@@ -38,12 +38,18 @@ public struct VaultBootstrap: Sendable {
     /// Defaults to a real backoff sleep; tests inject a no-op so the
     /// retry arms run instantly.
     public var transportRetrySleep: @Sendable (Int) async throws -> Void
+    /// GM-3's bound: this many transient drops WITHOUT PROGRESS abort the
+    /// run (typed, outbox intact). Progress resets the count — a burst-
+    /// killing gateway can drop every round of a large drain while the
+    /// outbox still converges.
+    public var maxConsecutiveTransportFailures: Int
 
     public init(
         client: KeyVaultClient,
         transport: any SyncTransport,
         database: AppDatabase,
         maxRounds: Int = 50,
+        maxConsecutiveTransportFailures: Int = 8,
         transportRetrySleep: @escaping @Sendable (Int) async throws -> Void = { seconds in
             try await Task.sleep(nanoseconds: UInt64(seconds) * 1_000_000_000)
         },
@@ -53,6 +59,7 @@ public struct VaultBootstrap: Sendable {
         self.transport = transport
         self.database = database
         self.maxRounds = maxRounds
+        self.maxConsecutiveTransportFailures = maxConsecutiveTransportFailures
         self.transportRetrySleep = transportRetrySleep
         self.log = log
     }
@@ -136,22 +143,34 @@ public struct VaultBootstrap: Sendable {
             // reject-settling churn. Consecutive drops are bounded so a
             // genuinely dead network still fails visibly.
             var consecutiveTransportFailures = 0
-            let maxConsecutiveTransportFailures = 8
+            var remainingAtLastFailure: Int?
             for round in 1...max(maxRounds, 1) {
                 report.roundsRun = round
                 do {
                     _ = try await engine.pull()
                     let pushReport = try await engine.push()
                     consecutiveTransportFailures = 0
+                    remainingAtLastFailure = nil
                     report.pushedAccepted += pushReport.accepted
                     let (_, remaining) = try await storeCounts()
                     report.remainingOutbox = remaining
                     log("Round \(round): pushed \(pushReport.accepted) accepted (\(pushReport.rejected) rejected, \(pushReport.deferred) deferred); outbox \(remaining) remaining.")
                     if remaining == 0 { break }
                 } catch let error where Self.isTransientTransport(error) {
-                    consecutiveTransportFailures += 1
                     let (_, remaining) = try await storeCounts()
                     report.remainingOutbox = remaining
+                    // "Consecutive" means WITHOUT PROGRESS: a round that
+                    // pushed chunks before its drop is converging, not
+                    // stuck — the gateway kills bursts (GM-3), so on a
+                    // large drain EVERY round may end in a drop while the
+                    // outbox still marches down. Only a drop with no
+                    // movement since the last one counts against the bound.
+                    if let last = remainingAtLastFailure, remaining < last {
+                        consecutiveTransportFailures = 1
+                    } else {
+                        consecutiveTransportFailures += 1
+                    }
+                    remainingAtLastFailure = remaining
                     guard consecutiveTransportFailures < maxConsecutiveTransportFailures else {
                         throw VaultBootstrapError.transportRepeatedlyFailed(
                             consecutiveFailures: consecutiveTransportFailures,

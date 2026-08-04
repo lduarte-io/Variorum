@@ -300,6 +300,40 @@ struct VaultBootstrapTests {
         }
     }
 
+    /// GM-3's second half (found at the LIVE repush, revert-verified): a
+    /// drop with PROGRESS since the last drop resets the consecutive
+    /// count — the live gateway kills every burst, so a large drain's
+    /// every round can end in a drop while the outbox still converges.
+    /// Pre-fix (revert the reset arm), progress-making rounds counted
+    /// against the bound and a converging drain aborted at max.
+    @Test func dropsWithProgressNeverExhaustTheBoundAndTheDrainCompletes() async throws {
+        try await withRunnerWorld { _, db, server, vaultWorld, _ in
+            // Seed enough rows for several 200-row chunks.
+            let ops = Operations()
+            let entry = try ops.createOrOpenJournalEntry(entryDate: "2026-08-05").container
+            for i in 0..<450 {
+                _ = try ops.newBlock(in: entry.id, text: "burst row \(i)", at: .end)
+            }
+            // Drop every SECOND push call: every round makes progress
+            // (one chunk lands) then drops. With the bound at 2, only
+            // the progress-reset lets this converge.
+            let flaky = FlakyTransport(
+                wrapped: server, dropPushCalls: Set(stride(from: 2, through: 100, by: 2)))
+            let bootstrap = VaultBootstrap(
+                client: vaultWorld.client,
+                transport: flaky,
+                database: db,
+                maxConsecutiveTransportFailures: 2,
+                transportRetrySleep: { _ in },
+                log: { _ in })
+
+            let report = try await bootstrap.run(
+                passphrase: "orchard-lantern-13", dryRun: false)
+            #expect(report.remainingOutbox == 0,
+                    "progress resets the bound — the converging drain completes")
+        }
+    }
+
     /// The bound: a genuinely dead network still fails VISIBLY (typed,
     /// outbox intact) — retry never becomes an infinite spin.
     @Test func aPersistentTransportFailureStillFailsVisiblyWithTheOutboxIntact() async throws {
