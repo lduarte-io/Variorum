@@ -985,6 +985,64 @@ does not gate the spike (project refs are random; display names rename freely).
     Fragments agent's work from the contract asks; the uid check is the one
     deliberate moment.
 
+- **Round 0t (same sitting) — the alignment round; NO CODE at her word.** Her
+  corrections and questions, dispositioned:
+  - **Badge timing CORRECTED to her:** the custom:fragments identity + provider
+    retirement is **14a's code batch**, not 14c — 14c is signups/multi-user.
+    Recorded in rounds 0s + the ruled-state banner (the single-sign-in bullet).
+  - **14c robustness, answered honestly:** 14c has NO plan file yet BY DESIGN
+    (every 14 phase authors its plan at its own kickoff sitting — the split's
+    rule, her caveat verbatim: "some design choices will have to be assessed
+    and done in that moment"). What exists is the master-plan ROW as a
+    complete SCOPE LEDGER (the round-0e completeness sweep at her
+    instruction), which 14a/14b findings keep appending to. Robust as a
+    checklist; the design is deliberately not pre-written.
+  - **Her dashboard act this round:** she "filled out the stargazing.tech
+    links in BOTH the fragments and the variorum project." Variorum-side =
+    the three-value flip (needs the save-reload-verify + the site actually
+    PUSHED — both asked). **Fragments-side: OPEN QUESTION — exactly which
+    fields?** The Fragments project needs NO stargazing URLs anywhere; its
+    ONE needed change is the custom OIDC provider entry (issuer + client id +
+    secret), which she confirmed she has NOT added. Its own 9c-era OAuth
+    Server (as issuer) will be switched off later — **WARNING recorded: NOT
+    until the 14a code batch lands** (until then the Variorum APP's only
+    sign-in UI is the custom:fragments flow; a dead session + a dead
+    Fragments issuer = locked out of the app, though never the account).
+  - **"Allow Dynamic OAuth Apps" for Fragments: NO** — that toggle is an
+    ISSUER-side setting (gates programmatic client registration on the
+    project acting as OAuth server). Fragments is not an issuer in the end
+    state; nothing to enable there. The Fragments client registration already
+    ran on the VARIORUM side via the admin door.
+  - **Touchpoint locations, pointed to precisely:** all three live in
+    `notes/fragments-bridge-contract.md` under "The 14a horizon" →
+    the staged TOUCHPOINT blocks (#1 with delivered coordinates + the
+    first-sign-in uid rule; #2 = 14b journal-class E2EE + trim/empty-body
+    relocations + the entry_date disclosure; #3 = 14c entitlement check).
+  - **HER PROPOSAL, recorded as the leaning: ONE batched Fragments handoff
+    after the family** ("would it be easier to just wait and tell the
+    fragments agent everything it has to do after 14c? it's okay if fragments
+    is broken while the 14 phases happen - that's the beauty of taking care
+    of this while i'm the only user"). The architect's read: YES, cleaner —
+    one coherent brief (provider + flow + her uid link + password retirement
+    + journal E2EE + entitlement) beats three conversations. Consequences
+    recorded with it: **(a)** the bridge stays on her Fragments PASSWORD
+    session until that batch — so her Fragments password's retirement DEFERS
+    to it (the 0f "no surviving password" ruling's timing moves; the ruling
+    itself stands); **(b)** at 14b the journal class goes ciphertext
+    Variorum-side while Fragments lags — the bridge likely PAUSES for
+    Fragments until its batch (EXACTLY the die-and-return latitude she
+    pre-granted at R5; the 14b sitting rules the specifics); **(c)** the
+    Variorum-Mobile daily-driver ruling (the gate sitting, same day) makes a
+    broken-Fragments window genuinely cheap — her phone journaling rides
+    Variorum Mobile.
+  - **start.html (her "smart.html"):** same as her earlier run — local server
+    up, open `http://localhost:3000/start.html` — but post-flip the middle
+    hop rides the PRODUCTION consent page, so it works only after the site
+    agent's push is live.
+  - Mobile context noted from the gate sitting's record: merge `mobile` →
+    `main` precedes the code batches at a Phase 14 pause — this alignment IS
+    that pause.
+
 ## Ledger
 
 | # | Item | Status |
