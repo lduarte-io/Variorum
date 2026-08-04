@@ -219,6 +219,24 @@ build refuses marker 5 by design."*
   The 13b doctrine applied, not new behavior: a message naming an act
   offers the act's door. Mobile suite re-run green; rebuilt,
   reinstalled.
+- **THE NEXT ROUND (her directive, 2026-08-04 morning, after the door
+  fixes):** the Mac is landing capability + copy changes THROUGHOUT
+  the E2EE flow right now — **do not pull main until her word.**
+  Sequence, hers: (1) she says pull → merge latest main; (2) mobile
+  makes the changes the merge implies; (3) at her word, merge to
+  `main`. **The BINDING design rule for those changes: the phone
+  might be the ENROLLER** — the setup flow, the screens along it, and
+  the saving-12-words ceremony get mobile-world care, and her named
+  case verbatim: "if a user switches apps to save their passphrase or
+  12 words somewhere the flow shouldn't just disappear." Concrete
+  classes that must hold on iOS: the flow's state (incl. the
+  shown-once `generatedWords`) survives backgrounding and return; the
+  ceremony sheets refuse casual swipe-dismissal; and scene DEATH
+  mid-ceremony is tolerable by construction — nothing lands until the
+  re-entry confirm (Round 5's order), so a killed app re-offers
+  generation rather than dangling a half-written vault. Copy is
+  copied WITH care from the Mac's flow, not invented fresh (the
+  wording rides the 14b GATE RATIFY block).
 - **Install DIRECTLY at build-ready (her ~3:50am blessing — this
   supersedes the earlier hold-for-her-go):** her words: "go ahead and
   automatically install to my phone if you're able to in the morning
