@@ -614,6 +614,28 @@ does not gate the spike (project refs are random; display names rename freely).
   trim and empty-body asks; #3 at 14c: the entitlement check) was delivered
   in-chat as her requested mental picture; TestFlight remains after the family.
 
+- **Round 0i (same sitting) — clarifications; the allowlist timing lands NOW at
+  her word ("I think either one works").** Dispositions recorded for the build:
+  the allowlist is the SINGLE-USER lockdown, not a multi-user feature — written
+  now as a committed artifact, deployed only at her explicit go per §12, and
+  REPLACED at 14c by real per-user isolation. Her mental-model confirmations,
+  all answered yes: her Variorum user always existed — only its PROOF was
+  Fragments-only (14a adds a direct password to the SAME user, then removes the
+  Fragments proof); 14a REVERSES the trust arrow (today Variorum delegates to
+  Fragments; after, Fragments delegates to the suite issuer riding the Variorum
+  project). **UI consequence of the 0f single-sign-in ruling, confirmed for the
+  build: the separate bridge credential surface RETIRES** — one identity, one
+  password, no separate "bridge" vs "sync" sign-ins anywhere; first sign-in per
+  device may involve one in-app entry plus one brief browser round (the
+  delegated hop that mints the bridge's Fragments-project session), presented
+  as ONE flow — flattened as far as the mechanics allow, a build-time detail.
+  Fragments-side: there is not and never was a bridge component there — its
+  sign-in simply opens its own data, journals included, unchanged. **The
+  bridge's end state, pinned in one line: a background limb of her one account —
+  the same journal_entries pipe, Variorum-side, session minted via the suite
+  identity (14a), payloads encrypted (14b), no identity or credential of its
+  own.**
+
 ## Ledger
 
 | # | Item | Status |
