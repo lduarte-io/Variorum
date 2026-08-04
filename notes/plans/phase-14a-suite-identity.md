@@ -1300,6 +1300,60 @@ suites); red-on-old pins verified both directions.
   0w — the gate's acceptance is her signing out and in once with
   email+password on the refreshed build.
 
+## The fresh-architect session (2026-08-04 — post-cutover: ladder → gate → closeout)
+
+- **Author ruling, mid-ladder (recorded for the closeout step):** the plan-file
+  sections that exist ONLY because of the mid-phase handoff — "what the
+  implementer said and the rulings on the implementer's work" — are removed at
+  the phase's end for repo hygiene, "only the typical notes kept." Executed at
+  closeout: the architect-recorded implementer report + the pre-cutover
+  adjudication section condense into the standard batch record; the ladder's
+  findings/dispositions (typical notes) stay.
+
+### Cold-review ladder — ROUND 1 (2026-08-04; fresh Fable reviewer,
+### REVIEW_PROMPT verbatim, zero implementation context)
+
+**Verdict: NO BLOCKER, NO MAJOR — 3 MINOR + 2 NIT.** The pre-cutover
+adjudication's four weigh-items were all addressed explicitly (clean bill
+below). Findings + architect dispositions (adjudicated against the spec docs;
+no disputes — the implementer session is dead, so dispositions are
+architect-direct):
+
+| # | Sev | Finding | Disposition |
+|---|-----|---------|-------------|
+| R1-1 | MINOR | `AppServices.swift:228` + `AuthViews.swift:126–128` — the wrong-password refusal (now the sign-in's COMMON failure path under the direct form) surfaces as a raw Swift enum dump (`String(describing:)` of `endpointFailure` w/ 400 `invalid_grant`), bypassing the R94 classify-and-speak doctrine; `ErrorCauseNote`'s existing guidance would be WRONG here ("sign out and back in") | CONFIRMED — fix: classify the sign-in failure path; the credentials class (400/`invalid_grant`) surfaces **"Wrong email or password."** (PROVISIONAL wording — her ratify rides the gate checklist); other classes get readable lines, never a raw dump. Red-on-old pin: scripted 400 → the mapped message. |
+| R1-2 | MINOR | `AuthViews.swift:137` — `.frame(minWidth: 440)` clips the sign-in form on iPhone sheets (~393 pt proposes, 440 forced → ~24 pt cut each edge): the exact surface the phase's mobile deliverable rides (round 0m "sign in from her phone"; 0s dissolved the mobile message into this seam). Pre-existing (9c Mac-only era), promoted by this batch's role change | CONFIRMED — fix: platform-gate the frame (`#if os(macOS)`, the file's existing pattern). Layout class: mechanism traced, no unit pin constructible (the guard's no-pin justification, recorded here) — verification is the PHONE half of the gate walk. |
+| R1-3 | MINOR | `Phase9cAuthWiringTests.swift:403–405` — the retirement + paste-in walks scan only `Shared/`'s TOP level (`contentsOfDirectory` is shallow; `Shared/` now has three Swift-bearing subdirs) — a reintroduction under a subfolder evades the walk while its message claims the shared sources are clean. Today's tree verified clean repo-wide | CONFIRMED — fix: deep enumerator (`FileManager.enumerator(at:)`). Test-only strengthening; no red-on-old owed. |
+| R1-4 | NIT | `Phase9cAuthWiringTests.swift:170/:308` — the wiring pin's doc comment says "the retirement walk above" (the walk sits ~230 lines BELOW); the pre-existing retirement-walk MARK dangles over the 13c lifecycle section | CONFIRMED — comment + MARK placement fix. |
+| R1-5 | NIT | `AuthViews.swift:87, 142–152` — the new credential fields carry no `.textContentType`, so iOS AutoFill/keychain suggestions won't offer credentials on the phone door (AutoFill is function, not styling) | CONFIRMED — fix: username/email + password content types (platform treatment implementer's judgment). |
+
+**Clean bill (the reviewer's, condensed):** slimming completeness verified
+repo-wide (zero live references to any retired door — PKCE/authorize/exchange/
+provider-pair/SignInFlow/ASWeb/custom:fragments — outside comments and the
+walk's own assertion strings; `callbackWithoutCode` gone; CryptoKit import
+dropped; no URL-scheme leftovers). The retirement walk's red-on-old
+INDEPENDENTLY verified against the true pre-batch tree (`0fd1314^`): exactly
+10 issues spanning all five auth files — spans the surface, not clustered.
+The wiring pin's chain is real (account state → the Step 4 `owner_id`
+adoption through the production runner path → sync composition → an actual
+transport round). Both changed suites re-run by the reviewer: 22 tests, 2
+suites, passed. Scope compliance under the 0w/0x amendments (no dormant road,
+no shims, no legacy-session tests; bridge shape-(c) byte-untouched; zero
+`Sync/` lines; no schema; no server config; ProjectConfig keeps both
+projects' coordinates; the two-form AccountView is CORRECT per 0t/0x — not
+drift). Continuity survives un-shimmed for free (the pre-batch Keychain blob
+decodes under the slimmed `AuthTokens`; a nil load is a clean signed-out
+launch, never corruption). The 9c hard-won machinery intact and pinned
+(single-flight refresh, sign-out-is-terminal, fail-visible refresh, the A4
+dev-store fence, LegacyPasteInCleanup). The signups-off precondition carried
+forward and strengthened in ProjectConfig's header. Keychain hygiene holds
+(password never persisted; no-user-id refuses before any save; distinct
+services).
+
+**Route: all five findings → ONE fresh implementer session (the cutover
+ruling's shape — a fresh implementer applies confirmed fixes); ROUND 2
+re-reviews the fixes with a fresh reviewer.**
+
 ## Ledger
 
 | # | Item | Status |
