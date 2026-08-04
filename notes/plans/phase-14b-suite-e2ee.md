@@ -1492,6 +1492,35 @@ window remain the wipe's precondition).**
   *[removed for publication]*
   the CAS token moving as designed), `has_recovery_wrap` TRUE, KDF 65536
   KiB / t=3. Her Mac is ENROLLED; the setup half of the gate is DONE.
+- **CF-11 — RULED IN (post-repush): a "Forget encryption keys on this
+  device" door.** Surfaced answering her phone-drill question: sign-out
+  deliberately does not clear custody, and iOS keychain items persist
+  across reinstall — so the phrase road on an enrolled phone has NO path
+  without this door, and device-handoff/switching genuinely needs it. Her
+  word: "yeah, forget encryption keys would be good to do." Ships in the
+  copy/flow round; the round's acceptance re-runs the drill on the phone
+  properly (forget → re-enroll via the phrase).
+- **CF-12 — her lift question (2026-08-04): QR enrollment + the biometric
+  setting, "the copy round might be a good time for it to ride after
+  we've validated the core flow."** The architect's honest shapes,
+  relayed: the BIOMETRIC require-at-launch setting (R-6's answered-open
+  door) is a REAL MINI-BATCH, rideable in the round (SecAccessControl on
+  the key item + LocalAuthentication unlock-once-per-launch + a
+  device-local toggle + both form factors + pins; sync waits for first
+  unlock while ON — the known cost). QR DEVICE-LINKING is NOT round
+  material: a genuine key-delivery protocol (ephemeral-key QR exchange, a
+  delivery channel — likely a server mailbox table = another §12 lockstep
+  event — camera plumbing, two-device UX both directions) — it stays the
+  recorded R-4 future door with its own design sitting when she wants it.
+  TERMINOLOGY note relayed: what she's seeing called "passkey" elsewhere
+  is WebAuthn SIGN-IN credentials (an account-password replacement — a
+  14c-era issuer consideration), unrelated to the encryption
+  passphrase/keys; what we'd build is biometric-GATED KEYCHAIN access.
+- **The phone status (hers, same message):** the installed mobile build
+  "didn't add an account login option" — the phone's encryption test
+  WAITS on the mobile session adding the sign-in door (that face is the
+  mobile project's scope; she is working with that session directly).
+  PL-6's phone half rides that + CF-11's door.
 
 ### THE WIPE AND REPUSH — EXECUTED (2026-08-04, her explicit go: "go ahead!
 ### this is the moment where supabase stops seeing all my innermost
