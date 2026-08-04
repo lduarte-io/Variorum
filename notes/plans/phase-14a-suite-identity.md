@@ -1354,6 +1354,33 @@ services).
 ruling's shape — a fresh implementer applies confirmed fixes); ROUND 2
 re-reviews the fixes with a fresh reviewer.**
 
+**FIX RECORD (fresh implementer, 2026-08-04 — commit `35062b2`, verified
+against the diff by the architect):** R1-1 = new
+`ErrorPresentation.signInFailureMessage(_:)` in the R94 doctrine's home
+(credentials class → "Wrong email or password." [PROVISIONAL, gate ratify];
+transport → connection line; unexpected-status/malformed → readable frames;
+never a raw dump; `ErrorCauseNote` deliberately NOT reused — its guidance is
+wrong on the sign-in form, recorded in the doc comment), wired into BOTH
+`AppServices` password-grant catch blocks (the Fragments connect door shares
+the identical 400 mechanism — half-fixing one of two byte-identical sites
+declined); **red-on-old pin `aWrongPasswordRefusalSpeaksTheHumanLine`
+VERIFIED both directions by behavioral revert** (red on the reverted catch:
+the raw `endpointFailure(status: 400, …invalid_grant…)` dump surfaced
+verbatim ≠ the mapped string; green restored) plus an other-classes
+readable-lines test. R1-2 = the `minWidth: 440` floor macOS-gated (postfix
+`#if`, mechanism comment). R1-3 = both walks deep via
+`FileManager.enumerator` with a depth self-check so the walk can never
+silently go shallow again. R1-4 = comment direction + MARK placement fixed.
+R1-5 = `.textContentType(.username/.password)` (platform-resolved, no gate
+needed). Acceptance: AuthSessionTests + Phase9cAuthWiringTests = **24 tests
+in 2 suites passed** (22 baseline + the 2 new); `VariorumMobile` BUILD
+SUCCEEDED (iPhone 17 Pro sim); zero `Sync/` lines; no schema; no server
+config; bridge untouched. Recorded-not-touched (the implementer's honest
+list): `runOwnerAdoption`'s raw `\(error)` interpolation (same cosmetic
+family, out of the findings' scope, and its established-session guidance is
+correct there); `AuthSessionTests`' refusal tests still assert the typed
+throw (correct — classification is the presentation layer's).
+
 ## Ledger
 
 | # | Item | Status |
