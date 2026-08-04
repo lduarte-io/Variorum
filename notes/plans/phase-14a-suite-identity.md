@@ -844,6 +844,23 @@ does not gate the spike (project refs are random; display names rename freely).
   provider — lands when the app's direct sign-in ships); Dynamic OAuth Apps
   re-confirmed OFF; `/consent.html` re-confirmed saved.
 
+- **Round 0o (same sitting) — the residual killed by her hand; the recovery
+  link dance diagnosed; the deterministic road handed over.** She killed PID
+  42190 and serves `SuiteAccountSpike/` on 3000; the catcher's diagnostic path
+  worked exactly as designed, reporting `#error=access_denied&error_code=
+  otp_expired` verbatim. Diagnosis: a new recovery request INVALIDATES the
+  prior link, Gmail's thread-bump surfaces the STALE message's link, and the
+  built-in email service is itself rate-limited (a few sends/hour) — not her
+  user, not the setup. Two roads handed over, the admin one recommended:
+  **(1) the admin door (deterministic, no email):** she runs
+  *[removed for publication]*
+  her chosen password — password and service key never leave her machine;
+  **(2) the magic-link door as fallback:** the catcher now accepts
+  `type=magiclink` fragments too (its own OTP type — separate cooldown and a
+  fresh email thread), same set-password form after. Her note recorded: **the
+  stargazing.tech agent is STARTED on the pages brief** — the Site URL flip
+  (localhost → stargazing.tech + `/oauth/consent`) queues behind its deploy.
+
 ## Ledger
 
 | # | Item | Status |

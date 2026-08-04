@@ -74,8 +74,8 @@ async function testSignIn() {
   } catch (e) { status("Sign-in failed: " + e.message, "err"); }
 }
 
-if (recoveryToken && type === "recovery") {
-  status("Recovery token received. Choose the new suite password.", "ok");
+if (recoveryToken && (type === "recovery" || type === "magiclink")) {
+  status("Token received (" + type + "). Choose the new suite password.", "ok");
   show("form");
 } else if (location.hash.length > 1) {
   status("Arrived with a fragment but not the expected recovery shape — report this verbatim:", "err");
