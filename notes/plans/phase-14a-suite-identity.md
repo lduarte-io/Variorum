@@ -1254,6 +1254,52 @@ suites); red-on-old pins verified both directions.
   because it is the sitting's truth: "It's been a genuinely useful sitting -
   we've made huge progress in just a few hours this evening."
 
+### Batch 1 — implementer report (ARCHITECT-RECORDED: the implementer session
+### died after its implementation commit, before writing this section)
+
+- **Implementation: COMPLETE and pushed — commit `5082a51`** (plus the
+  SignInFlow.swift deletion that rode docs commit `0fd1314`, confirmed
+  intentional). The implementer's final status, verbatim substance: both 9c
+  auth suites green (22 tests); the retirement-walk pin verified BOTH
+  directions (red-on-old: **10 issues on the pre-batch tree**, green after).
+- **What shipped** (from the commit + diff): `AuthSession` slims to the
+  direct core — `AuthConfiguration` = projectURL+apiKey; the PKCE/authorize/
+  exchange doors and the captured provider-token pair retired WHOLESALE
+  (they return at the Fragments batch, built against the live provider);
+  `SignInFlow` deleted (the implementer's judgment under amended scope item
+  4); `AppServices.signInWithVariorum` replaces `signInWithFragments`;
+  `AccountView`'s Variorum section is the email+password form (Return-key
+  doors, iOS email-field hygiene — the merged mobile surface rides the same
+  seam); the bridge's shape-(c) password road byte-untouched. NEW tests: the
+  retirement walk, the direct-sign-in wiring pin (account/adoption/sync
+  chain), password-grant coverage incl. refusal and no-user-id arms.
+- **Files:** AppServices, AuthSession, AuthViews, ProjectConfig,
+  AuthSessionTests, Phase9cAuthWiringTests (+ SignInFlow deleted) — net
+  −25 lines. Zero `Sync/` lines; no schema; no server config; no bridge
+  engine files.
+
+### Batch 1 — architect adjudication (2026-08-04, pre-cutover)
+
+- **Acceptance runs — THE ARCHITECT'S OWN, all four suites, ALL AT BASELINE:**
+  core **1039/114 PASSED** · Mac **1193/208, 1 issue = the standing
+  TakePaneMeasureTests tripwire CONFIRMED BY IDENTITY** (re-run in isolation:
+  `aStrandedRenderTierIsRebuiltByAConvergenceOccasion`, the recorded
+  environment-gated red) · mobile **172/24 PASSED** (iPhone 17 Pro sim) ·
+  spine **51/7 PASSED** (the seven Tutorial suite TYPE names).
+- **Scope compliance verified against the diff's file list:** every changed
+  file in the app auth layer + its tests; the amended scope held (no dormant
+  road built; bridge untouched; continuity shims absent by design).
+- **DISPOSITION: batch 1 ACCEPTED at the architect level** — subject to the
+  cold-review ladder, which is the fresh architect session's first act. Items
+  the ladder should weigh with fresh eyes: the AuthSession slimming's
+  completeness (does anything still reference the retired doors);
+  AccountView's refusal wording under the registry discipline; whether the
+  retirement walk's 10 red-on-old issues span the meaningful surface or
+  cluster; the wiring pin's chain coverage. NOTE for the gate: whether her
+  live session survived the seam rework is UNKNOWN and IRRELEVANT by round
+  0w — the gate's acceptance is her signing out and in once with
+  email+password on the refreshed build.
+
 ## Ledger
 
 | # | Item | Status |

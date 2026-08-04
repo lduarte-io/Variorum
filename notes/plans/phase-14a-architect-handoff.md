@@ -80,17 +80,18 @@ file's rounds 0d–0y ARE the record (the repo-first discipline held all night).
 
 - **The author has PAUSED all Variorum activity until Phase 14 completes**
   (round 0v) — app, bridge, mobile. The store is quiescent.
-- **Batch 1 implementer is RUNNING** (spawned 2026-08-04; a fresh Fable
-  session). Its scope AS AMENDED: (1) direct email+password sign-in against
-  the Variorum project through the ONE shared seam (Mac + mobile — merged);
-  (2) session continuity MAY break — no shims, no legacy tests (0w);
-  (3) the bridge: NOTHING built — the dormant delegated road was CUT (0x);
-  bridge module must merely keep compiling with suites green;
-  (4) custom:fragments out of the sign-in code; SignInFlow/ASWeb machinery
-  retire-or-keep at implementer judgment; (5) 9c auth suites updated,
-  red-on-old both directions. **Its report lands IN THE PLAN FILE**
-  ("### Batch 1 — implementer report (self-assessment)") committed+pushed —
-  instructed precisely for this cutover.
+- **Batch 1 is COMPLETE and ACCEPTED at the architect level** (commit
+  `5082a51` + the SignInFlow deletion on `0fd1314`; the implementer session
+  died after its implementation commit, so the report section in the plan
+  file is ARCHITECT-RECORDED from its final status + the diff). **The
+  architect's own acceptance runs: ALL FOUR SUITES AT BASELINE** — core
+  1039/114 · Mac 1193/208 (the tripwire confirmed BY IDENTITY in an isolated
+  re-run) · mobile 172/24 · spine 51/7. Scope compliance verified against
+  the file list (zero Sync/, no schema, bridge untouched, net −25 lines).
+  The adjudication section in the plan file lists what the ladder should
+  weigh with fresh eyes. **Your first act is the cold-review ladder on
+  batch 1's diff** (`git show 5082a51` + the SignInFlow deletion in
+  `0fd1314`).
 - Baselines (post-mobile-merge; never re-run at session start): core 1039/114 ·
   Mac 1193/208 (the standing TakePane tripwire red by identity) · mobile
   172/24 · spine 51/7.
