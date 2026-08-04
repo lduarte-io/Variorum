@@ -730,7 +730,24 @@ runbook.**
    generation and future regenerate are one flow; the Round-7 addition).
 3. `resyncReinitialize` as a real client operation (the harness-proven
    semantics from batch 2, productized behind an explicit announced door —
-   never reachable casually).
+   never reachable casually). **The door, concretized by the architect
+   before batch 3 (the Round-5 tail's executor): a headless maintenance
+   EXECUTABLE (`vault-bootstrap`, a new Package.swift executable target —
+   never linked into any app).** Inputs: the real-store path · the
+   passphrase-file path (bytes = passphrase, one trailing newline
+   stripped; file never printed) · project coordinates · a SHORT-LIVED
+   access token handed in by the architect (minted at the gate via the
+   announced Management-API admin road — generate-link → verify — so the
+   runner stays pure client machinery and holds no PAT). Acts, each
+   logged: create the vault row via PostgREST (passphrase wrap ONLY per
+   Round 5; REFUSES if a vault row already exists — idempotence by
+   refusal, never overwrite) OR unwrap an existing vault; then
+   `resyncReinitialize` on the store; then engine rounds until the outbox
+   drains; keys live in memory only and die with the process (the app
+   enrolls from the vault in the morning — Keychain custody is the APP's
+   act, never the runner's). A `--dry-run` mode prints the plan without
+   writing. The runner's own tests script its refusal arms; the
+   live-production run is the gate's, behind the A1 rail.
 4. `BridgeEngine` journal-class capability (encrypt push / decrypt land;
    rounds stay paused) + the touchpoint #2 contract-block update with the
    concrete format facts + the phone KDF latency measurement (R-7's
