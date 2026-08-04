@@ -1,7 +1,20 @@
 # Suite-account spike (Phase 14a Step 0 — THROWAWAY)
 
-The 14a kickoff sitting's live probes against the NEW neutral Supabase project
-(the suite's account home — issuer ruling R2, shape A, in
+> **ADAPTED 2026-08-03 (sitting round 0h — supersedes this file's original
+> separate-project framing):** the suite's account home is **the VARIORUM
+> project itself** (`<supabase-project-ref>`). Consequences for the run order
+> below: **(1)** the P-signup probe INVERTS — signups are OFF on this project
+> and stay off until 14c, so "Create account" must **403/refuse**, and that
+> refusal (plus a first-delegated-sign-in refusal) IS the load-bearing result
+> (round 0j — the toggle is the sole corpus guard, verified never assumed);
+> **(2)** P-ii runs signed in as HER — which requires her direct password
+> identity to exist first (the migration step; no throwaway accounts can be
+> minted); **(3)** the `vault_probe` scratch table lands on the LIVE Variorum
+> project — announced first, her explicit go, dropped after the probe
+> (server-only, never a synced table, so no §12 lockstep applies).
+
+The 14a kickoff sitting's live probes against the suite account project
+(issuer ruling R2 as amended at round 0h, in
 `notes/plans/phase-14a-suite-identity.md`). Sibling of `Spikes/AuthPairingSpike/`
 (9c's harness, kept as-is — its callback page still serves half 2's
 Variorum-delegation probe).

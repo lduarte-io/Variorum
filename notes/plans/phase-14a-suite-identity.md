@@ -733,6 +733,36 @@ does not gate the spike (project refs are random; display names rename freely).
   produce the passphrase; the honest corollary (unrecoverable-by-design) is
   the 14b setup warning's whole content.
 
+- **Round 0l (same sitting) — EXECUTION ROUND 1: the OAuth Server is ON.** Her
+  confirmations: `/architect-phase` discipline governs (config + docs are
+  sitting work; every CODE change goes to a fresh implementer with the ladder);
+  **"Allow new users to sign up" re-confirmed OFF, twice**. Her screenshot: the
+  OAuth Server toggle enabled on the Variorum project; Site URL
+  `http://localhost:3000`; Authorization Path `/oauth/consent`; Allow Dynamic
+  OAuth Apps OFF; **"Save changes" still pending** — the save-trap reminder
+  issued (the 9c didn't-save incidents; save, reload, verify). Executed this
+  round, committed: **(1)** the A1 rail — WAL-safe backup of the real store
+  (`variorum-backup-2026-08-04-024355.sqlite`, UTC name, `PRAGMA
+  integrity_check` ok, 4.9 MB) BEFORE further auth changes; **(2)**
+  `SuiteAccountSpike/config.js` filled with the Variorum project's public
+  coordinates; **(3)** the spike README adapted to the ruled shape (signup
+  probe INVERTED to refusal; P-ii runs as HER, so the password identity
+  precedes the spike; `vault_probe` on the live project only with her
+  announced go, dropped after); **(4)** **the pages brief authored:
+  `notes/stargazing-login-pages-brief.md`** — the 9c contract re-pointed at
+  the suite project with real public coordinates, the two live-failure traps
+  carried, NO create-account door (signups-off is correct behavior), "done,
+  not pretty" per her word; the old `fragments-consent-page-spec.md` annotated
+  SUPERSEDED. **Fragments: told NOTHING yet** — touchpoint #1 goes over only
+  after client registration mints real coordinates (client id + secret +
+  issuer endpoints). Open to her, in order: save-and-reload the OAuth screen
+  (Authorization Path → `/consent.html` for the spike; the real origin +
+  `/oauth/consent` at pages-deploy); report what sits BELOW "OAuth Endpoints"
+  (a manual OAuth-apps registration UI decides manual vs the dynamic-toggle
+  road); check her user's ⋯ menu under Authentication → Users for a direct
+  password-set door (else the admin-curl template, password never transiting
+  chat).
+
 ## Ledger
 
 | # | Item | Status |
