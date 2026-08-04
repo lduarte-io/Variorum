@@ -816,6 +816,34 @@ does not gate the spike (project refs are random; display names rename freely).
     live project (the README's SQL — her paste in the SQL editor at her go;
     dropped after the probe).
 
+- **Round 0n (same sitting) — the reset mystery SOLVED: the 9c residual was
+  squatting the port; the recovery flow itself worked perfectly.** Her report:
+  the recovery link landed on a bare directory listing; her read ("i think i
+  need to change my user from being fragments authorized or something")
+  REFUTED with evidence — nothing is wrong with her user. The lsof trace: PID
+  42190, `python3 -m http.server 3000`, cwd `Spikes/AuthPairingSpike`, up ~10
+  days — **the 9c LAN-interim sign-in server** (her element-hub guess also
+  refuted; the screenshots showed its "Fragments — authorize Variorum" page
+  and its exact three-file listing). The verify hop honored Site URL and
+  delivered the token in the fragment — it just landed in a directory with no
+  catcher page. **The residual's retirement is a NAMED 14a deliverable —
+  executed now:** she kills the process (the architect's kill was blocked by
+  the permission layer; one-liner handed over), then serves
+  `SuiteAccountSpike/` on the same port. From this moment new-device
+  `custom:fragments` sign-ins have no consent page — acceptable BY
+  CONSTRUCTION (that road retires this phase; existing sessions refresh
+  project-locally). Her wait-for-the-site alternative declined with reasons:
+  the registered redirect URI and Site URL both say localhost:3000, and the
+  spike's callback probes don't belong on production pages — two minutes
+  locally beats serializing on the site agent (the deployed `/oauth/reset`
+  serves REAL resets later). Also this round: **the brief's naming confirmed
+  already-neutral** (routes `/oauth/…`, "suite account" copy, no app names —
+  she sends it as-is); **the reset-purpose confusion cleared** (her user has
+  NO password — recovery is the dashboard's only door to GIVE it one; the
+  first half of stop-being-custom:fragments, whose second half — removing the
+  provider — lands when the app's direct sign-in ships); Dynamic OAuth Apps
+  re-confirmed OFF; `/consent.html` re-confirmed saved.
+
 ## Ledger
 
 | # | Item | Status |
