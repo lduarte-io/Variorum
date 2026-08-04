@@ -135,6 +135,12 @@ file's rounds 0d–0y ARE the record (the repo-first discipline held all night).
 
 ## Standing cautions
 
+- **Shared-checkout commit discipline:** implementers work in this same
+  checkout. While one is live, architect commits MUST use the pathspec form
+  (`git commit -m "…" -- <paths>`) — a bare commit takes the whole index and
+  swept the implementer's staged SignInFlow.swift deletion into docs commit
+  0fd1314 (harmless there, but the class is real).
+
 - Sessions are not data — but the mirror is LIVE production; every server
   change is announced-first, committed-artifact, her explicit go (SyncSpec
   §12 discipline; the R53/PAT precedent).
