@@ -12,6 +12,44 @@
 > at sitting batch 1 (see the sitting record). **14b is its OWN kickoff at this phase's
 > gate** — nothing here builds E2EE; 14a must merely never preclude it.
 
+## THE RULED STATE (as of sitting round 0k, 2026-08-03 — read FIRST; the sitting
+## rounds below are the record, and they SUPERSEDE earlier sections where they differ)
+
+- **Account home: the VARIORUM PROJECT ITSELF** (round 0h — supersedes batch-1 R2's
+  *[removed for publication]*
+  issuer; "stargazing" is the BRAND and the pages' front (planetlillian a live
+  candidate); an eventual custom domain fronts the issuer. **No new org, no Pro
+  purchase now** (her free-tier posture; upgrade at her word).
+- **14a creates NO table** — `auth.users` already holds her. Her migration = add a
+  *[removed for publication]*
+  then retire `custom:fragments`. Variorum + mobile sign in DIRECT to the project;
+  other apps (Fragments, future) ride the delegated OAuth flow.
+- **Single sign-in absolute** (0f/0i): the Fragments email+password identity retires;
+  the bridge's session goes suite-delegated (one browser hop per device, then the
+  standing persisted-session + refresh loop); the separate bridge/sync credential
+  surfaces RETIRE **at 14a** — one identity, one flow.
+- **Nobody signs in before the family completes** (0e/0f): Variorum signups stay OFF
+  until 14c's parent-join isolation; TestFlight waits for the whole family; NO
+  Fragments-native tester accounts, ever. Non-author provisioning is 14c's.
+- **No interim allowlist** (0j — supersedes 0i/0d): the signups-off toggle is the
+  SOLE guard until 14c; the spike's post-OAuth-server re-probe (signup 403 AND a
+  first delegated sign-in from a new identity both refuse) is LOAD-BEARING.
+- **Standing guardrails:** custom domain before the first non-author signup; the
+  re-decide checkpoint (the separate-project question gets one last look before the
+  first stranger account); the vault-home question re-opens FREE at 14b's sitting.
+- **The three Fragments touchpoints** (concrete asks live in
+  `notes/fragments-bridge-contract.md`, staged): #1 at 14a — trust the issuer,
+  delegated sign-in, link her user, retire native signup + password · #2 at 14b —
+  journal-class E2EE + the trim/empty-body relocations · #3 at 14c — the
+  entitlement check.
+- **Execution opened IN-SITTING (0k):** her hands-on order — A1 backup → enable the
+  OAuth 2.1 Server → register the Fragments client (+ the spike callback) → the
+  signup-refusal re-probe → add her direct password → the pages brief to the
+  stargazing.tech agent (authored AFTER client registration, so it carries real
+  coordinates) → the Fragments asks carried. **14b's draft is authored at 14a's
+  gate**; she opens it with its design sitting (key derivation / recovery /
+  enrollment — the deliberately careful one; cast decided there).
+
 ## What this phase is (the fixed scope boundary, from the 2026-07-30 split)
 
 One login for the whole suite — both apps trust a neutral account. Deliverables per the
@@ -663,6 +701,37 @@ does not gate the spike (project refs are random; display names rename freely).
   behaviors are small standing interactions; and at 14b Fragments' client DOES
   gain journal-class crypto — the one real involvement, scheduled as
   touchpoint #2.
+
+- **Round 0k (same sitting) — the docs audit + execution opens.** Her asks this
+  round, all executed same-commit: **(1)** the full-record audit — the RULED
+  STATE banner now heads this file (a fresh session reads it before the
+  historical sections; rounds supersede); the KnownIssues auth-hardening row
+  re-sequenced (provisioning → 14c); the contract's asks restructured into the
+  three STAGED touchpoints at her word ("clear what will be required from
+  fragments and what to tell fragments at each stage"); the release-strategy
+  identity-home bullet gained the dated 0g–0h addendum (it was accurate at
+  concept level — "neutral issuer" survives as brand — but now cannot be
+  misread as a separate project). **(2)** Her execution plan for the sitting,
+  recorded: she takes the 14a hands-on items NOW in-conversation (the Supabase
+  steps together, step-at-a-time with visual verification — the 9c didn't-save
+  incidents are the standing caution); the stargazing.tech pages BRIEF is
+  authored right after client registration so it carries real coordinates; the
+  Fragments asks carried by her after that; **the 14b draft is authored at
+  14a's gate** and she opens 14b with its design sitting. **(3)** One
+  correction delivered: the sign-in UNIFICATION (the separate bridge/sync
+  buttons collapsing into one flow) is **14a build work** — it happens when
+  custom:fragments retires and the bridge goes delegated — NOT a 14b item;
+  14b's sitting is the encryption design (passphrase/KDF, recovery phrase,
+  device enrollment, the setup-warning UX). Her phrasing ("which is also where
+  the separate bridge and sync button will be required") flagged back to her
+  in case she meant something the architect missed. **(4)** The
+  passphrase-storage explanation given in-chat (the envelope model): the
+  passphrase itself is NEVER stored anywhere — what the vault stores is the
+  random DATA KEY sealed under a passphrase-derived key (and a second copy
+  sealed under the recovery phrase); typing the passphrase derives the seal
+  key on-device and opens the envelope in memory. Nothing on any server can
+  produce the passphrase; the honest corollary (unrecoverable-by-design) is
+  the 14b setup warning's whole content.
 
 ## Ledger
 

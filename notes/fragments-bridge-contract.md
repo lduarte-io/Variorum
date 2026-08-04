@@ -451,9 +451,12 @@ line above):** the suite account home is the **VARIORUM PROJECT itself** (her
 ruling; "stargazing" stays the brand and the pages' front — plus an eventual
 custom domain — never a separate project). Consequence: **the issuer URL is known
 *[removed for publication]*
-custom domain before any non-author signup. The concrete Fragments-side asks,
-ready to carry once the OAuth 2.1 Server is enabled there and Fragments is
-registered as a client (client id + page URLs delivered with them):
+custom domain before any non-author signup. The Fragments-side asks, STAGED
+by touchpoint (what to do and when — her request that each stage be unambiguous):
+
+**TOUCHPOINT #1 — at 14a, NOW** (ready to carry once the OAuth 2.1 Server is
+enabled and Fragments is registered as a client; client id + page URLs delivered
+with them):
 1. Add the suite issuer as a trusted OIDC provider (`custom:stargazing`) and route
    sign-in through the delegated PKCE flow (the same 9c-proven pairing, pointed
    the other way).
@@ -465,6 +468,16 @@ registered as a client (client id + page URLs delivered with them):
    on — and suite signups stay OFF until Variorum's 14c isolation is built
    (nobody-before-the-family, her sequencing ruling).
 4. `journal_entries` shape/keys stay frozen (standing ask #3, unchanged).
-5. Heads-up on the later touchpoints: **14b** = journal-class E2EE under the
-   shared key + the trim / empty-body-as-deletion relocations; **14c** = the
-   one-payment entitlement check. TestFlight opens after the family completes.
+
+**TOUCHPOINT #2 — at 14b (suite E2EE):** the journal class goes ciphertext under
+the shared account key — Fragments' client gains encrypt/decrypt for that class
+(setup UX includes the account's encryption passphrase; the vault lives on the
+suite account) — and the two standing audit flags land: the TRIM behavior and the
+EMPTY-BODY-AS-DELETION detection move client-side or become metadata flags
+(server-side versions cannot operate on ciphertext). `entry_date` stays plaintext
+metadata, disclosed.
+
+**TOUCHPOINT #3 — at 14c (multi-user + the tier):** check the one-payment suite
+entitlement from the Fragments side (entitlement rows live on the suite account;
+both apps read the same answer). TestFlight opens only after the family
+completes — no tester account exists before then.
