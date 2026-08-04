@@ -25,8 +25,7 @@ struct Phase9cAuthWiringTests {
         AuthTokens(
             accessToken: "access", refreshToken: "refresh",
             expiresAt: Date().addingTimeInterval(3600),
-            userID: userID, email: email,
-            providerToken: "frag-token", providerRefreshToken: "frag-refresh")
+            userID: userID, email: email)
     }
 
     /// An HTTP hop that must never be reached (adopt/signOut paths only;
@@ -113,6 +112,7 @@ struct Phase9cAuthWiringTests {
         storeVariant: AppDatabase.StoreVariant = .real,
         bridgeEnabled: Bool = true,
         bridgeMinimumRoundInterval: Duration = .seconds(60),
+        authHTTP: (@Sendable (URLRequest) async throws -> (Data, URLResponse))? = nil,
         _ body: @MainActor (AppServices, AuthSession, AuthSession, AppDatabase, RecordingSyncTransport, RecordingBridgeTransport) async throws -> Void
     ) async throws {
         let db = try AppDatabase.inMemory()
@@ -120,7 +120,7 @@ struct Phase9cAuthWiringTests {
         let fragmentsStore = AuthTokensStore.inMemory()
         let auth = AuthSession(
             configuration: Self.testAuthConfiguration, store: authStore,
-            http: Self.noNetwork)
+            http: authHTTP ?? Self.noNetwork)
         let fragmentsAuth = AuthSession(
             configuration: Self.testAuthConfiguration, store: fragmentsStore,
             http: Self.noNetwork)
@@ -156,6 +156,50 @@ struct Phase9cAuthWiringTests {
             if await condition() { return }
             await Task.yield()
             try? await Task.sleep(for: .milliseconds(5))
+        }
+    }
+
+    // MARK: The direct sign-in (Phase 14a, batch 1)
+
+    /// The full app-layer door (round 0h: "the 9c AuthSession password
+    /// grant, re-aimed"): email+password → the password grant against the
+    /// Variorum project → account state, the Step 4 adoption, and the sync
+    /// chain — the same downstream composition the retired delegated door
+    /// drove. Pre-batch this door did not exist (the Variorum session
+    /// could only be minted through the browser flow), so the old side of
+    /// this pin is the retirement walk above plus a compile-time absence.
+    @Test func theDirectSignInComposesTheSyncChainAndRunsTheAdoption() async throws {
+        let grant: @Sendable (URLRequest) async throws -> (Data, URLResponse) = { request in
+            let url = request.url!.absoluteString
+            guard url.contains("grant_type=password") else {
+                throw AuthSessionError.malformedResponse("unexpected request: \(url)")
+            }
+            return (Data("""
+                {"access_token": "direct-access", "refresh_token": "direct-refresh",
+                 "expires_in": 3600,
+                 "user": {"id": "owner-14a", "email": "her@example.com"}}
+                """.utf8),
+                HTTPURLResponse(url: request.url!, statusCode: 200,
+                                httpVersion: nil, headerFields: nil)!)
+        }
+        try await withWiredServices(authHTTP: grant) { services, _, _, db, syncTransport, _ in
+            #expect(!services.sync.isConfigured, "signed out ⇒ no sync chain")
+            // A pre-sign-in (unowned) row — the adoption's target.
+            let postID = try await services.runnerPostID(title: "pre-sign-in")
+
+            await services.signInWithVariorum(email: "her@example.com", password: "pw")
+            await settle { services.sync.isConfigured }
+
+            #expect(services.account.lastError == nil)
+            #expect(services.account.variorum?.userID == "owner-14a")
+            #expect(services.account.variorum?.email == "her@example.com")
+            #expect(services.sync.isConfigured,
+                    "the direct sign-in must compose the sync chain")
+            #expect(try db.fetchString(
+                "SELECT owner_id FROM container WHERE id = ?", [postID]) == "owner-14a",
+                "the Step 4 adoption must ride the direct sign-in")
+            await settle { await syncTransport.calls > 0 }
+            #expect(await syncTransport.calls > 0)
         }
     }
 
@@ -340,6 +384,41 @@ struct Phase9cAuthWiringTests {
                 "the became-active hook must run the lifecycle cadence")
         #expect(!text.contains("services?.sync.triggerSync()"),
                 "…and never sync alone: with sync unconfigured the bridge would lose every cadence trigger it has")
+    }
+
+    /// PHASE 14a, BATCH 1 — THE RETIREMENT WALK (red-on-old; the walk was
+    /// run against the pre-batch tree and failed on every file it names):
+    /// the delegated `custom:fragments` sign-in is OUT of the app's code.
+    /// The Variorum sign-in is the direct password grant against its own
+    /// project (round 0h: "the 9c AuthSession password grant, re-aimed");
+    /// the browser-flow machinery (SignInFlow/ASWebAuthenticationSession,
+    /// PKCE, the authorize/exchange doors, the captured provider pair) is
+    /// retired wholesale — it returns at the Fragments batch, rebuilt
+    /// against a live provider (batch brief, rounds 0w/0x).
+    @Test func theDelegatedSignInIsRetiredInTheSharedSources() throws {
+        let sharedDir = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()  // VariorumTests
+            .deletingLastPathComponent()  // App/Variorum
+            .appendingPathComponent("Shared", isDirectory: true)
+        let sources = try FileManager.default
+            .contentsOfDirectory(at: sharedDir, includingPropertiesForKeys: nil)
+            .filter { $0.pathExtension == "swift" }
+        #expect(!sources.isEmpty)
+        #expect(!sources.contains { $0.lastPathComponent == "SignInFlow.swift" },
+                "the delegated browser flow must be deleted")
+
+        for file in sources {
+            let text = try String(contentsOf: file, encoding: .utf8)
+            let name = file.lastPathComponent
+            #expect(!text.contains("custom:fragments"),
+                    "\(name) still references the retired provider")
+            #expect(!text.contains("signInWithFragments"),
+                    "\(name) still carries the delegated Variorum sign-in door")
+            #expect(!text.contains("ASWebAuthentication"),
+                    "\(name) still references the browser-flow machinery")
+            #expect(!text.contains("provider_token"),
+                    "\(name) still captures the delegated provider pair")
+        }
     }
 
     @Test func thePasteInIsFullyRetiredInTheSharedSources() throws {
