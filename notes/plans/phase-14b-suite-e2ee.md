@@ -2461,6 +2461,49 @@ FINALIZED post-record per the repo-first rule):**
   BUILD SUCCEEDED **; mobile `build-for-testing` against the shared
   changes ** TEST BUILD SUCCEEDED **.
 
+### Crossover round — the architect's verification + dispositions (2026-08-04)
+
+**Verified (own evidence):** tree clean, the two commits match their
+claims; `git diff 4eb5eee..HEAD -- Sources/ Server/ Vendor/` EMPTY (zero
+core, zero `Sync/`, zero schema/server — the brief's boundaries held);
+all four touched shipped files READ IN FULL by this seat against the
+three items — the CF-16 comparison, the classifier's two invariant
+segments checked against `SyncError`'s actual description strings (the
+conjunction excludes `unencryptedValueInEncryptedColumn` exactly as
+claimed), the rebuilt row's faces checked door-for-door and
+word-for-word against the pre-round branches (all preserved), the
+`.task { refresh() }` confirmed surviving on the tab content. **Suites
+re-run by this seat (the verification pass), all four reproducing the
+implementer's lines exactly:** core "✔ 1156 tests in 124 suites passed"
+· Mac "✘ 1218 tests in 213 suites … 1 issue" with the one red confirmed
+BY IDENTITY from the result bundle
+(`aStrandedRenderTierIsRebuiltByAConvergenceOccasion` — the standing
+tripwire, nothing else) · mobile "✔ 173 tests in 25 suites passed" +
+TEST SUCCEEDED · spine "✔ 51 tests in 7 suites passed".
+
+**Dispositions (each PROVISIONAL adjudicated; her walk may overrule):**
+- *The sheet's one borderless Close (Done retired)* — **ACCEPTED,
+  option (a).** CF-1's grammar applied whole; a defaultAction beside the
+  Encryption tab's acts re-creates CF-1's exact ambiguity, and two
+  dismissal grammars on one sheet is the incoherence class. Hers at the
+  walk.
+- *The replaced ROW wording + "Re-enroll…" door label* — **ACCEPTED as
+  most spec-defensible** (the ruling specified the surface sentence, not
+  the row's). Joins the held locked-line wording as ONE walk item: the
+  sync row's two E2EE line wordings, presented to her together.
+- *The replaced caption* — **ACCEPTED** (standing refusal grammar,
+  states the why, invents no vocabulary).
+- *The macOS sheet floor 460×340* — **ACCEPTED** (mechanical: the sheet
+  fits its widest tab; the iPhone no-forced-width rule preserved).
+- *`isKeysLockedError` nonisolated* — **ACCEPTED** (call-compatible,
+  zero behavior).
+- *The biometric-locked comparison boundary* — **ACCEPTED as a
+  documented boundary, and the only correct shape:** gated custody is
+  unreadable without a prompt, and `refresh()` must never prompt (the
+  GM-1 stall class; prompting at sync cadence is the recorded
+  anti-pattern). The mismatch surfaces at first post-unlock refresh and
+  the classifier names the refusal meanwhile — honest at every moment.
+
 ## Ledger (running; every row owned)
 
 | # | Item | Status |
@@ -2482,7 +2525,7 @@ FINALIZED post-record per the repo-first rule):**
 | L15 | The gate steps 1–8 (deploy · setup · wipe-repush · phone enroll · recovery drill · refresh · ratifies) | steps 1–6 **done** (A1+export · 08 deployed marker 5 · her vault · wipe+repush+live dump proof · phone enrolled 0.16 s · phrase drill light road); step 7 refresh + step 8 ratifies ride the crossover tail (L21) |
 | L16 | MobileSoul PL-6 updated at design time (done this sitting) + closeout parity line | PL-6 written; closeout line owed |
 | L17 | The copy/flow round (CF-1…CF-13 + biometric) | **done** (`969ff83`+`a9b00fd`; 8+1 pins, five behavioral reverts; verified + adjudicated by the crossover architect — the adjudication section above) |
-| L18 | The crossover round (CF-14 · CF-15 · CF-16) | pending — brief above; CF-16 before her drill |
+| L18 | The crossover round (CF-14 · CF-15 · CF-16) | **done** (`910d30d`+`2f8249b`; 7 pins, four behavioral reverts; verified + adjudicated by the architect — the verification/dispositions section above; Mac 1218/213 tripwire-only reproduced by both seats) |
 | L19 | The mobile flow notes file (her coordination deliverable) | pending — `notes/plans/phase-14b-mobile-flow-notes.md` |
 | L20 | ONE cold pass over the copy/flow + crossover diffs (REVIEW_PROMPT verbatim) | pending |
 | L21 | HER ACCEPTANCE: the full re-key drill (runbook in the architect handoff; step 0 PINNED green) + the disclosure ratify + the `/Applications` refresh | pending — her go per step |
