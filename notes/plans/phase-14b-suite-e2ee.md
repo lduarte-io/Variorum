@@ -758,6 +758,241 @@ runbook.**
    vault-newer-format arms; bridge capability round-trip over ciphertext;
    the spine + both suites green.
 
+### Batch 3 — record (implementer session, 2026-08-04)
+
+**What shipped (four commits — `80f2204` vault client + custody · `363d0b6`
+the flows + L12 · `e4e9908` the runner · `80a6e5e` the bridge capability +
+contract facts):**
+
+- **L8 — the vault client + Keychain custody.** `KeyVaultClient` (Crypto/,
+  an actor): authenticated PostgREST on `key_vault`, columns 1:1 with 08's
+  DDL (`KeyVaultWireRow`), SINGLE-FLIGHT fetch (concurrent reads coalesce
+  onto one request, pinned), typed refusals — `vaultAlreadyExists` (create
+  never overwrites; PostgREST 409 = the PK backstop), `vaultAbsent` (update
+  never invents), `unsupportedFormatVersion` (refuse-by-version at fetch —
+  a newer vault is never guessed at), `malformedRow` — and the 9c auth
+  posture verbatim (signed-out refuses before composing; ONE 401
+  refresh-and-retry, pinned). The row's `user_id` is ALWAYS the session's
+  user, never caller-supplied. Custody: `E2EEKeychainStorage`
+  (App/Shared — the 9c `KeychainAuthStorage` pattern, its own service
+  `io.lduarte.Variorum.e2ee-keys`, `AfterFirstUnlock`), the
+  `DeviceKeyStore` seam (in-memory for every test — no test touches the
+  real Keychain), and **the R-6 future-biometrics door left open and
+  documented in the file's header comment** (a SecAccessControl on the one
+  item — policy on the item, never format). `DeviceKeySyncProvider` is the
+  REAL engine provider (batch-2 PROVISIONAL 2 resolved): reads custody per
+  round, so enrollment heals with no re-composition and a cleared device
+  refuses in the engine's own grammar.
+- **L9 — the shared flows.** `VaultEnrollment` (core — the ONE brain the
+  Mac app, the phone, and the runner share): `setUp` (passphrase wrap ONLY,
+  Round 5), `enroll(passphrase:)` / `enroll(recoveryWords:)` (both roads;
+  wrong-passphrase and every phrase-validation arm SPEAK, never crash),
+  `landRecoveryWrap` (the CONFIRMED words land; first generation rides
+  batch-1's strict `addingRecoveryWrap`, replacement rides the NEW
+  `replacingRecoveryWrap` behind an explicit `allowReplace` — batch-1's
+  PROVISIONAL widened exactly as its record predicted, the Crypto addition
+  recorded in-code), `changePassphrase(authorizedBy: passphrase|recovery,
+  newPassphrase:)` (Round 7: fresh salt + descriptor, master re-wrapped,
+  recovery words UNTOUCHED — pinned; the recovery road returns material,
+  so forgot-passphrase both fixes and enrolls). App-side:
+  `EncryptionSession` (@Observable state projection + the wording every
+  refusal speaks) and `EncryptionView` (ONE shared functional surface,
+  the AccountView precedent: setup with the ONE honest warning + the
+  sub-12-character caution; enrollment with the phrase road; the 12 words
+  shown ONCE and confirmed by full re-entry per Round 5 item 3's order;
+  regenerate behind a confirmationDialog; change-passphrase with the
+  forgot-it toggle). The sync status face gains the LOCKED-STATE line
+  ("Sync locked — enter your encryption passphrase" + the Unlock… door;
+  the classifier matches `SyncError.encryptionKeysUnavailable`'s surfaced
+  description EXACTLY — a substring match would swallow unrelated errors)
+  and the Encryption… door beside Account… (Round 6 item 2's home; the
+  phone reaches both through MobileSettingsView's same shared row).
+  `SyncSession.configure` gains a REQUIRED `keyProvider:` (deliberately
+  not defaulted at THIS seam — every composition site decides, the
+  required-`redo:` precedent); `AppServices` wires
+  `DeviceKeySyncProvider` + composes `EncryptionSession` over the same
+  auth session the transport rides, and key-landing triggers one healing
+  round.
+- **L10 — the runner.** `vault-bootstrap`: a new Package.swift
+  **executableTarget** (Tools/VaultBootstrap — never linked into any app;
+  no new dependencies, hand-rolled argument parsing) over the core
+  `VaultBootstrap` brain (Crypto/ — testable, injectable client/transport/
+  log). Exactly the concretization: store path (must EXIST — a typo can't
+  mint an empty store) · passphrase-file path (bytes = passphrase, ONE
+  trailing newline stripped at the BYTE level — `\r\n` is one grapheme to
+  Swift, found by the pin's first run; never printed, never logged —
+  pinned) · project coordinates · the short-lived access token (its `sub`
+  read locally for session composition only — RLS is the authority). Acts
+  logged step-by-step: create-vault (passphrase wrap ONLY; an existing row
+  takes the unwrap arm and is NEVER overwritten; the fetch-create race
+  lands on the 409 refusal) or unwrap-existing → `resyncReinitialize` →
+  pull→push rounds until the outbox drains (bounded at 50;
+  `outboxNeverDrained` refuses to claim success). Keys die with the
+  process — the runner target and its brain contain no Keychain code by
+  construction. `--dry-run` logs the plan (arm included — a read) and
+  writes NOTHING (pinned: no vault, no enqueue, no push). Run-too-early
+  self-defense noted in code: pre-truncate plaintext meets the decrypt
+  seam's policy refusal — cursor unmoved, nothing lands.
+- **L11 — the bridge capability, PAUSED.** `BridgeEncryption.swift` (new,
+  Bridge/): `BridgeKeyProviding` (a SEPARATE protocol from the sync seam,
+  deliberately — R-8's letter: the bridge only ever touches the
+  journal-bridge class) with the refusing `UnenrolledBridgeKeyProvider` as
+  `BridgeEngine`'s DEFAULT — **the pause is STRUCTURAL**: the app wires no
+  real bridge provider this phase (the 14c-end batch does, when Fragments
+  can read ciphertext), so every bridge round refuses visibly
+  ("Bridge paused: …", the §12 grammar) BEFORE any network contact, and
+  no plaintext-push code path exists anymore. Keys-first in BOTH halves;
+  encrypt-on-push at the wire (inland hashes/day-state/discrimination all
+  stay plaintext — the sync seam's boundary design; the empty body seals
+  too, the deletion semantic now client-side); decrypt-on-land for pulled
+  bodies AND `replaced`-receipt bodies (opened BEFORE discrimination — a
+  rescue lands words; an unopenable receipt body preserves durably
+  VERBATIM under the never-throw doctrine; a tombstone's body is never
+  read, left verbatim). **The AAD convention, designed and recorded
+  (touchpoint #2):** `UTF-8("journal_entries:<date>:body:<key_id>")` —
+  the DAY is the binding (the join key; a ciphertext cannot move between
+  days), the key id is the vault's `journal_bridge_key_id`; the suite's
+  one `table:rowID:column:keyID` grammar with the day in the rowID slot.
+  **The legacy rule (PROVISIONAL, recorded reasons):** a non-`e1:` body
+  LANDS as legacy plaintext — `journal_entries` is never wiped (no R-2
+  analog), pre-E2EE rows and interim writes are historical data, and
+  refusing them would jam the cursor on exactly the transition the
+  one-batch handoff executes; a tampered `e1:` body still refuses the
+  round with the cursor held (nothing unauthenticated ever lands). THE
+  BRIDGE CROWN: the ENTIRE existing bridge suite set runs GREEN over
+  ciphertext (105 tests / 9 suites — the harness binds the fixed journal
+  key; server-body assertions open at the edge; the receipt rules (i)–(iii)
+  compose over ciphertext unchanged). The contract file's TOUCHPOINT #2
+  block gained the concrete facts ADDITIVELY (AEAD · encoding · AAD ·
+  key-id source · the full vault unwrap chain incl. the recovery road's
+  constants · the legacy posture · the trim/empty-body-as-deletion
+  client-side relocations · the nonce-vs-receipt behavioral note).
+- **L12 — the phone KDF latency.** The mobile suite gains
+  `MobileKDFLatencyTests` — v1-descriptor derivation measured ON THE
+  SIMULATOR: **0.686 s** (iPhone 17 Pro sim; run green under the locked
+  session). **A SIMULATOR NUMBER IS NOT THE DEVICE NUMBER** — the device
+  number lands at the gate through the enrollment flow itself, which
+  measures every derivation and shows it on its own surface
+  (`EncryptionSession.lastKDFSeconds` → the enrolled section's caption +
+  os_log `io.lduarte.Variorum`/`e2ee`), so the gate reads it off the
+  phone screen at step 5.
+- **L13 — the GATE RATIFY block** (below, after this record): the setup
+  warning wording as shipped in `EncryptionView.setupWarning` + the
+  passphrase recommendation + the disclosure list (unchanged from THE
+  DESIGN — batch 2 shipped it with zero deltas; restated for her one-look
+  ratify).
+
+**The hallucination guard — revert-verified red, each mechanism traced:**
+(1) the bridge keys gate reverted to guess-a-key → the pause pin fails all
+four ways (rounds run, transport contacted); (2) the push seam reverted to
+ship plaintext → the ciphertext-on-the-wire pin fails; (3) the land seam
+reverted to raw bytes → the encrypted-write-lands pin AND the tamper-refusal
+pin fail (raw ciphertext lands — the exact disaster); (4) the receipt seam
+reverted to raw → the encrypted-receipt rescue pin fails (a ciphertext take)
+and the unopenable-receipt pin fails (rescuedReceipts 1, no preservation).
+All restored; suites re-run green. App-side: the locked-provider pin
+(refusal status + ZERO transport calls) fails without L9's plumb-through by
+construction (a dropped provider = the working default the test never
+installs); the existing wiring pins (`syncTransport.calls > 0`) are the
+other direction of the same seam.
+
+**Environment finding (binding on the acceptance below): the Mac GUI test
+runner cannot run in the CURRENT locked login session** — the 13b-recorded
+class, reproduced THREE times (~343 s "hung before establishing connection"
+/ "timed out while preparing"), including on the untouched control suite
+`StoreLocationTests` and after a `caffeinate -u` display wake — the diff is
+not the cause. (13k-era locked runs succeeded, so the lock STATE matters,
+not the lock alone; whatever state the session is in tonight blocks the
+host.) What IS proven: the Mac test bundle COMPILES (the hung runs build
+everything and reach "Testing started"), both app targets BUILD SUCCEEDED
+(Mac + iPhone sim), and the SIMULATOR runs tests fine (the mobile suite
+executed green). The Mac suite + the spine (which rides the Mac host)
+carry PENDING below for the architect's unlocked window.
+
+**Acceptance (the full pre-ladder set — claims PENDING until the runs
+land):**
+- Core `swift test` from the repo root: **PENDING** (expected baseline
+  1108/120 + 23/2 vault + 8/1 runner + 7/1 bridge = 1146/124).
+- Mac suite: **PENDING — BLOCKED by the locked-session runner hang**
+  (expected 1196/208 + 4 EncryptionFlowTests + 2 SyncLockedFaceTests in 2
+  new suites = 1202/210, the standing TakePane tripwire the one allowed
+  red). Bundle compiles; app builds.
+- Mobile suite: **PENDING** (expected 172/24 + 1/1 = 173/25; the KDF suite
+  already ran green in isolation).
+- The spine (7 Tutorial suites, 51/7): **PENDING — rides the Mac host,
+  same block.**
+
+**PROVISIONALs / deviations (recorded reasons):**
+- **PROVISIONAL (bridge):** the legacy-plaintext land rule (above — the
+  most spec-defensible reading; the refuse alternative jams the cursor on
+  the handoff's own transition). One residual corner recorded: a
+  pre-handoff plaintext body that ITSELF starts with a literal `e1:<valid
+  base64>` (a user typing that exact shape into the Day screen during the
+  pause) would refuse as tamper at resumption — visible, not silent, and
+  fixed by editing the entry; vanishingly narrow.
+- **PROVISIONAL (small):** `EncryptionSession.isKeysLockedError` matches
+  the refusal description EXACTLY (equality, not substring) — a wrapped or
+  translated error would fall back to the generic error face, never hide.
+- `SyncSession.configure`'s `keyProvider:` is REQUIRED, not defaulted —
+  deviation from batch-2's defaulted-engine-parameter shape, deliberate:
+  the app seam is where composition decides (the required-`redo:`
+  precedent); the ENGINE keeps its refusing default.
+- `KeyVaultClient`'s load-injectable init is PUBLIC (unlike the transports'
+  internal seams): the App-layer flow tests script vault responses via
+  public API only (App tests import VariorumCore non-@testable); recorded
+  in-code.
+- The runner picks its arm automatically (absent → create, present →
+  unwrap) per the plan's own "create … OR unwrap-existing"; the
+  create-refusal guards the race, not the arm choice.
+- The drift-arm receipt (id ≠ pushed id) preserves its body VERBATIM —
+  under E2EE that may be ciphertext under an unknowable day binding; raw
+  preservation is the honest form (the never-throw doctrine holds).
+- Batch-2's PROVISIONAL (keys-before-lockstep probe order) untouched, as
+  assigned to the ladder.
+
+**Scope proof:** `git diff bdf3c41..HEAD -- Sources/VariorumCore/Sync/
+Vendor/ Server/` is EMPTY — zero engine-seam lines, zero vendored lines,
+zero server artifacts this batch (SyncSession is App/Shared). No new
+dependencies (the executable target depends on VariorumCore alone). No
+schema.
+
+**Recorded-not-done (owed onward):** the Mac suite + spine EXECUTION (the
+locked-session block above — the bundle compiles; the architect runs them
+at an unlocked window, or this session re-runs if the session unlocks);
+the LIVE phone KDF number and the enrollment drill (the gate, steps 5–6);
+the deploy of 08/marker 5 + every production act (the architect's, per
+Rounds 4/5); no push to origin (the architect pushes after verification).
+
+### GATE RATIFY (L13 — her one-look ratify at gate step 8)
+
+**The ONE honest setup warning (as shipped in `EncryptionView`):**
+
+> This passphrase is not your account password, and it is never sent
+> anywhere. Variorum cannot reset it and cannot read your writing without
+> it — there is no "forgot passphrase" email, by design. If you lose the
+> passphrase and your 12-word recovery phrase, everything you've synced is
+> unreadable forever.
+
+**The recommendation line beside it:** "Use a long passphrase: four or more
+random words, or 16+ mixed characters — and never a password you use
+anywhere else." (Plus the soft caution under 12 characters — never a hard
+block, per Round 6.)
+
+**The disclosure list (what the server still sees under E2EE — unchanged
+from THE DESIGN; batch 2 shipped the classification with ZERO deltas):**
+`entry_date` (which days carry entries) · timestamps · positions/order ·
+kinds/status/profile enums · lock flags · the structural graph (ids,
+edges, memberships) · payload sizes and write cadence · `setting` values
+(enum semantics, no prose) · canvas x/y (spatial metadata). Everything
+user-authored encrypts — the eighteen columns: variant.working_text ·
+variant.label · commit_point.text · commit_point.message · block.name ·
+block.presentation · container.title · container.floating_notes ·
+reading.name · reading.query_spec · reading_section.name · tag.name ·
+tag.path · block_comment.text · reference.name · reference.url ·
+reference.view_state · lens.name. (The bridge adds: `journal_entries.body`
+ciphertext on the Fragments side; its `date` column stays plaintext,
+disclosed.)
+
 **THE LADDER — one ladder over the phase's combined diff** (fresh Fable cold
 reviewer, `notes/REVIEW_PROMPT.md` verbatim, zero framing; findings recorded
 here before any fix session; round 2 re-reviews; new BLOCKER/MAJOR ⇒ round
@@ -991,12 +1226,12 @@ attempted overnight if the ladder closes clean):**
 | L5 | Key-provider gating + visible refusal | **done — batch 2** (`a4b5765`; keys-first refusal, zero network contact, §12-shape pins, status names the fix; all refusal pins revert-verified red) |
 | L6 | Convergence suites GREEN over ciphertext + mirror-dump assertion + re-init harness scenario | **done — batch 2** (`a4b5765`+`a8c69c5`; 22-suite sync set green over ciphertext; total-dump walk pinned to full classification coverage; wipe keeps seq monotonic, fresh device onboards byte-identical) |
 | L7 | `08_phase14b_lockstep.sql` + `lockstepVersion` 5 (same commit; deploy at gate) | **done — batch 2** (`96b1e88`, the standalone schema commit; AUTHORED + PINNED, deploy remains the architect's gate act) |
-| L8 | Vault client + Keychain custody | pending — batch 3 |
-| L9 | Setup/enrollment flows, BOTH form factors (PL-6) + CHANGE PASSPHRASE (current-passphrase OR recovery-phrase authorized — her Round-7 scope addition) + the (re)generate-recovery-phrase surface | pending — batch 3 |
-| L10 | `resyncReinitialize` productized | pending — batch 3 |
-| L11 | Bridge journal-class capability (paused) + touchpoint #2 concrete facts | pending — batch 3 |
-| L12 | Phone KDF latency measured (R-7's condition) | pending — batch 3 |
-| L13 | Disclosure list + warning wording for her ratify | pending — batch 3 → gate |
+| L8 | Vault client + Keychain custody | **done — batch 3** (`80f2204`; single-flight PostgREST 1:1 with 08, refuse-by-version, 9c auth posture; Keychain custody with the R-6 biometrics door marked; DeviceKeySyncProvider = batch-2 PROVISIONAL 2 resolved) |
+| L9 | Setup/enrollment flows, BOTH form factors (PL-6) + CHANGE PASSPHRASE (current-passphrase OR recovery-phrase authorized — her Round-7 scope addition) + the (re)generate-recovery-phrase surface | **done — batch 3** (`363d0b6`; ONE shared seam — EncryptionSession/EncryptionView + the sync face's locked line + Unlock/Encryption doors; SyncSession takes the required keyProvider; locked-provider pin: refusal + zero transport contact) |
+| L10 | `resyncReinitialize` productized | **done — batch 3** (`e4e9908`; the vault-bootstrap executable per the concretization — create-or-unwrap, drain-bounded rounds, keys die with the process, dry-run writes nothing; 8 tests incl. the byte-level passphrase-file contract) |
+| L11 | Bridge journal-class capability (paused) + touchpoint #2 concrete facts | **done — batch 3** (`80a6e5e`; the STRUCTURAL pause via the refusing default provider; AAD = journal_entries:<date>:body:<key_id>; the legacy-plaintext land rule PROVISIONAL; 105/9 bridge suites green over ciphertext + 7 pins, four arms revert-verified; contract block additive) |
+| L12 | Phone KDF latency measured (R-7's condition) | **done — batch 3** (SIMULATOR 0.686 s, recorded as NOT the device number; the flow surfaces its own on-device number for the gate's step 5) |
+| L13 | Disclosure list + warning wording for her ratify | **done — batch 3 → gate** (the GATE RATIFY block above the ladder section) |
 | L14 | The ladder (combined diff) | pending |
 | L15 | The gate steps 1–8 (deploy · setup · wipe-repush · phone enroll · recovery drill · refresh · ratifies) | pending — her go per step |
 | L16 | MobileSoul PL-6 updated at design time (done this sitting) + closeout parity line | PL-6 written; closeout line owed |
