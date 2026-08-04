@@ -526,7 +526,9 @@ door; nothing further is needed from the Variorum side for this touchpoint):**
 **TOUCHPOINT #2 — designed at 14b, executed in the one batch:** the journal
 class goes ciphertext under the shared account key — Fragments' client gains
 encrypt/decrypt for that class (setup UX includes the account's encryption
-passphrase; the vault lives on the suite account) — and the two standing audit
+passphrase; the vault lives on the suite account; suite terminology ruling,
+hers: nothing is ever called "Passkey" — that word is WebAuthn sign-in
+vocabulary and confuses the encryption story) — and the two standing audit
 flags land: the TRIM behavior and the EMPTY-BODY-AS-DELETION detection move
 client-side or become metadata flags (server-side versions cannot operate on
 ciphertext). `entry_date` stays plaintext metadata, disclosed. **Existing-rows
@@ -573,12 +575,26 @@ Variorum bridge's capability is SHIPPED and PAUSED behind its key seam):**
    too — `master_wrapped_by_recovery`, BIP-39 12 words → PBKDF2-HMAC-SHA512
    ×2048 salt "mnemonic" → HKDF-SHA256 salt `variorum.suite.e2ee.v1` info
    `recovery-wrap-key` — but the Fragments client only needs the passphrase
-   road.)
-5. **Legacy plaintext:** `journal_entries` is never wiped, so pre-E2EE rows
-   (and any interim writes) stay plaintext on the server. The Variorum
-   bridge LANDS a non-`e1:` body as legacy plaintext rather than refusing —
-   mirror that posture; a tampered/unopenable `e1:` body must never be
-   displayed or silently dropped. Variorum's historical bodies re-arrive
+   road.) **PRECISION added at the 14b closeout (2026-08-04, R-8's letter
+   for your side): what Fragments PERSISTS is the `journal_bridge` key +
+   its id, NOTHING ELSE — master is a transient in-memory step of the
+   unwrap chain and is discarded the moment the class key is unwrapped;
+   never store master, never touch the corpus key.** Two row facts your
+   reader must tolerate: the row carries a **`revision`** column (writers'
+   compare-and-set token — READ and ignore it; Fragments NEVER writes the
+   vault row), and a **`format_version`** — refuse-by-version anything you
+   don't speak (mirror Variorum's posture: a newer vault is never guessed
+   at; tell the user to update).
+5. **Legacy plaintext — the EXACT classification (refined at the 14b
+   ladder R1-4 + cold pass C-4; mirror all three arms):** a body matching
+   `e1:` exactly is ciphertext (open it; a tampered/unopenable one must
+   never be displayed or silently dropped — preserve and refuse visibly);
+   a body with any OTHER `e<ASCII digits>:` prefix (`e2:` etc.) is an
+   UNSUPPORTED FUTURE VERSION — refuse/hold it, never display it, never
+   treat it as legacy text; anything else — including look-alikes with
+   non-ASCII numerals like `e²:` — is LEGACY PLAINTEXT and lands as text.
+   (`journal_entries` is never wiped, so pre-E2EE rows and interim writes
+   stay plaintext on the server.) Variorum's historical bodies re-arrive
    ENCRYPTED via the bridge's re-push from truth (as staged above); your
    side never migrates rows.
 6. **`entry_date`/`date` stays PLAINTEXT metadata, disclosed** (which days
@@ -598,6 +614,22 @@ Variorum bridge's capability is SHIPPED and PAUSED behind its key seam):**
    content (rule (i)) — if your client consumes its own receipts, decrypt
    `previous_body` before classifying, and treat an unopenable receipt body
    as an only-copy to preserve, never to drop.
+9. **STALE KEYS after a re-key (added at the 14b closeout — the CF-16
+   lesson, and 14c ships the user-facing re-key door in the SAME phase as
+   your batch):** the suite supports a deliberate RE-KEY (fresh vault,
+   fresh key ids, corpus re-encrypted — Variorum ran it live twice at
+   14b). After one, a device's held keys are silently wrong: decrypts
+   fail authentication because the AAD's `<key_id>` no longer matches.
+   **Mirror Variorum's honesty rule:** before failing opaquely, compare
+   your held `journal_bridge_key_id` against the vault row's current one
+   (you already read that row) — a mismatch means "this account's
+   encryption keys were replaced; enter the passphrase to re-enroll",
+   never a generic error. Re-enrollment overwrites the held key; nothing
+   else needs clearing. (Bridge-side consequence, for the 14c re-key
+   design: old-key `e1:` bodies left in `journal_entries` refuse on the
+   Variorum side until the bridge's re-push from truth overwrites them —
+   a re-key therefore triggers the same staged re-push as the migration
+   above.)
 
 **TOUCHPOINT #3 — at 14c (multi-user + the tier):** check the one-payment suite
 entitlement from the Fragments side (entitlement rows live on the suite account;

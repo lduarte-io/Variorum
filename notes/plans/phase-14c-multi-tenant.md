@@ -64,7 +64,11 @@ over bare verbs.
    window → reject `current: nil` → rebase-to-0 → old-key ciphertext
    accepted → every pull wedges). **The door MUST fence stale writers
    (vault-revision- or marker-class) BEFORE the truncate.** 14b ran it
-   safely only because her pause left one writer.
+   safely only because her pause left one writer. **And the JOURNAL
+   side:** a re-key strands old-key `e1:` bodies in `journal_entries`
+   (bridge pulls refuse until overwritten) — the door triggers the
+   bridge's staged re-push from truth as part of its act (the contract's
+   touchpoint #2, point 9 carries the Fragments-side half).
 *[removed for publication]*
    (entitlement on the account; P-ii verified: plain `auth.uid()`
    *[removed for publication]*
