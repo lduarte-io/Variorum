@@ -1139,17 +1139,25 @@ identity/provider cleanup is the gate's, after verification).
    design win. A one-time re-sign-in is the accepted cost (the bridge's
    Fragments password session is likewise re-mintable). Sessions are not
    data — nothing about her rows is touched either way.
-3. **The bridge's delegated swap, DORMANT:** implement the Fragments-project
-   session acquisition via the suite issuer (ASWebAuthenticationSession →
-   authorize → Fragments' GoTrue mints its native session) behind the
-   existing bridge-session seam, gated OFF by configuration until the
-   Fragments batch (the provider does not exist yet — the code must be
-   inert). The bridge KEEPS the password-grant shape (c) road as the active
-   path. Nothing in the bridge ENGINE (push/pull/journal semantics) changes.
+3. **The bridge — REMOVED FROM SCOPE (round 0x, her catch):** the dormant
+   delegated road is NOT built in this batch — it was premature (flag-gated
+   inert code that cannot run against a real provider until the Fragments
+   batch; it moves WHOLESALE to that era, built and tested against the live
+   provider). The bridge's existing code (engine + shape-(c) password
+   session) stays UNTOUCHED **by default, not by requirement**: her Phase-14
+   pause means bridge USABILITY is not required — if the cleanest seam rework
+   touches bridge call sites, that is allowed; the bar is only that the
+   module keeps compiling and its existing suites stay green (no corrupt
+   half-states). Full rip-out was considered and DECLINED: deleting settled,
+   tested machinery that returns at the Fragments batch buys no design
+   freedom the pause doesn't already grant.
 4. **custom:fragments retires from the CODE:** the Variorum sign-in no longer
-   references the provider; the ASWebAuthenticationSession machinery survives
-   only for item 3's dormant road. `ProjectConfig` keeps both projects'
-   coordinates (the bridge still needs Fragments').
+   references the provider. The SignInFlow/ASWebAuthenticationSession
+   machinery is no longer needed by ANY active path — the implementer may
+   retire it or leave it, whichever the cleanest seam favors (its hard-won
+   lifecycle fixes are documented in the 9c plan if it returns at the
+   Fragments batch). `ProjectConfig` keeps both projects' coordinates (the
+   bridge code still compiles against Fragments').
 5. **Tests:** the 9c auth suites updated to the direct shape; red-on-old pins
    for each behavior change; ALL suites green at acceptance (baselines
    above). Zero `Sync/` lines expected — any need to touch
@@ -1164,9 +1172,8 @@ schema: NONE (marker stays 4).
 **Acceptance:** she can sign OUT and back IN with email+password on the Mac
 app (and the mobile sign-in surface compiles/tests to the same seam) — a
 one-time re-sign-in after the update is acceptable, per scope item 2 as
-amended; the dormant road is provably inert (test: with the flag off, no
-delegated call is reachable); suites green; red-on-old pins verified both
-directions.
+amended; suites green (including the untouched bridge module's existing
+suites); red-on-old pins verified both directions.
 
 - **Round 0w (same sitting, mid-batch-1) — her R3 catch: session continuity
   DEMOTED.** Her words: "it is okay if I need to resign in - didn't we
@@ -1180,6 +1187,30 @@ directions.
   to the running implementer via SendMessage AND mirrored here same-turn**
   (the verify-subagent-message-delivery rule — the repo record is the
   authority if the message drops).
+
+- **Round 0x (same sitting, mid-batch-1) — her second catch: the bridge is
+  not a constraint, and the DORMANT ROAD was the actual contortion.** Her
+  question: "there's no contortion being done around the fragments bridge
+  staying usable, right? because it can be fully ripped out right now."
+  The architect's honest answer, recorded: keeping the bridge's existing
+  code untouched is the DO-NOTHING option (settled, tested machinery her
+  pause leaves idle) — no contortion there. The contortion-adjacent piece
+  was scope item 3 itself: building the delegated road NOW, flag-gated and
+  inert, unable to run against a real provider until the Fragments batch —
+  premature work done to say the transition "started." **CUT from batch 1;
+  it moves wholesale to the Fragments-batch era** (built and tested against
+  the live provider). The bridge's status pinned precisely:
+  untouched-BY-DEFAULT, never kept-usable-BY-REQUIREMENT — if the cleanest
+  seam rework touches bridge call sites, allowed; the bar is compiling +
+  existing suites green (no corrupt half-states). **Full rip-out considered
+  and DECLINED with reasoning:** deleting settled machinery that returns at
+  the Fragments batch buys no design freedom the pause doesn't already
+  grant — the best answer, not the most dramatic one. SignInFlow/ASWeb
+  machinery relaxed to implementer's judgment (no active path needs it).
+  Amendment sent to the running implementer AND mirrored in the brief
+  same-turn (the delivery-verification rule). Batch 1 is now smaller and
+  cleaner: direct sign-in · continuity-may-break · provider out of the
+  sign-in code · tests.
 
 ## Ledger
 
