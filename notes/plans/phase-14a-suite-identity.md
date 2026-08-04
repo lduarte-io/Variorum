@@ -1043,6 +1043,44 @@ does not gate the spike (project refs are random; display names rename freely).
     `main` precedes the code batches at a Phase 14 pause — this alignment IS
     that pause.
 
+- **Round 0u (same sitting) — PRODUCTION PROVEN; the exit criteria confirmed;
+  the code gate OPENS at her word.** Her confirmations: the site is PUSHED and
+  live · the three-value flip verified on reload · **mobile MERGED to main** ·
+  and the `start.html` flow ran END TO END through the PRODUCTION
+  stargazing.tech consent page ("it looks so cute!!") — exchange ok, suite
+  issuer, her uid, tokens present. **The re-run's "P-ii NOT CLEAN" verdict
+  EXPLAINED, not a regression:** the probe 404'd because `vault_probe` was
+  DROPPED after round 0r's verified run, exactly as promised — the harness
+  stopped-and-reported as designed; P-ii stands verified from 0r. Her
+  Variorum-side stargazing URLs: kept (correct there); any added on the
+  FRAGMENTS project: cleanup is now contract item 7. **The contract went
+  one-batch-complete at her ask:** the EXECUTION MODEL preamble (all three
+  touchpoints in ONE handoff at 14c's end; bridge paused 14b→batch, R5's
+  latitude spent as designed; Variorum Mobile carries her phone journaling
+  meanwhile) + the missing Supabase steps added — old-issuer shutdown with
+  its NOT-BEFORE-the-14a-code-batch guard · the signups-toggle nuance
+  (Fragments' global toggle ON for delegated first sign-ins; only the SURFACE
+  retires) · config hygiene · the existing-rows E2EE migration (the bridge
+  re-pushes from Variorum truth) · the ciphertext round-trip as the bridge's
+  resumption verification. **The 14c row now pins** the one-batch handoff and
+  the custom-domain-before-first-stranger guardrail (so both survive this
+  file's closeout). **Her exit criteria, confirmed one-to-one:** strangers
+  sign up on either app (14c + the batch's suite-pages signup flow, already
+  built and wired) · one login on both (14a code + the batch) · passphrase/
+  E2EE done (14b; per-user provisioning 14c) · bridge fully functional over
+  ciphertext (14a swap code + 14b payloads + the batch's resumption) ·
+  Supabase clean (14a's identity/provider cleanup, the batch's old-issuer
+  shutdown, 14c's isolation) · email provider (14c SMTP) — **and the closeout
+  ritual authors 14b's plan at this phase's gate, as standing.** Remaining
+  small items named to her: her bootstrap-password change at `/oauth/reset` ·
+  the spike client's deletion + spike teardown at the phase gate · the A1
+  rail before 14b's mirror migration (that plan's own step). **GREEN LIGHT
+  standing for batch 1 at her word** (scope: the direct sign-in surface
+  Mac+mobile through the one shared seam · the bridge's delegated swap
+  shipped DORMANT behind the session seam, activating at the Fragments batch ·
+  custom:fragments retirement in app + identity/provider cleanup · the 9c
+  auth tests updated).
+
 ## Ledger
 
 | # | Item | Status |
