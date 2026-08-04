@@ -15,6 +15,13 @@
 //  her exact checkbox sentence (CF-1/5/7), the CF-6/CF-13 copy pins, and
 //  the terminology walk (nothing is ever called Passkey).
 //
+//  Phase 14b CROSSOVER ROUND — the CF-14/15/16 pins: the replaced-keys
+//  projection + re-enroll road (CF-16, red-on-old against the
+//  custody-exists-alone "enrolled"), the payload-crypto classifier and
+//  its row face, the syncing row's door stability (CF-15), and the
+//  locked/replaced states' one-act Encryption-tab doors with the sibling
+//  "Encryption…" door retired (CF-14).
+//
 
 import CryptoKit
 import Dependencies
@@ -387,6 +394,190 @@ struct CopyFlowRoundTests {
                 "the honest core survives the clarification")
         #expect(EncryptionView.wholePhraseIsTheSecret.contains("no single word is a password"),
                 "CF-13: the whole phrase is the secret")
+    }
+}
+
+// MARK: - The crossover round (Phase 14b — CF-14 · CF-15 · CF-16)
+
+@MainActor
+@Suite("The crossover round (Phase 14b — CF-14/15/16 pins)")
+struct CrossoverRoundTests {
+    /// CF-16 (a), RED-ON-OLD: before the fix, `refresh()` decided
+    /// "enrolled" by custody-exists alone (EncryptionSession.swift:105 in
+    /// the landed round) — a re-keyed account's stale device read
+    /// `.enrolled` while its rounds failed generically. Now the key-id
+    /// comparison projects the honest REPLACED state, custody untouched by
+    /// the projection itself.
+    @Test func aReKeyedAccountProjectsTheReplacedStateOverStaleCustody() async throws {
+        // The old world: this device enrolls against vault #1.
+        let store = DeviceKeyStore.inMemory(backing: InMemoryKeyBacking())
+        let oldVault = ScriptedVault()
+        let old = makeEncryptionSession(store: store, vault: oldVault)
+        await old.setUp(passphrase: "the-old-passphrase")
+        #expect(old.lastError == nil)
+        let stale = try #require(store.load())
+
+        // The account is RE-KEYED elsewhere (the drill's shape: vault
+        // deleted, a fresh setup ran) — a new vault with new class-key ids
+        // now answers for the account; this device's custody survives.
+        let freshVault = ScriptedVault()
+        let reKeyer = makeEncryptionSession(store: .inMemory(), vault: freshVault)
+        await reKeyer.setUp(passphrase: "the-new-passphrase")
+        #expect(reKeyer.lastError == nil)
+
+        let session = makeEncryptionSession(store: store, vault: freshVault)
+        await session.refresh()
+        #expect(session.state == .keysReplaced(hasRecoveryWrap: false),
+                "CF-16: stale custody against a re-keyed vault projects REPLACED — never a false 'enrolled'")
+        #expect(store.load() == stale,
+                "the projection alone touches nothing — custody is replaced only by the re-enroll save")
+    }
+
+    /// CF-16 (b): the replaced state's road is ORDINARY re-enrollment —
+    /// the enroll save overwrites custody wholesale (the step-0 proven
+    /// class) and the device reads `.enrolled` again, serving the NEW key.
+    @Test func reEnrollingFromTheReplacedStateOverwritesCustodyWholesale() async throws {
+        let store = DeviceKeyStore.inMemory(backing: InMemoryKeyBacking())
+        let oldVault = ScriptedVault()
+        let old = makeEncryptionSession(store: store, vault: oldVault)
+        await old.setUp(passphrase: "the-old-passphrase")
+        let stale = try #require(store.load())
+
+        let freshVault = ScriptedVault()
+        let reKeyer = makeEncryptionSession(store: .inMemory(), vault: freshVault)
+        await reKeyer.setUp(passphrase: "the-new-passphrase")
+
+        let session = makeEncryptionSession(store: store, vault: freshVault)
+        await session.refresh()
+        #expect(session.state == .keysReplaced(hasRecoveryWrap: false))
+
+        await session.enroll(passphrase: "the-new-passphrase")
+        #expect(session.lastError == nil)
+        let fresh = try #require(store.load())
+        #expect(fresh != stale, "the enroll save overwrites the stale custody wholesale")
+        #expect(fresh.corpusKeyID != stale.corpusKeyID)
+        #expect(session.state == .enrolled(hasRecoveryWrap: false))
+        let provider = DeviceKeySyncProvider(store: store)
+        #expect(try provider.currentKeys().corpusKeyID == fresh.corpusKeyID,
+                "sync serves the NEW key, never the orphaned one")
+        await session.refresh()
+        #expect(session.state == .enrolled(hasRecoveryWrap: false),
+                "a fresh projection agrees — the ids match again")
+    }
+
+    /// CF-16 (c): the app-side classifier — true for the engine's
+    /// payload-crypto refusal (whatever row it names), false for the
+    /// locked-keys refusal, the unencrypted-value refusal (the other
+    /// "Sync refused:" case, which never means stale keys), and anything
+    /// else.
+    @Test func theCryptoFailureClassifierMatchesTheEngineRefusalShape() {
+        #expect(EncryptionSession.isPayloadCryptoError(
+            String(describing: SyncError.payloadCryptoFailure(
+                table: "variant", rowID: "r-1", column: "working_text",
+                detail: "authenticationFailure"))))
+        #expect(EncryptionSession.isPayloadCryptoError(
+            String(describing: SyncError.payloadCryptoFailure(
+                table: "tag", rowID: "t-9", column: "path", detail: "x"))),
+                "row coordinates vary — the classifier holds across them")
+        #expect(!EncryptionSession.isPayloadCryptoError(
+            String(describing: SyncError.encryptionKeysUnavailable)))
+        #expect(!EncryptionSession.isPayloadCryptoError(
+            String(describing: SyncError.unencryptedValueInEncryptedColumn(
+                table: "variant", rowID: "r-1", column: "working_text"))))
+        #expect(!EncryptionSession.isPayloadCryptoError("Sync error: something else"))
+    }
+
+    /// CF-16 (the classifier's face) + the ruled copy: a payload-crypto
+    /// refusal presents as the replaced-keys row with ONE door opening the
+    /// Encryption tab, and the surface's headline is the ruled sentence
+    /// byte-exact.
+    @Test func theReplacedRowNamesTheFixAndOpensTheEncryptionTab() {
+        let face = SyncRowFace.face(
+            allowsSync: true, isConfigured: true, signedIn: true,
+            isSyncing: false,
+            lastError: String(describing: SyncError.payloadCryptoFailure(
+                table: "variant", rowID: "r-1", column: "working_text",
+                detail: "authenticationFailure")),
+            lastErrorIsOffline: false)
+        #expect(face.kind == .keysReplaced)
+        #expect(face.doors == [SyncRowFace.Door(
+            label: "Re-enroll…", act: .openAccount(.encryption))],
+                "the replaced row's one door opens the Encryption tab directly")
+        #expect(EncryptionView.keysReplacedExplanation
+                == "This account's encryption keys were replaced. Enter your passphrase to re-enroll.",
+                "the ruled copy shape, byte-exact")
+    }
+
+    /// CF-15, RED-ON-OLD: the old `isSyncing` branch REPLACED the row's
+    /// content ("Sync now"/"Account…" vanished and reappeared every
+    /// round). Her ruling: the buttons must not move — "Sync now" stays
+    /// present and merely disables; "Account…" stays present.
+    @Test func theSyncingRowKeepsItsDoorsAndMerelyDisablesSyncNow() {
+        let face = SyncRowFace.face(
+            allowsSync: true, isConfigured: true, signedIn: true,
+            isSyncing: true, lastError: nil, lastErrorIsOffline: false)
+        #expect(face.kind == .syncing)
+        let syncNow = face.doors.first { $0.label == "Sync now" }
+        #expect(syncNow != nil, "CF-15: 'Sync now' stays present while a round runs")
+        #expect(syncNow?.enabled == false, "…and merely disables")
+        #expect(face.doors.contains { $0.label == "Account…" && $0.enabled },
+                "'Account…' stays present (and usable) too")
+    }
+
+    /// CF-14: the LOCKED state's own affordance reaches the unlock surface
+    /// in ONE act — the door opens the tabbed Account sheet directly at
+    /// the Encryption tab, never buried behind the Account tab.
+    @Test func theLockedRowReachesTheUnlockSurfaceInOneAct() {
+        let face = SyncRowFace.face(
+            allowsSync: true, isConfigured: true, signedIn: true,
+            isSyncing: false,
+            lastError: String(describing: SyncError.encryptionKeysUnavailable),
+            lastErrorIsOffline: false)
+        #expect(face.kind == .keysLocked)
+        #expect(face.doors == [SyncRowFace.Door(
+            label: "Unlock…", act: .openAccount(.encryption))],
+                "CF-14: 'Unlock…' stays in place and opens the Encryption tab in one act")
+    }
+
+    /// CF-14 (the retirement half): the separate "Encryption…" sibling
+    /// door is gone from every face — the surface is reached through the
+    /// Account sheet's Encryption tab (or the locked/replaced states' own
+    /// one-act doors).
+    @Test func theSeparateEncryptionDoorIsRetiredIntoTheAccountTabs() {
+        let idle = SyncRowFace.face(
+            allowsSync: true, isConfigured: true, signedIn: true,
+            isSyncing: false, lastError: nil, lastErrorIsOffline: false)
+        #expect(idle.kind == .idle)
+        #expect(idle.doors == [
+            SyncRowFace.Door(label: "Sync now", act: .syncNow),
+            SyncRowFace.Door(label: "Account…", act: .openAccount(.account)),
+        ], "the idle row offers exactly Sync now + Account… — no sibling Encryption door")
+
+        // Sweep the face family: no face anywhere mints an "Encryption…"
+        // door (the retired label), and every encryption-targeted door
+        // belongs to the locked or replaced state.
+        let errors: [String?] = [
+            nil,
+            "Sync error: something else",
+            String(describing: SyncError.encryptionKeysUnavailable),
+            String(describing: SyncError.payloadCryptoFailure(
+                table: "variant", rowID: "r", column: "working_text", detail: "d")),
+        ]
+        for isSyncing in [false, true] {
+            for error in errors {
+                for offline in [false, true] {
+                    let face = SyncRowFace.face(
+                        allowsSync: true, isConfigured: true, signedIn: true,
+                        isSyncing: isSyncing, lastError: error,
+                        lastErrorIsOffline: offline)
+                    #expect(!face.doors.contains { $0.label == "Encryption…" })
+                    for door in face.doors
+                    where door.act == .openAccount(.encryption) {
+                        #expect(face.kind == .keysLocked || face.kind == .keysReplaced)
+                    }
+                }
+            }
+        }
     }
 }
 

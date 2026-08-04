@@ -45,6 +45,13 @@ final class EncryptionSession {
         /// has not unlocked yet — sync waits; the surface offers the
         /// biometric unlock with the passphrase road beside it.
         case enrolledLocked(hasRecoveryWrap: Bool)
+        /// CF-16 (crossover round): custody exists but holds keys the
+        /// account no longer uses — the vault was RE-KEYED (deleted and set
+        /// up fresh) after this device enrolled. Without this state the
+        /// device reads "enrolled" while every round fails generically. The
+        /// road is ordinary re-enrollment: the enroll save overwrites
+        /// custody wholesale (the step-0 pin's proven class).
+        case keysReplaced(hasRecoveryWrap: Bool)
         /// The vault was written by a newer build — refuse by version.
         case newerFormat(Int)
     }
@@ -102,14 +109,26 @@ final class EncryptionSession {
         }
         do {
             let vault = try await client.fetchVault()
-            let unlocked = store.load() != nil
+            let custody = store.load()
             switch vault {
             case nil:
                 state = .noVault
             case let vault?:
                 let hasRecovery = vault.format.masterWrappedByRecovery != nil
-                if unlocked {
-                    state = .enrolled(hasRecoveryWrap: hasRecovery)
+                if let custody {
+                    // CF-16 (the re-key blindness, closed): "enrolled" is no
+                    // longer custody-exists alone — the custody must hold
+                    // THIS vault's class keys. A device that slept through a
+                    // re-key projects the honest REPLACED state instead of a
+                    // false "enrolled" whose rounds fail generically. (A
+                    // biometric-gated launch that hasn't unlocked cannot be
+                    // compared — custody is unreadable — so it stays
+                    // `enrolledLocked`; the mismatch surfaces at the first
+                    // post-unlock refresh, and the sync row's classifier
+                    // names the refusal meanwhile.)
+                    state = Self.custodyMatchesVault(custody, vault.format)
+                        ? .enrolled(hasRecoveryWrap: hasRecovery)
+                        : .keysReplaced(hasRecoveryWrap: hasRecovery)
                 } else if biometricRequired {
                     state = .enrolledLocked(hasRecoveryWrap: hasRecovery)
                 } else {
@@ -272,6 +291,19 @@ final class EncryptionSession {
         text.split(whereSeparator: \.isWhitespace).map(String.init)
     }
 
+    /// CF-16: does this device's custody hold the FETCHED vault's class
+    /// keys? A re-key (delete the vault, set up fresh) mints new key ids
+    /// for both classes, so stale custody mismatches on the plaintext ids
+    /// alone — no unwrap, no network beyond the fetch the caller already
+    /// made. A vault missing either class entry counts as a mismatch too
+    /// (custody claims keys the vault doesn't carry).
+    nonisolated static func custodyMatchesVault(
+        _ custody: DeviceKeyMaterial, _ vault: KeyVaultFormat
+    ) -> Bool {
+        vault.classKey(for: .corpus)?.keyID == custody.corpusKeyID
+            && vault.classKey(for: .journalBridge)?.keyID == custody.journalBridgeKeyID
+    }
+
     private func adopt(_ material: DeviceKeyMaterial) {
         if !store.save(material) {
             // Keychain refusal is exceptional; the keys still work for this
@@ -347,7 +379,23 @@ final class EncryptionSession {
     /// The sync status row's locked-state classifier: true exactly for the
     /// engine's keys-refusal (`SyncError.encryptionKeysUnavailable`, which
     /// the scheduler surfaces verbatim via `String(describing:)`).
-    static func isKeysLockedError(_ text: String) -> Bool {
+    /// (Nonisolated so the row's pure face model consults it directly.)
+    nonisolated static func isKeysLockedError(_ text: String) -> Bool {
         text == SyncError.encryptionKeysUnavailable.description
+    }
+
+    /// CF-16's classifier arm (App-layer only — the engine is untouched):
+    /// true for the engine's payload-crypto refusal
+    /// (`SyncError.payloadCryptoFailure`) as the scheduler surfaces it —
+    /// after a re-key, a stale device's rounds fail exactly here, so the
+    /// row names the Encryption surface instead of a generic "Sync error".
+    /// The case's description carries row coordinates (table/row/column/
+    /// detail), so unlike `isKeysLockedError` this anchors on the
+    /// description's two invariant segments; the conjunction excludes the
+    /// other "Sync refused:"-family case (`unencryptedValueInEncryptedColumn`),
+    /// which never means stale keys.
+    nonisolated static func isPayloadCryptoError(_ text: String) -> Bool {
+        text.hasPrefix("Sync refused: '")
+            && text.contains("failed to encrypt/decrypt (")
     }
 }

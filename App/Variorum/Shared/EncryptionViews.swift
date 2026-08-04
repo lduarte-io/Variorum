@@ -24,6 +24,14 @@
 //  The warning wording + the disclosure copy ride the plan file's GATE
 //  RATIFY + copy/flow record (L13) — change them there and here together.
 //
+//  Phase 14b CROSSOVER ROUND: this view is now the Account sheet's
+//  ENCRYPTION TAB content (CF-14 — her ruling: the Encryption surface
+//  folds UNDER the Account button; AccountView owns the sheet chrome —
+//  scroll, padding, the CF-1 borderless Close — and this view renders the
+//  states). CF-16: the honest REPLACED state — a device that slept
+//  through a re-key explains itself and offers the ordinary unlock roads
+//  instead of failing generically.
+//
 
 import SwiftUI
 import VariorumCore
@@ -44,7 +52,6 @@ nonisolated enum EncryptionSetupRules {
 
 struct EncryptionView: View {
     let services: AppServices
-    @Environment(\.dismiss) private var dismiss
 
     /// CF-1: the setup flow's position (steps 1–3; step 4 — the mandatory
     /// recovery phrase — is the `enrolled(hasRecoveryWrap: false)` state
@@ -138,6 +145,12 @@ struct EncryptionView: View {
         + "settings switches. Sealed words plus visible shape is what lets sync work "
         + "without trusting the server."
 
+    /// CF-16: the replaced state's headline — the ruled copy shape,
+    /// byte-pinned ("This account's encryption keys were replaced. Enter
+    /// your passphrase to re-enroll.").
+    static let keysReplacedExplanation =
+        "This account's encryption keys were replaced. Enter your passphrase to re-enroll."
+
     /// CF-11: the forget door's confirm message.
     static let forgetExplanation =
         "Sync on this device stops until you unlock again with your encryption passphrase "
@@ -171,18 +184,10 @@ struct EncryptionView: View {
     }()
 
     var body: some View {
-        ScrollView {
+        // CF-14: no chrome of its own — the tabbed Account sheet carries
+        // the scroll, the padding, and the CF-1 borderless Close; this view
+        // is the Encryption tab's content.
         VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Text("Encryption").font(.headline)
-                Spacer()
-                // CF-1: the sheet's dismissal is a plain Close — never a
-                // prominent "Done" sitting beside an act as if it were a
-                // step to take.
-                Button("Close") { dismiss() }
-                    .buttonStyle(.borderless)
-            }
-
             switch encryption.state {
             case .unknown:
                 ProgressView().controlSize(.small)
@@ -200,6 +205,8 @@ struct EncryptionView: View {
                 enrollmentSection(hasRecoveryWrap: hasRecoveryWrap)
             case .enrolledLocked(let hasRecoveryWrap):
                 lockedSection(hasRecoveryWrap: hasRecoveryWrap)
+            case .keysReplaced(let hasRecoveryWrap):
+                keysReplacedSection(hasRecoveryWrap: hasRecoveryWrap)
             case .enrolled(let hasRecoveryWrap):
                 if hasRecoveryWrap {
                     enrolledSection
@@ -220,11 +227,6 @@ struct EncryptionView: View {
                     .lineLimit(6)
             }
         }
-        .padding(20)
-        }
-        #if os(macOS)
-        .frame(minWidth: 460, minHeight: 340)
-        #endif
         .task { await encryption.refresh() }
     }
 
@@ -423,6 +425,23 @@ struct EncryptionView: View {
         }
         .disabled(encryption.busy)
         Divider()
+        unlockRoads(offerPhraseRoad: hasRecoveryWrap)
+    }
+
+    /// CF-16: the honest replaced state — custody exists, but the account
+    /// was re-keyed after this device enrolled. The headline is the ruled
+    /// copy; the roads are the ORDINARY unlock roads (passphrase, plus the
+    /// phrase reveal when the new vault carries a wrap) — the enroll save
+    /// overwrites the stale custody wholesale (the step-0 proven class).
+    @ViewBuilder
+    private func keysReplacedSection(hasRecoveryWrap: Bool) -> some View {
+        Text(Self.keysReplacedExplanation)
+            .foregroundStyle(.orange)
+            .fixedSize(horizontal: false, vertical: true)
+        Text("The keys this device holds were replaced after it enrolled — sync stays paused until you re-enroll; nothing is lost while paused.")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
         unlockRoads(offerPhraseRoad: hasRecoveryWrap)
     }
 
