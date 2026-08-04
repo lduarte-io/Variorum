@@ -999,6 +999,24 @@ reference.view_state · lens.name. (The bridge adds: `journal_entries.body`
 ciphertext on the Fragments side; its `date` column stays plaintext,
 disclosed.)
 
+**Batch-3 verification (the architect's own, post-record):** tree clean;
+six commits matching their claims; inland scope (Merge/Repairs/Vendor)
+EMPTY; the contract edit verified purely additive (+62 lines inside
+touchpoint #2); **full core suite re-run by the architect: 1146/124
+PASSED** (the second stale-SourceKit burst again refuted by CLI). **THE
+ACCEPTANCE HOLD, independently confirmed:** the architect's own bounded
+probe on the UNTOUCHED control suite (`StoreLocationTests`) hung past 300 s
+under the locked login session — the implementer's environment finding
+reproduced exactly (the 13b-recorded GUI-runner class; the wedged probe
+stopped cleanly, instance check clean). **Mac suite (expected 1202/210,
+tripwire-only) + spine (51/7) execution is HELD FOR THE MORNING'S UNLOCKED
+WINDOW and is a PRECONDITION for the wipe/repush and the `/Applications`
+refresh** — build-for-testing compiles green, core + mobile CLI suites
+green, so the hold is environmental, not a code signal. The overnight tail
+narrows accordingly: ladder overnight; deploy of `08` (additive, zero data
+risk) if the ladder closes clean; wipe · repush · refresh · everything
+her-facing rides the morning.
+
 **THE LADDER — one ladder over the phase's combined diff** (fresh Fable cold
 reviewer, `notes/REVIEW_PROMPT.md` verbatim, zero framing; findings recorded
 here before any fix session; round 2 re-reviews; new BLOCKER/MAJOR ⇒ round
