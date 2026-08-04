@@ -5713,6 +5713,70 @@ the worktree rules name); the design/beauty rounds (L11) iterate with
 her; S5's sync soak rides real use; TestFlight when she calls the app
 stable (M14).
 
+## GATE SITTING — RUN RECORD (opened 2026-08-03; her rulings verbatim, appended as they arrive)
+
+**Environment note (recorded so early observations aren't misread):** her
+first device run was built from the MAIN worktree's project
+(`~/dev/variorum/App/Variorum` — DerivedData's WorkspacePath confirmed
+it), whose `VariorumMobile` target on `main` is still the Phase 8
+capture app. Corrected in-sitting: the feel round's build is
+`~/dev/variorum-mobile/App/Variorum/Variorum.xcodeproj`, scheme
+`VariorumMobile`, Debug to her device (verified compiling + signing
+clean against the device SDK this sitting). Same bundle id in both
+trees, so the correct build replaces the old install; nothing to delete.
+
+**Q-M2 — RULED, with her OWN shape (supersedes all three offered: not
+(a) keep-both, not (b) Mac-adopts-auto-proceed-on-unique-match, not (c)
+phone-defers-to-ceremony). BOTH platforms change their default fanned
+divide to the duplicate shape.** Her words, verbatim: *"I think that
+both mobile and mac should change their default divide behavior to what
+i'm saying here: [y]ou have a block A, with takes 1, 2, and 3. you
+divide block A, and assuming that there is a valid divider (aka more
+than one word), it will automatically make you a block B and block C.
+and block B is the first half of what you divided, block C is the
+second half of what you divided, and both block B and block C have 3
+takes, and takes 2 & 3 are just identical on block B and block C. Yes,
+it might be a little annoying to have extra takes - but those takes are
+quick to delete. on the mac, opening the ceremony instead can be an
+option, but this gives divide a much quicker option and it's more
+intuitive as a user to divide, then delete the takes you don't want
+(this is quicker than dividing, realizing that you lost something you
+want, and going on some kind of hunt for it). and then it sidesteps
+smart divide rules entirely - the takes that you aren't dividing are
+just duplicated, one per each block."*
+
+- **The shape:** the displayed (peek-aware) take is cut at her cut; its
+  first half seeds B, its second half seeds C. Every OTHER active take
+  is duplicated WHOLE onto BOTH successors — no `CutPropagation`, no
+  unique-match gate, no refusal naming the Mac. Single-take divide is
+  untouched (the ordinary in-place cut). The Mac's W ceremony survives
+  as a deliberately-summoned OPTION, no longer the fanned default.
+- **Consequence surfaced to her in-sitting (recorded, not relitigated):**
+  a duplicated take chosen on BOTH successors renders the same text
+  twice in the post — the documented fanned-extract duplication class,
+  accepted knowingly ("quick to delete").
+- **Where it builds:** the shared core operation + the phone's divide
+  door = THIS project's gate fix batch (with the rest of her gate
+  rulings, standing discipline — red-on-old, ladder). The Mac
+  default-door switch = **Phase 13j** (her lean: "I suppose it could be
+  given to 13j since it's a change there, or somewhere else" — recorded
+  on the 13j row; movable at her word). The merge `mobile` → `main`
+  carries the core shape to the Mac codebase BEFORE the 13 phases run —
+  her stated requirement, and she confirmed the merge is fine.
+- **Design details left to the fix batch's brief** (not ruled, to be
+  built spec-defensibly + PROVISIONAL where needed): A's release to
+  lineage stays the W resolution (preserved whole, reversible by
+  re-pointing — nothing about the duplicate shape changes it); edge
+  types stay `derived_from`/'divide'; locked/archived takes' handling
+  under duplication.
+
+**13j addition — RULED (same sitting):** *"can you add to 13j that
+there needs to be some way to see unplaced blocks from a block that was
+derived from them? specifically for this case?"* — a lineage door on a
+successor block to its unplaced original (the divide-W/merge released
+originals), beside the existing global Library → Archived & Deleted →
+Unplaced blocks list. Recorded on the master plan's 13j row.
+
 ---
 
 ## Orientation
