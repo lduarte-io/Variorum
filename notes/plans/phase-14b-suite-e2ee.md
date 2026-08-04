@@ -1396,9 +1396,40 @@ after-state verification. The wipe · repush · refresh · everything
 her-facing still rides the morning (the Mac suite + spine at the unlocked
 window remain the wipe's precondition).**
 
+### The overnight tail — EXECUTED (2026-08-04 ~06:55–07:05 local; post-ladder,
+### per the Round-4/5 authorization and the recorded narrowing)
+
+- **Gate step 1 — the A1 rail: DONE.** Instance check clean (pgrep, path-
+  discriminated); WAL-safe backup `variorum-backup-2026-08-04-125511.sqlite`
+  (UTC name, `PRAGMA integrity_check` = ok, 4,907,008 bytes) in the store's
+  `Backups/` home. **Mirror export DONE beside it**
+  (`Backups/mirror-export-2026-08-04-125511/`): all 18 data tables +
+  `sync_meta` as JSON via the stored-PAT Management-API road, 19 files,
+  3,954,986 bytes total (variant.json 1.4 MB — the corpus's shape as
+  expected).
+- **Gate step 2 — the 08 deploy: DONE.** Pre-state read first:
+  `lockstep_version = "4"`. The committed
+  `Server/supabase/08_phase14b_lockstep.sql` executed VERBATIM (body-file +
+  curl; one road note: python-urllib's default user agent is
+  Cloudflare-blocked on the Management API — 403 code 1010 — curl is the
+  proven client). **After-state verified, every check:**
+  `lockstep_version = "5"` · `key_vault` present with all 17 columns
+  including `revision` · `relrowsecurity = true` · exactly the three owner
+  policies (select/insert/update — NO delete, by design) · `key_vault`
+  rows = 0. The installed marker-4 build now visibly refuses to sync BY
+  DESIGN (outbox intact, cursor unmoved) — the accepted §12 consequence;
+  her pause means no round was running; the refresh (pre-authorized)
+  follows the morning's Mac-suite green.
+- **THE OVERNIGHT RUN STOPS HERE, deliberately** (the recorded narrowing):
+  the vault setup, wipe, repush, refresh, and every her-facing act ride
+  the morning — the Mac suite + spine at the unlocked window are the
+  wipe's precondition, and the runner's session token is minted at the
+  gate, announced, not at 5 a.m.
+
 **THE GATE (announced steps, her explicit go per step — amended by Round 4:
 refresh pre-authorized; wipe pre-approved and sequenced at step 4; deploy
-attempted overnight if the ladder closes clean):**
+attempted overnight if the ladder closes clean — steps 1–2 EXECUTED
+overnight, the record above):**
 1. A1 backup of her real store + a mirror export (belt-and-braces).
 2. Deploy `08_phase14b_lockstep.sql` (vault table + marker 5) — her go; the
    committed artifact verbatim; after-state verified (`sync_schema_version()`
