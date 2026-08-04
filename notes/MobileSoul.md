@@ -1,0 +1,161 @@
+# Variorum for iPhone — The Soul Document
+
+*Written 2026-08-04 at the author's invitation, at the v1 gate's close
+("maybe even a 'mobile app soul' document where you distill ideas for
+the architecture, ui, and purpose of the app to help with decisions").
+**Canon for every mobile phase and consulted by every Mac phase
+closeout** (the parity ledger below). The author guides mobile LESS
+than the Mac — this document is what stands in for her in the gaps,
+beside the recorded rulings it points to. It binds direction; the gate
+record in `notes/plans/mobile-app-plan.md` holds the rulings verbatim.*
+
+## 1. Purpose — what this app IS
+
+Her daily-driver complement: *"like apple notes on the phone v.
+computer"*. A **complete, comprehensive app** — *"basically just as
+capable as the mac app… it can't be a very lobotomized version without
+me missing functionality"* (the parity ruling, CoreDescription pillar
+8's second supersession). The phone is where she writes in bed, on the
+couch, away from the desk — capture, real writing, real editing, real
+reading, takes included. It is NOT a satellite: it is the second full
+citizen of one store.
+
+**The soul test for any decision:** would she reach for the Mac
+because the phone *can't*, or because the Mac is *nicer for this*?
+The second is fine and permanent. The first is a defect unless it is
+on the ruled exclusion list.
+
+## 2. The bar — performance is identity (HER EXPLICIT BAR)
+
+P1–P3 are the phone's invariants **verbatim**, and she has set the
+number: *"I do not want the mobile app to choke even on 100k words"*.
+The Apple-Notes-lags failure mode is banned on the phone exactly as on
+the Mac — it is the app's founding grievance.
+
+- **P1 on phone:** cost ∝ viewport + edit, never document/corpus
+  size. Every list windowed (the Phase 10 window+probe discipline is
+  already the mobile view models' shape — keep it).
+- **P3 on phone:** ONE live editor ever; everything else is the
+  read-cheap tier. The phone's calm default IS its performance
+  architecture, same as the Mac.
+- **The phone adds a constraint the Mac never had — MEMORY.** iOS
+  kills apps at hard memory ceilings (jetsam). The 100k bar is a
+  memory bar as much as a latency bar: measure peak memory, not just
+  scroll/typing latency. Windowed reads and the read-cheap tier are
+  what keep the ceiling far.
+- **The executable form:** the parity round seeds a ~100k-word
+  fixture post + a large corpus in the dev store; every stage's
+  ladder includes a perf spot-check on it (typing latency, scroll,
+  open-time, memory); the round's exit gate runs it ON DEVICE. The
+  Stage 0 TK2 spike (kept as the iOS §5 executable) re-runs after
+  each iOS point release — same corollary as the Mac's.
+
+## 3. The architecture rule that makes parity CHEAP
+
+**Brains live in `VariorumCore` (or `App/Variorum/Shared/`); platforms
+own only faces.** This is the single most load-bearing idea for
+mobile's future: parity is then inheritance, not reimplementation.
+Proven three times already: the editor brain (`Shared/EditorBrain` —
+identity, crystallization, markdown law), `VoiceTokens`, the shared
+sync/auth shells. Consequences:
+
+- A capability built Mac-side with its brain in app-local code is a
+  **parity defect at birth** — the Mac phase should hoist the brain,
+  or the ledger row records the debt explicitly.
+- **Search (her named worry):** when the whole-library search row
+  runs, its engine choice (FTS5 vs sweep vs index) MUST land in
+  `VariorumCore/Queries` — never Mac-app code — so the phone gets
+  search by composing a face. P1-on-phone (and memory) sits at that
+  design table from the start: an index the phone can't afford is the
+  wrong index. The search row's design sitting consults this document.
+- The same rule reads in reverse: mobile never forks a brain. A
+  behavior difference between platforms is either a RULED compromise
+  (recorded) or a bug.
+
+## 4. The decision grammar (how to shrink a surface without losing the soul)
+
+When a Mac surface doesn't fit a phone, the shape changes and the
+capability survives. The ruled tools, in order of preference:
+
+1. **Same brain, phone-native face** (takes: swipe-peek + ✓ instead
+   of the board; books: the note list instead of the shelf's columns).
+2. **The workaround default** (her divide precedent — a simpler
+   default so good it became the Mac's own; merge may follow the same
+   road). Prefer inventing ONE honest simpler gesture over porting a
+   ceremony.
+3. **See-your-data** — *"if it exists on the mac app and is your
+   information you should be able to see that it exists"* — viewing
+   without a dedicated editor is a legitimate end state (references'
+   "More info" list, scraps viewing).
+4. **No-redirect** — "do it on the Mac" copy is a red flag; a road
+   must exist on the phone, even a modest one, except where she has
+   ruled the exclusion.
+5. **Exclusion, ruled and recorded** — Compare · the scraps
+   drag-into-note door · sticky-note/canvas editing · workspace &
+   windowing · two-pane outline · expand-all-fans · side-by-side
+   reference panel · ceremonies · iPad (PERMANENT: portrait-locked
+   iPhone; declaring iPad capability forbids portrait-only — never
+   declare it).
+
+Calm default, depth on demand, is doubly true on a phone: one column,
+one block blooming, machinery summoned per-block. The R58 lean —
+one take at a time — is the phone's native takes grammar, and it
+proved right. When in doubt, choose the calmer shape and record a
+PROVISIONAL.
+
+## 5. Platform truths (the fundamental differences — design around, never against)
+
+1. **The app dies without warning** (background → suspend → kill).
+   Pending buffers flush on background (shipped); any future
+   multi-step flow must survive interruption mid-step or not exist.
+2. **Text mutates in batches you didn't type** — autocorrect,
+   dictation, predictive text strip and rewrite. Identity is a
+   re-stamped projection, never attribute inheritance (the spike's
+   headline; the DEBUG audit guards it). Any new editor behavior must
+   pass the autocorrect/dictation test on device.
+3. **Offline is the phone's NORMAL.** Sync races and S5
+   conflict-as-variant fire more on mobile than they ever did between
+   two desks. A conflict variant landing on the phone must be
+   DISCOVERABLE there (the takes badge is the natural face) — a
+   parity-round check, and a standing acceptance item.
+4. **Memory ceilings** (§2). 5. **Portrait iPhone, forever** (§4.5).
+6. **Dynamic Type and VoiceOver are phone-native expectations** —
+   the token layer should scale with the user's text size where it
+   can, and the custom surfaces (badge, peek strip, seams) need
+   accessibility labels; audited at the parity round's polish stage,
+   owed before TestFlight strangers.
+7. **The sandbox**: no folder bridges, no bulk import; share-sheet
+   is the export grammar (FUTURE LIST). 8. **The A4 fence**: Debug =
+   dev store, never her corpus; Release installs are the real app
+   (M14: Xcode drops now, TestFlight at stability).
+
+## 6. THE PARITY LEDGER (the mechanism that keeps mobile whole)
+
+**The protocol (author-invited, 2026-08-04, recorded in CLAUDE.md's
+closeout ritual):** every Mac phase closeout MUST add a row here
+naming what the phase shipped that mobile owes a version of — or
+state "nothing mobile-visible" in its closeout paragraph. Mobile
+stages burn rows down and mark them. A phase that skips this line has
+an incomplete closeout. This replaces hope with bookkeeping.
+
+| # | From | What mobile owes | Status |
+|---|------|------------------|--------|
+| PL-1 | 13e (when it runs) | The takes vocabulary additions (reorder takes, move-take-into-block, copy-all-takes, takes-aware find&replace) — adopt into the phone's browser after the Mac lands them (the recorded L12 deferral) | waiting on 13e |
+| PL-2 | Whole-library search row (when it runs) | The engine lands in core Queries (§3); the phone gets a search face; phone memory/P1 sit at the design table | waiting on the row |
+| PL-3 | 13j (when it runs) | Trash/restore + restoration doors: phone parity at least to see-your-data (view the trash, restore a note; the per-post archived-blocks surface) | waiting on 13j |
+| PL-4 | 13i (when it runs) | Smart-book identity changes flow through reading assembly (core) — verify the phone book list renders the hybrid correctly; no new face expected | waiting on 13i |
+| PL-5 | 14a (in flight) | The suite sign-in through the shared shells — pulled in via the branch discipline; verify the phone sign-in flow end-to-end after 14a's code batches | open |
+| PL-6 | 14b (when it runs) | E2EE device enrollment UX ON the phone (the phone is a first-class device: key unwrap, recovery phrase entry) — design must include mobile from the start | waiting on 14b |
+| PL-7 | 13h (when it runs) | Folder bridge is Mac/files-domain; results flow to phone via sync — expect "nothing mobile-visible" beyond verification, but the closeout must say so | waiting on 13h |
+
+## 7. How to run mobile phases
+
+The active plan: `notes/plans/mobile-parity-round.md` (stages A–D,
+each its OWN `/architect-phase` invocation). **Invoke with the mobile
+plan NAMED explicitly** — e.g. `/architect-phase mobile parity stage
+A` — from the `~/dev/variorum-mobile` worktree; a bare
+`/architect-phase` resolves to the MAC master-plan pointer and is
+always wrong for mobile. The branch & merge discipline in that plan
+binds (pull `main` at stage kickoffs and batch boundaries; prompt her
+before merging outward). After the parity round, future mobile phases
+are planned against this document + the ledger above.
