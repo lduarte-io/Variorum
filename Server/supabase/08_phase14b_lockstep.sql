@@ -77,6 +77,14 @@ create table key_vault (
   corpus_key_wrapped_by_master         text not null,
   journal_bridge_key_id                text not null,
   journal_bridge_key_wrapped_by_master text not null,
+  -- Optimistic-concurrency token (ladder R1-2 — added while 08 is still
+  -- UNDEPLOYED, the zero-cost moment): every client update PATCHes with a
+  -- `revision=eq.<fetched>` filter and writes fetched+1; zero rows updated
+  -- means the row moved under the caller — the client refetches, never
+  -- blind-retries, never overwrites (a stale full-row PATCH could
+  -- otherwise silently revert a freshly regenerated recovery wrap to the
+  -- discarded words).
+  revision                             integer not null default 1,
   created_at                           timestamptz not null default now(),
   updated_at                           timestamptz not null default now()
 );
