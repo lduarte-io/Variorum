@@ -164,3 +164,44 @@ discipline, executed by sessions, that keeps the two lines healthy:
 - The 14a suite-identity work runs in the main worktree in parallel;
   nothing in this round touches auth (the suite-account change lands
   on the phone through the shared shells when 14a ships it).
+
+## PRE-STAGE-A: the 14b real-sync phone build (author's instruction, 2026-08-04 ~3:40am)
+
+*Recorded at her word, before Stage A — this section is self-contained:
+if the session that scheduled the morning check is gone, a fresh
+session executes from here. Main's own record of the same arrangement
+is the 14b round-6 commit (e9eb5ed): "mobile merges main in the
+MORNING, post-batches; Release install per the A4 fence; a pre-14b
+build refuses marker 5 by design."*
+
+- **What she asked for:** a build on her phone with **real sync** so
+  she can sign in (14a's direct email+password form through the shared
+  seam; verification pages live at stargazing.tech), enter her E2EE
+  passphrase to enroll (the PL-6 ledger row), and verify sync over the
+  encrypted mirror — 14b's morning gate step. This deliberately
+  supersedes, for now, the loose "real phone sync waits for
+  TestFlight" tie-in.
+- **The 7am check** (a ~6:57am one-shot is scheduled in the live
+  mobile session; session-only, so if that session died she messages
+  at 7 and this section is the instruction): in
+  `~/dev/variorum-mobile` on `mobile`, `git fetch origin`, then the
+  landing signal — `git show
+  origin/main:Sources/VariorumCore/Sync/SyncSchema.swift` must read
+  `lockstepVersion = 5` AND `git log origin/main` must show 14b
+  batch/ladder commits. **Not landed → report and WAIT for her word;
+  nothing else.** Never merge from pre-14b main: a marker-4 client
+  refuses the migrated mirror by design.
+- **On landed:** merge `origin/main` → `mobile` (notes-file conflicts
+  resolve as the UNION of both sides' records — the c928a33
+  precedent); run the mobile suite; build the Release phone build —
+  `xcodebuild -project App/Variorum/Variorum.xcodeproj -scheme
+  VariorumMobile -configuration Release -destination
+  'generic/platform=iOS' build` — **Release, never Debug** (Debug is
+  the dev-store fence and must never touch her corpus); commit and
+  push `mobile` only — **never push main** (active 14b development).
+- **HOLD the install** until she says the 14b gate is ready (the
+  mirror gets wiped and re-pushed encrypted at her go). Mechanics
+  scouted 2026-08-04: scheme `VariorumMobile`, automatic signing under
+  her team (<apple-team-id>), her iPhone 17 Pro paired and reachable by
+  `devicectl` (UDID <device-udid>) — install at
+  her go via `devicectl` or her Xcode, her presence assumed.
