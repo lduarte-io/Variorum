@@ -136,6 +136,16 @@ file's rounds 0d–0y ARE the record (the repo-first discipline held all night).
 
 ## Standing cautions
 
+- **Subagent background-wait DEATH (the batch-1 implementer's failure mode —
+  instruct every spawned session against it):** a subagent that launches a
+  long run (build/test) in the background and ENDS ITS TURN to "wait for the
+  notification" is self-terminating — the harness reads a stopped agent with
+  no tracked children as COMPLETED, the background work dies with it, and
+  the transcript may be cleaned up (batch 1's was — resume returned "no
+  transcript found"). Spawned implementers and reviewers must run acceptance
+  suites SYNCHRONOUSLY (wait in-turn, filtered output) and commit their
+  reports to the repo BEFORE any long wait. Repo-first reporting is what
+  made this death cost only test runs.
 - **Shared-checkout commit discipline:** implementers work in this same
   checkout. While one is live, architect commits MUST use the pathspec form
   (`git commit -m "…" -- <paths>`) — a bare commit takes the whole index and
