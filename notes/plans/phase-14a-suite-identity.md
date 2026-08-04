@@ -763,6 +763,59 @@ does not gate the spike (project refs are random; display names rename freely).
   password-set door (else the admin-curl template, password never transiting
   chat).
 
+- **Round 0m (same sitting) — EXECUTION ROUND 2: pages home ruled, spike client
+  registered, the brief goes one-pass-complete, the mobile message slotted.**
+  Her rulings and the acts, in order:
+  - **Pages home RULED: stargazing.tech** ("since it's currently up";
+    planetlillian stands down for now — the overall brand stays PROVISIONAL).
+    Her floated path `stargazing.tech/variorum` — the architect's
+    recommendation, recorded for her call at build: a SUITE-NEUTRAL path
+    (`/oauth/…`), because Fragments users and future apps land on these pages
+    too.
+  - **The brief EXPANDED to the complete one-pass page set** (her Cloudflare
+    rebuild budget: "limited number of rebuilds per day … I do want to get the
+    website fairly well thought out and completed"): page 1 sign-in+consent ·
+    page 2 **the sign-up form built and WIRED NOW** (her question answered YES,
+    ruled in — it renders the refusal as "Sign-ups aren't open yet" until 14c
+    opens the door, then works with zero page changes) · page 3 the
+    password-reset catcher (`/oauth/reset` + a forgot-password trigger). The
+    **"not pretty" instruction RETRACTED at her word** ("I don't need it to be
+    made particularly ugly either lol") — replaced with her actual frame: style
+    at the site agent's discretion; the priority is complete, reliable wiring
+    ("log in from phones, update variorum mobile and be able to log in").
+  - **The Site-URL flip CONFIRMED as in-phase work matching the brief**: Site
+    URL localhost:3000 today (the spike) → `https://stargazing.tech` + the
+    consent path at pages-deploy, with the save-reload-verify rule.
+  - **The MOBILE update message ADDED as a 14a-GATE deliverable at her word**
+    ("do add to the 14 plan that at some point we're going to have to send a
+    message to variorum mobile updating it - it carries the shared Phase 8/9c
+    shells right now"): when the auth-seam code batch lands, a self-contained
+    update message goes to the mobile project (direct sign-in adoption,
+    `custom:fragments` retirement, the ProjectConfig/AuthSession seam) so she
+    can sign in from her phone. Master-plan 14a row carries the clause.
+  - **Registration: the dynamic door WORKED on the first curl** — the spike
+    *[removed for publication]*
+    `http://localhost:3000/callback.html`), which also PROVES her
+    dynamic-toggle save landed (no "no add application section" ambiguity —
+    the dashboard has no manual UI, the 9c finding re-confirmed). She toggles
+    "Allow Dynamic OAuth Apps" OFF now (9c-proven: registered clients
+    survive). **The Fragments client will be registered LATER via the ADMIN
+    door** (`POST /auth/v1/admin/oauth/clients`, her PAT/service key — no
+    open-registration window, and its client_secret is minted fresh at
+    touchpoint-1 handoff).
+  - **The password road, answered and prepped:** recovery-email flow, and NO
+    provider change first — the email+password identity and `custom:fragments`
+    COEXIST on her user; the provider stays enabled until the app's direct
+    sign-in ships (her installed app's session refreshes project-locally
+    regardless), and her Fragments password stays valid for the bridge until
+    the delegated swap. The spike gained **`index.html`** — the recovery
+    catcher (Site URL localhost:3000 → the email link lands on it; set the new
+    suite password → PUT /auth/v1/user → built-in test sign-in verifies).
+    `config.js` carries the client id.
+  - Still open before the spike run: the `vault_probe` scratch table on the
+    live project (the README's SQL — her paste in the SQL editor at her go;
+    dropped after the probe).
+
 ## Ledger
 
 | # | Item | Status |
