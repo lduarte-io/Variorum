@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<!-- 14a spike — password-recovery catcher (THROWAWAY). The dashboard's "Send
+     password recovery" email links to the project's Site URL (localhost:3000
+     today), and GoTrue's verify hop lands the browser here with
+     #access_token=…&type=recovery in the fragment. This page catches it and
+     sets the user's NEW password via PUT /auth/v1/user — the moment her suite
+     account gains its direct password identity. The production equivalent is
+     the /oauth/reset page in notes/stargazing-login-pages-brief.md. -->
+<html>
+<head>
+<meta charset="utf-8">
+<title>Suite account — set password (spike)</title>
+<style>
+  body { font: 14px/1.5 -apple-system, sans-serif; max-width: 520px; margin: 3rem auto; padding: 0 1rem; }
+  input, button { font: inherit; padding: 6px 10px; margin: 4px 0; width: 100%; box-sizing: border-box; }
+  button { cursor: pointer; width: auto; padding: 6px 18px; }
+  .err { color: #b00; } .ok { color: #070; }
+  pre { background: #f4f4f4; padding: 10px; white-space: pre-wrap; }
+</style>
+<script src="config.js"></script>
+</head>
+<body>
+<h2>Set suite password <small>(spike recovery catcher)</small></h2>
+<div id="status"></div>
+<div id="form" style="display:none">
+  <input id="password" type="password" placeholder="new password" autocomplete="new-password">
+  <button onclick="setPassword()">Set password</button>
+</div>
+<div id="verify" style="display:none">
+  <p>Password set. Verify it works (signs in fresh with the new password):</p>
+  <input id="vemail" type="email" placeholder="email" autocomplete="username">
+  <button onclick="testSignIn()">Test sign-in</button>
+</div>
+
+<script>
+const hash = new URLSearchParams(location.hash.replace(/^#/, ""));
+const recoveryToken = hash.get("access_token");
+const type = hash.get("type");
+
+function status(msg, cls) { document.getElementById("status").innerHTML = `<p class="${cls||""}">${msg}</p>`; }
+function show(id) { document.getElementById(id).style.display = "block"; }
+function hide(id) { document.getElementById(id).style.display = "none"; }
+
+async function api(path, options = {}, bearer) {
+  const headers = Object.assign({ "apikey": SUITE_PUBLISHABLE_KEY, "Content-Type": "application/json" }, options.headers || {});
+  if (bearer) headers["Authorization"] = "Bearer " + bearer;
+  const response = await fetch(SUITE_URL + path, Object.assign({}, options, { headers }));
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(`${response.status} ${JSON.stringify(body)}`);
+  return body;
+}
+
+async function setPassword() {
+  try {
+    status("Setting password…");
+    const pw = document.getElementById("password").value;
+    if (pw.length < 8) { status("Use at least 8 characters.", "err"); return; }
+    const user = await api("/auth/v1/user", { method: "PUT", body: JSON.stringify({ password: pw }) }, recoveryToken);
+    hide("form");
+    status("Password set for " + (user.email || (user.user && user.user.email) || "the user"), "ok");
+    show("verify");
+  } catch (e) { status("Failed: " + e.message, "err"); }
+}
+
+async function testSignIn() {
+  try {
+    status("Signing in with the new password…");
+    const session = await api("/auth/v1/token?grant_type=password", {
+      method: "POST",
+      body: JSON.stringify({ email: document.getElementById("vemail").value,
+                             password: document.getElementById("password").value }),
+    });
+    status("VERIFIED — password sign-in works. uid: " + (session.user && session.user.id), "ok");
+  } catch (e) { status("Sign-in failed: " + e.message, "err"); }
+}
+
+if (recoveryToken && (type === "recovery" || type === "magiclink")) {
+  status("Token received (" + type + "). Choose the new suite password.", "ok");
+  show("form");
+} else if (location.hash.length > 1) {
+  status("Arrived with a fragment but not the expected recovery shape — report this verbatim:", "err");
+  document.body.insertAdjacentHTML("beforeend", "<pre>" + location.hash + "</pre>");
+} else {
+  status("No recovery token. Reach this page via the 'Send password recovery' email " +
+         "(Site URL must be http://localhost:3000 and this server running).", "err");
+}
+</script>
+</body>
+</html>

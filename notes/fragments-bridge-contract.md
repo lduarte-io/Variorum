@@ -418,3 +418,89 @@ re-decided at suite level) · the brand (stargazing is provisional, her word) ·
 consent/sign-in pages on stargazing.tech (that repo's own agent builds them) · her own
 account's migration path · how the one-payment entitlement is checked from both apps
 (14c's build, but the account model should not preclude it).
+
+**UPDATE 2026-08-03 (the 14a kickoff sitting, rounds 0d–0f — supersessions for this
+section; the sitting record is `notes/plans/phase-14a-suite-identity.md`):**
+
+- **TestFlight now WAITS — her ruling, verbatim:** *"I'm just going to wait to have
+  the testers and testflight until this whole phase 14 and all of its issues are
+  resolved and fragments has its new answers / new id provider - i'm not in THAT much
+  of a hurry to open up testflight tbh, I'd rather just get everything right."* And
+  separately: *"I don't want to have fragments native accounts."* Consequence: item 2's
+  "early testers may face a one-time re-link step" DISSOLVES — no tester account will
+  ever exist natively; testers arrive on suite (stargazing) accounts from day one,
+  after 14a's identity work + 14b's journal-class E2EE.
+- **Issuer mechanics RULED — shape (A):** a NEW neutral Supabase project is the suite's
+  account home and OIDC issuer (OAuth 2.1 Server); both app projects trust it as a
+  custom OIDC provider and keep minting their own native sessions. The Fragments-side
+  ask, when the project exists (its issuer URL is the missing coordinate): add the
+  neutral issuer as a trusted provider; route ALL sign-in — and signups, when they
+  open — through it; retire the native signup surface.
+- **Single sign-in RULED — the Fragments email+password identity RETIRES.** Her
+  Fragments USER survives (same uid, `journal_entries` rows untouched): the stargazing
+  identity links on, the password identity unlinks (or the deliberate re-map if that
+  final state is cleaner — the sitting's R3 posture). The one-seam auth module (item 1
+  above) is exactly what this rides on.
+- **The bridge's session goes DELEGATED:** it stops using email+password and obtains
+  its Fragments-project session through the stargazing issuer (one interactive flow
+  per device, then the same persisted-session + refresh loop as today).
+  `journal_entries` shape and key semantics stay frozen — ask #3 stands untouched.
+
+**AMENDMENT 2026-08-03 (round 0h — supersedes the "NEW neutral Supabase project"
+line above):** the suite account home is the **VARIORUM PROJECT itself** (her
+ruling; "stargazing" stays the brand and the pages' front — plus an eventual
+custom domain — never a separate project). Consequence: **the issuer URL is known
+*[removed for publication]*
+custom domain before any non-author signup. The Fragments-side asks, STAGED
+by touchpoint (what to do and when — her request that each stage be unambiguous):
+
+**TOUCHPOINT #1 — at 14a, NOW** (ready to carry once the OAuth 2.1 Server is
+enabled and Fragments is registered as a client; client id + page URLs delivered
+with them):
+1. Add the suite issuer as a trusted OIDC provider (`custom:stargazing`) and route
+   sign-in through the delegated PKCE flow (the same 9c-proven pairing, pointed
+   the other way).
+*[removed for publication]*
+   *[removed for publication]*
+   unlink/retire her email+password identity — single sign-in, no Fragments
+   password surviving.
+3. Retire the native signup surface: accounts are created at the suite from now
+   on — and suite signups stay OFF until Variorum's 14c isolation is built
+   (nobody-before-the-family, her sequencing ruling).
+4. `journal_entries` shape/keys stay frozen (standing ask #3, unchanged).
+
+**Coordinates DELIVERED (2026-08-04Z — the registration ran through the admin
+door; nothing further is needed from the Variorum side for this touchpoint):**
+*[removed for publication]*
+  works; endpoints live under it: `/oauth/authorize`, `/oauth/token`,
+  `/.well-known/jwks.json`).
+*[removed for publication]*
+  `client_secret_post` · registered redirect
+  *[removed for publication]*
+  GoTrue callback).
+- **client_secret:** in the author's untracked
+  `~/dev/variorum/.env.fragments-oauth.local` (`SUITE_FRAGMENTS_CLIENT_*`) —
+  she carries it into Fragments' provider config by hand; it appears in no
+  repo and no chat.
+- **THE FIRST-SIGN-IN RULE (load-bearing):** on her FIRST delegated sign-in
+  into Fragments via the new provider, VERIFY the minted session's uid equals
+  *[removed for publication]*
+  email to the existing user when it can). If a NEW uid appears instead, STOP —
+  do not use that account — and link deliberately via the admin API before
+  proceeding: every `journal_entries` row keys on the old uid. Also check the
+  interaction with Fragments' own signups toggle deliberately — a first
+  delegated sign-in rides the create-account path there, exactly as on the
+  Variorum side.
+
+**TOUCHPOINT #2 — at 14b (suite E2EE):** the journal class goes ciphertext under
+the shared account key — Fragments' client gains encrypt/decrypt for that class
+(setup UX includes the account's encryption passphrase; the vault lives on the
+suite account) — and the two standing audit flags land: the TRIM behavior and the
+EMPTY-BODY-AS-DELETION detection move client-side or become metadata flags
+(server-side versions cannot operate on ciphertext). `entry_date` stays plaintext
+metadata, disclosed.
+
+**TOUCHPOINT #3 — at 14c (multi-user + the tier):** check the one-payment suite
+entitlement from the Fragments side (entitlement rows live on the suite account;
+both apps read the same answer). TestFlight opens only after the family
+completes — no tester account exists before then.

@@ -1,5 +1,11 @@
 # Fragments OAuth login/consent page — spec for the author's site agent
 
+> **SUPERSEDED 2026-08-03 (Phase 14a, sitting round 0l):** this page was never
+> built (the LAN-interim spike page served instead), and the arrangement it
+> served — the Fragments project as issuer — retires at 14a. The live spec is
+> **`notes/stargazing-login-pages-brief.md`** (same contract, pointed at the
+> suite account project). Kept as history; do not build from this file.
+
 **What this is (Phase 9c, Step 0/5):** the one web page the Fragments↔Variorum
 one-account sign-in needs permanently. Supabase's OAuth 2.1 Server hosts NO
 login/consent UI — it 302s to the project's own Site URL and expects the app to
