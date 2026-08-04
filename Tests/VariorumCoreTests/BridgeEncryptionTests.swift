@@ -121,6 +121,30 @@ struct BridgeEncryptionTests {
         }
     }
 
+    /// R1-4's red-on-old: a FUTURE-version ciphertext body (`e2:…`) must
+    /// never land verbatim as the day's journal text. Pre-fix, `openLanded`
+    /// guarded on the exact-`e1:` `isEncrypted` check, so an `e2:` value
+    /// fell to the plaintext pass-through and ciphertext soup became the
+    /// entry; post-fix the pass-through rides ONLY `PayloadCipher.open`'s
+    /// `.notEncrypted` arm and `unsupportedVersion` refuses the round with
+    /// the cursor held (behavioral-revert verified: restoring the old guard
+    /// makes this test fail on the landed `e2:AAAA` body).
+    @Test func aFutureVersionCiphertextBodyRefusesTheRoundInsteadOfLanding() async throws {
+        try await withBridge { bridge in
+            _ = try await bridge.server.fragmentsAppWrites(
+                userID: "user-author", day: "2026-07-09",
+                body: "e2:AAAA", updatedAt: bridge.fragmentsStamp(1))
+
+            await #expect(throws: PayloadCipherError.unsupportedVersion("e2:")) {
+                try await bridge.engine.pullAndLand()
+            }
+            #expect(try bridge.rendered(day: "2026-07-09") == nil,
+                    "ciphertext soup never becomes the day's text")
+            let cursor = try await bridge.db.read { try BridgeEngine.cursor($0) }
+            #expect(cursor == nil, "the cursor holds before the refused row")
+        }
+    }
+
     /// A tampered `e1:` body REFUSES the round — nothing unauthenticated
     /// ever lands; the cursor holds so the row re-serves (visibly failing)
     /// until the server-side fault is addressed.

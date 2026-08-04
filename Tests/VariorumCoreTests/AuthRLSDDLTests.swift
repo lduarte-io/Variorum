@@ -353,7 +353,7 @@ struct AuthRLSDDLTests {
             "master_wrapped_by_passphrase", "master_wrapped_by_recovery",
             "corpus_key_id", "corpus_key_wrapped_by_master",
             "journal_bridge_key_id", "journal_bridge_key_wrapped_by_master",
-            "created_at", "updated_at",
+            "revision", "created_at", "updated_at",
         ] {
             #expect(sql.contains(column), "key_vault lacks column \(column)")
         }
@@ -361,6 +361,12 @@ struct AuthRLSDDLTests {
             of: #"master_wrapped_by_recovery\s+text,"#,
             options: .regularExpression) != nil,
             "the recovery wrap must be NULLABLE (the Round-5 overnight state)")
+        // R1-2: the CAS token, server-defaulted so rows written before the
+        // client carried it read as revision 1.
+        #expect(sql.range(
+            of: #"revision\s+integer not null default 1"#,
+            options: .regularExpression) != nil,
+            "key_vault needs the R1-2 revision CAS token with default 1")
         #expect(sql.range(
             of: #"master_wrapped_by_passphrase\s+text not null"#,
             options: .regularExpression) != nil)
@@ -377,5 +383,94 @@ struct AuthRLSDDLTests {
         #expect(sql.contains("LOAD-BEARING PRECONDITION"))
         #expect(sql.contains("Allow new users to sign up"))
         #expect(sql.contains("/auth/v1/signup"))
+    }
+
+    // MARK: - The R-2 mirror-truncate gate artifact (Phase 14b ladder R1-1
+    // — the one-time wipe half of wipe-and-repush; NOT schema choreography,
+    // so it lives in maintenance/ outside the numbered chain)
+
+    /// What can be wrong with a truncate artifact, as a pure check so the
+    /// doctored-fixture proof below can exercise it (the
+    /// `classificationProblems` shape): tables the registry syncs that the
+    /// TRUNCATE misses (a missed table keeps pre-14b PLAINTEXT rows the
+    /// decrypt seam then refuses on every pull — a permanent cursor
+    /// wedge), tables the TRUNCATE names that the registry does not
+    /// (anything extra is by definition not sync data — the forbidden
+    /// class), the forbidden names explicitly (`key_vault`, `sync_meta`,
+    /// `auth.*` — emptying the vault orphans the ciphertext corpus), and
+    /// the statement count (ONE truncate statement, nothing else — no
+    /// marker, no identity reset).
+    static func truncateProblems(strippedSQL sql: String)
+        -> (missing: Set<String>, extra: Set<String>, forbidden: Set<String>,
+            truncateCount: Int, statementCount: Int)
+    {
+        let lowered = sql.lowercased()
+        let marker = "truncate table"
+        var lists: [String] = []
+        var searchStart = lowered.startIndex
+        while let start = lowered.range(of: marker, range: searchStart..<lowered.endIndex) {
+            guard let end = lowered.range(of: ";", range: start.upperBound..<lowered.endIndex)
+            else { break }
+            lists.append(String(lowered[start.upperBound..<end.lowerBound]))
+            searchStart = end.upperBound
+        }
+        let named = Set(
+            lists.joined(separator: ",")
+                .components(separatedBy: CharacterSet(charactersIn: ", \n"))
+                .filter { !$0.isEmpty })
+        let registry = Set(SyncSchema.tables.map(\.name))
+        let forbidden = named.filter {
+            $0 == "key_vault" || $0 == "sync_meta" || $0.hasPrefix("auth.")
+        }
+        return (
+            missing: registry.subtracting(named),
+            extra: named.subtracting(registry),
+            forbidden: forbidden,
+            truncateCount: lists.count,
+            statementCount: lowered.filter { $0 == ";" }.count)
+    }
+
+    /// THE ARTIFACT PIN (R1-1): the committed gate artifact truncates
+    /// EXACTLY the registry's tables — order-insensitive equality, provably
+    /// free of `key_vault`/`sync_meta`/`auth.*`, one TRUNCATE statement and
+    /// nothing else (no lockstep marker: the gate act is not schema
+    /// choreography), and no `restart identity` (server_seq stays
+    /// monotonic, SyncSpec §9).
+    @Test func theMirrorTruncateArtifactMatchesTheRegistryExactly() throws {
+        let sql = Self.strippingComments(
+            try Self.sqlFile("maintenance/14b-mirror-truncate.sql"))
+        let problems = Self.truncateProblems(strippedSQL: sql)
+        #expect(problems.missing.isEmpty,
+                "the truncate artifact MISSES registry table(s) \(problems.missing.sorted()) — a missed table keeps plaintext rows and wedges every pull")
+        #expect(problems.extra.isEmpty,
+                "the truncate artifact names non-registry table(s) \(problems.extra.sorted())")
+        #expect(problems.forbidden.isEmpty,
+                "the truncate artifact must never touch \(problems.forbidden.sorted())")
+        #expect(problems.truncateCount == 1, "exactly ONE truncate statement")
+        #expect(problems.statementCount == 1, "the truncate is the artifact's ONLY statement")
+        #expect(!sql.lowercased().contains("restart identity"),
+                "server_seq's sequence is never reset (SyncSpec §9)")
+        #expect(!sql.lowercased().contains("lockstep_version"),
+                "the gate act bumps no marker — it is not schema choreography")
+    }
+
+    /// The artifact-class red-on-old (the doctored-fixture pattern the DDL
+    /// pins use): a doctored list that skips a registry table, and one that
+    /// names the vault, are both flagged — proving the pin above bites on
+    /// exactly the R1-1 failure classes rather than passing vacuously.
+    @Test func aDoctoredTruncateListIsFlaggedByTheCheck() {
+        let allButSetting = SyncSchema.tables.map(\.name).filter { $0 != "setting" }
+        let skipsATable = "truncate table\n  \(allButSetting.joined(separator: ",\n  "));"
+        let skipped = Self.truncateProblems(strippedSQL: skipsATable)
+        #expect(skipped.missing == ["setting"],
+                "the check failed to flag the skipped table (got \(skipped.missing.sorted()))")
+
+        let namesTheVault = "truncate table\n  "
+            + (SyncSchema.tables.map(\.name) + ["key_vault"]).joined(separator: ",\n  ")
+            + ";"
+        let vaulted = Self.truncateProblems(strippedSQL: namesTheVault)
+        #expect(vaulted.forbidden == ["key_vault"],
+                "the check failed to flag the forbidden table")
+        #expect(vaulted.extra == ["key_vault"])
     }
 }

@@ -87,7 +87,7 @@ final class EncryptionSession {
             case nil:
                 state = .noVault
             case let vault?:
-                let hasRecovery = vault.masterWrappedByRecovery != nil
+                let hasRecovery = vault.format.masterWrappedByRecovery != nil
                 state = enrolledLocally
                     ? .enrolled(hasRecoveryWrap: hasRecovery)
                     : .notEnrolled(hasRecoveryWrap: hasRecovery)
@@ -233,6 +233,9 @@ final class EncryptionSession {
             return "This account already has an encryption vault — enroll with its passphrase instead."
         case KeyVaultClientError.unsupportedFormatVersion:
             return "This account's encryption was set up by a newer version of Variorum — update the app first."
+        case KeyVaultClientError.vaultRevisionConflict:
+            // R1-2's CAS refusal: the caller must go back to CURRENT state.
+            return "The vault just changed on another device — nothing was overwritten. Try again from the current state."
         case KeyVaultError.recoveryWrapAlreadyPresent:
             return "A recovery phrase already exists — replacing it is a deliberate step (use Regenerate)."
         case is URLError:

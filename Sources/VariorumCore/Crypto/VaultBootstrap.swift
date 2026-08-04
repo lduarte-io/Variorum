@@ -158,18 +158,37 @@ public struct VaultBootstrap: Sendable {
     /// (`\n` or `\r\n` — her `read -s` shell writes one). Never printed,
     /// never logged. Empty (after the strip) refuses.
     public static func passphrase(fromFileBytes data: Data) throws -> String {
-        // Strip at the BYTE level ("\r\n" is one grapheme to Swift strings;
-        // the contract is about the file's bytes).
+        guard let text = strippedFileText(data) else {
+            throw VaultBootstrapError.passphraseFileUnreadable
+        }
+        guard !text.isEmpty else { throw VaultBootstrapError.passphraseFileEmpty }
+        return text
+    }
+
+    /// The access-token file's contract (ladder R1-8 — argv rides `ps`
+    /// output, so the gate hands the short-lived token in by FILE): same
+    /// byte contract as the passphrase file — the file's bytes ARE the
+    /// token, ONE trailing newline stripped; never printed, never logged.
+    /// The `--access-token` argv form is retained; exactly one of the two
+    /// is required (the CLI enforces the exactly-one).
+    public static func accessToken(fromFileBytes data: Data) throws -> String {
+        guard let text = strippedFileText(data) else {
+            throw VaultBootstrapError.accessTokenFileUnreadable
+        }
+        guard !text.isEmpty else { throw VaultBootstrapError.accessTokenFileEmpty }
+        return text
+    }
+
+    /// Strip ONE trailing newline at the BYTE level ("\r\n" is one grapheme
+    /// to Swift strings; the file contracts are about bytes), then decode
+    /// UTF-8. Nil = not UTF-8.
+    private static func strippedFileText(_ data: Data) -> String? {
         var bytes = data
         if bytes.last == 0x0A {
             bytes.removeLast()
             if bytes.last == 0x0D { bytes.removeLast() }
         }
-        guard let text = String(data: bytes, encoding: .utf8) else {
-            throw VaultBootstrapError.passphraseFileUnreadable
-        }
-        guard !text.isEmpty else { throw VaultBootstrapError.passphraseFileEmpty }
-        return text
+        return String(data: bytes, encoding: .utf8)
     }
 
     /// The `sub` claim of a JWT access token — the session's `auth.uid()`,
@@ -203,6 +222,10 @@ public enum VaultBootstrapError: Error, Equatable, Sendable {
     case passphraseFileUnreadable
     /// The passphrase file is empty (after the one-newline strip).
     case passphraseFileEmpty
+    /// The access-token file's bytes are not UTF-8 (R1-8's file form).
+    case accessTokenFileUnreadable
+    /// The access-token file is empty (after the one-newline strip).
+    case accessTokenFileEmpty
     /// The access token is not a decodable JWT with a `sub` claim.
     case malformedAccessToken
     /// The outbox did not drain within the round bound — the mirror kept

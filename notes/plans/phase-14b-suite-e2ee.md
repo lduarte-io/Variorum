@@ -349,10 +349,11 @@ grammar. New `sync_state` keys carry enrollment state/key ids (local-only).
 Client-side: a `resyncReinitialize` operation — reset every synced row's
 `sync_version` to 0, clear `sync_row_seq`, clear the pull cursor, enqueue
 every row (live AND tombstoned) into the outbox — proven in the two-client
-harness BEFORE production. Server-side: truncate the sixteen data tables
+harness BEFORE production. Server-side: truncate the eighteen data tables
 (never `auth.*`, never `key_vault`, never `sync_meta`) via a committed SQL
 artifact executed at her explicit go behind the A1 rail (+ a mirror export
-for belt-and-braces). The global `server_seq` sequence is NOT reset
+for belt-and-braces) — `Server/supabase/maintenance/14b-mirror-truncate.sql`,
+authored at ladder R1-1 and pinned table-for-table to the registry. The global `server_seq` sequence is NOT reset
 (ordering authority stays monotonic; SyncSpec §9). The phone RE-ONBOARDS:
 fresh store, enrollment, pull-to-head over ciphertext — which IS the restore
 drill's fresh-device half (her 4.5 MB corpus is far inside the pull-to-head

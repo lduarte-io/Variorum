@@ -23,8 +23,28 @@ import Foundation
 ///    idempotence by refusal, never overwrite; the mirror's PK is the
 ///    backstop);
 ///  - updating a missing row refuses (`vaultAbsent`);
+///  - updating past a row another device moved refuses
+///    (`vaultRevisionConflict` — the R1-2 CAS: every update filters on the
+///    `revision` fetched with the vault and writes fetched+1, so a stale
+///    read-modify-write can never silently revert the row; the caller
+///    refetches and re-derives, never blind-retries);
 ///  - undecodable rows refuse (`malformedRow`), never crash.
 public actor KeyVaultClient {
+    /// One fetched vault: the format PLUS the server row's `revision` — the
+    /// optimistic-concurrency token every update must present (R1-2). The
+    /// two travel together deliberately: an update built from a fetch
+    /// carries THAT fetch's token, so a write derived from stale state is
+    /// refused by the server-side filter instead of winning silently.
+    public struct FetchedVault: Equatable, Sendable {
+        public let format: KeyVaultFormat
+        public let revision: Int
+
+        public init(format: KeyVaultFormat, revision: Int) {
+            self.format = format
+            self.revision = revision
+        }
+    }
+
     public struct Configuration: Sendable {
         /// `https://<project>.supabase.co` — the Variorum project (R-1: the
         /// vault lives on the account home).
@@ -48,7 +68,7 @@ public actor KeyVaultClient {
     /// Single-flight fetch: concurrent reads coalesce onto one request
     /// (enrollment + a status refresh racing must not double-hit the
     /// server; both observe the same settled answer).
-    private var fetchTask: Task<KeyVaultFormat?, Error>?
+    private var fetchTask: Task<FetchedVault?, Error>?
 
     public init(
         configuration: Configuration,
@@ -77,9 +97,9 @@ public actor KeyVaultClient {
 
     // MARK: - Read
 
-    /// The signed-in user's vault, or nil when none exists yet. Single-
-    /// flight: concurrent callers share one request.
-    public func fetchVault() async throws -> KeyVaultFormat? {
+    /// The signed-in user's vault (format + revision token), or nil when
+    /// none exists yet. Single-flight: concurrent callers share one request.
+    public func fetchVault() async throws -> FetchedVault? {
         if let inFlight = fetchTask {
             return try await inFlight.value
         }
@@ -89,7 +109,7 @@ public actor KeyVaultClient {
         return try await task.value
     }
 
-    private func performFetch() async throws -> KeyVaultFormat? {
+    private func performFetch() async throws -> FetchedVault? {
         let session = try await sessionProvider.currentSession()
         let (data, _) = try await authorizedRequest(
             method: "GET",
@@ -105,7 +125,7 @@ public actor KeyVaultClient {
             throw KeyVaultClientError.malformedRow(String(describing: error))
         }
         guard let row = rows.first else { return nil }
-        return try row.format()
+        return FetchedVault(format: try row.format(), revision: row.revision)
     }
 
     // MARK: - Create
@@ -140,11 +160,20 @@ public actor KeyVaultClient {
     // MARK: - Update
 
     /// Replace the vault row's format fields (change-passphrase re-wraps,
-    /// recovery-wrap addition/replacement). Refuses when no row exists —
-    /// an update door must never invent a vault.
-    public func updateVault(_ format: KeyVaultFormat) async throws {
+    /// recovery-wrap addition/replacement) — CAS-guarded (ladder R1-2):
+    /// `expectedRevision` is the token that rode the fetch this update was
+    /// derived from; the PATCH filters `revision=eq.<expectedRevision>` and
+    /// writes `revision = expectedRevision + 1`, so a row another device
+    /// moved in the meantime matches ZERO rows and refuses typed
+    /// (`vaultRevisionConflict` — refetch and re-derive, never blind-retry:
+    /// the worst pre-fix arm was a stale full-row PATCH silently reverting
+    /// a freshly regenerated recovery wrap to the discarded words).
+    /// Refuses when no row exists (`vaultAbsent`) — an update door must
+    /// never invent a vault.
+    public func updateVault(_ format: KeyVaultFormat, expectedRevision: Int) async throws {
         let session = try await sessionProvider.currentSession()
-        let row = try KeyVaultWireRow(format: format, userID: session.userID)
+        var row = try KeyVaultWireRow(format: format, userID: session.userID)
+        row.revision = expectedRevision + 1
         let body: Data
         do {
             body = try JSONEncoder().encode(row)
@@ -154,13 +183,20 @@ public actor KeyVaultClient {
         let (data, _) = try await authorizedRequest(
             method: "PATCH",
             path: "rest/v1/key_vault",
-            query: [URLQueryItem(name: "user_id", value: "eq.\(session.userID)")],
+            query: [URLQueryItem(name: "user_id", value: "eq.\(session.userID)"),
+                    URLQueryItem(name: "revision", value: "eq.\(expectedRevision)")],
             body: body,
             prefer: "return=representation")
         // `return=representation` answers with the updated rows; an empty
-        // array means no row matched the filter — the vault is absent.
+        // array means no row matched the filter — either the vault is
+        // absent, or its revision moved under the caller. A fresh read
+        // disambiguates; either answer sends the caller back to CURRENT
+        // state rather than retrying the stale write.
         let rows = (try? JSONDecoder().decode([KeyVaultWireRow].self, from: data)) ?? []
-        guard !rows.isEmpty else { throw KeyVaultClientError.vaultAbsent }
+        guard !rows.isEmpty else {
+            if try await performFetch() == nil { throw KeyVaultClientError.vaultAbsent }
+            throw KeyVaultClientError.vaultRevisionConflict
+        }
     }
 
     // MARK: - HTTP plumbing (the transports' shape)
@@ -227,6 +263,11 @@ public enum KeyVaultClientError: Error, Equatable, Sendable {
     /// No vault row exists for this account (update refused; enrollment
     /// has nothing to unwrap).
     case vaultAbsent
+    /// The vault row changed since it was fetched (another device wrote
+    /// it): the update's `revision=eq.<fetched>` CAS filter matched zero
+    /// rows (ladder R1-2). REFETCH the vault and re-derive the update from
+    /// its CURRENT state — never blind-retry, never overwrite.
+    case vaultRevisionConflict
     /// The stored row was written by a NEWER vault format than this build
     /// speaks — refuse by version, never guess (L8's letter).
     case unsupportedFormatVersion(Int)
@@ -257,6 +298,10 @@ struct KeyVaultWireRow: Codable, Equatable {
     var corpusKeyWrappedByMaster: String
     var journalBridgeKeyID: String
     var journalBridgeKeyWrappedByMaster: String
+    /// The CAS token (ladder R1-2; the 08 column `revision integer not
+    /// null default 1`): reads carry the row's current value; updates
+    /// write fetched+1 behind the `revision=eq.<fetched>` filter.
+    var revision: Int = 1
 
     enum CodingKeys: String, CodingKey {
         case userID = "user_id"
@@ -274,6 +319,38 @@ struct KeyVaultWireRow: Codable, Equatable {
         case corpusKeyWrappedByMaster = "corpus_key_wrapped_by_master"
         case journalBridgeKeyID = "journal_bridge_key_id"
         case journalBridgeKeyWrappedByMaster = "journal_bridge_key_wrapped_by_master"
+        case revision = "revision"
+    }
+
+    /// Hand-written decode for exactly one reason: `revision` defaults to
+    /// 1 when the key is absent (the server column's own default — and the
+    /// synthesized decoder would refuse rows written before the client
+    /// carried the token). Encoding stays synthesized, which preserves the
+    /// Codable NIL-OMISSION of `masterWrappedByRecovery` — the accident
+    /// that protected the first-generation wrap pre-R1-2 (see the
+    /// enrollment tests' pinned-knowledge note).
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        userID = try container.decode(String.self, forKey: .userID)
+        formatVersion = try container.decode(Int.self, forKey: .formatVersion)
+        kdfAlgorithm = try container.decode(String.self, forKey: .kdfAlgorithm)
+        kdfArgon2Version = try container.decode(Int.self, forKey: .kdfArgon2Version)
+        kdfMemoryKiB = try container.decode(Int.self, forKey: .kdfMemoryKiB)
+        kdfIterations = try container.decode(Int.self, forKey: .kdfIterations)
+        kdfParallelism = try container.decode(Int.self, forKey: .kdfParallelism)
+        kdfSalt = try container.decode(String.self, forKey: .kdfSalt)
+        kdfOutputBytes = try container.decode(Int.self, forKey: .kdfOutputBytes)
+        masterWrappedByPassphrase = try container.decode(
+            String.self, forKey: .masterWrappedByPassphrase)
+        masterWrappedByRecovery = try container.decodeIfPresent(
+            String.self, forKey: .masterWrappedByRecovery)
+        corpusKeyID = try container.decode(String.self, forKey: .corpusKeyID)
+        corpusKeyWrappedByMaster = try container.decode(
+            String.self, forKey: .corpusKeyWrappedByMaster)
+        journalBridgeKeyID = try container.decode(String.self, forKey: .journalBridgeKeyID)
+        journalBridgeKeyWrappedByMaster = try container.decode(
+            String.self, forKey: .journalBridgeKeyWrappedByMaster)
+        revision = try container.decodeIfPresent(Int.self, forKey: .revision) ?? 1
     }
 
     /// Format → row. Refuses a format missing either v1 class key — the

@@ -73,7 +73,7 @@ public enum SyncSchema {
     /// lockstep event** — the DDL pin (`AuthRLSDDLTests`) fails the build
     /// if they drift.
     public static let lockstepVersion = 5
-    /// The 13 synced tables in FK-dependency-friendly apply order: parents
+    /// The synced tables, in FK-dependency-friendly apply order: parents
     /// before children wherever the graph is acyclic. (`container`⇄`block`⇄
     /// `variant` are mutually circular by design — the apply transaction runs
     /// with deferred FKs, so within one batch the order is a determinism

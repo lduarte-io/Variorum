@@ -43,10 +43,29 @@ struct SupabaseIntegrationTests {
             bearerToken: token)
     }
 
+    /// Phase 14b (ladder R1-3): post-E2EE this suite seals with the HARNESS
+    /// TEST KEY (`SyncTestKeys`), so a run against the production mirror
+    /// would push test-key ciphertext her real devices can NEVER decrypt —
+    /// their next pull jams permanently at `payloadCryptoFailure`
+    /// (park/heal is deliberately Phase 12). The env credentials alone are
+    /// therefore no longer enough: an EXPLICIT second opt-in is required,
+    /// and the sanctioned real-server pass is the gate's LIVE dump
+    /// verification (gate step 4), which runs under her real vault keys.
+    private static var allowsTestKeys: Bool {
+        ProcessInfo.processInfo.environment["VARIORUM_INTEGRATION_ALLOW_TEST_KEYS"] == "1"
+    }
+
     @Test(
         .enabled(
-            if: credentials != nil,
-            "Set VARIORUM_SUPABASE_URL / _API_KEY / _TOKEN (see .env.supabase.local) to run the real-server pass"))
+            if: credentials != nil && allowsTestKeys,
+            """
+            Requires VARIORUM_SUPABASE_URL / _API_KEY / _TOKEN (see \
+            .env.supabase.local) PLUS the explicit \
+            VARIORUM_INTEGRATION_ALLOW_TEST_KEYS=1 opt-in — this pass pushes \
+            TEST-KEY-sealed ciphertext that would permanently wedge a real \
+            device's pull against a production mirror (R1-3); the gate's live \
+            dump verification is the sanctioned real-server pass
+            """))
     func basicOfflineEditsConvergeOverTheRealServer() async throws {
         let env = try #require(Self.credentials)
         let transport = SupabaseTransport(

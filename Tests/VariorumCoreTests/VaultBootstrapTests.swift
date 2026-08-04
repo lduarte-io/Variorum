@@ -71,7 +71,7 @@ struct VaultBootstrapTests {
             // recovery phrase is generated in the app, in her presence.
             let vault = try await vaultWorld.client.fetchVault()
             #expect(vault != nil)
-            #expect(vault?.masterWrappedByRecovery == nil)
+            #expect(vault?.format.masterWrappedByRecovery == nil)
 
             // The mirror holds CIPHERTEXT, never her words.
             let variantID = try #require(try db.fetchString("SELECT id FROM variant LIMIT 1"))
@@ -204,6 +204,26 @@ struct VaultBootstrapTests {
         }
         #expect(throws: VaultBootstrapError.passphraseFileEmpty) {
             _ = try VaultBootstrap.passphrase(fromFileBytes: Data("\n".utf8))
+        }
+    }
+
+    /// R1-8: the token-file door shares the passphrase file's byte
+    /// contract — bytes ARE the token, ONE trailing newline stripped
+    /// (`\n` or `\r\n`), empty refuses typed. The argv form is retained;
+    /// the CLI requires exactly one of the two (the gate uses the file
+    /// form because argv rides `ps` output).
+    @Test func theAccessTokenFileContractStripsExactlyOneTrailingNewline() throws {
+        #expect(try VaultBootstrap.accessToken(fromFileBytes: Data("jwt.token.here\n".utf8))
+            == "jwt.token.here")
+        #expect(try VaultBootstrap.accessToken(fromFileBytes: Data("jwt.token.here\r\n".utf8))
+            == "jwt.token.here")
+        #expect(try VaultBootstrap.accessToken(fromFileBytes: Data("jwt.token.here".utf8))
+            == "jwt.token.here")
+        #expect(throws: VaultBootstrapError.accessTokenFileEmpty) {
+            _ = try VaultBootstrap.accessToken(fromFileBytes: Data("\n".utf8))
+        }
+        #expect(throws: VaultBootstrapError.accessTokenFileUnreadable) {
+            _ = try VaultBootstrap.accessToken(fromFileBytes: Data([0xFF, 0xFE]))
         }
     }
 

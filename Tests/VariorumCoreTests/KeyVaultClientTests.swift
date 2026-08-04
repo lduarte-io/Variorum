@@ -38,7 +38,9 @@ struct KeyVaultClientTests {
         let sample = try sampleFormat()
         try await world.client.createVault(sample.format)
         let fetched = try await world.client.fetchVault()
-        #expect(fetched == sample.format)
+        #expect(fetched?.format == sample.format)
+        // A fresh row carries the CAS token at the column default (R1-2).
+        #expect(fetched?.revision == 1)
         // The stored wire row carries the session's user — never a
         // caller-supplied id.
         #expect(world.server.storedRow(userID: world.userID) != nil)
@@ -57,15 +59,44 @@ struct KeyVaultClientTests {
         let sample = try sampleFormat()
         // Absent → refuses; nothing invented.
         await #expect(throws: KeyVaultClientError.vaultAbsent) {
-            try await world.client.updateVault(sample.format)
+            try await world.client.updateVault(sample.format, expectedRevision: 1)
         }
         try await world.client.createVault(sample.format)
         let updated = try sample.format.addingRecoveryWrap(
             masterKey: sample.master, recoveryKey: sample.recoveryKey)
-        try await world.client.updateVault(updated)
+        try await world.client.updateVault(updated, expectedRevision: 1)
         let fetched = try await world.client.fetchVault()
-        #expect(fetched == updated)
-        #expect(fetched?.masterWrappedByRecovery != nil)
+        #expect(fetched?.format == updated)
+        #expect(fetched?.format.masterWrappedByRecovery != nil)
+        // The CAS token advanced with the write (R1-2).
+        #expect(fetched?.revision == 2)
+    }
+
+    /// The CAS mechanics at the client seam (R1-2): an update presenting a
+    /// STALE revision token matches zero rows and refuses typed — the row
+    /// is byte-untouched, and the refusal's contract is refetch-and-
+    /// re-derive, never blind-retry.
+    @Test func aStaleRevisionUpdateRefusesTypedWithoutWriting() async throws {
+        let world = VaultTestWorld()
+        let sample = try sampleFormat()
+        try await world.client.createVault(sample.format)
+        // A concurrent writer moves the row: revision 1 → 2.
+        let moved = try sample.format.addingRecoveryWrap(
+            masterKey: sample.master, recoveryKey: sample.recoveryKey)
+        try await world.client.updateVault(moved, expectedRevision: 1)
+        let rowBefore = world.server.storedRow(userID: world.userID)
+
+        // The stale writer still holds token 1 — refused, nothing written.
+        await #expect(throws: KeyVaultClientError.vaultRevisionConflict) {
+            try await world.client.updateVault(sample.format, expectedRevision: 1)
+        }
+        #expect(world.server.storedRow(userID: world.userID) == rowBefore,
+                "a refused stale update writes nothing")
+        // Refetching yields the current token; the re-derived update lands.
+        let current = try #require(try await world.client.fetchVault())
+        #expect(current.revision == 2)
+        try await world.client.updateVault(current.format, expectedRevision: current.revision)
+        #expect(try await world.client.fetchVault()?.revision == 3)
     }
 
     @Test func aNewerFormatVersionRefusesByVersion() async throws {

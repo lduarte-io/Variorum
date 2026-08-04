@@ -20,7 +20,7 @@ struct VaultEnrollmentTests {
         // Round 5: the overnight vault carries the passphrase wrap ALONE.
         let vault = try await world.client.fetchVault()
         #expect(vault != nil)
-        #expect(vault?.masterWrappedByRecovery == nil)
+        #expect(vault?.format.masterWrappedByRecovery == nil)
         // The material's keys match what a fresh enrollment unwraps.
         let enrolled = try await world.enrollment.enroll(passphrase: "orchard-lantern-13")
         #expect(enrolled == material)
@@ -157,7 +157,7 @@ struct VaultEnrollmentTests {
         let material = try await world.enrollment.setUp(passphrase: "orchard-lantern-13")
         let words = try RecoveryPhrase.generate()
         try await world.enrollment.landRecoveryWrap(words: words, material: material)
-        let saltBefore = (try await world.client.fetchVault())!.kdf.salt
+        let saltBefore = (try await world.client.fetchVault())!.format.kdf.salt
 
         let returned = try await world.enrollment.changePassphrase(
             authorizedBy: .passphrase("orchard-lantern-13"),
@@ -175,7 +175,7 @@ struct VaultEnrollmentTests {
         let viaPhrase = try await world.enrollment.enroll(recoveryWords: words)
         #expect(viaPhrase == material)
         // A fresh salt + descriptor was minted for the new wrap.
-        let saltAfter = (try await world.client.fetchVault())!.kdf.salt
+        let saltAfter = (try await world.client.fetchVault())!.format.kdf.salt
         #expect(saltAfter != saltBefore)
     }
 
@@ -207,5 +207,85 @@ struct VaultEnrollmentTests {
         }
         let vaultAfter = try await world.client.fetchVault()
         #expect(vaultAfter == vaultBefore, "a refused change writes nothing")
+    }
+
+    // MARK: The vault CAS (ladder R1-2)
+
+    /// R1-2's red-on-old — the regenerate race, the reviewer's worst arm:
+    /// device B holds a fetch from BEFORE device A regenerated the recovery
+    /// phrase, and B's update (a change-passphrase-shaped full-row write —
+    /// exactly the PATCH every flow issues after its internal fetch, driven
+    /// at the client seam here so the fetch→update window is deterministic)
+    /// must REFUSE on the revision token instead of silently reverting the
+    /// vault. Pre-fix — behavioral revert: drop the `revision=eq.` filter
+    /// from `updateVault` — the stale PATCH matches on user_id alone and
+    /// the freshly WRITTEN phrase stops working while the DISCARDED one
+    /// works again; this test then fails on both the missing throw and the
+    /// dead written phrase.
+    @Test func aStaleFetchUpdateAfterARegenerateRefusesInsteadOfRevertingThePhrase() async throws {
+        let world = VaultTestWorld()
+        let material = try await world.enrollment.setUp(passphrase: "orchard-lantern-13")
+        let discarded = try RecoveryPhrase.generate()
+        try await world.enrollment.landRecoveryWrap(words: discarded, material: material)
+
+        // Device B: same account, same server, its OWN client — fetches
+        // BEFORE the regenerate. Its snapshot holds the soon-to-be-
+        // discarded wrap.
+        let deviceB = VaultTestWorld(server: world.server)
+        let stale = try #require(try await deviceB.client.fetchVault())
+        #expect(stale.format.masterWrappedByRecovery != nil)
+
+        // Device A regenerates: the WRITTEN phrase is now `written`.
+        let written = try RecoveryPhrase.generate()
+        try await world.enrollment.landRecoveryWrap(
+            words: written, material: material, allowReplace: true)
+
+        // Device B pushes an update derived from its STALE snapshot (a
+        // passphrase re-wrap that innocently carries the snapshot's OLD
+        // recovery wrap along — the full-row PATCH shape).
+        let descriptor = PassphraseKDF.Descriptor.v1(salt: PassphraseKDF.randomSalt())
+        let newKey = try PassphraseKDF.deriveKey(
+            passphrase: "meadow-castle-77", descriptor: descriptor)
+        var fromStale = stale.format
+        fromStale.kdf = descriptor
+        fromStale.masterWrappedByPassphrase = try AES.KeyWrap.wrap(
+            material.masterSymmetricKey, using: newKey)
+        await #expect(throws: KeyVaultClientError.vaultRevisionConflict) {
+            try await deviceB.client.updateVault(fromStale, expectedRevision: stale.revision)
+        }
+
+        // The WRITTEN phrase still unwraps; the discarded one stays dead —
+        // the exact outcome the pre-fix code silently inverted.
+        let recovered = try await world.enrollment.enroll(recoveryWords: written)
+        #expect(recovered == material)
+        await #expect(throws: VaultEnrollmentError.wrongRecoveryPhrase) {
+            _ = try await world.enrollment.enroll(recoveryWords: discarded)
+        }
+    }
+
+    /// WHY THE FIRST-GENERATION ARM WAS ACCIDENTALLY PROTECTED PRE-FIX
+    /// (the reviewer's subtlety, pinned as knowledge): Codable OMITS a nil
+    /// optional, so a stale row fetched before ANY recovery wrap existed
+    /// carries NO `master_wrapped_by_recovery` key in its PATCH body at
+    /// all — PostgREST sets only present keys, leaving a freshly-landed
+    /// FIRST wrap untouched. Only a stale NON-nil wrap (the regenerate
+    /// race above) could clobber — which is why the deliberate CAS token,
+    /// not the encoding accident, is the fix.
+    @Test func codableNilOmissionIsWhyTheFirstGenerationArmWasAccidentallySafe() throws {
+        let master = SymmetricKey(size: .bits256)
+        let noRecovery = try KeyVaultFormat.create(
+            masterKey: master,
+            passphraseKey: SymmetricKey(size: .bits256),
+            recoveryKey: nil,
+            classKeys: [
+                (keyClass: .corpus, keyID: "c", key: SymmetricKey(size: .bits256)),
+                (keyClass: .journalBridge, keyID: "j", key: SymmetricKey(size: .bits256)),
+            ],
+            kdf: .v1(salt: PassphraseKDF.randomSalt()))
+        let body = try JSONEncoder().encode(
+            try KeyVaultWireRow(format: noRecovery, userID: "u"))
+        let json = String(data: body, encoding: .utf8)!
+        #expect(!json.contains("master_wrapped_by_recovery"),
+                "the nil wrap is OMITTED, not null — the accidental pre-fix protection")
     }
 }

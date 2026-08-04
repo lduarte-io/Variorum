@@ -113,7 +113,7 @@ public struct VaultEnrollment: Sendable {
     /// vault speaks (`vaultAbsent` — no setup has run for this account).
     public func enroll(passphrase: String) async throws -> DeviceKeyMaterial {
         guard !passphrase.isEmpty else { throw VaultEnrollmentError.emptyPassphrase }
-        let vault = try await fetchRequiredVault()
+        let vault = try await fetchRequiredVault().format
         let passphraseKey = try measuredDerive(passphrase: passphrase, descriptor: vault.kdf)
         let master: SymmetricKey
         do {
@@ -132,7 +132,7 @@ public struct VaultEnrollment: Sendable {
     /// has no recovery wrap yet (the Round-5 overnight state).
     public func enroll(recoveryWords: [String]) async throws -> DeviceKeyMaterial {
         let recoveryKey = try RecoveryPhrase.recoveryWrapKey(words: recoveryWords)
-        let vault = try await fetchRequiredVault()
+        let vault = try await fetchRequiredVault().format
         let master: SymmetricKey
         do {
             master = try vault.unwrapMaster(withRecoveryKey: recoveryKey)
@@ -147,7 +147,7 @@ public struct VaultEnrollment: Sendable {
     /// Whether the account's vault carries a recovery wrap yet (drives the
     /// flows' offer: absent ⇒ GENERATE, present ⇒ the deliberate REPLACE).
     public func hasRecoveryWrap() async throws -> Bool {
-        try await fetchRequiredVault().masterWrappedByRecovery != nil
+        try await fetchRequiredVault().format.masterWrappedByRecovery != nil
     }
 
     /// Land the CONFIRMED 12 words as the vault's recovery wrap. The flow's
@@ -165,7 +165,8 @@ public struct VaultEnrollment: Sendable {
         words: [String], material: DeviceKeyMaterial, allowReplace: Bool = false
     ) async throws {
         let recoveryKey = try RecoveryPhrase.recoveryWrapKey(words: words)
-        let vault = try await fetchRequiredVault()
+        let fetched = try await fetchRequiredVault()
+        let vault = fetched.format
         let updated: KeyVaultFormat
         if vault.masterWrappedByRecovery == nil {
             updated = try vault.addingRecoveryWrap(
@@ -175,7 +176,10 @@ public struct VaultEnrollment: Sendable {
             updated = try vault.replacingRecoveryWrap(
                 masterKey: material.masterSymmetricKey, recoveryKey: recoveryKey)
         }
-        try await client.updateVault(updated)
+        // The update rides THIS fetch's revision token (R1-2): a vault
+        // another device moved since the fetch refuses as
+        // `vaultRevisionConflict` — never a silent phrase revert.
+        try await client.updateVault(updated, expectedRevision: fetched.revision)
     }
 
     // MARK: - Change passphrase (Round 7's scope addition)
@@ -195,7 +199,8 @@ public struct VaultEnrollment: Sendable {
         authorizedBy authorization: VaultAuthorization, newPassphrase: String
     ) async throws -> DeviceKeyMaterial {
         guard !newPassphrase.isEmpty else { throw VaultEnrollmentError.emptyPassphrase }
-        let vault = try await fetchRequiredVault()
+        let fetched = try await fetchRequiredVault()
+        let vault = fetched.format
         let master: SymmetricKey
         switch authorization {
         case .passphrase(let current):
@@ -223,13 +228,14 @@ public struct VaultEnrollment: Sendable {
         } catch {
             throw KeyVaultError.wrapFailed
         }
-        try await client.updateVault(updated)
+        // CAS-guarded like every vault update (R1-2).
+        try await client.updateVault(updated, expectedRevision: fetched.revision)
         return try material(from: vault, master: master)
     }
 
     // MARK: - Helpers
 
-    private func fetchRequiredVault() async throws -> KeyVaultFormat {
+    private func fetchRequiredVault() async throws -> KeyVaultClient.FetchedVault {
         guard let vault = try await client.fetchVault() else {
             throw KeyVaultClientError.vaultAbsent
         }
@@ -239,9 +245,14 @@ public struct VaultEnrollment: Sendable {
     private func material(
         from vault: KeyVaultFormat, master: SymmetricKey
     ) throws -> DeviceKeyMaterial {
-        guard let corpusEntry = vault.classKey(for: .corpus),
-              let journalEntry = vault.classKey(for: .journalBridge)
-        else { throw KeyVaultError.unknownClassKey(.corpus) }
+        // Each guard names the class it is actually missing (ladder R1-6 —
+        // a refusal that misnames its offender is worse than none).
+        guard let corpusEntry = vault.classKey(for: .corpus) else {
+            throw KeyVaultError.unknownClassKey(.corpus)
+        }
+        guard let journalEntry = vault.classKey(for: .journalBridge) else {
+            throw KeyVaultError.unknownClassKey(.journalBridge)
+        }
         let corpus = try vault.unwrapClassKey(.corpus, masterKey: master)
         let journal = try vault.unwrapClassKey(.journalBridge, masterKey: master)
         return DeviceKeyMaterial(

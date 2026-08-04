@@ -97,12 +97,27 @@ final class ScriptedVaultServer: @unchecked Sendable {
             patchCount += 1
             guard let filteredUser,
                   let body = request.httpBody,
-                  let row = try? JSONDecoder().decode(KeyVaultWireRow.self, from: body)
+                  let patch = (try? JSONSerialization.jsonObject(with: body)) as? [String: Any]
             else { return response(400) }
-            guard rowsByUser[filteredUser] != nil else {
-                // No row matched the filter: 200 with an empty representation.
+            guard let stored = rowsByUser[filteredUser],
+                  revisionFilter(url).map({ $0 == stored.revision }) ?? true
+            else {
+                // No row matched the filter (absent, or a stale `revision`
+                // CAS token — R1-2): 200 with an empty representation,
+                // PostgREST's zero-rows shape.
                 return response(200, body: Data("[]".utf8))
             }
+            // PostgREST PATCH sets exactly the keys PRESENT in the body —
+            // a Codable-omitted nil optional leaves the stored column
+            // untouched. Modeled deliberately (R1-2's pinned subtlety: the
+            // nil-omission is what accidentally protected a first-generation
+            // recovery wrap from a stale full-row PATCH pre-fix).
+            let storedJSON = (try? JSONSerialization.jsonObject(
+                with: JSONEncoder().encode(stored))) as? [String: Any] ?? [:]
+            let merged = storedJSON.merging(patch) { _, new in new }
+            guard let mergedData = try? JSONSerialization.data(withJSONObject: merged),
+                  let row = try? JSONDecoder().decode(KeyVaultWireRow.self, from: mergedData)
+            else { return response(400) }
             rowsByUser[filteredUser] = row
             return response(200, body: try! JSONEncoder().encode([row]))
         default:
@@ -117,6 +132,18 @@ final class ScriptedVaultServer: @unchecked Sendable {
         else { return nil }
         return String(value.dropFirst(3))
     }
+
+    /// The `revision=eq.N` CAS filter, when the request carries one (R1-2).
+    /// An ABSENT filter matches any revision — exactly PostgREST, and
+    /// exactly what makes the behavioral revert (dropping the filter from
+    /// the client) reproduce the pre-fix silent overwrite.
+    private func revisionFilter(_ url: URL) -> Int? {
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let item = components.queryItems?.first(where: { $0.name == "revision" }),
+              let value = item.value, value.hasPrefix("eq.")
+        else { return nil }
+        return Int(value.dropFirst(3))
+    }
 }
 
 /// One scripted vault world: server + client + enrollment, under a fixed
@@ -128,7 +155,13 @@ struct VaultTestWorld {
     let userID: String
 
     init(userID: String = "user-vault-test", accessToken: String = "token-1") {
-        let server = ScriptedVaultServer()
+        self.init(server: ScriptedVaultServer(), userID: userID, accessToken: accessToken)
+    }
+
+    /// A second device against a SHARED server (same account, its own
+    /// client) — the R1-2 cross-device interleaving's world.
+    init(server: ScriptedVaultServer, userID: String = "user-vault-test",
+         accessToken: String = "token-1") {
         let client = KeyVaultClient(
             configuration: KeyVaultClient.Configuration(
                 projectURL: URL(string: "https://vault.test.invalid")!,

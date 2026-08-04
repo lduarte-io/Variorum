@@ -44,19 +44,27 @@ public enum BridgeCrypto {
     }
 
     /// Open one landed body. THE LEGACY RULE (recorded, deliberate): a body
-    /// WITHOUT the `e1:` prefix passes through as legacy plaintext —
-    /// `journal_entries` is never wiped (unlike the R-2 mirror), so
-    /// pre-E2EE rows and interim Fragments-side writes are historical data,
-    /// not a fault; refusing them would jam the cursor on exactly the
-    /// transition the one-batch handoff executes. An `e1:`-prefixed value
-    /// that fails to open (tamper, wrong key, foreign version) REFUSES —
-    /// nothing unauthenticated ever lands.
+    /// that is not ciphertext at all — no `e<n>:` version prefix — passes
+    /// through as legacy plaintext: `journal_entries` is never wiped
+    /// (unlike the R-2 mirror), so pre-E2EE rows and interim
+    /// Fragments-side writes are historical data, not a fault; refusing
+    /// them would jam the cursor on exactly the transition the one-batch
+    /// handoff executes. EVERYTHING ELSE refuses (ladder R1-4): the
+    /// pass-through rides ONLY `PayloadCipher.open`'s `.notEncrypted` arm,
+    /// so a FUTURE-version ciphertext (`e2:…`) refuses as
+    /// `unsupportedVersion` instead of landing verbatim as the day's text,
+    /// and a tampered `e1:` body refuses as ever — nothing unauthenticated
+    /// (and no ciphertext soup) ever lands.
     public static func openLanded(
         _ value: String, day: String, keys: BridgeEncryptionKeys
     ) throws -> String {
-        guard PayloadCipher.isEncrypted(value) else { return value }
-        return try PayloadCipher.open(
-            value, key: keys.journalKey, binding: binding(day: day, keyID: keys.journalKeyID))
+        do {
+            return try PayloadCipher.open(
+                value, key: keys.journalKey,
+                binding: binding(day: day, keyID: keys.journalKeyID))
+        } catch PayloadCipherError.notEncrypted {
+            return value
+        }
     }
 }
 
