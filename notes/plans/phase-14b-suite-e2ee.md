@@ -554,6 +554,163 @@ tested).**
    scenario (wipe the fake mirror, re-init client A, repush, client B
    fresh-onboards and converges byte-identical).
 
+### Batch 2 — record (implementer session, 2026-08-04)
+
+**What shipped (four commits — `f8d76ec` classification+walk · `96b1e88`
+the lockstep/schema commit, standing alone · `a4b5765` the seam+gating ·
+`a8c69c5` the crown remainder):**
+
+- **L3 — the classification IN the registry.** `SyncTable` gains
+  `plainColumns` AND `encryptedColumns` (both explicit; `excludedColumns`
+  unchanged) — the brief named only `encryptedColumns`, and the addition of
+  an explicit PLAIN set is the deliberate delta WITH REASON: a
+  plain-by-default reading makes the completeness walk vacuous (every
+  column would be trivially "classified"), and only an explicit
+  plain/encrypted/excluded partition makes an unclassified future column
+  BUILD-FAILING, which is the walk's entire mandate. The walk
+  (`SyncSchemaTests.everyColumnOfEverySyncedTableIsClassifiedExactlyOnce`)
+  introspects PRAGMA table_info per synced table and fails on
+  unclassified/phantom/overlapping columns and a non-plain PK; the
+  doctored-double red proof follows the A6 precedent. **The classification
+  ships THE DESIGN's 18-column disclosure list EXACTLY, zero deltas**
+  (pinned flat in `theEncryptedSetMatchesTheDisclosureListExactly`, so a
+  future adjustment is a visible diff): variant.working_text/label ·
+  commit_point.text/message · block.name/presentation ·
+  container.title/floating_notes · reading.name/query_spec ·
+  reading_section.name · tag.name/path · block_comment.text ·
+  reference.name/url/view_state · lens.name; canvas x/y and
+  setting.value plain per THE DESIGN's parentheticals.
+- **L7 — the lockstep event, AUTHORED NEVER DEPLOYED** (its own commit per
+  the standing convention): `Server/supabase/08_phase14b_lockstep.sql` —
+  `key_vault` (user_id PK = auth.uid() referencing auth.users; the
+  KeyVaultFormat/Descriptor fields 1:1 — format_version, the six KDF
+  descriptor columns + salt, master wrapped by passphrase NOT NULL, master
+  wrapped by recovery NULLABLE (the Round-5 overnight state), both v1
+  class keys WITH key ids, timestamps), owner-only RLS policies
+  (select/insert/update on `auth.uid() = user_id`; DELIBERATELY no delete
+  policy or grant — losing the vault orphans the ciphertext corpus;
+  removal is 14c's account-deletion-scale operationalia), `revoke all from
+  anon` + `grant select, insert, update to authenticated` (the
+  P-ii-verified plain-PostgREST pattern), marker 4→5 as the file's LAST
+  statement. `SyncSchema.lockstepVersion = 5` in the SAME commit;
+  `AuthRLSDDLTests` extends the lockstepFiles chain (marker-pair pin,
+  monotonic history, marker-last-statement) + new pins: the 08 header's
+  choreography, the vault's RLS/policies/no-delete-door, the format
+  columns, and never-in-the-RPC-allowlists; `key_vault` joins the
+  serializer walk's server-only table set beside `sync_meta`. **The header
+  records why the marker bumps with no mirror-column change:** the
+  client's serializer semantics changed — pre-14b clients and the
+  encrypted corpus must refuse each other, and §12's marker is the fence.
+- **L4 — THE SEAM** (`Sources/VariorumCore/Sync/SyncEncryption.swift`, new
+  file + three edit sites in `SyncEngine.swift`): `SyncPayloadCrypto`
+  seals encrypted-classified text at row→wire (push chunks; the local
+  plaintext chunk is retained for the accept bookkeeping's
+  clear-vs-re-dirty comparison) and opens at wire→row — the pull window
+  BEFORE the apply transaction exists, AND the push-reject's `current` row
+  BEFORE the FK check and merge. **`Merge.swift`, `Repairs.swift`,
+  `SupabaseTransport.swift`, `SyncTransport.swift`, `SyncScheduler.swift`:
+  ZERO-line diff across the whole batch** (`git diff f8d76ec^..HEAD` on
+  those paths is empty — the inland-plaintext promise proven by the diff,
+  as the brief demands). NULL passes (presence is disclosed structure); a
+  non-text value in an encrypted column refuses typed both directions
+  (the blobInPayload doctrine). AAD = `table:rowID:column:keyID` via
+  batch 1's `PayloadCipher`; the corpus class key serves every synced
+  table (R-8 — journal-bridge is the bridge's, batch 3).
+- **L5 — key-provider gating + the visible refusal.** `SyncEngine` gains
+  `keyProvider: any SyncKeyProviding` with default
+  `UnenrolledKeyProvider` — the POST-14B DEFAULT REFUSES every round
+  (no plaintext mode exists), which keeps the App target compiling
+  unchanged (`SyncSession.swift` untouched; zero `App/` lines) with the
+  designed pre-enrollment behavior until batch 3 wires the
+  Keychain-backed provider. Keys are checked FIRST — before the §12
+  lockstep call, so a locked device refuses with ZERO network contact
+  (pinned by `CountingTransport`). Any provider throw maps to
+  `SyncError.encryptionKeysUnavailable`, whose description names the fix
+  ("Enter your encryption passphrase…") — the status-row pin mirrors the
+  §12 pin's shape exactly (outbox intact, cursor unmoved, heals with no
+  state surgery, `lastErrorIsOffline == false`). New typed errors beside
+  it: `unencryptedValueInEncryptedColumn(table:rowID:column:)` (the
+  policy refusal — non-`e1:` in an encrypted column) and
+  `payloadCryptoFailure(table:rowID:column:detail:)` (tamper/wrong-key/
+  foreign-version/non-text).
+- **L6 — the crown.** (a) The harness binds ONE suite-wide fixed test key
+  (`Support/SyncTestKeys.swift`; `SyncClient.keyProvider` defaults to it),
+  so THE ENTIRE existing convergence/fault-injection/repair/soak/
+  visibility-skew suite set runs over ciphertext BY DEFAULT — the
+  22-suite sync set (126 tests) green unchanged in semantics. The honest
+  test diffs, exactly the seam's proof: crafted server rows now seal as a
+  real competing device would (SyncPushTests' competing-writer recipes;
+  SyncPullTests' TestRows builders + local-fetch crafted rows — each
+  sealed under its OWN rowID because the AAD binds per-row), and
+  server-content assertions open ciphertext via `SyncTestKeys.openedText`;
+  six directly-constructed engines gained the test provider. (b) The
+  mirror-dump assertion (`SyncMirrorDumpAndResyncTests`): every
+  encrypted-classified value in the fake server's total dump bears `e1:`,
+  never equals its local plaintext, opens to exactly it — with coverage
+  PINNED equal to the full 18-column classification (a future encrypted
+  column cannot escape the walk), over a world that includes tombstoned
+  rows. (c) `resyncReinitialize()` on the engine — the R-2 client half,
+  core semantics only (batch 3 productizes the door): sync_version→0
+  everywhere, `sync_row_seq` cleared, cursor cleared, EVERY row (live AND
+  tombstoned; commit_point and setting included) enqueued; device_id
+  survives; ONE plain write transaction with triggers deliberately live
+  (the enqueues are the goal) plus explicit INSERT..SELECTs for totality.
+  (d) The scenario: `server.wipe()` (seq deliberately NOT reset —
+  SyncSpec §9 pinned by `headSeq > seqBeforeWipe`), A re-inits + repushes
+  through the encrypting serializer, a FRESH device onboards by
+  pull-to-head and converges byte-identical tombstones included, and the
+  pre-wipe second device re-inits too (the per-client reset the R-2
+  choreography prescribes).
+
+**The hallucination guard — refusal pins verified red by behavioral
+revert, each mechanism self-traced:** (1) the keys gate reverted to
+"guess a key instead of refusing" → both gating pins fail (and the healed
+round then fails `authenticationFailed` — the silent-divergence disaster
+the refusal exists to prevent, demonstrated); (2) the decrypt policy
+reverted to plaintext-pass-through → the policy pin fails (the row
+lands); (3) the push seam reverted to ship plaintext → the
+mirror-ciphertext pin fails (and the decrypt side of the same suite
+catches its own plaintext echo — the two halves police each other). All
+three reverts restored; the suite re-run green.
+
+**Own test-run lines (verbatim):**
+- The sync-adjacent set (22 suites incl. the two new ones):
+  `Test run with 126 tests in 22 suites passed after 0.801 seconds.`
+  (pre-crown; the crown suite adds 3 more:
+  `Test run with 3 tests in 1 suite passed after 0.155 seconds.`)
+- Registry/DDL walks: `Test run with 31 tests in 3 suites passed`.
+- Full core suite: **PENDING — run after this record lands (the
+  repo-first rule); expected 1094 + 14 new = 1108 tests / 120 suites.**
+
+**PROVISIONALs / deviations (recorded reasons):**
+- `plainColumns` added beside the brief's `encryptedColumns` — reason
+  above (the walk cannot build-fail otherwise). Not PROVISIONAL: it is
+  the only shape satisfying the brief's own build-failing mandate.
+- Classification deltas from THE DESIGN: NONE.
+- The engine's `keyProvider` parameter is DEFAULTED (to the refusing
+  provider) rather than required — deliberate: zero `App/` lines is a
+  hard boundary, `SyncSession.swift` constructs the engine, and the
+  default IS the mandated post-14b behavior (refuse until enrolled).
+  Batch 3 replaces the default at the construction site.
+- PROVISIONAL (small): keys are checked BEFORE the §12 lockstep probe
+  (cheaper refusal — no network when locked; either order satisfies the
+  refusal contract). If the ladder prefers §12 primacy, it is a two-line
+  swap.
+- `SupabaseIntegrationTests` (env-gated, real mirror) untouched: it now
+  inherits the harness test key, so a deliberate env-gated run against
+  the PRODUCTION mirror would push test-key ciphertext — and would in any
+  case refuse at the §12 gate until 08 deploys (marker 4 ≠ 5). The gate's
+  runbook owns when/how that pass runs post-deploy (real keys land with
+  batch 3's vault client).
+
+**Recorded-not-done (owed onward):** the vault PostgREST client, Keychain
+custody, enrollment/setup flows, CHANGE PASSPHRASE, the (re)generate
+surface (batch 3 — L8/L9); `resyncReinitialize` productized behind an
+announced door (batch 3 — L10); the bridge journal-class capability +
+touchpoint #2 concrete facts (batch 3 — L11); phone KDF latency (L12);
+the deploy of 08 + marker 5 (the ARCHITECT's gate act, never this
+session); no push to origin (the architect pushes after verification).
+
 **Batch 3 — vault client, setup/enrollment UX, the bridge capability, the
 runbook.**
 1. Vault PostgREST client (authenticated reads/writes on `key_vault`;
@@ -791,11 +948,11 @@ attempted overnight if the ladder closes clean):**
 |---|------|--------|
 | L1 | Vendored CArgon2 + wordlist (own commit; R-7 approval recorded) | **done — batch 1** (`ad7bbc7`; pins f57e61e1 / e7263a4c, batch record above) |
 | L2 | `Crypto/` module: KDF · RecoveryPhrase · KeyVaultFormat · PayloadCipher, vectors + tamper arms | **done — batch 1** (`ed30c3a`; 55 tests/4 suites; full core 1094/118 green; Mac KDF latency 0.583 s median; Round-5 wrap-addition included) |
-| L3 | `SyncSchema` classification + completeness walk | pending — batch 2 |
-| L4 | The serializer seam (encrypt-out/decrypt-in incl. reject-merge) | pending — batch 2 |
-| L5 | Key-provider gating + visible refusal | pending — batch 2 |
-| L6 | Convergence suites GREEN over ciphertext + mirror-dump assertion + re-init harness scenario | pending — batch 2 |
-| L7 | `08_phase14b_lockstep.sql` + `lockstepVersion` 5 (same commit; deploy at gate) | pending — batch 2 |
+| L3 | `SyncSchema` classification + completeness walk | **done — batch 2** (`f8d76ec`; plain+encrypted explicit per table, THE DESIGN's 18 columns exactly, walk build-failing, doctored red proof) |
+| L4 | The serializer seam (encrypt-out/decrypt-in incl. reject-merge) | **done — batch 2** (`a4b5765`; SyncEncryption.swift + 3 engine edit sites; Merge/Repairs/transports ZERO-diff — proven on the batch diff) |
+| L5 | Key-provider gating + visible refusal | **done — batch 2** (`a4b5765`; keys-first refusal, zero network contact, §12-shape pins, status names the fix; all refusal pins revert-verified red) |
+| L6 | Convergence suites GREEN over ciphertext + mirror-dump assertion + re-init harness scenario | **done — batch 2** (`a4b5765`+`a8c69c5`; 22-suite sync set green over ciphertext; total-dump walk pinned to full classification coverage; wipe keeps seq monotonic, fresh device onboards byte-identical) |
+| L7 | `08_phase14b_lockstep.sql` + `lockstepVersion` 5 (same commit; deploy at gate) | **done — batch 2** (`96b1e88`, the standalone schema commit; AUTHORED + PINNED, deploy remains the architect's gate act) |
 | L8 | Vault client + Keychain custody | pending — batch 3 |
 | L9 | Setup/enrollment flows, BOTH form factors (PL-6) + CHANGE PASSPHRASE (current-passphrase OR recovery-phrase authorized — her Round-7 scope addition) + the (re)generate-recovery-phrase surface | pending — batch 3 |
 | L10 | `resyncReinitialize` productized | pending — batch 3 |
