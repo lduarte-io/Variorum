@@ -167,7 +167,7 @@ bookkeeping.
 | PL-2 | Whole-library search row (when it runs) | The engine lands in core Queries (§3); the phone gets a search face; phone memory/P1 sit at the design table | waiting on the row |
 | PL-3 | 13j (when it runs) | Trash/restore + restoration doors: phone parity at least to see-your-data (view the trash, restore a note; the per-post archived-blocks surface) | waiting on 13j |
 | PL-4 | 13i (when it runs) | Smart-book identity changes flow through reading assembly (core) — verify the phone book list renders the hybrid correctly; no new face expected | waiting on 13i |
-| PL-5 | 14a (in flight) | The suite sign-in through the shared shells — pulled in via the branch discipline; verify the phone sign-in flow end-to-end after 14a's code batches | open |
+| PL-5 | 14a (closed 2026-08-04) | The suite sign-in through the shared shells — SHIPPED through the one shared seam at 14a (the `mobile`→`main` merge preceded the code batch by design): the direct email+password form IS the phone's sign-in door (AccountView via the Settings sheet; the iPhone-clip `minWidth` gated off; AutoFill `.textContentType`s on; mobile suite 172/24 green at the closeout). NO parity debt. | REMAINING: the live phone end-to-end sign-in verify at the next mobile session/install (the parity round's Stage A trigger — 14a's shared-seam landing — has now FIRED) |
 | PL-6 | 14b (when it runs) | E2EE device enrollment UX ON the phone (the phone is a first-class device: key unwrap, recovery phrase entry) — design must include mobile from the start | waiting on 14b |
 | PL-7 | 13h (when it runs) | Folder bridge is Mac/files-domain; results flow to phone via sync — expect "nothing mobile-visible" beyond verification, but the closeout must say so | waiting on 13h |
 
