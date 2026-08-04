@@ -91,8 +91,20 @@ struct BridgeHarness {
 
     // MARK: Fragments-side conveniences
 
-    /// The Fragments server's live body for a day (nil = absent/tombstoned).
-    func fragmentsBody(day: String) async -> String? {
+    /// The Fragments server's live body for a day (nil = absent/
+    /// tombstoned), OPENED (Phase 14b: the bridge pushes `e1:` ciphertext;
+    /// assertions compare words — the wire form has its own pins in
+    /// `BridgeEncryptionTests`). Legacy plaintext (a pre-E2EE
+    /// `fragmentsAppWrites` seed) returns verbatim, same as the landing's
+    /// own rule.
+    func fragmentsBody(day: String) async throws -> String? {
+        try BridgeTestKeys.opened(
+            await server.liveEntry(userID: config.userID, date: day)?.body, day: day)
+    }
+
+    /// The RAW wire body (ciphertext included) — for the pins that assert
+    /// the mirror never holds her words.
+    func fragmentsWireBody(day: String) async -> String? {
         await server.liveEntry(userID: config.userID, date: day)?.body
     }
 
@@ -117,7 +129,12 @@ func withBridge(
         let config = FragmentsBridgeConfiguration(userID: "user-author")
         let server = FakeFragmentsServer(
             visibilityHorizon: visibilityHorizon, localUserID: localUserID)
-        let engine = BridgeEngine(transport: server, configuration: config)
+        // Phase 14b: the fixed journal-key world — every bridge suite runs
+        // over ciphertext (the engine's default provider refuses, which is
+        // the designed pause; pinned separately in BridgeEncryptionTests).
+        let engine = BridgeEngine(
+            transport: server, configuration: config,
+            keyProvider: FixedBridgeKeyProvider())
         try await body(BridgeHarness(
             ops: ops, db: db, server: server, engine: engine, config: config,
             canonicalUserID: localUserID ?? "9f1c2b3a-4d5e-6f70-8192-a3b4c5d6e7f8"))

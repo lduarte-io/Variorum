@@ -16,15 +16,34 @@ public struct SyncTable: Equatable, Sendable {
     /// `reference.file_bookmark` (security-scoped bookmarks are per-machine;
     /// AppSpec §7). Apply preserves an excluded column's local value.
     public let excludedColumns: Set<String>
+    /// Columns that travel and are stored on the mirror IN THE CLEAR
+    /// (Phase 14b E2EE classification): ids, FKs, enums/status/kinds,
+    /// timestamps, positions, counters — disclosed structure, never prose.
+    /// **Every column must be classified explicitly**: the completeness walk
+    /// (`SyncSchemaTests`) introspects the live schema and fails the build
+    /// on any column that is not exactly one of plain / encrypted /
+    /// excluded — the postmortem-#4 serializer-drift lesson applied to
+    /// encryption, so a future migration cannot silently leak a new text
+    /// column. (`sync_version` rides separately as the CAS base and is
+    /// machinery, not a classified payload column.)
+    public let plainColumns: Set<String>
+    /// User-authored text columns (Phase 14b, THE DESIGN's disclosure
+    /// list): sealed by the payload seam on the way out, opened on the way
+    /// in — the mirror stores only `e1:` AEAD ciphertext for these. The
+    /// engine inland (merge, repairs, CAS) sees plaintext only.
+    public let encryptedColumns: Set<String>
     /// Whether the table carries `deleted_at`. `setting` is upsert-only and
     /// never tombstones; `commit_point` has no tombstone column by design
     /// (unreachable once its variant dies; AppSpec §14.4).
     public let hasTombstone: Bool
 
     init(_ name: String, primaryKey: String = "id",
+         plain: Set<String>, encrypted: Set<String> = [],
          excludedColumns: Set<String> = [], hasTombstone: Bool = true) {
         self.name = name
         self.primaryKey = primaryKey
+        self.plainColumns = plain
+        self.encryptedColumns = encrypted
         self.excludedColumns = excludedColumns
         self.hasTombstone = hasTombstone
     }
@@ -43,42 +62,135 @@ public enum SyncSchema {
     /// per-post extent target, S4-28.1/N36; mirror DDL
     /// 07_phase13b_lockstep.sql — deploy pre-authorized by the 13b EOL
     /// addendum, executed by the orchestrator at the consolidated
-    /// post-ladder window). **Bump this
+    /// post-ladder window); version 5 = the Phase 14b suite-E2EE event
+    /// (the `key_vault` account table + the client's encrypted payload
+    /// serializer — the eighteen encrypted-classified columns now travel
+    /// as `e1:` ciphertext, so pre-14b clients and the post-wipe encrypted
+    /// mirror corpus are mutually unreadable and MUST refuse each other;
+    /// mirror DDL 08_phase14b_lockstep.sql — deploy is the architect's
+    /// gate act, Rounds 4/5). **Bump this
     /// constant together with the mirror file's marker in every future
     /// lockstep event** — the DDL pin (`AuthRLSDDLTests`) fails the build
     /// if they drift.
-    public static let lockstepVersion = 4
-    /// The 13 synced tables in FK-dependency-friendly apply order: parents
+    public static let lockstepVersion = 5
+    /// The synced tables, in FK-dependency-friendly apply order: parents
     /// before children wherever the graph is acyclic. (`container`⇄`block`⇄
     /// `variant` are mutually circular by design — the apply transaction runs
     /// with deferred FKs, so within one batch the order is a determinism
     /// nicety, not a correctness requirement; across batches the read side
     /// tolerates stragglers, SyncSpec §5.)
     public static let tables: [SyncTable] = [
-        SyncTable("container"),
-        SyncTable("block"),
-        SyncTable("variant"),
-        SyncTable("commit_point", hasTombstone: false),
-        SyncTable("tag"),
-        SyncTable("edge"),
-        SyncTable("container_block"),
-        SyncTable("reading"),
+        SyncTable(
+            "container",
+            plain: [
+                "id", "owner_id", "kind", "profile", "entry_date", "locked",
+                "locked_at", "segmentation_default", "last_touched_at",
+                "last_major_revision_at", "churn_accumulator",
+                "baseline_length", "word_target", "created_at", "updated_at",
+                "archived_at", "deleted_at",
+            ],
+            encrypted: ["title", "floating_notes"]),
+        SyncTable(
+            "block",
+            plain: [
+                "id", "owner_id", "default_variant_id", "last_container_id",
+                "created_at", "updated_at", "archived_at", "deleted_at",
+            ],
+            encrypted: ["name", "presentation"]),
+        SyncTable(
+            "variant",
+            plain: [
+                "id", "block_id", "parent_variant_id", "status", "locked",
+                "fan_position", "created_at", "updated_at", "deleted_at",
+            ],
+            encrypted: ["working_text", "label"]),
+        SyncTable(
+            "commit_point",
+            plain: ["id", "variant_id", "kind", "created_at"],
+            encrypted: ["text", "message"],
+            hasTombstone: false),
+        SyncTable(
+            "tag",
+            plain: [
+                "id", "owner_id", "parent_id", "created_at", "updated_at",
+                "deleted_at",
+            ],
+            encrypted: ["name", "path"]),
+        SyncTable(
+            "edge",
+            plain: [
+                "id", "source_block_id", "target_block_id", "type",
+                "origin_op", "created_at", "deleted_at",
+            ]),
+        SyncTable(
+            "container_block",
+            plain: [
+                "id", "container_id", "block_id", "position",
+                "chosen_variant_id", "created_at", "updated_at", "deleted_at",
+            ]),
+        SyncTable(
+            "reading",
+            plain: [
+                "id", "owner_id", "kind", "profile", "sort_field", "sort_dir",
+                "grouping_tag_id", "max_posts", "word_target", "locked",
+                "created_at", "updated_at", "deleted_at",
+            ],
+            encrypted: ["name", "query_spec"]),
         // Phase 13 (A1): sections precede reading_post — the membership's
         // section_id FK points here, and apply order is FK-friendly.
-        SyncTable("reading_section"),
-        SyncTable("reading_post"),
-        SyncTable("post_tag"),
-        SyncTable("block_tag"),
-        SyncTable("reference", excludedColumns: ["file_bookmark"]),
+        SyncTable(
+            "reading_section",
+            plain: [
+                "id", "reading_id", "position", "created_at", "updated_at",
+                "deleted_at",
+            ],
+            encrypted: ["name"]),
+        SyncTable(
+            "reading_post",
+            plain: [
+                "id", "reading_id", "post_id", "position", "section_id",
+                "created_at", "deleted_at",
+            ]),
+        SyncTable(
+            "post_tag",
+            plain: ["id", "tag_id", "post_id", "created_at", "deleted_at"]),
+        SyncTable(
+            "block_tag",
+            plain: ["id", "tag_id", "block_id", "created_at", "deleted_at"]),
+        SyncTable(
+            "reference",
+            plain: [
+                "id", "owner_id", "container_id", "kind", "position",
+                "created_at", "updated_at", "deleted_at",
+            ],
+            encrypted: ["name", "url", "view_state"],
+            excludedColumns: ["file_bookmark"]),
         // Phase 11, Step A1 (the one lockstep event, SyncSpec §12):
         // canvas positions — metadata CAS, pure-duplicate repair on the
         // live-unique (container_id, block_id) — and saved lenses (sparse
         // selection profiles; lens_choice repairs as a pure duplicate on
         // the live-unique (lens_id, block_id); a lens itself has no
         // natural key — duplicate names are legal, no repair class).
-        SyncTable("canvas_layout"),
-        SyncTable("lens"),
-        SyncTable("lens_choice"),
+        // Canvas x/y stay PLAIN (THE DESIGN: spatial metadata, no prose).
+        SyncTable(
+            "canvas_layout",
+            plain: [
+                "id", "owner_id", "container_id", "block_id", "x", "y",
+                "created_at", "updated_at", "deleted_at",
+            ]),
+        SyncTable(
+            "lens",
+            plain: [
+                "id", "owner_id", "container_id", "created_at", "updated_at",
+                "deleted_at",
+            ],
+            encrypted: ["name"]),
+        SyncTable(
+            "lens_choice",
+            plain: [
+                "id", "lens_id", "block_id", "variant_id", "created_at",
+                "updated_at", "deleted_at",
+            ]),
         // Phase 13, Step A1 (the one lockstep event, SyncSpec §12): block
         // comments — working notes; metadata CAS, NO uniqueness, no repair
         // class (text races converge server-version-wins, deliberately not
@@ -87,8 +199,18 @@ public enum SyncSchema {
         // order); same no-natural-key, no-repair posture, and the
         // membership's dangling section_id reads as unsectioned (the
         // chosen-variant fallback class) so no repair rides the pointer.
-        SyncTable("block_comment"),
-        SyncTable("setting", primaryKey: "key", hasTombstone: false),
+        SyncTable(
+            "block_comment",
+            plain: [
+                "id", "owner_id", "block_id", "created_at", "updated_at",
+                "deleted_at",
+            ],
+            encrypted: ["text"]),
+        // `setting` values stay PLAIN (THE DESIGN's disclosure list: enum
+        // semantics, no prose).
+        SyncTable(
+            "setting", primaryKey: "key", plain: ["key", "value"],
+            hasTombstone: false),
     ]
 
     /// Local-only machinery that must never appear in a payload or a mirror.
@@ -226,6 +348,22 @@ public enum SyncError: Error, Equatable, Sendable {
     /// every client). Stalling is safe by design; guessing is the one
     /// forbidden move.
     case schemaLockstepMismatch(client: Int, server: Int)
+    /// Phase 14b: the device's encryption keys are absent or locked (not
+    /// enrolled, or the Keychain item is unavailable). The round refuses
+    /// BEFORE any network contact — outbox intact, cursor unmoved — in the
+    /// §12 refusal grammar. Post-14b there is NO plaintext mode.
+    case encryptionKeysUnavailable
+    /// Phase 14b policy: a value arrived WITHOUT the `e1:` ciphertext
+    /// format in an encrypted-classified column. Wipe-and-repush (R-2)
+    /// guarantees this never fires in practice — firing signals a real
+    /// fault (a pre-14b writer, or corruption), so the round refuses with
+    /// the row named rather than passing unverified bytes through.
+    case unencryptedValueInEncryptedColumn(table: String, rowID: String, column: String)
+    /// Phase 14b: sealing or opening a payload value failed (wrong key,
+    /// tampered/truncated ciphertext, a foreign format version, a non-text
+    /// value in an encrypted-classified column). Nothing unauthenticated
+    /// is ever applied; the round refuses with the row named.
+    case payloadCryptoFailure(table: String, rowID: String, column: String, detail: String)
 }
 
 extension SyncError: CustomStringConvertible {
@@ -243,6 +381,17 @@ extension SyncError: CustomStringConvertible {
             return "Sync paused: the app and the server are on different schema versions "
                 + "(app \(client), server \(server)). Finish the schema update on the lagging "
                 + "side; nothing is lost while paused (SyncSpec §12)."
+        case .encryptionKeysUnavailable:
+            return "Sync paused: this device's encryption keys are locked or not enrolled. "
+                + "Enter your encryption passphrase to unlock sync; nothing is lost while paused."
+        case .unencryptedValueInEncryptedColumn(let table, let rowID, let column):
+            return "Sync refused: '\(table)' row '\(rowID)' arrived with an unencrypted value "
+                + "in encrypted column '\(column)'. End-to-end encryption is mandatory — the "
+                + "round is refused so nothing unverified lands; outbox and cursor are untouched."
+        case .payloadCryptoFailure(let table, let rowID, let column, let detail):
+            return "Sync refused: '\(table)' row '\(rowID)' column '\(column)' failed to "
+                + "encrypt/decrypt (\(detail)). Nothing unverified lands; outbox and cursor "
+                + "are untouched."
         }
     }
 }

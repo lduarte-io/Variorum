@@ -7,12 +7,26 @@
 //  scheduler (the insurance clock) — deterministic clocks throughout.
 //
 
+import CryptoKit
 import Dependencies
 import Foundation
 import GRDB
 import Testing
 import VariorumCore
 @testable import Variorum
+
+/// Phase 14b: the App-suite fixed E2EE key world — a working provider so
+/// wiring tests' rounds reach their transports (post-14b there is no
+/// plaintext mode; a refusing provider is the pre-enrollment state, pinned
+/// separately). Target-internal, shared by every wiring suite; never the
+/// real Keychain.
+struct AppTestKeyProvider: SyncKeyProviding {
+    func currentKeys() throws -> SyncEncryptionKeys {
+        SyncEncryptionKeys(
+            corpusKey: SymmetricKey(data: Data((0..<32).map { UInt8($0 &+ 0x40) })),
+            corpusKeyID: "app-test-corpus-key-000000000001")
+    }
+}
 
 // MARK: - A4: dev-store separation
 
@@ -413,14 +427,14 @@ struct SyncSessionFenceTests {
         // The dev-store session, in the exact post-sign-in state a debug
         // smoke launch would find (the signed-in wiring composing a chain).
         let dev = SyncSession(database: db, allowsSync: false)
-        await dev.configure(transport: RecordingTransport())
+        await dev.configure(transport: RecordingTransport(), keyProvider: AppTestKeyProvider())
         #expect(!dev.isConfigured,
                 "a dev-store session must never pair with the production mirror")
         dev.stop()
 
         // The real-store session configures from the same composition.
         let real = SyncSession(database: db, allowsSync: true)
-        await real.configure(transport: RecordingTransport())
+        await real.configure(transport: RecordingTransport(), keyProvider: AppTestKeyProvider())
         #expect(real.isConfigured)
         real.stop()
     }
@@ -440,11 +454,11 @@ struct SyncSessionFenceTests {
             $0.uuid = .incrementing
             $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
         } operation: { @MainActor in
-            await session.configure(transport: gate)
+            await session.configure(transport: gate, keyProvider: AppTestKeyProvider())
             session.triggerSync()
             await gate.awaitParked()  // the old round is provably mid-flight
 
-            let reconfigure = Task { await session.configure(transport: spy) }
+            let reconfigure = Task { await session.configure(transport: spy, keyProvider: AppTestKeyProvider()) }
             // A trigger landing mid-reconfigure must not start a round on
             // any chain while the old round is still in flight.
             try await Task.sleep(for: .milliseconds(50))

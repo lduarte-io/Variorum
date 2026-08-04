@@ -124,7 +124,7 @@ struct Phase9bBridgeWiringTests {
         } operation: { @MainActor in
             let syncGate = GatedSyncTransport()
             let syncSession = SyncSession(database: db, allowsSync: true)
-            await syncSession.configure(transport: syncGate)
+            await syncSession.configure(transport: syncGate, keyProvider: AppTestKeyProvider())
 
             let bridgeTransport = RecordingBridgeTransport()
             let bridge = BridgeSession(allowsBridge: true)

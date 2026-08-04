@@ -109,13 +109,16 @@ struct SyncPushTests {
         try await a.push(maxIterations: 1)
         #expect(try a.outboxContains("variant", variantID),
                 "a mid-push edit must survive the accept bookkeeping")
-        let serverTextAfterFirst = await server.currentRow(table: "variant", rowID: variantID)?.workingText
-        #expect(serverTextAfterFirst == "pushed text")
+        // The mirror stores ciphertext (Phase 14b); assertions on server
+        // text open it with the suite key.
+        let afterFirst = await server.currentRow(table: "variant", rowID: variantID)
+        #expect(try SyncTestKeys.openedText(afterFirst, column: "working_text") == "pushed text")
 
         try await a.push()
         #expect(try a.outboxCount() == 0)
-        let serverText = await server.currentRow(table: "variant", rowID: variantID)?.workingText
-        #expect(serverText == "edited mid-push", "the newer edit ships on the next cycle")
+        let afterSecond = await server.currentRow(table: "variant", rowID: variantID)
+        #expect(try SyncTestKeys.openedText(afterSecond, column: "working_text")
+                == "edited mid-push", "the newer edit ships on the next cycle")
     }
 
     /// Reject → deterministic merge → re-push, all within one bounded call:
@@ -130,8 +133,11 @@ struct SyncPushTests {
         try await a.push()
 
         // Another writer moves the row on the server (base 1 → version 2).
+        // A competing device would seal its values (Phase 14b) — so does
+        // the crafted row.
         var competing = await server.currentRow(table: "container", rowID: postID)!
-        competing.columns["title"] = .text("competing title")
+        competing.columns["title"] = .text(try SyncTestKeys.seal(
+            "competing title", table: "container", rowID: postID, column: "title"))
         _ = try await server.push([competing])
 
         // Local intent: a metadata edit (loses, CAS rebase)…
@@ -147,7 +153,8 @@ struct SyncPushTests {
 
         // …and a tombstone (wins over the edit, and pushes through).
         var competing2 = await server.currentRow(table: "container", rowID: postID)!
-        competing2.columns["title"] = .text("edited again remotely")
+        competing2.columns["title"] = .text(try SyncTestKeys.seal(
+            "edited again remotely", table: "container", rowID: postID, column: "title"))
         _ = try await server.push([competing2])
         try a.with { ops, _ in
             try ops.deleteContainer(postID)
@@ -157,7 +164,8 @@ struct SyncPushTests {
         #expect(try a.outboxCount() == 0)
         let serverRow = await server.currentRow(table: "container", rowID: postID)
         #expect(serverRow?.isTombstoned == true, "the tombstone overlay re-pushed and stuck")
-        #expect(serverRow?.columns["title"] == .text("edited again remotely"),
+        #expect(try SyncTestKeys.openedText(serverRow, column: "title")
+                == "edited again remotely",
                 "the server edit's metadata survived under the tombstone")
     }
 
@@ -179,7 +187,8 @@ struct SyncPushTests {
 
         // A competing writer moves the variant on the server…
         var competing = await server.currentRow(table: "variant", rowID: variantID)!
-        competing.columns["working_text"] = .text("competing text")
+        competing.columns["working_text"] = .text(try SyncTestKeys.seal(
+            "competing text", table: "variant", rowID: variantID, column: "working_text"))
         _ = try await server.push([competing])
         // …the author edits locally (base is now stale — the push will
         // reject)…

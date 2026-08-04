@@ -9,6 +9,7 @@ DerivedData/
 .netrc
 .env.supabase.local
 .env.fragments-oauth.local
+.env.e2ee-passphrase.local
 notes/plans/phase-13b-stage0-screens/
 notes/plans/phase-13b-stage2-screens/
 notes/plans/phase-13b-stage3-screens/

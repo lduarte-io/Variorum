@@ -135,4 +135,22 @@ actor FakeSyncServer: SyncTransport {
     func rowCount(table: String) -> Int {
         tables[table]?.count ?? 0
     }
+
+    /// Every stored row — the total-mirror-dump surface the Phase 14b
+    /// assertion walks ("a total mirror dump reads as structure, never
+    /// words").
+    var allStoredRows: [SyncRow] {
+        tables.values.flatMap { $0.values.map(\.row) }
+    }
+
+    // MARK: Phase 14b — wipe-and-repush (ruling R-2)
+
+    /// Truncates every stored row — the fake twin of the gate's data-table
+    /// truncate artifact. The global `server_seq` sequence is deliberately
+    /// NOT reset: the ordering authority stays monotonic across the wipe
+    /// (SyncSpec §9), exactly as the real mirror's sequence object survives
+    /// a TRUNCATE.
+    func wipe() {
+        tables = [:]
+    }
 }

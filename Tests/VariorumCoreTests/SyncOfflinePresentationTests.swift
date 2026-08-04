@@ -60,7 +60,7 @@ struct SyncOfflinePresentationTests {
         let server = FakeSyncServer()
         let transport = OfflineOrForwardingTransport(server: server)
         let client = try SyncClient(name: "A", prefix: "AA", transport: transport)
-        let scheduler = SyncScheduler(engine: SyncEngine(transport: transport))
+        let scheduler = SyncScheduler(engine: SyncEngine(transport: transport, keyProvider: FixedSyncKeyProvider()))
 
         try client.with { ops, _ in
             let entry = try ops.createPost(title: "written offline", profile: .journal)
@@ -97,7 +97,7 @@ struct SyncOfflinePresentationTests {
         let server = FakeSyncServer()
         let transport = OfflineOrForwardingTransport(server: server)
         let client = try SyncClient(name: "A", prefix: "AA", transport: transport)
-        let scheduler = SyncScheduler(engine: SyncEngine(transport: transport))
+        let scheduler = SyncScheduler(engine: SyncEngine(transport: transport, keyProvider: FixedSyncKeyProvider()))
 
         try client.with { ops, _ in
             _ = try ops.createPost(title: "refused content", profile: .journal)

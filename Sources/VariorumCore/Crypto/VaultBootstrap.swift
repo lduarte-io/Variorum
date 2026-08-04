@@ -1,0 +1,235 @@
+import CryptoKit
+import Dependencies
+import Foundation
+
+/// The `vault-bootstrap` runner's brain (Phase 14b batch 3, L10 — the
+/// architect's pre-spawn concretization: the Round-5 overnight arrangement's
+/// EXECUTOR). The wipe-and-repush client half (`resyncReinitialize`, R-2)
+/// productized behind an explicit, announced door: a headless maintenance
+/// act, never reachable from any app surface — the CLI shell in
+/// `Tools/VaultBootstrap/` is its only caller besides the tests.
+///
+/// The acts, each logged: create the vault (passphrase wrap ONLY, Round 5;
+/// REFUSES on an existing row — idempotence by refusal, never overwrite) OR
+/// unwrap the existing vault; then `resyncReinitialize` on the store; then
+/// engine rounds until the outbox drains. **Keys live in memory only and
+/// die with the process** — custody (Keychain) is the APP's act at
+/// enrollment, deliberately never the runner's (this module contains no
+/// Security import, by construction). `dryRun` prints the plan and writes
+/// NOTHING — not a row, not an outbox entry, not a vault.
+///
+/// Sequencing note (the R-2 choreography): the runner is meant to run AFTER
+/// the mirror's data-table truncate. Run too early, the wrong order refuses
+/// itself loudly: the first pull would meet the pre-14b PLAINTEXT rows and
+/// the decrypt seam refuses the round (`unencryptedValueInEncryptedColumn`)
+/// before anything lands — cursor unmoved, nothing written.
+public struct VaultBootstrap: Sendable {
+    public let client: KeyVaultClient
+    public let transport: any SyncTransport
+    public let database: AppDatabase
+    /// Step-by-step act log (the CLI prints; tests capture). NEVER receives
+    /// the passphrase or any key material.
+    public let log: @Sendable (String) -> Void
+    /// Bounded drain: a mirror that keeps rejecting must fail visibly, not
+    /// spin.
+    public var maxRounds: Int
+
+    public init(
+        client: KeyVaultClient,
+        transport: any SyncTransport,
+        database: AppDatabase,
+        maxRounds: Int = 50,
+        log: @escaping @Sendable (String) -> Void
+    ) {
+        self.client = client
+        self.transport = transport
+        self.database = database
+        self.maxRounds = maxRounds
+        self.log = log
+    }
+
+    public enum Arm: String, Sendable {
+        case createVault = "create-vault"
+        case unwrapExisting = "unwrap-existing"
+    }
+
+    public struct Report: Sendable {
+        public var arm: Arm
+        public var roundsRun = 0
+        public var pushedAccepted = 0
+        public var remainingOutbox = 0
+        public var dryRun = false
+    }
+
+    /// The whole bootstrap. Throws typed on every refusal arm (wrong
+    /// passphrase, newer-format vault, an undrainable outbox); a thrown
+    /// error means the run stopped at the named step with nothing guessed.
+    @discardableResult
+    public func run(passphrase: String, dryRun: Bool) async throws -> Report {
+        guard !passphrase.isEmpty else { throw VaultEnrollmentError.emptyPassphrase }
+        if passphrase.count < 12 {
+            // Round 6 item 1: non-empty is the only enforcement; under 12
+            // characters gets the recorded warning. The passphrase itself
+            // is never logged.
+            log("WARNING: the passphrase is under 12 characters — long passphrases are the dump's only brute-force barrier.")
+        }
+
+        let (rowTotal, outboxBefore) = try await storeCounts()
+        log("Store: \(rowTotal) synced rows across \(SyncSchema.tables.count) tables; outbox \(outboxBefore) pending.")
+
+        // Which arm — a read either way (newer-format refuses here, typed).
+        let existingVault = try await client.fetchVault()
+        let arm: Arm = existingVault == nil ? .createVault : .unwrapExisting
+        log("Vault: \(existingVault == nil ? "absent — the create arm runs (passphrase wrap ONLY; the recovery phrase is generated in the app, in her presence)" : "present — the unwrap arm runs (never overwritten)").")
+
+        if dryRun {
+            log("DRY RUN — the plan: \(arm.rawValue) → resyncReinitialize (every row's sync_version → 0, sync_row_seq + pull cursor cleared, ALL \(rowTotal) rows enqueued) → engine rounds until the outbox drains. Nothing was written.")
+            var report = Report(arm: arm)
+            report.remainingOutbox = outboxBefore
+            report.dryRun = true
+            return report
+        }
+
+        // The KDF hop, measured into the log (never the passphrase).
+        let enrollment = VaultEnrollment(client: client, kdfMeasurement: { [log] seconds in
+            log(String(format: "Passphrase KDF derivation: %.3f s on this machine.", seconds))
+        })
+        let material: DeviceKeyMaterial
+        switch arm {
+        case .createVault:
+            material = try await enrollment.setUp(passphrase: passphrase)
+            log("Vault row created (passphrase wrap only; corpus + journal-bridge class keys minted).")
+        case .unwrapExisting:
+            material = try await enrollment.enroll(passphrase: passphrase)
+            log("Vault unwrapped — master and both class keys held in memory for this process only.")
+        }
+
+        let keys = SyncEncryptionKeys(
+            corpusKey: material.corpusSymmetricKey,
+            corpusKeyID: material.corpusKeyID)
+
+        return try await withDependencies {
+            $0.database = database
+        } operation: {
+            let engine = SyncEngine(
+                transport: transport, keyProvider: MaterialKeyProvider(keys: keys))
+
+            try await engine.resyncReinitialize()
+            let (_, outboxAfterReset) = try await storeCounts()
+            log("resyncReinitialize: sync_version → 0 everywhere, sync_row_seq + pull cursor cleared, \(outboxAfterReset) rows enqueued for the repush.")
+
+            var report = Report(arm: arm)
+            for round in 1...max(maxRounds, 1) {
+                report.roundsRun = round
+                _ = try await engine.pull()
+                let pushReport = try await engine.push()
+                report.pushedAccepted += pushReport.accepted
+                let (_, remaining) = try await storeCounts()
+                report.remainingOutbox = remaining
+                log("Round \(round): pushed \(pushReport.accepted) accepted (\(pushReport.rejected) rejected, \(pushReport.deferred) deferred); outbox \(remaining) remaining.")
+                if remaining == 0 { break }
+            }
+            guard report.remainingOutbox == 0 else {
+                throw VaultBootstrapError.outboxNeverDrained(
+                    remaining: report.remainingOutbox, rounds: report.roundsRun)
+            }
+            log("Outbox drained in \(report.roundsRun) round(s); \(report.pushedAccepted) rows accepted by the mirror. Keys die with this process — the app enrolls from the vault.")
+            return report
+        }
+    }
+
+    private func storeCounts() async throws -> (rows: Int, outbox: Int) {
+        try await database.read { db in
+            var total = 0
+            for table in SyncSchema.tables {
+                total += try Int.fetchOne(
+                    db, sql: "SELECT COUNT(*) FROM \(table.name)") ?? 0
+            }
+            let outbox = try Int.fetchOne(
+                db, sql: "SELECT COUNT(*) FROM sync_outbox") ?? 0
+            return (total, outbox)
+        }
+    }
+
+    // MARK: - CLI helpers (pure; tested)
+
+    /// The passphrase file's contract (Round 5 item 4): the file's bytes
+    /// ARE the passphrase; ONE trailing newline is stripped, forgiving
+    /// (`\n` or `\r\n` — her `read -s` shell writes one). Never printed,
+    /// never logged. Empty (after the strip) refuses.
+    public static func passphrase(fromFileBytes data: Data) throws -> String {
+        guard let text = strippedFileText(data) else {
+            throw VaultBootstrapError.passphraseFileUnreadable
+        }
+        guard !text.isEmpty else { throw VaultBootstrapError.passphraseFileEmpty }
+        return text
+    }
+
+    /// The access-token file's contract (ladder R1-8 — argv rides `ps`
+    /// output, so the gate hands the short-lived token in by FILE): same
+    /// byte contract as the passphrase file — the file's bytes ARE the
+    /// token, ONE trailing newline stripped; never printed, never logged.
+    /// The `--access-token` argv form is retained; exactly one of the two
+    /// is required (the CLI enforces the exactly-one).
+    public static func accessToken(fromFileBytes data: Data) throws -> String {
+        guard let text = strippedFileText(data) else {
+            throw VaultBootstrapError.accessTokenFileUnreadable
+        }
+        guard !text.isEmpty else { throw VaultBootstrapError.accessTokenFileEmpty }
+        return text
+    }
+
+    /// Strip ONE trailing newline at the BYTE level ("\r\n" is one grapheme
+    /// to Swift strings; the file contracts are about bytes), then decode
+    /// UTF-8. Nil = not UTF-8.
+    private static func strippedFileText(_ data: Data) -> String? {
+        var bytes = data
+        if bytes.last == 0x0A {
+            bytes.removeLast()
+            if bytes.last == 0x0D { bytes.removeLast() }
+        }
+        return String(data: bytes, encoding: .utf8)
+    }
+
+    /// The `sub` claim of a JWT access token — the session's `auth.uid()`,
+    /// needed only to compose the client's session (RLS is the real
+    /// authority; nothing here verifies the signature and nothing needs
+    /// to). Typed refusal on anything that isn't a three-part JWT with a
+    /// string `sub`.
+    public static func subject(ofAccessToken token: String) throws -> String {
+        let parts = token.split(separator: ".")
+        guard parts.count == 3 else { throw VaultBootstrapError.malformedAccessToken }
+        var payload = String(parts[1])
+            .replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")
+        while payload.count % 4 != 0 { payload += "=" }
+        guard let data = Data(base64Encoded: payload),
+              let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let sub = object["sub"] as? String, !sub.isEmpty
+        else { throw VaultBootstrapError.malformedAccessToken }
+        return sub
+    }
+}
+
+/// The runner's in-memory key world — keys die with the process.
+private struct MaterialKeyProvider: SyncKeyProviding {
+    let keys: SyncEncryptionKeys
+    func currentKeys() throws -> SyncEncryptionKeys { keys }
+}
+
+public enum VaultBootstrapError: Error, Equatable, Sendable {
+    /// The passphrase file's bytes are not UTF-8.
+    case passphraseFileUnreadable
+    /// The passphrase file is empty (after the one-newline strip).
+    case passphraseFileEmpty
+    /// The access-token file's bytes are not UTF-8 (R1-8's file form).
+    case accessTokenFileUnreadable
+    /// The access-token file is empty (after the one-newline strip).
+    case accessTokenFileEmpty
+    /// The access token is not a decodable JWT with a `sub` claim.
+    case malformedAccessToken
+    /// The outbox did not drain within the round bound — the mirror kept
+    /// rejecting or deferring; nothing is lost (the outbox keeps
+    /// everything), the run just refuses to claim success.
+    case outboxNeverDrained(remaining: Int, rounds: Int)
+}

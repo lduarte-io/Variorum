@@ -29,6 +29,12 @@ final class SyncClient {
     /// default, matching every pre-9c scenario). Mutable so a scenario can
     /// sign a device in mid-life — the next `with`/engine call binds it.
     var ownerID: String?
+    /// The device's E2EE key provider (Phase 14b): the suite default is the
+    /// shared test key world, so EVERY scenario runs over ciphertext — the
+    /// crown assertion. Mutable so a scenario can model a locked/unenrolled
+    /// device (`LockedSyncKeyProvider`) mid-life; the next engine call
+    /// binds it.
+    var keyProvider: any SyncKeyProviding = FixedSyncKeyProvider()
 
     /// `prefix` must be exactly two hex characters (e.g. "AA", "BB") — it
     /// leads every UUID the device mints, so two devices can never collide.
@@ -91,7 +97,8 @@ final class SyncClient {
 
     func engine(batchSize: Int = 200, maxPushIterations: Int = 5) -> SyncEngine {
         SyncEngine(
-            transport: transport, batchSize: batchSize, maxPushIterations: maxPushIterations)
+            transport: transport, batchSize: batchSize, maxPushIterations: maxPushIterations,
+            keyProvider: keyProvider)
     }
 
     @discardableResult

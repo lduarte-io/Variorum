@@ -2,23 +2,21 @@
 //  AuthSession.swift
 //  Variorum (shared: Mac + Mobile)
 //
-//  Phase 9c, Step 1 — the sign-in core: the Variorum project's Supabase Auth
-//  session over plain REST (no SDK — the hand-rolled transport doctrine),
-//  persisted in the Keychain under NEW keys, refreshed single-flight, and
-//  vended to the sync transport through the Step 2 `UserSessionProviding`
-//  seam. The concrete sign-in door is route A's delegated PKCE code flow
-//  (Step 0 memo, 2026-07-10): `custom:fragments` on the Variorum project —
-//  the author signs in once with her Fragments identity and Variorum mints
-//  her session.
+//  Phase 9c, Step 1 built this sign-in core: the app's Supabase Auth
+//  sessions over plain REST (no SDK — the hand-rolled transport doctrine),
+//  persisted in the Keychain, refreshed single-flight, and vended to the
+//  transports through the Step 2 `UserSessionProviding` seam.
 //
-//  TWO FACTS THE STEP 0 MEMO MAKES LOAD-BEARING HERE:
-//   1. The token exchange is the ONLY moment `provider_token` /
-//      `provider_refresh_token` (her Fragments-project user JWT + its
-//      refresh token) are ever delivered — Supabase never persists or
-//      re-delivers them. The exchange captures BOTH into the persisted
-//      tokens. (Their consumption is Step 5's — QUESTIONS #16.)
-//   2. Refresh responses do NOT carry provider tokens — a refresh must
-//      PRESERVE the captured pair, never overwrite it with nil (pinned).
+//  Phase 14a, batch 1 RE-AIMS it (sitting round 0h: the suite account
+//  lives on the VARIORUM project itself): the app's sign-in door is the
+//  DIRECT password grant against its own project — "the 9c AuthSession
+//  password grant, re-aimed". The delegated custom-provider flow (PKCE,
+//  the browser hop, the authorize/exchange doors, the captured provider
+//  token pair) is retired wholesale from this file; it returns at the
+//  Fragments batch, rebuilt against the live suite provider (the 9c plan
+//  documents the browser-flow lifecycle lessons). The bridge's
+//  Fragments-project session signs in through the SAME password door
+//  (QUESTIONS #16 shape (c) — its active road until that batch).
 //
 //  Refresh failures surface and KEEP the session: a transient network error
 //  must not destroy a signed-in state (the scheduler's offline posture
@@ -27,35 +25,21 @@
 //  the author signs in again — fail-visible, never fail-destructive.
 //
 
-import CryptoKit
 import Foundation
 import Security
 import VariorumCore
 
-// MARK: - Configuration (the Variorum project; values are publishable)
+// MARK: - Configuration (per project; values are publishable)
 
 nonisolated struct AuthConfiguration: Sendable {
-    /// `https://<variorum-project>.supabase.co`
+    /// `https://<project>.supabase.co`
     var projectURL: URL
     /// The publishable API key (post-04-flip it grants nothing by itself).
     var apiKey: String
-    /// The custom provider slug — `fragments` ⇒ `provider=custom:fragments`
-    /// (Step 0: the created provider's slug).
-    var providerSlug: String
-    /// The app's callback. ASWebAuthenticationSession captures it without
-    /// any Info.plist registration; it must be in the Variorum project's
-    /// Redirect URLs allow-list (Step 6 gate item).
-    var redirectURI: String
 
-    init(
-        projectURL: URL, apiKey: String,
-        providerSlug: String = "fragments",
-        redirectURI: String = "variorum://auth-callback"
-    ) {
+    init(projectURL: URL, apiKey: String) {
         self.projectURL = projectURL
         self.apiKey = apiKey
-        self.providerSlug = providerSlug
-        self.redirectURI = redirectURI
     }
 }
 
@@ -65,18 +49,14 @@ nonisolated struct AuthTokens: Codable, Equatable, Sendable {
     var accessToken: String
     var refreshToken: String
     var expiresAt: Date
-    /// The Variorum project's `auth.uid()` — the `owner_id` value class.
+    /// The project's `auth.uid()` — for the Variorum session this is the
+    /// `owner_id` value class.
     var userID: String
     var email: String?
-    /// The Fragments-project user JWT + refresh token, captured at the
-    /// sign-in exchange (the only delivery — Step 0 memo). Consumed by
-    /// Step 5 per QUESTIONS #16; preserved across refreshes.
-    var providerToken: String?
-    var providerRefreshToken: String?
 }
 
 /// Persistence seam (tests inject in-memory; production is the Keychain
-/// under keys DISTINCT from the retiring Phase 8 paste-in's).
+/// under keys DISTINCT from the retired Phase 8 paste-in's).
 nonisolated struct AuthTokensStore: Sendable {
     var load: @Sendable () -> AuthTokens?
     var save: @Sendable (AuthTokens) -> Void
@@ -112,7 +92,7 @@ nonisolated struct AuthTokensStore: Sendable {
 }
 
 /// The Keychain half — same Sec* pattern as the Phase 8 store, NEW service
-/// so retirement of the paste-in (Step 5) can delete the old item without
+/// so retirement of the paste-in (Step 5) could delete the old item without
 /// touching this one. `AfterFirstUnlock` for the same background-round
 /// reason as Phase 8.
 nonisolated enum KeychainAuthStorage {
@@ -179,29 +159,6 @@ nonisolated enum LegacyPasteInCleanup {
     }
 }
 
-// MARK: - PKCE (RFC 7636, S256 — pinned against the RFC's test vector)
-
-nonisolated enum PKCE {
-    /// 32 random bytes, base64url — 43 chars of the unreserved alphabet.
-    static func generateVerifier() -> String {
-        var bytes = [UInt8](repeating: 0, count: 32)
-        _ = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
-        return base64URL(Data(bytes))
-    }
-
-    /// S256: base64url(SHA256(ascii(verifier))).
-    static func challenge(forVerifier verifier: String) -> String {
-        base64URL(Data(SHA256.hash(data: Data(verifier.utf8))))
-    }
-
-    private static func base64URL(_ data: Data) -> String {
-        data.base64EncodedString()
-            .replacingOccurrences(of: "+", with: "-")
-            .replacingOccurrences(of: "/", with: "_")
-            .replacingOccurrences(of: "=", with: "")
-    }
-}
-
 // MARK: - The session
 
 nonisolated enum AuthSessionError: Error, Equatable, Sendable {
@@ -209,8 +166,6 @@ nonisolated enum AuthSessionError: Error, Equatable, Sendable {
     case endpointFailure(status: Int, body: String)
     case notHTTP
     case malformedResponse(String)
-    /// The callback URL carried no `code` (an error or a cancelled flow).
-    case callbackWithoutCode(String)
 }
 
 actor AuthSession: UserSessionProviding {
@@ -226,7 +181,7 @@ actor AuthSession: UserSessionProviding {
     private var tokens: AuthTokens?
     /// Single-flight: concurrent refresh demands coalesce onto one request.
     private var refreshTask: Task<AuthTokens, Error>?
-    /// Sign-in/out notification (Step 5 wires the UI + sync/bridge session
+    /// Sign-in/out notification (the app wires the UI + sync/bridge session
     /// lifecycles here). Fired on adopt and on sign-out, never on refresh.
     private var onChange: (@Sendable (AuthTokens?) -> Void)?
 
@@ -251,73 +206,18 @@ actor AuthSession: UserSessionProviding {
     var isSignedIn: Bool { tokens != nil }
     var currentUserID: String? { tokens?.userID }
     var currentEmail: String? { tokens?.email }
-    /// The captured Fragments-project token pair (Step 5's raw material —
-    /// QUESTIONS #16; nil after sign-out or if the provider sent none).
-    var providerTokenPair: (token: String, refresh: String)? {
-        guard let tokens, let token = tokens.providerToken,
-              let refresh = tokens.providerRefreshToken else { return nil }
-        return (token, refresh)
-    }
 
     func setOnChange(_ handler: @escaping @Sendable (AuthTokens?) -> Void) {
         onChange = handler
     }
 
-    // MARK: The sign-in door (route A: delegated PKCE code flow)
+    // MARK: The sign-in door (Phase 14a: the direct password grant)
 
-    /// The URL the sign-in UI opens (ASWebAuthenticationSession). The
-    /// verifier must be kept for the exchange.
-    nonisolated func authorizeURL(verifier: String) -> URL {
-        var components = URLComponents(
-            url: configuration.projectURL.appendingPathComponent("auth/v1/authorize"),
-            resolvingAgainstBaseURL: false)!
-        components.queryItems = [
-            URLQueryItem(name: "provider", value: "custom:\(configuration.providerSlug)"),
-            URLQueryItem(name: "redirect_to", value: configuration.redirectURI),
-            URLQueryItem(name: "code_challenge", value: PKCE.challenge(forVerifier: verifier)),
-            URLQueryItem(name: "code_challenge_method", value: "s256"),
-        ]
-        return components.url!
-    }
-
-    /// Completes the flow from the captured callback URL: extracts `?code`
-    /// and exchanges it. Throws `callbackWithoutCode` on an error callback.
-    func handleCallback(_ url: URL, verifier: String) async throws {
-        let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
-        guard let code = components?.queryItems?
-            .first(where: { $0.name == "code" })?.value
-        else {
-            throw AuthSessionError.callbackWithoutCode(url.absoluteString)
-        }
-        try await exchangeCode(code, verifier: verifier)
-    }
-
-    /// `POST /auth/v1/token?grant_type=pkce` — the ONE moment the provider
-    /// token pair is delivered (Step 0 memo); everything is captured and
-    /// persisted here.
-    func exchangeCode(_ code: String, verifier: String) async throws {
-        let response = try await tokenRequest(
-            grantType: "pkce",
-            body: ["auth_code": code, "code_verifier": verifier])
-        let adopted = AuthTokens(
-            accessToken: response.accessToken,
-            refreshToken: response.refreshToken,
-            expiresAt: response.expiryDate(now: now()),
-            userID: response.user?.id ?? "",
-            email: response.user?.email,
-            providerToken: response.providerToken,
-            providerRefreshToken: response.providerRefreshToken)
-        guard !adopted.userID.isEmpty else {
-            throw AuthSessionError.malformedResponse("token response carried no user id")
-        }
-        adopt(adopted)
-    }
-
-    /// The password door (`grant_type=password`) — the bridge's direct
-    /// Fragments-project sign-in (QUESTIONS #16, PROVISIONAL (c)): her
-    /// Fragments email+password once; only the resulting session persists,
-    /// never the password. Not used for the Variorum session (route A's
-    /// PKCE flow is that door).
+    /// `POST /auth/v1/token?grant_type=password` — THE sign-in door.
+    /// The Variorum session signs in with the suite email+password against
+    /// its own project (round 0h); the bridge's Fragments-project session
+    /// uses the same grant (QUESTIONS #16 shape (c)). Only the resulting
+    /// session persists, never the password.
     func signInWithPassword(email: String, password: String) async throws {
         let response = try await tokenRequest(
             grantType: "password",
@@ -327,9 +227,7 @@ actor AuthSession: UserSessionProviding {
             refreshToken: response.refreshToken,
             expiresAt: response.expiryDate(now: now()),
             userID: response.user?.id ?? "",
-            email: response.user?.email,
-            providerToken: response.providerToken,
-            providerRefreshToken: response.providerRefreshToken)
+            email: response.user?.email)
         guard !adopted.userID.isEmpty else {
             throw AuthSessionError.malformedResponse("token response carried no user id")
         }
@@ -378,7 +276,7 @@ actor AuthSession: UserSessionProviding {
         return UserSession(accessToken: refreshed.accessToken, userID: refreshed.userID)
     }
 
-    // MARK: Refresh (single-flight; preserves the provider pair)
+    // MARK: Refresh (single-flight)
 
     private func refresh() async throws -> AuthTokens {
         if let inFlight = refreshTask {
@@ -423,9 +321,6 @@ actor AuthSession: UserSessionProviding {
             next.userID = user.id
             next.email = user.email ?? next.email
         }
-        // THE PRESERVATION RULE (Step 0 memo): refresh responses never
-        // carry provider tokens — the captured pair survives verbatim
-        // (`next` starts as a copy of `current`).
         guard let live = tokens else {
             // Signed out mid-refresh: discard the result; the caller's
             // round refuses like any signed-out round.
@@ -490,8 +385,6 @@ nonisolated private struct TokenResponse: Decodable {
     let refreshToken: String
     let expiresIn: Double?
     let expiresAt: Double?
-    let providerToken: String?
-    let providerRefreshToken: String?
     let user: UserPayload?
 
     struct UserPayload: Decodable {
@@ -504,8 +397,6 @@ nonisolated private struct TokenResponse: Decodable {
         case refreshToken = "refresh_token"
         case expiresIn = "expires_in"
         case expiresAt = "expires_at"
-        case providerToken = "provider_token"
-        case providerRefreshToken = "provider_refresh_token"
         case user
     }
 

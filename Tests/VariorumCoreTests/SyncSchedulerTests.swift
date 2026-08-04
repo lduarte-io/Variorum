@@ -20,7 +20,7 @@ struct SyncSchedulerTests {
         let server = FakeSyncServer()
         let spy = GatedSpyTransport(server: server)
         let client = try SyncClient(name: "A", prefix: "AA", transport: spy)
-        let scheduler = SyncScheduler(engine: SyncEngine(transport: spy))
+        let scheduler = SyncScheduler(engine: SyncEngine(transport: spy, keyProvider: FixedSyncKeyProvider()))
         return World(server: server, spy: spy, client: client, scheduler: scheduler)
     }
 
@@ -208,7 +208,7 @@ struct SchedulerRetirementTests {
         let server = FakeSyncServer()
         let spy = GatedSpyTransport(server: server)
         let client = try SyncClient(name: "A", prefix: "AA", transport: spy)
-        let scheduler = SyncScheduler(engine: SyncEngine(transport: spy))
+        let scheduler = SyncScheduler(engine: SyncEngine(transport: spy, keyProvider: FixedSyncKeyProvider()))
         try client.with { ops, _ in
             _ = try ops.createPost(title: "content a stale trigger would push", profile: .journal)
         }
@@ -232,7 +232,7 @@ struct SchedulerRetirementTests {
         let server = FakeSyncServer()
         let spy = GatedSpyTransport(server: server)
         let client = try SyncClient(name: "A", prefix: "AA", transport: spy)
-        let scheduler = SyncScheduler(engine: SyncEngine(transport: spy))
+        let scheduler = SyncScheduler(engine: SyncEngine(transport: spy, keyProvider: FixedSyncKeyProvider()))
         try client.with { ops, _ in
             _ = try ops.createPost(title: "gated content", profile: .journal)
         }

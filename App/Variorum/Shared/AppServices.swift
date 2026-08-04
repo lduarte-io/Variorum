@@ -8,15 +8,21 @@
 //  Composition-root property, injected downward; no globals.
 //
 //  Phase 9c, Step 5 — the sign-in era: AppServices owns the TWO auth
-//  sessions (the Variorum session — route A's delegated sign-in, the
-//  identity everything keys on; and the bridge's direct Fragments-project
-//  session — QUESTIONS #16 PROVISIONAL (c)) and wires sign-in state into
-//  everything downstream: the owner-adoption backfill runs at sign-in and
-//  at every signed-in launch (idempotent — Step 4), the sync chain is
-//  composed over the AuthSession session provider (Step 2's seam), the
-//  bridge engine is composed over the Fragments session, and sign-out
-//  tears the chains down. The Phase 8 paste-in is fully retired; its
-//  Keychain item is cleared on the first real sign-in.
+//  sessions (the Variorum session — the identity everything keys on; and
+//  the bridge's direct Fragments-project session — QUESTIONS #16 shape
+//  (c)) and wires sign-in state into everything downstream: the
+//  owner-adoption backfill runs at sign-in and at every signed-in launch
+//  (idempotent — Step 4), the sync chain is composed over the AuthSession
+//  session provider (Step 2's seam), the bridge engine is composed over
+//  the Fragments session, and sign-out tears the chains down. The Phase 8
+//  paste-in is fully retired; its Keychain item is cleared on the first
+//  real sign-in.
+//
+//  Phase 14a, batch 1 — the Variorum sign-in goes DIRECT (round 0h): the
+//  suite email+password drives the password grant against the Variorum
+//  project itself; the delegated browser flow is retired from this file
+//  (the Fragments batch rebuilds delegation for the BRIDGE's session,
+//  against the live suite provider).
 //
 
 import Foundation
@@ -49,11 +55,15 @@ final class AppServices {
     /// Rotating cold copies (A1). Wired on the Mac; nil on iOS — the
     /// phone's store is re-derivable from the mirror.
     let backup: StoreBackup?
-    /// The Variorum-project session (route A — Step 0 memo): the identity
-    /// `owner_id` and the mirror's RLS key on.
+    /// The Variorum-project session (the suite account, signed in direct —
+    /// Phase 14a round 0h): the identity `owner_id` and the mirror's RLS
+    /// key on.
     let auth: AuthSession
     /// The bridge's Fragments-project session (QUESTIONS #16, shape (c)).
     let fragmentsAuth: AuthSession
+    /// The E2EE flows' state + doors (Phase 14b batch 3, L9) — one seam for
+    /// Mac and phone, exactly like the account surface.
+    let encryption: EncryptionSession
     let account = AccountState()
 
     /// The app session (store + runner) the services compose over —
@@ -69,14 +79,22 @@ final class AppServices {
     private let makeSyncTransport: (any UserSessionProviding) -> any SyncTransport
     private let makeBridgeTransport:
         (any UserSessionProviding, _ expectedUserID: String) -> any FragmentsBridgeTransport
+    /// The engine's E2EE key seam (Phase 14b batch 3 — batch 2's
+    /// PROVISIONAL 2 resolved at THIS construction site): production is the
+    /// Keychain-backed provider (enrollment-only cadence, R-6); tests
+    /// inject fixed/locked providers so wiring pins never touch the real
+    /// Keychain.
+    private let makeSyncKeyProvider: () -> any SyncKeyProviding
 
     init(
         session: AppSession, storeVariant: AppDatabase.StoreVariant,
         backupEnabled: Bool, bridgeEnabled: Bool = false,
         auth: AuthSession? = nil, fragmentsAuth: AuthSession? = nil,
+        encryption: EncryptionSession? = nil,
         bridgeMinimumRoundInterval: Duration = .seconds(60),
         makeSyncTransport: ((any UserSessionProviding) -> any SyncTransport)? = nil,
-        makeBridgeTransport: ((any UserSessionProviding, String) -> any FragmentsBridgeTransport)? = nil
+        makeBridgeTransport: ((any UserSessionProviding, String) -> any FragmentsBridgeTransport)? = nil,
+        makeSyncKeyProvider: (() -> any SyncKeyProviding)? = nil
     ) {
         self.session = session
         self.makeSyncTransport = makeSyncTransport ?? { provider in
@@ -84,6 +102,7 @@ final class AppServices {
                 configuration: ProjectConfig.variorumTransport,
                 sessionProvider: provider)
         }
+        self.makeSyncKeyProvider = makeSyncKeyProvider ?? { DeviceKeySyncProvider() }
         self.makeBridgeTransport = makeBridgeTransport ?? { provider, expectedUserID in
             FragmentsRPCTransport(
                 configuration: FragmentsRPCTransport.Configuration(
@@ -108,6 +127,19 @@ final class AppServices {
         self.fragmentsAuth = fragmentsAuth ?? AuthSession(
             configuration: ProjectConfig.fragmentsAuth,
             store: .keychain(service: KeychainAuthStorage.fragmentsService))
+        // The E2EE flows compose over the SAME auth session the sync
+        // transport rides — the vault lives on the account (R-1).
+        let authSession = self.auth
+        self.encryption = encryption ?? EncryptionSession(
+            store: .keychain(),
+            client: ProjectConfig.variorumConfigured
+                ? KeyVaultClient(
+                    configuration: KeyVaultClient.Configuration(
+                        projectURL: ProjectConfig.variorumProjectURL,
+                        apiKey: ProjectConfig.variorumPublishableKey),
+                    sessionProvider: authSession)
+                : nil,
+            signedIn: { await authSession.currentUserID != nil })
         // Bridge rounds ride the sync cadence: AFTER each sync round, never
         // interleaved with one (a landing sees the store the mirror sync
         // just settled). Unconfigured sessions no-op.
@@ -136,6 +168,11 @@ final class AppServices {
     /// sync + bridge, run the idempotent owner adoption when signed in,
     /// then the sweep and the backup clock.
     func start() async {
+        // Enrollment/setup landing keys heals the engine's keys-refusal
+        // immediately (Phase 14b): one round, through the ordinary trigger.
+        encryption.onKeysChanged = { [weak self] in
+            self?.sync.triggerSync()
+        }
         await auth.setOnChange { [weak self] tokens in
             Task { @MainActor [weak self] in
                 await self?.variorumSignInChanged(tokens)
@@ -197,39 +234,31 @@ final class AppServices {
         if !sync.isConfigured { bridge.trigger() }
     }
 
-    // MARK: - The Variorum sign-in (route A — the identity)
+    // MARK: - The Variorum sign-in (Phase 14a: direct — the identity)
 
-    /// ONE stored flow (review round 2, MINOR): the round-1 disposition
-    /// claimed SignInFlow's activeSession "doubles as a one-flight guard",
-    /// but a per-invocation `SignInFlow()` made that guard unreachable —
-    /// hoisting the instance is what makes it real. Two rapid taps now
-    /// land on the same instance: the second throws `alreadyRunning`
-    /// instead of minting a second browser sheet.
-    private let signInFlow = SignInFlow()
-
-    /// The full delegated sign-in (Step 0 memo): PKCE against the Variorum
-    /// project's `custom:fragments` provider via the system browser sheet.
-    /// Mac + iOS; the testable machinery lives in AuthSession — this method
-    /// is the UI-facing composition.
-    func signInWithFragments() async {
+    /// The direct suite sign-in (round 0h — "the 9c AuthSession password
+    /// grant, re-aimed"): email+password against the Variorum project
+    /// itself, the suite's account home. One door for Mac and mobile; the
+    /// testable machinery lives in AuthSession — this method is the
+    /// UI-facing composition.
+    func signInWithVariorum(email: String, password: String) async {
         guard ProjectConfig.variorumConfigured else {
             account.lastError = "Project keys not configured (ProjectConfig.swift)"
             return
         }
-        // Belt to the flow's own guard (round 2): the button disables on
-        // busy, but two taps can both enqueue before the first sets it.
+        // The round-2 double-tap belt: the button disables on busy, but
+        // two taps can both enqueue before the first sets it.
         guard !account.busy else { return }
         account.busy = true
         account.lastError = nil
         defer { account.busy = false }
-        let verifier = PKCE.generateVerifier()
-        let url = auth.authorizeURL(verifier: verifier)
         do {
-            let callback = try await signInFlow.run(
-                authorizeURL: url, callbackScheme: "variorum")
-            try await auth.handleCallback(callback, verifier: verifier)
+            try await auth.signInWithPassword(email: email, password: password)
         } catch {
-            account.lastError = String(describing: error)
+            // The R94 doctrine at the sign-in door (review round 1, R1-1):
+            // classify and speak — a wrong password says so in words, never
+            // as a raw enum dump.
+            account.lastError = ErrorPresentation.signInFailureMessage(error)
         }
     }
 
@@ -262,7 +291,8 @@ final class AppServices {
     private func connectSyncIfAllowed() async {
         guard sync.allowsSync else { return }
         guard await runOwnerAdoption() else { return }
-        await sync.configure(transport: makeSyncTransport(auth))
+        await sync.configure(
+            transport: makeSyncTransport(auth), keyProvider: makeSyncKeyProvider())
         sync.triggerSync()
     }
 
@@ -299,7 +329,9 @@ final class AppServices {
         do {
             try await fragmentsAuth.signInWithPassword(email: email, password: password)
         } catch {
-            account.lastError = String(describing: error)
+            // Same door class, same R94 treatment (R1-1): this form's
+            // wrong-password refusal is the identical 400/invalid_grant.
+            account.lastError = ErrorPresentation.signInFailureMessage(error)
         }
     }
 

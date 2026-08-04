@@ -7,33 +7,34 @@
 //  04_auth_rls.sql flip the Variorum API key identifies the project and
 //  grants NOTHING (RPC execution requires an authenticated user; RLS
 //  fences the tables), and Fragments' key has been publishable all along
-//  (their RLS is the guard). This is the paste-in's retirement: no
-//  credential entry ever again — the session is the identity.
+//  (their RLS is the guard). No credential entry ever — the session is
+//  the identity.
 //
-//  PRECONDITION FOR THE "GRANTS NOTHING" CLAIM (review round 1, BLOCKER):
-//  the Variorum project's "Allow new users to sign up" toggle must be OFF
-//  (the runbook's Gate 0). On a default project the bare key can MINT an
-//  authenticated session via /auth/v1/signup — and every authenticated
-//  user reads/writes the non-owner tables (the whole prose corpus) in the
-//  single-user phase. Signups off closes both that door and first-time
-//  delegated OIDC sign-ins; existing users (the author) are unaffected.
+//  Phase 14a (sitting round 0h): the VARIORUM project is the suite's
+//  account home and OAuth 2.1 issuer — the app signs in DIRECTLY to it
+//  with the suite email+password; only OTHER apps (Fragments, future)
+//  ride the delegated OAuth flow, and none of that flow lives in this
+//  app's code anymore.
 //
-//  THE AUTHOR FILLS THE TWO KEY CONSTANTS at the Step 6 gate (from her
-//  untracked env files; they are publishable and committable by design —
-//  the phase's whole point, UNDER the precondition above). Until filled,
-//  the sign-in surface shows the unconfigured hint and nothing attempts a
-//  request.
+//  PRECONDITION FOR THE "GRANTS NOTHING" CLAIM (9c review round 1,
+//  BLOCKER — still LOAD-BEARING, ruled-state banner): the Variorum
+//  project's "Allow new users to sign up" toggle must be OFF. On a
+//  default project the bare key can MINT an authenticated session via
+//  /auth/v1/signup — and every authenticated user reads/writes the
+//  non-owner tables (the whole prose corpus) in the single-user phase.
+//  The toggle is the SOLE guard until 14c's parent-join isolation;
+//  existing users (the author) are unaffected.
 //
 
 import Foundation
 import VariorumCore
 
 nonisolated enum ProjectConfig {
-    // MARK: Variorum (the mirror + the sign-in — Step 0 memo, route A)
+    // MARK: Variorum (the mirror + the sign-in — the suite account home)
 
     static let variorumProjectURL = URL(string: "https://qpzmroxogeufzizcuunl.supabase.co")!
     /// The Variorum project's PUBLISHABLE API key — author-filled at the
-    /// Step 6 gate; empty = the sign-in surface stays dormant.
+    /// 9c Step 6 gate; empty = the sign-in surface stays dormant.
     static let variorumPublishableKey = "sb_publishable_X-TQvz2RDj4cnCABZao4ww_WWGdSTwp"
 
     // MARK: Fragments (the 9b bridge's backend; QUESTIONS #16 shape (c))
@@ -46,8 +47,8 @@ nonisolated enum ProjectConfig {
     static var variorumConfigured: Bool { !variorumPublishableKey.isEmpty }
     static var fragmentsConfigured: Bool { !fragmentsPublishableKey.isEmpty }
 
-    /// The Variorum sign-in (route A: the `custom:fragments` provider —
-    /// Step 0 memo; slug + callback as deployed at the spike).
+    /// The Variorum sign-in — the DIRECT suite email+password against the
+    /// project itself (Phase 14a, round 0h).
     static var variorumAuth: AuthConfiguration {
         AuthConfiguration(
             projectURL: variorumProjectURL,
@@ -55,8 +56,8 @@ nonisolated enum ProjectConfig {
     }
 
     /// The bridge's direct Fragments-project session (QUESTIONS #16,
-    /// PROVISIONAL (c)). The provider slug is irrelevant here — this
-    /// session signs in with the password door, never PKCE.
+    /// shape (c) — the active road until the Fragments batch swaps it to
+    /// the suite-delegated flow, built there against the live provider).
     static var fragmentsAuth: AuthConfiguration {
         AuthConfiguration(
             projectURL: fragmentsProjectURL,

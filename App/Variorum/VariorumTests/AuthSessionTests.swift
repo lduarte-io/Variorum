@@ -3,11 +3,12 @@
 //  VariorumTests
 //
 //  Phase 9c, Step 1 — the sign-in core, headless against a scripted auth
-//  endpoint (the plan's "URLProtocol or protocol seam" — the seam). The
-//  Step 0 memo's two load-bearing facts are pinned: the provider token pair
-//  is captured at the ONE exchange that ever delivers it, and refreshes
-//  PRESERVE it (a naive overwrite would silently destroy Step 5's bridge
-//  material — Supabase never re-delivers).
+//  endpoint (the plan's "URLProtocol or protocol seam" — the seam).
+//  Phase 14a, batch 1 — updated to the DIRECT shape (round 0h): the
+//  password grant against the app's own project is THE sign-in door; the
+//  delegated PKCE/exchange machinery and the captured provider token pair
+//  are retired (their pins retired with them — the mechanism no longer
+//  exists to preserve).
 //
 
 import Foundation
@@ -15,7 +16,7 @@ import Testing
 import VariorumCore
 @testable import Variorum
 
-@Suite("AuthSession — sign-in core (Phase 9c, Step 1; no network)")
+@Suite("AuthSession — sign-in core (Phase 9c Step 1; 14a direct; no network)")
 struct AuthSessionTests {
     private static let configuration = AuthConfiguration(
         projectURL: URL(string: "https://variorum-project.supabase.co")!,
@@ -63,56 +64,19 @@ struct AuthSessionTests {
 
     private static func tokens(
         access: String = "access-1", refresh: String = "refresh-1",
-        expiresAt: Date = Date(timeIntervalSince1970: 2_000_000_000),
-        providerToken: String? = "frag-access", providerRefresh: String? = "frag-refresh"
+        expiresAt: Date = Date(timeIntervalSince1970: 2_000_000_000)
     ) -> AuthTokens {
         AuthTokens(
             accessToken: access, refreshToken: refresh, expiresAt: expiresAt,
-            userID: "<account-uuid>", email: "author@example.com",
-            providerToken: providerToken, providerRefreshToken: providerRefresh)
+            *[removed for publication]*
     }
 
-    // MARK: PKCE
+    // MARK: The password grant — THE sign-in door (Phase 14a: direct)
 
-    @Test func pkceChallengeMatchesTheRFCVector() {
-        // RFC 7636 appendix B — the S256 worked example.
-        #expect(PKCE.challenge(forVerifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk")
-                == "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM")
-    }
-
-    @Test func generatedVerifiersAreWellFormedAndDistinct() {
-        let unreserved = Set("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~")
-        let a = PKCE.generateVerifier()
-        let b = PKCE.generateVerifier()
-        #expect(a != b)
-        for verifier in [a, b] {
-            #expect(verifier.count >= 43 && verifier.count <= 128)
-            #expect(verifier.allSatisfy { unreserved.contains($0) })
-        }
-    }
-
-    @Test func authorizeURLCarriesTheDocumentedShape() {
-        let session = AuthSession(
-            configuration: Self.configuration, store: .inMemory())
-        let url = session.authorizeURL(verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk")
-        let components = URLComponents(url: url, resolvingAgainstBaseURL: false)!
-        #expect(url.absoluteString.hasPrefix(
-            "https://variorum-project.supabase.co/auth/v1/authorize?"))
-        let items = Dictionary(
-            uniqueKeysWithValues: components.queryItems!.map { ($0.name, $0.value ?? "") })
-        #expect(items["provider"] == "custom:fragments")
-        #expect(items["redirect_to"] == "variorum://auth-callback")
-        #expect(items["code_challenge"] == "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM")
-        #expect(items["code_challenge_method"] == "s256")
-    }
-
-    // MARK: The exchange — the ONE provider-pair delivery
-
-    @Test func codeExchangeCapturesTheFullPayloadIncludingTheProviderPair() async throws {
+    @Test func passwordSignInDrivesThePasswordGrantAndPersistsTheSession() async throws {
         let endpoint = ScriptedEndpoint([(200, """
             {"access_token": "v-access", "refresh_token": "v-refresh",
              "expires_in": 3600, "token_type": "bearer",
-             "provider_token": "frag-access", "provider_refresh_token": "frag-refresh",
              *[removed for publication]*
                       "email": "author@example.com"}}
             """)])
@@ -122,49 +86,64 @@ struct AuthSessionTests {
             configuration: Self.configuration, store: store,
             now: { epoch }, http: endpoint.loader())
 
-        try await session.handleCallback(
-            URL(string: "variorum://auth-callback?code=the-code")!,
-            verifier: "the-verifier")
+        try await session.signInWithPassword(
+            email: "author@example.com", password: "the-password")
 
         // The request shape.
         let request = endpoint.requests[0]
         #expect(request.url?.absoluteString
-                == "https://variorum-project.supabase.co/auth/v1/token?grant_type=pkce")
+                == "https://variorum-project.supabase.co/auth/v1/token?grant_type=password")
         #expect(request.value(forHTTPHeaderField: "apikey") == "publishable-key")
         let body = try JSONDecoder().decode(
             [String: String].self, from: request.httpBody ?? Data())
-        #expect(body == ["auth_code": "the-code", "code_verifier": "the-verifier"])
+        #expect(body == ["email": "author@example.com", "password": "the-password"])
 
-        // The persisted session — provider pair captured (Step 0 memo:
-        // never delivered again).
+        // The persisted session.
         let saved = try #require(store.load())
         #expect(saved.accessToken == "v-access")
         #expect(saved.refreshToken == "v-refresh")
         *[removed for publication]*
         #expect(saved.email == "author@example.com")
-        #expect(saved.providerToken == "frag-access")
-        #expect(saved.providerRefreshToken == "frag-refresh")
         #expect(saved.expiresAt == epoch.addingTimeInterval(3600))
-        let pair = await session.providerTokenPair
-        #expect(pair?.token == "frag-access")
-        #expect(pair?.refresh == "frag-refresh")
+        #expect(await session.isSignedIn)
     }
 
-    @Test func aCallbackWithoutACodeRefuses() async {
+    @Test func aRefusedPasswordSignInSurfacesAndSignsNothingIn() async {
+        let refusal = #"{"error":"invalid_grant","error_description":"Invalid login credentials"}"#
+        let endpoint = ScriptedEndpoint([(400, refusal)])
+        let store = AuthTokensStore.inMemory()
         let session = AuthSession(
-            configuration: Self.configuration, store: .inMemory(),
-            http: ScriptedEndpoint([]).loader())
-        await #expect(throws: AuthSessionError.self) {
-            try await session.handleCallback(
-                URL(string: "variorum://auth-callback?error=access_denied")!,
-                verifier: "v")
+            configuration: Self.configuration, store: store, http: endpoint.loader())
+
+        await #expect(throws: AuthSessionError.endpointFailure(
+            status: 400, body: refusal)) {
+            try await session.signInWithPassword(email: "author@example.com", password: "wrong")
         }
+        #expect(store.load() == nil, "a refused sign-in must persist nothing")
+        #expect(await session.isSignedIn == false)
+    }
+
+    @Test func aTokenResponseWithoutAUserIDRefuses() async {
+        // A malformed success (no user payload) must not mint a session
+        // with an empty owner identity — owner_id stamping keys on it.
+        let endpoint = ScriptedEndpoint([(200, """
+            {"access_token": "v-access", "refresh_token": "v-refresh", "expires_in": 3600}
+            """)])
+        let store = AuthTokensStore.inMemory()
+        let session = AuthSession(
+            configuration: Self.configuration, store: store, http: endpoint.loader())
+
+        await #expect(throws: AuthSessionError.malformedResponse(
+            "token response carried no user id")) {
+            try await session.signInWithPassword(email: "author@example.com", password: "pw")
+        }
+        #expect(store.load() == nil)
         #expect(await session.isSignedIn == false)
     }
 
     // MARK: Refresh
 
-    @Test func currentSessionRefreshesProactivelyNearExpiryAndPreservesTheProviderPair() async throws {
+    @Test func currentSessionRefreshesProactivelyNearExpiry() async throws {
         let endpoint = ScriptedEndpoint([(200, """
             {"access_token": "v-access-2", "refresh_token": "v-refresh-2",
              "expires_in": 3600,
@@ -187,13 +166,10 @@ struct AuthSessionTests {
             [String: String].self, from: request.httpBody ?? Data())
         #expect(body == ["refresh_token": "refresh-1"])
 
-        // THE PRESERVATION RULE: the refresh response carried no provider
-        // tokens; the captured pair must survive verbatim.
+        // The rotated pair persists.
         let saved = try #require(store.load())
         #expect(saved.accessToken == "v-access-2")
         #expect(saved.refreshToken == "v-refresh-2")
-        #expect(saved.providerToken == "frag-access")
-        #expect(saved.providerRefreshToken == "frag-refresh")
     }
 
     @Test func aFreshSessionIsVendedWithoutAnyRequest() async throws {
@@ -316,8 +292,7 @@ struct AuthSessionTests {
             http: ScriptedEndpoint([]).loader())
         #expect(await second.isSignedIn)
         *[removed for publication]*
-        let pair = await second.providerTokenPair
-        #expect(pair?.refresh == "frag-refresh")
+        #expect(await second.currentEmail == "author@example.com")
     }
 
     @Test func signOutClearsEverythingAndOnlySignOutDoes() async throws {
@@ -334,10 +309,9 @@ struct AuthSessionTests {
         #expect(endpoint.requests.first?.url?.path == "/auth/v1/logout")
         #expect(endpoint.requests.first?.value(forHTTPHeaderField: "Authorization")
                 == "Bearer access-1")
-        // Local state + persistence + provider pair all gone.
+        // Local state + persistence all gone.
         #expect(store.load() == nil)
         #expect(await session.isSignedIn == false)
-        #expect(await session.providerTokenPair == nil)
         #expect(changes.values == [false])
         await #expect(throws: VariorumCore.UserSessionError.notSignedIn) {
             _ = try await session.currentSession()

@@ -25,8 +25,7 @@ struct Phase9cAuthWiringTests {
         AuthTokens(
             accessToken: "access", refreshToken: "refresh",
             expiresAt: Date().addingTimeInterval(3600),
-            userID: userID, email: email,
-            providerToken: "frag-token", providerRefreshToken: "frag-refresh")
+            userID: userID, email: email)
     }
 
     /// An HTTP hop that must never be reached (adopt/signOut paths only;
@@ -113,6 +112,7 @@ struct Phase9cAuthWiringTests {
         storeVariant: AppDatabase.StoreVariant = .real,
         bridgeEnabled: Bool = true,
         bridgeMinimumRoundInterval: Duration = .seconds(60),
+        authHTTP: (@Sendable (URLRequest) async throws -> (Data, URLResponse))? = nil,
         _ body: @MainActor (AppServices, AuthSession, AuthSession, AppDatabase, RecordingSyncTransport, RecordingBridgeTransport) async throws -> Void
     ) async throws {
         let db = try AppDatabase.inMemory()
@@ -120,7 +120,7 @@ struct Phase9cAuthWiringTests {
         let fragmentsStore = AuthTokensStore.inMemory()
         let auth = AuthSession(
             configuration: Self.testAuthConfiguration, store: authStore,
-            http: Self.noNetwork)
+            http: authHTTP ?? Self.noNetwork)
         let fragmentsAuth = AuthSession(
             configuration: Self.testAuthConfiguration, store: fragmentsStore,
             http: Self.noNetwork)
@@ -142,7 +142,10 @@ struct Phase9cAuthWiringTests {
                 auth: auth, fragmentsAuth: fragmentsAuth,
                 bridgeMinimumRoundInterval: bridgeMinimumRoundInterval,
                 makeSyncTransport: { _ in syncTransport },
-                makeBridgeTransport: { _, _ in bridgeTransport })
+                makeBridgeTransport: { _, _ in bridgeTransport },
+                // Phase 14b: a working fixed key world so wiring rounds
+                // reach the transports (never the real Keychain in tests).
+                makeSyncKeyProvider: { AppTestKeyProvider() })
             await services.start()
             try await body(services, auth, fragmentsAuth, db, syncTransport, bridgeTransport)
             services.stop()
@@ -157,6 +160,106 @@ struct Phase9cAuthWiringTests {
             await Task.yield()
             try? await Task.sleep(for: .milliseconds(5))
         }
+    }
+
+    // MARK: The direct sign-in (Phase 14a, batch 1)
+
+    /// The full app-layer door (round 0h: "the 9c AuthSession password
+    /// grant, re-aimed"): email+password → the password grant against the
+    /// Variorum project → account state, the Step 4 adoption, and the sync
+    /// chain — the same downstream composition the retired delegated door
+    /// drove. Pre-batch this door did not exist (the Variorum session
+    /// could only be minted through the browser flow), so the old side of
+    /// this pin is the retirement walk BELOW plus a compile-time absence.
+    @Test func theDirectSignInComposesTheSyncChainAndRunsTheAdoption() async throws {
+        let grant: @Sendable (URLRequest) async throws -> (Data, URLResponse) = { request in
+            let url = request.url!.absoluteString
+            guard url.contains("grant_type=password") else {
+                throw AuthSessionError.malformedResponse("unexpected request: \(url)")
+            }
+            return (Data("""
+                {"access_token": "direct-access", "refresh_token": "direct-refresh",
+                 "expires_in": 3600,
+                 "user": {"id": "owner-14a", "email": "her@example.com"}}
+                """.utf8),
+                HTTPURLResponse(url: request.url!, statusCode: 200,
+                                httpVersion: nil, headerFields: nil)!)
+        }
+        try await withWiredServices(authHTTP: grant) { services, _, _, db, syncTransport, _ in
+            #expect(!services.sync.isConfigured, "signed out ⇒ no sync chain")
+            // A pre-sign-in (unowned) row — the adoption's target.
+            let postID = try await services.runnerPostID(title: "pre-sign-in")
+
+            await services.signInWithVariorum(email: "her@example.com", password: "pw")
+            await settle { services.sync.isConfigured }
+
+            #expect(services.account.lastError == nil)
+            #expect(services.account.variorum?.userID == "owner-14a")
+            #expect(services.account.variorum?.email == "her@example.com")
+            #expect(services.sync.isConfigured,
+                    "the direct sign-in must compose the sync chain")
+            #expect(try db.fetchString(
+                "SELECT owner_id FROM container WHERE id = ?", [postID]) == "owner-14a",
+                "the Step 4 adoption must ride the direct sign-in")
+            await settle { await syncTransport.calls > 0 }
+            #expect(await syncTransport.calls > 0)
+        }
+    }
+
+    /// REVIEW ROUND 1, R1-1 — THE RED-ON-OLD PIN: the wrong-password
+    /// refusal (the direct form's COMMON failure) must speak the R94 way —
+    /// classified into "Wrong email or password." — never surface as the
+    /// raw enum dump (`String(describing:)` of `endpointFailure` with the
+    /// 400/`invalid_grant` body, the pre-fix face).
+    @Test func aWrongPasswordRefusalSpeaksTheHumanLine() async throws {
+        let refusal: @Sendable (URLRequest) async throws -> (Data, URLResponse) = { request in
+            (Data(#"{"error":"invalid_grant","error_description":"Invalid login credentials"}"#.utf8),
+             HTTPURLResponse(url: request.url!, statusCode: 400,
+                             httpVersion: nil, headerFields: nil)!)
+        }
+        try await withWiredServices(authHTTP: refusal) { services, _, _, _, _, _ in
+            await services.signInWithVariorum(email: "her@example.com", password: "wrong")
+            #expect(services.account.lastError == "Wrong email or password.")
+            #expect(services.account.variorum == nil, "a refused sign-in signs nothing in")
+            #expect(!services.sync.isConfigured)
+        }
+    }
+
+    /// ROUND 2, R2-2 — the pin's SECOND credentials dialect: modern GoTrue
+    /// refuses with `error_code: "invalid_credentials"` (no `invalid_grant`
+    /// anywhere in the body). The mapper covers both dialects; which one her
+    /// live project speaks is verified only at the gate's live walk, so BOTH
+    /// arms are pinned here. Same mapped line, same door.
+    @Test func aModernDialectRefusalSpeaksTheSameHumanLine() async throws {
+        let refusal: @Sendable (URLRequest) async throws -> (Data, URLResponse) = { request in
+            (Data(#"{"code":400,"error_code":"invalid_credentials","msg":"Invalid login credentials"}"#.utf8),
+             HTTPURLResponse(url: request.url!, statusCode: 400,
+                             httpVersion: nil, headerFields: nil)!)
+        }
+        try await withWiredServices(authHTTP: refusal) { services, _, _, _, _, _ in
+            await services.signInWithVariorum(email: "her@example.com", password: "wrong")
+            #expect(services.account.lastError == "Wrong email or password.")
+            #expect(services.account.variorum == nil, "a refused sign-in signs nothing in")
+            #expect(!services.sync.isConfigured)
+        }
+    }
+
+    /// R1-1's other classes: every sign-in failure surfaces as a readable
+    /// human line — offline/transport names the connection, an unexpected
+    /// status names the refusal — never a raw `String(describing:)` dump.
+    @Test func otherSignInFailureClassesGetReadableLines() {
+        let offline = ErrorPresentation.signInFailureMessage(
+            URLError(.notConnectedToInternet))
+        #expect(offline == "Couldn't reach the server — check your connection and try again.")
+
+        let serverError = ErrorPresentation.signInFailureMessage(
+            AuthSessionError.endpointFailure(status: 503, body: "unavailable"))
+        #expect(serverError == "Sign-in failed — the server refused (HTTP 503). Try again in a moment.")
+        #expect(!serverError.contains("endpointFailure"), "never the enum's own face")
+
+        let garbled = ErrorPresentation.signInFailureMessage(
+            AuthSessionError.malformedResponse("decode failed"))
+        #expect(garbled == "Sign-in failed — the server's response couldn't be read. Try again in a moment.")
     }
 
     // MARK: Sign-in drives sync + adoption
@@ -261,9 +364,6 @@ struct Phase9cAuthWiringTests {
         }
     }
 
-    // MARK: The retirement walk (review focus 4 — "no dead credential
-    // path"; grep-pinned like the A6 walks)
-
     // MARK: The lifecycle cadence (Phase 13c, batch 1D — ledger A2)
     //
     // Her report: *"the bridge doesn't seem to refresh often enough."*
@@ -342,14 +442,59 @@ struct Phase9cAuthWiringTests {
                 "…and never sync alone: with sync unconfigured the bridge would lose every cadence trigger it has")
     }
 
-    @Test func thePasteInIsFullyRetiredInTheSharedSources() throws {
+    // MARK: The retirement walk (review focus 4 — "no dead credential
+    // path"; grep-pinned like the A6 walks)
+
+    /// PHASE 14a, BATCH 1 — THE RETIREMENT WALK (red-on-old; the walk was
+    /// run against the pre-batch tree and failed on every file it names):
+    /// the delegated `custom:fragments` sign-in is OUT of the app's code.
+    /// The Variorum sign-in is the direct password grant against its own
+    /// project (round 0h: "the 9c AuthSession password grant, re-aimed");
+    /// the browser-flow machinery (SignInFlow/ASWebAuthenticationSession,
+    /// PKCE, the authorize/exchange doors, the captured provider pair) is
+    /// retired wholesale — it returns at the Fragments batch, rebuilt
+    /// against a live provider (batch brief, rounds 0w/0x).
+    /// Every Swift source under Shared/ — DEEP (review round 1, R1-3):
+    /// `Shared/` carries Swift-bearing subdirectories (EditorBrain/,
+    /// MarkdownFace/, Theme/), and the walks' old shallow
+    /// `contentsOfDirectory` would let a reintroduction under one evade
+    /// them while their messages claim the shared sources are clean.
+    private static func sharedSwiftSources() -> [URL] {
         let sharedDir = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()  // VariorumTests
             .deletingLastPathComponent()  // App/Variorum
             .appendingPathComponent("Shared", isDirectory: true)
-        let sources = try FileManager.default
-            .contentsOfDirectory(at: sharedDir, includingPropertiesForKeys: nil)
-            .filter { $0.pathExtension == "swift" }
+        guard let walk = FileManager.default.enumerator(
+            at: sharedDir, includingPropertiesForKeys: nil)
+        else { return [] }
+        return walk.compactMap { $0 as? URL }.filter { $0.pathExtension == "swift" }
+    }
+
+    @Test func theDelegatedSignInIsRetiredInTheSharedSources() throws {
+        let sources = Self.sharedSwiftSources()
+        #expect(!sources.isEmpty)
+        #expect(sources.contains {
+                    $0.deletingLastPathComponent().lastPathComponent != "Shared" },
+                "the walk must be DEEP — subdirectory sources included (R1-3)")
+        #expect(!sources.contains { $0.lastPathComponent == "SignInFlow.swift" },
+                "the delegated browser flow must be deleted")
+
+        for file in sources {
+            let text = try String(contentsOf: file, encoding: .utf8)
+            let name = file.lastPathComponent
+            #expect(!text.contains("custom:fragments"),
+                    "\(name) still references the retired provider")
+            #expect(!text.contains("signInWithFragments"),
+                    "\(name) still carries the delegated Variorum sign-in door")
+            #expect(!text.contains("ASWebAuthentication"),
+                    "\(name) still references the browser-flow machinery")
+            #expect(!text.contains("provider_token"),
+                    "\(name) still captures the delegated provider pair")
+        }
+    }
+
+    @Test func thePasteInIsFullyRetiredInTheSharedSources() throws {
+        let sources = Self.sharedSwiftSources()
         #expect(!sources.isEmpty)
         #expect(!sources.contains { $0.lastPathComponent == "SyncCredentialsStore.swift" },
                 "the paste-in store must be deleted")
