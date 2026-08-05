@@ -323,6 +323,52 @@ this phase and what we should do"*
   *[removed for publication]*
   time by lookup).
 
+*[removed for publication]*
+*[removed for publication]*
+
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+
+**Recorded and ruled:**
+
+- **Domain permanence uncertainty PRESERVED:** the apex domain
+  (stargazing.tech, a paid premium domain) may move depending on her
+  first year — recorded so 14d's Fragments provider configs are
+  written knowing a future coordinated issuer move is a live
+  possibility (config-only, no data migration — the Round-7 answer
+  stands either way).
+*[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+*[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+- **The passphrase step WAITS FOR THE GATE:** it is the repush half
+  of the deploy — nothing passphrase-shaped exists to run before 09
+  deploys (running the runner now would push against the CURRENT
+  mirror, a no-op the wrong side of the rebuild). Sequence: batch 3 →
+  ladder → isolation round → the gate, where the deploy and her
+  passphrase moment arrive together, announced.
+
 ## THE DESIGN (settled by the sitting — the architecture the batches
 ## build)
 
