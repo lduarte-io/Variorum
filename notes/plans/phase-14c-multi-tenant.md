@@ -2249,6 +2249,239 @@ one-test add at any owner's hand; I-3/I-5 are gate-procedure pins for
 the architect's deploy checklist; I-4 is optional tidying. This round
 fixed nothing, per its mandate.)*
 
+### Isolation-round fix record (2026-08-05)
+
+*(The fresh fix session for the four adjudicated FIX NOW items. I-1 is
+NOT here by design — it is her disclosure-envelope call and sits in the
+ratify bundle. Commits: `ed9ddb8` the artifact half (SQL, its own
+commit per the model-change convention) · `5d2af2c` the proof half
+(pins + harness). Counts at the end: core **1201/127** green — was
+1194/127, +7 exactly the new tests, suites unchanged; `Sources/` and
+`App/` are BYTE-UNTOUCHED by this session (`git status` is the proof),
+so Mac **1240/219** tripwire-only, mobile **175/26**, and spine
+**51/7** stand at their recorded values by construction.)*
+
+**THE METHOD WORTH KNOWING FIRST — 09 has now been EXECUTED.** The
+artifact was never run anywhere (it is authored-not-deployed by design),
+so every claim about it was static. This session stood up a throwaway
+Postgres 16 in Docker with a stub of exactly what 09 assumes after 01–08
+(the three Supabase roles, `auth.users` + `auth.uid()` reading a GUC,
+`sync_meta` at marker 5, `sync_table_pk`, `key_vault`, and a pre-09
+`container` holding "her" row) and ran the real file against it. That
+turned three of the four items from reasoning into evidence — and it
+also proves, incidentally, that 09 is syntactically valid end to end,
+which nothing had established. **Never the live mirror; a local
+container, deleted afterwards.**
+
+**I-2 — the foreign-owner refusal now has executable proof. FIXED.**
+
+- *Trace (mine, independent).* `FakeSyncServer.push`'s guard read `if …
+  case .text(let pushedOwner)? = incoming.columns["owner_id"],
+  pushedOwner != userID { throw }` — implemented, and `grep` confirmed
+  `ownerMismatch` was never thrown in any test. So the eight
+  client-carried tables' entire defense rested on
+  `pushCarriesTheClientOwnerGuard`, which asserts the SQL *contains a
+  string*. The concrete road that leaves open: the partition alone does
+  NOT stop a hostile row — a row NAMING her as owner is a row addressed
+  to her partition, and only the guard refuses it.
+- *Fix.* Two tests in `MultiTenantSyncTests`. (1) **The hostile batch:**
+  A authors and syncs a note; B's own authenticated connection then
+  pushes a two-row batch — one honest B row plus one carrying HER uid
+  aimed at HER row's id — and the WHOLE call refuses; B's honest row
+  lands nowhere either (the RAISE-aborts-all parity); her stored row is
+  asserted BYTE-IDENTICAL afterwards (no version bump, no overwrite);
+  then the same refusal is proven for EVERY owner-carrying table in the
+  registry, driven off `SyncSchema`, so a future owner-carrying table is
+  covered the day it ships. (2) **The NULL/absent arm:** a row whose
+  `owner_id` is JSON null, and one with the column removed, both refuse
+  — the real body's `(item->'columns'->>'owner_id') is distinct from
+  caller::text` read literally (SQL NULL is distinct from every uuid).
+- *The fake was EXTENDED, not the test weakened* (the ruled preference).
+  **PROVISIONAL B1-1 is RETIRED and now MOOT** — its recorded reason was
+  "the harness's legacy signed-out fleets push NULL owners by design",
+  but batch 1 itself moved `SyncClient` to signed-in-by-default and
+  rewrote the pre-9c scenarios, so the looseness had outlived its cause.
+  The fake now refuses anything that is not exactly the caller's own
+  owner. Blast radius, measured by running the whole suite: 13 failures
+  in three fixture sets, every one a CRAFTED row omitting the owner —
+  none an engine-driven flow. All three moved to the signed-in shape the
+  born-multi-tenant mirror actually accepts: `FakeSyncServerTests`' CAS
+  fixtures gain the default account's owner; `SyncEncryptionTests`'
+  pre-14b plaintext arrival is now owned (what it models is the
+  PLAINTEXT value, which is untouched); `VaultBootstrapTests` seeds
+  under an injected `ownerIdentity`, which is truer anyway — the
+  runner's real subject is HER signed-in store at the gate's repush.
+  *(Consequence for the gate: B1-1 no longer needs her look. If the
+  ratify bundle still lists it, present it as retired-with-reasons, not
+  as an open question.)*
+- *Red-on-old, both directions.* With the fake's guard neutralized
+  (throw removed), both new tests go RED — 13 issues: "an error was
+  expected but none was thrown", the hostile row lands, her row's count
+  and content move. Restored green. And against the **unmodified
+  pre-fix fake**: the foreign arm PASSES (coverage class — exactly what
+  the reviewer said it was) while the NULL arm goes RED (3 issues),
+  which is precisely the latitude this change retires. Recording both
+  runs so nobody has to re-derive which arm the fake change bought.
+- *Live-probe obligations 5 and 6 STAND* — the real Postgres arm is
+  still the real proof — but **divergence D1 is RETIRED** (the fake no
+  longer accepts NULL owners) and **D2 is RETIRED** (the arm is
+  exercised).
+
+**I-3 — 09 executes as ONE transaction, and the grant sweep is a
+committed artifact. FIXED.**
+
+- *Trace.* Postures in 09 land by trailing REVOKEs that undo Supabase's
+  broad CREATE-time defaults. Executed statement-by-statement, each
+  object is reachable between its CREATE and its REVOKE; the worst case
+  is `entitlement_set`, which by webhook design takes identity as a
+  PARAMETER and has no `auth.uid()` gate at all.
+- *Fix.* `begin;` opens the file and `commit;` closes it after the
+  marker bump, so the deploy is all-or-nothing. **Every statement
+  checked for transaction-safety, not assumed:** the file is plain
+  DDL/DML — no `CREATE INDEX CONCURRENTLY`, `REINDEX CONCURRENTLY`,
+  `VACUUM`, `CREATE DATABASE`, `CREATE TABLESPACE`, `ALTER SYSTEM`,
+  `DISCARD ALL` (Postgres's cannot-run-in-a-transaction set) — and the
+  whole file then RAN wrapped against the scratch Postgres and
+  committed, which is the real check. **No exception had to be carved
+  out; nothing in the file resists a transaction.** Two consequences are
+  written into the header for the operator: the execution channel must
+  send the WHOLE body in one session (the stored-PAT Management-API
+  query road and the dashboard SQL editor both do; a
+  statement-by-statement paste would defeat it), and the rebuild's
+  ACCESS EXCLUSIVE locks are now held to commit — seconds, under her
+  pause, signups off.
+- *The sweep.* `Server/supabase/maintenance/14c-post-deploy-grant-sweep.sql`
+  — ONE read-only query (the 14b maintenance-artifact precedent) that
+  prints every function's ACL and per-role EXECUTE and every table's
+  RLS/force/policy-count/privileges, **each row carrying its EXPECTED
+  value from 09's letter and an OK / MISMATCH / UNEXPECTED / MISSING
+  verdict**. It covers the whole registry plus `entitlement`,
+  `key_vault`, `sync_meta`, and every function 01–09 expose — and it
+  surfaces objects nobody expected, which is how a LINGERING OLD RPC
+  OVERLOAD (the one door that would be a full cross-tenant read road)
+  becomes impossible to miss. Run live against the scratch mirror it
+  behaved exactly right: OK on everything 09 installs, and MISMATCH on
+  precisely the stub's deliberate gaps — a missing anon revoke on
+  `sync_schema_version`, missing RLS on `sync_meta`, missing
+  policies/grants on `key_vault`. That is the doctored-fixture proof,
+  arrived at honestly.
+- *Pins.* `AuthRLSDDLTests.deployShapeProblems` (a pure check, the
+  `truncateProblems` pattern) + `theRebuildDeploysAsOneTransaction
+  GuardedAgainstReRuns` on the real file, and
+  `aDoctoredDeployShapeIsFlaggedByTheCheck` proving the check bites on
+  five mis-shapes (unwrapped · guard-less · guard-after-the-drops ·
+  a CONCURRENTLY statement · a marker no longer last).
+  `thePostDeployGrantSweepIsReadOnlyAndCoversEverything` pins the sweep
+  as write-free and registry-complete. The existing
+  `theMarkerInsertIsTheLastStatementOfEveryLockstepFile` was widened to
+  "last statement INSIDE the transaction" — the same discipline, one
+  statement further in.
+- *Red-on-old.* Reverting 09 to its pre-fix HEAD content turns the new
+  pins RED (`["no-begin", "no-commit", "no-rerun-guard"]`, and the
+  doctored-fixture test with it, since its fixtures derive from the real
+  file); restored green.
+- *Obligation 11 is REFINED, not retired:* it now means "run the
+  committed sweep and read the verdict column — every row OK or INFO",
+  and it ABSORBS the optional `sync_table_pk` check (now an expectation
+  row). What remains genuinely live-only: confirming the deploy CHANNEL
+  sent the whole body in one session.
+
+**I-4 — `sync_table_pk`'s demotion completed. FIXED.**
+
+- *Trace.* Created in 02 when Supabase's defaults granted EXECUTE
+  broadly; 04:81 revoked public+anon and never `authenticated`. Its only
+  callers are inside `sync_push` (`pk := sync_table_pk(tbl)`) and
+  `sync_pull`'s two format templates — both SECURITY DEFINER bodies,
+  whose privilege checks run as the function OWNER, which also owns the
+  helper. So no grant is needed by anyone.
+- *Fix.* `revoke execute on function sync_table_pk(text) from public,
+  anon, authenticated;` in section 9, with NO replacement grant (not
+  even service_role — nothing calls it as service_role), and the reason
+  written beside it.
+- *Verified, not assumed — the fix's own risk was the thing to check.*
+  On the scratch mirror after the revoke: a direct call as
+  `authenticated` returns `ERROR: permission denied for function
+  sync_table_pk`, while `sync_push` as `authenticated` returns
+  `{"status":"accepted"}` and `sync_pull` serves the row once it clears
+  the A5 horizon. (Bonus observation from the same run: a second
+  account with no `key_vault` row was refused at the fence's
+  missing-vault arm, live.)
+- *Pin.* `theHelperFunctionsExecuteGrantIsFullyRevoked` — the revoke's
+  presence AND that nothing in the whole 04→09 composition grants it
+  back. Red on the pre-fix artifact.
+
+**I-5 — the re-run guard. FIXED.**
+
+- *Trace, executed rather than argued.* On the scratch mirror I deployed
+  the PRE-FIX 09, then added a second auth user and rows for both
+  tenants, then re-ran the pre-fix file: **2 tenant rows → 0, and
+  entitlements 1 → 2** (the stranger, previously unentitled, silently
+  gained `hosted_sync`). Both halves of the finding, reproduced.
+- *Fix.* A `do $rerun_guard$` block as the FIRST statement inside the
+  transaction — before a single DROP. It refuses when this mirror
+  already ran 09, on evidence that is true ONLY afterwards: the marker
+  reading ≥ 6, or the `entitlement` table, which no other artifact
+  creates. The refusal is NAMED (`VARIORUM_09_ALREADY_DEPLOYED`),
+  reports which evidence fired, and carries a HINT naming the one
+  deliberate override: prepend `set variorum.allow_09_rerun =
+  'yes-drop-every-tenants-data';` to the body in the same execution.
+- *The design call worth reading — why NOT "and data tables non-empty".*
+  The obvious stronger condition is a data-presence check. It is a trap:
+  under the FORCE RLS this very file installs, a deployer WITHOUT
+  BYPASSRLS (exactly what live-probe obligation 2 exists to determine)
+  reads its own tables as EMPTY, because `auth.uid()` is NULL in a SQL
+  session. A data-presence condition could therefore fail OPEN — the
+  guard silently not firing on the day it matters. The marker/entitlement
+  evidence needs no row visibility at all. The transaction wrapping is
+  what makes this exact: a failed deploy rolls back whole and leaves the
+  marker where it was, so an honest retry needs no override.
+- *THE FIRST LEGITIMATE DEPLOY, traced against the guard and then RUN:*
+  the gate's state is marker 5, her 14b corpus present, no `entitlement`
+  table → override unset, marker 5 < 6, `to_regclass('public.entitlement')`
+  NULL → the guard returns silently and the rebuild proceeds. Executed on
+  the scratch mirror in exactly that state: clean deploy, marker 6, one
+  entitlement seeded. **The guard cannot obstruct the gate.**
+- *Red-on-old, artifact vs artifact.* Same post-strangers scenario, fixed
+  file: `ERROR: VARIORUM_09_ALREADY_DEPLOYED … (lockstep marker 6;
+  entitlement table present)` with the hint, and afterwards
+  `container_rows=2, entitlements=1, marker=6` — every row and every
+  entitlement byte-intact, because the RAISE rolled the transaction back.
+  Then the override path, also executed: the NOTICE prints and the
+  rebuild proceeds (dropping the rows, as that operator asked for).
+- *Pins.* `theReRunGuardKeysOnEvidenceOnlyADeployedNineLeaves` (both
+  arms, the named refusal, the hint, the override token, and that no
+  data-presence read exists) + the shape check's `guard-after:*` arm,
+  which fails a guard that stands below the drops. Red on the pre-fix
+  artifact.
+
+**LIVE-PROBE OBLIGATIONS — the delta this session leaves the gate:**
+
+- **RETIRED: none of the twelve.** Obligations 5 and 6 keep their live
+  arms (harness proof is not Postgres proof); what retires is the
+  harness-side divergence **D1** and **D2** behind them.
+- **REFINED: obligation 11** — "run
+  `Server/supabase/maintenance/14c-post-deploy-grant-sweep.sql` and read
+  the verdict column; every row must read OK or INFO." It absorbs the
+  optional `sync_table_pk` check. Its residue is confirming the deploy
+  channel sent the whole body in one session (the file now declares the
+  transaction itself).
+- **ADDED — obligation 13, THE GUARD'S LIVE PROOF, and its safe window:**
+  immediately after the deploy succeeds and **BEFORE her repush**, run
+  09 a second time and confirm it refuses with
+  `VARIORUM_09_ALREADY_DEPLOYED`. That window is chosen deliberately: at
+  that moment the rebuilt tables are EMPTY, so even a guard that failed
+  would cost nothing (it would rebuild empty tables and re-seed her own
+  entitlement). Running this probe at any later point would risk her
+  corpus and must not be done.
+- **NOTHING ELSE ADDED, deliberately.** The I-4 revoke needs no probe of
+  its own — obligation 11's sweep carries its expectation row, and every
+  other probe that calls an RPC as `authenticated` exercises the "does
+  the revoke break the RPCs" question for free (it does not; proven
+  locally). The sync RPCs' fence probe stays where it already lives (the
+  gate handoff's step 6, beside obligation 7's truncate arm) — the
+  scratch run's incidental confirmation that a vault-less caller refuses
+  at the missing-vault arm is supporting evidence, not a substitute.
+
 ### The stargazing.tech checkout — contract facts (for the site's own
 ### agent)
 
