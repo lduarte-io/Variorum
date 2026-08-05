@@ -1374,6 +1374,202 @@ sign-up form, and the tier section — no mobile-only code).
   30/hr vs 360/hr across two official pages) — read the dashboard's
   shown value at the 14d act.
 
+### Cold-review ladder — ROUND 1 (2026-08-05; fresh Fable reviewer, REVIEW_PROMPT verbatim, zero implementation context)
+
+**Scope reviewed:** the full phase diff `01fc2a7..6d34fae` (batches 1–3),
+the 09 SQL artifact read line-by-line as deployed-at-gate production SQL,
+every new/changed core and App source, the harness rework, and the suites.
+**Runs performed by the reviewer:** full core suite — **1193 tests / 127
+suites GREEN** (matches the batch-3 record exactly); targeted Mac run over
+the phase's eight new/touched suites (AccountLifecycleDoorTests ·
+AccountDoorWiringTests · FreshAccountSetupGeneralityTests ·
+HostedSyncTierFaceTests · HostedSyncStatusReadTests ·
+SignUpPresentationTests · AuthSessionTests · CrossoverRoundTests) — **40/8
+GREEN**. Zero-diff on the engine inland re-verified on the whole phase
+range (`Merge.swift` / `Repairs.swift` / `SyncEncryption.swift` /
+`SyncScheduler.swift` — 0 lines); zero changes under `Persistence/`,
+`Models/`, `Operations/`, `Domain/`, `Queries/` (THE DESIGN 7's
+no-local-schema letter holds).
+
+**Findings, severity-ranked:**
+
+**[MAJOR] R1-1 · `Sources/VariorumCore/Crypto/AccountRekey.swift:100–147`
+(doc 48–56) + `App/Variorum/Shared/AppServices.swift:423–447` — the
+re-key's CRASH windows between steps 2 and 5 leave silent, unsignaled
+states; the recorded "the surface speaks that road on every failure"
+(batch-2 record) holds only for THROWN failures — a crash has no surface,
+and nothing persisted re-speaks the rerun road on relaunch.** Two traced
+arms:
+  *(a) crash after the truncate returns (step 4), before
+  `resyncReinitialize` commits (step 5):* the device holds NEW custody +
+  the NEW vault, so every later round passes the fence; the outbox holds
+  only rows dirty at crash time (those self-heal via the engine's
+  nil-current rebase, SyncEngine.swift:139–146); every CLEAN row never
+  re-enqueues — the mirror silently holds a near-empty corpus while the
+  sync row reads idle. No CF-16, no error, no prompt to re-run the door.
+  On a product whose one paid promise is the hosted E2EE copy, the backup
+  is silently gone until the user happens to re-run the door.
+  *(b) crash after custody adoption (step 3), before the truncate (step
+  4):* the mirror keeps the OLD-key corpus and the old master was
+  discarded in step 1 — those rows are permanently unopenable. This
+  device syncs on quietly (fence passes); a LATER second-device
+  enrollment pulls the old-key rows and refuses as payload-crypto wearing
+  the CF-16 face, whose prescription ("Re-enroll…") cannot heal it — the
+  key that sealed those rows no longer exists anywhere; the actual fix
+  (re-run the re-key door on the first device) is named nowhere.
+  *Partial mitigation observed, honestly:* on next `EncryptionSession
+  .refresh()` the state lands in `enrolled(hasRecoveryWrap: false)` — the
+  CF-5 mandatory-phrase step presents — so the user sees SOMETHING
+  changed; but completing the phrase step heals the recovery wrap only,
+  never the truncate/reinit halves. The `AccountRekey` doc comment
+  analyzes exactly one crash window (2→3, the visible one) and is silent
+  on 3→4 and 4→5, so the recorded analysis reads complete while the two
+  silent windows are the dangerous ones.
+  *Proposed fix (small, pinnable):* persist a rekey-in-progress marker
+  (device Keychain beside custody, or `sync_state`) written before step 2
+  and cleared only after step 5 completes; at composition/refresh, a set
+  marker re-speaks the rerun road (and may refuse rounds until re-run).
+  Red-on-old pin: set the marker, rebuild the world (the relaunch shape),
+  assert the surface speaks / rounds refuse — fails on today's code.
+
+**[MINOR] R1-2 · `Server/supabase/09_phase14c_multitenant.sql:971–974,
+1045` + `Tests/VariorumCoreTests/AuthRLSDDLTests.swift:389–407` + the
+batch-2 record above — the purge order's stated mechanism is FALSE:
+`key_vault.user_id`'s FK is `ON DELETE CASCADE`
+(08_phase14b_lockstep.sql:61–62), not RESTRICT.** The 09 header says "the
+vault row must die before the user row can", line 1045 says "key_vault's
+FK is gone now" (implying necessity), the DDL pin's comment says the
+order is "load-bearing", and the batch-2 record pinned the same claim —
+but with CASCADE, deleting `auth.users` first would succeed and cascade
+the vault row. Behavior is unaffected (explicit deletes work and the
+counts report stays accurate; `entitlement` has no FK at all), but
+deployed production SQL now teaches a wrong invariant — the drift class
+these comments exist to prevent (a future editor could "rely" on a
+RESTRICT that does not exist). *Fix:* correct the three comments + the
+record; keep the order as the deliberate reporting/clarity choice it
+actually is. No test pin needed (comment-accuracy class; the order pin
+itself stays).
+
+**[MINOR] R1-3 · `App/Variorum/Shared/TierViews.swift:78–95` —
+`HostedSyncTier.isCurrent`/`expiryLine` cannot parse PostgREST's
+fractional-second `timestamptz` output, making the fail-open
+"unparseable counts current" arm the LIKELY arm, not a corner.**
+`DateFormatter.variorumISO8601` demands `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`
+(VariorumRecord.swift:31–37 — fails on `+00:00` offsets and 6-digit
+fractions) and the fallback `ISO8601DateFormatter()` lacks
+`.withFractionalSeconds` (fails on any fraction). PostgREST serializes
+`timestamptz` with microseconds whenever they are non-zero — so an
+`expires_at` carrying fractional seconds (a processor-passed ISO with
+fractions; any server-computed stamp) parses nil → counts CURRENT → an
+EXPIRED subscription's Account tab shows "Hosted sync is active" (and
+the deletion door derives "cancel it first") while the server refuses
+rounds. Display-only, and fail-open is the RECORDED design call for
+gating — but the recorded intent was a parse-QUIRK escape hatch, not the
+common integration shape. *Fix:* add an `ISO8601DateFormatter` with
+`.withInternetDateTime, .withFractionalSeconds` as a second fallback.
+Red-on-old pin: a past expiry with `.123456+00:00` must project
+`.inactive` — fails today.
+
+**[NIT] R1-4 · `App/Variorum/Shared/AppServices.swift:431–435` — the
+custody-adoption closure captures `[weak self]`; if AppServices were gone
+mid-run, `onNewVaultMaterial` completes WITHOUT adopting and the brain
+proceeds to the truncate, making this device the stale writer against its
+own re-key.** Practically unreachable (AppServices is app-lifetime), but
+the brain's contract ("custody must land before the truncate") is
+enforced by convention only — a strong capture (the closure dies with the
+run anyway) or a throwing adoption contract would make it structural.
+
+**[NIT] R1-5 · `App/Variorum/Shared/ErrorPresentation.swift:68–80` — the
+sign-up block's doc comment was inserted between `signInFailureMessage`'s
+doc comment and its declaration**, so the sign-in commentary ("…is
+exactly wrong on the sign-in form itself") now reads as documentation for
+`signUpClosedMessage`, and `signInFailureMessage` (line ~137) is left
+undocumented. Comment-placement only; move the orphaned lines back above
+their function.
+
+**Clean bill — load-bearing things specifically checked and found solid:**
+
+- **The 09 artifact as production SQL:** all 18 tables verified reborn
+  with `(owner_id, id)` / `(owner_id, key)` composite PKs, FORCE RLS +
+  no-`to`-clause owner policies (correct under FORCE for the definer),
+  privilege revokes, stamp triggers, `(owner_id, server_seq)` indexes; NO
+  uniqueness/FKs/checks beyond the PKs (SyncSpec §2's dumbness preserved,
+  the header says so loudly); the old RPC signatures dropped FIRST (the
+  cross-tenant read door named and closed); `caller` correctly uuid-typed;
+  the CAS delete+insert shape byte-faithful to 06's (verified against
+  06:200–210) now tenant-scoped on every seek/delete/insert; the reject
+  payload subtracts `owner_id` for the ten and keeps it for the eight; a
+  malicious `owner_id` inside a ten-table payload is overridden by the
+  server stamp (`||` right-side wins — traced); `%L`/`%I`/`using`
+  parameterization sound throughout (no injection road found); the A5
+  horizon clause verbatim in every branch (18 `from %I t` = 18 owner
+  filters, and the pin counts them); the marker bump is the file's LAST
+  statement with `on conflict (key) do update` (line 1165–1166 — a
+  re-runnable deploy); the fence reads `key_vault` (ENABLE-only RLS, so
+  the definer-owner read works — verified against 08:107; the batch-1
+  "policies deliberately role-unrestricted" reasoning applies to the 18
+  FORCED tables and holds).
+- **The fence + entitlement gates:** auth → fence → entitlement order in
+  both RPC bodies AND the truncate; missing-vault refuses at the fence
+  (the purge backstop for the JWT-until-expiry window — pinned);
+  `entitlement` correctly RLS-enabled-not-forced (the definer must read
+  it); `entitlement_set` service_role-only with authenticated revoked by
+  name; the truncate never touches key_vault/entitlement/sync_meta and
+  never TRUNCATEs (registry-exact table list pinned via the shared array
+  parser).
+- **The engine wire:** `activeKeyID` REQUIRED on the protocol (no
+  default — a fence-dropping wrapper cannot compile), sent on BOTH
+  halves from the round's own key world (`crypto.keys.corpusKeyID` — the
+  id that seals is the id presented, so it cannot diverge); marker-token
+  classification at both transports (`SupabaseTransport.classifiedFailure`
+  + `AccountLifecycleClient.classified`), tokens pinned to the SQL by the
+  DDL tests; both new `SyncError` cases refuse with outbox intact +
+  cursor unmoved (verified in the fence suite's assertions).
+- **The two-user suites are real proofs, not smoke:** the fence test
+  asserts outbox/cursor/server-rows unchanged through both refused
+  halves, then walks the WHOLE CF-8 heal to convergence with the old key
+  provably unable to open the re-sealed corpus; the empty-store pin's
+  honest reshape (seeded settings ARE the first push) matches the schema
+  truth; the colliding-ids, scoped-settings, and in-partition-repair
+  suites each pin the exact pre-14c failure class.
+- **The re-key brain's THROWN-failure story:** wrong passphrase touches
+  nothing; a failed truncate leaves the new vault + custody and the rerun
+  completes whole (both pinned); the CAS-guarded `updateVault`
+  (`expectedRevision`) refuses a vault moved mid-flow; KDF work runs off
+  the MainActor (nonisolated async brain); custody adoption awaited
+  before the truncate. (The crash-window gap is R1-1.)
+- **The deletion door:** purge → forget → sign-out order wired and
+  pinned; a refused deletion clears NOTHING local (wrong-passphrase arm
+  pinned); her byte-pinned local-copy-survives copy present and pinned;
+  the vault-less arm matches PROVISIONAL B2-1's letter; sync stopped
+  around both doors with reconnect on every failure arm.
+- **The 14d prep's dormancy:** `DeviceBridgeKeyProvider` grep-verified
+  wired nowhere in production (`makeBridgeKeyProvider` stays nil);
+  `stageRepushFromTruth`'s sentinel can collide with no hex hash; staging
+  preserves stamps/created_at and skips stamp-only rows (pinned);
+  `db.changesCount` is the correct GRDB read for the staged count.
+- **Harness fidelity:** the fake's gate order (account → fence →
+  entitlement) and whole-batch owner-refusal match the RPC bodies;
+  `wipe()` preserves provisioning exactly as the real truncate spares
+  key_vault/entitlement; auto-adopt is opt-in only (fence suites always
+  set explicit ids); the `SyncClient` signed-in default matches the
+  born-multi-tenant reality and the OwnerIdentityTests rewrite is
+  coherent with the retired pre-9c mirror.
+- **Serializer walk:** drop-aware parsing traced correct (a rebuild
+  REPLACES the accumulated set; red-on-old pin feeds doctored SQL);
+  `entitlement` in the server-only set; conditional `owner_id`-as-server-
+  machinery only where the client schema lacks the column.
+- **No P1/S1–S5 violations anywhere in the diff:** no text copied across
+  entities, nothing scales with corpus size client-side (the pull union
+  rides the per-tenant indexes), tombstone semantics untouched (the
+  mirror truncate/purge are the RULED server-side acts, not domain
+  deletes), wall clocks nowhere near ordering (`updated_at` is display
+  bookkeeping; `revision` stays the CAS token — the R2-1 decision's
+  letter honored).
+- **The doors' Keychain-on-MainActor cadence** (adopt/forget in the new
+  flows) reuses exactly the paths already inside the OWNED KnownIssues
+  row (13e's settings-cadence family) — no NEW unowned debt.
+
 ### The stargazing.tech checkout — contract facts (for the site's own
 ### agent)
 
