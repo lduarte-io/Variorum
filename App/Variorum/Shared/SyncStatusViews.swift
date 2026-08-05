@@ -36,7 +36,7 @@ import VariorumCore
 nonisolated struct SyncRowFace: Equatable {
     enum Kind: Equatable {
         case devStore, signedOut, syncOff, syncing, offline
-        case keysLocked, keysReplaced, notEntitled, error, idle
+        case keysLocked, keysReplaced, rekeyIncomplete, notEntitled, error, idle
     }
 
     struct Door: Equatable, Identifiable {
@@ -95,6 +95,19 @@ nonisolated struct SyncRowFace: Equatable {
                 // opening the Encryption tab directly.
                 return SyncRowFace(kind: .keysLocked, doors: [
                     Door(label: "Unlock…", act: .openAccount(.encryption)),
+                ])
+            }
+            if EncryptionSession.isRekeyIncompleteError(error) {
+                // Ladder R1-1: a key replacement started on THIS device
+                // and never finished (a crash or mid-run failure left
+                // the persisted marker) — the engine refuses rounds on
+                // it, and the row's one door reaches the completing
+                // surface directly (fire-and-DO: the prompt IS the
+                // road). Its own state, never the replaced-keys row —
+                // CF-16's re-enroll prescription cannot complete a
+                // half-run re-key.
+                return SyncRowFace(kind: .rekeyIncomplete, doors: [
+                    Door(label: "Finish key replacement…", act: .openAccount(.encryption)),
                 ])
             }
             if EncryptionSession.isPayloadCryptoError(error)
@@ -210,6 +223,10 @@ struct SyncStatusRow: View {
             Text(Self.keysReplacedLabel)
                 .foregroundStyle(.orange)
                 .help(sync.status.lastError ?? "")
+        case .rekeyIncomplete:
+            Text(Self.rekeyIncompleteLabel)
+                .foregroundStyle(.orange)
+                .help(sync.status.lastError ?? "")
         case .notEntitled:
             // Phase 14c (L7): SECONDARY styling, deliberately — the same
             // quiet voice as signed-out/offline, never the error red or
@@ -254,6 +271,11 @@ struct SyncStatusRow: View {
     /// copy; the door beside it opens the Encryption tab, whose headline
     /// IS the ruled sentence).
     static let keysReplacedLabel = "Sync paused — this account's encryption keys were replaced"
+
+    /// Ladder R1-1's row line: an unfinished re-key on THIS device (the
+    /// persisted marker) — the door beside it opens the Encryption tab,
+    /// whose banner carries the completing Replace door.
+    static let rekeyIncompleteLabel = "Sync paused — key replacement didn't finish on this device"
 
     private var lastSyncLabel: String {
         guard let last = sync.status.lastSuccessAt else { return "Not synced yet" }

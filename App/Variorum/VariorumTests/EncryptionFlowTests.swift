@@ -541,6 +541,38 @@ struct CrossoverRoundTests {
                 "the ruled copy shape, byte-exact")
     }
 
+    /// Ladder R1-1: the engine's unfinished-re-key refusal (the persisted
+    /// `AccountRekeyMarker`) presents as its OWN paused row whose one
+    /// door reaches the completing surface directly — never the generic
+    /// error face (red-on-old: that was the pre-fix presentation), and
+    /// never the replaced-keys row, whose re-enroll prescription cannot
+    /// complete a half-run re-key. The classifier stays disjoint from
+    /// every sibling.
+    @Test func theRekeyIncompleteRowSpeaksTheFinishRoad() {
+        let text = String(describing: SyncError.accountRekeyIncomplete)
+        let face = SyncRowFace.face(
+            allowsSync: true, isConfigured: true, signedIn: true,
+            isSyncing: false, lastError: text, lastErrorIsOffline: false)
+        #expect(face.kind == .rekeyIncomplete)
+        #expect(face.doors == [SyncRowFace.Door(
+            label: "Finish key replacement…", act: .openAccount(.encryption))],
+                "one door, straight to the surface whose banner completes the road")
+        #expect(SyncStatusRow.rekeyIncompleteLabel.contains("didn't finish"),
+                "the row line names the state, not a generic error")
+
+        // Disjointness both ways: the marker refusal never wears the
+        // replaced/locked/tier faces, and their errors never wear this one.
+        #expect(EncryptionSession.isRekeyIncompleteError(text))
+        #expect(!EncryptionSession.isKeysReplacedError(text))
+        #expect(!EncryptionSession.isKeysLockedError(text))
+        #expect(!EncryptionSession.isPayloadCryptoError(text))
+        #expect(!HostedSyncTier.isNotEntitledError(text))
+        #expect(!EncryptionSession.isRekeyIncompleteError(
+            String(describing: SyncError.encryptionKeysReplaced)))
+        #expect(!EncryptionSession.isRekeyIncompleteError(
+            String(describing: SyncError.encryptionKeysUnavailable)))
+    }
+
     /// CF-15, RED-ON-OLD: the old `isSyncing` branch REPLACED the row's
     /// content ("Sync now"/"Account…" vanished and reappeared every
     /// round). Her ruling: the buttons must not move — "Sync now" stays
@@ -588,13 +620,15 @@ struct CrossoverRoundTests {
 
         // Sweep the face family: no face anywhere mints an "Encryption…"
         // door (the retired label), and every encryption-targeted door
-        // belongs to the locked or replaced state.
+        // belongs to the locked, replaced, or (ladder R1-1)
+        // rekey-incomplete state.
         let errors: [String?] = [
             nil,
             "Sync error: something else",
             String(describing: SyncError.encryptionKeysUnavailable),
             String(describing: SyncError.payloadCryptoFailure(
                 table: "variant", rowID: "r", column: "working_text", detail: "d")),
+            String(describing: SyncError.accountRekeyIncomplete),
         ]
         for isSyncing in [false, true] {
             for error in errors {
@@ -606,7 +640,8 @@ struct CrossoverRoundTests {
                     #expect(!face.doors.contains { $0.label == "Encryption…" })
                     for door in face.doors
                     where door.act == .openAccount(.encryption) {
-                        #expect(face.kind == .keysLocked || face.kind == .keysReplaced)
+                        #expect(face.kind == .keysLocked || face.kind == .keysReplaced
+                                || face.kind == .rekeyIncomplete)
                     }
                 }
             }
@@ -676,6 +711,70 @@ struct AccountLifecycleDoorTests {
                 "the rerun road is spoken on every failure")
         #expect(session.state == .enrolled(hasRecoveryWrap: false),
                 "the state is untouched by the failure (setup's step-4 state stands)")
+    }
+
+    /// Ladder R1-1: the surface RE-SPEAKS the rerun road across a
+    /// relaunch — refresh() projects the persisted marker through the
+    /// injected read (red-on-old by behavioral revert: without the
+    /// refresh read, `rekeyIncomplete` stays false and the pre-fix
+    /// silence returns — nothing persisted re-spoke the road), a
+    /// completed door run re-reads it clear, and the banner prompt is
+    /// pinned to the fire-and-DO grammar.
+    @Test func theSurfaceReSpeaksTheRerunRoadFromThePersistedMarker() async throws {
+        let store = DeviceKeyStore.inMemory()
+        let vault = ScriptedVault()
+        let session = makeEncryptionSession(store: store, vault: vault)
+        await session.setUp(passphrase: "the-old-passphrase")
+
+        // The relaunch shape after a mid-re-key crash: the marker reads
+        // set; refresh projects it.
+        let markerSet = LockIsolated(true)
+        session.rekeyIncompleteCheck = { markerSet.value }
+        await session.refresh()
+        #expect(session.rekeyIncomplete,
+                "refresh re-speaks the rerun road from the persisted marker")
+
+        // The completed door clears the marker (the runner models the
+        // brain's clear-at-completion); the session re-reads it.
+        session.rekeyRunner = { _ in
+            markerSet.setValue(false)
+            return DeviceKeyMaterial(
+                masterKey: Data(repeating: 9, count: 32),
+                corpusKey: Data(repeating: 10, count: 32), corpusKeyID: "corpus-new",
+                journalBridgeKey: Data(repeating: 11, count: 32),
+                journalBridgeKeyID: "journal-new")
+        }
+        await session.rekeyAccount(passphrase: "the-old-passphrase")
+        #expect(session.lastError == nil)
+        #expect(!session.rekeyIncomplete, "a completed run reads the marker clear")
+
+        // The banner prompt: paused + the rerun act + nothing lost.
+        #expect(EncryptionView.rekeyIncompletePrompt.contains("didn't finish"))
+        #expect(EncryptionView.rekeyIncompletePrompt.contains("Replace Encryption Keys"))
+        #expect(EncryptionView.rekeyIncompletePrompt.contains("nothing is lost"))
+    }
+
+    /// Ladder R1-1, the failed arm: a THROWN mid-run failure leaves the
+    /// marker set, and the session's re-read keeps the banner up beside
+    /// the spoken error — the persistent voice outlives the message.
+    @Test func aFailedRekeyKeepsTheBannerUp() async throws {
+        let store = DeviceKeyStore.inMemory()
+        let vault = ScriptedVault()
+        let session = makeEncryptionSession(store: store, vault: vault)
+        await session.setUp(passphrase: "the-old-passphrase")
+
+        let markerSet = LockIsolated(false)
+        session.rekeyIncompleteCheck = { markerSet.value }
+        session.rekeyRunner = { _ in
+            // The brain persists the marker before its vault write; the
+            // failure leaves it set.
+            markerSet.setValue(true)
+            throw AccountLifecycleError.httpFailure(status: 503, body: "gateway")
+        }
+        await session.rekeyAccount(passphrase: "the-old-passphrase")
+        #expect(session.lastError?.contains("run Replace Keys again") == true)
+        #expect(session.rekeyIncomplete,
+                "the failed run's marker projects — the rerun road survives the error message")
     }
 
     /// No runner wired (unconfigured project) ⇒ the door refuses in the
@@ -841,6 +940,37 @@ struct AccountDoorWiringTests {
                 "SELECT last_synced_hash FROM bridge_day WHERE day_key = '2026-08-01'"))
             #expect(stagedHash == "restaged:repush-from-truth",
                     "the bridge's staged re-push trigger rode the re-key (inert until 14d; the literal is core's restagedHashSentinel, symbol-pinned there)")
+            // Ladder R1-1: the completed road left NO rekey-in-progress
+            // residue — marker clear in the real store, banner down.
+            let marker = try await db.read { try AccountRekeyMarker.isSet($0) }
+            #expect(!marker, "a completed re-key clears the persisted marker")
+            #expect(!encryption.rekeyIncomplete)
+        }
+    }
+
+    /// Ladder R1-1, the WIRING loop closed over the real store: a marker
+    /// in the app database (what a mid-re-key crash leaves) reaches the
+    /// surface through the check `AppServices.start()` wired — refresh()
+    /// projects the rerun prompt — and account deletion clears it (a
+    /// purged account owes no completion). Red-on-old by behavioral
+    /// revert: without the AppServices wiring the check stays nil and the
+    /// projection assertion fails.
+    @Test func thePersistedMarkerReachesTheSurfaceAndDeletionClearsIt() async throws {
+        try await withDoorWorld { services, encryption, store, lifecycle, db, _ in
+            await encryption.setUp(passphrase: "orchard-lantern-13")
+            #expect(encryption.lastError == nil)
+
+            // The crash residue, in the REAL store this world composes over.
+            try await db.write { dbi in try AccountRekeyMarker.set(dbi) }
+            await encryption.refresh()
+            #expect(encryption.rekeyIncomplete,
+                    "the wired check reads the real sync_state row — the surface re-speaks the road on relaunch")
+
+            // Deletion clears it: the road no longer exists.
+            await services.deleteAccount(passphrase: "orchard-lantern-13")
+            #expect(services.account.lastError == nil)
+            let marker = try await db.read { try AccountRekeyMarker.isSet($0) }
+            #expect(!marker, "a purged account owes no re-key completion")
         }
     }
 

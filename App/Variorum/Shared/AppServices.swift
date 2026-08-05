@@ -239,6 +239,12 @@ final class AppServices {
                 guard let self else { throw CancellationError() }
                 return try await self.runAccountRekey(passphrase: passphrase)
             }
+            // Ladder R1-1: the persisted marker's surface read —
+            // refresh() projects the rerun prompt from it (the engine's
+            // own rounds refuse on the same `sync_state` key).
+            encryption.rekeyIncompleteCheck = { [database = session.database] in
+                (try? await database.read { try AccountRekeyMarker.isSet($0) }) ?? false
+            }
         }
         await auth.setOnChange { [weak self] tokens in
             Task { @MainActor [weak self] in
@@ -471,6 +477,10 @@ final class AppServices {
             let deletion = AccountDeletion(
                 client: keyVault, lifecycle: makeAccountLifecycle(auth))
             _ = try await deletion.run(passphrase: passphrase)
+            // Ladder R1-1: a purged account owes no re-key completion —
+            // clear the persisted marker so a future sign-in on this
+            // store isn't refused for a road that no longer exists.
+            try? await session.database.write { try AccountRekeyMarker.clear($0) }
             // Server side is gone; now the device's custody (CF-11's
             // machinery — the vault it unlocked no longer exists), then
             // the session (sign-out tears the sync chain down through the

@@ -79,12 +79,16 @@ struct AccountLifecycleTests {
     private func makeRekeyWorld() async throws -> RekeyWorld {
         let server = FakeSyncServer()
         let client = try SyncClient(name: "A1", prefix: "AA", transport: server)
+        let db = client.db
         let events = LockIsolated<[String]>([])
         let vault = ScriptedVaultServer()
         // The one-Postgres wiring: a successful vault POST/PATCH moves the
         // sync fence's comparand to the row's corpus key id — exactly what
         // writing the real key_vault row does — and logs the write for the
-        // ORDER pin.
+        // ORDER pin. The event's `marker=` suffix records whether the
+        // persisted rekey marker was set AT the write (ladder R1-1: the
+        // brain must set it BEFORE the vault write, so a crash in every
+        // later window leaves it behind).
         let vaultClient = KeyVaultClient(
             configuration: KeyVaultClient.Configuration(
                 projectURL: URL(string: "https://vault.test.invalid")!,
@@ -99,7 +103,10 @@ struct AccountLifecycleTests {
                    String(data: response.0, encoding: .utf8) != "[]",
                    let row = vault.storedRow(userID: RekeyWorld.vaultUserID) {
                     await server.setVaultCorpusKeyID(row.corpusKeyID)
-                    events.withValue { $0.append("vault-write:\(row.corpusKeyID)") }
+                    let markerSet = (try? await db.read { try AccountRekeyMarker.isSet($0) }) ?? false
+                    events.withValue {
+                        $0.append("vault-write:\(row.corpusKeyID):marker=\(markerSet ? "set" : "clear")")
+                    }
                 }
                 return response
             })
@@ -163,8 +170,8 @@ struct AccountLifecycleTests {
             "the re-key must truncate the account")
         #expect(vaultWrite < truncate,
                 "THE ORDER: the new vault lands BEFORE the truncate — every stale writer is fenced before any row is deleted (C-3)")
-        #expect(events[vaultWrite] == "vault-write:\(material.corpusKeyID)",
-                "the vault write carries the NEW corpus key id")
+        #expect(events[vaultWrite] == "vault-write:\(material.corpusKeyID):marker=set",
+                "the vault write carries the NEW corpus key id — and the persisted rekey marker was ALREADY SET at that instant (ladder R1-1: marker before vault write, so every crash window from 2→3 onward leaves it behind)")
         #expect(events[truncate] == "truncate:\(material.corpusKeyID)",
                 "the truncate presents the NEW key id — the fence's requirement")
         #expect(material.corpusKeyID != old.corpusKeyID,
@@ -179,6 +186,10 @@ struct AccountLifecycleTests {
         let fetched = try #require(try await world.vaultClient.fetchVault())
         #expect(fetched.format.masterWrappedByRecovery == nil)
         #expect(fetched.format.classKey(for: .corpus)?.keyID == material.corpusKeyID)
+
+        // Ladder R1-1: a COMPLETED road clears the persisted marker.
+        let markerAfter = try await world.client.db.read { try AccountRekeyMarker.isSet($0) }
+        #expect(!markerAfter, "the marker clears only when the whole road completes — and it did")
     }
 
     /// A WRONG passphrase refuses the whole act with NOTHING touched: no
@@ -201,6 +212,10 @@ struct AccountLifecycleTests {
         #expect(world.events.value.isEmpty, "no vault write, no truncate")
         #expect(await world.server.rowCount(table: "container") == rowsBefore)
         #expect(try world.client.outboxCount() == 0, "no re-enqueue either")
+        // Ladder R1-1: the marker is written AFTER authorization — a
+        // refused passphrase leaves no rekey-in-progress residue.
+        let markerSet = try await world.client.db.read { try AccountRekeyMarker.isSet($0) }
+        #expect(!markerSet, "a refused authorization never sets the marker")
     }
 
     // MARK: - The re-key road, end to end
@@ -325,21 +340,91 @@ struct AccountLifecycleTests {
         }
         // The failure's honest residue: the new vault is live (stale
         // writers fenced), custody was already handed over, the mirror
-        // still holds old-key rows — exactly what the rerun heals.
+        // still holds old-key rows — exactly what the rerun heals. And
+        // (ladder R1-1) the persisted marker is STILL SET: the rerun
+        // road survives a relaunch, not just this session's error string.
         let interim = try #require(adopted.value)
         let vaultNow = try #require(try await world.vaultClient.fetchVault())
         #expect(vaultNow.format.classKey(for: .corpus)?.keyID == interim.corpusKeyID)
         #expect(await world.server.rowCount(table: "container") > 0,
                 "the failed truncate left the old rows — the wedge the rerun clears")
+        let markerMidRoad = try await world.client.db.read { try AccountRekeyMarker.isSet($0) }
+        #expect(markerMidRoad,
+                "a mid-run failure leaves the marker set — the persisted rerun prompt (R1-1)")
 
         // THE RERUN: same passphrase (it unwraps the NEW vault), full road.
         let final = try await brain(world, onNewVaultMaterial: { _ in })
             .run(passphrase: Self.passphrase)
         #expect(await world.server.rowCount(table: "container") == 0)
         #expect(try world.client.outboxCount() > 0)
+        let markerHealed = try await world.client.db.read { try AccountRekeyMarker.isSet($0) }
+        #expect(!markerHealed, "the completed rerun clears the marker (R1-1)")
         world.client.keyProvider = FixedSyncKeyProvider(keys: keys(of: final))
         try await drain(world.client)
         #expect(try world.client.outboxCount() == 0)
+    }
+
+    /// Ladder R1-1 (MAJOR), the crash-window closure: the marker a
+    /// mid-run crash leaves behind refuses BOTH round halves across a
+    /// RELAUNCH — outbox intact, cursor unmoved, nothing reaching the
+    /// mirror — and the completed door clears it, after which rounds
+    /// drain again. (Every `push()`/`pull()` below builds a FRESH engine
+    /// over the same store: that IS the relaunch shape.) The pre-fix
+    /// silent windows this closes, traced at review round 1: a
+    /// truncated-but-not-reinitialized mirror read idle while near-empty
+    /// (clean rows never re-enqueue; dirty rows self-heal via the
+    /// nil-current rebase), and an untruncated old-key corpus synced on
+    /// quietly, poisoning every later enrollment. RED-ON-OLD by
+    /// behavioral revert: with the engine's marker check removed, both
+    /// refusal expectations fail (the rounds proceed).
+    @Test func theRekeyMarkerRefusesRoundsAcrossRelaunchUntilTheDoorCompletes() async throws {
+        let world = try await makeRekeyWorld()
+        let old = try await world.enrollment.setUp(passphrase: Self.passphrase)
+        world.client.keyProvider = FixedSyncKeyProvider(keys: keys(of: old))
+        try world.client.with { ops, _ in
+            _ = try ops.createPost(title: "before the crash", profile: .blog)
+        }
+        try await drain(world.client)
+
+        // The state a crash leaves: the marker set (as the brain persists
+        // it before its vault write) plus whatever was in flight.
+        try await world.client.db.write { db in try AccountRekeyMarker.set(db) }
+        try world.client.with { ops, _ in
+            _ = try ops.createPost(title: "typed after the crash", profile: .journal)
+        }
+        let outboxBefore = try world.client.outboxCount()
+        #expect(outboxBefore > 0)
+        let cursorBefore = try await world.client.db.read { db in
+            try String.fetchOne(
+                db, sql: "SELECT value FROM sync_state WHERE key = 'last_server_seq'")
+        }
+        let serverRows = await world.server.rowCount(table: "container")
+
+        await #expect(throws: SyncError.accountRekeyIncomplete) {
+            _ = try await world.client.push()
+        }
+        await #expect(throws: SyncError.accountRekeyIncomplete) {
+            _ = try await world.client.pull()
+        }
+        #expect(try world.client.outboxCount() == outboxBefore,
+                "outbox intact — nothing is lost while paused")
+        let cursorAfter = try await world.client.db.read { db in
+            try String.fetchOne(
+                db, sql: "SELECT value FROM sync_state WHERE key = 'last_server_seq'")
+        }
+        #expect(cursorAfter == cursorBefore, "cursor unmoved — the §12 refusal grammar")
+        #expect(await world.server.rowCount(table: "container") == serverRows,
+                "no write reached the mirror past the marker")
+
+        // THE DOOR COMPLETES: the full brain run clears the marker and
+        // the drain proceeds under the new keys.
+        let material = try await brain(world, onNewVaultMaterial: { _ in })
+            .run(passphrase: Self.passphrase)
+        let markerAfter = try await world.client.db.read { try AccountRekeyMarker.isSet($0) }
+        #expect(!markerAfter, "the completed road clears the marker")
+        world.client.keyProvider = FixedSyncKeyProvider(keys: keys(of: material))
+        try await drain(world.client)
+        #expect(try world.client.outboxCount() == 0, "rounds drain again once the road completes")
     }
 
     // MARK: - Account deletion (L5)

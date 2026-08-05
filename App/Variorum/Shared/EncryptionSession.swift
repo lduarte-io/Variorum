@@ -84,6 +84,17 @@ final class EncryptionSession {
     /// resyncReinitialize → bridge staging) has run.
     var rekeyRunner: ((String) async throws -> DeviceKeyMaterial)?
 
+    /// Ladder R1-1: the persisted rekey-in-progress read, injected by the
+    /// composition root (a local `sync_state` read through the app's
+    /// database — `AccountRekeyMarker`). nil = never set (unconfigured /
+    /// tests that predate the marker).
+    var rekeyIncompleteCheck: (@Sendable () async -> Bool)?
+    /// Ladder R1-1: true when a re-key started on THIS device and never
+    /// completed — the marker survives crash and relaunch, so the surface
+    /// re-speaks the rerun road here (the banner + its direct Replace
+    /// door) while the engine refuses rounds on the same fact.
+    private(set) var rekeyIncomplete = false
+
     private let store: DeviceKeyStore
     /// nil = the project is unconfigured (ProjectConfig keys empty) — the
     /// flows stay dormant exactly like the sign-in surface.
@@ -110,6 +121,10 @@ final class EncryptionSession {
     /// here and in the flows — never at construction.
     func refresh() async {
         guard let client else { return }
+        // Ladder R1-1: the persisted marker is re-projected on every
+        // refresh — a crash mid-re-key must re-speak the rerun road on
+        // the next launch, not stay silent behind an "enrolled" reading.
+        rekeyIncomplete = await rekeyIncompleteCheck?() ?? false
         biometricRequired = store.isBiometricGateOn()
         guard await signedIn() else {
             state = .signedOut
@@ -275,6 +290,10 @@ final class EncryptionSession {
             lastError = "Key replacement didn't finish — nothing is lost; "
                 + "run Replace Keys again to complete it. (\(Self.message(for: error)))"
         }
+        // Ladder R1-1: re-read the persisted marker — a completed run
+        // cleared it (the banner retires); a failed run left it set (the
+        // banner joins the thrown-failure message and outlives it).
+        rekeyIncomplete = await rekeyIncompleteCheck?() ?? false
     }
 
     /// The runner's custody adoption point (its contract: called after
@@ -461,5 +480,15 @@ final class EncryptionSession {
     /// poison push instead of after a failed decrypt.
     nonisolated static func isKeysReplacedError(_ text: String) -> Bool {
         text == SyncError.encryptionKeysReplaced.description
+    }
+
+    /// Ladder R1-1 — the unfinished-re-key classifier: true exactly for
+    /// the engine's persisted-marker refusal (`SyncError
+    /// .accountRekeyIncomplete`), as the scheduler surfaces it verbatim.
+    /// Deliberately its OWN row state, never the CF-16 replaced face:
+    /// the replaced row's re-enroll prescription cannot complete a
+    /// half-run re-key — only the door's rerun can.
+    nonisolated static func isRekeyIncompleteError(_ text: String) -> Bool {
+        text == SyncError.accountRekeyIncomplete.description
     }
 }

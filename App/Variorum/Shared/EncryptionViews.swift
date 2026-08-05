@@ -161,6 +161,16 @@ struct EncryptionView: View {
         "Sync on this device stops until you unlock again with your encryption passphrase "
         + "or recovery phrase. Nothing is deleted from this device or your account."
 
+    /// Ladder R1-1: the persisted-marker banner's prompt — a re-key
+    /// started on this device and never completed (a crash or a mid-run
+    /// failure), so sync is paused on the engine's own refusal and the
+    /// rerun road is spoken HERE, with the door right beside it
+    /// (fire-and-DO). The brain's rerun heals every window state,
+    /// whichever section renders below.
+    static let rekeyIncompletePrompt =
+        "Key replacement didn't finish on this device — sync is paused until it completes. "
+        + "Run Replace Encryption Keys again; nothing is lost, and your writing is untouched."
+
     /// Phase 14c (CF-8): the re-key door's explanation — the honest
     /// warning names what a re-key does to OTHER devices (they land in
     /// the keys-were-replaced state and re-enroll), what happens to the
@@ -210,6 +220,14 @@ struct EncryptionView: View {
         // the scroll, the padding, and the CF-1 borderless Close; this view
         // is the Encryption tab's content.
         VStack(alignment: .leading, spacing: 14) {
+            // Ladder R1-1: the unfinished-re-key banner rides ABOVE the
+            // state switch — every arm below (enrolled, mandatory-phrase,
+            // keysReplaced, …) is a state a mid-re-key crash can land in,
+            // and the completing door must be one act away in all of them.
+            if encryption.rekeyIncomplete {
+                rekeyIncompleteBanner
+                Divider()
+            }
             switch encryption.state {
             case .unknown:
                 ProgressView().controlSize(.small)
@@ -567,14 +585,19 @@ struct EncryptionView: View {
 
         Divider()
 
-        if showingRekey {
-            rekeySection
-        } else {
-            Button("Replace Encryption Keys…") { showingRekey = true }
-                .disabled(encryption.busy)
-        }
+        // Ladder R1-1: while a re-key is owed, the banner at the top
+        // carries this door (and the open flow) — rendering a second
+        // copy here would double the shared showingRekey flow.
+        if !encryption.rekeyIncomplete {
+            if showingRekey {
+                rekeySection
+            } else {
+                Button("Replace Encryption Keys…") { showingRekey = true }
+                    .disabled(encryption.busy)
+            }
 
-        Divider()
+            Divider()
+        }
 
         DisclosureGroup("What the server can and can't see") {
             Text(Self.disclosureCopy)
@@ -588,6 +611,25 @@ struct EncryptionView: View {
         Divider()
 
         forgetSection
+    }
+
+    // MARK: - The unfinished-re-key banner (ladder R1-1)
+
+    /// The persisted marker's surface voice: the prompt plus the
+    /// completing door RIGHT HERE — reachable from every state arm, so
+    /// the rerun is one act away whichever window the crash left.
+    @ViewBuilder
+    private var rekeyIncompleteBanner: some View {
+        Text(Self.rekeyIncompletePrompt)
+            .font(.caption)
+            .foregroundStyle(.orange)
+            .fixedSize(horizontal: false, vertical: true)
+        if showingRekey {
+            rekeySection
+        } else {
+            Button("Replace Encryption Keys…") { showingRekey = true }
+                .disabled(encryption.busy)
+        }
     }
 
     // MARK: - The re-key door (Phase 14c, CF-8 — THE DESIGN 3)

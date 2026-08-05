@@ -46,6 +46,19 @@ public struct SyncEngine: Sendable {
         self.keyProvider = keyProvider
     }
 
+    /// Ladder R1-1: the persisted rekey-in-progress marker's round guard —
+    /// `AccountRekey.run` sets the marker before its vault write and
+    /// clears it only when the whole road completes, so a crash anywhere
+    /// between leaves it set across relaunches. While it is set, both
+    /// round halves refuse with a self-explaining error naming the rerun
+    /// road — outbox intact, cursor unmoved, the §12 refusal grammar.
+    /// (`resyncReinitialize` is deliberately NOT guarded: the brain's own
+    /// step 5 runs with the marker set.)
+    private func refuseIfRekeyIncomplete() async throws {
+        let incomplete = try await database.read { try AccountRekeyMarker.isSet($0) }
+        guard !incomplete else { throw SyncError.accountRekeyIncomplete }
+    }
+
     /// The round's crypto seam, or the visible refusal (Phase 14b): ANY
     /// provider throw maps to `SyncError.encryptionKeysUnavailable` — a
     /// self-explaining status naming the fix, pinned exactly like the §12
@@ -81,6 +94,12 @@ public struct SyncEngine: Sendable {
     /// rows merge per SyncSpec §6 and re-push on the next iteration.
     @discardableResult
     public func push() async throws -> PushReport {
+        // An unfinished re-key on THIS device refuses first (ladder
+        // R1-1): rounds against a mid-re-key account can silently strand
+        // the hosted copy — see `AccountRekeyMarker`. Before keys and
+        // lockstep because its prescription (re-run the re-key door)
+        // subsumes both; before any network contact by construction.
+        try await refuseIfRekeyIncomplete()
         try ensureDeviceID()
         // Keys first (Phase 14b): absent/locked keys refuse the round
         // before any network contact — outbox intact, cursor unmoved.
@@ -224,6 +243,8 @@ public struct SyncEngine: Sendable {
     /// everything else.
     @discardableResult
     public func pull() async throws -> PullReport {
+        // The unfinished-re-key guard, the push half's twin (ladder R1-1).
+        try await refuseIfRekeyIncomplete()
         try ensureDeviceID()
         // Keys first (Phase 14b): absent/locked keys refuse the round
         // before any network contact — outbox intact, cursor unmoved.

@@ -403,6 +403,15 @@ public enum SyncError: Error, Equatable, Sendable {
     /// signed-out-reads-as-normal principle: sync is the tier, the app
     /// is not).
     case syncNotEntitled
+    /// Phase 14c ladder R1-1: a key replacement (CF-8) started on THIS
+    /// device and never completed — the persisted `AccountRekeyMarker`
+    /// survives a crash/relaunch mid-road. The round refuses — outbox
+    /// intact, cursor unmoved — because rounds against a mid-re-key
+    /// account can silently strand the hosted copy (a truncated-but-not-
+    /// reinitialized mirror reads idle while near-empty; an untruncated
+    /// old-key corpus poisons every later enrollment). Running the
+    /// re-key door again completes the road and clears the marker.
+    case accountRekeyIncomplete
 }
 
 extension SyncError: CustomStringConvertible {
@@ -438,6 +447,10 @@ extension SyncError: CustomStringConvertible {
         case .syncNotEntitled:
             return "Sync paused: hosted sync isn't active on this account. Your writing "
                 + "stays safe on this device; sync resumes once the plan is active."
+        case .accountRekeyIncomplete:
+            return "Sync paused: replacing this account's encryption keys didn't finish on "
+                + "this device. Run Replace Encryption Keys again (Account → Encryption) to "
+                + "complete it; nothing is lost while paused."
         }
     }
 }

@@ -1,6 +1,7 @@
 import CryptoKit
 import Dependencies
 import Foundation
+import GRDB
 
 /// Phase 14c batch 2 (ledger L4) — CF-8's user-facing re-key, the brain
 /// (THE DESIGN item 3). In-app, no terminal; the app's Encryption surface
@@ -50,10 +51,26 @@ import Foundation
 /// passphrase unwraps the NEW vault; another fresh vault is minted —
 /// harmless, everything re-encrypts from local truth at the repush), and
 /// steps 4–6 are idempotent against an already-truncated account. The
-/// surface speaks this road on every failure. A crash between 2 and 3
-/// leaves THIS device in the CF-16 replaced state like any other stale
-/// device — re-enrolling with the passphrase, then re-running the door,
-/// heals it.
+/// surface speaks this road on every THROWN failure — and a CRASH is
+/// covered by the persisted marker (`AccountRekeyMarker`, ladder R1-1):
+/// written after authorization and BEFORE the vault write, cleared only
+/// when the whole road completes, it survives relaunch, makes every
+/// engine round refuse (`SyncError.accountRekeyIncomplete` — outbox
+/// intact, cursor unmoved) and makes the surface re-speak the rerun
+/// road. The three crash windows it closes, traced (ladder round 1):
+///  - **2→3** (vault written, custody not adopted): visible anyway as
+///    the CF-16 replaced state — but CF-16's re-enroll heals custody
+///    ONLY, landing exactly in the 3→4 state below; the marker adds the
+///    completing prompt.
+///  - **3→4** (custody adopted, truncate not run): every round passes
+///    the fence while the mirror keeps an old-key corpus whose wrapped
+///    key the vault replacement destroyed — silent on this device (its
+///    cursor sits at head, so it never decrypts those rows), permanent
+///    payload-crypto refusals for any later-enrolling device.
+///  - **4→5** (truncate returned, resyncReinitialize not committed):
+///    clean rows never re-enqueue, dirty rows self-heal via the
+///    nil-current rebase, and the sync row reads idle over a near-empty
+///    mirror — the hosted copy silently gone.
 public struct AccountRekey: Sendable {
     public let client: KeyVaultClient
     public let lifecycle: any AccountLifecycleProviding
@@ -96,6 +113,18 @@ public struct AccountRekey: Sendable {
         } catch KeyVaultError.unwrapFailed {
             throw VaultEnrollmentError.wrongPassphrase
         }
+
+        // 1½. THE MARKER (ladder R1-1): persist rekey-in-progress BEFORE
+        // anything irreversible. From here until the whole road completes,
+        // a crash OR a thrown failure leaves the marker set — rounds
+        // refuse and the surface re-speaks the rerun road across
+        // relaunches, so none of the crash windows can strand the hosted
+        // copy unsignaled. (A step-2 failure keeps it set too, on
+        // purpose: an updateVault network failure is AMBIGUOUS — the
+        // write may have landed while the response was lost — and the
+        // rerun is the universal heal either way, matching the pinned
+        // doctrine above.)
+        try await database.write { db in try AccountRekeyMarker.set(db) }
 
         // 2. The NEW vault, written FIRST — the fence design's hinge.
         let master = SymmetricKey(size: .bits256)
@@ -146,7 +175,51 @@ public struct AccountRekey: Sendable {
             _ = try BridgeEngine.stageRepushFromTruth(db)
         }
 
+        // The marker clears ONLY here — after the WHOLE road (the bridge
+        // staging included, so 14d's leg is protected too). Any earlier
+        // exit leaves it set and the rerun road prompted.
+        try await database.write { db in try AccountRekeyMarker.clear(db) }
+
         return material
+    }
+}
+
+/// Phase 14c ladder R1-1 — the persisted rekey-in-progress MARKER: the
+/// crash-window closure for the brain's non-atomic sequence. It lives in
+/// the LOCAL-ONLY `sync_state` keyspace (never synced, no triggers watch
+/// it — the `device_id` precedent), so it is per-device by construction,
+/// exactly the scope of the road it tracks.
+///
+/// Why `sync_state` and not the device Keychain: (i) local-only BY
+/// DESIGN — SyncSpec §3's letter; (ii) `resyncReinitialize` deletes only
+/// the cursor key, so the marker survives the brain's own step 5 by
+/// construction; (iii) a Keychain marker would add synchronous SecItem
+/// hops at composition/round cadence — the owned 13e windowless-launch
+/// family — where a DB read is the engine's native cadence. The value is
+/// a wall-clock stamp for support honesty (a plain `Date()`, the
+/// `key_vault.updated_at` precedent — nothing orders by it).
+///
+/// Who touches it: `AccountRekey.run` sets it before the vault write and
+/// clears it after the whole road; the engine refuses both round halves
+/// while it is set (`SyncError.accountRekeyIncomplete`); the Encryption
+/// surface projects it as the rerun prompt; account deletion clears it
+/// (a purged account owes no completion).
+public enum AccountRekeyMarker {
+    public static let key = "rekey_in_progress"
+
+    public static func set(_ db: Database) throws {
+        try db.execute(
+            sql: "INSERT OR REPLACE INTO sync_state (key, value) VALUES (?, ?)",
+            arguments: [key, DateFormatter.variorumISO8601.string(from: Date())])
+    }
+
+    public static func clear(_ db: Database) throws {
+        try db.execute(sql: "DELETE FROM sync_state WHERE key = ?", arguments: [key])
+    }
+
+    public static func isSet(_ db: Database) throws -> Bool {
+        try String.fetchOne(
+            db, sql: "SELECT value FROM sync_state WHERE key = ?", arguments: [key]) != nil
     }
 }
 
