@@ -369,6 +369,46 @@ this phase and what we should do"*
   ladder → isolation round → the gate, where the deploy and her
   passphrase moment arrive together, announced.
 
+### Round 9 — THE SESSION SEAM RULED (2026-08-05; her directive at the
+### 356.6k context reading — the skill's own cutover discipline,
+### invoked by her)
+
+Her directive, verbatim-faithful: finish everything that comes BEFORE
+the steps requiring her — *"just finish up the actual code changes
+(including the extra cold review)"* — with the architect still
+controlling *"the ladder and tier of review"*; author mid-session
+handoff notes ahead of time so a NEW session does *"the driving /
+verification"*; the Fragments brief is THIS architect's responsibility
+(*"since you have more direct context on the code"*); and *"It would
+be your responsibility to write the plan for the 2nd half of 14c."*
+The folded-to-new-session scope, her words quoting the standing gate
+list: deploy + repush + phone re-onboard → probes → domain attach →
+the flip → the stranger validation walk → the one-look ratify bundle
+→ closeout including the 14d micro-plan.
+
+**THE SEAM, as ruled (this session = the BUILD HALF; a fresh session
+= the GATE HALF):**
+
+- **This session finishes:** batch 3 (verify + adjudicate) → the
+  standard ladder over the combined diff (fresh cold reviewer per
+  round, fixes, re-review, cap 3) → the DEDICATED isolation review
+  round → the FRAGMENTS BRIEF finalized in the contract file (the
+  14c-era concrete facts written by the seat that held the code
+  context; the few gate-dependent fields — e.g. the confirmed issuer
+  URL post-attachment — marked FILL-AT-GATE for the successor) → the
+  14d MICRO-PLAN DRAFTED (the architect's refinement, accepted
+  rationale: batch 2's traced corner and the dormant machinery live
+  in this session's verified context — the gate session finalizes
+  with gate facts rather than authoring cold) → the GATE-HALF PLAN +
+  the role handoff with a PASTE-READY kickoff prompt (the skill's
+  two-document form; `phase-13b-stage4-orchestrator-handoff.md` the
+  exemplar) → memory + push → HARD STOP.
+- **The fresh gate session executes:** the gate list above exactly as
+  recorded at L13 (announced per step; deploy/probes/flip
+  architect-driven per Round 7; her passphrase + Cloudflare + phone
+  acts + walks), the ratify bundle (B1-1/2/3 · B2-1/2/3 + batch 3's ·
+  the doors' copy redline), then the closeout ritual in full.
+
 ## THE DESIGN (settled by the sitting — the architecture the batches
 ## build)
 
