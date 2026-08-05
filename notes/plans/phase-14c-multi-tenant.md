@@ -627,6 +627,24 @@ SyncTransport (+17, the signatures + doctrine comment).
 EncryptionSession changes compile and pass untouched suites) · spine
 **51/7** green.
 
+**The architect's verification + adjudication (2026-08-04, at the
+batch's completion):** commits/diffs/record spot-checked per the
+verify-not-trust rule — tree clean at `c151c98`, `swift build` green
+(the transient SourceKit diagnostics were stale index noise), the 09
+artifact's claims confirmed by inspection (18 FORCE RLS statements,
+composite PKs, old signatures dropped, marker last), the zero-diff
+claim structure-checked. **PROVISIONAL dispositions (the mandate's
+architectural calls; bundled for her one-look ratify at the gate):**
+B1-1 SUSTAINED — the fake's latitude is tenant-safe by partitioning,
+the strict arm stays DDL-pinned and is proven on real Postgres at the
+gate, and a switchable fake is the postmortem's fidelity failure
+shape; B1-2 SUSTAINED as provisional until batch 3 (the artifact is
+undeployed; adjust-with-reasons stands); B1-3 SUSTAINED — THE DESIGN
+2's letter, the bridge's key id rides its own dialect at 14d. The
+old-signature drop is ratified as an isolation requirement, not a
+style call. The probe-account entitlement grant joins the gate
+runbook (L13).
+
 **Held for the architect / the gate:**
 
 - **The probe account needs a deliberate entitlement grant** in the
