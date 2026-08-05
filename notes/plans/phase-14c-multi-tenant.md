@@ -1092,6 +1092,15 @@ tripwire-only** (the standing `TakePaneMeasureTests` red BY IDENTITY;
 was 1220/213 — +6 in 2 new suites) · mobile **175/26** green
 (simulator; the shared seam carries both doors) · spine **51/7** green.
 
+*(Correction appended 2026-08-05, ladder R1-2 — the record above stands
+as written, this note dates the drift: the purge-order claim "key_vault's
+FK to auth.users makes vault-before-user load-bearing" is FALSE —
+08_phase14b_lockstep.sql declares that FK `ON DELETE CASCADE`, so
+deleting the auth user first would succeed and cascade the vault row.
+The order stands as the deliberate reporting/clarity choice (explicit
+removals, exact counts); the 09 comments and the DDL pin's comments now
+say so. Behavior was never affected; the order pin itself stays.)*
+
 ### Batch 3 — record (implementer session, 2026-08-05)
 
 **Shipped, per deliverable (commits on `main`):**

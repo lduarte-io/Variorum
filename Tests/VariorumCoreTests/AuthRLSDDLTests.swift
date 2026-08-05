@@ -388,11 +388,14 @@ struct AuthRLSDDLTests {
     }
 
     /// The deletion door's purge (her Round-5 ruling): data rows →
-    /// key_vault → entitlement → THE AUTH USER LAST (key_vault's FK
-    /// references auth.users, so the order is load-bearing). No fence
-    /// (deletion supersedes re-key) and no entitlement gate (deletion is
-    /// a right). The local-copy-survives rule is true by construction —
-    /// the body names only server tables.
+    /// key_vault → entitlement → THE AUTH USER LAST. The order is the
+    /// RULED reporting shape, pinned as a deliberate choice — NOT an FK
+    /// necessity (corrected 2026-08-05, ladder R1-2: key_vault.user_id's
+    /// FK is ON DELETE CASCADE per 08, so user-first would cascade the
+    /// vault row; explicit removals keep the counts report exact). No
+    /// fence (deletion supersedes re-key) and no entitlement gate
+    /// (deletion is a right). The local-copy-survives rule is true by
+    /// construction — the body names only server tables.
     @Test func theAccountPurgeRemovesDataVaultEntitlementThenTheAuthUser() throws {
         let body = try Self.finalBody(of: "account_purge")
         #expect(body.contains("raise exception 'account acts require an authenticated user'"))
@@ -403,8 +406,9 @@ struct AuthRLSDDLTests {
         #expect(body.contains("delete from key_vault where user_id = caller;"))
         #expect(body.contains("delete from entitlement where user_id = caller;"))
         #expect(body.contains("delete from auth.users where id = caller;"))
-        // The ORDER: the vault's FK to auth.users makes vault-before-user
-        // load-bearing; entitlement rides between by the ruling's letter.
+        // The ORDER: the ruled reporting shape (deliberate, not FK-forced
+        // — the vault FK is CASCADE; ladder R1-2); entitlement rides
+        // between by the ruling's letter.
         let vault = try #require(body.range(of: "delete from key_vault"))
         let entitlement = try #require(body.range(of: "delete from entitlement"))
         let authUser = try #require(body.range(of: "delete from auth.users"))
