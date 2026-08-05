@@ -125,7 +125,13 @@ struct SyncEncryptionTests {
         let plaintextRow = SyncRow(
             table: "container", rowID: "c-pre14b",
             columns: [
-                "id": .text("c-pre14b"), "owner_id": .null, "kind": .text("post"),
+                // Phase 14c: owned by the caller — the born-multi-tenant
+                // mirror has no unowned partition to push into (the
+                // isolation round's I-2 arm). What this row still models is
+                // the pre-14b PLAINTEXT value, which is what the pull under
+                // test refuses.
+                "id": .text("c-pre14b"),
+                "owner_id": .text(FakeSyncServer.defaultUserID), "kind": .text("post"),
                 "title": .text("bare plaintext"), "profile": .null, "entry_date": .null,
                 "locked": .integer(0), "locked_at": .null, "floating_notes": .null,
                 "segmentation_default": .null, "last_touched_at": .null,

@@ -533,14 +533,210 @@ struct AuthRLSDDLTests {
 
     /// The marker insert is EVERY lockstep file's LAST STATEMENT — a
     /// partially-executed deploy must never advertise the new version
-    /// before the tables exist.
+    /// before the tables exist. Phase 14c: a file may now close with
+    /// `commit;` (09's one-transaction wrapping, finding I-3), so the
+    /// marker must be the last statement INSIDE the transaction — the
+    /// same discipline, one statement further in.
     @Test func theMarkerInsertIsTheLastStatementOfEveryLockstepFile() throws {
         for file in Self.lockstepFiles {
-            let sql = Self.strippingComments(try Self.sqlFile(file))
+            var sql = Self.strippingComments(try Self.sqlFile(file))
                 .trimmingCharacters(in: .whitespacesAndNewlines)
+            if sql.hasSuffix("commit;") {
+                sql = String(sql.dropLast("commit;".count))
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+            }
             #expect(sql.hasSuffix("on conflict (key) do update set value = excluded.value;"),
-                    "\(file): the lockstep marker upsert must terminate the file")
+                    "\(file): the lockstep marker upsert must be the last statement (inside the transaction, where one is opened)")
         }
+    }
+
+    // MARK: - Phase 14c, the dedicated isolation round: the deploy-shape
+    // pins (findings I-3 + I-5). 09 rebuilds the whole mirror, so HOW it
+    // executes is part of what it does: created-then-revoked objects must
+    // never be reachable in a window, and the file must refuse to run
+    // twice once real accounts exist.
+
+    /// Statements Postgres refuses inside a transaction block — the set the
+    /// wrapping must not contain. (ALTER TYPE … ADD VALUE is deliberately
+    /// absent: legal inside a transaction since PG12, merely unusable in
+    /// the same one, and 09 has no enum work at all.)
+    private static let nonTransactionalStatements = [
+        "create index concurrently", "drop index concurrently",
+        "reindex concurrently", "vacuum", "create database", "drop database",
+        "create tablespace", "drop tablespace", "alter system", "discard all",
+    ]
+
+    /// What can be wrong with the deploy SHAPE of a rebuild artifact — a
+    /// pure check, so the doctored-fixture proof below can exercise it
+    /// (the `truncateProblems` pattern): not wrapped in ONE transaction,
+    /// a statement that cannot run inside one, the marker bump not last
+    /// inside the transaction, the re-run guard missing, or the guard
+    /// standing AFTER the first destructive statement (a guard that runs
+    /// after the drops guards nothing).
+    static func deployShapeProblems(strippedSQL: String) -> Set<String> {
+        let sql = strippedSQL.trimmingCharacters(in: .whitespacesAndNewlines)
+        let lowered = sql.lowercased()
+        var problems: Set<String> = []
+
+        if !lowered.hasPrefix("begin;") { problems.insert("no-begin") }
+        if !lowered.hasSuffix("commit;") { problems.insert("no-commit") }
+        for statement in nonTransactionalStatements where lowered.contains(statement) {
+            problems.insert("non-transactional:\(statement)")
+        }
+
+        let body = lowered.hasSuffix("commit;")
+            ? String(lowered.dropLast("commit;".count))
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            : lowered
+        if !body.hasSuffix("on conflict (key) do update set value = excluded.value;") {
+            problems.insert("marker-not-last-in-transaction")
+        }
+
+        guard let guardRange = lowered.range(of: "do $rerun_guard$") else {
+            problems.insert("no-rerun-guard")
+            return problems
+        }
+        // The guard must precede every destructive statement in the file.
+        for destructive in ["drop table", "drop function", "delete from", "truncate"] {
+            if let first = lowered.range(of: destructive),
+               first.lowerBound < guardRange.lowerBound {
+                problems.insert("guard-after:\(destructive)")
+            }
+        }
+        return problems
+    }
+
+    /// THE DEPLOY-SHAPE PIN (I-3 + I-5): 09 executes as ONE transaction,
+    /// carries no statement Postgres would refuse inside one, bumps the
+    /// marker last inside it, and opens with the re-run guard.
+    @Test func theRebuildDeploysAsOneTransactionGuardedAgainstReRuns() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("09_phase14c_multitenant.sql"))
+        let problems = Self.deployShapeProblems(strippedSQL: sql)
+        #expect(problems.isEmpty,
+                "09's deploy shape is unsound: \(problems.sorted()) — a created-then-revoked object must never be reachable in a window, and the guard must precede the drops")
+    }
+
+    /// The doctored-fixture proof that the shape check BITES (the
+    /// `aDoctoredTruncateListIsFlaggedByTheCheck` pattern): each way a
+    /// rebuild artifact can be mis-shaped is flagged by name.
+    @Test func aDoctoredDeployShapeIsFlaggedByTheCheck() throws {
+        let real = Self.strippingComments(try Self.sqlFile("09_phase14c_multitenant.sql"))
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Unwrapped (the pre-fix artifact's shape): no begin, no commit.
+        let unwrapped = real
+            .replacingOccurrences(of: "begin;", with: "", range: real.range(of: "begin;"))
+            .replacingOccurrences(of: "commit;", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let unwrappedProblems = Self.deployShapeProblems(strippedSQL: unwrapped)
+        #expect(unwrappedProblems.contains("no-begin") && unwrappedProblems.contains("no-commit"),
+                "the check failed to flag an unwrapped deploy (got \(unwrappedProblems.sorted()))")
+
+        // A guard-less artifact.
+        let unguarded = real.replacingOccurrences(of: "do $rerun_guard$", with: "do $other$")
+        #expect(Self.deployShapeProblems(strippedSQL: unguarded).contains("no-rerun-guard"),
+                "the check failed to flag a missing re-run guard")
+
+        // A guard moved BELOW the drops — present, and worthless.
+        let lateGuard = "begin;\ndrop table if exists container;\ndo $rerun_guard$ begin end $rerun_guard$;\n"
+            + "insert into sync_meta (key, value) values ('lockstep_version', '6')\n"
+            + "  on conflict (key) do update set value = excluded.value;\ncommit;"
+        #expect(Self.deployShapeProblems(strippedSQL: lateGuard).contains("guard-after:drop table"),
+                "the check failed to flag a guard standing after the drops")
+
+        // A statement Postgres refuses inside a transaction block.
+        let concurrent = real.replacingOccurrences(
+            of: "create index idx_owner_seq_container on container (owner_id, server_seq);",
+            with: "create index concurrently idx_owner_seq_container on container (owner_id, server_seq);")
+        #expect(Self.deployShapeProblems(strippedSQL: concurrent)
+                    .contains("non-transactional:create index concurrently"),
+                "the check failed to flag a statement that cannot run inside a transaction")
+
+        // The marker no longer last inside the transaction.
+        let markerNotLast = real.replacingOccurrences(
+            of: "commit;", with: "revoke execute on function account_purge() from anon;\ncommit;")
+        #expect(Self.deployShapeProblems(strippedSQL: markerNotLast)
+                    .contains("marker-not-last-in-transaction"),
+                "the check failed to flag a marker bump that is not the transaction's last statement")
+    }
+
+    /// THE RE-RUN GUARD's letter (I-5): it keys on evidence that is true
+    /// ONLY after 09 itself has run — the marker at 6+, or the
+    /// `entitlement` table no other artifact creates — never on "are the
+    /// data tables non-empty" (under the FORCE RLS this very file installs,
+    /// a deployer without BYPASSRLS reads its own tables as empty, so a
+    /// data-presence condition would fail OPEN). It raises a named, hinted
+    /// refusal and names the one deliberate override.
+    @Test func theReRunGuardKeysOnEvidenceOnlyADeployedNineLeaves() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("09_phase14c_multitenant.sql"))
+        #expect(sql.contains("deployed_marker >= 6 or entitlement_here"),
+                "the guard must fire on the marker OR the entitlement table — both true only after 09 ran")
+        #expect(sql.contains("to_regclass('public.entitlement') is not null"))
+        #expect(sql.contains("VARIORUM_09_ALREADY_DEPLOYED"),
+                "the refusal must be named, not generic")
+        #expect(sql.contains("hint    ="), "the refusal must carry the operator's next step")
+        #expect(sql.contains("current_setting('variorum.allow_09_rerun', true)")
+                    && sql.contains("'yes-drop-every-tenants-data'"),
+                "the deliberate override must be spelled in the file the operator is reading")
+        // The first legitimate deploy MUST pass: nothing in the guard may
+        // key on her corpus being present (marker 5 + rows + no entitlement
+        // table is the gate's exact state).
+        #expect(!sql.contains("count(*) from container"),
+                "the guard must never key on data presence — FORCE RLS makes that read fail OPEN")
+    }
+
+    /// I-4: `sync_table_pk`'s demotion is COMPLETED — 04 revoked
+    /// public+anon and left the `authenticated` grant that its 02-era
+    /// creation inherited from Supabase's defaults. No grant replaces it:
+    /// the only callers are the SECURITY DEFINER bodies, which call it as
+    /// the function's OWNER.
+    @Test func theHelperFunctionsExecuteGrantIsFullyRevoked() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("09_phase14c_multitenant.sql"))
+        #expect(sql.contains(
+            "revoke execute on function sync_table_pk(text) from public, anon, authenticated;"),
+                "the helper's authenticated EXECUTE must be revoked — the demotion posture completed")
+        let composed = try Self.composedSQL()
+        #expect(!composed.contains("grant execute on function sync_table_pk"),
+                "nothing may grant the helper back: the definer bodies call it as the owner")
+    }
+
+    /// THE POST-DEPLOY GRANT SWEEP (I-3's other half; live-probe
+    /// obligation 11): a committed, READ-ONLY verification query that
+    /// prints the FINAL posture — every function's per-role EXECUTE and
+    /// every table's RLS/policy/privilege state, each row carrying its
+    /// expectation and a verdict. It must write NOTHING (the gate runs it
+    /// against live production) and must cover the whole registry, so a
+    /// future table cannot quietly escape the sweep.
+    @Test func thePostDeployGrantSweepIsReadOnlyAndCoversEverything() throws {
+        let raw = try Self.sqlFile("maintenance/14c-post-deploy-grant-sweep.sql")
+        let sql = Self.strippingComments(raw)
+        // Read-only: no statement in the file may START with a writing verb.
+        let writingVerbs = ["create", "drop", "alter", "insert", "update", "delete",
+                            "truncate", "grant", "revoke", "do ", "begin", "commit"]
+        for line in sql.split(separator: "\n") {
+            let trimmed = line.trimmingCharacters(in: .whitespaces).lowercased()
+            for verb in writingVerbs where trimmed.hasPrefix(verb) {
+                Issue.record("the sweep must be read-only — found a statement starting `\(verb)`: \(trimmed)")
+            }
+        }
+        #expect(sql.lowercased().contains("select"), "the sweep is a query — the pin isn't vacuous")
+        // Coverage: every registry table, the three account-data tables,
+        // and every function 09 or its predecessors expose.
+        for table in SyncSchema.tables.map(\.name) + ["entitlement", "key_vault", "sync_meta"] {
+            #expect(sql.contains("('\(table)',"),
+                    "the sweep must carry an expectation for \(table)")
+        }
+        for function in ["sync_push(jsonb,text)", "sync_pull(bigint,text,integer)",
+                         "account_data_truncate(text)", "account_purge()",
+                         "entitlement_set(uuid,text,boolean,timestampwithtimezone,text)",
+                         "sync_schema_version()", "sync_table_pk(text)"] {
+            #expect(sql.contains("('\(function)'"),
+                    "the sweep must carry an expectation for \(function)")
+        }
+        // And it must surface an object nobody expected — a lingering old
+        // RPC overload is the door this sweep exists to catch.
+        #expect(sql.contains("UNEXPECTED FUNCTION"))
+        #expect(sql.contains("UNEXPECTED TABLE"))
     }
 
     // MARK: - Header choreography pins (prose, deliberately)

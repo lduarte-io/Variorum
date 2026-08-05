@@ -33,6 +33,12 @@ struct VaultBootstrapTests {
         let tick = LockIsolated(0)
         try await withDependencies {
             $0.database = db
+            // Phase 14c: the runner's real subject is HER signed-in store —
+            // the gate's repush road — and the born-multi-tenant mirror
+            // refuses unowned rows (the isolation round's I-2 arm, now
+            // enforced by the fake). Seeding under the default account is
+            // what a device that has adopted its identity actually writes.
+            $0.ownerIdentity = OwnerIdentity { FakeSyncServer.defaultUserID }
             $0.uuid = .incrementing
             $0.date = DateGenerator {
                 let seconds = tick.withValue { value -> Int in

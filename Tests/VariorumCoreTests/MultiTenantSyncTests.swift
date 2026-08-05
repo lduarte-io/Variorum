@@ -221,6 +221,142 @@ struct MultiTenantSyncTests {
         }
     }
 
+    // MARK: - The hostile write: the client-carried owner guard (the EIGHT)
+
+    /// A container row's full column set, owner and title to order — the
+    /// shape both the honest and the hostile pushes below wear.
+    private static func containerRow(
+        id: String, owner: String, title: String
+    ) -> SyncRow {
+        SyncRow(
+            table: "container", rowID: id,
+            columns: [
+                "id": .text(id), "owner_id": .text(owner),
+                "kind": .text("post"), "title": .text(title),
+                "profile": .null, "entry_date": .null,
+                "locked": .integer(0), "locked_at": .null, "floating_notes": .null,
+                "segmentation_default": .null, "last_touched_at": .null,
+                "last_major_revision_at": .null, "churn_accumulator": .real(0),
+                "baseline_length": .integer(0), "word_target": .null,
+                "created_at": .text(Fixture.now), "updated_at": .text(Fixture.now),
+                "archived_at": .null, "deleted_at": .null,
+            ],
+            syncVersion: 0)
+    }
+
+    /// THE HOSTILE WRITE (the isolation round's finding I-2): the eight
+    /// client-carried owner tables' whole defense is the server's
+    /// validate-equals-caller guard, and until now it had NO executable
+    /// proof — only a DDL text pin. Here B's own authenticated connection
+    /// pushes a batch claiming A's `owner_id`, aiming at the id of a row A
+    /// already owns: the WHOLE call refuses (the RPC's RAISE aborts the
+    /// transaction — B's legitimate row in the same batch lands nowhere
+    /// either), A's stored row is byte-identical afterwards, and the guard
+    /// holds for EVERY owner-carrying table in the registry, not just the
+    /// one this test names.
+    @Test func aForeignOwnerPushRefusesTheWholeBatchAndTouchesNothing() async throws {
+        let world = try await makeWorld()
+
+        // A authors and syncs an ordinary note.
+        let herContainerID: String = try world.a1.with { ops, _ in
+            try ops.createPost(title: "hers to keep", profile: .journal).id
+        }
+        try await fleetQuiesce(world.a1, world.a2)
+        let herRowBefore = await world.server.currentRow(
+            table: "container", rowID: herContainerID, for: Self.userA)
+        #expect(herRowBefore != nil, "her row must be on the mirror — the pin isn't vacuous")
+        let herRowsBefore = await world.server.rowCount(table: "container", for: Self.userA)
+        let strangerRowsBefore = await world.server.rowCount(table: "container", for: Self.userB)
+
+        // THE HOSTILE BATCH: one honest B row + one row claiming HER uid,
+        // aimed at HER row's id (the overwrite road, if the guard were
+        // absent — the partition alone would not stop a row that names her
+        // as its owner).
+        let honest = Self.containerRow(
+            id: "b-honest-row", owner: Self.userB,
+            title: try StrangerKeys.seal(
+                "B's own note", table: "container", rowID: "b-honest-row", column: "title"))
+        let hostile = Self.containerRow(
+            id: herContainerID, owner: Self.userA,
+            title: try StrangerKeys.seal(
+                "overwritten", table: "container", rowID: herContainerID, column: "title"))
+
+        await #expect(throws: FakeSyncServerError.ownerMismatch(
+            table: "container", rowID: herContainerID)) {
+            _ = try await world.server.push(
+                [honest, hostile],
+                activeKeyID: StrangerKeys.corpusKeyID, as: Self.userB)
+        }
+
+        // NOTHING landed — in either partition. The honest row shares the
+        // batch's fate exactly as the RPC's RAISE aborts the whole call.
+        #expect(await world.server.rowCount(table: "container", for: Self.userB)
+                == strangerRowsBefore,
+                "the RAISE aborts the WHOLE batch — B's own row must not land either")
+        #expect(await world.server.rowCount(table: "container", for: Self.userA)
+                == herRowsBefore)
+        #expect(await world.server.currentRow(
+            table: "container", rowID: herContainerID, for: Self.userA) == herRowBefore,
+                "her row must be byte-identical — no version bump, no overwrite")
+
+        // …and the guard is not container-specific: EVERY owner-carrying
+        // table in the registry refuses a foreign owner (registry-driven,
+        // so a future owner-carrying table is covered the day it ships).
+        let ownerCarrying = SyncSchema.tables.filter { $0.plainColumns.contains("owner_id") }
+        #expect(ownerCarrying.count >= 8, "the eight (or more) — the pin isn't vacuous")
+        for table in ownerCarrying {
+            let rowID = "hostile-\(table.name)"
+            await #expect(throws: FakeSyncServerError.ownerMismatch(
+                table: table.name, rowID: rowID),
+                "\(table.name) must refuse a row carrying another account's owner_id") {
+                _ = try await world.server.push(
+                    [SyncRow(
+                        table: table.name, rowID: rowID,
+                        columns: [table.primaryKey: .text(rowID), "owner_id": .text(Self.userA)],
+                        syncVersion: 0)],
+                    activeKeyID: StrangerKeys.corpusKeyID, as: Self.userB)
+            }
+            #expect(await world.server.rowCount(table: table.name, for: Self.userA) == 0
+                        || table.name == "container",
+                    "\(table.name): nothing landed in HER partition")
+        }
+    }
+
+    /// The NULL/absent-owner arm (the same guard's other half). The real 09
+    /// body reads `(item->'columns'->>'owner_id') is distinct from
+    /// caller::text` — SQL NULL is distinct from every uuid, so a row whose
+    /// owner is JSON null, or absent entirely, refuses exactly as a foreign
+    /// owner does. This arm was the fake's recorded emulation latitude
+    /// (PROVISIONAL B1-1, batch 1): the fake accepted such rows into the
+    /// caller's partition. The latitude is RETIRED here — the fake now
+    /// refuses like the server, so the guard's full letter is exercised
+    /// in-harness rather than resting on the DDL text pin plus a live probe.
+    @Test func aNullOrAbsentOwnerPushRefusesExactlyLikeAForeignOne() async throws {
+        let world = try await makeWorld()
+        let before = await world.server.rowCount(table: "container", for: Self.userB)
+
+        var nullOwner = Self.containerRow(
+            id: "b-null-owner", owner: Self.userB, title: "e1:unused")
+        nullOwner.columns["owner_id"] = .null
+        await #expect(throws: FakeSyncServerError.ownerMismatch(
+            table: "container", rowID: "b-null-owner")) {
+            _ = try await world.server.push(
+                [nullOwner], activeKeyID: StrangerKeys.corpusKeyID, as: Self.userB)
+        }
+
+        var absentOwner = Self.containerRow(
+            id: "b-absent-owner", owner: Self.userB, title: "e1:unused")
+        absentOwner.columns.removeValue(forKey: "owner_id")
+        await #expect(throws: FakeSyncServerError.ownerMismatch(
+            table: "container", rowID: "b-absent-owner")) {
+            _ = try await world.server.push(
+                [absentOwner], activeKeyID: StrangerKeys.corpusKeyID, as: Self.userB)
+        }
+
+        #expect(await world.server.rowCount(table: "container", for: Self.userB) == before,
+                "an unowned row lands nowhere — the born-multi-tenant mirror has no unowned partition")
+    }
+
     // MARK: - Composite identity: colliding ids, separate partitions
 
     /// The clean rebuild's letter: identity is (owner_id, id), so the SAME

@@ -25,15 +25,19 @@ import Foundation
 ///    tables never carry `owner_id` in either direction, exactly what
 ///    the real RPC's stamp-on-insert + subtract-on-serve produces;
 ///  - **validate-equals-caller for the client-carried owner tables** — a
-///    pushed row naming ANOTHER account's owner refuses the whole call
-///    (the RPC's RAISE). EMULATION LATITUDE, recorded: a NULL owner_id is
-///    accepted into the caller's partition here, where the real 09 RPC
-///    refuses it — the harness's legacy signed-out fleets (pre-9c
-///    scenarios) push NULL owners by design, and partitioning already
-///    makes the outcome tenant-safe. The strict NULL arm is pinned in the
-///    DDL (`AuthRLSDDLTests.pushCarriesTheClientOwnerGuard`) and holds on
-///    the real server; the two-user suites run fully signed-in so the
-///    meaningful arm (foreign owner refuses) is exercised here too;
+///    pushed row that does not carry EXACTLY the caller's own owner_id
+///    refuses the whole call (the RPC's RAISE): another account's uid, a
+///    JSON null, and an absent column alike, which is
+///    `(item->'columns'->>'owner_id') is distinct from caller::text` read
+///    byte for byte (SQL NULL is distinct from every uuid). **The batch-1
+///    NULL latitude is RETIRED** (the dedicated isolation round's finding
+///    I-2, 2026-08-05): it had been recorded for legacy signed-out fleets
+///    that pushed NULL owners by design, but batch 1 itself moved
+///    `SyncClient` to signed-in-by-default and rewrote the pre-9c
+///    scenarios, so nothing needed the looseness — and a guard whose
+///    central claim is only text-pinned is the postmortem's vacuous-pass
+///    shape. `MultiTenantSyncTests` now exercises the foreign, NULL, and
+///    absent arms directly;
 ///  - **the vault-key-id fence** — each account holds a vault corpus key
 ///    id; a round presenting a different id (or an unprovisioned account
 ///    — the real server's missing-vault-row case) refuses with
@@ -235,13 +239,18 @@ actor FakeSyncServer: SyncTransport {
         // Client-carried owner guard (the eight), validated for the WHOLE
         // batch BEFORE any row applies: the RPC's RAISE aborts the whole
         // transaction, so a partial application here would be emulation
-        // drift. A row naming ANOTHER account's owner refuses the call.
-        // NULL latitude per the header note.
+        // drift. A row that does not carry EXACTLY the caller's own
+        // owner_id refuses the call — another account's uid, a JSON null,
+        // and an absent column alike, which is the real RPC's
+        // `(item->'columns'->>'owner_id') is distinct from caller::text`
+        // read byte for byte (SQL NULL is distinct from any uuid).
         for incoming in batch {
-            if let table = SyncSchema.table(named: incoming.table),
-               table.plainColumns.contains("owner_id"),
-               case .text(let pushedOwner)? = incoming.columns["owner_id"],
-               pushedOwner != userID {
+            guard let table = SyncSchema.table(named: incoming.table),
+                  table.plainColumns.contains("owner_id")
+            else { continue }
+            guard case .text(let pushedOwner)? = incoming.columns["owner_id"],
+                  pushedOwner == userID
+            else {
                 throw FakeSyncServerError.ownerMismatch(
                     table: incoming.table, rowID: incoming.rowID)
             }

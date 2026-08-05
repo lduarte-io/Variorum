@@ -4,6 +4,11 @@ import Testing
 
 @Suite("Fake sync server: CAS + changefeed fidelity (Phase 5, Step 2)")
 struct FakeSyncServerTests {
+    /// Phase 14c: a crafted row carries the caller's `owner_id` — the
+    /// born-multi-tenant mirror refuses a client-carried owner table's row
+    /// that does not (`is distinct from caller`), and the fake enforces
+    /// that arm since the isolation round's finding I-2 retired its NULL
+    /// latitude. These CAS/changefeed fixtures are the default account's.
     private func containerRow(
         id: String, title: String, base: Int, deletedAt: String? = nil
     ) -> SyncRow {
@@ -11,6 +16,7 @@ struct FakeSyncServerTests {
             table: "container", rowID: id,
             columns: [
                 "id": .text(id), "kind": .text("post"),
+                "owner_id": .text(FakeSyncServer.defaultUserID),
                 "title": .text(title),
                 "created_at": .text(Fixture.now), "updated_at": .text(Fixture.now),
                 "deleted_at": deletedAt.map(SyncValue.text) ?? .null,
