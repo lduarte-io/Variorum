@@ -969,9 +969,13 @@ $$;
 -- 7. account_purge — the deletion door's immediate hard purge (batch 2;
 --    THE DESIGN item 4, her Round-5 ruling). ONE transaction: the
 --    account's rows across the 18 data tables, then its key_vault row,
---    then its entitlement rows, then THE AUTH USER ITSELF — the order
---    matters because key_vault.user_id references auth.users (08's FK),
---    so the vault row must die before the user row can.
+--    then its entitlement rows, then THE AUTH USER ITSELF. The explicit
+--    order is a deliberate REPORTING/CLARITY choice, not a constraint
+--    necessity (corrected 2026-08-05, ladder R1-2): key_vault.user_id's
+--    FK is ON DELETE CASCADE (08_phase14b_lockstep.sql), so deleting the
+--    auth user first would succeed and cascade the vault row away —
+--    deleting each piece explicitly keeps every removal deliberate and
+--    the returned counts exact (`entitlement` carries no FK at all).
 --
 --    THE PINNED COPY RULE lives client-side (her Round-5 ruling: the
 --    door's copy MUST say the local copy survives) — and it is TRUE by
@@ -1042,9 +1046,11 @@ begin
   delete from entitlement where user_id = caller;
   get diagnostics entitlement_rows = row_count;
 
-  -- The auth user LAST (key_vault's FK is gone now). Cascades inside
-  -- the auth schema (identities, sessions, refresh tokens) ride the
-  -- delete; the session that made this very call dies with them.
+  -- The auth user LAST — the deliberate reporting order above, not an
+  -- FK necessity (key_vault's FK is ON DELETE CASCADE; ladder R1-2).
+  -- Cascades inside the auth schema (identities, sessions, refresh
+  -- tokens) ride the delete; the session that made this very call dies
+  -- with them.
   delete from auth.users where id = caller;
   get diagnostics auth_rows = row_count;
 
