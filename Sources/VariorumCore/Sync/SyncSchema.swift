@@ -68,11 +68,19 @@ public enum SyncSchema {
     /// as `e1:` ciphertext, so pre-14b clients and the post-wipe encrypted
     /// mirror corpus are mutually unreadable and MUST refuse each other;
     /// mirror DDL 08_phase14b_lockstep.sql — deploy is the architect's
-    /// gate act, Rounds 4/5). **Bump this
+    /// gate act, Rounds 4/5); version 6 = the Phase 14c multi-tenant
+    /// event (the CLEAN REBUILD, sitting Round 4: the 18 data tables
+    /// born multi-tenant with composite (owner_id, id) PKs + forced RLS;
+    /// the RPCs rewritten tenant-scoped with the REQUIRED active-key-id
+    /// fence parameter — new signatures, so a pre-14c client's calls
+    /// have no function to land on even before the marker refusal; the
+    /// `entitlement` table; mirror DDL 09_phase14c_multitenant.sql —
+    /// deploy is the architect's gate act at the author's explicit go,
+    /// behind the A1 rail). **Bump this
     /// constant together with the mirror file's marker in every future
     /// lockstep event** — the DDL pin (`AuthRLSDDLTests`) fails the build
     /// if they drift.
-    public static let lockstepVersion = 5
+    public static let lockstepVersion = 6
     /// The synced tables, in FK-dependency-friendly apply order: parents
     /// before children wherever the graph is acyclic. (`container`⇄`block`⇄
     /// `variant` are mutually circular by design — the apply transaction runs
@@ -326,6 +334,23 @@ public enum SyncValue: Equatable, Sendable, Codable {
         case .text(let value): return value.databaseValue
         }
     }
+}
+
+/// Phase 14c — the server-refusal markers. The 09 RPCs RAISE with these
+/// tokens leading the message; the transport classifies a refusal body by
+/// marker into the matching typed `SyncError`, and the DDL pin
+/// (`AuthRLSDDLTests`) holds the SQL and these constants together so
+/// neither side can drift. Tokens, not sentences: the human wording may
+/// evolve server-side, the marker may not.
+public enum SyncServerRefusalMarker {
+    /// The vault-key-id fence (THE DESIGN item 2): the caller's presented
+    /// corpus key id does not match the account's current `key_vault`
+    /// row (or no vault row exists). Surfaces as the CF-16 replaced
+    /// state.
+    public static let staleKeyFence = "VARIORUM_STALE_KEY_FENCE"
+    /// The tier gate (THE DESIGN item 5): no active hosted_sync
+    /// entitlement on the account.
+    public static let notEntitled = "VARIORUM_NO_ENTITLEMENT"
 }
 
 public enum SyncError: Error, Equatable, Sendable {

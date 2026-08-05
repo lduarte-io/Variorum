@@ -146,8 +146,13 @@ struct SerializerCompletenessTests {
     /// table, never in a payload): `sync_meta` carries the SyncSpec §12
     /// lockstep marker (05_phase11_lockstep.sql), read via its own RPC;
     /// `key_vault` (08_phase14b_lockstep.sql) is ACCOUNT data reached via
-    /// plain authenticated PostgREST — the sync engine never touches it.
-    private static let serverOnlyTables: Set<String> = ["sync_meta", "key_vault"]
+    /// plain authenticated PostgREST — the sync engine never touches it;
+    /// `entitlement` (09_phase14c_multitenant.sql) is the tier's account
+    /// data, read via PostgREST and enforced inside the RPCs, never in a
+    /// payload.
+    private static let serverOnlyTables: Set<String> = [
+        "sync_meta", "key_vault", "entitlement",
+    ]
 
     @Test func mirrorDDLCoversEverySyncedColumn() throws {
         let mirror = try Self.mirrorColumnsFromDDL()
@@ -165,9 +170,15 @@ struct SerializerCompletenessTests {
                 let missing = expected.subtracting(mirrorColumns)
                 #expect(missing.isEmpty,
                         "mirror \(table.name) lacks synced column(s) \(missing.sorted()) — pushes would silently drop them (SyncSpec §12)")
+                // Phase 14c: `owner_id` on a table whose CLIENT schema has
+                // no such column is server machinery like server_seq —
+                // stamped into inserts and subtracted from payloads by the
+                // tenant-scoped RPCs (09), so the client never receives it.
+                var serverSide = Self.serverOnlyColumns
+                if !clientColumns.contains("owner_id") { serverSide.insert("owner_id") }
                 let unexpected = mirrorColumns
                     .subtracting(expected)
-                    .subtracting(Self.serverOnlyColumns)
+                    .subtracting(serverSide)
                 #expect(unexpected.isEmpty,
                         "mirror \(table.name) carries column(s) the client cannot receive: \(unexpected.sorted())")
             }
@@ -179,7 +190,12 @@ struct SerializerCompletenessTests {
 
     /// Parses `Server/supabase/*.sql` (in filename order, mirroring deploy
     /// order): `create table` bodies plus `alter table … add column`
-    /// migrations. Deliberately simple — the DDL files are ours and follow
+    /// migrations plus — Phase 14c — `drop table`, which RESETS the
+    /// table's accumulated set so the walk judges the deploy-order FINAL
+    /// state. Without drop handling, 09's rebuild would UNION with 01's
+    /// original definition and a column lost in the consolidation would
+    /// be invisible to the walk (the exact drift class the rebuild
+    /// risks). Deliberately simple — the DDL files are ours and follow
     /// one formatting convention.
     private static func mirrorColumnsFromDDL() throws -> [String: Set<String>] {
         let serverDir = URL(fileURLWithPath: #filePath)
@@ -195,42 +211,88 @@ struct SerializerCompletenessTests {
 
         var tables: [String: Set<String>] = [:]
         for file in files {
-            let sql = try String(contentsOf: file, encoding: .utf8)
-            var currentTable: String?
-            for rawLine in sql.split(separator: "\n", omittingEmptySubsequences: false) {
-                let line = rawLine.trimmingCharacters(in: .whitespaces).lowercased()
-                if line.hasPrefix("--") || line.isEmpty { continue }
-                if let range = line.range(of: "create table ") {
-                    var rest = String(line[range.upperBound...])
-                    if rest.hasPrefix("if not exists ") {
-                        rest = String(rest.dropFirst("if not exists ".count))
-                    }
-                    currentTable = rest.split(separator: " ").first.map(String.init)?
-                        .replacingOccurrences(of: "(", with: "")
-                    if let table = currentTable { tables[table, default: []] = tables[table] ?? [] }
-                    continue
-                }
-                if let table = currentTable {
-                    if line.hasPrefix(");") || line == ")" {
-                        currentTable = nil
-                        continue
-                    }
-                    if let first = line.split(separator: " ").first,
-                       !["primary", "foreign", "unique", "check", "constraint"].contains(String(first)) {
-                        tables[table, default: []].insert(String(first))
-                    }
-                    continue
-                }
-                if let range = line.range(of: "alter table ") {
-                    let tokens = line[range.upperBound...].split(separator: " ").map(String.init)
-                    // alter table <t> add column [if not exists] <col> …
-                    guard tokens.count >= 4, tokens[1] == "add", tokens[2] == "column" else { continue }
-                    let column = tokens[3] == "if" && tokens.count >= 7 ? tokens[6] : tokens[3]
-                    tables[tokens[0], default: []].insert(column)
-                }
-            }
+            try accumulateDDL(String(contentsOf: file, encoding: .utf8), into: &tables)
         }
         return tables
+    }
+
+    /// The pure accumulator (extracted so the drop-handling red-on-old
+    /// proof below can feed it doctored SQL directly).
+    static func accumulateDDL(_ sql: String, into tables: inout [String: Set<String>]) {
+        var currentTable: String?
+        for rawLine in sql.split(separator: "\n", omittingEmptySubsequences: false) {
+            let line = rawLine.trimmingCharacters(in: .whitespaces).lowercased()
+            if line.hasPrefix("--") || line.isEmpty { continue }
+            // drop table [if exists] <t>; — the rebuild pattern: the
+            // table's accumulated columns reset; only what the NEW
+            // definition carries counts from here on.
+            if let range = line.range(of: "drop table ") {
+                var rest = String(line[range.upperBound...])
+                if rest.hasPrefix("if exists ") {
+                    rest = String(rest.dropFirst("if exists ".count))
+                }
+                if let table = rest.split(separator: ";").first?
+                    .trimmingCharacters(in: .whitespaces), !table.isEmpty {
+                    tables[table] = nil
+                }
+                continue
+            }
+            if let range = line.range(of: "create table ") {
+                var rest = String(line[range.upperBound...])
+                if rest.hasPrefix("if not exists ") {
+                    rest = String(rest.dropFirst("if not exists ".count))
+                }
+                currentTable = rest.split(separator: " ").first.map(String.init)?
+                    .replacingOccurrences(of: "(", with: "")
+                if let table = currentTable { tables[table, default: []] = tables[table] ?? [] }
+                continue
+            }
+            if let table = currentTable {
+                if line.hasPrefix(");") || line == ")" {
+                    currentTable = nil
+                    continue
+                }
+                if let first = line.split(separator: " ").first,
+                   !["primary", "foreign", "unique", "check", "constraint"].contains(String(first)) {
+                    tables[table, default: []].insert(String(first))
+                }
+                continue
+            }
+            if let range = line.range(of: "alter table ") {
+                let tokens = line[range.upperBound...].split(separator: " ").map(String.init)
+                // alter table <t> add column [if not exists] <col> …
+                guard tokens.count >= 4, tokens[1] == "add", tokens[2] == "column" else { continue }
+                let column = tokens[3] == "if" && tokens.count >= 7 ? tokens[6] : tokens[3]
+                tables[tokens[0], default: []].insert(column)
+            }
+        }
+    }
+
+    /// Drop-handling red-on-old (Phase 14c): a rebuild that DROPS a
+    /// column must be visible to the walk. Before drop handling, the old
+    /// definition's columns survived in the union and hid the loss —
+    /// this proof fails on that parser and passes on the drop-aware one.
+    @Test func aRebuildThatDropsAColumnIsVisibleToTheWalk() {
+        var tables: [String: Set<String>] = [:]
+        SerializerCompletenessTests.accumulateDDL("""
+            create table demo (
+              id   text primary key,
+              kept text,
+              lost text
+            );
+            """, into: &tables)
+        #expect(tables["demo"] == ["id", "kept", "lost"])
+        SerializerCompletenessTests.accumulateDDL("""
+            drop table if exists demo;
+            create table demo (
+              owner_id uuid not null,
+              id       text not null,
+              kept     text,
+              primary key (owner_id, id)
+            );
+            """, into: &tables)
+        #expect(tables["demo"] == ["owner_id", "id", "kept"],
+                "the rebuild's definition must REPLACE the accumulated set — a union would hide the lost column")
     }
 
     // MARK: - The red-on-old proof (plan requirement): a deliberately hidden

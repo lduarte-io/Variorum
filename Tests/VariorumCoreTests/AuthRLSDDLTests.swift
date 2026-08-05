@@ -36,6 +36,7 @@ struct AuthRLSDDLTests {
         "06_phase13_lockstep.sql",
         "07_phase13b_lockstep.sql",
         "08_phase14b_lockstep.sql",
+        "09_phase14c_multitenant.sql",
     ]
 
     /// The RLS/grant surface: 04 (the auth flip) + the lockstep events
@@ -122,8 +123,139 @@ struct AuthRLSDDLTests {
             let body = try Self.finalBody(of: function)
             #expect(body.contains("raise exception 'sync requires an authenticated user'"),
                     "\(function)'s deployed body must refuse an unauthenticated caller")
-            #expect(body.contains("caller := auth.uid()::text;"))
+            // Phase 14c: `caller` is a real uuid now (the composite PK's
+            // type), no longer text-cast at assignment.
+            #expect(body.contains("caller := auth.uid();"))
         }
+    }
+
+    // MARK: - Phase 14c: the born-multi-tenant rebuild pins (batch 1)
+
+    /// The OLD RPC signatures must be dropped BEFORE the new ones exist:
+    /// Postgres overloads by signature, so a lingering sync_pull(bigint,
+    /// int) would keep serving the ten ownerless tables to any
+    /// authenticated caller with no owner filter, no fence, and no
+    /// entitlement — a cross-tenant read door beside the new one.
+    @Test func theOldRPCSignaturesAreDroppedByTheRebuild() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("09_phase14c_multitenant.sql"))
+        #expect(sql.contains("drop function if exists sync_push(jsonb);"))
+        #expect(sql.contains("drop function if exists sync_pull(bigint, int);"))
+        // And the new signatures carry the fence parameter + the posture.
+        #expect(sql.contains("create or replace function sync_push(batch jsonb, active_key_id text)"))
+        #expect(sql.contains("create or replace function sync_pull(since_seq bigint, active_key_id text, max_rows int default 500)"))
+        #expect(sql.contains("revoke execute on function sync_push(jsonb, text) from public, anon;"))
+        #expect(sql.contains("revoke execute on function sync_pull(bigint, text, int) from public, anon;"))
+        #expect(sql.contains("grant execute on function sync_push(jsonb, text) to authenticated, service_role;"))
+        #expect(sql.contains("grant execute on function sync_pull(bigint, text, int) to authenticated, service_role;"))
+    }
+
+    /// Every data table is REBUILT with the composite tenant identity:
+    /// owner_id uuid NOT NULL, primary key (owner_id, id) — (owner_id,
+    /// key) for setting — the (owner_id, server_seq) changefeed index,
+    /// and FORCED RLS with an owner policy. Registry-driven, so a future
+    /// table that misses the rebuild pattern fails here.
+    @Test func everyDataTableIsRebornMultiTenant() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("09_phase14c_multitenant.sql"))
+        for table in SyncSchema.tables {
+            #expect(sql.contains("drop table if exists \(table.name);"),
+                    "\(table.name) must be dropped before its rebuild")
+            #expect(sql.range(of: #"create table \#(table.name) \(\s*\n\s*owner_id\s+uuid not null,"#,
+                              options: .regularExpression) != nil,
+                    "\(table.name) must be reborn with owner_id uuid NOT NULL leading the composite PK")
+            #expect(sql.contains("primary key (owner_id, \(table.primaryKey))"),
+                    "\(table.name) must carry the composite PK (owner_id, \(table.primaryKey))")
+            #expect(sql.contains("create index idx_owner_seq_\(table.name) on \(table.name) (owner_id, server_seq);"),
+                    "\(table.name) needs its (owner_id, server_seq) changefeed index")
+            #expect(sql.contains("alter table \(table.name) enable row level security;"),
+                    "\(table.name) must re-enable RLS (the 04-era enable died with the drop)")
+            #expect(sql.contains("alter table \(table.name) force row level security;"),
+                    "\(table.name) must FORCE RLS — the ruled hybrid's database-enforced layer")
+            #expect(sql.contains("create policy \(table.name)_owner_all on \(table.name)"),
+                    "\(table.name) needs its owner policy")
+            #expect(sql.contains("revoke all on \(table.name) from anon, authenticated;"),
+                    "\(table.name) needs its direct-privilege revoke (the 04 sweep predates the rebuild)")
+            #expect(sql.contains("create trigger stamp_seq_\(table.name) before insert or update on \(table.name)"),
+                    "\(table.name) needs its seq/written-at stamp trigger back")
+        }
+        // The owner policies bind ALL roles (no `to` clause): under FORCE
+        // RLS the definer role itself must match a policy, or the RPCs
+        // default-deny themselves.
+        #expect(!sql.contains("_owner_all on") || !sql.contains("for all to authenticated"),
+                "owner policies must not carry a `to` clause — FORCE RLS binds the definer too")
+        #expect(sql.contains("for all using (owner_id = auth.uid()) with check (owner_id = auth.uid());"))
+    }
+
+    /// THE VAULT-KEY-ID FENCE (THE DESIGN item 2): both deployed bodies
+    /// compare the presented active_key_id against the caller's
+    /// key_vault corpus key id and refuse the whole round on mismatch
+    /// OR a missing vault row, with the marker the client classifies
+    /// into the CF-16 replaced state.
+    @Test func bothDeployedRPCBodiesCarryTheVaultKeyIDFence() throws {
+        for function in ["sync_push", "sync_pull"] {
+            let body = try Self.finalBody(of: function)
+            #expect(body.contains("select corpus_key_id into fence_key from key_vault where user_id = caller;"),
+                    "\(function) must read the caller's vault key id")
+            #expect(body.contains("if fence_key is null or fence_key is distinct from active_key_id then"),
+                    "\(function) must fence on mismatch AND on a missing vault row")
+            #expect(body.contains(SyncServerRefusalMarker.staleKeyFence),
+                    "\(function)'s fence refusal must carry the client-classifiable marker")
+        }
+    }
+
+    /// THE ENTITLEMENT GATE (THE DESIGN item 5): both deployed bodies
+    /// enforce the hosted_sync entitlement from birth, with the
+    /// client-classifiable marker.
+    @Test func bothDeployedRPCBodiesEnforceEntitlement() throws {
+        for function in ["sync_push", "sync_pull"] {
+            let body = try Self.finalBody(of: function)
+            #expect(body.contains("from entitlement"))
+            #expect(body.contains("feature = 'hosted_sync'"))
+            #expect(body.contains("(expires_at is null or expires_at > now())"))
+            #expect(body.contains(SyncServerRefusalMarker.notEntitled),
+                    "\(function)'s entitlement refusal must carry the client-classifiable marker")
+        }
+    }
+
+    /// The entitlement table itself: born clean, never a mirror table
+    /// (not in the allowlists), owner-only SELECT for the apps' reads,
+    /// no write grants to authenticated, and the deploy-path seed for
+    /// every existing auth user (= the author, with signups off).
+    @Test func theEntitlementTableIsBornCleanAndSeeded() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("09_phase14c_multitenant.sql"))
+        #expect(sql.contains("create table entitlement ("))
+        #expect(sql.contains("primary key (user_id, feature)"))
+        #expect(sql.contains("alter table entitlement enable row level security;"))
+        #expect(sql.contains("create policy entitlement_owner_select on entitlement"))
+        #expect(sql.contains("for select to authenticated using (auth.uid() = user_id);"))
+        #expect(sql.contains("revoke all on entitlement from anon, authenticated;"))
+        #expect(sql.contains("grant select on entitlement to authenticated;"))
+        #expect(!sql.contains("grant insert") && !sql.contains("grant update"),
+                "entitlement writes are server-side only (the webhook function / service_role)")
+        #expect(sql.contains("select id, 'hosted_sync', '14c-deploy-seed' from auth.users"),
+                "the deploy path seeds every existing auth user — hers, by construction")
+        for function in ["sync_push", "sync_pull"] {
+            let body = try Self.finalBody(of: function)
+            #expect(!body.contains("'entitlement'"),
+                    "\(function)'s allowlist must never carry entitlement — it is account data, not sync data")
+        }
+    }
+
+    /// The tenant-scoped CAS: every lookup in the deployed push body keys
+    /// on (caller, id) — the composite identity — for the lock+read, the
+    /// replace-delete, and the stamp-on-insert.
+    @Test func theDeployedPushBodyIsTenantScoped() throws {
+        let body = try Self.finalBody(of: "sync_push")
+        #expect(body.contains("where t.owner_id = $2 and t.%I = $1 for update"),
+                "the CAS lock+read must be tenant-scoped")
+        #expect(body.contains("delete from %I where owner_id = $2 and %I = $1"),
+                "the CAS replace-delete must be tenant-scoped")
+        #expect(body.contains("jsonb_build_object('sync_version', 1, 'owner_id', caller)"),
+                "owner is stamped server-side into every insert")
+        #expect(body.contains("jsonb_build_object('sync_version', current_version + 1, 'owner_id', caller)"))
+        // The reject payload subtracts the stamped owner for the
+        // mirror-only-owner tables (the client has no home for it).
+        #expect(body.contains("else current_jsonb - 'sync_version' - 'server_seq' - 'server_written_at' - 'owner_id'"),
+                "reject payloads must subtract owner_id for the mirror-only-owner tables")
     }
 
     /// The owner-guard table set is the CLIENT SCHEMA's truth, introspected:
@@ -172,21 +304,39 @@ struct AuthRLSDDLTests {
         }
     }
 
-    @Test func pushCarriesBothOwnerGuards() throws {
+    /// Phase 14c rework: the incoming client-carried owner guard survives
+    /// for the eight owner-carrying tables; the 04-era STORED-half guard
+    /// ("belongs to another owner") is deliberately RETIRED — the
+    /// tenant-scoped CAS read cannot see another owner's row at all, so
+    /// the guard became unreachable dead code (structural
+    /// unaddressability replaces it; the two-user suites prove the
+    /// behavior end-to-end).
+    @Test func pushCarriesTheClientOwnerGuard() throws {
         let body = try Self.finalBody(of: "sync_push")
         // Incoming half: a pushed row must carry the caller's owner_id
         // (NULL rejected too — `is distinct from`).
         #expect(body.contains("(item->'columns'->>'owner_id') is distinct from caller"))
-        // Stored half: a foreign-owned row is never overwritten NOR echoed
-        // back in a reject.
-        #expect(body.contains("(current_jsonb->>'owner_id') is distinct from caller"))
-        #expect(body.contains("belongs to another owner"))
+        #expect(body.contains("owner_id mismatch"))
     }
 
-    @Test func pullFiltersOwnerTablesToTheCaller() throws {
+    /// Phase 14c: EVERY table's changefeed branch is tenant-scoped (not
+    /// just the eight owner-carrying ones — 04's letter), and the
+    /// mirror-only-owner branch subtracts the stamped owner_id.
+    @Test func pullFiltersEveryTableToTheCallerAndSubtractsTheStampedOwner() throws {
         let body = try Self.finalBody(of: "sync_pull")
+        #expect(body.contains("where t.owner_id = %L"),
+                "every branch must filter to the caller's partition")
+        // Both branches exist: keep-owner (client-carried) and
+        // subtract-owner (mirror-only).
         #expect(body.contains("if tbl = any (owner_tables) then"))
-        #expect(body.contains("and t.owner_id = %L"))
+        #expect(body.contains("- 'sync_version' - 'server_seq' - 'server_written_at' - 'owner_id' as cols"),
+                "the mirror-only-owner branch must subtract the stamped owner_id")
+        // And no branch is left unfiltered: every `from %I t` is followed
+        // by the owner predicate in this body.
+        let fromCount = body.components(separatedBy: "from %I t").count - 1
+        let ownerFilterCount = body.components(separatedBy: "where t.owner_id = %L").count - 1
+        #expect(fromCount == ownerFilterCount && fromCount > 0,
+                "every changefeed branch must carry the owner filter (\(fromCount) from vs \(ownerFilterCount) filters)")
     }
 
     /// Replacing `sync_pull` must not regress A5: the visibility horizon and
@@ -312,6 +462,20 @@ struct AuthRLSDDLTests {
         #expect(sql08.contains("NO RPC REWORK RIDES THIS EVENT"))
         #expect(sql08.contains("A1 rail"))
         #expect(sql08.contains("wipe-and-repush"))
+        // 09 (Phase 14c): the clean rebuild. Deploy is the ARCHITECT's
+        // gate act at the author's EXPLICIT GO (choreography step 2 of
+        // the ruled signup-door order), never a batch implementer's;
+        // the A1 rail runs first because this file DROPS the data
+        // tables; her corpus re-pushes from local truth afterwards.
+        let sql09 = try Self.sqlFile("09_phase14c_multitenant.sql")
+        #expect(sql09.contains("THE CHOREOGRAPHY"))
+        #expect(sql09.contains("this file runs on the mirror FIRST"))
+        #expect(sql09.contains("SyncSpec §12"))
+        #expect(sql09.contains("ARCHITECT"))
+        #expect(sql09.contains("never a batch implementer"))
+        #expect(sql09.contains("EXPLICIT GO"))
+        #expect(sql09.contains("A1 rail"))
+        #expect(sql09.contains("re-pushes"))
     }
 
     // MARK: - The key_vault pins (Phase 14b — the vault is ACCOUNT data on
@@ -370,11 +534,18 @@ struct AuthRLSDDLTests {
         #expect(sql.range(
             of: #"master_wrapped_by_passphrase\s+text not null"#,
             options: .regularExpression) != nil)
-        // Never in the sync allowlists: the deployed RPC bodies must not
-        // mention the vault (it is not a mirror table).
+        // Never in the sync allowlists: the vault is not a mirror table.
+        // (Phase 14c rework: the deployed bodies now legitimately READ
+        // key_vault — the vault-key-id fence — so the pin narrows from
+        // "never mentioned" to "never allowlisted, never written".)
         for function in ["sync_push", "sync_pull"] {
-            #expect(!(try Self.finalBody(of: function)).contains("key_vault"),
-                    "\(function) must never touch key_vault")
+            let body = try Self.finalBody(of: function)
+            #expect(!body.contains("'key_vault'"),
+                    "\(function)'s allowlist must never carry key_vault")
+            #expect(!body.contains("insert into key_vault")
+                        && !body.contains("update key_vault")
+                        && !body.contains("delete from key_vault"),
+                    "\(function) must never WRITE the vault — the fence only reads it")
         }
     }
 
