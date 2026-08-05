@@ -256,6 +256,73 @@ reduces to the un-pause + the staged re-push run + the round-trip
 verification — so 14d gates on nothing but the Fragments conversation
 itself, exactly her intent.
 
+### Round 7 — her return after the session-limit break (2026-08-05;
+### the batch-3 implementer had died at her limit BEFORE any work —
+### verified: zero commits, clean tree; respawned fresh this round)
+
+Her message, verbatim: *"hi, you can go ahead and continue your work.
+you may have to restart a new implementer session - i hit my 5 hour
+limit and the implemeneter might just be gone completely or it might
+be recoverable. i'm also ready to do the deploy step whenever and I
+*[removed for publication]*
+second account. I can look at cloudflare for whatever you need for the
+domain step. if this is just for users having an account / logging in
+at stargazing.tech I think account makes more sense? or is it for
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+wasn't sure how much of this is direct code changes - I'm contemplating
+moving the SMTP into the same 14d phase as fragments due to this
+*[removed for publication]*
+*[removed for publication]*
+and you can drive the live probes and the deploy. i can type my
+passphrase into the runner as needed. let me know on what remains in
+this phase and what we should do"*
+
+**Recorded and ruled:**
+
+*[removed for publication]*
+  joins the gate runbook (L13); admin-provisioned, uid-checked,
+  entitlement-granted per the batch-1 hold.
+- **DNS is Cloudflare** — exact records handed to her at the domain
+  step.
+- **THE ISSUER HOSTNAME RULED: `auth.stargazing.tech`** (her pick
+  after the it's-not-billing clarification: the domain fronts the
+  AUTH SERVICE/issuer — tokens' `iss`, OAuth discovery, auth-email
+  links, both apps' + Fragments' provider configs; the sign-in/consent
+  PAGES and the future checkout are ordinary stargazing.tech content,
+  no special domain work). Her changeability question answered on the
+  record: the SITE is always freely changeable; the issuer SUBDOMAIN
+  is changeable too — a coordinated config update (both apps, the
+  Fragments provider entry, re-verification; old email links die,
+  sessions re-mint) with NO data migration ever — cheap now, more
+  coordination once third-party configs reference it. It is the one
+  hostname to treat as long-lived.
+- **SMTP's config ACT MOVES TO 14d — ratified** (her size concern +
+  the honest input: zero code, ~30 minutes of dashboard config, and
+  its only hard deadline is real email volume, which arrives with
+  TestFlight — already 14d-gated). 14c still ships the runbook + her
+  ratified template copy (batch 3, unchanged); the signup flip stays
+  in 14c on the built-in mailer, harmless at pre-distribution volume.
+- **Gate delegations, her word:** the architect DRIVES the deploy,
+  the live probes, AND the signup flip ("I also think that you can do
+  the signup flip and you can drive the live probes and the deploy")
+  — amending Round 5's the-flip-is-her-hand detail; each act still
+  announced before it runs, and the deploy still sequences AFTER the
+  ladder + the dedicated isolation round (a live-production deploy
+  deserves its review first — her "ready whenever" recorded as
+  standing readiness, not a resequencing). She types her passphrase
+  into the runner as needed.
+*[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  time by lookup).
+
 ## THE DESIGN (settled by the sitting — the architecture the batches
 ## build)
 
@@ -326,10 +393,11 @@ account creation UX (14a built sign-in; this adds sign-up), per-user
 vault provisioning at signup = the 14b stepped setup flow running for
 a fresh account (verify its generality; it was built account-agnostic),
 empty-store first pull reading as NORMAL (the v1 principle), custom
-SMTP before the door (the ~2/hr built-in cap; provider = her account,
-author-assist), rate/abuse limits recorded with the tier. The PL-6
-residual (the phone's first-run FULL-SETUP visual walk) rides the
-stranger-onboarding validation.
+SMTP before the door *(Round-7 amendment: the config ACT moves to 14d
+— 14c ships the runbook + her ratified template copy; the flip runs on
+the built-in mailer at pre-distribution volume)*, rate/abuse limits
+recorded with the tier. The PL-6 residual (the phone's first-run
+FULL-SETUP visual walk) rides the stranger-onboarding validation.
 
 **7. What this phase does NOT do (deliberate):** no Fragments-side
 work and no bridge resumption (14d's); no TestFlight (after 14d, her
@@ -951,10 +1019,10 @@ was 1220/213 — +6 in 2 new suites) · mobile **175/26** green
 | L7 | Entitlement machinery + hosted-sync gate UX (price-agnostic) | pending — batch 3 |
 | L8 | Sign-up surface + fresh-account vault provisioning + empty-store onboarding | pending — batch 3 |
 | L9 | Entitlement-write server function + the site-agent contract block (checkout is the site's build) | pending — batch 3 |
-| L10 | SMTP + rate/abuse limits (author-assist acts recorded) | pending — batch 3 |
+| L10 | SMTP runbook + template copy + rate/abuse limits (the config ACT re-owned to 14d, Round 7) | pending — batch 3 |
 | L11 | The ladder (combined diff) | pending |
 | L12 | The DEDICATED isolation-boundary review round (her proof-bar ruling) | pending |
-| L13 | The gate: deploy · repush · phone re-onboard · live probes (uid-checked second account; BYPASSRLS check) · domain + iss · SMTP · HER signup flip · stranger validation (incl. PL-6 phone walk) | pending — her go per step |
+| L13 | The gate: deploy · repush · phone re-onboard · live probes (second account on <her-email>, uid-checked, entitlement-granted; BYPASSRLS check) · auth.stargazing.tech + iss (Cloudflare, hers) · the signup flip (architect-driven per Round 7) · stranger validation (incl. PL-6 phone walk) | pending — announced per step; deploy/probes/flip architect-driven at her Round-7 delegation |
 | L14 | Closeout ritual in full (incl. the 14d micro-plan + the finalized contract brief; the §12 running record's 5→6 entry; the KnownIssues auth row resolved/re-owned) | pending |
 | L15 | The 14d prep: live journal-bridge provider + staged re-push machinery, dormant behind the standing pause, both halves pinned (Round-6 ruling) | **done — batch 2** (`8bedbe2`+`f564e00`; DeviceBridgeKeyProvider built, wired NOWHERE; stageRepushFromTruth with the sentinel design revert-proven; dormancy AND readiness pinned; the re-key door's trigger connected, inert) |
 
