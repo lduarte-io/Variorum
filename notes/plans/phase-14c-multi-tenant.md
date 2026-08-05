@@ -1868,6 +1868,20 @@ untouched by the fixes.
 **VERDICT: all five round-1 fixes SOUND; one NEW NIT (R2-1); no new
 BLOCKER/MAJOR — the ladder closes at round 2.**
 
+**R2-1 disposition — FIXED at the architect's hand (2026-08-05, the
+post-close NIT class, the 14b C-4…C-7 precedent):** mechanism
+self-traced against the code (the banner + its Replace door render
+above EVERY arm including `.signedOut`, where the brain's run needs a
+session — the door could only fail, and its thrown prescription says
+rerun instead of sign-in). Fix: the signed-out arm renders a door-less
+variant prompt (`rekeyIncompleteSignedOutPrompt` — "Sign in first,
+then run Replace Encryption Keys from this tab"); every other arm
+keeps the full banner + door. The owed-re-key signal is never hidden.
+Copy pins extended in `EncryptionFlowTests` (the signed-out variant
+prescribes sign-in FIRST and never the bare rerun); suite 4/1 green.
+NIT class per the guard: traced mechanism + justification; the
+structural door-absence rides the ViewBuilder branch.
+
 ### The stargazing.tech checkout — contract facts (for the site's own
 ### agent)
 

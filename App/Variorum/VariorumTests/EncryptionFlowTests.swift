@@ -752,6 +752,11 @@ struct AccountLifecycleDoorTests {
         #expect(EncryptionView.rekeyIncompletePrompt.contains("didn't finish"))
         #expect(EncryptionView.rekeyIncompletePrompt.contains("Replace Encryption Keys"))
         #expect(EncryptionView.rekeyIncompletePrompt.contains("nothing is lost"))
+        // Ladder R2-1: the signed-out variant prescribes sign-in FIRST —
+        // never a bare rerun the sessionless door would only refuse.
+        #expect(EncryptionView.rekeyIncompleteSignedOutPrompt.contains("Sign in first"))
+        #expect(EncryptionView.rekeyIncompleteSignedOutPrompt.contains("didn't finish"))
+        #expect(!EncryptionView.rekeyIncompleteSignedOutPrompt.contains("Run Replace Encryption Keys again"))
     }
 
     /// Ladder R1-1, the failed arm: a THROWN mid-run failure leaves the

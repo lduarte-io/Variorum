@@ -171,6 +171,14 @@ struct EncryptionView: View {
         "Key replacement didn't finish on this device — sync is paused until it completes. "
         + "Run Replace Encryption Keys again; nothing is lost, and your writing is untouched."
 
+    /// Ladder R2-1: the same owed-re-key signal over the SIGNED-OUT arm,
+    /// where the completing door could only fail (the brain needs a
+    /// session) with a rerun prescription that mis-directs — the
+    /// prescription becomes sign-in-first and the door waits below.
+    static let rekeyIncompleteSignedOutPrompt =
+        "Key replacement didn't finish on this device — sync is paused until it completes. "
+        + "Sign in first, then run Replace Encryption Keys from this tab; nothing is lost."
+
     /// Phase 14c (CF-8): the re-key door's explanation — the honest
     /// warning names what a re-key does to OTHER devices (they land in
     /// the keys-were-replaced state and re-enroll), what happens to the
@@ -225,7 +233,17 @@ struct EncryptionView: View {
             // keysReplaced, …) is a state a mid-re-key crash can land in,
             // and the completing door must be one act away in all of them.
             if encryption.rekeyIncomplete {
-                rekeyIncompleteBanner
+                if case .signedOut = encryption.state {
+                    // Ladder R2-1: over the signed-out arm the door's run
+                    // could only fail — the signal stays, the prescription
+                    // is sign-in-first, the door returns with the session.
+                    Text(Self.rekeyIncompleteSignedOutPrompt)
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                        .fixedSize(horizontal: false, vertical: true)
+                } else {
+                    rekeyIncompleteBanner
+                }
                 Divider()
             }
             switch encryption.state {
