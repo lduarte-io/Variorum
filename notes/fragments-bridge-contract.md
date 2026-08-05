@@ -651,3 +651,51 @@ Variorum bridge's capability is SHIPPED and PAUSED behind its key seam):**
 entitlement from the Fragments side (entitlement rows live on the suite account;
 both apps read the same answer). TestFlight opens only after the family
 completes — no tester account exists before then.
+
+**TOUCHPOINT #3 — THE CONCRETE FACTS (added at 14c's build, 2026-08-05 —
+the Variorum-side machinery is BUILT; what follows is everything the
+Fragments implementer needs for the entitlement check at the one-batch
+handoff):**
+
+1. **Where it lives:** the `entitlement` table on the SUITE (Variorum)
+   project — `(user_id uuid, feature text)` primary key, plus
+   `granted_at`, `expires_at timestamptz NULL` (NULL = non-expiring),
+   and a `source` provenance text. The feature name for the one
+   payment is exactly **`hosted_sync`** (one row covers BOTH apps —
+   the suite ruling's letter).
+2. **The read road:** plain authenticated PostgREST on the suite
+   project, same as the `key_vault` read your touchpoint-#2 client
+   already makes — owner-only RLS SELECT on `auth.uid()`; you read
+   YOUR user's row(s) for `feature = 'hosted_sync'` and never anyone
+   else's. **ENTITLED means: a row exists AND (`expires_at` IS NULL OR
+   `expires_at > now`).** No row, or an expired row, means not
+   entitled.
+3. **Never write it:** entitlement writes are service-role-only by
+   design (the checkout's webhook calls a dedicated server function);
+   the apps are readers. A failed read should degrade QUIET (Variorum's
+   posture: unknown-and-silent, never an error face — the static copy
+   carries the story).
+4. **What gating means on your side is YOURS to shape** (Variorum
+   gates its hosted sync rounds server-side with a
+   `VARIORUM_NO_ENTITLEMENT` refusal and presents it as a normal
+   activation prompt, never an error); the suite promise ("one payment
+   covers both apps") is worded on the stargazing.tech pages — the
+   14c ruling is that neither app promises the OTHER app's coverage
+   in-app until both ends are live.
+5. **The issuer/domain coordinate — FILL-AT-GATE:** the suite issuer
+   is being fronted by **`auth.stargazing.tech`** (ruled 2026-08-05);
+   the attach + `iss`-claim verification happen at 14c's gate, and the
+   CONFIRMED final URL lands here before your batch runs — write your
+   provider config against that URL only. (Recorded with it: the apex
+   domain may itself move on first-year evidence — any such move is a
+   coordinated config-only update, never data.)
+6. **One interplay note for the batch's bridge half (informational —
+   the Variorum side owns it):** when the bridge resumes at the
+   batch, historical plaintext journal days re-arrive as `e1:`
+   ciphertext via the staged re-push from Variorum truth; your side
+   simply sees ordinary LWW updates. If the suite account was RE-KEYED
+   before resumption (the 14c user-facing door), old-key ciphertext
+   rows may sit in `journal_entries` until that staged re-push
+   overwrites them — the Variorum side sequences its own resumption
+   around this; nothing for your side to do beyond point 9's standing
+   stale-key honesty rule.
