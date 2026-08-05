@@ -10,6 +10,21 @@
 
 *(Moved verbatim from the master plan's "Current phase" section, in the order they sat there — newest first, per that section's convention, back through Phase 13b, then the standing Phase 12 deferral paragraphs and the early out-of-band records. The ACTIVE pointer always lives in `notes/DetailedPlanForPhases.md`.)*
 
+*(Superseded pointer, kept for the thread — the ACTIVE pointer from Phase 14b's closeout to Phase 14c's opening, 2026-08-04, superseded at the 14c kickoff sitting the same day:)*
+
+**→ PHASE 14B CLOSED 2026-08-04 (opened, built, laddered, deployed,
+live-migrated, cold-passed, and acceptance-drilled the SAME DAY — one
+mid-phase orchestrator cutover crossed with zero loss; the closeout log
+below has the paragraph; the BINDING record is
+`notes/plans/phase-14b-suite-e2ee.md`). NEXT: PHASE 14C — multi-tenant
+hardening & the paid tier — at the author's word, from the paste-ready
+draft `notes/plans/phase-14c-multi-tenant.md` (kickoff message at top;
+it opens with its own design sitting per the split's caveat). Her
+Variorum-usage pause remains HERS to end (her 0v ruling ran "until
+Phase 14 completes"; 14c is the family's last member — she may revisit
+the pause's scope now that her corpus syncs E2EE). The mobile parity
+round's Stage A remains separately unblocked (its own plan).
+
 *(Superseded pointer, kept for the thread — the ACTIVE pointer through Phase 14b's run, 2026-08-04, superseded at its closeout the same day:)*
 
 **→ PHASE 14B OPEN 2026-08-04 — the kickoff sitting RAN (author-attended,

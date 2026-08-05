@@ -471,6 +471,22 @@ PAUSES from 14b's encryption until this batch completes (the R5 die-and-return
 latitude, spent as designed). Neither she nor the bridge depends on Fragments
 meanwhile; her phone journaling rides Variorum Mobile.
 
+**AMENDMENT (2026-08-04, the 14c design sitting — her ruling): the one
+batch now executes as its own MICRO-PHASE 14d, AFTER 14c's closeout.**
+14c ships the multi-tenant isolation, the stale-key fence, and the
+entitlement machinery this batch relies on, then closes without
+waiting on Fragments (her words: *"let's let this phase close out…
+it can be 14d… micro phase to validate that the bridge still works"* —
+Fragments has UI refactoring in flight). Content, order, and the three
+touchpoints below are UNCHANGED; the bridge stays paused until 14d
+runs; the custom domain attaches inside 14c (before its signup door
+opens), so this batch's provider configs are still written once
+against the final issuer URL. One addition the batch will gain from
+14c's build: sync rounds carry the caller's ACTIVE KEY ID (the
+stale-key fence — a mismatch against the vault's current key refuses
+the round with the keys-were-replaced state), and the concrete
+parameter facts join touchpoint #2's block when 14c lands them.
+
 **TOUCHPOINT #1 — at 14a, NOW** (ready to carry once the OAuth 2.1 Server is
 enabled and Fragments is registered as a client; client id + page URLs delivered
 with them):
