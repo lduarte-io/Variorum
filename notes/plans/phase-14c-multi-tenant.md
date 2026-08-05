@@ -662,6 +662,260 @@ runbook (L13).
   phrasing in older artifacts stand as deployed history — 09's header
   carries the current choreography.
 
+### Batch 2 — record (implementer session, 2026-08-04)
+
+**Shipped, per deliverable (commits on `main`):**
+
+1. **L4 — CF-8, the user-facing re-key door** (`ae1b4c6` the SQL half,
+   its own commit per the model-change convention · `8bedbe2` the core
+   brain · `f564e00` the app door):
+   - **09 gains `account_data_truncate(active_key_id)`** (new section 6;
+     the artifact stays AUTHORED NEVER DEPLOYED; the marker stays the
+     file's LAST statement — sections renumbered 6→8→9 so the
+     marker-last pin holds): tenant-scoped row DELETEs over EXACTLY the
+     18 registry tables (never TRUNCATE — row-scoped by the composite
+     identity; never key_vault/entitlement/sync_meta; `server_seq`
+     untouched, SyncSpec §9), gated by the SAME vault-key-id fence arm +
+     marker as the sync RPCs — the ORDER's server-side enforcement:
+     only a caller presenting the account's CURRENT corpus key id can
+     empty the account, and post-vault-write that is exactly the device
+     that just re-keyed (C-3's poison window closed structurally).
+     Three new `AuthRLSDDLTests` pins (registry-exact table lists via a
+     shared array parser; the fence/order/posture letters).
+   - **`AccountRekey` (core, Crypto/) — THE ORDER OF OPERATIONS, pinned:**
+     passphrase authorization (the CURRENT vault's master unwrapped,
+     then discarded — nothing of the old key world survives) → the NEW
+     vault written FIRST via the R1-2 CAS-guarded `updateVault` (fresh
+     master + corpus + journal-bridge keys with fresh ids, fresh
+     Argon2id salt/descriptor, the SAME passphrase; NO recovery wrap —
+     see the landing below) → `onNewVaultMaterial` AWAITED (custody
+     adoption, before the truncate, so this device is never stale
+     against its own new vault) → the fenced truncate presenting the
+     NEW corpus key id → `resyncReinitialize` (the proven R-2 half; the
+     DRAIN deliberately stays the app scheduler's — visible sync-row
+     progress; the headless drain shape stays `vault-bootstrap`'s) →
+     the bridge staging trigger (below; inert under the pause).
+     **Non-atomicity honest and PINNED:** the road back from ANY
+     mid-run failure is RUNNING THE DOOR AGAIN (the rerun test proves a
+     failed truncate heals whole); the surface speaks that road on
+     every failure.
+   - **The app door (the shared Mac+phone seam):** EncryptionView's
+     enrolled section gains "Replace Encryption Keys…" — the honest
+     warning naming the OTHER devices' fate (the CF-16 replaced state +
+     re-enroll), the recovery phrase's death, and the local copy's
+     survival; the CF-7-grammar understanding CHECKBOX; the passphrase
+     field. `EncryptionSession.rekeyAccount` drives the injected runner
+     (AppServices wires the REAL brain with the sync chain STOPPED
+     around the truncate/reinit window — no scheduler round can race
+     it — and the ordinary sign-in composition reconnecting after) and
+     **LANDS IN THE STANDING CF-5 MANDATORY-PHRASE STEP**:
+     `enrolled(hasRecoveryWrap: false)` IS step 4, so the new 12 words
+     generate/write-down/confirm through setup's own machinery — zero
+     new phrase code, and the flow is interruption-proof exactly as
+     CF-5 built it.
+2. **L5 — account deletion** (same three commits):
+   - **09 gains `account_purge()`** (new section 7): data rows →
+     `key_vault` → `entitlement` → **the auth user LAST** (key_vault's
+     FK to auth.users makes the order load-bearing; pinned). No fence
+     (deletion supersedes re-key — a stale device's owner may still
+     delete) and no entitlement gate on either door (data removal is a
+     right, never commerce-gated — a recorded design call). **The
+     definer-function auth-user removal VERIFIED honestly** (the
+     build-time Sonnet lookup THE DESIGN asked for): Supabase's 2025-04
+     auth-schema lockdown restricted DDL + migration-table DML ONLY —
+     the `postgres` role keeps DML on `auth.users`, and Supabase
+     collaborators explicitly confirm the SECURITY DEFINER
+     self-deletion RPC pattern (discussions #1066/#26223/#35987; the
+     restriction notice is #34270; `auth.identities/sessions/
+     refresh_tokens` cascade; no Supabase Storage in this project, so
+     the storage.objects RESTRICT caveat is N/A). Recorded caveats IN
+     the artifact: already-issued JWTs stay valid ≤1 h after deletion —
+     and the fence's missing-vault arm is the backstop (a purged
+     account's lingering push refuses; PINNED in harness); the
+     Edge-Function/admin-API shape is the recorded fallback if a live
+     deploy ever refuses the delete (a redesign-level swap, never a
+     quiet patch). The gate's probe-account deletion is the live
+     verification (the Verification section already names it).
+   - **`AccountDeletion` (core)** — the purge behind the CLIENT-side
+     passphrase authorization (a real master unwrap; the server can
+     never verify a passphrase — that is the E2EE design; the server's
+     own gate is the session). **`AccountLifecycleClient` +
+     `AccountLifecycleProviding`** (core, Auth/) — the doors' seam,
+     deliberately NOT folded into `SyncTransport` (fourteen conformers
+     would take a stance on doors they never exercise); the transports'
+     exact posture (signed-out refuses pre-compose; ONE 401 retry; the
+     fence marker classifies into `SyncError.encryptionKeysReplaced` —
+     ONE CF-16 state, whichever door refused), plus the entitlement
+     read (the P-ii pattern) for the subscription warning.
+   - **The app door:** AccountView's signed-in section gains "Delete
+     Account…" — **HER PINNED COPY RULE byte-anchored** ("The writing
+     on this device stays on this device… Only the account and its
+     synced copy are deleted" — the Mac pin holds the sentences); the
+     subscription warning FIRST (the static cancel-first advisory
+     always; the best-effort entitlement-read note strengthens it —
+     batch 3's checkout owns the real cancellation flow); the TYPED
+     confirmation ("delete my account") gating the button; the
+     passphrase field. `AppServices.deleteAccount`: purge → custody
+     cleared through the CF-11 forget machinery → sign-out; the local
+     STORE untouched by construction; a refused deletion clears
+     NOTHING local (the wiring pin's wrong-passphrase arm).
+3. **L6 — the runner fix + the R2-1 decision** (`8bedbe2`):
+   - **The drain-summary accumulator FIXED** (the 14b drill's recorded
+     quirk): the engine's `PushReport` dies with a THROWN round, so
+     under GM-3's absorbed drops every round but the last could lose
+     its accepted chunks from the total (the drill's 674-of-7,274).
+     The summary now counts the OUTBOX DRAIN itself (in the runner's
+     single-writer world an entry clears exactly when the mirror
+     accepts its row — thrown rounds included). `Report.pushedAccepted`
+     semantics: drained-to-mirror rows.
+   - **`key_vault.updated_at` client-write DECIDED — write it**: every
+     `updateVault` stamps `updated_at` truthfully. Reasons: the re-key
+     door replaces the row's ENTIRE contents through this path, so an
+     insert-time-only stamp would actively mislead ("when were the keys
+     replaced?" is a real support question at 14c's stranger scale);
+     display/bookkeeping only, never ordering (`revision` stays the CAS
+     token; SyncSpec §9's clock doctrine holds); creates stay
+     server-defaulted (`now()`); implemented as a plain now-closure,
+     deliberately NOT `@Dependency(\.date)` — a bound clock forced onto
+     every vault-touching suite across both layers for a value no
+     assertion orders by (the first `@Dependency` attempt broke exactly
+     that class of tests; reverted to the honest shape).
+4. **L15 — THE 14D PREP (her Round-6 ruling), built and PINNED, DORMANT:**
+   - **`BridgeEngine.stageRepushFromTruth`** — the staged
+     re-push-from-truth machinery: every AGREED journal day's
+     `last_synced_hash` becomes a SENTINEL (`restaged:repush-from-truth`)
+     so the push half's `hash == agreedHash ⇒ skip` guard re-pushes the
+     day's rendered truth, re-sealed under whatever journal key the
+     round holds. **The sentinel over NULL is a design call with a
+     traced reason:** an agreed-EMPTY day must re-push its sealed
+     emptiness over a dead-key body, and a NULLed hash would hit the
+     standing never-first-push-of-emptiness guard — the sentinel keeps
+     that guard scoped to genuinely virgin days (revert-proven).
+     Stamp-only rows and LWW stamps/created_at echoes survive staging;
+     idempotent; the identical-body re-push's `replaced` receipt is
+     absorbed by discrimination rule (ii) (traced: the pushed plaintext
+     contains the opened previous body), while a genuinely unseen
+     Fragments body still rescues under rule (iii).
+   - **`DeviceBridgeKeyProvider` (App/Shared)** — the LIVE
+     journal-bridge key provider: the real Keychain-custody road
+     through the 14b seam, `DeviceKeySyncProvider`'s exact twin for the
+     bridge's class (custody already holds the journal key + id from
+     enrollment — 14d adds no key machinery). **Production wires it
+     NOWHERE**: AppServices passes no `makeBridgeKeyProvider`, so the
+     refusing default — the STRUCTURAL PAUSE — stands until 14d's
+     deliberate act.
+   - **Both halves PINNED** (`BridgeRestageTests`): DORMANCY — with the
+     pause in place, a staged world's round refuses before any network
+     contact, zero transport writes, the staged days waiting intact;
+     READINESS — the deliberate flip (a live provider) drives the full
+     staged re-push against the fake: the day re-arrives `e1:`, opens
+     to the rendered truth, no spurious rescue, and the day SETTLES
+     back to a real agreed hash (the next round is quiet). The re-key
+     door's bridge trigger connects to this machinery (the end-to-end
+     re-key test asserts the staging), inert until 14d.
+
+**Design calls, each with its reason (beyond those above):**
+
+- **The re-key keeps the CURRENT passphrase** (a fresh salt/descriptor,
+  same secret): changing the passphrase is the standing separate door
+  (Round 7's), and coupling the two acts would widen CF-8's ceremony
+  for no security gain (the passphrase never left the device either
+  way). One door, one act — the CF-2 coherence doctrine.
+- **The new vault carries NO recovery wrap** — not an omission: the old
+  phrase wrapped the old master and dies with it BY DESIGN; landing in
+  `enrolled(hasRecoveryWrap: false)` makes the standing CF-5 mandatory
+  step mint the new phrase with zero new machinery and the same
+  interruption-proofness.
+- **The app pauses sync around the brain** (`sync.stop()` →
+  reconnect-after): a scheduler round racing the truncate/reinit window
+  would push against a half-re-keyed account; the reconnect is the
+  ordinary sign-in composition, so the drain starts through the
+  standing triggers and the sync row shows "N pending" progress.
+- **The doors' server grants are authenticated-only, no service_role**
+  (unlike the sync RPCs): account acts are always a signed-in user's
+  own, never server machinery's.
+- **`FakeSyncServer.purgeAccount`** models deletion as account
+  disappearance — a lingering device's round refuses at the fence's
+  missing-vault arm, which is exactly the real world's backstop for the
+  JWT-until-expiry window (pinned).
+- **The wiring emulation caveat, restated where it lives:** the
+  rekey-world harness wires the scripted vault so a successful vault
+  write MOVES the fake mirror's fence comparand (the one-Postgres
+  shape); the REAL Postgres truth is the DDL pins + the gate's live
+  probe, exactly the batch-1 discipline.
+
+**PROVISIONALs (logged for the ratify list; none gated the core):**
+
+- **PROVISIONAL B2-1 — a VAULT-LESS account deletes with the typed
+  confirmation + session alone.** No passphrase exists to demand, and
+  refusing outright would deny the deletion right (App Store 5.1.1(v),
+  14c's own operationalia row) to exactly the accounts with nothing
+  synced (no vault ⇒ nothing under the tier's mandatory E2EE). Options
+  weighed: (i) refuse (denies the right); (ii) demand the account
+  PASSWORD (a second credential surface for a corner; the session
+  already proves it); (iii) the chosen arm. Pinned.
+- **PROVISIONAL B2-2 — the doors' COPY WORDING** (the re-key warning +
+  checkbox sentence, the deletion explanation + "delete my account"
+  confirmation phrase): composed in the ruled CF-6/CF-7 grammar — the
+  local-copy-survives rule and the other-devices consequence are HER
+  PINNED requirements and byte-anchored; the exact sentences around
+  them are drafted for her walk, one line each to change.
+- **PROVISIONAL B2-3 — `refreshSubscriptionNote` is best-effort**: a
+  failed entitlement read stays silent because the STATIC cancel-first
+  advisory shows regardless; the note only ever strengthens. Batch 3's
+  tier UX (L7) may promote the read into its real home.
+
+**Red-on-old (all by behavioral revert, restored green after):**
+
+- The ORDER pin: the brain's truncate moved BEFORE the vault write →
+  `theRekeyWritesTheNewVaultFirstAndTruncatesUnderTheNewKeyID` RED on
+  the order assertion ("(vaultWrite → 1) < (truncate → 0)"); restored.
+- The staging: `stageRepushFromTruth` neutralized to a no-op → the
+  readiness pin RED three ways (staged 0, pushed 0, no server write);
+  restored.
+- The SENTINEL design: staging rewritten to NULL the hash (the rejected
+  shape) → `anAgreedEmptyDayRepushesSealedEmptinessOnlyWhenStaged` RED
+  exactly on the emptiness-guard mechanism; restored.
+- The deletion authorization: the unwrap check removed → wrong
+  passphrase PURGED anyway (the pin red on "a refused authorization
+  must never reach the purge"); restored.
+- The accumulator: the old returned-reports accounting restored → the
+  pin RED on the exact drill class ("(pushedAccepted → 158) ==
+  (totalRows → 1358)"); restored.
+- The updated_at stamp: the client write dropped → the stamp pin RED
+  (nil through every update); restored.
+- (The SQL pins, the new protocol/seam types, and the app doors are
+  red-on-old inherently — none existed on the pre-batch tree; the
+  batch-1 precedent's reading.)
+
+**Held for the architect / 14d:**
+
+- **A traced 14d-era coordination corner (recorded, NOT this batch's to
+  fix):** after a POST-14D re-key, any `journal_entries` row AHEAD of
+  the bridge's pull cursor still sealed under the old journal key
+  refuses the round at the land seam (R1-4's own refuse-with-cursor-held
+  choice) — and since `run()` is pull-then-push, the staged re-push
+  cannot overwrite those rows until they are re-written Fragments-side
+  (their re-enrollment + re-save) or land. Narrow (requires unlanded
+  Fragments writes at the re-key moment), VISIBLE (the round refuses,
+  never silent), nothing lost; at 14c the bridge is paused so the
+  corner cannot occur. 14d's design owns the final word — flagged for
+  its micro-plan.
+- The 09 artifact remains AUTHORED NEVER DEPLOYED; batch 2's sections
+  ride the same gate deploy (marker still last — pinned).
+- The gate's probe-account deletion doubles as the purge's live
+  verification (already the Verification section's letter), and the
+  BYPASSRLS check now also covers the two new definer functions for
+  free (same role, same probe).
+
+**Counts (batch end, all synchronous runs):** core **1191/127** green
+(was 1174/125 — +3 DDL pins, +9 AccountLifecycleTests, +4
+BridgeRestageTests, +1 accumulator pin, exactly accounted) · Mac
+encryption family 30/7 green · **full Mac suite: 1226/215
+tripwire-only** (the standing `TakePaneMeasureTests` red BY IDENTITY;
+was 1220/213 — +6 in 2 new suites) · mobile **175/26** green
+(simulator; the shared seam carries both doors) · spine **51/7** green.
+
 ## Ledger (running; every row owned)
 
 | # | Item | Status |
@@ -669,9 +923,9 @@ runbook (L13).
 | L1 | 09 artifact: rebuild DDL + tenant-scoped RPCs + forced RLS + fence + entitlement table; lockstepVersion 6 same-commit | **done — batch 1** (`b6b2c7e`; artifact AUTHORED NEVER DEPLOYED — the deploy is the gate's) |
 | L2 | Engine wire: key id per round; CF-16 fence surfacing; Merge/Repairs zero-diff proof | **done — batch 1** (`b40deeb` + `a6bf612`; zero-diff proven on the batch range — the record above) |
 | L3 | Fake-server multi-user parity + TWO-USER convergence suites + in-partition repairs + scoped settings | **done — batch 1** (`b40deeb` + `9316d5b`; 8 suites, all guards revert-verified red-on-old) |
-| L4 | CF-8 re-key door (vault-first order pinned; truncate RPC; bridge trigger inert-until-14d) | pending — batch 2 |
-| L5 | Account deletion door (purge RPC; local-copy-survives copy PINNED; custody cleanup) | pending — batch 2 |
-| L6 | Runner drain-summary fix + key_vault.updated_at decision | pending — batch 2 |
+| L4 | CF-8 re-key door (vault-first order pinned; truncate RPC; bridge trigger inert-until-14d) | **done — batch 2** (`ae1b4c6`+`8bedbe2`+`f564e00`; the order revert-verified red-on-old; the app door lands in the CF-5 mandatory-phrase step) |
+| L5 | Account deletion door (purge RPC; local-copy-survives copy PINNED; custody cleanup) | **done — batch 2** (same commits; her copy rule byte-pinned; the definer auth-user removal verified by lookup, the fence backstop pinned; purge→forget→signOut wired) |
+| L6 | Runner drain-summary fix + key_vault.updated_at decision | **done — batch 2** (`8bedbe2`; the summary counts the outbox drain — the drill's 674-of-7,274 class, red-on-old; updated_at DECIDED write-on-update with reasons) |
 | L7 | Entitlement machinery + hosted-sync gate UX (price-agnostic) | pending — batch 3 |
 | L8 | Sign-up surface + fresh-account vault provisioning + empty-store onboarding | pending — batch 3 |
 | L9 | Entitlement-write server function + the site-agent contract block (checkout is the site's build) | pending — batch 3 |
@@ -680,7 +934,7 @@ runbook (L13).
 | L12 | The DEDICATED isolation-boundary review round (her proof-bar ruling) | pending |
 | L13 | The gate: deploy · repush · phone re-onboard · live probes (uid-checked second account; BYPASSRLS check) · domain + iss · SMTP · HER signup flip · stranger validation (incl. PL-6 phone walk) | pending — her go per step |
 | L14 | Closeout ritual in full (incl. the 14d micro-plan + the finalized contract brief; the §12 running record's 5→6 entry; the KnownIssues auth row resolved/re-owned) | pending |
-| L15 | The 14d prep: live journal-bridge provider + staged re-push machinery, dormant behind the standing pause, both halves pinned (Round-6 ruling) | pending — batch 2 |
+| L15 | The 14d prep: live journal-bridge provider + staged re-push machinery, dormant behind the standing pause, both halves pinned (Round-6 ruling) | **done — batch 2** (`8bedbe2`+`f564e00`; DeviceBridgeKeyProvider built, wired NOWHERE; stageRepushFromTruth with the sentinel design revert-proven; dormancy AND readiness pinned; the re-key door's trigger connected, inert) |
 
 ## Environment traps (carried into every batch brief, per the skill)
 
