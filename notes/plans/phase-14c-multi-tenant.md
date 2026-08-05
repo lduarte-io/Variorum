@@ -1,5 +1,14 @@
 # Phase 14c — Multi-tenant hardening & the paid tier — plan
 
+> **BUILD HALF COMPLETE 2026-08-05 (tip `a27d114`) — the Round-9 seam
+> reached: three batches shipped, the ladder CLOSED at round 2, the
+> dedicated isolation round CLEAN (no BLOCKER/MAJOR), the Fragments
+> brief and the 14d micro-plan authored. THE GATE HALF runs in a FRESH
+> session from `notes/plans/phase-14c-gate-handoff.md` (paste-ready
+> kickoff at its top). Counts: core 1201/127 · Mac 1240/219
+> tripwire-only · mobile 175/26 · spine 51/7. The mirror is UNTOUCHED
+> (still marker 5) — the deploy is the gate's act.**
+>
 > **Status: OPEN — the design sitting RAN 2026-08-04 (author-attended,
 > same day as 14b's close). All seven staged questions RULED plus two
 > she added mid-sitting; rulings recorded verbatim-faithful below. Cast
@@ -2558,8 +2567,8 @@ price-agnostic: she names the number at launch.)*
 | L8 | Sign-up surface + fresh-account vault provisioning + empty-store onboarding | **done — batch 3** (same commit; `AuthSession.signUp` through the 14a seam, refusals classify-and-speak incl. the closed-door signups-off voice + the source-verified `email_address_not_authorized` arm; the confirmation notice enumeration-honest; FRESH-ACCOUNT GENERALITY pinned over arbitrary uids; the empty-store first pull pinned zero-row-clean at the engine with her corpus invisible) |
 | L9 | Entitlement-write server function + the site-agent contract block (checkout is the site's build) | **done — batch 3** (`entitlement_set` in 09 section 8, `dc077ca` its own commit — processor-agnostic, service_role-only, grant=upsert/revoke=delete, DDL-pinned; the probe grant's deliberate tool; the contract block written into this file below the batch-3 record) |
 | L10 | SMTP runbook + template copy + rate/abuse limits (the config ACT re-owned to 14d, Round 7) | **done — batch 3** (`notes/plans/phase-14c-smtp-runbook.md` — dashboard act step-by-step, Cloudflare DNS shape incl. the grey-cloud CNAME trap, reasoned provider recommendation, limits with reasons, template DRAFTS for her ratify; NO config act, NO dashboard contact; the built-in-mailer team-only fact flagged as a gate consideration) |
-| L11 | The ladder (combined diff) | pending |
-| L12 | The DEDICATED isolation-boundary review round (her proof-bar ruling) | pending |
+| L11 | The ladder (combined diff) | **done — CLOSED at round 2** (R1: 1 MAJOR + 2 MINOR + 2 NIT, all fixed revert-verified, a third crash window found in the tracing; R2: every fix SOUND with the MAJOR's pin independently revert-verified, one new NIT R2-1 fixed at the architect's hand) |
+| L12 | The DEDICATED isolation-boundary review round (her proof-bar ruling) | **done** (NO BLOCKER/NO MAJOR — no standing cross-tenant road; I-1 → her ratify bundle as a disclosure-envelope call; I-2…I-5 fixed, with 09 EXECUTED against a throwaway Postgres to prove the re-run guard and the sweep; 12 live-probe obligations enumerated for the gate) |
 | L13 | The gate: deploy · repush · phone re-onboard · live probes (second account on <her-email>, uid-checked, entitlement-granted; BYPASSRLS check) · auth.stargazing.tech + iss (Cloudflare, hers) · the signup flip (architect-driven per Round 7) · stranger validation (incl. PL-6 phone walk) | pending — announced per step; deploy/probes/flip architect-driven at her Round-7 delegation |
 | L14 | Closeout ritual in full (incl. the 14d micro-plan + the finalized contract brief; the §12 running record's 5→6 entry; the KnownIssues auth row resolved/re-owned) | pending |
 | L15 | The 14d prep: live journal-bridge provider + staged re-push machinery, dormant behind the standing pause, both halves pinned (Round-6 ruling) | **done — batch 2** (`8bedbe2`+`f564e00`; DeviceBridgeKeyProvider built, wired NOWHERE; stageRepushFromTruth with the sentinel design revert-proven; dormancy AND readiness pinned; the re-key door's trigger connected, inert) |

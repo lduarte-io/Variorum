@@ -145,12 +145,47 @@ walk. Announce each gate step to her before running it.
 
 ## State at cutover (VERIFY, never trust — the skill's rule)
 
-- Tip at handoff: **[FILL-AT-STOP: hash + one line]**
-- Counts at handoff: **[FILL-AT-STOP: core · Mac · mobile · spine]**
-- Ladder: round 1 = 1 MAJOR (R1-1 re-key crash windows) + 2 MINOR +
-  2 NIT, recorded in the plan file (`b9fcc3a`); fix session +
-  round 2: **[FILL-AT-STOP: disposition summary]**
-- Dedicated isolation round: **[FILL-AT-STOP: outcome]**
+- **Tip at handoff: `a27d114`** (the isolation-round fix record) — the
+  build half's last commit; verify with `git log --oneline -1` and a
+  clean `git status`.
+- **Counts at handoff: core 1201/127 green · Mac 1240/219
+  (TakePaneMeasureTests the ONE allowed red BY IDENTITY) · mobile
+  175/26 · spine 51/7.** The last two fix commits touched no `Sources/`
+  or `App/` code (SQL + tests only), so the Mac/mobile numbers stand
+  by construction — re-run at your leisure, never at session start.
+- **Ladder: CLOSED AT ROUND 2.** Round 1 = 1 MAJOR (R1-1, the re-key's
+  crash windows) + 2 MINOR + 2 NIT; the fix session traced all of them
+  independently (finding a THIRD crash window) and fixed all five with
+  revert-verified pins; round 2's fresh reviewer judged every fix
+  SOUND — independently revert-verifying the MAJOR's pin itself — and
+  raised one NIT (R2-1, the rekey banner over the signed-out arm),
+  FIXED at the architect's hand with copy pins. No new BLOCKER/MAJOR,
+  so no round 3 was owed.
+- **Dedicated isolation round: NO BLOCKER, NO MAJOR — "no standing
+  cross-tenant road exists in what this phase ships."** Verified in
+  detail: no injection surface, unforgeable owner stamp, all 18 pull
+  arms owner-filtered by construction, both old RPC signatures dropped
+  with no surviving door from 01–08, the purge cannot name another
+  user, the E2EE boundary unweakened, ten fake-vs-Postgres divergences
+  enumerated (none a hole). Findings: I-1 (MINOR) → **HER RATIFY
+  BUNDLE** (the shared `server_seq` write-activity side channel — a
+  disclosure-envelope call, hers); I-2…I-5 FIXED (executable proof for
+  the foreign-owner refusal; 09 as ONE transaction + the committed
+  post-deploy sweep; `sync_table_pk`'s revoke; the re-run guard) —
+  **and that fix session EXECUTED 09 against a throwaway Postgres 16
+  in Docker** (never the live mirror), which reproduced the re-run
+  hazard, proved the guard, exercised the sweep, and established the
+  artifact is syntactically valid end to end.
+- **PROVISIONAL B1-1 is RETIRED-WITH-REASONS** (the fake's NULL-owner
+  latitude was removed rather than the test weakened) — present it to
+  her as retired, never as an open question.
+- **12 LIVE-PROBE OBLIGATIONS** stand in the plan file (D1/D2 retired
+  harness-side; #11 refined to "run the committed sweep — every row OK
+  or INFO"; **#13 added: the re-run guard's live proof, whose ONLY
+  safe window is immediately after the deploy and BEFORE her repush,
+  while the rebuilt tables are empty — never later**).
+- New artifact: `Server/supabase/maintenance/14c-post-deploy-grant-sweep.sql`
+  (read-only; the gate runs it at step 2's close).
 - The mirror is UNTOUCHED all phase (still marker 5, her 14b corpus
   live) — the deploy is the gate's step 2, nothing before it.
 - 09 is AUTHORED-NOT-DEPLOYED; `SyncSchema.lockstepVersion` is already
@@ -180,7 +215,14 @@ walk. Announce each gate step to her before running it.
 
 ## Open author items (bundle, never improvise)
 
-- The ratify bundle (step 11's list).
+- The ratify bundle (step 11's list) — **now including I-1, the
+  cross-tenant write-activity side channel** (both arms recorded in
+  the isolation round's adjudication; extend the disclosure envelope,
+  or slot a per-tenant sequence as its own §12 event — engine surgery,
+  never a patch), and **B1-1 presented as RETIRED, not open**.
+- **The AppSpec §7 `sync_state` comment delta** (the third key,
+  `rekey_in_progress`) — flagged twice in the ladder records; it is a
+  closeout edit, easy to miss.
 *[removed for publication]*
   *[removed for publication]*
 *[removed for publication]*

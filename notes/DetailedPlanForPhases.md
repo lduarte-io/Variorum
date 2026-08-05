@@ -8,8 +8,31 @@ This is the master build plan. It holds: the phase table, the **current phase po
 
 ## Current phase
 
-**→ PHASE 14C OPEN 2026-08-04 — the design sitting RAN same-day as
-14b's close (author-attended; the BINDING record is
+**→ PHASE 14C — BUILD HALF COMPLETE 2026-08-05 (tip `a27d114`); THE
+GATE HALF AWAITS A FRESH SESSION at her word, from the paste-ready
+kickoff at the top of `notes/plans/phase-14c-gate-handoff.md` (the
+Round-9 session seam, her ruling).** Shipped in the build half: three
+batches (the born-multi-tenant mirror artifact + the two-user
+convergence suites · the re-key and account-deletion doors + the
+dormant 14d machinery · the tier's gate UX, the sign-up surface, the
+entitlement function, the SMTP runbook), the review ladder CLOSED at
+round 2 (1 MAJOR — the re-key's crash windows, closed by a persisted
+marker with engine refusals and a completing door — + 2 MINOR + 3 NIT,
+all fixed revert-verified), and the author-ruled DEDICATED ISOLATION
+ROUND returning NO BLOCKER/NO MAJOR ("no standing cross-tenant road
+exists in what this phase ships"), its four fix-now findings landed
+with 09 EXECUTED against a throwaway Postgres to prove the new re-run
+guard and the post-deploy sweep. Counts: core 1201/127 · Mac 1240/219
+tripwire-only · mobile 175/26 · spine 51/7. THE MIRROR IS UNTOUCHED
+(marker 5; 09 is authored-never-deployed) — the deploy, the live
+probes (12 enumerated obligations), the domain, the signup flip, her
+walks, the ratify bundle, and the closeout are the GATE half's. 14d
+(the Fragments batch + bridge resumption) is drafted and waits behind
+it.
+
+*(The sitting record, superseded as the pointer but kept for the
+thread:)* **PHASE 14C OPEN 2026-08-04 — the design sitting RAN
+same-day as 14b's close (author-attended; the BINDING record is
 `notes/plans/phase-14c-multi-tenant.md`'s sitting rounds 1–5).
 Rulings: ALL-FABLE cast · her usage pause HOLDS through 14c · THE
 CLEAN REBUILD — the mirror's 18 data tables reborn multi-tenant
