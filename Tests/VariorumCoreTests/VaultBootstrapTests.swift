@@ -339,6 +339,45 @@ struct VaultBootstrapTests {
         }
     }
 
+    /// THE DRAIN-SUMMARY ACCUMULATOR (14c batch 2, L6 — the 14b drill's
+    /// recorded cosmetic quirk, red-on-old): the engine's PushReport dies
+    /// with a THROWN round, so under GM-3's absorbed drops the old
+    /// summing-of-returned-reports lost every dropped round's accepted
+    /// chunks (the drill's summary claimed the last round's 674 where the
+    /// mirror held all 7,274). The fix counts the OUTBOX DRAIN itself.
+    /// Revert (restore `report.pushedAccepted += pushReport.accepted` in
+    /// the success arm only) and this pin fails on the undercount.
+    @Test func theDrainSummaryCountsAcceptsFromRoundsThatEndedInADrop() async throws {
+        try await withRunnerWorld { _, db, server, vaultWorld, _ in
+            // Enough rows for several 200-row chunks, so rounds accept a
+            // chunk and THEN drop — the drill's exact shape.
+            let ops = Operations()
+            let entry = try ops.createOrOpenJournalEntry(entryDate: "2026-08-06").container
+            for i in 0..<450 {
+                _ = try ops.newBlock(in: entry.id, text: "summary row \(i)", at: .end)
+            }
+            let flaky = FlakyTransport(
+                wrapped: server, dropPushCalls: Set(stride(from: 2, through: 100, by: 2)))
+            let bootstrap = VaultBootstrap(
+                client: vaultWorld.client,
+                transport: flaky,
+                database: db,
+                maxConsecutiveTransportFailures: 2,
+                transportRetrySleep: { _ in },
+                log: { _ in })
+
+            let report = try await bootstrap.run(
+                passphrase: "orchard-lantern-13", dryRun: false)
+            #expect(report.remainingOutbox == 0)
+            var totalRows = 0
+            for table in SyncSchema.tables {
+                totalRows += try db.fetchInt("SELECT COUNT(*) FROM \(table.name)") ?? 0
+            }
+            #expect(report.pushedAccepted == totalRows,
+                    "the summary counts EVERY drained row — dropped rounds' accepted chunks included (was: only rounds that returned)")
+        }
+    }
+
     /// The bound: a genuinely dead network still fails VISIBLY (typed,
     /// outbox intact) — retry never becomes an infinite spin.
     @Test func aPersistentTransportFailureStillFailsVisiblyWithTheOutboxIntact() async throws {

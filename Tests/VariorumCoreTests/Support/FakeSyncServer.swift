@@ -343,6 +343,16 @@ actor FakeSyncServer: SyncTransport {
     func truncateAccount(_ userID: String) {
         accounts[userID]?.tables = [:]
     }
+
+    /// The deletion door's purge (batch 2's `account_purge` RPC, her
+    /// Round-5 ruling): the whole account goes — data partition, vault
+    /// key id, entitlement (the real RPC also removes the auth user;
+    /// here the account's disappearance models it). A lingering device's
+    /// next round refuses at the fence's missing-vault arm — the same
+    /// backstop that covers the real world's JWT-until-expiry window.
+    func purgeAccount(_ userID: String) {
+        accounts[userID] = nil
+    }
 }
 
 /// A device's authenticated handle on the fake server: the same transport

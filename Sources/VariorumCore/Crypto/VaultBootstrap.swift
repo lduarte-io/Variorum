@@ -135,6 +135,23 @@ public struct VaultBootstrap: Sendable {
             log("resyncReinitialize: sync_version → 0 everywhere, sync_row_seq + pull cursor cleared, \(outboxAfterReset) rows enqueued for the repush.")
 
             var report = Report(arm: arm)
+            // THE DRAIN-SUMMARY ACCUMULATOR (the 14b acceptance drill's
+            // recorded cosmetic quirk, fixed at this batch's runner touch
+            // — 14c batch 2, L6): the engine's PushReport dies with a
+            // THROWN round, and under GM-3's absorbed drops every round
+            // but the last can throw AFTER accepting chunks — so summing
+            // only the returned reports understated the total (the
+            // drill's summary claimed the last round's 674 where the
+            // mirror held all 7,274). The truthful source is the OUTBOX
+            // ITSELF: in the runner's single-writer world an entry clears
+            // exactly when the mirror accepts its row, so the drained
+            // delta IS the accepted total, thrown rounds included.
+            var lastObservedOutbox = outboxAfterReset
+            func recordDrain(to remaining: Int) {
+                report.pushedAccepted += max(0, lastObservedOutbox - remaining)
+                lastObservedOutbox = remaining
+                report.remainingOutbox = remaining
+            }
             // GM-3: transient transport drops (the -1005 class — the live
             // gateway kills rapid-fire chunk bursts) RETRY IN-PROCESS with
             // backoff instead of aborting the run: the outbox is durable
@@ -151,14 +168,13 @@ public struct VaultBootstrap: Sendable {
                     let pushReport = try await engine.push()
                     consecutiveTransportFailures = 0
                     remainingAtLastFailure = nil
-                    report.pushedAccepted += pushReport.accepted
                     let (_, remaining) = try await storeCounts()
-                    report.remainingOutbox = remaining
+                    recordDrain(to: remaining)
                     log("Round \(round): pushed \(pushReport.accepted) accepted (\(pushReport.rejected) rejected, \(pushReport.deferred) deferred); outbox \(remaining) remaining.")
                     if remaining == 0 { break }
                 } catch let error where Self.isTransientTransport(error) {
                     let (_, remaining) = try await storeCounts()
-                    report.remainingOutbox = remaining
+                    recordDrain(to: remaining)
                     // "Consecutive" means WITHOUT PROGRESS: a round that
                     // pushed chunks before its drop is converging, not
                     // stuck — the gateway kills bursts (GM-3), so on a

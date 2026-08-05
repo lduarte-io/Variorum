@@ -1011,6 +1011,56 @@ public struct BridgeEngine: Sendable {
         }
     }
 
+    // MARK: - The staged re-push from truth (Phase 14c batch 2 — the 14d
+    // prep, her Round-6 ruling; also CF-8's bridge trigger)
+
+    /// The staging sentinel: a value no `BridgeHash.body` output can ever
+    /// equal (hashes are hex), written INTO `last_synced_hash` so the day
+    /// reads as "no longer agreed — the wire body is sealed under a dead
+    /// key (or a pre-E2EE plaintext); truth must re-push". Chosen over
+    /// NULLing the hash deliberately: an agreed-EMPTY day must re-push
+    /// its sealed emptiness too (over an old-key body), and a NULL agreed
+    /// hash would hit the push scan's never-first-push-of-emptiness guard
+    /// — the sentinel keeps that guard's protection scoped to genuinely
+    /// virgin days.
+    static let restagedHashSentinel = "restaged:repush-from-truth"
+
+    /// Mark every AGREED journal day for a re-push FROM VARIORUM TRUTH:
+    /// the push half's change detection is `hash == agreedHash ⇒ skip`,
+    /// so replacing each agreed hash with the sentinel makes every such
+    /// day push its rendered text again — sealed under whatever journal
+    /// key the round's provider holds. Stamp-only rows (hash NULL — the
+    /// deletion-raced-an-edit bookkeeping) and days with no row keep
+    /// their exact semantics; remote LWW stamps and created_at echoes are
+    /// untouched, so the re-pushes outrank exactly what they always did.
+    ///
+    /// Callers and cadence: the re-key door stages here (a re-key mints a
+    /// new journal-bridge key, so every satellite body is sealed under a
+    /// dead key until re-pushed — the contract's point 9), and 14d's
+    /// deliberate migration act stages here before its first live round.
+    /// **INERT while the structural pause stands**: staging is one local
+    /// bookkeeping write; no bridge round runs until a real key provider
+    /// is wired (the pause), and the staged days simply wait. Mid-window
+    /// behavior is the standing doctrine's: a Fragments edit landing on a
+    /// staged day classifies as both-changed (the sentinel matches no
+    /// incoming hash) and becomes a conflict card — nothing lost; and an
+    /// identical-body re-push's `replaced` receipt is absorbed by
+    /// discrimination rule (ii) (the pushed body contains it), while a
+    /// genuinely unseen body still rescues under rule (iii).
+    ///
+    /// Returns the number of days staged (idempotent: already-staged days
+    /// don't count again).
+    @discardableResult
+    static func stageRepushFromTruth(_ db: Database) throws -> Int {
+        try db.execute(
+            sql: """
+                UPDATE bridge_day SET last_synced_hash = ?
+                WHERE last_synced_hash IS NOT NULL AND last_synced_hash <> ?
+                """,
+            arguments: [restagedHashSentinel, restagedHashSentinel])
+        return db.changesCount
+    }
+
     // MARK: - Derivation-bug poison markers (reconciliation: a
     // unique_violation is a mis-derived id — surfaced permanently, never
     // retried; cleared only with the fix that ends the bug class)

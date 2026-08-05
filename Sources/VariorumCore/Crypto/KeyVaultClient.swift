@@ -64,6 +64,14 @@ public actor KeyVaultClient {
     /// The HTTP hop, seam-injectable for the no-network suites (the same
     /// discipline as `SupabaseTransport`).
     private let load: @Sendable (URLRequest) async throws -> (Data, URLResponse)
+    /// The `updated_at` stamp's clock (R2-1, decided at 14c batch 2) —
+    /// deliberately NOT `@Dependency(\.date)`: the stamp is display
+    /// bookkeeping only (never ordering — `revision` is the CAS token),
+    /// and a dependency here would force a bound clock onto every
+    /// vault-touching suite across both layers for a value no assertion
+    /// orders by. Grows an init parameter (the AuthSession `now:` shape)
+    /// the day a test needs determinism from it.
+    private let now: @Sendable () -> Date = { Date() }
 
     /// Single-flight fetch: concurrent reads coalesce onto one request
     /// (enrollment + a status refresh racing must not double-hit the
@@ -174,6 +182,14 @@ public actor KeyVaultClient {
         let session = try await sessionProvider.currentSession()
         var row = try KeyVaultWireRow(format: format, userID: session.userID)
         row.revision = expectedRevision + 1
+        // R2-1's declined one-liner, DECIDED at the 14c vault touch (batch
+        // 2): every update stamps `updated_at` truthfully. The re-key door
+        // replaces the row's ENTIRE contents through this path, so an
+        // insert-time-only stamp would actively mislead ("when were the
+        // keys replaced?" is a real support question at 14c's stranger
+        // scale). Display/bookkeeping data only — never ordering (the CAS
+        // token is `revision`; SyncSpec §9's clock doctrine holds).
+        row.updatedAt = DateFormatter.variorumISO8601.string(from: now())
         let body: Data
         do {
             body = try JSONEncoder().encode(row)
@@ -302,6 +318,12 @@ struct KeyVaultWireRow: Codable, Equatable {
     /// null default 1`): reads carry the row's current value; updates
     /// write fetched+1 behind the `revision=eq.<fetched>` filter.
     var revision: Int = 1
+    /// Bookkeeping stamp (R2-1, decided at 14c batch 2): nil on create
+    /// (the server default `now()` covers the insert; the synthesized
+    /// encoder omits nil), stamped by `updateVault` so the row's
+    /// timestamp stays truthful through re-wraps and re-keys. Display
+    /// data only — never ordering.
+    var updatedAt: String?
 
     enum CodingKeys: String, CodingKey {
         case userID = "user_id"
@@ -320,6 +342,7 @@ struct KeyVaultWireRow: Codable, Equatable {
         case journalBridgeKeyID = "journal_bridge_key_id"
         case journalBridgeKeyWrappedByMaster = "journal_bridge_key_wrapped_by_master"
         case revision = "revision"
+        case updatedAt = "updated_at"
     }
 
     /// Hand-written decode for exactly one reason: `revision` defaults to
@@ -351,6 +374,7 @@ struct KeyVaultWireRow: Codable, Equatable {
         journalBridgeKeyWrappedByMaster = try container.decode(
             String.self, forKey: .journalBridgeKeyWrappedByMaster)
         revision = try container.decodeIfPresent(Int.self, forKey: .revision) ?? 1
+        updatedAt = try container.decodeIfPresent(String.self, forKey: .updatedAt)
     }
 
     /// Format → row. Refuses a format missing either v1 class key — the
