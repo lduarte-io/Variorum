@@ -1281,6 +1281,30 @@ deploy.
 
 **PROVISIONALs (logged for the ratify list; none gated the core):**
 
+**The architect's verification + adjudication (2026-08-05, at the
+batch's completion):** commits/tree/build spot-checked — clean at
+`6d34fae`, `swift build` green, `entitlement_set` confirmed
+service_role-only with the marker still the file's last statement, the
+runbook present with the source-verified mailer facts. **PROVISIONAL
+dispositions:** B3-1 SUSTAINED as provisional for HER WALK (the B2-2
+class exactly); B3-2 SUSTAINED (nothing configured; her overrule one
+line at 14d); B3-3 SUSTAINED as provisional for HER WALK — and flagged
+PROMINENTLY on the ratify bundle, because whether the app promises
+Fragments coverage is a product-voice call (the implementer's arm is
+the defensible one: never promise in-app what is not live until 14d;
+the suite promise rides the site page). **THE MAILER-ARM DECISION
+(the runbook §1 fork, the architect's call, vetoable at the gate):
+*[removed for publication]*
+validation window and is removed after. Reasons: it exercises the
+FULL real stranger road (signup → confirmation email → confirm →
+vault setup) including the template copy she ratifies (the CF-10
+spirit wants her to see the real email); arm (b) would flip a
+launch-posture semantic (autoconfirm) as a test convenience — a real
+product decision she has not ruled, and the forgotten-toggle class;
+arm (c) bypasses exactly the door being validated. The 2/hr cap is
+irrelevant at one walk; the address is hers, so team membership
+grants nothing she doesn't hold.
+
 - **PROVISIONAL B3-1 — the tier/sign-up COPY WORDING** (the B2-2
   class): the pinned requirements — works-fully-without ·
   stargazing.tech · price-agnostic · the enumeration-honest notice ·
