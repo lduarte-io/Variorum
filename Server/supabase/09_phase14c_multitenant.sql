@@ -97,6 +97,55 @@
 --       probes, the domain, SMTP, and HER signup flip follow (steps
 --       4–8 of the ruled order).
 --
+-- THIS FILE EXECUTES AS ONE TRANSACTION (the dedicated isolation round's
+-- finding I-3). It opens with `begin;` and closes with `commit;` after the
+-- marker bump, so the deploy is ALL-OR-NOTHING: no window can exist in
+-- which a table or function has been CREATED — carrying Supabase's broad
+-- default privileges — while its trailing REVOKE has not yet run. The
+-- traced worst case that window held: `entitlement_set` (whose identity is
+-- its PARAMETER, by webhook design) momentarily executable by any role.
+-- Every statement here is transaction-safe by construction: plain DDL/DML
+-- only, with no CREATE INDEX CONCURRENTLY, REINDEX CONCURRENTLY, VACUUM,
+-- CREATE DATABASE, CREATE TABLESPACE, or ALTER SYSTEM anywhere in the file
+-- (Postgres's cannot-run-inside-a-transaction set) — verified by executing
+-- this entire file, wrapped, against a scratch Postgres 16. TWO OPERATOR
+-- CONSEQUENCES: (1) the execution channel must send the WHOLE body in ONE
+-- session — the stored-PAT Management-API query road and the dashboard SQL
+-- editor both do; a statement-by-statement paste would defeat the wrapping;
+-- (2) the rebuild's ACCESS EXCLUSIVE locks are held until commit — seconds,
+-- taken while her usage pause holds and signups are off.
+--
+-- THE POST-DEPLOY GRANT SWEEP (the same finding's other half): run
+-- `Server/supabase/maintenance/14c-post-deploy-grant-sweep.sql` IMMEDIATELY
+-- AFTER this deploy. It is READ-ONLY and prints the FINAL posture — every
+-- function's ACL and per-role EXECUTE, every table's RLS enabled/forced,
+-- policy count, and per-role privileges — each row carrying its EXPECTED
+-- value and an OK/MISMATCH verdict, so the operator SEES the posture
+-- instead of trusting it (live-probe obligation 11).
+--
+-- THE RE-RUN GUARD (the isolation round's finding I-5): this file is a
+-- ONE-TIME gate act, and re-executing it once real accounts exist would
+-- DROP every tenant's mirror data and re-seed `hosted_sync` to EVERY auth
+-- user (the seed's "that is exactly the author's account" is true only at
+-- THIS deploy, by the signups-off precondition). The guard in section 0a
+-- refuses re-execution when this mirror shows 09 ALREADY RAN — the marker
+-- already reading 6 or more, or the `entitlement` table (created by no
+-- other file) already existing. Both arms are true ONLY after 09 itself
+-- has run: at the gate's real state — marker 5, her 14b corpus live, no
+-- entitlement table — the guard passes and says nothing. It deliberately
+-- does NOT key on "are the data tables non-empty": under the FORCE RLS
+-- this file installs, a deployer without BYPASSRLS reads its own tables as
+-- EMPTY (auth.uid() is NULL in a SQL session), so a data-presence
+-- condition could silently fail to fire — exactly the wrong failure
+-- direction for a guard on the phase's most destructive artifact.
+-- THE DELIBERATE OVERRIDE, for a genuine intentional re-run: prepend
+--   set variorum.allow_09_rerun = 'yes-drop-every-tenants-data';
+-- to the body in the SAME execution (or run it in the same psql session);
+-- the guard then proceeds and says so with a NOTICE. Nothing else disables
+-- it — and because the deploy is one transaction, a failed run rolls back
+-- whole, leaving the marker at its old value so an honest retry needs no
+-- override at all.
+--
 -- THE DUMBNESS IS STILL LOAD-BEARING (SyncSpec §2): beyond each
 -- composite PK there are NO uniqueness constraints, NO foreign keys, NO
 -- checks on the data tables. The repair design REQUIRES the server to
@@ -109,6 +158,46 @@
 -- (security-scoped bookmarks are per-machine, AppSpec §7). Timestamps
 -- stay TEXT (opaque display/domain data; byte-identical ISO-8601).
 -- `key_vault`, `sync_meta`, and `auth.*` are NOT touched by the rebuild.
+
+begin;
+
+-- ---------------------------------------------------------------------------
+-- 0a. THE RE-RUN GUARD (isolation round, finding I-5) — the FIRST statement
+--     inside the transaction, before a single DROP. It refuses when this
+--     mirror already ran 09 (marker >= 6, or the `entitlement` table 09
+--     alone creates), because a re-run post-strangers would drop every
+--     tenant's data and entitle every auth user. The header records the
+--     full reasoning, including why "data tables non-empty" is NOT the
+--     condition (FORCE RLS makes that read fail-open for a deployer
+--     without BYPASSRLS) and how the deliberate override is spelled.
+-- ---------------------------------------------------------------------------
+
+do $rerun_guard$
+declare
+  override         text    := nullif(current_setting('variorum.allow_09_rerun', true), '');
+  deployed_marker  int     := 1;
+  entitlement_here boolean := to_regclass('public.entitlement') is not null;
+begin
+  if override = 'yes-drop-every-tenants-data' then
+    raise notice 'VARIORUM 09 RE-RUN OVERRIDE ACCEPTED — proceeding to DROP and rebuild every tenant''s mirror data tables.';
+    return;
+  end if;
+
+  if to_regclass('public.sync_meta') is not null then
+    select coalesce((select value::int from sync_meta where key = 'lockstep_version'), 1)
+      into deployed_marker;
+  end if;
+
+  if deployed_marker >= 6 or entitlement_here then
+    raise exception using
+      message = 'VARIORUM_09_ALREADY_DEPLOYED: this mirror has already run 09 (lockstep marker '
+                || deployed_marker || '; entitlement table '
+                || case when entitlement_here then 'present' else 'absent' end
+                || '). Re-running it would DROP every tenant''s mirror data and re-seed hosted_sync to EVERY auth user.',
+      hint    = 'If this re-run is genuinely intended, prepend `set variorum.allow_09_rerun = ''yes-drop-every-tenants-data'';` to the body in the same execution. Otherwise: nothing to do — the mirror already speaks this schema.';
+  end if;
+end
+$rerun_guard$;
 
 -- ---------------------------------------------------------------------------
 -- 0. Drop the OLD RPC signatures before anything else. CREATE with a new
@@ -1146,6 +1235,20 @@ grant execute on function entitlement_set(uuid, text, boolean, timestamptz, text
 --    account doors take the same posture — authenticated only (no
 --    service_role grant: the account acts are always a signed-in user's
 --    own, never server machinery's).
+--
+--    AND THE HELPER'S DEMOTION IS COMPLETED (isolation round, finding
+--    I-4): `sync_table_pk(text)` was created in 02, when Supabase's
+--    default privileges granted EXECUTE to PUBLIC; 04 revoked public+anon
+--    but never `authenticated`, so the grant inherited from that creation
+--    survived every rework since. It discloses nothing (an IMMUTABLE
+--    'key'-for-setting / 'id'-otherwise constant, public in this repo) —
+--    but a demotion posture that is complete everywhere else should be
+--    complete here too. NO grant replaces it: the only callers are the
+--    SECURITY DEFINER bodies above, which call it as the function OWNER
+--    (a definer function's privilege checks run as the definer), so
+--    neither `authenticated` nor `service_role` needs execute — verified
+--    by calling both RPCs as `authenticated` after this revoke against a
+--    scratch Postgres.
 -- ---------------------------------------------------------------------------
 
 revoke execute on function sync_push(jsonb, text) from public, anon;
@@ -1156,13 +1259,20 @@ revoke execute on function account_data_truncate(text) from public, anon;
 revoke execute on function account_purge() from public, anon;
 grant execute on function account_data_truncate(text) to authenticated;
 grant execute on function account_purge() to authenticated;
+revoke execute on function sync_table_pk(text) from public, anon, authenticated;
 
 -- ---------------------------------------------------------------------------
 -- 10. The lockstep marker (SyncSpec §12): sync_meta and
 --    sync_schema_version() already exist (05); nothing here recreates
 --    them. THE MARKER UPDATE IS DELIBERATELY THE LAST STATEMENT OF THIS
---    FILE: a partially-executed deploy never advertises the new version
---    before the rebuilt tables and rewritten RPCs exist.
+--    FILE — now the last statement INSIDE THE TRANSACTION, immediately
+--    before `commit;`: under the one-transaction wrapping a partial
+--    deploy cannot exist at all, and the marker's own discipline (never
+--    advertise the new version before the rebuilt tables and rewritten
+--    RPCs exist) still holds statement-order-wise. The pairing is what
+--    makes the re-run guard in section 0a exact: a failed deploy rolls
+--    back whole and leaves the marker where it was, so an honest retry
+--    needs no override.
 -- ---------------------------------------------------------------------------
 
 -- LAST STATEMENT (see above): the mirror now speaks lockstep version 6.
@@ -1170,3 +1280,5 @@ grant execute on function account_purge() to authenticated;
 -- pin fails the build if they drift.
 insert into sync_meta (key, value) values ('lockstep_version', '6')
   on conflict (key) do update set value = excluded.value;
+
+commit;
