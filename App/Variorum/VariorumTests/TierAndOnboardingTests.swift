@@ -92,6 +92,45 @@ struct HostedSyncTierFaceTests {
         }
     }
 
+    /// Ladder R1-3 (round 1), RED-ON-OLD: PostgREST serializes
+    /// `timestamptz` with an offset and up to six fractional digits
+    /// whenever the microseconds are non-zero — so a real server expiry
+    /// commonly reads "….123456+00:00", and the shipped parse (canonical
+    /// millisecond-Z DateFormatter, then a plain `ISO8601DateFormatter`)
+    /// returned nil on EVERY fractional shape, making the fail-open
+    /// "unparseable counts current" arm the LIKELY arm: an EXPIRED
+    /// subscription's Account tab said "Hosted sync is active". The
+    /// fractional-seconds fallback closes it; the fail-open arm survives
+    /// for genuinely alien text (the recorded design call).
+    @Test func postgRESTFractionalTimestampsParseAndExpire() {
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        // A genuinely expired subscription, PostgREST-shaped: reads
+        // EXPIRED (red-on-old: it counted current).
+        #expect(!HostedSyncTier.isCurrent(
+            AccountEntitlement(
+                feature: "hosted_sync", expiresAt: "2020-01-01T00:00:00.123456+00:00"),
+            now: now))
+        // The same shape in the future: CURRENT because the parse works —
+        // not the fail-open arm wearing a green coat.
+        #expect(HostedSyncTier.isCurrent(
+            AccountEntitlement(
+                feature: "hosted_sync", expiresAt: "2036-01-01T00:00:00.123456+00:00"),
+            now: now))
+        // Postgres trims trailing fraction zeros — short fractions parse
+        // too (red-on-old), and the no-fraction offset shape stays green.
+        #expect(!HostedSyncTier.isCurrent(
+            AccountEntitlement(
+                feature: "hosted_sync", expiresAt: "2020-01-01T00:00:00.12+00:00"),
+            now: now))
+        #expect(!HostedSyncTier.isCurrent(
+            AccountEntitlement(
+                feature: "hosted_sync", expiresAt: "2020-01-01T00:00:00+00:00"),
+            now: now))
+        // The expiry footnote parses the fractional shape instead of
+        // silently omitting a real date (red-on-old: nil).
+        #expect(HostedSyncTier.expiryLine("2036-01-01T00:00:00.123456+00:00") != nil)
+    }
+
     /// `isCurrent`: NULL expiry is non-expiring (09's letter); a future
     /// expiry is current; a past one is not; an unparseable one counts as
     /// current (the server's own gates parse authoritatively — the client

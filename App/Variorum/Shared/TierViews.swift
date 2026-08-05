@@ -70,6 +70,24 @@ nonisolated enum HostedSyncTier {
         text == SyncError.syncNotEntitled.description
     }
 
+    /// The server-timestamp parse (ladder R1-3): the canonical
+    /// millisecond-Z shape first, then plain internet date-time, then
+    /// fractional seconds — because PostgREST serializes `timestamptz`
+    /// with an offset and up to SIX fractional digits whenever the
+    /// microseconds are non-zero ("….123456+00:00"), which neither of the
+    /// first two arms can read. Without the third arm the fail-open
+    /// "unparseable counts current" rule below fired on the COMMON
+    /// integration shape, not the corner it was designed for. (Traced
+    /// empirically 2026-08-05: `.withFractionalSeconds` parses 1–6
+    /// fractional digits on the deployment OSes.)
+    static func parseServerTimestamp(_ text: String) -> Date? {
+        if let date = DateFormatter.variorumISO8601.date(from: text) { return date }
+        if let date = ISO8601DateFormatter().date(from: text) { return date }
+        let fractional = ISO8601DateFormatter()
+        fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return fractional.date(from: text)
+    }
+
     /// Is this entitlement row current? NULL expiry = non-expiring (09's
     /// letter); otherwise the ISO timestamp must lie ahead of `now`. An
     /// unparseable expiry counts as current — the server's own gates parse
@@ -77,9 +95,7 @@ nonisolated enum HostedSyncTier {
     /// quirk would manufacture a refusal the server never made.
     static func isCurrent(_ entitlement: AccountEntitlement, now: Date = Date()) -> Bool {
         guard let expires = entitlement.expiresAt else { return true }
-        let parsed = DateFormatter.variorumISO8601.date(from: expires)
-            ?? ISO8601DateFormatter().date(from: expires)
-        guard let parsed else { return true }
+        guard let parsed = parseServerTimestamp(expires) else { return true }
         return parsed > now
     }
 
@@ -88,9 +104,7 @@ nonisolated enum HostedSyncTier {
     /// renewal is the processor's world, honestly named.
     static func expiryLine(_ expiresAt: String?) -> String? {
         guard let expiresAt else { return nil }
-        let parsed = DateFormatter.variorumISO8601.date(from: expiresAt)
-            ?? ISO8601DateFormatter().date(from: expiresAt)
-        guard let parsed else { return nil }
+        guard let parsed = parseServerTimestamp(expiresAt) else { return nil }
         return "Renews or ends \(parsed.formatted(date: .abbreviated, time: .omitted))."
     }
 }
