@@ -1092,6 +1092,318 @@ tripwire-only** (the standing `TakePaneMeasureTests` red BY IDENTITY;
 was 1220/213 — +6 in 2 new suites) · mobile **175/26** green
 (simulator; the shared seam carries both doors) · spine **51/7** green.
 
+### Batch 3 — record (implementer session, 2026-08-05)
+
+**Shipped, per deliverable (commits on `main`):**
+
+1. **L7 — entitlement reads + the hosted-sync gate UX** (`6c205e8`, the
+   batch's app half, both apps' shared seam):
+   - **The tier face:** `SyncRowFace` gains `.notEntitled`; the server's
+     `VARIORUM_NO_ENTITLEMENT` refusal now presents as a NORMAL row —
+     secondary styling, and its doors are LITERALLY the idle row's
+     (`Sync now` enabled + `Account…`), pinned as data equality with the
+     idle face — instead of batch 1's deliberate stand-in (the generic
+     error face with the cause note). "Sync now" is the heal: activation
+     takes effect on the next round, no relaunch. The classifier
+     (`HostedSyncTier.isNotEntitledError`) is exact-match and pinned
+     disjoint from every keys classifier — commerce state never wears a
+     keys face.
+   - **The tier's one home** (`App/Variorum/Shared/TierViews.swift`):
+     the copy (what it is — the E2EE promise first · works-fully-without
+     — the v1 principle's own sentence · where it lives —
+     stargazing.tech, the web-first ruling) with a PRICE-AGNOSTIC pin
+     (no price-shaped token in any tier static — she names the number at
+     launch); the Account tab's `HostedSyncSection` (CF-14's "account
+     will one day show payment", made good): active shows the standing +
+     an honest "Renews or ends…" line (renewal is the processor's world
+     — the app cannot know which), inactive shows the three-line honest
+     pitch, `.unknown` renders NOTHING (a failed read is quiet — never
+     an error face; when the server actually refuses a round, the sync
+     row's tier line narrates).
+   - **B2-3 PROMOTED into this home:** `refreshHostedSyncStatus` is the
+     ONE entitlement read (the P-ii pattern through
+     `AccountLifecycleProviding`), feeding `AccountState.hostedSync`;
+     the deletion door's subscription note now DERIVES from the same
+     read (one read, one truth). Currency honors `expires_at` exactly as
+     09's letter (NULL = non-expiring; unparseable counts current — the
+     server parses authoritatively, and the client must never
+     manufacture a refusal the server didn't make).
+2. **L8 — sign-up + fresh-account onboarding** (same commit):
+   - **The sign-up door:** `AuthSession.signUp` drives
+     `POST /auth/v1/signup` through the 14a seam (same project, same
+     persistence, only sessions ever persist). Two success shapes,
+     verified against GoTrue source by the batch's one lookup: an
+     autoconfirm 200 IS a token response — adopted exactly as sign-in
+     (the onChange wiring composes sync; the empty-store first pull
+     follows); a session-less 200 = `.confirmationRequired`.
+   - **The refusals classify and speak** (the R94 doctrine at the
+     creation door, `ErrorPresentation.signUpFailureMessage`): the
+     signups-off toggle — THE pre-gate constant — speaks as a CLOSED
+     DOOR ("Account creation isn't open yet…"), never a generic failure
+     blaming the input (both GoTrue vocabularies: `signup_disabled` +
+     the message text); already-registered → "sign in instead"; weak
+     password; 429 rate limit; the network arm; and the SOURCE-VERIFIED
+     `email_address_not_authorized` arm — the built-in mailer refuses
+     non-team recipients entirely, so this is the pre-SMTP era's REAL
+     stranger refusal, and it blames the server's email setup, never
+     the user.
+   - **The surface** (`AccountView`): the signed-out section flips to a
+     create-account form (email · password · confirm — the typo class is
+     real when the reset road sits behind a 2/hr mailer; live mismatch
+     line; CF-1 grammar: one act button, a borderless way back; the
+     footnote speaks the v1 principle at the door: "works fully without
+     an account"). The confirmation NOTICE renders as a normal secondary
+     line, never red.
+   - **FRESH-ACCOUNT GENERALITY PINNED** (THE DESIGN 6's "verify its
+     generality" instruction, executed as a real pin —
+     `FreshAccountSetupGeneralityTests`, parameterized over two
+     arbitrary fresh uids): a brand-new account with no vault row walks
+     the CF-5 mandatory-phrase setup EXACTLY as her account did (the
+     `.noVault` offer, the pure rules gates incl. her checkbox sentence,
+     the create act, the step-4 `enrolled(hasRecoveryWrap: false)`
+     landing, confirm-by-re-entry), a second device of the same fresh
+     account enrolls by passphrase into IDENTICAL custody, and the
+     12-word road unlocks a third. Nothing keys on her account.
+   - **THE EMPTY-STORE FIRST ROUND PINNED at the engine**
+     (`MultiTenantSyncTests`, the harness's real shape): a fresh
+     entitled account's FIRST PULL against a mirror already holding
+     HER corpus serves ZERO rows — no stall, no refusal, A's corpus
+     invisible; the first push carries EXACTLY the store's seeded
+     `setting` rows (the honest finding below); the first authored note
+     then lands in the stranger's own partition with hers untouched.
+3. **L9 — the entitlement-write server function + the site contract**
+   (`dc077ca`, the SQL half, its own commit per the model-change
+   convention; the artifact stays AUTHORED NEVER DEPLOYED, marker still
+   the file's LAST statement — sections renumbered 8→9→10): 09 section 8
+   is `entitlement_set(target_user, target_feature, active, valid_until,
+   via)` — ONE processor-agnostic function the checkout webhook calls;
+   GRANT is an UPSERT (renewals move `expires_at` through the same
+   call), REVOKE is a row DELETE (a row IS the entitlement; billing
+   history is the processor's — the dumbness doctrine); identity is the
+   PARAMETER, never `auth.uid()` (a webhook has no user session);
+   SECURITY DEFINER with execute granted to service_role ONLY —
+   authenticated revoked BY NAME (batch 1's the-apps-never-write
+   letter). One new DDL pin
+   (`theEntitlementWriteDoorIsServiceRoleOnlyAndProcessorAgnostic`).
+   **The gate's probe-account grant (batch 1's held item) now has its
+   deliberate tool** — the header records the exact call. THE SITE
+   HANDOFF BLOCK follows this record (the section the stargazing.tech
+   agent reads; that repo builds the page — this repo never does).
+4. **L10 — the SMTP runbook + rate/abuse limits (RUNBOOK ONLY — the
+   config act is 14d's by Round 7):**
+   `notes/plans/phase-14c-smtp-runbook.md` — the exact dashboard act
+   (Authentication → Emails → SMTP Settings, field by field), the
+   sending-domain DNS shape for Cloudflare (SPF merge rule, the
+   CNAME-must-be-grey-cloud trap, DMARC p=none), a provider comparison
+   with a REASONED recommendation (Resend — TXT-only records sidestep
+   the Cloudflare trap; free tier covers auth volume; hers to
+   overrule), recommended rate/abuse-limit settings with reasons
+   (keep 30/hr email + 60 s windows; the CAPTCHA escalation recorded
+   unconfigured), and the auth email templates' DRAFT COPY staged for
+   HER RATIFY (CF-10 spirit; the reset draft carries the load-bearing
+   "never touches your encryption passphrase" paragraph — the 14b
+   two-secrets model must survive a stranger's password-reset moment).
+   NO dashboard contact was made. Facts source-verified by the batch's
+   ONE Sonnet lookup (GoTrue source + live Supabase docs; provider
+   pricing flagged third-party-sourced for a 14d re-check).
+
+**Design calls, each with its reason:**
+
+- **The tier row wears the idle doors LITERALLY** (pinned as equality
+  with the idle face): "reads as normal, never degraded" made
+  falsifiable — the door set, the styling voice, and the enabled states
+  are the ordinary row's, and "Sync now" doubles as the activation heal.
+- **The in-app tier copy deliberately does NOT promise Fragments
+  coverage.** The suite promise (one payment covers both apps) is the
+  PAGE's to make — where the purchase happens and where the ruled
+  choreography places it — because Fragments' own entitlement check
+  does not exist until the 14d-era batch, and shipped app copy must
+  claim only what the app does today. The contract block below hands
+  the suite promise to the site explicitly. (PROVISIONAL B3-3 — one
+  line to change if she wants the suite named in-app.)
+- **`.unknown` renders nothing at all** (not a spinner, not a
+  placeholder): the section only exists once a read succeeds — a
+  status read is never its own alarm, and an entitled user with a
+  failed read must not see the sales pitch.
+- **The subscription note keys on the tier's ONE feature** (the old
+  batch-2 read joined all active features): the suite has one
+  entitlement by design; a future second feature re-opens the
+  derivation — recorded so it cannot drift silently.
+- **`confirmationNotice` REWORDED mid-batch on a source-verified fact:**
+  GoTrue's enumeration prevention answers an already-registered email
+  with an IDENTICAL session-less 200 (sanitized user body) and sends NO
+  email — the pretty sentence ("we just sent you an email") would be a
+  lie in that arm. The shipped notice covers both roads honestly
+  without revealing which fired ("If this address already has an
+  account, no email arrives — sign in with its existing password
+  instead"), preserving the enumeration protection. Pinned.
+- **`signUp` decodes token-response-FIRST:** the autoconfirm shape is
+  exactly the password grant's response, so the adoption path is the
+  proven one; anything else on a 2xx is `.confirmationRequired` — no
+  brittle field-sniffing of the user body.
+- **The confirm-password field exists** (sign-in has none): a stranger
+  mistyping a NEW password locks themselves out until a reset email,
+  and the pre-SMTP mailer is capped at 2/hr to team addresses only —
+  the one place the extra field pays its rent.
+- **THE HONEST RESHAPE of the empty-store pin (a finding):** the
+  brief's "zero rows" phrasing meets reality — a virgin store is not
+  row-empty, because the schema SEEDS three `setting` rows and those
+  push on the first round (real, correct behavior: settings are
+  document semantics and must reach the mirror). The pin now says
+  what's true: the first PULL is zero-row-clean (the stranger's actual
+  first sync experience — the scheduler's order is pull→push), and the
+  first push carries exactly the seeds, nothing refusing anywhere.
+- **The runbook lives at `notes/plans/phase-14c-smtp-runbook.md`**: a
+  standalone file the 14d act executes from top to bottom (the 14d
+  micro-plan points at it), rather than prose buried in this file —
+  the 9c Step-6-runbook precedent.
+- **Template drafts cover only the emails in use** (confirm · reset ·
+  change-email): drafting copy for doors that don't exist (magic link,
+  invite, reauth) would sit stale and unratified; their Supabase
+  defaults stand until a feature uses them.
+
+**PROVISIONAL B1-2 — FINALIZED AS SHIPPED (the batch-3 duty on the
+undeployed artifact):** the entitlement shape stands exactly as batch 1
+authored it — `(user_id, feature)` PK · `feature = 'hosted_sync'` ·
+nullable `expires_at` (NULL = non-expiring) · `source` provenance text ·
+`granted_at`. Reasons, recorded: (a) the webhook write maps onto it 1:1
+— `entitlement_set`'s parameters ARE the row's columns, nothing
+processor-shaped needed; (b) the composite PK leaves room for a future
+second feature without redesign; (c) `expires_at` makes a lapsed
+subscription self-expiring even if a cancellation webhook never fires
+(both RPC gates and the app read honor it independently); (d) `source`
+is the support answer at stranger scale ("why is this account
+entitled?"). Considered and DECLINED: an `updated_at`/audit column (the
+mirror is not the billing system's history — the processor owns history;
+the dumbness doctrine) and a status column (state duplication — a row IS
+the entitlement; revoke deletes). The shape is final for the gate
+deploy.
+
+**PROVISIONALs (logged for the ratify list; none gated the core):**
+
+- **PROVISIONAL B3-1 — the tier/sign-up COPY WORDING** (the B2-2
+  class): the pinned requirements — works-fully-without ·
+  stargazing.tech · price-agnostic · the enumeration-honest notice ·
+  the closed-door signups-off voice — are byte-anchored; the sentences
+  around them are drafted for her walk, one line each to change.
+- **PROVISIONAL B3-2 — the runbook's provider recommendation (Resend) +
+  the §6 template drafts**: staged for her ratify at/before 14d;
+  nothing is configured; the recommendation carries its reasons and her
+  overrule is one line.
+- **PROVISIONAL B3-3 — no Fragments-coverage promise in-app** (the
+  design call above): the suite promise rides the site page; one line
+  to change at her word.
+
+**Red-on-old (all by behavioral revert, restored green after):**
+
+- The entitlement-write posture: the service_role grant flipped to
+  authenticated → the DDL pin RED on both posture arms; restored green.
+- The tier face: the classifier branch neutralized (`if false,`) → the
+  refusal fell to the generic `.error` face — the EXACT pre-batch
+  behavior — and `theTierRefusalPresentsAsANormalRowWithTheIdleDoors`
+  RED; restored green.
+- The quiet-failure arm: the failed entitlement read made to set
+  `account.lastError` → `aFailedReadStaysQuietAndUnknown` RED on "a
+  failed status read never mints an error face"; restored green.
+- (The signUp API, its classifier arms, the generality suite, and the
+  empty-store pin are red-on-old inherently — none existed on the
+  pre-batch tree. The generality and empty-store pins are behavior pins
+  of THE DESIGN 6's claims, not bug fixes — no old-code defect was
+  traced, so no hollow fix was minted; the hallucination guard's
+  traced-mechanism duty is met by the walks themselves.)
+
+**Counts (batch end): recorded after the full synchronous runs — see
+the acceptance line at the end of this record.**
+
+**Held for the architect / the gate:**
+
+- **A GATE consideration from the source-verified mailer facts (new
+  information, decision NOT made here):** the built-in mailer delivers
+  ONLY to org-team addresses, so at gate step (7) a stranger-shaped
+  signup on the built-in mailer cannot receive its confirmation email
+  even with signups ON. Three arms (runbook §1): add the probe address
+  to the org team for the window · toggle email confirmations OFF
+  (autoconfirm) — also a legitimate launch posture to rule deliberately
+  · admin-provision via the standing `generate_link` road. The
+  confirmations-toggle posture (ON-with-SMTP at 14d vs autoconfirm) is
+  a sitting-worthy call, recorded not made. The app face for the
+  refusal is already honest either way (the
+  `email_address_not_authorized` arm).
+- **The probe-account entitlement grant now has its deliberate tool**:
+  `entitlement_set('<probe-uid>', 'hosted_sync', true, null,
+  'probe-setup')` as service_role — 09's header records it.
+- **The site handoff block below is ready for her tasking** of the
+  stargazing.tech agent; the processor decision rides that tasking
+  (Round 7's letter).
+- 09 remains AUTHORED NEVER DEPLOYED; the marker is still the file's
+  last statement (pinned); batch 3's section rides the same gate
+  deploy.
+- The runbook flags one genuine Supabase docs discrepancy (OTP default
+  30/hr vs 360/hr across two official pages) — read the dashboard's
+  shown value at the 14d act.
+
+### The stargazing.tech checkout — contract facts (for the site's own
+### agent)
+
+*(This block is the handoff the site's agent builds from — she tasks
+that agent; this repo never writes site code. Everything here is
+price-agnostic: she names the number at launch.)*
+
+- **What is sold:** the suite's ONE hosted-sync plan. One payment
+  covers Variorum AND Fragments (the author's suite ruling —
+  *[removed for publication]*
+  ONE suite account and both apps check it (Fragments' check lands in
+  its own later batch — the page may promise suite coverage; the apps'
+  in-app copy deliberately claims only their own behavior until then).
+- **What the page promises (aligned with shipped app copy):** hosted
+  sync keeps an end-to-end encrypted copy of the user's writing — the
+  server can never read it; the apps work FULLY without the tier
+  (everything stays on-device); no price shown until she names one.
+- **The account model:** Supabase auth on the Variorum project; a user
+  IS an auth user (uuid). Sign-in for the checkout uses the SAME
+  project's auth (publishable key + `/auth/v1/token?grant_type=password`
+  — or the site's own session flow against the same issuer). **The
+  checkout MUST capture the buyer's account uuid at purchase time**
+  (require suite sign-in before checkout; store the uuid in the
+  processor's customer metadata) — the webhook maps processor customer
+  → uuid.
+- **The issuer hostname:** `auth.stargazing.tech` fronts the auth
+  service once attached at the 14c gate (until then the raw
+  *[removed for publication]*
+  pages and the checkout itself are ordinary stargazing.tech content —
+  no special domain work (the Round-7 ruling).
+- **The entitlement write (the ONE server integration):** on payment
+  events the site's SERVER-SIDE webhook calls the `entitlement_set`
+  RPC with the SERVICE-ROLE key — never from a browser; the
+  service-role key is a server secret:
+  `POST {projectURL}/rest/v1/rpc/entitlement_set` with JSON body
+  `{"target_user": "<uuid>", "target_feature": "hosted_sync",
+  "active": true, "valid_until": "<ISO8601 or null>",
+  "via": "<processor>:<subscription id>"}`.
+  Semantics: grant is an UPSERT (send it on checkout-complete AND on
+  every renewal, `valid_until` = the period end — a lapsed subscription
+  self-expires server-side even if a later webhook never fires); revoke
+  is `"active": false` (a row DELETE). The apps never write
+  entitlement; `authenticated` holds no execute grant on this function.
+- **How activation reaches the apps (no site work):** the apps READ
+  their own entitlement row (owner-only SELECT) and the sync RPCs gate
+  server-side (`VARIORUM_NO_ENTITLEMENT`); an activated plan heals on
+  the user's next sync round — no app release, no site callback.
+- **Cancellation/management UX is the checkout's own duty:** the apps'
+  account-deletion door warns "cancel your subscription first" and can
+  only best-effort read the entitlement — subscription management
+  lives with the processor, i.e. on the site.
+- **Processor choice:** hers, decided when she tasks the site agent
+  (Round 7's record: easy to change before real subscribers — this
+  function is processor-agnostic by design; sticky after, because
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+
 ## Ledger (running; every row owned)
 
 | # | Item | Status |
@@ -1102,10 +1414,10 @@ was 1220/213 — +6 in 2 new suites) · mobile **175/26** green
 | L4 | CF-8 re-key door (vault-first order pinned; truncate RPC; bridge trigger inert-until-14d) | **done — batch 2** (`ae1b4c6`+`8bedbe2`+`f564e00`; the order revert-verified red-on-old; the app door lands in the CF-5 mandatory-phrase step) |
 | L5 | Account deletion door (purge RPC; local-copy-survives copy PINNED; custody cleanup) | **done — batch 2** (same commits; her copy rule byte-pinned; the definer auth-user removal verified by lookup, the fence backstop pinned; purge→forget→signOut wired) |
 | L6 | Runner drain-summary fix + key_vault.updated_at decision | **done — batch 2** (`8bedbe2`; the summary counts the outbox drain — the drill's 674-of-7,274 class, red-on-old; updated_at DECIDED write-on-update with reasons) |
-| L7 | Entitlement machinery + hosted-sync gate UX (price-agnostic) | pending — batch 3 |
-| L8 | Sign-up surface + fresh-account vault provisioning + empty-store onboarding | pending — batch 3 |
-| L9 | Entitlement-write server function + the site-agent contract block (checkout is the site's build) | pending — batch 3 |
-| L10 | SMTP runbook + template copy + rate/abuse limits (the config ACT re-owned to 14d, Round 7) | pending — batch 3 |
+| L7 | Entitlement machinery + hosted-sync gate UX (price-agnostic) | **done — batch 3** (`6c205e8`; the `.notEntitled` face wears the IDLE doors literally — reads-as-normal pinned as data equality, red-on-old vs the generic error face; TierViews.swift the tier's one home, copy price-agnostic-pinned; B2-3 promoted — ONE entitlement read feeds `AccountState.hostedSync`, the deletion note derives) |
+| L8 | Sign-up surface + fresh-account vault provisioning + empty-store onboarding | **done — batch 3** (same commit; `AuthSession.signUp` through the 14a seam, refusals classify-and-speak incl. the closed-door signups-off voice + the source-verified `email_address_not_authorized` arm; the confirmation notice enumeration-honest; FRESH-ACCOUNT GENERALITY pinned over arbitrary uids; the empty-store first pull pinned zero-row-clean at the engine with her corpus invisible) |
+| L9 | Entitlement-write server function + the site-agent contract block (checkout is the site's build) | **done — batch 3** (`entitlement_set` in 09 section 8, `dc077ca` its own commit — processor-agnostic, service_role-only, grant=upsert/revoke=delete, DDL-pinned; the probe grant's deliberate tool; the contract block written into this file below the batch-3 record) |
+| L10 | SMTP runbook + template copy + rate/abuse limits (the config ACT re-owned to 14d, Round 7) | **done — batch 3** (`notes/plans/phase-14c-smtp-runbook.md` — dashboard act step-by-step, Cloudflare DNS shape incl. the grey-cloud CNAME trap, reasoned provider recommendation, limits with reasons, template DRAFTS for her ratify; NO config act, NO dashboard contact; the built-in-mailer team-only fact flagged as a gate consideration) |
 | L11 | The ladder (combined diff) | pending |
 | L12 | The DEDICATED isolation-boundary review round (her proof-bar ruling) | pending |
 | L13 | The gate: deploy · repush · phone re-onboard · live probes (second account on <her-email>, uid-checked, entitlement-granted; BYPASSRLS check) · auth.stargazing.tech + iss (Cloudflare, hers) · the signup flip (architect-driven per Round 7) · stranger validation (incl. PL-6 phone walk) | pending — announced per step; deploy/probes/flip architect-driven at her Round-7 delegation |
