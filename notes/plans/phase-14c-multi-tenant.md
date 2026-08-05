@@ -846,6 +846,28 @@ runbook (L13).
 
 **PROVISIONALs (logged for the ratify list; none gated the core):**
 
+**The architect's verification + adjudication (2026-08-04, at the
+batch's completion):** commits/tree/build spot-checked per the
+verify-not-trust rule — clean at `8431b9b`, `swift build` green (the
+recurring SourceKit diagnostics are stale index noise, dismissed by
+the green build again), the truncate RPC confirmed gated by the SAME
+fence arm/marker as the sync RPCs, `account_purge` present with the
+data → vault → entitlement → auth-user-last order, and
+`DeviceBridgeKeyProvider` confirmed BUILT AND WIRED NOWHERE in
+production (the Round-6 dormancy letter). **PROVISIONAL dispositions:**
+B2-1 SUSTAINED — refusing a vault-less deletion would deny the
+deletion right to exactly the accounts with nothing synced; session +
+typed confirmation is the honest floor; B2-2 SUSTAINED as provisional
+for HER WALK (the pinned requirements are byte-anchored; the
+surrounding sentences are a taste surface — propose-only, one line
+each to change); B2-3 SUSTAINED until batch 3's tier UX takes the
+read into its real home. **The held 14d trace is ROUTED: the 14d
+micro-plan (authored at L14's closeout) MUST carry the
+old-key-satellite-rows-ahead-of-the-cursor corner as a named step** —
+the staged re-push must be sequenced against the bridge's pull (or
+the pull's refusal tolerated for the window) when the pause lifts;
+narrow and visible, impossible while the pause stands.
+
 - **PROVISIONAL B2-1 — a VAULT-LESS account deletes with the typed
   confirmation + session alone.** No passphrase exists to demand, and
   refusing outright would deny the deletion right (App Store 5.1.1(v),
