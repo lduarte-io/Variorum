@@ -442,13 +442,215 @@ the signups toggle → stranger-onboarding validation (incl. the PL-6
 phone walk) → closeout (incl. authoring 14d's micro-plan + finalizing
 the contract brief she carries).
 
+### Batch 1 — record (implementer session, 2026-08-04)
+
+**Shipped, per deliverable (commits on `main`):**
+
+1. **L1 — the born-multi-tenant mirror artifact** (`b6b2c7e`, its own
+   commit per the model-change convention; AUTHORED NEVER DEPLOYED —
+   the deploy is the architect's gate act at her explicit go):
+   `Server/supabase/09_phase14c_multitenant.sql` — the 18 data tables
+   dropped and recreated per THE DESIGN 1 (final consolidated columns
+   from the 01→08 accretion; `owner_id uuid NOT NULL` leading composite
+   PKs `(owner_id, id)` / `(owner_id, key)` for setting; `(owner_id,
+   server_seq)` changefeed indexes; `server_written_at` + the two-column
+   stamp trigger; NO other constraints, NO FKs — SyncSpec §2's repair
+   requirement untouched); ENABLE + FORCE row level security on all 18
+   with owner policies on `auth.uid()`; the RPCs rewritten tenant-scoped
+   with NEW signatures `sync_push(batch, active_key_id)` /
+   `sync_pull(since_seq, active_key_id, max_rows)` — CAS keyed
+   (caller, id), owner stamped into every insert, owner subtracted from
+   every served payload for the TEN mirror-only-owner tables, the EIGHT
+   client-carried tables keeping validate-equals-caller, the A5 horizon
+   and wire shapes VERBATIM (pinned); the vault-key-id FENCE and the
+   entitlement gate opening both bodies; the `entitlement` table born
+   clean with the deploy-path seed; marker 5→6 the file's LAST
+   statement. `SyncSchema.lockstepVersion` → 6 in the SAME commit,
+   pin-held (the 08 precedent), plus the `SyncServerRefusalMarker`
+   constants the DDL pin ties to the SQL's RAISE tokens.
+2. **L2 — engine wire + CF-16 surfacing** (`b40deeb` + `a6bf612`):
+   `SyncTransport.push/pull` gain the REQUIRED `activeKeyID` parameter
+   (deliberately no default — the protocol's own schemaVersion doctrine:
+   wrappers forward, fakes enforce; a defaulted shim could silently drop
+   the fence in every composed test); the engine sends its held corpus
+   key id on BOTH round halves, resolved before network contact;
+   `SupabaseTransport` carries `active_key_id` in both wire DTOs and
+   classifies the marker refusals into typed errors
+   (`SyncError.encryptionKeysReplaced` / `.syncNotEntitled`); the app
+   classifier arm `EncryptionSession.isKeysReplacedError` + the
+   `SyncRowFace` keysReplaced arm covering BOTH CF-16 triggers
+   (fence-before-poison-push, decrypt-failure-after) — one state, one
+   face, one Re-enroll door.
+3. **L3 — fake parity + the two-user suites** (`b40deeb` + `9316d5b`):
+   `FakeSyncServer` reworked to multi-tenant parity (per-account
+   partitioned storage = the composite-PK twin; whole-batch owner
+   validation = the RAISE-aborts-all parity; per-account vault key id +
+   entitlement; `connection(as:)` per-user transports; per-user
+   inspection; `truncateAccount`; `wipe()` preserving provisioning
+   exactly as the real truncate never touches key_vault/entitlement) —
+   the EMULATION caveat recorded in the fake's header AND every
+   relevant suite (the real Postgres truth is the gate's integration
+   pass + live probes, per the preflight). `MultiTenantSyncTests`
+   (8 tests): the crown (two fleets converge independently over
+   ciphertext, zero cross-user rows, the all-tenants mirror-dump
+   ciphertext walk) · stranger-corpus exactly-as-unreadable · colliding
+   ids in separate partitions with independent CAS · scoped settings
+   never CAS-fight (the L2-subsumed redesign's proof) · the tag.path
+   repair stays in-partition (identical natural key across tenants
+   dedupes nothing) · the fence end-to-end (stale writer refuses both
+   halves typed, outbox/cursor intact, ZERO rows past the fence; heals
+   by the CF-8 road: new keys → account truncate → resyncReinitialize →
+   repush, the old key provably unable to open the re-sealed corpus) ·
+   the entitlement gate (refuses typed, heals on grant) · the
+   engine-wire pin (the held key id on every push AND pull).
+
+**Design calls, each with its reason:**
+
+- **The OLD RPC signatures are DROPPED first** (09 section 0): Postgres
+  overloads by signature, so a lingering `sync_pull(bigint, int)` would
+  keep serving the ten ownerless tables to any authenticated caller
+  with no owner filter, no fence, no entitlement — a cross-tenant read
+  door beside the new one. Pinned
+  (`theOldRPCSignaturesAreDroppedByTheRebuild`). Interim note: a
+  pre-14c client never sees the missing function in practice — the §12
+  marker check runs FIRST each round half and refuses at 5≠6.
+- **Marker TOKENS, not sentences** (`VARIORUM_STALE_KEY_FENCE` /
+  `VARIORUM_NO_ENTITLEMENT`): the transport classifies refusal bodies
+  by token; human wording may evolve server-side, the token may not,
+  and the DDL pin holds the SQL and the client constants together.
+- **Gate order auth → fence → entitlement** in both RPC bodies (and the
+  fake): the fence is the data-integrity guard — a stale writer's
+  refusal must never be maskable by commerce state.
+- **A missing vault row refuses AT THE FENCE** (same arm as mismatch):
+  mid-re-key and never-setup callers both hold no right to write; the
+  CF-16 re-enroll road is the honest fix for both. (The engine refuses
+  keys-unavailable before network contact anyway — this arm is the
+  server's backstop.)
+- **Owner policies carry NO `to` clause**: under FORCE RLS the definer
+  role itself must match a policy or the RPCs default-deny themselves;
+  direct API access stays shut by privilege revokes exactly as before.
+  The sitting's BYPASSRLS caveat is restated in 09's header for the
+  live probe.
+- **Owner stamped into ALL 18 inserts** (not only the ten): uniform and
+  server-authoritative; for the eight it merely re-affirms the
+  validated payload value. THE DESIGN's stamp/subtract letter holds:
+  subtraction stays exactly the ten's (the eight's clients own the
+  column).
+- **`entitlement` is RLS-ENABLED, deliberately NOT forced**: the
+  definer RPCs must read it for the gate; the apps read their own row
+  via the owner-only SELECT policy (the P-ii pattern); NO write grants
+  to authenticated — entitlement writes are server-side only (batch
+  3's webhook function / service_role).
+- **The retired stored-owner guard**: 04–06's "belongs to another
+  owner" arm is gone as structurally unreachable — the tenant-scoped
+  CAS read cannot see a foreign row. The pin pivoted from the guard's
+  text to the composite scoping itself
+  (`theDeployedPushBodyIsTenantScoped`); the two-user suites prove the
+  behavior end-to-end.
+- **`SyncClient` defaults SIGNED IN** (the fake's default account):
+  post-14c a syncing device is always signed in (transport requires a
+  session; adoption ran at 9c), and the born-multi-tenant mirror
+  refuses unowned pushes. `OwnerIdentityTests`' backfill choreography
+  REWRITTEN to the post-14c shape — adoption precedes first sync; the
+  pre-9c unowned-corpus-through-the-mirror scenario is retired with
+  the mirror it modeled (the file's history holds it).
+- **The serializer walk grew three teeth with the artifact** (same
+  commit): `entitlement` joins the server-only tables; `owner_id` on a
+  table whose CLIENT schema lacks it is server machinery (the
+  stamp/subtract's walk-side mirror); and the DDL parser is now
+  DROP-AWARE — 09's rebuild REPLACES a table's accumulated column set,
+  so a column lost in the consolidation fails the walk instead of
+  hiding in the 01∪09 union (the rebuild's own drift class).
+- **`SyncError.syncNotEntitled` is built now, its FACE is batch 3's**:
+  the typed error + transport classification ship with the wire (the
+  suites pin the refusal grammar); today it presents as the generic
+  error face with the cause note — the tier's dedicated UX is L7's,
+  deliberately not front-run.
+
+**PROVISIONAL (logged for the ratify list; none gated the core):**
+
+- **PROVISIONAL B1-1 — the fake's NULL-owner latitude.** The real 09
+  RPC refuses a NULL `owner_id` on the eight; the fake accepts it into
+  the caller's partition. Options weighed: (i) strict parity — refuse
+  NULL, which forces the whole legacy harness (every pre-9c-shaped
+  scenario and crafted row) onto signed-in fixtures; (ii) the chosen
+  latitude — partitioning already makes the outcome tenant-safe, the
+  strict arm stays PINNED in the DDL
+  (`pushCarriesTheClientOwnerGuard`'s `is distinct from`) and is proven
+  on real Postgres at the gate, and the two-user suites run fully
+  signed-in so the meaningful arm (foreign owner refuses) is exercised
+  in the fake too; (iii) a fake mode flag (rejected — a switchable
+  fake is the postmortem's fidelity failure shape). Recorded in the
+  fake's header where no reader can miss it.
+- **PROVISIONAL B1-2 — the entitlement table's shape**:
+  `(user_id, feature)` PK, `feature = 'hosted_sync'`, nullable
+  `expires_at` (NULL = non-expiring), `source` provenance text.
+  Price-agnostic per THE DESIGN 5; batch 3 may adjust with recorded
+  reasons before the deploy (the artifact is undeployed until the
+  gate).
+- **PROVISIONAL B1-3 — the fence compares `corpus_key_id` only**: THE
+  DESIGN 2's letter for these two RPCs; the journal-bridge key id
+  rides the BRIDGE's own rounds when they resume (14d/L15's road,
+  Fragments-side dialect — never these endpoints).
+
+**Red-on-old (all by behavioral revert, restored green after):**
+
+- Drop-aware DDL parser: drop-handling neutralized → 
+  `aRebuildThatDropsAColumnIsVisibleToTheWalk` RED; restored green.
+- The fence: the fake's key-id guard neutralized → the stale-writer
+  suite RED (would-be poison pushes land); restored green.
+- The partition: collapsed to the single pre-14c keyspace → the crown,
+  colliding-ids, and scoped-settings suites all RED (the exact
+  single-keyspace failure classes: cross-tenant CAS fights, B's fleet
+  adopting A's setting); restored green.
+- The entitlement gate: neutralized → the unentitled-round suite RED;
+  restored green.
+- The CF-16 face arm: removed → the fence refusal presented as the
+  generic `.error` face (Retry/Account doors) and
+  `theFenceRefusalPresentsAsTheReplacedRow` RED; restored green.
+- (The new DDL pins and the protocol parameter are red-on-old
+  inherently: no 09 file / no parameter exists on the pre-batch tree.)
+
+**Zero-diff proof (the 14b precedent, on the batch range
+`01fc2a7..a6bf612`):** `git diff -- Sources/VariorumCore/Sync/Merge.swift
+Repairs.swift SyncEncryption.swift` → EMPTY (0 lines). The engine
+inland — merge matrix, repairs, the payload-crypto seam — is
+byte-untouched; the batch's whole `Sync/` footprint is
+SupabaseTransport (+49) · SyncEngine (+10, the two call sites + doc) ·
+SyncSchema (+50, lockstepVersion 6 + markers + two error cases) ·
+SyncTransport (+17, the signatures + doctrine comment).
+
+**Counts (batch end, all synchronous runs):** core **1174/125** green
+(was 1158/124) · Mac **1220/213** with the standing
+`TakePaneMeasureTests` tripwire the ONE red BY IDENTITY (was 1218/213)
+· mobile **175/26** green (simulator; the shared SyncStatusViews/
+EncryptionSession changes compile and pass untouched suites) · spine
+**51/7** green.
+
+**Held for the architect / the gate:**
+
+- **The probe account needs a deliberate entitlement grant** in the
+  live-probe setup (recorded in 09's seed comment): entitlement is
+  enforced from birth, so an unentitled probe account would refuse at
+  the tier gate instead of serving zero rows — the grant is part of
+  provisioning the second account, and its own deletion later is the
+  natural purge test (the Verification section's letter).
+- **The BYPASSRLS empirical check** rides the live probe (the
+  sitting's pinned caveat; restated in 09's header).
+- **CF-8's account-scoped truncate RPC is batch 2's** — 09 ships no
+  truncate door (the fake's `truncateAccount` models the semantics the
+  two-user fence suite proves against).
+- 07's header note ("no un-updated client exists today") and 14b-era
+  phrasing in older artifacts stand as deployed history — 09's header
+  carries the current choreography.
+
 ## Ledger (running; every row owned)
 
 | # | Item | Status |
 |---|------|--------|
-| L1 | 09 artifact: rebuild DDL + tenant-scoped RPCs + forced RLS + fence + entitlement table; lockstepVersion 6 same-commit | pending — batch 1 |
-| L2 | Engine wire: key id per round; CF-16 fence surfacing; Merge/Repairs zero-diff proof | pending — batch 1 |
-| L3 | Fake-server multi-user parity + TWO-USER convergence suites + in-partition repairs + scoped settings | pending — batch 1 |
+| L1 | 09 artifact: rebuild DDL + tenant-scoped RPCs + forced RLS + fence + entitlement table; lockstepVersion 6 same-commit | **done — batch 1** (`b6b2c7e`; artifact AUTHORED NEVER DEPLOYED — the deploy is the gate's) |
+| L2 | Engine wire: key id per round; CF-16 fence surfacing; Merge/Repairs zero-diff proof | **done — batch 1** (`b40deeb` + `a6bf612`; zero-diff proven on the batch range — the record above) |
+| L3 | Fake-server multi-user parity + TWO-USER convergence suites + in-partition repairs + scoped settings | **done — batch 1** (`b40deeb` + `9316d5b`; 8 suites, all guards revert-verified red-on-old) |
 | L4 | CF-8 re-key door (vault-first order pinned; truncate RPC; bridge trigger inert-until-14d) | pending — batch 2 |
 | L5 | Account deletion door (purge RPC; local-copy-survives copy PINNED; custody cleanup) | pending — batch 2 |
 | L6 | Runner drain-summary fix + key_vault.updated_at decision | pending — batch 2 |
