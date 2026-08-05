@@ -1579,6 +1579,143 @@ their function.
   flows) reuses exactly the paths already inside the OWNED KnownIssues
   row (13e's settings-cadence family) — no NEW unowned debt.
 
+### Ladder fix record (round 1 → 2) — fix session, 2026-08-05
+
+*(Fresh Fable fix session per the ladder; every finding independently
+traced before any fix — the hallucination guard's letter; every
+bug-class pin verified by BEHAVIORAL REVERT with the exact red recorded.
+Commits: `419eeba` (R1-2 SQL) · `1df2e24` (R1-2 record) · `a1b9953`
+(R1-3) · `28e3376` (R1-4+R1-5) · `5a207ec` (R1-1).)*
+
+**R1-1 (MAJOR) — FIXED.** *Independent trace, all three windows
+confirmed against the shipped code:* **4→5** — `account_data_truncate`
+row-DELETEs mint no changefeed entries and `resyncReinitialize` is ONE
+write transaction, so a crash between them leaves sync_versions
+non-zero, the cursor at head, and the outbox holding only
+crash-time-dirty rows; on relaunch the fence passes (custody + vault
+both new), the pull serves nothing, the dirty rows self-heal through
+the nil-current rebase (SyncEngine.swift:140–146) and every CLEAN row
+never re-enqueues — the mirror silently holds a near-empty corpus while
+the row reads idle. **3→4** — the vault replacement destroys the old
+master's wrapped copy (step 1 discards the unwrap; step 2 replaces the
+row), and this device's cursor sits at head so it never decrypts the
+old-key rows; rounds pass the fence and the mirror becomes a mixed-key
+corpus — silent here, permanent `payloadCryptoFailure` for any
+later-enrolling device, with CF-16's "re-enroll" prescription unable to
+heal it. **2→3** — visible as CF-16 on this device, but its re-enroll
+heal lands EXACTLY in the 3→4 silent state (custody healed, truncate
+never run), so even the "visible" window needed the completing prompt.
+*The fix (the reviewer's proposed shape, strengthened):*
+`AccountRekeyMarker` — a persisted rekey-in-progress marker in the
+LOCAL-ONLY `sync_state` keyspace (never synced by design; survives
+`resyncReinitialize` by construction — it deletes only the cursor key;
+deliberately NOT the Keychain, which would grow the owned 13e
+settings-cadence SecItem family at round cadence). Written after
+authorization and BEFORE the vault write (so 2→3 is covered too);
+cleared ONLY when the WHOLE road completes — after step 6, a superset
+of the reviewer's after-step-5 that protects the bridge-staging leg for
+14d; a step-2 failure keeps it set on purpose (an `updateVault` network
+failure is ambiguous — the write may have landed — and the rerun is the
+universal heal, the pinned doctrine's own letter). Enforcement: BOTH
+engine round halves refuse first (`SyncError.accountRekeyIncomplete` —
+outbox intact, cursor unmoved, the §12 grammar; `resyncReinitialize`
+deliberately unguarded so the brain's step 5 runs). The surface SPEAKS
+on both form factors through the shared seam: a dedicated sync-row
+state (`.rekeyIncomplete`, one door "Finish key replacement…" straight
+to the Encryption tab — deliberately never the replaced-keys row, whose
+re-enroll cannot complete a half-run re-key) and an Encryption-surface
+banner above EVERY state arm carrying the completing Replace door (the
+brain's rerun heals every window state, from `.keysReplaced` included);
+account deletion clears the marker (a purged account owes no
+completion). The RULED order is untouched — the marker brackets it; the
+`AccountRekey` doc comment now analyzes all three windows (the
+reviewer's observed gap). Sync/ footprint: SyncEngine +21, SyncSchema
++13; Merge/Repairs/SyncEncryption/SyncScheduler ZERO-diff across the
+whole fix range (verified). One closeout note: `sync_state` gains its
+third key (`rekey_in_progress`) — AppSpec §7's `-- keys:` comment line
+is the closeout's to update with the delta, flagged here rather than
+edited canon mid-ladder. *Pins + behavioral-revert evidence:*
+`theRekeyMarkerRefusesRoundsAcrossRelaunchUntilTheDoorCompletes` (core;
+engine check neutralized → RED 5 issues: both "an error was expected
+but none was thrown", `outboxCount == outboxBefore` failed, "(cursorAfter
+→ \"5\") == (cursorBefore → nil)", server rowCount changed — the exact
+silent mechanism); the ORDER pin's new marker half (brain's marker
+write removed → RED: "vault-write:…:marker=clear" ≠ "…:marker=set") and
+`aFailedTruncateLeavesTheRerunRoadThatCompletes`'s marker half (same
+revert → RED on `markerMidRoad`); the wrong-passphrase test's
+no-marker-residue arm; `theRekeyIncompleteRowSpeaksTheFinishRoad` (Mac;
+classifier arm neutralized → RED: "(face.kind → .error)" with the
+generic Retry/Account doors — the pre-fix presentation);
+`theSurfaceReSpeaksTheRerunRoadFromThePersistedMarker` +
+`thePersistedMarkerReachesTheSurfaceAndDeletionClearsIt` (refresh read
+removed → RED on `rekeyIncomplete → false` in both) +
+`aFailedRekeyKeepsTheBannerUp`; plus marker-clear assertions riding the
+standing order/wiring pins. All restored green after each revert.
+
+**R1-2 (MINOR) — FIXED (comment/record class, no pin per the finding).**
+*Independent trace:* `08_phase14b_lockstep.sql:61–62` declares
+`user_id uuid primary key references auth.users (id) on delete cascade`
+— deleting the auth user first would succeed and cascade the vault row,
+so the three "vault must die before the user row can / load-bearing"
+claims described a RESTRICT that does not exist. *Fix:* 09's section-7
+header and in-body comment corrected (its own commit — the SQL-artifact
+convention; zero statements changed, still AUTHORED NEVER DEPLOYED);
+the DDL pin's doc + inline comments corrected (the order assertions
+stand — the order is the RULED reporting shape, now named as a
+deliberate choice); the batch-2 record's dated correction APPENDED
+below its original text, never rewritten.
+
+**R1-3 (MINOR) — FIXED.** *Independent trace, reproduced empirically in
+a scratch run before fixing:* `variorumISO8601` (`.SSS'Z'`) parses no
+offset shape; plain `ISO8601DateFormatter` parses no fraction — so
+`2020-01-01T00:00:00.123456+00:00` → nil under BOTH arms → counts
+CURRENT; and PostgREST serializes `timestamptz` with microseconds
+whenever non-zero, making that the common integration shape. The same
+scratch run verified `.withFractionalSeconds` parses 1–6 fractional
+digits on the deployment OSes (the historical exactly-3 limitation is
+gone), so the reviewer's proposed fallback is sufficient. *Fix:* one
+shared `HostedSyncTier.parseServerTimestamp` (canonical → plain →
+fractional) feeding `isCurrent` AND `expiryLine`; the fail-open arm
+survives for genuinely alien text (the recorded design call). *Pin:*
+`postgRESTFractionalTimestampsParseAndExpire` — run LITERALLY red-on-old
+(written first, executed on the pre-fix tree → RED, 3 issues: the past
+fractional expiry counted current, the trimmed-zero shape counted
+current, `expiryLine` nil on a real date), then green after the fix.
+
+**R1-4 (NIT) — FIXED (structural class, traced justification, no pin
+per the guard's architectural arm).** *Independent trace:* with
+`[weak self]`, a deallocated AppServices makes `onNewVaultMaterial`
+complete WITHOUT adopting; the brain (which cannot know) proceeds to
+the truncate, leaving this device the stale writer against its own
+re-key. Practically unreachable — AppServices is app-lifetime and the
+door is only drivable from its live UI — hence no pin: a red-on-old
+test would require deallocating AppServices mid-run, a state the app
+cannot reach. *Fix (smallest honest):* STRONG capture — the closure
+lives only for the run (the brain is a local), so the strong reference
+makes the adopt-before-truncate contract structural at zero cycle risk;
+the alternative throwing-adoption contract would have reshaped the core
+type for a hazard the capture eliminates outright.
+
+**R1-5 (NIT) — FIXED (comment placement, no pin).** *Independent
+trace:* the 14a sign-in doc block and the 14c sign-up block form one
+contiguous `///` run above `signUpClosedMessage`, so the sign-in
+commentary ("…exactly wrong on the sign-in form itself") documented the
+wrong declaration and `signInFailureMessage` sat bare. *Fix:* the block
+moved home above `signInFailureMessage`, with a one-line dated note of
+the move.
+
+**Verification (all synchronous):** core **1194/127 GREEN** (was
+1193/127 — +1 the relaunch pin, exactly accounted) · Mac touched
+suites + the tutorial spine **111/19 GREEN** (EncryptionFlowTests'
+eight suites · TierAndOnboardingTests' three · AuthSessionTests · the
+seven `Tutorial*Tests`; the full-suite baseline 1240/219 tripwire-only
+stands per the no-full-suite-rerun discipline — this session's Mac
+delta is +5 tests in already-run suites, all green) · mobile
+**175/26 GREEN** (iPhone 17 simulator — the shared seam carries the
+banner, the row state, and the classifier; no mobile-only code) ·
+engine inland ZERO-diff re-verified. Ready for ROUND 2 (the reviewer's
+re-review over these fixes).
+
 ### The stargazing.tech checkout — contract facts (for the site's own
 ### agent)
 
