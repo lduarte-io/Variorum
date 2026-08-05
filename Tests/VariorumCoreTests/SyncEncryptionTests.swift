@@ -135,7 +135,7 @@ struct SyncEncryptionTests {
                 "deleted_at": .null,
             ],
             syncVersion: 0)
-        _ = try await server.push([plaintextRow])
+        _ = try await server.push([plaintextRow], activeKeyID: SyncTestKeys.corpusKeyID)
 
         let outboxBefore = try b.outboxCount()
         await #expect(throws: SyncError.unencryptedValueInEncryptedColumn(
@@ -170,7 +170,7 @@ struct SyncEncryptionTests {
         let one = await server.currentRow(table: "container", rowID: postOne)!
         var two = await server.currentRow(table: "container", rowID: postTwo)!
         two.columns["title"] = one.columns["title"]
-        _ = try await server.push([two])
+        _ = try await server.push([two], activeKeyID: SyncTestKeys.corpusKeyID)
 
         do {
             _ = try await b.pull()
@@ -224,14 +224,14 @@ actor CountingTransport: SyncTransport {
         self.inner = inner
     }
 
-    func push(_ batch: [SyncRow]) async throws -> [SyncPushOutcome] {
+    func push(_ batch: [SyncRow], activeKeyID: String) async throws -> [SyncPushOutcome] {
         contacts += 1
-        return try await inner.push(batch)
+        return try await inner.push(batch, activeKeyID: activeKeyID)
     }
 
-    func pull(since: Int64, limit: Int) async throws -> [SyncPulledRow] {
+    func pull(since: Int64, limit: Int, activeKeyID: String) async throws -> [SyncPulledRow] {
         contacts += 1
-        return try await inner.pull(since: since, limit: limit)
+        return try await inner.pull(since: since, limit: limit, activeKeyID: activeKeyID)
     }
 
     func schemaVersion() async throws -> Int {

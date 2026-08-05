@@ -62,12 +62,12 @@ private actor GatedSyncTransport: SyncTransport {
         await withCheckedContinuation { gateWaiters.append($0) }
     }
 
-    func push(_ batch: [SyncRow]) async throws -> [SyncPushOutcome] {
+    func push(_ batch: [SyncRow], activeKeyID: String) async throws -> [SyncPushOutcome] {
         await pass()
         return batch.map { _ in .rejected(current: nil) }
     }
 
-    func pull(since: Int64, limit: Int) async throws -> [SyncPulledRow] {
+    func pull(since: Int64, limit: Int, activeKeyID: String) async throws -> [SyncPulledRow] {
         await pass()
         return []
     }

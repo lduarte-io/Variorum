@@ -25,10 +25,15 @@ final class SyncClient {
     /// calls (WithRandomNumberGenerator locks internally), so jitter never
     /// repeats within a device but stays deterministic per seed.
     private let randomNumberGenerator: WithRandomNumberGenerator
-    /// The device's signed-in owner (Phase 9c): nil = signed out (the
-    /// default, matching every pre-9c scenario). Mutable so a scenario can
-    /// sign a device in mid-life — the next `with`/engine call binds it.
-    var ownerID: String?
+    /// The device's signed-in owner (Phase 9c). Phase 14c changed the
+    /// default from nil (signed out — the pre-9c modeling convenience) to
+    /// the fake server's default account: the born-multi-tenant mirror
+    /// refuses unowned pushes on the owner-carrying tables, and
+    /// post-14c a syncing device is ALWAYS signed in (the transport
+    /// requires a session; adoption ran at 9c). Mutable so a scenario can
+    /// model signed-out or a different account — the next `with`/engine
+    /// call binds it.
+    var ownerID: String? = FakeSyncServer.defaultUserID
     /// The device's E2EE key provider (Phase 14b): the suite default is the
     /// shared test key world, so EVERY scenario runs over ciphertext — the
     /// crown assertion. Mutable so a scenario can model a locked/unenrolled

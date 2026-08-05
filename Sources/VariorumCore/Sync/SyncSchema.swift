@@ -389,6 +389,20 @@ public enum SyncError: Error, Equatable, Sendable {
     /// value in an encrypted-classified column). Nothing unauthenticated
     /// is ever applied; the round refuses with the row named.
     case payloadCryptoFailure(table: String, rowID: String, column: String, detail: String)
+    /// Phase 14c (THE DESIGN item 2): the server's vault-key-id fence
+    /// refused the round — this device's held corpus key id no longer
+    /// matches the account's current `key_vault` row (the account was
+    /// re-keyed elsewhere, or the vault is mid-replacement). The whole
+    /// round refuses — outbox intact, cursor unmoved — and the app
+    /// surfaces the CF-16 keys-were-replaced state; re-enrollment with
+    /// the current passphrase is the road back.
+    case encryptionKeysReplaced
+    /// Phase 14c (THE DESIGN item 5): the server's entitlement gate
+    /// refused the round — hosted sync is not active on this account.
+    /// Outbox intact, cursor unmoved; local writing is untouched (the
+    /// signed-out-reads-as-normal principle: sync is the tier, the app
+    /// is not).
+    case syncNotEntitled
 }
 
 extension SyncError: CustomStringConvertible {
@@ -417,6 +431,13 @@ extension SyncError: CustomStringConvertible {
             return "Sync refused: '\(table)' row '\(rowID)' column '\(column)' failed to "
                 + "encrypt/decrypt (\(detail)). Nothing unverified lands; outbox and cursor "
                 + "are untouched."
+        case .encryptionKeysReplaced:
+            return "Sync paused: this account's encryption keys were replaced — this device "
+                + "still holds the previous keys. Re-enroll with the current encryption "
+                + "passphrase; nothing is lost while paused."
+        case .syncNotEntitled:
+            return "Sync paused: hosted sync isn't active on this account. Your writing "
+                + "stays safe on this device; sync resumes once the plan is active."
         }
     }
 }

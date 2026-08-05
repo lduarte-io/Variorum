@@ -113,8 +113,11 @@ public struct SyncEngine: Sendable {
                 // payloads; `chunk` itself stays PLAINTEXT — it is what the
                 // accept bookkeeping compares against the live row
                 // (clear-vs-re-dirty) and what the reject path merges from.
+                // Phase 14c: the round's held key id rides every call — the
+                // server's vault-key-id fence compares it (THE DESIGN 2).
                 let wireChunk = try chunk.map(crypto.encryptForWire)
-                let rawOutcomes = try await transport.push(wireChunk)
+                let rawOutcomes = try await transport.push(
+                    wireChunk, activeKeyID: crypto.keys.corpusKeyID)
                 // THE SEAM, reject-merge half: a reject's `current` row is
                 // opened HERE, before the FK check and the merge — inland
                 // logic sees plaintext only.
@@ -230,7 +233,10 @@ public struct SyncEngine: Sendable {
         var pulled: [SyncPulledRow] = []
         var fetchCursor = since
         while true {
-            let window = try await transport.pull(since: fetchCursor, limit: batchSize)
+            // Phase 14c: the held key id rides the pull half too — both
+            // round halves are fenced (THE DESIGN 2).
+            let window = try await transport.pull(
+                since: fetchCursor, limit: batchSize, activeKeyID: crypto.keys.corpusKeyID)
             guard !window.isEmpty else { break }
             // THE SEAM, pull half (Phase 14b): every arriving row is opened
             // BEFORE the apply transaction exists — a decrypt refusal

@@ -621,11 +621,11 @@ struct TerminologyPinTests {
 struct SyncLockedFaceTests {
     private actor CountingTransport: SyncTransport {
         private(set) var calls = 0
-        func push(_ batch: [SyncRow]) async throws -> [SyncPushOutcome] {
+        func push(_ batch: [SyncRow], activeKeyID: String) async throws -> [SyncPushOutcome] {
             calls += 1
             return batch.map { _ in .rejected(current: nil) }
         }
-        func pull(since: Int64, limit: Int) async throws -> [SyncPulledRow] {
+        func pull(since: Int64, limit: Int, activeKeyID: String) async throws -> [SyncPulledRow] {
             calls += 1
             return []
         }

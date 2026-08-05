@@ -2,7 +2,9 @@ import Foundation
 
 /// The real-server implementation of `SyncTransport` (SyncSpec §2): the two
 /// RPC endpoints (`sync_push`, `sync_pull` — Server/supabase/02_sync_rpc.sql,
-/// as reworked by 03/04) over URLSession, authenticated per call through the
+/// as reworked by 03/04/05/06 and rebuilt tenant-scoped by 09, whose new
+/// signatures carry the Phase 14c `active_key_id` fence parameter) over
+/// URLSession, authenticated per call through the
 /// `UserSessionProviding` seam (Phase 9c, Step 2 — replacing Phase 5's
 /// static single-user token; the paste-in's fixed token rides a
 /// `StaticSessionProvider` until Step 5 retires it into the real sign-in).
@@ -67,8 +69,10 @@ public struct SupabaseTransport: SyncTransport {
 
     // MARK: - SyncTransport
 
-    public func push(_ batch: [SyncRow]) async throws -> [SyncPushOutcome] {
-        let data = try await rpc("sync_push", body: PushRequest(batch: batch.map(PushItem.init)))
+    public func push(_ batch: [SyncRow], activeKeyID: String) async throws -> [SyncPushOutcome] {
+        let data = try await rpc(
+            "sync_push",
+            body: PushRequest(batch: batch.map(PushItem.init), activeKeyID: activeKeyID))
         let results = try JSONDecoder().decode([PushResult].self, from: data)
         guard results.count == batch.count else {
             throw SupabaseTransportError.mismatchedResultCount(
@@ -77,8 +81,10 @@ public struct SupabaseTransport: SyncTransport {
         return try results.map { try $0.outcome() }
     }
 
-    public func pull(since: Int64, limit: Int) async throws -> [SyncPulledRow] {
-        let data = try await rpc("sync_pull", body: PullRequest(sinceSeq: since, maxRows: limit))
+    public func pull(since: Int64, limit: Int, activeKeyID: String) async throws -> [SyncPulledRow] {
+        let data = try await rpc(
+            "sync_pull",
+            body: PullRequest(sinceSeq: since, maxRows: limit, activeKeyID: activeKeyID))
         return try JSONDecoder().decode([PulledItem].self, from: data).map(\.pulledRow)
     }
 
@@ -133,18 +139,36 @@ public struct SupabaseTransport: SyncTransport {
             let (retryData, retryStatus) = try await send(
                 function, payload: payload, bearer: refreshed.accessToken)
             guard (200..<300).contains(retryStatus) else {
-                throw SupabaseTransportError.httpFailure(
+                throw Self.classifiedFailure(
                     status: retryStatus,
                     body: String(data: retryData, encoding: .utf8) ?? "")
             }
             return retryData
         }
         guard (200..<300).contains(status) else {
-            throw SupabaseTransportError.httpFailure(
+            throw Self.classifiedFailure(
                 status: status,
                 body: String(data: data, encoding: .utf8) ?? "")
         }
         return data
+    }
+
+    /// Phase 14c: the 09 RPCs RAISE with a leading marker token for the
+    /// two refusal classes the client must classify (the vault-key-id
+    /// fence → the CF-16 replaced state; the entitlement gate → the tier
+    /// face). PostgREST serves a RAISE as a non-2xx JSON body carrying
+    /// the message, so the body is matched by marker — tokens, not
+    /// sentences (the human wording may evolve server-side; the marker
+    /// may not, and the DDL pin holds both sides). Everything else stays
+    /// the plain HTTP failure it always was.
+    static func classifiedFailure(status: Int, body: String) -> any Error {
+        if body.contains(SyncServerRefusalMarker.staleKeyFence) {
+            return SyncError.encryptionKeysReplaced
+        }
+        if body.contains(SyncServerRefusalMarker.notEntitled) {
+            return SyncError.syncNotEntitled
+        }
+        return SupabaseTransportError.httpFailure(status: status, body: body)
     }
 
     private func send(
@@ -179,6 +203,14 @@ public enum SupabaseTransportError: Error, Equatable, Sendable {
 
 struct PushRequest: Encodable {
     let batch: [PushItem]
+    /// Phase 14c: the vault-key-id fence parameter (09's required
+    /// `active_key_id`).
+    let activeKeyID: String
+
+    enum CodingKeys: String, CodingKey {
+        case batch
+        case activeKeyID = "active_key_id"
+    }
 }
 
 struct PushItem: Codable {
@@ -255,9 +287,12 @@ struct PulledItem: Codable {
 struct PullRequest: Encodable {
     let sinceSeq: Int64
     let maxRows: Int
+    /// Phase 14c: the vault-key-id fence parameter (both round halves).
+    let activeKeyID: String
 
     enum CodingKeys: String, CodingKey {
         case sinceSeq = "since_seq"
         case maxRows = "max_rows"
+        case activeKeyID = "active_key_id"
     }
 }

@@ -185,20 +185,30 @@ struct OwnerIdentityTests {
         }
     }
 
-    // MARK: The backfill choreography converges (brief interpretation 3)
+    // MARK: The backfill choreography converges (brief interpretation 3;
+    // REWRITTEN at Phase 14c batch 1 to the born-multi-tenant reality)
 
-    /// The §12 ordering, end to end on the sync harness: a pre-9c corpus
-    /// exists on BOTH devices (NULL owners everywhere, mirror included);
-    /// the Mac signs in, adopts, pushes; the phone pulls — both stores
-    /// converge byte-identical with every owner-carrying row owned. Only
-    /// after this state would the author paste 04 (the flip is server-side
-    /// and deliberately not modeled here — the fake stays auth-agnostic).
+    /// The adoption choreography, end to end on the sync harness — the
+    /// POST-14c shape: rows authored signed OUT are unowned locally (that
+    /// state still exists), but an unowned corpus never reaches the
+    /// mirror anymore — the born-multi-tenant server refuses unowned
+    /// pushes on the owner-carrying tables, and a signed-out device
+    /// cannot compose a round at all (the transport requires a session).
+    /// So adoption PRECEDES first sync: each device signs in, adopts its
+    /// own unowned rows, and only then converges — the backfill rides the
+    /// ordinary outbox exactly as before, and both stores converge
+    /// byte-identical, fully owned. (The original pre-9c shape — an
+    /// unowned corpus converging THROUGH the mirror, adoption
+    /// propagating after — is retired with the 9c-era mirror it modeled;
+    /// this file's history holds it.)
     @Test func backfillPushesAndConvergesAcrossDevices() async throws {
         let server = FakeSyncServer()
         let mac = try SyncClient(name: "mac", prefix: "AA", transport: server)
         let phone = try SyncClient(name: "phone", prefix: "BB", transport: server, clockOffset: 977, seed: 2)
 
-        // The pre-9c corpus: authored on both devices, converged unowned.
+        // Authored signed OUT on both devices: locally unowned.
+        mac.ownerID = nil
+        phone.ownerID = nil
         try mac.with { ops, _ in
             let post = try ops.createPost(title: "mac post", profile: .blog)
             _ = try ops.newBlock(in: post.id, text: "Desk thoughts.", at: .end)
@@ -208,15 +218,17 @@ struct OwnerIdentityTests {
             let entry = try ops.createOrOpenJournalEntry(entryDate: "2026-07-09").container
             _ = try ops.newBlock(in: entry.id, text: "Phone thoughts.", at: .end)
         }
-        _ = try await syncToQuiescence(mac, phone, server: server)
         #expect(try mac.db.fetchInt(
             "SELECT COUNT(*) FROM container WHERE owner_id IS NOT NULL") == 0)
 
-        // The Mac signs in and adopts; the backfill rides the ordinary
-        // outbox to the mirror; the phone converges.
-        mac.ownerID = Self.author
-        let report = try mac.with { ops, _ in try ops.adoptOwnerID() }
-        #expect(report.total > 0)
+        // Both sign in as the account and adopt their OWN unowned rows
+        // BEFORE any round; the adoption rides the ordinary outbox.
+        mac.ownerID = FakeSyncServer.defaultUserID
+        phone.ownerID = FakeSyncServer.defaultUserID
+        let macReport = try mac.with { ops, _ in try ops.adoptOwnerID() }
+        let phoneReport = try phone.with { ops, _ in try ops.adoptOwnerID() }
+        #expect(macReport.total > 0)
+        #expect(phoneReport.total > 0)
         _ = try await syncToQuiescence(mac, phone, server: server)
 
         #expect(try mac.syncedDump() == phone.syncedDump(),

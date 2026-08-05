@@ -32,12 +32,23 @@ public protocol SyncTransport: Sendable {
     /// Pushes a batch; the result array is per-row, index-aligned with the
     /// batch. Each `SyncRow.syncVersion` is the CAS base (the row's last
     /// server-accepted version; 0 for never-accepted rows).
-    func push(_ batch: [SyncRow]) async throws -> [SyncPushOutcome]
+    ///
+    /// `activeKeyID` (Phase 14c, THE DESIGN item 2 — the vault-key-id
+    /// fence): the corpus key id this device's round seals with, compared
+    /// server-side against the account's current `key_vault` row. A
+    /// mismatch refuses the WHOLE round (`SyncError.encryptionKeysReplaced`
+    /// — the CF-16 state), so a stale writer can never poison-push past a
+    /// re-key. A REQUIRED parameter on the protocol, deliberately no
+    /// default — wrappers forward, fakes enforce (the schemaVersion
+    /// doctrine below): a wrapper that silently dropped the key id would
+    /// bypass the fence in every test that composes it.
+    func push(_ batch: [SyncRow], activeKeyID: String) async throws -> [SyncPushOutcome]
 
     /// Rows changed after `since`, ordered by `server_seq`, at most `limit`.
     /// State-based: each row appears once, in its current state, stamped
-    /// with its latest seq — never an op log.
-    func pull(since: Int64, limit: Int) async throws -> [SyncPulledRow]
+    /// with its latest seq — never an op log. `activeKeyID` as on `push`
+    /// (both round halves are fenced).
+    func pull(since: Int64, limit: Int, activeKeyID: String) async throws -> [SyncPulledRow]
 
     /// The mirror's deployed schema-version marker (SyncSpec §12's
     /// version-check mechanism — shipped with the Phase 11 lockstep event,

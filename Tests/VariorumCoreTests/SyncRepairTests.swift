@@ -352,7 +352,7 @@ struct SyncRepairTests {
         try await a.push()
         var staleBlock = await server.currentRow(table: "block", rowID: blockID)!
         staleBlock.columns["default_variant_id"] = .text(defaultID)
-        _ = try await server.push([staleBlock])
+        _ = try await server.push([staleBlock], activeKeyID: SyncTestKeys.corpusKeyID)
 
         try await b.pull()
         let bDefault = try b.db.fetchString(

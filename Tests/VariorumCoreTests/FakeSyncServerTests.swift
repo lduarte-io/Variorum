@@ -20,14 +20,14 @@ struct FakeSyncServerTests {
 
     @Test func casAcceptBumpsVersionAndStampsMonotonicSeq() async throws {
         let server = FakeSyncServer()
-        let first = try await server.push([containerRow(id: "c1", title: "a", base: 0)])
+        let first = try await server.push([containerRow(id: "c1", title: "a", base: 0)], activeKeyID: SyncTestKeys.corpusKeyID)
         guard case .accepted(let v1, let s1) = first[0] else {
             Issue.record("fresh row not accepted"); return
         }
         #expect(v1 == 1)
         #expect(s1 == 1)
 
-        let second = try await server.push([containerRow(id: "c1", title: "b", base: 1)])
+        let second = try await server.push([containerRow(id: "c1", title: "b", base: 1)], activeKeyID: SyncTestKeys.corpusKeyID)
         guard case .accepted(let v2, let s2) = second[0] else {
             Issue.record("matching base not accepted"); return
         }
@@ -37,11 +37,11 @@ struct FakeSyncServerTests {
 
     @Test func staleBaseRejectsWithTheCurrentServerRow() async throws {
         let server = FakeSyncServer()
-        _ = try await server.push([containerRow(id: "c1", title: "server truth", base: 0)])
+        _ = try await server.push([containerRow(id: "c1", title: "server truth", base: 0)], activeKeyID: SyncTestKeys.corpusKeyID)
 
         // A second writer still at base 0: rejected, and the reject carries
         // the CURRENT row (version + seq + payload), never a merge.
-        let result = try await server.push([containerRow(id: "c1", title: "stale attempt", base: 0)])
+        let result = try await server.push([containerRow(id: "c1", title: "stale attempt", base: 0)], activeKeyID: SyncTestKeys.corpusKeyID)
         guard case .rejected(let current) = result[0], let current else {
             Issue.record("stale base was not rejected with the current row"); return
         }
@@ -54,22 +54,23 @@ struct FakeSyncServerTests {
 
     @Test func nonZeroBaseAgainstAbsentRowRejectsWithNil() async throws {
         let server = FakeSyncServer()
-        let result = try await server.push([containerRow(id: "ghost", title: "x", base: 3)])
+        let result = try await server.push([containerRow(id: "ghost", title: "x", base: 3)], activeKeyID: SyncTestKeys.corpusKeyID)
         #expect(result[0] == .rejected(current: nil))
     }
 
     @Test func interleavedWritersConvergeThroughRejectAndRebase() async throws {
         let server = FakeSyncServer()
-        _ = try await server.push([containerRow(id: "c1", title: "from A", base: 0)])
+        _ = try await server.push([containerRow(id: "c1", title: "from A", base: 0)], activeKeyID: SyncTestKeys.corpusKeyID)
 
         // B races with base 0 → rejected; B rebases onto the current version
         // and pushes again → accepted at version 2.
-        let rejected = try await server.push([containerRow(id: "c1", title: "from B", base: 0)])
+        let rejected = try await server.push([containerRow(id: "c1", title: "from B", base: 0)], activeKeyID: SyncTestKeys.corpusKeyID)
         guard case .rejected(let current) = rejected[0], let current else {
             Issue.record("race not rejected"); return
         }
         let rebased = try await server.push(
-            [containerRow(id: "c1", title: "from B", base: current.row.syncVersion)])
+            [containerRow(id: "c1", title: "from B", base: current.row.syncVersion)],
+            activeKeyID: SyncTestKeys.corpusKeyID)
         guard case .accepted(let version, _) = rebased[0] else {
             Issue.record("rebased push not accepted"); return
         }
@@ -81,17 +82,17 @@ struct FakeSyncServerTests {
     @Test func pullOrdersBySeqAndWindowsByCursorAndLimit() async throws {
         let server = FakeSyncServer()
         for (id, title) in [("c1", "one"), ("c2", "two"), ("c3", "three")] {
-            _ = try await server.push([containerRow(id: id, title: title, base: 0)])
+            _ = try await server.push([containerRow(id: id, title: title, base: 0)], activeKeyID: SyncTestKeys.corpusKeyID)
         }
 
-        let firstWindow = try await server.pull(since: 0, limit: 2)
+        let firstWindow = try await server.pull(since: 0, limit: 2, activeKeyID: SyncTestKeys.corpusKeyID)
         #expect(firstWindow.map(\.row.rowID) == ["c1", "c2"])
         #expect(firstWindow.map(\.serverSeq) == [1, 2])
 
-        let rest = try await server.pull(since: firstWindow.last!.serverSeq, limit: 100)
+        let rest = try await server.pull(since: firstWindow.last!.serverSeq, limit: 100, activeKeyID: SyncTestKeys.corpusKeyID)
         #expect(rest.map(\.row.rowID) == ["c3"])
 
-        let empty = try await server.pull(since: rest.last!.serverSeq, limit: 100)
+        let empty = try await server.pull(since: rest.last!.serverSeq, limit: 100, activeKeyID: SyncTestKeys.corpusKeyID)
         #expect(empty.isEmpty)
     }
 
@@ -100,11 +101,11 @@ struct FakeSyncServerTests {
     /// never sees intermediate states.
     @Test func updatedRowAppearsOnceWithLatestStateAndSeq() async throws {
         let server = FakeSyncServer()
-        _ = try await server.push([containerRow(id: "c1", title: "draft", base: 0)])
-        _ = try await server.push([containerRow(id: "c2", title: "other", base: 0)])
-        _ = try await server.push([containerRow(id: "c1", title: "final", base: 1)])
+        _ = try await server.push([containerRow(id: "c1", title: "draft", base: 0)], activeKeyID: SyncTestKeys.corpusKeyID)
+        _ = try await server.push([containerRow(id: "c2", title: "other", base: 0)], activeKeyID: SyncTestKeys.corpusKeyID)
+        _ = try await server.push([containerRow(id: "c1", title: "final", base: 1)], activeKeyID: SyncTestKeys.corpusKeyID)
 
-        let all = try await server.pull(since: 0, limit: 100)
+        let all = try await server.pull(since: 0, limit: 100, activeKeyID: SyncTestKeys.corpusKeyID)
         #expect(all.map(\.row.rowID) == ["c2", "c1"], "re-accepted row moves to its new seq")
         let c1 = all.first { $0.row.rowID == "c1" }!
         #expect(c1.row.columns["title"] == .text("final"))
@@ -114,13 +115,14 @@ struct FakeSyncServerTests {
 
     @Test func tombstonesAreOrdinaryAcceptedUpdates() async throws {
         let server = FakeSyncServer()
-        _ = try await server.push([containerRow(id: "c1", title: "alive", base: 0)])
+        _ = try await server.push([containerRow(id: "c1", title: "alive", base: 0)], activeKeyID: SyncTestKeys.corpusKeyID)
         let result = try await server.push(
-            [containerRow(id: "c1", title: "alive", base: 1, deletedAt: Fixture.now)])
+            [containerRow(id: "c1", title: "alive", base: 1, deletedAt: Fixture.now)],
+            activeKeyID: SyncTestKeys.corpusKeyID)
         guard case .accepted = result[0] else {
             Issue.record("tombstone update rejected"); return
         }
-        let pulled = try await server.pull(since: 1, limit: 10)
+        let pulled = try await server.pull(since: 1, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID)
         #expect(pulled.count == 1)
         #expect(pulled[0].row.isTombstoned)
         #expect(await server.rowCount(table: "container") == 1, "tombstone never removes the row")
@@ -144,7 +146,7 @@ struct FakeSyncServerTests {
                 ],
                 syncVersion: 0)
         }
-        let results = try await server.push([placement("p1"), placement("p2")])
+        let results = try await server.push([placement("p1"), placement("p2")], activeKeyID: SyncTestKeys.corpusKeyID)
         #expect(results.allSatisfy {
             if case .accepted = $0 { return true } else { return false }
         }, "the dumb server must accept both sides of an I2 race")
@@ -160,7 +162,7 @@ struct FakeSyncServerTests {
                 "deleted_at": .null,
             ],
             syncVersion: 0)
-        let danglingResult = try await server.push([dangling])
+        let danglingResult = try await server.push([dangling], activeKeyID: SyncTestKeys.corpusKeyID)
         guard case .accepted = danglingResult[0] else {
             Issue.record("dangling FK refused — the mirror must not have FKs"); return
         }

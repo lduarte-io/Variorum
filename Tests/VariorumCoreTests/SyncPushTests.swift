@@ -138,7 +138,7 @@ struct SyncPushTests {
         var competing = await server.currentRow(table: "container", rowID: postID)!
         competing.columns["title"] = .text(try SyncTestKeys.seal(
             "competing title", table: "container", rowID: postID, column: "title"))
-        _ = try await server.push([competing])
+        _ = try await server.push([competing], activeKeyID: SyncTestKeys.corpusKeyID)
 
         // Local intent: a metadata edit (loses, CAS rebase)…
         try a.with { ops, _ in
@@ -155,7 +155,7 @@ struct SyncPushTests {
         var competing2 = await server.currentRow(table: "container", rowID: postID)!
         competing2.columns["title"] = .text(try SyncTestKeys.seal(
             "edited again remotely", table: "container", rowID: postID, column: "title"))
-        _ = try await server.push([competing2])
+        _ = try await server.push([competing2], activeKeyID: SyncTestKeys.corpusKeyID)
         try a.with { ops, _ in
             try ops.deleteContainer(postID)
         }
@@ -189,7 +189,7 @@ struct SyncPushTests {
         var competing = await server.currentRow(table: "variant", rowID: variantID)!
         competing.columns["working_text"] = .text(try SyncTestKeys.seal(
             "competing text", table: "variant", rowID: variantID, column: "working_text"))
-        _ = try await server.push([competing])
+        _ = try await server.push([competing], activeKeyID: SyncTestKeys.corpusKeyID)
         // …the author edits locally (base is now stale — the push will
         // reject)…
         try a.with { ops, _ in
@@ -261,8 +261,8 @@ actor InterferingTransport: SyncTransport {
         interference = body
     }
 
-    func push(_ batch: [SyncRow]) async throws -> [SyncPushOutcome] {
-        let outcomes = try await inner.push(batch)
+    func push(_ batch: [SyncRow], activeKeyID: String) async throws -> [SyncPushOutcome] {
+        let outcomes = try await inner.push(batch, activeKeyID: activeKeyID)
         if let body = interference {
             interference = nil
             try body()
@@ -270,8 +270,8 @@ actor InterferingTransport: SyncTransport {
         return outcomes
     }
 
-    func pull(since: Int64, limit: Int) async throws -> [SyncPulledRow] {
-        try await inner.pull(since: since, limit: limit)
+    func pull(since: Int64, limit: Int, activeKeyID: String) async throws -> [SyncPulledRow] {
+        try await inner.pull(since: since, limit: limit, activeKeyID: activeKeyID)
     }
 
     func schemaVersion() async -> Int {

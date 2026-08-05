@@ -361,11 +361,11 @@ actor ScriptedTransport: SyncTransport {
         rows = (rows + more).sorted { $0.serverSeq < $1.serverSeq }
     }
 
-    func push(_ batch: [SyncRow]) -> [SyncPushOutcome] {
+    func push(_ batch: [SyncRow], activeKeyID: String) -> [SyncPushOutcome] {
         batch.map { _ in .accepted(newVersion: 1, serverSeq: 0) }  // unused in these tests
     }
 
-    func pull(since: Int64, limit: Int) -> [SyncPulledRow] {
+    func pull(since: Int64, limit: Int, activeKeyID: String) -> [SyncPulledRow] {
         Array(rows.filter { $0.serverSeq > since }.prefix(limit))
     }
 
