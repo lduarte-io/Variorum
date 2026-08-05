@@ -1882,6 +1882,337 @@ prescribes sign-in FIRST and never the bare rerun); suite 4/1 green.
 NIT class per the guard: traced mechanism + justification; the
 structural door-absence rides the ViewBuilder branch.
 
+### THE DEDICATED ISOLATION ROUND (2026-08-05; the proof-bar ruling's extra review — fresh reviewer, boundary-only mandate)
+
+*(Fresh seat, zero implementation context, REVIEW_PROMPT standards; scope
+deliberately narrow and adversarial: can any account read, write,
+overwrite, delete, or infer another account's data through ANY road this
+phase ships? General quality was the standard ladder's and is not
+re-litigated. Everything below was traced against the real artifacts —
+09 read line-by-line, 01–08 enumerated, the Sync/ wire paths, the
+lifecycle brains, the fake + two-user suites — and the three
+boundary-relevant suites were re-run green on HEAD this round
+(`MultiTenantSyncTests` + `AuthRLSDDLTests` + `AccountLifecycleTests`,
+46 tests, 3 suites, all passing).)*
+
+**VERDICT: NO BLOCKER, NO MAJOR. Three MINOR + two NIT findings, none a
+standing cross-tenant road; the SQL's isolation core is genuinely tight
+(the composite-identity design does what the sitting ruled — foreign
+rows are unaddressable, not merely guarded). Every claim only the real
+Postgres can prove is enumerated in the LIVE-PROBE OBLIGATIONS list at
+the end — the gate owes those.**
+
+#### Findings
+
+**[MINOR] I-1 · the shared global `server_seq` is a NEW cross-tenant
+write-activity side channel · 09 §1 (`create sequence if not exists
+sync_server_seq` — ONE sequence, all tenants) + `sync_push`'s accepted
+results (`'server_seq', granted_seq`).** Traced mechanism: every
+accepted push returns the granted seq; a tenant who pushes at t₁
+(granted S₁) and again at t₂ (granted S₂) learns S₂−S₁−(own accepted
+rows between) = rows written by ALL OTHER tenants in the interval — and
+a repeatable probe write (e.g. toggling a setting) makes the sampling
+cadence arbitrary. No content, no uid, no table names disclose — but at
+launch scale (her + the first strangers) "aggregate" ≈ HER: the one
+other tenant can measure her write volume and timing (journaling
+cadence). This class is NEW at 14c: pre-14c no stranger existed to
+observe, and the ratified 14b disclosure envelope ("structure visible,
+words never") ruled what the SERVER sees of one user's corpus — it
+never ruled cross-tenant observability. Not a code defect; no red-on-old
+exists (the behavior is the design working as built). **Disposition owed
+to the author:** (a) accept-and-record — extend the disclosure envelope
+with "global-sequence deltas disclose aggregate foreign write
+volume/timing" (recommended at this scale; the channel is content-free
+and blurs as tenants grow), or (b) a future lockstep event moves to
+per-tenant sequences — client semantics survive by construction
+(post-14c every pull and every seq-ranked repair is already
+partition-internal; SyncSpec §9's ordering authority only ever orders
+within a corpus), but it is a redesign-level event, not a patch.
+
+**[MINOR] I-2 · the hostile FOREIGN-OWNER push refusal has zero
+executable proof · `Tests/.../Support/FakeSyncServer.swift`
+(`FakeSyncServerError.ownerMismatch`) + `MultiTenantSyncTests.swift`.**
+The fake implements the guard's arm and the suite header claims it
+("zero cross-user rows flow through either RPC door"), but grep finds
+NO test that pushes a B-authenticated row carrying A's `owner_id` —
+`ownerMismatch` is never thrown in any test. The claim rests on the DDL
+text pin alone (`pushCarriesTheClientOwnerGuard`, which pins the SQL's
+`is distinct from` line — text, not behavior). Coverage class (no
+red-on-old owed — the fake's arm already exists, so a new test passes
+immediately; its value is exercising the central hostile-write claim
+and pinning it against regression): one two-user test — B's connection
+pushes a `container` row with `owner_id` = A's uid → the WHOLE call
+refuses, zero rows land in either partition. The REAL arm is live-probe
+obligation 5 regardless — that probe, not the fake, is the actual
+proof.
+
+**[MINOR] I-3 · deploy transactionality is assumed, not pinned · 09
+throughout (creates precede their revokes; the entitlement seed at
+lines ~642–644; `entitlement_set` created ~1103, revoked ~1139).**
+Supabase default privileges grant broadly at CREATE time (functions get
+PUBLIC/anon/authenticated EXECUTE; tables get role grants), and 09's
+postures land by trailing revokes. Executed statement-by-statement
+(non-transactionally), sub-second windows exist — worst case
+`entitlement_set` momentarily executable by any role while carrying NO
+`auth.uid()` gate (identity is its parameter, by webhook design).
+Mitigations already real: the revokes are adjacent statements,
+PostgREST's schema cache lags new functions, and signups are OFF at
+deploy (only her token exists). Not a code change — a deploy-procedure
+pin: **execute 09 as ONE transaction** (a single management-API query
+body is one implicit transaction — verify that assumption at the gate)
+**and verify the final grants empirically post-deploy** (live-probe
+obligation 11). The marker-last discipline already covers the
+partial-deploy advertising story.
+
+**[NIT] I-4 · `sync_table_pk(text)` likely still EXECUTE-able by
+`authenticated` · 02 (creation) + 04:81 (revoke).** 04 revoked
+public+anon only; the default-privilege grant to `authenticated` from
+its 02-era creation was never revoked. Disclosure: a constant
+'id'/'key' mapping, public in this repo — zero data, zero tenant reach.
+Optional tidy at a future event; the gate's grant sweep (obligation 11)
+can confirm the actual state either way.
+
+**[NIT] I-5 · 09 carries no re-run guard · the whole file + the seed
+(`insert into entitlement … from auth.users`).** Re-executing 09 after
+strangers exist would DROP every tenant's mirror data tables and
+re-seed `hosted_sync` to EVERY auth user — the seed's "that is exactly
+the author's account" is true only at THIS deploy, by the signups-off
+precondition. The DDL monotonicity pin catches OLD files re-run after
+newer ones, not 09 re-run itself (its marker upsert is idempotent at
+6). The file is documented as a one-time gate act and the deploy is
+architect-held — procedural posture is honest; an in-file guard (abort
+when the marker already reads ≥ 6) would make it structural. Recorded
+for the 14d-era operator, not fix-owed now.
+
+#### Clean verdicts, per attack surface (what this round specifically verified)
+
+**Surface 1 — 09 in full (every RPC, every dynamic-SQL construction,
+every WHERE clause): CLEAN.**
+- **Injection: no client-controlled value reaches SQL as SQL.** Every
+  `%I` identifier is either allowlist-validated first (`tbl` in push —
+  `unknown sync table` raises before any format) or a loop constant over
+  the in-body array (pull's 18 arms, truncate's and purge's deletes);
+  `pk` comes from `sync_table_pk` — an IMMUTABLE constant mapping
+  ('key' for setting, 'id' else), never client data. `row_id`, `caller`,
+  and `full_row` ride `USING` parameters exclusively. `since_seq` and
+  `max_rows` interpolate via `%s` but are TYPED bigint/int parameters —
+  PostgREST's cast fails non-numeric input before the body runs, and a
+  NULL yields malformed SQL that errors the call (fail-closed).
+  `active_key_id` is only ever a plpgsql comparand (`is distinct
+  from`), never dynamic SQL.
+- **Push owner scoping: exact.** The CAS lock+read, the replace-delete,
+  and the insert are all keyed `(caller, id)`; the owner stamp
+  `(item->'columns') || jsonb_build_object('sync_version', …,
+  'owner_id', caller)` uses jsonb `||` right-operand precedence, so a
+  hostile payload smuggling `owner_id` or `sync_version` into `columns`
+  — including for the TEN ownerless tables, where the client-side guard
+  doesn't look — is OVERWRITTEN by the server's stamp before
+  `jsonb_populate_record` ever sees it. `server_seq`/`server_written_at`
+  are unforgeable: the BEFORE INSERT trigger reassigns both before any
+  constraint check, so a payload carrying them changes nothing.
+  Unknown payload keys are dropped by `jsonb_populate_record` (real
+  Postgres semantics — divergence D4 below). The eight's
+  validate-equals-caller guard refuses NULL too (`is distinct from`).
+- **Pull owner scoping: structural.** All 18 arms are generated by ONE
+  loop from TWO templates, and BOTH templates carry `where t.owner_id =
+  %L` — a per-table scoping divergence is impossible by construction,
+  and the DDL pin (`pullFiltersEveryTableToTheCallerAndSubtractsTheStampedOwner`)
+  counts `from %I t` occurrences against owner-filter occurrences so a
+  future template edit cannot drop the predicate silently. The A5
+  horizon survives verbatim in both templates.
+- **Reject payloads cannot leak foreign rows:** the reject's
+  `current_jsonb` comes from the tenant-scoped CAS read — there is no
+  code path in which it holds another owner's row — and the ten's
+  stamped `owner_id` is subtracted before serving.
+- **Gate ordering: sound.** auth-null → fence → entitlement, all before
+  any batch row is touched, in push, pull, and (fence only) truncate;
+  purge deliberately gateless per the ruled design. A RAISE aborts the
+  whole call — no partial application precedes any guard.
+- **`account_data_truncate`:** row-scoped deletes (`where owner_id =
+  $1`) over exactly the registry's 18 (DDL-pinned registry-equal);
+  never key_vault / entitlement / sync_meta; the fence arm is the sync
+  RPCs' exact text; the sequence is never reset.
+- **`account_purge`:** every delete keyed to `caller = auth.uid()` —
+  `delete from auth.users where id = caller` CANNOT name another user
+  under any input, because there is no input; the auth-schema deletes
+  cascade only off the caller's own row. The JWT-until-expiry window is
+  backstopped by the fence's missing-vault arm (the vault row died in
+  the purge), pinned in
+  `AccountLifecycleTests.aLingeringDevicesRoundRefusesAtTheFenceAfterThePurge`.
+- **`entitlement_set`:** service_role-only posture verified in-file
+  (revoked from public, anon, AND authenticated by name; granted to
+  service_role alone) and pinned
+  (`theEntitlementWriteDoorIsServiceRoleOnlyAndProcessorAgnostic`); its
+  deliberate lack of an `auth.uid()` gate is exactly why the posture is
+  the whole boundary — obligation 10 probes it empirically.
+- **FORCE RLS as the second net: coherent.** The no-`to` owner policies
+  bind every role including the definer under FORCE; the RPCs' queries
+  are all owner-scoped so they satisfy the policies (either layer alone
+  still isolates: an RPC guard bug hits the policy; a policy bug hits
+  the guard). `entitlement` and `key_vault` are ENABLE-only
+  DELIBERATELY — the definer must read them for the gates while direct
+  access stays policy-scoped and grant-limited — and both were checked:
+  entitlement is select-own-only to authenticated; key_vault (08,
+  untouched here) is select/insert/update-own-only with NO delete
+  grant or policy, and its insert `with check (auth.uid() = user_id)`
+  means a stranger can neither read, replace, nor fence-out her vault.
+  The one empirical premise (hosted `postgres` carries no BYPASSRLS) is
+  obligation 2.
+- **Error surfaces leak nothing foreign:** the fence marker is ONE
+  static string for missing-vault and mismatch alike; the entitlement
+  marker is static; no error anywhere embeds a key id or another
+  account's facts.
+- **The seed:** correct at deploy time by the signups-off precondition
+  (re-run hazard is I-5).
+
+**Surface 2 — the 01–08 composition's every door, dispositioned:
+CLEAN.** Complete function inventory across 01–08 (grep-verified,
+maintenance/ included): `sync_push(jsonb)` (02→03→04→05→06) and
+`sync_pull(bigint, int)` (same chain) — the ONLY client-callable data
+doors — are DROPPED by 09 §0 before anything else, and the drop is
+DDL-pinned (`theOldRPCSignaturesAreDroppedByTheRebuild`).
+`sync_table_pk(text)` survives (I-4 — harmless constants).
+`sync_schema_version()` survives deliberately (marker only, no tenant
+data). `stamp_server_seq()` returns `trigger` — uncallable via RPC by
+Postgres rule. NO other function, view, or rule exists in 01–08. All 18
+old tables die with their grants and policies at the rebuild's drops;
+`sync_meta` has RLS enabled, zero client privileges, and no policies —
+unreachable except through the definer marker RPC; the 14b-mirror-
+truncate maintenance artifact creates nothing and is registry-pinned.
+
+**Surface 3 — the client wire paths: CLEAN.** Push table names
+originate from the local outbox and are registry-checked client-side
+AND allowlist-checked server-side; the eight's `owner_id` values come
+from 9c Operations stamping. Traced end-to-end for a HOSTILE client: a
+foreign `owner_id` on the eight refuses at the guard; a smuggled
+`owner_id` on the ten is overwritten by the stamp; an unknown table
+raises; unknown columns drop at `jsonb_populate_record`; forged
+`server_seq`/`server_written_at`/`sync_version` are all overwritten —
+no pushed value widens scope beyond the caller's own partition. The
+`active_key_id` the engine sends is the device's own held corpus key id
+(`DeviceKeySyncProvider` → `crypto.keys.corpusKeyID`, pinned by
+`theEngineSendsItsHeldKeyIDOnBothRoundHalves`); lying about it can only
+fence the liar out. The pull direction applies rows through the
+client's own `unknownTable`/`unknownColumn` validation (the
+server-to-client injection guard, unchanged). `resyncReinitialize` is
+local-only. `AccountLifecycleClient.fetchEntitlements` filters
+`user_id=eq.<own>` AND rides the own-row RLS policy.
+
+**Surface 4 — the E2EE composition: NOT WEAKENED.** The only new
+server-visible datum this phase adds to the wire is the caller's own
+corpus key id — already stored server-side in their own `key_vault`
+row, so zero new disclosure. Both refusal markers are static strings;
+`PayloadCipherError`'s cases carry no key material; truncate/purge
+return counts only. `AccountRekey` mints fresh keys client-side, writes
+the vault CAS-guarded (`revision`) under owner-only RLS, adopts custody
+before the truncate, and presents the NEW id to the fenced truncate —
+the C-3 poison-push window stays structurally closed
+(`aStaleWritersRoundRefusesWithTheReplacedStateAndHealsByTheReKeyRoad`
+proves the whole arc, B's world untouched throughout). The
+stranger-corpus-unreadable proof is carried forward with BOTH arms
+(wrong key; wrong key under her AAD) in
+`aStrangersStoredCorpusIsExactlyAsUnreadableAsHers`, and the two-tenant
+mirror dump asserts `e1:` ciphertext across every encrypted column of
+EVERY account (`allStoredRows` spans tenants).
+
+**Surface 5 — the suites vs the real Postgres: the proofs cover the
+boundary claims they CAN cover; the divergences, enumerated:**
+- **D1** — the fake accepts a NULL `owner_id` into the caller's
+  partition (recorded latitude; legacy signed-out fleets); the real 09
+  refuses (`is distinct from`). DDL-pinned text; live obligation 6.
+- **D2** — the foreign-owner arm is implemented but untested (finding
+  I-2); live obligation 5.
+- **D3** — the fake ACCEPTS and stores unknown table names where the
+  real server raises `unknown sync table`. No isolation consequence
+  (storage is partitioned either way; a served echo would refuse
+  client-side as `unknownTable`); live obligation 12 covers the real
+  arm cheaply.
+- **D4** — the fake stores payloads verbatim (unknown COLUMN keys
+  included) where real `jsonb_populate_record` drops them; a fake echo
+  of an unknown column would refuse client-side (`unknownColumn`). No
+  hole; recorded.
+- **D5** — entitlement expiry is a Bool in the fake; the real
+  `expires_at > now()` arm is DDL-pinned text only. Live obligation 8.
+- **D6** — `account_data_truncate`'s SERVER-side fence has no fake twin
+  (the harness's `RecordingLifecycle` bridges to an unfenced
+  `truncateAccount(_:)`); the client-side ORDER (new-vault-first,
+  truncate presents the NEW id) is what the harness pins. Live
+  obligation 7.
+- **D7** — the RLS/FORCE second net is not emulated at all (a Swift
+  fake cannot execute policies — the recorded caveat). Live
+  obligations 1, 2, 9.
+- **D8** — auth-user removal is modeled as account disappearance; the
+  real DML privilege rests on the build-time lookup. The planned
+  probe-account deletion is the live proof (obligation 4).
+- **D9** — a concurrent same-row base-0 insert race errors the whole
+  batch on the real server (composite-PK violation; the retry heals via
+  the then-clean CAS reject) where the actor-serialized fake rejects
+  cleanly. Transient-error divergence, pre-existing class (the old
+  single-column PK had it too), no isolation consequence.
+- **D10** — the fake's `schemaVersion()` answers unauthenticated; the
+  real RPC requires `authenticated`. The marker is non-secret; no
+  consequence.
+
+**Surface 6 — new inference/metadata classes within the ruled
+envelope:** ONE found — I-1 (the global-seq channel). Checked and
+clean otherwise: the entitlement table reads own-row only; every
+refusal body names only the caller's own account states; pull cost is
+partition-local (the per-tenant `(owner_id, server_seq)` indexes), so
+timing discloses nothing foreign; the fence read is a PK lookup.
+
+#### LIVE-PROBE OBLIGATIONS (what only the real Postgres can prove — the gate runs these; 1–4 were already planned, 5–12 are this round's additions)
+
+1. **Stranger-sees-zero through BOTH RPCs** with the uid-checked probe
+   account (planned): probe pulls from 0 against her populated corpus →
+   zero rows; probe pushes; her next pull → zero probe rows.
+2. **BYPASSRLS empirical check** on the hosted `postgres` role —
+   explicitly covering the owner of all FOUR definer data-functions
+   (sync_push, sync_pull, account_data_truncate, account_purge) and the
+   18 tables (planned; the FORCE-RLS second net is real only if this
+   holds).
+3. **Probe-account entitlement grant** via `entitlement_set` as
+   service_role (planned — the batch-1 held item).
+4. **Probe-account deletion** = `account_purge`'s live verification:
+   auth user gone, vault row gone, entitlement gone, the calling
+   session dead, and the lingering-JWT window refusing at the fence
+   (planned).
+5. **Foreign-owner push refusal (D2/I-2's real arm):** as the probe,
+   push a `container` row carrying HER uid as `owner_id` → the whole
+   call refuses with `owner_id mismatch`; assert zero new rows in
+   EITHER partition.
+6. **NULL-owner push refusal (D1's strict arm):** as the probe, push a
+   client-carried table row with `owner_id` NULL → refused.
+7. **The truncate door's server fence (D6):** call
+   `account_data_truncate` with a wrong/stale `active_key_id` → expect
+   `VARIORUM_STALE_KEY_FENCE` and ZERO rows deleted (verify counts);
+   then with the current id → scoped deletion works.
+8. **The entitlement expiry arm (D5):** `entitlement_set(probe,
+   'hosted_sync', true, <past timestamp>, 'probe-expiry-test')` → both
+   RPC halves refuse `VARIORUM_NO_ENTITLEMENT`; re-grant heals with no
+   state surgery.
+9. **Direct-table-access denial:** as the probe's authenticated token,
+   GET `/rest/v1/container` (and one more data table, plus
+   `/rest/v1/sync_meta`) → privilege refusal; `/rest/v1/entitlement` →
+   own row only; `/rest/v1/key_vault` → own row only.
+10. **`entitlement_set` as authenticated** (the probe's token) → EXECUTE
+    refused — the service_role-only posture, empirically.
+11. **Post-deploy grant sweep (I-3/I-4):** `has_function_privilege`
+    for anon AND authenticated across all five new functions matches
+    09's letter; confirm the deploy body ran as ONE transaction (or
+    re-verify grants immediately after); optionally check
+    `sync_table_pk`'s authenticated EXECUTE while there.
+12. **Unknown-table refusal + composite-identity CAS (D3 + the
+    partition twin):** push table `not_a_table` → `unknown sync table`;
+    push a row whose id EQUALS one of hers at base 0 → accepted at
+    version 1 in the probe's partition, her row byte-untouched (the
+    live twin of `collidingRowIDsLandInSeparatePartitionsWithIndependentCAS`).
+
+*(Dispositions owed: I-1 is the author's call — accept-and-record into
+the disclosure envelope, or slot a per-tenant-sequence event; I-2 is a
+one-test add at any owner's hand; I-3/I-5 are gate-procedure pins for
+the architect's deploy checklist; I-4 is optional tidying. This round
+fixed nothing, per its mandate.)*
+
 ### The stargazing.tech checkout — contract facts (for the site's own
 ### agent)
 
