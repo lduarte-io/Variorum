@@ -487,6 +487,38 @@ struct CrossoverRoundTests {
         #expect(!EncryptionSession.isPayloadCryptoError("Sync error: something else"))
     }
 
+    /// Phase 14c — the FENCE's classifier arm (CF-16's new server-side
+    /// trigger): the vault-key-id fence refusal classifies TRUE here and
+    /// FALSE everywhere it must not; the other classifiers stay disjoint
+    /// from it.
+    @Test func theFenceRefusalClassifiesIntoTheReplacedStateAndNowhereElse() {
+        let fence = String(describing: SyncError.encryptionKeysReplaced)
+        #expect(EncryptionSession.isKeysReplacedError(fence))
+        #expect(!EncryptionSession.isKeysReplacedError(
+            String(describing: SyncError.encryptionKeysUnavailable)))
+        #expect(!EncryptionSession.isKeysReplacedError(
+            String(describing: SyncError.syncNotEntitled)),
+            "the tier refusal is NOT a keys state — it must never wear the replaced face")
+        #expect(!EncryptionSession.isPayloadCryptoError(fence),
+                "the two CF-16 arms are disjoint classifiers for one state")
+        #expect(!EncryptionSession.isKeysLockedError(fence))
+    }
+
+    /// Phase 14c: the fence refusal PRESENTS as the same replaced-keys row
+    /// as the payload-crypto arm — one state, one face, one door (the
+    /// Encryption tab), whichever trigger fired.
+    @Test func theFenceRefusalPresentsAsTheReplacedRow() {
+        let face = SyncRowFace.face(
+            allowsSync: true, isConfigured: true, signedIn: true,
+            isSyncing: false,
+            lastError: String(describing: SyncError.encryptionKeysReplaced),
+            lastErrorIsOffline: false)
+        #expect(face.kind == .keysReplaced)
+        #expect(face.doors == [SyncRowFace.Door(
+            label: "Re-enroll…", act: .openAccount(.encryption))],
+                "the fence's row door opens the Encryption tab directly — CF-16's one act")
+    }
+
     /// CF-16 (the classifier's face) + the ruled copy: a payload-crypto
     /// refusal presents as the replaced-keys row with ONE door opening the
     /// Encryption tab, and the surface's headline is the ruled sentence

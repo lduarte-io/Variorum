@@ -97,10 +97,14 @@ nonisolated struct SyncRowFace: Equatable {
                     Door(label: "Unlock…", act: .openAccount(.encryption)),
                 ])
             }
-            if EncryptionSession.isPayloadCryptoError(error) {
-                // CF-16: after a re-key, a stale device's rounds fail as
-                // payload-crypto refusals — name the real fix instead of a
-                // generic error face.
+            if EncryptionSession.isPayloadCryptoError(error)
+                || EncryptionSession.isKeysReplacedError(error) {
+                // CF-16: after a re-key, a stale device's rounds fail —
+                // since Phase 14c at the server's vault-key-id fence
+                // (BEFORE any poison push), and as payload-crypto
+                // refusals on anything that slipped past — both present
+                // as the replaced-keys line naming the real fix instead
+                // of a generic error face.
                 return SyncRowFace(kind: .keysReplaced, doors: [
                     Door(label: "Re-enroll…", act: .openAccount(.encryption)),
                 ])

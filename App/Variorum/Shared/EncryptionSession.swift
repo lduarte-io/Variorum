@@ -397,4 +397,15 @@ final class EncryptionSession {
         text.hasPrefix("Sync refused: '")
             && text.contains("failed to encrypt/decrypt (")
     }
+
+    /// Phase 14c — the fence's classifier arm: true exactly for the
+    /// server's vault-key-id fence refusal (`SyncError.encryptionKeysReplaced`,
+    /// which the transport classifies out of the VARIORUM_STALE_KEY_FENCE
+    /// marker and the scheduler surfaces verbatim). The SAME CF-16
+    /// replaced state as the payload-crypto arm above — the fence is that
+    /// state's server-side trigger, catching a stale writer BEFORE any
+    /// poison push instead of after a failed decrypt.
+    nonisolated static func isKeysReplacedError(_ text: String) -> Bool {
+        text == SyncError.encryptionKeysReplaced.description
+    }
 }
