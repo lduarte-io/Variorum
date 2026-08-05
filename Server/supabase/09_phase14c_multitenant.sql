@@ -72,7 +72,12 @@
 --     the deletion door's immediate hard purge (her Round-5 ruling):
 --     the account's data rows + its key_vault row + its entitlement
 --     rows + the auth user itself, in that order. Local copies SURVIVE
---     both doors by construction — neither touches any device.
+--     both doors by construction — neither touches any device;
+--   * THE ENTITLEMENT WRITE DOOR (batch 3; THE DESIGN item 5's write
+--     half): `entitlement_set` — the ONE processor-agnostic function the
+--     checkout webhook calls to grant/revoke a feature; service_role
+--     execute ONLY, the apps never write entitlement. Also the gate's
+--     deliberate probe-account grant tool.
 --
 -- THE CHOREOGRAPHY (SyncSpec §12; the ruled signup-door order, steps
 -- (1)–(3) of the gate):
@@ -1052,7 +1057,84 @@ end;
 $$;
 
 -- ---------------------------------------------------------------------------
--- 8. The demotion posture on the NEW signatures (the old signatures were
+-- 8. entitlement_set — the checkout webhook's write door (batch 3; THE
+--    DESIGN item 5's write half). The stargazing.tech checkout's webhook
+--    (or any successor processor's) calls this ONE function to grant or
+--    revoke a feature entitlement. The apps NEVER write entitlement —
+--    they hold no execute grant here (batch 1's letter: entitlement
+--    writes are server-side only), and the entitlement table itself
+--    grants authenticated SELECT alone.
+--
+--    PROCESSOR-AGNOSTIC BY DESIGN (the Round-1 ruling: price named at
+--    launch, machinery price-agnostic; Round 7's changeability answer —
+--    a processor swap is a webhook rewrite, never a schema change): the
+--    parameters are the entitlement row's own facts — who, which
+--    feature, active or not, until when, granted via what. No processor
+--    ids, no price, no currency live here; provenance rides `via` as
+--    free text (e.g. 'stripe:sub_...' / 'manual' / '14c-deploy-seed')
+--    for support archaeology at stranger scale.
+--
+--    GRANT is an UPSERT: a renewal moves expires_at forward through the
+--    same call, and granted_at re-stamps ("when did the CURRENT grant
+--    land" — the row is current state, not history). REVOKE is a row
+--    DELETE, never an expires_at stamp: a row IS the entitlement (the
+--    table's letter), and the mirror is not the billing system's
+--    history — the processor owns history (the dumbness doctrine).
+--    A subscription lapsing WITHOUT a webhook still expires on its own:
+--    the RPC gates and the app read both honor expires_at.
+--
+--    IDENTITY IS THE PARAMETER, never auth.uid(): the webhook has no
+--    user session — it maps the processor's customer to the account's
+--    uuid and calls as service_role. Posture: SECURITY DEFINER, execute
+--    granted to service_role ONLY (no browser or app ever calls this;
+--    the site's contract block in the 14c plan file carries the handoff
+--    facts). The GATE's probe-account entitlement grant (the batch-1
+--    held item) is this same door, called deliberately at probe setup:
+--      select entitlement_set('<probe-uid>', 'hosted_sync', true,
+--                             null, 'probe-setup');
+-- ---------------------------------------------------------------------------
+
+create or replace function entitlement_set(
+  target_user uuid,
+  target_feature text,
+  active boolean,
+  valid_until timestamptz default null,
+  via text default null
+) returns jsonb
+language plpgsql security definer
+set search_path = public
+as $$
+begin
+  if target_user is null then
+    raise exception 'entitlement_set requires a user id';
+  end if;
+  if target_feature is null or target_feature = '' then
+    raise exception 'entitlement_set requires a feature name';
+  end if;
+  if active then
+    insert into entitlement (user_id, feature, granted_at, source, expires_at)
+    values (target_user, target_feature, now(), via, valid_until)
+    on conflict (user_id, feature) do update
+      set granted_at = excluded.granted_at,
+          source     = excluded.source,
+          expires_at = excluded.expires_at;
+    return jsonb_build_object(
+      'user_id', target_user, 'feature', target_feature,
+      'active', true, 'expires_at', valid_until);
+  else
+    delete from entitlement
+      where user_id = target_user and feature = target_feature;
+    return jsonb_build_object(
+      'user_id', target_user, 'feature', target_feature, 'active', false);
+  end if;
+end;
+$$;
+
+revoke execute on function entitlement_set(uuid, text, boolean, timestamptz, text) from public, anon, authenticated;
+grant execute on function entitlement_set(uuid, text, boolean, timestamptz, text) to service_role;
+
+-- ---------------------------------------------------------------------------
+-- 9. The demotion posture on the NEW signatures (the old signatures were
 --    dropped in section 0; their historical revokes stand in the
 --    composition record). The version-check RPC is untouched. The two
 --    account doors take the same posture — authenticated only (no
@@ -1070,7 +1152,7 @@ grant execute on function account_data_truncate(text) to authenticated;
 grant execute on function account_purge() to authenticated;
 
 -- ---------------------------------------------------------------------------
--- 9. The lockstep marker (SyncSpec §12): sync_meta and
+-- 10. The lockstep marker (SyncSpec §12): sync_meta and
 --    sync_schema_version() already exist (05); nothing here recreates
 --    them. THE MARKER UPDATE IS DELIBERATELY THE LAST STATEMENT OF THIS
 --    FILE: a partially-executed deploy never advertises the new version

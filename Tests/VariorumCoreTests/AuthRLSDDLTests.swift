@@ -435,6 +435,36 @@ struct AuthRLSDDLTests {
                 "the account doors are never server machinery's")
     }
 
+    /// Phase 14c batch 3 (L9): the entitlement-WRITE door — the checkout
+    /// webhook's ONE server function. Processor-agnostic (who / feature /
+    /// active / until / via — no processor ids, no price), grant is an
+    /// UPSERT (renewals move expires_at through the same call), revoke is
+    /// a row DELETE (a row IS the entitlement), and the posture is
+    /// service_role ONLY: the apps never write entitlement (batch 1's
+    /// letter), so `authenticated` holds no execute grant here.
+    @Test func theEntitlementWriteDoorIsServiceRoleOnlyAndProcessorAgnostic() throws {
+        let body = try Self.finalBody(of: "entitlement_set")
+        #expect(body.contains(
+            "insert into entitlement (user_id, feature, granted_at, source, expires_at)"),
+                "the grant arm writes the entitlement row's own facts — nothing processor-shaped")
+        #expect(body.contains("on conflict (user_id, feature) do update"),
+                "a renewal re-grants through the same call — upsert, never an error")
+        #expect(body.contains("delete from entitlement"),
+                "revoke is a row DELETE — a row IS the entitlement; history is the processor's")
+        #expect(!body.contains("auth.uid()"),
+                "the webhook has no user session — identity is the parameter, never the caller")
+        #expect(body.contains("security definer"))
+
+        let sql = Self.strippingComments(try Self.sqlFile("09_phase14c_multitenant.sql"))
+        #expect(sql.contains(
+            "revoke execute on function entitlement_set(uuid, text, boolean, timestamptz, text) from public, anon, authenticated;"),
+                "the apps (authenticated) are revoked by name — they never write entitlement")
+        #expect(sql.contains(
+            "grant execute on function entitlement_set(uuid, text, boolean, timestamptz, text) to service_role;"))
+        #expect(!sql.contains("entitlement_set(uuid, text, boolean, timestamptz, text) to authenticated"),
+                "no grant road back to the apps, ever")
+    }
+
     /// Replacing `sync_pull` must not regress A5: the visibility horizon and
     /// the server-only column subtraction survive verbatim in the DEPLOYED
     /// bodies (04's and 05's alike).
