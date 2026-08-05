@@ -2160,6 +2160,42 @@ refusal body names only the caller's own account states; pull cost is
 partition-local (the per-tenant `(owner_id, server_seq)` indexes), so
 timing discloses nothing foreign; the fence read is a PK lookup.
 
+#### The architect's adjudication of this round (2026-08-05)
+
+- **I-1 (the shared `server_seq` cross-tenant write-activity side
+  channel) → HER RATIFY BUNDLE, flagged.** A genuine NEW observability
+  class this phase creates (no strangers existed before; the 14b
+  disclosure envelope ruled what the SERVER sees, never what one
+  tenant can infer about another). It is a DISCLOSURE-ENVELOPE
+  question — product-flavored, hers by the author-only rule, never the
+  architect's. Both arms recorded for her: extend the envelope (the
+  honest cheap arm — the inference is coarse write-cadence, no
+  content, and it is what a shared monotonic changefeed costs), or
+  slot a per-tenant sequence as its own §12 lockstep event (real
+  engine surgery: `server_seq` is SyncSpec §9's ordering authority,
+  so per-tenant sequences touch cursors, the horizon, and every
+  repair's seq ranking — a phase, not a patch). NOT built either way
+  this phase; the gate presents it.
+- **I-2 (the foreign-owner refusal has no executable proof) → FIX
+  NOW.** The guard is the eight client-carried tables' whole defense
+  and rests on a DDL text pin alone; a two-user harness test is
+  cheap, and the reviewer's point is exactly the postmortem's
+  vacuous-pass lesson.
+- **I-3 (deploy transactionality assumed) → FIX NOW, artifact-side**
+  (the artifact is undeployed, so this is free): 09 executes as ONE
+  transaction, and the gate's post-deploy grant sweep joins the
+  runbook. The traced worst window (a moment where `entitlement_set`
+  could carry default PUBLIC execute) is exactly the kind of thing
+  that must not depend on the operator's SQL-editor behavior.
+- **I-4 (`sync_table_pk` still authenticated-executable) → FIX NOW**
+  (a one-line revoke; zero disclosure either way, but the demotion
+  posture should be complete).
+- **I-5 (09 has no re-run guard) → FIX NOW.** Post-strangers a
+  re-execution would drop every tenant's data and entitle every auth
+  user. A guard that refuses re-execution unless deliberately
+  overridden is the cheapest possible insurance on the phase's most
+  destructive artifact.
+
 #### LIVE-PROBE OBLIGATIONS (what only the real Postgres can prove — the gate runs these; 1–4 were already planned, 5–12 are this round's additions)
 
 1. **Stranger-sees-zero through BOTH RPCs** with the uid-checked probe
