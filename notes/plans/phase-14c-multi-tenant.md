@@ -1716,6 +1716,158 @@ banner, the row state, and the classifier; no mobile-only code) ·
 engine inland ZERO-diff re-verified. Ready for ROUND 2 (the reviewer's
 re-review over these fixes).
 
+### Cold-review ladder — ROUND 2 (2026-08-05; fresh reviewer anchored on round 1's findings + dispositions + the fix record)
+
+**Scope re-reviewed:** the whole fix range `b9fcc3a..9159460` (all six
+fix commits plus the gate-handoff draft that rides the range) read
+line-by-line; every marker-lifecycle claim verified against the CODE,
+not the record; `notes/SyncSpec.md`'s refusal grammar and
+`notes/sync-postmortem-fragments.md` read per the prompt before judging
+the engine lines. **Runs performed by this reviewer (all synchronous):**
+core **1194/127 GREEN** (matches the fix record exactly — +1 the
+relaunch pin over round 1's 1193); Mac touched suites **60/12 GREEN**
+(the EncryptionFlowTests eight + TierAndOnboardingTests' three +
+AuthSessionTests) + the tutorial spine **51/7 GREEN** — together the fix
+record's 111/19, reproduced; engine-inland zero-diff re-verified on the
+fix range (`Merge.swift` / `Repairs.swift` / `SyncEncryption.swift` /
+`SyncScheduler.swift` — 0 lines; `Persistence/`, `Models/`,
+`Operations/`, `Domain/`, `Queries/` — 0 lines). **One pin
+independently revert-verified:** in a scratch worktree (main tree
+untouched) the engine's marker guard was neutralized and
+`theRekeyMarkerRefusesRoundsAcrossRelaunchUntilTheDoorCompletes` run —
+RED with the EXACT recorded five issues (both "an error was expected
+but none was thrown", the outbox drained past `outboxBefore`, cursor
+nil→"5", server rows changed), then the worktree removed. The MAJOR's
+red-on-old claim is real, not narrated.
+
+**Per-finding verdicts:**
+
+**R1-1 (MAJOR) — fix SOUND.** Every lifecycle claim verified against
+the code: the marker is written after authorization and BEFORE the
+vault write (`AccountRekey.swift:127` — so the 2→3 window is bracketed
+too) and cleared ONLY after step 6 (`:181` — the bridge-staging leg
+included); it survives `resyncReinitialize` by construction
+(`SyncEngine.swift:378` deletes only `last_server_seq`; the marker key
+is untouched); BOTH round halves refuse FIRST (`SyncEngine.swift:102`
+push, `:247` pull — before `ensureDeviceID`, keys, lockstep, and any
+network contact), throwing `SyncError.accountRekeyIncomplete` with
+outbox intact and cursor unmoved — the §12 grammar exactly, and the pin
+asserts all three (outbox count, cursor, server rows);
+`resyncReinitialize` is deliberately unguarded so the brain's own step
+5 runs (verified: it is not a round half and touches no network);
+account deletion clears the marker (`AppServices.swift:483`); the
+wrong-passphrase arm leaves no residue (marker set only after the
+unwrap succeeds — pinned). The surface story holds on both legs: the
+banner rides above EVERY Encryption state arm
+(`EncryptionViews.swift:227`; the enrolled arm's own Replace door is
+suppressed while the banner carries it — no doubled `showingRekey`
+flow, exactly two render sites for `rekeySection`), `refresh()`
+re-projects the marker on every launch (`EncryptionSession.swift:127`)
+and `rekeyAccount` re-reads it after every run (`:296`); the sync row's
+`.rekeyIncomplete` face is its own state with the one completing door,
+classified by exact string equality and pinned disjoint from
+keysLocked/keysReplaced/payload-crypto/notEntitled both ways. The
+scheduler surfaces the error verbatim (`String(describing:)` = the
+`description` the classifier matches), nils `lastError` only on a
+successful round, and the offline classifier is a URLError-code
+allowlist — the new refusal can never wear the offline face. The
+harness's "fresh engine per call = the relaunch shape" claim is true
+(`SyncTestHarness.swift:110–125` builds a new `SyncEngine` per
+push/pull over the same store). Nothing new introduced: the marker
+lives outside `SyncSchema.tables` (never serialized, no triggers watch
+`sync_state`), the completeness walk is untouched, and the Sync/
+footprint is the recorded +21/+13 with the four inland files zero-diff.
+
+**R1-2 (MINOR) — fix SOUND.** The factual basis re-verified at the
+source: `08_phase14b_lockstep.sql:61–62` declares `references
+auth.users (id) on delete cascade` — the finding's letter. `419eeba`
+changes comment lines only (zero SQL statements — verified in the
+diff); the 09 header and in-body comment now name the purge order as
+the deliberate reporting/clarity choice; the DDL pin's comments
+corrected with the order assertions intact; the batch-2 record's
+correction APPENDED below the original, dated, never rewritten.
+
+**R1-3 (MINOR) — fix SOUND.** Mechanism re-traced independently:
+`variorumISO8601` (`.SSS'Z'`, POSIX/UTC) cannot parse an offset shape;
+plain `ISO8601DateFormatter` cannot parse a fraction — so the pre-fix
+arms both returned nil on `….123456+00:00` and fail-open counted an
+expired subscription current. The shared `parseServerTimestamp`
+(canonical → plain → `.withFractionalSeconds`) feeds `isCurrent` AND
+`expiryLine`; the pin covers the 6-digit, trimmed-fraction,
+no-fraction-offset, and expiryLine arms and runs green now; the
+fail-open arm survives for genuinely alien text — the recorded design
+call, honored not widened.
+
+**R1-4 (NIT) — fix SOUND.** The strong capture makes
+adopt-before-truncate structural; the closure dies with the local brain
+so there is no cycle (the outer `rekeyRunner` door closure keeps its
+`[weak self]` + throw, correctly — a gone AppServices REFUSES rather
+than proceeds). The no-pin justification is legitimate under the
+guard's architectural arm: the red state requires deallocating an
+app-lifetime object mid-run.
+
+**R1-5 (NIT) — fix SOUND.** The sign-in doc block sits above
+`signInFailureMessage` with a dated moved-home note;
+`signUpClosedMessage` keeps only its own commentary.
+
+**NEW findings (none BLOCKER/MAJOR — by the ladder rule, NO round 3):**
+
+**[NIT] R2-1 · `App/Variorum/Shared/EncryptionViews.swift:227` +
+`EncryptionSession.swift:127` — the banner and its Replace door render
+above the `.signedOut` arm too, where the door can only fail and the
+thrown-arm's prescription is the wrong one.** Traced: `refresh()` reads
+the marker before the signed-in guard (deliberately — the banner is
+"above EVERY state arm"), so a crash-mid-re-key followed by sign-out
+relaunches into the banner; pressing Replace runs the brain, whose step
+1 `fetchVault` throws signed-out, and `rekeyAccount`'s catch speaks
+"run Replace Keys again" when the actual prerequisite is signing in.
+Mitigations already in place: the state arm directly below says "Sign
+in first — your encryption vault lives on your account", nothing is
+silent, nothing is lost, and the rerun completes after sign-in — hence
+NIT, not MINOR. Fix if wanted: keep the prompt, suppress the banner's
+button in `.signedOut` (one conditional; pinnable — signedOut + marker
+⇒ no Replace button, red on today's code).
+
+**Observations recorded so nobody re-derives them (no severity):**
+(1) a step-2 CAS refusal (`expectedRevision` mismatch — a DEFINITIVE
+no-write, unlike the ambiguous network arm the fix comment names) also
+keeps the marker set; harmless and arguably right — in that state the
+vault moved, this device is stale, rounds would refuse at the fence
+regardless, and the rerun heals. (2) `AccountRekeyMarker.set` stamps
+wall-clock `Date()` directly rather than `@Dependency(\.date)` —
+documented deliberate in its doc comment (support honesty; `isSet`
+checks presence only, nothing reads or orders by the value; the
+`key_vault.updated_at` precedent); not a finding. (3) CARRIED FORWARD
+for the closeout: AppSpec §7's `sync_state` `-- keys:` comment still
+lists two keys — the third (`rekey_in_progress`) is the closeout's
+delta to record, per the fix record's own flag. (4) the `.newerFormat`
++ marker double-corner resolves into a spoken refusal (the
+refuse-by-format-version posture throws at fetch/unwrap before any
+vault write), never a silent format downgrade — checked, clean.
+
+**Clean bill — what this round specifically checked and found solid:**
+the marker's engine read is one DB read per round half at round
+cadence, off the main thread through the reader pool (P2; no P1
+scaling); `runAccountRekey`'s catch reconnects the chain and the
+reconnected rounds refuse into the new row state — the crash story and
+the thrown story converge on one surface; deletion's `try?` clear can
+at worst leave a marker that re-prompts a completable rerun, never
+silence; the gate-handoff draft's "marker" mentions are all the
+LOCKSTEP marker (5→6), no staleness against the new machinery; the
+`VaultBootstrap` gate runner is unaffected (a marker on her store
+cannot exist absent a crashed re-key, and if it ever did the runner
+refuses visibly); the mobile seam claim verified STRUCTURALLY — the
+`Shared` folder is a synchronized group compiled into the
+`VariorumMobile` target, so the banner/row/classifier ride with zero
+mobile-only code (the simulator run itself accepted from the fix
+record per this round's core+Mac run mandate); no TODO/debug residue
+anywhere in the fix range; the postmortem's delicate classes (clock
+trust, changefeed, round order, serializer completeness) are all
+untouched by the fixes.
+
+**VERDICT: all five round-1 fixes SOUND; one NEW NIT (R2-1); no new
+BLOCKER/MAJOR — the ladder closes at round 2.**
+
 ### The stargazing.tech checkout — contract facts (for the site's own
 ### agent)
 
