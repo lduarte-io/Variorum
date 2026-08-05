@@ -233,6 +233,29 @@ recreate the 18 data tables BORN multi-tenant:
   domain attaches at choreography step (4), inside 14c, so 14d's
   provider configs are written once against the final issuer URL.
 
+### Round 6 — her gate-readiness + the 14d-prep ruling (mid-phase
+### message, 2026-08-04; recorded verbatim)
+
+Her words: *"what is waiting on me? please elaborate on the deploy,
+live probes, domain / SMTP steps, and signup flip. I'm ready to give
+whatever explicit go or whatever other support is needed. and good to
+know that there's going to be a couple last variorum changes at 14d -
+i think we should do whatever we can but still not gate on fragments
+being done."*
+
+Recorded: **(a)** her gate readiness — the gos come at the gate in the
+ruled order; nothing is hers before batches 1–3 + the ladder + the
+isolation round complete (the elaboration of each gate step was given
+in-session; the gate section of "The batches" is the binding text).
+**(b) THE 14D-PREP RULING: the Variorum-side 14d code is BUILT IN 14c,
+DORMANT** — the live journal-bridge key provider (the 14b Keychain
+custody seam) and the staged re-push-from-truth machinery land in
+batch 2, pinned but behind the STANDING structural pause, which
+remains the default until 14d's deliberate act. 14d's Variorum half
+reduces to the un-pause + the staged re-push run + the round-trip
+verification — so 14d gates on nothing but the Fragments conversation
+itself, exactly her intent.
+
 ## THE DESIGN (settled by the sitting — the architecture the batches
 ## build)
 
@@ -381,6 +404,14 @@ isolation build is server-side + engine wire).
    survives copy pinned; custody cleanup via the forget machinery).
 3. The drain-summary accumulator fix rides the runner touch; the
    `key_vault.updated_at` call decided with reasons.
+4. **THE 14D PREP (her Round-6 ruling):** the LIVE journal-bridge key
+   provider (the 14b Keychain custody seam) + the staged
+   re-push-from-truth machinery, built and PINNED but DORMANT — the
+   standing structural pause stays the default until 14d's deliberate
+   act. Pins prove BOTH halves: dormancy (no bridge round runs with
+   the pause in place) and readiness (the flip → a full staged
+   re-push round against the fake, every day re-arriving as
+   ciphertext).
 
 **Batch 3 — the tier + the door.**
 1. Entitlement reads + the hosted-sync gate UX in both apps' shared
@@ -429,6 +460,7 @@ the contract brief she carries).
 | L12 | The DEDICATED isolation-boundary review round (her proof-bar ruling) | pending |
 | L13 | The gate: deploy · repush · phone re-onboard · live probes (uid-checked second account; BYPASSRLS check) · domain + iss · SMTP · HER signup flip · stranger validation (incl. PL-6 phone walk) | pending — her go per step |
 | L14 | Closeout ritual in full (incl. the 14d micro-plan + the finalized contract brief; the §12 running record's 5→6 entry; the KnownIssues auth row resolved/re-owned) | pending |
+| L15 | The 14d prep: live journal-bridge provider + staged re-push machinery, dormant behind the standing pause, both halves pinned (Round-6 ruling) | pending — batch 2 |
 
 ## Environment traps (carried into every batch brief, per the skill)
 
