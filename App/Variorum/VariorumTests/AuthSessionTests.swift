@@ -141,6 +141,80 @@ struct AuthSessionTests {
         #expect(await session.isSignedIn == false)
     }
 
+    // MARK: The sign-up door (Phase 14c batch 3, L8 — THE DESIGN 6)
+
+    @Test func signUpWithAutoconfirmAdoptsTheSessionExactlyAsSignIn() async throws {
+        let endpoint = ScriptedEndpoint([(200, """
+            {"access_token": "s-access", "refresh_token": "s-refresh",
+             "expires_in": 3600, "token_type": "bearer",
+             "user": {"id": "11f2d9c4-1234-4abc-8def-000000000042",
+                      "email": "stranger@example.com"}}
+            """)])
+        let store = AuthTokensStore.inMemory()
+        let epoch = Date(timeIntervalSince1970: 2_000_000)
+        let session = AuthSession(
+            configuration: Self.configuration, store: store,
+            now: { epoch }, http: endpoint.loader())
+
+        let outcome = try await session.signUp(
+            email: "stranger@example.com", password: "a-real-passphrase")
+        #expect(outcome == .signedIn)
+
+        // The request shape: the signup endpoint, the same seam.
+        let request = endpoint.requests[0]
+        #expect(request.url?.absoluteString
+                == "https://variorum-project.supabase.co/auth/v1/signup")
+        #expect(request.value(forHTTPHeaderField: "apikey") == "publishable-key")
+        let body = try JSONDecoder().decode(
+            [String: String].self, from: request.httpBody ?? Data())
+        #expect(body == ["email": "stranger@example.com", "password": "a-real-passphrase"])
+
+        // The adopted session — sign-up IS sign-in once the server says yes.
+        let saved = try #require(store.load())
+        #expect(saved.accessToken == "s-access")
+        #expect(saved.userID == "11f2d9c4-1234-4abc-8def-000000000042")
+        #expect(saved.expiresAt == epoch.addingTimeInterval(3600))
+        #expect(await session.isSignedIn)
+    }
+
+    /// Email confirmations ON: the server answers with a session-less
+    /// user body (the confirmation email went out). NOTHING is adopted —
+    /// sign-in completes after the link.
+    @Test func signUpWithConfirmationRequiredAdoptsNothing() async throws {
+        let endpoint = ScriptedEndpoint([(200, """
+            {"id": "11f2d9c4-1234-4abc-8def-000000000042",
+             "email": "stranger@example.com", "aud": "authenticated",
+             "confirmation_sent_at": "2026-08-05T12:00:00Z"}
+            """)])
+        let store = AuthTokensStore.inMemory()
+        let session = AuthSession(
+            configuration: Self.configuration, store: store, http: endpoint.loader())
+
+        let outcome = try await session.signUp(
+            email: "stranger@example.com", password: "a-real-passphrase")
+        #expect(outcome == .confirmationRequired)
+        #expect(store.load() == nil, "no session exists yet — nothing to persist")
+        #expect(await session.isSignedIn == false)
+    }
+
+    /// The signups-off toggle (the corpus guard, flipped only at the
+    /// gate): the server's refusal surfaces as the verbatim endpoint
+    /// failure for the surface's classifier — and adopts nothing.
+    @Test func aRefusedSignUpThrowsAndSignsNothingIn() async {
+        let refusal = #"{"code":422,"error_code":"signup_disabled","msg":"Signups not allowed for this instance"}"#
+        let endpoint = ScriptedEndpoint([(422, refusal)])
+        let store = AuthTokensStore.inMemory()
+        let session = AuthSession(
+            configuration: Self.configuration, store: store, http: endpoint.loader())
+
+        await #expect(throws: AuthSessionError.endpointFailure(
+            status: 422, body: refusal)) {
+            try await session.signUp(email: "s@example.com", password: "pw-long-enough")
+        }
+        #expect(store.load() == nil)
+        #expect(await session.isSignedIn == false)
+    }
+
     // MARK: Refresh
 
     @Test func currentSessionRefreshesProactivelyNearExpiry() async throws {

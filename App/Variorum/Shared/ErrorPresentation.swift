@@ -71,6 +71,69 @@ enum ErrorPresentation {
     /// (PROVISIONAL, riding the gate checklist). Deliberately NOT routed
     /// through `ErrorCauseNote`: its "sign out and back in" guidance is for
     /// ESTABLISHED sessions and is exactly wrong on the sign-in form itself.
+    /// Phase 14c batch 3 (L8) — the SIGN-UP form's classify-and-speak,
+    /// the R94 doctrine at the account-creation door. The COMMON refusal
+    /// through the whole pre-gate era is the signups-off toggle (the
+    /// corpus guard, flipped only as the gate's deliberate act): it must
+    /// speak honestly as a CLOSED DOOR, never as a generic failure — the
+    /// server is refusing all new accounts, not this user's input.
+    static let signUpClosedMessage =
+        "Account creation isn't open yet — this server isn't accepting new accounts."
+
+    static let signUpExistsMessage =
+        "An account with this email already exists — sign in instead."
+
+    static func signUpFailureMessage(_ error: any Error) -> String {
+        if let authError = error as? AuthSessionError {
+            switch authError {
+            case .endpointFailure(let status, let body):
+                let lowered = body.lowercased()
+                // GoTrue's modern refusals carry `error_code` tokens; the
+                // message-text arms cover older bodies (the sign-in
+                // classifier's two-vocabulary precedent, R1-1).
+                if lowered.contains("signup_disabled")
+                    || lowered.contains("signups not allowed") {
+                    return signUpClosedMessage
+                }
+                if lowered.contains("user_already_exists")
+                    || lowered.contains("email_exists")
+                    || lowered.contains("already registered") {
+                    return signUpExistsMessage
+                }
+                if lowered.contains("email_address_not_authorized")
+                    || lowered.contains("not authorized") {
+                    // The pre-SMTP era's real refusal: the built-in mailer
+                    // delivers only to the project team's addresses, so a
+                    // stranger's confirmation email refuses even with
+                    // signups ON. Honest: the server's email delivery, not
+                    // the user's input.
+                    return "The server couldn't send a confirmation email to that address — "
+                        + "email delivery isn't fully set up yet. Try again later."
+                }
+                if lowered.contains("weak_password")
+                    || lowered.contains("password should be") {
+                    return "That password is too short or too weak for the server — try a longer one."
+                }
+                if status == 429 || lowered.contains("rate limit")
+                    || lowered.contains("rate_limit") {
+                    return "Too many attempts right now — wait a minute and try again."
+                }
+                if lowered.contains("validation_failed")
+                    || lowered.contains("invalid format")
+                    || lowered.contains("is invalid") {
+                    return "That doesn't look like a valid email address — check it and try again."
+                }
+                return "Account creation failed — the server refused (HTTP \(status)). Try again in a moment."
+            case .notHTTP, .malformedResponse:
+                return "Account creation failed — the server's response couldn't be read. Try again in a moment."
+            }
+        }
+        if error is URLError || (error as NSError).domain == NSURLErrorDomain {
+            return "Couldn't reach the server — check your connection and try again."
+        }
+        return "Account creation failed: \(error.localizedDescription)"
+    }
+
     static func signInFailureMessage(_ error: any Error) -> String {
         if let authError = error as? AuthSessionError {
             switch authError {

@@ -485,6 +485,76 @@ struct MultiTenantSyncTests {
         #expect(try world.b1.syncedDump() == world.b2.syncedDump())
     }
 
+    // MARK: - Stranger onboarding (Phase 14c batch 3 — THE DESIGN 6)
+
+    /// THE EMPTY-STORE FIRST ROUND READS AS NORMAL (the v1 principle,
+    /// pinned at the engine): a brand-new account — fresh uid, its own
+    /// key world, entitled (the probe-setup grant's twin), NOTHING
+    /// authored yet — runs its first full round against a mirror that
+    /// already holds ANOTHER user's corpus, and completes CLEAN: zero
+    /// rows in either direction, no refusal, no stall, outbox empty.
+    /// The app face composes over exactly this — a clean round leaves
+    /// `lastError` nil, and the nil-error face is the ordinary idle row
+    /// (pinned app-side). Then the first authored note lands ordinarily:
+    /// the empty round was a state, never a wall.
+    @Test func aFreshAccountsFirstRoundOnAnEmptyPartitionCompletesCleanWithZeroRows() async throws {
+        let world = try await makeWorld()
+        // The mirror is NOT empty — A's corpus is already up there. The
+        // fresh account's partition is what's empty.
+        try world.a1.with { ops, _ in
+            let post = try ops.createPost(title: "A's existing corpus", profile: .blog)
+            _ = try ops.newBlock(in: post.id, text: "Her words, already synced.", at: .end)
+        }
+        try await fleetQuiesce(world.a1, world.a2)
+
+        let userC = "00000000-cccc-4bbb-8ccc-000000000003"
+        let freshKeys = SyncEncryptionKeys(
+            corpusKey: SymmetricKey(data: Data((0..<32).map { UInt8($0 &+ 0x40) })),
+            corpusKeyID: "test-corpus-key-USERC-0000000003")
+        await world.server.provisionAccount(userC, vaultCorpusKeyID: freshKeys.corpusKeyID)
+        let device = try SyncClient(
+            name: "C1", prefix: "CA",
+            transport: world.server.connection(as: userC), clockOffset: 555, seed: 9)
+        device.ownerID = userC
+        device.keyProvider = FixedSyncKeyProvider(keys: freshKeys)
+
+        // THE FIRST PULL: zero rows, no stall, no error — the empty
+        // partition reads as normal, and A's corpus is invisible to the
+        // stranger. (The scheduler's real round order is pull→push, so
+        // this IS the stranger's first sync experience.)
+        let firstPull = try await device.pull()
+        #expect(firstPull.applied == 0 && firstPull.merged == 0 && firstPull.repairs == 0,
+                "an empty partition serves ZERO rows — A's corpus is invisible to the stranger")
+        #expect(!firstPull.stalled, "empty is a normal state, never a stall")
+
+        // A virgin store is not ROW-empty: the schema seeds the three
+        // `setting` rows, and those are honestly the first push's whole
+        // cargo — nothing else exists to send, and nothing refuses.
+        let nonSettingRows = try device.db.fetchInt(
+            "SELECT COUNT(*) FROM sync_outbox WHERE table_name <> 'setting'") ?? -1
+        #expect(nonSettingRows == 0,
+                "a virgin store's only pushable truth is its seeded settings")
+        let seededSettings = try device.outboxCount()
+        #expect(seededSettings > 0, "the seeds exist — the pin isn't vacuous")
+        let firstPush = try await device.push()
+        #expect(firstPush.accepted == seededSettings
+                    && firstPush.rejected == 0 && firstPush.deferred == 0,
+                "the first push carries exactly the seeds — clean, no refusal")
+        #expect(try device.outboxCount() == 0)
+
+        // The first authored note then lands ordinarily.
+        try device.with { ops, _ in
+            let post = try ops.createPost(title: "First note", profile: .blog)
+            _ = try ops.newBlock(in: post.id, text: "A stranger's first words.", at: .end)
+        }
+        _ = try await device.push()
+        #expect(try device.outboxCount() == 0, "the first real push drains whole")
+        #expect(await world.server.rowCount(table: "container", for: userC) == 1,
+                "the note landed in the stranger's own partition")
+        #expect(await world.server.rowCount(table: "container", for: Self.userA) == 1,
+                "…and A's partition is untouched by the stranger's arrival")
+    }
+
     // MARK: - The engine wire pin
 
     /// The engine sends its HELD key id on every round half — the fence's

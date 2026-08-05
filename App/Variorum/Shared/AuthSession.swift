@@ -168,6 +168,16 @@ nonisolated enum AuthSessionError: Error, Equatable, Sendable {
     case malformedResponse(String)
 }
 
+/// Phase 14c batch 3 (L8): what a sign-up produced. Supabase answers the
+/// signup endpoint two ways — a FULL token response when email
+/// confirmations are off (the session adopts, exactly as sign-in), or a
+/// session-less user body when a confirmation email went out (sign-in
+/// completes after the link).
+nonisolated enum SignUpOutcome: Equatable, Sendable {
+    case signedIn
+    case confirmationRequired
+}
+
 actor AuthSession: UserSessionProviding {
     let configuration: AuthConfiguration
     private let store: AuthTokensStore
@@ -232,6 +242,48 @@ actor AuthSession: UserSessionProviding {
             throw AuthSessionError.malformedResponse("token response carried no user id")
         }
         adopt(adopted)
+    }
+
+    /// `POST /auth/v1/signup` — THE account-creation door (Phase 14c,
+    /// THE DESIGN 6): the same seam and project as sign-in. While the
+    /// signups toggle is OFF (the corpus guard — it flips only as the
+    /// gate's deliberate act), the server refuses with the
+    /// signups-disabled body and this throws `endpointFailure` for the
+    /// surface to classify honestly. On success: an autoconfirm response
+    /// IS a token response — adopt it (signed in, exactly as the
+    /// password grant); a session-less body means the confirmation email
+    /// went out and sign-in completes after the link. Only a resulting
+    /// session ever persists, never the password.
+    func signUp(email: String, password: String) async throws -> SignUpOutcome {
+        var request = URLRequest(
+            url: configuration.projectURL.appendingPathComponent("auth/v1/signup"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(configuration.apiKey, forHTTPHeaderField: "apikey")
+        request.httpBody = try JSONEncoder().encode(["email": email, "password": password])
+
+        let (data, response) = try await http(request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw AuthSessionError.notHTTP
+        }
+        guard (200..<300).contains(httpResponse.statusCode) else {
+            throw AuthSessionError.endpointFailure(
+                status: httpResponse.statusCode,
+                body: String(data: data, encoding: .utf8) ?? "")
+        }
+        // The autoconfirm shape decodes as the full token response
+        // (access/refresh/user); anything else on a 2xx is the
+        // confirmation-required user body — created, not yet signed in.
+        guard let token = try? JSONDecoder().decode(TokenResponse.self, from: data),
+              let user = token.user, !user.id.isEmpty
+        else { return .confirmationRequired }
+        adopt(AuthTokens(
+            accessToken: token.accessToken,
+            refreshToken: token.refreshToken,
+            expiresAt: token.expiryDate(now: now()),
+            userID: user.id,
+            email: user.email))
+        return .signedIn
     }
 
     /// The injectable entry (tests; any future door): adopt a ready-made

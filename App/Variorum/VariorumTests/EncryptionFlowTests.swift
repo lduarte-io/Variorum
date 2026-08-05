@@ -1001,3 +1001,89 @@ struct SyncLockedFaceTests {
         }
     }
 }
+
+// MARK: - Fresh-account vault provisioning generality (Phase 14c batch 3 — THE DESIGN 6)
+
+/// THE GENERALITY PIN. THE DESIGN 6's claim is that per-user vault
+/// provisioning at signup "= the 14b stepped setup flow running for a
+/// fresh account (verify its generality; it was built account-agnostic)".
+/// Verified here, not assumed: a BRAND-NEW account — an arbitrary fresh
+/// uid, NO vault row, NO custody — walks the SAME mandatory-phrase setup
+/// her account did (the rules gates, the create act, the CF-5 step-4
+/// landing, the phrase confirm), a second device of the same fresh
+/// account enrolls by passphrase into identical custody, and the
+/// 12-word disaster road unlocks a third. Nothing anywhere keys on HER
+/// account: the walk is parameterized over arbitrary uids.
+@MainActor
+@Suite("Fresh-account setup generality (Phase 14c, batch 3)")
+struct FreshAccountSetupGeneralityTests {
+    private func session(
+        userID: String, store: DeviceKeyStore, vault: ScriptedVault
+    ) -> EncryptionSession {
+        let client = KeyVaultClient(
+            configuration: KeyVaultClient.Configuration(
+                projectURL: URL(string: "https://vault.test.invalid")!,
+                apiKey: "publishable-test-key"),
+            sessionProvider: StaticSessionProvider(
+                session: UserSession(accessToken: "t-fresh", userID: userID)),
+            load: vault.load)
+        return EncryptionSession(store: store, client: client, signedIn: { true })
+    }
+
+    @Test(arguments: [
+        "9b1c2d3e-4f50-4a61-8b72-000000000901",
+        "not-even-uuid-shaped-stranger-id",
+    ])
+    func aBrandNewAccountWalksTheMandatoryPhraseSetupExactlyAsHers(userID: String) async throws {
+        let vault = ScriptedVault()
+        let firstStore = DeviceKeyStore.inMemory()
+        let first = session(userID: userID, store: firstStore, vault: vault)
+
+        await first.refresh()
+        #expect(first.state == .noVault,
+                "a fresh account with no vault row is offered SETUP — the same door as hers")
+
+        // The stepped flow's gates (CF-1/5/7) are pure rules — identical
+        // for every account by construction; walked as the view walks them.
+        #expect(!EncryptionSetupRules.canLeavePassphraseStep(
+            passphrase: "meadow-lantern-9", confirm: "meadow-lantern-typo"))
+        #expect(EncryptionSetupRules.canLeavePassphraseStep(
+            passphrase: "meadow-lantern-9", confirm: "meadow-lantern-9"))
+        #expect(!EncryptionSetupRules.canLeaveWarningStep(acknowledged: false),
+                "her checkbox sentence gates the stranger exactly as it gated her")
+        #expect(EncryptionSetupRules.canLeaveWarningStep(acknowledged: true))
+
+        await first.setUp(passphrase: "meadow-lantern-9")
+        #expect(first.lastError == nil)
+        #expect(first.state == .enrolled(hasRecoveryWrap: false),
+                "the landing IS the CF-5 MANDATORY step 4 — for a stranger exactly as for her")
+        #expect(vault.hasRow, "the stranger's vault row was created")
+        #expect(firstStore.load() != nil, "custody landed")
+
+        // Step 4: generate → (write down) → confirm-by-re-entry lands the wrap.
+        let words = try #require(first.generatePhrase())
+        #expect(words.count == 12)
+        await first.landRecoveryWrap(confirmedWords: words, allowReplace: false)
+        #expect(first.lastError == nil)
+        #expect(first.state == .enrolled(hasRecoveryWrap: true),
+                "setup completes only WITH the phrase — CF-5's letter, account-agnostic")
+
+        // A second device of the SAME fresh account: ordinary enrollment.
+        let secondStore = DeviceKeyStore.inMemory()
+        let second = session(userID: userID, store: secondStore, vault: vault)
+        await second.refresh()
+        #expect(second.state == .notEnrolled(hasRecoveryWrap: true))
+        await second.enroll(passphrase: "meadow-lantern-9")
+        #expect(second.lastError == nil)
+        #expect(secondStore.load() == firstStore.load(),
+                "the stranger's vault is a REAL vault — a second device unwraps identical custody")
+
+        // And the 12-word disaster road unlocks a third device.
+        let thirdStore = DeviceKeyStore.inMemory()
+        let third = session(userID: userID, store: thirdStore, vault: vault)
+        await third.enroll(recoveryWordsText: words.joined(separator: " "))
+        #expect(third.lastError == nil)
+        #expect(thirdStore.load() == firstStore.load(),
+                "the phrase road is account-agnostic too")
+    }
+}

@@ -36,7 +36,7 @@ import VariorumCore
 nonisolated struct SyncRowFace: Equatable {
     enum Kind: Equatable {
         case devStore, signedOut, syncOff, syncing, offline
-        case keysLocked, keysReplaced, error, idle
+        case keysLocked, keysReplaced, notEntitled, error, idle
     }
 
     struct Door: Equatable, Identifiable {
@@ -107,6 +107,19 @@ nonisolated struct SyncRowFace: Equatable {
                 // of a generic error face.
                 return SyncRowFace(kind: .keysReplaced, doors: [
                     Door(label: "Re-enroll…", act: .openAccount(.encryption)),
+                ])
+            }
+            if HostedSyncTier.isNotEntitledError(error) {
+                // Phase 14c batch 3 (L7): the tier refusal is NOT an error
+                // — the app is whole without the tier (the v1 principle:
+                // an unentitled state reads as NORMAL, never degraded).
+                // The doors are the IDLE row's own — "Sync now" retries
+                // once the plan is active (the heal needs no relaunch),
+                // and "Account…" opens the tab whose tier section says
+                // what the tier is and where it lives.
+                return SyncRowFace(kind: .notEntitled, doors: [
+                    Door(label: "Sync now", act: .syncNow),
+                    Door(label: "Account…", act: .openAccount(.account)),
                 ])
             }
             return SyncRowFace(kind: .error, doors: [
@@ -196,6 +209,13 @@ struct SyncStatusRow: View {
         case .keysReplaced:
             Text(Self.keysReplacedLabel)
                 .foregroundStyle(.orange)
+                .help(sync.status.lastError ?? "")
+        case .notEntitled:
+            // Phase 14c (L7): SECONDARY styling, deliberately — the same
+            // quiet voice as signed-out/offline, never the error red or
+            // the keys orange (reads as normal).
+            Text(HostedSyncTier.rowLabel)
+                .foregroundStyle(.secondary)
                 .help(sync.status.lastError ?? "")
         case .error:
             Text("Sync error")

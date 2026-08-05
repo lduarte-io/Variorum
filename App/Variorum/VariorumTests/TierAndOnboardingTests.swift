@@ -1,0 +1,310 @@
+//
+//  TierAndOnboardingTests.swift
+//  VariorumTests
+//
+//  Phase 14c, batch 3 (L7 + L8) — the hosted-sync tier's gate UX and the
+//  stranger's front door, pinned:
+//   - the tier refusal (`SyncError.syncNotEntitled`) presents as a NORMAL
+//     row, never an error face (the v1 principle: sync is the tier, the
+//     app is not) — red-on-old against the generic `.error` face;
+//   - the tier classifier stays disjoint from every keys classifier;
+//   - the copy is honest and PRICE-AGNOSTIC (works-fully-without-it, the
+//     stargazing.tech pointer, no numbers anywhere);
+//   - the promoted entitlement read (B2-3's real home) feeds
+//     `AccountState.hostedSync`, and the deletion door's note DERIVES
+//     from the same read;
+//   - the sign-up refusals classify and speak (the R94 doctrine at the
+//     account-creation door), the signups-off toggle above all: a closed
+//     door in words, never a generic failure.
+//
+
+import Foundation
+import Dependencies
+import Testing
+import VariorumCore
+@testable import Variorum
+
+// MARK: - The tier face (L7)
+
+@MainActor
+@Suite("The hosted-sync tier face (Phase 14c, batch 3)")
+struct HostedSyncTierFaceTests {
+    /// THE TIER ROW READS AS NORMAL (red-on-old: the pre-batch face for
+    /// this error was `.error` — red label, Retry door): kind is the
+    /// dedicated `.notEntitled`, and the doors are the IDLE row's own —
+    /// "Sync now" enabled (activation heals on the next round, no
+    /// relaunch) and "Account…" opening the tab whose tier section says
+    /// what the tier is.
+    @Test func theTierRefusalPresentsAsANormalRowWithTheIdleDoors() {
+        let face = SyncRowFace.face(
+            allowsSync: true, isConfigured: true, signedIn: true,
+            isSyncing: false,
+            lastError: String(describing: SyncError.syncNotEntitled),
+            lastErrorIsOffline: false)
+        #expect(face.kind == .notEntitled)
+        #expect(face.doors == [
+            SyncRowFace.Door(label: "Sync now", act: .syncNow),
+            SyncRowFace.Door(label: "Account…", act: .openAccount(.account)),
+        ], "the unentitled row offers exactly the idle row's doors — normal, never degraded")
+
+        let idle = SyncRowFace.face(
+            allowsSync: true, isConfigured: true, signedIn: true,
+            isSyncing: false, lastError: nil, lastErrorIsOffline: false)
+        #expect(face.doors == idle.doors,
+                "the doors are LITERALLY the idle doors — the reads-as-normal principle in data")
+    }
+
+    /// The tier classifier is exact and disjoint from every keys
+    /// classifier — commerce state never wears a keys face, and keys
+    /// states never wear the tier's.
+    @Test func theTierClassifierIsExactAndDisjointFromKeysClassifiers() {
+        let tier = String(describing: SyncError.syncNotEntitled)
+        #expect(HostedSyncTier.isNotEntitledError(tier))
+        #expect(!HostedSyncTier.isNotEntitledError(
+            String(describing: SyncError.encryptionKeysReplaced)))
+        #expect(!HostedSyncTier.isNotEntitledError(
+            String(describing: SyncError.encryptionKeysUnavailable)))
+        #expect(!HostedSyncTier.isNotEntitledError("Sync error: something else"))
+        #expect(!EncryptionSession.isKeysReplacedError(tier))
+        #expect(!EncryptionSession.isKeysLockedError(tier))
+        #expect(!EncryptionSession.isPayloadCryptoError(tier))
+    }
+
+    /// The tier copy: honest (what it is · works fully without it · where
+    /// it lives) and PRICE-AGNOSTIC — she names the number at launch, so
+    /// no price-shaped token may appear anywhere in the tier's statics.
+    @Test func theTierCopyIsHonestAndPriceAgnostic() {
+        #expect(HostedSyncTier.whatItIs.contains("end-to-end encrypted"),
+                "the tier's first fact is the E2EE promise")
+        #expect(HostedSyncTier.worksWithoutIt.contains("works fully without"),
+                "the v1 principle's own sentence")
+        #expect(HostedSyncTier.whereToGetIt.contains("stargazing.tech"),
+                "where the tier lives — the web-first ruling")
+        #expect(HostedSyncTier.rowLabel.contains("hosted sync isn't active"),
+                "the row names the state, quietly")
+        for copy in [HostedSyncTier.rowLabel, HostedSyncTier.activeLine,
+                     HostedSyncTier.whatItIs, HostedSyncTier.worksWithoutIt,
+                     HostedSyncTier.whereToGetIt, AccountView.signUpFootnote] {
+            for token in ["$", "€", "per month", "/month", "price"] {
+                #expect(!copy.lowercased().contains(token),
+                        "price-agnostic machinery — no '\(token)' in: \(copy)")
+            }
+        }
+    }
+
+    /// `isCurrent`: NULL expiry is non-expiring (09's letter); a future
+    /// expiry is current; a past one is not; an unparseable one counts as
+    /// current (the server's own gates parse authoritatively — the client
+    /// must not manufacture a refusal the server never made).
+    @Test func entitlementCurrencyFollowsTheColumnsLetter() {
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        #expect(HostedSyncTier.isCurrent(
+            AccountEntitlement(feature: "hosted_sync"), now: now))
+        #expect(HostedSyncTier.isCurrent(
+            AccountEntitlement(feature: "hosted_sync", expiresAt: "2036-01-01T00:00:00Z"),
+            now: now))
+        #expect(!HostedSyncTier.isCurrent(
+            AccountEntitlement(feature: "hosted_sync", expiresAt: "2020-01-01T00:00:00Z"),
+            now: now))
+        #expect(HostedSyncTier.isCurrent(
+            AccountEntitlement(feature: "hosted_sync", expiresAt: "not-a-date"), now: now))
+    }
+}
+
+// MARK: - The promoted entitlement read (L7 — B2-3's real home)
+
+@MainActor
+@Suite("The promoted entitlement read (Phase 14c, batch 3)", .serialized)
+struct HostedSyncStatusReadTests {
+    private actor ScriptedLifecycle: AccountLifecycleProviding {
+        enum Script {
+            case entitlements([AccountEntitlement])
+            case failure
+        }
+        private let script: Script
+        init(_ script: Script) { self.script = script }
+        func truncateAccountData(activeKeyID: String) async throws -> [String: Int] { [:] }
+        func purgeAccount() async throws -> AccountPurgeReport {
+            AccountPurgeReport(dataRows: 0, vaultRows: 0, entitlementRows: 0, authUserRemoved: true)
+        }
+        func fetchEntitlements() async throws -> [AccountEntitlement] {
+            switch script {
+            case .entitlements(let rows): return rows
+            case .failure: throw AccountLifecycleError.httpFailure(status: 503, body: "down")
+            }
+        }
+    }
+
+    private actor QuietTransport: SyncTransport {
+        func push(_ batch: [SyncRow], activeKeyID: String) async throws -> [SyncPushOutcome] {
+            batch.map { _ in .rejected(current: nil) }
+        }
+        func pull(since: Int64, limit: Int, activeKeyID: String) async throws -> [SyncPulledRow] { [] }
+        func schemaVersion() async throws -> Int { SyncSchema.lockstepVersion }
+    }
+
+    private func withServices(
+        _ script: ScriptedLifecycle.Script,
+        _ body: @MainActor (AppServices) async throws -> Void
+    ) async throws {
+        let db = try AppDatabase.inMemory()
+        let auth = AuthSession(
+            configuration: AuthConfiguration(
+                projectURL: URL(string: "https://variorum-project.test.invalid")!,
+                apiKey: "publishable"),
+            store: .inMemory(),
+            http: { _ in throw AuthSessionError.malformedResponse("no network") })
+        await auth.adopt(AuthTokens(
+            accessToken: "access", refreshToken: "refresh",
+            expiresAt: Date().addingTimeInterval(3600),
+            userID: "user-tier", email: "tier@example.com"))
+        let fragmentsAuth = AuthSession(
+            configuration: AuthConfiguration(
+                projectURL: URL(string: "https://fragments-project.test.invalid")!,
+                apiKey: "publishable"),
+            store: .inMemory(),
+            http: { _ in throw AuthSessionError.malformedResponse("no network") })
+        let keyVault = KeyVaultClient(
+            configuration: KeyVaultClient.Configuration(
+                projectURL: URL(string: "https://vault.test.invalid")!,
+                apiKey: "publishable-test-key"),
+            sessionProvider: auth,
+            load: { _ in throw URLError(.cancelled) })
+        let store = DeviceKeyStore.inMemory()
+        let encryption = EncryptionSession(
+            store: store, client: keyVault, signedIn: { true })
+        let lifecycle = ScriptedLifecycle(script)
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+        } operation: { @MainActor in
+            let services = AppServices(
+                session: AppSession(database: db), storeVariant: .real,
+                backupEnabled: false, bridgeEnabled: false,
+                auth: auth, fragmentsAuth: fragmentsAuth, encryption: encryption,
+                makeSyncTransport: { _ in QuietTransport() },
+                makeSyncKeyProvider: { AppTestKeyProvider() },
+                keyVault: keyVault,
+                makeAccountLifecycle: { _ in lifecycle })
+            try await body(services)
+        }
+    }
+
+    /// An active `hosted_sync` row projects `.active` — and the deletion
+    /// door's subscription note DERIVES from the same read (one read, one
+    /// truth: B2-3 promoted).
+    @Test func anActiveEntitlementProjectsActiveAndDerivesTheNote() async throws {
+        try await withServices(.entitlements([
+            AccountEntitlement(feature: "hosted_sync", expiresAt: nil, source: "manual"),
+        ])) { services in
+            await services.refreshHostedSyncStatus()
+            #expect(services.account.hostedSync == .active(expiresAt: nil))
+            await services.refreshSubscriptionNote()
+            #expect(services.account.subscriptionNote != nil,
+                    "the note strengthens the static advisory when the read says active")
+        }
+    }
+
+    /// An expired row — or none — projects `.inactive`; no note. A row
+    /// for a DIFFERENT feature never activates the tier.
+    @Test func expiredForeignOrMissingRowsProjectInactive() async throws {
+        try await withServices(.entitlements([
+            AccountEntitlement(feature: "hosted_sync", expiresAt: "2020-01-01T00:00:00Z"),
+            AccountEntitlement(feature: "some_future_feature"),
+        ])) { services in
+            await services.refreshHostedSyncStatus()
+            #expect(services.account.hostedSync == .inactive)
+            await services.refreshSubscriptionNote()
+            #expect(services.account.subscriptionNote == nil)
+        }
+    }
+
+    /// A FAILED read stays quiet: `.unknown` untouched, no note, no error
+    /// face anywhere — reads-as-normal (when the server actually refuses
+    /// a round, the sync row's tier line narrates; a status read is never
+    /// its own alarm).
+    @Test func aFailedReadStaysQuietAndUnknown() async throws {
+        try await withServices(.failure) { services in
+            let errorBefore = services.account.lastError
+            await services.refreshHostedSyncStatus()
+            #expect(services.account.hostedSync == .unknown)
+            #expect(services.account.lastError == errorBefore,
+                    "a failed status read never mints an error face")
+            await services.refreshSubscriptionNote()
+            #expect(services.account.subscriptionNote == nil)
+        }
+    }
+}
+
+// MARK: - The sign-up door's voice (L8)
+
+@MainActor
+@Suite("Sign-up refusals classify and speak (Phase 14c, batch 3)")
+struct SignUpPresentationTests {
+    /// THE COMMON PRE-GATE REFUSAL: the signups-off toggle (the corpus
+    /// guard, flipped only as the gate's deliberate act). It must speak
+    /// as a CLOSED DOOR — the server refuses all new accounts — never as
+    /// a generic failure blaming this user's input. Both GoTrue
+    /// vocabularies classify (the modern error_code and the message
+    /// text).
+    @Test func theSignupsOffToggleSpeaksAsAClosedDoor() {
+        let modern = AuthSessionError.endpointFailure(
+            status: 422,
+            body: #"{"code":422,"error_code":"signup_disabled","msg":"Signups not allowed for this instance"}"#)
+        #expect(ErrorPresentation.signUpFailureMessage(modern)
+                == ErrorPresentation.signUpClosedMessage)
+        let older = AuthSessionError.endpointFailure(
+            status: 422, body: #"{"msg":"Signups not allowed for this instance"}"#)
+        #expect(ErrorPresentation.signUpFailureMessage(older)
+                == ErrorPresentation.signUpClosedMessage)
+        #expect(ErrorPresentation.signUpClosedMessage.contains("isn't open yet"),
+                "a closed door in words — the server's state, not the user's failure")
+    }
+
+    @Test func theOtherRefusalArmsSpeakTheirOwnWords() {
+        let exists = AuthSessionError.endpointFailure(
+            status: 422,
+            body: #"{"code":422,"error_code":"user_already_exists","msg":"User already registered"}"#)
+        #expect(ErrorPresentation.signUpFailureMessage(exists)
+                == ErrorPresentation.signUpExistsMessage)
+        let weak = AuthSessionError.endpointFailure(
+            status: 422,
+            body: #"{"code":422,"error_code":"weak_password","msg":"Password should be at least 6 characters."}"#)
+        #expect(ErrorPresentation.signUpFailureMessage(weak).contains("too short or too weak"))
+        let rate = AuthSessionError.endpointFailure(
+            status: 429,
+            body: #"{"code":429,"error_code":"over_email_send_rate_limit","msg":"For security purposes, you can only request this once every 60 seconds"}"#)
+        #expect(ErrorPresentation.signUpFailureMessage(rate).contains("Too many attempts"))
+        let network = URLError(.notConnectedToInternet)
+        #expect(ErrorPresentation.signUpFailureMessage(network).contains("check your connection"))
+        let unknown = AuthSessionError.endpointFailure(status: 500, body: "boom")
+        #expect(ErrorPresentation.signUpFailureMessage(unknown).contains("HTTP 500"),
+                "the fallback still names the shape instead of dumping an enum")
+        // The pre-SMTP era's REAL stranger refusal (source-verified): the
+        // built-in mailer refuses non-team recipients even with signups
+        // ON — the arm blames the server's email setup, never the input.
+        let unauthorized = AuthSessionError.endpointFailure(
+            status: 403,
+            body: #"{"code":403,"error_code":"email_address_not_authorized","msg":"Email address not authorized"}"#)
+        #expect(ErrorPresentation.signUpFailureMessage(unauthorized)
+                    .contains("email delivery isn't fully set up"))
+    }
+
+    /// The surface's own statics: the confirmation notice says what
+    /// happened and what to do — and stays TRUE under GoTrue's
+    /// enumeration prevention (an already-registered email gets the same
+    /// session-less 200 and NO email; the notice covers that road
+    /// without revealing which one fired). The footnote speaks the v1
+    /// principle at the door.
+    @Test func theSignUpSurfaceCopyIsPinned() {
+        #expect(AccountState.confirmationNotice.contains("confirmation link"),
+                "the notice names the email road")
+        #expect(AccountState.confirmationNotice.contains("sign in"),
+                "…and the step after it")
+        #expect(AccountState.confirmationNotice.contains("no email arrives"),
+                "the enumeration-prevention road is covered honestly — an existing address gets the identical response and no email")
+        #expect(AccountView.signUpFootnote.contains("works fully without an account"),
+                "the door itself says the app is whole without it")
+    }
+}

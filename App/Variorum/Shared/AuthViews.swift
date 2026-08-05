@@ -40,6 +40,12 @@ struct AccountView: View {
     @State private var tab: AccountTab
     @State private var variorumEmail = ""
     @State private var variorumPassword = ""
+    /// Phase 14c batch 3 (L8): the sign-up face's state — the signed-out
+    /// section flips between the sign-in and create-account forms.
+    @State private var creatingAccount = false
+    @State private var signUpEmail = ""
+    @State private var signUpPassword = ""
+    @State private var signUpConfirm = ""
     @State private var fragmentsEmail = ""
     @State private var fragmentsPassword = ""
     /// Phase 14c: the deletion door's friction state (her Round-5 ruling).
@@ -72,16 +78,38 @@ struct AccountView: View {
     /// typed).
     static let deleteConfirmationPhrase = "delete my account"
 
+    // MARK: Phase 14c batch 3 — the sign-up face's copy (THE DESIGN 6)
+
+    /// The create-account footnote: the v1 principle spoken at the door —
+    /// the app is whole without an account; an account is sign-in for the
+    /// tier, never a requirement.
+    static let signUpFootnote =
+        "One account for the suite — hosted sync runs under it. Variorum works fully "
+        + "without an account; everything you write stays on this device either way."
+
     init(services: AppServices, initialTab: AccountTab = .account) {
         self.services = services
         _tab = State(initialValue: initialTab)
     }
 
-    private enum Field { case variorumEmail, variorumPassword, bridgeEmail, bridgePassword }
+    private enum Field {
+        case variorumEmail, variorumPassword
+        case signUpEmail, signUpPassword, signUpConfirm
+        case bridgeEmail, bridgePassword
+    }
 
     private var canSignInVariorum: Bool {
         ProjectConfig.variorumConfigured && !services.account.busy
             && !variorumEmail.isEmpty && !variorumPassword.isEmpty
+    }
+
+    /// The create act's gate: both password entries must agree — the typo
+    /// class is real here (a mistyped password locks a stranger out until
+    /// a reset email, and the pre-SMTP mailer is tightly capped).
+    private var canSignUp: Bool {
+        ProjectConfig.variorumConfigured && !services.account.busy
+            && !signUpEmail.isEmpty && !signUpPassword.isEmpty
+            && signUpPassword == signUpConfirm
     }
 
     private var canConnectBridge: Bool {
@@ -106,6 +134,17 @@ struct AccountView: View {
         let password = fragmentsPassword
         fragmentsPassword = ""
         Task { await services.connectFragmentsJournal(email: email, password: password) }
+    }
+
+    /// One door for the button AND the fields' Return key (the sign-in
+    /// form's own rule, applied to the create face).
+    private func signUp() {
+        guard canSignUp else { return }
+        let email = signUpEmail
+        let password = signUpPassword
+        signUpPassword = ""
+        signUpConfirm = ""
+        Task { await services.signUpWithVariorum(email: email, password: password) }
     }
 
     var body: some View {
@@ -169,6 +208,10 @@ struct AccountView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
+            // Phase 14c batch 3 (L7): the tier's real home — CF-14's own
+            // words made good ("account will one day show payment").
+            HostedSyncSection(services: services)
+
             if showingDeleteAccount {
                 deleteAccountSection
             } else {
@@ -178,6 +221,8 @@ struct AccountView: View {
                 }
                 .disabled(services.account.busy)
             }
+        } else if creatingAccount {
+            signUpSection
         } else {
             Text("Sign in with your account email and password:")
             emailField("Email", text: $variorumEmail)
@@ -189,6 +234,12 @@ struct AccountView: View {
                 .onSubmit { signInVariorum() }
             Button("Sign In") { signInVariorum() }
                 .disabled(!canSignInVariorum)
+            Button("Create an account…") {
+                creatingAccount = true
+                services.account.lastError = nil
+                services.account.lastNotice = nil
+            }
+            .buttonStyle(.borderless)
             Text("One account for the suite — sync and everything you write run under it.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -227,6 +278,55 @@ struct AccountView: View {
         if let error = services.account.lastError {
             Text(error).font(.caption).foregroundStyle(.red)
         }
+        // Phase 14c (L8): the informational line — a notice is a normal
+        // outcome (the confirmation email went out), never red.
+        if let notice = services.account.lastNotice {
+            Text(notice)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    // MARK: Phase 14c batch 3 — the sign-up face (THE DESIGN 6)
+
+    /// The create-account form: the same seam as sign-in, the CF-1
+    /// grammar (one act button; the way back is borderless). The confirm
+    /// field guards the mistyped-password class. While the signups
+    /// toggle is OFF the server refuses every create — the surface
+    /// speaks that refusal as a closed door
+    /// (`ErrorPresentation.signUpClosedMessage`), never a generic error.
+    @ViewBuilder
+    private var signUpSection: some View {
+        Text("Create an account with an email and password:")
+        emailField("Email", text: $signUpEmail)
+            .focused($focus, equals: .signUpEmail)
+            .onSubmit { focus = .signUpPassword }
+        SecureField("Password", text: $signUpPassword)
+            .textContentType(.newPassword)
+            .focused($focus, equals: .signUpPassword)
+            .onSubmit { focus = .signUpConfirm }
+        SecureField("Confirm password", text: $signUpConfirm)
+            .textContentType(.newPassword)
+            .focused($focus, equals: .signUpConfirm)
+            .onSubmit { signUp() }
+        if !signUpConfirm.isEmpty && signUpPassword != signUpConfirm {
+            Text("The two password entries don't match yet.")
+                .font(.caption)
+                .foregroundStyle(.orange)
+        }
+        Button("Create Account") { signUp() }
+            .disabled(!canSignUp)
+        Button("Back to sign in") {
+            creatingAccount = false
+            services.account.lastError = nil
+            services.account.lastNotice = nil
+        }
+        .buttonStyle(.borderless)
+        Text(Self.signUpFootnote)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     // MARK: Phase 14c — the deletion door (THE DESIGN 4, her Round-5 ruling)

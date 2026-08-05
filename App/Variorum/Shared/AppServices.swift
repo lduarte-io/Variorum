@@ -45,10 +45,30 @@ final class AccountState {
     var lastError: String?
     /// Phase 14c (the deletion door): the best-effort subscription note —
     /// non-nil when the account holds an active entitlement row (the
-    /// phase's stand-in; batch 3's checkout owns the real cancellation
-    /// flow). The door's STATIC cancel-first advisory shows regardless;
-    /// this line only strengthens it when the read succeeds.
+    /// phase's stand-in; the checkout owns the real cancellation flow).
+    /// The door's STATIC cancel-first advisory shows regardless; this
+    /// line only strengthens it when the read succeeds. Batch 3 (B2-3
+    /// promoted): DERIVED from `hostedSync` — one read, one truth.
     var subscriptionNote: String?
+    /// Phase 14c batch 3 (L7, B2-3's real home): the tier standing as
+    /// last read. `.unknown` until a read succeeds; a FAILED read leaves
+    /// it untouched — quiet, never an error face (reads-as-normal).
+    var hostedSync: HostedSyncStatus = .unknown
+    /// Phase 14c batch 3 (L8): the sign-up flow's informational line —
+    /// a NOTICE, never an error (the confirmation-email road is a normal
+    /// outcome, not a failure). Cleared on sign-in and on the next act.
+    var lastNotice: String?
+
+    /// The confirmation-required outcome's words (pinned). Worded to stay
+    /// TRUE under GoTrue's enumeration prevention: an already-registered
+    /// email gets the same session-less 200 (a sanitized user body) and
+    /// NO email is actually sent — the client cannot distinguish, so the
+    /// notice covers both roads honestly without revealing which one this
+    /// address took.
+    static let confirmationNotice =
+        "Check your email for a confirmation link, then sign in here. If this address "
+        + "already has an account, no email arrives — sign in with its existing password "
+        + "instead."
 }
 
 @MainActor
@@ -309,6 +329,37 @@ final class AppServices {
         }
     }
 
+    /// Phase 14c batch 3 (L8, THE DESIGN 6): account creation through the
+    /// SAME seam as sign-in — email+password against the suite issuer.
+    /// While the signups toggle is OFF (the corpus guard, flipped only as
+    /// the gate's deliberate act), the server refuses and this surface
+    /// speaks that refusal honestly (`signUpFailureMessage`'s closed
+    /// arm). Two success shapes: autoconfirm signs straight in (the
+    /// onChange wiring composes sync; the empty-store first pull reads as
+    /// normal); confirmation-required posts the notice and sign-in
+    /// completes after her email link.
+    func signUpWithVariorum(email: String, password: String) async {
+        guard ProjectConfig.variorumConfigured else {
+            account.lastError = "Project keys not configured (ProjectConfig.swift)"
+            return
+        }
+        guard !account.busy else { return }  // the double-tap belt
+        account.busy = true
+        account.lastError = nil
+        account.lastNotice = nil
+        defer { account.busy = false }
+        do {
+            switch try await auth.signUp(email: email, password: password) {
+            case .signedIn:
+                break  // the onChange road takes it from here
+            case .confirmationRequired:
+                account.lastNotice = AccountState.confirmationNotice
+            }
+        } catch {
+            account.lastError = ErrorPresentation.signUpFailureMessage(error)
+        }
+    }
+
     func signOutVariorum() async {
         await auth.signOut()
     }
@@ -317,6 +368,7 @@ final class AppServices {
         if let tokens {
             account.variorum = AccountState.SignedIn(
                 userID: tokens.userID, email: tokens.email)
+            account.lastNotice = nil  // the sign-up notice's job is done
             // The paste-in's retirement completes at the first real
             // sign-in: the legacy Keychain item dies here (idempotent).
             LegacyPasteInCleanup.clear()
@@ -426,24 +478,36 @@ final class AppServices {
         }
     }
 
-    /// The deletion door's best-effort subscription check (the phase's
-    /// stand-in; batch 3's checkout owns the real cancellation flow): a
-    /// non-nil note strengthens the static cancel-first advisory. A
-    /// failed read stays nil — the static advisory shows regardless.
-    func refreshSubscriptionNote() async {
-        account.subscriptionNote = nil
-        guard keyVault != nil else { return }
+    /// Phase 14c batch 3 (L7 — B2-3 promoted into its real home): the ONE
+    /// entitlement read, feeding `AccountState.hostedSync` for the
+    /// Account tab's tier section AND the deletion door's note below.
+    /// The P-ii pattern (plain authenticated read of the account's own
+    /// row); a FAILED read changes nothing — `.unknown` renders nothing
+    /// and the surfaces stay quiet (reads-as-normal; when the server
+    /// actually refuses a round, the sync row's tier line narrates).
+    func refreshHostedSyncStatus() async {
+        guard keyVault != nil else { return }  // unconfigured stays dormant
         let lifecycle = makeAccountLifecycle(auth)
         guard let entitlements = try? await lifecycle.fetchEntitlements() else { return }
-        let active = entitlements.filter { entitlement in
-            guard let expires = entitlement.expiresAt else { return true }
-            return (DateFormatter.variorumISO8601.date(from: expires)
-                ?? ISO8601DateFormatter().date(from: expires)
-                ?? .distantFuture) > Date()
+        let active = entitlements.first { entitlement in
+            entitlement.feature == HostedSyncTier.feature
+                && HostedSyncTier.isCurrent(entitlement)
         }
-        if !active.isEmpty {
+        account.hostedSync = active.map { .active(expiresAt: $0.expiresAt) } ?? .inactive
+    }
+
+    /// The deletion door's best-effort subscription check — since batch 3
+    /// a DERIVATION over the promoted read above (one read, one truth): a
+    /// non-nil note strengthens the static cancel-first advisory. A
+    /// failed read stays nil — the static advisory shows regardless.
+    /// (Keys on the tier's ONE feature by design; a future second feature
+    /// re-opens this derivation, recorded.)
+    func refreshSubscriptionNote() async {
+        account.subscriptionNote = nil
+        await refreshHostedSyncStatus()
+        if case .active = account.hostedSync {
             account.subscriptionNote =
-                "This account has an active hosted-sync plan (\(active.map(\.feature).joined(separator: ", ")))."
+                "This account has an active hosted-sync plan — cancel it first."
         }
     }
 
