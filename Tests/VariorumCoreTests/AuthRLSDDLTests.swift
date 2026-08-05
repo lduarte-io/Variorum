@@ -339,6 +339,102 @@ struct AuthRLSDDLTests {
                 "every changefeed branch must carry the owner filter (\(fromCount) from vs \(ownerFilterCount) filters)")
     }
 
+    /// A named `constant text[] := array[...]` list inside a deployed
+    /// function body, parsed for the drift pins (the allowlist/owner-array
+    /// pattern, shared by the batch-2 account doors).
+    private static func namedArray(_ name: String, in body: String) -> Set<String>? {
+        let marker = "\(name) constant text[] := array["
+        guard let start = body.range(of: marker),
+              let end = body.range(of: "];", range: start.upperBound..<body.endIndex)
+        else { return nil }
+        return Set(
+            body[start.upperBound..<end.lowerBound]
+                .components(separatedBy: CharacterSet(charactersIn: "',\n "))
+                .filter { !$0.isEmpty })
+    }
+
+    // MARK: - Phase 14c batch 2: the account lifecycle doors (THE DESIGN 3–4)
+
+    /// CF-8's server half: the truncate door is auth-gated, FENCED (the
+    /// sync RPCs' exact vault-key-id arm with the same classifiable
+    /// marker — the re-key order's server-side enforcement: only the
+    /// freshly-written vault's holder can empty the account), strictly
+    /// tenant-scoped row deletes over EXACTLY the registry's tables, and
+    /// never touches key_vault / entitlement / sync_meta. Deliberately NO
+    /// entitlement gate (data removal is a right, never commerce-gated).
+    @Test func theAccountTruncateDoorIsFencedTenantScopedAndRegistryExact() throws {
+        let body = try Self.finalBody(of: "account_data_truncate")
+        #expect(body.contains("raise exception 'account acts require an authenticated user'"))
+        #expect(body.contains("select corpus_key_id into fence_key from key_vault where user_id = caller;"),
+                "the truncate must read the caller's vault key id — the fence")
+        #expect(body.contains("if fence_key is null or fence_key is distinct from active_key_id then"),
+                "the truncate must fence on mismatch AND on a missing vault row")
+        #expect(body.contains(SyncServerRefusalMarker.staleKeyFence),
+                "the fence refusal must carry the client-classifiable marker")
+        #expect(body.contains("delete from %I where owner_id = $1"),
+                "row deletes, tenant-scoped by the composite identity — never TRUNCATE")
+        #expect(!body.lowercased().contains("truncate table"),
+                "TRUNCATE would cross tenants; the door is row-scoped by design")
+        #expect(Self.namedArray("data_tables", in: body) == Set(SyncSchema.tables.map(\.name)),
+                "the truncate's table list drifted from the registry")
+        #expect(!body.contains("delete from key_vault"),
+                "the truncate must never touch the vault — the new vault IS the re-key")
+        #expect(!body.contains("delete from entitlement") && !body.contains("from entitlement"),
+                "the truncate must never touch entitlement (the tier survives a re-key; no commerce gate either)")
+        #expect(!body.contains("sync_meta"),
+                "the marker is schema choreography — never the truncate's")
+        #expect(!body.lowercased().contains("restart") && !body.lowercased().contains("setval"),
+                "server_seq's sequence is never reset (SyncSpec §9)")
+    }
+
+    /// The deletion door's purge (her Round-5 ruling): data rows →
+    /// key_vault → entitlement → THE AUTH USER LAST (key_vault's FK
+    /// references auth.users, so the order is load-bearing). No fence
+    /// (deletion supersedes re-key) and no entitlement gate (deletion is
+    /// a right). The local-copy-survives rule is true by construction —
+    /// the body names only server tables.
+    @Test func theAccountPurgeRemovesDataVaultEntitlementThenTheAuthUser() throws {
+        let body = try Self.finalBody(of: "account_purge")
+        #expect(body.contains("raise exception 'account acts require an authenticated user'"))
+        #expect(Self.namedArray("data_tables", in: body) == Set(SyncSchema.tables.map(\.name)),
+                "the purge's table list drifted from the registry")
+        #expect(body.contains("delete from %I where owner_id = $1"),
+                "data deletes are tenant-scoped by the composite identity")
+        #expect(body.contains("delete from key_vault where user_id = caller;"))
+        #expect(body.contains("delete from entitlement where user_id = caller;"))
+        #expect(body.contains("delete from auth.users where id = caller;"))
+        // The ORDER: the vault's FK to auth.users makes vault-before-user
+        // load-bearing; entitlement rides between by the ruling's letter.
+        let vault = try #require(body.range(of: "delete from key_vault"))
+        let entitlement = try #require(body.range(of: "delete from entitlement"))
+        let authUser = try #require(body.range(of: "delete from auth.users"))
+        #expect(vault.lowerBound < entitlement.lowerBound
+                && entitlement.lowerBound < authUser.lowerBound,
+                "the purge order is data → vault → entitlement → auth user")
+        #expect(!body.contains(SyncServerRefusalMarker.staleKeyFence),
+                "no fence on deletion — deletion supersedes re-key")
+        #expect(!body.contains(SyncServerRefusalMarker.notEntitled),
+                "no entitlement gate on deletion — deletion is a right")
+        #expect(!body.contains("sync_meta"))
+        for key in ["'data_rows'", "'vault_rows'", "'entitlement_rows'", "'auth_user_removed'"] {
+            #expect(body.contains(key), "the purge report must carry \(key)")
+        }
+    }
+
+    /// Both account doors take the demotion posture: authenticated only —
+    /// deliberately NO service_role grant (account acts are always a
+    /// signed-in user's own, never server machinery's).
+    @Test func theAccountDoorsCarryTheDemotionPosture() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("09_phase14c_multitenant.sql"))
+        #expect(sql.contains("revoke execute on function account_data_truncate(text) from public, anon;"))
+        #expect(sql.contains("revoke execute on function account_purge() from public, anon;"))
+        #expect(sql.contains("grant execute on function account_data_truncate(text) to authenticated;"))
+        #expect(sql.contains("grant execute on function account_purge() to authenticated;"))
+        #expect(!sql.contains("grant execute on function account_data_truncate(text) to authenticated, service_role")
+                && !sql.contains("grant execute on function account_purge() to authenticated, service_role"),
+                "the account doors are never server machinery's")
+    }
+
     /// Replacing `sync_pull` must not regress A5: the visibility horizon and
     /// the server-only column subtraction survive verbatim in the DEPLOYED
     /// bodies (04's and 05's alike).

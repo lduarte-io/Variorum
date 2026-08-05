@@ -60,7 +60,19 @@
 --     path seeds every EXISTING auth user (signups are OFF, so that is
 --     exactly the author's account — no hardcoded uid). The gate's
 --     second probe account is provisioned AFTER this deploy and gets its
---     entitlement row deliberately as part of the probe's setup.
+--     entitlement row deliberately as part of the probe's setup;
+--   * THE ACCOUNT LIFECYCLE DOORS (batch 2; THE DESIGN items 3–4):
+--     `account_data_truncate(active_key_id)` — CF-8's server half: the
+--     caller's OWN rows deleted across the 18 data tables (tenant-scoped
+--     by owner_id; never key_vault, never entitlement, never sync_meta),
+--     gated by the SAME vault-key-id fence as the sync RPCs, so the
+--     truncate can only run for a caller holding the account's CURRENT
+--     key — which, in the re-key order (new vault written FIRST), is
+--     exactly the device that just re-keyed; and `account_purge()` —
+--     the deletion door's immediate hard purge (her Round-5 ruling):
+--     the account's data rows + its key_vault row + its entitlement
+--     rows + the auth user itself, in that order. Local copies SURVIVE
+--     both doors by construction — neither touches any device.
 --
 -- THE CHOREOGRAPHY (SyncSpec §12; the ruled signup-door order, steps
 -- (1)–(3) of the gate):
@@ -884,18 +896,181 @@ end;
 $$;
 
 -- ---------------------------------------------------------------------------
--- 6. The demotion posture on the NEW signatures (the old signatures were
+-- 6. account_data_truncate — CF-8's server half (batch 2; THE DESIGN
+--    item 3). The user-facing re-key door's order of operations is the
+--    safety design: passphrase authorization → the NEW vault written
+--    FIRST (fresh key ids — every stale writer everywhere is fenced
+--    from that instant) → THIS truncate → local resyncReinitialize →
+--    repush. The fence check below is what makes the order enforceable
+--    server-side: only a caller presenting the account's CURRENT corpus
+--    key id — post-vault-write, that is the freshly-minted one — can
+--    empty the account's synced copy; a stale device refuses here with
+--    the same marker as at sync (cold pass C-3's poison-push window,
+--    closed structurally).
+--
+--    Tenant-scoped row DELETEs, never TRUNCATE: the composite
+--    (owner_id, id) identity makes `where owner_id = auth.uid()` exact,
+--    and other tenants' rows are structurally unaddressable. NEVER
+--    key_vault (the new vault is the re-key's whole point), NEVER
+--    entitlement (the tier survives a re-key), NEVER sync_meta (the
+--    marker is schema choreography). The global server_seq sequence is
+--    untouched (SyncSpec §9 — ordering authority stays monotonic).
+--
+--    DELIBERATELY NO entitlement gate: removing your own synced data is
+--    a data-removal right, never commerce-gated (an expired account can
+--    still empty its server copy; it just cannot repush until the tier
+--    is active again).
+-- ---------------------------------------------------------------------------
+
+create or replace function account_data_truncate(active_key_id text) returns jsonb
+language plpgsql security definer
+set search_path = public
+as $$
+declare
+  data_tables constant text[] := array[
+    'container', 'block', 'variant', 'commit_point', 'edge',
+    'container_block', 'reading', 'reading_section', 'reading_post', 'tag',
+    'post_tag', 'block_tag', 'reference', 'canvas_layout',
+    'lens', 'lens_choice', 'block_comment', 'setting'];
+  caller uuid;
+  fence_key text;
+  tbl text;
+  removed bigint;
+  counts jsonb := '{}'::jsonb;
+begin
+  caller := auth.uid();
+  if caller is null then
+    raise exception 'account acts require an authenticated user';
+  end if;
+
+  -- THE VAULT-KEY-ID FENCE (the sync RPCs' exact arm, same marker): a
+  -- missing vault row or a mismatched key id refuses the whole act —
+  -- the client classifies the marker into the CF-16 replaced state.
+  select corpus_key_id into fence_key from key_vault where user_id = caller;
+  if fence_key is null or fence_key is distinct from active_key_id then
+    raise exception 'VARIORUM_STALE_KEY_FENCE: this account''s encryption keys were replaced — the device holds a stale key id; re-enroll before syncing';
+  end if;
+
+  foreach tbl in array data_tables loop
+    execute format('delete from %I where owner_id = $1', tbl) using caller;
+    get diagnostics removed = row_count;
+    counts := counts || jsonb_build_object(tbl, removed);
+  end loop;
+  return counts;
+end;
+$$;
+
+-- ---------------------------------------------------------------------------
+-- 7. account_purge — the deletion door's immediate hard purge (batch 2;
+--    THE DESIGN item 4, her Round-5 ruling). ONE transaction: the
+--    account's rows across the 18 data tables, then its key_vault row,
+--    then its entitlement rows, then THE AUTH USER ITSELF — the order
+--    matters because key_vault.user_id references auth.users (08's FK),
+--    so the vault row must die before the user row can.
+--
+--    THE PINNED COPY RULE lives client-side (her Round-5 ruling: the
+--    door's copy MUST say the local copy survives) — and it is TRUE by
+--    construction here: this function touches only the server.
+--
+--    Server-side authorization is the authenticated session alone; the
+--    passphrase authorization and the typed confirmation are CLIENT-side
+--    friction by necessity (the server never sees the encryption
+--    passphrase — that is the whole E2EE design). No fence arm: deletion
+--    supersedes re-key (a stale device's owner may still delete the
+--    account), and no entitlement gate (deletion is a right, never
+--    commerce-gated).
+--
+--    Definer-function auth-user removal, VERIFIED (build-time lookup,
+--    2026-08-04, per THE DESIGN's verify-honestly instruction):
+--    Supabase's 2025-04 auth-schema lockdown restricted DDL and DML on
+--    the migration-tracking tables ONLY — the postgres role (this
+--    function's owner) retains full DML on auth.users, and Supabase
+--    collaborators explicitly confirm the SECURITY DEFINER
+--    delete-from-auth.users self-deletion RPC pattern (GitHub
+--    discussions #1066/#26223/#35987; the 2025 restriction notice is
+--    discussion #34270). auth.identities/sessions/refresh_tokens
+--    cascade off auth.users; this project uses no Supabase Storage, so
+--    the storage.objects RESTRICT caveat is N/A. Two recorded caveats:
+--    (1) already-issued access JWTs stay cryptographically valid until
+--    expiry (≤1 h) — a lingering device's push in that window refuses
+--    at the sync RPCs' fence anyway (its key_vault row is gone: the
+--    missing-vault arm), so no post-deletion write can land; (2) if a
+--    live deploy ever refuses this delete (a future privilege change),
+--    the recorded fallback shape is an Edge Function calling
+--    auth.admin.deleteUser() with the service role — a redesign-level
+--    swap, not a quiet patch. The gate's probe-account deletion is the
+--    live verification (the Verification section's letter).
+-- ---------------------------------------------------------------------------
+
+create or replace function account_purge() returns jsonb
+language plpgsql security definer
+set search_path = public
+as $$
+declare
+  data_tables constant text[] := array[
+    'container', 'block', 'variant', 'commit_point', 'edge',
+    'container_block', 'reading', 'reading_section', 'reading_post', 'tag',
+    'post_tag', 'block_tag', 'reference', 'canvas_layout',
+    'lens', 'lens_choice', 'block_comment', 'setting'];
+  caller uuid;
+  tbl text;
+  removed bigint;
+  data_rows bigint := 0;
+  vault_rows bigint;
+  entitlement_rows bigint;
+  auth_rows bigint;
+begin
+  caller := auth.uid();
+  if caller is null then
+    raise exception 'account acts require an authenticated user';
+  end if;
+
+  foreach tbl in array data_tables loop
+    execute format('delete from %I where owner_id = $1', tbl) using caller;
+    get diagnostics removed = row_count;
+    data_rows := data_rows + removed;
+  end loop;
+
+  delete from key_vault where user_id = caller;
+  get diagnostics vault_rows = row_count;
+
+  delete from entitlement where user_id = caller;
+  get diagnostics entitlement_rows = row_count;
+
+  -- The auth user LAST (key_vault's FK is gone now). Cascades inside
+  -- the auth schema (identities, sessions, refresh tokens) ride the
+  -- delete; the session that made this very call dies with them.
+  delete from auth.users where id = caller;
+  get diagnostics auth_rows = row_count;
+
+  return jsonb_build_object(
+    'data_rows', data_rows,
+    'vault_rows', vault_rows,
+    'entitlement_rows', entitlement_rows,
+    'auth_user_removed', auth_rows > 0);
+end;
+$$;
+
+-- ---------------------------------------------------------------------------
+-- 8. The demotion posture on the NEW signatures (the old signatures were
 --    dropped in section 0; their historical revokes stand in the
---    composition record). The version-check RPC is untouched.
+--    composition record). The version-check RPC is untouched. The two
+--    account doors take the same posture — authenticated only (no
+--    service_role grant: the account acts are always a signed-in user's
+--    own, never server machinery's).
 -- ---------------------------------------------------------------------------
 
 revoke execute on function sync_push(jsonb, text) from public, anon;
 revoke execute on function sync_pull(bigint, text, int) from public, anon;
 grant execute on function sync_push(jsonb, text) to authenticated, service_role;
 grant execute on function sync_pull(bigint, text, int) to authenticated, service_role;
+revoke execute on function account_data_truncate(text) from public, anon;
+revoke execute on function account_purge() from public, anon;
+grant execute on function account_data_truncate(text) to authenticated;
+grant execute on function account_purge() to authenticated;
 
 -- ---------------------------------------------------------------------------
--- 7. The lockstep marker (SyncSpec §12): sync_meta and
+-- 9. The lockstep marker (SyncSpec §12): sync_meta and
 --    sync_schema_version() already exist (05); nothing here recreates
 --    them. THE MARKER UPDATE IS DELIBERATELY THE LAST STATEMENT OF THIS
 --    FILE: a partially-executed deploy never advertises the new version
