@@ -92,6 +92,11 @@ struct EncryptionView: View {
     /// CF-11: the forget door's confirm.
     @State private var showingForgetConfirm = false
 
+    /// Phase 14c (CF-8): the re-key door's gate.
+    @State private var showingRekey = false
+    @State private var rekeyAcknowledged = false
+    @State private var rekeyPassphrase = ""
+
     private var encryption: EncryptionSession { services.encryption }
 
     // MARK: - The copy (GATE RATIFY / her walk — the record carries these)
@@ -155,6 +160,23 @@ struct EncryptionView: View {
     static let forgetExplanation =
         "Sync on this device stops until you unlock again with your encryption passphrase "
         + "or recovery phrase. Nothing is deleted from this device or your account."
+
+    /// Phase 14c (CF-8): the re-key door's explanation — the honest
+    /// warning names what a re-key does to OTHER devices (they land in
+    /// the keys-were-replaced state and re-enroll), what happens to the
+    /// recovery phrase, and that the local copy is untouched.
+    static let rekeyExplanation =
+        "Replacing your keys mints a fresh set, deletes the synced copy from the server, "
+        + "and re-uploads everything from this device sealed under the new keys. Your "
+        + "writing on this device is untouched. Every OTHER device will pause syncing and "
+        + "say its keys were replaced — re-enroll each one with your passphrase. Your "
+        + "current recovery phrase stops working; you'll write down a new one right after."
+
+    /// CF-8's understanding checkbox (the CF-7 grammar applied to this
+    /// door — friction per the 14b precedent).
+    static let rekeyUnderstandingCheckbox =
+        "I understand that my other devices pause syncing until I re-enroll them, "
+        + "and that my current recovery phrase stops working"
 
     /// CF-12: per-platform biometric naming — never the WebAuthn credential
     /// word (her terminology ruling; the TerminologyPinTests walk enforces
@@ -545,6 +567,15 @@ struct EncryptionView: View {
 
         Divider()
 
+        if showingRekey {
+            rekeySection
+        } else {
+            Button("Replace Encryption Keys…") { showingRekey = true }
+                .disabled(encryption.busy)
+        }
+
+        Divider()
+
         DisclosureGroup("What the server can and can't see") {
             Text(Self.disclosureCopy)
                 .font(.caption)
@@ -557,6 +588,52 @@ struct EncryptionView: View {
         Divider()
 
         forgetSection
+    }
+
+    // MARK: - The re-key door (Phase 14c, CF-8 — THE DESIGN 3)
+
+    /// The user-facing re-key: in-app, no terminal — her CF-8 deferral
+    /// made real. Friction per the 14b grammar: the honest warning, the
+    /// understanding CHECKBOX (the CF-7 precedent), and the passphrase as
+    /// authorization. On success the state lands in the MANDATORY new
+    /// recovery phrase step (CF-5) — the old phrase died with the old
+    /// keys, and setup's own machinery mints the new one.
+    @ViewBuilder
+    private var rekeySection: some View {
+        Text("Replace encryption keys")
+            .fontWeight(.semibold)
+        Text(Self.rekeyExplanation)
+            .font(.caption)
+            .foregroundStyle(.orange)
+            .fixedSize(horizontal: false, vertical: true)
+        Toggle(isOn: $rekeyAcknowledged) {
+            Text(Self.rekeyUnderstandingCheckbox)
+                .font(.caption)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        #if os(macOS)
+        .toggleStyle(.checkbox)
+        #endif
+        SecureField("Encryption passphrase", text: $rekeyPassphrase)
+        HStack {
+            Button("Replace Keys and Re-upload", role: .destructive) {
+                let passphrase = rekeyPassphrase
+                rekeyPassphrase = ""
+                Task {
+                    await encryption.rekeyAccount(passphrase: passphrase)
+                    if encryption.lastError == nil {
+                        showingRekey = false
+                        rekeyAcknowledged = false
+                    }
+                }
+            }
+            .disabled(encryption.busy || rekeyPassphrase.isEmpty || !rekeyAcknowledged)
+            Button("Cancel") {
+                showingRekey = false
+                rekeyAcknowledged = false
+                rekeyPassphrase = ""
+            }
+        }
     }
 
     // MARK: - Regenerate, behind the passphrase (CF-2)

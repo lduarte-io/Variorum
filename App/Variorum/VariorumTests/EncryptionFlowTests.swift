@@ -26,6 +26,7 @@
 import CryptoKit
 import Dependencies
 import Foundation
+import GRDB
 import Testing
 import VariorumCore
 @testable import Variorum
@@ -610,6 +611,287 @@ struct CrossoverRoundTests {
                 }
             }
         }
+    }
+}
+
+// MARK: - The account lifecycle doors (Phase 14c, batch 2 — CF-8 + deletion)
+
+@MainActor
+@Suite("The account lifecycle doors (Phase 14c, batch 2)")
+struct AccountLifecycleDoorTests {
+    private func material(_ seed: UInt8) -> DeviceKeyMaterial {
+        DeviceKeyMaterial(
+            masterKey: Data(repeating: seed, count: 32),
+            corpusKey: Data(repeating: seed &+ 1, count: 32),
+            corpusKeyID: "corpus-\(seed)",
+            journalBridgeKey: Data(repeating: seed &+ 2, count: 32),
+            journalBridgeKeyID: "journal-\(seed)")
+    }
+
+    /// CF-8's flow state machine: a successful run lands in
+    /// `enrolled(hasRecoveryWrap: false)` — the standing CF-5 MANDATORY
+    /// phrase step (the old phrase died with the old master; setup's own
+    /// machinery mints the new one) — with the runner-adopted custody in
+    /// place.
+    @Test func theRekeyDoorLandsInTheMandatoryPhraseStepWithNewCustody() async throws {
+        let store = DeviceKeyStore.inMemory()
+        let vault = ScriptedVault()
+        let session = makeEncryptionSession(store: store, vault: vault)
+        await session.setUp(passphrase: "the-old-passphrase")
+        let old = try #require(store.load())
+
+        let fresh = material(7)
+        session.rekeyRunner = { passphrase in
+            #expect(passphrase == "the-old-passphrase")
+            // The runner's CONTRACT: custody adopted mid-run.
+            await MainActor.run { session.adoptRekeyedMaterial(fresh) }
+            return fresh
+        }
+        var healed = 0
+        session.onKeysChanged = { healed += 1 }
+        await session.rekeyAccount(passphrase: "the-old-passphrase")
+
+        #expect(session.lastError == nil)
+        #expect(session.state == .enrolled(hasRecoveryWrap: false),
+                "the landing IS the CF-5 mandatory phrase step — the new 12 words follow")
+        #expect(store.load() == fresh, "custody holds the NEW keys")
+        #expect(store.load() != old)
+        #expect(healed == 1, "adoption fires the healing hook")
+    }
+
+    /// The non-atomic sequence's honest voice: ANY mid-run failure speaks
+    /// the rerun road (the brain's pinned recovery), never a bare error.
+    @Test func aFailedRekeySpeaksTheRerunRoad() async throws {
+        let store = DeviceKeyStore.inMemory()
+        let vault = ScriptedVault()
+        let session = makeEncryptionSession(store: store, vault: vault)
+        await session.setUp(passphrase: "the-old-passphrase")
+
+        session.rekeyRunner = { _ in
+            throw AccountLifecycleError.httpFailure(status: 503, body: "gateway")
+        }
+        await session.rekeyAccount(passphrase: "the-old-passphrase")
+        let error = try #require(session.lastError)
+        #expect(error.contains("run Replace Keys again"),
+                "the rerun road is spoken on every failure")
+        #expect(session.state == .enrolled(hasRecoveryWrap: false),
+                "the state is untouched by the failure (setup's step-4 state stands)")
+    }
+
+    /// No runner wired (unconfigured project) ⇒ the door refuses in the
+    /// standing dormant grammar, exactly like the other flows.
+    @Test func theRekeyDoorIsDormantWithoutARunner() async throws {
+        let session = makeEncryptionSession(
+            store: .inMemory(), vault: ScriptedVault())
+        await session.rekeyAccount(passphrase: "anything")
+        #expect(session.lastError == "Project keys not configured (ProjectConfig.swift)")
+    }
+
+    /// THE COPY PINS. Her Round-5 pinned rule (the CF-6 class): the
+    /// deletion door's copy MUST say the local copy survives — what dies
+    /// is the synced copy and the account. And the re-key copy names what
+    /// a re-key does to OTHER devices (the CF-16 replaced state +
+    /// re-enroll) and to the recovery phrase.
+    @Test func theDoorCopySaysTheLocalCopySurvivesAndNamesTheConsequences() {
+        // The deletion door — her pinned rule, byte-anchored.
+        #expect(AccountView.deleteAccountExplanation.contains(
+            "The writing on this device stays on this device"),
+            "HER PINNED RULE: the deletion copy says the local copy survives")
+        #expect(AccountView.deleteAccountExplanation.contains(
+            "anything on your other devices stays there too"))
+        #expect(AccountView.deleteAccountExplanation.contains(
+            "Only the account and its synced copy are deleted"))
+        #expect(AccountView.deleteAccountExplanation.contains("permanently"),
+                "the consequence is named honestly beside the survival")
+        #expect(AccountView.deleteSubscriptionAdvisory.contains("cancel it first"),
+                "subscription state warned first — the ruling's letter")
+        #expect(AccountView.deleteConfirmationPhrase == "delete my account")
+
+        // The re-key door — the honest warning names the other devices'
+        // fate and the phrase's death (the CF-7 checkbox grammar).
+        #expect(EncryptionView.rekeyExplanation.contains("Every OTHER device will pause syncing"))
+        #expect(EncryptionView.rekeyExplanation.contains("re-enroll"))
+        #expect(EncryptionView.rekeyExplanation.contains(
+            "Your writing on this device is untouched"))
+        #expect(EncryptionView.rekeyExplanation.contains(
+            "current recovery phrase stops working"))
+        #expect(EncryptionView.rekeyUnderstandingCheckbox.contains("I understand"))
+    }
+}
+
+// MARK: - The doors' AppServices wiring (Phase 14c, batch 2)
+
+@MainActor
+@Suite("Account door wiring (Phase 14c, batch 2)", .serialized)
+struct AccountDoorWiringTests {
+    private actor RecordingLifecycle: AccountLifecycleProviding {
+        private(set) var truncateKeyIDs: [String] = []
+        private(set) var purgeCalls = 0
+        func truncateAccountData(activeKeyID: String) async throws -> [String: Int] {
+            truncateKeyIDs.append(activeKeyID)
+            return [:]
+        }
+        func purgeAccount() async throws -> AccountPurgeReport {
+            purgeCalls += 1
+            return AccountPurgeReport(
+                dataRows: 1, vaultRows: 1, entitlementRows: 1, authUserRemoved: true)
+        }
+        func fetchEntitlements() async throws -> [AccountEntitlement] { [] }
+    }
+
+    private actor QuietTransport: SyncTransport {
+        func push(_ batch: [SyncRow], activeKeyID: String) async throws -> [SyncPushOutcome] {
+            batch.map { _ in .rejected(current: nil) }
+        }
+        func pull(since: Int64, limit: Int, activeKeyID: String) async throws -> [SyncPulledRow] { [] }
+        func schemaVersion() async throws -> Int { SyncSchema.lockstepVersion }
+    }
+
+    /// One composed world: real AppServices over an in-memory store, an
+    /// in-memory auth session (adopted tokens), the shared scripted vault
+    /// serving BOTH the encryption session and the door brains (the
+    /// one-Postgres shape), and the recording lifecycle.
+    private func withDoorWorld(
+        _ body: @MainActor (AppServices, EncryptionSession, DeviceKeyStore,
+                            RecordingLifecycle, AppDatabase, AuthSession) async throws -> Void
+    ) async throws {
+        let db = try AppDatabase.inMemory()
+        let authStore = AuthTokensStore.inMemory()
+        let auth = AuthSession(
+            configuration: AuthConfiguration(
+                projectURL: URL(string: "https://variorum-project.test.invalid")!,
+                apiKey: "publishable"),
+            store: authStore,
+            http: { _ in throw AuthSessionError.malformedResponse("no network") })
+        await auth.adopt(AuthTokens(
+            accessToken: "access", refreshToken: "refresh",
+            expiresAt: Date().addingTimeInterval(3600),
+            userID: "user-door", email: "door@example.com"))
+        let vault = ScriptedVault()
+        let keyVault = KeyVaultClient(
+            configuration: KeyVaultClient.Configuration(
+                projectURL: URL(string: "https://vault.test.invalid")!,
+                apiKey: "publishable-test-key"),
+            sessionProvider: auth,
+            load: vault.load)
+        let fragmentsAuth = AuthSession(
+            configuration: AuthConfiguration(
+                projectURL: URL(string: "https://fragments-project.test.invalid")!,
+                apiKey: "publishable"),
+            store: .inMemory(),
+            http: { _ in throw AuthSessionError.malformedResponse("no network") })
+        let store = DeviceKeyStore.inMemory()
+        let encryption = EncryptionSession(
+            store: store, client: keyVault, signedIn: { true })
+        let lifecycle = RecordingLifecycle()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.ownerIdentity = OwnerIdentity { authStore.load()?.userID }
+        } operation: { @MainActor in
+            let services = AppServices(
+                session: AppSession(database: db), storeVariant: .real,
+                backupEnabled: false, bridgeEnabled: false,
+                auth: auth, fragmentsAuth: fragmentsAuth, encryption: encryption,
+                makeSyncTransport: { _ in QuietTransport() },
+                makeSyncKeyProvider: { AppTestKeyProvider() },
+                keyVault: keyVault,
+                makeAccountLifecycle: { _ in lifecycle })
+            await services.start()
+            try await body(services, encryption, store, lifecycle, db, auth)
+            services.stop()
+        }
+    }
+
+    /// THE REKEY WIRING, end to end through the app seam: the wired
+    /// runner drives the REAL brain — new vault written (new ids), the
+    /// truncate presented the NEW corpus key id, custody adopted mid-run,
+    /// the store fully re-enqueued, the bridge's agreed day staged — and
+    /// the flow lands in the mandatory phrase step.
+    @Test func theRekeyWiringRunsTheBrainAdoptsCustodyAndReEnqueues() async throws {
+        try await withDoorWorld { services, encryption, store, lifecycle, db, _ in
+            await encryption.setUp(passphrase: "orchard-lantern-13")
+            #expect(encryption.lastError == nil)
+            let old = try #require(store.load())
+            // A synced row + an agreed bridge day, both pre-re-key.
+            _ = try await services.session.runner.run { ops in
+                try ops.createPost(title: "pre-rekey").id
+            }
+            try await db.write { dbi in
+                try dbi.execute(
+                    sql: "INSERT INTO bridge_day (day_key, last_synced_hash) VALUES (?, ?)",
+                    arguments: ["2026-08-01", "aaaa1111"])
+            }
+
+            await encryption.rekeyAccount(passphrase: "orchard-lantern-13")
+
+            #expect(encryption.lastError == nil)
+            #expect(encryption.state == .enrolled(hasRecoveryWrap: false),
+                    "the mandatory NEW phrase step follows the re-key")
+            let fresh = try #require(store.load())
+            #expect(fresh.corpusKeyID != old.corpusKeyID, "custody holds the NEW keys")
+            #expect(await lifecycle.truncateKeyIDs == [fresh.corpusKeyID],
+                    "the truncate presented the NEW key id — after the vault write, by the brain's pinned order")
+            let outbox = try #require(try db.doorInt("SELECT COUNT(*) FROM sync_outbox"))
+            let rows = try #require(try db.doorInt(
+                "SELECT (SELECT COUNT(*) FROM container) + (SELECT COUNT(*) FROM block) + (SELECT COUNT(*) FROM variant) + (SELECT COUNT(*) FROM container_block)"))
+            #expect(outbox >= rows, "resyncReinitialize re-enqueued the store")
+            let stagedHash = try #require(try db.doorString(
+                "SELECT last_synced_hash FROM bridge_day WHERE day_key = '2026-08-01'"))
+            #expect(stagedHash == "restaged:repush-from-truth",
+                    "the bridge's staged re-push trigger rode the re-key (inert until 14d; the literal is core's restagedHashSentinel, symbol-pinned there)")
+        }
+    }
+
+    /// THE DELETION WIRING: the purge runs only under the verified
+    /// passphrase; success clears custody (the CF-11 machinery) and signs
+    /// out; refusal touches NOTHING local — the wrong-passphrase arm is
+    /// the order's own proof (server first, local after).
+    @Test func theDeletionWiringPurgesThenForgetsThenSignsOut() async throws {
+        try await withDoorWorld { services, encryption, store, lifecycle, db, auth in
+            await encryption.setUp(passphrase: "orchard-lantern-13")
+            #expect(store.load() != nil)
+            let signedInBefore = await auth.currentUserID
+            #expect(signedInBefore != nil)
+
+            // The wrong-passphrase arm: nothing server-side, nothing local.
+            await services.deleteAccount(passphrase: "not-the-passphrase")
+            #expect(services.account.lastError == "Wrong encryption passphrase.")
+            #expect(await lifecycle.purgeCalls == 0, "no purge without authorization")
+            #expect(store.load() != nil, "custody untouched by a refused deletion")
+            let stillSignedIn = await auth.currentUserID
+            #expect(stillSignedIn != nil, "still signed in")
+
+            // The real arm: purge → forget → sign-out. The local STORE
+            // survives (her pinned rule made mechanical).
+            let postID = try await services.session.runner.run { ops in
+                try ops.createPost(title: "survives deletion").id
+            }
+            await services.deleteAccount(passphrase: "orchard-lantern-13")
+            #expect(services.account.lastError == nil)
+            #expect(await lifecycle.purgeCalls == 1)
+            #expect(store.load() == nil, "device custody cleared through the forget machinery")
+            let signedOut = await auth.currentUserID
+            #expect(signedOut == nil, "signed out")
+            #expect(try db.doorString(
+                "SELECT id FROM container WHERE id = ?", [postID]) == postID,
+                "the local copy SURVIVES — only the account and its synced copy died")
+        }
+    }
+}
+
+extension AppDatabase {
+    fileprivate func doorString(
+        _ sql: String, _ arguments: [(any DatabaseValueConvertible)?] = []
+    ) throws -> String? {
+        try read { db in
+            try String.fetchOne(db, sql: sql, arguments: StatementArguments(arguments))
+        }
+    }
+
+    fileprivate func doorInt(_ sql: String) throws -> Int? {
+        try read { db in try Int.fetchOne(db, sql: sql) }
     }
 }
 

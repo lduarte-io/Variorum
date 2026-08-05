@@ -43,6 +43,12 @@ final class AccountState {
     var fragments: SignedIn?
     var busy = false
     var lastError: String?
+    /// Phase 14c (the deletion door): the best-effort subscription note —
+    /// non-nil when the account holds an active entitlement row (the
+    /// phase's stand-in; batch 3's checkout owns the real cancellation
+    /// flow). The door's STATIC cancel-first advisory shows regardless;
+    /// this line only strengthens it when the read succeeds.
+    var subscriptionNote: String?
 }
 
 @MainActor
@@ -64,6 +70,9 @@ final class AppServices {
     /// The E2EE flows' state + doors (Phase 14b batch 3, L9) — one seam for
     /// Mac and phone, exactly like the account surface.
     let encryption: EncryptionSession
+    /// The vault client the encryption flows AND the 14c account doors
+    /// share (nil = unconfigured project; every door stays dormant).
+    let keyVault: KeyVaultClient?
     let account = AccountState()
 
     /// The app session (store + runner) the services compose over —
@@ -88,12 +97,19 @@ final class AppServices {
     /// The BRIDGE's journal-class key seam (Phase 14b, gate-morning GM-2).
     /// Production stays nil — BridgeEngine then takes its refusing default
     /// (`UnenrolledBridgeKeyProvider`), which IS the phase's RULED pause:
-    /// the app wires no real bridge key provider until the one-batch
-    /// Fragments handoff at 14c's end. The wiring tests inject a fixed
-    /// provider here so the cadence/interleaving/pause-status machinery
-    /// they pin stays pinned THROUGH the pause era (it guards the 14c-era
-    /// resumption); the pause itself stays pinned against the default.
+    /// the app wires no real bridge key provider until micro-phase 14d's
+    /// deliberate act (her Round-6 ruling — the LIVE provider,
+    /// `DeviceBridgeKeyProvider`, is BUILT and waits beside this seam,
+    /// dormant). The wiring tests inject a fixed provider here so the
+    /// cadence/interleaving/pause-status machinery they pin stays pinned
+    /// THROUGH the pause era (it guards the 14d resumption); the pause
+    /// itself stays pinned against the default.
     private let makeBridgeKeyProvider: (() -> any BridgeKeyProviding)?
+    /// Phase 14c: the account lifecycle doors' server seam (the re-key's
+    /// truncate, the deletion's purge, the entitlement read). Tests inject
+    /// recording fakes; production composes the real client over the same
+    /// session the sync transport rides.
+    private let makeAccountLifecycle: (any UserSessionProviding) -> any AccountLifecycleProviding
 
     init(
         session: AppSession, storeVariant: AppDatabase.StoreVariant,
@@ -104,10 +120,17 @@ final class AppServices {
         makeSyncTransport: ((any UserSessionProviding) -> any SyncTransport)? = nil,
         makeBridgeTransport: ((any UserSessionProviding, String) -> any FragmentsBridgeTransport)? = nil,
         makeSyncKeyProvider: (() -> any SyncKeyProviding)? = nil,
-        makeBridgeKeyProvider: (() -> any BridgeKeyProviding)? = nil
+        makeBridgeKeyProvider: (() -> any BridgeKeyProviding)? = nil,
+        keyVault: KeyVaultClient? = nil,
+        makeAccountLifecycle: ((any UserSessionProviding) -> any AccountLifecycleProviding)? = nil
     ) {
         self.session = session
         self.makeBridgeKeyProvider = makeBridgeKeyProvider
+        self.makeAccountLifecycle = makeAccountLifecycle ?? { provider in
+            AccountLifecycleClient(
+                configuration: ProjectConfig.variorumTransport,
+                sessionProvider: provider)
+        }
         self.makeSyncTransport = makeSyncTransport ?? { provider in
             SupabaseTransport(
                 configuration: ProjectConfig.variorumTransport,
@@ -139,17 +162,20 @@ final class AppServices {
             configuration: ProjectConfig.fragmentsAuth,
             store: .keychain(service: KeychainAuthStorage.fragmentsService))
         // The E2EE flows compose over the SAME auth session the sync
-        // transport rides — the vault lives on the account (R-1).
+        // transport rides — the vault lives on the account (R-1). One
+        // vault client serves the flows AND the 14c account doors.
         let authSession = self.auth
+        let vaultClient = keyVault ?? (ProjectConfig.variorumConfigured
+            ? KeyVaultClient(
+                configuration: KeyVaultClient.Configuration(
+                    projectURL: ProjectConfig.variorumProjectURL,
+                    apiKey: ProjectConfig.variorumPublishableKey),
+                sessionProvider: authSession)
+            : nil)
+        self.keyVault = vaultClient
         self.encryption = encryption ?? EncryptionSession(
             store: .keychain(),
-            client: ProjectConfig.variorumConfigured
-                ? KeyVaultClient(
-                    configuration: KeyVaultClient.Configuration(
-                        projectURL: ProjectConfig.variorumProjectURL,
-                        apiKey: ProjectConfig.variorumPublishableKey),
-                    sessionProvider: authSession)
-                : nil,
+            client: vaultClient,
             signedIn: { await authSession.currentUserID != nil })
         // Bridge rounds ride the sync cadence: AFTER each sync round, never
         // interleaved with one (a landing sees the store the mirror sync
@@ -183,6 +209,16 @@ final class AppServices {
         // immediately (Phase 14b): one round, through the ordinary trigger.
         encryption.onKeysChanged = { [weak self] in
             self?.sync.triggerSync()
+        }
+        // Phase 14c (CF-8): the re-key door's runner — the AccountRekey
+        // brain with the sync chain paused around it (no scheduler may
+        // race the truncate/reinit window; the reconnect afterwards is
+        // the ordinary sign-in composition, which also starts the drain).
+        if keyVault != nil {
+            encryption.rekeyRunner = { [weak self] passphrase in
+                guard let self else { throw CancellationError() }
+                return try await self.runAccountRekey(passphrase: passphrase)
+            }
         }
         await auth.setOnChange { [weak self] tokens in
             Task { @MainActor [weak self] in
@@ -321,6 +357,93 @@ final class AppServices {
             account.lastError =
                 "Owner adoption failed: \(error) — sync held; sign out and back in (or relaunch) to retry"
             return false
+        }
+    }
+
+    // MARK: - The account lifecycle doors (Phase 14c batch 2 — CF-8 + deletion)
+
+    /// CF-8's runner (the EncryptionSession door calls this through the
+    /// injected closure): the sync chain STOPS for the whole road — a
+    /// scheduler round racing the truncate/reinit window would push
+    /// against a half-re-keyed account — and the ordinary sign-in
+    /// composition reconnects afterwards, success or failure (the failed
+    /// arm's chain refuses at the fence until the rerun, visibly).
+    private func runAccountRekey(passphrase: String) async throws -> DeviceKeyMaterial {
+        guard let keyVault else { throw CancellationError() }
+        sync.stop()
+        let brain = AccountRekey(
+            client: keyVault,
+            lifecycle: makeAccountLifecycle(auth),
+            transport: makeSyncTransport(auth),
+            database: session.database,
+            onNewVaultMaterial: { [weak self] material in
+                // The brain AWAITS this before its truncate — custody
+                // must land before this device's rounds resume.
+                await MainActor.run { self?.encryption.adoptRekeyedMaterial(material) }
+            })
+        do {
+            let material = try await brain.run(passphrase: passphrase)
+            await connectSyncIfAllowed()
+            return material
+        } catch {
+            await connectSyncIfAllowed()
+            throw error
+        }
+    }
+
+    /// The deletion door (THE DESIGN 4, her Round-5 ruling): purge the
+    /// account server-side (passphrase-authorized in the brain; the typed
+    /// confirmation is the surface's), then the LOCAL after-acts — device
+    /// custody cleared through the CF-11 forget machinery, then sign-out.
+    /// The local STORE is deliberately untouched: the local copy
+    /// survives, exactly her pinned rule, and the signed-out state reads
+    /// as normal (the standing v1 principle).
+    func deleteAccount(passphrase: String?) async {
+        guard let keyVault else {
+            account.lastError = "Project keys not configured (ProjectConfig.swift)"
+            return
+        }
+        guard !account.busy else { return }
+        account.busy = true
+        account.lastError = nil
+        defer { account.busy = false }
+        sync.stop()
+        do {
+            let deletion = AccountDeletion(
+                client: keyVault, lifecycle: makeAccountLifecycle(auth))
+            _ = try await deletion.run(passphrase: passphrase)
+            // Server side is gone; now the device's custody (CF-11's
+            // machinery — the vault it unlocked no longer exists), then
+            // the session (sign-out tears the sync chain down through the
+            // ordinary onChange road).
+            await encryption.forgetDeviceKeys()
+            await auth.signOut()
+        } catch {
+            account.lastError = EncryptionSession.message(for: error)
+            // The account survives a refused deletion — reconnect the
+            // chain the door paused.
+            await connectSyncIfAllowed()
+        }
+    }
+
+    /// The deletion door's best-effort subscription check (the phase's
+    /// stand-in; batch 3's checkout owns the real cancellation flow): a
+    /// non-nil note strengthens the static cancel-first advisory. A
+    /// failed read stays nil — the static advisory shows regardless.
+    func refreshSubscriptionNote() async {
+        account.subscriptionNote = nil
+        guard keyVault != nil else { return }
+        let lifecycle = makeAccountLifecycle(auth)
+        guard let entitlements = try? await lifecycle.fetchEntitlements() else { return }
+        let active = entitlements.filter { entitlement in
+            guard let expires = entitlement.expiresAt else { return true }
+            return (DateFormatter.variorumISO8601.date(from: expires)
+                ?? ISO8601DateFormatter().date(from: expires)
+                ?? .distantFuture) > Date()
+        }
+        if !active.isEmpty {
+            account.subscriptionNote =
+                "This account has an active hosted-sync plan (\(active.map(\.feature).joined(separator: ", ")))."
         }
     }
 

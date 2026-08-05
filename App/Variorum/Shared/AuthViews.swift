@@ -42,7 +42,35 @@ struct AccountView: View {
     @State private var variorumPassword = ""
     @State private var fragmentsEmail = ""
     @State private var fragmentsPassword = ""
+    /// Phase 14c: the deletion door's friction state (her Round-5 ruling).
+    @State private var showingDeleteAccount = false
+    @State private var deleteConfirmationEntry = ""
+    @State private var deletePassphrase = ""
     @FocusState private var focus: Field?
+
+    // MARK: Phase 14c — the deletion door's copy (THE DESIGN 4)
+
+    /// HER PINNED COPY RULE (Round 5, the CF-6 class — her question was
+    /// "this won't delete the user's work locally, right?"): the door
+    /// MUST say the local copy survives. Byte-pinned.
+    static let deleteAccountExplanation =
+        "Deleting your account immediately and permanently removes the synced copy of "
+        + "your writing, your encryption vault, and the account itself from the server. "
+        + "The writing on this device stays on this device and keeps working — and "
+        + "anything on your other devices stays there too. Only the account and its "
+        + "synced copy are deleted."
+
+    /// The static cancel-first advisory (subscription state warned FIRST —
+    /// the ruling's letter; the entitlement read strengthens it when it
+    /// succeeds, and batch 3's checkout owns the real cancellation flow).
+    static let deleteSubscriptionAdvisory =
+        "If you have an active subscription, cancel it first — deleting the account "
+        + "does not cancel a purchase on its own."
+
+    /// The typed confirmation naming the consequence (her ruling's first
+    /// friction layer; the button stays dead until this exact phrase is
+    /// typed).
+    static let deleteConfirmationPhrase = "delete my account"
 
     init(services: AppServices, initialTab: AccountTab = .account) {
         self.services = services
@@ -140,6 +168,16 @@ struct AccountView: View {
             Text("Sync runs under this account; everything you write is owned by it.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+
+            if showingDeleteAccount {
+                deleteAccountSection
+            } else {
+                Button("Delete Account…", role: .destructive) {
+                    showingDeleteAccount = true
+                    Task { await services.refreshSubscriptionNote() }
+                }
+                .disabled(services.account.busy)
+            }
         } else {
             Text("Sign in with your account email and password:")
             emailField("Email", text: $variorumEmail)
@@ -188,6 +226,57 @@ struct AccountView: View {
         }
         if let error = services.account.lastError {
             Text(error).font(.caption).foregroundStyle(.red)
+        }
+    }
+
+    // MARK: Phase 14c — the deletion door (THE DESIGN 4, her Round-5 ruling)
+
+    /// Immediate hard purge behind real friction: the honest consequence
+    /// copy (the local copy SURVIVES — her pinned rule), the subscription
+    /// warning first, the TYPED confirmation naming the consequence, and
+    /// the encryption passphrase as authorization (verified by a real
+    /// vault unwrap in the brain; a vault-less account needs none — the
+    /// PROVISIONAL arm, so the field's caption says when it applies).
+    @ViewBuilder
+    private var deleteAccountSection: some View {
+        Text("Delete this account")
+            .fontWeight(.semibold)
+        Text(Self.deleteAccountExplanation)
+            .font(.caption)
+            .foregroundStyle(.orange)
+            .fixedSize(horizontal: false, vertical: true)
+        Text(Self.deleteSubscriptionAdvisory)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+        if let note = services.account.subscriptionNote {
+            Text(note)
+                .font(.caption)
+                .foregroundStyle(.orange)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        TextField("Type “\(Self.deleteConfirmationPhrase)” to continue", text: $deleteConfirmationEntry)
+            .autocorrectionDisabled()
+        SecureField("Encryption passphrase (if encryption is set up)", text: $deletePassphrase)
+        HStack {
+            Button("Delete Account Permanently", role: .destructive) {
+                let passphrase = deletePassphrase
+                deletePassphrase = ""
+                deleteConfirmationEntry = ""
+                showingDeleteAccount = false
+                Task {
+                    await services.deleteAccount(
+                        passphrase: passphrase.isEmpty ? nil : passphrase)
+                }
+            }
+            .disabled(services.account.busy
+                      || deleteConfirmationEntry.lowercased()
+                          .trimmingCharacters(in: .whitespaces) != Self.deleteConfirmationPhrase)
+            Button("Cancel") {
+                showingDeleteAccount = false
+                deleteConfirmationEntry = ""
+                deletePassphrase = ""
+            }
         }
     }
 

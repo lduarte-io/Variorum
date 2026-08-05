@@ -75,6 +75,15 @@ final class EncryptionSession {
     /// immediately instead of a stale reading).
     var onKeysChanged: (() -> Void)?
 
+    /// Phase 14c (CF-8): the re-key door's runner, injected by the
+    /// composition root (AppServices wires the real `AccountRekey` brain
+    /// with sync paused around it; nil = the door stays dormant, exactly
+    /// like an unconfigured client). CONTRACT: the runner adopts custody
+    /// mid-run through `adoptRekeyedMaterial` — before its truncate — and
+    /// returns only when the whole road (new vault → truncate →
+    /// resyncReinitialize → bridge staging) has run.
+    var rekeyRunner: ((String) async throws -> DeviceKeyMaterial)?
+
     private let store: DeviceKeyStore
     /// nil = the project is unconfigured (ProjectConfig keys empty) — the
     /// flows stay dormant exactly like the sign-in surface.
@@ -234,6 +243,47 @@ final class EncryptionSession {
         }
     }
 
+    // MARK: - The re-key door (Phase 14c, CF-8 — THE DESIGN 3)
+
+    /// CF-8: replace the account's encryption keys and re-upload the
+    /// corpus. The heavy lifting and the ORDER OF OPERATIONS live in the
+    /// injected runner (`AccountRekey`, pinned in core); this method is
+    /// the flow's state machine: friction already passed (the surface's
+    /// checkbox), busy handling, the refusal wording, and the landing —
+    /// `enrolled(hasRecoveryWrap: false)`, which IS the standing CF-5
+    /// mandatory-phrase step: the new 12 words are generated, written
+    /// down, and confirmed exactly as at setup. The old phrase died with
+    /// the old master, honestly.
+    func rekeyAccount(passphrase: String) async {
+        guard let rekeyRunner else {
+            lastError = "Project keys not configured (ProjectConfig.swift)"
+            return
+        }
+        guard !busy else { return }
+        busy = true
+        lastError = nil
+        defer { busy = false }
+        do {
+            _ = try await rekeyRunner(passphrase)
+            // Custody was adopted mid-run (the runner's contract); the
+            // fresh vault has no recovery wrap yet — step 4 begins now.
+            state = .enrolled(hasRecoveryWrap: false)
+        } catch {
+            // The brain's sequence is not atomic; the honest road back
+            // from ANY mid-run failure is running the door again (the
+            // rerun is pinned in core). Say so, plus the cause.
+            lastError = "Key replacement didn't finish — nothing is lost; "
+                + "run Replace Keys again to complete it. (\(Self.message(for: error)))"
+        }
+    }
+
+    /// The runner's custody adoption point (its contract: called after
+    /// the NEW vault lands, before the truncate — this device must never
+    /// be stale against its own new vault).
+    func adoptRekeyedMaterial(_ material: DeviceKeyMaterial) {
+        adopt(material)
+    }
+
     // MARK: - Device custody doors (CF-11 · CF-12)
 
     /// CF-11's act (behind the surface's confirmed destructive door):
@@ -368,6 +418,10 @@ final class EncryptionSession {
             return "The vault just changed on another device — nothing was overwritten. Try again from the current state."
         case KeyVaultError.recoveryWrapAlreadyPresent:
             return "A recovery phrase already exists — replacing it is a deliberate step (use Regenerate)."
+        case SyncError.encryptionKeysReplaced:
+            // Phase 14c: the server's fence refused an account act — the
+            // vault moved under this device mid-step.
+            return "This account's keys changed on another device — re-enroll with the current passphrase, then try again."
         case is URLError:
             return "Couldn't reach the server — check your connection and try again."
         default:
