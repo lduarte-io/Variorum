@@ -1312,8 +1312,16 @@ deploy.
   traced, so no hollow fix was minted; the hallucination guard's
   traced-mechanism duty is met by the walks themselves.)
 
-**Counts (batch end): recorded after the full synchronous runs — see
-the acceptance line at the end of this record.**
+**Counts (batch end, all synchronous runs, 2026-08-05):** core
+**1193/127** green (was 1191/127 — +1 the empty-store onboarding pin,
++1 the entitlement-write DDL pin, exactly accounted) · Mac
+**1240/219 tripwire-only** (the standing `TakePaneMeasureTests` red BY
+IDENTITY, the one allowed; was 1226/215 — +3 AuthSessionTests sign-up
+arms, +10 in TierAndOnboardingTests' three suites, +1
+FreshAccountSetupGeneralityTests, exactly accounted) · spine **51/7**
+green (by type name, the seven `Tutorial*Tests`) · mobile **175/26**
+green (iPhone 17 simulator; the shared seam carries the tier face, the
+sign-up form, and the tier section — no mobile-only code).
 
 **Held for the architect / the gate:**
 
