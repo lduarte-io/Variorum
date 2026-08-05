@@ -428,10 +428,17 @@ final class AppServices {
             lifecycle: makeAccountLifecycle(auth),
             transport: makeSyncTransport(auth),
             database: session.database,
-            onNewVaultMaterial: { [weak self] material in
+            onNewVaultMaterial: { material in
                 // The brain AWAITS this before its truncate — custody
-                // must land before this device's rounds resume.
-                await MainActor.run { self?.encryption.adoptRekeyedMaterial(material) }
+                // must land before this device's rounds resume. STRONG
+                // capture, deliberately (ladder R1-4): a weak self here
+                // would let a gone AppServices complete this closure
+                // WITHOUT adopting, and the brain would truncate with the
+                // device stale against its own new vault. The closure
+                // lives only for the run (the brain is a local), so the
+                // strong reference makes the adopt-before-truncate
+                // contract structural at zero cycle risk.
+                await MainActor.run { self.encryption.adoptRekeyedMaterial(material) }
             })
         do {
             let material = try await brain.run(passphrase: passphrase)

@@ -61,16 +61,6 @@ enum ErrorPresentation {
         "This looks like a sign-in problem — Account… → sign out and back in usually clears it "
         + "(server-side auth changes can strand the old session)."
 
-    /// Phase 14a review round 1 (R1-1) — the SIGN-IN FORM's classify-and-
-    /// speak: the account form's failures surface as human lines, never a
-    /// raw enum dump (`String(describing:)` of `endpointFailure` was the
-    /// pre-fix face of a wrong password — the direct form's COMMON refusal).
-    ///
-    /// The credentials class (the password grant's HTTP 400 / `invalid_grant`
-    /// refusal) gets the ruled wording — "Wrong email or password."
-    /// (PROVISIONAL, riding the gate checklist). Deliberately NOT routed
-    /// through `ErrorCauseNote`: its "sign out and back in" guidance is for
-    /// ESTABLISHED sessions and is exactly wrong on the sign-in form itself.
     /// Phase 14c batch 3 (L8) — the SIGN-UP form's classify-and-speak,
     /// the R94 doctrine at the account-creation door. The COMMON refusal
     /// through the whole pre-gate era is the signups-off toggle (the
@@ -134,6 +124,19 @@ enum ErrorPresentation {
         return "Account creation failed: \(error.localizedDescription)"
     }
 
+    /// Phase 14a review round 1 (R1-1) — the SIGN-IN FORM's classify-and-
+    /// speak: the account form's failures surface as human lines, never a
+    /// raw enum dump (`String(describing:)` of `endpointFailure` was the
+    /// pre-fix face of a wrong password — the direct form's COMMON refusal).
+    ///
+    /// The credentials class (the password grant's HTTP 400 / `invalid_grant`
+    /// refusal) gets the ruled wording — "Wrong email or password."
+    /// (PROVISIONAL, riding the gate checklist). Deliberately NOT routed
+    /// through `ErrorCauseNote`: its "sign out and back in" guidance is for
+    /// ESTABLISHED sessions and is exactly wrong on the sign-in form itself.
+    /// (Moved home 2026-08-05, ladder R1-5 — the 14c sign-up block had been
+    /// inserted between this comment and its function, re-attaching it to
+    /// `signUpClosedMessage`.)
     static func signInFailureMessage(_ error: any Error) -> String {
         if let authError = error as? AuthSessionError {
             switch authError {
