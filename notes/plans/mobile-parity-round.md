@@ -7501,3 +7501,174 @@ tripwire identity · Mac spine 51/7 by its `Tutorial*ActsTests`
 names) + mobile spine 33/7 + perf 9/2; commits per logical unit
 with the standing trailer; record as "## Stage D, batch D1 — BATCH
 RECORD"; push. PROVISIONAL-and-continue; author-only calls stop.
+
+## Stage D, batch D1 — BATCH RECORD (implementer, 2026-08-09)
+
+**Honest history first — the mid-batch session death and this
+completion.** The batch ran across TWO implementer sessions: the
+first built the whole styling pass, captured and eye-verified the
+34-screenshot evidence set, and died at its API limit mid-cleanup —
+its work UNCOMMITTED, its dying words "delete the throwaway harness
+pieces and revert the app hook." A fresh session (this one) adopted
+the tree: re-read `CLAUDE.md` · `MobileSoul.md` · this plan (the D
+kickoff + brief + PRE-STAGE-A history) · the LK canon · the handoff
+file, then read EVERY uncommitted diff line and the three untracked
+files before touching anything, re-ran every suite by its own hand,
+re-verified a screenshot sample by eye, and finished the cleanup.
+**Harness vs shipping, adjudicated from the evidence:** the capture
+harness (the A1/A3 throwaway precedent — an app-side capture driver
++ a navigation hook in `VariorumMobileApp.swift` + `/tmp/d1cap`
+ready/ack semaphores driving `simctl` screenshots) was found ALREADY
+removed from the repo by the dying session's last acts: the driver
+file deleted (the Shell/ directory's mtime records the removal at
+19:05, after the last capture at 19:02; no untracked or modified
+file beyond the shipping set remains anywhere in the tree — swept by
+`find -newermt`), and the app hook reverted (`VariorumMobileApp.
+swift` verified byte-identical to HEAD by md5). This session's own
+cleanup act: deleting the `/tmp/d1cap` semaphore debris (outside the
+repo). NOTHING in the committed diff is harness; nothing ambiguous
+had to be kept out.
+
+**What shipped (the one seam + five surfaces through it):**
+
+- **`Shared/Theme/SharedPageStyle.swift` — the ONE styling seam.**
+  An OPTIONAL environment value (`\.sharedPageStyle`) carrying the
+  live `VoiceTokens` + the chrome-casing rule (`chromeLabel` — the
+  P26/P43 one-register discipline; RULED COPY never re-cases). **The
+  one-seam law is STRUCTURAL, not reviewed-in:** on macOS the
+  environment accessor is compiled to always-nil (getter `nil`,
+  setter inert — `#if os(iOS)`), so the Mac cannot be handed a style
+  even deliberately and every styled arm is unreachable there BY
+  CONSTRUCTION. Helper vocabulary, each nil arm byte-equivalent to
+  the pre-D1 construction at its call sites: `pageProse` (nil ⇒
+  self) · `pageSecondary` · `pageWarning` · `pageCaption` ·
+  `pageCaptionWarning` · `pageCaptionError` · `pageCaptionProminent`
+  · `pageFieldChrome` (nil ⇒ self — the Mac's default bordered
+  field) · `pagePhraseCard` (nil ⇒ self; wraps OUTSIDE the
+  `privacySensitive` Text, never touching the mark) · `PageHeading`
+  · `PageDivider` · `PageDoor` (five forms — act/borderless/
+  bordered/destructive/inlineAct — each nil arm the exact Button
+  construction the site carried; styled arms dim when disabled via a
+  live `isEnabled` read).
+- **The injection site (`MobileSettingsView`)** — the ONE place a
+  style is constructed: around `SyncStatusRow` in the phone's
+  Settings sheet; the Account sheet presents from inside the row, so
+  the whole chain inherits through the environment (the
+  SnapshotPrivacy precedent). Horizontal padding 14→20 aligns the
+  row with the section headers (phone-local file).
+- **The tabbed Account sheet (`AuthViews.swift`).** Styled arm: LK7
+  text-door tabs (ink selected / faint otherwise, voice-cased, with
+  `isSelected` accessibility traits) replacing the segmented control
+  ON THE PHONE ONLY; `close` as a plain accent chrome door (CF-1's
+  grammar kept); the voice's room as the sheet background; carded
+  fields (bare iOS text fields carry NO visible affordance — the
+  pass's headline UI-principle fix); doors through `PageDoor`;
+  captions/warnings/errors through the caption helpers; the CF-14
+  tab MECHANISM untouched. Sign-up + delete-account sections same
+  treatment (delete stays `.destructive` red).
+- **The stepped E2EE setup + ceremony (`EncryptionViews.swift`).**
+  Steps 1–4 headed by voice-cased `PageHeading`s; the 12-words
+  display gains the phrase card (padding + hairline; the
+  `privacySensitive` mark and mono rendering byte-where-they-were);
+  `phraseEntryField` adds field chrome in its EXISTING iOS-only
+  branch; the CF-3 reveal class keeps a VISIBLE border in both arms
+  (`.bordered`); the two understanding-checkbox sentences render
+  full-strength ink (`pageCaptionProminent`); enrollment/locked/
+  replaced states, regenerate gate, change-passphrase, re-key, and
+  forget sections all through the same helpers — RULED copy
+  byte-unchanged throughout (setup intro, warning, checkbox
+  sentences, disclosure copy, CF-16's replaced explanation).
+- **The sync row (`SyncStatusViews.swift`).** Styled arm: label line
+  first, doors on their OWN row beneath (the brief's named
+  unaligned-rows fix — long paused-state labels and doors no longer
+  fight for one line), doors as plain accent chrome with dimmed
+  disabled states; nil arm restructured into an explicit else-branch
+  that is line-for-line the pre-D1 construction (same VStack/HStack
+  spacing, `.font(.caption)`, `.padding(6)`, sheet attachment order
+  preserved).
+- **The tier views (`TierViews.swift`).** `HostedSyncSection`
+  through `PageHeading`/`pageProse`/`pageCaption` — renders inside
+  the Account sheet, inherits the style there.
+- **`ErrorPresentation.swift`.** `ErrorCauseNote` through
+  `pageCaption`/`pageCaptionWarning` so the phone's error notes
+  speak the voice inside the styled row.
+- **`.gitignore`** +1: the `mobile-d1-screens/` evidence dir (the
+  a3-screens precedent).
+
+**THE LAW'S PROOF (zero Mac-rendered change), three layers:**
+1. **Type-level:** the macOS accessor compiles to always-nil —
+   pinned by `SharedPageStyleTests.theMacCanNeverBeHandedAShared
+   PageStyle` (Mac suite) and the seam's liveness by
+   `MobileSharedPageStyleTests` (phone suite: the environment
+   carries an injected style; chrome casing IS `chromeLabel`'s).
+2. **Line-by-line diff read (this session's own, adopting the
+   work):** every Shared/ change is either inside `if let style`
+   (unreachable on the Mac) or a nil-arm reconstruction of the exact
+   pre-D1 modifiers. The three nil-arm deltas that are not
+   byte-identical were each proven render-identical: (a) helpers add
+   an explicit `.font(.caption)` at sites whose Mac containers
+   ALREADY impose `.caption` — all three Mac call sites of
+   `ErrorCauseNote` verified (BridgeStatusViews' `.font(.caption)`
+   VStack; SyncStatusRow's nil-arm container; ChromeMinHeightTests'
+   own probe wrappers — that pin suite passes untouched); (b)
+   `AccountView`'s `.tint(pageStyle?.tokens.accent)` is `.tint(nil)`
+   on the Mac = restore-default with NOTHING to cancel (the
+   codebase's only `.tint` is this line, grep-verified); (c) the
+   `.background { if let … }` empty builder renders nothing. Also:
+   `HStack(alignment:)` nil arm is `.center` (the default it
+   replaced), `VStack(spacing:)` nil arm is the old 14, and the
+   sheet modifier's relocation preserves the exact modifier order.
+3. **The Mac suite:** 1246/220 with EXACTLY the standing
+   `TakePaneMeasureTests` tripwire red BY IDENTITY — the 1245/219
+   baseline + the new SharedPageStyleTests (1 test/1 suite), nothing
+   else moved. The 14b functional pins (MobileSnapshotPrivacyTests,
+   the CF copy pins, the flow-state pins) pass UNTOUCHED — **zero
+   pins flipped, sanctioned or otherwise** (no existing pin read
+   styling on these pages).
+
+**Counts (all by this session's own runs, post-adoption):**
+- **mobile 308/59** — the 306/58 baseline + MobileSharedPageStyle
+  Tests (2/1), exactly accounted ("Test run with 308 tests in 59
+  suites passed").
+- **core 1215/128** — baseline exact (zero core lines in the batch).
+- **Mac 1246/220 tripwire-only** — accounting above.
+- **Mac spine 51/7** (the seven `Tutorial*Tests` type names) ·
+  **mobile spine 33/7** (the seven mobile type names) · **perf 9/2**
+  (`MobilePerfFixtureTests` + `MobilePerfWalkTests`).
+
+**The screenshot set (gitignored `notes/plans/mobile-d1-screens/`,
+34 files = 17 before/after pairs, her bundle's evidence):**
+account-signin · account-signin-study · account-signup ·
+account-signedin · account-delete · settings-syncrow ·
+enc-setup-step1 · enc-setup-step2 · enc-setup-step3 ·
+enc-phrase-step4 · enc-phrase-step4-study · enc-enroll ·
+enc-enroll-phrase · enc-locked · enc-replaced · enc-enrolled ·
+enc-enrolled-2. The dying session eye-verified all 17 afters; this
+session RE-verified a sample by its own eye per the honest-evidence
+discipline (before/after-account-signin — the segmented-control +
+bare-fields page against the voiced tabs + carded fields;
+after-enc-phrase-step4 — the phrase card, orange warnings, dimmed
+confirm door, words visible scene-active as designed;
+after-settings-syncrow — the label-then-door two-row fix;
+after-account-signin-study — the study voice keeping written case;
+after-enc-enrolled — inline accent doors, voiced dividers, the red
+forget door). All consistent with the styled arms as read.
+
+**PROVISIONALs (for the end bundle):**
+- **PD1-1 — warning/error colors stay the system semantic orange/
+  red in the styled arms.** The LK canon has no warning token;
+  honesty outranks palette. One line each to re-tint if she wants
+  voice-toned warnings.
+- **PD1-2 — the injection scope is the Settings-sheet chain only**
+  (SyncStatusRow → Account sheet → everything within). Any OTHER
+  phone surface that ever renders these shared views would need its
+  own injection line (one modifier) — deliberately narrow so the
+  seam's reach is enumerable.
+- **PD1-3 — the enrolled page's secondary acts render as inline
+  accent text doors** (`inlineAct` — no box), reserving the carded
+  form for primary acts and the bordered form for the CF-3
+  must-look-like-a-button class. A register taste call for her
+  screenshot look.
+
+**Commits:** the seam + its two law pins · the five surfaces + the
+injection + the ignore line · this record. Pushed `origin mobile`.
