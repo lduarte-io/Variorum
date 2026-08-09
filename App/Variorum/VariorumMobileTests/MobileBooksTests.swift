@@ -155,6 +155,156 @@ struct MobileBookCreateTests {
     }
 }
 
+@MainActor
+@Suite("Mobile book details (parity C2 — the fork's ruled surface)")
+struct MobileBookDetailsTests {
+    /// Finish / reopen flips `reading.locked` both ways through the core
+    /// ops, and the identity block follows the ONE faces brain (the ✓
+    /// state on the name — never a meta stat). Dissolves inventory #8.
+    @Test func finishAndReopenFlipTheStateAndTheFaces() async throws {
+        try await withEditorWorld { session, db in
+            let bookID = try await session.runner.run { ops in
+                try ops.createReading(name: "Poems", kind: .curated)
+            }.id
+            let model = MobileBookDetailsModel(session: session, readingID: bookID)
+            await model.refresh()
+            #expect(model.nameLine == "Poems")
+
+            await model.setFinished(true)
+            #expect(try await db.read { db in
+                try Bool.fetchOne(
+                    db, sql: "SELECT locked FROM reading WHERE id = ?", arguments: [bookID])
+            } == true)
+            #expect(model.nameLine == "Poems ✓", "the finished state rides the name")
+            #expect(model.lastError == nil)
+
+            await model.setFinished(false)
+            #expect(try await db.read { db in
+                try Bool.fetchOne(
+                    db, sql: "SELECT locked FROM reading WHERE id = ?", arguments: [bookID])
+            } == false)
+            #expect(model.nameLine == "Poems", "reopen restores exactly — a reversible guard")
+        }
+    }
+
+    /// Rename trims, refuses blank at the face, and stays FREE on a
+    /// finished book (the Mac's renameReading has no lock guard — the
+    /// rename-stays-free-under-lock parallel, pinned).
+    @Test func renameTrimsGatesBlankAndWorksOnAFinishedBook() async throws {
+        try await withEditorWorld { session, db in
+            let bookID = try await session.runner.run { ops -> String in
+                let book = try ops.createReading(name: "Old", kind: .curated)
+                try ops.lockReading(book.id)
+                return book.id
+            }
+            let model = MobileBookDetailsModel(session: session, readingID: bookID)
+            await model.refresh()
+
+            await model.rename("  New Name ")
+            #expect(try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT name FROM reading WHERE id = ?", arguments: [bookID])
+            } == "New Name", "trimmed, and free under the finish lock")
+            #expect(model.lastError == nil)
+            #expect(model.nameLine == "New Name ✓")
+
+            await model.rename("   ")
+            #expect(try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT name FROM reading WHERE id = ?", arguments: [bookID])
+            } == "New Name", "a blank name never lands — the face gates")
+            #expect(!MobileBookDetailsModel.canRename("   "))
+            #expect(MobileBookDetailsModel.canRename("A"))
+        }
+    }
+
+    /// The daily-designation road end-to-end (dissolves inventory #10 and
+    /// gives #9 its road): a smart daily book makes the Today door speak;
+    /// designating a curated journal from details makes the next Today
+    /// shelve silently. The door's render rule is the Mac's own (curated
+    /// + journal profile — P-2), pinned pure.
+    @Test func designateDailyIsTheRoadOutOfTheTodayRefusals() async throws {
+        try await withEditorWorld { session, db in
+            let (_, journalID) = try await session.runner.run { ops -> (String, String) in
+                let smart = try ops.createReading(
+                    name: "Everything", kind: .smart, querySpec: #"{"tags":["x"]}"#)
+                try ops.setDailyJournalBook(smart.id)
+                let journal = try ops.createReading(
+                    name: "Mornings", kind: .curated, profile: "journal",
+                    sortField: .entryDate, sortDir: .asc)
+                return (smart.id, journal.id)
+            }
+            let shelf = MobileShelfViewModel(session: session)
+            _ = await shelf.openToday(day: "2026-08-09")
+            #expect(shelf.lastReport?.contains("smart") == true,
+                    "the smart daily book speaks")
+            #expect(shelf.lastReport?.contains("Mac") == false,
+                    "…and names a phone road, never the Mac")
+
+            let details = MobileBookDetailsModel(session: session, readingID: journalID)
+            await details.refresh()
+            #expect(!details.isDaily)
+            await details.designateDaily()
+            #expect(details.isDaily)
+            #expect(try await db.read { db in
+                try Queries.dailyJournalBookID(db)
+            } == journalID)
+
+            let again = await shelf.openToday(day: "2026-08-09")
+            #expect(again != nil)
+            #expect(try await db.read { db in
+                try Int.fetchOne(
+                    db,
+                    sql: "SELECT COUNT(*) FROM reading_post WHERE reading_id = ? AND deleted_at IS NULL",
+                    arguments: [journalID])
+            } == 1, "the day's entry shelves into the new daily book")
+
+            // The render rule, pure (P-2): curated journal only.
+            func reading(_ kind: ReadingKind, _ profile: String?) -> Reading {
+                Reading(
+                    id: "r", ownerId: nil, name: "R", kind: kind, profile: profile,
+                    sortField: .manual, sortDir: .asc, groupingTagId: nil,
+                    querySpec: nil, maxPosts: nil, wordTarget: nil, locked: false,
+                    createdAt: Date(), updatedAt: Date(), deletedAt: nil, syncVersion: 0)
+            }
+            #expect(MobileBookDetailsModel.showsDailyDoor(reading(.curated, "journal")))
+            #expect(!MobileBookDetailsModel.showsDailyDoor(reading(.curated, nil)))
+            #expect(!MobileBookDetailsModel.showsDailyDoor(reading(.smart, "journal")))
+        }
+    }
+
+    /// The identity block DISPLAYS tags for both kinds from the shelf
+    /// faces' one source (the ruled (B) reading: nothing tag-editable
+    /// ships here — a curated book's tags are derived from member notes
+    /// by model fact; smart-filter editing waits for the Mac's book
+    /// redefinition). The door's word is pinned.
+    @Test func theIdentityBlockDisplaysTagsForBothKinds() async throws {
+        try await withEditorWorld { session, db in
+            let (curatedID, smartID) = try await session.runner.run { ops -> (String, String) in
+                let curated = try ops.createReading(name: "Essays", kind: .curated)
+                let post = try ops.createPost(title: "Tagged")
+                _ = try ops.addPostToReading(post.id, to: curated.id)
+                let tag = try ops.createTag(name: "sea")
+                _ = try ops.applyTag(tag.id, toPost: post.id)
+                let smart = try ops.createReading(
+                    name: "By Water", kind: .smart, querySpec: #"{"tags":["sea"]}"#)
+                return (curated.id, smart.id)
+            }
+            let curated = MobileBookDetailsModel(session: session, readingID: curatedID)
+            await curated.refresh()
+            #expect(curated.tagPaths == ["sea"], "curated tags derive from member notes")
+            #expect(curated.metaLine == "1 note · #sea")
+
+            let smart = MobileBookDetailsModel(session: session, readingID: smartID)
+            await smart.refresh()
+            #expect(smart.tagPaths == ["sea"], "a smart book's tags are its own spec")
+            #expect(smart.metaLine == "smart · #sea")
+
+            #expect(MobileBookView.detailsDoorTitle == "Details")
+        }
+    }
+}
+
 /// The suites' shared settle helper (the MobileShellTests polling shape).
 @MainActor
 func settle(

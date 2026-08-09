@@ -172,9 +172,10 @@ struct MobileShellTests {
 
     /// The mint is NEVER blocked by shelving; with no daily book
     /// designated the shared door CREATES AND PINS the Journal book (the
-    /// author's 13d #37(iii) ruling); and every reportable outcome has
-    /// phone wording pointing at the Mac. (Re-pointed from the retired
-    /// capture door, wording byte-carried.)
+    /// author's 13d #37(iii) ruling); and every reportable outcome names
+    /// a PHONE road (parity C2 — inventory #8/#9/#10's sanctioned pin
+    /// flips: the book-details surface holds finish/reopen and the daily
+    /// designation, so no note redirects to the Mac).
     @Test func theTodayMintIsNeverBlockedAndCreatesThePinnedJournal() async throws {
         try await withEditorWorld { session, db in
             let model = MobileShelfViewModel(session: session)
@@ -197,9 +198,22 @@ struct MobileShellTests {
             #expect(MobileTodayDoor.shelvingNote(.shelved(readingID: "r")) == nil)
             #expect(MobileTodayDoor.shelvingNote(.alreadyDecided) == nil)
             #expect(MobileTodayDoor.shelvingNote(.bookFinished)?.contains("finished") == true)
+            #expect(MobileTodayDoor.shelvingNote(.bookFinished)?.contains("book details") == true,
+                    "the reopen note names the phone's own door")
             #expect(MobileTodayDoor.shelvingNote(.bookAtCapacity)?.contains("full") == true)
+            #expect(MobileTodayDoor.shelvingNote(.bookAtCapacity)?.contains("daily journal") == true,
+                    "the full-book note names the designation road")
             #expect(MobileTodayDoor.shelvingNote(.wrongKind)?.contains("smart") == true)
             #expect(MobileTodayDoor.shelvingNote(.refused("nope"))?.contains("nope") == true)
+            // Parity C2 (inventory #8/#9/#10): no shelving note redirects.
+            for note in [
+                MobileTodayDoor.shelvingNote(.bookFinished),
+                MobileTodayDoor.shelvingNote(.bookAtCapacity),
+                MobileTodayDoor.shelvingNote(.wrongKind),
+                MobileTodayDoor.shelvingNote(.refused("nope")),
+            ] {
+                #expect(note?.contains("Mac") == false, "no platform name in a refusal")
+            }
         }
     }
 

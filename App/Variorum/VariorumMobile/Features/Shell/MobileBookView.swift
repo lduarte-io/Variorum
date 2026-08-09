@@ -19,8 +19,14 @@ import VariorumCore
 struct MobileBookView: View {
     /// The Read door's word (P35 — voice-cased at render; pinned).
     static let readDoorTitle = "Read"
+    /// The details door's word (parity C2, the LK5 expansion — the fork's
+    /// ruled placement: the contents screen's trailing chrome, beside
+    /// Read; voice-cased at render; pinned).
+    static let detailsDoorTitle = "Details"
 
     @State private var model: MobileBookViewModel
+    @State private var detailsPresented = false
+    private let session: AppSession
     let tokens: VoiceTokens
     let onOpen: (String) -> Void
     /// The Read flow door (P35's inversion — Read is the door now).
@@ -32,6 +38,7 @@ struct MobileBookView: View {
         onRead: @escaping () -> Void
     ) {
         _model = State(initialValue: MobileBookViewModel(session: session, readingID: readingID))
+        self.session = session
         self.tokens = tokens
         self.onOpen = onOpen
         self.onRead = onRead
@@ -75,12 +82,26 @@ struct MobileBookView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
+                // The details door (parity C2 — the ruled placement: the
+                // contents screen is the book's front, and its nav bar is
+                // the book's chrome-door row).
+                Button(tokens.chromeLabel(Self.detailsDoorTitle)) {
+                    detailsPresented = true
+                }
+                .font(tokens.small)
+            }
+            ToolbarItem(placement: .topBarTrailing) {
                 // The Read door (P35): the calm continuous column, from
                 // the contents — the retired contents door's placement,
                 // mirrored.
                 Button(tokens.chromeLabel(Self.readDoorTitle)) { onRead() }
                     .font(tokens.small)
             }
+        }
+        .sheet(isPresented: $detailsPresented) {
+            MobileBookDetailsSheet(
+                session: session, readingID: model.readingID, tokens: tokens)
+                .presentationDetents([.medium, .large])
         }
         .task { await model.start() }
     }

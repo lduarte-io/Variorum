@@ -11,11 +11,13 @@
 //  she removed). Both halves run in ONE runner closure — the Mac
 //  `JournalBooks.openToday` composition, the phone's edition.
 //
-//  Carried verbatim from the retired Phase 8 capture door: the phone's
-//  WORDINGS point at the Mac, where books are managed — every outcome the
-//  shared helper can report speaks, and a clean shelving says nothing
-//  (P-2: the door acts; where it cannot, it speaks honestly). The Phase 8
-//  A1-class pins re-point here (`MobileShellTests`).
+//  Since parity C2 the wordings point at the PHONE'S OWN doors (the
+//  no-redirect principle — the book-details surface holds finish/reopen
+//  and the daily designation, so the old "on the Mac" tails dissolved
+//  with the doors' arrival): every outcome the shared helper can report
+//  speaks, and a clean shelving says nothing (P-2: the door acts; where
+//  it cannot, it speaks honestly). The Phase 8 A1-class pins live in
+//  `MobileShellTests`.
 //
 
 import Foundation
@@ -46,19 +48,20 @@ enum MobileTodayDoor {
     }
 
     /// The phone's wording for a shelving outcome — nil when there is
-    /// nothing to say. Books are managed on the Mac, so every note points
-    /// there rather than offering a door the phone does not have.
-    /// (Carried byte-for-byte from the retired Phase 8 capture surface.)
+    /// nothing to say. Since parity C2 every note names a PHONE road
+    /// (inventory #8/#9/#10 dissolved — the book-details surface holds
+    /// finish/reopen and the daily designation; extents stay unbuilt by
+    /// LK5's ranking, so the full-book note names the designation road).
     static func shelvingNote(_ shelving: Operations.DailyBookShelving) -> String? {
         switch shelving {
         case .shelved, .alreadyDecided:
             return nil
         case .bookFinished:
-            return "Entry saved. Your daily journal book is finished, so it wasn't added — reopen it on the Mac."
+            return "Entry saved. Your daily journal book is finished, so it wasn't added — reopen it from its book details."
         case .bookAtCapacity:
-            return "Entry saved. Your daily journal book is full, so it wasn't added — extend it on the Mac."
+            return "Entry saved. Your daily journal book is full, so it wasn't added — choose another book as your daily journal (a book's details has the door)."
         case .wrongKind:
-            return "Entry saved. Your daily journal is a smart book, which can't hold entries — pick a curated one on the Mac."
+            return "Entry saved. Your daily journal is a smart book, which can't hold entries — choose a hand-picked book as your daily journal (a book's details has the door)."
         case .refused(let reason):
             return "Entry saved, but it wasn't added to your daily journal book: \(reason)"
         }

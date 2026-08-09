@@ -258,8 +258,10 @@ enum MobileTutorialSeeder {
 
             "Tapping a book opens its CONTENTS — the chapter list you likely "
             + "arrived through. read, at the top, opens the same book as one "
-            + "calm continuous page; tapping any note, in either place, opens "
-            + "it for writing.",
+            + "calm continuous page; details, beside it, holds the book's own "
+            + "acts — rename it, finish or reopen it, or make it your daily "
+            + "journal. Tapping any note, in either place, opens it for "
+            + "writing.",
 
             "Writing happens in one place: the note's own page, one column, "
             + "nothing to manage. The machinery — takes, structure, comments — "
