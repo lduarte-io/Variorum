@@ -127,14 +127,19 @@ struct MobileScrapsTests {
             let model = MobileScrapsModel(session: session, window: 4)
             await model.refresh()
 
-            // Past the window: exactly the window shows, the marker
-            // fires, and the sentence is neutral.
+            // Past the window: exactly the window shows — the pool's
+            // END since D2 (the suffix window: a mint lands at
+            // pointer-order end, so the window keeps the end visible) —
+            // the marker fires, and the sentence is neutral.
             #expect(model.items.map { $0.block.text } ==
-                    ["scrap 1", "scrap 2", "scrap 3", "scrap 4"],
-                    "the window bounds what the surface builds")
+                    ["scrap 2", "scrap 3", "scrap 4", "scrap 5"],
+                    "the window bounds what the surface builds — the pool's END")
             #expect(model.truncated, "never a silent cut")
-            let marker = MobileScrapsModel.truncationMarker(shown: model.items.count)
-            #expect(marker == "Showing the first 4 scraps — the rest aren't loaded yet.")
+            let marker = MobileScrapsModel.truncationMarker(
+                shown: model.items.count, of: model.totalCount)
+            #expect(marker == "The first scrap isn't loaded — showing the latest 4.")
+            #expect(MobileScrapsModel.truncationMarker(shown: 4, of: 7)
+                == "The first 3 scraps aren't loaded — showing the latest 4.")
             #expect(!marker.contains("Mac"), "P32's grammar is neutral")
 
             // An exact-window pool shows everything and NO marker (the
@@ -144,6 +149,35 @@ struct MobileScrapsTests {
             #expect(model.items.count == 4)
             #expect(model.truncated == false,
                     "an exact-window pool never false-positives the marker")
+        }
+    }
+
+    /// A mint past the window LANDS VISIBLY (parity D2 — the routed C3
+    /// R2-2 mechanism): the old prefix window showed the first
+    /// `window` rows while the mint landed at pointer-order END, so
+    /// past the window a successful mint showed NOTHING — the field
+    /// cleared, no row appeared, and the mint door sat right under the
+    /// marker. The suffix window slides to where mints land: the new
+    /// scrap is the visible last row, every time.
+    @Test func aMintPastTheWindowLandsVisibly() async throws {
+        try await withEditorWorld { session, db in
+            _ = try await session.runner.run { ops -> String in
+                let pool = try ops.createPool(title: "Overfull")
+                for i in 1...5 {
+                    _ = try ops.newBlock(in: pool.id, text: "scrap \(i)")
+                }
+                return pool.id
+            }
+            let model = MobileScrapsModel(session: session, window: 4)
+            await model.refresh()
+            #expect(model.truncated)
+
+            #expect(await model.mintScrap("the fresh thought"))
+            #expect(model.items.last?.block.text == "the fresh thought",
+                    "the mint is the visible last row — never an invisible success")
+            #expect(model.items.count == 4, "the window still bounds the build")
+            #expect(model.truncated, "the marker still tells the truth about the head")
+            #expect(model.totalCount == 6)
         }
     }
 

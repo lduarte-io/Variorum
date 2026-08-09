@@ -48,6 +48,10 @@ final class MobileScrapsModel {
     /// True when the pool holds more than the window shows — the
     /// truncation marker's trigger (never a silent cut, P32's grammar).
     private(set) var truncated = false
+    /// The pool's whole count (the delivery is whole — core's standing
+    /// pool read carries no limit), so the marker can say how much of
+    /// the head is unloaded.
+    private(set) var totalCount = 0
     private(set) var lastError: String?
     private(set) var selectedPoolID: String?
     @ObservationIgnored private var itemsTask: Task<Void, Never>?
@@ -59,17 +63,32 @@ final class MobileScrapsModel {
     }
 
     /// The bounded-window truncation marker (P32's neutral grammar —
-    /// the book list's own sentence shape; never a silent cut, never a
-    /// platform).
-    nonisolated static func truncationMarker(shown: Int) -> String {
-        "Showing the first \(shown) scraps — the rest aren't loaded yet."
+    /// never a silent cut, never a platform). It renders at the list's
+    /// TOP since D2: the window shows the pool's END, so what is
+    /// missing is the list's head.
+    nonisolated static func truncationMarker(shown: Int, of total: Int) -> String {
+        let unloaded = total - shown
+        return unloaded == 1
+            ? "The first scrap isn't loaded — showing the latest \(shown)."
+            : "The first \(unloaded) scraps aren't loaded — showing the latest \(shown)."
     }
 
     /// ONE window rule for both delivery roads (the observation and the
-    /// headless refresh).
+    /// headless refresh). The window keeps the pool's END — the SUFFIX
+    /// (D2, the routed C3 R2-2 mechanism: a mint lands at pointer-order
+    /// end, and the old first-`window` prefix made a mint past the
+    /// window succeed INVISIBLY — the field cleared and no row
+    /// appeared, with the mint door sitting right under the marker
+    /// saying "the rest aren't loaded". The suffix window is the
+    /// honest generalization of the window-bump: it slides to where
+    /// mints land, so a mint is ALWAYS visible — and it matches the
+    /// Library neighbor's own spirit, whose newest-first window keeps
+    /// the newest visible). `count > window` stays exact truth, so an
+    /// exact-window pool can never false-positive the marker.
     private func adopt(_ value: [Queries.PoolItem]) {
         truncated = value.count > window
-        items = Array(value.prefix(window))
+        totalCount = value.count
+        items = Array(value.suffix(window))
     }
 
     /// The pool the area shows — the selection, falling back to the
@@ -136,6 +155,7 @@ final class MobileScrapsModel {
         observedPoolID = poolID
         items = []
         truncated = false
+        totalCount = 0
         guard let poolID else { return }
         itemsTask = Task { [session, weak self] in
             do {
@@ -223,6 +243,19 @@ struct MobileScrapsSection: View {
         if model.pools.count > 1 {
             poolPicker
         }
+        if model.truncated {
+            // The bounded window's honest marker (P32's grammar — never
+            // a silent cut). At the TOP since D2: the window keeps the
+            // pool's END (where a mint lands, so a mint is always
+            // visible), so the unloaded rows are the list's head.
+            Text(tokens.chromeLabel(
+                MobileScrapsModel.truncationMarker(
+                    shown: model.items.count, of: model.totalCount)))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .padding(.vertical, 8)
+                .padding(.horizontal, 12)
+        }
         ForEach(model.items, id: \.block.blockID) { item in
             scrapRow(item)
         }
@@ -232,16 +265,6 @@ struct MobileScrapsSection: View {
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
                 .padding(.vertical, 20)
-                .padding(.horizontal, 12)
-        }
-        if model.truncated {
-            // The bounded window's honest marker (P32's grammar — never
-            // a silent cut).
-            Text(tokens.chromeLabel(
-                MobileScrapsModel.truncationMarker(shown: model.items.count)))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-                .padding(.vertical, 8)
                 .padding(.horizontal, 12)
         }
         mintRow
