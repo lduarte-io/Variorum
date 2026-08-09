@@ -848,8 +848,16 @@ struct MobileTakesBrowserSurfaceTests {
             let titles = menu.children.compactMap { ($0 as? UIAction)?.title }
             // Custom items render VOICE-CASED since parity A3 (P26/P43;
             // the world runs terminal); the system's own suggestions are
-            // never touched.
-            #expect(titles == ["Copy", MobileEditorStyle.chromeCase(MobileEditMenu.takesTitle)])
+            // never touched. Since parity C4b a SELECTION's menu carries
+            // the two selection acts beside Takes… (this range has
+            // length — the sanctioned widening riding the doors; the
+            // caret-menu arm below stays byte-identical).
+            #expect(titles == [
+                "Copy",
+                MobileEditorStyle.chromeCase(MobileEditMenu.takesTitle),
+                MobileEditorStyle.chromeCase(MobileEditMenu.extractTitle),
+                MobileEditorStyle.chromeCase(MobileEditMenu.makeBlockTitle),
+            ])
             // S4: the Block submenu joins beside Takes… (the ⋯ menu's
             // rows from the ONE builder — the flat Takes… item is
             // byte-untouched; this assertion widened WITH the door).
