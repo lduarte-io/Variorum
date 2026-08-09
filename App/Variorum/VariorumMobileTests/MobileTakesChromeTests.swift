@@ -237,6 +237,87 @@ struct MobileTakesChromeTests {
         }
     }
 
+    /// FIX-3 (Stage A ladder round 1, the pin-first probe): the reviewer's
+    /// ~3 pt residual window — `commentMarkRoom` vs the marker's own
+    /// measured width — probed by FLUSH-END one-liners. The standing pin's
+    /// fixture WRAPS under the widened exclusion (it asserts the two-line
+    /// safe case); this one seeds a band of candidate lengths spanning the
+    /// flush boundary, so whatever TK2 does with `lineFragmentPadding` at
+    /// exclusion-path edges (the finding's undetermined half), the maximal
+    /// one-liner — the marker as far right as it can ever sit — is in the
+    /// set. Every one-line fanned+commented candidate's ●n marker must
+    /// clear the ⑂ badge.
+    @Test func aFlushEndOneLineFannedAndCommentedBlockNeverCrowdsTheBadge() async throws {
+        try await withEditorWorld { session, _ in
+            let charW = ("a" as NSString).size(
+                withAttributes: [.font: MobileEditorStyle.baseFont]).width
+            let probe = MobileEditorTextView.make()
+            probe.frame = CGRect(x: 0, y: 0, width: 393, height: 100)
+            probe.layoutIfNeeded()
+            let containerWidth = probe.textContainer.size.width
+            let pad: CGFloat = 5 // NSTextContainer.lineFragmentPadding default
+            let reserved = MobileTakesChromeController.gutterWidth
+                + MobileTakesChromeController.commentMarkRoom
+            let center = Int(((containerWidth - reserved) - pad) / charW)
+            let counts = Array((center - 3)...(center + 2))
+
+            let seed = try await session.runner.run { ops -> (post: String, blocks: [String]) in
+                let post = try ops.createPost(title: "flush", profile: .blog)
+                var blocks: [String] = []
+                for count in counts {
+                    let a = try ops.newBlock(
+                        in: post.id, text: String(repeating: "a", count: count), at: .end)
+                    _ = try ops.branchVariant(a.block.id, from: a.variant.id)
+                    _ = try ops.addBlockComment(to: a.block.id, text: "One.")
+                    blocks.append(a.block.id)
+                }
+                return (post.id, blocks)
+            }
+            let (model, surface) = await makeSurface(session, postID: seed.post)
+            let view = surface.textView
+            guard let chrome = view.takesChrome, let decor = view.blockDecor else {
+                Issue.record("chrome not installed")
+                return
+            }
+            _ = model
+            // The second chrome pass the app takes on its own (the standing
+            // decor→chrome ordering; see the pin above), then settle rounds
+            // (exclusion → relayout → chrome) until the geometry stops
+            // moving, as the app's own layout ticks would — the STEADY
+            // state is what this pin asserts (the one-tick pre-exclusion
+            // transient is the standing recorded behavior).
+            view.refreshChrome()
+            for _ in 0..<4 {
+                surface.layoutIfNeeded()
+                view.refreshChrome()
+            }
+
+            // PROBE VERDICT (2026-08-09, iPhone 17 Pro / iOS 26.2, recorded
+            // per the pin-first rule): GREEN — TK2 applies
+            // lineFragmentPadding (5 pt) against exclusion-path edges, so
+            // glyphs stop at cw−56−5 = 302 (max one-line endX measured
+            // 299.25; the next candidate wraps) while crossing needs
+            // endX > cw−59 = 304 — the reviewer's ~3 pt window is EMPTY,
+            // worst-case clearance ≥ 2 pt. The ●12 marker's fitted width
+            // is ALSO 30.0 (the button's insets floor) — no multi-digit
+            // widening at 12. `commentMarkRoom` stands at 26.
+            var oneLiners = 0
+            for blockID in seed.blocks {
+                let badge = try #require(chrome.badgeView(for: blockID))
+                let mark = try #require(decor.commentMark(for: blockID))
+                // A one-liner iff the marker (LAST line) shares the badge's
+                // (FIRST line's) vertical band — the crossing precondition.
+                guard mark.frame.maxY > badge.frame.minY,
+                      mark.frame.minY < badge.frame.maxY else { continue }
+                oneLiners += 1
+                #expect(!mark.frame.intersects(badge.frame),
+                        "flush-end one-liner: marker \(mark.frame) crosses badge \(badge.frame)")
+            }
+            #expect(oneLiners > 0,
+                    "the probe produced no one-liner — recompute the candidate band")
+        }
+    }
+
     @Test func panRouterScopesToFannedBlockGeometry() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedWrappingFannedPost(session)
