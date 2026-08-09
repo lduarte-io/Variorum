@@ -32,16 +32,44 @@ import VariorumCore
 @Observable
 final class MobileScrapsModel {
     @ObservationIgnored private let session: AppSession
+    /// The bounded window (FIX-C3c — MobileSoul §2's "every list
+    /// windowed"; the Library filter neighbor's own 200 mirrored). The
+    /// standing pool read delivers whole (core's pool shape carries no
+    /// limit — bounding the FETCH is a core seam, not a view-model's),
+    /// so the window bounds what the surface BUILDS, and `count >
+    /// window` is exact truth: an exact-window pool can never
+    /// false-positive the marker — the probe discipline's contract,
+    /// held by construction.
+    @ObservationIgnored private let window: Int
 
     private(set) var pools: [Container] = []
+    /// The WINDOWED listing (never more than `window` rows).
     private(set) var items: [Queries.PoolItem] = []
+    /// True when the pool holds more than the window shows — the
+    /// truncation marker's trigger (never a silent cut, P32's grammar).
+    private(set) var truncated = false
     private(set) var lastError: String?
     private(set) var selectedPoolID: String?
     @ObservationIgnored private var itemsTask: Task<Void, Never>?
     @ObservationIgnored private var observedPoolID: String?
 
-    init(session: AppSession) {
+    init(session: AppSession, window: Int = 200) {
         self.session = session
+        self.window = window
+    }
+
+    /// The bounded-window truncation marker (P32's neutral grammar —
+    /// the book list's own sentence shape; never a silent cut, never a
+    /// platform).
+    nonisolated static func truncationMarker(shown: Int) -> String {
+        "Showing the first \(shown) scraps — the rest aren't loaded yet."
+    }
+
+    /// ONE window rule for both delivery roads (the observation and the
+    /// headless refresh).
+    private func adopt(_ value: [Queries.PoolItem]) {
+        truncated = value.count > window
+        items = Array(value.prefix(window))
     }
 
     /// The pool the area shows — the selection, falling back to the
@@ -107,11 +135,12 @@ final class MobileScrapsModel {
         itemsTask?.cancel()
         observedPoolID = poolID
         items = []
+        truncated = false
         guard let poolID else { return }
         itemsTask = Task { [session, weak self] in
             do {
                 for try await value in session.database.observePool(poolID) {
-                    self?.items = value
+                    self?.adopt(value)
                 }
             } catch is CancellationError {
             } catch {
@@ -132,7 +161,7 @@ final class MobileScrapsModel {
                 return (pools, items)
             }
             self.pools = pools
-            self.items = items
+            adopt(items)
         } catch {
             lastError = String(describing: error)
         }
@@ -172,7 +201,16 @@ final class MobileScrapsModel {
 }
 
 /// The scraps section the Library's third filter shows: the picker row
-/// (several pools only), the scrap rows, the mint door.
+/// (several pools only), the scrap rows, the truncation marker, the
+/// mint door.
+///
+/// FIX-C3c: the body is FLAT builder content — no wrapping VStack — so
+/// the rows land in the Library's own LazyVStack context and
+/// materialize lazily (the round-1 mechanism: a plain VStack made the
+/// whole interior ONE lazy child, built the moment the filter showed).
+/// The observation's lifecycle is hosted by the Library view's
+/// `.task(id: filter)` (tasks live on stable chrome, never on a lazy
+/// row that can scroll away); the mint alert rides its own door.
 struct MobileScrapsSection: View {
     @Bindable var model: MobileScrapsModel
     let tokens: VoiceTokens
@@ -180,43 +218,38 @@ struct MobileScrapsSection: View {
     @State private var mintPresented = false
     @State private var mintField = ""
 
+    @ViewBuilder
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            if model.pools.count > 1 {
-                poolPicker
-            }
-            ForEach(model.items, id: \.block.blockID) { item in
-                scrapRow(item)
-            }
-            if model.items.isEmpty {
-                Text(tokens.chromeLabel(
-                    "No scraps yet — loose blocks live here, outside any note."))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .padding(.vertical, 20)
-                    .padding(.horizontal, 12)
-            }
-            mintRow
-            if let error = model.lastError {
-                Text(error)
-                    .font(tokens.small)
-                    .foregroundStyle(.red)
-                    .padding(.horizontal, 12)
-            }
+        if model.pools.count > 1 {
+            poolPicker
         }
-        .task { await model.start() }
-        .alert("New Scrap", isPresented: $mintPresented) {
-            TextField("A loose line…", text: $mintField)
-            Button("Keep") {
-                let text = mintField
-                let model = model
-                Task {
-                    if await model.mintScrap(text) { mintField = "" }
-                }
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("A scrap is a standalone block — it lives here, in no note.")
+        ForEach(model.items, id: \.block.blockID) { item in
+            scrapRow(item)
+        }
+        if model.items.isEmpty {
+            Text(tokens.chromeLabel(
+                "No scraps yet — loose blocks live here, outside any note."))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .padding(.vertical, 20)
+                .padding(.horizontal, 12)
+        }
+        if model.truncated {
+            // The bounded window's honest marker (P32's grammar — never
+            // a silent cut).
+            Text(tokens.chromeLabel(
+                MobileScrapsModel.truncationMarker(shown: model.items.count)))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .padding(.vertical, 8)
+                .padding(.horizontal, 12)
+        }
+        mintRow
+        if let error = model.lastError {
+            Text(error)
+                .font(tokens.small)
+                .foregroundStyle(.red)
+                .padding(.horizontal, 12)
         }
     }
 
@@ -276,5 +309,21 @@ struct MobileScrapsSection: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("New Scrap")
+        // The mint alert rides its own door (the flat body has no
+        // container to carry it; an alert presents modally, so its
+        // attachment point only governs lifetime).
+        .alert("New Scrap", isPresented: $mintPresented) {
+            TextField("A loose line…", text: $mintField)
+            Button("Keep") {
+                let text = mintField
+                let model = model
+                Task {
+                    if await model.mintScrap(text) { mintField = "" }
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("A scrap is a standalone block — it lives here, in no note.")
+        }
     }
 }

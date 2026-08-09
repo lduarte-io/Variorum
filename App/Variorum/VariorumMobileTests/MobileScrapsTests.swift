@@ -98,6 +98,55 @@ struct MobileScrapsTests {
         }
     }
 
+    /// FIX-C3c (the C3 ladder): the scraps listing is WINDOWED like
+    /// every mobile listing (MobileSoul §2's bar; the Library filter
+    /// neighbor's own 200 is the default, narrowed here to exercise the
+    /// seam) with the P32 truncation grammar — past the window the model
+    /// shows exactly the window and the neutral marker; an EXACT-window
+    /// pool shows no marker (the probe discipline's no-false-positive
+    /// contract — exact by construction here, since the standing pool
+    /// read delivers whole and the count is truth); the marker names no
+    /// platform. Both delivery roads (refresh and the observation's
+    /// adopt) share the one window rule. The row-level laziness half is
+    /// the view-structure change (flat builder content into the
+    /// Library's LazyVStack) — the recorded not-headless-testable
+    /// class; this pin is the window's.
+    @Test func theScrapsListingWindowsWithTheTruncationMarker() async throws {
+        try await withEditorWorld { session, db in
+            let exactID = try await session.runner.run { ops -> String in
+                let over = try ops.createPool(title: "Overfull")
+                for i in 1...5 {
+                    _ = try ops.newBlock(in: over.id, text: "scrap \(i)")
+                }
+                let exact = try ops.createPool(title: "Exact")
+                for i in 1...4 {
+                    _ = try ops.newBlock(in: exact.id, text: "kept \(i)")
+                }
+                return exact.id
+            }
+            let model = MobileScrapsModel(session: session, window: 4)
+            await model.refresh()
+
+            // Past the window: exactly the window shows, the marker
+            // fires, and the sentence is neutral.
+            #expect(model.items.map { $0.block.text } ==
+                    ["scrap 1", "scrap 2", "scrap 3", "scrap 4"],
+                    "the window bounds what the surface builds")
+            #expect(model.truncated, "never a silent cut")
+            let marker = MobileScrapsModel.truncationMarker(shown: model.items.count)
+            #expect(marker == "Showing the first 4 scraps — the rest aren't loaded yet.")
+            #expect(!marker.contains("Mac"), "P32's grammar is neutral")
+
+            // An exact-window pool shows everything and NO marker (the
+            // probe contract).
+            model.select(poolID: exactID)
+            await model.refresh()
+            #expect(model.items.count == 4)
+            #expect(model.truncated == false,
+                    "an exact-window pool never false-positives the marker")
+        }
+    }
+
     /// Several pools are all REACHABLE (the Mac N19 lesson, carried):
     /// the oldest is the default; selecting another re-reads its
     /// listing; a mint lands in the ACTIVE pool.

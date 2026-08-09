@@ -68,6 +68,14 @@ struct MobileLibraryView<TabBar: View>: View {
         // C3 — a way of looking; nothing is written).
         .task(id: model.sort) { await model.startAll() }
         .task { await model.startBookless() }
+        // The scraps observation's lifecycle lives HERE (FIX-C3c): the
+        // section's body is flat lazy-row content now, so its task
+        // moved to stable chrome — it runs while the Scraps filter
+        // shows and cancels when the filter leaves, exactly the old
+        // section-task lifecycle.
+        .task(id: model.filter) {
+            if model.filter == .scraps { await scraps.start() }
+        }
         .task(id: query) { await model.search(query) }
     }
 
