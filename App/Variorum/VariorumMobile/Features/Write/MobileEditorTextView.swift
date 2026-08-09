@@ -84,6 +84,34 @@ final class MobileFallbackCanary {
     }
 }
 
+// MARK: - Typewriter room (P24, parity A3 — her ruled requirement)
+
+/// P24, her words: *"make sure i can still have whitespace at the bottom
+/// of the note - a nicety from the mac i want preserved."* The arithmetic
+/// MIRRORS the Mac's `TypewriterRoom` (EditorTextView.swift, the 13d A22
+/// ruling: about one viewport-page LESS ONE LINE, so at maximum scroll
+/// the last line sits at the top rather than one pixel above it) —
+/// mirrored, never changed (the S2 guard-order precedent; the brain is
+/// one `max` expression, hoisting it would mean Mac-source churn outside
+/// this batch's scope — recorded in the batch record). The MECHANISM is
+/// the phone's own: `textContainerInset.bottom` (AppKit's inset broke
+/// hit-testing behind a backdrop view — the 13d record — but on iOS the
+/// inset region belongs to the text view itself, so a tap there lands
+/// the caret at the document's end for free, which IS the Mac's
+/// click-in-the-room rule).
+nonisolated enum MobileTypewriterRoom {
+    /// One viewport-page less one line (the Mac's exact expression).
+    static func height(viewport: CGFloat, lineHeight: CGFloat) -> CGFloat {
+        max(0, viewport - max(0, lineHeight))
+    }
+
+    /// One line of a font, from the font's own metrics (the Mac's rule,
+    /// UIFont-spelled).
+    static func lineHeight(of font: UIFont) -> CGFloat {
+        (font.ascender - font.descender + font.leading).rounded(.up)
+    }
+}
+
 // MARK: - The text view
 
 @MainActor
@@ -168,7 +196,22 @@ final class MobileEditorTextView: UITextView {
     /// pass inside the refresh itself.
     override func layoutSubviews() {
         super.layoutSubviews()
+        updateTypewriterRoom()
         refreshChrome(scope: .nearViewport)
+    }
+
+    /// P24: the bottom inset IS the typewriter room, recomputed from the
+    /// live viewport (the container pins this view's bottom to the
+    /// keyboard guide, so `bounds.height` is exactly the visible page —
+    /// the room follows the keyboard for free). EQUALITY-GATED like every
+    /// per-layout write (the chrome discipline), so the steady state is
+    /// write-free and this cannot loop layout.
+    private func updateTypewriterRoom() {
+        let room = MobileTypewriterRoom.height(
+            viewport: bounds.height,
+            lineHeight: MobileTypewriterRoom.lineHeight(of: MobileEditorStyle.baseFont))
+        guard abs(textContainerInset.bottom - room) > 0.5 else { return }
+        textContainerInset.bottom = room
     }
 
     // MARK: Chrome geometry (S4 — the ONE implementation both chrome

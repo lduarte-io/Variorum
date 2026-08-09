@@ -548,6 +548,52 @@ struct MobileEditorProjectionTests {
 // MARK: - The note seal (parity round Stage A batch A1, item 4)
 
 @MainActor
+@Suite("Mobile Write editor — typewriter room (P24, parity A3)")
+struct MobileTypewriterRoomTests {
+    /// P24, her ruled requirement: whitespace at the bottom of the note —
+    /// the last line never sits at the screen's foot. The inset IS the
+    /// room (one viewport-page less one line, the Mac A22 arithmetic
+    /// mirrored), recomputed as the viewport changes. RED-ON-OLD by A1's
+    /// real-touch evidence: the pre-fix surface kept the default ~8 pt
+    /// bottom inset ("a small scrollable range past the document's end"),
+    /// so both equalities below fail on the pre-fix tree.
+    @Test func theBottomOfTheNoteKeepsTypewriterRoom() async throws {
+        try await withEditorWorld { _, _ in
+            // The mechanism lives on the TEXT VIEW alone (layoutSubviews
+            // → updateTypewriterRoom — no model in the loop), so the pin
+            // frames a bare view directly: no window, no container — the
+            // surface container's keyboardLayoutGuide collapses
+            // windowless, and hosting a window in the shared test
+            // process is company other tests shouldn't keep. The world
+            // still wraps for the deterministic voice (baseFont).
+            let view = MobileEditorTextView.make()
+            view.text = "hello"
+            view.frame = CGRect(x: 0, y: 0, width: 393, height: 700)
+            view.layoutIfNeeded()
+
+            let line = MobileTypewriterRoom.lineHeight(of: MobileEditorStyle.baseFont)
+            #expect(view.bounds.height == 700)
+            #expect(view.textContainerInset.bottom
+                    == MobileTypewriterRoom.height(viewport: 700, lineHeight: line))
+            #expect(view.textContainerInset.bottom > 100,
+                    "the room is a page's worth of whitespace, not a margin")
+
+            // The room follows the viewport (in the app the container's
+            // keyboard guide reshapes this view when the keyboard rises —
+            // a smaller page keeps a smaller room).
+            view.frame = CGRect(x: 0, y: 0, width: 393, height: 420)
+            view.layoutIfNeeded()
+            #expect(view.textContainerInset.bottom
+                    == MobileTypewriterRoom.height(viewport: 420, lineHeight: line))
+
+            // The room is REAL scrollable range (the whitespace exists as
+            // content the scroll can enter, the Mac rule's letter).
+            #expect(view.contentSize.height >= view.textContainerInset.bottom)
+        }
+    }
+}
+
+@MainActor
 @Suite("Mobile Write editor — the note seal door (parity A1)")
 struct MobileNoteSealTests {
     private func containerLocked(_ db: AppDatabase, postID: String) async throws -> Bool {
