@@ -5819,3 +5819,77 @@ one indirection deeper. One-line doc fix at the next records edit.
 **Verdict: all four fixes HOLD; no BLOCKER/MAJOR — no round 3 owed.**
 Three NITs recorded above (one a pre-existing doc pointer), none
 gating.
+
+## Stage C — the C3 LADDER CLOSES at round 2 (architect, 2026-08-09); C4 OPENS
+
+Round 2: all four HOLD (C3d's platform claim independently
+reproduced by the reviewer's own probe); no BLOCKER/MAJOR. The three
+NITs, dispositioned at the architect's hand: **R2-1** the scraps
+observation surviving an active search is cost-only and now
+RECORDED here (the lifecycle comment's one-window overstatement
+noted; not worth a churn commit) · **R2-2** mint-past-window
+visibility ROUTED to Stage D's look round (inherent to the
+adjudicated windowing) · **R2-3** the spine-pointer confusion FIXED
+by this record: **the MOBILE spine's seven suite type names are
+`MobileWalkTests` · `MobileTutorialBookShapeTests` ·
+`MobileTutorialDoorTests` · `MobileTutorialWritingWalkTests` ·
+`MobileTutorialTakesWalkTests` · `MobileTutorialStructureWalkTests`
+· `MobileTutorialLibraryWalkTests` (32/7); the MAC spine's seven
+(51/7) are the `Tutorial*ActsTests` family listed at
+mobile-app-plan.md ~line 767 — two different spines, never
+interchangeable.** **C3 CLOSED.**
+
+**C4 OPENS — split into TWO build sessions for session-size safety,
+ONE ladder over the combined diff** (the family-granularity intent
+holds; the split is purely the ~500k context-degradation rule
+applied to a ten-item batch):
+
+- **C4a — takes completeness + locks + history + S5:** take
+  lock/unlock (the note seal's sibling; the SIX locked-take refusal
+  strings dissolve here per the inventory) · archived-takes listing
+  + unarchive · label take · the commit door + history face (with
+  AppSpec §9's "this commit predates a split" warning class where
+  the history shows one) · **the S5 conflict-discoverability
+  verify + pin** (a conflict variant landing on the phone must be
+  DISCOVERABLE — the takes badge its natural face).
+- **C4b — the editor fill:** insert-block-below (the ⋯-menu row
+  over the standing op) · the strike/code/link doors · find-in-note
+  (TEXTKIT2 §3's crash-pairing care binds) · **extract + make-block
+  on the selection menu** (her sitting ruling) · **the block-TOC
+  in-note list** (her sitting ruling — block NAMES' phone face).
+
+## Stage C, batch C4a brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
+
+**Cast:** a fresh Fable implementer session, `~/dev/variorum-mobile`,
+branch `mobile`, starting at this commit. Scope: C4a's five items
+above, the matrix's rows their spec (each cites its ruling).
+
+**Read first, IN FULL:** `CLAUDE.md` (AppSpec §9's lock/archive/
+commit entries are the op floor; SyncSpec §6's S5 is the conflict
+row's law) · `notes/MobileSoul.md` (§5.3: offline is the phone's
+NORMAL — the S5 check's why) · THIS plan file top to bottom (the
+MATRIX's takes/locks/history rows · the refusal inventory's six
+locked-take rows · PB1-4's neighbor note) · the Mac's takes/lock/
+history faces in code · `notes/plans/mobile-architect-handoff.md`.
+Environment traps bind; the MOBILE spine's seven names are in the
+C3-close section directly above.
+
+**The work:** every act through existing core ops (`lockVariant`/
+`unlockVariant` — remember lock-insures-first is the OP's own
+behavior · `archiveVariant`/the unarchive road · the label setter ·
+`commit` + `Queries` history reads · `resolveSyncConflict` is
+S5's landing, already core). The six locked-take strings dissolve
+WITH their doors in the same commits (fire-and-DO). The S5 row is
+VERIFY + PIN work: prove a conflict variant landing on this block
+surfaces in the phone's badge/browser (the fan count road), and pin
+it — if discovery genuinely fails, that is a FINDING (trace, fix if
+mobile-side, STOP if core-side). Tutorial-as-spec: the takes lesson
+grows where doors land. Small additive Queries legal with the
+four-suite duty; `Operations/`/schema/`Sync/` STOPS.
+
+**Discipline (standing):** synchronous; red-on-old for defect-class;
+state-transition tests per door; no platform-named refusals. Full
+mobile suite green by own run (from 265/48, arithmetic accounted) +
+mobile spine 32/7 + perf 9/2 by name. Commit per logical unit with
+the standing trailer; record as "## Stage C, batch C4a — BATCH
+RECORD"; push. PROVISIONAL-and-continue; author-only calls stop.
