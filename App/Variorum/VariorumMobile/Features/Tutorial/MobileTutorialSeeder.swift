@@ -295,7 +295,10 @@ enum MobileTutorialSeeder {
             + "lives in the sheet. more info, beside the tags, keeps "
             + "links and files with the note — tap a link to open it, or "
             + "add one; a file listed there stays on the device where it "
-            + "was added, and only its name travels.",
+            + "was added, and only its name travels. And blocks, at the "
+            + "line's end, lists this note's blocks — a block's name "
+            + "where you've set one, else its first sentence, worked out "
+            + "fresh each time — and a tap jumps you there.",
 
             "Settings, on the shelf's top line, holds the voice switch (the "
             + "last lesson), tag management — browse the whole tag tree "

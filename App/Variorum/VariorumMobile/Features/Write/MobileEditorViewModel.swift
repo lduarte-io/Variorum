@@ -658,6 +658,37 @@ final class MobileEditorViewModel {
         textView?.findInteraction?.presentFindNavigator(showingReplace: false)
     }
 
+    // MARK: - The block list's jump (parity C4b item 5 — the in-note
+    // block list's tap: "tap jumps the editor there")
+
+    /// Places the caret at the block's start and scrolls its first line
+    /// near the viewport's top. The geometry rides
+    /// `firstLineGeometry(atOffset:)` — `.ensuresLayout` on exactly the
+    /// target fragment (the hybrid-jump cost class: one fragment, never
+    /// the document); `scrollRangeToVisible` is the honest fallback
+    /// where TK2 offers no fragment yet.
+    func jumpToBlock(_ blockID: String) {
+        guard let range = rangeOfBlock(blockID), let textView else {
+            report("That block is no longer in this note.")
+            return
+        }
+        textView.selectedRange = NSRange(location: range.location, length: 0)
+        if let geometry = textView.firstLineGeometry(atOffset: range.location) {
+            // Container coords → content offset: the container starts
+            // below the top inset; land the block a breath under the
+            // viewport's top edge. Deliberately NOT clamped against
+            // `contentSize` — TK2's height ESTIMATE can run under the
+            // real layout at the target (TEXTKIT2 §2's class), and the
+            // fragment provably exists at this y (its layout was just
+            // ensured); the typewriter room's bottom inset already
+            // makes any block's top a legitimate scroll target.
+            let target = geometry.fragmentMinY + textView.textContainerInset.top - 24
+            textView.setContentOffset(CGPoint(x: 0, y: max(0, target)), animated: false)
+        } else {
+            textView.scrollRangeToVisible(range)
+        }
+    }
+
     // MARK: - The note seal (parity round Stage A batch A1, item 4 — her
     // ruling verbatim: "i do think that you should be able to unlock a
     // note and lock it on mobile"; the sealed refusals lose their Mac
