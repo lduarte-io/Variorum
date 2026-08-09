@@ -284,13 +284,44 @@ struct MobileLibrarySortTests {
     }
 
     /// The vocabulary, pinned: the brief's four words over the core's
-    /// own sort cases, the picker's order, and the no-op flip.
-    @Test func theSortVocabularyIsPinned() {
+    /// own sort cases, the picker's order, and the no-op flip —
+    /// setting the SAME sort wakes no observer, so the view's
+    /// `.task(id: sort)` never restarts the listing observation
+    /// (FIX-C3d: the C3 ladder's NIT — the comment claimed this pin;
+    /// now the pin exists, as a BEHAVIOR pin). Measured honestly
+    /// (2026-08-09, iOS 26.2): the silence is guaranteed TWICE — by
+    /// `setSort`'s own guard AND by the platform (the @Observable
+    /// macro on this SDK skips notification for equal-value writes to
+    /// Equatable properties: with the guard dropped, the equal-value
+    /// write still woke nothing while a different-value write did —
+    /// probe-verified both ways). So this pin holds the no-op-flip
+    /// CONTRACT; it cannot discriminate the model's guard line alone,
+    /// and does not claim to (the hallucination guard's honesty rule).
+    @Test func theSortVocabularyIsPinned() async throws {
         typealias M = MobileLibraryViewModel
         #expect(M.sortOptions == [.entryDate, .createdAt, .lastTouched, .lastMajorRevision])
         #expect(M.sortWord(.entryDate) == "entry date")
         #expect(M.sortWord(.createdAt) == "created")
         #expect(M.sortWord(.lastTouched) == "last touched")
         #expect(M.sortWord(.lastMajorRevision) == "last meaningful edit")
+
+        // The no-op flip: same value ⇒ no mutation ⇒ no observation
+        // fires (the registration stays armed); a real flip fires it.
+        try await withEditorWorld { session, _ in
+            let model = M(session: session)
+            #expect(model.sort == .lastTouched, "the standing default")
+            let notified = LockIsolated(false)
+            withObservationTracking {
+                _ = model.sort
+            } onChange: {
+                notified.setValue(true)
+            }
+            model.setSort(.lastTouched)
+            #expect(notified.value == false,
+                    "the same value writes nothing — the view's .task(id:) never restarts")
+            model.setSort(.entryDate)
+            #expect(notified.value == true, "a real flip wakes the observer")
+            #expect(model.sort == .entryDate)
+        }
     }
 }
