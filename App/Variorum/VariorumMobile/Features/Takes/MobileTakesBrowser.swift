@@ -215,8 +215,33 @@ final class MobileTakesBrowserController {
         // older ones. Blank copies no text and needs nothing; ✓ repoints
         // and reads no text (batch 1's interpretation 6 stands).
         await model.autosave.flushNow()
-        return await mint(verb: .branch) { ops in
-            try ops.branchVariant(blockID, from: displayed)
+        // Q-M1 — RULED (a) at the gate sitting ("seed-from-ledger"; her
+        // words: "I think that's fine for it to say as A"): under a
+        // REFUSED flush — you typed into a take a remote lock then froze;
+        // the refusal itself recommends branching — the branch carries
+        // what the card SHOWS. The shown bytes are the surface's own
+        // record (ledger-first, exactly what `cards()` renders); the mint
+        // is fresh and unlocked, so they ride into it through the same
+        // ordinary card-edit road and land at the refresh's flush. A
+        // successful flush makes this a byte-for-byte no-op (shown ==
+        // store == the branch's copy).
+        let shown = model.surfaceKnownText(variantID: displayed)
+        do {
+            let take = try await runner.run { ops in
+                try ops.branchVariant(blockID, from: displayed)
+            }
+            model.report(nil)
+            if let shown, shown != take.workingText {
+                model.recordTakeEdit(
+                    variantID: take.id, text: shown,
+                    charDelta: abs(shown.utf16.count - take.workingText.utf16.count))
+            }
+            await model.refreshTakesFromStore()
+            beginEditing(variantID: take.id)
+            return take
+        } catch {
+            model.report(Self.refusalMessage(error, verb: .branch))
+            return nil
         }
     }
 

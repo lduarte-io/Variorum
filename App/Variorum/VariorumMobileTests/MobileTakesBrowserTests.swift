@@ -297,6 +297,60 @@ struct MobileTakesBrowserTests {
         }
     }
 
+    @Test func branchUnderARefusedFlushSeedsFromTheShownBytes() async throws {
+        // Q-M1 — RULED (a) at the gate sitting ("seed-from-ledger"; her
+        // words: "I think that's fine for it to say as A"; batch A1 item
+        // 3). The scenario is the round-2 NIT's own: you typed into a
+        // take a remote lock then froze; the locked refusal RECOMMENDS
+        // branching — but the old branch minted the store's frozen bytes
+        // while the card still showed your pending ones. Ruled shape: the
+        // branch carries what the card SHOWS (the pending bytes ride into
+        // the new take). Red-on-old: with the seeding removed, the mint's
+        // ledger record and store row hold the frozen store bytes.
+        try await withEditorWorld { session, db in
+            let seed = try await seedFannedPost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            model.takesBrowser.open(blockID: seed.blockA)
+
+            // A pending, unflushed CARD edit on the DISPLAYED (chosen)
+            // take — the debounce held open by the injected sleep.
+            model.takesBrowser.beginEditing(variantID: seed.a1)
+            let typed = "First block, as chosen. Plus the pending words."
+            #expect(model.takesBrowser.cardGateAllows(
+                range: NSRange(location: 23, length: 0),
+                replacement: " Plus the pending words."))
+            model.takesBrowser.cardTextDidChange(typed)
+            #expect(model.autosave.isDirty)
+
+            // The remote lock freezes the take mid-edit; the delivery
+            // adopts the locked fan (the MINOR-1 pin's own mechanics).
+            try await session.runner.run { ops in try ops.lockVariant(seed.a1) }
+            let fresh = try await db.read { [postID = model.postID] in
+                try Queries.takesProjection($0, post: postID)
+            }
+            model.ingest(fresh)
+
+            // "Branch this one" — the refusal's recommended road. The
+            // flush inside refuses (locked source; keep-pending holds),
+            // and the mint carries the SHOWN bytes anyway.
+            let mint = await model.takesBrowser.branchDisplayed()
+            guard let mint else {
+                Issue.record("branch minted nothing")
+                return
+            }
+            #expect(model.surfaceKnownText(variantID: mint.id) == typed,
+                    "the card's shown bytes ride into the new take")
+            #expect(try await storedText(db, variantID: mint.id) == typed,
+                    "and land in the store through the mint's own flush")
+            // The source stays exactly as the keep-pending posture left
+            // it: frozen bytes in the store, pending bytes on the card.
+            #expect(try await storedText(db, variantID: seed.a1)
+                    == "First block, as chosen.")
+            #expect(model.surfaceKnownText(variantID: seed.a1) == typed)
+        }
+    }
+
     @Test func blankMintsAnEmptyTakeAtTheFanEnd() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedFannedPost(session)
