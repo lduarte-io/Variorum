@@ -272,6 +272,27 @@ final class MobileEditorViewModel {
                 root.present(alert, animated: true)
             }
         }
+        // Parity C4a: the takes browser's label prompt rides the same
+        // plumbing (the seam is the testable brain's edge; tests inject
+        // their own answers).
+        if takesBrowser.promptForText == nil {
+            takesBrowser.promptForText = { [weak textView] title, message, current, completion in
+                guard let root = textView?.window?.rootViewController else {
+                    completion(nil)
+                    return
+                }
+                let alert = UIAlertController(
+                    title: title, message: message, preferredStyle: .alert)
+                alert.addTextField { $0.text = current }
+                alert.addAction(UIAlertAction(title: "Set", style: .default) { _ in
+                    completion(alert.textFields?.first?.text ?? "")
+                })
+                alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
+                    completion(nil)
+                })
+                root.present(alert, animated: true)
+            }
+        }
     }
 
     /// The storage seam (tests attach a bare `NSTextStorage` — the VM's

@@ -167,6 +167,53 @@ final class MobileTakesBrowserController {
         onChanged?()
     }
 
+    // MARK: - Label (each card's ⋯ — parity C4a: the 13b `setTakeLabel`
+    // op's phone face; the Mac card menu's "Label take…" door)
+
+    /// The label prompt's seam (production: a UIAlertController installed
+    /// at the VM's attach — the block menu's plumbing pattern; tests
+    /// inject answers). completion(nil) = cancelled; EMPTY is a real
+    /// answer — the op clears (trim-and-NULL).
+    var promptForText:
+        (@MainActor (_ title: String, _ message: String, _ current: String?,
+                     _ completion: @escaping @MainActor (String?) -> Void) -> Void)?
+
+    static let labelPromptTitle = "Label Take"
+    /// The Mac label sheet's caption, phone-alerted: identity only,
+    /// never printed in the prose.
+    static let labelPromptMessage =
+        "A short name for this take's card — never printed in the prose. Leave empty to clear."
+
+    /// Opens the label prompt prefilled with the take's CURRENT label
+    /// (live or archived — labels serve both listings).
+    func requestLabel(variantID: String) {
+        guard let promptForText else { return }
+        let current = cards().first { $0.variantID == variantID }?.label
+            ?? archivedCards().first { $0.variantID == variantID }?.label
+        promptForText(Self.labelPromptTitle, Self.labelPromptMessage, current) {
+            [weak self] answer in
+            guard let answer else { return } // cancelled — nothing happens
+            Task { await self?.setLabel(variantID: variantID, label: answer) }
+        }
+    }
+
+    /// The op call (empty clears — the core trims and NULLs). Legal on a
+    /// LOCKED take (the lock freezes the BUFFER, not identity metadata)
+    /// and on an ARCHIVED one (the listing is where a label identifies) —
+    /// both the core op's own recorded rules, not door inventions.
+    func setLabel(variantID: String, label: String?) async {
+        guard let model else { return }
+        do {
+            try await runner.run { ops in try ops.setTakeLabel(variantID, label: label) }
+            model.report(nil)
+            await model.refreshTakesFromStore()
+            await reloadArchived()
+            onChanged?()
+        } catch {
+            model.report(Self.refusalMessage(error, verb: .label))
+        }
+    }
+
     /// Back into the fan — the road the archive refusals name.
     func unarchive(variantID: String) async {
         guard let model else { return }
@@ -486,7 +533,7 @@ final class MobileTakesBrowserController {
 
     // MARK: - Refusal copy (the ops' REAL refusals, in the phone's words)
 
-    enum Verb { case choose, branch, blank, archive, delete, lock, unlock, unarchive }
+    enum Verb { case choose, branch, blank, archive, delete, lock, unlock, unarchive, label }
 
     /// The in-sheet locked-take refusal (parity C4a — the unlock door is
     /// ON this card's ⋯, one tap away, so the copy points at it; the
@@ -524,6 +571,7 @@ final class MobileTakesBrowserController {
             case .lock: "lock a take"
             case .unlock: "unlock a take"
             case .unarchive: "unarchive a take"
+            case .label: "label a take"
             }
             return "This note is locked — unlock it to \(act)."
         case .lastActiveVariant:

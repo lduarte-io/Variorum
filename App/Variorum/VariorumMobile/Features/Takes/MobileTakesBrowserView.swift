@@ -411,6 +411,9 @@ final class MobileTakesBrowserView: UIView {
             onSetLocked: { [weak self] locked in
                 guard let model = self?.model else { return }
                 Task { await model.takesBrowser.setLocked(variantID: variantID, locked: locked) }
+            },
+            onLabel: { [weak self] in
+                self?.model?.takesBrowser.requestLabel(variantID: variantID)
             })
         cardsScroll.addSubview(view)
         cardViews[variantID] = view
@@ -427,6 +430,9 @@ final class MobileTakesBrowserView: UIView {
             onDelete: { [weak self] in
                 guard let model = self?.model else { return }
                 Task { await model.takesBrowser.delete(variantID: variantID) }
+            },
+            onLabel: { [weak self] in
+                self?.model?.takesBrowser.requestLabel(variantID: variantID)
             })
         cardsScroll.addSubview(view)
         archivedCardViews[variantID] = view
@@ -504,6 +510,7 @@ final class MobileTakesCardView: UIView {
     private let onArchive: () -> Void
     private let onDelete: () -> Void
     private let onSetLocked: (Bool) -> Void
+    private let onLabel: () -> Void
 
     /// The live editor's card height (functional; the look rounds rule).
     static let editorHeight: CGFloat = 120
@@ -514,13 +521,15 @@ final class MobileTakesCardView: UIView {
         onChoose: @escaping () -> Void,
         onArchive: @escaping () -> Void,
         onDelete: @escaping () -> Void,
-        onSetLocked: @escaping (Bool) -> Void = { _ in }
+        onSetLocked: @escaping (Bool) -> Void = { _ in },
+        onLabel: @escaping () -> Void = {}
     ) {
         self.variantID = variantID
         self.onEdit = onEdit
         self.onArchive = onArchive
         self.onDelete = onDelete
         self.onSetLocked = onSetLocked
+        self.onLabel = onLabel
         super.init(frame: .zero)
         accessibilityIdentifier = "takes.card.\(variantID)"
         layer.cornerRadius = 10
@@ -607,6 +616,7 @@ final class MobileTakesCardView: UIView {
         // menu-rowed) and a voice flip reaches an already-built card.
         let locked = card.isLocked
         menuButton.menu = UIMenu(children: [
+            UIAction(title: chromeCase("Label Take…")) { [onLabel] _ in onLabel() },
             UIAction(title: chromeCase(locked ? "Unlock Take" : "Lock Take")) {
                 [onSetLocked] _ in onSetLocked(!locked)
             },
@@ -669,15 +679,18 @@ final class MobileArchivedTakeCardView: UIView {
     private let bodyLabel = UILabel()
     private let onUnarchive: () -> Void
     private let onDelete: () -> Void
+    private let onLabel: () -> Void
 
     init(
         variantID: String,
         onUnarchive: @escaping () -> Void,
-        onDelete: @escaping () -> Void
+        onDelete: @escaping () -> Void,
+        onLabel: @escaping () -> Void = {}
     ) {
         self.variantID = variantID
         self.onUnarchive = onUnarchive
         self.onDelete = onDelete
+        self.onLabel = onLabel
         super.init(frame: .zero)
         accessibilityIdentifier = "takes.archived.\(variantID)"
         layer.cornerRadius = 10
@@ -723,6 +736,7 @@ final class MobileArchivedTakeCardView: UIView {
         menuButton.titleLabel?.font = face.chrome.withSize(14)
         menuButton.menu = UIMenu(children: [
             UIAction(title: chromeCase("Unarchive Take")) { [onUnarchive] _ in onUnarchive() },
+            UIAction(title: chromeCase("Label Take…")) { [onLabel] _ in onLabel() },
             UIAction(
                 title: chromeCase("Delete Take"), attributes: .destructive
             ) { [onDelete] _ in onDelete() },

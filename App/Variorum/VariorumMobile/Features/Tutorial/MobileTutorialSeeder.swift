@@ -416,7 +416,7 @@ enum MobileTutorialSeeder {
             + "it. + new take branches the one you were reading, or starts "
             + "blank. Tap a card to edit it right there — the card becomes "
             + "the page's one live editor. And each card's ⋯ holds the "
-            + "take's own acts — lock, archive, delete.",
+            + "take's own acts — label, lock, archive, delete.",
 
             "The keeper logged the weather twice, in two different moods.",
 
@@ -436,6 +436,11 @@ enum MobileTutorialSeeder {
             + "branch a fresh copy. Locking a take that has unsaved "
             + "changes quietly keeps a savepoint first, so the guard "
             + "insures exactly what it protects.",
+
+            "A LABEL is a short name on a take's card — \u{201C}bolder "
+            + "opening\u{201D}, \u{201C}the calm one\u{201D} — set from the same ⋯. "
+            + "It names the take wherever its card appears, archived "
+            + "included, and is never printed in the prose.",
         ])
         try take(on: browser.blocks[2],
             "the spare take — archive me from my card's ⋯.")
