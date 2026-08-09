@@ -51,6 +51,13 @@ struct MobileWriteScreen: View {
     static let lockDoorTitle = "Lock Note"
 
     @State private var model: MobileEditorViewModel
+    /// The membership chip's model (parity C2 — the masthead wears the
+    /// chip; the sheet carries the acts).
+    @State private var membership: MobileMembershipModel
+    @State private var membershipPresented = false
+    /// Rename note (parity C2): the title IS the door; the alert's field.
+    @State private var renamePresented = false
+    @State private var renameField = ""
     /// The shell's voice authority; nil in harness/preview use, where the
     /// stored preference read at init governs.
     private let router: MobileShellRouter?
@@ -59,18 +66,24 @@ struct MobileWriteScreen: View {
     /// carries the stack's identity, passed by the shell's per-stack
     /// destination builder — never read from the visible-tab state.
     private let tab: MobileTab
+    /// Push another note on the owning stack (the diverged copy's landing
+    /// — R67); nil in harness/preview use.
+    private let onOpenNote: ((String) -> Void)?
     private let fallbackVoice: ThemeVoice
     @Environment(\.colorScheme) private var scheme
 
     init(
         session: AppSession, postID: String,
         router: MobileShellRouter? = nil, beginEditing: Bool = false,
-        tab: MobileTab = .shelf
+        tab: MobileTab = .shelf,
+        onOpenNote: ((String) -> Void)? = nil
     ) {
         _model = State(initialValue: MobileEditorViewModel(session: session, postID: postID))
+        _membership = State(initialValue: MobileMembershipModel(session: session, postID: postID))
         self.router = router
         self.beginEditing = beginEditing
         self.tab = tab
+        self.onOpenNote = onOpenNote
         // The live phone voice governs from the first materialization —
         // set BEFORE the surface exists (makeUIView runs later). With a
         // router the value is already authoritative (idempotent).
@@ -117,13 +130,25 @@ struct MobileWriteScreen: View {
     private var masthead: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(alignment: .firstTextBaseline) {
-                Text(model.displayTitle ?? "")
-                    .font(tokens.title)
-                    .foregroundStyle(tokens.ink)
-                    .lineLimit(1)
+                // Rename note (parity C2 — "full app functionality"): the
+                // title IS the door; an alert confirms, so a stray tap
+                // costs nothing. The field edits the STORED title (the
+                // display title may be derived — DisplayTitle's brain).
+                Button {
+                    renameField = model.header?.title ?? ""
+                    renamePresented = true
+                } label: {
+                    Text(model.displayTitle ?? "")
+                        .font(tokens.title)
+                        .foregroundStyle(tokens.ink)
+                        .lineLimit(1)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Rename Note")
                 Spacer(minLength: 12)
                 sealDoor
             }
+            membershipChip
             if let canary = model.canaryMessage {
                 Text(canary).font(tokens.small).foregroundStyle(.red)
             }
@@ -161,6 +186,46 @@ struct MobileWriteScreen: View {
         .padding(.top, 10)
         .padding(.bottom, 8)
         .background(tokens.room)
+        .alert("Rename Note", isPresented: $renamePresented) {
+            TextField("Title", text: $renameField)
+            Button("Rename") {
+                let title = renameField
+                let model = model
+                Task { await model.renameNote(title) }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("A blank title clears the stored name — the note shows its own words instead.")
+        }
+        .sheet(isPresented: $membershipPresented) {
+            MobileMembershipSheet(
+                model: membership, tokens: tokens, onOpenNote: onOpenNote)
+        }
+    }
+
+    /// The membership chip (parity C2): which books hold this note — the
+    /// voice's path grammar for the single-book case (the Mac label's own
+    /// rule), accent ink when the note appears in several.
+    private var membershipChip: some View {
+        Button {
+            membershipPresented = true
+        } label: {
+            Text(tokens.chromeLabel(chipLabel))
+                .font(tokens.small)
+                .foregroundStyle(membership.books.count > 1 ? tokens.accent : tokens.muted)
+                .lineLimit(1)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Books holding this note")
+        .task(id: model.postID) { await membership.refresh() }
+    }
+
+    private var chipLabel: String {
+        let names = membership.books.map(\.name)
+        if names.count == 1, !tokens.pathPrefix.isEmpty {
+            return tokens.path([names[0]])
+        }
+        return MobileMembershipModel.labelText(bookNames: names)
     }
 
     /// The note seal's door (parity round Stage A batch A1, item 4 — her

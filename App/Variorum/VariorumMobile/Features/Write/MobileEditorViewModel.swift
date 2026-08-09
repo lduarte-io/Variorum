@@ -640,6 +640,33 @@ final class MobileEditorViewModel {
         await setSeal(locked: false)
     }
 
+    // MARK: - Rename note (parity C2 — note metadata, "full app
+    // functionality"; the masthead title is the door)
+
+    /// Renames the note through the core's `renameContainer`. A blank
+    /// (or whitespace) title stores NIL — the ⌘N semantics (13g R6-3, no
+    /// stored placeholder; the display title falls back to the derived
+    /// brain). Legal under the seal BY DESIGN (AppSpec §9's letter: the
+    /// seal is content-level — the post "may still be … retitled").
+    func renameNote(_ title: String?) async {
+        let trimmed = title?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let stored = (trimmed?.isEmpty ?? true) ? nil : trimmed
+        do {
+            try await session.runner.run { [postID] ops in
+                try ops.renameContainer(postID, title: stored)
+            }
+            report(nil)
+            // Deterministic flip for headless harnesses (the setSeal
+            // precedent); the observation echoes it in production.
+            let header = try await session.database.read { [postID] db in
+                try Queries.containerHeader(db, containerID: postID)
+            }
+            adoptHeader(header)
+        } catch {
+            report(String(describing: error))
+        }
+    }
+
     private func setSeal(locked: Bool) async {
         do {
             try await session.runner.run { [postID] ops in

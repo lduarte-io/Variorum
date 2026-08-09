@@ -156,7 +156,8 @@ struct MobileShellView: View {
         case .note(let postID, let focus):
             MobileWriteScreen(
                 session: session, postID: postID, router: router,
-                beginEditing: focus, tab: owner)
+                beginEditing: focus, tab: owner,
+                onOpenNote: { push(.note($0, focus: false), in: owner) })
         }
     }
 
