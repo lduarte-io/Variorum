@@ -94,38 +94,27 @@ final class MobileNoteTagsModel {
     /// op's own guard). Slash noise collapses forgivingly ("/a//b/" is
     /// a/b); an already-applied leaf no-ops politely. Returns the leaf's
     /// path on success (the field clears on it).
+    ///
+    /// Since FIX-C3a the segments/resolution/create walk is
+    /// `MobileTagsModel`'s ONE typed-path brain — the manager's
+    /// "+ new tag" door walks the same rule, so the two typing surfaces
+    /// cannot drift (this road keeps its apply half and its one-turn
+    /// composition byte-identical).
     @discardableResult
     func applyTypedPath(_ raw: String) async -> String? {
-        let segments = raw.split(separator: "/")
-            .map { $0.trimmingCharacters(in: .whitespaces) }
-            .filter { !$0.isEmpty }
+        let segments = MobileTagsModel.typedSegments(raw)
         guard !segments.isEmpty else {
-            status = "Type a tag name — “/” makes a hierarchy (life/goals)."
+            status = MobileTagsModel.emptyTypedPathMessage
             return nil
         }
         do {
             let post = postID
             let live = try await session.database.read { try Queries.allTags($0) }
-            var parentID: String?
-            var missing: [String] = []
-            var existingLeafID: String?
-            var path = ""
-            for (i, segment) in segments.enumerated() {
-                path = path.isEmpty ? segment : "\(path)/\(segment)"
-                if missing.isEmpty, let existing = live.first(where: { $0.path == path }) {
-                    parentID = existing.id
-                    if i == segments.count - 1 { existingLeafID = existing.id }
-                } else {
-                    missing.append(segment)
-                }
-            }
-            let leafPath = path
-            try await session.runner.run { [parentID, missing, existingLeafID] ops in
-                var parent = parentID
-                for segment in missing {
-                    parent = try ops.createTag(parent: parent, name: segment).id
-                }
-                guard let leafID = existingLeafID ?? parent else { return }
+            guard let plan = MobileTagsModel.typedPathPlan(segments: segments, live: live)
+            else { return nil }
+            try await session.runner.run { [plan] ops in
+                guard let leafID = try MobileTagsModel.createMissing(plan, ops: ops)
+                else { return }
                 do {
                     _ = try ops.applyTag(leafID, toPost: post)
                 } catch OperationError.alreadyTagged {
@@ -135,7 +124,7 @@ final class MobileNoteTagsModel {
             }
             await refresh()
             status = nil
-            return leafPath
+            return plan.leafPath
         } catch {
             status = MobileTagsModel.refusal(error)
             return nil

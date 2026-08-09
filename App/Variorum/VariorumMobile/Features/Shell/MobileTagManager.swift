@@ -99,6 +99,79 @@ final class MobileTagsModel {
             + "every note wearing any of them loses those tags. There is no undo for this."
     }
 
+    // MARK: - The typed-path create brain (FIX-C3a — ONE create rule)
+
+    /// The typed-path CREATE walk, shared: the note-tags sheet's typing
+    /// field and the manager's "+ new tag" door both resolve a typed
+    /// "life/goals" through THESE brains — one rule everywhere, reused
+    /// and never copied (the six-copied-brains KnownIssues row is the
+    /// anti-pattern; a third copy inside one target would be its worst
+    /// form).
+
+    /// Slash noise collapses forgivingly ("/a//b/" is a/b) — pure.
+    nonisolated static func typedSegments(_ raw: String) -> [String] {
+        raw.split(separator: "/")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+    }
+
+    /// The empty-type hint — ONE sentence for both typing surfaces.
+    static let emptyTypedPathMessage =
+        "Type a tag name — “/” makes a hierarchy (life/goals)."
+
+    /// A typed path resolved against the live taxonomy: the deepest
+    /// existing live prefix anchors creation; the missing remainder
+    /// creates on the way.
+    struct TypedPathPlan: Equatable, Sendable {
+        /// The deepest existing prefix's id — the create anchor (nil ⇒
+        /// creation starts at the root).
+        var parentID: String?
+        /// The segments still to create, in order.
+        var missing: [String]
+        /// Non-nil when the WHOLE path already exists (nothing to create).
+        var existingLeafID: String?
+        /// The full path the walk lands on.
+        var leafPath: String
+    }
+
+    /// The resolution half — pure over a taxonomy read (nil on empty
+    /// segments; the caller speaks `emptyTypedPathMessage`).
+    nonisolated static func typedPathPlan(
+        segments: [String], live: [Tag]
+    ) -> TypedPathPlan? {
+        guard !segments.isEmpty else { return nil }
+        var parentID: String?
+        var missing: [String] = []
+        var existingLeafID: String?
+        var path = ""
+        for (i, segment) in segments.enumerated() {
+            path = path.isEmpty ? segment : "\(path)/\(segment)"
+            if missing.isEmpty, let existing = live.first(where: { $0.path == path }) {
+                parentID = existing.id
+                if i == segments.count - 1 { existingLeafID = existing.id }
+            } else {
+                missing.append(segment)
+            }
+        }
+        return TypedPathPlan(
+            parentID: parentID, missing: missing,
+            existingLeafID: existingLeafID, leafPath: path)
+    }
+
+    /// The create half, run INSIDE one serialized runner turn (a racing
+    /// duplicate refuses through the op's own guard): creates the plan's
+    /// missing segments through the standing ops and returns the LEAF's
+    /// id.
+    nonisolated static func createMissing(
+        _ plan: TypedPathPlan, ops: Operations
+    ) throws -> String? {
+        var parent = plan.parentID
+        for segment in plan.missing {
+            parent = try ops.createTag(parent: parent, name: segment).id
+        }
+        return plan.existingLeafID ?? parent
+    }
+
     /// Refusal copy in phone words (no platform names) — the Mac
     /// `TagsViewModel.message` semantics mirrored.
     nonisolated static func refusal(_ error: Error) -> String {
@@ -121,6 +194,41 @@ final class MobileTagsModel {
 
     func create(parentID: String?, name: String) async {
         await run { ops in _ = try ops.createTag(parent: parentID, name: name) }
+    }
+
+    /// The "+ new tag" door — the typed-path road (FIX-C3a): a typed
+    /// "life/goals" resolves its deepest existing live prefix and
+    /// CREATES the missing remainder, the SAME rule the note-tags
+    /// sheet's typing field walks — so the empty state's "“/” nests"
+    /// hint teaches a road this door actually walks. A fully-existing
+    /// path refuses as the duplicate it is (the single-segment door's
+    /// own standing refusal — one rule, one sentence); the empty type
+    /// gets the shared hint.
+    func createTypedPath(_ raw: String) async {
+        let segments = Self.typedSegments(raw)
+        guard !segments.isEmpty else {
+            lastError = Self.emptyTypedPathMessage
+            return
+        }
+        do {
+            let live = try await session.database.read { try Queries.allTags($0) }
+            guard let plan = Self.typedPathPlan(segments: segments, live: live) else {
+                return
+            }
+            if plan.existingLeafID != nil {
+                lastError = Self.refusal(
+                    OperationError.duplicateTagPath(path: plan.leafPath))
+                await refresh()
+                return
+            }
+            try await session.runner.run { [plan] ops in
+                _ = try MobileTagsModel.createMissing(plan, ops: ops)
+            }
+            lastError = nil
+        } catch {
+            lastError = Self.refusal(error)
+        }
+        await refresh()
     }
 
     func rename(_ id: String, to newName: String) async {
@@ -150,6 +258,14 @@ final class MobileTagsModel {
 struct MobileTagManagerSheet: View {
     /// The Settings door's word (voice-cased at render, pinned).
     static let doorTitle = "Manage Tags"
+
+    /// The empty state's hint — a promise the + new tag door itself
+    /// keeps (FIX-C3a: the door walks the typed-path road, so "“/”
+    /// nests" names a road its own door walks; pinned WITH the door's
+    /// typed-path pin so the promise and the behavior can never drift
+    /// apart again).
+    static let emptyStateHint =
+        "No tags yet — + new tag starts the taxonomy; “/” nests (life/goals)."
 
     @State private var model: MobileTagsModel
     let tokens: VoiceTokens
@@ -185,8 +301,7 @@ struct MobileTagManagerSheet: View {
                         tagRow(tag)
                     }
                     if model.tags.isEmpty {
-                        Text(tokens.chromeLabel(
-                            "No tags yet — + new tag starts the taxonomy; “/” nests (life/goals)."))
+                        Text(tokens.chromeLabel(Self.emptyStateHint))
                             .font(tokens.small)
                             .foregroundStyle(tokens.muted)
                             .padding(.vertical, 20)
@@ -214,12 +329,23 @@ struct MobileTagManagerSheet: View {
                 let name = nameField
                 let parent = createParent?.id
                 let model = model
-                Task { await model.create(parentID: parent, name: name) }
+                Task {
+                    if let parent {
+                        await model.create(parentID: parent, name: name)
+                    } else {
+                        // The typed-path road (FIX-C3a) — the note-tags
+                        // sheet's own create rule: "life/goals" creates
+                        // the hierarchy on the way.
+                        await model.createTypedPath(name)
+                    }
+                }
             }
             Button("Cancel", role: .cancel) {}
         } message: {
             if let parent = createParent {
                 Text("A child of “\(parent.path)”.")
+            } else {
+                Text("“/” nests (life/goals) — missing parents are created on the way.")
             }
         }
         .alert(

@@ -52,6 +52,53 @@ struct MobileTagManagerTests {
         }
     }
 
+    /// FIX-C3a (the C3 ladder): the "+ new tag" door walks the SAME
+    /// typed-path road the note-tags sheet does — "life/goals" on an
+    /// empty taxonomy creates BOTH tags (the hierarchy on the way), a
+    /// partly-existing path creates only the missing tail with slash
+    /// noise forgiven, a fully-existing path refuses as the duplicate it
+    /// is, and the empty type gets the two surfaces' ONE shared hint.
+    /// The empty state's "“/” nests" promise (hoisted, pinned here)
+    /// now names a road its own door walks. Revert-verified red-on-old:
+    /// the pre-fix door routed the raw string to `createTag`, whose own
+    /// guard refuses any "/" — restored, this test fails at its first
+    /// assertion ("Tag names can't be empty or contain “/”.", nothing
+    /// minted) while the suite's siblings stay green.
+    @Test func theNewTagDoorWalksTypedPaths() async throws {
+        try await withEditorWorld { session, db in
+            let model = MobileTagsModel(session: session)
+
+            await model.createTypedPath("life/goals")
+            #expect(model.tags.map(\.path) == ["life", "life/goals"],
+                    "the missing hierarchy is created on the way")
+            #expect(model.lastError == nil)
+
+            // A partly-existing path creates only the missing tail, and
+            // slash noise forgives (the note sheet's own pinned edge).
+            await model.createTypedPath("/life//goals/2026/")
+            #expect(model.tags.map(\.path) == ["life", "life/goals", "life/goals/2026"],
+                    "only the tail is new; the existing prefix anchors it")
+            #expect(model.lastError == nil)
+
+            // A fully-existing path refuses as the duplicate it is (the
+            // single-segment door's standing refusal — one sentence).
+            await model.createTypedPath("life/goals")
+            #expect(model.lastError == "A tag named “life/goals” already exists.")
+            #expect(model.tags.count == 3, "refused creates mint nothing")
+
+            // The empty type speaks the shared hint (the note sheet's
+            // own sentence, one static for both surfaces).
+            await model.createTypedPath("   ")
+            #expect(model.lastError == MobileTagsModel.emptyTypedPathMessage)
+            #expect(model.lastError?.contains("Mac") == false)
+
+            // The empty state's promise, pinned beside the door that
+            // keeps it.
+            #expect(MobileTagManagerSheet.emptyStateHint.contains("“/” nests"),
+                    "the hint teaches exactly the road this door walks")
+        }
+    }
+
     /// Rename ripples the whole subtree's materialized paths (the op's
     /// one-transaction contract, exercised through the phone door).
     @Test func renameRipplesTheSubtree() async throws {
