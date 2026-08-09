@@ -1086,3 +1086,208 @@ the batch record into THIS file ("## Stage A, batch A3 — BATCH
 RECORD"); push `origin mobile` before finishing.
 PROVISIONAL-and-continue for non-gating ambiguity; author-only calls
 stop the batch.
+
+## Stage A, batch A3 — BATCH RECORD (implementer, 2026-08-09; commits `da9b0bc` · `1b06578` · `0819053` · `81de36d` · `da7d82b` · `58f7a47` + the record commit)
+
+**All eight items shipped** (items 2–7 pre-ruling; item 1 built to the
+`46d851f` ruling; item 8 last, after the flips settled the surfaces).
+Zero `Sources/VariorumCore/` lines, zero `App/Variorum/Shared/` lines
+(the Mac-suite condition never fired), zero schema, zero `Sync/`.
+
+1. **The Aa bar condensation (`da7d82b`, built to the ruling):** the
+   bar RESTS on three doors — **Aa · ⑂ · ⋯** — and Aa expands the
+   formatting strip IN PLACE: **× · B · I · # · • · ☑ · ⇥** (the LK8
+   order; × collapses). A DOOR change, never a vocabulary change: the
+   strip's six acts are the SAME builders byte-identical — the button
+   strip (not a UIMenu) is exactly what keeps P5's picker and ⇥'s
+   long-press outdent alive, the ruling's decisive mechanism. The bar
+   stays the `inputAccessoryView` (expand/collapse with the keyboard
+   up, the live toolbar's items swapped — the keyboard never moves);
+   the strip resets to collapsed per fresh keyboard presentation via
+   the keyboard-hide notification (the ruled calm default — hers to
+   flip at the sitting, recorded not PROVISIONAL). *Pins:*
+   `theBarRestsOnThreeDoorsAndAaExpandsTheStripInPlace` (resting
+   order · strip order · in-place round-trip on ONE toolbar instance ·
+   reset-per-presentation by deterministic notification) replaces the
+   flat-bar seven-acts pin 1-for-1 (the ruled supersession); the
+   act-firing pins throughout MobileMarkdownTests drive the
+   controller's own selectors — the strip buttons' exact targets — and
+   stayed green untouched; the P5 wiring pin expands the door first.
+
+2. **P35 — the navigation inversion (`da9b0bc`):** `.book` now lands
+   on the CONTENTS list (MobileBookView is the book's front); the
+   Read flow moved behind the contents screen's voiced "Read" chrome
+   door (`MobileRoute.bookRead`, the retired contents door's
+   placement mirrored); MobileReadView's own contents door retired
+   (`.bookList` gone — back IS the road). *Pin:*
+   `bookTapOpensContentsFirstAndReadIsTheDoor` (route vocabulary +
+   the voice-cased door word; the SwiftUI push wiring rides the
+   screenshot set per the A1 masthead precedent —
+   `after-book-contents.png` shows the front with its Read door).
+
+3. **P33 — the shelf's + New Note (`da9b0bc`):** the ONE shared
+   bookless mint (`MobileNewNoteDoor` — door word AND path; the
+   Library's door now calls it too, so the twins cannot fork),
+   nameless per the Mac ⌘N semantics, landing open-for-writing
+   through the same push as Today (`onOpenForWriting`), placed on the
+   shelf's path line beside Settings (the Library's own placement,
+   mirrored). *Pin:* `theShelfNewNoteDoorIsTheLibrarysTwin` (nameless
+   + bookless by store rows + the one voice-cased door word).
+
+4. **P5 — the heading long-press picker (`1b06578`):** # tap still
+   cycles (byte-unchanged, standing pin green); LONG-PRESS reveals
+   Heading 1/2/3 + Clear Heading — the Mac submenu's own toggle acts
+   (picking a line's own level clears; one vocabulary, no invention),
+   Clear = the toggle at the line's own level, no-op where no heading
+   exists; rows voice-cased, deferred per open. The # became a
+   wrapped button (the ⇥ precedent — a bar item can't carry a menu);
+   `showsMenuAsPrimaryAction = false` is the wiring that keeps tap =
+   cycle. *Pins:* `headingLongPressPicksDirectlyAndClearClears`
+   (rows · direct level jumps · clear-any-level · clear-no-ops ·
+   own-level toggle · menu-not-primary); the seven-acts pin updated
+   faithfully pre-Aa, then superseded by the Aa pin set.
+
+5. **P24 — the typewriter room, BUILT (`0819053`; A1's evidence
+   confirmed it absent):** `MobileTypewriterRoom` mirrors the Mac's
+   A22 arithmetic (one viewport-page less one line) — mirrored, never
+   changed (the S2 precedent; hoisting the one-line brain = Mac
+   churn outside scope, recorded); the mechanism is the phone's own
+   `textContainerInset.bottom`, recomputed equality-gated in
+   `layoutSubviews` from the live viewport (the keyboard guide
+   reshapes the view, so the room follows the keyboard free), and on
+   iOS a tap in the room lands the caret at the end — the Mac's
+   click-in-the-room rule for free. *Pin:*
+   `theBottomOfTheNoteKeepsTypewriterRoom` — REVERT-VERIFIED under
+   the final harness (disabled → 3 issues, inset 8.0 vs 683/403;
+   restored → green). *Mechanism note for the ladder:* the room's
+   "one line" counts font metrics, not the new lineSpacing — a ~6 pt
+   undercount, recorded.
+
+6. **P26/P43 — the voice-case sweep (`1b06578`; resolves PA1-1):**
+   ONE register through the new `MobileEditorStyle.chromeCase`
+   (terminal lowercases chrome, study normal case —
+   `VoiceTokens.chromeLabel`'s exact rule, so the UIKit and SwiftUI
+   halves cannot fork): the block menu's rows + callout submenu (one
+   builder, both doors), the edit menu's Takes…/Block, the bar-⋯
+   tail refusal row, the browser card's Archive/Delete Take rows
+   (built in `apply` so a voice flip reaches them), and the A1
+   seal-door strings hoisted to pinned statics rendered through
+   `tokens.chromeLabel` — **PA1-1 RESOLVED into the one register.**
+   Accessibility labels stay plain (VoiceOver reads words). Refusal
+   SENTENCES (statusMessage prose) deliberately untouched — their
+   pins stand; the locked-take copies stay for Stage C's families
+   (the A1 boundary). *Pins:* the vocabulary pin flipped to cased
+   renders + a study discrimination arm; the browser ⋯ pin reads the
+   cased rows; NEW `theEditMenuAndSealDoorsSpeakTheOneRegister`.
+
+7. **P38 — the crowding corner (`81de36d`):** mechanism traced — the
+   ●n marker (last line end) and the ⑂ badge (first-line gutter)
+   share the line on a ONE-line block, and a line filling to the old
+   30 pt exclusion left the marker crossing the badge. Fix: a fanned
+   block that is ALSO commented reserves the marker's room in its
+   first-line gutter (`commentMarkRoom` 26 pt) — keyed on CONTENT
+   (fanned ∧ commented), never measured line count (a geometry key
+   oscillates: widening wraps the line, unwrapping un-widens,
+   forever); marker PLACEMENT stands (her ruling); a multi-line
+   fanned+commented block pays one slightly shorter first line.
+   *Pin:* `aOneLineFannedAndCommentedBlockNeverCrowdsTheBadge` —
+   REVERT-VERIFIED (widening dropped → 2 issues: widths [30,30] AND
+   the mark at 345.5–375.5 crossing the badge at 367, same line; 8
+   siblings green; restored → green). *Hallucination-guard note:* the
+   first fixture (cw−32) was exposed by its own revert run — it
+   wraps even under the old gutter in steady state (its one-line
+   overlap was the transient pre-exclusion pass) — and was re-aimed
+   at cw−43 where the old tree crowds for real; recorded per the
+   guard.
+
+8. **The spacing/padding floor (`58f7a47`; LAST, after the flips):**
+   measured against the LK canon's own numbers, every change
+   PHONE-LOCAL (zero shared-token lines; the Mac's EditorTypography
+   untouched): **(a) the headline** — the Write editor's prose
+   margins, inset l/r 0 → 15 (+5 fragment padding = the canon's
+   `.prose` 20 px; text ran nearly edge-to-edge, the callout frame
+   even bled off the screen edge — her finding made visible);
+   **(b)** line air `lineSpacing = 0.4 × pointSize` (the canon's
+   ~1.62/1.6 prose line-height, one rule both voices); **(c)** the
+   uniform paragraph gap 0.5 → 1.0 × pointSize (the canon's `.block`
+   14 px at terminal's 14 pt; the 2026-07-12 uniform rule preserved
+   — the phone's look half, the Mac keeps its own constant);
+   **(d)** the masthead to the canon frame (h20 · top 10 · bottom 8).
+   VERIFIED AT CANON, untouched: the shelf path line/rows/today
+   button (mockup-exact), the tab bar (safe area carries indicator
+   room), the browser sheet, the Read page. *Pin flip:*
+   `surfaceWriteValuesFollowTheLiveVoice` pins the new phone
+   constants in both voices (the Mac-constant 0.5 pin superseded);
+   the P38 fixture reads container width off a probe view so margins
+   can never stale it.
+
+**THE SCREENSHOT SET** (gitignored `notes/plans/mobile-a3-screens/`;
+captured by a THROWAWAY isolated-run harness — hosted UIWindows must
+never keep the baseline suite company, see the walk5 note below —
+deleted after use per the A1 precedent; `layer.render(in:)`, since
+`drawHierarchy` renders blank headless): **before/after pairs of each
+spacing-touched surface** — `before-write-terminal.png` /
+`after-write-terminal.png` · `before-write-study.png` /
+`after-write-study.png` (the pair tells her story exactly:
+edge-to-edge cramped text before, the canon's margins/air/gaps
+after); **after-only flip evidence** — `after-shelf.png` (P33's door
+on the path line) · `after-book-contents.png` (P35's contents front
+with its Read door) · `after-kbar-resting.png` /
+`after-kbar-formatting.png` (the Aa bar's two states; the expanded
+shot rendered via a fresh build — UIToolbar's internal item views
+don't repaint headless; the in-place swap itself is pinned).
+
+**Counts, by this implementer's own runs (iPhone 17 Pro / iOS 26.2):**
+final full mobile suite — **"Test run with 189 tests in 28 suites
+passed"** — the 183/27 baseline + this batch's deltas exactly
+accounted: +1 suite (MobileTypewriterRoomTests), net +6 tests (P35
+flow pin · P33 twin pin · P5 picker pin · P24 room pin · P26/P43
+register pin · P38 crowding pin; the seven-acts pin superseded
+1-for-1 by the Aa pin). Core / Mac / spine deliberately not run: the
+batch's diff carries zero `Sources/VariorumCore`, zero
+`App/Variorum/Shared/`, zero Mac-side files — the only-if-shared
+condition never fired.
+
+**A finding earned the hard way (recorded for the ladder): hosted
+UIWindows are forbidden company for the baseline suite.** The P24
+pin's first form hosted the surface in a UIWindow
+(`makeKeyAndVisible`) — and the FULL suite then crashed 3/3 runs at
+walk5's typed insert (`desyncRecovery` fatal: the insert's verdict
+fell through to `.refuse` under `-[UITextInputController
+_insertText:fromKeyboard:]`), while walk-alone, pair runs, and the
+BASE tree (x2) all ran green — the window's existence engages the
+input-controller path for OTHER tests' programmatic `insertText`.
+Removing key-ness did NOT fix it; removing the window did (green x3).
+The P24 pin now frames a bare view (no window, no container — the
+mechanism never needed one), and the screenshot harness that DOES
+host windows runs isolated-only and was deleted. The pre-existing
+browser focus test keeps its window (historically green in company —
+its first-responder need is real); if the class ever resurfaces, this
+note is the trace to start from.
+
+**PROVISIONALs (for the chain's end bundle):**
+- **PA3-1:** the spacing floor's exact constants — prose inset 15
+  (+5 = canon 20) · lineSpacing 0.4× · paragraph gap 1.0× · masthead
+  20/10/8 — the canon's own numbers where they exist, one-rule
+  derivations where the canon drew pixels; all one-line changes for
+  her look round.
+- **PA3-2:** P5's picker row words ("Heading 1/2/3" — the Mac
+  submenu's words, voice-cased — and "Clear Heading" for her "clear")
+  and the picker's own-level-toggle semantics (the Mac's exact
+  behavior, deliberately not special-cased for the direct pick).
+- **PA3-3:** the Read door's word ("Read", chrome-cased, nav-trailing
+  — the retired contents door's placement mirrored) and the shelf's
+  + New Note placement (path line beside Settings, the Library twin's
+  own placement).
+- *(Not provisional, recorded as ruled:)* the Aa reset-per-
+  presentation cadence rides the end bundle as HER look item per the
+  ruling's own line.
+
+**Deliberate absences (scope, not holes):** the P38 fanned+commented
+one-liner now WRAPS a hair earlier when text fills the line (the
+reservation's ordinary cost — LK10's own grammar; recorded for her
+look); the room's ~6 pt lineSpacing undercount (item 5's note); the
+card editor (browser live card) doesn't carry the new paragraph
+style (it never carried the old one — a look-round line if wanted);
+Stage C's families untouched (locked-take copies, remaining refusal
+sweep).
