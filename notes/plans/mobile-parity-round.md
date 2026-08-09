@@ -45,8 +45,10 @@ session and is the launchable unit the author asked for.*
 > never let the tree sit unpushed at a stopping point.** Update the
 > CURRENT-STAGE pointer below at every stage close.
 
-**CURRENT STAGE → A (the floor) — not yet kicked off; the `mobile` →
-`main` v1 merge landed 2026-08-03 (see Branch & merge discipline).**
+**CURRENT STAGE → A (the floor) — KICKED OFF 2026-08-09 as the first
+leg of a CHAINED A→D run (her ruling at this kickoff — see STAGE A
+KICKOFF below; stages still run as their own phases, but no author
+gate between them; ONE combined sitting at the chain's end).**
 
 ## The mandate (what the author ruled this round INTO existence for)
 
@@ -299,3 +301,207 @@ build refuses marker 5 by design."*
   Installing ahead of the mirror wipe is safe by construction: a
   fresh install sits signed out, and nothing syncs until she signs in
   and enrolls with her passphrase — the E2EE gate IS her passphrase.
+
+---
+
+## STAGE A — KICKOFF (2026-08-09; the chained-run session)
+
+**Her invocation (`/architect-phase mobile parity stage A`, this
+worktree), rulings verbatim-faithful:**
+
+- **THE CHAIN RULING (supersedes the one-invocation-one-stage letter
+  for THIS run only):** asked whether to hard-stop at A's gate or
+  chain the stages, she ruled: *"I'll be connected and able to check
+  on things via my mobile phone's RC connect, but my only concern is
+  if the context window will become overly full if we do all of Chain
+  A->D in one pass. I think A->D is fine, but the orchestrator should
+  prepare a handoff message if the context window becomes overly
+  full, and I'll be able to paste that new message into a new chat if
+  needed. I think chaining A->D is otherwise fine."* Consequence:
+  stages still run as their OWN phases (batches → ladder → closeout →
+  pointer update), but the next stage kicks off at the previous one's
+  close without her word; every screenshot look, PROVISIONAL, and
+  bundled ruling collects into ONE combined sitting at the chain's
+  end. Stage D's inherently-hers items (the on-device 100k run, the
+  feel riders, her acceptance, the TestFlight trigger) wait there.
+  Author-only hard stops still stop the chain. **The context proviso
+  is a standing duty:** at any sign of an overly full window, the
+  orchestrator writes the two-document handoff (role file with a
+  paste-ready successor kickoff + the plan file current) and tells
+  her — she pastes it into a fresh chat.
+- **Branch discipline this run, hers:** *"I'm mid stage 14c on the
+  variorum mac app side - so don't merge into main. however, you can
+  merge current main in before you start working (it was mostly
+  database changes to allow for multi user)."* So: NO outward merge
+  this chain — the stage-end merge ask is pre-answered until she says
+  otherwise; inward pulls at stage kickoffs and batch boundaries per
+  the standing discipline.
+- Her framing kept: *"I like having a real app that syncs on my
+  phone, so it was a good move to enable real sync and usage at this
+  point in time."* The phone's live sync is a working asset; nothing
+  this chain does may break it (the install hold below).
+
+**The kickoff merge (executed 2026-08-09):** `origin/main` → `mobile`
+FAST-FORWARDED `09a0dfc` → `0ded142` (mobile held nothing main
+lacked; zero conflicts; the tree is byte-identical to main's 14c
+build-half ladder-verified tip). Pushed. Baseline counts stand by
+that tree's own recorded verification — **core 1201/127 · Mac
+1240/219 tripwire-only · mobile 175/26 · spine 51/7** (0ded142's
+record: the last two fix commits touched no Sources/ or App/ code) —
+no session-start suite run, per the standing rule.
+
+**THE INSTALL HOLD (BINDING all chain long):** the merged client's
+`lockstepVersion` is **6** (14c's reborn-mirror event); the LIVE
+mirror is still **marker 5** — 14c's deploy is its gate half's act
+and has not run. A phone install from this tree would refuse to sync
+by design (SyncSpec §12), and her phone's current marker-5 build
+syncs today. Therefore **no Release install to her phone from this
+tree until 14c's gate deploys the mirror** (or her explicit word).
+Everything this chain builds verifies on the simulator (Debug = dev
+store, the A4 fence; sync untouched). PL-5's remaining live-phone
+sign-in verify rides the end bundle behind the same hold.
+
+**Ledger sweep (the kickoff duty):** no Mac closeout has landed since
+14b's (PL-6 CLOSED; 14c is mid-phase — its parity line arrives at ITS
+closeout; this chain re-sweeps at every stage kickoff per the
+continuous-absorption ruling). Open rows PL-1…PL-4, PL-7 all wait on
+unrun Mac phases; nothing to absorb today. The kickoff merge DOES
+carry 14c's tier/onboarding shared views (`TierViews.swift`) onto the
+phone through the one seam — functional-by-convention; their look
+joins Stage D's shared-surface pass beside the 14b Account/Encryption
+pages if her look flags them.
+
+**Stage A batch structure (three batches, a fresh implementer each,
+strictly sequential):**
+
+- **A1 — the defect + the mechanical floor:** the takes-peek scroll
+  defect (reproduce → trace → red-on-old → fix) · the iPhone-only/
+  portrait-only target flip · Q-M1(a) seed-from-shown-bytes + pin ·
+  the note seal lock/unlock door (the refusal loses its redirect) ·
+  the P23 + P32 rewords.
+- **A2 — Q-M2, core + phone:** the duplicate-shape default divide as
+  a shared core operation + the phone's divide door adopting it. The
+  chain's one deliberate core-touching batch; the four-suite duty
+  fires; ZERO Mac behavior change (the Mac door change is 13j's).
+- **A3 — the ruled UI flips + the spacing floor:** the Aa bar
+  condensation · P35's book-tap inversion (contents first; Read is
+  the door) · P33's shelf + New Note · P5's long-press heading
+  picker · P24's typewriter-room inset (verify/build) · P26/P43
+  voice-cased menus · P38's one-line fanned+commented crowding
+  corner · then the first systematic spacing/padding pass (LK canon
+  binds; screenshots gathered for the end bundle).
+
+Then the Stage A ladder over the combined diff (fresh cold reviewer,
+`notes/REVIEW_PROMPT.md` verbatim; round 2 re-reviews; cap three),
+the stage closeout, pointer → B, and Stage B kicks off in-chain.
+
+## Environment traps (carried verbatim from `notes/plans/mobile-app-plan.md` — BINDING for every batch this round)
+
+- Simulator destination: **iPhone 17 family on the MOST RECENT iOS
+  runtime — her standing rule (LK1: "def only go for the iPhone 17 most
+  recent iOS simulators")**. Today that is
+  `-destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2'`;
+  when a newer runtime lands, move to it and re-verify. The iPhone 16
+  sims on this machine are iOS 18.3 — BELOW the deployment target; they
+  resolve to nothing (the sitting's own trap).
+- Mobile tests: `xcodebuild test -project App/Variorum/Variorum.xcodeproj
+  -scheme VariorumMobile -destination …` from the repo root; confirm the
+  "Test run with N tests" line; zsh `pipestatus`.
+- The A4 fence: debug/simulator builds resolve the DEV store and never
+  sync — safe by construction; NEVER point a debug build at the real
+  store; her phone installs Release (M14).
+- Shared-core discipline: touch `Sources/VariorumCore` only deliberately
+  and small; before landing any shared-core change, verify core + Mac
+  suite + spine by own runs (current baseline: core 1201/127 · Mac
+  1240/219 with the recorded tripwire · spine 51/7); Mac tests run from
+  `App/Variorum/`. `Sources/VariorumCore/Sync/` stays untouched (the
+  boundary stands regardless of cast).
+- Worktree: merge `main` → `mobile` regularly; `mobile` → `main` at
+  milestones at her word — **pre-answered NO for this chain (mid-14c)**;
+  push `origin mobile` after commits.
+- NO schema; a schema need is a SyncSpec §12 lockstep event
+  (mirror-first, her explicit go) — stop and report.
+- NEVER add a custom build configuration (the 4G trap — SPM deps build
+  Release under any configuration not named exactly "Debug", silently
+  stripping DEBUG-gated oracles).
+- Spike code lives under `App/Variorum/VariorumMobile/Spike/`,
+  DEBUG-gated, its UITest half behind the separate `TK2SpikeUITests`
+  scheme — KEPT as the executable TEXTKIT2 §5 form for iOS point
+  releases. It never rides the baseline suite.
+- **The install hold (this chain):** client marker 6 vs live mirror 5 —
+  no Release install to her phone until 14c's mirror deploy lands.
+
+## Stage A, batch A1 brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
+
+**Cast:** a fresh Fable implementer session, working in
+`~/dev/variorum-mobile`, branch `mobile`, starting at `0ded142`.
+
+**Read first, IN FULL, in this order — your own reading, never a
+summary:** `CLAUDE.md` · `notes/MobileSoul.md` · THIS plan file
+(`notes/plans/mobile-parity-round.md`) top to bottom ·
+`notes/plans/mobile-app-plan.md` §§ "The settled shape" (~line 313),
+"Environment traps" (~473), "GATE SITTING — RUN RECORD" (~5716 to the
+file's end — the rulings this batch builds), the Stage 2 batch-1
+brief + record (~1786–2076 — the peek chrome item 1 fixes), and the
+Stage 2 ladder's branchDisplayed/flush findings (~2435–2770 — item
+3's adjacent context) · `notes/plans/mobile-architect-handoff.md`
+(machinery lessons). The Environment traps section above BINDS.
+
+**Items (each lands with tests; red-on-old by behavioral revert for
+every bug-class fix — the hallucination guard is absolute):**
+
+1. **The takes-peek scroll defect.** Her report, verbatim in the gate
+   record: *"it seems that you can't actually scroll when the app has
+   takes open, so i could make a new take but i couldn't scroll down
+   through the list of takes to edit it better"* — pinned by her to
+   the S2 peek chrome on the WRITE surface (the takes button), NOT
+   the LK4 browser sheet. Reproduce on the simulator FIRST (a note
+   whose takes/text need scrolling; peek open). Trace the concrete
+   mechanism yourself — gesture arbitration between the peek strip's
+   pan/swipe recognizers and the scroll view is the obvious suspect,
+   but trace, never pattern-match. Fix WITHOUT breaking the ruled
+   swipe grammar (swipe flips takes · sticky peek · explicit ✓ — the
+   M rulings). Red-on-old pin.
+2. **iPhone-only, portrait-only (the platform ruling).**
+   `TARGETED_DEVICE_FAMILY` `"1,2"` → `1` and the landscape iPhone
+   orientations dropped, on EVERY mobile target (app + test hosts +
+   the spike target if it declares its own). Never declare iPad
+   capability (her ruling: declaring it forbids portrait-only). A pin
+   lands: a test asserting the built product declares device family
+   1-only and portrait-only orientations — exact shape your judgment.
+3. **Q-M1 (a) — seed-from-shown-bytes.** Her ruling: branching a take
+   under a REFUSED flush seeds the new take from what the card SHOWS
+   (the pending bytes ride into the new take). Locate the
+   branchDisplayed path (the S2 ladder's flush-first MAJOR is your
+   adjacent context — read its disposition). Red-on-old pin for the
+   refused-flush case specifically.
+4. **The note seal door.** Her ruling: *"i do think that you should
+   be able to unlock a note and lock it on mobile."* Route through
+   the core's `lockPost`/`unlockPost` operations (the seal's
+   auto-commit insurance already rides them). Place the door where
+   the note's acts live — your judgment, named and justified in the
+   batch record; wording consistent with the shipped register (A3
+   does the full P26/P43 voice-case sweep — don't fork registers).
+   The sealed-note refusal copy LOSES its "unlock it on the Mac"
+   redirect: the message names the act and offers the door (the 13b
+   fire-and-DO doctrine, already applied once on this surface — the
+   pre-Stage-A door fixes are the precedent). State-transition tests
+   through the view model + copy pins.
+5. **Two rewords, copy pins updated, no new capability.** P23: the
+   stale I10 refusal line rewords — the phone HAS a delete door since
+   S4; the "Mac gesture" tail violates no-redirect and goes. P32: the
+   truncation marker rewords neutrally (no "lives on the Mac");
+   load-more stays deferred with the Mac's bounded-window family.
+
+**Discipline:** work synchronously — never end your turn waiting on a
+background build; run every build/test to completion in-turn. Mobile
+suite green by your OWN run at the end (record the "Test run with N
+tests" line). If anything under `App/Variorum/Shared/` changes, run
+the Mac suite too (from `App/Variorum/`); `Sources/VariorumCore/`
+changes are NOT expected in this batch — a fix that seems to want one
+STOPS and returns to the architect first. Commit per logical item
+with the standing trailer; write the batch record into THIS file
+(counts, mechanisms traced, pins named, door placements justified,
+PROVISIONALs); push `origin mobile` before finishing.
+PROVISIONAL-and-continue for non-gating ambiguity; author-only calls
+stop the batch.
