@@ -3114,3 +3114,42 @@ for any future open-time work. The two throwaway probes were deleted
 after use (their numbers live in this record and the commit
 messages). No Read-flow measurements (B2's boundary); no on-device
 numbers (Stage D's gate).
+
+## Stage B, batch B3 — ACCEPTED; STAGE B BUILD COMPLETE — the ladder OPENS (architect, 2026-08-09)
+
+Verified: three commits present; scope clean by own check (zero
+core/Shared lines — the exclusion retirement is mobile-local; the
+Mac never used exclusionPaths); the full mobile suite re-run by the
+architect's own hand: **"Test run with 225 tests in 36 suites
+passed" in 18.5 s, ZERO known issues** (FB2-1's four self-armed
+wrappers all fired and unwrapped; the 250 MiB ceiling ARMED at a
+measured 43 MiB delta — PB2-2 resolves). The headline table (sim):
+keystroke top **551.4 → 6.09 ms** · end **297.8 → 7.01 ms** · scroll
+step **47.8 → 1.70 ms** · walk delta **5,842 → 43 MiB** · 100k open
+**901.9 → 433.2 ms**. Her bar's executable form now holds on the
+simulator; the device calibration stays Stage D's exit gate.
+
+**Two acceptance rulings:**
+- **The 100k OPEN stays recorded-not-pinned** (the fix session's
+  recommendation, accepted): open is O(post) by design and absolute
+  wall-clock pins are the machine-noise class; the number rides the
+  record and Stage D's device run re-measures it.
+- **PB3-3 (mechanism-reading lines in four pins flipped from
+  exclusion reads to reservation reads) — ACCEPTED:** the pins'
+  BEHAVIOR assertions are byte-identical; the flipped lines read the
+  new mechanism because the old one no longer exists, which is the
+  parity-refactor reading of "pins compile and pass unmodified" —
+  the assertions, not the plumbing, are the pin. PB3-1 (the noise
+  floor re-derived 4 → 12 ms because bare TK2 itself pays ~5 ms at
+  100k) is accepted on its recorded derivation; the 3× factor stands
+  untouched.
+
+**THE STAGE B LADDER OPENS.** Target: the stage's combined diff
+`5aa10f5..2f5b008` (B1 `9c3fba1`…`b3d3784` · B2 `f62151a`,
+`976a86a` · B3 `129f695`, `529a97e`, with the three batch records +
+acceptance notes + the FB2-1 adjudication as the reviewer's anchor).
+Fresh cold reviewer, `notes/REVIEW_PROMPT.md` VERBATIM, zero
+framing; findings repo-first as "## Stage B review — round 1
+findings". Baselines at ladder-open: **mobile 225/36 (zero known
+issues) · spine 32/7 · core 1214/128 · Mac 1245/219 tripwire-only ·
+spine-Mac 51/7.**
