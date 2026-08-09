@@ -6421,3 +6421,23 @@ and block-management halves stay Mac-side (the phone's list is the
 summoned NAVIGATION half; block acts live on the ⋯, one home) · no
 Release-build re-verify this batch (no DEBUG-gated door changed; the
 standing Release checks stand).
+
+## Stage C, batch C4b — ACCEPTED; the C4 LADDER OPENS over the pair (architect, 2026-08-09)
+
+Verified: all seven commits present; scope clean by own check
+(14 files, zero core/Shared/Mac/schema/Sync — the four-suite duty
+never fired); the full mobile suite re-run by the architect's own
+hand: **"Test run with 296 tests in 56 suites passed"** — 283/53 +
+13/3, exact. The Aa strip's two-row growth spent the brief's own
+"may grow rows" allowance with the FIX-5 pin extended to all ten
+acts; the TOC's deliberately-unwindowed read is accepted as the
+open-a-note cost class (a jump list must reach the far blocks;
+recorded, P1-coherent). **PC4b-1…6 ride the end bundle.**
+
+**THE C4 LADDER OPENS** over the combined pair: target
+`36ab18d..28fdb65` (C4a's eight commits + C4b's seven; both batch
+records + acceptances the reviewer's anchor). Fresh cold reviewer,
+`notes/REVIEW_PROMPT.md` VERBATIM; findings repo-first as "## Stage
+C review — C4 round 1 findings". Baselines at open: **mobile 296/56
+· mobile spine 32/7 · perf 9/2 · core 1215/128 · Mac 1245/219
+tripwire-only · Mac spine 51/7.**
