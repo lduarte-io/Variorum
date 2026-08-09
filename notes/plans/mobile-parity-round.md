@@ -7414,3 +7414,90 @@ holds every PROVISIONAL from A through C5 (the PC-series), the
 A/B number tables, the screenshot sets, and the two NAMED sitting
 questions (the Mac's carry-all-default; reopen-in-last-lens).
 **CURRENT STAGE → D.**
+
+---
+
+## STAGE D — KICKOFF (2026-08-09, in-chain per her ruling; the BUILD HALF — her acceptance, the on-device 100k run, and the TestFlight trigger wait in the end bundle)
+
+**Boundary duties executed:** `main` unmoved (`0ded142`; still
+mid-14c — the install hold stands). Ledger re-sweep: nothing new to
+absorb. Baselines carried from C's close: **mobile 306/58 · mobile
+spine 33/7 · perf 9/2 · core 1215/128 · Mac 1245/219 tripwire-only ·
+Mac spine 51/7.**
+
+**Stage D structure (two batches, fresh implementer each, ONE ladder
+over the pair; then the END BUNDLE assembly closes the chain):**
+
+- **D1 — the shared-surface pass:** the 14b Account/Encryption pages
+  (the tabbed Account sheet · the stepped E2EE setup · enrollment/
+  locked/replaced states · the sync row) + the 14c tier/onboarding
+  views AS THE PHONE RENDERS THEM — her instruction verbatim: "they
+  work, I just think they're a bit ugly right now and don't follow
+  UI principles." **The one-seam law binds absolutely: styling
+  through voice tokens and PLATFORM-CONDITIONAL layers, never a
+  fork, and ZERO Mac-rendered change** (Mac-side beauty coordinates
+  with the Design & UI review row — a Shared diff that restyles the
+  Mac is a STOP). Four-suite duty by construction (Shared/ changes).
+  Before/after screenshots per surface for her bundle.
+- **D2 — the phone-local look pass:** the whole-app spacing/design
+  sweep against the LK canon (A3's floor was the first coat; this is
+  the round the stage table promised) + the routed look items
+  accumulated by the ladders: the star-refusal display cadence ·
+  the scraps mint-past-window visibility · the history sheet's
+  unwindowed rows · the block-list sheet's load-at-presentation ·
+  the second identity line's chip crowding (PC4b-4 + PC5-5's fourth
+  chip). Before/after screenshots per touched surface.
+
+Then the D ladder over the combined diff, the Stage D closeout, and
+**THE END BUNDLE** — the chain's final act: one document assembling
+everything her combined sitting rules on (every PROVISIONAL by
+family, the A/B/B3 number tables, all screenshot sets, the two named
+questions, the on-device items — the 100k device run, the feel-round
+riders, PA1-3's both-surfaces re-check — the install hold's state,
+and the TestFlight trigger awaiting her word).
+
+## Stage D, batch D1 brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
+
+**Cast:** a fresh Fable implementer session, `~/dev/variorum-mobile`,
+branch `mobile`, starting at this commit.
+
+**Read first, IN FULL:** `CLAUDE.md` · `notes/MobileSoul.md` · THIS
+plan file top to bottom (the stage table's D row — her words on
+these pages; the PRE-STAGE-A section — the pages' history and her
+walk's acceptances) · the shared surfaces IN CODE
+(`App/Variorum/Shared/` — AccountView, EncryptionView, the setup/
+enrollment flows, SyncStatusRow, TierViews; note what
+`privacySensitive`/`SnapshotPrivacy` already mark — those are
+FUNCTIONAL, never restyle them away) · the LK look canon
+(`notes/plans/mobile-app-plan.md` ~242–312) + `Shared/Theme/
+VoiceTokens` · `notes/plans/mobile-architect-handoff.md`.
+Environment traps bind.
+
+**THE LAW (over everything else): one seam, zero Mac-rendered
+change.** Every styling change is EITHER a phone-only conditional
+layer (`#if os(iOS)` / platform-conditional modifiers) OR a
+voice-token application that provably does not alter the Mac's
+rendering. The Mac suite green UNCHANGED plus your own line-by-line
+diff read is the proof; a change that would restyle the Mac STOPS
+and returns to the architect. Functional behavior is PINNED —
+the 14b flows' pins must pass untouched (styling changes only;
+any pin that reads styling is flipped sanctioned and named).
+
+**The work:** restyle the phone rendering of — the tabbed Account
+sheet · the stepped E2EE setup flow (the phrase ceremony's screens
+included; the snapshot-privacy marks preserved) · the enrollment/
+locked/replaced states · the sync status row · the tier/onboarding
+views — to the LK canon: the voice register, the spacing floor's
+constants, the calm default. Fix obvious UI-principle violations
+(unaligned rows, orphan buttons, register mismatches) as part of
+the pass. Capture before/after screenshots of EVERY surface
+(`xcrun simctl io booted screenshot`, gitignored dir, listed in the
+record) — they are her bundle's evidence and the pass's acceptance
+face.
+
+**Discipline (standing):** synchronous; the four-suite duty by
+construction (mobile · core · Mac from `App/Variorum/` with the
+tripwire identity · Mac spine 51/7 by its `Tutorial*ActsTests`
+names) + mobile spine 33/7 + perf 9/2; commits per logical unit
+with the standing trailer; record as "## Stage D, batch D1 — BATCH
+RECORD"; push. PROVISIONAL-and-continue; author-only calls stop.
