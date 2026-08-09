@@ -44,6 +44,26 @@ final class MobileStarsModel {
     /// target id; books render their own stored name).
     private(set) var noteNames: [String: String] = [:]
     private(set) var lastError: String?
+    /// WHERE the last refusal's door fired (parity D2 — the routed C3
+    /// R1-7 mechanism: `lastError` is one field on the one shared model
+    /// and BOTH tab roots rendered it, so a cap refusal fired from the
+    /// Library also sat waiting at the shelf's bottom, and vice versa,
+    /// until some later toggle happened to succeed). A door refusal now
+    /// carries its origin and renders THERE only (`error(on:)`); a
+    /// HOMELESS error (a store-read failure — not door-fired) renders
+    /// on every root, honestly, and never auto-clears.
+    private(set) var errorHome: DoorHome?
+    /// The refusal's clearing cadence (the routed item's second half:
+    /// the refusal never cleared passively). Injectable so the pin can
+    /// drive it deterministically; ~8 s reads the two-line sentence.
+    @ObservationIgnored var errorClearDelay: Duration = .seconds(8)
+    @ObservationIgnored private var errorClearTask: Task<Void, Never>?
+
+    /// Which tab root a star door lives on.
+    enum DoorHome {
+        case shelf
+        case library
+    }
 
     init(session: AppSession) {
         self.session = session
@@ -52,6 +72,13 @@ final class MobileStarsModel {
     // MARK: - Pure brains (pinned)
 
     static let sectionHeader = "★ starred"
+
+    /// What a root renders: its own door's refusal, or a homeless
+    /// (store-read) error anywhere.
+    func error(on home: DoorHome) -> String? {
+        guard lastError != nil else { return nil }
+        return (errorHome == home || errorHome == nil) ? lastError : nil
+    }
 
     /// The row door's state-mirroring words — the Mac `StarCopy`'s own.
     nonisolated static func doorTitle(starred: Bool) -> String {
@@ -144,23 +171,46 @@ final class MobileStarsModel {
 
     /// Star or un-star, and SPEAK what the operations layer answers —
     /// the cap refuses honestly rather than evicting the oldest star
-    /// (the op's own rule; P-2's fire-and-refuse).
-    func toggle(_ target: StarTarget) async {
+    /// (the op's own rule; P-2's fire-and-refuse). The refusal speaks
+    /// at ITS door's root and clears after a beat (the D2 routed item).
+    func toggle(_ target: StarTarget, from home: DoorHome) async {
         let starred = isStarred(target)
         do {
             try await session.runner.run { ops in
                 try ops.setStarred(target, starred: !starred)
             }
-            lastError = nil
+            clearError()
         } catch let error as OperationError {
             if case .starLimitReached(let limit) = error {
-                lastError = Self.capRefusal(limit: limit)
+                speak(Self.capRefusal(limit: limit), at: home)
             } else {
-                lastError = "Refused: \(error)"
+                speak("Refused: \(error)", at: home)
             }
         } catch {
-            lastError = String(describing: error)
+            speak(String(describing: error), at: home)
         }
         await refresh()
+    }
+
+    /// A door refusal: spoken at its root, cleared after the cadence
+    /// (each fresh refusal restarts the clock).
+    private func speak(_ message: String, at home: DoorHome) {
+        lastError = message
+        errorHome = home
+        errorClearTask?.cancel()
+        errorClearTask = Task { [weak self] in
+            guard let delay = self?.errorClearDelay else { return }
+            try? await Task.sleep(for: delay)
+            guard !Task.isCancelled else { return }
+            self?.lastError = nil
+            self?.errorHome = nil
+        }
+    }
+
+    private func clearError() {
+        errorClearTask?.cancel()
+        errorClearTask = nil
+        lastError = nil
+        errorHome = nil
     }
 }

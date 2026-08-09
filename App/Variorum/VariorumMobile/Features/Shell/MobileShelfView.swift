@@ -70,9 +70,10 @@ struct MobileShelfView<TabBar: View>: View {
                     .padding(.horizontal, 20)
                     .padding(.bottom, 4)
             }
-            if let starsError = stars.lastError {
-                // The star cap refuses honestly (the op's own rule) —
-                // the shelf speaks it where the starred list lives.
+            if let starsError = stars.error(on: .shelf) {
+                // A star refusal fired HERE (D2 — one home per refusal:
+                // it speaks at its own door's root and clears after a
+                // beat; the old one-field rendering sat on both tabs).
                 Text(tokens.chromeLabel(starsError))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
@@ -168,7 +169,7 @@ struct MobileShelfView<TabBar: View>: View {
             Button(tokens.chromeLabel(
                 MobileStarsModel.doorTitle(starred: stars.isStarred(target)))) {
                 let stars = stars
-                Task { await stars.toggle(target) }
+                Task { await stars.toggle(target, from: .shelf) }
             }
         }
     }
@@ -228,7 +229,7 @@ struct MobileShelfView<TabBar: View>: View {
             Button(tokens.chromeLabel(MobileStarsModel.doorTitle(starred: true))) {
                 let stars = stars
                 let target = item.target
-                Task { await stars.toggle(target) }
+                Task { await stars.toggle(target, from: .shelf) }
             }
         }
     }

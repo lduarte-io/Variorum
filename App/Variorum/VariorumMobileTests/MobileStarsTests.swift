@@ -34,8 +34,8 @@ struct MobileStarsTests {
             await model.refresh()
             #expect(model.items.isEmpty)
 
-            await model.toggle(.post(noteID))
-            await model.toggle(.reading(bookID))
+            await model.toggle(.post(noteID), from: .shelf)
+            await model.toggle(.reading(bookID), from: .shelf)
             #expect(model.items.map(\.target) ==
                     [.post(noteID), .reading(bookID)],
                     "star order — star time is the order, the core's rule")
@@ -51,7 +51,7 @@ struct MobileStarsTests {
             }
             #expect(stored == #"["post:\#(noteID)","reading:\#(bookID)"]"#)
 
-            await model.toggle(.post(noteID))
+            await model.toggle(.post(noteID), from: .shelf)
             #expect(model.items.map(\.target) == [.reading(bookID)],
                     "un-star removes exactly; the book's star survives")
 
@@ -75,12 +75,12 @@ struct MobileStarsTests {
             }
             let model = MobileStarsModel(session: session)
             for id in ids.prefix(5) {
-                await model.toggle(.post(id))
+                await model.toggle(.post(id), from: .shelf)
             }
             #expect(model.items.count == 5)
             #expect(model.lastError == nil)
 
-            await model.toggle(.post(ids[5]))
+            await model.toggle(.post(ids[5]), from: .shelf)
             #expect(model.items.count == 5, "the cap evicts nothing")
             #expect(!model.isStarred(.post(ids[5])))
             let refusal = try #require(model.lastError)
@@ -104,9 +104,9 @@ struct MobileStarsTests {
                  try ops.createReading(name: "Poems", kind: .curated).id)
             }
             let model = MobileStarsModel(session: session)
-            await model.toggle(.post(bareID))
-            await model.toggle(.post(titledID))
-            await model.toggle(.reading(bookID))
+            await model.toggle(.post(bareID), from: .shelf)
+            await model.toggle(.post(titledID), from: .shelf)
+            await model.toggle(.reading(bookID), from: .shelf)
 
             let header = try #require(await session.database.read { db in
                 try Queries.containerHeader(db, containerID: bareID)
@@ -120,6 +120,55 @@ struct MobileStarsTests {
             #expect(model.displayName(titledRow) == "Harbor Light")
             let bookRow = try #require(model.items.first { $0.target == .reading(bookID) })
             #expect(model.displayName(bookRow) == "Poems")
+        }
+    }
+
+    /// The refusal's ONE HOME + clearing cadence (parity D2 — the
+    /// routed C3 R1-7 mechanism): `lastError` was one field on the one
+    /// shared model and BOTH tab roots rendered it, so a cap refusal
+    /// fired from the Library also sat at the shelf's bottom — and it
+    /// never cleared passively. Now: a door refusal renders at ITS
+    /// root only, a fresh success clears it at once, and an untouched
+    /// refusal clears itself after the cadence. A HOMELESS store-read
+    /// error still renders everywhere (it is not door-fired) and never
+    /// auto-clears — pinned so the gating can't over-reach.
+    @Test func aRefusalSpeaksAtItsOwnDoorAndClearsAfterABeat() async throws {
+        try await withEditorWorld { session, db in
+            let ids = try await session.runner.run { ops -> [String] in
+                try (0..<6).map { try ops.createPost(title: "Note \($0)").id }
+            }
+            let model = MobileStarsModel(session: session)
+            model.errorClearDelay = .milliseconds(40)
+            for id in ids.prefix(5) {
+                await model.toggle(.post(id), from: .shelf)
+            }
+            #expect(model.lastError == nil)
+
+            // The sixth star, fired from the LIBRARY's door: the
+            // refusal renders there and ONLY there.
+            await model.toggle(.post(ids[5]), from: .library)
+            #expect(model.error(on: .library) == MobileStarsModel.capRefusal(limit: 5))
+            #expect(model.error(on: .shelf) == nil,
+                    "the refusal speaks where its door fired — never on the other root")
+
+            // The cadence: an untouched refusal clears itself.
+            await settle { model.lastError == nil }
+            #expect(model.lastError == nil, "the refusal clears after a beat")
+            #expect(model.error(on: .library) == nil)
+
+            // A success clears immediately (no stale ghost): refuse
+            // again, then un-star one — the refusal is gone at once.
+            model.errorClearDelay = .seconds(60) // the cadence must not be what clears it
+            await model.toggle(.post(ids[5]), from: .library)
+            #expect(model.error(on: .library) != nil)
+            await model.toggle(.post(ids[0]), from: .shelf)
+            #expect(model.lastError == nil, "a successful toggle clears the refusal at once")
+
+            // (The HOMELESS arm — a store-read failure rendering on
+            // every root, never auto-clearing — is a one-line brain
+            // (`errorHome == nil` in `error(on:)`) whose failure state
+            // is not stageable through this harness's live store;
+            // code-read, recorded rather than fake-pinned.)
         }
     }
 }

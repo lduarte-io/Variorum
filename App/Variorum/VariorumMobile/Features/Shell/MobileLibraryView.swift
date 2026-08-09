@@ -52,9 +52,10 @@ struct MobileLibraryView<TabBar: View>: View {
                     .padding(.horizontal, 20)
                     .padding(.bottom, 4)
             }
-            if let starsError = stars.lastError {
-                // The star cap's honest refusal, spoken where the door
-                // fired.
+            if let starsError = stars.error(on: .library) {
+                // A star refusal fired HERE (D2 — one home per refusal,
+                // clearing after a beat; "spoken where the door fired"
+                // is now structurally true, not hoped).
                 Text(tokens.chromeLabel(starsError))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
@@ -211,7 +212,7 @@ struct MobileLibraryView<TabBar: View>: View {
                 Button(tokens.chromeLabel(
                     MobileStarsModel.doorTitle(starred: stars.isStarred(target)))) {
                     let stars = stars
-                    Task { await stars.toggle(target) }
+                    Task { await stars.toggle(target, from: .library) }
                 }
             }
         }
