@@ -3854,3 +3854,103 @@ PB2-3 (fixture constants) · PB3-1's derived 12 ms floor (recorded
 for her transparency, not a decision) — PB1-4 rides Stage C's
 refusal family with the lesson-update rider; PB2-2 RESOLVED (the
 armed ceiling). **CURRENT STAGE → C.**
+
+---
+
+## STAGE C — KICKOFF (2026-08-09, in-chain per her ruling)
+
+**Boundary duties executed:** `main` unmoved (`0ded142`). Ledger
+re-sweep: 14c still mid-phase — nothing to absorb; PL-1…PL-4/PL-7
+unchanged. Baselines carried from B's close: **mobile 227/36 zero
+known issues · spine 32/7 · perf 9/2 · core 1214/128 · Mac 1245/219
+tripwire-only · spine-Mac 51/7.** The install hold stands.
+
+**The ladder interpretation for this stage (recorded as a process
+PROVISIONAL — the stage table's gate column says "Per-family ladder
+rounds" where the standing shape is one stage-end ladder):** each
+BUILD batch groups 1–3 families and gets its OWN ladder (round 1 →
+fixes → round 2; new BLOCKER/MAJOR ⇒ round 3; cap three) — family
+granularity at batch cadence, honoring the table's words without a
+nine-ladder explosion. The audit batch (C1) produces a record, not a
+diff, and is reviewed by the architect directly rather than laddered.
+
+**Stage C structure:**
+
+- **C1 — THE PARITY MATRIX (the audit batch; record-only):** walk the
+  Mac capability registry (P-1) AND the Mac's feature surfaces beyond
+  it against the phone; produce the matrix — every capability × phone
+  status (already-parity / owed / compromised-shape /
+  not-owed-per-ruling), EVERY row citing its ruling (the exclusions
+  list, the gate record, MobileSoul §4, LK5's expansion) — plus a
+  proposed family-batch ordering with per-family scope lines. The
+  architect reviews and orders C2+ from it.
+- **C2+ — the family batches, matrix-ordered** (briefs written per
+  batch from the matrix): books & membership (incl. LK5's expansion —
+  the BOOK DETAILS surface off contents, finish/unfinish, tag editing
+  there, smart-book creation FROM tags) · tags (browse, apply,
+  create; tag posts; leaf-chip grammar) · locks (take lock/unlock
+  joins the note seal) · references ("More info": see, add, open) ·
+  scraps (view, maybe add) · comments/callouts gaps · lenses
+  (compromised shape — her top-bar sketch; design at the batch) ·
+  the S5 conflict surface (a conflict variant DISCOVERABLE on the
+  phone; the takes badge its natural face; verify + pin) · the
+  refusal-copy sweep (every "on the Mac" string dissolves or names
+  its sanctioned exception — the merge ceremony refusal included,
+  with PB1-4's lesson-update rider). The spine green every batch.
+
+## Stage C, batch C1 brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
+
+**Cast:** a fresh Fable implementer session, `~/dev/variorum-mobile`,
+branch `mobile`, starting at the Stage C kickoff commit. **This batch
+writes NO app code** — its deliverable is the PARITY MATRIX section
+appended to THIS file (plus the batch record). Read-only over the
+code; write-only into the plan.
+
+**Read first, IN FULL, in this order:** `CLAUDE.md` ·
+`notes/MobileSoul.md` (§4's decision grammar is the matrix's verdict
+vocabulary; §6's ledger protocol) · THIS plan file top to bottom (the
+mandate's exclusions; the Stage A/B closeouts — what already shipped;
+PB1-4) · `notes/plans/mobile-app-plan.md`'s GATE SITTING record
+(~5716–end: the parity ruling, see-your-data, no-redirect, the
+exclusions verbatim, LK5's expansion ruling, the P-round
+dispositions) · the Mac capability REGISTRY IN CODE (locate the
+`Registry/` layer under `App/Variorum/` — every declared act: verb,
+scope, doors, refusal copy) · the Mac's feature surfaces BEYOND the
+registry (the P-1 scope note: the registry covers the routed
+vocabulary — walk `App/Variorum/Features/` for surface-local
+capabilities: books/shelf faces, tags, locks, references, scraps,
+comments, lenses, search, settings) · the MOBILE app's shipped
+surfaces (`App/Variorum/VariorumMobile/`) so "already-parity" rows
+are grounded in code, not memory.
+
+**The deliverable — append to THIS file as "## THE PARITY MATRIX
+(C1, 2026-08-09)":**
+
+1. **The matrix:** one row per capability, columns: capability ·
+   where it lives on the Mac (registry act or surface:file) · phone
+   status — **already-parity** (cite the mobile code/tests) · **owed**
+   (full-shape) · **owed-compromised** (shape changes, capability
+   survives — name the intended shape in one line) ·
+   **not-owed-per-ruling** (cite the exclusion's words) — · and the
+   RULING CITATION for every non-already row. Group rows by family.
+2. **Gaps the registry can't see:** anything her rulings owe that no
+   Mac registry act names (the LK5 expansion's smart-book-from-tags;
+   the S5 conflict discoverability check) gets its own row with the
+   ruling cited.
+3. **The proposed batch ordering:** group the owed families into 3–4
+   build batches with one-line scope + risk notes each (which need
+   in-batch design forks, which are mechanical), and name anything
+   that looks core/Shared-touching so the architect can plan the
+   four-suite duty.
+4. **A refusal-copy inventory:** every user-facing string in the
+   mobile app that names the Mac (grep-grounded, file:line), each
+   marked dissolve / sanctioned-exception-candidate (the ceremony
+   class), for the sweep batch.
+
+**Discipline:** verdicts use the soul document's grammar and cite
+rulings — where a capability's status is genuinely unruled, mark it
+**OPEN-FOR-HER** with a one-line question (these collect into the end
+bundle; do NOT guess product behavior). Commit the matrix + batch
+record with the standing trailer; push `origin mobile`. Your final
+reply to me is compact: row counts per status, the proposed batch
+ordering, the OPEN-FOR-HER list, commit hash.
