@@ -37,15 +37,18 @@ final class MobileKeyboardBarController: NSObject {
     /// **The Aa condensation (parity A3 item 1 — HER RULING, the
     /// architect's ADOPT of the proposed expanding row):** at rest the
     /// bar carries THREE doors — **Aa · ⑂ · ⋯** — and Aa expands the
-    /// FORMATTING STRIP in place: **× · B · I · # · • · ☑ · ⇥** (the
-    /// LK8 order behind one door; × collapses back). A DOOR change, not
-    /// a vocabulary change: the six-act grammar, the # cycle + P5
+    /// FORMATTING STRIP in place (× collapses back). A DOOR change, not
+    /// a vocabulary change: the act grammar, the # cycle + P5
     /// long-press picker, and ⇥'s two directions are byte-identical —
     /// which is exactly why the door is a button strip and never a
     /// UIMenu (menu rows carry no second gesture; a menu-form Aa would
-    /// amputate both ruled long-press doors). The bar is the
-    /// `inputAccessoryView`, so expand/collapse happens with the
-    /// keyboard up, in place; the strip RESETS TO COLLAPSED at each
+    /// amputate both ruled long-press doors). Since parity C4b the strip
+    /// is TWO ROWS inside the one capsule — **× · B · I · S · ⟨⟩ ·
+    /// link**, then **# · • · ☑ · ⇥** (the strike/code/link doors
+    /// joined the grammar; the standing seven keep their LK8 relative
+    /// order; `formattingRowLabels` below is the split's truth). The
+    /// bar is the `inputAccessoryView`, so expand/collapse happens with
+    /// the keyboard up, in place; the strip RESETS TO COLLAPSED at each
     /// fresh keyboard presentation (the calm default — accepted at the
     /// ruling, hers to flip at the end sitting), via the keyboard-hide
     /// notification below.
@@ -73,22 +76,43 @@ final class MobileKeyboardBarController: NSObject {
     private(set) var isFormattingExpanded = false
 
     /// The strip's geometry constants (pinned): a 44 pt floor keeps
-    /// every act a full HIG tap target; the gap stays tight so seven
-    /// acts read as one strip and the row keeps headroom on every
-    /// supported width.
+    /// every act a full HIG tap target; the gap stays tight so the acts
+    /// read as one strip and each row keeps headroom on every supported
+    /// width.
     static let stripButtonMinWidth: CGFloat = 44
     static let stripButtonHeight: CGFloat = 38
     static let stripSpacing: CGFloat = 2
 
+    /// **The strip grew ROWS at parity C4b item 2** (the markdown
+    /// vocabulary's remaining acts — strikethrough · inline code · add
+    /// link — join the strip INSIDE its capsule, per the brief's LK8
+    /// answer): ten 44 pt acts cannot sit on one line of any iPhone
+    /// class (10×44 + 9×2 = 458 pt against the tightest cell's 333), so
+    /// the capsule holds TWO rows — the character acts (× B I S ⟨⟩ 🔗),
+    /// then the line acts (# • ☑ ⇥) — the standing seven keeping their
+    /// LK8 relative order and the three new acts landing exactly where
+    /// the Mac's act table puts them (after Italic). The bar itself
+    /// grows for the second row while expanded (`expandedBarHeight`;
+    /// `reloadInputViews` carries the new height to the keyboard) and
+    /// returns to the 44 pt resting bar at collapse — the resting bar
+    /// stays Aa · ⑂ · ⋯, byte-untouched.
+    static let restingBarHeight: CGFloat = 44
+    static let expandedBarHeight: CGFloat = 84
+
     /// The two states' acts, in bar order — one table per state so the
     /// bar and any test walk read the same truth (the registry-walk
     /// spirit). ⑂ = Takes (S2 batch 2); ⋯ = Block (S4 batch 1, with its
-    /// block menu); Aa/× = the formatting door's two faces.
+    /// block menu); Aa/× = the formatting door's two faces. The
+    /// formatting labels read in STRIP READING ORDER (row 1, then row
+    /// 2 — `formattingRowLabels` carries the split); the three C4b
+    /// arrivals wear the registry's own verbs.
     static let restingActLabels = ["Formatting", "Takes", "Block"]
-    static let formattingActLabels = [
-        "Hide Formatting", "Bold", "Italic", "Heading", "Bullet List",
-        "Checklist", "Indent",
+    static let formattingRowLabels: [[String]] = [
+        ["Hide Formatting", "Bold", "Italic", "Strikethrough", "Inline Code",
+         "Add Link"],
+        ["Heading", "Bullet List", "Checklist", "Indent"],
     ]
+    static var formattingActLabels: [String] { formattingRowLabels.flatMap(\.self) }
 
     init(textView: MobileEditorTextView) {
         self.textView = textView
@@ -112,7 +136,9 @@ final class MobileKeyboardBarController: NSObject {
     /// per the Aa door's state (`barItems`).
     func makeBar() -> UIView {
         let face = MobileEditorStyle.face
-        let bar = UIToolbar(frame: CGRect(x: 0, y: 0, width: 320, height: 44))
+        let bar = UIToolbar(frame: CGRect(
+            x: 0, y: 0, width: 320,
+            height: isFormattingExpanded ? Self.expandedBarHeight : Self.restingBarHeight))
         bar.autoresizingMask = [.flexibleWidth]
 
         let appearance = UIToolbarAppearance()
@@ -162,13 +188,17 @@ final class MobileKeyboardBarController: NSObject {
         return items
     }
 
-    /// The expanded formatting strip — ONE customView item whose seven
-    /// acts are real buttons in one stack (`kbar.formattingStrip`), in
-    /// the LK8 order behind the door: × · B · I · # · • · ☑ · ⇥. Owning
-    /// the row's geometry is the FIX-5 mechanism (the class doc has the
-    /// overflow arithmetic); each button keeps its exact selector, label,
-    /// and second gesture — the # picker and ⇥'s long-press outdent ride
-    /// the same real buttons they always did.
+    /// The expanded formatting strip — ONE customView item (the FIX-5
+    /// mechanism: owning the geometry is what makes overflow impossible
+    /// and the visibility pin holdable windowless), now a TWO-ROW
+    /// capsule (`kbar.formattingStrip`, parity C4b item 2 — the class
+    /// doc above has the arithmetic): the character acts
+    /// × · B · I · S · ⟨⟩ · link, then the line acts # · • · ☑ · ⇥.
+    /// Each button keeps its exact selector, label, and second gesture —
+    /// the # picker and ⇥'s long-press outdent ride the same real
+    /// buttons they always did; the three arrivals fire the SAME shared
+    /// brain acts the Mac's Format menu fires (.strikethrough · .code ·
+    /// .link — MarkdownSurfaceDoors, one computation both platforms).
     private func formattingStripItem(face: MobileEditorStyle.Face) -> UIBarButtonItem {
         func stripButton(
             _ title: String, _ label: String, _ selector: Selector
@@ -181,17 +211,51 @@ final class MobileKeyboardBarController: NSObject {
             button.addTarget(self, action: selector, for: .touchUpInside)
             return button
         }
+        /// The strike act's glyph is a struck-through S — the act shown
+        /// by wearing it (the checklist's ☑ precedent).
+        func strikeButton() -> UIButton {
+            let button = UIButton(type: .system)
+            button.setAttributedTitle(
+                NSAttributedString(string: "S", attributes: [
+                    .font: face.chrome, .foregroundColor: face.muted,
+                    .strikethroughStyle: NSUnderlineStyle.single.rawValue,
+                ]), for: .normal)
+            button.accessibilityLabel = "Strikethrough"
+            button.addTarget(self, action: #selector(fireStrikethrough), for: .touchUpInside)
+            return button
+        }
+        /// The link act wears the platform's own link glyph (the seal
+        /// door's SF precedent; symbols tint with the voice ink exactly
+        /// as titles do).
+        func linkButton() -> UIButton {
+            let button = UIButton(type: .system)
+            button.setImage(UIImage(
+                systemName: "link",
+                withConfiguration: UIImage.SymbolConfiguration(
+                    pointSize: face.chrome.pointSize, weight: .regular)), for: .normal)
+            button.tintColor = face.muted
+            button.accessibilityLabel = "Add Link"
+            button.addTarget(self, action: #selector(fireLink), for: .touchUpInside)
+            return button
+        }
 
-        let buttons: [UIButton] = [
-            stripButton("×", "Hide Formatting", #selector(toggleFormattingDoor)),
-            stripButton("B", "Bold", #selector(fireBold)),
-            stripButton("I", "Italic", #selector(fireItalic)),
-            headingButton(face: face),
-            stripButton("•", "Bullet List", #selector(fireBullet)),
-            stripButton("☑", "Checklist", #selector(fireChecklist)),
-            indentButton(face: face),
+        let rows: [[UIButton]] = [
+            [
+                stripButton("×", "Hide Formatting", #selector(toggleFormattingDoor)),
+                stripButton("B", "Bold", #selector(fireBold)),
+                stripButton("I", "Italic", #selector(fireItalic)),
+                strikeButton(),
+                stripButton("⟨⟩", "Inline Code", #selector(fireCode)),
+                linkButton(),
+            ],
+            [
+                headingButton(face: face),
+                stripButton("•", "Bullet List", #selector(fireBullet)),
+                stripButton("☑", "Checklist", #selector(fireChecklist)),
+                indentButton(face: face),
+            ],
         ]
-        for button in buttons {
+        for button in rows.flatMap(\.self) {
             button.widthAnchor.constraint(
                 greaterThanOrEqualToConstant: Self.stripButtonMinWidth
             ).isActive = true
@@ -199,8 +263,15 @@ final class MobileKeyboardBarController: NSObject {
                 equalToConstant: Self.stripButtonHeight
             ).isActive = true
         }
-        let strip = UIStackView(arrangedSubviews: buttons)
-        strip.axis = .horizontal
+        let rowStacks = rows.map { buttons -> UIStackView in
+            let row = UIStackView(arrangedSubviews: buttons)
+            row.axis = .horizontal
+            row.alignment = .center
+            row.spacing = Self.stripSpacing
+            return row
+        }
+        let strip = UIStackView(arrangedSubviews: rowStacks)
+        strip.axis = .vertical
         strip.alignment = .center
         strip.spacing = Self.stripSpacing
         strip.accessibilityIdentifier = "kbar.formattingStrip"
@@ -210,7 +281,10 @@ final class MobileKeyboardBarController: NSObject {
     }
 
     /// Aa opens the strip; × closes it — one door, two faces, swapping
-    /// the LIVE bar's items in place (the keyboard never moves).
+    /// the LIVE bar's items in place. Since C4b the expanded capsule is
+    /// two rows deep, so the BAR's height follows the state (the
+    /// keyboard itself never moves; the accessory grows upward and
+    /// `reloadInputViews` tells the input system).
     @objc func toggleFormattingDoor() {
         isFormattingExpanded.toggle()
         reloadBarItems()
@@ -218,6 +292,18 @@ final class MobileKeyboardBarController: NSObject {
 
     private func reloadBarItems() {
         bar?.items = barItems(face: MobileEditorStyle.face)
+        applyBarHeight()
+    }
+
+    /// The state's bar height, applied to the LIVE accessory (equality-
+    /// gated; `reloadInputViews` re-reads the accessory's frame).
+    private func applyBarHeight() {
+        guard let bar else { return }
+        let height = isFormattingExpanded
+            ? Self.expandedBarHeight : Self.restingBarHeight
+        guard abs(bar.frame.height - height) > 0.5 else { return }
+        bar.frame.size.height = height
+        textView?.reloadInputViews()
     }
 
     /// The reset-per-presentation half (the ruling's calm default).
@@ -338,6 +424,10 @@ final class MobileKeyboardBarController: NSObject {
 
     @objc func fireBold() { fire(.bold) }
     @objc func fireItalic() { fire(.italic) }
+    /// The C4b arrivals — the same shared-brain acts the Mac menu fires.
+    @objc func fireStrikethrough() { fire(.strikethrough) }
+    @objc func fireCode() { fire(.code) }
+    @objc func fireLink() { fire(.link) }
     @objc func fireBullet() { fire(.bullet) }
     @objc func fireChecklist() { fire(.checkbox) }
 

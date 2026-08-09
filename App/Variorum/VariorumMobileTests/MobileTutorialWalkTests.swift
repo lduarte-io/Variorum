@@ -353,6 +353,7 @@ struct MobileTutorialBookShapeTests {
                 try Queries.renderedText($0, containerID: formatting)
             }
             for syntax in ["**markdown**", "**bold**", "*italic*", "`inline code`",
+                           "~~struck words~~", "[links](https://commonmark.org)",
                            "## Headings are sizes", "- lists are lines",
                            "- [ ] a checkbox", "- [x] tap a box"] {
                 #expect(stored.contains(syntax), "the lesson shows \(syntax) by BEING it")
@@ -362,6 +363,7 @@ struct MobileTutorialBookShapeTests {
             // brain): markers gone, forms in their place.
             let rendered = MarkdownRendering.render(stored)
             for span in ["**markdown**", "*italic*", "`inline code`",
+                         "~~struck words~~", "](https://commonmark.org)",
                          "## Headings are sizes", "- [ ] a checkbox"] {
                 #expect(!rendered.text.contains(span), "read hides \(span.debugDescription)")
             }

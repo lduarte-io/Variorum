@@ -342,11 +342,17 @@ enum MobileTutorialSeeder {
             + "the word and dims the stars, so the page reads cleanly while "
             + "the text stays plain characters you could open anywhere.",
 
-            "The vocabulary is small: **bold**, *italic*, and `inline code`. "
-            + "Aa on the bottom bar opens the strip — × B I # • ☑ ⇥ — and B "
-            + "or I wraps whatever you've selected. Press the same button "
-            + "again and it takes the marks off; the act reads what is "
-            + "already there rather than blindly adding.",
+            "The vocabulary is small: **bold**, *italic*, `inline code`, "
+            + "~~struck words~~, and [links](https://commonmark.org). "
+            + "Aa on the bottom bar opens the strip — two rows of it now — "
+            + "and B or I wraps whatever you've selected. Press the same "
+            + "button again and it takes the marks off; the act reads what "
+            + "is already there rather than blindly adding.",
+
+            "The first row's other three: S strikes a selection through, "
+            + "⟨⟩ marks it as inline code, and the link glyph wraps it as "
+            + "[text]() with the caret waiting between the parentheses for "
+            + "the address. Same toggle rule, same plain characters.",
 
             "## Headings are sizes",
 
