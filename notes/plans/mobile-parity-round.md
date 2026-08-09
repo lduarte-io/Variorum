@@ -4265,3 +4265,76 @@ by name; four-suite duty if core Queries changed. Commit per logical
 unit with the standing trailer; write "## Stage C, batch C2 — BATCH
 RECORD (implementer, 2026-08-09)" into THIS file; push
 `origin mobile`. PROVISIONAL-and-continue; author-only calls stop.
+
+## MID-CHAIN SITTING (2026-08-09, via RC — the 11 OPEN-FOR-HER rows RULED; verbatim-faithful)
+
+She asked for the question tool and answered all eleven (two rounds
+of four after round one's four — the tool's 4-cap reshaped her 5+6).
+Her words quoted where she wrote them:
+
+1. **Book structure management → RULED SET ONLY, with a NEW FACT:**
+   *"There is a mac phase coming up that's going to redefine some
+   elements of books / chapters / rules, so keeping the ruled set
+   only is fine for now and we'll plan to add other functionality
+   once the mac side is done."* (13i's orbit.) Chapters/reorder/
+   sort-change/smart-filter-editing/conversion all WAIT for the Mac
+   redefinition; a post-13i mobile round adds them.
+2. **Tag management → CROSS FULLY** (after the subtree explanation;
+   her grounds, verbatim: *"I know some people won't use the mac app
+   at all, so I'm inclined to say cross fully."*) — rename +
+   delete-with-subtree get C3 doors, the subtree consequence named
+   in the delete confirm; phone tag-create supports child tags. Her
+   sentence is also a standing parity principle: phone-only users
+   are real.
+3. **Block tags → Mac-side for now** (recommended accepted).
+4. **Entry date → CROSSES** (recommended accepted) — folds into C2's
+   note-metadata family (running batch; added at the fork resume).
+5. **Extract + Make Block → CROSS via the selection menu** (C4).
+6. **Delete in Every Take → Mac-only for now.**
+7. **Take diff → swipe suffices** (R58's grammar re-affirmed).
+8. **Duplicate as Version → wait for a felt need.**
+9. **Library sort picker → ADD** (→ C3, the mechanical batch).
+10. **Stars → CROSS** — act + starred face, exact shape at the batch
+    (→ C3).
+11. **Block-TOC in-note list → YES, v1** — names get their phone
+    face (→ C4).
+
+**Scope updates from the sitting:** C3 gains tag management (rename
++ delete-with-subtree) · the Library sort picker · stars. C4 gains
+extract/make-block on the selection menu · the block-TOC list. The
+end bundle's open-question count drops to ZERO — everything her
+sitting owed is now ruled or consciously waiting (13i's round; felt-
+need flips). Also her morale note, kept because it names the bar:
+*"I was super happy to see that you diagnosed an issue with the
+notes being too slow to edit - it's the thing that most bugs me
+about apple notes so I'm happy it's being handled."* And her context
+guidance: *"500k is rather conservative so feel free to continue."*
+
+## Stage C, batch C2 — THE BOOK DETAILS RULING (architect, 2026-08-09; the fork's repo-first ruling)
+
+**ADOPT the proposed shape:** the voiced **"Details"** word in the
+contents screen's trailing chrome · a medium-detent LK4 sheet over
+the contents · the act column as proposed (identity block on the
+shelf faces' one brain · rename via the name row, alert-prefilled ·
+one state-mirroring Finish/Reopen row through `lockReading`/
+`unlockReading` · Use-as-Daily rendered on curated journal-profile
+books only, P-2's letter) · create-book stays the shelf's ·
+delete/extents/structure deliberately absent as proposed.
+
+**The tags half → (B), decided BY HER SITTING ANSWER, not by
+preference:** her book-structure ruling explicitly deferred
+smart-filter editing until the Mac's 13i-class redefinition — and
+option (A)'s editable half IS smart-filter editing. So: details
+**DISPLAYS** the book's tags (both kinds, the shelf faces' source);
+nothing tag-editable ships in C2; C3's tags family owns note-level
+tag editing; smart-filter tag editing joins the post-13i round with
+the rest of structure management. (A curated book's shelf tags are
+derived from member notes by model fact — there is no book-level tag
+row to edit; the display says so honestly if a reader wonders.)
+
+**Added to C2 at the same resume (her sitting, item 4):** entry-date
+set/clear crosses — the note-metadata family's last member; through
+the existing `setEntryDate` op, phone face the implementer's call,
+state-transition tests per act, no platform-named refusals. The
+Today-door rewords + the getting-around lesson update ride the fork
+build as proposed (tutorial-as-spec).
