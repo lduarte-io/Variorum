@@ -7043,3 +7043,27 @@ surface in the Read flow (a lens is an authoring-side way of
 looking; Read renders the book's truth, as on the Mac) · lens view
 memory (PC5-1, ruled session-local) · the Mac's fanned-merge default
 untouched (PC5-2 — 13j's orbit).
+
+## Stage C, batch C5 — ACCEPTED; the C5 LADDER OPENS (architect, 2026-08-09)
+
+Verified: all three commits present; scope clean by own check (zero
+core/Shared/Mac lines batch-wide); the full mobile suite re-run by
+the architect's own hand: **"Test run with 305 tests in 58 suites
+passed"** — 296/56 + 9/2 exact. **The spine GREW to 33/7** (the
+lens lesson's walk — the book grows a lesson when the phone grows a
+door; the B1 grammar working as designed). **The sweep pin's hollow
+first form is the batch's honesty story** (UAX #29 word boundaries
+treat apostrophes as word-internal — `/\bMac\b/` never matched "the
+Mac's"; `.wordBoundaryKind(.simple)` is the load-bearing fix,
+recorded as a machinery note) — the pin now proves **ZERO
+user-facing "Mac" strings remain in the mobile app**, red-verified
+by exactly the two pre-dissolve strings. PC5-1…5 ride the end
+bundle (PC5-2 — the Mac's own carry-all-default question — is a
+NAMED sitting item).
+
+**THE C5 LADDER OPENS.** Target: `3564a69..10e38a2` (the ruling +
+two build commits + record; the fork rulings the reviewer's
+anchor). Fresh cold reviewer, `notes/REVIEW_PROMPT.md` VERBATIM;
+findings repo-first as "## Stage C review — C5 round 1 findings".
+Baselines at open: **mobile 305/58 · mobile spine 33/7 · perf 9/2 ·
+core 1215/128 · Mac 1245/219 tripwire-only · Mac spine 51/7.**
