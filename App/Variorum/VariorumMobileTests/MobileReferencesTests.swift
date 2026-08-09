@@ -80,6 +80,47 @@ struct MobileReferencesTests {
         }
     }
 
+    /// FIX-C3b (the C3 ladder's false-copy MINOR): the row branch keys
+    /// on the STORED KIND — an unopenable URL row (nil url is legal
+    /// core: `addReference` validates nothing about the kind/url
+    /// pairing, and a synced row can carry it) is its OWN honest state:
+    /// its stored text shows, it opens nothing, and it NEVER wears the
+    /// file row's sentence. Revert-verified red-on-old: the pre-fix
+    /// view branch (openable-else-file-sentence) mirrored into the
+    /// brain classifies this row `.file` — the false copy — and this
+    /// test fails there while its siblings hold.
+    @Test func anUnopenableURLRowNeverWearsTheFileSentence() async throws {
+        try await withEditorWorld { session, db in
+            let postID = try await session.runner.run { ops -> String in
+                let post = try ops.createPost(title: "Harbor")
+                _ = try ops.addReference(
+                    to: post.id, kind: .url, name: "somewhere", url: nil)
+                _ = try ops.addReference(
+                    to: post.id, kind: .url, name: nil, url: "https://example.com")
+                _ = try ops.addReference(
+                    to: post.id, kind: .file, name: "notes.pdf")
+                return post.id
+            }
+            let model = MobileReferencesModel(session: session, postID: postID)
+            await model.refresh()
+            let broken = try #require(
+                model.references.first { $0.kind == .url && $0.url == nil })
+            let good = try #require(
+                model.references.first { $0.url == "https://example.com" })
+            let file = try #require(model.references.first { $0.kind == .file })
+
+            #expect(MobileReferencesModel.rowState(broken) == .unopenableLink,
+                    "a link with nothing to open is its OWN state — never the file row's")
+            #expect(MobileReferencesModel.rowTitle(broken) == "somewhere",
+                    "the stored text shows")
+            #expect(MobileReferencesModel.rowState(good)
+                == .opens(URL(string: "https://example.com")!),
+                    "a loadable link stays the door it was")
+            #expect(MobileReferencesModel.rowState(file) == .file,
+                    "the honest sentence's ONLY home is the file kind")
+        }
+    }
+
     /// File rows list HONESTLY: they are named, they are not openable
     /// (the bookmark is per-machine by model fact — there is no file
     /// here), and the sentence that says so names NO platform. The chip

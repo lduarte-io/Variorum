@@ -80,6 +80,30 @@ final class MobileReferencesModel {
         return URL(string: raw)
     }
 
+    /// What a row IS — the pure row-kind brain (FIX-C3b): the branch
+    /// keys on the STORED KIND, never on URL parseability alone, so an
+    /// unopenable link can never wear the file row's sentence (the C3
+    /// round-1 false-copy MINOR — a nil/unparseable-url `.url` row is
+    /// constructible through core today, and a synced row can carry it).
+    enum RowState: Equatable {
+        /// A URL row whose stored string loads — the row is a door.
+        case opens(URL)
+        /// A file row — named, never openable here (the bookmark is
+        /// per-machine by model fact); the ONLY state that wears
+        /// `fileRowNote`.
+        case file
+        /// A URL row with nothing to open (nil or unparseable url) —
+        /// its stored text shows, it opens nothing, and it NEVER wears
+        /// the file sentence: its own honest state.
+        case unopenableLink
+    }
+
+    nonisolated static func rowState(_ reference: Reference) -> RowState {
+        if reference.kind == .file { return .file }
+        if let url = openableURL(reference) { return .opens(url) }
+        return .unopenableLink
+    }
+
     /// The FILE row's honest sentence — what a file row IS, in neutral
     /// words, no platform named (the C3 brief's letter; the model fact
     /// is AppSpec §7's: bookmarks are per-machine and never sync).
@@ -209,14 +233,17 @@ struct MobileReferencesSheet: View {
         }
     }
 
-    /// One reference's row: a URL row is a DOOR (opens the link); a
-    /// file row is its name plus the honest sentence. Long-press holds
-    /// remove on both.
+    /// One reference's row, keyed on the pure row-kind brain (FIX-C3b):
+    /// a URL row that loads is a DOOR; a FILE row is its name plus the
+    /// honest sentence; an unopenable link shows its stored text alone —
+    /// no door, and never the file sentence. Long-press holds remove on
+    /// all three.
     @ViewBuilder
     private func row(_ reference: Reference) -> some View {
         let title = MobileReferencesModel.rowTitle(reference)
         Group {
-            if let url = MobileReferencesModel.openableURL(reference) {
+            switch MobileReferencesModel.rowState(reference) {
+            case .opens(let url):
                 Button {
                     openURL(url)
                 } label: {
@@ -235,7 +262,7 @@ struct MobileReferencesSheet: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Open \(title)")
-            } else {
+            case .file:
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)
                         .font(tokens.body)
@@ -245,6 +272,17 @@ struct MobileReferencesSheet: View {
                         .font(tokens.small)
                         .foregroundStyle(tokens.faint)
                         .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(.vertical, 6)
+            case .unopenableLink:
+                // The stored text, shown plain: nothing to open, and the
+                // file sentence would be a false copy here.
+                HStack {
+                    Text(title)
+                        .font(tokens.body)
+                        .foregroundStyle(tokens.ink)
+                        .lineLimit(1)
+                    Spacer()
                 }
                 .padding(.vertical, 6)
             }
