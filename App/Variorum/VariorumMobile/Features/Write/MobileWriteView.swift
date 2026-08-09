@@ -65,6 +65,10 @@ struct MobileWriteScreen: View {
     /// chip's model and its sheet.
     @State private var noteTags: MobileNoteTagsModel
     @State private var tagsPresented = false
+    /// The note's references (parity C3 — the "More info" list): the
+    /// chip's model and its sheet.
+    @State private var references: MobileReferencesModel
+    @State private var referencesPresented = false
     /// The shell's voice authority; nil in harness/preview use, where the
     /// stored preference read at init governs.
     private let router: MobileShellRouter?
@@ -88,6 +92,7 @@ struct MobileWriteScreen: View {
         _model = State(initialValue: MobileEditorViewModel(session: session, postID: postID))
         _membership = State(initialValue: MobileMembershipModel(session: session, postID: postID))
         _noteTags = State(initialValue: MobileNoteTagsModel(session: session, postID: postID))
+        _references = State(initialValue: MobileReferencesModel(session: session, postID: postID))
         self.router = router
         self.beginEditing = beginEditing
         self.tab = tab
@@ -166,6 +171,7 @@ struct MobileWriteScreen: View {
             // PROVISIONAL; her look round may re-arrange).
             HStack(spacing: 12) {
                 tagsChip
+                moreInfoChip
             }
             if let canary = model.canaryMessage {
                 Text(canary).font(tokens.small).foregroundStyle(.red)
@@ -222,6 +228,9 @@ struct MobileWriteScreen: View {
         .sheet(isPresented: $tagsPresented) {
             MobileNoteTagsSheet(model: noteTags, tokens: tokens)
         }
+        .sheet(isPresented: $referencesPresented) {
+            MobileReferencesSheet(model: references, tokens: tokens)
+        }
         .alert("Entry Date", isPresented: $datePresented) {
             TextField("2026-08-09", text: $dateField)
                 .keyboardType(.numbersAndPunctuation)
@@ -275,6 +284,24 @@ struct MobileWriteScreen: View {
         .buttonStyle(.plain)
         .accessibilityLabel("Tags")
         .task(id: model.postID) { await noteTags.refresh() }
+    }
+
+    /// The "more info" chip (parity C3 — her own name for the surface):
+    /// the note's kept links and files, one tap away; the count rides
+    /// the word when any exist.
+    private var moreInfoChip: some View {
+        Button {
+            referencesPresented = true
+        } label: {
+            Text(tokens.chromeLabel(
+                MobileReferencesModel.chipLabel(count: references.references.count)))
+                .font(tokens.small)
+                .foregroundStyle(references.references.isEmpty ? tokens.faint : tokens.muted)
+                .lineLimit(1)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("More Info")
+        .task(id: model.postID) { await references.refresh() }
     }
 
     /// The membership chip (parity C2): which books hold this note — the
