@@ -92,8 +92,9 @@ struct MobileReadView: View {
                             .padding(.vertical, 40)
                     }
                     if model.truncated {
-                        // The bounded-window marker (never a silent cut).
-                        Text("Showing the first \(model.entries.count) notes — the full book lives on the Mac.")
+                        // The bounded-window marker (never a silent cut;
+                        // P32's neutral reword — one shared sentence).
+                        Text(MobileBookViewModel.truncationMarker(shown: model.entries.count))
                             .font(.system(size: 11.5))
                             .foregroundStyle(page.pageMeta)
                             .padding(.vertical, 12)

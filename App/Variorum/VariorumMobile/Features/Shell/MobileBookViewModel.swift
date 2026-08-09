@@ -39,6 +39,16 @@ final class MobileBookViewModel {
         self.window = window
     }
 
+    /// The bounded-window truncation marker (never a silent cut) — ONE
+    /// sentence for both book surfaces (the note list and the Read flow).
+    /// Reworded at parity A1, P32's flip: NEUTRAL — the "full book lives
+    /// on the Mac" tail violated the no-redirect principle and went;
+    /// load-more itself stays deferred with the Mac's own bounded-window
+    /// family (the Phase 12 windowing row).
+    static func truncationMarker(shown: Int) -> String {
+        "Showing the first \(shown) notes — the rest of this book isn't loaded yet."
+    }
+
     nonisolated struct Snapshot: Equatable, Sendable {
         var reading: Reading?
         var entries: [Queries.ReadingEntry]

@@ -205,4 +205,16 @@ struct MobileLibraryTests {
                     "a nameless note shows its created day")
         }
     }
+
+    @Test func theTruncationMarkerCarriesNoMacRedirect() {
+        // P32's flip (parity A1, item 5): the marker rewords NEUTRALLY —
+        // the "full book lives on the Mac" tail violated the no-redirect
+        // principle; load-more stays deferred with the Mac's own
+        // bounded-window family. One shared sentence serves both book
+        // surfaces (the note list and the Read flow).
+        let copy = MobileBookViewModel.truncationMarker(shown: 300)
+        #expect(copy
+                == "Showing the first 300 notes — the rest of this book isn't loaded yet.")
+        #expect(!copy.contains("Mac"))
+    }
 }
