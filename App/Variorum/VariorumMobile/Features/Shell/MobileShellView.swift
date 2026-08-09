@@ -53,6 +53,9 @@ struct MobileShellView: View {
     @State private var libraryModel: MobileLibraryViewModel
     /// The scraps area's model (parity C3 — the Library's third filter).
     @State private var scrapsModel: MobileScrapsModel
+    /// The starred set (parity C3 — ONE model threaded to every surface
+    /// carrying the star door, the Mac StarDoor discipline).
+    @State private var starsModel: MobileStarsModel
     @State private var settingsPresented = false
     @Environment(\.colorScheme) private var scheme
     #if DEBUG
@@ -67,6 +70,7 @@ struct MobileShellView: View {
         _shelfModel = State(initialValue: MobileShelfViewModel(session: session))
         _libraryModel = State(initialValue: MobileLibraryViewModel(session: session))
         _scrapsModel = State(initialValue: MobileScrapsModel(session: session))
+        _starsModel = State(initialValue: MobileStarsModel(session: session))
     }
 
     private var tokens: VoiceTokens {
@@ -77,10 +81,11 @@ struct MobileShellView: View {
         ZStack {
             stack(path: $shelfPath, owner: .shelf) {
                 MobileShelfView(
-                    model: shelfModel, tokens: tokens,
+                    model: shelfModel, stars: starsModel, tokens: tokens,
                     tabBar: { tabBar },
                     onOpenBook: { shelfPath.append(MobileRoute.book($0)) },
                     onOpenForWriting: { shelfPath.append(MobileRoute.note($0, focus: true)) },
+                    onOpenNote: { shelfPath.append(MobileRoute.note($0, focus: false)) },
                     onSettings: { settingsPresented = true })
             }
             .opacity(tab == .shelf ? 1 : 0)
@@ -89,7 +94,8 @@ struct MobileShellView: View {
 
             stack(path: $libraryPath, owner: .library) {
                 MobileLibraryView(
-                    model: libraryModel, scraps: scrapsModel, tokens: tokens,
+                    model: libraryModel, scraps: scrapsModel, stars: starsModel,
+                    tokens: tokens,
                     tabBar: { tabBar },
                     onOpen: { libraryPath.append($0) })
             }
@@ -100,6 +106,7 @@ struct MobileShellView: View {
         .sheet(isPresented: $settingsPresented) {
             settingsSheet
         }
+        .task { await starsModel.start() }
         #if DEBUG
         .fullScreenCover(isPresented: $spikePresented) { SpikeScreen() }
         #endif

@@ -17,6 +17,9 @@ struct MobileLibraryView<TabBar: View>: View {
     /// The scraps area's model (parity C3 — the third filter's listing;
     /// constructed by the shell beside this view's own model).
     @Bindable var scraps: MobileScrapsModel
+    /// The starred set (parity C3): the note rows' star door — the ONE
+    /// model the shell threads to every surface with the door.
+    @Bindable var stars: MobileStarsModel
     let tokens: VoiceTokens
     @ViewBuilder let tabBar: () -> TabBar
     let onOpen: (MobileRoute) -> Void
@@ -46,6 +49,15 @@ struct MobileLibraryView<TabBar: View>: View {
                 Text(error)
                     .font(tokens.small)
                     .foregroundStyle(.red)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 4)
+            }
+            if let starsError = stars.lastError {
+                // The star cap's honest refusal, spoken where the door
+                // fired.
+                Text(tokens.chromeLabel(starsError))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
                     .padding(.horizontal, 20)
                     .padding(.bottom, 4)
             }
@@ -184,6 +196,16 @@ struct MobileLibraryView<TabBar: View>: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            // Star (parity C3, her ruling 10): the note row's long-press
+            // — the Mac's own row-menu placement, the phone's grammar.
+            .contextMenu {
+                let target = StarTarget.post(item.postID)
+                Button(tokens.chromeLabel(
+                    MobileStarsModel.doorTitle(starred: stars.isStarred(target)))) {
+                    let stars = stars
+                    Task { await stars.toggle(target) }
+                }
+            }
         }
     }
 

@@ -249,7 +249,10 @@ enum MobileTutorialSeeder {
             + "making it if the day hasn't started. + new note starts a "
             + "bookless note and drops you straight into writing; + new book, "
             + "at the list's end, starts a fresh book — hand-picked, a dated "
-            + "journal, or a smart book collecting by tags.",
+            + "journal, or a smart book collecting by tags. A long press "
+            + "also STARS a note or a book (up to five) — starred things "
+            + "sit above everything at the shelf's very top, and the same "
+            + "press takes the star back off.",
 
             "The LIBRARY tab is everything, newest first, with search across "
             + "titles, days, and book names — and a sort door: order the "

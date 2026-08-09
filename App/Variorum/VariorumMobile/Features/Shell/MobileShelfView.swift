@@ -19,12 +19,19 @@ import VariorumCore
 
 struct MobileShelfView<TabBar: View>: View {
     @Bindable var model: MobileShelfViewModel
+    /// The starred set (parity C3, her ruling 10): the section at the
+    /// shelf's top + the book rows' star door (ONE model, threaded by
+    /// the shell — the Mac StarDoor's one-value discipline).
+    @Bindable var stars: MobileStarsModel
     let tokens: VoiceTokens
     @ViewBuilder let tabBar: () -> TabBar
     let onOpenBook: (String) -> Void
     /// Open a note straight into typing — the Today button's landing AND
     /// the + New Note door's (P33: "the note opens for writing").
     let onOpenForWriting: (String) -> Void
+    /// Open a note for reading/editing without raising the keyboard —
+    /// a starred NOTE row's landing (parity C3).
+    let onOpenNote: (String) -> Void
     let onSettings: () -> Void
 
     @State private var createBookPresented = false
@@ -34,6 +41,7 @@ struct MobileShelfView<TabBar: View>: View {
             pathLine
             ScrollView {
                 LazyVStack(spacing: 0) {
+                    starredSection
                     ForEach(model.orderedBooks, id: \.reading.id) { book in
                         bookRow(book)
                     }
@@ -59,6 +67,15 @@ struct MobileShelfView<TabBar: View>: View {
                 Text(error)
                     .font(tokens.small)
                     .foregroundStyle(.red)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 4)
+            }
+            if let starsError = stars.lastError {
+                // The star cap refuses honestly (the op's own rule) —
+                // the shelf speaks it where the starred list lives.
+                Text(tokens.chromeLabel(starsError))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
                     .padding(.horizontal, 20)
                     .padding(.bottom, 4)
             }
@@ -143,6 +160,75 @@ struct MobileShelfView<TabBar: View>: View {
             let pinned = model.pins.contains(book.reading.id)
             Button(tokens.chromeLabel(MobileShelfFaces.pinDoorTitle(pinned: pinned))) {
                 Task { await model.setPinned(book.reading.id, pinned: !pinned) }
+            }
+            // Star (parity C3) — deliberately beside Pin, the Mac 13f
+            // adjacency: pinning orders THIS list; a star lifts the book
+            // to the starred section at the top.
+            let target = StarTarget.reading(book.reading.id)
+            Button(tokens.chromeLabel(
+                MobileStarsModel.doorTitle(starred: stars.isStarred(target)))) {
+                let stars = stars
+                Task { await stars.toggle(target) }
+            }
+        }
+    }
+
+    /// The starred section (parity C3 — the face's home, this batch's
+    /// call: the Mac's sidebar-top placement mirrored onto the phone's
+    /// home surface). Renders only when anything is starred; rows
+    /// navigate — book to its contents, note into its page.
+    @ViewBuilder
+    private var starredSection: some View {
+        if !stars.items.isEmpty {
+            HStack {
+                Text(tokens.chromeLabel(MobileStarsModel.sectionHeader))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                Spacer()
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 4)
+            .padding(.bottom, 2)
+            ForEach(stars.items, id: \.target) { item in
+                starredRow(item)
+            }
+            Divider()
+                .overlay(tokens.line)
+                .padding(.vertical, 6)
+        }
+    }
+
+    private func starredRow(_ item: Queries.StarredItem) -> some View {
+        Button {
+            switch MobileStarsModel.route(for: item.target) {
+            case .book(let id): onOpenBook(id)
+            case .note(let id, _): onOpenNote(id)
+            case .bookRead(let id): onOpenBook(id)
+            }
+        } label: {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text("★")
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+                Text(tokens.chromeLabel(stars.displayName(item)))
+                    .font(tokens.body)
+                    .foregroundStyle(tokens.ink)
+                    .lineLimit(1)
+                Spacer(minLength: 12)
+                Text(tokens.chromeLabel(item.target.kind == .reading ? "book" : "note"))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+            }
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .contextMenu {
+            Button(tokens.chromeLabel(MobileStarsModel.doorTitle(starred: true))) {
+                let stars = stars
+                let target = item.target
+                Task { await stars.toggle(target) }
             }
         }
     }
