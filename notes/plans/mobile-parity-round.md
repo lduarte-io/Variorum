@@ -693,3 +693,125 @@ remaining refusal-copy sweep (Stage C's families — the locked-take
 copies still name the Mac by design until that batch); the Aa bar /
 P35 / P33 / P5 / P24 / P26/P43 / P38 and the spacing floor (A3);
 Q-M2's core divide shape (A2, the chain's one core-touching batch).
+
+## Stage A, batch A1 — ACCEPTED (architect, 2026-08-09)
+
+Verified by spot-check + own runs before relying on anything above
+(the never-trust rule): all six commits present (`a95839d` …
+`3087f27`), diff scope confirmed — 20 files, **zero**
+`Sources/VariorumCore/` lines, zero `Shared/` lines, the pbxproj edit
+mobile-configs-only with the Mac build check recorded; the mobile
+suite re-run by the architect's own hand: **"Test run with 181 tests
+in 27 suites passed"** — the 175/26 baseline + six pins + one suite,
+exactly accounted. `main` unmoved at the batch boundary
+(`0ded142`; no inward pull needed).
+
+**The surface-pin adjudication (PA1-3's substance — recorded so the
+ladder and her end bundle read one story):** the gate record's
+"NOT the LK4 browser sheet" line was the PRIOR architect's
+interpretation of her second report, not her words — her words were
+*"i could make a new take but i couldn't scroll down through the list
+of takes to edit it better."* The implementer's real-touch runs
+proved the Write-surface peek scroll healthy (badge oracle full
+range, both directions, grammar intact) and traced a REAL scroll
+defect in the browser sheet: keyboard-blind layout — minting raises
+focus, the keyboard occludes the card band, and the max scroll offset
+ignored the occluded band entirely (exactly her scenario: mint a
+take, then the list won't scroll to it). The evidence-based
+reinterpretation is ACCEPTED — the mechanism matches her report
+better than the recorded pin did. **PA1-3 stands as the honest
+rider:** one on-device re-check of BOTH surfaces at the end bundle's
+feel round, since her report was on-device and the refutation is
+simulator+UITest evidence.
+
+**PROVISIONALs carried to the end bundle:** PA1-1 (the seal door's
+visual form/register — A3's voice-case sweep may recase it) · PA1-2
+(notification-fed keyboard geometry, the mechanism note flagged for
+the ladder) · PA1-3 (above). **Routed to A3:** the implementer's
+evidence note that the P24 typewriter-room inset is ABSENT on the
+phone (A3's item was already verify/build — the verify half is now
+done: build it).
+
+## Stage A, batch A2 brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
+
+**Cast:** a fresh Fable implementer session, working in
+`~/dev/variorum-mobile`, branch `mobile`, starting at the A1
+acceptance commit. **This is the chain's ONE deliberate core-touching
+batch** — the four-suite duty binds (mobile · core · Mac · spine, all
+by your own runs), and ZERO Mac behavior change is the acceptance
+bar: the Mac's fanned-divide door keeps opening the W ceremony until
+Phase 13j wires its switch; the new operation lands DORMANT for the
+Mac.
+
+**Read first, IN FULL, in this order — your own reading, never a
+summary:** `CLAUDE.md` (the invariants I1–I10, S1–S5, and AppSpec §9's
+divide/divide-W/merge entries are your spec floor) ·
+`notes/MobileSoul.md` · THIS plan file top to bottom ·
+`notes/plans/mobile-app-plan.md` §§ "The settled shape" (~313),
+"Environment traps" (~473), and the GATE SITTING record's **Q-M2
+ruling** (~5728–5778 — her words are the spec; build to them) ·
+`notes/plans/mobile-architect-handoff.md`. The parity plan's
+Environment traps section BINDS (NO schema; `Sources/VariorumCore/
+Sync/` untouched; the 4G configuration trap; simulator destination).
+
+**The work — Q-M2, her duplicate-shape default divide, core + phone:**
+
+1. **The core operation** (`Sources/VariorumCore/Operations/`, ONE
+   transaction, exact state-transition tests): dividing a FANNED
+   block at a cut in the DISPLAYED take. Shape, per her ruling
+   verbatim: the displayed take's first half seeds B, its second half
+   seeds C; **every OTHER active take is duplicated WHOLE onto BOTH
+   successors** (B and C each carry the full fan count); A is
+   released to lineage PRESERVED WHOLE — the W resolution byte-intact
+   (placement tombstoned, reversible by re-pointing; nothing about
+   the duplicate shape changes it); edges `(B derived_from A)` and
+   `(C derived_from A, 'divide')`; no `CutPropagation`, no
+   unique-match gate, no refusal naming any platform. Single-take
+   divide is UNTOUCHED (the ordinary in-place cut). The cut consults
+   the ONE `BoundarySnapping` rule (S4-22: between any two words,
+   word-edge floor, gentle settle); a cut at the block's very start
+   or end still refuses ("nothing to divide") — unchanged.
+2. **Composition with the standing rules (the spec floor — deviations
+   are findings, not choices):** touch-without-churn
+   (`last_touched_at` stamped, churn never); comment travel = the
+   divide-W rule (A keeps originals; copies to B AND C, source
+   `created_at` preserved, deleted comments never travel);
+   presentation INHERITED by both successors; commits NEVER copied;
+   duplicated takes are fresh rows with fresh UUIDs (parent-tree
+   remapped inside the copy set per the poolDragCopy precedent) and
+   are NOT born locked (the poolDragCopy rule); archived takes stay
+   on A in lineage (the W's unmarked-variant precedent — A is
+   preserved whole, nothing is lost); B's chosen/default = the cut
+   first half, C's = the cut second half, duplicates joining each fan
+   behind them in the source fan's order. ONE structural undo entry
+   restoring A's placement whole and cascading the mints away, with
+   the required `redo:` half built from do-time pre-images (exact-row
+   re-apply, never a forward re-run). I10 holds at birth by
+   construction (both successors carry the cut half at minimum).
+   Where any of this forces a genuine choice her ruling doesn't
+   cover, build the most spec-defensible reading and mark it
+   PROVISIONAL in the record — gating ambiguity stops the batch
+   instead.
+3. **The phone's divide door adopts it:** the existing mobile divide
+   door, when the block is FANNED, calls the new operation with the
+   DISPLAYED (peek-aware) take and the snapped cut — flush-first (the
+   R1-4 class: pending buffer flushes before the op reads store
+   bytes). The single-take path stays on plain `divide`. Refusal copy
+   carries no platform name. The door's tests cover: fanned divide
+   lands B/C with full fans; peeked-take divide cuts the PEEKED take;
+   the flush rides in front.
+4. **Dormant for the Mac, proven:** no Mac call site changes; the Mac
+   suite green UNCHANGED by your own run is the proof (the tripwire's
+   standing red stands by identity). Core suite green with the new
+   op's transition tests; spine 51/7 green; mobile suite green.
+   Record all four "Test run with N tests" lines.
+
+**Discipline:** work synchronously — never end your turn with a build
+or test run still in progress. Red-on-old applies to the op's tests
+as birth pins (state-transition tests that define the behavior); any
+BUG found along the way gets the full trace + behavioral-revert pin
+treatment. The operation lands in its own commit(s) BEFORE the phone
+door's commit (the model-change convention). Write the batch record
+into THIS file ("## Stage A, batch A2 — BATCH RECORD"), counts + the
+four suite lines + PROVISIONALs; push `origin mobile` before
+finishing. Author-only calls stop the batch.
