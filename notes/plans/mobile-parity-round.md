@@ -5207,3 +5207,239 @@ reviewer, `notes/REVIEW_PROMPT.md` VERBATIM; findings repo-first as
 "## Stage C review — C3 round 1 findings". Baselines at open:
 **mobile 262/48 · mobile spine 32/7 · perf 9/2 · core 1214/128 ·
 Mac 1245/219 tripwire-only · Mac spine 51/7.**
+
+## Stage C review — C3 round 1 findings (cold reviewer, 2026-08-09)
+
+**Method.** Cold, zero implementation context. Read: `CLAUDE.md`;
+`notes/MobileSoul.md` in full; this plan's PARITY MATRIX (the
+tags/references/scraps/Library/misc families and their citations), the
+MID-CHAIN SITTING's rulings 2/3/9/10, the C3 brief, batch record, and
+acceptance; the refusal-copy inventory; AppSpec §7 (`reference`,
+`setting`, tags) and §9 (tag ops). The full diff `ad4fbcf..c2602d8`
+read file by file (all five new sources, all six modified sources, all
+five test files), plus every core mechanism the batch claims to reuse,
+read in core and on the Mac side: `Operations+Appearance.setStarred` /
+`Queries.starred` / `StarTarget` vs the Mac `StarsModel`/`StarCopy`;
+`Operations+Tag` (createTag/renameTag/deleteTag/applyTag/removeTag) and
+`TagQueries` vs `TagsViewModel`/`TagAssignmentViewModel`/`TagChipAdder`;
+`Operations+Reference`/`ReferenceQueries` vs `ReferencesViewModel.addURL`;
+`PoolAndTray`/`Observations` vs `PoolViewModel` + `BlocksAreaView.submit`;
+`Timeline.LibrarySort`/`observeLibrary`. No fixes made. No "Review foci"
+section exists for this project; the spawn prompt's named checks are
+each answered below (findings or clean bill).
+
+### Findings
+
+**MINOR C3-R1-1 ·
+`App/Variorum/VariorumMobile/Features/Shell/MobileTagManager.swift:188–189`
+— the manager's empty state teaches a road its own door refuses.** The
+hint reads *"No tags yet — + new tag starts the taxonomy; “/” nests
+(life/goals)."* — but the one door that empty state offers (`+ new
+tag`) routes `MobileTagsModel.create` → `ops.createTag(name:)`, which
+REFUSES any name containing "/"
+(`Sources/VariorumCore/Operations/Operations+Tag.swift:15–17`,
+`invalidTagName`). Mechanism: fresh store → Settings → Manage Tags →
+the hint invites typing "life/goals" into the create alert → "Tag
+names can't be empty or contain “/”." The typed-path road exists only
+on the NOTE-tags sheet (`applyTypedPath`), which this sheet does not
+have; the Mac manager's own empty state promises nothing ("No tags
+yet." — `AppSettingsView.swift:244`). *Fix:* reword the hint to the
+doors that exist (create a root, then "New Child Tag…" on its
+long-press) or give the create alert the typed-path walk. Copy-class —
+a string pin, no red-on-old owed beyond it.
+
+**MINOR C3-R1-2 ·
+`App/Variorum/VariorumMobile/Features/Write/MobileReferences.swift:216–250`
+(with the brains at 68–81) — an unopenable URL row renders wearing the
+FILE row's honest sentence, which is then false.** The row view
+branches on `openableURL(reference) != nil`; the else arm shows
+`fileRowNote` ("A file stays on the device where it was added — only
+its name travels here"). `openableURL` returns nil for `kind == .url`
+whenever `reference.url` is nil or `URL(string:)` rejects it — and
+that state is constructible today: `addReference(to:kind:.url,
+name:"x", url:nil)` is legal core (`Operations+Reference.swift:10–29`
+validates nothing about the kind/url pairing), and a synced row can
+carry it. `rowTitle` then labels the row "link" while the sentence
+beneath calls it a file — incoherent copy on the batch's own
+honesty-focused surface. *Fix:* key the honest sentence on
+`reference.kind == .file` (an unparseable URL row wants its own words,
+or a plain non-door row with no sentence); make the branch a pure
+row-kind brain so it pins — the branch living only in the view is part
+of the smell.
+
+**MINOR C3-R1-3 ·
+`App/Variorum/VariorumMobile/Features/Shell/MobileScraps.swift:184–199`
+— the scraps rows are the phone's one non-lazy listing.** The
+section's `ForEach` sits inside a plain `VStack`, and the parent
+`LazyVStack` (`MobileLibraryView.swift:35–41`) cannot help:
+`MobileScrapsSection` is ONE lazy child, so its whole interior
+materializes the moment the Scraps filter shows. The Mac's own
+parallel is lazy (`BlocksAreaView.swift:49–51` — ScrollView →
+LazyVStack → ForEach over the same `PoolItem`s), and the held
+`observePool` fetch is already unbounded (core's standing pool shape),
+so at pool scale the phone pays full-row view construction plus a full
+re-render per observation delivery — the class MobileSoul §2 bans
+("every list windowed"; memory is the phone's own bar). No wrong
+behavior at today's scrap counts; a hazard that grows with her pool.
+*Fix:* restructure so the rows land in a lazy container (the section
+emits rows into the outer LazyVStack context, or carries its own
+ScrollView-level laziness as the Mac does).
+
+**MINOR C3-R1-4 ·
+`MobileNoteTags.swift:58–143` / `MobileScraps.swift:50–121` /
+`MobileTagManager.swift:77–118` / `MobileReferences.swift:58–64` — the
+batch's brains are byte-copies of Mac app-local code with no debt
+record; MobileSoul §3 names this the drift class.** The typed-path
+resolution walk (token-for-token `TagAssignmentViewModel.
+applyTypedPath`), the suggestion rule (=`TagChipAdder.suggestions`),
+the refusal-copy switch (=`TagsViewModel.message`), `depth(of:)`
+(=`TagsViewModel.depth`), the pool observation shape + `activePool`
+rule (=`PoolViewModel`), and the URL normalization
+(=`ReferencesViewModel.addURL`'s inline logic) now exist twice, in two
+app targets, with independent pins. MobileSoul §3: *"mobile never
+forks a brain"* — and for Mac-side brains in app-local code, *"the Mac
+phase should hoist the brain, or the ledger row records the debt
+explicitly."* The batch records neither. What concretely degrades: a
+13e-class Mac change to the typed road, the suggestion cap, or the
+normalization lands in one copy and the platforms silently diverge on
+a behavior promised to be ONE road (the C2-R1-2 drift class, realized
+across platforms instead of surfaces). Architectural — no test pin
+owed; the honest fix is a recorded debt row (parity ledger or a
+PROVISIONAL naming the duplicated brains); hoisting to `Shared/` fires
+the four-suite duty and is a later batch's deliberate call, not a
+review fix.
+
+**NIT C3-R1-5 · `MobileReferences.swift:252–258` + the PC3-2 record —
+remove is offered on FILE rows, which PC3-2's own ground does not
+cover.** The justification is "a row the phone can add it must be able
+to take back" — but the phone cannot add a file reference, and
+removing one tombstones the Mac's bookmark row through sync with no
+restore door anywhere. Defensible (her data, an existing op, the Mac
+panel also removes without confirm) — but the PROVISIONAL's wording
+should cover the file arm, or the menu should omit Remove there.
+
+**NIT C3-R1-6 ·
+`App/Variorum/VariorumMobileTests/MobileLibraryTests.swift:287–295` —
+`theSortVocabularyIsPinned`'s doc comment claims "and the no-op flip"
+but no assertion exercises `setSort`'s same-value guard.** Comment or
+assertion; one line either way.
+
+**NIT C3-R1-7 · `MobileShelfView.swift:73–78` +
+`MobileLibraryView.swift:55–63` — star refusals render on BOTH tab
+roots at once and never clear passively.** `lastError` is one field on
+the one shared model, and both roots render it: a cap refusal fired
+from a Library note row also sits waiting at the shelf's bottom (and
+vice versa), until some later toggle succeeds. The "spoken where the
+door fired" comments overstate. Cosmetic.
+
+**NIT C3-R1-8 (SPECULATIVE) · `MobileScraps.swift:106–121` — the
+nested pool-items observation may outlive the surface.** `start()`'s
+cancellation arm cancels `itemsTask` only via `catch is
+CancellationError`; if GRDB's `AsyncValueObservation` iteration ends
+by RETURNING (not throwing) when the section's `.task` cancels, the
+unstructured `itemsTask` (holding `session`; the model is shell-owned
+and app-long) keeps the unbounded pool render re-fetching at write
+rate after the user leaves the Scraps filter. Byte-identical to the
+Mac `PoolViewModel`, so parity holds either way; SPECULATIVE because
+the cancellation path's throw-vs-return behavior was not traced into
+GRDB.
+
+### Clean bill (load-bearing things specifically checked and found solid)
+
+- **Zero `Sources/VariorumCore/`, zero `App/Variorum/Shared/`, zero
+  Mac-side, zero schema, zero `Sync/`, zero pbxproj** — verified by own
+  `git diff --name-only ad4fbcf..c2602d8`: 17 files, all
+  `VariorumMobile`(+Tests) + this plan file. The small-Queries
+  allowance never fired — every read and act pre-existed, verified per
+  symbol in core: `createTag`/`renameTag`/`deleteTag`/`applyTag`/
+  `removeTag`; `allTags`/`postTags`/`observeTags` (all live-only);
+  `addReference`/`removeReference`/`Queries.references`; `createPool`/
+  `newBlock`/`pools`/`poolListing`/`observePools`/`observePool`;
+  `observeLibrary(sort:)` — the parameter existed since Phase 10;
+  `setStarred`/`Queries.starred`/`StarTarget`/`starLimitReached`.
+- **Stars: the mechanism IS the Mac's own, and nothing new syncs
+  incoherently.** The phone model mirrors `StarsModel` (same core
+  write — append order, cap-refuses-not-evicts, every-write self-heal;
+  same one read rule — live targets only, bounded by the cap), the
+  door words are `StarCopy`'s, and the stored value is ids-only
+  (`post:`/`reading:` keys under the `'starred'` setting) — plain
+  metadata CAS, ZERO schema, consistent with the 14b `setting.value`
+  PLAIN fence (no user-authored prose; the `shelf_pins` class
+  exactly). The store-truth test asserts the exact stored JSON; the
+  cap test proves refusal + no eviction + phone wording (never
+  "sidebar", never "Mac").
+- **The delete-with-subtree consequence counts the SUBTREE, not direct
+  children.** `subtreeCount` counts all live descendants by path
+  prefix — the same live-only prefix rule `deleteTag`'s SQL applies
+  (`substr(path,1,N) = prefix AND deleted_at IS NULL`) — and the
+  test's fixture is two levels deep (goals + 2026 under life = 2), so
+  the depth claim is proven, not assumed. The act's tombstones are
+  exact (3 dead tag rows, S2; the sibling's application survives);
+  both confirm arms pinned platform-free. "There is no undo for this"
+  is honest: no restoreTag op exists and structural undo excludes
+  tags.
+- **renameTag's ripple routes the SAME core op as the Mac** (the
+  one-transaction subtree path rewrite, `Operations+Tag.swift:35–71`),
+  proven through the phone door across three path depths.
+- **The typed-tag road is token-identical to the Mac N24 brain**
+  (deepest-live-prefix resolution → creates + leaf-apply in one
+  serialized runner turn → `alreadyTagged` no-op; slash noise
+  forgiven), proven end-to-end including leaf-only application and the
+  empty-type refusal in phone words.
+- **The file-reference copy is honest-neutral as claimed** — the
+  sentence states the model fact (`file_bookmark` LOCAL-ONLY, AppSpec
+  §7) and names no platform, pinned; file rows open nothing with no
+  invented refusal. (C3-R1-2 is the URL-row arm of that branch, not
+  the file arm.)
+- **addURL is the Mac's exact normalization** (trim → "://" check →
+  https prefix → URL + host guard, named by host), refusals in phone
+  words, blank a quiet no-op, unloadable mints nothing — all pinned;
+  rows list in the panel's own `(position, id)` order.
+- **The scrap mint is byte-mirrored against `BlocksAreaView.submit`,
+  including the fine grain:** both trim only for the emptiness guard
+  and mint the UNTRIMMED text; `createPool(title: "Pool")` only when
+  none exists; the mint lands in the ACTIVE pool; oldest-first
+  default; pool-created-once with exact rows (2 placements, 2 live
+  variants — I10 at birth) all pinned.
+- **The sort picker is read-only as claimed**: `setSort` flips a
+  session property — no op call, no setting write, nothing persisted;
+  the four words map onto the core `LibrarySort`'s own COALESCE stamp
+  expressions (nothing invented); rendered on ALL only, where the
+  other filters' orders would make the door a lie (P-2); the
+  `.task(id:)` restart contract is mirrored in the store-truth test
+  across three stamps.
+- **The starred face behaves**: renders only when non-empty; rows
+  navigate (book → contents, note → page, focus false); names ride the
+  ONE DisplayTitle chain with the untitled-star arm proven against a
+  created-day expectation (`StarredItem.name` alone would render
+  blank — the C2-R1-2 fix's `containerHeader.createdAt` carrying it).
+- **Zero new user-facing "Mac" strings** — my own grep over the diff's
+  added lines: no hit; the batch's three sensitive strings (delete
+  consequence, file sentence, star cap) each pinned platform-free.
+- **Tutorial-as-spec held per owning commit** — all six door commits
+  touch `MobileTutorialSeeder.swift` (verified by per-commit log); no
+  new lesson; the shape suites ride the green full run.
+- **The refusal inventory owns no C3 rows** — re-walked the fifteen:
+  C2's are dissolved, the rest name C4/C5/PL-3; none was C3's.
+- Noted, not a finding: the manager's `ORDER BY path` listing can
+  interleave an unrelated root between a parent and its indented child
+  (`"a"`, `"a-b"`, then `"a/x"` at depth 1 — '-' sorts before '/') —
+  the Mac manager renders the identical order with the identical depth
+  rule, so the phone mirrors rather than forks; the nested rows'
+  visible full paths carry the truth.
+
+### This reviewer's runs (iPhone 17 Pro / iOS 26.2 simulator; core from the repo root)
+
+- Full mobile suite: **262 tests, 262 passed, 0 failed — TEST
+  SUCCEEDED** (xcresult totals; the 246/42 baseline + the batch's 16/6
+  exactly: TagManager 3 · NoteTags 2 · References 3 · Scraps 3 ·
+  LibrarySort 2 · Stars 3).
+- Mobile spine by its seven suite type names: **"Test run with 32
+  tests in 7 suites passed"** — TEST SUCCEEDED.
+- Perf by name (`MobilePerfFixtureTests` · `MobilePerfWalkTests`):
+  **"Test run with 9 tests in 2 suites passed"** — TEST SUCCEEDED.
+- Core: **"Test run with 1214 tests in 128 suites passed"** — the
+  baseline exact.
+- Mac suite/spine deliberately not run: zero Mac-side and zero
+  `Shared/` lines in the diff (verified); the recorded 1245/219
+  tripwire-only + 51/7 baselines stand.
