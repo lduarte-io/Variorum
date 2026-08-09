@@ -191,7 +191,7 @@ struct MobileTakesChromeTests {
             probe.frame = CGRect(x: 0, y: 0, width: 393, height: 100)
             probe.layoutIfNeeded()
             let containerWidth = probe.textContainer.size.width
-            let pad: CGFloat = 5 // NSTextContainer.lineFragmentPadding default
+            let pad = probe.textContainer.lineFragmentPadding // read live so the guard can't silently degrade (ladder R2 NIT)
             let count = Int(((containerWidth - 43) - pad) / charW)
             let filling = String(repeating: "a", count: count)
 
@@ -255,7 +255,7 @@ struct MobileTakesChromeTests {
             probe.frame = CGRect(x: 0, y: 0, width: 393, height: 100)
             probe.layoutIfNeeded()
             let containerWidth = probe.textContainer.size.width
-            let pad: CGFloat = 5 // NSTextContainer.lineFragmentPadding default
+            let pad = probe.textContainer.lineFragmentPadding // read live so the guard can't silently degrade (ladder R2 NIT)
             let reserved = MobileTakesChromeController.gutterWidth
                 + MobileTakesChromeController.commentMarkRoom
             let center = Int(((containerWidth - reserved) - pad) / charW)

@@ -45,10 +45,11 @@ session and is the launchable unit the author asked for.*
 > never let the tree sit unpushed at a stopping point.** Update the
 > CURRENT-STAGE pointer below at every stage close.
 
-**CURRENT STAGE → A (the floor) — KICKED OFF 2026-08-09 as the first
-leg of a CHAINED A→D run (her ruling at this kickoff — see STAGE A
-KICKOFF below; stages still run as their own phases, but no author
-gate between them; ONE combined sitting at the chain's end).**
+**CURRENT STAGE → B (the tutorial book spine + the performance
+fixture) — Stage A CLOSED 2026-08-09 (ladder closed at round 2; the
+closeout section below has the record); the chain continues per her
+kickoff ruling (no author gate between stages; ONE combined sitting
+at the chain's end).**
 
 ## The mandate (what the author ruled this round INTO existence for)
 
@@ -2142,3 +2143,59 @@ No new BLOCKER/MAJOR — **round 3 is not triggered.**
   everything after it is two mobile files + this plan (my own
   diff-scope verification above); the 1245/219-tripwire-only and 51/7
   baselines stand.
+
+## Stage A ladder — round 2 ADJUDICATED; THE LADDER CLOSES · STAGE A CLOSED (architect, 2026-08-09)
+
+**Round-2 verdicts:** all five fixes HOLD (the reviewer re-verified
+each by its own reads, re-runs, and eyes — the evidence set
+included); no new BLOCKER/MAJOR — **the ladder closes at round 2**
+(round 3 not triggered). The three leftovers, dispositioned:
+
+- **MINOR (the FIX-2 class untreated at the two STANDING single-pass
+  fan-copy remaps — `poolDragCopy` and `copyPost`) → RECORDED with
+  owner 13e** in `notes/KnownIssuesAndTechDebt.md` (this commit).
+  Reasoning: pre-existing Mac-era core code, a store-safe thrown
+  refusal (not the crash class FIX-2 killed), unreachable until
+  13e's ruled reorder-takes creates the premise — fixing more core
+  after the ladder closed, from a mobile stage, is the wrong seam;
+  13e lands it WITH reorder-takes on FIX-2's exact template.
+- **NIT (FIX-5 addendum's windowed arithmetic) → precision note
+  here:** the addendum's larger figures reflect the toolbar's
+  stretch distribution, not the 44+2 floor; the pin's ≥-floor form
+  covers both distributions and no record claim is load-bearing on
+  the larger numbers.
+- **NIT (FIX-3 probe hard-coded `pad = 5`) → FIXED at the
+  architect's hand** (this commit; the `cad3312` precedent): both
+  probe sites now read `probe.textContainer.lineFragmentPadding`
+  live, so the guard cannot silently degrade if TK2's default moves.
+  Mobile re-run by the architect: **191/28 green**.
+
+**STAGE A CLOSED.** Shipped across A1–A3 + the ladder: the takes
+browser's keyboard-blind scroll fixed (her defect, surface
+re-adjudicated on evidence) · iPhone-only/portrait-only with a
+built-product pin · Q-M1(a) seed-from-shown-bytes · the note seal
+lock/unlock door with every sealed redirect dissolved ·
+**`divideDuplicating` — her Q-M2 duplicate-shape divide as a shared
+core operation + the phone's fanned door** (AppSpec §9 entry added
+this commit — sanctioned recording of her ruling; the Mac dormant
+until 13j) · the Aa bar condensation (ruled expanding row; the
+clipping MAJOR found by honest evidence and fixed with a
+structurally-windowless pin) · P35 contents-first · P33 shelf New
+Note · P5 long-press picker · P24 typewriter room · P26/P43 one
+register · P38's corner (refuted-by-probe, guard kept) · the
+spacing floor with an honest before/after evidence set · FIX-2's
+latent crash killed in core. **Final counts (architect's own runs
+where they changed):** mobile **191/28** · core **1214/128** · Mac
+**1245/219 tripwire-only** (the corrected live baseline) · spine
+**51/7**.
+
+**Deliberately deferred to the chain's end/merge seam (recorded, not
+skipped):** the AppSpec §14 delta-archive dance and the master-plan
+mobile-row update — both files are under active mid-14c edit on
+`main`, and a cross-branch dance now buys conflicts for no reader
+benefit; the §9 entry carries inline provenance meanwhile. **The end
+bundle accumulates from A:** PA1-2 · PA1-3 (device re-check, both
+surfaces) · PA2-1 · PA2-2 · PA3-1 (floor constants) · PA3-2 · PA3-3
+· the Aa reset cadence · the A-stage screenshot set
+(`notes/plans/mobile-a3-screens/`, defect shot preserved beside the
+fix). PA1-1 resolved in A3.
