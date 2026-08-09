@@ -3357,3 +3357,36 @@ the one-line shape.
   suites passed after 3.616 seconds"** — TEST SUCCEEDED.
 - Core / Mac / Mac-spine: not run (zero shared lines in the diff —
   the standing only-if-shared condition).
+
+## Stage B review — round 1 ADJUDICATION (architect, 2026-08-09; the fix session spawns on this record)
+
+No BLOCKER/MAJOR. All five findings adjudicated FIX — each is small,
+none reopens design:
+
+- **MINOR 1 → FIX-B1 (the reservation-style leak).** The reviewer's
+  mechanism is concrete and red-on-old pinnable: a mid-paragraph
+  Enter in a fanned block strands `tailIndent` on the continuation
+  paragraph (the governing-character gate can never heal what it
+  never governs), and the styled separator newline feeds UIKit
+  `typingAttributes` so tails typed after a one-paragraph fanned
+  block inherit a permanent 30 pt dent. Fix both roads (heal beyond
+  the governing paragraph; keep `typingAttributes` clean of
+  reservation styles); red-on-old pin per road, behavioral revert.
+- **MINOR 2 → FIX-B2 (honest flatness teeth + the double-build).**
+  Two halves, both owed: (a) single-build `blockRangesByID()` per
+  refresh event (it is built twice, once per controller,
+  unconditionally on every keystroke/scroll tick); (b) after (a),
+  re-measure the post-axis ratios — if they then bind under 3.0×,
+  restore the ratio as the pins' teeth; if they genuinely cannot
+  (platform floor effects), RENAME the pins to what they enforce
+  (floors) — a pin named "flat" that enforces a floor is the
+  record-claim class. Report which road the measurement chose.
+- **NIT 1 → FIX-B3:** the two surviving pins' narration flips to the
+  reservation mechanism (comments/derivation only; assertions
+  untouched).
+- **NIT 2 → FIX-B4:** the pocket-guide door routes through the
+  tested `findOrSeed` seam AND actually opens the guide (a door
+  that says "Open" and doesn't navigate is the fire-and-DO class,
+  DEBUG-only or not).
+- **NIT 3 → FIX-B5:** the replace-confirm continuation is cancelled
+  on sheet teardown (no leaked continuation, no held latch).
