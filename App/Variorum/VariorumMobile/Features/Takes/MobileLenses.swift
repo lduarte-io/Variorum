@@ -259,7 +259,10 @@ final class MobileLensesModel {
                 // but not `effective`) shows nothing to return from, and
                 // clearing it would tombstone exactly the row the honest
                 // dangle meta reports and 13j's restore road revives
-                // (C5 ladder MINOR-3).
+                // (C5 ladder MINOR-3). A pick on a DEPARTED block (live
+                // take, block released from this note) still clears —
+                // byte-identical to the prior behavior, in round 1's
+                // recorded departed-blocks family (R2 NIT-2's precision).
                 for blockID in existing.keys.sorted()
                 where picks[blockID] == nil && effective[blockID] != nil {
                     try ops.clearLensChoice(lens: lensID, block: blockID)

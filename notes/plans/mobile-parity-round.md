@@ -45,11 +45,11 @@ session and is the launchable unit the author asked for.*
 > never let the tree sit unpushed at a stopping point.** Update the
 > CURRENT-STAGE pointer below at every stage close.
 
-**CURRENT STAGE → C (capability parity by family) — Stages A and B
-CLOSED 2026-08-09 (each ladder closed at round 2; the closeout
-sections below have the records); the chain continues per her
-kickoff ruling (no author gate between stages; ONE combined sitting
-at the chain's end).**
+**CURRENT STAGE → D (polish & the look round, build half) — Stages
+A, B, and C CLOSED 2026-08-09 (every ladder closed at round 2; the
+closeout sections below have the records); the chain continues per
+her kickoff ruling (no author gate between stages; ONE combined
+sitting at the chain's end).**
 
 ## The mandate (what the author ruled this round INTO existence for)
 
@@ -7382,3 +7382,35 @@ mobile target and its tests.
 **VERDICT: the C5 ladder CLOSES at round 2 — all three fixes HOLD,
 no new BLOCKER/MAJOR; two durability NITs recorded above for the
 backlog, no round 3 owed.**
+
+## Stage C — the C5 LADDER CLOSES at round 2 · STAGE C CLOSED (architect, 2026-08-09)
+
+Round 2: all three fixes HOLD (the reviewer re-ran my behavioral
+revert independently AND proved the widened sweep's reach by
+planting a live offender — caught by name); no new BLOCKER/MAJOR;
+the two round-2 NITs FIXED at the architect's hand this commit
+(the per-root existence guard so a rename can never silently shrink
+the sweep; the departed-block comment precision), mobile re-run
+**306/58 green** by own hand.
+
+**STAGE C CLOSED.** The stage the parity ruling was FOR: from C1's
+matrix (71 registry + 20 registry-blind capabilities, every row
+ruled) through five build batches — **C2** books & membership
+(create/pin/details/smart-from-tags/chip/rename/entry-date) ·
+**C3** tags in full + references + scraps + sort + stars · **C4a**
+takes completeness + locks + history + the S5 three-road
+discoverability proof · **C4b** the editor fill (insert-below, ten
+acts in the Aa capsule, find, extract/make-block, the block list) ·
+**C5** lenses in her ruled saved-peek shape + the carry-all fanned
+merge — with FIVE ladders closed at round 2 each, her eleven
+mid-chain rulings folded in as they arrived, and **the no-redirect
+principle now PROVEN BY PIN: zero user-facing "Mac" strings in the
+mobile app, swept across both compiled roots.** Two KnownIssues
+rows recorded with owners (the single-pass remaps → 13e; the six
+copied brains → the mobile project row). **Final counts: mobile
+306/58 · mobile spine 33/7 · perf 9/2 · core 1215/128 · Mac
+1245/219 tripwire-only · Mac spine 51/7.** The end bundle now
+holds every PROVISIONAL from A through C5 (the PC-series), the
+A/B number tables, the screenshot sets, and the two NAMED sitting
+questions (the Mac's carry-all-default; reopen-in-last-lens).
+**CURRENT STAGE → D.**

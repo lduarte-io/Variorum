@@ -1073,6 +1073,11 @@ struct MobileNoRedirectSweepTests {
         var walked = 0
         var offenders: [String] = []
         for root in roots {
+            // A missing root yields an EMPTY enumerator, not nil (C5 R2
+            // NIT-1) — assert each root exists so a rename can never
+            // silently shrink the walk back to one root.
+            #expect(FileManager.default.fileExists(atPath: root.path),
+                    "sweep root missing: \(root.lastPathComponent)")
             let walk = try #require(FileManager.default.enumerator(
                 at: root, includingPropertiesForKeys: nil))
             for case let url as URL in walk where url.pathExtension == "swift" {
