@@ -1687,6 +1687,31 @@ FIX-1…FIX-4; the architect's-hand items are done in this commit (the
   benign-by-construction — recorded here so no reader infers
   door-level atomicity.
 
+### Round 1.5 — the fix pass's NEW finding, adjudicated (architect, 2026-08-09; FIX-5 issued to the same fix session BEFORE round 2, so the re-review gets a complete fix set)
+
+**The finding (fix session, during FIX-1's honest re-capture;
+verified by the architect's own eyes on the re-captured shot):** the
+expanded Aa strip renders **× and ⇥ CLIPPED to edge slivers** —
+seven circle-per-item toolbar items overflow the 402 pt bar; steady
+state, not a transient (byte-identical re-capture at +3 s). The
+seven acts stay pinned at the SELECTOR level, but on-screen
+visibility of the outer two was never pinned — exactly how it
+escaped A3's suite. Severity adjudicated **MAJOR**: the collapse
+door (×) is the way back out of the strip and is barely tappable;
+⇥'s door is effectively invisible. **FIX-5:** all seven items fully
+visible and tappable within the bar's width, the ruling otherwise
+untouched (in-place strip · LK8 order · Aa · ⑂ · ⋯ at rest) — the
+layout mechanics (compact item style, tightened insets, whatever
+fits honestly) are the fix session's call; NO item may leave the
+strip and NO scroll may hide one (a hidden door is the clipped door
+with extra steps). Red-on-old pin: every strip item's frame fully
+inside the bar bounds — red on today's code by the finding itself;
+windowless host preferred per the corrected machinery lesson (a
+window-hosting pin buys the full-suite-run duty). The
+`after-kbar-formatting` capture re-taken AFTER the fix (the current
+one stays the honest record of the defect in the fix-pass record's
+correction note).
+
 ## Stage A review — round 1 FIX-PASS RECORD (fix session, 2026-08-09)
 
 All four adjudicated fixes executed, one commit each, in the order
