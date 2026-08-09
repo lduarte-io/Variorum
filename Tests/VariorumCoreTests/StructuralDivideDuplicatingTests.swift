@@ -215,6 +215,33 @@ struct StructuralDivideDuplicatingTests {
         }
     }
 
+    @Test func aLockedDisplayedTakeDividesLegally() throws {
+        // Stage A ladder round 1, FIX-4: the op doc's "a LOCKED displayed
+        // take is deliberately legal" claim, pinned — buffers are COPIED,
+        // never edited (divideW's locked-marked rule). The lock stays on
+        // A's take, byte-untouched; nothing minted is born locked.
+        try withOperations { ops, db in
+            let world = try WWorld(ops)
+            try ops.lockVariant(world.v1)
+
+            let result = try ops.divideDuplicating(
+                world.a.block.id, displayedVariantID: world.v1, cut: 11)
+
+            #expect(result.first.variants.map(\.workingText)
+                == ["One alpha.", "Two intact.", "Three start.\nThree end."])
+            #expect(result.second.variants.map(\.workingText)
+                == ["One omega.", "Two intact.", "Three start.\nThree end."])
+            #expect(try db.fetchInt(
+                "SELECT locked FROM variant WHERE id = ?", [world.v1]) == 1)
+            #expect(try db.fetchString(
+                "SELECT working_text FROM variant WHERE id = ?", [world.v1])
+                == "One alpha. One omega.")
+            for variant in result.first.variants + result.second.variants {
+                #expect(variant.locked == false)
+            }
+        }
+    }
+
     @Test func commitsAreNeverCopied() throws {
         try withOperations { ops, db in
             let world = try WWorld(ops)
