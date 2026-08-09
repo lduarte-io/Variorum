@@ -63,6 +63,10 @@ final class MobileBlockMenuController {
     /// take through `MobileTakeHistoryController`).
     static let commitTitle = "Commit Take"
     static let historyTitle = "Take History…"
+    /// The insert door (parity C4b item 1 — the registry's own verb).
+    /// It heads the structural family: minting under the block is the
+    /// gentlest structural act, so it reads before the knives.
+    static let insertBelowTitle = "New Block Below"
     static let divideTitle = "Divide Block"
     static let mergeTitle = "Merge with Previous"
     static let deleteTitle = "Delete Block"
@@ -75,7 +79,7 @@ final class MobileBlockMenuController {
     static var rowTitles: [String] {
         [takesTitle, commentsTitle, calloutTitle, nameTitle,
          commitTitle, historyTitle,
-         divideTitle, mergeTitle, deleteTitle]
+         insertBelowTitle, divideTitle, mergeTitle, deleteTitle]
     }
 
     /// The callout submenu's titles in order (separators excluded) —
@@ -113,6 +117,10 @@ final class MobileBlockMenuController {
         })
         elements.append(UIAction(title: cased(Self.historyTitle)) { [weak self] _ in
             self?.model?.takeHistory.open(blockID: blockID)
+        })
+        elements.append(UIAction(title: cased(Self.insertBelowTitle)) { [weak self] _ in
+            guard let model = self?.model else { return }
+            Task { await model.structural.insertBlockBelow(blockID: blockID) }
         })
         elements.append(UIAction(title: cased(Self.divideTitle)) { [weak self] _ in
             guard let model = self?.model else { return }

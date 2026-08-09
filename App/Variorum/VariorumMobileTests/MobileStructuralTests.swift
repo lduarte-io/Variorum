@@ -613,6 +613,83 @@ struct MobileStructuralTests {
         }
     }
 
+    // MARK: Insert block below (parity C4b item 1)
+
+    /// The ⋯ row's act (birth pin — the door did not exist before C4b):
+    /// an EMPTY block mints right under the named block through the
+    /// standing `newBlock(at: .after(...))`, I10 holds at birth (the
+    /// empty variant IS the one live take), the caret lands in it, and
+    /// the Mac door's own status speaks. The awkward
+    /// type-into-next-then-divide road retires as THE road; the door
+    /// stays honest under it.
+    @Test func insertBlockBelowMintsAnEmptyBlockAndLandsTheCaret() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedProsePost(session)
+            let (model, surface) = await makeSurfaceEditor(session, postID: seed.postID)
+            surface.layoutIfNeeded()
+
+            await model.structural.insertBlockBelow(blockID: seed.blockA)
+
+            #expect(model.statusMessage == MobileStructuralController.blockInsertedStatus)
+            let placements = try await livePlacementBlockIDs(db, postID: seed.postID)
+            #expect(placements.count == 3)
+            #expect(placements.first == seed.blockA)
+            #expect(placements.last == seed.blockB)
+            let minted = placements[1]
+            #expect(try await liveBlockTexts(db, postID: seed.postID)
+                == ["Alpha beta. Gamma delta.", "", "Second block prose."])
+            // I10 at birth: exactly one live active (empty) take.
+            #expect(try await activeFanTexts(db, blockID: minted) == [""])
+            // The surface healed and the caret sits in the new block.
+            #expect(model.index.entries.map(\.blockID) == placements)
+            let range = try #require(model.rangeOfBlock(minted))
+            #expect(surface.textView.selectedRange
+                == NSRange(location: range.location, length: 0))
+        }
+    }
+
+    /// The door's guards: a sealed note refuses in phone words with
+    /// nothing minted, and a REFUSED flush refuses the act (the
+    /// structural-act contract's second half — re-rendering the surface
+    /// over unlandable pending bytes is the text-loss class).
+    @Test func insertBlockBelowRefusesUnderTheSealAndUnderARefusedFlush() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedProsePost(session)
+            let (model, storage) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            // Arm a refused flush: type into A's take, lock it remotely.
+            let range = try #require(model.rangeOfBlock(seed.blockA))
+            typeEdit(model, storage,
+                     range: NSRange(location: range.upperBound, length: 0),
+                     replacement: " Typed.")
+            #expect(model.autosave.isDirty)
+            try await session.runner.run { [a1 = seed.a1] ops in
+                try ops.lockVariant(a1)
+            }
+            await model.structural.insertBlockBelow(blockID: seed.blockA)
+            #expect(model.statusMessage
+                == "Unsaved changes couldn't be written — resolve that first, then retry.")
+            #expect(try await livePlacementBlockIDs(db, postID: seed.postID).count == 2)
+            #expect(model.autosave.isDirty)
+
+            // The seal's arm (a fresh, clean world state: unlock + flush).
+            try await session.runner.run { [a1 = seed.a1] ops in
+                try ops.unlockVariant(a1)
+            }
+            await model.autosave.flushNow()
+            try await session.runner.run { [postID = seed.postID] ops in
+                try ops.lockPost(postID)
+            }
+            model.report(nil)
+            await model.structural.insertBlockBelow(blockID: seed.blockA)
+            #expect(model.statusMessage
+                == "This note is locked — unlock it to add a block.")
+            #expect(model.statusMessage?.contains("Mac") == false)
+            #expect(try await livePlacementBlockIDs(db, postID: seed.postID).count == 2)
+        }
+    }
+
     // MARK: The S3 round-2 NIT's pin
 
     @Test func aCancelledLoadOnceNeverLandsAsAnError() async throws {

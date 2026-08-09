@@ -263,6 +263,52 @@ final class MobileStructuralController {
         }
     }
 
+    // MARK: - Insert block below (parity C4b item 1 — the Mac 13b 4D act's
+    // phone door; the matrix's "mechanical" row)
+
+    /// Mints an EMPTY block right under the given block and lands the
+    /// caret in it — `newBlock(text: "", at: .after(...))`, the Mac
+    /// `insertBlockBelowCaret`'s exact op (I10 holds: the empty variant IS
+    /// the block's one live take; blank takes render as the kept line).
+    /// The awkward type-into-next-then-divide road retires as THE road;
+    /// the door rides the ⋯ menu, which already resolves the caret's
+    /// block and refuses honestly in the open tail. Same structural-act
+    /// contract as every sibling: one flight, flush-first (a refused
+    /// flush refuses the act — the insert itself reads no buffer, but a
+    /// landed insert re-renders the surface, and re-rendering over
+    /// unlandable pending bytes is the text-loss class the contract
+    /// exists to kill), store-led settle, caret by identity.
+    func insertBlockBelow(blockID: String) async {
+        guard let model else { return }
+        guard !structuralInFlight else {
+            model.report("Another structural change is still landing.")
+            return
+        }
+        structuralInFlight = true
+        defer { structuralInFlight = false }
+
+        if model.isSealed {
+            model.report("This note is locked — unlock it to add a block.")
+            return
+        }
+        guard await flushPendingText() else { return }
+        do {
+            let result = try await session.runner.run { [postID = model.postID] ops in
+                try ops.newBlock(in: postID, text: "", at: .after(blockID))
+            }
+            model.report(Self.blockInsertedStatus)
+            await model.refreshTakesFromStore()
+            if let range = model.rangeOfBlock(result.block.id) {
+                model.textView?.selectedRange = NSRange(location: range.location, length: 0)
+            }
+        } catch {
+            model.report(Self.refusalMessage(error, act: "add a block"))
+        }
+    }
+
+    /// The Mac door's own note, verbatim (one sentence, both platforms).
+    static let blockInsertedStatus = "New block added below — type away."
+
     // MARK: - Delete block (the ⋯ menu's destructive act — S4 ladder MAJOR 1)
 
     /// Deletes a block through the SAME structural-act contract as

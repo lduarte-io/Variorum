@@ -318,7 +318,7 @@ enum MobileTutorialSeeder {
             "The bottom bar above the keyboard is the whole toolkit: Aa opens "
             + "the formatting strip, ⑂ opens the takes of the block you're in, "
             + "and ⋯ holds the block's own acts — comments, callout, "
-            + "savepoints, divide, merge, delete.",
+            + "savepoints, a new block below, divide, merge, delete.",
 
             "Your writing is always autosaved; a SAVEPOINT is the "
             + "deliberate extra. Commit Take, in ⋯, keeps the exact text "
