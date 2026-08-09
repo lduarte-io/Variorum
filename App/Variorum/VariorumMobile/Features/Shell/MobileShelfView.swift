@@ -132,6 +132,16 @@ struct MobileShelfView<TabBar: View>: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        // Pin/unpin (parity C2): the long-press menu — the act belongs
+        // where the list it orders lives (the Mac shelf row's own context
+        // menu, the phone's long-press grammar). One state-mirroring door;
+        // the book's other acts live on its details surface, not here.
+        .contextMenu {
+            let pinned = model.pins.contains(book.reading.id)
+            Button(tokens.chromeLabel(MobileShelfFaces.pinDoorTitle(pinned: pinned))) {
+                Task { await model.setPinned(book.reading.id, pinned: !pinned) }
+            }
+        }
     }
 
     /// "✎ today's entry ▊" — create-or-open, straight into the editor.

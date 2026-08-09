@@ -88,6 +88,13 @@ nonisolated enum MobileShelfFaces {
         return parts.joined(separator: " · ")
     }
 
+    /// The pin door's word, state-mirroring (parity C2 — the Mac shelf
+    /// menu's own words; voice-cased at render). Pure so the door's
+    /// vocabulary is pinned, not promised.
+    static func pinDoorTitle(pinned: Bool) -> String {
+        pinned ? "Unpin from Shelf Top" : "Pin to Shelf Top"
+    }
+
     /// Shelf order — the Mac `ShelfViewModel.ordered` SEMANTICS mirrored
     /// (pinned books first in pin order (R38), then journal-profile books
     /// by name, then the rest by name).

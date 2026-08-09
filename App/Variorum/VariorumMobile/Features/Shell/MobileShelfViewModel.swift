@@ -90,6 +90,21 @@ final class MobileShelfViewModel {
             isDaily: book.reading.id == dailyBookID)
     }
 
+    /// Pin / unpin (parity C2 — the [B1] record's deliberately-deferred
+    /// ACT; the phone has RENDERED pin order since S3): one reversible
+    /// toggle through the core's own `setShelfPinned` (append-to-pin-order
+    /// semantics, idempotent both ways — R38's letter).
+    func setPinned(_ readingID: String, pinned: Bool) async {
+        do {
+            try await session.runner.run { ops in
+                try ops.setShelfPinned(readingID, pinned: pinned)
+            }
+            lastError = nil
+        } catch {
+            lastError = String(describing: error)
+        }
+    }
+
     /// + New Note (P33, parity A3 — Library's twin through the ONE
     /// shared mint): a nameless bookless note, opened for writing.
     func newNote() async -> String? {
