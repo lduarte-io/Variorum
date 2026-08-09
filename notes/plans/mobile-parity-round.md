@@ -6441,3 +6441,211 @@ records + acceptances the reviewer's anchor). Fresh cold reviewer,
 C review — C4 round 1 findings". Baselines at open: **mobile 296/56
 · mobile spine 32/7 · perf 9/2 · core 1215/128 · Mac 1245/219
 tripwire-only · Mac spine 51/7.**
+
+## Stage C review — C4 round 1 findings (cold reviewer, 2026-08-09)
+
+**Method.** `notes/REVIEW_PROMPT.md` executed verbatim, cold. Read in
+full: the C4a/C4b briefs + batch records + acceptances, the PARITY
+MATRIX's takes/writing rows, the MID-CHAIN SITTING rulings (5 and 11),
+the refusal-copy inventory, `notes/MobileSoul.md`, AppSpec §9's
+lock/archive/commit/extract/divide entries + §12's TOC paragraph,
+SyncSpec §6's S5 row, TEXTKIT2_NOTES §2/§3. The combined diff
+`36ab18d..667f4c6` read file-by-file in its entirety (all 29 files);
+the Mac's `EditorSurfaceController` make-block body and
+`StructuralGesturePlanner` read beside the phone's new callers for
+byte-parity; every load-bearing record claim chased to its test or
+code. All suites re-run by this reviewer's own hand (counts at the
+bottom).
+
+### Findings
+
+1. **[MINOR] · `App/Variorum/VariorumMobile/Features/Takes/MobileTakeHistory.swift`
+   (`refresh()`) · the stale-read guard compares the BLOCK only, not
+   the captured take.** Mechanism: `refresh()` captures `variantID` at
+   entry, awaits the DB read, then guards `openBlockID == blockID`
+   before writing `items`. `variantID` is captured at `open()` (the
+   recorded held-for-the-sheet's-life design). Close the sheet, flip
+   the block's displayed take on the page, reopen on the SAME block —
+   the reopened sheet's `variantID` is the new take, but a first-open
+   refresh still in flight passes the block-only guard and can land
+   LAST, listing the OLD take's history under the new capture until
+   the next projection ingest re-reads. Reachability is one in-flight
+   DB read's latency across a close→flip→reopen by hand — narrow, and
+   it self-heals on any delivery — and the window is not deterministically
+   pinnable through the current seams (the read is not injectable), so
+   the fix protocol may fairly rank it hygiene rather than bug-class.
+   Proposed fix: extend the guard one clause —
+   `guard openBlockID == blockID, self.variantID == variantID` — so a
+   stale in-flight read can never publish under a newer capture.
+   (`reloadArchived()` has no analogous hazard: its data is per-block
+   and its guard already covers the block.)
+
+2. **[NIT] · `App/Variorum/VariorumMobile/Features/Write/MobileBlockList.swift`
+   (the sheet's `.task` refresh) · the open list never re-reads on a
+   delivery.** The rows load once per presentation; a remote divide or
+   block arrival landing WHILE the sheet is open (MobileSoul §5.3:
+   offline/sync races are the phone's normal) leaves the list one
+   delivery stale — the record's "the list is the census" is true at
+   open-cadence only. Honesty is preserved (a tap on a vanished block
+   refuses in the pinned words; a tap on a live row jumps correctly),
+   so this is a small staleness hazard, not wrong behavior. A
+   `projectionDidChange`-style re-read while presented — or a line in
+   the recorded judgment saying open-cadence is the deliberate scope —
+   would close it.
+
+3. **[NIT] · `App/Variorum/VariorumMobile/Features/Write/MobileStructural.swift:475`
+   (`blockInsertedStatus`) · the shared sentence is now THREE
+   literals.** "New block added below — type away." exists verbatim at
+   Mac `TakesViewModel.swift:1402`, Mac `EditorSurfaceController.swift:385`,
+   and the new mobile static. The record's "shared verbatim" is
+   by value, not by symbol; the one-vocabulary discipline elsewhere
+   (this batch's own refusal statics) pins copy so it cannot fork.
+   Cross-target sharing would need a Shared home, but the Mac's own
+   two literals could at least read one constant. Drift hazard only —
+   no behavior at stake.
+
+4. **[NIT] · `App/Variorum/VariorumMobile/Features/Takes/MobileTakeHistorySheetView.swift`
+   (`renderRows`) · every savepoint materializes as a UIView on every
+   render, unwindowed and without reuse.** Cost ∝ the take's commit
+   count — bounded by one variant's history (P1-coherent as the
+   open-cost class, like the TOC's recorded judgment), but idle
+   auto-commits accrete over years, and while the sheet is open every
+   remote-delivery ingest rebuilds the full row set (keystroke-cadence
+   rebuilds cannot occur — the page editor stands down under the
+   sheet). The TOC list took a LazyVStack for the same shape; the
+   comments-sheet precedent this view copies has few rows by nature.
+   A look-round/scale item, recorded so it is a decision rather than
+   an accident.
+
+No BLOCKER. No MAJOR. Nothing in the pair invents product behavior,
+touches `Sync/`/`Operations/`/schema, copies text across entities,
+stores a derived handle, or scales with corpus size.
+
+### Clean bill (load-bearing things specifically checked and found solid)
+
+- **The S5 discoverability proof — the batch's crown, verified against
+  the spec's letter.** `MobileConflictDiscoveryTests` drives the real
+  op (`resolveSyncConflict` — the engine's landing door), and the pins
+  hold SyncSpec §6/AppSpec §9 exactly: fresh ACTIVE take, label
+  `'conflict'`, at the fan's end; the chosen pointer AND chosen text
+  store-asserted untouched (raw SQL on `container_block`); THREE roads
+  from the one delivery (the ⑂ badge on a laid-out surface, the pill's
+  "take 1/2", the browser card wearing the label, not chosen); and the
+  sealed arm honors S5-outranks-the-seal — the conflict lands and
+  stays discoverable under `lockPost`, viewing free, editing refusing
+  with the sealed copy. The delivery arm is the standing observation's
+  exact ingest (`fromDelivery: true`). MobileSoul §5.3's acceptance
+  item now has its executable form.
+- **The commit-history hoist is a hoist, not a copy.**
+  `Queries.commitPredatesSplit` (core) is byte-identical to the old
+  `CommitRules` body (`splitDates.max()` guard + `<`); the Mac enum is
+  now a ONE-line delegation; the phone's history face reads the same
+  predicate. The Mac's own pin (`EditorSessionTests`, 20 tests) run by
+  this reviewer: green through the delegation. Core gained the
+  predicate's own test, mirror-cased.
+- **Take lock/unlock's flush-first guard — the traced mechanism and a
+  pin that goes red on the blind path.** Pending surface bytes live in
+  the coordinator; a blind `lockVariant` would insure the STALE store
+  text and the later flush would refuse `.lockedVariant`, stranding
+  the typed bytes — and `MobileTakeLockTests`'s assertions (store text
+  == typed, insurance commit text == typed, `!isDirty`) all diverge on
+  that path. The I6 arm pins ZERO commits on a committed-clean flip;
+  both seal arms speak phone words; unlock needs no flush and the
+  keep-pending bytes land immediately after unlock because
+  `refreshTakesFromStore` flushes first (read and confirmed).
+- **The six locked-take redirects + #14 are gone, and the grep claim
+  is TRUE.** All seven sites route through three pinned statics (page
+  sentence · in-sheet pair · verb arm) + the archived-list road; a
+  no-"Mac" sweep rides the pins. This reviewer's own grep over the
+  final tree: the ONLY user-facing "Mac" strings in the mobile target
+  are the merge-ceremony refusal (`MobileStructural.swift:239`) and
+  its tutorial sentence (`MobileTutorialSeeder.swift:528`) — C5's
+  sanctioned pair (PB1-4's rider); the `SpikeScenarios.swift:228` hit
+  is DEBUG diagnostics, inventory #15's recorded no-action.
+- **Extract + Make Block ride the ONE shared planner — no second
+  brain.** `StructuralGesturePlanner` (Shared) is untouched by the
+  diff — both commands and both plan cases pre-existed; the phone
+  calls `plan()` with the S4-22 snapping and whole refusal vocabulary
+  intact. The span body's order is honest: latch → flush FIRST → plan
+  against the post-flush surface (the flush persists bytes without
+  rewriting surface characters, so the captured range stays valid and
+  the plan reads the re-tiled index). Make Block is the Mac's exact
+  execution — `withCompound` two-divide, the second cut derived from
+  the first divide's ACTUAL output via the same dropped-units
+  arithmetic (compared line-by-line against
+  `EditorSurfaceController.swift:226–235`); atomicity on partial
+  failure is `withCompound`'s rollback, read in core. The fanned
+  middle span names the phone's OWN Q-M2 divide road; cross-block
+  spans name divide/merge — both roads exist on the phone; five
+  refusal shapes pinned no-Mac; the fanned-extract hint is the Mac's
+  contract-item-8 strings verbatim; the selection-only offer is
+  pinned with the caret arm byte-identical.
+- **The Aa strip's two-row growth and the extended FIX-5 pin.**
+  `allTenStripActsSitFullyVisibleAndTappableInsideTheBar` covers the
+  brief's letter: each row within the tightest class's 333 pt cell,
+  every button frames-in-bounds (±0.5) AND ≥44 pt, vertical
+  containment inside the capsule and the capsule inside the 84 pt
+  expanded bar (the new axis), the ten doors in
+  `formattingRowLabels`' flattened order, the 6/4 split pinned in
+  both geometry and constants. The resting bar (Aa · ⑂ · ⋯, 44 pt)
+  is pinned byte-unchanged with the height round-trip; the three
+  arrivals fire the shared `MarkdownEditing` acts with store bytes,
+  toggle, and the link's caret-in-parens pinned, identity audit zero.
+- **Find-in-note holds TEXTKIT2 §3's care by construction.** The diff
+  adds `isFindInteractionEnabled = true`, one `presentFind()` call,
+  and the `supportsTextReplacement` override — zero highlight code,
+  zero rendering attributes, zero spell-check lines (grep-confirmed;
+  the pin asserts `spellCheckingType == .default` and storage
+  untouched). Replace is declined at the protocol's own switch with
+  the M1/M1b reasoning carried in the override's comment (PROVISIONAL
+  PC4b-2, honestly recorded); a sealed note finds freely.
+- **The block-TOC is read-time truth and the jump is the hybrid-jump
+  class.** `Queries.blockTOC`/`tocHandle` are the pre-existing core
+  brains (zero core lines in C4b — confirmed by `git log` over
+  `Sources/` and `Shared/`); the derivation-is-read-time pin renames
+  and edits the fixture and watches the handle follow with no stored
+  copy; `jumpToBlock` ensures layout on exactly the target fragment
+  (`firstLineGeometry`, pre-existing), floor-clamps at 0 only
+  (deliberately unclamped above, TEXTKIT2 §2's under-estimate class,
+  reasoning in the code), lands the pinned 24 pt breath, and refuses
+  a dead block in pinned words. The LazyVStack + no-window judgment
+  is coherent: one `blockTOC` pass ∝ the post, laziness not
+  truncation.
+- **Insert Block Below is the standing op through the sibling
+  contract.** `newBlock(text: "", at: .after)` — I10 at birth pinned
+  (the empty variant IS the one live take), caret by identity, the
+  seal and refused-flush guards pinned with no platform name, and
+  `rowTitles` grew through the one builder so both ⋯ doors follow by
+  construction.
+- **Sanctioned pin flips, all accounted.** C4a: the three browser
+  copy pins + the takes-page pin + the structural pin + the card-⋯
+  four-row grammar; C4b: the Aa labels+height, the FIX-5 ten-act
+  extension, the P5 row-descent, the edit-menu with-selection arm.
+  Every flip widens with a door; no pin was deleted (the diff is
+  insertion-only across test files but for the flips themselves).
+- **Tutorial-as-spec held per owning commit.** Lock/label paragraphs
+  appended after the staged blocks (staging indices stand); the
+  savepoint paragraph + ⋯ enumeration with the crystallize walk's
+  4→5 in the same commit; the formatting lesson demonstrates by BEING
+  (~~struck words~~ + a real link) with the render-hides pinned; the
+  two knives on the divide lesson; the magnifier + blocks chip in the
+  getting-around paragraphs. Merge lesson untouched for C5, verified.
+- **Scope discipline.** Zero `Sources/VariorumCore/Sync/`, zero
+  `Operations/`, zero `Persistence/`/schema, zero
+  `App/Variorum/Shared/`, zero pbxproj; the only core lines are
+  C4a's sanctioned additive predicate + its test (four-suite duty
+  fired there; C4b's never fired, correctly).
+
+### This reviewer's runs (iPhone 17 Pro / iOS 26.2 simulator; core from the repo root; Mac from `App/Variorum/`)
+
+- Full mobile suite: **"Test run with 296 tests in 56 suites passed"**
+  — the recorded baseline, exact.
+- Mobile spine by its seven TRUE type names (the C3-close list):
+  **"Test run with 32 tests in 7 suites passed"**.
+- Perf by name: **"Test run with 9 tests in 2 suites passed"**.
+- Core `swift test`: **"Test run with 1215 tests in 128 suites
+  passed"**.
+- Mac `EditorSessionTests` (the delegation's covering suite — the
+  batch's only Mac-side line): **"Test run with 20 tests in 1 suite
+  passed"**. The full Mac 1245/219 tripwire-only baseline stands on
+  the implementer's and architect's recorded same-diff runs.
