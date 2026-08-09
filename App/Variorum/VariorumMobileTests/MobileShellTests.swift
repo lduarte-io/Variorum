@@ -356,4 +356,25 @@ struct MobileShellTests {
             #expect(!model.autosave.isDirty)
         }
     }
+
+    @Test func theBuiltProductIsIPhoneOnlyAndPortraitOnly() {
+        // THE PLATFORM RULING (the gate sitting, verbatim: "we CANNOT
+        // declare ipad capability or it doesn't let your app be portrait
+        // only"; batch A1 item 2). The pin reads the BUILT product's
+        // Info.plist — the hosted suite's Bundle.main IS the app — so any
+        // future pbxproj drift (a template re-add of "1,2", a landscape
+        // orientation returning) fails here, not on her phone.
+        let bundle = Bundle.main
+        let families = bundle.object(forInfoDictionaryKey: "UIDeviceFamily")
+            as? [Int]
+        #expect(families == [1],
+                "iPhone-only: TARGETED_DEVICE_FAMILY must be 1 — declaring iPad forbids portrait-only")
+        let orientations = bundle.object(
+            forInfoDictionaryKey: "UISupportedInterfaceOrientations") as? [String]
+        #expect(orientations == ["UIInterfaceOrientationPortrait"],
+                "portrait-locked: no landscape orientation may be declared")
+        #expect(bundle.object(
+            forInfoDictionaryKey: "UISupportedInterfaceOrientations~ipad") == nil,
+                "no iPad-specific declaration of any kind")
+    }
 }
