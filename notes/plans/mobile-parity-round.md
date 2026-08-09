@@ -6649,3 +6649,28 @@ stores a derived handle, or scales with corpus size.
   batch's only Mac-side line): **"Test run with 20 tests in 1 suite
   passed"**. The full Mac 1245/219 tripwire-only baseline stands on
   the implementer's and architect's recorded same-diff runs.
+
+## Stage C review — C4 round 1 ADJUDICATION + FIX (at the architect's hand, 2026-08-09); ROUND 2 OPENS
+
+No BLOCKER/MAJOR. Dispositions, executed this commit:
+
+- **MINOR (the take-history stale-read guard) → FIXED at the
+  architect's hand:** the post-read guard now checks BOTH captures
+  (`openBlockID` AND `self.variantID == variantID`) — the reviewer's
+  one-clause fix, its close→flip→reopen mechanism re-verified at the
+  fix site. Honestly unpinnable as the reviewer recorded (the read
+  is not seam-injectable); the R2-10 recorded-mechanism precedent
+  applies. Mobile re-run by own hand: **296/56 green**.
+- **NIT (block-list sheet load-at-presentation) → ROUTED to Stage
+  D's look round** (the mint-past-window family; the dead-tap
+  refusal keeps it honest meanwhile).
+- **NIT (the status literal's three verbatim copies) → record-only:**
+  a string, not a brain — shared by value across targets; drift
+  lands loudly in pins, and a Shared/ hoist for one sentence is
+  churn. Noted beside the copied-brains row's spirit, not on it.
+- **NIT (the history sheet's unwindowed rows) → ROUTED to Stage D's
+  look round** (the R2-2 scale family; bounded by one take's
+  history today).
+
+**ROUND 2 OPENS** on the one-clause fix set: target this commit
+inside `36ab18d..HEAD`; fresh reviewer; new BLOCKER/MAJOR ⇒ round 3.

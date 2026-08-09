@@ -152,7 +152,14 @@ final class MobileTakeHistoryController {
                 (commits: try Queries.commitHistory(db, variantID: variantID),
                  splits: try Queries.splitDates(db, blockID: blockID))
             }
-            guard openBlockID == blockID else { return }
+            // BOTH captures must still govern (C4 ladder MINOR): a
+            // close→flip→reopen on the same block could let an in-flight
+            // first-open read land last and list the OLD take's history
+            // under the new capture. Honestly unpinnable (the read isn't
+            // seam-injectable) — the mechanism is the reviewer's trace,
+            // re-verified at the fix.
+            guard openBlockID == blockID, self.variantID == variantID
+            else { return }
             items = value.commits.map {
                 HistoryItem(
                     commit: $0,
