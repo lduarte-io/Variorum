@@ -1049,6 +1049,33 @@ not):**
 **Discipline:** work synchronously; never end a turn with a build or
 test in progress (the Aa proposal turn-end is the ONE sanctioned
 exception — end it with the proposal only, nothing half-built).
+
+### The Aa bar — the architect's RULING on the A3 proposal (2026-08-09; the 4E propose-first pattern, executed)
+
+The implementer proposed (its turn-end message, 2026-08-09; items 2–7
+already built and green at the pause, nothing half-built): an
+**EXPANDING ROW** — the bar swaps in place on Aa (strip **× · B · I ·
+# · • · ☑ · ⇥**, LK8 order unchanged, × the way back); resting bar
+**Aa · ⑂ · ⋯** (takes and block acts are not formatting and stay one
+tap deep); as the `inputAccessoryView` the strip expands/collapses in
+place with the keyboard up; the strip resets to collapsed at each
+fresh keyboard presentation, persists within one editing session.
+Alternative offered: a UIMenu popover on Aa.
+
+**RULED: ADOPT the expanding row as proposed.** The decisive
+mechanism: UIMenu rows cannot carry a second gesture, so a menu-form
+Aa would silently amputate BOTH ruled long-press doors — P5's
+H1/H2/H3/clear picker (built in THIS batch) and ⇥'s long-press
+outdent — a shape that undoes a ruling is not a candidate. The sheet
+form is rightly out (LK4's sheet grammar is for content surfaces;
+six one-tap acts want no ceremony). Keeping ⑂ · ⋯ beside Aa reads
+her words exactly ("the formatting options" — the block's capability
+doors are not formatting). The six-act grammar stays byte-identical
+(a DOOR change, not a vocabulary change); the proposed pin set
+(resting order · strip order · round-trip · acts-fire-identically)
+lands with it. **One detail rides the end bundle as a look item:**
+the reset-to-collapsed-per-keyboard-presentation cadence is accepted
+as the calm default but is hers to flip at the sitting.
 Red-on-old for every defect-class fix (P24, P38); string/flow pins
 for the flips; the spacing pass is screenshot-evidenced. Mobile suite
 green by your own run at the end, the "Test run with N tests" line
