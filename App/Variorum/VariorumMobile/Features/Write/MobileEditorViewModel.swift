@@ -646,6 +646,18 @@ final class MobileEditorViewModel {
         statusMessage = message
     }
 
+    // MARK: - Find in note (parity C4b item 3 — the ⌘F family's phone
+    // face: the system find navigator on the Write surface)
+
+    /// Presents the system find navigator over this note (find only —
+    /// the surface declines text replacement structurally; the
+    /// `supportsTextReplacement` override carries the reasoning). The
+    /// masthead's magnifier is the door; hardware ⌘F reaches the same
+    /// interaction through the system's own key commands.
+    func presentFind() {
+        textView?.findInteraction?.presentFindNavigator(showingReplace: false)
+    }
+
     // MARK: - The note seal (parity round Stage A batch A1, item 4 — her
     // ruling verbatim: "i do think that you should be able to unlock a
     // note and lock it on mobile"; the sealed refusals lose their Mac

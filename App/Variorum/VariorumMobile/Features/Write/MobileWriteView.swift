@@ -159,6 +159,7 @@ struct MobileWriteScreen: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel("Rename Note")
                 Spacer(minLength: 12)
+                findDoor
                 sealDoor
             }
             HStack(spacing: 12) {
@@ -327,6 +328,25 @@ struct MobileWriteScreen: View {
             return tokens.path([names[0]])
         }
         return MobileMembershipModel.labelText(bookNames: names)
+    }
+
+    /// Find in note (parity C4b item 3): the masthead's trailing corner
+    /// is the phone's note-tool corner (the seal glyph's own placement
+    /// justification — note-level, always visible however far she has
+    /// scrolled), and the magnifier presents the SYSTEM find navigator
+    /// (find only; replace is structurally declined — the text view
+    /// carries the reasoning). Works on a sealed note too: finding is
+    /// reading, and reading stays free under the seal.
+    private var findDoor: some View {
+        Button {
+            model.presentFind()
+        } label: {
+            Image(systemName: "magnifyingglass")
+                .font(tokens.small)
+                .foregroundStyle(tokens.faint)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Find in Note")
     }
 
     /// The note seal's door (parity round Stage A batch A1, item 4 — her

@@ -283,7 +283,9 @@ enum MobileTutorialSeeder {
             + "separate copy for a single book — and tap the date beside it "
             + "to set or clear the day this note counts as (journals sort "
             + "by it). Editing a note edits it everywhere it appears; "
-            + "diverging is how one book gets its own.",
+            + "diverging is how one book gets its own. The magnifier up by "
+            + "the title finds text inside this note — the system's own "
+            + "find panel, and finding works even on a sealed note.",
 
             "The masthead's second line is the note's tags and its "
             + "sources: tap the tags to tag the note — type a tag and ⏎ "

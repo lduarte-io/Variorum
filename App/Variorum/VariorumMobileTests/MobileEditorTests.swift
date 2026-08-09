@@ -706,3 +706,64 @@ struct MobileNoteSealTests {
         }
     }
 }
+
+// MARK: - Find in note (parity C4b item 3)
+
+@MainActor
+@Suite("Mobile find in note — the system interaction, find only (parity C4b)")
+struct MobileFindInNoteTests {
+    /// The Write surface carries the SYSTEM find interaction (the matrix
+    /// row's own shape — iOS's native navigator over UITextView's
+    /// UITextSearching adoption), and REPLACE is structurally declined
+    /// at the protocol's own switch: the Mac's M1/M1b measurements
+    /// proved system replace applies coalesced multi-block storage
+    /// transactions that bypass the per-block edit police, and iOS's
+    /// replace road is exactly as unmeasured — so the phone ships find
+    /// whole and never offers a replace field (PROVISIONAL PC4b; the
+    /// text view's override carries the full reasoning).
+    @Test func theSurfaceCarriesFindWithReplaceStructurallyOff() async throws {
+        try await withEditorWorld { session, _ in
+            let postID = try await makePost(session, blocks: ["hello world"])
+            let (model, surface) = await makeSurfaceEditor(session, postID: postID)
+            let view = surface.textView
+
+            #expect(view.isFindInteractionEnabled)
+            #expect(view.findInteraction != nil,
+                    "the system navigator has its interaction to present")
+            let replaceOff = view.supportsTextReplacement == false
+            #expect(replaceOff,
+                    "replace is declined at the UITextSearching switch — the system never offers a replace field")
+
+            // The door's brain is one call onto the interaction; the
+            // masthead magnifier's SwiftUI wiring is the recorded
+            // A1-masthead not-headless-testable class (the chain-end
+            // look covers the pixels). Presenting needs a window, so
+            // the door itself is exercised on-device/at the look —
+            // here the model must at least never crash doorless.
+            let (headless, _) = makeEditor(session, postID: postID)
+            headless.presentFind() // no text view: a quiet no-op
+            _ = model // the surface model stays live through the pin
+        }
+    }
+
+    /// TEXTKIT2 §3's care, held by construction and pinned: enabling
+    /// find changes NOTHING about the note's storage or spell-checking
+    /// posture — no rendering-attribute highlighting of ours exists
+    /// (match decoration is the system interaction's internal
+    /// business), and the editor's spell-checking configuration is
+    /// byte-identical to what the surface always carried.
+    @Test func findAddsNoStorageOrSpellcheckCoupling() async throws {
+        try await withEditorWorld { session, _ in
+            let postID = try await makePost(session, blocks: ["alpha beta", "beta gamma"])
+            let (_, surface) = await makeSurfaceEditor(session, postID: postID)
+            let view = surface.textView
+
+            // The interaction's presence left the storage untouched.
+            #expect(view.textStorage.string == "alpha beta\nbeta gamma")
+            // Spell checking sits at the platform default — the find
+            // work never touched it (the §3 crash pairing stays
+            // exactly where the OS put it).
+            #expect(view.spellCheckingType == .default)
+        }
+    }
+}

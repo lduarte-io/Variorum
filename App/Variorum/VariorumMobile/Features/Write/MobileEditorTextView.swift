@@ -592,6 +592,17 @@ final class MobileEditorTextView: UITextView {
         view.adjustsFontForContentSizeCategory = true
         view.alwaysBounceVertical = true
         view.keyboardDismissMode = .interactive
+        // FIND IN NOTE (parity C4b item 3 — the Mac ⌘F family's phone
+        // face, the matrix's own shape: iOS's OWN find interaction, the
+        // system navigator over UITextView's native UITextSearching
+        // adoption). The TEXTKIT2 §3 care, held by construction: this
+        // code draws NO highlight of its own — match decoration is the
+        // system interaction's internal business, never a rendering
+        // attribute of ours — and nothing here touches spell-checking
+        // (no `spellCheckingType` change, no UITextChecker; the §3
+        // crash pairing is left exactly alone). Hardware ⌘F rides the
+        // system's own find key commands once the interaction is on.
+        view.isFindInteractionEnabled = true
         // The prose margins (parity A3 spacing floor — the LK canon's
         // `.prose padding:8px 20px`; her "more padding generally"): 15 pt
         // insets + the container's default 5 pt fragment padding = the
@@ -695,6 +706,26 @@ final class MobileEditorTextView: UITextView {
         backtab.wantsPriorityOverSystemBehavior = true
         return (super.keyCommands ?? []) + [tab, backtab]
     }
+
+    // MARK: Find in note (parity C4b item 3)
+
+    /// **REPLACE IS STRUCTURALLY OFF — find only (PROVISIONAL, C4b).**
+    /// The Mac's find-replace exists only because two measured facts
+    /// (EditorFind's M1/M1b) forced a whole custom gate: the system
+    /// finder applies Replace All as ONE coalesced multi-block storage
+    /// transaction that bypasses the per-block edit police, so the Mac
+    /// answers the finder NO and re-drives every match through the
+    /// ordinary input path itself. iOS's system replace road is exactly
+    /// as unmeasured here as AppKit's was there — whether it consults
+    /// the delegate gate per match is undocumented — and a machine-
+    /// driven sweep that could cross block seams unpoliced is the class
+    /// the Mac refused outright. So the phone ships FIND whole and
+    /// declines replacement at the protocol's own switch: the system
+    /// never offers a replace field. The in-note replace face lands
+    /// when it can ride the policed path (the Mac's deferred-
+    /// application shape, UIKit-spelled); the takes-aware replace
+    /// family is 13e's either way.
+    override var supportsTextReplacement: Bool { false }
 
     // MARK: Canary forwards
 
