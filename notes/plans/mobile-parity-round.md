@@ -2602,3 +2602,196 @@ trailer; write "## Stage B, batch B2 — BATCH RECORD (implementer,
 2026-08-09)" into THIS file (the fixture's shape, every measured
 number with its label, the pins' factors/bounds, suite names,
 PROVISIONALs); push `origin mobile` before finishing.
+
+## Stage B, batch B2 — BATCH RECORD (implementer, 2026-08-09; commits `f62151a` · `976a86a` + the record commit)
+
+**All four work items shipped — and the walk did exactly what it was
+built to do: it caught a BAR-GATING P1 finding (FB2-1, below), traced
+to its mechanism and NOT fixed or tuned around, per the brief's
+letter.** Diff scope: three files (the seeder, the Settings door edit,
+the walk suites) — **zero `Sources/VariorumCore/`** (the brief's
+expectation held), zero `App/Variorum/Shared/`, zero Mac-side files,
+zero schema, zero `Sync/`, zero pbxproj (synchronized groups). Core /
+Mac / Mac-spine deliberately not run: the only-if-shared condition
+never fired.
+
+**1. THE FIXTURE — "the proving ground" (`MobilePerfFixtureSeeder`,
+commit `f62151a`).** Reserved identities (the B1 discipline, disjoint
+from the pocket guide's): book **"the proving ground"** holding
+**"the long haul"** (the mega post) and **"the short walk"** (the
+control), tag **"perf fixture"**, six corpus books **"field journal
+vol. i…vi"**. The exact shape, store-verified equal to the generator's
+own arithmetic (the seed is deterministic end to end — SplitMix64
+prose, no `Date.now` anywhere in content):
+
+- **The mega post: 100,025 words in 1,370 blocks** —
+  crystallization-scale paragraphs (sentences 8–18 words, paragraphs
+  3–6 sentences), **258 multi-paragraph blocks** (every 7th two
+  paragraphs, every 19th three — I4's internal newlines), chrome
+  staged on prime strides so the chrome layer participates in every
+  measurement: **34 fanned · 26 commented · 14 callout blocks**
+  (fans every 41st, comments every 53rd, callouts every 97th; take
+  texts from an independent generator stream).
+- **The control post: ~4,000 words, the SAME shape rules, its own
+  seeds** — byte-identical in every world by construction (pinned),
+  chrome-staged (1 fan · 1 comment · 1 callout) so both sides of
+  every ratio run the same machinery.
+- **The corpus: 300 notes spread evenly across the six books** (4–8
+  one-paragraph blocks each; a fan every 10th note, a comment every
+  15th). The SMALL control world: the same six books, 12 notes, no
+  mega post — corpus SIZE is the axis, never corpus shape (pinned).
+- All content `.generic`, no entry dates (R57 mirrored; pinned:
+  zero journal-shaped rows). Seeded through ordinary Operations on
+  the quiet facade (`undoStack: nil`; pinned untouched).
+- **The DEBUG door** (Settings → "Performance (dev store)" → "Seed
+  the 100k fixture", beside the pocket guide's doors): find-or-seed
+  ONLY — an existing proving ground just reports; nothing is ever
+  destroyed, so no confirm is owed (PB2-1 records the deliberate
+  absence of a restore door). Latch + spoken outcome per the B1
+  family; Debug = dev store by the A4 fence; a Release build
+  verified the door compiles out (**BUILD SUCCEEDED**).
+
+**2. THE MEASUREMENT WALK (`MobilePerfWalkTests`, commit `976a86a`)**
+— the Mac PerfBenchmarkTests shape (ratios are the assertion,
+absolutes are machine noise): median-of-N, **factor 3.0×** on every
+flatness pin, noise floors (open 30 ms · keystroke 4 ms · scroll
+step 4 ms), absolutes printed as `PERF[sim]` lines — **every number
+below is a SIMULATOR number (iPhone 17 Pro / iOS 26.2, test host,
+in-memory store); the on-device run is Stage D's exit gate.** The
+axes, stated: typing and per-step scroll must be flat in POST size
+(P1's heart); OPEN must be flat in CORPUS size — open is NOT flat in
+the post's own length by design (the storage fill is O(post); AppSpec
+§4's "reading a post is one indexed query"), so the 100k open is a
+recorded absolute, never a flatness pin.
+
+**The measured numbers (the final full-suite run, 2026-08-09):**
+
+| Measurement | Control | 100k / big | Ratio | Verdict |
+|---|---|---|---|---|
+| Open, fixed control post — 12-note vs 300-note corpus | 33.8 ms | 35.0 ms | **1.03×** | **FLAT — green** |
+| Open, the 100k post | — | **901.9 ms** | — | recorded absolute |
+| Keystroke at the top viewport (4k vs 100k post) | 7.916 ms | **551.4 ms** | **69.7×** | **VIOLATION → FB2-1** |
+| Keystroke at the end of the note | 7.916 ms | **297.8 ms** | **37.6×** | **VIOLATION → FB2-1** |
+| Keystroke p95 | 9.4 ms | 575.9 / 401.8 ms | — | recorded |
+| Scroll step, full walk (median) | 1.735 ms | **47.8 ms** | **27.6×** | **VIOLATION → FB2-1** |
+| Scroll, the 100k post whole | 84 steps · 159 ms (control) | **2,075 steps · 100.5 s · p95 56.8 ms · worst 159.6 ms** | — | recorded |
+| Memory across the whole walk (phys_footprint, sampled) | — | start 105 MiB · after open 117 MiB · **sampled peak 5,947 MiB · walk delta 5,842 MiB** | — | **VIOLATION → FB2-1** |
+
+**FB2-1 — THE BAR-GATING FINDING (traced, recorded, deliberately not
+fixed here: the brief's "a flatness violation is a FINDING, not a
+tuning target" + the architect owns the disposition).** Her bar is
+*"I do not want the mobile app to choke even on 100k words"* — the
+app as built chokes at 100k: half-second keystrokes, 48 ms scroll
+ticks (a 16 ms frame budget), and a memory profile that jetsam would
+kill on a real phone many times over. The mechanism, traced cold with
+a throwaway probe (windowless AND windowed — identical, so NOT a
+harness artifact; probe deleted after use per the A1 precedent):
+
+1. **Bare TK2 on the IDENTICAL 100k text is pristine:** open 6 ms ·
+   keystroke ~5 ms · scroll step 0.6–1.0 ms · footprint FLAT
+   (~75 MiB, zero growth over the walk). The platform is healthy —
+   the Stage 0 ADOPT verdict re-confirmed at 100k. The app road is
+   the entire cost.
+2. **Every keystroke runs a DOCUMENT-scope chrome refresh:**
+   `MobileEditorViewModel.storageDidEdit` ends with
+   `textView?.refreshChrome()` — the DEFAULT `.document` scope — so
+   each keystroke resolves `.ensuresLayout` geometry for all ~74
+   decorated blocks across the whole 100k document. Measured: a
+   document chrome pass costs 115–330 ms on the mega post (vs ~0 on
+   the control — post-size-proportional, P1 violated).
+3. **The amplifier — every document pass RE-WRITES
+   `textContainer.exclusionPaths`** (probe: `changedSincePrior YES`
+   on every consecutive pass, 39 exclusion rects): each write
+   invalidates the WHOLE document's layout, exclusions carve the
+   lines so re-resolved geometry shifts, the next pass's rects differ
+   again — a self-sustaining geometry↔exclusion feedback loop. The
+   far-geometry cost after one invalidation: 262.7 ms (vs 1.2 ms on
+   clean layout — the probe's sharpest single number). The keystroke
+   pays it twice: inside `storageDidEdit` (~170–450 ms) and again in
+   the following layout pass (~310–340 ms).
+4. **Scroll and memory are the same loop's other faces:** each
+   scroll tick's `layoutSubviews` chrome pass costs ~12 ms clean but
+   ~40–70 ms under the walk's continual invalidation churn; the
+   churn's re-layout allocations accumulated a **5.9 GiB sampled
+   footprint peak** across the full traversal (even 8 steps grow
+   ~110 MiB; bare TK2: zero). The walk's 2,075 steps (vs ~450
+   expected from bare content height) are the same churn's
+   contentSize thrash, recorded.
+5. **Open (901.9 ms vs bare 6 ms)** is the first document chrome
+   pass + markdown styling + the far-decorated-block geometry
+   forcing essentially full layout — heavy but not itself the
+   bar-gating half; recorded.
+
+**How the finding lives in the suite (the self-arming shape):** the
+four violated assertions ride `withKnownIssue(FB2-1)` — the suite is
+GREEN and honest today, and the moment the owning fix lands, each
+wrapper's un-fired known issue FAILS its test until the wrapper is
+removed: the pins activate themselves against the fix, which is
+red-on-old inverted for a defect that predates its pin. The
+open-corpus pin rides unwrapped (green on today's code). NOT fixed,
+NOT tuned: no factor was widened, no probe was shrunk to pass.
+
+**The PROVISIONAL memory ceiling (the brief's ask — proposed from
+measurement):** `walkDeltaCeilingMB = 250` — the walk's sampled
+`phys_footprint` delta over its own start must stay ≤ 250 MiB.
+Derivation from the HEALTHY references (today's defect-inflated
+5,842 MiB is no basis for a bound): bare TK2 holds the whole walk
+flat (~0 delta) and the app road's open adds ~27 MiB, so 250 MiB is
+~9× the healthy open delta — generous for a fixed app, categorically
+under iOS foreground jetsam limits, and a bound today's churn (and
+any future per-fragment leak) blows through. PROVISIONAL — the
+architect/author may re-bound it, and Stage D's on-device run gives
+the real-phone calibration.
+
+**3. THE SUITES + THE LADDER SPOT-CHECK (standing):** the fixture
+suites are **`MobilePerfFixtureTests` · `MobilePerfWalkTests`** —
+run by exactly those TYPE names (the `-only-testing` trap). They
+RIDE the baseline mobile suite, so every ladder's full-suite run
+includes them by construction; the two-suite named run is the
+standalone spot-check form. **Cost, stated honestly: ~2.5 min while
+FB2-1 stands** (typing ~23 s + the merged full-traversal test
+~110 s — the defect's own cost; the two heavy twins were merged into
+ONE traversal precisely to halve this) **and ~15 s once the fix
+lands.** An env-var gate for the heavy half was built, PROVEN
+undeliverable (`TEST_RUNNER_`- and `SIMCTL_CHILD`-prefixed variables
+both fail to reach this project's hosted runner — verified by env
+dump), and REMOVED: a pin nobody runs is the silent-skip failure
+mode. If a later ladder finds the interim cost too heavy, splitting
+is the architect's call — the record here is the which-is-which.
+
+**4. THE SPINE:** **"Test run with 32 tests in 7 suites passed"** by
+this implementer's own named-selection run (the seven suite type
+names, unchanged from B1).
+
+**Counts, by this implementer's own runs (iPhone 17 Pro / iOS 26.2):**
+full mobile suite — **"Test run with 224 tests in 36 suites passed"**
+(4 known issues, all FB2-1's wrappers; exit 0) — the 215/34 baseline
++ this batch's 9 tests and 2 suites, exactly accounted (6 fixture +
+3 walk). A Release mobile build also succeeded (the door's DEBUG gate
+compiles out clean).
+
+**PROVISIONALs (for the chain's end bundle):**
+- **PB2-1:** the perf door is find-or-seed ONLY — no wholesale
+  restore door (nothing destructive ⇒ no confirm; a mangled fixture
+  is re-seedable by deleting "the proving ground" through ordinary
+  doors and tapping seed again). One door beside B1's two; hers to
+  extend.
+- **PB2-2:** the memory ceiling's bound (250 MiB walk delta) and its
+  test-host framing (in-memory store; the app's on-disk dev store and
+  the real phone differ — Stage D calibrates). The bound is the
+  target the FB2-1 fix must meet.
+- **PB2-3:** the fixture's exact scale constants — 100k mega target ·
+  4k control · 300/12 corpus notes · six books · the prime strides —
+  all one-line changes if her walkthrough wants a different feel.
+
+**Deliberate absences (scope, not holes):** NO fix for FB2-1 (the
+brief's stop-shape: traced and returned to the architect — the fix is
+editor-architecture work: keystroke-scope banding, exclusion
+staleness keyed on content rather than rect-compare, and breaking the
+geometry↔exclusion feedback loop; whether the Mac's chrome shares any
+of the class is the architect's routing question, not asserted here);
+no Read-flow or shell-surface measurements (the brief's four
+measurements are the walk; the shell's P1 discipline is pinned
+elsewhere); no on-device numbers (Stage D's exit gate, already
+planned); the dev store is not pre-seeded by this batch (the door is
+one tap).
