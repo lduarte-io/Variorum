@@ -2,12 +2,15 @@
 //  MobileStructuralTests.swift
 //  VariorumMobileTests
 //
-//  Mobile Stage 4, batch 1 (M10) — the divide/merge doors: the Mac's own
-//  no-ceremony paths on the phone, refusals naming the Mac exactly where
-//  a ceremony would open there. Store-byte checks throughout (the ops
-//  are the Phase 3 tested substrate; these pins hold the DOOR's routing,
-//  gating, and refusal shapes). Plus the S3 round-2 NIT's pin (the
-//  loadOnce cancellation filter).
+//  Mobile Stage 4, batch 1 (M10) — the divide/merge doors; the fanned
+//  divide re-ruled at the gate (Q-M2, parity batch A2): a fanned block
+//  divides through the shared duplicate-shape op — displayed take cut,
+//  every other active take duplicated whole onto both successors — and
+//  the old auto-proceed/refuse pair is retired (a sanctioned pin flip
+//  riding her ruling). Store-byte checks throughout (the ops are the
+//  tested substrate; these pins hold the DOOR's routing, gating, and
+//  refusal shapes). Plus the S3 round-2 NIT's pin (the loadOnce
+//  cancellation filter).
 //
 
 import Foundation
@@ -172,13 +175,10 @@ struct MobileStructuralTests {
         }
     }
 
-    // MARK: Divide on a fanned block (the #10 auto-proceed / the refusal)
+    // MARK: Divide on a fanned block (Q-M2 — the duplicate shape, parity A2)
 
-    @Test func divideOnAFannedBlockAutoProceedsOnUniqueMatch() async throws {
+    @Test func divideOnAFannedBlockLandsTheDuplicateShape() async throws {
         try await withEditorWorld { session, db in
-            // The two takes AGREE within CutPropagation's context window
-            // around the cut (±16 UTF-16 units) and differ beyond it —
-            // the unique-match case the #10 rule auto-proceeds on.
             let seed = try await seedProsePost(
                 session,
                 first: "Same beginning of the block here. Different ending number one.",
@@ -193,10 +193,9 @@ struct MobileStructuralTests {
             let (model, _) = makeEditor(session, postID: seed.postID)
             await model.loadOnce()
 
-            // The cut at "Different" (offset 34) maps UNIQUELY into the
-            // other take by CutPropagation's context match — the Mac
-            // needs no ceremony, so the phone auto-proceeds (M10's
-            // letter): the W outcome through ops.divideW.
+            // Her ruling's letter: the DISPLAYED take is cut at "Different"
+            // (offset 34); the other take is DUPLICATED WHOLE onto both
+            // successors — no CutPropagation, no unique-match gate.
             await model.structural.divide(atSurfaceCaret: 34)
             #expect(model.statusMessage == nil)
 
@@ -210,45 +209,143 @@ struct MobileStructuralTests {
                 "Same beginning of the block here. Different ending number one.",
                 "Same beginning of the block here. Different ending number two!",
             ])
-            // B's fan = the first halves; C's fan = the second halves —
-            // EVERY take carried through (the auto-proceed marks all).
+            // B: the cut first half leading, the other take whole behind
+            // it; C: the second half leading, the same duplicate behind.
             #expect(try await activeFanTexts(db, blockID: placements[0]) == [
                 "Same beginning of the block here.",
-                "Same beginning of the block here.",
+                "Same beginning of the block here. Different ending number two!",
             ])
             #expect(try await activeFanTexts(db, blockID: placements[1]) == [
                 "Different ending number one.",
-                "Different ending number two!",
+                "Same beginning of the block here. Different ending number two!",
             ])
             #expect(model.index.entries.count == 2)
         }
     }
 
-    @Test func divideOnAFannedBlockRefusesNamingTheMacWhereATakeDoesNotMap() async throws {
+    /// The ruled FLIP pin (Q-M2 supersedes M10's refusal): the exact
+    /// fixture that used to refuse toward the Mac's ceremony — no shared
+    /// context anywhere near the cut, so no take mapped — now divides
+    /// with the duplicate shape. No refusal on this road names any
+    /// platform anymore.
+    @Test func divideOnAFannedBlockWithUnmappableTakesStillDivides() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedProsePost(
                 session, first: "Shared start. Unique tail one.", second: nil)
             try await session.runner.run { [blockID = seed.blockA, a1 = seed.a1] ops in
                 let take = try ops.branchVariant(blockID, from: a1)
-                // NO shared context anywhere near the cut — the Mac
-                // would open the W ceremony here.
+                // NO shared context anywhere near the cut — the old door
+                // refused here; the duplicate shape needs no mapping.
                 try ops.autosave(
                     take.id, text: "Entirely different words in this take.",
                     charDelta: 10)
             }
             let (model, _) = makeEditor(session, postID: seed.postID)
             await model.loadOnce()
-            let before = try await liveBlockTexts(db, postID: seed.postID)
 
             await model.structural.divide(atSurfaceCaret: 14)
 
-            #expect(model.statusMessage
-                == "One of this block's takes needs its cut placed by hand — "
-                    + "that's the take ceremony, on the Mac for now.")
-            // The store is byte-untouched — a refusal, never a half-act.
-            #expect(try await liveBlockTexts(db, postID: seed.postID) == before)
-            #expect(try await livePlacementBlockIDs(db, postID: seed.postID)
-                == [seed.blockA])
+            #expect(model.statusMessage == nil)
+            let placements = try await livePlacementBlockIDs(db, postID: seed.postID)
+            #expect(placements.count == 2)
+            #expect(!placements.contains(seed.blockA))
+            #expect(try await blockIsLive(db, blockID: seed.blockA))
+            #expect(try await activeFanTexts(db, blockID: placements[0]) == [
+                "Shared start.",
+                "Entirely different words in this take.",
+            ])
+            #expect(try await activeFanTexts(db, blockID: placements[1]) == [
+                "Unique tail one.",
+                "Entirely different words in this take.",
+            ])
+        }
+    }
+
+    /// The peek-aware half of the door's contract: a PEEKED take is the
+    /// displayed take, so the cut lands in ITS text and the previously
+    /// chosen take rides whole onto both successors as a duplicate — and
+    /// each successor's chosen is its cut half.
+    @Test func divideOnAPeekedBlockCutsThePeekedTake() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedProsePost(
+                session, first: "Chosen words entirely here.", second: nil)
+            let peeked = try await session.runner.run {
+                [blockID = seed.blockA, a1 = seed.a1] ops in
+                let take = try ops.branchVariant(blockID, from: a1)
+                try ops.autosave(take.id, text: "Peeked take other words.", charDelta: 3)
+                return take.id
+            }
+            let (model, storage) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            // Flip to the peek: the surface now DISPLAYS the other take
+            // (zero store writes — the M6 rule; the peek is the display).
+            model.takes.flip(blockID: seed.blockA, forward: true)
+            #expect(model.takes.isPeeking(seed.blockA))
+            #expect(storage.string == "Peeked take other words.")
+
+            // Cut at "other" (offset 12 of the PEEKED text).
+            await model.structural.divide(atSurfaceCaret: 12)
+            #expect(model.statusMessage == nil)
+
+            // A released whole — chosen pointer and both takes untouched.
+            let placements = try await livePlacementBlockIDs(db, postID: seed.postID)
+            #expect(placements.count == 2)
+            #expect(!placements.contains(seed.blockA))
+            #expect(try await activeFanTexts(db, blockID: seed.blockA)
+                == ["Chosen words entirely here.", "Peeked take other words."])
+            // The PEEKED take was cut; the chosen take duplicated whole.
+            #expect(try await activeFanTexts(db, blockID: placements[0])
+                == ["Peeked take", "Chosen words entirely here."])
+            #expect(try await activeFanTexts(db, blockID: placements[1])
+                == ["other words.", "Chosen words entirely here."])
+            // Each successor's chosen is its cut half (the op's rule) —
+            // what she was looking at is what each new block shows.
+            for (blockID, half) in [(placements[0], "Peeked take"),
+                                    (placements[1], "other words.")] {
+                let chosenText = try await db.read { db in
+                    try String.fetchOne(
+                        db,
+                        sql: """
+                            SELECT v.working_text FROM container_block cb
+                            JOIN variant v ON v.id = cb.chosen_variant_id
+                            WHERE cb.block_id = ? AND cb.deleted_at IS NULL
+                            """,
+                        arguments: [blockID])
+                }
+                #expect(chosenText == half)
+            }
+            _ = peeked
+        }
+    }
+
+    /// The flush rides in front on the fanned road exactly as on the
+    /// single-take one: unflushed typing lands in the store BEFORE the op
+    /// reads it, so the cut halves carry the typed bytes.
+    @Test func fannedDivideCarriesUnflushedTypingThroughTheFlush() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedProsePost(session, second: nil)
+            try await session.runner.run { [blockID = seed.blockA, a1 = seed.a1] ops in
+                let take = try ops.branchVariant(blockID, from: a1)
+                try ops.autosave(take.id, text: "The other way entirely.", charDelta: 6)
+            }
+            let (model, storage) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            let range = try #require(model.rangeOfBlock(seed.blockA))
+            typeEdit(model, storage,
+                     range: NSRange(location: range.upperBound, length: 0),
+                     replacement: " Typed tail.")
+            #expect(model.autosave.isDirty)
+
+            await model.structural.divide(atSurfaceCaret: 12)
+            #expect(model.statusMessage == nil)
+
+            let placements = try await livePlacementBlockIDs(db, postID: seed.postID)
+            #expect(try await activeFanTexts(db, blockID: placements[0])
+                == ["Alpha beta.", "The other way entirely."])
+            #expect(try await activeFanTexts(db, blockID: placements[1])
+                == ["Gamma delta. Typed tail.", "The other way entirely."])
         }
     }
 

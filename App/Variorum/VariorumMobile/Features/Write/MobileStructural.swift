@@ -2,21 +2,21 @@
 //  MobileStructural.swift
 //  VariorumMobile
 //
-//  Mobile Stage 4, batch 1 (M10) — the phone's divide/merge doors: the
-//  Mac's own NO-CEREMONY paths, and honest refusals naming the Mac
-//  exactly where a ceremony would open there. A sibling type beside the
-//  takes controllers (the S1 NIT-3 law); the VM routes thinly.
+//  Mobile Stage 4, batch 1 (M10; divide re-ruled at the gate — Q-M2) —
+//  the phone's divide/merge doors. A sibling type beside the takes
+//  controllers (the S1 NIT-3 law); the VM routes thinly.
 //
-//  DIVIDE (her ruling's letter, recorded at M10): auto-proceeds on a
-//  fanned block when the cut lands uniquely in EVERY take — the ratified
-//  #10 auto-proceed rule through the SHARED `CutPropagation` (the Mac
-//  `propagatedCuts` mapping, mirrored exactly: the displayed take's
-//  snapped cut carried into every other active take by unique match) —
-//  and REFUSES where any take doesn't map, naming the Mac's take
-//  ceremony. Single-take divide is the everyday in-place op. The cut
-//  snaps through the ONE snap brain (`StructuralGesturePlanner.
-//  snapToInteriorBoundary` — the ruled word rule with the gentle settle,
-//  S4-22's letter).
+//  DIVIDE (Q-M2 — her duplicate-shape ruling, 2026-08-03 gate sitting;
+//  SUPERSEDES M10's auto-proceed/refuse pair): single-take divide is
+//  the everyday in-place op; a FANNED block divides through the shared
+//  `Operations.divideDuplicating` — the DISPLAYED (peek-aware) take is
+//  cut into B and C, and every OTHER active take is duplicated WHOLE
+//  onto both successors. No `CutPropagation`, no unique-match gate, no
+//  refusal naming any platform ("it sidesteps smart divide rules
+//  entirely - the takes that you aren't dividing are just duplicated,
+//  one per each block"). The cut snaps through the ONE snap brain
+//  (`StructuralGesturePlanner.snapToInteriorBoundary` — the ruled word
+//  rule with the gentle settle, S4-22's letter).
 //
 //  MERGE: instant (`Operations.merge`) when NEITHER side carries a fan;
 //  a fan on either side refuses to the Mac's pairing ceremony — the base
@@ -134,37 +134,21 @@ final class MobileStructuralController {
             return
         }
 
-        // The fanned path: the displayed take must still BE in the live
+        // The fanned path (Q-M2, her duplicate-shape ruling — the ruled
+        // DEFAULT): the DISPLAYED (peek-aware) take is cut; every other
+        // active take duplicates WHOLE onto both successors through the
+        // shared core op. The displayed take must still BE in the live
         // fan (the Takes board's F-3 guard — a fallback would divide a
         // take she was never in).
         guard let displayedID = fresh.variantID,
-              let rendered = active.first(where: { $0.id == displayedID })
+              active.contains(where: { $0.id == displayedID })
         else {
             model.report("This block's takes changed — try the divide again.")
             return
         }
-        // The #10 auto-proceed mapping (the Mac `propagatedCuts`,
-        // mirrored): the displayed take's cut carried into EVERY other
-        // active take by CutPropagation's unique match.
-        var cuts: [String: Int] = [displayedID: cut]
-        for take in active where take.id != displayedID {
-            guard let mapped = CutPropagation.propose(
-                activeCut: cut,
-                activeText: rendered.workingText,
-                targetText: take.workingText)
-            else {
-                // Exactly where the Mac would open the W ceremony (M10:
-                // refuse naming the Mac; the per-take decision is
-                // genuinely a human's).
-                model.report("One of this block's takes needs its cut placed by hand — "
-                    + "that's the take ceremony, on the Mac for now.")
-                return
-            }
-            cuts[take.id] = mapped
-        }
-        let markedCuts = cuts
         await runDivide(blockID: blockID) { ops in
-            try ops.divideW(blockID, cuts: markedCuts).first.block.id
+            try ops.divideDuplicating(
+                blockID, displayedVariantID: displayedID, cut: cut).first.block.id
         }
     }
 
