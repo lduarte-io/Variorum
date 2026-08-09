@@ -4,9 +4,10 @@
 //
 //  Parity round Stage C, batch C3 — the tags family: the manager
 //  (browse · create incl. child tags · rename · delete-with-subtree,
-//  her cross-fully ruling) . State-transition tests through the view
-//  models against a real in-memory store; every act routes through the
-//  existing core tag operations.
+//  her cross-fully ruling) and tags on a note (apply/remove, the
+//  leaf-chip grammar, the typed-path road). State-transition tests
+//  through the view models against a real in-memory store; every act
+//  routes through the existing core tag operations.
 //
 
 import Dependencies
@@ -120,6 +121,93 @@ struct MobileTagManagerTests {
             }
             #expect(deadTagCount == 3, "life + goals + 2026 are tombstones, not gone rows (S2)")
             #expect(model.lastError == nil)
+        }
+    }
+}
+
+@MainActor
+@Suite("Mobile note tags (parity C3 — apply/remove, the leaf-chip grammar)")
+struct MobileNoteTagsTests {
+    /// The typed-path road end-to-end (the Mac N24 brain mirrored):
+    /// "life/goals" on an empty taxonomy creates BOTH tags and applies
+    /// the LEAF only; typing it again no-ops politely; slash noise
+    /// forgives ("/a//b/" is a/b); an empty type refuses with the hint.
+    @Test func typedPathsApplyCreateAndForgive() async throws {
+        try await withEditorWorld { session, db in
+            let postID = try await session.runner.run { ops in
+                try ops.createPost(title: "Harbor")
+            }.id
+            let model = MobileNoteTagsModel(session: session, postID: postID)
+            await model.refresh()
+
+            let landed = await model.applyTypedPath("life/goals")
+            #expect(landed == "life/goals")
+            #expect(model.allTags.map(\.path) == ["life", "life/goals"],
+                    "the missing hierarchy is created on the way")
+            #expect(model.applied.map(\.path) == ["life/goals"],
+                    "the LEAF is applied — never the ancestors")
+
+            // Typing the same path again is a polite no-op.
+            let again = await model.applyTypedPath("life/goals")
+            #expect(again == "life/goals")
+            #expect(model.applied.map(\.path) == ["life/goals"])
+            #expect(model.status == nil)
+
+            // Slash noise forgives (the Mac's pinned edge).
+            let forgiven = await model.applyTypedPath("/a//b/")
+            #expect(forgiven == "a/b")
+            #expect(model.applied.map(\.path) == ["a/b", "life/goals"])
+
+            // An empty type refuses with the hint, and nothing lands.
+            let refused = await model.applyTypedPath("   ")
+            #expect(refused == nil)
+            #expect(model.status == "Type a tag name — “/” makes a hierarchy (life/goals).")
+            #expect(model.status?.contains("Mac") == false)
+        }
+    }
+
+    /// Remove takes the tag off THIS note only — the tag row lives on
+    /// for every other use. The chip and suggestion brains are pinned:
+    /// chips show the LEAF (K3), the line is nil when bare, and
+    /// suggestions drop applied paths, match substrings, and cap.
+    @Test func removeTakesTheTagOffTheNoteAndTheBrainsHold() async throws {
+        try await withEditorWorld { session, db in
+            let (postID, seaID) = try await session.runner.run { ops -> (String, String) in
+                let post = try ops.createPost(title: "Harbor")
+                let sea = try ops.createTag(name: "sea")
+                _ = try ops.applyTag(sea.id, toPost: post.id)
+                return (post.id, sea.id)
+            }
+            let model = MobileNoteTagsModel(session: session, postID: postID)
+            await model.refresh()
+            let sea = try #require(model.applied.first)
+
+            await model.remove(sea)
+            #expect(model.applied.isEmpty, "the application is gone")
+            #expect(model.allTags.map(\.id) == [seaID], "the tag itself lives on")
+            #expect(model.status == nil)
+
+            // The chip line (K3's leaf grammar), pinned.
+            #expect(MobileNoteTagsModel.chipLine(paths: []) == nil)
+            #expect(MobileNoteTagsModel.chipLine(paths: ["sea"]) == "#sea")
+            #expect(MobileNoteTagsModel.chipLine(paths: ["life/goals/2026", "sea"])
+                == "#2026 #sea", "chips show the leaf only")
+
+            // The suggestion rule, pinned: applied dropped, substring
+            // match case-insensitive, capped.
+            func tag(_ path: String) -> VariorumCore.Tag {
+                VariorumCore.Tag(id: path, ownerId: nil, parentId: nil,
+                    name: MobileShelfFaces.leaf(path), path: path,
+                    createdAt: Date(), updatedAt: Date(), deletedAt: nil,
+                    syncVersion: 0)
+            }
+            let all = [tag("life"), tag("life/goals"), tag("sea"), tag("sky")]
+            #expect(MobileNoteTagsModel.suggestions(all, typed: "", applied: ["sea"])
+                .map(\.path) == ["life", "life/goals", "sky"])
+            #expect(MobileNoteTagsModel.suggestions(all, typed: "GOAL", applied: [])
+                .map(\.path) == ["life/goals"])
+            #expect(MobileNoteTagsModel.suggestions(all, typed: "", applied: [], limit: 2)
+                .count == 2)
         }
     }
 }

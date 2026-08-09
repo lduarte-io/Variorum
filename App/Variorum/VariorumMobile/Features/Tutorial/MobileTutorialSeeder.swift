@@ -276,6 +276,12 @@ enum MobileTutorialSeeder {
             + "by it). Editing a note edits it everywhere it appears; "
             + "diverging is how one book gets its own.",
 
+            "The masthead's second line is the note's tags: tap it to tag "
+            + "the note — type a tag and ⏎ applies it, creating it if it's "
+            + "new (“/” nests: life/goals makes the whole path), or tap a "
+            + "suggestion; ✕ takes one off. Chips show a nested tag's last "
+            + "piece; the full path lives in the sheet.",
+
             "Settings, on the shelf's top line, holds the voice switch (the "
             + "last lesson), tag management — browse the whole tag tree "
             + "there, add tags and child tags, rename one (everything "

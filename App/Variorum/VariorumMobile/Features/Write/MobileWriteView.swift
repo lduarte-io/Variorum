@@ -61,6 +61,10 @@ struct MobileWriteScreen: View {
     /// Entry date (parity C2, her sitting item 4): the date chip's alert.
     @State private var datePresented = false
     @State private var dateField = ""
+    /// The note's tags (parity C3 — "tag posts", leaf-chip grammar): the
+    /// chip's model and its sheet.
+    @State private var noteTags: MobileNoteTagsModel
+    @State private var tagsPresented = false
     /// The shell's voice authority; nil in harness/preview use, where the
     /// stored preference read at init governs.
     private let router: MobileShellRouter?
@@ -83,6 +87,7 @@ struct MobileWriteScreen: View {
     ) {
         _model = State(initialValue: MobileEditorViewModel(session: session, postID: postID))
         _membership = State(initialValue: MobileMembershipModel(session: session, postID: postID))
+        _noteTags = State(initialValue: MobileNoteTagsModel(session: session, postID: postID))
         self.router = router
         self.beginEditing = beginEditing
         self.tab = tab
@@ -155,6 +160,13 @@ struct MobileWriteScreen: View {
                 membershipChip
                 dateChip
             }
+            // The identity area's second line (parity C3): the note's
+            // tags and its sources — two more chips would crowd the
+            // books · date line, so they breathe on their own (recorded
+            // PROVISIONAL; her look round may re-arrange).
+            HStack(spacing: 12) {
+                tagsChip
+            }
             if let canary = model.canaryMessage {
                 Text(canary).font(tokens.small).foregroundStyle(.red)
             }
@@ -207,6 +219,9 @@ struct MobileWriteScreen: View {
             MobileMembershipSheet(
                 model: membership, tokens: tokens, onOpenNote: onOpenNote)
         }
+        .sheet(isPresented: $tagsPresented) {
+            MobileNoteTagsSheet(model: noteTags, tokens: tokens)
+        }
         .alert("Entry Date", isPresented: $datePresented) {
             TextField("2026-08-09", text: $dateField)
                 .keyboardType(.numbersAndPunctuation)
@@ -241,6 +256,25 @@ struct MobileWriteScreen: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Entry Date")
+    }
+
+    /// The tags chip (parity C3 — "tag posts", the LK5 expansion's "full
+    /// app functionality"): the note's tags as LEAF-only chips (13k K3's
+    /// grammar; the full paths live in the sheet, where hierarchy is
+    /// surfaced). Tap → the tags sheet (apply by typing or suggestion,
+    /// remove with ✕).
+    private var tagsChip: some View {
+        Button {
+            tagsPresented = true
+        } label: {
+            Text(tokens.chromeLabel(noteTags.chipLine ?? "tags"))
+                .font(tokens.small)
+                .foregroundStyle(noteTags.chipLine != nil ? tokens.muted : tokens.faint)
+                .lineLimit(1)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Tags")
+        .task(id: model.postID) { await noteTags.refresh() }
     }
 
     /// The membership chip (parity C2): which books hold this note — the
