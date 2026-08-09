@@ -3583,3 +3583,227 @@ stage's combined `5aa10f5..747e3fd`. New BLOCKER/MAJOR ⇒ round 3
 (hard cap three). Baselines at round-2 open: **mobile 227/36 zero
 known issues · spine 32/7 · perf suites 9/2 · core 1214/128 · Mac
 1245/219 tripwire-only · spine-Mac 51/7.**
+
+## Stage B review — round 2 (fresh cold reviewer, 2026-08-09)
+
+A real re-review of the fix set `42d7392..747e3fd` inside the stage's
+combined `5aa10f5..747e3fd`, run against `notes/REVIEW_PROMPT.md`
+with the round-1 findings + adjudication + fix-pass record as the
+anchor and zero fix-session context. Every fix's code and pins read
+in full, with the surrounding files the mechanisms ride through
+(`MobileEditorTextView`'s reservation/heal section whole, both
+chrome controllers whole, the settings/shell views whole, the perf
+suite's constants and assertions, `MobileTutorialSeeder.findOrSeed`,
+the `storageDidEdit` road). **Both FIX-B1 behavioral reverts were
+re-executed by this reviewer's own hand** (transient source edits,
+restored to `f2c7a3e` exactly; tree verified clean after). One
+Sonnet lookup spent, per the standing exception, on Apple's
+`fixAttributes` documentation — the impossibility claim's external
+fact.
+
+### Verdicts on the round-1 dispositions
+
+- **FIX-B1 (the reservation-style leak, both roads) — HOLD.** The
+  shared `setReservation` walk (mutate-first / heal-rest) and the
+  edit-scoped `healReservationResidue` twins read correct, and the
+  per-road revert discipline REPRODUCES exactly as recorded: revert
+  A (the walk's continuation heal disabled) → ONLY pin (a) red, the
+  continuation paragraph reading precisely the traced 30.0, 12
+  siblings green; revert B (the chrome's residue-heal call disabled)
+  → ONLY pin (b) red at 30.0, 12 siblings green; the restored tree
+  green. Clean per-road discrimination, empirically re-verified.
+  Free consequence verified in code: fan-death cleanup
+  (`setTailReservation(0, …)`) now rides the same walk, so round
+  1's cleanup-only-clears-the-first-paragraph gap healed too.
+- **FIX-B2 (single-build + the RENAME road) — HOLD.** The one
+  `refreshChrome` door builds `blockRangesByID()` once and hands it
+  to both controllers; all six `MobileEditorViewModel` refresh call
+  sites route through that door (the solo peek/pill roads are
+  genuinely single-controller events — the defaulted self-build is
+  not a double-build). The rename is honest by this reviewer's own
+  measurement: keystroke ratios **9.41× / 10.08×** at 6.535/7.000 ms
+  — the 12 ms floor binds; scroll **3.14×** at 1.474 ms — the 4 ms
+  floor binds (and in this run `control×3 = 1.41 < big = 1.47`, so
+  the ratio term alone would have failed marginally — the floor IS
+  the protecting bound, exactly what the new names claim); the
+  corpus-open pin's kept flatness name binds through its ratio
+  (**0.99×** measured, `control×3 ≈ 69 ms ≫ the 30 ms floor`). The
+  assertion shape is byte-identical (`big ≤ max(control × factor,
+  floor)`), the ratio prints every run, and the self-arming note is
+  accurate. The ~5 ms bare-TK2 premise is anchored in the pre-fix
+  B3 record (this plan, the PB3-1 derivation), not invented at the
+  fix.
+- **FIX-B3 (narration flips) — HOLD.** All flips read;
+  assertions byte-untouched confirmed against the diff. This
+  reviewer's own sweep of every `exclusion` reference across mobile
+  sources AND tests: all survivors are historical narration ("since
+  parity B3", FB2-1's mechanism records) or live GUARD pins
+  (`exclusionPaths.isEmpty`) — zero comments still claim the
+  retired mechanism is the live one.
+- **FIX-B4 (the pocket-guide door) — HOLD.** The open door is one
+  call into the tested `findOrSeed` seam (the seam read in full:
+  exists → bookID immediately, residue → confirm → restore, the
+  MAJOR-A same-`Existing` discipline internal to it), and the
+  navigation closure is sound: `onSettings` is wired ONLY at the
+  shelf root (`MobileShelfView`), so whenever the closure fires the
+  shelf tab is necessarily the visible one and the `shelfPath` push
+  lands on the visible stack from its root — the deliberately
+  unwritten tab value is correct, not an omission. The restore
+  door's distinct always-replace grammar on `discover`/`restore`
+  intact. The compiled-out claim re-verified by this reviewer's own
+  Release build: **BUILD SUCCEEDED**.
+- **FIX-B5 (the continuation cancel) — HOLD.** Double-resume is
+  impossible by construction as claimed: both alert buttons
+  resume-then-nil, the teardown checks nil first, all on the
+  MainActor. The one adjacent presentation road checked — the spike
+  `fullScreenCover`, whose presentation WOULD fire the sheet root's
+  `onDisappear` — cannot race the continuation: while the confirm
+  is pending the alert's modality blocks every other door, so the
+  teardown decline is the only extra resolver, and it releases the
+  latch through the awaiting door's own refusal arm.
+
+### The FIX-B1 impossibility claim — reads TRUE
+
+The record's claim (the separator cannot be kept clean; attribute
+FIXING re-propagates the governing paragraph style across the whole
+paragraph, terminator included; therefore the reviewer's proposed
+write-exclusion shape is impossible and heal-the-landing is the only
+road) is **documented platform behavior**, not a probe artifact.
+Apple's `fixParagraphStyleAttribute(in:)` / `fixAttributes(in:)`
+documentation, verbatim: it *"assigns the first paragraph style
+attribute value in each paragraph to all characters of the
+paragraph"*, with the range *"extended as needed to cover the last
+paragraph partially contained"* and the paragraph delimited by
+CR/LF/U+2029 — and `NSTextStorage.processEditing()` *"fixes
+attributes"* automatically after every edit. A write clamped to
+exclude the terminator is therefore re-fixed back to the governing
+style — exactly what the fix session's deleted probe measured and
+what the recorded pin-(b)-v1-stayed-red-under-the-clamp experiment
+showed in-suite. One honesty note, no severity: on the live surface
+the separator carries the style through TWO mechanisms at once (the
+shipped walk deliberately writes the whole paragraph range, AND
+fixing would re-propagate regardless); pin (b)'s probe-liveness
+guard pins the feed, the documentation pins the impossibility.
+
+### New findings
+
+**MINOR R2-1 · `App/Variorum/VariorumMobile/Features/Write/MobileEditorTextView.swift:420–449` (`setReservation`) — the road-(a) walk makes the band-independent reservation verify O(fanned-block bytes) per pass — on every scroll tick — and the residual is unrecorded.**
+Mechanism: pre-fix, the verify read ONE governing character per
+fanned block per pass (one `paragraphRange` scan of the FIRST
+paragraph); post-fix, `setReservation` walks EVERY paragraph of
+every fanned block on every pass — and the reservation walk runs
+band-independent on all three scopes, including the per-scroll-tick
+`.nearViewport` — with each `getParagraphStart` scanning its
+paragraph's text. Per-tick cost: O(total bytes of all fanned
+blocks), where it was O(their first paragraphs). Identical for
+single-paragraph fanned blocks (the common case — the loop exits
+after one iteration); the delta exists exactly for MULTI-paragraph
+fanned blocks, and the mobile-real shape *journal `one_block` entry
++ a take* is precisely a large multi-paragraph fanned block whose
+whole text is re-scanned per tick (a 100k one-block fanned post ≈
+~1 ms/tick of pure verify). Invisible to the perf pins by fixture
+shape: the mega post's ~33 fanned blocks (fanStride 41) carry small
+paragraph counts, so the post-fix scroll step measured DOWN
+(1.47–1.56 ms). No bar violation today — this is the round-1
+MINOR-2 recorded-residual class, recorded so the next scale jump
+doesn't rediscover it. Proposed shape (the adjudication's to
+weigh): keep the governing-character verify band-independent, but
+run the continuation-heal half only on `.edit`/`.document` passes —
+a strand is only ever BORN by an edit, and every
+materialization/voice re-base arrives with its own `.document`
+refresh, so tick-cadence continuation scans add no heal occasion.
+Labeled honestly: a perf-mechanism finding, pinnable only as a
+measured budget on a multi-paragraph-fanned fixture — not
+red-on-old bug-class.
+
+**NIT R2-2 · `MobileEditorTextView.swift:451–460` (doc) vs `:484–509` — `healReservationResidue`'s comment misstates its covered set.**
+The comment says "every paragraph beginning in `range`"; the
+implementation also processes the paragraph that merely CONTAINS
+`range.location` (the first `getParagraphStart` returns
+`pStart ≤ range.location`). The broader sweep is correct and
+harmless — paragraph-granularity superset, governed starts protect
+live reservations — so the comment is the FIX-B3 narration class:
+one line.
+
+**NIT R2-3 · `MobileEditorTextView.swift:191–197` — `refreshChrome` pays the O(entries) index build before any controller guard.**
+Pre-fix the build sat behind each controller's
+`bounds.width > 0` / `refreshing` guards; post-fix the door builds
+unconditionally, so pre-layout events (`installTakes`' own
+`refreshChrome()` at `:164`, always; any refresh before first
+layout) pay a wasted O(entries) walk both controllers then discard.
+Setup-only in practice, steady state unaffected; hoisting a
+width/latch check into the door (or building lazily) restores the
+strictness.
+
+No BLOCKER/MAJOR — round 3 does not open.
+
+### Clean bill (load-bearing things specifically checked and found solid)
+
+- **Scope, own check:** `git diff --name-only 42d7392..747e3fd` =
+  seven mobile files + this plan file; zero `Sources/VariorumCore/`,
+  zero `App/Variorum/Shared/`, zero Mac-side, zero schema, zero
+  `Sync/`. Core/Mac/Mac-spine deliberately not run (the standing
+  only-if-shared condition).
+- **Counts, own runs** (below): full mobile 227/36 zero known
+  issues; pin arithmetic exact (225 ladder-open + FIX-B1's two).
+- **Both born-red claims re-verified empirically** by the per-road
+  reverts above — each pin fails on exactly its own road's absence,
+  at exactly the traced value, with all siblings green.
+- **No third writer to clobber:** grep over mobile sources — no
+  paragraph-indent (`tailIndent`/`firstLineHeadIndent`/`headIndent`)
+  writer exists outside the two reservation doors + heals;
+  `MarkdownFace` writes no `paragraphStyle`; the voice re-base
+  writes `baseParagraphStyle` then re-runs the document chrome pass.
+  The heals cannot zero a style any other subsystem owns.
+- **The governed-start skip sets are exactly each walk's own seen
+  set** (chrome `seen`→tail, decor `emojiSeen`→leading —
+  byte-mirrored twins), and the two doors' disjoint fields keep a
+  both-fanned-and-callout block composed under both heals.
+- **Typing/crystallization traced through the heal:** the
+  completing keystroke's own `.edit` pass covers the landing at
+  paragraph granularity (the heal expands to paragraph bounds);
+  per-keystroke healing means dents never accumulate across
+  paragraphs; `typingAttributes` re-derive clean from the healed
+  character at the next selection change, so steady state returns
+  to write-free after one heal write; paste lands its whole range
+  in the edited range (all its paragraphs healed); a mid-paragraph
+  landing is self-fixing (the paragraph's clean governor wins the
+  fix); deletion joining a dented tail into a governed paragraph
+  re-mutates to truth via the walk.
+- **The write-free steady state survives the heals** — every heal
+  is equality-gated; the B3 mechanism pin
+  (`aKeystrokesChromePassIsEditScopedAndWriteFreeWhenNothingMoved`)
+  green in this reviewer's full run.
+- **The `.edit` road routes through the ONE door** at all six VM
+  call sites (`:348/:428/:537/:562/:802` `.document`, `:915`
+  `.edit`); `layoutSubviews` → `.nearViewport` through the same
+  door — the FIX-B2 single-build covers every double-build site.
+- **The FIX-B2 measurement premise** (bare TK2 ~5 ms per edit at
+  1,370 paragraphs) is anchored in the pre-fix B3 record; the
+  corpus-open pin's kept flatness name binds through its ratio by
+  this reviewer's own 0.99× measurement.
+- **Release posture:** Release build SUCCEEDED with the DEBUG doors
+  compiled out (own run); the `#if DEBUG` split in
+  `MobileShellView.settingsSheet` is compile-time coherent in both
+  configurations.
+
+### This reviewer's runs (iPhone 17 Pro / iOS 26.2 simulator)
+
+- Full mobile suite: **"Test run with 227 tests in 36 suites passed
+  after 18.185 seconds"** — exit 0, zero known issues, zero
+  failures.
+- The spine by its seven type names: **"Test run with 32 tests in 7
+  suites passed after 3.643 seconds"** — TEST SUCCEEDED.
+- Perf suites standalone: **"Test run with 9 tests in 2 suites
+  passed after 9.795 seconds"**; PERF lines: open(100k) 443.5 ms ·
+  keystroke 6.535/7.000 ms (ratios 9.41×/10.08×) · scroll step
+  1.474 ms (3.14×) · corpus-open 0.99× · walk delta 41 MiB against
+  the armed 250.
+- Revert runs (chrome suite, 13 tests): revert A → exactly 1
+  failure (pin (a), 30.0); revert B → exactly 1 failure (pin (b),
+  30.0); both edits restored via `git checkout`, tree verified
+  clean at `f2c7a3e`.
+- Release build (`-configuration Release`, simulator destination):
+  **BUILD SUCCEEDED**.
+- Core / Mac / Mac-spine: not run — zero shared lines in the fix
+  set (the standing only-if-shared condition).
