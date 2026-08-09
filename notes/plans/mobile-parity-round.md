@@ -4745,3 +4745,45 @@ duplicates the shape of `MobileTutorialWalkTests`' private `poll`
   `Shared/` change verified Mac-identical by diff reading (clean
   bill, first entry) with the implementer's recorded Mac run as
   suite evidence.
+
+## Stage C review — C2 round 1 ADJUDICATION + FIX PASS (at the architect's hand, 2026-08-09)
+
+No BLOCKER/MAJOR; all six findings adjudicated FIX and executed by
+the architect directly (the skill's small-fixes allowance; every
+trace re-verified against the code before changing it):
+
+- **MINOR C2-R1-2 → FIXED (the one core-touching fix — the C2
+  brief's small-additive-Queries class):** `Queries.ContainerHeader`
+  gains `createdAt` (the raw TEXT stamp, fetched as stored — no
+  Date round-trip; the comment says why), and the masthead's
+  `DisplayTitle.note` call carries it — the masthead and the listing
+  rows now read ONE chain. Pin
+  `anUntitledUndatedNoteMastheadShowsItsCreatedDay` uses the brain
+  itself as oracle; **red-on-old verified by behavioral revert** (2
+  issues on the pre-fix VM line, siblings green, discrimination
+  clean).
+- **MINOR C2-R1-1 → FIXED:** the blank-clear copy hoisted to
+  `MobileEditorViewModel.blankTitleClearsMessage` and corrected —
+  "the note shows its date instead" (the chain's truth); pin
+  `theBlankClearMessageNamesTheRealFallback` guards both directions.
+- **NIT C2-R1-3 → FIXED:** the book-rename alert's Rename button
+  disables on blank — the face gate the model's comment promised.
+- **NIT C2-R1-4 → FIXED:** `AppSession`'s stale "no structural ops
+  on mobile" comment corrected (the phone registers undo entries at
+  its structural doors; no undo UI yet).
+- **NIT C2-R1-5 → RECORDED here:** the brief's "four rewords" vs
+  five dissolved — the fifth (#2/#5's second string) rode the same
+  tray commit; #2/#5 are reword-only per the matrix (no door owed);
+  the acceptance's "doors in the same commits" claim is precise for
+  #8/#9/#10 only.
+- **NIT C2-R1-6 → FIXED:** the walks' private `poll` delegates to
+  the shared `settle` — one polling body suite-wide, call sites
+  untouched.
+
+**Four-suite duty (the core header changed), all by the architect's
+own runs:** mobile **246/42** (244 + the two pins, exact) · core
+**1214/128** · Mac **1245/219 with exactly the standing TakePane
+tripwire by identity** · Mac spine **51/7** (by the seven TRUE suite
+type names — the file-name trap re-confirmed and dodged). **ROUND 2
+OPENS** on the fix set: target this commit's diff inside
+`6ccdfca..HEAD`; fresh reviewer; new BLOCKER/MAJOR ⇒ round 3.

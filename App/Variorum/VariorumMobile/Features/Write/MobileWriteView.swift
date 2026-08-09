@@ -201,7 +201,7 @@ struct MobileWriteScreen: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("A blank title clears the stored name — the note shows its own words instead.")
+            Text(MobileEditorViewModel.blankTitleClearsMessage)
         }
         .sheet(isPresented: $membershipPresented) {
             MobileMembershipSheet(

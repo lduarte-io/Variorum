@@ -67,11 +67,10 @@ private func withPocketGuideWorld<T>(
 private func poll(
     _ condition: @MainActor () -> Bool, turns: Int = 2000
 ) async {
-    for _ in 0..<turns {
-        if condition() { return }
-        await Task.yield()
-        try? await Task.sleep(for: .milliseconds(1))
-    }
+    // One polling body suite-wide (C2 ladder R1-6): delegate to the
+    // shared `settle` (MobileBooksTests) — the name stays for the walks'
+    // call sites.
+    await settle(attempts: turns, condition)
 }
 
 private enum PocketGuideWalkError: Error {

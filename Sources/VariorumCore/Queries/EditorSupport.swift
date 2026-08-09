@@ -29,6 +29,11 @@ extension Queries {
         /// The per-POST word target (v1_12, 13b 4F — S4-28.1): display/
         /// progress only; the bars show "n% of Nw". nil = no target.
         public let wordTarget: Int?
+        /// The mint stamp — carried so a header-fed display title can fall
+        /// back to the created DAY for an untitled, undated note exactly as
+        /// the listing rows do (DisplayTitle's one chain; C2 ladder R1-2:
+        /// two surfaces must never disagree on one note's name).
+        public let createdAt: String
     }
 
     /// nil ⇒ the container is missing or tombstoned (render nothing; the
@@ -48,7 +53,13 @@ extension Queries {
             locked: container.locked,
             archived: container.archivedAt != nil,
             effectiveSegmentation: container.segmentationDefault ?? settingMode ?? .paragraph,
-            wordTarget: container.wordTarget)
+            wordTarget: container.wordTarget,
+            // The raw TEXT stamp, not the record's Date — DisplayTitle's
+            // day derivation reads the stored string exactly as the
+            // timeline rows do (one chain, no encode round-trip).
+            createdAt: try String.fetchOne(
+                db, sql: "SELECT created_at FROM container WHERE id = ?",
+                arguments: [containerID]) ?? "")
     }
 
     /// A block's live fan in fan order (`(fan_position, id)`), archived takes

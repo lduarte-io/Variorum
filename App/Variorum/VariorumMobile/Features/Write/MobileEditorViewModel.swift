@@ -400,11 +400,18 @@ final class MobileEditorViewModel {
         }
     }
 
+    /// The rename alert's blank-clear explanation — hoisted and pinned
+    /// (C2 ladder R1-1): the copy names what DisplayTitle's chain actually
+    /// does (title → date → the created day; never "the note's own words").
+    static let blankTitleClearsMessage =
+        "A blank title clears the stored name — the note shows its date instead."
+
     func adoptHeader(_ value: Queries.ContainerHeader?) {
         header = value
         isSealed = value?.locked ?? false
         displayTitle = value.map {
-            DisplayTitle.note(title: $0.title, entryDate: $0.entryDate)
+            DisplayTitle.note(
+                title: $0.title, entryDate: $0.entryDate, createdAt: $0.createdAt)
         }
     }
 

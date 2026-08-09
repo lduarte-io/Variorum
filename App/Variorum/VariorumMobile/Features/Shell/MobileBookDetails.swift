@@ -197,6 +197,9 @@ struct MobileBookDetailsSheet: View {
                 let model = model
                 Task { await model.rename(name) }
             }
+            // The face gate the model's comment promises (C2 ladder
+            // R1-3): a blank name never fires a silent no-op.
+            .disabled(!MobileBookDetailsModel.canRename(renameField))
             Button("Cancel", role: .cancel) {}
         }
     }

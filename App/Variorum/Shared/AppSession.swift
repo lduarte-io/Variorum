@@ -37,8 +37,10 @@ final class UndoMenuState {
 final class AppSession {
     let database: AppDatabase
     /// The session-scoped structural undo stack (AppSpec §9) — in-memory,
-    /// never persisted. (On the Mac it wires to the Edit menu; the mobile
-    /// surface performs no structural ops, so it stays empty there.)
+    /// never persisted. (On the Mac it wires to the Edit menu; the phone
+    /// registers entries where its structural doors do — divide, delete,
+    /// the chip's diverge — with no undo UI yet: C2 ladder R1-4 corrected
+    /// the older "no structural ops on mobile" claim this line carried.)
     let undoStack: UndoStack
     let operations: Operations
     /// Serial off-main executor for every operations-layer write (P2), and

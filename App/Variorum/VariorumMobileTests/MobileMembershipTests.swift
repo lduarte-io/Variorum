@@ -307,6 +307,39 @@ struct MobileNoteEntryDateTests {
         }
     }
 
+    /// C2 ladder R1-2 (red-on-old): an untitled, UNDATED note's masthead
+    /// falls back to its created DAY through the SAME DisplayTitle chain
+    /// the Library row reads — two surfaces must never disagree on one
+    /// note's name. (Pre-fix the header dropped `createdAt`, so the
+    /// masthead read the placeholder while the row read the day.)
+    @Test func anUntitledUndatedNoteMastheadShowsItsCreatedDay() async throws {
+        try await withEditorWorld { session, db in
+            let postID = try await session.runner.run { ops in
+                try ops.createPost(title: nil)
+            }.id
+            let (model, _) = makeEditor(session, postID: postID)
+            await model.loadOnce()
+            let storedStamp = try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT created_at FROM container WHERE id = ?",
+                    arguments: [postID])
+            }
+            #expect(model.displayTitle == DisplayTitle.note(
+                title: nil, entryDate: nil, createdAt: storedStamp),
+                    "the masthead and the listing rows share one chain")
+            #expect(model.displayTitle != DisplayTitle.placeholder,
+                    "a created day exists, so the placeholder must not show")
+        }
+    }
+
+    /// C2 ladder R1-1: the blank-clear copy names the REAL fallback (the
+    /// date), never the retired "its own words" promise no display shape
+    /// ever kept.
+    @Test func theBlankClearMessageNamesTheRealFallback() {
+        #expect(MobileEditorViewModel.blankTitleClearsMessage.contains("its date"))
+        #expect(!MobileEditorViewModel.blankTitleClearsMessage.contains("own words"))
+    }
+
     /// A malformed day REFUSES AND KEEPS (the op's `invalidEntryDate`
     /// belt, spoken in phone words — no platform name; the ExtentInput
     /// parallel: a typo must never silently clear a stored date).
