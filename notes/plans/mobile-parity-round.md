@@ -3153,3 +3153,207 @@ framing; findings repo-first as "## Stage B review — round 1
 findings". Baselines at ladder-open: **mobile 225/36 (zero known
 issues) · spine 32/7 · core 1214/128 · Mac 1245/219 tripwire-only ·
 spine-Mac 51/7.**
+
+## Stage B review — round 1 findings (cold reviewer, 2026-08-09)
+
+Cold review of the Stage B combined diff `5aa10f5..2f5b008` (13
+mobile files + this plan file; commits `9c3fba1`…`529a97e`), run
+against `notes/REVIEW_PROMPT.md` verbatim with zero implementation
+context. Anchors read in full: the Stage B kickoff + all three batch
+records + acceptances + the FB2-1 adjudication; `notes/MobileSoul.md`
+(§2 load-bearing); CLAUDE.md; the canonical docs' invariant sections;
+the entire diff plus the current state of every touched file (and the
+surrounding files the mechanisms ride through: `MobileEditorStyle`,
+`MobileStructural`, `MarkdownFace`'s call site, the storage-delegate
+road). No "Review foci" section exists for this project. No fixes
+made; read-only throughout.
+
+### Findings
+
+**MINOR 1 · `App/Variorum/VariorumMobile/Features/Write/MobileEditorTextView.swift:339–383` + `Features/Takes/MobileTakesChrome.swift:188` — reservation paragraph styles leak beyond the first paragraph and outlive their purpose; unrecorded (PB3-2 covers a different, narrower delta).**
+Mechanism: `setReservation` writes the mutated style over the WHOLE
+first-paragraph range, deliberately including the trailing separator
+newline (the file's own comment, line 339, calls this "harmless and
+deliberate"). Two concrete leak roads follow: **(a) the split
+residue** — typing Enter INSIDE a fanned block's first paragraph
+(I4: newline is content) splits it; the second paragraph's characters
+already carry `tailIndent −30` (or −56 commented), the equality gate
+reads only the governing FIRST character (which is correct, so no
+pass ever re-writes), cleanup on fan-death clears only the first
+paragraph — so every line of the continuation paragraph renders
+30+ pt short for the rest of the session (heals only at a full
+re-materialization: re-open or voice switch). The emoji
+`firstLineHeadIndent` mirror: a split callout block's second
+paragraph indents its first line with no glyph over it. **(b) the
+separator inheritance** — because the styled paragraph range includes
+the block's separator "\n", UIKit's typing-attribute derivation
+(re-derived from the preceding character at each caret move; the
+constructor's one-time `typingAttributes` write at
+MobileEditorTextView.swift:462 does not pin it) hands the reservation
+to text typed immediately after a one-paragraph fanned block — the
+open tail, and every block crystallized from it, carries a permanent
+30 pt tail dent with no fan. Evidence: the write pattern read at
+:369–383 (whole-paragraph `addAttribute` incl. separator), the gate
+at :347–366 (governing character only), cleanup at
+MobileTakesChrome.swift:218–222 (first paragraph only); variant (a)
+is pure attribute persistence; variant (b) additionally rides
+documented UIKit typingAttributes behavior — traced, not executed by
+this reviewer. Red-on-old pinnable: seed a one-paragraph fanned
+block → settle chrome → `typeEdit` "\n" mid-first-paragraph →
+chrome pass → assert the second paragraph's governing `tailIndent
+== 0` (fails today). Proposed fix: the reservation walk (which
+already holds the block's full range) normalizes the block's
+NON-first paragraphs to zero reservation, and/or the write excludes
+the separator so the tail never inherits.
+
+**MINOR 2 · `App/Variorum/VariorumMobileTests/MobilePerfWalkTests.swift:552–560` (+ `Features/Write/MobileEditorViewModel.swift:698`, `Features/Takes/MobileTakesChrome.swift:173`, `Features/Write/MobileBlockDecor.swift:101`) — the post-axis "flatness" pins no longer bind through the ratio; the floors are the only teeth, and the residual per-event cost is O(entries) by mechanism.**
+Evidence, this reviewer's own full-suite run: keystroke ratios
+**9.44× / 10.39×**, scroll step **4.22×** — all beyond the stated
+3.0× factor; every post-axis pin passes solely under its absolute
+floor (12 ms / 4 ms), so the 3× factor is dead weight on them and a
+genuine post-size regression up to the floor (keystroke 6.7 →
+11.9 ms) would pass silently under a test named
+`typingAtTheViewportIsFlatInPostSize`. The floors are honestly
+derived (PB3-1's platform-floor derivation is recorded and was
+accepted; her bar is met with room) — the finding is that the pins'
+names/comments still claim the ratio axis while the binding
+assertion is an absolute per-event budget at the 100k bar. The
+mechanism of the residual growth is concrete: the keystroke and
+EVERY scroll tick pay O(entries) — `blockRangesByID()` is built
+**twice per refresh door** (once per controller: MobileBlockDecor
+:101 and MobileTakesChrome :173 — the B3 record's "ONE index walk
+per pass" is per-controller, two per pass), unconditionally even for
+a post with zero decorated blocks, plus the band-independent
+O(fanned) reservation verify per pass. At 1,370 entries that is the
+measured 1.8 ms vs 0.43 control. P1's letter ("cost ∝ viewport +
+edit, never document size") is met up to this linear small-constant
+term hidden under the floor. Proposed: re-comment/rename the
+post-axis pins to what they assert (per-event absolute budgets at
+the bar, floors binding), and cheaply shrink the mechanism — build
+the ranges dict once in `refreshChrome` and pass it to both
+controllers, with an early-out when no slot is decorated. Not a bar
+violation today; recorded so the next scale jump doesn't
+rediscover it.
+
+**NIT 1 · `App/Variorum/VariorumMobileTests/MobileTakesChromeTests.swift:182, 266–273, 311, 320–326` — surviving pins narrate the retired exclusion mechanism.**
+`textNeverRunsUnderTheBadge`'s comment still says the discrimination
+"proves the exclusion rect … did it"; the FIX-3 flush-end probe's
+doc block and recorded PROBE VERDICT derive its candidate band from
+exclusion-path-edge behavior ("TK2 applies lineFragmentPadding
+against exclusion-path edges", "the widened exclusion", settle
+rounds "exclusion → relayout → chrome") — a mechanism that no longer
+exists on this surface. The assertions are behavioral and pass under
+reservations, but the recorded derivation is exactly what the pin's
+own re-derivation instruction would mislead. One-comment fixes;
+PB3-3's open flip list covered the flipped pins, not these two
+survivors.
+
+**NIT 2 · `App/Variorum/VariorumMobile/Features/Shell/MobileSettingsView.swift:192–216` — the "Open the pocket guide" door re-implements `findOrSeed`'s branching inline, and never opens.**
+The tested seam `MobileTutorialSeeder.findOrSeed(session:confirmReplace:)`
+takes exactly the continuation-shaped closure the view builds, yet
+`tutorialDoor` duplicates the discover → exists-report /
+residue-confirm → restore grammar by hand (two encodings of one
+grammar = drift risk; the MAJOR-A same-`Existing` discipline is
+preserved, verified). And the door labeled "Open…" only
+seeds-or-reports — it never navigates to the book. DEBUG-only;
+recorded for the Stage C door families.
+
+**NIT 3 · `App/Variorum/VariorumMobile/Features/Shell/MobileSettingsView.swift:39, 204–208` — the confirm continuation can strand.**
+If the Settings sheet is torn down while the replace alert is up
+(swipe-dismiss), neither alert button runs, the checked continuation
+never resumes, and `tutorialDoor` suspends forever (leaked
+continuation + the in-flight latch held for the sheet's next
+presentation). DEBUG-only, low stakes; resume(false) on disappear is
+the one-line shape.
+
+### Clean bill (load-bearing things specifically checked and found solid)
+
+- **The suite counts, by this reviewer's own runs** (below): full
+  mobile **225/36 passed, 18.5 s, ZERO known issues**; the spine by
+  its seven type names **32/7 passed**. Arithmetic exact: 191/28 +
+  24/6 (B1) + 9/2 (B2) + 1 mechanism pin (B3) = 225/36.
+- **The B3 headline numbers reproduce on this host within noise**
+  (my run's own `PERF[sim]` lines): open(100k) 464.2 ms (record
+  433.2) · keystroke 6.72/7.40 ms (6.09/7.01) · scroll step 1.80 ms
+  (1.70) · walk delta 40 MiB vs the armed 250 (43) · corpus-open
+  1.13× flat · 2,077 steps / 3.63 s full traversal. The bar's
+  executable form holds on the simulator by independent measurement.
+- **The mechanism pin** (`aKeystrokesChromePassIsEditScopedAndWrite
+  FreeWhenNothingMoved`, MobileTakesChromeTests:552) read in full:
+  the far-not-resolved half is the discriminator and is red-on-old
+  by mechanism — the pre-B3 `storageDidEdit` ended in the
+  `.document`-default `refreshChrome()` (seen in the diff), whose
+  nil band resolves every fanned block's geometry, so the far-block
+  assertion fails on that tree; the `===` same-style-object
+  assertion is a real write-free guard; the empty-`exclusionPaths`
+  assertion is the root guard.
+- **The exclusion retirement is total and mobile-local:** grep-zero
+  live `exclusionPaths` references in mobile sources (doc comments
+  only) and grep-zero on the Mac side — the B3 claim verified.
+- **No write loop:** the storage observer guards on
+  `.editedCharacters` (MobileEditorViewModel:1411), so reservation
+  attribute writes cannot re-enter `storageDidEdit`; both
+  controllers carry the reentrancy latch (`refreshing`), and the
+  equality gates make the steady state write-free.
+- **The composition rule holds in code:** decor owns
+  `firstLineHeadIndent`, chrome owns `tailIndent`, both
+  read-modify-write ONE style object in the deterministic
+  decor→chrome order; the `.edit` band (near ∪ edited, NSUnionRange)
+  and the width-change/no-viewport full-pass escalations are
+  byte-mirrored in both controllers; `.document` remains the
+  delivery/flip/voice cadence (call sites read: 348, 428, 537, 562,
+  802 vs the one `.edit` at 915 and the one `.nearViewport` at the
+  layout hook).
+- **No paragraph-style clobber class:** `MarkdownFace` writes no
+  `paragraphStyle` (grep over Write/ + Shared/); `applyVoiceChange`
+  re-bases paragraph styles and then runs the document chrome pass
+  in the same act, so reservations heal exactly as claimed.
+- **The tutorial seeder's discipline:** Operations-only (no ad-hoc
+  row writes anywhere in either seeder), the quiet no-undo facade
+  with the walk pinning `undoStack.depth == 0`; R57 pinned
+  store-wide (zero journal-shaped rows); reserved identities
+  verified DISJOINT from the Mac's ("the field guide"/"tutorial"
+  read in the Mac source); exact-tag cleanup (never subtree) with
+  the sub-tag survival walk; the wholesale replace byte-compares her
+  note's whole subtree (container/placements/blocks/variants); pin
+  hygiene (no dead ids) walk-asserted; the confirm's disclosure
+  matches what cleanup actually deletes.
+- **The walks assert store outcomes through the app's own roads:**
+  typeEdit for gate-dependent behavior (FB1-1's rule, applied); the
+  Q-M2 duplicate-shape walk checks the peeked take is the one cut,
+  both successors carry half + the whole duplicate, and the original
+  is released with its full fan in lineage (the gate ruling's
+  letter); merge's single-space join round-trips byte-exact; the
+  ceremony step-back copy pinned in the walk matches the shipped
+  string at `MobileStructural.swift:238` (and PB1-4's coupling flag
+  is recorded for Stage C).
+- **The perf fixture is honest:** deterministic end to end
+  (SplitMix64, no `Date.now` in content, determinism pinned), store
+  truth == generator arithmetic pinned at 100,025 words / 1,370
+  blocks (my run's fixture line), the control byte-identical across
+  worlds pinned, chrome staged on BOTH sides of every ratio,
+  find-or-seed idempotence pinned, and the four B2 wrappers are
+  really gone (grep: zero `withKnownIssue` callers; the helper's
+  self-arming parameter survives documented for the next traced
+  finding).
+- **The 100k-open recorded-not-pinned ruling is internally
+  consistent** with the stated axes (open is O(post) by design,
+  AppSpec §4's letter) — and the axis that CAN regress by accident,
+  corpus-size open, IS an armed pin and measured genuinely flat
+  (1.13× my run).
+- **Scope:** the combined diff touches exactly 13 mobile files +
+  this plan file — zero `Sources/VariorumCore/`, zero
+  `App/Variorum/Shared/`, zero Mac-side, zero schema, zero `Sync/`
+  (file list verified against the diff stat). Core/Mac/Mac-spine
+  baselines were therefore not re-run by this reviewer (nothing in
+  the diff can move them); the mobile suite and spine were.
+
+### This reviewer's runs (iPhone 17 Pro / iOS 26.2 simulator)
+
+- Full mobile suite: **"Test run with 225 tests in 36 suites passed
+  after 18.496 seconds"** — exit 0, zero known issues, zero
+  failures.
+- The spine by its seven type names: **"Test run with 32 tests in 7
+  suites passed after 3.616 seconds"** — TEST SUCCEEDED.
+- Core / Mac / Mac-spine: not run (zero shared lines in the diff —
+  the standing only-if-shared condition).
