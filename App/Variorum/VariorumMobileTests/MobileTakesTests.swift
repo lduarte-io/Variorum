@@ -328,7 +328,7 @@ struct MobileTakesTests {
             await model.takes.chooseDisplayed(blockID: seed.blockA)
 
             #expect(model.statusMessage
-                    == "This note is locked — unlock it on the Mac to choose a take.")
+                    == "This note is locked — unlock it to choose a take.")
             #expect(try await chosenVariantID(db, blockID: seed.blockA) == seed.a1)
             // The PEEK is reading, not authoring — it survives the refusal.
             #expect(model.takes.isPeeking(seed.blockA))
@@ -351,7 +351,7 @@ struct MobileTakesTests {
             try await session.runner.run { ops in try ops.lockPost(seed.postID) }
             await model.takes.chooseDisplayed(blockID: seed.blockA)
             #expect(model.statusMessage
-                    == "This note is locked — unlock it on the Mac to choose a take.")
+                    == "This note is locked — unlock it to choose a take.")
 
             try await session.runner.run { ops in try ops.unlockPost(seed.postID) }
             await model.takes.chooseDisplayed(blockID: seed.blockA)
@@ -384,7 +384,7 @@ struct MobileTakesTests {
                 range: NSRange(location: 0, length: 0),
                 replacement: "x"))
             #expect(model.statusMessage
-                    == "This note is locked — unlock it on the Mac to edit.")
+                    == "This note is locked — unlock it to edit.")
             #expect(try await storedText(db, variantID: seed.a2)
                     == "First block, the other way.")
         }

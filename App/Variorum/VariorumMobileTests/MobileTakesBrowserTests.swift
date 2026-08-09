@@ -212,7 +212,7 @@ struct MobileTakesBrowserTests {
             await model.takesBrowser.choose(variantID: seed.a2)
 
             #expect(model.statusMessage
-                    == "This note is locked — unlock it on the Mac to choose a take.")
+                    == "This note is locked — unlock it to choose a take.")
             #expect(try await chosenVariantID(db, blockID: seed.blockA) == seed.a1)
             // The sheet survives the refusal (reading stays free).
             #expect(model.takesBrowser.isOpen)
@@ -384,7 +384,7 @@ struct MobileTakesBrowserTests {
             let mint = await model.takesBrowser.newBlank()
             #expect(mint == nil)
             #expect(model.statusMessage
-                    == "This note is locked — unlock it on the Mac to add a take.")
+                    == "This note is locked — unlock it to add a take.")
             #expect(try await liveActiveTakeIDs(db, blockID: seed.blockA).count == 2)
         }
     }
@@ -507,7 +507,7 @@ struct MobileTakesBrowserTests {
             model.takesBrowser.beginEditing(variantID: seed.a2)
             #expect(model.takesBrowser.editingVariantID == nil)
             #expect(model.statusMessage
-                    == "This note is locked — unlock it on the Mac to edit.")
+                    == "This note is locked — unlock it to edit.")
         }
     }
 

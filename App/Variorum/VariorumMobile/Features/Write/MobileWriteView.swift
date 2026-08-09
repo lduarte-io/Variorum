@@ -114,13 +114,27 @@ struct MobileWriteScreen: View {
                     .foregroundStyle(tokens.ink)
                     .lineLimit(1)
                 Spacer(minLength: 12)
+                sealDoor
             }
             if let canary = model.canaryMessage {
                 Text(canary).font(tokens.small).foregroundStyle(.red)
             }
             if model.isSealed {
-                Text("This note is locked — reading only.")
-                    .font(tokens.small).foregroundStyle(tokens.muted)
+                // The state line pairs with its door (the 13b fire-and-DO
+                // doctrine: a message naming an act offers the act) —
+                // every sealed refusal on this screen says "unlock it",
+                // and the door stands right here in the masthead.
+                HStack(spacing: 10) {
+                    Text("This note is locked — reading only.")
+                        .font(tokens.small).foregroundStyle(tokens.muted)
+                    Button("Unlock Note") {
+                        let model = model
+                        Task { await model.unlockNote() }
+                    }
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+                    .buttonStyle(.plain)
+                }
             }
             if let status = model.statusMessage {
                 Text(status).font(tokens.small).foregroundStyle(tokens.muted)
@@ -130,5 +144,32 @@ struct MobileWriteScreen: View {
         .padding(.horizontal)
         .padding(.bottom, 6)
         .background(tokens.room)
+    }
+
+    /// The note seal's door (parity round Stage A batch A1, item 4 — her
+    /// ruling: "you should be able to unlock a note and lock it on
+    /// mobile"). Placement: the masthead is the phone's note-identity
+    /// surface and its only note-level acts home — block acts live in the
+    /// bar's ⋯, but the seal is the NOTE's own state, already displayed
+    /// here, so its door lives beside it. The glyph mirrors the state;
+    /// lock and unlock are both one reversible tap (the seal is a guard,
+    /// never a snapshot — I6).
+    private var sealDoor: some View {
+        Button {
+            let model = model
+            Task {
+                if model.isSealed {
+                    await model.unlockNote()
+                } else {
+                    await model.lockNote()
+                }
+            }
+        } label: {
+            Image(systemName: model.isSealed ? "lock.fill" : "lock.open")
+                .font(tokens.small)
+                .foregroundStyle(model.isSealed ? tokens.accent : tokens.faint)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(model.isSealed ? "Unlock Note" : "Lock Note")
     }
 }

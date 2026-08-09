@@ -612,6 +612,57 @@ final class MobileEditorViewModel {
         statusMessage = message
     }
 
+    // MARK: - The note seal (parity round Stage A batch A1, item 4 — her
+    // ruling verbatim: "i do think that you should be able to unlock a
+    // note and lock it on mobile"; the sealed refusals lose their Mac
+    // redirect in the same batch, the no-redirect principle)
+
+    /// Seals the note through the core's `lockPost` (which auto-commits
+    /// dirty STORE buffers first — I6's consequence-not-equivalence).
+    /// FLUSH-GUARDED like every structural door (the Takes board
+    /// contract): pending SURFACE bytes must reach the store BEFORE the
+    /// seal — an autosave flush landing after it would refuse
+    /// `.lockedPost` and the typed text could never land (the text-loss
+    /// class the flush-first contract exists to kill), and the seal's own
+    /// auto-commit insurance can only insure what the store holds.
+    func lockNote() async {
+        await autosave.flushNow()
+        guard !autosave.isDirty else {
+            report("Unsaved changes couldn't be written — resolve that first, then retry.")
+            return
+        }
+        await setSeal(locked: true)
+    }
+
+    /// Reverses the seal (`unlockPost` — zero commits; the pre-lock
+    /// editing surface returns exactly).
+    func unlockNote() async {
+        await setSeal(locked: false)
+    }
+
+    private func setSeal(locked: Bool) async {
+        do {
+            try await session.runner.run { [postID] ops in
+                if locked {
+                    try ops.lockPost(postID)
+                } else {
+                    try ops.unlockPost(postID)
+                }
+            }
+            report(nil)
+            // The observation echoes this in production; the explicit
+            // re-read makes the flip deterministic (headless harnesses
+            // drive no observation) — the adoptHeader path is the ONE
+            // seal authority either way.
+            let header = try await session.database.read { [postID] db in
+                try Queries.containerHeader(db, containerID: postID)
+            }
+            adoptHeader(header)
+        } catch {
+            report(String(describing: error))
+        }
+    }
+
     /// True while an input-method composition is in flight (the flip and
     /// the idle mint share the bail — mutating mid-composition rewrites
     /// the marked region).
@@ -749,7 +800,7 @@ final class MobileEditorViewModel {
             return false
         }
         if header?.locked == true {
-            refuse("This note is locked — unlock it on the Mac to edit.")
+            refuse("This note is locked — unlock it to edit.")
             return false
         }
         guard let replacement else { return true } // attribute-only

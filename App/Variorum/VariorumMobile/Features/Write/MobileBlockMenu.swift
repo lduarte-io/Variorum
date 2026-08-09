@@ -238,7 +238,7 @@ final class MobileBlockMenuController {
         }
         switch error {
         case .lockedPost:
-            return "This note is locked — unlock it on the Mac to \(act)."
+            return "This note is locked — unlock it to \(act)."
         default:
             return String(describing: error)
         }

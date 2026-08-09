@@ -71,7 +71,7 @@ final class MobileStructuralController {
 
         // The seal outranks every other answer (the planner's rule).
         if model.isSealed {
-            model.report("This note is locked — unlock it on the Mac to restructure.")
+            model.report("This note is locked — unlock it to restructure.")
             return
         }
         guard let (i, intra) = entryTouching(caret: caret) else {
@@ -205,7 +205,7 @@ final class MobileStructuralController {
         defer { structuralInFlight = false }
 
         if model.isSealed {
-            model.report("This note is locked — unlock it on the Mac to restructure.")
+            model.report("This note is locked — unlock it to restructure.")
             return
         }
         guard let (i, _) = entryTouching(caret: caret) else {
@@ -351,7 +351,7 @@ final class MobileStructuralController {
         }
         switch error {
         case .lockedPost:
-            return "This note is locked — unlock it on the Mac to \(act)."
+            return "This note is locked — unlock it to \(act)."
         case .lockedVariant:
             return "This take is locked — branch it or unlock it on the Mac to edit."
         case .invalidCut:

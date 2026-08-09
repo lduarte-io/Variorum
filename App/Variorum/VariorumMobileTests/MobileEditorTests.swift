@@ -544,3 +544,119 @@ struct MobileEditorProjectionTests {
         }
     }
 }
+
+// MARK: - The note seal (parity round Stage A batch A1, item 4)
+
+@MainActor
+@Suite("Mobile Write editor — the note seal door (parity A1)")
+struct MobileNoteSealTests {
+    private func containerLocked(_ db: AppDatabase, postID: String) async throws -> Bool {
+        try await db.read { db in
+            try Bool.fetchOne(
+                db, sql: "SELECT locked FROM container WHERE id = ?",
+                arguments: [postID]) ?? false
+        }
+    }
+
+    private func commitCount(_ db: AppDatabase, variantID: String) async throws -> Int {
+        try await db.read { db in
+            try Int.fetchOne(
+                db, sql: "SELECT COUNT(*) FROM commit_point WHERE variant_id = ?",
+                arguments: [variantID]) ?? 0
+        }
+    }
+
+    @Test func lockNoteSealsAfterTheFlushAndUnlockReverses() async throws {
+        // Her ruling (the gate sitting, verbatim): "i do think that you
+        // should be able to unlock a note and lock it on mobile." The
+        // door's own contract, traced: `lockNote` FLUSHES FIRST — a
+        // pending surface edit left behind the seal would refuse at its
+        // later flush (`.lockedPost`) and the typed bytes could never
+        // land — then seals through the core's `lockPost`, whose
+        // auto-commit insures the (now current) store buffer. Red-on-old
+        // for the flush half by mutation: sealing without the flush
+        // leaves the store's bytes stale forever.
+        try await withEditorWorld { session, db in
+            let seeded = try await session.runner.run { ops in
+                let post = try ops.createPost(title: "seal", profile: .blog)
+                let a = try ops.newBlock(in: post.id, text: "Hello there.", at: .end)
+                return (postID: post.id, variantID: a.variant.id)
+            }
+            let (model, storage) = makeEditor(session, postID: seeded.postID)
+            await model.loadOnce()
+            #expect(!model.isSealed)
+
+            // A pending, unflushed edit rides into the seal.
+            #expect(typeEdit(
+                model, storage,
+                range: NSRange(location: ("Hello there." as NSString).length, length: 0),
+                replacement: " Sealed words."))
+            #expect(model.autosave.isDirty)
+
+            await model.lockNote()
+
+            // Sealed — in the store and on the model; nothing refused.
+            #expect(try await containerLocked(db, postID: seeded.postID))
+            #expect(model.isSealed)
+            #expect(model.statusMessage == nil)
+            // The pending bytes landed BEFORE the seal, and the seal's
+            // auto-commit insured them (I6's consequence).
+            #expect(try await storedText(db, variantID: seeded.variantID)
+                    == "Hello there. Sealed words.")
+            #expect(try await commitCount(db, variantID: seeded.variantID) == 1)
+
+            // The gate refuses under the seal — with the NO-REDIRECT copy
+            // (the "on the Mac" tail is gone; the masthead holds the
+            // Unlock Note door this copy points at).
+            #expect(!model.shouldChangeText(
+                in: NSRange(location: 0, length: 0), replacement: "x"))
+            #expect(model.statusMessage == "This note is locked — unlock it to edit.")
+
+            // Unlock reverses exactly (zero commits — I6).
+            model.report(nil)
+            await model.unlockNote()
+            #expect(!model.isSealed)
+            #expect(try await containerLocked(db, postID: seeded.postID) == false)
+            #expect(try await commitCount(db, variantID: seeded.variantID) == 1)
+            #expect(typeEdit(
+                model, storage,
+                range: NSRange(location: 0, length: 0), replacement: "Again: "))
+            await model.autosave.flushNow()
+            #expect(try await storedText(db, variantID: seeded.variantID)
+                    == "Again: Hello there. Sealed words.")
+        }
+    }
+
+    @Test func lockNoteRefusesWhileAPendingFlushCannotLand() async throws {
+        // The flush-guard's refusing arm (the structural doors' own
+        // contract): pending bytes on a remotely-locked take cannot flush
+        // — sealing anyway would strand them behind the seal, so the door
+        // refuses with the standing wording and the note stays open.
+        try await withEditorWorld { session, db in
+            let seeded = try await session.runner.run { ops in
+                let post = try ops.createPost(title: "seal", profile: .blog)
+                let a = try ops.newBlock(in: post.id, text: "Hello there.", at: .end)
+                return (postID: post.id, variantID: a.variant.id)
+            }
+            let (model, storage) = makeEditor(session, postID: seeded.postID)
+            await model.loadOnce()
+
+            #expect(typeEdit(
+                model, storage,
+                range: NSRange(location: ("Hello there." as NSString).length, length: 0),
+                replacement: " Pending."))
+            try await session.runner.run { ops in try ops.lockVariant(seeded.variantID) }
+
+            await model.lockNote()
+
+            #expect(try await containerLocked(db, postID: seeded.postID) == false,
+                    "the note stays open while its pending text cannot land")
+            #expect(!model.isSealed)
+            #expect(model.statusMessage
+                    == "Unsaved changes couldn't be written — resolve that first, then retry.")
+            #expect(model.surfaceKnownText(variantID: seeded.variantID)
+                    == "Hello there. Pending.")
+            #expect(model.autosave.isDirty, "keep-pending holds")
+        }
+    }
+}

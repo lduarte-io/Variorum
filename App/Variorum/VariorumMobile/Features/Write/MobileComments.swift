@@ -150,7 +150,7 @@ final class MobileCommentsController {
         }
         switch error {
         case .lockedPost:
-            return "This note is locked — unlock it on the Mac to change comments."
+            return "This note is locked — unlock it to change comments."
         case .invalidCommentText:
             return "A comment needs some text."
         default:

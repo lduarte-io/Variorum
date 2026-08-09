@@ -303,7 +303,7 @@ struct MobileStructuralTests {
             await model.loadOnce()
             await model.structural.divide(atSurfaceCaret: 12)
             #expect(model.statusMessage
-                == "This note is locked — unlock it on the Mac to restructure.")
+                == "This note is locked — unlock it to restructure.")
             _ = db
         }
     }

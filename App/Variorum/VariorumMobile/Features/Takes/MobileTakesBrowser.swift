@@ -279,7 +279,7 @@ final class MobileTakesBrowserController {
         guard let model else { return }
         guard let card = cards().first(where: { $0.variantID == variantID }) else { return }
         if model.isSealed {
-            model.report("This note is locked — unlock it on the Mac to edit.")
+            model.report("This note is locked — unlock it to edit.")
             return
         }
         if card.isLocked {
@@ -306,7 +306,7 @@ final class MobileTakesBrowserController {
     func cardGateAllows(range: NSRange, replacement: String) -> Bool {
         guard let model, let variantID = editingVariantID else { return false }
         if model.isSealed {
-            model.report("This note is locked — unlock it on the Mac to edit.")
+            model.report("This note is locked — unlock it to edit.")
             return false
         }
         // The LOCKED half, made real (S2 ladder round 1, MINOR 1): a take
@@ -388,7 +388,7 @@ final class MobileTakesBrowserController {
             case .archive: "archive a take"
             case .delete: "delete a take"
             }
-            return "This note is locked — unlock it on the Mac to \(act)."
+            return "This note is locked — unlock it to \(act)."
         case .lastActiveVariant:
             // I10's letter: removing the last active take is not a take
             // operation — it is deleting the block. Since S4 batch 1 the

@@ -170,12 +170,12 @@ struct MobileBlockMenuTests {
 
             await model.blockMenu.applyCallout(blockID: seed.blockA, edit: .toggle)
             #expect(model.statusMessage
-                == "This note is locked — unlock it on the Mac to change the callout.")
+                == "This note is locked — unlock it to change the callout.")
             #expect(try await storedPresentation(db, blockID: seed.blockA) == nil)
 
             await model.blockMenu.rename(blockID: seed.blockA, name: "handle")
             #expect(model.statusMessage
-                == "This note is locked — unlock it on the Mac to name the block.")
+                == "This note is locked — unlock it to name the block.")
             #expect(try await storedName(db, blockID: seed.blockA) == nil)
         }
     }
@@ -234,7 +234,7 @@ struct MobileBlockMenuTests {
             }
             await model.blockMenu.delete(blockID: seed.blockB)
             #expect(model.statusMessage
-                == "This note is locked — unlock it on the Mac to delete the block.")
+                == "This note is locked — unlock it to delete the block.")
             #expect(model.index.entries.map(\.blockID) == [seed.blockB])
         }
     }
@@ -353,7 +353,7 @@ struct MobileCommentsTests {
             }
             await model.comments.add("Under seal.")
             #expect(model.statusMessage
-                == "This note is locked — unlock it on the Mac to change comments.")
+                == "This note is locked — unlock it to change comments.")
             #expect(try await liveCommentTexts(db, blockID: seed.blockA).isEmpty)
         }
     }

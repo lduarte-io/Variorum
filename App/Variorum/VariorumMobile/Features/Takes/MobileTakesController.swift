@@ -209,7 +209,7 @@ final class MobileTakesController {
     static func chooseRefusalMessage(_ error: OperationError) -> String {
         switch error {
         case .lockedPost:
-            "This note is locked — unlock it on the Mac to choose a take."
+            "This note is locked — unlock it to choose a take."
         default:
             String(describing: error)
         }
