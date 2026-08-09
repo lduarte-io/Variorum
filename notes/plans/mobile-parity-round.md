@@ -6739,3 +6739,65 @@ baseline. The fix set touches no core/Shared/Mac line
 plan), so core 1215/128 · Mac 1245/219 tripwire-only · Mac spine
 51/7 · mobile spine 32/7 · perf 9/2 stand by construction on the
 round-1 reviewer's same-tree runs. **The C4 ladder can close.**
+
+## Stage C — the C4 LADDER CLOSES at round 2 (architect, 2026-08-09); C5 OPENS
+
+Round 2: HOLD, zero new findings (the guard's window closed, the
+misfire arms checked, the unpinnable claim re-verified against the
+seam reality rather than accepted). **C4 CLOSED.** Baselines:
+mobile 296/56 · mobile spine 32/7 · perf 9/2 · core 1215/128 · Mac
+1245/219 tripwire-only · Mac spine 51/7.
+
+## Stage C, batch C5 brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
+
+**Cast:** a fresh Fable implementer session, `~/dev/variorum-mobile`,
+branch `mobile`, starting at this commit. Scope: **lenses
+(compromised shape, hers) + the refusal sweep's last pair** — the
+stage's final batch; its ladder closes Stage C.
+
+**Read first, IN FULL:** `CLAUDE.md` (AppSpec §9's mergeCeremony
+entry — read it CLOSELY; §12's lens paragraphs; the 11a lens
+family) · `notes/MobileSoul.md` (§4's decision grammar — the
+workaround-first doctrine is this batch's law) · THIS plan file top
+to bottom (the MATRIX's lens + fanned-merge rows · PB1-4's rider ·
+the gate record's lens sketch and merge-workaround quotes, both in
+the MID-CHAIN SITTING's neighborhood and the mobile-app-plan GATE
+SITTING record) · the Mac's Lenses tab + lens core (LensQueries,
+the lens ops, `effectiveLensSelection`'s dangle rule) in code ·
+`notes/plans/mobile-architect-handoff.md`. Environment traps bind.
+
+**BOTH design forks are propose-first — ONE turn-end carrying BOTH
+proposals (the 4E pattern; saves a round trip):**
+
+1. **The lens shape.** Her sketch, verbatim: *"maybe you can choose
+   between lenses on the top bar and switch to a different active
+   lens but can save the one you're in, etc."* Propose: where lens
+   switching lives, what "save the current view as a lens" looks
+   like, how the dangling-pick fallback reads on the phone
+   (`effectiveLensSelection`'s rule — display honestly; the LOUD
+   restore door is 13j's, don't build it), what stays Mac-only
+   (the multi-column Lenses editor is workspace-class by her
+   distinction). Compromises in SHAPE, capability kept.
+2. **The fanned-merge road (the last two "Mac" strings).** The
+   matrix's candidates: archive-extras-then-merge named as the
+   road · a carry-all merge mirroring Q-M2's duplicate logic. NOTE
+   for your proposal: core's `mergeCeremony(B, C, pairings,
+   carries)` ALREADY composes a carry-all shape with zero core
+   change — one pairing (displayed+displayed) + carry the rest —
+   and her Q-M2 reasoning ("quick to delete" beats the hunt) plus
+   her merge-workaround quote both point there; but propose, don't
+   assume — the archive-first road is simpler still. Whichever
+   road: the refusal string dissolves WITH the door, the tutorial's
+   merge lesson + walk update in the SAME commit (PB1-4's rider),
+   and a whole-target sweep pin proves ZERO user-facing "Mac"
+   strings remain in the mobile app.
+
+**After the ruling:** build to it. Everything through existing core
+ops (`mergeCeremony` included — read its §9 entry's I10-at-birth
+refusals); small additive Queries with the four-suite duty;
+`Operations/`/schema/`Sync/` STOPS. Tutorial-as-spec. Synchronous;
+red-on-old for defect-class; state-transition tests per door; the
+sweep pin. Full mobile suite green by own run (from 296/56,
+arithmetic accounted) + mobile spine 32/7 + perf 9/2 by name.
+Record as "## Stage C, batch C5 — BATCH RECORD"; push.
+PROVISIONAL-and-continue; author-only calls stop.
