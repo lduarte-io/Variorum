@@ -7672,3 +7672,62 @@ forget door). All consistent with the styled arms as read.
 
 **Commits:** the seam + its two law pins · the five surfaces + the
 injection + the ignore line · this record. Pushed `origin mobile`.
+
+## Stage D, batch D1 — ACCEPTED (architect, 2026-08-09)
+
+Verified after the mid-batch session death and completion (the
+record's honest history): all three commits present; **mobile 308/59
+AND the Mac's 1246/220 tripwire-only both re-confirmed by the
+architect's own runs** — the Mac-unchanged law holds by the
+implementer's three proof layers plus my own suite run. The
+harness-vs-shipping adjudication read and accepted (the tree's
+forensics were sound; zero ambiguity survived). PD1-1…3 ride the
+end bundle.
+
+## Stage D, batch D2 brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
+
+**Cast:** a fresh Fable implementer session, `~/dev/variorum-mobile`,
+branch `mobile`, starting at the D1 acceptance commit. **The chain's
+FINAL build batch** — phone-local only (zero Shared/, zero core;
+a need that wants either STOPS).
+
+**Read first, IN FULL:** `CLAUDE.md` · `notes/MobileSoul.md` · THIS
+plan file top to bottom — the A3 spacing floor's record (the first
+coat this pass completes) and the ROUTED LOOK ITEMS this batch
+closes: the star-refusal display cadence (C3 R1-7) · the scraps
+mint-past-window visibility (C3 R2-2) · the take-history sheet's
+unwindowed rows (C4 NIT) · the block-list sheet's
+load-at-presentation staleness (C4 NIT) · the masthead chip
+crowding (PC4b-4 + PC5-5 — now FIVE chips: tags · more info ·
+blocks · lens · date) · the LK look canon
+(`notes/plans/mobile-app-plan.md` ~242–312) ·
+`notes/plans/mobile-architect-handoff.md`. Environment traps bind.
+
+**The work:**
+
+1. **The whole-app look sweep vs the LK canon:** every phone
+   surface (shelf · Library · book contents · Read · Write + its
+   sheets · Settings · the tag manager · the pocket guide's
+   rendering) walked against the canon — voice register, the
+   spacing constants, the calm default; fix what visibly violates,
+   record what is taste-only (her sitting's). Do not restyle for
+   restyling's sake — the A3 floor + D1 already carry the
+   principles; this pass is the completeness walk.
+2. **The five routed items,** each with its ladder-recorded
+   mechanism: star refusals get a clearing cadence and one home ·
+   the scraps mint lands visibly (scroll-to or window-bump — your
+   call) · the history sheet's rows go lazy (the TOC's own shape) ·
+   the block-list sheet re-reads on delivery · the masthead's five
+   chips get an honest crowding answer (grouping, overflow, or
+   priority — your call, PROVISIONAL; the second identity line is
+   PC3-1/PC4b-4's recorded home).
+3. **Screenshots:** before/after per touched surface on the live
+   simulator (the honest-evidence discipline — verify your captures
+   show what you claim); gitignored dir, set listed in the record.
+
+**Discipline (standing):** synchronous; red-on-old for defect-class
+fixes; pins where behavior is assertable, screenshots where not.
+Full mobile suite by own run (from 308/59, arithmetic accounted) +
+mobile spine 33/7 + perf 9/2 by name. Commits per logical unit with
+the standing trailer; record as "## Stage D, batch D2 — BATCH
+RECORD"; push. PROVISIONAL-and-continue; author-only calls stop.
