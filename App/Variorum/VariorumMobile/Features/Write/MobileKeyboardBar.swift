@@ -30,20 +30,47 @@ import VariorumCore
 @MainActor
 final class MobileKeyboardBarController: NSObject {
     private weak var textView: MobileEditorTextView?
+    /// The LIVE toolbar (weak — the view owns it as its accessory), so
+    /// the Aa door can swap its items IN PLACE.
+    private weak var bar: UIToolbar?
 
-    /// The eight acts, in bar order — one table so the bar and any test
-    /// walk read the same truth (the registry-walk spirit; the real
-    /// capability registry is a later-stage move). ⑂ = Takes (S2 batch 2);
-    /// ⋯ = Block (S4 batch 1 — LK8's eighth JOINS with its block menu:
-    /// Takes… · Comments… · Callout ▸ · Name… · Divide · Merge · Delete;
-    /// P-2 satisfied now that the door can act).
-    static let actLabels = [
-        "Bold", "Italic", "Heading", "Bullet List", "Checklist", "Indent", "Takes",
-        "Block",
+    /// **The Aa condensation (parity A3 item 1 — HER RULING, the
+    /// architect's ADOPT of the proposed expanding row):** at rest the
+    /// bar carries THREE doors — **Aa · ⑂ · ⋯** — and Aa expands the
+    /// FORMATTING STRIP in place: **× · B · I · # · • · ☑ · ⇥** (the
+    /// LK8 order behind one door; × collapses back). A DOOR change, not
+    /// a vocabulary change: the six-act grammar, the # cycle + P5
+    /// long-press picker, and ⇥'s two directions are byte-identical —
+    /// which is exactly why the door is a button strip and never a
+    /// UIMenu (menu rows carry no second gesture; a menu-form Aa would
+    /// amputate both ruled long-press doors). The bar is the
+    /// `inputAccessoryView`, so expand/collapse happens with the
+    /// keyboard up, in place; the strip RESETS TO COLLAPSED at each
+    /// fresh keyboard presentation (the calm default — accepted at the
+    /// ruling, hers to flip at the end sitting), via the keyboard-hide
+    /// notification below.
+    private(set) var isFormattingExpanded = false
+
+    /// The two states' acts, in bar order — one table per state so the
+    /// bar and any test walk read the same truth (the registry-walk
+    /// spirit). ⑂ = Takes (S2 batch 2); ⋯ = Block (S4 batch 1, with its
+    /// block menu); Aa/× = the formatting door's two faces.
+    static let restingActLabels = ["Formatting", "Takes", "Block"]
+    static let formattingActLabels = [
+        "Hide Formatting", "Bold", "Italic", "Heading", "Bullet List",
+        "Checklist", "Indent",
     ]
 
     init(textView: MobileEditorTextView) {
         self.textView = textView
+        super.init()
+        // Reset-per-presentation (the ruling's calm default): the strip
+        // collapses when the keyboard goes away, so every fresh raise
+        // starts on the resting bar; within one presentation it stays
+        // as left. Selector-based observers self-remove on deinit.
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(keyboardDidHide(_:)),
+            name: UIResponder.keyboardDidHideNotification, object: nil)
     }
 
     /// The 44 pt accessory bar riding the keyboard (spike item 6's measured
@@ -52,7 +79,8 @@ final class MobileKeyboardBarController: NSObject {
     /// top edge, act glyphs in the muted chrome ink, mono type in the
     /// terminal voice / the system sans in study — the mockups' own chrome
     /// rule). `MobileEditorTextView.applyVoiceChrome` rebuilds it at the
-    /// LK2 switch, so the values are read fresh per build.
+    /// LK2 switch, so the values are read fresh per build. Items resolve
+    /// per the Aa door's state (`barItems`).
     func makeBar() -> UIView {
         let face = MobileEditorStyle.face
         let bar = UIToolbar(frame: CGRect(x: 0, y: 0, width: 320, height: 44))
@@ -67,10 +95,18 @@ final class MobileKeyboardBarController: NSObject {
         bar.scrollEdgeAppearance = appearance
         bar.tintColor = face.muted
 
+        self.bar = bar
+        bar.items = barItems(face: face)
+        return bar
+    }
+
+    /// One state's items, flexible-spaced. The strip's six acts are the
+    /// SAME builders the flat bar carried — byte-identical doors behind
+    /// the one Aa gate.
+    private func barItems(face: MobileEditorStyle.Face) -> [UIBarButtonItem] {
         let titleAttributes: [NSAttributedString.Key: Any] = [
             .font: face.chrome, .foregroundColor: face.muted,
         ]
-
         func act(_ title: String, _ label: String, _ selector: Selector) -> UIBarButtonItem {
             let item = UIBarButtonItem(title: title, style: .plain, target: self, action: selector)
             item.accessibilityLabel = label
@@ -79,25 +115,45 @@ final class MobileKeyboardBarController: NSObject {
             return item
         }
 
-        var items: [UIBarButtonItem] = [
-            act("B", "Bold", #selector(fireBold)),
-            .flexibleSpace(),
-            act("I", "Italic", #selector(fireItalic)),
-            .flexibleSpace(),
-            headingItem(face: face),
-            .flexibleSpace(),
-            act("•", "Bullet List", #selector(fireBullet)),
-            .flexibleSpace(),
-            act("☑", "Checklist", #selector(fireChecklist)),
-            .flexibleSpace(),
-        ]
-        items.append(indentItem(face: face))
-        items.append(.flexibleSpace())
-        items.append(act("⑂", "Takes", #selector(fireTakes)))
-        items.append(.flexibleSpace())
-        items.append(blockMenuItem(face: face))
-        bar.items = items
-        return bar
+        let acts: [UIBarButtonItem] = isFormattingExpanded
+            ? [
+                act("×", "Hide Formatting", #selector(toggleFormattingDoor)),
+                act("B", "Bold", #selector(fireBold)),
+                act("I", "Italic", #selector(fireItalic)),
+                headingItem(face: face),
+                act("•", "Bullet List", #selector(fireBullet)),
+                act("☑", "Checklist", #selector(fireChecklist)),
+                indentItem(face: face),
+            ]
+            : [
+                act("Aa", "Formatting", #selector(toggleFormattingDoor)),
+                act("⑂", "Takes", #selector(fireTakes)),
+                blockMenuItem(face: face),
+            ]
+        var items: [UIBarButtonItem] = []
+        for (index, item) in acts.enumerated() {
+            if index > 0 { items.append(.flexibleSpace()) }
+            items.append(item)
+        }
+        return items
+    }
+
+    /// Aa opens the strip; × closes it — one door, two faces, swapping
+    /// the LIVE bar's items in place (the keyboard never moves).
+    @objc func toggleFormattingDoor() {
+        isFormattingExpanded.toggle()
+        reloadBarItems()
+    }
+
+    private func reloadBarItems() {
+        bar?.items = barItems(face: MobileEditorStyle.face)
+    }
+
+    /// The reset-per-presentation half (the ruling's calm default).
+    @objc private func keyboardDidHide(_ note: Notification) {
+        guard isFormattingExpanded else { return }
+        isFormattingExpanded = false
+        reloadBarItems()
     }
 
     /// ⋯ — the block menu on the caret's block (S4 batch 1; LK8's eighth

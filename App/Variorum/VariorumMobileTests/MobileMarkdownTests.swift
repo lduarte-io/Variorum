@@ -468,13 +468,16 @@ struct MobileMarkdownActsTests {
             bar.applyHeadingPick(level: 1)
             #expect(view.textStorage.string == "title")
 
-            // The wiring: the bar's # is a button whose menu is NOT the
+            // The wiring: the strip's # is a button whose menu is NOT the
             // primary action — tap keeps the cycle, long-press reveals
             // the picker (UIKit's own behavior for exactly this config).
+            // The # lives behind the Aa door since the ruling — expand
+            // first (the in-place swap).
             guard let toolbar = bar.makeBar() as? UIToolbar else {
                 Issue.record("the bar is not a toolbar")
                 return
             }
+            bar.toggleFormattingDoor()
             let headingButton = try #require((toolbar.items ?? [])
                 .compactMap { $0.customView as? UIButton }
                 .first { $0.accessibilityIdentifier == "kbar.heading" })
@@ -560,7 +563,19 @@ struct MobileMarkdownActsTests {
         }
     }
 
-    @Test func theBarCarriesExactlyTheSevenActs() async throws {
+    /// The Aa condensation's pin set (parity A3 item 1 — HER RULING on
+    /// the propose-first fork: the expanding row): the bar RESTS on
+    /// three doors (Aa · ⑂ · ⋯); Aa expands the formatting strip
+    /// (× · B · I · # · • · ☑ · ⇥ — the LK8 order) IN PLACE on the same
+    /// toolbar; × collapses back (round-trip); a fresh keyboard
+    /// presentation resets to collapsed (the keyboard-hide mechanism,
+    /// posted deterministically — the A1 notification precedent). The
+    /// six acts fire byte-identically from the strip — the act pins
+    /// throughout this file drive the controller's own selectors, which
+    /// are exactly what the strip's buttons target. (This pin's earlier
+    /// flat-bar forms recorded LK8's arrivals; the condensation is the
+    /// ruled supersession.)
+    @Test func theBarRestsOnThreeDoorsAndAaExpandsTheStripInPlace() async throws {
         try await withEditorWorld { session, _ in
             let postID = try await makePost(session, blocks: ["x"])
             let (_, surface) = await makeSurfaceEditor(session, postID: postID)
@@ -569,23 +584,40 @@ struct MobileMarkdownActsTests {
                 Issue.record("the bar is not a toolbar")
                 return
             }
-            // Eight act doors IN BAR ORDER (five titled items + the #, ⇥
-            // and ⋯ buttons): LK8's ruled eight, complete — ⑂ JOINED at
-            // S2 batch 2, ⋯ at S4 batch 1 WITH its block menu; # became
-            // a wrapped button at parity A3 (P5's long-press picker — a
-            // bar item can't carry a menu). This pin's earlier forms
-            // recorded each arrival in advance.
-            let titled = (toolbar.items ?? []).filter { $0.action != nil }
-            let custom = (toolbar.items ?? []).compactMap { $0.customView as? UIButton }
-            #expect(titled.count == 5)
-            #expect(custom.count == 3)
-            // Order pinned over the ITEMS as laid out (the titled/custom
-            // split can no longer read order — ⑂ rides after the ⇥
-            // button).
-            let labels = (toolbar.items ?? []).compactMap { item in
-                item.accessibilityLabel ?? (item.customView as? UIButton)?.accessibilityLabel
+            func labels() -> [String] {
+                (toolbar.items ?? []).compactMap { item in
+                    item.accessibilityLabel
+                        ?? (item.customView as? UIButton)?.accessibilityLabel
+                }
             }
-            #expect(labels == MobileKeyboardBarController.actLabels)
+
+            // At rest: the three doors, in order.
+            #expect(!bar.isFormattingExpanded)
+            #expect(labels() == MobileKeyboardBarController.restingActLabels)
+            #expect(MobileKeyboardBarController.restingActLabels
+                    == ["Formatting", "Takes", "Block"])
+
+            // Aa expands IN PLACE (same toolbar instance, items swapped).
+            bar.toggleFormattingDoor()
+            #expect(bar.isFormattingExpanded)
+            #expect(labels() == MobileKeyboardBarController.formattingActLabels)
+            #expect(MobileKeyboardBarController.formattingActLabels
+                    == ["Hide Formatting", "Bold", "Italic", "Heading",
+                        "Bullet List", "Checklist", "Indent"])
+
+            // × collapses back — the round-trip.
+            bar.toggleFormattingDoor()
+            #expect(!bar.isFormattingExpanded)
+            #expect(labels() == MobileKeyboardBarController.restingActLabels)
+
+            // Reset-per-presentation: an expanded strip collapses when
+            // the keyboard goes away, so the next raise starts calm.
+            bar.toggleFormattingDoor()
+            #expect(bar.isFormattingExpanded)
+            NotificationCenter.default.post(
+                name: UIResponder.keyboardDidHideNotification, object: nil)
+            #expect(!bar.isFormattingExpanded)
+            #expect(labels() == MobileKeyboardBarController.restingActLabels)
         }
     }
 }
