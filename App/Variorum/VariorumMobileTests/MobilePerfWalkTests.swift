@@ -229,10 +229,20 @@ private func typingSamples(
     var accepted = 0
     for i in 0..<keystrokes {
         let t0 = CACurrentMediaTime()
-        let ok = typeEdit(
-            model, storage,
-            range: NSRange(location: offset + i, length: 0), replacement: "x")
-        surface.layoutIfNeeded()
+        // One keystroke = one runloop turn on a real phone, and a turn
+        // DRAINS its autorelease pool — the drain rides inside the timed
+        // window (it is part of a real frame's cost). Without it the
+        // synchronous loop accumulates every turn's autoreleased
+        // garbage, and the walk's footprint measures a pile no real
+        // phone ever holds (B3 — the harness-fidelity half of the
+        // memory number).
+        let ok = autoreleasepool {
+            let ok = typeEdit(
+                model, storage,
+                range: NSRange(location: offset + i, length: 0), replacement: "x")
+            surface.layoutIfNeeded()
+            return ok
+        }
         samples.append((CACurrentMediaTime() - t0) * 1000)
         if ok { accepted += 1 }
     }
@@ -274,11 +284,15 @@ private func scrollWalkSamples(
     while y < tv.contentSize.height - tv.bounds.height, steps < 3000 {
         y += stepHeight
         let t0 = CACurrentMediaTime()
-        tv.setContentOffset(
-            CGPoint(x: 0, y: min(y, max(0, tv.contentSize.height - tv.bounds.height))),
-            animated: false)
-        tv.textLayoutManager?.textViewportLayoutController.layoutViewport()
-        surface.layoutIfNeeded()
+        // One step = one frame; a frame drains its pool (the typing
+        // helper's B3 note — the drain is timed as part of the step).
+        autoreleasepool {
+            tv.setContentOffset(
+                CGPoint(x: 0, y: min(y, max(0, tv.contentSize.height - tv.bounds.height))),
+                animated: false)
+            tv.textLayoutManager?.textViewportLayoutController.layoutViewport()
+            surface.layoutIfNeeded()
+        }
         samples.append((CACurrentMediaTime() - t0) * 1000)
         steps += 1
         if steps % 16 == 0 { onSample?(steps) }
@@ -483,47 +497,66 @@ struct MobilePerfFixtureTests {
 
 // MARK: - The walk (measurements + pins)
 
-/// FB2-1 (Stage B batch B2, 2026-08-09 — the BAR-GATING finding these
-/// pins record; the full trace is in the B2 batch record): the Write
-/// surface's chrome refresh is DOCUMENT-scoped per keystroke
-/// (`storageDidEdit` → `refreshChrome()` default scope) and every
-/// document pass RE-WRITES `textContainer.exclusionPaths`, invalidating
-/// the whole document's layout — a geometry↔exclusion feedback loop
-/// whose cost scales with decorated blocks × document size (P1
-/// violated). Measured at 100k words (simulator): ~0.5–0.6 s per
-/// keystroke (77×/43× off flat), ~50 ms per scroll step (31×), sampled
-/// walk footprint peak 6.2 GiB (jetsam-fatal on device). Bare TK2 on
-/// the identical text: open 6 ms · keystroke ~5 ms · step ~0.8 ms ·
-/// footprint flat — the platform is healthy; the app road is the whole
-/// cost. The wrapped pins BELOW fail-on-fix by `withKnownIssue`
-/// semantics: when the owning fix lands, each wrapper's un-fired known
-/// issue fails its test until removed — the pins activate themselves.
-private let fb2_1: Comment = """
-    FB2-1 (recorded, bar-gating): per-keystroke document-scope chrome \
-    refresh + exclusion-path rewrite invalidation — cost ∝ document, \
-    not viewport+edit. Fix owned by the architect's disposition; \
-    remove this wrapper when it lands.
-    """
+/// FB2-1 — FIXED at Stage B batch B3 (2026-08-09; found and traced at
+/// B2 — both batch records hold the full story). The B2 trace: the
+/// Write surface's chrome refresh was DOCUMENT-scoped per keystroke
+/// and every pass re-wrote `textContainer.exclusionPaths`, a
+/// geometry↔exclusion invalidation loop (551 ms keystrokes · 48 ms
+/// scroll steps · 5.8 GiB walk delta at 100k). The B3 probe found the
+/// ROOT deeper than the writes: exclusion-path PRESENCE alone makes
+/// TK2's post-edit relayout document-scale (~160–300 ms per keystroke
+/// with even ONE rect installed, position-independent; ~0.5 ms with
+/// zero) and inflates the height estimate ~1.4×. The fix: the
+/// keystroke road's chrome pass is `.edit`-scoped (viewport ∪ edit),
+/// and the gutter mechanism moved to first-paragraph PARAGRAPH-STYLE
+/// reservations (`MobileEditorTextView.setTailReservation` /
+/// `setLeadingFirstLineReservation`) — position-independent, so
+/// relayout stays incremental; container exclusion paths are RETIRED
+/// on the Write surface and pinned never to return
+/// (`MobileTakesChromeTests.aKeystrokesChromePassIsEditScopedAnd
+/// WriteFreeWhenNothingMoved`). The four pins below ride UNWRAPPED —
+/// their `withKnownIssue(FB2-1)` wrappers self-armed against the fix
+/// exactly as designed (each fired "known issue was not recorded" on
+/// the fixed tree) and were removed with the fix, red-on-old in
+/// reverse.
 
 @MainActor
 @Suite("Mobile perf walk (parity B2 — the 100k bar, measured)", .serialized)
 struct MobilePerfWalkTests {
     // The pins' stated factors (the Mac precedent's 3× shape) and noise
     // floors — ratios are the assertion, absolutes are the record.
+    //
+    // THE TYPING FLOOR WAS RE-DERIVED AT B3 (4 → 12 ms; PROVISIONAL —
+    // the architect/author may re-bound): B2 set 4 ms as a noise floor
+    // under a then-8 ms control, but the fix collapsed the control to
+    // ~0.7 ms, making the floor the binding bound — and the floor sat
+    // BELOW the PLATFORM's own measured cost: bare TK2 on the identical
+    // 100k text pays ~5 ms per keystroke (B2's bare probe — TK2's own
+    // per-edit bookkeeping at 1,370 paragraphs), so no app-layer fix
+    // can meet 4 ms. Post-fix the 100k keystroke medians 6–8 ms =
+    // platform ~5 + app road ≤ ~2.5 (audit, scoped chrome, index
+    // walks — all O(entries), none O(bytes)). 12 ms = the platform
+    // floor + the app road + host-variance headroom, still under ¾ of
+    // a 60 Hz frame (no choke) and 45× tighter than the defect it
+    // guards against (551 ms; any exclusion-path return measures
+    // 160 ms+). NOT a widened factor: the 3× ratio stands untouched.
     private static let flatFactor = 3.0
     private static let openFloorMS = 30.0
-    private static let typingFloorMS = 4.0
+    private static let typingFloorMS = 12.0
     private static let scrollFloorMS = 4.0
 
-    /// PROVISIONAL memory ceiling (the B2 brief: the bound is proposed
-    /// from measurement — generous but meaningful). Measured healthy
-    /// references (iPhone 17 Pro / iOS 26.2 simulator): bare TK2 holds
-    /// the whole 100k walk FLAT (~75 MiB, zero growth); the app road's
-    /// OPEN adds ~27 MiB. 250 MiB of walk delta is ~9× the healthy
-    /// open delta — generous for a fixed app, and categorically under
-    /// iOS foreground jetsam limits. Today's measured walk delta is
-    /// 6120 MiB (FB2-1's churn), so the ceiling pin rides the same
-    /// known-issue wrapper until the fix lands.
+    /// The memory ceiling — ARMED at B3 (PB2-2's 250 MiB bound kept as
+    /// proposed; still PROVISIONAL in its calibration — Stage D's
+    /// on-device run is the real phone's number). Derivation (B2):
+    /// bare TK2 holds the whole 100k walk FLAT (~75 MiB); the app
+    /// road's OPEN adds ~27 MiB; 250 MiB of walk delta is ~9× the
+    /// healthy open delta and categorically under iOS foreground
+    /// jetsam limits. Pre-fix the walk measured 5,763 MiB of delta
+    /// (FB2-1's churn); post-fix, with the harness draining its pool
+    /// once per step exactly as a real frame does (the helpers' B3
+    /// note — an undrained synchronous loop still measured 545 MiB of
+    /// garbage no phone ever holds), the walk delta measures 43 MiB —
+    /// 5.8× of headroom under the armed bound.
     private static let walkDeltaCeilingMB = 250.0
 
     @Test func openingAFixedPostIsFlatInCorpusSize() async throws {
@@ -588,13 +621,11 @@ struct MobilePerfWalkTests {
             expectFlat(
                 control: controlMedian, big: median(megaTop.samples),
                 factor: Self.flatFactor, floorMS: Self.typingFloorMS,
-                "keystroke(top viewport), 4k vs 100k post",
-                knownIssue: fb2_1)
+                "keystroke(top viewport), 4k vs 100k post")
             expectFlat(
                 control: controlMedian, big: median(megaEnd.samples),
                 factor: Self.flatFactor, floorMS: Self.typingFloorMS,
-                "keystroke(end of note), 4k vs 100k post",
-                knownIssue: fb2_1)
+                "keystroke(end of note), 4k vs 100k post")
             print(String(
                 format: "PERF[sim] keystroke p95 — control %.3f ms · 100k top %.3f ms · 100k end %.3f ms",
                 percentile(controlTyped.samples, 0.95),
@@ -651,8 +682,7 @@ struct MobilePerfWalkTests {
             expectFlat(
                 control: median(controlWalk.perStepMS), big: median(megaWalk.perStepMS),
                 factor: Self.flatFactor, floorMS: Self.scrollFloorMS,
-                "scroll step(full walk), 4k vs 100k post",
-                knownIssue: fb2_1)
+                "scroll step(full walk), 4k vs 100k post")
             print(String(
                 format: "PERF[sim] scroll(100k post) — %d steps · total %.0f ms · p95 %.2f ms · worst %.2f ms",
                 megaWalk.steps, megaWalk.perStepMS.reduce(0, +),
@@ -666,11 +696,9 @@ struct MobilePerfWalkTests {
             print(String(
                 format: "PERF[sim] memory(100k walk) — start %.0f MiB · after open %.0f MiB · sampled peak %.0f MiB · walk delta %.0f MiB (phys_footprint; test-host absolutes — the on-device run is Stage D's gate)",
                 start, afterOpen, peak, delta))
-            withKnownIssue(fb2_1) {
-                #expect(
-                    delta <= Self.walkDeltaCeilingMB,
-                    "PROVISIONAL ceiling: the 100k walk's footprint delta \(delta) MiB exceeds \(Self.walkDeltaCeilingMB) MiB")
-            }
+            #expect(
+                delta <= Self.walkDeltaCeilingMB,
+                "the 100k walk's footprint delta \(delta) MiB exceeds the \(Self.walkDeltaCeilingMB) MiB ceiling (PB2-2, armed at B3)")
         }
     }
 }
