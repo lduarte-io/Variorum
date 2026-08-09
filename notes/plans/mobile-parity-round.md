@@ -6107,3 +6107,75 @@ on the browser cards (PC4a-2's one-door reading) · the history sheet's
 SwiftUI-free UIKit wiring is the recorded A1-masthead
 not-headless-testable class for its pixels (the brain is fully
 pinned); the chain-end look covers it.
+
+## Stage C, batch C4a — ACCEPTED (architect, 2026-08-09)
+
+Verified: all eight commits present; core **1215/128** and mobile
+**283/53** re-confirmed by the architect's own runs (18/5 growth
+exact); the Mac's `CommitRules` delegation read line-by-line — a
+one-line delegation to the hoisted core brain, byte-identical
+behavior, NO seventh copied-brain row (the hoist-not-copy rule
+honored); the implementer's Mac 1245/219 tripwire-only + Mac spine
+51/7 runs stand on that diff. The six locked-take redirects are
+GONE with their doors landing in the same commits; **the S5 proof is
+the batch's crown: a conflict take landing on a phone block is
+discoverable by three roads from one delivery, pinned, and the
+sealed arm honors S5-outranks-the-seal exactly as the spec orders.**
+PC4a-1…5 ride the end bundle. The ONLY user-facing "Mac" strings
+left in the mobile target are the merge-ceremony refusal + its
+tutorial sentence — C5's, by design (PB1-4's rider).
+
+## Stage C, batch C4b brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
+
+**Cast:** a fresh Fable implementer session, `~/dev/variorum-mobile`,
+branch `mobile`, starting at this commit. Scope: **the editor fill**
+— the C4 split's second half; ONE ladder covers C4a+C4b after this
+batch.
+
+**Read first, IN FULL:** `CLAUDE.md` (AppSpec §9's extract entry —
+boundary-adjacency and the fanned-extract documented behavior — and
+§12's block-TOC paragraph are the spec floor; TEXTKIT2_NOTES §3's
+spell/completion crash pairing binds find-in-note) ·
+`notes/MobileSoul.md` · THIS plan file top to bottom (the MATRIX's
+editor-fill rows · the MID-CHAIN SITTING rulings 5 and 11 · the C4
+split note · the C4a record — the surfaces you extend) · the Mac's
+selection-menu/find/TOC faces in code ·
+`notes/plans/mobile-architect-handoff.md`. Environment traps bind;
+the MOBILE spine's seven names are in the C3-close section.
+
+**The five work items:**
+
+1. **Insert Block Below** — the ⋯-menu row over the standing op (the
+   matrix row: mechanical; the awkward type-into-next-then-divide
+   road retires as the road, the door stays).
+2. **Strike/code/link doors** — the markdown vocabulary's remaining
+   acts join the Aa strip's grammar (the SAME six-act brain family;
+   the LK8 order question: they land INSIDE the Aa strip — the
+   resting bar stays Aa · ⑂ · ⋯, and the strip may grow rows/acts
+   within its capsule; the FIX-5 visibility pin's frames-in-bounds
+   rule extends to whatever the strip becomes).
+3. **Find-in-note** — the Write editor's find face (the Mac's ⌘F
+   family, phone-shaped); TEXTKIT2 §3's crash-pairing care binds
+   (no continuous-spellcheck interaction; highlight via the standing
+   overlay discipline, never rendering attributes).
+4. **Extract + Make Block on the selection menu** (her sitting
+   ruling 5): both acts as UIEditMenu items over the existing core
+   ops — extract's boundary-adjacency refusals speak in phone words;
+   the fanned-extract documented behavior may warrant the Mac's hint
+   (your call, PROVISIONAL).
+5. **The block-TOC in-note list** (her sitting ruling 11): a
+   summoned in-note block list — one row per block, its NAME where
+   set else the first sentence DERIVED AT READ TIME (never stored —
+   AppSpec §12's letter); tap jumps the editor there; block names
+   get their phone face. Virtualized per P3 if long (the windowing
+   discipline).
+
+**Discipline (standing):** existing core ops; small additive Queries
+with the four-suite duty; `Operations/`/schema/`Sync/` STOPS.
+Tutorial-as-spec (the writing lesson grows where doors land).
+Synchronous; red-on-old for defect-class; state-transition tests per
+door; no platform-named refusals. Full mobile suite green by own run
+(from 283/53, arithmetic accounted) + mobile spine 32/7 + perf 9/2
+by name. Commit per logical unit with the standing trailer; record
+as "## Stage C, batch C4b — BATCH RECORD"; push.
+PROVISIONAL-and-continue; author-only calls stop.
