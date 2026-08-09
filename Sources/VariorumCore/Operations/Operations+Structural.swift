@@ -449,6 +449,184 @@ extension Operations {
         return result
     }
 
+    // MARK: - Divide, duplicate shape (the fanned DEFAULT — Q-M2, author ruling 2026-08-03)
+
+    public struct DivideDuplicatingResult: Equatable, Sendable {
+        /// B — the displayed take's first half leading its fan, every other
+        /// active take duplicated whole behind it in source fan order.
+        public let first: FanHalf
+        /// C — the second half leading, the same duplicates behind.
+        public let second: FanHalf
+        /// A's released placement row (the pre-image undo flips back).
+        public let releasedPlacementID: String
+    }
+
+    /// **The duplicate-shape divide — the ruled DEFAULT for dividing a
+    /// fanned block** (author, 2026-08-03 at the mobile v1 gate sitting,
+    /// Q-M2; her words are the spec, recorded verbatim in
+    /// `notes/plans/mobile-app-plan.md`'s gate record): the DISPLAYED take
+    /// is cut at `cut`; its first half seeds B, its second half seeds C;
+    /// **every OTHER active take is duplicated WHOLE onto BOTH successors**
+    /// — no `CutPropagation`, no unique-match gate, no ceremony. "It
+    /// sidesteps smart divide rules entirely - the takes that you aren't
+    /// dividing are just duplicated, one per each block." The extra takes
+    /// are hers to delete — quicker than a ceremony, and nothing is ever
+    /// hunted for. The phone's fanned divide door calls this; the Mac's
+    /// door keeps opening the W ceremony until Phase 13j wires its switch
+    /// (the operation is deliberately DORMANT for the Mac until then).
+    ///
+    /// Composition with the standing rules (the W resolution byte-intact):
+    /// A is **preserved whole** and released to lineage — placement
+    /// tombstoned, `last_container_id` stamped, every variant and commit
+    /// untouched, reversible by re-pointing (`placeBlock`). Archived takes
+    /// stay on A (the W's unmarked-variant precedent — nothing is lost);
+    /// locked takes duplicate fine (buffers are COPIED, never edited — the
+    /// W's locked-marked rule) and the duplicates are NOT born locked (the
+    /// poolDragCopy rule). Duplicates are fresh rows with fresh UUIDs,
+    /// texts, statuses (active by construction), and labels copied — a
+    /// whole-take ride keeps its name, the merge-carry precedent — with the
+    /// parent tree remapped INSIDE each successor's copy set (poolDragCopy's
+    /// rule: a parent outside the set — the displayed take, or an archived
+    /// take left on A — maps to nil). The cut halves mint unlabeled and
+    /// parentless, exactly as the W's halves do. Each successor's
+    /// chosen/default is its cut half; duplicates join the fan behind it in
+    /// source fan order. Both successors inherit A's presentation and get
+    /// COPIES of A's live comments (the divide-W travel rule; A keeps the
+    /// originals); commits are never copied. Edges: `(B derived_from A)`
+    /// and `(C derived_from A)`, originOp 'divide'. Touch-without-churn.
+    /// I10 holds at birth by construction — each successor carries its cut
+    /// half at minimum.
+    ///
+    /// The cut is a UTF-16 offset into the DISPLAYED take's text, halved by
+    /// the ONE cut brain (`BoundarySnapping.seamTrimmedHalves`; snapping is
+    /// the editor's contract, as in `divide`). A cut at the very start or
+    /// end refuses (`invalidCut` — her "valid divider" condition; there is
+    /// NO parking here, that is the ceremony's vocabulary). An unfanned
+    /// block is accepted deliberately (the divideW precedent: the editor
+    /// picks the gesture, the op doesn't second-guess) and degenerates to a
+    /// divide with release-A semantics and no duplicates — PROVISIONAL,
+    /// recorded in the A2 batch record.
+    @discardableResult
+    public func divideDuplicating(
+        _ blockID: String, displayedVariantID: String, cut: Int
+    ) throws -> DivideDuplicatingResult {
+        let result: DivideDuplicatingResult = try database.write { db in
+            let context = try placedContext(db, blockID: blockID)
+
+            // The displayed take must be a live ACTIVE take of THIS block
+            // (the ceremony's own validation grammar): an archived take of
+            // the right block diagnoses precisely; anything else — missing,
+            // tombstoned, or foreign — is not found among this block's takes.
+            guard let displayed = try Variant.fetchOne(db, key: displayedVariantID),
+                  displayed.deletedAt == nil, displayed.blockId == blockID
+            else { throw OperationError.variantNotFound(id: displayedVariantID) }
+            guard displayed.status == .active else {
+                throw OperationError.archivedVariant(id: displayedVariantID)
+            }
+
+            // Her "valid divider": the cut must leave two non-empty halves
+            // of the displayed take. Start/end cuts refuse — nothing to
+            // divide, unchanged from plain divide.
+            guard let halves = BoundarySnapping.seamTrimmedHalves(
+                    displayed.workingText, cutAtUTF16: cut),
+                  !halves.first.isEmpty, !halves.second.isEmpty
+            else { throw OperationError.invalidCut(variantID: displayedVariantID, cut: cut) }
+
+            // Every OTHER active take, in fan order — the duplicates.
+            let others = try Variant.fetchAll(
+                db,
+                sql: """
+                    SELECT * FROM variant
+                    WHERE block_id = ? AND deleted_at IS NULL AND status = 'active'
+                    ORDER BY fan_position, id
+                    """,
+                arguments: [blockID]).filter { $0.id != displayedVariantID }
+
+            let now = date.now
+
+            // Release A's placement; A itself is preserved whole (divideW's
+            // exact release — the stamp feeds the tray + restoreBlock).
+            var released = context.placement
+            released.deletedAt = now
+            released.updatedAt = now
+            try released.update(db)
+            var sourceBlock = context.block
+            sourceBlock.lastContainerId = context.container.id
+            sourceBlock.updatedAt = now
+            try sourceBlock.update(db)
+
+            // B then C stand exactly where A stood.
+            let containerID = context.container.id
+            func neighbor(_ aggregate: String, _ comparison: String) throws -> String? {
+                try String.fetchOne(
+                    db,
+                    sql: """
+                        SELECT \(aggregate)(position) FROM container_block
+                        WHERE container_id = ? AND deleted_at IS NULL AND position \(comparison) ?
+                        """,
+                    arguments: [containerID, context.placement.position])
+            }
+            let follower = try neighbor("MIN", ">")
+            let positionB = FractionalIndex.between(try neighbor("MAX", "<"), follower)
+            let positionC = FractionalIndex.between(positionB, follower)
+
+            // Per successor: the cut half leads (chosen + default), the
+            // duplicates follow in source fan order, labels riding, the
+            // parent tree remapped inside the copy set (index 0 is the cut
+            // half; duplicate i's slot is i+1; a parent outside the set
+            // maps to nil).
+            let indexBySource = Dictionary(
+                uniqueKeysWithValues: others.enumerated().map { ($1.id, $0 + 1) })
+            let duplicateLabels = others.map(\.label)
+            let duplicateParents = others.map { $0.parentVariantId.flatMap { indexBySource[$0] } }
+            var successors: [FanHalf] = []
+            for (half, position) in [(halves.first, positionB), (halves.second, positionC)] {
+                let minted = try mintFanBlock(
+                    db, texts: [half] + others.map(\.workingText), in: containerID,
+                    position: position, defaultIndex: 0, chosenIndex: 0,
+                    presentation: context.block.presentation,
+                    labels: [nil] + duplicateLabels,
+                    parentIndices: [nil] + duplicateParents, now: now)
+                let edge = try insertLineageEdge(
+                    db, from: minted.block.id, to: blockID, originOp: "divide", now: now)
+                // Phase 13 (A2) travel: copies to BOTH successors; A —
+                // preserved whole — keeps the originals.
+                try copyLiveComments(db, from: blockID, to: minted.block.id, now: now)
+                successors.append(FanHalf(
+                    block: minted.block, variants: minted.variants,
+                    sourceVariantIDs: [displayedVariantID] + others.map(\.id),
+                    placement: minted.placement, edge: edge))
+            }
+
+            try touchContainer(db, containerID, now: now)
+
+            return DivideDuplicatingResult(
+                first: successors[0], second: successors[1],
+                releasedPlacementID: context.placement.id)
+        }
+        undoStack?.register(
+            label: "Divide",
+            inverse: {
+                try $0.revertStructural(
+                    restoringTexts: [],
+                    tombstoningBlocks: [
+                        .init(result.first.block.id, result.first.variants),
+                        .init(result.second.block.id, result.second.variants),
+                    ],
+                    revivingPlacementRows: [result.releasedPlacementID])
+            },
+            redo: {
+                try $0.reapplyStructural(
+                    restoringTexts: [],
+                    untombstoningBlocks: [
+                        .init(result.first.block.id, result.first.variants),
+                        .init(result.second.block.id, result.second.variants),
+                    ],
+                    releasingPlacementRows: [result.releasedPlacementID])
+            })
+        return result
+    }
+
     // MARK: - Merge (mirrors W)
 
     public struct MergeResult: Equatable, Sendable {
@@ -919,18 +1097,24 @@ extension Operations {
     }
 
     /// A fresh block carrying a whole fan (divide-W's successors, merge's
-    /// single-variant result, the merge ceremony's paired+carried fan): one
+    /// single-variant result, the merge ceremony's paired+carried fan, the
+    /// duplicate-shape divide's successors): one
     /// variant per text, fresh fan positions
-    /// preserving the given order, parentless (block-level edges carry the
-    /// lineage; the variant parent tree never crosses blocks), placed at an
-    /// exact position. Lineage edges are the caller's — their count and
-    /// ancestors differ per operation. `labels`, when given, rides
+    /// preserving the given order, parentless by default (block-level edges
+    /// carry the lineage; the variant parent tree never crosses blocks),
+    /// placed at an exact position. Lineage edges are the caller's — their
+    /// count and ancestors differ per operation. `labels`, when given, rides
     /// index-aligned with `texts` (13b 4B: a carried take keeps its label —
     /// the name is part of the take it rides in on; pairings mint unlabeled).
+    /// `parentIndices`, when given, remaps a parent tree INSIDE the minted
+    /// set (the poolDragCopy precedent, mobile A2): entry `i`'s parent is
+    /// the minted variant at `parentIndices[i]`, which must be an EARLIER
+    /// index — parents precede children in fan order by `branchVariant`'s
+    /// append construction, and the FK enforces the contract at insert.
     private func mintFanBlock(
         _ db: Database, texts: [String], in containerID: String, position: String,
         defaultIndex: Int, chosenIndex: Int?, presentation: String? = nil,
-        labels: [String?]? = nil, now: Date
+        labels: [String?]? = nil, parentIndices: [Int?]? = nil, now: Date
     ) throws -> MintedFanBlock {
         var block = Block(
             id: newID(), ownerId: currentOwnerID(), presentation: presentation,
@@ -942,8 +1126,13 @@ extension Operations {
         for (i, text) in texts.enumerated() {
             let fanPosition = lastFanPosition.map { FractionalIndex.between($0, nil) }
                 ?? FractionalIndex.initial()
+            var parentID: String?
+            if let parentIndices, i < parentIndices.count, let parentIndex = parentIndices[i] {
+                parentID = variants[parentIndex].id
+            }
             let variant = Variant(
-                id: newID(), blockId: block.id, workingText: text,
+                id: newID(), blockId: block.id, parentVariantId: parentID,
+                workingText: text,
                 label: labels.flatMap { i < $0.count ? $0[i] : nil },
                 fanPosition: fanPosition, createdAt: now, updatedAt: now)
             try variant.insert(db)
