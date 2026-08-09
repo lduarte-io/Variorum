@@ -9,11 +9,20 @@
 //  8 shell that carries over), and the DEBUG spike door (the Stage 0
 //  KEPT deviation's manual entry).
 //
+//  Parity round Stage B, batch B1: the DEBUG tutorial doors (open /
+//  restore the pocket guide). DEBUG-only BY DESIGN — Debug builds
+//  resolve the DEV store (the A4 fence), so the guide can never reach
+//  her real corpus from here; the product door's placement is hers
+//  (PROVISIONAL PB1-1). The doors are thin wiring onto the tested
+//  seeder seams (`MobileTutorialSeeder.findOrSeed`/`restore`) — the
+//  walk suites drive those seams headlessly.
+//
 
 import SwiftUI
 import VariorumCore
 
 struct MobileSettingsView: View {
+    let session: AppSession
     let router: MobileShellRouter
     let services: AppServices?
 
@@ -21,6 +30,13 @@ struct MobileSettingsView: View {
     @Environment(\.dismiss) private var dismiss
     #if DEBUG
     @State private var spikePresented = false
+    /// The tutorial doors' state: one door in flight at a time (the
+    /// Mac's NIT-6 latch, sheet-local), the spoken outcome, and the
+    /// replace confirm's continuation (the alert resolves it).
+    @State private var tutorialInFlight = false
+    @State private var tutorialNote: String?
+    @State private var confirmPresented = false
+    @State private var confirmContinuation: CheckedContinuation<Bool, Never>?
     #endif
 
     private var tokens: VoiceTokens {
@@ -77,6 +93,41 @@ struct MobileSettingsView: View {
             Divider()
                 .overlay(tokens.line)
                 .padding(.vertical, 14)
+            Text(tokens.chromeLabel("Tutorial (dev store)"))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 4)
+            Button {
+                Task { await tutorialDoor(replace: false) }
+            } label: {
+                Text(tokens.chromeLabel("Open the pocket guide"))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 4)
+            Button {
+                Task { await tutorialDoor(replace: true) }
+            } label: {
+                Text(tokens.chromeLabel("Restore the pocket guide…"))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 4)
+            if let tutorialNote {
+                Text(tokens.chromeLabel(tutorialNote))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 2)
+            }
+            Divider()
+                .overlay(tokens.line)
+                .padding(.vertical, 14)
             Button("TK2 Spike") { spikePresented = true }
                 .font(tokens.small)
                 .padding(.horizontal, 20)
@@ -87,8 +138,58 @@ struct MobileSettingsView: View {
         .background(tokens.room.ignoresSafeArea())
         #if DEBUG
         .fullScreenCover(isPresented: $spikePresented) { SpikeScreen() }
+        .alert(MobileTutorialSeeder.replaceQuestion, isPresented: $confirmPresented) {
+            Button("Replace", role: .destructive) {
+                confirmContinuation?.resume(returning: true)
+                confirmContinuation = nil
+            }
+            Button("Cancel", role: .cancel) {
+                confirmContinuation?.resume(returning: false)
+                confirmContinuation = nil
+            }
+        } message: {
+            Text(MobileTutorialSeeder.replaceDetail)
+        }
         #endif
     }
+
+    #if DEBUG
+    /// The two doors share one body: `replace: false` is find-or-seed
+    /// (an existing book just reports — never a second guide); `replace:
+    /// true` is the wholesale restore, always confirm-gated when
+    /// anything tutorial-shaped exists (the Mac door grammar). The SAME
+    /// discovered `Existing` the confirm disclosed flows into the
+    /// replace (the MAJOR-A discipline, carried).
+    private func tutorialDoor(replace: Bool) async {
+        guard !tutorialInFlight else { return }
+        tutorialInFlight = true
+        defer { tutorialInFlight = false }
+        do {
+            let existing = try await session.database.read {
+                try MobileTutorialSeeder.discover($0)
+            }
+            if !replace, !existing.readingIDs.isEmpty {
+                tutorialNote = "The pocket guide is already on your shelf."
+                return
+            }
+            if !existing.isEmpty {
+                let confirmed = await withCheckedContinuation { continuation in
+                    confirmContinuation = continuation
+                    confirmPresented = true
+                }
+                guard confirmed else {
+                    tutorialNote = "Left as it was."
+                    return
+                }
+            }
+            _ = try await MobileTutorialSeeder.restore(
+                session: session, existing: existing)
+            tutorialNote = "The pocket guide is on your shelf."
+        } catch {
+            tutorialNote = String(describing: error)
+        }
+    }
+    #endif
 
     /// One voice's row: the terminal `›` marker carries the selection
     /// (the R1 idiom); study renders the plain selected ink.

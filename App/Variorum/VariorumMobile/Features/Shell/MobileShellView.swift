@@ -95,7 +95,7 @@ struct MobileShellView: View {
             .accessibilityHidden(tab != .library)
         }
         .sheet(isPresented: $settingsPresented) {
-            MobileSettingsView(router: router, services: services)
+            MobileSettingsView(session: session, router: router, services: services)
         }
         #if DEBUG
         .fullScreenCover(isPresented: $spikePresented) { SpikeScreen() }
