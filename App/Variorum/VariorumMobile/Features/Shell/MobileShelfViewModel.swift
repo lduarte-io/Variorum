@@ -90,6 +90,17 @@ final class MobileShelfViewModel {
             isDaily: book.reading.id == dailyBookID)
     }
 
+    /// + New Note (P33, parity A3 — Library's twin through the ONE
+    /// shared mint): a nameless bookless note, opened for writing.
+    func newNote() async -> String? {
+        do {
+            return try await MobileNewNoteDoor.mint(session: session)
+        } catch {
+            lastError = String(describing: error)
+            return nil
+        }
+    }
+
     /// Today's Entry (M7's button): create-or-open + the shared shelving
     /// door, in one composition. The entry ALWAYS opens; only the note
     /// changes. Returns the entry to navigate to.

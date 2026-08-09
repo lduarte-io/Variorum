@@ -181,8 +181,26 @@ struct MobileLibraryTests {
                 homeContainerID: "pool-id", homeIsPool: true)
             #expect(MobileLibraryViewModel.destination(for: poolHit) == nil)
             let bookHit = Queries.CatalogHit(kind: .book, id: "r", title: "Home", detail: "book")
+            // `.book` is the book's FRONT — since P35's inversion (parity
+            // A3) that front is the CONTENTS list; Read is its door.
             #expect(MobileLibraryViewModel.destination(for: bookHit) == .book("r"))
         }
+    }
+
+    /// P35's flip (parity A3), the headless half of the flow pin: a book
+    /// tap routes to `.book` — whose screen is the CONTENTS list — and
+    /// the Read flow is a separate route reached only through the
+    /// contents screen's voiced "Read" door (`MobileBookView.
+    /// readDoorTitle`). The SwiftUI push wiring itself rides the batch's
+    /// screenshot set (the A1 masthead precedent).
+    @Test func bookTapOpensContentsFirstAndReadIsTheDoor() {
+        let bookHit = Queries.CatalogHit(kind: .book, id: "r", title: "Home", detail: "book")
+        #expect(MobileLibraryViewModel.destination(for: bookHit) == .book("r"))
+        #expect(MobileRoute.bookRead("r") != MobileRoute.book("r"),
+                "Read is its own route — a door, never the book tap's landing")
+        #expect(MobileBookView.readDoorTitle == "Read")
+        #expect(VoiceTokens.terminalLight.chromeLabel(MobileBookView.readDoorTitle) == "read",
+                "the door renders voice-cased (P26/P43's one register)")
     }
 
     /// "+ new note" mints a NAMELESS note (13g R6-3: no stored

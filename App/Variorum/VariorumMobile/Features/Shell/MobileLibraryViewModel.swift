@@ -138,15 +138,12 @@ final class MobileLibraryViewModel {
         }
     }
 
-    /// "+ new note" — the phone's plain minting door (the Mac ⌘N's
-    /// semantics: NO stored placeholder title, 13g R6-3; a bookless mint
-    /// lands in the Pool filter, honestly). Returns the note to open.
+    /// "+ new note" — the phone's plain minting door, through the ONE
+    /// shared mint (`MobileNewNoteDoor` — since P33 the shelf carries the
+    /// twin, and the path cannot fork). Returns the note to open.
     func newNote() async -> String? {
         do {
-            let post = try await session.runner.run { ops in
-                try ops.createPost(title: nil)
-            }
-            return post.id
+            return try await MobileNewNoteDoor.mint(session: session)
         } catch {
             lastError = String(describing: error)
             return nil

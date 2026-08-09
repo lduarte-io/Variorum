@@ -63,7 +63,8 @@ struct MobileLibraryView<TabBar: View>: View {
                     }
                 }
             } label: {
-                Text(tokens.chromeLabel("+ New Note"))
+                // The ONE door word (P33: the shelf's twin reads it too).
+                Text(tokens.chromeLabel(MobileNewNoteDoor.doorTitle))
                     .font(tokens.small)
                     .foregroundStyle(tokens.accent)
             }

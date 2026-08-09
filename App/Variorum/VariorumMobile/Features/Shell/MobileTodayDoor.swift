@@ -64,3 +64,22 @@ enum MobileTodayDoor {
         }
     }
 }
+
+/// P33 (parity A3, her ruled flip: "the SHELF gains its own + New Note
+/// door") — the ONE bookless mint both tabs share: the Library's door and
+/// the shelf's twin call exactly this, so the mint path cannot fork. The
+/// Mac ⌘N's semantics (NO stored placeholder title, 13g R6-3); a bookless
+/// mint lands in the Pool filter, honestly; both doors open the note for
+/// writing (the landing is part of the twin promise).
+@MainActor
+enum MobileNewNoteDoor {
+    /// The door's word on BOTH tabs (voice-cased at render; pinned).
+    static let doorTitle = "+ New Note"
+
+    /// Mints the nameless bookless note; returns its id.
+    static func mint(session: AppSession) async throws -> String {
+        try await session.runner.run { ops in
+            try ops.createPost(title: nil)
+        }.id
+    }
+}

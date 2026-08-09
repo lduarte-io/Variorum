@@ -234,6 +234,35 @@ struct MobileShellTests {
         }
     }
 
+    // MARK: - + New Note (P33 — the shelf's twin of the Library door)
+
+    /// P33's flip (parity A3): the shelf mints through the ONE shared
+    /// door — a NAMELESS bookless note (the Mac ⌘N semantics the Library
+    /// pin already carries), reading the same door word, so the twins
+    /// cannot fork in path or register.
+    @Test func theShelfNewNoteDoorIsTheLibrarysTwin() async throws {
+        try await withEditorWorld { session, db in
+            let model = MobileShelfViewModel(session: session)
+            let postID = try #require(await model.newNote())
+            let stored = try await db.read { db in
+                try Row.fetchOne(
+                    db, sql: """
+                        SELECT title,
+                               (SELECT COUNT(*) FROM reading_post
+                                WHERE post_id = container.id
+                                  AND deleted_at IS NULL) AS memberships
+                        FROM container WHERE id = ?
+                        """,
+                    arguments: [postID])
+            }
+            #expect((stored?["title"] as String?) == nil, "no stored placeholder title")
+            #expect((stored?["memberships"] as Int?) == 0, "a BOOKLESS mint (the Pool's filter)")
+            #expect(MobileNewNoteDoor.doorTitle == "+ New Note")
+            #expect(VoiceTokens.terminalLight.chromeLabel(MobileNewNoteDoor.doorTitle)
+                    == "+ new note", "the door renders voice-cased on both tabs")
+        }
+    }
+
     // MARK: - The book list (chapters honored)
 
     /// The book list groups by the assembly's OWN section transitions

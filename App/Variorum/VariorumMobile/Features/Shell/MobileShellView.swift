@@ -26,12 +26,13 @@ import VariorumCore
 /// Where the shell can navigate. `focus` on a note ⇒ raise the keyboard
 /// on arrival (the Today door's straight-into-typing invitation).
 enum MobileRoute: Hashable {
-    /// A book's front: the Read flow (S4, M8 — "a book opens into the
-    /// calm continuous column").
+    /// A book's front: the CONTENTS list (the S3 screen). P35's ruled
+    /// inversion (parity A3) — "book-tap INVERTS — contents list first;
+    /// Read is the door": this supersedes S4's Read-first reading of M8.
     case book(String)
-    /// The book's note LIST (the S3 screen) — reachable from the Read
-    /// page's "contents" door.
-    case bookList(String)
+    /// The Read flow (the calm continuous column) — reached through the
+    /// contents screen's "Read" door, never by the book tap itself.
+    case bookRead(String)
     case note(String, focus: Bool)
 }
 
@@ -76,7 +77,7 @@ struct MobileShellView: View {
                     model: shelfModel, tokens: tokens,
                     tabBar: { tabBar },
                     onOpenBook: { shelfPath.append(MobileRoute.book($0)) },
-                    onOpenToday: { shelfPath.append(MobileRoute.note($0, focus: true)) },
+                    onOpenForWriting: { shelfPath.append(MobileRoute.note($0, focus: true)) },
                     onSettings: { settingsPresented = true })
             }
             .opacity(tab == .shelf ? 1 : 0)
@@ -122,14 +123,15 @@ struct MobileShellView: View {
     private func destination(_ route: MobileRoute, in owner: MobileTab) -> some View {
         switch route {
         case .book(let readingID):
-            // S4 (M8): a book opens into the READ flow; the note list is
-            // its "contents" door. Tapping into a note edits it in Write.
-            MobileReadView(
+            // P35 (parity A3, her ruled flip): a book opens into its
+            // CONTENTS list; Read is the door from there. Tapping into a
+            // note edits it in Write — both roads unchanged.
+            MobileBookView(
                 session: session, readingID: readingID, tokens: tokens,
                 onOpen: { push(.note($0, focus: false), in: owner) },
-                onList: { push(.bookList(readingID), in: owner) })
-        case .bookList(let readingID):
-            MobileBookView(
+                onRead: { push(.bookRead(readingID), in: owner) })
+        case .bookRead(let readingID):
+            MobileReadView(
                 session: session, readingID: readingID, tokens: tokens,
                 onOpen: { push(.note($0, focus: false), in: owner) })
         case .note(let postID, let focus):

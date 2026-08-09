@@ -22,7 +22,9 @@ struct MobileShelfView<TabBar: View>: View {
     let tokens: VoiceTokens
     @ViewBuilder let tabBar: () -> TabBar
     let onOpenBook: (String) -> Void
-    let onOpenToday: (String) -> Void
+    /// Open a note straight into typing — the Today button's landing AND
+    /// the + New Note door's (P33: "the note opens for writing").
+    let onOpenForWriting: (String) -> Void
     let onSettings: () -> Void
 
     var body: some View {
@@ -64,14 +66,28 @@ struct MobileShelfView<TabBar: View>: View {
         .task { await model.refreshTags() }
     }
 
-    /// "~/shelf · 6 books" (terminal) / "Shelf · 6 books" (study), the
-    /// settings door trailing.
+    /// "~/shelf · 6 books" (terminal) / "Shelf · 6 books" (study); the
+    /// + New Note door (P33 — Library's twin, same path-line placement)
+    /// and the settings door trailing.
     private var pathLine: some View {
-        HStack(alignment: .firstTextBaseline) {
+        HStack(alignment: .firstTextBaseline, spacing: 16) {
             Text(tokens.path(["Shelf"]) + tokens.chromeLabel("  ·  \(model.books.count) book\(model.books.count == 1 ? "" : "s")"))
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
             Spacer()
+            Button {
+                Task {
+                    if let postID = await model.newNote() {
+                        onOpenForWriting(postID)
+                    }
+                }
+            } label: {
+                Text(tokens.chromeLabel(MobileNewNoteDoor.doorTitle))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("New Note")
             Button {
                 onSettings()
             } label: {
@@ -123,7 +139,7 @@ struct MobileShelfView<TabBar: View>: View {
         Button {
             Task {
                 if let postID = await model.openToday() {
-                    onOpenToday(postID)
+                    onOpenForWriting(postID)
                 }
             }
         } label: {

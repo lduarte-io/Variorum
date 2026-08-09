@@ -20,8 +20,10 @@
 //  `MobileBookViewModel` (S3's brain, reused whole); the per-line
 //  transform + LK9 strings are `MobileReadPage` (pure); the per-note
 //  text read is the Mac flow's own (`renderPost` → `joinRenderedTexts`).
-//  The note LIST stays reachable — the "contents" chrome door pushes it
-//  (`MobileRoute.bookList`); both roads open notes in Write.
+//  Since parity A3 (P35, her ruled flip) this page is reached THROUGH
+//  the contents screen's "Read" door (`MobileRoute.bookRead`) — the
+//  contents list is the book's front, so this page's own contents door
+//  retired (the system back gesture IS the road back).
 //
 
 import SwiftUI
@@ -33,20 +35,17 @@ struct MobileReadView: View {
     let tokens: VoiceTokens
     /// Open a note in Write.
     let onOpen: (String) -> Void
-    /// The contents door — the book's note list (S3's screen).
-    let onList: () -> Void
 
     @Environment(\.colorScheme) private var scheme
 
     init(
         session: AppSession, readingID: String, tokens: VoiceTokens,
-        onOpen: @escaping (String) -> Void, onList: @escaping () -> Void
+        onOpen: @escaping (String) -> Void
     ) {
         self.session = session
         _model = State(initialValue: MobileBookViewModel(session: session, readingID: readingID))
         self.tokens = tokens
         self.onOpen = onOpen
-        self.onList = onList
     }
 
     private var page: ReadingPageTokens {
@@ -115,14 +114,6 @@ struct MobileReadView: View {
         }
         .background(tokens.room.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                // The contents door: the note list (scanning, dates, the
-                // S3 screen) — the calm column stays the book's front.
-                Button(tokens.chromeLabel("contents")) { onList() }
-                    .font(tokens.small)
-            }
-        }
         .task { await model.start() }
     }
 }
