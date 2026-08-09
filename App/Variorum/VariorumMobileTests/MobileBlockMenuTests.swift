@@ -256,7 +256,8 @@ struct MobileBlockMenuTests {
         }
     }
 
-    // MARK: Delete block (the tray stays Mac-side; flush-first)
+    // MARK: Delete block (flush-first; the tray's recovery door rides
+    // PL-3/13j — the copy no longer redirects, parity C2)
 
     @Test func deleteBlockTombstonesAndSpeaksTheTrayNote() async throws {
         try await withEditorWorld { session, db in
@@ -272,8 +273,16 @@ struct MobileBlockMenuTests {
                      replacement: " Typed.")
             await model.blockMenu.delete(blockID: seed.blockA)
 
+            // Parity C2 (inventory #2/#5, sanctioned pin flip riding the
+            // matrix's dissolve ruling): the tray sentences keep the FACT
+            // and lose the redirect — no string on this door names a
+            // platform (the no-redirect principle).
             #expect(model.statusMessage
-                == "Block deleted — it waits in this note's deleted-blocks tray on the Mac.")
+                == "Block deleted — it waits in this note's deleted-blocks tray.")
+            #expect(MobileStructuralController.blockDeletedStatus.contains("Mac") == false)
+            #expect(MobileBlockMenuController.deleteConfirmDetail
+                == "The block leaves this note and waits in its deleted-blocks tray.")
+            #expect(MobileBlockMenuController.deleteConfirmDetail.contains("Mac") == false)
             let deletedAt = try await db.read { db in
                 try String.fetchOne(
                     db, sql: "SELECT deleted_at FROM block WHERE id = ?",

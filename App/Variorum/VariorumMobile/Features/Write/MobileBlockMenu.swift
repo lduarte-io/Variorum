@@ -206,8 +206,16 @@ final class MobileBlockMenuController {
         }
     }
 
-    // MARK: - Delete block (the tray stays Mac-side; confirm, since the
-    // phone has no structural undo — v1's recorded posture)
+    // MARK: - Delete block (confirm, since the phone has no structural
+    // undo — v1's recorded posture; the tray's recovery DOOR rides
+    // PL-3/13j)
+
+    /// The confirm's detail (parity C2, inventory #2 — the "on the Mac"
+    /// redirect dissolved: the tray FACT stays, neutrally; the phone's
+    /// recovery surface is 13j's, PL-3). Pinned static — a promise made
+    /// in a literal is a promise no test can keep.
+    static let deleteConfirmDetail =
+        "The block leaves this note and waits in its deleted-blocks tray."
 
     private func confirmDelete(blockID: String) {
         guard let confirmDestructive else {
@@ -216,7 +224,7 @@ final class MobileBlockMenuController {
         }
         confirmDestructive(
             "Delete Block",
-            "The block waits in this note's deleted-blocks tray on the Mac.",
+            Self.deleteConfirmDetail,
             "Delete"
         ) { [weak self] proceed in
             guard proceed else { return }

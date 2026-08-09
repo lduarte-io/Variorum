@@ -289,12 +289,18 @@ final class MobileStructuralController {
             try await session.runner.run { ops in
                 try ops.deleteBlock(blockID)
             }
-            model.report("Block deleted — it waits in this note's deleted-blocks tray on the Mac.")
+            model.report(Self.blockDeletedStatus)
             await model.refreshTakesFromStore()
         } catch {
             model.report(Self.refusalMessage(error, act: "delete the block"))
         }
     }
+
+    /// The delete report (parity C2, inventory #5 — the "on the Mac"
+    /// redirect dissolved: the tray fact stays, neutrally; the recovery
+    /// DOOR rides PL-3/13j). Pinned static.
+    static let blockDeletedStatus =
+        "Block deleted — it waits in this note's deleted-blocks tray."
 
     // MARK: - Shared pieces
 
