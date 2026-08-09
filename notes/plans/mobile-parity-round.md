@@ -1932,3 +1932,213 @@ section above; fix-set diff `bb636e4..5812dc6` inside the stage's
 combined `b93d42c..5812dc6`. New BLOCKER/MAJOR ⇒ round 3 (hard cap
 three). Baselines at round-2 open: **mobile 191/28 · core 1214/128 ·
 Mac 1245/219 tripwire-only · spine 51/7.**
+
+## Stage A review — round 2 (fresh cold reviewer, 2026-08-09)
+
+**Scope, done in-session:** `notes/REVIEW_PROMPT.md` run verbatim
+against the fix set `bb636e4..5812dc6` (all six files read hunk by
+hunk) inside the stage's combined `b93d42c..5812dc6` as context; the
+fix code read in its final in-place form (`mintFanBlock` whole,
+`divideDuplicating` whole, `MobileKeyboardBar.swift` whole, the
+FIX-3/FIX-5 pins whole, the WWorld fixture and the birth-pin suite's
+head); the standing code the fixes lean on read beside them
+(`poolDragCopy`'s includeFan remap, `copyPost`'s fan-copy loop,
+`MobileTakesChrome`'s exclusion/badge geometry, `lockNote`/`setSeal`,
+the P24 typewriter-room comments, every test touching the expanded
+bar state — grep-complete). Every screenshot md5 claim re-verified on
+disk by my own `md5` runs; SIX captures inspected by my own eyes
+(both terminal write shots, the study after, the shelf and
+book-contents doors, the post-FIX-5 kbar shot AND the retained
+round-1 defect shot). Suites by my OWN runs (below). Read-only per
+the prompt; this record is the round's one write.
+
+### Verdicts on the round-1 dispositions (each fix read, not trusted)
+
+- **MAJOR (screenshot evidence) → FIX-1: HOLD.** All md5 claims
+  verified on this machine: the four write-pair md5s distinct; the
+  befores (07:09/07:11) genuinely pre-floor (edge-to-edge prose,
+  tight pitch, the callout bled to both edges) and the afters (07:14)
+  genuinely the shipped floor in BOTH voices (canon margins, line
+  air, paragraph gaps, the callout inset with its rounded frame) —
+  my own eyes, both voices; `after-shelf` carries the `+ new note`
+  path-line door; `after-book-contents` carries the voiced `read`
+  door (the P35 delegation has its evidence). Both strike-and-note
+  corrections present (lines ~996 and ~1280), originals retained as
+  claimed. The honest-delta disclosure became round 1.5's MAJOR —
+  the evidence discipline worked exactly as designed.
+- **MINOR (`mintFanBlock` parent-follows-child trap) → FIX-2: HOLD.**
+  The fix read line-by-line in place: IDs pre-assigned before any
+  insert; a backward parent rides the insert; a FORWARD parent's
+  pointer lands in a second pass after every row exists (correct
+  under the immediate FK — verified against schema §7's
+  `parent_variant_id` FK + `PRAGMA foreign_keys = ON`);
+  self/out-of-range indices read as parentless. The pin's
+  discrimination is arithmetic-certain on the old code (swapped fan →
+  others = [V3, V2] → dup-of-V3 at loop i=1 parents at index 2 while
+  `variants` holds one element → index trap); green on HEAD by my
+  targeted run (suite 13/1). The doc claim corrected. Verified
+  besides: only `divideDuplicating` passes `parentIndices` — divideW
+  / merge / mergeCeremony are behaviorally byte-identical through the
+  change, and the `newID()` mint SEQUENCE is unchanged (block →
+  variant ids → placement), so no test-determinism drift.
+- **MINOR-part-SPECULATIVE (P38 window) → FIX-3: HOLD — the
+  refuted-by-probe close is correctly executed.** The speculative
+  rule's letter: pin-first, probe green, no code change, the pin kept
+  as the guard. I re-derived the arithmetic independently (badge
+  minX = cw−26 = 337; crossing needs endX > cw−59 = 304; the padded
+  admit limit cw−61 = 302 → empty window) and checked the probe's
+  design: the candidate band (center±3 chars ≈ ±26 pt) spans the
+  flush boundary under EITHER padding hypothesis (the no-padding
+  limit sits 5 pt ≈ 0.6 chars above center), the probe view and the
+  real surface share width 393 so the band cannot miss by geometry,
+  and `oneLiners > 0` guards a dead probe. Green by my targeted run.
+- **MINOR (AppSpec §9 lacks `divideDuplicating`) → deferred to the
+  stage closeout: HOLD as disposed.** AppSpec §9 still lacks the
+  entry (expected pre-closeout); the deferral is owned by the Stage A
+  closeout in this chain — the closeout must deliver it.
+- **NIT (locked-displayed doc claim) → FIX-4: HOLD.** The test
+  displays the locked take ITSELF; asserts the divide succeeds, the
+  lock and source text byte-untouched, nothing minted born locked —
+  exactly the doc's claim. Green in my runs.
+- **NIT (windowless lesson under-counts) → architect's-hand: HOLD.**
+  The adjudication names both window-hosting pins; FIX-5's pin is
+  deliberately windowless per the corrected lesson — the lesson now
+  matches the suite.
+- **NIT (`lockNote` await window) → recorded-not-fixed: HOLD as
+  disposed.** The R2-10 record-only class per the round-1 reviewer's
+  own recommendation; the record (adjudication + the round-1 finding
+  text) is the convention's required artifact. Read the door again:
+  flush-first → dirty re-verify → seal, unchanged by the fix set.
+- **Round 1.5 MAJOR (clipped strip) → FIX-5: HOLD.** The rebuilt bar
+  read whole: ONE customView item carrying seven real `UIButton`s in
+  one stack (`kbar.formattingStrip`), each ≥44 pt wide / 38 pt tall
+  at 2 pt gaps — 320 pt intrinsic against the 333 pt tightest-class
+  cell, overflow impossible by construction; the LK8 order, the exact
+  selectors and labels, and BOTH ruled long-press doors preserved on
+  the same buttons (# menu-not-primary + the deferred picker; ⇥'s
+  recognizer); the resting bar and the reset-per-presentation
+  observer byte-untouched; bar height unchanged (38 ≤ 44), so zero
+  interaction with the A1 keyboard-overlap machinery; no retain
+  cycles (target-action unretained; menu closures weak). The pin is
+  structurally red-on-old (no `kbar.formattingStrip` exists on the
+  seven-item shape → the guard's `Issue.record` fires
+  unconditionally) and discriminates against regrowth (a voice font
+  inflating buttons past the 333 bound, a button under 44, an
+  out-of-bounds frame, a wrong order all fail it); green by my
+  targeted run and inside the full suite. The post-fix capture
+  verified by my own eyes — all seven glyphs whole in one capsule —
+  the +3 s confirm md5-identical (`0772c90e…` both), the round-1
+  defect shot retained and showing exactly the recorded slivers.
+
+### New findings
+
+- **[MINOR] · `Sources/VariorumCore/Operations/Operations+Pool.swift:66-72`
+  (poolDragCopy, `includeFan`) + `Sources/VariorumCore/Operations/Operations+Versions.swift:660-671`
+  (`copyPost` — the engine behind `duplicateAsVersion` and
+  `promoteLens`) · the exact falsifiable-premise class FIX-2 was
+  adjudicated on lives untreated at the two STANDING single-pass
+  fan-copy remaps.** Mechanism, traced: each loop iterates the fan in
+  `ORDER BY fan_position, id` and INSERTS with `parentVariantId:
+  take.parentVariantId.flatMap { copyIDs[$0] }` in one pass — a
+  parent that FOLLOWS its child in fan order makes the child's insert
+  a FORWARD FK reference, and under the immediate FK (the FIX-2
+  record's own stated mechanism) SQLite refuses the insert: the
+  transaction rolls back and the op throws an opaque FK error.
+  Refusal-shaped, store-safe — strictly softer than FIX-2's Swift
+  trap — and unreachable today by FIX-2's own construction argument;
+  but the day 13e's ruled reorder-takes (PL-1) makes `fan_position`
+  mutable, an includeFan pool drag or a fan-carrying post copy of a
+  reordered fan fails where the divide now succeeds. The FIX-2
+  adjudication's rationale ("13e inherits a hidden landmine its
+  ledger row will not mention") applies verbatim to both sites, and
+  the fix's doc now advertises mintFanBlock as ORDER-FREE while
+  citing poolDragCopy as its shape — a 13e reader could reasonably
+  infer the precedent shares the property. Pinnable red-on-old with
+  FIX-2's exact fixture (direct-SQL fan-position swap →
+  `poolDragCopy(includeFan: true)` throws). Fix shape: the same
+  second-pass pointer landing mintFanBlock now carries — or an
+  explicit deferral recorded on 13e's row; what it must not remain is
+  unnamed.
+- **[NIT] · this file, the FIX-5 addendum ("the post-fix windowed
+  probe measured the strip's glass cell at 342 pt with all seven
+  44×38 buttons at x = 0…288") · the record's windowed numbers are
+  internally inconsistent as written.** Seven 44-wide buttons at 2 pt
+  gaps span 320 pt with the last at x = 276 — not 288 inside a 332 pt
+  strip; the quoted positions fit a toolbar-stretched strip (~332 pt)
+  whose fill distribution widened ONE button to ~56 (x = 0, 58, …,
+  288 exactly). Nothing the pin asserts is falsified (≥44 and
+  in-bounds both hold under stretch, and stretch is why the ≥ floor
+  was the right constraint); the "44×38" phrasing describes the
+  constraint floor, not the windowed measurement the sentence claims
+  to be. Record precision only; the stretch mechanism is my
+  reconstruction (the arithmetic inconsistency itself is certain).
+- **[NIT] · `App/Variorum/VariorumMobileTests/MobileTakesChromeTests.swift:260`
+  (`let pad: CGFloat = 5 // NSTextContainer.lineFragmentPadding
+  default`) · the FIX-3 probe hard-codes the padding its own verdict
+  proved load-bearing.** The probe's candidate band centers on
+  `(cw − reserved − pad)/charW` with `pad` a literal; if `make()`
+  ever changes `lineFragmentPadding`, the band recenters wrongly and
+  the guard can degrade silently (some one-liners still found —
+  `oneLiners > 0` stays green — while the flush-end case drifts out
+  of the set). One line closes it: read
+  `probe.textContainer.lineFragmentPadding` instead of the literal.
+  Guard-hardening only; today the values agree.
+
+No new BLOCKER/MAJOR — **round 3 is not triggered.**
+
+### Clean bill (load-bearing things specifically checked and found solid)
+
+- **The fix set's scope**: exactly six files; zero
+  `Sources/VariorumCore/Sync/`, zero `Persistence/` (no schema), zero
+  `App/Variorum/Shared/`, zero Mac-app source — verified by my own
+  `git diff --name-only`. FIX-5's commits (`4c40229..5812dc6`) touch
+  two mobile files + this plan only, so the fix pass's recorded Mac
+  run (1245/219 tripwire-only, at the post-FIX-2 tree) covers the fix
+  set's only core change; Mac dormancy for FIX-5 holds by
+  construction.
+- **`mintFanBlock` in situ**: the second pass updates only
+  forward-parented rows (same `updatedAt`, outbox coalesces the
+  re-enqueue, `sync_version` untouched); S1's tiny-write shape holds
+  (one bounded UPDATE per forward parent); the FIX-2 pin's
+  expectations match the swapped-world arithmetic exactly
+  (`sourceVariantIDs == [v1, v3, v2]`, dup-of-V3 → dup-of-V2 behind
+  it, store rows agreeing).
+- **The Aa bar's test surface**: grep-complete — the only tests
+  touching the expanded state are the two the fix mechanically
+  updated (the P5 wiring lookup and the Aa round-trip's `labels()`
+  helper, every pinned label/order/selector unchanged) plus the new
+  pin; the round-trip pin still exercises expand → acts → collapse →
+  reset-per-presentation through the strip.
+- **The FIX-3 probe's geometry inputs**: probe view and `makeSurface`
+  share width 393; `gutterWidth` 30 / `commentMarkRoom` 26 read from
+  the shipped constants; the exclusion widens only for
+  fanned∧commented (content-keyed, the oscillation-proof key).
+- **The seal door and the P24 inset**: untouched by the fix set and
+  free of fix interaction (the strip changes no bar height, so the A1
+  keyboard-overlap subtraction is unaffected; the probe exercises
+  exclusion paths, not insets). `lockNote`'s flush-first → re-verify
+  → seal shape re-read and unchanged.
+- **The evidence claims, every one re-verified**: ten files on disk;
+  all four write-pair md5s distinct; `after-kbar-formatting` =
+  `after-kbar-formatting-confirm` (`0772c90e…`); the defect shot
+  retained; six captures inspected by my own eyes and matching the
+  record's descriptions.
+
+### This reviewer's runs
+
+- Core (`swift test`): **"Test run with 1214 tests in 128 suites
+  passed"** — the round-2-open baseline, exactly.
+- Mobile (iPhone 17 Pro / iOS 26.2), full:
+  **"Test run with 191 tests in 28 suites passed"** — the
+  round-2-open baseline, exactly.
+- Targeted, seen green by name: core
+  `StructuralDivideDuplicatingTests` **13/1** (the FIX-2 pin + FIX-4
+  test included); mobile
+  `allSevenStripActsSitFullyVisibleAndTappableInsideTheBar()` and
+  `aFlushEndOneLineFannedAndCommentedBlockNeverCrowdsTheBadge()`
+  **2/2**.
+- Mac / spine: not re-run — the fix set's only core change was
+  covered by the fix pass's recorded four-suite run at `4c40229`, and
+  everything after it is two mobile files + this plan (my own
+  diff-scope verification above); the 1245/219-tripwire-only and 51/7
+  baselines stand.
