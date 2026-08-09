@@ -5474,3 +5474,161 @@ No BLOCKER/MAJOR. Dispositions:
   refusal's display cadence is look-round material; recorded).
 - **NIT C3-R1-8 (SPECULATIVE) → record-only** (Mac-identical either
   way; the pin-first rule would spend more than the risk).
+
+## Stage C review — C3 round 1 FIX-PASS RECORD (fix session, 2026-08-09)
+
+All four adjudicated fixes executed, one commit each, in order:
+FIX-C3a `e62a116` · FIX-C3b `50405b7` · FIX-C3c `a30510e` · FIX-C3d
+`f3a131d` (+ this record). Diff scope across the whole fix set,
+verified by own `git diff --name-only 164a53d..HEAD`: **nine files,
+ALL mobile app + mobile tests — zero `Sources/VariorumCore/`, zero
+`App/Variorum/Shared/`, zero Mac-side files, zero schema, zero
+`Sync/`, zero pbxproj** (the STOP condition never fired;
+core/Mac/Mac-spine baselines stand — 1214/128 · 1245/219
+tripwire-only · 51/7).
+
+**FIX-C3a (the manager's + new tag walks the typed-path road — ONE
+create rule everywhere) — BUILT, revert-verified.** *Trace:* the
+manager's `+ new tag` routed the raw string to `createTag`, whose own
+guard refuses any "/" (`invalidTagName`) — while the empty-state hint
+promised "“/” nests (life/goals)"; the typed-path walk lived only on
+the note-tags sheet. *The fix's shape — reuse, never a third copy
+(the six-copied-brains row's anti-pattern, avoided at its worst
+form):* the walk's three parts hoisted INTO `MobileTagsModel` (the
+tags family's standing copy-brain home) as the ONE typed-path brain —
+`typedSegments` (slash noise forgives, pure) · `typedPathPlan`
+(deepest-existing-live-prefix resolution → `TypedPathPlan`, pure) ·
+`createMissing` (the create-on-the-way half, run INSIDE one
+serialized runner turn so a racing duplicate refuses through the
+op's own guard) · the shared `emptyTypedPathMessage`. The note-tags
+sheet's `applyTypedPath` REFACTORED ONTO the brain — its apply half
+and its one-turn create+apply composition byte-identical (its
+standing pins green untouched); the manager's new `createTypedPath`
+walks the same brain, refuses a fully-existing path as the duplicate
+it is (the standing sentence, one copy brain), and speaks the shared
+hint on an empty type. The empty-state hint hoisted to the pinned
+`MobileTagManagerSheet.emptyStateHint` (the C2-R1-1 hoist doctrine)
+— it now teaches a road its own door walks; the root create alert's
+message names the nesting ("“/” nests (life/goals) — missing parents
+are created on the way."). The child-tag door ("New Child Tag…")
+deliberately keeps single-NAME semantics — its alert frames "A child
+of “X”" and prompts a Name; extending typed paths under a parent was
+not the adjudication's letter and is one call away if her look wants
+it (recorded, not provisional — the hint's promise concerns the door
+it sits beside). *Pin:*
+`MobileTagManagerTests/theNewTagDoorWalksTypedPaths` — hierarchy
+created on the way · partly-existing path creates only the tail with
+slash noise forgiven · fully-existing path refuses with the standing
+sentence, nothing minted · the shared empty hint · the hoisted
+promise pinned beside the door that keeps it. *Revert verification:*
+the pre-fix raw-to-`createTag` door restored inside
+`createTypedPath` → the pin fails with **8 issues** (the traced
+refusal "Tag names can't be empty or contain “/”." and zero tags
+minted), all 5 suite siblings green; fix restored → 6/2 green.
+
+**FIX-C3b (reference rows branch on the STORED KIND; the unopenable
+link's own honest state) — BUILT, revert-verified.** *Trace
+(the reviewer's, re-verified in code):* the row view branched on
+`openableURL != nil` — a `.url` row with nil/unparseable url (legal
+core: `addReference` validates nothing about the kind/url pairing; a
+synced row can carry it) fell into the else arm wearing the FILE
+row's sentence, titled "link" above words calling it a file. *Fix:*
+the branch left the view for a pure row-kind brain —
+`MobileReferencesModel.RowState` (`opens(URL)` · `file` ·
+`unopenableLink`), keyed `kind == .file` FIRST, so the file sentence
+has exactly one home; the view switches on it. The unopenable link's
+own state: its STORED text shows (`rowTitle` — name, else url, else
+"link"), plain ink, no door, no sentence; remove stays on the
+long-press (all three states — PC3-2's standing scope). The
+loadable-link door and the file arm render byte-identically to
+before. *Pin:*
+`MobileReferencesTests/anUnopenableURLRowNeverWearsTheFileSentence`
+— a nil-url `.url` row classifies `.unopenableLink` with its stored
+text; the good link stays `.opens`; `.file` is the sentence's only
+home. *Revert verification:* the pre-fix openable-else-file branch
+mirrored into the brain → the pin fails with **1 issue**
+(`rowState(broken) → .file` — the false copy, recorded in the pin's
+own message), 3 siblings green; fix restored → 4/1 green.
+
+**FIX-C3c (the scraps listing goes LAZY and WINDOWED) — BUILT,
+revert-verified on the window half.** *The window (MobileSoul §2's
+bar):* `MobileScrapsModel` gains `window` (default **200 — the
+Library filter neighbor's own `listingLimit`**, the mirror the
+adjudication named; the book list's 300 is the reading surface's),
+applied through ONE `adopt` rule shared by BOTH delivery roads (the
+`observePool` loop and the headless `refresh`), with `truncated`
+beside it. *The marker (P32's grammar):*
+`MobileScrapsModel.truncationMarker(shown:)` — "Showing the first N
+scraps — the rest aren't loaded yet." — neutral, never a platform,
+rendered under the rows when the window cuts. *The probe
+discipline's contract, held by construction and PINNED:* the
+standing core pool read carries no limit (bounding the FETCH is a
+core seam — the zero-core mandate; recorded, matching the round-1
+finding's own "core's standing pool shape" reading), so the delivery
+is whole and `count > window` is exact truth — an exact-window pool
+can never false-positive the marker (the probe row's whole job,
+satisfied without one; asserted in the pin's second arm). *The lazy
+half:* `MobileScrapsSection.body` flattens to `@ViewBuilder` content
+— no wrapping VStack — so the rows land in the Library's own
+LazyVStack context and materialize lazily (the round-1 mechanism:
+the plain VStack made the whole interior ONE lazy child). The
+observation's lifecycle moves to stable chrome —
+`MobileLibraryView`'s `.task(id: model.filter)` runs `scraps.start()`
+while the Scraps filter shows and cancels when it leaves (the old
+section-task lifecycle exactly; a task must never live on a lazy row
+that can scroll away) — and the mint alert rides its own door (an
+alert presents modally; the attachment point governs lifetime only).
+The SwiftUI row-level laziness itself is the recorded
+not-headless-testable class (the A1-masthead precedent) — the
+structural change is the fix, the window is the pinned floor either
+way. *Pin:*
+`MobileScrapsTests/theScrapsListingWindowsWithTheTruncationMarker`
+(window 4 to exercise the seam): past-window → exactly the window +
+the marker, neutral; exact-window → all rows, NO marker. *Revert
+verification:* the unwindowed pre-fix delivery restored in `adopt` →
+the pin fails with **3 issues** (5 rows shown · `truncated` false ·
+the marker sentence off-by-the-cut), 3 siblings green; fix restored
+→ 4/1 green.
+
+**FIX-C3d (the sort-test doc comment's claimed no-op-flip pin) — THE
+PIN NOW EXISTS, and the five-minute truth ran deeper than the
+claim.** `theSortVocabularyIsPinned` gains the assertion the comment
+claimed: with observation tracking armed on `model.sort`, an
+equal-value `setSort` wakes NO observer (so the view's
+`.task(id: sort)` never restarts the listing observation) while a
+real flip wakes it; `setSort` itself is byte-unchanged. *The
+discovery, probe-verified both ways on iOS 26.2 (recorded here per
+the hallucination guard — the probes were transient source edits,
+restored):* **the silence is guaranteed TWICE.** With the model's
+`guard next != sort` DROPPED, the equal-value write STILL woke
+nothing — while a build-freshness probe writing a DIFFERENT value
+through the same call fired the same registration (and failed the
+ordering test, proving the toolchain rebuilt) — i.e. **the
+@Observable macro on this SDK skips notification for equal-value
+writes to Equatable properties.** A pin that passes on both sides of
+the model's guard cannot claim to discriminate that guard: the pin
+is therefore worded as the no-op-flip CONTRACT pin it is (the
+behavior the doc comment promised — no restart on a same-value pick
+— which the platform and the guard jointly hold), never a guard-line
+discriminator. The doc comment now says exactly that, with the
+measurement dated. *(A note for future mechanism pins in this repo:
+equal-value writes to Equatable `@Observable` properties are
+platform-deduped on iOS 26.2 — a same-style-object or
+no-notification pin cannot use them to discriminate an app-level
+equality guard.)*
+
+**Suites (this session's own runs, the final tree, iPhone 17 Pro /
+iOS 26.2 simulator):**
+- Full mobile: **"Test run with 265 tests in 48 suites passed"** —
+  the 262/48 ladder-open baseline + THREE pins (C3a · C3b · C3c),
+  exactly accounted (C3d's assertions ride the existing vocabulary
+  test).
+- The mobile spine by its seven suite type names: **"Test run with
+  32 tests in 7 suites passed"**.
+- Perf by name (`MobilePerfFixtureTests` · `MobilePerfWalkTests`):
+  **"Test run with 9 tests in 2 suites passed"**.
+- Core / Mac / Mac-spine deliberately not run: zero core, zero
+  `Shared/`, zero Mac-side lines in the fix set (the standing
+  only-if-shared condition; the scope check above is the proof) —
+  baselines stand (core 1214/128 · Mac 1245/219 tripwire-only ·
+  Mac spine 51/7).
