@@ -41,18 +41,20 @@ enum MobileEditMenu {
     /// The composed menu: the system's suggested actions, then Takes…
     /// where a block resolves — and, since S4, the Block submenu (the ⋯
     /// menu's same rows from the ONE builder, minus Takes…, which
-    /// already rides flat here).
+    /// already rides flat here). Displayed titles are VOICE-CASED
+    /// (P26/P43, parity A3 — one register with the block menu's rows).
     static func menu(
         model: MobileEditorViewModel?, range: NSRange, suggested: [UIMenuElement]
     ) -> UIMenu {
         guard let model, let blockID = takesTarget(model: model, range: range) else {
             return UIMenu(children: suggested)
         }
-        let takes = UIAction(title: takesTitle) { [weak model] _ in
+        let cased = MobileEditorStyle.chromeCase
+        let takes = UIAction(title: cased(takesTitle)) { [weak model] _ in
             model?.openTakesBrowser(blockID: blockID)
         }
         let block = UIMenu(
-            title: blockTitle,
+            title: cased(blockTitle),
             children: model.blockMenu.menuElements(blockID: blockID, includeTakes: false))
         return UIMenu(children: suggested + [takes, block])
     }

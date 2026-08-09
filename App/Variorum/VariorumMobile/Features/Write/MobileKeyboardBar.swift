@@ -84,7 +84,7 @@ final class MobileKeyboardBarController: NSObject {
             .flexibleSpace(),
             act("I", "Italic", #selector(fireItalic)),
             .flexibleSpace(),
-            act("#", "Heading", #selector(fireHeading)),
+            headingItem(face: face),
             .flexibleSpace(),
             act("•", "Bullet List", #selector(fireBullet)),
             .flexibleSpace(),
@@ -121,7 +121,8 @@ final class MobileKeyboardBarController: NSObject {
                 }
                 guard let blockID = model.blockIDAtCaret() else {
                     completion([UIAction(
-                        title: "Tap into a block first — block acts live on blocks.",
+                        title: MobileEditorStyle.chromeCase(
+                            "Tap into a block first — block acts live on blocks."),
                         attributes: .disabled) { _ in }])
                     return
                 }
@@ -130,6 +131,61 @@ final class MobileKeyboardBarController: NSObject {
             },
         ])
         return UIBarButtonItem(customView: button)
+    }
+
+    /// # carries two doors since parity A3 (P5, her ruled flip: "# tap
+    /// still cycles; LONG-PRESS opens a direct H1/H2/H3/clear picker"):
+    /// tap = the standing cycle, byte-unchanged; long-press = the direct
+    /// picker (a real UIButton whose `menu` is NOT the primary action —
+    /// UIKit's own long-press-reveals-menu behavior, the ⇥ button's
+    /// wrap-a-button precedent). Rows are the Mac heading submenu's own
+    /// words plus her "clear" row, voice-cased (P26/P43), rebuilt per
+    /// open so the register follows a voice flip.
+    private func headingItem(face: MobileEditorStyle.Face) -> UIBarButtonItem {
+        let button = UIButton(type: .system)
+        button.setTitle("#", for: .normal)
+        button.titleLabel?.font = face.chrome
+        button.setTitleColor(face.muted, for: .normal)
+        button.accessibilityLabel = "Heading"
+        button.accessibilityHint = "Long-press to pick a heading level"
+        button.accessibilityIdentifier = "kbar.heading"
+        button.addTarget(self, action: #selector(fireHeading), for: .touchUpInside)
+        button.showsMenuAsPrimaryAction = false
+        button.menu = UIMenu(children: [
+            UIDeferredMenuElement.uncached { [weak self] completion in
+                completion(self?.headingPickerElements() ?? [])
+            },
+        ])
+        return UIBarButtonItem(customView: button)
+    }
+
+    /// The picker's rows (test-visible): direct levels through the SAME
+    /// shared toggle rule the Mac submenu rides — picking a line's own
+    /// level clears it (one vocabulary, no invention) — plus her clear
+    /// row, which no-ops where no heading exists.
+    func headingPickerElements() -> [UIMenuElement] {
+        let cased = MobileEditorStyle.chromeCase
+        var rows: [UIMenuElement] = (1...3).map { level in
+            UIAction(title: cased("Heading \(level)")) { [weak self] _ in
+                self?.applyHeadingPick(level: level)
+            }
+        }
+        rows.append(UIAction(title: cased("Clear Heading")) { [weak self] _ in
+            self?.applyHeadingClear()
+        })
+        return rows
+    }
+
+    func applyHeadingPick(level: Int) {
+        guard let textView else { return }
+        MobileMarkdownActs.apply(.heading(level: level), to: textView)
+    }
+
+    func applyHeadingClear() {
+        guard let textView,
+              let act = MobileMarkdownActs.headingClearAct(in: textView)
+        else { return }
+        MobileMarkdownActs.apply(act, to: textView)
     }
 
     /// ⇥ needs a long-press (the outdent half), and a `UIBarButtonItem`

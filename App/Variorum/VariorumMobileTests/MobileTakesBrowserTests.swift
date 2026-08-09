@@ -743,10 +743,13 @@ struct MobileTakesBrowserSurfaceTests {
             #expect((subview(peekedCard, "takes.card.state") as? UILabel)?.text == "peeking")
             #expect(peekedCard.backgroundColor == MobileEditorStyle.face.takeTint)
 
-            // Each card's ⋯ carries exactly the two lifecycle doors.
+            // Each card's ⋯ carries exactly the two lifecycle doors —
+            // VOICE-CASED since parity A3 (P26/P43's ruled flip; the
+            // world runs terminal). The old system-register comparison
+            // is the sanctioned pin flip.
             let menu = try #require((subview(chosenCard, "takes.card.menu") as? UIButton)?.menu)
             #expect(menu.children.compactMap { ($0 as? UIAction)?.title }
-                    == ["Archive Take", "Delete Take"])
+                    == ["archive take", "delete take"])
         }
     }
 
@@ -839,12 +842,15 @@ struct MobileTakesBrowserSurfaceTests {
                 view, editMenuForTextIn: NSRange(location: 2, length: 3),
                 suggestedActions: suggested))
             let titles = menu.children.compactMap { ($0 as? UIAction)?.title }
-            #expect(titles == ["Copy", MobileEditMenu.takesTitle])
+            // Custom items render VOICE-CASED since parity A3 (P26/P43;
+            // the world runs terminal); the system's own suggestions are
+            // never touched.
+            #expect(titles == ["Copy", MobileEditorStyle.chromeCase(MobileEditMenu.takesTitle)])
             // S4: the Block submenu joins beside Takes… (the ⋯ menu's
             // rows from the ONE builder — the flat Takes… item is
             // byte-untouched; this assertion widened WITH the door).
             #expect(menu.children.compactMap { ($0 as? UIMenu)?.title }
-                == [MobileEditMenu.blockTitle])
+                == [MobileEditorStyle.chromeCase(MobileEditMenu.blockTitle)])
 
             // The brain resolves the range's block (boundary-tolerant).
             #expect(MobileEditMenu.takesTarget(

@@ -87,11 +87,18 @@ struct MobileBlockMenuTests {
             let (model, _) = makeEditor(session, postID: seed.postID)
             await model.loadOnce()
 
+            // Rendered titles are VOICE-CASED since parity A3 (P26/P43's
+            // ruled flip — the world runs terminal, so lowercase); the
+            // constants stay the canonical vocabulary. This pin's old
+            // uncased comparison is the SANCTIONED flip.
+            let cased = { MobileEditorStyle.chromeCase($0) }
+
             // The bar's ⋯ renders the WHOLE row set (Takes… first).
             let barElements = model.blockMenu.menuElements(
                 blockID: seed.blockA, includeTakes: true)
             let barTitles = barElements.map(\.title)
-            #expect(barTitles == MobileBlockMenuController.rowTitles)
+            #expect(barTitles == MobileBlockMenuController.rowTitles.map(cased))
+            #expect(barTitles.first == "takes…", "terminal chrome lowercases")
 
             // The edit menu's Block submenu renders the SAME rows minus
             // the flat Takes… item it already carries (one builder — the
@@ -99,24 +106,75 @@ struct MobileBlockMenuTests {
             let submenuElements = model.blockMenu.menuElements(
                 blockID: seed.blockA, includeTakes: false)
             #expect(submenuElements.map(\.title)
-                == Array(MobileBlockMenuController.rowTitles.dropFirst()))
+                == Array(MobileBlockMenuController.rowTitles.dropFirst()).map(cased))
 
             // The callout submenu's words are the Mac CalloutMenu's rows,
             // mirrored (toggle · five colors · emoji · remove).
             let callout = try #require(
-                barElements.first { $0.title == MobileBlockMenuController.calloutTitle }
-                    as? UIMenu)
+                barElements.first {
+                    $0.title == cased(MobileBlockMenuController.calloutTitle)
+                } as? UIMenu)
             #expect(callout.children.map(\.title)
-                == MobileBlockMenuController.calloutRowTitles)
+                == MobileBlockMenuController.calloutRowTitles.map(cased))
             #expect(MobileBlockMenuController.calloutRowTitles
                 == ["Toggle Callout", "Blue", "Green", "Sand", "Violet", "Rose",
                     "Emoji…", "Remove Callout"])
 
             // Delete is the destructive row (the card-⋯ grammar).
             let delete = try #require(
-                barElements.first { $0.title == MobileBlockMenuController.deleteTitle }
-                    as? UIAction)
+                barElements.first {
+                    $0.title == cased(MobileBlockMenuController.deleteTitle)
+                } as? UIAction)
             #expect(delete.attributes.contains(.destructive))
+
+            // The STUDY register keeps normal case (discrimination — the
+            // register follows the voice, never a hardcoded lowering).
+            MobileEditorStyle.voice = .study
+            defer { MobileEditorStyle.voice = .terminal }
+            let studyTitles = model.blockMenu.menuElements(
+                blockID: seed.blockA, includeTakes: true).map(\.title)
+            #expect(studyTitles == MobileBlockMenuController.rowTitles)
+        }
+    }
+
+    /// P26/P43's sweep, the rest of the register (parity A3): the edit
+    /// menu's Takes… + Block submenu titles, the bar's tail refusal row,
+    /// and the A1 seal-door strings (PA1-1 resolved — the recorded
+    /// system-register wording joins the ONE voice register) all case
+    /// with the voice.
+    @Test func theEditMenuAndSealDoorsSpeakTheOneRegister() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedTwoBlockPost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            // The edit menu's own items (suggested actions excluded here)
+            // render cased in terminal…
+            let composed = MobileEditMenu.menu(
+                model: model, range: NSRange(location: 1, length: 0), suggested: [])
+            #expect(composed.children.map(\.title) == ["takes…", "block"])
+            // …and uncased in study (the register follows the voice).
+            MobileEditorStyle.voice = .study
+            defer { MobileEditorStyle.voice = .terminal }
+            let studyComposed = MobileEditMenu.menu(
+                model: model, range: NSRange(location: 1, length: 0), suggested: [])
+            #expect(studyComposed.children.map(\.title) == ["Takes…", "Block"])
+
+            // The bar's open-tail refusal row is menu-grammared chrome.
+            #expect(MobileEditorStyle.chromeCase(
+                "Tap into a block first — block acts live on blocks.")
+                == "Tap into a block first — block acts live on blocks.",
+                "study keeps the sentence as written")
+
+            // The seal door's strings render through the same rule on the
+            // SwiftUI side (`tokens.chromeLabel`).
+            #expect(VoiceTokens.terminalLight.chromeLabel(MobileWriteScreen.sealedStateLine)
+                    == "this note is locked — reading only.")
+            #expect(VoiceTokens.terminalLight.chromeLabel(MobileWriteScreen.unlockDoorTitle)
+                    == "unlock note")
+            #expect(VoiceTokens.studyLight.chromeLabel(MobileWriteScreen.unlockDoorTitle)
+                    == "Unlock Note")
+            #expect(MobileWriteScreen.lockDoorTitle == "Lock Note")
         }
     }
 

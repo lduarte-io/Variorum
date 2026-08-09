@@ -42,6 +42,14 @@ struct MobileWriteView: UIViewRepresentable {
 /// recorded; the shell router is the one voice authority, so an open
 /// surface follows a Settings flip via `applyVoiceChange`).
 struct MobileWriteScreen: View {
+    /// The seal door's words (parity A3, P26/P43 — PA1-1 resolved: the
+    /// A1 door's system-register strings join the ONE voice register;
+    /// rendered through `tokens.chromeLabel`, pinned. Accessibility
+    /// labels stay plain — VoiceOver reads words, not chrome styling).
+    static let sealedStateLine = "This note is locked — reading only."
+    static let unlockDoorTitle = "Unlock Note"
+    static let lockDoorTitle = "Lock Note"
+
     @State private var model: MobileEditorViewModel
     /// The shell's voice authority; nil in harness/preview use, where the
     /// stored preference read at init governs.
@@ -123,17 +131,21 @@ struct MobileWriteScreen: View {
                 // The state line pairs with its door (the 13b fire-and-DO
                 // doctrine: a message naming an act offers the act) —
                 // every sealed refusal on this screen says "unlock it",
-                // and the door stands right here in the masthead.
+                // and the door stands right here in the masthead. Both
+                // render voice-cased (P26/P43 — PA1-1 resolved).
                 HStack(spacing: 10) {
-                    Text("This note is locked — reading only.")
+                    Text(tokens.chromeLabel(Self.sealedStateLine))
                         .font(tokens.small).foregroundStyle(tokens.muted)
-                    Button("Unlock Note") {
+                    Button {
                         let model = model
                         Task { await model.unlockNote() }
+                    } label: {
+                        Text(tokens.chromeLabel(Self.unlockDoorTitle))
                     }
                     .font(tokens.small)
                     .foregroundStyle(tokens.accent)
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Unlock Note")
                 }
             }
             if let status = model.statusMessage {
@@ -170,6 +182,6 @@ struct MobileWriteScreen: View {
                 .foregroundStyle(model.isSealed ? tokens.accent : tokens.faint)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(model.isSealed ? "Unlock Note" : "Lock Note")
+        .accessibilityLabel(model.isSealed ? Self.unlockDoorTitle : Self.lockDoorTitle)
     }
 }

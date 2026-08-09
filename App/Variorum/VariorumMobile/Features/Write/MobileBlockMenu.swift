@@ -82,30 +82,34 @@ final class MobileBlockMenuController {
     /// The menu's elements for one block — consumed by the bar's ⋯
     /// (whole) and the edit menu's Block submenu (minus Takes…, which
     /// already rides flat there — S2's own item, byte-untouched).
+    /// Displayed titles are VOICE-CASED (P26/P43, parity A3 — the flip
+    /// of P26/P43's recorded system-register posture): `rowTitles` stays
+    /// the canonical vocabulary, `chromeCase` is the render register.
     func menuElements(blockID: String, includeTakes: Bool) -> [UIMenuElement] {
+        let cased = MobileEditorStyle.chromeCase
         var elements: [UIMenuElement] = []
         if includeTakes {
-            elements.append(UIAction(title: Self.takesTitle) { [weak self] _ in
+            elements.append(UIAction(title: cased(Self.takesTitle)) { [weak self] _ in
                 self?.model?.openTakesBrowser(blockID: blockID)
             })
         }
-        elements.append(UIAction(title: Self.commentsTitle) { [weak self] _ in
+        elements.append(UIAction(title: cased(Self.commentsTitle)) { [weak self] _ in
             self?.model?.openComments(blockID: blockID)
         })
         elements.append(calloutSubmenu(blockID: blockID))
-        elements.append(UIAction(title: Self.nameTitle) { [weak self] _ in
+        elements.append(UIAction(title: cased(Self.nameTitle)) { [weak self] _ in
             self?.promptRename(blockID: blockID)
         })
-        elements.append(UIAction(title: Self.divideTitle) { [weak self] _ in
+        elements.append(UIAction(title: cased(Self.divideTitle)) { [weak self] _ in
             guard let model = self?.model else { return }
             Task { await model.structural.divideAtCaret() }
         })
-        elements.append(UIAction(title: Self.mergeTitle) { [weak self] _ in
+        elements.append(UIAction(title: cased(Self.mergeTitle)) { [weak self] _ in
             guard let model = self?.model else { return }
             Task { await model.structural.mergeWithPrevious() }
         })
         elements.append(UIAction(
-            title: Self.deleteTitle, attributes: .destructive
+            title: cased(Self.deleteTitle), attributes: .destructive
         ) { [weak self] _ in
             self?.confirmDelete(blockID: blockID)
         })
@@ -113,25 +117,26 @@ final class MobileBlockMenuController {
     }
 
     private func calloutSubmenu(blockID: String) -> UIMenu {
+        let cased = MobileEditorStyle.chromeCase
         var rows: [UIMenuElement] = [
-            UIAction(title: Self.calloutToggleTitle) { [weak self] _ in
+            UIAction(title: cased(Self.calloutToggleTitle)) { [weak self] _ in
                 Task { await self?.applyCallout(blockID: blockID, edit: .toggle) }
             },
         ]
         rows += MobileCallout.names.map { name in
-            UIAction(title: name.capitalized) { [weak self] _ in
+            UIAction(title: cased(name.capitalized)) { [weak self] _ in
                 Task { await self?.applyCallout(blockID: blockID, edit: .color(name)) }
             }
         }
         rows += [
-            UIAction(title: Self.calloutEmojiTitle) { [weak self] _ in
+            UIAction(title: cased(Self.calloutEmojiTitle)) { [weak self] _ in
                 self?.promptEmoji(blockID: blockID)
             },
-            UIAction(title: Self.calloutRemoveTitle) { [weak self] _ in
+            UIAction(title: cased(Self.calloutRemoveTitle)) { [weak self] _ in
                 Task { await self?.applyCallout(blockID: blockID, edit: .color(nil)) }
             },
         ]
-        return UIMenu(title: Self.calloutTitle, children: rows)
+        return UIMenu(title: cased(Self.calloutTitle), children: rows)
     }
 
     // MARK: - Callout (M12 — the one mirrored transform through the op)

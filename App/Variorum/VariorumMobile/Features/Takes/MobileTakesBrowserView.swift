@@ -400,8 +400,10 @@ final class MobileTakesBrowserView: UIView {
 
     // MARK: - Voice casing (the terminal-lowercase chrome rule)
 
+    /// The ONE UIKit register (P26/P43, parity A3 — this local helper
+    /// used to carry its own copy of the rule; delegating kills the fork).
     private func chromeCase(_ text: String) -> String {
-        MobileEditorStyle.voice == .terminal ? text.lowercased() : text
+        MobileEditorStyle.chromeCase(text)
     }
 }
 
@@ -435,6 +437,8 @@ final class MobileTakesCardView: UIView {
     private let edgeBar = UIView()
     private var editorHost: UIView?
     private let onEdit: () -> Void
+    private let onArchive: () -> Void
+    private let onDelete: () -> Void
 
     /// The live editor's card height (functional; the look rounds rule).
     static let editorHeight: CGFloat = 120
@@ -448,6 +452,8 @@ final class MobileTakesCardView: UIView {
     ) {
         self.variantID = variantID
         self.onEdit = onEdit
+        self.onArchive = onArchive
+        self.onDelete = onDelete
         super.init(frame: .zero)
         accessibilityIdentifier = "takes.card.\(variantID)"
         layer.cornerRadius = 10
@@ -470,10 +476,10 @@ final class MobileTakesCardView: UIView {
         menuButton.accessibilityIdentifier = "takes.card.menu"
         menuButton.accessibilityLabel = "Take actions"
         menuButton.showsMenuAsPrimaryAction = true
-        menuButton.menu = UIMenu(children: [
-            UIAction(title: "Archive Take") { _ in onArchive() },
-            UIAction(title: "Delete Take", attributes: .destructive) { _ in onDelete() },
-        ])
+        // The rows are built in `apply` (P26/P43, parity A3): titles are
+        // VOICE-CASED, and apply re-runs per render, so a voice flip
+        // reaches an already-built card's menu. P26's recorded
+        // system-register posture is the flipped PROVISIONAL.
 
         for view in [stateLabel, takeLabel, chooseButton, menuButton, bodyLabel] {
             addSubview(view)
@@ -529,6 +535,12 @@ final class MobileTakesCardView: UIView {
 
         menuButton.setTitleColor(face.muted, for: .normal)
         menuButton.titleLabel?.font = face.chrome.withSize(14)
+        menuButton.menu = UIMenu(children: [
+            UIAction(title: chromeCase("Archive Take")) { [onArchive] _ in onArchive() },
+            UIAction(
+                title: chromeCase("Delete Take"), attributes: .destructive
+            ) { [onDelete] _ in onDelete() },
+        ])
 
         bodyLabel.text = card.text.isEmpty ? chromeCase("(Empty take)") : card.text
         bodyLabel.font = face.body

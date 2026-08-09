@@ -430,6 +430,59 @@ struct MobileMarkdownActsTests {
         }
     }
 
+    /// P5 (parity A3, her ruled flip): "# tap still cycles; LONG-PRESS
+    /// opens a direct H1/H2/H3/clear picker." The picker's rows are the
+    /// Mac heading submenu's own toggle acts (picking a line's own level
+    /// clears it — one vocabulary) plus her clear row; titles voice-case
+    /// (P26/P43); the tap's cycle is byte-unchanged (the standing pin
+    /// above still covers it).
+    @Test func headingLongPressPicksDirectlyAndClearClears() async throws {
+        try await withEditorWorld { session, _ in
+            let postID = try await makePost(session, blocks: ["title"])
+            let (_, surface) = await makeSurfaceEditor(session, postID: postID)
+            let view = surface.textView
+            let bar = MobileKeyboardBarController(textView: view)
+            view.selectedRange = NSRange(location: 3, length: 0)
+
+            // The rows, voice-cased (the world runs terminal).
+            let titles = bar.headingPickerElements().compactMap { ($0 as? UIAction)?.title }
+            #expect(titles == ["heading 1", "heading 2", "heading 3", "clear heading"])
+
+            // Direct picks jump levels — no cycling through.
+            bar.applyHeadingPick(level: 2)
+            #expect(view.textStorage.string == "## title")
+            bar.applyHeadingPick(level: 3)
+            #expect(view.textStorage.string == "### title")
+
+            // Clear clears ANY level in one act…
+            bar.applyHeadingClear()
+            #expect(view.textStorage.string == "title")
+            // …and no-ops where no heading exists (nothing to clear).
+            bar.applyHeadingClear()
+            #expect(view.textStorage.string == "title")
+
+            // Picking the line's own level is the shared toggle (the Mac
+            // submenu's exact semantics — deliberately not special-cased).
+            bar.applyHeadingPick(level: 1)
+            #expect(view.textStorage.string == "# title")
+            bar.applyHeadingPick(level: 1)
+            #expect(view.textStorage.string == "title")
+
+            // The wiring: the bar's # is a button whose menu is NOT the
+            // primary action — tap keeps the cycle, long-press reveals
+            // the picker (UIKit's own behavior for exactly this config).
+            guard let toolbar = bar.makeBar() as? UIToolbar else {
+                Issue.record("the bar is not a toolbar")
+                return
+            }
+            let headingButton = try #require((toolbar.items ?? [])
+                .compactMap { $0.customView as? UIButton }
+                .first { $0.accessibilityIdentifier == "kbar.heading" })
+            #expect(headingButton.menu != nil)
+            #expect(!headingButton.showsMenuAsPrimaryAction)
+        }
+    }
+
     @Test func headingActAtDepthMintsAWorkingColumnZeroHeading() async throws {
         try await withEditorWorld { session, _ in
             // The 13k round-1 MAJOR's law (actKeepsIndent): a heading act on
@@ -516,15 +569,16 @@ struct MobileMarkdownActsTests {
                 Issue.record("the bar is not a toolbar")
                 return
             }
-            // Eight act doors IN BAR ORDER (six titled items + the ⇥ and
-            // ⋯ buttons): LK8's ruled eight, complete — ⑂ JOINED at S2
-            // batch 2, ⋯ at S4 batch 1 WITH its block menu (each door
-            // arriving WITH its surface, P-2's application; this pin's
-            // six- and seven-act forms recorded both arrivals in advance).
+            // Eight act doors IN BAR ORDER (five titled items + the #, ⇥
+            // and ⋯ buttons): LK8's ruled eight, complete — ⑂ JOINED at
+            // S2 batch 2, ⋯ at S4 batch 1 WITH its block menu; # became
+            // a wrapped button at parity A3 (P5's long-press picker — a
+            // bar item can't carry a menu). This pin's earlier forms
+            // recorded each arrival in advance.
             let titled = (toolbar.items ?? []).filter { $0.action != nil }
             let custom = (toolbar.items ?? []).compactMap { $0.customView as? UIButton }
-            #expect(titled.count == 6)
-            #expect(custom.count == 2)
+            #expect(titled.count == 5)
+            #expect(custom.count == 3)
             // Order pinned over the ITEMS as laid out (the titled/custom
             // split can no longer read order — ⑂ rides after the ⇥
             // button).

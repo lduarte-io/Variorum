@@ -99,25 +99,42 @@ enum MobileMarkdownActs {
         return true
     }
 
+    /// The caret line's current heading level (a selection reads its
+    /// START line — the cycle's own rule); nil = not a heading line.
+    static func currentHeadingLevel(in textView: UITextView) -> Int? {
+        let string = textView.textStorage.string as NSString
+        let selection = textView.selectedRange
+        guard string.length > 0, selection.location != NSNotFound else { return nil }
+        let location = min(selection.location, string.length)
+        let lines = string.lineRange(for: NSRange(location: location, length: 0))
+        for span in MarkdownSyntax.spans(in: string.substring(with: lines)) {
+            if case .heading(let level) = span.kind, span.range.lowerBound == 0 {
+                return level
+            }
+        }
+        return nil
+    }
+
     /// **The # button's brain (PROVISIONAL, batch 2):** the phone bar has ONE
     /// heading button where the Mac menu has a three-child submenu, so the
     /// tap CYCLES — no heading → H1 → H2 → H3 → clear (the last step is
     /// `.heading(3)` on an H3 line, which the shared toggle rule clears).
     /// A selection cycles off its START line's state.
     static func headingCycleAct(in textView: UITextView) -> MarkdownEditing.Act {
-        let string = textView.textStorage.string as NSString
-        let selection = textView.selectedRange
-        guard string.length > 0, selection.location != NSNotFound else {
+        guard let level = currentHeadingLevel(in: textView) else {
             return .heading(level: 1)
         }
-        let location = min(selection.location, string.length)
-        let lines = string.lineRange(for: NSRange(location: location, length: 0))
-        for span in MarkdownSyntax.spans(in: string.substring(with: lines)) {
-            if case .heading(let level) = span.kind, span.range.lowerBound == 0 {
-                return .heading(level: min(level + 1, 3))
-            }
-        }
-        return .heading(level: 1)
+        return .heading(level: min(level + 1, 3))
+    }
+
+    /// **The picker's clear row (P5, parity A3 — her ruled flip: "#
+    /// tap still cycles; LONG-PRESS opens a direct H1/H2/H3/clear
+    /// picker"):** clearing a heading is the shared toggle rule applied
+    /// at the line's OWN level (`.heading(L)` on an H-L line clears —
+    /// the Mac submenu's exact semantics, no new vocabulary); a line
+    /// with no heading has nothing to clear (nil ⇒ the row no-ops).
+    static func headingClearAct(in textView: UITextView) -> MarkdownEditing.Act? {
+        currentHeadingLevel(in: textView).map { .heading(level: $0) }
     }
 
     // MARK: - K5/K8: what ⏎ does on a list line

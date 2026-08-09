@@ -149,6 +149,17 @@ nonisolated enum MobileEditorStyle {
         }
     }
 
+    /// P26/P43 (parity A3, her ruled flip — "the phone's menus
+    /// VOICE-CASE … one register, hers"): every UIKit-rendered menu row
+    /// and chrome door routes through THIS ONE helper (terminal
+    /// lowercases its chrome; study keeps normal case) — the exact rule
+    /// `VoiceTokens.chromeLabel` applies on the SwiftUI surfaces, so the
+    /// two halves of the app cannot fork registers. Accessibility labels
+    /// stay plain (VoiceOver reads words, not chrome styling).
+    static func chromeCase(_ text: String) -> String {
+        voice == .terminal ? text.lowercased() : text
+    }
+
     // MARK: - The surface-write values (the pre-batch-3 names, kept)
 
     static var baseFont: UIFont { face.body }
