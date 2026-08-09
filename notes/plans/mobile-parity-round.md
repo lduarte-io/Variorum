@@ -815,3 +815,141 @@ door's commit (the model-change convention). Write the batch record
 into THIS file ("## Stage A, batch A2 — BATCH RECORD"), counts + the
 four suite lines + PROVISIONALs; push `origin mobile` before
 finishing. Author-only calls stop the batch.
+
+## Stage A, batch A2 — BATCH RECORD (implementer, 2026-08-09; commits `4ae64d2` · `3a75235` + the record commit)
+
+**All four items shipped.** The operation landed in its own commit
+BEFORE the door's (the model-change convention); zero schema, zero
+`Sources/VariorumCore/Sync/` lines, zero Mac-side source or test
+files touched.
+
+**1+2. The core operation — `Operations.divideDuplicating(blockID,
+displayedVariantID, cut)`** (`Operations+Structural.swift`, beside
+`divideW`; commit `4ae64d2`). ONE transaction; exact row-level
+semantics as built:
+
+- **Validation:** `placedContext` (live block, live placement,
+  unsealed container — `blockNotFound`/`blockNotPlaced`/`lockedPost`
+  refusals standing); the displayed take must be a live ACTIVE take
+  of THIS block (`variantNotFound` for missing/tombstoned/foreign,
+  `archivedVariant` for archived — the ceremony's validation
+  grammar). A LOCKED displayed take is deliberately legal: buffers
+  are copied, never edited (divideW's locked-marked rule).
+- **The cut:** UTF-16 offset into the DISPLAYED take's text, halved
+  by the ONE cut brain (`BoundarySnapping.seamTrimmedHalves` — A11's
+  seam ownership included); both halves non-empty or `invalidCut`
+  (her "valid divider"; start/end cuts refuse "nothing to divide" —
+  NO parking here, that vocabulary stays the ceremony's). Snapping
+  remains the door's contract (`StructuralGesturePlanner.
+  snapToInteriorBoundary`), exactly as plain `divide`.
+- **Rows written:** A's placement tombstoned + `last_container_id`
+  stamped (divideW's exact release — A PRESERVED WHOLE: every
+  variant, commit, comment, name, and its default pointer
+  byte-untouched; reversible by `placeBlock`, pinned). B then C
+  minted where A stood (the divideW position computation). Each
+  successor: the cut half FIRST (chosen AND default, unlabeled,
+  parentless — the W-halves shape), then every OTHER active take
+  duplicated WHOLE behind it in source fan order — fresh UUIDs,
+  texts + statuses (active by construction) + LABELS copied (the
+  merge-carry rule: a whole-take ride keeps its name), `locked=false`
+  (the poolDragCopy born-unlocked rule), parent tree remapped INSIDE
+  each successor's copy set (poolDragCopy's rule: a parent outside
+  the set — the displayed take, or a take left on A — maps to nil).
+  Archived takes stay on A (the W's unmarked-variant precedent).
+  Edges `(B derived_from A)` + `(C derived_from A)`, originOp
+  'divide'. Comments: COPIES to both successors, source `created_at`
+  preserved, deleted comments never travel, A keeps originals (the
+  divide-W travel rule). Presentation inherited by both. Commits
+  never copied. Touch-without-churn (`touchContainer` — divideW's
+  stamp; `last_major_revision_at` and `churn_accumulator` pinned
+  unmoved). I10 at birth by construction (each successor carries its
+  cut half at minimum).
+- **The one shared-internal change:** `mintFanBlock` gains optional
+  index-aligned `parentIndices` (the `labels` pattern; indices
+  reference earlier entries — parents precede children in fan order
+  by `branchVariant`'s append construction; the FK is the belt).
+  Defaulted nil, so every existing caller is byte-unchanged.
+- **Undo/redo, verified:** ONE entry, label "Divide" — inverse
+  restores A's placement row exact (position + chosen intact,
+  `snapshotRow`-compared) and tombstones both mints with their WHOLE
+  fans (cascade-stamped); the required `redo:` half re-applies the
+  SAME rows from do-time pre-images (exact-row, never a forward
+  re-run) — undo↔redo ping-pong pinned with every ID stable
+  (`undoRestoresAWholeAndRedoPingPongs`). No `insuring` pre-images
+  (no buffer is ever restored — the divideW class). Refusals leave
+  the world untouched and register nothing (pinned).
+- **Birth pins:** `StructuralDivideDuplicatingTests`, 11 tests — the
+  worked example's exact rows · any-active-take-displayed (the peek
+  case at the op level) · parent-tree remap · archived-stay/locked-
+  duplicate-unlocked · commits-never-copied · comment travel +
+  presentation · touch-without-churn · single-take acceptance
+  (PROVISIONAL, below) · reversible-by-re-pointing · refusals ·
+  undo/redo. Birth pins define the behavior per the brief's
+  red-on-old reading (the op does not exist on the old tree).
+
+**3. The phone's divide door** (commit `3a75235`,
+`MobileStructural.swift`): the fanned path's `CutPropagation`
+auto-proceed mapping AND the ceremony refusal naming the Mac are
+RETIRED — a fanned block now calls `divideDuplicating` with the
+DISPLAYED (peek-aware) take (`fresh.variantID`, post-flush) and the
+snapped cut. Flush-first unchanged (the R1-4 class), the post-flush
+re-verify unchanged (S4 MINOR 2's pin still green), the F-3
+displayed-still-in-fan guard unchanged, the single-take path still
+plain `divide`. No refusal on this road names any platform (the
+merge door's ceremony refusal deliberately KEPT for Stage C's
+families, per the A1 precedent; mobile structural undo stays
+Mac-side in v1, the recorded deliberate absence, unchanged). **Test
+deltas exactly accounted (−2 +4, sanctioned pin flips riding her
+ruling):** the auto-proceed pin → `divideOnAFannedBlockLandsThe
+DuplicateShape` (same fixture, the ruled outcome: B/C each carry the
+FULL fan count); the refuses-naming-the-Mac pin → `divideOnAFanned
+BlockWithUnmappableTakesStillDivides` (the IDENTICAL no-shared-
+context fixture that used to refuse now divides — the ruled flip
+pin); NEW `divideOnAPeekedBlockCutsThePeekedTake` (flip to the peek,
+divide — the PEEKED take is cut, the chosen take duplicates whole,
+each successor's chosen is its cut half, A's chosen pointer
+untouched) and `fannedDivideCarriesUnflushedTypingThroughTheFlush`
+(the flush rides in front on the fanned road).
+
+**4. Dormant for the Mac — PROVEN BY MATCHED RUNS.** No Mac call
+site changes (zero Mac-side files in the diff; the Mac's fanned-
+divide door keeps opening the W ceremony — 13j wires its switch).
+The Mac suite ran on BOTH sides of the batch on this machine, same
+day: post-A2 **1245/219, exactly the one standing TakePane tripwire
+red by identity** — and a throwaway worktree at the A1 acceptance
+commit (`3f7017f`, isolated DerivedData) ran **identically 1245/219
+with the same single tripwire**. Outcome-identical runs = zero Mac
+behavior change, proven rather than asserted. **Finding (for the
+ladder/architect, not mine to fix):** the kickoff-recorded Mac
+baseline "1240/219" does not match this machine's measurement on the
+SAME tree it was recorded for (both pre- and post-A2 measure
+1245/219) — recording drift from main's 14c session, evidenced by
+the matched pre-A2 run; the LIVE baseline on this machine is
+1245/219 tripwire-only.
+
+**Counts, by this implementer's own runs:**
+- Core (`swift test`): **"Test run with 1212 tests in 128 suites
+  passed"** — 1201/127 + the 11 birth pins + 1 suite, exactly
+  accounted.
+- Mobile (iPhone 17 Pro / iOS 26.2): **"Test run with 183 tests in
+  27 suites passed"** — 181/27 − 2 retired + 4 new, exactly
+  accounted.
+- Mac (from `App/Variorum/`): **"Test run with 1245 tests in 219
+  suites failed … with 1 issue"** — the one issue is the standing
+  `TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergence
+  Occasion` tripwire, allowed by identity; matched by the pre-A2
+  baseline run (above).
+- Spine (the seven suite type names): **"Test run with 51 tests in
+  7 suites passed"**.
+
+**PROVISIONALs (for the chain's end bundle):**
+- **PA2-1:** an UNFANNED block is accepted by `divideDuplicating`
+  with release-A semantics and no duplicates — the divideW
+  precedent's letter ("the editor picks the gesture, the op doesn't
+  second-guess"); the phone door routes single-take blocks to plain
+  `divide`, so no door reaches it today. Pinned
+  (`aSingleTakeBlockIsAcceptedWithReleaseASemantics`).
+- **PA2-2:** label handling composes two precedents her ruling
+  doesn't name: the cut halves mint UNLABELED (the W's halves rule)
+  while duplicates KEEP their labels (the merge-carry rule — a
+  whole-take ride keeps its name). Pinned in the worked example.
