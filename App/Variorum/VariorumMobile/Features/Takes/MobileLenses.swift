@@ -244,15 +244,24 @@ final class MobileLensesModel {
         status = nil
         let picks = displayedDivergences
         do {
-            let existing = try await session.database.read { db in
-                try Queries.lensChoices(db, lens: lensID)
+            let (existing, effective) = try await session.database.read { db in
+                (try Queries.lensChoices(db, lens: lensID),
+                 try Queries.effectiveLensSelection(db, lens: lensID))
             }
             try await session.runner.run { ops in
                 for (blockID, variantID) in picks.sorted(by: { $0.key < $1.key }) {
                     _ = try ops.setLensChoice(
                         lens: lensID, block: blockID, variant: variantID)
                 }
-                for blockID in existing.keys.sorted() where picks[blockID] == nil {
+                // Clear ONLY picks the user's view actually returned to
+                // chosen — an EFFECTIVE pick with no displayed divergence.
+                // A DANGLING pick (its take archived/dead — in `existing`
+                // but not `effective`) shows nothing to return from, and
+                // clearing it would tombstone exactly the row the honest
+                // dangle meta reports and 13j's restore road revives
+                // (C5 ladder MINOR-3).
+                for blockID in existing.keys.sorted()
+                where picks[blockID] == nil && effective[blockID] != nil {
                     try ops.clearLensChoice(lens: lensID, block: blockID)
                 }
             }

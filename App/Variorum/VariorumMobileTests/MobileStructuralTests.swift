@@ -1057,21 +1057,32 @@ struct MobileNoRedirectSweepTests {
     }
 
     @Test func nothingUserFacingNamesTheMac() throws {
-        let mobileRoot = URL(fileURLWithPath: #filePath)
+        // BOTH roots the mobile target compiles (C5 ladder MINOR-1):
+        // `VariorumMobile/` AND `App/Variorum/Shared/` — Shared views
+        // render on the phone. Caveat for a future tripper: a Shared
+        // literal inside an `#if os(macOS)` arm never renders on the
+        // phone; if one legitimately names the Mac someday, exempt it
+        // explicitly here rather than narrowing the walk.
+        let appRoot = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()  // VariorumMobileTests
             .deletingLastPathComponent()  // App/Variorum
-            .appendingPathComponent("VariorumMobile", isDirectory: true)
+        let roots = [
+            appRoot.appendingPathComponent("VariorumMobile", isDirectory: true),
+            appRoot.appendingPathComponent("Shared", isDirectory: true),
+        ]
         var walked = 0
         var offenders: [String] = []
-        let walk = try #require(FileManager.default.enumerator(
-            at: mobileRoot, includingPropertiesForKeys: nil))
-        for case let url as URL in walk where url.pathExtension == "swift" {
-            guard !url.path.contains("/Spike/") else { continue }
-            walked += 1
-            let source = try String(contentsOf: url, encoding: .utf8)
-            for literal in Self.stringLiteralContents(of: source)
-            where literal.contains(Self.forbidden) {
-                offenders.append("\(url.lastPathComponent): \"\(literal)\"")
+        for root in roots {
+            let walk = try #require(FileManager.default.enumerator(
+                at: root, includingPropertiesForKeys: nil))
+            for case let url as URL in walk where url.pathExtension == "swift" {
+                guard !url.path.contains("/Spike/") else { continue }
+                walked += 1
+                let source = try String(contentsOf: url, encoding: .utf8)
+                for literal in Self.stringLiteralContents(of: source)
+                where literal.contains(Self.forbidden) {
+                    offenders.append("\(url.lastPathComponent): \"\(literal)\"")
+                }
             }
         }
         #expect(walked > 40, "the walk must actually reach the shipped mobile sources")
@@ -1081,8 +1092,13 @@ struct MobileNoRedirectSweepTests {
 
     /// Extracts string-literal CONTENTS from Swift source — single-line
     /// `"…"` and multi-line `"""…"""` — ignoring `//` and `/* */`
-    /// comments (which narrate the Mac legitimately). Interpolation
-    /// bodies ride inside their literal (harmless for a word scan).
+    /// comments (which narrate the Mac legitimately). KNOWN LIMIT
+    /// (C5 ladder MINOR-2, verified): a literal NESTED inside an
+    /// interpolation — `"…\(flag ? "Mac" : "…")…"` — reads as code to
+    /// this state machine and is NOT scanned; the pin's claim is
+    /// top-level literals. A full tokenizer was judged disproportionate
+    /// for a copy sweep; a reviewer hitting this note should re-grep
+    /// interpolation bodies by hand if the pattern spreads.
     static func stringLiteralContents(of source: String) -> [String] {
         var literals: [String] = []
         var current = ""

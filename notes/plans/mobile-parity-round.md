@@ -7263,3 +7263,35 @@ passed** · perf by name **9/2 passed** — all matching the acceptance
 baselines. Core/Mac/Mac-spine not run: zero core, zero `Shared/`,
 zero Mac-side lines batch-wide (verified by my own per-commit
 `git show --stat`), so the only-if-shared condition never fired.
+
+## Stage C review — C5 round 1 ADJUDICATION + FIX PASS (at the architect's hand, 2026-08-09); ROUND 2 OPENS
+
+No BLOCKER/MAJOR. Dispositions, executed this commit:
+
+- **MINOR (save-into clears dangling picks) → FIXED:** the clear
+  clause now requires the pick be EFFECTIVE (`effective[blockID] !=
+  nil`) — a dangling pick shows nothing to return from, and
+  tombstoning it destroyed exactly the row the honest meta reports
+  and 13j's restore road revives. Pin
+  `saveIntoNeverClearsADanglingPick`, **red-on-old by behavioral
+  revert** (the pre-fix clause tombstoned B's pick — the exact
+  traced value; 5 siblings green, discrimination clean).
+- **MINOR (the sweep pin misses Shared/) → FIXED:** the walk now
+  covers BOTH roots the mobile target compiles (`VariorumMobile/` +
+  `App/Variorum/Shared/`), with the `#if os(macOS)`-arm caveat
+  recorded in place for any future legitimate tripper. Green on
+  today's tree (the reviewer's own greps pre-verified Shared clean).
+- **MINOR (interpolation-nested literals unscanned) → CLAIM
+  NARROWED, recorded:** the scanner's doc now states the verified
+  limitation plainly (top-level literals; the nested-ternary pattern
+  reads as code); a full tokenizer judged disproportionate for a
+  copy sweep — the honesty note is the guard.
+- **The four NITs → RECORDED:** the join-kind staleness and
+  `saveCurrentView`'s composite join the R2-10 recorded class; the
+  departed-blocks meta is the Mac-inherited fallback family; the
+  unreachable belt arm noted.
+
+Full mobile suite by the architect's own hand: **"Test run with 306
+tests in 58 suites passed"** (305 + the new pin, exact). **ROUND 2
+OPENS** on the fix set: target this commit's diff; fresh reviewer;
+new BLOCKER/MAJOR ⇒ round 3.

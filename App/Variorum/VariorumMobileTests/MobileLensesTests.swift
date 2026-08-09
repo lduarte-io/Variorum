@@ -145,6 +145,41 @@ struct MobileLensesTests {
         }
     }
 
+    /// C5 ladder MINOR-3 (red-on-old): "save into" clears ONLY picks the
+    /// view actually returned to chosen — a DANGLING pick (its take
+    /// archived) shows nothing to return from, and save-into must never
+    /// tombstone the row the honest meta reports and 13j's restore road
+    /// revives.
+    @Test func saveIntoNeverClearsADanglingPick() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedLensWorld(session)
+            let (lensID, doomed) = try await session.runner.run {
+                [postID = seed.postID, blockA = seed.blockA, a2 = seed.a2,
+                 blockB = seed.blockB, b1 = seed.b1] ops -> (String, String) in
+                let lens = try ops.createLens(post: postID, name: "keeps its ghost")
+                _ = try ops.setLensChoice(lens: lens.id, block: blockA, variant: a2)
+                let b2 = try ops.branchVariant(blockB, from: b1)
+                try ops.autosave(b2.id, text: "Doomed words.", charDelta: 3)
+                _ = try ops.setLensChoice(lens: lens.id, block: blockB, variant: b2.id)
+                try ops.archiveVariant(b2.id)
+                return (lens.id, b2.id)
+            }
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            let lenses = MobileLensesModel(
+                session: session, postID: seed.postID, editor: model)
+            await lenses.refresh()
+            await lenses.activate(lensID)
+            #expect(model.takes.isPeeking(seed.blockA))
+
+            await lenses.saveIntoActiveLens()
+            let stored = try await storedLensChoices(db, lensID: lensID)
+            #expect(stored[seed.blockB] == doomed,
+                    "the dangling pick SURVIVES a save-into")
+            #expect(stored[seed.blockA] == seed.a2)
+        }
+    }
+
     /// SAVES are sparse (the lens doctrine's storage philosophy): the
     /// displayed divergences and nothing else; saving puts you IN the
     /// saved lens; "save into the one you're in" upserts what diverges
