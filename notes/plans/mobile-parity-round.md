@@ -505,3 +505,191 @@ with the standing trailer; write the batch record into THIS file
 PROVISIONALs); push `origin mobile` before finishing.
 PROVISIONAL-and-continue for non-gating ambiguity; author-only calls
 stop the batch.
+
+## Stage A, batch A1 — BATCH RECORD (implementer, 2026-08-09; commits `a95839d` · `4473ba8` · `647a430` · `8163b0e` · `ddde966` + the record commit)
+
+**All five items shipped.** Per item:
+
+1. **The takes-peek scroll defect — TRACED AND FIXED; the recorded
+   surface pin did not survive reproduction.** Reproduction ran FIRST,
+   both roads, on the iPhone 17 Pro / iOS 26.2 simulator: **(a)** a
+   throwaway real-touch UITest (driven through the TK2SpikeUITests
+   scheme; deleted after use) walked her exact flow in the REAL app —
+   new note, ten wrapping paragraphs, ⑂, branch, done, horizontal
+   swipe — and proved the WRITE-SURFACE PEEK SCROLL HEALTHY: with a
+   peek active and the pill showing, vertical swipes moved the
+   content-anchored badge oracle across the full scrollable range,
+   both directions, twice, and the swipe still flipped (pill
+   appeared). The gesture-arbitration suspect (and the gate record's
+   "NOT the LK4 browser sheet" pin) is REFUTED with evidence; a
+   headless probe additionally cleared contentSize integrity, offset
+   retention across layout ticks, hit-test routing, and the pan
+   router's vertical-translation refusal. **(b)** The BROWSER SHEET's
+   mechanism was measured cold: a full-bounds manual-frame overlay
+   with ZERO keyboard relationship — footer/new-take doors at y≈800
+   and the card band to y≈648 on the phone-class window, against a
+   keyboard whose own measured height is 233 pt (top ≈641) — so the
+   moment minting raised focus (the S2 MINOR-2 fix, exactly "i could
+   make a new take") the card list's max scroll offset ignored the
+   occluded band — with few takes it is exactly ZERO, the list cannot
+   scroll at all ("you can't actually scroll") — while the live card
+   and the footer sat behind the keyboard ("couldn't scroll down
+   through the list of takes to edit it better"). The S2 ladder's own
+   flag-5 rider predicted this bite verbatim ("once focus rises, the
+   missing keyboard-guide constraint bites more often"); her gate
+   report IS that feel-round finding. The sheet rides OVER the Write
+   surface (page visible behind) and is entered from the takes button,
+   so her pin's words describe this overlay exactly. *Fix
+   (`MobileTakesBrowserView`):* the sheet's layout gains the
+   keyboard's share — `keyboardEndFrame` fed by the system
+   keyboard-frame notifications (the sheet is manual-frames, so the
+   guide-constraint mechanism doesn't fit; tests post the same
+   notifications deterministically), footer + card band end ABOVE the
+   keyboard (the band's max offset now accounts for every covered
+   card), and the live card is REVEALED once per editing transition
+   and once per keyboard move, never per render (her own scrolling is
+   not fought). The ruled swipe grammar is untouched (all peek/✓ pins
+   green). *Pin:* `theKeyboardNeverStrandsTheCardListFooterOrLiveCard`
+   — revert-verified: pre-fix mechanism restored → **3 issues**
+   (footer 688>400 · band 648>400 · the deepest live card at 833
+   outside the 485 band), 8 sibling tests green (discrimination); fix
+   restored → green. *Honest limits, for the stage's device round:*
+   the simulator harness would not present the software keyboard
+   (hardware-keyboard state persists in headless runs — the keyboard
+   element parks offscreen with its real height), so the fix's live
+   confirmation rides the stage's on-device look; and if her defect
+   has a second arm that only real fingers on a real phone surface,
+   the write-surface refutation should be re-checked there once.
+   *Ladder note:* the reveal pin initially targeted the branch mint
+   and passed on old code (hollow — `branchVariant` mints BESIDE its
+   source, near the top); re-aimed at the deepest card by frame, it
+   discriminates. Recorded per the hallucination guard.
+
+2. **iPhone-only, portrait-only (the platform ruling).**
+   `TARGETED_DEVICE_FAMILY` `"1,2"` → `1` on ALL SIX mobile build
+   configs (app + unit-test host + UITest/spike host, Debug and
+   Release each); the `_iPad` orientation declaration DROPPED entirely
+   (never declare iPad capability — her ruling's letter); iPhone
+   orientations reduced to portrait alone. Mac-side config blocks
+   byte-untouched (verified by mapping each settings block to its
+   bundle id), and the Mac target re-verified: **BUILD SUCCEEDED**
+   after the pbxproj edit. *Pin:*
+   `theBuiltProductIsIPhoneOnlyAndPortraitOnly` — reads the BUILT
+   product's Info.plist through the hosted suite's `Bundle.main`
+   (`UIDeviceFamily == [1]`, orientations == portrait-only, no
+   `~ipad` key), so pbxproj drift fails in CI, not on her phone. Run
+   RED on the pre-flip declarations first (families `[1,2]`,
+   landscape declared — 2 issues), green after the flip.
+
+3. **Q-M1 — RULED (a), BUILT: branch under a refused flush seeds from
+   the card's SHOWN bytes.** *Traced (the S2 round-2 NIT's own
+   scenario):* you typed into a take a remote lock then froze; the
+   locked refusal RECOMMENDS branching — but `branchDisplayed`'s
+   flush refuses (`lockedVariant`; the MINOR-1 keep-pending posture
+   holds the bytes), `branchVariant` copies `working_text` from the
+   STORE, and the mint carried the frozen bytes while the source card
+   showed the pending ones. *Fix:* the displayed take's
+   `surfaceKnownText` (exactly what `cards()` renders) is captured
+   before the mint; where it differs from the mint's store copy it
+   rides into the new take through the ordinary card-edit road
+   (`recordTakeEdit` → the refresh's flush — the mint is fresh and
+   unlocked, so it always lands, BEFORE `beginEditing` attaches the
+   card editor so the live card opens on the seeded bytes). A
+   successful flush makes the seeding a byte-for-byte no-op — the
+   ordinary road is untouched. *Pin:*
+   `branchUnderARefusedFlushSeedsFromTheShownBytes` (card edit on the
+   chosen take → remote lock delivered → branch → the mint's ledger
+   record AND store row hold the typed bytes; the source stays
+   keep-pending exact: frozen store bytes, pending card bytes) —
+   revert-verified: seeding disabled → **2 issues** (mint ledger nil,
+   mint store row stale), 20 siblings green; restored → 30/2 green
+   across both browser suites.
+
+4. **The note seal door + the sealed refusals lose the redirect.**
+   *Doors:* `MobileEditorViewModel.lockNote()/unlockNote()` through
+   the core's own `lockPost`/`unlockPost` (the seal's auto-commit
+   insurance rides them — pinned: one `commit_point` for the dirty
+   buffer at seal, zero on unlock, I6's
+   consequence-not-equivalence). `lockNote` is FLUSH-GUARDED like
+   every structural door — *traced:* a pending surface edit left
+   behind the seal would refuse at its later flush (`.lockedPost`)
+   and the typed bytes could never land (the text-loss class) — so
+   pending text lands BEFORE the seal, and a flush that cannot land
+   (locked take, keep-pending) refuses the whole act with the
+   standing wording, note left open. *Placement (named + justified):*
+   the MASTHEAD — the phone's note-identity surface and its only
+   note-level acts home (block acts live in the bar's ⋯; the seal is
+   the NOTE's own state, already displayed there): a state-mirroring
+   lock glyph beside the title (one reversible tap each way — the
+   seal is a guard, never a snapshot), plus **"Unlock Note" on the
+   sealed state line itself** (fire-and-DO: the line naming the state
+   offers the act; the masthead stays visible above the browser
+   sheet, so every sealed refusal's "unlock it" has its door in
+   view). *Copy sweep (sanctioned pin flips riding the ruling):* all
+   EIGHT sealed-note sites drop "on the Mac" → "This note is locked —
+   unlock it to ⟨act⟩."; the locked-TAKE / archived-take copies
+   deliberately KEPT for Stage C's locks family. *Tests:*
+   `MobileNoteSealTests` (a new suite): seal/unseal state transitions
+   through the VM against the store, the new gate copy pinned, the
+   refusing arm pinned; the flush-guard mutation-checked (blind seal
+   restored → **4 issues**: stranded store bytes + the blind seal
+   landing; restored → green); the affected suites 66/6 green. The
+   SwiftUI masthead wiring itself (3-line doors onto the tested VM
+   methods) is not headless-testable in this harness — recorded, the
+   stage's screenshot look covers it.
+
+5. **The two rewords.** **P32 BUILT:** the truncation marker rewords
+   neutrally — "the full book lives on the Mac" (both book surfaces)
+   → "Showing the first N notes — the rest of this book isn't loaded
+   yet.", hoisted to ONE shared sentence
+   (`MobileBookViewModel.truncationMarker`) consumed by the note list
+   AND the Read flow so the copy can never fork; load-more stays
+   deferred with the Mac's bounded-window family (Phase 12's row).
+   Copy pin `theTruncationMarkerCarriesNoMacRedirect` (exact wording
+   + no "Mac"). **P23 VERIFIED ALREADY SATISFIED — no change owed:**
+   the stale S2 I10 line ("Deleting the whole block is a Mac gesture
+   for now") was retired at S4 batch 1 when the phone's Delete Block
+   door landed; the shipped copy names the phone's own ⋯-menu door
+   and is pinned in MobileTakesBrowserTests + MobileWalkTests (both
+   green this batch). The P-round flip was recorded against the
+   S2-era copy; the record here closes it with evidence rather than a
+   redundant edit.
+
+**Counts, by this implementer's own runs (iPhone 17 Pro / iOS 26.2):**
+full mobile suite — **"Test run with 181 tests in 27 suites passed"**
+— the 175/26 baseline + this batch's six pins and one new suite,
+exactly accounted (keyboard pin · platform pin · Q-M1 pin · 2 seal
+tests · truncation pin). **Core / Mac / spine deliberately not run:**
+the batch's diff carries zero `Sources/VariorumCore`, zero
+`App/Variorum/Shared/`, zero Mac-side source, zero schema, zero
+`Sync/` lines — the brief's only-if-shared condition never fired; the
+one shared FILE touched (the pbxproj, mobile config blocks only) was
+covered by a Mac-target build: **BUILD SUCCEEDED**.
+
+**PROVISIONALs (for the chain's end bundle):**
+- **PA1-1:** the seal door's visual form — the masthead lock glyph
+  (SF `lock`/`lock.open`, muted-vs-accent by state) and the
+  system-register "Unlock Note" wording (the block menu's own
+  register; A3's voice-case sweep may recase). Placement itself is
+  justified above, not provisional.
+- **PA1-2:** the browser's keyboard feed rides the system keyboard
+  notifications rather than a `keyboardLayoutGuide` constraint (the
+  sheet is manual-frames; the guide is a constraint mechanism) — a
+  mechanism interpretation for the ladder, with the portrait-locked
+  window making the screen/window coordinate identity exact.
+- **PA1-3 (finding, not a provisional):** the gate record's surface
+  pin ("the S2 peek chrome, NOT the LK4 browser sheet") did not
+  reproduce under real touches; the browser's keyboard blindness did,
+  and matches her words exactly. If her defect has a second arm only
+  a physical device surfaces, the stage's device round should
+  re-check the write-surface peek scroll once on her phone.
+- **A3 note (P24):** the real-touch run observed a small scrollable
+  range past the document's end on the Write surface — consistent
+  with the typewriter-room bottom inset being absent; evidence for
+  A3's verify/build item.
+
+**Deliberate absences (scope, not holes):** take lock/unlock and the
+remaining refusal-copy sweep (Stage C's families — the locked-take
+copies still name the Mac by design until that batch); the Aa bar /
+P35 / P33 / P5 / P24 / P26/P43 / P38 and the spacing floor (A3);
+Q-M2's core divide shape (A2, the chain's one core-touching batch).
