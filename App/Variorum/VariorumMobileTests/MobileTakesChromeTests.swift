@@ -165,6 +165,72 @@ struct MobileTakesChromeTests {
         }
     }
 
+    /// P38 (parity A3, her ruled fix — marker PLACEMENT stands; the
+    /// one-line fanned+commented crowding corner goes): a fanned block
+    /// that is also commented reserves the ●n marker's room in its
+    /// first-line gutter (content-keyed — never measured line count, the
+    /// oscillation trap), so the marker can never run under the ⑂ badge.
+    /// RED-ON-OLD: the fixture's text is computed to end inside the old
+    /// crowding zone (right against the 30 pt gutter), where the old
+    /// tree's marker frame overlapped the badge's.
+    @Test func aOneLineFannedAndCommentedBlockNeverCrowdsTheBadge() async throws {
+        try await withEditorWorld { session, _ in
+            // The fixture, computed against the harness geometry (393 pt
+            // surface, mono base font in the terminal world): text whose
+            // end lands ONE LINE under the old 30 pt gutter (right edge ≤
+            // cw−30−pad) yet inside the badge's reach (end+3 plus the
+            // marker's ~30 pt crosses the badge's left edge at cw−26) —
+            // the steady-state crowding her P38 corner recorded. Target
+            // end ≈ cw−43.
+            let charW = ("a" as NSString).size(
+                withAttributes: [.font: MobileEditorStyle.baseFont]).width
+            let containerWidth: CGFloat = 393
+            let pad: CGFloat = 5 // NSTextContainer.lineFragmentPadding default
+            let count = Int(((containerWidth - 43) - pad) / charW)
+            let filling = String(repeating: "a", count: count)
+
+            let seed = try await session.runner.run { ops -> (post: String, a: String, b: String) in
+                let post = try ops.createPost(title: "crowd", profile: .blog)
+                let a = try ops.newBlock(in: post.id, text: filling, at: .end)
+                _ = try ops.branchVariant(a.block.id, from: a.variant.id)
+                _ = try ops.addBlockComment(to: a.block.id, text: "One.")
+                let b = try ops.newBlock(in: post.id, text: filling, at: .end)
+                _ = try ops.branchVariant(b.block.id, from: b.variant.id)
+                return (post.id, a.block.id, b.block.id)
+            }
+            let (model, surface) = await makeSurface(session, postID: seed.post)
+            let view = surface.textView
+            guard let chrome = view.takesChrome, let decor = view.blockDecor else {
+                Issue.record("chrome not installed")
+                return
+            }
+            _ = model
+            // The second chrome pass the app takes on its own: installing
+            // the widened exclusion invalidates layout, and the next
+            // layout tick re-measures the marker under it (the standing
+            // decor→chrome ordering; a single pass holds pre-exclusion
+            // geometry for exactly one tick).
+            view.refreshChrome()
+
+            // The MECHANISM: the fanned+commented block's gutter is
+            // widened by the marker's room; its fanned-but-uncommented
+            // sibling keeps the plain LK10 gutter (discrimination against
+            // a blanket widening).
+            let widths = view.textContainer.exclusionPaths.map(\.bounds.width).sorted()
+            #expect(widths == [
+                MobileTakesChromeController.gutterWidth,
+                MobileTakesChromeController.gutterWidth
+                    + MobileTakesChromeController.commentMarkRoom,
+            ])
+
+            // The BEHAVIOR: the ●n marker never intersects the ⑂ badge.
+            let badge = try #require(chrome.badgeView(for: seed.a))
+            let mark = try #require(decor.commentMark(for: seed.a))
+            #expect(!mark.frame.intersects(badge.frame),
+                    "the marker must never run under the badge")
+        }
+    }
+
     @Test func panRouterScopesToFannedBlockGeometry() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedWrappingFannedPost(session)

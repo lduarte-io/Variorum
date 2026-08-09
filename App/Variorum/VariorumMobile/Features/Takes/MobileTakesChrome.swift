@@ -58,6 +58,17 @@ final class MobileTakesChromeController {
     /// The LK10 gutter's width (badge + breathing room). PROVISIONAL like
     /// every visual constant — the look rounds rule.
     static let gutterWidth: CGFloat = 30
+    /// P38 (parity A3 — the ruled fix for the recorded one-line
+    /// fanned+commented crowding corner): a fanned block that is ALSO
+    /// commented reserves this much extra first-line room, so a one-line
+    /// block's ●n marker (which sits at the LAST line's end — the first
+    /// line, for one-liners) can never run under the ⑂ badge. Keyed on
+    /// CONTENT (fanned ∧ commented), never on measured line count —
+    /// a geometry key would oscillate (widening the exclusion can wrap
+    /// the line, unwrapping un-widens it, forever). A multi-line block
+    /// pays one slightly shorter first line; marker PLACEMENT itself
+    /// stands (her ruling).
+    static let commentMarkRoom: CGFloat = 26
 
     private weak var textView: MobileEditorTextView?
     private weak var model: MobileEditorViewModel?
@@ -151,10 +162,15 @@ final class MobileTakesChromeController {
             lastGeometryResolvedBlockIDs.insert(slot.blockID)
             seen.insert(slot.blockID)
             // The gutter: text-container coordinates (exclusion space).
+            // A commented fanned block reserves the ●n marker's room too
+            // (P38's one-line crowding fix — content-keyed, see the
+            // constant).
+            let gutterWidth = Self.gutterWidth
+                + (slot.commentCount > 0 ? Self.commentMarkRoom : 0)
             let gutter = CGRect(
-                x: containerWidth - Self.gutterWidth,
+                x: containerWidth - gutterWidth,
                 y: line.fragmentMinY,
-                width: Self.gutterWidth,
+                width: gutterWidth,
                 height: line.firstLineHeight)
             exclusionByBlock[slot.blockID] = gutter
             exclusions.append(gutter)
