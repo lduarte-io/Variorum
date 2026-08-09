@@ -4928,3 +4928,59 @@ CLOSES at round 2**; N1 is recorded for the architect's discretion.
 - Full Mac suite: not re-run (fetch-only consumers verified by
   enumeration; the architect's recorded post-fix 1245/219
   tripwire-only run stands).
+
+## Stage C — the C2 LADDER CLOSES at round 2 (architect, 2026-08-09); C3 OPENS
+
+Round 2: all six fixes HOLD (the architect's fixes held to full
+severity by a fresh reviewer — R1-2's core reasoning, consumer
+enumeration, and pin all verified independently); no new
+BLOCKER/MAJOR/MINOR. The one comment-only NIT (C2-R2-N1 — the undo
+comment's door list) FIXED at the architect's hand in this commit
+(merge + the browser's archive/delete-variant join the list;
+comment-only, no suite consequence). **C2 CLOSED.** Baselines
+carried: mobile 246/42 · core 1214/128 · Mac 1245/219 tripwire-only
+· Mac spine 51/7 · mobile spine 32/7 · perf 9/2.
+
+## Stage C, batch C3 brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
+
+**Cast:** a fresh Fable implementer session, `~/dev/variorum-mobile`,
+branch `mobile`, starting at this commit. **Scope: the see-your-data
+trio + the sitting's C3 additions** — tags (browse · create incl.
+child tags · apply/remove on posts, leaf-chip grammar · MANAGEMENT:
+rename + delete-with-subtree, her cross-fully ruling with the
+subtree consequence NAMED in the delete confirm) · references (the
+"More info" list: see, add a URL, open; FILE references listed
+honestly in neutral words — the bookmark is per-machine by model
+fact (`file_bookmark` is local-only, AppSpec §7), so the copy states
+what a file row is without naming any platform) · scraps (view the
+scraps area + mint a scrap — her "view your pool of scraps … and
+maybe add to it"; the drag-into-note door stays not-owed) · the
+Library sort picker (the standing sort vocabulary: entry date ·
+created · last touched · last meaningful edit) · stars (the act +
+a starred face for notes AND books — find the Mac's storage
+mechanism IN CODE and reuse it through core; the face's exact home
+is your call, PROVISIONAL).
+
+**Read first, IN FULL:** `CLAUDE.md` · `notes/MobileSoul.md` · THIS
+plan file top to bottom — the MATRIX's tags/references/scraps/
+Library rows + the MID-CHAIN SITTING's rulings 2/3/9/10 are your
+spec; the refusal inventory's C3 rows dissolve here ·
+`notes/plans/mobile-app-plan.md` §§ "The settled shape" +
+"Environment traps" · the Mac's tags/references/scraps/star faces
+in code (the shapes being paralleled) ·
+`notes/plans/mobile-architect-handoff.md`.
+
+**Discipline (the standing set):** everything routes through
+existing core operations; small additive `VariorumCore/Queries`
+reads legal IF genuinely needed (four-suite duty; zero change to
+existing queries; the Mac spine's seven TRUE type names are at
+~line 767 of mobile-app-plan.md); `Operations/`/schema/`Sync/`
+STOPS. Tutorial-as-spec: lessons + walks update in the same commit
+as any door they teach. Work synchronously; red-on-old for
+defect-class fixes; state-transition tests per new door; no
+platform-named refusals (the delete-with-subtree confirm names the
+CONSEQUENCE, not a platform). Full mobile suite green by your own
+run (arithmetic accounted) + mobile spine 32/7 + perf 9/2 by name.
+Commit per logical unit with the standing trailer; batch record
+into THIS file ("## Stage C, batch C3 — BATCH RECORD"); push
+`origin mobile`. PROVISIONAL-and-continue; author-only calls stop.
