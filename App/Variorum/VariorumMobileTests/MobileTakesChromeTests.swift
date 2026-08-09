@@ -96,6 +96,22 @@ private func pillSubview(_ chrome: MobileTakesChromeController, id: String) -> U
     chrome.pillView?.subviews.first { $0.accessibilityIdentifier == id }
 }
 
+/// The governing paragraph style at a surface location (B3: the gutter
+/// is a first-paragraph tail reservation — storage truth, read exactly
+/// where layout reads it).
+@MainActor
+private func governingStyle(
+    _ view: MobileEditorTextView, at location: Int
+) -> NSParagraphStyle? {
+    view.textStorage.attribute(
+        .paragraphStyle, at: location, effectiveRange: nil) as? NSParagraphStyle
+}
+
+@MainActor
+private func tailReservation(_ view: MobileEditorTextView, at location: Int) -> CGFloat {
+    -(governingStyle(view, at: location)?.tailIndent ?? 0)
+}
+
 // MARK: - The suite
 
 @MainActor
@@ -118,17 +134,27 @@ struct MobileTakesChromeTests {
                     == MobileTakesChromeController.badgeGlyph)
             #expect(chrome.badgeView(for: seed.blockB) == nil)
 
-            // LK10: exactly ONE gutter — the fanned block's; non-fanned
-            // blocks reserve nothing.
-            #expect(view.textContainer.exclusionPaths.count == 1)
-            let gutter = view.textContainer.exclusionPaths[0].bounds
-            #expect(abs(gutter.maxX - view.textContainer.size.width) < 1)
-            #expect(gutter.width == MobileTakesChromeController.gutterWidth)
+            // LK10: exactly ONE reservation — the fanned block's first
+            // paragraph ends `gutterWidth` short of the trailing margin
+            // (B3's paragraph-style mechanism); the fanless block
+            // reserves nothing; and the container carries NO exclusion
+            // paths (FB2-1's root — their presence alone made every
+            // keystroke's relayout document-scale; pinned).
+            let rangeA = try #require(model.rangeOfBlock(seed.blockA))
+            let rangeB = try #require(model.rangeOfBlock(seed.blockB))
+            #expect(tailReservation(view, at: rangeA.location)
+                    == MobileTakesChromeController.gutterWidth)
+            #expect(tailReservation(view, at: rangeB.location) == 0)
+            #expect(view.textContainer.exclusionPaths.isEmpty)
 
-            // The badge sits inside the gutter's column, on the first line.
-            if let badge {
-                #expect(badge.frame.minX >= gutter.minX + view.textContainerInset.left - 1)
-                #expect(abs(badge.frame.minY - (gutter.minY + view.textContainerInset.top)) < 1)
+            // The badge sits in the reserved trailing column, on the
+            // fanned block's first line.
+            if let badge, let line = view.firstLineGeometry(atOffset: rangeA.location) {
+                #expect(badge.frame.minX >= view.textContainerInset.left
+                        + view.textContainer.size.width
+                        - MobileTakesChromeController.gutterWidth - 1)
+                #expect(abs(badge.frame.minY
+                        - (line.fragmentMinY + view.textContainerInset.top)) < 1)
             }
             #expect(model.identityAuditFailures == 0)
             #expect(!view.canaryFired)
@@ -210,24 +236,24 @@ struct MobileTakesChromeTests {
                 Issue.record("chrome not installed")
                 return
             }
-            _ = model
             // The second chrome pass the app takes on its own: installing
-            // the widened exclusion invalidates layout, and the next
-            // layout tick re-measures the marker under it (the standing
-            // decor→chrome ordering; a single pass holds pre-exclusion
-            // geometry for exactly one tick).
+            // the widened reservation invalidates that paragraph, and the
+            // next layout tick re-measures the marker under it (the
+            // standing decor→chrome ordering; a single pass holds
+            // pre-reservation geometry for exactly one tick).
             view.refreshChrome()
 
-            // The MECHANISM: the fanned+commented block's gutter is
-            // widened by the marker's room; its fanned-but-uncommented
-            // sibling keeps the plain LK10 gutter (discrimination against
-            // a blanket widening).
-            let widths = view.textContainer.exclusionPaths.map(\.bounds.width).sorted()
-            #expect(widths == [
-                MobileTakesChromeController.gutterWidth,
-                MobileTakesChromeController.gutterWidth
-                    + MobileTakesChromeController.commentMarkRoom,
-            ])
+            // The MECHANISM (B3's paragraph-tail form): the
+            // fanned+commented block's reservation is widened by the
+            // marker's room; its fanned-but-uncommented sibling keeps the
+            // plain LK10 room (discrimination against a blanket widening).
+            let rangeA = try #require(model.rangeOfBlock(seed.a))
+            let rangeB = try #require(model.rangeOfBlock(seed.b))
+            #expect(tailReservation(view, at: rangeA.location)
+                    == MobileTakesChromeController.gutterWidth
+                        + MobileTakesChromeController.commentMarkRoom)
+            #expect(tailReservation(view, at: rangeB.location)
+                    == MobileTakesChromeController.gutterWidth)
 
             // The BEHAVIOR: the ●n marker never intersects the ⑂ badge.
             let badge = try #require(chrome.badgeView(for: seed.a))
@@ -472,28 +498,127 @@ struct MobileTakesChromeTests {
                 Issue.record("takes chrome not installed")
                 return
             }
-            // Both fanned blocks carry badges and gutters (full passes ran
-            // at load); the far one sits far outside the 700 pt viewport.
+            // Both fanned blocks carry badges and tail reservations (full
+            // passes ran at load); the far one sits far outside the
+            // 700 pt viewport.
             #expect(chrome.badgeView(for: seed.near) != nil)
             #expect(chrome.badgeView(for: seed.far) != nil)
-            #expect(view.textContainer.exclusionPaths.count == 2)
+            let nearRange = try #require(model.rangeOfBlock(seed.near))
+            let farRange = try #require(model.rangeOfBlock(seed.far))
+            #expect(tailReservation(view, at: nearRange.location)
+                    == MobileTakesChromeController.gutterWidth)
+            #expect(tailReservation(view, at: farRange.location)
+                    == MobileTakesChromeController.gutterWidth)
             #expect(view.contentSize.height > 2_000, "the post must dwarf the viewport")
 
             // The per-tick scope: the near block resolves, the FAR one is
-            // never layout-forced — yet its exclusion survives (cached).
+            // never layout-forced — yet its reservation survives (storage
+            // truth needs no geometry to verify).
             chrome.refresh(scope: .nearViewport)
             #expect(chrome.lastGeometryResolvedBlockIDs.contains(seed.near))
             #expect(!chrome.lastGeometryResolvedBlockIDs.contains(seed.far),
                     "a scroll tick must not force layout of far-off-screen fragments (P-8; TEXTKIT2 §2)")
             #expect(chrome.badgeView(for: seed.far) != nil)
-            #expect(view.textContainer.exclusionPaths.count == 2,
-                    "the off-band gutter survives from its cached rect")
+            #expect(tailReservation(view, at: farRange.location)
+                    == MobileTakesChromeController.gutterWidth,
+                    "the off-band reservation survives — storage truth, undisturbed by a tick")
 
             // The full pass (every content/geometry input axis) resolves
             // both — the scope discriminates, the vocabulary doesn't shrink.
             chrome.refresh(scope: .document)
             #expect(chrome.lastGeometryResolvedBlockIDs.contains(seed.near))
             #expect(chrome.lastGeometryResolvedBlockIDs.contains(seed.far))
+            #expect(model.identityAuditFailures == 0)
+            #expect(!view.canaryFired)
+        }
+    }
+
+    /// FB2-1 (parity B3 — the fix's mechanism pin; P-8's invalidation law
+    /// on the EDIT road): a typed character's chrome pass is EDIT-scoped
+    /// (the near-viewport band ∪ the edited range) — a keystroke never
+    /// forces layout of far-off-screen decorated blocks; the container
+    /// carries NO exclusion paths (FB2-1's ROOT: their presence alone
+    /// made every keystroke's relayout document-scale — the B3 probe's
+    /// numbers ride the batch record — so none may ever return to this
+    /// surface); and a pass whose reservations all held writes NOTHING
+    /// (the far block's governing style is the very same object after
+    /// the keystroke — a write would mint a fresh one and invalidate
+    /// its paragraph). RED-ON-OLD on the FAR-NOT-RESOLVED half: pre-B3,
+    /// `storageDidEdit` refreshed `.document`, so every keystroke
+    /// geometry-forced the far block — run red on that tree before the
+    /// fix landed. The write-free and no-exclusions halves are GUARDS
+    /// against regrowth, not the discriminator (recorded per the
+    /// hallucination guard).
+    @Test func aKeystrokesChromePassIsEditScopedAndWriteFreeWhenNothingMoved() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await session.runner.run { ops in
+                let post = try ops.createPost(title: "edit-scope", profile: .blog)
+                let near = try ops.newBlock(in: post.id, text: "The near fanned block.", at: .end)
+                let filler = String(
+                    repeating: "A steady filler paragraph that wraps across the "
+                        + "surface a few times to build real height. ",
+                    count: 5)
+                for _ in 0..<60 {
+                    _ = try ops.newBlock(in: post.id, text: filler, at: .end)
+                }
+                let far = try ops.newBlock(in: post.id, text: "The far fanned block.", at: .end)
+                let nearTake = try ops.branchVariant(near.block.id, from: near.variant.id)
+                try ops.autosave(nearTake.id, text: "Near, the other way.", charDelta: 5)
+                let farTake = try ops.branchVariant(far.block.id, from: far.variant.id)
+                try ops.autosave(farTake.id, text: "Far, the other way.", charDelta: 5)
+                return (postID: post.id, near: near.block.id, far: far.block.id)
+            }
+            let (model, surface) = await makeSurface(session, postID: seed.postID)
+            let view = surface.textView
+            guard let chrome = view.takesChrome else {
+                Issue.record("takes chrome not installed")
+                return
+            }
+            #expect(view.contentSize.height > 2_000, "the post must dwarf the viewport")
+            // Settle to steady state (the app's own reservation→relayout
+            // cadence — the FIX-3 probe's rounds), then photograph the
+            // far block's governing style instance.
+            view.refreshChrome()
+            for _ in 0..<4 {
+                surface.layoutIfNeeded()
+                view.refreshChrome()
+            }
+            let farBefore = try #require(model.rangeOfBlock(seed.far))
+            #expect(tailReservation(view, at: farBefore.location)
+                    == MobileTakesChromeController.gutterWidth)
+            let styleBefore = governingStyle(view, at: farBefore.location)
+
+            // ONE typed character inside the near block, through the
+            // policed road (gate → storage → storageDidEdit → the chrome
+            // pass under test). Nothing pumps another layout pass before
+            // the assertions — the keystroke's own pass is what's read.
+            guard let range = model.rangeOfBlock(seed.near), range.length > 1 else {
+                Issue.record("no surface range for the near block")
+                return
+            }
+            typeEdit(
+                model, view.textStorage,
+                range: NSRange(location: range.location + 1, length: 0), replacement: "x")
+
+            // The edit road's scope: the near (in-band, edited) block may
+            // resolve; the FAR block is never layout-forced by a keystroke…
+            #expect(!chrome.lastGeometryResolvedBlockIDs.contains(seed.far),
+                    "a keystroke must never force far-off-screen layout (FB2-1; P-8)")
+            // …its chrome survives (badge frame content-anchored,
+            // reservation storage truth)…
+            #expect(chrome.badgeView(for: seed.far) != nil)
+            let farAfter = try #require(model.rangeOfBlock(seed.far))
+            #expect(tailReservation(view, at: farAfter.location)
+                    == MobileTakesChromeController.gutterWidth)
+            // …the container carries NO exclusion paths (FB2-1's root —
+            // presence alone is the document-scale relayout class)…
+            #expect(view.textContainer.exclusionPaths.isEmpty,
+                    "container exclusion paths may never return to this surface (FB2-1)")
+            // …and a pass whose reservations all held wrote NOTHING (a
+            // write mints a fresh style object and invalidates the
+            // paragraph).
+            #expect(governingStyle(view, at: farAfter.location) === styleBefore,
+                    "an unchanged reservation must never be re-written — the write is the invalidation")
             #expect(model.identityAuditFailures == 0)
             #expect(!view.canaryFired)
         }

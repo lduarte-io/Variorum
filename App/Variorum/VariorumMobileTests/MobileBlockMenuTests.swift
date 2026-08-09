@@ -474,15 +474,16 @@ struct MobileBlockDecorTests {
 
             let label = try #require(decor.emojiLabel(for: seed.blockA))
             #expect(label.text == "🕯")
-            // The reserved leading gap (LK10's mechanism, mirrored): one
-            // exclusion at the line's start, published into the container's
-            // ONE exclusion set.
-            #expect(decor.currentEmojiExclusions.count == 1)
-            let gap = try #require(decor.currentEmojiExclusions.first)
-            #expect(gap.minX == 0)
-            #expect(gap.width > 0)
-            #expect(surface.textView.textContainer.exclusionPaths
-                .contains { $0.bounds == gap })
+            // The reserved leading gap (LK10's mirror corner; B3's
+            // mechanism): a firstLineHeadIndent on the block's first
+            // paragraph — exactly first-line-only, covering the glyph —
+            // and the container carries NO exclusion paths (FB2-1).
+            let style = surface.textView.textStorage.attribute(
+                .paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle
+            let gap = style?.firstLineHeadIndent ?? 0
+            #expect(gap >= label.bounds.width, "the gap must cover the glyph (gap \(gap))")
+            #expect(gap <= label.bounds.width + 10)
+            #expect(surface.textView.textContainer.exclusionPaths.isEmpty)
         }
     }
 

@@ -688,6 +688,23 @@ final class MobileEditorViewModel {
         return index.range(ofEntryAt: i)
     }
 
+    /// EVERY block's current surface range, from ONE index walk —
+    /// O(entries) total (parity B3, FB2-1's cost half): the chrome
+    /// controllers read a range per decorated block per pass, and
+    /// per-block `rangeOfBlock` is an O(entries) scan, so the old
+    /// decorated×entries per-tick cost was real milliseconds at 100k.
+    /// Block IDs are unique on the surface by I2 (one live placement),
+    /// so the dictionary is exact.
+    func blockRangesByID() -> [String: NSRange] {
+        var ranges = [String: NSRange](minimumCapacity: index.entries.count)
+        var location = 0
+        for entry in index.entries {
+            ranges[entry.blockID] = NSRange(location: location, length: entry.length)
+            location += entry.length + 1
+        }
+        return ranges
+    }
+
     // MARK: - Takes browser routing (S2 batch 2 — thin; the brain is `takesBrowser`)
 
     /// The block "at" a caret or menu location, boundary-tolerant: a caret
@@ -884,8 +901,18 @@ final class MobileEditorViewModel {
         textView?.canaryCheckpointAfterMutation()
         // S2: badge/gutter/marker geometry follows every character edit
         // (the overlay-geometry law — every input axis; equality-gated
-        // inside, so unchanged geometry writes nothing).
-        textView?.refreshChrome()
+        // inside, so unchanged geometry writes nothing). EDIT-SCOPED
+        // since parity B3 (FB2-1's fix): the pass touches the
+        // near-viewport band ∪ the edited range, never the document —
+        // the pre-B3 `.document` default here forced far-decorated-block
+        // layout on EVERY keystroke and re-wrote `exclusionPaths` into a
+        // geometry↔exclusion invalidation loop (551 ms keystrokes at
+        // 100k, measured; P-8's law: invalidation ∝ viewport + edit).
+        // Off-band chrome keeps its last resolved geometry and heals the
+        // moment its block scrolls near (the `.nearViewport` doctrine,
+        // extended to the edit road); `.document` passes remain the
+        // delivery/flip/voice axes' — user-act cadence, never keystroke.
+        textView?.refreshChrome(scope: .edit(editedRange))
     }
 
     private func fallbackVerdict(editedRange: NSRange, delta: Int) -> BlockRangeIndex.Verdict {
@@ -1261,9 +1288,16 @@ final class MobileEditorViewModel {
         guard let storage else { return }
         var clean = index.documentLength == storage.length
         if clean {
+            // Running-location walk (B3): `range(ofEntryAt: i)` is O(i),
+            // so the per-entry call made this per-keystroke audit
+            // O(entries²) — ~1.9M additions per keystroke at 1,370
+            // blocks, real DEBUG milliseconds on the keystroke road.
+            // Same ranges, same checks, one walk.
+            var runningLocation = 0
             for i in index.entries.indices {
                 let entry = index.entries[i]
-                let range = index.range(ofEntryAt: i)
+                let range = NSRange(location: runningLocation, length: entry.length)
+                runningLocation += entry.length + 1
                 guard range.length > 0 else { continue }
                 storage.enumerateAttribute(
                     EditorDocument.blockIDAttribute, in: range

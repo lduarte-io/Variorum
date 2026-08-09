@@ -143,10 +143,11 @@ final class MobileEditorTextView: UITextView {
     /// `MobileEditorViewModel.attach(textView:)`).
     func installTakes(model: MobileEditorViewModel) {
         editorModel = model
-        // S4: the block decor FIRST — the takes chrome's exclusion
-        // assembly unions the decor's emoji gutters, so `refreshChrome`
-        // runs the decor before the chrome (the one-container-property
-        // composition; see MobileBlockDecor's header).
+        // S4 ordering kept (decor before chrome): since B3 the two
+        // controllers compose their first-paragraph reservations by
+        // read-modify-write on ONE style object (decor's head field,
+        // chrome's tail field), so a stable order keeps a both-decorated
+        // block's writes deterministic.
         let decor = MobileBlockDecorController(textView: self, model: model)
         blockDecor = decor
         let chrome = MobileTakesChromeController(textView: self, model: model)
@@ -178,10 +179,11 @@ final class MobileEditorTextView: UITextView {
         }
     }
 
-    /// The ONE chrome refresh door (S4): the decor publishes its emoji
-    /// exclusions first, then the takes chrome assembles the container's
-    /// one exclusion set (its own gutters + the decor's) and re-anchors
-    /// everything. Every content/geometry input axis routes here.
+    /// The ONE chrome refresh door (S4; B3 retired the exclusion
+    /// assembly): the decor re-anchors frames/emoji and maintains its
+    /// head reservations, then the takes chrome does the same for
+    /// badges/markers/pill and its tail reservations. Every
+    /// content/geometry input axis routes here with its honest scope.
     func refreshChrome(scope: MobileTakesChromeController.RefreshScope = .document) {
         blockDecor?.refresh(scope: scope)
         takesChrome?.refresh(scope: scope)
@@ -307,6 +309,77 @@ final class MobileEditorTextView: UITextView {
             frame.minX + bounds.maxX,
             frame.minY + bounds.minY,
             bounds.height)
+    }
+
+    // MARK: First-paragraph reservations (parity B3 — FB2-1's mechanism)
+
+    /// THE GUTTER'S MECHANISM since B3: a PARAGRAPH-STYLE indent on the
+    /// block's first paragraph, replacing `textContainer.exclusionPaths`
+    /// entirely. Why (the B3 probe, recorded in the batch record):
+    /// container exclusion paths make TK2's post-edit relayout
+    /// DOCUMENT-scale by PRESENCE alone — ~160 ms per keystroke at 100k
+    /// words with even ONE rect installed, position-independent, and
+    /// ~0.5 ms with zero — and they inflate the height estimate ~1.4×
+    /// (the scroll walk's contentSize thrash). No write-gating can fix a
+    /// presence cost. Paragraph indents are layout-position-INDEPENDENT,
+    /// so relayout stays incremental: a reservation write invalidates
+    /// exactly one paragraph (P-8: invalidation ∝ what changed), and the
+    /// measured keystroke returns to the bare-TK2 class. Both chrome
+    /// controllers write through these two doors (the S4 one-
+    /// implementation rule): each owns ONE field — the takes chrome the
+    /// tail (⑂ gutter + P38's comment-mark room), the decor the leading
+    /// first line (the callout emoji gap) — read-modify-write, so the
+    /// two compose on a block that carries both. Equality-gated against
+    /// STORAGE TRUTH at the paragraph's governing (first) character —
+    /// never a cached record, so a materialization or voice re-base that
+    /// dropped the style heals at the next pass (the overlay law's
+    /// wire-time-delivery discipline), and a steady-state pass writes
+    /// nothing.
+    ///
+    /// The trailing newline the paragraph range carries (a one-paragraph
+    /// block's SEPARATOR) is styled with the paragraph — harmless and
+    /// deliberate: the visual paragraph stays uniform, and the block-ID
+    /// projection (the identity authority) is a different attribute.
+
+    /// Reserve `width` points of first-paragraph TRAILING room (0 clears).
+    /// Returns whether storage changed (the caller's invalidation record).
+    @discardableResult
+    func setTailReservation(_ width: CGFloat, blockRange: NSRange) -> Bool {
+        setReservation(blockRange: blockRange) { style in
+            let target = width <= 0 ? 0 : -width
+            guard abs(style.tailIndent - target) > 0.01 else { return false }
+            style.tailIndent = target
+            return true
+        }
+    }
+
+    /// Reserve `width` points of first-LINE leading room (0 clears) —
+    /// `firstLineHeadIndent` is exactly the emoji gap's first-line-only
+    /// shape.
+    @discardableResult
+    func setLeadingFirstLineReservation(_ width: CGFloat, blockRange: NSRange) -> Bool {
+        setReservation(blockRange: blockRange) { style in
+            let target = max(width, 0)
+            guard abs(style.firstLineHeadIndent - target) > 0.01 else { return false }
+            style.firstLineHeadIndent = target
+            return true
+        }
+    }
+
+    private func setReservation(
+        blockRange: NSRange, mutate: (NSMutableParagraphStyle) -> Bool
+    ) -> Bool {
+        guard blockRange.length > 0, let storage = textStorage as NSTextStorage?,
+              blockRange.location < storage.length else { return false }
+        let paragraph = storage.mutableString.paragraphRange(
+            for: NSRange(location: blockRange.location, length: 0))
+        let current = storage.attribute(
+            .paragraphStyle, at: blockRange.location, effectiveRange: nil)
+            as? NSParagraphStyle ?? MobileEditorStyle.baseParagraphStyle
+        let style = current.mutableCopy() as! NSMutableParagraphStyle
+        guard mutate(style) else { return false }
+        storage.addAttribute(.paragraphStyle, value: style, range: paragraph)
+        return true
     }
 
     /// The bulk-entry hint (the Mac EditorTextView's exact shape): bulk

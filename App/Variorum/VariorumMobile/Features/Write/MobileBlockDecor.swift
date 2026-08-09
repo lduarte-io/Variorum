@@ -13,22 +13,24 @@
 //    below the text canvas (P-8: overlays, never rendering attributes;
 //    the S2 peek marker's exact z-order), color resolved from the stored
 //    THEME-TOKEN name. The EMOJI renders in a reserved leading gap on the
-//    block's first line — LK10's exclusion mechanism at the mirror corner
+//    block's first line — LK10's reservation at the mirror corner
 //    (the ratified mockup draws the glyph before the first words), so
-//    text never runs under it.
+//    text never runs under it. MECHANISM since parity B3 (FB2-1): the
+//    gap is a `firstLineHeadIndent` reservation through
+//    `MobileEditorTextView.setLeadingFirstLineReservation` — exactly
+//    first-line-only. Container `exclusionPaths` are RETIRED on this
+//    surface (their PRESENCE made every keystroke's relayout
+//    document-scale — the B3 record's probe), and no code may reinstall
+//    one (pinned).
 //  - THE COMMENT MARKER (M12; the mockup's ●n form): a commented block
 //    wears a small ●n at the end of its LAST line; tapping it opens the
 //    block's comments sheet (the badge-tap grammar).
 //
-//  Exclusion composition: `textContainer.exclusionPaths` is ONE container
-//  property, owned by the takes chrome's assembly — this controller only
-//  PUBLISHES its emoji gutters (`currentEmojiExclusions`); the chrome
-//  unions them in. `MobileEditorTextView.refreshChrome` runs the decor
-//  FIRST for exactly that reason.
-//
 //  Geometry discipline is the chrome's own: equality-gated writes, the
-//  near-viewport band on scroll ticks (the S2 MINOR-3 scope law), cost ∝
-//  the post's framed/commented blocks on content axes.
+//  banded scopes on scroll/edit ticks (the S2 MINOR-3 scope law + B3's
+//  `.edit`), cost ∝ the post's framed/commented blocks on content axes.
+//  Reservations are band-independent storage truth, exactly as in the
+//  takes chrome (its header has the full B3 rationale).
 //
 
 import UIKit
@@ -43,10 +45,10 @@ final class MobileBlockDecorController {
     private var frames: [String: UIView] = [:]
     private var emojiLabels: [String: UILabel] = [:]
     private var commentMarks: [String: UIButton] = [:]
-    /// The emoji gutters for the chrome's ONE exclusion assembly
-    /// (container coordinates).
-    private(set) var currentEmojiExclusions: [CGRect] = []
-    private var emojiExclusionByBlock: [String: CGRect] = [:]
+    /// The blocks currently carrying an emoji head reservation —
+    /// cleanup targeting only (the takes chrome's `reservedBlocks`
+    /// discipline); the reservation's truth lives in storage.
+    private var emojiReservedBlocks: Set<String> = []
     private var lastFullPassWidth: CGFloat = -1
     private var refreshing = false
 
@@ -72,32 +74,54 @@ final class MobileBlockDecorController {
         let inset = textView.textContainerInset
         let containerWidth = textView.textContainer.size.width
 
+        // The band mirrors the takes chrome's exactly (the sibling
+        // discipline — one scope law, two controllers): `.edit` unions
+        // the edited range into the near band (parity B3's FB2-1 fix —
+        // invalidation ∝ viewport + edit, never post length).
         var band: NSRange?
-        if scope == .nearViewport, containerWidth == lastFullPassWidth {
-            band = textView.nearViewportBand()
-        } else {
+        switch scope {
+        case .document:
             lastFullPassWidth = containerWidth
+        case .nearViewport, .edit:
+            guard containerWidth == lastFullPassWidth else {
+                lastFullPassWidth = containerWidth
+                break
+            }
+            band = textView.nearViewportBand()
+            if case .edit(let edited) = scope, let near = band {
+                band = NSUnionRange(near, edited)
+            }
         }
         func near(_ range: NSRange) -> Bool {
             guard let band else { return true }
             return range.location < band.location + band.length
                 && band.location < range.location + max(range.length, 1)
         }
+        // One index walk for every range (the takes chrome's B3 read).
+        let ranges = model.blockRangesByID()
 
         // 1 — callout frames + emoji (M12; the one-frame rule).
         var framed: Set<String> = []
-        var emojiExclusions: [CGRect] = []
         var emojiSeen: Set<String> = []
         for slot in model.slots {
             guard let presentation = model.presentations[slot.blockID] else { continue }
-            guard let range = model.rangeOfBlock(slot.blockID) else { continue }
+            guard let range = ranges[slot.blockID] else { continue }
             let emoji = presentation.emoji ?? ""
+            // The reserved leading gap (LK10's mirror corner; B3's
+            // band-independent reservation walk — content-derived width,
+            // storage-truth gated, no geometry consulted): text on the
+            // first line starts after the glyph. The LABEL itself is
+            // geometry (made/placed in the banded arm below).
+            if !emoji.isEmpty {
+                emojiSeen.insert(slot.blockID)
+                let width = ceil((emoji as NSString).size(
+                    withAttributes: [.font: Self.emojiFont]).width)
+                textView.setLeadingFirstLineReservation(
+                    width + 8, blockRange: range)
+                emojiReservedBlocks.insert(slot.blockID)
+            }
             if !near(range), frames[slot.blockID] != nil {
                 framed.insert(slot.blockID)
-                if !emoji.isEmpty, let cached = emojiExclusionByBlock[slot.blockID] {
-                    emojiSeen.insert(slot.blockID)
-                    emojiExclusions.append(cached)
-                }
                 continue
             }
             guard let union = textView.blockRectsUnion(range: range) else { continue }
@@ -113,20 +137,11 @@ final class MobileBlockDecorController {
             wash.backgroundColor = MobileCallout.color(presentation.color)
 
             if !emoji.isEmpty, let line = textView.firstLineGeometry(atOffset: range.location) {
-                emojiSeen.insert(slot.blockID)
                 let label = emojiLabels[slot.blockID] ?? makeEmojiLabel(blockID: slot.blockID)
                 if label.text != emoji {
                     label.text = emoji
                     label.sizeToFit()
                 }
-                // The reserved leading gap (the LK10 mechanism, mirrored):
-                // text on the first line starts after the glyph.
-                let gutterWidth = label.bounds.width + 8
-                let gutter = CGRect(
-                    x: 0, y: line.fragmentMinY,
-                    width: gutterWidth, height: line.firstLineHeight)
-                emojiExclusionByBlock[slot.blockID] = gutter
-                emojiExclusions.append(gutter)
                 let origin = CGPoint(
                     x: inset.left + 2,
                     y: inset.top + line.fragmentMinY)
@@ -140,15 +155,20 @@ final class MobileBlockDecorController {
         for (blockID, label) in emojiLabels where !emojiSeen.contains(blockID) {
             label.removeFromSuperview()
             emojiLabels[blockID] = nil
-            emojiExclusionByBlock[blockID] = nil
         }
-        emojiExclusions.sort { ($0.minY, $0.minX) < ($1.minY, $1.minX) }
-        currentEmojiExclusions = emojiExclusions
+        // A retired emoji's paragraph gives its gap back (a block gone
+        // from the surface has no paragraph left to clear).
+        for blockID in emojiReservedBlocks.subtracting(emojiSeen) {
+            if let range = ranges[blockID] {
+                textView.setLeadingFirstLineReservation(0, blockRange: range)
+            }
+            emojiReservedBlocks.remove(blockID)
+        }
 
         // 2 — comment markers (●n at the block's last line end).
         var commented: Set<String> = []
         for slot in model.slots where slot.commentCount > 0 {
-            guard let range = model.rangeOfBlock(slot.blockID) else { continue }
+            guard let range = ranges[slot.blockID] else { continue }
             if !near(range), commentMarks[slot.blockID] != nil {
                 commented.insert(slot.blockID)
                 continue
@@ -192,10 +212,15 @@ final class MobileBlockDecorController {
         return wash
     }
 
+    /// The emoji glyph's font — ONE constant for the label AND the
+    /// reservation width (B3: the gap is content-derived, so the two
+    /// must never disagree).
+    static let emojiFont = UIFont.systemFont(ofSize: 13)
+
     private func makeEmojiLabel(blockID: String) -> UILabel {
         let label = UILabel()
         label.accessibilityIdentifier = "decor.emoji.\(blockID)"
-        label.font = .systemFont(ofSize: 13)
+        label.font = Self.emojiFont
         label.isUserInteractionEnabled = false
         textView?.addSubview(label)
         emojiLabels[blockID] = label

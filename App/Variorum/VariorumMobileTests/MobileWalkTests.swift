@@ -329,9 +329,16 @@ struct MobileWalkTests {
             }
 
             // The fanned block wears ⑂ (count-free) and reserves its
-            // gutter; the fanless one wears and reserves nothing.
+            // gutter (B3's paragraph-tail reservation; the container
+            // carries no exclusion paths — FB2-1); the fanless one wears
+            // and reserves nothing.
             #expect(chrome.badgeView(for: seed.blockA) != nil)
-            #expect(view.textContainer.exclusionPaths.count == 1)
+            let styleA = try #require(model.rangeOfBlock(seed.blockA)).location
+            #expect((view.textStorage.attribute(
+                .paragraphStyle, at: styleA, effectiveRange: nil)
+                as? NSParagraphStyle)?.tailIndent
+                    == -MobileTakesChromeController.gutterWidth)
+            #expect(view.textContainer.exclusionPaths.isEmpty)
             let storeBytesBefore = try await storedBlockTexts(db, postID: seed.postID)
             #expect(storeBytesBefore == ["The chosen opening.", "A fanless second block."])
 

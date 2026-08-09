@@ -13,9 +13,14 @@
 //    2 — LK3's "the tap is the door"; counts appear once open. Batch 1's
 //    interim pill reveal, P15, is RETIRED as its own record planned).
 //  - THE GUTTER (LK10, her ruling: "text shouldn't go under the take
-//    icon … maybe just reserve some space for it?"): an exclusion rect at
-//    the block's first fragment's trailing corner, so the first line ends
-//    short of the badge. Non-fanned blocks reserve NOTHING.
+//    icon … maybe just reserve some space for it?"): first-paragraph
+//    trailing room, so the badge line ends short of the badge.
+//    Non-fanned blocks reserve NOTHING. MECHANISM since parity B3
+//    (FB2-1): a paragraph-style tail reservation through
+//    `MobileEditorTextView.setTailReservation` — container
+//    `exclusionPaths` are RETIRED on this surface (their PRESENCE made
+//    every keystroke's relayout document-scale; the B3 record has the
+//    probe), and no code may reinstall one (pinned).
 //  - THE PEEK MARKER (M9): while a block displays a peeked take it wears
 //    the takes register visibly — the `takeTint` wash behind the block
 //    with a `takeLine` edge bar (the ratified v1 mockup's `.peeked`
@@ -30,21 +35,25 @@
 //    fragment hit-testing. Non-fanned blocks don't respond.
 //
 //  Geometry discipline: every refresh is EQUALITY-GATED (frames and
-//  exclusion rects only write when they moved), so the steady state is
+//  reservations only write when they moved), so the steady state is
 //  write-free and the layoutSubviews hook cannot loop. Fragment lookups
 //  ride `enumerateTextLayoutFragments(.ensuresLayout)` per FANNED block —
 //  the spike's measured 0.03 ms/rect class. SCOPES (S2 ladder round 1,
-//  MINOR 3 — the P-8 shape fix): content/geometry input axes (edits,
-//  projections, flips, voice, width) run `.document` — cost ∝ the post's
-//  fanned blocks (opt-in and rare by the model's own doctrine); the
-//  per-scroll-tick layoutSubviews hook runs `.nearViewport` — geometry is
-//  forced ONLY for blocks intersecting the padded TK2 viewport (the
-//  queryable `viewportRange`), so a tick's cost ∝ realized rows, never
-//  the post, and far-off-screen fragments are never layout-forced at
-//  scroll rate against TK2's own laziness (TEXTKIT2 §2). Off-band chrome
-//  keeps its last resolved geometry — every overlay is a content-anchored
-//  subview, so scrolling itself never moves it — and heals the moment its
-//  block scrolls near. The device round measures the magnitude.
+//  MINOR 3; `.edit` added at parity B3 — the P-8 shape law):
+//  projections, flips, voice, and width run `.document` — cost ∝ the
+//  post's fanned blocks (opt-in and rare by the model's own doctrine);
+//  the per-scroll-tick layoutSubviews hook runs `.nearViewport` —
+//  geometry is forced ONLY for blocks intersecting the padded TK2
+//  viewport (the queryable `viewportRange`); the KEYSTROKE road runs
+//  `.edit` — the near band ∪ the edited range — so a keystroke's
+//  invalidation ∝ viewport + edit, never post length (FB2-1's law).
+//  Off-band chrome keeps its last resolved geometry — every overlay is
+//  a content-anchored subview, so scrolling itself never moves it — and
+//  heals the moment its block scrolls near. RESERVATIONS are
+//  band-INDEPENDENT: they are storage-attribute truth (no geometry, no
+//  layout forcing to verify), checked against the paragraph's governing
+//  character every pass and written only on real change — one paragraph
+//  invalidated per real change, zero at steady state.
 //
 
 import UIKit
@@ -79,13 +88,13 @@ final class MobileTakesChromeController {
     private var pill: MobileTakesPillView?
     private(set) var pillBlockID: String?
     private var fadeTimer: Timer?
-    private var currentExclusions: [CGRect] = []
-    /// blockID → its last resolved gutter rect — what a `.nearViewport`
-    /// pass keeps for off-band blocks (dropping an off-band exclusion
-    /// would reflow the whole document per tick).
-    private var exclusionByBlock: [String: CGRect] = [:]
-    /// The container width of the last `.document` pass — a width change
-    /// moves every rect, so a tick under a new width escalates to full.
+    /// The blocks currently carrying a tail reservation — cleanup
+    /// targeting only (which paragraphs to CLEAR when a fan dies); the
+    /// reservation's truth always lives in storage, never here.
+    private var reservedBlocks: Set<String> = []
+    /// The container width of the last full-geometry pass — a width
+    /// change moves every overlay frame, so a banded pass under a new
+    /// width escalates to full.
     private var lastFullPassWidth: CGFloat = -1
     /// Test seam (the MINOR-3 call-shape pin): the blocks whose geometry
     /// the most recent refresh actually resolved (fragment layout forced).
@@ -109,12 +118,17 @@ final class MobileTakesChromeController {
 
     // MARK: The refresh (all input axes land here; equality-gated)
 
-    /// The refresh's cost scope (S2 ladder round 1, MINOR 3): `.document`
-    /// for content/geometry input axes; `.nearViewport` for the
+    /// The refresh's cost scope (S2 ladder round 1, MINOR 3; the third
+    /// case is parity B3's FB2-1 fix): `.document` for content/styling
+    /// input axes (deliveries, flips, voice — user-act or settle
+    /// cadence, never keystroke); `.nearViewport` for the
     /// per-scroll-tick hook — geometry forced only inside the padded TK2
     /// viewport, off-band chrome untouched (content-anchored; scrolling
-    /// never moves it).
-    enum RefreshScope { case document, nearViewport }
+    /// never moves it); `.edit` for the KEYSTROKE road — the band is
+    /// the near-viewport band ∪ the edited range, so invalidation ∝
+    /// viewport + edit, never post length (P-8's law; the pre-B3
+    /// `.document` keystroke pass was FB2-1's 70×-off-flat mechanism).
+    enum RefreshScope { case document, nearViewport, edit(NSRange) }
 
     func refresh(scope: RefreshScope = .document) {
         guard !refreshing, let textView, let model,
@@ -125,15 +139,26 @@ final class MobileTakesChromeController {
         let inset = textView.textContainerInset
         let containerWidth = textView.textContainer.size.width
 
-        // The near band. A tick under a changed width escalates to a full
-        // pass (every rect moved); an unavailable viewport reads as
+        // The near band. A banded pass under a changed width escalates to
+        // a full pass (every rect moved); an unavailable viewport reads as
         // everything-near (honest fallback — never a silently skipped
-        // block). nil band = full pass.
+        // block). nil band = full pass. The `.edit` band unions the edited
+        // range in (NSUnionRange — a covering span is an honest superset),
+        // so the edit's own blocks resolve even when the caret sits
+        // outside the viewport (a dictation landing while scrolled away).
         var band: NSRange?
-        if scope == .nearViewport, containerWidth == lastFullPassWidth {
-            band = textView.nearViewportBand()
-        } else {
+        switch scope {
+        case .document:
             lastFullPassWidth = containerWidth
+        case .nearViewport, .edit:
+            guard containerWidth == lastFullPassWidth else {
+                lastFullPassWidth = containerWidth
+                break
+            }
+            band = textView.nearViewportBand()
+            if case .edit(let edited) = scope, let near = band {
+                band = NSUnionRange(near, edited)
+            }
         }
         lastGeometryResolvedBlockIDs = []
         func near(_ range: NSRange) -> Bool {
@@ -141,39 +166,38 @@ final class MobileTakesChromeController {
             return range.location < band.location + band.length
                 && band.location < range.location + max(range.length, 1)
         }
+        // Every decorated block's range from ONE index walk (B3 —
+        // per-block `rangeOfBlock` is O(entries), and the per-pass
+        // decorated×entries scans were real per-tick milliseconds at
+        // 100k; FB2-1's record has the measurement).
+        let ranges = model.blockRangesByID()
 
-        // 1 — badges + gutters for FANNED blocks (LK3/LK10).
-        var exclusions: [CGRect] = []
+        // 1 — badges + first-paragraph tail reservations for FANNED
+        // blocks (LK3/LK10; B3's mechanism — see the header and
+        // `MobileEditorTextView.setTailReservation`). The RESERVATION
+        // walk is band-independent (storage truth, no layout forcing to
+        // verify) and writes only on real change; the BADGE walk is
+        // geometry and stays band-gated with off-band frames standing.
         var seen: Set<String> = []
         for slot in model.slots where slot.hasFan {
-            guard let range = model.rangeOfBlock(slot.blockID) else { continue }
-            if !near(range), let cached = exclusionByBlock[slot.blockID],
-               badges[slot.blockID] != nil {
-                // Off the band: last resolved geometry stands — the
-                // exclusion MUST stay in the assembled set (dropping it
-                // would reflow the document), the badge frame is
-                // content-anchored, and styling belongs to the full pass.
-                seen.insert(slot.blockID)
-                exclusions.append(cached)
+            guard let range = ranges[slot.blockID] else { continue }
+            seen.insert(slot.blockID)
+            // The gutter: a commented fanned block reserves the ●n
+            // marker's room too (P38's one-line crowding fix —
+            // content-keyed, see the constant).
+            textView.setTailReservation(
+                Self.gutterWidth
+                    + (slot.commentCount > 0 ? Self.commentMarkRoom : 0),
+                blockRange: range)
+            reservedBlocks.insert(slot.blockID)
+            if !near(range), badges[slot.blockID] != nil {
+                // Off the band: the badge's last resolved frame stands
+                // (content-anchored); styling belongs to the full pass.
                 continue
             }
             guard let line = textView.firstLineGeometry(atOffset: range.location)
             else { continue }
             lastGeometryResolvedBlockIDs.insert(slot.blockID)
-            seen.insert(slot.blockID)
-            // The gutter: text-container coordinates (exclusion space).
-            // A commented fanned block reserves the ●n marker's room too
-            // (P38's one-line crowding fix — content-keyed, see the
-            // constant).
-            let gutterWidth = Self.gutterWidth
-                + (slot.commentCount > 0 ? Self.commentMarkRoom : 0)
-            let gutter = CGRect(
-                x: containerWidth - gutterWidth,
-                y: line.fragmentMinY,
-                width: gutterWidth,
-                height: line.firstLineHeight)
-            exclusionByBlock[slot.blockID] = gutter
-            exclusions.append(gutter)
             // The badge: view (content) coordinates, inside the gutter.
             let badge = badges[slot.blockID] ?? makeBadge(blockID: slot.blockID)
             let frame = CGRect(
@@ -188,22 +212,20 @@ final class MobileTakesChromeController {
         for (blockID, badge) in badges where !seen.contains(blockID) {
             badge.removeFromSuperview()
             badges[blockID] = nil
-            exclusionByBlock[blockID] = nil
         }
-        // S4: the block decor's emoji gutters join the ONE exclusion
-        // assembly (one container property, one owner — the decor runs
-        // first in `refreshChrome`, so its rects are fresh here).
-        exclusions += textView.blockDecor?.currentEmojiExclusions ?? []
-        exclusions.sort { ($0.minY, $0.minX) < ($1.minY, $1.minX) }
-        if !rectsMatch(exclusions, currentExclusions) {
-            currentExclusions = exclusions
-            textView.textContainer.exclusionPaths = exclusions.map { UIBezierPath(rect: $0) }
+        // A dead fan's paragraph gives its room back (a block gone from
+        // the surface has no paragraph left to clear).
+        for blockID in reservedBlocks.subtracting(seen) {
+            if let range = ranges[blockID] {
+                textView.setTailReservation(0, blockRange: range)
+            }
+            reservedBlocks.remove(blockID)
         }
 
         // 2 — peek markers (M9: sticky, visible, per-block).
         var peeked: Set<String> = []
         for blockID in model.takes.peeks.keys {
-            guard let range = model.rangeOfBlock(blockID) else { continue }
+            guard let range = ranges[blockID] else { continue }
             if !near(range), markers[blockID] != nil {
                 // Off the band: the marker keeps its content-anchored
                 // frame; it heals when the block scrolls near.
@@ -237,7 +259,7 @@ final class MobileTakesChromeController {
         if let pillBlockID {
             if let pill, seen.contains(pillBlockID),
                let content = model.takes.pillContent(blockID: pillBlockID),
-               let range = model.rangeOfBlock(pillBlockID) {
+               let range = ranges[pillBlockID] {
                 if near(range) {
                     guard let union = textView.blockRectsUnion(range: range) else {
                         hidePill()
@@ -363,18 +385,6 @@ final class MobileTakesChromeController {
         return marker
     }
 
-    // MARK: Geometry
-
-    private func rectsMatch(_ a: [CGRect], _ b: [CGRect]) -> Bool {
-        guard a.count == b.count else { return false }
-        for (x, y) in zip(a, b) {
-            if abs(x.minX - y.minX) > 0.5 || abs(x.minY - y.minY) > 0.5
-                || abs(x.width - y.width) > 0.5 || abs(x.height - y.height) > 0.5 {
-                return false
-            }
-        }
-        return true
-    }
 }
 
 // MARK: - The pill (LK6, shape A)
