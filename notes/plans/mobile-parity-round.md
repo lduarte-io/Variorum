@@ -6842,3 +6842,204 @@ later); this batch changes zero Mac behavior.**
 
 Build order as proposed (merge road first, closing the sweep; then
 the lens family; then the record).
+
+## Stage C, batch C5 — BATCH RECORD (implementer, 2026-08-09; commits `b3d4e11` · `2426f1a` + the record commit)
+
+**Both ruled forks BUILT to the ruling; the mobile app's last two
+user-facing "Mac" strings are GONE, proven by a whole-target pin.**
+Diff scope, verified per commit by own `git diff --name-only`: **ten
+files across the two build commits, ALL mobile app + mobile tests —
+zero `Sources/VariorumCore/`, zero `App/Variorum/Shared/`, zero
+Mac-side files, zero schema, zero `Sync/`, zero pbxproj** (the
+synchronized groups took the two new files). Both forks compose
+EXISTING core ops end to end — the brief's small-additive-Queries
+allowance never fired, so the four-suite duty never fired;
+core/Mac/Mac-spine baselines stand by construction (core 1215/128 ·
+Mac 1245/219 tripwire-only · Mac spine 51/7).
+
+**1. THE FANNED-MERGE ROAD (`b3d4e11`) — the ruled carry-all through
+the canon ceremony op, zero core change.** The merge door's fanned arm
+now composes `Operations.mergeCeremony` (S4-23): ONE peek-aware
+pairing — the two DISPLAYED takes (captured post-flush,
+post-re-verify, before the read's suspension), joined under
+`MergeJoin.canon` resolved on the post-flush store texts (the plain
+merge's exact join brain) — plus every OTHER active take CARRIED
+WHOLE. Q-M2's duplicate logic, merge's edition: extras land ON the
+merged block, visible under the ⑂ badge, quick to delete, never
+hunted for; M10's silently-dropping-options concern dissolves BY
+CONSTRUCTION (nothing is dropped). Composition all core-guaranteed:
+sources released whole to lineage (reversible by re-pointing);
+archived takes stay with the sources (the `divideDuplicating`
+parallel — the core refuses archived carries by design); carried
+labels ride; comments copy from both sides; A′'s chosen = the joined
+take (the core's rendered×rendered rule — the caret-at-the-join
+arithmetic serves both roads unchanged); ONE core "Merge Takes" undo
+entry (no phone undo UI — the recorded deliberate absence; the road
+back is the Q-M2 divide, which handles fanned blocks). The fanless
+instant merge is byte-unchanged on plain `ops.merge`. A displayed
+take vanishing in the flush/read window refuses with the standing
+takes-changed wording (the F-3 guard class); the read→turn archived
+race lands on the core's own `archivedVariant` (the R2-10 recorded
+class). Silent on success (the Q-M2 divide's own posture).
+*Tutorial-as-spec, PB1-4's rider, SAME commit:* the merge lesson's
+ceremony paragraphs reworded to teach the ride; the staged tail +
+spare take reworded WITH their walk (the PB1-3 sanctioned coupling,
+now named in the seeder beside them); the structure walk's refusal
+pin flipped to MERGE the fanned tail and assert the carry-all rows
+(fan = [joined, spare] · chosen = joined · the carry a FRESH row ·
+the source's fan whole in lineage). *Pins:* the ruled-flip pin
+`mergeOnAFannedPairLandsTheCarryAll` (the EXACT fixture that used to
+refuse now merges; labels ride; archived-stay proven; caret pinned
+on a surface harness) + `mergeOnAPeekedPairJoinsTheDisplayedTakes` +
+`fannedMergeCarriesUnflushedTypingThroughTheFlush`.
+
+**2. THE WHOLE-TARGET SWEEP PIN (`b3d4e11`) —
+`MobileNoRedirectSweepTests.nothingUserFacingNamesTheMac`, run RED
+FIRST on the pre-dissolve tree with EXACTLY the two standing
+offenders** (`MobileStructural.swift` "…merge is the Mac's merge
+ceremony." · `MobileTutorialSeeder.swift` "the Mac's merge ceremony,
+and quietly dropping your options …"), green after the dissolve. The
+14b TerminologyPinTests' deep-walk shape narrowed to STRING LITERALS
+(a comment-ignoring scanner — comments narrate the Mac legitimately;
+only what a user can read is policed); `Spike/` exempt (inventory
+#15's recorded no-action), test sources exempt. **A hallucination-
+guard catch worth its own record: the pin's FIRST form passed HOLLOW
+on the very strings it polices, and the trace is a platform fact —
+Swift `Regex`'s default `\b` is the UAX #29 Unicode word boundary,
+under which an apostrophe between letters is word-INTERNAL, so
+`/\bMac\b/` never matches "the Mac's". `.wordBoundaryKind(.simple)`
+is the load-bearing fix, verified standalone (48 files walked, the
+two exact offenders found) and recorded in the pin's own comment.**
+*(Machinery note for future word-scan pins, the C3d dedupe-note
+class: a Swift Regex `\b` against possessives/contractions needs
+`.wordBoundaryKind(.simple)` or it silently under-matches.)*
+
+**3. LENSES (`2426f1a`) — the ruled compromised shape: a lens is a
+saved multi-block peek; zero core change.** *Door:* the **lens chip**
+on the masthead's second identity line — bare voiced "lens" at rest,
+**"lens: ⟨name⟩" in accent ink while active** (the whole-surface
+viewing state named in words). *The sheet (LK4, the references
+grammar):* **"the note"** (the `›` marker rides whichever row the
+display follows) · saved lenses in creation order, each with the
+HONEST dangle meta (`lensChoices` vs `effectiveLensSelection`: "n
+picks · k point(s) at a removed take — those blocks show the note's
+own choice" — display honestly; the LOUD restore door stays 13j's,
+not built) · row long-press Rename Lens…/Delete Lens (confirm-free —
+deleting a way of looking never deletes content, the core's own
+posture) · **save the current view as a lens…** (SPARSE divergences
+— exactly the live peeks, by the peek's own invariant; the saved
+lens becomes the active one) · **save into "⟨name⟩"** (her "can save
+the one you're in" verbatim: upsert + clear, rendered only while a
+lens is active — P-2) · **✓ make this the note** (rendered only
+while the view diverges — P-2) through `adoptPicksPreservingChosen`:
+adopting SWAPS, never destroys — the outgoing chosen auto-preserved
+as "chosen until ⟨date⟩", the status names it, stale picks skipped,
+ONE core undo entry; the peeks then end through the overlay's OWN
+chosen-caught-up self-heal at the refresh delivery, and the lens
+session ends (✓-ends-the-peek, scaled up). *Mechanism:* activation
+reads `effectiveLensSelection` once and applies each pick through
+two NEW `MobileTakesController` primitives — `peek(blockID:to:)`
+(the targeted flip, sharing `flip`'s ledger-first capture/restore
+byte-for-byte; landing on chosen ends any peek, which is exactly
+what makes a pick equal to chosen TRANSPARENT — the sparse doctrine)
+and `endAllPeeksRestoringDisplay()` (the switch's reset half) —
+ZERO store writes to view, free under the seal (a lens is viewing;
+the core's recorded lens-CRUD-under-seal posture holds through the
+door, pinned), cost ∝ picks (P1). The brain is `MobileLensesModel`
+(@Observable, the chip-model family — session + postID + a weak
+editor ref, both living as the Write screen's state, one lifetime).
+*Tutorial-as-spec, SAME commit:* the takes chapter grows the
+**"lenses" lesson** (a staged fan + a SEEDED "the other reading"
+lens so the sheet has a way of looking to switch to on first open);
+the getting-around masthead paragraph grows the chip; the plan's
+lesson count moves 13 → 14 and the ONE hard-coded page-meta pin
+flips with it ("note 14 of 14 · v" — every other count reads the
+plan as its oracle and followed free). *Walk:*
+`theLensLessonSwitchesSavesAndAdopts` — list → switch (store
+untouched, chosen unmoved) → return-to-note → swipe + save-sparse →
+adopt (chosen moved, preservation lens present, session ended), all
+store-asserted. *Pins:* `MobileLensesTests` (5 birth pins) —
+activate-writes-nothing · the dangle fallback + the honest meta
+byte-pinned · sparse saves + save-into upsert/clear · adopt-
+preserves-the-outgoing with the status pinned · rename/delete + the
+refusal arms (blank rename refuses in phone words; sealed adopt
+refuses in the standing sealed wording while SWITCHING stays free
+under the seal; deleting the active lens ends the session and
+restores truth).
+
+**Counts, by this implementer's own runs (iPhone 17 Pro / iOS 26.2
+simulator):**
+- Full mobile suite: **"Test run with 305 tests in 58 suites
+  passed"** — the 296/56 baseline + 9 tests + 2 suites, exactly
+  accounted: commit 1 +3/+1 (the sweep pin · the peeked-pair pin ·
+  the flush-carried pin; the ceremony-refusal pin and the walk's
+  merge test flipped 1-for-1 in place) · commit 2 +6/+1 (the 5
+  MobileLensesTests birth pins · the lens walk; the page-meta pin
+  flipped in place).
+- **The mobile spine GREW WITH THE BOOK: "Test run with 33 tests in
+  7 suites passed"** — 32/7 + the lens lesson's walk (the B1 growth
+  grammar: the spine is the tutorial's walk set, and the tutorial
+  grew a lesson with the door; same seven suite TYPE names, the
+  takes walk suite now 4). Every later batch and ladder runs 33/7.
+- Perf by name (`MobilePerfFixtureTests` · `MobilePerfWalkTests`):
+  **"Test run with 9 tests in 2 suites passed"**.
+- Core / Mac / Mac-spine deliberately not run: zero core, zero
+  `Shared/`, zero Mac-side lines in the whole batch (the scope check
+  above is the proof) — the only-if-shared condition never fired.
+- No Release re-verify: no DEBUG-gated door changed (the C4b
+  precedent); the standing Release checks stand.
+
+**Test posture:** the lens doors landed with birth pins (the surface
+did not exist on the old tree — the A2 reading of red-on-old); the
+merge road's flip pin rides the ruled supersession (the identical
+fixture, the ruled outcome — the A2 `divideOnAFannedBlock…` flip
+precedent); the sweep pin ran red-on-old in the strictest literal
+sense (the coordinator's ordered verification, executed and traced).
+No defect-class fix arose beyond the sweep pin's own hollow first
+form, which was traced to its platform mechanism before the fix (the
+guard's letter) and is recorded above.
+
+**PROVISIONALs (for the chain's end bundle):**
+- **PC5-1 (the ruling's own flag):** the ACTIVE lens is
+  session-local — evaporates with the note (M9's lifetime) — where
+  the Mac keeps per-post lens view memory. If she wants a note to
+  REOPEN in its last lens, that is a flip (persist one id per post),
+  not a redesign.
+- **PC5-2 (the ruling's ordered bundle item):** the CROSS-PLATFORM
+  question — the phone's fanned-merge default (carry-all) now
+  differs from the Mac's (the pairing ceremony). Whether carry-all
+  becomes the Mac's own quick default, as her divide workaround did,
+  is HERS — 13j's orbit or later; this batch changed zero Mac
+  behavior.
+- **PC5-3:** the lens vocabulary — chip word "lens" · "the note" ·
+  "save the current view as a lens…" · "save into ⟨name⟩" · "✓ make
+  this the note" · the dangle clause · the save-alert message · the
+  adopted status — all pinned statics, one-line changes for her
+  look.
+- **PC5-4:** phone saves are SPARSE (divergences only — the lens
+  doctrine's storage philosophy; a saved phone lens FOLLOWS chosen
+  on un-diverged blocks) where the Mac's save-current-choices door
+  writes full-fidelity explicit picks (frozen against later chosen
+  moves). The sparse reading composes with the peek (a peek IS a
+  divergence) and was the ruled primary; recorded so the difference
+  is a decision, not an accident.
+- **PC5-5:** the masthead's second line now carries FOUR chips
+  (tags · more info · blocks · lens) — joins PC4b-4's recorded
+  crowding look item; the chip is one line to move.
+- *(Recorded, not provisional:)* saving an undiverged view mints the
+  EMPTY lens — the transparent default, legal per the core's own
+  doctrine ("the empty lens is the transparent new-thread default");
+  adopt needs no flush (picks are pointers, no bytes ride — the Mac
+  adoptColumn's own posture); `saveIntoActiveLens` is a
+  read-then-act composite across one runner turn (the R2-10 recorded
+  class; `setLensChoice`'s own guards are the belt).
+
+**Deliberate absences (scope, not holes):** the multi-column Lenses
+BOARD, scratch columns, cross-column drag, diff, fan styles,
+branch-all-fans (workspace-class — her distinction, the ruled
+Mac-only exclusions) · `promoteLens`/`duplicateLens` (the version
+family — her "wait for a felt need" ruling's family) · no lens
+surface in the Read flow (a lens is an authoring-side way of
+looking; Read renders the book's truth, as on the Mac) · lens view
+memory (PC5-1, ruled session-local) · the Mac's fanned-merge default
+untouched (PC5-2 — 13j's orbit).
