@@ -244,9 +244,12 @@ enum MobileTutorialSeeder {
 
         _ = try lesson(welcome, "getting around", [
             "The SHELF is home: your books, with this one pinned to the top — "
-            + "pinned books always sit first. ✎ Today's Entry opens today's "
-            + "journal page, making it if the day hasn't started. + new note "
-            + "starts a bookless note and drops you straight into writing.",
+            + "pinned books always sit first, and a long press on a book row "
+            + "pins or unpins it. ✎ Today's Entry opens today's journal page, "
+            + "making it if the day hasn't started. + new note starts a "
+            + "bookless note and drops you straight into writing; + new book, "
+            + "at the list's end, starts a fresh book — hand-picked, a dated "
+            + "journal, or a smart book collecting by tags.",
 
             "The LIBRARY tab is everything, newest first, with search across "
             + "titles, days, and book names. Its bookless filter is the pool: "

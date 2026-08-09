@@ -27,6 +27,8 @@ struct MobileShelfView<TabBar: View>: View {
     let onOpenForWriting: (String) -> Void
     let onSettings: () -> Void
 
+    @State private var createBookPresented = false
+
     var body: some View {
         VStack(spacing: 0) {
             pathLine
@@ -41,6 +43,7 @@ struct MobileShelfView<TabBar: View>: View {
                             .foregroundStyle(tokens.muted)
                             .padding(.vertical, 24)
                     }
+                    newBookRow
                 }
                 .padding(.horizontal, 8)
                 todayButton
@@ -141,6 +144,34 @@ struct MobileShelfView<TabBar: View>: View {
             Button(tokens.chromeLabel(MobileShelfFaces.pinDoorTitle(pinned: pinned))) {
                 Task { await model.setPinned(book.reading.id, pinned: !pinned) }
             }
+        }
+    }
+
+    /// "+ new book" (parity C2 — her feel-round finding): the list's own
+    /// trailing row, where a list of books naturally ends with the door
+    /// that adds one; the path line stays two doors wide (the P38
+    /// crowding lesson). Opens the create sheet; the created book lands
+    /// on its contents front.
+    private var newBookRow: some View {
+        Button {
+            createBookPresented = true
+        } label: {
+            HStack {
+                Text(tokens.chromeLabel(MobileCreateBookSheet.doorTitle))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+                Spacer()
+            }
+            .padding(.vertical, 11)
+            .padding(.horizontal, 12)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("New Book")
+        .sheet(isPresented: $createBookPresented) {
+            MobileCreateBookSheet(
+                session: model.session, tokens: tokens,
+                onCreated: { onOpenBook($0) })
         }
     }
 

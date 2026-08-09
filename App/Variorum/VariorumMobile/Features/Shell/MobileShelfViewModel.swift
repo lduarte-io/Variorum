@@ -22,7 +22,9 @@ import VariorumCore
 @MainActor
 @Observable
 final class MobileShelfViewModel {
-    @ObservationIgnored private let session: AppSession
+    /// Non-private for the same reason the Mac `ShelfViewModel`'s is: the
+    /// shelf's sheets (create book) build their own models on the session.
+    @ObservationIgnored let session: AppSession
 
     private(set) var books: [Queries.ShelfBook] = []
     private(set) var pins: [String] = []
