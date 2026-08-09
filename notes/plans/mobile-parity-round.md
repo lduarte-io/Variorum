@@ -7295,3 +7295,90 @@ Full mobile suite by the architect's own hand: **"Test run with 306
 tests in 58 suites passed"** (305 + the new pin, exact). **ROUND 2
 OPENS** on the fix set: target this commit's diff; fresh reviewer;
 new BLOCKER/MAJOR ⇒ round 3.
+
+## Stage C review — C5 round 2 (fresh cold reviewer, 2026-08-09)
+
+Re-review of the fix set `96e1b9f..2ed9cdc` (round-1 findings + the
+adjudication read in full; the fixes at the architect's hand held to
+full severity). Every verification below is my own run.
+
+**Per-fix verdicts:**
+
+- **MINOR-3 fix (the effective-gated clear) — HOLDS.** The gate
+  `picks[blockID] == nil && effective[blockID] != nil` closes the
+  round-1 mechanism EXACTLY: `effectiveLensSelection` drops picks
+  whose take is tombstoned/archived (read line-by-line in
+  `LensQueries.swift` — the variant join is the only filter), so a
+  dangling pick can never enter the clear loop, while a
+  returned-to-chosen pick (take live+active) still clears — the
+  legitimate clear verified by the sibling
+  `savesWriteTheSparseDivergencesAndSaveIntoUpsertsAndClears`, green
+  on BOTH sides of the gate. **Red-on-old re-verified by my own
+  behavioral revert:** with the `effective` clause removed, exactly
+  `saveIntoNeverClearsADanglingPick` fails ("the dangling pick
+  SURVIVES a save-into" — B's pick tombstoned, the traced value) and
+  all 5 siblings stay green; gate restored, tree byte-clean. Both
+  queries read in ONE snapshot (a single `database.read` tuple) —
+  no new race seam.
+- **MINOR-1 fix (the widened sweep walk) — HOLDS.** The two roots
+  are exactly the mobile target's compiled source roots (pbxproj:
+  `fileSystemSynchronizedGroups` = `VariorumMobile` + `Shared`,
+  paths confirmed on disk; VariorumCore rides as a package product,
+  not target sources). **Reach proven, not assumed:** a transiently
+  planted `"do this on the Mac instead"` literal in
+  `Shared/ErrorPresentation.swift` turned the pin red by name and
+  quoted contents; removed, the pin is green (Shared has zero Mac
+  literals by my own grep — comment headers like "shared: Mac +
+  Mobile" are correctly ignored by the comment-stripping scanner,
+  which is why the widening is even possible without exemptions).
+  The `#if os(macOS)` caveat is recorded in place.
+- **MINOR-2 fix (the scanner's claim narrowed) — HOLDS.** The doc
+  now states the verified limitation plainly (top-level literals;
+  the nested-interpolation pattern reads as code) with the re-grep
+  instruction for a future reviewer; scanner code unchanged, so
+  round 1's isolation-verified mechanism still describes it.
+- **The four NIT dispositions (recorded, no code)** — appropriate;
+  nothing to re-verify.
+
+**New findings (no BLOCKER, no MAJOR):**
+
+- **[NIT] · `MobileStructuralTests.swift:1088` · the `walked > 40`
+  floor does not guard the SECOND root** — verified mechanism: a
+  URL-based `FileManager.enumerator(at:)` on a MISSING directory
+  returns non-nil and yields zero files (checked by my own run), so
+  `#require` never fires; if `Shared/` is ever renamed/moved, the
+  walk degrades to VariorumMobile alone (49 files today) and 49 > 40
+  stays green — the pin silently regresses to its round-1 scope.
+  One-line durability fix: raise the floor past one root's count
+  (e.g. > 70), or assert per-root reach. Not a hole today (reach
+  proven above).
+- **[NIT] · `MobileLenses.swift:256` (the fix comment) · "ONLY picks
+  the view actually returned to chosen" overclaims for the
+  DEPARTED-block corner** — a pick whose take is live+active but
+  whose BLOCK is no longer placed in the post is EFFECTIVE (the
+  query joins variant, never placement) with no possible peek, so
+  save-into still clears it. Behavior byte-identical to pre-fix and
+  inside round 1's recorded departed-blocks NIT family (13j's
+  orbit) — the comment, not the code, is the delta. A wording nudge
+  when that family is next touched.
+
+**Clean bill:** the fix-set diff touches exactly one mobile app
+file + one test file each way + the plan record — zero core, zero
+Shared, zero Mac lines (my own `git diff --stat`); the new pin's
+fixture mirrors round 1's traced scenario exactly (A live-diverged,
+B's pick archived post-set); `storedLensChoices` reads the raw live
+rows, so the pin asserts the stored truth, not a projection; the
+adjudication paragraph's claims all reproduced (red-on-old, sibling
+discrimination, 306/58).
+
+**My own runs (iPhone 17 Pro / iOS 26.2 simulator):** full mobile
+suite **306/58 passed** on the restored tree — baseline exact (the
+perf 9/2 and the spine's seven suites contained within); the
+behavioral-revert run failed on exactly the new pin; the
+planted-offender run failed on exactly the plant. Core/Mac/spine
+not separately run: the fix set carries zero lines outside the
+mobile target and its tests.
+
+**VERDICT: the C5 ladder CLOSES at round 2 — all three fixes HOLD,
+no new BLOCKER/MAJOR; two durability NITs recorded above for the
+backlog, no round 3 owed.**
