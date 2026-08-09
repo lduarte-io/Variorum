@@ -478,6 +478,13 @@ enum MobileTutorialSeeder {
             + "takes. Divide a sentence at its seam and merge it back, and "
             + "you get exactly the sentence you started with — merge is the "
             + "road back.",
+
+            "Two more knives live on the SELECTION menu — select some words "
+            + "and look: Extract Selection lifts a run at a block's start or "
+            + "end into its own block (the source keeps the rest, its takes "
+            + "untouched), and Make Block from Selection carves a middle "
+            + "span out as its own block. Both settle onto word edges, like "
+            + "divide's cut.",
         ])
 
         let fannedDivide = try lesson(structure, "divide with takes", [

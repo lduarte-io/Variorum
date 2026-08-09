@@ -38,11 +38,20 @@ enum MobileEditMenu {
     /// block menu's second door; M2's long-press reading widened).
     static let blockTitle = "Block"
 
+    /// The selection acts (parity C4b item 4 — her mid-chain ruling 5:
+    /// extract + make-block "CROSS via the selection menu"). The
+    /// registry's own verbs; rendered ONLY when the range has length
+    /// (P-2 — a caret can never span, so a door that could only refuse
+    /// isn't offered), and the acts route the ONE shared planner.
+    static let extractTitle = "Extract Selection"
+    static let makeBlockTitle = "Make Block from Selection"
+
     /// The composed menu: the system's suggested actions, then Takes…
-    /// where a block resolves — and, since S4, the Block submenu (the ⋯
-    /// menu's same rows from the ONE builder, minus Takes…, which
-    /// already rides flat here). Displayed titles are VOICE-CASED
-    /// (P26/P43, parity A3 — one register with the block menu's rows).
+    /// where a block resolves — the SELECTION acts where a selection
+    /// exists (C4b) — and, since S4, the Block submenu (the ⋯ menu's
+    /// same rows from the ONE builder, minus Takes…, which already
+    /// rides flat here). Displayed titles are VOICE-CASED (P26/P43,
+    /// parity A3 — one register with the block menu's rows).
     static func menu(
         model: MobileEditorViewModel?, range: NSRange, suggested: [UIMenuElement]
     ) -> UIMenu {
@@ -53,10 +62,21 @@ enum MobileEditMenu {
         let takes = UIAction(title: cased(takesTitle)) { [weak model] _ in
             model?.openTakesBrowser(blockID: blockID)
         }
-        let block = UIMenu(
+        var custom: [UIMenuElement] = [takes]
+        if range.length > 0 {
+            custom.append(UIAction(title: cased(extractTitle)) { [weak model] _ in
+                guard let model else { return }
+                Task { await model.structural.extractSelection(range: range) }
+            })
+            custom.append(UIAction(title: cased(makeBlockTitle)) { [weak model] _ in
+                guard let model else { return }
+                Task { await model.structural.makeBlockFromSelection(range: range) }
+            })
+        }
+        custom.append(UIMenu(
             title: cased(blockTitle),
-            children: model.blockMenu.menuElements(blockID: blockID, includeTakes: false))
-        return UIMenu(children: suggested + [takes, block])
+            children: model.blockMenu.menuElements(blockID: blockID, includeTakes: false)))
+        return UIMenu(children: suggested + custom)
     }
 }
 

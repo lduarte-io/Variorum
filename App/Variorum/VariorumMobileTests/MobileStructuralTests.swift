@@ -708,3 +708,192 @@ struct MobileStructuralTests {
         }
     }
 }
+
+// MARK: - The selection acts (parity C4b item 4 — her ruling 5)
+
+@MainActor
+@Suite("Mobile selection acts — extract + make block (parity C4b)")
+struct MobileSelectionActsTests {
+    /// Extract through the door: a boundary-adjacent prefix lifts out
+    /// as its own block BEFORE the source (AppSpec §9's letter — the
+    /// source survives, keeps identity, keeps its fan), the caret lands
+    /// in the extracted block, and unflushed typing rides through the
+    /// flush first (the standing contract).
+    @Test func extractLiftsABoundarySpanAndCarriesUnflushedTyping() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedProsePost(session)
+            let (model, surface) = await makeSurfaceEditor(session, postID: seed.postID)
+            surface.layoutIfNeeded()
+
+            // Unflushed typing at A's end — the flush must land it
+            // BEFORE the plan reads the surface and the op the store.
+            let storage = surface.textView.textStorage
+            let aRange = try #require(model.rangeOfBlock(seed.blockA))
+            typeEdit(model, storage,
+                     range: NSRange(location: aRange.upperBound, length: 0),
+                     replacement: " Typed.")
+            #expect(model.autosave.isDirty)
+
+            // Select "Alpha beta." — the prefix span.
+            await model.structural.extractSelection(
+                range: NSRange(location: 0, length: 11))
+
+            #expect(model.statusMessage == nil)
+            let placements = try await livePlacementBlockIDs(db, postID: seed.postID)
+            #expect(placements.count == 3)
+            // The extracted block lands BEFORE the surviving source.
+            #expect(placements[1] == seed.blockA)
+            #expect(try await liveBlockTexts(db, postID: seed.postID)
+                == ["Alpha beta.", "Gamma delta. Typed.", "Second block prose."])
+            // The caret sits in the extracted block.
+            let landing = try #require(model.rangeOfBlock(placements[0]))
+            #expect(surface.textView.selectedRange
+                == NSRange(location: landing.location, length: 0))
+        }
+    }
+
+    /// The fanned-extract documented behavior (AppSpec §9 review #10)
+    /// gets the Mac's hint on the phone (PROVISIONAL): extract edits
+    /// only the rendered take — the OTHER takes keep the span — and
+    /// the status line says so.
+    @Test func extractFromAFannedBlockSpeaksTheHintAndSparesOtherTakes() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedProsePost(session)
+            try await session.runner.run { [blockID = seed.blockA, a1 = seed.a1] ops in
+                _ = try ops.branchVariant(blockID, from: a1)
+            }
+            let (model, surface) = await makeSurfaceEditor(session, postID: seed.postID)
+            surface.layoutIfNeeded()
+
+            await model.structural.extractSelection(
+                range: NSRange(location: 0, length: 11))
+
+            #expect(model.statusMessage
+                == MobileStructuralController.fannedExtractHint(1))
+            #expect(model.statusMessage?.contains("Mac") == false)
+            // The other take kept the whole pre-extract text.
+            let fan = try await db.read { [blockID = seed.blockA] db in
+                try Queries.blockFan(db, blockID: blockID)
+                    .filter { $0.deletedAt == nil && $0.status == .active }
+                    .map(\.workingText)
+            }
+            #expect(fan.contains("Alpha beta. Gamma delta."),
+                    "the branched take keeps its own copy of the span")
+            #expect(fan.contains("Gamma delta."),
+                    "the rendered take lost exactly the extracted prefix")
+        }
+    }
+
+    /// Make Block from Selection: a middle span becomes its own block —
+    /// the Mac's exact execution (two divides, ONE compound), the
+    /// source keeping identity as the first piece, the caret landing in
+    /// the carved middle.
+    @Test func makeBlockCarvesAMiddleSpanAsItsOwnBlock() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedProsePost(
+                session, first: "Alpha beta. Gamma delta. Epsilon zeta.")
+            let (model, surface) = await makeSurfaceEditor(session, postID: seed.postID)
+            surface.layoutIfNeeded()
+
+            // Select "Gamma delta." — a true middle span.
+            await model.structural.makeBlockFromSelection(
+                range: NSRange(location: 12, length: 12))
+
+            #expect(model.statusMessage == nil)
+            let placements = try await livePlacementBlockIDs(db, postID: seed.postID)
+            #expect(placements.count == 4)
+            #expect(placements.first == seed.blockA, "the source keeps identity")
+            #expect(try await liveBlockTexts(db, postID: seed.postID)
+                == ["Alpha beta.", "Gamma delta.", "Epsilon zeta.",
+                    "Second block prose."])
+            let landing = try #require(model.rangeOfBlock(placements[1]))
+            #expect(surface.textView.selectedRange
+                == NSRange(location: landing.location, length: 0))
+        }
+    }
+
+    /// The refusal shapes, each in phone words with no platform named:
+    /// the fanned middle span names the phone's own divide road; the
+    /// cross-block spans name the divide/merge roads; extract's middle
+    /// span names Make Block; the seal and locked-take arms speak the
+    /// standing sentences.
+    @Test func selectionActsRefuseInPhoneWords() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedProsePost(session)
+            let (model, surface) = await makeSurfaceEditor(session, postID: seed.postID)
+            surface.layoutIfNeeded()
+
+            @MainActor
+            func expectRefusal(_ message: String, file: String = #function) async throws {
+                #expect(model.statusMessage == message)
+                #expect(model.statusMessage?.contains("Mac") == false)
+                #expect(try await livePlacementBlockIDs(db, postID: seed.postID).count == 2,
+                        "a refusal leaves the world untouched")
+            }
+
+            // Extract on a MIDDLE span → the Make Block pointer.
+            await model.structural.extractSelection(
+                range: NSRange(location: 12, length: 5)) // "Gamma"
+            try await expectRefusal(MobileStructuralController.spanRefusalMessage(
+                .middleSpanNeedsMakeBlock))
+
+            // Make Block on a FANNED block's middle span → the phone's
+            // own divide road (never a ceremony, never a platform).
+            try await session.runner.run { [blockID = seed.blockA, a1 = seed.a1] ops in
+                _ = try ops.branchVariant(blockID, from: a1)
+            }
+            await model.refreshTakesFromStore()
+            await model.structural.makeBlockFromSelection(
+                range: NSRange(location: 12, length: 5))
+            try await expectRefusal(MobileStructuralController.spanRefusalMessage(
+                .fannedMiddleSpan))
+
+            // A cross-block selection: extract refuses to the
+            // divide-then-merge road; make-block names merge-first.
+            let aLength = try #require(model.rangeOfBlock(seed.blockA)).length
+            let crossing = NSRange(location: 12, length: aLength - 12 + 8)
+            await model.structural.extractSelection(range: crossing)
+            try await expectRefusal(MobileStructuralController.spanRefusalMessage(
+                .crossBlockSpan))
+            await model.structural.makeBlockFromSelection(range: crossing)
+            try await expectRefusal(MobileStructuralController.crossBlockMakeBlockRefusal)
+
+            // The seal outranks every other answer (loadOnce re-reads
+            // the header — the headless world runs no live observation).
+            try await session.runner.run { [postID = seed.postID] ops in
+                try ops.lockPost(postID)
+            }
+            await model.loadOnce()
+            await model.structural.extractSelection(
+                range: NSRange(location: 0, length: 11))
+            #expect(model.statusMessage
+                == MobileStructuralController.spanRefusalMessage(.sealed))
+            #expect(model.statusMessage?.contains("Mac") == false)
+        }
+    }
+
+    /// The door itself (P-2's letter): the selection menu offers the
+    /// two acts ONLY when a selection exists — a caret's menu stays
+    /// exactly what it was.
+    @Test func theSelectionMenuOffersTheActsOnlyWithASelection() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedProsePost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            let cased = MobileEditorStyle.chromeCase
+
+            let caretMenu = MobileEditMenu.menu(
+                model: model, range: NSRange(location: 1, length: 0), suggested: [])
+            #expect(caretMenu.children.map(\.title)
+                == [cased(MobileEditMenu.takesTitle), cased(MobileEditMenu.blockTitle)])
+
+            let selectionMenu = MobileEditMenu.menu(
+                model: model, range: NSRange(location: 0, length: 11), suggested: [])
+            #expect(selectionMenu.children.map(\.title)
+                == [cased(MobileEditMenu.takesTitle),
+                    cased(MobileEditMenu.extractTitle),
+                    cased(MobileEditMenu.makeBlockTitle),
+                    cased(MobileEditMenu.blockTitle)])
+        }
+    }
+}

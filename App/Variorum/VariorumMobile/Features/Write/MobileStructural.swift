@@ -263,6 +263,171 @@ final class MobileStructuralController {
         }
     }
 
+    // MARK: - Extract + Make Block on the selection menu (parity C4b
+    // item 4 — her mid-chain ruling 5: "cross via the selection menu")
+
+    /// Extract Selection — AppSpec §9's boundary-adjacent split (source
+    /// survives), planned by the ONE shared planner both platforms run.
+    func extractSelection(range: NSRange) async {
+        await runSpanGesture(.extractSelection, range: range)
+    }
+
+    /// Make Block from Selection — the composed middle-span gesture
+    /// (two divides as ONE compound, the Mac's exact execution).
+    func makeBlockFromSelection(range: NSRange) async {
+        await runSpanGesture(.makeBlockFromSelection, range: range)
+    }
+
+    /// The two span acts' one body. Order matters and mirrors the
+    /// sibling doors' contract: latch → flush FIRST → plan against the
+    /// POST-flush surface (planning after the flush is what the divide
+    /// door's re-verify buys by other means — the plan can never hold a
+    /// pre-flush reading of a re-tiled surface) → execute through the
+    /// standing core ops → settle through the one fresh-read door.
+    private func runSpanGesture(
+        _ command: StructuralGesturePlanner.Command, range: NSRange
+    ) async {
+        guard let model else { return }
+        guard !structuralInFlight else {
+            model.report("Another structural change is still landing.")
+            return
+        }
+        structuralInFlight = true
+        defer { structuralInFlight = false }
+
+        guard await flushPendingText() else { return }
+        let world = StructuralGesturePlanner.World(
+            index: model.index,
+            fanArities: model.slots.map(\.activeVariantCount),
+            sealed: model.isSealed,
+            textAt: { [weak model] i in
+                guard let model, i >= 0, i < model.index.entries.count else { return "" }
+                return model.viewText(model.index.range(ofEntryAt: i))
+            })
+        let plan = StructuralGesturePlanner.plan(command, selection: range, world: world)
+
+        switch plan {
+        case .refusal(let refusal):
+            model.report(Self.spanRefusalMessage(refusal))
+
+        case .extract(_, let blockID, let span, _, let otherTakes):
+            do {
+                let result = try await session.runner.run { ops in
+                    try ops.extract(blockID, span: span)
+                }
+                // The fanned-extract hint (AppSpec §9 review #10's
+                // documented behavior — "the editor may hint"; the Mac's
+                // contract item 8 sentence, spoken through the phone's
+                // status line, its transient face. PROVISIONAL).
+                model.report(otherTakes > 0 ? Self.fannedExtractHint(otherTakes) : nil)
+                await model.refreshTakesFromStore()
+                if let landing = model.rangeOfBlock(result.block.id) {
+                    model.textView?.selectedRange = NSRange(
+                        location: landing.location, length: 0)
+                }
+            } catch {
+                model.report(Self.refusalMessage(error, act: "extract the selection"))
+            }
+
+        case .makeBlock(let i, let blockID, let span):
+            // The Mac's exact execution: two divides as ONE undoable
+            // compound (atomic on partial failure), the span's end
+            // mapped through the first divide's ACTUAL output — the
+            // seam trim may drop leading whitespace, so the second cut
+            // is derived, never re-guessed.
+            let entryLength = model.index.range(ofEntryAt: i).length
+            let stack = session.undoStack
+            do {
+                let middleID = try await session.runner.run { ops in
+                    try stack.withCompound(label: "Make Block", operations: ops) {
+                        let first = try ops.divide(blockID, cut: span.lowerBound)
+                        let dropped = (entryLength - span.lowerBound)
+                            - first.variant.workingText.utf16.count
+                        _ = try ops.divide(first.block.id, cut: span.count - dropped)
+                        return first.block.id
+                    }
+                }
+                model.report(nil)
+                await model.refreshTakesFromStore()
+                if let landing = model.rangeOfBlock(middleID) {
+                    model.textView?.selectedRange = NSRange(
+                        location: landing.location, length: 0)
+                }
+            } catch {
+                model.report(Self.refusalMessage(error, act: "make the block"))
+            }
+
+        case .makeBlockAcrossBlocks:
+            // The Mac's guided cross-block flow runs through the W
+            // machinery (ceremony arms the phone deliberately lacks —
+            // the ruled exclusion); the road is named instead, in
+            // phone words: both halves of it exist here.
+            model.report(Self.crossBlockMakeBlockRefusal)
+
+        case .divide, .divideW, .merge, .mergeChain:
+            // Unreachable from the two span commands (the planner's own
+            // switch); an impossible state answers with a refusal, never
+            // a crash (the pure layer's rule, held at the door too).
+            model.report(Self.spanRefusalMessage(.invalidSelection))
+        }
+    }
+
+    /// The planner's refusal vocabulary in phone words — no platform
+    /// named anywhere (the no-redirect principle); the roads named are
+    /// the PHONE's own doors. The Mac's `RefusalCopy` is the tone
+    /// reference; sentences shared where they were already
+    /// platform-neutral.
+    static func spanRefusalMessage(
+        _ refusal: StructuralGesturePlanner.Refusal
+    ) -> String {
+        switch refusal {
+        case .sealed:
+            "This note is locked — unlock it to restructure."
+        case .gapSlot:
+            "This block hasn't fully synced yet — try again once it arrives."
+        case .lockedVariant:
+            MobileEditorViewModel.lockedTakeRefusal
+        case .openTailTarget:
+            "This text isn't a block yet — it becomes one moments after you pause typing."
+        case .crossBlockSpan:
+            "The selection crosses a block boundary — divide the neighbors "
+                + "at the edges you want, then merge the middle pieces."
+        case .wholeBlockSpan:
+            "That selection already is a whole block — select part of it to split one out."
+        case .middleSpanNeedsMakeBlock:
+            "Extract takes a span at the block's start or end — for a "
+                + "middle span, use Make Block from Selection."
+        case .fannedMiddleSpan:
+            // The Mac's answer opens the W ceremony; the phone's honest
+            // road is its own ruled divide (Q-M2 — the other takes ride
+            // onto both halves whole), named instead of a ceremony it
+            // deliberately doesn't have.
+            "This block has other takes — divide at the span's edges "
+                + "instead: the other takes ride onto both halves whole."
+        case .notASeam:
+            "To merge, put the caret at a block seam or select across the blocks to join."
+        case .nothingToDo:
+            "No legal cut spot for that here — cuts land between words, "
+                + "at sentence ends, and at line breaks."
+        case .invalidSelection:
+            "The editor lost track of the selection — try again."
+        }
+    }
+
+    /// The cross-block Make Block refusal (the guided flow's phone
+    /// stand-in — a road named, never a redirect).
+    static let crossBlockMakeBlockRefusal =
+        "That selection crosses blocks — select within one block, or "
+        + "merge the blocks first (⋯ → Merge with Previous)."
+
+    /// The fanned-extract hint (the Mac's contract-item-8 sentence,
+    /// shared verbatim).
+    static func fannedExtractHint(_ otherTakes: Int) -> String {
+        otherTakes == 1
+            ? "This block has 1 other take — it keeps this span."
+            : "This block has \(otherTakes) other takes — they keep this span."
+    }
+
     // MARK: - Insert block below (parity C4b item 1 — the Mac 13b 4D act's
     // phone door; the matrix's "mechanical" row)
 
