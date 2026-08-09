@@ -25,6 +25,13 @@ struct MobileSettingsView: View {
     let session: AppSession
     let router: MobileShellRouter
     let services: AppServices?
+    #if DEBUG
+    /// FIX-B4 (Stage B ladder round 1, NIT 2 — fire-and-DO): the shell's
+    /// door for "Open the pocket guide" — dismisses Settings and
+    /// navigates to the book. nil ⇒ the door speaks its outcome in place
+    /// (defensive; the shell always wires it).
+    var onOpenTutorialBook: ((String) -> Void)? = nil
+    #endif
 
     @Environment(\.colorScheme) private var scheme
     @Environment(\.dismiss) private var dismiss
@@ -103,7 +110,7 @@ struct MobileSettingsView: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 4)
             Button {
-                Task { await tutorialDoor(replace: false) }
+                Task { await openGuideDoor() }
             } label: {
                 Text(tokens.chromeLabel("Open the pocket guide"))
                     .font(tokens.small)
@@ -113,7 +120,7 @@ struct MobileSettingsView: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 4)
             Button {
-                Task { await tutorialDoor(replace: true) }
+                Task { await restoreGuideDoor() }
             } label: {
                 Text(tokens.chromeLabel("Restore the pocket guide…"))
                     .font(tokens.small)
@@ -183,13 +190,42 @@ struct MobileSettingsView: View {
     }
 
     #if DEBUG
-    /// The two doors share one body: `replace: false` is find-or-seed
-    /// (an existing book just reports — never a second guide); `replace:
-    /// true` is the wholesale restore, always confirm-gated when
-    /// anything tutorial-shaped exists (the Mac door grammar). The SAME
-    /// discovered `Existing` the confirm disclosed flows into the
-    /// replace (the MAJOR-A discipline, carried).
-    private func tutorialDoor(replace: Bool) async {
+    /// The OPEN door (FIX-B4, Stage B ladder round 1, NIT 2): one call
+    /// into the tested `findOrSeed` seam — the discover → exists /
+    /// residue-confirm → restore grammar lives THERE, encoded once (the
+    /// walk suites drive it; the MAJOR-A same-`Existing` discipline is
+    /// the seam's own) — and then the door DOES what its label says:
+    /// the shell's closure dismisses Settings and navigates to the
+    /// book (the 13b fire-and-DO doctrine; "Open" that only
+    /// seeds-or-reports was the finding).
+    private func openGuideDoor() async {
+        guard !tutorialInFlight else { return }
+        tutorialInFlight = true
+        defer { tutorialInFlight = false }
+        do {
+            guard let bookID = try await MobileTutorialSeeder.findOrSeed(
+                session: session, confirmReplace: confirmReplace)
+            else {
+                tutorialNote = "Left as it was."
+                return
+            }
+            if let onOpenTutorialBook {
+                onOpenTutorialBook(bookID)
+            } else {
+                tutorialNote = "The pocket guide is on your shelf."
+            }
+        } catch {
+            tutorialNote = String(describing: error)
+        }
+    }
+
+    /// The RESTORE door keeps its own grammar — a wholesale replace,
+    /// always confirm-gated when anything tutorial-shaped exists (the
+    /// Mac door grammar; deliberately NOT `findOrSeed`, which
+    /// short-circuits at an existing book) — riding the same tested
+    /// `discover`/`restore` seams, the SAME discovered `Existing` the
+    /// confirm disclosed flowing into the replace (MAJOR-A, carried).
+    private func restoreGuideDoor() async {
         guard !tutorialInFlight else { return }
         tutorialInFlight = true
         defer { tutorialInFlight = false }
@@ -197,16 +233,8 @@ struct MobileSettingsView: View {
             let existing = try await session.database.read {
                 try MobileTutorialSeeder.discover($0)
             }
-            if !replace, !existing.readingIDs.isEmpty {
-                tutorialNote = "The pocket guide is already on your shelf."
-                return
-            }
             if !existing.isEmpty {
-                let confirmed = await withCheckedContinuation { continuation in
-                    confirmContinuation = continuation
-                    confirmPresented = true
-                }
-                guard confirmed else {
+                guard await confirmReplace() else {
                     tutorialNote = "Left as it was."
                     return
                 }
@@ -216,6 +244,16 @@ struct MobileSettingsView: View {
             tutorialNote = "The pocket guide is on your shelf."
         } catch {
             tutorialNote = String(describing: error)
+        }
+    }
+
+    /// The continuation-shaped confirm both doors share — the alert
+    /// resolves it (and FIX-B5's teardown cancel resolves it `false` if
+    /// the sheet dies with the alert up).
+    private func confirmReplace() async -> Bool {
+        await withCheckedContinuation { continuation in
+            confirmContinuation = continuation
+            confirmPresented = true
         }
     }
 

@@ -95,10 +95,29 @@ struct MobileShellView: View {
             .accessibilityHidden(tab != .library)
         }
         .sheet(isPresented: $settingsPresented) {
-            MobileSettingsView(session: session, router: router, services: services)
+            settingsSheet
         }
         #if DEBUG
         .fullScreenCover(isPresented: $spikePresented) { SpikeScreen() }
+        #endif
+    }
+
+    /// The Settings sheet. FIX-B4 (fire-and-DO): the DEBUG "Open the
+    /// pocket guide" door really OPENS the book — dismiss the sheet and
+    /// push the book's contents onto the SHELF stack (Settings is the
+    /// shelf's own door, so the shelf tab is the visible one whenever
+    /// this fires; the tab itself is deliberately not written — the tab
+    /// doors own the liveness handoff).
+    private var settingsSheet: some View {
+        #if DEBUG
+        return MobileSettingsView(
+            session: session, router: router, services: services,
+            onOpenTutorialBook: { bookID in
+                settingsPresented = false
+                shelfPath.append(MobileRoute.book(bookID))
+            })
+        #else
+        return MobileSettingsView(session: session, router: router, services: services)
         #endif
     }
 
