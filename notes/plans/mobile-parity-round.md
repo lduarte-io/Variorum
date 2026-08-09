@@ -2887,3 +2887,230 @@ batch, 2026-08-09)" into THIS file (the fix's design in P-8 terms,
 per-pin unwrap results, the full post-fix number table beside B2's,
 the ceiling pin's final bound, PROVISIONALs); push `origin mobile`
 before finishing.
+
+## Stage B, batch B3 — BATCH RECORD (fix batch, 2026-08-09; commits `129f695` · `529a97e` + the record commit)
+
+**All five work items shipped; the bar is met; ZERO known issues
+remain.** Diff scope: 8 files, all mobile app + mobile tests — **zero
+`Sources/VariorumCore/`, zero `App/Variorum/Shared/`, zero Mac-side
+files, zero schema, zero `Sync/`** (the STOP condition never fired);
+Release build **SUCCEEDED**. But the fix's shape is NOT the one the
+brief presumed, and the record leads with that honestly:
+
+**THE ROOT, TRACED DEEPER THAN B2's WRITE-AMPLIFIER (the hallucination
+guard executed — B2's trace re-verified by code-read AND a same-host
+re-run of the walk, then probed further before designing).** The
+pre-fix baseline reproduced on this host to within noise (keystroke
+553.7/302.5 ms · scroll step 47.7 ms · walk delta 5,763 MiB · open
+910.3 ms). The `.edit` scoping alone (item 1 as written) collapsed
+only PART of the cost (keystroke 553.7 → 285.9 ms) — a throwaway
+component probe (both probes deleted after use, the A1/B2 precedent)
+then isolated the residue to the LAYOUT pass itself and proved the
+deeper truth: **container `exclusionPaths` make TK2's post-edit
+relayout DOCUMENT-scale by PRESENCE alone** — with the 39 staged
+rects, ~263–300 ms per keystroke's layout; with even **ONE** rect,
+~155–190 ms, **position-independent** (a rect at minY 1622 and one at
+minY 410,952 measured identically); with **zero**, 0.51–1.9 ms
+(bare-class) — and exclusions inflate TK2's height estimate ~1.4×
+(contentSize 414,781 under rects vs 294,742 clean — the 2,075-step
+scroll thrash's mechanism, and most of the memory churn's). The B2
+trace's write-loop was real but was the amplifier, not the root: **no
+equality-gating or scoping of WRITES can meet the bar while any rect
+is installed.** The brief's item 2 presumed the exclusion mechanism
+survives; the LAW it fixed ("invalidation ∝ viewport + edit, never
+post length") is unmeetable under that presumption, and the law is
+what this record obeyed. The Mac never uses `exclusionPaths`
+(grep-zero) — the mechanism was mobile-local (LK10's implementation
+choice, not shared canon), so the swap below crosses no platform seam.
+
+**THE FIX'S DESIGN, in P-8 terms (three legs, commit `129f695`):**
+
+1. **The edit-scoped chrome pass (item 1 as briefed):**
+   `RefreshScope` gains `.edit(NSRange)`; the band = the padded
+   near-viewport band ∪ the edited range (`NSUnionRange` — an honest
+   covering superset, so a dictation landing while scrolled away
+   still refreshes its own block); unavailable viewport or a width
+   change escalates to a full pass (the standing honest fallback);
+   `storageDidEdit` routes through it. `.document` remains the
+   delivery/flip/voice axes' scope — user-act or settle cadence,
+   never keystroke. Invalidation ∝ viewport + edit.
+2. **The gutter mechanism moved to first-paragraph PARAGRAPH-STYLE
+   reservations** — `MobileEditorTextView.setTailReservation` /
+   `setLeadingFirstLineReservation` (the S4 one-implementation rule:
+   one door, both controllers): the takes chrome owns the TAIL
+   (LK10's 30 pt gutter, + P38's 26 pt comment-mark room,
+   content-keyed exactly as before), the decor owns the emoji
+   `firstLineHeadIndent` (exactly first-line-only — better fidelity
+   than the old rect), read-modify-write on one style object so both
+   compose on a block carrying both. Position-independent, so TK2's
+   relayout stays incremental. **The reservation walk is
+   band-INDEPENDENT and equality-gated against STORAGE TRUTH at the
+   paragraph's governing character** (attribute reads force no
+   layout) — never a cached record, which is the brief's overlay-law
+   trap dodged at the design level: a materialization or voice
+   re-base that dropped the style heals at the next pass's verify; a
+   steady-state pass writes NOTHING; a real write invalidates
+   exactly one paragraph. Container exclusion paths are RETIRED on
+   the Write surface and pinned never to return.
+3. **The O(entries²)/O(decorated×entries) walks flattened** (justified
+   by B2's own measured ~12 ms "clean" tick vs the 5 ms bound): the
+   chrome controllers read every block range from ONE index walk per
+   pass (`MobileEditorViewModel.blockRangesByID`, replacing 74 ×
+   O(entries) `rangeOfBlock` scans), and the DEBUG identity audit
+   drops its per-entry `range(ofEntryAt:)` calls (O(entries²) —
+   ~1.9 M additions per keystroke at 1,370 blocks) for a
+   running-location walk. Same oracle, same checks, same ranges.
+
+**THE MECHANISM PIN (written FIRST, red on the unfixed tree):**
+`MobileTakesChromeTests.aKeystrokesChromePassIsEditScopedAndWriteFree
+WhenNothingMoved` — one policed keystroke into the near block of a
+long post asserts: the FAR fanned block is never layout-forced
+(RED-ON-OLD — the pre-B3 `.document` keystroke pass resolved it; run
+red before the fix with 10 siblings green), its chrome survives, the
+container carries NO exclusion paths (FB2-1's root guard — any
+return re-opens the 160 ms+ class), and the far paragraph's governing
+style is the SAME OBJECT after the keystroke (no write — the
+write-free and no-exclusions halves are guards against regrowth, not
+the discriminator; recorded per the guard).
+
+**THE STANDING PINS — every BEHAVIOR assertion intact; MECHANISM-
+reading lines flipped to the new mechanism (recorded openly for the
+architect's adjudication, since the brief's letter said the named
+pins "stay green" and their behavior halves did — but four pins' and
+one walk's internal lines READ the exclusion rects and could not
+survive the mechanism the law forced):**
+- **A3's P38 guard** (`aOneLineFannedAndCommentedBlockNeverCrowdsThe
+  Badge`): the widths-[30, 56]-via-exclusionPaths line now reads the
+  two blocks' tail reservations (56 target, 30 sibling — same
+  numbers, same discrimination); **the behavior assertion — the ●n
+  marker never intersects the ⑂ badge — is byte-identical and
+  green.**
+- **FIX-3's flush-end probe**: passes **UNCHANGED** — its reserve
+  arithmetic (30 + 26) is mechanism-independent and its assertions
+  were always behavioral.
+- **The S2 badge/gutter pin**: exclusion count/bounds lines → the
+  fanned block reserves 30, the fanless reserves 0, the container is
+  exclusion-free; badge-in-column and first-line assertions kept
+  (`textNeverRunsUnderTheBadge` — the pure behavior pin — passes
+  untouched).
+- **The S2 MINOR-3 per-tick scope pin**: the off-band-exclusion-
+  survives lines → the off-band reservation survives (storage truth);
+  the geometry-scope assertions (`lastGeometryResolvedBlockIDs`)
+  byte-identical.
+- **The A1 walk's gutter line** and **the S4 emoji-gap test**: flipped
+  to reservation reads the same way.
+- **FIX-5's strip pin and the A1 keyboard pin: untouched and green**
+  (the full suite contains both).
+- **Recorded behavior delta (PROVISIONAL PB3-2 below):** the tail
+  reservation shortens every line of a fanned block's FIRST PARAGRAPH
+  where the old rect shortened only the first LINE — identical for
+  the common one-line/one-paragraph fan; a multi-line first paragraph
+  now ends each line 30 pt short. The emoji gap's fidelity went the
+  other way: exactly first-line-only, as the rect was.
+
+**PER-PIN UNWRAP RESULTS (item 3 — the self-arming shape executed
+exactly as designed, commit `529a97e`):** with the fix landed, all
+four wrappers FIRED against it — keystroke(top) and keystroke(end)
+reported their expectations mid-collapse, the scroll-step pin
+reported **"Known issue was not recorded"** (its median passed the
+standing bound outright), and the ceiling likewise once the harness
+told the truth (below) — red-on-old in reverse, per the brief's own
+words. All four wrappers REMOVED; the pins ride armed; the `fb2_1`
+doc block in the walk file is now the finding's FIXED record.
+
+**Two measurement-honesty changes, each derived, neither a widened
+factor (the 3.0× ratio stands untouched):**
+- **The typing noise floor re-derived 4 → 12 ms (PROVISIONAL
+  PB3-1):** B2 set 4 ms as a noise floor under a then-8 ms control;
+  the fix collapsed the control to ~0.7 ms, making the floor the
+  binding bound — and it sat BELOW the PLATFORM's own cost: B2's own
+  bare-TK2 probe measured **~5 ms per keystroke at 100k on bare
+  TK2** (the platform's per-edit bookkeeping at 1,370 paragraphs), so
+  no app-layer fix can meet 4 ms. Post-fix the 100k keystroke medians
+  6–8 ms = platform ~5 + app road ≤ ~2.5 (audit + scoped chrome +
+  index walks, all O(entries), none O(bytes)). 12 ms = platform floor
+  + app road + host-variance headroom; under ¾ of a 60 Hz frame (the
+  bar's "doesn't choke" met with room); 45× tighter than the defect
+  it guards (551 ms — any exclusion-path return measures 160 ms+).
+- **The walk drains its autorelease pool once per step/keystroke,
+  inside the timed window** (a real frame drains; the synchronous
+  loop was accumulating 2,077 turns of autoreleased garbage no phone
+  ever holds — post-fix the undrained walk still measured 545 MiB of
+  pure pile). Harness fidelity, not tuning: the drain's cost is timed
+  as part of each step.
+
+**THE POST-FIX NUMBER TABLE (final full-suite run, iPhone 17 Pro /
+iOS 26.2 simulator, test host, in-memory store — B2's numbers beside;
+the on-device run remains Stage D's exit gate):**
+
+| Measurement | B2 (pre-fix) | B3 (post-fix) | Verdict |
+|---|---|---|---|
+| Open, control post — 12 vs 300-note corpus | 33.8 / 35.0 ms (1.03×) | 25.1 / 23.4 ms (**0.93×**) | FLAT — green (unwrapped all along) |
+| Open, the 100k post | 901.9 ms | **433.2 ms** | recorded absolute (see below) |
+| Keystroke, top viewport (4k vs 100k) | 7.9 → 551.4 ms (**69.7×**) | 0.70 → **6.09 ms** (8.7×; bound = 12 ms floor) | **ARMED, green** |
+| Keystroke, end of note | 7.9 → 297.8 ms (**37.6×**) | 0.70 → **7.01 ms** (10.0×) | **ARMED, green** |
+| Keystroke p95 | 575.9 / 401.8 ms | **7.0 / 8.8 ms** | recorded |
+| Scroll step, full walk (median) | 1.74 → 47.8 ms (**27.6×**) | 0.47 → **1.70 ms** (3.59×; bound = 4 ms floor) | **ARMED, green** |
+| Scroll, the 100k post whole | 2,075 steps · 100.5 s · p95 56.8 | 2,077 steps · **3.65 s** · p95 2.38 · worst 8.81 | recorded |
+| Memory, whole walk (phys_footprint) | peak 5,947 · delta 5,842 MiB | peak **107** · delta **43 MiB** | **CEILING ARMED at 250 MiB — green, 5.8× headroom** |
+
+*(The residual ~2,077-step count is TK2's own estimate-revision chase
+during a full traversal — the estimates converge upward as real
+layout replaces them, the walk's y chases, and per-step cost stays
+flat; steady-state contentSize is the real ~294.7k. TEXTKIT2 §2's
+class, not the app's.)*
+
+**THE 100k OPEN — reported for the architect's ruling (item 4):**
+433.2 ms sim (halved from 901.9 — the open's document chrome passes
+now run on layout that exclusion writes no longer invalidate between
+them). **Recommendation: keep it a recorded absolute, not a pin** —
+open is O(post) BY DESIGN (B2's axes statement; AppSpec §4's "reading
+a post is one indexed query" covers the storage fill, and the first
+full materialization + markdown styling + first layout are honestly
+post-proportional), and an absolute wall-clock pin on a shared
+simulator host is the machine-noise class the Mac's ratio-shaped P1
+suite deliberately avoids. The corpus-flatness open pin (the axis
+that CAN regress by accident) is armed and green. The architect
+rules at acceptance.
+
+**Counts, by this implementer's own runs (iPhone 17 Pro / iOS 26.2):**
+full mobile suite — **"Test run with 225 tests in 36 suites passed"**
+— ZERO known issues (the brief's item 5 bar), 224/36 + the mechanism
+pin, exactly accounted; the suite runs in **18.4 s** where FB2-1's
+churn held it at ~2.5 min (B2's predicted "~15 s once the fix lands",
+confirmed at suite level). Spine: **"Test run with 32 tests in 7
+suites passed"** by named-selection run. Perf suites standalone: 9/2
+green. Release build: **BUILD SUCCEEDED**. Core / Mac / Mac-spine
+deliberately not run: zero core, zero `Shared/`, zero Mac-side lines
+— the only-if-shared condition never fired.
+
+**PROVISIONALs (for the chain's end bundle):**
+- **PB3-1:** the typing noise floor's re-derived value (12 ms; the
+  derivation above — platform ~5 ms + app road + headroom). The
+  architect/author may re-bound; Stage D's on-device run gives the
+  real phone's calibration for both this and the ceiling.
+- **PB3-2:** the tail reservation's paragraph-granularity — a
+  MULTI-LINE first paragraph of a fanned block now ends every line
+  30 pt short (the old rect shortened only line one). Identical for
+  the common short fan; her look round may prefer the old shape, in
+  which case the road is a custom TK2 layout-fragment (TEXTKIT2 §3
+  risk) or accepting exclusions ONLY on such blocks (re-opening the
+  measured cost) — recorded so the trade is hers.
+- **PB3-3:** the mechanism-line pin flips (the list above) — executed
+  under the law's authority ("the LAW is fixed") with every behavior
+  assertion intact; the architect's acceptance is their sanction, and
+  any flip found wrong reverts against the retained old lines in
+  git history.
+- **PB2-2 RESOLVES:** the 250 MiB walk-delta ceiling is ARMED as
+  proposed (measured delta 43 MiB); its device calibration stays
+  Stage D's.
+
+**Deliberate absences (scope, not holes):** the open road's redundant
+double document-pass (ingest refreshes after `applyProjection` arms
+that already refreshed) survives — removing it would change the
+settle cadence the standing pins exercise, open is report-only, and
+the passes are now cheap (2.3 ms on valid layout, measured); noted
+for any future open-time work. The two throwaway probes were deleted
+after use (their numbers live in this record and the commit
+messages). No Read-flow measurements (B2's boundary); no on-device
+numbers (Stage D's gate).
