@@ -984,6 +984,40 @@ both ride the end bundle for her eyes. The Q-M2 core shape her 13j
 row waits on now exists in `VariorumCore/Operations` — 13j wires the
 Mac's default switch on top, exactly as the row records.
 
+## Stage A, batch A3 — ACCEPTED; STAGE A BUILD COMPLETE — the ladder OPENS (architect, 2026-08-09)
+
+Verified before relying: all seven commits present (`da9b0bc` …
+`a57667e`, the ruling `46d851f` between them); scope confirmed by the
+architect's own checks — **zero `Sources/VariorumCore/`, zero
+`App/Variorum/Shared/`, zero Mac-app lines across the WHOLE batch**
+(the four-suite condition never fired, correctly); the screenshot set
+present and gitignored (`notes/plans/mobile-a3-screens/` — the
+before/after Write pairs are her spacing finding's exact evidence);
+the mobile suite re-run by the architect's own hand: **"Test run with
+189 tests in 28 suites passed"** — 183/27 + net six pins + one suite,
+exactly accounted.
+
+**Carried to the end bundle:** PA3-1 (the floor's exact constants —
+prose margins 20 · lineSpacing 0.4× · paragraph gap 1.0× · masthead
+20/10/8) · PA3-2 (picker words + own-level-toggle semantics) · PA3-3
+(the Read door's word/placement + New Note placement) · the Aa reset
+cadence (her ruled look item). **Machinery lesson, recorded for every
+future mobile batch:** hosted UIWindows are forbidden company for the
+baseline suite — the P24 pin's first window-hosted form crashed an
+unrelated walk's typed insert 3/3 full-suite runs (input-controller
+path engaged process-wide); pins host windowless. The A3 record holds
+the full trace.
+
+**THE STAGE A LADDER OPENS.** Target: the stage's combined diff
+`b93d42c..a57667e` (batches A1 `a95839d`…`ddde966` · A2 `4ae64d2`,
+`3a75235` · A3 above, with the three batch records + two acceptance
+notes as the reviewer's anchor). Fresh cold reviewer per the standing
+flow — `notes/REVIEW_PROMPT.md` VERBATIM, zero framing from the
+architect; findings land repo-first in this file as "## Stage A
+review — round 1 findings" before any fix session sees them. Baseline
+counts at ladder-open: **mobile 189/28 · core 1212/128 · Mac 1245/219
+tripwire-only · spine 51/7.**
+
 ## Stage A, batch A3 brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
 
 **Cast:** a fresh Fable implementer session, working in
