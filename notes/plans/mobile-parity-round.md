@@ -7067,3 +7067,199 @@ anchor). Fresh cold reviewer, `notes/REVIEW_PROMPT.md` VERBATIM;
 findings repo-first as "## Stage C review — C5 round 1 findings".
 Baselines at open: **mobile 305/58 · mobile spine 33/7 · perf 9/2 ·
 core 1215/128 · Mac 1245/219 tripwire-only · Mac spine 51/7.**
+
+## Stage C review — C5 round 1 findings (cold reviewer, 2026-08-09)
+
+Cold review of `3564a69..b9dca35` (commits `b3d4e11` · `2426f1a` + the
+record/acceptance commits) per `notes/REVIEW_PROMPT.md` verbatim.
+Anchors read in full: the C5 brief + the architect's fork RULING + the
+BATCH RECORD + acceptance; AppSpec §9 (`merge`/`mergeCeremony`) and
+§12's lens paragraphs; `notes/MobileSoul.md`; the core lens family
+(`Operations+Lens.swift`, `Operations+Versions.swift`
+`adoptPicksPreservingChosen`, `LensQueries.swift`) and
+`Operations+Structural.swift`'s two merge ops read line-by-line
+against the door's composition. No fixes made. No "Review foci"
+section exists for this project.
+
+**Severity-ranked findings (no BLOCKER, no MAJOR):**
+
+- **[MINOR] · `App/Variorum/VariorumMobileTests/MobileStructuralTests.swift:1059`
+  (the sweep pin's walk root) · the pin's guarantee is scoped narrower
+  than its stated claim** — the suite doc says "no user-facing string
+  in the mobile target names the Mac," but the walk covers ONLY
+  `App/Variorum/VariorumMobile/`. `App/Variorum/Shared/` compiles into
+  the mobile target (pbxproj: the `Shared` synchronized group sits in
+  all three targets' membership lists) and renders user-facing phone
+  surfaces — AuthViews, BridgeStatusViews, the 14b Account/Encryption
+  flows (PL-5/PL-6's own doors). Core refusal strings surfaced through
+  `String(describing:)` are likewise outside the walk. **Factually
+  clean today** — my own greps found zero "Mac" string literals in
+  `Shared/` and in `Sources/VariorumCore/` — so this is
+  guarantee-durability, not a live offender: a future Shared-seam
+  string naming the Mac (the most plausible place for one — account
+  copy written Mac-first) would escape the pin while shipping on the
+  phone. *Fix shape:* extend the walk to `Shared/` (same
+  comment-ignoring scanner; a planted offender goes red — pinnable),
+  or narrow the pin's claim comment to match its root.
+
+- **[MINOR] · `MobileStructuralTests.swift:1086`
+  (`stringLiteralContents`) · the scanner treats a literal nested
+  inside an interpolation as CODE** — mechanism verified by running
+  the scanner verbatim in isolation: for
+  `"open this on the \(pro ? "Mac" : "iPad") app"` it returns the
+  fragments `["open this on the (pro ? ", " : ", ") app"]` — the
+  nested `"Mac"` lands in code state and is never scanned. The
+  nested-literal-in-ternary pattern is realistic in this codebase
+  (`MobileLensesModel.rowMeta`'s pluralization ternary is exactly this
+  shape). Factually clean today (grep: no interpolation-nested "Mac"
+  in the target). Same honesty class as the pin's own recorded
+  UAX #29 catch: an under-matching guarantee. *Fix shape:* scan
+  interpolation bodies for nested literals (or scan comment-stripped
+  raw source), with a planted nested offender as the red pin.
+
+- **[MINOR] · `App/Variorum/VariorumMobile/Features/Takes/MobileLenses.swift:255`
+  (`saveIntoActiveLens`) · the clear loop drops DANGLING picks, wider
+  than the recorded "clear what returned to chosen"** — mechanism:
+  `existing` is RAW `lensChoices`; the loop clears every stored pick
+  whose block carries no live peek, and a pick dangling at an
+  archived/removed take never produces a peek (`effectiveLensSelection`
+  drops it; `peek(blockID:to:)` no-ops as the belt) — so "save into"
+  tombstones it. Concretely: lens L picks {A→a2, B→b2}; b2 archived;
+  activate L (honest meta says "1 points at a removed take"); swipe A;
+  save into L → B's pick is cleared, and a later 13j restore of b2 no
+  longer restores the look L recorded. `LensQueries.lensChoices`' own
+  comment keeps danglers deliberately visible ("the editing surface
+  needs to know what the lens says even when a pick dangles"), and the
+  BATCH RECORD's wording ("clear what returned to chosen") describes a
+  narrower clear than the code performs. Defensible under "the lens
+  becomes exactly the view you're in" — but that reading is nowhere
+  ruled or recorded. *Fix shape:* either preserve picks whose block
+  shows chosen only BY FALLBACK (clear only blocks whose displayed
+  take IS the live chosen), red-pinned on the dangling fixture — or
+  record the prune as the deliberate reading in the batch record +
+  PC5-4's neighborhood.
+
+- **[NIT] · `MobileStructural.swift:273` · join-kind staleness window
+  on the ceremony road** — `MergeJoin.canon` is resolved on texts from
+  the pre-write READ transaction while core joins texts re-read inside
+  the write transaction; a concurrent edit landing in that window
+  could change an edge's whitespace so the resolved kind (space vs
+  nothing) mismatches what canon would say for the joined bytes.
+  Worst case one cosmetic space; sub-ms; the same R2-10 window the
+  record already names for the archived race. Recorded-class —
+  awareness, no fix owed.
+
+- **[NIT] · `MobileLenses.swift:216` (`saveCurrentView`) · the same
+  R2-10 read-then-act note the record writes for `saveIntoActiveLens`
+  applies here unrecorded** — `createLens` + N `setLensChoice` run as
+  per-op transactions in one runner turn; a mid-loop refusal (a peeked
+  take archived in the window) leaves a partial lens minted and not
+  active, surfaced as a raw error string. Sub-ms, honestly unpinnable
+  (the recorded composite class); worth a line in the record so the
+  asymmetry isn't read as a difference.
+
+- **[NIT] · `MobileLenses.swift:122` (`rowMeta`) + `LensQueries.swift:47`
+  · the honest meta is blind to picks on DEPARTED blocks** — a pick
+  whose take is live+active but whose BLOCK is no longer placed in the
+  post (released by merge — including this very batch's carry-all — or
+  moved) counts as effective ("n picks", unavailable 0) yet does
+  nothing on activate (no slot; `peek` no-ops). The Mac's
+  `renderPost(throughLens:)` behaves identically, so this is inherited
+  fallback-class behavior, not new — but the phone's new meta sentence
+  makes the overcount user-visible. 13j-orbit polish beside the
+  restore doors.
+
+- **[NIT] · `MobileTakesController.swift:212`
+  (`endAllPeeksRestoringDisplay`) · the missing-original belt arm
+  skips `onPeekChanged`** — a peek without a captured original clears
+  silently (no chrome refresh for that block). Unreachable today by
+  construction (every write site sets `peeks` and `originals`
+  together); belt-only asymmetry, recorded for completeness.
+
+**Clean bill (load-bearing things checked and found solid):**
+
+- **The carry-all composition against §9's `mergeCeremony` semantics,
+  line-by-line:** ONE pairing (the two displayed takes) is always
+  passed, so I10-at-birth (`mergedBlockWouldHaveNoTake`) can never
+  fire and A′ is born with a take; `defaultIndex = renderedPairing ?? 0`
+  makes the JOINED take chosen on BOTH the plain and the peeked road
+  (one pairing at index 0) — the record's chosen claim holds; carries
+  are filtered to live ACTIVE takes only, so archived takes stay with
+  the released sources (core refuses archived carries; the
+  divideDuplicating parallel holds); the 1:1 arity set cannot trip
+  (head/tail live on different blocks; per-block fans cannot share an
+  id); carried labels ride (`labels.append(take.label)`); comments
+  copy from both sides and presentation keeps only on agreement —
+  both `merge`-byte-identical inside the ceremony op; releases stamp
+  `last_container_id`; ONE "Merge Takes" undo entry with exact-row
+  inverse+redo. ZERO core lines in the diff (verified per-commit by my
+  own `git show --stat`).
+- **The fanless instant merge is byte-unchanged:** the else-branch is
+  the same `ops.merge` call under the same active-fan-count fork read
+  from the STORE with the same filters; `leadingLength`'s capture
+  moved pre-suspension (with the displayed-take ids), which is the
+  more coherent instant and behaviorally identical outside races.
+- **The seal, both belts:** the door's `isSealed` pre-check AND core's
+  `placedContext` → `ensureUnlocked` on both merge ops — a stale
+  projection cannot land a merge under a sealed post.
+- **The F-3 displayed-take guard:** post-flush, post-re-verify capture
+  of the displayed ids; a vanished displayed take refuses with the
+  standing takes-changed wording rather than silently pairing a
+  fallback; a nil `variantID` (gap) falls into the same guard.
+- **The caret arithmetic serves both roads:** chosen = the joined
+  take, so `min(leadingLength, range.length)` lands the caret where
+  the trailing half begins on plain, peeked, and flush-carried
+  fixtures — pinned on a surface harness
+  (`mergeOnAFannedPairLandsTheCarryAll`).
+- **Lens switch is viewing, not writing:** `activate` composes
+  `endAllPeeksRestoringDisplay` + targeted `peek(blockID:to:)` — both
+  pure display/state, no runner call anywhere on the switch road;
+  pinned store-asserted (chosen pointer + texts unmoved). The targeted
+  peek shares `flip`'s ledger-first capture/restore byte-for-byte
+  (verified side-by-side), and landing on chosen ends the peek — the
+  sparse doctrine's transparency for picks equal to chosen.
+- **Sparse saves + adopt against the core contracts:**
+  `setLensChoice`'s guards mirror `chooseVariant` (live, active,
+  right block, placed in the lens's post); lens CRUD is free under
+  seal per the recorded Phase 11 posture (create/rename/delete/set
+  carry no seal check — the phone door composes, never widens);
+  `adoptPicksPreservingChosen` refuses under seal (`ensureUnlocked`),
+  preserves the outgoing chosen as the full-fidelity "chosen until
+  ⟨date⟩" lens (`preservationLensName` verified), skips stale picks,
+  registers ONE undo entry — and the phone's sealed-adopt refusal +
+  free-switch-under-seal are both pinned
+  (`renameDeleteAndTheRefusalArms`).
+- **The honest dangle meta is a VERB, correctly conjugated:** "1
+  points / 2 point at a removed take" — read twice before accepting
+  (the inverted-plural suspicion dissolves: the subject is the pick).
+- **The sweep pin's UAX #29 story, verified standalone:** by my own
+  run of `/\bMac\b/` against "the Mac's" — the default word boundary
+  does NOT match (apostrophe word-internal), `.wordBoundaryKind(.simple)`
+  DOES, and `.simple` still rejects "macOS"/"MacBook"/lowercase. The
+  red-on-old claim re-verified independently: the pin's own scanner +
+  regex run against `git show 3564a69:` of both files finds EXACTLY
+  the two recorded offenders and nothing else.
+- **PB1-4's rider in the SAME commit:** `b3d4e11` carries the seeder's
+  merge-lesson rewording + the structure walk's carry-all flip beside
+  the door; the lens lesson + its walk ride `2426f1a` beside the lens
+  family — tutorial-as-spec held both times; the page-meta pin flipped
+  13→14 with the plan and no stale "13 notes"/"13 of 13" literal
+  survives anywhere (grep).
+- **The spine's growth grammar:** the lens walk joined
+  `MobileTutorialTakesWalkTests` — one of the standing SEVEN type
+  names; no new suite name entered the spine.
+- **P1/P2 discipline:** lens refresh cost ∝ this post's lenses ×
+  picks; activation ∝ picks; the merge road reads two fans; all DB
+  work through `session.database.read`/the runner off the view;
+  `MobileLensesModel` holds ids and counts, never persisted text
+  copies; editor ref weak (no cycle; same-lifetime State pair).
+- **The M5/M6 letter holds:** ✓ remains the only choosing act — the
+  lens family's only chosen-writing door is adopt, through the
+  standing op; swipe/switch never write.
+
+**My own runs (iPhone 17 Pro / iOS 26.2 simulator):** full mobile
+suite **305/58 passed** · the spine by its seven type names **33/7
+passed** · perf by name **9/2 passed** — all matching the acceptance
+baselines. Core/Mac/Mac-spine not run: zero core, zero `Shared/`,
+zero Mac-side lines batch-wide (verified by my own per-commit
+`git show --stat`), so the only-if-shared condition never fired.
