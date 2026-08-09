@@ -291,7 +291,7 @@ struct MobileTutorialBookShapeTests {
             })
             #expect(try await db.read { try fanCount($0, blockID: ferry.blockID) } == 2)
 
-            // The merge lesson's fanned tail (the ceremony's demonstrator).
+            // The merge lesson's fanned tail (the carry-all's demonstrator).
             let merge = try await db.read { try lessonID($0, bookID: bookID, "merge") }
             let tail = try #require(try await db.read { db -> Queries.RenderedBlock? in
                 try Queries.renderPost(db, containerID: merge)
@@ -891,9 +891,13 @@ struct MobileTutorialStructureWalkTests {
     }
 
     /// The merge lesson: the staged neighbors join with a single space,
-    /// byte-exact — and merging the fanned tail steps back to the
-    /// ceremony out loud, exactly as the prose promises.
-    @Test func theMergeLessonJoinsExactlyAndAFanStepsBack() async throws {
+    /// byte-exact — and merging the fanned tail CARRIES the spare take
+    /// along whole (parity C5's ruled carry-all: the two displayed takes
+    /// join; every other take rides onto the merged block), exactly as
+    /// the prose promises. The tail's text and its spare take are the
+    /// lesson's STAGED cursor-instruction material (PB1-3's sanctioned
+    /// coupling class — the seeder names this walk beside them).
+    @Test func theMergeLessonJoinsExactlyAndAFanRidesAlong() async throws {
         try await withPocketGuideWorld { session, db, bookID in
             let lesson = try await db.read { try lessonID($0, bookID: bookID, "merge") }
             let (model, _) = await makeLessonSurface(session, postID: lesson)
@@ -914,18 +918,68 @@ struct MobileTutorialStructureWalkTests {
                 + "They have been waiting for a merge since the day they were seeded."),
                 "a single space at the seam — nothing else invented")
 
-            // The fanned tail: the phone steps back and says so.
+            // The fanned tail: the spare take rides the merge whole.
             let countBefore = joined.count
-            let tail = try #require(model.slots.first {
-                $0.text?.contains("This block has a spare take") == true
-            })
+            let tailText = "This block has a spare take, so a merge here carries it "
+                + "along whole."
+            let spareText = "the spare take that rides the merge whole."
+            let tail = try #require(model.slots.first { $0.text == tailText })
+            let spareID = try await db.read { [id = tail.blockID] db -> String? in
+                try String.fetchOne(
+                    db,
+                    sql: """
+                        SELECT id FROM variant
+                        WHERE block_id = ? AND deleted_at IS NULL
+                          AND status = 'active' AND working_text = ?
+                        """,
+                    arguments: [id, spareText])
+            }
             let tailRange = try #require(model.rangeOfBlock(tail.blockID))
             await model.structural.mergeWithPrevious(atSurfaceCaret: tailRange.location + 2)
-            #expect(model.statusMessage
-                    == "One of these blocks has other takes — pairing takes into a "
-                    + "merge is the Mac's merge ceremony.")
-            #expect(try await storedBlockTexts(db, postID: lesson).count == countBefore,
-                    "the refusal changes nothing")
+
+            #expect(model.statusMessage == nil,
+                    "the carry-all merges — no refusal, no redirect")
+            let after = try await storedBlockTexts(db, postID: lesson)
+            #expect(after.count == countBefore - 1, "two blocks became one")
+            let mergedText = try #require(
+                after.first { $0.hasSuffix(" " + tailText) },
+                "the displayed takes joined with the canon space")
+            // The merged block wears BOTH takes: the joined text chosen,
+            // the spare take riding whole behind it as a FRESH row (the
+            // source keeps its original in lineage).
+            let mergedBlockID = try #require(try await db.read { db -> String? in
+                try String.fetchOne(
+                    db,
+                    sql: """
+                        SELECT cb.block_id FROM container_block cb
+                        JOIN variant v ON v.id = cb.chosen_variant_id
+                        WHERE cb.container_id = ? AND cb.deleted_at IS NULL
+                          AND v.working_text = ?
+                        """,
+                    arguments: [lesson, mergedText])
+            }, "the merged block's chosen is the joined text")
+            let mergedFan = try await db.read { db -> [(id: String, text: String)] in
+                try Row.fetchAll(
+                    db,
+                    sql: """
+                        SELECT id, working_text FROM variant
+                        WHERE block_id = ? AND deleted_at IS NULL
+                          AND status = 'active'
+                        ORDER BY fan_position, id
+                        """,
+                    arguments: [mergedBlockID]
+                ).map { (id: $0["id"], text: $0["working_text"]) }
+            }
+            #expect(mergedFan.map(\.text) == [mergedText, spareText],
+                    "pairing first, the carried take whole behind it")
+            #expect(mergedFan.last?.id != spareID,
+                    "the carry is a fresh row; the source keeps its original")
+            // The released source stays live in lineage with its own fan.
+            let sourceFanCount = try await db.read { [id = tail.blockID] db in
+                try fanCount(db, blockID: id)
+            }
+            #expect(sourceFanCount == 2,
+                    "the released source keeps both takes in lineage")
         }
     }
 }

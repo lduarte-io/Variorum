@@ -449,25 +449,156 @@ struct MobileStructuralTests {
         }
     }
 
-    @Test func mergeRefusesToTheMacCeremonyWhenEitherSideCarriesAFan() async throws {
+    /// The ruled FLIP pin (parity C5 supersedes M10's refusal — her
+    /// workaround doctrine, Q-M2's logic on merge): the exact fixture
+    /// that used to refuse toward the Mac's ceremony now MERGES — the
+    /// two displayed takes join under the canon rule, and every other
+    /// active take rides WHOLE onto the merged block (label kept, fresh
+    /// row). Archived takes stay with the released source in lineage
+    /// (the divideDuplicating parallel). No refusal on this road names
+    /// any platform anymore.
+    @Test func mergeOnAFannedPairLandsTheCarryAll() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedProsePost(session)
-            try await session.runner.run { [blockID = seed.blockA, a1 = seed.a1] ops in
+            let (spareID, archivedID) = try await session.runner.run {
+                [blockID = seed.blockA, a1 = seed.a1] ops in
                 let take = try ops.branchVariant(blockID, from: a1)
                 try ops.autosave(take.id, text: "The other way entirely.", charDelta: 6)
+                try ops.setTakeLabel(take.id, label: "spare")
+                let parked = try ops.branchVariant(blockID, from: a1)
+                try ops.autosave(parked.id, text: "Parked words.", charDelta: 3)
+                try ops.archiveVariant(parked.id)
+                return (take.id, parked.id)
             }
-            let (model, _) = makeEditor(session, postID: seed.postID)
-            await model.loadOnce()
-            let before = try await liveBlockTexts(db, postID: seed.postID)
+            let (model, surface) = await makeSurfaceEditor(session, postID: seed.postID)
+            surface.layoutIfNeeded()
 
             let bRange = try #require(model.rangeOfBlock(seed.blockB!))
             await model.structural.mergeWithPrevious(atSurfaceCaret: bRange.location + 3)
 
-            #expect(model.statusMessage
-                == "One of these blocks has other takes — pairing takes into a "
-                    + "merge is the Mac's merge ceremony.")
-            #expect(try await liveBlockTexts(db, postID: seed.postID) == before)
-            #expect(try await livePlacementBlockIDs(db, postID: seed.postID).count == 2)
+            #expect(model.statusMessage == nil,
+                    "the carry-all merges — no refusal, no redirect")
+            let placements = try await livePlacementBlockIDs(db, postID: seed.postID)
+            #expect(placements.count == 1)
+            let merged = placements[0]
+            #expect(merged != seed.blockA && merged != seed.blockB)
+            // The fan: the joined take FIRST (chosen — the core's
+            // rendered×rendered rule), the carried take whole behind it.
+            #expect(try await activeFanTexts(db, blockID: merged) == [
+                "Alpha beta. Gamma delta. Second block prose.",
+                "The other way entirely.",
+            ])
+            let carried = try await db.read { db -> (id: String, label: String?)? in
+                try Row.fetchOne(
+                    db,
+                    sql: """
+                        SELECT id, label FROM variant
+                        WHERE block_id = ? AND deleted_at IS NULL
+                          AND status = 'active' AND working_text = ?
+                        """,
+                    arguments: [merged, "The other way entirely."]
+                ).map { (id: $0["id"], label: $0["label"]) }
+            }
+            #expect(carried?.label == "spare", "a carried take keeps its name")
+            #expect(carried?.id != spareID,
+                    "the carry is a FRESH row — the source keeps its original")
+            let chosenText = try await db.read { db in
+                try String.fetchOne(
+                    db,
+                    sql: """
+                        SELECT v.working_text FROM container_block cb
+                        JOIN variant v ON v.id = cb.chosen_variant_id
+                        WHERE cb.block_id = ? AND cb.deleted_at IS NULL
+                        """,
+                    arguments: [merged])
+            }
+            #expect(chosenText == "Alpha beta. Gamma delta. Second block prose.")
+            // The archived take did NOT ride — it stays on the released
+            // source, which keeps its WHOLE fan in lineage.
+            let archivedHome = try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT block_id FROM variant WHERE id = ?",
+                    arguments: [archivedID])
+            }
+            #expect(archivedHome == seed.blockA)
+            #expect(try await blockIsLive(db, blockID: seed.blockA))
+            #expect(try await blockIsLive(db, blockID: seed.blockB!))
+            #expect(try await activeFanTexts(db, blockID: seed.blockA)
+                == ["Alpha beta. Gamma delta.", "The other way entirely."])
+            // Caret at the join (the instant merge's rule, both roads).
+            let mergedRange = try #require(model.rangeOfBlock(merged))
+            #expect(surface.textView.selectedRange
+                == NSRange(
+                    location: mergedRange.location
+                        + ("Alpha beta. Gamma delta." as NSString).length,
+                    length: 0))
+            #expect(model.index.entries.count == 1)
+        }
+    }
+
+    /// The peek-aware half (Q-M2's peek rule, merge's edition): a PEEKED
+    /// take is the displayed take, so IT pairs into the join and the
+    /// previously chosen take rides whole as the carry.
+    @Test func mergeOnAPeekedPairJoinsTheDisplayedTakes() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedProsePost(
+                session, first: "Chosen words here.", second: "Trailing prose.")
+            try await session.runner.run { [blockID = seed.blockA, a1 = seed.a1] ops in
+                let take = try ops.branchVariant(blockID, from: a1)
+                try ops.autosave(take.id, text: "Peeked words instead.", charDelta: 4)
+            }
+            let (model, storage) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            model.takes.flip(blockID: seed.blockA, forward: true)
+            #expect(model.takes.isPeeking(seed.blockA))
+            #expect(storage.string.hasPrefix("Peeked words instead."))
+
+            let bRange = try #require(model.rangeOfBlock(seed.blockB!))
+            await model.structural.mergeWithPrevious(atSurfaceCaret: bRange.location + 3)
+
+            #expect(model.statusMessage == nil)
+            let placements = try await livePlacementBlockIDs(db, postID: seed.postID)
+            #expect(placements.count == 1)
+            // The PEEKED take joined; the chosen take rode whole.
+            #expect(try await activeFanTexts(db, blockID: placements[0]) == [
+                "Peeked words instead. Trailing prose.",
+                "Chosen words here.",
+            ])
+            // A released whole — chosen pointer and both takes untouched.
+            #expect(try await activeFanTexts(db, blockID: seed.blockA)
+                == ["Chosen words here.", "Peeked words instead."])
+        }
+    }
+
+    /// The flush rides in front on the fanned merge road exactly as on
+    /// the fanless one: unflushed typing lands in the store BEFORE the
+    /// join is computed, so the joined take carries the typed bytes.
+    @Test func fannedMergeCarriesUnflushedTypingThroughTheFlush() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedProsePost(
+                session, first: "First half.", second: "Second half.")
+            try await session.runner.run { [blockID = seed.blockA, a1 = seed.a1] ops in
+                let take = try ops.branchVariant(blockID, from: a1)
+                try ops.autosave(take.id, text: "The spare way.", charDelta: 4)
+            }
+            let (model, storage) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            let bRange = try #require(model.rangeOfBlock(seed.blockB!))
+            typeEdit(model, storage,
+                     range: NSRange(location: bRange.upperBound, length: 0),
+                     replacement: " Typed tail.")
+            #expect(model.autosave.isDirty)
+
+            await model.structural.mergeWithPrevious(atSurfaceCaret: bRange.location + 3)
+
+            #expect(model.statusMessage == nil)
+            let placements = try await livePlacementBlockIDs(db, postID: seed.postID)
+            #expect(try await activeFanTexts(db, blockID: placements[0]) == [
+                "First half. Second half. Typed tail.",
+                "The spare way.",
+            ])
         }
     }
 
@@ -895,5 +1026,101 @@ struct MobileSelectionActsTests {
                     cased(MobileEditMenu.makeBlockTitle),
                     cased(MobileEditMenu.blockTitle)])
         }
+    }
+}
+
+// MARK: - The whole-target no-redirect sweep (parity C5 — the last pair)
+
+/// The NO-REDIRECT principle made durable (her gate ruling: *"redirecting
+/// you to the mac to accomplish something is a bit of a red flag"*; the
+/// C1 inventory's fifteen rows all dissolved or sanctioned by C5): no
+/// user-facing string in the mobile target names the Mac. The walk is the
+/// 14b TerminologyPinTests' deep-walk shape, narrowed to STRING LITERALS
+/// (comments narrate the Mac everywhere, legitimately — only what a user
+/// can READ is policed). `Spike/` is exempt (DEBUG diagnostics behind the
+/// separate TK2SpikeUITests scheme — inventory #15's recorded no-action);
+/// test sources are exempt (this file is the pin, and pins quote the
+/// strings they police).
+@Suite("Mobile no-redirect sweep (parity C5)")
+struct MobileNoRedirectSweepTests {
+    /// Word-boundary "Mac" (matches "Mac" and "the Mac's"; never "macOS",
+    /// "MacBook", or lowercase identifiers). Computed — `Regex` is not
+    /// Sendable, so a stored static would not be concurrency-safe.
+    /// `.wordBoundaryKind(.simple)` is LOAD-BEARING (traced at the pin's
+    /// own red run): Swift Regex's default `\b` is the UAX #29 Unicode
+    /// boundary, under which an apostrophe between letters is
+    /// word-INTERNAL — the default never matches "the Mac's", and the
+    /// pin's first form passed hollow on exactly the strings it exists
+    /// to police.
+    private static var forbidden: Regex<Substring> {
+        /\bMac\b/.wordBoundaryKind(.simple)
+    }
+
+    @Test func nothingUserFacingNamesTheMac() throws {
+        let mobileRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()  // VariorumMobileTests
+            .deletingLastPathComponent()  // App/Variorum
+            .appendingPathComponent("VariorumMobile", isDirectory: true)
+        var walked = 0
+        var offenders: [String] = []
+        let walk = try #require(FileManager.default.enumerator(
+            at: mobileRoot, includingPropertiesForKeys: nil))
+        for case let url as URL in walk where url.pathExtension == "swift" {
+            guard !url.path.contains("/Spike/") else { continue }
+            walked += 1
+            let source = try String(contentsOf: url, encoding: .utf8)
+            for literal in Self.stringLiteralContents(of: source)
+            where literal.contains(Self.forbidden) {
+                offenders.append("\(url.lastPathComponent): \"\(literal)\"")
+            }
+        }
+        #expect(walked > 40, "the walk must actually reach the shipped mobile sources")
+        #expect(offenders.isEmpty,
+                "no user-facing mobile string names the Mac — found \(offenders)")
+    }
+
+    /// Extracts string-literal CONTENTS from Swift source — single-line
+    /// `"…"` and multi-line `"""…"""` — ignoring `//` and `/* */`
+    /// comments (which narrate the Mac legitimately). Interpolation
+    /// bodies ride inside their literal (harmless for a word scan).
+    static func stringLiteralContents(of source: String) -> [String] {
+        var literals: [String] = []
+        var current = ""
+        let chars = Array(source)
+        var i = 0
+        enum State { case code, lineComment, blockComment, string, multiline }
+        var state = State.code
+        var blockDepth = 0
+        func has(_ pattern: String) -> Bool {
+            i + pattern.count <= chars.count
+                && String(chars[i..<i + pattern.count]) == pattern
+        }
+        while i < chars.count {
+            switch state {
+            case .code:
+                if has("\"\"\"") { state = .multiline; current = ""; i += 3 }
+                else if has("//") { state = .lineComment; i += 2 }
+                else if has("/*") { state = .blockComment; blockDepth = 1; i += 2 }
+                else if chars[i] == "\"" { state = .string; current = ""; i += 1 }
+                else { i += 1 }
+            case .lineComment:
+                if chars[i] == "\n" { state = .code }
+                i += 1
+            case .blockComment:
+                if has("/*") { blockDepth += 1; i += 2 }
+                else if has("*/") { blockDepth -= 1; i += 2; if blockDepth == 0 { state = .code } }
+                else { i += 1 }
+            case .string:
+                if chars[i] == "\\", i + 1 < chars.count { current.append(chars[i + 1]); i += 2 }
+                else if chars[i] == "\"" { literals.append(current); state = .code; i += 1 }
+                else if chars[i] == "\n" { state = .code; i += 1 }  // unterminated — bail
+                else { current.append(chars[i]); i += 1 }
+            case .multiline:
+                if has("\"\"\"") { literals.append(current); state = .code; i += 3 }
+                else if chars[i] == "\\", i + 1 < chars.count { current.append(chars[i + 1]); i += 2 }
+                else { current.append(chars[i]); i += 1 }
+            }
+        }
+        return literals
     }
 }

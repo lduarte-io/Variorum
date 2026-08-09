@@ -523,17 +523,21 @@ enum MobileTutorialSeeder {
             + "seeded.",
 
             "Put the cursor in the second one and choose Merge with "
-            + "Previous from ⋯. When either block holds other takes, the "
-            + "phone steps back and says so: pairing takes into a merge is "
-            + "the Mac's merge ceremony, and quietly dropping your options "
-            + "is exactly what it refuses to do. The block below carries a "
-            + "second take, so merging it upward shows you that answer.",
+            + "Previous from ⋯. When either block holds other takes, they "
+            + "all ride along: the two takes you can see join into one, "
+            + "and every other take lands whole on the merged block — "
+            + "quick to delete if you don't want them, never lost. The "
+            + "block below carries a spare take, so merging it upward "
+            + "shows you the ride.",
 
-            "This block has a spare take, so a merge here steps back to "
-            + "the ceremony.",
+            // The staged cursor-instruction block the STRUCTURE WALK cuts
+            // (PB1-3's sanctioned coupling class — the walk asserts this
+            // text rides the join): reword WITH the walk or not at all.
+            "This block has a spare take, so a merge here carries it "
+            + "along whole.",
         ])
         try take(on: merging.blocks[4],
-            "the spare take that makes the merge step back.")
+            "the spare take that rides the merge whole.")
 
         // —————————————————————— the library of things ——————————————————————
 

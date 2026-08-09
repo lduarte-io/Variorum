@@ -18,14 +18,21 @@
 //  (`StructuralGesturePlanner.snapToInteriorBoundary` — the ruled word
 //  rule with the gentle settle, S4-22's letter).
 //
-//  MERGE: instant (`Operations.merge`) when NEITHER side carries a fan;
-//  a fan on either side refuses to the Mac's pairing ceremony — the base
-//  op COULD join chosen takes, but silently dropping her pairing options
-//  is exactly what the ceremony exists to prevent (M10's in-sitting
-//  precision). The fan check reads the STORE, never the projection (the
-//  13d ruled discipline: a plan-time arity is an enablement hint, never
-//  an authorization) — which also covers peeked blocks for free: a peek
-//  requires a fan, so a peeked side always refuses to the ceremony.
+//  MERGE (re-ruled at parity C5 — the CARRY-ALL, her workaround
+//  doctrine; SUPERSEDES M10's refuse-to-the-ceremony): instant
+//  (`Operations.merge`) when NEITHER side carries a fan — byte-
+//  unchanged. A fan on either side routes through the canon ceremony op
+//  (`Operations.mergeCeremony`, S4-23) with ONE peek-aware pairing —
+//  the two DISPLAYED takes joined under the canon rule — and every
+//  OTHER active take CARRIED WHOLE onto the merged block: Q-M2's
+//  duplicate logic, merge's edition ("quick to delete" beats the hunt).
+//  M10's silently-dropping-her-options concern dissolves by
+//  construction — NOTHING is dropped; every take survives on the merged
+//  block, visible under the ⑂ badge. Archived takes stay with the
+//  released sources in lineage (the divideDuplicating parallel; the
+//  core refuses archived carries by design). The fan check reads the
+//  STORE, never the projection (the 13d ruled discipline: a plan-time
+//  arity is an enablement hint, never an authorization).
 //
 //  Both doors FLUSH FIRST (the Takes board's `prepareDivide` contract:
 //  the op validates against the store and the cut was placed against
@@ -221,39 +228,69 @@ final class MobileStructuralController {
             return
         }
 
-        // The ceremony threshold reads the STORE (the 13d discipline):
-        // ANY fan on either side is the Mac's pairing ceremony — the
-        // phone refuses rather than silently dropping her pairing
-        // options (M10's precision).
+        // THE FORK IS READ FROM THE STORE (the 13d ruled discipline —
+        // never the projection). Parity C5's RULING: a fan on either
+        // side routes through the canon ceremony op with ONE peek-aware
+        // pairing (the two DISPLAYED takes, the canon join) and every
+        // OTHER active take carried WHOLE — the carry-all (the header's
+        // doctrine). The displayed take ids and the caret arithmetic are
+        // captured HERE, post-re-verify, before the read's suspension.
         let leadingID = leading.blockID
         let trailingID = trailing.blockID
+        let displayedLeadingID = model.index.entries[j - 1].variantID
+        let displayedTrailingID = model.index.entries[j].variantID
+        let leadingLength = model.index.entries[j - 1].length
+        let fans: (leading: [Variant], trailing: [Variant])
         do {
-            let counts = try await session.database.read { db in
-                (first: try Queries.blockFan(db, blockID: leadingID)
-                    .filter { $0.deletedAt == nil && $0.status == .active }.count,
-                 second: try Queries.blockFan(db, blockID: trailingID)
-                    .filter { $0.deletedAt == nil && $0.status == .active }.count)
-            }
-            if counts.first > 1 || counts.second > 1 {
-                model.report("One of these blocks has other takes — pairing takes into a "
-                    + "merge is the Mac's merge ceremony.")
-                return
+            fans = try await session.database.read { db in
+                func active(_ blockID: String) throws -> [Variant] {
+                    try Queries.blockFan(db, blockID: blockID)
+                        .filter { $0.deletedAt == nil && $0.status == .active }
+                }
+                return (try active(leadingID), try active(trailingID))
             }
         } catch {
             model.report(String(describing: error))
             return
         }
 
-        let leadingLength = model.index.entries[j - 1].length
-        do {
-            let result = try await session.runner.run { ops in
-                try ops.merge(leadingID, trailingID)
+        let body: @Sendable (Operations) throws -> String
+        if fans.leading.count > 1 || fans.trailing.count > 1 {
+            // The displayed (peek-aware) takes must still BE in their
+            // live fans (the divide door's F-3 guard class — the store
+            // may have moved in the flush/read window; a fallback would
+            // pair a take she was never looking at).
+            guard let head = fans.leading.first(where: { $0.id == displayedLeadingID }),
+                  let tail = fans.trailing.first(where: { $0.id == displayedTrailingID })
+            else {
+                model.report("This block's takes changed — try the merge again.")
+                return
             }
+            // The canon join resolved on the post-flush store texts —
+            // the plain merge's exact rule, through the ONE join brain.
+            let pairing = Operations.MergePairing(
+                firstVariantID: head.id, secondVariantID: tail.id,
+                join: MergeJoin.canon(head: head.workingText, tail: tail.workingText))
+            let carries = (fans.leading + fans.trailing)
+                .map(\.id).filter { $0 != head.id && $0 != tail.id }
+            body = { ops in
+                try ops.mergeCeremony(
+                    leadingID, trailingID,
+                    pairings: [pairing], carries: carries
+                ).block.id
+            }
+        } else {
+            body = { ops in try ops.merge(leadingID, trailingID).block.id }
+        }
+        do {
+            let mergedBlockID = try await session.runner.run(body)
             model.report(nil)
             await model.refreshTakesFromStore()
             // Caret at the join: right where the trailing half begins
-            // (the Mac's instant-merge caret rule).
-            if let range = model.rangeOfBlock(result.block.id) {
+            // (the Mac's instant-merge caret rule; the carry-all's chosen
+            // is the JOINED take — the core's rendered×rendered rule —
+            // so the same arithmetic serves both roads).
+            if let range = model.rangeOfBlock(mergedBlockID) {
                 let join = min(leadingLength, range.length)
                 model.textView?.selectedRange = NSRange(
                     location: range.location + join, length: 0)
