@@ -1,0 +1,676 @@
+//
+//  MobilePerfWalkTests.swift
+//  VariorumMobileTests
+//
+//  Parity round Stage B, batch B2 — THE SCRIPTED MEASUREMENT WALK: the
+//  soul document's bar made executable ("I do not want the mobile app
+//  to choke even on 100k words"; MEMORY is a first-class metric — iOS
+//  jetsam). Two suites:
+//
+//  · `MobilePerfFixtureTests` — the fixture's shape pins: the ~100k
+//    post is really 100k-shaped with chrome staged, the control post is
+//    byte-identical across worlds, the corpus spans six books at scale,
+//    nothing is journal-shaped (R57), the generator is deterministic,
+//    and the dev-store door find-or-seeds without duplicating.
+//  · `MobilePerfWalkTests` — the measurements: post OPEN-TIME (open →
+//    first render) · TYPING latency at the viewport · SCROLL through
+//    the full post · PEAK MEMORY across the whole walk. Two assertion
+//    kinds (the Mac PerfBenchmarkTests precedent, Phase 4): FLATNESS
+//    pins — the big measurement vs the small-fixture control within a
+//    stated factor (ratios are the assertion; absolute timings are
+//    machine noise) — and RECORDED absolutes (printed "PERF[sim]" lines
+//    harvested into the batch record, explicitly SIMULATOR numbers; the
+//    on-device run is Stage D's exit gate). The memory CEILING pin's
+//    bound is proposed from measurement and marked PROVISIONAL.
+//
+//  THE AXES, stated so nobody pins the wrong thing flat:
+//  · TYPING and PER-STEP SCROLL must be flat in POST size (P1's heart —
+//    keystroke and scroll-tick cost bound to the viewport, never the
+//    document; the Apple-Notes failure mode, banned).
+//  · OPEN must be flat in CORPUS size (the library around the post).
+//    Open is NOT flat in the post's OWN length by design — the storage
+//    fill is O(post) (AppSpec §4: "reading a post is one indexed
+//    query"); the 100k open is a recorded absolute, never a flatness
+//    pin.
+//  · MEMORY: the walk's sampled peak footprint (phys_footprint — the
+//    jetsam-relevant number) bounded by a PROVISIONAL ceiling over the
+//    walk's own start.
+//
+//  Windowless throughout (the corrected A3 machinery lesson). All
+//  measured sections are SYNCHRONOUS on the main actor — other
+//  suites' @MainActor tests cannot interleave inside a timed section;
+//  awaits (the open road's DB hop) are protected by median-of-N and
+//  the generous factors instead.
+//
+
+import Dependencies
+import Foundation
+import GRDB
+import Testing
+import UIKit
+import VariorumCore
+@testable import VariorumMobile
+
+// MARK: - The worlds (static, built once — the Mac CorpusFactory shape)
+
+@MainActor
+enum PerfWorlds {
+    struct World {
+        let db: AppDatabase
+        let seed: MobilePerfFixtureSeeder.SeedResult
+    }
+
+    /// The BIG world: the ~100k-word mega post + the full corpus
+    /// (300 notes across six books) + the control post.
+    static let big = Result { try build(
+        corpusNotes: MobilePerfFixtureSeeder.fullCorpusNoteCount, includeMega: true) }
+    /// The SMALL world: the SAME control post bytes, the same six
+    /// books, 1/25 the corpus, no mega post — the corpus-flatness
+    /// pins' other side.
+    static let small = Result { try build(corpusNotes: 12, includeMega: false) }
+
+    private static func build(corpusNotes: Int, includeMega: Bool) throws -> World {
+        MobileEditorStyle.voice = .terminal
+        let db = try AppDatabase.inMemory()
+        let start = Date(timeIntervalSince1970: 1_783_123_200)
+        let tick = LockIsolated(0)
+        return try withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = DateGenerator {
+                let seconds = tick.withValue { value -> Int in
+                    defer { value += 1 }
+                    return value
+                }
+                return start.addingTimeInterval(Double(seconds))
+            }
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 33))
+        } operation: {
+            let seed = try MobilePerfFixtureSeeder.seed(
+                ops: Operations(undoStack: nil),
+                corpusNotes: corpusNotes,
+                includeMegaPost: includeMega)
+            return World(db: db, seed: seed)
+        }
+    }
+}
+
+/// Per-test entry over a prebuilt world: ambient deps + a fresh
+/// AppSession. UUIDs are LIVE-random here (a second `.incrementing`
+/// stream would re-mint the world's own IDs); dates are live —
+/// measurement tests assert time and memory, never rows-by-ID.
+@MainActor
+private func withPerfWorld<T>(
+    _ world: PerfWorlds.World,
+    _ body: @MainActor (AppSession) async throws -> T
+) async throws -> T {
+    MobileEditorStyle.voice = .terminal
+    return try await withDependencies {
+        $0.database = world.db
+        $0.uuid = UUIDGenerator { UUID() }
+        $0.date = DateGenerator { Date() }
+        $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 77))
+    } operation: { @MainActor in
+        try await body(AppSession(database: world.db))
+    }
+}
+
+// MARK: - Measurement helpers
+
+private func median(_ samples: [Double]) -> Double {
+    guard !samples.isEmpty else { return 0 }
+    let sorted = samples.sorted()
+    return sorted[sorted.count / 2]
+}
+
+private func percentile(_ samples: [Double], _ p: Double) -> Double {
+    guard !samples.isEmpty else { return 0 }
+    let sorted = samples.sorted()
+    let index = min(sorted.count - 1, Int(Double(sorted.count) * p))
+    return sorted[index]
+}
+
+/// The flatness assertion (the Mac `expectFlat` shape): big must sit
+/// within `factor` of the control, or under the absolute noise floor.
+/// Absolutes land in the run log for the batch record — SIMULATOR
+/// numbers by construction.
+///
+/// `knownIssue`: a pin whose violation is a TRACED, RECORDED finding
+/// awaiting its owning fix wraps in `withKnownIssue` — the suite stays
+/// green and honest, and the moment the fix lands the un-fired known
+/// issue FAILS the test ("unexpectedly passed"), forcing the wrapper's
+/// removal — the pin arms itself against the fix by construction.
+private func expectFlat(
+    control: Double, big: Double,
+    factor: Double, floorMS: Double,
+    _ label: Comment,
+    knownIssue: Comment? = nil
+) {
+    print(String(
+        format: "PERF[sim] %@ — control %.3f ms · big %.3f ms · ratio %.2fx (bound: factor %.1fx, floor %.1f ms)",
+        "\(label)", control, big, control > 0 ? big / control : 0, factor, floorMS))
+    let assertion = {
+        #expect(
+            big <= max(control * factor, floorMS),
+            "\(label): control=\(control)ms big=\(big)ms")
+    }
+    if let knownIssue {
+        withKnownIssue(knownIssue) { assertion() }
+    } else {
+        assertion()
+    }
+}
+
+/// phys_footprint in MiB — the jetsam-relevant footprint (Xcode's
+/// memory-gauge number), not a compressed estimate.
+private func physFootprintMB() -> Double? {
+    var info = task_vm_info_data_t()
+    var count = mach_msg_type_number_t(
+        MemoryLayout<task_vm_info_data_t>.size / MemoryLayout<integer_t>.size)
+    let kr = withUnsafeMutablePointer(to: &info) { ptr in
+        ptr.withMemoryRebound(to: integer_t.self, capacity: Int(count)) {
+            task_info(mach_task_self_, task_flavor_t(TASK_VM_INFO), $0, &count)
+        }
+    }
+    guard kr == KERN_SUCCESS else { return nil }
+    return Double(info.phys_footprint) / 1_048_576
+}
+
+// MARK: - The surface (the walk-suite shape: real editor, windowless)
+
+/// Opens the full real editor over a post and measures open → first
+/// render: VM + surface construction, the authoritative `loadOnce`
+/// read, the projection into storage, and the first layout pass with
+/// the TK2 viewport laid out.
+@MainActor
+private func openSurface(
+    _ session: AppSession, postID: String
+) async -> (model: MobileEditorViewModel, surface: MobileWriteSurfaceView, openMS: Double) {
+    let t0 = CACurrentMediaTime()
+    let model = MobileEditorViewModel(
+        session: session, postID: postID,
+        sleep: { _ in throw CancellationError() })
+    model.tailIdleSleep = { _ in throw CancellationError() }
+    let surface = MobileWriteSurfaceView()
+    surface.frame = CGRect(x: 0, y: 0, width: 393, height: 700)
+    model.attach(textView: surface.textView)
+    await model.loadOnce()
+    surface.layoutIfNeeded()
+    surface.textView.textLayoutManager?.textViewportLayoutController.layoutViewport()
+    let ms = (CACurrentMediaTime() - t0) * 1000
+    return (model, surface, ms)
+}
+
+/// An interior typing offset inside the block at `blockIndex` (clamped)
+/// — one character before the block's end, so repeated inserts stay
+/// in-block (no crystallization, no tail).
+@MainActor
+private func interiorOffset(
+    _ model: MobileEditorViewModel, blockIndex: Int
+) -> Int? {
+    let entries = model.index.entries
+    guard !entries.isEmpty else { return nil }
+    let entry = entries[min(max(blockIndex, 0), entries.count - 1)]
+    guard let range = model.rangeOfBlock(entry.blockID), range.length > 1 else { return nil }
+    return range.location + range.length - 1
+}
+
+/// Types `keystrokes` single characters at a fixed interior position
+/// through the policed road (gate → storage → reprocess → re-stamp),
+/// forcing the layout pass each keystroke — the full latency a real
+/// keystroke pays. Synchronous throughout (no interleaving noise).
+@MainActor
+private func typingSamples(
+    _ model: MobileEditorViewModel, _ surface: MobileWriteSurfaceView,
+    at offset: Int, keystrokes: Int = 24
+) -> (samples: [Double], accepted: Int) {
+    let storage = surface.textView.textStorage
+    var samples: [Double] = []
+    var accepted = 0
+    for i in 0..<keystrokes {
+        let t0 = CACurrentMediaTime()
+        let ok = typeEdit(
+            model, storage,
+            range: NSRange(location: offset + i, length: 0), replacement: "x")
+        surface.layoutIfNeeded()
+        samples.append((CACurrentMediaTime() - t0) * 1000)
+        if ok { accepted += 1 }
+    }
+    return (samples, accepted)
+}
+
+/// The spike's proven scroll-to-end loop (estimates revise as layout
+/// lands, so the target is re-derived per iteration).
+@MainActor
+private func scrollToEnd(_ surface: MobileWriteSurfaceView) {
+    let tv = surface.textView
+    for _ in 0..<12 {
+        let target = max(
+            0, tv.contentSize.height + tv.adjustedContentInset.bottom - tv.bounds.height)
+        if abs(tv.contentOffset.y - target) <= 1 { break }
+        tv.setContentOffset(CGPoint(x: 0, y: target), animated: false)
+        tv.textLayoutManager?.textViewportLayoutController.layoutViewport()
+        surface.layoutIfNeeded()
+    }
+}
+
+/// Walks the whole document top to bottom in near-viewport steps (the
+/// Stage 0 spike's walk shape), timing every step: offset set + TK2
+/// viewport layout + the layout pass (which runs the chrome's
+/// near-viewport refresh — the per-tick cost a real scroll pays).
+@MainActor
+private func scrollWalkSamples(
+    _ surface: MobileWriteSurfaceView,
+    onSample: ((Int) -> Void)? = nil
+) -> (perStepMS: [Double], steps: Int) {
+    let tv = surface.textView
+    tv.setContentOffset(.zero, animated: false)
+    tv.textLayoutManager?.textViewportLayoutController.layoutViewport()
+    surface.layoutIfNeeded()
+    let stepHeight = max(200, tv.bounds.height - 40)
+    var samples: [Double] = []
+    var y = 0.0
+    var steps = 0
+    while y < tv.contentSize.height - tv.bounds.height, steps < 3000 {
+        y += stepHeight
+        let t0 = CACurrentMediaTime()
+        tv.setContentOffset(
+            CGPoint(x: 0, y: min(y, max(0, tv.contentSize.height - tv.bounds.height))),
+            animated: false)
+        tv.textLayoutManager?.textViewportLayoutController.layoutViewport()
+        surface.layoutIfNeeded()
+        samples.append((CACurrentMediaTime() - t0) * 1000)
+        steps += 1
+        if steps % 16 == 0 { onSample?(steps) }
+    }
+    return (samples, steps)
+}
+
+// MARK: - Store truths (fixture-shape pins)
+
+private func postWordCount(_ db: AppDatabase, postID: String) async throws -> Int {
+    let texts = try await storedBlockTextsPlain(db, postID: postID)
+    return texts.reduce(0) { count, text in
+        count + text.split(whereSeparator: { $0.isWhitespace || $0.isNewline }).count
+    }
+}
+
+private func storedBlockTextsPlain(
+    _ db: AppDatabase, postID: String
+) async throws -> [String] {
+    try await db.read { db in
+        try String.fetchAll(db, sql: """
+            SELECT v.working_text FROM container_block cb
+            JOIN block b ON b.id = cb.block_id
+            JOIN variant v ON v.id = COALESCE(cb.chosen_variant_id, b.default_variant_id)
+            WHERE cb.container_id = ? AND cb.deleted_at IS NULL
+            ORDER BY cb.position, cb.id
+            """, arguments: [postID])
+    }
+}
+
+private func chromeCounts(
+    _ db: AppDatabase, postID: String
+) async throws -> (fanned: Int, commented: Int, callouts: Int) {
+    try await db.read { db in
+        let fanned = try Int.fetchOne(db, sql: """
+            SELECT COUNT(*) FROM (
+              SELECT b.id FROM container_block cb
+              JOIN block b ON b.id = cb.block_id
+              JOIN variant v ON v.block_id = b.id
+                AND v.deleted_at IS NULL AND v.status = 'active'
+              WHERE cb.container_id = ? AND cb.deleted_at IS NULL
+              GROUP BY b.id HAVING COUNT(v.id) >= 2
+            )
+            """, arguments: [postID]) ?? -1
+        let commented = try Int.fetchOne(db, sql: """
+            SELECT COUNT(DISTINCT bc.block_id) FROM block_comment bc
+            JOIN container_block cb ON cb.block_id = bc.block_id
+              AND cb.deleted_at IS NULL
+            WHERE cb.container_id = ? AND bc.deleted_at IS NULL
+            """, arguments: [postID]) ?? -1
+        let callouts = try Int.fetchOne(db, sql: """
+            SELECT COUNT(*) FROM block b
+            JOIN container_block cb ON cb.block_id = b.id AND cb.deleted_at IS NULL
+            WHERE cb.container_id = ? AND b.presentation IS NOT NULL
+              AND b.deleted_at IS NULL
+            """, arguments: [postID]) ?? -1
+        return (fanned, commented, callouts)
+    }
+}
+
+// MARK: - The fixture's shape (pins)
+
+@MainActor
+@Suite("Mobile perf fixture (parity B2 — the 100k fixture's shape)", .serialized)
+struct MobilePerfFixtureTests {
+    @Test func theMegaPostIsHundredKShapedWithChromeStaged() async throws {
+        let world = try PerfWorlds.big.get()
+        let megaID = try #require(world.seed.megaPostID)
+
+        // The store's own truth equals the generator's arithmetic (the
+        // seed is deterministic end to end).
+        let words = try await postWordCount(world.db, postID: megaID)
+        #expect(words == world.seed.megaWordCount)
+        #expect(words >= 95_000 && words <= 110_000,
+                "the bar's number: ~100k words (got \(words))")
+
+        let texts = try await storedBlockTextsPlain(world.db, postID: megaID)
+        #expect(texts.count == world.seed.megaBlockCount)
+        #expect(texts.count >= 800, "crystallization-scale blocks (got \(texts.count))")
+        let multiParagraph = texts.filter { $0.contains("\n") }.count
+        #expect(multiParagraph == world.seed.megaMultiParagraphBlocks)
+        #expect(multiParagraph >= 50, "multi-paragraph blocks are part of the real shape")
+
+        // Chrome staged: the measurement never runs over a bare column.
+        let chrome = try await chromeCounts(world.db, postID: megaID)
+        #expect(chrome.fanned == world.seed.megaFannedBlocks)
+        #expect(chrome.commented == world.seed.megaCommentedBlocks)
+        #expect(chrome.callouts == world.seed.megaCalloutBlocks)
+        #expect(chrome.fanned >= 20 && chrome.commented >= 15 && chrome.callouts >= 8,
+                "fans \(chrome.fanned) · comments \(chrome.commented) · callouts \(chrome.callouts)")
+        print("PERF[fixture] mega: \(words) words · \(texts.count) blocks · "
+            + "\(multiParagraph) multi-paragraph · \(chrome.fanned) fanned · "
+            + "\(chrome.commented) commented · \(chrome.callouts) callouts")
+    }
+
+    @Test func theControlPostMatchesAcrossWorldsByteForByte() async throws {
+        let big = try PerfWorlds.big.get()
+        let small = try PerfWorlds.small.get()
+        let bigControl = try await storedBlockTextsPlain(
+            big.db, postID: big.seed.controlPostID)
+        let smallControl = try await storedBlockTextsPlain(
+            small.db, postID: small.seed.controlPostID)
+        #expect(bigControl == smallControl,
+                "the control is the same fixture in both worlds — the corpus is the only axis")
+        #expect(!bigControl.isEmpty)
+
+        // The control carries chrome too (both sides of every ratio run
+        // the same machinery).
+        let chrome = try await chromeCounts(big.db, postID: big.seed.controlPostID)
+        #expect(chrome.fanned == 1 && chrome.commented == 1 && chrome.callouts == 1)
+    }
+
+    @Test func nothingSeededIsJournalShaped() async throws {
+        // The R57 discipline mirrored from B1: no fixture row may be
+        // shaped like something the Fragments bridge would sweep.
+        let world = try PerfWorlds.big.get()
+        let journalShaped = try await world.db.read { db in
+            try Int.fetchOne(db, sql: """
+                SELECT COUNT(*) FROM container
+                WHERE deleted_at IS NULL
+                  AND (profile = 'journal' OR entry_date IS NOT NULL)
+                """) ?? -1
+        }
+        #expect(journalShaped == 0)
+    }
+
+    @Test func theCorpusSpansSixBooksAtScale() async throws {
+        let big = try PerfWorlds.big.get()
+        let small = try PerfWorlds.small.get()
+        for (world, notes) in [(big, 300), (small, 12)] {
+            let perBook: [Int] = try await world.db.read { db in
+                let names = MobilePerfFixtureSeeder.corpusBookNames
+                return try names.map { name in
+                    try Int.fetchOne(db, sql: """
+                        SELECT COUNT(*) FROM reading_post rp
+                        JOIN reading r ON r.id = rp.reading_id AND r.deleted_at IS NULL
+                        WHERE r.name = ? AND rp.deleted_at IS NULL
+                        """, arguments: [name]) ?? -1
+                }
+            }
+            #expect(perBook.count == 6)
+            #expect(perBook.reduce(0, +) == notes,
+                    "\(notes) corpus notes across six books (got \(perBook))")
+            #expect(perBook.allSatisfy { $0 == notes / 6 },
+                    "evenly spread — corpus SIZE is the axis, never its shape")
+            #expect(world.seed.corpusNoteCount == notes)
+        }
+    }
+
+    @Test func theProseGeneratorIsDeterministic() {
+        let a = MobilePerfFixtureSeeder.megaProse(targetWords: 20_000)
+        let b = MobilePerfFixtureSeeder.megaProse(targetWords: 20_000)
+        #expect(a.map(\.text) == b.map(\.text))
+        #expect(a.map(\.words) == b.map(\.words))
+        let c = MobilePerfFixtureSeeder.controlProse(targetWords: 2_000)
+        let d = MobilePerfFixtureSeeder.controlProse(targetWords: 2_000)
+        #expect(c.map(\.text) == d.map(\.text))
+        // Independent seeds: the two families never share a stream.
+        #expect(a.first?.text != c.first?.text)
+    }
+
+    @Test func theDevStoreDoorFindsOrSeedsWithoutDuplicating() async throws {
+        // The door's semantics at a tiny scale (full-scale build
+        // correctness is the static worlds' job; door semantics are
+        // scale-free). Deterministic deps — a fresh world.
+        MobileEditorStyle.voice = .terminal
+        let db = try AppDatabase.inMemory()
+        let start = Date(timeIntervalSince1970: 1_783_296_000)
+        let tick = LockIsolated(0)
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = DateGenerator {
+                let seconds = tick.withValue { value -> Int in
+                    defer { value += 1 }
+                    return value
+                }
+                return start.addingTimeInterval(Double(seconds))
+            }
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 55))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let first = try await MobilePerfFixtureSeeder.findOrSeed(
+                session: session, corpusNotes: 3, megaWords: 600)
+            #expect(first.seeded != nil, "a fresh store seeds")
+            let second = try await MobilePerfFixtureSeeder.findOrSeed(
+                session: session, corpusNotes: 3, megaWords: 600)
+            #expect(second.seeded == nil, "an existing proving ground just reports")
+            #expect(second.bookID == first.bookID)
+            let fixtureBooks = try await db.read { db in
+                try Int.fetchOne(
+                    db,
+                    sql: "SELECT COUNT(*) FROM reading WHERE name = ? AND deleted_at IS NULL",
+                    arguments: [MobilePerfFixtureSeeder.fixtureBookName]) ?? -1
+            }
+            #expect(fixtureBooks == 1, "never a second proving ground")
+            // The quiet facade: a seed is not her act.
+            #expect(session.undoStack.topLabel == nil)
+        }
+    }
+}
+
+// MARK: - The walk (measurements + pins)
+
+/// FB2-1 (Stage B batch B2, 2026-08-09 — the BAR-GATING finding these
+/// pins record; the full trace is in the B2 batch record): the Write
+/// surface's chrome refresh is DOCUMENT-scoped per keystroke
+/// (`storageDidEdit` → `refreshChrome()` default scope) and every
+/// document pass RE-WRITES `textContainer.exclusionPaths`, invalidating
+/// the whole document's layout — a geometry↔exclusion feedback loop
+/// whose cost scales with decorated blocks × document size (P1
+/// violated). Measured at 100k words (simulator): ~0.5–0.6 s per
+/// keystroke (77×/43× off flat), ~50 ms per scroll step (31×), sampled
+/// walk footprint peak 6.2 GiB (jetsam-fatal on device). Bare TK2 on
+/// the identical text: open 6 ms · keystroke ~5 ms · step ~0.8 ms ·
+/// footprint flat — the platform is healthy; the app road is the whole
+/// cost. The wrapped pins BELOW fail-on-fix by `withKnownIssue`
+/// semantics: when the owning fix lands, each wrapper's un-fired known
+/// issue fails its test until removed — the pins activate themselves.
+private let fb2_1: Comment = """
+    FB2-1 (recorded, bar-gating): per-keystroke document-scope chrome \
+    refresh + exclusion-path rewrite invalidation — cost ∝ document, \
+    not viewport+edit. Fix owned by the architect's disposition; \
+    remove this wrapper when it lands.
+    """
+
+@MainActor
+@Suite("Mobile perf walk (parity B2 — the 100k bar, measured)", .serialized)
+struct MobilePerfWalkTests {
+    // The pins' stated factors (the Mac precedent's 3× shape) and noise
+    // floors — ratios are the assertion, absolutes are the record.
+    private static let flatFactor = 3.0
+    private static let openFloorMS = 30.0
+    private static let typingFloorMS = 4.0
+    private static let scrollFloorMS = 4.0
+
+    /// PROVISIONAL memory ceiling (the B2 brief: the bound is proposed
+    /// from measurement — generous but meaningful). Measured healthy
+    /// references (iPhone 17 Pro / iOS 26.2 simulator): bare TK2 holds
+    /// the whole 100k walk FLAT (~75 MiB, zero growth); the app road's
+    /// OPEN adds ~27 MiB. 250 MiB of walk delta is ~9× the healthy
+    /// open delta — generous for a fixed app, and categorically under
+    /// iOS foreground jetsam limits. Today's measured walk delta is
+    /// 6120 MiB (FB2-1's churn), so the ceiling pin rides the same
+    /// known-issue wrapper until the fix lands.
+    private static let walkDeltaCeilingMB = 250.0
+
+    @Test func openingAFixedPostIsFlatInCorpusSize() async throws {
+        // The corpus axis: the SAME control post (byte-identical), a
+        // 25× corpus around it. Median of 5 full opens each side.
+        let big = try PerfWorlds.big.get()
+        let small = try PerfWorlds.small.get()
+
+        var smallSamples: [Double] = []
+        try await withPerfWorld(small) { session in
+            for _ in 0..<5 {
+                let opened = await openSurface(session, postID: small.seed.controlPostID)
+                smallSamples.append(opened.openMS)
+                #expect(opened.model.index.entries.count == small.seed.controlBlockCount)
+            }
+        }
+        var bigSamples: [Double] = []
+        try await withPerfWorld(big) { session in
+            for _ in 0..<5 {
+                let opened = await openSurface(session, postID: big.seed.controlPostID)
+                bigSamples.append(opened.openMS)
+                #expect(opened.model.index.entries.count == big.seed.controlBlockCount)
+            }
+        }
+        expectFlat(
+            control: median(smallSamples), big: median(bigSamples),
+            factor: Self.flatFactor, floorMS: Self.openFloorMS,
+            "open(control post), 12-note vs 300-note corpus")
+    }
+
+    @Test func typingAtTheViewportIsFlatInPostSize() async throws {
+        // The post axis, corpus held constant (both posts live in the
+        // BIG world): keystroke cost must be bound to the viewport,
+        // never the document. Measured at the TOP viewport (the
+        // worst case for index shifting — every downstream entry
+        // moves) AND at the END after a real scroll (her actual
+        // position in a long note).
+        let big = try PerfWorlds.big.get()
+        let megaID = try #require(big.seed.megaPostID)
+
+        try await withPerfWorld(big) { session in
+            let control = await openSurface(session, postID: big.seed.controlPostID)
+            let controlOffset = try #require(interiorOffset(control.model, blockIndex: 1))
+            let controlTyped = typingSamples(control.model, control.surface, at: controlOffset)
+            #expect(controlTyped.accepted == controlTyped.samples.count)
+
+            let mega = await openSurface(session, postID: megaID)
+            print(String(
+                format: "PERF[sim] open(100k post) — %.1f ms (recorded absolute; open scales with the post's own length by design)",
+                mega.openMS))
+            let topOffset = try #require(interiorOffset(mega.model, blockIndex: 1))
+            let megaTop = typingSamples(mega.model, mega.surface, at: topOffset)
+            #expect(megaTop.accepted == megaTop.samples.count)
+
+            scrollToEnd(mega.surface)
+            let endBlock = mega.model.index.entries.count - 2
+            let endOffset = try #require(interiorOffset(mega.model, blockIndex: endBlock))
+            let megaEnd = typingSamples(mega.model, mega.surface, at: endOffset)
+            #expect(megaEnd.accepted == megaEnd.samples.count)
+
+            let controlMedian = median(controlTyped.samples)
+            expectFlat(
+                control: controlMedian, big: median(megaTop.samples),
+                factor: Self.flatFactor, floorMS: Self.typingFloorMS,
+                "keystroke(top viewport), 4k vs 100k post",
+                knownIssue: fb2_1)
+            expectFlat(
+                control: controlMedian, big: median(megaEnd.samples),
+                factor: Self.flatFactor, floorMS: Self.typingFloorMS,
+                "keystroke(end of note), 4k vs 100k post",
+                knownIssue: fb2_1)
+            print(String(
+                format: "PERF[sim] keystroke p95 — control %.3f ms · 100k top %.3f ms · 100k end %.3f ms",
+                percentile(controlTyped.samples, 0.95),
+                percentile(megaTop.samples, 0.95),
+                percentile(megaEnd.samples, 0.95)))
+
+            // The probe is real: the typed characters landed on the
+            // surface (a dead probe must not pass silently).
+            #expect((mega.surface.textView.text ?? "").contains("xxxx"))
+        }
+    }
+
+    @Test func theFullScrollIsFlatPerStepAndTheWalkHoldsTheMemoryCeiling() async throws {
+        // THE FULL 100k TRAVERSAL, once, carrying BOTH assertions (one
+        // walk instead of two — the traversal is the expensive half,
+        // ~2 min while FB2-1 stands, seconds when healthy):
+        // · The post axis: the TOTAL cost of scrolling 100k words is
+        //   O(document) by definition (you traverse it all); the
+        //   PER-STEP cost is what P1 bounds — each tick lays out one
+        //   viewport band, never the document.
+        // · The phone's own constraint: PEAK MEMORY across the whole
+        //   walk (open → type → full scroll), sampled as phys_footprint
+        //   — jetsam kills on footprint. The worlds are forced FIRST so
+        //   the baseline sample excludes their build; the ceiling
+        //   bounds the walk's own sampled delta.
+        let big = try PerfWorlds.big.get()
+        _ = try PerfWorlds.small.get()
+        let megaID = try #require(big.seed.megaPostID)
+        let start = try #require(physFootprintMB(), "footprint readable on this host")
+
+        try await withPerfWorld(big) { session in
+            var peak = start
+            func sample() { peak = max(peak, physFootprintMB() ?? peak) }
+
+            let control = await openSurface(session, postID: big.seed.controlPostID)
+            let controlWalk = scrollWalkSamples(control.surface)
+            #expect(controlWalk.steps >= 5, "the control walk is a real walk")
+
+            let mega = await openSurface(session, postID: megaID)
+            sample()
+            let afterOpen = peak
+
+            // The walk's typing leg (memory participation; the typing
+            // FLATNESS pins live in the typing test).
+            let topOffset = try #require(interiorOffset(mega.model, blockIndex: 1))
+            _ = typingSamples(mega.model, mega.surface, at: topOffset, keystrokes: 8)
+            sample()
+
+            let megaWalk = scrollWalkSamples(mega.surface) { _ in sample() }
+            sample()
+            #expect(megaWalk.steps >= 100, "the 100k walk traverses the whole post")
+            #expect(megaWalk.steps < 3000, "the walk terminates (estimates settled)")
+
+            expectFlat(
+                control: median(controlWalk.perStepMS), big: median(megaWalk.perStepMS),
+                factor: Self.flatFactor, floorMS: Self.scrollFloorMS,
+                "scroll step(full walk), 4k vs 100k post",
+                knownIssue: fb2_1)
+            print(String(
+                format: "PERF[sim] scroll(100k post) — %d steps · total %.0f ms · p95 %.2f ms · worst %.2f ms",
+                megaWalk.steps, megaWalk.perStepMS.reduce(0, +),
+                percentile(megaWalk.perStepMS, 0.95), megaWalk.perStepMS.max() ?? 0))
+            print(String(
+                format: "PERF[sim] scroll(control post) — %d steps · total %.0f ms · p95 %.2f ms",
+                controlWalk.steps, controlWalk.perStepMS.reduce(0, +),
+                percentile(controlWalk.perStepMS, 0.95)))
+
+            let delta = peak - start
+            print(String(
+                format: "PERF[sim] memory(100k walk) — start %.0f MiB · after open %.0f MiB · sampled peak %.0f MiB · walk delta %.0f MiB (phys_footprint; test-host absolutes — the on-device run is Stage D's gate)",
+                start, afterOpen, peak, delta))
+            withKnownIssue(fb2_1) {
+                #expect(
+                    delta <= Self.walkDeltaCeilingMB,
+                    "PROVISIONAL ceiling: the 100k walk's footprint delta \(delta) MiB exceeds \(Self.walkDeltaCeilingMB) MiB")
+            }
+        }
+    }
+}
