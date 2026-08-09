@@ -168,9 +168,19 @@ nonisolated enum MobileEditorStyle {
 
     static var baseParagraphStyle: NSParagraphStyle {
         let style = NSMutableParagraphStyle()
-        // Uniform per-PARAGRAPH gap (the 2026-07-12 rule's letter) at the
-        // Mac's own constant (EditorTypography: 0.5 × pointSize).
-        style.paragraphSpacing = (baseFont.pointSize * 0.5).rounded()
+        // Uniform per-PARAGRAPH gap (the 2026-07-12 rule's letter —
+        // intra-block newlines and seams alike, boundaries invisible at
+        // rest). PHONE VALUE since the parity A3 spacing floor: the LK
+        // canon's own block gap (mockup `.block margin-bottom:14px` =
+        // 1.0 × the terminal point size; her finding "the spacing needs
+        // to be fixed" — more air generally). The Mac keeps its
+        // EditorTypography 0.5 × constant — this file is the phone's
+        // look half, deliberately phone-local.
+        style.paragraphSpacing = baseFont.pointSize.rounded()
+        // Line air to the canon's prose line-height (~1.62 terminal /
+        // ~1.6 study — one 0.4 × rule lands both voices' numbers over
+        // the fonts' natural boxes).
+        style.lineSpacing = (baseFont.pointSize * 0.4).rounded()
         return style
     }
 

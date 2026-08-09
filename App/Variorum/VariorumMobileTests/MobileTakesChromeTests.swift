@@ -184,7 +184,13 @@ struct MobileTakesChromeTests {
             // end ≈ cw−43.
             let charW = ("a" as NSString).size(
                 withAttributes: [.font: MobileEditorStyle.baseFont]).width
-            let containerWidth: CGFloat = 393
+            // The REAL container width at the harness frame (read off a
+            // made view so the A3 prose insets — or any future margin —
+            // can never stale this arithmetic).
+            let probe = MobileEditorTextView.make()
+            probe.frame = CGRect(x: 0, y: 0, width: 393, height: 100)
+            probe.layoutIfNeeded()
+            let containerWidth = probe.textContainer.size.width
             let pad: CGFloat = 5 // NSTextContainer.lineFragmentPadding default
             let count = Int(((containerWidth - 43) - pad) / charW)
             let filling = String(repeating: "a", count: count)

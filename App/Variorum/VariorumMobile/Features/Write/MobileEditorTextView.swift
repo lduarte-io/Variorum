@@ -347,6 +347,13 @@ final class MobileEditorTextView: UITextView {
         view.adjustsFontForContentSizeCategory = true
         view.alwaysBounceVertical = true
         view.keyboardDismissMode = .interactive
+        // The prose margins (parity A3 spacing floor — the LK canon's
+        // `.prose padding:8px 20px`; her "more padding generally"): 15 pt
+        // insets + the container's default 5 pt fragment padding = the
+        // canon's 20 pt visual margin each side. The default near-zero
+        // margins were the floor's headline finding. Bottom is managed by
+        // the typewriter room (P24) at every layout.
+        view.textContainerInset = UIEdgeInsets(top: 8, left: 15, bottom: 8, right: 15)
 
         // Batch 2: the bar's six live acts (LK8 minus ⑂/⋯ per P-2) replace
         // the batch-1 shell. Batch 3: chrome + bar resolve from the live

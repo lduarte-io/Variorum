@@ -89,21 +89,27 @@ struct MobileVoiceTests {
     }
 
     /// The switched style flows into every surface-write value: fonts,
-    /// ink, palette, and the paragraph gap (the Mac's 0.5 × pointSize
-    /// rule) all follow the live voice.
+    /// ink, palette, and the paragraph gap + line air all follow the
+    /// live voice. The gap pins the PHONE's A3 spacing-floor constants
+    /// (the LK canon's `.block` 14 px = 1.0 × pointSize, and the ~1.6
+    /// prose line-height via 0.4 × lineSpacing) — the sanctioned flip of
+    /// the earlier Mac-constant 0.5 × pin (the Mac keeps its own).
     @Test func surfaceWriteValuesFollowTheLiveVoice() {
         MobileEditorStyle.voice = .terminal
         defer { MobileEditorStyle.voice = .terminal }
         let terminalFont = MobileEditorStyle.baseFont
-        let terminalGap = MobileEditorStyle.baseParagraphStyle.paragraphSpacing
-        #expect(terminalGap == (terminalFont.pointSize * 0.5).rounded())
+        let terminalStyle = MobileEditorStyle.baseParagraphStyle
+        #expect(terminalStyle.paragraphSpacing == terminalFont.pointSize.rounded())
+        #expect(terminalStyle.lineSpacing == (terminalFont.pointSize * 0.4).rounded())
 
         MobileEditorStyle.voice = .study
         #expect(MobileEditorStyle.baseFont.familyName == "Iowan Old Style")
         #expect(MobileEditorStyle.markdownPalette
                 == MobileEditorStyle.studyFace.palette)
         #expect(MobileEditorStyle.baseParagraphStyle.paragraphSpacing
-                == (MobileEditorStyle.baseFont.pointSize * 0.5).rounded())
+                == MobileEditorStyle.baseFont.pointSize.rounded())
+        #expect(MobileEditorStyle.baseParagraphStyle.lineSpacing
+                == (MobileEditorStyle.baseFont.pointSize * 0.4).rounded())
         #expect(MobileEditorStyle.baseFont != terminalFont)
     }
 }

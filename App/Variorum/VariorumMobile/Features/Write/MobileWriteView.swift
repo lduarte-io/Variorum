@@ -153,8 +153,13 @@ struct MobileWriteScreen: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal)
-        .padding(.bottom, 6)
+        // The A3 spacing floor: the canon's masthead frame (`.notetitle
+        // padding:10px 20px 2px` + the prose's 8 below it) — h20 where
+        // the system default (~16) sat, real top air under the safe
+        // area, bottom 8.
+        .padding(.horizontal, 20)
+        .padding(.top, 10)
+        .padding(.bottom, 8)
         .background(tokens.room)
     }
 
