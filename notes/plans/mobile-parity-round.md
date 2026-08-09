@@ -5189,3 +5189,21 @@ there) · a star door on the open note's masthead (the Library row
 is the phone's row surface; one line if her look wants it) · the
 locked-take/merge-ceremony refusal strings untouched (C4/C5's
 families, incl. PB1-4's lesson rider).
+
+## Stage C, batch C3 — ACCEPTED; the C3 LADDER OPENS (architect, 2026-08-09)
+
+Verified: all seven commits present; scope clean by own check
+(17 files, ALL mobile — zero core/Shared/Mac/schema/Sync; the
+four-suite duty never fired, correctly); the full mobile suite
+re-run by the architect's own hand: **"Test run with 262 tests in
+48 suites passed"** — 246/42 + 16/6, exactly accounted. The stars
+mechanism reuses the Mac's 13f storage through core (zero schema);
+tag deletion's confirm names the CONSEQUENCE platform-free; the file
+-reference copy is honest-neutral as briefed. **PC3-1…PC3-6 ride the
+end bundle.**
+
+**THE C3 LADDER OPENS.** Target: `ad4fbcf..9f12f2b`. Fresh cold
+reviewer, `notes/REVIEW_PROMPT.md` VERBATIM; findings repo-first as
+"## Stage C review — C3 round 1 findings". Baselines at open:
+**mobile 262/48 · mobile spine 32/7 · perf 9/2 · core 1214/128 ·
+Mac 1245/219 tripwire-only · Mac spine 51/7.**
