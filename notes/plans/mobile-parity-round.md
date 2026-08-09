@@ -6674,3 +6674,68 @@ No BLOCKER/MAJOR. Dispositions, executed this commit:
 
 **ROUND 2 OPENS** on the one-clause fix set: target this commit
 inside `36ab18d..HEAD`; fresh reviewer; new BLOCKER/MAJOR ⇒ round 3.
+
+## Stage C review — C4 round 2 (fresh cold reviewer, 2026-08-09)
+
+**Verdict: the MINOR fix HOLDS.** The fix diff (`e37cb60..e2fbc5a`)
+read in full — one guard clause + its comment in
+`MobileTakeHistory.swift`, plus the round-1 record; zero other code
+lines. The round-1 mechanism re-traced independently against the
+whole file:
+
+- **The window is closed.** `refresh()` captures `(blockID,
+  variantID)` at entry on the MainActor, suspends at the one DB
+  read, and re-reads actor state at the guard with NO suspension
+  between the guard and the `items` write — so under
+  close→flip→reopen on the same block, the stale task's captured
+  old take fails `self.variantID == variantID` and never publishes;
+  the changed-block and closed-sheet arms were already covered by
+  `openBlockID == blockID` (a nil `self.variantID` also fails the
+  optional comparison correctly). The interleaving where the first
+  open's `Task` has not yet STARTED when the reopen lands is benign
+  by construction: capture happens at task entry, so it reads the
+  new state and performs a duplicate-but-correct read.
+- **No legitimate-refresh misfire.** `variantID` is mutated nowhere
+  but `open()`/`close()` (whole-file read); `projectionDidChange`
+  deliberately never re-captures (the recorded held-for-the-sheet's-
+  life design), so every mid-sheet refresh — ingest, post-verb,
+  post-restore — passes the new clause. Same-take reopen with a
+  read in flight publishes the correct take's history. The only
+  residual is delivery-ORDER content staleness for the same take
+  (older snapshot landing after a newer one), which predates the
+  fix, is unchanged by it, and is round 1's recorded self-healing
+  class.
+- **Honestly-unpinnable re-verified, not just accepted.**
+  `AppSession.database` is the concrete `AppDatabase` end-to-end
+  (no protocol seam); the tests drive the controller through the
+  real in-memory store and cannot gate the read mid-flight, so no
+  deterministic red-on-old pin exists without adding a database
+  seam — disproportionate to a hygiene guard. The R2-10
+  recorded-mechanism precedent applies as the adjudication invoked
+  it.
+- **The three routed NITs are recorded where the adjudication
+  says.** NIT-2 and NIT-4 → Stage D's look round, recorded in the
+  adjudication paragraph per the C3 precedent (C3-R1-7 and C3-R2-2
+  ride identically — the adjudication record IS the routing record;
+  the stage table's D row is the umbrella). NIT-3 record-only: the
+  six-copied-brains KnownIssues row exists on disk (verified), and
+  declining a seventh row for a string, not a brain, is consistent
+  with that row's own scope.
+- **Sweep of the fix's file:** nothing new. `commitNow`/`restore`
+  interact with the clause only through `refresh()`, whose capture
+  discipline they inherit; a swallowed stale read fires no
+  `onChanged`, so no phantom render.
+
+**No new findings. Clean bill:** the guard's both-captures
+comparison, the capture-at-task-entry benign arm, the
+`String? == String` optional promotion, and the routed-NIT records
+all checked and solid; the comment at the fix site states the
+mechanism and the unpinnable ruling accurately.
+
+**This reviewer's run:** full mobile suite — **"Test run with 296
+tests in 56 suites passed"** (iPhone 17 Pro / iOS 26.2), the exact
+baseline. The fix set touches no core/Shared/Mac line
+(`git diff e37cb60..e2fbc5a --stat`: the one mobile file + this
+plan), so core 1215/128 · Mac 1245/219 tripwire-only · Mac spine
+51/7 · mobile spine 32/7 · perf 9/2 stand by construction on the
+round-1 reviewer's same-tree runs. **The C4 ladder can close.**
