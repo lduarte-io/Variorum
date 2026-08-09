@@ -37,6 +37,10 @@ struct MobileSettingsView: View {
     @State private var tutorialNote: String?
     @State private var confirmPresented = false
     @State private var confirmContinuation: CheckedContinuation<Bool, Never>?
+    /// The performance fixture door's state (parity B2 — the B1 door
+    /// family's latch/outcome shape, its own latch).
+    @State private var perfInFlight = false
+    @State private var perfNote: String?
     #endif
 
     private var tokens: VoiceTokens {
@@ -128,6 +132,31 @@ struct MobileSettingsView: View {
             Divider()
                 .overlay(tokens.line)
                 .padding(.vertical, 14)
+            Text(tokens.chromeLabel("Performance (dev store)"))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 4)
+            Button {
+                Task { await perfDoor() }
+            } label: {
+                Text(tokens.chromeLabel("Seed the 100k fixture"))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 4)
+            if let perfNote {
+                Text(tokens.chromeLabel(perfNote))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 2)
+            }
+            Divider()
+                .overlay(tokens.line)
+                .padding(.vertical, 14)
             Button("TK2 Spike") { spikePresented = true }
                 .font(tokens.small)
                 .padding(.horizontal, 20)
@@ -187,6 +216,30 @@ struct MobileSettingsView: View {
             tutorialNote = "The pocket guide is on your shelf."
         } catch {
             tutorialNote = String(describing: error)
+        }
+    }
+
+    /// The performance fixture's door (parity B2): find-or-seed only —
+    /// an existing proving ground just reports, and nothing here is ever
+    /// destructive, so no confirm is owed. Seeding a few thousand rows
+    /// through Operations takes a moment on the dev store; the latch
+    /// keeps the door single-entry and the note speaks the outcome.
+    private func perfDoor() async {
+        guard !perfInFlight else { return }
+        perfInFlight = true
+        perfNote = "Seeding…"
+        defer { perfInFlight = false }
+        do {
+            let outcome = try await MobilePerfFixtureSeeder.findOrSeed(session: session)
+            if let seeded = outcome.seeded {
+                perfNote = "Seeded: \u{201C}\(MobilePerfFixtureSeeder.megaPostTitle)\u{201D} "
+                    + "(\(seeded.megaWordCount) words, \(seeded.megaBlockCount) blocks) "
+                    + "+ \(seeded.corpusNoteCount) corpus notes in six books."
+            } else {
+                perfNote = "The proving ground is already seeded."
+            }
+        } catch {
+            perfNote = String(describing: error)
         }
     }
     #endif
