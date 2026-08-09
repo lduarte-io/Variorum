@@ -336,21 +336,50 @@ final class MobileEditorTextView: UITextView {
     /// wire-time-delivery discipline), and a steady-state pass writes
     /// nothing.
     ///
-    /// The trailing newline the paragraph range carries (a one-paragraph
-    /// block's SEPARATOR) is styled with the paragraph — harmless and
-    /// deliberate: the visual paragraph stays uniform, and the block-ID
-    /// projection (the identity authority) is a different attribute.
+    /// FIX-B1 (Stage B ladder round 1, MINOR 1 — the reservation-style
+    /// leak, both roads).
+    /// **(a) The split residue:** a mid-paragraph Enter (I4: content)
+    /// used to strand the reservation on the continuation paragraph —
+    /// the governing-character gate reads only the first paragraph, so
+    /// no pass could ever heal what it never governed. Every reservation
+    /// call now walks the block's REMAINING paragraphs and zeroes its
+    /// own field where stranded (equality-gated per paragraph: a clean
+    /// continuation paragraph costs one attribute read, zero writes).
+    /// **(b) The separator inheritance:** the styled paragraph range
+    /// includes the block's trailing separator "\n", and UIKit
+    /// re-derives `typingAttributes` from the character before the
+    /// caret — so tails typed after a one-paragraph fanned block (and
+    /// every block crystallized from them, and the next block's first
+    /// characters) inherited a permanent dent in paragraphs the
+    /// reservation walk never visits. The separator itself CANNOT be
+    /// kept clean: NSTextStorage attribute FIXING re-propagates the
+    /// paragraph's governing style across the whole paragraph,
+    /// terminator included (measured — a write clamped to exclude the
+    /// terminator reads back styled; the fix-session probe pinned it
+    /// cold on a bare storage). So the fix heals the LANDING instead:
+    /// `healReservationResidue` runs edit-scoped after each
+    /// controller's reservation walk, zeroing that door's field in
+    /// every edited paragraph the walk does not govern. O(paragraphs
+    /// in the edit) — P-8 clean; the derived dent never survives its
+    /// own storageDidEdit pass.
 
     /// Reserve `width` points of first-paragraph TRAILING room (0 clears).
     /// Returns whether storage changed (the caller's invalidation record).
     @discardableResult
     func setTailReservation(_ width: CGFloat, blockRange: NSRange) -> Bool {
-        setReservation(blockRange: blockRange) { style in
-            let target = width <= 0 ? 0 : -width
-            guard abs(style.tailIndent - target) > 0.01 else { return false }
-            style.tailIndent = target
-            return true
-        }
+        setReservation(
+            blockRange: blockRange,
+            mutate: { style in
+                let target = width <= 0 ? 0 : -width
+                guard abs(style.tailIndent - target) > 0.01 else { return false }
+                style.tailIndent = target
+                return true
+            },
+            heal: { style in
+                guard abs(style.tailIndent) > 0.01 else { return false }
+                style.tailIndent = 0
+                return true
+            })
     }
 
     /// Reserve `width` points of first-LINE leading room (0 clears) —
@@ -358,27 +387,135 @@ final class MobileEditorTextView: UITextView {
     /// shape.
     @discardableResult
     func setLeadingFirstLineReservation(_ width: CGFloat, blockRange: NSRange) -> Bool {
-        setReservation(blockRange: blockRange) { style in
-            let target = max(width, 0)
-            guard abs(style.firstLineHeadIndent - target) > 0.01 else { return false }
-            style.firstLineHeadIndent = target
+        setReservation(
+            blockRange: blockRange,
+            mutate: { style in
+                let target = max(width, 0)
+                guard abs(style.firstLineHeadIndent - target) > 0.01 else { return false }
+                style.firstLineHeadIndent = target
+                return true
+            },
+            heal: { style in
+                guard abs(style.firstLineHeadIndent) > 0.01 else { return false }
+                style.firstLineHeadIndent = 0
+                return true
+            })
+    }
+
+    /// One walk over the paragraphs that BEGIN inside the block: the
+    /// FIRST gets `mutate` (the reservation's own equality gate inside),
+    /// every later one gets `heal` (zero this door's field if stranded —
+    /// FIX-B1 road a). Writes cover the full paragraph range — attribute
+    /// fixing re-propagates the governing style across each paragraph
+    /// either way (the header's measured truth). Each closure touches
+    /// ONLY its own field on a copy of the current style, so the two
+    /// doors still compose on a block carrying both.
+    private func setReservation(
+        blockRange: NSRange,
+        mutate: (NSMutableParagraphStyle) -> Bool,
+        heal: (NSMutableParagraphStyle) -> Bool
+    ) -> Bool {
+        guard blockRange.length > 0, let storage = textStorage as NSTextStorage?,
+              blockRange.location < storage.length else { return false }
+        let text = storage.mutableString
+        let blockEnd = min(blockRange.location + blockRange.length, storage.length)
+        var changed = false
+        var isFirst = true
+        var location = blockRange.location
+        while location < blockEnd {
+            var pStart = 0
+            var pEnd = 0
+            var cEnd = 0
+            text.getParagraphStart(
+                &pStart, end: &pEnd, contentsEnd: &cEnd,
+                for: NSRange(location: location, length: 0))
+            let writeRange = NSRange(location: pStart, length: pEnd - pStart)
+            if writeRange.length > 0,
+               applyReservation(writeRange, isFirst ? mutate : heal, storage) {
+                changed = true
+            }
+            isFirst = false
+            guard pEnd > location else { break }
+            location = pEnd
+        }
+        return changed
+    }
+
+    /// FIX-B1 road (b) — the typing-inheritance heal (edit-scoped; the
+    /// FIX-B1 header has the full mechanism): zeroes ONE reservation
+    /// field across every paragraph beginning in `range`, EXCEPT the
+    /// paragraphs whose starts the calling walk currently governs (a
+    /// reserved block's first paragraph). The chrome controllers call
+    /// their field's door after the reservation walk on the `.edit`
+    /// road, so a derived dent — the open tail, a next block's first
+    /// characters — never survives the keystroke's own pass.
+    /// Equality-gated per paragraph; a clean edit reads one attribute
+    /// per paragraph and writes nothing.
+    @discardableResult
+    func healTailReservationResidue(
+        in range: NSRange, skippingParagraphsAt governedStarts: Set<Int>
+    ) -> Bool {
+        healReservationResidue(in: range, skippingParagraphsAt: governedStarts) { style in
+            guard abs(style.tailIndent) > 0.01 else { return false }
+            style.tailIndent = 0
             return true
         }
     }
 
-    private func setReservation(
-        blockRange: NSRange, mutate: (NSMutableParagraphStyle) -> Bool
+    /// The leading door's twin (the callout emoji gap's field).
+    @discardableResult
+    func healLeadingReservationResidue(
+        in range: NSRange, skippingParagraphsAt governedStarts: Set<Int>
     ) -> Bool {
-        guard blockRange.length > 0, let storage = textStorage as NSTextStorage?,
-              blockRange.location < storage.length else { return false }
-        let paragraph = storage.mutableString.paragraphRange(
-            for: NSRange(location: blockRange.location, length: 0))
+        healReservationResidue(in: range, skippingParagraphsAt: governedStarts) { style in
+            guard abs(style.firstLineHeadIndent) > 0.01 else { return false }
+            style.firstLineHeadIndent = 0
+            return true
+        }
+    }
+
+    private func healReservationResidue(
+        in range: NSRange, skippingParagraphsAt governedStarts: Set<Int>,
+        heal: (NSMutableParagraphStyle) -> Bool
+    ) -> Bool {
+        guard let storage = textStorage as NSTextStorage?, storage.length > 0,
+              range.location < storage.length else { return false }
+        let text = storage.mutableString
+        let end = min(range.location + range.length, storage.length)
+        var changed = false
+        var location = range.location
+        while location < storage.length {
+            var pStart = 0
+            var pEnd = 0
+            var cEnd = 0
+            text.getParagraphStart(
+                &pStart, end: &pEnd, contentsEnd: &cEnd,
+                for: NSRange(location: location, length: 0))
+            if !governedStarts.contains(pStart),
+               applyReservation(NSRange(location: pStart, length: pEnd - pStart), heal, storage) {
+                changed = true
+            }
+            guard pEnd < end, pEnd > location else { break }
+            location = pEnd
+        }
+        return changed
+    }
+
+    /// The one write shape both walks share: copy the paragraph's
+    /// governing style, let the closure mutate its field, write only on
+    /// real change.
+    private func applyReservation(
+        _ paragraphRange: NSRange,
+        _ mutate: (NSMutableParagraphStyle) -> Bool,
+        _ storage: NSTextStorage
+    ) -> Bool {
+        guard paragraphRange.length > 0 else { return false }
         let current = storage.attribute(
-            .paragraphStyle, at: blockRange.location, effectiveRange: nil)
+            .paragraphStyle, at: paragraphRange.location, effectiveRange: nil)
             as? NSParagraphStyle ?? MobileEditorStyle.baseParagraphStyle
         let style = current.mutableCopy() as! NSMutableParagraphStyle
         guard mutate(style) else { return false }
-        storage.addAttribute(.paragraphStyle, value: style, range: paragraph)
+        storage.addAttribute(.paragraphStyle, value: style, range: paragraphRange)
         return true
     }
 

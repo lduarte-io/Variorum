@@ -221,6 +221,19 @@ final class MobileTakesChromeController {
             }
             reservedBlocks.remove(blockID)
         }
+        // FIX-B1 road (b): the EDIT road heals typing-inherited residue —
+        // UIKit derives typingAttributes from the character before the
+        // caret, and attribute fixing keeps a reserved block's separator
+        // styled, so characters typed right after a one-paragraph fanned
+        // block (the open tail, the next block's start) land carrying the
+        // dent in paragraphs this walk never visits. Zero the tail field
+        // across the edited range's paragraphs, skipping exactly the
+        // first paragraphs this walk governs (the reserved blocks').
+        if case .edit(let edited) = scope {
+            textView.healTailReservationResidue(
+                in: edited,
+                skippingParagraphsAt: Set(seen.compactMap { ranges[$0]?.location }))
+        }
 
         // 2 — peek markers (M9: sticky, visible, per-block).
         var peeked: Set<String> = []

@@ -624,6 +624,133 @@ struct MobileTakesChromeTests {
         }
     }
 
+    /// FIX-B1 road (a) (Stage B ladder round 1, MINOR 1 — the split
+    /// residue): typing Enter INSIDE a fanned block's first paragraph
+    /// (I4: the newline is content, not structure) splits it, and the
+    /// continuation paragraph's characters still carry the reservation's
+    /// `tailIndent` — the governing-character equality gate reads only
+    /// the FIRST paragraph, and cleanup on fan-death cleared only the
+    /// first paragraph too, so nothing ever healed the strand: every
+    /// continuation line rendered 30+ pt short until a full
+    /// re-materialization. The reservation walk now HEALS the block's
+    /// non-first paragraphs to zero on every pass (band-independent,
+    /// equality-gated — a clean continuation paragraph is never
+    /// re-written). RED-ON-OLD: born before the fix and run red on the
+    /// unfixed tree; re-verified by behavioral revert (heal removed →
+    /// the continuation paragraph reads the stranded −30).
+    @Test func aMidParagraphReturnNeverStrandsTheReservationOnTheContinuationParagraph() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedWrappingFannedPost(session)
+            let (model, surface) = await makeSurface(session, postID: seed.postID)
+            let view = surface.textView
+            // Settled: the fanned block's first paragraph carries the gutter.
+            let before = try #require(model.rangeOfBlock(seed.blockA))
+            #expect(tailReservation(view, at: before.location)
+                    == MobileTakesChromeController.gutterWidth)
+
+            // The mid-paragraph Enter, through the policed road — the
+            // storage edit's own chrome pass (`.edit`-scoped; the
+            // reservation walk is band-independent) is what must heal.
+            typeEdit(
+                model, view.textStorage,
+                range: NSRange(location: before.location + 5, length: 0),
+                replacement: "\n")
+
+            let after = try #require(model.rangeOfBlock(seed.blockA))
+            #expect(after.length == before.length + 1, "the newline is block content (I4)")
+            // The continuation paragraph's governing character sits right
+            // after the typed newline.
+            let continuation = before.location + 6
+            #expect(tailReservation(view, at: continuation) == 0,
+                    "the continuation paragraph must not keep the first paragraph's reservation")
+            // The first paragraph keeps its gutter — the heal never
+            // over-clears the reservation itself.
+            #expect(tailReservation(view, at: after.location)
+                    == MobileTakesChromeController.gutterWidth)
+            #expect(model.identityAuditFailures == 0)
+            #expect(!view.canaryFired)
+        }
+    }
+
+    /// FIX-B1 road (b) (Stage B ladder round 1, MINOR 1 — the separator
+    /// inheritance): the separator after a one-paragraph fanned block
+    /// carries the block's reservation style — and CANNOT be kept clean:
+    /// NSTextStorage attribute FIXING re-propagates the paragraph's
+    /// governing style across the whole paragraph, terminator included
+    /// (measured by the fix session's probe; a write clamped to exclude
+    /// the terminator reads back styled). UIKit re-derives
+    /// `typingAttributes` from the character before the caret, so text
+    /// typed in the open tail — and every block crystallized from it —
+    /// inherited a permanent 30 pt dent in paragraphs the reservation
+    /// walk never visits. The fix heals the LANDING: the `.edit` road's
+    /// chrome pass zeroes reservation fields across the edited range's
+    /// ungoverned paragraphs, so the derived dent never survives its own
+    /// keystroke. The walk simulates the documented derivation the way
+    /// FB1-1's rule simulates the keyboard: the typed character carries
+    /// the style read off the actual preceding character (windowless
+    /// `insertText` bypasses `typingAttributes`, so the real derivation
+    /// cannot be exercised headless). RED-ON-OLD: born before the fix
+    /// and run red on the unfixed tree; re-verified by behavioral
+    /// revert (residue heal removed → the tail keeps the dent).
+    @Test func aTailTypedAfterAFannedBlockNeverInheritsTheReservation() async throws {
+        try await withEditorWorld { session, _ in
+            // The fanned block is the post's LAST block — the open tail
+            // follows its separator (her exact case).
+            let seed = try await session.runner.run { ops -> (postID: String, blockA: String) in
+                let post = try ops.createPost(title: "tail-dent", profile: .blog)
+                let a = try ops.newBlock(
+                    in: post.id, text: "A" + String(repeating: "abcdefghij", count: 20), at: .end)
+                let take = try ops.branchVariant(a.block.id, from: a.variant.id)
+                try ops.autosave(take.id, text: "The other take of A.", charDelta: 5)
+                return (post.id, a.block.id)
+            }
+            let (model, surface) = await makeSurface(session, postID: seed.postID)
+            let view = surface.textView
+            let storage = view.textStorage
+            let rangeA = try #require(model.rangeOfBlock(seed.blockA))
+            #expect(tailReservation(view, at: rangeA.location)
+                    == MobileTakesChromeController.gutterWidth)
+
+            // Open the tail (the gate road — ⏎ at the document's end);
+            // the typed newline is the separator.
+            typeEdit(model, storage,
+                     range: NSRange(location: storage.length, length: 0), replacement: "\n")
+            let separator = storage.length - 1
+            #expect((storage.string as NSString)
+                .substring(with: NSRange(location: separator, length: 1)) == "\n")
+
+            // The derivation's feed: the separator carries the block's
+            // reservation (attribute fixing — the probe's measured truth;
+            // a clean feed would make this pin vacuous, so it is guarded).
+            let derived = governingStyle(view, at: separator)
+            #expect(-(derived?.tailIndent ?? 0) == MobileTakesChromeController.gutterWidth,
+                    "the probe is dead — the separator no longer carries the style this pin exists to contain")
+
+            // Type into the tail CARRYING the derived style (the
+            // documented typingAttributes derivation, simulated from the
+            // real preceding character per FB1-1's walk rule).
+            var attributes: [NSAttributedString.Key: Any] = [.font: MobileEditorStyle.baseFont]
+            if let derived { attributes[.paragraphStyle] = derived }
+            let typedAt = storage.length
+            let allowed = model.shouldChangeText(
+                in: NSRange(location: typedAt, length: 0), replacement: "x", isPaste: false)
+            #expect(allowed, "the tail must accept typing")
+            storage.replaceCharacters(
+                in: NSRange(location: typedAt, length: 0),
+                with: NSAttributedString(string: "x", attributes: attributes))
+
+            // The landing is healed in its own keystroke's pass: the tail
+            // character carries NO reservation…
+            #expect(tailReservation(view, at: typedAt) == 0,
+                    "a tail typed after a fanned block must not inherit its reservation")
+            // …while the fanned block keeps its own gutter untouched.
+            #expect(tailReservation(view, at: rangeA.location)
+                    == MobileTakesChromeController.gutterWidth)
+            #expect(model.identityAuditFailures == 0)
+            #expect(!view.canaryFired)
+        }
+    }
+
     @Test func theChromeRestylesWithTheVoice() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedWrappingFannedPost(session)

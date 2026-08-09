@@ -164,6 +164,14 @@ final class MobileBlockDecorController {
             }
             emojiReservedBlocks.remove(blockID)
         }
+        // FIX-B1 road (b), the leading field's twin (the takes chrome's
+        // call site has the mechanism): text typed right after a callout
+        // block must not inherit its emoji gap.
+        if case .edit(let edited) = scope {
+            textView.healLeadingReservationResidue(
+                in: edited,
+                skippingParagraphsAt: Set(emojiSeen.compactMap { ranges[$0]?.location }))
+        }
 
         // 2 — comment markers (●n at the block's last line end).
         var commented: Set<String> = []
