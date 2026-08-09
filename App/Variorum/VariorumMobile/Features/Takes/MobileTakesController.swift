@@ -176,6 +176,55 @@ final class MobileTakesController {
         onPeekChanged?(blockID)
     }
 
+    // MARK: - Targeted peeks (parity C5 — the lens activation's primitives)
+
+    /// The targeted flip: display a SPECIFIC take of a fanned block as
+    /// the sticky peek — `flip`'s body with a destination instead of a
+    /// step, sharing its ledger-first capture/restore exactly. Landing on
+    /// the chosen truth ends any peek (displaying truth is not a peek —
+    /// which is also what makes a lens pick equal to chosen TRANSPARENT,
+    /// the sparse doctrine's letter). Gap/fanless blocks and takes
+    /// outside the live active fan no-op (a dangling lens pick was
+    /// already dropped by `effectiveLensSelection`; this is the belt).
+    func peek(blockID: String, to variantID: String) {
+        guard let model, !model.markedTextActive else { return }
+        guard let current = model.slot(for: blockID) else { return }
+        guard let fan = fans[blockID], fan.count > 1,
+              let take = fan.first(where: { $0.id == variantID })
+        else { return }
+        let original = originals[blockID] ?? resolvedOriginal(current)
+        if take.id == original.variantID {
+            guard peeks[blockID] != nil else { return }
+            peeks[blockID] = nil
+            originals[blockID] = nil
+            model.displaySlot(resolvedOriginal(original), for: blockID)
+        } else {
+            peeks[blockID] = take.id
+            originals[blockID] = original
+            model.displaySlot(peekedSlot(over: original, take: take), for: blockID)
+        }
+        onPeekChanged?(blockID)
+    }
+
+    /// Ends EVERY peek and restores each block's chosen-truth display —
+    /// the lens switch's reset half (the view is always "chosen + the
+    /// active lens's picks + her swipes"; switching starts from truth).
+    func endAllPeeksRestoringDisplay() {
+        guard let model else { return }
+        for (blockID, _) in peeks {
+            guard let original = originals[blockID] else {
+                peeks[blockID] = nil
+                continue
+            }
+            peeks[blockID] = nil
+            originals[blockID] = nil
+            model.displaySlot(resolvedOriginal(original), for: blockID)
+            onPeekChanged?(blockID)
+        }
+        peeks = [:]
+        originals = [:]
+    }
+
     // MARK: - ✓ (M6: the ONLY choosing act)
 
     /// Commits the peeked take as the slot's chosen variant through the

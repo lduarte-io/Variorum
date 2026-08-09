@@ -71,7 +71,7 @@ enum MobileTutorialSeeder {
     nonisolated static let plan: [(chapter: String, lessons: [String])] = [
         ("welcome", ["start here", "getting around"]),
         ("writing", ["blocks & typing", "formatting"]),
-        ("takes", ["your first take", "swipe & choose", "the browser"]),
+        ("takes", ["your first take", "swipe & choose", "the browser", "lenses"]),
         ("structure", ["divide", "divide with takes", "merge"]),
         ("the library of things", ["comments & callouts", "the seal", "the voice switch"]),
     ]
@@ -295,10 +295,12 @@ enum MobileTutorialSeeder {
             + "lives in the sheet. more info, beside the tags, keeps "
             + "links and files with the note — tap a link to open it, or "
             + "add one; a file listed there stays on the device where it "
-            + "was added, and only its name travels. And blocks, at the "
-            + "line's end, lists this note's blocks — a block's name "
-            + "where you've set one, else its first sentence, worked out "
-            + "fresh each time — and a tap jumps you there.",
+            + "was added, and only its name travels. blocks lists this "
+            + "note's blocks — a block's name where you've set one, else "
+            + "its first sentence, worked out fresh each time — and a tap "
+            + "jumps you there. And lens, at the line's end, switches "
+            + "between saved ways of looking at this note (the lenses "
+            + "lesson shows it off).",
 
             "Settings, on the shelf's top line, holds the voice switch (the "
             + "last lesson), tag management — browse the whole tag tree "
@@ -463,6 +465,38 @@ enum MobileTutorialSeeder {
         ])
         try take(on: browser.blocks[2],
             "the spare take — archive me from my card's ⋯.")
+
+        // Parity C5 — the lens lesson lands WITH the door
+        // (tutorial-as-spec). A staged fan to arrange, and a seeded
+        // saved lens so the sheet has a way of looking to switch to on
+        // first open (the walk drives both).
+        let lensing = try lesson(takes, "lenses", [
+            "A LENS is a saved way of looking at this note: which take "
+            + "each block shows, remembered under a name. The note itself "
+            + "never moves — a lens is viewing, not choosing, so switching "
+            + "lenses writes nothing and works even on a sealed note.",
+
+            "The lighthouse keeps its own hours.",
+
+            "Tap lens on the masthead's second line to open the sheet: "
+            + "the note is what the note really says, and each saved lens "
+            + "is one tap to view. This note ships with one — switch to "
+            + "it and the block above flips to its other take, wearing "
+            + "the peek marker, because a lens IS a saved set of peeks. "
+            + "Swipe blocks to takes you like and save the current view "
+            + "as a lens, or save into the one you're in. And when a "
+            + "view should BE the note, ✓ make this the note adopts it — "
+            + "keeping the old arrangement as a lens of its own, so the "
+            + "road back stays visible.",
+        ])
+        let lighthouse = lensing.blocks[1]
+        let lighthouseTake = try take(on: lighthouse,
+            "The lighthouse answers to nobody's clock.")
+        let otherReading = try ops.createLens(
+            post: lensing.post.id, name: "the other reading")
+        _ = try ops.setLensChoice(
+            lens: otherReading.id, block: lighthouse.block.id,
+            variant: lighthouseTake.id)
 
         // ———————————————————————————— structure ————————————————————————————
 

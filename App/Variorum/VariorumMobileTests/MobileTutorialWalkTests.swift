@@ -779,6 +779,65 @@ struct MobileTutorialTakesWalkTests {
             #expect(try await db.read { try fanCount($0, blockID: rain.blockID) } == 4)
         }
     }
+
+    /// The lens lesson (parity C5 — the ruled saved-peek shape): the
+    /// seeded lens lists, switching to it applies its pick as a sticky
+    /// peek (zero store writes — viewing, never choosing), "the note"
+    /// returns to truth, saving the current view mints a SPARSE lens,
+    /// and ✓ adopt makes the view the note with the outgoing
+    /// arrangement preserved as a lens of its own.
+    @Test func theLensLessonSwitchesSavesAndAdopts() async throws {
+        try await withPocketGuideWorld { session, db, bookID in
+            let lesson = try await db.read { try lessonID($0, bookID: bookID, "lenses") }
+            let (model, _) = await makeLessonSurface(session, postID: lesson)
+            let lenses = MobileLensesModel(session: session, postID: lesson, editor: model)
+            let lighthouse = try #require(model.slots.first {
+                $0.text == "The lighthouse keeps its own hours."
+            })
+            let chosenBefore = try #require(lighthouse.variantID)
+            let storeBefore = try await storedBlockTexts(db, postID: lesson)
+
+            // The seeded lens lists with its honest meta.
+            await lenses.refresh()
+            let row = try #require(lenses.rows.first { $0.name == "the other reading" })
+            #expect(row.pickCount == 1 && row.unavailable == 0)
+
+            // SWITCH: the lens's pick becomes a sticky peek.
+            await lenses.activate(row.id)
+            #expect(model.slot(for: lighthouse.blockID)?.text
+                    == "The lighthouse answers to nobody's clock.")
+            #expect(model.takes.isPeeking(lighthouse.blockID))
+            #expect(lenses.chipLabel == "lens: the other reading")
+            #expect(try await storedBlockTexts(db, postID: lesson) == storeBefore,
+                    "a lens is viewing — the store is untouched")
+            #expect(try await db.read { try chosenVariantID($0, blockID: lighthouse.blockID) }
+                    == chosenBefore)
+
+            // "the note" ends the session; the display is truth again.
+            lenses.returnToNote()
+            #expect(model.slot(for: lighthouse.blockID)?.text
+                    == "The lighthouse keeps its own hours.")
+            #expect(lenses.chipLabel == "lens")
+
+            // Arrange by hand (the swipe), save the current view: a
+            // SPARSE lens — exactly the one divergence — and you're in it.
+            model.takes.flip(blockID: lighthouse.blockID, forward: true)
+            #expect(await lenses.saveCurrentView(name: "my reading"))
+            let saved = try #require(lenses.rows.first { $0.name == "my reading" })
+            #expect(saved.pickCount == 1)
+            #expect(lenses.activeLensName == "my reading")
+
+            // ✓ ADOPT: the view becomes the note; the outgoing chosen is
+            // preserved as a lens of its own; the peek and session end.
+            await lenses.adoptView()
+            #expect(try await db.read { try chosenVariantID($0, blockID: lighthouse.blockID) }
+                    != chosenBefore)
+            #expect(!model.takes.isPeeking(lighthouse.blockID))
+            #expect(lenses.rows.contains { $0.name.hasPrefix("chosen until") },
+                    "the old arrangement is kept — the road back visible")
+            #expect(lenses.activeLensID == nil, "adopting ends the lens session")
+        }
+    }
 }
 
 // MARK: - structure (the taught flows, on the lessons' own blocks)
@@ -1043,7 +1102,7 @@ struct MobileTutorialLibraryWalkTests {
             let last = try #require(slots.last)
             #expect(MobileReadPage.pageMeta(
                 ordinal: last.ordinal, total: book.entries.count,
-                chapterIndex: last.chapterIndex) == "note 13 of 13 · v")
+                chapterIndex: last.chapterIndex) == "note 14 of 14 · v")
         }
     }
 

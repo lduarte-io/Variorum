@@ -73,6 +73,11 @@ struct MobileWriteScreen: View {
     /// chip's model and its sheet; a tap jumps the editor there.
     @State private var blockList: MobileBlockListModel
     @State private var blocksPresented = false
+    /// Lenses (parity C5 — her top-bar sketch, the ruled saved-peek
+    /// shape): the chip's model and its sheet; the active lens is
+    /// session-local (evaporates with this screen — M9's lifetime).
+    @State private var lenses: MobileLensesModel
+    @State private var lensesPresented = false
     /// The shell's voice authority; nil in harness/preview use, where the
     /// stored preference read at init governs.
     private let router: MobileShellRouter?
@@ -93,11 +98,14 @@ struct MobileWriteScreen: View {
         tab: MobileTab = .shelf,
         onOpenNote: ((String) -> Void)? = nil
     ) {
-        _model = State(initialValue: MobileEditorViewModel(session: session, postID: postID))
+        let editor = MobileEditorViewModel(session: session, postID: postID)
+        _model = State(initialValue: editor)
         _membership = State(initialValue: MobileMembershipModel(session: session, postID: postID))
         _noteTags = State(initialValue: MobileNoteTagsModel(session: session, postID: postID))
         _references = State(initialValue: MobileReferencesModel(session: session, postID: postID))
         _blockList = State(initialValue: MobileBlockListModel(session: session, postID: postID))
+        _lenses = State(initialValue: MobileLensesModel(
+            session: session, postID: postID, editor: editor))
         self.router = router
         self.beginEditing = beginEditing
         self.tab = tab
@@ -179,6 +187,7 @@ struct MobileWriteScreen: View {
                 tagsChip
                 moreInfoChip
                 blocksChip
+                lensChip
             }
             if let canary = model.canaryMessage {
                 Text(canary).font(tokens.small).foregroundStyle(.red)
@@ -243,6 +252,9 @@ struct MobileWriteScreen: View {
                 blocksPresented = false
                 model.jumpToBlock(blockID)
             }
+        }
+        .sheet(isPresented: $lensesPresented) {
+            MobileLensSheet(model: lenses, tokens: tokens)
         }
         .alert("Entry Date", isPresented: $datePresented) {
             TextField("2026-08-09", text: $dateField)
@@ -359,6 +371,25 @@ struct MobileWriteScreen: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Blocks")
+    }
+
+    /// The lens chip (parity C5 — her sketch: "choose between lenses on
+    /// the top bar"): the bare voiced word at rest; the ACTIVE lens's
+    /// name in words while one drives the display (the whole-surface
+    /// viewing state, named honestly — accent ink says the display is a
+    /// way of looking, not the note). Fourth chip on the second line —
+    /// joins PC4b-4's recorded crowding look item.
+    private var lensChip: some View {
+        Button {
+            lensesPresented = true
+        } label: {
+            Text(tokens.chromeLabel(lenses.chipLabel))
+                .font(tokens.small)
+                .foregroundStyle(lenses.activeLensID != nil ? tokens.accent : tokens.faint)
+                .lineLimit(1)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Lenses")
     }
 
     /// Find in note (parity C4b item 3): the masthead's trailing corner
