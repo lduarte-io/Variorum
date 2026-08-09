@@ -3558,3 +3558,28 @@ iOS 26.2):**
 - Core / Mac / Mac-spine deliberately not run: zero shared lines in
   the fix set (the standing only-if-shared condition; the scope check
   above is the proof).
+
+## Stage B ladder — fix set ACCEPTED by the architect; ROUND 2 OPENS (2026-08-09)
+
+FIX-B1…FIX-B5 verified before relying: six commits present; scope
+clean by own check (seven mobile files, zero core/Shared/Mac lines);
+the full mobile suite re-run by the architect's own hand: **"Test run
+with 227 tests in 36 suites passed", zero known issues, 18.5 s** —
+225/36 + FIX-B1's two born-red pins, exactly accounted. FIX-B1's
+mechanism discovery is accepted AND noted for the canon fold-in at
+the stage closeout (NSTextStorage attribute fixing re-propagates the
+governing paragraph style across the paragraph, terminator included —
+the heal-the-landing shape is the only possible one). FIX-B2's
+RENAME road is accepted on its two-run measurement (bare TK2's own
+per-edit cost at 1,370 paragraphs makes a 3.0× post-axis ratio
+unattainable; the pins now claim exactly what they enforce, the
+ratio teeth self-arm if a control rises, and the corpus-axis pin
+keeps its honestly-binding flatness name).
+
+**ROUND 2 OPENS** (fresh cold reviewer; a real pass over the fixes
+and what they touched): anchor = the round-1 findings + adjudication
++ fix-pass record above; fix-set diff `42d7392..747e3fd` inside the
+stage's combined `5aa10f5..747e3fd`. New BLOCKER/MAJOR ⇒ round 3
+(hard cap three). Baselines at round-2 open: **mobile 227/36 zero
+known issues · spine 32/7 · perf suites 9/2 · core 1214/128 · Mac
+1245/219 tripwire-only · spine-Mac 51/7.**
