@@ -1831,3 +1831,82 @@ round 2 / the architect owns the disposition.
 The four-suite duty fired on FIX-2's core change; the diff otherwise
 carries zero `Sources/VariorumCore/Sync/`, zero `Persistence/`
 (no schema), zero Mac-app source, zero `App/Variorum/Shared/` lines.
+
+### FIX-5 addendum (fix session, 2026-08-09 — the round-1.5 adjudicated MAJOR: the clipped Aa strip)
+
+**The overflow, TRACED before any change (a throwaway windowed layout
+probe on the live toolbar, deleted after use — windowless the iOS 26
+toolbar materializes NOTHING: its items live in a SwiftUI
+`UICoreHostingView` that only builds children in a window, which is
+also exactly how the clip escaped every headless pin):** the expanded
+strip laid out as a **478 pt row centered in the 402 pt bar**
+(container at x = −38) — each of the five plain items (× B I • ☑) got
+a **62 pt** glass cell (52 pt `_UIButtonBarButton` + 5 pt padding each
+side), the two wrapped-button items (# ⇥) **48 pt** cells, and the six
+`.flexibleSpace()`s compressed to **12 pt** gaps: 5×62 + 2×48 + 6×12 =
+**478 > 402**, hanging **38 pt off EACH edge** — × visible only as the
+[0, 24] tail of its cell and ⇥ as a ~10 pt sliver, the screenshot's
+exact slivers.
+
+**Mechanics chosen (the adjudication left them to this session): the
+strip becomes ONE bar item, never seven.** The seven acts are real
+`UIButton`s in one `UIStackView` (`kbar.formattingStrip`) carried by a
+single `UIBarButtonItem(customView:)`, flexible-spaced to center:
+7 × 44 pt buttons (the HIG tap-target floor, pinned as
+`stripButtonMinWidth`) + 6 × 2 pt gaps = **320 pt intrinsic**, inside
+even the tightest iPhone class's cell (measured windowed: the toolbar
+insets its content row 16 pt a side and pads the customView's glass
+cell 5 pt a side, so a 375 pt bar still offers 333 pt) — overflow
+impossible by construction, NO item leaves the strip, NO scroll. The
+ruling is untouched: in-place expand/collapse on the accessory bar,
+the LK8 order (× · B · I · # · • · ☑ · ⇥), resting Aa · ⑂ · ⋯,
+reset-per-presentation — and both ruled long-press doors survive
+because the # and ⇥ buttons are the SAME buttons with the same wiring
+(menu-not-primary; the long-press recognizer). The `headingItem`/
+`indentItem` wrappers became `headingButton`/`indentButton` builders;
+the post-fix windowed probe measured the strip's glass cell at 342 pt
+with all seven 44×38 buttons at x = 0…288 inside it. Two standing
+tests took sanctioned mechanical updates (the Aa pin's `labels()`
+helper and the P5 wiring lookup now descend into the strip container;
+every pinned label, order, and selector unchanged).
+
+**Pin:**
+`MobileMarkdownActsTests/allSevenStripActsSitFullyVisibleAndTappableInsideTheBar`
+— WINDOWLESS host (the corrected machinery lesson's preferred form;
+possible at all only because the strip is now our own stack, which
+lays out headless where the toolbar's private cells cannot): requires
+the one-cell strip, then asserts strip width ≤ 333 (the tightest
+class's measured cell), every button fully inside the strip's bounds,
+every button ≥ 44 pt wide, and the seven doors in the LK8 order.
+**Revert-verified:** the pre-fix seven-separate-items arm restored →
+the pin FAILS at the strip requirement (recording the defect's
+arithmetic in its message) while all 13 suite siblings — the Aa
+round-trip pin included — stay green (clean discrimination); fix
+restored → 14/1 green.
+
+**The re-capture (the FIX-1 road, executed):**
+`after-kbar-formatting.png` re-taken 2026-08-09 ~07:54 on the live
+iPhone 17 Pro / iOS 26.2 simulator via `xcrun simctl io booted
+screenshot` — the SAME seeded dev-store content (the Field Notes
+book's Harbor Light note; the store survived from the FIX-1 session,
+verified by row query), a throwaway XCUITest driver
+(`KbarCaptureDriver`, TK2SpikeUITests scheme, signal-file handshake)
+navigating and holding the real app, deleted after use; the software
+keyboard raised to match the defect shot's state. **Verified by eye
+before being claimed: all SEVEN items — × B I # • ☑ ⇥ — fully visible
+in one glass capsule above the keyboard, nothing clipped.**
+`after-kbar-formatting-confirm.png` (+3 s) is byte-identical
+(md5 `0772c90e…` both) — steady state, the FIX-1 confirm methodology.
+**Which shot shows which state:**
+`after-kbar-formatting-round1-defect.png` (captured 07:14, the FIX-1
+session) is the DEFECT's honest record — × and ⇥ clipped to slivers;
+`after-kbar-formatting.png` (07:54, this fix) is the shipped state.
+
+**Suite (this session's own run, the final tree):** full mobile
+(iPhone 17 Pro / iOS 26.2) — **"Test run with 191 tests in 28 suites
+passed"** — the round-1 fix pass's 190/28 + the FIX-5 pin, exactly
+accounted. Core / Mac / spine deliberately not run: FIX-5's diff is
+two mobile files (`MobileKeyboardBar.swift`,
+`MobileMarkdownTests.swift`) — zero `Sources/VariorumCore/`, zero
+`App/Variorum/Shared/`, zero Mac-app lines, zero schema, zero
+`Sync/`.

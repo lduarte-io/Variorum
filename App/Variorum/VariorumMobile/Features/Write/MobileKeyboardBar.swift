@@ -49,7 +49,36 @@ final class MobileKeyboardBarController: NSObject {
     /// fresh keyboard presentation (the calm default — accepted at the
     /// ruling, hers to flip at the end sitting), via the keyboard-hide
     /// notification below.
+    ///
+    /// **The strip is ONE bar item, never seven (Stage A ladder FIX-5,
+    /// the round-1.5 MAJOR):** as seven separate `UIBarButtonItem`s,
+    /// iOS 26's circle-per-item toolbar gave every plain item a 62 pt
+    /// glass cell (52 pt button + 5 pt padding each side), the two
+    /// wrapped buttons 48 pt cells, and compressed the six flexible
+    /// spaces to 12 pt gaps — 5×62 + 2×48 + 6×12 = **478 pt, centered
+    /// in the 402 pt bar**, hanging 38 pt off EACH edge: × and ⇥
+    /// rendered as edge slivers (the collapse door barely tappable, ⇥
+    /// effectively invisible). The fix owns the geometry: the seven
+    /// acts are real `UIButton`s in one `UIStackView`
+    /// (`kbar.formattingStrip`) carried by a single customView item —
+    /// 7×44 pt targets + 6×2 pt gaps = 320 pt intrinsic, inside the
+    /// tightest iPhone class's cell (measured windowed: the toolbar's
+    /// content row insets 16 pt a side and the customView's glass cell
+    /// pads 5 pt a side, so a 375 pt bar still offers 375−32−10 =
+    /// 333 pt), so overflow is impossible by construction, nothing
+    /// scrolls, and nothing hides. Our own stack also lays out
+    /// WINDOWLESS, which is what makes the visibility pin possible at
+    /// all — the toolbar's private item cells only materialize in a
+    /// window, which is exactly how the clip escaped A3's suite.
     private(set) var isFormattingExpanded = false
+
+    /// The strip's geometry constants (pinned): a 44 pt floor keeps
+    /// every act a full HIG tap target; the gap stays tight so seven
+    /// acts read as one strip and the row keeps headroom on every
+    /// supported width.
+    static let stripButtonMinWidth: CGFloat = 44
+    static let stripButtonHeight: CGFloat = 38
+    static let stripSpacing: CGFloat = 2
 
     /// The two states' acts, in bar order — one table per state so the
     /// bar and any test walk read the same truth (the registry-walk
@@ -100,9 +129,11 @@ final class MobileKeyboardBarController: NSObject {
         return bar
     }
 
-    /// One state's items, flexible-spaced. The strip's six acts are the
-    /// SAME builders the flat bar carried — byte-identical doors behind
-    /// the one Aa gate.
+    /// One state's items. The resting bar is three flexible-spaced
+    /// doors; the expanded state is the ONE-cell strip (FIX-5 — seven
+    /// separate items overflowed the bar, see the class doc), centered.
+    /// The strip's six acts are the SAME builders the flat bar carried —
+    /// byte-identical doors behind the one Aa gate.
     private func barItems(face: MobileEditorStyle.Face) -> [UIBarButtonItem] {
         let titleAttributes: [NSAttributedString.Key: Any] = [
             .font: face.chrome, .foregroundColor: face.muted,
@@ -115,27 +146,67 @@ final class MobileKeyboardBarController: NSObject {
             return item
         }
 
-        let acts: [UIBarButtonItem] = isFormattingExpanded
-            ? [
-                act("×", "Hide Formatting", #selector(toggleFormattingDoor)),
-                act("B", "Bold", #selector(fireBold)),
-                act("I", "Italic", #selector(fireItalic)),
-                headingItem(face: face),
-                act("•", "Bullet List", #selector(fireBullet)),
-                act("☑", "Checklist", #selector(fireChecklist)),
-                indentItem(face: face),
-            ]
-            : [
-                act("Aa", "Formatting", #selector(toggleFormattingDoor)),
-                act("⑂", "Takes", #selector(fireTakes)),
-                blockMenuItem(face: face),
-            ]
+        if isFormattingExpanded {
+            return [.flexibleSpace(), formattingStripItem(face: face), .flexibleSpace()]
+        }
+        let acts: [UIBarButtonItem] = [
+            act("Aa", "Formatting", #selector(toggleFormattingDoor)),
+            act("⑂", "Takes", #selector(fireTakes)),
+            blockMenuItem(face: face),
+        ]
         var items: [UIBarButtonItem] = []
         for (index, item) in acts.enumerated() {
             if index > 0 { items.append(.flexibleSpace()) }
             items.append(item)
         }
         return items
+    }
+
+    /// The expanded formatting strip — ONE customView item whose seven
+    /// acts are real buttons in one stack (`kbar.formattingStrip`), in
+    /// the LK8 order behind the door: × · B · I · # · • · ☑ · ⇥. Owning
+    /// the row's geometry is the FIX-5 mechanism (the class doc has the
+    /// overflow arithmetic); each button keeps its exact selector, label,
+    /// and second gesture — the # picker and ⇥'s long-press outdent ride
+    /// the same real buttons they always did.
+    private func formattingStripItem(face: MobileEditorStyle.Face) -> UIBarButtonItem {
+        func stripButton(
+            _ title: String, _ label: String, _ selector: Selector
+        ) -> UIButton {
+            let button = UIButton(type: .system)
+            button.setTitle(title, for: .normal)
+            button.titleLabel?.font = face.chrome
+            button.setTitleColor(face.muted, for: .normal)
+            button.accessibilityLabel = label
+            button.addTarget(self, action: selector, for: .touchUpInside)
+            return button
+        }
+
+        let buttons: [UIButton] = [
+            stripButton("×", "Hide Formatting", #selector(toggleFormattingDoor)),
+            stripButton("B", "Bold", #selector(fireBold)),
+            stripButton("I", "Italic", #selector(fireItalic)),
+            headingButton(face: face),
+            stripButton("•", "Bullet List", #selector(fireBullet)),
+            stripButton("☑", "Checklist", #selector(fireChecklist)),
+            indentButton(face: face),
+        ]
+        for button in buttons {
+            button.widthAnchor.constraint(
+                greaterThanOrEqualToConstant: Self.stripButtonMinWidth
+            ).isActive = true
+            button.heightAnchor.constraint(
+                equalToConstant: Self.stripButtonHeight
+            ).isActive = true
+        }
+        let strip = UIStackView(arrangedSubviews: buttons)
+        strip.axis = .horizontal
+        strip.alignment = .center
+        strip.spacing = Self.stripSpacing
+        strip.accessibilityIdentifier = "kbar.formattingStrip"
+        let size = strip.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
+        strip.frame = CGRect(origin: .zero, size: size)
+        return UIBarButtonItem(customView: strip)
     }
 
     /// Aa opens the strip; × closes it — one door, two faces, swapping
@@ -196,8 +267,10 @@ final class MobileKeyboardBarController: NSObject {
     /// UIKit's own long-press-reveals-menu behavior, the ⇥ button's
     /// wrap-a-button precedent). Rows are the Mac heading submenu's own
     /// words plus her "clear" row, voice-cased (P26/P43), rebuilt per
-    /// open so the register follows a voice flip.
-    private func headingItem(face: MobileEditorStyle.Face) -> UIBarButtonItem {
+    /// open so the register follows a voice flip. (Since FIX-5 the
+    /// button rides the one-cell strip rather than its own bar item;
+    /// the wiring is byte-identical.)
+    private func headingButton(face: MobileEditorStyle.Face) -> UIButton {
         let button = UIButton(type: .system)
         button.setTitle("#", for: .normal)
         button.titleLabel?.font = face.chrome
@@ -212,7 +285,7 @@ final class MobileKeyboardBarController: NSObject {
                 completion(self?.headingPickerElements() ?? [])
             },
         ])
-        return UIBarButtonItem(customView: button)
+        return button
     }
 
     /// The picker's rows (test-visible): direct levels through the SAME
@@ -245,8 +318,9 @@ final class MobileKeyboardBarController: NSObject {
     }
 
     /// ⇥ needs a long-press (the outdent half), and a `UIBarButtonItem`
-    /// can't carry one — so it wraps a real button.
-    private func indentItem(face: MobileEditorStyle.Face) -> UIBarButtonItem {
+    /// can't carry one — so it has always been a real button. (Since
+    /// FIX-5 it rides the one-cell strip; the wiring is byte-identical.)
+    private func indentButton(face: MobileEditorStyle.Face) -> UIButton {
         let button = UIButton(type: .system)
         button.setTitle("⇥", for: .normal)
         button.titleLabel?.font = face.chrome
@@ -257,7 +331,7 @@ final class MobileKeyboardBarController: NSObject {
         let longPress = UILongPressGestureRecognizer(
             target: self, action: #selector(fireOutdent(_:)))
         button.addGestureRecognizer(longPress)
-        return UIBarButtonItem(customView: button)
+        return button
     }
 
     // MARK: - The doors

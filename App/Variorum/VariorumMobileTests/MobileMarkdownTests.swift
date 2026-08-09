@@ -479,7 +479,10 @@ struct MobileMarkdownActsTests {
             }
             bar.toggleFormattingDoor()
             let headingButton = try #require((toolbar.items ?? [])
-                .compactMap { $0.customView as? UIButton }
+                .compactMap { $0.customView as? UIStackView }
+                .first { $0.accessibilityIdentifier == "kbar.formattingStrip" }?
+                .arrangedSubviews
+                .compactMap { $0 as? UIButton }
                 .first { $0.accessibilityIdentifier == "kbar.heading" })
             #expect(headingButton.menu != nil)
             #expect(!headingButton.showsMenuAsPrimaryAction)
@@ -584,10 +587,21 @@ struct MobileMarkdownActsTests {
                 Issue.record("the bar is not a toolbar")
                 return
             }
+            // Since FIX-5 the expanded acts ride ONE strip container
+            // (seven separate items overflowed the bar) — labels collect
+            // per-item for the resting bar and per-button inside the
+            // strip, so both states read in door order.
             func labels() -> [String] {
-                (toolbar.items ?? []).compactMap { item in
-                    item.accessibilityLabel
-                        ?? (item.customView as? UIButton)?.accessibilityLabel
+                (toolbar.items ?? []).flatMap { item -> [String] in
+                    if let strip = item.customView as? UIStackView,
+                       strip.accessibilityIdentifier == "kbar.formattingStrip" {
+                        return strip.arrangedSubviews.compactMap { $0.accessibilityLabel }
+                    }
+                    if let label = item.accessibilityLabel
+                        ?? (item.customView as? UIButton)?.accessibilityLabel {
+                        return [label]
+                    }
+                    return []
                 }
             }
 
@@ -618,6 +632,73 @@ struct MobileMarkdownActsTests {
                 name: UIResponder.keyboardDidHideNotification, object: nil)
             #expect(!bar.isFormattingExpanded)
             #expect(labels() == MobileKeyboardBarController.restingActLabels)
+        }
+    }
+
+    /// FIX-5's pin (Stage A ladder round 1.5 — the adjudicated MAJOR):
+    /// all SEVEN strip acts sit fully visible and tappable inside the
+    /// bar's width. The defect's mechanism: as seven separate
+    /// `UIBarButtonItem`s, iOS 26's circle-per-item toolbar laid the
+    /// row out at 478 pt (5×62 pt plain cells + 2×48 pt wrapped cells +
+    /// 6×12 pt gaps), centered in the 402 pt bar — × and ⇥ clipped to
+    /// edge slivers, and NO pin covered on-screen visibility (the acts
+    /// were pinned at the selector level only; the toolbar's private
+    /// item cells materialize only in a window, so nothing headless
+    /// could see them). The fix owns the geometry — the seven acts in
+    /// ONE measurable stack (`kbar.formattingStrip`) — so this pin can
+    /// hold windowless (the corrected machinery lesson's preferred
+    /// host): the strip's total width fits the TIGHTEST iPhone class's
+    /// cell, every button lies fully inside the strip's bounds, every
+    /// button is a ≥44 pt tap target, and the seven doors read in the
+    /// LK8 order. On the seven-separate-items shape this pin has
+    /// nothing measurable to hold — it fails at the strip requirement
+    /// (revert-verified: the FIX-5 record has the run).
+    @Test func allSevenStripActsSitFullyVisibleAndTappableInsideTheBar() async throws {
+        try await withEditorWorld { session, _ in
+            let postID = try await makePost(session, blocks: ["x"])
+            let (_, surface) = await makeSurfaceEditor(session, postID: postID)
+            let bar = MobileKeyboardBarController(textView: surface.textView)
+            guard let toolbar = bar.makeBar() as? UIToolbar else {
+                Issue.record("the bar is not a toolbar")
+                return
+            }
+            bar.toggleFormattingDoor()
+
+            guard let strip = (toolbar.items ?? [])
+                .compactMap({ $0.customView as? UIStackView })
+                .first(where: { $0.accessibilityIdentifier == "kbar.formattingStrip" })
+            else {
+                Issue.record("""
+                    the expanded bar carries no one-cell formatting strip — \
+                    the seven-separate-items shape cannot promise on-screen \
+                    visibility (the FIX-5 defect: its row measured 478 pt \
+                    against the 402 pt bar, clipping × and ⇥ to slivers)
+                    """)
+                return
+            }
+            strip.layoutIfNeeded()
+
+            // The whole strip fits the TIGHTEST iPhone class: a 375 pt
+            // bar minus the measured chrome (the iOS 26 toolbar insets
+            // its content row 16 pt a side and pads the customView's
+            // glass cell 5 pt a side — the FIX-5 probe's own numbers):
+            // 375 − 32 − 10 = 333 pt available.
+            let tightestAvailable: CGFloat = 375 - 32 - 10
+            #expect(strip.bounds.width <= tightestAvailable)
+            #expect(strip.bounds.width > 0)
+
+            // Every act fully inside the strip's own bounds (visible),
+            // at least 44 pt wide (tappable), in the LK8 door order.
+            let buttons = strip.arrangedSubviews
+            #expect(buttons.count == 7)
+            for button in buttons {
+                #expect(button.frame.minX >= -0.5)
+                #expect(button.frame.maxX <= strip.bounds.width + 0.5)
+                #expect(button.frame.width + 0.5
+                        >= MobileKeyboardBarController.stripButtonMinWidth)
+            }
+            #expect(buttons.compactMap { $0.accessibilityLabel }
+                    == MobileKeyboardBarController.formattingActLabels)
         }
     }
 }
