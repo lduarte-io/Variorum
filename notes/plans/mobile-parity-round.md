@@ -4338,3 +4338,177 @@ the existing `setEntryDate` op, phone face the implementer's call,
 state-transition tests per act, no platform-named refusals. The
 Today-door rewords + the getting-around lesson update ride the fork
 build as proposed (tutorial-as-spec).
+
+## Stage C, batch C2 — BATCH RECORD (implementer, 2026-08-09; commits `303689e` · `121bdd6` · `54dd6f5` · `aaf80fa` · `c361db2` · `d6a8dc6` + the record commit)
+
+**Every matrix C2 row shipped** (books & membership + note metadata,
+plus the sitting's entry-date addition), all acts through EXISTING
+core operations — zero `Sources/VariorumCore/` lines, zero schema,
+zero `Sync/` (the anticipated small-Queries case never fired: every
+read needed already existed). ONE `App/Variorum/Shared/` change
+(below), Mac-suite-verified. Per capability:
+
+1. **Pin/unpin (`303689e`).** Door: the shelf book row's LONG-PRESS
+   context menu — the act belongs where the list it orders lives (the
+   Mac shelf row's own placement, the phone's long-press grammar);
+   state-mirroring words via the pure `MobileShelfFaces.pinDoorTitle`
+   (the Mac menu's own vocabulary, voice-cased). Op: `setShelfPinned`
+   (R38 append-order, idempotent both ways). Test: order flips both
+   ways against store truth + the door words
+   (`MobileBookPinTests`, 1).
+
+2. **Create book + smart-book-from-tags (`121bdd6`).** Door: the
+   shelf list's own trailing "+ new book" row (a list of books ends
+   with the door that adds one; the path line stays two doors — the
+   P38 crowding lesson); ONE sheet folds the Mac's three-kind alert
+   AND its Promote-to-Book sheet — deliberately, because the phone
+   has no smart-filter editor (ruled deferred), so smart creation IS
+   the from-tags road: spec chosen at birth (OR→`tags`,
+   AND→`tagsAll` — the Mac `PromoteTagsSheet.spec` rule mirrored
+   pure), tags stay on the notes (R37). Journal books mint the Mac
+   alert's exact dated shape (curated · profile 'journal' ·
+   entry-date asc). Refuse-at-the-face gates: no nameless book (K1 —
+   no literal placeholder mints), no tagless smart book. Landing:
+   the created book opens as its contents front (fire-and-DO). Ops:
+   `createReading` only. Tests: three-kind exact rows · end-to-end
+   from-tags collect + canonical spec JSON + AND arm · the pure gate
+   (`MobileBookCreateTests`, 3).
+
+3. **The membership chip + diverge-for-book (`54dd6f5`).** Door: the
+   masthead's identity line under the title (the chip label in the
+   voice's path grammar — "~/journal" terminal single-book, "in N
+   books" — accent when several; the Mac label's own rule); tap →
+   an LK4 sheet carrying the Mac chip's vocabulary: SEE curated AND
+   smart holdings (derived membership IS membership;
+   curated-before-smart order, no recents — the phone has no
+   workspace visit history, recorded), ADD to open curated books
+   (`addPostToReading`), add to smart books BY TAGGING
+   (`collectPostIntoSmartReading`, R98 apply-and-report), REMOVE
+   where a row exists (`removePostFromReading`; a smart row renders
+   NO remove — P-2, pinned pure), DIVERGE FOR THIS BOOK through the
+   SHARED flush-first entry (`AppSession.divergeForBook` →
+   `divergePostForReading`), the copy one tap away (R67 — an
+   `onOpenNote` push threaded from the shell). **The one `Shared/`
+   change: `divergeForBook` moved OUT of `AppSession`'s
+   `#if os(macOS)` fence** — the soul rule's letter (mobile never
+   forks a brain; this four-line entry IS the R1-4 flush-first
+   brain); Mac code byte-identical, and the full Mac suite ran as
+   proof: **"Test run with 1245 tests in 219 suites failed … 1
+   issue" — the one issue re-confirmed BY IDENTITY as the standing
+   `TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergence
+   Occasion` tripwire** (the recorded baseline exactly). Phone
+   wording deltas, deliberate: no "⌥⌘Z undoes it" tail (the phone
+   has no structural undo — the recorded v1 posture) and the
+   smart-diverge refusal names no Duplicate-as-Version door (OPEN →
+   ruled wait). Tests: brains (label/order/P-2) · exact membership
+   rows both ways · collect-by-tagging · diverge exact-slot + THE
+   PENDING-BYTES PIN (typed bytes recorded in the one per-post
+   coordinator ride into the copy — R1-4) · smart-diverge refusal
+   mints nothing (`MobileMembershipTests`, 4).
+
+4. **Rename note (`54dd6f5`).** Door: the masthead TITLE is the door
+   (alert-confirmed — a stray tap costs nothing; prefilled with the
+   STORED title, never the derived display). Op: `renameContainer`
+   (trimmed; blank clears to NIL — R6-3/K1's no-placeholder
+   semantics); legal under the seal BY AppSpec §9's letter ("may
+   still be … retitled"), pinned. Tests: trim/clear/under-seal
+   (`MobileNoteRenameTests`, 2).
+
+5. **Tray rewords (`aaf80fa`)** — inventory #2/#5 DISSOLVED
+   (sanctioned pin flips riding the matrix): the delete confirm's
+   detail and the post-delete report keep the tray FACT and lose "on
+   the Mac"; both hoisted to pinned statics with no-platform-name
+   assertions. The recovery DOOR stays PL-3/13j's, consciously
+   routed.
+
+6. **THE BOOK DETAILS SURFACE (`c361db2`, built to the fork's
+   ruling).** Door: the voiced **"Details"** word in the contents
+   screen's trailing chrome beside "Read" (pinned static); a
+   medium-detent LK4 sheet. The act column as ruled: identity block
+   on the ONE shelf-faces brain (name-with-✓ + count·tags·daily —
+   details can never disagree with the shelf; ONE read delivers row
+   + tags + designation coherently) · the name row IS the rename
+   door (`renameReading` — free on finished books, the
+   renameSection parallel, pinned; blank face-gated) · one
+   state-mirroring **Finish/Reopen** row (`lockReading`/
+   `unlockReading` — a reversible guard, its own inverse, no undo
+   entry) · **tags DISPLAY-ONLY, both kinds** (ruled (B): a curated
+   book's tags are derived from member notes by model fact; smart-
+   filter editing waits for the Mac's book redefinition) · **Use as
+   Daily Journal** rendered on curated journal-profile books only
+   (the Mac's render rule, P-2, pinned pure; `setDailyJournalBook`).
+   Deliberately absent as ruled: delete book (PL-3/13j) · extents
+   (LK5's ranking) · chapters/reorder/sort/filter/convert (the
+   post-13i round). **Same commit: the three Today-door rewords**
+   (inventory #8/#9/#10 dissolved — finished names "reopen it from
+   its book details"; full and smart name the designation road;
+   extents stay unbuilt so #9's road IS designation; substring pins
+   kept, road words + a no-"Mac" sweep added) and the
+   getting-around lesson's details sentence. Tests: finish/reopen
+   flips + faces · rename trim/gate/free-under-finish · the
+   designation road END-TO-END (a smart-daily Today refusal →
+   designate a curated journal from details → the next Today
+   shelves silently) · tags display for both kinds · the door word
+   (`MobileBookDetailsTests`, 4).
+
+7. **Entry date set/clear (`d6a8dc6`, her sitting item 4).** Door:
+   the masthead identity line's DATE CHIP beside the books chip
+   (the date is note identity exactly as membership is; the
+   alert-confirmed chip is the rename door's own grammar — field
+   prefilled, Set / Clear Date / Cancel, the format named in the
+   message). Op: `setEntryDate` (blank clears — un-dating is the
+   op's own letter; the op's `invalidEntryDate` stays the belt).
+   A malformed day REFUSES AND KEEPS in phone words (the
+   ExtentInput parallel; pinned static, no platform name). Dating
+   rides the retitle class under the seal (the op's standing
+   both-platform behavior — recorded and pinned, not left to
+   inference). Tests: set/clear + untitled-masthead-shows-the-day ·
+   refuse-and-keep · under-seal (`MobileNoteEntryDateTests`, 3).
+
+**Tutorial-as-spec:** the getting-around lesson's prose grew in the
+OWNING commits (shelf doors + pin long-press · the masthead
+identity paragraph · the details sentence · the date chip); no walk
+pins prose (PB1-3 — the shape/door suites re-ran green each time);
+no new lesson (the 13-lesson counts stay pinned).
+
+**Counts, by this implementer's own runs (iPhone 17 Pro / iOS
+26.2):** full mobile — **"Test run with 244 tests in 42 suites
+passed"** — the 227/36 baseline + 17 tests + 6 suites, exactly
+accounted (pin 1 · create 3 · membership 4 · rename 2 · details 4 ·
+entry-date 3; suites `MobileBookPinTests` · `MobileBookCreateTests`
+· `MobileBookDetailsTests` · `MobileMembershipTests` ·
+`MobileNoteRenameTests` · `MobileNoteEntryDateTests`). Spine
+**32/7** and perf **9/2** by named runs. Mac **1245/219
+tripwire-only by identity** (run at the one Shared/ change).
+Release build **SUCCEEDED**. Core/spine-Mac not run: zero
+`Sources/VariorumCore/` lines in the whole batch.
+
+**PROVISIONALs (for the chain's end bundle):**
+- **PC2-1:** the chip sheet's book-name rows are LABELS, not doors —
+  seeing the holdings is the owed capability; the Mac's
+  open-book-at-note ascent has no phone wiring yet (one push closure
+  away if her look wants it).
+- **PC2-2:** the create sheet's words (kind doors "Book · Journal
+  Book · Smart Book", the "Create Book" button, the three captions)
+  and its open-the-created-book landing — all one-line changes for
+  her look.
+- **PC2-3:** the date chip's face — a text-field alert (plain
+  yyyy-mm-dd, matching the op's own vocabulary) rather than a
+  DatePicker sheet, and "no date" as the unset label; a picker is a
+  look-round swap if wanted.
+- **PC2-4:** diverge and remove-from-book ship WITHOUT confirms —
+  both are recoverable by hand (re-add; the original keeps
+  everything), unlike the tray-bound delete-block whose confirm
+  precedent (P40) is explicitly about un-recoverable-on-phone
+  destruction. Recorded judgment, hers to flip.
+- **PC2-5:** the details sheet's Finish/Reopen caption sentences and
+  the "Book Details" header word — copy for her look round.
+
+**Deliberate absences (scope, not holes):** delete book + trash/
+restore (PL-3/13j, consciously routed) · extent faces (LK5's
+recorded ranking) · chapters/reorder/sort-change/smart-filter-
+editing/conversion (her sitting's ruled WAIT — the post-13i round)
+· the pin door not duplicated on details (one act, one door — the
+shelf row it orders) · locked-take/merge-ceremony refusal strings
+untouched (C4/C5's families, incl. PB1-4's lesson rider) ·
+note-level tag editing (C3's, per the ruling).
