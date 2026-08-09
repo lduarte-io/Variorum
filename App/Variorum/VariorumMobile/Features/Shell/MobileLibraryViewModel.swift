@@ -32,6 +32,10 @@ final class MobileLibraryViewModel {
     enum Filter: String, CaseIterable, Sendable {
         case all
         case bookless
+        /// The scraps area (parity C3 — her "view your pool of scraps …
+        /// and maybe add to it"): standalone blocks, not notes — the
+        /// listing is `MobileScrapsModel`'s, not this model's.
+        case scraps
     }
 
     @ObservationIgnored private let session: AppSession
@@ -52,7 +56,13 @@ final class MobileLibraryViewModel {
     }
 
     var visible: [Queries.TimelineItem] {
-        filter == .all ? all : bookless
+        switch filter {
+        case .all: return all
+        case .bookless: return bookless
+        // Scraps are blocks, not notes — their listing is the scraps
+        // model's; this note listing is empty under that filter.
+        case .scraps: return []
+        }
     }
 
     /// Everything, newest first — the standing sort (the Mac library's

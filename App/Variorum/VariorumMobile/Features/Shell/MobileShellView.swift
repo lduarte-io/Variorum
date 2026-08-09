@@ -51,6 +51,8 @@ struct MobileShellView: View {
     @State private var libraryPath = NavigationPath()
     @State private var shelfModel: MobileShelfViewModel
     @State private var libraryModel: MobileLibraryViewModel
+    /// The scraps area's model (parity C3 — the Library's third filter).
+    @State private var scrapsModel: MobileScrapsModel
     @State private var settingsPresented = false
     @Environment(\.colorScheme) private var scheme
     #if DEBUG
@@ -64,6 +66,7 @@ struct MobileShellView: View {
         self.router = router
         _shelfModel = State(initialValue: MobileShelfViewModel(session: session))
         _libraryModel = State(initialValue: MobileLibraryViewModel(session: session))
+        _scrapsModel = State(initialValue: MobileScrapsModel(session: session))
     }
 
     private var tokens: VoiceTokens {
@@ -86,7 +89,7 @@ struct MobileShellView: View {
 
             stack(path: $libraryPath, owner: .library) {
                 MobileLibraryView(
-                    model: libraryModel, tokens: tokens,
+                    model: libraryModel, scraps: scrapsModel, tokens: tokens,
                     tabBar: { tabBar },
                     onOpen: { libraryPath.append($0) })
             }

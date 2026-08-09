@@ -14,6 +14,9 @@ import VariorumCore
 
 struct MobileLibraryView<TabBar: View>: View {
     @Bindable var model: MobileLibraryViewModel
+    /// The scraps area's model (parity C3 — the third filter's listing;
+    /// constructed by the shell beside this view's own model).
+    @Bindable var scraps: MobileScrapsModel
     let tokens: VoiceTokens
     @ViewBuilder let tabBar: () -> TabBar
     let onOpen: (MobileRoute) -> Void
@@ -29,6 +32,10 @@ struct MobileLibraryView<TabBar: View>: View {
                 LazyVStack(spacing: 0) {
                     if let hits = model.hits {
                         hitRows(hits)
+                    } else if model.filter == .scraps {
+                        // The scraps area (parity C3): standalone blocks
+                        // with their tags, and the mint door.
+                        MobileScrapsSection(model: scraps, tokens: tokens)
                     } else {
                         listingRows
                     }
@@ -95,11 +102,14 @@ struct MobileLibraryView<TabBar: View>: View {
             .padding(.bottom, 8)
     }
 
-    /// all · bookless — the filter's two doors (text chrome, no icons).
+    /// all · bookless · scraps — the filter's doors (text chrome, no
+    /// icons; scraps joined at parity C3 — the Pool's phone home grew
+    /// its standalone-blocks neighbor).
     private var filterRow: some View {
         HStack(spacing: 18) {
             filterDoor("All", .all)
             filterDoor("Bookless", .bookless)
+            filterDoor("Scraps", .scraps)
             Spacer()
         }
         .padding(.horizontal, 20)
