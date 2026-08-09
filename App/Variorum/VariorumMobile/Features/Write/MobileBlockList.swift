@@ -26,6 +26,7 @@
 //
 
 import Foundation
+import GRDB // AsyncValueObservation iteration
 import Observation
 import SwiftUI
 import VariorumCore
@@ -69,6 +70,29 @@ final class MobileBlockListModel {
                 try Queries.blockTOC(db, post: postID)
             }
             status = nil
+        } catch {
+            status = String(describing: error)
+        }
+    }
+
+    /// The presented sheet's HELD observation (parity D2 — the routed
+    /// C4 NIT: the list loaded once per presentation, so a remote
+    /// divide or block arrival landing WHILE the sheet was open left it
+    /// one delivery stale; MobileSoul §5.3 — offline/sync races are the
+    /// phone's normal). The observation delivers the initial read too,
+    /// so the sheet's task is this one call; it cancels with the task
+    /// when the sheet dismisses — cost ∝ the post, only while
+    /// presented. `refresh()` stays the headless one-shot.
+    func start() async {
+        do {
+            let postID = postID
+            for try await value in session.database.observe({ db in
+                try Queries.blockTOC(db, post: postID)
+            }) {
+                rows = value
+                status = nil
+            }
+        } catch is CancellationError {
         } catch {
             status = String(describing: error)
         }
@@ -141,6 +165,9 @@ struct MobileBlockListSheet: View {
         }
         .padding(20)
         .background(tokens.room.ignoresSafeArea())
-        .task { await model.refresh() }
+        // The held observation (D2): the open list re-reads on every
+        // delivery — a remote divide landing mid-read appears; the task
+        // cancels the observation at dismissal.
+        .task { await model.start() }
     }
 }

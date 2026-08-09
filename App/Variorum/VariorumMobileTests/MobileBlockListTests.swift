@@ -107,6 +107,38 @@ struct MobileBlockListTests {
         }
     }
 
+    /// The OPEN list re-reads on a delivery (parity D2 — the routed C4
+    /// NIT: the sheet loaded once per presentation, so a remote divide
+    /// or block arrival landing while it was open left the census one
+    /// delivery stale; MobileSoul §5.3 — offline/sync races are the
+    /// phone's normal). `start()` holds the observation for the
+    /// sheet's life: the arrival lands in `rows` with NO refresh call.
+    @Test func theOpenListReReadsOnADelivery() async throws {
+        try await withEditorWorld { session, _ in
+            let postID = try await session.runner.run { ops -> String in
+                let post = try ops.createPost(title: "live census", profile: .blog)
+                _ = try ops.newBlock(in: post.id, text: "The first block stands.", at: .end)
+                _ = try ops.newBlock(in: post.id, text: "The second block stands.", at: .end)
+                return post.id
+            }
+            let model = MobileBlockListModel(session: session, postID: postID)
+            let sheetLife = Task { await model.start() }
+            defer { sheetLife.cancel() }
+            await settle { model.rows.count == 2 }
+            #expect(model.rows.count == 2, "the observation delivers the initial read")
+
+            // A remote-shaped arrival while the sheet is open — through
+            // ordinary operations, exactly what a sync apply produces.
+            try await session.runner.run { ops in
+                _ = try ops.newBlock(in: postID, text: "Arrived while open.", at: .end)
+            }
+            await settle { model.rows.count == 3 }
+            #expect(model.rows.count == 3,
+                    "the open list re-read on the delivery — no refresh call anywhere")
+            #expect(model.rows.last.map(MobileBlockListModel.handle) == "Arrived while open.")
+        }
+    }
+
     /// The empty state speaks the structural doors' own standing
     /// sentence (one vocabulary for "no blocks yet"), and the chip's
     /// word is the bare voiced door (countless — recorded judgment: the
