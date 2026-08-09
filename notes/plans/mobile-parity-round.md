@@ -4984,3 +4984,208 @@ run (arithmetic accounted) + mobile spine 32/7 + perf 9/2 by name.
 Commit per logical unit with the standing trailer; batch record
 into THIS file ("## Stage C, batch C3 — BATCH RECORD"); push
 `origin mobile`. PROVISIONAL-and-continue; author-only calls stop.
+
+## Stage C, batch C3 — BATCH RECORD (implementer, 2026-08-09)
+
+**Every brief item shipped** — the see-your-data trio (tags in full ·
+references · scraps) plus the sitting's C3 additions (the Library sort
+picker · stars). Diff scope, verified by own `git diff --name-only`:
+**17 files, ALL mobile app + mobile tests — zero
+`Sources/VariorumCore/`, zero `App/Variorum/Shared/`, zero Mac-side
+files, zero schema, zero `Sync/`, zero pbxproj** (synchronized groups
+took the five new source files). The brief's small-additive-Queries
+allowance never fired: every read and every act already existed in
+core — tags (`createTag`/`renameTag`/`deleteTag`/`applyTag`/
+`removeTag`; `allTags`/`postTags`/`observeTags`), references
+(`addReference`/`removeReference`; `Queries.references`), scraps
+(`createPool`/`newBlock`; `pools`/`poolListing`/`observePools`/
+`observePool`), sort (`observeLibrary(sort:)` — the parameter was
+there all along), stars (`setStarred`/`Queries.starred` — 13f W4's
+mechanism, found in code as the brief instructed). The four-suite
+duty therefore never fired; core / Mac / Mac-spine baselines stand
+untouched by construction. Release build **SUCCEEDED** (the DEBUG
+doors compile out). Per capability:
+
+1. **TAGS — management crosses FULLY (`dcc06f9`; her ruling 2, its
+   grounds recorded as a standing principle: "some people won't use
+   the mac app at all").** *Door:* **"Manage Tags" in Settings** —
+   placement justified as R52's letter mirrored (Settings is "tag
+   management's real home" on the Mac; the phone keeps the one home
+   rather than inventing a second). The manager sheet: browse the
+   hierarchy indented in path order (parents before children by the
+   materialized path's construction; full paths visible on nested
+   rows — hierarchy stays surfaced, R45) · create root tags ("+ new
+   tag") AND child tags ("New Child Tag…" on the row's long-press —
+   her ruling's letter) · rename (the op's one-transaction subtree
+   ripple) · **delete-with-subtree behind a confirm that NAMES THE
+   CONSEQUENCE**: the pure `deleteConsequence` brain speaks the
+   sub-tag count and that notes lose those tags ("Deleting “life”
+   also deletes its 3 sub-tags — every note wearing any of them
+   loses those tags. There is no undo for this.") — the consequence,
+   never a platform, pinned in both arms. Refusals in phone words
+   through one copy brain (duplicate path · invalid name · gone).
+   Deliberate delta from the Mac, recorded: the MAC's own delete row
+   fires with NO confirm — the phone adds one because the brief's
+   letter demands the named consequence; one-way divergence in the
+   phone's safer direction, not a fork of a brain.
+2. **TAGS ON A NOTE (`f1f9f13`; "tag posts — full app functionality";
+   the 13k K3 leaf-chip grammar).** *Door:* the masthead's SECOND
+   identity line wears the note's tags as LEAF-only chips ("#goals
+   #sea"; the door word "tags" when bare) — placement justified: the
+   masthead is the phone's note-identity surface (the C2 books/date
+   chips' own home), and a second line keeps four chips from
+   crowding one. Tap → the tags sheet (LK4): apply by TYPING — the
+   Mac N24 road mirrored exactly (deepest existing live prefix
+   resolves; the missing remainder is CREATED through the standing
+   ops, child tags included; the LEAF applies; one serialized runner
+   turn so a racing duplicate refuses through the op's own guard;
+   slash noise forgives, "/a//b/" is a/b; already-applied no-ops
+   politely) — apply by suggestion (applied dropped, substring
+   match, capped at 8 — the Mac `TagChipAdder` rule, pinned pure),
+   remove with ✕ (this note only; the tag lives on). Chips show the
+   leaf; the full path lives on the sheet's rows.
+3. **REFERENCES — the "More info" list (`ff8e358`; her precision #3:
+   see · add a URL · open; the side-by-side panel stays the ruled
+   exclusion).** *Door:* the **"more info" chip** beside the tags
+   chip (her own name for the surface; the count rides the word —
+   "more info · 2"). The sheet: rows in panel order (`position, id`
+   — the Mac panel's own); URL rows are DOORS (open in the system
+   browser; named by host; bare hosts normalize to https — the Mac
+   `addURL` brain extracted pure and pinned); **FILE rows list
+   honestly in neutral words** — "A file stays on the device where
+   it was added — only its name travels here." (the model fact:
+   `file_bookmark` is LOCAL-ONLY, AppSpec §7; NO platform named,
+   pinned) — and open nothing (`openableURL` nil by kind: there is
+   no file here to open, so no refusal is invented); "+ add a link"
+   (alert; unloadable strings refuse in phone words and mint
+   nothing; blank is a quiet no-op); remove on the row's long-press
+   (PC3-2 below — one step beyond the letter, no-redirect-grounded).
+4. **SCRAPS — view + mint (`9b3fc6a`; her precision #1).** *Door:*
+   the Library's THIRD filter — **All · Bookless · Scraps** —
+   justified: the Library is everything, the bookless filter is
+   already the Pool's phone home, and standalone blocks are the
+   pool family's other half; no new tab, no new place. The view:
+   scraps in pointer order (the pool renders as a container — one
+   traversal) with block tags DISPLAYED leaf-first (display only —
+   block-tag editing stays Mac-side, her ruling 3); several pools
+   all REACHABLE through a picker rendered only when several exist,
+   oldest the default (the Mac N19 lesson carried, not relearned).
+   The mint: "+ new scrap" → ONE standalone block via the Mac entry
+   bar's exact composition (`createPool(title: "Pool")` when none
+   exists — byte-mirrored, including the stored title — then
+   `newBlock`); blank text is a quiet no-op. The drag-into-note
+   door stays not-owed (the ruled exclusion, untouched).
+5. **THE LIBRARY SORT PICKER (`9ecaaa5`; her ruling 9).** *Door:* the
+   filter row's trailing **sort menu** ("sort: last touched"),
+   rendered on the ALL filter only — bookless keeps the core
+   query's own order and scraps are pointer-ordered, so a sort door
+   there could never mean what it says (P-2: not rendered). The
+   vocabulary is the brief's four words over the core `LibrarySort`'s
+   own stamp expressions — **entry date · created · last touched ·
+   last meaningful edit** (the 80%-sort's stamp) — newest first,
+   last-touched the standing default. A way of LOOKING: `setSort`
+   writes nothing; the view's `.task(id: sort)` restarts the held
+   observation (the A31 restart shape).
+6. **STARS (`27c06ad`; her ruling 10).** *The mechanism, found IN
+   CODE and reused through core as the brief instructed:* 13f W4's
+   synced `'starred'` setting list — `Operations.setStarred` (append
+   order, the honest 5-cap, every write self-heals) + `Queries.
+   starred` (the one live-targets read) + `StarTarget` (`post:`/
+   `reading:` keys); ZERO schema, the shelf_pins class. *The act:*
+   long-press **Star/Unstar** on shelf book rows (deliberately
+   beside Pin — the Mac 13f adjacency: pinning orders THIS list, a
+   star lifts the thing to the top section) and on Library note
+   rows; state-mirroring words (the Mac `StarCopy`'s own). *The
+   face (the brief's your-call, PROVISIONAL PC3-4):* **the starred
+   section at the SHELF's top** — the Mac's sidebar-top placement
+   mirrored onto the phone's home surface; rendered only when
+   anything is starred; rows navigate (book → contents, note → its
+   page; the route brain pinned) and un-star on long-press. *The
+   cap refuses in PHONE words* — "un-star one in the starred list
+   at the top of the shelf" (never "sidebar", never "Mac"; pinned)
+   — and evicts nothing. *Names ride the ONE DisplayTitle chain*
+   (the C2 doctrine): an untitled star reads its created day via a
+   bounded ≤5-point-read resolution through `containerHeader` —
+   `StarredItem.name` alone would render it blank.
+
+**Tutorial-as-spec, held per owning commit:** the pocket guide's
+getting-around lesson grew a sentence/paragraph in the SAME commit as
+each door — the Settings sentence (tag management) · the masthead
+paragraph (tags + more info, one second-line paragraph) · the Library
+paragraph (the sort door + the scraps filter) · the shelf paragraph
+(stars). No new lesson (the C2 precedent — the 13-lesson counts stay
+pinned); no walk pins prose (PB1-3); the shape suites re-ran green in
+the full run below.
+
+**The refusal inventory's C3 rows: NONE EXIST — verified, not
+assumed.** The inventory's fifteen rows are C2's (dissolved), C4's
+(locked/archived-take, #1/#3/#6/#11–14 — the takes/locks family),
+and C5's (the merge ceremony #4 + PB1-4's lesson rider); no row was
+assigned to C3 and none of C3's surfaces carried a Mac-naming
+string. The batch's own guarantee instead: **zero NEW user-facing
+"Mac" strings** (grep over the whole diff's added lines — no hit),
+and three refusal/consequence strings are pinned platform-free
+(the delete-tag consequence, the file-row sentence, the star cap).
+
+**Counts, by this implementer's own runs (iPhone 17 Pro / iOS 26.2
+simulator):**
+- Full mobile suite: **"Test run with 262 tests in 48 suites
+  passed"** — the 246/42 baseline + this batch's 16 tests and 6
+  suites, exactly accounted (`MobileTagManagerTests` 3 ·
+  `MobileNoteTagsTests` 2 · `MobileReferencesTests` 3 ·
+  `MobileScrapsTests` 3 · `MobileLibrarySortTests` 2 ·
+  `MobileStarsTests` 3).
+- Mobile spine by its seven type names: **"Test run with 32 tests in
+  7 suites passed"**.
+- Perf suites by name (`MobilePerfFixtureTests` ·
+  `MobilePerfWalkTests`): **"Test run with 9 tests in 2 suites
+  passed"**.
+- Core / Mac / Mac-spine deliberately not run: zero core, zero
+  `Shared/`, zero Mac-side lines in the whole batch — the
+  only-if-shared condition never fired; baselines stand (core
+  1214/128 · Mac 1245/219 tripwire-only · Mac spine 51/7).
+- Release build: **BUILD SUCCEEDED**.
+
+**Test posture:** every new door landed with state-transition tests
+through its view model against a real in-memory store (birth pins —
+the doors did not exist on the old tree, the A2 reading of
+red-on-old); no defect-class fix arose, so no behavioral-revert pin
+was owed. Every act's store consequence is asserted through core
+queries or raw SQL (star order as the stored JSON; tombstones as
+tombstones; the mint's exact rows).
+
+**PROVISIONALs (for the chain's end bundle):**
+- **PC3-1 — the masthead's second identity line** (tags · more info
+  under books · date): two rows read calmer than four chips on one;
+  her look round may re-arrange (one-line moves).
+- **PC3-2 — references REMOVE ships beyond the letter** ("see, add,
+  open"): a row the phone can add it must be able to take back —
+  an add-only surface would send its own typos to the Mac, the
+  no-redirect smell. Long-press, destructive-roled.
+- **PC3-3 — the phone's delete-tag confirm** (the Mac's own delete
+  row fires without one): the brief's named-consequence requirement
+  implies a confirm surface; recorded as deliberate one-way
+  divergence, hers to flip either way.
+- **PC3-4 — the starred face's home** (the brief's your-call): the
+  shelf-top section, the Mac's sidebar-top mirrored; a Library
+  filter or a smaller face are cheap moves if her look prefers.
+- **PC3-5 — door words for her look:** "Manage Tags" · "tags" /
+  "more info" chip words · "Scraps" / "+ new scrap" · "sort: …" ·
+  "★ starred" / "Star"/"Unstar" — all pinned statics, one-line
+  changes each.
+- **PC3-6 — search hits on pool scraps still render no row** (the
+  standing S3 filter): the scraps view exists now, but a hit can't
+  scroll-to/highlight a scrap, and a row that lands you at the top
+  of a list is a half-door; recorded rather than half-built. One
+  routing line away if ruled wanted.
+
+**Deliberate absences (scope, not holes):** block-tag EDITING
+(her ruling 3 — Mac-side; scrap rows display leafs only) · the
+scraps drag-into-note door (the ruled exclusion) · a references
+file-ADD door (no phone file picker owed; URL is the ruled add) ·
+the reference side-by-side panel (excluded) · sort on bookless/
+scraps (each keeps its own honest order; the door isn't rendered
+there) · a star door on the open note's masthead (the Library row
+is the phone's row surface; one line if her look wants it) · the
+locked-take/merge-ceremony refusal strings untouched (C4/C5's
+families, incl. PB1-4's lesson rider).
