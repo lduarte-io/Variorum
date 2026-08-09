@@ -2516,3 +2516,89 @@ batch (the door is one tap — Settings → open the pocket guide — and
 the walkthrough sits at the chain's end); no scripted SCROLL walk
 (nothing in the walk family scrolls today — B2's performance fixture
 brings the scripted scroll measurement).
+
+## Stage B, batch B1 — ACCEPTED (architect, 2026-08-09)
+
+Verified: all four commits present; scope clean by own check (zero
+`Sources/VariorumCore/`, zero `Shared/`, zero Mac-side, zero
+pbxproj — the DEBUG door compiles out of Release, and the A4 fence
+makes the seeded store the dev store by construction); the mobile
+suite re-run by the architect's own hand: **"Test run with 215 tests
+in 34 suites passed"** — 191/28 + 24 tests + 6 suites, exactly
+accounted. **THE SPINE STANDS:** seven suite type names
+(`MobileWalkTests` · `MobileTutorialBookShapeTests` ·
+`MobileTutorialDoorTests` · `MobileTutorialWritingWalkTests` ·
+`MobileTutorialTakesWalkTests` · `MobileTutorialStructureWalkTests` ·
+`MobileTutorialLibraryWalkTests`), **32/7** — every later batch
+record and ladder round in this chain states its green.
+
+**Carried to the end bundle:** PB1-1 (the seeding door's product
+placement — DEBUG-only today) · PB1-2 (guide/door names and copy) ·
+PB1-3 (lesson prose hers to reword — walks pin staging, not prose
+bytes) · **PB1-4 routed to Stage C's refusal-copy family with a
+flag: the phone's merge still carries the Mac-naming ceremony
+refusal, and the tutorial's merge lesson currently TEACHES it — when
+C dissolves the refusal, the lesson and its walk update in the same
+batch** (the tutorial-as-spec discipline: a stale lesson is a
+regression). FB1-1/FB1-2 stand as recorded walk rules, not defects.
+
+## Stage B, batch B2 brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
+
+**Cast:** a fresh Fable implementer session, `~/dev/variorum-mobile`,
+branch `mobile`, starting at the B1 acceptance commit. Expect zero
+`Sources/VariorumCore/` changes (measurement reads what exists; a
+need that wants core STOPS and returns to the architect). Zero
+schema; `Sync/` untouched; the Environment traps section binds.
+
+**Read first, IN FULL, in this order:** `CLAUDE.md` (P1–P3 — the
+performance invariants this batch makes executable on the phone) ·
+`notes/MobileSoul.md` §2 (THE BAR: her words — "I do not want the
+mobile app to choke even on 100k words"; MEMORY is a first-class
+metric — iOS jetsam; the executable form this batch builds) · THIS
+plan file top to bottom (B1's record — the fixture rides beside the
+pocket guide in the dev store, same door family) ·
+`notes/plans/mobile-app-plan.md` §§ "The settled shape" and
+"Environment traps" · the Mac P1 benchmark precedent IN CODE (the
+Phase 4 perf suites under `Tests/VariorumCoreTests/` — flatness
+assertions, not absolute wall-clock) ·
+`notes/plans/mobile-architect-handoff.md`.
+
+**The work:**
+
+1. **The fixture, seeded in the DEV store** (the B1 door family — a
+   DEBUG door beside the pocket guide's): a **~100k-word post**
+   shaped like real writing (crystallization-scale blocks, realistic
+   paragraph distribution, SOME fanned and commented blocks so the
+   chrome layer participates in every measurement) plus a **large
+   corpus** around it (hundreds of notes across several books — the
+   scale that can prove corpus-flatness). Deterministic content
+   (seeded generator, no `Date.now` randomness) so runs compare.
+2. **The scripted measurement walk:** a repeatable harness measuring
+   — post OPEN-TIME (open → first render) · TYPING latency (insert
+   at the viewport in the 100k post) · SCROLL through the full post
+   · **PEAK MEMORY across the whole walk** (the phone's own
+   constraint; footprint, not compressed estimates). Two assertion
+   kinds: **FLATNESS pins** (the 100k-post/large-corpus measurement
+   vs a small-fixture control within a stated factor — the Mac P1
+   shape; these are the suite's teeth) and **recorded absolutes**
+   (informational, landed in the batch record — simulator numbers,
+   explicitly labeled as such; the ON-DEVICE run is Stage D's exit
+   gate, already planned). A memory CEILING pin is wanted but its
+   bound is yours to propose from measurement — generous but
+   meaningful, marked PROVISIONAL.
+3. **The ladder spot-check, standing:** name the fixture suite(s) so
+   every ladder round from here on runs them by name beside the
+   spine. If the full walk is too heavy for every-run cadence, split
+   a fast spot-check subset and say which is which.
+4. **The spine stays green** (first batch under the new standing —
+   your record states its 32/7 by your own named-selection run).
+
+**Discipline:** work synchronously; red-on-old for any defect the
+measurements expose (a flatness violation is a FINDING — trace it,
+report it; if it gates the bar, STOP and return to the architect
+rather than tuning around it). Full mobile suite green by your own
+run, arithmetic accounted. Commit per logical unit with the standing
+trailer; write "## Stage B, batch B2 — BATCH RECORD (implementer,
+2026-08-09)" into THIS file (the fixture's shape, every measured
+number with its label, the pins' factors/bounds, suite names,
+PROVISIONALs); push `origin mobile` before finishing.
