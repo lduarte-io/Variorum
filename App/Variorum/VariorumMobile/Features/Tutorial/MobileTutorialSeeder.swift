@@ -415,8 +415,8 @@ enum MobileTutorialSeeder {
             "The sheet holds all four verbs. Tap ✓ on any card to choose "
             + "it. + new take branches the one you were reading, or starts "
             + "blank. Tap a card to edit it right there — the card becomes "
-            + "the page's one live editor. And each card's ⋯ archives or "
-            + "deletes its take.",
+            + "the page's one live editor. And each card's ⋯ holds the "
+            + "take's own acts — lock, archive, delete.",
 
             "The keeper logged the weather twice, in two different moods.",
 
@@ -426,6 +426,15 @@ enum MobileTutorialSeeder {
             + "keeps one take: removing the last one refuses out loud and "
             + "points at Delete Block instead — that isn't a take act, "
             + "it's deleting the block.",
+
+            // Parity C4a: the lock door's lesson lands WITH the door
+            // (tutorial-as-spec) — appended after the staged paragraphs
+            // so the walks' staging indices stand.
+            "A LOCK is a reversible guard on one take: its text refuses "
+            + "edits until you unlock it — one tap in the same ⋯ — or "
+            + "branch a fresh copy. Locking a take that has unsaved "
+            + "changes quietly keeps a savepoint first, so the guard "
+            + "insures exactly what it protects.",
         ])
         try take(on: browser.blocks[2],
             "the spare take — archive me from my card's ⋯.")

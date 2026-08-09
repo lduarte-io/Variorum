@@ -435,8 +435,10 @@ struct MobileTakesBrowserTests {
 
             model.takesBrowser.beginEditing(variantID: seed.a2)
             #expect(model.takesBrowser.editingVariantID == nil)
+            // Parity C4a: the redirect dissolved WITH the phone's own
+            // unlock door (the card's ⋯) — the copy names that road.
             #expect(model.statusMessage
-                    == "This take is locked — branch it or unlock it on the Mac to edit.")
+                    == "This take is locked — unlock it from its card's ⋯, or branch it.")
         }
     }
 
@@ -478,7 +480,7 @@ struct MobileTakesBrowserTests {
             #expect(!model.takesBrowser.cardGateAllows(
                 range: NSRange(location: 34, length: 0), replacement: "x"))
             #expect(model.statusMessage
-                    == "This take is locked — branch it or unlock it on the Mac to edit.")
+                    == "This take is locked — unlock it from its card's ⋯, or branch it.")
 
             // KEEP-PENDING: the pre-lock typed bytes survive the refusal —
             // still the surface's record, still pending.
@@ -592,7 +594,8 @@ struct MobileTakesBrowserTests {
             model.takesBrowser.open(blockID: seed.blockA)
 
             await model.takesBrowser.delete(variantID: seed.a2)
-            #expect(model.statusMessage == "That take is locked — unlock it on the Mac first.")
+            #expect(model.statusMessage
+                    == "That take is locked — unlock it from its card's ⋯ first.")
             #expect(try await variantStatus(db, variantID: seed.a2) == "active")
         }
     }

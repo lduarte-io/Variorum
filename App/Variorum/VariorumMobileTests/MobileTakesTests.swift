@@ -405,8 +405,10 @@ struct MobileTakesTests {
                 model, storage,
                 range: NSRange(location: 0, length: 0),
                 replacement: "x"))
+            // Parity C4a: the redirect dissolved WITH the phone's own
+            // unlock door — the copy names the takes sheet's road.
             #expect(model.statusMessage
-                    == "This take is locked — branch it or unlock it on the Mac to edit.")
+                    == "This take is locked — branch it, or unlock it from its card in the takes sheet (⑂).")
             #expect(try await storedText(db, variantID: seed.a2)
                     == "First block, the other way.")
         }

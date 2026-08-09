@@ -363,6 +363,10 @@ final class MobileTakesBrowserView: UIView {
             onDelete: { [weak self] in
                 guard let model = self?.model else { return }
                 Task { await model.takesBrowser.delete(variantID: variantID) }
+            },
+            onSetLocked: { [weak self] locked in
+                guard let model = self?.model else { return }
+                Task { await model.takesBrowser.setLocked(variantID: variantID, locked: locked) }
             })
         cardsScroll.addSubview(view)
         cardViews[variantID] = view
@@ -439,6 +443,7 @@ final class MobileTakesCardView: UIView {
     private let onEdit: () -> Void
     private let onArchive: () -> Void
     private let onDelete: () -> Void
+    private let onSetLocked: (Bool) -> Void
 
     /// The live editor's card height (functional; the look rounds rule).
     static let editorHeight: CGFloat = 120
@@ -448,12 +453,14 @@ final class MobileTakesCardView: UIView {
         onEdit: @escaping () -> Void,
         onChoose: @escaping () -> Void,
         onArchive: @escaping () -> Void,
-        onDelete: @escaping () -> Void
+        onDelete: @escaping () -> Void,
+        onSetLocked: @escaping (Bool) -> Void = { _ in }
     ) {
         self.variantID = variantID
         self.onEdit = onEdit
         self.onArchive = onArchive
         self.onDelete = onDelete
+        self.onSetLocked = onSetLocked
         super.init(frame: .zero)
         accessibilityIdentifier = "takes.card.\(variantID)"
         layer.cornerRadius = 10
@@ -535,7 +542,14 @@ final class MobileTakesCardView: UIView {
 
         menuButton.setTitleColor(face.muted, for: .normal)
         menuButton.titleLabel?.font = face.chrome.withSize(14)
+        // Rebuilt per apply, so the lock row MIRRORS the take's state
+        // (parity C4a — the seal glyph's one-reversible-tap grammar,
+        // menu-rowed) and a voice flip reaches an already-built card.
+        let locked = card.isLocked
         menuButton.menu = UIMenu(children: [
+            UIAction(title: chromeCase(locked ? "Unlock Take" : "Lock Take")) {
+                [onSetLocked] _ in onSetLocked(!locked)
+            },
             UIAction(title: chromeCase("Archive Take")) { [onArchive] _ in onArchive() },
             UIAction(
                 title: chromeCase("Delete Take"), attributes: .destructive

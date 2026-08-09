@@ -389,7 +389,7 @@ struct MobileStructuralTests {
             await model.refreshTakesFromStore()
             await model.structural.divide(atSurfaceCaret: 12)
             #expect(model.statusMessage
-                == "This take is locked — branch it or unlock it on the Mac to edit.")
+                == "This take is locked — branch it, or unlock it from its card in the takes sheet (⑂).")
 
             // The seal outranks everything (the pre-gate's wording once
             // the surface KNOWS the seal; the op's own lockedPost refusal

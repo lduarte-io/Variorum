@@ -1412,6 +1412,15 @@ final class MobileEditorViewModel {
 
     // MARK: - Messages
 
+    /// The page-level locked-take refusal (parity C4a — the "unlock it on
+    /// the Mac" redirect dissolved WITH the phone's own unlock door: the
+    /// take's card in the takes sheet carries Lock/Unlock in its ⋯, so
+    /// the copy names that road; the no-redirect principle's letter).
+    /// Pinned static — shared by the page gate and the structural doors,
+    /// so the sentence can never fork between them.
+    static let lockedTakeRefusal =
+        "This take is locked — branch it, or unlock it from its card in the takes sheet (⑂)."
+
     private func refuse(_ message: String) {
         statusMessage = message
     }
@@ -1427,7 +1436,7 @@ final class MobileEditorViewModel {
         case .readOnlySlot:
             "This block hasn't fully synced; it is read-only for now."
         case .lockedVariant:
-            "This take is locked — branch it or unlock it on the Mac to edit."
+            Self.lockedTakeRefusal
         case .indexDesync:
             "The editor lost track of block boundaries — reloading from the store."
         }

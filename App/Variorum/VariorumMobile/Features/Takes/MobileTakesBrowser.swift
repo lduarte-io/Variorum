@@ -283,7 +283,7 @@ final class MobileTakesBrowserController {
             return
         }
         if card.isLocked {
-            model.report("This take is locked — branch it or unlock it on the Mac to edit.")
+            model.report(Self.lockedTakeCardRefusal)
             return
         }
         editingVariantID = variantID
@@ -318,7 +318,7 @@ final class MobileTakesBrowserController {
         // the card keeps showing it ledger-first; refusing new keystrokes
         // drops nothing.
         if cards().first(where: { $0.variantID == variantID })?.isLocked == true {
-            model.report("This take is locked — branch it or unlock it on the Mac to edit.")
+            model.report(Self.lockedTakeCardRefusal)
             return false
         }
         pendingCardCost = range.length + (replacement as NSString).length
@@ -352,6 +352,47 @@ final class MobileTakesBrowserController {
         }
     }
 
+    // MARK: - Lock / unlock (each card's ⋯ — parity C4a: the note seal's
+    // sibling, through the core's own lockVariant/unlockVariant; the six
+    // locked-take "on the Mac" redirects dissolve WITH this door)
+
+    /// Locks or unlocks a take. The LOCK road is FLUSH-GUARDED (the A1
+    /// `lockNote` trace, the take's edition): the op's own insurance
+    /// auto-commits a dirty STORE buffer, but pending SURFACE bytes live
+    /// in the coordinator until a flush lands — locking past them would
+    /// insure the STALE store text, and the later flush would refuse
+    /// `.lockedVariant`, stranding the typed bytes pending forever (the
+    /// text-loss class the flush-first contract exists to kill). A flush
+    /// that cannot land refuses the whole act with the standing wording.
+    /// Unlock needs no flush: nothing about it reads a buffer, and a
+    /// locked take admits no pending edits to begin with.
+    func setLocked(variantID: String, locked: Bool) async {
+        guard let model else { return }
+        if locked {
+            await model.autosave.flushNow()
+            guard !model.autosave.isDirty else {
+                model.report(
+                    "Unsaved changes couldn't be written — resolve that first, then retry.")
+                return
+            }
+            if editingVariantID == variantID { endEditing() }
+        }
+        do {
+            try await runner.run { ops in
+                if locked {
+                    try ops.lockVariant(variantID)
+                } else {
+                    try ops.unlockVariant(variantID)
+                }
+            }
+            model.report(nil)
+            await model.refreshTakesFromStore()
+            onChanged?()
+        } catch {
+            model.report(Self.refusalMessage(error, verb: locked ? .lock : .unlock))
+        }
+    }
+
     private func lifecycle(
         variantID: String, verb: Verb,
         _ body: @escaping @Sendable (Operations) throws -> Void
@@ -370,12 +411,24 @@ final class MobileTakesBrowserController {
 
     // MARK: - Refusal copy (the ops' REAL refusals, in the phone's words)
 
-    enum Verb { case choose, branch, blank, archive, delete }
+    enum Verb { case choose, branch, blank, archive, delete, lock, unlock }
 
-    /// The everyday refusals get phone words (the batch-1 posture: the
-    /// named cases speak plainly and name the Mac where the road lives
-    /// there); rarer races speak in the operations layer's own words —
-    /// the op's real message, never invented behavior.
+    /// The in-sheet locked-take refusal (parity C4a — the unlock door is
+    /// ON this card's ⋯, one tap away, so the copy points at it; the
+    /// fire-and-DO message-names-the-door form).
+    static let lockedTakeCardRefusal =
+        "This take is locked — unlock it from its card's ⋯, or branch it."
+
+    /// The verb arm's locked-take refusal (delete/branch reaching a
+    /// locked take — same door, "that" grammar).
+    static let lockedTakeVerbRefusal =
+        "That take is locked — unlock it from its card's ⋯ first."
+
+    /// The everyday refusals get phone words (the batch-1 posture — and
+    /// since parity C4a every named road lives on the PHONE: the lock
+    /// and archive redirects dissolved with their doors); rarer races
+    /// speak in the operations layer's own words — the op's real
+    /// message, never invented behavior.
     static func refusalMessage(_ error: Error, verb: Verb) -> String {
         guard let error = error as? OperationError else {
             return String(describing: error)
@@ -387,6 +440,8 @@ final class MobileTakesBrowserController {
             case .branch, .blank: "add a take"
             case .archive: "archive a take"
             case .delete: "delete a take"
+            case .lock: "lock a take"
+            case .unlock: "unlock a take"
             }
             return "This note is locked — unlock it to \(act)."
         case .lastActiveVariant:
@@ -402,7 +457,7 @@ final class MobileTakesBrowserController {
             return "This take is what the note shows — choose another take first, "
                 + "then delete this one."
         case .lockedVariant:
-            return "That take is locked — unlock it on the Mac first."
+            return Self.lockedTakeVerbRefusal
         case .archivedVariant:
             return "That take is archived — unarchive it on the Mac first."
         default:

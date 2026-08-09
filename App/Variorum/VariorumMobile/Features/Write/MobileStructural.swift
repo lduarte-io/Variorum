@@ -125,7 +125,7 @@ final class MobileStructuralController {
 
         if active.count <= 1 {
             guard fresh.editable else {
-                model.report("This take is locked — branch it or unlock it on the Mac to edit.")
+                model.report(MobileEditorViewModel.lockedTakeRefusal)
                 return
             }
             await runDivide(blockID: blockID) { ops in
@@ -343,7 +343,7 @@ final class MobileStructuralController {
         case .lockedPost:
             return "This note is locked — unlock it to \(act)."
         case .lockedVariant:
-            return "This take is locked — branch it or unlock it on the Mac to edit."
+            return MobileEditorViewModel.lockedTakeRefusal
         case .invalidCut:
             return "No legal cut spot for that here — cuts land between words, "
                 + "at sentence ends, and at line breaks."
