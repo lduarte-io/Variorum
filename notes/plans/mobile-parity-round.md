@@ -6179,3 +6179,245 @@ door; no platform-named refusals. Full mobile suite green by own run
 by name. Commit per logical unit with the standing trailer; record
 as "## Stage C, batch C4b — BATCH RECORD"; push.
 PROVISIONAL-and-continue; author-only calls stop.
+
+## Stage C, batch C4b — BATCH RECORD (implementer, 2026-08-09; commits `a72c06f` · `c901d2a` · `20ddadd` · `c70801b` · `1be635f` · `dd715c2` + the record commit)
+
+**All five work items shipped.** Diff scope, verified by own `git diff
+--name-only 47baf1b..HEAD`: **14 files, ALL mobile app + mobile tests —
+zero `Sources/VariorumCore/`, zero `App/Variorum/Shared/`, zero
+Mac-side files, zero schema, zero `Sync/`, zero pbxproj** (synchronized
+groups took the two new files). The brief's small-additive-Queries
+allowance never fired: every brain the batch needed already existed —
+`newBlock(at: .after)` (item 1), `MarkdownSurfaceDoors` + the three
+`MarkdownEditing` acts (item 2), UITextView's native `UITextSearching`
+adoption (item 3), the SHARED `StructuralGesturePlanner` + `extract` +
+the divide compound (item 4), `Queries.blockTOC`/`tocHandle` (item 5).
+The four-suite duty therefore never fired; core / Mac / Mac-spine
+baselines stand by construction (core 1215/128 · Mac 1245/219
+tripwire-only · Mac spine 51/7). Per item:
+
+1. **INSERT BLOCK BELOW (`a72c06f`) — the matrix's mechanical row.**
+   *Door:* a **New Block Below** row on the ⋯ block menu, heading the
+   structural family (minting under the block is the gentlest
+   structural act, so it reads before the knives; the ⋯ already
+   resolves the caret's block and refuses honestly in the open tail —
+   placement justified). *Op:* `newBlock(in:text:"",at:.after(blockID))`
+   — the Mac 13b 4D act's exact op; I10 at birth (the empty variant IS
+   the one live take); the Mac door's status sentence shared verbatim.
+   The sibling contract whole: one flight · flush-first (a refused
+   flush refuses the act) · store-led settle · caret by identity into
+   the mint. The awkward type-into-next-then-divide road retires as
+   THE road. `rowTitles` grew through the one builder — both doors
+   (bar ⋯ + edit-menu Block submenu) follow by construction, and the
+   standing vocabulary pins read the constant, so nothing else moved.
+   *Tests (+2):* the mint's exact rows/caret/status; the seal +
+   refused-flush guards (no platform name). *Tutorial:* the blocks &
+   typing lesson's ⋯ enumeration grew the act in the same commit.
+
+2. **STRIKE / CODE / LINK IN THE Aa STRIP (`c901d2a`).** The three
+   remaining markdown acts join the strip INSIDE its capsule (the
+   brief's LK8 answer; the resting bar stays **Aa · ⑂ · ⋯**,
+   byte-untouched). *The geometry fact that shaped it:* ten 44 pt acts
+   cannot sit on one row of any iPhone class (10×44 + 9×2 = 458 pt vs
+   the tightest cell's 333), so the capsule holds **TWO ROWS** — the
+   character acts **× B I S ⟨⟩ link**, then the line acts **# • ☑ ⇥**
+   — the standing seven keeping their LK8 relative order, the
+   arrivals landing exactly where the Mac's act table puts them
+   (after Italic); the BAR grows to 84 pt while expanded
+   (`reloadInputViews` carries the height) and returns to 44 at
+   collapse/reset. The doors fire the SAME shared-brain acts the
+   Mac's Format menu fires (`.strikethrough`/`.code`/`.link` —
+   `MarkdownSurfaceDoors`, one computation both platforms; the link
+   act leaves the caret inside its empty parens, the law's own
+   contract, pinned). Glyphs: a struck-through **S** (the act worn),
+   **⟨⟩**, and the SF `link` symbol (the seal door's SF precedent —
+   symbols tint with the voice ink); labels are the registry's own
+   verbs. **The FIX-5 pin EXTENDED per the brief's rule** —
+   `allTenStripActsSitFullyVisibleAndTappableInsideTheBar`: every row
+   inside the tightest class's cell, every button frames-in-bounds
+   AND ≥44 pt, the capsule inside the expanded bar (the new vertical
+   axis), the ten doors in reading order, the 6/4 split pinned; the
+   Aa round-trip pin gained the height flip; the P5 wiring lookup
+   descends the row level (mechanics only — every pinned label,
+   order, selector unchanged). *Tests (+1):* the three acts' store
+   bytes + toggle + the link caret. *Tutorial:* the formatting lesson
+   demonstrates the acts by BEING them (`~~struck words~~` + a real
+   link) — lesson + the shape walk's span list in the same commit.
+
+3. **FIND-IN-NOTE (`20ddadd`).** *Shape:* the matrix row's own — iOS's
+   NATIVE find interaction on the Write surface
+   (`isFindInteractionEnabled`; the system navigator over UITextView's
+   `UITextSearching` adoption; hardware ⌘F rides the system's own
+   keys). *Door:* the masthead's **magnifier**, beside the seal glyph
+   — the note-tool corner (the seal's placement class: note-level,
+   always visible); finding is reading, so a sealed note finds
+   freely. *TEXTKIT2 §3's care, held by construction and pinned:*
+   zero highlight code of ours (match decoration is the system
+   interaction's internal business — never a rendering attribute of
+   ours, the overlay-discipline constraint satisfied by writing NO
+   decoration at all), zero spell-check coupling (`spellCheckingType`
+   untouched, no `UITextChecker` — the §3 crash pairing left exactly
+   where the OS put it). **REPLACE IS STRUCTURALLY OFF (PROVISIONAL
+   PC4b-2):** `supportsTextReplacement` overridden `false` at the
+   protocol's own switch, so the system never offers a replace field
+   — the Mac's M1/M1b measurements proved system-driven replace
+   applies coalesced multi-block storage transactions that bypass the
+   per-block police, and iOS's replace road is exactly as unmeasured;
+   an unpoliced machine-driven sweep is the class the Mac refused.
+   The in-note replace face lands when it can ride the policed path
+   (the Mac's deferred-application shape, UIKit-spelled); takes-aware
+   replace is 13e's either way. *Tests (+2, +1 suite):* interaction
+   on + replace declined + the doorless no-op; storage/spellcheck
+   untouched by the find work. *Tutorial:* the getting-around
+   masthead paragraph grew the magnifier.
+
+4. **EXTRACT + MAKE BLOCK ON THE SELECTION MENU (`c70801b` +
+   `dd715c2`) — her mid-chain ruling 5.** *Doors:* two UIEditMenu
+   items — the registry's verbs, voice-cased — rendered ONLY when a
+   selection exists (P-2: a caret can never span; the caret menu is
+   byte-unchanged, its standing pins prove it). *The brain is the ONE
+   shared planner* (`StructuralGesturePlanner.plan` — boundary
+   adjacency, the S4-22 word rule, the whole refusal vocabulary; zero
+   second opinion anywhere), and the span body mirrors the sibling
+   contract: latch → flush FIRST → **plan against the POST-flush
+   surface** (planning after the flush buys what the divide door's
+   re-verify buys — the plan can never hold a pre-flush reading of a
+   re-tiled surface) → the standing ops → the one fresh-read settle,
+   caret by identity. Extract runs `ops.extract` (source survives,
+   keeps identity + fan; the extracted block lands before/after per
+   edge; caret in it). Make Block runs **the Mac's exact execution**:
+   two divides as ONE `withCompound` (atomic on partial failure), the
+   second cut derived from the first divide's ACTUAL output (the
+   seam-trim arithmetic — never re-guessed); caret in the carved
+   middle. *Refusals in phone words, no platform named:* the
+   **fanned middle span names the phone's OWN divide road** (Q-M2 —
+   "divide at the span's edges instead: the other takes ride onto
+   both halves whole") instead of a ceremony the phone deliberately
+   lacks; extract's middle span points at Make Block; the cross-block
+   spans name the divide/merge roads (both exist here); the guided
+   cross-block flow's stand-in refuses with merge-first named
+   (`crossBlockMakeBlockRefusal`). **The fanned-extract hint SHIPS
+   (my call, PROVISIONAL PC4b-3):** AppSpec §9 review #10's
+   documented behavior gets the Mac's contract-item-8 sentence
+   verbatim through the status line (the phone's transient face) —
+   the honest voice for a span the other takes silently keep.
+   *Tests (+5, +1 suite):* prefix extract with flush-carried typing +
+   before-the-source landing + caret; the fanned hint + the
+   other-take-keeps-the-span store proof; the middle-span carve with
+   source identity kept; five refusal shapes each no-Mac-asserted;
+   the menu's selection-only offer. One standing pin widened with the
+   doors (`dd715c2` — the edit-menu composition pin's with-selection
+   arm; caret/tail arms byte-identical). *Tutorial:* the divide
+   lesson grew the two knives.
+
+5. **THE BLOCK-TOC IN-NOTE LIST (`1be635f`) — her mid-chain ruling
+   11; block names' phone face.** *Door:* the masthead's **blocks**
+   chip (the second identity line, beside tags · more info — the
+   masthead is the phone's note-level home; PROVISIONAL PC4b-4 for
+   her look: three chips now share that line). *Face:* an LK4
+   masthead-sheet (the references sheet's grammar) whose rows ride a
+   **LazyVStack** (P3 — virtualized; the handles derive IN the lazy
+   row bodies, so a 1,000-block note derives only what it shows).
+   One row per block: the NAME where set, else the first sentence
+   **derived at read time through the one core brain**
+   (`Queries.blockTOC` + `tocHandle` — the Mac TOC's own; never
+   stored, the no-denormalization letter), the Mac row's ⑂ fan
+   marker riding along — this is where names SET on the phone since
+   S4 finally RENDER (the [B1] record's "Stage C's call", called).
+   *The tap:* `jumpToBlock` — caret at the block's start; the
+   block's first line lands a breath under the viewport top via
+   `firstLineGeometry` (`.ensuresLayout` on exactly the target
+   fragment — the hybrid-jump cost class), deliberately UNCLAMPED
+   against `contentSize` (TK2's estimate can run under the real
+   layout at the target — TEXTKIT2 §2's class — and the typewriter
+   room already makes any block's top a legitimate scroll target);
+   `scrollRangeToVisible` is the honest fallback. A dead block
+   refuses in plain words. *Windowing judgment, recorded:* NO window
+   on this list — a jump list that cannot reach the note's far
+   blocks fails its whole purpose; the read is ONE `blockTOC` pass,
+   cost ∝ the post (the open-a-note class, AppSpec §4's letter), and
+   laziness — not truncation — is what P3 asks of a
+   bounded-by-one-post surface. *The chip is the bare voiced word,
+   countless* (recorded judgment: the chip refreshes at sheet
+   cadence, not keystroke cadence — a stale census on the masthead
+   would be worse than none; the list is the census). *Tests (+3,
+   +1 suite):* rows/names/first-sentences with the derivation proven
+   READ-TIME (rename + text edit follow on the next read, no stored
+   copy anywhere); the jump's caret + landing offset + dead-block
+   refusal; the empty state on the one standing sentence. *Tutorial:*
+   the getting-around masthead paragraph grew the door.
+
+**Tutorial-as-spec, held per owning commit:** the blocks & typing ⋯
+enumeration (item 1) · the formatting lesson's three acts + the shape
+walk's span list (item 2 — the ONE pinned-prose lesson, walk updated
+in the same commit per PB1-3's carve-out) · the getting-around
+masthead paragraph (items 3 + 5) · the divide lesson's two knives
+(item 4). No new lesson (the 13-lesson counts stand — spine green
+below); no walk pins prose beyond the formatting spans.
+
+**Counts, by this implementer's own runs (iPhone 17 Pro / iOS 26.2
+simulator):**
+- Full mobile suite: **"Test run with 296 tests in 56 suites
+  passed"** — the 283/53 baseline + this batch's 13 tests and 3
+  suites, exactly accounted (insert-below 2 · strip acts 1 · find 2
+  [+`MobileFindInNoteTests`] · selection acts 5
+  [+`MobileSelectionActsTests`] · block list 3
+  [+`MobileBlockListTests`]; the Aa/FIX-5/P5/edit-menu pins flipped
+  1-for-1, every flip named in its owning commit).
+- Mobile spine by its seven TRUE type names: **"Test run with 32
+  tests in 7 suites passed"**.
+- Perf by name (`MobilePerfFixtureTests` · `MobilePerfWalkTests`):
+  **"Test run with 9 tests in 2 suites passed"**.
+- Core / Mac / Mac-spine deliberately not run: zero core, zero
+  `Shared/`, zero Mac-side lines in the whole batch (the scope check
+  above is the proof) — the only-if-shared condition never fired;
+  baselines stand (core 1215/128 · Mac 1245/219 tripwire-only · Mac
+  spine 51/7).
+
+**Test posture:** every new door landed with state-transition tests
+through the view model / controller against a real in-memory store
+(birth pins — the doors did not exist on the old tree, the A2 reading
+of red-on-old); no defect-class fix arose, so no behavioral-revert pin
+was owed. Four standing pins took sanctioned flips riding the doors
+(the Aa pin's labels+height · the FIX-5 pin's ten-act extension — the
+brief's own instruction · the P5 wiring lookup's row descent · the
+edit-menu composition pin's with-selection arm), each recorded in its
+owning commit; every flip widens with a door, none weakens.
+
+**PROVISIONALs (for the chain's end bundle):**
+- **PC4b-1 — the New Block Below row's seat** (heading the structural
+  family, before Divide) and its shared status sentence — one-line
+  moves for her look.
+- **PC4b-2 — find ships REPLACE-OFF** (`supportsTextReplacement`
+  false): the M1/M1b reasoning above; the honest alternative — the
+  Mac's deferred-application gate rebuilt on UIKit — is real work her
+  bundle can commission if she wants in-note replace on the phone
+  before 13e's takes-aware family.
+- **PC4b-3 — the fanned-extract hint ships** (the Mac's sentence
+  through the status line); her look may prefer silence or other
+  words.
+- **PC4b-4 — the masthead's second line now carries THREE chips**
+  (tags · more info · blocks) — PC3-1's two-row calm reading holds,
+  but the line is fuller; her look round may re-arrange (the blocks
+  chip is one line to move).
+- **PC4b-5 — the strip's row split and glyphs** (6/4 by family; the
+  struck-S, ⟨⟩, SF `link`) and the 84 pt expanded bar — all one-line
+  changes for her look; the reset-per-presentation cadence is
+  unchanged and stays her recorded look item.
+- **PC4b-6 — the blocks chip is countless** (the recorded judgment
+  above); a live count needs an observation the masthead chips
+  deliberately don't hold — hers to commission if wanted.
+
+**Deliberate absences (scope, not holes):** the merge-ceremony
+refusal (inventory #4) + the tutorial's merge-lesson sentence (#7,
+PB1-4's rider) stay UNTOUCHED for C5's sanctioned-exception design —
+re-verified still the ONLY user-facing "Mac" strings in the mobile
+target (grep over the final tree) · no cross-block Make Block
+execution (the Mac's guided flow runs through W-ceremony arms the
+phone deliberately lacks; the refusal names the merge-first road —
+C5's workaround design owns any richer shape) · Delete in Every Take
+stays Mac-only (her ruling 6) · the Mac TOC's expand-into-read-tier
+and block-management halves stay Mac-side (the phone's list is the
+summoned NAVIGATION half; block acts live on the ⋯, one home) · no
+Release-build re-verify this batch (no DEBUG-gated door changed; the
+standing Release checks stand).
