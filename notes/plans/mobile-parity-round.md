@@ -1325,3 +1325,255 @@ card editor (browser live card) doesn't carry the new paragraph
 style (it never carried the old one — a look-round line if wanted);
 Stage C's families untouched (locked-take copies, remaining refusal
 sweep).
+
+## Stage A review — round 1 findings (cold reviewer, 2026-08-09)
+
+**Scope of this review, done in-session:** `notes/REVIEW_PROMPT.md` run
+verbatim; the FULL combined diff `b93d42c..a57667e` read file-by-file
+(the core op + its 400-line birth-pin suite in full; every mobile
+source hunk — browser view/controller, keyboard bar, markdown acts,
+editor style/text view/VM, structural door, block menu, edit-menu
+seam, comments, all seven shell/Read files, the pbxproj's six config
+blocks; every test-file hunk), plus the standing code the new code
+leans on read in place (`divideW` side-by-side with the new op,
+`mintFanBlock`, `poolDragCopy`'s copy-set remap, `revertStructural`/
+`reapplyStructural`, `touchContainer`, `copyLiveComments`,
+`placedContext`, `MobileBlockDecor`'s marker placement, `branchDisplayed`'s
+old `mint` road); anchors = this file's three batch records + two
+acceptance notes, `notes/plans/mobile-app-plan.md`'s GATE SITTING
+record (Q-M2/Q-M1/P-round/LK canon read at source), `notes/MobileSoul.md`.
+**Counts by this reviewer's OWN runs:** mobile (iPhone 17 Pro / iOS
+26.2) **"Test run with 189 tests in 28 suites passed"**; core `swift
+test` **"Test run with 1212 tests in 128 suites passed"**. Mac + spine
+deliberately not re-run: my own `git diff --stat` + grep confirm zero
+Mac-app source lines, pbxproj hunks confined to the six mobile config
+blocks, and `divideDuplicating` referenced nowhere outside the mobile
+door + core (+ its tests) — dormancy holds by construction, and the A2
+matched pre/post runs stand as the recorded proof. Read-only per the
+prompt; no fixes made. No "Review foci" section exists for this
+project; the batch records' own ladder notes served that role and each
+was checked.
+
+### Findings
+
+**[MAJOR] · `notes/plans/mobile-a3-screens/` (machine-local,
+gitignored) + this file's A3 batch record ("THE SCREENSHOT SET") and
+A3 acceptance ("screenshots verified") · the stage's screenshot
+evidence set is substantially broken, and the record's claims about it
+are falsified — her end-bundle look would be looking at wrong
+evidence.** Facts, all verifiable on this machine: **(1)**
+`before-write-terminal.png` is BYTE-IDENTICAL to
+`after-write-terminal.png` (`md5 e0fc548e…` both) and
+`before-write-study.png` to `after-write-study.png` (`79e539bb…`
+both); the "before" files' mtimes are ~50 s AFTER the "after" files'
+(06:10 vs 06:09) — the "pairs" are one capture duplicated, so no
+before/after flip evidence exists at all. **(2)** The write captures
+show the PRE-fix surface by four independent measurements: the callout
+frame runs flush to both screen edges (the record's own description of
+the BEFORE state — "the callout frame even bled off the screen edge");
+the prose left margin measures ≈5 pt (lineFragmentPadding alone — the
+shipped inset is 15+5=20); intra-paragraph line pitch ≈17 pt (the
+natural box — the shipped 0.4× lineSpacing would give ≈22); the
+paragraph gap ≈7 pt (the OLD 0.5× constant, not the shipped 1.0×=14).
+So even the files named "after" do not show the shipped floor. **(3)**
+`after-kbar-formatting.png` shows a FIVE-item strip (B · I · # · • ·
+☑) — the ruled strip is × · B · I · # · • · ☑ · ⇥; × and ⇥ are absent
+from the evidence for the ruled door's expanded state. **(4)**
+`after-book-contents.png` carries NO "Read" door — no nav bar rendered
+at all — yet the P35 pin explicitly delegates the SwiftUI push wiring
+to exactly this screenshot ("after-book-contents.png shows the front
+with its Read door"), so the Read door's on-screen existence is
+currently verified by NOTHING (the pin covers route vocabulary + the
+door word only). `after-shelf.png` (the P33 door, voice-cased, on the
+path line) and `after-kbar-resting.png` (Aa · ⑂ · ⋯) are genuine.
+**Mechanism:** the A3 brief specified `xcrun simctl io booted
+screenshot` of the real app; the implementer substituted a throwaway
+`layer.render(in:)` harness (recorded in the batch record), which did
+not reproduce the shipped construction (no `make()` insets/paragraph
+style on the rendered text view, no nav chrome, UIToolbar internals
+unpainted — the record itself flags the repaint problem), and the
+"before" files were produced by file copy. **Not a code finding:** the
+shipped spacing/margins/gap are pinned at the value level
+(`surfaceWriteValuesFollowTheLiveVoice`, the `make()` factory read in
+place) and the suites are green by my runs — the app almost certainly
+renders the floor correctly; what is broken is the EVIDENCE and the
+two record claims about it (the batch record's "the pair tells her
+story exactly" and the acceptance's "screenshots verified"). **Fix
+shape:** re-capture per the brief's own instruction — the real app on
+the simulator via `simctl`, afters from HEAD, befores from the
+pre-batch tree (`git worktree` at `1010030`), pixel-diff-verified
+different; include the expanded strip (all seven items) and the
+contents screen inside its NavigationStack showing the Read door; then
+correct the A3 record and acceptance note. No test pin owed (evidence
+class, not bug class — the md5 identity IS the trace).
+
+**[MINOR] · `Sources/VariorumCore/Operations/Operations+Structural.swift:1129-1132`
+(+ the doc claim at 1109-1113) · `mintFanBlock`'s `parentIndices`
+remap fatal-crashes (Swift array index-out-of-range, mid-write-
+transaction) on a parent that FOLLOWS its child in fan order, and the
+doc's safety claim is wrong — "the FK enforces the contract at insert"
+can never fire, because `variants[parentIndex]` traps before any
+insert.** Mechanism: `divideDuplicating` builds `indexBySource` from
+`others` in `ORDER BY fan_position, id`; a duplicate at loop index `i`
+whose parent sits LATER in that order gets `parentIndex > i`, and
+`variants` holds only `i` entries at that moment → trap. Reachability
+TODAY: none by construction — `branchVariant`/`resolveSyncConflict`
+mint children strictly after their parents (`FractionalIndex.between(a,
+nil) > a` strictly, on-device and cross-device alike), so I could not
+trace a present-day input that fires it; ties need byte-identical
+jittered positions between parent and child, which the construction
+cannot produce. **But the premise is falsifiable on the roadmap:** the
+day 13e's ruled "reorder takes" makes `fan_position` mutable (PL-1's
+row), a user who drags a child take above its parent and then divides
+that fanned block ON THE PHONE crashes the app inside the op (rollback
+keeps the store safe; the process dies). The cited precedent already
+solves this order-independently — `poolDragCopy` pre-assigns ALL copy
+IDs before inserting (`Operations+Pool.swift:65-77`) — and the fix is
+that shape (or map forward references to nil under an explicit guard).
+Pinnable red-on-old: a fixture that swaps two takes' `fan_position`
+via direct SQL (the sync suites' row-writing precedent), then calls
+`divideDuplicating`. Fix now while the op is fresh, or 13e inherits a
+hidden landmine its ledger row will not mention.
+
+**[MINOR, part SPECULATIVE] ·
+`Features/Takes/MobileTakesChrome.swift:71,168-176` +
+`Features/Write/MobileBlockDecor.swift:166-170` · P38's
+`commentMarkRoom` (26 pt) is smaller than the marker it reserves room
+for (30 pt by the batch's own revert measurement: "mark 345.5–375.5"),
+leaving a ~3 pt residual crossing window the shipped fixture never
+probes.** Arithmetic: badge left edge = cw−26 (gutter 30, badge inset
+4); marker spans `end.x+3 … end.x+3+max(width,20)` with width
+measured 30 → non-intersection requires `end.x ≤ cw−59`, but the
+widened exclusion admits glyphs to cw−56 — so a ONE-line block whose
+text ends within (cw−59, cw−56] still crosses, and a multi-digit count
+(●12+) widens the marker and the window. SPECULATIVE half: whether
+TK2 applies `lineFragmentPadding` (5 pt) against exclusion-path edges
+— if it does, glyphs stop at cw−61 and the window closes; I could not
+determine this from the shipped evidence, and the pin's fixture WRAPS
+under the new exclusion (the record's own "wraps a hair earlier"
+note), so it asserts the two-line safe case, never the flush-end
+one-line case. Cheap hardening either way: `commentMarkRoom` ≥
+marker-width+offset (33), or a flush-end computed fixture that settles
+the padding question and pins whichever answer is true.
+
+**[MINOR] · `notes/AppSpec.md` §9 (doc + section) ·
+`divideDuplicating` is a shipped operation in the transactional API
+with NO entry in the operations catalog** — §9 is canon's enumeration
+("Every mutation is one of these"), and a fresh Mac session reading
+canon cannot learn the op exists (13j's row says the core shape will
+exist; nothing in AppSpec says it now DOES, with its composition rules
+— the W release, duplicate labels, comment travel, undo shape — which
+this review had to reconstruct from the mobile plan's records). The
+mobile project's records legitimately live in mobile files, but a CORE
+operation is canon's jurisdiction. Fix at stage closeout: the §9 entry
+(pointing at the Q-M2 ruling and 13j for the Mac door), in whatever
+delta form the ritual owes.
+
+**[NIT] · `Operations+Structural.swift` (the op's doc, ~478) vs
+`Tests/VariorumCoreTests/StructuralDivideDuplicatingTests.swift:139` ·
+the "a LOCKED displayed take is deliberately legal" claim is
+untested** — the pin locks V3 and displays V1; no test displays the
+locked take itself. One fixture line closes it.
+
+**[NIT] · `MobileTakesBrowserTests.swift`
+(`theKeyboardNeverStrandsTheCardListFooterOrLiveCard`, the
+`UIWindow`+`makeKeyAndVisible` at its top) vs the A3 acceptance's
+machinery lesson ("pins host windowless") · the lesson's letter is
+overstated and its carve-out list incomplete:** TWO window-hosted
+tests ride the baseline suite (the pre-existing focus test, which the
+lesson names, AND this A1 keyboard pin, which it doesn't).
+Empirically green in company (my full-suite run), so no action beyond
+the record — but the walk5 hazard note is the trace future batches are
+told to start from, and it should name both hosts or the next
+debugging session starts from a false map.
+
+**[NIT] · `Features/Write/MobileEditorViewModel.swift:628-640`
+(`lockNote`) · the flush→seal suspension window is the R2-10
+read-then-act class, unrecorded at the door:** between `flushNow()`
+landing and `lockPost` committing, both awaits suspend the main actor
+— a keystroke interleaving there pends on the surface, then can never
+flush behind the seal (refused `.lockedPost`) until unlock, and dies
+with the session if the note closes sealed. Sub-millisecond, honestly
+unpinnable without an op-level precondition (exactly
+`shelveInDailyJournalBook`'s recorded residual class) — the repo's own
+convention is to RECORD it beside the door rather than paper over it;
+a comment line suffices.
+
+### Clean bill (load-bearing things specifically checked and found solid)
+
+- **The core op's row-level semantics**, read side-by-side with
+  `divideW`: the release (placement tombstone + `last_container_id` +
+  block stamp), the neighbor/position computation, the undo/redo
+  registration are line-for-line the W's own; A preserved whole
+  (variants, commits, default pointer, comments untouched — pinned);
+  W-reversibility by `placeBlock` pinned; I10 at birth by construction;
+  I2 via fresh single placements; S1/S2/S3 shapes (tiny writes,
+  tombstone-not-delete, fresh v4 UUIDs via `newID()`); owner stamping
+  on all minted rows; edges `derived_from`/'divide' both successors;
+  touch-without-churn through `touchContainer` (churn + major-revision
+  pinned unmoved); commits never copied; comment travel through the
+  one `copyLiveComments` helper (created_at preserved, deleted never
+  travel); duplicates born unlocked, labels riding (PA2-2's
+  composition), parent tree remapped inside each copy set with
+  out-of-set parents → nil (pinned against the WWorld chain).
+- **The 11 birth pins** cover the worked example's exact rows, the
+  any-active-take peek case, parent remap, archived-stay/locked-
+  duplicate-unlocked, commits, comments+presentation, churn, the
+  PA2-1 unfanned degenerate, reversibility, refusals-leave-the-world
+  (incl. undo-stack silence), and undo↔redo ping-pong on stable IDs.
+- **Mac dormancy** verified independently: grep shows
+  `divideDuplicating` referenced only by the mobile door, the op file,
+  and its core tests; the combined diff carries zero Mac-app files;
+  the pbxproj hunks map to the six mobile config blocks only.
+- **The phone's divide door**: flush-first → post-flush re-verify →
+  the F-3 displayed-still-in-fan guard, all preserved around the new
+  call; single-take path byte-untouched on plain `divide`; no
+  platform-naming refusal remains on the divide road (the kept
+  locked-take/merge-ceremony/tray/daily-book "Mac" strings are Stage
+  C's recorded families — verified by full grep).
+- **The A1 keyboard fix's mechanism**: the sheet is bottom-pinned to
+  the full-bounds overlay, so the screen-coordinate overlap subtracts
+  correctly from `footerY` and the card band's height (max scroll
+  offset now accounts for the occluded band); the reveal fires once
+  per editing transition/keyboard move, never per render (her own
+  scrolling unfought); observers weak, removed in deinit; PA1-2's
+  screen/window identity holds under the shipped portrait lock.
+- **The seal door**: routes through core `lockPost`/`unlockPost`; the
+  flush-guard's both arms pinned (landed-then-sealed with exactly one
+  auto-commit; refused-flush leaves the note open, keep-pending
+  intact); all ten sealed-NOTE refusal sites verified redirect-free by
+  grep; the masthead door + state line render through
+  `tokens.chromeLabel` (PA1-1 resolved into the register pin).
+- **Q-M1 seeding**: rides the ordinary `recordTakeEdit` road before
+  `beginEditing`, byte-no-op under a successful flush; the pin asserts
+  mint ledger + store bytes AND the source's keep-pending exactness.
+- **The Aa bar**: a door change in fact, not just in claim — the strip
+  items target the controller's own selectors (the standing act pins
+  drive exactly those), `headingItem`'s menu-not-primary wiring
+  preserves both ruled long-press doors, the reset cadence is the
+  deterministic keyboard-hide observer, and `headingCycleAct`'s
+  refactor through `currentHeadingLevel` is behavior-preserving (all
+  paths compared).
+- **P35/P33 routing**: `.bookList` fully retired (grep-zero); both
+  mint doors land `focus: true` through the one `MobileNewNoteDoor`;
+  the shelf/Library twins share word and path by construction.
+- **The platform flip**: six config blocks flipped, the iPad
+  orientation key dropped entirely, Mac blocks untouched; the
+  `Bundle.main` pin makes drift CI-visible.
+- **The spacing floor's locality**: zero `VoiceTokens`/
+  `EditorTypography`/`Shared/` lines in the diff — the Mac's look
+  untouched by construction; the typewriter room is equality-gated and
+  bounds-only (cannot loop layout), and its inset mechanism keeps
+  iOS's tap-to-end for free.
+- **P32/P23**: the one shared truncation sentence consumed by both
+  book surfaces; the I10 refusal copy names the phone's own ⋯ door.
+
+### This reviewer's runs
+
+- Mobile (iPhone 17 Pro / iOS 26.2): **"Test run with 189 tests in 28
+  suites passed"** — the ladder-open baseline, exactly.
+- Core (`swift test`): **"Test run with 1212 tests in 128 suites
+  passed"** — the ladder-open baseline, exactly.
+- Mac / spine: not re-run (dormancy-by-construction verified by my own
+  diff-scope + grep reads; the A2 matched runs and the recorded
+  1245/219-tripwire-only + 51/7 baselines stand).
