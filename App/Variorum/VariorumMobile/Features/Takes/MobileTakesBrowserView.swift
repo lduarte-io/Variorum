@@ -63,6 +63,29 @@ final class MobileTakesBrowserView: UIView {
     private var pageWasEditable = true
     private(set) var cardViews: [String: MobileTakesCardView] = [:]
 
+    /// The keyboard's current end frame (screen coordinates; nil = no
+    /// keyboard). THE GATE DEFECT (parity round Stage A, batch A1 — her
+    /// report: "i could make a new take but i couldn't scroll down through
+    /// the list of takes to edit it better"): this sheet was laid out
+    /// keyboard-blind — full-bounds manual frames, zero insets — so the
+    /// moment minting raised focus (the S2 MINOR-2 fix), the card list's
+    /// max scroll offset ignored the occluded band (with few takes it is
+    /// exactly ZERO — the list cannot scroll at all), the minted card (the
+    /// fan's end) sat behind the keyboard, and the new-take footer
+    /// vanished. The sheet is manual-frames over the page, so keyboard
+    /// geometry arrives by the system notifications (the surface
+    /// container's `keyboardLayoutGuide` is a constraint mechanism;
+    /// nothing here is constraint-laid) — and tests post the same
+    /// notifications deterministically.
+    private var keyboardEndFrame: CGRect?
+    /// Written once in init, read in deinit for removal — the
+    /// `nonisolated(unsafe)` is exactly that write-once shape.
+    private nonisolated(unsafe) var keyboardObservers: [NSObjectProtocol] = []
+    /// The take whose live card was last REVEALED (scrolled into the
+    /// unoccluded band) — one reveal per editing transition or keyboard
+    /// move, never per render, so her own scrolling is not fought.
+    private var lastRevealedEditingVariantID: String?
+
     init(textView: MobileEditorTextView, model: MobileEditorViewModel) {
         self.pageTextView = textView
         self.model = model
@@ -117,10 +140,56 @@ final class MobileTakesBrowserView: UIView {
         // convention); the sheet itself swallows its touches.
         let dimTap = UITapGestureRecognizer(target: self, action: #selector(dimTapped))
         dimView.addGestureRecognizer(dimTap)
+
+        // The keyboard joins the layout (batch A1 — see keyboardEndFrame).
+        let center = NotificationCenter.default
+        keyboardObservers = [
+            center.addObserver(
+                forName: UIResponder.keyboardWillChangeFrameNotification,
+                object: nil, queue: .main
+            ) { [weak self] note in
+                let end = (note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey]
+                    as? NSValue)?.cgRectValue
+                MainActor.assumeIsolated { self?.keyboardMoved(to: end) }
+            },
+            center.addObserver(
+                forName: UIResponder.keyboardWillHideNotification,
+                object: nil, queue: .main
+            ) { [weak self] _ in
+                MainActor.assumeIsolated { self?.keyboardMoved(to: nil) }
+            },
+        ]
+    }
+
+    deinit {
+        for token in keyboardObservers {
+            NotificationCenter.default.removeObserver(token)
+        }
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("not used") }
+
+    /// How far the keyboard intrudes into this view. Computed fresh per
+    /// layout (the conversion depends on where the view sits). `from: nil`
+    /// converts from window base coordinates; the app is portrait-locked
+    /// iPhone (the platform ruling), so screen and window bases agree.
+    private var keyboardOverlap: CGFloat {
+        guard let keyboardEndFrame, window != nil else { return 0 }
+        let local = convert(keyboardEndFrame, from: nil)
+        return max(0, bounds.maxY - local.minY)
+    }
+
+    private func keyboardMoved(to endFrame: CGRect?) {
+        guard keyboardEndFrame != endFrame else { return }
+        keyboardEndFrame = endFrame
+        guard !isHidden, superview != nil, let model else { return }
+        // The live card re-reveals under the NEW geometry (on device the
+        // keyboard's frame arrives a beat after the mint's transition).
+        lastRevealedEditingVariantID = nil
+        layoutChrome()
+        renderCards(model.takesBrowser)
+    }
 
     @objc private func dimTapped() {
         guard let model else { return }
@@ -208,7 +277,14 @@ final class MobileTakesBrowserView: UIView {
             button.titleLabel?.font = chrome
             button.sizeToFit()
         }
-        let footerY = sheetView.bounds.height - 44
+        // THE KEYBOARD'S SHARE (batch A1, the gate defect): the footer and
+        // the card list end ABOVE the keyboard — the sheet is bottom-
+        // pinned, so the overlap subtracts directly from its usable
+        // height. Without this the list's max scroll offset ignored the
+        // occluded band entirely and the new-take doors sat behind the
+        // keyboard. The clamp keeps the header row alive in degenerate
+        // geometries.
+        let footerY = max(sheetView.bounds.height - keyboardOverlap, 96) - 44
         footerLabel.frame.origin = CGPoint(x: 20, y: footerY + 6)
         branchButton.frame = CGRect(
             x: footerLabel.frame.maxX + 14, y: footerY,
@@ -255,6 +331,21 @@ final class MobileTakesBrowserView: UIView {
         }
         if browser.editingVariantID == nil { detachCardEditor() }
         cardsScroll.contentSize = CGSize(width: width, height: y)
+
+        // The live card is REVEALED when editing begins or moves (batch
+        // A1): the mint lands at the FAN'S END — exactly where the
+        // keyboard hides it — so the transition scrolls it into the
+        // unoccluded band. Once per transition (and once per keyboard
+        // move, which resets the marker), never per render.
+        if let editing = browser.editingVariantID {
+            if editing != lastRevealedEditingVariantID, let live = cardViews[editing] {
+                lastRevealedEditingVariantID = editing
+                cardsScroll.scrollRectToVisible(
+                    live.frame.insetBy(dx: 0, dy: -10), animated: false)
+            }
+        } else {
+            lastRevealedEditingVariantID = nil
+        }
     }
 
     private func makeCard(variantID: String) -> MobileTakesCardView {

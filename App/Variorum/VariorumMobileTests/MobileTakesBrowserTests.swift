@@ -834,4 +834,132 @@ struct MobileTakesBrowserSurfaceTests {
             #expect(surface.textView.takesBrowserView?.isHidden == false)
         }
     }
+
+    @Test func theKeyboardNeverStrandsTheCardListFooterOrLiveCard() async throws {
+        // THE GATE-SITTING SCROLL DEFECT'S PIN (parity round Stage A,
+        // batch A1 item 1 — her report: "i could make a new take but i
+        // couldn't scroll down through the list of takes to edit it
+        // better"). Traced mechanism: the LK4 sheet was laid out
+        // KEYBOARD-BLIND (full-bounds manual frames, zero insets), so once
+        // minting raised focus (the S2 MINOR-2 fix) the card list's max
+        // scroll offset ignored the occluded band — with few takes it is
+        // exactly ZERO, the list cannot scroll at all — while the minted
+        // card (the FAN'S END) and the new-take footer sat behind the
+        // keyboard. The fix feeds the keyboard's frame into the sheet's
+        // layout (the system notifications — posted here deterministically,
+        // exactly what the device delivers) and reveals the live card per
+        // editing transition. Red-on-old: with the overlap ignored, the
+        // footer and scroll band sit under the keyboard top and the last
+        // take's live card never enters the visible band.
+        try await withEditorWorld { session, db in
+            let seed = try await seedFannedPost(session)
+            // Real text mass at the fan's end — the gate case's shape.
+            let lastTakeID = try await session.runner.run { ops -> String in
+                var last = ""
+                for i in 0..<4 {
+                    let take = try ops.branchVariant(seed.blockA, from: seed.a1)
+                    try ops.autosave(
+                        take.id,
+                        text: "Take \(i) " + String(
+                            repeating: "with plenty of words to give the card real height ",
+                            count: 4),
+                        charDelta: 5)
+                    last = take.id
+                }
+                return last
+            }
+            let (model, surface) = await makeBrowserSurface(session, postID: seed.postID)
+            let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 393, height: 700))
+            window.addSubview(surface)
+            window.makeKeyAndVisible()
+            defer { window.isHidden = true }
+
+            model.openTakesBrowser(blockID: seed.blockA)
+            surface.layoutIfNeeded()
+            guard let browser = surface.textView.takesBrowserView else {
+                Issue.record("browser view not installed")
+                return
+            }
+            func find(_ id: String, in root: UIView) -> UIView? {
+                if root.accessibilityIdentifier == id { return root }
+                for sub in root.subviews {
+                    if let hit = find(id, in: sub) { return hit }
+                }
+                return nil
+            }
+            func cardsScroll(in root: UIView) -> UIScrollView? {
+                for sub in root.subviews {
+                    if let scroll = sub as? UIScrollView, !(scroll is UITextView) {
+                        return scroll
+                    }
+                    if let hit = cardsScroll(in: sub) { return hit }
+                }
+                return nil
+            }
+            guard let branchDoor = find("takes.browser.branch", in: browser),
+                  let scroll = cardsScroll(in: browser)
+            else {
+                Issue.record("browser furniture not found")
+                return
+            }
+
+            // The keyboard rises: 300 pt over a 700 pt window (top = 400).
+            let keyboardTop: CGFloat = 400
+            let keyboardFrame = CGRect(x: 0, y: keyboardTop, width: 393, height: 300)
+            func postKeyboard() {
+                NotificationCenter.default.post(
+                    name: UIResponder.keyboardWillChangeFrameNotification,
+                    object: nil,
+                    userInfo: [
+                        UIResponder.keyboardFrameEndUserInfoKey:
+                            NSValue(cgRect: keyboardFrame)
+                    ])
+            }
+            postKeyboard()
+
+            // 1 — the new-take doors live ABOVE the keyboard.
+            let branchInWindow = branchDoor.convert(branchDoor.bounds, to: window)
+            #expect(branchInWindow.maxY <= keyboardTop,
+                    "the new-take footer sits above the keyboard, not behind it")
+            // 2 — the card list's viewport ends above the keyboard, so its
+            // max scroll offset accounts for every covered card ("you
+            // can't actually scroll" dies here).
+            let scrollInWindow = scroll.convert(scroll.bounds, to: window)
+            #expect(scrollInWindow.maxY <= keyboardTop + 0.5,
+                    "the card list's visible band ends at the keyboard's top")
+
+            // 3 — editing the DEEPEST card (blank mints at the fan's end;
+            // branch beside its source — either way a card can sit beyond
+            // the unoccluded band) reveals it inside the visible band.
+            // The deepest card is found by frame, so no fan-order
+            // assumption rides the pin. Re-post the keyboard frame after
+            // the transition: in a window-hosted run the real host
+            // keyboard may have interleaved its own frames.
+            _ = lastTakeID // seeded mass; the target is the deepest card
+            guard let deepestID = browser.cardViews
+                .max(by: { $0.value.frame.minY < $1.value.frame.minY })?.key
+            else {
+                Issue.record("no cards rendered")
+                return
+            }
+            model.takesBrowser.beginEditing(variantID: deepestID)
+            postKeyboard()
+            surface.layoutIfNeeded()
+            guard let live = browser.cardViews[deepestID] else {
+                Issue.record("live card missing")
+                return
+            }
+            #expect(live.frame.minY >= scroll.contentOffset.y - 1)
+            #expect(live.frame.maxY <= scroll.contentOffset.y + scroll.bounds.height + 1,
+                    "the live card is scrolled into the unoccluded band")
+
+            // The keyboard leaves; the footer returns to the sheet's foot.
+            model.takesBrowser.endEditing()
+            NotificationCenter.default.post(
+                name: UIResponder.keyboardWillHideNotification, object: nil)
+            let restored = branchDoor.convert(branchDoor.bounds, to: window)
+            #expect(restored.maxY > keyboardTop,
+                    "without a keyboard the footer sits at the sheet's bottom again")
+        }
+    }
 }
