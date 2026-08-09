@@ -4196,3 +4196,72 @@ Copy-pin note for the sweep batch: several of these sentences are PINNED (the A1
 - Two rows interact with OTHER phases' territory and are routed, not built: deletion/restoration (PL-3/13j — consciously deferred, Stage E reads it) and the 13e takes vocabulary (PL-1). The lens batch carries a 13j-adjacent rider (dangling-pick honesty) without building the Mac's loud door.
 - The refusal sweep is LAST by dependency and carries PB1-4's lesson-update rider explicitly; six of the fourteen user-facing rows dissolve on ONE door family (take locks — C4), which is why C4 precedes C5.
 - The S5 row expects zero code: if the verify finds the badge/browser road broken, that is a FINDING (trace + red-on-old), not a silent fix.
+
+## Stage C, batch C1 — ACCEPTED; THE BATCH ORDERING RULED (architect, 2026-08-09)
+
+The matrix reviewed directly (the kickoff's record-only
+interpretation): 71 registry CapabilityIDs + 20 registry-blind rows
+all dispositioned, ruling citations on every non-already row,
+already-parity verdicts grounded in mobile code + pins, the
+refusal inventory grep-grounded (15 rows). **The proposed C2–C5
+ordering is ADOPTED as written** (C2 books/membership/metadata with
+the details-surface design fork · C3 the see-your-data trio · C4
+takes completeness/locks/history/editor fill + the S5 pin · C5
+lenses design-first + the refusal sweep LAST). **The 11 OPEN-FOR-HER
+rows ride the end bundle** — none gates a batch (all additive); her
+answers fold into the owning batch if they arrive mid-chain (the
+standing fold-in rule). The one sanctioned-exception-candidate (the
+merge-ceremony refusal) gets its "SOMEHOW" road designed at C5, per
+her no-redirect wording's own exception clause.
+
+## Stage C, batch C2 brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
+
+**Cast:** a fresh Fable implementer session, `~/dev/variorum-mobile`,
+branch `mobile`, starting at the C1 acceptance commit. **Scope:
+books & membership + note metadata — the matrix's C2 rows ONLY**
+(the OPEN-FOR-HER rows are out: no chapters/reorder/sort-picker/
+entry-date/stars/convert — unruled product behavior is never built).
+
+**Read first, IN FULL:** `CLAUDE.md` · `notes/MobileSoul.md` · THIS
+plan file top to bottom — above all **THE PARITY MATRIX's books &
+membership + note-metadata rows** (each row cites its ruling; build
+to the citations) and the refusal inventory's four C2 rows ·
+`notes/plans/mobile-app-plan.md`'s GATE SITTING record (LK5's
+expansion ruling verbatim) · the Mac's shelf/book faces in code
+(the shapes being paralleled — `App/Variorum/Features/`) · the
+mobile shell/shelf/book surfaces (`App/Variorum/VariorumMobile/`) ·
+`notes/plans/mobile-architect-handoff.md`. Environment traps bind.
+
+**THE ONE DESIGN FORK — propose BEFORE building (the 4E pattern):**
+the BOOK DETAILS surface's shape (off a book's contents: finish/
+unfinish · tag editing · rename · the daily-designation road — and
+create-book's home if you put it there). END YOUR TURN with a short
+proposal: where the door lives on the contents screen, sheet vs
+push, the acts' arrangement, refusal/undo stories per act, LK canon
+cited — one line of why each. The architect rules repo-first; you
+build on the ruling. Everything else builds straight.
+
+**The work (besides the fork):** create book (the matrix's kinds) ·
+pin/unpin · smart-book-from-tags (her "people also need to be able
+to create books based on tags") · the membership chip (see
+memberships, add-to-book; the diverge-for-book road where the core
+op's curated-only shape allows) · rename note · the four C2 refusal
+rewords (Today door + tray). ALL acts route through existing core
+operations (`addPostToReading`, `assertReadingAcceptsPosts`,
+`shelveInDailyJournalBook`, `divergePostForReading`, reading CRUD —
+they exist; read them). **Small additive `VariorumCore/Queries`
+reads are legal IF genuinely needed** (e.g. books-by-tag), with the
+FULL four-suite duty and zero change to existing queries; anything
+in `Operations/`, schema, or `Sync/` STOPS and returns to the
+architect. **Tutorial-as-spec rider:** any door or copy the pocket
+guide teaches that this batch changes updates the lesson AND its
+walk in the same commit.
+
+**Discipline:** work synchronously; red-on-old for defect-class
+fixes; state-transition tests through the view models for every new
+door; refusal copy carries no platform name. Full mobile suite green
+by your own run (arithmetic accounted) + the spine 32/7 + perf 9/2
+by name; four-suite duty if core Queries changed. Commit per logical
+unit with the standing trailer; write "## Stage C, batch C2 — BATCH
+RECORD (implementer, 2026-08-09)" into THIS file; push
+`origin mobile`. PROVISIONAL-and-continue; author-only calls stop.
