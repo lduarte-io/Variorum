@@ -5647,3 +5647,175 @@ rule). **ROUND 2 OPENS:** fix-set diff `164a53d..2bcd070` inside
 `ad4fbcf..2bcd070`; fresh reviewer; new BLOCKER/MAJOR ⇒ round 3.
 Baselines: mobile 265/48 · spine 32/7 · perf 9/2 · core 1214/128 ·
 Mac 1245/219 tripwire-only · Mac spine 51/7.
+
+## Stage C review — C3 round 2 (fresh cold reviewer, 2026-08-09)
+
+**Method.** Cold, zero fix-session context. Anchor read: the C3 round 1
+findings · the ADJUDICATION · the FIX-PASS RECORD · the fix-set
+acceptance. The fix-set diff `164a53d..2bcd070` read line by line (nine
+files, all mobile — verified by own `git diff --name-only`: zero
+`Sources/VariorumCore/`, zero `Shared/`, zero Mac-side, zero schema,
+zero `Sync/`, zero pbxproj); every touched file then read WHOLE on the
+final tree (`MobileTagManager` · `MobileNoteTags` · `MobileReferences`
+· `MobileScraps` · `MobileLibraryView` + the four test files), plus the
+core mechanisms the fixes lean on (`Queries.poolListing`/`observePool`
+— confirmed unbounded; `MobileLibraryViewModel.setSort`/`listingLimit`)
+and the adjudication's side-effects (the KnownIssues six-copied-brains
+row at `164a53d` — present, owner named). A REAL pass, not a stamp: the
+C3d platform claim was independently re-probed (below).
+
+### Verdicts, per fix
+
+**FIX-C3a — HOLD.** The typed-path brain lives ONCE
+(`MobileTagsModel.typedSegments` / `TypedPathPlan` / `typedPathPlan` /
+`createMissing` / `emptyTypedPathMessage`); own grep finds no leftover
+copy of the walk anywhere in the mobile target. The note-tags sheet's
+`applyTypedPath` is verified byte-equivalent through the hoist by
+line-diff of the old inline walk against the hoisted brain (identical
+resolution loop, identical `existingLeafID ?? parent` leaf rule,
+identical one-serialized-turn create+apply composition — the turn
+boundary itself is reading-verified, since no headless pin can see a
+transaction seam) and the standing `MobileNoteTagsTests` pins DO
+discriminate the walk's behavior surface: create sets, LEAF-only apply,
+polite re-apply no-op (the `existingLeafID` road + `alreadyTagged`
+catch), slash-noise forgiveness, and the exact empty-hint sentence
+would each fail on a mis-hoist. The new pin discriminates the door: the
+pre-fix raw-to-`createTag` route refuses any "/" at the op's own guard
+and mints nothing — the pin's first two assertions fail there. Checked
+deltas, all deliberate and sound: "///" and whitespace-only now speak
+the shared hint instead of `invalidTagName` (the note sheet's own
+sentences); a fully-existing path refuses with the standing duplicate
+sentence BEFORE the runner turn, and the read-to-turn race still lands
+on `createTag`'s own guard; a live-tombstoned path re-creates legally
+(live-only read + live-scoped unique index — the tombstone-then-
+recreate doctrine holds through the typed road). The child door's
+kept single-NAME semantics match its own alert copy ("A child of
+“X”." — no nesting promised there).
+
+**FIX-C3b — HOLD.** `RowState` keys `kind == .file` FIRST
+(`MobileReferences.swift:101–105`), so the file sentence has exactly
+one home; the unopenable link's state shows stored text, no door, no
+sentence; the `.opens` and `.file` view arms are byte-identical to the
+pre-fix rendering; remove rides all three states (PC3-2's standing
+scope). The pin discriminates: the pre-fix openable-else-file branch
+mirrored into the brain returns `.file` for a nil-url `.url` row — the
+pin's first assertion fails there. The pin's fixture builds the broken
+row through legal core (`addReference` validates nothing about the
+kind/url pairing — re-verified in `Operations+Reference`).
+
+**FIX-C3c — HOLD.** The window lands at ONE `adopt` rule shared by
+both delivery roads (`MobileScraps.swift:70–73`; the observation's
+loop and `refresh` both call it; `restartItems` resets `truncated`
+with `items`), the default 200 verifiably mirrors the Library
+neighbor's own `listingLimit` (`MobileLibraryViewModel.swift:58`).
+The by-construction probe claim VERIFIED IN CORE: `Queries.
+poolListing` → `renderPost` carries no LIMIT and `observePool` wraps
+it whole — the delivery is the whole pool, so `count > window` is
+exact truth and the exact-window arm discriminates a `>=`-class false
+positive. The pin discriminates the window (unwindowed adopt → 5 rows,
+`truncated` false, marker off-by-the-cut). The lazy half is
+structurally right: the flat `@ViewBuilder` body puts the `ForEach`
+into the Library's own LazyVStack list context (the pre-fix VStack was
+ONE lazy leaf), the observation's lifecycle moved to stable chrome
+(`.task(id: model.filter)`) with cancellation semantics preserved, and
+the mint alert rides its own door — the recorded not-headless-testable
+class, accepted as recorded. One lifecycle nuance survives as R2-1
+below.
+
+**FIX-C3d — HOLD.** The claimed pin now exists as the no-op-flip
+CONTRACT pin, honestly worded (it does not claim to discriminate the
+guard line — the hallucination guard's own rule). The platform-dedupe
+discovery was INDEPENDENTLY REPRODUCED by this reviewer's own
+scratchpad probe on this toolchain (outside the repo, no source
+edits): an equal-value write to an Equatable `@Observable` stored
+property fires NO `withObservationTracking` onChange; a
+different-value write fires it. The fix session's probe reasoning
+reads true — and its build-freshness arm (a different-value write
+through the same call firing while the guard was dropped) is exactly
+the control that makes the equal-value silence evidence rather than a
+stale build. The pin's construction is self-validating: if the
+tracking registration had failed to arm, the second assertion
+(real flip wakes it) would fail. `setSort` byte-unchanged, verified.
+
+### New findings
+
+**NIT C3-R2-1 · `MobileLibraryView.swift:76–78` +
+`MobileScraps.swift:205–213` — the scraps observation now survives an
+active SEARCH; the "exactly the old section-task lifecycle" comment
+overstates by one window.** Pre-fix, the section's own `.task`
+cancelled whenever `model.hits != nil` displaced the section from the
+tree (the `if let hits` branch wins over the filter branch); post-fix
+the task keys on `filter` alone, so while search hits show on the
+Scraps filter, the whole-pool observation keeps re-fetching at write
+rate (e.g. a sync apply landing mid-search) behind an invisible
+surface. Cost-only, bounded, ends on filter/tab change; no wrong
+behavior. Fix is one condition (`model.filter == .scraps && model.hits
+== nil` as the task id's companion) or an honest comment.
+
+**NIT C3-R2-2 · `MobileScraps.swift:170–200` + the window — at
+>window scraps, a successful mint is invisible.** `mintScrap` lands
+the new block at pointer-order END; `adopt` shows the first `window`
+rows; so past 200 scraps the mint succeeds (field clears, `refresh`
+runs) and no new row appears — only the marker's "the rest aren't
+loaded yet" covers it, and the "+ new scrap" door sits directly under
+that marker. Inherent consequence of the adjudicated windowing (the
+Mac's unbounded list shows its mint; the phone's windowed one cannot),
+not a defect: record-only for the look round — a courtesy candidate is
+mint-time copy or scrolling the marker into view.
+
+**NIT C3-R2-3 (doc, predates the fix set — recorded so the next
+session doesn't trip it) · the C3 brief's spine pointer names the
+MAC's suite types.** The brief (and the batch discipline) points at
+"~line 767 of mobile-app-plan.md" for the mobile spine's seven TRUE
+type names — but that note lists the MAC spine's `Tutorial*Tests`
+names (51/7). The MOBILE spine's seven are `MobileWalkTests` + the six
+`MobileTutorial*Tests` structs in `MobileTutorialWalkTests.swift`
+(24+8 = 32/7). This reviewer's first spine invocation selected ZERO
+tests off the Mac names — the exact trap the note itself warns about,
+one indirection deeper. One-line doc fix at the next records edit.
+
+### Clean bill (specifically checked, found solid)
+
+- **Scope:** nine files, all mobile app + tests (own `git diff
+  --name-only 164a53d..2bcd070`); zero core/Shared/Mac/schema/Sync/
+  pbxproj — the STOP condition never fired; core/Mac baselines stand
+  by construction.
+- **The adjudication's non-fix dispositions landed:** the
+  six-copied-brains KnownIssues row EXISTS at `164a53d` with a named
+  owner (the mobile project row) — and remains ACCURATE post-C3a: the
+  typed-path walk still lives twice ACROSS platforms (Mac
+  `TagAssignmentViewModel` + `MobileTagsModel`); C3a removed only the
+  would-be third in-target copy, exactly as the record claims. R1-5
+  stands as PC3-2; R1-7 recorded for Stage D; R1-8 record-only.
+- **Zero new user-facing "Mac" strings in the fix set** (own grep over
+  added lines — one doc-comment "per-machine" only); the truncation
+  marker, the shared empty hint, and the nesting alert message are all
+  platform-free.
+- **Fire-and-DO honored to the adjudication's letter:** the empty-state
+  hint was hoisted and KEPT, and the door now walks the road it
+  teaches — the promise was not deleted.
+- **The hint/door drift is pinned on both sides:** the hoisted
+  `emptyStateHint` static is asserted beside the door's typed-path pin.
+- **`setSort`, `openableURL`, `rowTitle`, the `.opens`/`.file` render
+  arms, and the note sheet's apply half:** byte-unchanged through the
+  fix set, verified against the diff.
+- **The C3d platform claim reproduced independently** (own probe, this
+  toolchain): equal-value Equatable writes are observation-deduped.
+
+### This reviewer's runs (iPhone 17 Pro / iOS 26.2 simulator)
+
+- Full mobile suite: **"Test run with 265 tests in 48 suites passed"**
+  — TEST SUCCEEDED (the 262/48 ladder-open baseline + the three fix
+  pins, exactly accounted; C3d rides the existing vocabulary test).
+- Mobile spine by its seven TRUE type names (`MobileWalkTests` + the
+  six `MobileTutorial*`): **32/32 passed, 0 failed** (xcresult
+  totals) — TEST SUCCEEDED.
+- Perf by name (`MobilePerfFixtureTests` · `MobilePerfWalkTests`):
+  **"Test run with 9 tests in 2 suites passed"** — TEST SUCCEEDED.
+- Core / Mac / Mac-spine not run: zero core, zero `Shared/`, zero
+  Mac-side lines in the fix set (own scope check); baselines stand
+  (core 1214/128 · Mac 1245/219 tripwire-only · Mac spine 51/7).
+
+**Verdict: all four fixes HOLD; no BLOCKER/MAJOR — no round 3 owed.**
+Three NITs recorded above (one a pre-existing doc pointer), none
+gating.
