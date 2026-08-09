@@ -35,6 +35,9 @@ struct MobileSettingsView: View {
 
     @Environment(\.colorScheme) private var scheme
     @Environment(\.dismiss) private var dismiss
+    /// The tag manager's presentation (parity C3 — Settings is tag
+    /// management's home, the Mac R52 placement mirrored).
+    @State private var tagsPresented = false
     #if DEBUG
     @State private var spikePresented = false
     /// The tutorial doors' state: one door in flight at a time (the
@@ -99,6 +102,30 @@ struct MobileSettingsView: View {
                     .foregroundStyle(tokens.faint)
                     .padding(.horizontal, 20)
             }
+
+            Divider()
+                .overlay(tokens.line)
+                .padding(.vertical, 14)
+
+            // Tag management (parity C3 — her cross-fully ruling; R52's
+            // Settings home mirrored: the manager is where you look at
+            // tags).
+            Text(tokens.chromeLabel("Tags"))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 4)
+            Button {
+                tagsPresented = true
+            } label: {
+                Text(tokens.chromeLabel(MobileTagManagerSheet.doorTitle))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 4)
+            .accessibilityLabel("Manage Tags")
 
             #if DEBUG
             Divider()
@@ -172,6 +199,9 @@ struct MobileSettingsView: View {
             Spacer()
         }
         .background(tokens.room.ignoresSafeArea())
+        .sheet(isPresented: $tagsPresented) {
+            MobileTagManagerSheet(session: session, tokens: tokens)
+        }
         #if DEBUG
         .fullScreenCover(isPresented: $spikePresented) { SpikeScreen() }
         .alert(MobileTutorialSeeder.replaceQuestion, isPresented: $confirmPresented) {

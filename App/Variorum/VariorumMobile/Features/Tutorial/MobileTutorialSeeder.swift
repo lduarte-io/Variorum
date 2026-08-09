@@ -277,7 +277,10 @@ enum MobileTutorialSeeder {
             + "diverging is how one book gets its own.",
 
             "Settings, on the shelf's top line, holds the voice switch (the "
-            + "last lesson) and the door that restores this book.",
+            + "last lesson), tag management — browse the whole tag tree "
+            + "there, add tags and child tags, rename one (everything "
+            + "nested under it follows), or delete one with its sub-tags — "
+            + "and the door that restores this book.",
         ])
 
         // ————————————————————————————— writing —————————————————————————————
