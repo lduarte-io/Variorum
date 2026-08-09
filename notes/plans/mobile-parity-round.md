@@ -2292,3 +2292,227 @@ the walk inventory, suite names + counts, any findings with pins,
 PROVISIONALs); push `origin mobile` before finishing.
 PROVISIONAL-and-continue for non-gating ambiguity; author-only calls
 stop the batch.
+
+## Stage B, batch B1 — BATCH RECORD (implementer, 2026-08-09; commits `9c3fba1` · `3afd5ca` · `b3d3784` + the record commit)
+
+**All three work items shipped.** Diff scope: **zero
+`Sources/VariorumCore/`** (the brief's expectation held — no seeder or
+read need ever wanted one), zero `App/Variorum/Shared/`, zero Mac-side
+files, zero schema, zero `Sync/`, zero pbxproj (the synchronized root
+groups picked the new files up). Four files total: the seeder, the
+Settings door (+ the shell's one-line session pass), the walk file.
+
+**1. THE POCKET GUIDE (`MobileTutorialSeeder`, commit `9c3fba1`)** —
+the phone-native tutorial book on the Mac `TutorialSeeder`'s SHAPE
+(seed through ordinary Operations · reserved-identity discovery ·
+wholesale replace behind a spoken confirm · the quiet no-undo facade),
+never its copy or content. Reserved identities deliberately DISJOINT
+from the Mac's: book **"the pocket guide"**, tag **"pocket guide"** —
+if the two seeders ever meet on one store, neither cleanup can eat the
+other's book. All content `.generic`, no entry dates (R57: nothing
+seeded is structurally visible to the Fragments bridge — pinned). The
+book seeds PINNED (the shelf's pin face taught by wearing it; the pin
+ACT stays Stage C's books family — the phone renders pin order today
+and the guide exercises exactly that). Cleanup unpins doomed books so
+`shelf_pins` never accrues dead ids across restores (pinned). What the
+book teaches, note by note — **5 chapters · 13 lessons + 1 bookless
+practice note**, each lesson exercising shipped capability in the
+phone's own vocabulary:
+
+- **welcome / "start here"** — the book-of-its-own-objects frame;
+  everything safe to play with; the Settings restore door; refusals
+  answer in plain words.
+- **welcome / "getting around"** — the shelf (pinned books first —
+  THIS book; ✎ Today's Entry; + new note; Settings), tabs Shelf ·
+  Library, Library = everything + search, the bookless filter as the
+  Pool's phone home (pointing at the seeded loose note), book-tap →
+  CONTENTS with read as the door (P35), machinery summoned per block
+  from the bottom bar.
+- **writing / "blocks & typing"** — blocks + type-past crystallization,
+  return-is-content (I4), invisible seams, the bar's Aa · ⑂ · ⋯, the
+  typewriter room.
+- **writing / "formatting"** — written IN the markdown it teaches
+  (bold/italic/code spans, a real `##` heading, real list lines, a
+  real unchecked + checked box): the Aa strip (× B I # • ☑ ⇥), # tap
+  cycles + long-press picks (P5), tap-a-box-to-tick, ⇥/long-press
+  indent-outdent, and read's marker-free face.
+- **takes / "your first take"** — the fan; a staged single-take harbor
+  block to fan out; the browser's branch-this-one ⧉ / blank ○;
+  minting never chooses (R90).
+- **takes / "swipe & choose"** — a staged THREE-take rain block;
+  swipe-flips-in-place as a sticky PEEK with marker + pill; ✓ (pill or
+  browser) is the only deciding act and ends the peek (M5/M6/M9).
+- **takes / "the browser"** — the sheet over the page; all FOUR verbs
+  (✓ · new take · edit-any-card · ⋯ archive/delete); a staged spare
+  take to archive; I10's refusal pointing at Delete Block.
+- **structure / "divide"** — the word-snap cut rule; a staged
+  two-thoughts block with its cursor instruction; merge as the road
+  back (the phone has no structural undo — the recorded deliberate
+  absence — so the lesson teaches the true road).
+- **structure / "divide with takes"** — **Q-M2, her duplicate shape,
+  taught in her own reasoning**: the take you're READING is cut, every
+  other take rides whole onto both halves, extras are quick to delete;
+  a staged two-take ferry block plus the swipe-then-divide instruction
+  (the peeked take is the one that divides).
+- **structure / "merge"** — staged neighbors joining with the single
+  space (divide-then-merge round-trips exactly); the fanned tail that
+  makes merge step back to the ceremony out loud (M10's precision —
+  the shipped copy, taught honestly).
+- **library / "comments & callouts"** — a staged comment (●1) and a
+  staged blue callout frame; the ⋯ doors; full CRUD + deleted-stay-
+  listed; travel across the knife.
+- **library / "the seal"** — ships SEALED at seed; refusals out loud;
+  the masthead lock/unlock doors (A1's seal); sealing's quiet
+  savepoint insurance.
+- **library / "the voice switch"** — terminal/study, Settings as the
+  home, restyles-touch-no-bytes.
+- **"loose thought"** (bookless, tagged) — the Library's bookless
+  filter has a tutorial object of its own to show.
+
+**2. The dev-store door (commit `3afd5ca`)** — a DEBUG "Tutorial (dev
+store)" section in Settings: **open the pocket guide** (find-or-seed;
+an existing book just reports) and **restore the pocket guide…**
+(wholesale replace, always confirm-gated when anything tutorial-shaped
+exists; the alert's copy discloses the exact tag + plural name scope).
+DEBUG-only BY DESIGN: Debug builds resolve the DEV store (the A4
+fence), so the guide can never reach her real corpus from this batch;
+the seeding is one tap away for the chain-end walkthrough. The doors
+are thin wiring onto the tested seeder seams (continuation-resolved
+confirm; a sheet-local in-flight latch — the Mac NIT-6 class); the
+SwiftUI wiring itself is the A1-masthead not-headless-testable class,
+recorded — the chain-end look covers it.
+
+**3. THE WALKS — THE SPINE (commit `b3d3784`).** Six new suites join
+`MobileWalkTests`, windowless throughout (the corrected A3 machinery
+lesson — no UIWindow rides the baseline suite from this file), every
+walk opening the seeded book and driving the taught flows through the
+same controllers/operations the app's surfaces route, store-asserted
+after each act. The inventory:
+
+- **`MobileTutorialBookShapeTests` (5)** — plan==seed exactly
+  (chapters + lessons in order under their chapters) · nothing
+  journal-shaped (R57) · tag identity + the pinned guide (tagged ==
+  lessons + exactly the loose note) · act-ready staging (all four
+  staged fans, the comment, the callout, the sealed lesson, the loose
+  note bookless AND in `poolPosts`) · the formatting lesson written in
+  its own vocabulary with read hiding the markers.
+- **`MobileTutorialDoorTests` (5)** — wholesale replace touches
+  nothing of hers (her note's container/placements/blocks/variants
+  byte-compared; her book survives; pins carry no dead ids) · the
+  confirm gates on residue and a declined confirm deletes NOTHING · a
+  `pocket guide/…` sub-tagged note is not the tutorial's to clean up ·
+  a residue store restores instead of duplicating and an existing
+  guide just opens · the seeder never touches the structural-undo
+  stack.
+- **`MobileTutorialWritingWalkTests` (2)** — the blocks lesson's
+  crystallization promise (open the tail at the document end, the
+  finished paragraph mints, teardown lands the tail) · the formatting
+  lesson's acts on its own text (bold wrap, heading direct-pick +
+  clear, the staged box ticked at laid-out geometry; stored bytes
+  checked).
+- **`MobileTutorialTakesWalkTests` (3)** — branch-a-copy + blank +
+  minting-never-chooses on the harbor block · the swipe lesson's
+  peek-sticky-marker-pill walk with ✓ choosing and ending the peek ·
+  **branch under a PEEK seeds from the peeked take** (the brief's
+  named arm).
+- **`MobileTutorialStructureWalkTests` (3)** — the staged cut +
+  merge-is-the-road-back, byte-exact round-trip · **the Q-M2
+  duplicate shape on the lesson's own ferry** (swipe first — the
+  PEEKED take is cut; each successor carries its half + the duplicate
+  whole; the original released with everything in lineage) · the
+  single-space join + the fanned merge stepping back to the ceremony
+  out loud (the shipped copy pinned).
+- **`MobileTutorialLibraryWalkTests` (6)** — the pinned guide first
+  with LK5's faces ("13 notes · #pocket guide") · contents-first
+  grouping == the chapter plan + the "Read" door + the Read assembly's
+  roman-numeraled chapters and page meta ("note 13 of 13 · v") ·
+  Library listing/search + the loose note in the bookless filter (and
+  no lesson there) · the seal's refuse-out-loud → unlock → reseal with
+  the savepoint insurance · the ●1 mark + callout frame rendering +
+  the comments sheet's verbs on the lesson's own block · the voice
+  switch restyling with bytes untouched.
+
+**THE SPINE'S STANDING — the suite TYPE names every later batch and
+ladder runs (the `-only-testing` trap: per-test and file-name
+selectors silently select zero; use exactly these):**
+
+> **`MobileWalkTests` · `MobileTutorialBookShapeTests` ·
+> `MobileTutorialDoorTests` · `MobileTutorialWritingWalkTests` ·
+> `MobileTutorialTakesWalkTests` · `MobileTutorialStructureWalkTests`
+> · `MobileTutorialLibraryWalkTests`**
+>
+> — the MOBILE spine: **"Test run with 32 tests in 7 suites passed"**
+> by this implementer's own named-selection run. It RIDES the baseline
+> mobile suite (no separate scheme), so "mobile suite green" contains
+> the spine by construction; the named run is the spot-check form. The
+> Mac spine (51/7, its own seven suite names) is unchanged and was not
+> run — zero Mac-side lines in this batch.
+
+**Counts, by this implementer's own runs (iPhone 17 Pro / iOS 26.2):**
+full mobile suite — **"Test run with 215 tests in 34 suites passed"**
+— the 191/28 baseline + this batch's 24 tests and 6 suites, exactly
+accounted (5 shape + 5 door + 2 writing + 3 takes + 3 structure + 6
+library). Core / Mac / spine-Mac deliberately not run: the diff
+carries zero core, zero Shared/, zero Mac-side lines — the
+only-if-shared condition never fired. A Release mobile build also
+succeeded (the door's DEBUG gate compiles out clean).
+
+**Findings (traced, dispositioned — no code defect found, so no
+red-on-old pin owed):**
+- **FB1-1 (harness truth, the walk that found it now documents it):**
+  windowless programmatic `insertText` NEVER consults the delegate
+  gate — the first crystallize-walk draft typed "\n" at the document
+  end through the real surface and the open-tail gesture silently
+  didn't fire: `pendingVerdict` stayed nil and `fallbackVerdict`
+  routed the newline as block content (deliberately — gate-bypassing
+  system paths must never mint blocks: `replacementIsSingleNewline:
+  false` is its designed posture). Traced against the A3 machinery
+  lesson's input-controller note (with a UIWindow the process engages
+  `_insertText:fromKeyboard:`; without one the plain path skips the
+  consult). NOT an app defect — real keyboards consult the gate — but
+  a walk-authoring rule: **gate-dependent behaviors walk through
+  `typeEdit` (the policed-edit simulator: gate first, then storage
+  mutation), never through windowless `insertText`.** The shipped
+  walk does; the rule is in the walk file's doc comment. Existing
+  walks are unaffected (all their inserts route identically under
+  either path — verified by the green suite).
+- **FB1-2 (recorded behavior, not a bug):** fan order is
+  branch-beside-source by construction — each `branchVariant` mints
+  between its source and the earlier mint, so the LAST-seeded branch
+  sits at fan position 2. The takes walks assert the true order with
+  a comment; the lesson prose deliberately names no order.
+
+**PROVISIONALs (for the chain's end bundle):**
+- **PB1-1:** the tutorial's PRODUCT door placement — this batch ships
+  the seeder + a DEBUG dev-store door only (Settings, per the A4
+  fence). Whether/where a Release phone carries a tutorial door (and
+  whether the pocket guide should reach her real corpus at all) is
+  hers.
+- **PB1-2:** the guide's reserved identities and door copy — book
+  name "the pocket guide", tag "pocket guide", the confirm's wording,
+  the two Settings door labels. All one-line changes for her look.
+- **PB1-3:** the lesson prose is phone-authored teaching prose in the
+  field guide's register (the tone reference, never the source — no
+  sentence is copied). Her walkthrough may reword any of it; the
+  walks pin STAGING and BEHAVIOR, not prose bytes, except the
+  formatting lesson's self-demonstrating syntax spans and the staged
+  cursor-instruction blocks the structure walks cut — those name the
+  coupled walk in this record's inventory.
+- **PB1-4 (a coupling, recorded):** the merge lesson's last paragraph
+  teaches the shipped ceremony refusal — which names the Mac (M10's
+  sanctioned exception, Stage C's refusal-copy family). If Stage C
+  rewords that refusal, the lesson's sentence and the structure
+  walk's pinned copy update in the same batch.
+
+**Deliberate absences (scope, not holes):** no lessons for Compare /
+scraps-drag / canvas / workspace (her ruled exclusions) nor for
+lenses, take-locks, references, tags-management (Stage C families —
+the book grows a lesson when the phone grows the door; the tutorial
+teaches what IS); no named-block lesson (the phone sets names via ⋯
+but nothing renders them — Stage C's call); no word-target face on
+the guide (LK5 ranks it behind the phone's shelf faces — nothing
+phone-visible reads it); the dev store is not pre-seeded by this
+batch (the door is one tap — Settings → open the pocket guide — and
+the walkthrough sits at the chain's end); no scripted SCROLL walk
+(nothing in the walk family scrolls today — B2's performance fixture
+brings the scripted scroll measurement).
