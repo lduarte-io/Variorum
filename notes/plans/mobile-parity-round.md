@@ -4512,3 +4512,24 @@ editing/conversion (her sitting's ruled WAIT — the post-13i round)
 shelf row it orders) · locked-take/merge-ceremony refusal strings
 untouched (C4/C5's families, incl. PB1-4's lesson rider) ·
 note-level tag editing (C3's, per the ruling).
+
+## Stage C, batch C2 — ACCEPTED; the C2 LADDER OPENS (architect, 2026-08-09)
+
+Verified: all seven commits present; the mobile suite re-run by the
+architect's own hand: **"Test run with 244 tests in 42 suites
+passed"** — 227/36 + 17/6, exactly accounted; zero
+`Sources/VariorumCore/` lines (the small-Queries allowance never
+fired); the ONE `Shared/` change (`AppSession.swift`, 24+/21− — the
+`divergeForBook` relocation out of the macOS fence) covered by the
+implementer's Mac run at **1245/219 tripwire-only by identity**.
+Five refusal strings dissolved with their doors landing in the same
+commits; the getting-around lesson grew per owning commit
+(tutorial-as-spec held). **PC2-1…PC2-5 ride the end bundle.**
+
+**THE C2 LADDER OPENS.** Target: `6ccdfca..e67a8e0` (the batch's
+seven commits; the C1 matrix, the fork ruling, and the mid-chain
+sitting are the reviewer's anchor). Fresh cold reviewer,
+`notes/REVIEW_PROMPT.md` VERBATIM; findings repo-first as "## Stage
+C review — C2 round 1 findings". Baselines at open: **mobile 244/42
+· spine 32/7 · perf 9/2 · core 1214/128 · Mac 1245/219
+tripwire-only · spine-Mac 51/7.**
