@@ -3,11 +3,12 @@
 //  VariorumMobile
 //
 //  Mobile Stage 4, batch 1 — the ⋯ BLOCK MENU: Takes… · Comments… ·
-//  Callout ▸ · Name Block… · Divide Block · Merge with Previous · Delete
-//  Block, on the caret's block, through TWO doors that cannot drift (the
-//  CalloutMenu one-vocabulary precedent): the keyboard bar's ⋯ and the
-//  extended edit menu both render `menuElements` — ONE builder decides
-//  the words and the order.
+//  Callout ▸ · Name Block… · Commit Take · Take History… (parity C4a) ·
+//  Divide Block · Merge with Previous · Delete Block, on the caret's
+//  block, through TWO doors that cannot drift (the CalloutMenu
+//  one-vocabulary precedent): the keyboard bar's ⋯ and the extended edit
+//  menu both render `menuElements` — ONE builder decides the words and
+//  the order.
 //
 //  Every row performs a STANDING act or delivers the ops' real refusal
 //  (P-2): Takes/Comments open their sheets; Callout rides the mirrored
@@ -57,6 +58,11 @@ final class MobileBlockMenuController {
     static let commentsTitle = "Comments…"
     static let calloutTitle = "Callout"
     static let nameTitle = "Name Block…"
+    /// The savepoint pair (parity C4a — AppSpec §9's deliberate-commit
+    /// pillar reaches the phone: both act on the caret block's DISPLAYED
+    /// take through `MobileTakeHistoryController`).
+    static let commitTitle = "Commit Take"
+    static let historyTitle = "Take History…"
     static let divideTitle = "Divide Block"
     static let mergeTitle = "Merge with Previous"
     static let deleteTitle = "Delete Block"
@@ -68,6 +74,7 @@ final class MobileBlockMenuController {
     /// The flat titles both doors must agree on (the drift pin's oracle).
     static var rowTitles: [String] {
         [takesTitle, commentsTitle, calloutTitle, nameTitle,
+         commitTitle, historyTitle,
          divideTitle, mergeTitle, deleteTitle]
     }
 
@@ -99,6 +106,13 @@ final class MobileBlockMenuController {
         elements.append(calloutSubmenu(blockID: blockID))
         elements.append(UIAction(title: cased(Self.nameTitle)) { [weak self] _ in
             self?.promptRename(blockID: blockID)
+        })
+        elements.append(UIAction(title: cased(Self.commitTitle)) { [weak self] _ in
+            guard let model = self?.model else { return }
+            Task { await model.takeHistory.commitNow(blockID: blockID) }
+        })
+        elements.append(UIAction(title: cased(Self.historyTitle)) { [weak self] _ in
+            self?.model?.takeHistory.open(blockID: blockID)
         })
         elements.append(UIAction(title: cased(Self.divideTitle)) { [weak self] _ in
             guard let model = self?.model else { return }

@@ -317,8 +317,16 @@ enum MobileTutorialSeeder {
 
             "The bottom bar above the keyboard is the whole toolkit: Aa opens "
             + "the formatting strip, ⑂ opens the takes of the block you're in, "
-            + "and ⋯ holds the block's own acts — comments, callout, divide, "
-            + "merge, delete.",
+            + "and ⋯ holds the block's own acts — comments, callout, "
+            + "savepoints, divide, merge, delete.",
+
+            "Your writing is always autosaved; a SAVEPOINT is the "
+            + "deliberate extra. Commit Take, in ⋯, keeps the exact text "
+            + "of the take you're in, forever — and Take History… lists "
+            + "every savepoint, newest first, with restore to bring one "
+            + "back into the take. A savepoint from before a divide says "
+            + "so, and asks first: restoring it brings back the whole "
+            + "pre-split text.",
 
             "The page keeps a little room below the last line — typewriter "
             + "room — so what you're typing never sits against the bottom "

@@ -574,7 +574,10 @@ struct MobileTutorialWritingWalkTests {
         try await withPocketGuideWorld { session, db, bookID in
             let lesson = try await db.read { try lessonID($0, bookID: bookID, "blocks & typing") }
             let before = try await storedBlockTexts(db, postID: lesson)
-            #expect(before.count == 4)
+            // 5 since parity C4a: the savepoint paragraph landed WITH the
+            // commit/history doors (tutorial-as-spec — lesson + walk in
+            // the same commit).
+            #expect(before.count == 5)
 
             let (model, storage) = makeEditor(session, postID: lesson)
             await model.loadOnce()

@@ -63,6 +63,8 @@ final class MobileEditorViewModel {
     @ObservationIgnored let comments: MobileCommentsController
     @ObservationIgnored let structural: MobileStructuralController
     @ObservationIgnored let blockMenu: MobileBlockMenuController
+    /// The C4a sibling: the commit door + take-history sheet's brain.
+    @ObservationIgnored let takeHistory: MobileTakeHistoryController
 
     // MARK: - Observable UI state
 
@@ -155,11 +157,13 @@ final class MobileEditorViewModel {
         self.comments = MobileCommentsController(session: session)
         self.structural = MobileStructuralController(session: session)
         self.blockMenu = MobileBlockMenuController(session: session)
+        self.takeHistory = MobileTakeHistoryController(session: session)
         takes.model = self
         takesBrowser.model = self
         comments.model = self
         structural.model = self
         blockMenu.model = self
+        takeHistory.model = self
         // Multicast observers, never the single-owner closures: a shared
         // coordinator has several listeners (the Mac's own move for the
         // same reason) — a second same-post editor must not deafen the
@@ -369,9 +373,11 @@ final class MobileEditorViewModel {
         textView?.refreshChrome()
         // S2 batch 2: an open browser re-renders its cards from the fresh
         // fan state (and closes if its block left the surface). S4: the
-        // comments sheet follows the same discipline.
+        // comments sheet follows the same discipline. C4a: the history
+        // sheet too.
         takesBrowser.projectionDidChange()
         comments.projectionDidChange()
+        takeHistory.projectionDidChange()
     }
 
     /// Teardown backstop: pending tail text mints (the idle plan — typed
