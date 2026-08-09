@@ -2199,3 +2199,96 @@ surfaces) · PA2-1 · PA2-2 · PA3-1 (floor constants) · PA3-2 · PA3-3
 · the Aa reset cadence · the A-stage screenshot set
 (`notes/plans/mobile-a3-screens/`, defect shot preserved beside the
 fix). PA1-1 resolved in A3.
+
+---
+
+## STAGE B — KICKOFF (2026-08-09, in-chain per her ruling)
+
+**Boundary duties executed:** `main` unmoved (`0ded142`; the pull is
+a no-op). Ledger re-sweep: 14c still mid-phase on `main` — no new Mac
+closeout, nothing to absorb; PL-1…PL-4/PL-7 unchanged. Baselines
+carried from A's close: **mobile 191/28 · core 1214/128 · Mac
+1245/219 tripwire-only · spine 51/7.** The install hold stands
+(client marker 6 vs live mirror 5).
+
+**Stage B structure (two batches, fresh implementer each):**
+
+- **B1 — the tutorial book spine:** the phone-native tutorial book
+  (the 13b tutorial-as-spec precedent) seeded in the DEV store,
+  exercising every shipped mobile capability; simulator-drivable
+  walks that fill it out and assert; it becomes the round's PERMANENT
+  acceptance spine — every later batch and ladder keeps it green.
+- **B2 — the performance fixture** (brief at B1's acceptance): the
+  ~100k-word post + large corpus in the dev store, the scripted
+  measurement walk (open-time · typing latency · scroll · PEAK
+  MEMORY), corpus-flat; from B2 on, every ladder includes its
+  spot-check.
+
+Then the Stage B ladder over the combined diff, closeout, pointer →
+C.
+
+## Stage B, batch B1 brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
+
+**Cast:** a fresh Fable implementer session, `~/dev/variorum-mobile`,
+branch `mobile`, starting at the Stage B kickoff commit. Expect zero
+`Sources/VariorumCore/` changes (a seeder/read need that seems to
+want one STOPS and returns to the architect).
+
+**Read first, IN FULL, in this order — your own reading, never a
+summary:** `CLAUDE.md` (P-6: the tutorial is the executable spec) ·
+`notes/MobileSoul.md` (§4's decision grammar shapes the tutorial's
+content) · THIS plan file top to bottom (the Stage A closeout tells
+you exactly what shipped and must be exercised) ·
+`notes/plans/mobile-app-plan.md` §§ "The settled shape" (~313) and
+"Environment traps" (~473) · the Mac tutorial machinery IN CODE —
+locate `TutorialSeeder` and the Mac's `TutorialWalkTests` under
+`App/Variorum/` and read both: you are reusing the SHAPE (seed
+through ordinary operations · walk asserts the happy path · the
+spine rides the baseline suite), NEVER the Mac-specific copy or
+content · `notes/plans/mobile-architect-handoff.md` (machinery
+lessons — the spine suite-name trap, the windowless-pin rule in the
+Stage A records).
+
+**The work:**
+
+1. **The mobile tutorial book, seeded in the DEV store** through
+   ordinary operations (a `MobileTutorialSeeder` on the Mac seeder's
+   shape): a book whose notes teach the PHONE's app in the phone's
+   own vocabulary, and whose content collectively exercises every
+   shipped capability — shelf (pin, New Note) · Library/Pool ·
+   book contents-first + the Read door · the Write editor (markdown
+   vocabulary, the Aa strip, checkbox tap, headings incl. the
+   long-press picker, lists, typewriter room) · takes end-to-end
+   (badge, swipe-peek, ✓, browser, the four verbs, branch — incl.
+   under a peeked take) · divide (single-take AND the new
+   duplicate-shape fanned divide) · merge · the seal door ·
+   comments/callouts rendering · the voice switch. Content is
+   phone-authored teaching prose (calm, her register — the Mac field
+   guide is the tone reference, not the source to copy).
+2. **The walks — the spine:** simulator-drivable walk tests that
+   OPEN the seeded book and drive the taught flows (scroll, tap,
+   type, move), asserting outcomes through the store after each act
+   (the Mac walk shape). They extend/join the existing
+   `MobileWalkTests` family and MUST ride the baseline mobile suite
+   (repeatable, deterministic, windowless where possible — the Stage
+   A lesson; any walk that must host a window buys a full-suite run
+   before acceptance). Name every suite the spine comprises in the
+   batch record — the ladder and every later batch runs them by
+   those names.
+3. **The spine's standing:** from this batch on, "the spine green"
+   is part of every batch record and every ladder round in this
+   round, exactly as `TutorialWalkTests` is the Mac's. State the
+   spine's suite names + counts prominently in the record.
+
+**Discipline:** work synchronously; red-on-old applies to any defect
+you find while walking (trace + behavioral-revert pin — a walk that
+exposes a real bug is a finding, record it and fix it or route it to
+the architect if it gates). Mobile suite green by your own run at
+the end (the "Test run with N tests" line — expect meaningful
+growth; account the arithmetic). Commit per logical unit with the
+standing trailer; write "## Stage B, batch B1 — BATCH RECORD
+(implementer, 2026-08-09)" into THIS file (what the book teaches,
+the walk inventory, suite names + counts, any findings with pins,
+PROVISIONALs); push `origin mobile` before finishing.
+PROVISIONAL-and-continue for non-gating ambiguity; author-only calls
+stop the batch.
