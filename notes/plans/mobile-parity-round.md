@@ -3954,3 +3954,245 @@ bundle; do NOT guess product behavior). Commit the matrix + batch
 record with the standing trailer; push `origin mobile`. Your final
 reply to me is compact: row counts per status, the proposed batch
 ordering, the OPEN-FOR-HER list, commit hash.
+
+## THE PARITY MATRIX (C1, 2026-08-09)
+
+**Method:** the Mac capability registry read in full
+(`App/Variorum/Variorum/Registry/CapabilityRegistry.swift` — all 71
+declared `CapabilityID`s — plus `Capability.swift`'s model), then the
+Mac's feature surfaces BEYOND it walked in code (shelf book menu ·
+book navigator/structure · membership chip · library note menu ·
+recovery · tags manager + chips · references panel · pool/scraps ·
+lenses board · commit bar incl. the date + history faces · settings
+panes), then every shipped MOBILE surface read so already-parity rows
+cite code, not memory. Verdicts use the soul document §4's grammar;
+every non-already row carries its ruling. **Citation key:** [PARITY]
+= the parity ruling (gate record, CoreDescription pillar 8's second
+supersession) · [SEE] = see-your-data · [NORED] = no-redirect ·
+[EXCL] = the exclusions verbatim · [LK5+] = LK5's expansion ruling
+(the P-round block: *"finishing / unfinishing should be a v1 phone
+capability… book details from the contents… change tags there too…
+create books based on tags and tag posts — again, full app
+functionality"*) · [FUT] = the FUTURE LIST · [WKRD] = her merge
+workaround doctrine (*"there is probably a workaround there the same
+way I chose a workaround for divide"*) · [PL-n] = parity-ledger rows
+· [P-n] = P-round dispositions · [B1] = the Stage B pocket-guide
+record. Registry rows the registry could NOT see are marked ◆
+(deliverable 2's class).
+
+### Family: writing & blocks
+
+| Capability | Mac location | Phone status | Ruling |
+|---|---|---|---|
+| Divide (single-take, in-place) | registry `.divide`; EditorViewModel | **already** — `MobileStructural.divide` (plain `ops.divide`); pins `MobileStructuralTests`, spine structure walk | — |
+| Divide (fanned — the duplicate shape) | core `divideDuplicating` (A2); Mac door stays W-ceremony until 13j | **already** — `MobileStructural.swift:149` (displayed/peek-aware take, snapped cut); pins `divideOnAFannedBlockLandsTheDuplicateShape`, `divideOnAPeekedBlockCutsThePeekedTake`, the ferry walk | Q-M2 (hers) |
+| Merge (instant, fanless) | registry `.merge` | **already** — `MobileStructural.mergeWithPrevious`; single-space round-trip pinned in the structure walk | — |
+| Merge with a fan on either side | Mac: the pairing ceremony (S4-23) | **owed-compromised** — today refuses to the Mac ceremony (`MobileStructural.swift:238`); the intended shape is a SIMPLER phone default designed at the batch (candidates: archive-extras-then-merge named as the road · a carry-all merge mirroring Q-M2's duplicate logic) — ceremonies themselves stay unreplicated | [WKRD] + [EXCL] (ceremonies) + [NORED]'s "SOMEHOW" |
+| Extract | registry `.extract` (⌘⇧E) | **OPEN-FOR-HER** — unruled; the phone has selection, so a selection-menu act is cheap. *Q: should extract (and make-block) cross to the phone's selection menu, or stay Mac gestures?* | — |
+| Make Block from Selection | registry `.makeBlock` | **OPEN-FOR-HER** — same question as extract | — |
+| Delete in Every Take | registry `.deleteInEveryTake` | **OPEN-FOR-HER** — unruled takes-editing convenience. *Q: wanted on the phone, or Mac-only?* | — |
+| New block at end | registry `.addBlockAtEnd` | **already** — the open tail + type-past crystallization (`MobileEditorViewModel.crystallizeIfNeeded`; crystallize walk, `typeEdit` road) | — |
+| New Block Below (mid-note) | registry `.insertBlockBelow` (⌘⇧⏎) | **owed** — no phone door; mechanical (a ⋯-menu row over the standing op); the awkward road today is type-into-next-then-divide | [PARITY] |
+| Delete block | registry `.deleteBlock` | **already** — ⋯ menu + confirm (`MobileBlockMenu.confirmDelete` → the structural contract, S4 MAJOR-1); pins in `MobileBlockMenuTests` | — (confirm copy → inventory #2) |
+| Structural undo / redo | registry `.structuralUndo`/`.structuralRedo` | **not-owed-now** — the recorded deliberate absence; her P40 disposition kept the delete confirm *"while the phone lacks structural undo"*, accepting the v1 state | [P40] |
+| Find in note (5 acts) | registry `.findInPost` family (⌘F…) | **owed** — no phone find; her L6 grievance ("reaching for that and not having it") is platform-neutral; shape: iOS's own find interaction on the Write surface (TEXTKIT2 §3 care) | [PARITY] |
+| Formatting: bold · italic · heading (+picker) · bullet · checklist · indent · outdent | registry `formatBold`…`formatOutdent` | **already** — the Aa strip + long-press pickers (`MobileKeyboardBar`, `MobileMarkdownActs`); pins `MobileMarkdownTests` | — |
+| Formatting: strikethrough · inline code · add link | registry `.formatStrikethrough`/`.formatCode`/`.formatAddLink` | **owed** — doors absent from the Aa strip/menus; the raw-syntax road already works (F-1 dual-mode's first face; code tint + tappable links render), so this is mechanical door-completion of her "all the formatting options" | [PARITY] + her Aa ruling's letter |
+| Commit (deliberate savepoint) + history view + restore | registry `.commitTake` (⌘S); `CommitBar` history list + Restore | **owed** — NO commit door and NO history surface on the phone (grep-verified: every mobile "commit" match is a comment); core `Queries.commitHistory` + `restoreCommit` exist; shape at the batch (a note/block-level act + a see-your-data history list; §9's predates-a-split warn rides restore). Idle auto-commit machinery ALREADY runs (shared `AppServices.idleCommits`) | [PARITY] + pillar 2 + [SEE] |
+| Editing-look settings (seams toggle, editing indicator, inline comments, hover handles, long-block layout, paragraph gap, spellcheck) | registry `.toggleSeams`; `AppSettingsView` | **not-owed** — each setting's own shipped copy says "This Mac only"; the phone's look is the LK canon's | the settings' own per-machine design |
+| Caret/keyboard ergonomics (previous/next block, mode keys, open-notes keys, back/forward) | registry `.previousBlock`/`.nextBlock`/`.switchMode`/`.openNote`/`.navigateBack`/`.navigateForward` | **not-owed** — moot on touch: tap places the caret, the system back gesture is the road, the phone has no mode row | [EXCL]'s workspace distinction ("workflow and editor options, not a fundamentally different capability") |
+
+### Family: takes
+
+| Capability | Mac location | Phone status | Ruling |
+|---|---|---|---|
+| Show takes (badge → browser) | registry `.showTakes` | **already** — the ⑂ badge + bar ⑂ + edit-menu Takes… (`MobileTakesChrome`, `MobileTakesBrowser.open` — the single-take block opens too, the fan-birth door); pins `MobileTakesBrowserTests`, takes walks | — |
+| Branch (new take from shown) | registry `.newTake` | **already** — "Branch this one ⧉" (`branchDisplayed`, flush-first + Q-M1(a) seed-from-shown-bytes pinned) | — |
+| Blank take | registry `.blankTake` | **already** — "Blank ○" (`newBlank`; minting never chooses, R90 pinned) | — |
+| Blank take as chosen | registry `.blankTakeAsChosen` (⇧⌥⌘T) | **already (composition)** — blank + ✓, two taps; no dedicated door owed (the power-chord is Mac keyboard vocabulary) | — |
+| Choose | registry `.chooseTake` | **already** — the pill ✓ and the browser card ✓ (`chooseDisplayed`/`choose`; M6's only-deciding-act pinned) | — |
+| Step previous/next | registry `.previousTake`/`.nextTake` | **already** — the swipe flip IS the step (M5; `MobileTakesController.flip`, peek pins) | — |
+| Archive take | registry `.archiveTake` | **already** — card ⋯ (`MobileTakesBrowser.archive`) | — |
+| Delete take | Mac: card menus (op `deleteVariant`) | **already** — card ⋯ (`delete`; I10 + chosen-slot refusals pinned with phone copy) | — |
+| Unarchive + the archived listing | registry `.unarchiveTake` (surface door on the archived card) | **owed** — the browser shows the LIVE fan only; "recovery surfaces stay Mac-side in v1" was a recorded v1 absence, and archived takes are her information (`Queries.blockFan` already returns them). Dissolves inventory #14 | [SEE] + [PARITY] |
+| Label take | registry `.labelTake` | **owed** — cards DISPLAY labels (`Card.label`) but no set-door exists; mechanical (a card-⋯ row over `setTakeLabel`) | [PARITY] |
+| Take lock/unlock | Mac: op `lockVariant`/`unlockVariant` (faces on cards) | **owed** — the C-kickoff locks family ("take lock/unlock joins the note seal"); dissolves the six locked-take redirects (inventory #1,3,6,11–13) | [PARITY] + [NORED]; A1's boundary note routed it here |
+| Diverge here (branch a specific thread) | registry `.divergeHere` | **already (composition)** — peek/flip to the take, then branch (branch copies the DISPLAYED take) | — |
+| Diff against chosen | registry `.diffAgainstChosen` | **OPEN-FOR-HER** — unruled; Compare is excluded but a one-column two-take diff is legible on a phone. *Q: is a read-only take-diff wanted, or does swipe-compare suffice?* | — |
+| Close-all / page fan | registry `.closeAllTakes`/`.pageFanBack`/`.pageFanForward` | **not-owed** — board-geometry acts with no phone referent (the browser scrolls; a peek ends by ✓ or flip-back) | [EXCL]'s workspace distinction |
+| Reorder takes · move-take-into-block · copy-all-takes · takes-aware find/replace | 13e's ruled additions (not yet on the Mac either) | **not-owed-YET** — adopt after the Mac lands them | [PL-1] |
+
+### Family: comments & callouts
+
+| Capability | Mac location | Phone status | Ruling |
+|---|---|---|---|
+| Comments CRUD + deleted-visible + restore | registry `.blockComments`; `CommentsPanel` | **already** — the comments sheet (`MobileComments`/`MobileCommentsSheetView`: add, edit, delete, deleted section, restore — never-skimpy ported); ●n mark + P38 corner pinned (`MobileTakesChromeTests`); travel is core's | — |
+| Callout frames (toggle · five colors · emoji · remove) | registry `.callout`; `CalloutMenu` | **already** — the ⋯ Callout submenu (`MobileBlockMenu.calloutSubmenu`, `MobileCallout` mirroring the one transform + token names); pins `MobileBlockMenuTests` | — |
+| The "gaps" audit (the C-kickoff family's question) | — | **CLOSED, no owed gap found**: the inline-tinted display setting is the Mac-local class ("This Mac only"); the margin-hover grammar and emoji PICKER are 13e candidates on BOTH platforms [PL-1]; Read renders calm prose exactly as the Mac's reading flow does | — |
+
+### Family: books & membership ◆ (largely registry-blind — the shelf/chip/navigator vocabulary)
+
+| Capability | Mac location | Phone status | Ruling |
+|---|---|---|---|
+| Open book → contents → Read; chapters honored | Mac book view/navigator | **already** — P35 contents-first (`MobileBookView` + `readDoorTitle` pin), Read flow with chapter captions + page meta (`MobileReadView`/`MobileReadPage`); library walks | — |
+| Create book (curated · smart · journal) ◆ | ShelfView "+ New Book" alert (3 kinds) | **owed** — her feel-round finding named it ("create a new book"); ops standing (`createReading`) | her finding #2 + [LK5+] |
+| Smart-book creation FROM tags ◆ | Settings tag manager "Promote to Book…" + shelf Create Smart Book | **owed** — the LK5 expansion names it verbatim | [LK5+] |
+| BOOK DETAILS surface off contents: finish/unfinish ◆ | shelf menu Finish/Reopen | **owed** — "finishing / unfinishing should be a v1 phone capability — there should be some way to get to book details from the contents of a book"; dissolves inventory #8 | [LK5+] |
+| Tag editing on book details ◆ | shelf tags column + manage | **owed** — "you can change tags there too" | [LK5+] |
+| Rename book ◆ | shelf menu Rename… | **owed** — rides the book-details surface; basic metadata under "full app functionality" | [LK5+]/[PARITY] |
+| Membership: see/add/move/remove a note between books ◆ | `MembershipChip` (R61/R67 add door) + Manage Notes… | **owed** — "the ability to move something between books"; the chip is the natural phone shape (masthead-adjacent) | her finding #2 + [PARITY] |
+| Diverge for this book | registry `.divergeForBook` (chip row door, W23) | **owed** — rides the chip's phone shape; flush-first (R1-4) binds | [PARITY]; shape at the batch |
+| Pin/unpin book ◆ | shelf menu Pin/Unpin | **owed** — the phone RENDERS pin order (`MobileShelfFaces.ordered`); the ACT was explicitly left to "Stage C's books family" | [B1]'s record + [PARITY] |
+| Daily-journal designation road ◆ | shelf menu "Use as Daily Journal" | **owed** — a road must exist for the Today door's smart/finished-book refusals to stop redirecting (inventory #8–10); shape at the batch (likely a book-details row) | [NORED] |
+| Chapter CRUD · in-book reorder · book sort · smart-filter editing · smart→curated conversion ◆ | book navigator + shelf menus | **OPEN-FOR-HER** — the LK5 expansion named details/tags/creation, not structure management. *Q: how much book STRUCTURE management crosses in v1 — chapters, reorder, sort, filter edits, conversion — vs. staying the Mac's desk work?* | — |
+| Extent faces (book word target / max posts; post word target) | shelf Length & Extent…; `WordTargetFace` | **not-owed-now** — LK5 ranked word progress behind the phone's faces; "v1 ships without it (recorded)"; revisitable at her look round | LK5's recorded ranking |
+| Book/post/block export; library export; import | shelf + library menus; registry `.exportLibrary`/`.importFiles`/`.exportCaretBlock` | **not-owed-per-ruling** — the download-link direction ("easier to eventually provide users with a link"); share-sheet is the future export grammar; "definitely no bulk import on an iphone" | [FUT] |
+
+### Family: notes (metadata & lifecycle)
+
+| Capability | Mac location | Phone status | Ruling |
+|---|---|---|---|
+| New note · Today's entry (+ daily shelving) | registry `.newPost`/`.todaysEntry` | **already** — the twin + new note doors (P33, `MobileNewNoteDoor` pin) and the Today button (`MobileTodayDoor` — create-or-open + `shelveInDailyJournalBook`, outcomes worded) | — |
+| Note seal (lock/unlock) | registry `.sealPost` | **already** — the masthead door + state line (A1; `MobileNoteSealTests`, flush-guard revert-verified) | — |
+| Rename note ◆ | library Rename… | **owed** — no phone door on stored titles; basic metadata | [PARITY] ("full app functionality") |
+| Entry date set/clear ◆ | `CommitBar` date face (`setEntryDate`) | **OPEN-FOR-HER** — unruled. *Q: should the phone re-date a note (journal sorting), or is dating Mac-side curation?* | — |
+| Archive/delete/restore note · tray · unplaced blocks · origin door | library rows, `RecoveryView`, registry `.showOriginBlock` | **owed — LEDGER-ROUTED to PL-3 (13j)**: deletion/Trash/restoration doors are 13j's one design (her gate ruling #7 widened it: "restoration of archived/deleted things generally — where the doors live"); the phone's half lands at least see-your-data when 13j runs. Consciously deferred — the Stage E gate reads this row | [PL-3] + gate ruling #7 |
+| Duplicate as Version · version links | library/pool rows; `.versionOf` doors | **OPEN-FOR-HER** — unruled (Compare excluded; diverge-for-book rides the chip). *Q: does duplicate-as-version cross, or wait for a use she feels?* | — |
+
+### Family: tags ◆
+
+| Capability | Mac location | Phone status | Ruling |
+|---|---|---|---|
+| Browse the taxonomy | Settings tag manager; `TagsViewModel` | **owed** — the C family's "browse"; leaf-chip grammar (13k K3) binds display, already applied on shelf faces (`MobileShelfFaces.leaf`) | [LK5+] |
+| Create tags (+ hierarchy) | tag manager New Tag…/New Child Tag… | **owed** | [LK5+] ("full app functionality") |
+| Apply/remove tags on posts | `NoteTagChips` (＋ chip) | **owed** — "tag posts" verbatim | [LK5+] |
+| Tag rename / delete (management) | tag manager Rename…/Delete (with subtree) | **OPEN-FOR-HER** — the expansion named browse/apply/create. *Q: does tag MANAGEMENT (rename, delete-with-subtree, hierarchy edits) cross, or stay the Mac Settings' home (R52)?* | — |
+| Block tags | registry `.tagBlock` (scrap rows/canvas) | **OPEN-FOR-HER** — her ruling named POSTS; block tags primarily serve the pool. *Q: does block-tagging ride the scraps surface, or stay Mac-side?* | — |
+
+### Family: references ◆
+
+| Capability | Mac location | Phone status | Ruling |
+|---|---|---|---|
+| See a note's references | `ReferencePanel` list | **owed** — the "More info"-style list, her words | her precision #3 + [SEE] |
+| Add (URL) + open a reference | panel Add File…/URL; open | **owed** — "maybe add + open one"; URLs open; FILE rows list honestly by name (`file_bookmark` is LOCAL-ONLY per AppSpec §7 — a Mac file cannot open on the phone; the copy must say so without redirecting) | her precision #3 |
+| Side-by-side reference panel | the Mac panel beside the draft | **not-owed-per-ruling** — "no side-by-side view ever" | [EXCL] |
+
+### Family: scraps / Snippets & pool ◆
+
+| Capability | Mac location | Phone status | Ruling |
+|---|---|---|---|
+| Pool (bookless notes) | sidebar Pool (R29) | **already** — the Library's bookless filter (`MobileLibraryViewModel.startBookless`; loose-note walk) | — |
+| View the scraps area | `ScrapsPanel`/`BlocksAreaView` | **owed** — "you should be able to view your pool of scraps if you want on mobile" | her precision #1 + [SEE] |
+| Add to scraps | scrap minting doors | **owed-compromised** — her "and maybe add to it": the maybe is recorded; scope settles at the batch (a plain add-scrap door at most) | her precision #1 |
+| Drag scraps into a note | the Mac drag door | **not-owed-per-ruling** — the exclusion verbatim ("it's hard to imagine how you would add items from there to a post / note on mobile") | [EXCL] |
+
+### Family: lenses
+
+| Capability | Mac location | Phone status | Ruling |
+|---|---|---|---|
+| Lenses (save current · switch active · adopt; rename) | registry `.saveChoicesAsLens`/`.renameLens`; `LensesBoardView` | **owed-compromised** — her sketch IS the intended shape: "choose between lenses on the top bar and switch to a different active lens but can save the one you're in"; design at the batch (the multi-column board never crosses); core `LensQueries` + ops standing | her lens precision + [PARITY] |
+| Lens dangling-pick honesty | Mac loud-fallback door = 13j's ruling | **rider on the lens batch** — the phone surface designs WITH `effectiveLensSelection`'s fallback visible (the Mac's loud door is 13j's; the phone must at least not lie) | gate ruling #7 |
+
+### Family: search
+
+| Capability | Mac location | Phone status | Ruling |
+|---|---|---|---|
+| Find anything (catalog scope) | registry `.findAnything` (⌘K) | **already** — the Library search (`MobileLibraryViewModel.search` — `searchCatalog`, same scope; body-search-not-invented pinned in `MobileLibraryTests`) | — |
+| Whole-library body search | the roadmap row (unrun) | **not-owed-YET** — the engine lands in core Queries with phone memory/P1 at the table | [PL-2] |
+| Library sort choice | Mac library view modes (timeline etc.) | **OPEN-FOR-HER** — the phone lists newest-first only. *Q: is a sort picker (entry date · created · last touched) wanted on the phone Library?* | — |
+| Timeline / folder view modes | Mac Library modes | **not-owed** — traversal coverage exists (Library + books + the owed tags family); view modes are Mac workflow surfaces | [EXCL]'s workspace distinction |
+
+### Family: sync · account · E2EE
+
+| Capability | Mac location | Phone status | Ruling |
+|---|---|---|---|
+| Suite sign-in / account | shared `AuthViews`/`SyncStatusViews` | **already** — PL-5 shipped through the one seam (Account sheet off the sync row; the pre-Stage-A door fixes); live-phone verify rides the end bundle behind the install hold | [PL-5] |
+| E2EE enroll/unlock/forget/recovery + snapshot cover | shared `EncryptionViews` | **already** — PL-6 CLOSED (her drill passed live; 0.16 s KDF; `MobileSnapshotPrivacyTests`) | [PL-6] |
+| Sync status face | shared `SyncStatusRow` | **already** — Settings' sync section | — |
+| S5 conflict discoverability ◆ | core: conflict-as-variant (label 'conflict') | **owed — VERIFY + PIN** (no code expected): a conflict variant landing on the phone must be DISCOVERABLE — the mechanism says it is (a conflict mints a take → the block is fanned → the ⑂ badge; the browser card shows the label) — the batch proves it end-to-end from a landed conflict row and pins it | the C-kickoff's named check; MobileSoul §5.3 (standing acceptance item) |
+| Fragments bridge faces | Mac-hosted engine (paused until the 14c-end batch) | **not-owed** — the bridge is a Mac-side engine by design; its results flow to the phone via sync | the bridge's Mac-hosted architecture |
+
+### Family: app-scope & misc
+
+| Capability | Mac location | Phone status | Ruling |
+|---|---|---|---|
+| Voice switch | Mac Settings appearance | **already** — Settings' voice rows (`MobileVoiceTests`; open surfaces follow via `applyVoiceChange`) | — |
+| Tutorial | registry `.restoreTutorial` | **already** — the pocket guide + DEBUG doors ([B1]; the PRODUCT door placement is PB1-1, hers at the end bundle) | — |
+| Shortcuts & Dictionary helper | registry `.helper` (⌘/) | **not-owed** — a keyboard-dictionary has no touch referent; the app-vocabulary teaching lives in the pocket guide | moot-by-platform; [B1] |
+| Quick note (summon-anywhere) | registry `.quickNote` + menu-bar extra | **not-owed-now** — the quick-capture widget is "W26's phone-shaped cousin", explicitly future | [FUT] |
+| Stars | registry `.toggleStar` | **OPEN-FOR-HER** — unruled (pins cover books; stars span notes AND books). *Q: does the starred set cross to the phone shelf, and where?* | — |
+| Workspace: splits · windows · open-notes list · note-only windows | registry `.openBeside`/`.closeSplit`/`.openInNewWindow` etc. | **not-owed-per-ruling** — workspace/windowing excluded | [EXCL] |
+| Compare · open peer post · Outline · expand-all-fans | registry `.openPeerPost`; Compare board | **not-owed-per-ruling** | [EXCL] |
+| Canvas / sticky-note editing · canvas bank | Canvas feature | **not-owed-per-ruling** | [EXCL] |
+| Tag-chips fold (context bar) | registry `.toggleTagChips` | **not-owed** — Mac context-bar chrome; the phone's tag display shape is the tags batch's | [EXCL]'s workspace distinction |
+| Block-TOC-style navigation + block-name display | Mac TOC view; names set via phone ⋯ but rendered nowhere | **OPEN-FOR-HER** — her own candidate ("the block-TOC-style list remains the phone-friendly navigation candidate"); block names' phone face was left as "Stage C's call" in [B1]. *Q: is an in-note block list (showing names) wanted for v1 navigation?* | — |
+
+### Row counts per status
+
+- **already-parity: 27** (composition-covered included)
+- **owed (full shape): 23** — insertBlockBelow · find-in-note · strike/code/link doors · commit+history · unarchive+archived-listing · label take · take lock/unlock · create book · smart-book-from-tags · book details finish/unfinish · book tag editing · rename book · membership chip · diverge-for-book · pin/unpin · daily-designation road · rename note · tags browse · tag create · tag apply · references-see · references-add/open · scraps view · S5 verify+pin *(24 named — diverge-for-book rides the chip row's batch, counted with it)*
+- **owed-compromised: 3** — fanned-merge workaround · lenses · scraps add
+- **owed, ledger-routed (consciously deferred): 1** — deletion/restoration surfaces (PL-3/13j; delete-book included)
+- **not-owed-per-ruling / moot: 19**
+- **OPEN-FOR-HER: 11** (the list below)
+
+### The OPEN-FOR-HER collection (for the chain's end bundle)
+
+1. **Extract + Make Block on the phone** — selection acts; cheap via the selection menu. Cross, or Mac gestures?
+2. **Delete in Every Take** — wanted on the phone?
+3. **Diff against chosen** — a one-column take-diff is phone-legible; wanted, or does swipe-compare suffice?
+4. **Book structure management** — chapter CRUD, in-book reorder, sort, smart-filter editing, smart→curated conversion: how much crosses in v1?
+5. **Entry date set/clear on the phone** — re-date a note there?
+6. **Duplicate as Version** — cross, or wait?
+7. **Tag management** (rename/delete/hierarchy) — cross, or stay the Mac Settings' home (R52)?
+8. **Block tags** — ride the scraps surface, or Mac-side?
+9. **Library sort picker** — entry date / created / last touched on the phone Library?
+10. **Stars** — does the starred set cross, and where does it live on the phone?
+11. **Block-TOC navigation + block-name display** — an in-note block list for v1?
+
+### The proposed build-batch ordering (C2–C5)
+
+1. **C2 — books & membership (+ note metadata riders).** Create book (three kinds) · pin/unpin · the BOOK DETAILS surface off contents (finish/unfinish · tag editing · rename book · the daily-designation road) · smart-book-from-tags · the membership chip (see/add/move/remove; diverge-for-book's shape) · rename note · the Today-door rewords these doors unlock. *Risk:* the batch's one design fork is the book-details surface's shape (LK4's sheet grammar is the precedent); everything else is mechanical over standing ops (`createReading`, `addPostToReading`, `removePostFromReading`, the lock ops, `applyTag`). Possible small core `Queries` additions for detail aggregates — **four-suite duty if any core line lands**.
+2. **C3 — the see-your-data trio: tags · references · scraps.** Tags browse/create/apply with leaf chips · the references "More info" list (see, add URL, open; file rows honest without redirecting) · scraps viewing (+ the maybe-add call). *Risk:* low, mostly mechanical; OPEN answers 7/8 may adjust scope mid-batch.
+3. **C4 — takes completeness · locks · commit/history · editor fill.** Take lock/unlock · the archived listing + unarchive · label take · the commit door + history surface (restore with the §9 predates-a-split warn) · insert block below · strike/code/link doors · find-in-note · the S5 conflict verify+pin. *Risk:* the find interaction on TK2 (TEXTKIT2 §3 care); history-surface shape is design-lite; `blockFan`/`commitHistory` already exist in core — zero core expected.
+4. **C5 — lenses (design-first) + THE REFUSAL-COPY SWEEP (last, by dependency).** The lens compromised shape (her top-bar sketch; a propose-first turn to the architect per the 4E pattern is warranted) · then the sweep: every inventory row below dissolves or names its sanctioned exception — the merge-ceremony wording gains its phone road, and **PB1-4's rider executes: the pocket guide's merge lesson + its walk pin update in the same batch**. *Risk:* the sweep depends on C2/C4 doors existing — hence last.
+
+**Core/Shared expectations across all four:** zero `Sources/VariorumCore/Sync/`, zero schema (any need = a §12 lockstep STOP), zero `App/Variorum/Shared/` expected; the only anticipated core surface is small additive `Queries` reads (C2), which fire the four-suite duty. The spine (32/7) green every batch; the perf suites ride the full-suite runs.
+
+### The refusal-copy inventory (grep-grounded: every user-facing mobile string naming the Mac)
+
+| # | file:line | The string (abbrev.) | Disposition |
+|---|---|---|---|
+| 1 | `Features/Write/MobileEditorViewModel.swift:1358` | "This take is locked — branch it or unlock it on the Mac to edit." | **dissolve** at C4 (take unlock door: "…or unlock it" + the door) |
+| 2 | `Features/Write/MobileBlockMenu.swift:219` | delete confirm: "The block waits in this note's deleted-blocks tray on the Mac." | **dissolve** (reword neutral — the tray fact without the redirect; the phone's recovery DOOR rides PL-3/13j) |
+| 3 | `Features/Write/MobileStructural.swift:128` | locked take (same sentence as #1) | **dissolve** at C4 |
+| 4 | `Features/Write/MobileStructural.swift:238-239` | "One of these blocks has other takes — pairing takes into a merge is the Mac's merge ceremony." | **sanctioned-exception-candidate** (her named merge exception) — but the sweep must add the phone ROAD per "SOMEHOW you should be able to get to the state you want" (the C5 workaround design or the archive-extras road named) |
+| 5 | `Features/Write/MobileStructural.swift:292` | "Block deleted — it waits in this note's deleted-blocks tray on the Mac." | **dissolve** (neutral reword; door rides PL-3) |
+| 6 | `Features/Write/MobileStructural.swift:340` | locked take (refusalMessage arm) | **dissolve** at C4 |
+| 7 | `Features/Tutorial/MobileTutorialSeeder.swift:452` | the merge lesson teaches the ceremony refusal | **PB1-4's rider** — updates in the SAME batch as #4 (lesson + walk pin) |
+| 8 | `Features/Shell/MobileTodayDoor.swift:57` | finished daily book: "…reopen it on the Mac." | **dissolve** at C2 (finish/unfinish lands) |
+| 9 | `Features/Shell/MobileTodayDoor.swift:59` | full daily book: "…extend it on the Mac." | **dissolve-candidate** — extents are LK5-deferred, so the road is designate-another/unfinish; the C2/C5 wording names a phone road or the row becomes a flagged exception |
+| 10 | `Features/Shell/MobileTodayDoor.swift:61` | smart daily book: "…pick a curated one on the Mac." | **dissolve** at C2 (the designation road) |
+| 11 | `Features/Takes/MobileTakesBrowser.swift:286` | locked take (beginEditing) | **dissolve** at C4 |
+| 12 | `Features/Takes/MobileTakesBrowser.swift:321` | locked take (card gate) | **dissolve** at C4 |
+| 13 | `Features/Takes/MobileTakesBrowser.swift:405` | "That take is locked — unlock it on the Mac first." | **dissolve** at C4 |
+| 14 | `Features/Takes/MobileTakesBrowser.swift:407` | "That take is archived — unarchive it on the Mac first." | **dissolve** at C4 (unarchive door) |
+| 15 | `Spike/SpikeScenarios.swift:228` | DEBUG spike recorder note ("same as Mac spike") | **no action** — not user-facing (DEBUG diagnostics; recorded for grep-completeness) |
+
+Copy-pin note for the sweep batch: several of these sentences are PINNED (the A1/A3 records name the kept locked-take copies as deliberate) — every dissolve is a sanctioned pin flip riding this matrix's rulings, recorded per flip.
+
+## Stage C, batch C1 — BATCH RECORD (implementer, 2026-08-09)
+
+**Method.** Read in the brief's order, in full: `CLAUDE.md` · `notes/MobileSoul.md` · THIS plan file top to bottom (A/B closeouts, PB1-4, the C kickoff) · the GATE SITTING record (`notes/plans/mobile-app-plan.md` ~5716–end). Then the code, read-only: the Mac Registry layer in full (`Capability.swift` + `CapabilityRegistry.swift` — 71 `CapabilityID`s; `OpsRefusalCopy`/`ShellActions` skimmed for door tables), the Mac feature surfaces beyond it (shelf/book/membership/library/recovery/tags/references/pool/lenses/settings/commit-bar/readings files walked by door extraction — `Button`/`Menu` sweeps plus header reads), and EVERY mobile feature file (Shell/Write/Takes/Read/Tutorial surfaced in full or by API walk; `MobileStructural`, `MobileBlockMenu`, `MobileTakesBrowser`, `MobileWriteView`, `MobileSettingsView`, shelf/library/book models read whole). Verdict-grounding greps: the `Mac`-string sweep (15 hits, all classified), the no-commit-door proof (zero non-comment `commit` references in mobile features), `blockFan`/`commitHistory` core availability, `IdleCommitScheduler` in shared `AppServices`.
+
+**Coverage counts.** All 71 registry `CapabilityID`s dispositioned (grouped into matrix rows where a family shares one verdict); 20 registry-blind capabilities (◆) rowed from the Mac's surface-local vocabulary and her rulings (the LK5 expansion's four, the S5 check, the shelf/chip/tags/references/scraps families); statuses: **27 already · 23 owed · 3 owed-compromised · 1 owed-ledger-routed · 19 not-owed · 11 OPEN-FOR-HER**. Every non-already row carries its ruling citation; every already row cites mobile code and its pin suite.
+
+**What I could not classify from code or record (hence OPEN):** the eleven OPEN-FOR-HER rows above — each is genuinely unruled (no gate-record sentence, no M/LK/P disposition, no exclusion covers it); none gates C2–C4's scope as ordered (OPEN answers 4/7/8 can adjust C2/C3 scope mid-chain if she answers early; the rest ride the end bundle).
+
+**No app code written** (the brief's letter): the diff is this plan file only. No tests run (record-only batch; the ladder interpretation in the C kickoff routes C1 to architect review, not a ladder). Baselines stand as carried at the C kickoff: mobile 227/36 zero known issues · spine 32/7 · perf 9/2 · core 1214/128 · Mac 1245/219 tripwire-only · spine-Mac 51/7.
+
+**Notes for the architect's review:**
+- The owed set is deliberately conservative on invention: where a Mac act's phone shape would be a design act (commit/history face, lens top-bar, merge workaround, book-details sheet), the row says "shape at the batch" rather than sketching UI — the batches' briefs own the shapes, the 4E propose-first pattern where flagged.
+- Two rows interact with OTHER phases' territory and are routed, not built: deletion/restoration (PL-3/13j — consciously deferred, Stage E reads it) and the 13e takes vocabulary (PL-1). The lens batch carries a 13j-adjacent rider (dangling-pick honesty) without building the Mac's loud door.
+- The refusal sweep is LAST by dependency and carries PB1-4's lesson-update rider explicitly; six of the fourteen user-facing rows dissolve on ONE door family (take locks — C4), which is why C4 precedes C5.
+- The S5 row expects zero code: if the verify finds the badge/browser road broken, that is a FINDING (trace + red-on-old), not a silent fix.
