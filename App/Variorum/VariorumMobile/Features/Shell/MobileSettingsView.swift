@@ -186,6 +186,19 @@ struct MobileSettingsView: View {
         } message: {
             Text(MobileTutorialSeeder.replaceDetail)
         }
+        .onDisappear {
+            // FIX-B5 (Stage B ladder round 1, NIT 3): a sheet torn down
+            // with the replace confirm up (swipe-dismiss) runs neither
+            // alert button — the checked continuation would leak and the
+            // suspended door would hold its in-flight latch for the
+            // sheet's next presentation. Teardown resolves the confirm
+            // as a DECLINE: the awaiting door resumes ("Left as it
+            // was."), its `defer` releases the latch, and a
+            // button-resolved continuation is already nil here (both
+            // buttons nil it after resuming — never a double resume).
+            confirmContinuation?.resume(returning: false)
+            confirmContinuation = nil
+        }
         #endif
     }
 
