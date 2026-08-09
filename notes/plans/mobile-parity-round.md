@@ -5632,3 +5632,18 @@ iOS 26.2 simulator):**
   only-if-shared condition; the scope check above is the proof) —
   baselines stand (core 1214/128 · Mac 1245/219 tripwire-only ·
   Mac spine 51/7).
+
+## Stage C — C3 fix set ACCEPTED; ROUND 2 OPENS (architect, 2026-08-09)
+
+FIX-C3a…d verified: scope clean by own check (nine files, all
+mobile), the full suite re-run by the architect's own hand —
+**265/48 green** (262 + 3 pins, exact). C3a's hoist-not-third-copy
+shape honored (the typed-path brain now lives ONCE in
+`MobileTagsModel`, the note sheet refactored onto it — the copied-
+brains row's anti-pattern avoided in the same ladder that recorded
+it). C3d's @Observable equal-value-dedupe discovery accepted as
+recorded (the pin words the CONTRACT, not a guard-line — the honesty
+rule). **ROUND 2 OPENS:** fix-set diff `164a53d..2bcd070` inside
+`ad4fbcf..2bcd070`; fresh reviewer; new BLOCKER/MAJOR ⇒ round 3.
+Baselines: mobile 265/48 · spine 32/7 · perf 9/2 · core 1214/128 ·
+Mac 1245/219 tripwire-only · Mac spine 51/7.
