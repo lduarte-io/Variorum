@@ -4,9 +4,9 @@
 //
 //  Mobile Stage 2, batch 1 — the takes chrome over REAL laid-out geometry
 //  (the checkbox-tap suite's pattern): the ⑂ badge overlay (LK3), the
-//  LK10 exclusion-rect gutter (text never under the badge; non-fanned
-//  blocks reserve nothing), the peek marker + LK6 pill, and the pan
-//  router's fragment-rect scoping. Gesture FEEL (dominance under a live
+//  LK10 gutter (a first-paragraph tail RESERVATION since parity B3 —
+//  text never under the badge; non-fanned blocks reserve nothing), the
+//  peek marker + LK6 pill, and the pan router's fragment-rect scoping. Gesture FEEL (dominance under a live
 //  touch, loupe coexistence) was the spike's real-touch half and rides
 //  the device round — these tests pin the scoping brain and the drawn
 //  chrome.
@@ -180,7 +180,8 @@ struct MobileTakesChromeTests {
 
             // …while the NON-fanned block's first line (same unbroken run)
             // uses the full width — the discrimination that proves the
-            // exclusion rect, not the text, did it.
+            // tail reservation (B3's paragraph-style mechanism), not the
+            // text, did it.
             guard let rangeB = model.rangeOfBlock(seed.blockB),
                   let widthB = firstLineWidth(view, atOffset: rangeB.location)
             else {
@@ -263,16 +264,19 @@ struct MobileTakesChromeTests {
         }
     }
 
-    /// FIX-3 (Stage A ladder round 1, the pin-first probe): the reviewer's
-    /// ~3 pt residual window — `commentMarkRoom` vs the marker's own
-    /// measured width — probed by FLUSH-END one-liners. The standing pin's
-    /// fixture WRAPS under the widened exclusion (it asserts the two-line
-    /// safe case); this one seeds a band of candidate lengths spanning the
-    /// flush boundary, so whatever TK2 does with `lineFragmentPadding` at
-    /// exclusion-path edges (the finding's undetermined half), the maximal
-    /// one-liner — the marker as far right as it can ever sit — is in the
-    /// set. Every one-line fanned+commented candidate's ●n marker must
-    /// clear the ⑂ badge.
+    /// FIX-3 (Stage A ladder round 1, the pin-first probe; narration
+    /// flipped to the reservation mechanism at the Stage B ladder,
+    /// FIX-B3 — the probe itself is mechanism-independent and its
+    /// assertions never changed): the reviewer's ~3 pt residual window —
+    /// `commentMarkRoom` vs the marker's own measured width — probed by
+    /// FLUSH-END one-liners. The standing pin's fixture WRAPS under the
+    /// widened reservation (it asserts the two-line safe case); this one
+    /// seeds a band of candidate lengths spanning the flush boundary, so
+    /// whatever TK2 does with `lineFragmentPadding` at the reservation's
+    /// trailing boundary (the finding's undetermined half), the maximal
+    /// one-liner — the marker as far right as it can ever sit — is in
+    /// the set. Every one-line fanned+commented candidate's ●n marker
+    /// must clear the ⑂ badge.
     @Test func aFlushEndOneLineFannedAndCommentedBlockNeverCrowdsTheBadge() async throws {
         try await withEditorWorld { session, _ in
             let charW = ("a" as NSString).size(
@@ -308,9 +312,9 @@ struct MobileTakesChromeTests {
             _ = model
             // The second chrome pass the app takes on its own (the standing
             // decor→chrome ordering; see the pin above), then settle rounds
-            // (exclusion → relayout → chrome) until the geometry stops
+            // (reservation → relayout → chrome) until the geometry stops
             // moving, as the app's own layout ticks would — the STEADY
-            // state is what this pin asserts (the one-tick pre-exclusion
+            // state is what this pin asserts (the one-tick pre-reservation
             // transient is the standing recorded behavior).
             view.refreshChrome()
             for _ in 0..<4 {
@@ -319,14 +323,17 @@ struct MobileTakesChromeTests {
             }
 
             // PROBE VERDICT (2026-08-09, iPhone 17 Pro / iOS 26.2, recorded
-            // per the pin-first rule): GREEN — TK2 applies
-            // lineFragmentPadding (5 pt) against exclusion-path edges, so
-            // glyphs stop at cw−56−5 = 302 (max one-line endX measured
-            // 299.25; the next candidate wraps) while crossing needs
-            // endX > cw−59 = 304 — the reviewer's ~3 pt window is EMPTY,
-            // worst-case clearance ≥ 2 pt. The ●12 marker's fitted width
-            // is ALSO 30.0 (the button's insets floor) — no multi-digit
-            // widening at 12. `commentMarkRoom` stands at 26.
+            // per the pin-first rule; measured under the Stage A exclusion
+            // mechanism and standing green unchanged under B3's tail
+            // reservations — the arithmetic is mechanism-independent):
+            // GREEN — TK2 applies lineFragmentPadding (5 pt) inside the
+            // reserved trailing boundary, so glyphs stop at cw−56−5 = 302
+            // (max one-line endX measured 299.25; the next candidate
+            // wraps) while crossing needs endX > cw−59 = 304 — the
+            // reviewer's ~3 pt window is EMPTY, worst-case clearance
+            // ≥ 2 pt. The ●12 marker's fitted width is ALSO 30.0 (the
+            // button's insets floor) — no multi-digit widening at 12.
+            // `commentMarkRoom` stands at 26.
             var oneLiners = 0
             for blockID in seed.blocks {
                 let badge = try #require(chrome.badgeView(for: blockID))
@@ -471,9 +478,10 @@ struct MobileTakesChromeTests {
         // fanned block at the top (in the viewport) and one far below:
         // a `.nearViewport` pass — the layoutSubviews tick's scope —
         // forces geometry ONLY for the near block, while the far block's
-        // gutter exclusion survives from its cached rect (dropping it
-        // would reflow the document); a `.document` pass resolves both.
-        // On the old code every fanned block was layout-forced per tick.
+        // gutter reservation survives untouched (storage truth — B3's
+        // mechanism needs no geometry to verify); a `.document` pass
+        // resolves both. On the old code every fanned block was
+        // layout-forced per tick.
         try await withEditorWorld { session, db in
             let seed = try await session.runner.run { ops in
                 let post = try ops.createPost(title: "long", profile: .blog)
