@@ -52,7 +52,9 @@ struct MobileLibraryView<TabBar: View>: View {
             tabBar()
         }
         .background(tokens.room.ignoresSafeArea())
-        .task { await model.startAll() }
+        // The listing observation restarts when the sort flips (parity
+        // C3 — a way of looking; nothing is written).
+        .task(id: model.sort) { await model.startAll() }
         .task { await model.startBookless() }
         .task(id: query) { await model.search(query) }
     }
@@ -111,9 +113,41 @@ struct MobileLibraryView<TabBar: View>: View {
             filterDoor("Bookless", .bookless)
             filterDoor("Scraps", .scraps)
             Spacer()
+            // The sort picker (parity C3 — her ruling 9), on the ALL
+            // filter only: bookless keeps the core query's own order and
+            // scraps are pointer-ordered, so a sort door there could
+            // never mean what it says (P-2 — it isn't rendered).
+            if model.filter == .all {
+                sortMenu
+            }
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 6)
+    }
+
+    /// "sort: last touched" — the four standing stamps (entry date ·
+    /// created · last touched · last meaningful edit), newest first.
+    private var sortMenu: some View {
+        Menu {
+            ForEach(MobileLibraryViewModel.sortOptions, id: \.self) { option in
+                Button {
+                    model.setSort(option)
+                } label: {
+                    if option == model.sort {
+                        Label(MobileLibraryViewModel.sortWord(option),
+                              systemImage: "checkmark")
+                    } else {
+                        Text(MobileLibraryViewModel.sortWord(option))
+                    }
+                }
+            }
+        } label: {
+            Text(tokens.chromeLabel("sort: \(MobileLibraryViewModel.sortWord(model.sort))"))
+                .font(tokens.small)
+                .foregroundStyle(tokens.accent)
+                .lineLimit(1)
+        }
+        .accessibilityLabel("Sort")
     }
 
     private func filterDoor(_ label: String, _ target: MobileLibraryViewModel.Filter) -> some View {

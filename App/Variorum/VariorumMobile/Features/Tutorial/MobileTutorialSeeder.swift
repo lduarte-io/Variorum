@@ -252,11 +252,14 @@ enum MobileTutorialSeeder {
             + "journal, or a smart book collecting by tags.",
 
             "The LIBRARY tab is everything, newest first, with search across "
-            + "titles, days, and book names. Its bookless filter is the pool: "
-            + "notes that belong to no book yet. One loose practice note was "
-            + "seeded there, so the filter has something to show you. The "
-            + "scraps filter beside it is your pool of standalone blocks — "
-            + "loose lines that live in no note — with + new scrap to keep "
+            + "titles, days, and book names — and a sort door: order the "
+            + "list by entry date, created, last touched, or last "
+            + "meaningful edit (fixing one typo never reshuffles that "
+            + "last one). Its bookless filter is the pool: notes that "
+            + "belong to no book yet. One loose practice note was seeded "
+            + "there, so the filter has something to show you. The scraps "
+            + "filter beside it is your pool of standalone blocks — loose "
+            + "lines that live in no note — with + new scrap to keep "
             + "another.",
 
             "Tapping a book opens its CONTENTS — the chapter list you likely "

@@ -236,3 +236,61 @@ struct MobileLibraryTests {
         #expect(!copy.contains("Mac"))
     }
 }
+
+@MainActor
+@Suite("Mobile library — the sort picker (parity C3, her ruling 9)")
+struct MobileLibrarySortTests {
+    /// The picker reorders the listing by STORE truth: each option is
+    /// the core `LibrarySort`'s own stamp expression, and flipping the
+    /// sort restarts the observation exactly as the view's `.task(id:)`
+    /// does. The default stays the standing last-touched.
+    @Test func theSortPickerReordersTheListingByStoreTruth() async throws {
+        try await withEditorWorld { session, db in
+            let (a, b, c) = try await session.runner.run { ops -> (String, String, String) in
+                let a = try ops.createPost(title: "Alpha")
+                let b = try ops.createPost(title: "Beta")
+                let c = try ops.createPost(title: "Gamma")
+                try ops.setEntryDate(a.id, entryDate: "2026-03-01")
+                try ops.setEntryDate(b.id, entryDate: "2026-01-01")
+                // The LAST text act touches Alpha — so created order and
+                // touched order deliberately disagree.
+                _ = try ops.newBlock(in: a.id, text: "harbor light")
+                return (a.id, b.id, c.id)
+            }
+            let model = MobileLibraryViewModel(session: session)
+            #expect(model.sort == .lastTouched, "the standing default")
+
+            var listing = Task { await model.startAll() }
+            await settle { model.all.count == 3 }
+            #expect(model.all.map(\.postID) == [a, c, b],
+                    "last touched: Alpha's text act outranks creation order")
+
+            // The view's restart contract, mirrored: cancel, flip, restart.
+            listing.cancel()
+            model.setSort(.createdAt)
+            listing = Task { await model.startAll() }
+            await settle { model.all.map(\.postID) == [c, b, a] }
+            #expect(model.all.map(\.postID) == [c, b, a],
+                    "created: newest mint first, the touch ignored")
+
+            listing.cancel()
+            model.setSort(.entryDate)
+            listing = Task { await model.startAll() }
+            await settle { model.all.map(\.postID) == [c, a, b] }
+            #expect(model.all.map(\.postID) == [c, a, b],
+                    "entry date: undated Gamma rides its created stamp; dated notes by their days")
+            listing.cancel()
+        }
+    }
+
+    /// The vocabulary, pinned: the brief's four words over the core's
+    /// own sort cases, the picker's order, and the no-op flip.
+    @Test func theSortVocabularyIsPinned() {
+        typealias M = MobileLibraryViewModel
+        #expect(M.sortOptions == [.entryDate, .createdAt, .lastTouched, .lastMajorRevision])
+        #expect(M.sortWord(.entryDate) == "entry date")
+        #expect(M.sortWord(.createdAt) == "created")
+        #expect(M.sortWord(.lastTouched) == "last touched")
+        #expect(M.sortWord(.lastMajorRevision) == "last meaningful edit")
+    }
+}

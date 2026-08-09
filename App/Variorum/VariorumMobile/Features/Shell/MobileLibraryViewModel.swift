@@ -43,6 +43,11 @@ final class MobileLibraryViewModel {
     @ObservationIgnored private let listingLimit: Int
 
     var filter: Filter = .all
+    /// The listing's sort (parity C3 — her sitting ruling 9: "Library
+    /// sort picker → ADD"). The standing default stays last-touched,
+    /// newest first; the view restarts the listing observation on a
+    /// change (`.task(id:)` — nothing is written, a way of LOOKING).
+    private(set) var sort: Queries.LibrarySort = .lastTouched
     private(set) var all: [Queries.TimelineItem] = []
     private(set) var bookless: [Queries.TimelineItem] = []
     /// nil = no search active (the listing shows); [] = a query with no
@@ -65,12 +70,39 @@ final class MobileLibraryViewModel {
         }
     }
 
-    /// Everything, newest first — the standing sort (the Mac library's
-    /// own observation shape).
+    // MARK: - The sort picker (parity C3 — ruling 9)
+
+    /// The picker's vocabulary — the C3 brief's four words over the
+    /// core's own `LibrarySort` (the standing sort stamps, AppSpec §10:
+    /// "last meaningful edit" is the 80%-sort's stamp).
+    nonisolated static let sortOptions: [Queries.LibrarySort] =
+        [.entryDate, .createdAt, .lastTouched, .lastMajorRevision]
+
+    nonisolated static func sortWord(_ sort: Queries.LibrarySort) -> String {
+        switch sort {
+        case .entryDate: return "entry date"
+        case .createdAt: return "created"
+        case .lastTouched: return "last touched"
+        case .lastMajorRevision: return "last meaningful edit"
+        }
+    }
+
+    /// Flips the way of looking; the view's `.task(id: sort)` restarts
+    /// the observation. Never a write — sorting reshuffles nothing
+    /// (CoreDescription pillar 7 is about the STAMPS; the picker only
+    /// chooses which one orders the list).
+    func setSort(_ next: Queries.LibrarySort) {
+        guard next != sort else { return }
+        sort = next
+    }
+
+    /// Everything, newest first under the picked stamp (the Mac
+    /// library's own observation shape; `.lastTouched` is the standing
+    /// default).
     func startAll() async {
         do {
             for try await items in session.database.observeLibrary(
-                sort: .lastTouched, direction: .desc, limit: listingLimit
+                sort: sort, direction: .desc, limit: listingLimit
             ) {
                 all = items
             }
