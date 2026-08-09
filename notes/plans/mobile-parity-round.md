@@ -5443,3 +5443,34 @@ GRDB.
 - Mac suite/spine deliberately not run: zero Mac-side and zero
   `Shared/` lines in the diff (verified); the recorded 1245/219
   tripwire-only + 51/7 baselines stand.
+
+## Stage C review — C3 round 1 ADJUDICATION (architect, 2026-08-09; the fix session spawns on this record)
+
+No BLOCKER/MAJOR. Dispositions:
+
+- **MINOR C3-R1-1 → FIX-C3a:** the manager's `+ new tag` gains the
+  SAME typed-path road the note-tags sheet already has (one create
+  rule everywhere — the hint then teaches a road its door walks);
+  never fix the hint by deleting the promise (fire-and-DO).
+- **MINOR C3-R1-2 → FIX-C3b:** the references row branches on
+  `kind == .file`; an unopenable URL row gets its own honest state
+  (stored text shown, no door, no file sentence). Pin the false-copy
+  case red-on-old.
+- **MINOR C3-R1-3 → FIX-C3c:** the scraps listing goes lazy AND
+  windowed with the standing probe+marker discipline (the P32
+  truncation grammar; MobileSoul §2's bar names the hazard). The
+  window size mirrors the other mobile lists'.
+- **MINOR C3-R1-4 → RECORDED with an owner** (this commit):
+  `notes/KnownIssuesAndTechDebt.md` gains the six-copied-brains row,
+  owned by the mobile project row (a post-chain mobile batch hoists;
+  any Mac phase touching one hoists THEN). The soul doc's rule
+  executed to the letter — the debt is explicit, not silent.
+- **NIT C3-R1-5 → stands as PC3-2** (already a recorded PROVISIONAL,
+  no-redirect-grounded; her bundle rules it).
+- **NIT C3-R1-6 → FIX-C3d:** the sort-test doc comment either gains
+  its claimed no-op-flip pin or loses the claim — whichever the
+  five-minute truth is.
+- **NIT C3-R1-7 → ROUTED to Stage D's polish pass** (the star
+  refusal's display cadence is look-round material; recorded).
+- **NIT C3-R1-8 (SPECULATIVE) → record-only** (Mac-identical either
+  way; the pin-first rule would spend more than the risk).
