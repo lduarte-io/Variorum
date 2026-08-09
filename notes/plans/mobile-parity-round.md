@@ -953,3 +953,109 @@ the matched pre-A2 run; the LIVE baseline on this machine is
   doesn't name: the cut halves mint UNLABELED (the W's halves rule)
   while duplicates KEEP their labels (the merge-carry rule — a
   whole-take ride keeps its name). Pinned in the worked example.
+
+## Stage A, batch A2 — ACCEPTED (architect, 2026-08-09)
+
+Verified before relying: all three commits present (`4ae64d2` ·
+`3a75235` · `cfc70f4`, op-before-door per the convention); diff scope
+confirmed by the architect's own check — **zero
+`Sources/VariorumCore/Sync/`, zero `Persistence/` (no schema), zero
+Mac-app files** (5 files total: the op + its tests, the door + its
+tests, this record) — so Mac dormancy holds BY CONSTRUCTION, with the
+implementer's matched pre/post runs as bonus proof. Suites re-run by
+the architect's own hand: **core "Test run with 1212 tests in 128
+suites passed"** · **mobile "Test run with 183 tests in 27 suites
+passed"**. Spine 51/7 and Mac 1245/219 stand on the implementer's
+recorded runs (the Mac diff being empty makes a third architect run
+redundant).
+
+**Baseline correction, adjudicated:** the kickoff's recorded Mac
+baseline (1240/219) was recording drift — the implementer measured
+the PRE-A2 tree (`3f7017f`, throwaway worktree, isolated DerivedData)
+at **1245/219 with the single TakePane identity tripwire**, identical
+to post-A2. The live Mac baseline on this machine is **1245/219**;
+the chain's later records use it. The dormancy proof is exact
+(outcome-identical matched runs).
+
+**PROVISIONALs PA2-1 (unfanned-block release-A semantics, doorless)
+and PA2-2 (labels: cut halves unlabeled, duplicates keep theirs)**
+are ACCEPTED as spec-defensible composition of standing precedents;
+both ride the end bundle for her eyes. The Q-M2 core shape her 13j
+row waits on now exists in `VariorumCore/Operations` — 13j wires the
+Mac's default switch on top, exactly as the row records.
+
+## Stage A, batch A3 brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
+
+**Cast:** a fresh Fable implementer session, working in
+`~/dev/variorum-mobile`, branch `mobile`, starting at the A2
+acceptance commit. UI-shape batch: the ruled P-round flips + the
+spacing floor. Expect ZERO `Sources/VariorumCore/` lines.
+
+**Read first, IN FULL, in this order — your own reading, never a
+summary:** `CLAUDE.md` · `notes/MobileSoul.md` (the decision grammar
+and platform truths bind every judgment here) · THIS plan file top to
+bottom · `notes/plans/mobile-app-plan.md` §§ "The settled shape"
+(~313), "Environment traps" (~473), the look sittings LK1–LK11
+(~242–312 — the LK canon binds the spacing work), and the GATE
+SITTING record's P-ROUND block (~5986–6036 — the flips this batch
+builds, her words) · `notes/plans/mobile-architect-handoff.md`.
+
+**THE ONE DESIGN FORK — propose BEFORE building (the 4E pattern):**
+item 1, the Aa bar. Her ruling: *"I'd condense things down to a
+formatting Aa icon that has all the formatting options, rather than
+having eight in the bottom bar."* Before writing its code, END YOUR
+TURN with a short proposal to the architect: the Aa door's form
+(popover vs sheet vs expanding row), the act arrangement inside it,
+what remains on the bar beside Aa, and how the door behaves with the
+keyboard up — each with a one-line why, LK canon cited. The
+architect's ruling lands repo-first; you build to it when told to
+continue. Every OTHER item below builds straight through.
+
+**Items (pins where behavior is assertable; screenshots where it is
+not):**
+
+1. **The Aa bar condensation** (after the ruling on your proposal):
+   the keyboard bar's formatting acts collapse into ONE Aa door; the
+   six-act grammar itself is unchanged — this is a DOOR change, not a
+   vocabulary change.
+2. **P35 — the navigation inversion:** book-tap opens the CONTENTS
+   list first; Read becomes a door from the contents. Flow pins.
+3. **P33 — the shelf's + New Note:** a bookless mint, Library's
+   twin — same mint path, same landing (the note opens for writing).
+4. **P5 — the heading picker:** # tap still cycles; LONG-PRESS opens
+   a direct H1/H2/H3/clear picker.
+5. **P24 — the typewriter-room bottom inset, BUILD:** A1's real-touch
+   evidence confirmed it absent. Whitespace at the bottom of the note
+   so the last line never sits at the screen's foot — her named Mac
+   nicety, preserved. Pin asserts the inset exists (red on the
+   pre-fix tree by A1's evidence).
+6. **P26/P43 — the voice-case sweep:** the ⋯ takes menu, the edit
+   menu's "Takes…", the structural rows — ONE register, hers; fold in
+   A1's seal-door strings (**this resolves PA1-1**). String pins.
+7. **P38 — the crowding corner:** the one-line fanned+commented
+   card's crowding fixed; placement itself stands (her ruling).
+8. **The spacing/padding FLOOR** (LAST, after the flips settle the
+   surfaces): a first systematic pass over the v1 surfaces — her
+   finding: *"the spacing needs to be fixed"*, more padding
+   generally. **The LK canon binds; changes are PHONE-LOCAL** —
+   platform-conditional or phone-local constants ONLY, NEVER a
+   rewrite of shared `VoiceTokens` values the Mac reads (a shared
+   token change would restyle the Mac outside any ruling — that is a
+   STOP, not a choice). Capture BEFORE/AFTER screenshots of each
+   touched surface (`xcrun simctl io booted screenshot`, a gitignored
+   dir; list the set in the record) — they are her end bundle's
+   evidence.
+
+**Discipline:** work synchronously; never end a turn with a build or
+test in progress (the Aa proposal turn-end is the ONE sanctioned
+exception — end it with the proposal only, nothing half-built).
+Red-on-old for every defect-class fix (P24, P38); string/flow pins
+for the flips; the spacing pass is screenshot-evidenced. Mobile suite
+green by your own run at the end, the "Test run with N tests" line
+recorded; if anything under `App/Variorum/Shared/` changes, the Mac
+suite runs too (baseline **1245/219 tripwire-only**, per the A2
+correction). Commit per logical item with the standing trailer; write
+the batch record into THIS file ("## Stage A, batch A3 — BATCH
+RECORD"); push `origin mobile` before finishing.
+PROVISIONAL-and-continue for non-gating ambiguity; author-only calls
+stop the batch.
