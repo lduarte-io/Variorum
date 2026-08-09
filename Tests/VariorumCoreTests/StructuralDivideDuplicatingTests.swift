@@ -136,6 +136,56 @@ struct StructuralDivideDuplicatingTests {
         }
     }
 
+    @Test func aParentThatFollowsItsChildInFanOrderStillRemaps() throws {
+        // Stage A ladder round 1, FIX-2: today's ops cannot produce a
+        // parent AFTER its child in fan order (`branchVariant` appends),
+        // but 13e's ruled reorder-takes makes `fan_position` mutable — so
+        // the pin CONSTRUCTS the store state directly (fan-position swap,
+        // legal in tests) and divides. RED-ON-OLD: the pre-fix remap
+        // indexed a partially built array (`variants[parentIndex]` with
+        // the parent not yet minted) and died by index trap inside the
+        // write transaction; the poolDragCopy pre-assigned-ID shape
+        // resolves the parent by ID, order-free.
+        try withOperations { ops, db in
+            let world = try WWorld(ops)  // V3 branched from V2
+            try db.write { db in
+                let p2 = try String.fetchOne(
+                    db, sql: "SELECT fan_position FROM variant WHERE id = ?",
+                    arguments: [world.v2])
+                let p3 = try String.fetchOne(
+                    db, sql: "SELECT fan_position FROM variant WHERE id = ?",
+                    arguments: [world.v3])
+                try db.execute(
+                    sql: "UPDATE variant SET fan_position = ? WHERE id = ?",
+                    arguments: [p3, world.v2])
+                try db.execute(
+                    sql: "UPDATE variant SET fan_position = ? WHERE id = ?",
+                    arguments: [p2, world.v3])
+            }
+
+            let result = try ops.divideDuplicating(
+                world.a.block.id, displayedVariantID: world.v1, cut: 11)
+
+            // Duplicates ride in the SWAPPED fan order — dup-of-V3 first.
+            #expect(result.first.variants.map(\.workingText)
+                == ["One alpha.", "Three start.\nThree end.", "Two intact."])
+            #expect(result.second.variants.map(\.workingText)
+                == ["One omega.", "Three start.\nThree end.", "Two intact."])
+            for half in [result.first, result.second] {
+                // dup-of-V3 still parents to THIS successor's dup-of-V2,
+                // which now sits BEHIND it in the fan.
+                #expect(half.sourceVariantIDs == [world.v1, world.v3, world.v2])
+                #expect(half.variants[1].parentVariantId == half.variants[2].id)
+                // dup-of-V2's parent (V1) is outside the copy set → nil.
+                #expect(half.variants[2].parentVariantId == nil)
+                // …and the store rows agree.
+                #expect(try db.fetchString(
+                    "SELECT parent_variant_id FROM variant WHERE id = ?",
+                    [half.variants[1].id]) == half.variants[2].id)
+            }
+        }
+    }
+
     @Test func archivedTakesStayOnAAndLockedTakesDuplicateUnlocked() throws {
         try withOperations { ops, db in
             let world = try WWorld(ops)

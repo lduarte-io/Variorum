@@ -1107,10 +1107,16 @@ extension Operations {
     /// index-aligned with `texts` (13b 4B: a carried take keeps its label —
     /// the name is part of the take it rides in on; pairings mint unlabeled).
     /// `parentIndices`, when given, remaps a parent tree INSIDE the minted
-    /// set (the poolDragCopy precedent, mobile A2): entry `i`'s parent is
-    /// the minted variant at `parentIndices[i]`, which must be an EARLIER
-    /// index — parents precede children in fan order by `branchVariant`'s
-    /// append construction, and the FK enforces the contract at insert.
+    /// set (the poolDragCopy pre-assigned-ID shape, `Operations+Pool`):
+    /// every variant's ID is assigned up front and entry `i`'s parent
+    /// resolves from that map, so the remap is ORDER-FREE — a parent may
+    /// sit at ANY index. A parent at a LATER index is impossible through
+    /// today's ops (`branchVariant` appends children after their parents)
+    /// but reachable the day reorder-takes makes `fan_position` mutable
+    /// (13e, PL-1); its pointer lands in a second pass AFTER every row
+    /// exists, because the immediate FK refuses a forward reference at
+    /// insert time. A self- or out-of-range index reads as parentless
+    /// (the outside-the-set rule).
     private func mintFanBlock(
         _ db: Database, texts: [String], in containerID: String, position: String,
         defaultIndex: Int, chosenIndex: Int?, presentation: String? = nil,
@@ -1121,23 +1127,43 @@ extension Operations {
             createdAt: now, updatedAt: now)
         try block.insert(db)
 
+        // The poolDragCopy shape: IDs pre-assigned before any insert, so a
+        // parent reference resolves by ID, never by index into the
+        // partially built array.
+        let ids = texts.map { _ in newID() }
+        func mintedParent(_ i: Int) -> (id: String, index: Int)? {
+            guard let parentIndices, i < parentIndices.count,
+                  let parentIndex = parentIndices[i],
+                  ids.indices.contains(parentIndex), parentIndex != i
+            else { return nil }
+            return (ids[parentIndex], parentIndex)
+        }
+
         var variants: [Variant] = []
+        var forwardParented: [Int] = []
         var lastFanPosition: String?
         for (i, text) in texts.enumerated() {
             let fanPosition = lastFanPosition.map { FractionalIndex.between($0, nil) }
                 ?? FractionalIndex.initial()
             var parentID: String?
-            if let parentIndices, i < parentIndices.count, let parentIndex = parentIndices[i] {
-                parentID = variants[parentIndex].id
+            if let parent = mintedParent(i) {
+                // A backward parent already exists — it rides the insert; a
+                // FORWARD parent's row doesn't yet, so its pointer waits for
+                // the second pass below (the immediate FK would refuse it).
+                if parent.index < i { parentID = parent.id } else { forwardParented.append(i) }
             }
             let variant = Variant(
-                id: newID(), blockId: block.id, parentVariantId: parentID,
+                id: ids[i], blockId: block.id, parentVariantId: parentID,
                 workingText: text,
                 label: labels.flatMap { i < $0.count ? $0[i] : nil },
                 fanPosition: fanPosition, createdAt: now, updatedAt: now)
             try variant.insert(db)
             variants.append(variant)
             lastFanPosition = fanPosition
+        }
+        for i in forwardParented {
+            variants[i].parentVariantId = mintedParent(i)?.id
+            try variants[i].update(db)
         }
 
         block.defaultVariantId = variants[defaultIndex].id
