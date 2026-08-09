@@ -746,13 +746,14 @@ struct MobileTakesBrowserSurfaceTests {
             #expect((subview(peekedCard, "takes.card.state") as? UILabel)?.text == "peeking")
             #expect(peekedCard.backgroundColor == MobileEditorStyle.face.takeTint)
 
-            // Each card's ⋯ carries exactly the two lifecycle doors —
-            // VOICE-CASED since parity A3 (P26/P43's ruled flip; the
-            // world runs terminal). The old system-register comparison
-            // is the sanctioned pin flip.
+            // Each card's ⋯ carries the take's own acts — label · lock
+            // (state-mirroring) · archive · delete since parity C4a (the
+            // takes-completeness doors; the two-row comparison is that
+            // batch's sanctioned pin flip) — VOICE-CASED since parity A3
+            // (P26/P43's ruled flip; the world runs terminal).
             let menu = try #require((subview(chosenCard, "takes.card.menu") as? UIButton)?.menu)
             #expect(menu.children.compactMap { ($0 as? UIAction)?.title }
-                    == ["archive take", "delete take"])
+                    == ["label take…", "lock take", "archive take", "delete take"])
         }
     }
 
