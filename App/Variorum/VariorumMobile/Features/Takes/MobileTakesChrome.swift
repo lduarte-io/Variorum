@@ -130,7 +130,12 @@ final class MobileTakesChromeController {
     /// `.document` keystroke pass was FB2-1's 70×-off-flat mechanism).
     enum RefreshScope { case document, nearViewport, edit(NSRange) }
 
-    func refresh(scope: RefreshScope = .document) {
+    /// `ranges`: the per-event ranges index the ONE `refreshChrome` door
+    /// builds and shares with both controllers (FIX-B2 — one O(entries)
+    /// walk per refresh event, not one per controller). nil ⇒ this
+    /// controller was refreshed alone (peek/pill roads, direct test
+    /// calls) and builds its own.
+    func refresh(scope: RefreshScope = .document, ranges: [String: NSRange]? = nil) {
         guard !refreshing, let textView, let model,
               textView.bounds.width > 0 else { return }
         refreshing = true
@@ -169,8 +174,9 @@ final class MobileTakesChromeController {
         // Every decorated block's range from ONE index walk (B3 —
         // per-block `rangeOfBlock` is O(entries), and the per-pass
         // decorated×entries scans were real per-tick milliseconds at
-        // 100k; FB2-1's record has the measurement).
-        let ranges = model.blockRangesByID()
+        // 100k; FB2-1's record has the measurement), shared across both
+        // controllers per event since FIX-B2.
+        let ranges = ranges ?? model.blockRangesByID()
 
         // 1 — badges + first-paragraph tail reservations for FANNED
         // blocks (LK3/LK10; B3's mechanism — see the header and

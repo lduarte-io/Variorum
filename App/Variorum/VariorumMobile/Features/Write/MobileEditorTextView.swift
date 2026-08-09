@@ -183,10 +183,17 @@ final class MobileEditorTextView: UITextView {
     /// assembly): the decor re-anchors frames/emoji and maintains its
     /// head reservations, then the takes chrome does the same for
     /// badges/markers/pill and its tail reservations. Every
-    /// content/geometry input axis routes here with its honest scope.
+    /// content/geometry input axis routes here with its honest scope —
+    /// and both controllers read ONE shared ranges index per event
+    /// (FIX-B2: `blockRangesByID` is an O(entries) walk, and it was
+    /// built twice per keystroke/scroll tick, once per controller,
+    /// unconditionally — the round-1 reviewer's measured residual).
     func refreshChrome(scope: MobileTakesChromeController.RefreshScope = .document) {
-        blockDecor?.refresh(scope: scope)
-        takesChrome?.refresh(scope: scope)
+        guard blockDecor != nil || takesChrome != nil, let model = editorModel
+        else { return }
+        let ranges = model.blockRangesByID()
+        blockDecor?.refresh(scope: scope, ranges: ranges)
+        takesChrome?.refresh(scope: scope, ranges: ranges)
     }
 
     /// Scrolling and width changes both land here (UIScrollView lays out

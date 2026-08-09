@@ -65,7 +65,12 @@ final class MobileBlockDecorController {
 
     // MARK: The refresh
 
-    func refresh(scope: MobileTakesChromeController.RefreshScope = .document) {
+    /// `ranges`: the per-event shared index (FIX-B2 — the takes chrome's
+    /// twin note); nil ⇒ a solo refresh builds its own.
+    func refresh(
+        scope: MobileTakesChromeController.RefreshScope = .document,
+        ranges: [String: NSRange]? = nil
+    ) {
         guard !refreshing, let textView, let model,
               textView.bounds.width > 0 else { return }
         refreshing = true
@@ -97,8 +102,9 @@ final class MobileBlockDecorController {
             return range.location < band.location + band.length
                 && band.location < range.location + max(range.length, 1)
         }
-        // One index walk for every range (the takes chrome's B3 read).
-        let ranges = model.blockRangesByID()
+        // One index walk for every range (the takes chrome's B3 read;
+        // shared across both controllers per event since FIX-B2).
+        let ranges = ranges ?? model.blockRangesByID()
 
         // 1 — callout frames + emoji (M12; the one-frame rule).
         var framed: Set<String> = []

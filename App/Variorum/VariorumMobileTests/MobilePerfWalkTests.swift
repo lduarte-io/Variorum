@@ -16,12 +16,14 @@
 //    first render) · TYPING latency at the viewport · SCROLL through
 //    the full post · PEAK MEMORY across the whole walk. Two assertion
 //    kinds (the Mac PerfBenchmarkTests precedent, Phase 4): FLATNESS
-//    pins — the big measurement vs the small-fixture control within a
-//    stated factor (ratios are the assertion; absolute timings are
-//    machine noise) — and RECORDED absolutes (printed "PERF[sim]" lines
-//    harvested into the batch record, explicitly SIMULATOR numbers; the
-//    on-device run is Stage D's exit gate). The memory CEILING pin's
-//    bound is proposed from measurement and marked PROVISIONAL.
+//    pins where the ratio genuinely binds (the corpus-open axis), and
+//    PER-EVENT BUDGET pins at the 100k bar where the floor binds (the
+//    post axis — FIX-B2's measured ruling; the walk suite's constants
+//    block has the derivation) — plus RECORDED absolutes (printed
+//    "PERF[sim]" lines harvested into the batch record, explicitly
+//    SIMULATOR numbers; the on-device run is Stage D's exit gate). The
+//    memory CEILING pin's bound is proposed from measurement and
+//    marked PROVISIONAL.
 //
 //  THE AXES, stated so nobody pins the wrong thing flat:
 //  · TYPING and PER-STEP SCROLL must be flat in POST size (P1's heart —
@@ -523,8 +525,28 @@ struct MobilePerfFixtureTests {
 @MainActor
 @Suite("Mobile perf walk (parity B2 — the 100k bar, measured)", .serialized)
 struct MobilePerfWalkTests {
-    // The pins' stated factors (the Mac precedent's 3× shape) and noise
-    // floors — ratios are the assertion, absolutes are the record.
+    // The bounds. Every pin asserts `big ≤ max(control × factor, floor)`
+    // (the Mac precedent's shape) — but WHICH term binds differs by
+    // axis, and each pin's name says what its teeth enforce (FIX-B2,
+    // Stage B ladder round 1, MINOR 2 — a pin named "flat" whose floor
+    // is the only binding bound is the record-claim class):
+    //
+    // · The CORPUS-open pin: the RATIO binds (control ~23 ms × 3 ≫ the
+    //   30 ms floor; measured 0.94–1.13× — genuinely flat). It keeps
+    //   its flatness name.
+    // · The POST-axis pins (keystroke, scroll step): the FLOOR binds —
+    //   a per-event absolute budget at the 100k bar. The FIX-B2
+    //   re-measure (single-build ranges landed first; both roads'
+    //   numbers in the fix-pass record) ruled the ratio CANNOT bind at
+    //   3×: bare TK2 itself pays ~5 ms per edit at 1,370 paragraphs
+    //   (B2's probe) against a 0.7 ms control TOTAL — a ~7× platform-
+    //   only ratio — and the scroll walk measured 3.4–4.2× across
+    //   clean runs (TK2's own estimate-revision traversal plus the ONE
+    //   remaining O(entries) ranges walk per tick, which the design
+    //   requires). The pins are NAMED for the budgets they enforce;
+    //   the ratio term stays in the assertion so flatness teeth
+    //   self-arm on any host where the control rises past floor/3, and
+    //   every run still prints the ratio for the record.
     //
     // THE TYPING FLOOR WAS RE-DERIVED AT B3 (4 → 12 ms; PROVISIONAL —
     // the architect/author may re-bound): B2 set 4 ms as a noise floor
@@ -587,10 +609,13 @@ struct MobilePerfWalkTests {
             "open(control post), 12-note vs 300-note corpus")
     }
 
-    @Test func typingAtTheViewportIsFlatInPostSize() async throws {
+    @Test func typingAtTheViewportHoldsThePerKeystrokeBudgetAt100k() async throws {
         // The post axis, corpus held constant (both posts live in the
-        // BIG world): keystroke cost must be bound to the viewport,
-        // never the document. Measured at the TOP viewport (the
+        // BIG world): keystroke cost must stay within the per-event
+        // BUDGET (the 12 ms floor — the binding bound; the constants
+        // block has the FIX-B2 ruling: the ratio cannot bind at 3×
+        // because bare TK2's own per-edit cost at 1,370 paragraphs is
+        // ~7× the control's total). Measured at the TOP viewport (the
         // worst case for index shifting — every downstream entry
         // moves) AND at the END after a real scroll (her actual
         // position in a long note).
@@ -638,14 +663,18 @@ struct MobilePerfWalkTests {
         }
     }
 
-    @Test func theFullScrollIsFlatPerStepAndTheWalkHoldsTheMemoryCeiling() async throws {
+    @Test func theFullScrollHoldsThePerStepBudgetAt100kAndTheWalkHoldsTheMemoryCeiling() async throws {
         // THE FULL 100k TRAVERSAL, once, carrying BOTH assertions (one
         // walk instead of two — the traversal is the expensive half,
-        // ~2 min while FB2-1 stands, seconds when healthy):
+        // ~2 min while FB2-1 stood, seconds healthy):
         // · The post axis: the TOTAL cost of scrolling 100k words is
         //   O(document) by definition (you traverse it all); the
         //   PER-STEP cost is what P1 bounds — each tick lays out one
-        //   viewport band, never the document.
+        //   viewport band, never the document. The binding bound is
+        //   the per-step BUDGET (the 4 ms floor; the constants block
+        //   has the FIX-B2 ruling — the walk measured 3.4–4.2× across
+        //   clean runs, TK2's estimate-revision traversal plus the one
+        //   designed O(entries) ranges walk per tick).
         // · The phone's own constraint: PEAK MEMORY across the whole
         //   walk (open → type → full scroll), sampled as phys_footprint
         //   — jetsam kills on footprint. The worlds are forced FIRST so
