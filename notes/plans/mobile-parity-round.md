@@ -2795,3 +2795,95 @@ measurements are the walk; the shell's P1 discipline is pinned
 elsewhere); no on-device numbers (Stage D's exit gate, already
 planned); the dev store is not pre-seeded by this batch (the door is
 one tap).
+
+## Stage B, batch B2 — ACCEPTED; FB2-1 ADJUDICATED: FIX NOW, IN-CHAIN, AS BATCH B3 (architect, 2026-08-09)
+
+Verified: all three commits present; scope clean by own check (zero
+core/Shared lines); the full mobile suite re-run by the architect's
+own hand: **"Test run with 224 tests in 36 suites passed … with 4
+known issues"** — the four being exactly FB2-1's self-arming wrapped
+pins, arithmetic exact (215/34 + 6 + 3 + 2 suites). The fixture is
+the stage's point proven: it exists to catch exactly this.
+
+**FB2-1's disposition — FIX NOW, as Stage B's fix batch (B3), before
+the Stage B ladder.** Reasoning: the soul document makes performance
+IDENTITY and her bar is explicit ("I do not want the mobile app to
+choke even on 100k words") — 551 ms keystrokes, 28× scroll steps,
+and a ~5.8 GiB walk delta ARE the choke, and the banned failure mode
+is the app's founding grievance. Routing it to Stage D would build
+Stage C's whole capability layer on a choking editor and guarantee a
+failed on-device exit gate. The mechanism is TRACED (B2's record):
+`storageDidEdit` → document-scope `refreshChrome()` → every pass
+re-writes `exclusionPaths` → whole-document layout invalidation — a
+geometry↔exclusion feedback loop; bare TK2 on identical text is
+pristine, so the app road is the entire cost. P-8 names the law the
+fix restores: **invalidation ∝ realized rows/viewport, never
+document size**; the overlay law's equality-gating discipline is the
+adjacent precedent. **PB2-2's 250 MiB walk-delta ceiling is the
+fix's numeric target** (device calibration stays Stage D's).
+
+**Also carried:** PB2-1 (find-or-seed-only door) · PB2-3 (fixture
+scale constants) to the end bundle. The 100k OPEN absolute (901.9 ms
+sim) stays a recorded-not-pinned number — the fix batch reports
+where it lands after the document-pass cost collapses, and whether
+an open-time pin is then honest to add (implementer reports, the
+architect rules at acceptance).
+
+## Stage B, batch B3 brief (the FB2-1 fix batch — self-contained; the implementer is briefed by THIS section plus the sections it names)
+
+**Cast:** a fresh Fable implementer session, `~/dev/variorum-mobile`,
+branch `mobile`, starting at the B2 acceptance commit. Mobile
+app-layer work expected (`MobileTakesChrome*` and the edit
+notification road); zero `Sources/VariorumCore/`; zero schema;
+`Sync/` untouched; Environment traps bind.
+
+**Read first, IN FULL:** `CLAUDE.md` (P1–P3; P-8's invalidation law)
+· `notes/MobileSoul.md` §2 · THIS plan file top to bottom — above
+all **the B2 BATCH RECORD's FB2-1 trace** (the mechanism is already
+traced; re-verify it yourself against the code before designing, the
+hallucination guard binds) — and the A3/FIX-5 records (the chrome
+layer you are changing carries their pins) ·
+`notes/plans/mobile-architect-handoff.md`.
+
+**The work — restore P1/P-8 on the editing road:**
+
+1. **Scope the chrome refresh to the edit.** `storageDidEdit` knows
+   its edited range; the chrome pass must touch only the blocks
+   whose chrome that edit can change (plus viewport-realized
+   geometry), never the document. Design the scoping yourself from
+   the traced mechanism — but the LAW is fixed: invalidation ∝
+   viewport + edit, never post length.
+2. **Break the exclusion feedback loop.** `exclusionPaths` writes
+   must be equality-gated (an unchanged path set is never
+   re-written) and scoped — a chrome pass that changes nothing must
+   invalidate nothing. The overlay law's wire-time-delivery +
+   equality-gate discipline is the precedent; mind its trap (state
+   computed before layout exists, frozen by the gate) — deliver at
+   wire time, gate only real non-changes.
+3. **The pins are the proof:** B2's four violated pins ride
+   `withKnownIssue(FB2-1)` and are SELF-ARMING — they fail the
+   moment the fix lands until unwrapped. Unwrap them as the fix
+   lands (that unwrap IS the red-on-old evidence in reverse: red
+   yesterday by measurement, green today by the same measurement).
+   The 250 MiB walk-delta memory ceiling (PB2-2) arms as a real pin.
+   Every existing chrome pin (A3's P38 guard, FIX-5's strip pin, the
+   A1 keyboard pin) stays green — the chrome layer's behavior is
+   pinned; only its COST may change.
+4. **Re-run the full measurement walk and record the post-fix
+   numbers** (open · keystroke top/end · scroll · peak memory, same
+   labels as B2's record) — these are her end bundle's honest
+   numbers. Report where the 100k OPEN lands and whether an
+   open-time pin would now be honest (report, don't add — the
+   architect rules at acceptance).
+5. **The spine stays green** (32/7 by your own named run) and the
+   full suite green with ZERO known issues remaining.
+
+**Discipline:** work synchronously (measurement runs are long — wait
+them out); if the scoped design turns out to require touching shared
+or core code, STOP and return to the architect with the constraint
+rather than crossing the boundary. Commit per logical unit with the
+standing trailer; write "## Stage B, batch B3 — BATCH RECORD (fix
+batch, 2026-08-09)" into THIS file (the fix's design in P-8 terms,
+per-pin unwrap results, the full post-fix number table beside B2's,
+the ceiling pin's final bound, PROVISIONALs); push `origin mobile`
+before finishing.
