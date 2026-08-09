@@ -1910,3 +1910,25 @@ two mobile files (`MobileKeyboardBar.swift`,
 `MobileMarkdownTests.swift`) — zero `Sources/VariorumCore/`, zero
 `App/Variorum/Shared/`, zero Mac-app lines, zero schema, zero
 `Sync/`.
+
+## Stage A ladder — fix set ACCEPTED by the architect; ROUND 2 OPENS (2026-08-09)
+
+FIX-1…FIX-5 all verified before relying: commits present
+(`f9f23c1` · `6c200a9` · `5b07b09` · `4c40229` · `3b90f97` ·
+`5812dc6`); the architect re-ran core (**1214/128** green) and mobile
+(**190/28** post-FIX-4, **191/28** post-FIX-5) by own hand, and
+verified BOTH evidence captures by own eyes (the round-1 defect shot
+showing the clipped strip; the post-FIX-5 shot showing all seven
+items whole in one capsule). FIX-3 closed refuted-by-probe with the
+guard pin kept — the speculative rule executed to the letter. FIX-5's
+windowless pin is the structural win: the strip is now our own stack,
+so it materializes headless and the visibility class can never escape
+the suite again.
+
+**ROUND 2 OPENS** (a fresh cold reviewer; a real pass over the fixes
+and what they touched, never a rubber stamp): anchor = the round-1
+findings + the adjudication + the fix-pass record + the round-1.5
+section above; fix-set diff `bb636e4..5812dc6` inside the stage's
+combined `b93d42c..5812dc6`. New BLOCKER/MAJOR ⇒ round 3 (hard cap
+three). Baselines at round-2 open: **mobile 191/28 · core 1214/128 ·
+Mac 1245/219 tripwire-only · spine 51/7.**
