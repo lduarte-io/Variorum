@@ -27,9 +27,13 @@
 //    silently the chosen one (R8/R23).
 //  - ARCHIVE / DELETE under each card's ⋯ — `archiveVariant` /
 //    `deleteVariant`; I10 (the last active take) and the chosen-slot
-//    guard refuse through the ops' own errors. Recovery surfaces
-//    (deleted/archived take resurrection) stay Mac-side in v1 — a
-//    DELIBERATE ABSENCE recorded for the stage gate, not a hole.
+//    guard refuse through the ops' own errors. Since parity C4a the
+//    card's ⋯ also carries LOCK/UNLOCK (`lockVariant`/`unlockVariant`,
+//    flush-first on lock) and the sheet lists the block's ARCHIVED
+//    takes below the fan with per-card Unarchive/Delete — the S2-era
+//    "recovery surfaces stay Mac-side" absence dissolved with the
+//    doors (deleted-take resurrection alone stays PL-3/13j's, with the
+//    rest of the trash family).
 //
 //  Verbs each end in a fresh store read through the VM's one projection
 //  door (`refreshTakesFromStore` — flush first so the delivery adopts
@@ -44,7 +48,10 @@ import VariorumCore
 
 @MainActor
 final class MobileTakesBrowserController {
-    private let runner: OperationsRunner
+    /// The session (parity C4a — the archived listing is a direct read;
+    /// the comments controller's own shape). The runner rides it.
+    private let session: AppSession
+    private var runner: OperationsRunner { session.runner }
     weak var model: MobileEditorViewModel?
 
     /// The block the sheet is open on. nil = closed.
@@ -52,6 +59,11 @@ final class MobileTakesBrowserController {
     /// The take whose card is the LIVE editor right now. nil = all cards
     /// read-only (P3's split inside the sheet).
     private(set) var editingVariantID: String?
+    /// The open block's ARCHIVED takes, fan-ordered (parity C4a —
+    /// see-your-data: archived takes are her information, and the road
+    /// back lives where the fan lives). Loaded at open and re-read after
+    /// every verb / projection ingest; empty when closed.
+    private(set) var archived: [Variant] = []
 
     /// The pixels' hook: state or content changed — re-render the sheet.
     var onChanged: (() -> Void)?
@@ -65,8 +77,8 @@ final class MobileTakesBrowserController {
 
     var isOpen: Bool { openBlockID != nil }
 
-    init(runner: OperationsRunner) {
-        self.runner = runner
+    init(session: AppSession) {
+        self.session = session
     }
 
     // MARK: - The card model (brain here, pixels in the view)
@@ -116,6 +128,59 @@ final class MobileTakesBrowserController {
         return (i + 1, model.slots.count)
     }
 
+    // MARK: - The archived listing (parity C4a — see-your-data; the Mac
+    // WriteTakesPanel's "archived takes" section, the phone's cards)
+
+    /// An archived take's card: read-only (an archived buffer refuses
+    /// edits by the op's own rule — history is not an editing surface),
+    /// with the road back (Unarchive) and Delete on its ⋯. The label
+    /// rides — the archived listing is exactly where a label helps
+    /// identify a take (the core op's own recorded rationale).
+    struct ArchivedCard: Equatable {
+        let variantID: String
+        let text: String
+        let label: String?
+    }
+
+    func archivedCards() -> [ArchivedCard] {
+        archived.map { take in
+            ArchivedCard(
+                variantID: take.id,
+                text: model?.surfaceKnownText(variantID: take.id) ?? take.workingText,
+                label: take.label)
+        }
+    }
+
+    /// One fresh read of the open block's archived takes, fan-ordered
+    /// (`Queries.blockFan` — the standing read; archived filtered here,
+    /// cost ∝ the block's own fan). Verbs and projection ingests both
+    /// land here, so the section is correct with or without the standing
+    /// observation (the browser's own deterministic-refresh discipline).
+    func reloadArchived() async {
+        guard let blockID = openBlockID else { return }
+        let rows = (try? await session.database.read { db in
+            try Queries.blockFan(db, blockID: blockID)
+                .filter { $0.status == .archived }
+        }) ?? []
+        guard openBlockID == blockID else { return }
+        archived = rows
+        onChanged?()
+    }
+
+    /// Back into the fan — the road the archive refusals name.
+    func unarchive(variantID: String) async {
+        guard let model else { return }
+        do {
+            try await runner.run { ops in try ops.unarchiveVariant(variantID) }
+            model.report(nil)
+            await model.refreshTakesFromStore()
+            await reloadArchived()
+            onChanged?()
+        } catch {
+            model.report(Self.refusalMessage(error, verb: .unarchive))
+        }
+    }
+
     // MARK: - Open / close
 
     /// The expand door (badge tap, the bar's ⑂, the edit-menu item all
@@ -133,7 +198,11 @@ final class MobileTakesBrowserController {
         }
         if openBlockID != nil { endEditing() }
         openBlockID = blockID
+        archived = []
         onChanged?()
+        // The archived section loads fresh per open (tests await
+        // `reloadArchived()` directly for determinism).
+        Task { await reloadArchived() }
     }
 
     /// Done: the live card resigns, pending edits flush, the page heals
@@ -143,6 +212,7 @@ final class MobileTakesBrowserController {
         guard isOpen else { return }
         endEditing()
         openBlockID = nil
+        archived = []
         onChanged?()
         await model?.refreshTakesFromStore()
     }
@@ -153,6 +223,7 @@ final class MobileTakesBrowserController {
         guard isOpen else { return }
         editingVariantID = nil
         openBlockID = nil
+        archived = []
         pendingCardCost = nil
         lastRecordedCardText = nil
         onChanged?()
@@ -172,6 +243,9 @@ final class MobileTakesBrowserController {
                 endEditing()
             }
             onChanged?()
+            // A remote archive/unarchive arrives by the same delivery —
+            // the archived section re-reads (parity C4a).
+            Task { await reloadArchived() }
         }
     }
 
@@ -403,6 +477,7 @@ final class MobileTakesBrowserController {
             try await runner.run(body)
             model.report(nil)
             await model.refreshTakesFromStore()
+            await reloadArchived()
             onChanged?()
         } catch {
             model.report(Self.refusalMessage(error, verb: verb))
@@ -411,7 +486,7 @@ final class MobileTakesBrowserController {
 
     // MARK: - Refusal copy (the ops' REAL refusals, in the phone's words)
 
-    enum Verb { case choose, branch, blank, archive, delete, lock, unlock }
+    enum Verb { case choose, branch, blank, archive, delete, lock, unlock, unarchive }
 
     /// The in-sheet locked-take refusal (parity C4a — the unlock door is
     /// ON this card's ⋯, one tap away, so the copy points at it; the
@@ -423,6 +498,12 @@ final class MobileTakesBrowserController {
     /// locked take — same door, "that" grammar).
     static let lockedTakeVerbRefusal =
         "That take is locked — unlock it from its card's ⋯ first."
+
+    /// The archived-take refusal (parity C4a — the "unarchive it on the
+    /// Mac" redirect dissolved WITH the archived listing: the road back
+    /// sits under the live cards in this same sheet).
+    static let archivedTakeRefusal =
+        "That take is archived — unarchive it from the archived list below."
 
     /// The everyday refusals get phone words (the batch-1 posture — and
     /// since parity C4a every named road lives on the PHONE: the lock
@@ -442,6 +523,7 @@ final class MobileTakesBrowserController {
             case .delete: "delete a take"
             case .lock: "lock a take"
             case .unlock: "unlock a take"
+            case .unarchive: "unarchive a take"
             }
             return "This note is locked — unlock it to \(act)."
         case .lastActiveVariant:
@@ -459,7 +541,7 @@ final class MobileTakesBrowserController {
         case .lockedVariant:
             return Self.lockedTakeVerbRefusal
         case .archivedVariant:
-            return "That take is archived — unarchive it on the Mac first."
+            return Self.archivedTakeRefusal
         default:
             return String(describing: error)
         }

@@ -422,10 +422,11 @@ enum MobileTutorialSeeder {
 
             "That block carries a spare take to practice on — archive it "
             + "from its card's ⋯ and it leaves the fan: out of the way, "
-            + "kept in the block's history, never gone. A block always "
-            + "keeps one take: removing the last one refuses out loud and "
-            + "points at Delete Block instead — that isn't a take act, "
-            + "it's deleting the block.",
+            + "kept just below under archived, never gone — unarchive "
+            + "there brings it straight back. A block always keeps one "
+            + "take: removing the last one refuses out loud and points at "
+            + "Delete Block instead — that isn't a take act, it's "
+            + "deleting the block.",
 
             // Parity C4a: the lock door's lesson lands WITH the door
             // (tutorial-as-spec) — appended after the staged paragraphs

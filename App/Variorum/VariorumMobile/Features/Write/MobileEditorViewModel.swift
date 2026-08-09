@@ -151,7 +151,7 @@ final class MobileEditorViewModel {
         // (the harness's deterministic sleep; production passes defaults).
         self.autosave = session.autosave(forPost: postID, debounce: debounce, sleep: sleep)
         self.takes = MobileTakesController(runner: session.runner)
-        self.takesBrowser = MobileTakesBrowserController(runner: session.runner)
+        self.takesBrowser = MobileTakesBrowserController(session: session)
         self.comments = MobileCommentsController(session: session)
         self.structural = MobileStructuralController(session: session)
         self.blockMenu = MobileBlockMenuController(session: session)

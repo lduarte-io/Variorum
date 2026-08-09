@@ -62,6 +62,10 @@ final class MobileTakesBrowserView: UIView {
     /// down (restored at close).
     private var pageWasEditable = true
     private(set) var cardViews: [String: MobileTakesCardView] = [:]
+    /// The archived section (parity C4a — see-your-data): a small header
+    /// + read-only cards below the live fan, inside the same scroll.
+    private let archivedHeader = UILabel()
+    private(set) var archivedCardViews: [String: MobileArchivedTakeCardView] = [:]
 
     /// The keyboard's current end frame (screen coordinates; nil = no
     /// keyboard). THE GATE DEFECT (parity round Stage A, batch A1 — her
@@ -114,6 +118,10 @@ final class MobileTakesBrowserView: UIView {
         sheetView.addSubview(doneButton)
 
         sheetView.addSubview(cardsScroll)
+
+        archivedHeader.accessibilityIdentifier = "takes.browser.archivedHeader"
+        archivedHeader.isHidden = true
+        cardsScroll.addSubview(archivedHeader)
 
         footerLabel.accessibilityIdentifier = "takes.browser.newtake"
         branchButton.accessibilityIdentifier = "takes.browser.branch"
@@ -228,6 +236,9 @@ final class MobileTakesBrowserView: UIView {
             detachCardEditor()
             for (_, card) in cardViews { card.removeFromSuperview() }
             cardViews = [:]
+            for (_, card) in archivedCardViews { card.removeFromSuperview() }
+            archivedCardViews = [:]
+            archivedHeader.isHidden = true
             return
         }
 
@@ -330,6 +341,39 @@ final class MobileTakesBrowserView: UIView {
             detachCardEditor()
         }
         if browser.editingVariantID == nil { detachCardEditor() }
+
+        // The archived section (parity C4a): below the live fan, inside
+        // the same scroll — "archived · n" then read-only cards whose ⋯
+        // holds the road back (Unarchive) and Delete.
+        let archivedCards = browser.archivedCards()
+        var archivedSeen: Set<String> = []
+        if archivedCards.isEmpty {
+            archivedHeader.isHidden = true
+        } else {
+            archivedHeader.isHidden = false
+            archivedHeader.text = chromeCase("Archived · \(archivedCards.count)")
+            archivedHeader.font = face.chrome.withSize(12)
+            archivedHeader.textColor = face.muted
+            archivedHeader.sizeToFit()
+            y += 6
+            archivedHeader.frame.origin = CGPoint(x: 0, y: y)
+            y += archivedHeader.bounds.height + 8
+            for card in archivedCards {
+                archivedSeen.insert(card.variantID)
+                let view = archivedCardViews[card.variantID]
+                    ?? makeArchivedCard(variantID: card.variantID)
+                view.apply(card: card, face: face, chromeCase: chromeCase(_:))
+                let height = view.preferredHeight(width: width)
+                view.frame = CGRect(x: 0, y: y, width: width, height: height)
+                view.layoutContent()
+                y += height + 10
+            }
+        }
+        for (variantID, view) in archivedCardViews where !archivedSeen.contains(variantID) {
+            view.removeFromSuperview()
+            archivedCardViews[variantID] = nil
+        }
+
         cardsScroll.contentSize = CGSize(width: width, height: y)
 
         // The live card is REVEALED when editing begins or moves (batch
@@ -370,6 +414,22 @@ final class MobileTakesBrowserView: UIView {
             })
         cardsScroll.addSubview(view)
         cardViews[variantID] = view
+        return view
+    }
+
+    private func makeArchivedCard(variantID: String) -> MobileArchivedTakeCardView {
+        let view = MobileArchivedTakeCardView(
+            variantID: variantID,
+            onUnarchive: { [weak self] in
+                guard let model = self?.model else { return }
+                Task { await model.takesBrowser.unarchive(variantID: variantID) }
+            },
+            onDelete: { [weak self] in
+                guard let model = self?.model else { return }
+                Task { await model.takesBrowser.delete(variantID: variantID) }
+            })
+        cardsScroll.addSubview(view)
+        archivedCardViews[variantID] = view
         return view
     }
 
@@ -592,5 +652,101 @@ final class MobileTakesCardView: UIView {
         bodyLabel.frame = CGRect(
             x: 12, y: bodyTop, width: bounds.width - 24,
             height: max(bounds.height - bodyTop - 12, 0))
+    }
+}
+
+// MARK: - One archived take card (parity C4a — see-your-data + the road back)
+
+/// Read-only by the model's own rule (an archived buffer refuses edits —
+/// history is not an editing surface); the ⋯ carries Unarchive (the road
+/// back) and Delete. The Mac WriteTakesPanel's archived card, phone-carded.
+@MainActor
+final class MobileArchivedTakeCardView: UIView {
+    let variantID: String
+    private let stateLabel = UILabel()
+    private let takeLabel = UILabel()
+    private let menuButton = UIButton(type: .custom)
+    private let bodyLabel = UILabel()
+    private let onUnarchive: () -> Void
+    private let onDelete: () -> Void
+
+    init(
+        variantID: String,
+        onUnarchive: @escaping () -> Void,
+        onDelete: @escaping () -> Void
+    ) {
+        self.variantID = variantID
+        self.onUnarchive = onUnarchive
+        self.onDelete = onDelete
+        super.init(frame: .zero)
+        accessibilityIdentifier = "takes.archived.\(variantID)"
+        layer.cornerRadius = 10
+        layer.borderWidth = 1
+
+        stateLabel.accessibilityIdentifier = "takes.archived.state"
+        takeLabel.accessibilityIdentifier = "takes.archived.label"
+        bodyLabel.accessibilityIdentifier = "takes.archived.body"
+        bodyLabel.numberOfLines = 2
+
+        menuButton.setTitle("⋯", for: .normal)
+        menuButton.accessibilityIdentifier = "takes.archived.menu"
+        menuButton.accessibilityLabel = "Archived take actions"
+        menuButton.showsMenuAsPrimaryAction = true
+
+        for view in [stateLabel, takeLabel, menuButton, bodyLabel] {
+            addSubview(view)
+        }
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("not used") }
+
+    func apply(
+        card: MobileTakesBrowserController.ArchivedCard,
+        face: MobileEditorStyle.Face,
+        chromeCase: (String) -> String
+    ) {
+        backgroundColor = face.card
+        layer.borderColor = face.line.resolvedColor(with: traitCollection).cgColor
+
+        let chrome = face.chrome.withSize(12)
+        stateLabel.text = chromeCase("Archived")
+        stateLabel.font = chrome
+        stateLabel.textColor = face.muted
+
+        takeLabel.text = card.label
+        takeLabel.font = chrome
+        takeLabel.textColor = face.muted
+        takeLabel.isHidden = (card.label ?? "").isEmpty
+
+        menuButton.setTitleColor(face.muted, for: .normal)
+        menuButton.titleLabel?.font = face.chrome.withSize(14)
+        menuButton.menu = UIMenu(children: [
+            UIAction(title: chromeCase("Unarchive Take")) { [onUnarchive] _ in onUnarchive() },
+            UIAction(
+                title: chromeCase("Delete Take"), attributes: .destructive
+            ) { [onDelete] _ in onDelete() },
+        ])
+
+        bodyLabel.text = card.text.isEmpty ? chromeCase("(Empty take)") : card.text
+        bodyLabel.font = face.body
+        bodyLabel.textColor = face.muted
+    }
+
+    func preferredHeight(width: CGFloat) -> CGFloat {
+        let size = bodyLabel.sizeThatFits(
+            CGSize(width: width - 24, height: .greatestFiniteMagnitude))
+        return max(min(size.height, 44), 18) + 42
+    }
+
+    func layoutContent() {
+        stateLabel.sizeToFit()
+        stateLabel.frame.origin = CGPoint(x: 12, y: 8)
+        takeLabel.sizeToFit()
+        takeLabel.frame.origin = CGPoint(x: stateLabel.frame.maxX + 10, y: 8)
+        menuButton.frame = CGRect(x: bounds.width - 36, y: 2, width: 30, height: 26)
+        bodyLabel.frame = CGRect(
+            x: 12, y: 30, width: bounds.width - 24,
+            height: max(bounds.height - 42, 0))
     }
 }
