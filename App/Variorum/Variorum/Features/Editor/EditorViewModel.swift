@@ -2559,9 +2559,11 @@ final class EditorViewModel {
 }
 
 /// Pure predicate behind the pre-split warning (tested in the app bundle).
+/// Since parity C4a the brain lives in core (`Queries.commitPredatesSplit`
+/// — the phone's history face reads it too; MobileSoul §3's one-brain
+/// rule); this enum delegates, byte-identical in behavior.
 nonisolated enum CommitRules {
     static func predatesSplit(commitDate: Date, splitDates: [Date]) -> Bool {
-        guard let newest = splitDates.max() else { return false }
-        return commitDate < newest
+        Queries.commitPredatesSplit(commitDate: commitDate, splitDates: splitDates)
     }
 }

@@ -90,6 +90,18 @@ extension Queries {
             arguments: [variantID])
     }
 
+    /// The pre-split warning's pure predicate (AppSpec §9's documented
+    /// restoreCommit behavior): a commit older than the NEWEST live
+    /// divide/extract on the block still holds the full pre-split text,
+    /// so restoring it resurrects both halves into this buffer — the
+    /// editor warns first. Hoisted from the Mac's app-local `CommitRules`
+    /// at parity C4a (the phone's history face reads the same brain —
+    /// MobileSoul §3's one-brain rule; the Mac's enum delegates here).
+    public static func commitPredatesSplit(commitDate: Date, splitDates: [Date]) -> Bool {
+        guard let newest = splitDates.max() else { return false }
+        return commitDate < newest
+    }
+
     /// Creation dates of the live divide/extract lineage edges that split
     /// THIS block (block as ancestor: `derived_from(source=descendant,
     /// target=ancestor)` — AppSpec §7). Feeds the editor's pre-split warning

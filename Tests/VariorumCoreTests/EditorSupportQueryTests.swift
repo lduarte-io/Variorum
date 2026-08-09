@@ -124,4 +124,18 @@ struct EditorSupportQueryTests {
             #expect(scrapDates.isEmpty)
         }
     }
+
+    /// The pre-split predicate (hoisted from the Mac's app-local
+    /// CommitRules at parity C4a — one brain, both platforms): older
+    /// than the NEWEST split warns; newer doesn't; no splits, no warning.
+    @Test func commitPredatesSplitComparesAgainstTheNewestSplit() {
+        let earlier = Date(timeIntervalSince1970: 100)
+        let split = Date(timeIntervalSince1970: 200)
+        let later = Date(timeIntervalSince1970: 300)
+        #expect(Queries.commitPredatesSplit(commitDate: earlier, splitDates: [split]))
+        #expect(!Queries.commitPredatesSplit(commitDate: later, splitDates: [split]))
+        #expect(!Queries.commitPredatesSplit(commitDate: earlier, splitDates: []))
+        #expect(Queries.commitPredatesSplit(
+            commitDate: later, splitDates: [split, Date(timeIntervalSince1970: 400)]))
+    }
 }
