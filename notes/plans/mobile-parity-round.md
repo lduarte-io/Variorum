@@ -1577,3 +1577,69 @@ a comment line suffices.
 - Mac / spine: not re-run (dormancy-by-construction verified by my own
   diff-scope + grep reads; the A2 matched runs and the recorded
   1245/219-tripwire-only + 51/7 baselines stand).
+
+## Stage A review — round 1 ADJUDICATION (architect, 2026-08-09; the fix session spawns on this record)
+
+Every finding gets a written disposition; the fix session executes
+FIX-1…FIX-4; the architect's-hand items are done in this commit (the
+14b C-4…C-7 / `cad3312` precedent).
+
+- **MAJOR (screenshots) → FIX-1, evidence rebuilt honestly.** The
+  reviewer's mechanism is verified (md5-identical pairs, inverted
+  mtimes, four independent pre-fix measurements — the "after" shots
+  are not the shipped surface). The evidence set is her end bundle's
+  spacing exhibit; broken evidence at the gate is exactly what MAJOR
+  means. Fix: re-capture per the A3 brief's OWN instruction — the
+  live simulator via `xcrun simctl io booted screenshot`, never a
+  `layer.render` harness. TRUE befores come from the pre-A3 tree
+  (`1010030`) built in a throwaway worktree with isolated
+  DerivedData; afters from HEAD; same seeded content, same surfaces,
+  the full six-surface set incl. a `kbar-formatting` showing ALL
+  SEVEN strip items (× · B · I · # · • · ☑ · ⇥) and a
+  `book-contents` showing the Read door. Then correct the TWO record
+  claims (the A3 record's screenshot paragraph; the A3 acceptance's
+  "exact evidence" line) to cite the re-captured set. No code
+  changes; the pinned values are not in question.
+- **MINOR (`mintFanBlock` parent-follows-child crash) → FIX-2.**
+  Mechanism confirmed by the architect's read: the `parentIndices`
+  remap indexes an array built in fan order; a parent AFTER its child
+  is a fatal index crash. Unreachable through today's ops — but 13e's
+  ruled reorder-takes (PL-1) falsifies the premise on the roadmap,
+  and the comment's "the FK enforces the contract" claim is factually
+  wrong (the trap fires before the FK could). Fix now, small: the
+  poolDragCopy pre-assigned-ID shape the comment itself cites.
+  Red-on-old pin: the ops can't produce the ordering today, so the
+  pin CONSTRUCTS the store state (direct `fan_position` writes in the
+  test factory — legal in tests) and calls the op — crash on pre-fix,
+  green after; revert-verified.
+- **MINOR-part-SPECULATIVE (P38 26 pt room vs 30 pt marker) →
+  FIX-3, PIN-FIRST.** The skill's speculative rule verbatim: build
+  the probing pin FIRST as the confirm — a flush-end one-line fixture
+  that actually exercises the ~3 pt window. Red → widen
+  `commentMarkRoom` to the measured marker width and keep the pin;
+  green → record-only (the finding closes as refuted-by-probe, the
+  pin stays as the guard either way).
+- **MINOR (AppSpec §9 lacks `divideDuplicating`) → DEFERRED TO THE
+  STAGE CLOSEOUT, architect's hand.** Sanctioned recording, not
+  invention: Q-M2 is her explicit ruling, and the closeout ritual's
+  §14 delta + §9 entry are where shipped-semantics land. Owned by the
+  Stage A closeout in this chain — not the fix session's.
+- **NIT (locked-displayed-take doc claim untested) → FIX-4.** One
+  test: divide with the DISPLAYED take locked, asserting the
+  documented legality (or, if the code refuses, the doc line is the
+  bug — report which before changing either).
+- **NIT (windowless lesson under-counts) → DONE HERE, architect's
+  hand:** the A3 machinery lesson above is hereby corrected — BOTH
+  window-hosting pins are named: the P24 pin's first form (crashed
+  walk5, retired) AND the A1 keyboard pin (`theKeyboardNeverStrands…`,
+  empirically green in company today). The lesson's rule stands:
+  prefer windowless pin hosts; any pin that must host a `UIWindow`
+  gets a full-suite run before acceptance, not a suite-local one.
+- **NIT (`lockNote` flush→seal await window) → RECORDED, not fixed
+  (the reviewer's own recommendation; the R2-10 read-then-act
+  precedent):** between the door's flush await and the seal
+  transaction, a sub-second write can land; the seal's own
+  transactional auto-commit insurance bounds the loss to zero (the
+  dirty buffer is committed by `lockPost` itself), so the window is
+  benign-by-construction — recorded here so no reader infers
+  door-level atomicity.
