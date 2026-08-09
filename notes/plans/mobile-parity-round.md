@@ -4787,3 +4787,144 @@ tripwire by identity** · Mac spine **51/7** (by the seven TRUE suite
 type names — the file-name trap re-confirmed and dodged). **ROUND 2
 OPENS** on the fix set: target this commit's diff inside
 `6ccdfca..HEAD`; fresh reviewer; new BLOCKER/MAJOR ⇒ round 3.
+
+## Stage C review — C2 round 2 (fresh cold reviewer, 2026-08-09)
+
+**Method.** Cold re-review of the fix set `59b9dd4..1aec1a2` inside
+the batch's `6ccdfca..1aec1a2` — a real pass over the fixes and what
+they touched, held to implementer severity (the fixes were the
+architect's). Read: the round-1 findings + adjudication above as
+anchor; the full fix diff file by file; `EditorSupport.swift`'s
+changed query in place; `DisplayTitle.swift` whole (the chain the
+R1-2 fix joins); `VariorumRecord.swift` (the `createdAt: Date`
+decode premise); every `ContainerHeader` consumer repo-wide by
+enumeration; every `DisplayTitle.note` call site by per-site read;
+the R1-4 comment's claims against the phone's actual registering
+doors (`MobileStructural`, `MobileTakesBrowser`,
+`Operations+Structural/+TakeEdits/+Deletion/+Diverge` register
+sites); `MobileBookDetails.swift` and `MobileWriteView.swift`'s
+alert regions whole; the `settle`/`poll` pair's exact semantics.
+Pins re-run by name where they settle claims. No fixes made.
+
+### Verdicts per round-1 fix — ALL SIX HOLD
+
+- **R1-2 (the core-touching fix) → HOLD.** The query shape checked
+  in place: the raw `String.fetchOne` re-reads the SAME row inside
+  the same read transaction two lines below `Container.fetchOne` —
+  the `?? ""` arm is unreachable (and would degrade to the
+  placeholder via `day(fromStamp:)`'s isEmpty guard, never crash).
+  The raw-fetch-vs-record-Date reasoning HOLDS and is the
+  established pattern, not an invention: the record decodes
+  `createdAt` as `Date` (`VariorumRecord`'s formatter strategy), and
+  every other carrier of this fact already reads the stored TEXT raw
+  — `noteDisplayTitle`'s `Row.fetchOne` (TakesQueries:146–151),
+  `TimelineItem.createdAt` (Timeline.swift:77), the catalog hits
+  (ShelfQueries:411) — so "one chain, as stored" is literally true
+  rather than a comment's hope. Consumers enumerated: the two editor
+  VMs (mobile now passes `createdAt`; the Mac's `adoptHeader` reads
+  `locked` only — behavior unchanged) + `observeContainerHeader`
+  (`removeDuplicates()` over Equatable — `createdAt` is immutable
+  per row, no operation writes it, so no new delivery source); NO
+  construction site exists outside core (the memberwise init is
+  internal; every test reference in all three test targets is a
+  fetch, grep-verified). The pin exercises the REAL path
+  (`loadOnce` → `Queries.containerHeader` → `adoptHeader`), uses
+  the brain itself as oracle (timezone-proof by construction), and
+  passes BY NAME in my targeted run; the red-on-old mechanism is
+  traced — pre-fix the call took `DisplayTitle.note`'s defaulted
+  `createdAt: nil`, so untitled+undated → placeholder → exactly the
+  adjudication's 2 issues. P1-clean: one extra PK point-read per
+  header materialization, cost ∝ the container, never the corpus.
+- **R1-1 → HOLD.** "the note shows its date instead" is the chain's
+  truth post-R1-2 (entry date, else created day; the placeholder
+  survives only for an unparseable stamp — practically unreachable);
+  the rename prefill is the STORED title (`header?.title ?? ""`,
+  MobileWriteView:141), never the displayed day, so blank-clear can
+  never accidentally store a date; the pin guards both directions;
+  no stale "own words" copy anywhere (grep, non-test sources).
+- **R1-3 → HOLD.** The `.disabled` gate re-evaluates as the alert's
+  `@State`-bound TextField edits; the model's `guard canRename`
+  belt stays beneath the face; `canRename` is pure, nonisolated,
+  and already pinned (MobileBooksTests:216–217); its `.whitespaces`
+  trim matches the create sheet's `canCreate` gate exactly — "the
+  create sheet's rule" is accurate to the letter.
+- **R1-4 → HOLD, with one NIT residue (N-1 below).** The falsehood
+  the finding named is gone and the sentence's claim is true — but
+  the replacement's door list undercounts (see N-1).
+- **R1-5 → HOLD.** Record-only, recorded; the reconciliation
+  paragraph is where the adjudication says it is.
+- **R1-6 → HOLD.** `settle` is internal (target-visible) and the
+  delegation's signature/isolation line up; semantics equivalent —
+  the `where`-clause loop performs up to `attempts` extra cheap
+  `done()` evaluations after the condition turns true instead of
+  poll's early return, with no suspension either way (the walks'
+  conditions are pure state reads); spine 32/7 green through the
+  rewired helper by my own run.
+
+### New findings
+
+- **NIT C2-R2-N1 · `App/Variorum/Shared/AppSession.swift:40–43` —
+  the R1-4 replacement comment's enumeration is itself incomplete.**
+  "divide, delete, the chip's diverge" reads as the phone's
+  registering-door list, but merge (`MobileStructural.swift:250` →
+  `ops.merge`, a register site in `Operations+Structural`) and the
+  Takes browser's archive/delete-variant
+  (`MobileTakesBrowser.swift:345` + its ⋯ menu →
+  `Operations+TakeEdits`/`+Deletion` register sites) also register
+  undo entries from phone doors. The corrected sentence's CLAIM
+  ("registers entries where its structural doors do") is true; the
+  em-dash list under it can misinform the next reader exactly as
+  the old comment did, one notch smaller. Comment-only fix — no pin
+  possible or owed.
+
+No other new findings: no BLOCKER, no MAJOR, no MINOR. Per the
+ladder rule (round 3 only on a NEW BLOCKER/MAJOR), **the C2 ladder
+CLOSES at round 2**; N1 is recorded for the architect's discretion.
+
+### Clean bill (specifically checked, found solid)
+
+- **The one-chain doctrine is now genuinely whole:** every
+  `DisplayTitle.note` caller repo-wide carries `createdAt` — the
+  masthead (post-fix), both mobile listing brains
+  (`MobileLibraryViewModel:155`, `MobileBookViewModel:101`), the
+  catalog hits, and `noteDisplayTitle` — verified per site, not by
+  grep alone (multi-line calls dodge a same-line grep).
+- **The Mac tree over the core change:** full Mac test-target
+  compile + the Mac spine green by my own run (51/7, the seven TRUE
+  suite type names); Mac `ContainerHeader` use is fetch-only and
+  field-stable (`adoptHeader` reads `locked`; no equality pins, no
+  constructions), so the architect's post-fix 1245/219
+  tripwire-only run stands as the full-suite evidence.
+- **Observation dedup unchanged:** `AppDatabase.observe` is
+  `.removeDuplicates()` over Equatable; `createdAt` never changes
+  on a live row, so widening the header cannot add deliveries.
+- **The oracle-input premise of the new pin:** `createPost(title:
+  nil)` mints nil title AND nil `entry_date`
+  (Operations+Container:16–26), so the pin's hardcoded oracle
+  arguments match the row's real state.
+- **The fix set stayed inside its lane:** zero `Sync/` lines, zero
+  schema, zero new operations; the one core change is the round-1
+  finding's own proposed shape (the C2 brief's small-additive-
+  Queries allowance, spent as designed).
+- **No new user-facing platform-name or promise strings**; the two
+  new pins are the only test-behavior additions, and the
+  `poll`→`settle` rewire left every call site untouched.
+
+### This reviewer's runs (iPhone 17 Pro / iOS 26.2 simulator; core from the repo root; Mac spine from `App/Variorum/`)
+
+- Full mobile suite: **"Test run with 246 tests in 42 suites
+  passed"** — TEST SUCCEEDED (244 + the two fix pins, exact); both
+  new pins additionally pass BY NAME in a targeted
+  `MobileNoteEntryDateTests` run (5/1).
+- Core: **"Test run with 1214 tests in 128 suites passed"** —
+  matches the round-2-open baseline exactly.
+- Mobile spine by its seven type names: **"Test run with 32 tests
+  in 7 suites passed"** — TEST SUCCEEDED.
+- Perf standalone: **"Test run with 9 tests in 2 suites passed"** —
+  TEST SUCCEEDED.
+- Mac spine by its seven TRUE type names: **"Test run with 51 tests
+  in 7 suites passed"** — TEST SUCCEEDED (full Mac test-target
+  compile rides this run).
+- Full Mac suite: not re-run (fetch-only consumers verified by
+  enumeration; the architect's recorded post-fix 1245/219
+  tripwire-only run stands).
