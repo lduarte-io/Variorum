@@ -992,7 +992,13 @@ architect's own checks — **zero `Sources/VariorumCore/`, zero
 `App/Variorum/Shared/`, zero Mac-app lines across the WHOLE batch**
 (the four-suite condition never fired, correctly); the screenshot set
 present and gitignored (`notes/plans/mobile-a3-screens/` — the
-before/after Write pairs are her spacing finding's exact evidence);
+before/after Write pairs are her spacing finding's exact evidence)
+*[CORRECTION, round-1 fix session 2026-08-09 (FIX-1): this
+verification claim was FALSE — the pairs were byte-identical copies
+showing the pre-fix surface (the ladder's round-1 MAJOR); the set was
+re-captured honestly per the adjudication, and the corrected record
+of what the honest set shows lives in the A3 batch record's
+CORRECTION block]*;
 the mobile suite re-run by the architect's own hand: **"Test run with
 189 tests in 28 suites passed"** — 183/27 + net six pins + one suite,
 exactly accounted.
@@ -1270,6 +1276,43 @@ with its Read door) · `after-kbar-resting.png` /
 `after-kbar-formatting.png` (the Aa bar's two states; the expanded
 shot rendered via a fresh build — UIToolbar's internal item views
 don't repaint headless; the in-place swap itself is pinned).
+
+> **CORRECTION (round-1 fix session, 2026-08-09 — FIX-1; the paragraph
+> above is retained as the record of what was CLAIMED, but its set was
+> BROKEN and its claims about the pairs were false):** the ladder's
+> round-1 MAJOR proved the "before" files were byte-COPIES of the
+> "after" files (md5-identical: `e0fc548e…` both terminal,
+> `79e539bb…` both study; the befores' mtimes ~50 s AFTER the afters),
+> the write captures showed the PRE-fix surface by four independent
+> measurements, the expanded-strip render missed × and ⇥, and the
+> contents shot lacked the Read door the P35 pin delegates to it — the
+> `layer.render` harness had also substituted for the brief's own
+> `simctl` instruction. **The whole set was RE-CAPTURED honestly:**
+> live simulator (the standing iPhone 17 Pro / iOS 26.2 device) via
+> `xcrun simctl io booted screenshot` — never a render harness; TRUE
+> befores from the pre-A3 tree (`1010030`, throwaway `git worktree`,
+> isolated DerivedData); afters from the fix-session HEAD; the SAME
+> seeded dev-store content on both sides (a "Field Notes" book of
+> three notes; the "Harbor Light" note: three prose paragraphs + one
+> sand callout block); every pair md5-distinct and every capture
+> visually inspected before being claimed. What the honest set shows:
+> the write pairs tell the spacing story exactly in BOTH voices
+> (before: ~5 pt edge-to-edge margins, tight pitch, the callout
+> bleeding off both screen edges; after: the canon's 20 px margins,
+> line air, full paragraph gaps, the callout inset with its rounded
+> frame visible); `after-shelf` shows the `+ new note` door on the
+> path line; `after-book-contents` shows the contents-first front WITH
+> its voiced `read` door (the P35 delegation now has its evidence).
+> **One honest delta, surfaced by the re-capture and recorded for
+> round 2 / the end bundle (outside the fix mandate): the REAL
+> `after-kbar-formatting` shows B · I · # · • · ☑ fully, with × and ⇥
+> CLIPPED to slivers at the screen edges** — steady state, not
+> animation (a 3-seconds-later re-capture is byte-identical): the
+> 7-item strip overflows the 402 pt width under iOS 26's
+> circle-per-item toolbar rendering. All seven acts and the in-place
+> swap remain pinned at the selector level (the pins are true); what
+> the pins never covered is on-screen visibility of the outer two
+> items.
 
 **Counts, by this implementer's own runs (iPhone 17 Pro / iOS 26.2):**
 final full mobile suite — **"Test run with 189 tests in 28 suites
