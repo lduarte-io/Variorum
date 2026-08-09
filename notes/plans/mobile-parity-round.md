@@ -5893,3 +5893,217 @@ mobile suite green by own run (from 265/48, arithmetic accounted) +
 mobile spine 32/7 + perf 9/2 by name. Commit per logical unit with
 the standing trailer; record as "## Stage C, batch C4a — BATCH
 RECORD"; push. PROVISIONAL-and-continue; author-only calls stop.
+
+## Stage C, batch C4a — BATCH RECORD (implementer, 2026-08-09; commits `c8f342e` · `597f8d6` · `d9a0e76` · `1c58e0c` · `572b057` · `dab4c03` · `e2fdd9d` + the record commit)
+
+**All five work items shipped; the S5 verdict is GREEN (no finding).**
+Diff scope, verified by own `git diff --name-only 36ab18d..HEAD`: 21
+files — **two core** (`Queries/EditorSupport.swift` + its core test —
+the sanctioned small-additive class, the four-suite duty fired), **one
+Mac file** (`EditorViewModel.swift` — the CommitRules DELEGATION only,
+behavior byte-identical), the rest mobile app + mobile tests. **Zero
+`Sources/VariorumCore/Sync/`, zero `Persistence/` (no schema), zero
+`Operations/`, zero `App/Variorum/Shared/`, zero pbxproj** (synchronized
+groups took the four new files). Per item:
+
+1. **TAKE LOCK/UNLOCK (`c8f342e`) — the note seal's sibling.** *Door:*
+   a state-mirroring **Lock Take / Unlock Take** row on each browser
+   card's ⋯ — placement justified: the card is the take's one identity
+   surface on the phone (the Mac's own card-menu placement,
+   WriteTakesPanel's ⋯), the row mirrors state per render (the seal
+   glyph's one-reversible-tap grammar, menu-rowed), and the sheet is one
+   ⑂ away from anywhere. *Ops:* `lockVariant`/`unlockVariant` — the
+   lock-insures-first behavior is the OP's own (a dirty STORE buffer
+   takes one quiet auto commit; I6's consequence-not-equivalence). *The
+   door's own guard, traced before building:* the op's insurance can
+   only commit what the STORE holds — pending SURFACE bytes live in the
+   coordinator until a flush lands, so a blind lock would insure the
+   STALE text and the later flush would refuse `.lockedVariant`,
+   stranding the typed bytes pending forever (the A1 `lockNote` trace,
+   the take's edition). So the lock road is **FLUSH-FIRST** with the
+   standing refused-flush wording; unlock needs no flush (nothing about
+   it reads a buffer, and a locked take admits no pending edits).
+   *Mutation-checked by behavioral revert:* blind lock restored → **3
+   issues** (stale store bytes · the insurance commit of the stale text
+   · stranded pending), 3 siblings green; fix restored → green.
+   *Tests:* `MobileTakeLockTests` (4) — the reversible flip with ZERO
+   commits on a committed-clean buffer (I6 through the door) · the
+   flush-guard pin · both seal arms in phone words · the copy pins.
+
+2. **THE SIX LOCKED-TAKE REFUSALS DISSOLVE WITH THE DOOR (`c8f342e` —
+   fire-and-DO: the doors land in the same commit as the copy).**
+   Inventory **#1 · #3 · #6 · #11 · #12 · #13**, all six sites now
+   phone-roaded through pinned statics that cannot fork:
+   - `MobileEditorViewModel.lockedTakeRefusal` — *"This take is locked
+     — branch it, or unlock it from its card in the takes sheet (⑂)."*
+     — the page-level sentence (the VM's gate copy + BOTH
+     `MobileStructural` sites route through the one static).
+   - `MobileTakesBrowserController.lockedTakeCardRefusal` — *"This
+     take is locked — unlock it from its card's ⋯, or branch it."* —
+     the in-sheet pair (beginEditing + the card gate), where the door
+     is one tap away on the same card.
+   - `MobileTakesBrowserController.lockedTakeVerbRefusal` — *"That
+     take is locked — unlock it from its card's ⋯ first."* — the verb
+     arm (delete/branch reaching a locked take).
+   Five standing pins flipped to the new copy (sanctioned, listed:
+   MobileTakesBrowserTests ×3 · MobileTakesTests ×1 ·
+   MobileStructuralTests ×1) + a no-"Mac" sweep pin over the statics
+   and both refusal mappers.
+
+3. **ARCHIVED-TAKES LISTING + UNARCHIVE (`597f8d6`) — dissolves
+   inventory #14.** *Door:* the browser sheet lists the open block's
+   archived takes below the live fan — an "archived · n" header +
+   read-only cards (labels riding — the archived listing is exactly
+   where a label identifies, the core op's own recorded rationale;
+   read-only by the op's own rule: an archived buffer refuses edits),
+   each card's ⋯ carrying **Unarchive Take** (the road back) and
+   **Delete Take**. Placement justified: see-your-data says the road
+   back lives where the fan lives (the Mac WriteTakesPanel's own
+   section, phone-carded). *Ops:* `unarchiveVariant` / the standing
+   `deleteVariant`; the listing is a direct `Queries.blockFan` read
+   (archived filtered; cost ∝ the block's fan) — the controller takes
+   the SESSION now (the comments controller's own shape; the one
+   constructor updated). Reloads at open, after every verb, and on
+   every projection ingest (a REMOTE archive lands live); clears at
+   close. *Copy:* `archivedTakeRefusal` — *"That take is archived —
+   unarchive it from the archived list below."* — pinned, no platform
+   name; the S2-era "recovery surfaces stay Mac-side in v1" header
+   absence dissolved with the doors (deleted-take RESURRECTION alone
+   stays PL-3/13j's, with the trash family). *Tests:*
+   `MobileArchivedTakesTests` (4) — the full round trip (archive →
+   listed with label → unarchive → back in fan order) · the sealed
+   refusal with viewing-stays-free · delete-from-the-listing · the
+   copy pin.
+
+4. **LABEL TAKE (`d9a0e76`).** *Door:* **Label Take…** on each card's
+   ⋯ — live AND archived cards. *Ops:* `setTakeLabel` (trim-and-NULL
+   clear; legal on a LOCKED take — identity metadata, not buffer — and
+   on an ARCHIVED one; both the op's own recorded rules, pinned through
+   the door). The prompt rides an injectable seam on the block menu's
+   plumbing pattern (production UIAlertController installed at the VM's
+   attach, prefilled with the STORED label; cancel is a true nothing;
+   EMPTY is a real answer — the clear). *Tests:* `MobileTakeLabelTests`
+   (2) — set/change/clear + locked + archived + the seam's prefill
+   under the pinned words · the sealed refusal.
+
+5. **THE COMMIT DOOR + THE TAKE-HISTORY FACE (`1c58e0c` core ·
+   `572b057` phone) — AppSpec §9's deliberate-savepoint pillar reaches
+   the phone.** *The core half, its own commit (the model-change
+   convention):* `Queries.commitPredatesSplit` lands beside
+   `splitDates` (additive; zero change to existing queries) and the
+   Mac's app-local `CommitRules` DELEGATES to it byte-identically (the
+   C2 `divergeForBook` relocation precedent; the Mac's own
+   EditorSessionTests pin holds through the delegation) — ONE brain,
+   both platforms, instead of a seventh row on the copied-brains
+   KnownIssues ledger. Core test added. *The phone half:* the block ⋯
+   gains **Commit Take** and **Take History…** — placement justified:
+   the ⋯ is the phone's one block-acts home, and both act on the caret
+   block's DISPLAYED (peek-aware) take, the Mac's caret-variant
+   semantics exactly (⌘S commits the caret take; the CommitBar lists
+   it) — flip/peek to a take and the doors follow it: per-take history
+   through composition, one door per act. Commit is **FLUSH-FIRST**
+   (the savepoint's whole job is the exact bytes she sees;
+   mutation-checked by behavioral revert: flush dropped → **2 issues**
+   — stale savepoint text + text left pending — 5 siblings green). The
+   history sheet (`MobileTakeHistoryController` + the comments sheet's
+   pixels pattern): rows newest-first — date · auto/manual ·
+   **"predates a split"** through the one core predicate · preview ·
+   per-row Restore. The PRE-SPLIT road **gates on the §9 warning**
+   (*"This commit predates a split of this block — restoring it brings
+   back text from before the split."*) via inspectable state
+   (`pendingRestore` — the view presents the confirm; headless tests
+   drive `restore(confirmed:)`), and restore is flush-first too (a
+   pending flush landing after it would overwrite the restored text —
+   the stale-flush class). Refusals in phone words; the locked-take arm
+   rides the ONE standing sentence (commit and restore both reach the
+   frozen buffer). Idle auto-commits already ran on the phone (shared
+   `AppServices`) — the history face is where they become VISIBLE:
+   see-your-data closes over machinery that was already writing.
+   *Tutorial-as-spec, the lesson+walk rider executed:* blocks & typing
+   grows the savepoint paragraph + the ⋯ enumeration, and the
+   crystallize walk's staging count moves 4 → 5 in the SAME commit.
+   *Tests:* `MobileTakeHistoryTests` (6) — the flush-first savepoint ·
+   both refusal arms (incl. the seal's own insurance row, asserted as
+   the SEAL's) · newest-first/kinds/flags on a real divide fixture ·
+   restore + the confirm gate + the resurrected pre-split text ·
+   restore-under-seal · the copy pins. The ⋯ drift pin flips through
+   the shared `rowTitles` oracle (both doors' rows grew).
+
+6. **THE S5 VERIFY + PIN (`dab4c03`) — VERDICT: GREEN, no finding.**
+   *The mechanism, proven end to end rather than asserted:* the
+   engine's reject merge lands the losing text through
+   `resolveSyncConflict` — a fresh ACTIVE variant, label `'conflict'`,
+   at the fan's end (S5: nothing clobbered). An active second variant
+   makes the slot's `activeVariantCount` 2 → `hasFan` → **three
+   discovery roads from one delivery**: the ⑂ BADGE renders on the
+   laid-out surface (the natural face — asserted on a real
+   `MobileWriteSurfaceView`, windowless), the swipe pill counts
+   "take 1/2", and the browser's fan lists the conflict card WEARING
+   its label, not chosen, the chosen pointer and text store-asserted
+   untouched. The delivery arm drives exactly what the standing
+   observation does (the fresh-read ingest as `fromDelivery`). *The
+   sealed arm pinned too:* S5 outranks the seal (the op's documented
+   rule — refusing would throw the losing text away), the landed
+   conflict stays discoverable under it, viewing free while editing
+   refuses with the sealed copy. `MobileConflictDiscoveryTests` (2);
+   MobileSoul §5.3's standing acceptance item now has its executable
+   form.
+
+**Counts, by this implementer's own runs (iPhone 17 Pro / iOS 26.2
+simulator; core from the repo root; Mac from `App/Variorum/`):**
+- Full mobile suite: **"Test run with 283 tests in 53 suites passed"**
+  — the 265/48 baseline + 18 tests + 5 suites, exactly accounted
+  (lock 4 · archived 4 · label 2 · history 6 · S5 2).
+- Mobile spine by its seven TRUE type names: **"Test run with 32 tests
+  in 7 suites passed"** (one staging assertion updated in place — the
+  lesson+walk rider; the count stands 32/7).
+- Perf by name (`MobilePerfFixtureTests` · `MobilePerfWalkTests`):
+  **"Test run with 9 tests in 2 suites passed"**.
+- Core (`swift test`): **"Test run with 1215 tests in 128 suites
+  passed"** — 1214 + the predicate test, exact.
+- Mac spine by its seven TRUE type names: **"Test run with 51 tests in
+  7 suites passed"**.
+- Full Mac suite: **"Test run with 1245 tests in 219 suites failed …
+  with 1 issue"** — the one issue re-confirmed BY IDENTITY as the
+  standing `TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByA
+  ConvergenceOccasion` tripwire (the recorded 1245/219 tripwire-only
+  baseline, exactly; the batch's Mac-side delta is the one-line
+  CommitRules delegation, and the suite proves it inert).
+
+**PROVISIONALs (for the chain's end bundle):**
+- **PC4a-1 — the locked-take wording SPLIT by context:** one page-level
+  sentence (names the takes sheet, ⑂) and one in-sheet pair (names the
+  card's ⋯, one tap away) rather than a single sentence everywhere —
+  the door-in-view principle read per surface; her look may unify.
+- **PC4a-2 — the savepoint doors' words and home:** "Commit Take" /
+  "Take History…" on the block ⋯, acting on the DISPLAYED take (the
+  matrix row's "shape at the batch", decided as the Mac's caret-variant
+  semantics + peek composition). A per-card history door in the browser
+  was deliberately NOT added (one act, one door; peek covers per-take).
+- **PC4a-3 — the history sheet's face:** the comments sheet's pattern
+  (top 160, dim, done), row grammar date-`.abbreviated/.shortened` ·
+  kind · flag · one-line preview · Restore, the empty-state sentence
+  ("No savepoints yet — Commit Take in ⋯ keeps one."), flag ink =
+  accent. All one-line changes for her look.
+- **PC4a-4 — the archived section's face:** "archived · n" header +
+  read-only two-line cards below the live fan, Delete offered beside
+  Unarchive (the Mac archived card's second door). Her look may fold
+  or re-arrange.
+- **PC4a-5 — the label prompt's copy:** "Label Take" / "A short name
+  for this take's card — never printed in the prose. Leave empty to
+  clear." (the Mac sheet's caption, phone-alerted).
+- *(Recorded, not provisional:)* the history sheet lists the take
+  CAPTURED at open — a remote flip mid-read must not silently swap
+  whose past you are reading; close-and-reopen follows the new
+  displayed take.
+
+**Deliberate absences (scope, not holes):** the merge-ceremony refusal
+(inventory #4) and the tutorial's merge-lesson sentence (#7, PB1-4's
+rider) stay UNTOUCHED — C5's sanctioned-exception design owns them
+(verified still present, the only user-facing "Mac" strings left in
+the mobile target) · deleted-take resurrection stays PL-3/13j's (the
+trash family; the archived road back is THIS batch's) · no commit door
+on the browser cards (PC4a-2's one-door reading) · the history sheet's
+SwiftUI-free UIKit wiring is the recorded A1-masthead
+not-headless-testable class for its pixels (the brain is fully
+pinned); the chain-end look covers it.
