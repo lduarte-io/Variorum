@@ -6801,3 +6801,44 @@ sweep pin. Full mobile suite green by own run (from 296/56,
 arithmetic accounted) + mobile spine 32/7 + perf 9/2 by name.
 Record as "## Stage C, batch C5 — BATCH RECORD"; push.
 PROVISIONAL-and-continue; author-only calls stop.
+
+## Stage C, batch C5 — the architect's RULING on both forks (2026-08-09; the 4E pattern, executed in one round)
+
+**FORK 1 (the lens shape) — ADOPT the primary as proposed:** the
+lens chip on the masthead's second line ("lens" at rest, "lens:
+⟨name⟩" active); the LK4 sheet with "the note" + saved lenses +
+the honest dangle clause; switch-as-sticky-peeks (zero writes to
+view — the M9 note's own direction realized); sparse divergence
+saves (the lens doctrine's storage philosophy); "save into the
+active lens" per her verbatim; ✓-adopt through
+`adoptPicksPreservingChosen` with the preservation lens as the
+visible road back; rename/delete confirm-free; the Mac-only
+exclusions as drawn (the board and the version family). The
+swipe-writes alternative is RIGHTLY rejected — ✓ stays the only
+deciding act (M5/M6's letter). **One PROVISIONAL added for her
+bundle: the active lens is session-local (evaporates with the
+note, M9's lifetime) where the Mac keeps per-post lens view
+memory — if she wants a note to REOPEN in its last lens, that is
+a flip, not a redesign.** The fourth chip joins the crowding look
+item as flagged.
+
+**FORK 2 (the fanned-merge road) — ADOPT the carry-all through
+`mergeCeremony`, zero core change:** one peek-aware pairing
+(displayed leading + displayed trailing, canon join on post-flush
+texts) + every other active take carried whole; archived takes
+stay with the released sources (the `divideDuplicating` parallel);
+silent on success with the ⑂ badge saying the rest; all refusal
+arms as enumerated, the read→turn archived race in the R2-10
+recorded class. The archive-first alternative is rejected FOR THE
+RECORDED REASON: it manufactures exactly the hunt Q-M2 exists to
+kill (stranded extras on released lineage with no phone surface
+until 13j) — carry-all drops nothing and costs the same build.
+PB1-4's rider and the whole-target sweep pin land as proposed.
+**Her bundle gains the cross-platform question, verbatim-honest:
+the phone's fanned-merge default now differs from the Mac's
+(ceremony) — whether carry-all becomes the Mac's own quick
+default, as her divide workaround did, is HERS (13j's orbit or
+later); this batch changes zero Mac behavior.**
+
+Build order as proposed (merge road first, closing the sweep; then
+the lens family; then the record).
