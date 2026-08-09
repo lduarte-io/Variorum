@@ -115,6 +115,8 @@ nonisolated enum HostedSyncTier {
 /// appearance; `.unknown` renders nothing at all.
 struct HostedSyncSection: View {
     let services: AppServices
+    /// D1: the phone's styling seam (nil on the Mac ALWAYS).
+    @Environment(\.sharedPageStyle) private var pageStyle
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -122,26 +124,23 @@ struct HostedSyncSection: View {
             case .unknown:
                 EmptyView()
             case .active(let expiresAt):
-                Text("Hosted Sync").fontWeight(.semibold)
+                PageHeading("Hosted Sync", style: pageStyle)
                 Text(HostedSyncTier.activeLine)
+                    .pageProse(pageStyle)
                 if let line = HostedSyncTier.expiryLine(expiresAt) {
                     Text(line)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .pageCaption(pageStyle)
                 }
             case .inactive:
-                Text("Hosted Sync").fontWeight(.semibold)
+                PageHeading("Hosted Sync", style: pageStyle)
                 Text(HostedSyncTier.whatItIs)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .pageCaption(pageStyle)
                     .fixedSize(horizontal: false, vertical: true)
                 Text(HostedSyncTier.worksWithoutIt)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .pageCaption(pageStyle)
                     .fixedSize(horizontal: false, vertical: true)
                 Text(HostedSyncTier.whereToGetIt)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .pageCaption(pageStyle)
             }
         }
         .task { await services.refreshHostedSyncStatus() }

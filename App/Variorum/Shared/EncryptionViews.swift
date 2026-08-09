@@ -52,6 +52,10 @@ nonisolated enum EncryptionSetupRules {
 
 struct EncryptionView: View {
     let services: AppServices
+    /// D1: the phone's styling seam (nil on the Mac ALWAYS — the
+    /// environment accessor compiles to nil there, so every styled arm
+    /// in this file is phone-only by construction).
+    @Environment(\.sharedPageStyle) private var pageStyle
 
     /// CF-1: the setup flow's position (steps 1–3; step 4 — the mandatory
     /// recovery phrase — is the `enrolled(hasRecoveryWrap: false)` state
@@ -238,25 +242,24 @@ struct EncryptionView: View {
                     // could only fail — the signal stays, the prescription
                     // is sign-in-first, the door returns with the session.
                     Text(Self.rekeyIncompleteSignedOutPrompt)
-                        .font(.caption)
-                        .foregroundStyle(.orange)
+                        .pageCaptionWarning(pageStyle)
                         .fixedSize(horizontal: false, vertical: true)
                 } else {
                     rekeyIncompleteBanner
                 }
-                Divider()
+                PageDivider(pageStyle)
             }
             switch encryption.state {
             case .unknown:
                 ProgressView().controlSize(.small)
                 Text("Checking this account's encryption state…")
-                    .foregroundStyle(.secondary)
+                    .pageSecondary(pageStyle)
             case .signedOut:
                 Text("Sign in first — your encryption vault lives on your account.")
-                    .foregroundStyle(.secondary)
+                    .pageSecondary(pageStyle)
             case .newerFormat:
                 Text("This account's encryption was set up by a newer version of Variorum. Update the app to unlock sync.")
-                    .foregroundStyle(.orange)
+                    .pageWarning(pageStyle)
             case .noVault:
                 setupSection
             case .notEnrolled(let hasRecoveryWrap):
@@ -279,7 +282,7 @@ struct EncryptionView: View {
                 ProgressView().controlSize(.small)
             }
             if let error = encryption.lastError {
-                Text(error).font(.caption).foregroundStyle(.red)
+                Text(error).pageCaptionError(pageStyle)
                     .textSelection(.enabled)
                     .fixedSize(horizontal: false, vertical: true)
                     .lineLimit(6)
@@ -294,66 +297,62 @@ struct EncryptionView: View {
     private var setupSection: some View {
         switch setupStep {
         case .passphrase:
-            Text("Step 1 of 4 — Choose your encryption passphrase")
-                .fontWeight(.semibold)
+            PageHeading("Step 1 of 4 — Choose your encryption passphrase", style: pageStyle)
             Text(Self.setupIntro)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .pageCaption(pageStyle)
                 .fixedSize(horizontal: false, vertical: true)
             SecureField("Encryption passphrase", text: $setupPassphrase)
+                .pageFieldChrome(pageStyle)
             SecureField("Repeat the passphrase", text: $setupConfirm)
+                .pageFieldChrome(pageStyle)
             if !setupPassphrase.isEmpty, setupPassphrase.count < 12 {
                 Text("Short passphrase — under 12 characters is easier to brute-force.")
-                    .font(.caption)
-                    .foregroundStyle(.orange)
+                    .pageCaptionWarning(pageStyle)
             }
             Text(Self.passphraseRecommendation)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .pageCaption(pageStyle)
                 .fixedSize(horizontal: false, vertical: true)
             if !setupConfirm.isEmpty, setupPassphrase != setupConfirm {
                 Text("The two entries don't match yet.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .pageCaption(pageStyle)
             }
-            Button("Continue") { setupStep = .warning }
+            PageDoor("Continue", style: pageStyle) { setupStep = .warning }
                 .disabled(!EncryptionSetupRules.canLeavePassphraseStep(
                     passphrase: setupPassphrase, confirm: setupConfirm))
         case .warning:
-            Text("Step 2 of 4 — What the secrets mean")
-                .fontWeight(.semibold)
+            PageHeading("Step 2 of 4 — What the secrets mean", style: pageStyle)
             Text(Self.setupWarning)
-                .font(.caption)
-                .foregroundStyle(.orange)
+                .pageCaptionWarning(pageStyle)
                 .fixedSize(horizontal: false, vertical: true)
             Text(Self.storageAdvice)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .pageCaption(pageStyle)
                 .fixedSize(horizontal: false, vertical: true)
             Toggle(isOn: $acknowledged) {
                 Text(Self.understandingCheckbox)
-                    .font(.caption)
+                    .pageCaptionProminent(pageStyle)
                     .fixedSize(horizontal: false, vertical: true)
             }
             #if os(macOS)
             .toggleStyle(.checkbox)
             #endif
             HStack {
-                Button("Back") { setupStep = .passphrase }
-                Button("Continue") { setupStep = .create }
+                PageDoor("Back", form: .inlineAct, style: pageStyle) {
+                    setupStep = .passphrase
+                }
+                PageDoor("Continue", style: pageStyle) { setupStep = .create }
                     .disabled(!EncryptionSetupRules.canLeaveWarningStep(
                         acknowledged: acknowledged))
             }
         case .create:
-            Text("Step 3 of 4 — Create your encrypted vault")
-                .fontWeight(.semibold)
+            PageHeading("Step 3 of 4 — Create your encrypted vault", style: pageStyle)
             Text("Your vault is created on your account, and this device holds its keys. The last step — your recovery phrase — comes right after.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .pageCaption(pageStyle)
                 .fixedSize(horizontal: false, vertical: true)
             HStack {
-                Button("Back") { setupStep = .warning }
-                Button("Create Encrypted Vault") {
+                PageDoor("Back", form: .inlineAct, style: pageStyle) {
+                    setupStep = .warning
+                }
+                PageDoor("Create Encrypted Vault", style: pageStyle) {
                     let passphrase = setupPassphrase
                     Task {
                         await encryption.setUp(passphrase: passphrase)
@@ -372,11 +371,9 @@ struct EncryptionView: View {
 
     private var mandatoryPhraseSection: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("Step 4 of 4 — Your recovery phrase (required)")
-                .fontWeight(.semibold)
+            PageHeading("Step 4 of 4 — Your recovery phrase (required)", style: pageStyle)
             Text("If you ever forget the passphrase, these 12 words are the only other way into your synced writing. Setup isn't finished until you've written them down and confirmed them — closing now just leaves this step waiting.")
-                .font(.caption)
-                .foregroundStyle(.orange)
+                .pageCaptionWarning(pageStyle)
                 .fixedSize(horizontal: false, vertical: true)
             if let words = generatedWords {
                 phraseConfirmSection(words: words, cancellable: false)
@@ -407,7 +404,9 @@ struct EncryptionView: View {
             .autocorrectionDisabled()
             .privacySensitive()
         #if os(iOS)
-        return field.textInputAutocapitalization(.never)
+        return field
+            .textInputAutocapitalization(.never)
+            .pageFieldChrome(pageStyle)
         #else
         return field
         #endif
@@ -418,8 +417,7 @@ struct EncryptionView: View {
     @ViewBuilder
     private func phraseConfirmSection(words: [String], cancellable: Bool) -> some View {
         Text(Self.wholePhraseIsTheSecret)
-            .font(.caption)
-            .foregroundStyle(.orange)
+            .pageCaptionWarning(pageStyle)
             .fixedSize(horizontal: false, vertical: true)
         Text(words.enumerated().map { "\($0.offset + 1). \($0.element)" }
             .joined(separator: "   "))
@@ -430,27 +428,26 @@ struct EncryptionView: View {
             // until a shell applies a .privacy redaction — the mobile
             // shell does, for the app-switcher snapshot (SnapshotPrivacy);
             // the Mac applies none and is byte-identical in behavior.
+            // D1: the phrase card wraps OUTSIDE this Text — the mark and
+            // the mono rendering stay exactly where they were.
             .privacySensitive()
+            .pagePhraseCard(pageStyle)
         Text("1. Write the 12 words down — on paper, or in a password manager.")
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            .pageCaption(pageStyle)
         Text("2. Type them back, in order, to confirm:")
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            .pageCaption(pageStyle)
         phraseEntryField("The 12 words, separated by spaces", text: $confirmEntry)
         if confirmMismatch {
             Text("That doesn't match the phrase above — check what you wrote down.")
-                .font(.caption)
-                .foregroundStyle(.red)
+                .pageCaptionError(pageStyle)
         }
         if replacingWrap {
             Text("The phrase you have now keeps working until this confirm lands — then it stops, everywhere.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .pageCaption(pageStyle)
                 .fixedSize(horizontal: false, vertical: true)
         }
         HStack {
-            Button("Confirm — I Wrote It Down") {
+            PageDoor("Confirm — I Wrote It Down", style: pageStyle) {
                 let entered = EncryptionSession.words(from: confirmEntry)
                     .map { $0.lowercased() }
                 guard entered == words else {
@@ -472,7 +469,7 @@ struct EncryptionView: View {
             }
             .disabled(encryption.busy || confirmEntry.isEmpty)
             if cancellable {
-                Button("Cancel") {
+                PageDoor("Cancel", form: .inlineAct, style: pageStyle) {
                     generatedWords = nil
                     confirmEntry = ""
                     confirmMismatch = false
@@ -487,9 +484,9 @@ struct EncryptionView: View {
     @ViewBuilder
     private func enrollmentSection(hasRecoveryWrap: Bool) -> some View {
         Text("Unlock sync on this device")
+            .pageProse(pageStyle)
         Text("Enter your encryption passphrase to unwrap this account's keys.")
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            .pageCaption(pageStyle)
         unlockRoads(offerPhraseRoad: hasRecoveryWrap)
     }
 
@@ -498,15 +495,15 @@ struct EncryptionView: View {
     @ViewBuilder
     private func lockedSection(hasRecoveryWrap: Bool) -> some View {
         Text("Sync is locked on this device.")
+            .pageProse(pageStyle)
         Text("\(Self.biometricName) — or your encryption passphrase — unlocks it. Your device passcode never does.")
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            .pageCaption(pageStyle)
             .fixedSize(horizontal: false, vertical: true)
-        Button("Unlock with \(Self.biometricName)") {
+        PageDoor("Unlock with \(Self.biometricName)", style: pageStyle) {
             Task { await encryption.unlockWithBiometrics() }
         }
         .disabled(encryption.busy)
-        Divider()
+        PageDivider(pageStyle)
         unlockRoads(offerPhraseRoad: hasRecoveryWrap)
     }
 
@@ -518,11 +515,10 @@ struct EncryptionView: View {
     @ViewBuilder
     private func keysReplacedSection(hasRecoveryWrap: Bool) -> some View {
         Text(Self.keysReplacedExplanation)
-            .foregroundStyle(.orange)
+            .pageWarning(pageStyle)
             .fixedSize(horizontal: false, vertical: true)
         Text("The keys this device holds were replaced after it enrolled — sync stays paused until you re-enroll; nothing is lost while paused.")
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            .pageCaption(pageStyle)
             .fixedSize(horizontal: false, vertical: true)
         unlockRoads(offerPhraseRoad: hasRecoveryWrap)
     }
@@ -532,24 +528,27 @@ struct EncryptionView: View {
         if !usePhraseInstead {
             SecureField("Encryption passphrase", text: $enrollPassphrase)
                 .onSubmit { enrollNow() }
-            Button("Unlock") { enrollNow() }
+                .pageFieldChrome(pageStyle)
+            PageDoor("Unlock", style: pageStyle) { enrollNow() }
                 .disabled(encryption.busy || enrollPassphrase.isEmpty)
             if offerPhraseRoad {
                 // CF-3: the reveal is a real, visibly-bordered button —
-                // never something that reads as static hint text.
-                Button("Use my recovery phrase instead") { usePhraseInstead = true }
-                    .buttonStyle(.bordered)
+                // never something that reads as static hint text (the
+                // styled .bordered arm keeps a visible border too).
+                PageDoor("Use my recovery phrase instead", form: .bordered,
+                         style: pageStyle) { usePhraseInstead = true }
             }
         } else {
             phraseEntryField("The 12 recovery words, separated by spaces", text: $phraseEntry)
-            Button("Unlock with Recovery Phrase") {
+            PageDoor("Unlock with Recovery Phrase", style: pageStyle) {
                 let entry = phraseEntry
                 phraseEntry = ""
                 Task { await encryption.enroll(recoveryWordsText: entry) }
             }
             .disabled(encryption.busy || phraseEntry.isEmpty)
-            Button("Back to passphrase entry") { usePhraseInstead = false }
-                .buttonStyle(.bordered)
+            PageDoor("Back to passphrase entry", form: .bordered, style: pageStyle) {
+                usePhraseInstead = false
+            }
         }
     }
 
@@ -565,43 +564,45 @@ struct EncryptionView: View {
     @ViewBuilder
     private var enrolledSection: some View {
         Text("This device holds your encryption keys.")
+            .pageProse(pageStyle)
         if let seconds = encryption.lastKDFSeconds {
             // L12: the on-device KDF number, readable straight off the flow.
             Text(String(format: "Passphrase key derivation took %.2f s on this device.", seconds))
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .pageCaption(pageStyle)
         }
         Text("A recovery phrase is on file for this account.")
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            .pageCaption(pageStyle)
 
-        Divider()
+        PageDivider(pageStyle)
 
         if let words = generatedWords {
-            Text("Your new recovery phrase — shown once:")
-                .fontWeight(.semibold)
+            PageHeading("Your new recovery phrase — shown once:", style: pageStyle)
             phraseConfirmSection(words: words, cancellable: true)
         } else if showingRegenerate {
             regenerateGateSection
         } else {
-            Button("Regenerate Recovery Phrase…") { showingRegenerate = true }
-                .disabled(encryption.busy)
+            PageDoor("Regenerate Recovery Phrase…", form: .inlineAct, style: pageStyle) {
+                showingRegenerate = true
+            }
+            .disabled(encryption.busy)
         }
 
-        Divider()
+        PageDivider(pageStyle)
 
         if showingChangePassphrase {
             changePassphraseSection
         } else {
-            Button("Change Encryption Passphrase…") { showingChangePassphrase = true }
-                .disabled(encryption.busy)
+            PageDoor("Change Encryption Passphrase…", form: .inlineAct, style: pageStyle) {
+                showingChangePassphrase = true
+            }
+            .disabled(encryption.busy)
         }
 
-        Divider()
+        PageDivider(pageStyle)
 
         biometricToggleSection
 
-        Divider()
+        PageDivider(pageStyle)
 
         // Ladder R1-1: while a re-key is owed, the banner at the top
         // carries this door (and the open flow) — rendering a second
@@ -610,25 +611,50 @@ struct EncryptionView: View {
             if showingRekey {
                 rekeySection
             } else {
-                Button("Replace Encryption Keys…") { showingRekey = true }
-                    .disabled(encryption.busy)
+                PageDoor("Replace Encryption Keys…", form: .inlineAct, style: pageStyle) {
+                    showingRekey = true
+                }
+                .disabled(encryption.busy)
             }
 
-            Divider()
+            PageDivider(pageStyle)
         }
 
-        DisclosureGroup("What the server can and can't see") {
-            Text(Self.disclosureCopy)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, 4)
-        }
-        .font(.caption)
+        disclosureSection
 
-        Divider()
+        PageDivider(pageStyle)
 
         forgetSection
+    }
+
+    /// The server-visibility disclosure. nil arm: the pre-D1 construction
+    /// exactly; styled arm: the same DisclosureGroup with a voice-cased
+    /// label and the voice's small type (content identical — the ruled
+    /// disclosure copy renders as written).
+    @ViewBuilder
+    private var disclosureSection: some View {
+        if let style = pageStyle {
+            DisclosureGroup {
+                Text(Self.disclosureCopy)
+                    .pageCaption(pageStyle)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 4)
+            } label: {
+                Text(style.chrome("What the server can and can't see"))
+                    .font(style.tokens.small)
+                    .foregroundStyle(style.tokens.accent)
+                    .accessibilityLabel("What the server can and can't see")
+            }
+        } else {
+            DisclosureGroup("What the server can and can't see") {
+                Text(Self.disclosureCopy)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 4)
+            }
+            .font(.caption)
+        }
     }
 
     // MARK: - The unfinished-re-key banner (ladder R1-1)
@@ -639,14 +665,15 @@ struct EncryptionView: View {
     @ViewBuilder
     private var rekeyIncompleteBanner: some View {
         Text(Self.rekeyIncompletePrompt)
-            .font(.caption)
-            .foregroundStyle(.orange)
+            .pageCaptionWarning(pageStyle)
             .fixedSize(horizontal: false, vertical: true)
         if showingRekey {
             rekeySection
         } else {
-            Button("Replace Encryption Keys…") { showingRekey = true }
-                .disabled(encryption.busy)
+            PageDoor("Replace Encryption Keys…", form: .inlineAct, style: pageStyle) {
+                showingRekey = true
+            }
+            .disabled(encryption.busy)
         }
     }
 
@@ -660,23 +687,22 @@ struct EncryptionView: View {
     /// keys, and setup's own machinery mints the new one.
     @ViewBuilder
     private var rekeySection: some View {
-        Text("Replace encryption keys")
-            .fontWeight(.semibold)
+        PageHeading("Replace encryption keys", style: pageStyle)
         Text(Self.rekeyExplanation)
-            .font(.caption)
-            .foregroundStyle(.orange)
+            .pageCaptionWarning(pageStyle)
             .fixedSize(horizontal: false, vertical: true)
         Toggle(isOn: $rekeyAcknowledged) {
             Text(Self.rekeyUnderstandingCheckbox)
-                .font(.caption)
+                .pageCaptionProminent(pageStyle)
                 .fixedSize(horizontal: false, vertical: true)
         }
         #if os(macOS)
         .toggleStyle(.checkbox)
         #endif
         SecureField("Encryption passphrase", text: $rekeyPassphrase)
+            .pageFieldChrome(pageStyle)
         HStack {
-            Button("Replace Keys and Re-upload", role: .destructive) {
+            PageDoor("Replace Keys and Re-upload", form: .destructive, style: pageStyle) {
                 let passphrase = rekeyPassphrase
                 rekeyPassphrase = ""
                 Task {
@@ -688,7 +714,7 @@ struct EncryptionView: View {
                 }
             }
             .disabled(encryption.busy || rekeyPassphrase.isEmpty || !rekeyAcknowledged)
-            Button("Cancel") {
+            PageDoor("Cancel", form: .inlineAct, style: pageStyle) {
                 showingRekey = false
                 rekeyAcknowledged = false
                 rekeyPassphrase = ""
@@ -700,18 +726,19 @@ struct EncryptionView: View {
 
     @ViewBuilder
     private var regenerateGateSection: some View {
-        Text("Replace the recovery phrase")
-            .fontWeight(.semibold)
+        PageHeading("Replace the recovery phrase", style: pageStyle)
         Text("Your encryption passphrase authorizes a new phrase — the same proof as changing it. The phrase you have now keeps working until the new one is confirmed.")
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            .pageCaption(pageStyle)
             .fixedSize(horizontal: false, vertical: true)
         SecureField("Encryption passphrase", text: $regeneratePassphrase)
             .onSubmit { regenerateNow() }
+            .pageFieldChrome(pageStyle)
         HStack {
-            Button("Verify and Generate New Phrase") { regenerateNow() }
-                .disabled(encryption.busy || regeneratePassphrase.isEmpty)
-            Button("Cancel") {
+            PageDoor("Verify and Generate New Phrase", style: pageStyle) {
+                regenerateNow()
+            }
+            .disabled(encryption.busy || regeneratePassphrase.isEmpty)
+            PageDoor("Cancel", form: .inlineAct, style: pageStyle) {
                 showingRegenerate = false
                 regeneratePassphrase = ""
             }
@@ -739,6 +766,7 @@ struct EncryptionView: View {
             set: { encryption.setBiometricRequirement($0) })
         ) {
             Text("Require \(Self.biometricName) to unlock sync")
+                .pageProse(pageStyle)
         }
         #if os(macOS)
         .toggleStyle(.checkbox)
@@ -747,12 +775,10 @@ struct EncryptionView: View {
                   || (!encryption.biometricRequired && !encryption.biometryAvailable))
         if !encryption.biometryAvailable {
             Text("No \(Self.biometricName) is set up on this device.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .pageCaption(pageStyle)
         }
         Text(Self.biometricToggleCopy)
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            .pageCaption(pageStyle)
             .fixedSize(horizontal: false, vertical: true)
     }
 
@@ -760,7 +786,8 @@ struct EncryptionView: View {
 
     @ViewBuilder
     private var forgetSection: some View {
-        Button("Forget Encryption Keys on This Device…", role: .destructive) {
+        PageDoor("Forget Encryption Keys on This Device…", form: .destructive,
+                 style: pageStyle) {
             showingForgetConfirm = true
         }
         .disabled(encryption.busy)
@@ -776,8 +803,7 @@ struct EncryptionView: View {
             Text(Self.forgetExplanation)
         }
         Text("For handing a device off, or testing your recovery phrase. Your writing on this device and the account vault are untouched.")
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            .pageCaption(pageStyle)
             .fixedSize(horizontal: false, vertical: true)
     }
 
@@ -786,31 +812,34 @@ struct EncryptionView: View {
     @ViewBuilder
     private var changePassphraseSection: some View {
         Text("Change encryption passphrase")
+            .pageProse(pageStyle)
         if !changeUseRecovery {
             SecureField("Current passphrase", text: $changeCurrent)
+                .pageFieldChrome(pageStyle)
             // CF-3: her live find, verbatim — "it really is very unclear
-            // that it's a button". A real bordered button now.
-            Button("Forgot it? Authorize with the recovery phrase") {
+            // that it's a button". A real bordered button now (the styled
+            // .bordered arm keeps a visible border too).
+            PageDoor("Forgot it? Authorize with the recovery phrase",
+                     form: .bordered, style: pageStyle) {
                 changeUseRecovery = true
             }
-            .buttonStyle(.bordered)
         } else {
             phraseEntryField("The 12 recovery words, separated by spaces", text: $changeRecoveryEntry)
-            Button("Back to current-passphrase entry") { changeUseRecovery = false }
-                .buttonStyle(.bordered)
+            PageDoor("Back to current-passphrase entry", form: .bordered,
+                     style: pageStyle) { changeUseRecovery = false }
         }
         SecureField("New passphrase", text: $changeNew)
+            .pageFieldChrome(pageStyle)
         SecureField("Repeat the new passphrase", text: $changeNewConfirm)
+            .pageFieldChrome(pageStyle)
         if !changeNew.isEmpty, changeNew.count < 12 {
             Text("Short passphrase — under 12 characters is easier to brute-force.")
-                .font(.caption)
-                .foregroundStyle(.orange)
+                .pageCaptionWarning(pageStyle)
         }
         Text("Your recovery phrase keeps working unchanged — the two are independent.")
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            .pageCaption(pageStyle)
         HStack {
-            Button("Change Passphrase") {
+            PageDoor("Change Passphrase", style: pageStyle) {
                 let authorization: VaultAuthorization = changeUseRecovery
                     ? .recoveryPhrase(EncryptionSession.words(from: changeRecoveryEntry))
                     : .passphrase(changeCurrent)
@@ -828,7 +857,7 @@ struct EncryptionView: View {
             .disabled(encryption.busy || changeNew.isEmpty
                       || changeNew != changeNewConfirm
                       || (changeUseRecovery ? changeRecoveryEntry.isEmpty : changeCurrent.isEmpty))
-            Button("Cancel") {
+            PageDoor("Cancel", form: .inlineAct, style: pageStyle) {
                 showingChangePassphrase = false
                 changeCurrent = ""
                 changeRecoveryEntry = ""

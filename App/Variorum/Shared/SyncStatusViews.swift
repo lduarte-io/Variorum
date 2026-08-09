@@ -151,6 +151,11 @@ nonisolated struct SyncRowFace: Equatable {
 /// signed out → the sign-in door.
 struct SyncStatusRow: View {
     let services: AppServices
+    /// D1: the phone's styling seam (nil on the Mac ALWAYS — the
+    /// environment accessor compiles to nil there). The mobile Settings
+    /// sheet injects it here; the Account sheet presented below inherits
+    /// it through the environment.
+    @Environment(\.sharedPageStyle) private var pageStyle
     /// CF-14: the ONE sheet, opened at the tab the pressed door names
     /// (nil = not presented).
     @State private var accountSheetTab: AccountTab?
@@ -168,78 +173,127 @@ struct SyncStatusRow: View {
     }
 
     var body: some View {
+        row
+            .sheet(item: $accountSheetTab) { tab in
+                AccountView(services: services, initialTab: tab)
+            }
+    }
+
+    /// The row itself. nil arm: the pre-D1 construction exactly (one
+    /// caption line, label + doors inline). Styled arm (the phone): the
+    /// voice's register — the label line first, the doors on their own
+    /// row beneath it (long paused-state labels + doors never fight for
+    /// one line: the D1 unaligned-row fix), plain accent doors, the
+    /// Settings sheet's own type scale.
+    @ViewBuilder
+    private var row: some View {
         let face = self.face
-        VStack(alignment: .leading, spacing: 2) {
-            HStack(spacing: 6) {
-                rowLabel(for: face.kind)
-                ForEach(face.doors) { door in
-                    Button(door.label) { perform(door.act) }
-                        .disabled(!door.enabled)
+        if let style = pageStyle {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 6) {
+                    rowLabel(for: face.kind)
+                }
+                if !face.doors.isEmpty {
+                    HStack(spacing: 14) {
+                        ForEach(face.doors) { door in
+                            Button {
+                                perform(door.act)
+                            } label: {
+                                Text(style.chrome(door.label))
+                                    .font(style.tokens.small)
+                                    .foregroundStyle(style.tokens.accent)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel(door.label)
+                            .disabled(!door.enabled)
+                            .opacity(door.enabled ? 1 : 0.35)
+                        }
+                    }
+                }
+                if face.kind == .error, let error = sync.status.lastError {
+                    ErrorCauseNote(error: error)
                 }
             }
-            // Sitting 9 (R94): the cause inline, classified — an auth-shaped
-            // failure names its fix and the Account door is right there. The
-            // keys-locked and keys-replaced states carry their own lines
-            // above instead (the cause IS the line).
-            if face.kind == .error, let error = sync.status.lastError {
-                ErrorCauseNote(error: error)
+            .font(style.tokens.small)
+            .foregroundStyle(style.tokens.ink)
+            .padding(.vertical, 6)
+        } else {
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    rowLabel(for: face.kind)
+                    ForEach(face.doors) { door in
+                        Button(door.label) { perform(door.act) }
+                            .disabled(!door.enabled)
+                    }
+                }
+                // Sitting 9 (R94): the cause inline, classified — an
+                // auth-shaped failure names its fix and the Account door is
+                // right there. The keys-locked and keys-replaced states
+                // carry their own lines above instead (the cause IS the
+                // line).
+                if face.kind == .error, let error = sync.status.lastError {
+                    ErrorCauseNote(error: error)
+                }
             }
-        }
-        .font(.caption)
-        .padding(6)
-        .sheet(item: $accountSheetTab) { tab in
-            AccountView(services: services, initialTab: tab)
+            .font(.caption)
+            .padding(6)
         }
     }
 
+    /// The label arms. The quiet/warning/error colors are shared; the
+    /// styled arm's font rides the row container (`tokens.small`), and
+    /// the quiet `.secondary` maps to the voice's muted ink. In the nil
+    /// arm every helper's output is render-identical to the pre-D1 lines
+    /// (an explicit `.font(.caption)` under the row's own `.caption`
+    /// container changes nothing).
     @ViewBuilder
     private func rowLabel(for kind: SyncRowFace.Kind) -> some View {
         switch kind {
         case .devStore:
             Text("Sync off (dev store)")
-                .foregroundStyle(.secondary)
+                .pageCaption(pageStyle)
         case .signedOut:
             Text("Signed out")
-                .foregroundStyle(.secondary)
+                .pageCaption(pageStyle)
         case .syncOff:
             Text("Sync is off")
-                .foregroundStyle(.secondary)
+                .pageCaption(pageStyle)
         case .syncing:
             // CF-15: the indicator rides BESIDE the label; the doors stay.
             ProgressView().controlSize(.small)
             Text("Syncing…")
         case .offline:
             Text(Self.offlineLabel)
-                .foregroundStyle(.secondary)
+                .pageCaption(pageStyle)
                 .help(sync.status.lastError ?? "")
             pendingNote
         case .keysLocked:
             // Phase 14b (L9): nothing is lost while paused; the outbox
             // keeps everything.
             Text(Self.lockedLabel)
-                .foregroundStyle(.orange)
+                .pageCaptionWarning(pageStyle)
                 .help(sync.status.lastError ?? "")
         case .keysReplaced:
             Text(Self.keysReplacedLabel)
-                .foregroundStyle(.orange)
+                .pageCaptionWarning(pageStyle)
                 .help(sync.status.lastError ?? "")
         case .rekeyIncomplete:
             Text(Self.rekeyIncompleteLabel)
-                .foregroundStyle(.orange)
+                .pageCaptionWarning(pageStyle)
                 .help(sync.status.lastError ?? "")
         case .notEntitled:
             // Phase 14c (L7): SECONDARY styling, deliberately — the same
             // quiet voice as signed-out/offline, never the error red or
             // the keys orange (reads as normal).
             Text(HostedSyncTier.rowLabel)
-                .foregroundStyle(.secondary)
+                .pageCaption(pageStyle)
                 .help(sync.status.lastError ?? "")
         case .error:
             Text("Sync error")
-                .foregroundStyle(.red)
+                .pageCaptionError(pageStyle)
         case .idle:
             Text(lastSyncLabel)
-                .foregroundStyle(.secondary)
+                .pageCaption(pageStyle)
             pendingNote
         }
     }
@@ -248,7 +302,7 @@ struct SyncStatusRow: View {
     private var pendingNote: some View {
         if sync.status.pendingPushCount > 0 {
             Text("· \(sync.status.pendingPushCount) pending")
-                .foregroundStyle(.secondary)
+                .pageCaption(pageStyle)
         }
     }
 

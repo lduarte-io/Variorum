@@ -94,8 +94,18 @@ struct MobileSettingsView: View {
                 .foregroundStyle(tokens.muted)
                 .padding(.horizontal, 20)
             if let services {
+                // D1: the ONE injection site of the shared pages' phone
+                // style — the row restyles to the live voice, and the
+                // Account sheet it presents inherits the style through
+                // the environment (sheets inherit their presenter's
+                // environment — the SnapshotPrivacy precedent). The Mac
+                // never sets this key (its accessor compiles to nil).
+                // Horizontal 20 aligns the row with the section headers
+                // (the styled row carries no horizontal padding of its
+                // own — the old 14+6 composition is the nil arm's).
                 SyncStatusRow(services: services)
-                    .padding(.horizontal, 14)
+                    .environment(\.sharedPageStyle, SharedPageStyle(tokens: tokens))
+                    .padding(.horizontal, 20)
             } else {
                 Text(tokens.chromeLabel("Starting…"))
                     .font(tokens.small)

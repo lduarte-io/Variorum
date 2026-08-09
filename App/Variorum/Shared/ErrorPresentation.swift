@@ -27,17 +27,22 @@ import SwiftUI
 /// invisible. `ChromeMinHeightTests` pins the probed height.
 struct ErrorCauseNote: View {
     let error: String
+    /// D1: the phone's styling seam (nil on the Mac ALWAYS). The nil
+    /// arms below are render-identical to the pre-D1 lines (the note
+    /// lives in caption-font containers; the explicit `.font(.caption)`
+    /// the helpers add changes nothing there).
+    @Environment(\.sharedPageStyle) private var pageStyle
 
     @ViewBuilder
     var body: some View {
         if ErrorPresentation.isAuthShaped(error) {
             Text(ErrorPresentation.authGuidance)
-                .foregroundStyle(.orange)
+                .pageCaptionWarning(pageStyle)
                 .lineLimit(6)
                 .fixedSize(horizontal: false, vertical: true)
         }
         Text(error)
-            .foregroundStyle(.secondary)
+            .pageCaption(pageStyle)
             .textSelection(.enabled)
             .lineLimit(4)
             .fixedSize(horizontal: false, vertical: true)

@@ -37,6 +37,10 @@ nonisolated enum AccountTab: String, CaseIterable, Identifiable, Sendable {
 struct AccountView: View {
     let services: AppServices
     @Environment(\.dismiss) private var dismiss
+    /// D1: the phone's styling seam (nil on the Mac ALWAYS — the
+    /// environment accessor compiles to nil there; every styled arm
+    /// below is phone-only by construction).
+    @Environment(\.sharedPageStyle) private var pageStyle
     @State private var tab: AccountTab
     @State private var variorumEmail = ""
     @State private var variorumPassword = ""
@@ -149,25 +153,8 @@ struct AccountView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 14) {
-                HStack {
-                    // CF-14: the two tabs, rendered as the plain segmented
-                    // control on both form factors (functional, unstyled).
-                    Picker("Section", selection: $tab) {
-                        ForEach(AccountTab.allCases) { tab in
-                            Text(tab.rawValue).tag(tab)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .labelsHidden()
-                    .fixedSize()
-                    Spacer()
-                    // CF-1's grammar, carried to the whole sheet: dismissal
-                    // is a borderless Close — no defaultAction, never a
-                    // prominent "Done" beside an act.
-                    Button("Close") { dismiss() }
-                        .buttonStyle(.borderless)
-                }
+            VStack(alignment: .leading, spacing: pageStyle != nil ? 16 : 14) {
+                header
 
                 switch tab {
                 case .account:
@@ -178,6 +165,15 @@ struct AccountView: View {
             }
             .padding(20)
         }
+        // D1 styled arm only (nil renders an empty background — no Mac
+        // change): the voice's room behind the sheet, the accent as the
+        // control tint (toggles, progress).
+        .background {
+            if let style = pageStyle {
+                style.tokens.room.ignoresSafeArea()
+            }
+        }
+        .tint(pageStyle?.tokens.accent)
         // Mac-only floor (review round 1, R1-2): an iPhone sheet proposes
         // ~393 pt — a forced width clips the form on the phone door. macOS
         // keeps a minimum sized for the wider Encryption tab (its 460, the
@@ -187,26 +183,81 @@ struct AccountView: View {
         #endif
     }
 
+    /// The sheet's header row. nil arm: the pre-D1 construction exactly
+    /// (segmented picker + borderless Close). Styled arm: the phone sheet
+    /// grammar — the tabs as voiced text doors (the LK7 tab-bar shape:
+    /// ink when selected, faint otherwise) with the CF-14 tab mechanism
+    /// untouched, and the CF-1 Close as a chrome-cased plain accent door.
+    @ViewBuilder
+    private var header: some View {
+        if let style = pageStyle {
+            HStack(alignment: .firstTextBaseline, spacing: 18) {
+                ForEach(AccountTab.allCases) { target in
+                    Button {
+                        tab = target
+                    } label: {
+                        Text(style.chrome(target.rawValue))
+                            .font(style.tokens.heading)
+                            .foregroundStyle(
+                                tab == target ? style.tokens.ink : style.tokens.faint)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(target.rawValue)
+                    .accessibilityAddTraits(tab == target ? [.isSelected] : [])
+                }
+                Spacer()
+                Button {
+                    dismiss()
+                } label: {
+                    Text(style.chrome("Close"))
+                        .font(style.tokens.small)
+                        .foregroundStyle(style.tokens.accent)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Close")
+            }
+            .padding(.bottom, 2)
+        } else {
+            HStack {
+                // CF-14: the two tabs, rendered as the plain segmented
+                // control (functional, unstyled — the Mac's arm).
+                Picker("Section", selection: $tab) {
+                    ForEach(AccountTab.allCases) { tab in
+                        Text(tab.rawValue).tag(tab)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .fixedSize()
+                Spacer()
+                // CF-1's grammar, carried to the whole sheet: dismissal
+                // is a borderless Close — no defaultAction, never a
+                // prominent "Done" beside an act.
+                Button("Close") { dismiss() }
+                    .buttonStyle(.borderless)
+            }
+        }
+    }
+
     @ViewBuilder
     private var accountSection: some View {
         if !ProjectConfig.variorumConfigured {
             Text("Project keys are not filled in yet (ProjectConfig.swift) — sign-in is dormant.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .pageCaption(pageStyle)
         }
 
         // MARK: The Variorum session (the suite identity)
         if let signedIn = services.account.variorum {
-            HStack {
+            HStack(alignment: pageStyle != nil ? .firstTextBaseline : .center) {
                 Text("Signed in\(signedIn.email.map { " as \($0)" } ?? "")")
+                    .pageProse(pageStyle)
                 Spacer()
-                Button("Sign out") {
+                PageDoor("Sign out", form: .inlineAct, style: pageStyle) {
                     Task { await services.signOutVariorum() }
                 }
             }
             Text("Sync runs under this account; everything you write is owned by it.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .pageCaption(pageStyle)
 
             // Phase 14c batch 3 (L7): the tier's real home — CF-14's own
             // words made good ("account will one day show payment").
@@ -215,7 +266,7 @@ struct AccountView: View {
             if showingDeleteAccount {
                 deleteAccountSection
             } else {
-                Button("Delete Account…", role: .destructive) {
+                PageDoor("Delete Account…", form: .destructive, style: pageStyle) {
                     showingDeleteAccount = true
                     Task { await services.refreshSubscriptionNote() }
                 }
@@ -225,65 +276,68 @@ struct AccountView: View {
             signUpSection
         } else {
             Text("Sign in with your account email and password:")
+                .pageProse(pageStyle)
             emailField("Email", text: $variorumEmail)
                 .focused($focus, equals: .variorumEmail)
                 .onSubmit { focus = .variorumPassword }
+                .pageFieldChrome(pageStyle)
             SecureField("Password", text: $variorumPassword)
                 .textContentType(.password)  // AutoFill (R1-5)
                 .focused($focus, equals: .variorumPassword)
                 .onSubmit { signInVariorum() }
-            Button("Sign In") { signInVariorum() }
+                .pageFieldChrome(pageStyle)
+            PageDoor("Sign In", style: pageStyle) { signInVariorum() }
                 .disabled(!canSignInVariorum)
-            Button("Create an account…") {
+            PageDoor("Create an account…", form: .borderless, style: pageStyle) {
                 creatingAccount = true
                 services.account.lastError = nil
                 services.account.lastNotice = nil
             }
-            .buttonStyle(.borderless)
             Text("One account for the suite — sync and everything you write run under it.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .pageCaption(pageStyle)
         }
 
-        Divider()
+        PageDivider(pageStyle)
 
         // MARK: The Fragments journal connection (the bridge's session)
         if let fragments = services.account.fragments {
-            HStack {
+            HStack(alignment: pageStyle != nil ? .firstTextBaseline : .center) {
                 Text("Fragments journal connected\(fragments.email.map { " (\($0))" } ?? "")")
+                    .pageProse(pageStyle)
                 Spacer()
-                Button("Disconnect") {
+                PageDoor("Disconnect", form: .inlineAct, style: pageStyle) {
                     Task { await services.disconnectFragmentsJournal() }
                 }
             }
         } else {
             Text("Connect the Fragments journal (two-way bridge):")
+                .pageProse(pageStyle)
             emailField("Fragments email", text: $fragmentsEmail)
                 .focused($focus, equals: .bridgeEmail)
                 .onSubmit { focus = .bridgePassword }
+                .pageFieldChrome(pageStyle)
             SecureField("Fragments password", text: $fragmentsPassword)
                 .textContentType(.password)  // AutoFill (R1-5)
                 .focused($focus, equals: .bridgePassword)
                 .onSubmit { connectBridge() }
-            Button("Connect") { connectBridge() }
+                .pageFieldChrome(pageStyle)
+            PageDoor("Connect", style: pageStyle) { connectBridge() }
                 .disabled(!canConnectBridge)
             Text("Signs in directly to the Fragments project; only the session is kept, never the password.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .pageCaption(pageStyle)
         }
 
         if services.account.busy {
             ProgressView().controlSize(.small)
         }
         if let error = services.account.lastError {
-            Text(error).font(.caption).foregroundStyle(.red)
+            Text(error).pageCaptionError(pageStyle)
         }
         // Phase 14c (L8): the informational line — a notice is a normal
         // outcome (the confirmation email went out), never red.
         if let notice = services.account.lastNotice {
             Text(notice)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .pageCaption(pageStyle)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
@@ -299,33 +353,34 @@ struct AccountView: View {
     @ViewBuilder
     private var signUpSection: some View {
         Text("Create an account with an email and password:")
+            .pageProse(pageStyle)
         emailField("Email", text: $signUpEmail)
             .focused($focus, equals: .signUpEmail)
             .onSubmit { focus = .signUpPassword }
+            .pageFieldChrome(pageStyle)
         SecureField("Password", text: $signUpPassword)
             .textContentType(.newPassword)
             .focused($focus, equals: .signUpPassword)
             .onSubmit { focus = .signUpConfirm }
+            .pageFieldChrome(pageStyle)
         SecureField("Confirm password", text: $signUpConfirm)
             .textContentType(.newPassword)
             .focused($focus, equals: .signUpConfirm)
             .onSubmit { signUp() }
+            .pageFieldChrome(pageStyle)
         if !signUpConfirm.isEmpty && signUpPassword != signUpConfirm {
             Text("The two password entries don't match yet.")
-                .font(.caption)
-                .foregroundStyle(.orange)
+                .pageCaptionWarning(pageStyle)
         }
-        Button("Create Account") { signUp() }
+        PageDoor("Create Account", style: pageStyle) { signUp() }
             .disabled(!canSignUp)
-        Button("Back to sign in") {
+        PageDoor("Back to sign in", form: .borderless, style: pageStyle) {
             creatingAccount = false
             services.account.lastError = nil
             services.account.lastNotice = nil
         }
-        .buttonStyle(.borderless)
         Text(Self.signUpFootnote)
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            .pageCaption(pageStyle)
             .fixedSize(horizontal: false, vertical: true)
     }
 
@@ -339,27 +394,25 @@ struct AccountView: View {
     /// PROVISIONAL arm, so the field's caption says when it applies).
     @ViewBuilder
     private var deleteAccountSection: some View {
-        Text("Delete this account")
-            .fontWeight(.semibold)
+        PageHeading("Delete this account", style: pageStyle)
         Text(Self.deleteAccountExplanation)
-            .font(.caption)
-            .foregroundStyle(.orange)
+            .pageCaptionWarning(pageStyle)
             .fixedSize(horizontal: false, vertical: true)
         Text(Self.deleteSubscriptionAdvisory)
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            .pageCaption(pageStyle)
             .fixedSize(horizontal: false, vertical: true)
         if let note = services.account.subscriptionNote {
             Text(note)
-                .font(.caption)
-                .foregroundStyle(.orange)
+                .pageCaptionWarning(pageStyle)
                 .fixedSize(horizontal: false, vertical: true)
         }
         TextField("Type “\(Self.deleteConfirmationPhrase)” to continue", text: $deleteConfirmationEntry)
             .autocorrectionDisabled()
+            .pageFieldChrome(pageStyle)
         SecureField("Encryption passphrase (if encryption is set up)", text: $deletePassphrase)
+            .pageFieldChrome(pageStyle)
         HStack {
-            Button("Delete Account Permanently", role: .destructive) {
+            PageDoor("Delete Account Permanently", form: .destructive, style: pageStyle) {
                 let passphrase = deletePassphrase
                 deletePassphrase = ""
                 deleteConfirmationEntry = ""
@@ -372,7 +425,7 @@ struct AccountView: View {
             .disabled(services.account.busy
                       || deleteConfirmationEntry.lowercased()
                           .trimmingCharacters(in: .whitespaces) != Self.deleteConfirmationPhrase)
-            Button("Cancel") {
+            PageDoor("Cancel", form: .inlineAct, style: pageStyle) {
                 showingDeleteAccount = false
                 deleteConfirmationEntry = ""
                 deletePassphrase = ""
