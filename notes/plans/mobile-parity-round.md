@@ -4533,3 +4533,215 @@ sitting are the reviewer's anchor). Fresh cold reviewer,
 C review — C2 round 1 findings". Baselines at open: **mobile 244/42
 · spine 32/7 · perf 9/2 · core 1214/128 · Mac 1245/219
 tripwire-only · spine-Mac 51/7.**
+
+## Stage C review — C2 round 1 findings (cold reviewer, 2026-08-09)
+
+**Method.** Cold, zero implementation context. Read: `CLAUDE.md`;
+`notes/MobileSoul.md` in full; this plan's Stage C kickoff, C1 brief +
+THE PARITY MATRIX (every C2 row and its citations), the MID-CHAIN
+SITTING, the BOOK DETAILS RULING, the C2 brief, batch record, and
+acceptance; `notes/plans/mobile-app-plan.md`'s gate record (the LK5
+expansion ruling verbatim at ~6028); AppSpec §7/§9 for the seal and
+`setEntryDate`/`renameContainer` letters. The full diff
+`6ccdfca..0999771` read file by file, plus every core operation the
+new doors call (`Operations+Diverge`, `+SmartCollect`, `+Reading`,
+`+Appearance`, `+Container`), the shared seam (`AppSession`,
+`AutosaveCoordinator.record/flushNow`), the Mac parallels being
+mirrored (`MembershipChip`, `ShelfView`'s create/rename alerts +
+pin menu, `AppSettingsView`'s PromoteTagsSheet spec rule,
+`ReadingsViewModel`), and all four new/changed test files. No fixes
+made. No "Review foci" section exists for this project.
+
+### Findings
+
+**MINOR C2-R1-1 ·
+`App/Variorum/VariorumMobile/Features/Write/MobileWriteView.swift:203`
+(the rename alert's message) — the blank-clear promise names a
+display shape that does not exist.** The alert says *"A blank title
+clears the stored name — the note shows its own words instead."*
+Mechanism: `renameNote(blank)` stores NIL →
+`adoptHeader` → `DisplayTitle.note(title: nil, entryDate:)` — and
+that brain's chain is title → DAY → the literal `"Untitled"`
+placeholder (`Sources/VariorumCore/Domain/DisplayTitle.swift:120–124`).
+No arm of the chain ever shows the note's words (first-sentence
+derivation is the BLOCK-name brain, never a note title). So a dated
+note shows its day and an undated one shows "Untitled" — the user
+who blanked the title expecting "its own words" gets neither. The
+sentence is also an unpinned view literal, against the batch's own
+hoist doctrine ("a promise in a literal is a promise no test can
+keep" — applied to the tray strings in `aaf80fa` but not here).
+*Fix:* reword to the day fact (e.g. "the note shows its day
+instead") and hoist to a pinned static. Copy-class — no red-on-old
+pin owed beyond the hoisted-string assertion.
+
+**MINOR C2-R1-2 ·
+`App/Variorum/VariorumMobile/Features/Write/MobileEditorViewModel.swift:406–408`
+— the masthead's DisplayTitle call drops the `createdAt` link the
+Library uses, and this batch's new doors walk users into the
+divergent state.** `adoptHeader` calls
+`DisplayTitle.note(title:entryDate:)` with no `createdAt`
+(`Queries.ContainerHeader` doesn't carry it —
+`Sources/VariorumCore/Queries/EditorSupport.swift:14–32`), while the
+Library row calls the same brain WITH it
+(`MobileLibraryViewModel.rowTitle:154–157`). Mechanism: mint via
+"+ new note" (nil title, nil entry_date) → the Library row shows the
+created day; the masthead shows the literal "Untitled" — two phone
+surfaces disagree on the same note's name, against the DisplayTitle
+header's own one-brain doctrine. Pre-existing call (unchanged by
+this diff), but C2 made the masthead title THE RENAME DOOR whose
+blank-clear arm lands exactly here, and the new pin
+(`setAndClearTheEntryDate`'s "untitled-masthead-shows-the-day")
+covers only the entry-dated arm. Red-on-old pinnable today: assert
+an untitled, undated note's `displayTitle` equals its created day —
+fails on this tree. *Fix shape:* carry `createdAt` on
+`ContainerHeader` and pass it (the C2 brief's small-additive-Queries
+allowance, which fires the four-suite duty), or record the
+divergence as deliberate where the ladder rules the query change out
+of a review round's scope.
+
+**NIT C2-R1-3 ·
+`App/Variorum/VariorumMobile/Features/Shell/MobileBookDetails.swift:118–123`
+— the book-rename door refuses blank silently.** `rename()` is
+`guard canRename else { return }`: tapping "Rename" with a blanked
+field dismisses the alert having done and said nothing — the quiet
+half-door class the capability doctrine dislikes. For the record,
+the Mac parallel is WORSE, not better: `ReadingsViewModel.rename`
+(`:63–65`) passes any string straight to `renameReading`, which has
+no gate (`Operations+Reading.swift:77–79`) — the Mac stores a blank
+book name (its own latent wart, out of this diff's scope). One line
+either way on the phone: speak a refusal into `lastError`, or
+disable the alert's Rename button as the create sheet disables
+"Create Book".
+
+**NIT C2-R1-4 · `App/Variorum/Shared/AppSession.swift:40–41` — a
+stale comment in the one Shared file this batch touched.** "(…the
+mobile surface performs no structural ops, so it stays empty
+there.)" has been false since the v1 build (the phone's
+divide/merge/delete register inverses) and this batch widens the
+falsehood: `divergePostForReading` registers an undo entry
+(`Operations+Diverge.swift:114`) now reachable from a phone door.
+Harmless at runtime (entries are small and session-scoped; no phone
+door drains them — the recorded no-structural-undo posture), but the
+comment misinforms the next reader of a load-bearing shared file.
+Comment fix only.
+
+**NIT C2-R1-5 · this plan file, the C2 brief ("the four C2 refusal
+rewords") vs the inventory and record (five: #2/#5/#8/#9/#10) — a
+count drift in the process record.** The code followed the matrix
+(all five dissolved); the acceptance's "five … with their doors
+landing in the same commits" is also loose for #2/#5, whose
+disposition is reword-only with the recovery door consciously
+PL-3/13j-routed (no door owed — the matrix's own ruling). Recorded
+so the numbers reconcile; no code change.
+
+**NIT C2-R1-6 ·
+`App/Variorum/VariorumMobileTests/MobileBooksTests.swift:305–316` —
+a second file-scope polling helper.** The new global `settle`
+duplicates the shape of `MobileTutorialWalkTests`' private `poll`
+(`:67`). Two coexisting helpers invite a third; hoist one into
+`MobileEditorTestSupport` when convenient. Cleanliness only.
+
+### Clean bill (load-bearing things specifically checked and found solid)
+
+- **The ONE `Shared/AppSession.swift` change is Mac-behavior-identical
+  by token identity:** the `divergeForBook` body (signature + the two
+  statements) is byte-identical before/after; only its position (out
+  of the `#if os(macOS)` fence) and the doc comment changed; every
+  member it references (`autosave(forPost:)`, `runner`,
+  `Operations.DivergeResult`) is unfenced shared code; the Mac-fenced
+  caller (`divergeFromNote:190`) is untouched. Verified by diff
+  reading; the implementer's + architect's Mac runs (1245/219
+  tripwire-only by identity) stand as the suite evidence.
+- **The flush-first claim is structurally true on the phone, not just
+  pinned:** the mobile editor takes its coordinator from the SAME
+  per-post registry the shared entry flushes
+  (`MobileEditorViewModel.swift:152` →
+  `session.autosave(forPost:)`; `divergeForBook` flushes that
+  registry's coordinator), and the R1-4 pin
+  (`divergeSwapsAtTheExactSlotAndCarriesPendingBytes`) records
+  pending bytes through that same accessor and reads them back out
+  of the copy's variant rows.
+- **Zero `Sources/VariorumCore/` lines** in `6ccdfca..0999771`
+  (verified by `git diff --name-only`; the small-Queries allowance
+  indeed never fired); zero schema; zero `Sync/`; every new door
+  routes through an existing core op, each read in source:
+  `setShelfPinned` (R38 append-order, idempotent guards) ·
+  `createReading` (three kinds; the journal shape byte-matches the
+  Mac alert's curated/'journal'/entryDate-asc) ·
+  `addPostToReading` / `collectPostIntoSmartReading` (R98) /
+  `removePostFromReading` · `divergePostForReading` (smart →
+  `wrongReadingKind`, finished → `lockedReading`, exact
+  slot + section, capacity deliberately ungated) · `renameContainer`
+  · `setEntryDate` (`JournalDay` belt) · `lockReading`/
+  `unlockReading` · `renameReading` · `setDailyJournalBook`.
+- **The five refusal dissolves, verified per commit:** #8/#9/#10
+  reword in `c361db2`, the SAME commit that builds the doors the new
+  words name (Finish/Reopen + Use-as-Daily on the details sheet);
+  #2/#5 reword neutrally in `aaf80fa` per the matrix's
+  reword-only/PL-3 disposition. `MobileShellTests` pins all four
+  shelving notes Mac-free; the tray pair are hoisted pinned statics.
+  No new user-facing "Mac" string anywhere in the diff (grep-checked;
+  remaining inventory rows #1/#3/#4/#6/#7/#11–14 are C4/C5's,
+  deliberately untouched).
+- **The book-details tags half is display-only as ruled (B):**
+  `MobileBookDetailsModel` exposes `tagPaths`/`metaLine` and no
+  tag-touching act; both kinds render through the ONE shelf faces
+  brain (smart = its own spec's tags; curated = derived member-post
+  paths), pinned in `theIdentityBlockDisplaysTagsForBothKinds`. The
+  create sheet's picker only chooses spec paths at birth
+  (`createReading` alone — R37 held: applications untouched); the
+  membership sheet's `collect` applies tags, which is the Mac's own
+  R98 smart-ADD road, not book-details tag editing.
+- **Under-seal rename/entry-date match the letters:** rename is
+  §9's own enumeration ("may still be … retitled") — pinned
+  (`renameWorksUnderTheSeal`); entry-date is not in §9's list but IS
+  the recorded core class — `setEntryDate` carries no seal guard by
+  design and the core's own `setPostWordTarget` comment names "the
+  N34 container-row-metadata-allowed class (title/date/profile/
+  segmentation stay editable under seal)" — so the phone pins
+  standing both-platform behavior rather than inventing it
+  (`entryDateWorksUnderTheSeal`).
+- **The Mac chip's vocabulary genuinely mirrored, deltas recorded:**
+  label three-case + path grammar (`MembershipChip.label:178–187`),
+  add/collect/remove/diverge bodies near-verbatim, smart rows
+  rendering diverge-with-honest-refusal exactly as the Mac's rows do
+  (its comment: "silence where the row looks actionable is the
+  confusion"). The phone's two wording deltas (no ⌥⌘Z tail, no
+  Duplicate-as-Version door) and its P-2 refinement (no remove door
+  on smart rows, where the Mac renders one that can only refuse) are
+  all recorded in the batch record.
+- **The spec/JSON road end-to-end:** `MobileCreateBookModel.spec`
+  mirrors `PromoteTagsSheet.spec` exactly (OR→`tags`, AND→`tagsAll`);
+  canonical JSON pinned; the single-tag AND degenerates to OR
+  (`joinAll && paths.count > 1`) — semantically identical, safely.
+- **Live projections hold:** the shelf's held observation covers
+  books + pins + daily designation, so pin/designate/finish/rename
+  flow to the shelf without manual refresh; the contents screen holds
+  its own reading-row observation, so a details rename/finish
+  updates the screen beneath the sheet.
+- **Tutorial-as-spec held:** the getting-around lesson grew in each
+  owning commit (pin long-press · + new book · details · the
+  masthead identity paragraph · the date chip); every door it names
+  exists in the same tree; walks pin staging, not prose (PB1-3) —
+  the 13-lesson counts stand (spine green below).
+- **Deliberate absences verified absent, not forgotten:** no delete
+  book, no extent faces, no chapter/sort/filter/convert acts, no
+  note-level tag editing on details (C3's), no pin door duplicated on
+  details — each matching its named ruling.
+
+### This reviewer's runs (iPhone 17 Pro / iOS 26.2 simulator)
+
+- Full mobile suite: **244 passed, 0 failed, in 42 suites** (xcresult
+  summary verified: passedTests 244, failedTests 0; the 42 suite
+  names enumerated — all six new C2 suites present). Matches the
+  batch's arithmetic exactly (227/36 + 17/6).
+- The spine by its seven type names: **"Test run with 32 tests in 7
+  suites passed after 3.539 seconds"** — TEST SUCCEEDED.
+- Perf suites standalone (`MobilePerfFixtureTests` ·
+  `MobilePerfWalkTests`): **"Test run with 9 tests in 2 suites
+  passed after 9.857 seconds"** — TEST SUCCEEDED.
+- Core / Mac / Mac-spine: not run — zero `Sources/VariorumCore/`
+  lines in the diff (the standing only-if-shared condition); the one
+  `Shared/` change verified Mac-identical by diff reading (clean
+  bill, first entry) with the implementer's recorded Mac run as
+  suite evidence.
