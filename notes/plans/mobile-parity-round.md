@@ -1686,3 +1686,123 @@ FIX-1…FIX-4; the architect's-hand items are done in this commit (the
   dirty buffer is committed by `lockPost` itself), so the window is
   benign-by-construction — recorded here so no reader infers
   door-level atomicity.
+
+## Stage A review — round 1 FIX-PASS RECORD (fix session, 2026-08-09)
+
+All four adjudicated fixes executed, one commit each, in the order
+FIX-2 · FIX-4 · FIX-3 · FIX-1 (code first, evidence last so the
+afters capture the final tree). Commits: FIX-2 `f9f23c1` · FIX-4
+`6c200a9` · FIX-3 `5b07b09` · FIX-1 `4c40229` (+ this record).
+
+**FIX-2 (`mintFanBlock` parent-follows-child trap) — FIXED,
+revert-verified.** *Trace, reproduced before fixing:* the pin was
+written FIRST and run on the unfixed tree — it died exactly as the
+reviewer traced: `Swift/ContiguousArrayBuffer.swift:692: Fatal error:
+Index out of range` (signal 5), inside the write transaction, at
+`variants[parentIndex]` with the parent's row not yet minted. *Fix
+(the adjudicated poolDragCopy pre-assigned-ID shape):* every variant
+ID is assigned up front and the parent resolves from that map —
+order-free; one mechanical wrinkle the shape needs here and the
+record should carry: the immediate FK (`foreignKeysEnabled`, no
+deferral outside sync apply) refuses a FORWARD reference at insert,
+so a later-index parent's pointer lands in a second pass after every
+row exists (backward parents still ride the insert — every existing
+caller's write pattern is byte-unchanged). Self/out-of-range indices
+read as parentless (the outside-the-set rule). The wrong "the FK
+enforces the contract at insert" doc claim is corrected (the trap
+fired before any insert could). *Pin:*
+`StructuralDivideDuplicatingTests/aParentThatFollowsItsChildInFanOrderStillRemaps`
+— CONSTRUCTS the store state per the adjudication (WWorld, then V2↔V3
+`fan_position` swapped by direct SQL — today's ops cannot produce the
+order; 13e's reorder-takes will), divides with V1 displayed, and
+asserts the duplicates ride in the swapped order with dup-of-V3
+parenting to THIS successor's dup-of-V2 (now BEHIND it in the fan),
+store rows agreeing. *Revert verification:* pre-fix remap restored →
+the pin crashes (the identical fatal), while the sibling
+backward-parent pin (`theParentTreeRemapsInsideTheCopySet`) stays
+green on the same reverted tree — the pin discriminates on exactly
+the constructed ordering; fix restored → suite 12/1 green (13/1 with
+FIX-4's test).
+
+**FIX-4 (locked-displayed-take doc claim) — TESTED, no discrepancy.**
+`StructuralDivideDuplicatingTests/aLockedDisplayedTakeDividesLegally`
+locks V1 and displays IT (the round-1 NIT: the standing pin locked V3
+and displayed V1): the divide succeeds as documented — the lock stays
+on A's take byte-untouched, both cut halves land, nothing minted is
+born locked. The code accepts; the doc line holds; the stop-and-report
+condition never fired.
+
+**FIX-3 (P38 `commentMarkRoom` 26 vs the ~30 pt marker) — PIN-FIRST
+RUN; the probe came back GREEN; finding CLOSED REFUTED-BY-PROBE, NO
+code change; the pin stays as the guard.** *The probe:*
+`MobileTakesChromeTests/aFlushEndOneLineFannedAndCommentedBlockNeverCrowdsTheBadge`
+seeds a band of candidate lengths (31…36 chars at the measured
+8.654 pt mono charW) spanning the flush boundary, lets the
+exclusion→relayout ticks settle (the app's own cadence), detects
+one-liners by marker/badge vertical-band overlap (the crossing
+precondition itself), and asserts every steady-state one-liner's ●n
+marker clears the ⑂ badge. *Measured numbers (iPhone 17 Pro /
+iOS 26.2, container width cw = 363.0):* the widened exclusion sits at
+x = 307 (56 = 30 + 26 wide); **TK2 DOES apply `lineFragmentPadding`
+(5 pt) against exclusion-path edges** — the finding's undetermined
+half, settled: max one-line endX measured **299.25** (the 34-char
+candidate; 35 wraps), i.e. the glyph admit limit is cw−56−5 = 302,
+while crossing needs endX > cw−59 = **304** — the reviewer's ~3 pt
+window (304, 302] is EMPTY; worst-case clearance ≥ 2 pt (measured
+4.75 pt at the flushest achievable one-liner: mark maxX 347.25 vs
+badge minX 352, view coords). *The multi-digit aside measured too:*
+"●12"'s fitted width is ALSO 30.0 — the button's insets floor
+dominates, so no widening at twelve comments. *One honest transient:*
+the FIRST pre-settle tick can cross (a 36-char candidate's mark at
+334.55 before its wrap settled) — exactly the A3 record's "a single
+pass holds pre-exclusion geometry for exactly one tick"; the pin
+asserts steady state. `commentMarkRoom` stands at 26.
+
+**FIX-1 (the evidence set) — REBUILT HONESTLY; both record claims
+corrected strike-and-note.** Executed per the adjudication's letter:
+befores from the pre-A3 tree (`1010030`) in a throwaway `git
+worktree` with isolated DerivedData; afters from this fix session's
+HEAD; the standing simulator booted with the software keyboard
+connected; every capture `xcrun simctl io booted screenshot` of the
+REAL app (a throwaway XCUITest DRIVER only navigated and held each
+surface — signal-file handshake with the capturing host — and was
+deleted after use; the app binaries were the two trees' own builds,
+unmodified). Same seeded content both sides (direct-SQL dev-store
+seed, the test-factory precedent: the "Field Notes" book, three
+titled notes, the "Harbor Light" target with three prose paragraphs +
+one sand callout). All four write-pair md5s distinct; all eight
+captures visually inspected before being claimed (the befores show
+the pre-floor surface — ~5 pt margins, tight pitch, the callout
+bleeding off both edges — in both voices; the afters show the shipped
+floor, the path-line `+ new note` door, the contents-first front with
+its `read` door, and the Aa bar's two states). The two false claims
+in this file carry dated CORRECTION notes (the A3 batch record's
+screenshot paragraph; the A3 acceptance's exact-evidence line).
+**NEW FINDING for round 2, surfaced by the honest capture and outside
+this mandate: the expanded formatting strip's outer items (× and ⇥)
+render CLIPPED to slivers at the screen edges** — steady state, not
+animation (a 3-seconds-later re-capture is byte-identical; the
+`after-kbar-formatting-confirm` check), the 7-item strip overflowing
+the 402 pt width under iOS 26's circle-per-item toolbar rendering.
+The seven acts and the in-place swap remain pinned at the selector
+level; no pin ever covered on-screen visibility of the outer two.
+Deliberately NOT fixed here (the mandate is exactly FIX-1…FIX-4);
+round 2 / the architect owns the disposition.
+
+**Suites (this session's own runs, the final tree):**
+- Core (`swift test`): **"Test run with 1214 tests in 128 suites
+  passed"** — 1212 + the FIX-2 pin + the FIX-4 test, exactly
+  accounted.
+- Mobile (iPhone 17 Pro / iOS 26.2): **"Test run with 190 tests in 28
+  suites passed"** — 189 + the FIX-3 probe pin, exactly accounted.
+- Mac (from `App/Variorum/`): **"Test run with 1245 tests in 219
+  suites failed … with 1 issue"** — the one issue re-confirmed BY
+  IDENTITY as the standing
+  `TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`
+  tripwire (the corrected 1245/219 baseline, tripwire-only).
+- Spine (the seven suite type names): **"Test run with 51 tests in 7
+  suites passed"**.
+
+The four-suite duty fired on FIX-2's core change; the diff otherwise
+carries zero `Sources/VariorumCore/Sync/`, zero `Persistence/`
+(no schema), zero Mac-app source, zero `App/Variorum/Shared/` lines.
