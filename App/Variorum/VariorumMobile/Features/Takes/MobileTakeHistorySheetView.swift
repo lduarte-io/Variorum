@@ -15,13 +15,18 @@ import UIKit
 import VariorumCore
 
 @MainActor
-final class MobileTakeHistorySheetView: UIView {
+final class MobileTakeHistorySheetView: UIView, UIScrollViewDelegate {
     private weak var pageTextView: MobileEditorTextView?
     private weak var model: MobileEditorViewModel?
 
     /// The comments sheet's constant family (PROVISIONAL visual
     /// constants; the look rounds rule).
     static let sheetTop: CGFloat = 160
+    /// The rows' fixed pitch (row height 64 + gap 10) — what makes the
+    /// D2 lazy materialization arithmetic-exact: content size and row
+    /// origins derive from the index, never from measuring every row.
+    static let rowHeight: CGFloat = 64
+    static let rowPitch: CGFloat = 74
 
     private let dimView = UIView()
     private let sheetView = UIView()
@@ -31,7 +36,20 @@ final class MobileTakeHistorySheetView: UIView {
     private let emptyLabel = UILabel()
 
     private var pageWasEditable = true
-    private(set) var rowViews: [UIView] = []
+    /// The MATERIALIZED rows only (parity D2 — the routed C4 NIT: every
+    /// savepoint used to materialize as a UIView on every render,
+    /// unwindowed and without reuse, so a years-deep take paid its
+    /// whole history per delivery ingest. Rows now materialize LAZILY —
+    /// the near-viewport band only, the block-TOC's own discipline in
+    /// this sheet's manual-frame terms), keyed by item index.
+    private(set) var rowViewsByIndex: [Int: UIView] = [:]
+    var rowViews: [UIView] { Array(rowViewsByIndex.values) }
+    /// The scroll surface, exposed for the lazy pin (harness-drivable —
+    /// the comments-sheet pattern's own discipline).
+    var rowsScrollForTesting: UIScrollView { rowsScroll }
+    /// The materialized band (equality gate — a scroll tick that stays
+    /// inside the band rebuilds nothing).
+    private var materializedBand: Range<Int> = 0..<0
     /// The pre-split confirm currently presented (one presentation per
     /// gate — render() re-runs freely and must not stack alerts).
     private var presentedRestoreID: String?
@@ -61,6 +79,7 @@ final class MobileTakeHistorySheetView: UIView {
             for: .touchUpInside)
         sheetView.addSubview(doneButton)
 
+        rowsScroll.delegate = self // the lazy band follows her scrolling
         sheetView.addSubview(rowsScroll)
 
         emptyLabel.accessibilityIdentifier = "history.empty"
@@ -105,8 +124,9 @@ final class MobileTakeHistorySheetView: UIView {
             }
         }
         guard open else {
-            for row in rowViews { row.removeFromSuperview() }
-            rowViews = []
+            for row in rowViewsByIndex.values { row.removeFromSuperview() }
+            rowViewsByIndex = [:]
+            materializedBand = 0..<0
             presentedRestoreID = nil
             return
         }
@@ -145,10 +165,15 @@ final class MobileTakeHistorySheetView: UIView {
             height: max(sheetView.bounds.height - 56, 0))
     }
 
+    /// Content changed (open, verb, delivery ingest): size the scroll
+    /// from the COUNT (fixed pitch — no row is measured) and rebuild
+    /// the band from scratch. Cost ∝ the band, never the take's history
+    /// (the D2 lazy shape).
     private func renderRows(_ history: MobileTakeHistoryController) {
         let face = MobileEditorStyle.face
-        for row in rowViews { row.removeFromSuperview() }
-        rowViews = []
+        for row in rowViewsByIndex.values { row.removeFromSuperview() }
+        rowViewsByIndex = [:]
+        materializedBand = 0..<0
 
         let items = history.items
         emptyLabel.isHidden = !items.isEmpty
@@ -165,16 +190,46 @@ final class MobileTakeHistorySheetView: UIView {
             return
         }
 
-        var y: CGFloat = 0
+        rowsScroll.contentSize = CGSize(
+            width: rowsScroll.bounds.width,
+            height: CGFloat(items.count) * Self.rowPitch)
+        materializeBand(face: face)
+    }
+
+    /// The near-viewport band (one viewport of overscan each side),
+    /// equality-gated: scrolling inside the band builds nothing;
+    /// leaving it swaps the materialized set. Row origins derive from
+    /// the index (fixed pitch), so any band lands pixel-identically to
+    /// the old build-everything pass.
+    private func materializeBand(face: MobileEditorStyle.Face? = nil) {
+        guard let model, model.takeHistory.isOpen else { return }
+        let items = model.takeHistory.items
+        guard !items.isEmpty else { return }
+        let viewport = max(rowsScroll.bounds.height, 0)
+        let top = rowsScroll.contentOffset.y - viewport
+        let bottom = rowsScroll.contentOffset.y + viewport * 2
+        let first = max(0, Int(floor(top / Self.rowPitch)))
+        let last = min(items.count, Int(ceil(bottom / Self.rowPitch)))
+        let band = first..<max(first, last)
+        guard band != materializedBand else { return }
+
+        let face = face ?? MobileEditorStyle.face
         let width = rowsScroll.bounds.width
-        for item in items {
-            let row = makeRow(item: item, face: face, width: width)
-            row.frame.origin.y = y
-            rowsScroll.addSubview(row)
-            rowViews.append(row)
-            y += row.bounds.height + 10
+        for (index, row) in rowViewsByIndex where !band.contains(index) {
+            row.removeFromSuperview()
+            rowViewsByIndex[index] = nil
         }
-        rowsScroll.contentSize = CGSize(width: width, height: y)
+        for index in band where rowViewsByIndex[index] == nil {
+            let row = makeRow(item: items[index], face: face, width: width)
+            row.frame.origin.y = CGFloat(index) * Self.rowPitch
+            rowsScroll.addSubview(row)
+            rowViewsByIndex[index] = row
+        }
+        materializedBand = band
+    }
+
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        materializeBand()
     }
 
     private func makeRow(

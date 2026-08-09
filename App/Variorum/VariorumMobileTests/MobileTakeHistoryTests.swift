@@ -243,4 +243,56 @@ struct MobileTakeHistoryTests {
             #expect(!copy.contains("Mac"))
         }
     }
+
+    /// The sheet's rows materialize LAZILY (parity D2 — the routed C4
+    /// NIT: every savepoint used to materialize as a UIView on every
+    /// render, unwindowed and without reuse, so a years-deep take paid
+    /// its whole history per delivery ingest). Fixed pitch makes the
+    /// arithmetic exact: content size derives from the COUNT, only the
+    /// near-viewport band builds, and the band follows her scrolling —
+    /// the far end materializes when she arrives, and the head lets go.
+    @Test func theHistorySheetsRowsMaterializeLazily() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedPost(session)
+            // A deep history: forty savepoints (idle auto-commits
+            // accrete over years — the routed finding's own scale note).
+            try await session.runner.run { [variantID = seed.variantID] ops in
+                for _ in 0..<40 { _ = try ops.commit(variantID, kind: .manual) }
+            }
+            let (model, surface) = await makeSurfaceEditor(session, postID: seed.postID)
+            surface.layoutIfNeeded()
+
+            model.takeHistory.open(blockID: seed.blockID)
+            await settle { model.takeHistory.items.count == 40 }
+            #expect(model.takeHistory.items.count == 40)
+            let sheet = try #require(surface.textView.takeHistorySheetView)
+
+            // The scroll knows the WHOLE history…
+            let pitch = MobileTakeHistorySheetView.rowPitch
+            #expect(sheet.rowsScrollForTesting.contentSize.height == 40 * pitch,
+                    "content size derives from the count — every row reachable")
+            // …but only the near-viewport band is BUILT.
+            #expect(sheet.rowViews.count < 40,
+                    "rows materialize lazily — never the whole history")
+            #expect(!sheet.rowViews.isEmpty)
+            let firstID = "history.row.\(model.takeHistory.items[0].commit.id)"
+            #expect(sheet.rowViews.contains {
+                $0.accessibilityIdentifier == firstID
+            }, "the visible head is materialized")
+            let lastID = "history.row.\(model.takeHistory.items[39].commit.id)"
+            #expect(!sheet.rowViews.contains { $0.accessibilityIdentifier == lastID },
+                    "the far end is not built until she scrolls there")
+
+            // Scroll to the bottom: the band follows — the far row
+            // materializes, the head lets go (bounded either way).
+            let scroll = sheet.rowsScrollForTesting
+            scroll.contentOffset = CGPoint(
+                x: 0, y: scroll.contentSize.height - scroll.bounds.height)
+            #expect(sheet.rowViews.contains { $0.accessibilityIdentifier == lastID },
+                    "the band followed the scroll to the far end")
+            #expect(!sheet.rowViews.contains { $0.accessibilityIdentifier == firstID },
+                    "the head let go — the band is a window, not a ratchet")
+            #expect(sheet.rowViews.count < 40)
+        }
+    }
 }
