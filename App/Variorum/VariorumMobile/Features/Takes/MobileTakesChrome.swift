@@ -177,6 +177,13 @@ final class MobileTakesChromeController {
         // 100k; FB2-1's record has the measurement), shared across both
         // controllers per event since FIX-B2.
         let ranges = ranges ?? model.blockRangesByID()
+        // R2-1: strands are only born by edits — the continuation-heal
+        // half of the reservation walk rides the `.edit`/`.document`
+        // roads; a scroll tick pays O(first paragraph) per block.
+        let healContinuations: Bool = {
+            if case .nearViewport = scope { return false }
+            return true
+        }()
 
         // 1 — badges + first-paragraph tail reservations for FANNED
         // blocks (LK3/LK10; B3's mechanism — see the header and
@@ -194,7 +201,7 @@ final class MobileTakesChromeController {
             textView.setTailReservation(
                 Self.gutterWidth
                     + (slot.commentCount > 0 ? Self.commentMarkRoom : 0),
-                blockRange: range)
+                blockRange: range, healContinuations: healContinuations)
             reservedBlocks.insert(slot.blockID)
             if !near(range), badges[slot.blockID] != nil {
                 // Off the band: the badge's last resolved frame stands
@@ -223,7 +230,8 @@ final class MobileTakesChromeController {
         // the surface has no paragraph left to clear).
         for blockID in reservedBlocks.subtracting(seen) {
             if let range = ranges[blockID] {
-                textView.setTailReservation(0, blockRange: range)
+                textView.setTailReservation(
+                    0, blockRange: range, healContinuations: healContinuations)
             }
             reservedBlocks.remove(blockID)
         }

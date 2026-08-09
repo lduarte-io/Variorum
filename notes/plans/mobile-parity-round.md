@@ -45,9 +45,9 @@ session and is the launchable unit the author asked for.*
 > never let the tree sit unpushed at a stopping point.** Update the
 > CURRENT-STAGE pointer below at every stage close.
 
-**CURRENT STAGE → B (the tutorial book spine + the performance
-fixture) — Stage A CLOSED 2026-08-09 (ladder closed at round 2; the
-closeout section below has the record); the chain continues per her
+**CURRENT STAGE → C (capability parity by family) — Stages A and B
+CLOSED 2026-08-09 (each ladder closed at round 2; the closeout
+sections below have the records); the chain continues per her
 kickoff ruling (no author gate between stages; ONE combined sitting
 at the chain's end).**
 
@@ -3807,3 +3807,50 @@ No BLOCKER/MAJOR — round 3 does not open.
   **BUILD SUCCEEDED**.
 - Core / Mac / Mac-spine: not run — zero shared lines in the fix
   set (the standing only-if-shared condition).
+
+## Stage B ladder — round 2 ADJUDICATED; THE LADDER CLOSES · STAGE B CLOSED (architect, 2026-08-09)
+
+**Round-2 verdicts:** all five fixes HOLD (both FIX-B1 reverts
+re-executed by the reviewer's own hand; the impossibility claim
+verified against Apple's own `fixParagraphStyleAttribute` wording);
+no new BLOCKER/MAJOR — **the ladder closes at round 2.** The three
+leftovers, dispositioned and DONE at the architect's hand this
+commit (the `cad3312` post-close precedent), mobile re-run
+**227/36 green** by the architect's own hand after:
+
+- **MINOR R2-1 → FIXED:** the continuation-heal half of the
+  reservation walk now rides the `.edit`/`.document` roads ONLY
+  (strands are only born by edits — the reviewer's own proposed
+  shape); a scroll tick pays O(first paragraph) per decorated block,
+  never O(block bytes). Both chrome callers pass the road's shape;
+  the flag defaults to the healing shape so no future caller can
+  accidentally opt out.
+- **NIT R2-2 → FIXED:** the road-(b) heal doc now says what the code
+  does (paragraphs the range TOUCHES, containing-paragraph
+  included).
+- **NIT R2-3 → FIXED:** `refreshChrome` guards `bounds.width > 0`
+  before building the O(entries) index — pre-layout events pay
+  nothing; the first real layout escalates to a full pass by the
+  standing width-change rule.
+
+**STAGE B CLOSED.** Shipped: **the pocket guide** (5 chapters / 13
+lessons, phone-authored, seeded through a DEBUG door; every shipped
+capability exercised) · **the spine** (seven suite type names, 32/7,
+riding the baseline suite) · **the proving ground** (100,025 words /
+1,370 blocks + a 300-note corpus, deterministic) · **the measurement
+walk** (flatness + floor pins, the armed 250 MiB ceiling) · **the
+FB2-1 fix** — her bar's executable form now HOLDS on the simulator:
+keystroke 551→6 ms · scroll 48→1.7 ms · walk delta 5,842→43 MiB ·
+100k open 902→433 ms · the suite itself 2.5 min→18 s — plus the
+reservation mechanism replacing exclusion paths outright, and the
+FIX-B1 heal roads. **Two TK2 discoveries folded into
+`notes/TEXTKIT2_NOTES.md` §3 as dated, pinned findings** (exclusion
+presence ⇒ document-scale relayout; attribute fixing re-propagates
+governing paragraph styles). **Final counts:** mobile **227/36
+zero known issues** · spine **32/7** · perf **9/2** · core 1214/128
+· Mac 1245/219 tripwire-only · spine-Mac 51/7. **End-bundle adds
+from B:** PB1-1/PB1-2/PB1-3 (guide placement/names/prose) · PB2-1 ·
+PB2-3 (fixture constants) · PB3-1's derived 12 ms floor (recorded
+for her transparency, not a decision) — PB1-4 rides Stage C's
+refusal family with the lesson-update rider; PB2-2 RESOLVED (the
+armed ceiling). **CURRENT STAGE → C.**

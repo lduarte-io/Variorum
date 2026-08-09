@@ -105,6 +105,12 @@ final class MobileBlockDecorController {
         // One index walk for every range (the takes chrome's B3 read;
         // shared across both controllers per event since FIX-B2).
         let ranges = ranges ?? model.blockRangesByID()
+        // R2-1 (the takes chrome's twin note): the continuation heal
+        // rides the `.edit`/`.document` roads only.
+        let healContinuations: Bool = {
+            if case .nearViewport = scope { return false }
+            return true
+        }()
 
         // 1 — callout frames + emoji (M12; the one-frame rule).
         var framed: Set<String> = []
@@ -123,7 +129,8 @@ final class MobileBlockDecorController {
                 let width = ceil((emoji as NSString).size(
                     withAttributes: [.font: Self.emojiFont]).width)
                 textView.setLeadingFirstLineReservation(
-                    width + 8, blockRange: range)
+                    width + 8, blockRange: range,
+                    healContinuations: healContinuations)
                 emojiReservedBlocks.insert(slot.blockID)
             }
             if !near(range), frames[slot.blockID] != nil {
@@ -166,7 +173,9 @@ final class MobileBlockDecorController {
         // from the surface has no paragraph left to clear).
         for blockID in emojiReservedBlocks.subtracting(emojiSeen) {
             if let range = ranges[blockID] {
-                textView.setLeadingFirstLineReservation(0, blockRange: range)
+                textView.setLeadingFirstLineReservation(
+                    0, blockRange: range,
+                    healContinuations: healContinuations)
             }
             emojiReservedBlocks.remove(blockID)
         }

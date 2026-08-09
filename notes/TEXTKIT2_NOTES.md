@@ -138,6 +138,10 @@ mostly documented in the STTextView Apple-bug list — reword/re-verify per OS v
 - Only `NSTextParagraph`-derived elements work reliably; custom `NSTextElement` subclasses hit
   runtime assertions. Your block model must map cleanly onto paragraph elements.
 
+**iOS 26 measured findings (mobile parity round Stage B, 2026-08-09 — the iPhone editor at a 100k-word fixture; both PINNED in `VariorumMobileTests`)**
+- **Exclusion-path PRESENCE alone makes post-edit relayout document-scale.** With even one `exclusionPaths` rect installed — position-independent, content-untouched — each keystroke's relayout measured ~155–300 ms at 100k words vs ~0.5 ms with zero rects, and the height estimate inflated 1.4×. Gutter/margin reservations on iOS therefore ride first-paragraph paragraph styles (`tailIndent` / `firstLineHeadIndent`), and container exclusions are retired-and-pinned on the phone's Write surface. (The Mac editor never used `exclusionPaths`; treat any future use as a perf decision, not a layout convenience.)
+- **NSTextStorage attribute FIXING re-propagates the paragraph's governing style across the whole paragraph, terminator included** (`fixParagraphStyleAttribute`'s documented behavior, and `processEditing` fixes automatically — probe-verified). A "write the clamped sub-range only" strategy for paragraph styles is impossible; heal the landing after the edit instead.
+
 **Spell check / completion**
 - Continuous spell checking + the word-completion popover has crashed NSTextView (reproducible
   with the debugger attached). Have a toggle to disable continuous spell checking while

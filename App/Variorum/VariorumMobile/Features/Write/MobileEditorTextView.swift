@@ -191,6 +191,11 @@ final class MobileEditorTextView: UITextView {
     func refreshChrome(scope: MobileTakesChromeController.RefreshScope = .document) {
         guard blockDecor != nil || takesChrome != nil, let model = editorModel
         else { return }
+        // Pre-layout there is nothing to place, and the first real
+        // layout escalates to a full pass via the width change — so a
+        // zero-width event must not pay the O(entries) index build
+        // (Stage B ladder R2-3).
+        guard bounds.width > 0 else { return }
         let ranges = model.blockRangesByID()
         blockDecor?.refresh(scope: scope, ranges: ranges)
         takesChrome?.refresh(scope: scope, ranges: ranges)
@@ -373,9 +378,12 @@ final class MobileEditorTextView: UITextView {
     /// Reserve `width` points of first-paragraph TRAILING room (0 clears).
     /// Returns whether storage changed (the caller's invalidation record).
     @discardableResult
-    func setTailReservation(_ width: CGFloat, blockRange: NSRange) -> Bool {
+    func setTailReservation(
+        _ width: CGFloat, blockRange: NSRange, healContinuations: Bool = true
+    ) -> Bool {
         setReservation(
             blockRange: blockRange,
+            healContinuations: healContinuations,
             mutate: { style in
                 let target = width <= 0 ? 0 : -width
                 guard abs(style.tailIndent - target) > 0.01 else { return false }
@@ -393,9 +401,12 @@ final class MobileEditorTextView: UITextView {
     /// `firstLineHeadIndent` is exactly the emoji gap's first-line-only
     /// shape.
     @discardableResult
-    func setLeadingFirstLineReservation(_ width: CGFloat, blockRange: NSRange) -> Bool {
+    func setLeadingFirstLineReservation(
+        _ width: CGFloat, blockRange: NSRange, healContinuations: Bool = true
+    ) -> Bool {
         setReservation(
             blockRange: blockRange,
+            healContinuations: healContinuations,
             mutate: { style in
                 let target = max(width, 0)
                 guard abs(style.firstLineHeadIndent - target) > 0.01 else { return false }
@@ -417,8 +428,14 @@ final class MobileEditorTextView: UITextView {
     /// either way (the header's measured truth). Each closure touches
     /// ONLY its own field on a copy of the current style, so the two
     /// doors still compose on a block carrying both.
+    /// `healContinuations: false` visits ONLY the first paragraph —
+    /// the per-scroll-tick road's shape (Stage B ladder R2-1): strands
+    /// are only born by edits, so the continuation heal belongs to the
+    /// `.edit`/`.document` roads, and a tick pays O(first paragraph),
+    /// never O(block bytes).
     private func setReservation(
         blockRange: NSRange,
+        healContinuations: Bool = true,
         mutate: (NSMutableParagraphStyle) -> Bool,
         heal: (NSMutableParagraphStyle) -> Bool
     ) -> Bool {
@@ -441,6 +458,7 @@ final class MobileEditorTextView: UITextView {
                applyReservation(writeRange, isFirst ? mutate : heal, storage) {
                 changed = true
             }
+            if isFirst, !healContinuations { break }
             isFirst = false
             guard pEnd > location else { break }
             location = pEnd
@@ -450,7 +468,8 @@ final class MobileEditorTextView: UITextView {
 
     /// FIX-B1 road (b) — the typing-inheritance heal (edit-scoped; the
     /// FIX-B1 header has the full mechanism): zeroes ONE reservation
-    /// field across every paragraph beginning in `range`, EXCEPT the
+    /// field across every paragraph the range TOUCHES — the paragraph
+    /// containing `range.location` included (R2-2) — EXCEPT the
     /// paragraphs whose starts the calling walk currently governs (a
     /// reserved block's first paragraph). The chrome controllers call
     /// their field's door after the reservation walk on the `.edit`
