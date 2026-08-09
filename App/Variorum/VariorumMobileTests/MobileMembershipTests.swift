@@ -270,3 +270,89 @@ struct MobileNoteRenameTests {
         }
     }
 }
+
+@MainActor
+@Suite("Mobile note metadata — entry date (parity C2, her sitting item 4)")
+struct MobileNoteEntryDateTests {
+    /// Set AND clear through the core's `setEntryDate`; the masthead
+    /// follows (an untitled note displays its day — the DisplayTitle
+    /// chain), and clearing un-dates the note exactly.
+    @Test func setAndClearTheEntryDate() async throws {
+        try await withEditorWorld { session, db in
+            let postID = try await session.runner.run { ops in
+                try ops.createPost(title: nil)
+            }.id
+            let (model, _) = makeEditor(session, postID: postID)
+            await model.loadOnce()
+
+            await model.setEntryDate("2026-08-09")
+            #expect(try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT entry_date FROM container WHERE id = ?",
+                    arguments: [postID])
+            } == "2026-08-09")
+            #expect(model.displayTitle == "2026-08-09",
+                    "an untitled note's masthead shows its day")
+            #expect(model.statusMessage == nil)
+
+            await model.setEntryDate("  ")
+            let stored = try await db.read { db in
+                try Row.fetchOne(
+                    db, sql: "SELECT entry_date FROM container WHERE id = ?",
+                    arguments: [postID])
+            }
+            #expect(stored?["entry_date"] == nil as String?,
+                    "blank clears — un-dating a note is legitimate")
+            #expect(model.statusMessage == nil)
+        }
+    }
+
+    /// A malformed day REFUSES AND KEEPS (the op's `invalidEntryDate`
+    /// belt, spoken in phone words — no platform name; the ExtentInput
+    /// parallel: a typo must never silently clear a stored date).
+    @Test func aMalformedDayRefusesAndKeeps() async throws {
+        try await withEditorWorld { session, db in
+            let postID = try await session.runner.run { ops -> String in
+                let post = try ops.createPost(title: nil)
+                try ops.setEntryDate(post.id, entryDate: "2026-08-01")
+                return post.id
+            }
+            let (model, _) = makeEditor(session, postID: postID)
+            await model.loadOnce()
+
+            await model.setEntryDate("next tuesday")
+            #expect(model.statusMessage == MobileEditorViewModel.entryDateRefusal)
+            #expect(MobileEditorViewModel.entryDateRefusal.contains("Mac") == false)
+            #expect(try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT entry_date FROM container WHERE id = ?",
+                    arguments: [postID])
+            } == "2026-08-01", "the stored date survives the typo")
+        }
+    }
+
+    /// Dating rides the retitle class — container METADATA the seal does
+    /// not freeze (the op's standing behavior on both platforms,
+    /// recorded and pinned rather than left to inference).
+    @Test func entryDateWorksUnderTheSeal() async throws {
+        try await withEditorWorld { session, db in
+            let postID = try await session.runner.run { ops -> String in
+                let post = try ops.createPost(title: "Sealed")
+                try ops.lockPost(post.id)
+                return post.id
+            }
+            let (model, _) = makeEditor(session, postID: postID)
+            await model.loadOnce()
+            #expect(model.isSealed)
+
+            await model.setEntryDate("2026-08-09")
+            #expect(try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT entry_date FROM container WHERE id = ?",
+                    arguments: [postID])
+            } == "2026-08-09")
+            #expect(model.statusMessage == nil, "no refusal — metadata, the retitle class")
+            #expect(model.isSealed, "dating never unseals")
+        }
+    }
+}

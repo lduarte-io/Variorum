@@ -690,6 +690,44 @@ final class MobileEditorViewModel {
         }
     }
 
+    // MARK: - Entry date (parity C2 — her mid-chain sitting, item 4:
+    // "entry date crosses"; the note-metadata family's last member)
+
+    /// The malformed-day refusal (refuse-and-KEEP — the ExtentInput
+    /// parallel: a typo must never silently clear a stored date). Pinned
+    /// static; no platform name.
+    static let entryDateRefusal =
+        "Dates are plain days like 2026-08-09 — nothing was changed."
+
+    /// Sets (or clears) the note's entry date through the core's own
+    /// `setEntryDate`. Blank/whitespace → CLEAR (nil — un-dating a note
+    /// is legitimate, the op's own letter); a malformed day is refused by
+    /// the op (`invalidEntryDate` — the belt) and spoken in phone words.
+    /// Like rename, this is container METADATA (the retitle class): the
+    /// op accepts it under the seal on both platforms — recorded, pinned.
+    func setEntryDate(_ raw: String?) async {
+        let trimmed = raw?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let stored = (trimmed?.isEmpty ?? true) ? nil : trimmed
+        do {
+            try await session.runner.run { [postID] ops in
+                try ops.setEntryDate(postID, entryDate: stored)
+            }
+            report(nil)
+            let header = try await session.database.read { [postID] db in
+                try Queries.containerHeader(db, containerID: postID)
+            }
+            adoptHeader(header)
+        } catch let error as OperationError {
+            if case .invalidEntryDate = error {
+                report(Self.entryDateRefusal)
+            } else {
+                report(String(describing: error))
+            }
+        } catch {
+            report(String(describing: error))
+        }
+    }
+
     /// True while an input-method composition is in flight (the flip and
     /// the idle mint share the bail — mutating mid-composition rewrites
     /// the marked region).

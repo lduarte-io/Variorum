@@ -269,10 +269,12 @@ enum MobileTutorialSeeder {
             + "same way.",
 
             "The note's masthead is its identity: tap the title to rename "
-            + "the note, and tap the books line under it to see which books "
+            + "the note, tap the books line under it to see which books "
             + "hold it — add it to one, take it out of one, or diverge a "
-            + "separate copy for a single book. Editing a note edits it "
-            + "everywhere it appears; diverging is how one book gets its own.",
+            + "separate copy for a single book — and tap the date beside it "
+            + "to set or clear the day this note counts as (journals sort "
+            + "by it). Editing a note edits it everywhere it appears; "
+            + "diverging is how one book gets its own.",
 
             "Settings, on the shelf's top line, holds the voice switch (the "
             + "last lesson) and the door that restores this book.",

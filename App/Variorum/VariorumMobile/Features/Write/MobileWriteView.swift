@@ -58,6 +58,9 @@ struct MobileWriteScreen: View {
     /// Rename note (parity C2): the title IS the door; the alert's field.
     @State private var renamePresented = false
     @State private var renameField = ""
+    /// Entry date (parity C2, her sitting item 4): the date chip's alert.
+    @State private var datePresented = false
+    @State private var dateField = ""
     /// The shell's voice authority; nil in harness/preview use, where the
     /// stored preference read at init governs.
     private let router: MobileShellRouter?
@@ -148,7 +151,10 @@ struct MobileWriteScreen: View {
                 Spacer(minLength: 12)
                 sealDoor
             }
-            membershipChip
+            HStack(spacing: 12) {
+                membershipChip
+                dateChip
+            }
             if let canary = model.canaryMessage {
                 Text(canary).font(tokens.small).foregroundStyle(.red)
             }
@@ -201,6 +207,40 @@ struct MobileWriteScreen: View {
             MobileMembershipSheet(
                 model: membership, tokens: tokens, onOpenNote: onOpenNote)
         }
+        .alert("Entry Date", isPresented: $datePresented) {
+            TextField("2026-08-09", text: $dateField)
+                .keyboardType(.numbersAndPunctuation)
+            Button("Set") {
+                let day = dateField
+                let model = model
+                Task { await model.setEntryDate(day) }
+            }
+            Button("Clear Date") {
+                let model = model
+                Task { await model.setEntryDate(nil) }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("A date makes this a day's entry — journals sort by it. Plain days only (2026-08-09); Clear leaves the note undated.")
+        }
+    }
+
+    /// The entry-date chip (parity C2, her sitting item 4 — set AND
+    /// clear). Placement: beside the books chip on the masthead's
+    /// identity line — the date is note identity exactly as membership
+    /// is, and the alert-confirmed chip is the rename door's own grammar.
+    private var dateChip: some View {
+        Button {
+            dateField = model.header?.entryDate ?? ""
+            datePresented = true
+        } label: {
+            Text(model.header?.entryDate ?? tokens.chromeLabel("no date"))
+                .font(tokens.small)
+                .foregroundStyle(model.header?.entryDate != nil ? tokens.muted : tokens.faint)
+                .lineLimit(1)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Entry Date")
     }
 
     /// The membership chip (parity C2): which books hold this note — the
