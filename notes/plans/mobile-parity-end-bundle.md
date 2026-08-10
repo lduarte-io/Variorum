@@ -17,20 +17,19 @@ combined sitting here in place of four stage gates.*
    17 pairs) · `notes/plans/mobile-d2-screens/` (the look pass +
    routed items). Say what you'd flip — everything is one-commit
    adjustable.
-2. **Rule the two NAMED questions** (§2 below).
+2. ~~Rule the two NAMED questions~~ **RULED at the chain's close**
+   (§2 — the Mac adopts the carry-all merge, on 13j's row; the lens
+   stays session-local).
 3. **Skim the taste-only list** (§3) and the PROVISIONAL inventory
    (§4) — silence keeps them as shipped; a word flips any of them.
 4. **The device half** (§5): when you want it — the 100k on-device
    run, the feel-round riders, the takes-surfaces re-check, the live
-   sign-in verify. **The phone INSTALL waits on 14c's mirror deploy**
-   (client marker 6 vs live mirror 5 — installing earlier would
-   stop your phone syncing by design).
-5. **Two process words when ready:** whether/when `mobile` → `main`
-   merges (pre-answered NO while you're mid-14c — your call when 14c
-   completes), and the **internal TestFlight** trigger ("super
-   basic… for just me and whoever I add" — D's close is its ruled
-   trigger point; your word starts it, noting it needs the merge/
-   14c question answered first only if you want the marker-6 build).
+   sign-in verify.
+5. ~~Two process words~~ **PRE-AUTHORIZED at the chain's close**
+   (§5): once 14c's deploy lands, the next mobile session merges
+   `mobile` → `main` and installs the Release build at its kickoff.
+   Only the **internal TestFlight** trigger still waits on your
+   word.
 6. **Stage E at your word** — its entry gate (the parity ledger
    empty or consciously deferred by you) is yours by design.
 
