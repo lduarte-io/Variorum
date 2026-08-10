@@ -7941,3 +7941,212 @@ records + acceptances the reviewer's anchor). Fresh cold reviewer,
 D review — round 1 findings". Baselines at open: **mobile 313/60 ·
 mobile spine 33/7 · perf 9/2 · core 1215/128 · Mac 1246/220
 tripwire-only · Mac spine 51/7.**
+
+## Stage D review — round 1 findings (cold reviewer, 2026-08-09)
+
+Cold review of `54f7190..2177489` (code `df178d1`…`ca47652` +
+`04d0f8b`; the two record commits plan-file-only, verified by own
+`--stat`). Anchor: the Stage D kickoff, both batch briefs + records +
+acceptances; `notes/MobileSoul.md`; the LK canon
+(mobile-app-plan.md ~242–312); CLAUDE.md/AppSpec/OverallModel/
+SyncSpec. Every diff hunk in all 24 files read line-by-line in this
+session; no fixes made. No "Review foci" section exists for this
+project.
+
+### Findings
+
+**MINOR D-R1-1 · `MobileChipFlow.swift:75–94` (`placeSubviews`) +
+`MobileWriteView.swift:282–394` — an over-wide chip is placed at its
+IDEAL width, so it overflows the masthead's trailing edge with NO
+truncation; the pre-D2 construction ellipsized.** Mechanism: every
+chip is measured with `sizeThatFits(.unspecified)` (a `lineLimit(1)`
+Text's ideal = its full single-line width) and then placed with
+exactly that proposal (`ProposedViewSize(sizes[index])`). The pure
+brain honestly gives a chip wider than `available` its own row
+(pinned), but the PLACEMENT never clamps: a lens chip carrying a
+long book name ("lens: <name>" — user text; ~54 chars crosses a
+393 pt phone at `tokens.small`), or a tags chip with 4–5 leaf tags,
+draws past the masthead's 20 pt padding and off the screen edge,
+cut mid-glyph by the screen with no ellipsis. Before D2 the HStack
+compressed the chip below ideal, so `lineLimit(1)` truncation
+engaged. The batch record's "nothing clips" holds for every chip
+that FITS a line but is falsified at the over-wide arm (no door
+hides — the chip stays tappable in its visible portion; following
+chips still wrap correctly — hence MINOR, the look-class this batch
+itself owns). *Evidence:* code read as above; the
+`after-masthead-crowded` capture exercises only a name short enough
+to fit one line, so the screenshot walk could not have caught it.
+*Proposed fix:* clamp the per-chip placement (and the row-width
+bookkeeping) to `bounds.width` — propose
+`width: min(size.width, bounds.width)` in `placeSubviews` (mirror in
+`sizeThatFits`), so the Text's own `lineLimit(1)` truncation
+re-engages; route the clamp through the pure brain (a pinned
+`placementWidth(ideal:available:)`) if the ladder wants it
+red-on-old-able — the Layout face alone is the recorded
+not-headless-testable class.
+
+**MINOR D-R1-2 · `MobileStars.swift:125–155` (`refresh`/`start`/
+`resolveNames`) vs `:197–208` (`speak`) — a homeless store-read
+error that lands while a refusal's cadence is pending inherits the
+refusal's home and its clear task, violating the recorded
+semantics.** The record (and the pin's own closing comment) claims:
+homeless errors "render on every root, honestly, and never
+auto-clear." But the homeless writers set `lastError` WITHOUT
+touching `errorHome` or `errorClearTask` — and `toggle` calls
+`refresh()` immediately after `speak(...)`. Interleaving: cap
+refusal fired from Library → `speak` sets `errorHome = .library`
+and schedules the 8 s clear → `refresh()`'s read (or a `start()`
+observation death inside the window) fails and overwrites
+`lastError` with the store error → that error now renders at the
+LIBRARY ONLY (`errorHome` still `.library`) and the pending task
+silently clears it at the cadence — one root and auto-cleared, the
+exact opposite of the recorded class. Double-fault rare (a failing
+local read), which is why MINOR; but the whole point of the homeless
+class was honesty under exactly that failure. *Pin note, honest:*
+the same not-stageable-through-the-live-store-harness note the
+batch record itself makes applies — this is the traced-mechanism
+architectural class, not a red-on-old candidate. *Proposed fix:*
+route homeless writes through one setter that nils `errorHome` AND
+cancels `errorClearTask` (the mirror of `speak`), so a homeless
+error always demotes the pending refusal to homeless semantics
+instead of inheriting door semantics.
+
+**NIT D-R1-3 · `MobileChipFlow.swift:58–73` (`sizeThatFits`) — an
+infinite width proposal is answered with `.infinity`.** `return
+CGSize(width: proposal.width ?? contentWidth, …)` echoes the
+proposal verbatim; when SwiftUI probes with
+`ProposedViewSize(width: .infinity, …)` (a standard max-flexibility
+probe) the layout reports infinite width instead of its content
+width. Harmless in the masthead's finite VStack today; a latent trap
+if the flow is ever hosted in a horizontally-unconstrained context.
+One line: treat a non-finite proposal like nil.
+
+**NIT D-R1-4 · `MobileTakeHistorySheetView.swift:46` — `rowViews`
+now returns dictionary-ordered (arbitrary-ordered) views where the
+pre-D2 array was top-to-bottom.** Today's only consumers are
+order-agnostic (`count`/`contains` in the lazy pin), so nothing is
+wrong — but the property's name still promises the old list shape,
+and a future consumer assuming visual order would be silently wrong.
+A one-line doc comment (or sorting by key) closes it.
+
+### Clean bill (load-bearing things specifically checked and found solid)
+
+- **THE LAW — zero Mac-rendered change from D1 — verified cold,
+  three ways by this reviewer's own hands.** (1) *Structural:* the
+  macOS `sharedPageStyle` accessor compiles to getter-nil/
+  setter-inert (`SharedPageStyle.swift:63–73`); `SharedPageStyleKey`
+  is `private`, so no Mac code path can reach storage around the
+  accessor; `SharedPageStyleTests` pins it Mac-side,
+  `MobileSharedPageStyleTests` pins the seam LIVE phone-side with
+  the casing proven to be `chromeLabel`'s own. (2) *Line-by-line:*
+  every Shared/ hunk walked — every styled arm sits behind
+  `if let style` / `pageStyle != nil`; every nil arm is
+  byte-equivalent to the pre-D1 construction at its site (helper by
+  helper: `pageProse`/`pagePhraseCard`/`pageFieldChrome` ⇒ self;
+  `pageSecondary` ⇒ `.foregroundStyle(.secondary)`; the caption
+  family ⇒ the exact `.font(.caption)` + color pairs; `PageHeading`
+  ⇒ `Text(title).fontWeight(.semibold)`; `PageDivider` ⇒
+  `Divider()`; all five `PageDoor` nil forms ⇒ the exact Button
+  constructions their sites carried, `.borderless`/`.bordered`/
+  destructive-role included). The three non-byte-identical deltas
+  each verified render-identical: ErrorCauseNote's added
+  `.font(.caption)` (all three Mac call sites impose caption
+  already — `BridgeStatusViews.swift:69`'s `.font(.caption)`
+  container, SyncStatusRow's nil-arm `.font(.caption)` container,
+  `ChromeMinHeightTests:56/72`'s own `.font(.caption)` probe
+  wrappers); `.tint(pageStyle?.tokens.accent)` = `.tint(nil)` on
+  the Mac with nothing to cancel (own grep: AuthViews:176 is the
+  codebase's ONLY `.tint`); the empty `.background {}` builder.
+  Plus: `HStack(alignment:)` nil arm `.center` is the HStack
+  default it replaced; `VStack(spacing:)` nil arm 14 is the pre-D1
+  value; SyncStatusRow's `.sheet` relocation preserves the exact
+  modifier order (`.font(.caption)` → `.padding(6)` → `.sheet`).
+  (3) *The suite:* Mac 1246/220 with EXACTLY the standing
+  `TakePaneMeasureTests` tripwire red BY IDENTITY, by this
+  reviewer's own run; Mac spine 51/7 by its seven suite names.
+- **The snapshot-privacy marks survive the restyle.**
+  `.privacySensitive()` still sits directly on the words display
+  Text (`EncryptionViews.swift:433`) with `pagePhraseCard` wrapping
+  OUTSIDE it (:434 — the card is chrome, the words redact), and on
+  the one shared `phraseEntryField` (:405) used at all three entry
+  sites (:439/:542/:827); D1's field chrome rides the EXISTING
+  iOS-only branch after the mark. `MobileSnapshotPrivacyTests`
+  green in this reviewer's mobile run.
+- **The 14b ruled copy is byte-unchanged.** No string constant
+  changed anywhere in the diff (every hunk walked); the CF copy
+  pins (`EncryptionFlowTests` — the checkbox sentence, the setup
+  warning) pass in this reviewer's own Mac run. Only CHROME words
+  (tabs, doors, headings, the disclosure label) route through
+  `chrome()`, the P26/P43 one-register rule; the checkbox sentences
+  render through `pageCaptionProminent` — font/ink only, never
+  re-cased.
+- **The five routed items each land on their ladder-recorded
+  mechanism** (each origin section re-read, each fix traced):
+  stars — C3-R1-7's both-roots/never-clears mechanism answered by
+  `error(on:)` origin gating + the injectable cadence + the
+  success-clears-at-once arm, both roots now reading `error(on:)`
+  (own grep: no root renders `stars.lastError` directly); scraps —
+  C3-R2-2's traced invisible mint answered by the suffix window,
+  and the pin DISCRIMINATES (on prefix code `items.last` reads
+  "scrap 4", not the mint); history — the C4 NIT's
+  whole-history-per-render answered by the fixed-pitch band
+  (64+10 = exactly the old pass's own per-row advance, so the
+  pixel-identical claim checks; `render()` runs `layoutChrome()`
+  before `renderRows()`, so the band always computes against real
+  bounds; programmatic `contentOffset` writes fire
+  `scrollViewDidScroll`, which is what the pin's bottom-scroll leg
+  rides); block list — the C4 NIT's one-delivery-stale answered by
+  the held observation for exactly the presented life
+  (initial-delivery + ordinary-operations-arrival pinned, cost ∝
+  the post only while presented); chips — the PC4b-4/PC5-5 crowding
+  answered by overflow with the row-breaking brain pure and pinned
+  (boundary arithmetic hand-checked: 100+12+100 = 212 fits 212,
+  breaks at 211; over-wide own-line; calm-at-rest) — D-R1-1 above
+  is the one gap in its rendering arm.
+- **The truncation-marker honesty holds at the head.**
+  `count > window` stays the exact trigger (an exact-window pool
+  cannot false-positive — pinned), the marker moved to the TOP
+  names the unloaded HEAD with its count, pluralizes at the
+  boundary, and stays platform-free (pinned `!contains("Mac")`);
+  `totalCount`/`items`/`truncated` are set atomically in the one
+  `adopt` both delivery roads share; `restartItems` resets all
+  three.
+- **Scope discipline.** Own `git diff --name-only`: 24 files — the
+  Shared/ five + SharedPageStyle + eight mobile app files + six
+  test files + .gitignore + the plan file; ZERO
+  `Sources/VariorumCore/`, zero `Sync/`, zero schema, zero
+  Mac-app-side files, zero pbxproj. D2's batch-wide zero-Shared
+  claim verified against `d8917fa..b41ba95`.
+- **Tree forensics / the harness claims.** `git status` clean; both
+  evidence dirs present with exactly the recorded counts (d1: 34,
+  d2: 28) and gitignored; `VariorumMobileUITests/` untouched across
+  the whole range (the D2 throwaway driver left no trace —
+  `TK2SpikeUITests.swift` last touched at Stage 0's `0fd69cc`,
+  LK11's kept halves intact); nothing harness-shaped anywhere in
+  the committed diff (the D1 session-death record's adjudication
+  checks out against the tree).
+- **The DEBUG spike-door register fix** (`04d0f8b`) is DEBUG-fenced
+  and voice-routed like its sibling doors; the injection site's
+  14→20 padding is phone-local.
+- **Counts — all reproduced by this reviewer's own runs** (below);
+  D1's 306/58→308/59 and D2's 308/59→313/60 arithmetic both exact
+  (+2/+1 seam pins; +5 pins/+1 suite: stars · scraps · history ·
+  block-list · chip-flow).
+- **KnownIssues:** nothing this stage owned is left unresolved; the
+  Mac Takes board row, the copy-doors row, and the windowless-launch
+  family remain 13e's by their recorded owners.
+
+### This reviewer's runs (iPhone 17 Pro / iOS 26.2 simulator; core from the repo root; Mac + Mac spine from `App/Variorum/`)
+
+- Full mobile suite: **"Test run with 313 tests in 60 suites
+  passed"** — the ladder baseline exact.
+- Mobile spine (the seven TRUE type names): **33/7 passed.**
+- Perf by name (`MobilePerfFixtureTests` · `MobilePerfWalkTests`):
+  **9/2 passed.**
+- Core `swift test`: **"Test run with 1215 tests in 128 suites
+  passed."**
+- Mac suite: **"Test run with 1246 tests in 220 suites failed with
+  1 issue"** — EXACTLY the standing
+  `TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`
+  tripwire, BY IDENTITY (the one allowed red).
+- Mac spine (the seven `Tutorial*Tests` names): **51/7 passed.**
