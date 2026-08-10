@@ -45,11 +45,12 @@ session and is the launchable unit the author asked for.*
 > never let the tree sit unpushed at a stopping point.** Update the
 > CURRENT-STAGE pointer below at every stage close.
 
-**CURRENT STAGE → D (polish & the look round, build half) — Stages
-A, B, and C CLOSED 2026-08-09 (every ladder closed at round 2; the
-closeout sections below have the records); the chain continues per
-her kickoff ruling (no author gate between stages; ONE combined
-sitting at the chain's end).**
+**THE CHAIN IS COMPLETE — STAGES A, B, C, AND D ALL CLOSED
+2026-08-09 (every ladder closed at round 2, zero third rounds; the
+closeout sections below have the records). THE END BUNDLE is with
+the author: `notes/plans/mobile-parity-end-bundle.md` — her combined
+sitting rules from it; Stage E waits for her word after the sitting
+(its entry gate is hers by design).**
 
 ## The mandate (what the author ruled this round INTO existence for)
 
@@ -8280,3 +8281,30 @@ five present chips are single-line by construction.
   the mobile app, mobile tests, and the plan file in
   `df25fcb..9780c13` — baselines stand (core 1215/128 · Mac
   1246/220 tripwire-only · Mac spine 51/7).
+
+## Stage D — the LADDER CLOSES at round 2 · STAGE D CLOSED · THE CHAIN'S BUILD IS COMPLETE (architect, 2026-08-09)
+
+Round 2: all four fixes HOLD (the clamp's five-chip host walk, the
+speakHomeless four-writer grep, the toggle end-state traced both
+ways); zero new findings; two hairlines hunted and dismissed with
+reasons. **STAGE D CLOSED.** Shipped: **D1** — the 14b Account/
+Encryption pages, the sync row, and the 14c tier views restyled to
+the LK canon through ONE seam that compiles inert on the Mac
+(three-layer proof + both the implementer's and the architect's own
+Mac runs; 17 before/after pairs), surviving a mid-batch session
+death with zero loss (the repo-first records did exactly what they
+exist for); **D2** — the whole-app canon walk (verdict:
+canon-coherent; one register fix; three taste-only items held FOR
+HER) + the five routed look items closed with pins; **the ladder** —
+2 MINOR + 2 NIT, all fixed at the architect's hand, round 2 all-HOLD.
+**Final counts: mobile 314/60 · mobile spine 33/7 · perf 9/2 · core
+1215/128 · Mac 1246/220 tripwire-only · Mac spine 51/7.**
+
+**THE CHAIN'S BUILD IS COMPLETE.** Stages A–D each ran as their own
+phase (batches → ladder → closeout), every ladder closed at round 2,
+zero rounds-3 the whole chain. What remains is HERS: the end bundle
+(`notes/plans/mobile-parity-end-bundle.md`, written at this close)
+assembles everything the combined sitting rules on. The stage
+table's D-row gate items that are inherently hers — the on-device
+100k run, her acceptance, the TestFlight trigger — wait there; the
+E row waits for her word after the sitting, per the plan's letter.
