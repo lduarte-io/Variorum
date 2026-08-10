@@ -201,9 +201,18 @@ struct MobileSettingsView: View {
             Divider()
                 .overlay(tokens.line)
                 .padding(.vertical, 14)
-            Button("TK2 Spike") { spikePresented = true }
-                .font(tokens.small)
-                .padding(.horizontal, 20)
+            // D2 look sweep: the spike door joins the one register
+            // (it rendered system-blue written case — the only chrome
+            // on this sheet outside the voice).
+            Button {
+                spikePresented = true
+            } label: {
+                Text(tokens.chromeLabel("TK2 Spike"))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 20)
             #endif
 
             Spacer()
