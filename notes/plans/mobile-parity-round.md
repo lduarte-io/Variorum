@@ -8308,3 +8308,22 @@ assembles everything the combined sitting rules on. The stage
 table's D-row gate items that are inherently hers — the on-device
 100k run, her acceptance, the TestFlight trigger — wait there; the
 E row waits for her word after the sitting, per the plan's letter.
+
+## POST-CLOSE RULINGS (2026-08-09, her question-tool round at the chain's close — recorded same-turn so the NEXT session inherits rulings, not questions)
+
+1. **The Mac ADOPTS the carry-all merge as its quick default** (the
+   merge edition of her divide precedent) — recorded on the master
+   plan's 13j row as item (4b); the phone's C5 shape is the
+   reference implementation.
+2. **The lens stays session-local** — PC5-1 resolves RULED (the
+   reopen flip stays available on felt need).
+3. **Post-14c acts PRE-AUTHORIZED, both:** the next mobile session,
+   at kickoff, verifies 14c's mirror deploy (marker 6), merges
+   `mobile` → `main` plain, and installs the Release build to her
+   phone — no in-the-moment word needed. The end bundle's §5
+   carries the operational detail.
+4. **The nav-chrome taste item defers to her screenshot look**
+   (bundle §3 stands).
+
+She finishes 14c next and returns to mobile in a FRESH session; this
+session ends at the chain's planned hard stop.

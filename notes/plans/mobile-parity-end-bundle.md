@@ -65,7 +65,18 @@ mid-chain rulings folded in as they arrived.**
 TakePane tripwire the one allowed red, by identity) · Mac spine
 **51/7**. Zero schema, zero `Sync/` lines, all chain long.
 
-## §2 — THE TWO NAMED QUESTIONS
+## §2 — THE TWO NAMED QUESTIONS — **BOTH RULED (2026-08-09, at the chain's close, via the question tool; recorded same-turn)**
+
+**Q1 → YES: the Mac ADOPTS the carry-all merge as its quick
+default** — recorded on the master plan's 13j row (item 4b, beside
+the divide default; the phone's C5 implementation is the reference).
+**Q2 → session-local STANDS** — PC5-1 resolves RULED-as-shipped (a
+reopen-in-last-lens flip remains available if daily use disagrees).
+**Also ruled the same round: the post-14c acts are PRE-AUTHORIZED**
+(§5 updated) and **the nav-chrome taste item defers to her
+screenshot look** (§3 stands).
+
+*(The original questions, kept for the record:)*
 
 1. **Does the Mac adopt the carry-all merge as ITS quick default?**
    The phone's fanned merge now pairs the two displayed takes and
@@ -133,9 +144,14 @@ TakePane tripwire the one allowed red, by identity) · Mac spine
   badge target · marker z-order · the sheet's keyboard constraint ·
   Write→Read freshness.
 - **PL-5's residue:** the live phone end-to-end sign-in verify.
-- **THE INSTALL HOLD:** the tree's client is lockstep marker 6; the
-  live mirror is marker 5 until 14c's gate deploys. Install after
-  the deploy (or say the word and accept a non-syncing build).
+- **THE INSTALL HOLD → PRE-AUTHORIZED RELEASE (her ruling,
+  2026-08-09):** once 14c's gate deploys the mirror to marker 6, the
+  next mobile session — at its kickoff, without waiting for her word
+  in the moment — VERIFIES the deploy landed, MERGES `mobile` →
+  `main` (plain merge; the §14 delta dance + full master-plan row
+  update ride that seam as recorded), and INSTALLS the Release build
+  to her phone over the tunnel. Until the deploy: the hold binds
+  exactly as before.
 
 ## §6 — Deferred with owners (nothing floating)
 
