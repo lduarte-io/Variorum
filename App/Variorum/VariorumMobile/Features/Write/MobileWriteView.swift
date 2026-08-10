@@ -175,15 +175,16 @@ struct MobileWriteScreen: View {
                 findDoor
                 sealDoor
             }
-            HStack(spacing: 12) {
-                membershipChip
+            // The note's primary home reads alone (full width for
+            // "in N books"); the FIVE identity chips — date · tags ·
+            // more info · blocks · lens — ride ONE wrapping flow (D2,
+            // the routed PC4b-4/PC5-5 crowding answer: OVERFLOW — the
+            // chips wrap when their content grows, so nothing clips and
+            // no door hides; calm at rest, five bare words fit one
+            // line. PROVISIONAL for her sitting).
+            membershipChip
+            MobileChipFlow(hSpacing: 12, vSpacing: 4) {
                 dateChip
-            }
-            // The identity area's second line (parity C3): the note's
-            // tags and its sources — two more chips would crowd the
-            // books · date line, so they breathe on their own (recorded
-            // PROVISIONAL; her look round may re-arrange).
-            HStack(spacing: 12) {
                 tagsChip
                 moreInfoChip
                 blocksChip
