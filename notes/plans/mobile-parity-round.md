@@ -7731,3 +7731,191 @@ Full mobile suite by own run (from 308/59, arithmetic accounted) +
 mobile spine 33/7 + perf 9/2 by name. Commits per logical unit with
 the standing trailer; record as "## Stage D, batch D2 — BATCH
 RECORD"; push. PROVISIONAL-and-continue; author-only calls stop.
+
+## Stage D, batch D2 — BATCH RECORD (implementer, 2026-08-09)
+
+**The chain's final build batch: the whole-app look walk + the five
+routed items, phone-local only — every item shipped.** Diff scope,
+verified by own `git diff --name-only d8917fa..HEAD`: **15 files, ALL
+mobile app + mobile tests + one .gitignore line — zero
+`Sources/VariorumCore/`, zero `App/Variorum/Shared/`, zero Mac-side
+files, zero pbxproj (synchronized groups took the one new source
+file), zero schema, zero `Sync/`** (the STOPS never fired; the
+four-suite duty never fired — core 1215/128 · Mac 1246/220
+tripwire-only · Mac spine 51/7 stand by construction from D1's close).
+
+**THE LOOK SWEEP (walked on the LIVE simulator, by screenshot + code,
+against the LK canon — voice register · the A3 spacing floor's
+constants · the calm default).** Every phone surface walked and
+CAPTURED: shelf · Library (all + scraps) · book contents · Read ·
+Write + its masthead · the tags / more info / blocks / books / lens
+sheets · the takes browser · the take-history sheet · the comments
+sheet · Settings · the tag manager · the pocket guide's rendering
+(contents + Read + three lessons open in Write). Verdict: the app
+reads canon-coherent — the A3 floor and D1's shared-surface pass
+carry; ONE fix-class finding, fixed: **the DEBUG "TK2 Spike" door**
+rendered system-blue written case (the only chrome on the Settings
+sheet outside the voice) — joined the one register (`04d0f8b`).
+**Recorded TASTE-ONLY, for her sitting (nothing built):**
+- **(a)** the pushed screens' SYSTEM nav chrome — the glass back
+  circle, and the contents screen's Details · Read glass capsule —
+  reads as iOS furniture against the flat voiced chrome (the standing
+  S3 PROVISIONAL, now with screenshot evidence:
+  `before-book-contents.png`); restyling it is a real design call
+  (custom back door vs the system's), hers.
+- **(b)** the date chip's bare state renders the words "no date" in
+  faint ink — honest, slightly odd as prose; a one-line reword or an
+  icon-state if she prefers.
+- **(c)** alert furniture (Rename Note · Entry Date · New Tag · New
+  Scrap · Save as Lens) is system-styled written case in both voices —
+  the standing system-furniture posture, listed so it is a decision.
+
+**THE FIVE ROUTED ITEMS, each on its ladder-recorded mechanism:**
+
+1. **Star refusals — ONE home + a clearing cadence (C3 R1-7;
+   `3695d6c`).** The mechanism as recorded: `lastError` was one field
+   on the one shared model and BOTH tab roots rendered it — a
+   Library-fired cap refusal also sat at the shelf's bottom, forever.
+   Now a door refusal carries its ORIGIN (`toggle(_:from:)` →
+   `error(on:)` — the shelf and Library roots each render only their
+   own), clears itself after a beat (injectable cadence, default 8 s;
+   each fresh refusal restarts the clock), and any successful toggle
+   clears it at once. Homeless store-read errors (not door-fired)
+   still render everywhere and never auto-clear — deliberate,
+   code-read (the one-line `errorHome == nil` arm; its failure state
+   is not stageable through the live-store harness — recorded, not
+   fake-pinned). *Pin:* `aRefusalSpeaksAtItsOwnDoorAndClearsAfterABeat`
+   (origin gating · passive clear · success-clears-at-once).
+   *Evidence:* `before-star-refusal-library/-shelf` (the refusal on
+   BOTH roots — staged live: six stars, the sixth refused) →
+   `after-star-refusal-library` (at its origin) ·
+   `after-star-refusal-shelf-clean` (the other root clean) ·
+   `after-star-refusal-library-cleared` (the cadence's clear, +9 s).
+2. **The scraps mint lands VISIBLY (C3 R2-2; `48de181`).** The
+   recorded mechanism: the mint lands at pointer-order END while the
+   window showed the FIRST 200 — past the window a successful mint
+   showed nothing. My call between the brief's scroll-to and
+   window-bump: **the SUFFIX window** — the honest generalization of
+   the bump (the window slides to where mints land, permanently), and
+   the Library neighbor's own newest-first spirit. The truncation
+   marker moves to the list's TOP and names the unloaded HEAD
+   (pluralized, neutral, platform-free), with the whole count carried.
+   *Pins:* the standing window pin flipped to the suffix + new
+   `aMintPastTheWindowLandsVisibly` — **revert-verified** (prefix
+   restored → exactly the two window pins red, the mint pin failing at
+   the traced invisible-success value, 3 siblings green). The >200
+   visual state is PIN-proven rather than screenshot-staged (the
+   brief's own "pins where behavior is assertable");
+   `after-library-scraps` shows the surface unchanged at small counts
+   (suffix ≡ whole list — deliberate).
+3. **The history sheet's rows go LAZY (C4 NIT; `99202d7`).** The
+   recorded mechanism: every savepoint materialized as a UIView on
+   every render, unwindowed, without reuse — a years-deep take paid
+   its whole history per delivery ingest. The fix is the TOC's
+   discipline in this manual-frame sheet's own terms: **fixed row
+   pitch (64+10) makes the arithmetic exact** — `contentSize` derives
+   from the COUNT (every row reachable), only the near-viewport band
+   (± one viewport) is BUILT, the band follows her scrolling through
+   the scroll delegate (equality-gated), and a delivery ingest
+   rebuilds only the band. *Pin:*
+   `theHistorySheetsRowsMaterializeLazily` (whole-count contentSize ·
+   band-bounded build · far end unbuilt at open · the band follows a
+   scroll to the bottom and the head lets go) — **revert-verified**
+   (build-everything restored → exactly the pin red with 4 issues, 6
+   siblings green). Visually identical by design —
+   `after-history-sheet` proves no regression.
+4. **The block-list sheet re-reads on delivery (C4 NIT; `942fb1f`).**
+   The recorded mechanism: the census loaded once per presentation —
+   a remote divide landing while open left it one delivery stale
+   (MobileSoul §5.3). The model gains `start()`: a held
+   ValueObservation over the one `blockTOC` read for exactly the
+   sheet's presented life (the observation delivers the initial read;
+   dismissal cancels it; `refresh()` stays the headless one-shot;
+   cost ∝ the post, only while presented). *Pin:*
+   `theOpenListReReadsOnADelivery` (an ordinary-operations arrival —
+   exactly what a sync apply produces — lands in `rows` with no
+   refresh call).
+5. **The masthead's five-chip crowding — answered with OVERFLOW
+   (PC4b-4 + PC5-5; `ca47652`; PROVISIONAL PD2-1).** My call among
+   grouping / overflow / priority: the five identity chips — **date ·
+   tags · more info · blocks · lens** — ride ONE wrapping flow
+   (`MobileChipFlow`, a Layout whose row-breaking is a PURE pinned
+   brain: greedy fill, break exactly when the next chip plus spacing
+   would cross, an over-wide chip gets its own line, never dropped),
+   and the **membership chip reads alone** on its own line (the
+   note's primary home, full width for "in N books"). Nothing clips,
+   nothing hides, no door moves behind a menu; calm at rest — five
+   bare words fit one line (`after-write-masthead`), and under an
+   active lens the flow wraps with "lens: the other reading" on its
+   own line, whole (`after-masthead-crowded` — the before shows the
+   same state surviving only because the guide's tag is short).
+   *Pin:* `MobileChipFlowTests` (the arithmetic exact, both break
+   boundaries, the over-wide arm, calm-at-rest); the Layout face is
+   the recorded not-headless-testable class — the captures are its
+   evidence.
+
+**THE SCREENSHOT SET** (gitignored `notes/plans/mobile-d2-screens/`,
+28 files, every capture verified by this implementer's own eye before
+being claimed — the honest-evidence discipline): **befores (19)**
+shelf · library · library-scraps · book-contents · read ·
+write-masthead · sheet-tags · sheet-moreinfo · sheet-blocks ·
+sheet-books · sheet-lens · takes-browser · history-sheet ·
+comments-sheet · masthead-crowded · settings · tagmanager ·
+star-refusal-library · star-refusal-shelf; **afters (9)**
+write-masthead · masthead-crowded · star-refusal-library ·
+star-refusal-shelf-clean · star-refusal-library-cleared ·
+library-scraps · sheet-blocks · history-sheet · settings. Captured on
+the LIVE iPhone 17 Pro / iOS 26.2 simulator via `xcrun simctl io
+booted screenshot`, a throwaway XCUITest driver (TK2SpikeUITests
+scheme, signal-file handshake) navigating the real Debug app over the
+dev store (the pocket guide seeded through its own Settings door;
+star staging through the real long-press doors, un-starred after) —
+the driver DELETED after use, the store's starred list verified empty
+after cleanup. **One capture honesty note:** the first star-staging
+leg failed silently (the walk's sheet dismissal left the tag manager
+up, so both "star" captures showed the tag manager) — caught by this
+implementer's own eye, re-staged by row NAMES, and re-verified; the
+captures in the set are the honest re-run. All captures render the
+STUDY voice (the stored preference on this simulator — her own D1-era
+state); the register seams (`chromeLabel`/tokens) are voice-pinned
+elsewhere.
+
+**Counts, by this implementer's own runs (iPhone 17 Pro / iOS 26.2):**
+- Full mobile suite: **"Test run with 313 tests in 60 suites
+  passed"** — the 308/59 baseline + this batch's FIVE pins and ONE
+  suite, exactly accounted (stars +1 · scraps +1 · history +1 ·
+  block-list +1 · chip-flow +1 [+`MobileChipFlowTests`]).
+- Mobile spine by its seven TRUE type names: **"Test run with 33
+  tests in 7 suites passed"**.
+- Perf by name (`MobilePerfFixtureTests` · `MobilePerfWalkTests`):
+  **"Test run with 9 tests in 2 suites passed"**.
+- Core / Mac / Mac-spine deliberately not run: zero core, zero
+  `Shared/`, zero Mac-side lines in the whole batch (the scope check
+  above is the proof) — the only-if-shared condition never fired;
+  baselines stand (core 1215/128 · Mac 1246/220 tripwire-only · Mac
+  spine 51/7).
+
+**PROVISIONALs (for the chain's end bundle):**
+- **PD2-1 — the crowding answer is OVERFLOW** (the wrapping flow;
+  membership alone on its line; the date chip joins the flow line —
+  the brief's five-chip enumeration made literal). Grouping (one
+  door, a sheet of surfaces) and priority (a ⋯ tuck) were the other
+  candidates, each one refactor away; the flow's spacing (12/4) rides
+  the same call.
+- **PD2-2 — the star refusal's cadence value (8 s)** and the
+  origin-gating semantics (homeless store-read errors render on every
+  root and never auto-clear — not door-fired, honest by class).
+- **PD2-3 — the scraps suffix window** (which 200 of a big pool the
+  phone shows: the LATEST — the mint-visible end) and the marker's
+  top placement + sentence.
+- **PD2-4 — the sweep's taste-only list (a)–(c) above** — the system
+  nav chrome the standing headline item.
+
+**Deliberate absences (scope, not holes):** no restyling for its own
+sake anywhere (the sweep's letter); the >200-scraps and deep-history
+visual states pin-proven rather than screenshot-staged; the taste-only
+items recorded, not built; the D1 shared surfaces untouched (their
+pass closed with D1); the lens/blocks/tags sheets' looks untouched
+(canon-coherent by walk); Stage D's inherently-hers items (the
+on-device 100k run, the feel riders, her acceptance, the TestFlight
+trigger) wait in the end bundle where the chain ruling put them.
