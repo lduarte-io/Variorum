@@ -18,6 +18,21 @@ struct MobileChipFlowTests {
     /// next chip plus its leading spacing would cross the line · an
     /// over-wide chip gets its own line, never dropped · calm at rest
     /// (chips that fit stay one line).
+    /// D ladder R1-1: an over-wide chip (user text — a long lens name)
+    /// clamps to the available width so truncation re-engages; a finite
+    /// clamp never touches narrower chips, and an unspecified (infinite)
+    /// width clamps nothing.
+    @Test func anOverWideChipClampsToTheAvailableWidth() {
+        #expect(MobileChipFlow.clampedWidths([500, 80], available: 393)
+            == [393, 80])
+        #expect(MobileChipFlow.clampedWidths([500, 80], available: .infinity)
+            == [500, 80])
+        // The clamped chip occupies its own full row in the brain.
+        #expect(MobileChipFlow.rows(
+            widths: MobileChipFlow.clampedWidths([500, 80], available: 393),
+            available: 393, spacing: 6) == [[0], [1]])
+    }
+
     @Test func theRowBreakingArithmeticIsExact() {
         // Calm at rest: five bare-word chips fit one line.
         #expect(MobileChipFlow.rows(

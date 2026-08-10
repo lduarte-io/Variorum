@@ -43,6 +43,10 @@ final class MobileTakeHistorySheetView: UIView, UIScrollViewDelegate {
     /// the near-viewport band only, the block-TOC's own discipline in
     /// this sheet's manual-frame terms), keyed by item index.
     private(set) var rowViewsByIndex: [Int: UIView] = [:]
+    /// ARBITRARY dictionary order (D ladder NIT R1-4) — the pre-D2 array
+    /// was top-to-bottom; consumers must not assume visual order here
+    /// (today's are order-agnostic; index into `rowViewsByIndex` for
+    /// position-aware reads).
     var rowViews: [UIView] { Array(rowViewsByIndex.values) }
     /// The scroll surface, exposed for the lazy pin (harness-drivable —
     /// the comments-sheet pattern's own discipline).

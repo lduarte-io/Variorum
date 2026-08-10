@@ -55,13 +55,26 @@ struct MobileChipFlow: Layout {
         return rows
     }
 
+    /// An over-wide chip (a long lens name, many tag leaves — user text)
+    /// CLAMPS to the available width so its `lineLimit(1)` truncation
+    /// re-engages (D ladder R1-1: the ideal-width proposal let user text
+    /// overflow the screen edge where the pre-D2 HStack truncated).
+    /// Pure — the row brain and both layout passes share it.
+    nonisolated static func clampedWidths(
+        _ widths: [CGFloat], available: CGFloat
+    ) -> [CGFloat] {
+        guard available.isFinite else { return widths }
+        return widths.map { min($0, available) }
+    }
+
     func sizeThatFits(
         proposal: ProposedViewSize, subviews: Subviews, cache: inout ()
     ) -> CGSize {
         let available = proposal.width ?? .infinity
         let sizes = subviews.map { $0.sizeThatFits(.unspecified) }
         let rows = Self.rows(
-            widths: sizes.map(\.width), available: available, spacing: hSpacing)
+            widths: Self.clampedWidths(sizes.map(\.width), available: available),
+            available: available, spacing: hSpacing)
         let height = rows.map { row in
             row.map { sizes[$0].height }.max() ?? 0
         }.reduce(0, +) + CGFloat(max(rows.count - 1, 0)) * vSpacing
@@ -69,25 +82,31 @@ struct MobileChipFlow: Layout {
             row.map { sizes[$0].width }.reduce(0, +)
                 + CGFloat(max(row.count - 1, 0)) * hSpacing
         }.max() ?? 0
-        return CGSize(width: proposal.width ?? contentWidth, height: height)
+        // A nil OR infinite proposal answers with content width (D ladder
+        // NIT R1-3 — echoing .infinity breaks any host that trusts it).
+        let proposed = proposal.width
+        let width = (proposed?.isFinite == true) ? proposed! : contentWidth
+        return CGSize(width: width, height: height)
     }
 
     func placeSubviews(
         in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews,
         cache: inout ()
     ) {
-        let sizes = subviews.map { $0.sizeThatFits(.unspecified) }
+        let ideal = subviews.map { $0.sizeThatFits(.unspecified) }
+        let clamped = Self.clampedWidths(ideal.map(\.width), available: bounds.width)
         let rows = Self.rows(
-            widths: sizes.map(\.width), available: bounds.width, spacing: hSpacing)
+            widths: clamped, available: bounds.width, spacing: hSpacing)
         var y = bounds.minY
         for row in rows {
-            let rowHeight = row.map { sizes[$0].height }.max() ?? 0
+            let rowHeight = row.map { ideal[$0].height }.max() ?? 0
             var x = bounds.minX
             for index in row {
                 subviews[index].place(
-                    at: CGPoint(x: x, y: y + (rowHeight - sizes[index].height) / 2),
-                    proposal: ProposedViewSize(sizes[index]))
-                x += sizes[index].width + hSpacing
+                    at: CGPoint(x: x, y: y + (rowHeight - ideal[index].height) / 2),
+                    proposal: ProposedViewSize(
+                        width: clamped[index], height: ideal[index].height))
+                x += clamped[index] + hSpacing
             }
             y += rowHeight + vSpacing
         }

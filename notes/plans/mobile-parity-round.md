@@ -8150,3 +8150,33 @@ A one-line doc comment (or sorting by key) closes it.
   `TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`
   tripwire, BY IDENTITY (the one allowed red).
 - Mac spine (the seven `Tutorial*Tests` names): **51/7 passed.**
+
+## Stage D review — round 1 ADJUDICATION + FIX PASS (at the architect's hand, 2026-08-09); ROUND 2 OPENS
+
+No BLOCKER/MAJOR. All four findings adjudicated FIX and executed
+this commit:
+
+- **MINOR D-R1-1 → FIXED:** `MobileChipFlow` gains the pure
+  `clampedWidths` brain — both layout passes clamp an over-wide chip
+  to the available width so `lineLimit(1)` truncation re-engages
+  (the pre-D2 HStack's behavior restored at the over-wide arm); the
+  placement proposal carries the clamped width. Pin
+  `anOverWideChipClampsToTheAvailableWidth` (brain-level birth pin —
+  the reviewer's own pin-latitude note; the SwiftUI Layout path is
+  not windowless-drivable).
+- **MINOR D-R1-2 → FIXED:** the ONE `speakHomeless` setter — nils
+  `errorHome`, cancels the clear task, then speaks — and all three
+  store-read writers route through it; a homeless error landing
+  inside a refusal's window can no longer inherit the home or the
+  cadence (the reviewer's traced interleaving closed at the setter).
+  Pin-resistant per the record's own not-stageable note; the R2-10
+  recorded-mechanism precedent applies.
+- **NIT D-R1-3 → FIXED:** `sizeThatFits` answers nil/infinite
+  proposals with content width, never `.infinity`.
+- **NIT D-R1-4 → FIXED:** `rowViews`' arbitrary dictionary order
+  documented at the declaration.
+
+Mobile re-run by the architect's own hand: **"Test run with 314
+tests in 60 suites passed"** (313 + the clamp pin, exact). **ROUND
+2 OPENS** on the fix set; fresh reviewer; new BLOCKER/MAJOR ⇒ round
+3.

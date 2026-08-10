@@ -116,7 +116,7 @@ final class MobileStarsModel {
             }
         } catch is CancellationError {
         } catch {
-            lastError = String(describing: error)
+            speakHomeless(String(describing: error))
         }
     }
 
@@ -127,7 +127,7 @@ final class MobileStarsModel {
             items = try await session.database.read { try Queries.starred($0) }
             await resolveNames()
         } catch {
-            lastError = String(describing: error)
+            speakHomeless(String(describing: error))
         }
     }
 
@@ -150,7 +150,7 @@ final class MobileStarsModel {
                     createdAt: header.createdAt))
             })
         } catch {
-            lastError = String(describing: error)
+            speakHomeless(String(describing: error))
         }
     }
 
@@ -190,6 +190,17 @@ final class MobileStarsModel {
             speak(String(describing: error), at: home)
         }
         await refresh()
+    }
+
+    /// A HOMELESS error (store reads — no door produced it): renders at
+    /// EVERY root and never auto-clears (the D2 recorded semantics).
+    /// One setter so an error landing inside a refusal's clear window can
+    /// never inherit the refusal's home or its cadence (D ladder R1-2).
+    private func speakHomeless(_ message: String) {
+        errorClearTask?.cancel()
+        errorClearTask = nil
+        errorHome = nil
+        lastError = message
     }
 
     /// A door refusal: spoken at its root, cleared after the cadence
