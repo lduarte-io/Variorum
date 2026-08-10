@@ -7919,3 +7919,25 @@ pass closed with D1); the lens/blocks/tags sheets' looks untouched
 (canon-coherent by walk); Stage D's inherently-hers items (the
 on-device 100k run, the feel riders, her acceptance, the TestFlight
 trigger) wait in the end bundle where the chain ruling put them.
+
+## Stage D, batch D2 — ACCEPTED; the D LADDER OPENS over the pair (architect, 2026-08-09)
+
+Verified: all seven commits present; scope clean by own check (zero
+core/Shared/Mac lines batch-wide); the full mobile suite re-run by
+the architect's own hand: **"Test run with 313 tests in 60 suites
+passed"** — 308/59 + 5/1, exact. The sweep's verdict accepted (the
+app reads canon-coherent — the A3 floor + D1 carry; ONE register
+fix; three taste-only items recorded FOR HER, exactly the
+propose-only posture); all five routed items closed with pins, two
+revert-verified; the screenshot honesty note (a wrong-surface
+staging caught by the implementer's own eye and re-staged) is the
+evidence discipline holding. **PD2-1…4 ride the end bundle.**
+
+**THE STAGE D LADDER OPENS** over the pair: target
+`54f7190..b41ba95` (D1's three commits — with the mid-batch session
+death and completion recorded honestly — + D2's seven; both batch
+records + acceptances the reviewer's anchor). Fresh cold reviewer,
+`notes/REVIEW_PROMPT.md` VERBATIM; findings repo-first as "## Stage
+D review — round 1 findings". Baselines at open: **mobile 313/60 ·
+mobile spine 33/7 · perf 9/2 · core 1215/128 · Mac 1246/220
+tripwire-only · Mac spine 51/7.**
