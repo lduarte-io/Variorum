@@ -8180,3 +8180,103 @@ Mobile re-run by the architect's own hand: **"Test run with 314
 tests in 60 suites passed"** (313 + the clamp pin, exact). **ROUND
 2 OPENS** on the fix set; fresh reviewer; new BLOCKER/MAJOR ⇒ round
 3.
+
+## Stage D review — round 2 (fresh cold reviewer, 2026-08-09)
+
+Re-review of the fix set `df25fcb..9780c13` (four files of code +
+the adjudication record; every hunk read line-by-line in this
+session, each fix traced against its round-1 mechanism). A real
+pass, proportionate to the set's size; no fixes made.
+
+### Verdicts
+
+- **D-R1-1 (the chip clamp) — HOLDS.** `clampedWidths` is pure and
+  shared by both layout passes; the placement proposal carries the
+  clamped width, so `lineLimit(1)` truncation re-engages at the
+  over-wide arm — verified that ALL FIVE chips hosted by the flow
+  (date · tags · more info · blocks · lens,
+  `MobileWriteView.swift:287–390`) are `lineLimit(1)` Texts, so the
+  clamped-width proposal truncates single-line and the ideal-height
+  placement stays exact. Normal rows are provably undisturbed:
+  `min(w, available)` is identity for every chip that fits, and the
+  row brain itself is byte-untouched (its original pin still runs on
+  unclamped inputs). The brain pin DISCRIMINATES on all three arms —
+  finite clamps only the over-wide chip (the 80 pt neighbor
+  untouched), an infinite available clamps nothing, and the clamped
+  chip still earns its own row. Birth pin per round 1's own recorded
+  latitude (the Layout face is the not-headless-drivable class).
+  Consistency checked: `sizeThatFits`' `contentWidth` is computed on
+  ideal widths but consumed ONLY on the nil/infinite arm, where
+  clamping is a no-op — no mismatch is reachable.
+- **D-R1-2 (`speakHomeless`) — HOLDS.** Grep-verified there are
+  exactly four `lastError` writers — `speakHomeless`, `speak`, the
+  cadence task's clear, `clearError` — and all three store-read
+  catches (`start` · `refresh` · `resolveNames`) route through the
+  setter, which cancels the clear task, nils it, nils `errorHome`,
+  THEN speaks. `toggle`'s refusal→refresh end-state traced both
+  ways: a SUCCESSFUL refresh writes no error, so the refusal keeps
+  its home and cadence (exactly what the existing pin proves at
+  `MobileStarsTests.swift:150` — the toggle it drives runs the
+  refresh); a FAILING refresh demotes to homeless semantics (both
+  roots, no cadence, persistent). Round 1's interleaving is closed
+  in every writer path, including a `start()` observation death and
+  `resolveNames` inside the window. The cancel/clear race is benign
+  by MainActor isolation (no suspension point between the cadence
+  task's cancellation guard and its clears). Pin-resistant per the
+  record's standing not-stageable note — the adjudication's honesty
+  about this checks out.
+- **D-R1-3 (finite `sizeThatFits`) — HOLDS, breaks no host.** Only
+  the infinite arm changed (nil and finite arms are behavior-
+  identical to pre-fix: nil → contentWidth before and after, finite
+  → the proposal); the flow's ONE host (`MobileWriteView.swift:186`,
+  the masthead VStack) proposes finite widths, so its rendering is
+  byte-unchanged, and an infinite probe now gets the honest content
+  width.
+- **D-R1-4 (the order doc) — HOLDS, truthful.** `rowViews` is
+  `Array(rowViewsByIndex.values)` — arbitrary order exactly as the
+  new comment says; today's only consumers (the lazy pin's
+  count/isEmpty/contains, `MobileTakeHistoryTests.swift:275–295`)
+  are order-agnostic, and the comments sheet's identically-named
+  ORDERED array is a distinct type the comment cannot mislead about.
+
+### New findings
+
+**None** — no BLOCKER/MAJOR/MINOR/NIT introduced by the fix set.
+Two hairlines hunted and dismissed honestly rather than numbered:
+(1) `refresh()`'s catch does not exclude `CancellationError` the way
+`start()`'s does, so a cancelled refresh would speak a persistent
+homeless error — but the shape PRE-EXISTS the fix set (only the
+setter call changed) and no production path can trigger it
+(`refresh` is reached only from unstructured button Tasks, never
+view-lifetime-cancelled); recorded, not a finding. (2) A future
+non-`lineLimit(1)` chip would render taller at its clamped width
+than the ideal-height placement allots — a latent class inherent to
+the flow's `.unspecified` measurement that predates the clamp; all
+five present chips are single-line by construction.
+
+### Clean bill
+
+- The fix-set scope is mobile-only by own `--stat` — zero
+  `Sources/VariorumCore/`, zero `Shared/`, zero Mac-side lines —
+  so core/Mac/Mac-spine baselines stand by construction.
+- The adjudication record's claims all match the code (the shared
+  brain, the one setter, the arm-by-arm proposal handling, the doc);
+  the 314 arithmetic is exact (313 + the clamp pin).
+- The existing D2 pins are untouched and still true to the shipped
+  semantics (`aRefusalSpeaksAtItsOwnDoorAndClearsAfterABeat`
+  re-read whole; `theRowBreakingArithmeticIsExact` still exercises
+  the unclamped brain).
+
+**The ladder CLOSES at round 2: no new BLOCKER/MAJOR — no round 3.**
+
+### This reviewer's runs (iPhone 17 Pro / iOS 26.2 simulator)
+
+- Full mobile suite: **"Test run with 314 tests in 60 suites
+  passed"** — the post-fix baseline exact.
+- Mobile spine (the seven TRUE type names) + perf
+  (`MobilePerfFixtureTests` · `MobilePerfWalkTests`), one named run:
+  **42/9 passed** (= spine 33/7 + perf 9/2, exact).
+- Core / Mac / Mac spine deliberately not run: zero lines outside
+  the mobile app, mobile tests, and the plan file in
+  `df25fcb..9780c13` — baselines stand (core 1215/128 · Mac
+  1246/220 tripwire-only · Mac spine 51/7).
