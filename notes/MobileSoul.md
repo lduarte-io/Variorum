@@ -103,6 +103,20 @@ one take at a time — is the phone's native takes grammar, and it
 proved right. When in doubt, choose the calmer shape and record a
 PROVISIONAL.
 
+**Her sharpening of the doctrine (2026-08-09, at the parity chain's
+close — verbatim, recorded for 13j's design sitting and every
+ceremony-touching phase after it):** *"Truthfully, I thought merge
+and divide were already overly fiddly on the mac app and I think
+mobile is good for exposing complexity that can't survive a
+simplified UI, because that's a sign it may be too complex period."*
+The phone is not just a smaller surface — it is a COMPLEXITY TEST:
+a capability that cannot survive the simplified UI is evidence
+against the complexity itself, not merely a case for a mobile
+workaround. This is the generalization of her divide precedent
+(the workaround that became the Mac's default), stated as principle.
+She is considering both structural-op cases fully before 13j builds
+the Mac's default switches.
+
 ## 5. Platform truths (the fundamental differences — design around, never against)
 
 1. **The app dies without warning** (background → suspend → kill).
