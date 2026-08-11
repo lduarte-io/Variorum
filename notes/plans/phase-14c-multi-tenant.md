@@ -2710,6 +2710,31 @@ on a wrong one. New pin `theDataDoorsAreOwnedByTheNonBypassDefinerRole`
 (AuthRLSDDLTests 33/33). Commits: `27e813e` · `c106d37` + the two
 artifact amendments; all pushed.
 
+**Gate step 3 — the repush: DONE (2026-08-11, her passphrase into the
+runner).** Confirm-twice zsh script (the corrected 14b shape) wrote the
+passphrase file; session re-minted uid-checked at both stages (the
+first had expired — the probe window outlived it); instance check
+clean. DRY-RUN exact (7,278 rows across 18 tables, outbox 0, the
+unwrap arm, writes nothing) → the real run: KDF 0.578 s →
+`resyncReinitialize` (7,278 enqueued) → **drained in ONE round, 7,278
+accepted, 0 rejected/deferred, outbox 0** (no gateway kills this time;
+the FIXED drain-summary accounting reported the true total — the 14b
+674-of-7,274 quirk's fix proven live). **THE PROOF TRIAD:** all 18
+tables' mirror counts EXACT vs local (7,278 total) · `owner_id`
+uniform — zero rows distinct from her uid (the born-multi-tenant
+check) · ZERO plaintext across the 18 registry-derived encrypted
+columns (3,063 sealed `e1:` values). Passphrase file and every
+session-bearing scratch file deleted after the proof.
+
+**Gate step 5 — the `/Applications` refresh: DONE (2026-08-11; taken
+immediately after step 3, since it is architect-side and independent of
+the phone's step 4 — the handoff's numbering, not its dependency
+order).** Release build green; instance check at the copy moment clean
+(pgrep, path-discriminated); `ditto` to `/Applications/Variorum.app`.
+Her installed build now speaks lockstep 6 — the marker-mismatch refusal
+window is closed; its next round pulls to head over the reinitialized
+cursor (echo applies, seq-recorded).
+
 ## Environment traps (carried into every batch brief, per the skill)
 
 - Instance checks: `pgrep -fl 'Variorum.app/Contents/MacOS'` AND
