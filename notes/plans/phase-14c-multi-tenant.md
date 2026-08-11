@@ -2735,6 +2735,53 @@ Her installed build now speaks lockstep 6 — the marker-mismatch refusal
 window is closed; its next round pulls to head over the reinitialized
 cursor (echo applies, seq-recorded).
 
+**Gate step 6 — the live probes: DONE (2026-08-11, architect-driven).**
+*[removed for publication]*
+`admin/generate_link` (BYPASSES signups-off — the deliberate tool);
+*[removed for publication]*
+on its minted session). Its magic-link OTP expired before verify (a
+recorded latitude — the admin generate_link road's link is short-lived
+and I minted then acted a beat late), so the session came via
+`admin/users` password set + `email_confirm` + the password grant —
+uid-checked identical; entitlement granted through `entitlement_set` as
+service_role; a fabricated `key_vault` row inserted through the probe's
+OWN token (which itself proved the own-row INSERT policy). **ALL 13
+OBLIGATIONS PASS** (the probe's own field-name slip on the first
+foreign/collision push — `id`/`base_sync_version` vs the wire's
+`row_id`/`base_version` — was caught by reading the deployed body and
+re-run correctly; the owner-guard refusals were real regardless because
+that guard reads `columns.owner_id`):
+
+- **1 (stranger pull=0):** probe `sync_pull(0)` against her populated
+  corpus → **0 rows**, no refusal.
+- **5 (foreign-owner push):** probe pushes a `container` claiming HER
+  uid → `owner_id mismatch … must carry owner_id = auth.uid()`; **6
+  (NULL owner):** same refusal; both re-affirmed with correct wire.
+- **12 (composite identity):** probe pushes base-0 at HER exact
+  container id → **accepted v1 in the PROBE's partition**; both owners
+  now hold that id at v1, **her row byte-untouched** (owner/kind/version
+  unchanged); unknown table → `unknown sync table`.
+- **9 (direct-table denial):** as the probe's authenticated token,
+  `container`/`variant`/`sync_meta` all **403**; `entitlement` and
+  `key_vault` return **the probe's own row ONLY** (her vault provably
+  absent from its view).
+- **10 (`entitlement_set` as authenticated):** **403 permission
+  denied** — the service_role-only posture, empirically.
+- **8 (entitlement expiry):** service_role sets a PAST `valid_until` →
+  both RPC halves refuse `VARIORUM_NO_ENTITLEMENT`; re-grant
+  (non-expiring) heals with no state surgery (pull serves clean).
+- **7 (truncate fence):** wrong `active_key_id` →
+  `VARIORUM_STALE_KEY_FENCE`, **zero deletes** (probe row still
+  present); correct id → scoped deletion (its 1 container gone), **HER
+  186 containers UNTOUCHED**; service-key sweep confirms **0 probe rows
+  remain** across all 18 tables.
+- **2 (BYPASSRLS) + 11 (grant sweep) + 13 (re-run guard):** done at
+  steps 2/G-3 above.
+
+The probe's entitlement + vault + auth user remain live for the gate's
+step-10 deletion-door live test (its own `account_purge` is the natural
+verification).
+
 ## Environment traps (carried into every batch brief, per the skill)
 
 - Instance checks: `pgrep -fl 'Variorum.app/Contents/MacOS'` AND
