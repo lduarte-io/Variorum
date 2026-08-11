@@ -430,8 +430,13 @@ struct AuthRLSDDLTests {
     /// signed-in user's own, never server machinery's).
     @Test func theAccountDoorsCarryTheDemotionPosture() throws {
         let sql = Self.strippingComments(try Self.sqlFile("09_phase14c_multitenant.sql"))
-        #expect(sql.contains("revoke execute on function account_data_truncate(text) from public, anon;"))
-        #expect(sql.contains("revoke execute on function account_purge() from public, anon;"))
+        // service_role joined both revokes at the 14c gate (2026-08-11): the
+        // live sweep caught Supabase's CREATE-time default-privilege grant to
+        // service_role surviving the public+anon-only revokes — the pin now
+        // demands the demotion be named in full, making this test's own
+        // "never server machinery's" doc comment literal.
+        #expect(sql.contains("revoke execute on function account_data_truncate(text) from public, anon, service_role;"))
+        #expect(sql.contains("revoke execute on function account_purge() from public, anon, service_role;"))
         #expect(sql.contains("grant execute on function account_data_truncate(text) to authenticated;"))
         #expect(sql.contains("grant execute on function account_purge() to authenticated;"))
         #expect(!sql.contains("grant execute on function account_data_truncate(text) to authenticated, service_role")

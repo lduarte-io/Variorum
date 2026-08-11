@@ -47,7 +47,13 @@ with expected_functions (signature, exp_anon, exp_authenticated, exp_service_rol
     ('entitlement_set(uuid,text,boolean,timestampwithtimezone,text)',  false, false, true),
     ('sync_schema_version()',                                          false, true,  null),
     ('sync_table_pk(text)',                                            false, false, null),
-    ('stamp_server_seq()',                                             null,  null,  null)
+    ('stamp_server_seq()',                                             null,  null,  null),
+    -- Identified at the 14c gate (2026-08-11): a platform-side event-trigger
+    -- function (attached as `ensure_rls` on ddl_command_end) that auto-enables
+    -- RLS on new public tables — never in a repo artifact, benign and
+    -- protective. RETURNS event_trigger, so it is uncallable via RPC by
+    -- Postgres rule; its broad EXECUTE acl is moot. INFO by design.
+    ('rls_auto_enable()',                                              null,  null,  null)
 ),
 observed_functions as (
   select
