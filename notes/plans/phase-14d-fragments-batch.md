@@ -1,33 +1,47 @@
 # Phase 14d — The Fragments batch & bridge resumption — micro-plan
 
-> **Status: DRAFT — authored in 14c's build-half session (2026-08-05,
-> the Round-9 assignment: the seat holding the batch-2/3 code context
-> writes this plan; the 14c GATE session finalizes the FILL-AT-GATE
-> fields at its closeout; the phase opens at the author's word AFTER
-> 14c closes). Micro phase by her ruling: 14c closes without waiting
-> on Fragments — this phase gates on nothing but the Fragments
-> conversation itself.**
+> **Status: FINALIZED 2026-08-11 at 14c's close — READY TO OPEN at the
+> author's word. All FILL-AT-GATE fields completed (below); the phase
+> now carries, besides the Fragments handoff, the operationalia she
+> DEFERRED out of 14c's gate (signup flip · stranger validation ·
+> branded auth-email links via the free template road — the phone
+> re-onboard already DISCHARGED by her live confirmation). Micro phase
+> by her ruling; it gates on nothing but the Fragments conversation and
+> her own account acts (Pro, SMTP provider, signup flip).**
 
-## Kickoff message (paste-ready once 14c's closeout finalizes this file)
+## Kickoff message (paste-ready)
 
 You are running Variorum Phase 14d (repo ~/dev/variorum, branch main)
 — a MICRO phase, likely a single author-attended session (cast decided
 at this kickoff as always; the 9d shape — author present, no
-coordinator relay — fits its size). Its whole scope: the ONE-BATCH
-Fragments handoff the author carries, plus Variorum's own small
-resumption acts. READ FIRST: (1) this file in full; (2) the master
-plan's 14d row; (3) `notes/fragments-bridge-contract.md` — the
+coordinator relay — fits its size). Its scope has TWO parts: (A) the
+ONE-BATCH Fragments handoff the author carries + Variorum's own small
+bridge-resumption acts (the reason this phase exists); and (B) the
+operationalia she deferred out of 14c's gate — opening the Variorum
+project's signup door, validating a stranger's first onboarding
+(empty-store first pull, vault setup, the PL-6 phone first-run walk),
+and the SMTP + branded-auth-email setup (the free template road:
+custom SMTP + a rewritten email template pointing at stargazing.tech +
+a `/auth/confirm` verifyOtp handler the site agent builds — the paid
+Custom Domain add-on was DECLINED). None of B is needed until real
+strangers/TestFlight, so sequence it around A per her word. READ
+FIRST: (1) this file in full (esp. the "ABSORBED FROM 14c" section +
+the completed FILL-AT-GATE fields — the issuer is the RAW project URL
+*[removed for publication]*
+master plan's 14d row; (3) `notes/fragments-bridge-contract.md` — the
 EXECUTION MODEL + its 2026-08-04 amendment + ALL THREE touchpoint
-blocks WITH their concrete-facts additions (this is the brief SHE
-carries; treat every FILL-AT-GATE field as verified-final before her
-conversation runs); (4) the 14c plan's Batch 2 record (the dormant
-machinery + THE TRACED CORNER) and Round 6/7 rulings; (5) the SMTP
-runbook `notes/plans/phase-14c-smtp-runbook.md`; (6)
-`notes/sync-postmortem-fragments.md` before any `Sources/VariorumCore/
-Sync/` or bridge-engine line. STANDING: sessions never touch
-`~/dev/fragments` or the Fragments Supabase project — the contract
-file is the channel, carried by her; the Variorum mirror rails
-(announced acts, committed artifacts, her go, the A1 rail) bind.
+blocks WITH their concrete-facts additions (the brief SHE carries;
+every FILL-AT-GATE field is verified-final); (4) the 14c plan
+`notes/plans/phase-14c-multi-tenant.md` — Batch 2's record (the dormant
+bridge machinery + THE TRACED CORNER) and the "GATE HALF — execution
+record" (what deployed and what deferred here); (5) the SMTP runbook
+`notes/plans/phase-14c-smtp-runbook.md` (execute its §2–§7 for part B);
+(6) `notes/sync-postmortem-fragments.md` before any
+`Sources/VariorumCore/Sync/` or bridge-engine line. STANDING: sessions
+never touch `~/dev/fragments` or the Fragments Supabase project — the
+contract file is the channel, carried by her; the Variorum mirror rails
+(announced acts, committed artifacts, her go, the A1 rail) bind; the
+signup toggle flips only as this phase's deliberate act.
 
 ## The scope, in execution order
 
