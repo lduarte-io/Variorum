@@ -50,10 +50,18 @@
 --     executing it ALSO requires USAGE on the `auth` schema, which the
 --     fresh role does not inherit (the post-repair probe pull refused
 --     42501 "permission denied for schema auth" — caught exactly where
---     the probe-before-repush ordering exists to catch it; the grant
---     below landed as the dated follow-up). Schema USAGE only — the
---     role holds NO privilege on any auth table; the one body that
---     touches `auth.users` (account_purge) deliberately kept postgres.
+--     the probe-before-repush ordering exists to catch it). A direct
+--     `grant usage on schema auth` BY POSTGRES IS A SILENT NO-OP — the
+--     schema is owned by supabase_admin and postgres holds plain U with
+--     no grant option (verified live: has_schema_privilege stayed
+--     false). The working road is MEMBERSHIP: the definer role joins
+--     `authenticated`, inheriting exactly the auth-schema USAGE
+--     Supabase grants its app role — semantically honest too (the
+--     definer acts on behalf of an authenticated caller, scoped by
+--     auth.uid()), and it gains nothing on the data tables, where
+--     authenticated holds no grants. Executed at the author's hand in
+--     the SQL editor (2026-08-11). The one body that touches
+--     `auth.users` (account_purge) deliberately kept postgres.
 --
 -- ROLLBACK (if a live refusal ever traces here): three one-line
 -- `alter function … owner to postgres;` statements restore the
@@ -78,7 +86,7 @@ grant select, insert, update, delete on
   to variorum_definer;
 grant select on key_vault, entitlement to variorum_definer;
 grant usage, select on all sequences in schema public to variorum_definer;
-grant usage on schema auth to variorum_definer;
+grant authenticated to variorum_definer;
 grant execute on function sync_table_pk(text) to variorum_definer;
 
 create policy key_vault_definer_fence_select on key_vault
