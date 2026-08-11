@@ -371,7 +371,13 @@ CREATE TABLE sync_outbox (
   PRIMARY KEY (table_name, row_id)              -- dirty-row SET: coalesces keystroke-rate autosaves
 );
 CREATE TABLE sync_state (key TEXT PRIMARY KEY, value TEXT NOT NULL);
--- keys: 'last_server_seq', 'device_id'
+-- keys: 'last_server_seq', 'device_id', 'rekey_in_progress'
+--   ('rekey_in_progress' — Phase 14c ladder R1-1: a persisted
+--   rekey-in-progress marker, written before the CF-8 re-key's vault
+--   write and cleared only when the whole road completes, so a crash
+--   mid-re-key re-speaks the rerun road on relaunch and both engine
+--   round halves refuse until it clears; local-only, never synced,
+--   survives resyncReinitialize by construction)
 CREATE TABLE _sync_applying (applying INTEGER NOT NULL);
 -- apply-mode flag; permanent and normally empty (a temp table is invisible to
 -- main-schema triggers — Phase 1 finding, SyncSpec §3); row exists only inside
@@ -499,7 +505,7 @@ Additional deltas: live-row partial unique indexes everywhere (§6 — correctne
 
 **The dated delta record (2026-07-04 → 2026-08-01, Phase 0 through Phase 13g) lives in `notes/AppSpecDeltaArchive.md`** — moved verbatim 2026-08-01 (author housekeeping, the Fragments precedent; the file had outgrown the context-load limit). §14 keeps the source-SPEC resolutions above and ONLY the most recent phase's delta below; the closeout ritual moves the outgoing delta to the archive in the same commit that records the next one. The archive is canon — rulings recorded there bind exactly as they did here.
 
-**Author-decision + shipped-semantics delta (2026-08-09, THE MOBILE PARITY & POLISH ROUND — the iPhone project's stages A–D, run as ONE chained `/architect-phase` session at her chain ruling; the BINDING records are `notes/plans/mobile-parity-round.md` (every brief, batch record, finding, disposition, count) and `notes/plans/mobile-parity-end-bundle.md` (the combined sitting bundle standing in for four stage gates, her checklist at its top); recorded at the mobile→main merge seam 2026-08-11 per the chain's deferred-dance note — this delta points rather than duplicates):** **(1) HER Q-M2 DIVIDE IS BUILT:** `divideDuplicating` shipped as the shared core op + the PHONE's fanned-divide door (§9's entry carries the full semantics with inline provenance); the Mac door change — the default flip, the deliberate ceremony door, the keybind — remains 13j's, so the op sits dormant Mac-side. **(2) THE CARRY-ALL FANNED MERGE shipped on the phone (C5):** one pairing of the two displayed takes + every other active take carried whole, composed from the Mac's own `mergeCeremony` with ZERO core change; her post-close ruling (the question-tool round, 2026-08-09): **the Mac ADOPTS this as its quick fanned-merge default** — 13j row item 4b, the merge edition of the divide precedent, the phone's C5 the reference implementation. **(3) HER OTHER POST-CLOSE RULINGS:** the phone's active lens stays SESSION-LOCAL (PC5-1 ruled-as-shipped; a reopen-in-last-lens flip stays available if daily use disagrees) · the post-14c merge+install PRE-AUTHORIZED for the next mobile session's kickoff (executed at this seam) · the nav-chrome taste item defers to her screenshot look. **(4) DOCTRINE:** `notes/MobileSoul.md` §4 gained her sharpened complexity-test doctrine verbatim (mobile as a COMPLEXITY TEST — complexity that can't survive the simplified UI may be too complex, period; flagged for 13j's design sitting before the Mac default switches build). **(5) PROVEN AND PINNED:** the no-redirect principle by pin (zero user-facing "Mac" strings, both compiled roots); iPhone-only/portrait-only pinned; the 100k proving ground caught FB2-1 (document-scope chrome refresh — keystrokes 551→6 ms, walk memory 5,842→43 MiB after the fix) and two TK2-on-iOS discoveries now recorded in TEXTKIT2_NOTES §3. **(6) HYGIENE:** ZERO schema and ZERO `Sync/` lines all chain; finals mobile 314/60 · mobile spine 33/7 · perf 9/2 · core 1215/128 · Mac 1246/220 tripwire-only · Mac spine 51/7; two KnownIssues rows born WITH owners (single-pass fan-copy remap → 13e, landing with reorder-takes; the six copied Mac view-model brains → the mobile project's hoist batch). Stage E and internal TestFlight wait on her word; the taste list and the PROVISIONAL inventory ride the end bundle.
+*[removed for publication]*
 
 ## 15. Risk register (why these are risks, so future sessions don't rediscover them)
 
