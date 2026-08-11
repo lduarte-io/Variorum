@@ -2573,6 +2573,283 @@ price-agnostic: she names the number at launch.)*
 | L14 | Closeout ritual in full (incl. the 14d micro-plan + the finalized contract brief; the §12 running record's 5→6 entry; the KnownIssues auth row resolved/re-owned) | pending |
 | L15 | The 14d prep: live journal-bridge provider + staged re-push machinery, dormant behind the standing pause, both halves pinned (Round-6 ruling) | **done — batch 2** (`8bedbe2`+`f564e00`; DeviceBridgeKeyProvider built, wired NOWHERE; stageRepushFromTruth with the sentinel design revert-proven; dormancy AND readiness pinned; the re-key door's trigger connected, inert) |
 
+## GATE HALF — execution record (fresh session, 2026-08-10/11; the
+## gate-handoff's kickoff; every act announced to the author before it ran)
+
+**Cutover verification (the handoff's VERIFY list, all confirmed):**
+tip `0ded142` (records-only — the commit that filled the handoff's
+[FILL-AT-STOP] fields; last code commit `a27d114` beneath it), tree
+clean, fully pushed; 09 confirmed `begin;`-wrapped with the re-run
+guard the first in-transaction statement and the marker last; the
+sweep artifact present; `SyncSchema.lockstepVersion = 6`; no running
+instances (pgrep, path-discriminated).
+
+**Gate step 1 — the A1 rail: DONE (2026-08-11 02:28 UTC).**
+- Real store located in the RELEASE app's sandbox container
+  (`~/Library/Containers/io.lduarte.Variorum/Data/Library/Application
+  Support/Variorum/variorum.sqlite` — the code comment's "inside the
+  app container when sandboxed" made literal; a first backup attempt
+  against the non-sandboxed path created two stray empty files,
+  removed same-minute with the real store untouched).
+- WAL-safe backup `variorum-backup-2026-08-11-022836.sqlite`
+  (5,959,680 bytes, `PRAGMA integrity_check` = ok) in the store's
+  `Backups/` home; store mtime Aug 4 19:08 — her pause visibly held.
+- Mirror export `Backups/mirror-export-2026-08-11-022836/`: **20
+  files** (the 18 data tables + `sync_meta` + `key_vault` — the vault
+  row added to the 14b's 19-file pattern deliberately, belt-and-braces
+  for the repush window), 7,278 rows, 4.5 MB, every request clean,
+  ciphertext sanity confirmed (`e1:` on sampled encrypted columns).
+  Road note: the export ran over the PROJECT service key via PostgREST
+  (paginated per 1000) because the Management-API PAT is dead (below).
+- Pre-state read: `sync_meta.lockstep_version = "5"` — the mirror is
+  exactly where the build half left it.
+
+**GATE FINDING G-1 — the stored Management-API PAT is DEAD (401 on
+every endpoint).** It worked at the 14b gate (2026-08-04); expired or
+revoked since. The project-level service key works (200). Blast
+radius: the deploy's one-transaction body, the re-run-guard live
+proof, the grant sweep, the BYPASSRLS catalog check, and the
+signup-flip config act all ride the Management API — a fresh PAT
+restores the whole architect-driven road. HER ACT: mint a new token
+(supabase.com/dashboard → Account → Access Tokens), update
+`SUPABASE_ACCESS_TOKEN` in `.env.supabase.local` (untracked) herself
+so the secret never enters a transcript.
+
+**GATE FINDING G-2 — a 2-row mirror⊃local divergence, fully bounded
+BEFORE the deploy (what the A1 rail exists to catch).** Table-by-table
+id AND sync_version diff of the export against the fresh backup:
+every table's id set identical and ZERO content-stale rows, EXCEPT
+`commit_point` — TWO mirror-only rows (`9F7D6D65…` on variant
+`3BF63774…`, `3B5044ED…` on variant `7F21796C…`), both `kind='auto'`,
+both created `2026-08-06T01:53:44.985Z`, seqs 25703/25704, v1 — the
+idle-insurance class, minted and pushed by HER PHONE the day after the
+14b drill, never pulled by the Mac (cursor 25028; outbox empty). Text
+is provably NOT at risk either way: no variant row is content-ahead,
+so both commits snapshot text the Mac already holds — but the repush
+pushes LOCAL truth, so unpulled rows die with the rebuild unless
+reconciled first. Presented to her with the recommendation: ONE sync
+round on the installed build (marker 5 = mirror 5, rounds still run)
+to pull both rows into local truth, then re-backup + re-verify parity.
+
+**G-1 RESOLVED:** she minted a fresh PAT and updated
+`.env.supabase.local` herself (the secret never entered a transcript);
+probes 200 on orgs and the query road (`sync_meta` reads marker 5).
+
+**G-2 RESOLVED — her chosen arm (pull them in) executed and verified
+(2026-08-11 02:41 UTC):** she opened the installed build, let it sync,
+quit. The round pulled both phone commits AND fired the Mac's own
+idle-insurance on open (2 NEW auto commits, minted and pushed, seqs
+25705/25706 — healthy, the >24h-dirty-buffer class). Post-pull:
+`variorum-backup-2026-08-11-024144.sqlite` (integrity ok — THE
+pre-deploy snapshot), commit_point 834 local, cursor 25706, outbox 0.
+Full 18-table re-diff (ids AND sync_versions): **every table
+IDENTICAL** — local truth equals the mirror exactly going into the
+deploy. The export's `commit_point.json` refreshed to the post-pull
+834 (the other 19 files unchanged by construction — verified by the
+parity sweep).
+
+**Gate step 2 — the deploy: DONE (2026-08-11, her explicit go, PAT
+road).** 09 executed VERBATIM in one Management-API POST (one session =
+one transaction; HTTP 201). After-state verified in full: marker
+**5→6**; all rebuilt tables empty with the composite PKs exact
+(`(owner_id, id)`; `(owner_id, key)` for setting); her account seeded
+`hosted_sync` (non-expiring, `14c-deploy-seed`); ONLY the new RPC
+signatures live (old `sync_push(jsonb)`/`sync_pull(bigint,int)` gone);
+FORCE RLS on exactly 18 tables. **Obligation 13 PROVEN LIVE in its one
+safe window:** 09 re-run → `VARIORUM_09_ALREADY_DEPLOYED` naming both
+evidence arms + the override hint; post-refusal state byte-intact.
+**Obligation 11:** the committed sweep's first run flagged THREE rows —
+all adjudicated same-sitting:
+
+- **G-sweep-1 (fixed, `27e813e`):** `account_data_truncate` +
+  `account_purge` carried a service_role EXECUTE (Supabase's CREATE-time
+  default privileges surviving 09's public+anon-only revokes — the
+  scratch stub couldn't emulate that machinery). Zero live reach (both
+  bodies refuse NULL `auth.uid()`, verified in the deployed purge body);
+  fixed as posture exactness: 09's revokes now name service_role,
+  `maintenance/14c-gate-grant-tidy.sql` tidied the live mirror, the
+  demotion-posture pin demands the full letter (33/33).
+- **G-sweep-2 (recorded INFO):** `rls_auto_enable()` — an OUT-OF-BAND
+  platform event-trigger function (`ensure_rls` on ddl_command_end,
+  auto-enables RLS on new public tables; beside Supabase's own platform
+  triggers). Benign and protective; `RETURNS event_trigger` makes it
+  uncallable via RPC, so its broad ACL is moot. Now an expected INFO row
+  with its identification comment.
+
+**GATE FINDING G-3 — OBLIGATION 2 ANSWERED NO, AND THE RULED SECOND NET
+REPAIRED LIVE (her go).** The BYPASSRLS check: hosted `postgres` (owner
+of every definer function) AND `service_role` carry `rolbypassrls=true`
+— and BYPASSRLS overrides even FORCE RLS, so the deployed hybrid ran
+ONE-layered at the RPC path (the guard layer; policies bound only
+direct anon/authenticated access). The sitting's pinned caveat, falsified
+empirically. HER RULING at the gate: repair now (the recommended arm) —
+`maintenance/14c-gate-definer-owner.sql`: `variorum_definer` (NOLOGIN,
+NOBYPASSRLS) owns the THREE data functions (`sync_push` · `sync_pull` ·
+`account_data_truncate`); `account_purge` (auth-schema DML) and
+`entitlement_set` (writes a select-only-policy table) deliberately keep
+postgres. Three live refusals taught the artifact its final shape, each
+recorded in its header: (1) `ALTER … OWNER` needs the NEW owner to hold
+CREATE on the schema at acquisition (42501; granted-then-revoked inside
+the transaction — the role ends usage-only); (2) `auth.uid()`'s PUBLIC
+execute is not enough without USAGE on schema `auth`, and (3) postgres
+CANNOT grant that directly (silent no-op — supabase_admin owns the
+schema) — the road is MEMBERSHIP (`grant authenticated to
+variorum_definer`, executed at HER hand in the SQL editor after the
+harness's classifier declined the statement architect-side). Two own-row
+SELECT policies added (`key_vault_definer_fence_select` /
+`entitlement_definer_gate_select` — the `to authenticated` policies
+would otherwise default-deny the fence and tier-gate reads), and the
+helper grant (`sync_table_pk` → variorum_definer only — the I-4
+owner-equality reasoning no longer supplies the call road; the DDL pin
+extended to sanction exactly this one re-grant). VERIFIED LIVE: ownership
+moved (rolbypassrls=false on all three), schema priv usage-only, the
+sweep all-OK/INFO post-repair (expectations taught the two definer
+policies), and the probe pair under her uid-checked short-lived session —
+a clean `[]` pull on the current corpus key id, `VARIORUM_STALE_KEY_FENCE`
+on a wrong one. New pin `theDataDoorsAreOwnedByTheNonBypassDefinerRole`
+(AuthRLSDDLTests 33/33). Commits: `27e813e` · `c106d37` + the two
+artifact amendments; all pushed.
+
+**Gate step 3 — the repush: DONE (2026-08-11, her passphrase into the
+runner).** Confirm-twice zsh script (the corrected 14b shape) wrote the
+passphrase file; session re-minted uid-checked at both stages (the
+first had expired — the probe window outlived it); instance check
+clean. DRY-RUN exact (7,278 rows across 18 tables, outbox 0, the
+unwrap arm, writes nothing) → the real run: KDF 0.578 s →
+`resyncReinitialize` (7,278 enqueued) → **drained in ONE round, 7,278
+accepted, 0 rejected/deferred, outbox 0** (no gateway kills this time;
+the FIXED drain-summary accounting reported the true total — the 14b
+674-of-7,274 quirk's fix proven live). **THE PROOF TRIAD:** all 18
+tables' mirror counts EXACT vs local (7,278 total) · `owner_id`
+uniform — zero rows distinct from her uid (the born-multi-tenant
+check) · ZERO plaintext across the 18 registry-derived encrypted
+columns (3,063 sealed `e1:` values). Passphrase file and every
+session-bearing scratch file deleted after the proof.
+
+**Gate step 5 — the `/Applications` refresh: DONE (2026-08-11; taken
+immediately after step 3, since it is architect-side and independent of
+the phone's step 4 — the handoff's numbering, not its dependency
+order).** Release build green; instance check at the copy moment clean
+(pgrep, path-discriminated); `ditto` to `/Applications/Variorum.app`.
+Her installed build now speaks lockstep 6 — the marker-mismatch refusal
+window is closed; its next round pulls to head over the reinitialized
+cursor (echo applies, seq-recorded).
+
+**Gate step 6 — the live probes: DONE (2026-08-11, architect-driven).**
+*[removed for publication]*
+`admin/generate_link` (BYPASSES signups-off — the deliberate tool);
+*[removed for publication]*
+on its minted session). Its magic-link OTP expired before verify (a
+recorded latitude — the admin generate_link road's link is short-lived
+and I minted then acted a beat late), so the session came via
+`admin/users` password set + `email_confirm` + the password grant —
+uid-checked identical; entitlement granted through `entitlement_set` as
+service_role; a fabricated `key_vault` row inserted through the probe's
+OWN token (which itself proved the own-row INSERT policy). **ALL 13
+OBLIGATIONS PASS** (the probe's own field-name slip on the first
+foreign/collision push — `id`/`base_sync_version` vs the wire's
+`row_id`/`base_version` — was caught by reading the deployed body and
+re-run correctly; the owner-guard refusals were real regardless because
+that guard reads `columns.owner_id`):
+
+- **1 (stranger pull=0):** probe `sync_pull(0)` against her populated
+  corpus → **0 rows**, no refusal.
+- **5 (foreign-owner push):** probe pushes a `container` claiming HER
+  uid → `owner_id mismatch … must carry owner_id = auth.uid()`; **6
+  (NULL owner):** same refusal; both re-affirmed with correct wire.
+- **12 (composite identity):** probe pushes base-0 at HER exact
+  container id → **accepted v1 in the PROBE's partition**; both owners
+  now hold that id at v1, **her row byte-untouched** (owner/kind/version
+  unchanged); unknown table → `unknown sync table`.
+- **9 (direct-table denial):** as the probe's authenticated token,
+  `container`/`variant`/`sync_meta` all **403**; `entitlement` and
+  `key_vault` return **the probe's own row ONLY** (her vault provably
+  absent from its view).
+- **10 (`entitlement_set` as authenticated):** **403 permission
+  denied** — the service_role-only posture, empirically.
+- **8 (entitlement expiry):** service_role sets a PAST `valid_until` →
+  both RPC halves refuse `VARIORUM_NO_ENTITLEMENT`; re-grant
+  (non-expiring) heals with no state surgery (pull serves clean).
+- **7 (truncate fence):** wrong `active_key_id` →
+  `VARIORUM_STALE_KEY_FENCE`, **zero deletes** (probe row still
+  present); correct id → scoped deletion (its 1 container gone), **HER
+  186 containers UNTOUCHED**; service-key sweep confirms **0 probe rows
+  remain** across all 18 tables.
+- **2 (BYPASSRLS) + 11 (grant sweep) + 13 (re-run guard):** done at
+  steps 2/G-3 above.
+
+The probe's entitlement + vault + auth user remain live for the gate's
+step-10 deletion-door live test (its own `account_purge` is the natural
+verification).
+
+**Gate step 7 — the domain: HER DECISIONS RECORDED (2026-08-11), attach
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+technical caveat: Supabase's docs confirm the auth ENDPOINT switches to
+the custom hostname but never explicitly document the JWT `iss` rewrite —
+so `iss` + the OpenID discovery doc get verified empirically at
+activation (already the standing guardrail). DNS: a CNAME +
+`_acme-challenge` TXT, Cloudflare grey-cloud (community consensus, not
+Supabase-documented).
+
+*[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+- **WHAT THE CUSTOM DOMAIN BUYS (her question answered):** it fronts the
+  AUTH SERVICE (GoTrue issuer) with `auth.stargazing.tech`, so (a) the
+  links in auth emails — confirm/reset — show her brand instead of the
+  *[removed for publication]*
+  + OAuth discovery + the apps'/Fragments' auth configs point at a stable
+  branded hostname. It is BRANDING + CONFIG-STABILITY only — zero effect
+  on isolation, security, or E2EE (users are exactly as safe with or
+  without it). It is NOT needed while she is the only user; the guardrail
+  ties it to BEFORE the first stranger and BEFORE 14d writes Fragments'
+  provider configs (so they're written once against the final URL).
+- **THE OPEN SEQUENCING FORK (hers — the friction doctrine surfaces it):**
+  the ruled choreography put domain-attach → signup-flip →
+  stranger-validation INSIDE 14c, but none of the three is needed while
+  she is the only user (real strangers arrive at TestFlight, post-14d).
+  So either (A) attach the domain now (Pro enables it) and run the flip +
+  validation to close the full ruled gate, or (B) close 14c on the proven
+  isolation + tier machinery and fold domain+flip+stranger-validation
+  into the pre-strangers run-up (14d-adjacent, where SMTP also lands).
+  Recorded for her call; not decided by the architect.
+- **HER FOLLOW-UP (2026-08-11) + THE SECOND LOOKUP — branded email links
+  *[removed for publication]*
+  Custom SMTP alone changes only the sender/FROM, not the link
+  hostname; but Supabase's OFFICIALLY DOCUMENTED server-side PKCE
+  pattern rewrites the email TEMPLATE so the link points at her own
+  domain — `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=…`
+  — and a small `/auth/confirm` handler on stargazing.tech exchanges it
+  via `supabase.auth.verifyOtp({ token_hash, type })`. Every link the
+  recipient SEES is then on stargazing.tech, sender too. Works for
+  confirm/reset/magic-link/email-change. Requirements: Site URL set to
+  the brand domain, the handler routes on the Redirect-URLs allowlist,
+  *[removed for publication]*
+  buys — all invisible to users:** the raw `/auth/v1/*` API hostname,
+  OAuth callback URLs, SAML EntityID; and per a community report
+  (GitHub Discussion #44373) it may NOT even rebrand the JWT `iss`
+  claim. Since her apps sign in via password grant + publishable key
+  (no OIDC-discovery issuer trust) and her users never see the API
+  hostname, **the add-on buys her nothing user-visible.** THE
+  CONSEQUENCE for the design: the Round-7/8 `auth.stargazing.tech`
+  ISSUER ruling is worth revisiting — branded email links are better
+  served by the free template road, which RIDES 14d's SMTP + the
+  stargazing.tech site handler (site-agent work), so the gate's
+  "domain-attach" sub-step DISSOLVES into 14d and the issuer can stay
+  *[removed for publication]*
+  payoff can't be realized until the template rewrite + Site-URL config
+  + the site handler exist — all 14d — so nothing about it blocks
+  finishing the isolation gate now. (Recorded for her ruling; the
+  14d/contract issuer field and the SMTP runbook's template §6 gain a
+  pointer to this at closeout if she takes the template road.)
+
 ## Environment traps (carried into every batch brief, per the skill)
 
 - Instance checks: `pgrep -fl 'Variorum.app/Contents/MacOS'` AND

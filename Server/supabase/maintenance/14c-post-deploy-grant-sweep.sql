@@ -47,7 +47,13 @@ with expected_functions (signature, exp_anon, exp_authenticated, exp_service_rol
     ('entitlement_set(uuid,text,boolean,timestampwithtimezone,text)',  false, false, true),
     ('sync_schema_version()',                                          false, true,  null),
     ('sync_table_pk(text)',                                            false, false, null),
-    ('stamp_server_seq()',                                             null,  null,  null)
+    ('stamp_server_seq()',                                             null,  null,  null),
+    -- Identified at the 14c gate (2026-08-11): a platform-side event-trigger
+    -- function (attached as `ensure_rls` on ddl_command_end) that auto-enables
+    -- RLS on new public tables — never in a repo artifact, benign and
+    -- protective. RETURNS event_trigger, so it is uncallable via RPC by
+    -- Postgres rule; its broad EXECUTE acl is moot. INFO by design.
+    ('rls_auto_enable()',                                              null,  null,  null)
 ),
 observed_functions as (
   select
@@ -80,8 +86,13 @@ expected_tables (relname, exp_anon, exp_authenticated, exp_rls, exp_forced, exp_
     ('lens_choice',     false, false, true,  true,  1),
     ('block_comment',   false, false, true,  true,  1),
     ('setting',         false, false, true,  true,  1),
-    ('entitlement',     false, true,  true,  false, 1),
-    ('key_vault',       false, true,  true,  false, 3),
+    -- policy counts +1 each since the 14c-gate BYPASSRLS repair
+    -- (2026-08-11, maintenance/14c-gate-definer-owner.sql): the own-row
+    -- SELECT policies for the non-bypass variorum_definer owner
+    -- (key_vault_definer_fence_select / entitlement_definer_gate_select)
+    -- — the fence and tier-gate reads inside the re-owned RPC bodies.
+    ('entitlement',     false, true,  true,  false, 2),
+    ('key_vault',       false, true,  true,  false, 4),
     ('sync_meta',       false, false, true,  false, 0)
 ),
 observed_tables as (

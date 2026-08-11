@@ -1255,8 +1255,15 @@ revoke execute on function sync_push(jsonb, text) from public, anon;
 revoke execute on function sync_pull(bigint, text, int) from public, anon;
 grant execute on function sync_push(jsonb, text) to authenticated, service_role;
 grant execute on function sync_pull(bigint, text, int) to authenticated, service_role;
-revoke execute on function account_data_truncate(text) from public, anon;
-revoke execute on function account_purge() from public, anon;
+-- service_role named since the 14c gate (2026-08-11): Supabase's default
+-- privileges grant EXECUTE to service_role at CREATE, so omitting it left
+-- the doors service_role-executable on the live mirror against this
+-- artifact's authenticated-only letter (caught by the post-deploy grant
+-- sweep; zero live reach either way — both bodies refuse a NULL auth.uid()
+-- caller, which service_role always is). The live mirror was tidied by
+-- maintenance/14c-gate-grant-tidy.sql the same day.
+revoke execute on function account_data_truncate(text) from public, anon, service_role;
+revoke execute on function account_purge() from public, anon, service_role;
 grant execute on function account_data_truncate(text) to authenticated;
 grant execute on function account_purge() to authenticated;
 revoke execute on function sync_table_pk(text) from public, anon, authenticated;
