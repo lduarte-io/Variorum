@@ -10,6 +10,56 @@
 
 *(Moved verbatim from the master plan's "Current phase" section, in the order they sat there — newest first, per that section's convention, back through Phase 13b, then the standing Phase 12 deferral paragraphs and the early out-of-band records. The ACTIVE pointer always lives in `notes/DetailedPlanForPhases.md`.)*
 
+*(Superseded pointer, kept for the thread — the ACTIVE pointer through Phase 14c's build half, superseded at 14c's close 2026-08-11:)*
+
+**→ PHASE 14C — BUILD HALF COMPLETE 2026-08-05 (tip `a27d114`); THE
+GATE HALF AWAITS A FRESH SESSION at her word, from the paste-ready
+kickoff at the top of `notes/plans/phase-14c-gate-handoff.md` (the
+Round-9 session seam, her ruling).** Shipped in the build half: three
+batches (the born-multi-tenant mirror artifact + the two-user
+convergence suites · the re-key and account-deletion doors + the
+dormant 14d machinery · the tier's gate UX, the sign-up surface, the
+entitlement function, the SMTP runbook), the review ladder CLOSED at
+round 2 (1 MAJOR — the re-key's crash windows, closed by a persisted
+marker with engine refusals and a completing door — + 2 MINOR + 3 NIT,
+all fixed revert-verified), and the author-ruled DEDICATED ISOLATION
+ROUND returning NO BLOCKER/NO MAJOR ("no standing cross-tenant road
+exists in what this phase ships"), its four fix-now findings landed
+with 09 EXECUTED against a throwaway Postgres to prove the new re-run
+guard and the post-deploy sweep. Counts: core 1201/127 · Mac 1240/219
+tripwire-only · mobile 175/26 · spine 51/7. THE MIRROR IS UNTOUCHED
+(marker 5; 09 is authored-never-deployed) — the deploy, the live
+probes (12 enumerated obligations), the domain, the signup flip, her
+walks, the ratify bundle, and the closeout are the GATE half's. 14d
+(the Fragments batch + bridge resumption) is drafted and waits behind
+it.
+
+*(The sitting record, superseded as the pointer but kept for the
+thread:)* **PHASE 14C OPEN 2026-08-04 — the design sitting RAN
+same-day as 14b's close (author-attended; the BINDING record is
+`notes/plans/phase-14c-multi-tenant.md`'s sitting rounds 1–5).
+Rulings: ALL-FABLE cast · her usage pause HOLDS through 14c · THE
+CLEAN REBUILD — the mirror's 18 data tables reborn multi-tenant
+(composite `(owner_id, id)` PKs — `(owner_id, key)` for setting;
+forced RLS + the explicit RPC guards, two independent layers; the
+ownerless-table count corrected eight→TEN) via ONE consolidated
+artifact + her wipe-and-repush, marker 5→6 at the gate · the
+VAULT-KEY-ID FENCE every round (C-3's stale-writer constraint honored
+structurally, and the whole stale-key class with it) · account
+deletion = IMMEDIATE HARD PURGE with the local-copy-survives copy
+PINNED · the 14a re-decide checkpoint CLOSED (the Variorum project
+stays the suite's home) · *[removed for publication]* · the
+door choreography ruled (isolation proven → rebuild deploy → live
+probes with a uid-checked second account → domain → tier → HER signup
+flip → stranger validation) · THE ONE-BATCH FRAGMENTS HANDOFF MOVED
+TO NEW MICRO-PHASE 14D at her word ("let's let this phase close
+out… it can be 14d") — 14c closes without waiting on Fragments; the
+bridge stays paused until 14d runs. Execution: batch 1 (the reborn
+mirror + the two-user harness) → batch 2 (the re-key + deletion
+doors) → batch 3 (the tier + the door) → the ladder + the DEDICATED
+isolation review round (her proof-bar ruling) → the author-attended
+gate in the ruled order.
+
 *(Superseded pointer, kept for the thread — the ACTIVE pointer from Phase 14b's closeout to Phase 14c's opening, 2026-08-04, superseded at the 14c kickoff sitting the same day:)*
 
 **→ PHASE 14B CLOSED 2026-08-04 (opened, built, laddered, deployed,
@@ -523,3 +573,5 @@ combined feel pass still owed.)*
 - **Phase 13k (closed 2026-08-02):** The walk's build round — opened by the author herself at the housekeeping session's tail ("let's bring real phase discipline to these issues"), run same-day under `/architect-phase` (Fable architect/orchestrator · a fresh Opus implementer per batch · ONE Fable cold reviewer, ladder closed at round 2). All TWELVE ledger rows shipped across three batches plus her round-4 screenshot-flick continuation: K1 the literal-"Untitled" retirement (blank-only absence, no sweep, the ⌘N nil-mint stands) · K2 nameless pools show their created day · K3 leaf-only tag chips (path in tooltip, color path-keyed) · K4 smart-book membership on note cards (the proposal gate caught the IN-subquery CORPUS SCAN; shipped CROSS-JOIN page-driven, measured flat, no cap, pinned by query plan) · K5 ⏎ list continuation (end-of-line, unchecked births, lead-only exits, panes too) · K6 the right-click Callout door (Write + take cards, clicked-block targeting) · K7 the formatting toolbar in BOTH bottom bars (eight acts, the Format menu's own brain) · K8 nested lists (Tab/⇧Tab, two-space unit, LIST-ONLY tokenizer widening, uncapped storage/drawn-clamp 6, outdent-first ⏎ at depth — the F-3 vocabulary's first extension) · K9 callout frames in Take mode (ONE frame around the fan) · K10 the per-voice inline-code chip (Read's page its own warm neutral) · K11 the always-compact bar (← book ＃ →: a real forward door, the book-icon ascent, the spelled-out back chip and "in xyz" fold retired) · K12 tag cards default-visible with the sticky ＃/⌘⇧I fold. Her flick then ruled the forward ARROW (the chevron read as a tags-expander), snug chips (the maxWidth flexible-up-to trap, pinned by ink pixels), and the boxy 3pt shape with a radius strip for her pick. **The ladder:** round 1 = 1 MAJOR (Format ▸ Heading on a nested item minted an unreadable indented heading — the actKeepsIndent gate restores #49(b)'s replace-the-lead at every depth) + 2 MINOR + 2 NIT, all fixed by the reviewer with revert-verified red-on-old pins; round 2 (fresh reviewer) = every disposition HOLDS — re-verified against the ACTUAL pre-fix tree — zero new HIGH, three teaching-surface residuals fixed (the ⌘/ helper's history row now interpolates the bar's own glyph constants, drift structurally impossible; the field-guide workspace lesson rewritten — the re-seed rides her one Restore-Tutorial click). **Process notes worth keeping:** both proposal gates earned their cost (the corpus scan; the vocabulary's exact shape); her machine DIED mid-batch-3 and the phase lost nothing (tree byte-verified by checksums, every cited run post-crash); the tripwire's lock-state covariate was REFUTED and its KnownIssues row corrected (A47c starts covariate-unknown); PoolDragTests' physical-⌥ read recorded as environment-sensitive; two hollow first-draft pins were reported honestly and rebuilt to discriminate. **Final counts core 1034/114 · Mac 1191/208 (the one tripwire red by identity) · mobile 14/4 · spine 51/7; NO schema (marker 4); zero `Sync/` lines; `renderedText`/export bodies/the bridge's join brain byte-untouched.** Her walk: #49–#52 answered at the kickoff sitting; #53/#55 IN FULL and #54 all-but-(d) at the closeout sitting (13i confirmed as the what-is-a-book phase for her hybrid smart-book question). `/Applications` refreshed at the closeout behind a fresh WAL-safe A1 backup (`variorum-backup-2026-08-02-224558.sqlite`, integrity ok), zero-instance verified before backup, build and copy. Handoff: `notes/handoffs/phase-13k-handoff.md` (her checklist at top). 13e next, at her word.
 
 *[removed for publication]*
+
+- **Phase 14b (closed 2026-08-04):** Suite E2EE — the tier ships unable to read your writing, opened and closed the SAME DAY under `/architect-phase` (ALL-FABLE at her invocation; one mid-phase orchestrator cutover — a safeguard reroute on the phase's security-shaped subject matter — crossed with ZERO loss via the two-document handoff + repo-first discipline; the incoming seat re-verified everything, per her mandate, before building on it). **THE RULINGS (R-1…R-8):** vault on the VARIORUM project (the free re-open spent) · WIPE-AND-REPUSH for her mirror · insights closed factually · passphrase-only enrollment both form factors (QR a future door) · 12-word BIP-39 · enrollment-only unlock (the per-launch biometric door held open, then OPENED in-phase at her CF-12 ruling: biometric or the passphrase, NEVER the device passcode) · Argon2id via the vendored PHC reference · master + per-class keys. **SHIPPED:** the crypto substrate (RFC-vectored; 64 MiB Argon2id; BIP-39 with checksum) · the `SyncSchema` classification (18 encrypted columns, build-failing completeness walk) + the serializer seam with the engine inland on plaintext (Merge/Repairs ZERO-diff, proven) · convergence suites GREEN OVER CIPHERTEXT (the crown) · `key_vault` (marker 4→5; R1-2's revision CAS) · Keychain custody + the shared stepped setup/enrollment flows (her CF walk rebuilt them: mandatory phrase, her checkbox sentence byte-pinned, the forget door, the biometric gate, Account-tab fold, sync-row stability, the CF-16 stale-key honesty state) · `resyncReinitialize` + the `vault-bootstrap` runner (GM-3's transient-drop absorption found and fixed at the live gate) · the bridge's journal-class capability STRUCTURALLY PAUSED until the 14c-end Fragments batch. **EXECUTED LIVE:** the mirror wiped and repushed TWICE (the gate morning, then her full re-key acceptance drill — vault deleted, new passphrase + new 12 words, truncate, repush, phone re-enrolled) — both times the headline proof passed: rows exact, ZERO plaintext across all 18 columns; CF-16 validated live on her phone; the recovery-phrase road proven twice; the mobile flow notes handed over and the phone's adaptation (snapshot cover ACCEPTED at her walk) merged back. **THE LADDER** closed at round 2 (1 MAJOR + 3 MINOR + 5 NIT, all fixed revert-verified); **ONE post-gate cold pass** (NO BLOCKER/MAJOR — 3 MINOR + 4 NIT; the SyncSpec staleness manifest incl. 13b's unrecorded 3→4 lockstep entry, the C-3 stale-writer fence constraint pinned to 14c, the PayloadCipher ASCII-digit fix, the KDF off-main tripwire). **Final counts (the merged tree, mobile's PL-6 build half in):** core 1158/124 · Mac 1218/213 (the standing TakePane tripwire the one allowed red, BY IDENTITY) · mobile 175/26 · spine 51/7. **MOBILE PARITY LINE: PL-6 SHIPPED THROUGH THE SHARED SEAM AND CLOSED** — the phone enrolls, decrypts, forgets, and phrase-recovers via the same flows (0.16 s device KDF); its snapshot cover + BIP-39 ergonomics landed via the mobile session's merge; no parity debt. The E2EE KnownIssues row RESOLVES with this phase; the C-1 MainActor-Keychain finding joins 13e's securityd row. Handoff: `notes/handoffs/phase-14b-handoff.md`. 14c next, at her word, from the paste-ready draft.

@@ -1,15 +1,29 @@
 # Phase 14c — Multi-tenant hardening & the paid tier — plan
 
-> **BUILD HALF COMPLETE 2026-08-05 (tip `a27d114`) — the Round-9 seam
-> reached: three batches shipped, the ladder CLOSED at round 2, the
-> dedicated isolation round CLEAN (no BLOCKER/MAJOR), the Fragments
-> brief and the 14d micro-plan authored. THE GATE HALF runs in a FRESH
-> session from `notes/plans/phase-14c-gate-handoff.md` (paste-ready
-> kickoff at its top). Counts: core 1201/127 · Mac 1240/219
-> tripwire-only · mobile 175/26 · spine 51/7. The mirror is UNTOUCHED
-> (still marker 5) — the deploy is the gate's act.**
+> **PHASE 14c CLOSED 2026-08-11 — the gate half ran and the phase is
+> DONE. The isolation proof bar is met and proven LIVE: the
+> born-multi-tenant mirror deployed (marker 5→6), her corpus repushed
+> exact + zero-plaintext + owner-uniform, the ruled two-layer security
+> net made real (the live BYPASSRLS repair — obligation 2 answered NO,
+> the three data RPCs re-owned to a non-bypass role), all 13 isolation
+> obligations passing against a real provisioned stranger, and the
+> account-deletion door verified end to end. The operationalia (signups
+> open · domain · stranger onboarding · phone re-onboard) DEFERRED to
+> 14d by her ruling — first needed post-14d, riding its SMTP + site
+> work; the custom domain DISSOLVED (branded emails via the free
+> template road). The gate execution record is the "GATE HALF" section
+> below; L13/L14 done; the closeout ritual is complete. 14d opens at
+> her word.**
 >
-> **Status: OPEN — the design sitting RAN 2026-08-04 (author-attended,
+> **Build half (historical): COMPLETE 2026-08-05 (tip `a27d114`) — the
+> Round-9 seam: three batches, the ladder CLOSED at round 2, the
+> dedicated isolation round CLEAN (no BLOCKER/MAJOR). Counts at close:
+> core 1201/127 · Mac 1240/219 tripwire-only · mobile 175/26 · spine
+> 51/7 (the gate half added the two adjudicated-sweep DDL pins and the
+> BYPASSRLS-repair pin — AuthRLSDDLTests 30→33; no app/core feature
+> code).**
+>
+> **Status: CLOSED — the design sitting RAN 2026-08-04 (author-attended,
 > same day as 14b's close). All seven staged questions RULED plus two
 > she added mid-sitting; rulings recorded verbatim-faithful below. Cast
 > ALL-FABLE at her pick. THE ONE-BATCH FRAGMENTS HANDOFF MOVED to new
@@ -2569,8 +2583,8 @@ price-agnostic: she names the number at launch.)*
 | L10 | SMTP runbook + template copy + rate/abuse limits (the config ACT re-owned to 14d, Round 7) | **done — batch 3** (`notes/plans/phase-14c-smtp-runbook.md` — dashboard act step-by-step, Cloudflare DNS shape incl. the grey-cloud CNAME trap, reasoned provider recommendation, limits with reasons, template DRAFTS for her ratify; NO config act, NO dashboard contact; the built-in-mailer team-only fact flagged as a gate consideration) |
 | L11 | The ladder (combined diff) | **done — CLOSED at round 2** (R1: 1 MAJOR + 2 MINOR + 2 NIT, all fixed revert-verified, a third crash window found in the tracing; R2: every fix SOUND with the MAJOR's pin independently revert-verified, one new NIT R2-1 fixed at the architect's hand) |
 | L12 | The DEDICATED isolation-boundary review round (her proof-bar ruling) | **done** (NO BLOCKER/NO MAJOR — no standing cross-tenant road; I-1 → her ratify bundle as a disclosure-envelope call; I-2…I-5 fixed, with 09 EXECUTED against a throwaway Postgres to prove the re-run guard and the sweep; 12 live-probe obligations enumerated for the gate) |
-| L13 | The gate: deploy · repush · phone re-onboard · live probes (second account on <her-email>, uid-checked, entitlement-granted; BYPASSRLS check) · auth.stargazing.tech + iss (Cloudflare, hers) · the signup flip (architect-driven per Round 7) · stranger validation (incl. PL-6 phone walk) | pending — announced per step; deploy/probes/flip architect-driven at her Round-7 delegation |
-| L14 | Closeout ritual in full (incl. the 14d micro-plan + the finalized contract brief; the §12 running record's 5→6 entry; the KnownIssues auth row resolved/re-owned) | pending |
+| L13 | The gate | **done — 2026-08-11** (A1 rail + deploy marker 5→6 + re-run-guard live proof + grant sweep all-green [G-sweep-1/2 adjudicated] + the BYPASSRLS repair making the two-layer net real [G-3] + repush 7,278 exact/zero-plaintext/owner-uniform + /Applications refresh + ALL 13 live probes + deletion-door test. Steps 4/7/8/9 [phone re-onboard · domain · signup flip · stranger validation] DEFERRED TO 14d at her ruling — the operationalia are first needed post-14d and ride its SMTP+site work; the domain dissolved [branded emails via the free template road]) |
+| L14 | Closeout ritual in full | **done — 2026-08-11** (this record + counts · master plan table/pointer/closeout-log · 14b closeout + superseded pointer → archive · AppSpec §14 5→6 delta [14b delta → archive] · SyncSpec §12 marker 5→6 entry · AppSpec §7 sync_state third-key comment · KnownIssues auth row re-owned to 14d · MobileSoul parity line · handoff · 14d micro-plan FILL-AT-GATE completed · contract issuer field · memory) |
 | L15 | The 14d prep: live journal-bridge provider + staged re-push machinery, dormant behind the standing pause, both halves pinned (Round-6 ruling) | **done — batch 2** (`8bedbe2`+`f564e00`; DeviceBridgeKeyProvider built, wired NOWHERE; stageRepushFromTruth with the sentinel design revert-proven; dormancy AND readiness pinned; the re-key door's trigger connected, inert) |
 
 ## GATE HALF — execution record (fresh session, 2026-08-10/11; the
@@ -2849,6 +2863,67 @@ Supabase-documented).
   finishing the isolation gate now. (Recorded for her ruling; the
   14d/contract issuer field and the SMTP runbook's template §6 gain a
   pointer to this at closeout if she takes the template road.)
+
+**Gate steps 4/7/8/9 — DEFERRED TO 14d at her ruling (2026-08-11).**
+With the isolation + tier machinery proven live, she chose to close 14c
+on that proof and fold the operationalia into 14d, where they are first
+actually needed (real strangers = TestFlight = post-14d) and where the
+SMTP + site work that makes the stranger email flow real will exist:
+- **(4) phone re-onboard** — pairs with a marker-6 build drop (her
+  phone is a marker-5 build from the 14b gate; post-rebuild it visibly
+  refuses to sync — safe, phone data intact — until updated). Rides the
+  mobile/TestFlight run-up. **Safety caveat recorded for her: until the
+  phone gets a current build + re-onboards, don't rely on phone↔Mac
+  sync — phone writing stays local-safe but won't propagate.**
+- **(7) domain** — DISSOLVED (the branded-email template road serves it
+  *[removed for publication]*
+  *[removed for publication]*
+- **(8) signup flip** + **(9) stranger validation** — land at 14d on
+  whichever issuer/SMTP posture she rules there (they need neither a
+  custom domain nor branded emails; ARM (a) is moot until then).
+
+**Gate step 10 — the deletion-door live test: DONE (2026-08-11).** The
+*[removed for publication]*
+session — the door's real server mechanism. Report:
+`data_rows 0, vault_rows 1, entitlement_rows 1, auth_user_removed true`.
+Post-state: admin auth-user lookup **404 User not found**; its vault and
+entitlement rows **gone** (service-key check by uid); its password grant
+now **400 Invalid login credentials** (session dead); **her account
+byte-untouched** (186 containers, vault, entitlement all present). The
+purge's `key_vault.user_id` FK CASCADE handled the vault removal
+regardless of statement order (the R1-2 correction's letter). Probe
+account fully cleaned up; all probe/session secrets deleted from scratch.
+
+**Gate step 11 — the ratify bundle: HER RULINGS (2026-08-11).**
+- **I-1 (the shared `server_seq` cross-tenant write-activity side
+  channel) → ACCEPT-AND-RECORD**, her words: *"that's fine on the
+  global sequence deltas reveal aggregate foreign write volume /
+  timing. i honestly don't think that matters that much."* The E2EE
+  disclosure envelope gains the line at closeout (AppSpec/14b design
+  record + the strategy file's disclosure list); the per-tenant-sequence
+  arm is NOT built (recorded as a future-lockstep option only).
+- **The doors' copy (B2-2 / B3-1) → TAKE AS-SHIPPED for now**, her
+  words: *"i think the doors' copy is fine for now, i'll check it out
+  later."* The byte-pinned requirements stand; a future taste pass may
+  redline the surrounding sentences (tracked in the handoff).
+- **B3-3 (no Fragments-coverage promise in-app) → AS-SHIPPED** (she
+  did not flag it; the site page carries the suite promise, the
+  implementer's defensible arm).
+- **B1-1 RETIRED** (presented as retired-with-reasons, not open);
+  **B1-2 / B1-3 / B2-1 / B2-3 SUSTAINED as recorded**; **ARM (a)
+  moot** (validation deferred to 14d); **pricing / processor** remain
+  hers at launch / at the site-agent tasking.
+
+**THE GATE — SUMMARY (2026-08-11):** the isolation proof bar is met and
+proven LIVE — the born-multi-tenant mirror deployed (marker 6), her
+corpus repushed exact + zero-plaintext + owner-uniform, the ruled
+two-layer security net made real (the BYPASSRLS repair), all 13
+isolation obligations passing against a real provisioned stranger, and
+the deletion door verified end-to-end. The tier machinery is deployed
+and gated. The operationalia (signups open, domain, stranger onboarding,
+phone re-onboard) ride 14d by her ruling. **The mirror is multi-tenant,
+her writing is intact and unreadable to anyone but her, and no account
+can reach another's data through any door this phase ships.**
 
 ## Environment traps (carried into every batch brief, per the skill)
 
