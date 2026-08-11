@@ -94,19 +94,65 @@ both apps. Then TestFlight unblocks (her standing ruling), and the
 closeout ritual runs (micro-sized: the master plan row + pointer, the
 contract file's state, the parity line, the handoff note).
 
-## FILL-AT-GATE fields (the 14c gate session completes these before
-## this phase can open)
+## FILL-AT-GATE fields — COMPLETED at the 14c close (2026-08-11)
 
-- [ ] The CONFIRMED issuer URL after the `auth.stargazing.tech`
-  attach + `iss`-claim verification (touchpoint #3 item 5 in the
-  contract file carries the same marker).
-- [ ] The deployed entitlement state (09's `entitlement_set` live;
-  her account's seed row confirmed; the probe account's grant/purge
-  history noted).
-- [ ] The signups toggle's post-gate state and any validation-era
-  org-team membership removed (the ARM (a) cleanup).
-- [ ] Her Variorum-usage pause status at 14c's close (Round 1 held it
-  through 14c; its end-state is hers).
+*[removed for publication]*
+  — the RAW Supabase project URL. **The `auth.stargazing.tech` custom
+  domain was DECLINED at the 14c gate** (her ruling): a lookup confirmed
+  branded auth-email links come FREE via a rewritten email template
+  (`{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=…`) + a
+  *[removed for publication]*
+  Custom Domain add-on (which rebrands only user-invisible surfaces — the
+  API hostname, OAuth callbacks, and per a community report maybe not
+  even the `iss`) buys nothing her users see. **14d writes Fragments'
+  provider config against this raw project URL.** (If she ever changes
+  her mind, attaching a custom domain later is a coordinated
+  config-only update, never data — but there is nothing to verify at
+  attach today because nothing is attached.) The branded-email TEMPLATE
+  work + the site handler ride THIS phase's SMTP step (Step 0).
+- [x] **The deployed entitlement state:** `entitlement_set` is LIVE
+  (service_role-only, verified). Her account's seed row is present and
+  confirmed (`hosted_sync`, non-expiring, source `14c-deploy-seed`,
+  *[removed for publication]*
+  *[removed for publication]*
+  then FULLY PURGED by the deletion-door test — no probe residue remains
+  (auth user, vault, entitlement all gone; verified).
+- [x] **The signups toggle's post-gate state:** STILL OFF — the signup
+  flip DEFERRED to 14d (this phase). No validation-era org-team
+  membership was ever added (ARM (a) was moot — stranger validation
+  deferred), so there is no cleanup owed. **Opening the signup door is
+  THIS phase's act**, after/with the SMTP setup (Step 0).
+- [x] **Her Variorum-usage pause status at 14c's close:** held through
+  14c (Round 1); its end-state is HERS to declare. Recorded caveat for
+  this phase: the 14c rebuild reset the mirror, so her PHONE's saved
+  cursor is stale and it must RE-ONBOARD (fresh store, enroll by
+  passphrase, pull-to-head) before phone↔Mac sync is reliable — until
+  then phone writing stays local-safe but may not propagate. Its build
+  VERSION is the mobile session's to confirm (the 2026-08-11 merged-tree
+  Release install carries lockstepVersion 6, but its completion needed
+  the phone unlocked to mount) — if already marker-6 it won't refuse on
+  version, if older it will; either way re-onboard is the clean path.
+
+## ABSORBED FROM 14c (her 2026-08-11 deferral ruling — this phase now
+## carries these beside the Fragments touchpoints)
+
+- **The signup flip** — open the Variorum project's signup door (the
+  sole remaining corpus guard until then); preconditions already green
+  (isolation proven, tier machinery live).
+- **Stranger-onboarding validation** — a fresh account in-app: the
+  empty-store first pull reads as normal, the CF-5 stepped vault setup
+  as a stranger, and the PL-6 phone first-run FULL-SETUP walk (its
+  first safe live subject). Whichever email-confirmation posture she
+  rules with SMTP live (ARM-(a) org-team add, autoconfirm, or admin
+  provisioning — the runbook §1 fork).
+- **The phone re-onboard** — the reset mirror leaves the phone's cursor
+  stale; re-onboard (fresh store, enroll by passphrase, pull-to-head
+  over ciphertext — the 14b road). Confirm the phone's build version
+  first (the 2026-08-11 merged-tree install may already have made it
+  marker-6); pairs with the mobile/TestFlight run-up.
+- **Branded auth-email links** — the FREE template road (above) + the
+  `/auth/confirm` handler the stargazing.tech agent builds; rides the
+  SMTP step. No custom domain.
 
 ## Held facts this plan must not lose
 

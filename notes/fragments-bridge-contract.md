@@ -682,13 +682,19 @@ handoff):**
    covers both apps") is worded on the stargazing.tech pages — the
    14c ruling is that neither app promises the OTHER app's coverage
    in-app until both ends are live.
-5. **The issuer/domain coordinate — FILL-AT-GATE:** the suite issuer
-   is being fronted by **`auth.stargazing.tech`** (ruled 2026-08-05);
-   the attach + `iss`-claim verification happen at 14c's gate, and the
-   CONFIRMED final URL lands here before your batch runs — write your
-   provider config against that URL only. (Recorded with it: the apex
-   domain may itself move on first-year evidence — any such move is a
-   coordinated config-only update, never data.)
+5. **The issuer/domain coordinate — RESOLVED AT THE 14c GATE
+   (2026-08-11): the confirmed issuer URL is the RAW project URL
+   *[removed for publication]*
+   `auth.stargazing.tech` custom domain was DECLINED — a lookup
+   confirmed branded auth-email links come FREE via a rewritten email
+   template pointing at stargazing.tech + a `/auth/confirm` `verifyOtp`
+   *[removed for publication]*
+   only user-invisible surfaces — the API hostname, OAuth callbacks, and
+   per a community report maybe not even the `iss`) buys nothing users
+   see. **Write your provider config against
+   *[removed for publication]*
+   custom domain later, it is a coordinated config-only update on both
+   apps + your provider entry — never data; nothing forces it.)
 6. **One interplay note for the batch's bridge half (informational —
    the Variorum side owns it):** when the bridge resumes at the
    batch, historical plaintext journal days re-arrive as `e1:`

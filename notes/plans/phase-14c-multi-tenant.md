@@ -2869,12 +2869,20 @@ With the isolation + tier machinery proven live, she chose to close 14c
 on that proof and fold the operationalia into 14d, where they are first
 actually needed (real strangers = TestFlight = post-14d) and where the
 SMTP + site work that makes the stranger email flow real will exist:
-- **(4) phone re-onboard** — pairs with a marker-6 build drop (her
-  phone is a marker-5 build from the 14b gate; post-rebuild it visibly
-  refuses to sync — safe, phone data intact — until updated). Rides the
-  mobile/TestFlight run-up. **Safety caveat recorded for her: until the
-  phone gets a current build + re-onboards, don't rely on phone↔Mac
-  sync — phone writing stays local-safe but won't propagate.**
+- **(4) phone re-onboard** — the rebuild reset the mirror (tables +
+  the server_seq changefeed restarted), so the phone's saved cursor is
+  stale against it; the clean fix is a re-onboard (fresh store, enroll
+  by passphrase, pull-to-head), the 14b road. **Build-version caveat
+  corrected at closeout (the mobile session's memory):** the phone is
+  NOT confidently a marker-5 build — the mobile session pushed the
+  merged-tree Release build (which carries 14c's lockstepVersion 6) to
+  her phone today, though the install needed the phone unlocked to
+  mount and its completion is the mobile session's to confirm. If it
+  landed, the phone is a marker-6 client and won't refuse on version;
+  if not, its older build refuses until updated. Either way the
+  re-onboard is the clean path and a 14d act. **Safety caveat for her:
+  until the phone is re-onboarded, don't rely on phone↔Mac sync — phone
+  writing stays local-safe but may not propagate.**
 - **(7) domain** — DISSOLVED (the branded-email template road serves it
   *[removed for publication]*
   *[removed for publication]*
