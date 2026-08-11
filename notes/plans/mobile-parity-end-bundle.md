@@ -151,6 +151,18 @@ screenshot look** (§3 stands).
   update ride that seam as recorded), and INSTALLS the Release build
   to her phone over the tunnel. Until the deploy: the hold binds
   exactly as before.
+  **EXECUTED 2026-08-11 (the next mobile session, at her ask):** the
+  deploy verified landed on the gate record (marker 6 deployed, live
+  probes all pass); `main` merged into `mobile` CLEAN (zero conflicts
+  — the gate half touched no file the chain touched); suites green on
+  the merged tree (mobile 314/60 · core 1216/128, main's grown
+  AuthRLSDDLTests); the §14 delta dance + the master-plan row update
+  landed at the seam as recorded; `mobile` ⇄ `main` pushed at one
+  tip; the Release build INSTALLED to her phone over the tunnel (one
+  locked-device + tunnel-blip delay; it took the moment she
+  unlocked); `/Applications` refreshed from the merged tree in a
+  zero-instance window. Only internal TestFlight still waits on her
+  word.
 
 ## §6 — Deferred with owners (nothing floating)
 

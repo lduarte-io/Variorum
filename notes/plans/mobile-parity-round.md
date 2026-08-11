@@ -432,6 +432,9 @@ the stage closeout, pointer → B, and Stage B kicks off in-chain.
   releases. It never rides the baseline suite.
 - **The install hold (this chain):** client marker 6 vs live mirror 5 —
   no Release install to her phone until 14c's mirror deploy lands.
+  *(RELEASED + EXECUTED 2026-08-11 — the deploy landed at marker 6;
+  the §5 pre-authorized merge+install ran; the end bundle §5 has the
+  record.)*
 
 ## Stage A, batch A1 brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
 
