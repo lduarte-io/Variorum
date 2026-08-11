@@ -46,8 +46,14 @@
 --   * `stamp_server_seq` is INVOKER security, so the BEFORE INSERT
 --     trigger runs as the DML role — the sequences grant covers its
 --     nextval.
---   * `auth.uid()` carries a PUBLIC execute ACL (verified live), so the
---     new owner needs no grant there.
+--   * `auth.uid()` carries a PUBLIC execute ACL (verified live) — but
+--     executing it ALSO requires USAGE on the `auth` schema, which the
+--     fresh role does not inherit (the post-repair probe pull refused
+--     42501 "permission denied for schema auth" — caught exactly where
+--     the probe-before-repush ordering exists to catch it; the grant
+--     below landed as the dated follow-up). Schema USAGE only — the
+--     role holds NO privilege on any auth table; the one body that
+--     touches `auth.users` (account_purge) deliberately kept postgres.
 --
 -- ROLLBACK (if a live refusal ever traces here): three one-line
 -- `alter function … owner to postgres;` statements restore the
@@ -72,6 +78,7 @@ grant select, insert, update, delete on
   to variorum_definer;
 grant select on key_vault, entitlement to variorum_definer;
 grant usage, select on all sequences in schema public to variorum_definer;
+grant usage on schema auth to variorum_definer;
 grant execute on function sync_table_pk(text) to variorum_definer;
 
 create policy key_vault_definer_fence_select on key_vault
