@@ -58,7 +58,13 @@ begin;
 create role variorum_definer with nologin nobypassrls;
 grant variorum_definer to postgres;
 
-grant usage on schema public to variorum_definer;
+-- CREATE rides beside USAGE only for the ownership acquisition below —
+-- Postgres requires the NEW owner to hold CREATE on the schema at
+-- `alter … owner to` time (the first live execution refused exactly
+-- there, 42501, and rolled back whole). It is revoked again before
+-- commit; the role ends usage-only, owning functions it could not
+-- re-create.
+grant usage, create on schema public to variorum_definer;
 grant select, insert, update, delete on
   container, block, variant, commit_point, edge, container_block,
   reading, reading_section, reading_post, tag, post_tag, block_tag,
@@ -76,5 +82,7 @@ create policy entitlement_definer_gate_select on entitlement
 alter function sync_push(jsonb, text) owner to variorum_definer;
 alter function sync_pull(bigint, text, integer) owner to variorum_definer;
 alter function account_data_truncate(text) owner to variorum_definer;
+
+revoke create on schema public from variorum_definer;
 
 commit;
