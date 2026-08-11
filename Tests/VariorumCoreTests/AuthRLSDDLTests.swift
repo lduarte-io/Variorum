@@ -703,6 +703,46 @@ struct AuthRLSDDLTests {
         let composed = try Self.composedSQL()
         #expect(!composed.contains("grant execute on function sync_table_pk"),
                 "nothing may grant the helper back: the definer bodies call it as the owner")
+        // The 14c-gate definer-owner repair (2026-08-11) is the ONE sanctioned
+        // re-grant road, and only to variorum_definer — a NOLOGIN role no API
+        // request can ever run as. The no-door-back posture holds; the grant
+        // exists because ownership of the calling bodies moved off the
+        // helper's owner (the BYPASSRLS repair), breaking the owner-equality
+        // the original revoke reasoning rested on.
+        let definerOwner = Self.strippingComments(
+            try Self.sqlFile("maintenance/14c-gate-definer-owner.sql"))
+        #expect(definerOwner.contains(
+            "grant execute on function sync_table_pk(text) to variorum_definer;"))
+        #expect(!definerOwner.contains("grant execute on function sync_table_pk(text) to authenticated")
+                && !definerOwner.contains("grant execute on function sync_table_pk(text) to anon")
+                && !definerOwner.contains("grant execute on function sync_table_pk(text) to public"),
+                "the helper re-grant reaches only the nologin definer role")
+    }
+
+    /// THE 14C-GATE BYPASSRLS REPAIR (2026-08-11; live-probe obligation 2's
+    /// consequence): the hosted `postgres` role carries BYPASSRLS — which
+    /// overrides even FORCE RLS — so the ruled two-layer hybrid needed the
+    /// three DATA functions owned by a dedicated NON-BYPASS role for the
+    /// policy net to bind their bodies. account_purge (auth-schema DML) and
+    /// entitlement_set (writes a select-only-policy table) deliberately keep
+    /// postgres; the artifact's header carries the full reasoning.
+    @Test func theDataDoorsAreOwnedByTheNonBypassDefinerRole() throws {
+        let sql = Self.strippingComments(
+            try Self.sqlFile("maintenance/14c-gate-definer-owner.sql"))
+        #expect(sql.contains("create role variorum_definer with nologin nobypassrls;"))
+        #expect(sql.contains("alter function sync_push(jsonb, text) owner to variorum_definer;"))
+        #expect(sql.contains("alter function sync_pull(bigint, text, integer) owner to variorum_definer;"))
+        #expect(sql.contains("alter function account_data_truncate(text) owner to variorum_definer;"))
+        #expect(!sql.contains("alter function account_purge"),
+                "the purge keeps postgres — auth-schema DML")
+        #expect(!sql.contains("alter function entitlement_set"),
+                "the entitlement writer keeps postgres — it writes a table whose only policy is a read")
+        // The two reads the RPC bodies make against ENABLE-only tables need
+        // their own own-row policies for the non-bypass owner, or the fence
+        // and tier gate would default-deny every round.
+        #expect(sql.contains("create policy key_vault_definer_fence_select on key_vault"))
+        #expect(sql.contains("create policy entitlement_definer_gate_select on entitlement"))
+        #expect(sql.contains("using (auth.uid() = user_id)"))
     }
 
     /// THE POST-DEPLOY GRANT SWEEP (I-3's other half; live-probe
