@@ -2820,6 +2820,35 @@ Supabase-documented).
   isolation + tier machinery and fold domain+flip+stranger-validation
   into the pre-strangers run-up (14d-adjacent, where SMTP also lands).
   Recorded for her call; not decided by the architect.
+- **HER FOLLOW-UP (2026-08-11) + THE SECOND LOOKUP — branded email links
+  *[removed for publication]*
+  Custom SMTP alone changes only the sender/FROM, not the link
+  hostname; but Supabase's OFFICIALLY DOCUMENTED server-side PKCE
+  pattern rewrites the email TEMPLATE so the link points at her own
+  domain — `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=…`
+  — and a small `/auth/confirm` handler on stargazing.tech exchanges it
+  via `supabase.auth.verifyOtp({ token_hash, type })`. Every link the
+  recipient SEES is then on stargazing.tech, sender too. Works for
+  confirm/reset/magic-link/email-change. Requirements: Site URL set to
+  the brand domain, the handler routes on the Redirect-URLs allowlist,
+  *[removed for publication]*
+  buys — all invisible to users:** the raw `/auth/v1/*` API hostname,
+  OAuth callback URLs, SAML EntityID; and per a community report
+  (GitHub Discussion #44373) it may NOT even rebrand the JWT `iss`
+  claim. Since her apps sign in via password grant + publishable key
+  (no OIDC-discovery issuer trust) and her users never see the API
+  hostname, **the add-on buys her nothing user-visible.** THE
+  CONSEQUENCE for the design: the Round-7/8 `auth.stargazing.tech`
+  ISSUER ruling is worth revisiting — branded email links are better
+  served by the free template road, which RIDES 14d's SMTP + the
+  stargazing.tech site handler (site-agent work), so the gate's
+  "domain-attach" sub-step DISSOLVES into 14d and the issuer can stay
+  *[removed for publication]*
+  payoff can't be realized until the template rewrite + Site-URL config
+  + the site handler exist — all 14d — so nothing about it blocks
+  finishing the isolation gate now. (Recorded for her ruling; the
+  14d/contract issuer field and the SMTP runbook's template §6 gain a
+  pointer to this at closeout if she takes the template road.)
 
 ## Environment traps (carried into every batch brief, per the skill)
 
