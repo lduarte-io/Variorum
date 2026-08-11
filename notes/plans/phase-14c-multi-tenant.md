@@ -2782,6 +2782,45 @@ The probe's entitlement + vault + auth user remain live for the gate's
 step-10 deletion-door live test (its own `account_purge` is the natural
 verification).
 
+**Gate step 7 — the domain: HER DECISIONS RECORDED (2026-08-11), attach
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+technical caveat: Supabase's docs confirm the auth ENDPOINT switches to
+the custom hostname but never explicitly document the JWT `iss` rewrite —
+so `iss` + the OpenID discovery doc get verified empirically at
+activation (already the standing guardrail). DNS: a CNAME +
+`_acme-challenge` TXT, Cloudflare grey-cloud (community consensus, not
+Supabase-documented).
+
+*[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+- **WHAT THE CUSTOM DOMAIN BUYS (her question answered):** it fronts the
+  AUTH SERVICE (GoTrue issuer) with `auth.stargazing.tech`, so (a) the
+  links in auth emails — confirm/reset — show her brand instead of the
+  *[removed for publication]*
+  + OAuth discovery + the apps'/Fragments' auth configs point at a stable
+  branded hostname. It is BRANDING + CONFIG-STABILITY only — zero effect
+  on isolation, security, or E2EE (users are exactly as safe with or
+  without it). It is NOT needed while she is the only user; the guardrail
+  ties it to BEFORE the first stranger and BEFORE 14d writes Fragments'
+  provider configs (so they're written once against the final URL).
+- **THE OPEN SEQUENCING FORK (hers — the friction doctrine surfaces it):**
+  the ruled choreography put domain-attach → signup-flip →
+  stranger-validation INSIDE 14c, but none of the three is needed while
+  she is the only user (real strangers arrive at TestFlight, post-14d).
+  So either (A) attach the domain now (Pro enables it) and run the flip +
+  validation to close the full ruled gate, or (B) close 14c on the proven
+  isolation + tier machinery and fold domain+flip+stranger-validation
+  into the pre-strangers run-up (14d-adjacent, where SMTP also lands).
+  Recorded for her call; not decided by the architect.
+
 ## Environment traps (carried into every batch brief, per the skill)
 
 - Instance checks: `pgrep -fl 'Variorum.app/Contents/MacOS'` AND
