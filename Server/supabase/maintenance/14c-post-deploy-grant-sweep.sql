@@ -86,8 +86,13 @@ expected_tables (relname, exp_anon, exp_authenticated, exp_rls, exp_forced, exp_
     ('lens_choice',     false, false, true,  true,  1),
     ('block_comment',   false, false, true,  true,  1),
     ('setting',         false, false, true,  true,  1),
-    ('entitlement',     false, true,  true,  false, 1),
-    ('key_vault',       false, true,  true,  false, 3),
+    -- policy counts +1 each since the 14c-gate BYPASSRLS repair
+    -- (2026-08-11, maintenance/14c-gate-definer-owner.sql): the own-row
+    -- SELECT policies for the non-bypass variorum_definer owner
+    -- (key_vault_definer_fence_select / entitlement_definer_gate_select)
+    -- — the fence and tier-gate reads inside the re-owned RPC bodies.
+    ('entitlement',     false, true,  true,  false, 2),
+    ('key_vault',       false, true,  true,  false, 4),
     ('sync_meta',       false, false, true,  false, 0)
 ),
 observed_tables as (
