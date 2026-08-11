@@ -145,11 +145,13 @@ contract file's state, the parity line, the handoff note).
   first safe live subject). Whichever email-confirmation posture she
   rules with SMTP live (ARM-(a) org-team add, autoconfirm, or admin
   provisioning — the runbook §1 fork).
-- **The phone re-onboard** — the reset mirror leaves the phone's cursor
-  stale; re-onboard (fresh store, enroll by passphrase, pull-to-head
-  over ciphertext — the 14b road). Confirm the phone's build version
-  first (the 2026-08-11 merged-tree install may already have made it
-  marker-6); pairs with the mobile/TestFlight run-up.
+- **The phone re-onboard — DISCHARGED (her live confirmation
+  2026-08-11), no action owed.** She installed the marker-6 build and
+  phone↔Mac sync works perfectly with NO re-onboard and NO passphrase
+  re-entry — correct, because the 14c repush was unwrap-only (keys
+  unchanged) and enrolled devices hold class keys in the Keychain, not
+  the passphrase. Kept here only as a recorded-resolved note; her phone
+  is a first-class synced device against the reborn mirror.
 - **Branded auth-email links** — the FREE template road (above) + the
   `/auth/confirm` handler the stargazing.tech agent builds; rides the
   SMTP step. No custom domain.

@@ -2933,6 +2933,27 @@ phone re-onboard) ride 14d by her ruling. **The mirror is multi-tenant,
 her writing is intact and unreadable to anyone but her, and no account
 can reach another's data through any door this phase ships.**
 
+**POST-CLOSE CONFIRMATION (2026-08-11, her report) — the phone
+re-onboard was NOT needed; RESOLVED.** She installed the marker-6
+mobile build and confirmed phone↔Mac sync works perfectly WITHOUT a
+re-onboard and WITHOUT re-entering the passphrase. This is correct and
+expected, and it retires the conservative "phone re-onboard owed"
+caveat: (1) the 14c repush was UNWRAP-ONLY (her existing vault, same
+keys — a wrong passphrase would have failed the unwrap), so nothing
+about her keys or passphrase changed this phase; (2) enrolled devices
+hold the CLASS KEYS in their Keychain (14b R-6 enrollment-only
+cadence), not the passphrase, so ongoing sync never needs the
+passphrase — and changing a passphrase merely RE-WRAPS the same master,
+leaving enrolled devices untouched (only a full re-key, which shows the
+CF-16 "keys replaced" state, or the forget door forces re-entry); (3)
+the marker-6 build matches lockstep, the held corpus key id matches the
+fence (unchanged), and her account is entitled — so the round just
+worked. The stale-cursor concern was real in principle but harmless
+here: the phone already held the full corpus locally, so a redundant
+cursor caused no loss. **14d's phone-re-onboard item is DISCHARGED by
+her live confirmation** (kept on the 14d plan only as a
+recorded-resolved note; her phone is a first-class synced device again).
+
 ## Environment traps (carried into every batch brief, per the skill)
 
 - Instance checks: `pgrep -fl 'Variorum.app/Contents/MacOS'` AND
