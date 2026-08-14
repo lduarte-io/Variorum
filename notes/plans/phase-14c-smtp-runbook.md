@@ -116,10 +116,16 @@ email to her own non-team address), then check the received headers show
   `v=DMARC1; p=none; rua=mailto:<her-choice>@stargazing.tech` —
   universally-recommended deliverability/anti-spoofing hygiene once
   SPF+DKIM pass; tighten to `p=quarantine` later if wanted.
-- The auth-email links themselves point at the ISSUER
+- ~~The auth-email links themselves point at the ISSUER
   (`auth.stargazing.tech` once the domain attaches — the Round-7
-  ruling); the SENDING domain records above are independent of the
-  issuer hostname and can be done in the same Cloudflare sitting.
+  ruling)~~ **SUPERSEDED at the 14c gate (2026-08-11; amendment dated
+  2026-08-14): the custom domain was DECLINED — the issuer stays the
+  raw project URL, and the links brand via the TEMPLATE road instead:
+  `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=…` +
+  a `/auth/confirm` `verifyOtp` handler on stargazing.tech (the
+  site agent builds it; the paste-ready brief lives in the 14d plan).**
+  The SENDING domain records above are independent of the link
+  hostname and can be done in the same Cloudflare sitting.
 
 ## 5. Rate/abuse limits (dashboard: Authentication → Rate Limits)
 
@@ -152,6 +158,18 @@ Edited at **Authentication → Emails (Templates)**. Template variables
 available *(source-verified)*: `{{ .ConfirmationURL }}`, `{{ .Token }}`,
 `{{ .TokenHash }}`, `{{ .SiteURL }}`, `{{ .RedirectTo }}`, `{{ .Email }}`,
 `{{ .NewEmail }}` (change-email only), `{{ .Data }}`.
+
+**Template-form sequencing (added 2026-08-14, the 14d kickoff — the
+gate's template-road ruling applied):** the drafts below use
+`{{ .ConfirmationURL }}` (stock Supabase links). That is the CORRECT
+form to paste at Step 0 — the branded form
+(`{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=…`)
+must NOT be pasted until stargazing.tech's `/auth/confirm` handler is
+live and on the redirect allowlist, or every confirm/reset link
+dead-ends at a 404. The flip to the branded form is a config-only act
+once the site agent reports the deployed route (requirements at flip
+time: Site URL set to the brand domain, handler routes allowlisted,
+PKCE flow, autoconfirm OFF).
 
 Drafting principles (the CF-10 spirit, applied): plain words, no
 marketing voice, say what the email is and what clicking does, name the

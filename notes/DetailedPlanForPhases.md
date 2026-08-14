@@ -8,7 +8,13 @@ This is the master build plan. It holds: the phase table, the **current phase po
 
 ## Current phase
 
-**→ PHASE 14C CLOSED 2026-08-11 — multi-tenant hardening & the paid
+**→ PHASE 14D OPENED 2026-08-14 under `/architect-phase`
+(author-attended; cast: Fable architect implements directly, the 9d
+shape, + one cold review at close — the kickoff sitting record in
+`notes/plans/phase-14d-fragments-batch.md`). Her sequencing ruling:
+the Fragments prompt handed off AND the SMTP act run NOW — release-
+ready "pretty much at the end of this phase." Previously: PHASE 14C
+CLOSED 2026-08-11 — multi-tenant hardening & the paid
 tier is DONE; the isolation proof bar is met and PROVEN LIVE. NEXT:
 PHASE 14D — the one-batch Fragments handoff + bridge resumption — at
 her word, from the paste-ready kickoff at the top of
