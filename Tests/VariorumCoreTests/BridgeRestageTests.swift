@@ -132,10 +132,11 @@ struct BridgeRestageTests {
         }
     }
 
-    /// DORMANCY: with the STRUCTURAL PAUSE in place (the engine's refusing
-    /// default provider — production wires nothing else until 14d),
-    /// staging changes NOTHING observable: the round refuses before any
-    /// network contact, and the staged days wait intact.
+    /// DORMANCY: under the engine's refusing default provider (the
+    /// 14b–14c structural pause's mechanism; since the 14d un-pause the
+    /// keyless states — unenrolled, CF-12-locked, tests), staging
+    /// changes NOTHING observable: the round refuses before any network
+    /// contact, and the staged days wait intact.
     @Test func stagingIsInertWhileKeysAreUnavailable() async throws {
         try await withBridge { bridge in
             _ = try bridge.makeEntry(day: "2026-08-04", text: "waits for keys")

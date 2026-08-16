@@ -12,18 +12,26 @@
 //
 //  Phase 14a (sitting round 0h): the VARIORUM project is the suite's
 //  account home and OAuth 2.1 issuer — the app signs in DIRECTLY to it
-//  with the suite email+password; only OTHER apps (Fragments, future)
-//  ride the delegated OAuth flow, and none of that flow lives in this
-//  app's code anymore.
+//  with the suite email+password. Other apps (Fragments) ride the
+//  delegated OAuth flow against it; since 14d this app ALSO carries a
+//  delegated flow of its own (SignInFlow + AuthSession's PKCE doors),
+//  pointed the OTHER way — the bridge signing into the FRAGMENTS
+//  project via the suite provider entry.
 //
-//  PRECONDITION FOR THE "GRANTS NOTHING" CLAIM (9c review round 1,
-//  BLOCKER — still LOAD-BEARING, ruled-state banner): the Variorum
-//  project's "Allow new users to sign up" toggle must be OFF. On a
-//  default project the bare key can MINT an authenticated session via
-//  /auth/v1/signup — and every authenticated user reads/writes the
-//  non-owner tables (the whole prose corpus) in the single-user phase.
-//  The toggle is the SOLE guard until 14c's parent-join isolation;
-//  existing users (the author) are unaffected.
+//  THE "GRANTS NOTHING" CLAIM, RULED STATE AS OF 14D (2026-08-16 —
+//  supersedes the 9c-era signups-OFF banner that stood here): signups
+//  are deliberately OPEN (the release posture; her go at the 14d
+//  sitting). The bare key can mint an authenticated session — and that
+//  session reaches NOTHING of anyone else's: the guard is 14c's
+//  born-multi-tenant isolation (composite (owner_id, id) PKs, forced
+//  RLS + tenant-scoped RPC guards, proven by 13 live obligations
+//  against a real stranger) plus the entitlement gate (a fresh account
+//  cannot write to the mirror until a plan activates). Do NOT re-close
+//  the signup toggle on this banner's old wording — the OFF era ended
+//  when the isolation shipped and the door's opening was the 14d
+//  deliberate act. (History: 9c review round 1's BLOCKER made the OFF
+//  toggle the SOLE guard of the single-user era — correct then, ended
+//  now.)
 //
 
 import Foundation

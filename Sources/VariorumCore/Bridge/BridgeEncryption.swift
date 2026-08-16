@@ -2,14 +2,14 @@ import CryptoKit
 import Foundation
 
 /// Phase 14b batch 3 (L11) — the bridge's journal-class E2EE capability
-/// (R-8: the `journal_bridge` class key; touchpoint #2 designs the
-/// Fragments end, EXECUTED at the 14c-end batch). The bridge's ROUNDS STAY
-/// PAUSED from this phase until that batch: the capability ships, nothing
-/// enables scheduling — and the pause is STRUCTURAL, because the engine's
-/// default provider refuses every round (below), and the app deliberately
-/// wires no real bridge key provider until the Fragments side can read
-/// ciphertext (a premature encrypted push would turn her Day screen into
-/// `e1:` soup; a premature plaintext push no longer exists as a code path).
+/// (R-8: the `journal_bridge` class key; touchpoint #2 designed the
+/// Fragments end, EXECUTED at the 14d batch). HISTORY: the bridge's
+/// rounds stayed STRUCTURALLY PAUSED from 14b until 14d — the engine's
+/// default provider refuses every round (below), and the app wired no
+/// real provider while the Fragments side couldn't read ciphertext.
+/// **The pause ENDED at 14d (2026-08-16):** production wires the live
+/// Keychain provider, both ends speak `e1:`, and the refusing default
+/// now models only keyless states (unenrolled, CF-12-locked, tests).
 ///
 /// **The AAD convention (batch-3's recorded design call — simple enough for
 /// Fragments' client to reproduce):**

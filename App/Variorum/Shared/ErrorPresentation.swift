@@ -147,6 +147,20 @@ enum ErrorPresentation {
     /// inserted between this comment and its function, re-attaching it to
     /// `signUpClosedMessage`.)
     static func signInFailureMessage(_ error: any Error) -> String {
+        // The delegated door's browser-flow failures (14d cold review,
+        // MINOR 4 — the R94 class): speak human, never the enum's raw
+        // face. `.cancelled` is swallowed by the caller (a closed sheet
+        // is a decision); these are the arms that reach a surface.
+        if let flowError = error as? SignInFlow.FlowError {
+            switch flowError {
+            case .couldNotPresent:
+                return "The browser sign-in couldn't open — bring a Variorum window to the front and try again."
+            case .alreadyRunning:
+                return "A browser sign-in is already in progress — finish or close it first."
+            case .cancelled, .failed:
+                return "The browser sign-in didn't complete — try again."
+            }
+        }
         if let authError = error as? AuthSessionError {
             switch authError {
             case .endpointFailure(let status, let body):

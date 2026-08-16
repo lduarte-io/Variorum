@@ -265,6 +265,18 @@ struct Phase9cAuthWiringTests {
         let garbled = ErrorPresentation.signInFailureMessage(
             AuthSessionError.malformedResponse("decode failed"))
         #expect(garbled == "Sign-in failed — the server's response couldn't be read. Try again in a moment.")
+
+        // 14d cold review (MINOR 4): the delegated door's browser-flow
+        // failures must speak human, never the enum's raw face — the
+        // R94 class. `.couldNotPresent` is reachable (start() == false).
+        let noWindow = ErrorPresentation.signInFailureMessage(
+            SignInFlow.FlowError.couldNotPresent)
+        #expect(!noWindow.contains("FlowError"), "never the enum's own face")
+        #expect(noWindow == "The browser sign-in couldn't open — bring a Variorum window to the front and try again.")
+        let browserFailed = ErrorPresentation.signInFailureMessage(
+            SignInFlow.FlowError.failed("boom"))
+        #expect(!browserFailed.contains("FlowError"), "never the enum's own face")
+        #expect(browserFailed == "The browser sign-in didn't complete — try again.")
     }
 
     // MARK: Sign-in drives sync + adoption

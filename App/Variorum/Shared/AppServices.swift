@@ -594,8 +594,10 @@ final class AppServices {
         let engine = BridgeEngine(
             transport: makeBridgeTransport(fragmentsAuth, fragmentsUserID),
             configuration: FragmentsBridgeConfiguration(userID: fragmentsUserID),
-            // nil ⇒ the engine's refusing default — the RULED pause,
-            // byte-identical to the pre-seam composition (GM-2).
+            // nil ⇒ the engine's refusing default. Through 14b–14c this
+            // WAS the ruled structural pause (GM-2); since the 14d
+            // un-pause production always passes the live provider, so
+            // nil here means a test composition or a keyless state.
             keyProvider: makeBridgeKeyProvider?() ?? UnenrolledBridgeKeyProvider())
         await bridge.configure(engine: engine)
         bridge.trigger(manual: true)

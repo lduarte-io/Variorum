@@ -168,7 +168,11 @@ nonisolated enum PKCE {
     /// 32 random bytes, base64url — 43 chars of the unreserved alphabet.
     static func generateVerifier() -> String {
         var bytes = [UInt8](repeating: 0, count: 32)
-        _ = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
+        let status = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
+        // 14d cold review (NIT): a failed RNG must never yield a
+        // deterministic all-zeros verifier — refuse loudly instead
+        // (essentially unreachable; the honest guard costs one line).
+        precondition(status == errSecSuccess, "SecRandomCopyBytes failed: \(status)")
         return base64URL(Data(bytes))
     }
 
