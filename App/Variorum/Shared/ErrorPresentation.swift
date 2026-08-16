@@ -121,6 +121,10 @@ enum ErrorPresentation {
                 return "Account creation failed — the server refused (HTTP \(status)). Try again in a moment."
             case .notHTTP, .malformedResponse:
                 return "Account creation failed — the server's response couldn't be read. Try again in a moment."
+            case .callbackWithoutCode:
+                // The delegated door's refusal (14d) — unreachable from the
+                // sign-up form, spoken honestly if it ever routes here.
+                return "The browser sign-in came back without a sign-in code — try again."
             }
         }
         if error is URLError || (error as NSError).domain == NSURLErrorDomain {
@@ -156,6 +160,12 @@ enum ErrorPresentation {
                 return "Sign-in failed — the server refused (HTTP \(status)). Try again in a moment."
             case .notHTTP, .malformedResponse:
                 return "Sign-in failed — the server's response couldn't be read. Try again in a moment."
+            case .callbackWithoutCode:
+                // The delegated bridge door (14d): the browser flow
+                // returned an error callback — commonly a refused or
+                // abandoned consent, or the provider entry not existing
+                // yet (pre-touchpoint-#1).
+                return "The browser sign-in didn't complete — no sign-in code came back. Try again."
             }
         }
         if error is URLError || (error as NSError).domain == NSURLErrorDomain {

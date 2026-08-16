@@ -551,6 +551,39 @@ final class AppServices {
         }
     }
 
+    /// The DELEGATED road (Phase 14d — the door back in, her ruling at the
+    /// kickoff sitting: "there should not be some kind of session
+    /// dependency"): sign into the FRAGMENTS project through the suite
+    /// issuer's provider entry (`custom:stargazing`, touchpoint #1) via
+    /// the browser flow. One interactive flow per device; afterwards the
+    /// same persisted-session + refresh loop as the password door — which
+    /// touchpoint #1 retires, making this the ONLY road back in.
+    func connectFragmentsJournalDelegated() async {
+        guard ProjectConfig.fragmentsConfigured else {
+            account.lastError = "Project keys not configured (ProjectConfig.swift)"
+            return
+        }
+        guard !account.busy else { return }
+        account.busy = true
+        account.lastError = nil
+        defer { account.busy = false }
+        do {
+            let verifier = PKCE.generateVerifier()
+            let authorizeURL = fragmentsAuth.authorizeURL(
+                verifier: verifier,
+                providerSlug: ProjectConfig.fragmentsSuiteProviderSlug,
+                redirectURI: ProjectConfig.fragmentsBridgeRedirectURI)
+            let scheme = URL(string: ProjectConfig.fragmentsBridgeRedirectURI)!.scheme!
+            let callback = try await SignInFlow().run(
+                authorizeURL: authorizeURL, callbackScheme: scheme)
+            try await fragmentsAuth.handleCallback(callback, verifier: verifier)
+        } catch SignInFlow.FlowError.cancelled {
+            // A closed browser sheet is a decision, not an error.
+        } catch {
+            account.lastError = ErrorPresentation.signInFailureMessage(error)
+        }
+    }
+
     func disconnectFragmentsJournal() async {
         await fragmentsAuth.signOut()
     }

@@ -312,6 +312,18 @@ struct AccountView: View {
         } else {
             Text("Connect the Fragments journal (two-way bridge):")
                 .pageProse(pageStyle)
+            // Phase 14d — the delegated road (the door back in): signs
+            // into the Fragments project through the Stargazing account
+            // via the browser flow. Works once touchpoint #1's provider
+            // entry exists; the password form below dies with her
+            // Fragments password at that same touchpoint and retires
+            // when the batch confirms.
+            PageDoor("Sign in with your Stargazing account", style: pageStyle) {
+                Task { await services.connectFragmentsJournalDelegated() }
+            }
+            .disabled(!ProjectConfig.fragmentsConfigured || services.account.busy)
+            Text("Opens a browser sign-in through your suite account — the road that keeps working after the Fragments password retires.")
+                .pageCaption(pageStyle)
             emailField("Fragments email", text: $fragmentsEmail)
                 .focused($focus, equals: .bridgeEmail)
                 .onSubmit { focus = .bridgePassword }

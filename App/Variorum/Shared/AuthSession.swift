@@ -25,6 +25,7 @@
 //  the author signs in again — fail-visible, never fail-destructive.
 //
 
+import CryptoKit
 import Foundation
 import Security
 import VariorumCore
@@ -159,6 +160,31 @@ nonisolated enum LegacyPasteInCleanup {
     }
 }
 
+// MARK: - PKCE (RFC 7636, S256 — pinned against the RFC's test vector;
+// retired at 14a with the old delegated direction, REBUILT at 14d for the
+// bridge's delegated road into the Fragments project)
+
+nonisolated enum PKCE {
+    /// 32 random bytes, base64url — 43 chars of the unreserved alphabet.
+    static func generateVerifier() -> String {
+        var bytes = [UInt8](repeating: 0, count: 32)
+        _ = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
+        return base64URL(Data(bytes))
+    }
+
+    /// S256: base64url(SHA256(ascii(verifier))).
+    static func challenge(forVerifier verifier: String) -> String {
+        base64URL(Data(SHA256.hash(data: Data(verifier.utf8))))
+    }
+
+    private static func base64URL(_ data: Data) -> String {
+        data.base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+    }
+}
+
 // MARK: - The session
 
 nonisolated enum AuthSessionError: Error, Equatable, Sendable {
@@ -166,6 +192,8 @@ nonisolated enum AuthSessionError: Error, Equatable, Sendable {
     case endpointFailure(status: Int, body: String)
     case notHTTP
     case malformedResponse(String)
+    /// The callback URL carried no `code` (an error or a cancelled flow).
+    case callbackWithoutCode(String)
 }
 
 /// Phase 14c batch 3 (L8): what a sign-up produced. Supabase answers the
@@ -284,6 +312,65 @@ actor AuthSession: UserSessionProviding {
             userID: user.id,
             email: user.email))
         return .signedIn
+    }
+
+    // MARK: The delegated sign-in door (Phase 14d — the bridge's road
+    // back in; the 9c machinery rebuilt, pointed the other way)
+
+    /// The URL the browser flow opens against THIS session's project:
+    /// `/auth/v1/authorize?provider=custom:<slug>` with a PKCE S256
+    /// challenge. At 14d the caller is the BRIDGE's session signing into
+    /// the FRAGMENTS project through the suite issuer's provider entry
+    /// (touchpoint #1 creates it) — the road that outlives the retired
+    /// Fragments password. The verifier must be kept for the exchange.
+    /// Slug and redirect ride as parameters deliberately: the 14a-narrowed
+    /// `AuthConfiguration` stays two fields, and the Variorum session
+    /// never grows delegated shape it doesn't use.
+    nonisolated func authorizeURL(
+        verifier: String, providerSlug: String, redirectURI: String
+    ) -> URL {
+        var components = URLComponents(
+            url: configuration.projectURL.appendingPathComponent("auth/v1/authorize"),
+            resolvingAgainstBaseURL: false)!
+        components.queryItems = [
+            URLQueryItem(name: "provider", value: "custom:\(providerSlug)"),
+            URLQueryItem(name: "redirect_to", value: redirectURI),
+            URLQueryItem(name: "code_challenge", value: PKCE.challenge(forVerifier: verifier)),
+            URLQueryItem(name: "code_challenge_method", value: "s256"),
+        ]
+        return components.url!
+    }
+
+    /// Completes the flow from the captured callback URL: extracts `?code`
+    /// and exchanges it. Throws `callbackWithoutCode` on an error callback.
+    func handleCallback(_ url: URL, verifier: String) async throws {
+        let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        guard let code = components?.queryItems?
+            .first(where: { $0.name == "code" })?.value
+        else {
+            throw AuthSessionError.callbackWithoutCode(url.absoluteString)
+        }
+        try await exchangeCode(code, verifier: verifier)
+    }
+
+    /// `POST /auth/v1/token?grant_type=pkce`. The minted session IS the
+    /// goal — no provider-token capture (that was the retired 9c
+    /// architecture's need; the 14d road signs into the target project
+    /// directly and the session persists like any other).
+    func exchangeCode(_ code: String, verifier: String) async throws {
+        let response = try await tokenRequest(
+            grantType: "pkce",
+            body: ["auth_code": code, "code_verifier": verifier])
+        let adopted = AuthTokens(
+            accessToken: response.accessToken,
+            refreshToken: response.refreshToken,
+            expiresAt: response.expiryDate(now: now()),
+            userID: response.user?.id ?? "",
+            email: response.user?.email)
+        guard !adopted.userID.isEmpty else {
+            throw AuthSessionError.malformedResponse("token response carried no user id")
+        }
+        adopt(adopted)
     }
 
     /// The injectable entry (tests; any future door): adopt a ready-made

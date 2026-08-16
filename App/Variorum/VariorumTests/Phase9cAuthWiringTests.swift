@@ -495,26 +495,33 @@ struct Phase9cAuthWiringTests {
             "the Mac app must wire the LIVE bridge key provider — its absence re-pauses the bridge (the 14b pause ended at 14d)")
     }
 
-    @Test func theDelegatedSignInIsRetiredInTheSharedSources() throws {
+    /// AMENDED AT 14D (the rebuild round 0x foretold): the browser-flow
+    /// machinery RETURNED — `SignInFlow.swift` lives again, now pointed
+    /// the OTHER way (the bridge signs into the FRAGMENTS project via
+    /// `custom:stargazing`). What stays retired forever is the OLD
+    /// direction: the `custom:fragments` provider (Variorum trusting
+    /// Fragments' issuer), its `signInWithFragments` door, and the
+    /// captured provider-token pair. The walk now pins both truths.
+    @Test func theRetiredFragmentsIssuerDirectionStaysOutWhileTheRebuiltFlowLives() throws {
         let sources = Self.sharedSwiftSources()
         #expect(!sources.isEmpty)
         #expect(sources.contains {
                     $0.deletingLastPathComponent().lastPathComponent != "Shared" },
                 "the walk must be DEEP — subdirectory sources included (R1-3)")
-        #expect(!sources.contains { $0.lastPathComponent == "SignInFlow.swift" },
-                "the delegated browser flow must be deleted")
+        #expect(sources.contains { $0.lastPathComponent == "SignInFlow.swift" },
+                "the rebuilt delegated browser flow must exist (14d — the bridge's road back in)")
 
         for file in sources {
             let text = try String(contentsOf: file, encoding: .utf8)
             let name = file.lastPathComponent
             #expect(!text.contains("custom:fragments"),
-                    "\(name) still references the retired provider")
+                    "\(name) still references the retired provider direction")
             #expect(!text.contains("signInWithFragments"),
-                    "\(name) still carries the delegated Variorum sign-in door")
-            #expect(!text.contains("ASWebAuthentication"),
-                    "\(name) still references the browser-flow machinery")
+                    "\(name) still carries the retired delegated Variorum sign-in door")
+            #expect(!text.contains("ASWebAuthentication") || name == "SignInFlow.swift",
+                    "\(name) references the browser-flow machinery outside its one home")
             #expect(!text.contains("provider_token"),
-                    "\(name) still captures the delegated provider pair")
+                    "\(name) still captures the retired delegated provider pair")
         }
     }
 

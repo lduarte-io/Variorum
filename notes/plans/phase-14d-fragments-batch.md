@@ -365,18 +365,68 @@ Honest scope note: sentinel rows for days with no live entry are
 inert residue (nothing to push; a revived day re-pushes then), so
 "zero-plaintext satellite" scopes to live days re-pushed from truth.
 
-**2.4 THE SESSION DEPENDENCY — flagged to her at this sitting (the
-one sequencing trap the reading surfaced):** bridge rounds run only
-while the Mac's FRAGMENTS session is connected, and the only sign-in
-door is `connectFragmentsJournal` — the direct Fragments-project
-EMAIL+PASSWORD grant, which **touchpoint #1 retires**. A live
-persisted session survives the retirement (the refresh loop is
-identity-independent), but a signed-out Mac after the retirement has
-NO road back until a delegated door exists (the contract's recorded
-future shape, deliberately not this micro-phase's build). **Her act,
-BEFORE the Fragments batch's identity work: open Variorum's account
-settings and confirm the Fragments journal shows connected — or sign
-in now, while the password still exists.**
+**2.4 THE SESSION DEPENDENCY — flagged, then RESOLVED BY HER RULING
+(2026-08-16):** bridge rounds run only while the Mac's FRAGMENTS
+session is connected, and the only sign-in door was
+`connectFragmentsJournal` — the direct EMAIL+PASSWORD grant, which
+touchpoint #1 retires. Her rulings, verbatim-faithful: *"this is not
+a micro session anymore even, this is the everything gets done and is
+working and ready for release from an email / fragments / account,
+etc. session"* (THE SCOPE WIDENING — part B completes in-phase, the
+phase's bar is release-readiness); *"there should not be some kind of
+session dependency. the fragments session is working right now and
+will be done sometime"* (the connect-now stopgap REJECTED — build the
+proper door); *"can't we just wait to run the bridge tests til the
+door back in exists?"* (YES — the round-trip verification waits for
+the door + the Fragments side; nothing is lost meanwhile: staged days
+wait inert, a dead session means visible refusals only).
+
+**2.5 THE DELEGATED DOOR — BUILT (2026-08-16; the road back in; round
+0x's "moves wholesale to the Fragments-batch era" landing exactly
+there):** the 9c browser-flow machinery REBUILT from its final
+pre-deletion state, pointed the other way — the bridge signs into the
+FRAGMENTS project through the suite issuer's provider entry
+(`custom:stargazing`, touchpoint #1). Pieces: `PKCE` (RFC 7636 S256)
+restored into AuthSession + the delegated methods
+(`authorizeURL(verifier:providerSlug:redirectURI:)` /
+`handleCallback` / `exchangeCode` — NO provider-token capture: the
+minted session IS the goal, unlike the retired 9c architecture);
+`SignInFlow.swift` restored verbatim-with-lessons (all three 9c
+lifecycle hazards + the XPC-queue SIGTRAP fix preserved);
+`ProjectConfig.fragmentsSuiteProviderSlug = "stargazing"` +
+`fragmentsBridgeRedirectURI = "variorum://auth-callback"`;
+`AppServices.connectFragmentsJournalDelegated()` (cancelled browser
+sheet = a decision, not an error); the account sheet's Fragments
+section gains "Sign in with your Stargazing account" ABOVE the
+password form (both doors through the transition; the password form
+retires when the batch confirms — architect call, recorded). The
+retirement walk AMENDED to its new truth
+(`theRetiredFragmentsIssuerDirectionStaysOutWhileTheRebuiltFlowLives`:
+SignInFlow.swift must EXIST; `custom:fragments` /
+`signInWithFragments` / `provider_token` stay forbidden;
+browser-flow machinery allowed ONLY in SignInFlow.swift — the walk
+caught my own ProjectConfig comment naming the framework, reworded).
+Four new AuthSessionTests pins (the RFC appendix-B vector · the
+authorize-URL shape · callback-without-code refuses ·
+exchange-mints-and-persists with exact request shape). **Counts:**
+the two Mac auth suites 33/33 green; mobile target BUILD SUCCEEDED
+(all six touched files are shared; SignInFlow's iOS anchor arm rides).
+The `callbackWithoutCode` case taught both ErrorPresentation
+switches honest lines. **NOT testable end-to-end until touchpoint #1
+exists server-side** — the live exercise is the batch's, by design.
+
+**NEW FRAGMENTS-SIDE ASKS (join the batch prompt — the door's two
+config needs):** (i) allowlist `variorum://auth-callback` in the
+FRAGMENTS project's auth Redirect URLs (the bridge's delegated
+sign-in rides it); (ii) the provider entry's slug should be exactly
+`stargazing` (the app's authorize URL says `custom:stargazing`) — if
+it lands under another name, report it and the one app constant
+follows.
+
+**Pro plan — CONFIRMED PURCHASED (her mid-sitting report,
+2026-08-16):** the Supabase project is on Pro — the 14c gate ruling
+("the real backups that the pro level plan offers") executed. Nothing
+app- or config-side keys on the plan tier; recorded as done.
 
 You are the Fragments-side agent for the ONE-BATCH suite handoff (the
 author carries this conversation; the Variorum side calls it Phase
@@ -417,7 +467,15 @@ OAuth 2.1 Server (its old role as Variorum's issuer) and retire the
 *[removed for publication]*
 shipped at 14a and nothing depends on the old issuer. (5) Config
 hygiene: remove any stargazing.tech URLs from Fragments' own auth
-configuration — none belong there. **Touchpoint #2 — journal-class
+configuration — none belong there. (6) THE BRIDGE'S DELEGATED ROAD
+(two config needs on YOUR project — the Variorum side built its door
+at 14d and it rides your provider entry): add
+`variorum://auth-callback` to the Fragments project's auth Redirect
+URLs allow-list, and make the provider entry's slug exactly
+`stargazing` (the Variorum app's authorize URL says
+`custom:stargazing`) — if it must land under another name, report the
+actual slug through the author so the app constant follows.
+**Touchpoint #2 — journal-class
 E2EE:** build the client end exactly to the concrete format facts
 block: AES-256-GCM with per-value random 96-bit nonce; the `e1:`
 prefix matched EXACTLY (the three-arm classification: `e1:` =

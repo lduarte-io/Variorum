@@ -55,14 +55,27 @@ nonisolated enum ProjectConfig {
             apiKey: variorumPublishableKey)
     }
 
-    /// The bridge's direct Fragments-project session (QUESTIONS #16,
-    /// shape (c) — the active road until the Fragments batch swaps it to
-    /// the suite-delegated flow, built there against the live provider).
+    /// The bridge's Fragments-project session configuration. Two doors
+    /// mint it: the direct password grant (QUESTIONS #16 shape (c) — dies
+    /// with her Fragments password at touchpoint #1) and, since 14d, the
+    /// DELEGATED road below (the door that outlives the retirement).
     static var fragmentsAuth: AuthConfiguration {
         AuthConfiguration(
             projectURL: fragmentsProjectURL,
             apiKey: fragmentsPublishableKey)
     }
+
+    /// The suite issuer's provider entry ON THE FRAGMENTS PROJECT
+    /// (touchpoint #1 creates it): `custom:stargazing`. If their config
+    /// lands under a different slug, this one constant follows it.
+    static let fragmentsSuiteProviderSlug = "stargazing"
+
+    /// The app's callback for the delegated bridge sign-in. Must be on
+    /// the FRAGMENTS project's Redirect URLs allow-list (a touchpoint #1
+    /// config item — the batch prompt carries it). No Info.plist scheme
+    /// registration is needed; the browser sign-in session (SignInFlow)
+    /// intercepts its own callback.
+    static let fragmentsBridgeRedirectURI = "variorum://auth-callback"
 
     static var variorumTransport: SupabaseTransport.Configuration {
         SupabaseTransport.Configuration(
