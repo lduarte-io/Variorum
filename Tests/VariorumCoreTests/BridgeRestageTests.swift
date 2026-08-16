@@ -136,20 +136,24 @@ struct BridgeRestageTests {
     /// default provider — production wires nothing else until 14d),
     /// staging changes NOTHING observable: the round refuses before any
     /// network contact, and the staged days wait intact.
-    @Test func stagingIsInertWhileTheStructuralPauseStands() async throws {
+    @Test func stagingIsInertWhileKeysAreUnavailable() async throws {
         try await withBridge { bridge in
-            _ = try bridge.makeEntry(day: "2026-08-04", text: "waits for 14d")
+            _ = try bridge.makeEntry(day: "2026-08-04", text: "waits for keys")
             try await bridge.db.write { db in
                 try BridgeEngine.recordDay(
                     db, dayKey: "2026-08-04", hash: "beef0000", remoteStamp: nil)
                 _ = try BridgeEngine.stageRepushFromTruth(db)
             }
-            // The paused engine: the app's production composition (no
-            // provider wired) — the refusing default.
-            let paused = BridgeEngine(
+            // The keyless engine — the refusing default. (This WAS the
+            // Mac's production composition through the 14b→14c structural
+            // pause; since the 14d un-pause production wires the live
+            // provider, and this pin covers the states that still read as
+            // keyless: an unenrolled device, a CF-12-locked launch, and
+            // any test composition passing no provider.)
+            let keyless = BridgeEngine(
                 transport: bridge.server, configuration: bridge.config)
             await #expect(throws: BridgeEncryptionError.keysUnavailable) {
-                _ = try await paused.run()
+                _ = try await keyless.run()
             }
             #expect(await bridge.server.acceptedWriteCount == 0,
                     "no round ran — nothing reached the transport")
@@ -157,7 +161,7 @@ struct BridgeRestageTests {
                 try BridgeEngine.dayRow(db, dayKey: "2026-08-04")
             }
             #expect(row?.hash == BridgeEngine.restagedHashSentinel,
-                    "the staged day waits, intact, for 14d's deliberate flip")
+                    "the staged day waits, intact, for the keys to arrive")
         }
     }
 }

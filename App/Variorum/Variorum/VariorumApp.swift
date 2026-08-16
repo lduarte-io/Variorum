@@ -49,7 +49,16 @@ struct VariorumApp: App {
                             session: session,
                             storeVariant: bootstrap.storeVariant,
                             backupEnabled: true,
-                            bridgeEnabled: true)  // Mac-side (Phase 9b scope)
+                            bridgeEnabled: true,  // Mac-side (Phase 9b scope)
+                            // THE 14D UN-PAUSE (2026-08-16, the phase's
+                            // deliberate act): the LIVE journal-bridge key
+                            // provider ends the 14b structural pause —
+                            // bridge rounds run again, bodies sealing and
+                            // opening through Keychain custody. An
+                            // unenrolled or locked device still refuses
+                            // before any network contact through this same
+                            // provider (no keys ⇒ the round refuses).
+                            makeBridgeKeyProvider: { DeviceBridgeKeyProvider() })
                         services = fresh
                         await fresh.start()
                     }

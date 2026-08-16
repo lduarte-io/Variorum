@@ -115,15 +115,16 @@ final class AppServices {
     /// Keychain.
     private let makeSyncKeyProvider: () -> any SyncKeyProviding
     /// The BRIDGE's journal-class key seam (Phase 14b, gate-morning GM-2).
-    /// Production stays nil — BridgeEngine then takes its refusing default
-    /// (`UnenrolledBridgeKeyProvider`), which IS the phase's RULED pause:
-    /// the app wires no real bridge key provider until micro-phase 14d's
-    /// deliberate act (her Round-6 ruling — the LIVE provider,
-    /// `DeviceBridgeKeyProvider`, is BUILT and waits beside this seam,
-    /// dormant). The wiring tests inject a fixed provider here so the
-    /// cadence/interleaving/pause-status machinery they pin stays pinned
-    /// THROUGH the pause era (it guards the 14d resumption); the pause
-    /// itself stays pinned against the default.
+    /// **THE PAUSE ENDED AT 14D (2026-08-16, the deliberate act):** the
+    /// Mac's production composition (VariorumApp) wires
+    /// `DeviceBridgeKeyProvider` here, so bridge rounds run against
+    /// Keychain custody; an unenrolled or locked device still refuses
+    /// before network contact (the provider reads no keys). nil now means
+    /// only the engine's refusing default (`UnenrolledBridgeKeyProvider`)
+    /// — held by tests that model the keyless state and by the phone's
+    /// composition (bridge disabled there; Phase 9b's Mac-side scope).
+    /// History: production passed nil from 14b's gate morning through
+    /// 14c — the RULED structural pause while the Fragments handoff waited.
     private let makeBridgeKeyProvider: (() -> any BridgeKeyProviding)?
     /// Phase 14c: the account lifecycle doors' server seam (the re-key's
     /// truncate, the deletion's purge, the entitlement read). Tests inject

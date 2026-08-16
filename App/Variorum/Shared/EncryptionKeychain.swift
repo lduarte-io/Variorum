@@ -387,20 +387,19 @@ nonisolated struct DeviceKeySyncProvider: SyncKeyProviding {
     }
 }
 
-/// Phase 14c batch 2 — THE 14D PREP (her Round-6 ruling): the LIVE
-/// journal-bridge key provider, the real Keychain-custody road through
-/// the 14b seam — `DeviceKeySyncProvider`'s exact twin for the bridge's
-/// class (R-8: the bridge only ever touches the journal-bridge key;
-/// custody already holds it from enrollment, id included, so 14d adds no
-/// new key machinery). **BUILT AND DORMANT**: no production composition
-/// consults this type while the STRUCTURAL PAUSE stands — AppServices
-/// passes no `makeBridgeKeyProvider`, so `BridgeEngine` keeps its
-/// refusing default and every bridge round refuses before network
-/// contact. 14d's deliberate act is wiring THIS provider at that seam
-/// (plus running the staged re-push); the readiness half is pinned in
-/// core (`BridgeRestageTests`) and the provider's own custody arms below.
-/// Under the biometric gate (CF-12) a locked launch reads as no keys —
-/// the bridge waits exactly as sync does.
+/// Phase 14c batch 2 — built as THE 14D PREP (her Round-6 ruling): the
+/// LIVE journal-bridge key provider, the real Keychain-custody road
+/// through the 14b seam — `DeviceKeySyncProvider`'s exact twin for the
+/// bridge's class (R-8: the bridge only ever touches the journal-bridge
+/// key; custody already holds it from enrollment, id included, so 14d
+/// added no new key machinery). **WIRED LIVE AT 14D (2026-08-16):** the
+/// Mac's production composition passes this provider at AppServices'
+/// `makeBridgeKeyProvider` seam — the 14b structural pause is over, and
+/// the liveness pin (`Phase9cAuthWiringTests`) guards the wiring. The
+/// readiness half stays pinned in core (`BridgeRestageTests`) and the
+/// provider's own custody arms below. Under the biometric gate (CF-12) a
+/// locked launch reads as no keys — the bridge waits exactly as sync
+/// does.
 nonisolated struct DeviceBridgeKeyProvider: BridgeKeyProviding {
     var store: DeviceKeyStore = .keychain()
 

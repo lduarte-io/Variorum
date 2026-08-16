@@ -298,8 +298,85 @@ contract file's state, the parity line, the handoff note).
   (`sb_publishable_X-TQvz2RDj4cnCABZao4ww_WWGdSTwp`, public by
   design) was then fetched cleanly for the site prompt.
 
-## The Fragments-side prompt (paste-ready — she carries it WITH the
-## contract file, `notes/fragments-bridge-contract.md`)
+## Step 2 execution record (the un-pause + the resumption order —
+## 2026-08-16, the architect implementing per the cast ruling)
+
+**2.1 The deliberate un-pause — BUILT, PINNED, REVERT-VERIFIED:**
+`VariorumApp`'s production composition now passes
+`makeBridgeKeyProvider: { DeviceBridgeKeyProvider() }` (the Mac's
+construction site; the phone's composition is untouched — the bridge
+is disabled there by Phase 9b's Mac-side scope). Comment truths
+updated at all three carriers (the AppServices seam doc, the
+provider's own doc, the core dormancy test). **The dormancy pin
+flipped to liveness as the plan demanded:** core
+`stagingIsInertWhileTheStructuralPauseStands` RENAMED to its post-14d
+truth `stagingIsInertWhileKeysAreUnavailable` (same mechanism — the
+refusing default now models the unenrolled/CF-12-locked states, no
+longer production); NEW app-side liveness pin
+`theMacProductionCompositionWiresTheLiveBridgeKeyProvider`
+(source-anchored, the retirement-walk precedent — the scene body is
+not constructible headless). **Red-on-old by behavioral revert:** the
+wiring stashed → the suite fails on exactly that pin (14/15 pass);
+restored → 15/15. Core bridge suites 85/9 green. *(A vacuous-pass
+trap re-confirmed live: function-level `-only-testing` selected 0
+tests and "passed" — the environment traps' suite-level-only rule is
+load-bearing; the revert proof was re-run at suite level.)*
+
+**2.2 THE RESUMPTION ORDER — ARM (ii) RULED BY TRACE (the architect's
+call, the plan's two arms adjudicated with the trace in hand):**
+
+- The traced facts: `run()` is pull→push (pinned, untouched); the
+  pull's ONLY refusal classes are unopenable `e1:` bodies (tampered /
+  old-key / future-version) — legacy PLAINTEXT lands as text by the
+  three-arm classification, and plaintext rows are what Fragments has
+  written since the pause (their client has no E2EE until touchpoint
+  #2).
+- **The refusal set arm (ii) would tolerate is EMPTY at this
+  resumption:** the bridge NEVER ran an encrypted round (the pause
+  predates any possible `e1:` push — GM-2's record), so no old-key
+  ciphertext can exist in the satellite; her 14b re-keys predate any
+  possible Fragments-side ciphertext; and any `e1:` their new client
+  writes post-handoff seals under the CURRENT vault key, which
+  `DeviceBridgeKeyProvider` also holds. There is nothing to refuse.
+- **Consequence: arm (i)'s push-first drain is NOT BUILT** — it would
+  be engine surface guarding a state that cannot occur today (dead
+  code, and `BridgeEngine` surgery for nothing). The ordinary
+  pull→push round resumes unmodified.
+- **The FUTURE corner keeps batch 2's recorded posture as the final
+  word (the plan asked 14d to own it):** a post-14d re-key with
+  unlanded Fragments writes ahead of the cursor refuses the round
+  VISIBLY, cursor held, until those rows are re-saved Fragments-side
+  under the new key or the account re-enrolls them; the re-key door
+  already stages the re-push. Narrow (needs both events), loud, loses
+  nothing. If it ever bites in practice, a one-time push-only drain
+  affordance is the then-fix — built against the live evidence, not
+  speculatively.
+
+**2.3 The staging + first-round choreography (the acts that remain):**
+(a) A1 rail — WAL-safe backup of the real store; (b) staging —
+`stageRepushFromTruth`'s exact UPDATE run once against the real
+store's `bridge_day` at a zero-instance window (inert bookkeeping;
+the staged days wait); (c) the `/Applications` refresh with the
+un-paused build (no lockstep change — marker 6 both sides); (d) her
+first launch runs the resumed round: pull (any pause-era plaintext
+lands via the standing doctrine), then every staged live day
+re-pushes as `e1:` — ending the satellite's legacy-plaintext era.
+Honest scope note: sentinel rows for days with no live entry are
+inert residue (nothing to push; a revived day re-pushes then), so
+"zero-plaintext satellite" scopes to live days re-pushed from truth.
+
+**2.4 THE SESSION DEPENDENCY — flagged to her at this sitting (the
+one sequencing trap the reading surfaced):** bridge rounds run only
+while the Mac's FRAGMENTS session is connected, and the only sign-in
+door is `connectFragmentsJournal` — the direct Fragments-project
+EMAIL+PASSWORD grant, which **touchpoint #1 retires**. A live
+persisted session survives the retirement (the refresh loop is
+identity-independent), but a signed-out Mac after the retirement has
+NO road back until a delegated door exists (the contract's recorded
+future shape, deliberately not this micro-phase's build). **Her act,
+BEFORE the Fragments batch's identity work: open Variorum's account
+settings and confirm the Fragments journal shows connected — or sign
+in now, while the password still exists.**
 
 You are the Fragments-side agent for the ONE-BATCH suite handoff (the
 author carries this conversation; the Variorum side calls it Phase

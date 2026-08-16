@@ -475,6 +475,26 @@ struct Phase9cAuthWiringTests {
         return walk.compactMap { $0 as? URL }.filter { $0.pathExtension == "swift" }
     }
 
+    /// THE 14D UN-PAUSE PIN (2026-08-16 — the liveness half of 14c batch
+    /// 2's dormancy/readiness pair): the Mac's production composition
+    /// wires the LIVE journal-bridge key provider at the AppServices
+    /// seam. The 14b structural pause is OVER — a regression to the
+    /// refusing default (dropping the argument) would silently re-pause
+    /// the bridge, which after 14d is a data outage, not a designed
+    /// state. Source-anchored like the retirement walks below: the
+    /// SwiftUI scene body is not constructible headless, so the pin
+    /// reads the composition site itself.
+    @Test func theMacProductionCompositionWiresTheLiveBridgeKeyProvider() throws {
+        let appSource = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()  // VariorumTests
+            .deletingLastPathComponent()  // App/Variorum
+            .appendingPathComponent("Variorum/VariorumApp.swift")
+        let text = try String(contentsOf: appSource, encoding: .utf8)
+        #expect(
+            text.contains("makeBridgeKeyProvider: { DeviceBridgeKeyProvider() }"),
+            "the Mac app must wire the LIVE bridge key provider — its absence re-pauses the bridge (the 14b pause ended at 14d)")
+    }
+
     @Test func theDelegatedSignInIsRetiredInTheSharedSources() throws {
         let sources = Self.sharedSwiftSources()
         #expect(!sources.isEmpty)
