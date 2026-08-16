@@ -18,3 +18,5 @@ notes/plans/phase-13k-batch3-screens/
 notes/plans/mobile-a3-screens/
 notes/plans/mobile-d1-screens/
 notes/plans/mobile-d2-screens/
+.env.smtp.local
+.env.*.local
