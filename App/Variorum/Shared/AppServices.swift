@@ -531,25 +531,10 @@ final class AppServices {
 
     // MARK: - The Fragments session (the bridge's — QUESTIONS #16 (c))
 
-    /// The bridge's direct Fragments-project sign-in: her Fragments
-    /// email+password once; only the session persists, never the password.
-    func connectFragmentsJournal(email: String, password: String) async {
-        guard ProjectConfig.fragmentsConfigured else {
-            account.lastError = "Project keys not configured (ProjectConfig.swift)"
-            return
-        }
-        guard !account.busy else { return }  // the round-2 double-tap belt
-        account.busy = true
-        account.lastError = nil
-        defer { account.busy = false }
-        do {
-            try await fragmentsAuth.signInWithPassword(email: email, password: password)
-        } catch {
-            // Same door class, same R94 treatment (R1-1): this form's
-            // wrong-password refusal is the identical 400/invalid_grant.
-            account.lastError = ErrorPresentation.signInFailureMessage(error)
-        }
-    }
+    // (The direct Fragments email+password door — `connectFragmentsJournal`
+    // — was REMOVED at 14d: the batch retired her Fragments password
+    // server-side (provider off, the grant 422s), so the door could only
+    // ever refuse. The delegated road below is the one Fragments sign-in.)
 
     /// The DELEGATED road (Phase 14d — the door back in, her ruling at the
     /// kickoff sitting: "there should not be some kind of session

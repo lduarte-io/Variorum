@@ -26,9 +26,15 @@ struct BridgeStatusRow: View {
                 Text("Bridge off")
                     .foregroundStyle(.secondary)
             } else if !bridge.isConfigured {
-                // Awaiting Phase 9c's sign-in — deliberately no setup door.
-                Text("Fragments bridge off (sign-in arrives with 9c)")
+                // No Fragments session yet (14d wording — the 9b-era
+                // "sign-in arrives with 9c" placeholder outlived three
+                // phases; her report caught it). The door is the account
+                // sheet's Stargazing connect button.
+                Text("Journal bridge off")
                     .foregroundStyle(.secondary)
+                if let onOpenAccount {
+                    Button("Connect…") { onOpenAccount() }
+                }
             } else if bridge.status.isBridging {
                 ProgressView().controlSize(.small)
                 Text("Bridging…")

@@ -652,6 +652,46 @@ entitlement from the Fragments side (entitlement rows live on the suite account;
 both apps read the same answer). TestFlight opens only after the family
 completes — no tester account exists before then.
 
+---
+
+## THE ONE-BATCH HANDOFF — EXECUTED AND CLOSED (2026-08-16, Phase 14d;
+## the Fragments agent's closing report, carried by the author)
+
+All three touchpoints verified done. The standing facts, superseding
+any pending-tense wording above:
+
+- **ONE STARGAZING ACCOUNT — the end state is REAL.** Her delegated
+  *[removed for publication]*
+  *[removed for publication]*
+  duplicate ever created); the identity row reads `custom:stargazing` /
+  *[removed for publication]*
+  retired:** email provider off, the password grant 422s, the stored
+  hash blanked. Any Variorum-only or Fragments-native account framing
+  is DEPRECATED (the author's instruction).
+- **The old issuer era is over:** Fragments' own OAuth 2.1 server is
+  *[removed for publication]*
+- **Journal-class E2EE is LIVE on both ends:** their client's
+  enrollment opened the real vault (pure-Swift Argon2id + AES-KeyWrap
+  interoperates; their tolerant `kdf_*` decode matched the live row),
+  and her journal rows re-pushed as `e1:` ciphertext (verified
+  server-side by prefix only). No interim plaintext remains on the
+  wire for her rows. The Variorum bridge is RESUMED (the 14b pause
+  ended; the staged re-push from truth drained — both ends observed
+  it independently).
+- **The entitlement gate is live and quiet** on her device (a
+  not-entitled read would pause visibly).
+- **The bridge's sign-in road is DELEGATED:** the Variorum app's
+  Fragments email+password door is REMOVED (it could only 422); the
+  browser flow through the suite issuer (`provider=custom:stargazing`
+  — the platform prefixes dashboard-created custom providers; bare
+  `stargazing` 400s) is the one road, with `variorum://auth-callback`
+  on the Fragments project's redirect allow-list.
+- **STANDING DESIGN NOTE (their flag, recorded as the contract's):**
+  Fragments holds the suite provider token IN MEMORY ONLY, so its
+  suite-project reads (vault, entitlement) happen at interactive
+  sign-ins. If either side ever wants silent re-reads, that is a
+  future contract conversation — not assumed by anything shipped.
+
 **TOUCHPOINT #3 — THE CONCRETE FACTS (added at 14c's build, 2026-08-05 —
 the Variorum-side machinery is BUILT; what follows is everything the
 Fragments implementer needs for the entitlement check at the one-batch

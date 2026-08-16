@@ -50,8 +50,6 @@ struct AccountView: View {
     @State private var signUpEmail = ""
     @State private var signUpPassword = ""
     @State private var signUpConfirm = ""
-    @State private var fragmentsEmail = ""
-    @State private var fragmentsPassword = ""
     /// Phase 14c: the deletion door's friction state (her Round-5 ruling).
     @State private var showingDeleteAccount = false
     @State private var deleteConfirmationEntry = ""
@@ -99,7 +97,6 @@ struct AccountView: View {
     private enum Field {
         case variorumEmail, variorumPassword
         case signUpEmail, signUpPassword, signUpConfirm
-        case bridgeEmail, bridgePassword
     }
 
     private var canSignInVariorum: Bool {
@@ -116,11 +113,6 @@ struct AccountView: View {
             && signUpPassword == signUpConfirm
     }
 
-    private var canConnectBridge: Bool {
-        ProjectConfig.fragmentsConfigured && !services.account.busy
-            && !fragmentsEmail.isEmpty && !fragmentsPassword.isEmpty
-    }
-
     /// One door for the button AND the fields' Return key (the 9c sitting,
     /// 2026-07-11: Return in these fields was a silent no-op — the form
     /// only worked via its button).
@@ -130,14 +122,6 @@ struct AccountView: View {
         let password = variorumPassword
         variorumPassword = ""
         Task { await services.signInWithVariorum(email: email, password: password) }
-    }
-
-    private func connectBridge() {
-        guard canConnectBridge else { return }
-        let email = fragmentsEmail
-        let password = fragmentsPassword
-        fragmentsPassword = ""
-        Task { await services.connectFragmentsJournal(email: email, password: password) }
     }
 
     /// One door for the button AND the fields' Return key (the sign-in
@@ -275,7 +259,7 @@ struct AccountView: View {
         } else if creatingAccount {
             signUpSection
         } else {
-            Text("Sign in with your account email and password:")
+            Text("Sign in with your Stargazing account:")
                 .pageProse(pageStyle)
             emailField("Email", text: $variorumEmail)
                 .focused($focus, equals: .variorumEmail)
@@ -299,10 +283,18 @@ struct AccountView: View {
 
         PageDivider(pageStyle)
 
-        // MARK: The Fragments journal connection (the bridge's session)
+        // MARK: The journal bridge's connection (Phase 14d — ONE
+        // Stargazing identity, presented as such; her ruling: "I don't
+        // want a variorum + stargazing account, I want just one
+        // stargazing account." The bridge holds a second SESSION of the
+        // SAME account against the Fragments project — a connection, not
+        // another sign-in. The email+password form is GONE, not hidden:
+        // the batch retired her Fragments password server-side (the
+        // grant 422s), so the delegated browser road is the only honest
+        // door.)
         if let fragments = services.account.fragments {
             HStack(alignment: pageStyle != nil ? .firstTextBaseline : .center) {
-                Text("Fragments journal connected\(fragments.email.map { " (\($0))" } ?? "")")
+                Text("Journal bridge (Fragments) connected\(fragments.email.map { " (\($0))" } ?? "")")
                     .pageProse(pageStyle)
                 Spacer()
                 PageDoor("Disconnect", form: .inlineAct, style: pageStyle) {
@@ -310,32 +302,13 @@ struct AccountView: View {
                 }
             }
         } else {
-            Text("Connect the Fragments journal (two-way bridge):")
+            Text("Journal bridge (Fragments) — journal in either app, one journal:")
                 .pageProse(pageStyle)
-            // Phase 14d — the delegated road (the door back in): signs
-            // into the Fragments project through the Stargazing account
-            // via the browser flow. Works once touchpoint #1's provider
-            // entry exists; the password form below dies with her
-            // Fragments password at that same touchpoint and retires
-            // when the batch confirms.
-            PageDoor("Sign in with your Stargazing account", style: pageStyle) {
+            PageDoor("Connect with your Stargazing account", style: pageStyle) {
                 Task { await services.connectFragmentsJournalDelegated() }
             }
             .disabled(!ProjectConfig.fragmentsConfigured || services.account.busy)
-            Text("Opens a browser sign-in through your suite account — the road that keeps working after the Fragments password retires.")
-                .pageCaption(pageStyle)
-            emailField("Fragments email", text: $fragmentsEmail)
-                .focused($focus, equals: .bridgeEmail)
-                .onSubmit { focus = .bridgePassword }
-                .pageFieldChrome(pageStyle)
-            SecureField("Fragments password", text: $fragmentsPassword)
-                .textContentType(.password)  // AutoFill (R1-5)
-                .focused($focus, equals: .bridgePassword)
-                .onSubmit { connectBridge() }
-                .pageFieldChrome(pageStyle)
-            PageDoor("Connect", style: pageStyle) { connectBridge() }
-                .disabled(!canConnectBridge)
-            Text("Signs in directly to the Fragments project; only the session is kept, never the password.")
+            Text("Opens a quick browser sign-in with the same Stargazing account; only the session is kept.")
                 .pageCaption(pageStyle)
         }
 
@@ -364,7 +337,7 @@ struct AccountView: View {
     /// (`ErrorPresentation.signUpClosedMessage`), never a generic error.
     @ViewBuilder
     private var signUpSection: some View {
-        Text("Create an account with an email and password:")
+        Text("Create your Stargazing account with an email and password:")
             .pageProse(pageStyle)
         emailField("Email", text: $signUpEmail)
             .focused($focus, equals: .signUpEmail)

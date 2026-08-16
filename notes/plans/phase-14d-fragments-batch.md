@@ -218,6 +218,69 @@ contract file's state, the parity line, the handoff note).
   probe user** (admin delete; or her click-then-ignore is harmless —
   purge is the tidy arm).
 
+## THE ONE-BATCH FRAGMENTS HANDOFF — CLOSED (2026-08-16; the
+## Fragments agent's closing report, relayed by her — the phase's
+## reason discharged)
+
+Their verified outcomes, verbatim-faithful: **(a) uid — verified the
+*[removed for publication]*
+*[removed for publication]*
+no link step needed (verified-email auto-link matched); the identity
+*[removed for publication]*
+contract's coordinates exactly. **(b)** old issuer OFF + old client
+*[removed for publication]*
+opened the real vault (pure-Swift Argon2id + KeyWrap chain
+interoperates; their tolerant `kdf_*` decode matched the live row),
+and her journal rows re-pushed as `e1:` within a minute of enrolling
+— checked server-side by PREFIX only, never content; "no interim
+plaintext left on the wire for your rows." **Password fully retired:**
+email provider off, the grant 422s, stored hash blanked — single
+sign-in, nothing surviving. **(d)** the entitlement gate live and
+QUIET on her device (a not-entitled read would have paused visibly).
+**(e) for Variorum:** the slug is `custom:stargazing` (already
+as-built, §2.6); the kdf-spelling flag soft-closed; **ONE STANDING
+DESIGN NOTE (recorded in the contract file too):** Fragments holds
+the suite provider token IN MEMORY ONLY, so suite reads (vault /
+entitlement) happen at interactive sign-ins — silent re-reads are a
+future contract conversation, deliberately not this batch's.
+
+**Variorum-side corroboration (the same hour, independent):**
+`bridge_day` went 7 agreed days → **9 agreed days, ZERO sentinels** —
+the resumed rounds ran and the staged re-push DRAINED. Accepted
+pushes mean the fail-closed canonical-user gate passed under RLS,
+which EMPIRICALLY proves the session's uid beside their explicit
+confirmation — the FIRST-SIGN-IN RULE is closed by both roads. Both
+ends independently observed the same event (our drain, their `e1:`
+prefixes). **What remains of Step 3:** the REVERSE direction — one
+entry written Fragments-side landing in Variorum over ciphertext
+(her one-minute check) — and then the phase's proof triad is whole
+(push ✔ by both ends · entitlement same answer both apps ✔ (their
+(d) + our "Hosted sync is active") · pull pending that one check).
+
+## The account-sheet unification (2026-08-16 — her ruling executed)
+
+Her words: *"shouldn't we be removing the variorum only sign in? I
+don't honestly see the point of still having two sign in options on
+the screen … I don't want a variorum + stargazing account, I want
+just one stargazing account."* The truth the sheet failed to speak:
+there IS one identity — the "Variorum" sign-in has been the
+Stargazing account since 14a; the Fragments row is a second SESSION
+of the SAME account against the Fragments project (the bridge's
+backend), never a second account. Executed: the sign-in heading now
+says **"Sign in with your Stargazing account:"**; the bridge section
+reads **"Journal bridge (Fragments)"** with ONE connect door (the
+delegated browser button) — **the Fragments email+password form is
+REMOVED, not hidden** (the batch retired her password server-side;
+the form could only 422 — honesty, not cosmetics), and
+`AppServices.connectFragmentsJournal` (the dead password door) is
+deleted with it. The stale 9b status placeholder — her catch,
+*"fragments bridge off (sign-in arrives with 9c)"* — replaced with
+"Journal bridge off" + a Connect… door to the account sheet. Suites
+33/33; mobile builds clean. **Held for her word (propose-only):** the
+status row's "Bridge now" button label — candidates "Sync journal
+now" / fold into the lifecycle round — her taste call, not taken
+autonomously.
+
 ## Residuals (phase-end carry-outs — hers, at her word)
 
 - **DMARC on stargazing.tech — deliberately NOT done in this phase
