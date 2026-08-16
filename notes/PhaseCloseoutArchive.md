@@ -10,6 +10,52 @@
 
 *(Moved verbatim from the master plan's "Current phase" section, in the order they sat there — newest first, per that section's convention, back through Phase 13b, then the standing Phase 12 deferral paragraphs and the early out-of-band records. The ACTIVE pointer always lives in `notes/DetailedPlanForPhases.md`.)*
 
+*(Superseded pointer, kept for the thread — the ACTIVE pointer through Phase 14d's run, superseded at 14d's close 2026-08-16; this pointer was itself rewritten at the 2026-08-14 kickoff from the 14c-close form below it:)*
+
+**→ PHASE 14D OPENED 2026-08-14 under `/architect-phase`
+(author-attended; cast: Fable architect implements directly, the 9d
+shape, + one cold review at close — the kickoff sitting record in
+`notes/plans/phase-14d-fragments-batch.md`). Her sequencing ruling:
+the Fragments prompt handed off AND the SMTP act run NOW — release-
+ready "pretty much at the end of this phase." Previously: PHASE 14C
+CLOSED 2026-08-11 — multi-tenant hardening & the paid
+tier is DONE; the isolation proof bar is met and PROVEN LIVE. NEXT:
+PHASE 14D — the one-batch Fragments handoff + bridge resumption — at
+her word, from the paste-ready kickoff at the top of
+`notes/plans/phase-14d-fragments-batch.md`.**
+
+*(Superseded pointer, kept for the thread — the ACTIVE pointer from 14c's close 2026-08-11 until the 14d kickoff rewrote it 2026-08-14; archived here in full at the 14d closeout:)*
+
+**→ PHASE 14C CLOSED 2026-08-11 — multi-tenant hardening & the paid
+tier is DONE; the isolation proof bar is met and PROVEN LIVE. NEXT:
+PHASE 14D — the one-batch Fragments handoff + bridge resumption — at
+her word, from the paste-ready kickoff at the top of
+`notes/plans/phase-14d-fragments-batch.md`.** The gate half ran
+architect-driven (her Round-7 delegation, each act announced): the
+born-multi-tenant mirror deployed (marker **5→6**), her corpus
+repushed exact + zero-plaintext + owner-uniform (7,278 rows, one
+round), the ruled two-layer security net made REAL by the live
+BYPASSRLS repair (obligation 2 answered NO — the three data RPCs
+re-owned to a non-bypass `variorum_definer` role), **all 13 live
+isolation obligations passing against a real provisioned stranger**
+(pull=0 both ways, foreign/NULL-owner refused, colliding id lands
+in-partition with her row byte-untouched, direct-table denial,
+own-row-only vault/entitlement, the truncate fence + scoped delete
+leaving her corpus intact), and the account-deletion door verified
+end to end. **Deferred to 14d by her ruling** (first needed post-14d,
+riding its SMTP + site work): the signup flip · stranger-onboarding
+validation · the phone re-onboard (its saved cursor is stale against
+the reset mirror — re-onboard is the clean fix; whether today's
+merged-tree install made it a marker-6 client is the mobile session's
+to confirm; until re-onboarded, phone writing stays local-safe but may
+not propagate) · the custom domain, which DISSOLVED (branded auth-email
+links come FREE via
+the template + `token_hash` road; she buys Pro for the server-side
+backups regardless). **14d now ABSORBS those operationalia** beside the
+Fragments touchpoints. The BINDING record is
+`notes/plans/phase-14c-multi-tenant.md` (the "GATE HALF — execution
+record" section); the closeout log below has the paragraph.
+
 *(Superseded pointer, kept for the thread — the ACTIVE pointer through Phase 14c's build half, superseded at 14c's close 2026-08-11:)*
 
 **→ PHASE 14C — BUILD HALF COMPLETE 2026-08-05 (tip `a27d114`); THE
@@ -575,3 +621,6 @@ combined feel pass still owed.)*
 *[removed for publication]*
 
 - **Phase 14b (closed 2026-08-04):** Suite E2EE — the tier ships unable to read your writing, opened and closed the SAME DAY under `/architect-phase` (ALL-FABLE at her invocation; one mid-phase orchestrator cutover — a safeguard reroute on the phase's security-shaped subject matter — crossed with ZERO loss via the two-document handoff + repo-first discipline; the incoming seat re-verified everything, per her mandate, before building on it). **THE RULINGS (R-1…R-8):** vault on the VARIORUM project (the free re-open spent) · WIPE-AND-REPUSH for her mirror · insights closed factually · passphrase-only enrollment both form factors (QR a future door) · 12-word BIP-39 · enrollment-only unlock (the per-launch biometric door held open, then OPENED in-phase at her CF-12 ruling: biometric or the passphrase, NEVER the device passcode) · Argon2id via the vendored PHC reference · master + per-class keys. **SHIPPED:** the crypto substrate (RFC-vectored; 64 MiB Argon2id; BIP-39 with checksum) · the `SyncSchema` classification (18 encrypted columns, build-failing completeness walk) + the serializer seam with the engine inland on plaintext (Merge/Repairs ZERO-diff, proven) · convergence suites GREEN OVER CIPHERTEXT (the crown) · `key_vault` (marker 4→5; R1-2's revision CAS) · Keychain custody + the shared stepped setup/enrollment flows (her CF walk rebuilt them: mandatory phrase, her checkbox sentence byte-pinned, the forget door, the biometric gate, Account-tab fold, sync-row stability, the CF-16 stale-key honesty state) · `resyncReinitialize` + the `vault-bootstrap` runner (GM-3's transient-drop absorption found and fixed at the live gate) · the bridge's journal-class capability STRUCTURALLY PAUSED until the 14c-end Fragments batch. **EXECUTED LIVE:** the mirror wiped and repushed TWICE (the gate morning, then her full re-key acceptance drill — vault deleted, new passphrase + new 12 words, truncate, repush, phone re-enrolled) — both times the headline proof passed: rows exact, ZERO plaintext across all 18 columns; CF-16 validated live on her phone; the recovery-phrase road proven twice; the mobile flow notes handed over and the phone's adaptation (snapshot cover ACCEPTED at her walk) merged back. **THE LADDER** closed at round 2 (1 MAJOR + 3 MINOR + 5 NIT, all fixed revert-verified); **ONE post-gate cold pass** (NO BLOCKER/MAJOR — 3 MINOR + 4 NIT; the SyncSpec staleness manifest incl. 13b's unrecorded 3→4 lockstep entry, the C-3 stale-writer fence constraint pinned to 14c, the PayloadCipher ASCII-digit fix, the KDF off-main tripwire). **Final counts (the merged tree, mobile's PL-6 build half in):** core 1158/124 · Mac 1218/213 (the standing TakePane tripwire the one allowed red, BY IDENTITY) · mobile 175/26 · spine 51/7. **MOBILE PARITY LINE: PL-6 SHIPPED THROUGH THE SHARED SEAM AND CLOSED** — the phone enrolls, decrypts, forgets, and phrase-recovers via the same flows (0.16 s device KDF); its snapshot cover + BIP-39 ergonomics landed via the mobile session's merge; no parity debt. The E2EE KnownIssues row RESOLVES with this phase; the C-1 MainActor-Keychain finding joins 13e's securityd row. Handoff: `notes/handoffs/phase-14b-handoff.md`. 14c next, at her word, from the paste-ready draft.
+
+- **Phase 14c (closed 2026-08-11):** Multi-tenant hardening & the paid tier — the mirror reborn so strangers' accounts are safe,
+ *[removed for publication]*

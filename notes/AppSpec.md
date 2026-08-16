@@ -503,7 +503,7 @@ Resolved (source SPEC §14 open questions), with the calls made:
 
 Additional deltas: live-row partial unique indexes everywhere (§6 — correctness fix); I10 added (§5); `chosen_variant_id` NULL-fallback semantics defined (§7); stack concretized (§1–2: Observation + swift-dependencies, SPM core + thin app, Xcode 26 both machines, deployment target macOS 15, Swift Testing).
 
-**The dated delta record (2026-07-04 → 2026-08-01, Phase 0 through Phase 13g) lives in `notes/AppSpecDeltaArchive.md`** — moved verbatim 2026-08-01 (author housekeeping, the Fragments precedent; the file had outgrown the context-load limit). §14 keeps the source-SPEC resolutions above and ONLY the most recent phase's delta below; the closeout ritual moves the outgoing delta to the archive in the same commit that records the next one. The archive is canon — rulings recorded there bind exactly as they did here.
+**The dated delta record (2026-07-04 → 2026-08-11, Phase 0 through Phase 14c) lives in `notes/AppSpecDeltaArchive.md`** — moved verbatim 2026-08-01 (author housekeeping, the Fragments precedent; the file had outgrown the context-load limit). §14 keeps the source-SPEC resolutions above and ONLY the most recent phase's delta below; the closeout ritual moves the outgoing delta to the archive in the same commit that records the next one. The archive is canon — rulings recorded there bind exactly as they did here.
 
 *[removed for publication]*
 

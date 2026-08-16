@@ -1,15 +1,20 @@
 # Phase 14d — The Fragments batch & bridge resumption — micro-plan
 
-> **Status: OPEN — kicked off 2026-08-14 under `/architect-phase`
-> (author-attended; the kickoff sitting record below carries her cast
-> and sequencing rulings). Previously: FINALIZED 2026-08-11 at 14c's
-> close. All FILL-AT-GATE fields completed (below); the phase
-> now carries, besides the Fragments handoff, the operationalia she
-> DEFERRED out of 14c's gate (signup flip · stranger validation ·
-> branded auth-email links via the free template road — the phone
-> re-onboard already DISCHARGED by her live confirmation). Micro phase
-> by her ruling; it gates on nothing but the Fragments conversation and
-> her own account acts (Pro, SMTP provider, signup flip).**
+> **Status: CLOSED 2026-08-16 — the release-readiness bar met.** Ran
+> 2026-08-14→16 under `/architect-phase` (the 9d cast: Fable architect
+> implementing, author present, ONE cold review — closed at round 1,
+> all findings landed). Everything shipped: SMTP + branded auth
+> emails live · signups OPEN · the bridge UN-PAUSED and resumed over
+> ciphertext (the staged re-push drained; round-trip proven both
+> directions by her live check) · THE ONE-BATCH FRAGMENTS HANDOFF
+> CLOSED (uid preserved, password retired, journal E2EE live both
+> ends, ONE STARGAZING ACCOUNT) · the delegated bridge door built ·
+> the account-sheet unification. Residuals (hers): the stranger walk,
+> secret-key rotation, DMARC, the Bridge-now relabel offer, the
+> auto-connect direction. TestFlight UNBLOCKED. The closeout section
+> at the bottom has the counts; `notes/handoffs/phase-14d-handoff.md`
+> is her checkpoint. *(Previously: OPEN at the 2026-08-14 kickoff;
+> FINALIZED 2026-08-11 at 14c's close.)*
 
 ## Kickoff message (paste-ready)
 
@@ -292,6 +297,68 @@ status row's "Bridge now" button label — candidates "Sync journal
 now" / fold into the lifecycle round — her taste call, not taken
 autonomously.
 
+## THE COLD REVIEW — round 1 (2026-08-16; fresh Fable reviewer,
+## REVIEW_PROMPT verbatim, zero framing; ONE round per the ruled cast)
+
+**Verdict: 2 MAJOR / 4 MINOR / 2 NIT — ALL AGREED at adjudication;
+zero engine findings; a strong clean bill** (arm (ii) verified against
+code not narrative; the un-pause pinned Mac-only with no new
+main-thread Keychain hop; PKCE/exchange pins re-run; scope discipline
+exact — zero Sources/ logic, zero Sync/ lines, zero schema; secrets
+hygiene; the counts re-run live by the reviewer: 85/9 core bridge,
+33/33 Mac auth, mobile BUILD SUCCEEDED). Dispositions:
+
+- **MAJOR 1 (the real-store acts had no execution record)** — AGREED,
+  doc-class (the CLAUDE.md completeness bar's letter): §2.3 rewritten
+  above as the execution record (backup artifact + integrity +
+  timestamps, the staging count, the zero-instance checks, the drain
+  evidence). No pin applies (process/doc).
+- **MAJOR 2 (ProjectConfig's signups-OFF ruled-state banner
+  contradicted the deployed state)** — AGREED, traced (a future
+  session obeying it would re-close the release posture): the banner
+  REWRITTEN to the 14d truth (signups open; isolation + entitlement
+  are the guard; the OFF era preserved as history; the
+  "none-of-that-flow-lives-here" line corrected for the rebuilt
+  delegated door). Doc-class, no pin.
+- **MINOR 3 (three residual structural-pause carriers)** — AGREED,
+  swept: the AppServices composition comment, the BridgeEncryption
+  file header, the BridgeRestageTests doc header.
+- **MINOR 4 (FlowError failures spoke the raw enum face — the R94
+  class)** — AGREED, the one code-behavior fix:
+  `signInFailureMessage` taught the `SignInFlow.FlowError` cases;
+  **pin red-on-old PROVEN LIVE** (the pre-fix run produced exactly the
+  traced face, "…(Variorum.SignInFlow.FlowError error 0.)", then
+  green).
+- **MINOR 5 (closeout obligations at risk)** — AGREED; each landed:
+  *[removed for publication]*
+  the auth table verified to hold exactly her account) — the
+  reviewer's read predated the act; (b) the master-plan row's
+  verification cell amended to her residual/discharged rulings;
+  (c) KnownIssues: rotation-at-scale re-owned to the **v1 release
+  readiness** row (nothing 14d touched rotation; no blank owner);
+  (d) the parity line is NOT "nothing mobile-visible" — PL-9 written;
+  (e) the §14 delta + handoff ride this closeout.
+- **MINOR 6 (record accuracy: "probe-verified once" overstated the
+  branded click-through; the reverse-direction ciphertext claim is
+  report-based)** — AGREED; the walk wording amended (the click-
+  through is genuinely the walk's), and the Step-3 record's ciphertext
+  claim stands explicitly ON the Fragments agent's report + their
+  post-enrollment client behavior (recorded as such here).
+- **NIT (PKCE RNG status discarded — SPECULATIVE by the reviewer's
+  own label)** — fixed with the one-line `precondition` (an RNG
+  failure must refuse, never yield a deterministic verifier); no pin
+  constructible (the API isn't injectable), the reviewer's own
+  honest labeling.
+- **NIT (dead-but-defensive `alreadyRunning`; the phone's bridge door
+  with no consumer)** — record-only: the guard stays (harmless belt);
+  the phone-door shape is pre-existing and goes to PL-9's mobile
+  judgment.
+
+**Ladder state: CLOSED at round 1** — the ruled cast (2026-08-14
+kickoff sitting) was explicitly ONE cold review; both MAJORs were
+doc-class with no behavior change, so no fix warrants a re-review
+round under the ladder's own purpose.
+
 ## Residuals (phase-end carry-outs — hers, at her word)
 
 - **DMARC on stargazing.tech — deliberately NOT done in this phase
@@ -322,8 +389,11 @@ autonomously.
      `you+walk@gmail.com` — works and lands in your own inbox).
      Expect the "confirmation email went out" notice, worded sanely.
   2. The email arrives from Stargazing; its link lands on
-     `stargazing.tech/auth/confirm` and confirms plainly (the
-     branded road, already probe-verified once).
+     `stargazing.tech/auth/confirm` and confirms plainly. (Precision
+     per the cold review: the DISPATCH of the branded email is
+     probe-verified; your click-through is the FIRST full
+     `verifyOtp` confirmation — genuinely part of the walk, don't
+     skip it.)
   3. Sign in with the new account in-app. CHECK: the app reads
      normal, never degraded; YOUR real writing does NOT appear
      under the stranger account (empty remote store); hosted sync
@@ -340,6 +410,28 @@ autonomously.
      exit AND the last check (deletion as a stranger).
   7. Anything odd → report to a polish session, only if different
      from the above expectations.
+- **THE BRIDGE AUTO-CONNECT direction (her 2026-08-16 question:
+  "can't we handle authenticating them in that project
+  automatically?" — DESIGNED, deliberately not built mid-closeout).**
+  The shape: the app already holds an ISSUER session (the suite
+  sign-in), and Supabase's OAuth server supports API-driven consent
+  with auto-approval for an already-granted client (PROVEN LIVE at
+  the 9c gate — "a granted client+scope auto-approves at the details
+  GET; the response IS the completion redirect_url"). So Connect can
+  walk authorize → consent-auto-approve → Fragments' GoTrue callback
+  HEADLESSLY with the suite bearer, capture the `variorum://` code
+  from the Location header instead of a browser, and exchange as
+  today — zero typing; the browser stays as the fallback for a
+  never-granted first consent. The one fragile seam to probe first:
+  whether GoTrue's provider flow carries state in cookies the
+  browser normally ferries between redirects. Owner: a polish
+  session at her word (the Connect button stays meanwhile; pressing
+  it is one browser hop, no credential re-entry when the browser
+  holds a session).
+- **The "Bridge now" button label** — her question answered (Sync
+  now = the whole store ↔ the suite mirror; Bridge now = journal
+  days ↔ Fragments); a relabel ("Sync journal now" or fold into the
+  lifecycle round) is offered, propose-only, at her word.
 
 ## Kickoff sitting record (2026-08-14 — author-attended)
 
@@ -489,18 +581,27 @@ call, the plan's two arms adjudicated with the trace in hand):**
   affordance is the then-fix — built against the live evidence, not
   speculatively.
 
-**2.3 The staging + first-round choreography (the acts that remain):**
-(a) A1 rail — WAL-safe backup of the real store; (b) staging —
-`stageRepushFromTruth`'s exact UPDATE run once against the real
-store's `bridge_day` at a zero-instance window (inert bookkeeping;
-the staged days wait); (c) the `/Applications` refresh with the
-un-paused build (no lockstep change — marker 6 both sides); (d) her
-first launch runs the resumed round: pull (any pause-era plaintext
-lands via the standing doctrine), then every staged live day
-re-pushes as `e1:` — ending the satellite's legacy-plaintext era.
-Honest scope note: sentinel rows for days with no live entry are
-inert residue (nothing to push; a revived day re-pushes then), so
-"zero-plaintext satellite" scopes to live days re-pushed from truth.
+**2.3 The staging + first-round choreography — EXECUTED (record
+written at the review's demand, MAJOR 1 — the acts ran 2026-08-16 as
+announced, each at a verified zero-instance window):**
+(a) **A1 rail:** WAL-safe `VACUUM INTO` backup
+`Backups/variorum-backup-2026-08-16-120844.sqlite` (4,612,096 bytes,
+`PRAGMA integrity_check` = ok) taken at 12:08Z with
+`pgrep -fl 'Variorum.app/Contents/MacOS'` returning nothing ("zero-
+instance confirmed" in the transcript); (b) **staging:** the exact
+`stageRepushFromTruth` UPDATE run once against the real store's
+`bridge_day` — **7 rows changed** (pre-state: 7 rows, all non-NULL
+hashes, 0 sentinels; post-state: 7 sentinels; 10 live journal days
+total in scope, the other 3 being nil-agreement first-pushes);
+(c) **the `/Applications` refresh:** Release build + `ditto`,
+instance-checked at the copy moment — TWICE this phase (12:23Z the
+un-pause build; 20:13Z the unification build; a third refresh follows
+the review-fix pass at closeout); (d) **the resumed first round RAN
+AND DRAINED** (her launch): `bridge_day` 7 sentinel → **9 agreed
+days, 0 sentinels** — corroborated server-side by the Fragments
+agent's independent `e1:`-prefix observation. Honest scope note as
+planned: "zero-plaintext satellite" scopes to live days re-pushed
+from truth.
 
 **2.4 THE SESSION DEPENDENCY — flagged, then RESOLVED BY HER RULING
 (2026-08-16):** bridge rounds run only while the Mac's FRAGMENTS
@@ -700,3 +801,32 @@ suite once ("Stargazing — one login for Variorum and Fragments").
 Report back the exact deployed route URL(s) so the Variorum side can
 add them to the project's redirect allowlist and set the Site URL
 before the email templates flip to the token_hash form.
+
+## CLOSEOUT (2026-08-16)
+
+**The verification letter, met in full:** a journal entry created in
+either app lands in the other, encrypted in flight and at rest on the
+satellite (her live check, both directions); her Fragments uid
+*[removed for publication]*
+fail-closed gate's empirical proof); the one-payment entitlement reads
+the same answer from both apps (Variorum "Hosted sync is active";
+Fragments' gate live and quiet). PLUS the absorbed operationalia:
+signups OPEN · SMTP + branded auth-email links LIVE (dispatch
+probe-verified; the click-through rides her walk) · the stranger walk
+HER RESIDUAL at her ruling · the phone re-onboard DISCHARGED pre-phase.
+
+**Counts at close:** Mac auth suites 33/33 · core bridge suites 85/9 ·
+mobile target builds clean — all re-run by the cold reviewer
+independently. The phase touched NO core logic, NO `Sync/` lines, NO
+schema (the full-suite baselines stand: core 1216/128 · Mac 1246/220
+tripwire-only · mobile 314/60 from the 2026-08-11 merged-tree run —
+the phase's app-side surface is covered by the two auth suites + the
+bridge family above). Commits `3af8f95`…`d029969` + this closeout;
+all pushed.
+
+**Ladder:** ONE round (the ruled cast), closed same-day; 2 MAJOR
+(doc-class, landed) / 4 MINOR / 2 NIT, all agreed, dispositions above.
+
+**Deferred out / residual:** everything in the Residuals section
+(hers, at her word) + the KnownIssues rotation re-own (v1 release
+readiness row) + PL-9 (the mobile parity ledger). Nothing unowned.
