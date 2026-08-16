@@ -5,8 +5,13 @@
 1. **Nothing is required to keep working.** Launch Variorum and write.
    Sync, the journal bridge (both directions, encrypted), your one
    Stargazing sign-in, and the branded account emails are all live and
-   verified. The installed `/Applications` build is current (refreshed
-   at close with the review fixes).
+   verified. *(One tiny carry: the installed build is the 20:13Z
+   unification build — the closeout's REVIEW-FIX pass (nicer
+   browser-flow error wording; comment truths; nothing behavioral you
+   have) missed its install window because the app was running at
+   close. Any session refreshes it in a minute next time the app is
+   closed: `xcodebuild -scheme Variorum -configuration Release build`
+   + ditto to `/Applications` — the standing one-liner.)*
 2. **The stranger-validation walk — yours, on your own time** (your
    ruling: a residual; the phase closed without it). The step-by-step
    instructions live in `notes/plans/phase-14d-fragments-batch.md` →
