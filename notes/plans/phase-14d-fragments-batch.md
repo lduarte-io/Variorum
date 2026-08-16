@@ -223,6 +223,45 @@ contract file's state, the parity line, the handoff note).
   (`.env.smtp.local`, gitignored) or directly into the dashboard —
   never a transcript.
 
+## Step 0 execution record (SMTP — 2026-08-16, the kickoff sitting's
+## second day; architect acts via the Management API, hers by hand)
+
+- **Her acts, done:** Resend account + domain `stargazing.tech` added;
+  the Cloudflare records placed (Resend's shape: DKIM TXT on
+  `resend._domainkey`, SPF TXT + feedback MX on `send`); domain
+  **VERIFIED** at Resend; the API key staged in `.env.smtp.local`.
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  pass without it.
+- **Hygiene fix (committed `d360530`):** `.env.smtp.local` arrived
+  untracked but NOT gitignored (the other secret files are ignored by
+  name) — added it plus the `.env.*.local` glob before touching
+  anything else.
+- **Config pushed (PATCH 200, read-back verified):**
+  `smtp.resend.com:587`, user `resend`, pass set (never echoed),
+  sender `Stargazing <no-reply@stargazing.tech>` (the runbook's
+  candidates — one-line renames if she rules otherwise),
+  `smtp_max_frequency` 60 s, `rate_limit_email_sent` pinned 30/hr
+  (was unset-default). Useful read-backs: `site_url` is ALREADY
+  `https://stargazing.tech` (good for the branded flip),
+  `mailer_autoconfirm` false, `disable_signup` still true (the door
+  stays shut until the deliberate flip).
+- **Delivery probe fired:** throwaway auth user
+  *[removed for publication]*
+  (bypasses signups-off by design), `/auth/v1/recover` → 200 through
+  the new SMTP. Non-team address ⇒ delivery at all proves custom SMTP
+  live (the built-in mailer refuses such addresses). AWAITING her
+  inbox check: sender correct + `spf=pass`/`dkim=pass` headers.
+  **Cleanup owed: purge the throwaway user after her check** (it must
+  not survive into the stranger-validation walk).
+- **Still open in Step 0:** her template-copy ratify (§6 drafts +
+  sender identity) → paste via Management API on the STOCK
+  `{{ .ConfirmationURL }}` form; the branded `token_hash` flip waits
+  for the site handler (the sequencing rule above).
+
 ## The Fragments-side prompt (paste-ready — she carries it WITH the
 ## contract file, `notes/fragments-bridge-contract.md`)
 
