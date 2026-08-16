@@ -257,6 +257,17 @@ entry written Fragments-side landing in Variorum over ciphertext
 (push ✔ by both ends · entitlement same answer both apps ✔ (their
 (d) + our "Hosted sync is active") · pull pending that one check).
 
+**STEP 3 COMPLETE — her live confirmation (2026-08-16):** *"confirmed
+that it worked! everything looks good to go - journal entry started
+on fragments, opened in variorum and confirmed that it appeared."*
+The pull half lands over ciphertext (their client writes `e1:`
+post-enrollment; the bridge opened and landed it through the ordinary
+doors). **The round's verification letter is fully met:** an entry
+created in either app lands in the other, encrypted in flight and at
+rest on the satellite; her Fragments uid preserved (both roads); the
+one-payment entitlement reads the same answer from both apps. Her
+instruction: cold review now, straight into closeout.
+
 ## The account-sheet unification (2026-08-16 — her ruling executed)
 
 Her words: *"shouldn't we be removing the variorum only sign in? I
