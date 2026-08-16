@@ -153,6 +153,11 @@ escalation if signup abuse ever appears — recorded as the future knob,
 not configured now.
 
 ## 6. Auth email templates — DRAFT COPY FOR HER RATIFY
+## *(SUPERSEDED 2026-08-16 at the 14d Step 0 act: she ratified a
+## humanized revision — her own confirm-signup rewrite + plainer
+## phrasing throughout — and it is PASTED LIVE; the deployed config is
+## the copy's source of truth, recorded in the 14d plan's Step 0
+## record. The drafts below stand as history.)*
 
 Edited at **Authentication → Emails (Templates)**. Template variables
 available *(source-verified)*: `{{ .ConfirmationURL }}`, `{{ .Token }}`,

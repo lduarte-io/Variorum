@@ -187,6 +187,23 @@ contract file's state, the parity line, the handoff note).
 - The 2/hr built-in mailer cap ends at Step 0 — do not schedule
   TestFlight invites before it.
 
+## Residuals (phase-end carry-outs — hers, at her word)
+
+- **DMARC on stargazing.tech — deliberately NOT done in this phase
+  (her ruling, 2026-08-16): she's finishing the phase without it, and
+  hasn't fully decided which email should receive the reports; she
+  will come back to it later.** The note to carry back, recorded at
+  her request: *DMARC is entirely fine to add later (it's
+  deliverability/anti-spoofing hygiene on top of SPF+DKIM, not
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  whenever you like.*
+- **The secret-key rotation** (the Step 0 incident note above) —
+  recommended, hers to take or decline.
+
 ## Kickoff sitting record (2026-08-14 — author-attended)
 
 - **Invocation:** `/architect-phase`, her args: Fable orchestrator;
@@ -257,10 +274,29 @@ contract file's state, the parity line, the handoff note).
   inbox check: sender correct + `spf=pass`/`dkim=pass` headers.
   **Cleanup owed: purge the throwaway user after her check** (it must
   not survive into the stranger-validation walk).
-- **Still open in Step 0:** her template-copy ratify (§6 drafts +
-  sender identity) → paste via Management API on the STOCK
-  `{{ .ConfirmationURL }}` form; the branded `token_hash` flip waits
-  for the site handler (the sequencing rule above).
+- **Step 0 COMPLETE (2026-08-16, same sitting):** she confirmed the
+  probe email ARRIVED ("i got the stargazing email in my email! so
+  *[removed for publication]*
+  nothing survives into the stranger-validation walk). **Templates
+  PASTED (PATCH 200, read-back verified) with HER RATIFIED COPY** —
+  her own confirm-signup rewrite verbatim (typo fixed), reset kept
+  with the load-bearing account-password-vs-encryption-passphrase
+  paragraph rephrased plainly, all three humanized per her advance
+  ratify ("whatever you do with that is fine and ratified"; "the em
+  dashes and how they're phrased is just too AI"). The LIVE config is
+  the copy's source of truth; the runbook §6 drafts are superseded
+  (dated note added there). Stock `{{ .ConfirmationURL }}` form as
+  ruled; the branded flip still waits on the site handler.
+- **INCIDENT NOTE (architect's own, honest):** while fetching "the
+  publishable key" for the site prompt, `VARIORUM_SUPABASE_API_KEY`
+  from `.env.supabase.local` was echoed into the transcript — and it
+  turned out to be an `sb_secret_…` SECRET key (that env file is
+  architect tooling, not app config). Exposure bounded to her local
+  transcript; RECOMMENDED: rotate the secret key at the dashboard
+  (Settings → API keys) and update the env file — her call, tracked
+  here until she takes or declines it. The actual publishable key
+  (`sb_publishable_X-TQvz2RDj4cnCABZao4ww_WWGdSTwp`, public by
+  design) was then fetched cleanly for the site prompt.
 
 ## The Fragments-side prompt (paste-ready — she carries it WITH the
 ## contract file, `notes/fragments-bridge-contract.md`)
@@ -343,7 +379,8 @@ anything that needs a contract change — through her, never silently.
 Build the auth-email landing flow on stargazing.tech for the
 Stargazing suite (the Variorum/Fragments account system). The suite's
 *[removed for publication]*
-its PUBLISHABLE key — public by design; the author supplies it). The
+its PUBLISHABLE key, public by design:
+`sb_publishable_X-TQvz2RDj4cnCABZao4ww_WWGdSTwp`). The
 auth emails will link to
 `https://stargazing.tech/auth/confirm?token_hash=<hash>&type=<type>`
 (Supabase's documented server-side PKCE pattern), so build: (1) an
