@@ -491,6 +491,33 @@ follows.
 ("the real backups that the pro level plan offers") executed. Nothing
 app- or config-side keys on the plan tier; recorded as done.
 
+**2.6 TOUCHPOINT #1's DOOR CONFIG — CONFIRMED LIVE (the Fragments
+agent's report, relayed 2026-08-16):**
+- **Provider entry LIVE; the wire value is `custom:stargazing`** (the
+  platform prefixes dashboard-created custom providers; bare
+  `stargazing` returns 400). **NO APP CHANGE NEEDED — as-built
+  correct:** `authorizeURL` emits
+  `provider=custom:\(slug)` with `fragmentsSuiteProviderSlug =
+  "stargazing"` → exactly `custom:stargazing`, and the AuthSessionTests
+  pin asserts that literal value. Their caution was the anticipated
+  report-the-actual-slug case; the answer is "already emitted".
+- **Redirect allowlist LIVE:** their list is exactly
+  `fragments://suite-auth-callback,variorum://auth-callback` — ours in.
+  The delegated door's two config dependencies are both met; the
+  Stargazing button is usable from this moment.
+- **THE LINK — her report "I think it worked automatically" is NOT
+  yet the rule's verification.** The FIRST-SIGN-IN RULE wants an
+  explicit uid check, and two roads close it: (a) the Fragments
+  agent's one-line confirmation that the delegated sign-in's user is
+  *[removed for publication]*
+  Variorum drill itself is an empirical instrument — with a WRONG
+  (new) uid, RLS starves the bridge: `user_settings.local_user_id`
+  has no row for it, so the fail-closed gate holds all pushes with
+  the visible "Fragments account not yet synced" note and nothing is
+  written anywhere. A clean bridge round after the delegated sign-in
+  therefore proves the uid empirically; the agent's explicit
+  confirmation remains the clean record and is asked for.
+
 You are the Fragments-side agent for the ONE-BATCH suite handoff (the
 author carries this conversation; the Variorum side calls it Phase
 14d). All work happens in `~/dev/fragments` and the Fragments Supabase
