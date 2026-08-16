@@ -1,12 +1,16 @@
 # Auth email (SMTP) + rate/abuse limits — the runbook
 
-**Status: RUNBOOK ONLY — authored at Phase 14c batch 3 (L10, 2026-08-05).
-The config ACT is 14d's (her Round-7 ratification: zero code, ~30 minutes
-of dashboard work, and its only hard deadline is real email volume, which
-arrives with TestFlight — already 14d-gated). NO dashboard was touched
-authoring this; nothing here is configured yet. The template copy below is
-DRAFT, staged for HER RATIFY (the CF-10 spirit: these emails are a
-stranger's first contact with the suite).**
+**Status: EXECUTED AT 14D (2026-08-16) — §2–§7 all done live:** Resend
+chosen and domain-verified (her DNS hand), SMTP config + 30/hr rate
+limit + 60 s resend window set via the Management API, her RATIFIED
+(humanized) template copy pasted and then FLIPPED to the branded
+`token_hash` form once the stargazing.tech `/auth/confirm` handler
+shipped, delivery + branded-signup probes both live-verified. The
+deployed config is the copy's source of truth; the 14d plan's Step 0 +
+Part B records are the execution record. DMARC deliberately deferred
+(her residual). *(Original status, for history: authored at Phase 14c
+batch 3 (L10, 2026-08-05) as runbook-only, nothing configured, drafts
+staged for her ratify.)*
 
 Facts marked *(source-verified)* were pulled 2026-08-05 by the batch's one
 Sonnet lookup — primary sources: the `supabase/auth` (GoTrue) source code

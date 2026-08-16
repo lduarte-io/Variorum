@@ -187,6 +187,37 @@ contract file's state, the parity line, the handoff note).
 - The 2/hr built-in mailer cap ends at Step 0 — do not schedule
   TestFlight invites before it.
 
+## Part B execution record (2026-08-16 — the account doors, her go)
+
+- **THE SIGNUP FLIP — EXECUTED (her explicit instruction, given
+  twice: "go ahead and flip signups"):** `disable_signup: false`
+  (PATCH 200, read-back verified). The signups-off corpus guard era
+  ends here — safe by 14c's proven isolation net + the entitlement
+  gate (a fresh account can write nothing to the mirror until a plan
+  activates; the auth tables + one vault row are the designed open
+  surface; the runbook §5 rate limits are the abuse posture).
+- **The site handler SHIPPED (the stargazing.tech agent's report,
+  relayed by her):** `https://stargazing.tech/auth/confirm` — one URL,
+  all types (signup / email_change / recovery, invite/magiclink
+  gracefully); production 307-redirects to the trailing-slash form
+  WITH the query preserved (tested); `/oauth/reset` untouched (old
+  fragment-format recovery links keep working through the flip).
+- **The allowlist + branded flip — EXECUTED:** `uri_allow_list` now
+  carries `/oauth/reset` + BOTH confirm forms (trailing-slash
+  belt-and-braces per the site agent); Site URL confirmed
+  `https://stargazing.tech`; all three templates flipped to
+  `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=…`
+  (signup / recovery / email_change), her ratified copy byte-kept.
+  The don't-flip-before-the-handler-lives rule was satisfied in
+  order: handler live first, flip second.
+- **The end-to-end probe — LIVE:** a stranger-shaped signup
+  *[removed for publication]*
+  *[removed for publication]*
+  no session) — the open door + the branded confirmation email
+  dispatched via Resend in one act. **Closeout owes: purge this
+  probe user** (admin delete; or her click-then-ignore is harmless —
+  purge is the tidy arm).
+
 ## Residuals (phase-end carry-outs — hers, at her word)
 
 - **DMARC on stargazing.tech — deliberately NOT done in this phase
@@ -203,6 +234,38 @@ contract file's state, the parity line, the handoff note).
   whenever you like.*
 - **The secret-key rotation** (the Step 0 incident note above) —
   recommended, hers to take or decline.
+- **THE STRANGER-VALIDATION WALK — RULED A RESIDUAL (her 2026-08-16
+  instruction; the phase closes without it).** Her words: *"i feel
+  like that's a residual as well and we can close the phase out
+  without it being done. I'll just do that on my own time and only
+  report if there's an issue in a new session to fix any remaining
+  issues. there'll probably be a couple of polish sessions truth be
+  told so i'll do that walk and only report back to one of those if
+  it's different."* **THE WALK, written down for her own time
+  (~15 min):**
+  1. On the Mac, as a stranger would: Account sheet → Create
+     Account with a fresh email (plus-addressing —
+     `you+walk@gmail.com` — works and lands in your own inbox).
+     Expect the "confirmation email went out" notice, worded sanely.
+  2. The email arrives from Stargazing; its link lands on
+     `stargazing.tech/auth/confirm` and confirms plainly (the
+     branded road, already probe-verified once).
+  3. Sign in with the new account in-app. CHECK: the app reads
+     normal, never degraded; YOUR real writing does NOT appear
+     under the stranger account (empty remote store); hosted sync
+     presents the activation prompt as a normal prompt (no
+     entitlement), never an error face.
+  4. Walk the encryption setup as a stranger (passphrase + the
+     12-word phrase steps) — do the steps read sanely to someone
+     who knows nothing?
+  5. The phone half (PL-6 first-run): OPTIONAL on the real phone —
+     it means signing your own account out and back afterward (one
+     passphrase re-entry + pull-to-head, the proven road) — a
+     simulator run is the low-cost arm.
+  6. The stranger account's own "Delete Account…" door is the tidy
+     exit AND the last check (deletion as a stranger).
+  7. Anything odd → report to a polish session, only if different
+     from the above expectations.
 
 ## Kickoff sitting record (2026-08-14 — author-attended)
 
