@@ -412,5 +412,41 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint.**
 
-*(Next free number: **#57**.)*
+## Phase 13e (2026-08-17) — batch 2's build-time calls, bundled for the sitting
+
+57. **2026-08-17 · Phase 13e (batch 2 — the fan's hands) · FIFTEEN build-time calls, each one line to change.** Your A19 said *"Reorder takes"* and your A18 said *"⌘-click in Takes to select blocks to merge; merge several when they have no takes"* — they did not say what happens at the ends of a fan, whether a locked take may be moved, or what a fanned selection should do. Those are the calls below. **Nothing here needed a schema change or new merge semantics**: `fan_position` was already a jittered fractional-index key (SyncSpec §8) and merge is AppSpec §9's, untouched. The BINDING build record is the 13e plan's batch-2 record.
+
+    **(a) A LOCKED take and an ARCHIVED take can both be reordered.** The lock freezes the BUFFER, not identity metadata — the ratified `setTakeLabel` precedent — and an archived take's place in the ordering is where it comes back to. **The alternative:** refuse either (one guard line each).
+
+    **(b) Stepping happens within the ACTIVE fan — the takes the cards show.** An archived take sitting between two active ones is neither stepped onto nor stepped over: it keeps its own key, so the move lands the take beside the card you were looking at. **The alternative:** step over the whole live fan, archived takes included, which would make one press appear to do nothing.
+
+    **(c) Reordering the fan does NOT touch the note or accumulate churn.** Block `reorder` stamps neither, and AppSpec §9's touch-list names divide-W, merge and poolDragCopy — not reordering. Rearranging takes is not working on the prose, and it must never reshuffle the library's meaningful sort. **The alternative:** stamp `last_touched_at` (the divide-W/merge posture).
+
+    **(d) The arrows are KEYLESS.** Your ruling named no chord, and an invented one would owe a collision sweep nobody asked for (the `.toggleStar` precedent). They are `.surface` doors — the target is the CARD you point at. **The alternative:** name a chord and I'll declare it in the key table.
+
+    **(e) The glyphs follow the strip's direction, and the end arrow greys rather than vanishing** — ◀ ▶ in carousel / slot split / the rail, ▲ ▼ in the stack, and the first card's "earlier" is disabled (the pager's disabled-◀ grammar). A one-take fan draws no arrows at all (P-2). **The alternative:** hide the unusable arrow, which makes the card's furniture jump as takes move.
+
+    **(f) Moving a take relative to ITSELF writes nothing** — no row, no sync row, no undo entry (the extent-setter no-op convention).
+
+    **(g) E15 — the board defers on a DIRTY BUFFER only; a structural flight is deliberately not folded in.** Write's editor also defers during a flight because its controller has a flight-exit settle hook; the board has none, and its native divide relies on ordinary adoption to show the successors. Adding the flight arm without the hook would leave the successors unrendered until the next delivery. **The alternative:** build the board a flight-exit hook (a real change, not a line).
+
+    **(h) E15 — the echo check is STRICT: any live buffer means "refetch".** With no buffer the board's display IS the projection, so a byte-identical delivery adopts on the spot; with a buffer in hand nothing cheap can tell a stale photograph from a newer one, so the fresh-read path decides. Cost: at most one extra read per delivery inside the settle window (exactly what both editors pay at the same moment). A LAX check would freeze the display; a strict one only ever costs a read.
+
+    **(i) ⌘-click on a LINK still follows the link.** 13g's F-5/L10 gave ⌘-click that meaning on every pane, and a shipped ruling outranks a new gesture on the same chord; off a link — which is the whole of an ordinary block — the chord was unclaimed. **The alternative:** make ⌘-click select blocks even over a link, and reach links another way.
+
+    **(j) ⌘-click CONSUMES the click: the live ring does not move to the block you pick.** Picking blocks is not writing in one, and a claimed chord that also moved the caret would be two gestures on one press. **The alternative:** focus the pane as well.
+
+    **(k) A fanned PAIR carries into Write, where the merge ceremony lives.** Your ruled threshold (S4-23(4) — any fan on either side opens the ceremony) is untouched by this door, and the ceremony is mounted on Write's surface; so the pair travels there, visibly, exactly as the Takes merge door has always done. The quick-vs-ceremony DEFAULT flip is 13j's row 4b, deliberately not this batch's. **The alternative:** make the ceremony mountable on the board (a real extraction, 13j's orbit anyway).
+
+    **(l) A fanned run of THREE OR MORE merges right here and SPEAKS about the folded-away takes.** Write's own multi-block merge has never consulted fan arity — it chains and says what happened to the other takes — so refusing in Takes what Write allows would put Takes behind Write (R118). Nothing vanishes silently: the status line names the count and the road back. **The alternative:** refuse fanned multi-selections and say "one pair at a time".
+
+    **(m) Adjacency and fan arity are read from the STORE, and a gapped selection refuses BY NAME before anything is minted.** The takes projection is frozen while a buffer is dirty, so a projection-read order could carry the wrong pair into Write. The refusal keeps your picks (nothing to re-click) and mints nothing.
+
+    **(n) The selection is session-only and prunes itself.** It dies with the board (like fan expansion), drops blocks the note no longer holds (a merge's own sources, a delete, a sync arrival), and the banner renders only while something is picked — at rest the page is exactly as calm as before. "clear" is inline chrome rather than a declared act (the pager's ◀ ▶ precedent).
+
+    **(o) ⌘-click picks blocks on the TAKES board's article cells only.** Not on Lenses (its columns are a different question), and not on a slot-split bloom, where the fan cards REPLACE the article cell — close the fan and the block is pickable again. **The alternative:** put the gesture on the row's whole width, which would mean claiming ⌘-click on the fan cards too.
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#58**.)*
 

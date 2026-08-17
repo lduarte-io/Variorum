@@ -121,6 +121,22 @@ extension Operations {
         }
     }
 
+    /// Inverse (and, with the other pre-image, the re-apply) of
+    /// `reorderTake`: put the take back at its exact pre-image `fan_position`.
+    /// The `restorePlacementLocation` shape, one table over — exact-row, never
+    /// a fresh key. The take must still be live and its post unsealed; either
+    /// refusal leaves the entry on the stack for retry.
+    func restoreFanPosition(_ variantID: String, position: String) throws {
+        try database.write { db in
+            var variant = try liveVariant(db, variantID)
+            try ensurePlacementUnlocked(db, blockID: variant.blockId)
+            guard variant.fanPosition != position else { return }
+            variant.fanPosition = position
+            variant.updatedAt = date.now
+            try variant.update(db)
+        }
+    }
+
     /// One buffer's do-time images, for `revertStructural`: the text before
     /// the structural op (what undo restores) and the text the op wrote
     /// (how undo recognizes a buffer that diverged afterwards).

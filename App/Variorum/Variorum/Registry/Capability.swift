@@ -302,6 +302,20 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     case showOriginBlock
     // Takes lifecycle completeness (13b Stage 3, 3D — T5/N1/N6)
     case unarchiveTake, labelTake, renameLens
+    // 13e E4 (her A19: "Reorder takes"). TWO declarations rather than one
+    // "reorder" act, for the find/formatting families' reason: each is its own
+    // door on the card, each renders its own enablement (the first card cannot
+    // move earlier), and one declaration could not say that. `.surface` acts —
+    // the target is the CARD you point at, which is the archived-card class
+    // (3D's precedent), not a routed context command.
+    case moveTakeEarlier, moveTakeLater
+    // 13e E3 (her A18: "⌘-click in Takes to select blocks to merge; merge
+    // several when they have no takes"). ONE act with two door families: the
+    // article cell's context menu, and the selection banner the board raises
+    // while a selection exists. The SELECTION gesture itself (⌘-click) is not
+    // a door — it is how the act's target is named, like a text selection in
+    // Write.
+    case mergeSelectedBlocks
     // Scrap tagging (13b 4D — N32(c)/S4-15: the one canvas-only door grows
     // registry-declared siblings on the scrap rows)
     case tagBlock

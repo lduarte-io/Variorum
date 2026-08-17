@@ -62,21 +62,14 @@ extension Operations {
                         ORDER BY fan_position, id
                         """,
                     arguments: [poolBlockID])
-                var copyIDs: [String: String] = [:]
-                for take in fan { copyIDs[take.id] = newID() }
-                for take in fan {
-                    let variant = Variant(
-                        id: copyIDs[take.id] ?? newID(), blockId: copy.id,
-                        parentVariantId: take.parentVariantId.flatMap { copyIDs[$0] },
-                        workingText: take.workingText, status: take.status,
-                        locked: false, label: take.label,
-                        fanPosition: take.fanPosition,
-                        createdAt: now, updatedAt: now)
-                    try variant.insert(db)
-                    variants.append(variant)
-                }
+                // 13e E4's rider: THE one fan-copy machine
+                // (`copyFan`), whose second pass lands a parent that sits
+                // LATER in fan order — reachable since reorder-takes made
+                // `fan_position` mutable (the KnownIssues row's FIX-2).
+                let copied = try copyFan(db, takes: fan, toBlock: copy.id, now: now)
+                variants = copied.variants
                 // The rendered variant is live, so its copy always exists.
-                renderedCopyID = copyIDs[rendered.id] ?? variants[0].id
+                renderedCopyID = copied.copyIDs[rendered.id] ?? variants[0].id
             } else {
                 let variant = Variant(
                     id: newID(), blockId: copy.id,

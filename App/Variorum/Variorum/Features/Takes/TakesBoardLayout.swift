@@ -313,6 +313,60 @@ final class TakesBoardLayout {
         expandedBlocks = []
     }
 
+    // MARK: - The merge selection (13e E3 — her A18: "⌘-click in Takes to
+    // select blocks to merge; merge several when they have no takes")
+
+    /// Blocks ⌘-clicked into the merge selection — SESSION-ONLY view state,
+    /// exactly like expansion: it names what the author is pointing at, never
+    /// anything the store keeps. It dies with the board.
+    private(set) var mergeSelection: Set<String> = []
+
+    func toggleMergeSelection(_ blockID: String) {
+        if mergeSelection.contains(blockID) {
+            mergeSelection.remove(blockID)
+        } else {
+            mergeSelection.insert(blockID)
+        }
+    }
+
+    func clearMergeSelection() {
+        guard !mergeSelection.isEmpty else { return }
+        mergeSelection = []
+    }
+
+    func isSelectedForMerge(_ blockID: String) -> Bool {
+        mergeSelection.contains(blockID)
+    }
+
+    /// Drops selected blocks the post no longer holds (a merge's own
+    /// successors, a delete, a sync arrival) — the conductor passes the fresh
+    /// slot set at adoption, exactly as it passes the fanned set to
+    /// `expandAll`; this component never reads the projection.
+    func pruneMergeSelection(to blockIDs: Set<String>) {
+        let kept = mergeSelection.intersection(blockIDs)
+        guard kept != mergeSelection else { return }
+        mergeSelection = kept
+    }
+
+    /// **Do these blocks form ONE unbroken run of the post?** Merge joins
+    /// NEIGHBOURS (AppSpec §9: the blocks must be placed adjacently, `first`
+    /// immediately before `second`), so a selection with a gap in it can only
+    /// ever refuse — and it must refuse by NAME, before anything is minted,
+    /// rather than half-merging and rolling back. Pure and order-driven: the
+    /// caller supplies the post's real order.
+    nonisolated static func isContiguousRun(
+        _ picked: Set<String>, in order: [String]
+    ) -> Bool {
+        guard !picked.isEmpty else { return false }
+        let indices = order.enumerated()
+            .filter { picked.contains($0.element) }
+            .map(\.offset)
+        guard indices.count == picked.count, let first = indices.first,
+              let last = indices.last
+        else { return false }  // a selected block the order doesn't hold
+        return last - first + 1 == indices.count
+    }
+
     // MARK: - Discrete paging (session-only; model-owned)
 
     /// Per-key page offsets for the card rows (carousel, slot split, and —

@@ -141,6 +141,12 @@ extension Operations {
         /// The column an `InsertPosition` anchor names — the pointed-at
         /// entity (block, post), or the row's own id for references.
         let anchorColumn: String
+        /// The ordering column. Every pointer list calls it `position`; the
+        /// FAN calls it `fan_position` (13e E4 — reorder-takes), and the
+        /// ordering RULE is identical either way: jittered fractional-index
+        /// keys, sort key `(position, id)`, no rebalance (SyncSpec §8). One
+        /// resolver rather than a second copy of the neighbor arithmetic.
+        var positionColumn: String = "position"
         /// Typed refusal when an anchor has no live row in this scope.
         let missingAnchor: (String) -> OperationError
     }
@@ -155,7 +161,7 @@ extension Operations {
             guard let position = try String.fetchOne(
                 db,
                 sql: """
-                    SELECT position FROM \(list.table)
+                    SELECT \(list.positionColumn) FROM \(list.table)
                     WHERE \(list.scopeColumn) = ? AND \(list.anchorColumn) = ? AND deleted_at IS NULL
                     """,
                 arguments: [scopeID, anchorID])
@@ -166,7 +172,7 @@ extension Operations {
             try String.fetchOne(
                 db,
                 sql: """
-                    SELECT \(aggregate)(position) FROM \(list.table)
+                    SELECT \(aggregate)(\(list.positionColumn)) FROM \(list.table)
                     WHERE \(list.scopeColumn) = ? AND deleted_at IS NULL
                     """,
                 arguments: [scopeID])
@@ -175,8 +181,9 @@ extension Operations {
             try String.fetchOne(
                 db,
                 sql: """
-                    SELECT \(aggregate)(position) FROM \(list.table)
-                    WHERE \(list.scopeColumn) = ? AND deleted_at IS NULL AND position \(comparison) ?
+                    SELECT \(aggregate)(\(list.positionColumn)) FROM \(list.table)
+                    WHERE \(list.scopeColumn) = ? AND deleted_at IS NULL
+                      AND \(list.positionColumn) \(comparison) ?
                     """,
                 arguments: [scopeID, anchor])
         }
@@ -205,6 +212,26 @@ extension Operations {
                 anchorColumn: "block_id",
                 missingAnchor: { OperationError.blockNotPlaced(id: $0) }),
             scopeID: containerID, at: insert)
+    }
+
+    /// A `variant.fan_position` in a block's live fan (13e E4 — the
+    /// reorder-takes act her A19 asked for). The fan is an ordered list like
+    /// any other, so it resolves through the ONE resolver above: neighbors by
+    /// `fan_position`, the new key from `FractionalIndex.between` with its
+    /// per-call jitter, no rebalance (SyncSpec §8). Scope is the block's LIVE
+    /// rows — the same set `branchVariant`/`newBlankVariant` have always
+    /// measured against, so an archived take still holds its place in the
+    /// ordering rather than being silently stepped over.
+    func fanPosition(
+        _ db: Database, blockID: String, at insert: InsertPosition
+    ) throws -> String {
+        try listPosition(
+            db,
+            in: OrderedList(
+                table: "variant", scopeColumn: "block_id",
+                anchorColumn: "id", positionColumn: "fan_position",
+                missingAnchor: { OperationError.variantNotFound(id: $0) }),
+            scopeID: blockID, at: insert)
     }
 
     /// A `reading_post.position` in a reading's live membership list.

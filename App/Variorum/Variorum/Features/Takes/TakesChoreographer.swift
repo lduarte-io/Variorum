@@ -47,8 +47,22 @@ final class TakesChoreographer {
     /// selection, so any refusal is the operation's own, spoken — the
     /// lecture-and-redirect door is retired (its copy was also factually
     /// wrong for Divide).
-    func moveToWriteAndRun(_ act: MoveAndExecuteAct) {
-        guard let slot = model.commandTargetSlot else {
+    /// `targetBlockID` names the block the landing addresses. Default (nil) is
+    /// the routed target — the pane you're in — which is every pre-13e caller.
+    /// 13e E3 passes the SECOND block of a ⌘-click merge pair, because the
+    /// seam that pair means is the one above THAT block, not above whichever
+    /// pane happens to hold the ring.
+    func moveToWriteAndRun(_ act: MoveAndExecuteAct, targetBlockID: String? = nil) {
+        // A NAMED target that the board no longer holds refuses; it never
+        // falls back to the routed one, which would carry a different pair
+        // than the author picked.
+        let addressed: Queries.RenderedBlock?
+        if let targetBlockID {
+            addressed = model.projection.slots.first { $0.blockID == targetBlockID }
+        } else {
+            addressed = model.commandTargetSlot
+        }
+        guard let slot = addressed else {
             model.speak("Click into a block first — then the gesture knows where to act.")
             return
         }

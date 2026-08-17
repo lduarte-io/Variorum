@@ -655,20 +655,12 @@ extension Operations {
                 createdAt: now, updatedAt: now)
             try blockCopy.insert(db)
 
-            var copyIDs: [String: String] = [:]
-            var copiedVariants: [Variant] = []
-            for take in toCopy { copyIDs[take.id] = newID() }
-            for take in toCopy {
-                let variant = Variant(
-                    id: copyIDs[take.id]!, blockId: blockCopy.id,
-                    parentVariantId: take.parentVariantId.flatMap { copyIDs[$0] },
-                    workingText: take.workingText, status: take.status,
-                    locked: false, label: take.label,
-                    fanPosition: take.fanPosition,
-                    createdAt: now, updatedAt: now)
-                try variant.insert(db)
-                copiedVariants.append(variant)
-            }
+            // 13e E4's rider: THE one fan-copy machine (`copyFan`) — its
+            // second pass lands a parent sitting LATER in fan order, which
+            // reorder-takes made reachable (the KnownIssues row's FIX-2).
+            let copied = try copyFan(db, takes: toCopy, toBlock: blockCopy.id, now: now)
+            let copyIDs = copied.copyIDs
+            let copiedVariants = copied.variants
 
             // chosen: the copy of the slot's pick (nil or unhealthy source
             // chosen ⇒ nil — the read-time default fallback carries).

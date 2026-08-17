@@ -56,8 +56,12 @@ struct TakesBoardView: View {
     private let mainColumn = TakesColumn(id: "takes-main", kind: .main)
 
     /// The registry ids this board renders INLINE (13b Stage 3, 3D — the
-    /// `.surface` door; walk-asserted): the archived listing's Unarchive.
-    static let surfaceCapabilities: [CapabilityID] = [.unarchiveTake]
+    /// `.surface` door; walk-asserted): the archived listing's Unarchive, and
+    /// since 13e the take card's fan-order arrows (E4/A19) plus the merge
+    /// selection banner (E3/A18).
+    static let surfaceCapabilities: [CapabilityID] = [
+        .unarchiveTake, .moveTakeEarlier, .moveTakeLater, .mergeSelectedBlocks,
+    ]
 
     /// Batch 14 (her image-#9 report — TWO live rings): the fan CARDS pane
     /// in their own namespace. When the chosen take's card was focused,
@@ -125,6 +129,7 @@ struct TakesBoardView: View {
                     .padding(.horizontal, 24)
                     .padding(.vertical, 4)
             }
+            mergeSelectionBanner
             singleColumnArticle
             TakesBottomBar(model: model)
         }
@@ -388,6 +393,40 @@ struct TakesBoardView: View {
         Button(name) { Task { await model.setFanStyle(style) } }
     }
 
+    // MARK: - The merge selection banner (13e E3 — her A18)
+
+    /// While blocks are ⌘-clicked, the board says so and offers the act — the
+    /// `.surface` half of the declared door (its twin is the article cell's
+    /// context menu). It renders only while a selection exists, so at rest the
+    /// page is exactly as calm as before.
+    @ViewBuilder
+    private var mergeSelectionBanner: some View {
+        let picked = model.selectedBlocksInOrder
+        if !picked.isEmpty {
+            HStack(spacing: 8) {
+                Text(tokens.chromeLabel(picked.count == 1
+                    ? "1 block picked — ⌘-click another to merge them"
+                    : "\(picked.count) blocks picked"))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(1)
+                Button(CapabilityRegistry.capability(.mergeSelectedBlocks).verb) {
+                    Task { await model.mergeSelectedBlocks() }
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary, font: tokens.mono))
+                .disabled(picked.count < 2)
+                .help("Join the picked blocks into one — neighbours only; ⌥⌘Z undoes it")
+                Button(tokens.chromeLabel("clear")) { model.clearMergeSelection() }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                    .help("Unpick every block")
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 24)
+            .padding(.vertical, 4)
+            .background(tokens.wash)
+        }
+    }
+
     // MARK: - The article (ONE column; blooms in the set style)
 
     private var singleColumnArticle: some View {
@@ -609,16 +648,33 @@ struct TakesBoardView: View {
         // that; never laid out in space the sidebar owns.
         let compactNote = commentRoom < 90
         let noteWidth = min(150, max(commentRoom - 16, 24))
+        let picked = model.isSelectedForMerge(slot.blockID)
         return TakesCellView(
             model: model, tokens: tokens, slot: slot, column: mainColumn,
             tinted: false, role: "article",
             // 13f W7: the room's landing — nonzero only for the pane it named.
             caretToEndToken: model.resolvedTake(column: mainColumn, slot: slot)
                 .map { model.caretToEndToken(forVariant: $0.variantID) } ?? 0,
+            // 13e E3 (her A18): ⌘-click picks this block for a merge. The
+            // claim consumes the click, so the ring does not migrate here —
+            // picking blocks is not writing in one.
+            onCommandClick: {
+                model.toggleMergeSelection(slot.blockID)
+                return true
+            },
             onDiff: { diffPresentation = $0 })
             .padding(2)
             .background(washed && markChangingBlock ? tokens.wash : Color.clear)
             .clipShape(RoundedRectangle(cornerRadius: 6))
+            // 13e E3: a picked block SAYS it is picked (boundaries are
+            // invisible at rest — a selection that shows nothing is the
+            // silent-door class).
+            .overlay {
+                if picked {
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(tokens.accent, lineWidth: 2)
+                }
+            }
             // Batch 14 (her "even when there is a comment, i can't really
             // see the comment anywhere (I suppose it oculd go on the left
             // in the blank area)"): the block's comments in the LEFT
@@ -656,7 +712,10 @@ struct TakesBoardView: View {
                     tokens: tokens,
                     onFocus: { focusPane(slot: slot, take: take) },
                     onEdit: { model.paneEdited(variantID: take.id, newText: $0) },
-                    onChoose: { Task { await model.choose(blockID: slot.blockID, variantID: take.id) } })
+                    onChoose: { Task { await model.choose(blockID: slot.blockID, variantID: take.id) } },
+                    // 13e E4: the stack lays its cards out VERTICALLY, so
+                    // earlier/later read as ▲ ▼ here.
+                    reorder: reorderDoors(take: take, slot: slot, axis: .vertical))
             }
             fanFooter(slot: slot)
         }
@@ -1060,7 +1119,10 @@ struct TakesBoardView: View {
                     tokens: tokens, isChosen: isChosen, label: take.label,
                     onChoose: {
                         Task { await model.choose(blockID: slot.blockID, variantID: take.id) }
-                    })
+                    },
+                    // 13e E4: carousel, slot split and the rail all lay their
+                    // cards out HORIZONTALLY, so earlier/later read as ◀ ▶.
+                    reorder: reorderDoors(take: take, slot: slot, axis: .horizontal))
                 if capped {
                     ScrollView(.vertical) {
                         miniPaneSurface(take: take, slot: slot, reportsHeight: reportsHeight)
@@ -1103,6 +1165,25 @@ struct TakesBoardView: View {
         }
     }
 
+    /// 13e E4 (her A19): the card's fan-order doors, or nil where the act
+    /// cannot apply (a one-take fan, or a card whose take has left the fan).
+    /// The enablement per direction is the fan's own arithmetic — first card,
+    /// no "earlier"; last card, no "later" — the pager's disabled-◀ grammar.
+    private func reorderDoors(
+        take: Variant, slot: Queries.RenderedBlock, axis: Axis
+    ) -> TakeChooseHeader.ReorderDoors? {
+        let fan = model.projection.fans[slot.blockID] ?? []
+        guard fan.count > 1, let index = fan.firstIndex(where: { $0.id == take.id })
+        else { return nil }
+        return TakeChooseHeader.ReorderDoors(
+            axis: axis,
+            canMoveEarlier: index > 0,
+            canMoveLater: index < fan.count - 1,
+            move: { delta in
+                Task { await model.moveTake(take.id, in: slot.blockID, by: delta) }
+            })
+    }
+
     private func paneKeyIsLive(slot: Queries.RenderedBlock, take: Variant) -> Bool {
         model.isPaneLive(
             TakesViewModel.PaneKey(
@@ -1125,28 +1206,60 @@ struct TakeChooseHeader: View {
     let isChosen: Bool
     let label: String?
     let onChoose: () -> Void
+    /// **13e E4 (her A19) — the fan-order doors on the card itself.** nil is
+    /// the default, so every pre-13e renderer of this header reads unchanged
+    /// and a one-take fan draws no arrows at all (P-2: a door that could
+    /// never act isn't rendered).
+    var reorder: ReorderDoors?
+
+    /// What the card needs to offer the two moves: which way its strip runs,
+    /// whether each direction can act (the FIRST card cannot move earlier —
+    /// the pager's disabled-◀ grammar), and the act itself.
+    struct ReorderDoors {
+        let axis: Axis
+        let canMoveEarlier: Bool
+        let canMoveLater: Bool
+        /// −1 = earlier, +1 = later.
+        let move: (Int) -> Void
+    }
 
     var body: some View {
-        Button(action: onChoose) {
-            HStack(spacing: 4) {
-                Text(tokens.chromeLabel(isChosen ? "✓ chosen" : "choose"))
-                    .font(tokens.small)
-                    .foregroundStyle(isChosen ? tokens.chosen : tokens.muted)
-                if let label {
-                    Text(label)
+        HStack(spacing: 4) {
+            Button(action: onChoose) {
+                HStack(spacing: 4) {
+                    Text(tokens.chromeLabel(isChosen ? "✓ chosen" : "choose"))
                         .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                        .lineLimit(1)
+                        .foregroundStyle(isChosen ? tokens.chosen : tokens.muted)
+                    if let label {
+                        Text(label)
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
+                            .lineLimit(1)
+                    }
+                    Spacer(minLength: 0)
                 }
-                Spacer(minLength: 0)
+                .contentShape(Rectangle())
             }
-            .contentShape(Rectangle())
+            .buttonStyle(.plain)
+            .disabled(isChosen)
+            .help(isChosen
+                  ? "The note shows this take (everywhere)"
+                  : "Choose this take — the note shows it (everywhere); ⌘⏎ from the keyboard")
+            if let reorder {
+                Button(reorder.axis == .vertical ? "▲" : "◀") { reorder.move(-1) }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                    .disabled(!reorder.canMoveEarlier)
+                    .help(CapabilityRegistry.capability(.moveTakeEarlier).verb
+                        + " — one place \(reorder.axis == .vertical ? "up" : "left") in this "
+                        + "block's fan (⌥⌘Z undoes)")
+                Button(reorder.axis == .vertical ? "▼" : "▶") { reorder.move(1) }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                    .disabled(!reorder.canMoveLater)
+                    .help(CapabilityRegistry.capability(.moveTakeLater).verb
+                        + " — one place \(reorder.axis == .vertical ? "down" : "right") in this "
+                        + "block's fan (⌥⌘Z undoes)")
+            }
         }
-        .buttonStyle(.plain)
-        .disabled(isChosen)
-        .help(isChosen
-              ? "The note shows this take (everywhere)"
-              : "Choose this take — the note shows it (everywhere); ⌘⏎ from the keyboard")
     }
 }
 
@@ -1187,6 +1300,8 @@ private struct CollapsibleTakeCard: View {
     let onFocus: () -> Void
     let onEdit: (String) -> Void
     let onChoose: () -> Void
+    /// 13e E4: the fan-order doors, forwarded to the header.
+    var reorder: TakeChooseHeader.ReorderDoors?
     @State private var collapsed = false
 
     var body: some View {
@@ -1200,7 +1315,7 @@ private struct CollapsibleTakeCard: View {
                     // header band here too — one checkmark, ever.
                     TakeChooseHeader(
                         tokens: tokens, isChosen: isChosen, label: take.label,
-                        onChoose: onChoose)
+                        onChoose: onChoose, reorder: reorder)
                 }
                 if collapsed {
                     Text(text.split(separator: "\n").first.map(String.init) ?? "(empty)")

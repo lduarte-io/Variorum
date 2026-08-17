@@ -170,6 +170,72 @@ extension Operations {
         }
     }
 
+    // MARK: - Fan ORDER (13e E4 — her A19: "Reorder takes")
+
+    /// Move a take within its block's fan. **Ordering like every other
+    /// ordering in the system** (SyncSpec §8): the new `fan_position` is a
+    /// jittered fractional-index key from `FractionalIndex.between`, the sort
+    /// key stays `(fan_position, id)`, and no rebalance operation exists or
+    /// is needed. Under sync a `fan_position` is plain metadata CAS with no
+    /// uniqueness and no §7 repair class — a residual tie is stable and
+    /// harmless, exactly as §8 promises.
+    ///
+    /// `insert` names a SIBLING take of the same block (`.after`/`.before`),
+    /// or the fan's own ends. An anchor that is not a live take of this block
+    /// refuses (`variantNotFound`) rather than landing the take somewhere
+    /// approximate — the door re-reads the fan and retries.
+    ///
+    /// Mirrors `reorder`'s shape deliberately (`Operations+Placement`), so
+    /// the two orderings cannot drift:
+    /// - **no touch, no churn.** `reorder` stamps neither, and AppSpec §9's
+    ///   touch-list names divide-W, merge and poolDragCopy — not reordering.
+    ///   Rearranging the fan is not working on the prose, and it must never
+    ///   reshuffle the library's meaningful sort.
+    /// - **the SEAL refuses** (`ensurePlacementUnlocked`): a sealed post
+    ///   freezes pointer order and everything under it.
+    /// - **structural undo AND redo from do-time pre-images** (13c 1B): the
+    ///   exact prior key comes back on undo, the exact landed key on redo, so
+    ///   ping-pong never re-derives a fresh jittered key and drifts.
+    ///
+    /// ALLOWED on a LOCKED take, and on an ARCHIVED one: the lock freezes the
+    /// BUFFER, not identity metadata (`setTakeLabel`'s ratified precedent),
+    /// and an archived take's place in the ordering is where it returns to.
+    /// PROVISIONAL — recorded for the checkpoint walk.
+    ///
+    /// A move relative to the take ITSELF is a no-op and writes nothing (no
+    /// row, no outbox entry, no undo entry) — the extent-setter convention.
+    public func reorderTake(_ variantID: String, to insert: InsertPosition) throws {
+        let images: (variantID: String, previous: String, landed: String)?
+            = try database.write { db in
+            let variant = try liveVariant(db, variantID)
+            _ = try liveBlock(db, variant.blockId)
+            try ensurePlacementUnlocked(db, blockID: variant.blockId)
+            switch insert {
+            case .after(let anchorID), .before(let anchorID):
+                guard anchorID != variantID else { return nil }
+            case .start, .end:
+                break
+            }
+            var moved = variant
+            let previous = moved.fanPosition
+            moved.fanPosition = try fanPosition(
+                db, blockID: moved.blockId, at: insert)
+            moved.updatedAt = date.now
+            try moved.update(db)
+            return (variantID, previous, moved.fanPosition)
+        }
+        guard let images else { return }
+        undoStack?.register(
+            label: "Reorder Take",
+            inverse: {
+                try $0.restoreFanPosition(images.variantID, position: images.previous)
+            },
+            // 13c 1B (A10): the exact landed key, never a fresh derivation.
+            redo: {
+                try $0.restoreFanPosition(images.variantID, position: images.landed)
+            })
+    }
+
     // MARK: - Take identity metadata
 
     /// Sets (or clears, with nil/whitespace-only) a take's label — the fan
@@ -215,6 +281,67 @@ extension Operations {
         }
         try ensurePlacementUnlocked(db, blockID: variant.blockId)
         return variant
+    }
+
+    /// **THE fan-copy machine** — one implementation behind `poolDragCopy`
+    /// and `copyPost` (13e E4's rider; the KnownIssues row *"Single-pass
+    /// fan-copy remaps assume parent-precedes-child"*, found by the mobile
+    /// parity Stage A ladder). Texts, statuses, labels and fan positions are
+    /// copied; the parent tree is remapped INSIDE the copied set; commits are
+    /// never copied and copies are never born locked (lineage is coarse, and
+    /// the guard belongs to the original).
+    ///
+    /// **The forward-parent pass is why this exists** (`mintFanBlock`'s FIX-2
+    /// template, verbatim in shape): `parent_variant_id` is an IMMEDIATE
+    /// foreign key, so a take whose parent sits LATER in fan order cannot
+    /// carry its pointer at insert time — the insert would refuse and the
+    /// whole copy would throw. Both callers walked the fan `ORDER BY
+    /// fan_position, id` in ONE pass, which was safe only while
+    /// `fan_position` was effectively immutable; **E4's reorder-takes
+    /// falsifies that premise**, so the forward pointers land in a second
+    /// pass, after every row exists. A parent outside the copied set reads as
+    /// parentless (the standing rule — block-level edges carry cross-block
+    /// lineage).
+    ///
+    /// Returns the copies in the source's fan order and the sourceID → copyID
+    /// map the callers resolve chosen/default through.
+    func copyFan(
+        _ db: Database, takes: [Variant], toBlock blockID: String, now: Date
+    ) throws -> (variants: [Variant], copyIDs: [String: String]) {
+        var copyIDs: [String: String] = [:]
+        var sourceOrder: [String: Int] = [:]
+        for (i, take) in takes.enumerated() {
+            copyIDs[take.id] = newID()
+            sourceOrder[take.id] = i
+        }
+        var variants: [Variant] = []
+        var forwardParented: [Int] = []
+        for (i, take) in takes.enumerated() {
+            var parentCopyID: String?
+            if let sourceParent = take.parentVariantId, let copy = copyIDs[sourceParent] {
+                if let parentIndex = sourceOrder[sourceParent], parentIndex < i {
+                    parentCopyID = copy  // its row rides ahead of this insert
+                } else {
+                    forwardParented.append(i)  // the pointer waits for pass 2
+                }
+            }
+            let variant = Variant(
+                id: copyIDs[take.id] ?? newID(), blockId: blockID,
+                parentVariantId: parentCopyID,
+                workingText: take.workingText, status: take.status,
+                locked: false, label: take.label,
+                fanPosition: take.fanPosition,
+                createdAt: now, updatedAt: now)
+            try variant.insert(db)
+            variants.append(variant)
+        }
+        for i in forwardParented {
+            guard let sourceParent = takes[i].parentVariantId,
+                  let copy = copyIDs[sourceParent] else { continue }
+            variants[i].parentVariantId = copy
+            try variants[i].update(db)
+        }
+        return (variants, copyIDs)
     }
 
     func insertCommit(

@@ -57,15 +57,26 @@ final class TakesViewModel {
             onError: { [weak self] error in
                 self?.statusMessage = Self.message(for: error)
             },
+            // 13e E15: settle no longer ADOPTS the held photograph — it
+            // settles through the ONE fresh-read path, exactly as both
+            // editor surfaces do (the value was fetched BEFORE the flush
+            // that just landed, so adopting it regressed the board to
+            // pre-flush bytes).
             onSettled: { [weak self] in
-                guard let self, !self.autosave.isDirty,
-                      let deferred = self.deferredProjection else { return }
-                self.deferredProjection = nil
-                self.adopt(deferred)
+                self?.storeWriteGeneration &+= 1
+                self?.applyPendingIfClean()
             })
     }
 
     @ObservationIgnored private var autosaveToken: UUID?
+    /// The store-write freshness generation (the `EditorViewModel` fence,
+    /// mirrored — mobile S3 ladder MAJOR 3): bumped whenever OUR writes
+    /// settle, so a fresh read that STRADDLED a settle is re-signaled
+    /// instead of adopted.
+    @ObservationIgnored private var storeWriteGeneration = 0
+    /// Whether a projection has ever been adopted — the policy's `loaded`
+    /// input (a first value has no display to protect).
+    @ObservationIgnored private(set) var loaded = false
 
     // MARK: - Observable state
 
@@ -265,11 +276,9 @@ final class TakesViewModel {
     func start() async {
         do {
             for try await value in session.database.observeTakes(postID) {
-                if autosave.isDirty {
-                    deferredProjection = value  // adopt at settle
-                } else {
-                    adopt(value)
-                }
+                // 13e E15: a delivery is a SIGNAL, never adoption authority
+                // (the shared policy — the same words `observeSlots` uses).
+                deliver(value)
             }
         } catch is CancellationError {
         } catch {
@@ -277,9 +286,109 @@ final class TakesViewModel {
         }
     }
 
+    // MARK: - Projection deliveries (13e E15 — the board joins the ONE policy)
+
+    /// **A DELIVERY may never rewrite the board** (the KnownIssues row *"The
+    /// Mac Takes board adopts projection deliveries directly"*, owner 13e;
+    /// the class the mobile S3 ladder closed at `EditorProjectionPolicy` for
+    /// both EDITOR surfaces while this board kept its own two-line rule).
+    ///
+    /// The mechanism, traced on this surface: an observation value fetched
+    /// BEFORE a flush can be CONSUMED after it settles — at that clean
+    /// instant the old rule adopted it, `authority.settle` then cleared the
+    /// (no-longer-pending) buffer, and every pane mirroring that variant fell
+    /// back to the projection's PRE-FLUSH text. A keystroke in that window
+    /// computes its delta against the stale text (`paneEdited` →
+    /// `currentStoreText`) and autosaves it over the newer store text. The
+    /// old settle path had the same hole from the other side: it adopted the
+    /// photograph it had been holding since before the flush.
+    ///
+    /// Internal so pins drive it deterministically (the `adopt` precedent —
+    /// the test host never runs the observation).
+    func deliver(_ new: Queries.TakesProjection) {
+        applyProjection(new, fromDelivery: true)
+    }
+
+    /// Executes the ONE policy's decision for this surface. The board has no
+    /// text surface to differentially rewrite, so the three render arms
+    /// collapse into adoption — what matters is the precedence the policy
+    /// pins: not-loaded ▸ busy ▸ echo ▸ delivery-refetch.
+    ///
+    /// `busy` is exactly the board's standing defer condition (a dirty
+    /// buffer). A structural flight is deliberately NOT folded in: the board
+    /// has no flight-exit settle hook the way `EditorSurfaceController` does,
+    /// and its native divide relies on the ordinary adoption to show the
+    /// successors (recorded, #57).
+    func applyProjection(_ new: Queries.TakesProjection, fromDelivery: Bool = false) {
+        switch EditorProjectionPolicy.decide(
+            loaded: loaded,
+            busy: autosave.isDirty,
+            forceFull: false,
+            delivery: fromDelivery,
+            matchesSurface: displayMatches(new),
+            // The board never renders a partial rewrite; the differential
+            // arm has no meaning here and is never taken.
+            sameSequence: false
+        ) {
+        case .deferUntilClean:
+            deferredProjection = new
+        case .refetchFresh:
+            // Hold the marker and settle by the ONE fresh-read path; the
+            // fresh value comes back as a NON-delivery and adopts.
+            deferredProjection = new
+            applyPendingIfClean()
+        case .initialRender, .adoptEcho, .differential, .fullRender, .forcedFullRender:
+            adopt(new)
+        }
+    }
+
+    /// True when the delivery says exactly what the board already SHOWS — the
+    /// echo check, in this surface's own terms.
+    ///
+    /// With NO live buffer the board's display IS the projection, so a
+    /// byte-identical delivery is an echo and adopting it changes nothing.
+    /// With a buffer in hand the display is deliberately NOT the projection,
+    /// and nothing cheap here can tell a stale photograph from a genuinely
+    /// newer one — so nothing matches and the fresh-read path decides. The
+    /// cost is bounded and deliberate: at most one extra read per delivery
+    /// inside the settle window (exactly what the editor surfaces pay at the
+    /// same moment), and zero the rest of the time. A LAX check here would
+    /// freeze the display; a strict one only ever costs a read.
+    func displayMatches(_ new: Queries.TakesProjection) -> Bool {
+        authority.buffers.isEmpty && new == projection
+    }
+
+    /// Settles a held delivery by RE-READING the store (the editor surfaces'
+    /// `applyPendingIfClean`, mirrored): the held value predates the write
+    /// that settled, so the fresh projection — which includes that write — is
+    /// what adopts. A settle landing DURING the read re-signals through the
+    /// generation fence.
+    func applyPendingIfClean() {
+        guard !autosave.isDirty, deferredProjection != nil else { return }
+        deferredProjection = nil
+        let generation = storeWriteGeneration
+        Task { [weak self] in
+            guard let self else { return }
+            guard let fresh = try? await session.database.read({ [postID] db in
+                try Queries.takesProjection(db, post: postID)
+            }) else { return }
+            guard !autosave.isDirty else {
+                deferredProjection = fresh
+                return
+            }
+            guard generation == storeWriteGeneration else {
+                deferredProjection = fresh
+                applyPendingIfClean()
+                return
+            }
+            applyProjection(fresh)
+        }
+    }
+
     /// Internal so tests drive projections deterministically (the test host
     /// never fires `.task`).
     func adopt(_ new: Queries.TakesProjection) {
+        loaded = true
         refreshWordCounts(old: projection, new: new)
         projection = new
         // THE CONVERGENCE HALF of the buffer-authoritative discipline
@@ -308,6 +417,11 @@ final class TakesViewModel {
             }
         }
         if changed { saveMemory() }
+        // 13e E3: a ⌘-click selection only ever names blocks the post holds —
+        // a merge's own successors, a delete or a sync arrival drop out (the
+        // `expandAll` shape: the conductor hands over the fresh set, the
+        // layout component never reads the projection).
+        board.pruneMergeSelection(to: Set(new.slots.map(\.blockID)))
         // 13b 1b: programmatic landings (add-block focus, cross-mode
         // blooms, the N9 "just start typing" ring) resolve against the
         // fresh slots.
@@ -928,6 +1042,178 @@ final class TakesViewModel {
         } catch {
             statusMessage = Self.message(for: error)
             return nil
+        }
+    }
+
+    // MARK: - Fan ORDER (13e E4 — her A19: "Reorder takes")
+
+    /// Move a take one place earlier (`delta < 0`) or later in its block's
+    /// fan. The card's own ◀ ▶ / ▲ ▼ door calls this.
+    ///
+    /// **Flush first, then read the fan FROM THE STORE** — 13d batch 3's
+    /// precedent on this surface, for its exact reason: the takes projection
+    /// is deliberately frozen while any buffer is dirty, so a projection-read
+    /// neighbour is an enablement hint and never an authorization (a take
+    /// that arrived mid-burst would otherwise make the move land beside the
+    /// wrong card). A refused flush keeps its text pending and stops the act
+    /// (13c R2-6's one-act-one-contract rule).
+    ///
+    /// Stepping happens within the ACTIVE fan — the set the cards show. An
+    /// archived take keeps its own place in the ordering; it is neither
+    /// stepped onto nor stepped over.
+    func moveTake(_ variantID: String, in blockID: String, by delta: Int) async {
+        guard delta != 0 else { return }
+        guard await flushPendingText() else { return }
+        let fan: [Variant]
+        do {
+            fan = try await session.database.read { db in
+                try Queries.blockFan(db, blockID: blockID)
+            }
+        } catch {
+            statusMessage = Self.message(for: error)
+            return
+        }
+        let active = fan.filter { $0.status == .active }
+        guard let index = active.firstIndex(where: { $0.id == variantID }) else {
+            speak("This block's takes changed — try the move again.")
+            return
+        }
+        let target = index + delta
+        guard active.indices.contains(target) else {
+            speak(delta < 0
+                  ? "This take is already first in the fan."
+                  : "This take is already last in the fan.")
+            return
+        }
+        let anchor = active[target].id
+        statusMessage = nil
+        do {
+            try await session.runner.run { ops in
+                try ops.reorderTake(
+                    variantID, to: delta < 0 ? .before(anchor) : .after(anchor))
+            }
+            speak("Take moved \(delta < 0 ? "earlier" : "later") — \u{2325}\u{2318}Z undoes it.")
+        } catch {
+            statusMessage = Self.message(for: error)
+        }
+    }
+
+    // MARK: - The merge selection (13e E3 — her A18)
+
+    /// The ⌘-clicked blocks — the board layout's, forwarded (session-only
+    /// view state, like expansion).
+    var mergeSelection: Set<String> { board.mergeSelection }
+
+    func toggleMergeSelection(_ blockID: String) {
+        board.toggleMergeSelection(blockID)
+    }
+
+    func clearMergeSelection() {
+        board.clearMergeSelection()
+    }
+
+    func isSelectedForMerge(_ blockID: String) -> Bool {
+        board.isSelectedForMerge(blockID)
+    }
+
+    /// The selection in the POST's order (the projection's slot order) — what
+    /// the banner counts and what the merge walks.
+    var selectedBlocksInOrder: [String] {
+        projection.slots.map(\.blockID).filter { board.mergeSelection.contains($0) }
+    }
+
+    /// **Her A18, built: "⌘-click in Takes to select blocks to merge; merge
+    /// several when they have no takes."**
+    ///
+    /// Merge semantics are untouched canon (AppSpec §9): neighbours only,
+    /// nothing cartesian, the sources released to lineage. What this door adds
+    /// is WHICH blocks — pointed at directly instead of derived from a text
+    /// selection Write's planner reads.
+    ///
+    /// Two roads, and the fork is the ruled one:
+    /// - **a PAIR where either side carries a fan** takes the ceremony
+    ///   threshold (S4-23 ruling 4: any fan opens the merge ceremony), which
+    ///   mounts in Write — so the pair CARRIES there, visibly, exactly as
+    ///   today's merge door from Takes does. The ceremony's entry shape is
+    ///   deliberately untouched here; the quick/ceremony default flip is
+    ///   13j's row 4b.
+    /// - **everything else merges RIGHT HERE** as a left-to-right chain of
+    ///   the ordinary binary merge under ONE undo entry — byte-for-byte
+    ///   Write's own `mergeChain` behaviour (its multi-block road has never
+    ///   consulted fan arity either), so no surface is behind another (R118)
+    ///   and no new merge semantics are invented. A fan folded away SPEAKS,
+    ///   naming the road back, exactly as Write's does.
+    ///
+    /// Adjacency and arity are read FROM THE STORE, never from the frozen
+    /// projection: a wrong pair carried into Write would merge blocks she
+    /// never picked.
+    func mergeSelectedBlocks() async {
+        guard !structuralInFlight else {
+            speak("Another structural change is still landing.")
+            return
+        }
+        let picked = board.mergeSelection
+        guard picked.count >= 2 else {
+            speak("\u{2318}-click a second block first — merge joins the blocks you pick.")
+            return
+        }
+        guard await flushPendingText() else { return }
+        let slots: [Queries.RenderedBlock]
+        do {
+            slots = try await session.database.read { [postID] db in
+                try Queries.renderPost(db, containerID: postID)
+            }
+        } catch {
+            statusMessage = Self.message(for: error)
+            return
+        }
+        let order = slots.map(\.blockID)
+        guard TakesBoardLayout.isContiguousRun(picked, in: order) else {
+            speak("Merge joins neighbouring blocks — these aren't next to each other. "
+                + "Pick blocks that sit side by side.")
+            return
+        }
+        let chain = order.filter { picked.contains($0) }
+        let arity: (String) -> Int = { id in
+            slots.first { $0.blockID == id }?.activeVariantCount ?? 1
+        }
+        if chain.count == 2, arity(chain[0]) > 1 || arity(chain[1]) > 1 {
+            // The ruled ceremony threshold — and the ceremony lives in Write,
+            // so the PAIR travels (fire-and-DO: the move is performed, not
+            // lectured about). The caret lands at the SECOND block's start,
+            // which is the seam the planner reads for exactly this pair.
+            clearMergeSelection()
+            speak("These blocks have takes — opening the merge ceremony in Write.")
+            choreography.moveToWriteAndRun(
+                .structural(.merge), targetBlockID: chain[1])
+            return
+        }
+        let otherTakes = chain.reduce(0) { $0 + max(0, arity($1) - 1) }
+        structuralInFlight = true
+        defer { structuralInFlight = false }
+        statusMessage = nil
+        do {
+            let stack = session.undoStack
+            let landing: (blockID: String, variantID: String)
+                = try await session.runner.run { ops in
+                try stack.withCompound(label: "Merge Blocks", operations: ops) {
+                    var merged = (blockID: chain[0], variantID: "")
+                    for next in chain.dropFirst() {
+                        let result = try ops.merge(merged.blockID, next)
+                        merged = (result.block.id, result.variant.id)
+                    }
+                    return merged
+                }
+            }
+            clearMergeSelection()
+            choreography.parkFocus(onVariant: landing.variantID)
+            speak(otherTakes > 0
+                  ? "Merged \(chain.count) blocks — \(otherTakes) other "
+                    + "\(otherTakes == 1 ? "take stays" : "takes stay") with the released "
+                    + "blocks (\(RecoveryPath.unplacedBlocks); \u{2325}\u{2318}Z undoes)."
+                  : "Merged \(chain.count) blocks — \u{2325}\u{2318}Z undoes it.")
+        } catch {
+            statusMessage = Self.message(for: error)
         }
     }
 

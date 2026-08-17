@@ -36,6 +36,10 @@ struct TakesCellView: View {
     /// 13f W7: forwarded to the pane, defaulted OFF so every host but the
     /// takes board's article column reads exactly as before.
     var caretToEndToken: Int = 0
+    /// 13e E3 (her A18): the ⌘-click claim, set ONLY by the takes board's
+    /// article cell — nil on the Lenses board and anywhere else, so no other
+    /// composition's ⌘-click behaviour moves.
+    var onCommandClick: (() -> Bool)?
     let onDiff: (TakesDiffPresentation) -> Void
 
     var body: some View {
@@ -49,6 +53,7 @@ struct TakesCellView: View {
                 role: role, variantID: resolved.variantID,
                 onFocusRequest: { model.focus(key) },
                 onEdit: { model.paneEdited(variantID: resolved.variantID, newText: $0) },
+                onCommandClick: onCommandClick,
                 onSelectionChange: { range in
                     // The choreography's carried caret (13b 1b): what a
                     // fire-and-DO landing brings into Write.
@@ -129,6 +134,21 @@ struct TakesCellView: View {
                 model.requestTakeLabel(variantID: resolved.variantID)
             },
         ]
+        // 13e E3 (her A18): the merge door for a ⌘-click selection, rendered
+        // only where it can act — on the Takes board, with two or more blocks
+        // picked (the `.diffAgainstChosen` per-target shape, P-2). The count
+        // is in the row's words so the menu says what it will join.
+        if model.host == .takes {
+            let picked = model.selectedBlocksInOrder
+            if picked.count >= 2 {
+                specs.append(.init(
+                    title: "\(CapabilityRegistry.capability(.mergeSelectedBlocks).verb) "
+                        + "(\(picked.count))"
+                ) {
+                    Task { await model.mergeSelectedBlocks() }
+                })
+            }
+        }
         if slot.variantID != resolved.variantID, let chosenText = slot.text {
             specs.append(.init(title: "Diff against chosen") {
                 onDiff(TakesDiffPresentation(
@@ -197,6 +217,8 @@ struct TakesCellView: View {
         .labelTake,
         .showOriginBlock,  // 13f W10b — rendered only where an origin exists
         .callout,  // 13k K6 — the frame door where the takes are
+        // 13e E3 (A18) — rendered only on the Takes board with a selection
+        .mergeSelectedBlocks,
     ]
 }
 

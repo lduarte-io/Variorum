@@ -64,6 +64,16 @@ nonisolated enum CapabilityRegistry {
         }
     }
 
+    /// The TAKES BOARD's own surface acts (13e E3/E4): the card and slot
+    /// doors that exist only where the cards are drawn. `closeAllTakes` and
+    /// the fan pagers already gate on `mode == .takes`; this adds the
+    /// attachment half those two predate (13c 2B's lesson: a board can mount
+    /// outside a post detail, and enablement must track the surface that
+    /// actually acts).
+    private static let takesBoard: @Sendable (CapabilityContext) -> Capability.Availability = { ctx in
+        (ctx.takesBoardAttached || ctx.mode == .takes) ? .act : .unavailable
+    }
+
     /// Step/choose additionally act in Canvas (the ‹ › switcher's keys).
     private static let takeFamilyPlusCanvas: @Sendable (CapabilityContext) -> Capability.Availability = { ctx in
         if ctx.mode == .canvas { return .act }
@@ -297,6 +307,40 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Unarchiving acts on an archived take — open its block's takes first.",
             availability: takeFamily),
+        // 13e E4 (her A19: *"Reorder takes"*): the fan becomes rearrangeable,
+        // and the doors are the take card's own ◀ ▶ (▲ ▼ in the stack style) —
+        // `.surface` acts, because the target is the card you point at (the
+        // `.unarchiveTake` class). Board-only by nature: the cards exist on the
+        // Takes board, so the rule is the board's ATTACHMENT (13c 2B's shape —
+        // the book spread mounts the same board with no post detail around it)
+        // rather than a mode name. Keyless deliberately: her ruling named no
+        // chord, and an invented one would owe a collision sweep nobody asked
+        // for (the `.toggleStar` precedent).
+        Capability(
+            id: .moveTakeEarlier, verb: "Move Take Earlier", scope: .take,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Takes are rearranged on their cards, on the Takes board (⌘2).",
+            availability: takesBoard),
+        Capability(
+            id: .moveTakeLater, verb: "Move Take Later", scope: .take,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Takes are rearranged on their cards, on the Takes board (⌘2).",
+            availability: takesBoard),
+        // 13e E3 (her A18: *"⌘-click in Takes to select blocks to merge; merge
+        // several when they have no takes"*). BLOCK scope — it joins blocks —
+        // with two doors: the article cell's context menu and the selection
+        // banner. Native on the board: a ⌘-click selection names the blocks
+        // directly, so a fanless run merges right here; a fanned PAIR reaches
+        // the ruled ceremony by the one visible choreography (P-2), which is
+        // performing the act, not redirecting away from it.
+        Capability(
+            id: .mergeSelectedBlocks, verb: "Merge Selected Blocks", scope: .block,
+            doors: [.contextMenu, .surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "⌘-click blocks on the Takes board (⌘2) to pick what merges.",
+            availability: takesBoard),
         // 13b Stage 3 (3D — T5/N6): the 3B core op `setTakeLabel` gets its
         // faces — the take card's context menu and the bar's block menu.
         Capability(

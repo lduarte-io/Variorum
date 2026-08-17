@@ -554,7 +554,7 @@ binaries live in the session scratchpad, throwaway.
 | Batch | Scope | Status |
 |---|---|---|
 | 1 | **The door set:** E1 (swatches + real emoji picker) · E13 (duplicate-book-name refusal) · E11 (ascent registry declaration) | **DONE 2026-08-17** — record below (core 1223/130 · Mac 1266/224 tripwire-only · mobile 314/60 · spine 51/7; Mac baseline corrected to 1251/220) |
-| 2 | **The fan's hands:** E4 (reorder takes + the fan-copy remap fix that lands WITH it — its KnownIssues row's FIX-2 template) · E15 (Takes-board policy routing) · E3 (⌘-click merge selection) | pending |
+| 2 | **The fan's hands:** E4 (reorder takes + the fan-copy remap fix that lands WITH it — its KnownIssues row's FIX-2 template) · E15 (Takes-board policy routing) · E3 (⌘-click merge selection) | **DONE 2026-08-17** — record below (core 1235/132 · Mac 1285/227 tripwire-only · mobile 314/60 · spine 51/7; both KnownIssues rows RESOLVED) |
 | 3 | **Take↔block structure:** E5 (move-a-take-into-a-block-below) · E6 (copy-all-takes / takes-to-blocks — the A45 repair tool) | pending |
 | 4 | **Block management:** E2 (block multi-select + multi-delete) | pending |
 | 5 | **Canvas:** E7-bank (canvas bank) · E12 (drag jitter/resist — live-path trace, no archeology per her rider) | pending |
@@ -923,3 +923,188 @@ BEFORE final claims only with PENDING marks; commit per convention;
 NEVER push; NEVER `/Applications`; her real-store instance is never
 touched (Environment traps bind verbatim; Mac tests via the
 cwd-independent `-project` invocation).
+
+### BATCH 2 RECORD — the fan's hands (2026-08-17, a fresh Opus implementer; COMPLETE)
+
+**Shipped, per ledger row.**
+
+- **E4 — reorder takes (A19), plus the fan-copy rider that lands WITH it.**
+  - **The op:** `Operations.reorderTake(_:to:)` (`Operations+Variant.swift`),
+    `reorder`'s shape one table over. `fan_position` now resolves through the
+    SAME ordered-list resolver every pointer list uses — `OrderedList` gained
+    a `positionColumn` (default `"position"`; the fan passes `"fan_position"`)
+    and `fanPosition(_:blockID:at:)` is its door, so the jitter, the
+    `(position, id)` sort key and the no-rebalance rule (SyncSpec §8) are
+    literally the same code rather than a second copy of the neighbour
+    arithmetic. **No touch, no churn** (block `reorder` stamps neither, and
+    §9's touch-list names divide-W/merge/poolDragCopy — not reordering); the
+    SEAL refuses through `ensurePlacementUnlocked`; **undo AND redo from
+    do-time pre-images** via the new exact-row inverse
+    `restoreFanPosition` (`Operations+UndoInverses.swift`), so ping-pong never
+    re-derives a key and drifts. A locked/archived take may be moved
+    (`setTakeLabel`'s ratified precedent — #57(a)); a move relative to itself
+    writes nothing (#57(f)); a foreign anchor refuses `variantNotFound`.
+  - **The door:** the take CARD's own arrows, on `TakeChooseHeader` — ◀ ▶ in
+    carousel / slot split / the rail, ▲ ▼ in the stack (#57(e)), the end
+    direction greyed (the pager's disabled-◀ grammar), and NO arrows at all on
+    a one-take fan (P-2). `TakesViewModel.moveTake(_:in:by:)` flushes first and
+    reads the fan **from the STORE** (13d batch 3's precedent: the projection
+    is frozen while dirty, so a projection-read neighbour is an enablement hint
+    and never an authorization), stepping within the ACTIVE fan (#57(b)).
+    Registry: `.moveTakeEarlier` / `.moveTakeLater`, `.surface` doors, keyless
+    (#57(d)), availability on the new `takesBoard` rule (attachment OR
+    `mode == .takes` — 13c 2B's lesson, which the older `pageFan` pair
+    predates), declared in `TakesBoardView.surfaceCapabilities`.
+  - **THE FAN-COPY RIDER, RESOLVED** (KnownIssues *"Single-pass fan-copy remaps
+    assume parent-precedes-child"*, owner 13e): `poolDragCopy` and `copyPost`
+    now copy through ONE machine, `Operations.copyFan`, whose second pass lands
+    a FORWARD parent pointer after every row exists — `mintFanBlock`'s FIX-2
+    template in shape, and the row's premise falsified exactly as it predicted
+    (the pins build the state through the real `reorderTake`, not hand-written
+    SQL). The two call sites were byte-identical loops, so this is one
+    implementation replacing two, not a new abstraction.
+- **E15 — the Takes board joins the ONE projection-delivery policy**
+  (KnownIssues *"The Mac Takes board adopts projection deliveries directly"*,
+  owner 13e; POLICY-ROUTED, not re-recorded). `start()` now calls
+  `deliver(_:)` → `applyProjection(_:fromDelivery:)`, which executes
+  `EditorProjectionPolicy.decide` — the same brain both editor surfaces run —
+  and `onSettled` no longer ADOPTS the held photograph: it bumps a
+  `storeWriteGeneration` fence and settles through `applyPendingIfClean()`,
+  which re-reads `Queries.takesProjection` and adopts the FRESH value. The
+  board's render arms collapse into adoption (it has no text surface to rewrite
+  differentially), so what the policy buys is its precedence: not-loaded ▸ busy
+  ▸ echo ▸ delivery-refetch. Two deliberate calls, both recorded: `busy` stays
+  the board's standing dirty-buffer condition (a structural flight is NOT
+  folded in — the board has no flight-exit settle hook, #57(g)), and the echo
+  check is STRICT (any live buffer ⇒ refetch, #57(h)).
+- **E3 — ⌘-click merge selection in Takes (A18, HER ask, built to her words).**
+  `PaneTextView` gained `onCommandClick` — asked AFTER the link door (13g L10's
+  ⌘-click ruling wins on the shared chord, #57(i)) and BEFORE selection
+  tracking, consuming the click so the ring does not migrate (#57(j)); wired
+  through the coordinator like every other callback, and nil everywhere but the
+  Takes board's article cells (#57(o)). The selection is session-only view
+  state on `TakesBoardLayout` (the expansion class) with a pure
+  `isContiguousRun(_:in:)` rule and a `pruneMergeSelection(to:)` the conductor
+  feeds at adoption (#57(n)). `mergeSelectedBlocks()` reads order AND arity
+  from the STORE, then forks the ruled way: **a fanned PAIR carries to Write**,
+  where the ceremony lives (S4-23(4) untouched; the default flip is 13j's row
+  4b — #57(k)), and **everything else merges right here** as a left-to-right
+  chain of the ordinary binary `merge` under ONE `withCompound` entry ("Merge
+  Blocks") — byte-for-byte Write's `mergeChain` behaviour, including the
+  speak-about-folded-fans line (#57(l)), which is what keeps Takes from sitting
+  behind Write (R118). Doors: the article cell's context menu (rendered only
+  with ≥2 picked — the `.diffAgainstChosen` per-target shape) and the board's
+  selection banner; declared as ONE act, `.mergeSelectedBlocks`, with both door
+  families. `TakesChoreographer.moveToWriteAndRun` gained an explicit
+  `targetBlockID:` (default = today's routed target, so every pre-13e caller is
+  unchanged) and REFUSES a named-but-missing target rather than silently
+  retargeting.
+
+**Mechanisms traced (the hallucination guard).** E15's mechanism, traced on
+this surface before any fix: an observation value fetched BEFORE a flush is
+consumed after it settles; the old rule adopted it, `authority.settle` then
+cleared the no-longer-pending buffer, and every pane mirroring that variant
+fell back to the projection's PRE-FLUSH text — after which a keystroke computes
+its delta against the stale text (`paneEdited` → `currentStoreText`) and
+autosaves it over the newer store text. The old settle path had the same hole
+from the other side. The fan-copy mechanism is the row's, re-traced: the
+`ORDER BY fan_position, id` walk sets `parent_variant_id` in one pass, and
+`parent_variant_id` is an IMMEDIATE foreign key, so a parent sitting LATER in
+fan order makes the insert a forward reference — the whole copy throws (proven
+below: `SQLite error 19: FOREIGN KEY constraint failed`). E4 and E3 are
+features, not bug fixes, and carry no bug mechanism.
+
+**Pins + red-on-old evidence (behavioral revert, checksums recorded).** New
+core file `Tests/VariorumCoreTests/FanOrderTests.swift` (12 tests, 2 suites)
+and new Mac file `App/Variorum/VariorumTests/FanHandsTests.swift` (19 tests,
+3 suites).
+
+*Revert A — the FIX-2 second pass removed (the pre-fix single pass restored
+inside `copyFan`). File:* `Operations+Variant.swift`
+`0e3f0ac2…41aca` → `03366612…d72fe`. Result: **exactly the two rider pins RED**
+— `ReorderedFanCopyTests.aParentThatFollowsItsChildInFanOrderStillRemaps` (the
+row's named fixture, poolDragCopy) and `aDuplicatedPostRemapsAForwardParentToo`
+(copyPost), both dying on `SQLite error 19: FOREIGN KEY constraint failed`
+inside the write — while the whole of `PoolDragCopyTests` and
+`VersionOperationsTests` stayed green (25 tests, 2 issues; clean attribution).
+Restored: `0e3f0ac2…41aca`.
+
+*Revert B — E15's two lines put back to the pre-13e rule (`deliver` adopts
+whenever clean; `onSettled` adopts the held photograph). File:*
+`TakesViewModel.swift` `45b9f1a5…ae150` → `6c311013…45cea`. Result: **the three
+delivery pins RED with the exact stale symptom** —
+`aDeliveryFetchedBeforeAFlushNeverRegressesTheBoard` (`"Original."` where the
+store holds `"Typed while in flight."`),
+`aStaleDeliveryArrivingCleanIsRefetchedRatherThanAdopted` (`"Original."` over
+`"Newer text."`), and `aDeliveryWhileDirtyStillDefersAndTheSettleReadsTheStore`
+(`"One."` where the buffer held `"One, edited."`) — while E4's and E3's pins
+stayed green (19 tests, 3 issues, all in the delivery suite). The fourth
+delivery pin (`anIdenticalDeliveryIsAdoptedOnTheSpotWithNoRefetch`) passes on
+BOTH sides deliberately: the echo arm is behaviour-preserving by design, and a
+red there would have been the bug. Restored: `45b9f1a5…ae150`.
+
+*E4's and E3's pins are feature pins, not bug pins* (no red-on-old is owed):
+the fan-order suite covers the jittered key sorting strictly between its new
+neighbours AND differing on a repeat into the same gap (the §8 pin), the
+untouched-neighbour keys, the outbox row landing on the moved row alone, the
+container row byte-unchanged (no touch, no churn), the seal refusal, the
+locked/archived allowance, the foreign anchor, the self-anchored no-op, and
+undo→redo→undo on the exact keys; the door suite covers the store-read flush
+contract, both end refusals, a take that left the fan, both registry
+declarations, the pure contiguity rule, the 2-block and 3-block merges under
+ONE undo entry (with the undo restoring all three whole), the gapped refusal
+minting nothing, the one-picked refusal, the fanned-pair CARRY (intent block,
+offset, follow-up, the visible mode switch, nothing merged), the fanned-run
+speak line, and the selection's pruning.
+
+**Counts (own runs, quoted from the "Test run with N tests" lines).**
+- Core: **`✔ Test run with 1235 tests in 132 suites passed`** (baseline
+  1223/130 → +12/+2, exactly the new core file).
+- Mac: **`✘ Test run with 1285 tests in 227 suites failed … with 1 issue`** —
+  the ONE issue is
+  `TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`,
+  the recorded environment-gated tripwire, allowed by IDENTITY (baseline
+  1266/224 → +19/+3, exactly the new Mac file). **A47c datum:** it fired again
+  in an UNLOCKED session (`CGSSessionScreenIsLocked = 0`), consistent with
+  batch 1's "fires regardless of lock state" hypothesis.
+- Mobile: **`✔ Test run with 314 tests in 60 suites passed`** (iPhone 16e —
+  run because E4/FIX-2 land in `Sources/`; baseline matched exactly).
+- Tutorial spine, by TYPE name (all seven): **`✔ Test run with 51 tests in 7
+  suites passed`**.
+
+**PROVISIONALs / build-time calls:** fifteen, bundled as **QUESTIONS #57**
+(a)–(o) — the locked/archived allowance, the active-fan stepping rule, no
+touch/churn, keylessness, the glyphs + greyed ends, the self-anchored no-op,
+E15's dirty-buffer-only busy arm and strict echo check, the link-vs-selection
+chord, the consumed click, the fanned-pair carry, the fanned-run chain + speak,
+store-read adjacency, the session-only selection, and the article-cells-only
+gesture.
+
+**KnownIssues dispositions (both rows this batch owned).**
+- *"Single-pass fan-copy remaps assume parent-precedes-child"* (owner 13e) —
+  **RESOLVED** at the mechanism, with the row's own named fixture
+  (`aParentThatFollowsItsChildInFanOrderStillRemaps`) red-on-old. The closeout
+  clears the row.
+- *"The Mac Takes board adopts projection deliveries directly"* (owner 13e) —
+  **RESOLVED by policy-routing**, not re-recorded: the board runs
+  `EditorProjectionPolicy` and settles through a fresh read, with red-on-old
+  pins on both roads. The closeout clears the row. Checked while here: the
+  PHONE's takes projection already ingests through the same policy
+  (`MobileEditorViewModel.observeTakesProjection` → `ingest(_:fromDelivery:)`),
+  so the class is now closed on both platforms.
+
+**Nothing stopped, nothing schema-shaped.** No design fork appeared: A18's
+words determined the gesture (⌘-click, several-when-fanless) and the two
+choices they left open — where a fanned pair goes, and what a fanned run does —
+were settled by RULED canon (S4-23(4)) and by Write's own shipped behaviour
+(R118), not invented. `Sources/VariorumCore/Sync/` untouched (zero lines); no
+migration, no mirror implication, no `/Applications` refresh; her real-store
+instance (PID 54789) was live the whole batch and was never addressed.
+
+**MOBILE PARITY (for the closeout ledger):** the phone owes **reorder-takes**
+a door — the core op `reorderTake` is shared, so its takes surface needs the
+arrows (or a drag) and nothing else; and, AT HER WORD, a phone shape for the
+**⌘-click merge selection** (a pointer chord has no phone twin — the phone's
+fanned merge is the shipped carry-all, C5). E15's fix is Mac-only by
+construction (the phone was already policy-routed), and the fan-copy fix rides
+core, so the phone has it already.
