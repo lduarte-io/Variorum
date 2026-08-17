@@ -1186,3 +1186,48 @@ only with PENDING marks; commit per convention; NEVER push; NEVER
 `/Applications`; her real-store instance is never touched (Environment
 traps bind verbatim; Mac tests via the cwd-independent `-project`
 invocation).
+
+**ARCHITECT RULING AR-1 (2026-08-17 — batch 3's propose-first fork,
+ruled on the implementer's trace after the architect independently
+verified its two decisive claims in `Repairs.swift`/`Merge.swift`):
+ROAD B — MINT-COPY; the source take is ARCHIVED.** Grounds, in order
+of force: **(1)** Road A (moving the variant row's `block_id`) is not
+architecturally available in this phase: closing its move/move I10
+hole needs a NEW SyncSpec §7 repair class (verified — the repair
+candidate set is populated from the ARRIVING row's `block_id` only,
+so the block a take LEFT never becomes a candidate; the race
+converges to a live placed block with zero live variants and no
+self-heal), it falsifies the repair layer's documented-unreachable
+foreign-chosen state, and it routes cross-block parent pointers
+through the conflict-rescue door (verified — the rescue inserts on
+the SERVER row's block carrying the LOCAL row's parent). A spec
+change plus `Sync/` surgery is outside the batch, the phase, and the
+standing rider — and would be the wrong design regardless: it
+enlarges the exact state space every ratified repair was written
+against. **(2)** Road B composes with the ratified repairs (its
+race self-heals through the EXISTING archive/archive I10 rescue),
+its I10 guard is already pinned (`ensureNotLastActive`), and its
+undo/redo bodies already exist. **(3)** The A45 repair intent is
+honored by ARCHIVE, not row surgery: nothing is lost — the source
+take, WITH its commits, label and lock, stays reachable in the
+block's archived listing; "coarse, not forensic" accepts history
+staying with the source (the divide / restoreCommit-predates-split
+precedent), and `archiveVariant` is the one disposal door that
+legally accepts a CHOSEN take (tombstone would refuse E5's
+commonest case — moving the take you're looking at).
+
+**The six calls, ruled defaults — ALL still logged PROVISIONAL
+(#58+) for her ratify list:** (a) ARCHIVE — part of AR-1. (b) a
+LOCKED take: trace what `archiveVariant` does with a locked variant
+TODAY and follow that door exactly — permit if it permits, refuse
+with its own refusal if it refuses; the copy is not born locked
+either way (the copy doctrine); never a third behavior. (c) E6b
+keeps the CHOSEN take on X — order shown-then-alternates, coherent
+with copy-all-takes, and a conversion must never silently change
+what the note reads as. (d) blank takes SKIPPED (the
+`divideSideWouldBeEmpty` refusal family — minting empty blocks
+serves nobody); say so in the door's receipt if one exists. (e)
+chords GRANTED — her A20/A21 words ask for shortcuts: ⌥⌘⏎ (E5) and
+⇧⌥⌘⏎ (E6b) under the standing collision pin; exact keys hers to
+re-pick. (f) archived takes ride nowhere — the divide-W
+unmarked-variant precedent, exact.
