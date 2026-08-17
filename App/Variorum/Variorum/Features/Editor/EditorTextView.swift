@@ -161,6 +161,18 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
     /// ⌘S — commit the caret block's variant (AppSpec §9 commit shortcut).
     var onCommitShortcut: (() -> Void)?
 
+    /// **13e E2 (her A17) — the block PICK.** `(offset, extending) -> claimed`:
+    /// the document offset the click landed at, and whether ⇧ was held
+    /// (extend the run) rather than not (toggle this block). Returning false
+    /// declines the click — which is what a click past the last block does,
+    /// since the open tail is not a block and picking nothing is not a
+    /// gesture worth eating a caret move for.
+    var onBlockPick: ((Int, Bool) -> Bool)?
+
+    /// 13e E2: an unmodified click — the surface's cue that the block
+    /// selection is over.
+    var onPlainClick: (() -> Void)?
+
     /// N14 (13b Stage 3F) — the overlay family's LAYOUT-SETTLE trigger.
     /// Fragment-geometry consumers (badges, decor) that compute before
     /// TK2's first viewport layout read garbage frames, and no mount-time
@@ -485,7 +497,35 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
                at: convert(event.locationInWindow, from: nil), in: self) {
             return
         }
+        // 13e E2 (her A17: *"block highlight instead of text highlight
+        // across blocks"*): ⌘-click PICKS the block under the pointer, and
+        // ⌘⇧-click extends the run. Asked AFTER the link door — 13g L10's
+        // ruling owns ⌘-click where a link sits, exactly as it does on the
+        // panes (the batch-2 precedent, one rule on both text surface kinds)
+        // — and BEFORE `super`, because a claimed chord must not also move
+        // the caret: picking blocks is not writing in one.
+        //
+        // ⇧ ALONE is deliberately untouched: it extends the TEXT selection,
+        // which is the very gesture her ask contrasts with, and stealing it
+        // to mean "extend the block run" would take away the thing block
+        // selection exists beside.
+        if event.clickCount == 1, event.modifierFlags.contains(.command),
+           let onBlockPick {
+            let point = convert(event.locationInWindow, from: nil)
+            if onBlockPick(
+                characterIndexForInsertion(at: point),
+                event.modifierFlags.contains(.shift)) {
+                return
+            }
+        }
         super.mouseDown(with: event)
+        // 13e E2: an ORDINARY click puts the selection down — she is writing
+        // again, not picking. The banner's "clear" is the deliberate door;
+        // this is the one that keeps a forgotten highlight from following
+        // her around the note.
+        if event.modifierFlags.intersection([.command, .option, .control, .shift]).isEmpty {
+            onPlainClick?()
+        }
     }
 
     override func paste(_ sender: Any?) {

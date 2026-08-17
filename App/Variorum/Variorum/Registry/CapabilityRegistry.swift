@@ -341,6 +341,27 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "⌘-click blocks on the Takes board (⌘2) to pick what merges.",
             availability: takesBoard),
+        // 13e E2 (her A17: *"delete several blocks at the same time from a
+        // post - highlighting all of the blocks perhaps? block highlight
+        // instead of text highlight across blocks?"*). BLOCK scope, two door
+        // families like its merge sibling: the surface banner each host
+        // raises while a selection exists, and the block's own context menu.
+        //
+        // Its availability is `takeFamily`, NOT `takesBoard`, and the
+        // difference is the whole shape of E2: her words name the surface
+        // where text highlight across blocks is the alternative — Write —
+        // and R118 then forbids leaving the board behind, so BOTH post
+        // surfaces host the selection and both render the door. No chord:
+        // the obvious key is ⌫, which belongs to the caret in the very
+        // surface this act lives in, and a delete key that means two things
+        // depending on invisible state is the class P-2 retired
+        // (QUESTIONS #59(d)).
+        Capability(
+            id: .deleteSelectedBlocks, verb: "Delete Selected Blocks", scope: .block,
+            doors: [.contextMenu, .surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BlockSelectionCopy.nothingPicked,
+            availability: takeFamily),
         // 13e E6 (her A21's clipboard half, verbatim: *"keyboard shortcut for
         // copying all takes together to clipboard"*). TAKE scope, native
         // wherever takes are: the target is the block you are in (the caret

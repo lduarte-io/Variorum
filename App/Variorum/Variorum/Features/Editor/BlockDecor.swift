@@ -78,6 +78,12 @@ nonisolated enum BlockDecor {
         var fannedBlockIDs: Set<String> = []
         var appearance = EditorAppearance()
         var caretBlockID: String?
+        /// 13e E2 (her A17: *"highlighting all of the blocks perhaps? block
+        /// highlight instead of text highlight across blocks?"*) — the
+        /// picked blocks. Drawn as a wash PLUS an accent border, so it is
+        /// legible beside the editing indicator's background style (which is
+        /// a wash alone, and only ever on the caret block).
+        var selectedBlockIDs: Set<String> = []
         var presentations: [String: BlockPresentation] = [:]
         var comments: [String: [CommentBrief]] = [:]
         /// The prose column's edges + the surface's width (view coords).
@@ -307,6 +313,8 @@ final class BlockDecorOverlayController {
     private var calloutViews: [DecorRectView] = []
     private var emojiLabels: [NSTextField] = []
     private var indicatorView: DecorRectView?
+    /// 13e E2: one view per PICKED, visible block (pooled like the seams).
+    private var selectionViews: [DecorRectView] = []
     private var commentCards: [CommentCardView] = []
     private var handleViews: [DragHandleView] = []
     private var insertionBar: DecorRectView?
@@ -365,6 +373,7 @@ final class BlockDecorOverlayController {
         for label in emojiLabels { label.removeFromSuperview() }
         for card in commentCards { card.removeFromSuperview() }
         for handle in handleViews { handle.removeFromSuperview() }
+        for view in selectionViews { view.removeFromSuperview() }
         indicatorView?.removeFromSuperview()
         insertionBar?.removeFromSuperview()
         seamViews = []
@@ -372,6 +381,7 @@ final class BlockDecorOverlayController {
         emojiLabels = []
         commentCards = []
         handleViews = []
+        selectionViews = []
         indicatorView = nil
         insertionBar = nil
     }
@@ -383,6 +393,7 @@ final class BlockDecorOverlayController {
         guard let textView else { return }
         let tokens = state.appearance.tokens
         renderCallouts(state, tokens: tokens, in: textView)
+        renderSelection(state, tokens: tokens, in: textView)
         renderIndicator(state, tokens: tokens, in: textView)
         renderSeams(state, tokens: tokens, in: textView)
         renderComments(state, tokens: tokens, in: textView)
@@ -442,6 +453,28 @@ final class BlockDecorOverlayController {
                     x: max(2, state.textLeft - label.frame.width - 8),
                     y: item.frame.frame.minY)
             }
+        }
+    }
+
+    /// **13e E2 (her A17): the BLOCK HIGHLIGHT.** One wash-and-border band
+    /// per picked, visible block — the same full-width geometry the editing
+    /// indicator uses (`indicatorRect`), because "the block, edge to edge"
+    /// is the same shape in both cases and a second rect rule would drift
+    /// from it. Drawn BELOW the text like every other decoration (an
+    /// overlay, never a rendering attribute — TEXTKIT2 §3), and pooled, so a
+    /// selection of forty blocks costs only the visible ones (P1).
+    private func renderSelection(
+        _ state: BlockDecor.State, tokens: VoiceTokens, in textView: NSTextView
+    ) {
+        let frames = state.selectedBlockIDs.isEmpty
+            ? []
+            : state.frames.filter { state.selectedBlockIDs.contains($0.blockID) }
+        pool(&selectionViews, count: frames.count, in: textView, below: true) { DecorRectView() }
+        for (view, frame) in zip(selectionViews, frames) {
+            view.frame = BlockDecor.indicatorRect(
+                block: frame.frame, textLeft: state.textLeft, textRight: state.textRight)
+            view.configure(
+                fill: NSColor(tokens.wash), border: NSColor(tokens.accent), cornerRadius: 6)
         }
     }
 

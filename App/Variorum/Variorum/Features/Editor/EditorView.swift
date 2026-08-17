@@ -90,6 +90,7 @@ struct EditorView: View {
                     .frame(maxWidth: .infinity)
                     .background(chromeTokens.wash)
             }
+            blockSelectionBanner
             if inline {
                 InlineEditorSurface(model: model, height: $inlineHeight, chrome: chrome)
                     .frame(height: inlineHeight)
@@ -178,6 +179,43 @@ struct EditorView: View {
 }
 
 extension EditorView {
+    /// The registry ids this surface renders INLINE (the `.surface` door;
+    /// walk-asserted): the block-selection banner (13e E2 — her A17).
+    static let surfaceCapabilities: [CapabilityID] = [.deleteSelectedBlocks]
+
+    /// **13e E2 (her A17) — the picked-blocks banner.** The Takes board's
+    /// banner, on the other post surface that hosts the same selection
+    /// (R118: Write is not privileged, and neither is the board). It renders
+    /// ONLY while a selection exists, so at rest the page is exactly as calm
+    /// as before — and its presence is what keeps ⌘-click from being a
+    /// gesture with a highlight and no door.
+    @ViewBuilder
+    fileprivate var blockSelectionBanner: some View {
+        let picked = model.selectedBlocksInOrder
+        if !picked.isEmpty {
+            HStack(spacing: 8) {
+                Text(chromeTokens.chromeLabel(
+                    BlockSelectionCopy.bannerLabel(picked: picked.count)))
+                    .font(chromeTokens.small)
+                    .foregroundStyle(chromeTokens.muted)
+                    .lineLimit(1)
+                Button(BlockSelectionCopy.deleteVerb(picked: picked.count)) {
+                    Task { await model.deleteSelectedBlocks() }
+                }
+                .buttonStyle(VoicedButtonStyle(
+                    tokens: chromeTokens, role: .primary, font: chromeTokens.mono))
+                .help(BlockSelectionCopy.deleteHelp)
+                Button(chromeTokens.chromeLabel("clear")) { model.clearBlockSelection() }
+                    .buttonStyle(VoicedButtonStyle(tokens: chromeTokens, role: .quiet))
+                    .help("Unpick every block")
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 24)
+            .padding(.vertical, 4)
+            .background(chromeTokens.wash)
+        }
+    }
+
     /// The ONE appearance push (models never read SwiftUI environments or
     /// @AppStorage): theme + scheme + the S4-19 hover-handle setting.
     fileprivate func pushAppearance() {
@@ -292,6 +330,7 @@ private struct EditorSurface: NSViewRepresentable {
         textView.onPoolDrop = { [weak model] blockID, offset, includeFan in
             model?.poolDrop(blockID: blockID, atOffset: offset, includeFan: includeFan) ?? false
         }
+
         context.coordinator.install(scrollView: scrollView, textView: textView)
         return scrollView
     }
@@ -378,6 +417,7 @@ struct InlineEditorSurface: NSViewRepresentable {
         textView.onPoolDrop = { [weak model] blockID, offset, includeFan in
             model?.poolDrop(blockID: blockID, atOffset: offset, includeFan: includeFan) ?? false
         }
+
         context.coordinator.install(textView: textView) { [self] newHeight in
             if abs(height - newHeight) > 0.5 { height = newHeight }
         }

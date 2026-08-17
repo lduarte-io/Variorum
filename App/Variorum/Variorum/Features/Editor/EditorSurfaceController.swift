@@ -480,6 +480,72 @@ final class EditorSurfaceController {
         if landed { model.showStatus(note) }
     }
 
+    // MARK: - Delete SELECTED blocks (13e batch 4 — E2, her A17)
+
+    /// **Her A17, built: "delete several blocks at the same time from a post
+    /// - highlighting all of the blocks perhaps? block highlight instead of
+    /// text highlight across blocks?"**
+    ///
+    /// Write's half. The blocks are the ones she ⌘-clicked (the highlight is
+    /// literally her word for it); the act is the STANDING unrestricted
+    /// `deleteBlock` per block (QUESTIONS #33(a) — the block goes, whatever
+    /// it holds), and all of them run under ONE `withCompound` entry so a
+    /// multi-delete is ONE mistake to reverse. Every leg registers a redo, so
+    /// the compound is redoable too (13c A10's rule: a compound is redoable
+    /// exactly when every leg is).
+    ///
+    /// **No partial acts.** The compound is the guarantee, not a pre-check: a
+    /// sealed post refuses at the first leg through the operation itself
+    /// (P-2 — the door delivers the ops layer's real refusal rather than
+    /// guessing at one), and a leg that throws after others landed unwinds
+    /// them immediately. So the reachable mixed case — a picked block deleted
+    /// or moved by another pane, another window, or a sync arrival between
+    /// the pick and the press — ends with NOTHING deleted and a refusal that
+    /// says exactly that (`OpsRefusalCopy`'s `blockNotFound` words, which
+    /// this act is the first door to make reachable).
+    ///
+    /// The order is read from the STORE inside `runStructural`'s flight
+    /// (which flushes first): the surface's index names WHICH blocks, the
+    /// store decides what actually happens to them.
+    func deleteSelectedBlocks() async {
+        let picked = model.selectedBlocksInOrder
+        guard !picked.isEmpty else {
+            model.refuseFeedback(BlockSelectionCopy.nothingPicked)
+            return
+        }
+        let landing = caretLandingAfterRemoving(picked)
+        let stack = model.session.undoStack
+        let landed = await runStructural { ops in
+            try stack.withCompound(label: "Delete Blocks", operations: ops) {
+                for blockID in picked { try ops.deleteBlock(blockID) }
+            }
+            return StructuralOutcome(
+                caretBlockID: landing.blockID, caretOffset: landing.offset, seam: nil,
+                note: BlockSelectionCopy.deletedNote(picked.count))
+        }
+        if landed { model.clearBlockSelection() }
+    }
+
+    /// Where the caret goes when a whole SET of blocks leaves: the block
+    /// below the last one removed, else the block above the first — the
+    /// single-block rule, applied to the run's edges. Blocks between the
+    /// edges are irrelevant: everything after the last removed index
+    /// survives by definition, as does everything before the first.
+    private func caretLandingAfterRemoving(
+        _ blockIDs: [String]
+    ) -> (blockID: String, offset: Int) {
+        let entries = model.index.entries
+        let indices = blockIDs.compactMap { id in
+            entries.firstIndex { $0.blockID == id }
+        }.sorted()
+        guard let first = indices.first, let last = indices.last else {
+            return (blockIDs.first ?? "", 0)
+        }
+        if last + 1 < entries.count { return (entries[last + 1].blockID, 0) }
+        if first > 0 { return (entries[first - 1].blockID, entries[first - 1].length) }
+        return (entries[first].blockID, 0)
+    }
+
     /// Where the caret goes when entry `i` leaves: the START of the block
     /// below (what the eye expects when the seam above the caret closes),
     /// else the END of the block above. On the post's only block there is

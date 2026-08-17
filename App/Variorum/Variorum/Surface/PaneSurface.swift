@@ -232,7 +232,12 @@ final class PaneTextView: NSTextView, MarkdownFormattable {
     /// outranks a new gesture on the same chord. Off a link — which is the
     /// whole of an ordinary block — the chord was unclaimed (it fell through
     /// to plain selection tracking plus focus).
-    var onCommandClick: (() -> Bool)?
+    ///
+    /// 13e E2 (her A17) widened it to carry ONE fact — whether ⇧ was also
+    /// held, i.e. "extend the run" rather than "toggle this one". A second
+    /// closure would have made the two halves of one gesture two doors, and
+    /// the modifier is genuinely part of the click, not a separate act.
+    var onCommandClick: ((Bool) -> Bool)?
 
     /// 13b 1b (AD-4): the pane's Variorum context menu — right-clicking a
     /// take card used to show ONLY the stock text menu (the SwiftUI
@@ -507,7 +512,7 @@ final class PaneTextView: NSTextView, MarkdownFormattable {
         // selection). After the link door by ruling; before selection
         // tracking, because a claimed chord must not also move the caret.
         if event.clickCount == 1, event.modifierFlags.contains(.command),
-           onCommandClick?() == true {
+           onCommandClick?(event.modifierFlags.contains(.shift)) == true {
             fireConvergenceOccasion()  // 13c 1G: a click is an occasion
             return
         }
@@ -613,7 +618,7 @@ struct PaneSurfaceView: View {
     /// 13e E3 (her A18): a ⌘-click this pane's composition claims — return
     /// true to consume it (see `PaneTextView.onCommandClick`). nil
     /// everywhere but the Takes board's article cells.
-    var onCommandClick: (() -> Bool)?
+    var onCommandClick: ((Bool) -> Bool)?
     /// 13b 1b: the live pane's selection, reported as it changes — the
     /// fire-and-DO choreography carries it into Write.
     var onSelectionChange: ((NSRange) -> Void)?
@@ -713,7 +718,7 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
     var paragraphGap: ParagraphGap = .standard
     var onFocusRequest: (() -> Void)?
     var onEdit: ((String) -> Void)?
-    var onCommandClick: (() -> Bool)?
+    var onCommandClick: ((Bool) -> Bool)?
     var onSelectionChange: ((NSRange) -> Void)?
     var menuItems: (() -> [PaneTextView.MenuItemSpec])?
     var onMeasuredHeight: ((CGFloat) -> Void)?
@@ -746,8 +751,8 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         // 13e E3: the claim goes through the COORDINATOR like every other
         // callback, so `updateNSView` keeps it current instead of capturing
         // a stale closure from the first render.
-        view.onCommandClick = { [weak coordinator = context.coordinator] in
-            coordinator?.onCommandClick?() ?? false
+        view.onCommandClick = { [weak coordinator = context.coordinator] extending in
+            coordinator?.onCommandClick?(extending) ?? false
         }
         context.coordinator.onCommandClick = onCommandClick
         context.coordinator.onFocusRequest = onFocusRequest
@@ -874,7 +879,7 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         var onEdit: ((String) -> Void)?
         var onFocusRequest: (() -> Void)?
         /// 13e E3: the composition's ⌘-click claim (her A18's selection).
-        var onCommandClick: (() -> Bool)?
+        var onCommandClick: ((Bool) -> Bool)?
         var onSelectionChange: ((NSRange) -> Void)?
         /// QoL batch 2 (L3/L4): the composer's measured-height sink.
         var onMeasuredHeight: ((CGFloat) -> Void)?

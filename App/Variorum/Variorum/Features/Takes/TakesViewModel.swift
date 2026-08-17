@@ -1213,6 +1213,14 @@ final class TakesViewModel {
         board.toggleMergeSelection(blockID)
     }
 
+    /// ⌘⇧-click (13e E2): extend the run from the anchor, in the POST's
+    /// order. The order comes from the projection because this is the
+    /// SELECTION, not an act — naming what she is pointing at is exactly
+    /// what a projection is for; every act below still re-reads the store.
+    func extendMergeSelection(to blockID: String) {
+        board.extendMergeSelection(to: blockID, in: projection.slots.map(\.blockID))
+    }
+
     func clearMergeSelection() {
         board.clearMergeSelection()
     }
@@ -1317,6 +1325,71 @@ final class TakesViewModel {
                     + "\(otherTakes == 1 ? "take stays" : "takes stay") with the released "
                     + "blocks (\(RecoveryPath.unplacedBlocks); \u{2325}\u{2318}Z undoes)."
                   : "Merged \(chain.count) blocks — \u{2325}\u{2318}Z undoes it.")
+        } catch {
+            statusMessage = Self.message(for: error)
+        }
+    }
+
+    /// **Her A17, built (13e E2): "delete several blocks at the same time
+    /// from a post."** The board's half — the same ⌘-click selection E3
+    /// merges, pointed at the delete door instead (a selection was never
+    /// merge's private property; it names what the pointer is pointing at).
+    ///
+    /// The act is the STANDING unrestricted `deleteBlock` per block
+    /// (QUESTIONS #33(a): the block goes, whatever it holds), run under ONE
+    /// `withCompound` entry — so a multi-delete is ONE mistake to reverse,
+    /// which is exactly what makes deleting a dozen blocks a safe gesture at
+    /// all. Every leg registers a redo, so the compound is redoable too.
+    ///
+    /// **No partial acts, and the compound is what guarantees it, not a
+    /// pre-check.** A seal refuses at the first leg through the operation
+    /// itself (P-2 — the door delivers the ops layer's real refusal, never
+    /// its own guess at one), and a leg that throws AFTER others landed
+    /// unwinds them immediately (`UndoStack.withCompound`'s atomicity). So
+    /// the reachable mixed case — a picked block deleted or moved by
+    /// another surface, a split pane, or a sync arrival between the pick and
+    /// the act — ends with NOTHING deleted and a refusal that says so.
+    ///
+    /// Order is the POST's, read from the STORE: the projection is a
+    /// selection aid, never an authorization (batch 2's rule, unchanged).
+    func deleteSelectedBlocks() async {
+        guard !structuralInFlight else {
+            speak("Another structural change is still landing.")
+            return
+        }
+        let picked = board.mergeSelection
+        guard !picked.isEmpty else {
+            speak(BlockSelectionCopy.nothingPicked)
+            return
+        }
+        guard await flushPendingText() else { return }
+        let order: [String]
+        do {
+            order = try await session.database.read { [postID] db in
+                try Queries.renderPost(db, containerID: postID).map(\.blockID)
+            }
+        } catch {
+            statusMessage = Self.message(for: error)
+            return
+        }
+        let chain = order.filter { picked.contains($0) }
+        guard !chain.isEmpty else {
+            clearMergeSelection()
+            speak("Those blocks are no longer in this note — nothing to delete.")
+            return
+        }
+        structuralInFlight = true
+        defer { structuralInFlight = false }
+        statusMessage = nil
+        do {
+            let stack = session.undoStack
+            try await session.runner.run { ops in
+                try stack.withCompound(label: "Delete Blocks", operations: ops) {
+                    for blockID in chain { try ops.deleteBlock(blockID) }
+                }
+            }
+            clearMergeSelection()
+            speak(BlockSelectionCopy.deletedNote(chain.count))
         } catch {
             statusMessage = Self.message(for: error)
         }

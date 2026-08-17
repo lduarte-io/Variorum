@@ -474,5 +474,35 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint.**
 
-*(Next free number: **#59**.)*
+## Phase 13e (2026-08-17) — batch 4's build-time calls, bundled for the sitting
+
+59. **2026-08-17 · Phase 13e (batch 4 — E2, block multi-select and multi-delete) · TWELVE build-time calls, each one line to change.** Your A17, verbatim: *"delete several blocks at the same time from a post - highlighting all of the blocks perhaps? block highlight instead of text highlight across blocks?"* Built. The BINDING build record is the 13e plan's batch-4 record.
+
+    **(a) It lives on BOTH post surfaces — Write's editor AND the Takes board.** Your words name the surface where "text highlight across blocks" is the alternative, which is Write; R118 then forbids leaving the board behind, and the board already had the ⌘-click selection batch 2 built for merge. So it is ONE selection with TWO acts (merge, delete), not two selections. **The alternative:** Write only.
+
+    **(b) NOT on the Blocks list (⌘6) or Canvas.** Your ask contrasts block highlight with TEXT highlight, which is a writing-surface contrast; a list already deletes a row at a time. **The alternative:** add multi-select to the Blocks list too (its own selection host).
+
+    **(c) ⌘-click toggles a block; ⌘⇧-click extends the run from the last one you clicked.** ⇧ ALONE is untouched — it stays the text selection's, which is the very gesture your ask contrasts with. **The alternative:** re-pick either chord.
+
+    **(d) NO keyboard shortcut.** The obvious key is ⌫, and ⌫ belongs to the caret in the very surface this act lives in — a delete key meaning two things depending on invisible state is exactly the class the app retired. **The alternative:** grant a chord (it would need a collision sweep and a decision about ⌫).
+
+    **(e) The highlight is a soft wash plus an accent border, edge to edge across the block** — the same band the editing indicator draws, so a selected block reads as "the whole block" and still tells itself apart from the caret block. **The alternative:** any other look; it is one line of colour.
+
+    **(f) An ORDINARY click puts the selection down.** She is writing again, not picking. The banner's "clear" is the deliberate door; this is what keeps a forgotten highlight from following her around the note. TYPING does not clear it (the highlight is visible while she types). **The alternative:** keep the selection until cleared explicitly, or clear on typing too.
+
+    **(g) The delete is ONE undo entry over every picked block** (⌥⌘Z brings them all back at once, ⇧⌥⌘Z takes them again). A multi-delete is one mistake to reverse, which is what makes deleting a dozen blocks safe at all. **The alternative:** one entry per block.
+
+    **(h) It is the standing UNRESTRICTED delete** (your #33(a) ruling): the block goes, whatever it holds — takes, comments, a callout frame. Every block still lands in the note's deleted-blocks tray. **The alternative:** refuse blocks that carry takes or comments, or warn first.
+
+    **(i) NO confirmation prompt.** Your A12 destructive-undo warning shipped at 13d for the case where text becomes unreachable; a delete here is undoable, redoable AND tray-recoverable, so a prompt would be friction over three safety nets. **The alternative:** a confirm above some count.
+
+    **(j) A refusal rolls the WHOLE gesture back — no partial acts.** A sealed note refuses at the first block through the operation itself; a picked block that vanished under her (another pane, the other half of a split, a sync arrival) unwinds everything that already landed and says *"One of the blocks you picked is already gone… Nothing was deleted."* Those words are new: that refusal used to print its raw internal name. **The alternative:** delete what it can and report the rest.
+
+    **(k) A refusal KEEPS your picks** (nothing to re-click), and a successful delete clears them. **The alternative:** clear on refusal too.
+
+    **(l) The selection is session-only and prunes itself** — it dies with the surface, and drops blocks the note no longer holds, so a block that comes BACK (an undo, a tray restore, a sync arrival) never arrives already highlighted. The banner renders only while something is picked; at rest the page is exactly as calm as before. **The alternative:** none proposed — this is batch 2's rule, applied.
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#60**.)*
 

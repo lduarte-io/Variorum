@@ -61,6 +61,8 @@ struct TakesBoardView: View {
     /// selection banner (E3/A18).
     static let surfaceCapabilities: [CapabilityID] = [
         .unarchiveTake, .moveTakeEarlier, .moveTakeLater, .mergeSelectedBlocks,
+        // 13e E2 (A17): the same banner offers the delete door.
+        .deleteSelectedBlocks,
     ]
 
     /// Batch 14 (her image-#9 report — TWO live rings): the fan CARDS pane
@@ -417,9 +419,7 @@ struct TakesBoardView: View {
         let picked = model.selectedBlocksInOrder
         if !picked.isEmpty {
             HStack(spacing: 8) {
-                Text(tokens.chromeLabel(picked.count == 1
-                    ? "1 block picked — ⌘-click another to merge them"
-                    : "\(picked.count) blocks picked"))
+                Text(tokens.chromeLabel(BlockSelectionCopy.bannerLabel(picked: picked.count)))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
                     .lineLimit(1)
@@ -429,6 +429,15 @@ struct TakesBoardView: View {
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary, font: tokens.mono))
                 .disabled(picked.count < 2)
                 .help("Join the picked blocks into one — neighbours only; ⌥⌘Z undoes it")
+                // 13e E2 (her A17): the delete door, beside merge, over the
+                // one selection. Never disabled — one pick is a legitimate
+                // delete, so the button either acts or delivers the ops
+                // layer's own refusal (P-2).
+                Button(BlockSelectionCopy.deleteVerb(picked: picked.count)) {
+                    Task { await model.deleteSelectedBlocks() }
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                .help(BlockSelectionCopy.deleteHelp)
                 Button(tokens.chromeLabel("clear")) { model.clearMergeSelection() }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                     .help("Unpick every block")
@@ -671,8 +680,14 @@ struct TakesBoardView: View {
             // 13e E3 (her A18): ⌘-click picks this block for a merge. The
             // claim consumes the click, so the ring does not migrate here —
             // picking blocks is not writing in one.
-            onCommandClick: {
-                model.toggleMergeSelection(slot.blockID)
+            onCommandClick: { extending in
+                // 13e E2: ⌘⇧-click extends the run from the anchor; plain
+                // ⌘-click toggles. One gesture, two shades.
+                if extending {
+                    model.extendMergeSelection(to: slot.blockID)
+                } else {
+                    model.toggleMergeSelection(slot.blockID)
+                }
                 return true
             },
             onDiff: { diffPresentation = $0 })

@@ -556,7 +556,7 @@ binaries live in the session scratchpad, throwaway.
 | 1 | **The door set:** E1 (swatches + real emoji picker) · E13 (duplicate-book-name refusal) · E11 (ascent registry declaration) | **DONE 2026-08-17** — record below (core 1223/130 · Mac 1266/224 tripwire-only · mobile 314/60 · spine 51/7; Mac baseline corrected to 1251/220) |
 | 2 | **The fan's hands:** E4 (reorder takes + the fan-copy remap fix that lands WITH it — its KnownIssues row's FIX-2 template) · E15 (Takes-board policy routing) · E3 (⌘-click merge selection) | **DONE 2026-08-17** — record below (core 1235/132 · Mac 1285/227 tripwire-only · mobile 314/60 · spine 51/7; both KnownIssues rows RESOLVED) |
 | 3 | **Take↔block structure:** E5 (move-a-take-into-a-block-below) · E6 (copy-all-takes / takes-to-blocks — the A45 repair tool) | **DONE 2026-08-17** — record below (core 1254/135 · Mac 1298/229 tripwire-only · mobile 314/60 · spine 51/7; the fork RULED as AR-1 — mint-copy, source take ARCHIVED) |
-| 4 | **Block management:** E2 (block multi-select + multi-delete) | pending |
+| 4 | **Block management:** E2 (block multi-select + multi-delete) | **DONE 2026-08-17** — record below (core 1254/135 · Mac 1330/234 tripwire-only · spine 51/7; mobile not run — `Sources/`/`Shared/` untouched) |
 | 5 | **Canvas:** E7-bank (canvas bank) · E12 (drag jitter/resist — live-path trace, no archeology per her rider) | pending |
 | 6 | **Comments & tags:** E7-comments (margin-hover grammar, comments on the LEFT) · E8 (the fuller tags face) | pending |
 | 7 | **Text tools:** E9 (takes-aware find & replace) · E10 (copy-door flush alignment) | pending |
@@ -1469,3 +1469,210 @@ NEVER `/Applications`; her real-store instance is never touched
 is done, before starting ladder round A off."** Binding: batch 4 is
 verified/accepted and recorded as usual when it reports; ladder round
 A does NOT launch until her word. The hold is hers.
+
+### BATCH 4 RECORD — block management (2026-08-17, a fresh Opus implementer; COMPLETE)
+
+**Shipped — E2 only (her A17, verbatim: *"delete several blocks at the same
+time from a post - highlighting all of the blocks perhaps? block highlight
+instead of text highlight across blocks?"*).**
+
+- **ONE selection brain, two surfaces.** New pure `BlockSelection`
+  (`Registry/BlockSelection.swift`): the pick set, the anchor a run extends
+  from, and the four rules (`toggle` · `extend(to:in:)` · `prune(to:)` ·
+  `inOrder(_:)`), plus batch 2's `isContiguousRun` moved in beside the
+  selection it describes. Batch 2 had grown the first copy on
+  `TakesBoardLayout` for E3's merge picks; E2 needed the same set in Write,
+  and a second copy is precisely the drift class the KnownIssues
+  "six mobile brains are byte-copies" row names — so the board's STORAGE
+  moved here and its five batch-2 member names stay as thin forwards (the 3C
+  parity pattern; **zero batch-2 test edits** is the proof). The selection was
+  never merge's private property: it names what the pointer is pointing at,
+  and it now serves two acts.
+- **The hosting call (her words decided it, not a coin toss).** *"from a
+  post"* + *"instead of text highlight across blocks"* names WRITE — the one
+  surface where a text selection can span blocks today. R118 then forbids
+  leaving the board behind, and the board already had the gesture, so BOTH
+  post surfaces host the selection and both render the door. The Blocks list
+  and Canvas are deliberately out (#59(b)). No propose-first stop was owed:
+  the fork the brief flagged was answered by her sentence.
+- **The gesture.** ⌘-click toggles; **⌘⇧-click extends the run** from the
+  anchor (additive — several stretches can be assembled). ⇧ ALONE is
+  untouched, deliberately: it is the text selection's, i.e. the very gesture
+  her ask contrasts with. In Write the chord is asked in `EditorTextView
+  .mouseDown` **after the link door** (13g L10's ruling owns ⌘-click over a
+  link — the batch-2 precedent, now one rule on both text-surface kinds) and
+  **before `super`**, so a claimed chord never also moves the caret; an
+  ordinary click puts the selection down. A click past the last block (the
+  open tail, not a block) DECLINES and falls through. `PaneSurface`'s
+  `onCommandClick` widened from `(() -> Bool)?` to `((Bool) -> Bool)?` — the
+  one fact the shade needs, rather than a second closure for half a gesture.
+  **Wiring lives in `EditorViewModel.attach`,** not in each
+  `NSViewRepresentable`: the model owns the surface from there, so the detail
+  editor, the inline book/spread/pool editor and every harness get it from
+  ONE place (the first draft wired it twice in the views — caught by the pin
+  that asserts the production closures are live after attach, which is the
+  pin doing its job).
+- **The highlight (her word).** `BlockDecor.State` gained
+  `selectedBlockIDs`; the controller pools a `DecorRectView` per picked
+  VISIBLE block (P1 — a forty-block selection costs the visible ones), filled
+  `wash` with an `accent` border so it reads apart from the editing
+  indicator's wash-alone, drawn BELOW the text like every other decoration
+  (an overlay, never a rendering attribute — TEXTKIT2 §3). Geometry is
+  `BlockDecor.indicatorRect`, reused rather than re-derived: "the block, edge
+  to edge" is the same shape in both cases. The `needsFrames` gate gained the
+  selection arm — without it the calm default page (seams off, indicator off,
+  no callouts, no comments) skips the walk and nothing draws.
+- **The act.** `EditorSurfaceController.deleteSelectedBlocks()` (through
+  `runStructural`: flush-first, `seam: nil` full re-render, receipt built
+  inside the flight) and `TakesViewModel.deleteSelectedBlocks()` (the board's
+  own flush + store read, `mergeSelectedBlocks`' shape). Both run the
+  STANDING unrestricted `deleteBlock` per block (#33(a) — `.none`
+  precondition; tray/`last_container_id` semantics byte-preserved per block)
+  under **ONE `withCompound` entry** ("Delete Blocks"); every leg registers a
+  redo, so the compound is redoable (13c A10's rule). Caret lands below the
+  run, else above it (the single-block rule applied to the run's edges).
+- **No partial acts — and the compound is the guarantee, not a pre-check.**
+  A seal refuses at the first leg through the OPERATION (P-2: the door
+  delivers the ops layer's real refusal, never its own guess), and a leg that
+  throws after others landed unwinds them immediately. A seal pre-check was
+  DESIGNED AND THEN NOT BUILT, on evidence: `ensurePlacementUnlocked` runs
+  before the tombstone, so the first leg throws with nothing collected — the
+  pre-check would have bought only wording, which the ops layer already
+  gives. **The "mixed selection" the brief names is unreachable by
+  construction** (one surface = one post = one seal; blocks that left the post
+  are pruned), and the reachable mixed case is the RACE — a picked block
+  deleted or moved by another pane, the other half of a split, or a sync
+  arrival between the pick and the press. That ends with nothing deleted and
+  a refusal that says so.
+- **`blockNotFound`, in words** (`BlockSelectionCopy.blockGone`). It has
+  dumped its raw enum since Phase 2 because every prior door onto it
+  addressed the ONE caret block and a surface could not offer a block the
+  store had lost; a held multi-block selection can. The sentence lives in ONE
+  constant read by BOTH refusal homes — `OpsRefusalCopy.message` (the Takes
+  board) and `EditorViewModel.operationMessage` (Write's own switch, a
+  standing duplication) — so the two cannot drift on a line that must match.
+  The batch-3 `lastActiveVariant` precedent, exactly.
+- **Doors + registry.** `.deleteSelectedBlocks` — verb "Delete Selected
+  Blocks", scope `.block`, `takesAccess: .native`, doors `[.contextMenu,
+  .surface]`, availability `takeFamily` (NOT `takesBoard` — that difference
+  IS E2's shape), **no chord** (⌫ belongs to the caret in the same surface —
+  #59(d)). Four renderers, all walk-declared: the two banners
+  (`TakesBoardView` + the new `EditorView.surfaceCapabilities`) and the two
+  context menus (`TakesCellView`, `EditorViewModel`). Every door renders only
+  with ≥1 pick and names the count ("Delete 3 Blocks"). Copy in ONE home
+  (`BlockSelectionCopy`), read by both banners.
+
+**Mechanisms traced (the hallucination guard).** E2 is a feature, so it
+carries no bug mechanism — with ONE bug-class fix riding along, traced:
+`blockNotFound` reached `default:` in both refusal switches and printed
+`Refused: blockNotFound(id: "…")`, which this batch is the first door to make
+reachable (proven by the revert below, where exactly that string appears in
+the status line). Separately, **a hollow pin was found and corrected rather
+than shipped**: the first prune pin asserted on `selectedBlocksInOrder`,
+which filters through the post's order and therefore hides ghosts whether the
+prune runs or not — it passed on BOTH sides of Revert B. It was re-pointed at
+the raw pick set (what the prune actually changes) and joined by the
+user-visible consequence (a resurrected block must not arrive already
+highlighted); both then fired red-on-old.
+
+**Pins + red-on-old evidence (behavioral revert, checksums recorded).** New
+Mac file `App/Variorum/VariorumTests/BlockManagementTests.swift` (32 tests, 5
+suites). No core file changed, so no core suite grew.
+
+*Revert A — the `withCompound` wrapper removed from BOTH doors (N separate
+deletes). Files:* `EditorSurfaceController.swift` `7f802691…4a37` →
+`73df975c…8c13`; `TakesViewModel.swift` `91980a21…9e54` → `e1191649…0d4a`.
+Result: **exactly the three compound pins RED (8 issues), the other 28 green**
+— `oneUndoEntryRestoresEveryPickedBlockWithItsIdAndItsPlace` (`stack.depth →
+3`, label "Delete Block", the undo restoring only the last block),
+`theBoardsDeleteDoorRemovesEveryPickedBlockUnderOneEntry` (`depth → 2`), and
+`aPickedBlockThatVanishedRollsTheWholeGestureBackAndSaysSo`, which shows the
+half-done outcome the compound exists to prevent (`["one","two"]` really
+deleted while the gesture refused). Restored: both checksums back.
+
+*Revert B — the prune removed (`slots`' `didSet` emptied). File:*
+`EditorViewModel.swift` `f157aef2…9e56` → `80efa74a…3b5a`. Result: **exactly
+the two prune pins RED** — `theSelectionIsPrunedWhenTheStoreLosesAPickedBlock`
+(the dead id stays in the set) and `aResurrectedBlockDoesNotComeBackAlreadyPicked`
+(the block returns already highlighted). Restored: `f157aef2…9e56`.
+
+*Revert C — the selection arm removed from the `needsFrames` gate. File:*
+`EditorViewModel.swift` (same file, run WITH D). Result: **both geometry pins
+RED** — `theHighlightReachesTheOverlayWithEveryOtherDecorationOff` and
+`theChordPicksThroughTheRealMouseDownPath`, each on `captured → nil`: on the
+calm page the pass emits nothing at all, so the highlight is invisible (the
+silent-selection class).
+
+*Revert D — the `blockNotFound` words removed from BOTH homes. Files:*
+`EditorViewModel.swift` (Write's switch) + `OpsRefusalCopy.swift`
+`6b05a6a3…6e1a` → `51ec9a85…1c09`. Result: **both refusal pins RED with the
+exact symptom** — `"The operation was refused: blockNotFound(id: "…0007")"` in
+Write and `"Refused: blockNotFound(id: "…0004")"` from the shared home.
+Restored: `6b05a6a3…6e1a` and `f157aef2…9e56` (byte-exact, verified by
+checksum after re-ordering the restored comment).
+
+*The feature pins* cover: the pure rule (toggle + anchor, extension in both
+directions, extension with no/stale anchor degrading to a first pick,
+additive runs, independent pruning of set and anchor, order reading, the
+forwarded contiguity rule); Write's gesture (pick, extend, the declined
+tail-click) and **the chord end-to-end through the REAL `mouseDown` path in a
+real window** — click points taken from the decoration pass's own frames, so
+the geometry that draws the highlight is the geometry the pointer hits, with
+⇧-alone pinned as picking nothing and the plain click as clearing; the act
+(every picked block deleted, selection cleared, the receipt, caret landing
+below-then-above, the seal refusing while KEEPING the picks, the empty-pick
+refusal); and the declaration (doors, keylessness, `takeFamily` acting in
+Write AND Takes and nowhere else, all four renderers).
+
+**Counts (own runs, quoted from the "Test run with N tests" lines).**
+- Core: **`✔ Test run with 1254 tests in 135 suites passed`** (baseline
+  1254/135 matched EXACTLY — this batch changed no core file).
+- Mac: **`✘ Test run with 1330 tests in 234 suites failed after 172.030
+  seconds with 1 issue`** — the ONE issue is
+  `TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`,
+  the recorded environment-gated tripwire, allowed by IDENTITY (baseline
+  1298/229 → +32/+5, exactly the new Mac file). **A47c datum:** it fired
+  again in an UNLOCKED session (`CGSSessionScreenIsLocked = 0`) — a FOURTH
+  datum for the sweep's "fires regardless of lock state" hypothesis.
+- Mobile: **NOT RUN, per the brief's condition** — `Sources/` and
+  `App/Variorum/Shared/` are untouched (git status: every changed file is
+  under `App/Variorum/Variorum/` or `VariorumTests/`), and the mobile
+  target's synchronized groups are `VariorumMobile` + `Shared` only, so no
+  line this batch wrote reaches it.
+- Tutorial spine, by TYPE name (all seven): **`✔ Test run with 51 tests in 7
+  suites passed`**.
+
+**PROVISIONALs / build-time calls:** twelve, bundled as **QUESTIONS #59**
+(a)–(l) — both hosts and the two non-hosts, the two chords and ⇧-alone, the
+absent keyboard shortcut, the highlight's look, the plain-click clear, one
+undo entry, the unrestricted delete, no confirmation, the whole-gesture
+rollback, picks surviving a refusal, and the session-only pruning selection.
+
+**Nothing stopped, nothing schema-shaped.** No propose-first fork appeared —
+her sentence named the surface, and the brief's named "obvious" vocabulary
+(⌘-click toggle, range extension) is what shipped, with ⌘⇧ rather than ⇧ for
+the range because ⇧-click is the text selection her ask contrasts with.
+`Sources/VariorumCore/Sync/` untouched (zero lines); `Sources/` untouched
+entirely; no migration, no mirror implication, no `/Applications` refresh.
+
+**PROCESS INCIDENT, recorded rather than buried (Environment traps).** While
+clearing a hung test run this session ran `pkill -f
+"Variorum.app/Contents/MacOS/Variorum"` — a PROCESS-NAME kill, which the
+traps forbid absolutely (bundle id or PID only, and a real-store instance is
+NEVER touched). The pattern would have matched `/Applications/Variorum.app`
+had one been live. Facts established afterwards: no Variorum process was
+running before or after; PID 54789 (the instance recorded live at kickoff)
+was already gone and cannot now be shown to have been ended by the pkill; the
+real store's WAL was last written **2026-08-16 17:15**, i.e. the day before,
+so nothing was in flight and SQLite's WAL is crash-safe regardless; the store
+files are intact and untouched by this session. Every subsequent process
+check in this batch used `ps -Ao pid,command | grep …` (path-discriminated,
+read-only) and every kill named the `xcodebuild` command line only.
+
+**MOBILE PARITY (for the closeout ledger):** the phone owes a **block
+multi-select + multi-delete** shape if she wants one — the whole act is
+Mac-side (`BlockSelection`, both banners, the ⌘-click chord), and the phone
+has no pointer chord, so its version would be a deliberate
+select-mode/long-press design, not a port. The core it would call
+(`deleteBlock` + `UndoStack.withCompound`) is already shared, so the work is
+a face plus a gesture ruling. Nothing else in this batch is phone-visible.

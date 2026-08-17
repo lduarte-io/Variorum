@@ -75,6 +75,12 @@ final class EditorViewModel {
     }
     private(set) var caretBlockID: String?
     private(set) var caretVariantID: String?
+    /// **13e E2 (her A17) — the BLOCK selection.** Observed, because the
+    /// banner and the highlight both render from it. Session-only view
+    /// state, exactly like the Takes board's (it is the same
+    /// `BlockSelection` brain): nothing here is persisted, projected or
+    /// synced.
+    private(set) var blockSelection = BlockSelection()
     /// 13f W10b — blockID → its RELEASED originals (live, unplaced), from
     /// `Queries.unplacedOrigins`. Empty for an ordinary post; the "Show
     /// Original Block" door reads it synchronously at menu-build time.
@@ -196,7 +202,14 @@ final class EditorViewModel {
     // MARK: - Editor internals (never observed)
 
     @ObservationIgnored private(set) var index = BlockRangeIndex(entries: [], tailLength: nil)
-    @ObservationIgnored private(set) var slots: [Queries.RenderedBlock] = []
+    @ObservationIgnored private(set) var slots: [Queries.RenderedBlock] = [] {
+        // 13e E2: the block selection is pruned wherever the surface adopts
+        // a fresh projection — a `didSet` rather than a call at each of the
+        // two adoption sites, because a THIRD site added later would
+        // otherwise silently reopen the ghost-selection class (batch 2's
+        // pruning lesson, made structural).
+        didSet { pruneBlockSelection() }
+    }
     @ObservationIgnored private(set) var tailText = ""
     @ObservationIgnored private(set) weak var textView: EditorTextView?
     @ObservationIgnored private(set) weak var scrollView: NSScrollView?
@@ -308,6 +321,17 @@ final class EditorViewModel {
         canary.onFire = { [weak self] message in self?.canaryMessage = message }
         canary.arm(for: textView)
         textView.onCommitShortcut = { [weak self] in self?.commitCaretVariant() }
+        // 13e E2 (her A17): ⌘-click picks a block, ⌘⇧-click extends the run,
+        // an ordinary click puts the selection down. Wired HERE rather than
+        // in each `NSViewRepresentable` because the model owns the surface
+        // from this point — one wiring for the detail editor, the inline
+        // book/spread/pool editor, and every harness that attaches a real
+        // text view (two copies in the views would be a wiring a pin could
+        // pass without the app having).
+        textView.onBlockPick = { [weak self] offset, extending in
+            self?.pickBlock(atOffset: offset, extending: extending) ?? false
+        }
+        textView.onPlainClick = { [weak self] in self?.clearBlockSelection() }
         // QoL batch 3 (L6): the find bar's replacements arrive here. Only the
         // editor that owns a scroll view has a bar at all, so the hook is
         // wired only there — the inline book/spread/pool editor never sees a
@@ -1299,6 +1323,11 @@ final class EditorViewModel {
         await structural.deleteCaretBlock()
     }
 
+    /// 13e E2's Write door (her A17): every ⌘-clicked block, one undo entry.
+    func deleteSelectedBlocks() async {
+        await structural.deleteSelectedBlocks()
+    }
+
     // MARK: - 13e batch 3 (her A20/A21) — take ↔ block, forwards
 
     func moveCaretTakeIntoBlockBelow() async {
@@ -1552,6 +1581,8 @@ final class EditorViewModel {
         .divide, .extract, .makeBlock, .merge, .deleteInEveryTake, .showTakes,
         .showOriginBlock,  // 13f W10b — rendered only where an origin exists
         .callout,  // 13k K6 — the submenu this surface inserts beside Format
+        // 13e E2 (A17) — rendered only while blocks are picked
+        .deleteSelectedBlocks,
     ]
 
     func contextMenuItems() -> [EditorTextView.StructuralMenuItem] {
@@ -1583,6 +1614,18 @@ final class EditorViewModel {
                 self?.openCaretFan()
             },
         ]
+        // 13e E2 (her A17): the delete door for a ⌘-click selection,
+        // rendered only where it can act — with at least one block picked
+        // (the `.showOriginBlock` per-target shape below, P-2). The count is
+        // in the row's words so the menu says how much it will remove.
+        let picked = selectedBlocksInOrder
+        if !picked.isEmpty {
+            items.append(.init(
+                title: BlockSelectionCopy.deleteVerb(picked: picked.count), enabled: true
+            ) { [weak self] in
+                Task { await self?.deleteSelectedBlocks() }
+            })
+        }
         // 13f W10b: the lineage door, rendered ONLY on a block whose own
         // `derived_from` edge points at a live, unplaced original (P-2 — a
         // door that could never act is not rendered at all). Ordinary blocks
@@ -1786,6 +1829,62 @@ final class EditorViewModel {
             location = end + 1
         }
         return .end
+    }
+
+    // MARK: - The block selection (13e E2 — her A17)
+
+    /// The picked blocks in the POST's order — what the banner counts and
+    /// what the delete door walks (through a fresh STORE read; this order is
+    /// the surface's own and is a selection aid, never an authorization).
+    var selectedBlocksInOrder: [String] {
+        blockSelection.inOrder(index.entries.map(\.blockID))
+    }
+
+    /// The ⌘-click / ⌘⇧-click door, in document offsets — the surface knows
+    /// where the pointer landed, the index knows which block that is, and
+    /// this is the one place the two meet. Returns whether the click was
+    /// CLAIMED: a click past the last block (the open tail, which is not a
+    /// block yet) claims nothing and falls through to the ordinary caret
+    /// move it looked like.
+    @discardableResult
+    func pickBlock(atOffset offset: Int, extending: Bool) -> Bool {
+        guard let blockID = blockID(atOffset: offset) else { return false }
+        if extending {
+            blockSelection.extend(to: blockID, in: index.entries.map(\.blockID))
+        } else {
+            blockSelection.toggle(blockID)
+        }
+        refreshDecorations()
+        return true
+    }
+
+    func clearBlockSelection() {
+        guard !blockSelection.isEmpty || blockSelection.anchor != nil else { return }
+        blockSelection.clear()
+        refreshDecorations()
+    }
+
+    /// Drops picks the surface no longer holds. Called from `slots`' own
+    /// `didSet`, so every adoption path prunes; the decoration refresh only
+    /// fires when something actually left (the calm default costs nothing).
+    private func pruneBlockSelection() {
+        let before = blockSelection
+        blockSelection.prune(to: Set(index.entries.map(\.blockID)))
+        if blockSelection != before { refreshDecorations() }
+    }
+
+    /// Which block a document offset falls in — the index walk
+    /// `insertPosition(forOffset:)` already does, answering identity instead
+    /// of a boundary. The trailing separator belongs to the block BEFORE it
+    /// (a click at a block's very end is a click in that block).
+    func blockID(atOffset offset: Int) -> String? {
+        var location = 0
+        for entry in index.entries {
+            let end = location + entry.length
+            if offset <= end { return entry.blockID }
+            location = end + 1
+        }
+        return nil
     }
 
     // MARK: - Commit + history (Step 5)
@@ -2227,6 +2326,12 @@ final class EditorViewModel {
             || appearance.indicator != .off
             || !presentationsByBlock.isEmpty
             || !commentsByBlock.isEmpty
+            // 13e E2: a block selection needs frames like any other
+            // decoration — without this arm the calm default (seams off,
+            // indicator off, no callouts, no comments) skips the walk and
+            // the highlight never draws, which is the silent-selection
+            // class: she would be picking blocks with nothing to see.
+            || !blockSelection.isEmpty
         guard needsFrames, let textView, loaded,
               let layoutManager = textView.textLayoutManager,
               let contentManager = layoutManager.textContentManager,
@@ -2294,6 +2399,7 @@ final class EditorViewModel {
             fannedBlockIDs: Set(slots.filter(\.hasFan).map(\.blockID)),
             appearance: appearance,
             caretBlockID: caretBlockID,
+            selectedBlockIDs: blockSelection.picked,
             presentations: presentationsByBlock,
             comments: commentsByBlock,
             textLeft: origin.x,
@@ -2580,6 +2686,12 @@ final class EditorViewModel {
             return "The merged block needs at least one take — pair takes with ＋, or check “carry” on one."
         case .takePairedTwice:
             return "A take can sit in only one pairing (and a paired take can't also carry) — remove the duplicate first."
+        // 13e E2 (her A17): the multi-delete's rollback refusal. It shares
+        // ONE constant with `OpsRefusalCopy`'s case so this surface and the
+        // Takes board cannot drift on the sentence — the two refusal
+        // switches are a standing duplication, and a shared constant is how
+        // a line that MUST match stays matched.
+        case .blockNotFound: return BlockSelectionCopy.blockGone
         default: return "The operation was refused: \(opError)"
         }
     }

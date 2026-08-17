@@ -319,6 +319,13 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // a door — it is how the act's target is named, like a text selection in
     // Write.
     case mergeSelectedBlocks
+    // 13e E2 (her A17, verbatim: "delete several blocks at the same time
+    // from a post - highlighting all of the blocks perhaps? block highlight
+    // instead of text highlight across blocks?"). ONE act over the SAME
+    // block selection `.mergeSelectedBlocks` reads — hosted by both post
+    // surfaces that can carry one (Write's editor, the Takes board), which
+    // is why its availability is the take family's rather than the board's.
+    case deleteSelectedBlocks
     // 13e E6 (her A21, verbatim: "keyboard shortcut for copying all takes
     // together to clipboard, or turning all takes into their own blocks").
     // The CLIPBOARD half: the block's whole fan as text, in the app's OWN

@@ -176,6 +176,67 @@ nonisolated enum TakeStructureCopy {
     }
 }
 
+/// 13e batch 4 — what the BLOCK SELECTION says (her A17, verbatim: *"delete
+/// several blocks at the same time from a post - highlighting all of the
+/// blocks perhaps? block highlight instead of text highlight across
+/// blocks?"*). ONE home, for the `TakeStructureCopy` reason: the two post
+/// surfaces that host a selection — Write's editor and the Takes board —
+/// render the same banner and the same receipt, and words written twice are
+/// a promise no test can keep.
+nonisolated enum BlockSelectionCopy {
+    /// The banner's line. It teaches the second gesture where the first one
+    /// just worked, which is the only moment the hint is welcome.
+    static func bannerLabel(picked: Int) -> String {
+        picked == 1
+            ? "1 block picked — \u{2318}-click another, or \u{2318}\u{21e7}-click to "
+                + "pick a whole run"
+            : "\(picked) blocks picked"
+    }
+
+    static func deleteVerb(picked: Int) -> String {
+        picked <= 1 ? "Delete Block" : "Delete \(picked) Blocks"
+    }
+
+    static let deleteHelp =
+        "Delete every picked block — each one waits in this note's "
+        + "deleted-blocks tray, and \u{2325}\u{2318}Z brings them all back at once"
+
+    /// The receipt. It names the tray AND the one undo, because the whole
+    /// point of the compound is that a multi-delete is ONE mistake to
+    /// reverse, not N.
+    static func deletedNote(_ count: Int) -> String {
+        (count == 1
+            ? "Block deleted"
+            : "\(count) blocks deleted")
+            + " — \u{2325}\u{2318}Z undoes it in one go, and they wait in this "
+            + "note's deleted-blocks tray."
+    }
+
+    /// Nothing picked. Reachable from the routed/registry note only; the
+    /// banner and the context row do not render without a selection (P-2).
+    static let nothingPicked =
+        "\u{2318}-click the blocks you want to remove first — they highlight as "
+        + "you pick them."
+
+    /// **`blockNotFound`, in words.** It has existed since Phase 2 and
+    /// dumped the raw enum, because until now every door onto it addressed
+    /// the ONE block the caret was in and a surface could not offer a block
+    /// the store had lost. A multi-block selection can: it is held across
+    /// time while the store moves under it (another pane, the other half of
+    /// a split, a sync arrival). The compound's atomic rollback means she
+    /// meets it with NOTHING deleted — which is the fact the words must
+    /// carry, or a rolled-back gesture reads as a half-done one.
+    ///
+    /// It lives here, in ONE place, because Write's editor keeps its own
+    /// refusal switch (`EditorViewModel.operationMessage`) beside
+    /// `OpsRefusalCopy` and both of this act's hosts must say the same
+    /// sentence — a shared constant is what makes that true by
+    /// construction rather than by proofreading.
+    static let blockGone =
+        "One of the blocks you picked is already gone — it may have been "
+        + "deleted or moved elsewhere. Nothing was deleted; pick again and retry."
+}
+
 nonisolated enum OpsRefusalCopy {
     static func message(for error: Error) -> String {
         if let error = error as? OperationError {
@@ -245,6 +306,18 @@ nonisolated enum OpsRefusalCopy {
             case .noConvertibleTakes:
                 return "This block has no other takes with text in them — "
                     + "nothing to turn into blocks."
+            // 13e batch 4 (E2 — her A17): `blockNotFound` has existed since
+            // Phase 2 and dumped the raw enum, because until now every door
+            // onto it addressed the ONE block the caret was in and the
+            // surface could not offer a block the store had lost. A
+            // multi-block selection can: it is held across time while the
+            // store moves under it (a sync arrival, another pane, the other
+            // half of a split), and the compound's atomic rollback means she
+            // meets this refusal with NOTHING deleted — which is the fact the
+            // words have to carry, or a rolled-back gesture reads as a
+            // half-done one.
+            case .blockNotFound:
+                return BlockSelectionCopy.blockGone
             default:
                 return "Refused: \(error)"
             }

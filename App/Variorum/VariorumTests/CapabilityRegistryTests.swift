@@ -227,6 +227,13 @@ struct CapabilityRegistryTests {
             // 13k K11/K12: the context bar's own icon row — ← and → (the
             // ⌘[ / ⌘] acts, wearing their faces) and the ＃ tag fold.
             .union(ContextBar.surfaceCapabilities)
+            // 13e E2 (A17): Write's block-selection banner — the SECOND
+            // renderer of the one delete-selected act (the board's banner is
+            // the first). A JUSTIFIED EDIT to this pin: E2 adds a surface
+            // that renders a `.surface` door, and the union names every
+            // renderer by construction, so a new renderer is a new line
+            // here. Without it the walk fails, which is the pin working.
+            .union(EditorView.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

@@ -38,8 +38,9 @@ struct TakesCellView: View {
     var caretToEndToken: Int = 0
     /// 13e E3 (her A18): the ⌘-click claim, set ONLY by the takes board's
     /// article cell — nil on the Lenses board and anywhere else, so no other
-    /// composition's ⌘-click behaviour moves.
-    var onCommandClick: (() -> Bool)?
+    /// composition's ⌘-click behaviour moves. The `Bool` is 13e E2's: ⇧ was
+    /// held too, i.e. extend the run rather than toggle this one.
+    var onCommandClick: ((Bool) -> Bool)?
     let onDiff: (TakesDiffPresentation) -> Void
 
     var body: some View {
@@ -167,6 +168,16 @@ struct TakesCellView: View {
                     Task { await model.mergeSelectedBlocks() }
                 })
             }
+            // 13e E2 (her A17): the delete door over the SAME selection.
+            // Rendered from ONE pick, not two — one picked block is a
+            // perfectly good thing to delete, where a merge needs a partner.
+            if !picked.isEmpty {
+                specs.append(.init(
+                    title: BlockSelectionCopy.deleteVerb(picked: picked.count)
+                ) {
+                    Task { await model.deleteSelectedBlocks() }
+                })
+            }
         }
         if slot.variantID != resolved.variantID, let chosenText = slot.text {
             specs.append(.init(title: "Diff against chosen") {
@@ -238,6 +249,8 @@ struct TakesCellView: View {
         .callout,  // 13k K6 — the frame door where the takes are
         // 13e E3 (A18) — rendered only on the Takes board with a selection
         .mergeSelectedBlocks,
+        // 13e E2 (A17) — the delete door over the same selection
+        .deleteSelectedBlocks,
         // 13e E6 (A21) — the clipboard half's card door
         .copyAllTakes,
         // 13e batch 3 (A20/A21) — the take↔block pair's card doors

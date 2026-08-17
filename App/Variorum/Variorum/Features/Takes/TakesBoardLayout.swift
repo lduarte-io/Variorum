@@ -313,29 +313,42 @@ final class TakesBoardLayout {
         expandedBlocks = []
     }
 
-    // MARK: - The merge selection (13e E3 — her A18: "⌘-click in Takes to
-    // select blocks to merge; merge several when they have no takes")
+    // MARK: - The block selection (13e E3 — her A18: "⌘-click in Takes to
+    // select blocks to merge"; 13e E2 — her A17's multi-DELETE joins it)
 
-    /// Blocks ⌘-clicked into the merge selection — SESSION-ONLY view state,
+    /// Blocks ⌘-clicked into the board's selection — SESSION-ONLY view state,
     /// exactly like expansion: it names what the author is pointing at, never
     /// anything the store keeps. It dies with the board.
-    private(set) var mergeSelection: Set<String> = []
+    ///
+    /// 13e batch 4 (E2): the STORAGE is now the shared `BlockSelection`
+    /// brain, because Write's editor needed the same set and the same rules
+    /// and a second copy is the drift class. The batch-2 member names below
+    /// are kept as thin forwards (the 3C parity pattern — every batch-2 pin
+    /// reads unmodified), and the selection now serves TWO acts: merge (E3)
+    /// and delete (E2). It was never merge's private property; it is what
+    /// the pointer is pointing at.
+    private(set) var selection = BlockSelection()
+
+    var mergeSelection: Set<String> { selection.picked }
 
     func toggleMergeSelection(_ blockID: String) {
-        if mergeSelection.contains(blockID) {
-            mergeSelection.remove(blockID)
-        } else {
-            mergeSelection.insert(blockID)
-        }
+        selection.toggle(blockID)
+    }
+
+    /// ⌘⇧-click: extend the run from the anchor (E2's addition — a run of
+    /// blocks is exactly what a multi-delete addresses, and picking twelve
+    /// of them one ⌘-click at a time is the friction her ask names).
+    func extendMergeSelection(to blockID: String, in order: [String]) {
+        selection.extend(to: blockID, in: order)
     }
 
     func clearMergeSelection() {
-        guard !mergeSelection.isEmpty else { return }
-        mergeSelection = []
+        guard !selection.isEmpty || selection.anchor != nil else { return }
+        selection.clear()
     }
 
     func isSelectedForMerge(_ blockID: String) -> Bool {
-        mergeSelection.contains(blockID)
+        selection.contains(blockID)
     }
 
     /// Drops selected blocks the post no longer holds (a merge's own
@@ -343,28 +356,15 @@ final class TakesBoardLayout {
     /// slot set at adoption, exactly as it passes the fanned set to
     /// `expandAll`; this component never reads the projection.
     func pruneMergeSelection(to blockIDs: Set<String>) {
-        let kept = mergeSelection.intersection(blockIDs)
-        guard kept != mergeSelection else { return }
-        mergeSelection = kept
+        selection.prune(to: blockIDs)
     }
 
-    /// **Do these blocks form ONE unbroken run of the post?** Merge joins
-    /// NEIGHBOURS (AppSpec §9: the blocks must be placed adjacently, `first`
-    /// immediately before `second`), so a selection with a gap in it can only
-    /// ever refuse — and it must refuse by NAME, before anything is minted,
-    /// rather than half-merging and rolling back. Pure and order-driven: the
-    /// caller supplies the post's real order.
+    /// Batch 2's name for the shared rule (`BlockSelection.isContiguousRun`),
+    /// kept so its pins read unmodified.
     nonisolated static func isContiguousRun(
         _ picked: Set<String>, in order: [String]
     ) -> Bool {
-        guard !picked.isEmpty else { return false }
-        let indices = order.enumerated()
-            .filter { picked.contains($0.element) }
-            .map(\.offset)
-        guard indices.count == picked.count, let first = indices.first,
-              let last = indices.last
-        else { return false }  // a selected block the order doesn't hold
-        return last - first + 1 == indices.count
+        BlockSelection.isContiguousRun(picked, in: order)
     }
 
     // MARK: - Discrete paging (session-only; model-owned)
