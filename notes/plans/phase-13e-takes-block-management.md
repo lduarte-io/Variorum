@@ -1393,3 +1393,74 @@ core/`Queries` work, so the phone needs faces only (its takes surface for the
 first two; a share/copy row for the third). `TakeClipboard` itself is
 AppKit-side and would need an iOS twin (`UIPasteboard`); the projection it
 copies (`Queries.blockTakes`) is already shared.
+
+**ARCHITECT ACCEPTANCE (2026-08-17, batch 3):** ACCEPTED on spot-checks —
+`b1014e6` + `0a3e347` verified (tree clean; zero `Sync/` files in the
+diff; core build clean; the E5/A21 core suites re-run green 19/3 by the
+architect's own run; the table row, record, and QUESTIONS #58 in the
+commit). AR-1(b)'s trace answered the locked-take call from the code
+(`performArchiveVariant` never checks `locked` → permitted; copy not
+born locked). Third unlocked A47c datum recorded. Parity flags for the
+closeout: the phone owes doors for all three acts (core/Queries are
+shared; `TakeClipboard` needs a `UIPasteboard` twin). Next free
+QUESTIONS number: **#59**.
+
+**THE REVIEW SEAM PLAN (architect, 2026-08-17 — under her granted
+latitude for "a couple" of Fable cold reviews):** ladder round A runs
+AFTER BATCH 4 over the combined batches-1–4 diff (`6346853..`) — the
+ops/structural half of the phase reviewed while its implementers'
+records are fresh; ladder round B is the standard phase-end review
+over the remainder (batches 5–8 + any round-A fixes). Both run
+`notes/REVIEW_PROMPT.md` VERBATIM, fresh cold reviewer each, zero
+framing, findings recorded repo-first before any fix session.
+
+## Batch 4 brief — block management (a FRESH Opus implementer; self-contained)
+
+**Read first, in full:** `CLAUDE.md` (+ canon — AppSpec §9's
+`deleteBlock`/`restoreBlock`/tray semantics and the structural
+undo/redo contract bind); this plan file TOP TO BOTTOM (batch 2's
+board-selection precedent and batch 3's compound-undo shapes are your
+templates); the "Applying the constitution" notes in
+`.claude/skills/architect-phase/SKILL.md`; **the 13c intake ledger row
+A17** (`notes/plans/phase-13c-book-forms-and-conversions.md`) — E2
+builds HER ask; her verbatim words are the spec. Do your own reading;
+at most ONE read-only lookup subagent, external facts only.
+
+**Scope: E2 ONLY — block-level multi-select and multi-delete (A17).**
+
+- Selection is SESSION-ONLY UI state (the batch-2 `TakesBoardLayout`
+  precedent); which surfaces host it is A17's words' call — if her
+  words underdetermine the hosting surface(s) or gesture vocabulary
+  beyond the obvious (⌘-click toggle, ⇧-click range), build the
+  spec-defensible obvious and PROVISIONAL the rest; a genuinely
+  fork-sized shape question comes back to the architect propose-first.
+- Multi-delete = the standing UNRESTRICTED `deleteBlock` per block
+  (QUESTIONS #33(a) — `.none` precondition), under **ONE compound
+  undo entry** (`withCompound`; every leg redoable, exact-row) —
+  tray/`last_container_id` semantics byte-preserved per block, so the
+  per-post deleted-blocks tray lists every victim and `restoreBlock`
+  revives each. Seal refuses the whole gesture; a mixed selection
+  (some sealed) refuses honestly rather than half-acting (fire-and-DO
+  — no partial surprises).
+- Registry-declare acts + doors (`.surface`/context-menu as fits;
+  chord only if a free one exists under the standing collision-sweep
+  discipline — record the sweep); refusals in words (the batch-3
+  `OpsRefusalCopy` pin class).
+- Red-on-old pins: the compound undo restores ALL selected blocks with
+  IDs intact; the mixed-seal refusal; the selection-prune-on-store-change
+  class if your selection can dangle (trace it — the batch-2
+  adoption-time pruning is the template).
+
+**The loop (binding, unchanged):** red-on-old by behavioral revert
+with checksums; PROVISIONAL → QUESTIONS.md (next free **#59**); STOP
+on anything schema-shaped; ZERO `Sources/VariorumCore/Sync/` lines;
+spine green by TYPE name; full suites with counts from your own "Test
+run with N tests" lines — **baselines to match-or-beat: core 1254/135
+· Mac 1298/229 (the ONE tripwire red allowed by identity) · mobile
+314/60 · spine 51/7**; mobile runs only if `Sources/`/`Shared/` is
+touched (iPhone 16e). Builds/tests SYNCHRONOUS — never end your turn
+on a background wait. Append your batch record here BEFORE final
+claims only with PENDING marks; commit per convention; NEVER push;
+NEVER `/Applications`; her real-store instance is never touched
+(Environment traps bind verbatim; Mac tests via the cwd-independent
+`-project` invocation).
