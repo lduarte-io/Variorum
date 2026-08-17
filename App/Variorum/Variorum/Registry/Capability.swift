@@ -97,6 +97,7 @@ nonisolated enum RoutedCommand: Equatable, Sendable {
     case comments        // ⌘⇧' — the target block's comments panel
     case callout(CalloutEdit)  // 13c R2-2 (A13(a)): the target block's frame
     case pageFan(Int)    // ⌥⌘←/→ — page the focused block's take cards
+    case copyAllTakes    // 13e E6 (A21): the target block's whole fan → the clipboard
 }
 
 // MARK: - Choreography intents (the ONE mode-switch choreography's payloads)
@@ -316,6 +317,13 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // a door — it is how the act's target is named, like a text selection in
     // Write.
     case mergeSelectedBlocks
+    // 13e E6 (her A21, verbatim: "keyboard shortcut for copying all takes
+    // together to clipboard, or turning all takes into their own blocks").
+    // The CLIPBOARD half: the block's whole fan as text, in the app's OWN
+    // ratified export shape (the shown take, then its labeled "Alternates"
+    // section — literally the format her 2026-07-25 intake note was exported
+    // in). Reads only; writes no row.
+    case copyAllTakes
     // Scrap tagging (13b 4D — N32(c)/S4-15: the one canvas-only door grows
     // registry-declared siblings on the scrap rows)
     case tagBlock

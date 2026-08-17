@@ -250,6 +250,11 @@ extension EditorView {
             return true
         case .pageFan:
             return false  // fan pages live on the Takes board
+        case .copyAllTakes:
+            // 13e E6 (A21): native in Write — the caret block's fan, same
+            // bytes and same sentence as the boards' door (R118).
+            Task { await model.copyCaretBlockTakes() }
+            return true
         case .find(let action):
             // QoL batch 3 (L6): the find bar lives in THIS editor's own scroll
             // view. The inline book/spread/pool editor owns none, so it

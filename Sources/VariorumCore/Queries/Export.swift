@@ -112,6 +112,20 @@ extension Queries {
     /// section. A dead/missing block exports as the empty string (tolerant
     /// read, the Queries doctrine).
     public static func exportBlock(_ db: Database, blockID: String) throws -> String {
+        try blockTakes(db, blockID: blockID).markdown
+    }
+
+    /// **13e E6 (her A21, the clipboard half: *"copying all takes together to
+    /// clipboard"*)** — `exportBlock`'s projection PLUS how many takes it
+    /// represents, from the one walk that builds it. The count exists so the
+    /// door's confirmation cannot claim a different number than the text
+    /// holds: "all takes" means exactly what the ratified export shape means
+    /// (the shown take when it has text, then its live ACTIVE non-blank
+    /// alternates — archived takes are out of the fan and out of the export).
+    /// A second implementation of that rule app-side would be the drift class.
+    public static func blockTakes(
+        _ db: Database, blockID: String
+    ) throws -> (markdown: String, takeCount: Int) {
         let row = try Row.fetchOne(
             db,
             sql: """
@@ -132,21 +146,24 @@ extension Queries {
                 WHERE b.id = ? AND b.deleted_at IS NULL
                 """,
             arguments: [blockID])
-        guard let row else { return "" }
+        guard let row else { return ("", 0) }
         let renderedID: String? = row["variant_id"]
         let renderedText: String? = row["text"]
         var pieces: [String] = []
+        var takeCount = 0
         if let renderedText, !renderedText.isEmpty {
             pieces.append(exportMapped(
                 renderedText,
                 presentation: BlockPresentation.decode(row["presentation"])))
+            takeCount += 1
         }
         let alternates = try exportAlternates(
             db, blockID: blockID, renderedVariantID: renderedID)
         if !alternates.isEmpty {
             pieces.append(alternatesSection(alternates))
         }
-        return joinRenderedTexts(pieces)
+        takeCount += alternates.count
+        return (joinRenderedTexts(pieces), takeCount)
     }
 
     // MARK: - Reading export

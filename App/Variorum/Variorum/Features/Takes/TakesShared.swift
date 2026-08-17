@@ -133,6 +133,13 @@ struct TakesCellView: View {
             .init(title: "Label take\u{2026}") {
                 model.requestTakeLabel(variantID: resolved.variantID)
             },
+            // 13e E6 (her A21's clipboard half): the whole fan as text. The
+            // target is named EXPLICITLY — a right-click never moves the
+            // keyboard, so the routed target could name another card's block
+            // (13k K6's lesson, same fix).
+            .init(title: "\(CapabilityRegistry.capability(.copyAllTakes).verb) (⌘⇧C)") {
+                Task { await model.copyAllTakes(blockID: slot.blockID) }
+            },
         ]
         // 13e E3 (her A18): the merge door for a ⌘-click selection, rendered
         // only where it can act — on the Takes board, with two or more blocks
@@ -219,6 +226,8 @@ struct TakesCellView: View {
         .callout,  // 13k K6 — the frame door where the takes are
         // 13e E3 (A18) — rendered only on the Takes board with a selection
         .mergeSelectedBlocks,
+        // 13e E6 (A21) — the clipboard half's card door
+        .copyAllTakes,
     ]
 }
 

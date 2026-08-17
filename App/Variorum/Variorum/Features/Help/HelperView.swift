@@ -68,6 +68,9 @@ struct HelperView: View {
             ("⌘⇧A", "archive the take you're in"),
             ("⌘⇧L", "save current choices as a lens"),
             ("⌥⌘← / ⌥⌘→", "previous / next page of takes (on the Takes board)"),
+            // 13e E6 (A21's clipboard half).
+            ("⌘⇧C", "copy this block's takes — the shown one, then its alternates "
+                + "(⌘C is still ordinary copy)"),
         ]),
         ShortcutGroup(title: "Writing", items: [
             ("⌘S", "commit — an immutable savepoint of the take you're in"),

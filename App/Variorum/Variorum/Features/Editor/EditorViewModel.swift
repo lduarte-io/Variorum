@@ -2329,6 +2329,23 @@ final class EditorViewModel {
         }
     }
 
+    /// **13e E6 (her A21's clipboard half)** — the caret block's whole fan on
+    /// the clipboard, through the ONE brain the boards' door uses
+    /// (`TakeClipboard`), so no surface copies different bytes or speaks a
+    /// different sentence (R118). Flushes first: the projection reads the
+    /// store, and this editor's buffer is normally a debounce ahead of it.
+    func copyCaretBlockTakes(
+        to destination: TakeClipboard.Destination = .general
+    ) async {
+        guard let caretBlockID else {
+            showStatus("Place the caret in a block first — this copies that block's takes.")
+            return
+        }
+        await autosave.flushNow()
+        showStatus(await TakeClipboard.copyBlock(
+            caretBlockID, session: session, to: destination).message)
+    }
+
     /// Sets/clears the caret block's callout frame (R16/R27). Kept as the
     /// named colour door the Phase 13 pins drive; the routed door above is
     /// the one the menu and the boards use.

@@ -306,6 +306,7 @@ struct CapabilityRegistryTests {
             .toggleSeal, .comments,
             .callout(.toggle),  // 13c R2-2 (A13(a))
             .pageFan(1),
+            .copyAllTakes,  // 13e E6 (A21's clipboard half)
         ]
         for command in commands {
             let note = CapabilityRegistry.unhandledNote(

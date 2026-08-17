@@ -1098,6 +1098,31 @@ final class TakesViewModel {
         }
     }
 
+    // MARK: - Copy all takes (13e E6 — her A21's clipboard half)
+
+    /// *"keyboard shortcut for copying all takes together to clipboard"* —
+    /// the target block's whole fan as text, in the app's own ratified export
+    /// shape (`TakeClipboard`, the one brain both editors' doors use).
+    ///
+    /// FLUSHES FIRST so the clipboard carries what she SEES: the projection
+    /// reads the store, and a dirty buffer means the store is a keystroke
+    /// behind the card. A refused flush stops the act (13c R2-6's
+    /// one-act-one-contract rule) rather than copying stale prose silently.
+    /// `blockID` names the target explicitly where a caller knows it (a
+    /// right-click does not move the keyboard — 13k K6's lesson); nil uses the
+    /// standing routed target.
+    func copyAllTakes(
+        blockID: String? = nil, to destination: TakeClipboard.Destination = .general
+    ) async {
+        guard let targetID = blockID ?? commandTargetSlot?.blockID else {
+            speak("Click into a block first — this copies that block's takes.")
+            return
+        }
+        guard await flushPendingText() else { return }
+        speak(await TakeClipboard.copyBlock(
+            targetID, session: session, to: destination).message)
+    }
+
     // MARK: - The merge selection (13e E3 — her A18)
 
     /// The ⌘-clicked blocks — the board layout's, forwarded (session-only

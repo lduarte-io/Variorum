@@ -84,6 +84,8 @@ struct EditorCommands: Commands {
         .newTake, .blankTake, .blankTakeAsChosen, .chooseTake,
         .previousTake, .nextTake, .archiveTake, .saveChoicesAsLens,
         .closeAllTakes, .pageFanBack, .pageFanForward,
+        // 13e E6 (A21): copy all takes.
+        .copyAllTakes,
         .previousBlock, .nextBlock, .blockComments, .callout,
         .findInPost, .findAndReplace, .findNext, .findPrevious, .useSelectionForFind,
         // 13g batch 3 (L8): the Format menu.
@@ -133,6 +135,13 @@ struct EditorCommands: Commands {
         case .previousTake: (.leftArrow, [.command, .control])
         case .nextTake: (.rightArrow, [.command, .control])
         case .archiveTake: ("a", [.command, .shift])
+        // 13e E6 (A21's clipboard half). THE COLLISION SWEEP'S RESULT: ⌘⇧C is
+        // FREE — no `c` chord is bound anywhere in the app but ⌥⌘C (callout),
+        // swept across this table, every `keyboardShortcut(` call site in
+        // `Variorum/` and `Shared/`, every `NSMenuItem` keyEquivalent (all
+        // empty strings) and both key overrides (⌘S; the Tab/Return pair).
+        // ⌘C is the system's Copy and stays untouched.
+        case .copyAllTakes: ("c", [.command, .shift])
         case .saveChoicesAsLens: ("l", [.command, .shift])
         case .pageFanBack: (.leftArrow, [.command, .option])
         case .pageFanForward: (.rightArrow, [.command, .option])
@@ -397,6 +406,13 @@ struct EditorCommands: Commands {
             Button(verb(.pageFanForward)) { actions?.dispatch(.pageFan(1)) }
                 .keyboardShortcut(.rightArrow, modifiers: [.command, .option])
                 .disabled(!enabled(.pageFanForward))
+
+            // 13e E6 (her A21's clipboard half): the block's whole fan as
+            // text, in the app's own ratified export shape. ⌘⇧C — ⌘C stays
+            // the system's Copy.
+            Button(verb(.copyAllTakes)) { actions?.dispatch(.copyAllTakes) }
+                .keyboardShortcut("c", modifiers: [.command, .shift])
+                .disabled(!enabled(.copyAllTakes))
 
             Divider()
 

@@ -341,6 +341,26 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "⌘-click blocks on the Takes board (⌘2) to pick what merges.",
             availability: takesBoard),
+        // 13e E6 (her A21's clipboard half, verbatim: *"keyboard shortcut for
+        // copying all takes together to clipboard"*). TAKE scope, native
+        // wherever takes are: the target is the block you are in (the caret
+        // block in Write, the focused card's block on a board) and the text is
+        // the app's OWN ratified export shape — the shown take, then the
+        // labeled Alternates section (`Queries.blockTakes`, one rule shared
+        // with export, so the confirmation's count and the text agree).
+        // Reads only — no row is written, which is why the seal never refuses
+        // it. ⌘⇧C: her ask names a shortcut, and the collision sweep found no
+        // `c` chord bound anywhere but ⌥⌘C (callout) — swept across
+        // `EditorCommands.keyEquivalent`, every `keyboardShortcut(` call site
+        // in `Variorum/` and `Shared/`, every `NSMenuItem` keyEquivalent (all
+        // empty strings), and both `keyDown`/`performKeyEquivalent` overrides.
+        // ⌘C itself is untouched — it stays the system's Copy.
+        Capability(
+            id: .copyAllTakes, verb: "Copy All Takes", scope: .take,
+            doors: [.menuBar, .contextMenu],
+            shortcutLabel: "⌘⇧C", takesAccess: .native,
+            unavailableNote: "Takes live inside a note — open one first.",
+            availability: takeFamily),
         // 13b Stage 3 (3D — T5/N6): the 3B core op `setTakeLabel` gets its
         // faces — the take card's context menu and the bar's block menu.
         Capability(
@@ -956,6 +976,7 @@ nonisolated enum CapabilityRegistry {
         case .comments: id = .blockComments
         case .callout: id = .callout
         case .pageFan: id = .pageFanBack
+        case .copyAllTakes: id = .copyAllTakes
         case .find(let action):
             switch action {
             case .show: id = .findInPost
