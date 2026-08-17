@@ -1464,3 +1464,8 @@ claims only with PENDING marks; commit per convention; NEVER push;
 NEVER `/Applications`; her real-store instance is never touched
 (Environment traps bind verbatim; Mac tests via the cwd-independent
 `-project` invocation).
+
+**AUTHOR INSTRUCTION (2026-08-17, mid-batch-4): "pause after batch 4
+is done, before starting ladder round A off."** Binding: batch 4 is
+verified/accepted and recorded as usual when it reports; ladder round
+A does NOT launch until her word. The hold is hers.
