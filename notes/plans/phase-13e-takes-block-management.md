@@ -467,6 +467,16 @@ it in 13e (→ **ledger row E14**), chord **⌃⌥⌘N** fixed for now (the
 tested chord; "configurable from day one" offered and not taken —
 a recorder UI is a later at-her-word add).
 
+**Baseline correction on the record (2026-08-17):** the standing
+full-suite baselines at 13e's open are the 14d-close figures —
+**core 1216/128 · Mac 1246/220 tripwire-only · mobile 314/60 ·
+spine 51/7** (14d shipped zero core-logic/`Sync/`/schema changes,
+so the §5-seam merged-tree figures stand; core independently
+re-verified green by the architect's own run 2026-08-16). The
+"Baselines at open" section's 13k-era figures are superseded.
+Mirror at lockstep marker **6**; local schema unchanged since
+v1_12.
+
 **THE SITTING IS CLOSED (2026-08-17).** All five kickoff steps ran:
 the reminder-note walk (remainder open at leisure), W26 (test
 passed + build ruled), the kickoff sweep confirmed as the
@@ -493,3 +503,137 @@ author-attended sitting made a flashing full-suite run the wrong
 act mid-sitting); mirror is at lockstep marker **6** (14c), not
 this file's authoring-time marker 4 — no schema change since
 v1_12 locally, the delta is all server-side.
+
+---
+
+## Environment traps (13e's binding copy — the 13c core + the 13g standing rules + this phase's specifics; every batch brief carries THIS section)
+
+Instance checks: `pgrep -fl 'Variorum.app/Contents/MacOS'` AND
+discriminate by PATH (the DerivedData test host matches mid-run;
+`/Applications` = hers/real-store); real-store instances by STORE,
+not path — **NEVER quit/kill one, and NEVER address a Variorum
+instance by PROCESS NAME: bundle id (`io.lduarte.Variorum.debug`)
+or PID only** (the 13g batch-1 incident's standing rule); no
+Release builds or `/Applications` refreshes while a real-store
+instance lives (one was LIVE at kickoff, PID 54789 — re-check,
+never assume); Mac suites DO run beside her live app (the Debug
+host's container holds the seeded design corpus); **Mac test runs
+use the cwd-independent `-project` invocation** (the second 13g
+standing rule): `xcodebuild test -project
+<home>/dev/variorum/App/Variorum/Variorum.xcodeproj
+-scheme Variorum -destination 'platform=macOS'`, SUITE-level
+`-only-testing` only, confirm the "Test run with N tests" line;
+`xcodebuild build-for-testing` compiles without the runner; zsh
+`pipestatus` (lowercase); NEVER add a custom build configuration
+(SPM builds packages release under any config not named "Debug" —
+strips the DEBUG oracles); test windows flash beside a live
+session — prefer zero-instance windows for timing-sensitive
+measurement; the Mac runner needs an UNLOCKED login session
+(lock-flag check: `swift -e 'import CoreGraphics;
+print((CGSessionCopyCurrentDictionary() as? [String: Any])?["CGSSessionScreenIsLocked"] ?? 0)'`);
+backups WAL-safe with UTC names, ALWAYS before touching the real
+store (the A1 rail); the real store lives in the SANDBOX CONTAINER
+`~/Library/Containers/io.lduarte.Variorum/Data/Library/Application Support/Variorum/`;
+drives need unlocked + author-free + own `caffeinate -d`;
+osascript System Events menu clicks work (accessibility granted);
+fresh hosting views for remounts; a bare NSWindow auto-assigns
+first responder on order-front; async-poll (never sync RunLoop
+pumping) drains settle hops; screenshots in gitignored dirs; never
+`git checkout` over uncommitted work; **implementer sessions never
+push** (the orchestrator pushes at bout ends per the 2026-08-03
+author rule). 13e specifics: `PoolDragTests` reads the physical ⌥
+key — a real keypress during a suite run can flake it (13k
+record); the ONE allowed standing red is
+`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`
+(environment-gated tripwire, covariate UNKNOWN — its KnownIssues
+row; the kickoff sweep owns the A47c re-run); the W26 probe
+binaries live in the session scratchpad, throwaway.
+
+## THE BATCH PLAN (architect's order, 2026-08-17 — adjustable on evidence; one FRESH Opus implementer per batch, strictly sequential)
+
+| Batch | Scope | Status |
+|---|---|---|
+| 1 | **The door set:** E1 (swatches + real emoji picker) · E13 (duplicate-book-name refusal) · E11 (ascent registry declaration) | briefed below |
+| 2 | **The fan's hands:** E4 (reorder takes + the fan-copy remap fix that lands WITH it — its KnownIssues row's FIX-2 template) · E15 (Takes-board policy routing) · E3 (⌘-click merge selection) | pending |
+| 3 | **Take↔block structure:** E5 (move-a-take-into-a-block-below) · E6 (copy-all-takes / takes-to-blocks — the A45 repair tool) | pending |
+| 4 | **Block management:** E2 (block multi-select + multi-delete) | pending |
+| 5 | **Canvas:** E7-bank (canvas bank) · E12 (drag jitter/resist — live-path trace, no archeology per her rider) | pending |
+| 6 | **Comments & tags:** E7-comments (margin-hover grammar, comments on the LEFT) · E8 (the fuller tags face) | pending |
+| 7 | **Text tools:** E9 (takes-aware find & replace) · E10 (copy-door flush alignment) | pending |
+| 8 | **W26 (E14):** the system-wide ⌃⌥⌘N summon — the batch's own verification act is the SANDBOXED in-app registration | pending |
+
+The kickoff sweep runs BESIDE the batches, orchestrator-owned: the
+A47c experiments under BOTH lock states (locked runs when she is
+away); the windowless launch stays CAPTURE-ON-OCCURRENCE (the
+row's `sample <pid> 5`-first protocol); the note-window clip joins
+whichever batch next touches window lifecycle (batch 8's orbit)
+with its three already-failed fixes read first.
+
+## Batch 1 brief — the door set (a FRESH Opus implementer; self-contained)
+
+**Read first, in full:** `CLAUDE.md` (+ the canon it loads); this
+plan file TOP TO BOTTOM (the P-1…P-9 constitution, the sitting
+rounds — E13's ruling is Round 3 — and the Environment traps above
+are all binding); the `architect-phase` skill's "Applying the
+constitution" notes (`.claude/skills/architect-phase/SKILL.md`).
+You do your own reading in your own context — never delegate it.
+
+**Scope: E1 + E13 + E11 ONLY.** No other ledger row, however
+adjacent it looks.
+
+- **E1 — callout colour swatches + a real emoji picker.** Today's
+  callout editor takes color and emoji through minimal controls;
+  her A13(b) ask upgrades both. Constraints: a callout color is a
+  THEME-TOKEN NAME, never a literal (AppSpec §7 `presentation`,
+  R1) — swatches present the token palette rendered per
+  voice/appearance and store the NAME; the emoji field gains a real
+  picker (the native character palette
+  `NSApp.orderFrontCharacterPalette` is the zero-dependency road —
+  if you find yourself designing anything bigger, that is an
+  in-batch design fork: PROPOSE to the architect before building
+  that half). The upgraded controls appear at EVERY standing
+  callout door — the Block menu / ⌥⌘C sheet, Write's right-click,
+  a take card's right-click (13k K6 + #53(g)) — one control
+  component, not per-door copies. Frame semantics byte-untouched
+  (one frame per block; takes share it; take-mode draws around the
+  fan).
+- **E13 — duplicate-book-name refusal (her Round 3 ruling).** The
+  create-book and rename-book DOORS refuse a case-insensitive
+  match against any LIVE book's name (archived/deleted don't
+  count) with honest wording ("A book named 'Ideas' already
+  exists"). Door-level by her explicit word — NO schema, NO
+  operation-level invariant, NO SyncSpec §7 repair (the offline
+  race stays legal; 13k K4's shown-once display absorbs it). Shape:
+  a small core read (the `assertReadingAcceptsPosts` precedent —
+  store-truthful inside the door's serialized path, never a stale
+  projection read), consulted by every door that names a book
+  (create, rename, and the smart-book creation door if it names
+  freely). Red-on-old pin: the door accepts the duplicate on the
+  pre-fix tree, refuses after — behavioral revert with checksums.
+- **E11 — declare the book-icon ascent (P-1 hygiene).** The
+  "open this book at this note" act (the context bar's book icon +
+  the membership chip's book rows — one ACT, its doors enumerated)
+  enters the capability registry: availability rule (a note open;
+  the icon renders greyed-with-tooltip on a bookless note per the
+  ratified #55(b)/(g) shape — declaring must not change shipped
+  behavior), refusal wording, registry-walk coverage. Nothing
+  user-visible changes; the walk test growing to cover the doors
+  IS the deliverable.
+
+**The loop (binding):** red-on-old pins by behavioral revert with
+checksums; PROVISIONAL-and-continue for non-gating ambiguity
+(append to `notes/QUESTIONS.md` — next free number **#56**);
+STOP-and-report for anything gating or schema-shaped; the tutorial
+spine green by TYPE name; full suites at batch end with counts
+quoted from your own "Test run with N tests" lines — baselines to
+match-or-beat: **core 1216/128 · Mac 1246/220** (the ONE allowed
+red is the recorded tripwire, by identity) **· mobile 314/60 —
+mobile runs because E13's core read touches `Sources/`** (iPhone
+16e destination). Run builds/tests SYNCHRONOUSLY in your session —
+never end your turn to "wait" on a background run (a session that
+ends waiting dies as completed). Append the batch record to this
+file (what shipped, mechanisms traced, pins with checksums, counts,
+PROVISIONALs) BEFORE final claims only with PENDING marks; commit
+per convention with the standing trailer; NEVER push; NEVER
+`/Applications`; her real-store instance is never touched (the
+Environment traps above bind verbatim).
