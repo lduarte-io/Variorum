@@ -555,7 +555,7 @@ binaries live in the session scratchpad, throwaway.
 |---|---|---|
 | 1 | **The door set:** E1 (swatches + real emoji picker) · E13 (duplicate-book-name refusal) · E11 (ascent registry declaration) | **DONE 2026-08-17** — record below (core 1223/130 · Mac 1266/224 tripwire-only · mobile 314/60 · spine 51/7; Mac baseline corrected to 1251/220) |
 | 2 | **The fan's hands:** E4 (reorder takes + the fan-copy remap fix that lands WITH it — its KnownIssues row's FIX-2 template) · E15 (Takes-board policy routing) · E3 (⌘-click merge selection) | **DONE 2026-08-17** — record below (core 1235/132 · Mac 1285/227 tripwire-only · mobile 314/60 · spine 51/7; both KnownIssues rows RESOLVED) |
-| 3 | **Take↔block structure:** E5 (move-a-take-into-a-block-below) · E6 (copy-all-takes / takes-to-blocks — the A45 repair tool) | pending |
+| 3 | **Take↔block structure:** E5 (move-a-take-into-a-block-below) · E6 (copy-all-takes / takes-to-blocks — the A45 repair tool) | **DONE 2026-08-17** — record below (core 1254/135 · Mac 1298/229 tripwire-only · mobile 314/60 · spine 51/7; the fork RULED as AR-1 — mint-copy, source take ARCHIVED) |
 | 4 | **Block management:** E2 (block multi-select + multi-delete) | pending |
 | 5 | **Canvas:** E7-bank (canvas bank) · E12 (drag jitter/resist — live-path trace, no archeology per her rider) | pending |
 | 6 | **Comments & tags:** E7-comments (margin-hover grammar, comments on the LEFT) · E8 (the fuller tags face) | pending |
@@ -1231,3 +1231,165 @@ chords GRANTED — her A20/A21 words ask for shortcuts: ⌥⌘⏎ (E5) and
 ⇧⌥⌘⏎ (E6b) under the standing collision pin; exact keys hers to
 re-pick. (f) archived takes ride nowhere — the divide-W
 unmarked-variant precedent, exact.
+
+### BATCH 3 RECORD — take↔block structure (2026-08-17, a fresh Opus implementer; COMPLETE)
+
+**Shipped, per ledger row — under AR-1 (mint-copy, the source take ARCHIVED).**
+
+- **E6 (A21's CLIPBOARD half) — "copy all takes together to clipboard."** Built
+  BEFORE the propose-first stop, since it carries no fork. The format is not
+  invented: `Queries.blockTakes` returns `exportBlock`'s own projection PLUS its
+  take count from the same walk (`exportBlock` now delegates — output
+  byte-identical, `ExportProjectionTests` re-run green), so the clipboard
+  carries the app's ratified fan shape — the shown take, then the labeled
+  `--- Alternates for this block ---` section, literally the format her intake
+  note was exported in — and the confirmation can never claim a different
+  number than the text holds. ONE brain (`TakeClipboard`, with an injectable
+  `Destination` so pins never touch her real clipboard) behind both doors:
+  Write's caret block (`copyCaretBlockTakes`) and a board's focused card
+  (`copyAllTakes`), both flushing first. Registry `.copyAllTakes` — ⌘⇧C (the
+  sweep found no `c` chord bound but ⌥⌘C; ⌘C stays the system's Copy) — menu
+  bar + take-card doors, helper row, routed through all four handlers (Compare
+  declines, its recorded 4C posture).
+- **E5 (A20) — `Operations.takeToBlockBelow(blockID:variantID:)`.** ONE
+  transaction: mint a block immediately after the source carrying the take's
+  text (label riding — the merge-carry precedent; presentation inherited;
+  live comments COPIED — extract's travel rule), a `derived_from`/'manual'
+  edge, then ARCHIVE the source take on its own block (the archive ROW work
+  inline, byte-for-byte `archiveVariant`'s transition including the
+  `default_variant_id` reassignment), touch-without-churn. Refusals, all from
+  existing rules: I10 via `ensureNotLastActive` (a one-take fan), a BLANK take
+  (`emptyTakeCannotBecomeABlock` — AR-1(d)), the seal via `placedContext`, and
+  the `divideDuplicating` validation grammar for a foreign/archived/missing
+  take. A LOCKED take is permitted because `archiveVariant` permits one TODAY
+  (AR-1(b), traced — `performArchiveVariant` checks tombstone/status/seal/I10
+  and never `locked`); the copy is not born locked.
+- **E6b (A21's second half — the A45 repair) — `Operations.takesToBlocks(blockID)`.**
+  ONE transaction, ONE undo entry: the take the slot RENDERS stays (AR-1(c) —
+  the note reads exactly as it read), every other ACTIVE take with prose becomes
+  its own block below in fan order (each mint anchored `.after` the previous, so
+  the run reads in fan order), each source archived; blank takes SKIPPED and
+  COUNTED (AR-1(d)), archived takes riding nowhere (AR-1(f)). Refuses
+  `noConvertibleTakes` when the fan holds nothing else with prose. **The order
+  it produces is the clipboard door's order** — shown take, then alternates —
+  so the two halves of A21 agree by construction.
+- **Undo/redo (both doors).** `revertStructural`/`reapplyStructural` gained
+  DEFAULTED parameters (`unarchivingTakes:` / `rearchivingTakes:`) so the mint
+  tombstone and the take's status flip land in ONE transaction and every
+  pre-13e call site reads unchanged; `revertArchiveVariant`'s body was factored
+  into a shared `unarchiveTakeRow` so there is one archive-inverse brain rather
+  than a copy. Exact-row both ways (no row is minted by either half), the
+  standing refusal buckets kept (a sealed post throws and keeps the entry;
+  divergence is quiet), and the redo road runs `ensureNotLastActive` so
+  re-archiving can never empty a fan the world changed under it.
+- **Doors.** Registry `.takeToBlockBelow` / `.takesToBlocks` — TWO declarations
+  (one addresses a take, one a fan; each carries its own key), scope `.take`,
+  `takesAccess: .native`, `takeFamily` availability, doors `[.menuBar,
+  .contextMenu]`, chords **⌥⌘⏎ / ⇧⌥⌘⏎** (AR-1(e); the Return family's only
+  bound chords are ⌘⏎ and ⌘⇧⏎ — swept across `EditorCommands.keyEquivalent`,
+  every `keyboardShortcut(` call site in `Variorum/`+`Shared/`, every
+  `NSMenuItem` keyEquivalent and both key overrides). Native on THREE surfaces:
+  Write (through `runStructural`, so the identity rewrite and caret landing are
+  the standing ones), Takes and Lenses (flush-first, store-validated, the ring
+  handing over to the minted block's pane). The card's right-click names its
+  block AND its take explicitly (13k K6's lesson). Receipts live in ONE home
+  (`TakeStructureCopy`) and every line says where the ORIGINAL went;
+  `StructuralOutcome` gained an optional `note` so Write's receipt is built
+  INSIDE the flight from the op's own result rather than re-derived beside it.
+  Three refusals gained real words in `OpsRefusalCopy` (`lastActiveVariant` had
+  dumped the raw enum since Phase 2).
+
+**Mechanisms traced (the hallucination guard).** E5/E6b are features, not bug
+fixes, so they carry no bug mechanism — but the FORK did, and it was traced
+before anything was built (the proposal, verified independently by the
+architect): `TouchedRows.blocksWithVariantChanges` is populated only from the
+ARRIVING row's `block_id` (`Repairs.swift:157–160`), so a moved take's OLD
+block never becomes a repair candidate and the double-move race converges to a
+live placed block with zero live variants and no self-heal
+(`Repairs.swift:400–402`); the repair layer separately DECLARES a foreign
+chosen pointer unreachable *"by design: the operations layer forbids minting
+one"* (`Repairs.swift:415–417`); and `rescueLosingText` inserts a conflict take
+on the SERVER row's block carrying the LOCAL row's parent
+(`Merge.swift:83–98`), which under the edit-vs-move race is a cross-block
+parent the codebase's own doctrine forbids. ONE real bug-class fix rode along:
+the `lastActiveVariant` raw enum dump, which E5 makes a refusal she would
+actually meet.
+
+**Pins + red-on-old evidence (behavioral revert, checksums recorded).** New core
+suites in `Tests/VariorumCoreTests/TakeStructureTests.swift` (19 tests, 3
+suites) and Mac suites in `App/Variorum/VariorumTests/TakeStructureDoorTests.swift`
+(13 tests, 2 suites).
+
+*Revert A — the `lastActiveVariant` refusal words deleted from `OpsRefusalCopy`
+(the pre-13e state). File:* `OpsRefusalCopy.swift` `7152d04f…abe6` →
+`fb443f5f…aab2`. Result: **`aRefusalArrivesInWordsNotAsAnEnumDump` RED with the
+exact symptom** — `"Refused: lastActiveVariant(id: "00000000-…-000000000002")"`
+— while the suite's other six pins stayed green (clean attribution). Restored:
+`7152d04f…abe6`.
+
+*Revert B — the flush dropped from `TakesViewModel.moveTakeIntoBlockBelow`.
+File:* `TakesViewModel.swift` `089a7a4c…8e24` → `3da17a38…41dc`. Result:
+**`theDoorFlushesFirstSoTheNewBlockCarriesWhatSheJustTyped` RED** — the minted
+block carried `"Second take."` where the pane held `"Typed after branching."`
+(the copy-doors staleness class, this door's version). Restored:
+`089a7a4c…8e24`.
+
+*Revert C — the undo's un-archive half removed from `revertStructural`. File:*
+`Operations+UndoInverses.swift` `bc53dfd3…2b32` → `da521717…3d125`. Result:
+**exactly the three undo pins RED** — `undoRestoresTheFanAndRedoLandsTheExactRowsAgain`,
+`undoPutsTheDefaultBackWhenTheMovedTakeHadBeenIt` and
+`oneUndoEntryReturnsTheWholeFanAndRedoRebuildsTheExactRun` (the takes stayed
+archived after undo; the default never came back) — the rest of both suites
+green. Restored: `bc53dfd3…2b32`.
+
+*The feature pins* cover: the mint's position (immediately below), the archive
+(status archived, never tombstoned, still in the fan listing), the edge's
+direction and `manual` origin, the label riding while commits do NOT and the
+copy is not born locked, the locked-take allowance, moving the SHOWN take
+(default reassigned, chosen pointer deliberately untouched, the note still
+reading), presentation inheritance + comment COPIES with the source keeping its
+own, touch-without-churn, all four refusals writing nothing, undo→redo→undo on
+exact rows; and for E6b: the shown take staying with the alternates in fan
+order, the shown-take rule holding when the chosen take is NOT first, blanks
+skipped/counted and archived takes riding nowhere, the seal, the
+nothing-to-convert refusal, and ONE undo entry returning the whole fan. The
+door suites add the ring handover, the right-click's explicit target, the flush
+contract, the refusal words, the counted receipt with its skipped-blank line,
+and both registry declarations with their chords.
+
+**Counts (own runs, quoted from the "Test run with N tests" lines).**
+- Core: **`✔ Test run with 1254 tests in 135 suites passed`** (baseline 1235/132
+  → +19/+3, exactly the new core file).
+- Mac: **`✘ Test run with 1298 tests in 229 suites failed … with 1 issue`** —
+  the ONE issue is
+  `TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`,
+  the recorded environment-gated tripwire, allowed by IDENTITY (baseline
+  1285/227 → +13/+2, exactly the new Mac file). **A47c datum:** it fired again
+  in an UNLOCKED session (`CGSSessionScreenIsLocked = 0`) — a third datum for
+  the sweep's "fires regardless of lock state" hypothesis.
+- Mobile: **`✔ Test run with 314 tests in 60 suites passed`** (iPhone 16e — run
+  because the ops land in `Sources/`; baseline matched exactly).
+- Tutorial spine, by TYPE name (all seven): **`✔ Test run with 51 tests in 7
+  suites passed`**.
+
+**PROVISIONALs / build-time calls:** ten, bundled as **QUESTIONS #58** (a)–(j) —
+the archive disposition, the locked-take allowance, which take stays on the
+block, blank takes skipped, the two chords, archived takes riding nowhere, the
+presentation/comment travel, the label riding while commits stay, the `manual`
+origin_op, and moving the shown take. All six of AR-1's ruled defaults are
+among them, per the ruling's own instruction.
+
+**Nothing stopped, nothing schema-shaped.** The one design fork was proposed and
+RULED before either shape was built (AR-1); no `origin_op` value was invented
+('manual' is existing CHECK vocabulary); `Sources/VariorumCore/Sync/` untouched
+(zero lines — and the fork's whole point was that the other road would have
+needed it); no migration, no mirror implication, no `/Applications` refresh.
+Her real-store instance (PID 54789) was live the whole batch and was never
+addressed.
+
+**MOBILE PARITY (for the closeout ledger):** the phone owes **all three acts a
+door** — `takeToBlockBelow`, `takesToBlocks` and the clipboard copy are shared
+core/`Queries` work, so the phone needs faces only (its takes surface for the
+first two; a share/copy row for the third). `TakeClipboard` itself is
+AppKit-side and would need an iOS twin (`UIPasteboard`); the projection it
+copies (`Queries.blockTakes`) is already shared.

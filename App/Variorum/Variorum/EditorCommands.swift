@@ -86,6 +86,8 @@ struct EditorCommands: Commands {
         .closeAllTakes, .pageFanBack, .pageFanForward,
         // 13e E6 (A21): copy all takes.
         .copyAllTakes,
+        // 13e batch 3 (A20/A21): the take↔block pair.
+        .takeToBlockBelow, .takesToBlocks,
         .previousBlock, .nextBlock, .blockComments, .callout,
         .findInPost, .findAndReplace, .findNext, .findPrevious, .useSelectionForFind,
         // 13g batch 3 (L8): the Format menu.
@@ -142,6 +144,12 @@ struct EditorCommands: Commands {
         // empty strings) and both key overrides (⌘S; the Tab/Return pair).
         // ⌘C is the system's Copy and stays untouched.
         case .copyAllTakes: ("c", [.command, .shift])
+        // 13e batch 3 (A20/A21). THE COLLISION SWEEP'S RESULT: the Return
+        // family's only bound chords are ⌘⏎ (Choose Take) and ⌘⇧⏎ (New Block
+        // Below) — the same five places swept as ⌘⇧C was. ⌥⌘⏎ and ⇧⌥⌘⏎ are
+        // free, and they read as that family's other two members.
+        case .takeToBlockBelow: (.return, [.command, .option])
+        case .takesToBlocks: (.return, [.command, .option, .shift])
         case .saveChoicesAsLens: ("l", [.command, .shift])
         case .pageFanBack: (.leftArrow, [.command, .option])
         case .pageFanForward: (.rightArrow, [.command, .option])
@@ -413,6 +421,15 @@ struct EditorCommands: Commands {
             Button(verb(.copyAllTakes)) { actions?.dispatch(.copyAllTakes) }
                 .keyboardShortcut("c", modifiers: [.command, .shift])
                 .disabled(!enabled(.copyAllTakes))
+
+            // 13e batch 3 (her A20/A21's second half — AR-1): the take↔block
+            // pair, in the Return family with New Block Below above them.
+            Button(verb(.takeToBlockBelow)) { actions?.dispatch(.takeToBlockBelow) }
+                .keyboardShortcut(.return, modifiers: [.command, .option])
+                .disabled(!enabled(.takeToBlockBelow))
+            Button(verb(.takesToBlocks)) { actions?.dispatch(.takesToBlocks) }
+                .keyboardShortcut(.return, modifiers: [.command, .option, .shift])
+                .disabled(!enabled(.takesToBlocks))
 
             Divider()
 

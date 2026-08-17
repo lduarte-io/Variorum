@@ -141,6 +141,41 @@ nonisolated enum BookNameCopy {
     }
 }
 
+/// 13e batch 3 — what the take↔block doors SAY when they act (her A20/A21,
+/// under architect ruling AR-1). ONE home, for the `BookNameCopy` reason:
+/// both editor kinds render these doors (R118 — Write is never privileged),
+/// and a receipt written twice is a promise no test can keep.
+///
+/// Every line names where the ORIGINAL went, because AR-1's whole shape is
+/// that nothing is lost: the take is archived on its own block, reachable in
+/// the archived listing with its commits. A door that removes a take from a
+/// fan without saying it is recoverable is the lecture-less-silence class
+/// P-2 retired.
+nonisolated enum TakeStructureCopy {
+    static let movedNote =
+        "That take is now the block below — the original is archived on its "
+        + "block (\u{201c}archived \u{B7} n\u{201d} under its takes brings it back); "
+        + "\u{2325}\u{2318}Z undoes it."
+
+    /// The conversion's receipt, counts and all — including the blank takes
+    /// it passed over (AR-1(d): they are skipped, and the door says so
+    /// rather than leaving her to notice a missing block).
+    static func convertedNote(blocks: Int, skippedBlanks: Int) -> String {
+        var line = blocks == 1
+            ? "1 take is now its own block below"
+            : "\(blocks) takes are now their own blocks below"
+        line += " — this block still shows the take it showed, and the originals "
+            + "are archived on it."
+        if skippedBlanks > 0 {
+            line += skippedBlanks == 1
+                ? " 1 blank take was left alone (there was nothing to make a block from)."
+                : " \(skippedBlanks) blank takes were left alone "
+                    + "(there was nothing to make blocks from)."
+        }
+        return line + " \u{2325}\u{2318}Z undoes it."
+    }
+}
+
 nonisolated enum OpsRefusalCopy {
     static func message(for error: Error) -> String {
         if let error = error as? OperationError {
@@ -197,6 +232,19 @@ nonisolated enum OpsRefusalCopy {
             case .blockCarriesUnshownText:
                 return "That block isn't empty after all — it carries a take or "
                     + "a comment that isn't shown here. Nothing was deleted."
+            // 13e batch 3 (E5/E6b — her A20/A21): the take↔block doors'
+            // three refusals, in words. `lastActiveVariant` has existed
+            // since Phase 2 and dumped the raw enum; E5 makes it a door she
+            // will actually meet (a one-take block has nothing to move out),
+            // so it gets its words here beside the two new cases.
+            case .lastActiveVariant:
+                return "This block has only one take — a take moves out when "
+                    + "there's another one left behind. Divide the block instead (⌘⇧D)."
+            case .emptyTakeCannotBecomeABlock:
+                return "That take is empty — there's no text to become a block."
+            case .noConvertibleTakes:
+                return "This block has no other takes with text in them — "
+                    + "nothing to turn into blocks."
             default:
                 return "Refused: \(error)"
             }

@@ -92,6 +92,15 @@ public enum OperationError: Error, Equatable, Sendable {
     case takePairedTwice(variantID: String)
     /// poolDragCopy's source must live in a pool.
     case blockNotInPool(id: String)
+    /// 13e batch 3 (E5 — her A20): a BLANK take has no prose to become a
+    /// block, so `takeToBlockBelow` refuses rather than minting an empty
+    /// block (the `divideSideWouldBeEmpty` family — architect ruling AR-1(d);
+    /// `takesToBlocks` SKIPS blank takes instead, and says so).
+    case emptyTakeCannotBecomeABlock(variantID: String)
+    /// 13e batch 3 (E6b — her A21): `takesToBlocks` found nothing to convert
+    /// — the block's fan holds no other take with prose beside the one it
+    /// shows (an unfanned block, or a fan of blanks).
+    case noConvertibleTakes(blockID: String)
     /// A live block whose slot resolves to no live variant — unreachable
     /// through the operations layer (I10 + default reassignment); a distinct
     /// case so a sync-race arrival diagnoses cleanly (Phase 5).

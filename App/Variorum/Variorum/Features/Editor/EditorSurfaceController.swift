@@ -385,6 +385,59 @@ final class EditorSurfaceController {
         if landed { model.showStatus("New block added below — type away.") }
     }
 
+    // MARK: - Take ↔ block structure (13e batch 3 — her A20/A21, AR-1)
+
+    /// **Her A20's Write half**: the take the caret is in leaves the fan and
+    /// becomes its own block directly below. Runs through `runStructural`
+    /// like every structural gesture (one flight, flush first, store-led
+    /// rewrite, caret by identity) and lands the caret in the NEW block —
+    /// the insert-below handover, exactly.
+    ///
+    /// The op archives the original on its block (AR-1), so the receipt says
+    /// where it went: a door that quietly removes a take from a fan and does
+    /// not say it is recoverable is the class R118/P-2 retired.
+    func moveCaretTakeIntoBlockBelow() async {
+        guard let blockID = model.caretBlockID, let variantID = model.caretVariantID else {
+            model.refuseFeedback(model.index.entries.isEmpty
+                ? "No blocks yet — type on the page and each finished paragraph becomes one."
+                : "Put the caret in a take first — this moves that take into its own block.")
+            return
+        }
+        let landed = await runStructural { ops in
+            let result = try ops.takeToBlockBelow(blockID, variantID: variantID)
+            return StructuralOutcome(
+                caretBlockID: result.block.id, caretOffset: 0, seam: nil)
+        }
+        if landed {
+            model.showStatus(TakeStructureCopy.movedNote)
+        }
+    }
+
+    /// **Her A21's second half (the A45 repair), Write side**: every other
+    /// take of the caret block becomes its own block below it, in fan order.
+    /// The caret stays in the block it was in — which still shows exactly
+    /// what it showed (AR-1(c)).
+    func turnCaretBlockTakesIntoBlocks() async {
+        guard let blockID = model.caretBlockID else {
+            model.refuseFeedback(model.index.entries.isEmpty
+                ? "No blocks yet — type on the page and each finished paragraph becomes one."
+                : "Put the caret in a block first — this turns its takes into blocks.")
+            return
+        }
+        _ = await runStructural { ops in
+            let result = try ops.takesToBlocks(blockID)
+            // The receipt is built INSIDE the flight, from the op's own
+            // result, and rides back on the outcome — the counts (and the
+            // skipped blanks) are the operation's answer, never a projection
+            // read taken beside it.
+            return StructuralOutcome(
+                caretBlockID: blockID, caretOffset: 0, seam: nil,
+                note: TakeStructureCopy.convertedNote(
+                    blocks: result.converted.count,
+                    skippedBlanks: result.skippedBlankTakes))
+        }
+    }
+
     // MARK: - Delete block (13c batch 1B — A8)
 
     /// The Write half of the delete-block act (her A8: "I don't seem to
@@ -749,6 +802,12 @@ final class EditorSurfaceController {
         let caretBlockID: String
         let caretOffset: Int
         let seam: StructuralSeam?
+        /// 13e batch 3: a receipt built INSIDE the flight from the op's own
+        /// result (counts the surface could otherwise only re-derive from a
+        /// projection read taken beside the write). Spoken by
+        /// `runStructural` once the rewrite lands; nil for every door that
+        /// speaks its own fixed line, which is all of them before 13e.
+        var note: String? = nil
     }
 
     // MARK: - Phase 11, A9: the boundary-fluidity package (committed scope)
@@ -1635,6 +1694,10 @@ final class EditorSurfaceController {
                 try Queries.renderPost($0, containerID: postID)
             }
             applyStructuralResult(fresh, outcome: outcome)
+            // 13e batch 3: a receipt the op itself computed (see
+            // `StructuralOutcome.note`), spoken once the surface agrees with
+            // the store.
+            if let note = outcome.note { model.showStatus(note) }
             return true
         } catch {
             model.showOperationError(error)

@@ -71,6 +71,13 @@ struct HelperView: View {
             // 13e E6 (A21's clipboard half).
             ("⌘⇧C", "copy this block's takes — the shown one, then its alternates "
                 + "(⌘C is still ordinary copy)"),
+            // 13e batch 3 (A20/A21's second half): the take↔block pair. Both
+            // lines name where the ORIGINAL goes, because that is the thing
+            // she would otherwise have to discover.
+            ("⌥⌘⏎", "move the take you're in into its own block below — the "
+                + "original is archived on this block"),
+            ("⇧⌥⌘⏎", "turn ALL of this block's takes into blocks below it — the "
+                + "block keeps showing what it showed; the originals are archived on it"),
         ]),
         ShortcutGroup(title: "Writing", items: [
             ("⌘S", "commit — an immutable savepoint of the take you're in"),

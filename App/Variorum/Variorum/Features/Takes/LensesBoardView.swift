@@ -176,6 +176,14 @@ struct LensesBoardView: View {
             // 13e E6 (A21): the shared model machinery, same as Takes.
             Task { await model.copyAllTakes() }
             return true
+        case .takeToBlockBelow:
+            // 13e E5 (A20): the shared model machinery, same as Takes.
+            Task { await model.moveTakeIntoBlockBelow() }
+            return true
+        case .takesToBlocks:
+            // 13e E6b (A21/A45): likewise.
+            Task { await model.turnTakesIntoBlocks() }
+            return true
         case .find:
             // QoL batch 3 (L6): find is the full-document editor's — a lens
             // column is one take's pane, not the post's text. Declining lets

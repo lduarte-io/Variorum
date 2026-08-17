@@ -307,6 +307,7 @@ struct CapabilityRegistryTests {
             .callout(.toggle),  // 13c R2-2 (A13(a))
             .pageFan(1),
             .copyAllTakes,  // 13e E6 (A21's clipboard half)
+            .takeToBlockBelow, .takesToBlocks,  // 13e batch 3 (A20/A21)
         ]
         for command in commands {
             let note = CapabilityRegistry.unhandledNote(

@@ -140,6 +140,18 @@ struct TakesCellView: View {
             .init(title: "\(CapabilityRegistry.capability(.copyAllTakes).verb) (⌘⇧C)") {
                 Task { await model.copyAllTakes(blockID: slot.blockID) }
             },
+            // 13e batch 3 (her A20/A21's second half — AR-1): the take↔block
+            // pair, on the card that IS the take. Both name their target
+            // explicitly, for the same right-click reason.
+            .init(title: "\(CapabilityRegistry.capability(.takeToBlockBelow).verb) (⌥⌘⏎)") {
+                Task {
+                    await model.moveTakeIntoBlockBelow(
+                        blockID: slot.blockID, variantID: resolved.variantID)
+                }
+            },
+            .init(title: "\(CapabilityRegistry.capability(.takesToBlocks).verb) (⇧⌥⌘⏎)") {
+                Task { await model.turnTakesIntoBlocks(blockID: slot.blockID) }
+            },
         ]
         // 13e E3 (her A18): the merge door for a ⌘-click selection, rendered
         // only where it can act — on the Takes board, with two or more blocks
@@ -228,6 +240,8 @@ struct TakesCellView: View {
         .mergeSelectedBlocks,
         // 13e E6 (A21) — the clipboard half's card door
         .copyAllTakes,
+        // 13e batch 3 (A20/A21) — the take↔block pair's card doors
+        .takeToBlockBelow, .takesToBlocks,
     ]
 }
 

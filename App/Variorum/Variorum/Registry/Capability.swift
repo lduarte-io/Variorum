@@ -98,6 +98,8 @@ nonisolated enum RoutedCommand: Equatable, Sendable {
     case callout(CalloutEdit)  // 13c R2-2 (A13(a)): the target block's frame
     case pageFan(Int)    // ⌥⌘←/→ — page the focused block's take cards
     case copyAllTakes    // 13e E6 (A21): the target block's whole fan → the clipboard
+    case takeToBlockBelow  // 13e E5 (A20): the take you're in becomes the block below
+    case takesToBlocks     // 13e E6b (A21/A45): every other take becomes its own block
 }
 
 // MARK: - Choreography intents (the ONE mode-switch choreography's payloads)
@@ -324,6 +326,14 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // section — literally the format her 2026-07-25 intake note was exported
     // in). Reads only; writes no row.
     case copyAllTakes
+    // 13e batch 3 (her A20: "shortcut for moving a take into being a new
+    // block beneath the current block"; her A21's second half: "or turning
+    // all takes into their own blocks" — the A45 repair tool). TWO
+    // declarations, not one "convert" act: one addresses a TAKE and one
+    // addresses a whole FAN, each carries its own key, and one declaration
+    // could not say that (the find/formatting families' reason). Built under
+    // architect ruling AR-1: mint-copy, the source take ARCHIVED.
+    case takeToBlockBelow, takesToBlocks
     // Scrap tagging (13b 4D — N32(c)/S4-15: the one canvas-only door grows
     // registry-declared siblings on the scrap rows)
     case tagBlock

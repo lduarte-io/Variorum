@@ -1062,9 +1062,14 @@ extension Operations {
     /// NULL default first, then pointing it at the freshly inserted variant.
     /// `presentation` is the Phase 13 travel half: a structural successor
     /// inherits its source's callout frame (nil for brand-new blocks).
+    /// `label` is 13e batch 3's (E5/E6b): a take that rides WHOLE into a
+    /// block keeps its name — the merge-carry precedent, where a carried
+    /// take keeps its label because the name is part of the take it rides in
+    /// on. Every other caller mints unlabeled, exactly as before.
     func mintBlock(
         _ db: Database, text: String, in containerID: String,
-        at insert: InsertPosition, presentation: String? = nil, now: Date
+        at insert: InsertPosition, presentation: String? = nil,
+        label: String? = nil, now: Date
     ) throws -> MintedBlock {
         var block = Block(
             id: newID(), ownerId: currentOwnerID(), presentation: presentation,
@@ -1073,6 +1078,7 @@ extension Operations {
 
         let variant = Variant(
             id: newID(), blockId: block.id, workingText: text,
+            label: label,
             fanPosition: FractionalIndex.initial(),
             createdAt: now, updatedAt: now)
         try variant.insert(db)

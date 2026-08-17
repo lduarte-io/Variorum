@@ -87,17 +87,27 @@ extension Operations {
     /// restored. Same seal guard as every other write under a post.
     func revertArchiveVariant(_ variantID: String, wasDefault: Bool) throws {
         try database.write { db in
-            var variant = try liveVariant(db, variantID)
-            try ensurePlacementUnlocked(db, blockID: variant.blockId)
-            let now = date.now
-            if variant.status == .archived {
-                variant.status = .active
-                variant.updatedAt = now
-                try variant.update(db)
-            }
-            if wasDefault {
-                try restoreDefaultVariant(db, blockID: variant.blockId, to: variantID, now: now)
-            }
+            try unarchiveTakeRow(db, variantID: variantID, wasDefault: wasDefault)
+        }
+    }
+
+    /// The un-archive ROW work, shared (13e batch 3): `revertArchiveVariant`
+    /// is this in its own transaction, and `revertStructural` runs it inside
+    /// the transaction that also tombstones the blocks a take↔block
+    /// conversion minted — one archive-inverse brain, two callers.
+    private func unarchiveTakeRow(
+        _ db: Database, variantID: String, wasDefault: Bool
+    ) throws {
+        var variant = try liveVariant(db, variantID)
+        try ensurePlacementUnlocked(db, blockID: variant.blockId)
+        let now = date.now
+        if variant.status == .archived {
+            variant.status = .active
+            variant.updatedAt = now
+            try variant.update(db)
+        }
+        if wasDefault {
+            try restoreDefaultVariant(db, blockID: variant.blockId, to: variantID, now: now)
         }
     }
 
@@ -219,13 +229,32 @@ extension Operations {
     /// current home so the tray can reach it (the insurance doctrine's
     /// mirror case — nothing typed becomes unreachable; Phase 3 review
     /// finding, on the ratify list).
+    ///
+    /// `unarchivingTakes` is 13e batch 3's half (E5/E6b — the take↔block
+    /// doors): those operations mint a block AND archive the take it came
+    /// from, so their inverse must do both, in ONE transaction. Defaulted
+    /// empty, so every pre-13e caller reads unchanged. The takes come back
+    /// FIRST — restoring the source block's fan before the mints go, so no
+    /// intermediate state has a live block with nothing in it.
     func revertStructural(
         restoringTexts: [TextPreImage],
         tombstoningBlocks: [MintedPreImage],
-        revivingPlacementRows: [String]
+        revivingPlacementRows: [String],
+        unarchivingTakes: [(variantID: String, wasDefault: Bool)] = []
     ) throws {
         try database.write { db in
             let now = date.now
+
+            for take in unarchivingTakes {
+                // Divergence is quiet (the standing bucket): a take deleted
+                // since — or whose row is gone — means the world moved past
+                // this entry. A SEALED post still throws, keeping the entry.
+                guard let variant = try Variant.fetchOne(db, key: take.variantID),
+                      variant.deletedAt == nil
+                else { continue }
+                try unarchiveTakeRow(
+                    db, variantID: take.variantID, wasDefault: take.wasDefault)
+            }
 
             for preImage in restoringTexts {
                 var variant = try liveVariant(db, preImage.variantID)
@@ -308,14 +337,41 @@ extension Operations {
     /// post-op text, so it is committed first — the same fourth-occasion
     /// reasoning that guards `revertStructural`, applied to the other
     /// direction.
+    ///
+    /// `rearchivingTakes` is 13e batch 3's mirror (E5/E6b): redo puts the
+    /// minted blocks back AND re-archives the takes they came from, in ONE
+    /// transaction. Defaulted empty, so every pre-13e caller reads
+    /// unchanged. Same divergence rule as everywhere here: a take that died
+    /// or is already archived is left alone quietly; a sealed post throws
+    /// and keeps the entry.
     func reapplyStructural(
         restoringTexts: [TextPreImage],
         untombstoningBlocks: [MintedPreImage],
-        releasingPlacementRows: [String]
+        releasingPlacementRows: [String],
+        rearchivingTakes: [String] = []
     ) throws {
         try database.write { db in
             let now = date.now
             let nowStamp = DateFormatter.variorumISO8601.string(from: now)
+
+            for variantID in rearchivingTakes {
+                guard let take = try Variant.fetchOne(db, key: variantID),
+                      take.deletedAt == nil, take.status == .active
+                else { continue }
+                try ensurePlacementUnlocked(db, blockID: take.blockId)
+                // I10, on the redo road too: if the other takes have gone
+                // since the undo, re-archiving this one would leave a live
+                // block with no live active take. Resolvable ⇒ it throws and
+                // the entry stays for retry (the `archiveVariant` redo path's
+                // own posture, which runs this same guard).
+                try ensureNotLastActive(db, take)
+                var archived = take
+                archived.status = .archived
+                archived.updatedAt = now
+                try archived.update(db)
+                try reassignDefaultIfNeeded(
+                    db, blockID: take.blockId, removing: take.id, now: now)
+            }
 
             // Mirror of the inverse's revive: the sources the forward op
             // released to lineage go back out of the post.

@@ -361,6 +361,30 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: "⌘⇧C", takesAccess: .native,
             unavailableNote: "Takes live inside a note — open one first.",
             availability: takeFamily),
+        // 13e batch 3 (her A20/A21 — the take↔block pair, architect ruling
+        // AR-1). Native wherever takes are: both acts are decided INSIDE the
+        // operation (fan arity, blank takes, the seal, I10), so the doors
+        // never gate on a projection — they fire and the op's own refusal
+        // speaks (P-2). ⌥⌘⏎ / ⇧⌥⌘⏎: her A20/A21 words ask for shortcuts, and
+        // the collision sweep found the Return family's only bound chords to
+        // be ⌘⏎ (Choose Take) and ⌘⇧⏎ (New Block Below) — swept across
+        // `EditorCommands.keyEquivalent`, every `keyboardShortcut(` call site
+        // in `Variorum/` and `Shared/`, every `NSMenuItem` keyEquivalent (all
+        // empty strings), and both key overrides. The pair reads as a family
+        // with its neighbours: ⌘⇧⏎ makes an empty block below, ⌥⌘⏎ makes one
+        // out of the take you're in, ⇧⌥⌘⏎ makes one out of every take.
+        Capability(
+            id: .takeToBlockBelow, verb: "Move Take into a Block Below", scope: .take,
+            doors: [.menuBar, .contextMenu],
+            shortcutLabel: "⌥⌘⏎", takesAccess: .native,
+            unavailableNote: "Takes become blocks inside a note — open one first.",
+            availability: takeFamily),
+        Capability(
+            id: .takesToBlocks, verb: "Turn All Takes into Blocks", scope: .take,
+            doors: [.menuBar, .contextMenu],
+            shortcutLabel: "⇧⌥⌘⏎", takesAccess: .native,
+            unavailableNote: "Takes become blocks inside a note — open one first.",
+            availability: takeFamily),
         // 13b Stage 3 (3D — T5/N6): the 3B core op `setTakeLabel` gets its
         // faces — the take card's context menu and the bar's block menu.
         Capability(
@@ -977,6 +1001,8 @@ nonisolated enum CapabilityRegistry {
         case .callout: id = .callout
         case .pageFan: id = .pageFanBack
         case .copyAllTakes: id = .copyAllTakes
+        case .takeToBlockBelow: id = .takeToBlockBelow
+        case .takesToBlocks: id = .takesToBlocks
         case .find(let action):
             switch action {
             case .show: id = .findInPost

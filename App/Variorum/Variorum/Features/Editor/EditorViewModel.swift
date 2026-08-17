@@ -1299,6 +1299,16 @@ final class EditorViewModel {
         await structural.deleteCaretBlock()
     }
 
+    // MARK: - 13e batch 3 (her A20/A21) — take ↔ block, forwards
+
+    func moveCaretTakeIntoBlockBelow() async {
+        await structural.moveCaretTakeIntoBlockBelow()
+    }
+
+    func turnCaretBlockTakesIntoBlocks() async {
+        await structural.turnCaretBlockTakesIntoBlocks()
+    }
+
     // MARK: - 13d batch 2 (#34) — backspace at a texted seam
 
     typealias SeamMerge = EditorSurfaceController.SeamMerge

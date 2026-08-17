@@ -75,6 +75,10 @@ private struct TakesWorld {
     func projection(of blockID: String) throws -> (markdown: String, takeCount: Int) {
         try database.read { try Queries.blockTakes($0, blockID: blockID) }
     }
+
+    func fan(of blockID: String) throws -> [Variant] {
+        try database.read { try Queries.blockFan($0, blockID: blockID) }
+    }
 }
 
 /// A pasteboard of this test's own — her real clipboard is never touched.
@@ -83,6 +87,175 @@ private func scratchPasteboard(_ name: String) -> TakeClipboard.Destination {
     let destination = TakeClipboard.Destination.named("io.lduarte.variorum.tests.\(name)")
     destination.pasteboard.clearContents()
     return destination
+}
+
+// MARK: - E5 / E6b: the take↔block doors (her A20/A21, under AR-1)
+
+@MainActor
+@Suite("The take↔block doors (13e E5/E6b, A20/A21)")
+struct TakeToBlockDoorTests {
+    /// Adds a second take ("Second take.") to the world's one block and
+    /// returns (slot, firstTakeID, secondTakeID) against the fresh
+    /// projection.
+    @MainActor
+    private func fanned(
+        _ world: TakesWorld
+    ) throws -> (slot: Queries.RenderedBlock, first: String, second: String) {
+        let slot = try #require(world.model.projection.slots.first)
+        let first = try #require(slot.variantID)
+        let second = try world.session.operations.branchVariant(slot.blockID, from: first)
+        try world.session.operations.autosave(second.id, text: "Second take.", charDelta: 0)
+        try world.reload()
+        return (try #require(world.model.projection.slots.first), first, second.id)
+    }
+
+    @Test func theBoardDoorMovesTheTakeYoureInAndTheRingFollowsIt() async throws {
+        try await withTakesWorld(seedBlocks: ["Shown take."]) { world in
+            let fan = try fanned(world)
+            world.focus(blockID: fan.slot.blockID, variantID: fan.second)
+
+            await world.model.moveTakeIntoBlockBelow()
+            try world.reload()
+
+            // Two blocks now, the new one immediately below, carrying the
+            // take's text; the original is ARCHIVED on its own block (AR-1).
+            let slots = world.model.projection.slots
+            #expect(slots.count == 2)
+            #expect(slots[0].blockID == fan.slot.blockID)
+            #expect(slots[1].text == "Second take.")
+            let archived = try world.fan(of: fan.slot.blockID)
+                .first { $0.id == fan.second }
+            #expect(archived?.status == .archived)
+            #expect(archived?.deletedAt == nil)
+            // The ring hands over to the minted block's pane (the
+            // insert-below handover), and the receipt names the road back.
+            #expect(world.model.focusedPane?.blockID == slots[1].blockID)
+            #expect(world.model.statusMessage?.contains("archived") == true)
+        }
+    }
+
+    @Test func theCardDoorActsOnItsOwnTakeNotTheFocusedOne() async throws {
+        // A right-click never moves the keyboard (13k K6's lesson): the card
+        // names both its block AND its take.
+        try await withTakesWorld(seedBlocks: ["First block.", "Second block."]) { world in
+            let slots = world.model.projection.slots
+            let first = slots[0]
+            let second = slots[1]
+            let secondsExtra = try world.session.operations.branchVariant(
+                second.blockID, from: try #require(second.variantID))
+            try world.session.operations.autosave(
+                secondsExtra.id, text: "Other take.", charDelta: 0)
+            try world.reload()
+            world.focus(blockID: first.blockID, variantID: try #require(first.variantID))
+
+            await world.model.moveTakeIntoBlockBelow(
+                blockID: second.blockID, variantID: secondsExtra.id)
+            try world.reload()
+
+            #expect(world.model.projection.slots.map(\.text)
+                == ["First block.", "Second block.", "Other take."])
+        }
+    }
+
+    @Test func theDoorFlushesFirstSoTheNewBlockCarriesWhatSheJustTyped() async throws {
+        // The op reads the STORE; the pane buffer is a debounce ahead of it.
+        // Without the flush the minted block would carry prose she had
+        // already replaced on screen (the copy-doors class, KnownIssues).
+        try await withTakesWorld(seedBlocks: ["Shown take."]) { world in
+            let fan = try fanned(world)
+            world.focus(blockID: fan.slot.blockID, variantID: fan.second)
+            world.model.paneEdited(variantID: fan.second, newText: "Typed after branching.")
+
+            await world.model.moveTakeIntoBlockBelow()
+            try world.reload()
+
+            #expect(world.model.projection.slots.last?.text == "Typed after branching.")
+        }
+    }
+
+    @Test func aRefusalArrivesInWordsNotAsAnEnumDump() async throws {
+        // A one-take block has nothing to move out (I10 — `lastActiveVariant`),
+        // and that refusal used to dump the raw enum.
+        try await withTakesWorld(seedBlocks: ["The only take."]) { world in
+            let slot = try #require(world.model.projection.slots.first)
+            world.focus(blockID: slot.blockID, variantID: try #require(slot.variantID))
+
+            await world.model.moveTakeIntoBlockBelow()
+            try world.reload()
+
+            #expect(world.model.projection.slots.count == 1)
+            let message = try #require(world.model.statusMessage)
+            #expect(message.contains("only one take"))
+            #expect(message.contains("lastActiveVariant") == false)
+        }
+    }
+
+    @Test func theConversionCountsItsBlocksAndNamesTheBlanksItSkipped() async throws {
+        try await withTakesWorld(seedBlocks: ["Shown take."]) { world in
+            let fan = try fanned(world)
+            // Branched from the SECOND take, so it lands after it in the fan
+            // (`branchVariant` puts a branch beside its source) — the run
+            // below must come out in exactly that order.
+            let third = try world.session.operations.branchVariant(
+                fan.slot.blockID, from: fan.second)
+            try world.session.operations.autosave(third.id, text: "Third take.", charDelta: 0)
+            _ = try world.session.operations.newBlankVariant(fan.slot.blockID)  // skipped
+            try world.reload()
+
+            await world.model.turnTakesIntoBlocks(blockID: fan.slot.blockID)
+            try world.reload()
+
+            // The block still shows what it showed; the alternates follow in
+            // fan order (AR-1(c)); the blank is left alone and NAMED (AR-1(d)).
+            #expect(world.model.projection.slots.map(\.text)
+                == ["Shown take.", "Second take.", "Third take."])
+            let message = try #require(world.model.statusMessage)
+            #expect(message.contains("2 takes are now their own blocks below"))
+            #expect(message.contains("1 blank take was left alone"))
+        }
+    }
+
+    @Test func theConversionRefusesHonestlyWhenThereIsNoOtherTake() async throws {
+        try await withTakesWorld(seedBlocks: ["Alone."]) { world in
+            let slot = try #require(world.model.projection.slots.first)
+
+            await world.model.turnTakesIntoBlocks(blockID: slot.blockID)
+            try world.reload()
+
+            #expect(world.model.projection.slots.count == 1)
+            let message = try #require(world.model.statusMessage)
+            #expect(message.contains("no other takes with text"))
+        }
+    }
+
+    @Test func bothActsAreDeclaredWithTheirChordsDoorsAndParity() {
+        for (id, verb, label) in [
+            (CapabilityID.takeToBlockBelow, "Move Take into a Block Below", "⌥⌘⏎"),
+            (CapabilityID.takesToBlocks, "Turn All Takes into Blocks", "⇧⌥⌘⏎"),
+        ] {
+            let capability = CapabilityRegistry.capability(id)
+            #expect(capability.verb == verb)
+            #expect(capability.scope == .take)
+            #expect(capability.doors == [.menuBar, .contextMenu])
+            #expect(capability.shortcutLabel == label)
+            #expect(capability.takesAccess == .native)
+            // R118: native in Takes, and never available where no note is.
+            #expect(CapabilityRegistry.availability(
+                id, in: CapabilityContext(mode: .takes)) == .act)
+            #expect(CapabilityRegistry.availability(
+                id, in: CapabilityContext(mode: .write, writeEditorAttached: true)) == .act)
+            #expect(CapabilityRegistry.availability(id, in: CapabilityContext()) == .unavailable)
+            #expect(EditorCommands.menuRendered.contains(id))
+            #expect(TakesCellView.contextMenuCapabilities.contains(id))
+            // The chord is wired in the ONE place keys are declared, and it
+            // is a RETURN chord free of ⌘⏎ / ⌘⇧⏎.
+            let key = try? #require(EditorCommands.keyEquivalent(for: id))
+            #expect(key?.0 == .return)
+        }
+        #expect(EditorCommands.keyEquivalent(for: .takeToBlockBelow)?.1 == [.command, .option])
+        #expect(EditorCommands.keyEquivalent(for: .takesToBlocks)?.1
+            == [.command, .option, .shift])
+    }
 }
 
 // MARK: - E6's clipboard half (her A21)

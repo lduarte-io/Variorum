@@ -1098,6 +1098,86 @@ final class TakesViewModel {
         }
     }
 
+    // MARK: - Take ↔ block structure (13e batch 3 — her A20/A21, AR-1)
+
+    /// **Her A20 on the boards**: the take you're in leaves the fan and
+    /// becomes the block below. Native here (R118 — the take card is exactly
+    /// where you are looking at a take), the ring hands over to the minted
+    /// block's pane the moment its slot arrives (the insert-below handover
+    /// precedent).
+    ///
+    /// The target is named explicitly by the card's own door (a right-click
+    /// never moves the keyboard — 13k K6); the routed door falls back to the
+    /// pane you're in, then the shown take of the one block on a one-block
+    /// note (`commandTargetSlot`'s rule).
+    ///
+    /// Flushes first and lets the OP validate — the fan arity, the blank
+    /// take, the seal and I10 are all decided inside the write, never from
+    /// the frozen projection (13d batch 3's rule for this surface).
+    func moveTakeIntoBlockBelow(blockID: String? = nil, variantID: String? = nil) async {
+        guard !structuralInFlight else {
+            speak("Another structural change is still landing.")
+            return
+        }
+        guard let target = takeTarget(blockID: blockID, variantID: variantID) else {
+            speak("Click into a take first — this moves that take into its own block.")
+            return
+        }
+        guard await flushPendingText() else { return }
+        structuralInFlight = true
+        defer { structuralInFlight = false }
+        statusMessage = nil
+        do {
+            let result: Operations.TakeToBlockResult = try await session.runner.run { ops in
+                try ops.takeToBlockBelow(target.blockID, variantID: target.variantID)
+            }
+            choreography.parkFocus(onVariant: result.variant.id)
+            speak(TakeStructureCopy.movedNote)
+        } catch {
+            statusMessage = Self.message(for: error)
+        }
+    }
+
+    /// **Her A21's second half on the boards (the A45 repair)**: every other
+    /// take of the target block becomes its own block below it, in fan order,
+    /// under ONE undo entry. The block keeps showing what it showed.
+    func turnTakesIntoBlocks(blockID: String? = nil) async {
+        guard !structuralInFlight else {
+            speak("Another structural change is still landing.")
+            return
+        }
+        guard let targetID = blockID ?? commandTargetSlot?.blockID else {
+            speak("Click into a block first — this turns its takes into blocks.")
+            return
+        }
+        guard await flushPendingText() else { return }
+        structuralInFlight = true
+        defer { structuralInFlight = false }
+        statusMessage = nil
+        do {
+            let result: Operations.TakesToBlocksResult = try await session.runner.run { ops in
+                try ops.takesToBlocks(targetID)
+            }
+            speak(TakeStructureCopy.convertedNote(
+                blocks: result.converted.count, skippedBlanks: result.skippedBlankTakes))
+        } catch {
+            statusMessage = Self.message(for: error)
+        }
+    }
+
+    /// The take a take-scoped routed act addresses: the pane you're in;
+    /// failing that, the shown take of the block the command targets (the
+    /// one-block-note case `commandTargetSlot` already covers). An explicit
+    /// pair from a card's own door always wins.
+    private func takeTarget(
+        blockID: String?, variantID: String?
+    ) -> (blockID: String, variantID: String)? {
+        if let blockID, let variantID { return (blockID, variantID) }
+        if let pane = focusedPane { return (pane.blockID, pane.variantID) }
+        guard let slot = commandTargetSlot, let shown = slot.variantID else { return nil }
+        return (slot.blockID, shown)
+    }
+
     // MARK: - Copy all takes (13e E6 — her A21's clipboard half)
 
     /// *"keyboard shortcut for copying all takes together to clipboard"* —

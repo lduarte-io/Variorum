@@ -252,6 +252,15 @@ struct TakesBoardView: View {
             // 13e E6 (A21): the focused block's fan → the clipboard.
             Task { await model.copyAllTakes() }
             return true
+        case .takeToBlockBelow:
+            // 13e E5 (A20): native here — the take you're in becomes the
+            // block below, and the ring follows it.
+            Task { await model.moveTakeIntoBlockBelow() }
+            return true
+        case .takesToBlocks:
+            // 13e E6b (A21/A45): the whole fan, in fan order, under ONE undo.
+            Task { await model.turnTakesIntoBlocks() }
+            return true
         case .find:
             // QoL batch 3 (L6): v1 finds across the POST's text, which is the
             // full-document editor's surface; a take card is one take. The

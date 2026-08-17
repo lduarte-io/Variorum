@@ -240,7 +240,10 @@ extension Operations {
 
     /// I10: a live block keeps at least one live active variant. Removing
     /// the last one is not a variant operation — it is deleting the block.
-    private func ensureNotLastActive(_ db: Database, _ variant: Variant) throws {
+    /// Internal (was private) since 13e batch 3: the take↔block doors archive
+    /// a take inside their OWN transaction, and they owe I10 the same guard
+    /// this file's doors owe it — one rule, not a second copy of it.
+    func ensureNotLastActive(_ db: Database, _ variant: Variant) throws {
         guard variant.status == .active else { return }
         let otherActive = try Int.fetchOne(
             db,
@@ -257,8 +260,10 @@ extension Operations {
     /// `default_variant_id` lifecycle (AppSpec §9): when the variant it names
     /// is removed from the active fan, reassign to the most recently updated
     /// live active variant. Never NULL while the block is live — guaranteed
-    /// jointly by the I10 guard above and this reassignment.
-    private func reassignDefaultIfNeeded(
+    /// jointly by the I10 guard above and this reassignment. Internal since
+    /// 13e batch 3 for the take↔block doors' inline archive (same reason as
+    /// the guard above — one rule, not a second copy).
+    func reassignDefaultIfNeeded(
         _ db: Database, blockID: String, removing variantID: String, now: Date
     ) throws {
         var block = try liveBlock(db, blockID)

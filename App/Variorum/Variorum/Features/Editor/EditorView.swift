@@ -255,6 +255,15 @@ extension EditorView {
             // bytes and same sentence as the boards' door (R118).
             Task { await model.copyCaretBlockTakes() }
             return true
+        case .takeToBlockBelow:
+            // 13e E5 (A20): native in Write — the caret's take becomes the
+            // block below, through the one structural flight.
+            Task { await model.moveCaretTakeIntoBlockBelow() }
+            return true
+        case .takesToBlocks:
+            // 13e E6b (A21/A45): the caret block's whole fan.
+            Task { await model.turnCaretBlockTakesIntoBlocks() }
+            return true
         case .find(let action):
             // QoL batch 3 (L6): the find bar lives in THIS editor's own scroll
             // view. The inline book/spread/pool editor owns none, so it

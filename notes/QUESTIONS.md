@@ -448,5 +448,31 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint.**
 
-*(Next free number: **#58**.)*
+## Phase 13e (2026-08-17) — batch 3's build-time calls, bundled for the sitting
+
+58. **2026-08-17 · Phase 13e (batch 3 — take ↔ block structure) · TEN build-time calls, each one line to change.** Your A20 said *"shortcut for moving a take into being a new block beneath the current block"* and your A21 said *"…or turning all takes into their own blocks"* — which the A45 finding reframed as the repair for *"my current takes should've been blocks."* Both are built. The one architectural fork they hid — whether the take's ROW moves to the new block or the block gets a fresh copy — was traced and ruled by the architect (ruling **AR-1**, in the 13e plan): **the new block gets a copy, and the original take is ARCHIVED on its own block.** The rejected road (moving the row) would have needed a brand-new sync repair rule to be safe, and would have made a block she could never fix if two devices moved different takes out of it offline. Everything below is a call inside that ruling; the BINDING build record is the 13e plan's batch-3 record.
+
+    **(a) The original take is ARCHIVED, not deleted** (AR-1). Nothing is lost: it keeps its commits, its label and its lock, and "archived · n" under the block's takes brings it back. **The alternative:** delete it (its commits become unreachable), or leave it in the fan (the text would then read twice).
+
+    **(b) A LOCKED take may be moved out.** That is exactly what archiving a locked take does today, and this door archives — so it follows that door rather than inventing a third behaviour. The lock freezes the BUFFER and nothing here edits it; the archived original keeps its lock, and the new block's copy is NOT born locked (the standing copy doctrine). **The alternative:** refuse a locked take (one guard line).
+
+    **(c) "Turn all takes into blocks" keeps the take the block is SHOWING, and the others become blocks below it in fan order.** So the note still reads exactly as it read — the first block's text never changes — and the run below is the same order the clipboard door writes (shown take, then alternates). **The alternative:** keep the FIRST take in the fan instead, which puts the blocks in strict fan order but silently changes what the block shows.
+
+    **(d) BLANK takes are skipped, and the receipt says so** ("1 blank take was left alone"). Minting an empty block serves nobody. Moving a single blank take refuses by name instead. **The alternative:** convert blanks too (empty blocks below).
+
+    **(e) The chords are ⌥⌘⏎ (this take) and ⇧⌥⌘⏎ (all takes)** — your words asked for shortcuts, and the sweep found the Return family's only bound chords to be ⌘⏎ (choose take) and ⌘⇧⏎ (new block below), so the pair reads as that family's other two members. Both are menu items and both are in the helper (⌘/). **The alternative:** re-pick either key, or drop the chords and keep the menu doors.
+
+    **(f) ARCHIVED takes ride nowhere** — they stay on the source block, exactly as an unmarked take stays on A in the divide ceremony. **The alternative:** convert them too, which would resurrect set-aside text as blocks in the note.
+
+    **(g) The new block INHERITS the callout frame and gets COPIES of the block's comments; the source keeps its own.** The standing structural-successor travel rules (a divide's halves behave the same way). **The alternative:** mint plain / carry no comments.
+
+    **(h) The take's LABEL rides onto the new block's take; its COMMITS do not.** A whole-take ride keeps its name (the merge-carry precedent), and commits are never copied anywhere in the system — they stay with the archived original, which is exactly where the road back is. **The alternative:** drop the label too.
+
+    **(i) The lineage edge is stamped `manual`.** The new block records that it descends from the block it came out of; `manual` is the existing vocabulary and a new value would be a schema change. **The alternative:** none without a schema event — recorded so the wording is yours to know, not to fix.
+
+    **(j) Moving the take a block is SHOWING is allowed** — the block then shows its default take instead (the standing rule for archiving a shown take), and the note keeps reading. Refused only when the block has just ONE take: a take moves out when there is another left behind. **The alternative:** refuse to move the shown take at all.
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#59**.)*
 
