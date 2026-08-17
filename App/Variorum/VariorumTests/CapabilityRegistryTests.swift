@@ -62,6 +62,13 @@ struct CapabilityRegistryTests {
         // — the same hole the find family and the navigation core each
         // opened before their own contexts joined.
         contexts.append(CapabilityContext(mode: nil, canStarCurrent: true))
+        // 13e E11 (the ASCENT): its own context, the `canStarCurrent` family —
+        // a fact about what the pane is SHOWING (this note is in a book), not
+        // a stack depth. Without it `.openBookAtNote` would read
+        // `.unavailable` everywhere the walk looks, the same hole the find
+        // family, the navigation core and the star door each opened before
+        // their own contexts joined.
+        contexts.append(CapabilityContext(mode: nil, canAscendToBook: true))
         return contexts
     }
 
@@ -117,6 +124,15 @@ struct CapabilityRegistryTests {
             .renameLens, .tagBlock,
             .findInPost, .findAndReplace, .findNext, .findPrevious, .useSelectionForFind,
             .openPeerPost,
+            // 13e E11: `.openBookAtNote` joins `.openPeerPost` — the same
+            // kind and the same reason, stated rather than assumed. It is a
+            // NAVIGATION act (it opens a book at a note); nothing is edited,
+            // so no surface can be "behind Write". And literally so, twice
+            // over: its two doors are the context BAR, which sits above the
+            // pane, and the membership CHIP in the masthead — both render
+            // over every mode, so Takes reaches them without a mode switch,
+            // exactly as `.divergeForBook` does.
+            .openBookAtNote,
         ]
         for capability in CapabilityRegistry.all
         where capability.scope != .app && !exempt.contains(capability.id) {

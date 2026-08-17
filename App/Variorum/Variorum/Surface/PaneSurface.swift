@@ -232,6 +232,12 @@ final class PaneTextView: NSTextView, MarkdownFormattable {
         var enabled = true
         var action: () -> Void = {}
         var children: [MenuItemSpec] = []
+        /// 13e E1: a leading image for the row — today the callout palette's
+        /// colour swatch (`CalloutMenu.swatchImage`). It rides the SPEC rather
+        /// than being built here so the composing surface stays the only place
+        /// that knows what a row means, and so the swatch is the same object
+        /// the other two callout renderers draw.
+        var image: NSImage?
     }
 
     var variorumMenu: (() -> [MenuItemSpec])?
@@ -266,6 +272,7 @@ final class PaneTextView: NSTextView, MarkdownFormattable {
         let trampoline = PaneMenuTrampoline(enabled: spec.enabled, action: spec.action)
         menuItem.target = trampoline
         menuItem.representedObject = trampoline  // retains it for the menu's life
+        menuItem.image = spec.image
         if !spec.children.isEmpty {
             let submenu = NSMenu(title: spec.title)
             for child in spec.children {

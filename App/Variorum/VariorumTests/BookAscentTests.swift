@@ -402,10 +402,20 @@ struct AscentDoorTests {
         #expect(key?.1 == [.command, .shift])
         #expect(EditorCommands.menuRendered.contains(.toggleTagChips))
         #expect(ShellActions.paletteActs.contains(.toggleTagChips))
-        // The bar's own icon row declares all three of its doors, so the
-        // `.surface` walk covers them.
+        // The bar's own icon row declares its doors, so the `.surface` walk
+        // covers them.
+        //
+        // **13e E11 (JUSTIFIED EDIT — called out so a reviewer checks it
+        // rather than assuming):** the ASCENT joined the list. 13k left it
+        // out deliberately and recorded the omission as a build-time call
+        // (#55(i)); she ratified that WITH the declare-it alternative open
+        // ("13e's if ever wanted") and then asked for the registry to be kept
+        // up to date — so the fourth element is her ruling landing, and this
+        // flipped expectation is that change's own red-on-old proof (the
+        // pre-13e registry has no `.openBookAtNote` at all). The three
+        // originals and their order are untouched.
         #expect(ContextBar.surfaceCapabilities
-                == [.navigateBack, .navigateForward, .toggleTagChips])
+                == [.navigateBack, .navigateForward, .toggleTagChips, .openBookAtNote])
     }
 
     /// Visiting a book floats it in the chooser — recorded at the ONE

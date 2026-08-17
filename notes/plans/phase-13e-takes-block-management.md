@@ -553,7 +553,7 @@ binaries live in the session scratchpad, throwaway.
 
 | Batch | Scope | Status |
 |---|---|---|
-| 1 | **The door set:** E1 (swatches + real emoji picker) · E13 (duplicate-book-name refusal) · E11 (ascent registry declaration) | briefed below |
+| 1 | **The door set:** E1 (swatches + real emoji picker) · E13 (duplicate-book-name refusal) · E11 (ascent registry declaration) | **DONE 2026-08-17** — record below (core 1223/130 · Mac 1266/224 tripwire-only · mobile 314/60 · spine 51/7; Mac baseline corrected to 1251/220) |
 | 2 | **The fan's hands:** E4 (reorder takes + the fan-copy remap fix that lands WITH it — its KnownIssues row's FIX-2 template) · E15 (Takes-board policy routing) · E3 (⌘-click merge selection) | pending |
 | 3 | **Take↔block structure:** E5 (move-a-take-into-a-block-below) · E6 (copy-all-takes / takes-to-blocks — the A45 repair tool) | pending |
 | 4 | **Block management:** E2 (block multi-select + multi-delete) | pending |
@@ -619,6 +619,198 @@ adjacent it looks.
   behavior), refusal wording, registry-walk coverage. Nothing
   user-visible changes; the walk test growing to cover the doors
   IS the deliverable.
+
+### BATCH 1 RECORD — the door set (2026-08-17, a fresh Opus implementer; COMPLETE)
+
+**Shipped, per ledger row.**
+
+- **E1 — callout colour swatches + a real emoji picker.** Both upgrades
+  land in the ONE vocabulary (`CalloutMenu`), so all three standing
+  doors get them without a per-door copy — which is what K6's
+  consolidation was for.
+  - **Swatches:** `CalloutMenu.Row` gained `swatch: String?` (the
+    palette TOKEN NAME, set on exactly the five colour rows) and
+    `CalloutMenu.swatchImage(for:dark:size:)` draws a 14pt rounded chip
+    filled by `CalloutPalette.color(name, dark:)` — the SAME resolution
+    the block's frame uses, so nothing new is stored (AppSpec §7 / R1:
+    the stored value is the name) and a palette change reaches menus and
+    blocks together. `isTemplate = false` + `accessibilityDescription =
+    name`. Appearance comes from ONE reading
+    (`CalloutMenu.isDarkAppearance()`, the app's effective appearance),
+    because two of the three renderers are `NSMenu`s with no SwiftUI
+    environment. Rendered by: the shared AppKit builder
+    (`CalloutMenu.menuItem` → Write's right-click), the pane menu spec
+    (`PaneTextView.MenuItemSpec` gained `image`; `TakesShared` passes
+    the row's chip → a take card's right-click), and the SwiftUI menu bar
+    (`EditorCommands` — a `Label` with `Image(nsImage:)
+    .renderingMode(.original)`). Row WORDS untouched, so the K6 drift pin
+    still compares identical titles across the three doors (#56(j)).
+  - **Emoji picker:** the prompt's accessory is now
+    `[ field ] [ Emoji & Symbols… ]` (`CalloutMenu.emojiAccessory`,
+    returned as a value so a pin can inspect and fire it), whose button
+    focuses the field and calls `NSApp.orderFrontCharacterPalette(field)`
+    — the zero-dependency road the brief named, with NO design fork
+    taken. It is an ACCESSORY button, not a third alert button, because
+    an alert button ends the modal session and would dismiss the prompt
+    the glyph must land in. Typing/pasting still works; the K6 contract
+    (empty string = "no glyph", nil = cancel) is byte-unchanged.
+- **E13 — duplicate-book-name refusal (her Round 3 ruling).** New pure
+  Domain rule `BookNaming` (ends-trimmed + case-folded key; internal
+  spacing and diacritics deliberately NOT folded — #56(e)) and one core
+  read `Operations.assertBookNameIsFree(_:excluding:)` throwing the new
+  `OperationError.duplicateBookName(name:)` (payload = the EXISTING
+  book's stored casing, so the refusal names back the book she already
+  has). Live = `deleted_at IS NULL`: a FINISHED book counts, a deleted
+  one does not (#56(a)/(b)). `createReading`/`renameReading` are
+  BYTE-UNCHANGED — the guard is door-level by her explicit word, so the
+  seeders, `shelveInDailyJournalBook`'s never-throwing create-and-pin
+  and the sync apply path cannot refuse for a name reason (#56(h)),
+  pinned by `createAndRenameStillAcceptDuplicateNamesThemselves`. FIVE
+  Mac doors consult it INSIDE their own runner closure (bodies are
+  synchronous, so no other door's write interleaves; only the
+  cross-device race her ruling tolerates survives): the shelf's New Book
+  (all three buttons) + Rename (`ReadingsViewModel`), the navigator's
+  Rename (`BookStructureModel`), Settings ▸ Promote to Book
+  (`PromoteTagsSheet` — which also stopped dumping raw enums, the R93
+  class), and BOTH conversion doors' TYPED fresh-collector name (the
+  derived default is deliberately unguarded — #56(f)). Ruled wording in
+  ONE home (`BookNameCopy.refusal(existing:)`), read by both
+  `ReadingsViewModel.message` and `OpsRefusalCopy.message`. NO schema,
+  no operation-level invariant, no §7 repair.
+- **E11 — the book ascent, declared (P-1 hygiene).** New
+  `CapabilityID.openBookAtNote`: verb "Open Book at This Note", scope
+  `.book`, doors `[.surface]`, no chord, `unavailableNote` =
+  `WorkspaceNaming.ascentUnavailableNote` (the written refusal #55(i)
+  said it lacked), availability gated on the new
+  `CapabilityContext.canAscendToBook` (the `canStarCurrent` family).
+  Both renderers of the one act now declare it —
+  `ContextBar.surfaceCapabilities` and
+  `MembershipChip.surfaceCapabilities` — and `ContextBar.bookEnabled`
+  READS the registry instead of re-deriving `!books.isEmpty`, so the
+  declaration is load-bearing rather than decorative while staying
+  byte-identical to the shipped face (#55(b)/(g): grey with a tooltip on
+  a bookless note). Registry-walk additions: a sampled context carrying
+  `canAscendToBook`, and the R118 exemption beside `.openPeerPost` with
+  its reasoning stated (a navigation act, and literally reachable from
+  Takes — both doors render above the mode row).
+
+**Mechanisms traced (the hallucination guard).** E13 is a new rule, not
+a bug fix, and its mechanism is the one her observation named: nothing
+anywhere consulted book names, so `createReading`/`renameReading`
+accepted "Ideas" twice and 13k K4's card row showed the name once —
+verified by the pre-fix reverts below, where the second book really is
+minted. E1's mechanism: the three renderers built menu items with a
+title and no image and the emoji prompt built a bare `NSTextField`, so
+there was no chip and no picker to press — again verified by revert. E11
+changed no behaviour by design, so it carries no bug mechanism; its
+proof is the flipped `ContextBar.surfaceCapabilities` expectation.
+
+**Pins + red-on-old evidence (behavioral revert, checksums recorded).**
+New core file `Tests/VariorumCoreTests/BookNameGuardTests.swift` (7
+tests, 2 suites) and new Mac file
+`App/Variorum/VariorumTests/DoorSetTests.swift` (15 tests, 4 suites).
+
+*Group A revert — the four E13 door asserts deleted (the pre-13e door
+shape). Files reverted:* `ReadingsViewModel.swift`
+`4cae903b…1b596` → `05e1cc7f…a7ee`; `BookStructureModel.swift`
+`b133e84d…88ce` → `1aa1588c…38a8`; `ShelfViewModel.swift`
+`7c6a575e…f433` → `35b28ec5…fa11`. Result: **all four pins RED, each for
+its own door** — `theShelfsNewBookDoorRefusesANameAlreadyTaken` (5
+issues; the store ends holding two "Ideas"),
+`theShelfsRenameDoorRefusesAnotherBooksNameButNeverItsOwn` (2),
+`theNavigatorsRenameDoorCarriesTheSameGuard` (2),
+`theConversionsTypedCollectorNameIsGuardedAndTheDerivedOneIsNot` (5 —
+the report line shows the fresh `"ideas"` collector really was minted).
+Restored: both checksums back to `4cae903b…`, `b133e84d…`, `7c6a575e…`.
+
+*Group B revert — four E1 lines (the swatch assignment in
+`CalloutMenu.menuItem`; the palette lookup in `swatchImage`; the picker
+button's place in the accessory stack; `menuItem.image = spec.image` in
+`PaneTextView.makeMenuItem`). Files:* `CalloutMenu.swift`
+`df406f95…d865` → `a4608884…dbd9`; `PaneSurface.swift`
+`757d8d07…1835` → `7a06bda1…0c96`. Result: **exactly the four
+corresponding pins RED** —
+`theSharedMenuBuilderDrawsASwatchOnEveryColourRow` (Blue's `image` is
+nil), `theSwatchPaintsThePalettesOwnColourPerAppearance` (12 issues,
+including both distinctness checks),
+`aPaneMenuSpecCarriesItsSwatchThroughToTheItem`,
+`theAccessoryOffersTheSystemPickerBesideTheField` — while
+`onlyTheColourRowsCarryASwatchToken`,
+`pressingItOpensThePickerAtTheField` and `anEmptyAnswerIsStillARealAnswer`
+stayed GREEN (they do not depend on those lines — clean attribution).
+Restored: `df406f95…d865`, `757d8d07…1835`.
+
+*E11's proof is the JUSTIFIED EDIT* to `BookAscentTests
+.theFoldIsOneDeclaredActWithOneKey`, whose exact-list expectation on
+`ContextBar.surfaceCapabilities` encoded the pre-E11 (undeclared)
+state and now names the fourth element; the pre-13e registry has no
+`.openBookAtNote` at all, so the flip IS the red-on-old. Called out in
+the test's own comment per the 13b 4D convention. The E11 behaviour pins
+(`theBarsBookDoorIsGatedByTheRegistry`) pass on BOTH sides deliberately —
+"declaring must not change shipped behaviour" is the deliverable's claim,
+and a red there would have been the bug.
+
+*A note on the colour pin's shape (worth keeping):* the first version
+compared the drawn pixel against a fixed sRGB triple and failed by up to
+0.054 per channel — the drawing context is the device's, so a fixed-space
+comparison crosses a profile hop. It now compares the swatch against a
+flat reference chip drawn through the SAME `NSImage` path (plus two
+distinctness checks), which is exact and cannot be satisfied by a
+tolerance wide enough to accept a wrong colour.
+
+**Counts (own runs, quoted from the "Test run with N tests" lines).**
+- Core: **`✔ Test run with 1223 tests in 130 suites passed`** (baseline
+  1216/128 → +7/+2, exactly the new core file).
+- Mac: **`✘ Test run with 1266 tests in 224 suites failed … with 1
+  issue`** — the ONE issue is
+  `TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergence
+  Occasion`, the recorded environment-gated tripwire, allowed by
+  IDENTITY.
+- **BASELINE CORRECTION (verified, worth the phase's while):** the
+  carried-forward Mac baseline of **1246/220 is 5 tests low**. This
+  batch ran the Mac suite in a throwaway git worktree at the pristine
+  kickoff commit `6346853` (own DerivedData, removed afterwards) and got
+  **`✘ Test run with 1251 tests in 220 suites failed … with 1 issue`** —
+  the same single tripwire red. So the true pre-batch baseline is
+  **1251/220 tripwire-only**, and this batch's +15/+4 lands exactly on
+  1266/224. (The kickoff section had recorded the Mac run as *pending*;
+  this closes it.) **A47c datum, free:** the tripwire fired on a pristine
+  HEAD in an UNLOCKED session (`CGSSessionScreenIsLocked = 0`) — evidence
+  for the sweep's covariate question, and proof the red is nothing this
+  batch touched.
+- Mobile: **`✔ Test run with 314 tests in 60 suites passed`** (iPhone
+  16e / iOS 26.2 — run because E13's rule lands in `Sources/`; baseline
+  matched exactly).
+- Tutorial spine, by TYPE name (all seven): **`✔ Test run with 51 tests
+  in 7 suites passed`**.
+
+**PROVISIONALs / build-time calls:** fifteen, bundled as **QUESTIONS
+#56** (a)–(o) — the finished-book and deleted-book halves of "live", the
+second-unnamed-book refusal, casing-only renames, the fold's deliberate
+narrowness, the typed-vs-derived collector name, all-or-nothing
+conversion refusal, doors-not-operations, the unguarded phone doors, the
+swatch's words/appearance/Remove-row calls, the system emoji picker, and
+E11's scope/keylessness/parity exemption. Two of them are HAND-CHECKS no
+test can drive: whether a glyph clicked in the system palette lands in
+the modal prompt's field (#56(m)), and whether SwiftUI draws the menu
+bar's chips in colour (#56(n)) — the two `NSMenu` doors' chips are pinned.
+
+**Nothing stopped, nothing schema-shaped.** No design fork appeared: the
+emoji picker stayed on the brief's named road
+(`orderFrontCharacterPalette`), and no ledger row outside E1/E13/E11 was
+touched. `Sources/VariorumCore/Sync/` untouched; no migration; no mirror
+implication; no `/Applications` refresh (her real-store instance, PID
+54789, was live the whole batch and was never addressed).
+
+**MOBILE PARITY (for the closeout ledger):** the phone owes the
+**duplicate-book-name refusal at its own two doors** —
+`MobileCreateBook` and `MobileBookDetails`' rename — one
+`assertBookNameIsFree` line each, since the rule already lives in core
+(#56(i)). Also open, if she wants it: the phone's callout controls
+(`MobileCallout`/`MobileBlockMenu`) have neither swatches nor a picker.
+E11 is Mac-registry-only and owes the phone nothing.
+
+---
 
 **The loop (binding):** red-on-old pins by behavioral revert with
 checksums; PROVISIONAL-and-continue for non-gating ambiguity

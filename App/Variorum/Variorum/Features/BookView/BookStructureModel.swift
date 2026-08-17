@@ -440,7 +440,12 @@ final class BookStructureModel {
     }
 
     func rename(to name: String) async {
-        await run { try $0.renameReading(self.readingID, name: name) }
+        // 13e E13 — the same guard the shelf's rename carries, at the book's
+        // own door (her round-3 ruling; `excluding` is this book's row).
+        await run {
+            try $0.assertBookNameIsFree(name, excluding: self.readingID)
+            try $0.renameReading(self.readingID, name: name)
+        }
     }
 
     func setWordTarget(_ target: Int?) async {
@@ -479,7 +484,14 @@ final class BookStructureModel {
         do {
             let readingID = readingID
             _ = try await session.runner.run { ops in
-                try ops.convertSmartReadingToCurated(
+                // 13e E13: the fresh collector is a book she NAMED, so the
+                // guard rides it — but only when she typed one. A nil name
+                // means the op derives "<book> (collecting)", and a derived
+                // name is not "purposefully" naming two books the same thing
+                // (her ruling's own words), so the derivation is left alone
+                // rather than made able to refuse a conversion.
+                if let collectingName { try ops.assertBookNameIsFree(collectingName) }
+                return try ops.convertSmartReadingToCurated(
                     readingID, keepCollecting: keepCollecting,
                     collectingName: collectingName, order: order)
             }

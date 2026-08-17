@@ -348,13 +348,21 @@ struct PromoteTagsSheet: View {
         Task {
             do {
                 _ = try await session.runner.run { ops in
-                    try ops.createReading(
+                    // 13e E13 — this is a book-CREATING door with a free-text
+                    // name, so it carries the same guard the shelf's does
+                    // (her round-3 ruling). Inside the runner closure with
+                    // the mint, for that guard's own reason.
+                    try ops.assertBookNameIsFree(bookName)
+                    return try ops.createReading(
                         name: bookName, kind: .smart,
                         querySpec: try Self.spec(paths: paths, joinAll: all).encodedJSON())
                 }
                 dismiss()
             } catch {
-                self.error = String(describing: error)
+                // …and speaks the ops layer's refusal in the app's words
+                // rather than dumping the raw enum (the R93 class; this door
+                // was the last book-naming one still doing it).
+                self.error = OpsRefusalCopy.message(for: error)
             }
         }
     }

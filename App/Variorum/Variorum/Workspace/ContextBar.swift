@@ -83,13 +83,16 @@ struct ContextBar: View {
     }
 
     /// The `.surface` acts this bar renders (P-1's declared ⇔ rendered
-    /// walk). The ascent is deliberately NOT among them — it has never been
-    /// a declared capability, here or on the membership chip that has
-    /// carried the same act since Phase 13, and declaring it is a
-    /// build-time call on the walk register (QUESTIONS #55) rather than
-    /// something this batch decided quietly.
+    /// walk).
+    ///
+    /// **13e E11: the ASCENT joined them.** It was deliberately left out at
+    /// 13k ("declaring it is a build-time call on the walk register" —
+    /// QUESTIONS #55(i)), she ratified that with the declare-it alternative
+    /// left open, and then asked for the registry to be kept up to date. The
+    /// act is unchanged; what it gains is a catalog row, a written refusal
+    /// and this walk's coverage.
     static let surfaceCapabilities: [CapabilityID] = [
-        .navigateBack, .navigateForward, .toggleTagChips,
+        .navigateBack, .navigateForward, .toggleTagChips, .openBookAtNote,
     ]
 
     @State private var listingBooks = false
@@ -105,7 +108,17 @@ struct ContextBar: View {
 
     var backEnabled: Bool { originLabel != nil }
     var forwardEnabled: Bool { forwardLabel != nil }
-    var bookEnabled: Bool { !books.isEmpty }
+
+    /// 13e E11 — the book door's enablement, read FROM the registry rather
+    /// than re-derived here (P-1: "gating is data, never per-view
+    /// if-statements"). Byte-identical to the shipped `!books.isEmpty` by
+    /// construction — the context it builds carries exactly that fact — which
+    /// is what makes the declaration load-bearing instead of decorative
+    /// without changing anything she can see.
+    var bookEnabled: Bool {
+        CapabilityRegistry.isEnabled(
+            .openBookAtNote, in: CapabilityContext(canAscendToBook: !books.isEmpty))
+    }
 
     /// What the ＃ door DOES, as a value the body reads: fold and the cards
     /// go, unfold and they are back. K12's whole behaviour, stated where a

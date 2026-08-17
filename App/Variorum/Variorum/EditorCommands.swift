@@ -438,7 +438,27 @@ struct EditorCommands: Commands {
                     } else if row.promptsForEmoji {
                         Button(row.title) { promptCalloutEmoji() }
                     } else if let edit = row.edit {
-                        Button(row.title) { actions?.dispatch(.callout(edit)) }
+                        Button {
+                            actions?.dispatch(.callout(edit))
+                        } label: {
+                            // 13e E1: the swatch rides the LABEL where the row
+                            // carries a colour token — the same
+                            // `CalloutMenu.swatchImage` the two NSMenu doors
+                            // draw. `.renderingMode(.original)` and the
+                            // image's own `isTemplate = false` are both needed:
+                            // a menu label's image is tinted by default, which
+                            // is the one thing a colour chip must not be.
+                            if let swatch = row.swatch {
+                                Label {
+                                    Text(row.title)
+                                } icon: {
+                                    Image(nsImage: CalloutMenu.swatchImage(for: swatch))
+                                        .renderingMode(.original)
+                                }
+                            } else {
+                                Text(row.title)
+                            }
+                        }
                             // ⌥⌘C rides the toggle row, exactly as before.
                             .keyboardShortcut(
                                 edit == .toggle

@@ -179,9 +179,13 @@ struct TakesCellView: View {
                     }
                 }
                 guard let edit = row.edit else { return nil }
-                return .init(title: row.title) {
-                    Task { await model.applyCallout(edit, blockID: slot.blockID) }
-                }
+                return .init(
+                    title: row.title,
+                    action: { Task { await model.applyCallout(edit, blockID: slot.blockID) } },
+                    // 13e E1: the swatch, from the one vocabulary's own row —
+                    // the card's right-click shows the same chip the menu bar
+                    // and Write's right-click show.
+                    image: row.swatch.map { CalloutMenu.swatchImage(for: $0) })
             }))
         return specs
     }

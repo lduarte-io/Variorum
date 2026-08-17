@@ -374,5 +374,43 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: ANSWERED 2026-08-02 (the closeout sitting): "55: i approve all of these" — (a)–(j) RATIFIED AS SHIPPED, including (i)'s undeclared ascent (the declare-it alternative stays one small line, 13e's if ever wanted). Her two clarifying questions answered on the record: the "book ascent not registry-declared" line means the open-the-book-at-this-note act was never entered in the internal capability catalog (it works; it just lacks a formal availability rule + refusal entry and the registry walk's coverage); the "dropdown's two doors" hand-check = plain click and ⌘-click on the book icon, whose modifier is read at the AppKit last inch tests cannot pin. Record: the 13k plan's round 5.**
 
-*(Next free number at authoring time: **#56**.)*
+---
+
+## Phase 13e (2026-08-17) — batch 1's build-time calls, bundled for the sitting
+
+56. **2026-08-17 · Phase 13e (batch 1 — the door set) · FIFTEEN build-time calls, each one line to change, bundled the way #49–#55 were.** Your kickoff-sitting rulings said WHAT: duplicate book names REFUSE at the door (round 3), callouts get colour swatches and a real emoji picker (E1/A13(b)), and the book ascent enters the capability registry (E11). They did not say whether a FINISHED book's name counts as taken, or what the emoji picker should be, or whether the colour rows keep their words — those are the calls below. **Nothing here needed a schema change, an operation-level invariant or a SyncSpec §7 repair**, and nothing touches `renderedText`, the export BODY projections or the bridge's join brain. The BINDING build record is the 13e plan's batch-1 record.
+
+    **(a) A FINISHED (locked) book's name IS taken.** Your ruling's words were *"archived/deleted books don't count"* — and books have no archive, only a finished flag, which is not deletion: a finished book sits on the shelf, in ⌘K and on every note card, so a second book wearing its name is exactly the confusion the ruling is about. **The alternative:** exempt finished books, so a name is free once the book is done. One line.
+
+    **(b) A DELETED book frees its name immediately** — the other half of the same words. Consequence, stated rather than smuggled: RESTORING that book (`restoreReading`) can re-create a duplicate pair, because nothing checks names at restore time. That is the offline-race tolerance your ruling already accepts, and adding a name check to a RECOVERY door would mean refusing to give you your book back. **The alternative:** count deleted books too (a name is never released).
+
+    **(c) A second UNNAMED book refuses.** The shelf's New Book alert substitutes "Untitled" (or "Untitled Journal") for a blank field, and since 13k K1 that string is a real name — so the second blank-field create now says *"A book named 'Untitled' already exists"*. **The alternatives:** exempt the placeholder names so unnamed books stack, or make the Create buttons refuse an empty field outright (which is a different door change).
+
+    **(d) A book may always be renamed to its own name, casing included** — "Orbit" → "ORBIT" goes through, because a book cannot collide with itself and re-capitalising is a rename you are entitled to make.
+
+    **(e) The name match is ends-trimmed and case-folded, and NOTHING else.** `"my  book"` (two spaces) and `"my book"` are two names, and so are "Élan" and "Elan". Your ruling said case-insensitive; every wider fold would refuse a name you are entitled to use. **The alternative:** collapse internal spacing and/or fold diacritics too.
+
+    **(f) The conversion offer's TYPED fresh-collector name is guarded; the DERIVED one is not.** Type "Ideas" into "keep a fresh smart book collecting this filter" and it refuses; leave it blank and the op's own "<book> (collecting)" default goes through even if that name is somehow taken — a name the app computed is not *purposefully* naming two books the same thing (your ruling's own words). **The alternative:** guard the derived name too, and have the conversion refuse over a name you never typed.
+
+    **(g) A refused collector name refuses the WHOLE conversion** — the smart book stays smart, nothing is minted, nothing half-done. **The alternative:** convert anyway and skip the fresh collector (which would silently drop the thing you asked for).
+
+    **(h) The guard lives at the DOORS, never in the operations.** `createReading` and `renameReading` still accept duplicate names by design: the tutorial/mobile seeders, the daily journal book's own create-and-pin (which AppSpec §9 promises *never throws*) and the sync apply path all mint through them, and a name refusal in any of those would break something that must not break. Your "not a schema rule" reading, taken literally and one layer up.
+
+    **(i) The five Mac doors are guarded this batch; the PHONE's two are not.** Guarded: the shelf's New Book (all three buttons) and Rename, the book navigator's Rename, Settings ▸ Promote to Book, and the conversion offer's collector field. The phone's create-book and rename-book doors call the same core rule but were left alone — 13e is a Mac phase, and the shared brain sits in core precisely so the phone's two call sites are one line each. It rides the mobile parity ledger. **The alternative:** wire the phone now (two lines, out of this batch's scope).
+
+    **(j) A colour row keeps its WORD beside the swatch** — "🟦 Blue", never a bare chip. A swatch-only row would be the one control in the app that cannot be read aloud (the R93 legibility mandate), and the words are what the K6 drift pin compares across the three doors. **The alternative:** chips alone, or chips with the word only in the tooltip.
+
+    **(k) "Remove Callout" carries no swatch** — it takes a frame away rather than choosing a colour. Toggle and Emoji likewise. **The alternative:** give Remove an empty/hollow chip.
+
+    **(l) The swatch renders per APPEARANCE (light/dark), not per voice.** The callout palette has never had a voice dimension — one wash per token per appearance, shared by Write's frame and Take mode's — so a swatch shows exactly the colour the block will wear. **The alternative:** nothing to change here unless the palette itself gains voice-specific washes, which is a design question.
+
+    **(m) The emoji picker is the SYSTEM one** — the accessory row now reads `[ field ] [ Emoji & Symbols… ]`, and the button opens macOS's own character palette pointed at the field; typing or pasting a glyph still works exactly as before. It is a button in the accessory rather than a third alert button because an alert button would dismiss the prompt the picked glyph is meant to land in. **A HAND-CHECK, not a call:** whether a glyph clicked in that system panel lands in the prompt's field is the one inch no test can drive — if it does not, the field still accepts typing and paste (today's behaviour), and the fix is to move the prompt out of the modal alert. **The alternative:** build our own grid of curated emoji, which is a design fork I did not take.
+
+    **(n) The menu-bar (Block ▸ Callout) swatches ride SwiftUI, so they are a hand-check too.** Write's right-click and a take card's right-click are real `NSMenu`s and their chips are pinned by test; the menu bar's rows are SwiftUI labels, where an image can be tinted by the framework rather than drawn as-is. It is asked for correctly (a non-template image, `.renderingMode(.original)`); if the menu bar's chips look grey while the right-click's look coloured, that is this, and the row's word is unaffected either way.
+
+    **(o) The ascent is declared BOOK-scoped, keyless, and exempt from the Takes-parity table.** It joins `.openPeerPost` as a NAVIGATION act rather than an editing one — nothing is edited, so no surface can be "behind Write" — and literally so: its two doors are the context bar (above the pane) and the membership chip (in the masthead), both of which render over every mode. No chord, because your ruling named none and an invented one would owe a collision sweep nobody asked for. **Nothing you can see changed** (#55(i)'s letter): the bar's book icon is still grey-with-a-tooltip on a bookless note, and it now reads that greyness FROM the registry instead of deciding it locally.
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#57**.)*
 

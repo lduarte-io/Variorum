@@ -180,6 +180,19 @@ public enum OperationError: Error, Equatable, Sendable {
     /// as the road (P-2 — the door fires and speaks).
     case starLimitReached(limit: Int)
 
+    // Book names (Phase 13e, E13 — her kickoff-sitting round-3 ruling).
+    /// A DOOR that names a book found a LIVE book already wearing that name
+    /// (case-insensitively — `BookNaming`). The payload is the EXISTING
+    /// book's stored name, not what she typed, so the refusal can show her
+    /// the book she already has in its own casing.
+    ///
+    /// Deliberately NOT thrown by `createReading`/`renameReading`: this is a
+    /// door guard (`assertBookNameIsFree`), never an operation-level
+    /// invariant — the offline race stays legal, and the seeders, the daily
+    /// book's own ensure and the sync apply path must never refuse for a
+    /// name reason.
+    case duplicateBookName(name: String)
+
     // Smart collection (taste checkpoint, Sitting 9 — R98).
     /// The smart reading's filter cannot be satisfied by tagging (date
     /// bounds, a profile mismatch, an archived post, a malformed spec, or

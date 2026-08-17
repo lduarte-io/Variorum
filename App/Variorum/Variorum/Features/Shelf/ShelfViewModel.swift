@@ -173,7 +173,11 @@ final class ShelfViewModel {
     ) async {
         do {
             let result = try await session.runner.run { ops in
-                try ops.convertSmartReadingToCurated(
+                // 13e E13 — the typed fresh-collector name only (the shelf
+                // half of the same guard the navigator's door carries; a
+                // derived name is never refused).
+                if let collectingName { try ops.assertBookNameIsFree(collectingName) }
+                return try ops.convertSmartReadingToCurated(
                     readingID, keepCollecting: keepCollecting,
                     collectingName: collectingName)
             }

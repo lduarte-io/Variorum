@@ -294,6 +294,59 @@ extension Operations {
         }
     }
 
+    /// **THE DUPLICATE-BOOK-NAME DOOR GUARD** (Phase 13e, E13 — her
+    /// kickoff-sitting round-3 ruling: *REFUSE at the door*).
+    ///
+    /// Throws `duplicateBookName` when a LIVE reading already wears this name
+    /// under `BookNaming`'s rule (ends-trimmed, case-folded), carrying that
+    /// book's stored name so the door can name it back to her. `excluding` is
+    /// the RENAME door's own row — renaming a book to the name it already has
+    /// (or only changing its casing) is not a collision with itself.
+    ///
+    /// ── WHY IT IS A SEPARATE READ AND NOT A GUARD INSIDE THE OPS ──────────
+    /// `createReading` and `renameReading` stay byte-unchanged on purpose.
+    /// Three callers must never refuse for a name reason: the seeders (the
+    /// tutorial book, the mobile fixtures), `shelveInDailyJournalBook`'s
+    /// create-and-pin (AppSpec §9 — "it NEVER throws"), and the sync apply
+    /// path, which lands whatever another device wrote. Her ruling is about
+    /// what a DOOR does when she types a name, which is exactly the scope of
+    /// an assert a door calls (the `assertReadingAcceptsPosts` precedent
+    /// above: the same shape, for the same reason — a door refusing BEFORE
+    /// it mints anything).
+    ///
+    /// ── WHAT COUNTS AS "LIVE" ────────────────────────────────────────────
+    /// `deleted_at IS NULL`, and nothing narrower. A FINISHED (locked) book
+    /// counts: it is on the shelf, in the palette and on every note card, so
+    /// a second book wearing its name is exactly the confusion her ruling is
+    /// about. A DELETED book does not — her words, "archived/deleted books
+    /// don't count" — so a name is free again the moment its book is gone
+    /// (recovering that book via `restoreReading` can therefore re-create the
+    /// collision; the offline-race tolerance covers it, and no repair rule
+    /// exists to invent).
+    ///
+    /// ── COST ─────────────────────────────────────────────────────────────
+    /// One indexless scan of the `reading` table — bounded by the number of
+    /// BOOKS, which is a shelf, never a corpus (P1: nothing here scales with
+    /// posts, blocks or takes). The comparison runs in Swift rather than SQL
+    /// because SQLite's `NOCASE` collation folds ASCII only, and a rule that
+    /// silently stopped applying to a non-ASCII name would be worse than no
+    /// rule.
+    public func assertBookNameIsFree(_ name: String, excluding readingID: String? = nil) throws {
+        let key = BookNaming.key(name)
+        try database.read { db in
+            let rows = try Row.fetchAll(
+                db, sql: "SELECT id, name FROM reading WHERE deleted_at IS NULL")
+            for row in rows {
+                let id: String = row["id"]
+                guard id != readingID else { continue }
+                let existing: String = row["name"]
+                if BookNaming.key(existing) == key {
+                    throw OperationError.duplicateBookName(name: existing)
+                }
+            }
+        }
+    }
+
     public func removePostFromReading(_ postID: String, from readingID: String) throws {
         try database.write { db in
             let reading = try liveReading(db, readingID)

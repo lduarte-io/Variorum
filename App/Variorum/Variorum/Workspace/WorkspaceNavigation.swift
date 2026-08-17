@@ -432,6 +432,15 @@ nonisolated enum WorkspaceNaming {
         return "This note is in \(count) books — click to pick one"
     }
 
+    /// 13e E11 — the ascent's DECLARED refusal, the one thing the act was
+    /// missing besides its catalog row (#55(i)'s "a formal availability rule
+    /// and a written refusal"). It says the same thing the grey icon's tooltip
+    /// says on a bookless note, in the registry's own register, so the
+    /// declaration and the face cannot drift apart.
+    static let ascentUnavailableNote =
+        "This note isn't in any book yet — add it to one from the membership "
+        + "chip above the note."
+
     /// The dropdown's own line, so the icon's help and the list it opens
     /// cannot disagree about how many books there are.
     static func ascentListHeader(count: Int) -> String {

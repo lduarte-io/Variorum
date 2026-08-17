@@ -218,6 +218,13 @@ nonisolated struct CapabilityContext: Equatable, Sendable {
     /// own target and apply the per-target condition themselves (the
     /// `.diffAgainstChosen` / `.showOriginBlock` split, P-2).
     var canStarCurrent = false
+    /// 13e E11: the pane's note is in at least one book — i.e. the ascent has
+    /// somewhere to go. The `canStarCurrent` family (a fact about what the
+    /// pane is SHOWING, never a stack depth), and the honest shape of what
+    /// the bar has always done: her ruled #55(b)/(g) face renders the book
+    /// icon GREY with a tooltip on a bookless note, which is exactly what
+    /// `.unavailable` means in this registry.
+    var canAscendToBook = false
 }
 
 // MARK: - The capability declaration
@@ -378,6 +385,14 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // is the BOOK ROW you point at in the membership chip, so no routed
     // context command could name it without guessing which book she meant.
     case divergeForBook
+    // 13e E11 — THE BOOK ASCENT, declared at last. It has WORKED since Phase
+    // 13 (the membership chip's book rows) and 13k K11 (the context bar's
+    // book icon) and was never in this catalog; #55(i) recorded the omission
+    // and she ratified it with the declare-it alternative left open ("13e's
+    // if ever wanted"), then asked for it directly: *"the registry should be
+    // kept up to date, and keeping the registry up to date should be part of
+    // the plan."* ONE act, two door families — nothing user-visible changes.
+    case openBookAtNote
     case newPost, todaysEntry, findAnything, importFiles, exportLibrary
     case toggleSeams, helper
     case restoreTutorial

@@ -48,7 +48,13 @@ final class ReadingsViewModel {
     ) async -> String? {
         do {
             let reading = try await session.runner.run { ops in
-                try ops.createReading(
+                // 13e E13 — the duplicate-name guard, INSIDE the runner
+                // closure with the mint (her round-3 ruling). Runner bodies
+                // are synchronous, so no other door's write can land between
+                // the read and the insert; the only surviving race is the
+                // cross-device one her ruling deliberately tolerates.
+                try ops.assertBookNameIsFree(name)
+                return try ops.createReading(
                     name: name, kind: kind, profile: profile,
                     sortField: sortField, sortDir: sortDir)
             }
@@ -61,7 +67,13 @@ final class ReadingsViewModel {
     }
 
     func rename(_ id: String, to name: String) async {
-        await run { ops in try ops.renameReading(id, name: name) }
+        // E13: `excluding` is this book's own row — renaming a book to the
+        // name it already has, or only changing its casing, is not a
+        // collision with itself.
+        await run { ops in
+            try ops.assertBookNameIsFree(name, excluding: id)
+            try ops.renameReading(id, name: name)
+        }
     }
 
     func delete(_ id: String) async {
@@ -149,6 +161,11 @@ final class ReadingsViewModel {
                 : "Only hand-shaped (curated) books hold a note list you pick by hand."
         case .postNotInReading:
             return "That note isn't in this book."
+        // 13e E13 — her round-3 ruling, from the ONE copy home (this
+        // function is what the shelf's create/rename AND the navigator's
+        // rename both speak; `OpsRefusalCopy` reads the same sentence).
+        case .duplicateBookName(let existing):
+            return BookNameCopy.refusal(existing: existing)
         default:
             return "The operation was refused: \(op)"
         }

@@ -776,6 +776,32 @@ nonisolated enum CapabilityRegistry {
             unavailableNote: "Diverging happens inside a note — open one first.",
             availability: { ctx in ctx.mode != nil ? .act : .unavailable }),
 
+        // 13e E11 — THE BOOK ASCENT ("open this book, at this note"). Two
+        // `.surface` door families for ONE act: the context bar's book icon
+        // (13k K11 — one book opens, several list) and the membership chip's
+        // book rows (Phase 13, wired 13f W20(a)). Both point AT a book, which
+        // is what makes them `.surface` rather than routed — the
+        // `.divergeForBook` reason, and the reason the chip's own rows need no
+        // context gate: a row exists only where its book does.
+        //
+        // The gate is the BAR's case: her #55(b)/(g) ruling renders the icon
+        // grey with a tooltip on a bookless note, and grey is what
+        // `.unavailable` draws. So declaring changes nothing she can see —
+        // which is E11's whole letter (the walk's coverage IS the deliverable).
+        //
+        // `takesAccess: nil` and EXEMPT from the R118 parity table, exactly as
+        // `.openPeerPost` is and for the identical reason: this is a
+        // NAVIGATION act, not an editing one — no surface is "behind Write"
+        // because no surface edits anything here. (Literally so, twice over:
+        // the bar sits ABOVE the pane and the chip lives in the masthead, so
+        // both doors render over every mode.)
+        Capability(
+            id: .openBookAtNote, verb: "Open Book at This Note", scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: WorkspaceNaming.ascentUnavailableNote,
+            availability: { ctx in ctx.canAscendToBook ? .act : .unavailable }),
+
         Capability(
             id: .newPost, verb: "New Note", scope: .app,
             doors: [.menuBar, .palette],

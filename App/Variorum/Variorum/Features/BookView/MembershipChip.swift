@@ -187,8 +187,13 @@ struct MembershipChip: View {
     }
 
     /// The `.surface` acts this chip renders (P-1's declared ⇔ rendered
-    /// walk): W23's per-book diverge door lives on the book rows here.
-    static let surfaceCapabilities: [CapabilityID] = [.divergeForBook]
+    /// walk): W23's per-book diverge door lives on the book rows here — and,
+    /// since 13e E11, so does the ASCENT the same rows have carried since
+    /// Phase 13 (`ascend`, wired at 13f W20(a)). Both point at the BOOK ROW,
+    /// which is what makes them surface acts; the per-row condition stays the
+    /// surface's (a row exists only where its book does — the
+    /// `.diffAgainstChosen` split, P-2).
+    static let surfaceCapabilities: [CapabilityID] = [.divergeForBook, .openBookAtNote]
 
     /// 13g cold review R1-1 (L17's explainer half — her WT-7 round-4
     /// ruling): the lead-in above "Duplicate as Version", CONDITIONED on

@@ -122,6 +122,25 @@ nonisolated enum WordTargetFaceCopy {
     }
 }
 
+/// 13e E13 — what a door says when the name is taken. ONE sentence, in ONE
+/// place, for the same reason `DivergeCopy` and `StarCopy` are enums rather
+/// than string literals: five doors name a book (the shelf's New Book and
+/// Rename, the navigator's Rename, Settings' Promote to Book, and the
+/// conversion offer's fresh collector), and a promise made in five `Text`
+/// literals is a promise no test can keep.
+///
+/// Her ruled wording is the model — *"A book named 'Ideas' already exists"* —
+/// with the road named after it, because a refusal that does not say what to
+/// do instead is the lecture-without-a-door class P-2 retired. The name
+/// quoted is the EXISTING book's, in its own casing, which is the answer to
+/// "but I don't have a book called that" when she typed different capitals.
+nonisolated enum BookNameCopy {
+    static func refusal(existing: String) -> String {
+        "A book named \u{201c}\(existing)\u{201d} already exists — pick a different "
+            + "name, or rename that one first."
+    }
+}
+
 nonisolated enum OpsRefusalCopy {
     static func message(for error: Error) -> String {
         if let error = error as? OperationError {
@@ -172,6 +191,9 @@ nonisolated enum OpsRefusalCopy {
                 return "You can star \(limit) things at a time — un-star one in the "
                     + "\(StarCopy.sectionHeader) list at the top of the sidebar, and "
                     + "this can take its place."
+            // 13e E13: her round-3 ruling's words, from the one home above.
+            case .duplicateBookName(let existing):
+                return BookNameCopy.refusal(existing: existing)
             case .blockCarriesUnshownText:
                 return "That block isn't empty after all — it carries a take or "
                     + "a comment that isn't shown here. Nothing was deleted."
