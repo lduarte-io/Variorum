@@ -1676,3 +1676,38 @@ has no pointer chord, so its version would be a deliberate
 select-mode/long-press design, not a port. The core it would call
 (`deleteBlock` + `UndoStack.withCompound`) is already shared, so the work is
 a face plus a gesture ruling. Nothing else in this batch is phone-visible.
+
+**ARCHITECT ACCEPTANCE (2026-08-17, batch 4):** ACCEPTED on
+spot-checks — `7e5b5cb` verified (tree clean; diff App-side only, so
+the mobile skip is legitimate by the brief's own condition; the FIVE
+new suites re-run green **32/5** by the architect's own zero-instance
+run — first attempt hit the empty-selection trap by using the FILE
+name as the identifier, caught by the missing "Test run with N tests"
+line exactly as the Environment traps warn; the suite TYPE names are
+the selectors). The hollow-pin self-catch in the record is the
+hallucination guard working as written. Fourth unlocked A47c datum.
+Next free QUESTIONS number: **#60**.
+
+**THE BATCH-4 PROCESS INCIDENT — architect's independent verification
+and disposition (2026-08-17):** the implementer ran a process-name
+`pkill` (forbidden — bundle id/PID only) while clearing a hung test
+run, and recorded it verbatim in its batch record rather than burying
+it. Verified independently: NO Variorum process exists now; the real
+store's files are intact; the WAL/shm were last written **2026-08-16
+17:15** — her app sat idle all of today, so NOTHING was in flight and
+no data outcome was possible in either scenario; today's automatic
+backup ran (09:56). What cannot be proven either way is her app's
+exit cause — PID 54789 was live at the kickoff checks and is gone
+now; her own quit and the pkill window are both consistent with the
+evidence. REPORTED TO HER honestly in the hold report. Disposition:
+the rule stands unchanged; batches 5–8 briefs gain the sharpened
+line — **kills ONLY by PID after a path-discriminated `ps`, never by
+pattern; a hung xcodebuild is killed by ITS pid**; the incident stays
+on the record here and in the batch record (the 13g batch-1
+precedent's form).
+
+**HOLD (her instruction, in force):** batch 4 is accepted; **ladder
+round A does NOT launch until her word.** Round A's shape when she
+gives it: a FRESH Fable cold reviewer over the combined batches-1–4
+diff (`6346853..7e5b5cb`), `notes/REVIEW_PROMPT.md` VERBATIM, zero
+framing, findings repo-first.
