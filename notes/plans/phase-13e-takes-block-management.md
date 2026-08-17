@@ -1108,3 +1108,81 @@ arrows (or a drag) and nothing else; and, AT HER WORD, a phone shape for the
 fanned merge is the shipped carry-all, C5). E15's fix is Mac-only by
 construction (the phone was already policy-routed), and the fan-copy fix rides
 core, so the phone has it already.
+
+**ARCHITECT ACCEPTANCE (2026-08-17, batch 2):** ACCEPTED on spot-checks —
+`e0b3d5e` verified (tree clean; core build clean; `FanOrderTests` re-run
+green 12/2 by the architect's own run; the diff stat corroborates the
+report — zero `Sync/` files, the FIX-2 rider landing in
+`Operations+Pool.swift`/`Operations+Versions.swift` through the one
+`copyFan` machine, QUESTIONS #57 + the batch record in the commit).
+Both KnownIssues rows (fan-copy remap · Takes-board policy) are
+RESOLVED in the record — their table rows clear at the closeout per the
+file's own rule, after the ladder confirms. A47c fired again unlocked
+(second pristine-tree datum). Held-bundle addition: none new beyond the
+parity flags (the phone owes a reorder-takes DOOR — core op shared; a
+phone shape for ⌘-click selection is at her word). Next free QUESTIONS
+number: **#58**.
+
+## Batch 3 brief — take↔block structure (a FRESH Opus implementer; self-contained)
+
+**Read first, in full:** `CLAUDE.md` (+ the canon it loads — OverallModel
+§4's invariants, I1/I7/I10 especially, and AppSpec §9's structural ops +
+comment-travel rules bind this batch); this plan file TOP TO BOTTOM;
+the "Applying the constitution" notes in
+`.claude/skills/architect-phase/SKILL.md`; **the 13c intake ledger rows
+A20 and A21** (`notes/plans/phase-13c-book-forms-and-conversions.md`) —
+E5/E6 build HER asks, her verbatim words are the spec — **and, same
+file, the "sub-takes finding" section (A45)**: it reframes E6 as the
+REPAIR TOOL for "my takes should've been blocks," which is the purpose
+your shape must serve. Do your own reading; at most ONE read-only
+lookup subagent, external facts only.
+
+**Scope: E5 + E6 ONLY.**
+
+- **E5 — move-a-take-into-a-block-below (A20).** A take leaves its fan
+  and becomes its own block adjacent-below. **E6 — copy-all-takes /
+  takes-to-blocks (A21).** The whole fan (or its copy) becomes a run of
+  sibling blocks — the A45 repair for work already shaped wrong.
+- **THE ONE DESIGN FORK, NAMED UP FRONT — propose before building:**
+  does the take's VARIANT ROW move to the new block (UPDATE
+  `variant.block_id` — preserves the take's commits, labels, identity;
+  a WRITE PATTERN NO EXISTING OP USES), or does the new block mint a
+  FRESH variant copy (the divide/poolDragCopy precedent — commits are
+  never copied, history stays behind on the source)? The A45 repair
+  framing argues for preservation (the point is that these takes always
+  should have BEEN blocks); the mint-copy road is the proven pattern.
+  Trace both against I1/I10, sync (a `block_id` flip is metadata CAS —
+  state what a concurrent edit/tombstone race does), undo (exact-row
+  both ways), and the RESTRICT/chosen-variant guards — then PROPOSE
+  with a recommendation and WAIT for the architect's ruling before
+  building that half. Everything else (doors, refusals, tests for the
+  unforked parts) may proceed meanwhile.
+- **Canon that binds whichever shape wins:** I7 stays absolute (this is
+  the sub-takes ANSWER, never nesting); lineage edges use EXISTING
+  `origin_op` values only ('manual' or NULL — the CHECK constraint is
+  DDL: ANY new value is schema-shaped → STOP); minted/receiving blocks
+  place via fractional keys; comment travel follows the structural-
+  successor COPY rules (AppSpec §9 — state your choice per op,
+  PROVISIONAL where canon underdetermines); presentation inheritance
+  per the same section; I10 at every edge (the LAST take leaving a fan
+  = what? — trace, don't guess: refusal vs block-conversion is likely
+  A20/A21-wording-dependent, PROVISIONAL if her words don't say); seal
+  refuses everything; structural undo entries carry inverse AND redo
+  from do-time pre-images; every door registry-declared, fire-and-DO.
+- E6's copy-all-takes half: if A21's words cover both a COPY shape and
+  a CONVERT shape, build what her words say and PROVISIONAL the
+  boundary — never silently pick.
+
+**The loop (binding, unchanged):** red-on-old by behavioral revert with
+checksums; PROVISIONAL → QUESTIONS.md (next free **#58**); STOP on
+anything schema-shaped; ZERO `Sources/VariorumCore/Sync/` lines; spine
+green by TYPE name; full suites with counts from your own "Test run
+with N tests" lines — **baselines to match-or-beat: core 1235/132 ·
+Mac 1285/227 (the ONE tripwire red allowed by identity) · mobile
+314/60 · spine 51/7**; mobile runs (core ops touch `Sources/`; iPhone
+16e destination). Builds/tests SYNCHRONOUS — never end your turn on a
+background wait. Append your batch record here BEFORE final claims
+only with PENDING marks; commit per convention; NEVER push; NEVER
+`/Applications`; her real-store instance is never touched (Environment
+traps bind verbatim; Mac tests via the cwd-independent `-project`
+invocation).
