@@ -1,8 +1,70 @@
 # Phase 13e — Takes & block management
 
-**Status: PASTE-READY (authored at the 13g closeout, 2026-08-01,
+**Status: OPEN — kicked off 2026-08-16 under `/architect-phase`
+(the author's invocation; the opening sitting ran the same day
+under a 30-minute author window — the sitting record below). The
+paste-ready-era status line is superseded.**
+
+## The binding principles (the P-1…P-9 constitution — copied VERBATIM at kickoff per the `/architect-phase` rule; the application notes in `.claude/skills/architect-phase/SKILL.md` bind alongside)
+
+- **P-1 — One capability registry.** Every user-facing act is declared
+  exactly once: verb, scope (block/take/post/book), per-mode availability
+  rule, its doors (menu / context / bar / shortcut / palette), and its
+  refusal copy. Surfaces render their doors FROM the registry; gating is
+  data, never per-view if-statements. A registry-walk test asserts every
+  declared door exists and every rendered door is declared. This kills the
+  D3/D4 class structurally — the capability matrix stays green by
+  construction instead of by audit.
+- **P-2 — Fire-and-DO (R115).** A rendered door either performs the act —
+  including any mode-switch choreography, done visibly for the user — or
+  delivers the operations layer's real refusal. A door that can never act in
+  its context isn't rendered. Lecture-and-redirect is retired.
+- **P-3 — One text surface, one liveness authority.** ONE TK2 surface
+  component (live + read modes; one measurement brain — the width-gated
+  remeasure; the shared canary) that every pane composes; the live editor
+  core's identity machinery (`BlockRangeIndex`, crystallization) becomes its
+  live mode, not a sibling implementation. "What text does this pane show,
+  and is it live" is answered by ONE pure, unit-tested authority
+  (`PaneTextAuthority`); views never re-derive it. Its invariants stated as
+  code: exactly one live pane; the live pane is buffer-authoritative; read
+  panes are projection-authoritative once caught up.
+- **P-4 — Broadcasts carry signals, never decisions.** NotificationCenter
+  may announce that something happened (mode changed, post opened); no
+  listener derives business state or availability from a broadcast, and no
+  flow's correctness depends on broadcast ordering. Cross-feature flows
+  route through composition. (Stage 0's survey enumerates today's
+  notification bus; Stage 1 disciplines it.)
+- **P-5 — The friction doctrine (R116).** Repeated pushback against a rule
+  marks an under-architected feature. The response is never another patch:
+  write the feature's DESIGN MEMO — intended behavior whole, edge cases
+  enumerated on paper, refusal wordings, undo story — get the author's
+  rulings on the product-flavored edges, then build to the memo. Happy path
+  ships first, but the edges are *decided at design time*, not discovered by
+  the author. First two memos owed: **merge** and **the W ceremony**.
+- **P-6 — The tutorial is the executable spec (R113).** The guided tutorial
+  flow is the contract for every happy path. It stays green — automated
+  where the harness allows, screenshot-walked otherwise — and any change
+  that breaks a tutorial step is a regression by definition.
+- **P-7 — Find bugs before she does.** Every layer keeps a proactive
+  harness: the ops-layer soaks (exist), the board/view-model invariant soak
+  (Stage 1), the registry walk (P-1), the per-batch scripted screenshot
+  walkthrough. Red-on-old stays absolute: no bug-class fix without a pin
+  that fails on the pre-fix code.
+- **P-8 — Standing law, consolidated.** P1–P3 performance invariants bind
+  the rebuilt layer exactly as they bind the substrate (invalidation ∝
+  realized rows; one live editor; virtualized long views). Overlays, never
+  rendering attributes. Chrome `fixedSize` texts always carry a `lineLimit`
+  (the b6dae25 class). `Theme/VoiceControls.swift` is THE chrome vocabulary.
+  Complexity lives in the store; restraint lives in the UI.
+- **P-9 — No god objects in the frontend either.** A view model mixing
+  board layout, text authority, and gesture routing splits by concern
+  (`TakesViewModel` at 890 lines is the standing counterexample). Same
+  hygiene rule as the substrate, applied where it was being waived.
+
+*(Original status paragraph, superseded above:)* Status was
+PASTE-READY (authored at the 13g closeout, 2026-08-01,
 per the front-loaded-planning rule). The author kicks it off at her
-word.** Sequencing was HER 13f round-5 ruling: 13f → 13g → **13e**,
+word. Sequencing was HER 13f round-5 ruling: 13f → 13g → **13e**,
 then her choice (13h · 13i · 13j all pending at her word).
 **13e's closeout authors the NEXT phase's plan** (whichever she
 picks at that point — the standing ritual).
@@ -231,6 +293,10 @@ K3, 2026-07-25).
 | E9 | The takes-aware find & replace half (the KnownIssues row: replace across a block's live takes — the Delete-in-Every-Take apply-and-report precedent is the aligned shape) | KnownIssues |
 | E10 | The 11a copy-doors flush alignment (duplicateAsVersion/promoteLens faces flush the pending buffer first — the diverge doors' shape; KnownIssues row) | KnownIssues |
 | E11 | Declare the book-icon ascent ("open this book at this note") in the capability registry — availability rule, doors, refusal wording, registry-walk coverage. The 13k handoff residual (the door has worked since Phase 13, never declared); her 2026-08-02 call: "the registry should be kept up to date, and keeping the registry up to date should be part of the plan." Pure P-1 hygiene, nothing user-visible | 13k handoff |
+| E12 | **Canvas drag jitter/resist regression** (her kickoff-sitting finding, 2026-08-17, verbatim: "right now moving cards around on canvas is very weird and buggy compared to how it used to be. they jitter while moving and seemingly resist moving") — trace the mechanism in TODAY'S code (the hallucination guard binds), red-on-old pin, fix. **Her scoping rider (2026-08-17, same sitting): NOT a bisect hunt** — "it was a really long time ago when canvas cards last could be moved properly, like before the issue of them all stacking on top of each other at creation time was solved. so i wouldn't do too much code archeology because the change to them all being placed somewhere also happened a long time ago." The onset window is the creation-time-placement fix era (the 13b Stage 4 canvas rework's orbit); diagnose the live drag path directly, don't excavate history. Rides the canvas batch beside E7's bank | kickoff sitting |
+| E13 | **Duplicate-book-name door guard — RULED at the kickoff sitting: REFUSE at the door.** Create/rename refuse a case-insensitive match against any LIVE book's name, honest wording ("A book named 'Ideas' already exists"); archived/deleted books don't count; NO schema — the offline race stays legal and 13k K4's shown-once display absorbs it | kickoff sitting |
+| E14 | **W26 BUILD — RULED IN at the kickoff sitting (2026-08-17), chord ⌃⌥⌘N (fixed for now; a recorder UI is a later at-her-word add).** The true system-wide quick-note summon: the probe-proven shape (`RegisterEventHotKey` under the app's event loop) summons the 13f sticky while ANY app is frontmost. The batch's own verification act: the SANDBOXED in-app registration (the probe was unsandboxed — the one context gap). Registry-declared like every door (P-1); the chord joins the key table under the standing collision pin | kickoff sitting (W26) |
+| E15 | **The Mac Takes board's projection-delivery policy routing** (its KnownIssues row, owner 13e, surfaced by the mobile S3 ladder 2026-08-03): `TakesViewModel` adopts clean-instant AND deferred deliveries outside the shared `EditorProjectionEngine` policy guarding both editor surfaces. Policy-route the board, or re-record its residual with evidence. Rides whichever batch touches the Takes board (E3/E4's orbit) | KnownIssues |
 
 ## THE KICKOFF SWEEP (owns four parked items; the hallucination guard binds hard)
 
@@ -331,3 +397,99 @@ sessions per batch and, if the orchestrator itself runs long, a
 mid-phase orchestrator handoff on the 13b context-degradation rule
 — never deferral. The defer-candidates sentence above is
 superseded.)*
+
+---
+
+## THE KICKOFF SITTING (opened 2026-08-16, rounds landed 2026-08-17 — her verdicts verbatim-faithful; the phase is OPEN)
+
+**Round 1 — CAST & SCOPE CONFIRMED, with her amendments (2026-08-17).**
+Her words: *"confirm, you can have several Opus subagents and
+implementers if you want, but only one fable orchestrating session
+and only one fable cold review. my 'as many agents as you want' was
+for when my session limit was running out, i didn't see these
+questions so we're in the new week now. also, since this phase is so
+big, maybe you can run a couple of fable cold reviews at points that
+make sense, if needed"* — and, on the first question slot: *"Do NOT
+spawn unlimited subagents."* Binding reading: **ONE Fable
+orchestrating session (this one) · Opus implementers (several
+allowed, at the orchestrator's judgment — never unlimited
+subagents) · Fable cold review nominally ONE at phase end, with her
+granted latitude for a couple at sensible mid-phase seams if
+needed.** Scope: the full E1–E11 ledger + E12/E13 below + the
+four-row kickoff sweep — the standing NO-TRIM ruling, reconfirmed.
+
+**Round 2 — E7 RULED: margin-hover comments + canvas bank BUILD;
+synced card sizes NOT picked** (stays recorded, unbuilt — so no
+schema event is on this phase's horizon). Two riders from the same
+answer:
+- Her comment-side instruction/question: *"comments need to be on
+  the left instead of the right - is that true in this phase?"* —
+  architect's answer: it is NOW — folded INTO E7's margin-comment
+  work as her instruction (comments render in the LEFT margin).
+  **CONFIRMED by her the next round:** *"E7's margin comment work
+  was my comments on the left point, so that osunds [sounds]
+  good."* The left-side move and the hover grammar are one E7
+  work item.
+- Her live FINDING, verbatim: *"right now moving cards around on
+  canvas is very weird and buggy compared to how it used to be.
+  they jitter while moving and seemingly resist moving."* →
+  **ledger row E12** (canvas drag jitter/resist regression), routed
+  to the canvas batch beside E7's bank; the hallucination guard
+  binds (self-traced mechanism; red-on-old pin; "compared to how it
+  used to be" marks it bisectable).
+
+**Round 3 — DUPLICATE BOOK NAMES RULED: REFUSE at the door** (her
+pick of the recommended shape) → **ledger row E13**: create/rename
+refuse a case-insensitive match against any LIVE book's name with
+honest wording; archived/deleted books don't count; NO schema — the
+offline race stays legal, K4's shown-once display absorbs it.
+
+**Round 4 — W26: THE AUTHOR-ATTENDED TEST PASSED (2026-08-17).**
+Probe v1 (a bare CLI pumping a plain RunLoop) registered clean but
+never dispatched the event — the fix was a real `NSApplication`
+accessory event loop (probe v2, unsandboxed, Glass-chime fire
+signal). RESULT, measured on her machine: `InstallEventHandler: 0`
+· `RegisterEventHotKey: 0` · **THREE FIRES logged (15:29:50/52/53
+UTC) with another app frontmost — she heard the chime — and NO
+permission prompt at registration or at fire, across all three
+runs.** Her words: *"i heard the glass chime!"* The 13f research's
+one open question (does macOS prompt?) is CLOSED: no, on macOS 26.x,
+for a ⌘-inclusive chord, unsandboxed context. **Standing caveat:**
+the shipping app is SANDBOXED — the in-app registration is the
+build batch's own verification act (FB15168205's regression class
+is ⌥-only/⌥⇧ chords; ⌃⌥⌘N sits outside it). Probe source:
+the session scratchpad's `w26probe2.swift` (throwaway; the shape —
+NSApplication accessory loop + `RegisterEventHotKey` — is what the
+app-side build reuses).
+
+**Round 5 — W26's BUILD RULED IN, same sitting:** her picks — build
+it in 13e (→ **ledger row E14**), chord **⌃⌥⌘N** fixed for now (the
+tested chord; "configurable from day one" offered and not taken —
+a recorder UI is a later at-her-word add).
+
+**THE SITTING IS CLOSED (2026-08-17).** All five kickoff steps ran:
+the reminder-note walk (remainder open at leisure), W26 (test
+passed + build ruled), the kickoff sweep confirmed as the
+architect's autonomous work, scope confirmed (E1–E15, no trim),
+cast confirmed with her amendments. The phase proceeds
+autonomously from here: remaining preflight reading (13g handoff ·
+F-1…F-5 · 13c environment traps · QUESTIONS.md), the Mac baseline
+run at a zero-conflict window, then the batch plan + the first
+Opus implementer brief — author touchpoints only at held items and
+the end-of-phase checkpoint, per the standing away-run rules.
+
+**The reminder-note remainder** (the 13k handoff checklist's
+hand-checks · #54(d) Read's chip voice-independence · the code-chip
+live judgment + radius · the Read-scroll link click) stays OPEN AT
+LEISURE per her standing word ("i'll do these other handchecks
+later in time") — re-surfaced at the sitting, nothing gates.
+
+**Baselines re-verified at kickoff (architect's own runs):** core
+**1216/128 GREEN** (run 2026-08-16 — supersedes this file's
+authoring-time 1034/114: Phases 14a–14d landed between; 1216/128
+matches the mobile-parity §5 seam record exactly). Mac suite run
+pending at the next convenient window (her live instance + the
+author-attended sitting made a flashing full-suite run the wrong
+act mid-sitting); mirror is at lockstep marker **6** (14c), not
+this file's authoring-time marker 4 — no schema change since
+v1_12 locally, the delta is all server-side.
