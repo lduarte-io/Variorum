@@ -829,3 +829,97 @@ PROVISIONALs) BEFORE final claims only with PENDING marks; commit
 per convention with the standing trailer; NEVER push; NEVER
 `/Applications`; her real-store instance is never touched (the
 Environment traps above bind verbatim).
+
+**ARCHITECT ACCEPTANCE (2026-08-17):** Batch 1 ACCEPTED on spot-checks —
+`b20bcc2` verified (tree clean; `swift build` clean, so the post-commit
+SourceKit "Cannot find BookNaming" diagnostics were stale indexing;
+`BookNameGuardTests` re-run green 7/2 by the architect's own run; the
+createReading/renameReading byte-unchanged claim corroborated by the
++53/−0 `Operations+Reading.swift` diff; the plan record + QUESTIONS #56
+confirmed in the commit). **The Mac baseline stands CORRECTED: the true
+pre-batch figure was 1251/220 tripwire-only** (the implementer's
+throwaway-worktree run at `6346853` — this CLOSES the kickoff's pending
+Mac-baseline verification; the carried-forward 1246/220 was 5 low), so
+batch 1's 1266/224 is exactly +15/+4. **Free A47c datum recorded for
+the sweep:** the tripwire fired on the PRISTINE kickoff tree in an
+UNLOCKED session (`CGSSessionScreenIsLocked = 0`, 2026-08-17) — with
+13k's locked-session fire, the tripwire has now fired in BOTH states;
+the A47c re-run starts from "fires regardless of lock state" as the
+working hypothesis.
+
+**HELD FOR THE NEXT SITTING (running bundle — grows per batch, walks at
+the checkpoint):**
+- #56(m) — the one hand-check no test can drive: a glyph clicked in the
+  system Emoji & Symbols palette actually lands in the modal prompt's
+  field.
+- #56(n) — whether SwiftUI tints the menu-bar door's colour chips (the
+  two NSMenu doors' chips are pinned; the third is the eyeball).
+- The mobile parity flags from batch 1 (for the closeout's parity
+  line): the phone owes the duplicate-name guard at `MobileCreateBook`
+  + `MobileBookDetails` rename (one line each — the rule is in core),
+  and, AT HER WORD, swatches/picker for `MobileCallout`/`MobileBlockMenu`.
+
+## Batch 2 brief — the fan's hands (a FRESH Opus implementer; self-contained)
+
+**Read first, in full:** `CLAUDE.md` (+ the canon it loads — AppSpec §9's
+operations material and SyncSpec §8's ordering rules bind this batch);
+this plan file TOP TO BOTTOM (constitution, sitting rounds, Environment
+traps, batch 1's record, this brief); the "Applying the constitution"
+notes in `.claude/skills/architect-phase/SKILL.md`; the KnownIssues rows
+named below VERBATIM (`notes/KnownIssuesAndTechDebt.md`); **and the 13c
+intake ledger's row A18** (`notes/plans/phase-13c-book-forms-and-conversions.md`)
+— E3 builds HER ask, so her verbatim words are the spec; if the ledger's
+words underdetermine the gesture's shape, that is an in-batch design
+fork: PROPOSE to the architect before building that half. Do your own
+reading; at most ONE read-only lookup subagent, external facts only.
+
+**Scope: E4 + E15 + E3 ONLY.**
+
+- **E4 — reorder takes (A19).** The Takes board gains take reordering;
+  `fan_position` moves through `FractionalIndex.between` with jitter —
+  ordering like every other (SyncSpec §8: no rebalance exists; sort key
+  stays `(position, id)`; pin the jittered-key write like every other
+  ordering op). Trace the existing block `reorder` op and MIRROR its
+  shape (touch/churn/undo semantics — reorder is on the structural-undo
+  list; a fan reorder entry should register inverse AND redo from
+  do-time pre-images like every 13c-era registration; if any semantic
+  is genuinely undefined for the fan case, PROVISIONAL-and-continue).
+  Registry-declare the act with its doors.
+  - **The fan-copy remap fix lands WITH E4** (its KnownIssues row —
+    read it): `poolDragCopy` (`Operations+Pool.swift`) and `copyPost`
+    (`Operations+Versions.swift`) remap `parent_variant_id` in ONE pass
+    assuming parent-precedes-child in fan order; reorder-takes
+    falsifies the premise. Fix with the row's named FIX-2 template
+    (pre-assigned IDs + second pass); the row names the fixture:
+    `aParentThatFollowsItsChildInFanOrderStillRemaps` — red-on-old
+    against a reordered fan, behavioral revert with checksums. Note the
+    row's resolution in your record (the closeout clears it).
+- **E15 — the Takes board's projection-delivery policy routing** (its
+  KnownIssues row — read it). `TakesViewModel` adopts clean-instant AND
+  deferred deliveries OUTSIDE the shared `EditorProjectionEngine`
+  policy that guards both editor surfaces. Either policy-route the
+  board (red-on-old: reproduce the stale/keystroke-in-window class on
+  the board pre-fix — the row cites the mobile S3 ladder's fix with
+  pins on both platforms as the template), or RE-RECORD the residual
+  with evidence (the hallucination guard: a re-record needs the traced
+  mechanism for why the board is safe, not a shrug).
+- **E3 — ⌘-click merge selection in Takes (A18, HER ask).** Build to
+  the intake row's words. Canon that binds whatever the shape: merge
+  semantics are AppSpec §9's (`merge`/`mergeCeremony` — nothing
+  cartesian, adjacency, the seal refusal); the ceremony's ENTRY shape
+  is untouched (the quick/ceremony DEFAULT flip is 13j's row 4b, NOT
+  this batch); doors registry-declared, fire-and-DO, refusals honest.
+
+**The loop (binding, unchanged):** red-on-old by behavioral revert with
+checksums; PROVISIONAL → QUESTIONS.md (next free **#57**); STOP on
+anything schema-shaped or gating; ZERO `Sources/VariorumCore/Sync/`
+lines; spine green by TYPE name; full suites with counts from your own
+"Test run with N tests" lines — **baselines to match-or-beat: core
+1223/130 · Mac 1266/224 (the ONE tripwire red allowed by identity) ·
+mobile 314/60 · spine 51/7**; mobile runs (E4's core work touches
+`Sources/`; iPhone 16e destination). Builds/tests SYNCHRONOUS — never
+end your turn on a background wait. Append your batch record here
+BEFORE final claims only with PENDING marks; commit per convention;
+NEVER push; NEVER `/Applications`; her real-store instance is never
+touched (Environment traps bind verbatim; Mac tests via the
+cwd-independent `-project` invocation).
