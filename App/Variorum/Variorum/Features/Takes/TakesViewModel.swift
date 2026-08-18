@@ -101,6 +101,15 @@ final class TakesViewModel {
     /// the carried pane selection, landing consumption. Lazy so the
     /// composition can reference `self`.
     @ObservationIgnored private(set) lazy var choreography = TakesChoreographer(model: self)
+    /// The board's STRUCTURAL DOORS (seam 3 — 13e ladder round A, A-2: the
+    /// P-9 split the constitution names, on the editor side's
+    /// `EditorSurfaceController` pattern). Every act that mints, joins,
+    /// moves or removes rows from this surface lives there; this class keeps
+    /// each pre-move name as a forwarder, so views and pins read unchanged.
+    /// It holds NO state of its own — the latch, the status line and the
+    /// projection stay here — so nothing about observation or invalidation
+    /// changes with the move. Lazy so the composition can reference `self`.
+    @ObservationIgnored private(set) lazy var structure = TakesStructureController(model: self)
     /// Fanned blocks currently bloomed — the board's (forwarded).
     var expandedBlocks: Set<String> { board.expandedBlocks }
     /// The board's transient outcome line. PRESENTATION is the shell's
@@ -702,27 +711,9 @@ final class TakesViewModel {
         }
     }
 
-    /// 13b 4C (S4-2d, the lenses half): block drag-reorder on the board —
-    /// ONE post, ONE order, so every column moves together BY CONSTRUCTION
-    /// (columns render `projection.slots` order; no column holds an order
-    /// of its own). An ordinary `reorder` through ops — one op per drop,
-    /// ⌥⌘Z undoes; the drag FACE was the missing piece, never the
-    /// machinery. `before: nil` ⇒ the post's end.
+    /// Block drag-reorder — the structure controller's (13e round A, A-2).
     func reorderBlock(_ blockID: String, before targetBlockID: String?) async {
-        guard projection.slots.contains(where: { $0.blockID == blockID }) else { return }
-        if let targetBlockID {
-            guard targetBlockID != blockID,
-                  projection.slots.contains(where: { $0.blockID == targetBlockID })
-            else { return }
-            // Dropping right before its own successor is a no-op.
-            if let from = projection.slots.firstIndex(where: { $0.blockID == blockID }),
-               let to = projection.slots.firstIndex(where: { $0.blockID == targetBlockID }),
-               to == from + 1 { return }
-        } else if projection.slots.last?.blockID == blockID {
-            return  // already last
-        }
-        let insert: Operations.InsertPosition = targetBlockID.map { .before($0) } ?? .end
-        await run { ops in try ops.reorder(blockID, to: insert) }
+        await structure.reorderBlock(blockID, before: targetBlockID)
     }
 
     /// A scratch/lens column adopts a different take for one slot (a VIEW
@@ -1047,135 +1038,22 @@ final class TakesViewModel {
 
     // MARK: - Fan ORDER (13e E4 — her A19: "Reorder takes")
 
-    /// Move a take one place earlier (`delta < 0`) or later in its block's
-    /// fan. The card's own ◀ ▶ / ▲ ▼ door calls this.
-    ///
-    /// **Flush first, then read the fan FROM THE STORE** — 13d batch 3's
-    /// precedent on this surface, for its exact reason: the takes projection
-    /// is deliberately frozen while any buffer is dirty, so a projection-read
-    /// neighbour is an enablement hint and never an authorization (a take
-    /// that arrived mid-burst would otherwise make the move land beside the
-    /// wrong card). A refused flush keeps its text pending and stops the act
-    /// (13c R2-6's one-act-one-contract rule).
-    ///
-    /// Stepping happens within the ACTIVE fan — the set the cards show. An
-    /// archived take keeps its own place in the ordering; it is neither
-    /// stepped onto nor stepped over.
+    /// Move a take one place earlier or later in its block's fan — the
+    /// structure controller's (13e round A, A-2).
     func moveTake(_ variantID: String, in blockID: String, by delta: Int) async {
-        guard delta != 0 else { return }
-        guard await flushPendingText() else { return }
-        let fan: [Variant]
-        do {
-            fan = try await session.database.read { db in
-                try Queries.blockFan(db, blockID: blockID)
-            }
-        } catch {
-            statusMessage = Self.message(for: error)
-            return
-        }
-        let active = fan.filter { $0.status == .active }
-        guard let index = active.firstIndex(where: { $0.id == variantID }) else {
-            speak("This block's takes changed — try the move again.")
-            return
-        }
-        let target = index + delta
-        guard active.indices.contains(target) else {
-            speak(delta < 0
-                  ? "This take is already first in the fan."
-                  : "This take is already last in the fan.")
-            return
-        }
-        let anchor = active[target].id
-        statusMessage = nil
-        do {
-            try await session.runner.run { ops in
-                try ops.reorderTake(
-                    variantID, to: delta < 0 ? .before(anchor) : .after(anchor))
-            }
-            speak("Take moved \(delta < 0 ? "earlier" : "later") — \u{2325}\u{2318}Z undoes it.")
-        } catch {
-            statusMessage = Self.message(for: error)
-        }
+        await structure.moveTake(variantID, in: blockID, by: delta)
     }
 
     // MARK: - Take ↔ block structure (13e batch 3 — her A20/A21, AR-1)
 
-    /// **Her A20 on the boards**: the take you're in leaves the fan and
-    /// becomes the block below. Native here (R118 — the take card is exactly
-    /// where you are looking at a take), the ring hands over to the minted
-    /// block's pane the moment its slot arrives (the insert-below handover
-    /// precedent).
-    ///
-    /// The target is named explicitly by the card's own door (a right-click
-    /// never moves the keyboard — 13k K6); the routed door falls back to the
-    /// pane you're in, then the shown take of the one block on a one-block
-    /// note (`commandTargetSlot`'s rule).
-    ///
-    /// Flushes first and lets the OP validate — the fan arity, the blank
-    /// take, the seal and I10 are all decided inside the write, never from
-    /// the frozen projection (13d batch 3's rule for this surface).
+    /// Her A20 on the boards — the structure controller's (13e round A, A-2).
     func moveTakeIntoBlockBelow(blockID: String? = nil, variantID: String? = nil) async {
-        guard !structuralInFlight else {
-            speak("Another structural change is still landing.")
-            return
-        }
-        guard let target = takeTarget(blockID: blockID, variantID: variantID) else {
-            speak("Click into a take first — this moves that take into its own block.")
-            return
-        }
-        guard await flushPendingText() else { return }
-        structuralInFlight = true
-        defer { structuralInFlight = false }
-        statusMessage = nil
-        do {
-            let result: Operations.TakeToBlockResult = try await session.runner.run { ops in
-                try ops.takeToBlockBelow(target.blockID, variantID: target.variantID)
-            }
-            choreography.parkFocus(onVariant: result.variant.id)
-            speak(TakeStructureCopy.movedNote)
-        } catch {
-            statusMessage = Self.message(for: error)
-        }
+        await structure.moveTakeIntoBlockBelow(blockID: blockID, variantID: variantID)
     }
 
-    /// **Her A21's second half on the boards (the A45 repair)**: every other
-    /// take of the target block becomes its own block below it, in fan order,
-    /// under ONE undo entry. The block keeps showing what it showed.
+    /// Her A21's second half (the A45 repair) — the controller's.
     func turnTakesIntoBlocks(blockID: String? = nil) async {
-        guard !structuralInFlight else {
-            speak("Another structural change is still landing.")
-            return
-        }
-        guard let targetID = blockID ?? commandTargetSlot?.blockID else {
-            speak("Click into a block first — this turns its takes into blocks.")
-            return
-        }
-        guard await flushPendingText() else { return }
-        structuralInFlight = true
-        defer { structuralInFlight = false }
-        statusMessage = nil
-        do {
-            let result: Operations.TakesToBlocksResult = try await session.runner.run { ops in
-                try ops.takesToBlocks(targetID)
-            }
-            speak(TakeStructureCopy.convertedNote(
-                blocks: result.converted.count, skippedBlanks: result.skippedBlankTakes))
-        } catch {
-            statusMessage = Self.message(for: error)
-        }
-    }
-
-    /// The take a take-scoped routed act addresses: the pane you're in;
-    /// failing that, the shown take of the block the command targets (the
-    /// one-block-note case `commandTargetSlot` already covers). An explicit
-    /// pair from a card's own door always wins.
-    private func takeTarget(
-        blockID: String?, variantID: String?
-    ) -> (blockID: String, variantID: String)? {
-        if let blockID, let variantID { return (blockID, variantID) }
-        if let pane = focusedPane { return (pane.blockID, pane.variantID) }
-        guard let slot = commandTargetSlot, let shown = slot.variantID else { return nil }
-        return (slot.blockID, shown)
+        await structure.turnTakesIntoBlocks(blockID: blockID)
     }
 
     // MARK: - Copy all takes (13e E6 — her A21's clipboard half)
@@ -1235,182 +1113,15 @@ final class TakesViewModel {
         projection.slots.map(\.blockID).filter { board.mergeSelection.contains($0) }
     }
 
-    /// **Her A18, built: "⌘-click in Takes to select blocks to merge; merge
-    /// several when they have no takes."**
-    ///
-    /// Merge semantics are untouched canon (AppSpec §9): neighbours only,
-    /// nothing cartesian, the sources released to lineage. What this door adds
-    /// is WHICH blocks — pointed at directly instead of derived from a text
-    /// selection Write's planner reads.
-    ///
-    /// Two roads, and the fork is the ruled one:
-    /// - **a PAIR where either side carries a fan** takes the ceremony
-    ///   threshold (S4-23 ruling 4: any fan opens the merge ceremony), which
-    ///   mounts in Write — so the pair CARRIES there, visibly, exactly as
-    ///   today's merge door from Takes does. The ceremony's entry shape is
-    ///   deliberately untouched here; the quick/ceremony default flip is
-    ///   13j's row 4b.
-    /// - **everything else merges RIGHT HERE** as a left-to-right chain of
-    ///   the ordinary binary merge under ONE undo entry — byte-for-byte
-    ///   Write's own `mergeChain` behaviour (its multi-block road has never
-    ///   consulted fan arity either), so no surface is behind another (R118)
-    ///   and no new merge semantics are invented. A fan folded away SPEAKS,
-    ///   naming the road back, exactly as Write's does.
-    ///
-    /// Adjacency and arity are read FROM THE STORE, never from the frozen
-    /// projection: a wrong pair carried into Write would merge blocks she
-    /// never picked.
+    /// Her A18's merge over the ⌘-click selection — the structure
+    /// controller's (13e round A, A-2).
     func mergeSelectedBlocks() async {
-        guard !structuralInFlight else {
-            speak("Another structural change is still landing.")
-            return
-        }
-        let picked = board.mergeSelection
-        guard picked.count >= 2 else {
-            speak("\u{2318}-click a second block first — merge joins the blocks you pick.")
-            return
-        }
-        guard await flushPendingText() else { return }
-        let slots: [Queries.RenderedBlock]
-        do {
-            slots = try await session.database.read { [postID] db in
-                try Queries.renderPost(db, containerID: postID)
-            }
-        } catch {
-            statusMessage = Self.message(for: error)
-            return
-        }
-        let order = slots.map(\.blockID)
-        // LADDER ROUND A (A-3): EXISTENCE BEFORE CONTIGUITY. A pick the post
-        // no longer holds fails the contiguity test too — `isContiguousRun`
-        // requires every picked id to appear in the order — so asking
-        // adjacency first reported a gap where the truth is that a block is
-        // gone, and sent her looking for a neighbour that is already there.
-        // Same race the delete door meets, so it wears the same words one
-        // verb apart.
-        guard picked.isSubset(of: Set(order)) else {
-            speak(BlockSelectionCopy.blockGoneForMerge)
-            return
-        }
-        guard TakesBoardLayout.isContiguousRun(picked, in: order) else {
-            speak("Merge joins neighbouring blocks — these aren't next to each other. "
-                + "Pick blocks that sit side by side.")
-            return
-        }
-        let chain = order.filter { picked.contains($0) }
-        let arity: (String) -> Int = { id in
-            slots.first { $0.blockID == id }?.activeVariantCount ?? 1
-        }
-        if chain.count == 2, arity(chain[0]) > 1 || arity(chain[1]) > 1 {
-            // The ruled ceremony threshold — and the ceremony lives in Write,
-            // so the PAIR travels (fire-and-DO: the move is performed, not
-            // lectured about). The caret lands at the SECOND block's start,
-            // which is the seam the planner reads for exactly this pair.
-            clearMergeSelection()
-            speak("These blocks have takes — opening the merge ceremony in Write.")
-            choreography.moveToWriteAndRun(
-                .structural(.merge), targetBlockID: chain[1])
-            return
-        }
-        let otherTakes = chain.reduce(0) { $0 + max(0, arity($1) - 1) }
-        structuralInFlight = true
-        defer { structuralInFlight = false }
-        statusMessage = nil
-        do {
-            let stack = session.undoStack
-            let landing: (blockID: String, variantID: String)
-                = try await session.runner.run { ops in
-                try stack.withCompound(label: "Merge Blocks", operations: ops) {
-                    var merged = (blockID: chain[0], variantID: "")
-                    for next in chain.dropFirst() {
-                        let result = try ops.merge(merged.blockID, next)
-                        merged = (result.block.id, result.variant.id)
-                    }
-                    return merged
-                }
-            }
-            clearMergeSelection()
-            choreography.parkFocus(onVariant: landing.variantID)
-            speak(otherTakes > 0
-                  ? "Merged \(chain.count) blocks — \(otherTakes) other "
-                    + "\(otherTakes == 1 ? "take stays" : "takes stay") with the released "
-                    + "blocks (\(RecoveryPath.unplacedBlocks); \u{2325}\u{2318}Z undoes)."
-                  : "Merged \(chain.count) blocks — \u{2325}\u{2318}Z undoes it.")
-        } catch {
-            statusMessage = Self.message(for: error)
-        }
+        await structure.mergeSelectedBlocks()
     }
 
-    /// **Her A17, built (13e E2): "delete several blocks at the same time
-    /// from a post."** The board's half — the same ⌘-click selection E3
-    /// merges, pointed at the delete door instead (a selection was never
-    /// merge's private property; it names what the pointer is pointing at).
-    ///
-    /// The act is the STANDING unrestricted `deleteBlock` per block
-    /// (QUESTIONS #33(a): the block goes, whatever it holds), run under ONE
-    /// `withCompound` entry — so a multi-delete is ONE mistake to reverse,
-    /// which is exactly what makes deleting a dozen blocks a safe gesture at
-    /// all. Every leg registers a redo, so the compound is redoable too.
-    ///
-    /// **No partial acts, and the compound is what guarantees it, not a
-    /// pre-check.** A seal refuses at the first leg through the operation
-    /// itself (P-2 — the door delivers the ops layer's real refusal, never
-    /// its own guess at one), and a leg that throws AFTER others landed
-    /// unwinds them immediately (`UndoStack.withCompound`'s atomicity). So
-    /// the reachable mixed case — a picked block deleted or moved by
-    /// another surface, a split pane, or a sync arrival between the pick and
-    /// the act — ends with NOTHING deleted and a refusal that says so.
-    ///
-    /// Order is the POST's, read from the STORE: the projection is a
-    /// selection aid, never an authorization (batch 2's rule, unchanged).
+    /// Her A17's multi-delete over the same selection — the controller's.
     func deleteSelectedBlocks() async {
-        guard !structuralInFlight else {
-            speak("Another structural change is still landing.")
-            return
-        }
-        let picked = board.mergeSelection
-        guard !picked.isEmpty else {
-            speak(BlockSelectionCopy.nothingPicked)
-            return
-        }
-        guard await flushPendingText() else { return }
-        let order: [String]
-        do {
-            order = try await session.database.read { [postID] db in
-                try Queries.renderPost(db, containerID: postID).map(\.blockID)
-            }
-        } catch {
-            statusMessage = Self.message(for: error)
-            return
-        }
-        // LADDER ROUND A (A-1): the picks are NOT pre-filtered against the
-        // order. Filtering them WAS the half-act: a pick the post had lost
-        // silently dropped out of the chain and the survivors were deleted
-        // anyway — one declared act with two behaviours, since Write's host
-        // hands every pick to the compound and lets the operation refuse
-        // (`blockNotFound` → the whole gesture unwinds → `blockGone`). The
-        // order still comes from the STORE for the blocks it holds; a pick it
-        // does not hold rides at the end, where `deleteBlock` meets it and
-        // the compound's atomic rollback does the rest. That is also the only
-        // shape that covers the race which opens BETWEEN this read and the
-        // write, which no pre-check could.
-        let chain = order.filter { picked.contains($0) }
-            + picked.subtracting(order).sorted()
-        structuralInFlight = true
-        defer { structuralInFlight = false }
-        statusMessage = nil
-        do {
-            let stack = session.undoStack
-            try await session.runner.run { ops in
-                try stack.withCompound(label: "Delete Blocks", operations: ops) {
-                    for blockID in chain { try ops.deleteBlock(blockID) }
-                }
-            }
-            clearMergeSelection()
-            speak(BlockSelectionCopy.deletedNote(chain.count))
-        } catch {
-            statusMessage = Self.message(for: error)
-        }
+        await structure.deleteSelectedBlocks()
     }
 
     // MARK: - Take lifecycle (the retired FanPanel's doors, kept — R87:
@@ -1637,6 +1348,14 @@ final class TakesViewModel {
     /// The bar's speaking surface (9d fire-and-speak — a message, never a
     /// dead key).
     func speak(_ message: String) {
+        setStatus(message)
+    }
+
+    /// The ONE write into the board's status line, and the seam primitive
+    /// the structure controller speaks through (13e round A, A-2 — the
+    /// property's setter stays private to this type). `nil` clears the line
+    /// before an act, exactly as the pre-move bodies did.
+    func setStatus(_ message: String?) {
         statusMessage = message
     }
 
@@ -1673,258 +1392,44 @@ final class TakesViewModel {
     }
 
     // MARK: - The structural doors (13d Batch 3, A9)
+    //
+    // 13e round A (A-2): the bodies live in `TakesStructureController` now;
+    // these forwards keep every call site and pin naming the model.
 
     /// THE structural door for both boards: divide acts NATIVELY here;
-    /// extract, make-block and merge keep the carry choreography. One
-    /// entry point so the three call sites (the Takes handler, the Lenses
-    /// handler, the bottom bar's buttons) cannot drift into three answers
-    /// — the sediment class this phase's constitution names.
+    /// extract, make-block and merge keep the carry choreography.
     func runStructuralDoor(_ act: StructuralAct) {
-        switch act {
-        case .divide:
-            Task { await divideFocused() }
-        case .extract, .makeBlock, .merge:
-            moveToWriteAndRun(.structural(act))
-        }
+        structure.runStructuralDoor(act)
     }
 
-    /// A9, verbatim: *"i desperately need divide in takes mode"* — divide
-    /// WITHOUT leaving Takes. An unfanned block takes a plain divide at the
-    /// pane caret; a fanned block opens the take ceremony right here, its
-    /// cut seeded from the take the caret is actually in.
-    ///
-    /// The verdict is `StructuralGesturePlanner`'s — the SAME brain Write's
-    /// door consults, handed a single-entry world over the take the caret
-    /// sits in. The seal refusal, the gap refusal, the locked-take refusal
-    /// and the S4-22 word-rule snap all come back from it, byte-identical
-    /// to Write's (pinned as such: `theTakesPlanAndWritesPlanAgree`).
+    /// A9's native divide (plain cut or the take ceremony, in place).
     func divideFocused() async {
-        guard !structuralInFlight else {
-            speak("Another structural change is still landing.")
-            return
-        }
-        guard let slot = commandTargetSlot else {
-            speak("Click into a block first — divide cuts the block you're in.")
-            return
-        }
-        guard let seed = seedTakeForDivide(slot: slot) else {
-            speak("This block has no renderable take to divide.")
-            return
-        }
-        structuralInFlight = true
-        guard let prepared = await prepareDivide(slot: slot, seed: seed) else {
-            structuralInFlight = false  // it already spoke
-            return
-        }
-        switch prepared.plan {
-        case .divide(_, let blockID, let cut):
-            // The act runs with the panes still FROZEN — that window is
-            // exactly what the latch exists for.
-            await runDivide(blockID: blockID, cut: cut)
-            structuralInFlight = false
-        case .divideW(_, let blockID, let activeCut):
-            // The ceremony opens IN PLACE — no mode switch (A9's whole
-            // point). The latch releases FIRST: the sheet is window-modal
-            // and its confirm is its own flight, which re-takes the latch
-            // (Write's arrangement exactly — opening the ceremony has
-            // never been a flight there either). Holding it across the
-            // sheet would drop the live ring for as long as she reads.
-            structuralInFlight = false
-            await ceremony.open(
-                blockID: blockID, seedVariantID: prepared.seedTakeID, seedCut: activeCut)
-        case .refusal(let refusal):
-            structuralInFlight = false
-            speak(RefusalCopy.message(for: refusal))
-        default:
-            // The remaining plans are span gestures the divide command
-            // never returns; nothing here can act on them.
-            structuralInFlight = false
-            speak(RefusalCopy.message(for: .nothingToDo))
-        }
+        await structure.divideFocused()
     }
 
-    /// Flush, read the fan from the STORE, and plan. Returns nil having
-    /// SPOKEN when it cannot get that far.
-    private func prepareDivide(
-        slot: Queries.RenderedBlock, seed: (variantID: String, caret: Int)
-    ) async -> (plan: StructuralGesturePlanner.Plan, seedTakeID: String)? {
-        // Flush FIRST: the op validates against the store, and the plan
-        // snaps against what she SEES — after the flush those are the same
-        // text. A refused flush keeps its text pending (Phase 7 MAJOR 1)
-        // and stops the act, the one-act-one-contract rule 13c R2-6
-        // established for this surface's other native door.
-        guard await flushPendingText() else { return nil }
-        // THE FORK IS READ FROM THE STORE, not from `projection.fans`
-        // (13d Batch 3, ruled — batch 2's precedent): the takes projection
-        // is deliberately frozen while any buffer is dirty, so a plan-time
-        // arity is an enablement hint and never an authorization. Batch 2's
-        // revert D is the receipt for what a projection-read fan guard
-        // costs — it ate a take that had just arrived.
-        let fan: [Variant]
-        do {
-            fan = try await session.database.read { db in
-                try Queries.blockFan(db, blockID: slot.blockID)
-            }
-        } catch {
-            statusMessage = Self.message(for: error)
-            return nil
-        }
-        let liveActive = fan.filter { $0.deletedAt == nil && $0.status == .active }
-        // The seed must still BE in the live fan (13d cold review, F-3):
-        // when the caret's take has vanished (archived/deleted by sync or a
-        // sibling surface mid-race), refuse-and-speak exactly as Write's
-        // door does — a fallback to some other live take silently divided a
-        // take she was never in, at a caret offset from the one that died.
-        guard let seedTake = liveActive.first(where: { $0.id == seed.variantID })
-        else {
-            speak("This block's takes changed — try the divide again.")
-            return nil
-        }
-        let plan = StructuralGesturePlanner.plan(
-            .divideAtCursor,
-            selection: NSRange(location: seed.caret, length: 0),
-            world: divideWorld(slot: slot, take: seedTake, arity: liveActive.count))
-        return (plan, seedTake.id)
-    }
-
-    /// The take the caret is in, and where the caret is within it. The
-    /// carried-caret rule is the choreographer's own, reused: a reported
-    /// selection counts only when it belongs to the focused pane's take
-    /// (a stale selection from a pane she has left names nothing). With no
-    /// caret the offset is 0, and divide there refuses "nothing to divide"
-    /// — which is exactly what the carry door does today, so this is
-    /// parity rather than invention.
-    private func seedTakeForDivide(
-        slot: Queries.RenderedBlock
-    ) -> (variantID: String, caret: Int)? {
-        guard let variantID = focusedPane?.variantID ?? slot.variantID else { return nil }
-        guard let selection = paneSelection, selection.variantID == variantID else {
-            return (variantID, 0)
-        }
-        return (variantID, selection.range.location)
-    }
-
-    /// A single-entry world over the take the caret is in — the planner is
-    /// pure over a tiling, and one take IS a one-entry tiling. `tailLength:
-    /// nil` because a board has no open tail; `editable` is the take's own
-    /// lock (a locked take refuses a plain divide and permits the ceremony,
-    /// which copies — the Phase 3 op semantics the planner already encodes).
-    /// Internal, not private, so the PARITY PIN can drive it: constraint
-    /// 1's one-brain claim is enforced by test, never by comment
+    /// The single-entry planner world over the take the caret is in —
+    /// forwarded so the PARITY PIN keeps driving it through the model
     /// (`theTakesWorldAndWritesWorldPlanAlike`).
     func divideWorld(
         slot: Queries.RenderedBlock, take: Variant, arity: Int
     ) -> StructuralGesturePlanner.World {
-        let text = authority.text(variantID: take.id, storeText: take.workingText)
-        return StructuralGesturePlanner.World(
-            index: BlockRangeIndex(
-                entries: [BlockRangeIndex.Entry(
-                    blockID: slot.blockID,
-                    variantID: take.id,
-                    length: text.utf16.count,
-                    editable: !take.locked)],
-                tailLength: nil),
-            fanArities: [arity],
-            sealed: projection.sealed,
-            textAt: { _ in text })
+        structure.divideWorld(slot: slot, take: take, arity: arity)
     }
 
-    /// The plain divide's act. The board shows the successors through its
-    /// ORDINARY projection path — the observation fires and `adopt` runs
-    /// (it lands rather than defers precisely because the flush left the
-    /// buffer clean), so there is no bespoke re-render here. The ring goes
-    /// to the SUCCESSOR, mirroring Write's caret rule for this gesture.
-    private func runDivide(blockID: String, cut: Int) async {
-        statusMessage = nil
-        do {
-            let result: Operations.DivideResult = try await session.runner.run { ops in
-                try ops.divide(blockID, cut: cut)
-            }
-            choreography.parkFocus(onVariant: result.variant.id)
-            statusMessage = "Block divided — ⌥⌘Z undoes it."
-        } catch {
-            statusMessage = Self.message(for: error)
-        }
-    }
-
-    /// D3's third leg — the add-block door, NATIVE in Takes/Lenses: an
-    /// empty block mints at the post's end and its pane takes the ring the
-    /// moment its slot arrives ("just start typing", literally).
+    /// D3's third leg — the add-block door, NATIVE in Takes/Lenses (the
+    /// structure controller's, 13e round A, A-2).
     func addBlockAtEnd() async {
-        statusMessage = nil
-        do {
-            let result: Operations.NewBlockResult = try await session.runner.run { [postID] ops in
-                try ops.newBlock(in: postID, text: "", at: .end)
-            }
-            choreography.parkFocus(onVariant: result.variant.id)
-            statusMessage = "New block added at the end — type away."
-        } catch {
-            statusMessage = Self.message(for: error)
-        }
+        await structure.addBlockAtEnd()
     }
 
-    /// 13b 4D (N28's second half — the Takes trap's insert door; S4-13):
-    /// an empty block mints right BELOW the focused block (the pane you're
-    /// in; on a one-block post, THE block) and its pane takes the ring the
-    /// moment its slot arrives — the addBlockAtEnd ring-handover precedent
-    /// at `.after(...)`. Position through the ops layer's fractional index
-    /// (the architect precision); sealed posts refuse through the op,
-    /// spoken.
+    /// N28's insert-below door — the controller's.
     func insertBlockBelowFocused() async {
-        guard let slot = commandTargetSlot else {
-            speak("Click into a block first — the new block lands right below it.")
-            return
-        }
-        statusMessage = nil
-        do {
-            let result: Operations.NewBlockResult = try await session.runner.run { [postID] ops in
-                try ops.newBlock(in: postID, text: "", at: .after(slot.blockID))
-            }
-            choreography.parkFocus(onVariant: result.variant.id)
-            statusMessage = "New block added below — type away."
-        } catch {
-            statusMessage = Self.message(for: error)
-        }
+        await structure.insertBlockBelowFocused()
     }
 
-    /// 13c 1B (A8 — her "I don't seem to have the ability to delete /
-    /// archive empty blocks?"): the delete door where takes live, NATIVE
-    /// (R118 parity — Write is never the privileged surface). The ring
-    /// lands on the neighbour that takes the departed block's place (the
-    /// insert-below handover precedent, other direction). Flushes first,
-    /// so a pending buffer never lands in a tombstoned variant; sealed
-    /// posts refuse through the op, spoken.
+    /// A8's delete-block door where takes live — the controller's.
     func deleteFocusedBlock() async {
-        guard let slot = commandTargetSlot else {
-            speak("Click into a block first — this removes the block you're in.")
-            return
-        }
-        let slots = projection.slots
-        let survivor: Queries.RenderedBlock? = slots
-            .firstIndex { $0.blockID == slot.blockID }
-            .flatMap { i in i + 1 < slots.count ? slots[i + 1] : (i > 0 ? slots[i - 1] : nil) }
-        await autosave.flushNow()
-        // 13c Stage 1 ladder, R2-6: the flush can REFUSE and keep its text
-        // pending (Phase 7 MAJOR 1), and `runStructural` — the Write door
-        // for this same declared act — has always checked that before
-        // running an op against a store the surface disagrees with. One
-        // declared act, one contract, however many doors (P-1's own
-        // reasoning); without this the two native doors differed.
-        guard !autosave.isDirty else {
-            speak("Unsaved changes couldn't be written — resolve that first, then retry.")
-            return
-        }
-        statusMessage = nil
-        do {
-            try await session.runner.run { ops in try ops.deleteBlock(slot.blockID) }
-            if let variantID = survivor?.variantID {
-                choreography.parkFocus(onVariant: variantID)
-            }
-            statusMessage =
-                "Block deleted — ⌥⌘Z undoes it, and it waits in this note's deleted-blocks tray."
-        } catch {
-            statusMessage = Self.message(for: error)
-        }
+        await structure.deleteFocusedBlock()
     }
 
     /// The routed comments door (⌘⇧' — the bars' block menu made
@@ -2462,7 +1967,10 @@ final class TakesViewModel {
 
     // MARK: - Plumbing
 
-    private func run(_ body: @escaping @Sendable (Operations) throws -> Void) async {
+    /// The ops-call plumbing: clear the line, run, speak a refusal.
+    /// Internal (13e round A, A-2) so the structure controller's doors run
+    /// through the SAME body rather than growing a second copy of it.
+    func run(_ body: @escaping @Sendable (Operations) throws -> Void) async {
         statusMessage = nil
         do {
             try await session.runner.run(body)

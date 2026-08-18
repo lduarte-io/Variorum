@@ -1909,3 +1909,92 @@ the formatter appends nothing where no chord is declared.
 board's rollback alignment, the picks surviving that refusal, the
 recorded moved-block consequence both hosts share, merge's own words for
 the race, and the registry-read chord labels.
+
+### ROUND-A FIX RECORD — part 2 of 2: A-2, the P-9 extraction (2026-08-18; LANDED, parity held)
+
+**A-2 [MINOR] — the board's structural doors got their controller.
+DONE, no fallback taken.** New file
+`App/Variorum/Variorum/Features/Takes/TakesStructureController.swift`
+(668 lines) on the editor side's `EditorSurfaceController` pattern —
+the in-repo answer the finding named. `TakesViewModel` **2521 → 2047
+lines** (−474; below its 2057-line size at the phase's open, which was
+the accretion the finding measured).
+
+**What moved:** the board's WRITE-DOOR band — the block placement doors
+(`addBlockAtEnd`, `insertBlockBelowFocused`, `deleteFocusedBlock`,
+`reorderBlock`), the native divide with its planner plumbing
+(`runStructuralDoor`, `divideFocused`, `prepareDivide`,
+`seedTakeForDivide`, `divideWorld`, `runDivide`), fan reordering
+(`moveTake`), the take↔block pair (`moveTakeIntoBlockBelow`,
+`turnTakesIntoBlocks`, `takeTarget`), and the selection's two acts
+(`mergeSelectedBlocks`, `deleteSelectedBlocks`). Every body is the
+original VERBATIM, modulo `model.` receiver prefixes.
+
+**What deliberately did NOT move, with reasons stated in the file:**
+the `DivideWCeremonyHost` conformance (a protocol FACE the board wears
+as a whole — `DivideWCeremony(host:)` is constructed with the model and
+both boards bind its sheet through it; moving it would change a type
+rather than a file, and `divideFocused` opens it through
+`model.ceremony` exactly as before); the `structuralInFlight` LATCH (a
+fact about the SURFACE — its panes freeze for a flight — not about this
+band, so one latch stays where the panes are); `copyAllTakes` (it mints
+nothing: the seam is "acts that mint, join, move or remove rows").
+
+**The seam, named:** the controller reaches the model only through
+named internal members — `setStatus`, `run`, `speak`,
+`flushPendingText`, `structuralInFlight`, `commandTargetSlot`,
+`clearMergeSelection`, and its read surface. Two visibility changes
+made that possible and are the whole of the model's new API:
+`setStatus(_:)` (the ONE write into the status line, so its property
+setter stays private to the type — `speak` now goes through it) and
+`run(_:)` promoted from private to internal, so both halves share ONE
+ops-call body instead of growing a second copy. The controller holds
+**no state** and is not `@Observable`, so nothing about observation or
+invalidation moved with the doors.
+
+**PARITY PROOF — ZERO test edits.** The whole extraction is
+`+668 / −474` across exactly two files (`git status`: one modified
+model, one new controller); no test file was opened, and the full Mac
+suite runs the same 1338 tests in 237 suites it ran before the move.
+
+**ONE real defect found BY the move, fixed inside it (recorded rather
+than smoothed over):** the first draft copied `EditorSurfaceController`'s
+`unowned` back-reference posture wholesale, and the suite died with
+`Fatal error: Attempted to read an unowned reference but object …
+was already destroyed`. Mechanism, traced: `runStructuralDoor`'s divide
+is the band's one FIRE-AND-FORGET door (`Task { await divideFocused() }`
+returns before its work ends). Pre-move that closure's `self` WAS the
+model, so the flight kept it alive; captured on the controller instead,
+the model could die under a Task that then read its `unowned` reference
+— which `TakesDivideTests.theDivideDoorNeverParksAWriteIntent` reached
+the instant its scope ended. The Task now captures the MODEL strongly
+(`Task { [model] in await model.structure.divideFocused() }`), which is
+the pre-move lifetime exactly; the file's header states the rule.
+
+**Counts (own runs, quoted from the "Test run with N tests" lines).**
+- Mac: **`✘ Test run with 1338 tests in 237 suites failed after 170.246
+  seconds with 1 issue`** — the ONE issue is the recorded
+  `TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergence
+  Occasion` tripwire, allowed by IDENTITY. Identical test/suite counts
+  before and after the extraction: **that identity IS the parity proof.**
+  (A47c: unlocked again, `CGSSessionScreenIsLocked = 0`.)
+- Core: **`✔ Test run with 1254 tests in 135 suites passed`** — the
+  baseline matched EXACTLY; no core file changed this session.
+- Tutorial spine, by TYPE name (all seven): **`✔ Test run with 51 tests
+  in 7 suites passed`** (re-run after the extraction).
+- Mobile: **NOT RUN, per the standing condition** — `Sources/` and
+  `App/Variorum/Shared/` are untouched by every commit this session
+  (verified against `d7675f5..`), so no line written here reaches the
+  phone target.
+
+**Nothing stopped, nothing schema-shaped.** `Sources/VariorumCore/Sync/`
+untouched (zero lines); `Sources/` untouched entirely; no migration, no
+mirror implication; no `/Applications` refresh; no Variorum instance was
+running at any point (`ps -Ao pid,command` path-discriminated at the
+session's open), and no process was killed by pattern.
+
+**MOBILE PARITY (for the closeout ledger):** nothing mobile-visible in
+round A. A-1/A-3's races and A-2's split are Mac-surface-only (the phone
+has neither a ⌘-click selection nor this board), A-4 is Mac-registry
+copy, and A-5 is an AppKit type's annotation. The phone's own take
+surface owes nothing new here.
