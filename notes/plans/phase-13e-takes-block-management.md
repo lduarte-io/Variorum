@@ -2628,3 +2628,62 @@ THE SUITE IS FULLY GREEN:**
   disposition. **Full Mac suite: `✔ Test run with 1362 tests in 246
   suites passed` — the FIRST fully-green full Mac run since the
   tripwire era began (13g).** Next free QUESTIONS: **#63**.
+
+## Batch 7 brief — text tools + the routed rider (a FRESH Opus implementer; self-contained)
+
+**Read first, in full:** `CLAUDE.md` (+ canon — AppSpec §9's variant
+ops; the 13g F-1…F-5 formatting law in
+`notes/plans/phase-13g-formatting-lists-checkboxes.md` sitting rounds,
+since replace edits markdown-carrying text); this plan file TOP TO
+BOTTOM (batch 5's acceptance carries YOUR ROUTED RIDER — the
+`slotHeightHandle` sibling — with its pin-first instruction; the
+Environment traps bind); the "Applying the constitution" notes in
+`.claude/skills/architect-phase/SKILL.md`; **the sources:** the
+KnownIssues rows "Find & replace — the takes-aware half" (E9's
+letter: replace across a block's live takes; the Delete-in-Every-Take
+apply-and-report precedent is the RULED aligned shape) and "Copy
+doors read the store past a dirty buffer" (E10's letter: the 11a
+`duplicateAsVersion`/`promoteLens` faces align to the flush-first
+shape — `AppSession.divergeForBook` is the recorded template); the
+in-post ⌘F family shipped by the QoL round (find it in the code —
+E9 composes with it, never a second find UI).
+
+**Scope: E9 + E10 + the routed rider ONLY.**
+
+- **E9 — takes-aware find & replace:** replace across a BLOCK's live
+  takes on the Delete-in-Every-Take apply-and-report shape (per-take
+  apply through the ordinary edit pipeline — autosave, churn, text
+  undo per take; locked/archived takes skipped AND REPORTED, never
+  silently; refuses under seal like any edit). Compose with the
+  shipped ⌘F family's UI — a scope extension ("in every take of this
+  block"), not a second find surface. Registry-declared; PROVISIONAL
+  the underdetermined edges (scope wording, whether replace-all
+  crosses blocks — the KnownIssues row's letter is per-BLOCK takes;
+  whole-library is the separate unslotted row, NOT this batch).
+- **E10 — the copy-doors flush alignment:** `duplicateAsVersion` /
+  `promoteLens` faces flush the pending buffer FIRST (the
+  `divergeForBook` template); red-on-old pin per door (type into a
+  dirty buffer, fire the door, the copy carries the keystrokes —
+  today it doesn't). The KnownIssues row resolves with this.
+- **THE ROUTED RIDER — `TakesBoardView.slotHeightHandle` (batch 5's
+  sweep find, the SAME coordinate-space class):** fix with the same
+  named-space shape; attempt the pin FIRST with batch 5's
+  `CanvasDragRig` machinery (the non-activating NSPanel +
+  `NSApp.sendEvent` pump — locate the handle however the rig can);
+  if the handle's location genuinely cannot be driven, the class fix
+  lands anyway with the canvas pins as the class's red-on-old
+  evidence + a record-only note + the hand-check flagged for her
+  checklist. Never silently left.
+
+**The loop (binding, unchanged):** red-on-old by behavioral revert
+with checksums; PROVISIONAL → QUESTIONS.md (next free **#63**); ZERO
+`Sources/VariorumCore/Sync/` lines; STOP on schema or fork-sized
+gaps; spine green by TYPE name (the seven `Tutorial*Tests`); full
+suites, counts from your own "Test run with N tests" lines —
+**baselines: core 1254/135 · Mac 1362/246 — NOW FULLY GREEN, zero
+allowed reds: any red is yours to explain · mobile 314/60, run only
+if `Sources/`/`Shared/` touched** (iPhone 16e). Builds/tests
+SYNCHRONOUS; kills by PID only after a path-discriminated `ps`;
+batch record here BEFORE final claims only with PENDING marks;
+commit per convention; NEVER push; NEVER `/Applications`; instances
+by bundle id `io.lduarte.Variorum.debug` or PID only.
