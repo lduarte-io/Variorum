@@ -2908,3 +2908,83 @@ and parity round Stage B verified `VariorumMobile/` + `Shared/` contain zero
 `DragGesture` constructions) — batch 5's standing rider still applies: any
 future phone drag that moves its own gesture view should be BORN in a named
 space.
+
+**ARCHITECT ACCEPTANCE (2026-08-18, batch 7):** ACCEPTED on spot-checks —
+`cd98c8a` verified (tree clean; zero `Sync/`; `CopyDoorFlushTests` 6/1 +
+the two E9 suites 16/2 re-run green by the architect's own runs; mobile
+ran and passed in-batch since `Shared/AppSession.swift` was touched).
+The rider landed WITH its pin (no hand-check owed — the `CanvasDragRig`
+re-aimed at the board worked); revert B's second red proving
+`divergeForBook` rides the shared flush body is the sweep discipline
+paying for itself. Both KnownIssues rows dispositioned in-file by the
+implementer (the takes-aware half resolved + row re-owned to the
+whole-library row; the copy-doors row removed). Next free QUESTIONS:
+**#64**.
+
+## Batch 8 brief — W26 + the window-lifecycle riders (a FRESH Opus implementer; self-contained)
+
+**Read first, in full:** `CLAUDE.md`; this plan file TOP TO BOTTOM —
+especially sitting Rounds 4–5 (the W26 probe result: `RegisterEventHotKey`
+under a real event loop fired ⌃⌥⌘N with NO permission prompt,
+unsandboxed; her BUILD ruling and chord pick) and the Environment
+traps; the "Applying the constitution" notes in
+`.claude/skills/architect-phase/SKILL.md`; the 13f W5 record in
+`notes/plans/phase-13f-workspace.md` (the quick-note sticky the
+hotkey summons — `Window` scene, `WindowRegistry.Kind.quickNote`,
+capture-then-mint, the menu-bar extra + ⌘⇧N doors this ADDS to); the
+KnownIssues rows "The note-only window's TOP is clipped until any
+resize" (your DIAGNOSIS rider — its three already-failed fixes are
+recorded IN THE ROW so nobody repeats them; read them first) and
+"Windowless launch" (capture-on-occurrence — the `sample <pid> 5`
+protocol applies if the state occurs during YOUR app runs).
+
+**Scope: E14 + the two riders ONLY.**
+
+- **E14 — the true system-wide quick-note hotkey (her Round-5 ruling,
+  chord ⌃⌥⌘N fixed):** `RegisterEventHotKey` registered from the app
+  (the probe's NSApplication-accessory shape, now inside Variorum's
+  real event loop); a fire summons the 13f sticky exactly as ⌘⇧N
+  does (one summon brain — never a second mint path). **The batch's
+  OWN verification act: the SANDBOXED registration** — build the
+  Debug app, launch it (bundle id `io.lduarte.Variorum.debug`; the
+  dev store — NEVER the Release build, NEVER `/Applications`),
+  verify status 0 + a real fire while another app is frontmost
+  (drive the chord via CGEvent or osascript key code — accessibility
+  is granted per the traps), and record the sandboxed result either
+  way; a sandbox refusal is a FINDING to record, not to work around
+  (FB15168205's class is ⌥-only/⌥⇧ chords — ⌃⌥⌘N sits outside it,
+  but the probe was unsandboxed and this is the one context gap).
+  Registry-declared with the chord in the key table under the
+  standing collision pin; the helper row rides (the drift guard
+  requires it). If the app is mid-run when you need to quit it:
+  quit by bundle id, never by pattern.
+- **RIDER 1 — the note-only window's clipped top (KnownIssues row):**
+  a DIAGNOSIS pass with fresh eyes on the window-lifecycle batch.
+  The row records the reproduction (a note IN A BOOK opened in a
+  note-only window; the masthead clips; ANY resize repairs
+  permanently; layout converges while pixels stay the first pass's)
+  and THREE fixes already measured wrong — do not repeat them. The
+  one recorded structural difference is the pane row's re-proposing
+  GeometryReader. If you trace the mechanism: fix + red-on-old pin
+  (the batch-5/7 rig class may drive it). If not: record what you
+  ruled out with evidence and leave the row honestly enriched —
+  never a speculative patch (the hallucination guard).
+- **RIDER 2 — the windowless launch (capture-on-occurrence):** your
+  app launches for E14's verification are chances for the state to
+  occur naturally. If it does: `sample <pid> 5` FIRST, then the
+  CGWindowList census by PID, then `lsappinfo`, then time a `quit` —
+  the row's protocol verbatim. Do not summon it; do not chase it.
+
+**The loop (binding, unchanged):** red-on-old by behavioral revert
+with checksums where a defect is fixed; PROVISIONAL → QUESTIONS.md
+(next free **#64**); ZERO `Sources/VariorumCore/Sync/` lines; STOP on
+schema; spine green by TYPE name; full suites, counts from your own
+"Test run with N tests" lines — **baselines: core 1254/135 · Mac
+1385/250 FULLY GREEN (zero allowed reds) · mobile 314/60, run only if
+`Sources/`/`Shared/` touched** (iPhone 16e). Builds/tests
+SYNCHRONOUS; kills by PID only after a path-discriminated `ps`;
+batch record here BEFORE final claims only with PENDING marks; commit
+per convention; NEVER push; NEVER `/Applications` (the phase-end
+refresh is the ORCHESTRATOR's act, pre-authorized by her, not
+yours); instances by bundle id `io.lduarte.Variorum.debug` or PID
+only — her real-store app is closed and stays untouched.
