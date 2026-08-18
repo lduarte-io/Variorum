@@ -2079,3 +2079,61 @@ allowance; LADDER ROUND A IS NOW FULLY CLOSED):**
   ONE red confirmed BY IDENTITY as the A47c tripwire (+1/+1 = the
   new pin); spine **51/7 green**; core untouched by the pass
   (1254/135 stands). Sixth A47c unlocked datum.
+
+## Batch 5 brief — canvas (a FRESH Opus implementer; self-contained)
+
+**Read first, in full:** `CLAUDE.md` (+ canon — P1/P3 bind every canvas
+choice); this plan file TOP TO BOTTOM (sitting Round 2 carries E12's
+finding VERBATIM and her no-archeology scoping rider; the Environment
+traps bind); the "Applying the constitution" notes in
+`.claude/skills/architect-phase/SKILL.md`; the canvas's own history —
+the 13b Stage 4 canvas-package record (bounded realization, the 4E
+pattern) in `notes/plans/phase-13b-make-it-work.md` and the
+`canvas_layout` machinery from 11a (find it in the code:
+`App/Variorum/Variorum/Features/Canvas/` and the core's canvas
+queries/ops). Do your own reading; at most ONE read-only lookup
+subagent, external facts only.
+
+**Scope: E7-bank + E12 ONLY.**
+
+- **E12 FIRST — the drag jitter/resist regression (her live finding,
+  Round 2):** cards "jitter while moving and seemingly resist moving."
+  TRACE THE LIVE DRAG PATH in today's code — her rider forbids commit
+  archeology (the onset era is known: around the stacking-at-creation
+  placement fix, the 13b Stage 4 canvas rework's orbit). The recorded
+  first hypothesis (verify or discard, never assume): the drag
+  gesture's local offset fighting a round-tripped persisted/observed
+  position re-entering the view mid-drag (the overlay/sink delivery
+  law's family — state computed before layout, equality gates, or an
+  observation echo landing during the gesture). Red-on-old pin at
+  whatever level the mechanism lives (state/geometry-level pins are
+  the batch-4 precedent); if the mechanism is genuinely unpinnable at
+  test level, the record must say exactly why and flag the hand-check
+  for her checklist — never a fix without the traced mechanism.
+- **E7-bank — the canvas BANK (her sitting Round 2 pick):** a parking
+  strip on the canvas for cards not yet placed. The schema-free shape
+  is the natural one: a card with NO stored `canvas_layout` position
+  sits in the bank; dragging OUT of the bank writes its first
+  position through the standing canvas ops; dragging back to the bank
+  clears it (tombstone/clear through the same ops — trace what the
+  11a machinery offers before inventing). NO new tables/columns
+  (schema = STOP); bounded realization binds (the bank renders its
+  window, never the corpus); doors registry-declared; refusals honest;
+  canvas movement stays free (R40's letter — the switcher is
+  view-local; chosen moves only through the explicit ✓).
+- If either half surfaces a fork bigger than these shapes (e.g. the
+  bank wants a persisted order), STOP and propose to the architect
+  before building that half.
+
+**The loop (binding, unchanged):** red-on-old by behavioral revert
+with checksums; PROVISIONAL → QUESTIONS.md (next free **#61**); ZERO
+`Sources/VariorumCore/Sync/` lines; spine green by TYPE name (the
+seven `Tutorial*Tests` suites); full suites with counts from your own
+"Test run with N tests" lines — **baselines to match-or-beat: core
+1254/135 · Mac 1339/238 (the ONE tripwire red allowed by identity) ·
+mobile 314/60 — mobile only if `Sources/`/`Shared/` touched** (iPhone
+16e). Builds/tests SYNCHRONOUS; kills ONLY by PID after a
+path-discriminated `ps`; batch record appended here BEFORE final
+claims only with PENDING marks; commit per convention; NEVER push;
+NEVER `/Applications`; no Variorum instance addressed except by
+bundle id `io.lduarte.Variorum.debug` or PID.
