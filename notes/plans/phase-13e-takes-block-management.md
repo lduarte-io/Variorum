@@ -3323,3 +3323,55 @@ this phase: A, A-round-2, B). If she wants a fourth pass over batch 9
   (+1 = the B-2 pin) · affected suites 24/5 green. B-5's hand-check
   joins her checklist. Batch 9 (B-1's promised lazy-load fix)
   launches now.
+
+## Batch 9 brief — the promised Keychain lazy-load fix (B-1; a FRESH Opus implementer; self-contained)
+
+**Read first, in full:** `CLAUDE.md`; this plan file TOP TO BOTTOM
+(round B's B-1 adjudication is your mandate; the Environment traps
+bind); the "Applying the constitution" notes in
+`.claude/skills/architect-phase/SKILL.md`; **the KnownIssues
+"Windowless launch" row VERBATIM** (`notes/KnownIssuesAndTechDebt.md`)
+— it carries the 14b-captured mechanism (the launch-time
+`sample` caught `VariorumApp.body` → `AppServices.init` →
+`AuthSession.init` → `KeychainAuthStorage.load` →
+`SecItemCopyMatching` blocking the MAIN thread on securityd at app
+construction) AND the 14b cold pass's SETTINGS-CADENCE addition
+(`EncryptionSession`'s refresh/adopt/forget/toggle running
+synchronous `SecItem*` custody closures on the MainActor at
+sheet-open/enroll cadence) AND the recorded pin shape (an injected
+store recording the calling thread / asserting no load during init —
+red on today's code). Then read the code itself: `AuthSession`,
+`KeychainAuthStorage`, `AppServices` composition, and
+`EncryptionSession`'s custody paths.
+
+**Scope: the row's promised fix, BOTH families, NOTHING else.**
+- `AuthSession`: the token load becomes lazy/off-main at first use —
+  never a synchronous main-thread Keychain hop during construction.
+  Pin: the injected store asserts NO load during init (red on
+  today's code) and records the calling thread of the first real
+  load.
+- `EncryptionSession`'s settings-cadence sites: the synchronous
+  MainActor `SecItem*` custody closures move off-main/lazy with
+  **custody SEMANTICS byte-preserved** — same reads, same writes,
+  same ordering guarantees, only the thread/timing changes. The
+  engine's `DeviceKeySyncProvider` reads are recorded off-main and
+  unaffected — DO NOT touch them. Pins: the injected store records
+  the calling thread (red on today's code per the recorded shape).
+- THE FENCES: this is auth + E2EE custody territory at a phase's
+  tail. NO behavior change beyond threading/laziness; NO signature
+  changes rippling into the engine; ZERO `Sources/VariorumCore/Sync/`
+  lines; if the E2EE custody half's safe shape is bigger than
+  "move the hop off-main," STOP on that half, land the AuthSession
+  half alone, and report — the remainder is then re-owned BY NAME at
+  the closeout (round B's adjudication anticipates exactly this).
+  All existing auth/encryption suites must stay green — any red is a
+  STOP, not a fix-forward.
+
+**The loop (binding):** red-on-old by behavioral revert with
+checksums; PROVISIONAL → QUESTIONS.md (next free **#65**); spine
+green by TYPE name; full suites — **baselines: core 1254/135 · Mac
+1404/254 FULLY GREEN · mobile 314/60 (mobile RUNS — `Shared/` is
+touched; iPhone 16e)**. Builds/tests SYNCHRONOUS; kills by PID only;
+batch record here BEFORE final claims only with PENDING marks;
+commit per convention; NEVER push; NEVER `/Applications`; instances
+by bundle id `io.lduarte.Variorum.debug` or PID only.
