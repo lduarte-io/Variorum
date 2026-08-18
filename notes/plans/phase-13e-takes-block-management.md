@@ -2338,3 +2338,70 @@ born in a named space. Verified while here: `App/Variorum/VariorumMobile/` and
 `App/Variorum/Shared/` contain **zero** `DragGesture` constructions today,
 so nothing on the phone carries the defect now — recorded rather than
 assumed.
+
+**ARCHITECT ACCEPTANCE (2026-08-18, batch 5):** ACCEPTED on spot-checks —
+`cd39e2e`+`e42676e` verified (tree clean; zero `Sync/`; the four new
+suites re-run green **11/4** by the architect's own run — by TYPE name,
+the file-name trap sidestepped this time). E12's mechanism is the
+phase's best trace so far: the default `.local` coordinate space fed
+each drag event the view's own already-applied offset, halving travel
+with an alternating stall (her "resist" and "jitter" respectively),
+measured three ways before any change and pinned with the exact
+numbers. **ROUTING (architect):** the sweep's found sibling —
+`TakesBoardView.slotHeightHandle`, the SAME class, traced but unfixed
+(out of E12's letter; fragile-pin concern) — is ROUTED TO BATCH 7 as a
+rider (the batch that touches the Takes surface): fix with the same
+named-space shape; attempt the pin FIRST with the batch-5
+`CanvasDragRig` machinery (the NSPanel + sendEvent pump the rig
+proved); if the handle's location genuinely cannot be driven, the
+class-fix lands with the canvas pins as the class's red-on-old
+evidence + a record-only note and the hand-check flagged for her
+checklist (the sweep-table discipline: every instance FIXED or
+provably safe — never silently left). Seventh unlocked A47c datum.
+Next free QUESTIONS: **#62**.
+
+## Batch 6 brief — comments & tags (a FRESH Opus implementer; self-contained)
+
+**Read first, in full:** `CLAUDE.md` (+ canon — R7/R9's comment
+margins, AppSpec §7 `block_comment`, §9's comment ops); this plan file
+TOP TO BOTTOM (sitting Round 2: her comments-on-the-LEFT instruction,
+CONFIRMED as E7's own item; Environment traps; batch records); the
+"Applying the constitution" notes in
+`.claude/skills/architect-phase/SKILL.md`; **the sources of HER asks:**
+the 13c kickoff-candidates record naming the "margin-hover comment
+grammar" (`notes/plans/phase-13c-book-forms-and-conversions.md`) and
+the 13f round-11 record carrying the tag-surface ask + the in-post
+tags face verbatim (`notes/plans/phase-13f-workspace.md` — search
+"round 11"; note 13g batch 1 already moved comments LEFT in Write and
+13k made tag cards default-visible on the context bar — E8 is the
+FULLER face composing with both). Do your own reading; at most ONE
+read-only lookup subagent, external facts only.
+
+**Scope: E7-comments + E8 ONLY.**
+
+- **E7-comments — the margin-hover comment grammar, on the LEFT** (her
+  sitting pick + her left-side instruction): comments surface on
+  margin hover per the 13c candidate's description; the R7
+  margin-default + inline-tinted setting stands; R9's sacred margins
+  bind; verify the LEFT placement holds on EVERY surface that renders
+  comments (13g moved Write — sweep the others; a right-margin
+  straggler is exactly what her sitting question smells like). NO new
+  comment semantics: `block_comment` ops are §9's, per-BLOCK, never
+  per-take.
+- **E8 — the fuller tags face** to the 13f round-11 ask's letter:
+  compose with the 13k context-bar cards (default-visible, ＃/⌘⇧I
+  fold) and the 13g top-bar chips — never a THIRD tag mechanism
+  beside them; the registry declares any new door. If her recorded
+  words underdetermine a fork-sized shape, STOP and propose.
+
+**The loop (binding, unchanged):** red-on-old by behavioral revert
+with checksums; PROVISIONAL → QUESTIONS.md (next free **#62**); ZERO
+`Sources/VariorumCore/Sync/` lines; spine green by TYPE name (the
+seven `Tutorial*Tests`); full suites, counts from your own "Test run
+with N tests" lines — **baselines: core 1254/135 · Mac 1350/242 (the
+ONE tripwire red by identity) · mobile 314/60, run only if
+`Sources/`/`Shared/` touched** (iPhone 16e). Builds/tests SYNCHRONOUS;
+kills by PID only after a path-discriminated `ps`; batch record here
+BEFORE final claims only with PENDING marks; commit per convention;
+NEVER push; NEVER `/Applications`; instances by bundle id
+`io.lduarte.Variorum.debug` or PID only.
