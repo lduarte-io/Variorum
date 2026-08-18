@@ -714,9 +714,9 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **(g) ⌘Z with nothing left in the text says so, and names the key that CAN help.** It never takes the key — ⌘Z that can undo text still does, every time. ⌘⇧Z got the same treatment for redo. It stays silent when there is nothing structural to point at, so a fresh note never lectures. **The alternative:** make ⌘Z itself do the structural undo when the text stack is empty (this would join two stacks your 2026-07-04 decision deliberately keeps apart).
 
-    **ONE THING LEFT ALONE, named rather than hidden:** the iPhone's two delete messages still promise the tray. They were out of this Mac batch's scope and the phone has no tray either; the parity row carries it.
+    **ONE THING LEFT ALONE, named rather than hidden:** the iPhone's two delete messages still promise the tray. They were out of this Mac batch's scope and the phone has no tray either; the parity row carries it. *(The phone's receipts were made true at batch 2's rider.)*
 
-    **Status: open — walk at the checkpoint.**
+    **Status: (b) and (c) RULED at the 13j round-6 sitting, 2026-08-18 — both RATIFIED as shipped (the 13j plan's run record is the binding text). The rest: walk at the checkpoint.**
 
 ## Phase 13j (2026-08-18) — batch 2's calls (the tray, the graveyard, the receipts' graduation)
 
@@ -742,7 +742,7 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **(g) The iPhone's two delete messages stopped promising a tray.** The phone has no tray face and no undo door, so they now say what is true there: *"The block leaves this note, with its takes. There's no undo here."* and *"Block deleted."* No mention of the Mac (the no-redirect rule). **The phone's own tray is a parity-ledger row.** **The alternative:** leave the sentence and build the phone tray sooner.
 
-    **Status: open — walk at the checkpoint.**
+    **Status: RULED at the 13j round-6/7 sitting, 2026-08-18 — FINDING 1 answered by her BLOCK-ARCHIVE ruling (build it, riding batch 6 — the section takes back "Deleted & archived"); FINDING 2 RATIFIED (Put back returns to the old spot — built at batch 3); (a) ratified deleted-only; (b) ratified after-the-icons; (c) ratified "This Note's Tray". The binding text is the 13j plan's run record. The rest: walk at the checkpoint.**
 
 ## Phase 13j (2026-08-18) — batch 3's calls (the recovery doors: the original's peek, the lens notice, deleted takes)
 

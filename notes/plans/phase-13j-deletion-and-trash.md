@@ -509,10 +509,10 @@ server-shaped lands.
 |---|---|---|
 | 1 | **The mini-round:** J7 (⌘Z→⌥⌘Z status-line hint) · J8 (copy truth: the receipt's interim honesty + the diagnosing `.crossesBlockBoundary` refusal) · J9 (whole-block-selection delete → the delete compound; ONE precise trace FIRST) | **DONE 2026-08-18** — record below (core 1254/135 · Mac **1433/258 FULLY GREEN** · spine 51/7 · mobile 314/60; the J9 trace: the paragraph-end SEPARATOR owned by no entry — the open tail was NOT the decliner; QUESTIONS #66 logged — (b) fanned-block delete and (c) the superseded Phase-11 join outcome are HER calls; ARCHITECT-VERIFIED against commits `152f3fc`/`cc51792`) |
 | 2 | **The tray (J2) + the graveyard removal (J6):** the context-bar door ("⌫ N", nonempty-only) + the two-section tray panel with Put back; the global unplaced section leaves the Library surface (pool door dies with it); the delete receipt/help copy graduates to naming the real tray + its door (J8(a)'s completion); **+ the batch-1 hand-off rider: the phone's two tray-promising receipts made TRUE on the phone's own terms** | **DONE 2026-08-18** — record below (core 1259/135 · Mac **1450/259 FULLY GREEN** · spine 51/7 · mobile 314/60; BOTH VERIFY-first flags answered — block-level archive is UNREACHABLE (section named "Deleted"), and `restoreBlock` places at the note's END, diverging from the round-5 design statement: **REPORTED, op UNTOUCHED, her call at QUESTIONS #67**; ARCHITECT-VERIFIED against `7e45d0d` — the core count REPRODUCED by the architect's own run, F2 ADJUDICATED into batch 3's rider, the Blocks-mode `traySection` consolidation held propose-only) |
-| 3 | **DONE 2026-08-18** — record below (core 1278/136 · Mac **1467/261 FULLY GREEN** · spine 51/7 · mobile 314/60; the bridge RECONCILED — the peek is the destination, `TrayRequest.revealBlockID` KEPT as the peek's second action; the archived-take road VERIFIED as `unarchiveVariant` and reused unchanged; the F2 rider BUILT with both roads pinned; the capture caught two copy defects and both are fixed; QUESTIONS #68 logged). Scope: **The lineage door (J3, as AMENDED round 5) + lens-fallback loudness (J5) + deleted-take recovery (round 5):** the context-menu item + ⌘K palette act, the read-only original peek with Put back / Open tray; **the History-face lineage row** (Write's CommitBar history + Takes' history sheet — the summoned "past" surface); the lens column's in-place archived-pick notice + one-click Restore; **the deleted-take restore op + deleted-takes query + the History face's quiet deleted-take rows with Put back** (zero schema); **+ the F2 placement rider** (`restoreBlock` flips the surviving placement row — adjudication above) | **DONE** |
+| 3 | **DONE 2026-08-18** — record below (core 1278/136 · Mac **1467/261 FULLY GREEN** · spine 51/7 · mobile 314/60; the bridge RECONCILED — the peek is the destination, `TrayRequest.revealBlockID` KEPT as the peek's second action; the archived-take road VERIFIED as `unarchiveVariant` and reused unchanged; the F2 rider BUILT with both roads pinned; the capture caught two copy defects and both are fixed; QUESTIONS #68 logged; **ARCHITECT-VERIFIED against `b331ef6` — the core count REPRODUCED by the architect's own run; F2 was RATIFIED by her at round 6 while this batch ran, so the rider ships ruled, not provisional**). Scope: **The lineage door (J3, as AMENDED round 5) + lens-fallback loudness (J5) + deleted-take recovery (round 5):** the context-menu item + ⌘K palette act, the read-only original peek with Put back / Open tray; **the History-face lineage row** (Write's CommitBar history + Takes' history sheet — the summoned "past" surface); the lens column's in-place archived-pick notice + one-click Restore; **the deleted-take restore op + deleted-takes query + the History face's quiet deleted-take rows with Put back** (zero schema); **+ the F2 placement rider** (`restoreBlock` flips the surviving placement row — adjudication above) | **DONE** |
 | 4 | **The defaults pair (J4/J4b):** divide default → `divideDuplicating` (the dormant core op wired); merge default → carry-all (composed from `mergeCeremony`, the phone's C5 the reference); "Divide with Ceremony…" ⌥⌘⇧D · "Merge with Ceremony…" ⌥⌘⇧M in Block menu + context menu + palette | pending |
 | 5 | **J11 — the savepoint cadence:** on-note-close auto-commit per edited take (deduped) + `idle_commit_hours` default 24→2 + the ONE enum setting ("Every session · Idle only · Only when I commit"-shaped) + the history view's quiet-run collapse (the legibility half) | pending |
-| 6 | **J1 — the Trash:** the surface reshape (rename to Trash; Archived keeps no clock; per-row "N days left" + Put back; sort/filter by kind + date **incl. the round-5 Takes filter — deleted takes ride the clock with block/note context**; Delete Now per row + Empty Trash, confirm-once, IN-TRASH ONLY — no full-delete door in any note context, ever; a note deleted whole lists as ONE note row, cascade victims never double-listed) + the 30-day leave-all-surfaces clock; **the purge design memo authored here** (client+server mechanics, the horizon, the per-device pull cursor, the lineage-only-originals edge) → STOP: her explicit go gates any server-shaped build | pending |
+| 6 | **J1 — the Trash:** the surface reshape (rename to Trash; Archived keeps no clock; per-row "N days left" + Put back; sort/filter by kind + date **incl. the round-5 Takes filter — deleted takes ride the clock with block/note context**; Delete Now per row + Empty Trash, confirm-once, IN-TRASH ONLY — no full-delete door in any note context, ever; a note deleted whole lists as ONE note row, cascade victims never double-listed) + the 30-day leave-all-surfaces clock; **+ BLOCK-LEVEL ARCHIVE (round-7 ruling):** `archiveBlock`/`unarchiveBlock` on the ruled shape (release placement + stamp; tray section takes back "Deleted & archived"; no countdown on archived rows; Put back via the ratified F2 road; structural-undo entries; doors + registry + receipts); **+ the Blocks-mode `traySection` routed to the one panel (round-7 ruling)**; **the purge design memo authored here** (client+server mechanics, the horizon, the per-device pull cursor, the lineage-only-originals edge) → STOP: her explicit go gates any server-shaped build | pending |
 | 7 | **J10 — the tutorial deletion chapter** (walk-asserted per P-6: delete blocks in-tutorial, the tray, Put back, cross-block deletion, the Trash, the ceremony doors) + the whole-note-version-history design brief (round 2's deferral deliverable) | pending |
 
 Ladder shape (the 13e precedent): ladder A after batch 4, ladder B
@@ -1184,6 +1184,34 @@ really."
 should add block level archive? I think that it might be
 worthwhile." → The architect's analysis + her ruling: round 7.
 
+**Round 7 rulings, question mode (2026-08-18):**
+
+- **BLOCK-LEVEL ARCHIVE RULED IN: built in 13j, riding batch 6.**
+  Her lean confirmed against the architect's analysis (the Trash's
+  clock removes the keep-forever road for a block; the pool-move
+  loses the note tie; her original J2 wording assumed the state
+  existed; `block.archived_at` has existed since v1 — ZERO schema,
+  zero lockstep). The ruled shape: `archiveBlock` releases the
+  placement (tombstoned) + stamps `archived_at` — the note renders
+  on with no view-level filtering; the block appears in the tray's
+  first section, which takes back its round-2 ruled name
+  **"Deleted & archived"** (archived rows carry NO countdown —
+  archive has no clock); Put back = clear `archived_at` + the
+  ratified F2 placement road; `unarchiveBlock` the mirror;
+  structural-undo entries like the archiveVariant class; doors +
+  registry + receipts; the tutorial (batch 7) teaches the trio —
+  Archive (kept forever, this note's tray) · Delete (30-day clock)
+  · Move to scraps (material for anywhere) — as ONE story.
+- **#67(b) RATIFIED as shipped:** the ⌫ badge sits after the four
+  constant icons, before the tag cards.
+- **#67(c) RATIFIED as shipped:** the name stays "This Note's
+  Tray" (one constant; the Apple-familiar alternative declined —
+  it would be false, the tray holds never-deleted things).
+- **The Blocks-mode `traySection` RULED: routed to the one panel**
+  — the section becomes a one-line door opening This Note's Tray
+  (one surface, one truth). Riding batch 6 with the rest of the
+  tray-family work.
+
 ## ARCHITECT ADJUDICATION after batch 2 (2026-08-18)
 
 Verified against commit `7e45d0d`: tree clean, the record's shape
@@ -1529,3 +1557,97 @@ the Lenses board's scrolling stack and has no offscreen host either.
   `/Applications` write, no Release build; no push. No other `xcodebuild`
   was active before any run.
 - **Nothing PENDING** — every claim above is from a run in this session.
+
+## Batch 4 brief — the defaults pair (J4/J4b; a FRESH Opus implementer; self-contained)
+
+**Read first, in full:** `CLAUDE.md` (+ the canon it loads —
+AppSpec §9's `divideDuplicating` and `mergeCeremony` entries are
+this batch's core reading); this plan file TOP TO BOTTOM (the
+constitution, sitting rounds 1–7 — the rulings are the letter —
+the Environment traps, all three batch records, both
+adjudications); the `architect-phase` skill's "Applying the
+constitution" notes. Reference implementations: the PHONE's
+fanned-divide door (mobile parity Stage A) and its CARRY-ALL merge
+(parity C5) — read them as the reference for shape and receipts,
+never as code to move (Mac faces are Mac-side).
+
+**Scope — the two default flips + the two ceremony doors (rounds
+3–4 rulings; her 2026-08-03/08-09 rulings underneath):**
+
+1. **J4 — the divide default flips.** On a FANNED block, the
+   divide gesture (⌘⇧D and every existing divide door) runs
+   **`divideDuplicating`** — the core op shipped at mobile parity
+   Stage A, dormant on the Mac since — instead of opening the W
+   ceremony: the displayed take's halves seed B and C; every
+   other active take duplicates WHOLE onto both; A released
+   preserved (the op does all of this — the Mac work is the
+   routing + the receipt). Single-take divide is byte-unchanged
+   (plain `divide`). Start/end cuts refuse per the op
+   (`invalidCut` — no parking outside the ceremony). The receipt
+   tells the duplicate-shape truth (the phone's wording is the
+   reference; her accepted consequence — a duplicated take chosen
+   on both successors reads twice — is stated calmly, "quick to
+   delete" her own words).
+2. **J4's ceremony door.** "Divide with Ceremony…" **⌥⌘⇧D** — the
+   Block menu, the block context menu, AND the ⌘K palette (round
+   4: never only a buried item). Opens the existing W ceremony
+   sheet exactly as today. Availability: fanned blocks only (the
+   ceremony's standing precondition) — registry-declared; follow
+   the registry's existing render/disable grammar (P-1/P-2).
+3. **J4b — the merge default flips.** The fanned-pair merge
+   gesture (⌘⇧M and every merge door) runs the **CARRY-ALL
+   merge**: one pairing of the two displayed takes + every other
+   active take carried whole — **composed from the Mac's own
+   `mergeCeremony` op, zero core change** (the phone's C5 is the
+   composition reference). The instant no-fan merge is
+   byte-unchanged. N-way merge chains (the 9d supersession):
+   verify how today's chain interacts with the fanned default and
+   keep its shipped behavior for unfanned chains; a fanned link
+   uses the carry-all composition pairwise — if the chain
+   composition surfaces an edge beyond this sentence, STOP that
+   half and report (P-5).
+4. **J4b's ceremony door.** "Merge with Ceremony…" **⌥⌘⇧M** —
+   same three doors; opens the pairing ceremony sheet as today
+   (S4-23's ceremony untouched — it demotes, never degrades).
+   Fanned-adjacency availability per the ceremony's standing
+   precondition; registry-declared.
+
+**Tutorial discipline (P-6):** the spine stays green. If any
+tutorial step's COPY describes the old fanned defaults, align the
+described flow to the ruled product (bounded, recorded in the
+batch record — the tutorial follows rulings; a broken WALK is a
+regression, a stale SENTENCE is a copy fix). The full deletion-
+chapter overhaul remains batch 7's.
+
+**Constraints:** zero schema; zero `Sources/VariorumCore/Sync/`
+lines; ZERO core-op changes (both ops exist — this batch is
+routing, doors, receipts, registry); no invented product behavior
+— the rulings above are the letter; the Environment traps bind
+verbatim (re-check instances yourself; NEVER touch a real-store
+instance; kills by PID/bundle-id only; no Release builds or
+`/Applications` refreshes; you NEVER push). Before Mac suite
+runs, confirm no other `xcodebuild` run is active.
+
+**Hallucination guard:** red-on-old pins by behavioral revert,
+checksums recorded. At minimum: the fanned divide gesture mints
+the duplicate shape (and does NOT open the ceremony); the fanned
+merge composes carry-all (successor fan = the pairing + every
+carried take, source fan order); both ceremony doors open their
+sheets and fire from all three door kinds + keybinds; unfanned
+divide/merge byte-unchanged; the registry walk covers the new
+declarations.
+
+**Verification (batch end, counts quoted):** core (baseline
+**1278/136**); Mac `-project` invocation (baseline **1467/261**
+FULLY GREEN — zero allowed reds); spine by TYPE name (51/7);
+mobile ONLY if `Sources/`/`Shared/` is touched (baseline 314/60,
+iPhone 16e — this batch should touch neither). Confirm every
+"Test run with N tests" line.
+
+**Record (repo-first):** append the BATCH 4 RECORD to this file —
+what shipped per item, the chain-composition answer, pins + revert
+evidence with checksums, suite counts, hand-offs — then commit per
+convention. The architect verifies before relying on it. **Ladder
+A follows this batch** (the plan's ladder shape), so leave the
+record especially clean: the cold reviewer's anchor is the batch
+records + dispositions.
