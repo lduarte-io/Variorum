@@ -507,8 +507,8 @@ server-shaped lands.
 
 | Batch | Scope | Status |
 |---|---|---|
-| 1 | **The mini-round:** J7 (⌘Z→⌥⌘Z status-line hint) · J8 (copy truth: the receipt's interim honesty + the diagnosing `.crossesBlockBoundary` refusal) · J9 (whole-block-selection delete → the delete compound; ONE precise trace FIRST) | **DONE 2026-08-18** — record below |
-| 2 | **The tray (J2) + the graveyard removal (J6):** the context-bar door ("⌫ N", nonempty-only) + the two-section tray panel with Put back; the global unplaced section leaves the Library surface (pool door dies with it); the delete receipt/help copy graduates to naming the real tray + its door (J8(a)'s completion) | pending |
+| 1 | **The mini-round:** J7 (⌘Z→⌥⌘Z status-line hint) · J8 (copy truth: the receipt's interim honesty + the diagnosing `.crossesBlockBoundary` refusal) · J9 (whole-block-selection delete → the delete compound; ONE precise trace FIRST) | **DONE 2026-08-18** — record below (core 1254/135 · Mac **1433/258 FULLY GREEN** · spine 51/7 · mobile 314/60; the J9 trace: the paragraph-end SEPARATOR owned by no entry — the open tail was NOT the decliner; QUESTIONS #66 logged — (b) fanned-block delete and (c) the superseded Phase-11 join outcome are HER calls; ARCHITECT-VERIFIED against commits `152f3fc`/`cc51792`) |
+| 2 | **The tray (J2) + the graveyard removal (J6):** the context-bar door ("⌫ N", nonempty-only) + the two-section tray panel with Put back; the global unplaced section leaves the Library surface (pool door dies with it); the delete receipt/help copy graduates to naming the real tray + its door (J8(a)'s completion); **+ the batch-1 hand-off rider: the phone's two tray-promising receipts made TRUE on the phone's own terms** | pending — brief below |
 | 3 | **The lineage door (J3, as AMENDED round 5) + lens-fallback loudness (J5) + deleted-take recovery (round 5):** the context-menu item + ⌘K palette act, the read-only original peek with Put back / Open tray; **the History-face lineage row** (Write's CommitBar history + Takes' history sheet — the summoned "past" surface); the lens column's in-place archived-pick notice + one-click Restore; **the deleted-take restore op + deleted-takes query + the History face's quiet deleted-take rows with Put back** (zero schema) | pending |
 | 4 | **The defaults pair (J4/J4b):** divide default → `divideDuplicating` (the dormant core op wired); merge default → carry-all (composed from `mergeCeremony`, the phone's C5 the reference); "Divide with Ceremony…" ⌥⌘⇧D · "Merge with Ceremony…" ⌥⌘⇧M in Block menu + context menu + palette | pending |
 | 5 | **J11 — the savepoint cadence:** on-note-close auto-commit per edited take (deduped) + `idle_commit_hours` default 24→2 + the ONE enum setting ("Every session · Idle only · Only when I commit"-shaped) + the history view's quiet-run collapse (the legibility half) | pending |
@@ -784,3 +784,117 @@ them. They are the permanent record of why, not a pin on the fix.
   Nothing else was running.
 - **Nothing PENDING** — every claim above is from a run in this
   session.
+
+## Batch 2 brief — the tray (J2) + the graveyard removal (J6) (a FRESH Opus implementer; self-contained)
+
+**Read first, in full:** `CLAUDE.md` (+ the canon it loads); this
+plan file TOP TO BOTTOM (the P-1…P-9 constitution, sitting rounds
+1–5 — the rulings are the letter — the Environment traps, and the
+BATCH 1 RECORD above); the `architect-phase` skill's "Applying the
+constitution" notes (`.claude/skills/architect-phase/SKILL.md`).
+
+**Scope — four items:**
+
+1. **The tray face (J2 — rulings: rounds 1, 2, 5).** The note's
+   context bar (`Workspace/ContextBar.swift` is the likely home —
+   verify) gains a quiet door visible ONLY when the note has tray
+   content, reading "⌫ N" where **N counts DELETED blocks only**
+   (round-5 statement: preserved originals never inflate an
+   urgent-looking number); the note ••• menu carries the same act
+   named in words. It opens the tray panel: **TWO quiet sections**
+   — "Deleted & archived", then "Preserved originals" — each row a
+   first-line preview + when it went + ONE **Put back** verb.
+   Read-cheap tier only (P3 — no live editor in the tray).
+   Queries: deleted = tombstoned blocks with `last_container_id` =
+   this note (`idx_block_last_container` is the access path);
+   preserved originals = LIVE blocks with NO live placement and
+   `last_container_id` = this note. Standing windowed-observation
+   discipline (visible truncation markers, probe-row +1).
+   - **NO countdown in this batch:** the 30-day clock does not
+     exist until batch 6 — showing "N days left" before the clock
+     runs is the copy-truth defect class. Batch 6 adds it.
+   - **Archived blocks: VERIFY, don't invent.** `block.archived_at`
+     exists in schema; establish whether ANY shipped op sets it.
+     If block-level archive is unreachable in the product, the
+     first section lists deleted only and its label says
+     "Deleted" (stay honest). Record the finding either way.
+   - **Put back — deleted block:** `restoreBlock`. The round-5
+     design statement says a put-back block returns to its OLD
+     position when neighbors survive (the tombstoned placement
+     row keeps its fractional key). **VERIFY the shipped op's
+     actual placement behavior FIRST**; if it diverges (e.g.
+     appends to the end), REPORT to the architect before touching
+     op semantics — an ops-layer change needs its own
+     state-transition tests and a deliberate record, never a
+     silent edit.
+   - **Put back — preserved original:** face-level composition
+     over `placeBlock` (the W-reversal road; NO new op
+     semantics): placed immediately AFTER its last live successor
+     in this note when one exists, else at the note's end (the
+     architect's recorded micro-placement call).
+   - **Sealed note:** the tray still opens (reading is free); Put
+     back delivers the op's real refusal worded as diagnosis —
+     "This note is marked complete — unseal it to put this back."
+     (the J8 doctrine; P-2).
+   - Registry discipline (P-1): the tray act declared once with
+     both doors (the context-bar `.surface` door + the ••• menu
+     item); the registry walk asserts them.
+2. **The graveyard removal (J6 — ruled round 2).** The "Unplaced
+   blocks" section AND its "Place in pool" door leave the Library
+   recovery surface (`RecoveryView`) entirely; dead code goes with
+   them (and any registry declaration of the pool-add door). The
+   surface keeps Archived (posts) · Deleted books · Recently
+   Deleted unchanged — batch 6 reshapes those into the Trash.
+3. **J8(a)'s graduation — the ONE edit** (batch 1 made it so):
+   `BlockSelectionCopy.deletedNote` + `.deleteHelp` now tell the
+   WHOLE truth — deleted blocks wait in this note's tray, named
+   with its real door ("the ⌫ door in the note's bar"-shaped
+   wording); ⌥⌘Z stays named for the immediate undo. Extend batch
+   1's `noDeleteReceiptPromisesATrayThatDoesNotExistYet` pin to
+   its graduated form (the tray EXISTS now — the pin asserts the
+   copy names a real, rendered door).
+4. **The phone-receipts rider (batch 1's hand-off).**
+   `MobileStructural.swift` + `MobileBlockMenu.swift` delete
+   receipts still promise a tray; the phone has NO tray. Make them
+   TRUE on the phone's own terms: establish what the phone's real
+   recovery road is today (its structural-undo affordance, if
+   any); word the receipts to that road, promising nothing that
+   lacks a face. If the phone genuinely has no road, the honest
+   minimal receipt states the deletion plainly — the parity
+   ledger already carries the tray-twin debt for closeout. NEVER
+   redirect to the Mac in user-facing copy (the no-redirect
+   principle, MobileSoul).
+
+**Constraints:** zero schema; zero `Sources/VariorumCore/Sync/`
+lines; ops-layer changes only as reported-then-ruled (the
+`restoreBlock` placement question above); no invented product
+behavior beyond the recorded rulings + the architect's
+micro-placement call; the Environment traps bind verbatim
+(re-check instances yourself — her real-store app may or may not
+be live; NEVER touch it; kills by PID/bundle-id only; no Release
+builds or `/Applications` refreshes; you NEVER push). Before Mac
+suite runs, confirm no other `xcodebuild` run is active
+(`pgrep -fl xcodebuild`).
+
+**Hallucination guard:** red-on-old pins by behavioral revert for
+every fix-class change. The tray's tests pin at minimum: the
+badge rule (deleted-only count; hidden when empty), the
+two-section split, Put back round-trips (deleted block → its old
+position when neighbors survive, per the verified/ruled behavior;
+original → placed after its last live successor), the sealed
+diagnosis, and the graduated receipt truth.
+
+**Verification (batch end, counts quoted):** core (baseline
+1254/135); Mac via the cwd-independent `-project` invocation
+(baseline **1433/258** after batch 1 — FULLY GREEN, zero allowed
+reds); the spine by TYPE name (51/7 — the seven names are in the
+BATCH 1 RECORD); mobile (314/60, iPhone 16e — the rider touches
+mobile files). Confirm every "Test run with N tests" line.
+Screenshot-verify the tray where the environment allows; else
+record for the next drive.
+
+**Record (repo-first):** append the BATCH 2 RECORD to this file —
+what shipped per item, the archived-blocks and restoreBlock-
+placement findings, pins + revert evidence with checksums, suite
+counts, hand-offs — then commit per convention (CLAUDE.md
+trailer). The architect verifies before relying on it.
