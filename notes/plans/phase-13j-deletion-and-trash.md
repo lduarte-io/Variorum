@@ -183,6 +183,49 @@ teaches all of it.
 *(The "Applying the constitution" precision notes bind by reference:
 `.claude/skills/architect-phase/SKILL.md`.)*
 
+## Environment traps (13j's binding copy — the 13e text verbatim with the phase-specifics tail updated; every batch brief carries THIS section)
+
+Instance checks: `pgrep -fl 'Variorum.app/Contents/MacOS'` AND
+discriminate by PATH (the DerivedData test host matches mid-run;
+`/Applications` = hers/real-store); real-store instances by STORE,
+not path — **NEVER quit/kill one, and NEVER address a Variorum
+instance by PROCESS NAME: bundle id (`io.lduarte.Variorum.debug`)
+or PID only** (the 13g batch-1 incident's standing rule); no
+Release builds or `/Applications` refreshes while a real-store
+instance lives (one was LIVE at the 13j kickoff, PID 13761 —
+re-check, never assume); Mac suites DO run beside her live app
+(the Debug host's container holds the seeded design corpus); **Mac
+test runs use the cwd-independent `-project` invocation** (the
+second 13g standing rule): `xcodebuild test -project
+<home>/dev/variorum/App/Variorum/Variorum.xcodeproj
+-scheme Variorum -destination 'platform=macOS'`, SUITE-level
+`-only-testing` only, confirm the "Test run with N tests" line;
+`xcodebuild build-for-testing` compiles without the runner; zsh
+`pipestatus` (lowercase); NEVER add a custom build configuration
+(SPM builds packages release under any config not named "Debug" —
+strips the DEBUG oracles); test windows flash beside a live
+session — prefer zero-instance windows for timing-sensitive
+measurement; the Mac runner needs an UNLOCKED login session
+(lock-flag check: `swift -e 'import CoreGraphics;
+print((CGSessionCopyCurrentDictionary() as? [String: Any])?["CGSSessionScreenIsLocked"] ?? 0)'`);
+backups WAL-safe with UTC names, ALWAYS before touching the real
+store (the A1 rail); the real store lives in the SANDBOX CONTAINER
+`~/Library/Containers/io.lduarte.Variorum/Data/Library/Application Support/Variorum/`;
+drives need unlocked + author-free + own `caffeinate -d`;
+osascript System Events menu clicks work (accessibility granted);
+fresh hosting views for remounts; a bare NSWindow auto-assigns
+first responder on order-front; async-poll (never sync RunLoop
+pumping) drains settle hops; screenshots in gitignored dirs; never
+`git checkout` over uncommitted work; **implementer sessions never
+push** (the orchestrator pushes at bout ends per the 2026-08-03
+author rule). **13j specifics:** the Mac suite is FULLY GREEN
+since 13e — **ZERO allowed reds** (the A47c tripwire era ENDED at
+the 13e disposition; any red is the batch's to explain);
+`PoolDragTests` reads the physical ⌥ key — a real keypress during
+a suite run can flake it (13k record); her real-store app was live
+at kickoff and the sitting ran beside it — re-check instances
+before any Release/install act.
+
 ## Baselines at open (verify with your own runs)
 
 The 13e finals: core **1254/135** · Mac **1413/256 — FULLY GREEN,
@@ -218,10 +261,11 @@ Kickoff environment facts: **her real-store instance is LIVE (PID
 13761, `/Applications` path — by STORE: never touched; no Release
 builds or `/Applications` refreshes this session without a
 sanctioned zero-instance window)**. Baselines: the core suite
-launched at kickoff (19:27 UTC, background — result recorded when
-it lands); the Mac/spine suites run at the sitting's first natural
-break so the test host's windows don't flash over her live sitting
-— both before any build work, either way.
+launched at kickoff (19:27 UTC, background) — **VERIFIED GREEN:
+1254 tests / 135 suites passed (33.9s), the 13e final exactly**;
+the Mac/spine suites run at the sitting's first natural break so
+the test host's windows don't flash over her live sitting — both
+before any build work, either way.
 
 **Her opening note (verbatim):** "I will add as a note that i'm
 here for the design sitting. let's answer all the questions that
@@ -240,3 +284,246 @@ horizon), J4/J4b door wording + keybinds, J5, the J7–J10 fold-in
 confirmation, scope + cast confirmation.
 
 *(Her rulings land below, verbatim-faithful, the turn they happen.)*
+
+### Sitting round 1 — recovery map + J11 (2026-08-18)
+
+- **J2 tray home RULED: the note's context bar + ••• menu** — her
+  pick of the recommended shape: a quiet door in the note's own
+  chrome, visible ONLY when the note has deleted/archived blocks
+  (e.g. "⌫ 3"); opens a tray panel with per-row first-line preview,
+  when it went, and Restore. Calm at rest.
+- **J11 cadence RULED: on-note-close + shorter idle backstop** —
+  every editing session that changed a note leaves one quiet
+  savepoint (`kind:'auto'`) per edited take at close/leave; the
+  existing `idle_commit_hours` default drops 24h → ~2h as the
+  backstop for notes that stay open. The dedupe guard rides every
+  path (unchanged take ⇒ no new row). Zero schema.
+- **J11 setting RULED: ONE simple setting** — a single enum-valued
+  setting ("Every session · Idle only · Only when I commit"-shaped;
+  exact wording at build), synced like other settings, E2EE-clean
+  (enum semantics, no prose — the `setting.value` column fence
+  holds). Not full knobs; not settingless.
+- **The graveyard question held OPEN by her counter-question
+  (verbatim):** "what do you think the utility of a global lineage
+  list is? what is the usecase here? i think it makes more sense
+  per note if we do want to keep it (a lineage list and a deleted
+  blocks list, but tbh that also seems quite confusing?). if a user
+  has deleted a block completely, the idea that it deletes the
+  previous version makes a certain amount of sense. offering whole
+  note version history (with all the blocks, etc.) seems like it
+  makes a lot more sense than this lineage history, but maybe i'm
+  not seeing some potential use for it." → The architect's utility
+  analysis + her ruling: round 2.
+
+### Sitting round 2 — the graveyard's fate, tray grammar, note history (2026-08-18)
+
+The architect's utility answer put to her (recorded in brief; the
+full enumeration is the sitting transcript's): the global list's
+only unique case — an original whose successors were ALL later
+deleted — is covered per-note because released originals carry
+`last_container_id` (stamped by divide-W/merge exactly so "a
+released block deleted later still trays"); everything else is
+served better contextually (J3's successor door), and the J4/J4b
+default flips make orphaned-take originals rare going forward. The
+spec's own rationale for the global view was a DEVELOPER safety
+net — it survives as a debug query, not a room in the house.
+
+- **J6 RULED: the global unplaced-blocks listing is REMOVED.**
+  Released originals surface in the per-note tray + J3's lineage
+  door on successors (the primary road). The Library recovery
+  surface keeps notes & books; the "Place in pool" door dies with
+  the section. (AppSpec §12's "unplaced-blocks utility view" line
+  gets a ratified-supersession note at closeout, per this ruling.)
+- **Tray grammar RULED: TWO quiet sections** — "Deleted & archived"
+  and "Preserved originals" as labeled groups inside the one tray
+  panel (she chose the visible distinction over the single-list
+  shape). One "Put back" verb per row either way; rows carry
+  first-line preview + when.
+- **Whole-note version history RULED: future row + in-phase design
+  brief** (the S4-16 deferral form — moved in time, never into
+  vagueness). 13j authors the detailed brief as a deliverable: the
+  session-grain text browser that the new cadence makes derivable,
+  AND the structure-snapshot question (block order/membership at a
+  time — new pointer-shaped rows, schema + §12 lockstep, its own
+  design). A new master-plan row lands at closeout.
+- **Cascade instinct steered, she accepted the carry:** no
+  delete-cascades-to-ancestors semantics; instead the J1 purge
+  design rules what happens to lineage-only originals when their
+  whole descendant family purges (named edge, carried into the J1
+  round).
+
+### Sitting round 3 — the Trash (J1), designed WITH the GC horizon (2026-08-18)
+
+Framing put to her (accepted without dispute): the horizon rule
+means the 30-day clock is when things leave every surface; the
+byte-removal janitor TRAILS invisibly until every device on the
+account has seen the deletion (else a stale peer's re-push
+resurrects it). Knowing "every device has seen it" needs a small
+server-side addition (a per-device pull cursor) — **STOP-class:
+the purge design memo returns for her explicit go before anything
+server-shaped lands, mirror-first**. Purge takes the whole family
+(blocks, takes, savepoints, edges, comments) including preserved
+originals whose entire descendant family is going.
+
+- **J1 scope RULED: everything deleted rides ONE uniform 30-day
+  story — with her rider (verbatim):** "everything deleted, one
+  uniform story, but have a delete now option WITHIN the trash
+  (not from within the normal note). maybe you can sort the trash
+  by blocks or note or whatever would be important for that to be
+  a real option, but never accidental full delete from within a
+  note, but an option for full delete without waiting." → Binding
+  consequences: **Delete Now and Empty Trash live ONLY inside the
+  Trash surface — no full-delete door exists in the note/editor
+  context, ever**; the Trash surface gets sort/filter by kind
+  (blocks · notes · books; date) so per-row Delete Now is a real
+  usable option; the per-note tray's Deleted rows show the
+  countdown quietly but carry no purge door.
+- **J1 home RULED: the Library recovery surface, renamed "Trash"**
+  — Archived (kept forever, no clock) stays its own calm section;
+  Recently Deleted becomes the Trash with per-row "N days left" +
+  Put back. No new sidebar room (R44 stands).
+- **J1 doors RULED: Delete Now per row + Empty Trash, both
+  confirm once, both in-Trash only** (per the rider above). Rows
+  vanish from all surfaces immediately; bytes follow at the
+  horizon.
+- **J1 window RULED: fixed 30 days** — no setting; Delete Now is
+  the impatience door.
+
+### Sitting round 4 — ceremony doors, the lineage door, opening batch, cast (2026-08-18)
+
+- **J4/J4b doors RULED: "Divide with Ceremony…" ⌥⌘⇧D · "Merge
+  with Ceremony…" ⌥⌘⇧M** — the plain chord (⌘⇧D / ⌘⇧M) + ⌥, the
+  same "deliberate variant" modifier the ⌥⌘Z family carries. Both
+  in the Block menu, the block context menu, and the ⌘K palette —
+  never only a buried item (her standing binding).
+- **J3 grammar RULED: context menu only — NOT daily chrome. Her
+  words (verbatim):** "I think context menu only. maybe also
+  within the bottom bar? or is that what you mean by context item?
+  I honestly feel like this will rarely matter to people so it
+  shouldn't be part of the daily chrome, just accessible if
+  needed." **Architect's clarification (given at the sitting):**
+  the context menu is the right-click menu on the block; the
+  bottom bar is persistent daily chrome — which her own criterion
+  excludes. Shape as recorded: a right-click item ("See original
+  from divide…" / "…from merge…") appearing ONLY when an unplaced
+  original exists behind the block, opening a read-only peek of
+  the original (takes visible) with "Put back in note" + "Open
+  this note's tray"; the ⌘K palette carries the same act (a
+  palette is summoned, not chrome — architect call inside her
+  criterion, hers to strike). No hover glyph, no bottom-bar
+  button.
+- **J5 confirmed as stated** (no objection): the lens column
+  speaks in place when a pick dangles — "This pick was archived —
+  showing the default take" + one-click Restore. The restoration
+  map is COMPLETE: in-note → the tray; from a successor → the
+  lineage door; whole notes/books → the Trash's Put back; lens
+  picks → the inline restore.
+- **Opening batch RULED: the mini-round folds in** — batch 1 =
+  J7 + J8 + J9 (J9's one precise trace first).
+- **Cast RULED: the 13e shape** — Fable architect/orchestrator
+  (this session) · a FRESH Opus implementer per batch · Fable cold
+  reviews.
+
+### THE SITTING IS CLOSED (2026-08-18) — scope confirmed
+
+Every agenda item ruled: J1 (rounds 3), J2 (1–2), J3 (4), J4/J4b
+(4), J5 (4, as-stated), J6 (2 — the global listing REMOVED), J7–J9
+(fold to batch 1), J10 (standing scope, late batch), J11 (1 —
+close+idle-backstop cadence, one simple setting). Plus two closeout
+deliverables born at the sitting: the whole-note-version-history
+design brief + future master-plan row (round 2's deferral), and
+the AppSpec §12 ratified-supersession note for the unplaced-blocks
+utility view line. Nothing schema-shaped builds in any batch; the
+J1 purge memo returns to her for the STOP-class go before anything
+server-shaped lands.
+
+## THE BATCH PLAN (architect's order, 2026-08-18 — adjustable on evidence; one FRESH Opus implementer per batch, strictly sequential; the 13e-shape ladder rides the phase)
+
+| Batch | Scope | Status |
+|---|---|---|
+| 1 | **The mini-round:** J7 (⌘Z→⌥⌘Z status-line hint) · J8 (copy truth: the receipt's interim honesty + the diagnosing `.crossesBlockBoundary` refusal) · J9 (whole-block-selection delete → the delete compound; ONE precise trace FIRST) | pending — brief below |
+| 2 | **The tray (J2) + the graveyard removal (J6):** the context-bar door ("⌫ N", nonempty-only) + the two-section tray panel with Put back; the global unplaced section leaves the Library surface (pool door dies with it); the delete receipt/help copy graduates to naming the real tray + its door (J8(a)'s completion) | pending |
+| 3 | **The lineage door (J3) + lens-fallback loudness (J5):** the context-menu item + ⌘K palette act, the read-only original peek with Put back / Open tray; the lens column's in-place archived-pick notice + one-click Restore | pending |
+| 4 | **The defaults pair (J4/J4b):** divide default → `divideDuplicating` (the dormant core op wired); merge default → carry-all (composed from `mergeCeremony`, the phone's C5 the reference); "Divide with Ceremony…" ⌥⌘⇧D · "Merge with Ceremony…" ⌥⌘⇧M in Block menu + context menu + palette | pending |
+| 5 | **J11 — the savepoint cadence:** on-note-close auto-commit per edited take (deduped) + `idle_commit_hours` default 24→2 + the ONE enum setting ("Every session · Idle only · Only when I commit"-shaped) + the history view's quiet-run collapse (the legibility half) | pending |
+| 6 | **J1 — the Trash:** the surface reshape (rename to Trash; Archived keeps no clock; per-row "N days left" + Put back; sort/filter by kind + date; Delete Now per row + Empty Trash, confirm-once, IN-TRASH ONLY — no full-delete door in any note context, ever) + the 30-day leave-all-surfaces clock; **the purge design memo authored here** (client+server mechanics, the horizon, the per-device pull cursor, the lineage-only-originals edge) → STOP: her explicit go gates any server-shaped build | pending |
+| 7 | **J10 — the tutorial deletion chapter** (walk-asserted per P-6: delete blocks in-tutorial, the tray, Put back, cross-block deletion, the Trash, the ceremony doors) + the whole-note-version-history design brief (round 2's deferral deliverable) | pending |
+
+Ladder shape (the 13e precedent): ladder A after batch 4, ladder B
+after batch 7 — fresh Fable cold reviewers on `REVIEW_PROMPT.md`
+verbatim; adjustable on evidence.
+
+## Batch 1 brief — the mini-round (a FRESH Opus implementer; self-contained)
+
+**Read first, in full:** `CLAUDE.md` (+ the canon it loads); this
+plan file TOP TO BOTTOM (the P-1…P-9 constitution, the RUN RECORD's
+sitting rulings, and the Environment traps above are all binding);
+the 13e plan's "POST-CLOSE LIVE REPORTS" section
+(`notes/plans/phase-13e-takes-block-management.md`, bottom) — her
+three verbatim reports are this batch's founding evidence; the
+`architect-phase` skill's "Applying the constitution" notes
+(`.claude/skills/architect-phase/SKILL.md`).
+
+**Scope — three items, all fully ruled:**
+
+1. **J7 — the ⌘Z→⌥⌘Z hint (her live ruling, ready to build).**
+   Plain ⌘Z pressed with nothing to undo in the text while the
+   structural undo stack holds entries → the status line speaks:
+   "Nothing to undo in the text — your last change was structural:
+   ⌥⌘Z undoes it, ⇧⌥⌘Z redoes." The key is NEVER consumed; the two
+   stacks stay canon-separate (2026-07-04). The symmetric case
+   (⌘⇧Z with an empty text-redo while the structural REDO stack
+   holds entries) is IN scope only if it lands under the same
+   shape trivially — otherwise record it for the architect.
+   Red-on-old pin: the hint fires exactly on (text-undo empty ∧
+   structural stack nonempty), never otherwise.
+2. **J8 — copy truth, two halves.** (a) The multi-delete
+   receipt/help copy stops naming the nonexistent tray TODAY —
+   interim wording says only what is true ("⌥⌘Z puts them back
+   during this session"-shaped); batch 2 graduates it to naming
+   the real tray. (b) `.crossesBlockBoundary`'s refusal stops
+   guessing three causes and DIAGNOSES the actual blocker — the
+   refusal carries WHICH condition declined (locked take / open
+   tail / spans-a-seam / …), the enum-dump family one level up.
+   Copy that names a cause the code didn't establish is the
+   defect class itself — wire the copy to the real decliner.
+3. **J9 — whole-block-selection delete routes to the delete
+   compound. ONE PRECISE TRACE FIRST (the hallucination guard):**
+   reproduce her case (a selection covering exactly one whole
+   paragraph/block in a note carrying an OPEN TAIL — her
+   screenshot report, the 13e POST-CLOSE section) and establish
+   WHICH eligibility guard declines (the open-tail edge vs the
+   ends-exactly-at-a-block-start edge vs other) — record the
+   trace in the batch record BEFORE building. Then: a selection
+   covering exactly N whole blocks (N ≥ 1) + delete routes to the
+   13e batch-4 delete compound — ONE ⌥⌘Z-undoable entry
+   (ghosts-first, redo carried) — and the text-edit road never
+   refuses that intent again. Partial-block selections keep
+   today's behavior. **If the trace surfaces edges beyond the
+   ruled shape: STOP and report to the architect** (P-5 — the
+   design-memo form, never improvised edges). Red-on-old pins:
+   the route fires on whole-block selections (incl. the
+   open-tail-present case), the refusal never appears for that
+   intent, and the compound's undo restores exactly.
+
+**Constraints:** zero schema; zero `Sources/VariorumCore/Sync/`
+lines; registry discipline for any door/copy the work touches
+(P-1); no invented product behavior — the rulings above are the
+letter. The Environment traps bind verbatim: NEVER touch the
+real-store instance; kills by PID/bundle-id only; no Release
+builds or `/Applications` refreshes; implementer sessions NEVER
+push.
+
+**Verification (batch end, counts quoted):** core `swift test`
+(baseline 1254/135); the Mac suite via the cwd-independent
+`-project` invocation (baseline 1413/256, FULLY GREEN — zero
+allowed reds); the tutorial spine by TYPE name (baseline 51/7);
+mobile ONLY if `Sources/`/`Shared/` was touched (baseline 314/60,
+iPhone 16e). Confirm the "Test run with N tests" line for every
+run.
+
+**Record (repo-first):** append the batch-1 record to this file —
+the J9 trace, per-item what-shipped, pins named with their
+red-on-old evidence (behavioral revert), suite counts, anything
+unverified marked PENDING — then commit per convention. The
+architect verifies before relying on it.
