@@ -3707,3 +3707,65 @@ pick is genuinely open (13h/13i/13j/13l/13m all have standing
 briefs); authoring one speculatively would guess her word. The
 handoff is `notes/handoffs/phase-13e-handoff.md`, her checklist at
 the top.
+
+---
+
+## POST-CLOSE LIVE REPORTS (2026-08-18, her first morning back — recorded verbatim-faithful; the architect's traces beside each)
+
+**Report 1 — "How do you get to a notes deleted blocks tray?"**
+TRACED, and her confusion is CORRECT: **the per-note deleted-blocks
+tray has NO FACE anywhere.** `Library ▸ Archived & Deleted`
+(`RecoveryView`) has four sections — Archived (posts) · Unplaced
+blocks (whose ONLY door is "Place in pool") · Deleted books ·
+Recently Deleted (POSTS only). **Deleted BLOCKS appear in none of
+them** — `restoreBlock` and `last_container_id` exist in the ops
+layer with no door, so after the session's ⌥⌘Z window closes, a
+deleted block is unreachable by any click. WORSE: batch 4's shipped
+receipt/help copy says deleted blocks "wait in this note's
+deleted-blocks tray" — copy naming a surface that does not exist
+(the R2-1 truth class, one level up). Her 13j item (2) is exactly
+this build; her fresh detail (the unplaced list is long, unsorted,
+place-in-pool-only, and is where she landed hunting an archived
+block) sharpens the 13j brief.
+
+**Report 2 — "⌘Z won't undo the multi-delete — on purpose?" + her
+RULING:** yes, on purpose (the 2026-07-04 canon: ⌘Z is text undo
+only; structural undo is ⌥⌘Z, redo ⇧⌥⌘Z; the stacks never
+interleave). She found ⌥⌘Z herself, then RULED: *"if a user is
+spamming command z, i think it should prompt them to do a structural
+undo if it's not doing a regular undo."* → BUILD ITEM (her live
+ruling): plain ⌘Z with nothing to undo in the text while the
+structural stack holds entries → the status line speaks ("Nothing to
+undo in the text — your last change was structural: ⌥⌘Z undoes it,
+⇧⌥⌘Z redoes."). Never consumes the key.
+
+**Report 3 — the screenshot: selecting ONE WHOLE PARAGRAPH and
+pressing delete REFUSES** with "This edit reaches a block that can't
+take it right now (a locked take, unsynced text, or text that isn't
+a block yet) — resolve that, or edit within one block." Her words:
+*"what kind of writing app won't let you delete a paragraph? there's
+not even a take on it right now."* TRACED to
+`EditorViewModel.message(for:)` → `.crossesBlockBoundary`, reached
+only when the Phase-11/13d cross-block compounds decline
+eligibility: a whole-paragraph selection includes the inter-block
+seam, so the edit reads as cross-block; her note carries an OPEN
+TAIL (the last typed paragraph, not yet a block), and the tail —
+or the span's degenerate ends-exactly-at-a-block-start edge — is
+the likely eligibility decliner (ONE precise trace owed before any
+fix). TWO defects regardless of the trace's answer: (a) the refusal
+GUESSES at three causes instead of DIAGNOSING the actual one (the
+enum-dump family one level up — the copy must name the real
+blocker); (b) the PRODUCT gap — a selection covering exactly N
+whole blocks should route to the batch-4 delete compound (ONE
+⌥⌘Z-undoable entry, the intent is obviously "delete these
+paragraphs"), not to the text-edit road at all. Fix-shape proposed
+to her; the friction doctrine applies (this is her repeated-pushback
+class — the design memo form if the trace surfaces more edges).
+
+**DISPOSITION — the post-close mini-round, offered for her word:**
+(1) the ⌘Z→⌥⌘Z hint (her ruling — ready to build); (2) the
+receipt/help copy truth fix (stop naming the nonexistent tray);
+(3) whole-block-selection delete routed to the delete compound +
+the diagnosing refusal copy (the one precise trace first); Report
+1's tray face stays 13j's (its own build, her slotted item). She
+may fold all of it into the next phase's opening batch instead.
