@@ -232,7 +232,14 @@ nonisolated enum BlockSelectionCopy {
     /// `OpsRefusalCopy` and both of this act's hosts must say the same
     /// sentence — a shared constant is what makes that true by
     /// construction rather than by proofreading.
-    static let blockGone = blockGoneLine(nothingWas: "deleted")
+    /// Hedge asymmetry (ladder round 2, R2-1): this line's thrower story is
+    /// DELETED-only — a pick that merely MOVED is live at its new address
+    /// and the delete door deletes it there (#60(c)), so "or moved
+    /// elsewhere" could never be this sentence's truth. Merge's line keeps
+    /// the wider hedge: its pre-check reads absence from THIS note's order,
+    /// which moves do produce.
+    static let blockGone = blockGoneLine(
+        nothingWas: "deleted", hedge: "it may have been deleted since you picked it")
 
     /// **The same race, one door over (ladder round A, A-3).** The Takes
     /// board's merge read the vanished pick as a GAP — "these aren't next to
@@ -243,13 +250,15 @@ nonisolated enum BlockSelectionCopy {
     ///
     /// Its own line rather than `blockGone` because the verb has to be true:
     /// this door merges, and nothing was merged.
-    static let blockGoneForMerge = blockGoneLine(nothingWas: "merged")
+    static let blockGoneForMerge = blockGoneLine(
+        nothingWas: "merged", hedge: "it may have been deleted or moved elsewhere")
 
     /// The one sentence both refusals wear, so the pair cannot drift apart
-    /// in everything except the verb that distinguishes them.
-    private static func blockGoneLine(nothingWas: String) -> String {
-        "One of the blocks you picked is already gone — it may have been "
-        + "deleted or moved elsewhere. Nothing was \(nothingWas); pick again and retry."
+    /// in everything except the verb and the hedge that distinguish them
+    /// (the hedge asymmetry is `blockGone`'s doc comment — R2-1).
+    private static func blockGoneLine(nothingWas: String, hedge: String) -> String {
+        "One of the blocks you picked is already gone — \(hedge). "
+        + "Nothing was \(nothingWas); pick again and retry."
     }
 }
 
@@ -334,6 +343,13 @@ nonisolated enum OpsRefusalCopy {
             // half-done one.
             case .blockNotFound:
                 return BlockSelectionCopy.blockGone
+            // Ladder round 2 (R2-2): `blockNotFound`'s mid-flight sibling —
+            // the block is live but its placement left this note between a
+            // door's read and its write. First made reachable by the
+            // multi-pick doors; spoke the raw enum until now.
+            case .blockNotPlaced:
+                return "That block is no longer in this note — it may have "
+                    + "moved while you worked. Nothing was changed here."
             default:
                 return "Refused: \(error)"
             }

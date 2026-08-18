@@ -498,11 +498,14 @@ final class EditorSurfaceController {
     /// sealed post refuses at the first leg through the operation itself
     /// (P-2 — the door delivers the ops layer's real refusal rather than
     /// guessing at one), and a leg that throws after others landed unwinds
-    /// them immediately. So the reachable mixed case — a picked block deleted
-    /// or moved by another pane, another window, or a sync arrival between
-    /// the pick and the press — ends with NOTHING deleted and a refusal that
-    /// says exactly that (`OpsRefusalCopy`'s `blockNotFound` words, which
-    /// this act is the first door to make reachable).
+    /// them immediately. A picked block DELETED by another pane, another
+    /// window, or a sync arrival between the pick and the press refuses the
+    /// whole gesture with NOTHING deleted (`OpsRefusalCopy`'s
+    /// `blockNotFound` words, which this act is the first door to make
+    /// reachable). A picked block that merely MOVED to another unsealed
+    /// note is live and is deleted where it now lives, counted by the
+    /// success receipt (#60(c) — the pick names the block, not its address;
+    /// ladder round 2, R2-1, correcting this comment's earlier claim).
     ///
     /// The order is read from the STORE inside `runStructural`'s flight
     /// (which flushes first): the surface's index names WHICH blocks, the

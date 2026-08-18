@@ -590,7 +590,19 @@ final class TakesStructureController {
                           + "blocks (\(RecoveryPath.unplacedBlocks); \u{2325}\u{2318}Z undoes)."
                         : "Merged \(chain.count) blocks — \u{2325}\u{2318}Z undoes it.")
         } catch {
-            model.setStatus(TakesViewModel.message(for: error))
+            // Ladder round 2 (R2-2): the read-to-write race — a pick that
+            // died or moved between the existence read above and
+            // `ops.merge` — speaks THIS door's verb. Without this arm,
+            // `blockNotFound` mapped to the DELETE door's words ("Nothing
+            // was deleted") and `blockNotPlaced` fell to the raw-enum arm.
+            let op = error as? OperationError
+            if case .blockNotFound = op {
+                model.setStatus(BlockSelectionCopy.blockGoneForMerge)
+            } else if case .blockNotPlaced = op {
+                model.setStatus(BlockSelectionCopy.blockGoneForMerge)
+            } else {
+                model.setStatus(TakesViewModel.message(for: error))
+            }
         }
     }
 
@@ -609,10 +621,13 @@ final class TakesStructureController {
     /// pre-check.** A seal refuses at the first leg through the operation
     /// itself (P-2 — the door delivers the ops layer's real refusal, never
     /// its own guess at one), and a leg that throws AFTER others landed
-    /// unwinds them immediately (`UndoStack.withCompound`'s atomicity). So
-    /// the reachable mixed case — a picked block deleted or moved by
-    /// another surface, a split pane, or a sync arrival between the pick and
-    /// the act — ends with NOTHING deleted and a refusal that says so.
+    /// unwinds them immediately (`UndoStack.withCompound`'s atomicity). A
+    /// picked block another surface DELETED between the pick and the act
+    /// refuses the WHOLE gesture — nothing deleted, `blockGone` spoken. A
+    /// picked block that merely MOVED to another unsealed note is live and
+    /// is deleted where it now lives, counted by the success receipt
+    /// (#60(c) — the pick names the block, not its address; ladder round 2,
+    /// R2-1, correcting this comment's earlier deleted-or-moved claim).
     ///
     /// Order is the POST's, read from the STORE: the projection is a
     /// selection aid, never an authorization (batch 2's rule, unchanged).
@@ -643,12 +658,15 @@ final class TakesStructureController {
         // hands every pick to the compound and lets the operation refuse
         // (`blockNotFound` → the whole gesture unwinds → `blockGone`). The
         // order still comes from the STORE for the blocks it holds; a pick it
-        // does not hold rides at the end, where `deleteBlock` meets it and
-        // the compound's atomic rollback does the rest. That is also the only
-        // shape that covers the race which opens BETWEEN this read and the
-        // write, which no pre-check could.
-        let chain = order.filter { picked.contains($0) }
-            + picked.subtracting(order).sorted()
+        // does not hold rides at the FRONT (ladder round 2, R2-3), where
+        // `deleteBlock` meets it BEFORE any survivor's leg lands — a
+        // detectable stale pick refuses with zero transient tombstones and
+        // the redo future intact (R1-10 burns the future per REGISTERED leg,
+        // so legs that never run can't burn it). The compound's atomic
+        // rollback remains the guarantee for the true race that opens
+        // BETWEEN this read and the write, which no ordering can detect.
+        let chain = picked.subtracting(order).sorted()
+            + order.filter { picked.contains($0) }
         model.structuralInFlight = true
         defer { model.structuralInFlight = false }
         model.setStatus(nil)

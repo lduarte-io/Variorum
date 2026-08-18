@@ -2042,3 +2042,40 @@ small-code-at-adjudication allowance):
   suffixes in `TakesBottomBar`/`TakesBoardView` beside declared
   capabilities, no drift guard. Fix: `Capability.menuTitle` at each
   site whose capability declares the chord.
+
+**THE ARCHITECT'S ADJUDICATION FIX PASS (2026-08-18 — R2-1…R2-4, done
+by the orchestrator under the skill's small-code-at-adjudication
+allowance; LADDER ROUND A IS NOW FULLY CLOSED):**
+- **R2-3 FIXED with a true red-on-current pin:**
+  `BoardDeleteRedoSurvivalTests.aRefusedGestureLeavesTheRedoFutureStanding`
+  ran RED on the pre-fix code with the exact traced symptom
+  (`redoDepth → 0` — the survivor's leg registered before the ghost
+  threw), then GREEN after the ghosts-FIRST chain ordering; the
+  refusal, nothing-deleted, and picks-kept contract byte-unchanged
+  (all six affected suites green, 22 tests). The chain comment's
+  overstated "only shape" claim corrected per the reviewer.
+- **R2-1 FIXED:** both delete-door doc comments now state #60(c)'s
+  truth (a DELETED pick refuses-and-rolls-back; a MOVED pick is
+  deleted where it now lives, counted by the receipt), each marked
+  with its R2-1 correction; `blockGone`'s hedge narrowed to its
+  thrower's actual story ("deleted since you picked it") with the
+  hedge asymmetry documented — `blockGoneForMerge` keeps the wider
+  deleted-or-moved hedge its pre-check honestly covers. The literal
+  prefix pins survive (they assert the unchanged prefix).
+- **R2-2 FIXED:** `mergeSelectedBlocks` now catches
+  `blockNotFound`/`blockNotPlaced` and speaks `blockGoneForMerge`
+  (the door's own verb) on the read-to-write race; `blockNotPlaced`
+  gained real words in `OpsRefusalCopy` (the raw-enum arm retired for
+  it). No pin — the interleave needs a runner seam that doesn't
+  exist (the reviewer's own hard-to-pin label); mechanism traced.
+- **R2-4 FIXED:** all eight hand-typed chord-suffix sites
+  (`TakesBottomBar` ×3, `TakesBoardView` ×5) now read the registry
+  (`menuTitle`/`shortcutLabel` on `.newTake`/`.blankTake`/
+  `.blankTakeAsChosen`/`.showTakes`) — a chord re-pick has ONE home.
+  Byte note, honest: the two-chord blank-take tooltip's punctuation
+  shifted ("(⌥⌘T); ⇧⌥⌘T opens it as chosen" vs the old single
+  parenthetical) — wording-equivalent, drift-proof.
+- **Counts (architect's own runs):** full Mac **1339/238** with the
+  ONE red confirmed BY IDENTITY as the A47c tripwire (+1/+1 = the
+  new pin); spine **51/7 green**; core untouched by the pass
+  (1254/135 stands). Sixth A47c unlocked datum.

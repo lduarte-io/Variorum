@@ -246,3 +246,46 @@ struct TakeCardMenuTitleTests {
                 == "Copy these (⌘⇧C)")
     }
 }
+
+// MARK: - Round 2 (R2-3): a refused gesture leaves the redo future standing
+
+@MainActor
+@Suite("A refused multi-delete leaves the redo future standing (round 2, R2-3)")
+struct BoardDeleteRedoSurvivalTests {
+    /// **Red-on-current pin (ladder round 2, R2-3).** Ghosts used to ride at
+    /// the END of the delete chain, so a stale pick the read had ALREADY
+    /// detected first committed every survivor's tombstone — each leg
+    /// registering, each registration burning the redo future (R1-10's
+    /// recorded behavior) — before the ghost's refusal unwound it all.
+    /// Ghosts-first keeps the pinned contract byte-identical (refusal +
+    /// nothing deleted + picks kept) while the detectable case now refuses
+    /// BEFORE any leg lands, so a redo future survives a refused gesture.
+    /// The compound remains the guarantee for the true read-to-write race,
+    /// which no ordering can pre-detect.
+    @Test func aRefusedGestureLeavesTheRedoFutureStanding() async throws {
+        try await withBoard(seedBlocks: ["one", "two", "three"]) { board in
+            let ids = try board.blockIDs()
+            // Pick while both are live — the race window is held open by the
+            // projection deliberately not being reloaded.
+            board.model.toggleMergeSelection(ids[0])
+            board.model.toggleMergeSelection(ids[1])
+            // The ghost: "two" leaves behind the surface's back.
+            try await board.session.runner.run { ops in try ops.deleteBlock(ids[1]) }
+            // A redo future she cares about: "three" deleted, then undone.
+            try await board.session.runner.run { ops in try ops.deleteBlock(ids[2]) }
+            let stack = board.session.undoStack
+            _ = try await board.session.runner.run { ops in
+                try stack.undo(with: ops)
+            }
+            #expect(board.session.undoStack.redoDepth == 1,
+                    "staging: one redo entry exists before the gesture")
+
+            await board.model.deleteSelectedBlocks()
+
+            #expect(board.model.statusMessage == BlockSelectionCopy.blockGone,
+                    "the refusal is unchanged by the ordering")
+            #expect(board.session.undoStack.redoDepth == 1,
+                    "a REFUSED gesture must not burn the redo future — pre-fix the survivor's leg registered before the ghost threw")
+        }
+    }
+}

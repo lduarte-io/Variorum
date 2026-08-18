@@ -74,7 +74,8 @@ struct TakesBottomBar: View {
     /// in reach.
     private var blockMenu: some View {
         VoicedMenu(tokens: tokens, label: "block") {
-            Button("＋ New take — branch of what's shown (⌘T)") {
+            Button(CapabilityRegistry.capability(.newTake)
+                .menuTitle("＋ New take — branch of what's shown")) {
                 guard let slot = targetSlot else { return speakNoTarget() }
                 let from = model.focusedPane?.variantID ?? slot.variantID
                 guard let from else {
@@ -82,11 +83,13 @@ struct TakesBottomBar: View {
                 }
                 Task { await model.branchTakeRevealed(blockID: slot.blockID, from: from) }
             }
-            Button("＋ Blank take (⌥⌘T)") {
+            Button(CapabilityRegistry.capability(.blankTake)
+                .menuTitle("＋ Blank take")) {
                 guard let slot = targetSlot else { return speakNoTarget() }
                 Task { await model.newBlankTakeRevealed(blockID: slot.blockID) }
             }
-            Button("＋ Blank take, opened as chosen (⇧⌥⌘T)") {
+            Button(CapabilityRegistry.capability(.blankTakeAsChosen)
+                .menuTitle("＋ Blank take, opened as chosen")) {
                 guard let slot = targetSlot else { return speakNoTarget() }
                 Task { await model.newBlankTakeAsChosen(blockID: slot.blockID) }
             }

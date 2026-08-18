@@ -648,8 +648,13 @@ struct TakesBoardView: View {
         }
         .buttonStyle(VoicedButtonStyle(tokens: tokens, role: slot.hasFan ? .primary : .quiet))
         .help(slot.hasFan
-              ? (bloomed ? "Close this fan (⌘⇧T)" : "Open this fan (\(styleName)) — ⌘⇧T")
-              : "Give this block its first alternative take (⌘⇧T)")
+              ? (bloomed
+                 ? CapabilityRegistry.capability(.showTakes).menuTitle("Close this fan")
+                 : "Open this fan (\(styleName))"
+                   + (CapabilityRegistry.capability(.showTakes).shortcutLabel
+                        .map { " — \($0)" } ?? ""))
+              : CapabilityRegistry.capability(.showTakes)
+                  .menuTitle("Give this block its first alternative take"))
     }
 
     /// The slot-split bloom's close door (its bloom REPLACES the cell, so
@@ -866,7 +871,8 @@ struct TakesBoardView: View {
                 // stands down here — this is where it would collide).
                 Button("✕") { model.toggleExpanded(slot.blockID) }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                    .help("Close this fan (⌘⇧T)")
+                    .help(CapabilityRegistry.capability(.showTakes)
+                        .menuTitle("Close this fan"))
             }
             if takes.isEmpty {
                 fanFooter(slot: slot)
@@ -1112,12 +1118,16 @@ struct TakesBoardView: View {
                 Task { await model.branchTakeRevealed(blockID: slot.blockID, from: from) }
             }
             .disabled(slot.variantID == nil)
-            .help("A new take that starts as a copy of what's shown (⌘T)")
+            .help(CapabilityRegistry.capability(.newTake)
+                .menuTitle("A new take that starts as a copy of what's shown"))
             Text("·").foregroundStyle(tokens.faint)
             Button("＋ blank take") {
                 Task { await model.newBlankTakeRevealed(blockID: slot.blockID) }
             }
-            .help("A genuinely different take, from scratch (⌥⌘T; ⇧⌥⌘T opens it as chosen)")
+            .help(CapabilityRegistry.capability(.blankTake)
+                .menuTitle("A genuinely different take, from scratch")
+                + (CapabilityRegistry.capability(.blankTakeAsChosen).shortcutLabel
+                     .map { "; \($0) opens it as chosen" } ?? ""))
         }
         .buttonStyle(.plain)
         .font(tokens.small)
