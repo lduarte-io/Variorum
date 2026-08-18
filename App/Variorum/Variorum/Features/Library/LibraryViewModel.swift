@@ -152,8 +152,20 @@ final class LibraryViewModel {
 
     /// Duplicate-as-version from anywhere (the spike's ruling: the post
     /// exactly as it is — unambiguous from any surface).
+    ///
+    /// 13e E10: through the copy family's ONE flush-first entry
+    /// (`AppSession.runCopying`) — a row duplicated while its post is open
+    /// and dirty must carry what she just typed. The library and pool rows
+    /// can name a post that is not open at all; the flush is a no-op there.
     func duplicateAsVersion(postID: String) async {
-        await run { ops in _ = try ops.duplicateAsVersion(postID) }
+        do {
+            _ = try await session.runCopying(from: postID) { ops in
+                try ops.duplicateAsVersion(postID)
+            }
+            lastError = nil
+        } catch {
+            lastError = String(describing: error)
+        }
     }
 
     private func run(_ body: @escaping @Sendable (Operations) throws -> Void) async {

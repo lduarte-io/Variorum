@@ -114,6 +114,21 @@ struct CapabilityRegistryTests {
         // ANY surface — it is her L6 rider's recorded future scope (owner
         // 13e). The moment it is built, these declarations gain a real
         // `takesAccess` and leave this list.
+        //
+        // **13e E9 — that last sentence, corrected on the record.** The
+        // takes-aware REPLACE is now built (`.replaceAllInEveryTake`), and
+        // the family still belongs here, for a reason stated rather than
+        // inherited: what stays Write-only is the FIND BAR — a
+        // full-document surface affordance that only the scroll-view-owning
+        // editor has, by the QoL round's own ruling ("a find ACROSS the post
+        // has no meaning on a per-take pane"). The new act is driven BY that
+        // bar's two strings and its own matches, so it cannot be reached
+        // from a surface that has no bar; Takes is not behind Write because
+        // no surface anywhere hosts a per-take find. Giving it
+        // `moveAndExecute` would be worse than the exemption: moving to
+        // Write and firing Replace All against whatever the bar's fields
+        // happen to hold — an EMPTY replacement field deletes every match —
+        // is precisely the door P-2 forbids. Logged for her at #63(g).
         // 13f batch 3 (W16): `.openPeerPost` joins the `.switchMode` half of
         // this list — a NAVIGATION act, not an editing one. It opens a post;
         // no surface is behind another because no surface edits anything
@@ -123,6 +138,7 @@ struct CapabilityRegistryTests {
             .previousBlock, .nextBlock, .exportCaretBlock, .switchMode,
             .renameLens, .tagBlock,
             .findInPost, .findAndReplace, .findNext, .findPrevious, .useSelectionForFind,
+            .replaceAllInEveryTake,
             .openPeerPost,
             // 13e E11: `.openBookAtNote` joins `.openPeerPost` — the same
             // kind and the same reason, stated rather than assumed. It is a

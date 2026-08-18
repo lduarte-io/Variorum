@@ -915,12 +915,18 @@ final class TakesViewModel {
         case .main:
             await duplicateAsVersion()
         case .lens(let lensID):
-            await run { ops in _ = try ops.promoteLens(lensID, carryFans: carryFans) }
+            // 13e E10: `promoteLens` copies the post the lens belongs to —
+            // the same class as the duplicate door, so the same entry.
+            await runCopying { ops in _ = try ops.promoteLens(lensID, carryFans: carryFans) }
         case .scratch:
             let picks = column.picks
             let lensName = column.name ?? "Lens"
             do {
-                let promoted: Operations.PostCopyResult = try await session.runner.run { [postID] ops in
+                // 13e E10: `promotePicks` is a post copy too — the row named
+                // two doors; the family is what the sweep found.
+                let promoted: Operations.PostCopyResult = try await session.runCopying(
+                    from: postID
+                ) { [postID] ops in
                     let result = try ops.promotePicks(
                         post: postID, picks: picks, carryFans: carryFans)
                     if keepAsLens {
@@ -940,8 +946,11 @@ final class TakesViewModel {
         }
     }
 
+    /// 13e E10: the copy family's flush-first entry, like every other copy
+    /// door — this board's panes are live editors, so the buffer under the
+    /// ring is exactly the text a duplicate would otherwise miss.
     func duplicateAsVersion() async {
-        await run { [postID] ops in _ = try ops.duplicateAsVersion(postID) }
+        await runCopying { [postID] ops in _ = try ops.duplicateAsVersion(postID) }
     }
 
     /// "Write new takes on every block" from the TAKES tab (R82: the door
@@ -1974,6 +1983,20 @@ final class TakesViewModel {
         statusMessage = nil
         do {
             try await session.runner.run(body)
+        } catch {
+            statusMessage = Self.message(for: error)
+        }
+    }
+
+    /// `run`'s COPY sibling (13e E10): identical plumbing, through the copy
+    /// family's one flush-first entry (`AppSession.runCopying`). Separate
+    /// from `run` deliberately — flushing before every ops call would make
+    /// every board door pay for a hazard only the copy doors carry, and
+    /// would hide which doors mint copies.
+    func runCopying(_ body: @escaping @Sendable (Operations) throws -> Void) async {
+        statusMessage = nil
+        do {
+            try await session.runCopying(from: postID, body)
         } catch {
             statusMessage = Self.message(for: error)
         }

@@ -90,6 +90,8 @@ struct EditorCommands: Commands {
         .takeToBlockBelow, .takesToBlocks,
         .previousBlock, .nextBlock, .blockComments, .callout,
         .findInPost, .findAndReplace, .findNext, .findPrevious, .useSelectionForFind,
+        // 13e E9: the find family's takes-aware sixth.
+        .replaceAllInEveryTake,
         // 13g batch 3 (L8): the Format menu.
         .formatBold, .formatItalic, .formatStrikethrough, .formatCode,
         // 13g batch 4 (L10): the Add Link door.
@@ -320,6 +322,17 @@ struct EditorCommands: Commands {
                 Button(verb(.useSelectionForFind)) { actions?.dispatch(.find(.useSelection)) }
                     .keyboardShortcut("e", modifiers: .command)
                     .disabled(!enabled(.useSelectionForFind))
+                Divider()
+                // 13e E9 — the takes-aware half, as a SCOPE EXTENSION of the
+                // bar above it rather than a second find surface: it uses the
+                // find bar's own two strings and its own matches, and carries
+                // each into every OTHER live take of the blocks they touch.
+                // Keyless deliberately (#63(f)) — an act that edits takes she
+                // cannot see is one to choose, not to hit.
+                Button(verb(.replaceAllInEveryTake)) {
+                    actions?.dispatch(.find(.replaceAllInEveryTake))
+                }
+                .disabled(!enabled(.replaceAllInEveryTake))
             }
         }
         // The structural gestures' menu-bar door (Phase 9, contract item 1;

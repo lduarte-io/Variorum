@@ -71,14 +71,23 @@ nonisolated enum CalloutEdit: Equatable, Sendable {
 ///
 /// Deliberately distinct from `findAnything` (⌘K, the palette): that searches
 /// the LIBRARY's titles and names; this searches the TEXT of the post you are
-/// in, over its chosen takes. The takes-aware find/replace and whole-library
-/// body search are recorded future scope (owner 13e), per her L6 rider.
+/// in, over its chosen takes. *(13e E9: the takes-aware REPLACE half is now
+/// built — `replaceAllInEveryTake` below. Whole-library body search remains
+/// future scope, and its owner is the master plan's own **Whole-library text
+/// search** row, not this family.)*
 nonisolated enum FindAction: String, Sendable, CaseIterable {
     case show          // ⌘F — the find bar
     case showReplace   // ⌥⌘F — the find bar with its replace field
     case next          // ⌘G
     case previous      // ⇧⌘G
     case useSelection  // ⌘E — search for what's selected
+    /// 13e E9 — the takes-aware half (the KnownIssues row *"Find & replace —
+    /// the takes-aware half"*, owner 13e). Deliberately a SCOPE EXTENSION of
+    /// the shipped bar rather than a second find surface: it takes the find
+    /// bar's own two strings and its own matches, and carries each one into
+    /// every OTHER live take of the blocks the matches touch — the
+    /// Delete-in-Every-Take apply-and-report shape, one act over.
+    case replaceAllInEveryTake
 }
 
 /// Everything the menu bar / palette / bars route to "whichever post
@@ -383,6 +392,11 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // undeclared keys sitting in the one place keys are declared is exactly
     // P-1's collision-drift class.
     case findInPost, findNext, findPrevious, findAndReplace, useSelectionForFind
+    // 13e E9: the SIXTH member of that family — the takes-aware replace. Its
+    // own declaration for the family's own reason: it is a distinct act with
+    // a distinct verb and its own honest refusal, and a scope hidden inside
+    // another act's implementation is exactly what P-1 forbids.
+    case replaceAllInEveryTake
     // 13g batch 3 (L8/L9) — the FORMATTING acts over markdown-as-content
     // (her rulings F-1…F-3). SEVEN declarations rather than one submenu-owning
     // act, for the find family's reason: two of them carry a KEY, and an

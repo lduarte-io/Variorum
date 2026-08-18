@@ -645,6 +645,19 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: "⌘E", takesAccess: nil,
             unavailableNote: "Find works in the note editor — open a note in Write (⌘1).",
             availability: findFamily),
+        // 13e E9 — the takes-aware half. KEYLESS by the collision sweep's
+        // verdict and by choice: the Find family's own keys are taken
+        // (⌘F/⌥⌘F/⌘G/⇧⌘G/⌘E), and an act that edits takes she cannot see is
+        // one to pick deliberately from a menu, not to hit by muscle memory
+        // (#63(f)). It uses the find bar's OWN two strings, so its
+        // availability is the family's — where there is no bar there is
+        // nothing to replace with.
+        Capability(
+            id: .replaceAllInEveryTake, verb: "Replace All in Every Take", scope: .post,
+            doors: [.menuBar],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "Find works in the note editor — open a note in Write (⌘1).",
+            availability: findFamily),
 
         // MARK: Formatting (13g batch 3 — L8, her rulings F-1…F-3)
         //
@@ -1067,6 +1080,7 @@ nonisolated enum CapabilityRegistry {
             case .next: id = .findNext
             case .previous: id = .findPrevious
             case .useSelection: id = .useSelectionForFind
+            case .replaceAllInEveryTake: id = .replaceAllInEveryTake
             }
         }
         return capability(id).unavailableNote

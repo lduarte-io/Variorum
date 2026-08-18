@@ -296,6 +296,13 @@ final class EditorViewModel {
     /// be re-entrant). Exposed so tests can await it deterministically, the
     /// `pendingCrossBlockTask` precedent.
     @ObservationIgnored var findReplaceTask: Task<Void, Never>?
+    /// 13e E9: the takes-aware replace's ONE-SHOT arming — true only
+    /// between "Replace All in Every Take" being pressed and the finder's
+    /// client question arriving (a synchronous window, M5). Never a mode:
+    /// a scope she cannot see the state of would make an ordinary Replace
+    /// All silently edit takes, which is the surprise this act exists to
+    /// make deliberate.
+    @ObservationIgnored var takesScopeArmed = false
 
     var hasOpenTail: Bool { index.tailLength != nil }
 
@@ -1809,6 +1816,14 @@ final class EditorViewModel {
         let post = postID
         Task { [session] in
             do {
+                // 13e E10's sweep: `poolDragCopy` reads the SOURCE block's
+                // `working_text` rows, so a scrap dragged in while its own
+                // editor still holds a pending buffer copies stale text —
+                // the copy-door class, one container over. The source's
+                // container is not named here (only its block is), so the
+                // family's block-shaped entry flushes every open post; a
+                // clean coordinator costs nothing.
+                await session.flushEveryOpenPost()
                 _ = try await session.runner.run { ops in
                     try ops.poolDragCopy(
                         blockID, to: post, at: insert, includeFan: includeFan)

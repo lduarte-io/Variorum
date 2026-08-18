@@ -315,7 +315,12 @@ struct MembershipChip: View {
     private func duplicate() {
         Task {
             do {
-                let result = try await session.runner.run { [postID] ops in
+                // 13e E10: the chip's duplicate row rides the copy family's
+                // one flush-first entry, exactly as its diverge row does
+                // (`session.divergeForBook` is the same body) — the chip
+                // sits in the masthead ABOVE a live editor, so its post is
+                // dirty whenever she is typing.
+                let result = try await session.runCopying(from: postID) { [postID] ops in
                     try ops.duplicateAsVersion(postID)
                 }
                 duplicatedPostID = result.post.id

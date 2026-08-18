@@ -115,6 +115,49 @@ nonisolated enum FindReplaceGate {
         count == 1 ? "Replaced 1 match." : "Replaced \(count) matches."
     }
 
+    // MARK: - 13e E9 — the takes-aware half's words
+
+    /// The APPLY-AND-REPORT line (the `deleteInEveryTake` shape, which is
+    /// the KnownIssues row's ruled aligned shape): what landed, in how many
+    /// takes, and every take that was skipped WITH its reason — never
+    /// silently. `moved` carries the substring valve's count, in the same
+    /// one voice, so nothing is reported by a message another overwrites.
+    static func replacedInEveryTake(
+        replacements: Int, takes: Int, skipped: [String], moved: Int
+    ) -> String {
+        var message = "Replaced \(replacements) "
+            + (replacements == 1 ? "match" : "matches")
+            + " in \(takes) \(takes == 1 ? "take" : "takes")."
+        if !skipped.isEmpty {
+            message += " Skipped \(skipped.count): " + skipped.joined(separator: ", ") + "."
+        }
+        if moved > 0 {
+            message += " \(moved) moved before \(moved == 1 ? "it" : "they") could be replaced."
+        }
+        return message
+    }
+
+    /// Nothing to do — every match moved, or the blocks carry no take that
+    /// could take the replacement. A refusal in words, never a silent no-op.
+    static func nothingReplacedInAnyTake(moved: Int, skipped: [String]) -> String {
+        var message = "Nothing was replaced"
+        if moved > 0 {
+            message += " — \(moved) \(moved == 1 ? "match" : "matches") moved before "
+                + "\(moved == 1 ? "it" : "they") could be"
+        } else if !skipped.isEmpty {
+            message += " — " + skipped.joined(separator: ", ")
+        }
+        return message + "."
+    }
+
+    /// The menu act fired with nothing for the finder to hand us — no
+    /// search string, no bar to read one from, or nothing in the note that
+    /// matches. Fire-and-speak: a door that could not act says so (P-2),
+    /// and one sentence covers all three because the way out is the same.
+    static let noFindToReplace =
+        "Nothing to replace — open Find and Replace (⌥⌘F) and type what to find "
+        + "and what to replace it with."
+
     /// **The apply-time completion, ONE voice (cold review F-1 + F-7):** when
     /// everything approved was applied it says so; when some approved matches
     /// could no longer be applied — the text MOVED in the deferred window
@@ -152,6 +195,155 @@ nonisolated enum FindReplaceGate {
     }
 }
 
+// MARK: - 13e E9 — the takes-aware replace, as a pure rule
+
+/// One approved find-bar match, carried from the gate to whichever road
+/// applies it: the surface path (ordinary typing, chosen text only) or the
+/// takes path. `expected` is the SUBSTRING VALVE's captured text — a range
+/// is applied only if it still holds what the finder matched (F-1's rule,
+/// now shared by both roads rather than living inside one of them).
+struct FindReplaceItem: Equatable, Sendable {
+    let range: NSRange
+    let replacement: String
+    let expected: String?
+}
+
+/// **The takes-aware replace's brain (13e E9).** Pure, so the rule that
+/// decides what happens inside a take she cannot see is unit-testable
+/// without a text view, a board, or a store — and so it can be READ.
+///
+/// The rule, in one paragraph. A find-bar gesture approves matches in the
+/// takes the note SHOWS. Carrying one into another take needs an answer to
+/// "which occurrence?", and there are exactly two honest answers:
+///
+/// - **The gesture covered EVERY occurrence of that phrase in the visible
+///   take** (what Replace All does): then "all of them" is literally what
+///   she asked for, and every occurrence in the other take is replaced.
+/// - **It covered only some** (a single Replace among several matches):
+///   then the #10 discipline applies, exactly as `deleteInEveryTake` uses
+///   it — a UNIQUE occurrence is replaced, and an ambiguous one is SKIPPED
+///   AND REPORTED rather than guessed at.
+///
+/// Nothing here reads or writes markdown syntax specially: under 13g's F-1
+/// the stored text IS the markdown, so a replacement is ordinary content
+/// and the spans re-scan themselves afterwards (display == stored is
+/// untouched — this rule never invents syntax and never strips it).
+nonisolated enum TakesReplacePlan {
+    /// One approved match, in the coordinates of the take it was found in.
+    struct Match: Equatable, Sendable {
+        let range: NSRange       // intra-take (UTF-16, the surface's unit)
+        let needle: String
+        let replacement: String
+    }
+
+    /// What one phrase asks of the OTHER takes.
+    struct Group: Equatable, Sendable {
+        let needle: String
+        let replacement: String
+        /// The visible gesture covered every occurrence of `needle` there.
+        let coversEveryOccurrence: Bool
+    }
+
+    enum Outcome: Equatable, Sendable {
+        case edited(text: String, charDelta: Int, replacements: Int)
+        /// The phrase is not in this take at all.
+        case noMatch
+        /// It is there more than once and the gesture did not ask for all
+        /// of them — which occurrence would be a guess.
+        case ambiguous
+    }
+
+    /// Applies matches to the take they were found in — LAST MATCH FIRST,
+    /// so every earlier offset stays valid (the surface path's own ordering
+    /// rule, and the reason the SDK header gives for its reverse order).
+    static func applyMatches(_ matches: [Match], to text: String) -> (text: String, charDelta: Int) {
+        var result = text as NSString
+        var delta = 0
+        for match in matches.sorted(by: { $0.range.location > $1.range.location }) {
+            guard match.range.upperBound <= result.length else { continue }
+            delta += match.range.length + (match.replacement as NSString).length
+            result = result.replacingCharacters(in: match.range, with: match.replacement) as NSString
+        }
+        return (result as String, delta)
+    }
+
+    /// The matches, grouped by the phrase they searched for. `coversEvery`
+    /// is measured against the visible take's own text: three matches of
+    /// "cat" where "cat" occurs three times is a Replace All.
+    static func groups(from matches: [Match], visibleText: String) -> [Group] {
+        var seen: [String] = []
+        var byKey: [String: (needle: String, replacement: String, count: Int)] = [:]
+        for match in matches {
+            let key = match.needle + "\u{0}" + match.replacement
+            if var existing = byKey[key] {
+                existing.count += 1
+                byKey[key] = existing
+            } else {
+                byKey[key] = (match.needle, match.replacement, 1)
+                seen.append(key)
+            }
+        }
+        return seen.compactMap { key in
+            guard let entry = byKey[key] else { return nil }
+            return Group(
+                needle: entry.needle,
+                replacement: entry.replacement,
+                coversEveryOccurrence: entry.count >= occurrences(of: entry.needle, in: visibleText))
+        }
+    }
+
+    /// Applies every group to another take's text, in order. Groups run
+    /// SEQUENTIALLY against the evolving text — a replacement that creates
+    /// or destroys another phrase's occurrence is seen by the next group,
+    /// which is what a person doing it by hand would get.
+    static func apply(_ groups: [Group], toOtherTake text: String) -> Outcome {
+        var current = text as NSString
+        var replacements = 0
+        var delta = 0
+        var ambiguous = false
+        for group in groups {
+            let needle = group.needle as NSString
+            guard needle.length > 0 else { continue }
+            let count = occurrences(of: group.needle, in: current as String)
+            guard count > 0 else { continue }
+            if !group.coversEveryOccurrence && count > 1 {
+                ambiguous = true
+                continue
+            }
+            let replaced = current.replacingOccurrences(
+                of: group.needle, with: group.replacement,
+                options: .literal, range: NSRange(location: 0, length: current.length))
+            replacements += count
+            delta += count * (needle.length + (group.replacement as NSString).length)
+            current = replaced as NSString
+        }
+        if replacements > 0 {
+            return .edited(text: current as String, charDelta: delta, replacements: replacements)
+        }
+        return ambiguous ? .ambiguous : .noMatch
+    }
+
+    /// Non-overlapping literal occurrences — the same counting AppKit's own
+    /// Replace All performs, and the same `TakeSpanMatch.uniqueRange` uses
+    /// to decide ambiguity (one occurrence or nothing).
+    static func occurrences(of needle: String, in text: String) -> Int {
+        guard !needle.isEmpty else { return 0 }
+        let haystack = text as NSString
+        let step = (needle as NSString).length
+        var count = 0
+        var from = 0
+        while from < haystack.length {
+            let found = haystack.range(
+                of: needle, options: .literal,
+                range: NSRange(location: from, length: haystack.length - from))
+            guard found.location != NSNotFound else { break }
+            count += 1
+            from = found.location + step
+        }
+        return count
+    }
+}
+
 // MARK: - The editor's find doors
 
 @MainActor
@@ -163,9 +355,33 @@ extension EditorViewModel {
     @discardableResult
     func performFind(_ action: FindAction) -> Bool {
         guard let textView, scrollView != nil else { return false }
+        // 13e E9: the takes scope is ARMED for exactly one finder call, not
+        // held as a mode. AppKit's finder call is synchronous (M5), so the
+        // flag is consumed by `gateFindReplace` within this call or not at
+        // all — and "not at all" means the finder had nothing to replace
+        // (no search string, no bar), which the door then SAYS rather than
+        // failing silently (P-2). A one-shot flag also means the ordinary
+        // ⌘F family can never acquire a hidden scope by accident.
+        let armed = action == .replaceAllInEveryTake
+        if armed {
+            // Asked HERE as well as in the gate, deliberately: under a seal
+            // the text view is not editable, so AppKit's finder may never
+            // reach the client question at all — and a door that answered
+            // "nothing to find" when the truth is "this note is sealed"
+            // would be the lecture-shaped refusal P-2 retired.
+            guard header?.locked != true else {
+                refuseFeedback("This note is sealed — unlock it to edit.")
+                return true
+            }
+            takesScopeArmed = true
+        }
         let item = NSMenuItem()
         item.tag = action.finderAction.rawValue
         textView.performTextFinderAction(item)
+        if armed && takesScopeArmed {
+            takesScopeArmed = false
+            refuseFeedback(FindReplaceGate.noFindToReplace)
+        }
         return true
     }
 
@@ -173,11 +389,26 @@ extension EditorViewModel {
     /// method, which has already told AppKit NO. Everything from here is ours.
     func gateFindReplace(ranges: [NSRange], strings: [String]) {
         guard let textView else { return }
+        // 13e E9: consumed HERE, before any early return, so a refusal
+        // clears the arming too — the door's own "nothing to replace" line
+        // must not fire on top of a refusal that already spoke.
+        let takesScope = takesScopeArmed
+        takesScopeArmed = false
         guard header?.locked != true else {
             refuseFeedback("This note is sealed — unlock it to edit.")
             return
         }
-        guard !ranges.isEmpty else { return }
+        guard !ranges.isEmpty else {
+            // 13e E9: the ordinary bar buttons stay silent here (she is
+            // looking straight at the bar that found nothing), but a MENU
+            // act that was deliberately chosen must not do nothing silently
+            // — measured: AppKit calls its client with an empty range set
+            // rather than skipping the call, so this is the road the
+            // "nothing to replace" line actually travels, and
+            // `performFind`'s still-armed check is the belt behind it.
+            if takesScope { refuseFeedback(FindReplaceGate.noFindToReplace) }
+            return
+        }
         // A flight already in progress, or a structural op landing: the
         // surface is not ours to rewrite (the standing fence).
         guard !structuralInFlight else {
@@ -191,7 +422,18 @@ extension EditorViewModel {
                 replacing: range, replacementIsSingleNewline: false,
                 segmentation: header?.effectiveSegmentation ?? .paragraph
             ) {
-            case .block, .tail:
+            case .block:
+                continue
+            case .tail:
+                // 13e E9: the TAKES road has one blocker the surface road
+                // does not. A match in the open tail sits in text that is
+                // not a block yet, so it has no variant row to carry into
+                // other takes — and the takes road writes through the
+                // operations layer, which knows only variants. The tail
+                // sentence already says the true thing ("it becomes a block
+                // once typing pauses; try again then"), and the family's
+                // all-or-nothing rule keeps the gesture whole.
+                if takesScope { blockers.append(.stillFormingParagraph) }
                 continue
             case .refuse(.lockedVariant):
                 blockers.append(.lockedTake)
@@ -239,10 +481,23 @@ extension EditorViewModel {
         let snapshot = textView.string as NSString
         let plan = zip(ranges, paddedStrings(strings, to: ranges.count)).map {
             range, replacement in
-            (range: range,
-             replacement: replacement,
-             expected: range.upperBound <= snapshot.length
-                ? snapshot.substring(with: range) : nil)
+            FindReplaceItem(
+                range: range,
+                replacement: replacement,
+                expected: range.upperBound <= snapshot.length
+                    ? snapshot.substring(with: range) : nil)
+        }
+        // 13e E9: the SCOPE fork, and the only one — everything above (the
+        // seal, the flight fence, the per-range verdicts, the all-or-nothing
+        // refusal, the valve's captured substrings) is shared, so the two
+        // roads can never disagree about what a match is or when a gesture
+        // must refuse. They differ in exactly one thing: where the approved
+        // text lands.
+        if takesScope {
+            findReplaceTask = Task { @MainActor [weak self] in
+                await self?.structural.replaceInEveryTake(plan)
+            }
+            return
         }
         findReplaceTask = Task { @MainActor [weak self] in
             self?.applyFindReplace(plan, in: textView)
@@ -269,7 +524,7 @@ extension EditorViewModel {
     /// structural change landing in the window), which `shouldChangeText`
     /// then refuses instead of merging.
     private func applyFindReplace(
-        _ plan: [(range: NSRange, replacement: String, expected: String?)],
+        _ plan: [FindReplaceItem],
         in textView: EditorTextView
     ) {
         let manager = textView.undoManager
@@ -317,6 +572,10 @@ extension FindAction {
         case .next: .nextMatch
         case .previous: .previousMatch
         case .useSelection: .setSearchString
+        // 13e E9: the SAME finder action as an ordinary Replace All — the
+        // act is a scope, not a second search. What differs is that the
+        // model is armed when the finder asks its client question.
+        case .replaceAllInEveryTake: .replaceAll
         }
     }
 }

@@ -110,11 +110,51 @@ final class AppSession {
     /// moment. The pre-existing 11a copy doors (`duplicateAsVersion` /
     /// `promoteLens`) are deliberately untouched — that class goes to
     /// KnownIssues at the closeout (the orchestrator's ruling).
+    ///
+    /// *(13e E10: that last sentence is RETIRED — the 11a copy doors now
+    /// ride `runCopying` below, which is this entry's own flush-first body
+    /// made shared. The KnownIssues row it named resolves with that.)*
     func divergeForBook(_ postID: String, in bookID: String) async throws
         -> Operations.DivergeResult {
-        await autosave(forPost: postID).flushNow()
-        return try await runner.run { ops in
+        try await runCopying(from: postID) { ops in
             try ops.divergePostForReading(postID, in: bookID)
+        }
+    }
+
+    /// **THE COPY FAMILY'S ONE ENTRY (13e E10 — the KnownIssues row *"Copy
+    /// doors read the store past a dirty buffer"*, owner 13e).** Every door
+    /// that mints a COPY of a post runs through here, because every one of
+    /// them carries the same hazard: the copying operations read
+    /// `working_text` ROWS, so a copy taken inside the editor's autosave
+    /// debounce lacks the last seconds of typing. The loss is the copy's
+    /// completeness, never text — the original still receives the flush —
+    /// but a duplicate that silently drops the paragraph she just wrote is
+    /// exactly the surprise the insure-before-copy doctrine exists to
+    /// prevent.
+    ///
+    /// The body is `divergeForBook`'s, which the 13f cold review (R1-4)
+    /// wrote for the ONE door it was reviewing; 13e's row is the rest of
+    /// the family arriving at the same rule rather than growing a second
+    /// copy of it. `flushNow()` on a post that is not open is a no-op with
+    /// nothing pending, so the entry is safe for the library and pool rows,
+    /// which duplicate posts that may not be open at all.
+    func runCopying<T: Sendable>(
+        from postID: String, _ body: @escaping @Sendable (Operations) throws -> T
+    ) async throws -> T {
+        await autosave(forPost: postID).flushNow()
+        return try await runner.run(body)
+    }
+
+    /// The copy family's OTHER shape (13e E10's sweep): a copy whose SOURCE
+    /// is named by a block, not by a post — `poolDragCopy`, where the block
+    /// being dragged lives in some pool the dropping editor cannot name.
+    /// Flushing every open coordinator answers it without a lookup, and
+    /// costs nothing when nothing is pending (`flushNow` returns
+    /// immediately on a clean coordinator). Open posts are a handful by
+    /// construction — this is not a corpus walk.
+    func flushEveryOpenPost() async {
+        for coordinator in postAutosaves.values {
+            await coordinator.flushNow()
         }
     }
 

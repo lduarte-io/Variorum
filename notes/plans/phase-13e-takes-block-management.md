@@ -559,7 +559,7 @@ binaries live in the session scratchpad, throwaway.
 | 4 | **Block management:** E2 (block multi-select + multi-delete) | **DONE 2026-08-17** — record below (core 1254/135 · Mac 1330/234 tripwire-only · spine 51/7; mobile not run — `Sources/`/`Shared/` untouched) |
 | 5 | **Canvas:** E7-bank (canvas bank) · E12 (drag jitter/resist — live-path trace, no archeology per her rider) | **DONE 2026-08-18** — record below (Mac 1350/242 tripwire-only · core 1254/135 · spine 51/7; mobile not run — `Sources/`/`Shared/` untouched. E12's mechanism MEASURED — the default `.local` drag space is displaced by the drag's own offset, halving every translation; fixed with one named surface space, red-on-old on both pins. E7's bank built as the FACE 4E's ruling named, board byte-unchanged when closed. ONE routed finding: the Takes slot-height handle carries the same defect, out of E12's letter) |
 | 6 | **Comments & tags:** E7-comments (margin-hover grammar, comments on the LEFT) · E8 (the fuller tags face) | **DONE 2026-08-18** — record below (Mac 1362/246 tripwire-only · core 1254/135 · spine 51/7; mobile not run — `Sources/`/`Shared/` untouched. The LEFT-placement SWEEP found NO Mac straggler (table in the record; the phone's ●n marker is its own M12 ruling, flagged not changed); the hover "+ //" door built on the left, hover-only; ONE REAL BUG fixed with it — a calm page grew no geometry, so 13b 4D's hover drag-handle reveal has been invisible on plain notes since it shipped. E8 gave the Library AND Pool rows the note's own chip grammar (✕ remove, ＋ type-to-create), bulk untag, and the first `.tagNote` declaration) |
-| 7 | **Text tools:** E9 (takes-aware find & replace) · E10 (copy-door flush alignment) | pending |
+| 7 | **Text tools:** E9 (takes-aware find & replace) · E10 (copy-door flush alignment) | **DONE 2026-08-18** — record below (Mac **1385/250 FULLY GREEN** · core 1254/135 · mobile 314/60 · spine 51/7. E9 shipped as a SCOPE EXTENSION of the shipped ⌘F family — `Replace All in Every Take`, one transaction/one undo entry on the ruled apply-and-report shape, its carry rule a pure brain. E10 gave the copy family ONE flush-first entry (`AppSession.runCopying`, `divergeForBook`'s own body made shared) — both KnownIssues rows dispositioned. The ROUTED RIDER is FIXED **with** its pin: the `CanvasDragRig` machinery re-aimed at the board, the handle located by probe, red-on-old at the traced numbers — no hand-check owed) |
 | 8 | **W26 (E14):** the system-wide ⌃⌥⌘N summon — the batch's own verification act is the SANDBOXED in-app registration | pending |
 
 The kickoff sweep runs BESIDE the batches, orchestrator-owned: the
@@ -2687,3 +2687,224 @@ SYNCHRONOUS; kills by PID only after a path-discriminated `ps`;
 batch record here BEFORE final claims only with PENDING marks;
 commit per convention; NEVER push; NEVER `/Applications`; instances
 by bundle id `io.lduarte.Variorum.debug` or PID only.
+
+### BATCH 7 RECORD — text tools + the routed rider (2026-08-18, a fresh Opus implementer; COMPLETE)
+
+**Shipped, per ledger row.**
+
+- **E9 — takes-aware find & replace (`Replace All in Every Take`).** A SCOPE
+  EXTENSION of the shipped ⌘F family, never a second find surface: the act is
+  a row in **Edit ▸ Find**, it fires AppKit's own `.replaceAll`, and what
+  differs is only where the approved text lands. Everything above the fork is
+  SHARED with the shipped road — the seal check, the structural-flight fence,
+  the per-range `index.verdict` walk, the ALL-OR-NOTHING counting refusal, and
+  the F-1 substring valve's captured expectations — so the two roads cannot
+  disagree about what a match is or when a gesture must refuse.
+  - **The carry rule is a PURE brain** (`TakesReplacePlan`, beside
+    `FindReplaceGate` in `EditorFind.swift`), so the thing that decides what
+    happens inside a take she cannot see is unit-testable without a text view,
+    a board or a store. Two arms, both from precedent: a gesture that covered
+    EVERY occurrence of a phrase in the visible take carries all of them (a
+    Replace All means all); a PARTIAL gesture carries only an UNAMBIGUOUS
+    single occurrence and otherwise skips-and-reports — literally the #10
+    discipline `deleteInEveryTake` has used since Phase 11. Groups run
+    sequentially against the evolving text (what a person doing it by hand
+    would get), and needles are the LITERAL matched substrings, so a
+    case-insensitive find contributes one group per spelling.
+  - **The landing is `deleteInEveryTake`'s** — the row's ruled aligned shape,
+    followed rather than paraphrased: ONE `editTakesAtomically` through
+    `runStructural` (one transaction, one undo entry labelled "Replace in
+    Every Take", dirty targets insurance-committed, churn per block,
+    `expectedText` CAS on every edit), with the VISIBLE take riding the same
+    transaction. Consequence stated rather than hidden: this act undoes with
+    ⌥⌘Z, not ⌘Z (#63(c)); the ordinary Replace All is byte-unchanged and still
+    rides `insertText` under an NSTextView undo group (pinned).
+  - **Apply-and-report:** "Replaced N matches in M takes." plus every skipped
+    take NAMED with its reason — `(locked)` · `(archived)` · `(no match)` ·
+    `(appears more than once)` — and the valve's `moved` count in the same one
+    voice. Nothing is edited silently and nothing is skipped silently.
+  - **One blocker the surface road does not have:** with the act armed, a match
+    in the OPEN TAIL blocks the whole gesture (the existing
+    `stillFormingParagraph` sentence, which already says the true thing) —
+    that text is not a block yet, so it has no variant row the operations
+    layer could write.
+  - **Arming, not a mode:** `takesScopeArmed` is ONE-SHOT, set in
+    `performFind` and consumed at the top of `gateFindReplace` before any
+    early return, so a refusal disarms too and the ⌘F family can never acquire
+    a hidden scope. Fired with nothing to find, the door SPEAKS (P-2) — and
+    the road it travels was MEASURED, not assumed: AppKit calls its client
+    with an EMPTY range set rather than skipping the call, so the empty-ranges
+    arm carries the line and `performFind`'s still-armed check is the belt
+    behind it. A sealed note is refused at the door with the SEAL's own reason
+    (a sealed editor may never reach the gate at all).
+  - **Declared (P-1):** `.replaceAllInEveryTake` — verb "Replace All in Every
+    Take", scope `.post`, door `[.menuBar]`, KEYLESS (#63(f)), the find
+    family's `unavailableNote` and `findFamily` availability; added to
+    `EditorCommands.menuRendered` (the walk's set equality) and to the R118
+    exemption list with its reason STATED, not inherited — and the QoL round's
+    stale sentence in that list ("the moment it is built, these declarations
+    gain a real `takesAccess`") CORRECTED on the record: what stays Write-only
+    is the find BAR, so no surface anywhere hosts a per-take find, and
+    `moveAndExecute` would be worse than the exemption (moving to Write and
+    firing Replace All against an EMPTY replacement field deletes every match).
+    Logged at #63(g).
+- **E10 — the copy doors' flush alignment (the KnownIssues row, RESOLVED).**
+  ONE flush-first brain, `AppSession.runCopying(from:_:)`, which is
+  `divergeForBook`'s own body made shared — and `divergeForBook` now calls it,
+  so the family has one rule rather than two copies of one (proven: the 13f
+  R1-4 pin goes RED under this batch's revert). Four doors routed:
+  `LibraryViewModel.duplicateAsVersion` (the Library catalog's row AND the
+  Pool's row), `TakesViewModel.duplicateAsVersion` (a new `runCopying`
+  sibling of the board's `run` plumbing — deliberately separate, so only the
+  doors that mint copies pay for the hazard), `promoteColumn`'s lens arm
+  (`promoteLens`) and its scratch arm (`promotePicks` — the sweep's find, the
+  same class), and `MembershipChip.duplicate` (one line to the shared entry,
+  the `divergeForBook` precedent for a SwiftUI View's private method).
+  - **THE SWEEP TABLE** (every door that mints a copy from stored text):
+    | Door | Verdict |
+    |---|---|
+    | `LibraryViewModel.duplicateAsVersion` (Library row · Pool row) | **FIXED**, pins `theLibraryDuplicateDoorCarriesThePendingText`, `thePoolRowsDuplicateIsTheSameDoor` |
+    | `TakesViewModel.duplicateAsVersion` (board row · `promoteColumn` main) | **FIXED**, pin `theBoardsDuplicateDoorCarriesThePendingText` |
+    | `TakesViewModel.promoteColumn` — lens arm (`promoteLens`) | **FIXED**, pin `promotingALensCarriesThePendingText` |
+    | `TakesViewModel.promoteColumn` — scratch arm (`promotePicks`) | **FIXED** (the row named two doors; the family is what the sweep found) |
+    | `MembershipChip.duplicate` | **FIXED** via the shared entry, pin `theSharedCopyEntryFlushesBeforeItRuns` (its private method has no seam a pin can reach — the `divergeForBook` precedent) |
+    | `AppSession.divergeForBook` | **ALREADY FIXED** (13f R1-4) — now expressed through the same body; its own pin re-verifies the route |
+    | `EditorViewModel.poolDrop` (`poolDragCopy`) | **FIXED** — the sweep's find: the copy reads the SOURCE block's rows, and the dropping editor is handed a block id, not a container, so `AppSession.flushEveryOpenPost()` answers it without a lookup (a clean coordinator costs nothing). Pin `aScrapDraggedInCarriesItsOwnPendingText` |
+    | `TutorialSeeder`'s `duplicateAsVersion` | **SAFE, mechanism stated:** it runs inside the seeder's own transaction over freshly-minted rows; no editor, no debounce, nothing pending |
+    | `adoptLensPreservingChosen` / `adoptPicksPreservingChosen` | **SAFE:** they re-point chosen variants and mint a lens — no text is copied, so a pending buffer has nothing to be missing from |
+- **THE ROUTED RIDER — `TakesBoardView.slotHeightHandle`, FIXED with a PIN**
+  (batch 5's sweep table entry, the last unfixed instance of E12's class). The
+  board names ONE space (`TakesBoardView.surfaceSpace`, applied to its root
+  VStack — `CanvasView.surfaceSpace`'s twin) and the handle's `DragGesture`
+  measures in it. The pin DRIVES, exactly as the brief instructed: batch 5's
+  `CanvasDragRig` machinery re-aimed at the board (non-activating `NSPanel`,
+  synthesized `NSEvent`s through `NSApp.sendEvent`, the app's own event pump),
+  with the handle LOCATED rather than guessed — the take strip's real
+  `NSScrollView` frame converted to window coordinates, then a small probe
+  drag walking down from its bottom edge until one takes (measured: the handle
+  sits ~34 pt below the strip, which is chrome no pin should encode). No
+  hand-check was needed and none is owed.
+
+**Mechanisms traced (the hallucination guard).** E10's, traced before the fix
+and reproduced by both reverts: `copyPost` walks `working_text` ROWS while the
+editor holds keystrokes in a 500 ms debounce, so a copy taken inside that
+window is minted from the previous text (the ORIGINAL is unharmed — its flush
+lands moments later; what is lost is the copy's completeness). The rider's is
+batch 5's, one surface over and re-derived here: the handle sits BELOW the row
+it resizes, so a `.local`-space drag feeds its own applied change back into
+every translation — measured on the real board at 120 pt of movement for a
+200 pt pull, committing 76. E9 is a FEATURE and carries no bug mechanism; its
+pins are feature pins (the batch-2/3 convention).
+
+**Pins + red-on-old evidence (behavioral revert, checksums recorded).** Three
+new Mac files: `TakesFindReplaceTests.swift` (16 tests, 2 suites — 7 pure +
+9 driven), `CopyDoorFlushTests.swift` (6 tests, 1 suite),
+`TakesSlotDragTests.swift` (1 test, 1 suite). No core file changed, so no core
+suite grew.
+
+*Revert A — the rider's `coordinateSpace:` argument removed (the pre-fix
+`DragGesture(minimumDistance: 2)` restored). File:* `TakesBoardView.swift`
+`9c1fabb2…f0d02` → `ad9e6eac…bdeaa`. Result: **the rider pin RED with the
+exact traced numbers** — mid-drag `450` where the fix gives `370` (a 200 pt
+pull moved the strip 120 — the halving with the stall she called "jitter" and
+"resist"), and the COMMITTED height `494` (moved 76 — one more feedback step
+short of the drop) — while the whole neighbouring `TakesCardHeightTests`
+suite, which owns the slot-height machinery, stayed GREEN (16 tests, 2 issues,
+both in the new suite: clean attribution). Restored: `9c1fabb2…f0d02`.
+
+*Revert B — the flush line removed from `AppSession.runCopying` (the pre-fix
+"runner, no flush" body). File:* `AppSession.swift` `8b1b5b33…01a51` →
+`81b2d7a8…2d06b`. Result: **five of the six copy pins RED with the exact
+symptom** — `theLibraryDuplicateDoorCarriesThePendingText`,
+`thePoolRowsDuplicateIsTheSameDoor`,
+`theBoardsDuplicateDoorCarriesThePendingText`,
+`promotingALensCarriesThePendingText` and
+`theSharedCopyEntryFlushesBeforeItRuns` (each copy carrying the PRE-flush
+text: `"Chip text."` where the buffer held `"Chip text. NEW"`) — while
+`aScrapDraggedInCarriesItsOwnPendingText` stayed GREEN (it rides
+`flushEveryOpenPost`, not this entry: clean attribution). **And the 13f R1-4
+pin went RED with them** (`DivergeDoorTests.aDivergeCarriesThePendingUnflushedText`,
+`"Alpha beta."` vs `"Alpha beta. NEW"`), which is the proof that
+`divergeForBook` genuinely rides the new shared body rather than a copy of it.
+Restored: `8b1b5b33…01a51`.
+
+*Revert C — `await session.flushEveryOpenPost()` removed from `poolDrop`.
+File:* `EditorViewModel.swift` `35db8633…6a37` → `d9a81f01…83d30`. Result:
+**`aScrapDraggedInCarriesItsOwnPendingText` RED alone** (`"Scrap."` where the
+scrap's own editor held `"Scrap. TYPED"`), the other five green. Restored:
+`35db8633…6a37`.
+
+*E9's feature pins* cover, pure: last-match-first application with churn as
+inserted+deleted; the covered-every-occurrence arm carrying all of them (a
+count from the TARGET take, never copied from the visible one); the partial
+arm reaching an unambiguous occurrence and returning `.ambiguous` otherwise;
+`.noMatch`; sequential groups over the evolving text; non-overlapping
+case-sensitive literal counting; and markdown-carrying text surviving
+byte-for-byte (13g F-1/F-2: display == stored is untouched). Driven through
+the REAL find bar: both takes carrying the replacement with the report line
+and ONE undo entry named "Replace in Every Take"; the ordinary Replace All
+still touching ONLY the shown take (the attribution half, and the proof the
+arming is one-shot); a locked take skipped and NAMED by its label; an archived
+take skipped and named; a one-take block degrading to an ordinary replace and
+saying so; undo returning both buffers; the nothing-to-replace line with the
+arming cleared; the seal refusing in the seal's own words with nothing
+touched; and the declaration (verb, door, keylessness, `menuRendered`, the
+routed act's own note, and the family's availability in Write-with-scroll-view
+vs Takes).
+
+**Counts (own runs, quoted from the "Test run with N tests" lines).**
+- Mac: **`✔ Test run with 1385 tests in 250 suites passed after 190.075
+  seconds`** — FULLY GREEN, zero reds (baseline 1362/246 → +23/+4, exactly the
+  three new files). The A47c tripwire, dispositioned at batch 6, passed.
+- Core: **`✔ Test run with 1254 tests in 135 suites passed`** — baseline
+  matched EXACTLY; no core file changed (`Sources/` untouched entirely).
+- Mobile: **`✔ Test run with 314 tests in 60 suites passed`** (iPhone 16e) —
+  RUN because `App/Variorum/Shared/AppSession.swift` is touched; baseline
+  matched exactly.
+- Tutorial spine, by TYPE name (all seven): **`✔ Test run with 51 tests in 7
+  suites passed`**.
+
+**PROVISIONALs / build-time calls:** twelve, bundled as **QUESTIONS #63**
+(a)–(l) — the act-not-a-mode shape, the two carry arms, structural undo
+rather than ⌘Z, skipped-and-named, the open-tail refusal, keylessness, the
+Takes non-offer (with the reason `moveAndExecute` was refused), the
+nothing-to-replace line, the copy-door flush, the pool-drag sweep find, the
+rider's fix and the sweep's completeness.
+
+**KnownIssues dispositions (both rows this batch owned).**
+- *"Find & replace — the takes-aware half + whole-library search"* — the
+  TAKES-AWARE half **RESOLVED**; the row is retitled to its surviving half and
+  re-owned to the master plan's **Whole-library text search** row (its home
+  since the 2026-07-30 13f kickoff — never left blank).
+- *"Copy doors read the store past a dirty buffer"* — **RESOLVED and REMOVED**
+  (the row's own rule: remove when resolved). Every door in the sweep table is
+  FIXED or provably SAFE with its mechanism stated.
+
+**Nothing stopped, nothing schema-shaped.** No design fork appeared that the
+sources underdetermined: the row RULED the apply-and-report shape and named
+its precedent, and the two questions that precedent left open — where the
+scope switch lives, and which occurrence to carry — were answered by the
+constraint the brief set (compose with the ⌘F family, never a second find UI)
+and by the #10 discipline already shipped one act over.
+`Sources/VariorumCore/Sync/` untouched (zero lines); `Sources/` untouched
+entirely; no migration, no mirror implication; no `/Applications` refresh. No
+Variorum instance was running at any point (`ps -Ao pid,command`,
+path-discriminated, at the batch's open and before each full-suite run), and
+no process was killed at all this batch.
+
+**MOBILE PARITY (for the closeout ledger):** the phone owes, if she wants
+them — **(1)** nothing for E9 by construction: the phone has no find bar at
+all (whole-post find is the Mac's, by the QoL round's ruling), so the
+takes-aware replace has no phone door to be behind; the pure rule
+(`TakesReplacePlan`) lives app-side Mac code and would be a HOIST, not a copy,
+if the phone ever grows a find surface (the "six mobile brains" row's family).
+**(2)** E10's fix is in `Shared/` — `AppSession.runCopying` and
+`flushEveryOpenPost` compile into the phone target and are used by
+`divergeForBook`, which the phone's membership chip already calls, so the
+phone HAS the flush-first brain today; what it owes is only a copy DOOR of its
+own if she ever wants one (its lenses/version family is an explicit mobile
+exclusion). **(3)** the rider is Mac-only by construction (no takes board,
+and parity round Stage B verified `VariorumMobile/` + `Shared/` contain zero
+`DragGesture` constructions) — batch 5's standing rider still applies: any
+future phone drag that moves its own gesture view should be BORN in a named
+space.

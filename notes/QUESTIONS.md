@@ -592,5 +592,41 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint.**
 
-*(Next free number: **#63**.)*
+## Phase 13e (2026-08-18) — batch 7's calls (find & replace across takes · the copy doors' flush), bundled for the sitting
+
+63. **2026-08-18 · Phase 13e batch 7 (E9 + E10 + the routed drag rider) · TWELVE calls, each one line to change.** The BINDING record is the 13e plan's batch-7 section.
+
+    **WHAT E9 IS, IN ONE SENTENCE — the takes half of find & replace you asked us to record at the QoL sitting** (*"a future phase will for sure need to handle takes find and replace and whole library search"*): the find bar is unchanged, and a new menu row beside it — **Edit ▸ Find ▸ Replace All in Every Take** — carries the SAME search and replacement into every other live take of the blocks the matches touch, then tells you what it did and what it skipped. (The whole-LIBRARY search half is untouched; it has its own roadmap row, at your "after the existing 13 phases" slotting.)
+
+    **(a) It is an ACT beside the bar, not a mode or a checkbox.** There is no scope switch to leave on: the ordinary ⌘F family behaves exactly as it did, and takes are reached only by choosing this row deliberately. **The alternative:** a sticky "in every take" toggle in the Find menu.
+
+    **(b) What it does inside an unseen take, precisely.** If the gesture replaced EVERY occurrence of the phrase in the take you can see (an ordinary Replace All), it replaces every occurrence in the other takes too. If it replaced only SOME of them, it reaches an unseen take only where the phrase occurs exactly ONCE — otherwise which occurrence would be a guess, so it is skipped and named. (This is the same "unique match or nothing" rule Delete in Every Take has used since Phase 11.) **The alternative:** always all, or always unique-only.
+
+    **(c) It lands as ONE act, undone with ⌥⌘Z (structural undo), not ⌘Z.** The other takes are on no surface, so they can only be written by an operation — and putting the visible take through the same transaction is what makes one undo return everything it touched. An ordinary Replace All is unchanged (⌘Z, as always). **The alternative:** two undos (text undo for what you see, structural for the rest).
+
+    **(d) Skipped takes are always NAMED with their reason** — "(locked)", "(archived)", "(no match)", "(appears more than once)" — in one line with the count. Locked takes are never edited around their lock; archived takes are out of the fan and out of the act. **The alternative:** refuse the whole gesture unless every take matches.
+
+    **(e) A match in the paragraph you are still typing refuses the WHOLE gesture** (with the existing sentence: it becomes a block once typing pauses). That text is not a block yet, so it has no take to carry anything into. The ordinary Replace All still handles it normally. **The alternative:** replace what it can and report the rest.
+
+    **(f) The row has NO keyboard shortcut.** An act that edits takes you cannot see felt like one to choose from a menu rather than to hit by muscle memory. **The alternative:** give it a chord (the Find family's own keys are taken).
+
+    **(g) The Takes tab does not offer it.** The whole find family is Write's, by the QoL round's own ruling ("a find across the post has no meaning on a per-take pane"), and this act reads the find bar's two fields — so it exists exactly where the bar does. **The alternative:** offer it in Takes, moving you to Write and firing against whatever the bar's fields hold (an empty replacement field would delete every match — which is why it was not built).
+
+    **(h) Fired with nothing to find, it says so** ("Nothing to replace — open Find and Replace (⌥⌘F) and type what to find and what to replace it with"). **The alternative:** open the bar for you.
+
+    **THE COPY DOORS (E10) — a tech-debt row from the 13f review, closed.**
+
+    **(i) Duplicate as Version, Make this a post (from a lens or an arranged column), and the membership chip's Duplicate now all flush your typing before copying.** Before this, a copy taken within half a second of a keystroke was minted from the previous text — the original was always fine, but the copy silently lacked the sentence you had just finished. **The alternative:** none proposed; this is the fix.
+
+    **(j) The sweep found one more of the same kind and fixed it too: dragging a scrap into a draft** copied the scrap's stored text, so a scrap dragged in immediately after typing in it arrived stale. **The alternative:** leave it, as out of the row's letter.
+
+    **THE DRAG RIDER — the sibling of your canvas report.**
+
+    **(k) The takes board's "drag to shorten this block's takes" handle had the SAME defect your canvas cards had** (*"they jitter while moving and seemingly resist moving"*): it followed a little over half your pointer and landed short. It was found by batch 5's sweep, not by a report, and is now fixed with the same one-line rule. Measured: a 200 pt pull moved the strip 120 pt and committed 76. **The alternative:** none proposed.
+
+    **(l) Nothing else on the Mac carries that class** — the sweep table in the plan file lists every drag gesture in the app with a verdict, and this was the last unfixed one. **The alternative:** none.
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#64**.)*
 

@@ -72,6 +72,17 @@ struct TakesBoardView: View {
     /// froze stale. Distinct namespaces keep exactly ONE pane live (R22).
     static let fanColumnID = TakesViewModel.takesFanColumnID
 
+    /// **The board's own coordinate space (13e batch 7 — the routed rider
+    /// from batch 5's E12 sweep; `CanvasView.surfaceSpace`'s twin).** A
+    /// `DragGesture` with no coordinate space measures in the gesture
+    /// VIEW's space — and the slot-height handle sits directly BELOW the
+    /// row it resizes, so shortening the row moves the handle, and each
+    /// event then reports `pointerDelta − alreadyAppliedChange`: the drag
+    /// converges to half the pointer's travel with an alternating stall
+    /// (her canvas words exactly — "they jitter … and seemingly resist").
+    /// A space the drag cannot move has no feedback term.
+    static let surfaceSpace = "variorum-takes-surface"
+
     /// The rail card's geometry (13b 3F — her grid design input: the cards
     /// "a little bit wider and show the option better"; height stays the
     /// batch-7 uniform rule — "2 high" is literally two card-heights).
@@ -136,6 +147,13 @@ struct TakesBoardView: View {
             TakesBottomBar(model: model)
         }
         .background(tokens.surface)
+        // 13e batch 7 — THE ROUTED RIDER (batch 5's E12 sweep found this
+        // board carrying the SAME coordinate-space defect the canvas had).
+        // The board names a space so a drag measured in it is measured
+        // against something the drag itself cannot move; the slot-height
+        // handle below is the one gesture that needs it, and any future
+        // board drag inherits the fix by being born here.
+        .coordinateSpace(.named(Self.surfaceSpace))
         .task { await model.start() }
         // 13b Stage 3 (3D — N1): the archived listing is its own read
         // (the fans query stays active-only), refreshed at projection
@@ -833,7 +851,12 @@ struct TakesBoardView: View {
         .help("Drag to shorten this block's takes (remembered on this Mac); "
             + "drag back down — or double-click — for full length")
         .gesture(
-            DragGesture(minimumDistance: 2)
+            // 13e batch 7 (the routed rider): measured in the BOARD's named
+            // space, never the handle's own — the handle moves with the
+            // height it sets, and a self-moving space feeds its own change
+            // back into every translation (batch 5's E12 mechanism, one
+            // surface over).
+            DragGesture(minimumDistance: 2, coordinateSpace: .named(Self.surfaceSpace))
                 .onChanged { value in
                     model.beginSlotDrag(slot.blockID)
                     model.slotDragChanged(slot.blockID, translation: value.translation.height)

@@ -1703,6 +1703,169 @@ final class EditorSurfaceController {
         return preview.isEmpty ? "an empty take" : "“\(preview)…”"
     }
 
+    // MARK: - 13e E9 — the takes-aware replace
+
+    /// **"Replace All in Every Take"** — the KnownIssues row *"Find &
+    /// replace — the takes-aware half"* (owner 13e), built on its own
+    /// named precedent: `deleteInEveryTake`'s APPLY-AND-REPORT shape
+    /// (matching takes edited; skipped takes named with their reason;
+    /// ONE transaction, ONE undo entry, dirty targets insurance-committed
+    /// by `editTakesAtomically`).
+    ///
+    /// It is deliberately NOT a second find surface (the row's letter):
+    /// the matches and both strings are the shipped find bar's, approved
+    /// by the shipped gate, and this method is only where they land.
+    ///
+    /// **Why the whole gesture rides the operations layer** — including
+    /// the visible take, which the surface road would type through
+    /// `insertText`: the other takes are on no surface at all, so they can
+    /// only be written by an operation; putting the visible take through
+    /// the same transaction is what makes ONE undo entry cover the act she
+    /// performed. The consequence is stated in her report and logged at
+    /// #63(c): this act undoes with ⌥⌘Z (structural undo), not ⌘Z.
+    func replaceInEveryTake(_ plan: [FindReplaceItem]) async {
+        defer { model.findReplaceTask = nil }
+        guard model.header?.locked != true else {
+            model.refuseFeedback("This note is sealed — unlock it to edit.")
+            return
+        }
+        guard !plan.isEmpty else { return }
+
+        // Which block each approved match sits in. The gate has already
+        // refused anything crossing a boundary or sitting in the open
+        // tail, so every item lands inside exactly one editable entry.
+        struct Target {
+            let blockID: String
+            let renderedID: String
+            let entryRange: NSRange
+            var items: [FindReplaceItem]
+        }
+        let entries = model.index.entries
+        var targets: [Target] = []
+        var moved = 0
+        for item in plan {
+            var placed = false
+            for i in entries.indices {
+                let entryRange = model.index.range(ofEntryAt: i)
+                guard item.range.location >= entryRange.location,
+                      item.range.upperBound <= entryRange.upperBound
+                else { continue }
+                guard let variantID = entries[i].variantID, entries[i].editable else { break }
+                if let existing = targets.firstIndex(where: { $0.blockID == entries[i].blockID }) {
+                    targets[existing].items.append(item)
+                } else {
+                    targets.append(Target(
+                        blockID: entries[i].blockID, renderedID: variantID,
+                        entryRange: entryRange, items: [item]))
+                }
+                placed = true
+                break
+            }
+            // No entry owns it any more — the surface moved under the
+            // deferred window. The valve's own counter, same voice.
+            if !placed { moved += 1 }
+        }
+
+        await model.autosave.flushNow()
+        guard !model.autosave.isDirty else {
+            model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
+            return
+        }
+
+        var edits: [Operations.TakeEdit] = []
+        var skipped: [String] = []
+        var replacements = 0
+        var takesEdited = 0
+        var caret: (blockID: String, offset: Int)?
+        do {
+            for target in targets {
+                // The SUBSTRING VALVE, this road's half: the surface text is
+                // re-read AFTER the flush, and a match is carried only if it
+                // still holds exactly what the finder matched. `expectedText`
+                // on every edit is the second layer — the whole batch refuses
+                // if a buffer changed under the gesture.
+                let renderedText = model.viewText(target.entryRange)
+                let surface = renderedText as NSString
+                var matches: [TakesReplacePlan.Match] = []
+                for item in target.items {
+                    let intra = NSRange(
+                        location: item.range.location - target.entryRange.location,
+                        length: item.range.length)
+                    guard intra.upperBound <= surface.length,
+                          let expected = item.expected,
+                          surface.substring(with: intra) == expected
+                    else {
+                        moved += 1
+                        continue
+                    }
+                    matches.append(TakesReplacePlan.Match(
+                        range: intra, needle: expected, replacement: item.replacement))
+                }
+                guard !matches.isEmpty else { continue }
+                if caret == nil, let first = matches.min(by: { $0.range.location < $1.range.location }) {
+                    caret = (target.blockID,
+                             first.range.location + (first.replacement as NSString).length)
+                }
+
+                let visible = TakesReplacePlan.applyMatches(matches, to: renderedText)
+                edits.append(Operations.TakeEdit(
+                    variantID: target.renderedID, newText: visible.text,
+                    charDelta: visible.charDelta, expectedText: renderedText))
+                replacements += matches.count
+                takesEdited += 1
+
+                let groups = TakesReplacePlan.groups(from: matches, visibleText: renderedText)
+                let fan = try await model.session.database.read { db in
+                    try Queries.blockFan(db, blockID: target.blockID)
+                }
+                for take in fan where take.deletedAt == nil && take.id != target.renderedID {
+                    // Skipped AND REPORTED, never silently — the row's letter.
+                    guard take.status == .active else {
+                        skipped.append(takeName(take) + " (archived)")
+                        continue
+                    }
+                    guard !take.locked else {
+                        skipped.append(takeName(take) + " (locked)")
+                        continue
+                    }
+                    switch TakesReplacePlan.apply(groups, toOtherTake: take.workingText) {
+                    case .edited(let text, let charDelta, let count):
+                        edits.append(Operations.TakeEdit(
+                            variantID: take.id, newText: text,
+                            charDelta: charDelta, expectedText: take.workingText))
+                        replacements += count
+                        takesEdited += 1
+                    case .noMatch:
+                        skipped.append(takeName(take) + " (no match)")
+                    case .ambiguous:
+                        skipped.append(takeName(take) + " (appears more than once)")
+                    }
+                }
+            }
+        } catch {
+            model.showOperationError(error)
+            return
+        }
+
+        guard !edits.isEmpty else {
+            model.refuseFeedback(
+                FindReplaceGate.nothingReplacedInAnyTake(moved: moved, skipped: skipped))
+            return
+        }
+        let allEdits = edits
+        let landing = caret ?? (blockID: targets[0].blockID, offset: 0)
+        let landed = await runStructural { ops in
+            _ = try ops.editTakesAtomically(allEdits, undoLabel: "Replace in Every Take")
+            return StructuralOutcome(
+                caretBlockID: landing.blockID, caretOffset: landing.offset, seam: nil)
+        }
+        if landed {
+            model.showStatus(FindReplaceGate.replacedInEveryTake(
+                replacements: replacements, takes: takesEdited,
+                skipped: skipped, moved: moved))
+        }
+    }
+
     // `StructuralSeam` lives beside its pure consumer in
     // StructuralSeamEdit.swift (review round 1, MINOR 5).
 
