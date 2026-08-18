@@ -232,9 +232,25 @@ nonisolated enum BlockSelectionCopy {
     /// `OpsRefusalCopy` and both of this act's hosts must say the same
     /// sentence — a shared constant is what makes that true by
     /// construction rather than by proofreading.
-    static let blockGone =
+    static let blockGone = blockGoneLine(nothingWas: "deleted")
+
+    /// **The same race, one door over (ladder round A, A-3).** The Takes
+    /// board's merge read the vanished pick as a GAP — "these aren't next to
+    /// each other" — because contiguity was the first thing asked, and a
+    /// block the order no longer holds fails that test for a reason the
+    /// sentence then misreports. The block is gone; saying "not adjacent"
+    /// sends her hunting for a neighbour that is standing right there.
+    ///
+    /// Its own line rather than `blockGone` because the verb has to be true:
+    /// this door merges, and nothing was merged.
+    static let blockGoneForMerge = blockGoneLine(nothingWas: "merged")
+
+    /// The one sentence both refusals wear, so the pair cannot drift apart
+    /// in everything except the verb that distinguishes them.
+    private static func blockGoneLine(nothingWas: String) -> String {
         "One of the blocks you picked is already gone — it may have been "
-        + "deleted or moved elsewhere. Nothing was deleted; pick again and retry."
+        + "deleted or moved elsewhere. Nothing was \(nothingWas); pick again and retry."
+    }
 }
 
 nonisolated enum OpsRefusalCopy {

@@ -96,10 +96,10 @@ struct FormatBar: View {
     }
 
     /// Verb + key, from the registry — so the tooltip can never claim a
-    /// chord the capability does not declare.
+    /// chord the capability does not declare. (Ladder round A, A-4: the
+    /// composition itself now lives on `Capability`, so this bar and the
+    /// take card's rows format a chord the same single way.)
     private func help(_ id: CapabilityID) -> String {
-        let capability = CapabilityRegistry.capability(id)
-        guard let shortcut = capability.shortcutLabel else { return capability.verb }
-        return "\(capability.verb) (\(shortcut))"
+        CapabilityRegistry.capability(id).menuTitle()
     }
 }

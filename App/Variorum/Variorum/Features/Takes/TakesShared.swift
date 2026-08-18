@@ -100,14 +100,14 @@ struct TakesCellView: View {
         var specs: [PaneTextView.MenuItemSpec] = [
             // R2-A: the cell KNOWS its column — on the Lenses host the
             // mint lands as THIS column's pick (the ring follows).
-            .init(title: "＋ New take — branch of this one (⌘T)") {
+            .init(title: TakeCardMenuCopy.newTake) {
                 Task {
                     await model.branchTakeRevealed(
                         blockID: slot.blockID, from: resolved.variantID,
                         preferredColumnID: column.id)
                 }
             },
-            .init(title: "＋ Blank take (⌥⌘T)") {
+            .init(title: TakeCardMenuCopy.blankTake) {
                 Task {
                     await model.newBlankTakeRevealed(
                         blockID: slot.blockID, preferredColumnID: column.id)
@@ -126,7 +126,7 @@ struct TakesCellView: View {
                         fromVariantID: resolved.variantID)
                 }
             },
-            .init(title: "Archive this take (⌘⇧A)") {
+            .init(title: TakeCardMenuCopy.archiveTake) {
                 Task { await model.archiveTake(resolved.variantID) }
             },
             // 13b Stage 3 (3D — N6): the 3B `setTakeLabel` op's card door;
@@ -138,19 +138,19 @@ struct TakesCellView: View {
             // target is named EXPLICITLY — a right-click never moves the
             // keyboard, so the routed target could name another card's block
             // (13k K6's lesson, same fix).
-            .init(title: "\(CapabilityRegistry.capability(.copyAllTakes).verb) (⌘⇧C)") {
+            .init(title: TakeCardMenuCopy.copyAllTakes) {
                 Task { await model.copyAllTakes(blockID: slot.blockID) }
             },
             // 13e batch 3 (her A20/A21's second half — AR-1): the take↔block
             // pair, on the card that IS the take. Both name their target
             // explicitly, for the same right-click reason.
-            .init(title: "\(CapabilityRegistry.capability(.takeToBlockBelow).verb) (⌥⌘⏎)") {
+            .init(title: TakeCardMenuCopy.takeToBlockBelow) {
                 Task {
                     await model.moveTakeIntoBlockBelow(
                         blockID: slot.blockID, variantID: resolved.variantID)
                 }
             },
-            .init(title: "\(CapabilityRegistry.capability(.takesToBlocks).verb) (⇧⌥⌘⏎)") {
+            .init(title: TakeCardMenuCopy.takesToBlocks) {
                 Task { await model.turnTakesIntoBlocks(blockID: slot.blockID) }
             },
         ]
@@ -256,6 +256,53 @@ struct TakesCellView: View {
         // 13e batch 3 (A20/A21) — the take↔block pair's card doors
         .takeToBlockBelow, .takesToBlocks,
     ]
+}
+
+/// **The take card's chorded row WORDS — ladder round A (A-4).** One home,
+/// for the `BlockSelectionCopy` reason and one more: every chord here comes
+/// from the capability that DECLARES it (`Capability.menuTitle`), never a
+/// hand-typed suffix. The mechanism the finding names is concrete — AR-1(e)
+/// leaves ⌥⌘⏎ / ⇧⌥⌘⏎ hers to re-pick, and while the suffixes were typed by
+/// hand a re-pick had to visit the registry, this menu, and the shortcut
+/// helper, with nothing making the three agree. `TakeCardMenuTitleTests` is
+/// the drift guard over exactly that.
+///
+/// The words themselves are unchanged — the rows that speak in the card's
+/// own sentence keep it and pass it through the formatter; the rows that
+/// speak the registry's verb read it from there as they already did.
+nonisolated enum TakeCardMenuCopy {
+    static var newTake: String {
+        CapabilityRegistry.capability(.newTake)
+            .menuTitle("＋ New take — branch of this one")
+    }
+
+    static var blankTake: String {
+        CapabilityRegistry.capability(.blankTake).menuTitle("＋ Blank take")
+    }
+
+    static var archiveTake: String {
+        CapabilityRegistry.capability(.archiveTake).menuTitle("Archive this take")
+    }
+
+    static var copyAllTakes: String {
+        CapabilityRegistry.capability(.copyAllTakes).menuTitle()
+    }
+
+    static var takeToBlockBelow: String {
+        CapabilityRegistry.capability(.takeToBlockBelow).menuTitle()
+    }
+
+    static var takesToBlocks: String {
+        CapabilityRegistry.capability(.takesToBlocks).menuTitle()
+    }
+
+    /// Every chorded row on the card, paired with the capability that
+    /// declares its key — what the drift guard walks.
+    static var chorded: [(id: CapabilityID, title: String)] {
+        [(.newTake, newTake), (.blankTake, blankTake), (.archiveTake, archiveTake),
+         (.copyAllTakes, copyAllTakes), (.takeToBlockBelow, takeToBlockBelow),
+         (.takesToBlocks, takesToBlocks)]
+    }
 }
 
 enum TakesShared {

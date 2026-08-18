@@ -20,6 +20,18 @@
 import AppKit
 import VariorumCore
 
+/// **`@MainActor` — ladder round A (A-5), a CLEANLINESS annotation, not a bug
+/// fix.** The reviewer flagged the pasteboard write as running off the main
+/// actor after `copyBlock`'s awaited read and labelled the finding itself
+/// SPECULATIVE; no concrete failure was traceable — `NSPasteboard` is not
+/// documented main-thread-only, both production doors (`TakesViewModel`,
+/// `EditorViewModel`) and every pin already call in from the MainActor, and
+/// nothing here touches a view. So the bug claim is dismissed under the
+/// hallucination guard (no pin is owed, and one would have passed on both
+/// sides), while the annotation is applied on its own merits: it states the
+/// actor these callers already run on, so the hop off and back cannot be
+/// introduced later by accident.
+@MainActor
 enum TakeClipboard {
     /// Where a copy lands. `.general` is the system clipboard; a NAMED
     /// destination is a pasteboard of the caller's own — which is how a pin

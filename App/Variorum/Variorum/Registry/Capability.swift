@@ -288,6 +288,26 @@ nonisolated struct Capability: Identifiable, Sendable {
     /// copy — the router speaks this for an unhandled dispatch).
     let unavailableNote: String
     let availability: @Sendable (CapabilityContext) -> Availability
+
+    /// **A door's label with its DECLARED chord appended** — "Copy All Takes
+    /// (⌘⇧C)" — and the ONE formatter that composes the two, so a key she
+    /// re-picks moves in the registry alone.
+    ///
+    /// Ladder round A (A-4): the take card's context rows typed their chord
+    /// suffixes by hand beside a registry that already declared them, which
+    /// AR-1(e) makes concretely expensive — the ruling leaves ⌥⌘⏎ / ⇧⌥⌘⏎
+    /// hers to re-pick, and a re-pick had three homes to visit (the registry,
+    /// the menu row, the helper list) with nothing making them agree. Now the
+    /// declaration is the source and `TakeCardMenuCopy`'s pin is the guard.
+    ///
+    /// `title` overrides the verb where a door speaks in its own words (the
+    /// card's "＋ New take — branch of this one" is a sentence, not a menu
+    /// verb); an unshortcut act renders its words unchanged.
+    func menuTitle(_ title: String? = nil) -> String {
+        let base = title ?? verb
+        guard let shortcutLabel else { return base }
+        return "\(base) (\(shortcutLabel))"
+    }
 }
 
 nonisolated enum CapabilityID: String, CaseIterable, Sendable {

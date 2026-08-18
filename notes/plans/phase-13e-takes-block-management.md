@@ -1796,3 +1796,116 @@ tripwire-only · mobile 314/60 — mobile only if `Sources/`/`Shared/`
 touched); Environment traps bind verbatim (kills ONLY by PID after a
 path-discriminated `ps`); batch record appended here; commit(s) per
 convention; never push.
+
+### ROUND-A FIX RECORD — part 1 of 2: A-1 · A-3 · A-4 · A-5 (2026-08-18, a fresh Opus fix session)
+
+**A-1 [MINOR] — the board's multi-delete now rolls back like Write's.
+FIXED.** Mechanism, traced on this surface before the fix:
+`TakesViewModel.deleteSelectedBlocks` computed
+`chain = order.filter { picked.contains($0) }` against a fresh
+`Queries.renderPost` read, so a pick the post no longer held simply
+DROPPED OUT and the survivors were deleted — with the success receipt
+("Block deleted — ⌥⌘Z undoes it in one go…") and the selection cleared,
+i.e. the half-act reported as a whole one. Write's host
+(`EditorSurfaceController.deleteSelectedBlocks`) hands EVERY pick to the
+compound and lets `deleteBlock` refuse (`blockNotFound` → `withCompound`
+unwinds the legs that landed → `BlockSelectionCopy.blockGone`), which is
+what the board's own doc comment already claimed. The fix is one
+expression: the store's order for the blocks it holds, **plus** the picks
+it does not (`picked.subtracting(order).sorted()`), so the operation
+meets the ghost and the compound's atomic rollback does the rest — and
+the empty-chain branch (which cleared the picks and spoke its own
+sentence) is retired, since #59(k) says a refusal keeps them. This is
+also the only shape covering the race that opens BETWEEN the read and the
+write, which no pre-filter can (the batch-4 record's own "the compound is
+the guarantee, not a pre-check" reasoning, applied to the surface that
+had not applied it).
+
+**A-3 [NIT] — merge names the vanished pick instead of calling it a gap.
+FIXED.** `isContiguousRun` requires every picked id to APPEAR in the
+order, so a vanished pick failed the adjacency test and the board reported
+*"these aren't next to each other"* — the wrong diagnosis, sending her to
+look for adjacency that was never the problem. Existence is now asked
+first (`picked.isSubset(of: Set(order))`), speaking a new sibling line in
+the ONE copy home: `BlockSelectionCopy.blockGoneForMerge`, which is
+`blockGone`'s sentence with the only word that must differ ("Nothing was
+merged"). Both now derive from one private `blockGoneLine(nothingWas:)`,
+so the pair cannot drift apart in the parts that must match;
+`blockGone`'s bytes are unchanged (pinned).
+
+**A-4 [NIT] — the take card's chords come from the registry. FIXED.**
+Mechanism (cleanliness, no bug — the strings agreed today): the card's
+rows typed "(⌘T)", "(⌥⌘T)", "(⌘⇧A)", "(⌘⇧C)", "(⌥⌘⏎)", "(⇧⌥⌘⏎)" beside a
+registry that declares each one, and AR-1(e) explicitly leaves the last
+two hers to re-pick — so a re-pick had three homes (registry, this menu,
+the ⌘/ helper) with nothing making them agree. ONE formatter now composes
+verb-plus-chord (`Capability.menuTitle(_:)`, which also absorbs
+`FormatBar.help`'s private copy of the same composition), and the card's
+six chorded rows read from `TakeCardMenuCopy` — a copy home in the
+`BlockSelectionCopy` shape. **Words byte-unchanged** (pinned literally).
+
+**A-5 [NIT · SPECULATIVE] — `@MainActor` on `TakeClipboard`, as
+CLEANLINESS only.** Per the adjudication and the hallucination guard: the
+bug claim is DISMISSED as untraceable (the reviewer's own label;
+`NSPasteboard` is not documented main-thread-only, and both production
+doors plus every pin already call in from the MainActor), so **no pin is
+owed and none was written** — one would have passed on both sides. The
+annotation states the actor these callers already run on so the hop
+cannot be reintroduced silently; the reasoning is written into the type's
+doc comment, not just here.
+
+**Pins + red-on-old evidence (behavioral revert, checksums recorded).**
+New Mac file `App/Variorum/VariorumTests/RoundAFixTests.swift` (8 tests,
+3 suites). No core file changed.
+
+*Revert A — the pre-fix pre-filter restored in
+`TakesViewModel.deleteSelectedBlocks` (the `order.filter` chain + the
+empty-chain guard). File:* `TakesViewModel.swift`
+`550ed56c…b415b` → `f6b2acad…1ded9`. Result: **`BoardDeleteRollbackTests
+.aVanishedPickRollsTheWholeGestureBackAndSaysSo` RED with the exact
+symptom (4 issues)** — the survivor "one" really was deleted, the status
+line read the SUCCESS receipt ("Block deleted — ⌥⌘Z undoes it in one
+go…"), an undo entry was registered (depth 2 vs the staged 1), and the
+selection cleared — while `everyPickStillGoesWhenTheNoteHoldsThemAll`,
+the A-3 suite, and all four batch-4 `BoardBlockSelectionTests` stayed
+GREEN (clean attribution). Restored: `550ed56c…b415b`.
+
+*Revert B — the existence guard deleted from `mergeSelectedBlocks`
+(contiguity asked first again). File:* `TakesViewModel.swift`
+`550ed56c…b415b` → `b30ceb71…9890f`. Result: **`BoardMergeDiagnosisTests
+.aVanishedPickIsNamedAsGoneNotAsAGap` RED with the exact symptom** —
+*"Merge joins neighbouring blocks — these aren't next to each other."* —
+while `aGenuineGapStillSaysGap`, the A-1 pins and all nine batch-2
+`MergeSelectionTests` stayed GREEN. Restored: `550ed56c…b415b`
+(byte-exact, checksum-verified).
+
+*The other pins:* `aGenuineGapStillSaysGap` and
+`everyPickStillGoesWhenTheNoteHoldsThemAll` pass on BOTH sides
+deliberately — they are the attribution half (the fixes narrowed a
+diagnosis and closed a race without touching the ordinary roads).
+`TakeCardMenuTitleTests`' three are A-4's drift guard and its no-change
+proof, explicitly NOT red-on-old (recorded in the file's own comments):
+every chorded row must end with exactly the chord its capability
+declares, the six titles are pinned byte-identical to what shipped, and
+the formatter appends nothing where no chord is declared.
+
+**Counts (own runs, quoted from the "Test run with N tests" lines).**
+- Mac: **`✘ Test run with 1338 tests in 237 suites failed after 170.184
+  seconds with 1 issue`** — the ONE issue is
+  `TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergence
+  Occasion`, the recorded environment-gated tripwire, allowed by IDENTITY
+  (baseline 1330/234 → +8/+3, exactly the new file). **A47c datum:** it
+  fired again in an UNLOCKED session (`CGSSessionScreenIsLocked = 0`) — a
+  FIFTH datum for the sweep's "fires regardless of lock state"
+  hypothesis.
+- Tutorial spine, by TYPE name (all seven): **`✔ Test run with 51 tests
+  in 7 suites passed`**.
+- Core / mobile: NOT RUN for this commit — `Sources/` and
+  `App/Variorum/Shared/` are untouched (every changed file is under
+  `App/Variorum/Variorum/` or `VariorumTests/`); both are run at the
+  session's end.
+
+**PROVISIONALs:** five, bundled as **QUESTIONS #60** (a)–(e) — the
+board's rollback alignment, the picks surviving that refusal, the
+recorded moved-block consequence both hosts share, merge's own words for
+the race, and the registry-read chord labels.

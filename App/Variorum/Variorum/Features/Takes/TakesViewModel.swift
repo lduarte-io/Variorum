@@ -1281,6 +1281,17 @@ final class TakesViewModel {
             return
         }
         let order = slots.map(\.blockID)
+        // LADDER ROUND A (A-3): EXISTENCE BEFORE CONTIGUITY. A pick the post
+        // no longer holds fails the contiguity test too — `isContiguousRun`
+        // requires every picked id to appear in the order — so asking
+        // adjacency first reported a gap where the truth is that a block is
+        // gone, and sent her looking for a neighbour that is already there.
+        // Same race the delete door meets, so it wears the same words one
+        // verb apart.
+        guard picked.isSubset(of: Set(order)) else {
+            speak(BlockSelectionCopy.blockGoneForMerge)
+            return
+        }
         guard TakesBoardLayout.isContiguousRun(picked, in: order) else {
             speak("Merge joins neighbouring blocks — these aren't next to each other. "
                 + "Pick blocks that sit side by side.")
@@ -1372,12 +1383,19 @@ final class TakesViewModel {
             statusMessage = Self.message(for: error)
             return
         }
+        // LADDER ROUND A (A-1): the picks are NOT pre-filtered against the
+        // order. Filtering them WAS the half-act: a pick the post had lost
+        // silently dropped out of the chain and the survivors were deleted
+        // anyway — one declared act with two behaviours, since Write's host
+        // hands every pick to the compound and lets the operation refuse
+        // (`blockNotFound` → the whole gesture unwinds → `blockGone`). The
+        // order still comes from the STORE for the blocks it holds; a pick it
+        // does not hold rides at the end, where `deleteBlock` meets it and
+        // the compound's atomic rollback does the rest. That is also the only
+        // shape that covers the race which opens BETWEEN this read and the
+        // write, which no pre-check could.
         let chain = order.filter { picked.contains($0) }
-        guard !chain.isEmpty else {
-            clearMergeSelection()
-            speak("Those blocks are no longer in this note — nothing to delete.")
-            return
-        }
+            + picked.subtracting(order).sorted()
         structuralInFlight = true
         defer { structuralInFlight = false }
         statusMessage = nil

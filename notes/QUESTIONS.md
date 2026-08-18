@@ -504,5 +504,21 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint.**
 
-*(Next free number: **#60**.)*
+## Phase 13e (2026-08-18) — the ladder round A fix session's calls, bundled for the sitting
+
+60. **2026-08-18 · Phase 13e (ladder round A — the cold review's fixes) · FIVE calls, each one line to change.** The phase's first cold review found no blockers and no majors; these are the calls made while fixing the small things it did find. The BINDING record is the 13e plan's round-A section.
+
+    **(a) The Takes board's multi-delete now behaves EXACTLY like Write's when a picked block has vanished under you** (deleted in another pane, moved, or arrived-deleted from your phone): the whole gesture rolls back, nothing is deleted, and it says *"One of the blocks you picked is already gone… Nothing was deleted."* Before this fix the board quietly dropped the missing one and deleted the rest — one act with two behaviours, depending which surface you were on. **The alternative:** none proposed; #59(j) already ruled the rollback for this act, and this is the board honouring it.
+
+    **(b) That refusal now KEEPS your picks on the board too** (#59(k)'s rule, which the board's own vanished-pick path did not follow — it cleared them). **The alternative:** clear on this refusal.
+
+    **(c) Recorded, not changed: a picked block that MOVED to another note is deleted where it now lives** — on both surfaces. Both hosts name the blocks you picked and let the operation act on them; a block that left the note is still a real block, and "delete the blocks I picked" is what happens. It is rare (blocks move between notes only by a deliberate act elsewhere) and it is undoable. **The alternative:** refuse a pick the note no longer holds, which would make the board refuse where Write acts unless both were changed together.
+
+    **(d) The merge door now says a picked block is GONE instead of saying the blocks "aren't next to each other."** Same race, one door over: the adjacency test fails for a missing block, so the sentence blamed the wrong thing and sent you looking for a neighbour that was standing right there. A genuine gap still says gap. **The alternative:** one sentence for both cases.
+
+    **(e) The take card's right-click rows now take their key hints from the ONE place the keys are declared** (so the ⌥⌘⏎ / ⇧⌥⌘⏎ pair #58(e) leaves yours to re-pick moves in one edit, not three). Nothing you see changed — the words are pinned byte-identical. **The alternative:** none; this is housekeeping the review asked for.
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#61**.)*
 
