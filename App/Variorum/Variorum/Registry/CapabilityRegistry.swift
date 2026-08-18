@@ -441,6 +441,26 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "Tags go on a block where you see it — scrap rows and canvas cards carry the door.",
             availability: always),
+        // 13e E7 — the canvas BANK (her sitting Round 2 pick; the 4E fork
+        // she preserved, built as the FACE that ruling named). Both doors
+        // are canvas-surface doors on the `.tagBlock` pattern: the target
+        // is pointed at directly (the strip you can see, the card you
+        // right-clicked), so availability is `always` and the R118 parity
+        // table exempts them for the reason it exempts `.tagBlock` — the
+        // canvas sits OUTSIDE the post-mode row, and no editing mode is
+        // privileged over another.
+        Capability(
+            id: .toggleCanvasBank, verb: "Bank", scope: .post,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "The bank is the canvas's parking strip — open a canvas to see it.",
+            availability: always),
+        Capability(
+            id: .returnCardToBank, verb: "Return to Bank", scope: .block,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "A card returns to the bank from the canvas it sits on.",
+            availability: always),
         Capability(
             id: .divergeHere, verb: "Diverge here (new take, this thread)", scope: .take,
             doors: [.contextMenu],

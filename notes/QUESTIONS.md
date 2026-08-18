@@ -520,5 +520,35 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint.**
 
-*(Next free number: **#61**.)*
+## Phase 13e (2026-08-18) — batch 5's calls (the canvas: the drag fix + the bank), bundled for the sitting
+
+61. **2026-08-18 · Phase 13e batch 5 (canvas — E12's drag fix and E7's bank) · ELEVEN calls, each one line to change.** The BINDING record is the 13e plan's batch-5 section.
+
+    **THE DRAG FIX, first — because it explains itself:** your *"they jitter while moving and seemingly resist moving"* was ONE mechanism, measured rather than guessed. Every canvas drag was measured against the card it was moving, so each mouse-move reported "how far you've come, minus how far I've already moved you" — which halves the travel and stalls every other event. Dragged 100pt, the card went 40 and stuttered the whole way. It now measures against the canvas itself, and a card follows the pointer exactly.
+
+    **(a) The bank starts CLOSED, and remembers per canvas** (on this Mac, like card sizes and take picks). A canvas you have never arranged still opens to its cards in the spread grid — the shipped face — and the bank is something you open when the board gets crowded, which is the case you named ("when there are many"). **The alternative:** open it by default whenever cards are unplaced (the board would then start empty with a full strip).
+
+    **(b) The bank lists cards in the NOTE's order, and has no order of its own.** Giving the strip a hand-arrangeable order would need somewhere to store it — a schema change — and this batch's rule was no schema. **The alternative:** a persisted bank order, at the cost of a lockstep event.
+
+    **(c) A card dropped out of the bank lands with its TOP-LEFT corner where you let go.** **The alternative:** centre the card under the cursor.
+
+    **(d) The card's right-click row "Reset position" now reads "Return to Bank".** Same act, same op — dropping a card on the strip does exactly what that row does, so they say the same thing. **The alternative:** keep the old words.
+
+    **(e) Returning a card that is ALREADY in the bank does nothing, silently** (rather than refusing with the store's "no position row" complaint — a true sentence about rows and a false one about what you did). **The alternative:** speak a refusal.
+
+    **(f) While the bank is OPEN, a banked card is in the STRIP and not on the board** — never in both places at once — and the board's extent, fit-all and the overview count only placed cards. Closing the bank puts them back on the board exactly as before. **The alternative:** show them in both places.
+
+    **(g) Click-in-order reaches banked cards: clicking a chip numbers it** just like clicking a card, so parking a card never puts it outside the one spatial→structural door. **The alternative:** numbers only on the board.
+
+    **(h) The bank's door sits in the canvas top strip ("Bank · 4") and appears only when something is parked or the strip is open** — a fully-arranged board with a closed bank has nothing for it to say. **The alternative:** always show it.
+
+    **(i) A chip shows the card's first ~90 characters at a fixed 150×52.** **The alternative:** any other size/preview length.
+
+    **(j) All three canvas drags — moving a card, resizing one, dragging a chip out of the bank — measure in ONE named canvas space** (rather than the screen). It is what lets a drop be asked "board or bank?" and answered without a second geometry brain. **The alternative:** none proposed; this is the fix's shape.
+
+    **(k) The RESIZE grip was fixed with the same rule**, though your report named moving only: the grip sits at the card's corner, so growing the card moved the grip, and a 60×40 pull grew the card by 36×24. It now grows exactly as far as you pull. **The alternative:** none proposed.
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#62**.)*
 

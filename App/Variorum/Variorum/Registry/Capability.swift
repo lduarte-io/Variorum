@@ -364,6 +364,9 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // Scrap tagging (13b 4D — N32(c)/S4-15: the one canvas-only door grows
     // registry-declared siblings on the scrap rows)
     case tagBlock
+    // The canvas BANK (13e E7 — her sitting Round 2 pick): the strip's own
+    // toggle, and the card door that sends a placed card back to it.
+    case toggleCanvasBank, returnCardToBank
     // Commit + undo/redo (13c 1B — A10 adds the redo half)
     case commitTake, structuralUndo, structuralRedo
     // Post scope

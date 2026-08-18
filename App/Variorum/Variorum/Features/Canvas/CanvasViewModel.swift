@@ -184,6 +184,14 @@ final class CanvasViewModel {
         return projection.cards.filter { filteredBlockIDs.contains($0.block.blockID) }
     }
 
+    /// The cards the BOARD draws: what the filter shows, minus whatever the
+    /// OPEN bank is holding (13e E7). With the bank closed — the default —
+    /// this is `visibleCards` verbatim, so the 4E board is byte-unchanged.
+    var boardCards: [Queries.PoolItem] {
+        guard bankOpen else { return visibleCards }
+        return visibleCards.filter { projection.positions[$0.block.blockID] != nil }
+    }
+
     /// One-shot filter application — exactly `everythingTagged`'s block
     /// half (subtree semantics; pinned).
     func applyFilter(tagID: String?) async {
@@ -239,10 +247,11 @@ final class CanvasViewModel {
             x: CanvasBoardGeometry.boardInset, y: CanvasBoardGeometry.boardInset)
     }
 
-    /// Every visible card's resting frame (position + size) — the culling
-    /// brain's input and fit-all's bounding-box source.
+    /// Every BOARD card's resting frame (position + size) — the culling
+    /// brain's input and fit-all's bounding-box source. Banked cards are
+    /// not on the board, so they shape neither its extent nor its zoom.
     var cardFrames: [String: CGRect] {
-        Dictionary(uniqueKeysWithValues: visibleCards.map { item in
+        Dictionary(uniqueKeysWithValues: boardCards.map { item in
             let id = item.block.blockID
             return (id, CGRect(origin: restingPosition(blockID: id),
                                size: cardSize(blockID: id)))
@@ -288,7 +297,7 @@ final class CanvasViewModel {
     /// the culled set, plus the LIVE pane's card (the ring never dies by
     /// scrolling) and any card mid-drag/mid-resize.
     var realizedCards: [Queries.PoolItem] {
-        visibleCards.filter { item in
+        boardCards.filter { item in
             let id = item.block.blockID
             if realizedIDs.contains(id) { return true }
             if authority.livePane?.blockID == id { return true }
@@ -319,6 +328,135 @@ final class CanvasViewModel {
     }
 
     func resetPosition(blockID: String) async {
+        statusMessage = nil
+        do {
+            try await session.runner.run { [containerID] ops in
+                try ops.removeCanvasPosition(container: containerID, block: blockID)
+            }
+        } catch {
+            statusMessage = OpsRefusalCopy.message(for: error)
+        }
+    }
+
+    // MARK: - The BANK (13e E7 — her sitting Round 2 pick)
+    //
+    // Her original alternative to the spread grid (S4-7a): *"an explicit
+    // drag-in from a scrollable bank of posts when there are many"*. The 4E
+    // ruling took the grid and recorded her fork verbatim — the bank
+    // returns "as a future FACE on top of culling (a listing of
+    // never-positioned cards; culling is needed under it anyway)". This is
+    // that face, and the shape is the one that needs NO schema: a card the
+    // store has no `canvas_layout` position for IS a banked card. Dragging
+    // one out writes its first position (`setCanvasPosition`); dragging one
+    // back clears it (`removeCanvasPosition`) — the standing 11a ops, no
+    // new rows, nothing to sync that was not already synced.
+    //
+    // The bank is a FACE, not a mode change: CLOSED (the default) the board
+    // is byte-for-byte 4E's, spread grid included, so a never-arranged post
+    // still opens to its cards rather than to an empty board — the exact
+    // objection that rejected the bank MODEL in 4E. Open, the never-placed
+    // cards move into the strip, and click-in-order still reaches them
+    // there (the other half of that objection, answered by the γ rider's
+    // pattern: a chip click numbers the card).
+
+    /// Open/closed, remembered per canvas — the LOCAL view-memory class
+    /// (`viewPicks`/`cardSizes`' shelf: `UserDefaults`, never a row).
+    private(set) var bankOpen = false
+    private var bankMemoryKey: String { "canvasBankOpen.\(containerID)" }
+
+    /// What the bank holds: the cards the store has no position for.
+    /// Order is the post's pointer order (the projection's) — deliberately
+    /// NOT a bank order of its own, which would want a persisted home.
+    var bankCards: [Queries.PoolItem] {
+        visibleCards.filter { projection.positions[$0.block.blockID] == nil }
+    }
+
+    /// Is this card in the (open) bank rather than on the board?
+    func isBanked(blockID: String) -> Bool {
+        bankOpen && projection.positions[blockID] == nil
+    }
+
+    func toggleBank() {
+        bankOpen.toggle()
+        defaults.set(bankOpen, forKey: bankMemoryKey)
+        // The board's card set just changed under the culler.
+        recull()
+    }
+
+    // MARK: The drop decision (one brain, the `visibleRect` precedent)
+
+    /// The bank strip's frame, in the canvas SURFACE space. Reported by the
+    /// view exactly as the scroll geometry is (`noteVisibleRect`) — the
+    /// decision below is the model's, so no gesture re-derives it.
+    private(set) var bankRect: CGRect = .zero
+    /// The board's viewport (the ScrollView's frame), same space.
+    private(set) var boardViewportRect: CGRect = .zero
+
+    func noteBankRect(_ rect: CGRect) { bankRect = rect }
+    func noteBoardViewport(_ rect: CGRect) { boardViewportRect = rect }
+
+    /// Where the board's rendered content starts: FREE movement means
+    /// stored coordinates may be negative, so the board draws shifted, with
+    /// the leftmost/topmost card at the inset margin.
+    var boardOrigin: CGPoint {
+        var minX: CGFloat = 0
+        var minY: CGFloat = 0
+        for frame in cardFrames.values {
+            minX = min(minX, frame.minX)
+            minY = min(minY, frame.minY)
+        }
+        return CGPoint(x: minX - CanvasBoardGeometry.boardInset,
+                       y: minY - CanvasBoardGeometry.boardInset)
+    }
+
+    /// What a drop at this surface point means.
+    enum DropTarget: Equatable {
+        /// The board, at this point in STORED (canvas_layout) coordinates.
+        case board(CGPoint)
+        /// The open bank strip.
+        case bank
+        /// Neither (the top strip, the gap outside both) — the gesture
+        /// leaves everything where it was.
+        case nowhere
+    }
+
+    /// The ONE answer both bank gestures ask (13e E7). The bank is tested
+    /// FIRST: a drop on the open strip means "unplace", never a board
+    /// coordinate that happens to sit behind it.
+    func dropTarget(atSurface point: CGPoint) -> DropTarget {
+        if bankOpen, bankRect.contains(point) { return .bank }
+        // The OVERVIEW is read- and arrange-INERT below 1:1 (4E's α rider):
+        // a drop onto a zoomed-out board is not a placement, so the bank
+        // obeys the same rule the board's own cards do.
+        guard overviewScale == nil, boardViewportRect.contains(point) else { return .nowhere }
+        let origin = visibleRect.isEmpty ? boardOrigin : visibleRect.origin
+        return .board(CGPoint(
+            x: origin.x + (point.x - boardViewportRect.minX),
+            y: origin.y + (point.y - boardViewportRect.minY)))
+    }
+
+    /// Drag OUT of the bank: the card's FIRST stored position, at the board
+    /// point it was dropped on. One op, exactly like a drag on the board.
+    func placeFromBank(blockID: String, at point: CGPoint) async {
+        statusMessage = nil
+        do {
+            try await session.runner.run { [containerID] ops in
+                _ = try ops.setCanvasPosition(
+                    container: containerID, block: blockID, x: point.x, y: point.y)
+            }
+        } catch {
+            statusMessage = OpsRefusalCopy.message(for: error)
+        }
+    }
+
+    /// Drag back INTO the bank (or the card's own door): the position row
+    /// tombstones, so the card is "not placed yet" again. Already-banked
+    /// cards are a no-op rather than a refusal — the gesture's meaning is
+    /// "be in the bank", and it already is (`canvasPositionNotFound` would
+    /// be a true statement about rows and a lie about what she did).
+    func returnToBank(blockID: String) async {
+        dragOffsets[blockID] = .zero
+        guard projection.positions[blockID] != nil else { return }
         statusMessage = nil
         do {
             try await session.runner.run { [containerID] ops in
@@ -381,6 +519,8 @@ final class CanvasViewModel {
                 pair.count == 2 ? CGSize(width: pair[0], height: pair[1]) : nil
             }
         }
+        // 13e E7: the bank's own memory — absent key ⇒ CLOSED (#61(a)).
+        bankOpen = defaults.bool(forKey: bankMemoryKey)
     }
 
     private func saveViewMemory() {

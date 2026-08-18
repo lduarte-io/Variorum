@@ -2137,3 +2137,204 @@ path-discriminated `ps`; batch record appended here BEFORE final
 claims only with PENDING marks; commit per convention; NEVER push;
 NEVER `/Applications`; no Variorum instance addressed except by
 bundle id `io.lduarte.Variorum.debug` or PID.
+
+### BATCH 5 RECORD — canvas (2026-08-18, a fresh Opus implementer; COMPLETE)
+
+**E12 — the drag jitter/resist regression: MECHANISM MEASURED, then fixed.**
+
+- **The mechanism, in one sentence:** every canvas drag was measured in the
+  DEFAULT (`.local`) coordinate space — the gesture view's own — and that
+  space is displaced by the very `.offset` (card move) or size change
+  (resize grip) the drag's own translation applies, so each event reports
+  `pointerDelta − alreadyAppliedOffset`. The series converges to HALF the
+  pointer's travel and alternates step/stall — `Δ=10 → T=10` (offset 10),
+  `Δ=20 → T=10` (STALL), `Δ=30 → T=20`, `Δ=40 → T=20` (STALL) … — which is
+  exactly her two words: it **stutters** (jitter) and it **lags the
+  pointer** (resist). The landing was wrong too, worse than the tracking:
+  `.onEnded` reports one more event's worth of feedback, so a card dropped
+  100pt away was STORED 40pt away.
+- **How it was established — no archeology, per her rider.** Three
+  measurements, in this order. (1) A THROWAWAY standalone SwiftUI probe
+  (`dragprobe.swift`/`dragprobe2.swift` in the session scratchpad, the W26
+  probe's shape) rebuilt the canvas card's structure and drove a real drag:
+  arm A (today's shape — child gesture, default space) reported
+  `(10,5) (10,5) (20,10) (20,10) … (50,25)` for a pointer that travelled
+  `(100,50)`; arm B (the SAME structure, gesture in a NAMED ancestor space)
+  reported `(10,5) (20,10) … (100,50)` — exact. (2) Arm C put the gesture on
+  the OFFSET VIEW ITSELF (the textbook draggable-card pattern) and it
+  halved identically — so the defect is the SPACE, not the header-child
+  placement, and no "put the gesture on the card" fix would have helped.
+  (3) The same drag driven through VARIORUM's own `CanvasView` in a hosted
+  window reproduced it to the number: mid-drag `(60,30)`, stored
+  `resting+(40,20)`, for a pointer that travelled `(100,50)`.
+- **The fix:** ONE named space on the whole canvas surface —
+  `CanvasView.surfaceSpace`, applied to the root VStack (top strip · board ·
+  bank strip) — and both card gestures measure in it
+  (`DragGesture(coordinateSpace: .named(...))`). A space the drag cannot
+  move has no feedback term. The stored-position arithmetic is byte
+  unchanged (a delta is a delta in any unscaled space), so every existing
+  canvas pin passed untouched.
+- **The RESIZE grip rode the same fix** (her report named moving only): the
+  grip sits at the card's bottom-right, so the size the drag applies MOVES
+  the grip — the same class, one gesture over, measured at `(36,24)` for a
+  `(60,40)` pull. Recorded as #61(k).
+- **THE SWEEP TABLE** (the constitution's closing form for a fixed class —
+  every `DragGesture` in `App/Variorum/`):
+  | Instance | Verdict |
+  |---|---|
+  | `CanvasView` card header (move) | **FIXED**, pin `aCardFollowsThePointerOneToOneInsteadOfHalfOfIt` |
+  | `CanvasView` resize grip | **FIXED**, pin `theResizeGripFollowsThePointerToo` |
+  | `CanvasView` bank chip (new, E7) | **BORN FIXED** — same named space, pinned by the drag-in pin |
+  | `RootView.paneDivider` | **SAFE, mechanism stated:** already a NAMED space (`paneRowSpace`) *and* it reads `value.location`, not `translation` — a fraction of the row, not an accumulated delta |
+  | `DivideWSheet` flow (cut placement) | **SAFE:** reads `value.location`, and the gesture's view (the drawn flow) does not move — only the cut marker inside it does |
+  | `TakesBoardView.slotHeightHandle` | **THE SAME DEFECT, NOT FIXED — out of E12's letter (canvas), recorded for routing.** Traced: `DragGesture(minimumDistance: 2)` in the default space, `value.translation.height` → `TakesBoardLayout.slotDragChanged`, and `slotHeight = baseline + translation` while the handle sits BELOW the row it resizes — so the handle moves with the change, and shortening/lengthening a takes strip halves and stalls exactly as the canvas did. The fix is one line (a named space on the board root + `coordinateSpace:` on that gesture); the cost is its PIN, which needs a hosted board drag whose handle position depends on measured pane heights — the fragile-pin class the Environment traps warn about. **Left to the architect to route rather than built without a pin (the hallucination guard's letter) or parked with a blank owner (KnownIssues' letter).** |
+
+**E7-bank — the canvas BANK, built as the FACE the 4E ruling named.**
+
+- **The shape, and why this one.** Her S4-7a alternative was *"an explicit
+  drag-in from a scrollable bank of posts when there are many"*; 4E took the
+  spread grid and recorded her fork verbatim — *"the BANK returns as a
+  future FACE on top of culling (a listing of never-positioned cards)"* —
+  having REJECTED the bank MODEL because it "strands unpositioned cards
+  outside click-in-order and fit-all" and "opens her exact scenario (the
+  never-arranged long post) to an EMPTY canvas". Both objections are
+  answered structurally rather than argued away: the bank is **CLOSED by
+  default and remembered per canvas**, so an unarranged canvas still opens
+  to its spread grid byte-for-byte (#61(a)), and while it IS open a chip
+  click numbers a card in click-in-order exactly as a board click does
+  (#61(g), the overview's γ rider one surface over). No schema: a card with
+  no live `canvas_layout` row IS a banked card, and the two doors are the
+  standing 11a ops (`setCanvasPosition` / `removeCanvasPosition`).
+- **What shipped.** `CanvasViewModel` gained `bankOpen` (local view memory —
+  the `viewPicks`/`cardSizes` shelf), `bankCards` (no stored position, in
+  the note's pointer order — #61(b)), `boardCards` (the board's set: minus
+  what an open bank holds), `placeFromBank(blockID:at:)`, and
+  `returnToBank(blockID:)` (a no-op for an already-banked card rather than
+  the ops layer's `canvasPositionNotFound` — #61(e)). `cardFrames`,
+  `realizedCards` and the overview's silhouettes now derive from
+  `boardCards`, so a banked card shapes neither the board's extent nor
+  fit-all's zoom. The view gained the strip (a `LazyHStack` of chips in a
+  horizontal ScrollView), the top-strip toggle ("Bank · n", rendered only
+  when something is parked or the strip is open — P-2), a drag ghost, and
+  the card menu's renamed row.
+- **ONE drop brain, not two gestures guessing.** The bank's geometry is
+  REPORTED to the model exactly as the scroll geometry already is
+  (`noteBankRect` / `noteBoardViewport`, the `noteVisibleRect` precedent),
+  and `CanvasViewModel.dropTarget(atSurface:)` answers `.bank` /
+  `.board(storedPoint)` / `.nowhere` for both gestures. It composes with
+  E12's fix by construction: the drag and the strip's frame are read in the
+  SAME named space, which is what makes the question askable at all. It
+  also honours 4E's α rider — the overview is arrange-inert, so a drop onto
+  a zoomed-out board places nothing. The view's duplicated `boardOrigin`
+  arithmetic moved onto the model with it (one answer, two readers).
+- **Doors + registry (P-1).** `.toggleCanvasBank` (verb "Bank") and
+  `.returnCardToBank` (verb "Return to Bank"), both `.surface`-doored on the
+  `.tagBlock` pattern, declared in `CanvasView.surfaceCapabilities` (the
+  walk covers them by union) and added to the R118 exemption list with the
+  reason STATED, not inherited (the canvas sits outside the post-mode row;
+  neither act edits text — one opens a strip, the other moves an
+  ARRANGEMENT row the seal posture itself calls viewing). The card's shipped
+  "Reset position" row now reads "Return to Bank" in both its menus — the
+  same op, the bank's words (#61(d)).
+
+**Mechanisms traced (the hallucination guard).** E12's is above, measured
+three ways before a line was changed. E7 is a feature and carries no bug
+mechanism; its pins are feature pins (the batch-2/3 convention), except the
+bounded-realization pin, which measures the P1 claim rather than asserting
+it.
+
+**Pins + red-on-old evidence (behavioral revert, checksums recorded).** Two
+new Mac files: `App/Variorum/VariorumTests/CanvasDragTests.swift` (2 tests,
+1 suite — plus the shared `CanvasDragRig`) and
+`App/Variorum/VariorumTests/CanvasBankTests.swift` (9 tests, 3 suites).
+
+*Revert (E12) — the two `coordinateSpace:` arguments removed, i.e. the
+pre-fix `DragGesture()` restored in both canvas gestures. File:*
+`CanvasView.swift` `c689c443…f4c` → `9f7ac1d0…561`. Result: **both pins RED
+with the exact traced symptoms** —
+`aCardFollowsThePointerOneToOneInsteadOfHalfOfIt` (3 issues: mid-drag
+`(60,30)` vs `(100,50)`; stored `x = 60` vs `120`; stored `y = 40` vs `70`)
+and `theResizeGripFollowsThePointerToo` (2 issues: `(36,24)` vs `(60,40)`;
+card `264×186` vs `300×210`). Restored: `c689c443…f4c`, both green.
+*(That checksum is the file at revert time; the bank work landed after.)*
+
+**HOW THE DRAG PINS DRIVE — worth keeping, because nothing else reaches a
+SwiftUI gesture.** Four delivery roads were tried and measured: (1)
+`window.sendEvent` with synthesized NSEvents — nothing arrives; (2)
+`NSApp.sendEvent` in a background test host — nothing, because the window
+cannot be key while the app is inactive; (3) `NSApp.activate` + `NSApp
+.sendEvent` — WORKS but is environment-dependent (macOS 14+ restricts
+activation from a background app; it worked once and then stopped); (4) the
+shipped road: an **`NSPanel` with `.nonactivatingPanel`** (`isFloatingPanel`,
+`becomesKeyOnlyIfNeeded = false`) — it takes key WITHOUT the app
+activating, so `NSApp.sendEvent` dispatches into SwiftUI's gesture
+machinery with no CGEvent, no cursor movement, no accessibility permission
+and no focus steal. The rig also pumps the event queue itself
+(`NSApp.nextEvent` + `sendEvent`): a bare `RunLoop.run(until:)` never
+DISPATCHES queued NSEvents, which is why the first attempts looked dead.
+*A second measured fact, recorded so nobody re-derives it:* the DEBUG
+`CanvasCardMaterialization` counter counts `ForEach` child CONSTRUCTION,
+not body evaluation, so it reads 0 for a change that re-renders existing
+cards — it pins the mount, not the update.
+
+*The feature pins* cover: bank membership (exactly the cards with no stored
+position) and the board's byte-unchanged closed state; place-from-bank
+writing ONE row at the given point with negative coordinates still legal;
+return-to-bank tombstoning it; the already-banked no-op writing nothing and
+speaking nothing; click-in-order numbering a BANKED card and the applied
+order really leading the note; the drop decision (strip first, board second,
+top strip and the overview neither) and the no-scroll-report-yet fallback to
+the board's own origin; the hosted drag-in placing the card at the dropped
+board coordinate and emptying the strip; the hosted drop-onto-the-strip
+tombstoning the position row; and the bounded realization — a 300-card
+fully-banked canvas realizes ZERO board cards and a WINDOW of chips
+(`CanvasBankChipMaterialization`, the `CanvasCardMaterialization`
+precedent).
+
+**Counts (own runs, quoted from the "Test run with N tests" lines).**
+- Mac: **`✘ Test run with 1350 tests in 242 suites failed after 175.404
+  seconds with 1 issue`** — the ONE issue is
+  `TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`,
+  the recorded environment-gated tripwire, allowed by IDENTITY (baseline
+  1339/238 → +11/+4, exactly the two new files). **A47c datum:** it fired
+  again in an UNLOCKED session (`CGSSessionScreenIsLocked = 0`) — a SEVENTH
+  datum for the sweep's "fires regardless of lock state" hypothesis.
+- Core: **`✔ Test run with 1254 tests in 135 suites passed`** — the baseline
+  matched EXACTLY; this batch changed no core file.
+- Mobile: **NOT RUN, per the brief's condition** — `Sources/` and
+  `App/Variorum/Shared/` are untouched (every changed file is under
+  `App/Variorum/Variorum/`, `VariorumTests/`, or `notes/`).
+- Tutorial spine, by TYPE name (all seven): **`✔ Test run with 51 tests in 7
+  suites passed`**.
+
+**PROVISIONALs / build-time calls:** eleven, bundled as **QUESTIONS #61**
+(a)–(k) — the bank's closed default and per-canvas memory, its
+pointer-order listing (the persisted bank order deliberately NOT taken),
+the top-left drop landing, the renamed card row, the already-banked no-op,
+banked cards leaving the board while the strip is open, order mode reaching
+chips, the toggle's conditional door, the chip's size/preview, the one named
+space for all three drags, and the resize grip riding E12's fix.
+
+**Nothing stopped, nothing schema-shaped.** No propose-first fork was taken:
+the brief's named fork (a persisted bank order) was declined and recorded as
+#61(b), and the bank was built as the FACE the 4E ruling described rather
+than as the bank MODEL that ruling rejected — which is what kept the shipped
+board byte-unchanged and required no test edits anywhere in the canvas
+suites. `Sources/VariorumCore/Sync/` untouched (zero lines); `Sources/`
+untouched entirely; no migration, no mirror implication; no
+`/Applications` refresh. No Variorum instance was running at any point
+(`ps -Ao pid,command` path-discriminated at the batch's open and before each
+full-suite run), and no process was killed by pattern or by name.
+
+**MOBILE PARITY (for the closeout ledger):** **nothing mobile-visible** —
+the phone has no canvas at all (the mobile gate ruled canvas/sticky-note
+editing an explicit EXCLUSION, `notes/plans/mobile-parity-round.md`'s
+matrix: *"Canvas / sticky-note editing · canvas bank — not-owed-per-ruling
+[EXCL]"*), so both E12 and E7 are Mac-only by construction. **One rider
+worth the ledger's ink:** E12's mechanism is a SwiftUI fact, not a Mac one —
+any iOS drag that moves its own gesture view through `.offset` (or its own
+frame) has the same feedback, so the phone's future drag gestures should be
+born in a named space. Verified while here: `App/Variorum/VariorumMobile/` and
+`App/Variorum/Shared/` contain **zero** `DragGesture` constructions today,
+so nothing on the phone carries the defect now — recorded rather than
+assumed.

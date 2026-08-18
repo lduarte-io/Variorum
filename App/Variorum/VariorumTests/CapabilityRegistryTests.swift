@@ -133,6 +133,17 @@ struct CapabilityRegistryTests {
             // over every mode, so Takes reaches them without a mode switch,
             // exactly as `.divergeForBook` does.
             .openBookAtNote,
+            // 13e E7: the canvas BANK's two doors join `.tagBlock` for its
+            // exact reason, stated rather than inherited — the canvas is a
+            // surface OUTSIDE the post-mode row (it opens on a post or on
+            // the scraps), its doors are pointed at directly (the strip,
+            // the card you right-clicked), and neither act edits text:
+            // opening a strip is a view act, and returning a card to it
+            // moves an ARRANGEMENT row (`canvas_layout`), which the seal
+            // posture itself calls viewing rather than authoring. Takes is
+            // not "behind" anything here because there is no takes-side
+            // canvas for it to be behind.
+            .toggleCanvasBank, .returnCardToBank,
         ]
         for capability in CapabilityRegistry.all
         where capability.scope != .app && !exempt.contains(capability.id) {

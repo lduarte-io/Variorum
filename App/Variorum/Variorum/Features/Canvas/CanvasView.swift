@@ -49,6 +49,15 @@ import VariorumCore
 enum CanvasCardMaterialization {
     static var count = 0
 }
+
+/// 13e E7's half of the same pin: the bank strip's chips ride a
+/// `LazyHStack`, so a canvas whose every card is unplaced renders its
+/// WINDOW, never the corpus (the brief's bounded-realization rule — the
+/// bank is a face over the same culling, not an escape from it).
+@MainActor
+enum CanvasBankChipMaterialization {
+    static var count = 0
+}
 #endif
 
 struct CanvasView: View {
@@ -56,12 +65,30 @@ struct CanvasView: View {
     let containerID: String
     /// Post canvases offer 💾 save-picks-as-lens; a pool has no lens home.
     var offersLensSave = true
+
+    /// 13e E12 — THE canvas's drag measuring space, named on the whole
+    /// surface (top strip · board · bank strip), so every drag reports
+    /// against something the drag itself cannot move.
+    ///
+    /// The mechanism this exists for, measured (13e batch 5): a
+    /// `DragGesture()` in the DEFAULT (`.local`) space measures against the
+    /// gesture view's own frame — and that frame is displaced by the very
+    /// `.offset` (or size) the drag's own translation applies. Each event's
+    /// translation is therefore `pointerDelta − alreadyAppliedOffset`, which
+    /// converges to HALF the pointer's travel and alternates step/stall:
+    /// her *"they jitter while moving and seemingly resist moving"*. A space
+    /// the drag does not move removes the feedback term entirely.
+    static let surfaceSpace = "variorum-canvas-surface"
     @State private var model: CanvasViewModel
     @State private var lensPromptShown = false
 
     /// 13b 4D (N32(c) — S4-15): the card's "Tags…" — app-wide it was the
     /// ONE tag door; now registry-declared with its scrap-row siblings.
-    static let surfaceCapabilities: [CapabilityID] = [.tagBlock]
+    /// 13e E7 adds the bank's two doors (the strip's toggle in the top
+    /// strip; the card's own "Return to Bank" row).
+    static let surfaceCapabilities: [CapabilityID] = [
+        .tagBlock, .toggleCanvasBank, .returnCardToBank,
+    ]
 
     init(
         session: AppSession, containerID: String, offersLensSave: Bool = true,
@@ -87,6 +114,9 @@ struct CanvasView: View {
     /// recorded judgment call; ScrollPosition stays available if this
     /// ever proves insufficient).
     @State private var scrollTarget: CGPoint?
+    /// The chip under the pointer while dragging out of the bank (the
+    /// ghost's whole state — nothing model-side moves until the drop).
+    @State private var bankDrag: BankDrag?
     /// The voice reaches the canvas (optional environment, terminal
     /// fallback — the established pattern).
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
@@ -101,12 +131,24 @@ struct CanvasView: View {
         let preview: String?
     }
 
+    /// A bank chip mid-drag: which card, and where the pointer is in the
+    /// surface space.
+    struct BankDrag: Equatable {
+        let blockID: String
+        let point: CGPoint
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             topStrip
             ScrollViewReader { proxy in
                 ScrollView([.horizontal, .vertical]) {
                     board
+                }
+                .onGeometryChange(for: CGRect.self) {
+                    $0.frame(in: .named(Self.surfaceSpace))
+                } action: { rect in
+                    model.noteBoardViewport(rect)
                 }
                 .onScrollGeometryChange(for: CGRect.self, of: { $0.visibleRect }) { _, rect in
                     // The model culls in BOARD coordinates; the content
@@ -130,7 +172,12 @@ struct CanvasView: View {
                     }
                 }
             }
+            if model.bankOpen {
+                bankStrip
+            }
         }
+        .coordinateSpace(.named(Self.surfaceSpace))
+        .overlay(alignment: .topLeading) { bankGhost }
         .background(tokens.room)
         .task { await model.start() }
         .task { await model.startTags() }
@@ -209,6 +256,19 @@ struct CanvasView: View {
                         + "view; big boards open a read-only overview")
             }
 
+            // 13e E7 — the bank's door. It appears when there is something
+            // to park or somewhere parked: on a fully-arranged board with
+            // the bank closed there is nothing for it to say (P-2).
+            if model.bankOpen || !model.bankCards.isEmpty {
+                Button(model.bankOpen
+                       ? "hide bank"
+                       : "\(CapabilityRegistry.capability(.toggleCanvasBank).verb) · \(model.bankCards.count)") {
+                    model.toggleBank()
+                }
+                .help("Cards you haven't placed wait in the bank — drag one out "
+                    + "to put it where you drop it, or drop a placed card back in")
+            }
+
             // S4-7f — the ONE spatial→structural door: explicit mode,
             // numbered preview, one confirm, ⌥⌘Z undoes, cancel inert.
             if model.orderMode {
@@ -241,6 +301,151 @@ struct CanvasView: View {
         // 13b 1b (AD-14): outcomes speak through the ONE shell toast.
     }
 
+    // MARK: - The bank (13e E7)
+
+    /// The parking strip: the cards the store has no position for. It is a
+    /// FACE over the same culling — chips realize lazily, so a canvas whose
+    /// every card is unplaced renders its window, never the corpus.
+    private var bankStrip: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
+                Text("bank · \(model.bankCards.count)")
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(1)
+                Text(model.orderMode
+                     ? "click a card to number it, here or on the board"
+                     : "drag a card onto the board to place it — drop a placed card here to unplace it")
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(1)
+                Spacer(minLength: 0)
+                Button("hide") { model.toggleBank() }
+                    .buttonStyle(.plain)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+            }
+            if model.bankCards.isEmpty {
+                Text("every card is placed — drop one here to park it again")
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .frame(maxWidth: .infinity, minHeight: 52, alignment: .leading)
+            } else {
+                ScrollView(.horizontal) {
+                    LazyHStack(spacing: 6) {
+                        ForEach(model.bankCards, id: \.block.placementID) { item in
+                            bankChip(item)
+                        }
+                    }
+                    .padding(.vertical, 2)
+                }
+                .frame(height: 60)
+            }
+        }
+        .padding(6)
+        .background(tokens.wash)
+        .overlay(alignment: .top) { Rectangle().fill(tokens.line).frame(height: 1) }
+        .contentShape(Rectangle())
+        .onGeometryChange(for: CGRect.self) {
+            $0.frame(in: .named(Self.surfaceSpace))
+        } action: { rect in
+            model.noteBankRect(rect)
+        }
+    }
+
+    private func bankChip(_ item: Queries.PoolItem) -> some View {
+        #if DEBUG
+        CanvasBankChipMaterialization.count += 1
+        #endif
+        let blockID = item.block.blockID
+        let pending = model.pendingOrderNumber(blockID: blockID)
+        return VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: 4) {
+                Text("⠿")
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                if let pending {
+                    Text("\(pending)")
+                        .font(tokens.small.bold())
+                        .foregroundStyle(tokens.accent)
+                }
+                Spacer(minLength: 0)
+            }
+            Text(bankPreview(item))
+                .font(tokens.small)
+                .foregroundStyle(tokens.ink)
+                .lineLimit(2)
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+        }
+        .padding(6)
+        .frame(width: 150, height: 52, alignment: .topLeading)
+        .background(tokens.card)
+        .clipShape(RoundedRectangle(cornerRadius: 5))
+        .overlay(RoundedRectangle(cornerRadius: 5).stroke(
+            pending == nil ? tokens.takeLine : tokens.accent,
+            lineWidth: pending == nil ? 1 : 2))
+        .opacity(bankDrag?.blockID == blockID ? 0.35 : 1)
+        .contentShape(Rectangle())
+        .help("Drag onto the board to place this card where you drop it")
+        .gesture(
+            // The surface space again (E12): a chip that follows the
+            // pointer must be measured against something the drag doesn't
+            // move — and the SAME space carries the drop test below.
+            DragGesture(coordinateSpace: .named(Self.surfaceSpace))
+                .onChanged { value in
+                    bankDrag = BankDrag(blockID: blockID, point: value.location)
+                }
+                .onEnded { value in
+                    bankDrag = nil
+                    guard case .board(let point) =
+                        model.dropTarget(atSurface: value.location) else { return }
+                    Task { await model.placeFromBank(blockID: blockID, at: point) }
+                })
+        .onTapGesture {
+            // Order mode reaches the bank too (the overview's γ rider, one
+            // surface over): a banked card is never stranded outside the
+            // ONE spatial→structural door.
+            if model.orderMode { model.toggleOrderClick(blockID: blockID) }
+        }
+        .contextMenu {
+            Button("Place on the board") {
+                Task {
+                    await model.placeFromBank(
+                        blockID: blockID, at: model.restingPosition(blockID: blockID))
+                }
+            }
+            Button("Tags…") {
+                tagSheetBlock = CanvasView.TagSheetBlock(id: blockID, preview: item.block.text)
+            }
+        }
+    }
+
+    private func bankPreview(_ item: Queries.PoolItem) -> String {
+        let text = (item.block.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        return text.isEmpty ? "· · ·" : String(text.prefix(90))
+    }
+
+    /// The dragged chip under the pointer — view-local, hit-testing off, so
+    /// it can never intercept its own drop.
+    @ViewBuilder
+    private var bankGhost: some View {
+        if let bankDrag,
+           let item = model.bankCards.first(where: { $0.block.blockID == bankDrag.blockID }) {
+            Text(bankPreview(item))
+                .font(tokens.small)
+                .foregroundStyle(tokens.ink)
+                .lineLimit(2)
+                .padding(6)
+                .frame(width: 150, height: 52, alignment: .topLeading)
+                .background(tokens.card)
+                .clipShape(RoundedRectangle(cornerRadius: 5))
+                .overlay(RoundedRectangle(cornerRadius: 5).stroke(tokens.accent, lineWidth: 1))
+                .shadow(color: .black.opacity(0.18), radius: 3, y: 2)
+                .offset(x: bankDrag.point.x - 75, y: bankDrag.point.y - 26)
+                .allowsHitTesting(false)
+        }
+    }
+
     private func handleFitAll() {
         switch model.fitAll(viewport: model.visibleRect.isEmpty
             ? CGSize(width: 1200, height: 800) : model.visibleRect.size) {
@@ -271,7 +476,9 @@ struct CanvasView: View {
                 // SILHOUETTES for every card — cheap rounded rects, no
                 // panes, so the realization bound survives the zoom.
                 ZStack(alignment: .topLeading) {
-                    ForEach(model.visibleCards, id: \.block.placementID) { item in
+                    // 13e E7: the overview shows the BOARD's cards — what
+                    // the open bank holds is not on the board to fit.
+                    ForEach(model.boardCards, id: \.block.placementID) { item in
                         silhouette(item, scale: scale, origin: origin)
                     }
                 }
@@ -294,16 +501,10 @@ struct CanvasView: View {
 
     /// FREE movement (Sitting 9): stored coordinates may be negative — the
     /// board renders shifted so the minimum card sits at the top-left
-    /// margin and the scroll area covers the whole span.
-    private var boardOrigin: CGPoint {
-        var minX: CGFloat = 0
-        var minY: CGFloat = 0
-        for frame in model.cardFrames.values {
-            minX = min(minX, frame.minX)
-            minY = min(minY, frame.minY)
-        }
-        return CGPoint(x: minX - 20, y: minY - 20)
-    }
+    /// margin and the scroll area covers the whole span. 13e E7 moved the
+    /// arithmetic onto the MODEL (the drop decision needs the same answer;
+    /// one brain, never two).
+    private var boardOrigin: CGPoint { model.boardOrigin }
 
     private var boardSize: CGSize {
         let origin = boardOrigin
@@ -448,11 +649,24 @@ private struct CanvasCardView: View {
         .contentShape(Rectangle())
         .help("Drag here to move the card — dragging in the text selects text")
         .gesture(
-            DragGesture()
+            // 13e E12: measured in the SURFACE space (see
+            // `CanvasView.surfaceSpace`) — the default local space moves
+            // with the `.offset` this drag applies, which halved every
+            // translation and made the card stutter.
+            DragGesture(coordinateSpace: .named(CanvasView.surfaceSpace))
                 .onChanged { value in
                     model.dragOffsets[blockID] = value.translation
                 }
                 .onEnded { value in
+                    // 13e E7: dropped ON the open bank ⇒ the card unplaces
+                    // (its position row tombstones) instead of landing at a
+                    // coordinate under the strip. The test is possible at
+                    // all because the drag and the strip's frame are read in
+                    // the SAME space (E12's fix, composing).
+                    if model.dropTarget(atSurface: value.location) == .bank {
+                        Task { await model.returnToBank(blockID: blockID) }
+                        return
+                    }
                     Task {
                         await model.dragEnded(blockID: blockID, translation: value.translation)
                     }
@@ -604,7 +818,11 @@ private struct CanvasCardView: View {
             .contentShape(Rectangle())
             .help("Drag to resize this card (remembered on this Mac)")
             .gesture(
-                DragGesture()
+                // 13e E12, the same class one gesture over: the grip sits
+                // at the card's bottom-right, so the size this drag
+                // applies MOVES the grip — in the default local space the
+                // resize resisted exactly as the move did.
+                DragGesture(coordinateSpace: .named(CanvasView.surfaceSpace))
                     .onChanged { value in
                         model.resizeOffsets[blockID] = value.translation
                     }
@@ -620,8 +838,12 @@ private struct CanvasCardView: View {
         Button("Tags…") {
             tagSheetBlock = CanvasView.TagSheetBlock(id: blockID, preview: item.block.text)
         }
-        Button("Reset position") {
-            Task { await model.resetPosition(blockID: blockID) }
+        // 13e E7: the shipped "Reset position" row, wearing the bank's own
+        // words — it is the same op (`removeCanvasPosition`) and now the
+        // same act as dropping the card on the strip, so it says so
+        // (#61(d)). Registry-declared with the toggle.
+        Button(CapabilityRegistry.capability(.returnCardToBank).verb) {
+            Task { await model.returnToBank(blockID: blockID) }
         }
         Button("Reset size") {
             model.resetSize(blockID: blockID)
@@ -639,9 +861,9 @@ private struct CanvasCardView: View {
                     tagSheetBlock = CanvasView.TagSheetBlock(id: blockID, preview: preview)
                 }),
             PaneTextView.MenuItemSpec(
-                title: "Reset position",
+                title: CapabilityRegistry.capability(.returnCardToBank).verb,
                 action: { [model, blockID] in
-                    Task { await model.resetPosition(blockID: blockID) }
+                    Task { await model.returnToBank(blockID: blockID) }
                 }),
             PaneTextView.MenuItemSpec(
                 title: "Reset size",
