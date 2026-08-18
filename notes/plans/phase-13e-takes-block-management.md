@@ -1998,3 +1998,13 @@ round A. A-1/A-3's races and A-2's split are Mac-surface-only (the phone
 has neither a ⌘-click selection nor this board), A-4 is Mac-registry
 copy, and A-5 is an AppKit type's annotation. The phone's own take
 surface owes nothing new here.
+
+**ARCHITECT ACCEPTANCE (2026-08-18, round-A fixes):** ACCEPTED —
+`0255e24` + `cc9cd5e` verified (tree clean; the three new fix suites +
+batch 4's board suite re-run green **12/4** by the architect's own
+run; `TakesViewModel` 2047 lines / `TakesStructureController` 668
+confirmed on disk — the P-9 extraction is real and parity held with
+ZERO test edits). The extraction's self-found latent defect (the
+`unowned` capture crash in the fire-and-forget divide door) is noted
+as a bonus catch. Fifth A47c unlocked datum. Next free QUESTIONS:
+**#61**. Round 2 (fresh re-reviewer) launches now per the ladder.
