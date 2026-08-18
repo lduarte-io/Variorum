@@ -451,6 +451,24 @@ nonisolated enum WorkspaceNaming {
 
     /// 13k K12 — the ＃ door's two states. Her ruling made folding a
     /// deliberate, sticky choice, so the door must say which way it goes.
+    /// **The tray badge's tooltip** (13j J2). The glyph alone cannot say
+    /// what it opens, so the tooltip names the surface AND both counts —
+    /// the badge shows only the deleted number (sitting round 5), and a
+    /// panel with a fourth row under it would otherwise read as a miscount.
+    static func trayDoorHelp(deleted: Int, preserved: Int) -> String {
+        let deletedPhrase = deleted == 1
+            ? "1 block deleted from this note"
+            : "\(deleted) blocks deleted from this note"
+        guard preserved > 0 else {
+            return "\(deletedPhrase) \u{2014} click to put any of them back"
+        }
+        let preservedPhrase = preserved == 1
+            ? "1 original a divide or merge kept whole"
+            : "\(preserved) originals a divide or merge kept whole"
+        return "\(deletedPhrase), plus \(preservedPhrase) \u{2014} "
+            + "click to put any of them back"
+    }
+
     static func tagsFoldHelp(folded: Bool) -> String {
         folded
             ? "Show this note's tag cards (\u{2318}\u{21e7}I)"

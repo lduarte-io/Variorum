@@ -517,11 +517,12 @@ final class MobileStructuralController {
     /// divide/merge — the one-flight latch, then flush-FIRST with the
     /// post-flush dirty re-check. `deleteBlock` IS a structural op (it
     /// registers structural undo and rides `runStructural` on the Mac),
-    /// and the contract's second half is what makes the tray-copy promise
-    /// TRUE: a refused flush keeps its text pending (`isDirty` stays
-    /// true), and a tombstone landed past it would strand the typed bytes
-    /// outside both the surface and the tray's copy — the text-loss class
-    /// the flush-first contract exists to kill (the `.none` door does not
+    /// and the contract's second half is what makes the deleted block
+    /// RECOVERABLE at all: a refused flush keeps its text pending
+    /// (`isDirty` stays true), and a tombstone landed past it would strand
+    /// the typed bytes outside both the surface and the tombstoned take
+    /// they belong to — the text-loss class the flush-first contract exists
+    /// to kill (the `.none` door does not
     /// refuse a locked take, so the op itself is no belt here).
     func deleteBlock(blockID: String) async {
         guard let model else { return }
@@ -544,11 +545,13 @@ final class MobileStructuralController {
         }
     }
 
-    /// The delete report (parity C2, inventory #5 — the "on the Mac"
-    /// redirect dissolved: the tray fact stays, neutrally; the recovery
-    /// DOOR rides PL-3/13j). Pinned static.
-    static let blockDeletedStatus =
-        "Block deleted — it waits in this note's deleted-blocks tray."
+    /// The delete report. **13j batch 2 — MADE TRUE on the phone's own
+    /// terms**, exactly as its confirm was: this app has no tray face, so
+    /// naming one sends her looking for a door that is not there.
+    /// `MobileBlockMenuController.deleteConfirmDetail` carries the full
+    /// reasoning; the receipt is the plain statement of what happened.
+    /// Pinned static.
+    static let blockDeletedStatus = "Block deleted."
 
     // MARK: - Shared pieces
 

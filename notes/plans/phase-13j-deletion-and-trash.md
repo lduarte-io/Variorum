@@ -508,7 +508,7 @@ server-shaped lands.
 | Batch | Scope | Status |
 |---|---|---|
 | 1 | **The mini-round:** J7 (⌘Z→⌥⌘Z status-line hint) · J8 (copy truth: the receipt's interim honesty + the diagnosing `.crossesBlockBoundary` refusal) · J9 (whole-block-selection delete → the delete compound; ONE precise trace FIRST) | **DONE 2026-08-18** — record below (core 1254/135 · Mac **1433/258 FULLY GREEN** · spine 51/7 · mobile 314/60; the J9 trace: the paragraph-end SEPARATOR owned by no entry — the open tail was NOT the decliner; QUESTIONS #66 logged — (b) fanned-block delete and (c) the superseded Phase-11 join outcome are HER calls; ARCHITECT-VERIFIED against commits `152f3fc`/`cc51792`) |
-| 2 | **The tray (J2) + the graveyard removal (J6):** the context-bar door ("⌫ N", nonempty-only) + the two-section tray panel with Put back; the global unplaced section leaves the Library surface (pool door dies with it); the delete receipt/help copy graduates to naming the real tray + its door (J8(a)'s completion); **+ the batch-1 hand-off rider: the phone's two tray-promising receipts made TRUE on the phone's own terms** | pending — brief below |
+| 2 | **The tray (J2) + the graveyard removal (J6):** the context-bar door ("⌫ N", nonempty-only) + the two-section tray panel with Put back; the global unplaced section leaves the Library surface (pool door dies with it); the delete receipt/help copy graduates to naming the real tray + its door (J8(a)'s completion); **+ the batch-1 hand-off rider: the phone's two tray-promising receipts made TRUE on the phone's own terms** | **DONE 2026-08-18** — record below (core 1259/135 · Mac **1450/259 FULLY GREEN** · spine 51/7 · mobile 314/60; BOTH VERIFY-first flags answered — block-level archive is UNREACHABLE (section named "Deleted"), and `restoreBlock` places at the note's END, diverging from the round-5 design statement: **REPORTED, op UNTOUCHED, her call at QUESTIONS #67**) |
 | 3 | **The lineage door (J3, as AMENDED round 5) + lens-fallback loudness (J5) + deleted-take recovery (round 5):** the context-menu item + ⌘K palette act, the read-only original peek with Put back / Open tray; **the History-face lineage row** (Write's CommitBar history + Takes' history sheet — the summoned "past" surface); the lens column's in-place archived-pick notice + one-click Restore; **the deleted-take restore op + deleted-takes query + the History face's quiet deleted-take rows with Put back** (zero schema) | pending |
 | 4 | **The defaults pair (J4/J4b):** divide default → `divideDuplicating` (the dormant core op wired); merge default → carry-all (composed from `mergeCeremony`, the phone's C5 the reference); "Divide with Ceremony…" ⌥⌘⇧D · "Merge with Ceremony…" ⌥⌘⇧M in Block menu + context menu + palette | pending |
 | 5 | **J11 — the savepoint cadence:** on-note-close auto-commit per edited take (deduped) + `idle_commit_hours` default 24→2 + the ONE enum setting ("Every session · Idle only · Only when I commit"-shaped) + the history view's quiet-run collapse (the legibility half) | pending |
@@ -898,3 +898,247 @@ what shipped per item, the archived-blocks and restoreBlock-
 placement findings, pins + revert evidence with checksums, suite
 counts, hand-offs — then commit per convention (CLAUDE.md
 trailer). The architect verifies before relying on it.
+
+---
+
+## BATCH 2 RECORD — the tray (J2) + the graveyard removal (J6) (2026-08-18; fresh Opus implementer)
+
+**Scope built, to the letter of the sitting's rulings:** the per-note tray
+face (J2 — rounds 1, 2, 5), the global unplaced-blocks listing's removal
+(J6 — round 2), the J8(a) receipt graduation, and the batch-1 phone-receipts
+rider. **Zero schema; zero `Sources/VariorumCore/Sync/` lines.** Core changes
+are QUERIES ONLY — no operation's semantics were touched (see VERIFY-2).
+One new capability-registry row (`.showNoteTray`, two doors). No Release
+build, no `/Applications` refresh.
+
+### THE TWO VERIFY-FIRST FINDINGS (both established BEFORE the label / the pin)
+
+**VERIFY-1 — is `block.archived_at` reachable? NO.** The column exists
+(`Migrations.swift:425`), the model carries it (`Models/Block.swift:30`) and
+`Sync/SyncSchema.swift` classifies it — but a sweep of every `archivedAt`
+write in `Sources/VariorumCore` finds only `Operations+Container.swift:354/358`
+(`archiveContainer` / `unarchiveContainer`, the CONTAINER's column), and
+`grep -rn "archiveBlock"` over the whole repo returns nothing. **No shipped
+operation ever writes a non-nil `block.archived_at`.** Consequence, taken:
+the tray's first section is named **"Deleted"**, not the sitting's
+provisional "Deleted & archived" — the brief's own instruction ("if
+block-level archive is unreachable in the product… stay honest"). Pinned:
+`theDeletedSectionDoesNotClaimAnArchivedStateNothingProduces`. Logged for
+her at QUESTIONS #67 (Finding 1) with the build-a-block-archive alternative
+named.
+
+**VERIFY-2 — what does `restoreBlock` ACTUALLY do? It places at the END —
+which DIVERGES from the round-5 design statement.** The op's own doc comment
+states it (`Operations+Placement.swift:47–49`): *"The old placement row stays
+tombstoned; a fresh placement lands at the end of `last_container_id`"*, and
+`Operations+UndoInverses.swift:24–25` states the contrast explicitly —
+*"Differs from the public `restoreBlock` tray gesture, which re-places fresh
+at the end."* The exact-position machinery EXISTS but only on the undo path
+(`revertDeleteBlock` flips the original placement row, position + chosen
+variant intact); the tray gesture has never used it.
+
+**What I did, per the brief:** built Put back on `restoreBlock` AS SHIPPED,
+pinned the ACTUAL behaviour (`putBackReturnsADeletedBlockThroughRestoreBlock`
+asserts the block lands last), worded the receipt to match ("Put back at the
+end of this note."), and **touched no operation.** **REPORTED, not fixed** —
+an ops-layer change needs its own state-transition tests and a deliberate
+record. **Her call is at QUESTIONS #67 (Finding 2)**, with the concrete
+alternative named: make `restoreBlock` flip a surviving tombstoned placement
+row so Put back and ⌥⌘Z land in the same spot. It is a small change to a
+shipped op with real sync-race questions (a placement row whose neighbours
+moved, or whose container is since sealed), which is exactly why it is hers.
+
+**A THIRD finding, unasked but load-bearing: the tray was not faceless — it
+was BURIED.** `BlockTOCView.traySection` has rendered a deleted-blocks list
+since Phase 11, inside the Blocks mode, only when non-empty. The plan's
+"TODAY NO surface anywhere lists deleted blocks" is true of every surface she
+WRITES in and false of the app as a whole. That sharpens rather than weakens
+J2: her report was a findability finding, and the fix is a door in the note's
+own chrome. The Blocks-mode section is left untouched (two views over one
+query is the pointer religion, not duplication); noted for the closeout as a
+possible consolidation.
+
+### WHAT SHIPPED
+
+**1 — The tray face (J2).**
+
+- **Core, queries only** (`Queries/PoolAndTray.swift`, `Queries/Observations.swift`):
+  `preservedOriginals(db, postID:, limit:)` — live, unplaced, `last_container_id`
+  = this note, carrying its release stamp (the placement row's own
+  `deleted_at`, not `block.updated_at`, which moves on any touch) AND its
+  Put-back landing (the last live successor placed in this note, by one
+  correlated subquery); `trayCounts(db, postID:)` — the badge's two numbers.
+  **`trayCounts` deliberately never reads `variant`**: it is a HELD
+  observation on an open note, GRDB tracks the tables a query reads, and
+  joining preview text in would re-run it at autosave rate on the one table
+  autosave writes (P1). The listings pay the join because they are opened
+  deliberately. Observations: `observePreservedOriginals`, `observeTrayCounts`.
+- **The face** (`Features/Tray/TrayPanel.swift`, new module): `TrayPath` (the
+  ONE naming home — the `RecoveryPath` pattern), `TrayRequest` (the
+  `CommentsRequest` shape), `TrayViewModel` (both listings, windowed 500 + the
+  probe row, `adopt` test seam), `TrayPanel` (two labelled sections, one **Put
+  back** per row, read-cheap `Text` rows — never a pane, P3), `TrayRefusalCopy`
+  (the seal, diagnosed with its way out), `TrayRowPreview` (first line + the
+  stamp, both pure).
+- **The doors, ONE act declared once** (`.showNoteTray`, scope `.post`, doors
+  `[.surface, .bottomBar]`, availability `noteScoped`): the context bar's
+  **⌫ N** badge, rendered only when `deletedCount > 0`; and **"This Note's
+  Tray…"** in the `note ▾` menu of BOTH bars (`CommitBar`, `TakesBottomBar`),
+  always there — a badge that hides at zero cannot be the only way in.
+- **How the badge sits with her K11 ruling** (recorded because two of her
+  rulings meet here): K11 says the icon row *"should always look like this"*,
+  and its stated reason is that *"adding a tag moves nothing she is aiming
+  at"*; J2 asks for a door visible only when the note has deleted something.
+  Both are kept — `ContextBarDoors.iconRow` is UNTOUCHED (pinned:
+  `theFourConstantIconsAreUnchangedByTheTrayDoor`), so the four aiming targets
+  stay a constant cluster, and the badge renders after them. The only thing
+  that ever shifts is the tag cards, and only when she has just deleted
+  something. Named for her at #67(b) with the far-right alternative.
+- **Put back, both kinds.** Deleted → `restoreBlock` (VERIFY-2's real
+  behaviour, said plainly). Preserved original → face-level composition over
+  `placeBlock` at `.after(lastLiveSuccessor)` else `.end`, with the landing
+  **re-read at act time** rather than taken from the listing (13c R3-1's
+  lesson: a listing is a projection; an argument read from one is read from a
+  snapshot). The sub-ms race is recorded in the code, not papered over.
+- **Sealed:** the tray still opens and lists (reading is free); Put back
+  delivers `TrayRefusalCopy.sealed` — *"This note is marked complete — unseal
+  it to put this back."* — the J8 doctrine, P-2.
+- **NO countdown**, deliberately: the 30-day clock is batch 6's, and showing
+  "N days left" before it exists is the copy-truth defect class.
+
+**2 — The graveyard removal (J6).** The "Unplaced blocks" section, its "Place
+in pool" menu, `RecoveryViewModel.unplaced/pools/startUnplaced/place`, the
+`UnplacedListing` type, `RecoveryPath.unplacedSection`/`.unplacedBlocks`, the
+`.variorumRevealUnplacedBlock` notification, RootView's
+`revealUnplacedBlockID` plumbing and `RecoveryView`'s whole reveal apparatus
+are GONE. The surface keeps Archived · Deleted books · Recently Deleted
+unchanged (batch 6 reshapes those). `Queries.unplacedBlocks` SURVIVES —
+the sitting's words, *a debug query, not a room in the house* — pinned so its
+removal would be deliberate.
+
+**THE CONSEQUENCE THE BRIEF'S ONE SENTENCE DID NOT NAME, and how it was
+handled.** `RecoveryPath.unplacedBlocks` was woven into **eight shipped copy
+sites** (both ceremony explainers + the completion note, the merge receipts on
+the instant AND ceremony paths, the Takes chain-merge receipt, the helper's
+merge entry, `.showOriginBlock`'s declared refusal) and **two live doors**
+pointed INTO the section (`revealOriginBlock` from Write and from the board).
+Removing the room without them would have left eight sentences promising a
+place that no longer exists — the exact defect class J8 exists to kill — and
+two doors that can never act (P-2). So the removal carried its sweep:
+
+- every copy site now reads `TrayPath.originalsPath` (or
+  `.originalsPathWithDoor` where the sentence TEACHES the road), one constant,
+  same arrow grammar — the destination moved, the voice did not;
+- **`revealOriginBlock` (both view models) now opens THIS note's tray with
+  the original's row marked** — no broadcast, no navigation, no leaving the
+  note. This is the ruled destination applied to an existing door, not a new
+  design: a divide-W/merge release stamps `last_container_id` with the note it
+  left, so the original really is in that note's tray. **J3 (batch 3) owns the
+  door's final form** (the read-only peek with Put back / Open tray); this is
+  the bridge that keeps it honest meanwhile. A requested block the tray does
+  not hold gets one quiet true line rather than a silent no-op.
+
+**3 — J8(a)'s graduation (the ONE edit batch 1 promised).**
+`BlockSelectionCopy.deletedNote` and `.deleteHelp` name the tray AND its real
+door again, alongside ⌥⌘Z — two different promises, because ⌥⌘Z dies with the
+session and the tray does not. Batch 1's interim pin
+(`noDeleteReceiptPromisesATrayThatDoesNotExistYet`) is **graduated in place**
+to `everyDeleteReceiptNamesTheTrayAndTheTrayHasARealDoor`: same claim (*a
+receipt may only name a surface that has a door*), stronger form — it asserts
+the copy names the tray AND that `.showNoteTray` is a declared act both
+renderers carry, so the sentence cannot outlive its door.
+
+**4 — The phone-receipts rider.** Established first: the phone has **no tray
+face and no undo door** — `grep -rn "restoreBlock" App/Variorum/VariorumMobile`
+returns nothing, and its `session.undoStack` use is compound-scoping only
+(`MobileStructural.swift:376`). Parity C2 had kept the "deleted-blocks tray"
+sentence on the reading that the tray was a FACT even without a phone face;
+J8's doctrine — and her own morning report about the Mac's identical promise —
+says a promise a user cannot act on is a place she goes looking for and does
+not find. So: `MobileBlockMenuController.deleteConfirmDetail` = *"The block
+leaves this note, with its takes. There's no undo here."*;
+`MobileStructuralController.blockDeletedStatus` = *"Block deleted."* No
+platform is named (no-redirect, MobileSoul §4), nothing is promised, and
+"gone forever" is NOT claimed either (the block is tombstoned, not purged).
+A SANCTIONED PIN FLIP on `MobileBlockMenuTests`, annotated in place, now
+asserting both the no-redirect rule and the no-unbacked-promise rule.
+
+### PINS + RED-ON-OLD EVIDENCE (behavioral revert, checksummed)
+
+One new suite, **17 tests** (`NoteTrayTests`), plus 5 new core query tests in
+`PoolTrayQueryTests`. Every revert restored to a byte-identical checksum.
+
+| Revert | Pins that went RED | Restored |
+|---|---|---|
+| **A** — the badge always renders (`trayDoorShown` → `trayFace != nil`) | `theBadgeCountsDeletedOnlyAndHidesWhenThereAreNone` (2 issues — the empty case AND the originals-only case) | `ContextBar.swift`; the file then took ONE further deliberate doc-typo fix (`traysDoorShown` → `trayDoorShown`), so its recorded baseline is `447456fc7b…`, not the pre-revert `360623aef4…`. `TrayPanel.swift` restored byte-exact (`ef84ed66db…`) |
+| **B+C** — the seal falls through to the generic ops copy; the original always lands at `.end` | `putBackUnderASealedNoteDiagnosesInsteadOfDumpingTheEnum` (got *"…to change takes or choices"*, the generic line) · `putBackReturnsAPreservedOriginalBesideItsSuccessors` | `TrayPanel.swift` → `ef84ed66db…` (identical) |
+| **D+G** — the batch-1 interim receipt copy restored; `preservedOriginals` returns `[]` | `theDeleteReceiptNamesTheRealTrayAndItsRealDoor` (5) · `everyDeleteDoorStillSpeaksTheOneGraduatedReceipt` · `everyDeleteReceiptNamesTheTrayAndTheTrayHasARealDoor` (3) · `theTraySplitsDeletedFromPreservedOriginals` · `putBackReturnsAPreservedOriginalBesideItsSuccessors` (2) | `OpsRefusalCopy.swift` → `b5714f4eea…`; `PoolAndTray.swift` → `5203be3f06…` (both identical) |
+| **E** — `revealOriginBlock` goes back to broadcasting at the removed room | `theDoorOpensThisNotesTrayAtTheOriginAndSpeaks` · `theBoardsProjectionCarriesTheOriginsAndItsDoorActs` (both: `trayRequest` nil) | `EditorViewModel.swift` → `aadca5d361…`; `TakesViewModel.swift` → `db202b937d…` (both identical) |
+| **F** — one copy site points back at "Library → Archived & Deleted → Unplaced blocks" | `noShippedCopyStillPointsAtTheRemovedUnplacedListing` (2) | `DivideWCeremony.swift` → `790aa7b511…` (identical) |
+| **G(mobile)** — the phone re-promises the tray | `deleteBlockTombstonesAndSpeaksTheTrayNote` (4 issues) | `MobileStructural.swift` → `f79f7393b6…`; `MobileBlockMenu.swift` → `76bcabae9d…` (both identical) |
+
+**Four consequential pin edits, each annotated in place rather than
+quietly relaxed** (all four failed on the batch's own first full run, which is
+how they were found): `BookAscentTests`' `surfaceCapabilities` literal gains
+`.showNoteTray` as its third recorded justified edit; `BoundaryFluidityTests`
+and `MergeCeremonySheetTests` keep the identical CLAIM (*the lineage road stays
+named*) with the destination updated; `UndoHintAndRefusalTests`' interim pin
+graduates as described above.
+
+### THE VISUAL LOOP
+
+**The BADGE is captured** — `ContextBarCaptureTests` gains states 7
+(`⌫ 1`) and 8 (`⌫ 3` with originals waiting), and its `bar(...)` helper
+defaults to an empty tray so states **1–6 render byte-unchanged**, which is
+itself the claim K11 cares about. Inspected: the badge sits after the four
+constant icons, in the accent colour, before the tag cards; the at-rest bar is
+identical to before. Path (sandboxed host):
+`~/Library/Containers/io.lduarte.Variorum.debug/Data/tmp/variorum-13k-batch3-screens`
+— `cp` the `*-7-tray-badge-*.png` / `*-8-tray-badge-*.png` out to view.
+
+**The PANEL cannot be captured offscreen — measured, not assumed.** A capture
+arm was written against the same harness and rendered `ImageRenderer`'s
+unsupported-view placeholder: SwiftUI `List` is NSTableView-backed. Recorded
+in `NoteTrayTests` in the same register that harness uses for the book
+dropdown's popover, and the arm was removed rather than left writing a broken
+image. **The panel is a HAND-CHECK item for the next drive.**
+
+### SUITE COUNTS (every "Test run with N tests" line confirmed)
+
+- core `swift test` — **1259 tests / 135 suites PASSED** (baseline 1254/135 + 5)
+- Mac (`-project` invocation) — **1450 tests / 259 suites PASSED, FULLY GREEN,
+  zero reds** (baseline 1433/258 + 17 tests in 1 new suite)
+- tutorial spine, by TYPE name (the seven from the batch-1 record) —
+  **51 tests / 7 suites PASSED** (baseline exact)
+- mobile (`VariorumMobile`, iPhone 16e) — **314 tests / 60 suites PASSED**
+  (baseline exact). Run because the rider touched `VariorumMobile/`.
+
+### FOR THE ARCHITECT / HER
+
+- **QUESTIONS #67** logged (seven lettered entries + both VERIFY findings in
+  her format). The one that is genuinely a decision: **VERIFY-2's alternative**
+  — teach `restoreBlock` to flip a surviving tombstoned placement row so Put
+  back lands where ⌥⌘Z lands. Recommended, but it is an ops change and hers.
+- **BATCH 3 HAND-OFFS.** (i) `revealOriginBlock`'s tray landing is a BRIDGE —
+  J3 replaces it with the read-only peek; `TrayRequest.revealBlockID` and the
+  panel's mark/`revealMissing` line are the seam it can reuse or retire.
+  (ii) `TrayPath` is the ONE naming home for anything else that points at the
+  tray. (iii) The panel has no deleted-TAKE section — round 5 routed deleted
+  takes to the block's History face, batch 3.
+- **BATCH 6 HAND-OFFS.** The clock: `TrayItem.deletedAt` and
+  `PreservedOriginal.releasedAt` are already on the rows (rendered as "when",
+  no countdown). The tray's Deleted rows are where "N days left" goes, and per
+  her round-3 rider they carry **no purge door** — Delete Now and Empty Trash
+  are in-Trash only, forever.
+- **PARITY LEDGER.** The phone owes a tray face (its receipts are now honest
+  about not having one) — `preservedOriginals` / `trayCounts` / `trayBlocks`
+  are all core, so the phone inherits the brains and owes only the face.
+- **A CONSOLIDATION NOTE, propose-only:** `BlockTOCView.traySection` still
+  renders its own small deleted-blocks list inside the Blocks mode. Left
+  untouched (two views over one query is not duplication), but the closeout may
+  want it routed to the one panel.
+- **Environment.** No Variorum instance was running at any point in this batch
+  (`pgrep` checked before every suite run and before the drill); no kill, no
+  quit, no `/Applications` write, no Release build; no push. No other
+  `xcodebuild` was active before any run.
+- **Nothing PENDING** — every claim above is from a run in this session.

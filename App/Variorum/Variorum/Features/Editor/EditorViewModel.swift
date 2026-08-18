@@ -1692,15 +1692,34 @@ final class EditorViewModel {
         return items
     }
 
-    /// Fire-and-DO (P-2): navigate to the recovery surface and reveal the
-    /// released original there. The BROADCAST carries the signal — which
-    /// block she asked to see — and the shell decides where that lands
-    /// (P-4; the `.variorumOpenPost` precedent, one level up).
+    /// Fire-and-DO (P-2): show the released original.
+    ///
+    /// **13j J6 REPOINTED this door.** It used to broadcast a signal the
+    /// shell turned into a navigation to Library → Archived & Deleted →
+    /// Unplaced blocks — the listing her round-2 ruling removed ("what is
+    /// that cursed table of lost hopes and dreams?"). Released originals now
+    /// live in the note's OWN tray (the release stamps `last_container_id`
+    /// with the note they left, which is what makes that true), so the door
+    /// opens the tray right here with the original's row marked. No
+    /// navigation, no broadcast, no leaving the note.
+    ///
+    /// The door's final form — a read-only PEEK of the original with its
+    /// takes — is J3's, batch 3. This keeps it honest in the meantime, which
+    /// is not optional: a door pointing at a removed room is the defect
+    /// class this phase is about.
     func revealOriginBlock(_ blockID: String) {
-        NotificationCenter.default.post(
-            name: .variorumRevealUnplacedBlock, object: nil,
-            userInfo: ["blockID": blockID])
-        showStatus("Showing the original block in \(RecoveryPath.surface).")
+        trayRequest = TrayRequest(postID: postID, revealBlockID: blockID)
+        showStatus("Showing the original in \(TrayPath.menuLabel).")
+    }
+
+    /// 13j J2: the tray sheet's pending target (`EditorView` presents it).
+    var trayRequest: TrayRequest?
+
+    /// The `note ▾` menu's door onto the tray — always available while a
+    /// note is open, because a badge that hides at zero cannot be the only
+    /// way in (the registry declares both doors as one act).
+    func requestNoteTray() {
+        trayRequest = TrayRequest(postID: postID)
     }
 
     private func refreshGestureAvailability() {

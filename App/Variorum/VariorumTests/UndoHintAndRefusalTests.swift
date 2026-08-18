@@ -171,20 +171,35 @@ struct UndoHintAndRefusalTests {
     /// **The tray this copy used to promise has no face anywhere** (her first
     /// morning back, report 1 — `restoreBlock` and `last_container_id` are
     /// faceless ops). Until batch 2 builds it, no delete receipt may name it.
-    @Test func noDeleteReceiptPromisesATrayThatDoesNotExistYet() {
+    /// **GRADUATED at batch 2** (13j J8(a), as the batch-1 record promised).
+    /// The claim is the same one it always was — *a receipt may only name a
+    /// surface that has a door* — and what changed is the world: batch 2
+    /// built the tray, so the pin flips from "must not name it" to "names it
+    /// AND the door is real". The stronger form is deliberate: asserting the
+    /// string alone would let the copy survive a future removal of the door
+    /// it names, which is the exact defect this pin exists for.
+    @Test func everyDeleteReceiptNamesTheTrayAndTheTrayHasARealDoor() {
         let lines = [
             BlockSelectionCopy.deletedNote(1),
             BlockSelectionCopy.deletedNote(4),
             BlockSelectionCopy.deleteHelp,
         ]
         for line in lines {
-            #expect(!line.lowercased().contains("tray"),
-                    "interim truth: \"\(line)\" must not name a surface that has no door")
+            #expect(line.contains(TrayPath.menuLabel),
+                    "the tray exists now, so the receipt names it: \"\(line)\"")
         }
-        // …and what it says instead is TRUE: the undo window is the session.
+        // The named surface is a DECLARED, RENDERED act — not a sentence.
+        let act = CapabilityRegistry.capability(.showNoteTray)
+        #expect(act.verb == TrayPath.menuLabel)
+        #expect(act.doors == [.surface, .bottomBar])
+        #expect(ContextBar.surfaceCapabilities.contains(.showNoteTray))
+        #expect(CommitBar.renderedCapabilities.contains(.showNoteTray))
+        // …and the interim truth survives beside it: ⌥⌘Z is still named,
+        // because the two roads are different promises (one dies with the
+        // session, one does not).
         #expect(BlockSelectionCopy.deletedNote(1).contains("\u{2325}\u{2318}Z"))
         #expect(BlockSelectionCopy.deletedNote(4).contains("in one go"),
-                "the compound's one-mistake-to-reverse promise survives the trim")
+                "the compound's one-mistake-to-reverse promise survives")
     }
 
     /// One receipt, every delete door — Write's block delete, the Takes

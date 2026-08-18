@@ -33,6 +33,7 @@ struct CommitBar: View {
             .merge, .showTakes,
             .insertBlockBelow,  // 13b 4D (N28/S4-13): editor parity — Write's bar door
             .deleteBlock,  // 13c 1B (A8): the delete door beside the insert door
+            .showNoteTray,  // 13j J2: the note ▾ menu's tray door
         ]
         // 13k K7: the formatting toolbar's own eight, from ITS table (the
         // cluster is rendered here, so its doors are declared here).
@@ -165,12 +166,17 @@ struct CommitBar: View {
                 model.toggleSeal()
             }
             Divider()
+            // 13j J2: the tray's NAMED door. The context bar's ⌫ badge is
+            // the glance; this is the one that is always there, and it is
+            // where someone who has never seen the badge will look.
+            Button("\(TrayPath.menuLabel)\u{2026}") { model.requestNoteTray() }
+            Divider()
             Button(model.header?.entryDate.map { "Date: \($0)…" } ?? "Set date…") {
                 pickedDate = Self.date(fromDay: model.header?.entryDate) ?? Date()
                 datePickerShown = true
             }
         }
-        .help("The note itself: its savepoints, its seal, its date")
+        .help("The note itself: its savepoints, its seal, its tray, its date")
         .popover(isPresented: $datePickerShown, content: datePickerPopover)
     }
 

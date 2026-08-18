@@ -232,12 +232,28 @@ final class MobileBlockMenuController {
     // undo — v1's recorded posture; the tray's recovery DOOR rides
     // PL-3/13j)
 
-    /// The confirm's detail (parity C2, inventory #2 — the "on the Mac"
-    /// redirect dissolved: the tray FACT stays, neutrally; the phone's
-    /// recovery surface is 13j's, PL-3). Pinned static — a promise made
-    /// in a literal is a promise no test can keep.
+    /// The confirm's detail.
+    ///
+    /// **13j batch 2 — MADE TRUE ON THE PHONE'S OWN TERMS.** Parity C2 kept
+    /// the "deleted-blocks tray" sentence here after dissolving its "on the
+    /// Mac" redirect, on the reading that the tray was a FACT even without a
+    /// phone face. J8's copy doctrine says otherwise, and her own morning
+    /// report is the evidence: a promise a user cannot act on is not a fact
+    /// she can use, it is a place she goes looking for and does not find.
+    /// This phone has NO tray face and NO undo door (v1's recorded posture,
+    /// verified by sweep this batch: no `restoreBlock` door anywhere in
+    /// `VariorumMobile`, and the structural undo stack is used only for
+    /// compounds), so the confirm says the two things that are true here and
+    /// promises nothing else.
+    ///
+    /// It does NOT say "do it on the Mac" — the no-redirect principle
+    /// (MobileSoul §4) — and it does not say "gone forever" either, because
+    /// the block is tombstoned, not purged. "There's no undo here" is
+    /// exactly what it is. The phone's own tray is the parity ledger's row.
+    /// Pinned static — a promise made in a literal is a promise no test can
+    /// keep.
     static let deleteConfirmDetail =
-        "The block leaves this note and waits in its deleted-blocks tray."
+        "The block leaves this note, with its takes. There's no undo here."
 
     private func confirmDelete(blockID: String) {
         guard let confirmDestructive else {
@@ -257,8 +273,9 @@ final class MobileBlockMenuController {
     /// The act itself rides the STRUCTURAL controller's contract (S4
     /// ladder MAJOR 1): `deleteBlock` is a structural op, so it takes the
     /// one-flight latch + the flush-guard its siblings carry — a refused
-    /// flush refuses the delete, which is what makes the tray-copy
-    /// promise true. This door keeps only the confirm seam.
+    /// flush refuses the delete, which is what keeps the typed bytes inside
+    /// the take the tombstone takes down with it. This door keeps only the
+    /// confirm seam.
     func delete(blockID: String) async {
         await model?.structural.deleteBlock(blockID: blockID)
     }

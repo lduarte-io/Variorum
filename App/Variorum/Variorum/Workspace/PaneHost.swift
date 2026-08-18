@@ -25,6 +25,7 @@
 //  books' order is `BookChooserOrder`'s.
 //
 
+import GRDB // AsyncValueObservation iteration
 import SwiftUI
 import VariorumCore
 
@@ -69,6 +70,18 @@ struct PaneHost<Content: View>: View {
     @State private var tags: [Tag] = []
     @State private var allTags: [Tag] = []
 
+    /// 13j J2 — the tray badge's counts. Unlike `books`/`tags` above this
+    /// IS a held observation, and deliberately so: the badge's whole job is
+    /// to appear the moment she deletes a block, which is the one event a
+    /// one-shot read keyed on the pane's note would never see.
+    ///
+    /// It is affordable because `Queries.trayCounts` reads `block`,
+    /// `container_block` and `container` and never `variant` — so the
+    /// observation does not re-run at autosave rate on the table autosave
+    /// writes (its own doc comment carries the reasoning).
+    @State private var trayCounts = Queries.TrayCounts(deleted: 0, preservedOriginals: 0)
+    @State private var trayShown = false
+
     /// 13k K12: her deliberate, sticky fold — this Mac's own preference,
     /// read the way every other local UI setting in the app is read
     /// (`writeHoverHandles`, the paragraph gap, the spellcheck level). Every
@@ -103,6 +116,12 @@ struct PaneHost<Content: View>: View {
                         onRemove: { tag in remove(tag, from: postID) })
                 },
                 tagsFolded: tagsFolded,
+                trayFace: notePostID.map { _ in
+                    ContextBar.TrayFace(
+                        deletedCount: trayCounts.deleted,
+                        preservedCount: trayCounts.preservedOriginals,
+                        onOpen: { trayShown = true })
+                },
                 onBack: onBack,
                 onForward: onForward,
                 onOpenBook: { bookID in
@@ -112,6 +131,15 @@ struct PaneHost<Content: View>: View {
                 onToggleTags: onToggleTags)
             if bar.hasContent {
                 bar
+                    // 13j J2: the badge's own panel, anchored on the bar it
+                    // belongs to. The `note ▾` menus host their own (the
+                    // `CommentsPanel` precedent — one view, presented where
+                    // each door lives).
+                    .popover(isPresented: $trayShown, arrowEdge: .bottom) {
+                        if let postID = notePostID {
+                            TrayPanel(session: session, postID: postID)
+                        }
+                    }
                 Divider().overlay(tokens.line)
             }
             if split, !focused, let selection = workspace.selections[pane] {
@@ -130,6 +158,25 @@ struct PaneHost<Content: View>: View {
         }
         .task(id: noteID) { await loadBooks() }
         .task(id: notePostID) { await loadTags() }
+        .task(id: notePostID) { await watchTray() }
+    }
+
+    /// 13j J2 — the badge's live counts (see `trayCounts`' own note for why
+    /// this one is held where its siblings are one-shot).
+    private func watchTray() async {
+        guard let postID = notePostID else {
+            trayCounts = Queries.TrayCounts(deleted: 0, preservedOriginals: 0)
+            return
+        }
+        do {
+            for try await value in session.database.observeTrayCounts(postID) {
+                trayCounts = value
+            }
+        } catch {
+            // A failed observation leaves the badge away rather than
+            // showing a number it cannot stand behind.
+            trayCounts = Queries.TrayCounts(deleted: 0, preservedOriginals: 0)
+        }
     }
 
     // MARK: - The tag half (13g batch 7, R6-1)

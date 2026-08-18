@@ -60,6 +60,12 @@ extension Queries {
         /// that died independently under a different stamp stays dead on
         /// restore, so it doesn't preview either (review finding).
         public let text: String?
+
+        public init(blockID: String, deletedAt: String, text: String?) {
+            self.blockID = blockID
+            self.deletedAt = deletedAt
+            self.text = text
+        }
     }
 
     /// The per-post tray: blocks *individually deleted* from this post —
@@ -92,7 +98,149 @@ extension Queries {
             .map { TrayItem(blockID: $0["block_id"], deletedAt: $0["deleted_at"], text: $0["text"]) }
     }
 
+    /// **A note's PRESERVED ORIGINAL** (13j J2, sitting round 2): a block
+    /// that is LIVE, has no live placement, and whose `last_container_id`
+    /// names this note — i.e. the divide-W's preserved-whole A and the
+    /// merge's released B/C, seen from the note they were released FROM.
+    ///
+    /// This is the per-note half of what the global "Unplaced blocks"
+    /// listing used to show, and her round-2 ruling removed that room in
+    /// favour of this: the release stamps `last_container_id` exactly so a
+    /// released block still knows its home (Phase 3's finding), which is
+    /// what makes the scoped read possible at all.
+    ///
+    /// It deliberately does NOT walk lineage edges. `unplacedOrigins` reads
+    /// the same population FROM a successor (the block → its origin map, the
+    /// J3 door's source); this reads it from the NOTE, so an original whose
+    /// successors were all deleted still lists — the one case the global
+    /// listing served uniquely.
+    public struct PreservedOriginal: Equatable, Sendable {
+        public let blockID: String
+        /// Preview text: the default variant's live buffer.
+        public let text: String?
+        /// When the block was RELEASED — the tombstone on the placement row
+        /// this note used to hold (`deleteBlock`'s own stamp shape). Not
+        /// `block.updated_at`, which moves whenever anything touches the
+        /// block; the release is the event the row is about.
+        public let releasedAt: String?
+        /// **Where Put back lands it**: immediately after this block, the
+        /// LAST live successor of the original still placed in this note —
+        /// nil when none survives, and the note's end is then the landing.
+        ///
+        /// Read here rather than composed by a caller so the SQL does it
+        /// once, in the same pass; the face still re-reads at act time,
+        /// because a listing is a projection and a landing is an argument.
+        public let landAfterBlockID: String?
+    }
+
+    /// The per-note preserved-originals listing (newest release first).
+    /// `limit` follows the windowed-observation discipline (the
+    /// `unplacedBlocks` / `observeLibrary` shape): a held observation over a
+    /// corpus-history-shaped set is always bounded, and a caller passes
+    /// `window + 1` so a truncation marker never false-positives.
+    public static func preservedOriginals(
+        _ db: Database, postID: String, limit: Int? = nil
+    ) throws -> [PreservedOriginal] {
+        var sql = """
+            SELECT b.id AS block_id,
+                   dv.working_text AS text,
+                   (SELECT MAX(rel.deleted_at) FROM container_block rel
+                     WHERE rel.block_id = b.id AND rel.container_id = :post
+                       AND rel.deleted_at IS NOT NULL) AS released_at,
+                   (SELECT cb.block_id FROM edge e
+                     JOIN container_block cb
+                       ON cb.block_id = e.source_block_id
+                      AND cb.container_id = :post AND cb.deleted_at IS NULL
+                     WHERE e.target_block_id = b.id
+                       AND e.type = 'derived_from' AND e.deleted_at IS NULL
+                     ORDER BY cb.position DESC, cb.block_id DESC
+                     LIMIT 1) AS land_after
+            FROM block b
+            LEFT JOIN variant dv
+              ON dv.id = b.default_variant_id AND dv.deleted_at IS NULL
+            WHERE b.last_container_id = :post AND b.deleted_at IS NULL
+              AND NOT EXISTS (
+                SELECT 1 FROM container_block placed
+                WHERE placed.block_id = b.id AND placed.deleted_at IS NULL)
+            ORDER BY released_at DESC, b.id
+            """
+        var arguments: StatementArguments = ["post": postID]
+        if let limit {
+            sql += " LIMIT :limit"
+            arguments += ["limit": limit]
+        }
+        return try Row.fetchAll(db, sql: sql, arguments: arguments)
+            .map {
+                PreservedOriginal(
+                    blockID: $0["block_id"], text: $0["text"],
+                    releasedAt: $0["released_at"], landAfterBlockID: $0["land_after"])
+            }
+    }
+
+    /// **What the tray door wears** (13j J2): how many blocks each of the
+    /// tray's two sections holds, for one note.
+    ///
+    /// Its own query rather than `trayBlocks().count + preservedOriginals().count`
+    /// for ONE load-bearing reason: it touches `block`, `container_block`
+    /// and `container` and **never `variant`**. The door's count is a HELD
+    /// observation on an open note, and GRDB tracks the tables a query
+    /// reads — so joining the preview text in would re-run this at autosave
+    /// rate on the one table autosave writes (P1). The listings pay the
+    /// variant join because they are opened deliberately; the badge does
+    /// not, because it is always on.
+    public struct TrayCounts: Equatable, Sendable {
+        /// Blocks individually deleted from this note (`trayBlocks`'
+        /// population) — the ONLY number the door shows (13j sitting round
+        /// 5: preserved originals must not inflate an urgent-looking count).
+        public let deleted: Int
+        /// Live-but-unplaced originals released from this note.
+        public let preservedOriginals: Int
+
+        public init(deleted: Int, preservedOriginals: Int) {
+            self.deleted = deleted
+            self.preservedOriginals = preservedOriginals
+        }
+
+        /// Nothing to recover at all — the tray panel's empty state.
+        public var isEmpty: Bool { deleted == 0 && preservedOriginals == 0 }
+    }
+
+    public static func trayCounts(_ db: Database, postID: String) throws -> TrayCounts {
+        let row = try Row.fetchOne(
+            db,
+            sql: """
+                SELECT
+                  (SELECT COUNT(*) FROM block b
+                    WHERE b.last_container_id = :post AND b.deleted_at IS NOT NULL
+                      AND NOT EXISTS (
+                        SELECT 1 FROM container_block cb
+                        JOIN container cc ON cc.id = cb.container_id
+                        WHERE cb.block_id = b.id
+                          AND cb.deleted_at = b.deleted_at
+                          AND cc.deleted_at = b.deleted_at)) AS deleted_count,
+                  (SELECT COUNT(*) FROM block b
+                    WHERE b.last_container_id = :post AND b.deleted_at IS NULL
+                      AND NOT EXISTS (
+                        SELECT 1 FROM container_block placed
+                        WHERE placed.block_id = b.id AND placed.deleted_at IS NULL))
+                    AS original_count
+                """,
+            arguments: ["post": postID])
+        return TrayCounts(
+            deleted: row?["deleted_count"] ?? 0,
+            preservedOriginals: row?["original_count"] ?? 0)
+    }
+
     /// One live-but-unplaced block (divide-W/merge lineage leftovers).
+    ///
+    /// **13j J6 — the room this fed is GONE.** Her round-2 ruling removed
+    /// the global "Unplaced blocks" listing from the Library recovery
+    /// surface ("what is that cursed table of lost hopes and dreams?"); the
+    /// population now surfaces per-note (`preservedOriginals`, above) and
+    /// from a successor (`unplacedOrigins`). The query SURVIVES deliberately
+    /// — the sitting's words: it lives on as a debug query, not a room in
+    /// the house — because the spec's own rationale for the view was a
+    /// developer safety net, and a safety net with no window is still a net.
     public struct UnplacedBlock: Equatable, Sendable {
         public let blockID: String
         public let text: String?

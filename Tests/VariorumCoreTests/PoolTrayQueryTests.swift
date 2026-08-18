@@ -151,6 +151,129 @@ struct PoolTrayQueryTests {
         }
     }
 
+    // MARK: - Preserved originals + the tray's counts (13j J2)
+
+    @Test func preservedOriginalsAreThisNotesReleasedBlocks() throws {
+        // A divide-W preserves A whole and releases it; the release stamps
+        // `last_container_id`, which is exactly what makes the per-note
+        // read possible (the round-2 ruling's mechanism).
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let other = try ops.createPost()
+            let fanned = try ops.newBlock(in: post.id, text: "Alpha one. Beta one.")
+            let take2 = try ops.branchVariant(fanned.block.id, from: fanned.variant.id)
+            try ops.autosave(take2.id, text: "Alpha two. Beta two.", charDelta: 0)
+            let w = try ops.divideW(
+                fanned.block.id, cuts: [fanned.variant.id: 10, take2.id: 10])
+
+            // A releases from THIS note…
+            let here = try db.read {
+                try Queries.preservedOriginals($0, postID: post.id)
+            }
+            #expect(here.map(\.blockID) == [fanned.block.id])
+            #expect(here[0].text == "Alpha one. Beta one.")
+            #expect(here[0].releasedAt != nil, "the release stamp is the placement tombstone")
+            // …and lands back after its LAST live successor (C), never at
+            // the note's end by default.
+            #expect(here[0].landAfterBlockID == w.second.block.id)
+
+            // …and never appears in another note's tray.
+            #expect(try db.read {
+                try Queries.preservedOriginals($0, postID: other.id)
+            }.isEmpty)
+        }
+    }
+
+    @Test func aPlacedOrDeletedBlockIsNotAPreservedOriginal() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let live = try ops.newBlock(in: post.id, text: "still here")
+            let deleted = try ops.newBlock(in: post.id, text: "gone")
+            try ops.deleteBlock(deleted.block.id)
+            let originals = try db.read {
+                try Queries.preservedOriginals($0, postID: post.id)
+            }
+            #expect(originals.isEmpty, "placed blocks and tombstones are the OTHER two states")
+            _ = live
+
+            // And putting a released original back removes it from the
+            // section — the placement is the whole condition.
+            let fanned = try ops.newBlock(in: post.id, text: "Alpha one. Beta one.")
+            let take2 = try ops.branchVariant(fanned.block.id, from: fanned.variant.id)
+            try ops.autosave(take2.id, text: "Alpha two. Beta two.", charDelta: 0)
+            _ = try ops.divideW(
+                fanned.block.id, cuts: [fanned.variant.id: 10, take2.id: 10])
+            #expect(try db.read {
+                try Queries.preservedOriginals($0, postID: post.id)
+            }.count == 1)
+            _ = try ops.placeBlock(fanned.block.id, in: post.id, at: .end)
+            #expect(try db.read {
+                try Queries.preservedOriginals($0, postID: post.id)
+            }.isEmpty)
+        }
+    }
+
+    @Test func anOriginalWhoseSuccessorsAllDiedStillListsAndLandsAtTheEnd() throws {
+        // Round 2's named case — the one thing the global listing served
+        // uniquely, and the reason this read is note-scoped rather than a
+        // walk from the successors.
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let fanned = try ops.newBlock(in: post.id, text: "Alpha one. Beta one.")
+            let take2 = try ops.branchVariant(fanned.block.id, from: fanned.variant.id)
+            try ops.autosave(take2.id, text: "Alpha two. Beta two.", charDelta: 0)
+            let w = try ops.divideW(
+                fanned.block.id, cuts: [fanned.variant.id: 10, take2.id: 10])
+            try ops.deleteBlock(w.first.block.id)
+            try ops.deleteBlock(w.second.block.id)
+
+            let originals = try db.read {
+                try Queries.preservedOriginals($0, postID: post.id)
+            }
+            #expect(originals.map(\.blockID) == [fanned.block.id])
+            #expect(originals[0].landAfterBlockID == nil, "no live successor ⇒ the note's end")
+        }
+    }
+
+    @Test func trayCountsSplitDeletedFromPreserved() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            #expect(try db.read { try Queries.trayCounts($0, postID: post.id) }.isEmpty)
+
+            let gone = try ops.newBlock(in: post.id, text: "gone")
+            try ops.deleteBlock(gone.block.id)
+            let fanned = try ops.newBlock(in: post.id, text: "Alpha one. Beta one.")
+            let take2 = try ops.branchVariant(fanned.block.id, from: fanned.variant.id)
+            try ops.autosave(take2.id, text: "Alpha two. Beta two.", charDelta: 0)
+            _ = try ops.divideW(
+                fanned.block.id, cuts: [fanned.variant.id: 10, take2.id: 10])
+
+            let counts = try db.read { try Queries.trayCounts($0, postID: post.id) }
+            #expect(counts.deleted == 1)
+            #expect(counts.preservedOriginals == 1)
+            #expect(!counts.isEmpty)
+            // The two counts agree with the two listings they describe.
+            #expect(try db.read { try Queries.trayBlocks($0, postID: post.id) }.count
+                == counts.deleted)
+            #expect(try db.read { try Queries.preservedOriginals($0, postID: post.id) }.count
+                == counts.preservedOriginals)
+        }
+    }
+
+    @Test func trayCountsExcludeContainerCascadeVictimsLikeTheListingDoes() throws {
+        // The badge must not light up on a note that was deleted whole —
+        // those blocks belong to `restoreContainer`, not the tray (the
+        // Phase-4 tray-semantics rule, held by the count query too).
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            _ = try ops.newBlock(in: post.id, text: "with the note")
+            try ops.deleteContainer(post.id)
+            let counts = try db.read { try Queries.trayCounts($0, postID: post.id) }
+            #expect(counts.deleted == 0)
+            #expect(counts.isEmpty)
+        }
+    }
+
     // MARK: - Unplaced blocks (the safety net)
 
     @Test func unplacedPopulatesAfterDivideWAndMerge() throws {

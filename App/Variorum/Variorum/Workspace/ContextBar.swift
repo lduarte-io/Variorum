@@ -62,6 +62,11 @@ struct ContextBar: View {
     var tagFace: TagFace? = nil
     /// K12 — her deliberate, sticky choice (`TagChipsFold`).
     let tagsFolded: Bool
+    /// 13j J2 — the TRAY badge. Present only when the pane holds a note;
+    /// the badge itself renders only when that note has deleted something
+    /// (her sitting-round-1 ruling: *"visible ONLY when the note has
+    /// deleted/archived blocks"* — calm at rest).
+    var trayFace: TrayFace? = nil
     /// R4-3: the chips' corner radius. Defaulted, so every caller in the
     /// app gets the shipped shape and only the capture harness ever names
     /// one (her experiment framing — the variants are a picture, not a
@@ -82,6 +87,18 @@ struct ContextBar: View {
         var onRemove: (Tag) -> Void
     }
 
+    /// The tray half, same bundling (13j J2).
+    struct TrayFace {
+        /// Blocks individually deleted from this note — **the only number
+        /// the badge shows.** Sitting round 5, stated: preserved originals
+        /// appear in the panel but must not inflate an urgent-looking count.
+        var deletedCount: Int
+        /// …which the tooltip still mentions, because "3 deleted" beside a
+        /// panel holding four rows would read as a miscount.
+        var preservedCount: Int
+        var onOpen: () -> Void
+    }
+
     /// The `.surface` acts this bar renders (P-1's declared ⇔ rendered
     /// walk).
     ///
@@ -99,6 +116,9 @@ struct ContextBar: View {
         // declared once and both renderers name it (E11's shape, one act
         // over).
         .tagNote,
+        // 13j J2: the tray badge — the bar's fifth door, and the only one
+        // that is CONDITIONAL (see `trayDoorShown`).
+        .showNoteTray,
     ]
 
     @State private var listingBooks = false
@@ -131,6 +151,22 @@ struct ContextBar: View {
     /// pin can hold it rather than only inside a `ViewBuilder`.
     var chipsShown: Bool { tagFace != nil && !tagsFolded }
 
+    /// **Whether the tray badge is on the bar** (13j J2), as a value rather
+    /// than an `if` inside the body — the K11 discipline this file already
+    /// keeps for `renderedIcons`.
+    ///
+    /// ── HOW THIS SITS WITH HER K11 RULING ────────────────────────────────
+    /// K11 says the icon row *"should always look like this"* — four doors
+    /// that never move — and its stated reason is that *"adding a tag moves
+    /// nothing she is aiming at"*. Her later J2 ruling asks for a door that
+    /// is *"visible ONLY when the note has deleted/archived blocks"*. Both
+    /// are hers, and they compose exactly: `ContextBarDoors.iconRow` is
+    /// UNTOUCHED, so the four aiming targets stay a constant cluster in
+    /// their constant order; the badge appears AFTER them, before the chips,
+    /// and only ever moves when she has just deleted something — a
+    /// deliberate act of her own, not the passive drift the ruling names.
+    var trayDoorShown: Bool { (trayFace?.deletedCount ?? 0) > 0 }
+
     /// Nothing to say ⇒ no bar: a cold launch at the shelf keeps exactly
     /// the chrome it had before any of this shipped.
     ///
@@ -160,6 +196,9 @@ struct ContextBar: View {
                     case .tags: tagsDoor
                     case .forward: forwardDoor
                     }
+                }
+                if let trayFace, trayDoorShown {
+                    trayDoor(trayFace)
                 }
                 if let tagFace, chipsShown {
                     NoteTagChips(
@@ -255,6 +294,21 @@ struct ContextBar: View {
             }
         }
         .padding(12)
+    }
+
+    /// **⌫ N — the tray badge** (13j J2). Quiet, countable, and it says
+    /// what it opens: no glyph on its own can carry "the blocks this note
+    /// deleted", so the tooltip does the naming and the panel does the rest.
+    private func trayDoor(_ face: TrayFace) -> some View {
+        Button(action: face.onOpen) {
+            glyph(enabled: true) {
+                Text(tokens.chromeLabel(TrayPath.doorLabel(deleted: face.deletedCount)))
+                    .lineLimit(1)
+            }
+        }
+        .buttonStyle(.plain)
+        .help(WorkspaceNaming.trayDoorHelp(
+            deleted: face.deletedCount, preserved: face.preservedCount))
     }
 
     /// K12's deliberate fold. Folded it carries the count (the shipped

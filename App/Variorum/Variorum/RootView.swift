@@ -57,7 +57,6 @@ struct RootView: View {
     @State private var blockTarget: BlockTarget?
     /// 13f W10b: the released original the lineage door asked to see; the
     /// recovery surface reveals it and consumes the request.
-    @State private var revealUnplacedBlockID: String?
     /// 13f W20(a) — THE ASCENT: the post a book was asked to open AT. One
     /// shot, keyed by book so a stale request can never land in another
     /// book (the `blockTarget` guard's shape).
@@ -224,15 +223,6 @@ struct RootView: View {
             guard let id = note.userInfo?["postID"] as? String, claimBroadcast() else { return }
             router.pendingSelection = .post(id)
         }
-        // 13f W10b: "Show Original Block" — the surface names the block, the
-        // SHELL decides the destination (P-4). One place, both editors.
-        .onReceive(
-            NotificationCenter.default.publisher(for: .variorumRevealUnplacedBlock)
-        ) { note in
-            guard let id = note.userInfo?["blockID"] as? String, claimBroadcast() else { return }
-            revealUnplacedBlockID = id
-            router.pendingSelection = .recovery
-        }
         // 13f W20(a) — THE ASCENT: the membership chip names a book and a
         // post; the SHELL decides that this means "navigate to the book,
         // and hand it the post to land on" (P-4, the W10b precedent).
@@ -308,8 +298,8 @@ struct RootView: View {
     private var windowIsKey: Bool { windows.isKey(windowID) }
 
     /// **Who acts on an app-wide navigation broadcast.** Those notifications
-    /// (`.variorumOpenPost`, `.variorumRevealUnplacedBlock`,
-    /// `.variorumOpenBookAtPost`) reach every window that listens, so with a
+    /// (`.variorumOpenPost`, `.variorumOpenBookAtPost`) reach every window
+    /// that listens, so with a
     /// second window on screen ONE click would navigate both — P-4's own
     /// class, arriving the moment windows do. The registry names a single
     /// target: the key window when it can navigate, otherwise the most
@@ -601,9 +591,7 @@ struct RootView: View {
         case .recovery:
             RecoveryView(
                 session: session, library: library,
-                openPost: { postID in openHere(.post(postID)) },
-                revealBlockID: revealUnplacedBlockID,
-                onRevealConsumed: { revealUnplacedBlockID = nil })
+                openPost: { postID in openHere(.post(postID)) })
         }
     }
 

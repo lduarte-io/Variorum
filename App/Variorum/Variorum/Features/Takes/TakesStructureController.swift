@@ -589,7 +589,7 @@ final class TakesStructureController {
             model.speak(otherTakes > 0
                         ? "Merged \(chain.count) blocks — \(otherTakes) other "
                           + "\(otherTakes == 1 ? "take stays" : "takes stay") with the released "
-                          + "blocks (\(RecoveryPath.unplacedBlocks); \u{2325}\u{2318}Z undoes)."
+                          + "blocks (\(TrayPath.originalsPath); \u{2325}\u{2318}Z undoes)."
                         : "Merged \(chain.count) blocks — \u{2325}\u{2318}Z undoes it.")
         } catch {
             // Ladder round 2 (R2-2): the read-to-write race — a pick that

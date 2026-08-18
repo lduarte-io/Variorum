@@ -446,7 +446,7 @@ struct MergeSelectionTests {
             #expect(try world.storeSlots().map(\.text) == ["One. Two. Three."])
             let spoken = try #require(world.model.statusMessage)
             #expect(spoken.contains("1 other take stays with the released blocks"))
-            #expect(spoken.contains(RecoveryPath.unplacedBlocks))
+            #expect(spoken.contains(TrayPath.originalsPath))
         }
     }
 

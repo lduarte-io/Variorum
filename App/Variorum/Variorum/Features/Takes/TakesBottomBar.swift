@@ -35,6 +35,7 @@ struct TakesBottomBar: View {
             .labelTake,  // 13b Stage 3, 3D (N6): the block menu's label door
             .insertBlockBelow,  // 13b 4D (N28/S4-13): the block menu's insert door
             .deleteBlock,  // 13c 1B (A8): the block menu's delete door
+            .showNoteTray,  // 13j J2: the note ▾ menu's tray door
         ]
         // 13k K7: the formatting toolbar rides BOTH bars — the acts are
         // `takesAccess: .native`, so Write must not be the only surface with
@@ -195,6 +196,16 @@ struct TakesBottomBar: View {
         ) { target in
             CommentsPanel(session: model.session, blockID: target.blockID)
         }
+        // 13j J2: this note's tray, hosted where the comments sheet is —
+        // one view, presented wherever a door raises it.
+        .sheet(item: Binding(
+            get: { model.trayRequest },
+            set: { model.trayRequest = $0 })
+        ) { request in
+            TrayPanel(
+                session: model.session, postID: request.postID,
+                revealBlockID: request.revealBlockID)
+        }
         .sheet(item: Binding(
             get: { model.takeLabelRequest },
             set: { model.takeLabelRequest = $0 })
@@ -280,12 +291,16 @@ struct TakesBottomBar: View {
                 Task { await model.toggleSeal() }
             }
             Divider()
+            // 13j J2: the tray's NAMED door — Write's bar's item, here, so
+            // the two bars keep one grammar (R6-2's whole point).
+            Button("\(TrayPath.menuLabel)\u{2026}") { model.requestNoteTray() }
+            Divider()
             Button(model.projection.entryDate.map { "Date: \($0)…" } ?? "Set date…") {
                 pickedDate = CommitBar.date(fromDay: model.projection.entryDate) ?? Date()
                 datePickerShown = true
             }
         }
-        .help("The note itself: this take's savepoints, its seal, its date")
+        .help("The note itself: this take's savepoints, its seal, its tray, its date")
         .popover(isPresented: $datePickerShown) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Entry date").font(.headline)

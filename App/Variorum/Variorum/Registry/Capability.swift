@@ -358,6 +358,9 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // 13f W10b: the lineage door back to a RELEASED original (block scope,
     // rendered only where one exists — P-2)
     case showOriginBlock
+    // 13j J2: the per-note TRAY — what this note has deleted, and what a
+    // divide/merge preserved whole (post scope; two doors, one act)
+    case showNoteTray
     // Takes lifecycle completeness (13b Stage 3, 3D — T5/N1/N6)
     case unarchiveTake, labelTake, renameLens
     // 13e E4 (her A19: "Reorder takes"). TWO declarations rather than one

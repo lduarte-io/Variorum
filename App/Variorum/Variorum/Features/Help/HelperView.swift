@@ -288,7 +288,7 @@ struct HelperView: View {
          "Join neighboring blocks into one (⌘⇧M): cursor at the seam, or a selection "
          + "across the run. From Takes it joins your block with the one above. The "
          + "merged text is what you were LOOKING at; other takes stay with the released "
-         + "blocks — find them under \(RecoveryPath.unplacedBlocks), "
+         + "blocks — find them under \(TrayPath.originalsPathWithDoor), "
          + "or ⌥⌘Z brings everything straight back."),
         ("extract / make block",
          "Extract (⌘⇧E) pulls a selected span at a block's edge into its own block; "

@@ -420,9 +420,13 @@ struct AscentDoorTests {
         // and E8 gave the Library's rows the same act, so it is declared
         // once with both renderers naming it. The four earlier elements
         // and their order are untouched.
+        // **13j J2 (a THIRD justified edit, same convention):** the TRAY
+        // badge — the bar's fifth door and the only conditional one (it
+        // renders when this note has deleted something). The five earlier
+        // elements and their order are untouched.
         #expect(ContextBar.surfaceCapabilities
                 == [.navigateBack, .navigateForward, .toggleTagChips,
-                    .openBookAtNote, .tagNote])
+                    .openBookAtNote, .tagNote, .showNoteTray])
     }
 
     /// Visiting a book floats it in the chooser — recorded at the ONE

@@ -101,7 +101,9 @@ struct MergeCeremonySheetTests {
             #expect(spareCount == 2)
             // The lineage-road speech survives on the ceremony path.
             let status = try #require(h.model.statusMessage)
-            #expect(status.contains("Unplaced blocks"), "the road stays named: \(status)")
+            // 13j J6: the destination moved to the note's own tray; the
+            // claim — that the road is named at all — is unchanged.
+            #expect(status.contains(TrayPath.originalsPath), "the road stays named: \(status)")
             #expect(h.session.undoStack.topLabel == "Merge Takes")
             try expectStoreMatchesView(h)
         }

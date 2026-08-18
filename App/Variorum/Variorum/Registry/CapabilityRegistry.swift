@@ -140,6 +140,17 @@ nonisolated enum CapabilityRegistry {
             ? .act : .unavailable
     }
 
+    /// **NOTE-SCOPED READING** (13j J2 — the tray). Wherever a note is on
+    /// screen, "what has this note deleted" is a question with an answer:
+    /// every post mode, plus the attached-editor/attached-board arms that
+    /// cover the book-inline, spread and pool surfaces carrying no mode
+    /// (`editableText`'s reach, for its reason — but this act edits nothing,
+    /// so it wears its own name rather than borrowing that one's).
+    private static let noteScoped: @Sendable (CapabilityContext) -> Capability.Availability = { ctx in
+        ctx.writeEditorAttached || ctx.takesBoardAttached || ctx.mode != nil
+            ? .act : .unavailable
+    }
+
     private static let always: @Sendable (CapabilityContext) -> Capability.Availability = { _ in .act }
 
     // MARK: - The table
@@ -514,8 +525,29 @@ nonisolated enum CapabilityRegistry {
             id: .showOriginBlock, verb: "Show Original Block", scope: .block,
             doors: [.contextMenu],
             shortcutLabel: nil, takesAccess: .native,
-            unavailableNote: "Released originals are listed under Library → Archived & Deleted.",
+            // 13j J6: the global "Unplaced blocks" listing this note used to
+            // name is GONE (her round-2 ruling). Released originals live in
+            // the note's own tray now, and that is where this door lands.
+            unavailableNote: "Released originals wait in \(TrayPath.menuLabel) — "
+                + "\(TrayPath.doorPhrase).",
             availability: takeFamily),
+        // 13j J2 — **THE PER-NOTE TRAY.** Her words: *"you need to be able to
+        // see the archived blocks (or deleted blocks) that are associated
+        // with a particular post, because just going to the library you get a
+        // little lost."*
+        //
+        // TWO doors for ONE act, which is the whole reason it is declared:
+        // the context bar's quiet `⌫ N` badge (`.surface`, rendered only
+        // when this note has deleted something — sitting round 1's "calm at
+        // rest") and the `note ▾` menu's item, which is named in words and
+        // is always there, because a badge that hides when the count is zero
+        // cannot be the only way in.
+        Capability(
+            id: .showNoteTray, verb: TrayPath.menuLabel, scope: .post,
+            doors: [.surface, .bottomBar],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Open a note and its tray lists what it has deleted.",
+            availability: noteScoped),
 
         // MARK: Commit + undo
         Capability(

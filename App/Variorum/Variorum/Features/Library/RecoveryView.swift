@@ -8,6 +8,30 @@
 //  `restoreContainer` away — the 2026-07-05 author decision's read side).
 //  Functional, unstyled.
 //
+//  ── 13j J6: THE "UNPLACED BLOCKS" SECTION IS GONE ────────────────────────
+//  Her report, verbatim: *"what is that cursed table of lost hopes and
+//  dreams? if a user ever gets there (which I'm wondering if they should at
+//  all tbh) … why are we even offering to auto add deleted blocks to the
+//  snippets pool? it doesn't make that much sense to me."*
+//
+//  The sitting's round-2 ruling removed the listing outright, and the
+//  argument was that its ONE unique case — an original whose successors were
+//  all later deleted — is already covered per-note, because a divide-W/merge
+//  release stamps `last_container_id` exactly so a released block still
+//  knows its home. Everything else is served better where she is standing:
+//  the note's own tray (`TrayPanel`, "Preserved originals") and the lineage
+//  door on a successor. The spec's own rationale for the global view was a
+//  DEVELOPER safety net — `Queries.unplacedBlocks` survives as that, a debug
+//  query rather than a room in the house.
+//
+//  The "Place in pool" door went with it, and so did the W10b reveal
+//  plumbing that navigated here (`.variorumRevealUnplacedBlock`, RootView's
+//  `revealUnplacedBlockID`): the lineage door now opens the note's tray in
+//  place, which is where the block it names actually lives.
+//
+//  What this surface keeps is unchanged and stays that way until batch 6
+//  reshapes it into the Trash: Archived · Deleted books · Recently Deleted.
+//
 
 import Foundation
 import GRDB // AsyncValueObservation iteration
@@ -30,26 +54,9 @@ import VariorumCore
 nonisolated enum RecoveryPath {
     /// The Library ⋯ menu's item, and the palette row.
     static let menuLabel = "Archived & Deleted"
-    /// The section within it that lists divide-W/merge leftovers.
-    static let unplacedSection = "Unplaced blocks"
     /// The arrow is the shipped copy's own (`\u{2192}`, as the merge
     /// ceremony and the helper already write it) — one voice, not a new one.
     static var surface: String { "Library \u{2192} \(menuLabel)" }
-    static var unplacedBlocks: String { "\(surface) \u{2192} \(unplacedSection)" }
-}
-
-extension Notification.Name {
-    /// 13f W10b: "show me the released original" — a SIGNAL (which block),
-    /// never a decision (where it lands). `RootView` composes the navigation,
-    /// exactly as it does for `.variorumOpenPost` (P-4).
-    static let variorumRevealUnplacedBlock =
-        Notification.Name("variorumRevealUnplacedBlock")
-}
-
-/// The unplaced-blocks observation's value (nonisolated — it hops executors).
-nonisolated struct UnplacedListing: Equatable, Sendable {
-    var blocks: [Queries.UnplacedBlock]
-    var pools: [Container]
 }
 
 @MainActor
@@ -63,12 +70,6 @@ final class RecoveryViewModel {
 
     private(set) var archived: [Queries.TimelineItem] = []
     private(set) var deleted: [Queries.TimelineItem] = []
-    /// Phase 11 (A3 family; §12's low-priority safety net): live blocks
-    /// with NO live placement — divide-W/merge lineage leftovers. Listed
-    /// plainly; the door back is placeBlock into a pool.
-    private(set) var unplaced: [Queries.UnplacedBlock] = []
-    private(set) var unplacedTruncated = false
-    private(set) var pools: [Container] = []
     /// 13b 4F (N37 — S4-28.2, the author's reversal of the pre-13
     /// "readings have no restore door" boundary): deleted BOOKS, one
     /// `restoreReading` away — chapters and memberships revive by the
@@ -117,26 +118,6 @@ final class RecoveryViewModel {
         self.deleted = deleted
     }
 
-    func startUnplaced() async {
-        do {
-            // Bounded + the probe row (review round 1, MINOR 3 — the same
-            // window+1 discipline as the two sections above it).
-            for try await value in session.database.observe({ db in
-                UnplacedListing(
-                    blocks: try Queries.unplacedBlocks(db, limit: Self.window + 1),
-                    pools: try Queries.pools(db))
-            }) {
-                unplacedTruncated = value.blocks.count > Self.window
-                unplaced = unplacedTruncated
-                    ? Array(value.blocks.prefix(Self.window)) : value.blocks
-                pools = value.pools
-            }
-        } catch is CancellationError {
-        } catch {
-            lastError = String(describing: error)
-        }
-    }
-
     func startDeletedReadings() async {
         do {
             for try await value in session.database.observe({ db in
@@ -168,71 +149,25 @@ final class RecoveryViewModel {
             lastError = String(describing: error)
         }
     }
-
-    /// The safety net's one door: re-place the lineage leftover somewhere
-    /// visible (`placeBlock` — the W-reversibility primitive's face).
-    func place(blockID: String, into containerID: String) async {
-        do {
-            try await session.runner.run { ops in
-                _ = try ops.placeBlock(blockID, in: containerID, at: .end)
-            }
-            lastError = nil
-        } catch {
-            lastError = String(describing: error)
-        }
-    }
 }
 
 struct RecoveryView: View {
     let session: AppSession
     let library: LibraryViewModel
     var openPost: (String) -> Void
-    /// 13f W10b: the block the "Show Original Block" door asked to see —
-    /// scrolled to and marked on arrival, then consumed (the
-    /// `router.pendingSelection` one-shot pattern).
-    var revealBlockID: String?
-    var onRevealConsumed: () -> Void = {}
     @State private var model: RecoveryViewModel
-    @State private var revealed: String?
 
     init(
         session: AppSession, library: LibraryViewModel,
-        openPost: @escaping (String) -> Void,
-        revealBlockID: String? = nil,
-        onRevealConsumed: @escaping () -> Void = {}
+        openPost: @escaping (String) -> Void
     ) {
         self.session = session
         self.library = library
         self.openPost = openPost
-        self.revealBlockID = revealBlockID
-        self.onRevealConsumed = onRevealConsumed
         _model = State(initialValue: RecoveryViewModel(session: session))
     }
 
-    var body: some View {
-        ScrollViewReader { proxy in
-            list
-                // The reveal waits for the row to EXIST: the unplaced
-                // observation starts with this view, so a reveal requested
-                // during navigation would otherwise scroll to nothing. Keyed
-                // on both the request and the listing, so whichever lands
-                // second still performs it.
-                .onChange(of: revealTrigger, initial: true) { _, _ in
-                    guard let revealBlockID,
-                          model.unplaced.contains(where: { $0.blockID == revealBlockID })
-                    else { return }
-                    revealed = revealBlockID
-                    withAnimation { proxy.scrollTo(revealBlockID, anchor: .center) }
-                    onRevealConsumed()
-                }
-        }
-    }
-
-    /// The request + the listing's identity: either arriving completes the
-    /// reveal (pure, so the ordering rule is readable and testable).
-    private var revealTrigger: String {
-        "\(revealBlockID ?? "-")#\(model.unplaced.count)"
-    }
+    var body: some View { list }
 
     private var list: some View {
         List {
@@ -252,42 +187,6 @@ struct RecoveryView: View {
                 }
                 if model.archivedTruncated {
                     Text("Showing the \(RecoveryViewModel.window) most recently archived — older ones aren't listed.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            Section(RecoveryPath.unplacedSection) {
-                // §12's utility view: live blocks no container points at
-                // (released to lineage by divide-W/merge, or a restore that
-                // lost its home). A cheap query worth having as a safety
-                // net (the spec's words) — listed plainly.
-                if model.unplaced.isEmpty {
-                    Text("No unplaced blocks.").foregroundStyle(.secondary)
-                }
-                ForEach(model.unplaced, id: \.blockID) { item in
-                    HStack {
-                        Text((item.text?.isEmpty == false) ? String(item.text!.prefix(80)) : "(empty block)")
-                            .lineLimit(1)
-                        Spacer()
-                        Menu("Place in pool") {
-                            ForEach(model.pools, id: \.id) { pool in
-                                // 13k K2: the pool's own name, or the day it
-                                // was created — the one display brain.
-                                Button(PoolNaming.title(pool)) {
-                                    Task { await model.place(blockID: item.blockID, into: pool.id) }
-                                }
-                            }
-                        }
-                        .fixedSize()
-                    }
-                    // 13f W10b: the block the lineage door sent her to is
-                    // MARKED, so a long list still answers "which one".
-                    .listRowBackground(
-                        revealed == item.blockID
-                            ? Color.accentColor.opacity(0.18) : Color.clear)
-                }
-                if model.unplacedTruncated {
-                    Text("Showing the \(RecoveryViewModel.window) most recently touched unplaced blocks — older ones aren't listed.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -358,7 +257,6 @@ struct RecoveryView: View {
         .task { await model.startArchived() }
         .task { await model.startDeleted() }
         .task { await model.startDeletedReadings() }
-        .task { await model.startUnplaced() }
     }
 
     private func title(_ item: Queries.TimelineItem) -> some View {

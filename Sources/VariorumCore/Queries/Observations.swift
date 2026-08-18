@@ -112,4 +112,22 @@ extension AppDatabase {
     public func observeTray(_ postID: String) -> AsyncValueObservation<[Queries.TrayItem]> {
         observe { try Queries.trayBlocks($0, postID: postID) }
     }
+
+    /// A post's PRESERVED ORIGINALS, live (13j J2 — the tray's second
+    /// section). Bounded like every corpus-history-shaped listing.
+    public func observePreservedOriginals(
+        _ postID: String, limit: Int? = nil
+    ) -> AsyncValueObservation<[Queries.PreservedOriginal]> {
+        observe { try Queries.preservedOriginals($0, postID: postID, limit: limit) }
+    }
+
+    /// The tray door's two counts, live (13j J2). Deliberately the count
+    /// query rather than the listings — see `Queries.trayCounts`: this one
+    /// never reads `variant`, so an open note's badge does not re-run at
+    /// autosave rate (P1).
+    public func observeTrayCounts(
+        _ postID: String
+    ) -> AsyncValueObservation<Queries.TrayCounts> {
+        observe { try Queries.trayCounts($0, postID: postID) }
+    }
 }

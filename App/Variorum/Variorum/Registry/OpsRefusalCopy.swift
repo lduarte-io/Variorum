@@ -197,27 +197,41 @@ nonisolated enum BlockSelectionCopy {
         picked <= 1 ? "Delete Block" : "Delete \(picked) Blocks"
     }
 
+    /// **13j J8(a), GRADUATED (batch 2).** Batch 1 trimmed this line to the
+    /// interim truth because the tray it named had no door; batch 2 built
+    /// the door, so the whole truth fits again — and the two halves are
+    /// different promises, deliberately: ⌥⌘Z is the immediate one-gesture
+    /// reversal that dies with the session, the tray is the one that does
+    /// not. A receipt that named only the first taught her that a delete is
+    /// permanent after a restart, which is exactly what her morning report
+    /// found.
     static let deleteHelp =
         "Delete every picked block — \u{2325}\u{2318}Z brings them all back at "
-        + "once, while this session is open"
+        + "once, and afterwards they wait in \(TrayPath.menuLabel)"
 
     /// The receipt. It names the ONE undo, because the whole point of the
     /// compound is that a multi-delete is one mistake to reverse, not N.
     ///
-    /// **13j J8(a) — THE INTERIM TRUTH.** Until this batch these lines also
-    /// promised the block "waits in this note's deleted-blocks tray", and her
-    /// first morning back found that the tray HAS NO FACE anywhere: the ops
-    /// exist (`restoreBlock`, `last_container_id`) with no door, so past the
-    /// session's ⌥⌘Z window a deleted block is unreachable by any click. Copy
-    /// naming a surface that does not exist is the defect class the whole
-    /// J8 row is about, so the promise is withdrawn and replaced by the fact:
-    /// the undo window is the session. **Batch 2 builds the tray, and this is
-    /// the line that graduates** — it will name the tray and its real door.
+    /// **13j J8(a) — GRADUATED (batch 2).**
+    ///
+    /// The history, because it is the point. This line used to promise the
+    /// block "waits in this note's deleted-blocks tray", and her first
+    /// morning back found that the tray HAD NO FACE anywhere: the ops
+    /// existed (`restoreBlock`, `last_container_id`) with no door, so past
+    /// the session's ⌥⌘Z window a deleted block was unreachable by any
+    /// click. Batch 1 withdrew the promise and said only what was true.
+    /// **Batch 2 built the door, so the promise comes back — naming it.**
+    ///
+    /// It names BOTH roads because they are different promises: ⌥⌘Z is the
+    /// immediate reversal that dies with the session; the tray is the one
+    /// that survives a restart. Saying only the first is what made a delete
+    /// feel permanent.
     static func deletedNote(_ count: Int) -> String {
-        count == 1
-            ? "Block deleted — \u{2325}\u{2318}Z puts it back while this session is open."
+        let road = "then in \(TrayPath.menuLabel) \u{2014} \(TrayPath.doorPhrase)."
+        return count == 1
+            ? "Block deleted — \u{2325}\u{2318}Z puts it back, \(road)"
             : "\(count) blocks deleted — \u{2325}\u{2318}Z puts them all back in one go, "
-                + "while this session is open."
+                + road
     }
 
     /// Nothing picked. Reachable from the routed/registry note only; the

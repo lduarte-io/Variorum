@@ -51,7 +51,12 @@ struct ContextBarCaptureTests {
 
     private func bar(
         tokens: VoiceTokens, origin: String?, forward: String?, books: [Reading],
-        tags: [VariorumCore.Tag]?, folded: Bool
+        tags: [VariorumCore.Tag]?, folded: Bool,
+        // 13j J2 — the tray badge's state. Defaulted to "nothing deleted",
+        // so every state this harness already captured renders EXACTLY as it
+        // did before the door existed (which is itself the claim her K11
+        // ruling cares about: at rest, the bar is unchanged).
+        trayDeleted: Int = 0, trayPreserved: Int = 0
     ) -> ContextBar {
         ContextBar(
             tokens: tokens, originLabel: origin, forwardLabel: forward, books: books,
@@ -59,6 +64,8 @@ struct ContextBarCaptureTests {
                 .init(tags: $0, allTags: $0, onApply: { _ in }, onRemove: { _ in })
             },
             tagsFolded: folded,
+            trayFace: tags == nil ? nil : .init(
+                deletedCount: trayDeleted, preservedCount: trayPreserved, onOpen: {}),
             onBack: {}, onForward: {}, onOpenBook: { _ in }, onToggleTags: {})
     }
 
@@ -95,6 +102,16 @@ struct ContextBarCaptureTests {
                 ("6-a-place-not-a-note",
                  bar(tokens: tokens, origin: "Shelf", forward: "Orbit", books: [],
                      tags: nil, folded: false)),
+                // 13j J2 — the TRAY BADGE, the bar's one conditional door.
+                // States 1–6 above are all "nothing deleted", so the pair
+                // 1 vs 7 is the picture of what her ruling asks for: calm at
+                // rest, one quiet ⌫ N once this note has deleted something.
+                ("7-tray-badge-one-deleted",
+                 bar(tokens: tokens, origin: "Orbit", forward: nil, books: one,
+                     tags: tags, folded: false, trayDeleted: 1)),
+                ("8-tray-badge-with-originals-waiting",
+                 bar(tokens: tokens, origin: "Orbit", forward: nil, books: one,
+                     tags: tags, folded: false, trayDeleted: 3, trayPreserved: 2)),
             ]
             for (name, state) in states {
                 try write(state, tokens: tokens, to: "\(voiceName)-\(name).png")

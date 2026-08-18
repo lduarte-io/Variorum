@@ -1368,13 +1368,24 @@ final class TakesViewModel {
         statusMessage = message
     }
 
-    /// 13f W10b — the lineage door's act, identical to Write's: the surface
-    /// names the block, the SHELL decides where that lands (P-4).
+    /// 13f W10b — the lineage door's act, identical to Write's, and
+    /// REPOINTED with it at 13j J6: the released original lives in this
+    /// note's own tray now (the global unplaced listing is gone), so the
+    /// door opens the tray with its row marked instead of navigating to a
+    /// room that no longer exists. `EditorViewModel.revealOriginBlock`
+    /// carries the full reasoning.
     func revealOriginBlock(_ blockID: String) {
-        NotificationCenter.default.post(
-            name: .variorumRevealUnplacedBlock, object: nil,
-            userInfo: ["blockID": blockID])
-        speak("Showing the original block in \(RecoveryPath.surface).")
+        trayRequest = TrayRequest(postID: postID, revealBlockID: blockID)
+        speak("Showing the original in \(TrayPath.menuLabel).")
+    }
+
+    /// 13j J2: the tray sheet's pending target (`TakesBottomBar` presents
+    /// it, where the comments sheet lives).
+    var trayRequest: TrayRequest?
+
+    /// The `note ▾` menu's door onto the tray.
+    func requestNoteTray() {
+        trayRequest = TrayRequest(postID: postID)
     }
 
     // MARK: - Fire-and-DO (13b 1b, R115/R118 — the D3 lecture's replacement)

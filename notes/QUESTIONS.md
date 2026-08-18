@@ -718,4 +718,30 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint.**
 
-*(Next free number: **#67**.)*
+## Phase 13j (2026-08-18) — batch 2's calls (the tray, the graveyard, the receipts' graduation)
+
+67. **2026-08-18 · Phase 13j batch 2 (J2 + J6 + J8(a) + the phone-receipts rider) · SEVEN entries.** The BINDING record is the 13j plan's batch-2 section, including two VERIFY-FIRST findings the brief required before anything was built.
+
+    **WHAT SHIPPED, IN ONE SENTENCE:** every note now carries its own tray — a quiet **⌫ N** in the note's bar and a named item in the `note ▾` menu — listing what that note has deleted and what a divide or merge kept whole, with one **Put back** on every row; the Library's "Unplaced blocks" table is gone; and the delete receipts name the tray again, because now it exists.
+
+    **FINDING 1 — there is no such thing as an archived BLOCK.** The sitting called the first section "Deleted & archived", so the brief asked me to check before labelling it. The `block.archived_at` column exists in the schema and in the model, and the sync layer carries it — but **no operation anywhere writes it**, and there is no "archive block" act in the app at all. Archiving is something TAKES and NOTES can be; blocks can only be deleted. **So the section is called "Deleted."** Naming a state the app cannot produce is the same defect as naming a door that isn't there. **The alternative:** build a block-level archive (a real feature, its own decision).
+
+    **FINDING 2 — Put back does NOT return a deleted block to its old spot.** The sitting's design note said a put-back block returns to where it was, because its old placement row still holds its position. The shipped `restoreBlock` does not do that: it leaves the old row tombstoned and puts the block at the **END** of the note. (The exact-position machinery exists, but only on ⌥⌘Z's path, which flips the original row.) **I did not change the operation** — an ops-layer change needs its own state-transition tests and a deliberate record, so the brief said report first. The tray therefore says "Put back at the end of this note", which is true. **The alternative, and it is a real one: make `restoreBlock` flip the old placement row when it survives, so Put back and ⌥⌘Z land in the same place.** That is the behaviour the sitting described, and it would make the tray better. It is a small change to a shipped operation and it is yours to authorize.
+
+    **(a) The badge counts DELETED blocks only, and hides at zero** — your round-1 "calm at rest" plus round-5's "originals must not inflate an urgent-looking count". Consequence, named: a note with preserved originals but nothing deleted shows **no badge**, and the `note ▾` item is how you reach those. **The alternative:** count both.
+
+    **(b) The badge sits AFTER the four constant icons, before the tag cards.** Your K11 ruling says the icon row never changes; your J2 ruling says this door appears only when there is something in the tray. Both are kept: the four aiming targets are untouched, and the badge appears beside them — so the only thing that ever moves is the tag cards, and only when you have just deleted something. **The alternative:** park it at the far right where nothing moves at all.
+
+    **(c) It is called "This Note's Tray"** — your own word, and the word the receipts have always used. **The alternative:** anything you like; it is one constant (`TrayPath.menuLabel`) and every receipt, ceremony explainer and menu item follows it.
+
+    **(d) A preserved original's Put back lands it after its last surviving successor**, not at the note's end — so putting back a divide's original drops it right beside the two blocks it became. With no successors left, it goes to the end. This is composed at the face over `placeBlock`; no operation changed. **The alternative:** always the end (simpler, and wrong-feeling where the successors are still there).
+
+    **(e) "Show Original Block" now opens THIS note's tray** instead of navigating to the Library table you called "that cursed table of lost hopes and dreams". It had to land somewhere real the moment the table went. **Its final form is batch 3's** — a read-only peek of the original with its takes — so this is a bridge, not the destination. **The alternative:** remove the door until batch 3.
+
+    **(f) The delete receipts graduated.** They now say the blocks wait in This Note's Tray and name the ⌫ door, alongside ⌥⌘Z — two different promises, because ⌥⌘Z dies with the session and the tray does not. **The alternative:** name only one road.
+
+    **(g) The iPhone's two delete messages stopped promising a tray.** The phone has no tray face and no undo door, so they now say what is true there: *"The block leaves this note, with its takes. There's no undo here."* and *"Block deleted."* No mention of the Mac (the no-redirect rule). **The phone's own tray is a parity-ledger row.** **The alternative:** leave the sentence and build the phone tray sooner.
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#68**.)*

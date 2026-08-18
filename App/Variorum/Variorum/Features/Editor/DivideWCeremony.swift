@@ -348,14 +348,14 @@ final class DivideWCeremony {
             + "its own \u{2702}, and its two halves become the two new blocks' "
             + "takes. **An unchecked take is not cut and goes into neither new "
             + "block** — it stays whole on the original block, which the divide "
-            + "keeps and releases to \(RecoveryPath.unplacedBlocks)."
+            + "keeps and releases to \(TrayPath.originalsPathWithDoor)."
     }
 
     /// The per-row caption under an unchecked take — the same answer where
     /// she was actually looking when she asked.
     nonisolated static var uncheckedRowNote: String {
         "Not cut — stays whole on the original block, which waits in "
-            + "\(RecoveryPath.surface)."
+            + "\(TrayPath.originalsPath)."
     }
 
     /// The completion's destination sentence — pure, so the copy is pinned
@@ -367,7 +367,7 @@ final class DivideWCeremony {
         guard uncheckedTakes > 0 else { return nil }
         let takes = uncheckedTakes == 1 ? "1 uncut take" : "\(uncheckedTakes) uncut takes"
         return "Divided — the original block kept \(takes) and waits in "
-            + "\(RecoveryPath.unplacedBlocks). \u{2325}\u{2318}Z undoes the divide."
+            + "\(TrayPath.originalsPathWithDoor). \u{2325}\u{2318}Z undoes the divide."
     }
 
     /// Rebuilds the ceremony over the CURRENT fan: marks survive by take

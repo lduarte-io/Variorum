@@ -126,6 +126,14 @@ struct EditorView: View {
                 session.commandRouter.unregisterHandler(commandToken)
             }
         }
+        .sheet(item: $model.trayRequest) { request in
+            // 13j J2: this note's tray — what it has deleted, and what a
+            // divide or merge preserved whole. One view, presented wherever
+            // a door raises it (the `CommentsPanel` precedent).
+            TrayPanel(
+                session: session, postID: request.postID,
+                revealBlockID: request.revealBlockID)
+        }
         .sheet(item: $model.commentsPanel) { panel in
             // Phase 13 C1 (R7): the block's comments — margin/inline faces
             // all open here; deleted comments visible + resurrectable.

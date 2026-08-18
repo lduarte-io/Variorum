@@ -124,7 +124,7 @@ final class WindowRegistry {
     func kind(of id: UUID) -> Kind? { entries[id]?.kind }
 
     /// Where an app-wide NAVIGATION broadcast lands (`.variorumOpenPost`,
-    /// `.variorumRevealUnplacedBlock`, `.variorumOpenBookAtPost`).
+    /// `.variorumOpenBookAtPost`).
     ///
     /// **This is the second window's own correctness problem, and it is why
     /// the rule is not simply `isKey`.** Those notifications are posted to

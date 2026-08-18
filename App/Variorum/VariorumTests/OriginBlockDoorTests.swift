@@ -17,8 +17,15 @@
 //
 //  W10b — a successor block offers a door straight back at its released
 //  original. The door is registry-declared and rendered ONLY where such an
-//  origin exists (P-2), the act is a broadcast the SHELL turns into
-//  navigation (P-4), and the recovery surface marks the block on arrival.
+//  origin exists (P-2).
+//
+//  **13j J6 REPOINTED W10b's landing** (her round-2 ruling removed the
+//  global "Unplaced blocks" listing this door used to navigate to). The
+//  door now opens the NOTE'S OWN TRAY — where the release stamped the block
+//  — with its row marked; no broadcast, no navigation, no leaving the note.
+//  The arms below moved with it: what used to assert the posted
+//  notification now asserts the raised `TrayRequest`, which is a stronger
+//  claim, not a weaker one (it names the destination, not just the signal).
 //
 //  What is NOT pinned here, deliberately and per the batch's honesty rule:
 //  the SwiftUI drop/reveal geometry (the `ScrollViewReader` scroll and the
@@ -44,14 +51,18 @@ struct OriginBlockDoorTests {
     /// stopped. Both sentences now carry the road, in the same grammar the
     /// merge ceremony has used all along.
     @Test func theCeremonyCopyNamesTheRecoverySurface() {
-        #expect(DivideWCeremony.checklistExplainer.contains(RecoveryPath.unplacedBlocks),
+        #expect(DivideWCeremony.checklistExplainer.contains(TrayPath.originalsPath),
                 "the explainer names the full path, section included")
-        #expect(DivideWCeremony.uncheckedRowNote.contains(RecoveryPath.surface),
+        #expect(DivideWCeremony.uncheckedRowNote.contains(TrayPath.originalsPath),
                 "so does the caption under the unchecked take she is looking at")
-        // The name is the DOOR's own — the Library menu item reads the same
-        // constant, so the sentence cannot point at a label that isn't there.
-        #expect(RecoveryPath.surface.contains(RecoveryPath.menuLabel))
-        #expect(RecoveryPath.unplacedBlocks.contains(RecoveryPath.unplacedSection))
+        // 13j J6: the name is the DOOR's own — the tray panel's title and
+        // its section header read the same constants the sentence does, so
+        // the copy cannot point at a label that isn't there. (Before J6 this
+        // pointed at the Library's removed "Unplaced blocks" section.)
+        #expect(TrayPath.originalsPath.contains(TrayPath.menuLabel))
+        #expect(TrayPath.originalsPath.contains(TrayPath.originalsSection))
+        #expect(TrayPath.originalsPathWithDoor.contains(TrayPath.doorPhrase),
+                "the teaching form names the way in, not just the place")
     }
 
     /// The completion sentence: only when an unchecked take actually rode the
@@ -64,7 +75,7 @@ struct OriginBlockDoorTests {
         #expect(one?.contains("uncut takes") == false, "singular stays singular")
         let three = try? #require(DivideWCeremony.releasedOriginalNote(uncheckedTakes: 3))
         #expect(three?.contains("3 uncut takes") == true)
-        #expect(three?.contains(RecoveryPath.unplacedBlocks) == true)
+        #expect(three?.contains(TrayPath.originalsPath) == true)
         #expect(three?.contains("\u{2325}\u{2318}Z") == true, "the ratified undo grammar")
     }
 
@@ -87,7 +98,7 @@ struct OriginBlockDoorTests {
             await board.model.ceremony.confirm()
             let status = try #require(board.model.statusMessage)
             #expect(status.contains("2 uncut takes"), "\(status)")
-            #expect(status.contains(RecoveryPath.unplacedBlocks), "\(status)")
+            #expect(status.contains(TrayPath.originalsPath), "\(status)")
         }
     }
 
@@ -223,23 +234,18 @@ struct OriginBlockDoorTests {
         }
     }
 
-    /// Fire-and-DO (P-2) + broadcasts-carry-signals (P-4): invoking posts the
-    /// block id and speaks; it never navigates by itself.
-    @Test func theDoorBroadcastsTheBlockAndSpeaks() async throws {
+    /// Fire-and-DO (P-2): invoking opens THIS NOTE'S TRAY at the named
+    /// block, and speaks. 13j J6's repoint — it used to broadcast a signal
+    /// the shell turned into a navigation to a listing that no longer
+    /// exists.
+    @Test func theDoorOpensThisNotesTrayAtTheOriginAndSpeaks() async throws {
         try await withEditor(seedBlocks: ["one"]) { editor in
-            let received = LockIsolated<[String]>([])
-            let token = NotificationCenter.default.addObserver(
-                forName: .variorumRevealUnplacedBlock, object: nil, queue: nil
-            ) { note in
-                if let id = note.userInfo?["blockID"] as? String {
-                    received.withValue { $0.append(id) }
-                }
-            }
-            defer { NotificationCenter.default.removeObserver(token) }
-
+            #expect(editor.model.trayRequest == nil)
             editor.model.revealOriginBlock("origin-block")
-            #expect(received.value == ["origin-block"])
-            #expect(editor.model.statusMessage?.contains(RecoveryPath.surface) == true)
+            let request = try #require(editor.model.trayRequest)
+            #expect(request.postID == editor.postID, "the note she is standing in")
+            #expect(request.revealBlockID == "origin-block")
+            #expect(editor.model.statusMessage?.contains(TrayPath.menuLabel) == true)
         }
     }
 
@@ -259,18 +265,11 @@ struct OriginBlockDoorTests {
                     == [slot.blockID],
                     "the board reads the origin off its ordinary projection")
 
-            let received = LockIsolated<[String]>([])
-            let token = NotificationCenter.default.addObserver(
-                forName: .variorumRevealUnplacedBlock, object: nil, queue: nil
-            ) { note in
-                if let id = note.userInfo?["blockID"] as? String {
-                    received.withValue { $0.append(id) }
-                }
-            }
-            defer { NotificationCenter.default.removeObserver(token) }
             board.model.revealOriginBlock(slot.blockID)
-            #expect(received.value == [slot.blockID])
-            #expect(board.model.statusMessage?.contains(RecoveryPath.surface) == true)
+            let request = try #require(board.model.trayRequest)
+            #expect(request.postID == board.postID)
+            #expect(request.revealBlockID == slot.blockID)
+            #expect(board.model.statusMessage?.contains(TrayPath.menuLabel) == true)
         }
     }
 

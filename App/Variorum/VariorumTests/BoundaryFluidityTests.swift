@@ -384,7 +384,10 @@ struct BoundaryFluidityTests {
             let status = try #require(harness.model.statusMessage)
             #expect(status.contains("take"),
                     "the gesture SPEAKS about the fan it folded away: \(status)")
-            #expect(status.contains("Unplaced blocks"),
+            // 13j J6: the road's DESTINATION moved (the global unplaced
+            // listing is gone; released originals live in the note's tray),
+            // and the claim is unchanged — the road stays NAMED.
+            #expect(status.contains(TrayPath.originalsPath),
                     "the lineage road stays named on the ceremony path: \(status)")
         }
     }

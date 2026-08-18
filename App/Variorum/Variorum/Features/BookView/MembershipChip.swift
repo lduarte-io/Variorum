@@ -411,6 +411,8 @@ extension Notification.Name {
     /// 13f W20(a) — THE ASCENT: a surface asks the shell to open a BOOK,
     /// revealed at a post (`userInfo`: `bookID`, `postID`). P-4 exactly —
     /// the surface names a destination, `RootView` decides what it means
-    /// (the `.variorumRevealUnplacedBlock` precedent, batch 2).
+    /// (the `.variorumOpenPost` precedent, one level up; the W10b
+    /// `.variorumRevealUnplacedBlock` that first carried this shape was
+    /// retired at 13j J6 — its destination no longer exists).
     static let variorumOpenBookAtPost = Notification.Name("variorumOpenBookAtPost")
 }

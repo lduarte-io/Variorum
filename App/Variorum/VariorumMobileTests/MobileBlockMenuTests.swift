@@ -273,16 +273,25 @@ struct MobileBlockMenuTests {
                      replacement: " Typed.")
             await model.blockMenu.delete(blockID: seed.blockA)
 
-            // Parity C2 (inventory #2/#5, sanctioned pin flip riding the
-            // matrix's dissolve ruling): the tray sentences keep the FACT
-            // and lose the redirect — no string on this door names a
-            // platform (the no-redirect principle).
-            #expect(model.statusMessage
-                == "Block deleted — it waits in this note's deleted-blocks tray.")
-            #expect(MobileStructuralController.blockDeletedStatus.contains("Mac") == false)
+            // **13j batch 2 — a SECOND sanctioned pin flip on this door.**
+            // Parity C2 kept the "deleted-blocks tray" sentence here after
+            // dissolving its "on the Mac" redirect, reasoning that the tray
+            // was a FACT even without a phone face. J8's copy doctrine — and
+            // her own morning report on the Mac's identical promise — says a
+            // promise a user cannot act on is not a fact she can use. This
+            // phone has no tray face and no undo door, so both strings now
+            // say only what is true HERE.
+            #expect(model.statusMessage == "Block deleted.")
             #expect(MobileBlockMenuController.deleteConfirmDetail
-                == "The block leaves this note and waits in its deleted-blocks tray.")
-            #expect(MobileBlockMenuController.deleteConfirmDetail.contains("Mac") == false)
+                == "The block leaves this note, with its takes. There's no undo here.")
+            for line in [MobileStructuralController.blockDeletedStatus,
+                         MobileBlockMenuController.deleteConfirmDetail] {
+                // The no-redirect principle (MobileSoul §4) — unchanged.
+                #expect(!line.contains("Mac"))
+                // …and the new half: no phone string promises a surface the
+                // phone does not have. The tray twin is the parity ledger's.
+                #expect(!line.lowercased().contains("tray"))
+            }
             let deletedAt = try await db.read { db in
                 try String.fetchOne(
                     db, sql: "SELECT deleted_at FROM block WHERE id = ?",
