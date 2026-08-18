@@ -1711,3 +1711,19 @@ round A does NOT launch until her word.** Round A's shape when she
 gives it: a FRESH Fable cold reviewer over the combined batches-1–4
 diff (`6346853..7e5b5cb`), `notes/REVIEW_PROMPT.md` VERBATIM, zero
 framing, findings repo-first.
+
+**AUTHOR GO (2026-08-18, overnight): the HOLD LIFTS.** Her words:
+*"resume your work and progress through the rest of this phase. you
+can restart with the ladder round A. I will be asleep, so make
+judgement calls where needed and compile them for my review at the
+end. go all the way through phase closeout and leave residuals for me
+at the top of the completed phase, so if your context window is quite
+full I'll be able to review it without reviving you. also, I closed
+my app earlier and its closed now, so it can be refreshed when phase
+13 is complete."* Binding readings: ladder round A launches NOW;
+batches 5–8 and ladder round B follow; judgment calls are
+PROVISIONAL-and-continue, ALL compiled into a RESIDUALS section at
+the TOP of this file at closeout (readable without reviving the
+session); the closeout runs the FULL standing ritual; the
+`/Applications` refresh is PRE-AUTHORIZED at phase completion (her
+app confirmed closed — the A1 rail still runs first).
