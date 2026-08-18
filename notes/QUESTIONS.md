@@ -744,4 +744,26 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint.**
 
-*(Next free number: **#68**.)*
+## Phase 13j (2026-08-18) — batch 3's calls (the recovery doors: the original's peek, the lens notice, deleted takes)
+
+68. **2026-08-18 · Phase 13j batch 3 (J3 + J5 + deleted-take recovery + the F2 placement rider) · SIX entries.** The BINDING record is the 13j plan's batch-3 section.
+
+    **WHAT SHIPPED, IN ONE SENTENCE:** a block that came out of a divide or a merge now offers "See original from divide…" — on its right-click menu, in ⌘K, and as a quiet line in its History — opening a read-only look at the original with **Put back in note** and **Open this note's tray**; a saved lens whose pick was archived or deleted now SAYS so in the column with a one-click Restore; a deleted TAKE can be put back at last; and Put back returns a deleted block to its own place, as you were told it would.
+
+    **(a) F2 is BUILT — your call from batch 2, as the architect ruled it.** `restoreBlock` now flips the placement row the deletion took down, so a block comes back **where it was**, and Put back and ⌥⌘Z land in the same spot. Fresh-at-end survives as the fallback for the one case that genuinely has no old place: a divide's original that was released to lineage and deleted later. The receipt reads the operation's own answer, so it never promises the wrong one. **It is still yours to ratify** — this entry is the "built as ruled" note, not a second asking. **The alternative:** the shipped-before behaviour (always the end).
+
+    **(b) Deleted takes can be put back — and the door has no undo entry.** `restoreVariant` is a tombstone flip: the take comes back with its label, its place in the fan, its parent and its savepoints, exactly as it was. It sits in the recovery-door family (`restoreBlock`, `restoreSection`, restore-comment), which deliberately register NO undo entry, because the door IS the recovery and an entry whose inverse is "delete it again" is a second way to lose the thing. **The alternative:** make it undoable like a structural act.
+
+    **(c) Put back does NOT move the block's default take pointer.** If the take you are restoring used to be the block's default, the delete moved that pointer to another take and the restore leaves it there. Reason: ⌥⌘Z remembers what the pointer WAS at the moment of the delete; a recovery door opened days later does not, and guessing would move a pointer you may have set by hand since. **The alternative:** restore the pointer too when the take was the default (this needs the fact stored somewhere, which is a schema question).
+
+    **(d) The lens notice is worded to the ACTUAL state, and two of its four states carry no button.** "This pick was archived…" and "This pick was deleted…" each get a Restore that opens the right door. A pick whose take does not exist on this device at all, or points at another block (both only reachable through a sync race), get the notice WITHOUT a button — there is nothing to restore, and a button that could only fail is the door P-2 forbids. **The alternative:** one hedged sentence for all four.
+
+    **(e) The notice appears on SAVED lens columns only.** An unnamed/scratch column's picks live in the view, not the store, so they cannot come back dangling after a restart — there is nothing to notice. **The alternative:** show it on scratch columns too (it would only ever fire mid-session).
+
+    **(f) The lineage row shows a DATE, not a time.** "From a divide on Aug 18, 2026 — the original is preserved". The capture caught the time-of-day version pushing the sentence's point off the end of the line. The tray's rows keep their time, because "when did I delete this" is often a same-day question. **The alternative:** time everywhere, or nowhere.
+
+    **ONE THING NAMED RATHER THAN HIDDEN:** the new take-restore act is declared in the capability registry (`Put Back Take`), while the tray's own two Put backs — shipped in batch 2 — are not. Both are inline rows on a recovery panel; the registry grows as work touches it, so the asymmetry is a tidy-up for a later pass, not a defect. It is recorded for the closeout's propose-only list.
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#69**.)*

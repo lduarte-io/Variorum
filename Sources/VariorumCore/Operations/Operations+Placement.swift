@@ -41,13 +41,49 @@ extension Operations {
         }
     }
 
+    /// Where a `restoreBlock` put the block back — so the door that raised it
+    /// can say the true thing (13j batch 3, the F2 rider).
+    public enum BlockRestoreLanding: Sendable, Equatable {
+        /// Its OWN place: the placement row this deletion tombstoned came
+        /// back live, fractional position and chosen variant intact.
+        case itsOldPlace
+        /// The end of `last_container_id` — the fallback, when no revivable
+        /// row exists (a block released to lineage and deleted later has no
+        /// placement row carrying its tombstone's stamp).
+        case endOfNote
+        /// Live again, but with nowhere to go: `last_container_id` is unset
+        /// or its container has since died.
+        case unplaced
+    }
+
     /// Undo a `deleteBlock` from the tray: clear the block's tombstone and
     /// those of children stamped with the block's exact `deleted_at`
     /// (cascade victims) — independently-deleted rows keep their different
-    /// stamps and stay dead. The old placement row stays tombstoned; a fresh
-    /// placement lands at the end of `last_container_id`, when that container
-    /// still lives (otherwise the block returns live but unplaced).
-    public func restoreBlock(_ blockID: String) throws {
+    /// stamps and stay dead.
+    ///
+    /// **THE PLACEMENT (13j batch 3 — the architect's F2 ruling; PROVISIONAL,
+    /// her ratify at QUESTIONS #67 F2).** This op used to leave the old
+    /// placement row tombstoned and mint a FRESH one at the note's end, which
+    /// meant Put back and ⌥⌘Z — the two doors onto one gesture — landed a
+    /// block in two different places, and the tray's receipt had to say so.
+    /// It now flips the row this deletion took down (stamp-matched, exactly
+    /// as `revertDeleteBlock` does), so the old fractional position revives
+    /// and the two doors agree. The exact-row shape is the restore family's
+    /// rule everywhere else — `restoreContainer`, `restoreReading`,
+    /// `restoreSection` and `revertDeleteBlock` all flip exact rows rather
+    /// than minting replacements.
+    ///
+    /// Fresh-at-end SURVIVES as the fallback, because a released-then-deleted
+    /// block genuinely has no row to revive: divide-W/merge tombstone the
+    /// placement at RELEASE time (its own stamp), and the later `deleteBlock`
+    /// finds no live placement to stamp, so nothing carries the block's
+    /// tombstone. Same for a container that has since died — the block
+    /// returns live but unplaced.
+    ///
+    /// A sealed container refuses on BOTH roads (`ensureUnlocked`), exactly
+    /// as it did when the only road was `insertPlacement`.
+    @discardableResult
+    public func restoreBlock(_ blockID: String) throws -> BlockRestoreLanding {
         try database.write { db in
             guard var block = try Block.fetchOne(db, key: blockID) else {
                 throw OperationError.blockNotFound(id: blockID)
@@ -63,11 +99,34 @@ extension Operations {
             try block.update(db)
             try flipBlockCascadeTombstones(db, blockID: blockID, stamp: stamp, now: now)
 
-            if let lastContainerID = block.lastContainerId,
-               let container = try Container.fetchOne(db, key: lastContainerID),
-               container.deletedAt == nil {
-                _ = try insertPlacement(db, blockID: blockID, containerID: lastContainerID, at: .end)
+            guard let lastContainerID = block.lastContainerId,
+                  let container = try Container.fetchOne(db, key: lastContainerID),
+                  container.deletedAt == nil
+            else { return .unplaced }
+
+            // The row this deletion took down, in the container the block
+            // was deleted FROM. Both halves of the key matter: the stamp
+            // says "this deletion", the container says "this note" — a
+            // block that lived elsewhere earlier carries older tombstoned
+            // rows there, and reviving one of those would move it.
+            if let revivable = try ContainerBlock.fetchOne(
+                db,
+                sql: """
+                    SELECT * FROM container_block
+                    WHERE block_id = ? AND container_id = ? AND deleted_at = ?
+                    ORDER BY id LIMIT 1
+                    """,
+                arguments: [blockID, lastContainerID, stamp]),
+               try livePlacement(db, blockID: blockID) == nil {
+                try ensureUnlocked(container)
+                var revived = revivable
+                revived.deletedAt = nil
+                revived.updatedAt = now
+                try revived.update(db)
+                return .itsOldPlace
             }
+            _ = try insertPlacement(db, blockID: blockID, containerID: lastContainerID, at: .end)
+            return .endOfNote
         }
     }
 

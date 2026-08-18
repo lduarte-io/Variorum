@@ -72,13 +72,43 @@ extension Queries {
     ///
     /// Cost: one indexed pass over the post's placements (the `renderPost`
     /// class, and it rides the same projections), never the corpus.
+    ///
+    /// **13j J3 — the value grew from a bare id to `UnplacedOrigin`.** Her
+    /// ruled door says *"See original from divide…"* / *"…from merge…"*, and a
+    /// menu builder runs synchronously off a held projection: it cannot ask
+    /// the store which act released the block, so the projection has to carry
+    /// it. The edge already knows — `origin_op` since Phase 3 — and its
+    /// `created_at` is the date the History face's lineage row names.
+    public struct UnplacedOrigin: Equatable, Sendable, Identifiable {
+        /// The released original's block id.
+        public let blockID: String
+        /// The `derived_from` edge's `origin_op` — 'divide' | 'merge' |
+        /// 'extract' | 'pool_copy' | 'manual' | nil. What the door's words
+        /// say happened.
+        public let originOp: String?
+        /// When the edge was minted, i.e. when the divide or merge happened
+        /// (the canonical ISO-8601 stamp). Deliberately the EDGE's stamp
+        /// rather than a placement tombstone: it is the same fact seen from
+        /// ONE block, so the per-block read below needs no container.
+        public let at: String
+
+        public var id: String { blockID }
+
+        public init(blockID: String, originOp: String?, at: String) {
+            self.blockID = blockID
+            self.originOp = originOp
+            self.at = at
+        }
+    }
+
     public static func unplacedOrigins(
         _ db: Database, inContainer containerID: String
-    ) throws -> [String: [String]] {
+    ) throws -> [String: [UnplacedOrigin]] {
         let rows = try Row.fetchAll(
             db,
             sql: """
-                SELECT cb.block_id AS block_id, origin.id AS origin_id
+                SELECT cb.block_id AS block_id, origin.id AS origin_id,
+                       e.origin_op AS origin_op, e.created_at AS created_at
                 FROM container_block cb
                 JOIN edge e
                   ON e.source_block_id = cb.block_id
@@ -92,13 +122,47 @@ extension Queries {
                 ORDER BY cb.block_id, origin.id
                 """,
             arguments: ["post": containerID])
-        var map: [String: [String]] = [:]
+        var map: [String: [UnplacedOrigin]] = [:]
         for row in rows {
             let blockID: String = row["block_id"]
-            let originID: String = row["origin_id"]
-            map[blockID, default: []].append(originID)
+            map[blockID, default: []].append(
+                UnplacedOrigin(
+                    blockID: row["origin_id"], originOp: row["origin_op"],
+                    at: row["created_at"]))
         }
         return map
+    }
+
+    /// The same population read from ONE block (13j J3 — the History face's
+    /// lineage row, and the peek's own re-read at act time). The container
+    /// scoping above exists so a whole post's menus can be built from one
+    /// projection; this is the single-block door onto the identical fact, so
+    /// a surface holding no post-wide projection (a history sheet, a peek)
+    /// never has to fake one.
+    public static func unplacedOrigins(
+        _ db: Database, ofBlock blockID: String
+    ) throws -> [UnplacedOrigin] {
+        try Row.fetchAll(
+            db,
+            sql: """
+                SELECT origin.id AS origin_id, e.origin_op AS origin_op,
+                       e.created_at AS created_at
+                FROM edge e
+                JOIN block origin
+                  ON origin.id = e.target_block_id AND origin.deleted_at IS NULL
+                WHERE e.source_block_id = :block
+                  AND e.type = 'derived_from' AND e.deleted_at IS NULL
+                  AND NOT EXISTS (
+                    SELECT 1 FROM container_block placed
+                    WHERE placed.block_id = origin.id AND placed.deleted_at IS NULL)
+                ORDER BY origin.id
+                """,
+            arguments: ["block": blockID])
+            .map {
+                UnplacedOrigin(
+                    blockID: $0["origin_id"], originOp: $0["origin_op"],
+                    at: $0["created_at"])
+            }
     }
 
     /// The block's `version_of` peers ("two versions of an article", usable

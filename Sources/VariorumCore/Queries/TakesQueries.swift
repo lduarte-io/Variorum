@@ -19,6 +19,14 @@ extension Queries {
         /// lensID → blockID → variantID (EFFECTIVE picks — dangling
         /// dropped, the fall-through class).
         public var lensSelections: [String: [String: String]]
+        /// 13j J5 — lensID → blockID → the pick that was DROPPED, and why.
+        /// The other half of `lensSelections`: the fall-through is correct
+        /// and silent, and her ruling is that a lens must say so in place
+        /// with a one-click way back. Rides the projection for
+        /// `unplacedOrigins`' reason — the board already re-reads on exactly
+        /// the writes that change it (archiving, deleting or restoring a
+        /// take all touch `variant`).
+        public var lensDangles: [String: [String: DanglingPick]]
         public var fanStyle: FanStyle
         public var sealed: Bool
         /// The post's profile + entry date (taste-checkpoint R84: the
@@ -33,7 +41,7 @@ extension Queries {
         /// (P-2). It rides the projection rather than a fourth observation
         /// because the board already re-reads on exactly the writes that
         /// change it (a divide-W or merge lands new slots).
-        public var unplacedOrigins: [String: [String]]
+        public var unplacedOrigins: [String: [UnplacedOrigin]]
         /// 13k K9 — blockID → the block's CALLOUT FRAME, for the boards to
         /// draw (her instruction: *"callouts are supposed to be added to
         /// take mode as well"*; the ruled shape is ONE frame around the
@@ -52,15 +60,17 @@ extension Queries {
         public init(
             slots: [RenderedBlock] = [], fans: [String: [Variant]] = [:],
             lenses: [Lens] = [], lensSelections: [String: [String: String]] = [:],
+            lensDangles: [String: [String: DanglingPick]] = [:],
             fanStyle: FanStyle = .stack, sealed: Bool = false,
             profile: Profile? = nil, entryDate: String? = nil,
-            unplacedOrigins: [String: [String]] = [:],
+            unplacedOrigins: [String: [UnplacedOrigin]] = [:],
             presentations: [String: BlockPresentation] = [:]
         ) {
             self.slots = slots
             self.fans = fans
             self.lenses = lenses
             self.lensSelections = lensSelections
+            self.lensDangles = lensDangles
             self.fanStyle = fanStyle
             self.sealed = sealed
             self.profile = profile
@@ -77,14 +87,21 @@ extension Queries {
         let fans = try activeFans(db, blockIDs: slots.filter { !$0.isGap }.map(\.blockID))
         let lenses = try Queries.lenses(db, post: containerID)
         var selections: [String: [String: String]] = [:]
+        var dangles: [String: [String: DanglingPick]] = [:]
         for lens in lenses {
             selections[lens.id] = try effectiveLensSelection(db, lens: lens.id)
+            // 13j J5: only where there IS something to say — an entry per
+            // lens with no dangling pick would make "does this lens have a
+            // problem" a dictionary lookup that always succeeds.
+            let dangling = try danglingLensPicks(db, lens: lens.id)
+            if !dangling.isEmpty { dangles[lens.id] = dangling }
         }
         let header = try Row.fetchOne(
             db, sql: "SELECT locked, profile, entry_date FROM container WHERE id = ?",
             arguments: [containerID])
         return TakesProjection(
             slots: slots, fans: fans, lenses: lenses, lensSelections: selections,
+            lensDangles: dangles,
             fanStyle: try fanStyle(db),
             sealed: header?["locked"] ?? false,
             profile: (header?["profile"] as String?).flatMap(Profile.init(rawValue:)),

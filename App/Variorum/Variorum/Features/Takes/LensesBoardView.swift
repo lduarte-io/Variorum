@@ -22,6 +22,42 @@
 import SwiftUI
 import VariorumCore
 
+/// **13j J5 — what a lens says when its pick is gone**, in ONE home (the
+/// `TrayPath` pattern: the notice, the button and the receipt are three
+/// sentences about one fact and must not drift).
+///
+/// Worded to the ACTUAL state, per her ruling — "archived" and "deleted" are
+/// different things with different roads back, and a single hedged sentence
+/// covering both would be exactly the guessing-copy defect J8 closed one
+/// batch ago.
+nonisolated enum LensFallbackCopy {
+    static let restoreVerb = "Restore"
+
+    static func notice(for state: Queries.DanglingPick.State) -> String {
+        switch state {
+        case .archived: "This pick was archived — showing the note's take instead"
+        case .deleted: "This pick was deleted — showing the note's take instead"
+        case .gone: "This pick is gone — showing the note's take instead"
+        case .foreign: "This pick belongs to another block — showing the note's take instead"
+        }
+    }
+
+    static func restoreHelp(for state: Queries.DanglingPick.State) -> String {
+        switch state {
+        case .archived: "Unarchive that take — this column goes back to showing it"
+        case .deleted: "Put that take back — this column goes back to showing it"
+        case .gone, .foreign: ""
+        }
+    }
+
+    static let restoredArchived = "Take unarchived — this lens is showing its pick again."
+    static let restoredDeleted = "Take put back — this lens is showing its pick again."
+    /// The two states with no road: nothing to act on, said plainly rather
+    /// than by a button that could only fail.
+    static let nothingToRestore =
+        "That take isn't here to restore — pick another one for this block."
+}
+
 struct LensesBoardView: View {
     let session: AppSession
     let postID: String
@@ -183,6 +219,10 @@ struct LensesBoardView: View {
         case .takesToBlocks:
             // 13e E6b (A21/A45): likewise.
             Task { await model.turnTakesIntoBlocks() }
+            return true
+        case .showOriginBlock:
+            // 13j J3: the shared model machinery, same as Takes and Write.
+            model.revealFocusedBlockOrigin()
             return true
         case .find:
             // QoL batch 3 (L6): find is the full-document editor's — a lens
@@ -399,6 +439,7 @@ struct LensesBoardView: View {
                                         model: model, tokens: tokens, slot: slot, column: column,
                                         tinted: i < tints.count ? tints[i] : false,
                                         onDiff: { diffPresentation = $0 })
+                                    dangleNotice(slot: slot, column: column)
                                     pickSwitcher(slot: slot, column: column)
                                 }
                                 .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -438,6 +479,7 @@ struct LensesBoardView: View {
                                                 model: model, tokens: tokens, slot: slot,
                                                 column: column, tinted: false,
                                                 onDiff: { diffPresentation = $0 })
+                                            dangleNotice(slot: slot, column: column)
                                             pickSwitcher(slot: slot, column: column)
                                         }
                                     }
@@ -501,6 +543,36 @@ struct LensesBoardView: View {
         .dropDestination(for: String.self) { items, _ in
             dropBlock(items, before: nil)
         } isTargeted: { dropAtEnd = $0 }
+    }
+
+    /// **13j J5 — the lens says it IN PLACE.** Her mobile-gate ruling: when a
+    /// saved lens's pick dangles at an archived or deleted take, the Mac must
+    /// *"say loudly if that take was archived and this is a fallback WITH a
+    /// button for quick restore."*
+    ///
+    /// The read-time fallback (`effectiveLensSelection` drops the pick, the
+    /// slot resolves ordinarily) is CORRECT and completely silent — which is
+    /// the defect: the column shows a take she never chose, with nothing
+    /// saying so. This is the notice, worded to the actual state, rendered in
+    /// the column that made the pick and nowhere else.
+    @ViewBuilder
+    private func dangleNotice(slot: Queries.RenderedBlock, column: TakesColumn) -> some View {
+        if let pick = model.danglingPick(columnID: column.id, slot: slot) {
+            HStack(spacing: 6) {
+                Text(tokens.chromeLabel(LensFallbackCopy.notice(for: pick.state)))
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(2)
+                if pick.isRestorable {
+                    Button(LensFallbackCopy.restoreVerb) {
+                        Task { await model.restoreDanglingPick(pick) }
+                    }
+                    .controlSize(.mini)
+                    .help(LensFallbackCopy.restoreHelp(for: pick.state))
+                }
+                Spacer(minLength: 4)
+            }
+            .font(tokens.small)
+        }
     }
 
     /// The per-block ‹ take k of n › switcher (the canvas grammar reused —

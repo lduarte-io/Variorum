@@ -19,13 +19,16 @@
 //  original. The door is registry-declared and rendered ONLY where such an
 //  origin exists (P-2).
 //
-//  **13j J6 REPOINTED W10b's landing** (her round-2 ruling removed the
-//  global "Unplaced blocks" listing this door used to navigate to). The
-//  door now opens the NOTE'S OWN TRAY — where the release stamped the block
-//  — with its row marked; no broadcast, no navigation, no leaving the note.
-//  The arms below moved with it: what used to assert the posted
-//  notification now asserts the raised `TrayRequest`, which is a stronger
-//  claim, not a weaker one (it names the destination, not just the signal).
+//  **13j MOVED W10b's landing TWICE, and the arms moved with it.** Her
+//  round-2 ruling removed the global "Unplaced blocks" listing this door used
+//  to navigate to, so batch 2 repointed it at the note's own tray as a
+//  bridge; rounds 4 + 5 then ruled the final form, and batch 3 built it — the
+//  door opens a READ-ONLY PEEK of the original, with Put back and the tray as
+//  its two actions. Each move made the arms stronger, not weaker: what once
+//  asserted a posted notification now asserts the raised request, which names
+//  the destination rather than the signal. The peek's own behaviour (its two
+//  actions, the op-aware wording, the History face's row) is pinned in
+//  `RecoveryDoorsTests`; this suite keeps W10's claims.
 //
 //  What is NOT pinned here, deliberately and per the batch's honesty rule:
 //  the SwiftUI drop/reveal geometry (the `ScrollViewReader` scroll and the
@@ -130,9 +133,16 @@ struct OriginBlockDoorTests {
 
     @Test func theRegistryDeclaresTheDoorAsABlockScopedContextAct() {
         let door = CapabilityRegistry.capability(.showOriginBlock)
-        #expect(door.verb == "Show Original Block")
+        // **A JUSTIFIED PIN EDIT (13j J3).** The CLAIM is unchanged — a
+        // block-scoped act, native in Takes, grey with no post open — but her
+        // rounds 4 + 5 gave the door its final grammar: three SUMMONED doors
+        // (right-click, ⌘K, the History face's lineage row) and no ambient
+        // chrome. The verb is the target-less form the palette shows; the
+        // context row's op-aware words are `OriginPeekCopy.doorVerb`, pinned
+        // in `RecoveryDoorsTests`.
+        #expect(door.verb == OriginPeekCopy.genericVerb)
         #expect(door.scope == .block)
-        #expect(door.doors == [.contextMenu])
+        #expect(door.doors == [.contextMenu, .palette, .surface])
         #expect(door.takesAccess == .native, "R118: not a Write privilege")
         // Acts where blocks are edited; honestly grey with no post open.
         #expect(CapabilityRegistry.availability(
@@ -168,7 +178,10 @@ struct OriginBlockDoorTests {
             editor.model.updateCaretContext()
             #expect(editor.model.caretBlockOriginID == nil)
             let before = menuTitles()
-            #expect(!before.contains("Show Original Block"),
+            // 13j J3: the row now says WHICH act released the original
+            // (her ruled wording); the CLAIM — an ordinary block's menu is
+            // untouched — is unchanged.
+            #expect(!before.contains(where: { $0.hasPrefix("See original from") }),
                     "an ordinary block's menu is untouched: \(before)")
 
             let w = try editor.session.operations.divideW(
@@ -182,7 +195,8 @@ struct OriginBlockDoorTests {
             #expect(editor.model.caretBlockID == w.first.block.id)
             #expect(editor.model.caretBlockOriginID == slot.blockID,
                     "the door names A — the block the ceremony preserved whole")
-            #expect(menuTitles().contains("Show Original Block"))
+            #expect(menuTitles().contains(OriginPeekCopy.doorVerb(op: "divide")),
+                    "the row names the act that released it: \(menuTitles())")
             #expect(menuTitles().count == before.count + 1,
                     "exactly one item joined; nothing else moved")
 
@@ -230,22 +244,24 @@ struct OriginBlockDoorTests {
             #expect(editor.model.caretBlockID == minted.block.id)
             #expect(editor.model.caretBlockOriginID == nil)
             #expect(!editor.model.contextMenuItems().map(\.title)
-                .contains("Show Original Block"))
+                .contains(where: { $0.hasPrefix("See original from") }))
         }
     }
 
-    /// Fire-and-DO (P-2): invoking opens THIS NOTE'S TRAY at the named
-    /// block, and speaks. 13j J6's repoint — it used to broadcast a signal
-    /// the shell turned into a navigation to a listing that no longer
-    /// exists.
-    @Test func theDoorOpensThisNotesTrayAtTheOriginAndSpeaks() async throws {
+    /// Fire-and-DO (P-2): invoking opens the READ-ONLY PEEK of the original
+    /// — 13j J3's final form, replacing batch 2's tray bridge (which itself
+    /// replaced 13f's navigation to the listing J6 removed). The tray
+    /// SURVIVES as the peek's second action, pinned in `RecoveryDoorsTests`.
+    @Test func theDoorOpensThePeekAtTheOrigin() async throws {
         try await withEditor(seedBlocks: ["one"]) { editor in
-            #expect(editor.model.trayRequest == nil)
-            editor.model.revealOriginBlock("origin-block")
-            let request = try #require(editor.model.trayRequest)
+            #expect(editor.model.originPeek == nil)
+            editor.model.revealOriginBlock(
+                Queries.UnplacedOrigin(
+                    blockID: "origin-block", originOp: "divide", at: "2026-08-18T10:00:00Z"))
+            let request = try #require(editor.model.originPeek)
             #expect(request.postID == editor.postID, "the note she is standing in")
-            #expect(request.revealBlockID == "origin-block")
-            #expect(editor.model.statusMessage?.contains(TrayPath.menuLabel) == true)
+            #expect(request.origin.blockID == "origin-block")
+            #expect(request.origin.originOp == "divide")
         }
     }
 
@@ -261,15 +277,19 @@ struct OriginBlockDoorTests {
 
             let w = try board.session.operations.divideW(slot.blockID, cuts: [chosen: 11])
             try board.reload()
-            #expect(board.model.projection.unplacedOrigins[w.first.block.id]
-                    == [slot.blockID],
+            // 13j J3: the projection's values carry the act and the date
+            // now — a menu builder runs synchronously and cannot ask the
+            // store which act released the block. Same CLAIM, richer value.
+            let origins = try #require(
+                board.model.projection.unplacedOrigins[w.first.block.id])
+            #expect(origins.map(\.blockID) == [slot.blockID],
                     "the board reads the origin off its ordinary projection")
+            #expect(origins.first?.originOp == "divide")
 
-            board.model.revealOriginBlock(slot.blockID)
-            let request = try #require(board.model.trayRequest)
+            board.model.revealOriginBlock(try #require(origins.first))
+            let request = try #require(board.model.originPeek)
             #expect(request.postID == board.postID)
-            #expect(request.revealBlockID == slot.blockID)
-            #expect(board.model.statusMessage?.contains(TrayPath.menuLabel) == true)
+            #expect(request.origin.blockID == slot.blockID)
         }
     }
 

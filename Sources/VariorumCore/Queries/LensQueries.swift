@@ -64,6 +64,81 @@ extension Queries {
             uniqueKeysWithValues: rows.map { ($0["block_id"], $0["variant_id"]) })
     }
 
+    /// **A pick that no longer resolves** (13j J5 — her mobile-gate ruling:
+    /// when a saved lens's pick dangles the Mac must *"say loudly if that take
+    /// was archived and this is a fallback WITH a button for quick restore"*).
+    ///
+    /// `effectiveLensSelection` DROPS these silently and the column falls
+    /// through to the note's own chosen take — correct, and completely
+    /// invisible: the lens shows a take she never picked, with nothing saying
+    /// so. This is the same set, seen from the other side, carrying WHY —
+    /// because the notice has to word itself to the actual state and the
+    /// Restore button has to know which door to open (unarchive vs restore).
+    public struct DanglingPick: Equatable, Sendable {
+        public enum State: String, Equatable, Sendable {
+            /// The take is live but archived — `unarchiveVariant` brings it back.
+            case archived
+            /// The take is tombstoned — `restoreVariant` brings it back.
+            case deleted
+            /// No such row at all (a sync arrival naming a take this device
+            /// never saw, or a purge). Nothing to restore; the notice says so.
+            case gone
+            /// The row exists but belongs to a DIFFERENT block (the sync race
+            /// `effectiveLensSelection`'s join guards against). Nothing this
+            /// surface can honestly restore INTO this slot.
+            case foreign
+        }
+
+        public let variantID: String
+        public let state: State
+
+        public init(variantID: String, state: State) {
+            self.variantID = variantID
+            self.state = state
+        }
+
+        /// True where a Restore door can act — the notice renders either way,
+        /// because "showing the default take" is the fact she needs first.
+        public var isRestorable: Bool { state == .archived || state == .deleted }
+    }
+
+    /// blockID → the lens's dangling pick for that block. Cost ∝ the lens's
+    /// own overrides (the `lensChoices` pass, one join), never the corpus.
+    public static func danglingLensPicks(
+        _ db: Database, lens lensID: String
+    ) throws -> [String: DanglingPick] {
+        let rows = try Row.fetchAll(
+            db,
+            sql: """
+                SELECT lc.block_id AS block_id, lc.variant_id AS variant_id,
+                       v.id AS found_id, v.block_id AS variant_block,
+                       v.deleted_at AS deleted_at, v.status AS status
+                FROM lens_choice lc
+                LEFT JOIN variant v ON v.id = lc.variant_id
+                WHERE lc.lens_id = ? AND lc.deleted_at IS NULL
+                """,
+            arguments: [lensID])
+        var dangling: [String: DanglingPick] = [:]
+        for row in rows {
+            let blockID: String = row["block_id"]
+            let variantID: String = row["variant_id"]
+            let state: DanglingPick.State
+            if (row["found_id"] as String?) == nil {
+                state = .gone
+            } else if (row["deleted_at"] as String?) != nil {
+                state = .deleted
+            } else if (row["variant_block"] as String?) != blockID {
+                state = .foreign
+            } else if (row["status"] as String?) == VariantStatus.archived.rawValue {
+                state = .archived
+            } else {
+                continue  // live, active, on this block — the effective pick
+            }
+            dangling[blockID] = DanglingPick(variantID: variantID, state: state)
+        }
+        return dangling
+    }
+
     /// `renderPost` seen THROUGH a lens: slots with an effective override
     /// render that take's text; un-overridden slots (and every slot when
     /// `lensID` is nil) render exactly as `renderPost` does — the sparse-

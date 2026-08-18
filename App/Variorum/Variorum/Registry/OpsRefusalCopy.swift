@@ -292,6 +292,12 @@ nonisolated enum OpsRefusalCopy {
                 return "This note is sealed — unseal it to change takes or choices."
             case .archivedVariant:
                 return "That take is archived — unarchive it first."
+            // 13j batch 3 (the round-5 deleted-take ruling): the recovery
+            // door's double-click / raced-restore path — the
+            // `readingNotDeleted` sentence, one row-kind down. It is a
+            // SUCCESS story told as a refusal, so it says so.
+            case .variantNotDeleted:
+                return "That take is already back — it's in the block's fan."
             case .lockedVariant:
                 return "That take is locked — unlock it or branch a new take."
             case .versionLinkNotFound:

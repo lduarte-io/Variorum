@@ -176,8 +176,13 @@ struct LineageQueryTests {
             let result = try ops.divideW(a.block.id, cuts: [a.variant.id: 11])
 
             let origins = try db.read { try Queries.unplacedOrigins($0, inContainer: post.id) }
-            #expect(origins[result.first.block.id] == [a.block.id])
-            #expect(origins[result.second.block.id] == [a.block.id])
+            // 13j J3 (a JUSTIFIED shape edit — the CLAIM is unchanged): the
+            // values carry the ACT and the DATE now, because her ruled door
+            // row names which act released the original and a menu builder
+            // runs synchronously off the held projection.
+            #expect(origins[result.first.block.id]?.map(\.blockID) == [a.block.id])
+            #expect(origins[result.second.block.id]?.map(\.blockID) == [a.block.id])
+            #expect(origins[result.first.block.id]?.first?.originOp == "divide")
             // …and the original itself is exactly what the safety net lists.
             let unplaced = try db.read { try Queries.unplacedBlocks($0) }
             #expect(unplaced.map(\.blockID) == [a.block.id])
@@ -195,7 +200,9 @@ struct LineageQueryTests {
             let merged = try ops.merge(b.block.id, c.block.id)
 
             let origins = try db.read { try Queries.unplacedOrigins($0, inContainer: post.id) }
-            #expect(origins[merged.block.id] == [b.block.id, c.block.id].sorted())
+            #expect(origins[merged.block.id]?.map(\.blockID)
+                == [b.block.id, c.block.id].sorted())
+            #expect(origins[merged.block.id]?.allSatisfy { $0.originOp == "merge" } == true)
             #expect(origins.count == 1, "only the merged block has released origins")
         }
     }
@@ -220,7 +227,7 @@ struct LineageQueryTests {
             let w = try ops.divideW(a.block.id, cuts: [a.variant.id: 6])
             #expect(try db.read {
                 try Queries.unplacedOrigins($0, inContainer: post.id)
-            }[w.first.block.id] == [a.block.id])
+            }[w.first.block.id]?.map(\.blockID) == [a.block.id])
 
             let pool = try ops.createPool(title: "scraps")
             _ = try ops.placeBlock(a.block.id, in: pool.id, at: .end)

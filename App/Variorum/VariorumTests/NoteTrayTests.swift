@@ -163,10 +163,17 @@ struct NoteTrayTests {
 
     // MARK: - Put back
 
-    /// **The deleted block's real landing.** `restoreBlock` leaves the old
-    /// placement row tombstoned and mints a FRESH one at the note's end —
-    /// that is what the shipped operation does, and the receipt says so.
-    @Test func putBackReturnsADeletedBlockThroughRestoreBlock() async throws {
+    /// **The deleted block's landing — MOVED by a ruling, not a bug fix.**
+    ///
+    /// Batch 2 verified and pinned the shipped behaviour: `restoreBlock` left
+    /// the old placement row tombstoned and minted a FRESH one at the note's
+    /// end, so Put back and ⌥⌘Z landed a block in two different places, and
+    /// this row's receipt had to say "at the end". The architect's F2 ruling
+    /// (batch 3; PROVISIONAL, her ratify at QUESTIONS #67 F2) aligned the op
+    /// to the restore family's exact-row religion — so the block comes back
+    /// WHERE IT WAS and the receipt says that. The op's own answer drives the
+    /// receipt, which is what keeps the fallback honest (next arm).
+    @Test func putBackReturnsADeletedBlockToItsOwnPlace() async throws {
         try await withEditor(seedBlocks: ["First.", "Second.", "Third."]) { editor in
             let slots = try editor.storeSlots()
             let middle = slots[1].blockID
@@ -175,12 +182,33 @@ struct NoteTrayTests {
 
             let model = TrayViewModel(session: editor.session, postID: editor.postID)
             await model.putBackDeleted(middle)
-            #expect(model.statusMessage == "Put back at the end of this note.")
+            #expect(model.statusMessage == TrayPath.putBackWhereItWas)
             #expect(try editor.storeSlots().map(\.blockID)
-                == [slots[0].blockID, slots[2].blockID, middle],
-                "the shipped restoreBlock re-places FRESH at the end — pinned as it is")
+                == [slots[0].blockID, middle, slots[2].blockID],
+                "between its neighbours, on its own revived placement row")
             #expect(try editor.storeSlots().map(\.text)
-                == ["First.", "Third.", "Second."])
+                == ["First.", "Second.", "Third."])
+        }
+    }
+
+    /// …and the FALLBACK's receipt is still true: a released original that
+    /// was deleted later has no placement row carrying its tombstone, so it
+    /// lands at the end and the row says so rather than promising a place it
+    /// cannot reach.
+    @Test func putBackSaysAtTheEndWhenNoOldPlaceCanRevive() async throws {
+        try await withEditor(seedBlocks: ["Alpha one. Beta one.", "Tail."]) { editor in
+            let ops = editor.session.operations
+            let slot = try #require(try editor.storeSlots().first)
+            let chosen = try #require(slot.variantID)
+            let take2 = try ops.branchVariant(slot.blockID, from: chosen)
+            try ops.autosave(take2.id, text: "Alpha two. Beta two.", charDelta: 0)
+            _ = try ops.divideW(slot.blockID, cuts: [chosen: 10, take2.id: 10])
+            try ops.deleteBlock(slot.blockID)
+
+            let model = TrayViewModel(session: editor.session, postID: editor.postID)
+            await model.putBackDeleted(slot.blockID)
+            #expect(model.statusMessage == TrayPath.putBackAtEnd)
+            #expect(try editor.storeSlots().map(\.blockID).last == slot.blockID)
         }
     }
 

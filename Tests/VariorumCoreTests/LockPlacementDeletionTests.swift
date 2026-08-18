@@ -382,16 +382,28 @@ struct LockPlacementDeletionTests {
             #expect(try db.deletedAt("edge", "e1") == nil)
             // …the independently-deleted variant stays dead, stamp intact…
             #expect(try db.deletedAt("variant", spare.id) == spareStamp)
-            // …the old placement stays tombstoned; a fresh one landed at the
-            // end of the remembered container.
-            #expect(try db.deletedAt("container_block", made.placement.id) != nil)
-            #expect(try blockOrder(db, post.id) == [other.block.id, made.block.id])
+            // …and the OLD placement row comes back live.
+            //
+            // **A RULED CHANGE, not a bug fix (13j batch 3 — the architect's
+            // F2 ruling; PROVISIONAL, her ratify at QUESTIONS #67 F2).** This
+            // arm used to assert the opposite — the row stayed tombstoned and
+            // a FRESH placement landed at the end — which meant Put back and
+            // ⌥⌘Z, the two doors onto one gesture, put a block in two
+            // different places. The op now flips the row this deletion took
+            // down, exactly as `revertDeleteBlock` and the rest of the restore
+            // family do; the fresh-at-end road survives as the fallback and is
+            // pinned in `RecoveryOpsTests`.
+            #expect(try db.deletedAt("container_block", made.placement.id) == nil)
+            #expect(try blockOrder(db, post.id) == [made.block.id, other.block.id],
+                    "back in its own place, ahead of the witness")
             let placement = try db.read { db in
                 try ContainerBlock
                     .filter(Column("block_id") == made.block.id && Column("deleted_at") == nil)
                     .fetchOne(db)
             }
-            #expect(placement?.chosenVariantId == nil)
+            #expect(placement?.id == made.placement.id, "the SAME row, revived")
+            #expect(placement?.chosenVariantId == made.variant.id,
+                    "the chosen variant rides the row back with it")
         }
     }
 

@@ -63,6 +63,49 @@ extension Operations {
         }
     }
 
+    /// **Put a DELETED take back** (13j — the sitting's round-5 ruling: *"YES
+    /// — the FULL uniform story"*; the phase's own bar names takes, and a
+    /// deleted take had no door anywhere in the app).
+    ///
+    /// The RECOVERY-DOOR class, like `restoreBlock` / `restoreSection` /
+    /// `restoreBlockComment`: **no undo entry** — the door IS the recovery,
+    /// and an undo stack entry whose inverse is "delete it again" would be a
+    /// second way to lose the thing this door exists to find.
+    ///
+    /// A tombstone FLIP, never a re-mint: `label`, `fan_position`,
+    /// `parent_variant_id`, `working_text` and `status` all come back exactly
+    /// as they were, and the take's `commit_point` rows — which never carried
+    /// a tombstone (AppSpec §14 item 4: there is deliberately no
+    /// variant→commit_point cascade) — are reachable again the moment the
+    /// take is.
+    ///
+    /// **`default_variant_id` is deliberately NOT re-pointed.** `deleteVariant`
+    /// captured `wasDefault` at do-time so its UNDO could put the pointer
+    /// back; a recovery door has no such memory, and guessing would move a
+    /// pointer she has since set by hand. The block already holds a valid
+    /// default (I10 + `reassignDefaultIfNeeded`), so nothing is left dangling.
+    ///
+    /// Refusals, all resolvable and all naming their road: a take that is not
+    /// deleted (`variantNotDeleted`), one whose BLOCK is dead (`blockNotFound`
+    /// — restore the block first, which revives its stamp-matched takes for
+    /// free), and a sealed post (`lockedPost`, via the placement guard — the
+    /// seal refuses everything under the post).
+    public func restoreVariant(_ id: String) throws {
+        try database.write { db in
+            guard var variant = try Variant.fetchOne(db, key: id) else {
+                throw OperationError.variantNotFound(id: id)
+            }
+            guard variant.deletedAt != nil else {
+                throw OperationError.variantNotDeleted(id: id)
+            }
+            _ = try liveBlock(db, variant.blockId)
+            try ensurePlacementUnlocked(db, blockID: variant.blockId)
+            variant.deletedAt = nil
+            variant.updatedAt = date.now
+            try variant.update(db)
+        }
+    }
+
     /// Tombstone. Refuses while any live slot shows this variant (re-point
     /// first), while it is its block's last live active variant (I10 — that
     /// is `deleteBlock`), and while locked (the guard means something).

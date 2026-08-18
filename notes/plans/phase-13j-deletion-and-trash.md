@@ -509,7 +509,7 @@ server-shaped lands.
 |---|---|---|
 | 1 | **The mini-round:** J7 (⌘Z→⌥⌘Z status-line hint) · J8 (copy truth: the receipt's interim honesty + the diagnosing `.crossesBlockBoundary` refusal) · J9 (whole-block-selection delete → the delete compound; ONE precise trace FIRST) | **DONE 2026-08-18** — record below (core 1254/135 · Mac **1433/258 FULLY GREEN** · spine 51/7 · mobile 314/60; the J9 trace: the paragraph-end SEPARATOR owned by no entry — the open tail was NOT the decliner; QUESTIONS #66 logged — (b) fanned-block delete and (c) the superseded Phase-11 join outcome are HER calls; ARCHITECT-VERIFIED against commits `152f3fc`/`cc51792`) |
 | 2 | **The tray (J2) + the graveyard removal (J6):** the context-bar door ("⌫ N", nonempty-only) + the two-section tray panel with Put back; the global unplaced section leaves the Library surface (pool door dies with it); the delete receipt/help copy graduates to naming the real tray + its door (J8(a)'s completion); **+ the batch-1 hand-off rider: the phone's two tray-promising receipts made TRUE on the phone's own terms** | **DONE 2026-08-18** — record below (core 1259/135 · Mac **1450/259 FULLY GREEN** · spine 51/7 · mobile 314/60; BOTH VERIFY-first flags answered — block-level archive is UNREACHABLE (section named "Deleted"), and `restoreBlock` places at the note's END, diverging from the round-5 design statement: **REPORTED, op UNTOUCHED, her call at QUESTIONS #67**; ARCHITECT-VERIFIED against `7e45d0d` — the core count REPRODUCED by the architect's own run, F2 ADJUDICATED into batch 3's rider, the Blocks-mode `traySection` consolidation held propose-only) |
-| 3 | **The lineage door (J3, as AMENDED round 5) + lens-fallback loudness (J5) + deleted-take recovery (round 5):** the context-menu item + ⌘K palette act, the read-only original peek with Put back / Open tray; **the History-face lineage row** (Write's CommitBar history + Takes' history sheet — the summoned "past" surface); the lens column's in-place archived-pick notice + one-click Restore; **the deleted-take restore op + deleted-takes query + the History face's quiet deleted-take rows with Put back** (zero schema); **+ the F2 placement rider** (`restoreBlock` flips the surviving placement row — adjudication above) | pending — brief below |
+| 3 | **DONE 2026-08-18** — record below (core 1278/136 · Mac **1467/261 FULLY GREEN** · spine 51/7 · mobile 314/60; the bridge RECONCILED — the peek is the destination, `TrayRequest.revealBlockID` KEPT as the peek's second action; the archived-take road VERIFIED as `unarchiveVariant` and reused unchanged; the F2 rider BUILT with both roads pinned; the capture caught two copy defects and both are fixed; QUESTIONS #68 logged). Scope: **The lineage door (J3, as AMENDED round 5) + lens-fallback loudness (J5) + deleted-take recovery (round 5):** the context-menu item + ⌘K palette act, the read-only original peek with Put back / Open tray; **the History-face lineage row** (Write's CommitBar history + Takes' history sheet — the summoned "past" surface); the lens column's in-place archived-pick notice + one-click Restore; **the deleted-take restore op + deleted-takes query + the History face's quiet deleted-take rows with Put back** (zero schema); **+ the F2 placement rider** (`restoreBlock` flips the surviving placement row — adjudication above) | **DONE** |
 | 4 | **The defaults pair (J4/J4b):** divide default → `divideDuplicating` (the dormant core op wired); merge default → carry-all (composed from `mergeCeremony`, the phone's C5 the reference); "Divide with Ceremony…" ⌥⌘⇧D · "Merge with Ceremony…" ⌥⌘⇧M in Block menu + context menu + palette | pending |
 | 5 | **J11 — the savepoint cadence:** on-note-close auto-commit per edited take (deduped) + `idle_commit_hours` default 24→2 + the ONE enum setting ("Every session · Idle only · Only when I commit"-shaped) + the history view's quiet-run collapse (the legibility half) | pending |
 | 6 | **J1 — the Trash:** the surface reshape (rename to Trash; Archived keeps no clock; per-row "N days left" + Put back; sort/filter by kind + date **incl. the round-5 Takes filter — deleted takes ride the clock with block/note context**; Delete Now per row + Empty Trash, confirm-once, IN-TRASH ONLY — no full-delete door in any note context, ever; a note deleted whole lists as ONE note row, cascade victims never double-listed) + the 30-day leave-all-surfaces clock; **the purge design memo authored here** (client+server mechanics, the horizon, the per-device pull cursor, the lineage-only-originals edge) → STOP: her explicit go gates any server-shaped build | pending |
@@ -1143,6 +1143,47 @@ image. **The panel is a HAND-CHECK item for the next drive.**
   `xcodebuild` was active before any run.
 - **Nothing PENDING** — every claim above is from a run in this session.
 
+### Sitting round 6 — her return during batch 3 (2026-08-18)
+
+**Her messages (verbatim):** "my variorum isn't currently running,
+so you can refresh it when the batch is done. i'm ready for the
+questions, please ask them in question mode with options that make
+the pros and cons of each choice clear." — then, correcting: "I
+said when the batch is done but I meant when the phase is done
+really."
+
+- **The `/Applications` refresh is AUTHORIZED for the PHASE
+  CLOSEOUT** (her correction — the standing ritual's home for it);
+  still gated on a zero-instance re-check + the A1 rail at
+  execution time.
+- The held bundle (#66/#67's genuine forks + the propose-only
+  items) goes to her NOW in question mode, pros/cons explicit —
+  rulings recorded below as they land. Entries not asked (66 a,
+  d–g; 67 d–g) shipped to her existing rulings' letter and remain
+  ratify-by-walk at the checkpoint.
+
+**Round 6 rulings, question mode (pros/cons put in front of her):**
+
+- **#66(b) RATIFIED as shipped:** whole-paragraph-selection Delete
+  removes a fanned block, takes and all — one rule with ⌘-click +
+  Delete under #33(a); the #34 alternative declined (its letter
+  protects a MERGE folding takes into other text; a delete sets
+  the block aside whole, tray-recoverable).
+- **#66(c) RATIFIED as shipped:** N whole paragraphs + Delete
+  removes all N — the Phase-11 join-and-leave-empty outcome is
+  formally SUPERSEDED by her ratification (joins remain via
+  partial-selection delete and merge).
+- **#67 F2 RATIFIED (the PROVISIONAL resolves):** Put back returns
+  a deleted block to its old spot when the placement row survives;
+  end-of-note is the fallback. Batch 3's rider proceeds as ruled.
+- **#67(a) RATIFIED as shipped:** the ⌫ badge counts DELETED
+  blocks only and hides at zero; originals-only notes carry no
+  badge (note ▾ + the History row are the roads).
+
+**Her new question, mid-round (verbatim):** "do you think that we
+should add block level archive? I think that it might be
+worthwhile." → The architect's analysis + her ruling: round 7.
+
 ## ARCHITECT ADJUDICATION after batch 2 (2026-08-18)
 
 Verified against commit `7e45d0d`: tree clean, the record's shape
@@ -1274,3 +1315,217 @@ what shipped per item, the bridge-reconciliation decision, the
 archived-take-road finding, pins + revert evidence with
 checksums, suite counts, hand-offs — then commit per convention.
 The architect verifies before relying on it.
+
+---
+
+## BATCH 3 RECORD — the recovery doors (2026-08-18; fresh Opus implementer)
+
+**Scope built, to the letter of the rulings:** J3's final door grammar
+(rounds 4 + 5), J5's lens-fallback loudness, deleted-take recovery (the
+round-5 ruling), and the F2 placement rider (the architect's
+adjudication). **Zero schema; zero `Sources/VariorumCore/Sync/` lines.**
+Two new capability rows (`.restoreTake`; `.showOriginBlock` gains
+`.palette` + `.surface`). No Release build, no `/Applications` refresh,
+no push.
+
+### THE TWO ANSWERS THE BRIEF ASKED FOR
+
+**THE BRIDGE RECONCILIATION — the peek is the destination; the tray seam
+STAYS, demoted to the peek's second action.** Batch 2's
+`revealOriginBlock` opened the note's tray with the original's row marked
+and said in its own comment that J3 owned the final form. Both view
+models now raise an `OriginPeekRequest` instead — the ruled read-only
+peek — and `TrayRequest.revealBlockID` is KEPT because the peek's second
+action (*"Open this note's tray"*) raises it, with the original's row
+still marked. **Why keep rather than retire:** the seam's only purpose
+was to answer "which one" in a long list, and that question is asked
+exactly when someone leaves the peek for the whole tray. Retiring it
+would have meant deleting the mark and the `revealMissing` line batch 2
+built, then rebuilding both the first time a door wanted them.
+
+**THE ARCHIVED-TAKE ROAD — VERIFIED, and REUSED unchanged.** The road is
+`Operations.unarchiveVariant(id)` (`Operations+Deletion.swift:55`): a
+status flip back to `.active`, refusing under a sealed post via
+`ensurePlacementUnlocked`, registering no undo entry — the recovery-door
+class already. Its shipped doors are the Takes board's archived-take card
+(`TakesBoardView.swift:1121`), the Write takes panel
+(`WriteTakesPanel.swift:205`) and `EditorViewModel:2190`, all through
+`TakesViewModel.unarchiveTake`. J5's Restore calls the SAME op for the
+archived case and 13j's new `restoreVariant` for the deleted one; no
+second unarchive road was written.
+
+### WHAT SHIPPED
+
+**1 — J3's final grammar (rounds 4 + 5).** Three SUMMONED doors, no
+ambient chrome (no hover glyph, no bottom-bar button):
+
+- **the block's right-click row**, rendered only where a live unplaced
+  original exists (unchanged P-2 condition), now saying WHICH act
+  released it — `OriginPeekCopy.doorVerb(op:)` gives "See original from
+  divide…" / "…from merge…" / "…from extract…", and any other or absent
+  `origin_op` degrades to "See the original this came from…" rather than
+  inventing a word. Both hosts render it (Write's `contextMenuItems`, the
+  take card's specs);
+- **⌘K**, via a new `RoutedCommand.showOriginBlock` handled in all three
+  surface handlers, wired in `ShellActions.paletteActs` + `paletteAction`
+  and mapped in `unhandledNote`. Context-blind by nature, so on a block
+  with no original it SPEAKS (`OriginPeekCopy.noOriginHere`);
+- **the History face's quiet lineage row** — her round-5 amendment
+  (*"since it is lineage"*) — in Write's `CommitHistoryView` AND the
+  Takes bar's history sheet, through ONE shared component
+  (`BlockPastSection`), so the two faces cannot drift.
+
+The door opens `OriginPeekPanel`: the original's own takes read-cheap
+(`Text`, never a pane — P3), a heading naming the act and the date, and
+exactly two actions. **Put back in note** runs the SAME composition the
+tray's originals section runs — extracted to `PreservedOriginPutBack` so
+two doors on one act cannot drift on the landing or the receipt — and
+**Open this note's tray** raises the tray OVER the peek (a sheet on a
+sheet, so closing it returns to the peek rather than to nothing).
+
+**Core, to carry the words:** `Queries.unplacedOrigins` values grew from
+a bare id to `UnplacedOrigin { blockID, originOp, at }` — a menu builder
+runs synchronously off a held projection and cannot ask the store which
+act released the block — plus a per-BLOCK overload (`ofBlock:`) the
+History face and the peek read, using the EDGE's own `created_at` as the
+date so no container is needed.
+
+**2 — J5, the lens-fallback loudness.** `Queries.danglingLensPicks(lens:)`
+is `effectiveLensSelection` seen from the other side, carrying WHY:
+`.archived` · `.deleted` · `.gone` · `.foreign`. It rides
+`TakesProjection.lensDangles` (the `unplacedOrigins` precedent — the
+board already re-reads on exactly the writes that change it, and the map
+is absent for lenses with nothing to say). The Lenses board renders
+`dangleNotice` under the cell in BOTH column layouts, worded to the state
+(`LensFallbackCopy`), with a **Restore** button only on the two states
+that have a road — the other two say so instead of offering a button that
+could only fail. Restore routes archived → `unarchiveVariant`, deleted →
+`restoreVariant`. **Scope, recorded:** LENS columns only; a scratch
+column's picks are view-local and cannot dangle across a session.
+
+**3 — Deleted-take recovery (round 5).** `Operations.restoreVariant` —
+recovery-door class, **no undo entry** — flips the tombstone and nothing
+else: label, `fan_position`, parent, text and status all come back as
+they were, and the take's commits (which never carried a tombstone) are
+reachable again. Refusals: `variantNotDeleted` (new `OperationError`
+case, with words in `OpsRefusalCopy`), `blockNotFound` under a dead block
+(the road is restore the block first), `lockedPost` under a seal.
+**`default_variant_id` is deliberately NOT re-pointed** — `deleteVariant`
+captured `wasDefault` at do-time for its UNDO; a recovery door has no
+such memory and guessing would move a pointer she has since set by hand.
+Reads: `Queries.deletedTakes(blockID:)` + `observeDeletedTakes`, and
+`Queries.blockPast` + `observeBlockPast` (the History face's one
+projection). **NO countdown** — the 30-day clock is batch 6's. Archived
+takes are byte-unchanged.
+
+**P1 note, stated because it is the `trayCounts` finding one surface
+over:** `observeBlockPast` reads `variant`, the one table autosave
+writes, so it is held ONLY while the History face is on screen (the
+view's `.task` owns the lifetime; `EditorViewModel.blockPast` is built on
+open and dropped on close). Cost ∝ the block's own fan history and its
+own edges, never the corpus.
+
+**4 — The F2 placement rider (adjudication; PROVISIONAL #67 F2).**
+`restoreBlock` now flips the tombstoned placement row for (block,
+`last_container_id`) **stamp-matched** — the row THIS deletion took down,
+exactly as `revertDeleteBlock` matches — so the old fractional position
+and chosen variant revive and Put back lands where ⌥⌘Z lands. It returns
+a new `BlockRestoreLanding` (`.itsOldPlace` / `.endOfNote` / `.unplaced`)
+so the receipt reads the op's own answer instead of assuming one; the
+tray's copy follows (`TrayPath.putBackWhereItWas` etc., all receipts in
+one home). The fresh-at-end fallback survives for the case that has no
+revivable row (a divide-W/merge release tombstones the placement at
+RELEASE time, so a later `deleteBlock` on the unplaced block stamps
+nothing). A sealed container refuses on BOTH roads, whole transaction
+rolled back. `revertDeleteBlock` untouched, as the brief required.
+
+### PINS + RED-ON-OLD EVIDENCE (behavioral revert, checksummed)
+
+Two new suites, **35 tests**: `RecoveryOpsTests` (19, core),
+`RecoveryDoorsTests` (15, Mac) + `RecoveryFaceCaptureTests` (1, the
+visual loop) — and one new arm in `NoteTrayTests`.
+
+| Revert | Pins that went RED | Restored |
+|---|---|---|
+| **A** — the placement revive disabled (`if false, let revivable = …`) | `restoreBlockRevivesTheExactPlacementRow` (4 issues) · `restoreBlockRevivesTheRowThisDeletionTookDown` (2) · `putBackAndStructuralUndoLandTheBlockInTheSameSpot` · `LockPlacementDeletionTests.restoreBlockResurrectsCascadeVictimsButNotIndependentDeletes` (4) · Mac `NoteTrayTests.putBackReturnsADeletedBlockToItsOwnPlace` (3) | `Operations+Placement.swift` → `4f256a71e40c…` (identical) |
+| **B** — `restoreVariant`'s three guards dropped | `restoreVariantRefusesALiveTake` · `restoreVariantRefusesUnderADeadBlock` (2) · `restoreVariantRefusesUnderASealedNote` (2) | `Operations+Deletion.swift` → `63959b2bc35d…` (identical) |
+| **C** — `danglingLensPicks` blinded (`for row in rows where false`) | `danglingLensPicksNamesEachStateAndSkipsTheHealthyOnes` (4) · Mac `onlyALensColumnWithADanglingPickShowsTheNotice` · `theNoticesRestoreRoundTripsBothStates` | `LensQueries.swift` → `50fb67594aab…` (identical) |
+| **D** — `revealOriginBlock` back to the batch-2 tray bridge | `theContextRowOpensThePeekAtTheOriginAndItShowsItsTakes` · `OriginBlockDoorTests.theDoorOpensThePeekAtTheOrigin` | `EditorViewModel.swift` → `f8e539d0217f…` (identical) |
+| **E** — `Queries.blockPast` returns an empty projection | `theHistoryFacesPastRegionCarriesLineageAndDeletedTakes` (4) | `EditorSupport.swift` → `5421f36ca545…` (identical) |
+| **F** — `doorVerb` always generic | `theDoorsWordsNameTheActThatReleasedTheOriginal` (3) | `OriginPeek.swift` restored to `0080504ccf58…` (identical); the file then took ONE further deliberate fix (the date-only stamp, below), so its recorded baseline is **`d0eeeb6254ef…`** |
+
+**Consequential pin edits, each annotated in place** (the batch-2
+precedent — a RULED change, never a quietly relaxed pin):
+`LockPlacementDeletionTests`' restore arm now asserts the revived row
+(it asserted the opposite, which is the divergence F2 closed);
+`NoteTrayTests`' Put-back arm moved with it and gained the fallback's own
+arm; `OriginBlockDoorTests` keeps every W10 CLAIM with the door's new
+verb, doors and destination; `LineageQueryTests` keeps its claims with
+the richer value shape; `CapabilityRegistryTests`' `.surface` union gains
+`BlockPastSection` and the routed-note list gains `.showOriginBlock`;
+`BlockTOCTests`' restore message follows F2 (its assertion was already
+true — the block it restores is the last one).
+
+### THE VISUAL LOOP
+
+**The block-past region IS captured** — `RecoveryFaceCaptureTests`, three
+states × two voices, written to the sandboxed host's temp dir
+(`~/Library/Containers/io.lduarte.Variorum.debug/Data/tmp/variorum-13j-batch3-screens`;
+`cp` them out to view). **It caught two real defects, both fixed:**
+
+1. the lineage row read *"from a merge on aug 18, 2026 at 6:30 am — the
+   original is p…"* — the sentence's own point truncated to make room for
+   a minute nobody needs. Fixed at the source (`OriginPeekCopy.stamp` is
+   date-only; a divide happens on a DAY) plus `lineLimit(2)` as the belt.
+   The tray's rows keep their time deliberately;
+2. an empty deleted TAKE rendered as **"(empty block)"**, because
+   `TrayRowPreview.line`'s fallback was written for the tray's block
+   rows. `BlockPastCopy.rowLabel` now says "(empty take)".
+
+**Hand-check items for the next drive** (measured, not assumed — batch
+2's finding stands): `OriginPeekPanel` and `TrayPanel` are SwiftUI
+`List`s, i.e. NSTableView-backed, and `ImageRenderer` renders its
+unsupported-view placeholder for them. The J5 dangle notice lives inside
+the Lenses board's scrolling stack and has no offscreen host either.
+
+### SUITE COUNTS (every "Test run with N tests" line confirmed)
+
+- core `swift test` — **1278 tests / 136 suites PASSED** (baseline
+  1259/135 + 19 in 1 new suite)
+- Mac (`-project` invocation) — **1467 tests / 261 suites PASSED, FULLY
+  GREEN, zero reds** (baseline 1450/259 + 17 in 2 new suites)
+- tutorial spine, by TYPE name (the seven from the batch-1 record) —
+  **51 tests / 7 suites PASSED** (baseline exact)
+- mobile (`VariorumMobile`, iPhone 16e) — **314 tests / 60 suites
+  PASSED** (baseline exact). Run because core `Sources/` was touched; the
+  only changes after that run were three Mac-app files under
+  `App/Variorum/Variorum/Features/Tray/` and test files, none of which
+  the mobile target compiles.
+
+### FOR THE ARCHITECT / HER
+
+- **QUESTIONS #68** logged (six lettered entries in her format): F2 built
+  as ruled (her ratify still stands), the no-undo-entry recovery class,
+  the deliberate default-pointer decision, the four-state lens wording,
+  the lens-columns-only scope, and the date-only lineage stamp.
+- **A REGISTRY ASYMMETRY, propose-only:** `.restoreTake` is declared
+  while the tray's own two Put backs (batch 2) are not. Both are inline
+  rows on a recovery panel; P-1's scope note says the registry grows as
+  work touches it, so this batch declared what it introduced and left
+  batch 2's alone rather than retro-declaring. A tidy-up for the closeout
+  or the Design & UI review row, never a silent fix.
+- **BATCH 6 HAND-OFFS.** The Trash's Takes filter reads
+  `Queries.deletedTakes`; the clock's per-row countdown belongs beside
+  `BlockPastCopy`'s rows and the tray's, both of which already render a
+  stamp and deliberately no countdown. `restoreVariant` is the Put-back
+  op for a take wherever the Trash lists one.
+- **PARITY LEDGER.** The phone inherits `restoreVariant`,
+  `deletedTakes`, `blockPast`, `danglingLensPicks` and the F2 landing by
+  construction (all core) and owes the FACES: a deleted-take row in its
+  history, and its lens peeks' dangling-pick notice. The J3 peek is a Mac
+  door today.
+- **Environment.** No Variorum instance was running at any point in this
+  batch (`pgrep` checked before every suite run); no kill, no quit, no
+  `/Applications` write, no Release build; no push. No other `xcodebuild`
+  was active before any run.
+- **Nothing PENDING** — every claim above is from a run in this session.

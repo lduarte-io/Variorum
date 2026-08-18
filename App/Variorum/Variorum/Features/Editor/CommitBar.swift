@@ -289,10 +289,33 @@ struct CommitBar: View {
 
 /// The caret variant's append-only history, newest first, with restore —
 /// and the documented pre-split warning (AppSpec §9) marked per row.
+///
+/// **13j batch 3:** the block's PAST sits above the savepoints — its lineage
+/// row (J3, her round-5 amendment: *"since it is lineage"*) and its deleted
+/// takes (the round-5 ruling: *"quiet rows in the block's History face …
+/// with Put back"*) — through the one component the Takes history sheet also
+/// composes, so the two faces cannot tell different stories about one block.
 struct CommitHistoryView: View {
     let model: EditorViewModel
+    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
+    @Environment(\.colorScheme) private var scheme
+
+    private var tokens: VoiceTokens {
+        themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
+    }
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if let past = model.blockPast {
+                BlockPastSection(model: past, tokens: tokens) { origin in
+                    model.revealOriginBlock(origin)
+                }
+            }
+            commitList
+        }
+    }
+
+    private var commitList: some View {
         List(model.commitList ?? []) { item in
             HStack(spacing: 8) {
                 Text(item.commit.createdAt.formatted(date: .abbreviated, time: .standard))

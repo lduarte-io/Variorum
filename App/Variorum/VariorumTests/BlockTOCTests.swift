@@ -213,7 +213,10 @@ struct BlockTOCTests {
                 try Queries.renderPost(db, containerID: postID).map(\.blockID)
             }
             #expect(order.count == 2)
-            #expect(order.last == doomed, "restoreBlock re-places at the end (the tray gesture)")
+            // 13j F2: `restoreBlock` revives the placement row this deletion
+            // tombstoned, so the block comes back in its own place — which
+            // for the last block is the end, exactly as before.
+            #expect(order.last == doomed, "back in its own place")
             #expect(try await db.read { try Queries.trayBlocks($0, postID: postID) }.isEmpty)
         }
     }

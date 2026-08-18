@@ -216,8 +216,9 @@ final class BlockTOCViewModel {
         await run { ops in try ops.deleteBlock(blockID) }
     }
 
-    /// The tray's restore door (restoreBlock re-places at the end — the
-    /// Phase 2 tray gesture).
+    /// The tray's restore door. **13j batch 3 (the F2 rider):** `restoreBlock`
+    /// revives the placement row this deletion tombstoned, so the block comes
+    /// back where it was rather than at the note's end.
     func restoreBlock(_ blockID: String) async {
         await run { ops in try ops.restoreBlock(blockID) }
     }

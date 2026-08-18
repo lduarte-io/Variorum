@@ -20,6 +20,10 @@ struct TakesBottomBar: View {
     @State private var pickedDate = Date()
     @State private var historyShown = false
     @State private var history: [CommitPoint] = []
+    /// 13j batch 3: the block's PAST beside its savepoints — the lineage row
+    /// (J3, her round-5 amendment) and its deleted takes (the round-5 ruling),
+    /// through the one component Write's history face also composes.
+    @State private var pastModel: BlockPastModel?
     /// N15's class: the bar's measured width — the one/two-row switch.
     @State private var barWidth: CGFloat = 0
     @Environment(\.openWindow) private var openWindow
@@ -206,6 +210,14 @@ struct TakesBottomBar: View {
                 session: model.session, postID: request.postID,
                 revealBlockID: request.revealBlockID)
         }
+        // 13j J3: the released original's peek, hosted beside the tray — one
+        // view, presented wherever a door raises it.
+        .sheet(item: Binding(
+            get: { model.originPeek },
+            set: { model.originPeek = $0 })
+        ) { request in
+            OriginPeekPanel(session: model.session, request: request)
+        }
         .sheet(item: Binding(
             get: { model.takeLabelRequest },
             set: { model.takeLabelRequest = $0 })
@@ -369,13 +381,17 @@ struct TakesBottomBar: View {
     }
 
     private func openHistory() async {
-        guard let variantID = model.focusedPane?.variantID else {
+        guard let pane = model.focusedPane else {
             model.speak("Click into a take first — History shows that take's savepoints.")
             return
         }
+        let variantID = pane.variantID
         history = (try? await model.session.database.read { db in
             try Queries.commitHistory(db, variantID: variantID).reversed()
         }) ?? []
+        // 13j batch 3: the block's past rides the same summoned face — one
+        // "past" surface per block (her round-5 words).
+        pastModel = BlockPastModel(session: model.session, blockID: pane.blockID)
         historyShown = true
     }
 
@@ -385,6 +401,12 @@ struct TakesBottomBar: View {
                 Text("Savepoints — this take").font(.headline)
                 Spacer()
                 Button("Close") { historyShown = false }
+            }
+            if let pastModel {
+                BlockPastSection(model: pastModel, tokens: tokens) { origin in
+                    historyShown = false
+                    model.revealOriginBlock(origin)
+                }
             }
             if history.isEmpty {
                 Text("No savepoints yet — ⌘S commits one.")

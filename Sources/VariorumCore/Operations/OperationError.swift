@@ -39,6 +39,13 @@ public enum OperationError: Error, Equatable, Sendable {
     /// soft delete: a variant some live slot renders cannot be removed.
     case variantIsChosen(id: String)
     case archivedVariant(id: String)
+    /// `restoreVariant` addressed a take that is not deleted (13j, sitting
+    /// round 5 — the deleted-take recovery door). The
+    /// `containerNotDeleted`/`readingNotDeleted`/`sectionNotDeleted`/
+    /// `commentNotDeleted` parallel, one row-kind further down: a recovery
+    /// door that silently succeeded on a LIVE take would teach that Put back
+    /// did something when it did nothing.
+    case variantNotDeleted(id: String)
 
     /// A `deleteBlock` carrying `BlockDeletionPrecondition
     /// .emptyWithNothingUnshown` found the block holding prose its slot does

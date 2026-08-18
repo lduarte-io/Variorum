@@ -191,11 +191,13 @@ struct TakesCellView: View {
         // kind of per-target condition as "Diff against chosen" above. This
         // is the answer to her sitting question where she asked it: looking
         // at a divide's successor takes.
-        if let originID = model.projection.unplacedOrigins[slot.blockID]?.first {
+        if let origin = model.projection.unplacedOrigins[slot.blockID]?.first {
             specs.append(.init(
-                title: CapabilityRegistry.capability(.showOriginBlock).verb
+                // 13j J3: her ruled wording — the row names the act that
+                // released the original ("See original from divide…").
+                title: OriginPeekCopy.doorVerb(op: origin.originOp)
             ) {
-                model.revealOriginBlock(originID)
+                model.revealOriginBlock(origin)
             })
         }
         if let fan = model.projection.fans[slot.blockID], fan.count > 1 {

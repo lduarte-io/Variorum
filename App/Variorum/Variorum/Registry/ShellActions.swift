@@ -416,6 +416,10 @@ struct ShellActions {
         .toggleStar,
         // 13f batch 6 (W5): the quick note, typeable like every other door.
         .quickNote,
+        // 13j J3 (sitting round 4): the lineage door, typeable — a palette is
+        // summoned, not chrome, so it sits inside her not-daily-chrome
+        // criterion (the architect's call at the sitting, hers to strike).
+        .showOriginBlock,
     ]
 
     /// Palette rows for the act capabilities: title = the registry verb,
@@ -453,6 +457,7 @@ struct ShellActions {
         case .toggleTagChips: return { shell.toggleTagChips() }
         case .toggleStar: return { toggleStarForCurrent() }
         case .quickNote: return { shell.quickNoteRequested = true }
+        case .showOriginBlock: return { dispatch(.showOriginBlock) }
         case .restoreTutorial: return { restoreTutorial() }
         default:
             // NIT-1 (Stage 1 ladder): a future `paletteActs` entry without

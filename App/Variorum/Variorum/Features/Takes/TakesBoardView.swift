@@ -281,6 +281,11 @@ struct TakesBoardView: View {
             // 13e E6b (A21/A45): the whole fan, in fan order, under ONE undo.
             Task { await model.turnTakesIntoBlocks() }
             return true
+        case .showOriginBlock:
+            // 13j J3: the focused block's released original — the peek, or
+            // the honest note where there is none.
+            model.revealFocusedBlockOrigin()
+            return true
         case .find:
             // QoL batch 3 (L6): v1 finds across the POST's text, which is the
             // full-document editor's surface; a take card is one take. The

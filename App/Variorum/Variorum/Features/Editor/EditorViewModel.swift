@@ -82,9 +82,11 @@ final class EditorViewModel {
     /// synced.
     private(set) var blockSelection = BlockSelection()
     /// 13f W10b — blockID → its RELEASED originals (live, unplaced), from
-    /// `Queries.unplacedOrigins`. Empty for an ordinary post; the "Show
-    /// Original Block" door reads it synchronously at menu-build time.
-    private(set) var unplacedOriginsByBlock: [String: [String]] = [:]
+    /// `Queries.unplacedOrigins`. Empty for an ordinary post; the lineage
+    /// door reads it synchronously at menu-build time. 13j J3: the values
+    /// carry the act and the date, because the ruled row says WHICH act
+    /// released the original and a menu builder cannot ask the store.
+    private(set) var unplacedOriginsByBlock: [String: [Queries.UnplacedOrigin]] = [:]
     /// 9d — the caret block's user-facing number (1-based, current order,
     /// derived at read time, never stored) and the post's block count.
     private(set) var caretOrdinal: Int?
@@ -104,6 +106,9 @@ final class EditorViewModel {
     var fanPanel: FanPanelState?
     /// Commit history for the caret variant (nil = panel closed).
     var commitList: [CommitListItem]?
+    /// 13j batch 3 — the caret BLOCK's past (its lineage row and its deleted
+    /// takes), alive exactly while the history face is open. nil = closed.
+    var blockPast: BlockPastModel?
     /// A restore that needs the pre-split warning confirmed first.
     var pendingRestore: CommitListItem?
     /// Per-command gesture enablement (Phase 9) — recomputed on every caret/
@@ -448,7 +453,7 @@ final class EditorViewModel {
     }
 
     /// Internal so tests drive the lineage door without an observation.
-    func adoptUnplacedOrigins(_ value: [String: [String]]) {
+    func adoptUnplacedOrigins(_ value: [String: [Queries.UnplacedOrigin]]) {
         unplacedOriginsByBlock = value
     }
 
@@ -456,10 +461,14 @@ final class EditorViewModel {
     /// at, when it has one that is live and unplaced (13f W10b). Deterministic
     /// (the query sorts) and nil for every ordinary block, which is what keeps
     /// the door off ordinary blocks.
-    var caretBlockOriginID: String? {
+    var caretBlockOrigin: Queries.UnplacedOrigin? {
         guard let caretBlockID else { return nil }
         return unplacedOriginsByBlock[caretBlockID]?.first
     }
+
+    /// The same fact as an id, for callers that only need to know THAT there
+    /// is one (the pre-13j shape, kept so nothing has to unwrap to ask).
+    var caretBlockOriginID: String? { caretBlockOrigin?.blockID }
 
     /// Teardown: persist what only the editor knows (open tail, scroll
     /// anchor), then let go. The open tail crystallizes on idle (author
@@ -1681,12 +1690,13 @@ final class EditorViewModel {
         // 13f W10b: the lineage door, rendered ONLY on a block whose own
         // `derived_from` edge points at a live, unplaced original (P-2 — a
         // door that could never act is not rendered at all). Ordinary blocks
-        // see the menu exactly as before.
-        if let originID = caretBlockOriginID {
+        // see the menu exactly as before. 13j J3: the row says WHICH act
+        // released it — her ruled wording ("See original from divide…").
+        if let origin = caretBlockOrigin {
             items.append(.init(
-                title: CapabilityRegistry.capability(.showOriginBlock).verb, enabled: true
+                title: OriginPeekCopy.doorVerb(op: origin.originOp), enabled: true
             ) { [weak self] in
-                self?.revealOriginBlock(originID)
+                self?.revealOriginBlock(origin)
             })
         }
         return items
@@ -1694,23 +1704,40 @@ final class EditorViewModel {
 
     /// Fire-and-DO (P-2): show the released original.
     ///
-    /// **13j J6 REPOINTED this door.** It used to broadcast a signal the
-    /// shell turned into a navigation to Library → Archived & Deleted →
-    /// Unplaced blocks — the listing her round-2 ruling removed ("what is
-    /// that cursed table of lost hopes and dreams?"). Released originals now
-    /// live in the note's OWN tray (the release stamps `last_container_id`
-    /// with the note they left, which is what makes that true), so the door
-    /// opens the tray right here with the original's row marked. No
-    /// navigation, no broadcast, no leaving the note.
+    /// **The door's history, because the record is the argument.** 13f W10b
+    /// broadcast a signal the shell turned into a navigation to Library →
+    /// Archived & Deleted → Unplaced blocks; her round-2 ruling removed that
+    /// room ("what is that cursed table of lost hopes and dreams?"), so batch
+    /// 2 repointed the door at the note's OWN tray — released originals live
+    /// there because the release stamps `last_container_id` with the note
+    /// they left — and recorded that J3 owned the final form.
     ///
-    /// The door's final form — a read-only PEEK of the original with its
-    /// takes — is J3's, batch 3. This keeps it honest in the meantime, which
-    /// is not optional: a door pointing at a removed room is the defect
-    /// class this phase is about.
-    func revealOriginBlock(_ blockID: String) {
-        trayRequest = TrayRequest(postID: postID, revealBlockID: blockID)
-        showStatus("Showing the original in \(TrayPath.menuLabel).")
+    /// **13j J3 — THE FINAL FORM, and the batch-2 bridge reconciled.** The
+    /// bridge above kept the door honest while the room was gone; her rounds
+    /// 4 + 5 ruled what it should actually open, and this is that: a
+    /// read-only PEEK of the original itself, its takes visible, with exactly
+    /// two actions — **Put back in note** and **Open this note's tray**. The
+    /// tray landing SURVIVES as the peek's second action, which is what keeps
+    /// `TrayRequest.revealBlockID` earning its place instead of becoming a
+    /// seam nothing raises.
+    func revealOriginBlock(_ origin: Queries.UnplacedOrigin) {
+        originPeek = OriginPeekRequest(postID: postID, origin: origin)
     }
+
+    /// The ⌘K row's body: the caret block's original, or the honest note
+    /// where it has none. A palette row carries no target, so it speaks
+    /// rather than sitting grey — the standing fire-and-speak posture for
+    /// every context-blind door.
+    func revealCaretBlockOrigin() {
+        guard let origin = caretBlockOrigin else {
+            showStatus(OriginPeekCopy.noOriginHere)
+            return
+        }
+        revealOriginBlock(origin)
+    }
+
+    /// 13j J3: the origin peek's pending target (`EditorView` presents it).
+    var originPeek: OriginPeekRequest?
 
     /// 13j J2: the tray sheet's pending target (`EditorView` presents it).
     var trayRequest: TrayRequest?
@@ -1993,6 +2020,10 @@ final class EditorViewModel {
         if commitList != nil {
             commitList = nil
             commitListVariantID = nil
+            // 13j batch 3: the past's observation lives exactly as long as
+            // the face does (the view's `.task` tears it down; dropping the
+            // model here is the same fact stated from the model's side).
+            blockPast = nil
         } else {
             Task { await loadCommitHistory() }
         }
@@ -2014,6 +2045,12 @@ final class EditorViewModel {
                     predatesSplit: CommitRules.predatesSplit(commitDate: $0.createdAt, splitDates: splits))
             }
             commitListVariantID = variantID
+            // 13j batch 3: the block's past, beside its savepoints — rebuilt
+            // per BLOCK, so re-opening the face on a different block never
+            // shows the previous one's deleted takes.
+            if blockPast?.blockID != blockID {
+                blockPast = BlockPastModel(session: session, blockID: blockID)
+            }
         } catch {
             statusMessage = "Could not load history: \(error)"
         }

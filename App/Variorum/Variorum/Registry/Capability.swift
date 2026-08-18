@@ -109,6 +109,11 @@ nonisolated enum RoutedCommand: Equatable, Sendable {
     case copyAllTakes    // 13e E6 (A21): the target block's whole fan → the clipboard
     case takeToBlockBelow  // 13e E5 (A20): the take you're in becomes the block below
     case takesToBlocks     // 13e E6b (A21/A45): every other take becomes its own block
+    /// 13j J3: peek at the released original behind the caret/focused block.
+    /// Routed because the ⌘K row has no target in hand — the surface names
+    /// the block it is standing in, exactly as `.deleteBlock` does, and
+    /// speaks the honest note where the block has no original (P-2).
+    case showOriginBlock
 }
 
 // MARK: - Choreography intents (the ONE mode-switch choreography's payloads)
@@ -363,6 +368,15 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     case showNoteTray
     // Takes lifecycle completeness (13b Stage 3, 3D — T5/N1/N6)
     case unarchiveTake, labelTake, renameLens
+    // 13j, sitting round 5 — DELETED takes get a door at last. The sweep at
+    // the sitting found there was no `restoreVariant` op and no deleted-take
+    // query anywhere: a deleted take was unreachable forever, while the
+    // phase's own bar names takes ("deleting things — blocks, notes, takes —
+    // and getting them back is obvious, honest, and calm"). A `.surface`
+    // act, the `.unarchiveTake` class exactly: the target is the ROW you
+    // point at in the History face, so no routed context command could name
+    // it without guessing which take she meant.
+    case restoreTake
     // 13e E4 (her A19: "Reorder takes"). TWO declarations rather than one
     // "reorder" act, for the find/formatting families' reason: each is its own
     // door on the card, each renders its own enablement (the first card cannot

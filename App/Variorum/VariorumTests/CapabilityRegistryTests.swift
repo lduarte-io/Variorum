@@ -278,6 +278,15 @@ struct CapabilityRegistryTests {
             // joining the walk is a new line here.
             .union(LibraryCatalogView.surfaceCapabilities)
             .union(PoolPostsView.surfaceCapabilities)
+            // 13j batch 3 (A JUSTIFIED EDIT, called out like E2's and E8's
+            // above): the block's PAST region inside the History face renders
+            // two `.surface` acts — the lineage row (J3, her round-5
+            // amendment) and the deleted take's Put back (the round-5
+            // ruling). The declaration lives with the BUILDER rather than in
+            // each of the two history hosts (the `MarkdownActs` precedent),
+            // so both faces are covered by construction. The union names
+            // every renderer, so a new builder is a new line here.
+            .union(BlockPastSection.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 
@@ -359,6 +368,7 @@ struct CapabilityRegistryTests {
             .pageFan(1),
             .copyAllTakes,  // 13e E6 (A21's clipboard half)
             .takeToBlockBelow, .takesToBlocks,  // 13e batch 3 (A20/A21)
+            .showOriginBlock,  // 13j J3 — the ⌘K row's routed body
         ]
         for command in commands {
             let note = CapabilityRegistry.unhandledNote(

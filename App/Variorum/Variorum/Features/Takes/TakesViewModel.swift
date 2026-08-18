@@ -1162,6 +1162,44 @@ final class TakesViewModel {
         }
     }
 
+    // MARK: - 13j J5 — the lens's dangling pick, said out loud
+
+    /// The pick a lens column MADE for this slot and can no longer show
+    /// (`Queries.danglingLensPicks`), or nil where the column is showing what
+    /// it picked. Only LENS columns: a scratch column's picks are view-local
+    /// (`column.picks`), never stored, so they cannot dangle across a
+    /// session — recorded rather than silently scoped.
+    func danglingPick(columnID: String, slot: Queries.RenderedBlock) -> Queries.DanglingPick? {
+        guard let column = columns.first(where: { $0.id == columnID }),
+              case .lens(let lensID) = column.kind
+        else { return nil }
+        return projection.lensDangles[lensID]?[slot.blockID]
+    }
+
+    /// **The one-click Restore** her ruling asked for, routed to the right
+    /// door by the pick's actual state: an ARCHIVED take comes back through
+    /// `unarchiveVariant` — the road that has shipped since 13b Stage 3 and
+    /// is what the archived listing's own Unarchive button calls — and a
+    /// DELETED one through 13j's `restoreVariant`. A pick with no row, or one
+    /// pointing at another block's take, has nothing this surface can
+    /// honestly restore, and its notice renders without the button.
+    func restoreDanglingPick(_ pick: Queries.DanglingPick) async {
+        switch pick.state {
+        case .archived:
+            await run { ops in try ops.unarchiveVariant(pick.variantID) }
+            if statusMessage == nil {
+                statusMessage = LensFallbackCopy.restoredArchived
+            }
+        case .deleted:
+            await run { ops in try ops.restoreVariant(pick.variantID) }
+            if statusMessage == nil {
+                statusMessage = LensFallbackCopy.restoredDeleted
+            }
+        case .gone, .foreign:
+            statusMessage = LensFallbackCopy.nothingToRestore
+        }
+    }
+
     // MARK: - The archived listing (13b Stage 3, 3D — N1: the road back
     // lives in Takes). The fans query stays ACTIVE-ONLY by design; the
     // archived listing is its own read, refreshed by the board view at
@@ -1368,16 +1406,30 @@ final class TakesViewModel {
         statusMessage = message
     }
 
-    /// 13f W10b — the lineage door's act, identical to Write's, and
-    /// REPOINTED with it at 13j J6: the released original lives in this
-    /// note's own tray now (the global unplaced listing is gone), so the
-    /// door opens the tray with its row marked instead of navigating to a
-    /// room that no longer exists. `EditorViewModel.revealOriginBlock`
-    /// carries the full reasoning.
-    func revealOriginBlock(_ blockID: String) {
-        trayRequest = TrayRequest(postID: postID, revealBlockID: blockID)
-        speak("Showing the original in \(TrayPath.menuLabel).")
+    /// 13f W10b — the lineage door's act, identical to Write's, and given
+    /// its FINAL form with it at 13j J3: a read-only peek of the original,
+    /// its takes visible, with Put back and the note's tray as its two
+    /// actions. `EditorViewModel.revealOriginBlock` carries the full
+    /// reasoning and the door's whole history.
+    func revealOriginBlock(_ origin: Queries.UnplacedOrigin) {
+        originPeek = OriginPeekRequest(postID: postID, origin: origin)
     }
+
+    /// The ⌘K row's body on the boards: the focused block's original, or the
+    /// honest note where it has none (fire-and-speak — Write's twin).
+    func revealFocusedBlockOrigin() {
+        guard let slot = commandTargetSlot,
+              let origin = projection.unplacedOrigins[slot.blockID]?.first
+        else {
+            speak(OriginPeekCopy.noOriginHere)
+            return
+        }
+        revealOriginBlock(origin)
+    }
+
+    /// 13j J3: the origin peek's pending target (`TakesBottomBar` presents
+    /// it, where the tray and comments sheets live).
+    var originPeek: OriginPeekRequest?
 
     /// 13j J2: the tray sheet's pending target (`TakesBottomBar` presents
     /// it, where the comments sheet lives).

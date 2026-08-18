@@ -134,6 +134,11 @@ struct EditorView: View {
                 session: session, postID: request.postID,
                 revealBlockID: request.revealBlockID)
         }
+        .sheet(item: $model.originPeek) { request in
+            // 13j J3: the released original itself, read-only, with Put back
+            // and the tray as its two actions.
+            OriginPeekPanel(session: session, request: request)
+        }
         .sheet(item: $model.commentsPanel) { panel in
             // Phase 13 C1 (R7): the block's comments — margin/inline faces
             // all open here; deleted comments visible + resurrectable.
@@ -309,6 +314,11 @@ extension EditorView {
         case .takesToBlocks:
             // 13e E6b (A21/A45): the caret block's whole fan.
             Task { await model.turnCaretBlockTakesIntoBlocks() }
+            return true
+        case .showOriginBlock:
+            // 13j J3: the ⌘K row — the caret block's released original, or
+            // the honest note where it has none.
+            model.revealCaretBlockOrigin()
             return true
         case .find(let action):
             // QoL batch 3 (L6): the find bar lives in THIS editor's own scroll

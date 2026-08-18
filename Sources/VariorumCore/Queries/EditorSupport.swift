@@ -120,6 +120,56 @@ extension Queries {
             arguments: [blockID])
             .map(\.createdAt)
     }
+
+    // MARK: - The block's PAST (13j J3 + the round-5 deleted-take ruling)
+
+    /// A block's DELETED takes, newest tombstone first — the population that
+    /// had no door anywhere in the app until 13j (verified by sweep at the
+    /// sitting: no `restoreVariant` op, no deleted-take query, so a deleted
+    /// take was unreachable forever).
+    ///
+    /// Read for a LIVE block, which is what makes the listing exactly the
+    /// restorable set: a take that died WITH its block carries the block's
+    /// stamp and comes back with `restoreBlock`, and one that died
+    /// independently keeps its own stamp — so on a live block every tombstoned
+    /// take is one `restoreVariant` can put back. Cost ∝ the block's own fan
+    /// history (`idx_variant_block`), never the corpus.
+    public static func deletedTakes(_ db: Database, blockID: String) throws -> [Variant] {
+        try Variant.fetchAll(
+            db,
+            sql: """
+                SELECT * FROM variant
+                WHERE block_id = ? AND deleted_at IS NOT NULL
+                ORDER BY deleted_at DESC, id
+                """,
+            arguments: [blockID])
+    }
+
+    /// **What ONE block's History face shows besides its savepoints** (13j
+    /// batch 3): the takes it has deleted, and the originals a divide or a
+    /// merge preserved whole behind it.
+    ///
+    /// ONE projection rather than two because the face renders them as one
+    /// quiet "past" region and both hosts (Write's inline history, the Takes
+    /// history sheet) need exactly this pair — one observation, one model,
+    /// two hosts.
+    public struct BlockPast: Equatable, Sendable {
+        public var deletedTakes: [Variant]
+        public var origins: [UnplacedOrigin]
+
+        public init(deletedTakes: [Variant] = [], origins: [UnplacedOrigin] = []) {
+            self.deletedTakes = deletedTakes
+            self.origins = origins
+        }
+
+        public var isEmpty: Bool { deletedTakes.isEmpty && origins.isEmpty }
+    }
+
+    public static func blockPast(_ db: Database, blockID: String) throws -> BlockPast {
+        BlockPast(
+            deletedTakes: try deletedTakes(db, blockID: blockID),
+            origins: try unplacedOrigins(db, ofBlock: blockID))
+    }
 }
 
 // MARK: - Live projections
@@ -128,6 +178,24 @@ extension AppDatabase {
     /// The editing container's header, live (seal toggles, retitles).
     public func observeContainerHeader(_ containerID: String) -> AsyncValueObservation<Queries.ContainerHeader?> {
         observe { try Queries.containerHeader($0, containerID: containerID) }
+    }
+
+    /// A block's deleted takes, live (13j batch 3) — the observation the
+    /// round-5 ruling's Put back needs so a restored take leaves the listing
+    /// without a hand-rolled reload.
+    public func observeDeletedTakes(_ blockID: String) -> AsyncValueObservation<[Variant]> {
+        observe { try Queries.deletedTakes($0, blockID: blockID) }
+    }
+
+    /// The block's past, live (13j batch 3). **Held only while the History
+    /// face is on screen**, deliberately: it reads `variant`, which is the
+    /// one table autosave writes, so a standing observation would re-run at
+    /// keystroke rate (the `trayCounts` finding, one surface over). Bounded
+    /// by construction either way — cost ∝ this block's own fan history and
+    /// its own lineage edges, never the corpus (P1) — and the face is a
+    /// summoned panel, not ambient chrome.
+    public func observeBlockPast(_ blockID: String) -> AsyncValueObservation<Queries.BlockPast> {
+        observe { try Queries.blockPast($0, blockID: blockID) }
     }
 }
 // (An observeBlockFan wrapper was dropped in the Phase 7 review round —

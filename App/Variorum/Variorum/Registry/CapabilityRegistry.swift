@@ -521,15 +521,36 @@ nonisolated enum CapabilityRegistry {
         // per-target condition is the surface's: the menu item renders only
         // on a block whose origin is live and unplaced (P-2 — a door that
         // could never act is not rendered, not rendered-and-grey).
+        //
+        // **13j J3 gave the door its final grammar** (sitting rounds 4 + 5).
+        // Three summoned doors, no ambient chrome: the block's right-click
+        // menu (its row speaks the op — "See original from divide…" — through
+        // `OriginPeekCopy.doorVerb`), ⌘K, and the History face's quiet
+        // lineage row (`.surface`; the round-5 amendment, *"since it is
+        // lineage"*). The VERB here is the target-less form the palette shows,
+        // because a palette row has no block in hand to name the act that
+        // released the original.
         Capability(
-            id: .showOriginBlock, verb: "Show Original Block", scope: .block,
-            doors: [.contextMenu],
+            id: .showOriginBlock, verb: OriginPeekCopy.genericVerb, scope: .block,
+            doors: [.contextMenu, .palette, .surface],
             shortcutLabel: nil, takesAccess: .native,
             // 13j J6: the global "Unplaced blocks" listing this note used to
             // name is GONE (her round-2 ruling). Released originals live in
             // the note's own tray now, and that is where this door lands.
             unavailableNote: "Released originals wait in \(TrayPath.menuLabel) — "
                 + "\(TrayPath.doorPhrase).",
+            availability: takeFamily),
+        // 13j, sitting round 5 — the deleted take's way back. A `.surface`
+        // act on the History face's own row (the `.unarchiveTake` shape): the
+        // target is the row she points at. The note names the ROAD rather
+        // than the state, because the one place this can be read with nothing
+        // to act on is a context with no block in reach.
+        Capability(
+            id: .restoreTake, verb: "Put Back Take", scope: .take,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "A deleted take waits in its block's History — "
+                + "open a note and a block's History lists what it has deleted.",
             availability: takeFamily),
         // 13j J2 — **THE PER-NOTE TRAY.** Her words: *"you need to be able to
         // see the archived blocks (or deleted blocks) that are associated
@@ -1122,6 +1143,7 @@ nonisolated enum CapabilityRegistry {
         case .copyAllTakes: id = .copyAllTakes
         case .takeToBlockBelow: id = .takeToBlockBelow
         case .takesToBlocks: id = .takesToBlocks
+        case .showOriginBlock: id = .showOriginBlock
         case .find(let action):
             switch action {
             case .show: id = .findInPost

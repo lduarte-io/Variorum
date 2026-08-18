@@ -33,11 +33,14 @@
 //
 //  ── WHAT THE TWO PUT BACKS ACTUALLY DO (and how they differ) ─────────────
 //  A DELETED block goes through `restoreBlock`, which flips the tombstone
-//  (with its exact-stamp cascade victims) and re-places the block at the
-//  note's END. That is the shipped operation's real behaviour, not a
-//  simplification: the old placement row stays tombstoned and a fresh one is
-//  minted. The row says so, because a receipt that promised the old spot
-//  would be the copy-truth defect one door over.
+//  (with its exact-stamp cascade victims) AND the placement row that deletion
+//  took down — so the block comes back WHERE IT WAS, in its own fractional
+//  position, and Put back lands it exactly where ⌥⌘Z does. (Batch 2 shipped
+//  this row against the op as it then stood, which minted a fresh placement
+//  at the note's end; the architect's F2 ruling aligned the op to the restore
+//  family's exact-row religion in batch 3, and the receipt reads the op's own
+//  answer rather than assuming either landing — a released-then-deleted block
+//  has no row to revive and still lands at the end.)
 //
 //  A PRESERVED ORIGINAL goes through `placeBlock` — the W-reversibility
 //  primitive, exactly as the ceremony's own "reversible by re-pointing at A"
@@ -85,6 +88,24 @@ nonisolated enum TrayPath {
     static let putBackVerb = "Put back"
 
     static func doorLabel(deleted: Int) -> String { "\(doorGlyph) \(deleted)" }
+
+    /// **The put-back receipts, in ONE place** (13j batch 3): the tray's two
+    /// sections and the origin peek all speak them, so three doors onto two
+    /// acts cannot describe the same landing three ways.
+    ///
+    /// The deleted-block half moved with the F2 rider: `restoreBlock` now
+    /// flips the placement row this deletion tombstoned, so a block normally
+    /// comes back WHERE IT WAS — and the receipt says that instead of
+    /// "at the end", which is what it had to say while the op minted fresh.
+    static let putBackWhereItWas = "Put back where it was."
+    static let putBackAtEnd = "Put back at the end of this note."
+    static let putBackBeside = "Put back where it came from."
+    /// The block is live again but has nowhere to land (its note is gone).
+    /// Unreachable from the tray, which is always open ON a live note —
+    /// worded anyway, because a receipt that cannot be produced is still a
+    /// receipt a future door could produce.
+    static let putBackUnplaced =
+        "Put back — but its note is gone, so it's waiting unplaced."
 
     /// **Where a released original waits, in one phrase** — the string every
     /// ceremony explainer, merge receipt and helper entry uses. It replaces
@@ -196,56 +217,78 @@ final class TrayViewModel {
 
     // MARK: - Put back
 
-    /// A deleted block: `restoreBlock`, whose real behaviour is a FRESH
-    /// placement at the note's end (see this file's header). The receipt
-    /// says exactly that.
-    func putBackDeleted(_ blockID: String) async {
-        await run { ops in try ops.restoreBlock(blockID) }
-        if statusMessage == nil {
-            statusMessage = "Put back at the end of this note."
-        }
-    }
-
-    /// A preserved original: `placeBlock` after its last live successor.
+    /// A deleted block: `restoreBlock`.
     ///
-    /// The landing is re-read HERE, at act time, rather than taken from the
-    /// listing — a listing is a projection, and an argument read from a
-    /// projection is read from a snapshot (13c R3-1's lesson, applied at the
-    /// only place it can bite: the successor could have moved or gone since
-    /// the panel last rendered). The recorded corner: if it moves in the
-    /// sub-millisecond window between this read and the write, `placeBlock`
-    /// refuses by name and she retries.
-    func putBackOriginal(_ blockID: String) async {
-        let landing: String?
-        do {
-            landing = try await session.database.read { [postID] db in
-                try Queries.preservedOriginals(db, postID: postID)
-                    .first { $0.blockID == blockID }?.landAfterBlockID
-            }
-        } catch {
-            statusMessage = String(describing: error)
-            return
-        }
-        let insert: Operations.InsertPosition = landing.map { .after($0) } ?? .end
-        await run { ops in
-            _ = try ops.placeBlock(blockID, in: self.postID, at: insert)
-        }
-        if statusMessage == nil {
-            statusMessage = landing == nil
-                ? "Put back at the end of this note."
-                : "Put back where it came from."
-        }
-    }
-
-    private func run(_ body: @escaping @Sendable (Operations) throws -> Void) async {
+    /// **13j batch 3 — the F2 rider.** The op now flips the placement row
+    /// this deletion tombstoned, so the block comes back in its OWN place and
+    /// Put back lands it exactly where ⌥⌘Z does. The receipt reads the op's
+    /// own answer rather than assuming one: a block released to lineage and
+    /// deleted later has no row to revive and still lands at the end, and
+    /// saying "where it was" there would be the copy-truth defect one door
+    /// over.
+    func putBackDeleted(_ blockID: String) async {
         statusMessage = nil
         do {
-            try await session.runner.run(body)
+            let landing = try await session.runner.run { ops in
+                try ops.restoreBlock(blockID)
+            }
+            statusMessage = switch landing {
+            case .itsOldPlace: TrayPath.putBackWhereItWas
+            case .endOfNote: TrayPath.putBackAtEnd
+            case .unplaced: TrayPath.putBackUnplaced
+            }
         } catch let error as OperationError {
             statusMessage = TrayRefusalCopy.message(for: error)
         } catch {
             statusMessage = String(describing: error)
         }
+    }
+
+    /// A preserved original: `placeBlock` after its last live successor,
+    /// through the ONE shared brain the peek also calls (13j batch 3 — two
+    /// doors, one act).
+    func putBackOriginal(_ blockID: String) async {
+        statusMessage = nil
+        do {
+            statusMessage = try await PreservedOriginPutBack.run(
+                session: session, postID: postID, blockID: blockID)
+        } catch let error as OperationError {
+            statusMessage = TrayRefusalCopy.message(for: error)
+        } catch {
+            statusMessage = String(describing: error)
+        }
+    }
+}
+
+/// **The preserved original's PUT BACK, in ONE place** (13j batch 3): the
+/// tray's originals section and the J3 peek are two doors onto one act, and a
+/// second copy of the composition is a second place for the landing rule to
+/// drift.
+///
+/// It is a face-level composition over `placeBlock` — the W-reversibility
+/// primitive, exactly as the ceremony's "reversible by re-pointing at A"
+/// promises — and NO operation's semantics change for it.
+///
+/// The landing is re-read HERE, at act time, rather than taken from a
+/// listing: a listing is a projection, and an argument read from a projection
+/// is read from a snapshot (13c R3-1's lesson, applied at the only place it
+/// can bite — the successor could have moved or gone since the panel last
+/// rendered). The recorded corner is unchanged: if it moves in the
+/// sub-millisecond window between this read and the write, `placeBlock`
+/// refuses by name and she retries.
+@MainActor
+enum PreservedOriginPutBack {
+    /// Returns the receipt; refusals throw for the caller to word.
+    static func run(session: AppSession, postID: String, blockID: String) async throws -> String {
+        let landing = try await session.database.read { db in
+            try Queries.preservedOriginals(db, postID: postID)
+                .first { $0.blockID == blockID }?.landAfterBlockID
+        }
+        let insert: Operations.InsertPosition = landing.map { .after($0) } ?? .end
+        try await session.runner.run { ops in
+            _ = try ops.placeBlock(blockID, in: postID, at: insert)
+        }
+        return landing == nil ? TrayPath.putBackAtEnd : TrayPath.putBackBeside
     }
 }
 
@@ -317,8 +360,9 @@ struct TrayPanel: View {
                         row(
                             blockID: item.blockID, text: item.text,
                             stamp: item.deletedAt, when: "deleted",
-                            help: "Puts the block back at the END of this note "
-                                + "(a restored block gets a fresh place in the order)"
+                            help: "Puts the block back where it was in this note "
+                                + "(a released original that was deleted later has "
+                                + "no old place left, and lands at the end)"
                         ) {
                             await model.putBackDeleted(item.blockID)
                         }
@@ -404,12 +448,17 @@ nonisolated enum TrayRowPreview {
     /// grow to the block's height, and its first line is what identifies it
     /// (the `tocHandle` instinct, without borrowing its naming rules: a
     /// tray row is not a heading).
+    /// The empty case's words, named so a caller in another scope can tell
+    /// it apart and say its OWN noun (13j batch 3: the History face's take
+    /// rows read "(empty block)" until the capture caught it).
+    static let emptyBlock = "(empty block)"
+
     static func line(_ text: String?, limit: Int = 90) -> String {
-        guard let text, !text.isEmpty else { return "(empty block)" }
+        guard let text, !text.isEmpty else { return emptyBlock }
         let first = text.split(
             separator: "\n", maxSplits: 1, omittingEmptySubsequences: false)[0]
         let trimmed = first.trimmingCharacters(in: .whitespaces)
-        if trimmed.isEmpty { return "(empty block)" }
+        if trimmed.isEmpty { return emptyBlock }
         return trimmed.count > limit ? String(trimmed.prefix(limit)) + "\u{2026}" : trimmed
     }
 
