@@ -441,6 +441,22 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "Tags go on a block where you see it — scrap rows and canvas cards carry the door.",
             availability: always),
+        // 13e E8 — NOTE tagging, declared (P-1's "the registry grows to
+        // cover a surface door as work touches it"; her 2026-08-02 word:
+        // *"the registry should be kept up to date"*). The act is the
+        // chips' ＋ / ✕ — one act with two renderers, the context bar
+        // (13g R6-1 / 13k K12) and the Library's note rows (13e E8) — and
+        // its availability is `always` for `.tagBlock`'s own reason: both
+        // doors point at a note directly (the one this bar belongs to, the
+        // one this row is), so there is no context in which a RENDERED
+        // door cannot act. Nothing about the shipped faces changes; what
+        // they gain is a catalog row, a written refusal, and walk coverage.
+        Capability(
+            id: .tagNote, verb: "Tag Note", scope: .post,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "Tags go on a note where you see it — the context bar's cards and the Library's rows carry the door.",
+            availability: always),
         // 13e E7 — the canvas BANK (her sitting Round 2 pick; the 4E fork
         // she preserved, built as the FACE that ruling named). Both doors
         // are canvas-surface doors on the `.tagBlock` pattern: the target

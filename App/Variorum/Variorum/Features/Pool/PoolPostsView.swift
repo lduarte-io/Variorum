@@ -21,7 +21,9 @@ import VariorumCore
 final class PoolPostsModel {
     @ObservationIgnored let session: AppSession
     private(set) var posts: [Queries.TimelineItem] = []
-    private(set) var postTags: [String: [String]] = [:]
+    /// 13e E8: whole tags, like the Library's — the chips need the id to
+    /// take one off (`TagChips` carries the reasoning).
+    private(set) var postTags: [String: [Tag]] = [:]
     private(set) var lastError: String?
 
     /// Bounded like every held listing (the observeLibrary discipline).
@@ -83,9 +85,43 @@ final class PoolPostsModel {
             lastError = TagsViewModel.message(error)
         }
     }
+
+    /// 13e E8 — the Library's two doors, on the pool's rows. Same reasoning,
+    /// same one implementation: adding rides the shipped type-to-create door
+    /// (13b 3D's N24, the context bar's `＋`), removing is the ops call with
+    /// batch semantics. The pool listing is the OTHER half of the R46
+    /// surface her round-11 ask named, so a different grammar here would be
+    /// exactly the second tag mechanism this work exists to avoid.
+    func applyTypedPath(_ raw: String, to postID: String) async {
+        let door = TagAssignmentViewModel(session: session, postID: postID)
+        if await door.applyTypedPath(raw) == nil {
+            lastError = door.lastError
+        } else {
+            lastError = nil
+        }
+        await loadTags()
+    }
+
+    func removeTag(_ tagID: String, from postID: String) async {
+        do {
+            try await session.runner.run { ops in
+                do {
+                    try ops.removeTag(tagID, fromPost: postID)
+                } catch OperationError.tagNotApplied {}
+            }
+            await loadTags()
+        } catch {
+            lastError = TagsViewModel.message(error)
+        }
+    }
 }
 
 struct PoolPostsView: View {
+    /// 13e E8: the pool rows' tag doors — the THIRD renderer of the one
+    /// `.tagNote` act (the context bar's cards and the Library's rows are
+    /// the others), declared so the `.surface` walk covers them.
+    static let surfaceCapabilities: [CapabilityID] = [.tagNote]
+
     let session: AppSession
     let model: PoolPostsModel
     let library: LibraryViewModel
@@ -153,26 +189,19 @@ struct PoolPostsView: View {
             Text(item.displayTitle)
                 .font(tokens.body)
                 .foregroundStyle(tokens.ink)
-            HStack(spacing: 4) {
-                ForEach(model.postTags[item.postID] ?? [], id: \.self) { path in
-                    Text("#\(path)")
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent.opacity(0.85))
-                }
-                Menu {
-                    ForEach(tags.tags, id: \.id) { tag in
-                        Button(tag.path) {
-                            Task { await model.applyTag(tag.id, to: item.postID) }
-                        }
-                    }
-                } label: {
-                    Image(systemName: "plus.circle")
-                        .font(.system(size: 10))
-                        .foregroundStyle(tokens.faint)
-                }
-                .menuStyle(.borderlessButton)
-                .frame(width: 22)
-            }
+            // 13e E8: the note's own chip grammar (colour · leaf · ✕ off ·
+            // ＋ types one on), identical to the Library's rows and the
+            // context bar's cards.
+            NoteTagsRow(
+                tokens: tokens,
+                tags: model.postTags[item.postID] ?? [],
+                allTags: tags.tags,
+                onApply: { path in
+                    Task { await model.applyTypedPath(path, to: item.postID) }
+                },
+                onRemove: { tag in
+                    Task { await model.removeTag(tag.id, from: item.postID) }
+                })
             Spacer()
             Menu(tokens.chromeLabel("Add to Book")) {
                 ForEach(readings.readings.filter { $0.kind == .curated }, id: \.id) { reading in

@@ -34,7 +34,8 @@ final class LibraryCatalogModel {
     /// the UI's unordered spawns).
     var query = ""
     private(set) var hits: [Queries.CatalogHit] = []
-    private(set) var postTags: [String: [String]] = [:]
+    /// 13e E8: the listed notes' live tags (whole rows — see `TagChips`).
+    private(set) var postTags: [String: [Tag]] = [:]
     /// 13g R5-6: postID → the note card's read-time extras (snippet +
     /// books). Loaded ONLY in `.notes` mode and only for the hits on
     /// screen — the same bounded-to-what-is-listed discipline as
@@ -154,9 +155,73 @@ final class LibraryCatalogModel {
             lastError = TagsViewModel.message(error)
         }
     }
+
+    /// 13e E8 — the ADD half of her round-11 ask, through the SHIPPED
+    /// type-to-create door (`TagAssignmentViewModel.applyTypedPath`, 13b
+    /// 3D's N24 — the same door the context bar's `＋` uses, R6-1). So the
+    /// hierarchy walk, the per-segment creation and the
+    /// already-applied-is-a-no-op rule are one implementation with one set
+    /// of semantics; this surface adds no tag rules of its own.
+    ///
+    /// The first post's turn creates whatever segments are missing and the
+    /// rest find them existing, so a typed path applied to a selection
+    /// mints the tag ONCE.
+    func applyTypedPath(_ raw: String, to postIDs: [String]) async {
+        for postID in postIDs {
+            let door = TagAssignmentViewModel(session: session, postID: postID)
+            if await door.applyTypedPath(raw) == nil {
+                lastError = door.lastError
+                break  // the refusal is the same for every remaining post
+            }
+            lastError = nil
+        }
+        await search()
+    }
+
+    /// 13e E8 — the REMOVE half (*"see the posts at a high level and remove
+    /// / add them"*). Keyed on the TAG the row is showing: it is drawn from
+    /// the same rows this reads, and the operations layer refuses anything
+    /// that changed underneath (`tagNotApplied` for a tag already taken off,
+    /// which batch semantics treat as done rather than as an error — the
+    /// `applyTag` mirror).
+    func removeTag(_ tagID: String, from postIDs: [String]) async {
+        do {
+            try await session.runner.run { ops in
+                for postID in postIDs {
+                    do {
+                        try ops.removeTag(tagID, fromPost: postID)
+                    } catch OperationError.tagNotApplied {
+                        // Batch semantics: already off is a no-op.
+                    }
+                }
+            }
+            await search()
+        } catch {
+            lastError = TagsViewModel.message(error)
+        }
+    }
+
+    /// The tags carried by the given notes, each once, in path order — the
+    /// bulk UNTAG menu's rows (a menu offering a tag nothing selected wears
+    /// would be a door that cannot act, P-2).
+    func tagsOn(_ postIDs: Set<String>) -> [Tag] {
+        var seen: Set<String> = []
+        var result: [Tag] = []
+        for postID in postIDs.sorted() {
+            for tag in postTags[postID] ?? [] where seen.insert(tag.id).inserted {
+                result.append(tag)
+            }
+        }
+        return result.sorted { $0.path < $1.path }
+    }
 }
 
 struct LibraryCatalogView: View {
+    /// 13e E8: the note rows' tag doors (`＋` / `✕`) — the SECOND renderer
+    /// of the one `.tagNote` act (the context bar's cards are the first),
+    /// declared so the `.surface` walk covers them.
+    static let surfaceCapabilities: [CapabilityID] = [.tagNote]
+
     let session: AppSession
     let model: LibraryCatalogModel
     let library: LibraryViewModel
@@ -302,6 +367,22 @@ struct LibraryCatalogView: View {
                         }
                     }
                     .font(tokens.small)
+                    // 13e E8 — the bulk half of *"remove / add them"*. The
+                    // rows are the tags the SELECTION actually wears, so the
+                    // menu never offers an act that would do nothing (P-2);
+                    // with none, there is no menu at all.
+                    let worn = model.tagsOn(selectedPosts)
+                    if !worn.isEmpty {
+                        Menu(tokens.chromeLabel("Untag \(selectedPosts.count) notes")) {
+                            ForEach(worn, id: \.id) { tag in
+                                Button(tag.path) {
+                                    let ids = Array(selectedPosts)
+                                    Task { await model.removeTag(tag.id, from: ids) }
+                                }
+                            }
+                        }
+                        .font(tokens.small)
+                    }
                 }
             }
         }
@@ -429,6 +510,10 @@ struct LibraryCatalogView: View {
                 .foregroundStyle(card.snippet.isEmpty ? tokens.faint : tokens.muted)
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
+            // 13e E8: the same tags face the List row wears. Quiet on an
+            // untagged card until the pointer arrives, so her
+            // Apple-Notes-shaped list stays what it is at rest.
+            tagsRow(hit, revealsOnHover: true)
         }
         .padding(.vertical, 9)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -436,6 +521,25 @@ struct LibraryCatalogView: View {
         .onTapGesture { onOpen(.post(hit.id)) }
         .contextMenu { postRowMenu(hit) }
         .help("Open this note")
+    }
+
+    /// 13e E8: ONE tags face, both note renderers — the `postRowMenu`
+    /// pattern (13g R5-6), applied to the row's tags so the List row and
+    /// the note card can never offer different tag doors on the same note.
+    /// Every write goes through the model, which owns the ops calls and the
+    /// re-read.
+    private func tagsRow(_ hit: Queries.CatalogHit, revealsOnHover: Bool = false) -> some View {
+        NoteTagsRow(
+            tokens: tokens,
+            tags: model.postTags[hit.id] ?? [],
+            allTags: tags.tags,
+            onApply: { path in
+                Task { await model.applyTypedPath(path, to: [hit.id]) }
+            },
+            onRemove: { tag in
+                Task { await model.removeTag(tag.id, from: [hit.id]) }
+            },
+            revealsOnHover: revealsOnHover)
     }
 
     private func postRow(_ hit: Queries.CatalogHit) -> some View {
@@ -446,31 +550,11 @@ struct LibraryCatalogView: View {
             if let date = hit.detail {
                 Text(date).font(tokens.small).foregroundStyle(tokens.muted)
             }
-            // The tags column (R46): chips + the addable "+".
-            HStack(spacing: 4) {
-                ForEach(model.postTags[hit.id] ?? [], id: \.self) { path in
-                    Text("#\(path)")
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent.opacity(0.85))
-                }
-                Menu {
-                    ForEach(tags.tags, id: \.id) { tag in
-                        Button(tag.path) {
-                            Task { await model.applyTag(tag.id, to: [hit.id]) }
-                        }
-                    }
-                    Divider()
-                    Button("Tags…") {
-                        tagSheetTarget = .init(id: hit.id, title: hit.title)
-                    }
-                } label: {
-                    Image(systemName: "plus.circle")
-                        .font(.system(size: 10))
-                        .foregroundStyle(tokens.faint)
-                }
-                .menuStyle(.borderlessButton)
-                .frame(width: 22)
-            }
+            // The tags column (R46), wearing the note's OWN chip grammar
+            // since 13e E8 — colour, leaf, ✕ off, ＋ types one on. The
+            // sheet stays reachable from the row's context menu ("Tags…"),
+            // which is where the taxonomy-wide toggle list belongs.
+            tagsRow(hit)
             Spacer()
         }
         .contentShape(Rectangle())
@@ -705,16 +789,22 @@ enum NoteCards {
 }
 
 enum TagChips {
+    /// 13e E8: the chips load whole TAGS, not paths. Her round-11 ask was
+    /// *"see the posts at a high level and remove / add them"*, and removing
+    /// needs the tag's identity — resolving a path back to an id at click
+    /// time would be a second lookup that can disagree with what is drawn.
+    /// One grouped query still (the round-2 NIT's rule: never N round
+    /// trips), bounded to the listed posts.
     nonisolated static func load(
         _ db: Database, postIDs: [String]
-    ) throws -> [String: [String]] {
+    ) throws -> [String: [Tag]] {
         let json = String(
             decoding: (try? JSONEncoder().encode(postIDs)) ?? Data("[]".utf8),
             as: UTF8.self)
         let rows = try Row.fetchAll(
             db,
             sql: """
-                SELECT pt.post_id AS post_id, t.path AS path
+                SELECT pt.post_id AS chip_post_id, t.*
                 FROM post_tag pt
                 JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL
                 WHERE pt.deleted_at IS NULL
@@ -722,9 +812,11 @@ enum TagChips {
                 ORDER BY pt.post_id, t.path
                 """,
             arguments: [json])
-        var result: [String: [String]] = [:]
+        var result: [String: [Tag]] = [:]
         for row in rows {
-            result[row["post_id"] as String, default: []].append(row["path"])
+            // The join's own column is aliased so it can never collide with
+            // a tag column; `Tag` decodes the rest and ignores it.
+            result[row["chip_post_id"] as String, default: []].append(try Tag(row: row))
         }
         return result
     }

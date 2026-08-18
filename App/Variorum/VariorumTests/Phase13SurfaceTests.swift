@@ -370,8 +370,12 @@ struct CommentsAndReorderTests {
             #expect(card.frame.maxX <= state.textLeft - 22, "clear of the drag-handle lane")
 
             // The caret block still has no comment, and nothing renders for
-            // it: the "+" door is gone, not moved (⌘⇧' and the bottom bar's
-            // "comments" button are its replacements, as they always were).
+            // it: the RIGHT-hand "+" is gone, and the CARET-block always-on
+            // form was never revived. (13e E7 note, so this pin's subject
+            // stays exact: an add door exists again, but only under the
+            // POINTER and only in the left margin — nothing is hovered here,
+            // so the at-rest margin is unchanged, which is what this asserts.
+            // `MarginHoverCommentTests` owns the hover door.)
             #expect(cards.allSatisfy { $0.frame.minY == 40 },
                     "only the COMMENTED block draws in the margin")
         }

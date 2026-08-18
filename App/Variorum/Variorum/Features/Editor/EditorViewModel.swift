@@ -174,6 +174,15 @@ final class EditorViewModel {
     var appearance = EditorAppearance() {
         didSet { if oldValue != appearance { refreshDecorations() } }
     }
+    /// 13e E7: whether the pointer is inside this surface, reported by the
+    /// decoration controller's hover tracker. It is a DECORATION INPUT, not
+    /// UI state anything renders directly: the hover faces need block
+    /// geometry to resolve against, and `refreshDecorations`' gate skips the
+    /// walk entirely on a calm page. Ignored for observation like every
+    /// other decoration input — it drives the sink, never a view body.
+    @ObservationIgnored var pointerInEditor = false {
+        didSet { if oldValue != pointerInEditor { refreshDecorations() } }
+    }
     /// Callout frames + comment briefs for this container, observed live
     /// (cost ∝ the post — the P1 unit).
     @ObservationIgnored private(set) var presentationsByBlock: [String: BlockPresentation] = [:]
@@ -2332,6 +2341,17 @@ final class EditorViewModel {
             // the highlight never draws, which is the silent-selection
             // class: she would be picking blocks with nothing to see.
             || !blockSelection.isEmpty
+            // 13e E7: so does a POINTER IN THE SURFACE. The hover faces —
+            // the drag handle (13b 4D, S4-19) and the new margin comment
+            // invitation — resolve the hovered block against these frames,
+            // so on a calm page they had nothing to resolve against and
+            // NEITHER could ever appear: hovering a plain post revealed no
+            // handle at all, working exactly as built and invisible in the
+            // one state it was built for (the E2 silent-selection class,
+            // one affordance over). Cost stays P1-shaped: the walk is
+            // viewport-proportional, it runs only while she is pointing at
+            // the surface, and it stops the moment the pointer leaves.
+            || pointerInEditor
         guard needsFrames, let textView, loaded,
               let layoutManager = textView.textLayoutManager,
               let contentManager = layoutManager.textContentManager,

@@ -801,13 +801,19 @@ enum TutorialSeeder {
             // 13b 4D (N35/S4-33): the doors she couldn't find, named where
             // comments are taught — the bar button (both editors now) and
             // the margin's own + door.
+            //
+            // 13e E7 keeps the promise TRUE (P-6): 13g R5-3 retired the
+            // right-hand ＋ and this sentence went on describing it, so the
+            // lesson has been one door ahead of the app since. The door is
+            // back where the margin now is — on the LEFT — and it appears
+            // when she points at a block, which the words say.
             "A COMMENT is a working note on a BLOCK — about the writing, not in "
             + "it: \u{201C}take 1 is better, but take 2's ending\u{2026}\u{201D}. This block "
             + "carries one; it renders in the margin with a // prefix. Click it "
             + "to open the block's comments panel — or press \u{2318}\u{21E7}' anywhere. "
             + "The comments button sits in the bottom bar in Write and Takes "
-            + "alike, and in Write an uncommented block offers a quiet \u{FF0B} in "
-            + "the margin right where its note would sit.",
+            + "alike, and in Write, pointing at an uncommented block offers a "
+            + "quiet \u{FF0B} in the left margin right where its note would sit.",
 
             "Comments survive the knife: divide or merge a commented block and "
             + "the note rides onto the successors. Deleted comments stay "

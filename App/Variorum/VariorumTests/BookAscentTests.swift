@@ -414,8 +414,15 @@ struct AscentDoorTests {
         // flipped expectation is that change's own red-on-old proof (the
         // pre-13e registry has no `.openBookAtNote` at all). The three
         // originals and their order are untouched.
+        // **13e E8 (a SECOND justified edit, same convention):** the tag
+        // CARDS' own doors (`＋` / `✕`) are declared now as `.tagNote` —
+        // they have worked since 13g R6-1 and were never in the catalog,
+        // and E8 gave the Library's rows the same act, so it is declared
+        // once with both renderers naming it. The four earlier elements
+        // and their order are untouched.
         #expect(ContextBar.surfaceCapabilities
-                == [.navigateBack, .navigateForward, .toggleTagChips, .openBookAtNote])
+                == [.navigateBack, .navigateForward, .toggleTagChips,
+                    .openBookAtNote, .tagNote])
     }
 
     /// Visiting a book floats it in the chooser — recorded at the ONE

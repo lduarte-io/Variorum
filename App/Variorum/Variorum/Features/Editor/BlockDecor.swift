@@ -229,6 +229,23 @@ nonisolated enum BlockDecor {
 
     /// The clearance a left card leaves for the drag-handle lane.
     static let leftCardLane: CGFloat = 28
+
+    /// The hover add-a-comment chip's size (13e E7 — the margin-hover
+    /// grammar). Small deliberately: it is an invitation in a sacred margin
+    /// (R9), not a control.
+    static let addChipSize = CGSize(width: 44, height: 16)
+
+    /// Where the hover "+ //" sits: RIGHT-ALIGNED against the card lane, so
+    /// it appears exactly where that block's comment card would start
+    /// reading — the 13b-4D chip's own rule ("exactly where its margin card
+    /// would sit"), now on the LEFT and clear of the drag-handle lane like
+    /// `leftCardRect`.
+    static func leftAddChipRect(textLeft: CGFloat, blockTop: CGFloat) -> CGRect {
+        CGRect(
+            x: max(0, textLeft - Self.leftCardLane - Self.addChipSize.width),
+            y: blockTop,
+            width: Self.addChipSize.width, height: Self.addChipSize.height)
+    }
 }
 
 // MARK: - The callout palette (token NAMES → colors; R1 forbids stored values)
@@ -329,6 +346,11 @@ final class BlockDecorOverlayController {
                 Task { await model?.moveBlock(fromEntry: from, toBoundary: to) }
             })
         model.decorSink = { [weak self] state in self?.render(state) }
+        // 13e E7: the pointer's presence reaches the model, so the calm
+        // page grows geometry exactly while she is pointing at it (and the
+        // hover faces — the handle AND the comment invitation — can exist
+        // there at all).
+        onPointerInside = { [weak model] inside in model?.pointerInEditor = inside }
         // Stage 2 walk fix (the starved-host class): wiring delivers the
         // current state — decorations computed before this host existed
         // must not stay invisible until the next real change.
@@ -343,9 +365,13 @@ final class BlockDecorOverlayController {
         self.textView = textView
         self.onOpenComments = onOpenComments
         self.onMoveBlock = onMoveBlock
-        // 13b 4D (S4-19): hover tracking exists only where a drop door
-        // does — the read tier (nil doors) never tracks or reveals.
-        if onMoveBlock != nil {
+        // 13b 4D (S4-19): hover tracking exists only where a DOOR does —
+        // the read tier (nil doors) never tracks or reveals. 13e E7 widens
+        // the condition from "a drop door" to "a drop door or a comments
+        // door", because the hover margin now offers the comment invitation
+        // too; every production controller has both or neither, so nothing
+        // shipped changes shape.
+        if onMoveBlock != nil || onOpenComments != nil {
             let tracker = HandleHoverTracker()
             tracker.onHover = { [weak self, weak textView] windowPoint in
                 guard let self else { return }
@@ -365,6 +391,13 @@ final class BlockDecorOverlayController {
     }
 
     func uninstall() {
+        // 13e E7: the surface is going away with the pointer possibly still
+        // over it (a mode switch, a closing pane). Tell the model the
+        // pointer is gone, or its decoration walk stays awake for a surface
+        // nobody is pointing at.
+        onPointerInside?(false)
+        onPointerInside = nil
+        hoveredBlockID = nil
         if let hoverArea { textView?.removeTrackingArea(hoverArea) }
         hoverArea = nil
         hoverTracker = nil
@@ -376,6 +409,7 @@ final class BlockDecorOverlayController {
         for view in selectionViews { view.removeFromSuperview() }
         indicatorView?.removeFromSuperview()
         insertionBar?.removeFromSuperview()
+        addChip?.removeFromSuperview()
         seamViews = []
         calloutViews = []
         emojiLabels = []
@@ -384,6 +418,8 @@ final class BlockDecorOverlayController {
         selectionViews = []
         indicatorView = nil
         insertionBar = nil
+        addChip = nil
+        addChipBlockID = nil
     }
 
     // MARK: Render
@@ -397,6 +433,7 @@ final class BlockDecorOverlayController {
         renderIndicator(state, tokens: tokens, in: textView)
         renderSeams(state, tokens: tokens, in: textView)
         renderComments(state, tokens: tokens, in: textView)
+        renderAddChip(state, tokens: tokens, in: textView)
         renderHandles(state, in: textView)
     }
 
@@ -570,18 +607,73 @@ final class BlockDecorOverlayController {
         }
     }
 
-    // MARK: The margin add-a-comment door — RETIRED 13g batch 6 (R5-3)
+    // MARK: The margin add-a-comment door — 13e E7: the HOVER grammar, LEFT
     //
-    // 13b 4D shipped a quiet "+ //" in the RIGHT gutter at the caret block
-    // (N35, answering "she couldn't find any way to leave a comment"). Her
-    // R5-3 ruling retires it, verbatim: *"stop showing the comment + to the
+    // The history this door has, in order, because it explains its shape:
+    // 13b 4D shipped a quiet "+ //" in the RIGHT gutter at the CARET block
+    // (N35, answering "she couldn't find any way to leave a comment"); her
+    // R5-3 ruling retired it, verbatim: *"stop showing the comment + to the
     // right completely, it conflicts with the take icon"* — the fan badge
     // holds that corner, and two things wanted the same pixels.
     //
-    // What N35 was FOR is unchanged and still reachable: ⌘⇧' , the bottom
-    // bar's "comments" button, Block ▸ Comments, and — once a block carries
-    // one — its own card, now in the left margin. Nothing became a dead key;
-    // one crowded affordance went away.
+    // 13e E7 is the rung 4D recorded as next ("the full every-block-hover
+    // mockup grammar"), built where her R5-3 objection cannot apply: the
+    // LEFT margin, which her sitting-Round-2 instruction made the comment
+    // side of the surface, and where nothing else lives at a block's top.
+    // Two deliberate narrowings keep the margin calm (R9):
+    //
+    //   - HOVER ONLY. No block wears a "+" at rest — the at-rest margin is
+    //     exactly what it was after R5-3, and it can never grow the rail of
+    //     buttons 4D was scoped away from. The caret-block always-on form
+    //     is NOT revived.
+    //   - UNCOMMENTED BLOCKS ONLY. A block that already carries a comment
+    //     shows its CARD there, and the card is the same door.
+    //
+    // Everything else is 4D's rule unchanged: margin-card mode only (the
+    // inline setting has its own strip grammar; a gutter too narrow for
+    // cards keeps the badge), the live editor only (the read tier has no
+    // comments door, so it can never render one), and one click opens the
+    // block's comments panel — the one door every comment face opens.
+
+    private var addChip: CommentCardView?
+    /// Test seam: which block the add door currently offers (nil = none).
+    private(set) var addChipBlockID: String?
+
+    private func renderAddChip(
+        _ state: BlockDecor.State, tokens: VoiceTokens, in textView: NSTextView
+    ) {
+        let eligible = onOpenComments != nil
+            && !state.appearance.inlineComments
+            && BlockDecor.gutterFitsCards(width: state.textLeft)
+        guard eligible, let blockID = hoveredBlockID,
+              state.comments[blockID]?.isEmpty ?? true,
+              let frame = state.frames.first(where: { $0.blockID == blockID })
+        else {
+            addChip?.removeFromSuperview()
+            addChip = nil
+            addChipBlockID = nil
+            return
+        }
+        let chip = addChip ?? {
+            let chip = CommentCardView()
+            addChip = chip
+            return chip
+        }()
+        if chip.superview == nil { textView.addSubview(chip) }
+        addChipBlockID = blockID
+        chip.onClick = onOpenComments.map { open in { open(blockID) } }
+        // The study voice carries no comment glyph (`commentPrefix` is ""),
+        // so the chip says "+" there rather than "+ " — one voice's idiom
+        // never prints another's punctuation.
+        let glyph = tokens.commentPrefix.trimmingCharacters(in: .whitespaces)
+        chip.present(
+            text: glyph.isEmpty ? "+" : "+ \(glyph)",
+            tint: .clear, ink: NSColor(tokens.faint),
+            style: .badge)
+        chip.toolTip = "Add a comment on this block (⌘⇧')"
+        chip.frame = BlockDecor.leftAddChipRect(
+            textLeft: state.textLeft, blockTop: frame.frame.minY)
+    }
 
     private func renderHandles(_ state: BlockDecor.State, in textView: NSTextView) {
         // Handles exist only where a drop door does (the read tier renders
@@ -628,13 +720,30 @@ final class BlockDecorOverlayController {
     private var hoverTracker: HandleHoverTracker?
     private var hoverArea: NSTrackingArea?
     private(set) var hoveredBlockID: String?
+    /// 13e E7: "the pointer is (not) in this surface", reported to whoever
+    /// owns the decoration walk. The live editor's convenience init wires
+    /// it to the model; a bare controller (tests, the read tier) leaves it
+    /// nil and behaves exactly as before.
+    var onPointerInside: ((Bool) -> Void)?
 
     /// The hover input, in text-view coordinates (internal so tests drive
     /// it without synthetic mouse events; nil = the pointer left).
-    /// Re-renders handles ONLY when the hovered block changes — mouse-moved
-    /// cadence never re-renders per event (cost: one frames scan).
+    /// Re-renders the hover faces ONLY when the hovered block changes —
+    /// mouse-moved cadence never re-renders per event (cost: one frames
+    /// scan).
+    ///
+    /// 13e E7: the pointer's PRESENCE is reported separately from the
+    /// hovered block, because the two answer different questions. The block
+    /// resolves against `state.frames`, which the model only computes when
+    /// something is decorated — so on a calm page (seams off, indicator off,
+    /// no callouts, no comments, nothing picked) there are no frames to
+    /// resolve against and no hover face could ever appear. `onPointerInside`
+    /// tells the model the pointer is here, which is itself a reason to have
+    /// geometry; the walk stays viewport-proportional and stops again the
+    /// moment the pointer leaves.
     func noteHover(atY y: CGFloat?) {
-        guard onMoveBlock != nil else { return }
+        guard onMoveBlock != nil || onOpenComments != nil else { return }
+        onPointerInside?(y != nil)
         let id = y.flatMap { y in
             state.frames.first {
                 $0.frame.minY - 4 <= y && y <= $0.frame.maxY + 4
@@ -646,6 +755,7 @@ final class BlockDecorOverlayController {
         // next render after drag end settles the reveal.
         guard dragEntryIndex == nil, let textView else { return }
         renderHandles(state, in: textView)
+        renderAddChip(state, tokens: state.appearance.tokens, in: textView)
     }
 
     /// Grows/shrinks a view pool in place.

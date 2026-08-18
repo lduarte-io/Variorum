@@ -550,5 +550,47 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint.**
 
-*(Next free number: **#62**.)*
+## Phase 13e (2026-08-18) — batch 6's calls (comments in the margin · the tags face), bundled for the sitting
+
+62. **2026-08-18 · Phase 13e batch 6 (E7-comments + E8 — the margin-hover comment door, and the tags face on the listings) · SIXTEEN calls, each one line to change.** The BINDING record is the 13e plan's batch-6 section.
+
+    **YOUR SITTING QUESTION, ANSWERED FIRST — *"comments need to be on the left instead of the right - is that true in this phase?"*** It was already true on the Mac before this batch, and the sweep says so with evidence rather than from memory: every comment face the Mac draws sits on the LEFT — the margin card and its narrow-gutter count badge (moved by your own R5-3 ruling at 13g), the Takes board's margin note, and now the new hover door. Nothing was found lurking on the right. The ONE thing that is not on the left is on your PHONE: a commented block wears a small ●n marker at the end of its last line, which is the phone's own ruled grammar (it has no margin to put a card in) — untouched here, and yours to move if you want it moved.
+
+    **(a) The margin's "+ //" door is back — but only under the POINTER.** 13b built it always-on at the caret block, on the right; you retired it there ("it conflicts with the take icon"). It now appears in the LEFT margin on whatever block you are pointing at, exactly where that block's comment card would read, and vanishes when you move away. **The alternative:** also show it permanently on the caret block.
+
+    **(b) Only UNCOMMENTED blocks offer it.** A block that already carries a comment shows its card there, and the card is the same door. **The alternative:** offer "+" beside an existing card too (two doors in one margin).
+
+    **(c) Inline-comment mode and narrow windows keep their own grammar** — the strip and the count badge respectively; the invitation appears only where a margin card would fit. **The alternative:** an invitation in those modes too, wherever it can be squeezed.
+
+    **(d) It says "+ //" in the terminal voice and "+" in the study voice** (which has no comment glyph). **The alternative:** one wording for both.
+
+    **(e) It is NOT tied to the "reveal drag handles on hover" setting** — that setting names the handles. Pointing at a block offers the comment door whether or not handles reveal. **The alternative:** fold it under that setting, or give it a setting of its own.
+
+    **(f) A real bug went with it, and it was yours to have hit: on a plain page, hovering revealed NOTHING — not even the drag handle.** The surface skips its decoration pass entirely when nothing is decorated (no seams, no callouts, no comments, no highlight), and the hover faces need that pass to know where the blocks are. So the handle reveal has been invisible on ordinary notes since it shipped. The page now takes its measurements while the pointer is inside it and stops again the moment it leaves. **The alternative:** none proposed — this is the fix's shape.
+
+    **(g) The reading surface offers no comment door** (it never had one — reading stays quiet). **The alternative:** a read-side add door.
+
+    **THE TAGS FACE — your 13f round-11 ask, whose second half ("does it exist within the post?") shipped at 13g/13k as the context bar's cards. This is the FIRST half: the high-level area could only ADD, and only tags that already existed.**
+
+    **(h) The Library's rows and the Pool's rows now wear the SAME cards your note wears** — the tag's colour, its leaf, `✕` to take it off, `＋` to put one on. Not a new tag mechanism: literally the same component. **The alternative:** leave the listings' plain `#path` text and add a remove button to it.
+
+    **(i) `＋` on a listing row TYPES a tag on, creating it if it is new** (the same door the context bar's ＋ has always used). So you can invent a tag while looking at the library, not only while inside a note. **The alternative:** keep the listing's old menu of existing tags only.
+
+    **(j) In the Notes-mode card list the tag row stays invisible until you point at the card** (and holds its room, so nothing jumps); in the List mode's column it always shows. **The alternative:** always show on both, or never on the cards.
+
+    **(k) A selection of several notes now offers "Untag N notes" beside "Tag N notes"**, listing only the tags the selection actually wears. **The alternative:** no bulk remove, or one menu listing the whole taxonomy.
+
+    **(l) Bulk acts are forgiving: a note that already has the tag (or already lacks it) is quietly skipped, never an error.** **The alternative:** report the skips.
+
+    **(m) The row shows ALL of a note's tags** — no "+2 more" cap. Long runs compress rather than overflowing. **The alternative:** cap at N with an overflow chip.
+
+    **(n) The taxonomy-wide checklist sheet ("Tags…") stays on the Library row's right-click menu**, where it was; the inline `＋` no longer duplicates it as a list of every tag. **The alternative:** keep the long menu inline as well.
+
+    **(o) Tagging a note is now a declared act in the capability catalog** (it never was), naming its three renderers — the context bar's cards, the Library's rows, the Pool's rows. Nothing you see changed. **The alternative:** leave it undeclared.
+
+    **(p) The Pool's rows were included, though your ask named the Library.** They are the same surface family (both are "notes at a high level"), and leaving them behind would have meant two different tag grammars in one app. **The alternative:** Library only.
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#63**.)*
 

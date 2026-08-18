@@ -558,7 +558,7 @@ binaries live in the session scratchpad, throwaway.
 | 3 | **Take↔block structure:** E5 (move-a-take-into-a-block-below) · E6 (copy-all-takes / takes-to-blocks — the A45 repair tool) | **DONE 2026-08-17** — record below (core 1254/135 · Mac 1298/229 tripwire-only · mobile 314/60 · spine 51/7; the fork RULED as AR-1 — mint-copy, source take ARCHIVED) |
 | 4 | **Block management:** E2 (block multi-select + multi-delete) | **DONE 2026-08-17** — record below (core 1254/135 · Mac 1330/234 tripwire-only · spine 51/7; mobile not run — `Sources/`/`Shared/` untouched) |
 | 5 | **Canvas:** E7-bank (canvas bank) · E12 (drag jitter/resist — live-path trace, no archeology per her rider) | **DONE 2026-08-18** — record below (Mac 1350/242 tripwire-only · core 1254/135 · spine 51/7; mobile not run — `Sources/`/`Shared/` untouched. E12's mechanism MEASURED — the default `.local` drag space is displaced by the drag's own offset, halving every translation; fixed with one named surface space, red-on-old on both pins. E7's bank built as the FACE 4E's ruling named, board byte-unchanged when closed. ONE routed finding: the Takes slot-height handle carries the same defect, out of E12's letter) |
-| 6 | **Comments & tags:** E7-comments (margin-hover grammar, comments on the LEFT) · E8 (the fuller tags face) | pending |
+| 6 | **Comments & tags:** E7-comments (margin-hover grammar, comments on the LEFT) · E8 (the fuller tags face) | **DONE 2026-08-18** — record below (Mac 1362/246 tripwire-only · core 1254/135 · spine 51/7; mobile not run — `Sources/`/`Shared/` untouched. The LEFT-placement SWEEP found NO Mac straggler (table in the record; the phone's ●n marker is its own M12 ruling, flagged not changed); the hover "+ //" door built on the left, hover-only; ONE REAL BUG fixed with it — a calm page grew no geometry, so 13b 4D's hover drag-handle reveal has been invisible on plain notes since it shipped. E8 gave the Library AND Pool rows the note's own chip grammar (✕ remove, ＋ type-to-create), bulk untag, and the first `.tagNote` declaration) |
 | 7 | **Text tools:** E9 (takes-aware find & replace) · E10 (copy-door flush alignment) | pending |
 | 8 | **W26 (E14):** the system-wide ⌃⌥⌘N summon — the batch's own verification act is the SANDBOXED in-app registration | pending |
 
@@ -2405,3 +2405,197 @@ kills by PID only after a path-discriminated `ps`; batch record here
 BEFORE final claims only with PENDING marks; commit per convention;
 NEVER push; NEVER `/Applications`; instances by bundle id
 `io.lduarte.Variorum.debug` or PID only.
+
+### BATCH 6 RECORD — comments & tags (2026-08-18, a fresh Opus implementer; COMPLETE)
+
+**E7-comments — the margin-hover grammar, on the LEFT.**
+
+- **THE SWEEP FIRST, because her sitting question is a question about the
+  whole app** (*"comments need to be on the left instead of the right - is
+  that true in this phase?"*). Every place the Mac draws a comment FACE,
+  with the code fact that decides it:
+
+  | Surface | Comment face | Side | Evidence |
+  |---|---|---|---|
+  | Write, live editor | margin CARD (`BlockDecorOverlayController.renderComments`) | **LEFT** | `BlockDecor.leftCardRect` — 13g R5-3 moved it; `aMarginCommentCardSitsInTheLEFTGutterClearOfTheHandleLane` |
+  | Write, narrow gutter | count BADGE (same pass) | **LEFT** | `x = max(2, textLeft − 36)`; swept by the new `everyMarginCommentFaceSitsLeftOfTheText` |
+  | Write, inline setting | tinted STRIP under the block | neither — spans the text column | R7's setting, unchanged |
+  | Write, hover (NEW) | "+ //" invitation | **LEFT** | `BlockDecor.leftAddChipRect`, right-aligned to the card lane |
+  | READ tier (Read mode, book pages, spreads) | the SAME controller, doors nil | **LEFT**, and quiet | `ReadPostView.install` builds it `onOpenComments: nil` |
+  | Takes board, article cell | `CommentMarginNote` | **LEFT** | `.overlay(alignment: .topLeading)` + a negative x offset (`TakesBoardView.washedCell`) |
+  | Lenses board | none (the bar's comments button only) | — | no `CommentMarginNote` on that board; the ACT is native there |
+  | Compare · Canvas · Blocks/Scraps · WriteTakesPanel | none | — | no comment face renders on them |
+  | `CommentsPanel` | the panel itself | modal sheet/popover | no side to be on |
+  | **PHONE** (`MobileBlockDecor`) | ●n marker at the block's LAST LINE END | trailing | its OWN ruling (M12, the mockup's ●n form) — a phone has no gutter; **NOT changed here**, flagged for her word (#62's preamble) |
+
+  **Verdict: no Mac straggler exists.** Her question's premise was true
+  before this batch and is true after it; the one non-left face in the
+  suite is the phone's, by its own ruling.
+- **The hover door itself** (the rung 13b 4D recorded as next — *"the full
+  every-block-hover mockup grammar"*): pointing at an UNCOMMENTED block
+  offers a quiet "+ //" in the left margin, exactly where that block's card
+  would read (`leftAddChipRect` right-aligns to the same lane
+  `leftCardRect` uses, so the invitation and the note it becomes occupy the
+  same pixels); clicking opens that block's comments panel — the one door
+  every comment face opens. **Deliberately narrow**, and each narrowing is
+  4D's own rule kept: margin-card mode only, live editor only, and — new —
+  HOVER only, so the at-rest margin is byte-identical to what R5-3 left and
+  can never grow a rail of buttons. Her R5-3 objection was the RIGHT side's
+  collision with the fan badge; nothing lives at a block's top-left.
+- **ONE REAL BUG, found by building on it and fixed at its mechanism.**
+  `refreshDecorations` skips the frame walk when nothing is decorated (the
+  calm default costs nothing) — and `noteHover` resolves the hovered block
+  against `state.frames`. So on an ordinary post (seams off, indicator off,
+  no callouts, no comments, nothing picked) there were no frames, nothing
+  resolved, and the hover reveal drew NOTHING: **13b 4D's S4-19 drag-handle
+  promise has been invisible on plain notes since it shipped** — working
+  exactly as built, in the one state nobody tested it in (the batch-4
+  silent-selection class, one affordance over). The fix is the E2 arm's
+  twin: the controller reports the POINTER'S PRESENCE to the model
+  (`onPointerInside` → `EditorViewModel.pointerInEditor`), which is itself
+  a reason to have geometry. Cost stays P1-shaped — the walk is
+  viewport-proportional, runs only while the pointer is inside, and stops
+  on exit (`uninstall` reports the exit too, so a closing pane cannot leave
+  the walk awake).
+- **The tutorial kept pace (P-6), and it was already stale:** the
+  "comments & tags" lesson has promised *"an uncommented block offers a
+  quiet ＋ in the margin"* since 4D, which R5-3 made FALSE in 13g without
+  the lesson noticing. It now says pointing at one does, in the LEFT
+  margin — true again.
+
+**E8 — the fuller tags face (her 13f round-11 ask, first half).**
+
+- **What was actually missing, checked rather than assumed.** The ask's
+  SECOND half (*"does it exist within the post?"*) shipped meanwhile: 13g
+  R6-1 put coloured cards with `＋`/`✕` on the context bar and 13k K12/K3
+  made them default-visible with leaf labels. The FIRST half — *"a quick
+  and intuitive area where you can see the posts at a high level and remove
+  / add them"* — did not: the Library's and the Pool's rows drew plain
+  `#path` TEXT with a `＋` menu of tags that already existed, and **no
+  inline way to take one off at all** (only the Library row's "Tags…"
+  sheet; the Pool had no remove door anywhere).
+- **The fix is composition, not a third mechanism.** Both listings now
+  render `NoteTagChips` — the exact component the context bar uses —
+  through one small wrapper (`NoteTagsRow`), so colour, leaf label, `✕` and
+  the type-to-apply `＋` popover are one implementation with one set of
+  semantics. Adding routes through the SHIPPED type-to-create door
+  (`TagAssignmentViewModel.applyTypedPath`, 13b 3D's N24), so a path typed
+  in the Library walks the hierarchy and creates missing segments exactly
+  as it does inside a note; removing is `Operations.removeTag` with the
+  `applyTag` mirror's batch semantics (already-off is done, not an error).
+- **The chips carry whole tags now.** `TagChips.load` returned PATHS, and
+  removing needs identity — resolving a path back to an id at click time
+  would be a second lookup that can disagree with what is drawn. Still ONE
+  grouped query, still bounded to the listed posts (the round-2 NIT's rule
+  intact); the generation-guard staleness contract is untouched.
+- **Bulk gained its missing half:** "Untag N notes" beside "Tag N notes",
+  listing only the tags the selection actually wears (`tagsOn` — a menu row
+  that would do nothing is a door that cannot act, P-2), and a typed path
+  applied to a selection mints the tag ONCE (the first note's turn creates
+  it; the rest find it).
+- **The Pool rode along, deliberately.** 13f's own answer named the Library
+  *"and Pool likewise"* as the R46 surface; leaving the pool's rows on the
+  add-only column would have shipped two tag grammars in one app.
+- **Declared (P-1).** New `.tagNote` — verb "Tag Note", scope `.post`,
+  doors `[.surface]`, `always` (both doors point at a note directly — the
+  `.tagBlock` reason one scope up), written refusal, and **three**
+  renderers naming it (`ContextBar` — which had rendered it undeclared
+  since 13g R6-1 — plus `LibraryCatalogView` and `PoolPostsView`). R118
+  exemption stated, not inherited: tagging is not text editing and its
+  doors sit outside the post-mode row entirely.
+
+**Mechanisms traced (the hallucination guard).** E7's bug is traced above
+(gate skips walk → no frames → `noteHover` resolves nothing → no handle,
+no chip) and proven by Revert B, where the pin dies at exactly those
+observations. E8 is a feature and carries no bug mechanism — with one
+honest caveat recorded rather than dressed up: the listings' "could only
+add" state is a MISSING door, not a defect, so its pins are feature pins.
+
+**Pins + red-on-old evidence (behavioral revert, checksums recorded).** New
+Mac file `App/Variorum/VariorumTests/CommentsAndTagsTests.swift` (12 tests,
+4 suites). No core file changed, so no core suite grew.
+
+*Revert A — the hover door's two call sites removed (`renderAddChip` in
+`render` and in `noteHover`), i.e. the pre-E7 margin. File:*
+`BlockDecor.swift` `e54d1a47…4aab` → `89618c96…03b8`. Result: **exactly the
+two chip pins RED (3 issues)** —
+`hoveringAnUncommentedBlockOffersTheDoorInTheLeftMargin` (`addChipBlockID →
+nil`, and no chip view exists to click) and
+`everyMarginCommentFaceSitsLeftOfTheText` at its hover arm (`faces()` empty
+where the invitation should be) — while `theAddChipSitsWhereTheCardWouldRead`
+(pure geometry) and `theDoorIsOfferedOnlyWhereItCouldBeUsed` (which asserts
+ABSENCE — the read tier, inline mode, narrow gutters) stayed GREEN: clean
+attribution. Restored: `e54d1a47…4aab`, byte-exact.
+
+*Revert B — the `|| pointerInEditor` arm removed from `refreshDecorations`'
+gate. File:* `EditorViewModel.swift` `b07b8245…d017` → `43acabb3…26c7`.
+Result: **`CalmPageHoverTests.aCalmPageRevealsItsHoverFacesInsteadOfNothing`
+RED with the exact traced symptom (3 issues)** — `captured?.frames.isEmpty
+→ nil` (the model emitted no geometry at all), `controller.hoveredBlockID →
+nil` (nothing to resolve against), and the require on the delivered state —
+while all four margin pins stayed GREEN (they feed the controller by hand
+and never touch the model's gate). Restored: `b07b8245…d017`, byte-exact.
+
+*E8's pins are FEATURE pins* (the batch-2/3 convention; no red-on-old is
+owed for a door that did not exist): the chip carrying the tag's identity,
+the removal reaching the STORE and not just the screen, removing twice
+being a no-op, a typed path creating every missing segment once and
+applying the leaf, a typed path over a selection minting one tag, the bulk
+untag menu listing worn tags in path order and nothing else, the pool's
+rows carrying the same two doors, and the declaration with all three
+renderers named. Two JUSTIFIED TEST EDITS, called out in the tests
+themselves: `ShelfAndPaletteTests`' chip assertions read `.map(\.path)`
+(a TYPE change, same fact) and `BookAscentTests.theFoldIsOneDeclaredActWithOneKey`
+names the fifth element (`.tagNote` — the convention batch 1 used for E11),
+with the walk's union gaining the two new renderers.
+
+**Counts (own runs, quoted from the "Test run with N tests" lines).**
+- Mac: **`✘ Test run with 1362 tests in 246 suites failed after 176.555
+  seconds with 1 issue`** — the ONE issue is
+  `TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`,
+  the recorded environment-gated tripwire, allowed by IDENTITY (baseline
+  1350/242 → +12/+4, exactly the new file). **A47c datum:** it fired again
+  in an UNLOCKED session (`CGSSessionScreenIsLocked = 0`) — an EIGHTH datum
+  for the sweep's "fires regardless of lock state" hypothesis.
+- Core: **`✔ Test run with 1254 tests in 135 suites passed`** — the baseline
+  matched EXACTLY; this batch changed no core file.
+- Mobile: **NOT RUN, per the brief's condition** — `Sources/` and
+  `App/Variorum/Shared/` are untouched (every changed file is under
+  `App/Variorum/Variorum/`, `VariorumTests/`, or `notes/`).
+- Tutorial spine, by TYPE name (all seven): **`✔ Test run with 51 tests in 7
+  suites passed`** (run twice — after the lesson edit and again at the end).
+
+**PROVISIONALs / build-time calls:** sixteen, bundled as **QUESTIONS #62**
+(a)–(p), with her sitting question answered in the entry's preamble (the
+sweep's verdict) — the hover-only door, uncommented blocks only, the mode
+narrowings, the two voices' wording, the handle-setting independence, the
+calm-page geometry fix, the read tier's silence, the listings adopting the
+note's own chips, type-to-create from a listing, the hover-revealed card
+row, bulk untag, forgiving batch semantics, no overflow cap, the sheet
+staying on the right-click menu, the declaration, and the Pool's inclusion.
+
+**Nothing stopped, nothing schema-shaped.** No fork appeared that her
+recorded words underdetermined: the comment door's shape is 13b 4D's
+recorded next rung plus her R5-3 side ruling, and E8's shape is her
+round-11 sentence read against what 13g/13k had already built (the "never a
+third mechanism" constraint decided the rest).
+`Sources/VariorumCore/Sync/` untouched (zero lines); `Sources/` untouched
+entirely; no migration, no mirror implication; no `/Applications` refresh.
+No Variorum instance was running at any point (`ps -Ao pid,command`,
+path-discriminated, at the batch's open and before each full-suite run),
+and no process was killed at all this batch.
+
+**MOBILE PARITY (for the closeout ledger):** the phone owes, if she wants
+them — **(1)** the LEFT-margin comment placement question itself: the phone
+shows a ●n marker at the end of a commented block's last line (its own M12
+ruling, no gutter to put a card in), so "comments on the left" has no phone
+translation without a design call — flagged for her word rather than
+assumed; **(2)** an add-a-comment invitation has no phone twin either (no
+hover), and its doors there are the block menu and the comments sheet,
+which are already prominent; **(3)** the TAGS face: wherever the phone lists
+a note's tags, it owes the `✕`-remove + type-to-create `＋` grammar — the
+work is a face, since `applyTypedPath`'s brain is app-side Mac code today
+and copying it would make it the seventh row of the KnownIssues "six mobile
+brains are byte-copies" family rather than a hoist. Nothing in this batch
+touched `Sources/` or `Shared/`, so nothing reached the phone by
+construction.

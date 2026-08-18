@@ -144,6 +144,15 @@ struct CapabilityRegistryTests {
             // not "behind" anything here because there is no takes-side
             // canvas for it to be behind.
             .toggleCanvasBank, .returnCardToBank,
+            // 13e E8: `.tagNote` joins `.tagBlock` for the reason stated
+            // there, one scope up — tagging is not TEXT EDITING, and its
+            // two renderers sit outside the post-mode row entirely: the
+            // context BAR (above the pane, over every mode — Takes reaches
+            // the cards without a mode switch, exactly as it reaches the
+            // book ascent) and the LIBRARY's note rows, which no editing
+            // mode owns. Takes cannot be "behind Write" where Write has no
+            // door of its own.
+            .tagNote,
         ]
         for capability in CapabilityRegistry.all
         where capability.scope != .app && !exempt.contains(capability.id) {
@@ -245,6 +254,14 @@ struct CapabilityRegistryTests {
             // renderer by construction, so a new renderer is a new line
             // here. Without it the walk fails, which is the pin working.
             .union(EditorView.surfaceCapabilities)
+            // 13e E8 (A JUSTIFIED EDIT, called out like E2's above): note
+            // TAGGING is declared now, and it has TWO renderers — the
+            // context bar's cards (shipped 13g R6-1, never declared) and
+            // the Library's note rows, which E8 gave the same grammar. The
+            // union names every renderer by construction, so the Library
+            // joining the walk is a new line here.
+            .union(LibraryCatalogView.surfaceCapabilities)
+            .union(PoolPostsView.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

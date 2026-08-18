@@ -188,6 +188,61 @@ struct NoteTagChips: View {
     }
 }
 
+/// **13e E8 — the same cards, on a LISTING row.** Her 13f round-11 ask was
+/// two halves: *"a quick and intuitive area where you can see the posts at a
+/// high level and remove / add them"*, and *"does it exist within the
+/// post?"*. The second half shipped at 13g R6-1 (these chips, on the context
+/// bar) and 13k K12/K3 (visible by default, leaf labels). The FIRST half —
+/// the high-level area — had a tags column that could only ADD, and only
+/// from tags that already existed: plain `#path` text, a `＋` menu of the
+/// taxonomy, and no way to take one off without opening a sheet.
+///
+/// So the listing row wears the note's own grammar: the tag's colour, its
+/// leaf, `✕` to take it off, `＋` to type one on (creating it if it is new).
+/// This is deliberately NOT a third tag mechanism — it is `NoteTagChips`,
+/// the one the context bar renders, given a row's worth of room:
+///
+///   - `compact` drops the row when a note carries no tags AND nothing is
+///     hovered, so a listing of untagged notes stays as calm as it is today
+///     (the `＋` appears with the pointer — the margin-hover discipline E7
+///     brings to comments, one surface over);
+///   - the doors are the caller's, so the Library's model owns every write
+///     and this view stays chrome.
+struct NoteTagsRow: View {
+    let tokens: VoiceTokens
+    let tags: [Tag]
+    let allTags: [Tag]
+    let onApply: (String) -> Void
+    let onRemove: (Tag) -> Void
+    /// True on rows that must stay quiet until pointed at (the note-card
+    /// listing); false where the row always shows (the List mode's column).
+    var revealsOnHover = false
+
+    /// The chip row's height, RESERVED even when nothing is drawn, so a card
+    /// does not jump the moment the pointer arrives (the N40 jumping class:
+    /// a hover that re-heights its row is worse than the affordance is
+    /// worth). It costs one small constant on untagged cards and nothing at
+    /// all on the List mode's column, which always shows its `＋`.
+    static let reservedHeight: CGFloat = 18
+
+    @State private var hovering = false
+
+    var body: some View {
+        Group {
+            if tags.isEmpty && revealsOnHover && !hovering {
+                // Nothing to say and nothing being pointed at: the room the
+                // chips would take, held open and empty.
+                Color.clear.frame(height: Self.reservedHeight)
+            } else {
+                NoteTagChips(
+                    tokens: tokens, tags: tags, allTags: allTags,
+                    onApply: onApply, onRemove: onRemove)
+            }
+        }
+        .onHover { hovering = $0 }
+    }
+}
+
 /// The `＋` popover: type a path, ⏎ applies. Suggestions are the live
 /// taxonomy filtered by what has been typed, already-applied paths dropped —
 /// clicking one applies it.

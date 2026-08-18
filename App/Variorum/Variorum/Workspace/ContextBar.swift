@@ -93,6 +93,12 @@ struct ContextBar: View {
     /// and this walk's coverage.
     static let surfaceCapabilities: [CapabilityID] = [
         .navigateBack, .navigateForward, .toggleTagChips, .openBookAtNote,
+        // 13e E8: the CARDS' own doors — `＋` types a tag on, `✕` takes one
+        // off. They have worked since 13g R6-1 and were never declared; the
+        // Library's rows now render the same act, so the one act is
+        // declared once and both renderers name it (E11's shape, one act
+        // over).
+        .tagNote,
     ]
 
     @State private var listingBooks = false

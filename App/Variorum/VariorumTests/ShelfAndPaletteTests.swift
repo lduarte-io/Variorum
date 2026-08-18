@@ -262,12 +262,17 @@ struct PromoteAndPaletteTests {
             }
             let model = LibraryCatalogModel(session: session)
             await model.search()  // the CURRENT generation's chips
-            #expect(model.postTags[tagged] == ["stars"])
+            // 13e E8 (JUSTIFIED EDIT — a TYPE change, not a meaning one):
+            // the chips carry whole `Tag` rows now, because taking a tag
+            // OFF a row needs its id. The assertions read the same fact
+            // through `.path`; the staleness contract they exist for is
+            // untouched.
+            #expect(model.postTags[tagged]?.map(\.path) == ["stars"])
 
             // A STALE generation's chips arrive late (the race, made
             // deterministic): they must not land.
             await model.loadTagChips(for: [other], generation: 0)
-            #expect(model.postTags[tagged] == ["stars"],
+            #expect(model.postTags[tagged]?.map(\.path) == ["stars"],
                     "the superseded read never overwrites the current chips")
             #expect(model.postTags.count >= 1)
         }

@@ -364,6 +364,11 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // Scrap tagging (13b 4D — N32(c)/S4-15: the one canvas-only door grows
     // registry-declared siblings on the scrap rows)
     case tagBlock
+    // NOTE tagging (13e E8 — her 13f round-11 ask, both halves): the chips'
+    // ＋ / ✕ doors, wherever they are rendered — the context bar (R6-1) and
+    // the Library's note rows. ONE act, its renderers enumerated, on the
+    // `.tagBlock` pattern one scope up.
+    case tagNote
     // The canvas BANK (13e E7 — her sitting Round 2 pick): the strip's own
     // toggle, and the card door that sends a placed card back to it.
     case toggleCanvasBank, returnCardToBank
