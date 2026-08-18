@@ -241,6 +241,66 @@ nonisolated struct BlockRangeIndex: Equatable, Sendable {
         return nil
     }
 
+    // MARK: - J9 (13j batch 1): the WHOLE-BLOCK selection
+
+    /// Phase 13j, batch 1 — her J9, from the screenshot report: *"what kind
+    /// of writing app won't let you delete a paragraph? there's not even a
+    /// take on it right now."*
+    ///
+    /// **The traced mechanism** (recorded in the batch-1 record, pinned by
+    /// `WholeBlockDeleteTests`' two trace tests): selecting a paragraph the
+    /// way a triple-click or a drag-to-the-next-paragraph does includes the
+    /// newline the eye sees at its end — and that newline is a SEPARATOR,
+    /// owned by no entry. So containment fails (`.crossesBlockBoundary`),
+    /// and BOTH cross-block planners then decline on the same two guards:
+    /// `touched.count >= 2` (the span intersects exactly one entry's
+    /// characters) and contiguity (`upperBound <= last-entry.upperBound` —
+    /// the separator sits one past it). The open tail was a suspect in the
+    /// post-close reading and the trace ruled it out: a tail-free note
+    /// declines identically.
+    ///
+    /// This is the geometry half of the answer: *does this span cover a
+    /// contiguous run of WHOLE entries, and nothing else but the separators
+    /// that glue that run to its neighbours?* At most one separator may hang
+    /// off each end — the one before the run's first entry, the one after
+    /// its last (which may be the tail's, so the tail's own TEXT is never
+    /// inside the answer). A span covering any entry only PARTIALLY answers
+    /// nil: partial selections keep their existing behaviour by her ruling.
+    ///
+    /// `starts` and `ends` are both strictly increasing (each entry consumes
+    /// its length plus one separator), so the two lookups below have at most
+    /// one solution each and the run they bracket is unambiguous.
+    ///
+    /// **Ranges of exactly one character are deliberately excluded.** A
+    /// one-character deletion is a SEAM KEYSTROKE, and the two seam carves
+    /// own that geometry whole — A7's empty-block delete with its
+    /// no-fan/nothing-unshown authorization, and #34's texted-seam merge with
+    /// its fan refusal. Answering it here would route around guards the
+    /// author ruled, which is the one thing this function must not do.
+    func wholeBlockRun(covering range: NSRange) -> ClosedRange<Int>? {
+        guard !entries.isEmpty, range.length > 1,
+              range.location >= 0, range.upperBound <= documentLength
+        else { return nil }
+        var starts: [Int] = []
+        var ends: [Int] = []
+        var location = 0
+        for entry in entries {
+            starts.append(location)
+            ends.append(location + entry.length)
+            location += entry.length + 1
+        }
+        // The run's first entry starts AT the span's start, or one past it
+        // (the span opened on the separator that precedes the entry).
+        let first = entries.indices.first { starts[$0] == range.location }
+            ?? entries.indices.first { $0 > 0 && starts[$0] == range.location + 1 }
+        // …and its last entry ends AT the span's end, or one short of it
+        // (the span closed on the separator that follows).
+        let last = entries.indices.first { ends[$0] == range.upperBound }
+            ?? entries.indices.first { ends[$0] == range.upperBound - 1 }
+        guard let first, let last, first <= last else { return nil }
+        return first...last
+    }
+
     // MARK: - #34 (13d batch 2): the texted seam
 
     /// Phase 13d, batch 2 — her QUESTIONS #34 ruling, option (ii): backspace

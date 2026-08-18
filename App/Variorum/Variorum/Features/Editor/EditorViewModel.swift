@@ -348,6 +348,10 @@ final class EditorViewModel {
             self?.pickBlock(atOffset: offset, extending: extending) ?? false
         }
         textView.onPlainClick = { [weak self] in self?.clearBlockSelection() }
+        // 13j J7 (her ruling): ⌘Z / ⌘⇧Z with nothing left in the TEXT stack
+        // point at the structural one — spoken, never a key stolen.
+        textView.onTextUndoUnavailable = { [weak self] in self?.speakUndoHint(.undo) }
+        textView.onTextRedoUnavailable = { [weak self] in self?.speakUndoHint(.redo) }
         // QoL batch 3 (L6): the find bar's replacements arrive here. Only the
         // editor that owns a scroll view has a bar at all, so the hook is
         // wired only there — the inline book/spread/pool editor never sees a
@@ -863,6 +867,21 @@ final class EditorViewModel {
                 scheduleCrossBlockCompound { [weak self] in
                     await self?.runSeamMerge(seam)
                 }
+            } else if let whole = planWholeBlockDeletion(range: range, replacement: replacement) {
+                // 13j J9 (her ruling): a selection covering exactly N WHOLE
+                // blocks + Delete IS the delete gesture — it routes to the
+                // 13e batch-4 delete compound (ONE ⌥⌘Z entry, redo carried)
+                // instead of refusing. It sits BELOW the two seam carves
+                // deliberately: their geometry is a single separator, which
+                // `wholeBlockRun` excludes by construction — so A7's
+                // no-fan/nothing-unshown authorization and #34's fan refusal
+                // keep every case they ruled, and this road can never route
+                // around them. It sits ABOVE merge-then-edit because a run of
+                // whole paragraphs plus Delete means "these paragraphs go",
+                // not "join them and leave the join empty".
+                scheduleCrossBlockCompound { [weak self] in
+                    await self?.runWholeBlockDeletion(whole)
+                }
             } else if let compound = planCrossBlockEdit(range: range, replacement: replacement) {
                 scheduleCrossBlockCompound { [weak self] in
                     await self?.runCrossBlockEdit(compound)
@@ -872,7 +891,12 @@ final class EditorViewModel {
                     await self?.runVisibleTakeEdit(visible)
                 }
             } else {
-                refuseFeedback(message(for: .crossesBlockBoundary))
+                // 13j J8(b): the refusal DIAGNOSES. Every road above declined
+                // for a reason this arm can still see — the range, the index's
+                // tiling and the projection beside it — so the line names that
+                // one reason instead of listing three.
+                refuseFeedback(
+                    CrossBlockRefusal.message(range: range, index: index, slots: slots))
             }
             return false
         case .refuse(let refusal):
@@ -1342,6 +1366,18 @@ final class EditorViewModel {
     /// 13e E2's Write door (her A17): every ⌘-clicked block, one undo entry.
     func deleteSelectedBlocks() async {
         await structural.deleteSelectedBlocks()
+    }
+
+    // MARK: - 13j J9 — a whole-block selection + Delete, forwards
+
+    typealias WholeBlockDeletion = EditorSurfaceController.WholeBlockDeletion
+
+    func planWholeBlockDeletion(range: NSRange, replacement: String) -> WholeBlockDeletion? {
+        structural.planWholeBlockDeletion(range: range, replacement: replacement)
+    }
+
+    func runWholeBlockDeletion(_ plan: WholeBlockDeletion) async {
+        await structural.runWholeBlockDeletion(plan)
     }
 
     // MARK: - 13e batch 3 (her A20/A21) — take ↔ block, forwards
@@ -2658,6 +2694,25 @@ final class EditorViewModel {
         statusMessage = message
     }
 
+    /// **13j J7 — the sign at the junction.** Speaks only when the text stack
+    /// is empty AND the structural one is not (`EditorUndoHint` holds the
+    /// rule); a `showStatus`, never a `refuseFeedback`, because nothing was
+    /// refused — the keystroke was passed straight through to AppKit and the
+    /// line is a direction, not a beep.
+    func speakUndoHint(_ chord: EditorUndoHint.Chord) {
+        let manager = textView?.undoManager
+        let textStackHasEntries = chord == .undo
+            ? (manager?.canUndo ?? false)
+            : (manager?.canRedo ?? false)
+        guard let line = EditorUndoHint.message(
+            for: chord,
+            textStackHasEntries: textStackHasEntries,
+            structuralUndoLabel: session.undoMenuState.topLabel,
+            structuralRedoLabel: session.undoMenuState.topRedoLabel)
+        else { return }
+        showStatus(line)
+    }
+
     /// Internal (was private) since N10: the controller's refusals speak
     /// through the model's one voice.
     func refuseFeedback(_ message: String) {
@@ -2670,10 +2725,15 @@ final class EditorViewModel {
     func message(for refusal: BlockRangeIndex.Refusal) -> String {
         switch refusal {
         case .crossesBlockBoundary:
-            // Reached only when NEITHER compound is eligible (Phase 11,
-            // A9 + the #11a ruling): a locked take, a gap slot, or the
-            // open tail inside the span.
-            "This edit reaches a block that can’t take it right now (a locked take, unsynced text, or text that isn’t a block yet) — resolve that, or edit within one block."
+            // 13j J8(b), her report: *"the reason is really unclear to me why
+            // right now."* This case used to name THREE causes at once for a
+            // gesture that had exactly one. Both live doors onto it now
+            // DIAGNOSE — they hold the range and the slots, so they call
+            // `CrossBlockRefusal.message(range:index:slots:)`, which asks
+            // which condition actually declined. What remains here is the
+            // range-less fallback for any future caller that has neither:
+            // the residual geometry, stated plainly and guessing nothing.
+            CrossBlockRefusal.message(for: .partialBlockAcrossSeam)
         case .readOnlySlot:
             "This block hasn't fully synced; it is read-only for now."
         case .lockedVariant:

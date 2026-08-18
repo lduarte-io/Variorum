@@ -451,8 +451,10 @@ final class EditorSurfaceController {
     /// invariant makes a post's block count load-bearing, and the
     /// blockless post is an explicitly-modelled state — it is what a fresh
     /// post is (`BlockRangeIndex`: "When there are no entries the tail IS
-    /// the document"). The block is undoable (⌥⌘Z), redoable (⇧⌥⌘Z), and
-    /// waits in the post's deleted-blocks tray either way.
+    /// the document"). The block is undoable (⌥⌘Z) and redoable (⇧⌥⌘Z).
+    /// *(13j J8(a): this comment used to add "and waits in the post's
+    /// deleted-blocks tray" — the tray has no face until batch 2 builds it,
+    /// and the receipt now says only what is true.)*
     func deleteCaretBlock() async {
         guard let blockID = model.caretBlockID,
               let index = model.index.entries.firstIndex(where: { $0.blockID == blockID })
@@ -464,8 +466,8 @@ final class EditorSurfaceController {
                 : "Put the caret in a block first — this removes the block you're in.")
             return
         }
-        await runDeleteBlock(blockID, entryIndex: index, note:
-            "Block deleted — ⌥⌘Z undoes it, and it waits in this note's deleted-blocks tray.")
+        // 13j J8(a): the ONE shared receipt (see `BlockSelectionCopy`).
+        await runDeleteBlock(blockID, entryIndex: index, note: BlockSelectionCopy.deletedNote(1))
     }
 
     /// The one delete-block body both doors use: the menu/bar act above and
@@ -516,17 +518,62 @@ final class EditorSurfaceController {
             model.refuseFeedback(BlockSelectionCopy.nothingPicked)
             return
         }
-        let landing = caretLandingAfterRemoving(picked)
+        if await runBlockDeleteCompound(picked) { model.clearBlockSelection() }
+    }
+
+    /// THE delete compound, one body, two doors (13j J9 made it two): the
+    /// ⌘-click pick above, and a whole-block text selection + Delete below.
+    /// Her J9 ruling is literally *"routes to the batch-4 delete compound"* —
+    /// so the second door runs this body rather than a second copy of it, and
+    /// the two can never drift on the label, the compound, or the receipt.
+    private func runBlockDeleteCompound(_ blockIDs: [String]) async -> Bool {
+        let landing = caretLandingAfterRemoving(blockIDs)
         let stack = model.session.undoStack
-        let landed = await runStructural { ops in
+        return await runStructural { ops in
             try stack.withCompound(label: "Delete Blocks", operations: ops) {
-                for blockID in picked { try ops.deleteBlock(blockID) }
+                for blockID in blockIDs { try ops.deleteBlock(blockID) }
             }
             return StructuralOutcome(
                 caretBlockID: landing.blockID, caretOffset: landing.offset, seam: nil,
-                note: BlockSelectionCopy.deletedNote(picked.count))
+                note: BlockSelectionCopy.deletedNote(blockIDs.count))
         }
-        if landed { model.clearBlockSelection() }
+    }
+
+    // MARK: - J9 (13j batch 1): a whole-block selection + Delete
+
+    /// **Her J9, built.** Her report, verbatim: *"what kind of writing app
+    /// won't let you delete a paragraph? there's not even a take on it right
+    /// now"* — and her ruling: a selection covering exactly N whole blocks
+    /// (N ≥ 1) plus Delete routes to the 13e batch-4 delete compound, ONE
+    /// ⌥⌘Z-undoable entry, and the text-edit road never refuses that intent
+    /// again. Partial-block selections keep today's behaviour.
+    ///
+    /// The plan is PURELY GEOMETRIC on purpose — which blocks does the span
+    /// cover whole? — and carries no content guards at all. That is the
+    /// 13c R3-1 lesson applied rather than re-learned: a plan-time guard
+    /// reading `model.slots` is an enablement hint, never an authorization,
+    /// because the projection is deliberately frozen for the length of a
+    /// typing burst. The authorization is `deleteBlock`'s own — the STANDING
+    /// unrestricted door (QUESTIONS #33(a), her ruling: the block goes,
+    /// whatever it holds), which is exactly the act the ⌘-click multi-delete
+    /// already performs on fanned blocks. A sealed note refuses at the first
+    /// leg through the operation itself (P-2), with nothing deleted.
+    struct WholeBlockDeletion: Sendable, Equatable {
+        let blockIDs: [String]
+    }
+
+    func planWholeBlockDeletion(range: NSRange, replacement: String) -> WholeBlockDeletion? {
+        // Delete, never type-over: a replacement spanning whole blocks is a
+        // different gesture and keeps the merge-then-edit / visible-take
+        // roads it has always taken.
+        guard replacement.isEmpty,
+              let run = model.index.wholeBlockRun(covering: range)
+        else { return nil }
+        return WholeBlockDeletion(blockIDs: run.map { model.index.entries[$0].blockID })
+    }
+
+    func runWholeBlockDeletion(_ plan: WholeBlockDeletion) async {
+        _ = await runBlockDeleteCompound(plan.blockIDs)
     }
 
     /// Where the caret goes when a whole SET of blocks leaves: the block
@@ -1613,7 +1660,11 @@ final class EditorSurfaceController {
         var targets: [Target] = []
         for i in touched {
             guard let variantID = entries[i].variantID, entries[i].editable else {
-                model.refuseFeedback(model.message(for: .crossesBlockBoundary))
+                // 13j J8(b): this guard KNOWS which of the two it hit — a
+                // gap slot or a locked take — so it says which, instead of
+                // borrowing a line that listed both plus a third.
+                model.refuseFeedback(CrossBlockRefusal.message(
+                    for: entries[i].variantID == nil ? .unsyncedBlock : .lockedTake))
                 return
             }
             let entryRange = model.index.range(ofEntryAt: i)

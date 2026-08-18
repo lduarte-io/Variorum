@@ -540,12 +540,60 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
         return body()
     }
 
+    /// **13j J7 — her ruling, verbatim:** *"if a user is spamming command z, i
+    /// think it should prompt them to do a structural undo if it's not doing a
+    /// regular undo."*
+    ///
+    /// The two stacks stay canon-separate (2026-07-04: ⌘Z is text undo, ⌥⌘Z
+    /// is structural, and they never interleave) — this is a SIGN at the
+    /// junction, not a bridge across it. Fired when the text stack has nothing
+    /// left; the model decides whether there is a structural change worth
+    /// pointing at, and speaks or stays quiet.
+    var onTextUndoUnavailable: (() -> Void)?
+    /// The mirror (⌘⇧Z with an empty text-redo stack).
+    var onTextRedoUnavailable: (() -> Void)?
+
+    /// Which hint chord this event is, if either. PURE, so the fire/no-fire
+    /// matrix is a unit test rather than an event-loop one.
+    ///
+    /// ⌥⌘Z and ⇧⌥⌘Z are deliberately NOT ours: they are already the doors the
+    /// hint points at, and the mask below excludes them by requiring the
+    /// modifiers to be exactly ⌘ or exactly ⌘⇧. `charactersIgnoringModifiers`
+    /// is upper-cased while shift is held, so the comparison lower-cases.
+    enum UndoHintChord: Equatable, Sendable { case undo, redo }
+
+    nonisolated static func undoHintChord(for event: NSEvent) -> UndoHintChord? {
+        let meaningful: NSEvent.ModifierFlags = [.shift, .command, .control, .option]
+        guard (event.charactersIgnoringModifiers ?? "").lowercased() == "z" else { return nil }
+        switch event.modifierFlags.intersection(meaningful) {
+        case .command: return .undo
+        case [.command, .shift]: return .redo
+        default: return nil
+        }
+    }
+
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
         if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command,
            event.charactersIgnoringModifiers == "s",
            let onCommitShortcut {
             onCommitShortcut()
             return true
+        }
+        // J7. **The key is NEVER consumed** — this arm falls through to
+        // `super` on every path, so ⌘Z that CAN undo text still does, and the
+        // hint is the only thing added where it could not. The
+        // first-responder gate keeps a split window's second editor quiet:
+        // `performKeyEquivalent` walks the whole hierarchy, and both editors
+        // share the window's undo manager, so without it one press would
+        // speak twice. (A view with no window is a harness's, and it is by
+        // definition the one being driven.)
+        if let chord = Self.undoHintChord(for: event),
+           window == nil || window?.firstResponder === self {
+            switch chord {
+            case .undo where undoManager?.canUndo != true: onTextUndoUnavailable?()
+            case .redo where undoManager?.canRedo != true: onTextRedoUnavailable?()
+            default: break
+            }
         }
         return super.performKeyEquivalent(with: event)
     }

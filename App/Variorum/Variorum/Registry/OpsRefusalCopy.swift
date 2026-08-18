@@ -198,18 +198,26 @@ nonisolated enum BlockSelectionCopy {
     }
 
     static let deleteHelp =
-        "Delete every picked block — each one waits in this note's "
-        + "deleted-blocks tray, and \u{2325}\u{2318}Z brings them all back at once"
+        "Delete every picked block — \u{2325}\u{2318}Z brings them all back at "
+        + "once, while this session is open"
 
-    /// The receipt. It names the tray AND the one undo, because the whole
-    /// point of the compound is that a multi-delete is ONE mistake to
-    /// reverse, not N.
+    /// The receipt. It names the ONE undo, because the whole point of the
+    /// compound is that a multi-delete is one mistake to reverse, not N.
+    ///
+    /// **13j J8(a) — THE INTERIM TRUTH.** Until this batch these lines also
+    /// promised the block "waits in this note's deleted-blocks tray", and her
+    /// first morning back found that the tray HAS NO FACE anywhere: the ops
+    /// exist (`restoreBlock`, `last_container_id`) with no door, so past the
+    /// session's ⌥⌘Z window a deleted block is unreachable by any click. Copy
+    /// naming a surface that does not exist is the defect class the whole
+    /// J8 row is about, so the promise is withdrawn and replaced by the fact:
+    /// the undo window is the session. **Batch 2 builds the tray, and this is
+    /// the line that graduates** — it will name the tray and its real door.
     static func deletedNote(_ count: Int) -> String {
-        (count == 1
-            ? "Block deleted"
-            : "\(count) blocks deleted")
-            + " — \u{2325}\u{2318}Z undoes it in one go, and they wait in this "
-            + "note's deleted-blocks tray."
+        count == 1
+            ? "Block deleted — \u{2325}\u{2318}Z puts it back while this session is open."
+            : "\(count) blocks deleted — \u{2325}\u{2318}Z puts them all back in one go, "
+                + "while this session is open."
     }
 
     /// Nothing picked. Reachable from the routed/registry note only; the

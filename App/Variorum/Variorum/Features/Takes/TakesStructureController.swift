@@ -138,8 +138,10 @@ final class TakesStructureController {
             if let variantID = survivor?.variantID {
                 model.choreography.parkFocus(onVariant: variantID)
             }
-            model.setStatus(
-                "Block deleted — ⌥⌘Z undoes it, and it waits in this note's deleted-blocks tray.")
+            // 13j J8(a): ONE receipt for every delete door — the interim
+            // truth (the tray this used to promise has no face until batch 2),
+            // shared so the Takes board and Write can never drift on it.
+            model.setStatus(BlockSelectionCopy.deletedNote(1))
         } catch {
             model.setStatus(TakesViewModel.message(for: error))
         }
