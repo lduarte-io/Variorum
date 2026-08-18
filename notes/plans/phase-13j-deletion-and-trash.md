@@ -273,8 +273,9 @@ that full run — verified by inclusion** (batches still quote the
 spine separately by TYPE name per the standing loop). Mobile
 baseline launched from the MAIN tree (the `mobile` worktree
 branch sits behind main since 13e landed on main; scheme
-`VariorumMobile`, iPhone 16e sim) — result recorded when it
-lands.
+`VariorumMobile`, iPhone 16e sim) — **VERIFIED GREEN: 314 tests /
+60 suites, TEST SUCCEEDED (23.5s), the 13e final exactly. ALL
+FOUR BASELINES VERIFIED by the orchestrator's own runs.**
 
 **Her opening note (verbatim):** "I will add as a note that i'm
 here for the design sitting. let's answer all the questions that
