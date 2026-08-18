@@ -2599,3 +2599,32 @@ and copying it would make it the seventh row of the KnownIssues "six mobile
 brains are byte-copies" family rather than a hoist. Nothing in this batch
 touched `Sources/` or `Shared/`, so nothing reached the phone by
 construction.
+
+**ARCHITECT ACCEPTANCE (2026-08-18, batch 6) + THE A47c DISPOSITION —
+THE SUITE IS FULLY GREEN:**
+- **Batch 6 ACCEPTED** on spot-checks — `aa908d5` verified (tree clean;
+  zero `Sources/`; the four new suites re-run green **12/4** by type
+  name). The sweep table answers her sitting question with evidence:
+  NO Mac comment face sits right of the text — the only trailing face
+  is the phone's ●n, by its own M12 ruling (flagged, not changed).
+  The batch's bonus real-bug find (the S4-19 drag-handle hover reveal
+  never drew on an ordinary post since 13b — the decoration walk
+  skipped when nothing was decorated) is fixed at its mechanism with
+  a red-on-old pin.
+- **THE A47c KICKOFF-SWEEP ITEM IS DISPOSITIONED FROM EVIDENCE (the
+  architect's own experiments, tonight):** the tripwire's directed
+  re-run found the render-surface cull is **LOAD/TIMING-DEPENDENT on
+  macOS 26.5.x** — standalone runs leave all bands inked after the
+  kill (8+ runs, both lock states), full-suite runs still strand
+  (fully in the 13g/13k era, PARTIALLY — 1-of-6 bands — tonight).
+  **The "environment-gated" mystery dissolves: the covariate was
+  suite context, never lock state.** The pin is re-shaped to assert
+  the real contract in all three worlds (the occasion's mechanical
+  restore RUNS — still red on the pre-A47c revert everywhere — and
+  the page ends DRAWN — red on any unhealed strand); the guard
+  machinery stays byte-unchanged as regression insurance; the
+  TEXTKIT2_NOTES §3 measured-findings entry records the point-release
+  fact. The KnownIssues tripwire row clears at closeout with this
+  disposition. **Full Mac suite: `✔ Test run with 1362 tests in 246
+  suites passed` — the FIRST fully-green full Mac run since the
+  tripwire era began (13g).** Next free QUESTIONS: **#63**.

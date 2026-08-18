@@ -609,8 +609,23 @@ extension TakePaneMeasureTests {
             let measured = PaneMeasurement.height(of: long)
             #expect(abs(long.bounds.height - measured) <= 3,
                     "the strand is laid-out-but-UNDRAWN: geometry stays exact (frame \(long.bounds.height) vs measured \(measured))")
-            #expect(stranded.prefix(topHalf).allSatisfy { !$0 },
-                    "the kill stranded the render tier: the upper visible bands are blank (\(stranded)) — if this fails, the TK2 cull no longer reproduces on this OS; re-run the A47c experiments before touching the mechanism")
+            // 13e KICKOFF-SWEEP DISPOSITION (2026-08-18; amended the same
+            // night by full-suite evidence) — the re-run this pin's own
+            // message directed is DONE, and the answer dissolves the whole
+            // "environment-gated" mystery: the cull is LOAD/TIMING-
+            // DEPENDENT on this OS. Standalone suite runs leave ALL bands
+            // inked after the kill (8+ runs, both lock states); FULL-suite
+            // runs still strand — fully in the 13g/13k era, PARTIALLY
+            // tonight (1-of-6 top bands inked). The covariate was never
+            // lock state; it was suite context. Three kill outcomes are
+            // therefore all real on this one OS (none · partial · full),
+            // so the pin asserts NO particular kill outcome. The CONTRACT
+            // is the two arms below, unconditional in every world: the
+            // occasion's mechanical restore RUNS (`renderRestoresRun` —
+            // red on the pre-A47c revert regardless of world), and the
+            // page ends DRAWN (red whenever a strand of ANY depth goes
+            // unhealed). The guard machinery stays byte-unchanged: it is
+            // exactly what turns each of these worlds into a drawn page.
 
             // THE OCCASION — the funnel wire, exactly what a click /
             // scroll-end / ring move fires in production.
