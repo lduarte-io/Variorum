@@ -161,7 +161,13 @@ struct HelperView: View {
                 + "on the context bar are the same two doors"),
             ("⌘⇧I", "show or fold this note's tag cards (the ＃ on the context bar does "
                 + "it too, and the choice sticks)"),
-            ("⌘⇧N", "the quick note — a floating pad, from anywhere"),
+            ("⌘⇧N", "the quick note — a floating pad, from anywhere in Variorum"),
+            // 13e E14 (W26): the SYSTEM chord. Its own row, because it is a
+            // genuinely different promise from the one above — this one works
+            // while another app is frontmost, and a key that reaches her from
+            // outside the app is exactly the key she most needs written down.
+            ("⌃⌥⌘N", "the quick note from ANY app — Variorum need not be in front "
+                + "(the menu-bar \u{25FB} does the same with a click)"),
             ("View ▸ Open Beside", "put a second note beside this one (right-click a "
                 + "note row for that note; the menu takes the most recent other one)"),
             ("View ▸ Close Split", "fold the window back to one pane"),
@@ -384,8 +390,9 @@ struct HelperView: View {
         // this entry was the surface the sweep missed — it taught the Pool
         // while the pad's own placeholder already said Quicknotes.
         ("quick note",
-         "A small floating pad for catching a thought — ⌘⇧N, File ▸ Quick Note, or the "
-         + "✏︎ in the system menu bar (which reaches you from any app). Return makes a "
+         "A small floating pad for catching a thought — ⌘⇧N, File ▸ Quick Note, the "
+         + "✏︎ in the system menu bar, or \u{2303}\u{2325}\u{2318}N, which reaches you "
+         + "from any app without a click. Return makes a "
          + "new line, not a new note; closing it (or ⌘⏎) keeps what you wrote as a new "
          + "note, tagged \u{201C}quicknote\u{201D} — the smart Quicknotes book on the "
          + "shelf collects it, and taking the tag off sends it back to the Pool."),

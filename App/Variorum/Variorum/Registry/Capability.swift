@@ -264,6 +264,17 @@ nonisolated struct Capability: Identifiable, Sendable {
         /// too, so a second row appearing in the extra later cannot go
         /// undeclared.
         case menuBarExtra
+        /// 13e E14 (W26): the SYSTEM HOT KEY — a chord the system hands us
+        /// while any app is frontmost (`RegisterEventHotKey`). Its own case
+        /// for the `.menuBarExtra` reason, one step further out: `.menuBar`
+        /// exists only while Variorum is frontmost, the extra exists
+        /// whatever is frontmost but must be clicked, and this one needs
+        /// neither. The walk asserts declared ⇔ registered
+        /// (`GlobalHotKeyCenter.registered`), so a chord asked of the system
+        /// can never go undeclared — and a declared one can never go
+        /// unregistered, which would be a key she reads about and presses to
+        /// no effect.
+        case systemHotKey
     }
 
     /// R118 — TAKES PARITY, part of the declaration: how the Takes surface
@@ -297,6 +308,21 @@ nonisolated struct Capability: Identifiable, Sendable {
     /// copy — the router speaks this for an unhandled dispatch).
     let unavailableNote: String
     let availability: @Sendable (CapabilityContext) -> Availability
+    /// 13e E14 (W26): the SYSTEM chord — the one a `.systemHotKey`-doored act
+    /// wears while any app is frontmost ("⌃⌥⌘N").
+    ///
+    /// Separate from `shortcutLabel` because they are separate keys reaching
+    /// separate mechanisms: `shortcutLabel` is the in-app chord SwiftUI wires
+    /// (⌘⇧N for the quick note), this is the chord Carbon registers with the
+    /// system, and an act can honestly wear both. It is the ONE source for
+    /// the system registration — `GlobalHotKeyChord` parses it into the pair
+    /// `RegisterEventHotKey` takes — so the words in the helper and the keys
+    /// the system grabs cannot drift.
+    ///
+    /// `var` with a default, deliberately: a `let` with a default is omitted
+    /// from the memberwise initializer entirely, and the point of the default
+    /// is that ~130 declarations that own no system chord say nothing at all.
+    var systemShortcutLabel: String? = nil
 
     /// **A door's label with its DECLARED chord appended** — "Copy All Takes
     /// (⌘⇧C)" — and the ONE formatter that composes the two, so a key she

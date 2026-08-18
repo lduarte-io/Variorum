@@ -560,7 +560,7 @@ binaries live in the session scratchpad, throwaway.
 | 5 | **Canvas:** E7-bank (canvas bank) · E12 (drag jitter/resist — live-path trace, no archeology per her rider) | **DONE 2026-08-18** — record below (Mac 1350/242 tripwire-only · core 1254/135 · spine 51/7; mobile not run — `Sources/`/`Shared/` untouched. E12's mechanism MEASURED — the default `.local` drag space is displaced by the drag's own offset, halving every translation; fixed with one named surface space, red-on-old on both pins. E7's bank built as the FACE 4E's ruling named, board byte-unchanged when closed. ONE routed finding: the Takes slot-height handle carries the same defect, out of E12's letter) |
 | 6 | **Comments & tags:** E7-comments (margin-hover grammar, comments on the LEFT) · E8 (the fuller tags face) | **DONE 2026-08-18** — record below (Mac 1362/246 tripwire-only · core 1254/135 · spine 51/7; mobile not run — `Sources/`/`Shared/` untouched. The LEFT-placement SWEEP found NO Mac straggler (table in the record; the phone's ●n marker is its own M12 ruling, flagged not changed); the hover "+ //" door built on the left, hover-only; ONE REAL BUG fixed with it — a calm page grew no geometry, so 13b 4D's hover drag-handle reveal has been invisible on plain notes since it shipped. E8 gave the Library AND Pool rows the note's own chip grammar (✕ remove, ＋ type-to-create), bulk untag, and the first `.tagNote` declaration) |
 | 7 | **Text tools:** E9 (takes-aware find & replace) · E10 (copy-door flush alignment) | **DONE 2026-08-18** — record below (Mac **1385/250 FULLY GREEN** · core 1254/135 · mobile 314/60 · spine 51/7. E9 shipped as a SCOPE EXTENSION of the shipped ⌘F family — `Replace All in Every Take`, one transaction/one undo entry on the ruled apply-and-report shape, its carry rule a pure brain. E10 gave the copy family ONE flush-first entry (`AppSession.runCopying`, `divergeForBook`'s own body made shared) — both KnownIssues rows dispositioned. The ROUTED RIDER is FIXED **with** its pin: the `CanvasDragRig` machinery re-aimed at the board, the handle located by probe, red-on-old at the traced numbers — no hand-check owed) |
-| 8 | **W26 (E14):** the system-wide ⌃⌥⌘N summon — the batch's own verification act is the SANDBOXED in-app registration | pending |
+| 8 | **W26 (E14):** the system-wide ⌃⌥⌘N summon — the batch's own verification act is the SANDBOXED in-app registration | **DONE 2026-08-18** — record below (Mac **1403/254 FULLY GREEN** · core 1254/135 · spine 51/7; mobile not run — `Sources/`/`Shared/` untouched). **THE SANDBOXED VERIFICATION PASSED**: `InstallEventHandler status=0` · `RegisterEventHotKey quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0` · TWO real fires with Finder and then Terminal frontmost, each opening the pad and activating the app, with NO permission prompt. **RIDER 1 CLOSED**: the note-window clip's mechanism found (the pre-K11 bar appeared only after the async book read, inserting itself above the masthead a runloop late), PROVEN by reverting it on the live app, already fixed by 13k K11, now pinned. **RIDER 2**: the windowless launch did not occur in either launch |
 
 The kickoff sweep runs BESIDE the batches, orchestrator-owned: the
 A47c experiments under BOTH lock states (locked runs when she is
@@ -2988,3 +2988,239 @@ per convention; NEVER push; NEVER `/Applications` (the phase-end
 refresh is the ORCHESTRATOR's act, pre-authorized by her, not
 yours); instances by bundle id `io.lduarte.Variorum.debug` or PID
 only — her real-store app is closed and stays untouched.
+
+### BATCH 8 RECORD — W26 + the window-lifecycle riders (2026-08-18, a fresh Opus implementer; COMPLETE)
+
+**THE SANDBOXED VERIFICATION ACT — THE BATCH'S OWN, AND IT PASSED.** Stated
+first because the brief made it the deliverable, and a refusal would have been
+a finding rather than a thing to work around.
+
+- **The context gap is closed.** The probe at the sitting was UNSANDBOXED; the
+  shipping app is not. Verified before driving anything: `codesign -d
+  --entitlements -` on the built Debug bundle reports
+  `com.apple.security.app-sandbox = true` (alongside hardened runtime,
+  app-scope bookmarks, user-selected files, network client) — so what follows
+  happened inside the sandbox, with the real bundle id
+  `io.lduarte.Variorum.debug` and the dev store.
+- **What the system answered**, quoted from the unified log
+  (`/usr/bin/log show --predicate 'subsystem == "io.lduarte.Variorum"'
+  --info`; note the ABSOLUTE path — `log` is a zsh builtin and the bare word
+  fails with *"too many arguments"*, which cost a false negative before it was
+  spotted):
+  - `InstallEventHandler status=0`
+  - `RegisterEventHotKey quickNote ⌃⌥⌘N keyCode=45 modifiers=6400 status=0`
+    (45 = `kVK_ANSI_N`; 6400 = 0x1900 = `controlKey|optionKey|cmdKey` — the
+    declared label, arrived at by parsing that label, not by a second table)
+  - `hot key fired: quickNote (fire #1)` · `hot key fired: quickNote (fire #2)`
+- **Two real fires, with ANOTHER APP FRONTMOST both times.** Finder was made
+  frontmost and confirmed (`System Events … frontmost is true` → `Finder`), the
+  chord driven with `key code 45 using {control down, option down, command
+  down}`; afterwards the frontmost app was **Variorum** and a
+  `CGWindowListCopyWindowInfo([.optionAll], …)` census by PID showed a **"Quick
+  Note" window 340×260, `onscreen=true`**, which had not been on screen before.
+  Repeated from **Terminal** with the same result (fire #2).
+- **NO PERMISSION PROMPT** at registration or at either fire — the sitting's
+  Round-4 finding, now confirmed in the one context it had not been tested in.
+  FB15168205's regression class (⌥-only / ⌥⇧ chords) does not touch ⌃⌥⌘N.
+
+**E14 — the system-wide quick-note hot key, as built.**
+
+- **A FOURTH DOOR on the SAME act, not a second act** (P-1: every act declared
+  exactly once). `.quickNote` now declares
+  `[.menuBar, .menuBarExtra, .palette, .systemHotKey]`, and the new
+  `Capability.Door.systemHotKey` case exists for the `.menuBarExtra`
+  precedent's reason, one step further out: `.menuBar` exists only while
+  Variorum is frontmost, the extra exists whatever is frontmost but must be
+  CLICKED, and this one needs neither.
+- **ONE source for the chord.** `Capability.systemShortcutLabel` ("⌃⌥⌘N") is
+  the only place the keys are stated; `GlobalHotKeyChord.chord(forLabel:)`
+  PARSES it into the `(keyCode, modifiers)` pair Carbon takes (glyph table +
+  the SDK's own `kVK_ANSI_*` names — no magic numbers). So the helper row, the
+  catalog entry and the system registration are three readings of one string
+  and cannot drift; an unreadable label is a FAILING TEST rather than a hot key
+  that quietly never fires.
+- **`GlobalHotKeySystem` is the four Carbon calls behind an injected value**,
+  and that is a deliberate answer to this phase's own A47c night: a pin that
+  asked the system for HER chord would fight the running app for it. Pins drive
+  the whole road through `.inert`; ONE pin exercises `.carbon` with a RESERVED
+  chord it registers and releases.
+- **`fire(_:)` is a NAMED call**, not a closure buried in a C callback (the
+  `QuickNotePad` lesson, W20) — the pins drive exactly what the callback calls.
+  The callback itself carries the box's ADDRESS across the isolation boundary
+  (`UInt(bitPattern:)`) because a raw pointer is not `Sendable` and Swift 6 is
+  right to refuse to send one; the box holds the centre WEAKLY and is retained
+  by the userData pointer, released in `uninstall()`.
+- **Installed once, by `RootView.onAppear`** — the one place holding both the
+  app-lifetime centre (`@State` on `VariorumApp`, beside `WindowRegistry`) and
+  the `openWindow` a summon needs. Idempotent, so a second window replaces the
+  action and asks the system for nothing. The captured action outlives its
+  window deliberately: she can close every window and the chord still answers
+  (the menu-bar extra's own promise). The recorded consequence, logged as
+  #64(e): a launch that never shows a window has no hot key until one opens —
+  which is the separate windowless-launch row's state, and it did not occur.
+- **ONE summon line for all four doors** (`QuickNoteSummon.summon`), and it
+  activates Variorum first. That is a real behaviour change riding along and it
+  is stated rather than smuggled: the menu-bar extra is pressed with another
+  app in front BY DEFINITION, and the floating pad could open behind it. The
+  other two doors are pressed while Variorum is already frontmost, where
+  activating is a no-op — one line serving four beats two knowing a rule the
+  other two don't. There is NO second mint path: what a pad becomes is still
+  `QuickNoteMint.file`'s business, byte-untouched.
+- **Declared, swept and discoverable.** The registry walk gains
+  `theSystemHotKeysRegisterExactlyTheDeclaredGlobalDoors` (declared ⇔
+  registered — the `.menuBarExtra` table's assertion one door out); the
+  COLLISION SWEEP is extended to the class a system chord creates — it
+  *shadows*, so a system chord equal to an in-app one would cost her the menu
+  key (`noSystemChordShadowsAnInAppOneOrAnother`); and the helper (⌘/) gains
+  its own row plus a rewritten dictionary entry, guarded by
+  `everyDeclaredSystemChordIsReadableAndNamedInTheHelper` (13g L1's
+  discoverability guard, extended to the second kind of key).
+
+**RIDER 1 — the note-only window's clipped top: MECHANISM FOUND, ALREADY
+FIXED, NOW PINNED.**
+
+- **It does not reproduce on HEAD.** A note IN A BOOK (`2026-03-01`, in
+  *Journal 2026*), opened through her own road (right-click the Open strip's
+  row ▸ Open in New Window) in a fresh note-only window: the masthead drew
+  whole. The row's three failed fixes were read first and none was repeated.
+- **The mechanism, and it was upstream of the repair the row could not
+  explain.** At the 13g tree `ContextBar.hasContent` read
+  `originLabel != nil || !books.isEmpty`. A note-only window has NO history, so
+  `originLabel` is always nil (`NoteWindowView` passes `onBack: {}` — its own
+  file calls the back half "honestly empty"), leaving `!books.isEmpty` — and
+  `books` is filled by `PaneHost`'s `.task(id: noteID) { await loadBooks() }`,
+  i.e. AFTER the first presentation. So on a note in a book the bar and its
+  divider were INSERTED ABOVE THE MASTHEAD one runloop late, and the
+  already-presented pixels were never re-composited for the insertion; any
+  resize redisplays the content and repairs it permanently. That also explains
+  the reproduction's odd precondition (*a note IN A BOOK, so the context bar
+  renders*): a bookless note grew no bar and never clipped.
+- **13k K11 fixed it as a side effect** — the bar was rebuilt as a constant
+  icon row and `hasContent` gained `isNote`, which is true on the FIRST pass.
+  Nobody knew they had made the fix, and nothing held it.
+- **PROVEN BY BEHAVIORAL REVERT ON THE LIVE APP, not argued.** `ContextBar
+  .hasContent` was returned to the 13g expression (`eda2131a…9279` →
+  `9652697d…7b86`), the Debug app rebuilt and relaunched, and the SAME window
+  restored: the title clipped to a sliver along its top edge with "Write ▾" and
+  both inspector icons sliced beside it (capture `revert_note.png`) — and one
+  resize repaired it permanently (`revert_after_resize.png`). Every recorded
+  symptom, reproduced and then removed. Restored and checksum-verified.
+- **What shipped is the guard, not a patch:** `NoteWindowFirstPassTests` pins
+  that a note-only window's bar has content on the first pass BEFORE any async
+  read returns, with the absence case pinned beside it so the pin is not
+  "always true". `ContextBar.hasContent` and `NoteWindowView` carry the trace
+  in their own comments; the KnownIssues row is marked RESOLVED with the
+  disposition for the closeout to clear (rows 21/23's convention).
+
+**RIDER 2 — the windowless launch: DID NOT OCCUR.** Both Debug launches this
+batch (the verification act, and again after the rider-1 rebuild) came up with
+the main window on screen — censused by `CGWindowListCopyWindowInfo`
+`.optionAll` filtered by PID, so other Spaces and off-screen windows would have
+counted. Nothing was summoned, nothing chased, `sample` never owed. Recorded on
+the row as two more launches on the no-repro side; the protocol stands.
+
+**Mechanisms traced (the hallucination guard).** E14 is a FEATURE and carries
+no bug mechanism; its pins are feature pins (the batch-2/3 convention). Rider
+1's mechanism is above and was proven by revert on the live app before a line
+was written about it. The one behaviour change that is not a feature — the
+menu-bar extra activating before it opens the pad — is stated as such (#64(c))
+rather than folded into the new door's description.
+
+**Pins + red-on-old evidence (behavioral revert, checksums recorded).** Two new
+Mac files: `App/Variorum/VariorumTests/SystemHotKeyTests.swift` (15 tests, 3
+suites) and `App/Variorum/VariorumTests/WindowFirstPassTests.swift` (3 tests, 1
+suite). No core file changed, so no core suite grew.
+
+*Revert A (rider 1) — `ContextBar.hasContent` returned to the 13g expression
+`originLabel != nil || !books.isEmpty`. File:* `ContextBar.swift`
+`22794b1c…c793` → `3bf4d0d7…5c7d08`. Result: **`NoteWindowFirstPassTests
+.aNoteOnlyWindowsBarIsThereBeforeItsBooksAre` RED with the exact symptom** —
+`hasContent → false` for the first-pass state (holds a note, no history, no
+books yet) — while `theRuleItselfSaysANoteIsEnoughOnItsOwn` (which pins
+`ContextBarDoors`) and `aPaneHoldingNoNoteStillHasNoBarAtAll` (whose two arms
+the 13g rule also satisfied) stayed GREEN: clean attribution. Restored,
+checksum back to `22794b1c…c793`. *(This is the TEST-level half; the
+LIVE-APP half of the same revert is the visual reproduction described above.)*
+
+*Revert B (E14) — the `.systemHotKey` door removed from `.quickNote`'s
+declaration. File:* `CapabilityRegistry.swift` `42116755…863f` →
+`67a19201…596d`. Result: **exactly the four declaration pins RED** —
+`theSystemHotKeysRegisterExactlyTheDeclaredGlobalDoors` (`[quickNote]` vs `[]`
+— the walk catching a chord asked of the system with no declaration behind it),
+`theQuickNoteActCarriesTheSystemDoorBesideItsThreeOthers`,
+`everyDeclaredSystemChordIsReadableAndNamedInTheHelper` (its door half), and
+the JUSTIFIED EDIT `QuickNoteDoorTests.oneDeclarationCarriesAllFourDoors` —
+while the whole chord suite and the whole road suite stayed GREEN (they read
+the label and the centre, not the door set): clean attribution. Restored,
+checksum back to `42116755…863f`.
+
+*The JUSTIFIED EDIT*, called out in the test itself (the E2/E8 convention):
+`QuickNoteDoorTests.oneDeclarationCarriesAllThreeDoors` →
+`…AllFourDoors`, its exact-set expectation naming the fourth element. The
+pre-13e registry has no `.systemHotKey` case at all, so the flip IS the
+red-on-old for the declaration.
+
+*The feature pins* cover: the declared label being exactly the chord Carbon is
+asked for (keyCode, modifier mask, and the 6400 the verification act logged);
+each modifier glyph's own Carbon bit; a label that is not "modifiers then one
+letter" refused four ways; the letter table across A–Z and its
+case-insensitivity; the declared ⇔ registered walk; the four doors and the
+untouched in-app chord; every declared system chord readable AND named in the
+helper AND wearing the system door; the shadow/collision sweep; install asking
+for every declared chord with the right pair and routing the press to the
+summon; a second install replacing the action and asking for nothing new; an
+unrouted press ignored; uninstall handing every chord back and stopping;
+a refused registration recorded with its status rather than pretended away; the
+REAL Carbon road taking and releasing a reserved chord; and the summon opening
+exactly the one pad window id.
+
+**Counts (own runs, quoted from the "Test run with N tests" lines).**
+- Mac: **`✔ Test run with 1403 tests in 254 suites passed after 188.263
+  seconds`** — FULLY GREEN, zero reds (baseline 1385/250 → +18/+4, exactly the
+  two new files). The A47c tripwire, dispositioned at batch 6, passed again.
+- Core: **`✔ Test run with 1254 tests in 135 suites passed after 33.284
+  seconds`** — baseline matched EXACTLY; `Sources/` untouched entirely.
+- Mobile: **NOT RUN, per the brief's condition** — `Sources/` and
+  `App/Variorum/Shared/` are untouched (every changed file is under
+  `App/Variorum/Variorum/`, `VariorumTests/`, or `notes/`).
+- Tutorial spine, by TYPE name (all seven): **`✔ Test run with 51 tests in 7
+  suites passed`**.
+
+**PROVISIONALs / build-time calls:** eleven, bundled as **QUESTIONS #64**
+(a)–(k) — the fourth-door shape, both keys staying live, the activation (with
+the menu-bar extra's change named), one registration per app, the
+install-at-first-window consequence, a refused registration being logged not
+announced, the fixed chord with no recorder UI, the helper's own row, the pad
+opening empty, and the two riders' dispositions.
+
+**KnownIssues dispositions.**
+- *"The note-only window's TOP is clipped until any resize"* (owner: 13e
+  kickoff sweep) — **RESOLVED**: mechanism found, proven by revert on the live
+  app, fixed since 13k K11, now pinned. Marked RESOLVED in place with the full
+  disposition; the closeout clears the row (rows 21/23's convention).
+- *"Windowless launch …"* (owner unchanged) — enriched with this batch's two
+  no-repro launches; the capture protocol stands, the lazy-Keychain fix shape
+  is untouched (it is the kickoff sweep's, not this batch's scope).
+
+**Nothing stopped, nothing schema-shaped.** No design fork appeared: her Round-5
+ruling fixed the chord and the shape, the 13f W5 record fixed the summon, and
+the one question those left — how a Carbon callback reaches a SwiftUI window —
+was answered by the app's own idiom (an app-lifetime object installed by the
+window that holds `openWindow`, the `WindowRegistry` precedent) rather than by
+a new mechanism. `Sources/VariorumCore/Sync/` untouched (zero lines);
+`Sources/` untouched entirely; no migration, no mirror implication; no
+`/Applications` refresh and no Release build. Instances were addressed by PID
+only after a path-discriminated `ps -Ao pid,command`; the two Debug instances
+this batch launched (787, 1266) were ended with `kill <pid>`, never by pattern
+or process name; her real-store app was closed throughout and never touched.
+
+**MOBILE PARITY (for the closeout ledger):** **nothing mobile-visible.** A
+system-wide hot key has no iOS twin at all (iOS has no `RegisterEventHotKey`
+and no concept of a chord while another app is frontmost), the quick-note pad
+is a Mac window, and rider 1 is a Mac window-lifecycle fact. Verified rather
+than assumed: `Sources/` and `App/Variorum/Shared/` carry zero lines from this
+batch, so nothing reached the phone target by construction. **One rider worth
+the ledger's ink, if she ever wants the capture on the phone:** the *summon*
+half is already shared in spirit — the pad's mint rides `importPost` in core —
+so a phone quick-capture would be a face plus a share-sheet/Shortcuts door, not
+a port of this machinery.

@@ -628,5 +628,38 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint.**
 
-*(Next free number: **#64**.)*
 
+
+## Phase 13e (2026-08-18) — batch 8's calls (the system-wide quick-note hotkey), bundled for the sitting
+
+64. **2026-08-18 · Phase 13e batch 8 (E14 / W26 + the two window-lifecycle riders) · NINE calls, each one line to change.** The BINDING record is the 13e plan's batch-8 section.
+
+    **WHAT SHIPPED, IN ONE SENTENCE — the thing you asked us to make sure you landed on again:** **⌃⌥⌘N now opens the quick-note pad from ANY app**, with Variorum in the background and nothing clicked. It was proved on your machine in the sitting with an unsandboxed probe ("i heard the glass chime!"); this batch built it inside the real, SANDBOXED app and drove it with Finder and then Terminal in front — it registered clean (status 0, no permission prompt) and fired both times.
+
+    **(a) It is a FOURTH DOOR on the same act, not a second act.** Quick Note has one entry in the capability catalog wearing four doors — the menu-bar ✏︎, ⌘⇧N, File ▸ Quick Note, and now the system chord — so the pad, the mint and the wording are literally one implementation. **The alternative:** a separate "Quick Note from Anywhere" act with its own row everywhere.
+
+    **(b) The act wears TWO keys, and both stay live: ⌘⇧N inside Variorum, ⌃⌥⌘N from anywhere.** They are different mechanisms (one is the app's menu, one is the system's), so a chord that shadowed the other would have cost you the menu item. **The alternative:** retire ⌘⇧N and keep only the system chord.
+
+    **(c) Summoning now BRINGS VARIORUM FORWARD first — and that includes the menu-bar ✏︎, which did not before.** Both of those doors are pressed while another app is in front, and the floating pad could open behind it. **The alternative:** open the pad without activating (the pre-13e menu-bar behaviour).
+
+    **(d) The chord is asked for ONCE for the whole app, however many windows are open** — and it keeps answering after you close every window (the menu-bar extra's own promise). **The alternative:** one registration per window.
+
+    **(e) It is installed when the main window first appears.** Consequence, stated rather than hidden: a launch that never shows a window has no hot key until one opens. (That state is the separate windowless-launch bug on the deferred list; it did NOT occur in either of this batch's launches.) **The alternative:** install at app launch through a different road — possible, and it would need its own way to reach the pad.
+
+    **(f) A registration the system refuses is RECORDED, not announced.** The status goes to the log (`RegisterEventHotKey … status=`) and the door simply does not answer; nothing pops up. **The alternative:** a visible message when the chord could not be taken (e.g. another app already holds it).
+
+    **(g) The chord is FIXED — there is no recorder UI**, exactly as you ruled at the sitting ("a recorder UI is a later at-her-word add"). The machinery is shaped for one: the label in the catalog is the single source the system registration is derived from, so changing the chord is one string. **The alternative:** build the picker now.
+
+    **(h) The helper (⌘/) gained its OWN row for it**, separate from ⌘⇧N's, because it is a different promise — this one works while Variorum is not in front. **The alternative:** one combined row.
+
+    **(i) The quick-note pad opens EMPTY on a system summon, like every other door** — one summon, one note; an abandoned pad keeps nothing. Unchanged from 13f, restated because the chord makes it much easier to summon. **The alternative:** re-open the last pad's text.
+
+    **THE TWO WINDOW RIDERS — both dispositioned, nothing invented.**
+
+    **(j) The note-window CLIPPED TOP you reported at 13g ("the top of it i couldn't scroll to … it was cut off") is FIXED, and has been since 13k.** The mechanism was found this batch and proved by reverting it: the context bar used to appear only once a note's books had loaded — which happens a moment AFTER the window is drawn — so on a note in a book the bar was inserted above the title after the fact, and the title's top was clipped until you resized. 13k's rebuilt always-visible bar removed the trigger without anyone noticing. There is now a test holding that property. **The alternative:** none proposed; the deferred-work row is removed.
+
+    **(k) The windowless-launch bug did not occur** in either of this batch's app launches (both came up with a window), so nothing was captured and nothing changed. Its row stands with its capture-on-occurrence protocol. **The alternative:** none.
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#65**.)*

@@ -272,7 +272,10 @@ struct QuickNoteMenuBarContent: View {
 
     var body: some View {
         Button(QuickNoteCopy.summonVerb) {
-            openWindow(id: EditorCommands.quickNoteWindowGroupID)
+            // 13e E14: through the ONE summon line, which activates first —
+            // this door is pressed with ANOTHER app frontmost by definition,
+            // and the floating pad used to open behind it.
+            QuickNoteSummon.summon { openWindow(id: $0) }
         }
         .keyboardShortcut("n", modifiers: [.command, .shift])
     }

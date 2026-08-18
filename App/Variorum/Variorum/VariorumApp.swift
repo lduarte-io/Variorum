@@ -30,6 +30,12 @@ struct VariorumApp: App {
     /// `WindowGroup` window — nothing could ship a second window before
     /// this moved.)
     @State private var windows = WindowRegistry()
+    /// 13e E14 (W26): the app's SYSTEM hot keys — ⌃⌥⌘N summons the quick-note
+    /// pad while any app is frontmost. App-level like the window register and
+    /// for the same reason: there is one of it, however many windows exist.
+    /// `RootView` installs it (it holds the `openWindow` the summon needs);
+    /// installing is idempotent, so a second window costs nothing.
+    @State private var hotKeys = GlobalHotKeyCenter()
 
     var body: some Scene {
         // Batch 7: a sane fresh-window size (the oversized-window report —
@@ -41,7 +47,9 @@ struct VariorumApp: App {
         WindowGroup(id: EditorCommands.mainWindowGroupID) {
             switch bootstrap.state {
             case .ready(let session):
-                RootView(session: session, services: services, windows: windows)
+                RootView(
+                    session: session, services: services, windows: windows,
+                    hotKeys: hotKeys)
                     .onAppear { appDelegate.session = session }
                     .task {
                         guard services == nil else { return }

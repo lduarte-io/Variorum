@@ -22,6 +22,12 @@ struct RootView: View {
     /// it the key window (the mount gate) and is it the navigation target
     /// (the app-wide broadcasts) — and writes one: its own registration.
     let windows: WindowRegistry
+    /// 13e E14 (W26): the app's SYSTEM hot keys. This window INSTALLS them —
+    /// it is the one place that holds both the app-lifetime centre and the
+    /// `openWindow` a summon needs — and installing is idempotent, so a
+    /// second window replaces the action with an identical one and asks the
+    /// system for nothing more.
+    let hotKeys: GlobalHotKeyCenter
     /// Menu-command routing (⌘N/⌘J/⌘K — Phase 13 B2), and since 13f batch 3
     /// this window's WORKSPACE. **Owned here since batch 5b**: it used to be
     /// App-level `@State`, which every `WindowGroup` window shared — one
@@ -80,6 +86,14 @@ struct RootView: View {
         openWindow(id: EditorCommands.noteWindowGroupID, value: noteID)
     }
 
+    /// 13e E14: the quick note's ONE summon, from this window's environment —
+    /// used by ⌘K's row (through the shell) and by the system hot key, which
+    /// this window installs. `QuickNoteSummon` is the line all four doors
+    /// share.
+    private func summonQuickNote() {
+        QuickNoteSummon.summon { openWindow(id: $0) }
+    }
+
     /// 13f batch 6 (W4): ONE door value, handed to every surface that
     /// renders the star act (the Open strip, the Library catalog, the Pool,
     /// the shelf's book rows) — so the menu's word is derived in one place
@@ -92,11 +106,16 @@ struct RootView: View {
 
     init(
         session: AppSession, services: AppServices? = nil,
-        router: ShellRouter = ShellRouter(), windows: WindowRegistry = WindowRegistry()
+        router: ShellRouter = ShellRouter(), windows: WindowRegistry = WindowRegistry(),
+        // 13e E14: defaulted like `windows`, and defaulted to the INERT
+        // system — a harness that mounts this view must never ask the real
+        // system for her chord (it would fight the running app for it).
+        hotKeys: GlobalHotKeyCenter = GlobalHotKeyCenter(system: .inert)
     ) {
         self.session = session
         self.services = services
         self.windows = windows
+        self.hotKeys = hotKeys
         _router = State(initialValue: router)
         _library = State(initialValue: LibraryViewModel(session: session))
         _tags = State(initialValue: TagsViewModel(session: session))
@@ -236,7 +255,7 @@ struct RootView: View {
         // the File-menu item open.
         .onChange(of: router.quickNoteRequested) { _, requested in
             guard requested else { return }
-            openWindow(id: EditorCommands.quickNoteWindowGroupID)
+            summonQuickNote()
             router.quickNoteRequested = false
         }
         // Phase 13 C1: the voice's text-surface half — keep the one global
@@ -264,6 +283,13 @@ struct RootView: View {
             wirePaletteCommands()
             wireWorkspace()
             adoptMarkdownPalette()
+            // 13e E14 (W26): ask the system for ⌃⌥⌘N. Here because this is
+            // the one place holding BOTH the app-lifetime centre and the
+            // `openWindow` a summon needs; idempotent, so the second window
+            // asks for nothing new. The captured action outlives this window
+            // deliberately — she can close every window and the pad still
+            // answers her chord (the menu-bar extra's own promise).
+            hotKeys.install { _ in summonQuickNote() }
         }
         .onDisappear { windows.unregister(windowID) }
     }

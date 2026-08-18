@@ -874,9 +874,16 @@ nonisolated enum CapabilityRegistry {
         // 13f batch 6 — W5's QUICK NOTE. `always`, and honestly so: a pad
         // can be summoned from anywhere at any time — that is the whole
         // feature. It takes no target and reads no context.
+        // 13e E14 (W26, her kickoff-sitting Round 5): a FOURTH door on the
+        // SAME act — the system hot key ⌃⌥⌘N, which reaches the pad while
+        // any app is frontmost and needs no click. It is another door here
+        // rather than a second capability because it is the same summon of
+        // the same pad (P-1: every act declared exactly once), and it wears
+        // its own label because it is its own key on its own mechanism —
+        // ⌘⇧N is SwiftUI's, ⌃⌥⌘N is Carbon's.
         Capability(
             id: .quickNote, verb: QuickNoteCopy.verb, scope: .app,
-            doors: [.menuBar, .menuBarExtra, .palette],
+            doors: [.menuBar, .menuBarExtra, .palette, .systemHotKey],
             // THE COLLISION SWEEP'S RESULT (13f batch 6): ⌘⇧N is FREE —
             // swept across `EditorCommands.keyEquivalent` (36 chords),
             // every `.keyboardShortcut(` call site in `Variorum/` and
@@ -886,7 +893,17 @@ nonisolated enum CapabilityRegistry {
             // Post, which is exactly the right neighbour — ⌘N makes a
             // note, ⌘⇧N pops the pad.
             shortcutLabel: "\u{2318}\u{21e7}N", takesAccess: nil,
-            unavailableNote: "", availability: always),
+            unavailableNote: "", availability: always,
+            // 13e E14's COLLISION SWEEP: ⌃⌥⌘N is free in the app's own table
+            // (no `n` chord carries control or option — ⌘N is New Post and
+            // ⌘⇧N is this pad's in-app door), and it is free of the system's
+            // own reserved combinations. Registered with Carbon, so it also
+            // must not SHADOW an in-app chord — pinned by
+            // `noSystemChordShadowsAnInAppOne`. FB15168205's reported sandbox
+            // regression class is ⌥-only and ⌥⇧ chords; this one carries ⌃
+            // and ⌘ and sits outside it (and the sitting's live probe fired
+            // it three times with no prompt).
+            systemShortcutLabel: "\u{2303}\u{2325}\u{2318}N"),
         // 13f batch 6 — W4's STARS (her round-3 ruling: *"up to 5 notes or
         // books, star/unstar via context menu + ⌘K, section at the
         // sidebar's top"*). The gate governs the ⌘K door ONLY: at the shelf

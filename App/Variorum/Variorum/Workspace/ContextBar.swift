@@ -133,6 +133,17 @@ struct ContextBar: View {
 
     /// Nothing to say ⇒ no bar: a cold launch at the shelf keeps exactly
     /// the chrome it had before any of this shipped.
+    ///
+    /// **`isNote` is load-bearing beyond the icon row (13e batch 8, rider
+    /// 1).** It is what makes this answer TRUE ON THE FIRST PASS for a
+    /// note-only window, whose history is empty and whose `books` arrive from
+    /// an async read. Before K11 added it, that window's bar appeared a
+    /// runloop late — inserted above the masthead, whose pixels were already
+    /// presented — and clipped the top of the window until she resized it
+    /// (the KnownIssues row, traced in `NoteWindowView`, reproduced by
+    /// reverting exactly this line). Making the bar conditional on anything
+    /// loaded ASYNCHRONOUSLY re-opens that defect; `NoteWindowFirstPassTests`
+    /// is the guard.
     var hasContent: Bool {
         ContextBarDoors.hasContent(
             isNote: isNote, canBack: backEnabled, canForward: forwardEnabled,

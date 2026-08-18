@@ -124,8 +124,41 @@ struct NoteWindowView: View {
     }
 }
 
-// MARK: - R5-11, the clipped top: REPRODUCED AND TRACED, DELIBERATELY NOT
-// FIXED IN THIS BATCH (13g batch 6)
+// MARK: - R5-11, the clipped top: MECHANISM FOUND AND CLOSED (13e batch 8,
+// rider 1 — the diagnosis pass over the 13g trace below)
+//
+// **It does not reproduce on HEAD, and 13k K11 is why.** The trace kept
+// below stopped at "what does the resize invalidate that none of the three
+// fixes do"; the answer was upstream of the repair. At the 13g tree
+// `ContextBar.hasContent` read
+//
+//     var hasContent: Bool { originLabel != nil || !books.isEmpty }
+//
+// and this window has NO history, so `originLabel` is always nil (see
+// `onBack: {}` above — the back half is honestly empty). That left
+// `!books.isEmpty`, and `books` is filled by `PaneHost`'s
+// `.task(id: noteID) { await loadBooks() }` — AFTER the first presentation.
+// So for a note IN A BOOK the bar and its divider were inserted ABOVE the
+// masthead one runloop late, the already-presented pixels were never
+// re-composited for the insertion, and the masthead's top rode under the
+// band that had appeared over it. Any resize redisplays the content and
+// repairs it permanently — her "I couldn't scroll to it", exactly. It also
+// explains the reproduction's odd precondition (*a note IN A BOOK, so the
+// context bar renders*): a bookless note grew no bar and never clipped.
+//
+// PROVEN BY BEHAVIORAL REVERT ON THE LIVE APP (2026-08-18): HEAD draws the
+// masthead whole; restoring the expression above and rebuilding reproduced
+// the clip exactly (title, "Write ▾" and the inspector icons all sliced along
+// their top edge), and one resize repaired it permanently. K11's rebuilt bar
+// gained `isNote`, so the bar is there on the first pass and nothing arrives
+// above the masthead afterwards. `NoteWindowFirstPassTests` pins that
+// property — it is red on the 13g rule — because the fix was a side effect
+// nobody knew they had made.
+//
+// The 13g trace stays below, unedited, as the record of what was ruled out.
+//
+// ── (13g batch 6's record) REPRODUCED AND TRACED, DELIBERATELY NOT
+// FIXED IN THAT BATCH
 //
 // Her report: *"opening in a new window seems to be working pretty well but
 // there is this bug where the top of it i couldn't scroll to (where it says

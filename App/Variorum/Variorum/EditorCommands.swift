@@ -239,7 +239,8 @@ struct EditorCommands: Commands {
             // 13f batch 6 (W5) — the quick note's File-menu door, one of the
             // three her round-14.1 ruling names (the menu-bar extra and
             // ⌘⇧N are the others). ONE declaration renders all three.
-            Button(verb(.quickNote)) { openWindow(id: Self.quickNoteWindowGroupID) }
+            // 13e E14: through the ONE summon line the other three doors use.
+            Button(verb(.quickNote)) { QuickNoteSummon.summon { openWindow(id: $0) } }
                 .keyboardShortcut("n", modifiers: [.command, .shift])
                 .disabled(session == nil)
         }

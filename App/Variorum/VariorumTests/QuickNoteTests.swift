@@ -279,10 +279,17 @@ struct QuickNoteMintTests {
 @MainActor
 @Suite("The quick note's doors (13f W5)")
 struct QuickNoteDoorTests {
-    @Test func oneDeclarationCarriesAllThreeDoors() {
+    /// A JUSTIFIED EDIT (13e E14, the E2/E8 convention — called out here
+    /// rather than made quietly): the act gained a FOURTH door, the system
+    /// hot key ⌃⌥⌘N (her kickoff-sitting Round 5). The exact-set expectation
+    /// encoded the pre-E14 declaration, so naming the fourth element IS the
+    /// red-on-old for the declaration — the pre-13e registry has no
+    /// `.systemHotKey` case at all. The door's own pins live in
+    /// `SystemHotKeyTests`.
+    @Test func oneDeclarationCarriesAllFourDoors() {
         let capability = CapabilityRegistry.capability(.quickNote)
-        #expect(capability.doors == [.menuBar, .menuBarExtra, .palette],
-                "her round-14.1 ruling: the menu-bar extra, ⌘⇧N's menu item, and ⌘K")
+        #expect(capability.doors == [.menuBar, .menuBarExtra, .palette, .systemHotKey],
+                "round-14.1's three doors, joined at 13e E14 by the system chord")
         #expect(capability.scope == .app)
         // `always`, and honestly: a pad can be summoned from anywhere at
         // any time — it takes no target and reads no context.
