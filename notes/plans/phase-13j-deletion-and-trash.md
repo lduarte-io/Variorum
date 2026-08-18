@@ -434,7 +434,63 @@ originals whose entire descendant family is going.
   (this session) · a FRESH Opus implementer per batch · Fable cold
   reviews.
 
-### THE SITTING IS CLOSED (2026-08-18) — scope confirmed
+### Sitting round 5 — her post-close review ask + the J3 AMENDMENT (2026-08-18, same sitting resumed)
+
+**Her message (verbatim):** "do you think that we've got everything
+decided in a user friendly way? do you think there's something I'm
+missing about how things are added and deleted that would be better
+to handle differently? I also think it should be added to the
+bottom bar note block where you see the history, since it is
+lineage. it would make sense to me for it to be there. do you think
+there's anything I haven't considered in the usability? I imagine
+if things make sense naturally and intuitively to me after this
+round will be the big question, but still, I want to make sure you
+think we're in a good place design wise and rasie any last
+questions if not"
+
+- **J3 AMENDED by her ruling: the lineage door ALSO joins the
+  block's History face** — "since it is lineage." Architect's
+  reading of the surface (stated back to her, hers to correct):
+  Write's bottom-bar per-block **History** toggle
+  (`CommitBar.swift` → `CommitHistoryView`) and Takes'
+  per-take History sheet (`TakesBottomBar`). When the block has an
+  unplaced original, the history face carries a quiet lineage row
+  ("From a divide on ‹date› — the original is preserved · See
+  original") opening the same peek as the context-menu item. This
+  COMPOSES with round 4's criterion rather than contradicting it:
+  the history face is SUMMONED (behind the existing History
+  toggle), so no new ambient chrome appears. Routed to batch 3.
+- **The architect's audit at her ask — the ONE genuine gap found:
+  DELETED TAKES.** The phase's own bar names takes ("deleting
+  things — blocks, notes, takes — and getting them back is
+  obvious, honest, and calm"), and the J1 scope ruling says
+  "everything deleted" — but takes were never explicit in the
+  Trash round, and the code has NO `restoreVariant` op and NO
+  deleted-take query anywhere (verified by sweep this round): a
+  deleted take is unreachable forever today. **Her ruling: YES —
+  the FULL uniform story.** Deleted takes ride the same 30-day
+  clock: quiet rows in the block's History face (beside commits
+  and the lineage row — one "past" surface per block) with Put
+  back, AND in the Trash under a Takes filter with block/note
+  context. Archived takes keep NO clock (the archived-notes
+  parallel). Needs a small restore op + a deleted-takes query —
+  zero schema. Routing: the op + query + History-face rows →
+  batch 3 (the recovery-doors batch); the Trash's Takes filter +
+  clock inclusion → batch 6. Audit statements (design, correction invited — no
+  question burned): Put back returns a block to its OLD position
+  when neighbors survive (the tombstoned placement row keeps its
+  fractional key — revival is free); a note deleted whole lists
+  in the Trash as ONE note row, its cascade-deleted blocks never
+  double-listed under the blocks filter (the exact-stamp machinery
+  is the discriminator); Put back into a SEALED note diagnoses
+  ("this note is marked complete — unseal to put it back"), the
+  J8 refusal doctrine; the tray door's "⌫ N" badge counts DELETED
+  blocks only (preserved originals show in the panel but don't
+  inflate an urgent-looking count); the archived-vs-Trash
+  distinction (kept-forever vs 30-days) is taught EXPLICITLY in
+  J10's chapter; the phone inherits the Trash CLOCK automatically
+  (store-level) but owes the tray/Trash FACES — the closeout's
+  MobileSoul parity row.
 
 Every agenda item ruled: J1 (rounds 3), J2 (1–2), J3 (4), J4/J4b
 (4), J5 (4, as-stated), J6 (2 — the global listing REMOVED), J7–J9
@@ -453,10 +509,10 @@ server-shaped lands.
 |---|---|---|
 | 1 | **The mini-round:** J7 (⌘Z→⌥⌘Z status-line hint) · J8 (copy truth: the receipt's interim honesty + the diagnosing `.crossesBlockBoundary` refusal) · J9 (whole-block-selection delete → the delete compound; ONE precise trace FIRST) | pending — brief below |
 | 2 | **The tray (J2) + the graveyard removal (J6):** the context-bar door ("⌫ N", nonempty-only) + the two-section tray panel with Put back; the global unplaced section leaves the Library surface (pool door dies with it); the delete receipt/help copy graduates to naming the real tray + its door (J8(a)'s completion) | pending |
-| 3 | **The lineage door (J3) + lens-fallback loudness (J5):** the context-menu item + ⌘K palette act, the read-only original peek with Put back / Open tray; the lens column's in-place archived-pick notice + one-click Restore | pending |
+| 3 | **The lineage door (J3, as AMENDED round 5) + lens-fallback loudness (J5) + deleted-take recovery (round 5):** the context-menu item + ⌘K palette act, the read-only original peek with Put back / Open tray; **the History-face lineage row** (Write's CommitBar history + Takes' history sheet — the summoned "past" surface); the lens column's in-place archived-pick notice + one-click Restore; **the deleted-take restore op + deleted-takes query + the History face's quiet deleted-take rows with Put back** (zero schema) | pending |
 | 4 | **The defaults pair (J4/J4b):** divide default → `divideDuplicating` (the dormant core op wired); merge default → carry-all (composed from `mergeCeremony`, the phone's C5 the reference); "Divide with Ceremony…" ⌥⌘⇧D · "Merge with Ceremony…" ⌥⌘⇧M in Block menu + context menu + palette | pending |
 | 5 | **J11 — the savepoint cadence:** on-note-close auto-commit per edited take (deduped) + `idle_commit_hours` default 24→2 + the ONE enum setting ("Every session · Idle only · Only when I commit"-shaped) + the history view's quiet-run collapse (the legibility half) | pending |
-| 6 | **J1 — the Trash:** the surface reshape (rename to Trash; Archived keeps no clock; per-row "N days left" + Put back; sort/filter by kind + date; Delete Now per row + Empty Trash, confirm-once, IN-TRASH ONLY — no full-delete door in any note context, ever) + the 30-day leave-all-surfaces clock; **the purge design memo authored here** (client+server mechanics, the horizon, the per-device pull cursor, the lineage-only-originals edge) → STOP: her explicit go gates any server-shaped build | pending |
+| 6 | **J1 — the Trash:** the surface reshape (rename to Trash; Archived keeps no clock; per-row "N days left" + Put back; sort/filter by kind + date **incl. the round-5 Takes filter — deleted takes ride the clock with block/note context**; Delete Now per row + Empty Trash, confirm-once, IN-TRASH ONLY — no full-delete door in any note context, ever; a note deleted whole lists as ONE note row, cascade victims never double-listed) + the 30-day leave-all-surfaces clock; **the purge design memo authored here** (client+server mechanics, the horizon, the per-device pull cursor, the lineage-only-originals edge) → STOP: her explicit go gates any server-shaped build | pending |
 | 7 | **J10 — the tutorial deletion chapter** (walk-asserted per P-6: delete blocks in-tutorial, the tray, Put back, cross-block deletion, the Trash, the ceremony doors) + the whole-note-version-history design brief (round 2's deferral deliverable) | pending |
 
 Ladder shape (the 13e precedent): ladder A after batch 4, ladder B
