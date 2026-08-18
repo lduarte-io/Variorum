@@ -899,7 +899,7 @@ nonisolated enum CapabilityRegistry {
             // ⌘⇧N is this pad's in-app door), and it is free of the system's
             // own reserved combinations. Registered with Carbon, so it also
             // must not SHADOW an in-app chord — pinned by
-            // `noSystemChordShadowsAnInAppOne`. FB15168205's reported sandbox
+            // `noSystemChordShadowsAnInAppOneOrAnother`. FB15168205's reported sandbox
             // regression class is ⌥-only and ⌥⇧ chords; this one carries ⌃
             // and ⌘ and sits outside it (and the sitting's live probe fired
             // it three times with no prompt).

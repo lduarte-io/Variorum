@@ -167,15 +167,37 @@ final class LibraryCatalogModel {
     /// rest find them existing, so a typed path applied to a selection
     /// mints the tag ONCE.
     func applyTypedPath(_ raw: String, to postIDs: [String]) async {
-        for postID in postIDs {
+        // Ladder round B (B-2): the batch used to BREAK on the first
+        // refusal in Set order — a vanished post's turn silently cost every
+        // post after it, and WHICH posts got the tag depended on iteration
+        // order. Now: deterministic order, every post gets its turn (the
+        // REMOVE sibling's recorded forgiving-batch semantics — tagging is
+        // idempotent and re-runnable; contrast the multi-delete door, whose
+        // destructive act refuses whole), and partiality is REPORTED. A
+        // path-shaped refusal simply fails every turn and reads as itself.
+        var failed = 0
+        var lastRefusal: String?
+        for postID in postIDs.sorted() {
             let door = TagAssignmentViewModel(session: session, postID: postID)
             if await door.applyTypedPath(raw) == nil {
-                lastError = door.lastError
-                break  // the refusal is the same for every remaining post
+                failed += 1
+                lastRefusal = door.lastError
             }
-            lastError = nil
         }
+        let report: String?
+        if failed == 0 {
+            report = nil
+        } else if failed == postIDs.count {
+            report = lastRefusal
+        } else {
+            report = "Tagged \(postIDs.count - failed) of \(postIDs.count) notes — "
+                + "\(failed) refused (\(lastRefusal ?? "a note may be gone")). "
+                + "The tagged ones keep the tag."
+        }
+        // The refresh AFTER, the report LAST — a successful `search()`
+        // clears `lastError`, and the partiality report must survive it.
         await search()
+        if let report { lastError = report }
     }
 
     /// 13e E8 — the REMOVE half (*"see the posts at a high level and remove

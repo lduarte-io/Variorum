@@ -3302,3 +3302,24 @@ for these — the round-A precedent applied symmetrically, inside her
 granted "couple of reviews" budget (three Fable review sessions ran
 this phase: A, A-round-2, B). If she wants a fourth pass over batch 9
 + the B-fixes at her return, it is one word.
+
+**THE ROUND-B ADJUDICATION FIX PASS (2026-08-18, the architect's own):**
+- **B-2 FIXED with a true red-on-old pin:**
+  `LibraryTagFaceTests.aVanishedPostSkipsAndTheRestStillGetTheTag` RED
+  on the pre-fix tree (checksums `04d8ecca…` fixed ↔ `d219ee69…` HEAD
+  reverted; the live post got nothing + no report), GREEN after —
+  deterministic order, forgiving-batch semantics (the REMOVE sibling's
+  recorded choice), partiality reported and SURVIVING the search
+  refresh (the first fix draft's report was erased by `search()`'s own
+  success-clear — caught by the pin, reordered).
+- **B-3 FIXED** — install idempotence keyed on the handler (hardening,
+  no pin per the hollow-pin analysis).
+- **B-4 FIXED** — `GlobalHotKeySystem` names itself
+  (`system=carbon`/`inert`/`unlabeled`) in both registration log
+  lines; test fakes read as not-"carbon" by default.
+- **B-6a/b FIXED** — the collision-sweep comment names the real test;
+  QUESTIONS #64's header reconciled to the eleven-entry truth.
+- **Counts (architect's own runs): full Mac `✔ 1404/254 FULLY GREEN`**
+  (+1 = the B-2 pin) · affected suites 24/5 green. B-5's hand-check
+  joins her checklist. Batch 9 (B-1's promised lazy-load fix)
+  launches now.

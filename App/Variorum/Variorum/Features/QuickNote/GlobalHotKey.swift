@@ -138,6 +138,12 @@ nonisolated enum GlobalHotKeyChord {
 /// the process.
 @MainActor
 struct GlobalHotKeySystem {
+    /// Ladder round B (B-4): the system NAMES itself in every log line —
+    /// log-reading is this feature's recorded verification method, and a
+    /// fake-system install used to emit success-shaped lines
+    /// indistinguishable from the real app's. Defaulted so test fakes
+    /// compile unchanged — an unlabeled fake still reads as not-"carbon".
+    var label: String = "unlabeled"
     var installHandler: (UnsafeMutableRawPointer) -> (EventHandlerRef?, OSStatus)
     var register: (GlobalHotKeyChord.Chord, EventHotKeyID) -> (EventHotKeyRef?, OSStatus)
     var unregister: (EventHotKeyRef) -> OSStatus
@@ -145,6 +151,7 @@ struct GlobalHotKeySystem {
 
     /// The real one.
     static let carbon = GlobalHotKeySystem(
+        label: "carbon",
         installHandler: { userData in
             var spec = EventTypeSpec(
                 eventClass: OSType(kEventClassKeyboard),
@@ -195,6 +202,7 @@ struct GlobalHotKeySystem {
     /// The pins' one — it takes the same road and asks the system for
     /// nothing, so a suite never fights the running app for a hot key.
     static let inert = GlobalHotKeySystem(
+        label: "inert",
         installHandler: { _ in (nil, noErr) },
         register: { _, _ in (nil, noErr) },
         unregister: { _ in noErr },
@@ -262,7 +270,12 @@ final class GlobalHotKeyCenter {
     @discardableResult
     func install(summon: @escaping (CapabilityID) -> Void) -> [Registration] {
         self.summon = summon
-        guard registrations.isEmpty else { return registrations }
+        // Ladder round B (B-3): idempotence keyed on the HANDLER, not on
+        // `registrations.isEmpty` — an all-labels-unparseable world leaves
+        // `made` empty, and a second install would have stacked a second
+        // Carbon handler and leaked the first retained box. Unreachable
+        // while the parse pin is green; hardening, no pin owed.
+        guard handler == nil else { return registrations }
 
         let box = GlobalHotKeyBox()
         box.center = self
@@ -270,7 +283,8 @@ final class GlobalHotKeyCenter {
         let (handler, handlerStatus) = system.installHandler(
             Unmanaged.passRetained(box).toOpaque())
         self.handler = handler
-        Self.log.notice("InstallEventHandler status=\(handlerStatus, privacy: .public)")
+        Self.log.notice(
+            "InstallEventHandler system=\(self.system.label, privacy: .public) status=\(handlerStatus, privacy: .public)")
 
         var made: [Registration] = []
         for (index, id) in Self.registered.enumerated() {
@@ -288,7 +302,8 @@ final class GlobalHotKeyCenter {
             made.append(Registration(id: id, chord: chord, status: status))
             Self.log.notice(
                 """
-                RegisterEventHotKey \(id.rawValue, privacy: .public) \
+                RegisterEventHotKey system=\(self.system.label, privacy: .public) \
+                \(id.rawValue, privacy: .public) \
                 \(label, privacy: .public) keyCode=\(chord.keyCode, privacy: .public) \
                 modifiers=\(chord.modifiers, privacy: .public) \
                 status=\(status, privacy: .public)

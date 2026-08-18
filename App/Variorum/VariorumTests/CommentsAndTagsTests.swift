@@ -378,6 +378,34 @@ struct LibraryTagFaceTests {
         }
     }
 
+    /// **Ladder round B (B-2) — red-on-old.** The bulk apply used to BREAK
+    /// on the first refusal in Set order, so a vanished post's turn
+    /// silently cost every post after it. The forgiving-batch shape now
+    /// (the REMOVE sibling's recorded choice): deterministic order, every
+    /// post gets its turn, partiality REPORTED. Staged so the vanished
+    /// post sorts FIRST — on the pre-fix code the live post deterministically
+    /// got nothing.
+    @Test func aVanishedPostSkipsAndTheRestStillGetTheTag() async throws {
+        try await withTagSession { session, _ in
+            let (goneID, liveID) = try await session.runner.run { ops -> (String, String) in
+                let gone = try ops.createPost(title: "a gone", profile: .generic)
+                let live = try ops.createPost(title: "b live", profile: .generic)
+                try ops.deleteContainer(gone.id)
+                return (gone.id, live.id)
+            }
+            let ordered = [goneID, liveID].sorted()
+            let model = LibraryCatalogModel(session: session)
+            await model.search()
+
+            await model.applyTypedPath("swept", to: ordered)
+
+            #expect(model.postTags[liveID]?.map(\.path) == ["swept"],
+                    "the live post is tagged even when the vanished one takes its turn first")
+            #expect(model.lastError?.contains("1 of 2") == true,
+                    "partiality is reported, never silent")
+        }
+    }
+
     /// A typed path applied to a SELECTION mints the tag once and wears it
     /// everywhere (the bulk add half).
     @Test func aTypedPathReachesEverySelectedNoteAndMintsOnce() async throws {

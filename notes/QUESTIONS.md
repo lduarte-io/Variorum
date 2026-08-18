@@ -632,7 +632,7 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
 ## Phase 13e (2026-08-18) — batch 8's calls (the system-wide quick-note hotkey), bundled for the sitting
 
-64. **2026-08-18 · Phase 13e batch 8 (E14 / W26 + the two window-lifecycle riders) · NINE calls, each one line to change.** The BINDING record is the 13e plan's batch-8 section.
+64. **2026-08-18 · Phase 13e batch 8 (E14 / W26 + the two window-lifecycle riders) · ELEVEN entries — nine build-time calls, each one line to change, plus the two riders' dispositions as (j)/(k).** *(Count wording reconciled at ladder round B, B-6b — the header said NINE while the batch record said eleven; both were describing the same (a)–(k) bundle.)* The BINDING record is the 13e plan's batch-8 section.
 
     **WHAT SHIPPED, IN ONE SENTENCE — the thing you asked us to make sure you landed on again:** **⌃⌥⌘N now opens the quick-note pad from ANY app**, with Variorum in the background and nothing clicked. It was proved on your machine in the sitting with an unsandboxed probe ("i heard the glass chime!"); this batch built it inside the real, SANDBOXED app and drove it with Finder and then Terminal in front — it registered clean (status 0, no permission prompt) and fired both times.
 
