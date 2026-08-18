@@ -3224,3 +3224,21 @@ the ledger's ink, if she ever wants the capture on the phone:** the *summon*
 half is already shared in spirit — the pad's mint rides `importPost` in core —
 so a phone quick-capture would be a face plus a share-sheet/Shortcuts door, not
 a port of this machinery.
+
+**ARCHITECT ACCEPTANCE (2026-08-18, batch 8):** ACCEPTED on spot-checks —
+`d1cd19d` verified (tree clean; the four new suites re-run green
+**18/4** by the architect's own run). The SANDBOXED W26 verification
+PASSED (real sandbox confirmed by entitlement read; two fires with
+other apps frontmost; the Quick Note window censused on screen; no
+prompt anywhere) — the one context gap from the sitting probe is
+closed. Rider 1 is the batch's jewel: the clip's mechanism found
+UPSTREAM (the pre-13k bar hung on async-arriving `books`, inserting
+itself a runloop after presentation), proven by a one-line live
+revert reproducing her exact symptom, pinned, and none of the three
+failed fixes repeated. Rider 2 honestly enriched (two more no-repro
+launches). ALL EIGHT BATCHES ARE DONE — the ledger's build half is
+complete. **LADDER ROUND B launches now** (the review-seam plan's
+second half): a FRESH Fable cold reviewer over the phase since round
+A closed (`cc9cd5e..d1cd19d` — the adjudication pass, batches 5–8,
+the A47c disposition), `notes/REVIEW_PROMPT.md` VERBATIM, zero
+framing. Next free QUESTIONS: **#65**.
