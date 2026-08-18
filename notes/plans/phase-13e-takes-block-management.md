@@ -1727,3 +1727,72 @@ the TOP of this file at closeout (readable without reviving the
 session); the closeout runs the FULL standing ritual; the
 `/Applications` refresh is PRE-AUTHORIZED at phase completion (her
 app confirmed closed — the A1 rail still runs first).
+
+---
+
+## LADDER ROUND A (2026-08-18, overnight — fresh Fable cold reviewer over `6346853..7e5b5cb`; REVIEW_PROMPT verbatim, zero framing)
+
+**Verdict: ZERO BLOCKER / ZERO MAJOR — 2 MINOR · 2 NIT · 1 NIT-SPECULATIVE,
+with a strong clean bill** (verified solid by the reviewer's own runs:
+reorderTake's one-resolver shape · the FIX-2 rider genuinely closing its
+row · E15's policy execution incl. the no-loop settle · batch 3's AR-1
+shapes with I10 traced at every constructible edge · E13's door-level
+honesty · registry/P-1 coverage · copy homes · gesture layering ·
+P1/P3/TK2 · sync shape zero-diff · spine 51/7 green).
+
+**Findings + the architect's adjudications (spec-anchored; no dispute
+turned on undefined product behavior, so the implementer dispute loop
+was not owed — the `/architect-phase` skill's ladder governs, and the
+architect adjudicates directly):**
+
+- **A-1 [MINOR] — the board's `deleteSelectedBlocks` half-acts in the
+  vanished-pick race** (pre-filters the pick set and deletes survivors)
+  while Write's host rolls the whole gesture back and speaks
+  (`blockGone`) — ONE declared act, two behaviors, contradicting the
+  method's own doc comment and the batch-4 record. **ADJUDICATED VALID
+  — FIX:** align the board to the rollback contract; red-on-old pin
+  (board: pick 2, delete 1 via the runner, act — today the survivor
+  dies, after: refusal + nothing deleted).
+- **A-2 [MINOR] — P-9 accretion:** `TakesViewModel` grew 2057→2521
+  lines THIS phase while the constitution names it the standing
+  counterexample; the pure brains were extracted (`BlockSelection`,
+  `TakeClipboard`) but the board's structural DOORS never got their
+  controller (the editor side's own `EditorSurfaceController` is the
+  in-repo pattern). **ADJUDICATED VALID — FIX in-phase:** extract the
+  board's structural-door half on the 3C parity discipline (every
+  pre-move name kept as a computed forward/typealias; ZERO test edits
+  is the parity proof; full suites green). Fallback if the extraction
+  fights back: revert clean and park as a KnownIssues row for her
+  flick at residuals — never a half-landed refactor.
+- **A-3 [NIT] — `mergeSelectedBlocks` misdiagnoses the vanished-pick
+  race** as "not adjacent" when the truth is "a block is gone"
+  (`blockGone`'s family, one door over). **VALID — FIX:** check
+  existence before contiguity; wording pin.
+- **A-4 [NIT] — hand-coded chord suffixes** in `TakesShared` context
+  menus duplicate the registry's `shortcutLabel` — AR-1(e) leaves the
+  keys hers to re-pick, and a re-pick now needs three homes.
+  **VALID — FIX:** read the registry.
+- **A-5 [NIT · SPECULATIVE] — `TakeClipboard` touches `NSPasteboard`
+  off the main actor** after an awaited read; no concrete failure
+  traceable (reviewer's own label). **DISPOSITION per the
+  hallucination guard: the bug claim is DISMISSED as untraceable; the
+  `@MainActor` annotation is applied as a CLEANLINESS change only**
+  (both callers are already MainActor; the hop buys nothing) — no pin
+  owed, justification recorded here.
+
+**ROUND-A FIX BRIEF (a FRESH Opus fix session; self-contained):** fix
+A-1, A-3, A-4, A-5 exactly as adjudicated above (A-1 and A-3 with
+red-on-old pins by behavioral revert with checksums; A-4 with the
+existing drift-guard class if one fits; A-5 annotation-only), then
+attempt A-2's extraction LAST on the 3C parity discipline — a
+`TakesSurfaceController` (or the name the editor-side pattern
+suggests) owning the board's structural doors, `TakesViewModel`
+keeping every existing name as a forward; ZERO test edits; if parity
+cannot be held, `git checkout` the extraction's files back (they are
+the only uncommitted things at that point — the A-1/A-3/A-4/A-5 fixes
+commit FIRST, separately) and record the fallback. Full suites +
+spine at the end (baselines: core 1254/135 · Mac 1330/234
+tripwire-only · mobile 314/60 — mobile only if `Sources/`/`Shared/`
+touched); Environment traps bind verbatim (kills ONLY by PID after a
+path-discriminated `ps`); batch record appended here; commit(s) per
+convention; never push.
