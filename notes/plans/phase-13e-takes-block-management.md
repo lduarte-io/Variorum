@@ -2008,3 +2008,37 @@ ZERO test edits). The extraction's self-found latent defect (the
 `unowned` capture crash in the fire-and-forget divide door) is noted
 as a bonus catch. Fifth A47c unlocked datum. Next free QUESTIONS:
 **#61**. Round 2 (fresh re-reviewer) launches now per the ladder.
+
+## LADDER ROUND 2 (2026-08-18 — fresh Fable re-reviewer over `d7675f5..cc9cd5e` + blast radius)
+
+**Verdict: ZERO new BLOCKER/MAJOR — the ladder CLOSES at round 2.**
+All five round-A fixes VERIFIED (A-1 mechanism+pin real; A-2 extraction
+verbatim-modulo-`model.` with the parity proof confirmed and the
+`unowned`→strong capture correct; A-3 guard present, copy shared; A-4
+formatter+pins honest; A-5 as adjudicated). Reviewer's own runs: 45
+tests / 6 suites green. Four residues, all adjudicated VALID and sized
+for the architect's own adjudication fix pass (the skill's
+small-code-at-adjudication allowance):
+
+- **R2-1 [MINOR]** — both delete-door doc comments claim a MOVED pick
+  refuses-and-rolls-back; the mechanism (and #60(c)'s own record) says
+  a moved pick is deleted where it now lives. Fix: reword both
+  comments to #60(c)'s truth; rider — `blockGone`'s "or moved
+  elsewhere" hedge is wrong on the delete door's thrower story (right
+  on merge's pre-check road).
+- **R2-2 [NIT]** — merge's read-to-write race path speaks the DELETE
+  door's words (`blockNotFound`→`blockGone` "Nothing was deleted") and
+  a moved pick in that window hits the raw-enum arm
+  (`blockNotPlaced`). Fix: catch both in `mergeSelectedBlocks` and
+  speak `blockGoneForMerge`; map `blockNotPlaced` to real copy.
+- **R2-3 [NIT]** — ghosts ride at the END of the delete chain, so a
+  detectable stale pick first commits every survivor's tombstone +
+  registrations (destroying the redo future per R1-10) before
+  unwinding. Fix: ghosts-first ordering — identical pinned contract,
+  zero transient tombstones, the redo stack SURVIVES a refused
+  gesture; red-on-current pin (stage a redo future + a vanished pick,
+  act, future survives).
+- **R2-4 [NIT]** — the A-4 class one component over: hand-typed chord
+  suffixes in `TakesBottomBar`/`TakesBoardView` beside declared
+  capabilities, no drift guard. Fix: `Capability.menuTitle` at each
+  site whose capability declares the chord.
