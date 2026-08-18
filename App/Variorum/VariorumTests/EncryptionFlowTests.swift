@@ -228,7 +228,10 @@ struct CopyFlowRoundTests {
         let session = makeEncryptionSession(store: store, vault: vault)
         await session.setUp(passphrase: passphrase)
 
-        session.setBiometricRequirement(true)
+        // JUSTIFIED EDIT (13e batch 9, B-1): the toggle act is async now —
+        // its custody read+write ride one off-main hop. Expectations below
+        // are byte-unchanged.
+        await session.setBiometricRequirement(true)
         #expect(session.lastError == nil)
         #expect(session.biometricRequired)
         #expect(store.load() != nil,
@@ -265,7 +268,7 @@ struct CopyFlowRoundTests {
         let vault = ScriptedVault()
         let session = makeEncryptionSession(store: store, vault: vault)
         await session.setUp(passphrase: passphrase)
-        session.setBiometricRequirement(true)
+        await session.setBiometricRequirement(true)  // JUSTIFIED EDIT: 13e batch 9 (B-1)
         backing.simulateRelaunch()
 
         await session.unlockWithBiometrics()
@@ -292,8 +295,10 @@ struct CopyFlowRoundTests {
         let vault = ScriptedVault()
         let session = makeEncryptionSession(store: store, vault: vault)
         await session.setUp(passphrase: passphrase)
-        session.setBiometricRequirement(true)
-        session.setBiometricRequirement(false)
+        // JUSTIFIED EDIT (13e batch 9, B-1): async act; the two flips still
+        // land in this order — the custody hop's queue is serial.
+        await session.setBiometricRequirement(true)
+        await session.setBiometricRequirement(false)
         #expect(!session.biometricRequired)
         #expect(!store.isBiometricGateOn())
 
@@ -679,7 +684,11 @@ struct AccountLifecycleDoorTests {
         session.rekeyRunner = { passphrase in
             #expect(passphrase == "the-old-passphrase")
             // The runner's CONTRACT: custody adopted mid-run.
-            await MainActor.run { session.adoptRekeyedMaterial(fresh) }
+            // JUSTIFIED EDIT (13e batch 9, B-1): `adoptRekeyedMaterial` is
+            // async now — its custody save hops off the main thread — so
+            // the call IS the MainActor hop. The awaited contract (custody
+            // lands before the runner returns) is byte-unchanged.
+            await session.adoptRekeyedMaterial(fresh)
             return fresh
         }
         var healed = 0

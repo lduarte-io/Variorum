@@ -761,9 +761,16 @@ struct EncryptionView: View {
 
     @ViewBuilder
     private var biometricToggleSection: some View {
+        // 13e batch 9 (B-1): the act is async now (its custody read+write
+        // hops off the main thread), so the setter starts it the way every
+        // other door on this surface does — a `Task`. The toggle keeps
+        // showing `biometricRequired`, which still flips only when custody
+        // actually landed, so a refused change still snaps back.
         Toggle(isOn: Binding(
             get: { encryption.biometricRequired },
-            set: { encryption.setBiometricRequirement($0) })
+            set: { required in
+                Task { await encryption.setBiometricRequirement(required) }
+            })
         ) {
             Text("Require \(Self.biometricName) to unlock sync")
                 .pageProse(pageStyle)

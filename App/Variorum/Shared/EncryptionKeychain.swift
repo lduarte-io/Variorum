@@ -118,6 +118,41 @@ nonisolated struct DeviceKeyStore: Sendable {
             })
     }
 
+    /// 13e batch 9 (ladder round B, B-1) — THE OFF-MAIN CUSTODY HOP, the
+    /// second half of the KnownIssues "Windowless launch" row's promised
+    /// fix (the 14b cold pass's settings-cadence addition).
+    ///
+    /// Every closure above is a synchronous `SecItem*` call, and
+    /// `EncryptionSession` — a `@MainActor` type — used to run them inline:
+    /// a stalled securityd (the row's captured `ClientSession::decrypt`
+    /// wait) would beachball the open Encryption sheet instead of making it
+    /// wait politely. This hop moves the call off the main thread and
+    /// changes nothing else about it.
+    ///
+    /// The queue is SERIAL and shared by every hop deliberately: custody
+    /// calls keep landing in the order they were made, which is the
+    /// ordering the inline MainActor calls had by construction. (A
+    /// `Task.detached` per call would be off-main too, and would give that
+    /// ordering up for nothing.) A caller that needs two calls ADJACENT —
+    /// read-then-write — passes both inside ONE hop.
+    ///
+    /// NOT used by `DeviceKeySyncProvider`/`DeviceBridgeKeyProvider`: the
+    /// engine already reads custody off-main from its own rounds, and its
+    /// `SyncKeyProviding` seam is synchronous by contract.
+    func offMain<T: Sendable>(
+        _ body: @escaping @Sendable (DeviceKeyStore) -> T
+    ) async -> T {
+        let store = self
+        return await withCheckedContinuation { continuation in
+            DeviceKeyStore.custodyQueue.async {
+                continuation.resume(returning: body(store))
+            }
+        }
+    }
+
+    private static let custodyQueue = DispatchQueue(
+        label: "io.lduarte.Variorum.custody", qos: .userInitiated)
+
     static func inMemory(initial: DeviceKeyMaterial? = nil) -> DeviceKeyStore {
         inMemory(backing: InMemoryKeyBacking(initial: initial))
     }

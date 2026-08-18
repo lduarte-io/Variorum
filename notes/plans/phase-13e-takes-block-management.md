@@ -3375,3 +3375,210 @@ touched; iPhone 16e)**. Builds/tests SYNCHRONOUS; kills by PID only;
 batch record here BEFORE final claims only with PENDING marks;
 commit per convention; NEVER push; NEVER `/Applications`; instances
 by bundle id `io.lduarte.Variorum.debug` or PID only.
+
+### BATCH 9 RECORD — the promised Keychain lazy-load fix (2026-08-18, a fresh Opus implementer; COMPLETE — BOTH families landed, nothing stopped)
+
+**Shipped, per family. Neither half needed the escape the brief anticipated:
+the E2EE custody half's safe shape IS "move the hop off-main," and it is what
+shipped.**
+
+- **FAMILY 1 — `AuthSession`'s token load is lazy and off-main.** The
+  captured stack's exact frame is gone: `init` reads no Keychain at all, and
+  the new `ensureLoadedFromStore()` performs the one read at FIRST USE
+  (`isSignedIn` / `currentUserID` / `currentEmail` — now `get async`, so
+  every call site is BYTE-UNCHANGED, all of them already `await`ed — plus
+  `currentSession()`, `refresh()` and `signOut()`).
+  - **Why "off-main" needs no hop here, traced rather than assumed:** first
+    use is always inside the ACTOR, and a default actor's executor is the
+    global concurrent pool — never the main thread — so the read cannot block
+    the UI however long securityd takes. (The pins MEASURE this rather than
+    trusting it: the recorded calling thread is not main.)
+  - **The read is deliberately SUSPENSION-FREE.** A queue hop here would have
+    opened a real hole: with an `await` between "read the Keychain" and
+    "adopt what it returned", a sign-in landing in that window could be
+    overwritten by the older persisted item. A synchronous read inside the
+    actor makes that interleaving impossible by construction, with no guard
+    to get wrong. Belt beside it: `adopt`/`signOut` set `storeLoaded`, so a
+    superseded item is never read back at all (pinned).
+  - **`signOut()` calls the ensure FIRST**, so a sign-out before anything
+    read the store still carries the persisted bearer to `/auth/v1/logout` —
+    what the eager load used to guarantee by accident now happens on purpose
+    (pinned; that pin passes on BOTH sides deliberately — the attribution
+    half).
+- **FAMILY 2 — `EncryptionSession`'s settings-cadence custody hops leave the
+  MainActor**, with custody semantics byte-preserved. New
+  `DeviceKeyStore.offMain(_:)` (in `EncryptionKeychain.swift`, beside the
+  store it serves) runs a store closure on ONE shared SERIAL queue; the four
+  paths the row names route through it:
+
+  | Path | Before | After |
+  |---|---|---|
+  | `refresh()` (sheet-open cadence) | `isBiometricGateOn()` + `load()` inline on the MainActor | two hops — same two reads, same order |
+  | `adopt(_:)` (every enrollment landing) | `save()` inline | one hop; the method is `async` now |
+  | `forgetDeviceKeys()` (CF-11) | `clear()` inline | one hop |
+  | `setBiometricRequirement(_:)` (CF-12's toggle) | `load()` then `setBiometricGate()` inline | ONE hop carrying BOTH — the adjacency the inline pair had, kept exactly |
+
+  - **Why a serial queue and not `Task.detached`:** a detached task per call
+    is off-main too, and would give up the ORDER the inline MainActor calls
+    had for nothing. The queue is FIFO, so custody calls still land in the
+    order they were made. Where two calls must be adjacent (the toggle's
+    read-then-write), they travel inside one hop rather than trusting the
+    queue to have nothing else in it.
+  - **The hop is load-bearing, measured:** this target builds with
+    `-enable-upcoming-feature NonisolatedNonsendingByDefault` (SE-0461), so a
+    `nonisolated async` method called from the MainActor runs ON the
+    MainActor — revert B below proves it: with the hop's body replaced by an
+    inline call, all four custody pins go red on `anyOnMainThread → true`.
+  - **Ripple, all of it:** `adoptRekeyedMaterial` is `async` (its caller in
+    `AppServices.runAccountRekey` drops `MainActor.run` and awaits the call
+    directly — the adopt-before-truncate contract is unchanged and now covers
+    the Keychain write itself), and the toggle's SwiftUI `Binding` setter
+    starts a `Task` (the toggle still shows `biometricRequired`, which still
+    flips only when custody actually landed).
+- **THE FENCES, kept:** `Sources/` is untouched ENTIRELY (zero lines, so
+  `Sources/VariorumCore/Sync/` trivially so); the engine's
+  `DeviceKeySyncProvider`/`DeviceBridgeKeyProvider` custody reads were not
+  touched (their seam is synchronous by contract and they already read
+  off-main from the engine's rounds); no signature change ripples into the
+  engine; no wording, no ordering, no read/write set changed anywhere.
+
+**THE SWEEP TABLE** (the constitution's closing form — every synchronous
+Keychain/custody touch point in `App/`, found by grepping `SecItem`,
+`LAContext`, `.keychain(`, and every `DeviceKeyStore`/`AuthTokensStore` call
+site):
+
+| Site | Cadence · thread before | Verdict |
+|---|---|---|
+| `AuthSession.init` → `store.load()` | app construction · MAIN | **FIXED** (lazy first use, on the actor), pins `constructingTheSessionTouchesNoKeychainAtAll`, `theFirstTokenReadHappensOffTheMainThread` |
+| `AuthSession.adopt` / `signOut` / `performRefresh` → `save`/`clear` | sign-in, sign-out, refresh · already OFF-main (actor executor) | **SAFE, mechanism stated:** actor-isolated, so never the main thread; deliberately left synchronous — the suspension-free reasoning above |
+| `EncryptionSession.refresh` → `isBiometricGateOn` + `load` | sheet open · MAIN | **FIXED**, pin `refreshReadsTheGateAndCustodyOffTheMainThread` |
+| `EncryptionSession.adopt` (setUp · enroll ×2 · changePassphrase · adoptRekeyedMaterial) → `save` | enroll · MAIN | **FIXED**, pin `enrollingThisDeviceSavesCustodyOffTheMainThread` |
+| `EncryptionSession.forgetDeviceKeys` → `clear` | forget door · MAIN | **FIXED**, pin `theForgetDoorClearsCustodyOffTheMainThread` |
+| `EncryptionSession.setBiometricRequirement` → `load` + `setBiometricGate` | toggle · MAIN | **FIXED**, pin `theBiometricToggleTouchesCustodyOffTheMainThread` |
+| `EncryptionSession.landRecoveryWrap` → `load` | phrase landing · MAIN | **FIXED** (same hop) — the fifth site the row's four-path letter did not name, found by the sweep and fixed with its family |
+| `EncryptionSession.biometryAvailable` → `LAContext.canEvaluatePolicy` | view BODY · MAIN | **NOT CHANGED — out of the row's letter, mechanism stated:** not a `SecItem*` custody call (a LocalAuthentication availability probe; no item decrypt, so not the captured class), and it is read while the sheet DRAWS — an async value could only be served by seeding it at `refresh()` (the `biometricRequired` pattern), which would make the sheet's first pass claim "no biometrics on this Mac" until the refresh returned. Reasoning written into the property's own doc comment; **ROUTED to the architect** (#65(f)(i)) |
+| `LegacyPasteInCleanup.clear()` → `SecItemDelete` | first sign-in · MAIN | **NOT CHANGED — out of the row's two families, mechanism stated:** a delete of the retired Phase 8 item; no item data is decrypted, so it never enters the captured `ClientSession::decrypt` interaction class. **ROUTED to the architect** (#65(f)(ii)) |
+| `DeviceKeyStore.unlockWithBiometrics` → `evaluatePolicy` then `SecItemCopyMatching` | biometric unlock · caller's actor (MainActor under SE-0461) | **NOT CHANGED, recorded:** not one of the four named paths, and the read follows a user-completed biometric prompt with the evaluated `LAContext` in hand. Recorded so the sweep is complete rather than silently short |
+| `DeviceKeySyncProvider` / `DeviceBridgeKeyProvider` → `store.load()` | engine rounds · OFF-main | **SAFE and FENCED:** recorded off-main in the row itself, synchronous by seam contract, and the brief names them untouchable. Verified untouched (zero `Sources/` lines) |
+
+**Mechanisms traced (the hallucination guard).** The bug mechanism is the
+row's own, re-verified in TODAY's code before anything moved: `AppServices`
+is `@MainActor` and its `init` constructed two `AuthSession`s, each of whose
+`init` ran `store.load()` → `KeychainAuthStorage.load` →
+`SecItemCopyMatching` — on the main thread, inside the first window's
+`.task`, before any window could present (the 14b `sample` caught exactly
+this, waiting in `ClientSession::decrypt` → `mach_msg`; the same wait hangs
+the test HOST). Revert A reproduces it as an observation: the pin records
+`Call(name: "load", onMainThread: true)` at construction. The
+settings-cadence half's mechanism is the 14b cold pass's, likewise
+re-verified: `EncryptionSession` is `@MainActor` and called the custody
+closures inline, so a securityd stall would beachball the open sheet; revert
+B reproduces it (`anyOnMainThread → true` on all four paths).
+
+**Pins + red-on-old evidence (behavioral revert, checksums recorded).** New
+Mac file `App/Variorum/VariorumTests/KeychainOffMainTests.swift` (9 tests, 2
+suites — `AuthSessionLazyLoadTests` 5, `EncryptionCustodyThreadTests` 4),
+built on the row's OWN recorded pin shape: an injected store recording
+whether it was called during construction and which thread each call landed
+on. No core file changed, so no core suite grew.
+
+*Revert A — the pre-fix EAGER load restored in `AuthSession.init`
+(`self.tokens = store.load()`, with `storeLoaded` pre-set so the lazy path is
+inert — i.e. exactly one load, at construction, as before). File:*
+`AuthSession.swift` `9c391acd…1cf2` → `d47f2c37…9571`. Result: **exactly the
+three claim-bearing AuthSession pins RED (4 issues)** —
+`constructingTheSessionTouchesNoKeychainAtAll` (the log holds
+`Call(name: "load", onMainThread: true)` — the captured mechanism, in a
+test), `theFirstTokenReadHappensOffTheMainThread` (`anyOnMainThread → true`),
+and `adoptingSupersedesTheStoreAndTheLazyLoadNeverRuns` (`names → ["load",
+"save"]`, same thread symptom) — while `everyLaterReadRidesTheOneLoad` and
+`aSignOutBeforeAnyReadStillLogsThePersistedSessionOut` stayed GREEN (the
+attribution half: one read either way, and the bearer was always carried),
+**and all four custody pins stayed GREEN** (clean cross-family attribution).
+Restored: `9c391acd…1cf2`, checksum-verified.
+
+*Revert B — the off-main hop's body replaced by an inline call
+(`return body(self)`), i.e. the pre-fix shape where every custody closure ran
+on the caller. File:* `EncryptionKeychain.swift` `5fa3ec3a…e632` →
+`cdbb4c77…6150`. Result: **exactly the four custody pins RED with the exact
+symptom** — `theBiometricToggleTouchesCustodyOffTheMainThread`,
+`theForgetDoorClearsCustodyOffTheMainThread`,
+`enrollingThisDeviceSavesCustodyOffTheMainThread` and
+`refreshReadsTheGateAndCustodyOffTheMainThread`, every one on
+`anyOnMainThread → true` — while **all five AuthSession pins stayed GREEN**.
+Restored: `5fa3ec3a…e632`, checksum-verified. *(This revert is also the
+measurement behind the SE-0461 note above: without the hop, the nonisolated
+async method runs on the MainActor.)*
+
+*The other pins* are the laziness's own guards, each stating in its own
+comment which side it falls on: the one-read rule, the superseded-store rule,
+and the sign-out bearer. The custody pins additionally hold what did NOT
+change — the toggle's `["load", "setBiometricGate"]` adjacency, refresh's
+`["isBiometricGateOn", "load"]` order and its `.enrolled` projection, the
+forget door's engine-seam refusal afterwards, and setUp's single custody
+write.
+
+**JUSTIFIED TEST EDITS (5 lines, all mechanical, each called out in the test
+itself):** `EncryptionFlowTests` gained `await` on four
+`setBiometricRequirement` calls and on the re-key runner's
+`adoptRekeyedMaterial` (whose `await MainActor.run { … }` became the awaited
+call itself). No expectation changed anywhere.
+
+**Counts (own runs, quoted from the "Test run with N tests" lines).**
+- Mac: **`✔ Test run with 1413 tests in 256 suites passed after 190.231
+  seconds`** — FULLY GREEN, zero reds (baseline 1404/254 → +9/+2, exactly the
+  new file).
+- Core: **`✔ Test run with 1254 tests in 135 suites passed after 33.543
+  seconds`** — baseline matched EXACTLY; `Sources/` untouched entirely.
+- Mobile: **`✔ Test run with 314 tests in 60 suites passed after 23.614
+  seconds`** (iPhone 16e) — RUN because `App/Variorum/Shared/` is touched;
+  baseline matched exactly.
+- Tutorial spine, by TYPE name (all seven): **`✔ Test run with 51 tests in 7
+  suites passed after 14.520 seconds`**.
+- **The STOP check, run before anything else was claimed:** every existing
+  auth/encryption suite by TYPE name — `AuthSessionTests`,
+  `EncryptionFlowTests`, `CopyFlowRoundTests`, `CrossoverRoundTests`,
+  `AccountLifecycleDoorTests`, `AccountDoorWiringTests`,
+  `TerminologyPinTests`, `SyncLockedFaceTests`,
+  `FreshAccountSetupGeneralityTests`, `Phase9cAuthWiringTests`,
+  `HostedSyncTierFaceTests`, `HostedSyncStatusReadTests`,
+  `SignUpPresentationTests` — **`✔ Test run with 79 tests in 13 suites passed
+  after 23.275 seconds`**. No red, so no STOP.
+
+**PROVISIONALs / build-time calls:** ten, bundled as **QUESTIONS #65**
+(a)–(j) — the lazy first-use read, the supersede rule, the serial-queue
+ordering, the toggle's now-async flip, the re-key adoption's awaited road,
+the TWO deliberately-unmoved sites (with their mechanisms), the untouched
+engine reads, the five `await` test edits, the pins, and the windowless row's
+surviving half.
+
+**KnownIssues disposition.** *"Windowless launch (the openApplication path) +
+quit-from-windowless hangs"* (owner: 13e kickoff sweep) — **the PROMISED FIX
+IS BUILT, both families, with the row's own recorded pin shape**; the row is
+updated in place with the full disposition (what moved, what deliberately did
+not, and the two sweep-table sites routed to the architect). **The row is NOT
+cleared:** what survives is the windowless-launch OBSERVATION itself — only
+real use can retire that — plus the capture-on-occurrence protocol, the
+`.terminateLater`-with-no-deadline candidate, and the -1712 AppleEvent
+timeout. **Its owner needs re-naming at the closeout** (the fix half is
+discharged; the observation half is not a 13e item any more) — flagged in the
+row's own owner cell rather than left to be noticed.
+
+**Nothing stopped, nothing schema-shaped.** The brief's anticipated escape
+(land the AuthSession half alone) was NOT taken and is not owed: the E2EE
+half's safe shape is exactly "move the hop off-main", which is what shipped,
+with the two out-of-letter sites recorded rather than quietly swept in.
+`Sources/` untouched entirely (so `Sources/VariorumCore/Sync/` zero lines);
+no migration, no mirror implication, no `/Applications` refresh, no Release
+build. No Variorum instance was running at any point (`ps -Ao pid,command`,
+path-discriminated, at the batch's open and before each full-suite run), and
+no process was killed at all this batch.
+
+**MOBILE PARITY (for the closeout ledger):** **the phone HAS this fix
+already, by construction** — every changed file is in `App/Variorum/Shared/`
+(`AuthSession`, `EncryptionSession`, `EncryptionKeychain`, `EncryptionViews`,
+`AppServices`), which compiles into the mobile target; the phone's
+composition root constructs `AppServices` the same way and its Encryption
+surface IS the shared one (PL-6). The mobile suite ran green for exactly that
+reason. What the phone owes: **nothing** — the sweep found no Keychain call
+site outside `Shared/`.

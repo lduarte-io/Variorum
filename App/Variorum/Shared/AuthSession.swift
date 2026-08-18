@@ -24,6 +24,20 @@
 //  refresh token therefore shows as a persistent, visible sync error until
 //  the author signs in again — fail-visible, never fail-destructive.
 //
+//  Phase 13e, batch 9 (ladder round B, B-1) — THE LAZY LOAD, the fix the
+//  KnownIssues "Windowless launch" row promised. The 14b gate morning
+//  captured a live windowless launch with `sample`: the MAIN thread sat
+//  inside `AppServices.init` → `AuthSession.init` →
+//  `KeychainAuthStorage.load` → `SecItemCopyMatching` → `ClientSession
+//  ::decrypt` → `mach_msg`, waiting on securityd while no window existed
+//  yet. The persisted session is therefore read at FIRST USE now
+//  (`ensureLoadedFromStore`), never during construction — and first use is
+//  always inside this ACTOR, whose executor is never the main thread, so
+//  the hop cannot block the UI however long securityd takes. Nothing else
+//  moves: the load is still one synchronous read with no suspension point,
+//  so no caller can interleave between "read the Keychain" and "adopt what
+//  it held" (see `ensureLoadedFromStore`'s note on why that matters).
+//
 
 import CryptoKit
 import Foundation
@@ -221,6 +235,9 @@ actor AuthSession: UserSessionProviding {
     private let expiryMargin: TimeInterval
 
     private var tokens: AuthTokens?
+    /// 13e batch 9 (B-1): has the persisted session been consulted (or
+    /// superseded by an adopt/sign-out)? The lazy load's whole bookkeeping.
+    private var storeLoaded = false
     /// Single-flight: concurrent refresh demands coalesce onto one request.
     private var refreshTask: Task<AuthTokens, Error>?
     /// Sign-in/out notification (the app wires the UI + sync/bridge session
@@ -240,14 +257,41 @@ actor AuthSession: UserSessionProviding {
         self.now = now
         let session = URLSession.shared
         self.http = http ?? { try await session.data(for: $0) }
-        self.tokens = store.load()
+        // 13e batch 9 (B-1): the Keychain read that used to happen HERE now
+        // happens at first use — see the type's header and
+        // `ensureLoadedFromStore`. Construction touches no Keychain at all.
     }
 
     // MARK: State
 
-    var isSignedIn: Bool { tokens != nil }
-    var currentUserID: String? { tokens?.userID }
-    var currentEmail: String? { tokens?.email }
+    /// 13e batch 9 (B-1): the persisted session, read once, at first use.
+    ///
+    /// SYNCHRONOUS on purpose. The load runs on the actor's executor (never
+    /// the main thread — that is the whole fix), and keeping it free of any
+    /// suspension point means no `adopt`/`signOut` can interleave between
+    /// the Keychain read and the adoption of what it returned: a stale
+    /// persisted session can never overwrite a live one, without a single
+    /// guard for it. `storeLoaded` is set FIRST so the flag reads true for
+    /// anything the closure could reach, and so `adopt`/`signOut` can
+    /// declare the store consulted (their own write is the newer truth —
+    /// re-reading it later would only risk reviving what they replaced).
+    private func ensureLoadedFromStore() {
+        guard !storeLoaded else { return }
+        storeLoaded = true
+        tokens = store.load()
+    }
+
+    var isSignedIn: Bool {
+        get async { ensureLoadedFromStore(); return tokens != nil }
+    }
+
+    var currentUserID: String? {
+        get async { ensureLoadedFromStore(); return tokens?.userID }
+    }
+
+    var currentEmail: String? {
+        get async { ensureLoadedFromStore(); return tokens?.email }
+    }
 
     func setOnChange(_ handler: @escaping @Sendable (AuthTokens?) -> Void) {
         onChange = handler
@@ -380,6 +424,10 @@ actor AuthSession: UserSessionProviding {
     /// The injectable entry (tests; any future door): adopt a ready-made
     /// token set as the signed-in session.
     func adopt(_ newTokens: AuthTokens) {
+        // 13e batch 9 (B-1): an adopt SUPERSEDES whatever the Keychain held,
+        // so the lazy load has nothing left to do — and must never run later
+        // and overwrite this with the older item.
+        storeLoaded = true
         tokens = newTokens
         store.save(newTokens)
         onChange?(newTokens)
@@ -388,6 +436,10 @@ actor AuthSession: UserSessionProviding {
     /// Best-effort server-side logout, unconditional local clear. The only
     /// path that destroys a session.
     func signOut() async {
+        // 13e batch 9 (B-1): a sign-out before anything read the store must
+        // still log the PERSISTED session out server-side — so consult it
+        // first, exactly as the eager load used to guarantee.
+        ensureLoadedFromStore()
         if let tokens {
             var request = URLRequest(
                 url: configuration.projectURL.appendingPathComponent("auth/v1/logout"))
@@ -406,6 +458,7 @@ actor AuthSession: UserSessionProviding {
     // MARK: UserSessionProviding (the Step 2 seam)
 
     func currentSession() async throws -> UserSession {
+        ensureLoadedFromStore()  // 13e batch 9 (B-1): first use, first read
         guard let current = tokens else { throw UserSessionError.notSignedIn }
         if now() >= current.expiresAt.addingTimeInterval(-expiryMargin) {
             let refreshed = try await refresh()
@@ -422,6 +475,7 @@ actor AuthSession: UserSessionProviding {
     // MARK: Refresh (single-flight)
 
     private func refresh() async throws -> AuthTokens {
+        ensureLoadedFromStore()  // 13e batch 9 (B-1): first use, first read
         if let inFlight = refreshTask {
             // Review round 2 (NIT): waiters run the same post-await
             // re-check as the leader — a sign-out landing mid-refresh must

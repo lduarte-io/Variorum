@@ -445,7 +445,12 @@ final class AppServices {
                 // lives only for the run (the brain is a local), so the
                 // strong reference makes the adopt-before-truncate
                 // contract structural at zero cycle risk.
-                await MainActor.run { self.encryption.adoptRekeyedMaterial(material) }
+                // 13e batch 9 (B-1): `adoptRekeyedMaterial` is async now
+                // (its Keychain write hops off the main thread), so the
+                // hop to the MainActor is the call itself — and the await
+                // still covers the whole adoption, which is what the
+                // adopt-before-truncate contract needs.
+                await self.encryption.adoptRekeyedMaterial(material)
             })
         do {
             let material = try await brain.run(passphrase: passphrase)

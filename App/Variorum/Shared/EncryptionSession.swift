@@ -19,11 +19,32 @@
 //  launch; the `enrolledLocked` state), and the passphrase-authorized
 //  phrase regenerate (CF-2 — the surface's rules made coherent).
 //
+//  Phase 13e, batch 9 (ladder round B, B-1) — EVERY CUSTODY HOP LEAVES THE
+//  MAIN THREAD. This type is `@MainActor` and used to call the store's
+//  synchronous `SecItem*` closures inline on the four settings-cadence
+//  paths the KnownIssues "Windowless launch" row names — refresh, adopt,
+//  forget, toggle — so a stalled securityd (the row's captured
+//  `ClientSession::decrypt` wait) would beachball the open sheet rather
+//  than make it wait. Each of those calls now goes through
+//  `DeviceKeyStore.offMain`, whose serial queue preserves the order they
+//  always had; where two calls must stay ADJACENT (the toggle's
+//  read-then-write) they travel inside ONE hop. Nothing about custody
+//  semantics moves: same reads, same writes, same order, same wording.
+//
 
 import Foundation
 import Observation
 import os
 import VariorumCore
+
+/// 13e batch 9 (B-1): what the biometric toggle's ONE custody hop found —
+/// carried out of the hop so the wording stays on the MainActor where it
+/// belongs. File-scope (not nested) so it is plainly `Sendable`.
+private enum BiometricGateOutcome: Sendable {
+    case landed
+    case noMaterial
+    case refused
+}
 
 @MainActor
 @Observable
@@ -113,6 +134,16 @@ final class EncryptionSession {
     }
 
     /// CF-12: whether the biometric toggle is even offerable here.
+    ///
+    /// 13e batch 9 (B-1), stated rather than silently left: this is the one
+    /// store closure the fix does NOT move off the main thread. It is a
+    /// `LAContext.canEvaluatePolicy` availability probe — not a `SecItem*`
+    /// custody call, so it is outside the KnownIssues row's letter and
+    /// outside the captured `ClientSession::decrypt` mechanism — and it is
+    /// read from a view BODY, where an async value could only be served by
+    /// seeding it at `refresh()` (the `biometricRequired` pattern), which
+    /// would make the sheet's first pass claim "no biometrics on this Mac"
+    /// until the refresh returned. Recorded for the architect to route.
     var biometryAvailable: Bool { store.biometryAvailable() }
 
     // MARK: - State refresh
@@ -125,14 +156,14 @@ final class EncryptionSession {
         // refresh — a crash mid-re-key must re-speak the rerun road on
         // the next launch, not stay silent behind an "enrolled" reading.
         rekeyIncomplete = await rekeyIncompleteCheck?() ?? false
-        biometricRequired = store.isBiometricGateOn()
+        biometricRequired = await store.offMain { $0.isBiometricGateOn() }
         guard await signedIn() else {
             state = .signedOut
             return
         }
         do {
             let vault = try await client.fetchVault()
-            let custody = store.load()
+            let custody = await store.offMain { $0.load() }
             switch vault {
             case nil:
                 state = .noVault
@@ -174,7 +205,7 @@ final class EncryptionSession {
     func setUp(passphrase: String) async {
         await runFlow { enrollment in
             let material = try await enrollment.setUp(passphrase: passphrase)
-            self.adopt(material)
+            await self.adopt(material)
             self.state = .enrolled(hasRecoveryWrap: false)
         }
     }
@@ -185,7 +216,7 @@ final class EncryptionSession {
     func enroll(passphrase: String) async {
         await runFlow { enrollment in
             let material = try await enrollment.enroll(passphrase: passphrase)
-            self.adopt(material)
+            await self.adopt(material)
             let hasRecovery = (try? await enrollment.hasRecoveryWrap()) ?? false
             self.state = .enrolled(hasRecoveryWrap: hasRecovery)
         }
@@ -196,7 +227,7 @@ final class EncryptionSession {
         let words = Self.words(from: recoveryWordsText)
         await runFlow { enrollment in
             let material = try await enrollment.enroll(recoveryWords: words)
-            self.adopt(material)
+            await self.adopt(material)
             self.state = .enrolled(hasRecoveryWrap: true)
         }
     }
@@ -233,7 +264,7 @@ final class EncryptionSession {
     /// CF-2 passphrase gate (Round 7: replacing the disaster road is a
     /// deliberate ceremony).
     func landRecoveryWrap(confirmedWords: [String], allowReplace: Bool) async {
-        guard let material = store.load() else {
+        guard let material = await store.offMain({ $0.load() }) else {
             lastError = "This device holds no keys — unlock with your passphrase first."
             return
         }
@@ -252,7 +283,7 @@ final class EncryptionSession {
         await runFlow { enrollment in
             let material = try await enrollment.changePassphrase(
                 authorizedBy: authorization, newPassphrase: newPassphrase)
-            self.adopt(material)
+            await self.adopt(material)
             let hasRecovery = (try? await enrollment.hasRecoveryWrap()) ?? false
             self.state = .enrolled(hasRecoveryWrap: hasRecovery)
         }
@@ -299,8 +330,13 @@ final class EncryptionSession {
     /// The runner's custody adoption point (its contract: called after
     /// the NEW vault lands, before the truncate — this device must never
     /// be stale against its own new vault).
-    func adoptRekeyedMaterial(_ material: DeviceKeyMaterial) {
-        adopt(material)
+    ///
+    /// 13e batch 9 (B-1): `async` now, because the custody save it performs
+    /// hops off the main thread — and the runner AWAITS this call exactly
+    /// as before, so the adopt-before-truncate contract is unchanged (it is
+    /// in fact stronger: the await now covers the Keychain write itself).
+    func adoptRekeyedMaterial(_ material: DeviceKeyMaterial) async {
+        await adopt(material)
     }
 
     // MARK: - Device custody doors (CF-11 · CF-12)
@@ -312,7 +348,7 @@ final class EncryptionSession {
     /// engine's next round refuses VISIBLY right away: the sync face
     /// returns to its locked line, never a stale "synced" reading.
     func forgetDeviceKeys() async {
-        store.clear()
+        await store.offMain { $0.clear() }
         biometricRequired = false
         onKeysChanged?()
         await refresh()
@@ -339,16 +375,23 @@ final class EncryptionSession {
     /// material (the toggle lives on the enrolled surface); re-persists
     /// custody under the new policy. Never touches the vault, the format,
     /// or the protocol — R-6's device-local promise, kept.
-    func setBiometricRequirement(_ required: Bool) {
-        guard let material = store.load() else {
+    /// 13e batch 9 (B-1): `async` now, and the read and the re-persist ride
+    /// ONE hop — inline on the MainActor nothing could interleave between
+    /// them, and the single hop keeps exactly that. Every outcome's wording
+    /// is byte-unchanged.
+    func setBiometricRequirement(_ required: Bool) async {
+        let outcome = await store.offMain { store -> BiometricGateOutcome in
+            guard let material = store.load() else { return .noMaterial }
+            return store.setBiometricGate(required, material) ? .landed : .refused
+        }
+        switch outcome {
+        case .noMaterial:
             lastError = "Unlock this device's keys first."
-            return
-        }
-        guard store.setBiometricGate(required, material) else {
+        case .refused:
             lastError = "The device Keychain refused the change — nothing was altered."
-            return
+        case .landed:
+            biometricRequired = required
         }
-        biometricRequired = required
     }
 
     // MARK: - Plumbing
@@ -372,8 +415,8 @@ final class EncryptionSession {
             && vault.classKey(for: .journalBridge)?.keyID == custody.journalBridgeKeyID
     }
 
-    private func adopt(_ material: DeviceKeyMaterial) {
-        if !store.save(material) {
+    private func adopt(_ material: DeviceKeyMaterial) async {
+        if !(await store.offMain { $0.save(material) }) {
             // Keychain refusal is exceptional; the keys still work for this
             // process' healing round, but custody must be visible.
             lastError = "The device Keychain refused to store the keys — sync will ask again next launch."

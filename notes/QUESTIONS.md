@@ -662,4 +662,34 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint.**
 
-*(Next free number: **#65**.)*
+
+
+## Phase 13e (2026-08-18) — batch 9's calls (the promised Keychain fix), bundled for the sitting
+
+65. **2026-08-18 · Phase 13e batch 9 (ladder round B's B-1 — the lazy/off-main Keychain fix the deferred-work row had promised) · TEN entries: eight build-time calls and two things deliberately NOT changed.** The BINDING record is the 13e plan's batch-9 section.
+
+    **WHAT SHIPPED, IN ONE SENTENCE:** the app no longer asks the system Keychain for anything on the main thread — not while it is starting up, and not while the Encryption settings sheet is open. **Why it matters to you:** the beachball-at-launch state (the app running with NO window, which you have hit, and which also froze test runs) was CAUGHT IN THE ACT back in August — the main thread was sitting inside a Keychain read, waiting on the system's security daemon, before any window existed. That read now happens later and elsewhere. **Nothing about your sign-in, your keys, or your encryption changes** — same reads, same writes, same order, same wording; only which thread does the waiting.
+
+    **(a) The persisted sign-in is read at FIRST USE, not while the app is being built.** It is still read exactly once, still adopted exactly as before, and a sign-out before anything read it still logs the saved session out properly. **The alternative:** keep reading it during construction and try to make that read faster (it is not slow — it is occasionally BLOCKED, which no speed-up fixes).
+
+    **(b) Signing in supersedes the saved session outright** — once you sign in (or out), the older saved item is never read again, so it can never come back over the top of what you just did. **The alternative:** read it anyway and compare.
+
+    **(c) The custody hops (the Encryption sheet's) run on ONE shared queue, in order.** Every Keychain call the sheet makes still lands in the exact order it always did — which matters for the one place that reads-then-writes (the biometric toggle), and that pair now travels together in a single hop. **The alternative:** fire each hop independently (simpler, but it would give up the ordering for nothing).
+
+    **(d) The "require Face ID / Touch ID to unlock sync" toggle now flips only once the change has actually landed in the Keychain.** Before, the flip and the write were the same instant because both happened on the main thread. On a healthy machine you will see no difference; on a stalled one, the sheet stays responsive and the toggle catches up. **The alternative:** flip the toggle immediately and write behind it (it would lie if the write were refused).
+
+    **(e) The re-key door's mid-run custody adoption is now awaited through the same road** — the contract it exists for (this device holds the new keys BEFORE the server truncate) is unchanged and, if anything, tighter: the wait now covers the Keychain write itself. **The alternative:** none proposed.
+
+    **(f) Two things were deliberately NOT moved, and both are stated rather than left silent.** (i) The check for *whether* this Mac has Face ID / Touch ID at all: it is not a keys read (it asks the biometrics system, not the Keychain), and it is read while the sheet is drawing — making it async would mean the sheet's first frame claiming "no biometrics on this device" until a refresh returned. (ii) A one-line cleanup of the retired Phase 8 paste-in item, which still runs on the main thread at sign-in: it is neither of the two families the deferred-work row named, and a delete of a long-gone item does not go near the mechanism that was captured stalling. **The alternative for either:** move it too, in a batch that owns it.
+
+    **(g) The engine's own key reads were not touched at all** — they already happen off the main thread, on their own rounds, and the batch's fence named them untouchable. **The alternative:** none.
+
+    **(h) Five existing test lines gained the word `await`** (nothing else changed in them) because two acts became asynchronous; each edit is called out in the test itself. **The alternative:** none — this is what a signature change costs.
+
+    **(i) The fix is held by nine new tests** that record which thread every Keychain call landed on, and they were proved to FAIL on the old code (both halves, separately). **The alternative:** none.
+
+    **(j) The windowless-launch row itself stays open** — the fix its capture pointed at is now built, but "it never happens again" is a claim only real use can make. Its capture-on-occurrence protocol stands, and the row needs a new owner now that this phase is closing. **The alternative:** close the row on the strength of the fix.
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#66**.)*
