@@ -1,9 +1,84 @@
 # Phase 13e — Takes & block management
 
-**Status: OPEN — kicked off 2026-08-16 under `/architect-phase`
-(the author's invocation; the opening sitting ran the same day
-under a 30-minute author window — the sitting record below). The
-paste-ready-era status line is superseded.**
+**Status: CLOSED 2026-08-18 — all nine batches + both ladder rounds
+done, suites FULLY GREEN (core 1254/135 · Mac 1413/256 · mobile
+314/60 · spine 51/7), the overnight run per her instruction; the
+closeout record is the final section. HER RESIDUALS ARE THE NEXT
+SECTION — readable without reviving any session.**
+
+## HER RESIDUALS — READ THIS FIRST (compiled at the overnight closeout, 2026-08-18; every item is recorded in full at its own section below)
+
+**Hand-checks (~5 minutes, nothing gates):**
+1. **Relaunch `/Applications/Variorum.app`** — refreshed at the
+   closeout behind a fresh A1 backup; the whole phase is in it.
+2. **Help ▸ Restore Tutorial, once** — the seeder changed this
+   phase, so your store's seeded copy is stale until the click.
+3. **⌃⌥⌘N from ANY app** — the quick note pops (W26, verified
+   sandboxed with two real fires). Then B-5's check: close EVERY
+   window and press it again — it should still answer (the one
+   promise no test can drive).
+4. **#56(m):** in a callout's emoji prompt, click a glyph in the
+   system Emoji & Symbols palette — it should land in the field.
+5. **#56(n):** the menu-bar Block menu's callout colour rows — do
+   the chips render tinted?
+6. Your carried 13k-era leftovers, still open at leisure: the
+   Read-scroll link click · #54(d) (Read's chip voice-independence)
+   · the chip radius/tint judgments.
+
+**The ratify list — QUESTIONS #56–#65** (ten bundles; every
+overnight judgment logged PROVISIONAL). The load-bearing ones:
+- **AR-1** (batch 3's propose-first fork): a take converted to a
+  block MINTS A COPY and the source take is ARCHIVED — commits stay
+  reachable on the source; the row-move road was proven sync-unsafe
+  (full trace at the AR-1 section). Six edge defaults at #58:
+  archive disposition · locked takes convert (copy unlocked) ·
+  takes-to-blocks keeps the CHOSEN take on the source · blanks
+  skipped · chords ⌥⌘⏎ / ⇧⌥⌘⏎ · archived takes stay behind.
+- **E13:** duplicate LIVE book names now REFUSE at create/rename
+  (case-insensitive; finished counts as taken, deleted frees).
+- **B-2:** bulk tagging is forgiving-batch (skip the vanished,
+  report partiality — matching removal's recorded semantics, NOT
+  the multi-delete's all-or-nothing); the report wording is
+  draft-grade, yours to reword.
+- **The review-flow judgments:** three Fable review sessions ran
+  (round A · its round-2 re-review · round B); the round-B residues
+  were fixed at the architect's adjudication WITHOUT a fourth cold
+  pass — one word re-opens it over batch 9 + the B-fixes.
+- **The A47c disposition:** the tripwire's covariate was SUITE
+  CONTEXT, never lock state — the TK2 cull is load-dependent on
+  this OS; the pin now asserts the outcome contract (restore runs +
+  page ends drawn); the guard machinery stays; TEXTKIT2_NOTES §3
+  carries the entry. The zero-allowed-reds era starts here.
+
+**The batch-4 incident** (full record at its section): that batch's
+implementer ran a forbidden process-name `pkill`; your store was
+verified safe (WAL idle since the previous day; fresh backups);
+whether your app's earlier exit was your own quit or the pkill is
+unattributable. The rule stands; every later brief was sharpened;
+no recurrence.
+
+**Comments-on-left:** the batch-6 sweep found NO Mac face right of
+the text (the only trailing face is the phone's ●n, by its own M12
+ruling) — if you SAW right-side comments somewhere, say where and
+it becomes a finding with a reproduction to chase.
+
+**Mobile parity owed by the phone** (the ledger row is in
+MobileSoul): the reorder-takes door · the duplicate-name guard at
+its two book doors · copy-all-takes (a `UIPasteboard` twin) · E5/E6
+doors · the ●n placement design call · swatches/picker at your word.
+
+**THE NEXT PHASE IS UNPICKED — your menu:** 13h (folder bridge) ·
+13i (smart-book identity) · 13j (deletion & the Trash) · 13l (data
+safety) · 13m (the variorum edition) · or an unslotted row. The
+standing briefs are ready; the next plan gets authored AT YOUR PICK
+— the one closeout-ritual item deliberately deferred to your word,
+recorded as a deviation.
+
+---
+
+*(Original status line, superseded above: OPEN — kicked off
+2026-08-16 under `/architect-phase`; the opening sitting ran the
+same day under a 30-minute author window.)*
 
 ## The binding principles (the P-1…P-9 constitution — copied VERBATIM at kickoff per the `/architect-phase` rule; the application notes in `.claude/skills/architect-phase/SKILL.md` bind alongside)
 
@@ -3582,3 +3657,53 @@ composition root constructs `AppServices` the same way and its Encryption
 surface IS the shared one (PL-6). The mobile suite ran green for exactly that
 reason. What the phone owes: **nothing** — the sweep found no Keychain call
 site outside `Shared/`.
+
+---
+
+## THE CLOSEOUT RECORD (2026-08-18 — the phase CLOSES; the architect's final section)
+
+**Every ledger row DISPOSITIONED — no orphans:** E1/E13/E11 (batch 1) ·
+E4+the fan-copy rider/E15/E3 (batch 2) · E5/E6 under AR-1 (batch 3) ·
+E2 (batch 4) · E12/E7-bank (batch 5) · E7-comments/E8 (batch 6) ·
+E9/E10+the slot-handle rider (batch 7) · E14+both window riders
+(batch 8) · the B-1 Keychain fix (batch 9). W26 = E14 SHIPPED with
+the sandboxed verification passed. The kickoff sweep's four rows:
+A47c DISPOSITIONED (suite-context covariate; pin re-shaped; suite
+fully green) · the note-window clip RESOLVED (batch 8's upstream
+trace) · the windowless launch's CAUSE FIXED (batch 9) with the
+observational survivors re-owned to the v1-release-readiness row ·
+the shell-redo row was already closed (listed to prevent re-opening,
+and it stayed closed). KnownIssues: FIVE rows resolved/removed this
+phase (fan-copy remap · Takes-board policy · takes-aware F&R half ·
+copy-door flush · note-window clip), the tripwire row removed by
+disposition, the windowless row slimmed to survivors and re-owned,
+the six-brains row gained the applyTypedPath seventh-candidate
+caution. **Review:** ladder A (2 MINOR · 2 NIT · 1 SPECULATIVE →
+all fixed/dispositioned; round-2 re-review verified all five, closed
+zero-new-major) · ladder B (1 MINOR — batch 9 built it · 4 NIT ·
+1 SPECULATIVE → her hand-check; fixed at adjudication) — every
+finding carries a written disposition at its round's section.
+**Batch-9 routed sites adjudicated ACCEPTED-SAFE** (architect):
+`LAContext.canEvaluatePolicy` is not SecItem/securityd-decrypt
+class and an async seed would lie on first paint;
+`LegacyPasteInCleanup`'s `SecItemDelete` never enters the captured
+class — both recorded with mechanisms in the batch-9 sweep table.
+**Final counts (all the architect's own runs or in-batch runs
+re-verified):** core **1254/135** · Mac **1413/256 FULLY GREEN —
+zero allowed reds; the tripwire era ended this phase** · mobile
+**314/60** · spine **51/7**. ZERO schema (mirror stays at lockstep
+marker 6; no §12 event); ZERO `Sources/VariorumCore/Sync/` lines
+all phase; core `Sources/` touched only by batches 2/3 (the three
+new §9 operations + the copyFan machine + the E13 core read).
+**QUESTIONS:** #56–#65 logged; next free **#66**. **Docs:** AppSpec
+§14 gains the 13e delta (the 14d delta rolls to the archive);
+TEXTKIT2_NOTES §3 carries the A47c point-release entry; MobileSoul
+gains the PL-10 parity row; the master plan's pointer flips with
+the closeout paragraph (the 14d closeout rolls to the archive).
+**The `/Applications` refresh** runs at this closeout behind the A1
+rail per her pre-authorization (her app confirmed closed).
+**Deviation recorded:** the next phase's plan is NOT authored — her
+pick is genuinely open (13h/13i/13j/13l/13m all have standing
+briefs); authoring one speculatively would guess her word. The
+handoff is `notes/handoffs/phase-13e-handoff.md`, her checklist at
+the top.

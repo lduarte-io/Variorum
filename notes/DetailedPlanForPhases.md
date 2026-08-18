@@ -8,57 +8,33 @@ This is the master build plan. It holds: the phase table, the **current phase po
 
 ## Current phase
 
-**→ PHASE 14D CLOSED 2026-08-16 — the Fragments batch, the bridge
-resumption, AND the release-readiness operationalia are ALL DONE (her
-mid-phase scope widening: "everything gets done and is working and
-ready for release from an email / fragments / account, etc.
-session"). NEXT: at her word, as always — the 13 family (13e takes &
-block management · 13i smart-book identity · 13j deletion & the
-Trash · 13l data safety · 13m the variorum edition), mobile Stage E /
-internal TestFlight (NOW UNBLOCKED — her standing ruling's condition
-is met), or the unslotted rows.** What 14d shipped, in one breath:
-SMTP + branded auth-email links live (Resend; the stargazing.tech
-`/auth/confirm` handler; her ratified copy) · signups OPEN (the
-14c-proven isolation + entitlement gate are the guard) · the 14b
-bridge pause ENDED (the staged re-push from truth drained — her
-journal history is `e1:` ciphertext on the satellite) · THE ONE-BATCH
-*[removed for publication]*
-password retired; journal-class E2EE live BOTH ends; ONE STARGAZING
-ACCOUNT — the Variorum-only framing deprecated at her word) · the
-delegated bridge sign-in door built (the 9c machinery pointed the
-other way) · the account-sheet unification · the round-trip proven
-both directions by her live check. Cold review: one round (the ruled
-cast), 2 doc-class MAJORs + 4 MINOR + 2 NIT, all landed. Residuals
-(hers, recorded in the plan): the stranger walk · secret-key
-rotation · DMARC · the Bridge-now relabel · the bridge auto-connect
-direction. The BINDING record is
-`notes/plans/phase-14d-fragments-batch.md`; the closeout log below
-has the paragraph; her checkpoint is
-`notes/handoffs/phase-14d-handoff.md`. The gate half ran
-architect-driven (her Round-7 delegation, each act announced): the
-born-multi-tenant mirror deployed (marker **5→6**), her corpus
-repushed exact + zero-plaintext + owner-uniform (7,278 rows, one
-round), the ruled two-layer security net made REAL by the live
-BYPASSRLS repair (obligation 2 answered NO — the three data RPCs
-re-owned to a non-bypass `variorum_definer` role), **all 13 live
-isolation obligations passing against a real provisioned stranger**
-(pull=0 both ways, foreign/NULL-owner refused, colliding id lands
-in-partition with her row byte-untouched, direct-table denial,
-own-row-only vault/entitlement, the truncate fence + scoped delete
-leaving her corpus intact), and the account-deletion door verified
-end to end. **Deferred to 14d by her ruling** (first needed post-14d,
-riding its SMTP + site work): the signup flip · stranger-onboarding
-validation · the phone re-onboard (its saved cursor is stale against
-the reset mirror — re-onboard is the clean fix; whether today's
-merged-tree install made it a marker-6 client is the mobile session's
-to confirm; until re-onboarded, phone writing stays local-safe but may
-not propagate) · the custom domain, which DISSOLVED (branded auth-email
-links come FREE via
-the template + `token_hash` road; she buys Pro for the server-side
-backups regardless). **14d now ABSORBS those operationalia** beside the
-Fragments touchpoints. The BINDING record is
-`notes/plans/phase-14c-multi-tenant.md` (the "GATE HALF — execution
-record" section); the closeout log below has the paragraph.
+**→ PHASE 13E CLOSED 2026-08-18 — Takes & block management is DONE:
+all NINE batches + both review ladders ran in ONE overnight pass at
+her instruction, the suites are FULLY GREEN (core 1254/135 · Mac
+1413/256 — the tripwire era ENDED: its covariate was suite context,
+never lock state · mobile 314/60 · spine 51/7), and HER RESIDUALS +
+ratify list (QUESTIONS #56–#65) are compiled at the TOP of
+`notes/plans/phase-13e-takes-block-management.md` per her word.
+NEXT: at her word — 13h (folder bridge) · 13i (smart-book identity)
+· 13j (deletion & the Trash) · 13l (data safety) · 13m (the
+variorum edition), mobile Stage E / internal TestFlight, or the
+unslotted rows; the next plan is authored AT HER PICK (deliberate
+recorded deviation — the pick was genuinely open).** In one breath:
+the fan's missing hands (reorder-takes · ⌘-click merge selection ·
+take-to-block-below · takes-to-blocks under AR-1's
+mint-copy-source-ARCHIVED ruling · copy-all-takes ⌘⇧C) · block
+multi-select/multi-delete under one compound entry · the canvas
+bank + the MEASURED coordinate-space drag fix (her jitter finding —
+the gesture was reading its own applied offset) · margin-hover
+comments on the LEFT (the sweep proved no Mac straggler) · the
+listings' tag faces · Replace All in Every Take · the copy-door
+flush · **W26: ⌃⌥⌘N summons the quick note from ANY app,
+sandbox-verified** · duplicate-book-name refusal · the Keychain
+lazy-load fix ending the windowless-launch CAUSE · five KnownIssues
+rows resolved + the A47c tripwire dispositioned from evidence. Zero
+BLOCKER/MAJOR across both ladders; ZERO schema (marker 6 stands);
+ZERO `Sync/` lines. The BINDING record is the plan file; her
+checkpoint is `notes/handoffs/phase-13e-handoff.md`.
 
 *(The pointer THREAD — every superseded pointer paragraph, kept verbatim, newest first, plus the standing Phase 12 deferral paragraphs and the early out-of-band records — lives in `notes/PhaseCloseoutArchive.md` (the 2026-08-01 housekeeping rule: this section holds only the ACTIVE pointer; a superseded pointer moves to the archive at the closeout that supersedes it). Phase 12's standing condition — it kicks off only after a window of real daily use, re-baselining on the then-current counts — remains recorded on its phase-table row below.)*
 
@@ -89,7 +65,7 @@ record" section); the closeout log below has the paragraph.
 | 13b | **Make It Work — usability & interaction hardening** (author 2026-07-20, Sitting 9 batches 15–16) | The app becomes actually usable: every door works or speaks honestly, the interaction layer gets its missing architecture, the tutorial proves every flow | Stage 0 audits (architecture survey, capability matrix, self-driven bug inventory) → selective interaction-layer consolidation (capability registry, fire-and-DO R115, ONE text surface + `PaneTextAuthority`, board soak) → the tutorial spine (R113) → themed batches; merge + W design memos per the friction doctrine (R116); plan + binding principles: `notes/plans/phase-13b-make-it-work.md` | The tutorial flow green end-to-end as the permanent acceptance script; the capability matrix clean (no silent/lecturing doors); board soak + registry walk green; author-ratified backlog burned down | **done** (CLOSED 2026-07-22 at Stage 4's end by the author's end-of-life directive — no Stage 5; the ~5k-line plan file was taxing R114's read-in-full rule, so "the fix is to close the file, not weaken the reading rule". Five stages, each laddered; Mac 431/81 → **652/123**, core 747/90 → **817/96**. Stage 4 shipped the two ceremonies (the ruled cut rule + parking; the merge-pairing ceremony — her canon ruling), Compare rebuilt as editable lenses-across-posts with Outline retired, the takes/editor QoL set, the canvas package on bounded realization, the book progress bar + paged view, `restoreReading`, and migration v1_12 (deployed). Successor: **Phase 13c**; the visual review became a standalone re-runnable row.)|
 | 13c | **Book forms, conversions & carried work** (created 2026-07-22 at the 13b closeout; opened 2026-07-25) | The book becomes the book she pictured — and the daily refusals stop | A **friction batch first** (ruling K2: the bridge's missing daily-book membership, the whitespace-phantom + jumping-block layout defects, backspace/delete on empty blocks, divide in Takes, redo, callout mode parity) → then the uniform-page traditional book view (`Outline · Book · Read` per her 7/23–24 direction + 4F's brief), N38 smart→smart+curated conversion, N41 comments airiness, Compare related-blocks-only, book-order-as-a-lens. Plan: `notes/plans/phase-13c-book-forms-and-conversions.md`; cast ALL-OPUS under `/architect-phase` *(Stage 2 re-cast at her 2026-07-27 K6 ruling: Fable orchestrator · Opus implementers · ONE Fable cold review)* | Per-batch ladder over the combined diff; the tutorial spine stays green (P-6); red-on-old absolute | **done** (closed 2026-07-27; her #29–#47 walk pending — the closeout log has the paragraph) |
 | 13d | **The refusal & ergonomics floor** (roadmap ruling K3, 2026-07-25) | What's left of "nothing should refuse you", plus the typing ergonomics | Ledger rows A5, A11, A12, A14, A15, A16, A22, A23, A24 — callout colour spacing; divide on an empty line leaving the blank nowhere; the destructive-undo warning (pairs with 13c's redo); ⌘⇧Enter new block; shift-Enter staying in the block in BOTH editors; the global `one_block` face (N34); typewriter room; the paragraph-tall gap setting; spellcheck levels — plus the 13c walk's ruled flips, #34's seam merge, and A9's native divide (#41) | Registry walk clean; capability matrix green by construction | **done** (closed 2026-07-28; the closeout log has the paragraph) |
-| 13e | **Takes & block management** (K3) | The fan and the block list get their missing hands | Ledger rows A13(b), A17–A21 — colour swatches + a real emoji picker; block-level multi-select and multi-delete; ⌘-click merge selection in Takes; reorder takes; move-a-take-into-a-block-below; copy-all-takes / takes-to-blocks. Plus the 13c kickoff candidates she approves (margin-hover comment grammar, canvas bank, synced card sizes). **Plus W26 — the true system-wide quick-note hotkey, at the OPENING SITTING (author-attended; her 2026-08-01 slotting ruling at the 13g opening sitting: "give W26 to a particular phase in the not yet run 13 phases … so that i'm sure to land on it again"; the Carbon research lives in the 13f plan file)** | Ladder + soaks; `fan_position` reorder pinned like every other ordering | pending |
+| 13e | **DONE — closed 2026-08-18 (the overnight run; residuals at the top of the plan file). Takes & block management** (K3) | The fan and the block list get their missing hands | Ledger rows A13(b), A17–A21 — colour swatches + a real emoji picker; block-level multi-select and multi-delete; ⌘-click merge selection in Takes; reorder takes; move-a-take-into-a-block-below; copy-all-takes / takes-to-blocks. Plus the 13c kickoff candidates she approves (margin-hover comment grammar, canvas bank, synced card sizes). **Plus W26 — the true system-wide quick-note hotkey, at the OPENING SITTING (author-attended; her 2026-08-01 slotting ruling at the 13g opening sitting: "give W26 to a particular phase in the not yet run 13 phases … so that i'm sure to land on it again"; the Carbon research lives in the 13f plan file)** | Ladder + soaks; `fan_position` reorder pinned like every other ordering | pending |
 | 13f | **Workspace** (K3; one of her two soonest — K4) | More than one thing on screen, and the app calls them notes | Ledger rows A25–A30, A32 — two posts side by side in one window; several windows / a split window; tabs of open notes with ⌘⇧1…; starred notes; the quick-note sticky format; **the `post` → `note` UI-string sweep (K5 — strings only; `container.kind='post'` and the canon docs keep the model term)**; the infinite-scroll editor idea | P3 holds across windows (ONE live editor, `PaneTextAuthority`); no second liveness mechanism | **done** (closed 2026-07-31; her walkthrough rides 13g's opening sitting per her round-15 directive — the closeout log has the paragraph) |
 *[removed for publication]*
 | 13h | **The LLM folder bridge** (K3) | Her prose is reachable from a folder without giving up block identity | Ledger rows A35–A36 — a post ⇄ `.md` file in a folder, openable by path, edits landing back through ordinary operations; markdown folder import mapping folders to chapters/books. **The Fragments bridge's proven shape pointed at a folder instead of a table** — real work, not new architecture (S5 guards the landings). **Design note (author, 2026-07-30 at the 13f sitting): the phase OPENS with the longer design conversation she named** — `notes/plans/phase-13h-folder-design-note.md` holds her verbatim floated shape (files STAY markdown, only an editor exposed; becoming a variorum post is a DELIBERATE conversion step) beside this row's standing bridge shape; her closing word: "I'll just need to decide more at that step to be honest." Sequencing hers the same sitting: 13g before 13h. *(Second design input the same day, from the release-strategy conversation — `notes/release-and-v1-strategy.md` §9: the ADJACENT MCP-door direction, inclination-level — an MCP server projected from the capability registry; AI writes as takes/comments through operations, insure-first; reads SCOPED by grants (share-from-app + TCC-style consent, journals excluded from "always", an "open book" switch for the trusting end); local LLMs first-class via the same server. Whether the MCP door is this phase's scope or its own row is the kickoff's call.)* | Nothing typed on either side is ever lost; round-trip byte stability per the 11b import pins | pending |
@@ -134,6 +110,6 @@ Phases may subdivide when their just-in-time plans are written; the table then g
 
 *(One paragraph per completed phase: what shipped, verification result, anything deferred and where it went. Phase N's closeout is Phase N+1's starting context.)*
 
-*[removed for publication]*
+- **Phase 13e (closed 2026-08-18):** Takes & block management — the fan and the block list got their missing hands. Opened 2026-08-16 at her invocation under `/architect-phase` (cast, her amendment: ONE Fable orchestrating session · fresh Opus implementers per batch, never unlimited subagents · Fable cold reviews with her granted latitude), and closed in ONE overnight run at her instruction ("go all the way through phase closeout… leave residuals for me at the top"). **NINE batches:** (1) E1 callout swatches + the system emoji picker at every door / E13 duplicate-LIVE-book-name refusal (case-insensitive, DOOR-level by her ruling — no schema, no repair) / E11 the book-icon ascent declared (P-1); (2) E4 reorder-takes through the ONE ordered-list resolver + the fan-copy FIX-2 rider / E15 the Takes board policy-routed / E3 her ⌘-click merge selection (a fanned pair carries to Write's ceremony — S4-23 untouched); (3) E5 take-to-block-below + E6 copy-all-takes & takes-to-blocks under **AR-1** — the phase's one propose-first fork, ruled MINT-COPY with the source take ARCHIVED after the architect independently verified the row-move road opens a repair-less I10 hole in the sync repair layer; (4) E2 block multi-select/multi-delete under ONE compound entry (+ the batch-4 pkill incident, self-reported, independently verified harmless, rule re-sharpened); (5) E12 — her canvas-jitter finding TRACED to the default `.local` coordinate space feeding each drag event the view's own already-applied offset (halving travel with an alternating stall, her words exactly), measured three ways and pinned with the numbers + the canvas bank on the no-position shape; (6) E7 margin-hover comments on the LEFT with the all-surfaces sweep proving no Mac straggler + a dormant 13b hover-reveal bug fixed at its mechanism + E8 the listings' tag faces (one chip mechanism); (7) E9 Replace-All-in-Every-Take on the apply-and-report shape / E10 the copy-door flush-first alignment + the slot-handle rider pinned via the batch-5 drag rig; (8) E14/**W26 — ⌃⌥⌘N summons the quick note from any app, SANDBOX-VERIFIED** (two real fires, no prompt at any point) + the note-window clip traced UPSTREAM (the pre-13k bar inserting itself a runloop after presentation) and pinned; (9) the round-B-caught **Keychain lazy-load fix** (AuthSession first-use off-main; EncryptionSession custody hops off-main, semantics byte-preserved) — the windowless-launch CAUSE closed. **THE A47c TRIPWIRE DISPOSITIONED from the architect's own experiments:** the covariate was SUITE CONTEXT (the TK2 cull is load-dependent on 26.5.x — TEXTKIT2_NOTES §3 entry); the pin re-shaped to the outcome contract; the Mac suite FULLY GREEN for the first time since 13g. **Ladders:** A (2 MINOR · 2 NIT · 1 SPECULATIVE → all fixed/dispositioned incl. the P-9 `TakesStructureController` extraction with the zero-test-edit parity proof; round-2 verified every fix) and B (1 MINOR → batch 9 · 4 NIT → adjudication fixes · 1 SPECULATIVE → her hand-check); ZERO BLOCKER/MAJOR all phase; three Fable review sessions; the no-fourth-review judgment recorded for her ratify. **KnownIssues:** five rows resolved/removed (fan-copy remap · Takes-board policy · takes-aware F&R half · copy-door flush · note-window clip) + the tripwire row removed by disposition + the windowless row's observational survivors re-owned to v1-release-readiness + the six-brains row cautioned (applyTypedPath). ZERO schema · ZERO `Sources/VariorumCore/Sync/` lines · marker 6 stands. **Final counts:** core 1254/135 · Mac **1413/256 FULLY GREEN** · mobile 314/60 · spine 51/7. QUESTIONS #56–#65 are her ratify list; her residuals live at the TOP of the plan file by her instruction. **MOBILE PARITY LINE:** the phone owes — the reorder-takes door (core op shared) · the duplicate-name guard at its two book doors · a `UIPasteboard` copy-all-takes twin · E5/E6 doors · the ●n comment-placement design call · swatches/picker at her word (MobileSoul PL-10 is the row); batch 9's fix reached the phone by construction (`Shared/`). `/Applications` refreshed at the closeout behind the A1 rail (her pre-authorization; her app closed). Handoff: `notes/handoffs/phase-13e-handoff.md`. Next at her word.
 
 *(All earlier closeouts — Phases 0 through 13k, 9b/9c/9d, the QoL round, every paragraph verbatim — live in `notes/PhaseCloseoutArchive.md`. The rule since 2026-08-01: this log holds ONLY the most recently closed phase; the closeout ritual moves the previous paragraph to the archive in the same commit that writes the new one.)*

@@ -8,6 +8,60 @@
 
 ## The pointer thread (superseded "Current phase" pointers)
 
+**→ PHASE 14D CLOSED 2026-08-16 — the Fragments batch, the bridge
+resumption, AND the release-readiness operationalia are ALL DONE (her
+mid-phase scope widening: "everything gets done and is working and
+ready for release from an email / fragments / account, etc.
+session"). NEXT: at her word, as always — the 13 family (13e takes &
+block management · 13i smart-book identity · 13j deletion & the
+Trash · 13l data safety · 13m the variorum edition), mobile Stage E /
+internal TestFlight (NOW UNBLOCKED — her standing ruling's condition
+is met), or the unslotted rows.** What 14d shipped, in one breath:
+SMTP + branded auth-email links live (Resend; the stargazing.tech
+`/auth/confirm` handler; her ratified copy) · signups OPEN (the
+14c-proven isolation + entitlement gate are the guard) · the 14b
+bridge pause ENDED (the staged re-push from truth drained — her
+journal history is `e1:` ciphertext on the satellite) · THE ONE-BATCH
+*[removed for publication]*
+password retired; journal-class E2EE live BOTH ends; ONE STARGAZING
+ACCOUNT — the Variorum-only framing deprecated at her word) · the
+delegated bridge sign-in door built (the 9c machinery pointed the
+other way) · the account-sheet unification · the round-trip proven
+both directions by her live check. Cold review: one round (the ruled
+cast), 2 doc-class MAJORs + 4 MINOR + 2 NIT, all landed. Residuals
+(hers, recorded in the plan): the stranger walk · secret-key
+rotation · DMARC · the Bridge-now relabel · the bridge auto-connect
+direction. The BINDING record is
+`notes/plans/phase-14d-fragments-batch.md`; the closeout log below
+has the paragraph; her checkpoint is
+`notes/handoffs/phase-14d-handoff.md`. The gate half ran
+architect-driven (her Round-7 delegation, each act announced): the
+born-multi-tenant mirror deployed (marker **5→6**), her corpus
+repushed exact + zero-plaintext + owner-uniform (7,278 rows, one
+round), the ruled two-layer security net made REAL by the live
+BYPASSRLS repair (obligation 2 answered NO — the three data RPCs
+re-owned to a non-bypass `variorum_definer` role), **all 13 live
+isolation obligations passing against a real provisioned stranger**
+(pull=0 both ways, foreign/NULL-owner refused, colliding id lands
+in-partition with her row byte-untouched, direct-table denial,
+own-row-only vault/entitlement, the truncate fence + scoped delete
+leaving her corpus intact), and the account-deletion door verified
+end to end. **Deferred to 14d by her ruling** (first needed post-14d,
+riding its SMTP + site work): the signup flip · stranger-onboarding
+validation · the phone re-onboard (its saved cursor is stale against
+the reset mirror — re-onboard is the clean fix; whether today's
+merged-tree install made it a marker-6 client is the mobile session's
+to confirm; until re-onboarded, phone writing stays local-safe but may
+not propagate) · the custom domain, which DISSOLVED (branded auth-email
+links come FREE via
+the template + `token_hash` road; she buys Pro for the server-side
+backups regardless). **14d now ABSORBS those operationalia** beside the
+Fragments touchpoints. The BINDING record is
+`notes/plans/phase-14c-multi-tenant.md` (the "GATE HALF — execution
+record" section); the closeout log below has the paragraph.
+
+*(Superseded 2026-08-18 at the 13e closeout.)*
+
 *(Moved verbatim from the master plan's "Current phase" section, in the order they sat there — newest first, per that section's convention, back through Phase 13b, then the standing Phase 12 deferral paragraphs and the early out-of-band records. The ACTIVE pointer always lives in `notes/DetailedPlanForPhases.md`.)*
 
 *(Superseded pointer, kept for the thread — the ACTIVE pointer through Phase 14d's run, superseded at 14d's close 2026-08-16; this pointer was itself rewritten at the 2026-08-14 kickoff from the 14c-close form below it:)*
@@ -567,6 +621,9 @@ combined feel pass still owed.)*
 ---
 
 ## Closeout log (every phase before the most recent)
+
+*[removed for publication]*
+
 
 *(One paragraph per completed phase: what shipped, verification result, anything deferred and where it went — moved verbatim from the master plan's closeout log, in that log's own order. The MOST RECENT phase's paragraph always lives in `notes/DetailedPlanForPhases.md` and moves here when its successor closes.)*
 
