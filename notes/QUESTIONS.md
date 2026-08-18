@@ -692,4 +692,30 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint.**
 
-*(Next free number: **#66**.)*
+## Phase 13j (2026-08-18) — batch 1's calls (the mini-round: your ⌘Z hint, copy truth, and deleting a paragraph)
+
+66. **2026-08-18 · Phase 13j batch 1 (J7 + J8 + J9 — the three things your first morning back turned up) · SEVEN entries.** The BINDING record is the 13j plan's batch-1 section, including the one precise trace you were owed before anything was built.
+
+    **WHAT SHIPPED, IN ONE SENTENCE:** selecting a paragraph and pressing Delete now deletes the paragraph; the refusals stopped guessing; and ⌘Z with nothing left to undo now points you at ⌥⌘Z instead of doing nothing.
+
+    **THE TRACE, first — because you asked what was actually wrong.** When you select a paragraph, you also select the newline at the end of it (that is what a triple-click and a drag-to-the-next-paragraph both do). That newline belongs to NO block — it is the seam between two of them — so the editor read your selection as "an edit that reaches across a boundary" and handed it to the two roads that handle those. Both of those roads require the selection to touch **at least two blocks' text**, and yours touched one block plus a seam. So both declined, and the last line in the chain spoke. **The open tail was NOT the cause** — that was the plausible guess in the write-up, and the trace ruled it out: a note with no unfinished paragraph refuses in exactly the same way. Both facts are held by tests.
+
+    **(a) A selection covering WHOLE paragraphs plus Delete now runs the same delete you get from ⌘-clicking blocks** — one ⌥⌘Z undoes the whole thing however many paragraphs went, and ⇧⌥⌘Z puts them back. **The alternative:** empty the paragraph's text and leave an empty paragraph sitting there (what happens today if you select the text WITHOUT the trailing newline).
+
+    **(b) It deletes a block WHATEVER it holds — takes included.** This follows your own unrestricted-delete ruling (#33(a): "the block goes, whatever it holds") and matches exactly what ⌘-click + Delete already does. **The alternative, and it is a real one:** refuse when a selected paragraph has takes, the way backspace-at-a-seam refuses ("a keystroke won't fold a fan away", your #34 ruling). The two rulings point different ways here, and the difference is that a MERGE folds takes into another block's text while a DELETE sets the block aside whole — undoable now, and in the tray once batch 2 builds it. **This one is genuinely yours to settle; it is one line of code either way.**
+
+    **(c) Selecting TWO whole paragraphs and pressing Delete now removes both.** It used to join them and leave one empty paragraph behind. Better, and it is what your ruling says — but it does change something that was ratified back in Phase 11, so it is named here rather than buried. **The alternative:** keep the join for two-or-more and let the new road handle only single paragraphs.
+
+    **(d) PARTIAL selections are untouched** — half of one paragraph through half of the next still joins the two, exactly as before. **The alternative:** none proposed; you ruled this half explicitly.
+
+    **(e) Every delete receipt stopped promising a tray that does not exist.** They now say only what is true — ⌥⌘Z puts it back while this session is open. **Batch 2 builds the tray and these are the lines that graduate**, so you will see them change again once the promise is real. **The alternative:** leave the copy and build the tray first.
+
+    **(f) The refusal that confused you now names ONE cause, and gives a way out of it.** Instead of "a locked take, unsynced text, or text that isn't a block yet", it says which of those it actually is — a locked take, a block that hasn't synced, the unfinished paragraph, a fan at the seam, an archived take, a comment, or a partly-covered block — each with its own road. **The alternative:** keep one line and make it vaguer still.
+
+    **(g) ⌘Z with nothing left in the text says so, and names the key that CAN help.** It never takes the key — ⌘Z that can undo text still does, every time. ⌘⇧Z got the same treatment for redo. It stays silent when there is nothing structural to point at, so a fresh note never lectures. **The alternative:** make ⌘Z itself do the structural undo when the text stack is empty (this would join two stacks your 2026-07-04 decision deliberately keeps apart).
+
+    **ONE THING LEFT ALONE, named rather than hidden:** the iPhone's two delete messages still promise the tray. They were out of this Mac batch's scope and the phone has no tray either; the parity row carries it.
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#67**.)*

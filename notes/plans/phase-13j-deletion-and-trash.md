@@ -507,7 +507,7 @@ server-shaped lands.
 
 | Batch | Scope | Status |
 |---|---|---|
-| 1 | **The mini-round:** J7 (⌘Z→⌥⌘Z status-line hint) · J8 (copy truth: the receipt's interim honesty + the diagnosing `.crossesBlockBoundary` refusal) · J9 (whole-block-selection delete → the delete compound; ONE precise trace FIRST) | pending — brief below |
+| 1 | **The mini-round:** J7 (⌘Z→⌥⌘Z status-line hint) · J8 (copy truth: the receipt's interim honesty + the diagnosing `.crossesBlockBoundary` refusal) · J9 (whole-block-selection delete → the delete compound; ONE precise trace FIRST) | **DONE 2026-08-18** — record below |
 | 2 | **The tray (J2) + the graveyard removal (J6):** the context-bar door ("⌫ N", nonempty-only) + the two-section tray panel with Put back; the global unplaced section leaves the Library surface (pool door dies with it); the delete receipt/help copy graduates to naming the real tray + its door (J8(a)'s completion) | pending |
 | 3 | **The lineage door (J3, as AMENDED round 5) + lens-fallback loudness (J5) + deleted-take recovery (round 5):** the context-menu item + ⌘K palette act, the read-only original peek with Put back / Open tray; **the History-face lineage row** (Write's CommitBar history + Takes' history sheet — the summoned "past" surface); the lens column's in-place archived-pick notice + one-click Restore; **the deleted-take restore op + deleted-takes query + the History face's quiet deleted-take rows with Put back** (zero schema) | pending |
 | 4 | **The defaults pair (J4/J4b):** divide default → `divideDuplicating` (the dormant core op wired); merge default → carry-all (composed from `mergeCeremony`, the phone's C5 the reference); "Divide with Ceremony…" ⌥⌘⇧D · "Merge with Ceremony…" ⌥⌘⇧M in Block menu + context menu + palette | pending |
@@ -593,3 +593,194 @@ the J9 trace, per-item what-shipped, pins named with their
 red-on-old evidence (behavioral revert), suite counts, anything
 unverified marked PENDING — then commit per convention. The
 architect verifies before relying on it.
+
+---
+
+## BATCH 1 RECORD — the mini-round (2026-08-18; fresh Opus implementer)
+
+**Scope built, to the letter of the sitting's rulings:** J7 (the
+⌘Z→⌥⌘Z hint), J8 (copy truth, both halves), J9 (whole-block
+selection + Delete → the delete compound, the ONE precise trace
+first). Zero schema; zero `Sources/VariorumCore/Sync/` lines;
+zero `Sources/` lines at all. No new capability-registry rows —
+none of the three adds a routed DOOR (J7 is a sign on an existing
+key; J9 is a keystroke road beside A7's and #34's, which are
+likewise undeclared by the same precedent; J8 is copy). No
+Release build, no `/Applications` refresh.
+
+### THE J9 TRACE (done and recorded BEFORE the fix, per the brief)
+
+**Executable, and it lives in the repo:**
+`WholeBlockDeleteTests.swift`'s two `trace…` tests, written and
+run green against the UNMODIFIED code before a line of the fix
+existed.
+
+**The mechanism, exactly.** A note of three blocks with an open
+tail renders `Alpha one.\nBeta two.\nGamma three.\ntail` — entries
+at `[0,10)`, `[11,20)`, `[21,33)`, separators at 10, 20, 33.
+Selecting the middle paragraph the way a triple-click or a
+drag-to-the-next-paragraph does yields `{11, 10}` — block 1 whole
+PLUS the separator at 20. That separator is owned by NO entry (the
+EditorDocument tiling doctrine), so `BlockRangeIndex.verdict`'s
+containment fails in both directions and answers
+`.refuse(.crossesBlockBoundary)` — correctly.
+
+**WHICH eligibility guard declined — both planners, the SAME two
+guards:**
+
+1. `touched.count >= 2` — the span intersects exactly ONE entry's
+   characters (`touched == [1]`; the intersection with Gamma is
+   `{21, 0}`, length 0, because the span's upper bound IS Gamma's
+   start);
+2. the contiguity guard `range.upperBound <= range(ofEntryAt:
+   last).upperBound` — 21 > 20, because the trailing separator sits
+   one past the last touched entry.
+
+`planCrossBlockEdit` and `planVisibleTakeEdit` both carry both
+guards, so both return nil, `planEmptyBlockDeletion` and
+`planSeamMerge` never see it (they require `range.length == 1`),
+and `shouldChangeText` falls to the final `else` and speaks.
+
+**THE OPEN TAIL IS NOT THE DECLINER.** The post-close write-up
+named it as the likely culprit; the trace ruled it out — a
+tail-free note declines identically on the same two guards
+(`traceTheOpenTailIsNotTheDecliner`). The "ends-exactly-at-a-block-
+start" suspicion was the *right family* and the wrong statement:
+the span does not end at a block start, it ends one PAST the last
+block's end, on a character no block owns.
+
+**No edges beyond the ruled shape were surfaced by the trace**, so
+the build proceeded per the brief. Two consequences of the ruled
+shape that ARE recorded for her (QUESTIONS #66(b)/(c)) rather than
+improvised around: what happens to a FANNED block on this road, and
+the two-whole-paragraph case that used to join.
+
+### WHAT SHIPPED
+
+**J7 — the hint.** `EditorUndoHint` (new, pure): the fire rule is
+`text stack empty ∧ structural stack non-empty`, per chord, with
+the structural side read from `session.undoMenuState` — the SAME
+projection the Edit menu's own enablement reads, so the sign and
+the door can never disagree. `EditorTextView.undoHintChord(for:)`
+(new, pure, `nonisolated`) classifies ⌘Z / ⌘⇧Z and deliberately
+does NOT claim ⌥⌘Z / ⇧⌥⌘Z — those are already the doors the hint
+points at. Wired in `performKeyEquivalent`, which **falls through
+to `super` on every path**: the chord is never consumed, and the
+integration pin asserts the return is `false`. The first-responder
+gate keeps a split window's second editor quiet (both editors see
+`performKeyEquivalent` and share the window's undo manager, so
+without it one press would speak twice). Spoken via `showStatus`,
+never `refuseFeedback` — nothing was refused, so nothing beeps.
+**The redo mirror shipped** (it landed under the same shape
+trivially, as the brief allowed). **The two stacks stay
+canon-separate** — this adds a sign at the junction, not a bridge.
+
+**J8(a) — the receipt's interim truth.** `BlockSelectionCopy
+.deletedNote` / `.deleteHelp` no longer promise "this note's
+deleted-blocks tray"; they say the true thing (⌥⌘Z, while this
+session is open). The two hand-written single-block receipts
+(Write's `deleteCaretBlock`, the Takes board's delete) now CALL
+`deletedNote(1)` instead of carrying their own copy of the
+sentence — one receipt, every delete door, so batch 2's graduation
+is one edit. A shipped singular/plural bug went with it: the old
+line said "Block deleted — ⌥⌘Z undoes it **in one go**" for a
+single block.
+
+**J8(b) — the refusal diagnoses.** `CrossBlockRefusal` (new,
+pure): seven causes, each traced to the guard that produces it,
+asked most-specific-first (seam-keystroke residue → open tail →
+not-editable → partial coverage). The copy is split into a
+`causeClause` (names ONE thing) and a `roadClause` (the way out) —
+which is what let the pin hold the actual promise: **a pin caught
+the first draft still guessing**, saying "an archived take or a
+comment", and the fix was to split `carriesUnshownText`'s two kinds
+into two causes rather than to weaken the pin. Both live doors onto
+the old line now diagnose (`shouldChangeText`'s final else, with
+the range and slots; `deleteInEveryTake`'s editability guard, which
+already knew which of the two it hit). The enum's own
+`message(for: .crossesBlockBoundary)` survives as the range-less
+fallback, pointed at the residual cause, guessing nothing.
+
+**J9 — the route.** `BlockRangeIndex.wholeBlockRun(covering:)`
+(new, pure, in `Shared/`): does this span cover a contiguous run of
+WHOLE entries plus at most one separator hanging off each end, and
+nothing else? Ranges of exactly ONE character are excluded by
+construction, so A7's empty-block carve and #34's texted-seam merge
+keep every case they ruled — including their fan and
+nothing-unshown authorizations, which this road must never route
+around (pinned). `planWholeBlockDeletion` is PURELY GEOMETRIC and
+carries no content guards at all — the 13c R3-1 lesson applied
+rather than re-learned (a plan-time read of `model.slots` is an
+enablement hint, never an authorization, because the projection is
+deliberately frozen for a typing burst); the authorization is
+`deleteBlock`'s own unrestricted door (#33(a)), and a sealed note
+refuses at the first leg through the operation (P-2). It runs the
+**shared** compound body extracted from `deleteSelectedBlocks`, so
+"routes to the 13e batch-4 delete compound" is literally true and
+the two doors cannot drift on the label ("Delete Blocks"), the
+compound, or the receipt. Placed in the arm AFTER both seam carves
+and BEFORE merge-then-edit. Type-overs are excluded
+(`replacement.isEmpty`): a replacement spanning whole blocks keeps
+its existing road, since a delete compound would drop the typed
+characters.
+
+### PINS + RED-ON-OLD EVIDENCE (behavioral revert, checksummed)
+
+Two new suites, **20 tests**: `WholeBlockDeleteTests` (10),
+`UndoHintAndRefusalTests` (10).
+
+| Revert | Pins that went RED | Restored |
+|---|---|---|
+| J9's routing arm disabled (`else if false, let whole = …`) | `aWholeParagraphSelectionDeletesTheBlock` (2 issues — texts unchanged; the REFUSAL spoke instead of the receipt) · `theRouteIsOneUndoEntryAndItRoundTrips` (2 — `stack.topLabel` nil) · `aRunOfWholeParagraphsGoesUnderOneEntry` (2). The four geometry pins and the two partial/type-over pins correctly stayed GREEN (pure brain + unchanged roads). | `EditorViewModel.swift` restored, checksum `16143846a0…` identical to pre-revert |
+| J7's hint arm disabled (`if false, let chord = …`) | `commandZAfterAStructuralChangeSpeaksTheHintAndKeepsTheKey` | `EditorTextView.swift` restored, checksum `a4ab58f6c4…` |
+| J8(a) copy reverted to the tray-naming line | `noDeleteReceiptPromisesATrayThatDoesNotExistYet` (2 issues) | `OpsRefusalCopy.swift` restored, checksum `d07609dec6…` |
+| J8(b) refusal reverted to the shipped three-cause guess | `aPartialCrossBlockSelectionSpeaksTheDiagnosis` | `EditorViewModel.swift` restored, same checksum |
+
+The two `trace…` tests pass on BOTH sides deliberately: they
+characterize the mechanism (the verdict and the two planners'
+declines), which the fix does not change — it adds a road beside
+them. They are the permanent record of why, not a pin on the fix.
+
+### SUITE COUNTS (every "Test run with N tests" line confirmed)
+
+- core `swift test` — **1254 tests / 135 suites PASSED** (baseline exact)
+- Mac (`-project` invocation) — **1433 tests / 258 suites PASSED,
+  FULLY GREEN, zero reds** (baseline 1413/256 + this batch's 20
+  tests in 2 suites)
+- tutorial spine, by TYPE name (`TutorialBookShapeTests`,
+  `TutorialDoorTests`, `TutorialWritingActsTests`,
+  `TutorialTakesActsTests`, `TutorialStructureActsTests`,
+  `TutorialLookingActsTests`, `TutorialLibraryActsTests`) —
+  **51 tests / 7 suites PASSED** (baseline exact)
+- mobile (`VariorumMobile`, iPhone 16e) — **314 tests / 60 suites
+  PASSED** (baseline exact). Run because `Shared/EditorBrain/
+  BlockRangeIndex.swift` was touched; the addition is a pure
+  function no phone code calls yet.
+
+### FOR THE ARCHITECT / HER
+
+- **QUESTIONS #66** logged (seven lettered entries, her format):
+  the trace's answer, and the two calls that are genuinely hers —
+  **(b)** whether the whole-block road may delete a FANNED block
+  (built to J9's letter + #33(a)'s unrestricted delete; the
+  alternative is #34's keystroke rule, "a keystroke won't fold a
+  fan away", and it is one guard line either way), and **(c)** the
+  two-whole-paragraph case, which used to JOIN and leave an empty
+  block and now deletes both (the ruled letter, but it supersedes
+  a Phase-11-ratified outcome, so it is named).
+- **PARITY / batch 2 hand-offs.** (i) The iPhone's two delete
+  receipts still promise the tray (`MobileStructural.swift`,
+  `MobileBlockMenu.swift`) — deliberately out of this Mac batch's
+  scope, and the phone has no tray either; a parity-ledger row.
+  (ii) **Batch 2's J8(a) graduation is now ONE edit**:
+  `BlockSelectionCopy.deletedNote` + `.deleteHelp` are the only
+  places the sentence lives. (iii) `BlockRangeIndex.wholeBlockRun`
+  is in `Shared/`, so the phone can adopt the same road when its
+  turn comes.
+- **Environment.** Her real-store instance (PID 13761) was live at
+  batch start and was NEVER touched — no kill, no quit, no
+  `/Applications` write, no Release build. It was gone by the time
+  the full-suite runs began (her own act; observed, not caused).
+  Nothing else was running.
+- **Nothing PENDING** — every claim above is from a run in this
+  session.
