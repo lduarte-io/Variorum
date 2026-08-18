@@ -3242,3 +3242,63 @@ second half): a FRESH Fable cold reviewer over the phase since round
 A closed (`cc9cd5e..d1cd19d` — the adjudication pass, batches 5–8,
 the A47c disposition), `notes/REVIEW_PROMPT.md` VERBATIM, zero
 framing. Next free QUESTIONS: **#65**.
+
+---
+
+## LADDER ROUND B (2026-08-18 — fresh Fable cold reviewer over `cc9cd5e..d1cd19d` + phase-wide; REVIEW_PROMPT verbatim)
+
+**Verdict: ZERO BLOCKER / ZERO MAJOR — 1 MINOR · 4 NIT · 1
+NIT-SPECULATIVE**, with a clean bill that independently corroborated
+the two explicit checklist items (the A47c disposition's evidence
+chain — including WHY the re-shaped pin keeps full red-on-revert
+power — and the W26 sandboxed claim, verified by the reviewer's own
+`codesign` read + unified-log pull matching PIDs and timestamps).
+
+**Findings + adjudications (architect, spec-anchored):**
+- **B-1 [MINOR] — the KnownIssues windowless-launch row's FIX half is
+  unbuilt** while the plan declared the build half complete: the row
+  promises "13e builds the lazy-load fix" (the 14b-captured
+  main-thread `SecItemCopyMatching` in `AuthSession.init`, plus the
+  14b cold pass's settings-cadence sites in `EncryptionSession`), and
+  zero auth/keychain lines exist in the phase. The reviewer is right
+  and the "all eight batches done" line was premature. **ADJUDICATED:
+  BUILD IT — batch 9**, the recorded fix shape verbatim (lazy/off-main
+  first-use Keychain load; the injected-store pin recording the
+  calling thread, red on today's code). If the E2EE custody half
+  proves riskier than its recorded shape, it lands partial with the
+  remainder re-owned BY NAME — never a silent clear.
+- **B-2 [NIT] — bulk tag-apply half-acts nondeterministically** on a
+  mid-batch post-gone refusal. **ADJUDICATED: align to the REMOVAL
+  sibling's deliberate forgiving-batch semantics** (not A-1's
+  all-or-nothing — tagging is idempotent and its sibling already
+  chose forgiveness on the record): deterministic order, skip the
+  vanished, apply the rest, REPORT the partiality. Fix + pin
+  (architect's own).
+- **B-3 [NIT] — `GlobalHotKeyCenter.install` idempotence keyed on a
+  false-empty corner.** Hardening only (unreachable while the parse
+  pin is green — the reviewer's own hollow-pin analysis): guard on
+  the handler's existence. No pin owed. (Architect's own.)
+- **B-4 [NIT] — fake-system hot-key installs log
+  success-shaped lines indistinguishable from real ones**, and
+  log-reading is this feature's recorded verification method.
+  **FIX: name the system in the line.** (Architect's own.)
+- **B-5 [NIT·SPECULATIVE] — #64(d)'s closed-window summon promise
+  rests on a captured `OpenWindowAction`'s validity; no failure
+  mechanism traceable.** DISPOSITION: no code change (the
+  hallucination guard); a 30-second hand-check joins her checklist
+  (close every window → press ⌃⌥⌘N).
+- **B-6 [NIT] — record precision:** (a) the collision-sweep comment's
+  pin name corrected to the real test name (architect's own); (b)
+  the #64 header/record count wording reconciled in QUESTIONS; (c)
+  the closeout sweeps ALL KnownIssues dispositions consistently —
+  noted as a closeout duty (it already was one).
+
+**Ladder-closure note (recorded honestly as an architect judgment for
+her review):** round B closed with zero BLOCKER/MAJOR; the B-2/3/4/6
+fixes are adjudication-sized and land with the architect's own
+verification runs; B-1's batch 9 lands with its own pins and the
+architect's spot-checks. NO additional cold re-review round is spawned
+for these — the round-A precedent applied symmetrically, inside her
+granted "couple of reviews" budget (three Fable review sessions ran
+this phase: A, A-round-2, B). If she wants a fourth pass over batch 9
++ the B-fixes at her return, it is one word.
