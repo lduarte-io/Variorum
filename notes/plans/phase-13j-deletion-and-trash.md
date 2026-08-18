@@ -265,7 +265,16 @@ launched at kickoff (19:27 UTC, background) — **VERIFIED GREEN:
 1254 tests / 135 suites passed (33.9s), the 13e final exactly**;
 the Mac/spine suites run at the sitting's first natural break so
 the test host's windows don't flash over her live sitting — both
-before any build work, either way.
+before any build work, either way. **Mac suite VERIFIED GREEN
+post-sitting: 1413 tests / 256 suites, TEST SUCCEEDED (192s) —
+the 13e final exactly, fully green, zero reds; the tutorial
+spine's suites (`TutorialWalkTests.swift` types) ran green INSIDE
+that full run — verified by inclusion** (batches still quote the
+spine separately by TYPE name per the standing loop). Mobile
+baseline launched from the MAIN tree (the `mobile` worktree
+branch sits behind main since 13e landed on main; scheme
+`VariorumMobile`, iPhone 16e sim) — result recorded when it
+lands.
 
 **Her opening note (verbatim):** "I will add as a note that i'm
 here for the design sitting. let's answer all the questions that
