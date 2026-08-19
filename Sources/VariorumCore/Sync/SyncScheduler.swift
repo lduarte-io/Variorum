@@ -154,6 +154,38 @@ public actor SyncScheduler {
     private func runOneRound() async {
         status.isSyncing = true
         publishStatus()
+        // 13j ladder B (B2): the LEDGER RECONCILIATION runs BEFORE the
+        // round's drain — a returner's outbox is screened against other
+        // devices' purges before anything pushes, so a never-pushed CHILD
+        // of a meanwhile-purged family (the one id no ledger can name) is
+        // swept with its family instead of landing as a permanent mirror
+        // orphan under a missing parent — the poison-row jam every peer's
+        // pull would then stall on forever. The round's own pull→push
+        // order (A3) is untouched: this is a purge-bookkeeping read+local
+        // drop, never engine work. The SAY-SO floor gate (round 10) now
+        // refuses the WHOLE round — outbox intact, cursor unmoved, the
+        // §12 grammar — instead of speaking only after one drain already
+        // ran; any other pre-pass fault (offline, keys) is left for the
+        // round's own error posture, which sees the same transport.
+        if let janitor {
+            do {
+                _ = try await janitor.reconcileLedger()
+            } catch let error as SyncError {
+                if case .deviceLeftBehindReloadRequired = error {
+                    status.lastError = String(describing: error)
+                    status.lastErrorIsOffline = false
+                    status.pendingPushCount =
+                        (try? await outboxCount()) ?? status.pendingPushCount
+                    status.isSyncing = false
+                    status.roundsCompleted += 1
+                    publishStatus()
+                    return
+                }
+                // Anything else: the round's own attempt decides.
+            } catch {
+                // Transport/keys faults: the round's own attempt decides.
+            }
+        }
         do {
             // Pinned: pull → push (A3).
             _ = try await engine.pull()

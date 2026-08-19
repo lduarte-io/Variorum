@@ -78,6 +78,30 @@ extension Operations {
         }
     }
 
+    /// **The restore-side belt (13j ladder B, B1):** a restore door that
+    /// flips a tombstone back VOIDS any live intent naming the row, inside
+    /// the restore's own transaction — so a later re-delete can never be
+    /// claimed by a leftover intent, and the janitor's sweep-time staleness
+    /// check becomes the second net rather than the only one. The voided
+    /// intent is an ordinary tombstoned row: the outbox trigger captures
+    /// it, so peers stop fencing too. Quiet by design — restoring a row
+    /// with no intent standing writes nothing.
+    ///
+    /// The residual, traced and accepted (the 6b response's race
+    /// endpoints): a restore landing on a device that has not yet PULLED
+    /// the intent voids nothing here — the sweep-time staleness check
+    /// covers that device's own janitor, and the voiding device's
+    /// tombstone converges the rest.
+    func voidPurgeIntents(_ db: Database, table: String, rowID: String) throws {
+        let stamp = DateFormatter.variorumISO8601.string(from: date.now)
+        try db.execute(
+            sql: """
+                UPDATE purge_intent SET deleted_at = :stamp, updated_at = :stamp
+                WHERE table_name = :table AND row_id = :row AND deleted_at IS NULL
+                """,
+            arguments: ["stamp": stamp, "table": table, "row": rowID])
+    }
+
     /// The target must be purgeABLE: tombstoned for the four Trash kinds,
     /// a QUIET savepoint for commit_point. Returns whether an intent
     /// should be MINTED — a row already gone with any intent standing

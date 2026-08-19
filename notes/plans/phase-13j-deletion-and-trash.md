@@ -4039,6 +4039,218 @@ story; unreachable-until-purge exactly like its family. The
 reviewer makes the final call with both positions in hand; the
 spec outranks all of us.
 
+### LADDER B ROUND 1 — THE REVIEWER'S FIX PASS (2026-08-19; the same Fable session, authorized per the cross-model flow; the Sync/ rider satisfied by the seat)
+
+**FINAL CALL PER FINDING, then what was built.** Every implementer
+constraint was weighed and adopted unless noted; the author's round-11
+ruling governs B3; the spec governs B5.
+
+- **B1 [BLOCKER] — CONFIRMED; FIXED with THREE nets, each proven
+  independently load-bearing by its own drill.** (1) **Sweep-time
+  staleness** (`PurgeJanitor.familyVerdict`, inside the family's one
+  read transaction per the 6b constraint): a family row of the four
+  tombstoned kinds that EXISTS and is LIVE reads the family `.stale` —
+  never purged, and the standing intent is COMPLETED without being
+  honored (`completeStaleIntents`; the tombstone travels, so peers stop
+  fencing too). Exempt exactly as constrained: `commit_point` is never
+  liveness-checked (no tombstone — a naive check would void every
+  pruning intent; `pruningMintsOnlyEligible…` stands as that guard, green
+  throughout), and the stranded-origin SUBTREE (the origin block + its
+  own live takes, identified through `Expansion.strandedOriginals`) is
+  live BY DESIGN and rides per round 8b. `rowExists → skip` keeps its
+  already-purged meaning. (2) **The restore-side belt**
+  (`Operations.voidPurgeIntents`): all six tombstone-flip doors —
+  `restoreBlock` / `restoreVariant` / `restoreContainer` /
+  `restoreReading` / `revertDeleteBlock` / `revertDeleteVariant` — void
+  live intents naming the row they revive, inside the restore's own
+  transaction (ordinary write; the outbox trigger captures it), so a
+  later re-delete can never be claimed by a leftover intent. Cascade
+  victims carry no intents of their own (an intent is minted per TRASH
+  ROW; a cascade victim never lists there) — stated at `restoreContainer`.
+  (3) **Stamp-aware fences** at all NINE listing sites (Trash ×4 +
+  strandedOriginals' family check, trayBlocks, trayCounts, deletedPosts,
+  deletedReadings, deletedTakes): a LIVE intent fences; a COMPLETED one
+  fences only rows it actually covered (`pi.deleted_at >= row.deleted_at`
+  — the purged-elsewhere ledger lag keeps fencing, proven by
+  `aCompletedIntentStillFences…`), and a VOIDED intent from before a
+  re-delete never hides the fresh tombstone's row. **Residual, recorded
+  (the 6b response's race endpoints, both coherent):** a cross-device
+  restore that lands where the intent has not yet arrived voids nothing
+  there; if the row is then re-deleted before ANY sweep or the void's
+  arrival, the still-live intent claims the fresh tombstone — narrow
+  (one pull gap), self-healing on either device's next sweep or pull,
+  and honestly unpinnable without a cross-device clock oracle.
+- **B2 [MAJOR] — CONFIRMED; FIXED as the implementer shaped it:** the
+  ledger scan extracted (`PurgeJanitor.reconcileLedger`) and run by the
+  scheduler BEFORE each round's pull→push (A3 untouched — the pre-pass
+  is purge bookkeeping + a local drop, never engine work; `sweep()`
+  still runs it too, idempotent, so standalone callers are whole). The
+  returner's never-pushed child dies with its family before the drain
+  can push it. **The content-discarding consequence is named out loud**
+  (memo §6c item 1, author-visible): a returner's unpushed writing UNDER
+  a purged family is discarded with the family — the purge-wins
+  doctrine's letter. The say-so floor gate now refuses the WHOLE round
+  (outbox intact, cursor unmoved — strictly better than speaking after
+  one drain already ran); any other pre-pass fault defers to the round's
+  own error posture. The server-side parent-join fence was NOT taken
+  (agreed with the implementer: domain knowledge stays off the dumb
+  mirror, SyncSpec §2). The poison-row KnownIssues row needs no edit:
+  the constructible source this finding named is CLOSED by the pre-pass,
+  so its "rare by construction" premise stands again.
+- **B3 [MAJOR] — CONFIRMED; BUILT to her round-11 ruling exactly:** the
+  per-FAMILY discriminator lives in `familyVerdict` — a family whose
+  EVERY row is `sync_row_seq`-absent is `.eligibleLocalOnly`: local
+  physical removal with NO `executePurge` and NO ledger entry (no peer
+  ever saw it; nothing to strand or fence); one synced member ⇒ the
+  whole family `.deferred` (family-completeness); the outbox never
+  disqualifies a local family (the never-configured install's rows sit
+  there forever by construction; `deleteLocal` sweeps them with the
+  family). The transported sweep no longer ends at horizon 0 — local
+  families purge there too. **`LocalPurge`** (Sync/, beside the janitor,
+  sharing its collection/verdict/family statics — ONE rule, two
+  cadences) is the transportless sweep the never-signed-in install
+  runs: wired in `AppServices` (Shared/ — both platforms) at launch +
+  hourly, gated per-tick on `SyncSession.isConfigured` so two sweeps
+  never race, plus once after every purge-door confirm so Delete Now
+  means what it says the moment she reads it; savepoint pruning mints by
+  the same brain there, so a local install's quiet history prunes too.
+  **The receipts are conditional and true for BOTH populations**
+  (`RecoveryPath.deleteNowReceipt/emptyTrashReceipt(_:synced:)` — the
+  synced sentence unchanged; the local one promises the app's OWN
+  cleanup and no timing it cannot keep). **One constraint of my own,
+  stated:** an intent collected through the local arm (never accepted by
+  the server) may only ever drive a LOCAL-ONLY purge — a synced family
+  waits for its intent to PUBLISH first, so a peer that pulls the intent
+  still learns "this is going" before it goes (memo §4a's letter
+  preserved). **And one fence added before it could bite (the A4
+  lesson):** `LocalPurge` binds its store EXPLICITLY (`AppSession` passes
+  its own database) — a physical-removal pass must never resolve the
+  ambient installed database, which in a test host is the DEV STORE.
+- **B4 [MINOR] — CONFIRMED; FIXED under the implementer's ORDER-BY
+  condition:** each Trash arm now carries `ORDER BY … \(dir), id \(dir)
+  LIMIT n` in the CALLER'S direction (the top-N-over-top-Ns equivalence
+  holds only when the arms sort the way the merge does — the naive
+  DESC-limit under oldest-first returns the newest rows re-sorted, and
+  drill G's red shows exactly that shape); `strandedOriginals` gained
+  additive `oldestFirst`/`limit` (defaults keep every caller
+  byte-identical); the tiebreak coherence (each arm's second key IS
+  `TrashItem.id`) is stated at the one place it must survive; the
+  `window + 1` probe row survives per-arm; the false "bounded by
+  `limit`" docstring now tells the truth (the implementer's own
+  correction, landed with the fix).
+- **B5 [MINOR] — CONFIRMED; the OUTCOME FINAL CALL goes to the
+  spec-anchored position: an expired or intent-named family's original
+  leaves BOTH tray buckets.** Weighed with both positions in hand:
+  batch 6's return-to-forever reading keeps every live block on a
+  surface, but under round 8b + memo §4c the janitor's family expansion
+  STILL takes a post-window original with its family — so "Preserved
+  originals (forever)" would be a label on a row the sweep is about to
+  take, which is precisely the trust violation her round-8b ruling
+  exists to prevent, now reborn in the post-window gap. The uniform
+  Trash story (round 3) decides it: the original rode a VISIBLE clock
+  for its full 30 days and leaves every surface exactly when the clock
+  said — unreachable-until-purge exactly like its family, which is not
+  the round-2 orphan class (that class was a live block with no surface
+  and NO STORY; this one's story was told, on a countdown, for a month).
+  Built in SQL at the one home (`originFamilyClocks` now answers FATES —
+  `.counting(clock)` / `.gone` — mirroring `strandedOriginals`' window
+  AND intent fences exactly; the tray's adopt splits three ways and both
+  readers read one truth), per the implementer's SQL-not-adopt seam
+  correction in spirit: the rule lives in the query, the panel only
+  renders it.
+- **B6 [MINOR] — the KnownIssues row LANDED** ("Purge janitor sweep is
+  corpus-shaped per clean round", owner **12 (Hardening)** — the
+  bridge-sweep row's own owner and class), naming the four unindexed
+  tombstone scans, the commit_point aggregation, the local road's hourly
+  collection, and the remedy sketch (partial `deleted_at` indexes,
+  sweep throttle, a dirty flag).
+- **B7 — RECORDED as agreed:** the reonboard road's re-offer corner
+  (below-floor purged rows re-insert at scale once pruning exists) joins
+  the pruning rider's owed list in the memo's §6b, beside the
+  fresh-device refinement; the rider chooses adopt-server-state vs
+  ledger-screening.
+- **B8 [NIT] — FIXED:** collection takes `deleted_at < :cutoff` —
+  strictly complementary to every listing's `>=`; the boundary stamp
+  belongs to the thing being recovered, as `TrashWindow`'s own doc line
+  says.
+- **B9 [NIT] — FIXED, both halves + the implementer's extra:** the
+  scan-point non-completeness comment sits on the sweep loop; the
+  processed-target dedupe makes a double-collected root one purge and
+  ONE count (no second executePurge, no wasted ledger seq).
+- **B10 [NIT] — the arm ADDED, enqueued like its three siblings** (the
+  architectural-finding rules: no pin possible for an unreachable state;
+  the traced mechanism — the DELETE-fired SET-NULL-under-ABORT wedge on
+  a dirty surviving block — and the justification live in the code
+  comment at the arm).
+- **B11 [NIT] — the comment corrected** (an explicit JSON null arrives
+  as SQL NULL, not the parameter's default; the RPC's null-guard is what
+  makes the behavior right).
+- **The closeout reminders stand** for the closeout ritual: the
+  Tombstone-GC row's S4-28.3 half (bulk "delete other takes") needs its
+  own owner at resolution; `purged_row`'s indefinite server-side id
+  retention earns a disclosure line beside the two recorded ones; the
+  canon deltas (batch 5's two + the disclosure lines + this pass's §9
+  additions ride the phase delta).
+
+**PINS + REVERT EVIDENCE (behavioral revert, checksummed — every restore
+verified byte-identical by `shasum -a 256` against the pre-drill hash).**
+13 new core tests: `PurgeOpsTests` +4 (the belt across all six doors ×2
+tests · the re-delete listing · the completed-intent fence guard),
+`PurgeConvergenceTests` +6 (B1's two doors · B3's two · B2's
+scheduler-road orphan pin · B9's dedupe), `TrashAndArchiveTests` +3
+(B4's direction-under-limit · B5's two fate pins). No net-new Mac tests;
+two `TrashPurgeDoorsTests` pins GRADUATED to the stronger round-11 truth
+(annotated in place — intent completed + bytes gone + the local wording,
+with the synced arm asserted as a unit), and
+`TrashSurfaceTests`/`TutorialWalkTests` took signature-only annotated
+edits (`originFamilyClocks` gained `now:`; the snapshot field renamed).
+
+| Drill | Reverted mechanism | Pins RED | Restored (sha-256 first 12) |
+|---|---|---|---|
+| **A** | sweep-time staleness suppressed (`if false,` on the liveness arm) | `aPeerPutBackBeforeTheIntentArrivesSurvivesTheSweep` (5 issues — the live block purged from mirror + both stores); `anUndoneDeleteSurvivesItsOwnStaleIntent` stayed GREEN, proving the belt is an independent net | `PurgeJanitor.swift` → `c8c0d74a374d` (identical) |
+| **B** | the belt emptied (`voidPurgeIntents` early-return) | `everyRestoreRoadVoidsALiveIntentNamingItsRow` (2) · `theUndoRoadVoidsALiveIntentToo` (1) · `aReDeletedRowListsInTheTrashDespiteItsVoidedIntent` (2) | `Operations+Purge.swift` → `22ca1a0e8757` (identical) |
+| **C** | the stamp-aware fence reverted at the two arms the pin reads | `aReDeletedRowListsInTheTrashDespiteItsVoidedIntent` (2 — Trash AND tray hid the re-deleted row); `aCompletedIntentStillFences…` stayed green (the any-state fence also fences — the claim the stamp form must preserve) | `Trash.swift` → `527075a4f6fe`, `PoolAndTray.swift` → `07c14c845ba3` (both identical) |
+| **D** | the local arm disabled (`.eligibleLocalOnly` → `.deferred`) | `aNeverSyncedFamilyPurgesLocallyWithNoLedgerAndNoMirrorContact` (6 issues — nothing purged, outbox kept, no local completion, both roads dead) | `PurgeJanitor.swift` → `c8c0d74a374d` (identical) |
+| **E** | the scheduler pre-pass removed (the OLD order — drain first) | `aReturnersUnpushedChildNeverLandsAsAMirrorOrphan` ("never a mirror orphan" — the comment landed on the mirror under a missing parent) | `SyncScheduler.swift` → `285516385a71` (identical) |
+| **F** | the processed-root dedupe removed | `aDoubleCollectedRootPurgesOnceAndCountsOnce` (familiesPurged 2 ≠ 1) | `PurgeJanitor.swift` → `c8c0d74a374d` (identical) |
+| **G** | B4's direction reverted (arms hard-code DESC while limiting) | `oldestFirstWithALimitReturnsTheTrueOldestRows` (returned ids 3,4 — the newest two re-sorted: the exact silent-wrongness the condition names) | `Trash.swift` → `527075a4f6fe` (identical) |
+| **H** | B5's fate classification reverted (always `.counting`) | `anExpiredFamilysOriginalLeavesBothTrayBucketsAndTheTrash` · `anIntentNamedFamilysOriginalLeavesTheTrayWithItsBlocks` (both `.counting ≠ .gone`) | `Trash.swift` → `527075a4f6fe` (identical) |
+
+(B4's SQL-bounding half and B3's new road are feature-shaped rather than
+defect-shaped — their red-on-old is the drills above where a defect form
+exists (D, G); the A6-discipline bounding itself is the architectural
+class, justified in the docstring.)
+
+**THE DEPLOY-WINDOW CHECKLIST IS UNCHANGED:** every fix is CLIENT-side —
+`Server/supabase/10_phase13j_purge.sql` was NOT touched (the B2 fix
+deliberately keeps family/parent knowledge off the dumb mirror). The
+marker-7 build pending the window now carries the B1/B2/B3 nets; nothing
+new is owed mirror-side.
+
+**MOBILE:** `Sources/` and `Shared/` were touched — the phone inherits
+the belt, the fences, the verdict, `LocalPurge`, and the
+`AppServices`-wired local cadence by construction; the receipts'
+conditional wording is Mac-side (`RecoveryView`), and the phone's owed
+Trash face carries its own twin per the standing parity line. Mobile
+suite run below.
+
+**COUNTS (all from runs in this session, every "Test run with N tests"
+line confirmed):** core `swift test` — **1348 tests / 141 suites PASSED,
+FULLY GREEN** (baseline 1335/141 + 13 in 3 existing suites) · Mac
+(`-project` invocation) — **1545 tests / 269 suites PASSED, FULLY
+GREEN, zero reds** (baseline exact — no net-new Mac tests; annotated
+pin edits only) · tutorial spine, by TYPE name (the eight suites) —
+**63 tests / 8 suites PASSED** (baseline exact) · mobile
+(`VariorumMobile`, iPhone 16e) — **314 tests / 60 suites PASSED**
+(baseline exact; run because `Sources/` and `Shared/` were touched —
+the phone inherits the belt, fences, verdict, `LocalPurge` and the
+AppServices local cadence by construction). **Environment, honestly:**
+no Variorum instance existed at any suite run (`pgrep` checked; the
+one `pgrep -fl xcodebuild` hit throughout was a FRAGMENTS-project
+watchdog SHELL whose script text mentions xcodebuild — no actual
+xcodebuild was running); no kill, no quit, no Release build, no
+`/Applications` write, no live-mirror contact, no push.
+
 ## Batch 7 brief — the tutorial's deletion chapter + the note-history brief (a FRESH Opus implementer; self-contained)
 
 **Read first, in full:** `CLAUDE.md` (+ the canon it loads); this

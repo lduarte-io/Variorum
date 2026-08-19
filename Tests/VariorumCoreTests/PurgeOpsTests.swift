@@ -341,4 +341,129 @@ struct PurgeOpsTests {
                     "the original is gone with its family")
         }
     }
+
+    // MARK: - 13j ladder B (B1): the restore-side belt + the stamp-aware fence
+
+    @Test func everyRestoreRoadVoidsALiveIntentNamingItsRow() throws {
+        try withOperations { ops, db in
+            // Block: delete → intent → restoreBlock voids it.
+            let post = try ops.createPost(title: "note", profile: .generic)
+            let made = try ops.newBlock(in: post.id, text: "prose", at: .end)
+            _ = try ops.newBlock(in: post.id, text: "the rest", at: .end)
+            try ops.deleteBlock(made.block.id)
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "block", rowID: made.block.id)])
+            _ = try ops.restoreBlock(made.block.id)
+            #expect(try db.fetchInt(
+                """
+                SELECT COUNT(*) FROM purge_intent
+                WHERE table_name = 'block' AND row_id = ? AND deleted_at IS NULL
+                """, [made.block.id]) == 0,
+                    "a restored block voids the live intent naming it")
+
+            // Take: delete → intent → restoreVariant voids it.
+            let extra = try ops.branchVariant(made.block.id, from: made.variant.id)
+            try ops.deleteVariant(extra.id)
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "variant", rowID: extra.id)])
+            _ = try ops.restoreVariant(extra.id)
+            #expect(try db.fetchInt(
+                """
+                SELECT COUNT(*) FROM purge_intent
+                WHERE table_name = 'variant' AND row_id = ? AND deleted_at IS NULL
+                """, [extra.id]) == 0)
+
+            // Note: delete → intent → restoreContainer voids it.
+            try ops.deleteContainer(post.id)
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "container", rowID: post.id)])
+            try ops.restoreContainer(post.id)
+            #expect(try db.fetchInt(
+                """
+                SELECT COUNT(*) FROM purge_intent
+                WHERE table_name = 'container' AND row_id = ? AND deleted_at IS NULL
+                """, [post.id]) == 0)
+
+            // Book: delete → intent → restoreReading voids it.
+            let book = try ops.createReading(name: "book", kind: .curated)
+            try ops.deleteReading(book.id)
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "reading", rowID: book.id)])
+            try ops.restoreReading(book.id)
+            #expect(try db.fetchInt(
+                """
+                SELECT COUNT(*) FROM purge_intent
+                WHERE table_name = 'reading' AND row_id = ? AND deleted_at IS NULL
+                """, [book.id]) == 0)
+        }
+    }
+
+    @Test func theUndoRoadVoidsALiveIntentToo() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "note", profile: .generic)
+            let made = try ops.newBlock(in: post.id, text: "prose", at: .end)
+            _ = try ops.newBlock(in: post.id, text: "the rest", at: .end)
+            try ops.deleteBlock(made.block.id)
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "block", rowID: made.block.id)])
+            // The ⌥⌘Z inverse — the single-device door of the B1 hole.
+            try ops.revertDeleteBlock(made.block.id)
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM block WHERE id = ? AND deleted_at IS NULL",
+                [made.block.id]) == 1, "the undo brought the block back")
+            #expect(try db.fetchInt(
+                """
+                SELECT COUNT(*) FROM purge_intent
+                WHERE table_name = 'block' AND row_id = ? AND deleted_at IS NULL
+                """, [made.block.id]) == 0,
+                    "…and the leftover intent can never claim it")
+        }
+    }
+
+    @Test func aReDeletedRowListsInTheTrashDespiteItsVoidedIntent() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "note", profile: .generic)
+            let made = try ops.newBlock(in: post.id, text: "prose", at: .end)
+            _ = try ops.newBlock(in: post.id, text: "the rest", at: .end)
+            try ops.deleteBlock(made.block.id)
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "block", rowID: made.block.id)])
+            _ = try ops.restoreBlock(made.block.id)  // voids the intent
+            try ops.deleteBlock(made.block.id)       // a FRESH, ordinary delete
+
+            // The stamp-aware fence (B1): the voided intent predates the
+            // fresh tombstone, so the row lists — an any-state fence would
+            // hide it forever, an unrecoverable-but-alive-intent limbo.
+            let rows = try db.read {
+                try Queries.trash($0, now: harnessNow, kinds: [.block])
+            }
+            #expect(rows.map(\.id) == [made.block.id],
+                    "a re-deleted row lists on its fresh 30-day clock")
+            let tray = try db.read {
+                try Queries.trayBlocks($0, postID: post.id, now: harnessNow)
+            }
+            #expect(tray.map(\.blockID) == [made.block.id])
+        }
+    }
+
+    @Test func aCompletedIntentStillFencesTheRowItActuallyCovered() throws {
+        try withOperations { ops, db in
+            // The purged-elsewhere ledger lag: the intent COMPLETED at or
+            // after the row's tombstone — the fence must hold until the
+            // ledger scan drops the local copy (never a re-listing window).
+            let post = try ops.createPost(title: "note", profile: .generic)
+            let made = try ops.newBlock(in: post.id, text: "prose", at: .end)
+            _ = try ops.newBlock(in: post.id, text: "the rest", at: .end)
+            try ops.deleteBlock(made.block.id)
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "block", rowID: made.block.id)])
+            // Complete it the way a peer's janitor would (deleted_at AFTER
+            // the row's own tombstone — completion follows deletion).
+            try db.write { db in
+                try db.execute(
+                    sql: """
+                        UPDATE purge_intent SET deleted_at = '2027-01-01T00:00:00.000Z'
+                        WHERE table_name = 'block' AND row_id = ?
+                        """,
+                    arguments: [made.block.id])
+            }
+            let rows = try db.read {
+                try Queries.trash($0, now: harnessNow, kinds: [.block])
+            }
+            #expect(rows.isEmpty, "purged stays purged — the completed intent still fences")
+        }
+    }
 }

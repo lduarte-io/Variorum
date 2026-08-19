@@ -105,7 +105,8 @@ extension Queries {
                   AND cb.deleted_at = b.deleted_at
                   AND cc.deleted_at = b.deleted_at)
               AND NOT EXISTS (SELECT 1 FROM purge_intent pi
-                WHERE pi.table_name = 'block' AND pi.row_id = b.id)
+                WHERE pi.table_name = 'block' AND pi.row_id = b.id
+                  AND (pi.deleted_at IS NULL OR pi.deleted_at >= b.deleted_at))
             ORDER BY b.deleted_at DESC, b.id
             """
         var arguments: StatementArguments = [
@@ -253,7 +254,8 @@ extension Queries {
                           AND cb.deleted_at = b.deleted_at
                           AND cc.deleted_at = b.deleted_at)
                       AND NOT EXISTS (SELECT 1 FROM purge_intent pi
-                        WHERE pi.table_name = 'block' AND pi.row_id = b.id)) AS deleted_count,
+                        WHERE pi.table_name = 'block' AND pi.row_id = b.id
+                          AND (pi.deleted_at IS NULL OR pi.deleted_at >= b.deleted_at))) AS deleted_count,
                   (SELECT COUNT(*) FROM block b
                     WHERE b.last_container_id = :post AND b.deleted_at IS NULL
                       AND b.archived_at IS NULL

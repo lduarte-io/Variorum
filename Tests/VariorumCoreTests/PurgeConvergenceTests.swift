@@ -468,4 +468,245 @@ struct PurgeConvergenceTests {
         #expect(after.skippedNoHorizon == false)
         #expect(try a.outboxCount() == 0)
     }
+
+    // MARK: - 9. 13j ladder B (B1): a restored family is NEVER purged by
+    // its stale intent — the single-device ⌥⌘Z door (the sharper red)
+
+    @Test func anUndoneDeleteSurvivesItsOwnStaleIntent() async throws {
+        let server = FakeSyncServer()
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+
+        let blockID: String = try a.with { ops, _ in
+            let post = try ops.createPost(title: "kept", profile: .generic)
+            let made = try ops.newBlock(in: post.id, text: "restored words", at: .end)
+            _ = try ops.newBlock(in: post.id, text: "the rest", at: .end)
+            try ops.deleteBlock(made.block.id)
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "block", rowID: made.block.id)])
+            return made.block.id
+        }
+        try await round(a)
+
+        // ⌥⌘Z: the structural undo's inverse — the belt voids the intent.
+        try a.with { ops, _ in try ops.revertDeleteBlock(blockID) }
+        try await round(a)
+
+        let report = try await sweep(a, server)
+        #expect(report.familiesPurged == 0,
+                "a restored, visible block is never purged by a leftover intent")
+        #expect(try a.db.fetchInt(
+            "SELECT COUNT(*) FROM block WHERE id = ? AND deleted_at IS NULL", [blockID]) == 1,
+                "the block she brought back stays")
+        #expect(await server.currentRow(table: "block", rowID: blockID) != nil,
+                "…and its mirror copy stays with it")
+        #expect(await server.isPurged(table: "block", rowID: blockID) == false,
+                "no ledger entry ever fences it")
+        #expect(try a.db.fetchInt(
+            """
+            SELECT COUNT(*) FROM purge_intent
+            WHERE table_name = 'block' AND row_id = ? AND deleted_at IS NULL
+            """, [blockID]) == 0, "the stale intent is voided, not honored")
+    }
+
+    // MARK: - 10. B1's second door: a peer's Put back BEFORE the intent
+    // arrives — the sweep-time staleness check is the net there
+
+    @Test func aPeerPutBackBeforeTheIntentArrivesSurvivesTheSweep() async throws {
+        let server = FakeSyncServer()
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: server, clockOffset: 90, seed: 2)
+
+        let blockID: String = try a.with { ops, _ in
+            let post = try ops.createPost(title: "shared", profile: .generic)
+            let made = try ops.newBlock(in: post.id, text: "contested", at: .end)
+            _ = try ops.newBlock(in: post.id, text: "the rest", at: .end)
+            try ops.deleteBlock(made.block.id)
+            return made.block.id
+        }
+        try await syncToQuiescence(a, b, server: server)
+        try await round(a)
+        try await round(b)
+
+        // A confirms Delete Now; B restores BEFORE pulling the intent —
+        // B's belt finds no intent to void, so only the sweep-time
+        // staleness check stands between her Put back and the purge.
+        try a.with { ops, _ in
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "block", rowID: blockID)])
+        }
+        try b.with { ops, _ in _ = try ops.restoreBlock(blockID) }
+        try await round(b)  // the restore pushes; the intent arrives after
+        try await round(a)  // A pushes the intent + pulls the restore
+        try await round(b)  // B's cursor passes the intent: it is published
+
+        let report = try await sweep(a, server)
+        #expect(report.familiesPurged == 0)
+        #expect(report.staleIntentsCompleted >= 1,
+                "the stale intent completes WITHOUT a purge")
+        #expect(await server.currentRow(table: "block", rowID: blockID) != nil)
+        for client in [a, b] {
+            #expect(try client.db.fetchInt(
+                "SELECT COUNT(*) FROM block WHERE id = ? AND deleted_at IS NULL",
+                [blockID]) == 1, "\(client.name): the restored block survives")
+        }
+        try await syncToQuiescence(a, b, server: server)
+        #expect(try a.syncedDump() == b.syncedDump())
+        // A second sweep is quiet: the completed intent claims nothing.
+        let again = try await sweep(a, server)
+        #expect(again.familiesPurged == 0 && again.staleIntentsCompleted == 0)
+    }
+
+    // MARK: - 11. 13j ladder B (B3, her round-11 ruling): the LOCAL road
+
+    @Test func aNeverSyncedFamilyPurgesLocallyWithNoLedgerAndNoMirrorContact() async throws {
+        let server = FakeSyncServer()
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+
+        // NEVER a round: the free, local, never-signed-in install. The
+        // family's rows sit in the outbox forever by construction — outbox
+        // presence must NOT disqualify (her adopted discriminator).
+        let family = try buildAndDeleteFamily(a)
+        try a.with { ops, _ in
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "container", rowID: family.post)])
+        }
+        #expect(try a.outboxContains("container", family.post))
+
+        let report = try await a.withAsync { _ in try await LocalPurge().sweep() }
+        #expect(report.familiesPurged == 1)
+        #expect(try familyRowCount(a, post: family.post) == 0,
+                "never-synced things really delete, right here")
+        #expect(try a.outboxContains("container", family.post) == false,
+                "the family's outbox entries go with it")
+        #expect(await server.purgedLedgerCount() == 0,
+                "no ledger entry — there is no one to fence")
+        #expect(await server.headSeq == 0, "no mirror contact of any kind")
+        let intentState = try a.db.fetchString(
+            "SELECT deleted_at FROM purge_intent WHERE table_name = 'container' AND row_id = ?",
+            [family.post])
+        #expect(intentState != nil, "the intent completes locally")
+
+        // The 30-day road runs locally too — no intent needed.
+        let aged = try buildAndDeleteFamily(a)
+        try backdate(a, from: aged.deletedStamp, to: oldStamp)
+        let second = try await a.withAsync { _ in try await LocalPurge().sweep() }
+        #expect(second.familiesPurged == 1)
+        #expect(try familyRowCount(a, post: aged.post) == 0)
+    }
+
+    @Test func oneSyncedMemberMakesTheWholeFamilyWaitForTheHorizon() async throws {
+        let server = FakeSyncServer()
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+
+        let family = try buildAndDeleteFamily(a)
+        try await round(a)  // the family is on the mirror: synced
+        try a.with { ops, _ in
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "container", rowID: family.post)])
+        }
+        let local = try await a.withAsync { _ in try await LocalPurge().sweep() }
+        #expect(local.familiesPurged == 0,
+                "one synced member ⇒ the whole family waits (family-completeness)")
+        #expect(try familyRowCount(a, post: family.post) > 0)
+
+        // The TRANSPORTED janitor's local arm is the same rule from the
+        // other side: a never-pushed family purges locally with no
+        // executePurge and no ledger entry, even signed in.
+        let fresh = try buildAndDeleteFamily(a)
+        try a.with { ops, _ in
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "container", rowID: fresh.post)])
+        }
+        let ledgerBefore = await server.purgedLedgerCount()
+        let swept = try await sweep(a, server)
+        #expect(swept.familiesPurged >= 1)
+        #expect(try familyRowCount(a, post: fresh.post) == 0)
+        #expect(await server.purgedLedgerCount() == ledgerBefore,
+                "a local-only family writes no ledger entry")
+        #expect(await server.currentRow(table: "container", rowID: fresh.post) == nil,
+                "the mirror never saw it and never will")
+    }
+
+    // MARK: - 12. 13j ladder B (B2): a returner's unpushed CHILD of a
+    // purged family never lands as a mirror orphan — the pre-drain screen
+
+    @Test func aReturnersUnpushedChildNeverLandsAsAMirrorOrphan() async throws {
+        let server = FakeSyncServer()
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: server, clockOffset: 90, seed: 2)
+
+        let (postID, blockID): (String, String) = try a.with { ops, _ in
+            let post = try ops.createPost(title: "shared", profile: .generic)
+            let made = try ops.newBlock(in: post.id, text: "prose", at: .end)
+            return (post.id, made.block.id)
+        }
+        try await syncToQuiescence(a, b, server: server)
+        try await round(a)
+        try await round(b)
+
+        // B goes dark holding a NEVER-PUSHED child — the one id no ledger
+        // can ever name, because the server never saw it.
+        let commentID: String = try b.with { ops, db in
+            _ = try ops.addBlockComment(to: blockID, text: "typed while away")
+            return try db.fetchString(
+                "SELECT id FROM block_comment WHERE block_id = ?", [blockID])!
+        }
+        #expect(try b.outboxContains("block_comment", commentID))
+
+        // A deletes the note; 30 days pass; B drops out; A's janitor purges.
+        try a.with { ops, _ in try ops.deleteContainer(postID) }
+        let stamp = try a.db.fetchString(
+            "SELECT deleted_at FROM container WHERE id = ?", [postID])!
+        try backdate(a, from: stamp, to: oldStamp)
+        try await round(a)
+        await server.setHorizonDropoutTicks(10)
+        await server.advanceClock(by: 100)
+        try await round(a)
+        let purged = try await sweep(a, server)
+        #expect(purged.familiesPurged >= 1)
+
+        // B returns THROUGH THE SCHEDULER — the production road: the
+        // pre-drain ledger screen runs before pull→push, so the orphan
+        // never pushes. (Red on the old order: the round's drain ran
+        // first and landed the comment as a permanent orphan under a
+        // missing parent — the poison-row jam every peer's pull would
+        // then stall on forever.)
+        try await b.withAsync { _ in
+            let engine = b.engine()
+            let janitor = PurgeJanitor(transport: server, keyProvider: b.keyProvider)
+            let scheduler = SyncScheduler(engine: engine, janitor: janitor)
+            await scheduler.trigger()
+            await scheduler.awaitIdle()
+        }
+        #expect(await server.currentRow(table: "block_comment", rowID: commentID) == nil,
+                "the unpushed child died with its family — never a mirror orphan")
+        #expect(try b.outboxContains("block_comment", commentID) == false)
+        #expect(try b.db.fetchInt(
+            "SELECT COUNT(*) FROM block_comment WHERE id = ?", [commentID]) == 0,
+                "the purge-wins doctrine's letter: writing under a purged family is discarded")
+        try await round(a)
+        try await round(b)
+        try await round(a)
+        #expect(try a.outboxCount() == 0)
+        #expect(try b.outboxCount() == 0)
+        #expect(try a.syncedDump() == b.syncedDump())
+    }
+
+    // MARK: - 13. 13j ladder B (B9): a root collected by both arms is one
+    // purge and one count
+
+    @Test func aDoubleCollectedRootPurgesOnceAndCountsOnce() async throws {
+        let server = FakeSyncServer()
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+
+        // A 31-day-old tombstone WITH a Delete Now intent: both collection
+        // arms name the same container root.
+        let family = try buildAndDeleteFamily(a)
+        try backdate(a, from: family.deletedStamp, to: oldStamp)
+        try a.with { ops, _ in
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "container", rowID: family.post)])
+        }
+        try await round(a)
+        try await round(a)
+
+        let report = try await sweep(a, server)
+        #expect(report.familiesPurged == 1,
+                "one family, however many arms collected its root")
+        #expect(try familyRowCount(a, post: family.post) == 0)
+    }
 }

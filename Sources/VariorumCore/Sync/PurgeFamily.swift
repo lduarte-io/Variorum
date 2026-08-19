@@ -294,6 +294,33 @@ struct PurgeFamily {
         }
         let variants = family.ids(in: "variant")
         if !variants.isEmpty {
+            // 13j ladder B (B10) — the fourth detachment arm, closing the
+            // asymmetry with `chosen_variant_id` below: a SURVIVING block
+            // whose `default_variant_id` names a purged take. Unreachable
+            // through op discipline (delete/archive reassign the default;
+            // SyncSpec §7 repairs a default that arrives dead) — but if the
+            // state ever arose on a block with a pending outbox entry, the
+            // DELETE-fired ON DELETE SET NULL would run the capture trigger
+            // under ABORT semantics (the 2b class, SQLite 19) and wedge the
+            // family's sweep on retry. Enqueued like its three siblings so
+            // the mirror's surviving row converges.
+            let dangling = try String.fetchAll(
+                db,
+                sql: """
+                    SELECT id FROM block
+                    WHERE default_variant_id IN (SELECT value FROM json_each(?))
+                      AND id NOT IN (SELECT value FROM json_each(?))
+                    """,
+                arguments: [jsonArray(variants), jsonArray(family.ids(in: "block"))])
+            if !dangling.isEmpty {
+                try db.execute(
+                    sql: """
+                        UPDATE block SET default_variant_id = NULL, updated_at = ?
+                        WHERE id IN (SELECT value FROM json_each(?))
+                        """,
+                    arguments: [stamp, jsonArray(Set(dangling))])
+                for id in dangling { try enqueue?("block", id) }
+            }
             let placements = try String.fetchAll(
                 db,
                 sql: """

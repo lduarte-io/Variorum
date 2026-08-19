@@ -67,23 +67,48 @@ struct TrashPurgeDoorsTests {
 
             // Confirm: ONE intent lands, the row leaves the Trash at once
             // (the read-side fence), and the receipt tells the split truth.
+            //
+            // LADDER B (B3), ANNOTATED PIN EDIT — a RULED change, never a
+            // quietly relaxed pin (her round-11 ruling: never-synced things
+            // purge immediately). This test's world has no sync chain, so
+            // the confirm's local sweep now COMPLETES the intent and takes
+            // the bytes on the spot — the assertions graduate to the
+            // STRONGER truth: intent completed, family physically gone,
+            // and the receipt speaks the LOCAL wording (no "synced
+            // devices" that don't exist).
             await model.confirmPendingPurge()
             #expect(model.lastError == nil)
-            let intents: Int = try await editor.database.read { db in
-                try Int.fetchOne(
+            let intentStates: (live: Int, completed: Int) = try await editor.database.read { db in
+                (try Int.fetchOne(
                     db,
                     sql: "SELECT COUNT(*) FROM purge_intent WHERE table_name = 'block' AND row_id = ? AND deleted_at IS NULL",
+                    arguments: [blockID]) ?? 0,
+                 try Int.fetchOne(
+                    db,
+                    sql: "SELECT COUNT(*) FROM purge_intent WHERE table_name = 'block' AND row_id = ? AND deleted_at IS NOT NULL",
+                    arguments: [blockID]) ?? 0)
+            }
+            #expect(intentStates.live == 0, "the local road completed the intent")
+            #expect(intentStates.completed == 1)
+            let bytesGone: Int = try await editor.database.read { db in
+                try Int.fetchOne(
+                    db, sql: "SELECT COUNT(*) FROM block WHERE id = ?",
                     arguments: [blockID]) ?? 0
             }
-            #expect(intents == 1)
+            #expect(bytesGone == 0,
+                    "never-synced things really delete, right here (round 11)")
             let listed: [Queries.TrashItem] = try await editor.database.read { db in
                 try Queries.trash(db, now: harnessNow)
             }
             #expect(listed.isEmpty, "the row leaves every surface immediately")
             let receipt = try #require(model.receipt)
             #expect(receipt.contains("gone from the app now"))
-            #expect(receipt.contains("every synced device"),
-                    "the receipt is honest about NOW vs the janitor")
+            #expect(receipt.contains("the app's own cleanup"),
+                    "no sync chain ⇒ the receipt never promises devices that don't exist")
+            // The synced wording survives as the other arm (unit — the
+            // conditional itself).
+            #expect(RecoveryPath.deleteNowReceipt(.block, synced: true)
+                .contains("every synced device"))
             // Asking again is one purge (idempotent through the op).
             model.requestDeleteNow(row)
             await model.confirmPendingPurge()
@@ -142,10 +167,23 @@ struct TrashPurgeDoorsTests {
 
             await model.confirmPendingPurge()
             #expect(model.lastError == nil)
-            let intents: Int = try await editor.database.read { db in
-                try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM purge_intent WHERE deleted_at IS NULL") ?? 0
+            // LADDER B (B3), ANNOTATED PIN EDIT (the Delete Now test's
+            // reason): this never-synced world purges immediately — one
+            // intent per Trash row still minted, now COMPLETED by the
+            // local sweep, families physically gone.
+            let intents: (live: Int, completed: Int) = try await editor.database.read { db in
+                (try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM purge_intent WHERE deleted_at IS NULL") ?? 0,
+                 try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM purge_intent WHERE deleted_at IS NOT NULL") ?? 0)
             }
-            #expect(intents == 4, "everything, always — one intent per Trash row")
+            #expect(intents.live == 0)
+            #expect(intents.completed == 4, "everything, always — one intent per Trash row")
+            let survivors: Int = try await editor.database.read { db in
+                (try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM block WHERE id IN (?, ?)",
+                                  arguments: [blockID, secondBlock]) ?? 0)
+                + (try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM reading WHERE deleted_at IS NOT NULL") ?? 0)
+                + (try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM container WHERE title = 'doomed'") ?? 0)
+            }
+            #expect(survivors == 0, "the bytes went with the confirm (round 11)")
             let listed: [Queries.TrashItem] = try await editor.database.read { db in
                 try Queries.trash(db, now: harnessNow)
             }

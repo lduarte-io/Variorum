@@ -56,6 +56,11 @@ extension Operations {
             block.updatedAt = now
             try block.update(db)
             try flipBlockCascadeTombstones(db, blockID: blockID, stamp: stamp, now: now)
+            // 13j ladder B (B1): the ⌥⌘Z road is the single-device door of
+            // the stale-intent hole — a restored row voids any live intent
+            // naming it, or a Delete Now confirmed BETWEEN the delete and
+            // this undo would still purge the row she just brought back.
+            try voidPurgeIntents(db, table: "block", rowID: blockID)
         }
     }
 
@@ -77,6 +82,9 @@ extension Operations {
                 variant.deletedAt = nil
                 variant.updatedAt = now
                 try variant.update(db)
+                // 13j ladder B (B1): the ⌥⌘Z road voids any live intent
+                // naming the restored take (revertDeleteBlock's reason).
+                try voidPurgeIntents(db, table: "variant", rowID: variantID)
             }
             if wasDefault {
                 try restoreDefaultVariant(db, blockID: variant.blockId, to: variantID, now: now)

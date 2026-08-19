@@ -49,19 +49,25 @@ public struct PurgeJanitor: Sendable {
     // MARK: - Report
 
     public struct SweepReport: Equatable, Sendable {
-        /// True when the pass stopped at "no horizon" — the designed safe
-        /// no-op (no server-known device cursors yet, or none in-window).
+        /// True when no SYNCED family could be considered — no server-known
+        /// device cursors yet, or none in-window. (13j ladder B, B3: the
+        /// pass no longer stops here — LOCAL-ONLY families, which need no
+        /// horizon because no peer ever saw them, still purge below.)
         public var skippedNoHorizon = false
         /// Rows dropped locally by the ledger reconciliation scan (purges
         /// other devices executed that this store still held).
         public var ledgerRowsDropped = 0
-        /// Families this pass purged (mirror + local).
+        /// Families this pass purged (mirror + local, or local-only).
         public var familiesPurged = 0
         /// Rows physically removed locally by those families.
         public var rowsPurgedLocally = 0
         /// Families collected but SKIPPED this pass (a member still owed a
         /// push, or its publication had not crossed the horizon).
         public var familiesDeferred = 0
+        /// Stale intents completed WITHOUT a purge (13j ladder B, B1): a
+        /// live intent whose target row is LIVE again — restored since the
+        /// confirm — is voided, never honored.
+        public var staleIntentsCompleted = 0
         /// Savepoint purge intents minted by the pruning pass.
         public var pruneIntentsMinted = 0
         public init() {}
@@ -87,93 +93,100 @@ public struct PurgeJanitor: Sendable {
         }
 
         var report = SweepReport()
-        let (cursor, scanPoint, acknowledgedFloor) = try await database.read { db in
-            (try Self.stateValue(db, "last_server_seq"),
-             try Self.stateValue(db, "last_purge_seq"),
-             try Self.stateValue(db, "purge_floor_acknowledged"))
-        }
 
-        // 1. THE LEDGER SCAN (row-by-row reconciliation — the memo's §2):
-        // entries above our scan point name rows OTHER devices purged that
-        // this store may still hold. The FLOOR gate comes first: a scan
-        // point below the floor means entries this device needs are gone —
-        // the SAY-SO-FIRST returner road (round 10), unless the reload was
-        // already acknowledged at this floor.
-        let page = try await transport.purgeLedger(since: scanPoint, activeKeyID: keyID)
-        if page.floor > scanPoint && page.floor > acknowledgedFloor {
-            throw SyncError.deviceLeftBehindReloadRequired(
-                floor: page.floor, scanPoint: scanPoint)
-        }
-        if !page.entries.isEmpty {
-            let stamp = nowStamp()
-            let maxSeq = page.entries.map(\.purgedSeq).max() ?? scanPoint
-            let dropped: Int = try await database.write { db in
-                try db.execute(sql: "PRAGMA defer_foreign_keys = ON")
-                let present = try page.entries.filter { entry in
-                    try Self.rowExists(db, table: entry.table, rowID: entry.rowID)
-                }
-                var count = 0
-                if !present.isEmpty {
-                    let family = try PurgeFamily.expand(
-                        db, roots: present.map { SyncPurgeTarget(table: $0.table, rowID: $0.rowID) })
-                    count = family.rows.count
-                    try PurgeFamily.deleteLocal(db, family: family, stamp: stamp)
-                }
-                try Self.setStateValue(db, "last_purge_seq", maxSeq)
-                return count
-            }
-            report.ledgerRowsDropped = dropped
-        }
+        // 1. THE LEDGER SCAN (row-by-row reconciliation — the memo's §2).
+        // Extracted as `reconcileLedger` (13j ladder B, B2): the scheduler
+        // ALSO runs it BEFORE each round, so a returner's outbox is screened
+        // against other devices' purges before anything is pushed — the
+        // never-pushed-child orphan road closes without reordering the
+        // round. Running it again here is cheap (since-scanPoint is empty
+        // the second time) and keeps standalone `sweep()` callers whole.
+        report.ledgerRowsDropped = try await reconcileLedger()
 
         // 2. THE HORIZON. Capped at our own committed cursor — everything
         // ≤ the cursor was genuinely served to us (the A5 visibility filter
         // guarantees served ⇒ committed), which is the client-side form of
-        // the memo's "minus the visibility-skew margin".
+        // the memo's "minus the visibility-skew margin". No horizon no
+        // longer ends the pass (B3): LOCAL-ONLY families — every row
+        // `sync_row_seq`-absent, so no peer ever saw them and there is no
+        // one to strand — purge below with no mirror contact at all.
+        let cursor = try await database.read { try Self.stateValue($0, "last_server_seq") }
         let horizon = min(try await transport.syncHorizon(activeKeyID: keyID), cursor)
-        guard horizon > 0 else {
-            report.skippedNoHorizon = true
-            return report
-        }
+        if horizon <= 0 { report.skippedNoHorizon = true }
 
         // 3. COLLECTION: intent roots (live intents published before the
-        // horizon) + 30-day tombstone roots (published before the horizon,
-        // cascade victims riding their root, nothing still owed a push).
+        // horizon, or never-synced ones — the local road needs no
+        // publication) + 30-day tombstone roots.
+        let now = date.now
         let roots = try await database.read { db in
-            try self.collectRoots(db, horizon: horizon)
+            try Self.collectRoots(db, horizon: horizon, now: now)
         }
 
-        // 4. One family at a time: expand + verify → mirror purge → local
-        // removal (ONE local transaction per family) → advance the scan
-        // point past our own ledger entries (self-echo skip).
-        for root in roots {
-            let expansion: PurgeFamily.Expansion? = try await database.read { db in
+        // 4. One family at a time: expand + verdict → mirror purge (synced
+        // families only) → local removal (ONE local transaction per family)
+        // → advance the scan point past our own ledger entries (self-echo
+        // skip). NOTE (B9): the scan point is a SELF-ECHO device, not a
+        // completeness guarantee — a concurrent peer sweep's lower-seq
+        // entries may be skipped by this advance; those families re-collect
+        // through the 30-day road and converge there.
+        var processed: Set<SyncPurgeTarget> = []
+        for (root, localOnlyIntent) in roots {
+            // B9: a root already taken by an earlier family this pass
+            // (an intent on a 31-day tombstone is collected by BOTH arms)
+            // is done — never a second executePurge, never double-counted.
+            if processed.contains(root) { continue }
+            let staged: (PurgeFamily.Expansion, Self.FamilyVerdict) = try await database.read { db in
                 let family = try PurgeFamily.expand(db, roots: [root])
-                return try self.familyIsEligible(db, family, horizon: horizon) ? family : nil
+                return (family, try Self.familyVerdict(db, family, horizon: horizon))
             }
-            guard let expansion else {
+            let expansion = staged.0
+            var verdict = staged.1
+            // An UNPUBLISHED intent (the local road's collection arm) may
+            // only ever drive a LOCAL-ONLY purge: a synced family waits for
+            // its intent to publish first, so a peer that pulls the intent
+            // still learns "this is going" before it goes (memo §4a).
+            if localOnlyIntent, verdict == .eligibleSynced { verdict = .deferred }
+            switch verdict {
+            case .stale:
+                // 13j ladder B, B1: the intent's target (or a family row)
+                // is LIVE again — restored since the confirm. A stale
+                // intent is COMPLETED, never honored: void it so a later
+                // re-delete can never be claimed by a leftover intent.
+                report.staleIntentsCompleted += try await completeStaleIntents(root)
+            case .deferred:
                 report.familiesDeferred += 1
-                continue
-            }
-            let grantedSeq = try await transport.executePurge(
-                expansion.orderedRows, activeKeyID: keyID)
-            let stamp = nowStamp()
-            let removed: Int = try await database.write { db in
-                try db.execute(sql: "PRAGMA defer_foreign_keys = ON")
-                // Re-expand inside the removal's own transaction (the
-                // projection lesson): the mirror has already purged, so
-                // whatever the family holds NOW goes — a restore that
-                // raced the await loses to the purge (the ruled
-                // purge-wins doctrine; its push would be 'purged'-refused).
-                let family = try PurgeFamily.expand(db, roots: [root])
-                try PurgeFamily.deleteLocal(db, family: family, stamp: stamp)
-                let scan = try Self.stateValue(db, "last_purge_seq")
-                if grantedSeq > scan {
-                    try Self.setStateValue(db, "last_purge_seq", grantedSeq)
+            case .eligibleLocalOnly:
+                // B3 (her round-11 ruling): every row of this family is
+                // `sync_row_seq`-absent — the mirror never saw any of it,
+                // so there is nothing to strand, nothing to fence, and no
+                // ledger entry to write. Local physical removal only.
+                let removed = try await deleteFamilyLocally(root)
+                report.familiesPurged += 1
+                report.rowsPurgedLocally += removed
+                processed.formUnion(expansion.rows)
+            case .eligibleSynced:
+                let grantedSeq = try await transport.executePurge(
+                    expansion.orderedRows, activeKeyID: keyID)
+                let removed: Int = try await database.write { db in
+                    try db.execute(sql: "PRAGMA defer_foreign_keys = ON")
+                    // Re-expand inside the removal's own transaction (the
+                    // projection lesson): the mirror has already purged, so
+                    // whatever the family holds NOW goes — a restore that
+                    // raced the await loses to the purge (the ruled
+                    // purge-wins doctrine; its push would be
+                    // 'purged'-refused).
+                    let family = try PurgeFamily.expand(db, roots: [root])
+                    try PurgeFamily.deleteLocal(db, family: family, stamp: self.nowStamp())
+                    let scan = try Self.stateValue(db, "last_purge_seq")
+                    if grantedSeq > scan {
+                        try Self.setStateValue(db, "last_purge_seq", grantedSeq)
+                    }
+                    return family.rows.count
                 }
-                return family.rows.count
+                report.familiesPurged += 1
+                report.rowsPurgedLocally += removed
+                processed.formUnion(expansion.rows)
             }
-            report.familiesPurged += 1
-            report.rowsPurgedLocally += removed
         }
 
         // 5. SAVEPOINT PRUNING (memo §4d): mint intents for prunable quiet
@@ -184,8 +197,9 @@ public struct PurgeJanitor: Sendable {
         // horizon like every other root.
         let pruning = try await database.read { try Queries.historyPruning($0) }
         if pruning == .standard {
+            let takes = pruningTakesPerPass
             let prunable = try await database.read { db in
-                try self.prunableSavepoints(db)
+                try Self.prunableSavepoints(db, takesPerPass: takes, now: now)
             }
             if !prunable.isEmpty {
                 let minted = try Operations().requestPurge(
@@ -196,54 +210,127 @@ public struct PurgeJanitor: Sendable {
         return report
     }
 
+    // MARK: - The ledger reconciliation (extracted 13j ladder B, B2)
+
+    /// The row-by-row reconciliation scan (the memo's §2): entries above our
+    /// scan point name rows OTHER devices purged that this store may still
+    /// hold — drop them family-complete and advance the scan point. The
+    /// FLOOR gate comes first: a scan point below the floor means entries
+    /// this device needs are gone — the SAY-SO-FIRST returner road (round
+    /// 10), unless the reload was already acknowledged at this floor.
+    ///
+    /// **Callable BEFORE a round's drain** (B2): `SyncScheduler` runs it
+    /// ahead of each round so a returner's outbox is screened against
+    /// other devices' purges before anything pushes — `deleteLocal` sweeps
+    /// the family's outbox entries, so a never-pushed CHILD of a purged
+    /// family (the one row no ledger could ever name, because the server
+    /// never saw its id) dies here instead of landing as a permanent
+    /// mirror orphan under a missing parent. The consequence is the
+    /// purge-wins doctrine's letter, named out loud: a returner's unpushed
+    /// writing UNDER a purged family is discarded with the family.
+    @discardableResult
+    public func reconcileLedger() async throws -> Int {
+        let keyID: String
+        do {
+            keyID = try keyProvider.currentKeys().corpusKeyID
+        } catch {
+            throw SyncError.encryptionKeysUnavailable
+        }
+        let (scanPoint, acknowledgedFloor) = try await database.read { db in
+            (try Self.stateValue(db, "last_purge_seq"),
+             try Self.stateValue(db, "purge_floor_acknowledged"))
+        }
+        let page = try await transport.purgeLedger(since: scanPoint, activeKeyID: keyID)
+        if page.floor > scanPoint && page.floor > acknowledgedFloor {
+            throw SyncError.deviceLeftBehindReloadRequired(
+                floor: page.floor, scanPoint: scanPoint)
+        }
+        guard !page.entries.isEmpty else { return 0 }
+        let stamp = nowStamp()
+        let maxSeq = page.entries.map(\.purgedSeq).max() ?? scanPoint
+        return try await database.write { db in
+            try db.execute(sql: "PRAGMA defer_foreign_keys = ON")
+            let present = try page.entries.filter { entry in
+                try Self.rowExists(db, table: entry.table, rowID: entry.rowID)
+            }
+            var count = 0
+            if !present.isEmpty {
+                let family = try PurgeFamily.expand(
+                    db, roots: present.map { SyncPurgeTarget(table: $0.table, rowID: $0.rowID) })
+                count = family.rows.count
+                try PurgeFamily.deleteLocal(db, family: family, stamp: stamp)
+            }
+            try Self.setStateValue(db, "last_purge_seq", maxSeq)
+            return count
+        }
+    }
+
     // MARK: - Collection
 
-    private func collectRoots(_ db: Database, horizon: Int64) throws -> [SyncPurgeTarget] {
-        var roots: [SyncPurgeTarget] = []
-        let cutoff = TrashWindow.cutoffStamp(now: date.now)
+    /// The sweep's candidate roots. Three arms:
+    ///  - live intents whose own publication crossed the horizon (the
+    ///    synced intent road — a peer that pulls the intent learns "this
+    ///    is going" BEFORE it goes);
+    ///  - live intents the server has NEVER accepted (`sync_row_seq`
+    ///    absent — 13j ladder B, B3: the local road's door; the family
+    ///    verdict below purges these ONLY when the whole family is
+    ///    local-only, so a synced family still waits for its published
+    ///    intent);
+    ///  - 30-day tombstone roots (the ordinary path — no intent needed):
+    ///    containers and readings outright; blocks that are NOT a
+    ///    same-stamp cascade victim of a same-stamp container (those ride
+    ///    the container root); takes whose block is live (dead-block takes
+    ///    ride the block root). `< :cutoff` (B8): the boundary stamp
+    ///    belongs to the thing being recovered — every listing keeps it
+    ///    with `>=`, so collection takes strictly older only.
+    static func collectRoots(
+        _ db: Database, horizon: Int64, now: Date
+    ) throws -> [(root: SyncPurgeTarget, localOnlyIntent: Bool)] {
+        var roots: [(SyncPurgeTarget, Bool)] = []
+        let cutoff = TrashWindow.cutoffStamp(now: now)
 
-        // Live intents whose own publication crossed the horizon.
         for row in try Row.fetchAll(
             db,
             sql: """
-                SELECT pi.id AS intent_id, pi.table_name AS t, pi.row_id AS r
+                SELECT pi.table_name AS t, pi.row_id AS r,
+                       (s.server_seq IS NOT NULL) AS synced
                 FROM purge_intent pi
-                JOIN sync_row_seq s ON s.table_name = 'purge_intent' AND s.row_id = pi.id
+                LEFT JOIN sync_row_seq s
+                  ON s.table_name = 'purge_intent' AND s.row_id = pi.id
+                 AND s.server_seq > 0
                 WHERE pi.deleted_at IS NULL
-                  AND s.server_seq > 0 AND s.server_seq <= :horizon
-                  AND NOT EXISTS (
-                    SELECT 1 FROM sync_outbox o
-                    WHERE o.table_name = 'purge_intent' AND o.row_id = pi.id)
+                  AND (
+                    (s.server_seq IS NOT NULL AND s.server_seq <= :horizon
+                     AND NOT EXISTS (
+                       SELECT 1 FROM sync_outbox o
+                       WHERE o.table_name = 'purge_intent' AND o.row_id = pi.id))
+                    OR s.server_seq IS NULL)
                 ORDER BY pi.id
                 """,
             arguments: ["horizon": horizon]) {
-            roots.append(SyncPurgeTarget(table: row["t"], rowID: row["r"]))
+            roots.append((
+                SyncPurgeTarget(table: row["t"], rowID: row["r"]),
+                (row["synced"] as Int64? ?? 0) == 0))
         }
 
-        // 30-day tombstone roots (the ordinary path — no intent needed).
-        // Publication and pending-push checks ride the family verification;
-        // here only the ROOT shape is selected: containers and readings
-        // outright; blocks that are NOT a same-stamp cascade victim of a
-        // same-stamp container (those ride the container root); takes whose
-        // block is live (dead-block takes ride the block root).
         func tombstoneRoots(_ sql: String) throws -> [String] {
             try String.fetchAll(db, sql: sql, arguments: ["cutoff": cutoff])
         }
         for id in try tombstoneRoots("""
             SELECT id FROM container
-            WHERE deleted_at IS NOT NULL AND deleted_at <= :cutoff ORDER BY id
+            WHERE deleted_at IS NOT NULL AND deleted_at < :cutoff ORDER BY id
             """) {
-            roots.append(SyncPurgeTarget(table: "container", rowID: id))
+            roots.append((SyncPurgeTarget(table: "container", rowID: id), false))
         }
         for id in try tombstoneRoots("""
             SELECT id FROM reading
-            WHERE deleted_at IS NOT NULL AND deleted_at <= :cutoff ORDER BY id
+            WHERE deleted_at IS NOT NULL AND deleted_at < :cutoff ORDER BY id
             """) {
-            roots.append(SyncPurgeTarget(table: "reading", rowID: id))
+            roots.append((SyncPurgeTarget(table: "reading", rowID: id), false))
         }
         for id in try tombstoneRoots("""
             SELECT b.id FROM block b
-            WHERE b.deleted_at IS NOT NULL AND b.deleted_at <= :cutoff
+            WHERE b.deleted_at IS NOT NULL AND b.deleted_at < :cutoff
               AND NOT EXISTS (
                 SELECT 1 FROM container_block cb
                 JOIN container cc ON cc.id = cb.container_id
@@ -252,53 +339,149 @@ public struct PurgeJanitor: Sendable {
                   AND cc.deleted_at = b.deleted_at)
             ORDER BY b.id
             """) {
-            roots.append(SyncPurgeTarget(table: "block", rowID: id))
+            roots.append((SyncPurgeTarget(table: "block", rowID: id), false))
         }
         for id in try tombstoneRoots("""
             SELECT v.id FROM variant v
             JOIN block b ON b.id = v.block_id AND b.deleted_at IS NULL
-            WHERE v.deleted_at IS NOT NULL AND v.deleted_at <= :cutoff
+            WHERE v.deleted_at IS NOT NULL AND v.deleted_at < :cutoff
             ORDER BY v.id
             """) {
-            roots.append(SyncPurgeTarget(table: "variant", rowID: id))
+            roots.append((SyncPurgeTarget(table: "variant", rowID: id), false))
         }
         return roots
     }
 
-    /// Every family row must be PUBLISHED BEFORE THE HORIZON (its latest
-    /// server-accepted state — which includes its tombstone — has been seen
-    /// by every live device) and OWE THE SERVER NOTHING (a pending outbox
-    /// entry means the local state diverges from the accepted one; purging
-    /// under it would strand the mirror's live copy). Any failure defers
-    /// the WHOLE family to a later pass — resumable, never partial.
-    private func familyIsEligible(
+    // MARK: - The family verdict
+
+    enum FamilyVerdict: Equatable {
+        /// Every row published ≤ horizon, nothing owed a push: mirror
+        /// purge + local removal.
+        case eligibleSynced
+        /// Every row `sync_row_seq`-absent (13j ladder B, B3 — her round-11
+        /// ruling): the mirror never saw any of it, so local removal only —
+        /// no `executePurge`, no ledger entry, and the outbox does NOT
+        /// disqualify (a never-configured install's rows sit there forever
+        /// by construction; `deleteLocal` sweeps them with the family).
+        case eligibleLocalOnly
+        /// Not yet: a member still owes a push or hasn't crossed the
+        /// horizon. Re-collected next pass — resumable, never partial.
+        case deferred
+        /// 13j ladder B, B1: a family row of a tombstoned kind is LIVE
+        /// again — restored since the intent's confirm (⌥⌘Z, or a peer's
+        /// Put back before the intent arrived). The family must NOT purge,
+        /// and the standing intent is stale: complete it without honoring
+        /// it. (Stranded originals and their own live sub-rows are exempt —
+        /// they are live BY DESIGN and ride the family per round 8b;
+        /// `commit_point` has no tombstone and is never checked — a naive
+        /// liveness read there would void every pruning intent forever.)
+        case stale
+    }
+
+    /// One consistent read-transaction verdict for a family (the fix
+    /// placement the 6b response asked for): staleness first, then the
+    /// local/synced split, then synced eligibility. `rowExists → skip`
+    /// keeps its meaning — ABSENT is already-purged, proceed.
+    static func familyVerdict(
         _ db: Database, _ family: PurgeFamily.Expansion, horizon: Int64
-    ) throws -> Bool {
+    ) throws -> FamilyVerdict {
+        let tombstonedKinds: Set<String> = ["container", "reading", "block", "variant"]
+        var anySynced = false
+        var allSyncedEligible = true
         for target in family.rows {
-            let pending = try Bool.fetchOne(
-                db,
-                sql: "SELECT EXISTS (SELECT 1 FROM sync_outbox WHERE table_name = ? AND row_id = ?)",
-                arguments: [target.table, target.rowID]) ?? false
-            if pending { return false }
-            guard try Self.rowExists(db, table: target.table, rowID: target.rowID) else {
-                continue  // already gone locally — nothing to publish
-            }
             let seq = try Int64.fetchOne(
                 db,
                 sql: "SELECT server_seq FROM sync_row_seq WHERE table_name = ? AND row_id = ?",
                 arguments: [target.table, target.rowID]) ?? 0
-            guard seq > 0, seq <= horizon else { return false }
+            if seq > 0 { anySynced = true }
+            guard try rowExists(db, table: target.table, rowID: target.rowID) else {
+                continue  // already gone locally — nothing to publish
+            }
+            if tombstonedKinds.contains(target.table),
+               try rowIsLive(db, target),
+               !(try isStrandedOriginSubtreeRow(db, target, family: family)) {
+                return .stale
+            }
+            let pending = try Bool.fetchOne(
+                db,
+                sql: "SELECT EXISTS (SELECT 1 FROM sync_outbox WHERE table_name = ? AND row_id = ?)",
+                arguments: [target.table, target.rowID]) ?? false
+            if pending || seq <= 0 || seq > horizon { allSyncedEligible = false }
         }
-        return true
+        if !anySynced { return .eligibleLocalOnly }
+        return allSyncedEligible ? .eligibleSynced : .deferred
+    }
+
+    private static func rowIsLive(_ db: Database, _ target: SyncPurgeTarget) throws -> Bool {
+        try Bool.fetchOne(
+            db,
+            sql: "SELECT deleted_at IS NULL FROM \(target.table) WHERE id = ?",
+            arguments: [target.rowID]) ?? false
+    }
+
+    /// The round-8b exemption: a stranded origin joined the family LIVE by
+    /// design, and `expandBlock` brought its own live variants with it.
+    private static func isStrandedOriginSubtreeRow(
+        _ db: Database, _ target: SyncPurgeTarget, family: PurgeFamily.Expansion
+    ) throws -> Bool {
+        guard !family.strandedOriginals.isEmpty else { return false }
+        switch target.table {
+        case "block":
+            return family.strandedOriginals.contains(target.rowID)
+        case "variant":
+            let blockID = try String.fetchOne(
+                db, sql: "SELECT block_id FROM variant WHERE id = ?",
+                arguments: [target.rowID])
+            return blockID.map(family.strandedOriginals.contains) ?? false
+        default:
+            return false
+        }
+    }
+
+    // MARK: - Stale-intent completion + the local family removal
+
+    /// Voids every live intent naming this root (13j ladder B, B1): the
+    /// tombstone travels like any completion, so peers stop fencing too.
+    /// Ordinary write — the outbox trigger captures it.
+    private func completeStaleIntents(_ root: SyncPurgeTarget) async throws -> Int {
+        let stamp = nowStamp()
+        return try await database.write { db in
+            let stale = try String.fetchAll(
+                db,
+                sql: """
+                    SELECT id FROM purge_intent
+                    WHERE table_name = ? AND row_id = ? AND deleted_at IS NULL
+                    """,
+                arguments: [root.table, root.rowID])
+            for id in stale {
+                try db.execute(
+                    sql: "UPDATE purge_intent SET deleted_at = ?, updated_at = ? WHERE id = ?",
+                    arguments: [stamp, stamp, id])
+            }
+            return stale.count
+        }
+    }
+
+    private func deleteFamilyLocally(_ root: SyncPurgeTarget) async throws -> Int {
+        let stamp = nowStamp()
+        return try await database.write { db in
+            try db.execute(sql: "PRAGMA defer_foreign_keys = ON")
+            let family = try PurgeFamily.expand(db, roots: [root])
+            try PurgeFamily.deleteLocal(db, family: family, stamp: stamp)
+            return family.rows.count
+        }
     }
 
     // MARK: - Pruning candidates
 
-    /// Prunable quiet-savepoint ids across at most `pruningTakesPerPass`
-    /// LIVE takes (a dead take's savepoints ride its purge), skipping rows
+    /// Prunable quiet-savepoint ids across at most `takesPerPass` LIVE
+    /// takes (a dead take's savepoints ride its purge), skipping rows
     /// already named by a standing intent. The per-take rule is
     /// `SavepointPruning.prunable` — one brain, consulted per take.
-    private func prunableSavepoints(_ db: Database) throws -> [String] {
+    /// Static so `LocalPurge` prunes by the same rule (13j ladder B, B3).
+    static func prunableSavepoints(
+        _ db: Database, takesPerPass: Int, now: Date
+    ) throws -> [String] {
         let candidates = try String.fetchAll(
             db,
             sql: """
@@ -312,7 +495,7 @@ public struct PurgeJanitor: Sendable {
                 """,
             arguments: [
                 "keep": SavepointPruning.keepNewestQuiet,
-                "takes": pruningTakesPerPass,
+                "takes": takesPerPass,
             ])
         var prunable: [String] = []
         for variantID in candidates {
@@ -334,7 +517,7 @@ public struct PurgeJanitor: Sendable {
                     id: row["id"], kind: row["kind"], createdAt: created)
             }
             prunable.append(contentsOf: SavepointPruning.prunable(
-                among: savepoints, now: date.now))
+                among: savepoints, now: now))
         }
         return prunable
     }
@@ -411,5 +594,125 @@ public struct PurgeJanitor: Sendable {
 
     private func nowStamp() -> String {
         DateFormatter.variorumISO8601.string(from: date.now)
+    }
+}
+
+// MARK: - The LOCAL purge (13j ladder B, B3 — her round-11 ruling)
+
+/// **The transportless half of "really deleted"** — the road the free,
+/// local, never-signed-in install runs (her round-11 ruling: never-synced
+/// things purge immediately; "really deleted" really true for the free v1
+/// population).
+///
+/// It shares the janitor's collection, verdict, and family machinery —
+/// ONE rule, two cadences — and touches NO wire: no preflight, no ledger,
+/// no horizon, no `executePurge`. Only families whose EVERY row is
+/// `sync_row_seq`-absent purge here (the per-FAMILY discriminator she
+/// adopted): a family with one synced member has a mirror copy somewhere
+/// and WAITS for the transported janitor — which is also why running this
+/// beside a configured sync session is pointless rather than dangerous
+/// (the app gates on `SyncSession.isConfigured` instead of racing two
+/// sweeps). Stale intents complete here too (B1's rule is road-independent),
+/// and savepoint pruning mints by the same brain, so a local install's
+/// quiet history prunes exactly like a synced one's.
+public struct LocalPurge: Sendable {
+    /// EXPLICITLY bindable (the A4 fence's lesson, applied before it could
+    /// bite): the app passes its own session's store, so a sweep can never
+    /// resolve the ambient installed database — in a test host that is the
+    /// DEV STORE, and a physical-removal pass is the one thing that must
+    /// never land there by dependency accident. Nil resolves the ambient
+    /// dependency (the core tests' scoped worlds).
+    private let database: AppDatabase
+    @Dependency(\.date) var date
+
+    public var pruningTakesPerPass: Int
+
+    public init(database: AppDatabase? = nil, pruningTakesPerPass: Int = 64) {
+        if let database {
+            self.database = database
+        } else {
+            @Dependency(\.database) var ambient
+            self.database = ambient
+        }
+        self.pruningTakesPerPass = pruningTakesPerPass
+    }
+
+    public struct SweepReport: Equatable, Sendable {
+        public var familiesPurged = 0
+        public var rowsPurgedLocally = 0
+        public var staleIntentsCompleted = 0
+        public var pruneIntentsMinted = 0
+        public init() {}
+    }
+
+    @discardableResult
+    public func sweep() async throws -> SweepReport {
+        var report = SweepReport()
+        let now = date.now
+        let roots = try await database.read { db in
+            // Horizon 0: no synced family is ever eligible on this road.
+            try PurgeJanitor.collectRoots(db, horizon: 0, now: now)
+        }
+        var processed: Set<SyncPurgeTarget> = []
+        for (root, _) in roots {
+            if processed.contains(root) { continue }
+            let stamp = DateFormatter.variorumISO8601.string(from: now)
+            let outcome: (verdict: PurgeJanitor.FamilyVerdict, rows: Int, stale: Int) =
+                try await database.write { db in
+                    try db.execute(sql: "PRAGMA defer_foreign_keys = ON")
+                    let family = try PurgeFamily.expand(db, roots: [root])
+                    let verdict = try PurgeJanitor.familyVerdict(db, family, horizon: 0)
+                    switch verdict {
+                    case .stale:
+                        let stale = try String.fetchAll(
+                            db,
+                            sql: """
+                                SELECT id FROM purge_intent
+                                WHERE table_name = ? AND row_id = ? AND deleted_at IS NULL
+                                """,
+                            arguments: [root.table, root.rowID])
+                        for id in stale {
+                            try db.execute(
+                                sql: "UPDATE purge_intent SET deleted_at = ?, updated_at = ? WHERE id = ?",
+                                arguments: [stamp, stamp, id])
+                        }
+                        return (verdict, 0, stale.count)
+                    case .eligibleLocalOnly:
+                        try PurgeFamily.deleteLocal(db, family: family, stamp: stamp)
+                        return (verdict, family.rows.count, 0)
+                    case .eligibleSynced, .deferred:
+                        return (verdict, 0, 0)
+                    }
+                }
+            report.staleIntentsCompleted += outcome.stale
+            if outcome.verdict == .eligibleLocalOnly {
+                report.familiesPurged += 1
+                report.rowsPurgedLocally += outcome.rows
+                processed.insert(root)
+            }
+        }
+
+        // Pruning by the one brain (memo §4d) — a local install's minted
+        // intents are themselves never-synced, so the NEXT local sweep
+        // takes the named savepoints through the local road above.
+        let pruning = try await database.read { try Queries.historyPruning($0) }
+        if pruning == .standard {
+            let takes = pruningTakesPerPass
+            let prunable = try await database.read { db in
+                try PurgeJanitor.prunableSavepoints(db, takesPerPass: takes, now: now)
+            }
+            if !prunable.isEmpty {
+                // The op bound to THIS sweep's store (the explicit-database
+                // fence above): never the ambient installed one.
+                let boundOps = withDependencies {
+                    $0.database = database
+                } operation: {
+                    Operations()
+                }
+                report.pruneIntentsMinted = try boundOps.requestPurge(
+                    prunable.map { SyncPurgeTarget(table: "commit_point", rowID: $0) })
+            }
+        }
+        return report
     }
 }

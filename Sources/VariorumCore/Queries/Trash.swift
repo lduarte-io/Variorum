@@ -69,7 +69,13 @@ extension Queries {
     /// · a stranded original whose note is itself in the Trash — it rides the
     ///   note's ONE row (her round-8b letter, "never double-listed").
     ///
-    /// Cost: the four listings are indexed reads bounded by `limit`; the
+    /// Cost: the four listings are reads bounded IN SQL by `limit` (13j
+    /// ladder B, B4 — the A6 limit-into-SQL discipline: each arm carries
+    /// its own ORDER BY + LIMIT, in the CALLER'S direction, because the
+    /// top-N of the merged union equals the top-N over per-arm top-Ns only
+    /// when every arm sorts the same way the merge does; a DESC arm under
+    /// an oldest-first merge would hand over its newest rows and present
+    /// the oldest of THOSE — silently wrong, not merely slow). The
     /// stranded-originals half walks the derived_from families of unplaced
     /// blocks (`originFamilies`), which is why it is a DELIBERATELY-opened
     /// surface's query and not a held per-keystroke one.
@@ -78,6 +84,11 @@ extension Queries {
         oldestFirst: Bool = false, limit: Int? = nil
     ) throws -> [TrashItem] {
         let cutoff = TrashWindow.cutoffStamp(now: now)
+        // Each arm's second sort key IS the row's own id — the same pair
+        // the in-memory merge below compares — so per-arm LIMITs and the
+        // merged prefix agree exactly (B4's tiebreak-coherence condition).
+        let dir = oldestFirst ? "ASC" : "DESC"
+        let limitClause = limit.map { " LIMIT \($0)" } ?? ""
         var items: [TrashItem] = []
 
         if kinds.contains(.note) {
@@ -87,9 +98,16 @@ extension Queries {
                     SELECT id, title, entry_date, deleted_at
                     FROM container
                     WHERE kind = 'post' AND deleted_at IS NOT NULL AND deleted_at >= :cutoff
+                      -- The fence is STAMP-AWARE (13j ladder B, B1): a LIVE
+                      -- intent fences, and a completed one fences only rows
+                      -- it actually covered (completed at-or-after the
+                      -- row's tombstone — the purged-elsewhere ledger lag).
+                      -- A VOIDED intent from before a re-delete never hides
+                      -- the fresh tombstone's row.
                       AND NOT EXISTS (SELECT 1 FROM purge_intent pi
-                        WHERE pi.table_name = 'container' AND pi.row_id = container.id)
-                    ORDER BY deleted_at DESC, id DESC
+                        WHERE pi.table_name = 'container' AND pi.row_id = container.id
+                          AND (pi.deleted_at IS NULL OR pi.deleted_at >= container.deleted_at))
+                    ORDER BY deleted_at \(dir), id \(dir)\(limitClause)
                     """,
                 arguments: ["cutoff": cutoff]
             ).map { row in
@@ -107,8 +125,9 @@ extension Queries {
                     SELECT id, name, deleted_at FROM reading
                     WHERE deleted_at IS NOT NULL AND deleted_at >= :cutoff
                       AND NOT EXISTS (SELECT 1 FROM purge_intent pi
-                        WHERE pi.table_name = 'reading' AND pi.row_id = reading.id)
-                    ORDER BY deleted_at DESC, id DESC
+                        WHERE pi.table_name = 'reading' AND pi.row_id = reading.id
+                          AND (pi.deleted_at IS NULL OR pi.deleted_at >= reading.deleted_at))
+                    ORDER BY deleted_at \(dir), id \(dir)\(limitClause)
                     """,
                 arguments: ["cutoff": cutoff]
             ).map { row in
@@ -140,8 +159,9 @@ extension Queries {
                           AND cb.deleted_at = b.deleted_at
                           AND cc.deleted_at = b.deleted_at)
                       AND NOT EXISTS (SELECT 1 FROM purge_intent pi
-                        WHERE pi.table_name = 'block' AND pi.row_id = b.id)
-                    ORDER BY b.deleted_at DESC, b.id DESC
+                        WHERE pi.table_name = 'block' AND pi.row_id = b.id
+                          AND (pi.deleted_at IS NULL OR pi.deleted_at >= b.deleted_at))
+                    ORDER BY b.deleted_at \(dir), b.id \(dir)\(limitClause)
                     """,
                 arguments: ["cutoff": cutoff]
             ).map { row in
@@ -174,8 +194,9 @@ extension Queries {
                     WHERE v.deleted_at IS NOT NULL AND v.deleted_at >= :cutoff
                       AND b.deleted_at IS NULL
                       AND NOT EXISTS (SELECT 1 FROM purge_intent pi
-                        WHERE pi.table_name = 'variant' AND pi.row_id = v.id)
-                    ORDER BY v.deleted_at DESC, v.id DESC
+                        WHERE pi.table_name = 'variant' AND pi.row_id = v.id
+                          AND (pi.deleted_at IS NULL OR pi.deleted_at >= v.deleted_at))
+                    ORDER BY v.deleted_at \(dir), v.id \(dir)\(limitClause)
                     """,
                 arguments: ["cutoff": cutoff]
             ).map { row in
@@ -192,7 +213,8 @@ extension Queries {
         }
 
         if kinds.contains(.preservedOriginal) {
-            items += try strandedOriginals(db, now: now)
+            items += try strandedOriginals(
+                db, now: now, oldestFirst: oldestFirst, limit: limit)
         }
 
         items.sort { a, b in
@@ -214,8 +236,16 @@ extension Queries {
     /// An original with NO descendant family at all is deliberately NOT here:
     /// there is no family clock to ride, so it stays permanent in the note's
     /// tray. Nothing ages out for want of an edge.
-    public static func strandedOriginals(_ db: Database, now: Date) throws -> [TrashItem] {
+    ///
+    /// `oldestFirst`/`limit` (13j ladder B, B4 — additive, defaults keep
+    /// every existing caller byte-identical): the arm sorts and bounds in
+    /// SQL like its four siblings above, in the caller's direction.
+    public static func strandedOriginals(
+        _ db: Database, now: Date, oldestFirst: Bool = false, limit: Int? = nil
+    ) throws -> [TrashItem] {
         let cutoff = TrashWindow.cutoffStamp(now: now)
+        let dir = oldestFirst ? "ASC" : "DESC"
+        let limitClause = limit.map { " LIMIT \($0)" } ?? ""
         return try Row.fetchAll(
             db,
             sql: """
@@ -254,11 +284,14 @@ extension Queries {
                 HAVING live_count = 0 AND family_clock >= :cutoff
                   -- 13j batch 6b: a family with a standing purge intent has
                   -- left every surface (the doors' promise); its origin
-                  -- rides the purge and stops listing with it.
+                  -- rides the purge and stops listing with it. Stamp-aware
+                  -- (ladder B, B1): a VOIDED intent from before a re-delete
+                  -- never fences the fresh tombstone's family.
                   AND SUM(CASE WHEN EXISTS (SELECT 1 FROM purge_intent pi
-                    WHERE pi.table_name = 'block' AND pi.row_id = f.id)
+                    WHERE pi.table_name = 'block' AND pi.row_id = f.id
+                      AND (pi.deleted_at IS NULL OR pi.deleted_at >= d.deleted_at))
                     THEN 1 ELSE 0 END) = 0
-                ORDER BY family_clock DESC, f.origin DESC
+                ORDER BY family_clock \(dir), f.origin \(dir)\(limitClause)
                 """,
             arguments: ["cutoff": cutoff]
         ).map { row in
@@ -273,18 +306,36 @@ extension Queries {
         }
     }
 
-    /// One note's originals, split into the two states her round-8b ruling
-    /// named — WITHOUT walking the corpus: the recursion is seeded by this
-    /// note's own originals, so the cost is those families and nothing else
-    /// (the tray holds this observation while a note is open, so its cost is
-    /// P1's business).
+    /// A stranded family's fate, as the tray renders it (13j ladder B, B5).
+    public enum OriginFamilyFate: Equatable, Sendable {
+        /// The family is in the Trash window: the origin rides this clock
+        /// in the tray's clock-bearing section (her round-8b ruling).
+        case counting(String)
+        /// The family has LEFT every surface — the window expired, or a
+        /// purge intent stands. The origin leaves BOTH tray buckets with
+        /// it: it rode a visible clock for its 30 days and goes exactly
+        /// when the clock said (the uniform Trash story) —
+        /// unreachable-until-purge precisely like its family. Returning it
+        /// to "Preserved originals" instead would show "permanent" on a row
+        /// the janitor's family expansion (memo §4c) still takes — her
+        /// round-8b trust violation reborn in the post-window gap.
+        case gone
+    }
+
+    /// One note's originals' fates — WITHOUT walking the corpus: the
+    /// recursion is seeded by this note's own originals, so the cost is
+    /// those families and nothing else (the tray holds this observation
+    /// while a note is open, so its cost is P1's business).
     ///
-    /// `atRisk[blockID]` carries the family clock for an original whose last
-    /// live descendant is gone; anything absent from it is permanent.
+    /// An origin ABSENT from the result has a live descendant and is
+    /// truthfully permanent; `.counting` rides the tray's clock section;
+    /// `.gone` leaves both buckets (above). The window and intent fences
+    /// here MIRROR `strandedOriginals`' exactly — two surfaces answering
+    /// one state differently was B5's finding.
     public static func originFamilyClocks(
-        _ db: Database, postID: String
-    ) throws -> [String: String] {
-        var clocks: [String: String] = [:]
+        _ db: Database, postID: String, now: Date
+    ) throws -> [String: OriginFamilyFate] {
+        var fates: [String: OriginFamilyFate] = [:]
         for row in try Row.fetchAll(
             db,
             sql: """
@@ -311,17 +362,28 @@ extension Queries {
                 )
                 SELECT f.origin AS block_id,
                        MAX(d.deleted_at) AS family_clock,
-                       SUM(CASE WHEN d.deleted_at IS NULL THEN 1 ELSE 0 END) AS live_count
+                       SUM(CASE WHEN d.deleted_at IS NULL THEN 1 ELSE 0 END) AS live_count,
+                       -- The intent fence, stamp-aware (B1/B5 — the exact
+                       -- condition `strandedOriginals` applies).
+                       SUM(CASE WHEN EXISTS (SELECT 1 FROM purge_intent pi
+                         WHERE pi.table_name = 'block' AND pi.row_id = f.id
+                           AND (pi.deleted_at IS NULL OR pi.deleted_at >= d.deleted_at))
+                         THEN 1 ELSE 0 END) AS fenced_count
                 FROM fam f JOIN block d ON d.id = f.id
                 GROUP BY f.origin
                 HAVING live_count = 0
                 """,
             arguments: ["post": postID]) {
-            if let clock: String = row["family_clock"] {
-                clocks[row["block_id"] as String] = clock
+            guard let clock: String = row["family_clock"] else { continue }
+            let fenced = (row["fenced_count"] as Int? ?? 0) > 0
+            let blockID = row["block_id"] as String
+            if fenced || !TrashWindow.isInWindow(clock, now: now) {
+                fates[blockID] = .gone
+            } else {
+                fates[blockID] = .counting(clock)
             }
         }
-        return clocks
+        return fates
     }
 
     /// **Did deleting these blocks strand an original?** (her round-8b

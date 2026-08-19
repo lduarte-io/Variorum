@@ -155,13 +155,25 @@ nonisolated enum RecoveryPath {
     /// the row left every surface the moment the intent was written; the
     /// bytes follow once every device on the account has seen the deletion
     /// (the horizon — the memo's rule; she never waits on it).
-    static func deleteNowReceipt(_ kind: Queries.TrashItem.Kind) -> String {
-        "The \(rowKind(kind)) is gone from the app now — the bytes follow "
-            + "once every synced device has caught up."
+    ///
+    /// `synced` (13j ladder B, B3 — her round-11 ruling: receipts true for
+    /// BOTH populations): with no sync chain configured there are no
+    /// "synced devices" to catch up, and the app's OWN local cleanup takes
+    /// the bytes — never-synced things right away, anything that once
+    /// synced when its safety rule allows. The local wording says exactly
+    /// that and promises no timing it cannot keep.
+    static func deleteNowReceipt(_ kind: Queries.TrashItem.Kind, synced: Bool) -> String {
+        synced
+            ? "The \(rowKind(kind)) is gone from the app now — the bytes follow "
+                + "once every synced device has caught up."
+            : "The \(rowKind(kind)) is gone from the app now — the app's own "
+                + "cleanup removes the bytes."
     }
-    static func emptyTrashReceipt(_ total: Int) -> String {
-        "The Trash is emptied — \(total) thing\(total == 1 ? "" : "s") gone from the app now; "
-            + "the bytes follow once every synced device has caught up."
+    static func emptyTrashReceipt(_ total: Int, synced: Bool) -> String {
+        let head = "The Trash is emptied — \(total) thing\(total == 1 ? "" : "s") gone from the app now; "
+        return synced
+            ? head + "the bytes follow once every synced device has caught up."
+            : head + "the app's own cleanup removes the bytes."
     }
 }
 
@@ -316,13 +328,14 @@ final class RecoveryViewModel {
         lastError = nil
         receipt = nil
         do {
+            let synced = session.syncConfigured()
             switch confirm {
             case .deleteNow(let item):
                 try await session.runner.run { ops in
                     _ = try ops.requestPurge(
                         [SyncPurgeTarget(table: item.kind.purgeTable, rowID: item.id)])
                 }
-                receipt = RecoveryPath.deleteNowReceipt(item.kind)
+                receipt = RecoveryPath.deleteNowReceipt(item.kind, synced: synced)
             case .emptyTrash:
                 // Re-read at ACT time (a confirm is a pause; the listing is
                 // a projection — the R3-1 lesson): everything currently in
@@ -337,8 +350,13 @@ final class RecoveryViewModel {
                 try await session.runner.run { ops in
                     _ = try ops.requestPurge(targets)
                 }
-                receipt = RecoveryPath.emptyTrashReceipt(targets.count)
+                receipt = RecoveryPath.emptyTrashReceipt(targets.count, synced: synced)
             }
+            // 13j ladder B (B3): on a local-only install the cleanup IS
+            // the app's — run it now, so Delete Now means what it says the
+            // moment she reads it (never-synced families remove here; a
+            // configured chain's janitor owns the road instead).
+            await session.sweepLocalPurge()
         } catch let error as OperationError {
             lastError = TrayRefusalCopy.message(for: error)
         } catch {

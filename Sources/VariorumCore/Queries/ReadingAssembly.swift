@@ -158,7 +158,8 @@ extension Queries {
         var sql = """
             SELECT * FROM reading WHERE deleted_at IS NOT NULL AND deleted_at >= ?
               AND NOT EXISTS (SELECT 1 FROM purge_intent pi
-                WHERE pi.table_name = 'reading' AND pi.row_id = reading.id)
+                WHERE pi.table_name = 'reading' AND pi.row_id = reading.id
+                  AND (pi.deleted_at IS NULL OR pi.deleted_at >= reading.deleted_at))
             ORDER BY deleted_at DESC, id DESC
             """
         var arguments: [(any DatabaseValueConvertible)?] = [TrashWindow.cutoffStamp(now: now)]

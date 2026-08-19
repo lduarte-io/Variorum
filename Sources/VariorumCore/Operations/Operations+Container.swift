@@ -400,6 +400,12 @@ extension Operations {
             container.deletedAt = nil
             container.updatedAt = now
             try container.update(db)
+            // 13j ladder B (B1): a restored row voids any live intent
+            // naming it — a leftover intent must never claim it later.
+            // Cascade-revived blocks carry no intents of their own (an
+            // intent is minted per TRASH ROW, and a cascade victim never
+            // lists there), so voiding the container's is the whole job.
+            try voidPurgeIntents(db, table: "container", rowID: id)
 
             // Phase 11 (review round 1, MAJOR): the container's LENSES
             // revive by the exact-stamp contract — BEFORE the block flips

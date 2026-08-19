@@ -99,6 +99,13 @@ final class AppServices {
     /// internal so the wiring tests can drive the production runner path.
     let session: AppSession
 
+    /// 13j ladder B (B3): the LOCAL purge cadence — launch + hourly, each
+    /// tick a no-op while sync is configured (`AppSession.sweepLocalPurge`
+    /// gates itself). The transported janitor rides sync rounds; this is
+    /// the never-signed-in install's only clock, riding the same rhythm the
+    /// idle-commit sweep uses.
+    private var localPurgeTask: Task<Void, Never>?
+
     /// Injectable transport composition (review round 1, MINOR: without
     /// the seam, the wiring tests fired real network requests at the
     /// production project URL — breaking the repo-wide no-network test
@@ -173,6 +180,9 @@ final class AppServices {
         // syncing — a dev bug's writes would push to the mirror and
         // replicate to her real devices.
         sync = SyncSession(database: session.database, allowsSync: storeVariant == .real)
+        // 13j ladder B (B3): the purge doors' receipts and the local purge
+        // road both read this — one truth, the sync session's own.
+        session.syncConfigured = { [weak sync = sync] in sync?.isConfigured ?? false }
         // THE A4 FENCE EXTENDS TO THE BRIDGE (Phase 9b): the author's live
         // Fragments journal pairs with the REAL store only.
         bridge = BridgeSession(
@@ -270,6 +280,14 @@ final class AppServices {
         }
         idleCommits.start()
         backup?.start()
+        // 13j ladder B (B3): the local purge cadence — see the property.
+        localPurgeTask?.cancel()
+        localPurgeTask = Task { [weak session = session] in
+            while !Task.isCancelled {
+                await session?.sweepLocalPurge()
+                do { try await Task.sleep(for: .seconds(60 * 60)) } catch { return }
+            }
+        }
     }
 
     func stop() {
@@ -277,6 +295,8 @@ final class AppServices {
         bridge.stop()
         idleCommits.stop()
         backup?.stop()
+        localPurgeTask?.cancel()
+        localPurgeTask = nil
     }
 
     /// THE LIFECYCLE CADENCE PULSE (the app's became-active hook; launch runs

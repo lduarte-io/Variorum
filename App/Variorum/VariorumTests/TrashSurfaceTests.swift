@@ -195,8 +195,10 @@ struct TrashSurfaceTests {
 
             // …and the tray MOVES the row: out of the forever section, into
             // the clock-bearing one (the visible move her ruling asked for).
-            let clocks: [String: String] = try await editor.database.read { db in
-                try Queries.originFamilyClocks(db, postID: editor.postID)
+            // (Ladder B, B5 — annotated pin edit, claim unchanged: the
+            // clocks query gained `now:` and answers FATES.)
+            let clocks: [String: Queries.OriginFamilyFate] = try await editor.database.read { db in
+                try Queries.originFamilyClocks(db, postID: editor.postID, now: harnessNow)
             }
             #expect(clocks[blockID] != nil)
             let stranded: [String] = try await editor.database.read { db in

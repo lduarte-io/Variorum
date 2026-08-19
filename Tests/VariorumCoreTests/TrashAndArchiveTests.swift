@@ -164,6 +164,10 @@ struct TrashAndArchiveTests {
 
     // MARK: - The preserved original's two states (her round-8b ruling)
 
+    // 13j ladder B (B5) — annotated pin edit, claims byte-unchanged:
+    // `originFamilyClocks` gained `now:` (the tray twin's window/intent
+    // fences) and returns FATES; the in-window assertions here read the
+    // same truths through the new shape.
     @Test func anOriginalIsPermanentWhileADescendantLivesAndMovesWhenTheLastOneGoes() throws {
         try withOperations { ops, db in
             let post = try ops.createPost(title: "divided")
@@ -174,7 +178,7 @@ struct TrashAndArchiveTests {
             // While the successors live: the original is a PERMANENT row —
             // in the note's tray, with no family clock.
             let before = try db.read { db in
-                (clocks: try Queries.originFamilyClocks(db, postID: post.id),
+                (clocks: try Queries.originFamilyClocks(db, postID: post.id, now: harnessNow),
                  stranded: try Queries.strandedOriginals(db, now: harnessNow).count,
                  originals: try Queries.preservedOriginals(db, postID: post.id).map(\.blockID))
             }
@@ -183,11 +187,11 @@ struct TrashAndArchiveTests {
             #expect(before.originals == [block.block.id])
 
             try ops.deleteBlock(w.first.block.id)
-            let midway = try db.read { try Queries.originFamilyClocks($0, postID: post.id) }
+            let midway = try db.read { try Queries.originFamilyClocks($0, postID: post.id, now: harnessNow) }
             #expect(midway.isEmpty, "one descendant still lives — still permanent")
 
             try ops.deleteBlock(w.second.block.id)
-            let clocks = try db.read { try Queries.originFamilyClocks($0, postID: post.id) }
+            let clocks = try db.read { try Queries.originFamilyClocks($0, postID: post.id, now: harnessNow) }
             #expect(clocks[block.block.id] != nil,
                     "the LAST live descendant went — the original moves onto the clock")
             let stranded = try db.read { try Queries.strandedOriginals($0, now: harnessNow) }
@@ -199,7 +203,7 @@ struct TrashAndArchiveTests {
             // section. Pure derivation — nothing is written to the original.
             _ = try ops.restoreBlock(w.second.block.id)
             let after = try db.read { db in
-                (clocks: try Queries.originFamilyClocks(db, postID: post.id),
+                (clocks: try Queries.originFamilyClocks(db, postID: post.id, now: harnessNow),
                  stranded: try Queries.strandedOriginals(db, now: harnessNow).count)
             }
             #expect(after.clocks.isEmpty, "put one back and the original is permanent again")
@@ -375,6 +379,101 @@ struct TrashAndArchiveTests {
             #expect(block?.archivedAt != nil, "redo sets it aside again")
             #expect(try db.read { try Queries.archivedBlocks($0, postID: post.id) }
                 .map(\.blockID) == [first.block.id])
+        }
+    }
+
+    // MARK: - 13j ladder B (B4): the per-arm SQL window is direction-true
+
+    @Test func oldestFirstWithALimitReturnsTheTrueOldestRows() throws {
+        try withOperations { ops, db in
+            // Five deleted notes, deleted in order — the harness clock
+            // ticks, so their tombstones are strictly increasing.
+            var ids: [String] = []
+            for index in 0..<5 {
+                let post = try ops.createPost(title: "note \(index)", profile: .generic)
+                try ops.deleteContainer(post.id)
+                ids.append(post.id)
+            }
+            // The B4 trap this pins: a DESC arm under an oldest-first merge
+            // hands over its NEWEST rows and presents the oldest of THOSE —
+            // silently wrong. The arm must sort in the caller's direction
+            // BEFORE it limits.
+            let oldest = try db.read {
+                try Queries.trash($0, now: harnessNow, kinds: [.note],
+                                  oldestFirst: true, limit: 2)
+            }
+            #expect(oldest.map(\.id) == Array(ids.prefix(2)),
+                    "oldest-first + limit = the true oldest, not the newest re-sorted")
+            let newest = try db.read {
+                try Queries.trash($0, now: harnessNow, kinds: [.note], limit: 2)
+            }
+            #expect(newest.map(\.id) == Array(ids.suffix(2).reversed()))
+        }
+    }
+
+    // MARK: - 13j ladder B (B5): the two surfaces answer one state ONE way
+
+    @Test func anExpiredFamilysOriginalLeavesBothTrayBucketsAndTheTrash() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "divided", profile: .generic)
+            let block = try ops.newBlock(in: post.id, text: "First half. Second half.")
+            _ = try ops.branchVariant(block.block.id, from: block.variant.id)
+            let w = try ops.divideW(block.block.id, cuts: [block.variant.id: 12])
+            try ops.deleteBlock(w.first.block.id)
+            try ops.deleteBlock(w.second.block.id)
+
+            // Day 29: counting — the tray's clock section and the Trash
+            // agree the family is in its window.
+            let day29 = harnessNow.addingTimeInterval(29 * 86_400)
+            let counting = try db.read {
+                try Queries.originFamilyClocks($0, postID: post.id, now: day29)
+            }
+            guard case .counting? = counting[block.block.id] else {
+                Issue.record("day 29: the original rides the family's clock")
+                return
+            }
+            #expect(try db.read { try Queries.strandedOriginals($0, now: day29) }
+                .map(\.id) == [block.block.id])
+
+            // Day 31: the family left every surface — the original leaves
+            // BOTH tray buckets with it (round 8b + memo §4c: the janitor's
+            // family expansion still takes it, so a "permanent" label here
+            // would be the trust violation reborn in the post-window gap).
+            let day31 = harnessNow.addingTimeInterval(31 * 86_400)
+            let fates = try db.read {
+                try Queries.originFamilyClocks($0, postID: post.id, now: day31)
+            }
+            #expect(fates[block.block.id] == .gone,
+                    "expired family ⇒ the original leaves both buckets")
+            #expect(try db.read { try Queries.strandedOriginals($0, now: day31) }.isEmpty,
+                    "…and the Trash's twin arm answers the same state the same way")
+        }
+    }
+
+    @Test func anIntentNamedFamilysOriginalLeavesTheTrayWithItsBlocks() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "divided", profile: .generic)
+            let block = try ops.newBlock(in: post.id, text: "First half. Second half.")
+            _ = try ops.branchVariant(block.block.id, from: block.variant.id)
+            let w = try ops.divideW(block.block.id, cuts: [block.variant.id: 12])
+            try ops.deleteBlock(w.first.block.id)
+            try ops.deleteBlock(w.second.block.id)
+            _ = try ops.requestPurge([
+                SyncPurgeTarget(table: "block", rowID: w.first.block.id),
+                SyncPurgeTarget(table: "block", rowID: w.second.block.id),
+            ])
+
+            // The deleted blocks left every surface at the confirm; the
+            // origin leaves the tray's clock section (and the Trash) WITH
+            // them — never a countdown pointing at rows no surface lists.
+            let fates = try db.read {
+                try Queries.originFamilyClocks($0, postID: post.id, now: harnessNow)
+            }
+            #expect(fates[block.block.id] == .gone,
+                    "an intent-named family takes its original off every surface")
+            #expect(try db.read { try Queries.strandedOriginals($0, now: harnessNow) }.isEmpty)
+            #expect(try db.read { try Queries.trayBlocks($0, postID: post.id, now: harnessNow) }
+                .isEmpty, "the fenced blocks are gone from the tray")
         }
     }
 }

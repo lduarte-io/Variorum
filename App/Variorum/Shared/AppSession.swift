@@ -56,6 +56,32 @@ final class AppSession {
     /// session was built in, in production and under test alike.
     @ObservationIgnored private let clock: DateGenerator
     var now: Date { clock.now }
+
+    /// **Is a sync chain configured?** (13j ladder B, B3 — her round-11
+    /// ruling's receipt condition.) Wired by AppServices to
+    /// `SyncSession.isConfigured`; false by default, which is the honest
+    /// answer for a session nothing wired (tests, previews, the
+    /// never-signed-in install). The purge doors word their receipts by it,
+    /// and the local purge road below runs only while it is false — a
+    /// configured chain's janitor covers everything, local families
+    /// included, so two sweeps never race.
+    @ObservationIgnored var syncConfigured: () -> Bool = { false }
+
+    /// One best-effort local sweep (13j ladder B, B3 — `LocalPurge`, the
+    /// transportless road: never-synced families physically remove with no
+    /// server, no ledger, no horizon — there is no one to strand). Swept at
+    /// launch + periodic cadence by AppServices, and right after a
+    /// purge-door confirm so Delete Now on a local install feels like what
+    /// it says. Quiet on failure (a purge cadence is never a surface to
+    /// throw at; the next sweep retries), and a no-op while a sync chain is
+    /// configured (its janitor owns the road). The store is bound
+    /// EXPLICITLY — this session's, never the ambient installed one (the
+    /// A4 fence's lesson: a test host's ambient database is the dev store,
+    /// and physical removal must never land there by dependency accident).
+    func sweepLocalPurge() async {
+        guard !syncConfigured() else { return }
+        _ = try? await LocalPurge(database: database).sweep()
+    }
     /// The session-scoped structural undo stack (AppSpec §9) — in-memory,
     /// never persisted. (On the Mac it wires to the Edit menu; the phone
     /// registers entries where its structural doors do — divide, merge,

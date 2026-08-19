@@ -151,6 +151,9 @@ extension Operations {
             reading.deletedAt = nil
             reading.updatedAt = now
             try reading.update(db)
+            // 13j ladder B (B1): a restored row voids any live intent
+            // naming it — a leftover intent must never claim it later.
+            try voidPurgeIntents(db, table: "reading", rowID: id)
 
             // Chapters: exact-stamp cascade victims revive; independently
             // deleted chapters (different stamp) stay dead — and now have

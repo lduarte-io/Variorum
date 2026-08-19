@@ -98,6 +98,9 @@ extension Operations {
             block.updatedAt = now
             try block.update(db)
             try flipBlockCascadeTombstones(db, blockID: blockID, stamp: stamp, now: now)
+            // 13j ladder B (B1): a restored row voids any live intent
+            // naming it — a leftover intent must never claim it later.
+            try voidPurgeIntents(db, table: "block", rowID: blockID)
 
             guard let lastContainerID = block.lastContainerId,
                   let container = try Container.fetchOne(db, key: lastContainerID),

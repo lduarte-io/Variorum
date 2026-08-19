@@ -186,8 +186,11 @@ final class TrayViewModel {
     /// The originals whose last live descendant has been deleted: they have
     /// MOVED onto the family's clock, and the tray shows the move rather than
     /// letting a row quietly change meaning where she is not looking. Keyed
-    /// by block id → the family's stamp.
-    private(set) var strandedClocks: [String: String] = [:]
+    /// by block id → the family's FATE (13j ladder B, B5): `.counting` rides
+    /// the clock section; `.gone` — window expired or intent standing —
+    /// leaves BOTH buckets, exactly as the Trash's twin arm reads the same
+    /// state (the query's own doc carries the reasoning).
+    private(set) var strandedFates: [String: Queries.OriginFamilyFate] = [:]
     private(set) var statusMessage: String?
 
     /// The row the caller asked to be shown (the J3-family lineage door's
@@ -236,7 +239,8 @@ final class TrayViewModel {
                     // their families and nothing else — the tray holds this
                     // observation while the note is open, so its cost is P1's
                     // business (`Queries.originFamilyClocks`).
-                    strandedClocks: try Queries.originFamilyClocks(db, postID: postID))
+                    strandedFates: try Queries.originFamilyClocks(
+                        db, postID: postID, now: now))
             }) {
                 adopt(value)
             }
@@ -250,7 +254,7 @@ final class TrayViewModel {
         var deleted: [Queries.TrayItem] = []
         var archived: [Queries.TrayItem] = []
         var originals: [Queries.PreservedOriginal] = []
-        var strandedClocks: [String: String] = [:]
+        var strandedFates: [String: Queries.OriginFamilyFate] = [:]
     }
 
     /// Internal so tests drive the panel deterministically (the
@@ -260,21 +264,35 @@ final class TrayViewModel {
         deleted = deletedTruncated
             ? Array(snapshot.deleted.prefix(Self.window)) : snapshot.deleted
         archived = Array(snapshot.archived.prefix(Self.window))
-        strandedClocks = snapshot.strandedClocks
+        strandedFates = snapshot.strandedFates
         // The SPLIT her round-8b ruling asked for, made where the two lists
         // are handed over: an original with a live descendant stays in the
-        // forever section; one whose family is gone moves up into the
-        // clock-bearing section, in this same panel, where she can see it go.
-        let forever = snapshot.originals.filter { strandedClocks[$0.blockID] == nil }
+        // forever section; one whose family is COUNTING moves up into the
+        // clock-bearing section, in this same panel, where she can see it
+        // go — and one whose family is GONE (window expired, or Delete Now
+        // named it) appears in NEITHER (13j ladder B, B5): it rode its
+        // visible clock and leaves every surface exactly when the clock
+        // said, unreachable-until-purge like its family.
+        let forever = snapshot.originals.filter { strandedFates[$0.blockID] == nil }
         originalsTruncated = forever.count > Self.window
         originals = originalsTruncated ? Array(forever.prefix(Self.window)) : forever
-        stranded = snapshot.originals.filter { strandedClocks[$0.blockID] != nil }
+        stranded = snapshot.originals.filter {
+            if case .counting = strandedFates[$0.blockID] { return true }
+            return false
+        }
         loaded = true
     }
 
     /// The originals now riding the Trash's clock — rendered in the first
     /// section beside the deleted blocks, wearing the family's countdown.
     private(set) var stranded: [Queries.PreservedOriginal] = []
+
+    /// The counting family clock for a stranded row (nil for permanent or
+    /// gone — the row then renders elsewhere or nowhere, B5).
+    func strandedClock(_ blockID: String) -> String? {
+        if case .counting(let stamp)? = strandedFates[blockID] { return stamp }
+        return nil
+    }
 
     // MARK: - Put back
 
@@ -497,8 +515,8 @@ struct TrayPanel: View {
                     ForEach(model.stranded, id: \.blockID) { item in
                         row(
                             blockID: item.blockID, text: item.text,
-                            stamp: model.strandedClocks[item.blockID], when: "goes",
-                            clock: model.strandedClocks[item.blockID].flatMap {
+                            stamp: model.strandedClock(item.blockID), when: "goes",
+                            clock: model.strandedClock(item.blockID).flatMap {
                                 TrashWindow.daysLeft($0, now: session.now)
                             },
                             note: TrayPath.goesWithItsFamily,

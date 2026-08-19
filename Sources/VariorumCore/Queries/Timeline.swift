@@ -220,7 +220,8 @@ extension Queries {
             FROM container
             WHERE kind = 'post' AND deleted_at IS NOT NULL AND deleted_at >= ?
               AND NOT EXISTS (SELECT 1 FROM purge_intent pi
-                WHERE pi.table_name = 'container' AND pi.row_id = container.id)
+                WHERE pi.table_name = 'container' AND pi.row_id = container.id
+                  AND (pi.deleted_at IS NULL OR pi.deleted_at >= container.deleted_at))
             ORDER BY deleted_at DESC, id DESC
             """
         var arguments: [(any DatabaseValueConvertible)?] = [TrashWindow.cutoffStamp(now: now)]

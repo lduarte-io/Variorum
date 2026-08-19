@@ -2408,7 +2408,8 @@ struct TutorialDeletionActsTests {
                     deleted: try Queries.trayBlocks(db, postID: lesson, now: now),
                     archived: try Queries.archivedBlocks(db, postID: lesson),
                     originals: try Queries.preservedOriginals(db, postID: lesson),
-                    strandedClocks: try Queries.originFamilyClocks(db, postID: lesson))
+                    strandedFates: try Queries.originFamilyClocks(
+                        db, postID: lesson, now: now))
             })
             #expect(tray.deleted.map(\.blockID) == [doomed.blockID])
             #expect(tray.archived.map(\.blockID) == [keeper.blockID])
@@ -2562,7 +2563,7 @@ struct TutorialDeletionActsTests {
             // …and the tray holds it in the clockless section meanwhile.
             let (originals, clocks) = try await db.read { db in
                 (try Queries.preservedOriginals(db, postID: lesson).map(\.blockID),
-                 try Queries.originFamilyClocks(db, postID: lesson))
+                 try Queries.originFamilyClocks(db, postID: lesson, now: harnessNow))
             }
             #expect(originals.contains(dividing.blockID))
             #expect(clocks[dividing.blockID] == nil, "permanent while its descendants live")
@@ -2658,7 +2659,7 @@ struct TutorialDeletionActsTests {
                 "the receipt names the original it just put on the clock")
 
             let (clocks, originals) = try await db.read { db in
-                (try Queries.originFamilyClocks(db, postID: lesson),
+                (try Queries.originFamilyClocks(db, postID: lesson, now: harnessNow),
                  try Queries.preservedOriginals(db, postID: lesson))
             }
             #expect(clocks[dividing.blockID] != nil, "the original now rides the family's clock")
@@ -2668,7 +2669,7 @@ struct TutorialDeletionActsTests {
                 deleted: try await db.read { [now = session.now] db in
                     try Queries.trayBlocks(db, postID: lesson, now: now)
                 },
-                archived: [], originals: originals, strandedClocks: clocks))
+                archived: [], originals: originals, strandedFates: clocks))
             #expect(!tray.originals.contains { $0.blockID == dividing.blockID },
                     "it has left the section that promised permanence")
             #expect(tray.stranded.contains { $0.blockID == dividing.blockID },

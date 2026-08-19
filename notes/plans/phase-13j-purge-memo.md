@@ -422,7 +422,50 @@ silently disagrees with the artifact:**
 UNBUILT** (the §6 posture): the floor stays 0 in production, so the
 say-so state is unreachable — P-2 renders no door for a state that cannot
 occur. The future ledger-pruning rider owes: the floor's server-side
-advance, the returner face, and the fresh-device refinement above.
+advance, the returner face, and the fresh-device refinement above —
+**plus (13j ladder B, B7): the reonboard road's re-offer corner.**
+`reonboardFromAccount` composes the EXISTING `resyncReinitialize`, which
+re-enqueues the WHOLE local store at base 0 — so once a floor > 0 exists,
+purged rows whose ledger entries were pruned BELOW it re-insert on the
+mirror at scale, for exactly the device class the say-so exists for. The
+rider chooses: adopt-server-state reinitialization, or ledger-screening
+the re-enqueued set. Unreachable today (floor 0), recorded so the rider
+inherits it beside the fresh-device refinement.
+
+## 6c. LADDER B ADDENDUM (2026-08-19 — the review's fixes against this memo)
+
+1. **§2's returner sentence gains its missing half (B2):** the ledger now
+   screens the outbox BEFORE each round's drain (the scheduler runs the
+   janitor's `reconcileLedger` pre-pass ahead of pull→push, order
+   untouched) — a returner's NEVER-PUSHED child row of a meanwhile-purged
+   family (an id no ledger can name, because the server never saw it)
+   dies with its family instead of landing as a permanent mirror orphan
+   every peer's pull would stall on. **The consequence, named out loud
+   (the purge-wins doctrine's letter): a returner's unpushed writing
+   UNDER a purged family is discarded with the family.** The say-so
+   floor gate now refuses the WHOLE round (outbox intact, cursor
+   unmoved) instead of speaking only after one drain already ran.
+2. **§4a/§4b gain the LOCAL ROAD (B3 — her round-11 ruling):** a family
+   whose EVERY row the server never accepted (`sync_row_seq`-absent)
+   purges LOCALLY with no `executePurge` and no ledger entry — no peer
+   ever saw it, so there is no one to strand and nothing to fence; one
+   synced member means the whole family waits (family-completeness), and
+   outbox presence never disqualifies (a never-configured install's rows
+   sit there forever by construction). `LocalPurge` — the transportless
+   sweep sharing the janitor's collection/verdict/family machinery — runs
+   it on never-signed-in installs (launch + hourly + after each purge
+   confirm), so "really deleted" is really true for the free v1
+   population; the doors' receipts word the two populations honestly.
+3. **§4b gains the STALENESS rule (B1 — the ladder's BLOCKER):** an
+   intent whose target row is LIVE at sweep time — restored since the
+   confirm (⌥⌘Z, or a peer's Put back before the intent arrived) — is
+   STALE: the family never purges, and the intent is COMPLETED without
+   being honored. The restore doors themselves VOID live intents naming
+   the rows they revive (the belt), the read-side fences are
+   stamp-aware (a voided intent never hides a re-deleted row's fresh
+   clock), and stranded originals plus their own live sub-rows are
+   exempt (they are live BY DESIGN, §4c) — as is `commit_point`, which
+   has no tombstone (a naive check would void every pruning intent).
 
 ## 7. Build shape (batch 6b), for the record
 

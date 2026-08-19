@@ -111,6 +111,9 @@ extension Operations {
             variant.deletedAt = nil
             variant.updatedAt = date.now
             try variant.update(db)
+            // 13j ladder B (B1): a restored row voids any live intent
+            // naming it — a leftover intent must never claim it later.
+            try voidPurgeIntents(db, table: "variant", rowID: id)
             return variant.status
         }
     }

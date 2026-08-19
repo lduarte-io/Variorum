@@ -390,8 +390,11 @@ struct PullRequest: Encodable {
     /// Phase 14c: the vault-key-id fence parameter (both round halves).
     let activeKeyID: String
     /// Phase 13j: the device-cursor report (10's `device_id` parameter) —
-    /// non-nil on a round's first window only. Encoded even when nil
-    /// (PostgREST maps a JSON null onto the parameter's default).
+    /// non-nil on a round's first window only. Encoded even when nil: an
+    /// explicitly-passed JSON null arrives as SQL NULL (it does NOT take
+    /// the parameter's default — 13j ladder B, B11), and the RPC's own
+    /// `if dev is not null` guard is what makes a null mean "don't record".
+    /// Always sending the key also keeps the overload resolution exact.
     let deviceID: String?
 
     enum CodingKeys: String, CodingKey {
