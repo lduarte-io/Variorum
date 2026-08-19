@@ -4041,6 +4041,40 @@ checklist read in full (the mirror-export half of the rail runs
 as the window's first act via the stored-PAT road; the grant
 sweep's lingering-overload tripwire noted).
 
+### THE DEPLOY EXECUTED (2026-08-19 — the one-window's server half; her hands on the trigger)
+
+The architect's mutating POST was blocked by the session's
+permission classifier — correctly not worked around; the deploy
+script was prepared and **SHE ran it via the `!` road** (the
+output in-conversation). Results, in the checklist's order:
+
+- **Pre-deploy snapshot:** marker **6**; containers 216 · blocks
+  1907 · variants 2115 · commits 876 · vaults 1. (The A1 rail:
+  the WAL-safe local backup was taken at staging; the mirror half
+  satisfied by the snapshot + local-truth repushability — the
+  14b/14c doctrine; the artifact drops no data tables.)
+- **Deploy:** `10_phase13j_purge.sql` whole-body, one session,
+  via the Management API — returned `[]` (clean).
+- **Verification:** `sync_schema_version()` = **7** ✓;
+  `purge_intent`/`device_cursor`/`purged_row` all **0 rows** ✓;
+  the grant sweep **every row OK/INFO** ✓ — the three purge
+  functions authenticated-only under `variorum_definer`; the
+  corrected `sync_pull(bigint,text,integer,text)` present; **the
+  lingering old overload ABSENT** (the checklist's tripwire —
+  clean); all three new tables forced-RLS with one owner policy;
+  `device_cursor`/`purged_row` carry the narrowed definer grants
+  (arw / ar — no definer delete on the cursor, no update on the
+  ledger).
+
+**MARKER 7 IS LIVE.** Every installed marker-6 build now refuses
+sync by design (outbox intact) until its refresh — the window's
+device half proceeds immediately: the Mac Release build is
+running; the phone (iPhone 17 Pro, paired over the tunnel,
+*[removed for publication]*
+device install app`; her standing install blessing on record at
+`mobile-parity-round.md:291`, re-affirmed by her staged-window
+readiness this sitting).
+
 ### Sanity passes over the reviewer's ladder-B fix diff (`44c04d7`; sequential, read-only)
 
 **Batch 6b (B1/B2/B3/B7–B11): CLEAR on all**, re-traced against
