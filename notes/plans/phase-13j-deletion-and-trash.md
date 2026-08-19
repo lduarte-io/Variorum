@@ -4161,6 +4161,31 @@ on minutes later, and re-installs again after this rename).
   `device_cursor` two-row verification closes the deploy
   checklist; then the closeout ritual.
 
+### Sitting round 13 — the window VERIFIED CLOSED + her next-phase pick (2026-08-19)
+
+**Her word:** "both synced successfully, so go head and check on
+them." → `device_cursor` read: **TWO rows** (`4D871175…` at seq
+34358, `3D4D5F8A…` at seq 34233), both seen within seconds — the
+deploy checklist's final item PASSES. **THE 13J WINDOW IS
+FORMALLY COMPLETE**: marker 7 live with the renamed pull, both
+devices rounding cleanly, the horizon computable.
+
+**HER NEXT-PHASE PICK: 13l — the data-safety floor**, with a NEW
+SCOPE REQUIREMENT (her words, verbatim): "I think it would be
+fitting post trash and deletion for you to write the phsae
+desription for 13l - the data safety floor. we have to make sure
+that items that have been deleted when restored from backup are
+restored or not in the expected way, including after a true
+delete, in addition to the other items that phase has." → The
+closeout authors the 13l plan FROM the standing brief + this
+requirement: the restore drill gains DELETION-AWARE semantics —
+what a backup restore does to tombstoned, Trash'd, and PURGED
+(true-deleted) things must be DEFINED, ruled where taste-shaped,
+and TESTED, on both the synced road (where the purge ledger makes
+a restored store a RETURNER — `reconcileLedger` re-drops purged
+families, by design) and the local-only road (where no ledger
+exists and restore legitimately time-travels).
+
 ### Sanity passes over the reviewer's ladder-B fix diff (`44c04d7`; sequential, read-only)
 
 **Batch 6b (B1/B2/B3/B7–B11): CLEAR on all**, re-traced against
