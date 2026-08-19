@@ -93,11 +93,54 @@ extension Operations {
     /// locked post refuses — lock forbids new commits. Pools are accepted
     /// deliberately (the spec names posts as the case that matters, but a
     /// pool scrap's buffer deserves the same insurance).
+    ///
+    /// **13j J11:** one of the two CADENCE occasions, so it obeys
+    /// `savepoint_cadence` — "Only when I commit" turns it off. The gate is
+    /// here rather than in the scheduler so the rule cannot be missed by a
+    /// second caller; the insurance occasions (`lockPost`, `lockVariant`,
+    /// structural-undo divergence, bridge landings) share
+    /// `autoCommitDirtyVariants` BELOW this gate and are untouched by it.
     @discardableResult
     public func idleAutoCommit(_ containerID: String) throws -> [CommitPoint] {
         try database.write { db in
             let container = try liveContainer(db, containerID)
             try ensureUnlocked(container)
+            guard try Queries.savepointCadence(db).savesWhenIdle else { return [] }
+            return try autoCommitDirtyVariants(db, containerID: containerID, now: date.now)
+        }
+    }
+
+    /// **THE SIXTH QUIET AUTO-COMMIT OCCASION** (Phase 13j, J11 — her
+    /// sitting-round-1 ruling: *"every editing session that changed a note
+    /// leaves one quiet savepoint (`kind:'auto'`) per edited take at
+    /// close/leave"*, after her report that *"I haven't been seeing auto
+    /// commits in the history"*). The app calls it when a container stops
+    /// being the open one — a note navigated away from, a window closed, the
+    /// app quit, a quick note filed.
+    ///
+    /// The BODY is `idleAutoCommit`'s, deliberately: same dedupe (a take
+    /// whose buffer already matches its latest commit writes nothing), same
+    /// skip of locked takes, same acceptance of pools. What differs is the
+    /// two refusals, and both differ for the same reason — **a lifecycle
+    /// moment must never throw at a surface that is going away:**
+    ///
+    /// - a container that is gone (deleted while open, or never existed)
+    ///   answers `[]` rather than `containerNotFound`;
+    /// - a SEALED container answers `[]` rather than `lockedPost`. Sealing
+    ///   already insured every buffer under it (`lockPost`), so there is
+    ///   nothing dirty to save and nothing to report — where the idle sweep's
+    ///   throw is a genuine race guard on a candidate list, here the sealed
+    ///   note is the ordinary case (seal, then navigate away).
+    ///
+    /// Governed by `savepoint_cadence`: only `.everySession` saves here.
+    @discardableResult
+    public func closeAutoCommit(_ containerID: String) throws -> [CommitPoint] {
+        try database.write { db in
+            guard let container = try Container.fetchOne(db, key: containerID),
+                  container.deletedAt == nil,
+                  !container.locked
+            else { return [] }
+            guard try Queries.savepointCadence(db).savesOnLeaving else { return [] }
             return try autoCommitDirtyVariants(db, containerID: containerID, now: date.now)
         }
     }

@@ -7,11 +7,31 @@ import GRDB
 // asks these questions and `Operations.idleAutoCommit` answers per
 // container (idempotent, at most one auto commit per dirty variant).
 extension Queries {
-    /// The `idle_commit_hours` setting (default 24).
+    /// The `idle_commit_hours` setting.
+    ///
+    /// **Default 2, not 24** (Phase 13j, J11 — her cadence ruling). The
+    /// fallback matches `seedV1Settings` deliberately: a store with no row at
+    /// all must read the same backstop a seeded one does, or "unset" and
+    /// "default" would mean two different things (the `defaultSegmentation`
+    /// precedent, stated for the same reason).
     public static func idleCommitHours(_ db: Database) throws -> Double {
         try String.fetchOne(
             db, sql: "SELECT value FROM setting WHERE key = 'idle_commit_hours'")
-            .flatMap(Double.init) ?? 24
+            .flatMap(Double.init) ?? 2
+    }
+
+    /// **The savepoint cadence** (Phase 13j, J11): which of the two CADENCE
+    /// occasions write — leaving a note, and the long-idle backstop. Absent
+    /// or unrecognized reads as her default, `.everySession`, which is what
+    /// makes the setting safe to add without seeding every existing store.
+    ///
+    /// Both `Operations.closeAutoCommit` and `Operations.idleAutoCommit` read
+    /// this INSIDE their own write transaction, so the rule holds whichever
+    /// caller asks — never per-call-site gating that a new door could miss.
+    public static func savepointCadence(_ db: Database) throws -> SavepointCadence {
+        try String
+            .fetchOne(db, sql: "SELECT value FROM setting WHERE key = 'savepoint_cadence'")
+            .flatMap(SavepointCadence.init(rawValue:)) ?? .everySession
     }
 
     /// Containers plausibly owed a long-idle auto commit: live, unsealed,

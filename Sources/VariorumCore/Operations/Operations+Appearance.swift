@@ -75,6 +75,27 @@ extension Operations {
         }
     }
 
+    // MARK: - The savepoint cadence (13j, J11)
+
+    /// The ONE cadence setting (her sitting-round-1 ruling: *"a single
+    /// enum-valued setting… Not full knobs; not settingless"*). Synced
+    /// document semantics like every other `setting` row, and E2EE-clean by
+    /// its enum values (`SavepointCadence` carries the reasoning).
+    ///
+    /// It governs the two CADENCE occasions only —
+    /// `Operations.closeAutoCommit` and `Operations.idleAutoCommit`, each of
+    /// which reads it inside its own transaction. The insurance occasions
+    /// (post-seal, locking a dirty take, structural-undo divergence, bridge
+    /// landings) are deliberately NOT governed by it and stay on in every
+    /// mode; the setting's help copy says so, because a setting that reads
+    /// as "stop making savepoints" while savepoints still happen is exactly
+    /// the copy-truth defect this phase is about.
+    public func setSavepointCadence(_ cadence: SavepointCadence) throws {
+        try database.write { db in
+            try upsertSetting(db, key: "savepoint_cadence", value: cadence.rawValue)
+        }
+    }
+
     // MARK: - Shelf pins (R38)
 
     /// Pins a book to the shelf's top (appended to pin order); unpinning
