@@ -125,7 +125,14 @@ begin
 end;
 $$;
 
+-- The ownership handoff needs the definer role to hold CREATE on the
+-- schema for the duration (the 10/14c idiom — the live 42501 this file's
+-- first run hit proved the revoke-after-deploy discipline is working):
+-- opened and closed in the same transaction, usage untouched.
+grant usage, create on schema public to variorum_definer;
 alter function sync_pull(bigint, text, int, text) owner to variorum_definer;
+revoke create on schema public from variorum_definer;
+
 revoke execute on function sync_pull(bigint, text, int, text) from public, anon;
 grant execute on function sync_pull(bigint, text, int, text) to authenticated, service_role;
 
