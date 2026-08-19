@@ -4075,6 +4075,23 @@ device install app`; her standing install blessing on record at
 `mobile-parity-round.md:291`, re-affirmed by her staged-window
 readiness this sitting).
 
+### THE DEVICE HALF EXECUTED (2026-08-19, minutes after the deploy — the one-window held)
+
+- **Mac:** Release built clean (zero instances at copy time; the
+  concurrent xcodebuild was the FRAGMENTS project's — another
+  session, left alone); `/Applications/Variorum.app` replaced via
+  `ditto`, `codesign -v` clean. Her closeout authorization spent
+  as sequenced.
+- **Phone:** `VariorumMobile` Release (generic/platform=iOS,
+  `-allowProvisioningUpdates`, her team) built clean; installed
+  *[removed for publication]*
+  the documented `devicectl` road — install returned the bundle
+  URL cleanly, no locked-device refusal.
+- **Remaining window verification:** the first live rounds — she
+  launches both apps; `device_cursor` should gain both devices'
+  rows; the janitor's first sweeps no-op until both cursors pass
+  her existing tombstones (expected, the checklist's own note).
+
 ### Sanity passes over the reviewer's ladder-B fix diff (`44c04d7`; sequential, read-only)
 
 **Batch 6b (B1/B2/B3/B7–B11): CLEAR on all**, re-traced against
