@@ -43,6 +43,20 @@ from real two-device use, which the mobile project enables.
 4. **Candidate, her call — sync-status visibility:** a small
    "everything pushed / outbox empty / last pull at …" face so "did my
    writing reach the mirror" is answerable at a glance.
+5. **Candidate, her ask (2026-08-19) — the passphrase sanity check.** Her
+   words: "a place where people can verify that they still have their
+   passcode or passphrase right without having to reset something else,
+   like a sanity check." A read-only verify face (Settings → Encryption is
+   the natural home): type the encryption passphrase → derive the wrap key
+   (Argon2id, same params, OFF-MAIN — the derivation is deliberately slow)
+   → attempt to unwrap the vault's master-key blob → say yes/no. The
+   unwrap attempt IS the verification (GCM auth failure = wrong
+   passphrase); NO state changes, NO re-key, NOTHING reset. The same face
+   should verify the 12-word RECOVERY PHRASE by its own unwrap path — the
+   forget-risk is identical (the R-6 enrollment-only cadence means neither
+   secret is ever exercised day-to-day, which is exactly why people lose
+   them). Thematically this phase's: the restore drill proves a backup
+   restores; this proves the human still holds the key.
 
 ## Kickoff decisions (hers)
 
