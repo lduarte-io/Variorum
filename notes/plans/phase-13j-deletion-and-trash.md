@@ -3933,6 +3933,72 @@ marker-7, the two disclosure lines).
   horizon; formerly-synced rows keep the wait), with honest
   wording either way.
 
+### Sitting round 11 — B3's product fork RULED (2026-08-19)
+
+**RULED: BUILD THE LOCAL-ONLY PURGE ROAD** (her pick of the
+recommended option): never-synced things purge immediately —
+"really deleted" really true for the free v1 population;
+formerly-synced rows keep the horizon wait; receipts true
+everywhere. The 6b implementer's sharpening (below) is ADOPTED
+into the fix shape: the discriminator is **per-FAMILY, not
+per-install** — a family whose EVERY row is `sync_row_seq`-absent
+purges locally with no `executePurge` and no ledger entry (no one
+to strand, nothing to fence); one synced member ⇒ the whole
+family waits (family-completeness); outbox presence must NOT
+disqualify (the never-configured install's normal state).
+
+### Cross-model flow — implementer responses (ladder B)
+
+**Batch 6b's implementer (B1, B2, B3-mechanics, B7, B8–B11):
+AGREE on ALL**, re-traced in its own code, with fix-shaping
+constraints the reviewer must weigh:
+
+- **B1** — "a real hole in my own design; the fence's
+  listing-blindness is exactly why my battery never met it."
+  Constraints: **(i) the staleness re-check EXEMPTS
+  `commit_point` targets** (no tombstone ⇒ always "live" ⇒ a
+  naive check voids every pruning intent forever); the four
+  tombstoned kinds only. **(ii)** placement inside
+  `familyIsEligible` (same read transaction as expansion — one
+  consistent snapshot); `rowExists → continue` keeps its meaning
+  (ABSENT = already purged = proceed; EXISTS-AND-LIVE = stale).
+  **(iii)** completing a stale intent does NOT un-hide the
+  restored row — **the read-side FENCE needs the same staleness
+  awareness** (its recommendation: the restore-side belt
+  tombstones matching live intents AND the fence excludes intents
+  whose named row is currently LIVE — self-healing per device).
+  **(iv)** the belt's race endpoints are both coherent (traced).
+  **(v)** pins: both-devices-survive + the peer-Put-back variant
+  + pruning-intents-still-complete. Plus a framing correction:
+  the FIRST door needs no peer and no listing — the minting
+  device's own undo stack suffices; the single-device arm is the
+  sharper red.
+- **B2** — AGREE; "the purge changed the poison-row premise and I
+  updated nothing." Constraints: **do not reorder the round**
+  (pull→push pinned, A3); the doctrine-clean shape is a
+  **ledger-scan-only pre-pass before the drain** when the ledger
+  head advanced (safe pre-round by construction; `deleteLocal`
+  already sweeps family outbox entries, so the unpushed child's
+  entry dies before the drain sees it); **name the
+  content-discarding consequence out loud** in the disposition (a
+  returner's typed child under a purged family is discarded — the
+  purge-wins doctrine's letter, author-visible); a server-side
+  parent-join fence is the tempting WRONG fix (domain knowledge
+  on the dumb mirror — recommend against).
+- **B3-mechanics** — AGREE both halves; the per-FAMILY
+  discriminator sharpening (adopted at round 11, above); one
+  `familyIsEligible` arm + an executePurge/ledger skip + one
+  conditional receipt wording.
+- **B7** — AGREE record-only; the re-insert-at-scale case joins
+  the owed-refinements record beside the fresh-device one.
+- **B8** — AGREE (`<` honors TrashWindow's own boundary doc
+  line). **B9** — AGREE both halves (+ the cheap
+  processed-target dedupe). **B10** — AGREE as belt class; no
+  pin possible (unreachable — the architectural-finding rules
+  apply); if added, the arm must ENQUEUE like its three
+  siblings. **B11** — AGREE (the mechanism sentence is wrong;
+  behavior accidentally right; comment fix only).
+
 ## Batch 7 brief — the tutorial's deletion chapter + the note-history brief (a FRESH Opus implementer; self-contained)
 
 **Read first, in full:** `CLAUDE.md` (+ the canon it loads); this
