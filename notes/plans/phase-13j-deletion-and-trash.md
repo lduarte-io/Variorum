@@ -1,13 +1,17 @@
 # Phase 13j — Deletion, the Trash & the recovery story (A USABILITY PHASE)
 
-**Status: OPEN — launched 2026-08-18 (same day as authoring) via
-`/architect-phase`; the author-attended OPENING DESIGN SITTING is IN
-PROGRESS (run record at the bottom of this file); cast confirmed at
-the sitting. Authoring provenance: written 2026-08-18 at her
-instruction, the morning after 13e closed ("go ahead and make
-writing the 13j plan next the next priority and just fold in the
-mini round… once all my extra comments are recorded… I'll just
-launch the 13j plan").**
+**Status: CLOSED 2026-08-19 — every J-item shipped to her rulings,
+the purge LIVE at lockstep marker 7, both devices refreshed and
+verified rounding. HER RESIDUALS ARE SHORT: (1) click Help ▸
+Restore Tutorial… once in the running app (the deletion chapter
+re-seeds the field guide — today's pre-window backup is the A1
+rail); (2) the QUESTIONS #66–#73 walk (every genuinely-open fork
+was ruled at the sittings — the walk is confirm-by-reading);
+(3) 13l at her word (`notes/plans/phase-13l-data-safety-floor.md`
+— HER PICK, authored at this closeout). The handoff:
+`notes/handoffs/phase-13j-handoff.md`. The CLOSEOUT RECORD is at
+the bottom of this file; the sitting rounds 1–13 and every batch/
+ladder record between are the binding texts.**
 
 ## HER MANDATE (verbatim-faithful — this phase's emphasis)
 
@@ -5035,3 +5039,41 @@ calm or as alarming, which is a taste question and hers.
   answer is "confirmed clear at launch, contended mid-run".
 - **Nothing PENDING** — every count and every claim above is from a run
   in this session.
+
+---
+
+## CLOSEOUT RECORD (2026-08-19)
+
+**Every ledger row DISPOSITIONED — none orphaned:** J1 SHIPPED
+(the Trash, rounds 3/8–10; the purge built 6b, deployed at the
+window; Delete Now/Empty Trash live, in-Trash-only,
+confirm-every-time) · J2 SHIPPED (batch 2; the tray, two
+sections, round-7 name kept) · J3 SHIPPED (batch 3, as amended
+round 5 — context menu + palette + the History-face row; no daily
+chrome) · J4/J4b SHIPPED (batch 4; ceremonies at ⌥⌘⇧D/⌥⌘⇧M) · J5
+SHIPPED (batch 3; the four-state lens notice) · J6 SHIPPED
+(batch 2; the graveyard removed, AppSpec §12 supersession noted)
+· J7/J8/J9 SHIPPED (batch 1; the separator trace) · J10 SHIPPED
+(batch 7; spine 63/8) · J11 SHIPPED (batch 5 + round 9's pruning
+setting). Riders all landed (rig hardening — the NSHostingView
+first-mouse mechanism; R2-N2 spacing; the enum-dump wording; the
+window-repair rename). **Ladders:** A (1 BLOCKER · 1 MAJOR · 4
+MINOR · 2 NIT — all fixed, zero disputes, sanity passes clear) ·
+B (1 BLOCKER · 2 MAJOR · 3 MINOR · 5 NIT + a residue pass — all
+fixed incl. her ruled local-only purge road; zero disputes; the
+B5 three-way adjudicated to the spec side). **The window:**
+deploy → 42702 → her ruled rename (round 12; the standing naming
+rule born) → both devices refreshed → device_cursor two rows.
+**Final counts: core 1350/141 · Mac 1546/269 FULLY GREEN · spine
+63/8 · mobile 314/60; marker 7.** Two process incidents
+self-reported, rules sharpened (explicit-path staging;
+verify-product-timestamps). **Deferred WITH briefs (the S4-16
+form):** whole-note version history
+(`notes/plans/whole-note-history-brief.md`); ledger pruning + the
+returner face + the purge_intent GC (the memo §6b — the pruning
+rider). Canon deltas applied (OverallModel §3 six occasions + §6
+S2 bend; AppSpec §12 supersession + §14 delta; SyncSpec §12
+marker-7 entry); archives rolled; KnownIssues swept (Tombstone-GC
+RESOLVED; S4-28.3 slim row; the sweep-cost row owner 12);
+MobileSoul PL-11; QUESTIONS #66–#73 her walk. Next phase's plan
+AUTHORED at her pick: 13l.
