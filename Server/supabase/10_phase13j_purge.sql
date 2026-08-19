@@ -367,6 +367,17 @@ returns jsonb
 language plpgsql security definer
 set search_path = public
 as $$
+-- 42702 FIX (2026-08-19, the window's first live round — caught exactly
+-- where the deploy checklist marked PENDING "only a live call proves the
+-- Postgres side"): the `device_id` PARAMETER is visible inside the cursor
+-- UPSERT's ON CONFLICT column list, and PL/pgSQL raises "column reference
+-- device_id is ambiguous". The parameter CANNOT be renamed (PostgREST
+-- passes named JSON keys — the name IS the wire contract), so columns win
+-- by pragma; every variable read in this function's static SQL was swept
+-- for same-named columns in scope (none exist — the sweep is in the 13j
+-- plan's window record). Re-deployed via
+-- maintenance/13j-window-pull-ambiguity.sql.
+#variable_conflict use_column
 declare
   allowed constant text[] := array[
     'container', 'block', 'variant', 'commit_point', 'edge',
