@@ -15,9 +15,14 @@ struct IdleCommitSweepTests {
     private let afterEverything = "2026-07-01T23:59:59.999Z"
     private let openMark = ""
 
-    @Test func idleCommitHoursReadsTheSettingWithA24Default() throws {
+    /// 13j J11 (her cadence ruling — a CONSEQUENTIAL pin edit, annotated in
+    /// place): the seeded backstop is 2 h, not 24. The CLAIM is unchanged —
+    /// the query reads the setting and falls back to the seeded default; only
+    /// the ruled number moved. `SavepointCadenceTests` pins the seed, the
+    /// one-time migration and its only-if-still-default guard.
+    @Test func idleCommitHoursReadsTheSettingWithTheSeededDefault() throws {
         let db = try AppDatabase.inMemory()
-        #expect(try db.read { try Queries.idleCommitHours($0) } == 24)
+        #expect(try db.read { try Queries.idleCommitHours($0) } == 2)
         try db.write { db in
             try db.execute(
                 sql: "UPDATE setting SET value = '6' WHERE key = 'idle_commit_hours'")

@@ -130,7 +130,13 @@ struct MigrationTests {
         #expect(seeds.count == 3)
         #expect(seeds.contains { $0 == ("default_segmentation", "paragraph") })
         #expect(seeds.contains { $0 == ("major_revision_threshold", "0.8") })
-        #expect(seeds.contains { $0 == ("idle_commit_hours", "24") })
+        // 13j J11 (her cadence ruling — a CONSEQUENTIAL pin edit, annotated
+        // in place per the batch-2/3/4 precedent, never quietly relaxed):
+        // the backstop seeds at 2 h, not the original 24. The claim is
+        // unchanged — the three settings seed, with these exact values;
+        // only the ruled value moved. Existing stores are carried by
+        // `v1_13_savepoint_backstop`, pinned separately.
+        #expect(seeds.contains { $0 == ("idle_commit_hours", "2") })
     }
 
     @Test func migratorIsIdempotentAcrossReopen() throws {

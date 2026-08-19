@@ -88,3 +88,37 @@ public enum EditingIndicatorStyle: String, Codable, Sendable, CaseIterable, Data
     case outline
     case background
 }
+
+/// **The savepoint cadence** (Phase 13j, J11 — her sitting-round-1 ruling:
+/// *"ONE simple setting"*, after her observation that *"unless you've been
+/// remembering to commit version history is kind of weak right now"*).
+///
+/// Stored in the synced `setting` table under `savepoint_cadence` (document
+/// semantics, the `fan_style`/`default_segmentation` class — the same note
+/// keeps the same history habits on every device). **E2EE-clean by
+/// construction:** the value is one of three enum tokens, never prose, so
+/// `setting.value`'s PLAIN classification and its column-fenced disclosure
+/// promise (AppSpec §7, the 14b ladder's R1-9) hold unchanged.
+///
+/// **It governs exactly TWO occasions — the CADENCE ones — and no others.**
+/// The quiet auto-commits that exist to INSURE something about to become
+/// unreachable (sealing a post, locking a dirty take, a structural undo about
+/// to overwrite an edited buffer, a Fragments-bridge landing — OverallModel
+/// §3) are not a cadence and stay on in every mode. Two booleans rather than
+/// per-call-site `switch`es, so a third occasion can never quietly acquire a
+/// fourth reading of the same enum.
+public enum SavepointCadence: String, Codable, Sendable, CaseIterable, DatabaseValueConvertible {
+    /// Her default: a savepoint per changed take when a note stops being
+    /// the open one, plus the idle backstop for notes left open.
+    case everySession = "every_session"
+    /// The backstop alone — nothing at close.
+    case idleOnly = "idle_only"
+    /// Neither. ⌘S (and the insurance occasions) are all that write.
+    case onlyOnCommit = "only_on_commit"
+
+    /// Does leaving a note leave a savepoint behind?
+    public var savesOnLeaving: Bool { self == .everySession }
+
+    /// Does the long-idle sweep still insure a note left open?
+    public var savesWhenIdle: Bool { self != .onlyOnCommit }
+}

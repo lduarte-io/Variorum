@@ -390,6 +390,29 @@ extension AppDatabase {
         migrator.registerMigration("v1_12_container_word_target") { db in
             try db.execute(sql: "ALTER TABLE container ADD COLUMN word_target INTEGER")
         }
+        // Phase 13j, J11 (her sitting-round-1 cadence ruling): the idle
+        // BACKSTOP drops 24 h → 2 h, now that leaving a note leaves a
+        // savepoint of its own. **ZERO SCHEMA** — no table, no column, no
+        // index: one seeded `setting` VALUE, so the mirror needs nothing and
+        // `SyncSchema.lockstepVersion` does not move (marker 6 stands). It
+        // rides as a migration because it must happen exactly ONCE per store.
+        //
+        // **The guard is the whole point: only a value still at the shipped
+        // default moves.** No UI has ever exposed `idle_commit_hours`, so in
+        // practice every store reads '24' — but a value she (or a future
+        // door) set by hand is hers, and a migration that overwrote it would
+        // be the app deciding it knows better. `seedV1Settings` seeds '2'
+        // directly, so a fresh store finds nothing to change here.
+        //
+        // The write enqueues an ordinary outbox row and converges as plain
+        // metadata CAS (SyncSpec §6) — two devices migrating offline both
+        // land on '2', which is the same value.
+        migrator.registerMigration("v1_13_savepoint_backstop") { db in
+            try db.execute(sql: """
+                UPDATE setting SET value = '2'
+                WHERE key = 'idle_commit_hours' AND value = '24'
+                """)
+        }
         return migrator
     }
 }
@@ -704,10 +727,16 @@ private func createV1Indexes(_ db: Database) throws {
 }
 
 private func seedV1Settings(_ db: Database) throws {
+    // `idle_commit_hours` seeds at 2, not AppSpec §7's original 24 (Phase
+    // 13j, J11 — her cadence ruling: *"the existing idle timer drops from
+    // 24h to ~2h as the backstop for notes that stay open"*). Existing
+    // stores are moved by `v1_13_savepoint_backstop`, which only touches a
+    // value still at the old default; seeding the new value here means a
+    // fresh store never writes the row twice.
     try db.execute(sql: """
         INSERT INTO setting (key, value) VALUES
           ('default_segmentation', 'paragraph'),
           ('major_revision_threshold', '0.8'),
-          ('idle_commit_hours', '24');
+          ('idle_commit_hours', '2');
         """)
 }
