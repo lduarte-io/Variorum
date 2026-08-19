@@ -4049,6 +4049,29 @@ both convergent) — record the class, or take the cheap hardening
 — the exact sentence is "transient resurrection converging to
 purged."
 
+**Batch 6 (B4/B5 sanity pass): B4 CLEAR** (direction on both key
+columns all five arms; the tiebreak↔`TrashItem.id` correspondence
+survived; the probe row exact; its own false docstring corrected
+"better than what I wrote"; one non-blocking observation — the
+interpolated `limitClause` vs the bound `:limit` of its
+neighbors, statement-cache churn only). **B5: the fix RIGHT and
+its own recommendation WITHDRAWN** on the stated grounds
+("unreachable-but-alive is a stronger anchor than the orphan
+worry I raised") — **plus ONE CONCERN, the flow returns it to
+the reviewer: `Queries.trayCounts` is a fate-blind THIRD
+surface.** Its `preservedOriginals` sub-count carries no window
+and no intent fence, so a note with one deleted block + one
+`.gone` original badges `⌫ 1` with a tooltip reading "…plus 1
+original a divide or merge kept whole — click to put any of them
+back" — over-counting AND making exactly the promise B5 ruled a
+`.gone` row must not carry, while the panel truthfully shows no
+original. Copy, not a phantom door (badge visibility is
+deleted-only). Fix-shaping: do NOT fence in SQL (the badge query
+stays variant-free-cheap by design; the fate needs family
+recursion) — drop the "plus N originals" tooltip clause (the
+panel is where originals are counted) or keep the number minus
+the promise; move the sub-count's own doc with the choice.
+
 **ARCHITECT'S ADJUDICATION NOTE for the reviewer's B5 final call
 (spec-anchored, weighs against batch 6's recommended outcome):**
 under round 8b + the memo's §4c, a stranded original PURGES WITH
