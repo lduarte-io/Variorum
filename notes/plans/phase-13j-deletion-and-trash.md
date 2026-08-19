@@ -4024,6 +4024,23 @@ corrections that change the fix shapes:
   original "returns to Preserved originals as forever" — is
   recorded WITH the architect's spec-anchored objection below.
 
+### THE WINDOW IS STAGED (2026-08-19) — her readiness + the architect's prep
+
+**Her word (verbatim):** "my variorum is quit and my mobile phone
+is unlocked and ready for the two device refreshes whenever that
+agent returns." Sequencing restated to her honestly: the
+reviewer's residual pass, then ROUND 2's fresh re-review (the
+ladder's rule), THEN the window — she is pinged when installs are
+imminent. **Prep done now:** zero REAL-STORE instances verified
+(the one live process is the reviewer's DerivedData Debug test
+host — dev store by design, left alone); **the A1-rail WAL-safe
+backup TAKEN:**
+`Backups/variorum-20260819T172955Z-pre13j-window.sqlite`
+(5.96 MB, `PRAGMA integrity_check` = ok); the deploy-window
+checklist read in full (the mirror-export half of the rail runs
+as the window's first act via the stored-PAT road; the grant
+sweep's lingering-overload tripwire noted).
+
 ### Sanity passes over the reviewer's ladder-B fix diff (`44c04d7`; sequential, read-only)
 
 **Batch 6b (B1/B2/B3/B7–B11): CLEAR on all**, re-traced against
@@ -4298,6 +4315,79 @@ one `pgrep -fl xcodebuild` hit throughout was a FRAGMENTS-project
 watchdog SHELL whose script text mentions xcodebuild — no actual
 xcodebuild was running); no kill, no quit, no Release build, no
 `/Applications` write, no live-mirror contact, no push.
+
+### LADDER B ROUND 1 — THE SANITY-PASS RESIDUALS' DISPOSITIONS (2026-08-19; the reviewer's final word + fixes, same session, per the flow)
+
+Both sanity passes returned three items; final word and disposition on
+each:
+
+- **Item 1 (batch 6's B5-class concern) — CONFIRMED and FIXED: the
+  "plus N originals" tooltip clause is DROPPED.** `Queries.trayCounts`
+  is fate-blind by design (the badge query must stay cheap — no family
+  recursion, per the fix-shaping, which I adopt: never fence it in SQL),
+  so its originals sub-count cannot tell a permanent original from a
+  `.gone` one — the tooltip could name a number the panel truthfully
+  does not show, under the exact "put any of them back" promise the B5
+  call ruled a `.gone` row must not carry. Of the two honest cheap
+  roads I take the DROP, not the number-minus-promise: a count that can
+  silently disagree with the panel it opens is still a miscount with or
+  without the promise, the badge's own NUMBER stays deleted-only (her
+  ratified #67(a), untouched), and the panel's sections name their own
+  rows ("kept — no clock", "goes with its deleted blocks") where the
+  fates are actually known — the original miscount worry the clause
+  answered is now answered by the rows themselves. Landed:
+  `trayDoorHelp(deleted:)` (the clause and its parameter gone),
+  `ContextBar.TrayFace` drops `preservedCount`, `PaneHost` stops
+  passing it; `trayCounts.preservedOriginals` KEEPS its core home
+  (tested; the phone's owed face may want it) with its doc now naming
+  the fate-blindness as CONTRACT — no user-facing copy may promise
+  anything about its rows. The truth-pin (the batch-1 family):
+  `theBadgeTooltipNamesTheDeletedCountAndNeverOriginals` GRADUATES the
+  old both-counts pin (annotated — a RULED change) and asserts the
+  clause's ABSENCE at every count; **drill J** restored the old clause
+  → the pin went RED on both counts ("may not promise a fate it cannot
+  see"), restored by reverse edit, `NoteTrayTests` 18/18 green after.
+- **Item 2, Obs 1 (batch 6b's traced seq-absence≠mirror-absence
+  window) — HARDENED, not merely recorded (the sketched cheap road
+  taken):** `familyVerdict` gains a `road:` parameter — the TRANSPORTED
+  sweep treats a seq-absent-but-outbox-pending family as `.deferred`
+  (after `resyncReinitialize` the seq table is cleared wholesale while
+  the mirror holds every row; a sweep in that window would otherwise
+  local-purge synced families into the traced transient resurrection —
+  and physically drop local rows whose mirror copies stand). Cost
+  accepted and stated in code: ONE round of latency for a family minted
+  and deleted before it ever pushed — it drains, becomes synced, and
+  purges through the LEDGERED road, the truer story for rows the mirror
+  did see (the transported local-only arm survives as the rule's letter
+  but is expected-rare; `LocalPurge` is the local road's real carrier
+  and stays OUTBOX-BLIND, her round-11 letter — a reinit implies a
+  configured chain, which the app gates that road off of). Pins: NEW
+  `aReinitializedStoreNeverLocalPurgesItsSyncedFamilies` (reinit →
+  sweep → nothing purged, mirror intact; next rounds → the ledgered
+  purge) — **drill I** (`if false,` on the deferral) went RED at
+  exactly the mechanism (the synced family local-purged in the window),
+  restored byte-identical (`shasum` match); and the
+  `oneSyncedMember…` test's transported arm GRADUATED (annotated) from
+  immediate-local-purge to defer-then-ledgered-purge.
+- **Item 2, Obs 2 — both sentences LANDED where a future reader needs
+  them:** `LocalPurge`'s doc replaces "pointless rather than dangerous"
+  with the traced truth — racing a configured chain risks **transient
+  resurrection converging to purged** (the reinit case spelled out),
+  which is WHY the road gates on `isConfigured` and why the transported
+  sweep carries the deferral this road deliberately does not; and the
+  scheduler's pre-pass comment gains the B2 answer's sentence — the
+  pre-pass cannot starve the round's pull because the changefeed is
+  STATE-BASED (SyncSpec §2; a dangling survivor it exposes is the §5
+  self-healing straggler class).
+- **Item 3 (batch 6's statement-cache observation) — TAKEN:** `:limit`
+  now BINDS in all five Trash arms (`trash`'s four +
+  `strandedOriginals`), one cached statement per shape instead of per
+  window; the direction stays interpolated (an ORDER BY keyword cannot
+  bind), commented at the site.
+
+**Residual counts (this pass):** core `swift test` — **1349 tests /
+141 suites PASSED, FULLY GREEN** (+1: the reinit pin) · Mac — see the
+run below · spine 63/8 · mobile 314/60 (Sources/ touched — run).
 
 ## Batch 7 brief — the tutorial's deletion chapter + the note-history brief (a FRESH Opus implementer; self-contained)
 
