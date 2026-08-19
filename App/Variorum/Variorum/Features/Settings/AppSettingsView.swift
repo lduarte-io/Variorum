@@ -65,6 +65,10 @@ private struct AppearancePane: View {
     /// entry DOES to the store rather than how one Mac looks.
     @State private var defaultSegmentation: Segmentation = .paragraph
     @State private var segmentationNote: String?
+    /// 13j J11: the ONE cadence setting — synced document semantics, exactly
+    /// like the segmentation default beside it.
+    @State private var savepointCadence: SavepointCadence = .everySession
+    @State private var cadenceNote: String?
 
     var body: some View {
         Form {
@@ -156,6 +160,34 @@ private struct AppearancePane: View {
                         .lineLimit(4)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                // 13j J11 (her round-1 ruling): the ONE cadence setting.
+                // SYNCED like segmentation above it, and for the same reason
+                // — it is a habit of the document, not a look of this Mac.
+                Picker(SavepointCadenceCopy.title, selection: Binding(
+                    get: { savepointCadence },
+                    set: { setSavepointCadence($0) })) {
+                    ForEach(SavepointCadence.allCases, id: \.self) { cadence in
+                        Text(SavepointCadenceCopy.label(cadence)).tag(cadence)
+                    }
+                }
+                Text(SavepointCadenceCopy.help)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                // The sentence the setting must never leave out: the
+                // INSURANCE occasions are not a cadence and stay on in
+                // every mode.
+                Text(SavepointCadenceCopy.insuranceNote)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                if let cadenceNote {
+                    Text(cadenceNote)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(4)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
         }
         .formStyle(.grouped)
@@ -169,6 +201,17 @@ private struct AppearancePane: View {
                     try Queries.defaultSegmentation(db)
                 }) {
                     defaultSegmentation = value
+                }
+            } catch {}
+        }
+        // 13j J11: the same bounded observation for the cadence, so a change
+        // made on another device shows here and the picker never drifts.
+        .task {
+            do {
+                for try await value in session.database.observe({ db in
+                    try Queries.savepointCadence(db)
+                }) {
+                    savepointCadence = value
                 }
             } catch {}
         }
@@ -189,6 +232,21 @@ private struct AppearancePane: View {
                 // Readable words, never the raw enum dump (the R1-3 class —
                 // 13d cold review, F-9).
                 segmentationNote = OpsRefusalCopy.message(for: error)
+            }
+        }
+    }
+
+    /// 13j J11 — the same shape as its neighbour: the write goes through the
+    /// runner, and the observation above carries the new value back, so the
+    /// picker never holds an optimistic guess.
+    private func setSavepointCadence(_ cadence: SavepointCadence) {
+        guard cadence != savepointCadence else { return }
+        cadenceNote = nil
+        Task {
+            do {
+                try await session.runner.run { try $0.setSavepointCadence(cadence) }
+            } catch {
+                cadenceNote = OpsRefusalCopy.message(for: error)
             }
         }
     }

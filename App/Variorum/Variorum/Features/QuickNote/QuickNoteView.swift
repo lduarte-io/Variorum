@@ -83,10 +83,17 @@ final class QuickNotePad {
     /// Clearing FIRST is what makes the three triggers compose — close
     /// follows ⌘⏎, and quit can follow either, and none of them can mint a
     /// second note from the same summon.
+    ///
+    /// **13j J11:** filing IS the pad's leaving — the note it mints is not
+    /// open in any pane, so no other road would ever reach it, and a captured
+    /// thought with no savepoint is exactly the thin history she reported.
+    /// One line, on the one shared body, so all three triggers inherit it.
     private func take() async -> String? {
         let text = self.text
         self.text = ""
-        return await QuickNoteMint.file(text, session: session)
+        guard let postID = await QuickNoteMint.file(text, session: session) else { return nil }
+        await session.savepointOnLeaving(postID)
+        return postID
     }
 }
 

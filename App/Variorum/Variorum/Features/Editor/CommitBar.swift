@@ -297,6 +297,9 @@ struct CommitBar: View {
 /// composes, so the two faces cannot tell different stories about one block.
 struct CommitHistoryView: View {
     let model: EditorViewModel
+    /// 13j J11: which quiet runs are open. View-local session state, like
+    /// every other expansion in the app — a fold is not document semantics.
+    @State private var expandedRuns: Set<String> = []
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
@@ -315,31 +318,54 @@ struct CommitHistoryView: View {
         }
     }
 
+    /// **13j J11 — the quiet-run collapse.** Leaving a note now leaves a
+    /// savepoint, so this list would fill with `auto` rows; consecutive ones
+    /// fold into one line she can open, and a deliberate ⌘S savepoint is
+    /// never folded into anything. The grouping is `SavepointRuns` (pure,
+    /// shared with the Takes sheet, which shows the same commits in the
+    /// opposite order).
     private var commitList: some View {
-        List(model.commitList ?? []) { item in
-            HStack(spacing: 8) {
-                Text(item.commit.createdAt.formatted(date: .abbreviated, time: .standard))
-                    .font(.caption)
-                Text(item.commit.kind == .auto ? "auto" : "manual")
-                    .font(.caption2)
-                    .foregroundStyle(item.commit.kind == .auto ? .secondary : .primary)
-                if let message = item.commit.message {
-                    Text(message).font(.caption).lineLimit(1)
+        List {
+            ForEach(SavepointRuns.rows(
+                model.commitList ?? [],
+                isQuiet: { $0.commit.kind == .auto },
+                id: { $0.id })
+            ) { row in
+                let rendered = SavepointHistoryFace.rendered(row, expanded: expandedRuns)
+                if let count = rendered.runCount {
+                    QuietRunRow(count: count, expanded: rendered.expanded, tokens: tokens) {
+                        expandedRuns = SavepointHistoryFace.toggling(row.id, in: expandedRuns)
+                    }
                 }
-                if item.predatesSplit {
-                    Text("predates a split")
-                        .font(.caption2)
-                        .foregroundStyle(.orange)
-                }
-                Spacer()
-                Text(String(item.commit.text.prefix(60)))
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                Button("Restore") { model.restore(item) }
-                    .controlSize(.small)
-                    .disabled(model.header?.locked == true)
+                ForEach(rendered.items) { commitRow($0) }
             }
+        }
+    }
+
+    @ViewBuilder
+    private func commitRow(_ item: EditorViewModel.CommitListItem) -> some View {
+        HStack(spacing: 8) {
+            Text(item.commit.createdAt.formatted(date: .abbreviated, time: .standard))
+                .font(.caption)
+            Text(item.commit.kind == .auto ? "auto" : "manual")
+                .font(.caption2)
+                .foregroundStyle(item.commit.kind == .auto ? .secondary : .primary)
+            if let message = item.commit.message {
+                Text(message).font(.caption).lineLimit(1)
+            }
+            if item.predatesSplit {
+                Text("predates a split")
+                    .font(.caption2)
+                    .foregroundStyle(.orange)
+            }
+            Spacer()
+            Text(String(item.commit.text.prefix(60)))
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+            Button("Restore") { model.restore(item) }
+                .controlSize(.small)
+                .disabled(model.header?.locked == true)
         }
     }
 }

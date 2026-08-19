@@ -281,7 +281,12 @@ struct RootView: View {
             // answers her chord (the menu-bar extra's own promise).
             hotKeys.install { _ in summonQuickNote() }
         }
-        .onDisappear { windows.unregister(windowID) }
+        .onDisappear {
+            windows.unregister(windowID)
+            // 13j J11: closing the window is a leaving for every note its
+            // panes were showing.
+            SavepointOnLeave.windowClosing(workspace: router.workspace, session: session)
+        }
     }
 
     /// 13g batch 2 (L7): keep the markdown face's two colors on the current
@@ -363,6 +368,11 @@ struct RootView: View {
         session.recentBookIDs = { windows.activeRouter?.workspace.recentBookIDs ?? [] }
         let status = session.status
         router.speak = { status.speak($0) }
+        // 13j J11: THIS window's workspace raises its departures to the
+        // session's one savepoint entry. Per-window (unlike the gates above,
+        // which read the key window through the registry) because leaving is
+        // a fact about the panes that just changed, not about focus.
+        SavepointOnLeave.wire(workspace: router.workspace, session: session)
         router.workspace.visit(selection ?? .shelf)
     }
 

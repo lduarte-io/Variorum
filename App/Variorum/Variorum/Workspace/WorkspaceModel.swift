@@ -70,6 +70,44 @@ final class WorkspaceModel {
     /// only for rendering. Navigation state itself never holds text.
     private(set) var titles: [String: String] = [:]
 
+    /// **13j J11 — the LEAVING signal.** The notes this window's panes are
+    /// showing right now, in pane order. Pools count alongside posts, exactly
+    /// as `SidebarSelection.noteID` counts them: a scraps container opens in a
+    /// detail editor and its buffers deserve the same savepoints (her ruling's
+    /// "the quick note and scraps follow the same rule").
+    var shownNoteIDs: [String] {
+        panes.compactMap { selections[$0]?.noteID }
+    }
+
+    /// Raised with the notes that have just STOPPED being shown by this
+    /// window. Wired by the shell to `AppSession.savepointOnLeaving`
+    /// (`SavepointOnLeave.wire`); a no-op by default, so a workspace built in
+    /// a test or a preview writes nothing.
+    ///
+    /// **Why the signal lives here and not in an `.onChange` in the view:**
+    /// this type already owns the shown set, and every navigation door in the
+    /// app funnels through `select` (its own contract). A view-side observer
+    /// would answer the same question one layer further from the fact, and —
+    /// the reason that matters — could not be driven by a test without
+    /// mounting SwiftUI, which is precisely how a starting `.task` inside a
+    /// false conditional shipped dead through five green pins at this
+    /// phase's ladder A (finding A1). Emitted from ONE private helper that
+    /// wraps every mutation of the set, so a future door that changes what a
+    /// pane shows is covered without remembering anything.
+    @ObservationIgnored var onNotesLeft: ([String]) -> Void = { _ in }
+
+    /// Runs `change`, then reports what left the shown set. Order-preserving
+    /// and duplicate-safe: a note still shown by ANOTHER pane of this window
+    /// has not been left (the ⌘-click-into-the-other-pane case, where only
+    /// focus moved).
+    private func reportingDepartures(_ change: () -> Void) {
+        let before = shownNoteIDs
+        change()
+        let after = Set(shownNoteIDs)
+        let departed = before.filter { !after.contains($0) }
+        if !departed.isEmpty { onNotesLeft(departed) }
+    }
+
     /// What the FOCUSED pane is showing — the shell's selection binding and
     /// every app-scope act that needs "the thing she is looking at" (13f
     /// batch 6: ⌘K's Toggle Star and its registry gate) read this one
@@ -121,9 +159,15 @@ final class WorkspaceModel {
             focusedPane = existing
             return .focusedExistingPane(existing)
         }
-        selections[pane] = destination
-        focusedPane = pane
-        visit(destination, in: pane)
+        // 13j J11: this is the door every navigation funnels through, so
+        // wrapping it here is what makes "she left that note" complete
+        // without instrumenting each door (the `visit` recording's own
+        // argument, applied to the leaving half).
+        reportingDepartures {
+            selections[pane] = destination
+            focusedPane = pane
+            visit(destination, in: pane)
+        }
         return .adopted
     }
 
@@ -165,11 +209,16 @@ final class WorkspaceModel {
     @discardableResult
     func closeSplit() -> Bool {
         guard panes.count > 1, let index = panes.firstIndex(of: focusedPane) else { return false }
-        let closing = panes.remove(at: index)
-        selections.removeValue(forKey: closing)
-        histories.removeValue(forKey: closing)
-        splitFractions = PaneLayout.evenFractions(paneCount: panes.count)
-        focusedPane = panes[min(index, panes.count - 1)]
+        // 13j J11: folding the window back is a leaving for whatever that
+        // pane was showing (unless the other pane shows it, which the
+        // same-note rule already forbids).
+        reportingDepartures {
+            let closing = panes.remove(at: index)
+            selections.removeValue(forKey: closing)
+            histories.removeValue(forKey: closing)
+            splitFractions = PaneLayout.evenFractions(paneCount: panes.count)
+            focusedPane = panes[min(index, panes.count - 1)]
+        }
         return true
     }
 
@@ -255,7 +304,11 @@ final class WorkspaceModel {
     /// `openBesideCandidate` is nil (Open Beside grey) and `panes.count` is
     /// 1 (Close Split grey) — four honest greys and not one new rule.
     func showOnly(_ destination: SidebarSelection) {
-        selections[focusedPane] = destination
+        // 13j J11: wrapped for completeness of the class, not because the
+        // note-only window navigates — it calls this exactly once, from
+        // nothing, so nothing departs. A later ruling giving that window a
+        // history gets the leaving signal for free.
+        reportingDepartures { selections[focusedPane] = destination }
     }
 
     /// Closes an Open row. Pure view state: the note is untouched, and it

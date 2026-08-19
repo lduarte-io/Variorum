@@ -120,7 +120,12 @@ struct NoteWindowView: View {
             let status = session.status
             router.speak = { status.speak($0) }
         }
-        .onDisappear { windows.unregister(windowID) }
+        .onDisappear {
+            windows.unregister(windowID)
+            // 13j J11: this window shows exactly one note and never
+            // navigates, so its whole leaving story is its teardown.
+            SavepointOnLeave.leaving([postID], session: session)
+        }
     }
 }
 

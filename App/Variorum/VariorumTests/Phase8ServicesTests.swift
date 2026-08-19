@@ -292,7 +292,9 @@ struct IdleCommitSchedulerTests {
             try session.operations.autosave(
                 minted.variant.id, text: "typed, then left alone", charDelta: 17)
 
-            // 26 h later (idle_commit_hours = 24): one quiet insurance commit.
+            // 26 h later (well past `idle_commit_hours`, which 13j J11 moved
+            // from 24 h to 2 h): one quiet insurance commit. The number is
+            // left where it was — it was never the bar, only a time past it.
             clock.setValue(Date(timeIntervalSince1970: 1_782_864_000 + 26 * 3600))
             await scheduler.sweepNow()
             #expect(scheduler.lastSweepCommitCount == 1)
@@ -326,14 +328,21 @@ struct IdleCommitSchedulerTests {
             let cleanMint = try session.operations.newBlock(in: clean.id, text: "done")
             _ = try session.operations.commit(cleanMint.variant.id)
 
-            // Only 23 h pass: nothing is idle past the 24 h bar…
-            clock.setValue(Date(timeIntervalSince1970: 1_782_864_000 + 23 * 3600))
+            // 13j J11 (her cadence ruling — a CONSEQUENTIAL pin edit,
+            // annotated in place): the backstop bar moved 24 h → 2 h, so the
+            // two probes move with it. The CLAIM is byte-unchanged — a
+            // not-yet-idle post gets nothing, and past the bar exactly the
+            // dirty one is insured while the clean and empty ones still get
+            // nothing.
+            //
+            // Only 1 h passes: nothing is idle past the 2 h bar…
+            clock.setValue(Date(timeIntervalSince1970: 1_782_864_000 + 1 * 3600))
             await scheduler.sweepNow()
             #expect(scheduler.lastSweepCommitCount == 0)
 
-            // …then 26 h: the fresh (dirty) post gets its one commit; the
+            // …then 4 h: the fresh (dirty) post gets its one commit; the
             // clean and empty posts still get none.
-            clock.setValue(Date(timeIntervalSince1970: 1_782_864_000 + 26 * 3600))
+            clock.setValue(Date(timeIntervalSince1970: 1_782_864_000 + 4 * 3600))
             await scheduler.sweepNow()
             #expect(scheduler.lastSweepCommitCount == 1)
         }

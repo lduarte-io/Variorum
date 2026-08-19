@@ -84,8 +84,16 @@ final class AppSession {
         // shares this coordinator. (The phone has neither a quit door nor
         // the multi-book note; its background flush rides the liveness
         // authority's own bookkeeping.)
-        _ = quitFinalize.register { [weak coordinator] in
-            await coordinator?.flushNow()
+        //
+        // **13j J11 — ⌘Q IS A LEAVING, and this is the one registration
+        // point that already knows every open post.** The quit closure
+        // flushes AND savepoints, so quit is covered by construction for
+        // every post any surface has opened this session — the same
+        // "registered ONCE, covers every surface" property the flush half
+        // has had since 13b 1a. `savepointOnLeaving` flushes first itself,
+        // so the two halves are one call.
+        _ = quitFinalize.register { [weak self] in
+            await self?.savepointOnLeaving(postID)
         }
         coordinator.onFirstEdit = { [weak self] in
             self?.noteMultiBookEdit(postID)
@@ -155,6 +163,43 @@ final class AppSession {
     func flushEveryOpenPost() async {
         for coordinator in postAutosaves.values {
             await coordinator.flushNow()
+        }
+    }
+
+    /// **THE SAVEPOINT-ON-LEAVING ENTRY (13j J11 — her sitting-round-1
+    /// cadence ruling).** A note has stopped being an open one: flush what
+    /// is pending, then leave one quiet savepoint per take that changed.
+    ///
+    /// **Every leaving road calls THIS and nothing else** — the shell's
+    /// shown-notes departure, a window's teardown, ⌘Q (registered above), and
+    /// the quick note's filing. Its two lines are the whole per-platform
+    /// half of the ruling; everything that DECIDES anything (the dedupe, the
+    /// cadence modes, the seal, the vanished container) lives in
+    /// `Operations.closeAutoCommit`, so a second platform owes a hook, never
+    /// a rule (MobileSoul's brains-in-core line).
+    ///
+    /// **Flush-first is load-bearing, not tidiness:** `closeAutoCommit` reads
+    /// `working_text` ROWS, and the leaving gesture arrives inside the
+    /// autosave debounce by construction — she stops typing and navigates.
+    /// Without the flush the savepoint would capture the text as of half a
+    /// second before the last keystrokes, which is the copy-door class 13e's
+    /// E10 closed for the copy family (`runCopying`), arriving here.
+    ///
+    /// It never throws: a leaving is not a moment to refuse at. The op's own
+    /// two quiet no-ops cover the sealed and vanished cases; anything else
+    /// (a store error) is swallowed here rather than raised at a surface that
+    /// is already gone — nothing was lost, because the flush landed the text
+    /// and the next leaving tries again.
+    func savepointOnLeaving(_ postID: String) async {
+        // The EXISTING coordinator, never a minted one: a post no surface
+        // opened has nothing pending by construction, and minting here would
+        // cache a coordinator — and, on the Mac, a quit registration — for a
+        // note that was never open. The quick note's filing is exactly that
+        // case: it mints its note through the operations layer, so there is
+        // no buffer to flush and no reason to grow one.
+        await postAutosaves[postID]?.flushNow()
+        _ = try? await runner.run { ops in
+            try ops.closeAutoCommit(postID)
         }
     }
 

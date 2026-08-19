@@ -24,6 +24,9 @@ struct TakesBottomBar: View {
     /// (J3, her round-5 amendment) and its deleted takes (the round-5 ruling),
     /// through the one component Write's history face also composes.
     @State private var pastModel: BlockPastModel?
+    /// 13j J11: which quiet savepoint runs this sheet has open. View-local,
+    /// like Write's — a fold is not document semantics.
+    @State private var expandedRuns: Set<String> = []
     /// N15's class: the bar's measured width — the one/two-row switch.
     @State private var barWidth: CGFloat = 0
     @Environment(\.openWindow) private var openWindow
@@ -416,27 +419,47 @@ struct TakesBottomBar: View {
                 Text("No savepoints yet — ⌘S commits one.")
                     .foregroundStyle(tokens.muted)
             }
-            List(history, id: \.id) { commit in
-                HStack(spacing: 8) {
-                    Text(commit.createdAt.formatted(date: .abbreviated, time: .standard))
-                        .font(.caption)
-                    Text(commit.kind == .auto ? "auto" : "manual")
-                        .font(.caption2)
-                        .foregroundStyle(commit.kind == .auto ? .secondary : .primary)
-                    Spacer()
-                    Text(String(commit.text.prefix(60)))
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                    Button("Restore") {
-                        Task { await model.restoreCommit(commit) }
+            // 13j J11 — the same quiet-run collapse Write's face renders,
+            // through the same pure grouping and the same collapsed row.
+            // This face lists OLDEST-first (`openHistory` reverses the
+            // query's newest-first order) and the rule does not care: a run
+            // is contiguous read either way.
+            List {
+                ForEach(SavepointRuns.rows(
+                    history, isQuiet: { $0.kind == .auto }, id: { $0.id })
+                ) { row in
+                    let rendered = SavepointHistoryFace.rendered(row, expanded: expandedRuns)
+                    if let count = rendered.runCount {
+                        QuietRunRow(count: count, expanded: rendered.expanded, tokens: tokens) {
+                            expandedRuns = SavepointHistoryFace.toggling(row.id, in: expandedRuns)
+                        }
                     }
-                    .controlSize(.small)
-                    .disabled(model.projection.sealed)
+                    ForEach(rendered.items, id: \.id) { commitRow($0) }
                 }
             }
         }
         .padding(12)
         .frame(minWidth: 520, minHeight: 280)
+    }
+
+    @ViewBuilder
+    private func commitRow(_ commit: CommitPoint) -> some View {
+        HStack(spacing: 8) {
+            Text(commit.createdAt.formatted(date: .abbreviated, time: .standard))
+                .font(.caption)
+            Text(commit.kind == .auto ? "auto" : "manual")
+                .font(.caption2)
+                .foregroundStyle(commit.kind == .auto ? .secondary : .primary)
+            Spacer()
+            Text(String(commit.text.prefix(60)))
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+            Button("Restore") {
+                Task { await model.restoreCommit(commit) }
+            }
+            .controlSize(.small)
+            .disabled(model.projection.sealed)
+        }
     }
 }
