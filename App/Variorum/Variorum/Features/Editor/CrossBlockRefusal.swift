@@ -144,8 +144,14 @@ nonisolated enum CrossBlockRefusal {
     static func roadClause(for cause: Cause) -> String {
         switch cause {
         case .seamBesideFan:
-            "A keystroke won't fold a fan away \u{2014} use Merge Blocks "
-                + "(\u{2318}\u{21e7}M) to pair the takes yourself."
+            // 13j ladder A round 1, finding A2 (MAJOR — fixed by the
+            // reviewer): this line still taught "⌘⇧M to pair the takes
+            // yourself" after the J4b flip made ⌘⇧M carry-all — the exact
+            // sentence the batch-4 sweep fixed in `seamFanRefusal`, alive in
+            // its second home, inside J8(b)'s own file. Both speakers now
+            // read the ONE roads constant.
+            "A keystroke won't fold a fan away \u{2014} "
+                + FannedDefaultsCopy.fanFoldRoads
         case .seamBesideArchivedTake:
             "Open its takes to see it, or use Delete Block to remove the block whole."
         case .seamBesideComment:

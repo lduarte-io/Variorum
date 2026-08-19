@@ -392,6 +392,88 @@ struct FannedDefaultsTests {
         }
     }
 
+    /// **THE A5 PIN (13j ladder A round 1 — red-on-old by behavioral
+    /// revert).** A fanned chain link whose displayed take no longer
+    /// resolves in the live fan used to fall to plain `merge` INSIDE the
+    /// compound — folding that fan to lineage with no speech, where the pair
+    /// road refuses. The whole run now refuses BEFORE the compound opens:
+    /// nothing merged, nothing released, the pair road's own words.
+    ///
+    /// The repro is the frozen-projection property itself, no race needed:
+    /// the surface loads, the store's chosen take moves and the old one
+    /// dies through ordinary ops, and the un-reloaded chain still names the
+    /// dead take as "displayed".
+    @Test func aChainWithAStaleDisplayedTakeRefusesWholeAndTouchesNothing() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two.", "Gamma three."]) { h in
+            let ops = h.session.operations
+            let slots = try h.storeSlots()
+            let original = try #require(slots[0].variantID)
+            let take2 = try ops.branchVariant(slots[0].blockID, from: original)
+            _ = try ops.branchVariant(slots[0].blockID, from: original)
+            try h.reload()  // the surface shows ORIGINAL as block 0's take
+
+            // The store moves under the frozen projection: the slot now
+            // chooses take2 and the once-displayed original is deleted —
+            // legal, ordinary ops. The fan stays fanned (2 takes).
+            try ops.chooseVariant(slots[0].blockID, variantID: take2.id)
+            try ops.deleteVariant(original)
+
+            selectAcross(h, 0, 2)
+            await h.model.invokeGesture(.mergeBlocks)
+
+            #expect(h.model.statusMessage == FannedDefaultsCopy.takesChangedMerge,
+                    "the whole run refuses up front, in the pair road's words")
+            let after = try h.storeSlots()
+            #expect(after.count == 3, "nothing merged — no row was touched")
+            #expect(try fan(h, slots[0].blockID).count == 2,
+                    "no fan folded to lineage on the quiet")
+        }
+    }
+
+    /// A5's validation brain, pure — the matrix a store test cannot reach
+    /// deterministically. An EMPTY side passes through deliberately: the
+    /// plain road's own op refusal (typed, loud, whole compound rolled
+    /// back) is the honest diagnosis for a block with no takes at all (the
+    /// gap class), where "takes changed" would misname it.
+    @Test func theChainValidationRefusesStaleDisplayedTakesAndPassesGapsThrough() {
+        func take(_ id: String) -> Variant {
+            Variant(id: id, blockId: "b", fanPosition: id,
+                    createdAt: Date(timeIntervalSince1970: 0),
+                    updatedAt: Date(timeIntervalSince1970: 0))
+        }
+        let fanned = [take("x"), take("y")]
+        let single = [take("s")]
+
+        // Healthy: every displayed take resolves.
+        #expect(CarryAllMerge.chainComposes(
+            order: ["a", "b"], fans: ["a": fanned, "b": single],
+            displayed: ["a": "x", "b": "s"]))
+        // The race class: a fanned link's displayed take is gone.
+        #expect(!CarryAllMerge.chainComposes(
+            order: ["a", "b"], fans: ["a": fanned, "b": single],
+            displayed: ["a": "gone", "b": "s"]))
+        #expect(!CarryAllMerge.chainComposes(
+            order: ["a", "b"], fans: ["a": single, "b": fanned],
+            displayed: ["a": "s", "b": nil]))
+        // …anywhere down the run, not only at link 1.
+        #expect(!CarryAllMerge.chainComposes(
+            order: ["a", "b", "c"],
+            fans: ["a": single, "b": single, "c": fanned],
+            displayed: ["a": "s", "b": "s", "c": "gone"]))
+        // An unfanned link never demands a displayed take.
+        #expect(CarryAllMerge.chainComposes(
+            order: ["a", "b"], fans: ["a": single, "b": single],
+            displayed: ["a": nil, "b": nil]))
+        // The gap class passes through: an EMPTY side is the op's to refuse
+        // (loudly), never this guard's.
+        #expect(CarryAllMerge.chainComposes(
+            order: ["a", "b"], fans: ["a": fanned, "b": []],
+            displayed: ["a": "x", "b": nil]))
+        #expect(CarryAllMerge.chainComposes(
+            order: ["a", "b"], fans: ["a": [], "b": fanned],
+            displayed: ["a": nil, "b": "x"]))
+    }
+
     // MARK: - The composition brain, pure
 
     @Test func theCompositionCarriesEveryOtherActiveTake() async throws {

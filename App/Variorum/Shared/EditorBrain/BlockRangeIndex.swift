@@ -294,9 +294,18 @@ nonisolated struct BlockRangeIndex: Equatable, Sendable {
         let first = entries.indices.first { starts[$0] == range.location }
             ?? entries.indices.first { $0 > 0 && starts[$0] == range.location + 1 }
         // …and its last entry ends AT the span's end, or one short of it
-        // (the span closed on the separator that follows).
-        let last = entries.indices.first { ends[$0] == range.upperBound }
-            ?? entries.indices.first { ends[$0] == range.upperBound - 1 }
+        // (the span closed on the separator that follows). The `starts <
+        // upperBound` fence (13j ladder A, finding A8): a ZERO-LENGTH entry
+        // sitting exactly AT the span's end has `ends == upperBound` without
+        // being covered — the half-open span stops at its position — and the
+        // primary lookup used to grab it, bracketing one more empty block
+        // than the selection covers. Trailing edge only: at the LEADING edge
+        // a zero-length entry at `range.location` IS inside the half-open
+        // span, so `first` needs no mirror. For any non-empty entry the
+        // fence is vacuous (`starts = ends − length < upperBound`).
+        let last = entries.indices.first {
+            ends[$0] == range.upperBound && starts[$0] < range.upperBound
+        } ?? entries.indices.first { ends[$0] == range.upperBound - 1 }
         guard let first, let last, first <= last else { return nil }
         return first...last
     }

@@ -22,6 +22,7 @@ import ConcurrencyExtras
 import Dependencies
 import Foundation
 import GRDB
+import SwiftUI  // NSHostingView — the A1 pin mounts the section for real
 import Testing
 import VariorumCore
 @testable import Variorum
@@ -292,6 +293,134 @@ struct RecoveryDoorsTests {
             let past = BlockPastModel(session: editor.session, blockID: slot.blockID)
             await past.putBackTake(extra.id)
             #expect(past.statusMessage == TrayRefusalCopy.sealed)
+        }
+    }
+
+    /// **THE A1 PIN (13j ladder A round 1, BLOCKER — red-on-old by
+    /// behavioral revert).** Mounting the section over a REAL store must
+    /// start its own observation and surface the block's past — NO `adopt`
+    /// anywhere in this test. On the pre-fix code the starting `.task` sat
+    /// INSIDE the `if !model.isEmpty` conditional, and `past` begins empty:
+    /// the task could never attach, so the section was dead by construction
+    /// on every real host while every adopt-driven pin above stayed green.
+    @Test func theHistoryFaceSectionStartsItsOwnObservationWhenMounted() async throws {
+        try await withEditor(seedBlocks: ["shown"]) { editor in
+            let ops = editor.session.operations
+            let slot = try #require(try editor.storeSlots().first)
+            let chosen = try #require(slot.variantID)
+            let extra = try ops.branchVariant(slot.blockID, from: chosen)
+            try ops.deleteVariant(extra.id)
+
+            let past = BlockPastModel(session: editor.session, blockID: slot.blockID)
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 480, height: 220),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let hosting = NSHostingView(rootView: BlockPastSection(
+                model: past, tokens: .fallback(for: .light), onSeeOrigin: { _ in }))
+            hosting.frame = NSRect(x: 0, y: 0, width: 480, height: 220)
+            window.contentView = hosting
+            window.orderFrontRegardless()
+
+            // Async-poll (never sync RunLoop pumping) until the observation
+            // the MOUNT must start delivers the deleted take.
+            for _ in 0..<80 where past.past.isEmpty {
+                hosting.layoutSubtreeIfNeeded()
+                window.displayIfNeeded()
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(25))
+            }
+            #expect(past.past.deletedTakes.map(\.id) == [extra.id],
+                    "the mount starts the observation — no adopt seam in this test")
+        }
+    }
+
+    /// **THE A3 PIN (13j ladder A round 1 — red-on-old).** The restore is an
+    /// exact flip (#68(b), ruled): a take ARCHIVED when it was deleted comes
+    /// back archived — into the archived listing, not the fan — and the
+    /// receipt must say which. The pre-fix door claimed the fan for every
+    /// restored take, and its Put-back help promised "its place in the fan".
+    @Test func putBackOfAnArchivedDeletedTakeDoesNotClaimTheFan() async throws {
+        try await withEditor(seedBlocks: ["shown"]) { editor in
+            let ops = editor.session.operations
+            let slot = try #require(try editor.storeSlots().first)
+            let chosen = try #require(slot.variantID)
+            let extra = try ops.branchVariant(slot.blockID, from: chosen)
+            try ops.archiveVariant(extra.id)
+            try ops.deleteVariant(extra.id)
+
+            // The row knows its status, so the help words to it BEFORE the
+            // act (the receipt is the act's own answer, below).
+            let listed = try await editor.database.read { [blockID = slot.blockID] db in
+                try Queries.deletedTakes(db, blockID: blockID)
+            }
+            #expect(BlockPastCopy.putBackHelp(try #require(listed.first))
+                .contains("archived takes"))
+
+            let past = BlockPastModel(session: editor.session, blockID: slot.blockID)
+            await past.putBackTake(extra.id)
+            #expect(past.statusMessage == BlockPastCopy.takeRestoredArchived,
+                    "the receipt reads the op's own status — never \"the fan\" here")
+            let status = try await editor.database.read { [id = extra.id] db in
+                try Variant.fetchOne(db, key: id)?.status
+            }
+            #expect(status == .archived, "the exact flip stands — nothing un-archived")
+
+            // An ACTIVE deleted take keeps the fan receipt, and its help
+            // still names the fan.
+            let active = try ops.branchVariant(slot.blockID, from: chosen)
+            try ops.deleteVariant(active.id)
+            let activeRow = try await editor.database.read { [blockID = slot.blockID] db in
+                try Queries.deletedTakes(db, blockID: blockID)
+            }
+            #expect(BlockPastCopy.putBackHelp(try #require(activeRow.first))
+                .contains("fan"))
+            await past.putBackTake(active.id)
+            #expect(past.statusMessage == BlockPastCopy.takeRestored)
+        }
+    }
+
+    /// **A3's LENS half (red-on-old).** Restoring a deleted pick that comes
+    /// back ARCHIVED must not claim the lens is showing it again — the pick
+    /// still dangles (now as archived, Restore now offering unarchive), and
+    /// the second click heals it. The truthful two-click chain, pinned.
+    @Test func theLensRestoreOfAnArchivedDeletedPickSaysItCameBackArchived() async throws {
+        try await withLensBoard { board in
+            let ops = board.session.operations
+            let slot = try #require(board.model.projection.slots.first)
+            let chosen = try #require(slot.variantID)
+            let take2 = try ops.branchVariant(slot.blockID, from: chosen)
+            let lens = try ops.createLens(post: board.postID, name: "thread")
+            _ = try ops.setLensChoice(lens: lens.id, block: slot.blockID, variant: take2.id)
+            board.model.addLensColumn(lens.id)
+            try board.reload()
+            let column = try #require(board.model.columns.first {
+                if case .lens = $0.kind { return true } else { return false }
+            })
+
+            try ops.archiveVariant(take2.id)
+            try ops.deleteVariant(take2.id)
+            try board.reload()
+            let deleted = try #require(board.model.danglingPick(columnID: column.id, slot: slot))
+            #expect(deleted.state == .deleted)
+
+            await board.model.restoreDanglingPick(deleted)
+            #expect(board.model.statusMessage == LensFallbackCopy.restoredDeletedButArchived,
+                    "not \"showing its pick again\" — the pick still dangles, archived")
+            try board.reload()
+            let archived = try #require(board.model.danglingPick(columnID: column.id, slot: slot))
+            #expect(archived.state == .archived, "the notice re-renders truthfully")
+
+            // The second click heals it — the chain the receipt teaches.
+            await board.model.restoreDanglingPick(archived)
+            #expect(board.model.statusMessage == LensFallbackCopy.restoredArchived)
+            try board.reload()
+            #expect(board.model.danglingPick(columnID: column.id, slot: slot) == nil)
+            #expect(board.model.projection.lensSelections[lens.id]?[slot.blockID] == take2.id)
         }
     }
 

@@ -306,6 +306,28 @@ struct UndoHintAndRefusalTests {
         }
     }
 
+    /// **THE A2 PIN (13j ladder A round 1, MAJOR — red-on-old).** After the
+    /// J4b flip ⌘⇧M carries every take along and ⌥⌘⇧M pairs by hand — and
+    /// BOTH fan-fold refusals must teach exactly that. The pre-fix
+    /// `.seamBesideFan` road still said "use Merge Blocks (⌘⇧M) to pair the
+    /// takes yourself": the batch-4 copy sweep was site-directed and fixed
+    /// only the texted-seam twin, so the same sentence lived on in its
+    /// second home — inside J8(b)'s own file. The close is structural: both
+    /// speakers now END IN the one shared roads constant, so they cannot
+    /// drift apart again.
+    @Test func theSeamFanRoadTeachesTheFlippedDefaultsFromOneHome() {
+        let road = CrossBlockRefusal.roadClause(for: .seamBesideFan)
+        #expect(!road.contains("to pair the takes yourself"),
+                "⌘⇧M does not pair any more — hand-pairing is the ceremony's")
+        #expect(road.contains("brings every take along"))
+        #expect(road.contains("Merge with Ceremony (⌥⌘⇧M)"))
+        #expect(road.hasSuffix(FannedDefaultsCopy.fanFoldRoads),
+                "one home: the diagnosis speaks the shared roads sentence")
+        #expect(EditorSurfaceController.seamFanRefusal(leading: 2, trailing: 1)
+            .hasSuffix(FannedDefaultsCopy.fanFoldRoads),
+                "…and so does the texted-seam refusal")
+    }
+
     /// The refusal her screenshot showed is now the DELETE road, so the only
     /// selections that still speak are the ones her ruling left alone — and
     /// they say which block, and why.

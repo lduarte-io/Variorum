@@ -45,7 +45,9 @@ struct RecoveryOpsTests {
             try ops.deleteVariant(second.id)
             #expect(try db.deletedAt("variant", second.id) != nil)
 
-            try ops.restoreVariant(second.id)
+            let revived = try ops.restoreVariant(second.id)
+            #expect(revived == .active,
+                    "the op reports the status it revived (13j ladder A, A3) — the doors word their receipts to it")
             let after = try #require(try db.snapshotRow("variant", second.id))
             #expect(after == before, "every column back, tombstone included")
 
@@ -68,7 +70,9 @@ struct RecoveryOpsTests {
             try ops.archiveVariant(second.id)
             try ops.deleteVariant(second.id)
 
-            try ops.restoreVariant(second.id)
+            let revived = try ops.restoreVariant(second.id)
+            #expect(revived == .archived,
+                    "the op's own answer says ARCHIVED (13j ladder A, A3) — the faces read it, so no receipt can claim the fan for this take")
             let status = try db.fetchString(
                 "SELECT status FROM variant WHERE id = ?", [second.id])
             #expect(status == VariantStatus.archived.rawValue)

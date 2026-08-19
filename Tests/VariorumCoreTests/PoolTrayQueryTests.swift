@@ -128,6 +128,27 @@ struct PoolTrayQueryTests {
         }
     }
 
+    /// 13j ladder A round 1, finding A6: the tray listing is bounded IN SQL
+    /// — a held observation passes `window + 1`, so its cost is the window,
+    /// never the note's whole deletion history. Newest-first survives the
+    /// limit (the LIMIT rides the same ORDER BY).
+    @Test func trayBlocksHonoursItsLimit() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            var ids: [String] = []
+            for i in 0..<4 {
+                let made = try ops.newBlock(in: post.id, text: "scrap \(i)")
+                ids.append(made.block.id)
+            }
+            for id in ids { try ops.deleteBlock(id) }
+            let bounded = try db.read { try Queries.trayBlocks($0, postID: post.id, limit: 2) }
+            #expect(bounded.map(\.blockID) == [ids[3], ids[2]],
+                    "the two newest deletions, and only those")
+            let unbounded = try db.read { try Queries.trayBlocks($0, postID: post.id) }
+            #expect(unbounded.count == 4, "nil limit keeps the one-shot callers whole")
+        }
+    }
+
     @Test func trayPreviewShowsOnlyWhatRestoreWouldRevive() throws {
         // restoreBlock revives children by exact-stamp match; a default
         // variant that died independently under a different stamp stays

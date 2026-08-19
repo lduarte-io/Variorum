@@ -1851,6 +1851,145 @@ reaching length-1 spans would route around ruled authorizations.
 **All six flow findings: AGREE, unanimous.** The package returns
 to the reviewer for final calls + its own fix pass (next entry).
 
+### LADDER A ROUND 1 — THE REVIEWER'S FIX PASS (2026-08-18; the same Fable session, authorized per the cross-model flow)
+
+**Final calls: ALL SIX findings CONFIRMED and FIXED; every
+implementer constraint ACCEPTED (none overruled); the A5 gap-slot
+candidate DISMISSED with the traced mechanism.** A4/A7 were already
+landed at architect adjudication (911f4b7) — both diffs
+sanity-swept in this pass: correct, nothing further.
+
+**Per-finding disposition:**
+
+- **A1 (BLOCKER) — FIXED, the Group form.** `BlockPastSection.body`
+  now wraps the emptiness conditional in an always-present
+  (zero-size when empty) `VStack` carrying the starting
+  `.task(id:)`, so MOUNTING the section starts its observation;
+  host-side `start()` was rejected exactly per the constraint
+  (`TakesBottomBar`'s `@State pastModel` never clears on sheet
+  dismissal — a host-driven start would leak the `variant`
+  observation past the sheet's life; the view-side task cancels
+  with the hierarchy, preserving held-only-while-on-screen, P1).
+  The moved body kept its bytes (re-indented only);
+  `RecoveryFaceCaptureTests` keeps `adopt` (synthetic states by
+  design, per the constraint).
+- **A2 (MAJOR) — FIXED, the structural close.** New
+  `FannedDefaultsCopy.fanFoldRoads` — ONE home for the roads
+  sentence — and BOTH speakers now end in it:
+  `CrossBlockRefusal.roadClause(.seamBesideFan)` (was still
+  teaching "⌘⇧M to pair the takes yourself") and
+  `EditorSurfaceController.seamFanRefusal` (recomposed onto the
+  constant; output byte-identical to batch 4's). The
+  causeClause/roadClause split is untouched. **The sweep's closing
+  form (the constraint's table):** every user-facing site naming
+  ⌘⇧M/⌘⇧D was enumerated by phrase-directed grep — 22 sites; ONE
+  was stale (this finding's, fixed); all others verified CURRENT:
+  the batch-4 five (seamFanRefusal, both Takes-bar helps, both
+  helper dictionary entries), the helper's shortcut rows, both
+  one-word-take refusals (⌥⌘⇧D parking road), the three ceremony
+  refusals in `FannedDefaultsCopy`, `EditorFind`'s
+  merge-the-blocks-first road (claims merging, not pairing — true),
+  and `OpsRefusalCopy`'s four Divide-splits roads (true under
+  either default). **Both overclaiming records AMENDED in place**:
+  QUESTIONS #69's "ALSO SWEPT" paragraph and the batch-4 record's
+  copy-sweep paragraph each carry the correction note.
+- **A3 (MINOR) — FIXED, copy-side only per the constraint; the
+  offered op road taken.** `restoreVariant` now RETURNS the revived
+  `VariantStatus` (`@discardableResult`; a this-batch signature —
+  no shipped caller read a return; the exact-flip semantics are
+  byte-unchanged, #68(b) ruled). The three faces read the op's own
+  answer: the History face's receipt
+  (`BlockPastCopy.restored(_:)` — new `takeRestoredArchived`), its
+  Put-back help (worded to the row's status), and the lens restore
+  (`LensFallbackCopy.restoredDeletedButArchived` — the notice then
+  truthfully re-renders as `.archived` with Restore offering
+  unarchive: the two-click chain, pinned). Core pins extended to
+  assert both returned statuses.
+- **A5 (MINOR) — FIXED, the pre-compound validation (the
+  implementer's recommended shape).** New pure
+  `CarryAllMerge.chainComposes(order:fans:displayed:)`, guarded at
+  BOTH call sites (Write's `runMergeChain`, the board's
+  `mergeSelectedBlocks`) BEFORE the compound opens — the whole run
+  refuses with `takesChangedMerge`, nothing touched (the
+  refuse-whole-chain constraint is satisfied by construction: a
+  pre-compound refusal has no partial act to disclaim, and the
+  constant's plural already reads as the run); no typed error was
+  needed (constraint (ii) moot under the pre-compound shape).
+  **The validation deliberately passes EMPTY sides through** — the
+  op's typed refusal is the honest diagnosis there (below).
+- **A6 (MINOR) — FIXED, both instances, the limit-defaulting-nil
+  shape.** `Queries.trayBlocks(_:postID:limit:)` +
+  `observeTray(_:limit:)` bound in SQL; `TrayViewModel.start()`
+  passes `window + 1` for the deleted half (the originals half
+  already did); **the flow's second instance closed**:
+  `BlockTOCViewModel.startTray()` now passes the same window,
+  adopts through the seam with a `trayTruncated` flag, and the
+  Blocks-mode section renders a visible truncation marker (never a
+  silent cut). One-shot callers and all four test sites compile
+  unchanged (nil default). Provenance: batch 2's code (recorded
+  per the constraint). Disposition class: architectural/P1
+  discipline — the limit's own state-transition test
+  (`trayBlocksHonoursItsLimit`, core) rather than a red-on-old
+  claim.
+- **A8 (NIT) — FIXED, the trailing fence; the length>1 fence
+  untouched.** `wholeBlockRun`'s primary trailing lookup gains
+  `&& starts[$0] < range.upperBound`: a zero-length entry sitting
+  exactly AT the span's end has `ends == upperBound` without being
+  covered (half-open span), and the primary lookup grabbed it —
+  one more empty block than the selection covers. Trailing edge
+  only, exactly as the implementer's arithmetic said (a zero-length
+  entry at `range.location` IS inside the half-open span — no
+  mirror). Non-empty entries are unaffected (the fence is vacuous
+  for `length ≥ 1`).
+
+**THE GAP-SLOT CANDIDATE (A5's flow rider) — VERIFIED and
+DISMISSED.** The board's `mergeSelectedBlocks` indeed has no
+gap-slot guard, and a gap's `displayed[id]` is nil with no race —
+but the silent fold is NOT reachable through it: a gap slot is
+`variantID == nil` at render (`PostRender.swift:56`), and
+`ops.merge` → `placedContext` → `renderedVariant`
+(`Operations+Structural.swift:23–40`) throws the TYPED
+`noRenderableVariant` (or `blockNotFound` for a missing block row)
+before any join — the whole compound rolls back and the catch
+speaks. Loud on the OLD code and the new alike; there is also no
+fan on a gap to fold. Consequence honored in the fix: the
+validation passes empty-fan sides through so the op's diagnosis
+(not "takes changed") is what she reads.
+
+**PINS + RED-ON-OLD EVIDENCE (behavioral revert, checksummed;
+every revert restored byte-identical, `shasum -a 256`):**
+
+| Revert | Pins that went RED | Restored |
+|---|---|---|
+| **A1** — the `.task` back inside the emptiness conditional | `RecoveryDoorsTests.theHistoryFaceSectionStartsItsOwnObservationWhenMounted` (the mounted section never populated — the exact dead-wiring mechanism; all 17 adopt-driven siblings stayed green, which is the finding's own evidence) | `BlockPastSection.swift` → `42146f7267…` (identical) |
+| **A2** — the road clause back to "use Merge Blocks (⌘⇧M) to pair the takes yourself" | `UndoHintAndRefusalTests.theSeamFanRoadTeachesTheFlippedDefaultsFromOneHome` (4 issues) | `CrossBlockRefusal.swift` → `7e2c6c36c7…` (identical) |
+| **A3** — both doors back to the unconditional fan-claiming receipts | `RecoveryDoorsTests.putBackOfAnArchivedDeletedTakeDoesNotClaimTheFan` · `theLensRestoreOfAnArchivedDeletedPickSaysItCameBackArchived` (each caught its door claiming the fan / "showing its pick again") | `BlockPastSection.swift` → `42146f7267…`; `TakesViewModel.swift` → `35afcf040b…` (both identical) |
+| **A5** — both pre-compound guards removed | `FannedDefaultsTests.aChainWithAStaleDisplayedTakeRefusesWholeAndTouchesNothing` (2 issues: the old code MERGED all three — "Merged 3 blocks" — and the fan folded silently; the repro is the frozen-projection property itself, choose-away + delete with no reload, no race needed) | `EditorSurfaceController.swift` → `c60b692f55…`; `TakesStructureController.swift` → `0d78e3703c…` (both identical) |
+| **A8** — the trailing fence dropped | `WholeBlockDeleteTests.wholeBlockRunDoesNotGrabAZeroLengthEntryAtTheSpansEnd` (2 issues — `0...2` and `0...1`, the implementer's own arithmetic reproduced) | `BlockRangeIndex.swift` → `fe546d77e5…` (identical) |
+
+Plus the pure A5 matrix
+(`theChainValidationRefusesStaleDisplayedTakesAndPassesGapsThrough`
+— the race class refused anywhere down the run; unfanned links
+demand nothing; both gap directions pass through) and the A3 core
+return-value asserts (extended in place in `RecoveryOpsTests`,
+both statuses).
+
+**SUITE COUNTS (end state, every "Test run with N tests" line
+confirmed):** core `swift test` — **1279 / 136 PASSED** (baseline
+1278/136 + the A6 limit test) · Mac `-project` invocation —
+**1499 / 263 PASSED, FULLY GREEN, zero reds** (baseline 1492/263
++ 7: the A1/A2/A8 pins, both A3 pins, the A5 pair) · tutorial
+spine by TYPE name — **51 / 7 PASSED** (exact) · mobile
+(`VariorumMobile`, iPhone 16e) — **314 / 60 PASSED** (exact; run
+because `Sources/` — the `restoreVariant` signature, the
+`trayBlocks` limit — and `Shared/` — the A8 fence — were touched).
+Zero schema; zero `Sources/VariorumCore/Sync/` lines; no Release
+build, no `/Applications` write, no push; no Variorum instance
+running at any check; no other `xcodebuild` active before any run.
+
+**Round 2 re-reviews fresh** per the ladder — its anchor is this
+record plus the findings above.
+
 ---
 
 ## BATCH 4 RECORD — the defaults pair (J4/J4b) (2026-08-18; fresh Opus implementer)
@@ -1984,7 +2123,12 @@ and now describe the ruled product: the **seam-backspace refusal**
 (`seamFanRefusal` — #34's ruling is untouched, but "Use Merge Blocks (⌘⇧M) to
 pair the takes yourself" was false; it now names both roads and what each
 does), the Takes bar's **Divide** and **Merge** helps, and the helper's
-**"divide / the take ceremony"** and **"merge"** dictionary entries. The
+**"divide / the take ceremony"** and **"merge"** dictionary entries.
+*(CORRECTED at ladder A round 1, finding A2 — the sweep was site-directed,
+not phrase-directed, and MISSED the same sentence's second home:
+`CrossBlockRefusal.roadClause(.seamBesideFan)`, the empty-looking seam's
+diagnosis, kept teaching "⌘⇧M pairs" until the reviewer's fix pass landed the
+shared `FannedDefaultsCopy.fanFoldRoads` constant both speakers now end in.)* The
 helper's shortcut list gained ⌥⌘⇧D and ⌥⌘⇧M (the discoverability pin
 `everyDeclaredShortcutIsFindableInTheHelper` requires it) and ⌘⇧D/⌘⇧M's rows
 now say what they do to a fan.

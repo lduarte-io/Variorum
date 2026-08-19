@@ -140,6 +140,32 @@ struct WholeBlockDeleteTests {
                 "one character of tail text in the span and the answer is no")
     }
 
+    /// **THE A8 PIN (13j ladder A round 1 — red-on-old).** A ZERO-LENGTH
+    /// entry sitting exactly AT the span's end has `ends == upperBound`
+    /// without being covered — the half-open span stops at its position —
+    /// and the primary trailing lookup used to grab it, bracketing one more
+    /// empty block than the selection covers. Trailing edge only: at the
+    /// LEADING edge a zero-length entry at `range.location` IS inside the
+    /// half-open span, so `first` needs no mirror (the implementer's own
+    /// arithmetic, reproduced). The `range.length > 1` fence off A7's carve
+    /// and #34's seam is untouched — the sibling pins above hold it.
+    @Test func wholeBlockRunDoesNotGrabAZeroLengthEntryAtTheSpansEnd() {
+        // Three empty blocks: entries at 0, 1, 2 (each zero-length), the two
+        // separators at 0 and 1. The span [0,2) covers e0, both separators
+        // and e1 — and STOPS AT e2's position, so e2 is not in the run.
+        let empties = Self.index([0, 0, 0])
+        #expect(empties.wholeBlockRun(covering: NSRange(location: 0, length: 2)) == 0...1)
+        // A text block, its separator, then a trailing empty block: the span
+        // covering the text and its newline ends AT the empty's position.
+        let trailingEmpty = Self.index([5, 0])
+        #expect(trailingEmpty.wholeBlockRun(covering: NSRange(location: 0, length: 6)) == 0...0)
+        // …and a zero-length entry genuinely INSIDE the span still counts:
+        // with a tail behind it, [0,3) reaches one past e2's own separator,
+        // so all three empties are covered and the run says so.
+        let tailed = Self.index([0, 0, 0], tail: 2)
+        #expect(tailed.wholeBlockRun(covering: NSRange(location: 0, length: 3)) == 0...2)
+    }
+
     /// **The seam carves keep every case they ruled.** A one-character
     /// deletion is A7's/#34's geometry, and this road must never route around
     /// their fan / nothing-unshown authorizations.

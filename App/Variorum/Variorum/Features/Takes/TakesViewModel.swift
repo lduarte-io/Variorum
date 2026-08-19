@@ -1191,9 +1191,21 @@ final class TakesViewModel {
                 statusMessage = LensFallbackCopy.restoredArchived
             }
         case .deleted:
-            await run { ops in try ops.restoreVariant(pick.variantID) }
-            if statusMessage == nil {
-                statusMessage = LensFallbackCopy.restoredDeleted
+            // 13j ladder A round 1, finding A3: the restore is an exact flip
+            // (#68(b), ruled), so a take ARCHIVED when it was deleted comes
+            // back archived — the pick then STILL dangles (as `.archived`,
+            // Restore now offering unarchive) and "showing its pick again"
+            // would be false. The receipt reads the op's own answer.
+            statusMessage = nil
+            do {
+                let status = try await session.runner.run { ops in
+                    try ops.restoreVariant(pick.variantID)
+                }
+                statusMessage = status == .archived
+                    ? LensFallbackCopy.restoredDeletedButArchived
+                    : LensFallbackCopy.restoredDeleted
+            } catch {
+                statusMessage = Self.message(for: error)
             }
         case .gone, .foreign:
             statusMessage = LensFallbackCopy.nothingToRestore

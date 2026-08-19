@@ -90,7 +90,15 @@ extension Operations {
     /// — restore the block first, which revives its stamp-matched takes for
     /// free), and a sealed post (`lockedPost`, via the placement guard — the
     /// seal refuses everything under the post).
-    public func restoreVariant(_ id: String) throws {
+    ///
+    /// **Returns the revived take's `status`** (13j ladder A round 1, finding
+    /// A3 — the `BlockRestoreLanding` shape one op over): the exact flip is
+    /// the ruled behaviour (#68(b)), which means a take that was ARCHIVED
+    /// when it was deleted comes back archived — into the archived listing,
+    /// not the fan — and a receipt that assumed "the fan" was lying for that
+    /// row. The door reads the op's own answer instead of assuming one.
+    @discardableResult
+    public func restoreVariant(_ id: String) throws -> VariantStatus {
         try database.write { db in
             guard var variant = try Variant.fetchOne(db, key: id) else {
                 throw OperationError.variantNotFound(id: id)
@@ -103,6 +111,7 @@ extension Operations {
             variant.deletedAt = nil
             variant.updatedAt = date.now
             try variant.update(db)
+            return variant.status
         }
     }
 

@@ -78,6 +78,59 @@ nonisolated enum CarryAllMerge {
             carries: carries)
     }
 
+    /// **The chain's PRE-COMPOUND validation** (13j ladder A round 1,
+    /// finding A5 — fixed by the reviewer, cross-model flow; the batch-4
+    /// implementer's recommended shape). A fanned link whose displayed take
+    /// no longer resolves in its live fan used to fall to plain `merge`
+    /// inside the compound — folding that fan to lineage with no speech,
+    /// where the PAIR road refuses (`takesChangedMerge`). Every failure mode
+    /// is knowable before the compound opens, from the same one store read
+    /// the chain already takes: link 1's leading side, and every link's
+    /// trailing side. Later links' leading side is the previous link's own
+    /// result (the joined take rides `result.variants`), resolvable by
+    /// construction — so validating the read is validating the chain.
+    ///
+    /// **A side with NO takes at all passes through, deliberately** (the
+    /// gap-slot class the flow asked this pass to verify): the plain road's
+    /// own op refusal (`noRenderableVariant` / `blockNotFound`, typed and
+    /// loud, whole compound rolled back) is the honest diagnosis there —
+    /// "takes changed" would misname a block that never synced. This
+    /// function refuses only the race class: a displayed take absent from a
+    /// NON-EMPTY fan.
+    ///
+    /// Pure, so the matrix is a unit test — and refusing HERE refuses the
+    /// WHOLE run before any row is touched, which is what `withCompound`'s
+    /// atomicity means the alternative would have been anyway.
+    static func chainComposes(
+        order: [String],
+        fans: [String: [Variant]],
+        displayed: [String: String?]
+    ) -> Bool {
+        guard let firstID = order.first else { return true }
+        func resolves(_ id: String?, in fan: [Variant]) -> Bool {
+            guard let id else { return false }
+            return fan.contains { $0.id == id }
+        }
+        var leadingCount = (fans[firstID] ?? []).count
+        var leadingResolves = resolves(displayed[firstID] ?? nil, in: fans[firstID] ?? [])
+        for nextID in order.dropFirst() {
+            let trailingFan = fans[nextID] ?? []
+            if leadingCount > 1 || trailingFan.count > 1 {
+                // The link the code would compose. Empty sides pass through
+                // (the op speaks); a stale displayed take refuses the run.
+                if leadingCount >= 1, !leadingResolves { return false }
+                if trailingFan.count >= 1,
+                   !resolves(displayed[nextID] ?? nil, in: trailingFan) { return false }
+                leadingCount = max(1, leadingCount + trailingFan.count - 1)
+            } else {
+                leadingCount = 1
+            }
+            // Either road's result leads the next link with its own take.
+            leadingResolves = true
+        }
+        return true
+    }
+
     /// The merged block's JOINED take — the one minted from the pairing.
     ///
     /// Read off the result's own `sources` correspondence rather than
@@ -135,6 +188,22 @@ nonisolated enum FannedDefaultsCopy {
         return "Merged \(blocks) blocks — the takes you were looking at joined, and "
             + "\(takes) came along whole. Extra copies are quick to delete; ⌥⌘Z undoes."
     }
+
+    // MARK: The fan-fold ROADS (one sentence, two speakers)
+
+    /// **The roads out of "backspace won't fold a fan away", in ONE home**
+    /// (13j ladder A round 1, finding A2 — fixed by the reviewer, cross-model
+    /// flow). Two refusals make this promise: the texted-seam refusal
+    /// (`EditorSurfaceController.seamFanRefusal`) and the empty-looking
+    /// seam's diagnosis (`CrossBlockRefusal.roadClause(.seamBesideFan)`) —
+    /// different guards, same promise. The J4b flip's copy sweep was
+    /// site-directed and caught only the first, so the second went on
+    /// teaching "⌘⇧M pairs the takes yourself" after ⌘⇧M stopped pairing.
+    /// A second home of one sentence is how copy drifts; both speakers now
+    /// compose around this constant, and the pin holds them to it.
+    static let fanFoldRoads =
+        "Merge Blocks (⌘⇧M) joins them and "
+        + "brings every take along; Merge with Ceremony (⌥⌘⇧M) pairs the takes yourself."
 
     // MARK: The ceremony doors' honest refusals
 

@@ -52,6 +52,12 @@ nonisolated enum LensFallbackCopy {
 
     static let restoredArchived = "Take unarchived — this lens is showing its pick again."
     static let restoredDeleted = "Take put back — this lens is showing its pick again."
+    /// 13j ladder A (A3): the exact flip can revive a take ARCHIVED — the
+    /// pick then still dangles (the notice re-renders as archived, Restore
+    /// now offering unarchive), and the line above would have lied.
+    static let restoredDeletedButArchived =
+        "Take put back — it came back archived, so this pick still shows the "
+        + "note's take. Restore again to unarchive it."
     /// The two states with no road: nothing to act on, said plainly rather
     /// than by a button that could only fail.
     static let nothingToRestore =

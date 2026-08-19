@@ -75,26 +75,37 @@ extension Queries {
     /// and belong to `restoreContainer`, not the tray (resolves the
     /// KnownIssues "tray semantics" entry — see the Phase 4 closeout).
     /// `restoreBlock` on a tray item lands it back in this post.
-    public static func trayBlocks(_ db: Database, postID: String) throws -> [TrayItem] {
-        try Row.fetchAll(
-            db,
-            sql: """
-                SELECT b.id AS block_id, b.deleted_at AS deleted_at,
-                       dv.working_text AS text
-                FROM block b
-                LEFT JOIN variant dv
-                  ON dv.id = b.default_variant_id
-                 AND (dv.deleted_at IS NULL OR dv.deleted_at = b.deleted_at)
-                WHERE b.last_container_id = ? AND b.deleted_at IS NOT NULL
-                  AND NOT EXISTS (
-                    SELECT 1 FROM container_block cb
-                    JOIN container cc ON cc.id = cb.container_id
-                    WHERE cb.block_id = b.id
-                      AND cb.deleted_at = b.deleted_at
-                      AND cc.deleted_at = b.deleted_at)
-                ORDER BY b.deleted_at DESC, b.id
-                """,
-            arguments: [postID])
+    ///
+    /// `limit` (13j ladder A round 1, finding A6 — the `preservedOriginals`
+    /// shape, retrofitted): a HELD observation over this listing is bounded
+    /// in SQL, not in memory — the caller passes `window + 1` so a
+    /// truncation marker never false-positives. Defaulting nil keeps the
+    /// one-shot callers unchanged.
+    public static func trayBlocks(
+        _ db: Database, postID: String, limit: Int? = nil
+    ) throws -> [TrayItem] {
+        var sql = """
+            SELECT b.id AS block_id, b.deleted_at AS deleted_at,
+                   dv.working_text AS text
+            FROM block b
+            LEFT JOIN variant dv
+              ON dv.id = b.default_variant_id
+             AND (dv.deleted_at IS NULL OR dv.deleted_at = b.deleted_at)
+            WHERE b.last_container_id = :post AND b.deleted_at IS NOT NULL
+              AND NOT EXISTS (
+                SELECT 1 FROM container_block cb
+                JOIN container cc ON cc.id = cb.container_id
+                WHERE cb.block_id = b.id
+                  AND cb.deleted_at = b.deleted_at
+                  AND cc.deleted_at = b.deleted_at)
+            ORDER BY b.deleted_at DESC, b.id
+            """
+        var arguments: StatementArguments = ["post": postID]
+        if let limit {
+            sql += " LIMIT :limit"
+            arguments += ["limit": limit]
+        }
+        return try Row.fetchAll(db, sql: sql, arguments: arguments)
             .map { TrayItem(blockID: $0["block_id"], deletedAt: $0["deleted_at"], text: $0["text"]) }
     }
 

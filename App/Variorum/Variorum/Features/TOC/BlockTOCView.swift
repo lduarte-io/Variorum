@@ -54,6 +54,12 @@ final class BlockTOCViewModel {
 
     private(set) var rows: [Queries.TOCRow] = []
     private(set) var tray: [Queries.TrayItem] = []
+    /// 13j ladder A round 1, finding A6 (the flow's SECOND instance): this
+    /// mode's tray observation was held UNBOUNDED — the same `trayBlocks`
+    /// fetch the tray panel windows, with no window at all. Same window
+    /// constant as the panel (one discipline, one number), truncation
+    /// visible below the section (never a silent cut).
+    private(set) var trayTruncated = false
     private(set) var pools: [Container] = []
     /// Expanded rows — SESSION-ONLY in v1 (the ratified reading; nothing
     /// persisted anywhere).
@@ -89,8 +95,10 @@ final class BlockTOCViewModel {
 
     func startTray() async {
         do {
-            for try await value in session.database.observeTray(postID) {
-                tray = value
+            for try await value in session.database.observeTray(
+                postID, limit: TrayViewModel.window + 1
+            ) {
+                adopt(tray: value)
             }
         } catch is CancellationError {
         } catch {
@@ -116,7 +124,14 @@ final class BlockTOCViewModel {
         self.rows = rows
         authority.settle(isPending: { autosave.pending[$0] != nil })
     }
-    func adopt(tray: [Queries.TrayItem]) { self.tray = tray }
+    func adopt(tray: [Queries.TrayItem]) {
+        // A6: the probe-row window (the `TrayViewModel.adopt` shape) — the
+        // observation fetches window + 1, so an exact-window listing never
+        // false-positives the marker.
+        trayTruncated = tray.count > TrayViewModel.window
+        self.tray = trayTruncated
+            ? Array(tray.prefix(TrayViewModel.window)) : tray
+    }
 
     /// A row's displayed text: the authority's overlay over the store's
     /// row text (13b 1a — retires the NIT-5 stale-flash residual).
@@ -450,6 +465,14 @@ struct BlockTOCView: View {
                     }
                     .controlSize(.mini)
                 }
+            }
+            if model.trayTruncated {
+                // A6: the visible marker (the standing windowed-observation
+                // discipline — never a silent cut).
+                Text("Showing the \(TrayViewModel.window) most recently deleted — "
+                    + "older ones aren't listed.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
     }

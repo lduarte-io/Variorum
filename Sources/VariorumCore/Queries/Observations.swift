@@ -108,9 +108,12 @@ extension AppDatabase {
         observe { try Queries.postTags($0, postID: postID) }
     }
 
-    /// A post's deleted-blocks tray, live.
-    public func observeTray(_ postID: String) -> AsyncValueObservation<[Queries.TrayItem]> {
-        observe { try Queries.trayBlocks($0, postID: postID) }
+    /// A post's deleted-blocks tray, live. `limit` (13j ladder A, A6): a
+    /// held observation passes `window + 1` — bounded in SQL, marker-safe.
+    public func observeTray(
+        _ postID: String, limit: Int? = nil
+    ) -> AsyncValueObservation<[Queries.TrayItem]> {
+        observe { try Queries.trayBlocks($0, postID: postID, limit: limit) }
     }
 
     /// A post's PRESERVED ORIGINALS, live (13j J2 — the tray's second

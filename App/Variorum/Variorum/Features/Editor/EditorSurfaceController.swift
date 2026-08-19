@@ -581,6 +581,17 @@ final class EditorSurfaceController {
             uniqueKeysWithValues: model.index.entries
                 .filter { blockIDs.contains($0.blockID) }
                 .map { ($0.blockID, $0.variantID) })
+        // A5 (ladder A round 1): validate BEFORE the compound — a fanned
+        // link whose displayed take vanished under the gesture used to fall
+        // to plain `merge` inside it, folding that fan to lineage with no
+        // speech. The whole run refuses up front (nothing touched), the
+        // pair road's own words.
+        guard CarryAllMerge.chainComposes(
+            order: blockIDs, fans: fans, displayed: displayed)
+        else {
+            model.showStatus(FannedDefaultsCopy.takesChangedMerge)
+            return
+        }
         let stack = model.session.undoStack
         _ = await runStructural { ops in
             try stack.withCompound(label: "Merge Blocks", operations: ops) {
@@ -1690,9 +1701,10 @@ final class EditorSurfaceController {
         case (true, false): subject = "The block above has takes"
         default: subject = "The block below has takes"
         }
+        // A2 (ladder A round 1): the roads sentence comes from the ONE home
+        // both fan-fold refusals share — see `FannedDefaultsCopy.fanFoldRoads`.
         return subject
-            + " — backspace won't fold a fan away. Merge Blocks (⌘⇧M) joins them and "
-            + "brings every take along; Merge with Ceremony (⌥⌘⇧M) pairs the takes yourself."
+            + " — backspace won't fold a fan away. " + FannedDefaultsCopy.fanFoldRoads
     }
 
     /// The merge ceremony's threshold read, shared by the ⌘⇧M door and the

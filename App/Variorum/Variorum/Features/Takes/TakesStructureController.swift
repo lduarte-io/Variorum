@@ -642,6 +642,16 @@ final class TakesStructureController {
             uniqueKeysWithValues: chain.map { id in
                 (id, slots.first { $0.blockID == id }?.variantID)
             })
+        // A5 (ladder A round 1): Write's pre-compound validation, on this
+        // door too — one chain body, one refusal rule. (This board reads
+        // its slots fresh, so the residual reachability here is the
+        // archived-default sync-race class rather than the frozen
+        // projection; the guard is the same either way.)
+        guard CarryAllMerge.chainComposes(order: chain, fans: fans, displayed: displayed)
+        else {
+            model.speak(FannedDefaultsCopy.takesChangedMerge)
+            return
+        }
         model.structuralInFlight = true
         defer { model.structuralInFlight = false }
         model.setStatus(nil)

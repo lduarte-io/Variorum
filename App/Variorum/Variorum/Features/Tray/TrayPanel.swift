@@ -186,7 +186,11 @@ final class TrayViewModel {
         do {
             for try await value in session.database.observe({ [postID] db in
                 Snapshot(
-                    deleted: try Queries.trayBlocks(db, postID: postID),
+                    // A6 (ladder A round 1): BOTH listings bounded in SQL —
+                    // the deleted half was fetched whole and windowed in
+                    // memory, the discipline honored only halfway.
+                    deleted: try Queries.trayBlocks(
+                        db, postID: postID, limit: Self.window + 1),
                     originals: try Queries.preservedOriginals(
                         db, postID: postID, limit: Self.window + 1))
             }) {
