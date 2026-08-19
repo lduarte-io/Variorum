@@ -1802,7 +1802,13 @@ struct TutorialLibraryActsTests {
             #expect(prose.contains("PAGES"), "the lesson teaches the paginated face")
             #expect(prose.contains("flowing across"), "…and says what makes it a page")
             #expect(prose.contains("click the word counts"))
-            #expect(prose.contains("Restore door"))
+            // 13j batch 6 — A JUSTIFIED PIN EDIT (the bounded copy alignment
+            // the brief allows; batch 7 owns the deletion chapter itself):
+            // the CLAIM is unchanged — the lesson teaches that a deleted book
+            // is recoverable and names the door — but the door's verb is the
+            // Trash's one verb now, and the lesson says the window too.
+            #expect(prose.contains("Put back door"))
+            #expect(prose.contains("30 days"))
 
             // PAGES: the page brain flips the guide post by post (the
             // model-driven domain — the entry list).

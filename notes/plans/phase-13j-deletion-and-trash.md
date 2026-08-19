@@ -760,6 +760,28 @@ them. They are the permanent record of why, not a pin on the fix.
   BlockRangeIndex.swift` was touched; the addition is a pure
   function no phone code calls yet.
 
+### THE TUTORIAL (P-6 — the spine stays green, 51/7)
+
+ONE stale sentence aligned, bounded, in place: the books lesson said a
+deleted book is recoverable via *"Library ▸ Archived & Deleted lists deleted
+books with a Restore door"* — the door label is unchanged, but the verb is
+the Trash's ONE verb now and the window is worth naming, so it reads
+*"…holds the TRASH, where a deleted book waits 30 days with a Put back
+door"*. `TutorialWalkTests`' locator moved with it (annotated in place; the
+claim — the lesson teaches recovery and names the door — is byte-identical in
+meaning). **The deletion CHAPTER itself is batch 7's**, and it now has three
+verbs to teach as one story.
+
+*(Lesson content changed ⇒ the real store's seeded field guide is stale; the
+closeout's standing re-seed covers it.)*
+
+### NOT BUILT, deliberately, and recorded as a walk candidate
+
+**Multi-select ARCHIVE.** The brief's own fence: block multi-delete exists
+(13e E2) and archive is its twin verb, but her round-7 ruling named single
+doors and nothing more. It is one composition away — the same
+`selectedBlocksInOrder` + one compound entry — and it is hers to want.
+
 ### FOR THE ARCHITECT / HER
 
 - **QUESTIONS #66** logged (seven lettered entries, her format):

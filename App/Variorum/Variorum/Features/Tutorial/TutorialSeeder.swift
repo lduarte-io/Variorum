@@ -899,8 +899,9 @@ enum TutorialSeeder {
             + "A single note can wear its own target too: click the word "
             + "counts in the editor's bottom bar. Targets are a measure, "
             + "never a wall. And deleting a book is recoverable: Library \u{25B8} "
-            + "Archived & Deleted lists deleted books with a Restore door — "
-            + "chapters and membership come back with it.",
+            + "Archived & Deleted holds the TRASH, where a deleted book waits "
+            + "30 days with a Put back door — chapters and membership come "
+            + "back with it.",
         ])
 
         let scraps = try lesson(library, "pool & scraps", [
