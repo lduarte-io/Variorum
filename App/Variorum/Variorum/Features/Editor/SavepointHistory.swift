@@ -67,9 +67,16 @@ struct QuietRunRow: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
-            Button(expanded ? SavepointRuns.hideVerb : SavepointRuns.showVerb, action: onToggle)
-                .controlSize(.small)
-                .buttonStyle(.link)
+            // `VoicedButtonStyle`, not `.buttonStyle(.link)` — P-8's chrome
+            // vocabulary rule (`Theme/VoiceControls.swift` is THE vocabulary),
+            // and the capture made the cost of the shortcut visible: the link
+            // style is AppKit-backed and `ImageRenderer` drew its
+            // unsupported-view placeholder where the verb belongs, so the one
+            // piece of this batch's chrome that CAN be inspected offscreen
+            // could not have been.
+            Button(tokens.chromeLabel(
+                expanded ? SavepointRuns.hideVerb : SavepointRuns.showVerb), action: onToggle)
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
             Spacer()
         }
         .help(SavepointRuns.runHelp)

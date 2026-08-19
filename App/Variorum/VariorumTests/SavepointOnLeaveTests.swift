@@ -25,6 +25,7 @@ import AppKit
 import Dependencies
 import Foundation
 import GRDB
+import SwiftUI
 import Testing
 import VariorumCore
 @testable import Variorum
@@ -327,5 +328,77 @@ struct SavepointHistoryFaceTests {
         for cadence in SavepointCadence.allCases {
             #expect(!SavepointCadenceCopy.label(cadence).isEmpty)
         }
+    }
+}
+
+// MARK: - The visual loop
+
+/// THE ONE new piece of chrome this batch adds that CAN be rendered
+/// offscreen. Batch 2's measured limit still holds — SwiftUI `List` is
+/// NSTableView-backed and `ImageRenderer` draws its unsupported-view
+/// placeholder — so the two history LISTS remain hand-check items, named as
+/// such in the batch record rather than faked here. `QuietRunRow` is a plain
+/// HStack of text and a link button, so it renders at full fidelity, and it
+/// is exactly the chrome that needs looking at: it appears INSIDE an existing
+/// list where "quiet" is the whole design requirement.
+///
+/// LIGHT only (13g batch 2's recorded finding: this project's offscreen dark
+/// renders resolve the wrong appearance).
+@MainActor
+@Suite("The quiet-run line's capture (13j J11 — the visual loop)")
+struct QuietRunRowCaptureTests {
+    private static let outputDirectory = FileManager.default.temporaryDirectory
+        .appendingPathComponent("variorum-13j-batch5-screens")
+
+    @Test func captureTheCollapsedAndExpandedRunLine() throws {
+        try FileManager.default.createDirectory(
+            at: Self.outputDirectory, withIntermediateDirectories: true)
+        for (voiceName, tokens) in [
+            ("terminal", VoiceTokens.terminalLight), ("study", VoiceTokens.studyLight),
+        ] {
+            for (name, count, expanded) in [
+                ("1-collapsed-three", 3, false),
+                ("2-expanded-three", 3, true),
+                ("3-collapsed-many", 17, false),
+            ] {
+                let view = VStack(alignment: .leading, spacing: 6) {
+                    QuietRunRow(
+                        count: count, expanded: expanded, tokens: tokens, onToggle: {})
+                    // One deliberate savepoint beneath it, so the capture
+                    // shows the contrast the design is about: a ⌘S row is
+                    // never folded away.
+                    HStack(spacing: 8) {
+                        Text("Aug 18, 2026 at 9:30:04 AM").font(.caption)
+                        Text("manual").font(.caption2)
+                        Spacer()
+                        Text("The paragraph as she left it.")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        Button("Restore") {}.controlSize(.small)
+                    }
+                }
+                try writeImage(
+                    view
+                        .frame(width: 560, alignment: .leading)
+                        .padding(8)
+                        .background(tokens.room),
+                    to: "\(voiceName)-\(name).png")
+            }
+        }
+        print("13j batch 5 captures: \(Self.outputDirectory.path)")
+    }
+
+    private func writeImage(_ view: some View, to name: String) throws {
+        let renderer = ImageRenderer(content: view)
+        renderer.scale = 2
+        guard let image = renderer.nsImage,
+              let tiff = image.tiffRepresentation,
+              let rep = NSBitmapImageRep(data: tiff),
+              let png = rep.representation(using: .png, properties: [:])
+        else {
+            Issue.record("the renderer produced no image for \(name)")
+            return
+        }
+        try png.write(to: Self.outputDirectory.appendingPathComponent(name))
     }
 }
