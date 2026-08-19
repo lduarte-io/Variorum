@@ -3813,6 +3813,126 @@ this batch's to run)
   in this session; the deploy-window items are PENDING by design and
   listed in the checklist.
 
+## LADDER B — ROUND 1 (2026-08-19; fresh Fable cold reviewer over batches 5/6/6b/7; findings recorded here BEFORE any fix session sees them)
+
+The reviewer reproduced core **1335/141** itself, ran 39 targeted
+Mac tests + the 12-test tutorial spine suite + the serializer
+completeness walk green, and reviewed the mirror SQL as text
+against SyncSpec §2/§12 + the 14c precedents. Findings (compressed
+faithfully; the reviewer's full text is the sitting transcript's):
+
+- **B1 [BLOCKER] · `PurgeJanitor.collectRoots` (intent arm) +
+  `revertDeleteBlock` — a STANDING PURGE INTENT OUTLIVES A
+  RESTORE, and the janitor then physically purges a LIVE,
+  restored family.** Verified chain: delete → Delete Now mints an
+  intent (liveness checked at MINT time only; no undo entry;
+  nothing voids the earlier delete's entry) → ⌥⌘Z flips the
+  tombstones back with zero knowledge of `purge_intent` (no op
+  outside Operations+Purge reads the table) → the block is live
+  and edited again; its pushes are ACCEPTED (mirror rows exist,
+  ledger empty) → the janitor's sweep never re-checks the target
+  is still tombstoned → `expand` expands the live family →
+  purged from mirror + ledger-fenced + removed locally. **Her
+  restored, visible block silently vanishes everywhere and can
+  never be pushed back.** Second door, undo-free: a peer that
+  hasn't pulled the intent still lists Put back; the restore
+  lands; the janitor purges live rows. Exceeds the memo's own
+  §4f clause ("a TOMBSTONE may be removed" — these aren't
+  tombstones at removal time), §4a, and the pointer religion. No
+  test covers restore-vs-standing-intent. Fix shape: SWEEP-TIME
+  RE-VERIFICATION — an intent whose target row is LIVE at
+  collection is stale: skip AND COMPLETE it (a later re-delete
+  can never be claimed by a leftover intent); belt candidates:
+  void matching intents inside the restore/undo tombstone-flip
+  helpers. Pin: delete → Delete Now → ⌥⌘Z → rounds → sweep →
+  the block survives on BOTH devices, red on current code.
+- **B2 [MAJOR] · sweep ordering + the poison-row KnownIssues
+  premise — the purge makes the PERMANENT-ORPHAN CURSOR JAM
+  constructible.** A 60-day-dropped device holding a never-pushed
+  CHILD row (comment/edge/tag/lens_choice) of a family purged in
+  its absence returns; the ROUND runs before the ledger scan, so
+  the drain pushes the child first; its fresh id is in no ledger
+  → a mirror orphan under a missing parent that nothing ever
+  removes → every peer's pull hits the missing-referent straggler
+  stall PERMANENTLY. The poison-row row's "rare by construction"
+  premise is falsified by physical removal; nothing was updated.
+  Fix: screen the outbox against the ledger pre-drain when the
+  ledger head advanced past the scan point; at minimum the
+  KnownIssues row names the purge as the first constructible
+  source. Pinnable on the fake server.
+- **B3 [MAJOR] · `SyncSession` + the doors' receipts — a
+  LOCAL-ONLY (no-account) install can NEVER purge, and the
+  receipts promise otherwise.** The janitor exists only inside
+  `SyncSession` and sweeps only after a CLEAN round (signed-in +
+  entitled + keys + cursor), so for the stated v1 population
+  (free and local; hosted sync the one paid tier) Delete Now /
+  Empty Trash mint intents no janitor will ever honor — bytes
+  stay forever while the receipt says "the bytes follow…".
+  Indefinitely false copy in the copy-truth phase; recorded
+  NOWHERE. Fix: surface to the author (the clean candidate: a
+  LOCAL-ONLY PURGE ROAD — with no peers the horizon is vacuous
+  and immediate local removal is safe by the design's own logic);
+  at minimum honest signed-out wording + a recorded consequence
+  with an owner. **The product fork goes to HER (round 11).**
+- **B4 [MINOR] · `Queries.trash` — all four kind arms fetch
+  UNBOUNDED** (no LIMIT in any arm; merge + `prefix(limit)` in
+  memory; the held observation re-runs it corpus-of-Trash-shaped
+  on every change) — the A6 limit-into-SQL discipline its own
+  brief demanded. Fix: `LIMIT :limit` per arm, keep the merge.
+- **B5 [MINOR] · `originFamilyClocks` lacks BOTH fences its
+  Trash twin (`strandedOriginals`) has** — no purge-intent fence,
+  no 30-day window: after Delete Now, the origin keeps listing in
+  the tray wearing "goes with its deleted blocks" until the
+  physical pass (indefinitely, for B3's population); past-window
+  families read "leaves today" forever in the tray while the
+  Trash fenced them. Fix: mirror both fences.
+- **B6 [MINOR] · the janitor's sweep cost is CORPUS-SHAPED every
+  clean round** (four full-table tombstone scans — no `deleted_at`
+  indexes — + the pruning aggregation over ALL of commit_point,
+  edit-adjacent cadence) — the bridge-sweep P1-tension class,
+  with no KnownIssues row. Fix: the row (owner: Phase 12 or the
+  pruning rider) naming the cheap remedies (partial indexes,
+  sweep throttle, a dirty flag).
+- **B7 [MINOR-class, recorded with B6's family] ·
+  `reonboardFromAccount` re-offers the ENTIRE local store** — once
+  ledger pruning exists, below-floor purged rows re-insert at
+  scale for exactly the device class the say-so exists for.
+  Unreachable today (floor 0); the owed-refinements record names
+  only the fresh-device case. Fix: record beside it (the rider
+  chooses adopt-server-state vs ledger-screening).
+- **B8–B11 [NITs]:** the `<=`-vs-`>=` boundary stamp
+  (measure-zero); the scan-point completeness comment + the
+  double-collected-root empty re-execution; `PurgeFamily`'s
+  missing `default_variant_id` detachment arm (unreachable via op
+  discipline; one cheap arm closes it); the `SupabaseTransport`
+  PullRequest comment's wrong mechanism sentence. Plus closeout
+  reminders (mine): the Tombstone-GC row's S4-28.3 half (bulk
+  "delete other takes") needs its own owner at resolution;
+  `purged_row`'s indefinite id retention earns an E2EE-envelope
+  line; the canon-delta list.
+
+**Clean bill headlines:** the resurrection ban's core road proven
+end-to-end; the horizon genuinely conservative (seq-based,
+committed-cursor-capped, fresh-device-halts); the mirror SQL
+faithful to §2/§12 + the 14c definer/posture precedents; the
+FK-closure family argument holds; the doors structurally
+in-Trash-only; batches 5/6/7 solid at their mechanisms; ladder A's
+territory intact; scope hygiene exact (v1_14 alone, dormant
+marker-7, the two disclosure lines).
+
+### Round-1 dispositions (running)
+
+- **B1, B2, B3(mechanics), B7, B8–B11 → the CROSS-MODEL FLOW**,
+  batch 6b's Fable implementer first (agree/dispute, verbatim);
+  **B4, B5 → batch 6's Opus implementer** (its code); responses
+  return to the reviewer for final calls + its fix pass; sanity
+  passes; round 2 (a new BLOCKER/MAJOR ⇒ round 3).
+- **B3's PRODUCT FORK → the author (round 11)**, architect
+  recommendation: the local-only purge road (never-synced rows
+  only — `sync_row_seq`-absent — purge immediately with no
+  horizon; formerly-synced rows keep the wait), with honest
+  wording either way.
+
 ## Batch 7 brief — the tutorial's deletion chapter + the note-history brief (a FRESH Opus implementer; self-contained)
 
 **Read first, in full:** `CLAUDE.md` (+ the canon it loads); this
