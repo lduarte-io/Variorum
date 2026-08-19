@@ -57,6 +57,20 @@ from real two-device use, which the mobile project enables.
    secret is ever exercised day-to-day, which is exactly why people lose
    them). Thematically this phase's: the restore drill proves a backup
    restores; this proves the human still holds the key.
+6. **RULED IN — the app-level lock (author, 2026-08-19, verbatim):** "we
+   can add the app level lock with fingerprint or faceid to 13l (with a
+   backup being your passphrase). it helps with the walking by snooping
+   case, and we'll be honest about what it can do." Touch ID on the Mac,
+   the E2EE encryption passphrase as her named fallback; a setting, off
+   by default. **Honest wording is PART OF the deliverable** — the lock's
+   own settings description says what it is and is not (hides your
+   writing from view; adds no encryption; the disk's own protection —
+   FileVault — covers the files). Presence control only, and deliberately
+   the WHOLE-APP shape: one door fronts every surface at once — no
+   schema, no sync, no read-layer redaction sweep. The per-note/journal
+   protection family is deliberately NOT this item — its architecture
+   lives in `notes/plans/note-protection-design-note.md`, a future row's.
+   The mobile twin (Face ID) rides the parity ledger at closeout.
 
 ## Kickoff decisions (hers)
 
@@ -67,6 +81,12 @@ from real two-device use, which the mobile project enables.
   her call.
 - Whether candidates 3 and 4 are in scope.
 - Where the visible evidence lives (log vs face).
+- **The app lock's fallback story (item 6).** Her word names the
+  encryption passphrase as backup — but a signed-out local-only user HAS
+  no encryption passphrase, and `LAPolicy.deviceOwnerAuthentication`
+  offers the system login-password fallback for free (Apple's own UI).
+  The kickoff picks: passphrase-when-enrolled + system fallback
+  otherwise, or one uniform story.
 
 ## Recorded leans & facts for the kickoff (2026-08-18/19 — leans, not rulings; the sitting still decides)
 
