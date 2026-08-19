@@ -92,11 +92,24 @@ multiple items and deleting all of them." Build, opening the phase
   leave-and-return — no intent minted, data safe). The confirm was
   ruled (13j round 10) and built with green seam-pins — this is
   the A1 pins-over-dead-wiring class ON the surface the
-  screenshot drive couldn't capture. TRACE the click's real
-  mechanism first; fix; the pin MOUNTS THE REAL TRASH SURFACE and
-  drives the real button (never the adopt/view-model seam). Check
-  Empty Trash's presentation road in the same trace — same file,
-  same dialog machinery, same suspicion.
+  screenshot drive couldn't capture. **MECHANISM TRACED (the
+  architect, read-only, 2026-08-19 — the fixer confirms red-on-old
+  before touching it):** `RecoveryView`'s `.confirmationDialog`
+  presents off `isPresented: Binding(get: { model.pendingConfirm
+  != nil } …)` — a COMPUTED binding over an `@Observable`
+  property that is never read during body evaluation, so setting
+  `pendingConfirm` registers NO observation dependency, the view
+  never re-renders, the binding's get is never re-asked, and the
+  dialog never presents: the click sets state nobody is watching.
+  The overlay/sink family's letter ("wiring is the delivery").
+  **BOTH purge doors ride this road — Empty Trash's
+  `requestEmptyTrash` sets the same `pendingConfirm` — so true
+  delete is currently UNREACHABLE from the UI entirely** (the
+  30-day clock + janitor road still purges on schedule; nothing
+  else is affected). Fix shape: make the presentation state
+  observable-in-body (`@Bindable`/a body read), and the pin
+  MOUNTS THE REAL TRASH SURFACE and drives the real button —
+  never the view-model seam that stayed green over this.
 
 - **"Delete Note…" in the note ▾ menu — WITH CONFIRMATION** (her
   ruling); ordinary move-to-Trash ONLY (the round-3 rider stands:
@@ -120,6 +133,13 @@ multiple items and deleting all of them." Build, opening the phase
 
 ### 8b. 13J-AUDIT ADDITIONS (the architect's close-of-day deletion audit, 2026-08-19 — recorded for this phase)
 
+- **RULED (2026-08-19, her words): "there are no future upgraders
+  I'm the only user. and the notes i already deleted are fine to
+  be deleted."** → The backlog amnesty is DECLINED (the janitor
+  proceeds); the future-upgrader sentence is DROPPED from this
+  phase (revisit at the v1-release-readiness row, where strangers
+  become real). The item below stands as the record of the
+  consideration:
 - **The pre-13j deleted backlog (tell-her-first class):** anything
   tombstoned >30 days BEFORE 13j left every surface at the upgrade
   (the read-side fence grandfathers nothing) and becomes
