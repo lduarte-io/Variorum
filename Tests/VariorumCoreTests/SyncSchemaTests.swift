@@ -205,6 +205,22 @@ struct SyncSchemaTests {
                 to: post.id, kind: .file, name: "notes.pdf",
                 fileBookmark: Data([0xDE, 0xAD, 0xBE, 0xEF]))
             _ = try ops.addReference(to: post.id, kind: .url, url: "https://example.org")
+            // Phase 13j (v1_14): a purge-intent fixture row so every walk
+            // and round-trip sees the table. Direct SQL — the walk needs
+            // A row, not a whole deleted-family setup.
+            try db.write { database in
+                try database.execute(
+                    sql: """
+                        INSERT INTO purge_intent
+                          (id, owner_id, table_name, row_id, requested_at, created_at, updated_at)
+                        VALUES (?, NULL, 'block', ?, ?, ?, ?)
+                        """,
+                    arguments: [
+                        "0F000000-0000-4000-8000-00000000F14E", scrap.id,
+                        "2026-08-19T00:00:00.000Z", "2026-08-19T00:00:00.000Z",
+                        "2026-08-19T00:00:00.000Z",
+                    ])
+            }
             return db
         }
     }

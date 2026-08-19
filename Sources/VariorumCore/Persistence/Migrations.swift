@@ -413,6 +413,57 @@ extension AppDatabase {
                 WHERE key = 'idle_commit_hours' AND value = '24'
                 """)
         }
+        // Phase 13j, batch 6b (J1 — the PURGE BUILD; the binding design is
+        // notes/plans/phase-13j-purge-memo.md §5a, her round-8
+        // pre-authorization: "The small purge_intent table is fine and I'll
+        // authorize the DDL and mirror deploy right now").
+        //
+        // **The purge INTENT: "this is going, everywhere."** One row per
+        // thing being purged — Delete Now / Empty Trash mint them, the
+        // savepoint-pruning pass mints them for prunable quiet savepoints
+        // (memo §4d, so `table_name` carries 'commit_point' beside the four
+        // Trash kinds — the §5a comment's enumeration plus the §4d road),
+        // and the janitor tombstones them when the purge completes. Synced
+        // like any other row so the act TRAVELS: a peer that pulls an
+        // intent purges its own copy when its own horizon allows, instead
+        // of discovering a silent hole later.
+        //
+        // Deliberately NO foreign key on (table_name, row_id): the row it
+        // names is precisely the row the janitor will physically DELETE,
+        // and an FK would make completing the purge a constraint violation.
+        // Every column is PLAIN under E2EE — ids and enums only, no user
+        // words by design, so the disclosure list gains nothing to
+        // disclose (the classification in SyncSchema.swift is the record).
+        //
+        // ONE SyncSpec §12 lockstep event (marker 6 → 7; mirror DDL
+        // Server/supabase/10_phase13j_purge.sql — finalized in this batch,
+        // DEPLOYED only at the architect's one-window per her
+        // pre-authorization). Until the mirror is at marker 7, a v1_14
+        // client visibly refuses to sync — outbox intact, cursor unmoved,
+        // by design; her installed builds are untouched until the window.
+        migrator.registerMigration("v1_14_purge_intent") { db in
+            try db.execute(sql: """
+                CREATE TABLE purge_intent (
+                  id            TEXT PRIMARY KEY,
+                  owner_id      TEXT,
+                  table_name    TEXT NOT NULL,
+                  row_id        TEXT NOT NULL,
+                  requested_at  TEXT NOT NULL,
+                  created_at    TEXT NOT NULL,
+                  updated_at    TEXT NOT NULL,
+                  deleted_at    TEXT,
+                  sync_version  INTEGER NOT NULL DEFAULT 0
+                );
+                CREATE UNIQUE INDEX uq_purge_intent_live
+                  ON purge_intent(table_name, row_id) WHERE deleted_at IS NULL;
+                CREATE INDEX idx_purge_intent_row ON purge_intent(table_name, row_id);
+                """)
+            // Repair rule for the live-unique index (SyncSpec §7, wired in
+            // Repairs.swift): two devices asking to purge the same row is
+            // not a conflict — pure duplicate, keep the smaller id,
+            // tombstone the other. The act is idempotent by nature.
+            try createOutboxCaptureTriggers(db, table: "purge_intent", pk: "id")
+        }
         return migrator
     }
 }

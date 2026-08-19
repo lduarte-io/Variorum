@@ -18,6 +18,9 @@ struct MigrationTests {
         // Phase 13 (v1_8/v1_10, the Phase 13 §12 lockstep event): block
         // comments + reading sections (chapters).
         "block_comment", "reading_section",
+        // Phase 13j (v1_14, the purge §12 lockstep event, marker 6→7):
+        // the purge intent — "this is going, everywhere".
+        "purge_intent",
     ]
 
     static let expectedIndexes: Set<String> = [
@@ -40,6 +43,10 @@ struct MigrationTests {
         // comments nor chapters have a natural key.
         "idx_block_comment_block",
         "idx_reading_section_order",
+        // Phase 13j (v1_14): the intent's live-unique pair (two devices
+        // asking to purge the same row dedupe as a pure duplicate,
+        // SyncSpec §7) + the lookup index.
+        "uq_purge_intent_live", "idx_purge_intent_row",
     ]
 
     // Tables synced to the server — all carry sync_version (AppSpec §6).
@@ -49,6 +56,7 @@ struct MigrationTests {
         "post_tag", "block_tag", "reference", "setting",
         "canvas_layout", "lens", "lens_choice",
         "block_comment", "reading_section",
+        "purge_intent",
     ]
 
     @Test func allTablesExist() throws {
@@ -100,7 +108,8 @@ struct MigrationTests {
         }
         #expect(partialUniques == ["uq_edge_live", "uq_cblock_ownership", "uq_reading_post_live",
                                    "uq_tag_path_live", "uq_post_tag_live", "uq_block_tag_live",
-                                   "uq_canvas_layout_live", "uq_lens_choice_live"])
+                                   "uq_canvas_layout_live", "uq_lens_choice_live",
+                                   "uq_purge_intent_live"])
     }
 
     @Test func everySyncedTableCarriesSyncVersionDefaultZero() throws {

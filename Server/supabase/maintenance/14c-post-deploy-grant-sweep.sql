@@ -41,9 +41,18 @@
 with expected_functions (signature, exp_anon, exp_authenticated, exp_service_role) as (
   values
     ('sync_push(jsonb,text)',                                          false, true,  true),
-    ('sync_pull(bigint,text,integer)',                                 false, true,  true),
+    -- 13j (10_phase13j_purge.sql): sync_pull's signature gained the
+    -- device_id parameter; the OLD (bigint,text,integer) overload is
+    -- DROPPED by 10 — if it ever shows here again it is UNEXPECTED, the
+    -- exact lingering-overload class this sweep exists to catch.
+    ('sync_pull(bigint,text,integer,text)',                            false, true,  true),
     ('account_data_truncate(text)',                                    false, true,  false),
     ('account_purge()',                                                false, true,  false),
+    -- 13j purge functions (10): the account-door posture — a purge is a
+    -- signed-in device's own act, never server machinery's.
+    ('sync_horizon(text)',                                             false, true,  false),
+    ('sync_purge_ledger(bigint,text)',                                 false, true,  false),
+    ('sync_purge_execute(jsonb,text)',                                 false, true,  false),
     ('entitlement_set(uuid,text,boolean,timestampwithtimezone,text)',  false, false, true),
     ('sync_schema_version()',                                          false, true,  null),
     ('sync_table_pk(text)',                                            false, false, null),
@@ -86,6 +95,11 @@ expected_tables (relname, exp_anon, exp_authenticated, exp_rls, exp_forced, exp_
     ('lens_choice',     false, false, true,  true,  1),
     ('block_comment',   false, false, true,  true,  1),
     ('setting',         false, false, true,  true,  1),
+    -- 13j (10_phase13j_purge.sql): the 19th data table + the two
+    -- server-only purge tables, all on the standard forced-RLS posture.
+    ('purge_intent',    false, false, true,  true,  1),
+    ('device_cursor',   false, false, true,  true,  1),
+    ('purged_row',      false, false, true,  true,  1),
     -- policy counts +1 each since the 14c-gate BYPASSRLS repair
     -- (2026-08-11, maintenance/14c-gate-definer-owner.sql): the own-row
     -- SELECT policies for the non-bypass variorum_definer owner

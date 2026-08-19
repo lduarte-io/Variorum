@@ -76,11 +76,18 @@ public enum SyncSchema {
     /// have no function to land on even before the marker refusal; the
     /// `entitlement` table; mirror DDL 09_phase14c_multitenant.sql —
     /// deploy is the architect's gate act at the author's explicit go,
-    /// behind the A1 rail). **Bump this
+    /// behind the A1 rail); version 7 = the Phase 13j purge event (v1_14
+    /// `purge_intent` — the ONE synced purge table, her round-8
+    /// pre-authorization — plus the server-only `device_cursor` /
+    /// `purged_row` tables, `sync_horizon()`, the purge-execution RPC,
+    /// the pull-RPC cursor upsert and the push-RPC's typed 'purged'
+    /// refusal; mirror DDL 10_phase13j_purge.sql — FINALIZED in batch
+    /// 6b, deployed ONLY at the architect's one-window, which bundles
+    /// the Mac + phone refreshes). **Bump this
     /// constant together with the mirror file's marker in every future
     /// lockstep event** — the DDL pin (`AuthRLSDDLTests`) fails the build
     /// if they drift.
-    public static let lockstepVersion = 6
+    public static let lockstepVersion = 7
     /// The synced tables, in FK-dependency-friendly apply order: parents
     /// before children wherever the graph is acyclic. (`container`⇄`block`⇄
     /// `variant` are mutually circular by design — the apply transaction runs
@@ -219,6 +226,21 @@ public enum SyncSchema {
         SyncTable(
             "setting", primaryKey: "key", plain: ["key", "value"],
             hasTombstone: false),
+        // Phase 13j batch 6b (the ONE lockstep event, marker 6→7): the
+        // purge intent — "this is going, everywhere". EVERY column PLAIN
+        // by design: ids, an enum table name, and timestamps — no user
+        // words exist in the row, so the E2EE disclosure envelope gains
+        // exactly one named line ("purge_intent: ids/enums only") and
+        // nothing to seal. Live-unique (table_name, row_id) repairs as a
+        // pure duplicate (smaller id wins — Repairs.swift; the act is
+        // idempotent by nature). No FKs, so registry position is free;
+        // last keeps the apply-order walk trivially satisfied.
+        SyncTable(
+            "purge_intent",
+            plain: [
+                "id", "owner_id", "table_name", "row_id", "requested_at",
+                "created_at", "updated_at", "deleted_at",
+            ]),
     ]
 
     /// Local-only machinery that must never appear in a payload or a mirror.

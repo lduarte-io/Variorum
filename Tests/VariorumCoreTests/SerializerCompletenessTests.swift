@@ -78,6 +78,22 @@ struct SerializerCompletenessTests {
             _ = try ops.addReference(
                 to: post.id, kind: .file, name: "notes.pdf",
                 fileBookmark: Data([0xDE, 0xAD, 0xBE, 0xEF]))
+            // Phase 13j (v1_14): a purge-intent fixture row so the walks
+            // see the table. Direct SQL rather than the ops door — the
+            // walk needs A row, not a whole deleted-family setup.
+            try db.write { database in
+                try database.execute(
+                    sql: """
+                        INSERT INTO purge_intent
+                          (id, owner_id, table_name, row_id, requested_at, created_at, updated_at)
+                        VALUES (?, NULL, 'block', ?, ?, ?, ?)
+                        """,
+                    arguments: [
+                        "0F000000-0000-4000-8000-00000000F14E", scrap.id,
+                        "2026-08-19T00:00:00.000Z", "2026-08-19T00:00:00.000Z",
+                        "2026-08-19T00:00:00.000Z",
+                    ])
+            }
             return db
         }
     }
@@ -152,6 +168,11 @@ struct SerializerCompletenessTests {
     /// payload.
     private static let serverOnlyTables: Set<String> = [
         "sync_meta", "key_vault", "entitlement",
+        // Phase 13j (10_phase13j_purge.sql): the per-device pull cursor and
+        // the content-free purged-ids ledger — purge machinery the RPCs
+        // read/write server-side, never payload tables (the client learns
+        // of them only through sync_horizon / sync_purge_ledger).
+        "device_cursor", "purged_row",
     ]
 
     @Test func mirrorDDLCoversEverySyncedColumn() throws {

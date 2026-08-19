@@ -37,7 +37,17 @@ struct AuthRLSDDLTests {
         "07_phase13b_lockstep.sql",
         "08_phase14b_lockstep.sql",
         "09_phase14c_multitenant.sql",
+        "10_phase13j_purge.sql",
     ]
+
+    /// Which lockstep file BORE each registry table's multi-tenant DDL.
+    /// 09 is the clean rebuild (the original 18); tables that joined the
+    /// registry at a LATER event carry their born-multi-tenant pattern in
+    /// their own file (13j: `purge_intent` in 10). The reborn pin below
+    /// reads each table's own bearer.
+    private static func bearingFile(of tableName: String) -> String {
+        tableName == "purge_intent" ? "10_phase13j_purge.sql" : "09_phase14c_multitenant.sql"
+    }
 
     /// The RLS/grant surface: 04 (the auth flip) + the lockstep events
     /// (05 Phase 11, 06 Phase 13, 07 Phase 13b), in deploy order.
@@ -155,10 +165,19 @@ struct AuthRLSDDLTests {
     /// and FORCED RLS with an owner policy. Registry-driven, so a future
     /// table that misses the rebuild pattern fails here.
     @Test func everyDataTableIsRebornMultiTenant() throws {
-        let sql = Self.strippingComments(try Self.sqlFile("09_phase14c_multitenant.sql"))
+        // 13j rework (batch 6b): each table's checks read the file that
+        // BORE its multi-tenant DDL — 09's rebuild for the original 18,
+        // a later lockstep event's own file for tables born after it
+        // (purge_intent in 10). A table BORN at a later event is created,
+        // never dropped-and-rebuilt, so the drop assertion applies only
+        // to 09's rebuilds; every other pattern assertion is identical.
         for table in SyncSchema.tables {
-            #expect(sql.contains("drop table if exists \(table.name);"),
-                    "\(table.name) must be dropped before its rebuild")
+            let bearer = Self.bearingFile(of: table.name)
+            let sql = Self.strippingComments(try Self.sqlFile(bearer))
+            if bearer == "09_phase14c_multitenant.sql" {
+                #expect(sql.contains("drop table if exists \(table.name);"),
+                        "\(table.name) must be dropped before its rebuild")
+            }
             #expect(sql.range(of: #"create table \#(table.name) \(\s*\n\s*owner_id\s+uuid not null,"#,
                               options: .regularExpression) != nil,
                     "\(table.name) must be reborn with owner_id uuid NOT NULL leading the composite PK")
@@ -179,10 +198,13 @@ struct AuthRLSDDLTests {
         }
         // The owner policies bind ALL roles (no `to` clause): under FORCE
         // RLS the definer role itself must match a policy, or the RPCs
-        // default-deny themselves.
-        #expect(!sql.contains("_owner_all on") || !sql.contains("for all to authenticated"),
-                "owner policies must not carry a `to` clause — FORCE RLS binds the definer too")
-        #expect(sql.contains("for all using (owner_id = auth.uid()) with check (owner_id = auth.uid());"))
+        // default-deny themselves. Checked in BOTH bearing files (13j).
+        for file in ["09_phase14c_multitenant.sql", "10_phase13j_purge.sql"] {
+            let sql = Self.strippingComments(try Self.sqlFile(file))
+            #expect(!sql.contains("_owner_all on") || !sql.contains("for all to authenticated"),
+                    "\(file): owner policies must not carry a `to` clause — FORCE RLS binds the definer too")
+            #expect(sql.contains("for all using (owner_id = auth.uid()) with check (owner_id = auth.uid());"))
+        }
     }
 
     /// THE VAULT-KEY-ID FENCE (THE DESIGN item 2): both deployed bodies
@@ -771,10 +793,16 @@ struct AuthRLSDDLTests {
             #expect(sql.contains("('\(table)',"),
                     "the sweep must carry an expectation for \(table)")
         }
-        for function in ["sync_push(jsonb,text)", "sync_pull(bigint,text,integer)",
+        // 13j (batch 6b): sync_pull's expectation moved to its NEW
+        // signature (10 drops the old overload — a reappearance is the
+        // UNEXPECTED class the sweep exists to catch), and the three
+        // purge functions joined on the account-door posture.
+        for function in ["sync_push(jsonb,text)", "sync_pull(bigint,text,integer,text)",
                          "account_data_truncate(text)", "account_purge()",
                          "entitlement_set(uuid,text,boolean,timestampwithtimezone,text)",
-                         "sync_schema_version()", "sync_table_pk(text)"] {
+                         "sync_schema_version()", "sync_table_pk(text)",
+                         "sync_horizon(text)", "sync_purge_ledger(bigint,text)",
+                         "sync_purge_execute(jsonb,text)"] {
             #expect(sql.contains("('\(function)'"),
                     "the sweep must carry an expectation for \(function)")
         }
@@ -942,7 +970,10 @@ struct AuthRLSDDLTests {
     /// `auth.*` — emptying the vault orphans the ciphertext corpus), and
     /// the statement count (ONE truncate statement, nothing else — no
     /// marker, no identity reset).
-    static func truncateProblems(strippedSQL sql: String)
+    static func truncateProblems(
+        strippedSQL sql: String,
+        registry: Set<String> = Set(SyncSchema.tables.map(\.name))
+    )
         -> (missing: Set<String>, extra: Set<String>, forbidden: Set<String>,
             truncateCount: Int, statementCount: Int)
     {
@@ -960,7 +991,6 @@ struct AuthRLSDDLTests {
             lists.joined(separator: ",")
                 .components(separatedBy: CharacterSet(charactersIn: ", \n"))
                 .filter { !$0.isEmpty })
-        let registry = Set(SyncSchema.tables.map(\.name))
         let forbidden = named.filter {
             $0 == "key_vault" || $0 == "sync_meta" || $0.hasPrefix("auth.")
         }
@@ -979,9 +1009,26 @@ struct AuthRLSDDLTests {
     /// choreography), and no `restart identity` (server_seq stays
     /// monotonic, SyncSpec §9).
     @Test func theMirrorTruncateArtifactMatchesTheRegistryExactly() throws {
+        // 13j rework (batch 6b, annotated in place — a RULED registry
+        // change, never a quietly relaxed pin): the artifact is a
+        // ONE-TIME gate act, EXECUTED 2026-08-04 (twice) against the
+        // 14b-era registry and superseded operationally by 14c's
+        // tenant-scoped `account_data_truncate`. Its pin therefore
+        // compares against the registry AS IT STOOD when the artifact
+        // ran — the 18 names below, frozen — not the growing current
+        // registry (13j's `purge_intent` postdates the act; demanding it
+        // here would rewrite executed history). The CLAIM is unchanged:
+        // the artifact that ran missed no then-synced table and touched
+        // nothing forbidden.
+        let registryAt14b: Set<String> = [
+            "container", "block", "variant", "commit_point", "edge",
+            "container_block", "reading", "reading_section", "reading_post",
+            "tag", "post_tag", "block_tag", "reference", "canvas_layout",
+            "lens", "lens_choice", "block_comment", "setting",
+        ]
         let sql = Self.strippingComments(
             try Self.sqlFile("maintenance/14b-mirror-truncate.sql"))
-        let problems = Self.truncateProblems(strippedSQL: sql)
+        let problems = Self.truncateProblems(strippedSQL: sql, registry: registryAt14b)
         #expect(problems.missing.isEmpty,
                 "the truncate artifact MISSES registry table(s) \(problems.missing.sorted()) — a missed table keeps plaintext rows and wedges every pull")
         #expect(problems.extra.isEmpty,
@@ -1014,5 +1061,171 @@ struct AuthRLSDDLTests {
         #expect(vaulted.forbidden == ["key_vault"],
                 "the check failed to flag the forbidden table")
         #expect(vaulted.extra == ["key_vault"])
+    }
+
+    // MARK: - Phase 13j batch 6b: the purge lockstep event (10) pins.
+    // The memo (notes/plans/phase-13j-purge-memo.md) is the binding
+    // design; the adjudication's two mechanical notes (the purge-execution
+    // RPC; the device_cursor.seen_at disclosure) land here. The artifact
+    // is FINALIZED, NOT DEPLOYED — deploy is the architect's one-window.
+
+    /// 10 takes the 09 deploy shape: one transaction, re-run guard before
+    /// the one destructive statement (the old pull-signature drop), the
+    /// marker bump last inside the transaction. The same pure check that
+    /// pins 09 — and the doctored-fixture proof there already shows it
+    /// bites.
+    @Test func thePurgeEventDeploysAsOneGuardedTransaction() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("10_phase13j_purge.sql"))
+        let problems = Self.deployShapeProblems(strippedSQL: sql)
+        #expect(problems.isEmpty,
+                "10's deploy shape is unsound: \(problems.sorted())")
+        // And the guard keys on evidence only a deployed 10 leaves.
+        #expect(sql.contains("deployed_marker >= 7 or purge_table_here"))
+        #expect(sql.contains("to_regclass('public.purge_intent') is not null"))
+        #expect(sql.contains("VARIORUM_10_ALREADY_DEPLOYED"))
+    }
+
+    /// The old sync_pull overload is dropped FIRST (the 09 discipline: an
+    /// overload left standing would be a cursor-less changefeed door
+    /// beside the new one), the new signature carries the device
+    /// parameter, and the grants move with it.
+    @Test func thePurgeEventDropsTheOldPullSignatureAndCreatesTheNewOne() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("10_phase13j_purge.sql"))
+        #expect(sql.contains("drop function if exists sync_pull(bigint, text, int);"))
+        #expect(sql.contains(
+            "create or replace function sync_pull(since_seq bigint, active_key_id text, max_rows int default 500, device_id text default null)"))
+        #expect(sql.contains("revoke execute on function sync_pull(bigint, text, int, text) from public, anon;"))
+        #expect(sql.contains("grant execute on function sync_pull(bigint, text, int, text) to authenticated, service_role;"))
+    }
+
+    /// The three purge functions take the ACCOUNT-DOOR posture
+    /// (authenticated only — a purge is a signed-in device's own act) and
+    /// the DATA-function ownership (the non-bypass definer role, the 14c
+    /// gate pattern), with the definer's table grants for the rows their
+    /// bodies touch.
+    @Test func thePurgeFunctionsCarryTheAccountDoorPostureAndDefinerOwnership() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("10_phase13j_purge.sql"))
+        for function in ["sync_horizon(text)", "sync_purge_ledger(bigint, text)",
+                         "sync_purge_execute(jsonb, text)"] {
+            #expect(sql.contains("revoke execute on function \(function) from public, anon, service_role;"),
+                    "\(function) must be revoked from server machinery by name")
+            #expect(sql.contains("grant execute on function \(function) to authenticated;"))
+            #expect(sql.contains("alter function \(function.replacingOccurrences(of: ", ", with: ", ")) owner to variorum_definer;"),
+                    "\(function) must be owned by the non-bypass definer role")
+        }
+        #expect(sql.contains("alter function sync_pull(bigint, text, int, text) owner to variorum_definer;"),
+                "the re-created sync_pull must return to the definer owner")
+        #expect(sql.contains("grant select, insert, update, delete on purge_intent to variorum_definer;"))
+        #expect(sql.contains("grant select, insert, update on device_cursor to variorum_definer;"))
+        #expect(sql.contains("grant select, insert on purged_row to variorum_definer;"))
+        // The CREATE-for-ownership-acquisition dance is closed again.
+        #expect(sql.contains("grant usage, create on schema public to variorum_definer;"))
+        #expect(sql.contains("revoke create on schema public from variorum_definer;"))
+    }
+
+    /// THE LEDGER CHECK (the memo's §2): the deployed push body refuses a
+    /// row named in purged_row with the typed 'purged' status, BEFORE any
+    /// CAS work — a stale peer can never resurrect a purged row.
+    @Test func theDeployedPushBodyRefusesPurgedRowsBeforeTheCAS() throws {
+        let body = try Self.finalBody(of: "sync_push")
+        #expect(body.contains("from purged_row p"))
+        #expect(body.contains("'status', 'purged'"))
+        let ledgerCheck = try #require(body.range(of: "from purged_row"))
+        let casLock = try #require(body.range(of: "for update"))
+        #expect(ledgerCheck.lowerBound < casLock.lowerBound,
+                "the ledger check must precede the CAS lock — a purged row has no CAS state")
+    }
+
+    /// THE DEVICE CURSOR (what makes a horizon computable): the deployed
+    /// pull body upserts the caller's cursor monotonically — greatest(),
+    /// so a replayed lower window can never regress what the server
+    /// believes the device has seen — and stamps seen_at.
+    @Test func theDeployedPullBodyRecordsTheDeviceCursorMonotonically() throws {
+        let body = try Self.finalBody(of: "sync_pull")
+        #expect(body.contains("insert into device_cursor (owner_id, device_id, last_seq, seen_at)"))
+        #expect(body.contains("set last_seq = greatest(device_cursor.last_seq, excluded.last_seq)"))
+        #expect(body.contains("seen_at  = now()"))
+        // Null device = no upsert (mid-round windows pass null so a crash
+        // before the apply commit can never over-report).
+        #expect(body.contains("if dev is not null then"))
+    }
+
+    /// THE HORIZON (her round-8 ruling): min live-device cursor; a device
+    /// unseen for 60 days leaves it; an account with no cursors answers 0
+    /// (the janitor's safe no-op). Fenced; deliberately NO entitlement
+    /// gate — purge is data removal, a right (the account_data_truncate
+    /// reasoning, recorded in the artifact).
+    @Test func theHorizonDropsDevicesUnseenForSixtyDays() throws {
+        let body = try Self.finalBody(of: "sync_horizon")
+        #expect(body.contains("min(last_seq)"))
+        #expect(body.contains("seen_at > now() - interval '60 days'"))
+        #expect(body.contains("coalesce"))
+        #expect(body.contains("select corpus_key_id into fence_key from key_vault where user_id = caller;"))
+        #expect(!body.contains("from entitlement"),
+                "no entitlement gate on purge — data removal is a right")
+    }
+
+    /// THE LEDGER PAGE: entries above the caller's scan point plus the
+    /// coverage floor — 0 while ledger pruning is unbuilt (complete
+    /// coverage from the beginning of time); the future pruning rider
+    /// advances it, and a client below the floor takes the SAY-SO-FIRST
+    /// returner road (round 10).
+    @Test func theLedgerPageCarriesEntriesAndTheCoverageFloor() throws {
+        let body = try Self.finalBody(of: "sync_purge_ledger")
+        #expect(body.contains("'floor', 0"))
+        #expect(body.contains("p.purged_seq > since_seq"))
+        #expect(body.contains("'purged_seq', p.purged_seq"))
+        #expect(!body.contains("from entitlement"))
+    }
+
+    /// THE PURGE-EXECUTION DOOR (the adjudication's note 1): tenant-scoped
+    /// row deletes over the registry's tables only, every deleted row
+    /// recorded in the ledger in the SAME transaction (idempotent upsert —
+    /// a janitor resuming mid-family re-runs safely), one granted seq per
+    /// call. The family expansion is deliberately CLIENT-side — the
+    /// server stays dumb (SyncSpec §2).
+    @Test func thePurgeExecutionDoorIsTenantScopedAndLedgerRecording() throws {
+        let body = try Self.finalBody(of: "sync_purge_execute")
+        #expect(body.contains("delete from %I where owner_id = $2 and %I = $1"),
+                "purge deletes are tenant-scoped by the composite identity")
+        #expect(body.contains("insert into purged_row (owner_id, table_name, row_id, purged_seq)"))
+        #expect(body.contains("on conflict (owner_id, table_name, row_id) do nothing"),
+                "the ledger upsert is what makes a resumed family purge idempotent")
+        #expect(Self.namedArray("allowed", in: body) == Set(SyncSchema.tables.map(\.name)),
+                "the purge door's allowlist drifted from the registry")
+        #expect(body.contains("select corpus_key_id into fence_key from key_vault where user_id = caller;"))
+        #expect(!body.contains("from entitlement"))
+        #expect(!body.lowercased().contains("truncate table"))
+    }
+
+    /// The account doors keep their pinned shapes with the registry grown:
+    /// both data_tables arrays are registry-exact (checked by the standing
+    /// pins above via finalBody), and account_purge now also removes the
+    /// caller's purge-machinery rows — the whole account goes.
+    @Test func theAccountPurgeTakesThePurgeMachineryRowsToo() throws {
+        let body = try Self.finalBody(of: "account_purge")
+        #expect(body.contains("delete from device_cursor where owner_id = caller;"))
+        #expect(body.contains("delete from purged_row where owner_id = caller;"))
+        // account_data_truncate deliberately touches NEITHER (purged
+        // stays purged across a re-key; cursors stay valid under the
+        // monotonic sequence) — pinned from the truncate's own body.
+        let truncate = try Self.finalBody(of: "account_data_truncate")
+        #expect(!truncate.contains("device_cursor") && !truncate.contains("purged_row"),
+                "a re-key truncate must not touch the purge machinery")
+    }
+
+    /// 10's header carries the choreography record: pre-authorized deploy
+    /// (her round-8 words), architect's one-window, the phone-refresh
+    /// bundling, the A1 rail.
+    @Test func thePurgeHeaderCarriesTheChoreography() throws {
+        let sql = try Self.sqlFile("10_phase13j_purge.sql")
+        #expect(sql.contains("THE CHOREOGRAPHY"))
+        #expect(sql.contains("this file runs on the mirror FIRST"))
+        #expect(sql.contains("SyncSpec §12"))
+        #expect(sql.contains("ARCHITECT"))
+        #expect(sql.contains("never a batch implementer"))
+        #expect(sql.contains("PRE-AUTHORIZED"))
+        #expect(sql.contains("A1 rail"))
+        #expect(sql.contains("PHONE"))
     }
 }
