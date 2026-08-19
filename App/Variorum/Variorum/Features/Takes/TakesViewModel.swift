@@ -1518,6 +1518,11 @@ final class TakesViewModel {
         await structure.deleteFocusedBlock()
     }
 
+    /// 13j (her round-7 ruling): the archive door beside it, same controller.
+    func archiveFocusedBlock() async {
+        await structure.archiveFocusedBlock()
+    }
+
     /// The routed comments door (⌘⇧' — the bars' block menu made
     /// keyboard-reachable): the bar presents the sheet for this target.
     struct CommentsRequest: Identifiable, Equatable {

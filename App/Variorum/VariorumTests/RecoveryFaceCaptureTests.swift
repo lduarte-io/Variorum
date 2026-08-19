@@ -47,7 +47,15 @@ struct RecoveryFaceCaptureTests {
         try FileManager.default.createDirectory(
             at: Self.outputDirectory, withIntermediateDirectories: true)
         let db = try AppDatabase.inMemory()
-        let session = withDependencies { $0.database = db } operation: { AppSession(database: db) }
+        // 13j batch 6: the session now carries a READ-side clock (the 30-day
+        // Trash window is a required argument everywhere it applies), and a
+        // dependency read with no override is an issue in a test context by
+        // design — so this synthetic world says what time it is, like every
+        // other harness here.
+        let session = withDependencies {
+            $0.database = db
+            $0.date = DateGenerator { harnessNow }
+        } operation: { AppSession(database: db) }
         let deletedAt = Date(timeIntervalSince1970: 1_782_950_400)
 
         let states: [(String, Queries.BlockPast)] = [

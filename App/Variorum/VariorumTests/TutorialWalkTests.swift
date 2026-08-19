@@ -1863,7 +1863,7 @@ struct TutorialLibraryActsTests {
             }
             #expect(deadGuide == nil)
             let listedDeleted: [String] = try await db.read {
-                try Queries.deletedReadings($0).map(\.id)
+                try Queries.deletedReadings($0, now: harnessNow).map(\.id)
             }
             #expect(listedDeleted == [bookID],
                     "the recovery surface lists the deleted guide")

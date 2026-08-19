@@ -6,7 +6,6 @@
 //  (kept-out-of-view, one click back — the face the Phase 4 closeout
 //  promised `unarchiveContainer`) and deleted posts (tombstones, one
 //  `restoreContainer` away — the 2026-07-05 author decision's read side).
-//  Functional, unstyled.
 //
 //  ── 13j J6: THE "UNPLACED BLOCKS" SECTION IS GONE ────────────────────────
 //  Her report, verbatim: *"what is that cursed table of lost hopes and
@@ -14,23 +13,35 @@
 //  all tbh) … why are we even offering to auto add deleted blocks to the
 //  snippets pool? it doesn't make that much sense to me."*
 //
-//  The sitting's round-2 ruling removed the listing outright, and the
-//  argument was that its ONE unique case — an original whose successors were
-//  all later deleted — is already covered per-note, because a divide-W/merge
-//  release stamps `last_container_id` exactly so a released block still
-//  knows its home. Everything else is served better where she is standing:
-//  the note's own tray (`TrayPanel`, "Preserved originals") and the lineage
-//  door on a successor. The spec's own rationale for the global view was a
-//  DEVELOPER safety net — `Queries.unplacedBlocks` survives as that, a debug
-//  query rather than a room in the house.
+//  The sitting's round-2 ruling removed the listing outright. Released
+//  originals surface where she is standing instead: the note's own tray
+//  (`TrayPanel`, "Preserved originals") and the lineage door on a successor.
+//  `Queries.unplacedBlocks` survives as a debug query, not a room.
 //
-//  The "Place in pool" door went with it, and so did the W10b reveal
-//  plumbing that navigated here (`.variorumRevealUnplacedBlock`, RootView's
-//  `revealUnplacedBlockID`): the lineage door now opens the note's tray in
-//  place, which is where the block it names actually lives.
+//  ── 13j J1: AND NOW THE TRASH ────────────────────────────────────────────
+//  Her words (2026-08-01): *"some kind of 'true delete' should be added for
+//  posts (going to a Trash for 30 days before really deleting), because I
+//  already have posts in my library i don't want to have."* The sitting's
+//  round-3 rulings shaped it:
 //
-//  What this surface keeps is unchanged and stays that way until batch 6
-//  reshapes it into the Trash: Archived · Deleted books · Recently Deleted.
+//  · **Everything deleted rides ONE uniform story** — notes, blocks, takes
+//    and books in ONE listing, filterable by kind and sortable by date,
+//    because per-row Delete Now is only a real option if she can FIND the
+//    row ("maybe you can sort the trash by blocks or note or whatever would
+//    be important for that to be a real option").
+//  · **Archived stays its own calm section**, with no clock at all: archive
+//    is kept-forever, and the two ideas must not blur.
+//  · **The window is fixed at 30 days** — no setting; Delete Now is the
+//    impatience door.
+//
+//  **What is deliberately NOT here yet: Delete Now and Empty Trash.** They
+//  are ruled, and their backing is a sync-visible purge intent — schema- and
+//  server-shaped, and therefore hers to authorize (the purge design memo,
+//  `notes/plans/phase-13j-purge-memo.md`). A door that cannot act is not
+//  rendered (P-2), so this batch renders none: no greyed buttons promising a
+//  thing that does not exist. What the 30-day clock DOES today is honest on
+//  its own terms — a deleted thing leaves every surface at the boundary, and
+//  the bytes follow when the purge lands.
 //
 
 import Foundation
@@ -52,11 +63,53 @@ import VariorumCore
 /// is the internal case name, and no surface has ever shown it — copy that
 /// named it would send her looking for a door that does not exist.
 nonisolated enum RecoveryPath {
-    /// The Library ⋯ menu's item, and the palette row.
+    /// The Library ⋯ menu's item, and the palette row. It names BOTH halves
+    /// of the surface, which is what it holds: the calm Archived section and
+    /// the Trash's countdown (13j J1 — her ruled name for the deleted half
+    /// is `trashSection` below).
     static let menuLabel = "Archived & Deleted"
     /// The arrow is the shipped copy's own (`\u{2192}`, as the merge
     /// ceremony and the helper already write it) — one voice, not a new one.
     static var surface: String { "Library \u{2192} \(menuLabel)" }
+
+    /// **The Trash** (13j J1, her word). One listing over every deleted
+    /// thing, on the 30-day clock.
+    static let trashSection = "Trash"
+    /// The other half: kept forever, no clock, deliberately calm.
+    static let archivedSection = "Archived"
+    /// The one verb in the Trash, whatever kind the row is.
+    static let putBackVerb = "Put back"
+
+    /// How the Trash explains itself in one line — the promise stated where
+    /// she can read it, because a countdown with no sentence is a threat.
+    static let windowNote =
+        "Deleted things wait here for \(TrashWindow.days) days, then they're gone."
+
+    /// The kind filter's words.
+    static func kindLabel(_ kind: Queries.TrashItem.Kind) -> String {
+        switch kind {
+        case .note: return "Notes"
+        case .book: return "Books"
+        case .block: return "Blocks"
+        case .take: return "Takes"
+        case .preservedOriginal: return "Originals"
+        }
+    }
+
+    /// What ONE row calls itself, in the singular.
+    static func rowKind(_ kind: Queries.TrashItem.Kind) -> String {
+        switch kind {
+        case .note: return "note"
+        case .book: return "book"
+        case .block: return "block"
+        case .take: return "take"
+        case .preservedOriginal: return "preserved original"
+        }
+    }
+
+    /// The stranded original's own line (her round-8b ruling — the same
+    /// sentence the note's tray shows, from the tray's one home).
+    static var goesWithItsFamily: String { TrayPath.goesWithItsFamily }
 }
 
 @MainActor
@@ -69,16 +122,31 @@ final class RecoveryViewModel {
     nonisolated static let window = 500
 
     private(set) var archived: [Queries.TimelineItem] = []
-    private(set) var deleted: [Queries.TimelineItem] = []
-    /// 13b 4F (N37 — S4-28.2, the author's reversal of the pre-13
-    /// "readings have no restore door" boundary): deleted BOOKS, one
-    /// `restoreReading` away — chapters and memberships revive by the
-    /// exact-stamp rule; diverged stories stay dead.
-    private(set) var deletedReadings: [Reading] = []
-    private(set) var deletedReadingsTruncated = false
     private(set) var archivedTruncated = false
-    private(set) var deletedTruncated = false
+    /// 13j J1: ONE listing over every deleted thing (notes · blocks · takes ·
+    /// books · stranded originals), replacing the separate "Recently Deleted"
+    /// and "Deleted books" sections.
+    private(set) var trash: [Queries.TrashItem] = []
+    private(set) var trashTruncated = false
     private(set) var lastError: String?
+    /// A successful Put back's own words (the tray's receipts, from their one
+    /// home) — kept apart from `lastError` so a success is never rendered in
+    /// the red slot.
+    private(set) var receipt: String?
+
+    /// The filter and the sort — her round-3 ruling's two controls. Changing
+    /// either restarts the observation, because both are applied IN SQL
+    /// (a window applied before a filter would filter the first N of the
+    /// wrong set — `observeReading`'s own lesson).
+    var kindFilter: Queries.TrashItem.Kind? {
+        didSet { if kindFilter != oldValue { restartToken &+= 1 } }
+    }
+    var oldestFirst = false {
+        didSet { if oldestFirst != oldValue { restartToken &+= 1 } }
+    }
+    /// Bumped whenever the query's shape changes; the view's `.task(id:)`
+    /// restarts on it.
+    private(set) var restartToken: UInt64 = 0
 
     init(session: AppSession) {
         self.session = session
@@ -98,13 +166,16 @@ final class RecoveryViewModel {
         }
     }
 
-    func startDeleted() async {
+    func startTrash() async {
+        let kinds: Set<Queries.TrashItem.Kind> = kindFilter.map { [$0] }
+            ?? Set(Queries.TrashItem.Kind.allCases)
         do {
-            for try await value in session.database.observeDeletedPosts(
+            for try await value in session.database.observeTrash(
+                now: session.now, kinds: kinds, oldestFirst: oldestFirst,
                 limit: Self.window + 1
             ) {
-                deletedTruncated = value.count > Self.window
-                deleted = deletedTruncated ? Array(value.prefix(Self.window)) : value
+                trashTruncated = value.count > Self.window
+                trash = trashTruncated ? Array(value.prefix(Self.window)) : value
             }
         } catch is CancellationError {
         } catch {
@@ -113,38 +184,46 @@ final class RecoveryViewModel {
     }
 
     /// Internal so tests drive listings deterministically.
-    func adopt(archived: [Queries.TimelineItem], deleted: [Queries.TimelineItem]) {
+    func adopt(archived: [Queries.TimelineItem], trash: [Queries.TrashItem]) {
         self.archived = archived
-        self.deleted = deleted
+        self.trash = trash
     }
 
-    func startDeletedReadings() async {
+    /// **"N days left"** for a row, read against the session's clock.
+    func daysLeft(_ item: Queries.TrashItem) -> Int? {
+        TrashWindow.daysLeft(item.deletedAt, now: session.now)
+    }
+
+    /// **Put back — one verb, each kind's own road** (13j J1). Every road
+    /// already existed; what was missing was a place to stand where all four
+    /// are offered together.
+    func putBack(_ item: Queries.TrashItem) async {
+        lastError = nil
+        receipt = nil
         do {
-            for try await value in session.database.observe({ db in
-                try Queries.deletedReadings(db, limit: Self.window + 1)
-            }) {
-                deletedReadingsTruncated = value.count > Self.window
-                deletedReadings = deletedReadingsTruncated
-                    ? Array(value.prefix(Self.window)) : value
+            // A preserved original was never deleted — putting it back means
+            // PLACING it, which is the tray's own composition (it re-reads
+            // its landing at act time, because a listing is a projection).
+            if item.kind == .preservedOriginal {
+                guard let noteID = item.noteID else {
+                    lastError = TrayPath.putBackUnplaced
+                    return
+                }
+                receipt = try await PreservedOriginPutBack.run(
+                    session: session, postID: noteID, blockID: item.id)
+                return
             }
-        } catch is CancellationError {
-        } catch {
-            lastError = String(describing: error)
-        }
-    }
-
-    /// The restore door (surface-local, the standing recovery-surface
-    /// class): the book comes back whole — chapters, memberships, and
-    /// chapter assignments by the exact-stamp rule; it reappears on the
-    /// shelf by itself (the shelf observes).
-    func restoreReading(_ readingID: String) async {
-        do {
             try await session.runner.run { ops in
-                try ops.restoreReading(readingID)
+                switch item.kind {
+                case .note: try ops.restoreContainer(item.id)
+                case .book: try ops.restoreReading(item.id)
+                case .block: _ = try ops.restoreBlock(item.id)
+                case .take: _ = try ops.restoreVariant(item.id)
+                case .preservedOriginal: break  // handled above
+                }
             }
-            lastError = nil
         } catch let error as OperationError {
-            lastError = OpsRefusalCopy.message(for: error)
+            lastError = TrayRefusalCopy.message(for: error)
         } catch {
             lastError = String(describing: error)
         }
@@ -171,7 +250,7 @@ struct RecoveryView: View {
 
     private var list: some View {
         List {
-            Section("Archived") {
+            Section(RecoveryPath.archivedSection) {
                 if model.archived.isEmpty {
                     Text("Nothing archived.").foregroundStyle(.secondary)
                 }
@@ -191,55 +270,19 @@ struct RecoveryView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            Section("Deleted books") {
-                // 13b 4F (N37 — S4-28.2): deleting a book is recoverable
-                // now — the reversal of the pre-13 boundary, her ruling.
-                if model.deletedReadings.isEmpty {
-                    Text("No deleted books.").foregroundStyle(.secondary)
+            Section(RecoveryPath.trashSection) {
+                Text(RecoveryPath.windowNote)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                controls
+                if model.trash.isEmpty {
+                    Text("The Trash is empty.").foregroundStyle(.secondary)
                 }
-                ForEach(model.deletedReadings, id: \.id) { reading in
-                    HStack(spacing: 6) {
-                        Text(reading.name)
-                        Text(reading.kind == .smart ? "smart book" : "book")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        if let deletedAt = reading.deletedAt {
-                            Text(deletedAt.formatted(date: .abbreviated, time: .shortened))
-                                .font(.caption2)
-                                .foregroundStyle(.tertiary)
-                        }
-                        Spacer()
-                        Button("Restore") {
-                            Task { await model.restoreReading(reading.id) }
-                        }
-                        .help("The book comes back whole — chapters and membership included; "
-                            + "notes deleted separately stay in Recently Deleted below")
-                    }
+                ForEach(model.trash) { item in
+                    trashRow(item)
                 }
-                if model.deletedReadingsTruncated {
-                    Text("Showing the \(RecoveryViewModel.window) most recently deleted books — older ones aren't listed.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            Section("Recently Deleted") {
-                if model.deleted.isEmpty {
-                    Text("Nothing deleted.").foregroundStyle(.secondary)
-                }
-                ForEach(model.deleted, id: \.postID) { item in
-                    HStack {
-                        title(item)
-                        Text(item.stamp)
-                            .font(.caption2)
-                            .foregroundStyle(.tertiary)
-                        Spacer()
-                        Button("Restore") {
-                            Task { await library.restore(postID: item.postID) }
-                        }
-                    }
-                }
-                if model.deletedTruncated {
-                    Text("Showing the \(RecoveryViewModel.window) most recently deleted — older ones aren't listed.")
+                if model.trashTruncated {
+                    Text("Showing the \(RecoveryViewModel.window) most recent — older ones aren't listed.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -252,11 +295,101 @@ struct RecoveryView: View {
                     .foregroundStyle(.red)
                     .textSelection(.enabled)
                     .padding(4)
+            } else if let receipt = model.receipt {
+                Text(receipt)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .textSelection(.enabled)
+                    .padding(4)
             }
         }
         .task { await model.startArchived() }
-        .task { await model.startDeleted() }
-        .task { await model.startDeletedReadings() }
+        // Restarts when the filter or the sort changes — both are applied in
+        // SQL, so the observation itself is what moves.
+        .task(id: model.restartToken) { await model.startTrash() }
+    }
+
+    /// Her round-3 ruling's two controls: filter by kind, sort by date.
+    private var controls: some View {
+        HStack(spacing: 12) {
+            Picker("Show", selection: Binding(
+                get: { model.kindFilter },
+                set: { model.kindFilter = $0 })) {
+                Text("Everything").tag(Queries.TrashItem.Kind?.none)
+                ForEach(Queries.TrashItem.Kind.allCases, id: \.self) { kind in
+                    Text(RecoveryPath.kindLabel(kind)).tag(Queries.TrashItem.Kind?.some(kind))
+                }
+            }
+            .pickerStyle(.menu)
+            .frame(maxWidth: 220)
+            Toggle("Oldest first", isOn: Binding(
+                get: { model.oldestFirst },
+                set: { model.oldestFirst = $0 }))
+                .toggleStyle(.checkbox)
+            Spacer()
+        }
+        .font(.caption)
+    }
+
+    @ViewBuilder
+    private func trashRow(_ item: Queries.TrashItem) -> some View {
+        HStack(spacing: 6) {
+            Text(item.title ?? TrayRowPreview.line(item.text))
+                .lineLimit(1)
+            Text(RecoveryPath.rowKind(item.kind))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            if item.kind == .preservedOriginal {
+                Text(RecoveryPath.goesWithItsFamily)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+            // "from ‹note›" — the context her round-5 statement asked for,
+            // with the honest addition when that note is in the Trash too.
+            if let noteTitle = item.noteTitle {
+                Text(item.noteIsDeleted
+                     ? "from \(noteTitle) (also in the Trash)"
+                     : "from \(noteTitle)")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .lineLimit(1)
+            }
+            if let display = TrayRowPreview.stampText(item.deletedAt, verb: "deleted") {
+                Text(display)
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+            if let days = model.daysLeft(item) {
+                Text(TrayPath.daysLeftLabel(days))
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+            Spacer()
+            // The open-there door, only where the note is live (P-2: a door
+            // that cannot act is not rendered).
+            if let noteID = item.noteID, !item.noteIsDeleted,
+               item.kind != .note, item.kind != .book {
+                Button("Open note") { openPost(noteID) }
+                    .controlSize(.small)
+            }
+            Button(RecoveryPath.putBackVerb) {
+                Task { await model.putBack(item) }
+            }
+            .controlSize(.small)
+            .help(putBackHelp(item))
+        }
+    }
+
+    private func putBackHelp(_ item: Queries.TrashItem) -> String {
+        switch item.kind {
+        case .note: return "The note comes back with its blocks, its tags and its books"
+        case .book: return "The book comes back whole — chapters and membership included"
+        case .block: return "The block goes back where it was in its note"
+        case .take: return "The take comes back in its block, exactly as it was"
+        case .preservedOriginal:
+            return "Places the original back into its note — it stops counting down"
+        }
     }
 
     private func title(_ item: Queries.TimelineItem) -> some View {

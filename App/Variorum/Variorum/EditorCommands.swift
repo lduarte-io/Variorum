@@ -83,7 +83,9 @@ struct EditorCommands: Commands {
         // 13j J4/J4b: the two ceremony doors, beside the verbs they used to
         // be the default of.
         .divideWithCeremony, .mergeWithCeremony,
-        .addBlockAtEnd, .insertBlockBelow, .deleteBlock, .showTakes,
+        .addBlockAtEnd, .insertBlockBelow, .deleteBlock,
+        // 13j (her round-7 ruling): block ARCHIVE — kept, no clock.
+        .archiveBlock, .showTakes,
         .newTake, .blankTake, .blankTakeAsChosen, .chooseTake,
         .previousTake, .nextTake, .archiveTake, .saveChoicesAsLens,
         .closeAllTakes, .pageFanBack, .pageFanForward,
@@ -412,6 +414,14 @@ struct EditorCommands: Commands {
             // lands in the post's tray either way.
             Button(verb(.deleteBlock)) { actions?.dispatch(.deleteBlock) }
                 .disabled(!enabled(.deleteBlock))
+
+            // 13j (her round-7 ruling): the third verb. Archive sets the
+            // block aside KEPT — it leaves the note, waits in the note's
+            // tray with no countdown, and Put back returns it where it
+            // stood. Deliberately next to Delete, because the difference
+            // between them is the thing to learn.
+            Button(verb(.archiveBlock)) { actions?.dispatch(.archiveBlock) }
+                .disabled(!enabled(.archiveBlock))
 
             Divider()
 

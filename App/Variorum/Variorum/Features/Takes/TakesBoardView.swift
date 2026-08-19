@@ -254,6 +254,11 @@ struct TakesBoardView: View {
             // block goes and the ring lands on its neighbour.
             Task { await model.deleteFocusedBlock() }
             return true
+        case .archiveBlock:
+            // 13j (her round-7 ruling): archive is native here for the same
+            // R118 reason delete is — Takes is never behind Write.
+            Task { await model.archiveFocusedBlock() }
+            return true
         case .toggleSeal:
             Task { await model.toggleSeal() }
             return true

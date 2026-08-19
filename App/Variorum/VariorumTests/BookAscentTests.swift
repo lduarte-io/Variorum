@@ -98,7 +98,16 @@ struct BookAnchorTests {
 struct BookCarryTests {
     private func model(entries: [String]) -> BookViewModel {
         let db = try! AppDatabase.inMemory()
-        let session = AppSession(database: db)
+        // 13j batch 6: the session snapshots a READ-side clock at
+        // construction (the 30-day Trash window is a required argument
+        // wherever it applies), and a dependency read with no override is an
+        // issue in a test context by design — so this synthetic world names
+        // its clock like every other harness here. Nothing else changes: this
+        // suite drives a model by `adopt`.
+        let session = withDependencies {
+            $0.database = db
+            $0.date = DateGenerator { harnessNow }
+        } operation: { AppSession(database: db) }
         let model = BookViewModel(session: session, readingID: "book")
         model.adopt(entries.map {
             Queries.ReadingEntry(postID: $0, title: nil, entryDate: nil, sectionPath: nil)

@@ -33,7 +33,7 @@ struct NoteTrayTests {
         let postID = editor.postID
         return try editor.database.read { db -> TrayViewModel.Snapshot in
             TrayViewModel.Snapshot(
-                deleted: try Queries.trayBlocks(db, postID: postID),
+                deleted: try Queries.trayBlocks(db, postID: postID, now: harnessNow),
                 originals: try Queries.preservedOriginals(db, postID: postID))
         }
     }
@@ -151,14 +151,23 @@ struct NoteTrayTests {
         }
     }
 
-    /// **The VERIFIED section name.** No shipped operation writes
-    /// `block.archived_at` — there is no `archiveBlock` anywhere — so the
-    /// first section says "Deleted" rather than the sitting's provisional
-    /// "Deleted & archived". Naming a state the product cannot produce is
-    /// the same defect as naming a door that does not exist.
-    @Test func theDeletedSectionDoesNotClaimAnArchivedStateNothingProduces() {
-        #expect(TrayPath.deletedSection == "Deleted")
-        #expect(!TrayPath.deletedSection.lowercased().contains("archiv"))
+    /// **The section name, GRADUATED — the same claim, the other side of a
+    /// ruling** (13j batch 6; the batch-1→2 receipt pin's own precedent).
+    ///
+    /// Batch 2 verified that NO shipped operation wrote `block.archived_at`
+    /// and named the section "Deleted" for it: naming a state the product
+    /// cannot produce is the same defect as naming a door that does not
+    /// exist. Her round-7 ruling BUILT the state (`archiveBlock`), so the
+    /// name her round-2 ruling wanted comes back with it — and the pin keeps
+    /// its claim in the stronger form: the heading may name "archived" only
+    /// while an op can actually produce one and the tray can list it.
+    @Test func theDeletedSectionNamesOnlyStatesTheProductCanProduce() {
+        #expect(TrayPath.deletedSection == "Deleted & archived")
+        // The state is real: the act is declared with its doors, and the
+        // tray has a listing to put an archived block in.
+        #expect(CapabilityRegistry.capability(.archiveBlock).verb == "Archive Block")
+        #expect(TrayPath.archivedForever.contains("no clock"),
+                "…and the row says what makes it different from a deleted one")
     }
 
     // MARK: - Put back

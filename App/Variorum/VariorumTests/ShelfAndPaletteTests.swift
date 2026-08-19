@@ -302,7 +302,15 @@ struct PromoteAndPaletteTests {
             Queries.CatalogHit(kind: .block, id: "k", title: "Block", detail: nil),
         ]
         let db = try! AppDatabase.inMemory()
-        let model = LibraryCatalogModel(session: AppSession(database: db))
+        // 13j batch 6: a session snapshots its READ-side clock at
+        // construction (the Trash window's required `now`), and an
+        // unoverridden dependency is an issue in a test context by design —
+        // so this synthetic world names one. The filter under test is pure.
+        let session = withDependencies {
+            $0.database = db
+            $0.date = DateGenerator { harnessNow }
+        } operation: { AppSession(database: db) }
+        let model = LibraryCatalogModel(session: session)
         model.scope = .books
         #expect(model.filtered(hits).map(\.id) == ["b"])
         model.scope = .blocks

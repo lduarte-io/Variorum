@@ -254,6 +254,21 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Blocks live inside a note — open one first.",
             availability: takeFamily),  // the one named rule, not a copy
+        // 13j (her round-7 ruling — her own question: "do you think that we
+        // should add block level archive? I think that it might be
+        // worthwhile"). The third verb: ARCHIVE keeps the block forever in
+        // this note's tray with no clock, where DELETE starts the Trash's
+        // 30-day countdown and MOVE TO SCRAPS cuts the tie to the note. Two
+        // SUMMONED doors — the Block menu and the block's context menu — and
+        // deliberately no shortcut and no bar button: it is a deliberate,
+        // occasional act, and the bars are daily chrome (her not-daily-chrome
+        // criterion, round 4, applied one act over).
+        Capability(
+            id: .archiveBlock, verb: "Archive Block", scope: .block,
+            doors: [.menuBar, .contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Blocks live inside a note — open one first.",
+            availability: takeFamily),
 
         // MARK: The take family (take scope)
         Capability(
@@ -1166,6 +1181,7 @@ nonisolated enum CapabilityRegistry {
         case .addBlockAtEnd: id = .addBlockAtEnd
         case .insertBlockBelow: id = .insertBlockBelow
         case .deleteBlock: id = .deleteBlock
+        case .archiveBlock: id = .archiveBlock
         case .toggleSeal: id = .sealPost
         case .comments: id = .blockComments
         case .callout: id = .callout

@@ -78,14 +78,39 @@ nonisolated enum TrayPath {
     /// own chrome, never as a menu path: the badge is the door she will see
     /// while she is standing where the delete happened.
     static let doorPhrase = "the \(doorGlyph) door in the note's bar"
-    /// The deleted section's header. **"Deleted", not "Deleted & archived"**
-    /// — see `TrayViewModel`'s note: no shipped operation writes
-    /// `block.archived_at`, so an "archived" heading would name a state the
-    /// product cannot produce.
-    static let deletedSection = "Deleted"
+    /// The first section's header — **"Deleted & archived"**, the name her
+    /// round-2 ruling gave it and batch 2 could not honestly use: no
+    /// operation wrote `block.archived_at` then, so the heading would have
+    /// named a state the product could not produce. Her round-7 ruling built
+    /// the state (`archiveBlock`), so the name comes back with it.
+    static let deletedSection = "Deleted & archived"
     static let originalsSection = "Preserved originals"
     /// The one verb, both sections.
     static let putBackVerb = "Put back"
+
+    /// **The countdown** (13j J1 — 30 days, her fixed window). Deleted rows
+    /// wear it; ARCHIVED rows never do (archive is kept-forever, and that
+    /// difference is the whole reason the two states share a section header
+    /// that names them both).
+    static func daysLeftLabel(_ days: Int) -> String {
+        switch days {
+        case 0: return "leaves today"
+        case 1: return "1 day left"
+        default: return "\(days) days left"
+        }
+    }
+
+    /// What an ARCHIVED row says instead of a countdown — the promise stated,
+    /// so the two row kinds in one section are never read as one thing.
+    static let archivedForever = "kept — no clock"
+
+    /// **The stranded original's label** (her round-8b ruling): an original
+    /// whose whole descendant family is in the Trash rides the family's
+    /// clock, and says so where she can see it. Her failure mode, in her own
+    /// words, was believing "the ancestor being there in that one ancestor
+    /// tray is their guaranteed backup" — so the row MOVES, visibly, and
+    /// wears the reason.
+    static let goesWithItsFamily = "preserved original — goes with its deleted blocks"
 
     static func doorLabel(deleted: Int) -> String { "\(doorGlyph) \(deleted)" }
 
@@ -146,16 +171,23 @@ final class TrayViewModel {
 
     private(set) var deleted: [Queries.TrayItem] = []
     private(set) var deletedTruncated = false
-    /// **13j batch 2 — the VERIFIED finding behind the section's name.**
-    /// `block.archived_at` exists in schema v1 and in the model, and the sync
-    /// serializer classifies it — but a sweep of `Sources/VariorumCore`
-    /// found NO operation that ever writes it, and no `archiveBlock` exists
-    /// anywhere in the repo. Block-level archive is unreachable in the
-    /// product. So this listing is deleted blocks, and the section says
-    /// "Deleted": naming a state nothing can produce is the same defect as
-    /// naming a surface that has no door.
+    /// **13j batch 6 — the state batch 2 found unreachable is real now.**
+    /// That batch's VERIFY-1 swept `Sources/VariorumCore` and found NO
+    /// operation writing `block.archived_at`; her round-7 ruling built
+    /// `archiveBlock`/`unarchiveBlock`, so archived blocks list here beside
+    /// the deleted ones — with no countdown, which is the difference the
+    /// section header now names.
+    private(set) var archived: [Queries.TrayItem] = []
+    /// The originals that are TRULY permanent: at least one descendant of
+    /// theirs is still live (her round-8b ruling — the forever-section may
+    /// only hold things that will actually stay).
     private(set) var originals: [Queries.PreservedOriginal] = []
     private(set) var originalsTruncated = false
+    /// The originals whose last live descendant has been deleted: they have
+    /// MOVED onto the family's clock, and the tray shows the move rather than
+    /// letting a row quietly change meaning where she is not looking. Keyed
+    /// by block id → the family's stamp.
+    private(set) var strandedClocks: [String: String] = [:]
     private(set) var statusMessage: String?
 
     /// The row the caller asked to be shown (the J3-family lineage door's
@@ -169,7 +201,9 @@ final class TrayViewModel {
         self.revealBlockID = revealBlockID
     }
 
-    var isEmpty: Bool { deleted.isEmpty && originals.isEmpty }
+    var isEmpty: Bool {
+        deleted.isEmpty && archived.isEmpty && originals.isEmpty && stranded.isEmpty
+    }
 
     /// True once the listings have loaded and the requested block is in
     /// neither of them — e.g. an original released from a DIFFERENT note
@@ -179,10 +213,13 @@ final class TrayViewModel {
     var revealMissing: Bool {
         guard loaded, let revealBlockID else { return false }
         return !deleted.contains { $0.blockID == revealBlockID }
+            && !archived.contains { $0.blockID == revealBlockID }
             && !originals.contains { $0.blockID == revealBlockID }
+            && !stranded.contains { $0.blockID == revealBlockID }
     }
 
     func start() async {
+        let now = session.now
         do {
             for try await value in session.database.observe({ [postID] db in
                 Snapshot(
@@ -190,9 +227,16 @@ final class TrayViewModel {
                     // the deleted half was fetched whole and windowed in
                     // memory, the discipline honored only halfway.
                     deleted: try Queries.trayBlocks(
+                        db, postID: postID, now: now, limit: Self.window + 1),
+                    archived: try Queries.archivedBlocks(
                         db, postID: postID, limit: Self.window + 1),
                     originals: try Queries.preservedOriginals(
-                        db, postID: postID, limit: Self.window + 1))
+                        db, postID: postID, limit: Self.window + 1),
+                    // Seeded by THIS note's originals, so the recursion walks
+                    // their families and nothing else — the tray holds this
+                    // observation while the note is open, so its cost is P1's
+                    // business (`Queries.originFamilyClocks`).
+                    strandedClocks: try Queries.originFamilyClocks(db, postID: postID))
             }) {
                 adopt(value)
             }
@@ -204,7 +248,9 @@ final class TrayViewModel {
 
     nonisolated struct Snapshot: Equatable, Sendable {
         var deleted: [Queries.TrayItem] = []
+        var archived: [Queries.TrayItem] = []
         var originals: [Queries.PreservedOriginal] = []
+        var strandedClocks: [String: String] = [:]
     }
 
     /// Internal so tests drive the panel deterministically (the
@@ -213,11 +259,22 @@ final class TrayViewModel {
         deletedTruncated = snapshot.deleted.count > Self.window
         deleted = deletedTruncated
             ? Array(snapshot.deleted.prefix(Self.window)) : snapshot.deleted
-        originalsTruncated = snapshot.originals.count > Self.window
-        originals = originalsTruncated
-            ? Array(snapshot.originals.prefix(Self.window)) : snapshot.originals
+        archived = Array(snapshot.archived.prefix(Self.window))
+        strandedClocks = snapshot.strandedClocks
+        // The SPLIT her round-8b ruling asked for, made where the two lists
+        // are handed over: an original with a live descendant stays in the
+        // forever section; one whose family is gone moves up into the
+        // clock-bearing section, in this same panel, where she can see it go.
+        let forever = snapshot.originals.filter { strandedClocks[$0.blockID] == nil }
+        originalsTruncated = forever.count > Self.window
+        originals = originalsTruncated ? Array(forever.prefix(Self.window)) : forever
+        stranded = snapshot.originals.filter { strandedClocks[$0.blockID] != nil }
         loaded = true
     }
+
+    /// The originals now riding the Trash's clock — rendered in the first
+    /// section beside the deleted blocks, wearing the family's countdown.
+    private(set) var stranded: [Queries.PreservedOriginal] = []
 
     // MARK: - Put back
 
@@ -235,6 +292,28 @@ final class TrayViewModel {
         do {
             let landing = try await session.runner.run { ops in
                 try ops.restoreBlock(blockID)
+            }
+            statusMessage = switch landing {
+            case .itsOldPlace: TrayPath.putBackWhereItWas
+            case .endOfNote: TrayPath.putBackAtEnd
+            case .unplaced: TrayPath.putBackUnplaced
+            }
+        } catch let error as OperationError {
+            statusMessage = TrayRefusalCopy.message(for: error)
+        } catch {
+            statusMessage = String(describing: error)
+        }
+    }
+
+    /// An ARCHIVED block (13j, her round-7 ruling): `unarchiveBlock` — the
+    /// stamp is cleared and the placement row this archive released comes
+    /// back, so the block lands where it stood. The receipt reads the op's
+    /// own answer, exactly as the deleted row's does.
+    func putBackArchived(_ blockID: String) async {
+        statusMessage = nil
+        do {
+            let landing = try await session.runner.run { ops in
+                try ops.unarchiveBlock(blockID)
             }
             statusMessage = switch landing {
             case .itsOldPlace: TrayPath.putBackWhereItWas
@@ -293,6 +372,33 @@ enum PreservedOriginPutBack {
             _ = try ops.placeBlock(blockID, in: postID, at: insert)
         }
         return landing == nil ? TrayPath.putBackAtEnd : TrayPath.putBackBeside
+    }
+}
+
+/// **Did this delete strand a preserved original?** (13j, her round-8b
+/// ruling (d) — the receipt names it.)
+///
+/// Her concern, verbatim: *"the issue I don't want is for someone to think
+/// the ancestor being there in that one ancestor tray is their guaranteed
+/// backup and then they freely delete a block only to realize the ancestor
+/// disappeared later."* The design answer was that the original MOVES,
+/// visibly, onto the family's clock — and the moment the move happens is a
+/// delete she just made, so the receipt is where she will actually read it.
+///
+/// Asked AFTER the delete lands, from the store: whether the deleted block
+/// was the last live descendant is a fact about rows, not about a
+/// projection, and a projection is exactly what a surface would be guessing
+/// from. Returns nil when nothing was stranded — the ordinary case, and no
+/// sentence at all is better than a reassuring one.
+@MainActor
+enum StrandedOriginals {
+    static func note(session: AppSession, blockIDs: [String]) async -> String? {
+        guard !blockIDs.isEmpty else { return nil }
+        let stranded = (try? await session.database.read { db in
+            try Queries.originalsStrandedBy(db, blockIDs: blockIDs)
+        }) ?? []
+        guard !stranded.isEmpty else { return nil }
+        return BlockSelectionCopy.strandedOriginalNote(stranded.count)
     }
 }
 
@@ -357,18 +463,50 @@ struct TrayPanel: View {
             }
             List {
                 Section(tokens.chromeLabel(TrayPath.deletedSection)) {
-                    if model.deleted.isEmpty {
-                        empty("Nothing deleted from this note.")
+                    if model.deleted.isEmpty && model.archived.isEmpty
+                        && model.stranded.isEmpty {
+                        empty("Nothing deleted or archived from this note.")
                     }
                     ForEach(model.deleted, id: \.blockID) { item in
                         row(
                             blockID: item.blockID, text: item.text,
                             stamp: item.deletedAt, when: "deleted",
+                            clock: TrashWindow.daysLeft(item.deletedAt, now: session.now),
                             help: "Puts the block back where it was in this note "
                                 + "(a released original that was deleted later has "
                                 + "no old place left, and lands at the end)"
                         ) {
                             await model.putBackDeleted(item.blockID)
+                        }
+                    }
+                    // Archived rows, NO countdown — her round-7 ruling's own
+                    // distinction, rendered rather than merely stated.
+                    ForEach(model.archived, id: \.blockID) { item in
+                        row(
+                            blockID: item.blockID, text: item.text,
+                            stamp: item.deletedAt, when: "archived", clock: nil,
+                            forever: true,
+                            help: "Kept out of the note, with no clock — Put back "
+                                + "returns it where it stood"
+                        ) {
+                            await model.putBackArchived(item.blockID)
+                        }
+                    }
+                    // The originals that MOVED here (round 8b): their whole
+                    // family is in the Trash, so they ride its clock.
+                    ForEach(model.stranded, id: \.blockID) { item in
+                        row(
+                            blockID: item.blockID, text: item.text,
+                            stamp: model.strandedClocks[item.blockID], when: "goes",
+                            clock: model.strandedClocks[item.blockID].flatMap {
+                                TrashWindow.daysLeft($0, now: session.now)
+                            },
+                            note: TrayPath.goesWithItsFamily,
+                            help: "Put back the blocks it became — or put the "
+                                + "original itself back into this note — and it "
+                                + "stops counting down"
+                        ) {
+                            await model.putBackOriginal(item.blockID)
                         }
                     }
                     if model.deletedTruncated { truncation("deleted") }
@@ -381,7 +519,8 @@ struct TrayPanel: View {
                     ForEach(model.originals, id: \.blockID) { item in
                         row(
                             blockID: item.blockID, text: item.text,
-                            stamp: item.releasedAt, when: "released",
+                            stamp: item.releasedAt, when: "released", clock: nil,
+                            forever: true,
                             help: item.landAfterBlockID == nil
                                 ? "Puts the original back at the end of this note"
                                 : "Puts the original back beside the blocks it became"
@@ -418,7 +557,8 @@ struct TrayPanel: View {
     /// One row: a first-line preview, when it went, and the ONE verb.
     /// Read-cheap by construction — a `Text`, never a pane (P3).
     private func row(
-        blockID: String, text: String?, stamp: String?, when: String, help: String,
+        blockID: String, text: String?, stamp: String?, when: String,
+        clock: Int?, forever: Bool = false, note: String? = nil, help: String,
         putBack: @escaping () async -> Void
     ) -> some View {
         HStack(spacing: 8) {
@@ -426,8 +566,27 @@ struct TrayPanel: View {
                 .font(tokens.body)
                 .foregroundStyle(text?.isEmpty == false ? tokens.ink : tokens.muted)
                 .lineLimit(1)
+            if let note {
+                Text(tokens.chromeLabel(note))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(1)
+            }
             if let stamp, let display = TrayRowPreview.stampText(stamp, verb: when) {
                 Text(tokens.chromeLabel(display))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(1)
+            }
+            // The clock, or the promise of no clock — one of the two, never
+            // both and never neither (13j J1 / round 7).
+            if let clock {
+                Text(tokens.chromeLabel(TrayPath.daysLeftLabel(clock)))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(1)
+            } else if forever {
+                Text(tokens.chromeLabel(TrayPath.archivedForever))
                     .font(tokens.small)
                     .foregroundStyle(tokens.faint)
                     .lineLimit(1)

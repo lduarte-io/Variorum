@@ -169,7 +169,7 @@ struct PaneHost<Content: View>: View {
             return
         }
         do {
-            for try await value in session.database.observeTrayCounts(postID) {
+            for try await value in session.database.observeTrayCounts(postID, now: session.now) {
                 trayCounts = value
             }
         } catch {

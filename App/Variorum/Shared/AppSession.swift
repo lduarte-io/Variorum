@@ -12,6 +12,7 @@
 //  profile, never a separate data model (CoreDescription pillar 8).
 //
 
+import Dependencies
 import Observation
 import Foundation
 import VariorumCore
@@ -36,6 +37,25 @@ final class UndoMenuState {
 @MainActor
 final class AppSession {
     let database: AppDatabase
+
+    /// **The READ-side clock** (13j J1 — the 30-day Trash window).
+    ///
+    /// Every recovery listing takes a required `now`, because "in the Trash"
+    /// is a statement about time and a surface that inherited someone else's
+    /// idea of the boundary could show her a Put back she can no longer use.
+    /// It resolves through `@Dependency(\.date)` — the same injected clock
+    /// `Operations` writes stamps with — so a test standing on day 29 and a
+    /// test standing on day 31 are both one line, and production reads the
+    /// system clock.
+    ///
+    /// **Snapshotted in `init`, deliberately.** The readers are all HELD
+    /// observations (`.task`s that start when a surface appears and read the
+    /// clock when they start), so the read can land long after the scope that
+    /// built the session has gone; taking the generator at construction is
+    /// what makes "the session's clock" mean the clock of the world the
+    /// session was built in, in production and under test alike.
+    @ObservationIgnored private let clock: DateGenerator
+    var now: Date { clock.now }
     /// The session-scoped structural undo stack (AppSpec §9) — in-memory,
     /// never persisted. (On the Mac it wires to the Edit menu; the phone
     /// registers entries where its structural doors do — divide, merge,
@@ -308,6 +328,8 @@ final class AppSession {
     #endif
 
     init(database: AppDatabase) {
+        @Dependency(\.date) var date
+        self.clock = date
         self.database = database
         let undo = UndoStack()
         self.undoStack = undo

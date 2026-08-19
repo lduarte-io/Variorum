@@ -753,6 +753,29 @@ final class EditorSurfaceController {
         await runDeleteBlock(blockID, entryIndex: index, note: BlockSelectionCopy.deletedNote(1))
     }
 
+    /// **ARCHIVE the caret block** (13j, her round-7 ruling): the block
+    /// leaves the note KEPT — its placement is released, `archived_at` is
+    /// stamped, and it waits in the note's tray with no countdown. Delete's
+    /// twin in every other respect: the same caret landing, the same
+    /// structural undo (and redo), the same fire-and-speak refusals.
+    func archiveCaretBlock() async {
+        guard let blockID = model.caretBlockID,
+              let index = model.index.entries.firstIndex(where: { $0.blockID == blockID })
+        else {
+            model.refuseFeedback(model.index.entries.isEmpty
+                ? "No blocks yet — type on the page and each finished paragraph becomes one."
+                : "Put the caret in a block first — this sets the block you're in aside.")
+            return
+        }
+        let landing = caretLandingAfterRemoving(index)
+        let landed = await runStructural { ops in
+            try ops.archiveBlock(blockID)
+            return StructuralOutcome(
+                caretBlockID: landing.blockID, caretOffset: landing.offset, seam: nil)
+        }
+        if landed { model.showStatus(BlockSelectionCopy.archivedNote) }
+    }
+
     /// The one delete-block body both doors use: the menu/bar act above and
     /// A7's empty-block backspace below.
     private func runDeleteBlock(_ blockID: String, entryIndex: Int, note: String) async {
@@ -762,7 +785,10 @@ final class EditorSurfaceController {
             return StructuralOutcome(
                 caretBlockID: landing.blockID, caretOffset: landing.offset, seam: nil)
         }
-        if landed { model.showStatus(note) }
+        if landed {
+            model.showStatus(note + (await StrandedOriginals.note(
+                session: model.session, blockIDs: [blockID]) ?? ""))
+        }
     }
 
     // MARK: - Delete SELECTED blocks (13e batch 4 — E2, her A17)

@@ -203,11 +203,16 @@ struct BlockTOCTests {
 
             await model.deleteBlock(doomed)
             #expect(model.statusMessage == nil)
-            let tray = try await db.read { try Queries.trayBlocks($0, postID: postID) }
+            let tray = try await db.read { try Queries.trayBlocks($0, postID: postID, now: harnessNow) }
             #expect(tray.map(\.blockID) == [doomed], "the deleted block trays")
             model.adopt(tray: tray)
 
-            await model.restoreBlock(doomed)
+            // A JUSTIFIED PIN EDIT (13j, her round-7 ruling): the CLAIM is
+            // unchanged — a deleted block trays and comes back in its own
+            // place — but the Blocks mode no longer carries its own Restore
+            // door. Her ruling routed this section to the ONE panel, so the
+            // door under test is the operation the panel's Put back runs.
+            try await session.runner.run { ops in _ = try ops.restoreBlock(doomed) }
             #expect(model.statusMessage == nil)
             let order = try await db.read { db in
                 try Queries.renderPost(db, containerID: postID).map(\.blockID)
@@ -217,7 +222,7 @@ struct BlockTOCTests {
             // tombstoned, so the block comes back in its own place — which
             // for the last block is the end, exactly as before.
             #expect(order.last == doomed, "back in its own place")
-            #expect(try await db.read { try Queries.trayBlocks($0, postID: postID) }.isEmpty)
+            #expect(try await db.read { try Queries.trayBlocks($0, postID: postID, now: harnessNow) }.isEmpty)
         }
     }
 

@@ -96,7 +96,7 @@ final class BlockTOCViewModel {
     func startTray() async {
         do {
             for try await value in session.database.observeTray(
-                postID, limit: TrayViewModel.window + 1
+                postID, now: session.now, limit: TrayViewModel.window + 1
             ) {
                 adopt(tray: value)
             }
@@ -231,12 +231,10 @@ final class BlockTOCViewModel {
         await run { ops in try ops.deleteBlock(blockID) }
     }
 
-    /// The tray's restore door. **13j batch 3 (the F2 rider):** `restoreBlock`
-    /// revives the placement row this deletion tombstoned, so the block comes
-    /// back where it was rather than at the note's end.
-    func restoreBlock(_ blockID: String) async {
-        await run { ops in try ops.restoreBlock(blockID) }
-    }
+    // (The tray's own Restore door used to live here. 13j round 7 routed this
+    // mode's tray section to the ONE panel — "one surface, one truth" — so
+    // the door lives in `TrayPanel` and this model no longer carries a second
+    // copy of it. The tray LISTING stays: the section's door wears its count.)
 
     /// 13b 4D (N32(a), her confusion answered in the UI): move-to-pool is
     /// `moveBlock` — the block LEAVES the post (I2: one home per block; its
@@ -280,6 +278,8 @@ struct BlockTOCView: View {
     /// 13b 4D (N39): the typed-position prompt's target + entry.
     @State private var moveTarget: Queries.TOCRow?
     @State private var moveOrdinalText = ""
+    /// 13j (round 7): the tray panel this mode's section now opens.
+    @State private var trayShown = false
 
     init(
         session: AppSession, postID: String,
@@ -306,6 +306,9 @@ struct BlockTOCView: View {
                 }
                 .padding(12)
             }
+        }
+        .sheet(isPresented: $trayShown) {
+            TrayPanel(session: session, postID: postID)
         }
         .task { await model.start() }
         .task { await model.startTray() }
@@ -446,34 +449,28 @@ struct BlockTOCView: View {
         }
     }
 
+    /// **13j (her round-7 ruling): ONE panel, one truth.** This section used
+    /// to render its own small deleted-blocks list — a second listing over
+    /// the same query, which batch 2 left alone deliberately (two views over
+    /// one query is the pointer religion, not duplication) and flagged for
+    /// her. She ruled: *"routed to the one panel"*. So the section is now a
+    /// DOOR: it says how many blocks are waiting and opens This Note's Tray,
+    /// where the countdown, the archived rows and the preserved originals all
+    /// live. Nothing here can drift from that panel, because there is nothing
+    /// here to drift.
     private var traySection: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Deleted blocks (the tray)")
-                .font(.caption.weight(.semibold))
-                .padding(.top, 12)
-            ForEach(model.tray, id: \.blockID) { item in
-                HStack(spacing: 6) {
-                    Text((item.text?.isEmpty == false)
-                         ? String(item.text!.prefix(80))
-                         : "(empty block)")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                    Spacer()
-                    Button("Restore") {
-                        Task { await model.restoreBlock(item.blockID) }
-                    }
-                    .controlSize(.mini)
-                }
+            Button {
+                trayShown = true
+            } label: {
+                Text("\(TrayPath.menuLabel) — \(model.tray.count) deleted")
+                    .font(.caption.weight(.semibold))
             }
-            if model.trayTruncated {
-                // A6: the visible marker (the standing windowed-observation
-                // discipline — never a silent cut).
-                Text("Showing the \(TrayViewModel.window) most recently deleted — "
-                    + "older ones aren't listed.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+            .buttonStyle(.link)
+            .padding(.top, 12)
+            .help("Opens this note's tray: what it has deleted (with how long "
+                + "you have to put it back), what it has archived, and any "
+                + "originals a divide or merge preserved")
         }
     }
 }

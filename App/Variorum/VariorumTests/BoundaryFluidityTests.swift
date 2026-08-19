@@ -60,7 +60,7 @@ struct BoundaryFluidityTests {
             #expect(restored == ["Alpha one.", "Beta two."],
                     "one ⌥⌘Z restores both blocks byte-identically")
             let trayed = try await harness.database.read { db in
-                try Queries.trayBlocks(db, postID: harness.postID)
+                try Queries.trayBlocks(db, postID: harness.postID, now: harnessNow)
             }
             #expect(trayed.count == 1,
                     "the edited merged mint trays instead of vanishing (insurance doctrine)")

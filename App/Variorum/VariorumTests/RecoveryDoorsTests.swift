@@ -235,7 +235,7 @@ struct RecoveryDoorsTests {
 
             let successor = w.first.block.id
             let past = BlockPastModel(session: editor.session, blockID: successor)
-            past.adopt(try await editor.database.read { try Queries.blockPast($0, blockID: successor) })
+            past.adopt(try await editor.database.read { try Queries.blockPast($0, blockID: successor, now: harnessNow) })
             #expect(!past.isEmpty)
             #expect(past.past.origins.map(\.blockID) == [slot.blockID])
             #expect(past.past.origins.first?.originOp == "divide")
@@ -245,7 +245,7 @@ struct RecoveryDoorsTests {
             let extra = try ops.branchVariant(successor, from: w.first.variants[0].id)
             try ops.setTakeLabel(extra.id, label: "second thoughts")
             try ops.deleteVariant(extra.id)
-            past.adopt(try await editor.database.read { try Queries.blockPast($0, blockID: successor) })
+            past.adopt(try await editor.database.read { try Queries.blockPast($0, blockID: successor, now: harnessNow) })
             #expect(past.past.deletedTakes.map(\.id) == [extra.id])
             #expect(BlockPastCopy.rowLabel(past.past.deletedTakes[0]) == "second thoughts")
 
@@ -253,7 +253,7 @@ struct RecoveryDoorsTests {
             let plain = try ops.newBlock(in: editor.postID, text: "ordinary")
             let plainPast = BlockPastModel(session: editor.session, blockID: plain.block.id)
             plainPast.adopt(try await editor.database.read {
-                try Queries.blockPast($0, blockID: plain.block.id)
+                try Queries.blockPast($0, blockID: plain.block.id, now: harnessNow)
             })
             #expect(plainPast.isEmpty)
         }
@@ -356,7 +356,7 @@ struct RecoveryDoorsTests {
             // The row knows its status, so the help words to it BEFORE the
             // act (the receipt is the act's own answer, below).
             let listed = try await editor.database.read { [blockID = slot.blockID] db in
-                try Queries.deletedTakes(db, blockID: blockID)
+                try Queries.deletedTakes(db, blockID: blockID, now: harnessNow)
             }
             #expect(BlockPastCopy.putBackHelp(try #require(listed.first))
                 .contains("archived takes"))
@@ -375,7 +375,7 @@ struct RecoveryDoorsTests {
             let active = try ops.branchVariant(slot.blockID, from: chosen)
             try ops.deleteVariant(active.id)
             let activeRow = try await editor.database.read { [blockID = slot.blockID] db in
-                try Queries.deletedTakes(db, blockID: blockID)
+                try Queries.deletedTakes(db, blockID: blockID, now: harnessNow)
             }
             #expect(BlockPastCopy.putBackHelp(try #require(activeRow.first))
                 .contains("fan"))

@@ -67,7 +67,7 @@ struct LifecycleFacesTests {
             #expect(row["deleted_at"] != nil)
             // The recovery listings see it; the library doesn't.
             let (deleted, library) = try await db.read {
-                (try Queries.deletedPosts($0), try Queries.library($0))
+                (try Queries.deletedPosts($0, now: harnessNow), try Queries.library($0))
             }
             #expect(deleted.map(\.postID) == [post.id])
             #expect(library.isEmpty)
@@ -236,13 +236,21 @@ struct LifecycleFacesTests {
             let deleted = try session.operations.createPost(title: "d")
             try session.operations.archiveContainer(archived.id)
             try session.operations.deleteContainer(deleted.id)
-            let (archivedItems, deletedItems) = try await db.read {
-                (try Queries.archivedPosts($0), try Queries.deletedPosts($0))
+            // A JUSTIFIED PIN EDIT (13j J1, the batch-2/3/4 precedent — a
+            // RULED change, never a quietly relaxed pin): the CLAIM is
+            // unchanged (the recovery surface's two listings feed the
+            // model), and only the deleted half's shape moved — her round-3
+            // ruling turned "Recently Deleted" into the Trash, ONE listing
+            // over every deleted thing, so the model adopts `trash` rows.
+            let (archivedItems, trashItems) = try await db.read {
+                (try Queries.archivedPosts($0), try Queries.trash($0, now: harnessNow))
             }
             let model = RecoveryViewModel(session: session)
-            model.adopt(archived: archivedItems, deleted: deletedItems)
+            model.adopt(archived: archivedItems, trash: trashItems)
             #expect(model.archived.map(\.postID) == [archived.id])
-            #expect(model.deleted.map(\.postID) == [deleted.id])
+            #expect(model.trash.filter { $0.kind == .note }.map(\.id) == [deleted.id])
+            #expect(!model.trash.contains { $0.id == archived.id },
+                    "archived is NOT in the Trash — kept forever, no clock (round 3)")
         }
     }
 
@@ -260,11 +268,17 @@ struct LifecycleFacesTests {
             try session.operations.assignPostToSection(post.id, in: book.id, section: chapter.id)
             try session.operations.deleteReading(book.id)
 
-            let listed = try await db.read { try Queries.deletedReadings($0) }
+            let listed = try await db.read { try Queries.deletedReadings($0, now: harnessNow) }
             #expect(listed.map(\.id) == [book.id], "the recovery surface's feed")
 
+            // A JUSTIFIED PIN EDIT (13j J1): same CLAIM — the surface's door
+            // emits exactly `restoreReading` and the book comes back whole —
+            // through the door her round-3 ruling gave it: ONE **Put back**
+            // verb on a Trash row, whatever kind the row is.
             let model = RecoveryViewModel(session: session)
-            await model.restoreReading(book.id)
+            let row = Queries.TrashItem(
+                kind: .book, id: book.id, deletedAt: "")
+            await model.putBack(row)
             #expect(model.lastError == nil)
             let (live, sections, assignments) = try await db.read { [bookID = book.id] db in
                 (try Queries.reading(db, id: bookID) != nil,
@@ -281,7 +295,7 @@ struct LifecycleFacesTests {
             // accepted the raw enum dump "Refused: readingNotDeleted(id:
             // …)", which is exactly the class the finding ends — the
             // double-click path must speak plainly).
-            await model.restoreReading(book.id)
+            await model.putBack(row)
             let refusal = try #require(model.lastError)
             #expect(!refusal.contains("readingNotDeleted"),
                     "no enum dump on the double-click path: \(refusal)")

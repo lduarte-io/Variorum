@@ -234,6 +234,27 @@ nonisolated enum BlockSelectionCopy {
                 + road
     }
 
+    /// **The ARCHIVE receipt** (13j, her round-7 ruling — the third verb).
+    /// It says the thing that makes archive different from delete IN THE
+    /// SAME BREATH as the act: no clock. The road it names is the note menu
+    /// item, never the tray BADGE, because the badge counts DELETED blocks
+    /// only (her ratified #67(a)) and would stay hidden for a note that had
+    /// only archived something — a receipt must name a door she can see.
+    static let archivedNote =
+        "Block archived — it's kept, with no countdown, in "
+        + "\(TrayPath.menuLabel) (the note menu). \u{2325}\u{2318}Z undoes this."
+
+    /// **The stranding sentence** (her round-8b ruling (d)): when a delete
+    /// takes the LAST live descendant of a preserved original, the original
+    /// stops being permanent and starts counting down with the family — and
+    /// the receipt says so, because her named failure mode was believing an
+    /// ancestor waiting in the tray was a guaranteed backup.
+    static func strandedOriginalNote(_ count: Int) -> String {
+        count == 1
+            ? " The original preserved from this block's divide rides the Trash with it."
+            : " \(count) preserved originals ride the Trash with these blocks."
+    }
+
     /// Nothing picked. Reachable from the routed/registry note only; the
     /// banner and the context row do not render without a selection (P-2).
     static let nothingPicked =
@@ -378,6 +399,28 @@ nonisolated enum OpsRefusalCopy {
             case .blockNotPlaced:
                 return "That block is no longer in this note — it may have "
                     + "moved while you worked. Nothing was changed here."
+            // 13j batch 6 (the enum-dump straggler, routed here from LADDER
+            // A's round-1 sanity pass, which found it falling to `default:`
+            // as "Refused: \(error)" — loud and typed, but a raw dump as a
+            // sentence).
+            //
+            // **Reachability, VERIFIED rather than assumed** (the reviewer's
+            // own gap-slot trace, re-walked in this batch): every structural
+            // op resolves its text through `renderedVariant`, which throws
+            // this when a slot renders NOTHING — a GAP SLOT (`variantID ==
+            // nil` at render) is the shipped case, and the merge, divide,
+            // extract, pool-copy and version doors all pass through it. Its
+            // sibling on that same road, `blockNotFound`, already speaks
+            // (13e E2), so this is the last one; the OTHER errors those
+            // doors raise are worded above. It is unreachable for a healthy
+            // live block (I10 plus the default-variant reassignment
+            // guarantee one), which is exactly why the words describe the
+            // state it really means — text that has not arrived here yet —
+            // rather than blaming her for a block she can see.
+            case .noRenderableVariant:
+                return "That block has no text here yet — it may still be "
+                    + "arriving from another device. Nothing was changed; "
+                    + "try again in a moment."
             default:
                 return "Refused: \(error)"
             }

@@ -402,7 +402,31 @@ struct TakesBottomBar: View {
         historyShown = true
     }
 
+    /// True while the block has nothing in its past — the A1 container is
+    /// mounted and zero-size, so the sheet's spacing must not pay for it.
+    private var pastIsEmpty: Bool { pastModel?.isEmpty ?? true }
+
+    /// **R2-N2's absorption, as a value** (13j batch 6): what the past
+    /// section's top padding must be so the sheet's own `spacing: 8` is not
+    /// paid twice for a zero-size view. Pure and static so a pin can hold the
+    /// decision without measuring SwiftUI: the stack puts a gap BEFORE this
+    /// child and another AFTER it, and an empty child means the reader sees
+    /// 16 pt of nothing under the title. Cancelling exactly one gap restores
+    /// the single space the sheet was designed with.
+    static func pastSectionTopPadding(pastEmpty: Bool) -> CGFloat {
+        pastEmpty ? -8 : 0
+    }
+
     private var historySheet: some View {
+        // 13j batch 6 — LADDER A's R2-N2, absorbed. The past section's
+        // container is deliberately ALWAYS mounted (it carries the starting
+        // `.task`; a `Group` that renders nothing runs no task, which is the
+        // A1 BLOCKER this fixed), so on the common case — a block with no
+        // past — a zero-size view still takes a stack gap and the sheet
+        // showed a doubled 16 pt space under its title. The gap is the
+        // STACK's to decide, so the stack decides it: the section keeps its
+        // life, the spacing stops paying for a view with no height. (Write's
+        // host is spacing-0 and was never affected.)
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text("Savepoints — this take").font(.headline)
@@ -414,6 +438,7 @@ struct TakesBottomBar: View {
                     historyShown = false
                     model.revealOriginBlock(origin)
                 }
+                .padding(.top, Self.pastSectionTopPadding(pastEmpty: pastIsEmpty))
             }
             if history.isEmpty {
                 Text("No savepoints yet — ⌘S commits one.")

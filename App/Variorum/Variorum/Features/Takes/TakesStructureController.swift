@@ -138,10 +138,42 @@ final class TakesStructureController {
             if let variantID = survivor?.variantID {
                 model.choreography.parkFocus(onVariant: variantID)
             }
-            // 13j J8(a): ONE receipt for every delete door — the interim
-            // truth (the tray this used to promise has no face until batch 2),
-            // shared so the Takes board and Write can never drift on it.
-            model.setStatus(BlockSelectionCopy.deletedNote(1))
+            // 13j J8(a): ONE receipt for every delete door — shared so the
+            // Takes board and Write can never drift on it. 13j round 8b: it
+            // also names a preserved original this delete just stranded.
+            model.setStatus(BlockSelectionCopy.deletedNote(1)
+                + (await StrandedOriginals.note(
+                    session: model.session, blockIDs: [slot.blockID]) ?? ""))
+        } catch {
+            model.setStatus(TakesViewModel.message(for: error))
+        }
+    }
+
+    /// **ARCHIVE the focused block** (13j, her round-7 ruling) — Takes' and
+    /// Lenses' door onto the third verb, the same shape as `deleteFocusedBlock`
+    /// above so the two acts cannot drift on their guards, their flush
+    /// discipline, or their ring landing.
+    func archiveFocusedBlock() async {
+        guard let slot = model.commandTargetSlot else {
+            model.speak("Click into a block first — this sets the block you're in aside.")
+            return
+        }
+        let slots = model.projection.slots
+        let survivor: Queries.RenderedBlock? = slots
+            .firstIndex { $0.blockID == slot.blockID }
+            .flatMap { i in i + 1 < slots.count ? slots[i + 1] : (i > 0 ? slots[i - 1] : nil) }
+        await model.autosave.flushNow()
+        guard !model.autosave.isDirty else {
+            model.speak("Unsaved changes couldn't be written — resolve that first, then retry.")
+            return
+        }
+        model.setStatus(nil)
+        do {
+            try await model.session.runner.run { ops in try ops.archiveBlock(slot.blockID) }
+            if let variantID = survivor?.variantID {
+                model.choreography.parkFocus(onVariant: variantID)
+            }
+            model.setStatus(BlockSelectionCopy.archivedNote)
         } catch {
             model.setStatus(TakesViewModel.message(for: error))
         }

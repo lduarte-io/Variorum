@@ -136,6 +136,13 @@ struct EditorHarness {
 
 /// Runs `body` against a fresh in-memory store + live editor pipeline with
 /// deterministic dependencies. `profile` seeds the post (journal = one_block).
+/// **The Mac harness world's "now"** (13j): the recovery queries take a
+/// required clock, because the 30-day Trash window is what "in the Trash"
+/// means. Every hosted world here stamps its fixtures from 2026-07-01, so a
+/// listing asked as of this moment sees what the test just deleted — and a
+/// test that wants the far side of the window passes its own date.
+let harnessNow = Date(timeIntervalSince1970: 1_782_864_000 + 3_600)
+
 @MainActor
 func withEditor<T>(
     profile: Profile? = nil,

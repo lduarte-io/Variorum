@@ -1379,6 +1379,11 @@ final class EditorViewModel {
         await structural.deleteCaretBlock()
     }
 
+    /// 13j's Write door (her round-7 ruling): archive the caret block.
+    func archiveCaretBlock() async {
+        await structural.archiveCaretBlock()
+    }
+
     /// 13e E2's Write door (her A17): every ⌘-clicked block, one undo entry.
     func deleteSelectedBlocks() async {
         await structural.deleteSelectedBlocks()
@@ -1663,6 +1668,8 @@ final class EditorViewModel {
         // 13j J4/J4b: the two ceremony doors — her round-4 binding names the
         // block context menu explicitly, beside the Block menu and ⌘K.
         .divideWithCeremony, .mergeWithCeremony,
+        // 13j (her round-7 ruling): block archive — the Block menu's twin.
+        .archiveBlock,
         .showOriginBlock,  // 13f W10b — rendered only where an origin exists
         .callout,  // 13k K6 — the submenu this surface inserts beside Format
         // 13e E2 (A17) — rendered only while blocks are picked
@@ -1708,6 +1715,15 @@ final class EditorViewModel {
             },
             .init(title: "Show Takes", enabled: true) { [weak self] in
                 self?.openCaretFan()
+            },
+            // 13j (her round-7 ruling): the third verb, beside the two it
+            // has to be told apart from. Rendered unconditionally like every
+            // other structural row on THIS menu (the 2026-07-09
+            // fire-and-speak posture); a caret outside a block gets the
+            // door's own honest sentence.
+            .init(title: CapabilityRegistry.capability(.archiveBlock).menuTitle(),
+                  enabled: true) { [weak self] in
+                Task { await self?.archiveCaretBlock() }
             },
         ]
         // 13e E2 (her A17): the delete door for a ⌘-click selection,

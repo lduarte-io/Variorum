@@ -294,6 +294,11 @@ extension EditorView {
             // caret lands in the neighbour that takes its place.
             Task { await model.deleteCaretBlock() }
             return true
+        case .archiveBlock:
+            // 13j (her round-7 ruling): the same landing, the other verb —
+            // the block is KEPT in the note's tray with no countdown.
+            Task { await model.archiveCaretBlock() }
+            return true
         case .toggleSeal:
             model.toggleSeal()
             return true

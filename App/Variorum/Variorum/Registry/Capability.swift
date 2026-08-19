@@ -113,6 +113,9 @@ nonisolated enum RoutedCommand: Equatable, Sendable {
     case addBlockAtEnd   // D3's third leg: a new block at the post's end
     case insertBlockBelow  // 13b 4D (N28/S4-13): a new block BELOW the caret/focused block
     case deleteBlock     // 13c 1B (A8): delete the caret/focused block
+    /// 13j (her round-7 ruling): set the caret/focused block ASIDE, kept —
+    /// the third verb beside delete (30 days) and move-to-scraps.
+    case archiveBlock
     case toggleSeal
     case comments        // ⌘⇧' — the target block's comments panel
     case callout(CalloutEdit)  // 13c R2-2 (A13(a)): the target block's frame
@@ -371,6 +374,11 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     case divideWithCeremony, mergeWithCeremony
     case insertBlockBelow  // 13b 4D (N28's second half; S4-13: native in BOTH editors)
     case deleteBlock       // 13c 1B (A8): the delete door where she writes
+    // 13j, her round-7 ruling ("do you think that we should add block level
+    // archive? I think that it might be worthwhile"): block ARCHIVE — kept
+    // forever in this note's tray, no clock. Two doors, both summoned: the
+    // Block menu and the block's own context menu.
+    case archiveBlock
     // The take family (take scope)
     case showTakes, newTake, blankTake, blankTakeAsChosen, chooseTake
     case previousTake, nextTake, archiveTake, saveChoicesAsLens, closeAllTakes

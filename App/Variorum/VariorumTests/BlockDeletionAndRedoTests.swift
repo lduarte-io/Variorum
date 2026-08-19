@@ -500,7 +500,7 @@ struct BlockDeletionAndRedoTests {
             #expect(harness.documentText == "")
             // The tray reaches it, and undo puts it back.
             let tray = try await harness.database.read { db in
-                try Queries.trayBlocks(db, postID: harness.postID)
+                try Queries.trayBlocks(db, postID: harness.postID, now: harnessNow)
             }
             #expect(tray.count == 1)
 

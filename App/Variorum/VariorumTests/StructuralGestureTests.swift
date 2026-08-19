@@ -376,12 +376,16 @@ struct DivideExtractGestureTests {
             // (her sitting round-4 binding names this menu explicitly). The
             // claim is unchanged and is asserted below: every row stays
             // ENABLED and a refused one speaks.
+            // 13j batch 6 — A JUSTIFIED EDIT of the same kind: her round-7
+            // ruling added block ARCHIVE, and her round-4 binding names the
+            // block context menu as one of its two doors. The claim below is
+            // untouched: every row stays ENABLED and a refused one speaks.
             #expect(items.map(\.title) == [
                 "Divide Block at Cursor", "Divide with Ceremony… (⌥⌘⇧D)",
                 "Extract Selection",
                 "Make Block from Selection", "Merge Blocks",
                 "Merge with Ceremony… (⌥⌘⇧M)",
-                "Delete in Every Take", "Show Takes",
+                "Delete in Every Take", "Show Takes", "Archive Block",
             ])
             let allEnabled = items.allSatisfy(\.enabled)
             #expect(allEnabled)

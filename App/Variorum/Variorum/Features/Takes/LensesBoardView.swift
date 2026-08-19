@@ -202,6 +202,10 @@ struct LensesBoardView: View {
             // 13c 1B (A8): the shared model machinery, same as Takes.
             Task { await model.deleteFocusedBlock() }
             return true
+        case .archiveBlock:
+            // 13j (her round-7 ruling): the shared machinery again.
+            Task { await model.archiveFocusedBlock() }
+            return true
         case .toggleSeal:
             Task { await model.toggleSeal() }
             return true

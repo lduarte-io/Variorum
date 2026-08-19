@@ -112,7 +112,7 @@ final class BlockPastModel {
     /// `AppDatabase.observeBlockPast` for the full reasoning.
     func start() async {
         do {
-            for try await value in session.database.observeBlockPast(blockID) {
+            for try await value in session.database.observeBlockPast(blockID, now: session.now) {
                 adopt(value)
             }
         } catch is CancellationError {
