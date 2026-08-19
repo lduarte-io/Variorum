@@ -115,6 +115,15 @@ extension Queries {
                  AND e.type = 'derived_from' AND e.deleted_at IS NULL
                 JOIN block origin
                   ON origin.id = e.target_block_id AND origin.deleted_at IS NULL
+                 -- 13j batch 6: an ARCHIVED block is unplaced too, and it is
+                 -- NOT a leftover — it is a set-aside she chose (her round-7
+                 -- ruling). Offering it here would let the lineage door's
+                 -- "Put back in note" place it through `placeBlock`, which
+                 -- knows nothing about `archived_at` — leaving a block that
+                 -- is in the note AND marked archived, listed in two places
+                 -- that mean opposite things. Its own road is the tray's
+                 -- Put back, which clears the stamp.
+                 AND origin.archived_at IS NULL
                 WHERE cb.container_id = :post AND cb.deleted_at IS NULL
                   AND NOT EXISTS (
                     SELECT 1 FROM container_block placed
@@ -150,6 +159,7 @@ extension Queries {
                 FROM edge e
                 JOIN block origin
                   ON origin.id = e.target_block_id AND origin.deleted_at IS NULL
+                 AND origin.archived_at IS NULL  -- 13j batch 6, per the twin above
                 WHERE e.source_block_id = :block
                   AND e.type = 'derived_from' AND e.deleted_at IS NULL
                   AND NOT EXISTS (

@@ -3113,9 +3113,19 @@ never cleared.
 **Two consequences named rather than assumed:** the ⌫ badge still counts
 DELETED blocks only (her ratified #67(a)), so a note with only archived
 blocks carries no badge — which is why the archive receipt names the `note ▾`
-item, a door that is always there. And archived blocks are excluded from
-`unplacedOrigins`' population by the same exclusion, so the lineage door
-never offers to place a block whose archive stamp would survive the placing.
+item, a door that is always there.
+
+**And a DEFECT I found by checking my own record's claim, recorded because
+the checking is the point.** This paragraph first said archived blocks were
+excluded from `unplacedOrigins` too — they were not. That population is the
+LINEAGE door's, whose "Put back in note" runs `placeBlock`, which knows
+nothing about `archived_at`: an archived divide-original was offered there,
+and placing it would have left a block that is IN the note and listed as
+kept aside, in two places that mean opposite things. Both overloads now
+exclude archived blocks (`theLineageDoorDoesNotOfferAnArchivedBlock`, revert
+J), and `archivedBlocks` gained a belt — it lists only blocks with no live
+placement — so even a future door that placed one without clearing the stamp
+could not make the tray lie.
 
 **4 — Her round-8b ruling, as derived state.** `originFamilyClocks` (per
 note — the recursion is seeded by that note's own originals, so a held tray
@@ -3163,7 +3173,7 @@ consequence flagged for the deploy window.
 
 ### PINS + RED-ON-OLD EVIDENCE (behavioral revert, checksummed)
 
-Two new suites, **22 tests**: `TrashAndArchiveTests` (12, core),
+Two new suites, **23 tests**: `TrashAndArchiveTests` (13, core),
 `TrashSurfaceTests` (10, Mac). Every revert restored **byte-identical**
 (`shasum -a 256`, first 12 hex shown).
 
@@ -3178,6 +3188,7 @@ Two new suites, **22 tests**: `TrashAndArchiveTests` (12, core),
 | **G** — R2-N2 un-absorbed | `theHistorySheetStopsPayingForAnEmptyPastSection` | `TakesBottomBar.swift` → `9f86a8dfcbe6` (identical) |
 | **H** — the enum dump restored | `theGapSlotRefusalSpeaksInsteadOfDumpingItsEnum` (3) | `OpsRefusalCopy.swift` → `363da0abfcfe` (identical) |
 | **I** — the stranding sentence removed | `theDeleteReceiptNamesAnOriginalItJustStranded` | `TrayPanel.swift` → `8705fb25e33a` (identical) |
+| **J** — the lineage door offers archived blocks again | `theLineageDoorDoesNotOfferAnArchivedBlock` | `Lineage.swift` → `4cdc96a6ce66` (identical) |
 
 **Consequential pin edits, each annotated IN PLACE** (the batch-2/3/4/5
 precedent — a RULED change, never a quietly relaxed pin):
@@ -3219,11 +3230,11 @@ one item a screenshot answers better than a value pin).
 
 ### SUITE COUNTS (every "Test run with N tests" line confirmed)
 
-- core `swift test` — **1307 tests / 139 suites PASSED** (baseline 1295/138
-  + 12 in 1 new suite)
+- core `swift test` — **1308 tests / 139 suites PASSED** (baseline 1295/138
+  + 13 in 1 new suite)
 - Mac (`-project` invocation) — **1526 tests / 267 suites PASSED, FULLY
   GREEN, zero reds** (baseline 1516/266 + 10 in 1 new suite), and **green on
-  two consecutive full runs**
+  three full runs, the last of them after the revert-J fix**
 - tutorial spine, by TYPE name (the seven from the batch-1 record) —
   **51 tests / 7 suites PASSED** (baseline exact)
 - mobile (`VariorumMobile`, iPhone 16e) — **314 tests / 60 suites PASSED**

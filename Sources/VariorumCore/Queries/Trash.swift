@@ -368,6 +368,14 @@ extension Queries {
             LEFT JOIN variant dv ON dv.id = b.default_variant_id AND dv.deleted_at IS NULL
             WHERE b.last_container_id = :post AND b.deleted_at IS NULL
               AND b.archived_at IS NOT NULL
+              -- Belt, not braces: `archiveBlock` always releases the
+              -- placement, so an archived block with a live one cannot occur
+              -- by any door — and if a future door ever placed one without
+              -- clearing the stamp, the tray would rather list nothing than
+              -- claim a block she can see in her note is "kept aside".
+              AND NOT EXISTS (
+                SELECT 1 FROM container_block placed
+                WHERE placed.block_id = b.id AND placed.deleted_at IS NULL)
             ORDER BY b.archived_at DESC, b.id
             """
         var arguments: StatementArguments = ["post": postID]

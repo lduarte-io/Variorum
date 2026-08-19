@@ -278,6 +278,35 @@ struct TrashAndArchiveTests {
         }
     }
 
+    /// **An archived block is not a leftover** (her round-7 ruling meeting
+    /// her round-4 lineage door): the door offers ORIGINALS a divide or merge
+    /// released, and offering an archived block there would let its Put back
+    /// run `placeBlock` — which knows nothing about `archived_at` — leaving a
+    /// block that is in the note AND listed as kept aside.
+    @Test func theLineageDoorDoesNotOfferAnArchivedBlock() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "divided")
+            let block = try ops.newBlock(in: post.id, text: "First half. Second half.")
+            _ = try ops.branchVariant(block.block.id, from: block.variant.id)
+            let w = try ops.divideW(block.block.id, cuts: [block.variant.id: 12])
+
+            let before = try db.read {
+                try Queries.unplacedOrigins($0, ofBlock: w.first.block.id).map(\.blockID)
+            }
+            #expect(before == [block.block.id], "the original is the door's whole point")
+
+            try ops.archiveBlock(block.block.id)
+            let after = try db.read { db in
+                (ofBlock: try Queries.unplacedOrigins(db, ofBlock: w.first.block.id).count,
+                 inPost: try Queries.unplacedOrigins(db, inContainer: post.id).count,
+                 tray: try Queries.archivedBlocks(db, postID: post.id).map(\.blockID))
+            }
+            #expect(after.ofBlock == 0, "archived: the lineage door stops offering it")
+            #expect(after.inPost == 0, "…on both reads of the same fact")
+            #expect(after.tray == [block.block.id], "its road is the tray's Put back")
+        }
+    }
+
     @Test func unarchivePutsTheBlockBackWhereItStood() throws {
         try withOperations { ops, db in
             let post = try ops.createPost(title: "note")
