@@ -2746,6 +2746,40 @@ options catalog.
   architect scopes at the memo's landing, cast per the standing
   Sync/ rider where the engine is touched.
 
+**Round 8b — the lineage-originals bake-in REFINED at her return
+(same day).** Her concern (verbatim): "I think it's fine for
+preserved originals whose entire descendant family purges age out
+with that family unless they're in some area in the note where it
+seems to the user like they'll stay forever (like in the ancestry
+area, and not in the trash area). we have to be sure that they'll
+move over OR that it's communicated clearly when the block is
+deleted like (the ancestor of this block has also been moved to
+the trash) or something like that. the issue I don't want is for
+someone to think the ancestor being there in that one ancestor
+tray is their guaranteed backup and then they freely delete a
+block only to realize the ancestor disappeared later. that makes
+me wonder if it even should auto delete." The architect's
+two-perspective analysis (put to her whole): auto-purge is what
+"really deleted" MEANS — the original IS the pre-divide text, so
+exempting it falsifies the Trash's core promise in the other
+direction — and exemption recreates the orphan class (a live
+original whose note purged has NO honest surface; the graveyard
+reborn); her failure mode is a PLACEMENT defect, not a semantics
+one. **RULED: AUTO-PURGE, VISIBLY MOVED OVER** — all DERIVED
+state, zero new delete semantics: while ANY live descendant
+exists, the original sits in "Preserved originals" with no clock
+(truthfully permanent); the moment its LAST live descendant
+enters the Trash, its row MOVES into the Trash countdown riding
+the family's exact clock, labeled ("preserved original — goes
+with its deleted blocks"); Put back of any descendant returns it
+to the forever-section clockless; delete receipts + the Delete
+Now confirm name it ("The original preserved from this block's
+divide rides the Trash with it"). Whole-note delete: the original
+rides under the note's ONE Trash row (never double-listed).
+**Build routing: the derived at-risk state, the two listings'
+split, and the receipts are batch 6 BUILD items (read-side, zero
+schema); the purge rule itself stays the memo's.**
+
 ## ARCHITECT ADJUDICATION after batch 5 (2026-08-19)
 
 Verified against the five commits (`2d534cf…9d19d7a`): tree clean,
