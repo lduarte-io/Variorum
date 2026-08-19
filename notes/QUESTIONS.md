@@ -838,4 +838,24 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint; the deploy window (mirror → Mac → phone, bundled) is the architect's act under your standing pre-authorization.**
 
-*(Next free number: **#73**.)*
+73. **2026-08-19 · Phase 13j batch 7 (J10 — the tutorial's deletion chapter + the note-history brief) · SEVEN entries.** The BINDING record is the 13j plan's batch-7 section.
+
+    **WHAT SHIPPED, IN ONE SENTENCE:** the field guide has a **deleting & getting it back** chapter — four lessons that make you actually delete things (a whole paragraph, several at once, a block archived, a block moved out to scraps, a whole lesson sent to the Trash and put back) and then show you every road back: the note's own tray, the Trash and its clock, the block's History face with its preserved original and its deleted takes — with every act in it executed by the walk, so a lesson that promises a door the app doesn't have is now a red test.
+
+    **(a) The chapter sits after "structure" and before "ways of looking", and it is called "deleting & getting it back".** That is where its prerequisites have just landed — you have made blocks, fanned them, divided them, and read about the two undos — and the honest next question is how to throw a piece away. **The alternative:** last in the book, as a closing "everything is safe" chapter.
+
+    **(b) One lesson asks you to delete THAT LESSON from the library and Put it back from the Trash.** It is the most reproducible round trip the app has (the note comes back into this book, in this chapter, in its place — the walk asserts exactly that), and it makes the Trash a place you have been before you need it. It also names Help ▸ Restore Tutorial… in the same breath, in case it feels vertiginous. **The alternative:** teach the Trash with a note you made yourself, which nobody has at that moment.
+
+    **(c) The chapter teaches the difference between emptying a paragraph and deleting it, out loud.** A triple-click takes the paragraph AND its line break, and that is what makes it a delete; selecting only the words inside and pressing ⌫ gives you an empty block, still there. Both are shipped behaviour (your ratified #66(b)/(c) sit on the first road), and the lesson says which gesture does which rather than letting the difference be a surprise. **The alternative:** teach only the delete and leave the other case to be discovered.
+
+    **(d) A FIX rode the chapter: the multi-delete receipts now name a preserved original they just stranded.** Writing the lesson traced a gap in batch 6's work — the stranding sentence ("The original preserved from this block's divide rides the Trash with it") was wired into the two single-block delete doors but NOT into the ⌘-click multi-delete or the whole-paragraph-selection road, which are the likeliest doors to strand one: picking a divide's two successors together and deleting them is exactly how a family's last live descendant goes. Both compound doors (Write's and the board's) now say it, pinned red-on-old. **The alternative:** leave it, and have the sentence appear only when blocks are deleted one at a time.
+
+    **(e) Three older lessons were refreshed, bounded, because they had drifted.** "the workspace" now names the ⌫ tray badge that joins the context bar's four constant doors when a note has deleted blocks; "keeping takes safe" now teaches the savepoint cadence you ruled at round 1 (leaving a note leaves quiet savepoints; the ~2 h backstop; the one setting; the collapsed run line) — it had been describing a history with nothing in it but ⌘S; and "the two undos" now names **⇧⌥⌘Z redo** (shipped at 13c and never taught) and the ⌘Z sign at the junction. Every other lesson was checked and left alone; the full site-by-site table is in the batch record.
+
+    **(f) The guide is now about 7,200 words against its 4,000-word target — so its shelf row reads well over 100%.** That was already true before this chapter (the target has not moved since Phase 13), and the books lesson's own line is "targets are a measure, never a wall", so the overrun is arguably the lesson demonstrating itself. **The alternative:** raise the guide's target to a round number so the shelf row reads like a book in progress.
+
+    **(g) One silent door found and deliberately NOT changed.** The Blocks-mode row menu's "Delete block" speaks no receipt at all on success — it is the one delete door with nothing to say, and it has been that way since long before this phase. Giving it the shared receipt is a two-line change; it is recorded rather than done because a receipt appearing in a new place is a taste call, not a bug fix.
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#74**.)*

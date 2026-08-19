@@ -514,7 +514,7 @@ server-shaped lands.
 | 5 | **J11 — the savepoint cadence:** on-note-close auto-commit per edited take (deduped) + `idle_commit_hours` default 24→2 + the ONE enum setting ("Every session · Idle only · Only when I commit"-shaped) + the history view's quiet-run collapse (the legibility half) | **DONE 2026-08-19** — record below (core 1295/138 · Mac **1516/266 FULLY GREEN** · spine 51/7 · mobile 314/60; the LIFECYCLE ANSWER: a note is left when no pane of a window shows it — one entry, `AppSession.savepointOnLeaving`, off four existing funnels, no second lifecycle mechanism; `closeAutoCommit` is the SIXTH quiet occasion, gated with `idleAutoCommit` while the four INSURANCE occasions stay ungoverned; ZERO schema — one seeded setting VALUE, marker 6 stands; the Mac's intermittent canvas reds TRACED to load-dependent mouse-event rigs and proven PRE-EXISTING on a worktree at `43192a9`; two canon deltas owed at closeout; QUESTIONS #70 logged) |
 | 6 | **J1 — the Trash:** the surface reshape (rename to Trash; Archived keeps no clock; per-row "N days left" + Put back; sort/filter by kind + date **incl. the round-5 Takes filter — deleted takes ride the clock with block/note context**; Delete Now per row + Empty Trash, confirm-once, IN-TRASH ONLY — no full-delete door in any note context, ever; a note deleted whole lists as ONE note row, cascade victims never double-listed) + the 30-day leave-all-surfaces clock; **+ BLOCK-LEVEL ARCHIVE (round-7 ruling):** `archiveBlock`/`unarchiveBlock` on the ruled shape (release placement + stamp; tray section takes back "Deleted & archived"; no countdown on archived rows; Put back via the ratified F2 road; structural-undo entries; doors + registry + receipts); **+ the Blocks-mode `traySection` routed to the one panel (round-7 ruling)**; **the purge design memo authored here** (client+server mechanics, the horizon, the per-device pull cursor, the lineage-only-originals edge) → STOP: her explicit go gates any server-shaped build | **DONE 2026-08-19** — record below (core **1308/139** — REPRODUCED by the architect · Mac **1526/267 FULLY GREEN** · spine 51/7 · mobile 314/60; the memo at `notes/plans/phase-13j-purge-memo.md`, adjudicated; the rig flake's REAL mechanism found + closed; revert J's self-audit defect fixed+pinned; QUESTIONS #71; ARCHITECT-VERIFIED against the five commits) |
 | 6b | **The PURGE BUILD (created at rounds 8–10; FABLE seat — the Sync/ rider):** v1_14 `purge_intent` (own schema commit) · the janitor + PurgeFamily + the convergence battery · the finalized-NOT-deployed mirror artifact `10_phase13j_purge.sql` (incl. the adjudicated purge-execution RPC + the corrected `sync_pull` device signature) · Delete Now/Empty Trash in-Trash-only, confirm-every-time, structurally enforced · the pruning pass + Standard/Never setting · the say-so returner road · the intent fence on every recovery listing | **DONE 2026-08-19** — record below (core **1335/141** — REPRODUCED by the architect · Mac **1532/268 FULLY GREEN** · spine 51/7 · mobile 314/60; the drill-A pin found a REAL defect first run (the FK-SET-NULL/outbox-ABORT demotion — fixed at mechanism); FOUR memo corrections in the §6b addendum incl. the sync_pull-signature fact; mirror-side items PENDING by design until the one-window; the deploy checklist in the record; QUESTIONS #72; ARCHITECT-VERIFIED against `8f4c80f…7e78891`) |
-| 7 | **J10 — the tutorial deletion chapter** (walk-asserted per P-6: delete blocks in-tutorial, the tray, Put back, cross-block deletion, the Trash, the ceremony doors) + the whole-note-version-history design brief (round 2's deferral deliverable) | pending — brief below |
+| 7 | **J10 — the tutorial deletion chapter** (walk-asserted per P-6: delete blocks in-tutorial, the tray, Put back, cross-block deletion, the Trash, the ceremony doors) + the whole-note-version-history design brief (round 2's deferral deliverable) | **DONE 2026-08-19** — record below (core **1335/141** baseline exact · Mac **1545/269 FULLY GREEN** · spine **63/8 — the NEW baseline**, was 51/7 · mobile NOT RUN, correctly — zero `Sources/`/`Shared/` lines; the chapter is FOUR lessons in a new chapter between structure and ways-of-looking, every act walk-executed; the content-refresh sweep landed as a 25-site table with THREE fixes; **one real defect found by writing the lesson and fixed at both sites** — the multi-delete receipts never named a stranded preserved original, red-on-old with checksums; the note-history brief at `notes/plans/whole-note-history-brief.md`; QUESTIONS #73) |
 
 Ladder shape (the 13e precedent): ladder A after batch 4, ladder B
 after batch 7 — fresh Fable cold reviewers on `REVIEW_PROMPT.md`
@@ -3907,3 +3907,265 @@ hand-offs (the field-guide re-seed reminder for the closeout) —
 then commit per convention. **Ladder B follows this batch** over
 everything since ladder A (batches 5, 6, 6b, 7) — leave the
 record especially clean.
+
+---
+
+## BATCH 7 RECORD — the tutorial's deletion chapter + the note-history brief (2026-08-19; fresh Opus implementer)
+
+**Scope built, to the letter of her J10 instruction:** a real deletion
+CHAPTER whose every step the reader performs and the walk executes; the
+content-refresh sweep her standing report demanded, as a complete table;
+and the whole-note-version-history design brief (round 2's deferral
+deliverable). **ZERO schema · ZERO `Sources/VariorumCore/Sync/` lines ·
+ZERO `Sources/` lines of any kind · ZERO `Shared/` lines** — the batch
+is tutorial content, one two-site receipt fix, tests, and two documents.
+No new capability rows (the chapter teaches doors that are all already
+declared — that is the point of it). No Release build, no
+`/Applications` refresh, no push.
+
+### THE CHAPTER — "deleting & getting it back" (4 lessons, between "structure" and "ways of looking")
+
+Placed where its prerequisites have just landed (blocks, takes, divide,
+the two undos) and where the honest next question is "how do I throw a
+piece away". Every door it names is shipped and registry-declared; every
+act below is executed by `TutorialDeletionActsTests`.
+
+| Lesson | What the reader DOES | What it teaches |
+|---|---|---|
+| **deleting blocks** | triple-clicks SCRATCH ONE and presses ⌫; ⌘-clicks SCRATCH TWO + THREE and uses **Delete 2 Blocks**; presses ⌘Z out of habit | the whole-paragraph road (J9) and the emptying-vs-deleting difference; multi-select (⌘-click, ⌘⇧-click for a run) under ONE undo; ⌥⌘Z / ⇧⌥⌘Z; the ⌘Z→⌥⌘Z sign (J7); and where it all went — the ⌫ badge and `note ▾ ▸ This Note's Tray…` |
+| **archive · delete · scraps** | archives ARCHIVE ME (Block ▸ Archive Block), deletes DELETE ME, moves MOVE ME OUT to a pool from Blocks (⌘5) | **the TRIO as ONE story** (her round-7 ruling's letter): Archive = kept forever, no clock · Delete = 30 days in the Trash, then really gone · Move out = the tie to this note cut, a scrap for anywhere — and which to reach for |
+| **the tray & the Trash** | opens the tray both ways; then deletes THIS LESSON from the library and Puts it back from the Trash | the tray's two sections and its one Put back verb; Library ▸ ⋯ ▸ Archived & Deleted — the calm clockless **Archived** list and the **Trash** with days-left, kind filter and sort; **Delete Now / Empty Trash as in-Trash-only doors that confirm every time** (her round-3 rider + round 10) |
+| **what a block leaves behind** | divides a staged fanned block with ⌘⇧D; opens History; deletes a staged spare take and puts it back | the History face's **past** region: the lineage row → the read-only peek (**Put back in note** · **Open this note's tray**), the Preserved originals section, **Deleted takes** with Put back, the lens-pick notice — and the round-8b honest sentence: an original is permanent only while a descendant lives, and it MOVES onto the family's clock, visibly, when the last one goes |
+
+Two staged fans ride the last lesson (one to divide, one carrying the
+spare take to delete); the three SCRATCH blocks and the three trio
+blocks are staged with loud prefixes so a reader — and the walk — can
+find them without counting.
+
+### THE CONTENT-REFRESH SWEEP (her standing report: *"the tutorial's actual content is still out of date"*)
+
+Every lesson sentence that describes DELETION, HISTORY or a DEFAULT,
+verdicted. Twenty-five sites; **three fixed**, twenty-two current.
+
+| # | Lesson | The claim | Verdict |
+|---|---|---|---|
+| 1 | start here | "delete it — Help ▸ Restore Tutorial… replaces the whole book" | CURRENT |
+| 2 | getting around | the four sidebar places; POOL = notes in no book | CURRENT (R29/R44) |
+| 3 | **the workspace** | "the CONTEXT BAR — always the same four doors" | **FIXED** — J2 added a fifth, conditional thing to see there (the ⌫ tray badge with its count, opening the note's tray). The four constant icons are untouched (K11); the lesson now names the badge and what it opens. A lesson that inventories a bar and misses a door that exists is the J8 bar's other half |
+| 4 | blocks & typing | crystallization, ⌘⇧B seams, the bar's counts, the one_block chip | CURRENT |
+| 5 | shaping blocks | ⌘⇧K, ⌘⇧⏎, block names, the callout | CURRENT |
+| 6 | formatting | markdown-as-content, Read's other face | CURRENT (13g) |
+| 7 | your first take | ⌘T / ⌥⌘T, the one live ring | CURRENT |
+| 8 | choosing & the board | ⌘⏎, the paged strip, the style menu | CURRENT |
+| 9 | **keeping takes safe** | "Everything autosaves… A COMMIT is more deliberate: ⌘S" — a history with nothing in it but ⌘S | **FIXED** — J11 (batch 5) gave the app its own cadence and this lesson never learned it. A new closing paragraph teaches leaving-a-note savepoints, the ~2 h backstop, the collapsed "N quiet savepoints · show" line, and the ONE setting in Settings ▸ Writing — worded from `SavepointCadenceCopy` / `SavepointRuns`' own sentences, including the promise the setting must never leave out (insurance still fires in every mode) |
+| 10 | keeping takes safe | "open note ▾ … History. Your savepoint is listed; Restore loads any savepoint" | CURRENT (the past region below it is taught in the new chapter) |
+| 11 | keeping takes safe | ⌘⇧A archive, the "archived · 1" door, Unarchive | CURRENT |
+| 12 | divide | the fanned default duplicates; ⌥⌘⇧D is the ceremony | CURRENT (batch 4) |
+| 13 | the take ceremony | the SUMMONED ⌥⌘⇧D sheet, parking | CURRENT (batch 4) |
+| 14 | extract & make block | ⌘⇧E's word-edge snap; ⌘⇧K for a middle span | CURRENT |
+| 15 | merge | carry-all by default; ⌥⌘⇧M pairs by hand | CURRENT (batch 4) |
+| 16 | **the two undos** | "⌘Z is TEXT undo… ⌥⌘Z is STRUCTURAL undo…" | **FIXED** — twice. **⇧⌥⌘Z redo** shipped at 13c (her A10, *"i desperately need a 'redo' command"*) and no lesson ever named it; and J7's sign at the junction belongs where the two stacks are introduced. Both landed here; the deletion chapter meets the sign again in action |
+| 17 | lenses | ✓ adopt swaps, the preservation lens | CURRENT (the dangling-pick notice is taught in the new chapter, where restoration lives) |
+| 18 | compare & versions | "Unmark deletes only the connection" | CURRENT |
+| 19 | blocks · canvas | "Move out to a pool … the block LEAVES this note … ⌥⌘Z brings it back" | CURRENT — and the trio lesson names the same door in the same words, deliberately |
+| 20 | comments & tags | "Deleted comments stay visible in the panel and can be brought back" | CURRENT |
+| 21 | books & the shelf | "Archived & Deleted holds the TRASH, where a deleted book waits 30 days with a Put back door" | CURRENT (batch 1 aligned it; batch 6's pin holds it) |
+| 22 | pool & scraps | the scraps panel, the ⌥-drag fan | CURRENT |
+| 23 | export — it's all yours | the four export doors, Alternates | CURRENT |
+| 24 | the seal | "Everything under a sealed note refuses to change" | CURRENT |
+| 25 | three ways of working | polish / thread / fork | CURRENT |
+
+*(The sweep is prose-directed, not site-directed — the A2 lesson from
+ladder A: every lesson was read whole, not grepped for a phrase.)*
+
+### THE DEFECT THE CHAPTER FOUND — the stranding sentence never reached the compound doors
+
+**Traced before it was fixed.** Her round-8b ruling: the delete that
+strands a preserved original names it in its own receipt. Batch 6 wired
+`StrandedOriginals.note` into the two **single-block** doors
+(`EditorSurfaceController.runDeleteBlock`,
+`TakesStructureController.deleteFocusedBlock`) — and NOT into the
+compound one (`runBlockDeleteCompound`, which since J9 serves BOTH the
+⌘-click multi-delete and the whole-paragraph-selection road) nor into
+the board's twin (`TakesStructureController.deleteSelectedBlocks`). The
+compound is the door most likely to strand one: picking a divide's two
+successors together and deleting them in one gesture is exactly how a
+family's last live descendant goes. Her named failure mode — believing
+"the ancestor being there in that one ancestor tray is their guaranteed
+backup" — was live in precisely the case that moves it.
+
+**Fixed at both sites, mirroring the shipped sibling exactly:** the
+receipt moved out of `StructuralOutcome.note` and is spoken after the
+flight, because the store has to be asked whether anything was stranded
+and that answer only exists once the delete has landed. Nothing else
+changed: same label, same compound, same counts.
+
+### PINS + RED-ON-OLD EVIDENCE (behavioral revert, checksummed)
+
+One new suite, **12 tests** (`TutorialDeletionActsTests` — the spine's
+eighth), plus **1** new test in `TrashSurfaceTests` (the compound-door
+stranding pin, which covers BOTH doors).
+
+| Revert | Pins that went RED | Restored |
+|---|---|---|
+| **A** — both stranding appends removed (Write's `runBlockDeleteCompound` and the board's `deleteSelectedBlocks` back to the bare `deletedNote(count)`) | `TrashSurfaceTests.bothMultiDeleteDoorsNameAnOriginalTheyJustStranded` (2 issues — Write's arm and the board's, each reporting only "2 blocks deleted — …") · `TutorialDeletionActsTests.theOriginalMovesOntoTheFamilysClockWhenItsLastDescendantGoes` (1) | `EditorSurfaceController.swift` → `7f59c04f218d…`; `TakesStructureController.swift` → `2e1bcd2d8189…` (both restored BYTE-IDENTICAL, `shasum -a 256` before and after) |
+
+The chapter's other eleven walk tests are not revert-drilled and should
+not be: they are the tutorial-as-spec contract (P-6), asserting that the
+lesson's promised acts still work — a class whose red-on-old is any
+future change that breaks a step, which is the definition the
+constitution gives.
+
+**No pin was edited or relaxed anywhere in this batch.** The three
+refreshed lessons were checked against the pins that read them
+(`theWorkspaceLessonTeachesTheQuicknotesLanding` reads the workspace
+lesson; `structuralUndoInsuresTextTypedAfterTheAct` and
+`archiveLeavesTheBoardAndUnarchiveBringsItBack` locate their blocks by
+content, not index) — all green unchanged, which is why appending
+rather than inserting was the shape chosen for "keeping takes safe".
+
+### WHAT THE WALK EXECUTES (the chapter's pins, one line each)
+
+- `everyDoorTheChapterNamesIsADoorTheAppHas` — every door the four
+  lessons promise, asserted against the constant that spells it
+  (`TrayPath` / `RecoveryPath` / `OriginPeekCopy` / `BlockPastCopy` /
+  the registry's own verbs / `TrashWindow.days`). The prose is written
+  literally, never interpolated from those constants, so this is a real
+  pin and not a tautology — a renamed door or a retired act makes it red.
+- `theChapterIsStagedForItsActs` — the three SCRATCH blocks, the three
+  trio blocks, and the two fans the last lesson needs.
+- `aWholeParagraphSelectionDeletesTheScratchBlockAndUndoBringsItBack` —
+  the TRIPLE-CLICK's own range (asked of the text view, not arithmetic'd)
+  → the block goes, the receipt speaks, `Queries.trayBlocks` holds it,
+  ⌥⌘Z restores it in place.
+- `theTwoScratchParagraphsGoUnderOneUndoEntry` — `pickBlock` twice, the
+  context row reading "Delete 2 Blocks", ONE `Delete Blocks` entry,
+  one press restores both.
+- `commandZAfterTheLessonsDeleteNamesTheStructuralUndo` — a real ⌘Z in a
+  real key window: the hint speaks, `performKeyEquivalent` returns false.
+- `theThreeVerbsSendTheirBlocksToThreeDifferentPlaces` — archived (no
+  clock) · deleted (`daysLeft == 30`) · moved to the pool, all three off
+  the page, and ⌥⌘Z bringing the moved one home.
+- `theTrayPutsBackWhatTheNoteSetAside` — both sections listed, both Put
+  backs landing "where it was", the note's order byte-identical after.
+- `theLessonItselfGoesToTheTrashAndComesBackIntoItsChapter` — the
+  library door deletes it, the Trash row wears the full window, Put back
+  returns it to the book AND its chapter assignment.
+- `thePurgeDoorsAreTrashOnlyAndAskEveryTime` — `[.surface]` doors,
+  `RecoveryView` the only renderer (no bar, no context bar), the confirm
+  raised twice for two presses, the bulk confirm naming "1 note".
+- `theDividedBlocksPastNamesItsPreservedOriginalAndPutsItBack` — ⌘⇧D on
+  the staged fan → A released preserved, the lineage row's sentence, the
+  door's ruled verb, the tray's clockless section, and the peek's Put
+  back landing it beside its successors.
+- `theDeletedSpareTakeWaitsInTheBlocksPastAndComesBack` — the take card's
+  Delete → `blockPast.deletedTakes` → Put back with label, fan position
+  and text intact.
+- `theOriginalMovesOntoTheFamilysClockWhenItsLastDescendantGoes` — both
+  successors deleted in ONE compound → the receipt's stranding sentence,
+  `originFamilyClocks` naming the original, and the tray's row having
+  MOVED out of the forever section into the clock-bearing one.
+
+### THE NOTE-HISTORY DESIGN BRIEF (round 2's deferral deliverable)
+
+`notes/plans/whole-note-history-brief.md` — self-contained for a future
+sitting, honest about costs, binding nothing. Her round-1 words are its
+founding quote. What it holds:
+
+- **what is derivable TODAY with zero schema**, because J11 changed the
+  arithmetic: a session-grain TEXT browser over the note's takes'
+  savepoints — with its limits stated plainly (it cannot show a block
+  deleted since, the note's order then, or which take was chosen then);
+- **the load-bearing observation**: a **lens is already half a snapshot**
+  (`lens_choice` stores which take each block shows); the missing half is
+  a stored ORDERED placement list, which is what makes structure history
+  a schema question rather than a face;
+- **what a true structure history would cost**: pointer-shaped
+  `note_snapshot` / `note_snapshot_entry` rows (ids and positions only —
+  PLAIN under E2EE, nothing to seal), rows ∝ blocks × snapshots, a §12
+  lockstep event, and its **purge interplay** — a snapshot naming a
+  purged block either joins the family or pins it against purge, and
+  pinning would defeat her own J1 promise;
+- **six knots for her**: text history vs structure history · when a
+  snapshot is taken · what Restore DOES (browse · restore in place under
+  one undo entry · mint a VERSION note beside the current one) · what a
+  purge does to old snapshots · where the face lives when "History" is
+  already taken by the per-block one · and what CONSOLIDATES, since the
+  app would then have four past-shaped surfaces;
+- a recommendation, stated as one and ignorable: ship the derived
+  browser, let a month of use decide whether it buys the schema event.
+
+### SUITE COUNTS (every "Test run with N tests" line confirmed)
+
+- core `swift test` — **1335 tests / 141 suites PASSED** (baseline exact;
+  no `Sources/` line was touched)
+- Mac (`-project` invocation) — **1545 tests / 269 suites PASSED, FULLY
+  GREEN, zero reds** (baseline 1532/268 + 13: 12 in the new spine suite,
+  1 in `TrashSurfaceTests`)
+- **the tutorial spine, by TYPE name — 63 tests / 8 suites PASSED. THE
+  NEW SPINE BASELINE** (was 51/7): the seven standing types
+  (`TutorialBookShapeTests`, `TutorialDoorTests`,
+  `TutorialWritingActsTests`, `TutorialTakesActsTests`,
+  `TutorialStructureActsTests`, `TutorialLookingActsTests`,
+  `TutorialLibraryActsTests`) plus **`TutorialDeletionActsTests`**
+- mobile — **NOT RUN, correctly**: `git status` confirms zero files under
+  `Sources/`, `Shared/` or `VariorumMobile/`
+
+### THE VISUAL LOOP
+
+**Nothing new to capture, and the reason is measured rather than
+assumed** (batches 2/3/6's standing finding): every surface this chapter
+teaches is either a SwiftUI `List` (the tray panel, the origin peek, the
+Trash listing — NSTableView-backed, so `ImageRenderer` draws its
+unsupported-view placeholder) or was captured already
+(`ContextBarCaptureTests`' ⌫ badge states 7–8;
+`RecoveryFaceCaptureTests`' block-past region; batch 5's quiet-run row).
+The chapter itself is PROSE inside the ordinary editor, whose rendering
+is the most-captured surface in the app.
+
+**HAND-CHECK ITEM for the next drive:** the chapter read end to end in
+the real app — specifically whether four lessons of deleting reads as
+calm or as alarming, which is a taste question and hers.
+
+### FOR THE ARCHITECT / HER
+
+- **QUESTIONS #73 logged** (seven lettered entries in her format): the
+  chapter's placement and name; the delete-this-lesson practice; the
+  emptying-vs-deleting teaching; the stranding fix; the three refreshed
+  lessons; the guide's word target now well under its own length; and
+  the one silent door found and deliberately not changed.
+- **THE FIELD-GUIDE RE-SEED IS OWED AT CLOSEOUT** (the standing rule,
+  restated because this batch is the one that stales it hardest): lesson
+  content changed, so the REAL store's seeded field guide is now out of
+  date. The closeout re-seeds it through the PRODUCT door (Help ▸ Restore
+  Tutorial…) behind the A1 rail, at a zero-instance window. **No test
+  store, no dev store and no real store was touched by this batch.**
+- **A propose-only observation, not built:** the Blocks-mode row menu's
+  "Delete block" speaks no receipt at all on success — the one delete
+  door with nothing to say, pre-dating this phase entirely. Two lines to
+  give it the shared receipt; recorded rather than done because a receipt
+  appearing in a new place is a taste call (#73(g)).
+- **A second propose-only observation:** the field guide's `wordTarget`
+  is 4000 and its prose now measures ~7,200 words (it was already ~5,900
+  before this chapter), so its shelf row reads far over 100%. Nothing is
+  broken — targets are display-only by ruling — but a demo book whose own
+  lesson says "a measure, never a wall" is either proving the point or
+  looking untidy, and that is hers (#73(f)).
+- **PARITY LEDGER.** Nothing new is owed by the phone from this batch —
+  the tutorial is a Mac surface, and the phone has its own pocket guide
+  (mobile parity Stage B). What the phone's guide OWES, when its turn
+  comes, is the same chapter's material to whatever depth its own
+  deletion faces reach (it inherits every brain by construction and owes
+  the faces — the standing 13j parity line).
+- **Environment, honestly.** No Variorum instance existed at any point in
+  this batch (`pgrep -fl 'Variorum.app/Contents/MacOS'` checked before
+  every suite run and before the revert drill); no kill, no quit, no
+  Release build, no `/Applications` write, no push. A FRAGMENTS-project
+  `xcodebuild` (another session's, simulator-bound) ran intermittently
+  throughout: I waited it out before the full Mac run (a 60-check poll
+  loop, clear after five), and it RESTARTED during that run and was
+  active for the spine run too — both were fully green regardless.
+  Recorded because the trap's letter is confirm-first and the honest
+  answer is "confirmed clear at launch, contended mid-run".
+- **Nothing PENDING** — every count and every claim above is from a run
+  in this session.
