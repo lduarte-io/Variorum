@@ -3463,3 +3463,351 @@ enumerated, counts, the deploy-window checklist for the architect
 anything unverified marked PENDING — then commit per convention
 (the schema commit separate). The architect verifies before
 relying on it.
+
+---
+
+## BATCH 6b RECORD — the PURGE BUILD (2026-08-19; FABLE implementer — the standing Sync/ rider's seat)
+
+**Scope built, to the memo's letter (every ruling closed at rounds
+8/8b/9/10) plus the adjudication's two mechanical notes.** Commits:
+`8f4c80f` (the SCHEMA commit, its own per convention) · `30b6018` (the
+purge core — the `Sync/` surgery) · `979f2d4` (the doors + the setting) ·
+this record. **NOTHING DEPLOYED:** the mirror artifact is FINALIZED and
+self-reviewed; the deploy is the architect's one-window under her round-8
+pre-authorization (checklist below). No Release build, no `/Applications`
+refresh, no push, no contact with the live mirror at any point — the fake
+server was this batch's whole world, as briefed.
+
+### WHAT SHIPPED, PER ITEM
+
+**1 — Migration `v1_14` (the schema commit).** `purge_intent` exactly as
+the memo's §5a: UUID PK, `owner_id`, `(table_name, row_id)` with the
+live-unique partial index `uq_purge_intent_live` + `idx_purge_intent_row`,
+ISO stamps, tombstone, `sync_version`; outbox capture via the ONE shared
+trigger builder; deliberately NO FK on the named row (it is the row the
+janitor will DELETE) and no CHECK on `table_name` (sync application must
+never refuse a future kind it has a home for — the §5a comment's
+enumeration gains `commit_point` per §4d's own sentence, recorded in the
+memo's §6b addendum). `PurgeIntent` record type; the ALL-PLAIN `SyncTable`
+classification (ids/enums/stamps only — nothing to seal; the completeness
+walks pass by introspection); **`SyncSchema.lockstepVersion` 6 → 7 in
+code** — her installed builds untouched until the window; every engine
+test runs at marker 7 both sides. The §7 repair: `purge_intent` joins
+`writeResolvedRow`'s pure-duplicate arm on `(table_name, row_id)` —
+smaller id wins, the act is idempotent by nature.
+
+**2 — The janitor (`Sources/VariorumCore/Sync/PurgeJanitor.swift`).**
+The memo's §4b pass, riding the existing scheduler (`SyncScheduler`
+gains an optional `janitor:` — nil-defaulted so every existing test
+composition is untouched; `SyncSession` wires one exactly when the
+transport carries the purge surface, so BOTH platforms inherit through
+`Shared/`). The sweep: the engine's own preflight discipline in the
+engine's order (rekey marker → keys → §12 lockstep, all refusing with
+outbox intact and cursor unmoved) → **the ledger reconciliation scan**
+(entries above the local `last_purge_seq` name rows other devices purged;
+present rows drop family-complete in one transaction; the scan point
+advances) with **the round-10 SAY-SO-FIRST floor gate** ahead of it →
+**the horizon** = `min(sync_horizon(), own committed cursor)` — the own-
+cursor cap is the client-side form of the memo's "minus the visibility-
+skew margin": everything ≤ the cursor was genuinely SERVED, and the A5
+filter makes served ⇒ committed → **collection**: live intents published
+before the horizon + 30-day tombstone roots (containers, readings,
+non-cascade-victim blocks, live-block takes — victims ride their root) →
+**per family**: expand → EVERY-ROW eligibility (each row's
+`sync_row_seq` > 0 ∧ ≤ horizon ∧ no pending outbox entry — any failure
+DEFERS the whole family to a later pass, the resumability property) →
+`executePurge` on the mirror → ONE local transaction (re-expanded inside
+it — the projection lesson; a restore that raced the await loses to the
+purge, the ruled purge-wins doctrine) → intents completed (tombstoned,
+still traveling) → **savepoint pruning** (Standard: mints intents per
+`SavepointPruning` — 90d / keep-newest-10 quiet per take, her round-9
+numbers; `Never` mints nothing; ⌘S immune TWICE — the brain considers
+only `kind='auto'` and the op refuses manual rows; capped at 64 takes per
+pass, P1 politeness). **No-horizon ⇒ no-op**, exactly as briefed: no
+cursors, no server, no session all read as horizon 0.
+
+**3 — The mirror artifact, FINALIZED NOT DEPLOYED:
+`Server/supabase/10_phase13j_purge.sql`.** The memo's §5b + the
+adjudication's note (1), in the 09 idiom throughout:
+- `purge_intent` born multi-tenant (composite PK, `idx_owner_seq_…`,
+  ENABLE+FORCE RLS, the no-`to`-clause owner policy, the seq stamp
+  trigger, the privilege revoke) — the 19th data table;
+- `device_cursor` (owner, device, last_seq, seen_at) and `purged_row`
+  (owner, table, row, purged_seq) — server-only, RLS'd, never in any
+  allowlist;
+- **sync_push rewritten**: the LEDGER CHECK before any CAS work — a row
+  named in `purged_row` answers the typed `'purged'` status;
+  `purge_intent` joins `allowed` + `owner_tables` (the client schema
+  carries `owner_id`, so the nine);
+- **sync_pull rewritten with a NEW SIGNATURE** — `device_id text default
+  null` (the OLD `(bigint, text, int)` overload DROPPED FIRST, the 09
+  discipline; the memo's "the 14c signatures already carry the device"
+  was WRONG about the device half — mechanical correction recorded in
+  the memo's §6b): a non-null device upserts `device_cursor`
+  monotonically (`greatest`) with `seen_at = now()`;
+- **`sync_horizon(active_key_id)`** — min live-device cursor, the 60-day
+  drop-out arm (her round-8 ruling), 0 when no cursors;
+- **`sync_purge_ledger(since_seq, active_key_id)`** — entries above the
+  scan point + the coverage FLOOR (literal 0: ledger pruning is
+  deliberately unbuilt; the future pruning rider advances it and owes
+  the returner face);
+- **`sync_purge_execute(rows, active_key_id)`** — the adjudication's RPC:
+  tenant-scoped row deletes over exactly the handed list (the family
+  expansion stays CLIENT-side — the server stays dumb, SyncSpec §2's
+  letter), every row ledger-recorded `on conflict do nothing` (the
+  idempotence a resumed family needs), ONE granted seq per call;
+- `account_data_truncate` / `account_purge` re-created ONLY insofar as
+  the registry grew (their `data_tables` arrays are DDL-pinned
+  registry-exact); `account_purge` additionally removes the caller's
+  `device_cursor` + `purged_row` rows (the whole account goes); the
+  truncate deliberately touches NEITHER (purged stays purged across a
+  re-key; cursors stay valid under the monotonic sequence);
+- ownership/grants: the three purge functions + the re-created pull →
+  `variorum_definer` (the 14c non-bypass pattern, with the CREATE-for-
+  acquisition dance opened and closed inside the transaction); posture:
+  the ACCOUNT-DOOR one (authenticated only, service_role revoked by
+  name) — and NO entitlement gate on any purge function, deliberately
+  (data removal is a right — the account_data_truncate precedent,
+  stated in the artifact);
+- ONE guarded transaction (rerun guard keyed on marker ≥ 7 or
+  `purge_intent`'s existence, before the one destructive statement), the
+  marker upsert **6 → 7 LAST**, `commit;` after.
+The maintenance grant sweep learned the new objects
+(`14c-post-deploy-grant-sweep.sql`: the three tables + three functions +
+the new pull signature — an old-signature reappearance now reads
+UNEXPECTED, the exact lingering-overload class the sweep hunts).
+
+**4 — The doors, IN-TRASH ONLY.** `RecoveryView`: per-row **Delete Now**
+(never on a preserved original — round 8b; confirms EVERY time, round 10
+— no don't-ask state exists to set) + **Empty Trash** in the controls row
+(rendered only when the Trash holds something, P-2), its confirm reading
+the UNWINDOWED counts at ask time and naming the FULL count by kind (the
+memo's wording shape; riding originals named, never counted). Both
+confirm through ONE view-model state (`PurgeConfirm`) a test can drive
+without UI; the confirmed act re-reads at act time (R3-1) and writes ONE
+thing — `requestPurge` intents; the read-side fence (below) empties the
+listing the same instant; the receipts say the NOW-vs-janitor split in as
+many words (the J8 bar). Registry: `.deleteNow` / `.emptyTrash`, scope
+`.app`, doors `[.surface]` ONLY, `RecoveryView.surfaceCapabilities` their
+ONE renderer — the walk's union makes a leaked purge door a build
+failure. The batch-6 interim no-doors pin and the file header GRADUATED
+in place (annotated).
+
+**5 — `requestPurge` + the fence + the setting.** The op (`Operations+
+Purge.swift`): one transaction per batch; refuses a LIVE target
+(`purgeTargetNotDeleted` — only Trash things purge), a MANUAL savepoint
+(`deliberateSavepointNeverPruned` — her round-9 immunity's op-level
+belt), an unknown table (`unsupportedPurgeTarget`); dedupes against the
+live-unique pair; a row already GONE with any intent standing skips
+(idempotent — a re-mint for a purged id would circulate forever); NO undo
+entry (the confirm is the guard; an inverse racing the janitor would
+sometimes lie); no touch, no churn. **The intent FENCE** rides every
+recovery listing — `Queries.trash` (all four arms + `strandedOriginals`'s
+family check), `deletedPosts`, `deletedReadings`, `trayBlocks`,
+`trayCounts`, `deletedTakes` (and so `blockPast`) — intent-named rows
+leave every surface the moment the confirm lands, any intent state (a
+completed intent's rows are already gone; purged stays purged).
+`HistoryPruning` (standard·never) under the synced `history_pruning` key
+(E2EE-clean enum), `Queries.historyPruning` fallback `.standard`,
+`Operations.setHistoryPruning`, the Settings ▸ Writing row beside the
+cadence one with help carrying the ⌘S-never sentence.
+
+**6 — The returner road (round 10).** `SyncError
+.deviceLeftBehindReloadRequired` in her round-10 wording class ("this
+device has been away a while — it needs to reload from your account.
+Anything written here first gets saved up; nothing typed is lost");
+thrown by the sweep's floor gate; `PurgeJanitor.reonboardFromAccount
+(using:)` composes the ruled order — **unsynced writes pushed FIRST**,
+then the EXISTING `resyncReinitialize`, then the floor acknowledged
+(`purge_floor_acknowledged` in `sync_state`, local-only, surviving
+reinit by construction). **NO Mac face, deliberately (a judgment call,
+stated):** the floor is 0 in production until ledger pruning exists, so
+the state is UNREACHABLE — P-2 renders no door for a state that cannot
+occur; the say-so wording surfaces through the scheduler's standing
+status row if it ever fires, and the future pruning rider owes the real
+face. Proven end-to-end against the fake's settable floor.
+
+**7 — The disclosure additions (adjudication note 2).** Recorded in the
+memo's §6b addendum for the closeout's canon delta: **(i)
+`device_cursor.seen_at`** — per-device ACTIVITY TIMING, content-free,
+disclosed to the server operator (it is what the 60-day membership rule
+reads); **(ii) `purge_intent`** travels entirely PLAIN — ids, an enum
+table name, timestamps; no user words exist in the row.
+
+### THE CONVERGENCE-SUITE ADDITIONS (AppSpec §15.3 — enumerated)
+
+`PurgeConvergenceTests` (8, two in-memory clients vs the fake server):
+1. `aThirtyDayDeletionPurgesEverywhereAndAStalePeerCannotResurrectIt` —
+   the 30-day road end-to-end: family-complete on mirror + both locals;
+   the stale peer's pending edit push answers `'purged'`, the outbox
+   entry DROPS and its local copy goes with it; ledger populated; dumps
+   byte-equal.
+2. `deleteNowsIntentPurgesAYoungTombstoneOnEveryDevice` — the intent
+   road on a minutes-old tombstone; the intent COMPLETES (tombstoned,
+   still traveling); **an intent applied twice is one purge** (second
+   sweep = 0 families); B converges through intent + ledger.
+3. `anIntentMintedOnTwoDevicesDedupesAndPurgesOnce` — the §7 pure-
+   duplicate repair leaves ONE live intent on both devices; two sweeps,
+   ONE ledger set; dumps equal.
+4. `anInWindowLaggardHoldsTheHorizonAndADropoutDoesNot` — a live device
+   behind the deletion HOLDS the horizon (family deferred, mirror
+   untouched); a 60-day dropout (modeled in fake-clock ticks) releases
+   it; the returning dropout reconciles by ledger, never resurrects.
+5. `theJanitorResumesCleanlyAfterACrashBetweenMirrorAndLocal` — mirror
+   purged, local never ran → the next sweep completes through the ledger
+   scan; the ledger set unchanged (idempotence); a third sweep no-ops.
+6. `pruningMintsOnlyEligibleQuietSavepointsAndNeverEverManual` — 16
+   quiet + 2 manual: Standard mints exactly 6 (16 − newest 10, all past
+   90d), zero manual; the intents purge next pass (12 rows survive:
+   newest ten quiet + both manuals); Never mints nothing however old the
+   backlog.
+7. `withNoRecordedCursorsTheJanitorDoesNothing` — push-only device,
+   horizon 0: skippedNoHorizon, nothing removed anywhere, no ledger.
+8. `aLeftBehindDeviceIsToldToReloadAndTheRoadSavesItsWriting` — floor >
+   scan point → the SAY-SO error with her wording; the road pushes the
+   unsynced note to the server FIRST, reinitializes, acknowledges; the
+   gate opens and rounds resume.
+
+`PurgeOpsTests` (9, core): the op's exact state transitions (row +
+outbox capture), idempotence, the live-target/manual-savepoint/unknown-
+table refusals, the already-purged skip, **the fence across all six
+listings in one world**, the pruning brain's matrix (quiet-only, age
+bar, keep-10, tie-break), **the zero-orphan claim DB-verified** (the
+family delete commits under `PRAGMA foreign_keys=ON` — a missed child is
+a commit failure; plus explicit per-table sweeps proving the book and
+tag survive as acquaintances, never family), and **the stranded original
+joining its family** (round 8b, divide-W shaped).
+
+`AuthRLSDDLTests` (+10): 10's deploy shape via the same pure checker
+that pins 09 (one guarded transaction, marker last); the old-pull-
+signature drop + new signature + grants; the account-door posture +
+definer ownership + the acquisition dance closed; the ledger check
+BEFORE the CAS (range-ordered); the monotonic cursor upsert; the 60-day
+horizon arm + no entitlement gate; the ledger page's floor; the purge
+door's tenant scoping + idempotent ledger upsert + registry-exact
+allowlist; account_purge taking the purge-machinery rows while the
+truncate touches neither; 10's choreography header.
+
+Plus the Mac `TrashPurgeDoorsTests` (6): the confirm-every-time
+discipline, cancel-mints-nothing, the full-count-by-kind wording (unit
+and end-to-end), rows leaving the listing at once, the empty-Trash
+quiet line, the no-door-on-originals belt, and the pruning face words.
+
+### PINS + REVERT EVIDENCE (behavioral revert, checksummed — every
+restore verified byte-identical by `shasum -a 256`)
+
+| Revert | Pins that went RED | Restored |
+|---|---|---|
+| **A** — PurgeFamily's FK-action pre-nulling disabled (`if false,` both arms) | `aFamilyRemovalLeavesZeroOrphansTheForeignKeysProveIt` · `aStrandedOriginalJoinsItsFamilysPurge` · `unknownTablesAndMissingRowsRefuseByName` — each with the exact traced mechanism (SQLite 19: a DELETE-fired `ON DELETE SET NULL` runs the outbox capture trigger under the FK action's ABORT semantics, demoting its INSERT OR REPLACE; **this defect was FOUND by the batch's own first test run** and fixed at the mechanism) | `PurgeFamily.swift` → `f5cc65c6c0e2…` (identical) |
+| **B** — the engine's `.purged` handler drops only the outbox entry (no local family removal) | `aThirtyDayDeletionPurgesEverywhereAndAStalePeerCannotResurrectIt` ("the purged row's local copy goes with the refusal") | `SyncEngine.swift` → `7f590e34199f…` (identical) |
+| **C** — the Trash note-arm intent fence removed | `anIntentNamedRowLeavesEverySurfaceImmediately` (after.trash 1 ≠ 0) | `Trash.swift` → `fb5d8098ce65…` (identical) |
+| **D** — the family eligibility's horizon guard vacuous (`|| true` both arms) | `anInWindowLaggardHoldsTheHorizonAndADropoutDoesNot` (4 issues — the laggard no longer held the horizon; the mirror emptied under a live device that had not seen the deletion) | `PurgeJanitor.swift` → `f711168621…` (identical) |
+| **E** — the returner floor gate disabled (`if false,`) | `aLeftBehindDeviceIsToldToReloadAndTheRoadSavesItsWriting` (no error thrown — the say-so silenced) | `PurgeJanitor.swift` → `f711168621…` (identical) |
+| **F** — Delete Now stops raising its confirm | `deleteNowConfirmsEveryTimeAndTheConfirmedActEmptiesTheRow` (the confirm never raised) | `RecoveryView.swift` → `f46d093f29…` (identical; the file then took the deliberate batch-6 header graduation, so its final recorded state is `01cae27cb106…`) |
+
+The DDL pins carry no revert drills (the artifact-pin class — string-
+level truth against a finalized file; the doctored-fixture proofs the 09
+era shipped already exercise the shared checkers).
+
+### SUITE COUNTS (every "Test run with N tests" line confirmed)
+
+- core `swift test` — **1335 tests / 141 suites PASSED** (baseline
+  1308/139 + 27 in 2 new suites: PurgeOps 9 · PurgeConvergence 8 ·
+  AuthRLSDDL +10)
+- Mac (`-project` invocation) — **1532 tests / 268 suites PASSED, FULLY
+  GREEN, zero reds, first full run** (baseline 1526/267 + 6 in 1 new
+  suite)
+- tutorial spine, by TYPE name (the seven from the batch-1 record) —
+  **51 tests / 7 suites PASSED** (baseline exact)
+- mobile (`VariorumMobile`, iPhone 16e) — **314 tests / 60 suites
+  PASSED** (baseline exact). Run because `Sources/` and `Shared/` were
+  touched; the phone inherits the fence, the op, the setting semantics
+  and the janitor-through-SyncSession by construction.
+
+### THE DEPLOY-WINDOW CHECKLIST (for the architect — nothing here is
+this batch's to run)
+
+1. **Preconditions:** her explicit window (the round-9 one-window
+   sequencing); zero-instance check; the A1 rail (WAL-safe local backup
+   + a mirror export) — 10 does not drop data tables, but the rail is
+   non-negotiable for any mirror act.
+2. **Deploy the artifact:** `Server/supabase/10_phase13j_purge.sql`,
+   WHOLE BODY in ONE session via the stored-PAT Management-API road or
+   the dashboard SQL editor (the one-transaction wrapping requires it;
+   a statement-by-statement paste defeats the guard). The rerun guard
+   refuses a second run; the override is spelled in the file.
+3. **Post-deploy verification, in order:** `select sync_schema_version();`
+   → **7**; run `maintenance/14c-post-deploy-grant-sweep.sql` → every
+   row OK/INFO (the sweep already carries the new expectations —
+   `purge_intent`/`device_cursor`/`purged_row` on the forced-RLS
+   posture; `sync_pull(bigint,text,integer,text)`; the three purge
+   functions authenticated-only; **an appearing
+   `sync_pull(bigint,text,integer)` is the UNEXPECTED lingering-overload
+   class — investigate before anything else**); confirm zero rows in
+   `purge_intent`/`device_cursor`/`purged_row`.
+4. **The Mac refresh** (Release → `/Applications`, her closeout
+   authorization, zero-instance + A1) and **the phone build over the
+   tunnel** (her presence; the parity-round mechanism) — BUNDLED into
+   the same window: from the marker bump until each installs, marker-6
+   builds visibly refuse to sync (outbox intact, offline free — the
+   designed §12 stall; don't strand her daily build outside the window).
+5. **First live rounds:** a Mac round completes; `device_cursor` gains
+   the Mac's row on its second pull; after both devices round,
+   `select * from device_cursor` shows both. The janitor's first sweeps
+   will no-op (horizon = the laggard cursor) until both devices have
+   pulled past her existing tombstones — expected, not a fault.
+6. **PENDING (live-only, unverifiable against the fake):** the real
+   PostgREST decode of the three new RPCs' wire shapes (the fake spoke
+   the protocol types; `SupabaseTransportTests` pins the JSON shapes but
+   only a live call proves the Postgres side end-to-end) — the window's
+   first live round covers pull/push+cursor; the first janitor sweep
+   past the horizon covers horizon/ledger/execute. Until the window,
+   everything mirror-side is PENDING by design.
+
+### FOR THE ARCHITECT / HER
+
+- **QUESTIONS #72** logged (five lettered entries in her format): the
+  `.purged` local-drop extension (the convergence requirement's
+  reading of "drops that outbox entry"); the earlier-deleted-block
+  own-clock consequence; no per-original Delete Now; archive's total
+  immunity from every purge road; pruning's setting governs MINTING
+  while traveled intents complete.
+- **The memo's §6b addendum** records the two disclosure lines and FOUR
+  mechanical corrections (the device parameter the 14c signatures did
+  NOT already carry; the sync_meta upsert idiom; the §5a comment's
+  `commit_point`; the fresh-device over-eagerness of the returner check
+  under future pruning) — the memo and the artifact cannot silently
+  disagree.
+- **Recorded consequences, none improvised:** survivor detachment runs
+  as ENQUEUED updates so the mirror's surviving rows converge (a peer
+  pulling a dangling reference before this device's push heals it sees
+  a TRANSIENT straggler stall, the self-healing SyncSpec §5 class —
+  analysis in `PurgeFamily.deleteLocal`'s comment); archived blocks of
+  a purged note lose their `last_container_id` context (they were
+  already faceless once the note DELETED — a pre-existing batch-6-era
+  corner, noted for the walk, not widened here); stars/shelf-pin JSON
+  lists may briefly name a purged note (read-tolerant, self-healing at
+  next edit); `bridge_day` hash rows for purged journal days linger
+  locally (content-free bookkeeping; the bridge's sweep reads live days
+  only — the memo's §4e).
+- **Deliberately UNBUILT, each with its owner:** ledger pruning (the
+  memo's own answer — same horizon, one level up; owner: the future
+  pruning rider, which also owes the returner FACE and the fresh-device
+  floor-check refinement); the returner's Mac face (P-2 — the state is
+  unreachable at floor 0); a `purge_intent` GC (completed intents are
+  tiny and fence forever — the pruning rider's scope).
+- **Environment, honestly:** no Variorum instance existed at any point
+  (checked before every suite run); no kill, no quit, no Release build,
+  no `/Applications` write, no push, no live-mirror contact. A
+  FRAGMENTS-project `xcodebuild` (another session's, simulator-bound)
+  ran intermittently throughout: the counted verification runs (core /
+  full Mac / spine) started with none active; the MOBILE run launched
+  immediately after the spine without a fresh check (adjacent in time;
+  passed 314/60), and TWO small targeted runs (16 and 6 tests, on our
+  own project's DerivedData) started while the fragments run was active
+  — recorded because the trap's letter says confirm-first, and one
+  compound command printed BUSY without gating. Nothing contended;
+  nothing flaked.
+- **Nothing else PENDING** — every count and claim above is from a run
+  in this session; the deploy-window items are PENDING by design and
+  listed in the checklist.

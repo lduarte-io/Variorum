@@ -822,4 +822,20 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint.**
 
-*(Next free number: **#72**.)*
+72. **2026-08-19 · Phase 13j batch 6b (J1 — THE PURGE BUILD) · FIVE entries.** The BINDING record is the 13j plan's batch-6b section; the design you already ruled and pre-authorized is `notes/plans/phase-13j-purge-memo.md` (its §6b addendum records what the build corrected mechanically).
+
+    **WHAT SHIPPED, IN ONE SENTENCE:** "really deleted" is real now — **Delete Now and Empty Trash exist in the Trash** (Delete Now confirms every time per your round-10 ruling; Empty Trash names the full count by kind per round 8), rows leave every surface the instant you confirm, and the invisible **janitor** then removes the bytes locally and from your account's mirror once every synced device has seen the deletion (the horizon; a device unseen 60 days drops out) — with the content-free ledger refusing any stale device's attempt to push a purged thing back, quiet savepoints pruning at your ruled 90-days/keep-10 with a "Never" setting beside the cadence one, and ⌘S savepoints never touched. **Nothing is deployed:** the mirror artifact is finalized and waits for the architect's one-window under your round-8 pre-authorization; until then the marker-7 build refuses to sync by design.
+
+    **(a) A row the server says is PURGED is dropped locally too, not just from the push queue.** The memo's sentence said the client "drops that outbox entry"; the build also removes the row's local family, because a purged row's mirror copies no longer exist — keeping a local live orphan would diverge forever with no feed able to correct it, and the convergence tests you get this batch demand both devices end identical. **The alternative:** drop only the queue entry and let the ledger scan catch the row later — same end state, a window of divergence in between.
+
+    **(b) A block you deleted EARLIER on its own clock does NOT ride its note's later purge.** It is its own Trash row with its own countdown, so it purges on its own schedule; what does go with the note is its old placement row, so if you later put that block back it lands at the note's end rather than its old spot — and its "from ‹note›" context goes blank when the note's bytes go. **The alternative:** purging the note takes every block that ever lived there, clocks be damned.
+
+    **(c) Delete Now never appears on a preserved original's row.** An original rides its family (your round-8b ruling) — when you Delete Now the last of its blocks, the confirm's receipt already covers it, and it goes in the same sweep. **The alternative:** a per-original door, which would make "preserved" a lie twice over.
+
+    **(d) Archived blocks and archived notes are UNTOUCHED by every purge road.** Archive is kept-forever; no intent can name a live row (the op refuses: "Only things in the Trash can be deleted for good"), and a note's purge takes only the blocks that died WITH it. Nothing you set aside can leave by any door but your own delete first.
+
+    **(e) The savepoint pruning's janitor half consults the setting before minting, but honors intents that already traveled.** If you switch to "Never" after a pass minted intents, those intents complete (the instruction already left the device); nothing NEW mints from then on. **The alternative:** un-minting standing intents on a setting change — racy across devices and against the intent table's own idempotence rule.
+
+    **Status: open — walk at the checkpoint; the deploy window (mirror → Mac → phone, bundled) is the architect's act under your standing pre-authorization.**
+
+*(Next free number: **#73**.)*

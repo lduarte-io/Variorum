@@ -372,6 +372,58 @@ is the whole reason it is worth building.
 
 ---
 
+## 6b. BATCH 6b ADDENDUM (2026-08-19 — the build's record against this memo; the full account is the plan file's BATCH 6b RECORD)
+
+**Built to the letter above, with the architect's two adjudication notes
+landed and FOUR mechanical corrections recorded here so the memo never
+silently disagrees with the artifact:**
+
+1. **The E2EE disclosure envelope gains TWO named lines** (the
+   adjudication's note 2, the 14c I-1 precedent): `device_cursor.seen_at`
+   discloses per-device ACTIVITY TIMING (content-free) to the server
+   operator — it is what the 60-day horizon-membership rule reads; and
+   `purge_intent` travels entirely PLAIN (ids, an enum table name,
+   timestamps — no user words exist in the row, so there is nothing to
+   seal). The closeout's delta carries both to canon.
+2. **§5b item 5's "the 14c signatures already carry the device" was wrong
+   about the device half** — `sync_pull(since_seq, active_key_id,
+   max_rows)` carried no device parameter. The artifact ADDS
+   `device_id text default null` (the old signature dropped first, the 09
+   discipline) and the client sends it on a round's FIRST window only,
+   where `since_seq` is the committed cursor — a mid-round window's
+   uncommitted fetch position must never over-report what the device has
+   integrated.
+3. **§5b's marker draft used the wrong idiom** (`UPDATE sync_meta SET
+   schema_version = 7`); the deployed `sync_meta` is a key/value table and
+   the artifact uses the standing upsert
+   (`insert … ('lockstep_version', '7') on conflict …`), last inside one
+   guarded transaction.
+4. **§5a's table_name comment enumeration gains `commit_point`** — §4d's
+   own sentence ("before minting any savepoint purge intent") already
+   implied it; the pruning pass mints intents with
+   `table_name = 'commit_point'`.
+
+**Two behaviors the build fixed in meaning-preserving ways, recorded:**
+
+- **The 'purged' push refusal drops the outbox entry AND the local copy**
+  (family-expanded, inside the apply transaction). §2's sentence named
+  only the outbox entry, but the §7.6 convergence requirement ("both
+  devices converge") is unsatisfiable if the stale peer keeps a live local
+  orphan no feed can ever correct — the rows' mirror copies no longer
+  exist. The ledger scan covers the pull-only peer the same way.
+- **The returner check is over-eager for a FRESH device under future
+  ledger pruning** (scan point 0 < floor fires the say-so even though an
+  empty store holds nothing stale). Safe in the wrong-direction-only
+  sense, unreachable until the pruning rider advances the floor (0
+  today), and that rider owes the refinement — recorded, not papered
+  over.
+
+**The ledger's own pruning and the returner's Mac face are deliberately
+UNBUILT** (the §6 posture): the floor stays 0 in production, so the
+say-so state is unreachable — P-2 renders no door for a state that cannot
+occur. The future ledger-pruning rider owes: the floor's server-side
+advance, the returner face, and the fresh-device refinement above.
+
 ## 7. Build shape (batch 6b), for the record
 
 1. Migration `v1_14` + the `SyncTable` classification + the outbox trigger
