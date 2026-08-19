@@ -4024,6 +4024,31 @@ corrections that change the fix shapes:
   original "returns to Preserved originals as forever" — is
   recorded WITH the architect's spec-anchored objection below.
 
+### Sanity passes over the reviewer's ladder-B fix diff (`44c04d7`; sequential, read-only)
+
+**Batch 6b (B1/B2/B3/B7–B11): CLEAR on all**, re-traced against
+its engine context. Headlines: B1's three nets verified at their
+mechanisms (the staleness verdict shares the expansion's read
+snapshot; both exemptions honored precisely; the six-door void
+coverage proven COMPLETE from the cascade-victim premise; the
+stamp-aware fence is the STRONGER form of its own
+recommendation); the B1×§7-repair interaction traced clean (no
+unfence hole, no resurrection door); B2's pre-pass provably
+cannot starve the round's pull (state-based feed — the §5
+self-healing class; one sentence worth adding); B3 exactly the
+sharpening, with the unpublished-intent-only-local rule composing
+with §4a to the letter. TWO record-level observations, THE
+REVIEWER'S FINAL WORD: **(Obs 1)** one traced window where
+seq-absence ≠ mirror-absence (post-`resyncReinitialize`
+wholesale seq clear — self-closing at first pull via the
+dirty-merge seq recording; the re-key and sub-round sub-cases
+both convergent) — record the class, or take the cheap hardening
+(TRANSPORTED sweep treats seq-absent-but-outbox-pending as
+`.deferred`; `LocalPurge` stays outbox-blind); **(Obs 2)** the
+`LocalPurge` race comment says "pointless rather than dangerous"
+— the exact sentence is "transient resurrection converging to
+purged."
+
 **ARCHITECT'S ADJUDICATION NOTE for the reviewer's B5 final call
 (spec-anchored, weighs against batch 6's recommended outcome):**
 under round 8b + the memo's §4c, a stranded original PURGES WITH
