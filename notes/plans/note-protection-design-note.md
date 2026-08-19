@@ -1,11 +1,16 @@
 # Per-note / per-journal protection (DESIGN NOTE — for a future row)
 
-**Status: DESIGN NOTE ONLY — created 2026-08-19 at the author's
-instruction ("please record the rest of the notes we have today on the
-architecture of per note / per journal in a note for a future row").
-There is deliberately NO master-plan row yet** — she creates it at her
-word; this note waits so the row's design sitting starts with the whole
-conversation in front of it. Binding nothing beyond her verbatim words.
+**Status: the design record for master-plan row 13p** — created
+2026-08-19 at the author's instruction ("please record the rest of the
+notes we have today on the architecture of per note / per journal in a
+note for a future row"); **the row was created LATER THE SAME DAY at her
+word** ("just give … the particular note encryption a 13 phase because I
+do want to get to it with the apple notes, genuinely encrypted shape").
+**That ruling sets the DESTINATION: shape B below — the genuinely
+encrypted Apple-Notes shape** — reached via A as its prefix; B-lite
+(journal-class-first) is the recorded candidate road. Everything else
+here binds nothing beyond her verbatim words; the 13p design sitting
+rules the rest.
 
 **What is NOT this note's scope:** the APP-LEVEL lock — ruled into 13l
 the same day (whole-app Touch ID/Face ID gate, passphrase fallback,
