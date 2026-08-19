@@ -1474,9 +1474,11 @@ final class TakesViewModel {
         structure.runStructuralDoor(act)
     }
 
-    /// A9's native divide (plain cut or the take ceremony, in place).
-    func divideFocused() async {
-        await structure.divideFocused()
+    /// A9's native divide, in place. 13j J4: the default cuts (plain on an
+    /// unfanned block, the DUPLICATING shape on a fanned one) and
+    /// `ceremony: true` is ⌥⌘⇧D's road onto the same sheet as before.
+    func divideFocused(ceremony: Bool = false) async {
+        await structure.divideFocused(ceremony: ceremony)
     }
 
     /// The single-entry planner world over the take the caret is in —

@@ -180,7 +180,11 @@ final class TakesStructureController {
     /// — the sediment class this phase's constitution names.
     func runStructuralDoor(_ act: StructuralAct) {
         switch act {
-        case .divide:
+        case .divide, .divideWithCeremony:
+            // 13j J4: BOTH divide doors act natively here — the duplicating
+            // default and the ceremony sheet alike (the sheet has mounted on
+            // this board since 13d Batch 3, so there is nothing to carry).
+            let ceremony = act == .divideWithCeremony
             // The Task captures the MODEL strongly — the pre-move shape,
             // and load-bearing rather than stylistic: before A-2 this
             // closure's `self` WAS the model, so the flight outlived the
@@ -189,8 +193,10 @@ final class TakesStructureController {
             // is `unowned`), which a fire-and-forget door reached the
             // moment its caller returned — caught by
             // `TakesDivideTests.theDivideDoorNeverParksAWriteIntent`.
-            Task { [model] in await model.structure.divideFocused() }
-        case .extract, .makeBlock, .merge:
+            Task { [model] in await model.structure.divideFocused(ceremony: ceremony) }
+        case .extract, .makeBlock, .merge, .mergeWithCeremony:
+            // 13j J4b: the PAIRING sheet mounts in Write alone, so its door
+            // carries the pair there exactly as ⌘⇧M always has.
             model.moveToWriteAndRun(.structural(act))
         }
     }
@@ -205,7 +211,11 @@ final class TakesStructureController {
     /// sits in. The seal refusal, the gap refusal, the locked-take refusal
     /// and the S4-22 word-rule snap all come back from it, byte-identical
     /// to Write's (pinned as such: `theTakesPlanAndWritesPlanAgree`).
-    func divideFocused() async {
+    ///
+    /// 13j J4: `ceremony` names the door — ⌘⇧D on a fanned block now runs
+    /// the DUPLICATING divide (her Q-M2 shape), and ⌥⌘⇧D opens the sheet
+    /// this door has always opened. The plan is the same either way.
+    func divideFocused(ceremony: Bool = false) async {
         guard !model.structuralInFlight else {
             model.speak("Another structural change is still landing.")
             return
@@ -225,11 +235,30 @@ final class TakesStructureController {
         }
         switch prepared.plan {
         case .divide(_, let blockID, let cut):
+            guard !ceremony else {
+                // The ceremony door on an unfanned block — Write's own
+                // answer, word for word (P-2: the ceremony genuinely cannot
+                // act, so the door says why and names the one that can).
+                model.structuralInFlight = false
+                model.speak(FannedDefaultsCopy.divideCeremonyNeedsAFan)
+                return
+            }
             // The act runs with the panes still FROZEN — that window is
             // exactly what the latch exists for.
             await runDivide(blockID: blockID, cut: cut)
             model.structuralInFlight = false
         case .divideW(_, let blockID, let activeCut):
+            guard ceremony else {
+                // **13j J4 — the flipped default.** `prepareDivide` has
+                // already flushed and read the live fan from the STORE, and
+                // `seedTakeID` is verified to be in it, so the duplicating
+                // divide has everything it needs and no second read.
+                await runDuplicatingDivide(
+                    blockID: blockID, displayedVariantID: prepared.seedTakeID,
+                    activeCut: activeCut)
+                model.structuralInFlight = false
+                return
+            }
             // The ceremony opens IN PLACE — no mode switch (A9's whole
             // point). The latch releases FIRST: the sheet is window-modal
             // and its confirm is its own flight, which re-takes the latch
@@ -349,6 +378,38 @@ final class TakesStructureController {
             }
             model.choreography.parkFocus(onVariant: result.variant.id)
             model.setStatus("Block divided — ⌥⌘Z undoes it.")
+        } catch {
+            model.setStatus(TakesViewModel.message(for: error))
+        }
+    }
+
+    /// **13j J4's road on this board** — the duplicate-shape divide (her
+    /// Q-M2 ruling). The seed take's halves lead B and C; every other active
+    /// take is duplicated whole onto both; A is released preserved. Same op,
+    /// same receipt words and same ring rule as Write's road (the successor
+    /// leads), because two doors on one act share the copy or they drift.
+    private func runDuplicatingDivide(
+        blockID: String, displayedVariantID: String, activeCut: Int?
+    ) async {
+        guard let cut = activeCut else {
+            // A one-word seed take has no interior cut — Write's answer,
+            // verbatim (the ceremony's parking is the road for that).
+            model.speak(RefusalCopy.message(for: .nothingToDo)
+                + " Divide with Ceremony (⌥⌘⇧D) can send a whole take to one side.")
+            return
+        }
+        model.setStatus(nil)
+        do {
+            let result: Operations.DivideDuplicatingResult
+                = try await model.session.runner.run { ops in
+                try ops.divideDuplicating(
+                    blockID, displayedVariantID: displayedVariantID, cut: cut)
+            }
+            // The ring goes to the SECOND successor's leading take — Write's
+            // caret rule for this shape, in this board's vocabulary.
+            model.choreography.parkFocus(onVariant: result.second.variants[0].id)
+            model.setStatus(FannedDefaultsCopy.divided(
+                duplicated: max(0, result.first.variants.count - 1)))
         } catch {
             model.setStatus(TakesViewModel.message(for: error))
         }
@@ -498,23 +559,20 @@ final class TakesStructureController {
     /// is WHICH blocks — pointed at directly instead of derived from a text
     /// selection Write's planner reads.
     ///
-    /// Two roads, and the fork is the ruled one:
-    /// - **a PAIR where either side carries a fan** takes the ceremony
-    ///   threshold (S4-23 ruling 4: any fan opens the merge ceremony), which
-    ///   mounts in Write — so the pair CARRIES there, visibly, exactly as
-    ///   today's merge door from Takes does. The ceremony's entry shape is
-    ///   deliberately untouched here; the quick/ceremony default flip is
-    ///   13j's row 4b.
-    /// - **everything else merges RIGHT HERE** as a left-to-right chain of
-    ///   the ordinary binary merge under ONE undo entry — byte-for-byte
-    ///   Write's own `mergeChain` behaviour (its multi-block road has never
-    ///   consulted fan arity either), so no surface is behind another (R118)
-    ///   and no new merge semantics are invented. A fan folded away SPEAKS,
-    ///   naming the road back, exactly as Write's does.
+    /// **13j J4b RETIRED THE FORK** (her 2026-08-09 ruling — this door's own
+    /// pre-13j comment named row 4b as the owner of the flip, and this is
+    /// it). There is no longer a road that leaves this surface: every pick,
+    /// fanned or not, merges RIGHT HERE as a left-to-right chain under ONE
+    /// undo entry — byte-for-byte Write's own `mergeChain` behaviour, with
+    /// Write's own carry-all links (a link whose either side carries a fan
+    /// composes through `mergeCeremony`; an unfanned link keeps `merge`
+    /// byte-unchanged). Nothing is folded away and nothing is lectured
+    /// about, so no surface is behind another (R118). The PAIRING ceremony
+    /// keeps its own door (⌥⌘⇧M, `.mergeWithCeremony`), which still carries
+    /// to Write because that is where its sheet mounts.
     ///
-    /// Adjacency and arity are read FROM THE STORE, never from the frozen
-    /// projection: a wrong pair carried into Write would merge blocks she
-    /// never picked.
+    /// Adjacency, order and the fans are read FROM THE STORE, never from the
+    /// frozen projection: a wrong pair would merge blocks she never picked.
     func mergeSelectedBlocks() async {
         guard !model.structuralInFlight else {
             model.speak("Another structural change is still landing.")
@@ -553,44 +611,82 @@ final class TakesStructureController {
             return
         }
         let chain = order.filter { picked.contains($0) }
-        let arity: (String) -> Int = { id in
-            slots.first { $0.blockID == id }?.activeVariantCount ?? 1
-        }
-        if chain.count == 2, arity(chain[0]) > 1 || arity(chain[1]) > 1 {
-            // The ruled ceremony threshold — and the ceremony lives in Write,
-            // so the PAIR travels (fire-and-DO: the move is performed, not
-            // lectured about). The caret lands at the SECOND block's start,
-            // which is the seam the planner reads for exactly this pair.
-            model.clearMergeSelection()
-            model.speak("These blocks have takes — opening the merge ceremony in Write.")
-            model.choreography.moveToWriteAndRun(
-                .structural(.merge), targetBlockID: chain[1])
+        // **13j J4b — the carry-all default reaches THIS door too** (the row
+        // her ruling names: "every merge door"). The pre-13j branch carried a
+        // fanned PAIR to Write to open the ceremony, and its own comment
+        // named this batch as the owner of the flip. There is nothing left to
+        // carry: the carry-all composes from `mergeCeremony` and needs no
+        // sheet, so a fanned pair merges RIGHT HERE like every other pick —
+        // one chain body, every link carrying all.
+        //
+        // Fans are read FROM THE STORE for the composition — the projection
+        // stays what it has always been on this surface: the selection aid
+        // that decides nothing (batch 2's rule, unchanged).
+        let fans: [String: [Variant]]
+        do {
+            fans = try await model.session.database.read { db in
+                var result: [String: [Variant]] = [:]
+                for id in chain {
+                    result[id] = try Queries.blockFan(db, blockID: id)
+                        .filter { $0.deletedAt == nil && $0.status == .active }
+                }
+                return result
+            }
+        } catch {
+            model.setStatus(TakesViewModel.message(for: error))
             return
         }
-        let otherTakes = chain.reduce(0) { $0 + max(0, arity($1) - 1) }
+        // The take she is LOOKING at, per block: the board's own rendered
+        // pick, which is the slot's chosen take.
+        let displayed = Dictionary(
+            uniqueKeysWithValues: chain.map { id in
+                (id, slots.first { $0.blockID == id }?.variantID)
+            })
         model.structuralInFlight = true
         defer { model.structuralInFlight = false }
         model.setStatus(nil)
         do {
             let stack = model.session.undoStack
-            let landing: (blockID: String, variantID: String)
+            let landing: (blockID: String, variantID: String, takes: Int)
                 = try await model.session.runner.run { ops in
                 try stack.withCompound(label: "Merge Blocks", operations: ops) {
-                    var merged = (blockID: chain[0], variantID: "")
+                    var mergedID = chain[0]
+                    var mergedVariantID = ""
+                    var leadingFan = fans[chain[0]] ?? []
+                    var leadingDisplayedID = displayed[chain[0]] ?? nil
+                    var takesOnMerged = leadingFan.count
                     for next in chain.dropFirst() {
-                        let result = try ops.merge(merged.blockID, next)
-                        merged = (result.block.id, result.variant.id)
+                        let trailingFan = fans[next] ?? []
+                        if leadingFan.count > 1 || trailingFan.count > 1,
+                           let composition = CarryAllMerge.compose(
+                            leadingDisplayedID: leadingDisplayedID, leadingFan: leadingFan,
+                            trailingDisplayedID: displayed[next] ?? nil,
+                            trailingFan: trailingFan) {
+                            let result = try ops.mergeCeremony(
+                                mergedID, next,
+                                pairings: [composition.pairing], carries: composition.carries)
+                            let joined = CarryAllMerge.joinedTake(of: result)
+                            mergedID = result.block.id
+                            mergedVariantID = joined?.id ?? result.variants[0].id
+                            leadingFan = result.variants
+                            leadingDisplayedID = joined?.id
+                            takesOnMerged = result.variants.count
+                        } else {
+                            let result = try ops.merge(mergedID, next)
+                            mergedID = result.block.id
+                            mergedVariantID = result.variant.id
+                            leadingFan = [result.variant]
+                            leadingDisplayedID = result.variant.id
+                            takesOnMerged = 1
+                        }
                     }
-                    return merged
+                    return (mergedID, mergedVariantID, takesOnMerged)
                 }
             }
             model.clearMergeSelection()
             model.choreography.parkFocus(onVariant: landing.variantID)
-            model.speak(otherTakes > 0
-                        ? "Merged \(chain.count) blocks — \(otherTakes) other "
-                          + "\(otherTakes == 1 ? "take stays" : "takes stay") with the released "
-                          + "blocks (\(TrayPath.originalsPath); \u{2325}\u{2318}Z undoes)."
-                        : "Merged \(chain.count) blocks — \u{2325}\u{2318}Z undoes it.")
+            model.speak(FannedDefaultsCopy.mergedChain(
+                blocks: chain.count, carried: max(0, landing.takes - 1)))
         } catch {
             // Ladder round 2 (R2-2): the read-to-write race — a pick that
             // died or moved between the existence read above and

@@ -548,27 +548,41 @@ enum TutorialSeeder {
             "This block holds two thoughts and they deserve two blocks. Put your "
             + "cursor right before this second sentence and press \u{2318}\u{21E7}D.",
 
-            "From Takes, the same door WORKS — press \u{2318}\u{21E7}D there, or Divide "
-            + "in the bottom bar's block \u{25BE} group, and watch the app do the "
-            + "carrying: it "
-            + "switches to Write, lands your cursor where you were, and cuts. "
-            + "That visible carry is a feature, not a trick — every structure "
-            + "gesture in Takes travels the same way.",
+            // 13j J4 (her 2026-08-03 ruling): the fanned default. Stated here
+            // because THIS is the lesson someone reads before their first
+            // divide on a block that already has takes.
+            "If the block has SEVERAL takes, \u{2318}\u{21E7}D still just cuts: the take "
+            + "you're LOOKING at splits across the two new blocks, and every other "
+            + "take is copied onto both of them whole. Nothing goes missing and "
+            + "there's nothing to hunt for — the extra copies are quick to delete. "
+            + "When you'd rather place a cut in each take by hand, that's the "
+            + "ceremony, \u{2325}\u{2318}\u{21E7}D, and it has the next lesson to itself.",
+
+            "From Takes, divide acts RIGHT THERE — press \u{2318}\u{21E7}D, or Divide "
+            + "in the bottom bar's block \u{25BE} group, and the block you're in is "
+            + "cut without leaving the board. (Extract, Make Block and Merge "
+            + "still travel to Write and act there, visibly — that carry is a "
+            + "feature, not a trick.)",
 
             "One \u{2325}\u{2318}Z (structural undo) puts a divided block back together. "
             + "The undo chapter has the whole story.",
         ])
 
         let ceremony = try lesson(structure, "the take ceremony", [
-            "When you divide a block that has SEVERAL takes, there's a real "
-            + "question the app can't answer for you: each take is a different "
-            + "text, so each take needs its own cut. The app asks exactly once, "
-            + "in one sheet — the take ceremony.",
+            // 13j J4: the ceremony is SUMMONED now, not the default. Her
+            // ruling flipped ⌘⇧D on a fanned block to the duplicating shape;
+            // this lesson teaches the door that still asks take by take.
+            "Dividing a fanned block raises a real question: each take is a "
+            + "different text, so where does each one get cut? \u{2318}\u{21E7}D answers "
+            + "it the quick way — cut the take you're looking at, copy the rest "
+            + "onto both halves. When the answer matters, ask for the ceremony "
+            + "instead: \u{2325}\u{2318}\u{21E7}D lays every take out in one sheet and lets you "
+            + "place each cut yourself.",
 
             // 13b 4A: the sheet shows every checked take at once, the ✂
             // drags between word edges, keyboard placement, and PARKING.
             "The block below carries three takes, staged for it. Put your cursor "
-            + "mid-block and press \u{2318}\u{21E7}D. The sheet titled \u{201C}Divide into takes\u{201D} "
+            + "mid-block and press \u{2325}\u{2318}\u{21E7}D. The sheet titled \u{201C}Divide into takes\u{201D} "
             + "shows every take with a checkbox, each checked take's text laid "
             + "out with a ✂ you can place anywhere between words: drag it, "
             + "click a spot, or use \u{2190}/\u{2192} (\u{2325} jumps by sentence, \u{21E5} moves "
@@ -632,28 +646,37 @@ enum TutorialSeeder {
             + "whole run as one undoable act. From Takes, Merge joins the block "
             + "you're in UPWARD, into the one above.",
 
-            // 13b 4B (S4-23): the merge CEREMONY — fanned merges are no
-            // longer a silent rule; the sheet shows the choice.
-            "When either block has other takes, Merge opens a small CEREMONY "
-            + "instead of deciding silently: both blocks' takes side by side, "
-            + "pre-paired with the two you were looking at — press \u{23CE} and you "
-            + "get exactly the everyday join. Pair takes with \u{FF0B} and the merged "
-            + "block gets one joined take per pairing (divide a two-take block, "
-            + "pair 1+1 and 2+2, and it comes back whole); check \u{201C}carry\u{201D} to "
-            + "ride a take over unjoined; each pairing previews its join — "
-            + "space, new line, or nothing. Takes are never multiplied "
-            + "combinatorially: pairing is choosing by hand.",
+            // 13b 4B (S4-23) gave merge its ceremony; 13j J4b (her
+            // 2026-08-09 ruling) made CARRY-ALL the default and left the
+            // ceremony as the summoned door — divide's story, one gesture
+            // over.
+            "When either block has other takes, Merge brings them ALL along: "
+            + "the two takes you were looking at join, and every other take "
+            + "rides onto the merged block whole. Nothing is left behind to "
+            + "hunt for, and the extra copies are quick to delete. To choose "
+            + "by hand instead, use Merge with Ceremony (\u{2325}\u{2318}\u{21E7}M): both "
+            + "blocks' takes side by side, pre-paired with the two you were "
+            + "looking at — press \u{23CE} and you get exactly the everyday join. "
+            + "Pair takes with \u{FF0B} and the merged block gets one joined take "
+            + "per pairing (divide a two-take block, pair 1+1 and 2+2, and it "
+            + "comes back whole); check \u{201C}carry\u{201D} to ride a take over "
+            + "unjoined; each pairing previews its join — space, new line, or "
+            + "nothing. Takes are never multiplied combinatorially: pairing is "
+            + "choosing by hand.",
 
-            "Whatever you leave unpaired stays with the released blocks in "
-            + "lineage — the app names the road, and \u{2325}\u{2318}Z brings the sources "
-            + "back, takes and all. The block below carries a spare take so you "
-            + "can watch the ceremony open when you merge it into this one.",
+            "In the ceremony, whatever you leave unpaired stays with the "
+            + "released blocks in lineage — the app names the road, and "
+            + "\u{2325}\u{2318}Z brings the sources back, takes and all, from either "
+            + "road. The block below carries a spare take so you can watch "
+            + "both: \u{2318}\u{21E7}M brings the spare along, \u{2325}\u{2318}\u{21E7}M opens the "
+            + "ceremony with the takes laid out for pairing.",
 
-            "This block has a second take — merge me upward and the ceremony "
-            + "will open with my takes laid out for pairing.",
+            "This block has a second take — merge me upward and my spare comes "
+            + "along whole; with \u{2325}\u{2318}\u{21E7}M the ceremony opens instead, my "
+            + "takes laid out for pairing.",
         ])
         try take(on: merging.blocks[6],
-            "The spare take: pair me, carry me, or leave me in lineage — the merge ceremony asks; undo brings me home.")
+            "The spare take: I come along whole on an ordinary merge — or pair me, carry me, or leave me in lineage when you open the ceremony. Undo brings me home either way.")
 
         _ = try lesson(structure, "the two undos", [
             "Variorum keeps two undo stacks, deliberately separate. \u{2318}Z is TEXT "

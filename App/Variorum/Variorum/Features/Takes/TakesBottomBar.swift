@@ -50,15 +50,19 @@ struct TakesBottomBar: View {
     /// The structural doors the bar renders (registry-walk-asserted: the
     /// bottomBar-doored structural set, in gesture order).
     static let structuralBar: [(title: String, act: StructuralAct, help: String)] = [
+        // 13j J4/J4b: both helps say what the flipped defaults actually do —
+        // copy naming a behaviour the app no longer has is the J8 class.
         ("Divide", .divide,
-         "Cut the block you're in at your cursor, right here — a block with "
-         + "several takes opens the take ceremony without leaving this view"),
+         "Cut the block you're in at your cursor, right here — on a block with "
+         + "several takes the take you're looking at is cut and the rest are "
+         + "copied whole onto both halves (⌥⌘⇧D to place each cut by hand)"),
         ("Extract", .extract,
          "Pull your selected span out into its own block — in Write, carried there for you"),
         ("Make Block", .makeBlock,
          "Your selected span becomes its own block — in Write, carried there for you"),
         ("Merge", .merge,
-         "Join the block you're in with the one above it — in Write, carried there for you"),
+         "Join the block you're in with the one above it, bringing every take "
+         + "along — in Write, carried there for you (⌥⌘⇧M to pair takes by hand)"),
     ]
 
     private var tokens: VoiceTokens {

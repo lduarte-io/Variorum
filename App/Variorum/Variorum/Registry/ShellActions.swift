@@ -420,6 +420,10 @@ struct ShellActions {
         // summoned, not chrome, so it sits inside her not-daily-chrome
         // criterion (the architect's call at the sitting, hers to strike).
         .showOriginBlock,
+        // 13j J4/J4b (sitting round 4): the two ceremony doors, typeable —
+        // her binding is "the Block menu, the block context menu, AND the
+        // ⌘K palette; never only a buried item".
+        .divideWithCeremony, .mergeWithCeremony,
     ]
 
     /// Palette rows for the act capabilities: title = the registry verb,
@@ -445,6 +449,8 @@ struct ShellActions {
         case .extract: return { dispatch(.structural(.extract)) }
         case .makeBlock: return { dispatch(.structural(.makeBlock)) }
         case .merge: return { dispatch(.structural(.merge)) }
+        case .divideWithCeremony: return { dispatch(.structural(.divideWithCeremony)) }
+        case .mergeWithCeremony: return { dispatch(.structural(.mergeWithCeremony)) }
         case .addBlockAtEnd: return { dispatch(.addBlockAtEnd) }
         case .insertBlockBelow: return { dispatch(.insertBlockBelow) }
         case .deleteBlock: return { dispatch(.deleteBlock) }

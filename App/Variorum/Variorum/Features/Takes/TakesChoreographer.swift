@@ -79,11 +79,13 @@ final class TakesChoreographer {
             return sel.range
         }()
         switch act {
-        case .structural(.merge):
+        case .structural(.merge), .structural(.mergeWithCeremony):
             // The merge memo: joining from Takes joins UPWARD — the caret
             // lands at the block's start, the seam with the block above.
+            // (13j J4b: the ceremony door carries the same way — its sheet
+            // mounts in Write, and it reads the same seam.)
             intent.offsetInBlock = 0
-        case .structural(.divide):
+        case .structural(.divide), .structural(.divideWithCeremony):
             intent.offsetInBlock = carried?.location ?? 0
         case .structural(.extract), .structural(.makeBlock), .deleteInEveryTake:
             intent.offsetInBlock = carried?.location ?? 0

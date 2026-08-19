@@ -12,6 +12,16 @@
 //  instant paths byte-unchanged; the session remembers the last
 //  confirmed join.
 //
+//  **13j batch 4 (J4b) — A JUSTIFIED EDIT to every ceremony opening below,
+//  and the DOOR moved rather than the claims.** Her 2026-08-09 ruling made
+//  the CARRY-ALL merge the fanned default on every merge door, so ⌘⇧M no
+//  longer summons this sheet; ⌥⌘⇧M does
+//  (`invokeGesture(.mergeBlocks, ceremony: true)`). Everything S4-23 ruled
+//  about the sheet — the pre-pairing, ⏎'s outcome, 1:1 arity, the join
+//  memory, the drift refresh — is pinned here exactly as before, reached by
+//  the door that now opens it. Two pins below deliberately keep the DEFAULT
+//  door, each saying why: the unfanned instant merge, and the N-ary chain.
+//
 //  RED-ON-OLD (procedure for the verifier, the locked-session regime):
 //  revert = restore the pre-4B `.merge` case body in
 //  EditorSurfaceController.applyStructural (a direct call to the instant
@@ -52,7 +62,7 @@ struct MergeCeremonySheetTests {
             try h.reload()
 
             selectAcross(h, 0, 1)
-            await h.model.invokeGesture(.mergeBlocks)
+            await h.model.invokeGesture(.mergeBlocks, ceremony: true)
 
             let state = try #require(h.model.mergeCeremony)
             let untouched = try h.storeSlots()
@@ -85,7 +95,7 @@ struct MergeCeremonySheetTests {
             try h.reload()
 
             selectAcross(h, 0, 1)
-            await h.model.invokeGesture(.mergeBlocks)
+            await h.model.invokeGesture(.mergeBlocks, ceremony: true)
             #expect(h.model.mergeCeremony != nil)
             await h.model.confirmMergeCeremony()
 
@@ -121,7 +131,7 @@ struct MergeCeremonySheetTests {
             try h.reload()
 
             selectAcross(h, 0, 1)
-            await h.model.invokeGesture(.mergeBlocks)
+            await h.model.invokeGesture(.mergeBlocks, ceremony: true)
             #expect(h.model.mergeCeremony != nil)
             h.model.toggleMergeCarry(spare.id)
             await h.model.confirmMergeCeremony()
@@ -148,6 +158,8 @@ struct MergeCeremonySheetTests {
     @Test func anUnfannedMergeStaysInstant() async throws {
         try await withEditor(seedBlocks: ["One two.", "Three four."]) { h in
             selectAcross(h, 0, 1)
+            // The DEFAULT door, deliberately: this pin's claim is that the
+            // everyday merge is untouched, and 13j J4b keeps it exactly so.
             await h.model.invokeGesture(.mergeBlocks)
             #expect(h.model.mergeCeremony == nil, "no fan, no ceremony")
             let joined = try h.storeSlots()
@@ -156,9 +168,16 @@ struct MergeCeremonySheetTests {
         }
     }
 
-    /// S4-23 ruling 5: N-ary chains (3+ blocks) BYPASS the ceremony —
-    /// chain-merge the visible takes instantly, exactly as today, with the
-    /// standing speech.
+    /// S4-23 ruling 5: N-ary chains (3+ blocks) BYPASS the pairing sheet.
+    ///
+    /// **A JUSTIFIED EDIT (13j batch 4, J4b), claim intact.** The ruling
+    /// this pins is untouched — a chain never opens the pairing ceremony —
+    /// but its links now CARRY ALL where either side has a fan (her
+    /// 2026-08-09 ruling reaching the chain the same way it reaches the
+    /// pair), so the merged block keeps the spare instead of leaving it in
+    /// lineage, and the receipt says which. Asking for the ceremony over a
+    /// run of three is a separate act with its own pin in
+    /// `FannedDefaultsTests` (it refuses and names this road).
     @Test func aThreeBlockChainBypassesTheCeremony() async throws {
         try await withEditor(seedBlocks: ["One two.", "Three four.", "Five six."]) { h in
             let slots = try h.storeSlots()
@@ -172,9 +191,11 @@ struct MergeCeremonySheetTests {
             #expect(h.model.mergeCeremony == nil, "chains stay OUT of the ceremony")
             let chained = try h.storeSlots()
             #expect(chained.map(\.text) == ["One two. Three four. Five six."])
+            #expect(chained[0].activeVariantCount == 2, "the spare rode the chain")
             let status = try #require(h.model.statusMessage)
-            #expect(status.contains("Merged the visible takes"),
-                    "the chain keeps its instant speech: \(status)")
+            #expect(status.contains("Merged 3 blocks"),
+                    "the chain keeps its own receipt: \(status)")
+            #expect(status.contains("came along whole"), "and says what became of the spare")
         }
     }
 
@@ -190,7 +211,7 @@ struct MergeCeremonySheetTests {
             try h.reload()
 
             selectAcross(h, 0, 1)
-            await h.model.invokeGesture(.mergeBlocks)
+            await h.model.invokeGesture(.mergeBlocks, ceremony: true)
             let state = try #require(h.model.mergeCeremony)
             h.model.setMergeJoin(pairingID: state.pairings[0].id, join: .newline)
             await h.model.confirmMergeCeremony()
@@ -205,7 +226,7 @@ struct MergeCeremonySheetTests {
             try h.reload()
             let count = h.model.index.entries.count
             selectAcross(h, count - 2, count - 1)
-            await h.model.invokeGesture(.mergeBlocks)
+            await h.model.invokeGesture(.mergeBlocks, ceremony: true)
             let next = try #require(h.model.mergeCeremony)
             #expect(next.pairings[0].join == .newline,
                     "the last confirmed choice seeds the next sheet")
@@ -223,7 +244,7 @@ struct MergeCeremonySheetTests {
             try h.reload()
 
             selectAcross(h, 0, 1)
-            await h.model.invokeGesture(.mergeBlocks)
+            await h.model.invokeGesture(.mergeBlocks, ceremony: true)
             var state = try #require(h.model.mergeCeremony)
             #expect(state.pairings.count == 1)
 
@@ -272,7 +293,7 @@ struct MergeCeremonySheetTests {
             try h.reload()
 
             selectAcross(h, 0, 1)
-            await h.model.invokeGesture(.mergeBlocks)
+            await h.model.invokeGesture(.mergeBlocks, ceremony: true)
             #expect(h.model.mergeCeremony != nil)
 
             // The world moves while the sheet is open.

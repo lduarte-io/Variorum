@@ -370,7 +370,15 @@ struct BoundaryFluidityTests {
             try harness.reload()
 
             harness.textView.setSelectedRange(NSRange(location: 4, length: 10))
-            await harness.model.invokeGesture(.mergeBlocks)
+            // 13j J4b — A JUSTIFIED EDIT, and the door moved rather than the
+            // claim. This pin's promise is that a fanned merge SPEAKS about
+            // the fan instead of folding it away silently. Her 2026-08-09
+            // ruling made ⌘⇧M carry every take along, so the ceremony is now
+            // ⌥⌘⇧M's road — asserted here — and the speech it must make has
+            // changed with the act: nothing goes to lineage on the DEFAULT
+            // road, so the ceremony path is where the lineage sentence still
+            // belongs, and that is exactly what this test drives.
+            await harness.model.invokeGesture(.mergeBlocks, ceremony: true)
 
             // The ceremony opened (no rows touched yet); ⏎ = the old
             // instant outcome.

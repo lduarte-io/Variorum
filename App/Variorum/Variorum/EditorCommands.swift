@@ -80,6 +80,9 @@ struct EditorCommands: Commands {
         .importFiles, .exportLibrary, .exportCaretBlock,
         .structuralUndo, .structuralRedo,
         .divide, .extract, .makeBlock, .merge, .deleteInEveryTake,
+        // 13j J4/J4b: the two ceremony doors, beside the verbs they used to
+        // be the default of.
+        .divideWithCeremony, .mergeWithCeremony,
         .addBlockAtEnd, .insertBlockBelow, .deleteBlock, .showTakes,
         .newTake, .blankTake, .blankTakeAsChosen, .chooseTake,
         .previousTake, .nextTake, .archiveTake, .saveChoicesAsLens,
@@ -131,6 +134,16 @@ struct EditorCommands: Commands {
         case .extract: ("e", [.command, .shift])
         case .makeBlock: ("k", [.command, .shift])
         case .merge: ("m", [.command, .shift])
+        // 13j J4/J4b (her sitting round-4 ruling: the plain chord + ⌥, "the
+        // same 'deliberate variant' modifier the ⌥⌘Z family carries").
+        // THE COLLISION SWEEP'S RESULT: ⌥⌘⇧D and ⌥⌘⇧M are FREE — swept
+        // across this table, every `.keyboardShortcut(` call site in
+        // `Variorum/` and `Shared/`, every `NSMenuItem` keyEquivalent (there
+        // are none) and the one `performKeyEquivalent` override (⌘S, plus
+        // J7's non-consuming ⌘Z/⌘⇧Z hint arm). No `d` or `m` chord anywhere
+        // in the app carries ⌥; the only ones are ⌘⇧D and ⌘⇧M themselves.
+        case .divideWithCeremony: ("d", [.command, .option, .shift])
+        case .mergeWithCeremony: ("m", [.command, .option, .shift])
         case .showTakes: ("t", [.command, .shift])
         case .newTake: ("t", .command)
         case .blankTake: ("t", [.command, .option])
@@ -346,6 +359,14 @@ struct EditorCommands: Commands {
                 .keyboardShortcut("d", modifiers: [.command, .shift])
                 .disabled(!enabled(.divide))
 
+            // 13j J4: the ceremony, summoned deliberately. On a fanned block
+            // ⌘⇧D now duplicates (her Q-M2 shape) and THIS opens the sheet.
+            Button(verb(.divideWithCeremony)) {
+                actions?.dispatch(.structural(.divideWithCeremony))
+            }
+            .keyboardShortcut("d", modifiers: [.command, .option, .shift])
+            .disabled(!enabled(.divideWithCeremony))
+
             Button(verb(.extract)) { actions?.dispatch(.structural(.extract)) }
                 .keyboardShortcut("e", modifiers: [.command, .shift])
                 .disabled(!enabled(.extract))
@@ -359,6 +380,14 @@ struct EditorCommands: Commands {
             Button(verb(.merge)) { actions?.dispatch(.structural(.merge)) }
                 .keyboardShortcut("m", modifiers: [.command, .shift])
                 .disabled(!enabled(.merge))
+
+            // 13j J4b: the pairing ceremony's own door — ⌘⇧M now carries
+            // every take along (her 2026-08-09 ruling) and THIS pairs them.
+            Button(verb(.mergeWithCeremony)) {
+                actions?.dispatch(.structural(.mergeWithCeremony))
+            }
+            .keyboardShortcut("m", modifiers: [.command, .option, .shift])
+            .disabled(!enabled(.mergeWithCeremony))
 
             // #11b (author, 2026-07-13): the deliberate, NAMED command.
             Button(verb(.deleteInEveryTake)) { actions?.dispatch(.deleteInEveryTake) }

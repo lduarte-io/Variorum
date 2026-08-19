@@ -158,7 +158,7 @@ struct EditorWindowSmokeTests {
             h.textView.setSelectedRange(NSRange(
                 location: h.model.index.range(ofEntryAt: 10).location + 4, length: 0))
             h.model.updateCaretContext()
-            await h.model.invokeGesture(.divideAtCursor)      // fanned → ceremony
+            await h.model.invokeGesture(.divideAtCursor, ceremony: true)  // 13j J4: the ceremony DOOR
             #expect(h.model.divideWCeremony != nil)
             await h.model.confirmDivideWCeremony()            // active take marked → single-take fans
             let afterW = try h.storeSlots()
@@ -257,7 +257,7 @@ struct EditorWindowSmokeTests {
             h.textView.setSelectedRange(NSRange(
                 location: h.model.index.range(ofEntryAt: target + 2).location + 4, length: 0))
             h.model.updateCaretContext()
-            await h.model.invokeGesture(.divideAtCursor)  // fanned → ceremony
+            await h.model.invokeGesture(.divideAtCursor, ceremony: true)  // 13j J4: the ceremony DOOR
             #expect(h.model.divideWCeremony != nil)
             t0 = ContinuousClock.now
             await h.model.confirmDivideWCeremony()

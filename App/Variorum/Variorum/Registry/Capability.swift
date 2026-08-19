@@ -42,6 +42,17 @@ nonisolated enum TakesCommand: String, Sendable {
 /// reverse).
 nonisolated enum StructuralAct: String, Sendable, CaseIterable {
     case divide, extract, makeBlock, merge
+    /// 13j J4/J4b — **the two DELIBERATE ceremony doors.** Her 2026-08-03
+    /// and 2026-08-09 rulings flipped the fanned defaults to the duplicating
+    /// divide and the carry-all merge; the ceremonies survive as summoned
+    /// options with a keybind of their own ("never only a buried menu
+    /// item"). They are their own ACTS rather than a flag on the two above,
+    /// for the find/formatting families' reason: each carries its own key,
+    /// its own verb and its own honest refusal, and a mode hidden inside
+    /// another act's implementation is exactly what P-1 forbids. Both plan
+    /// through their twin's planner command — the plan SHAPE is identical
+    /// and only the execution differs.
+    case divideWithCeremony, mergeWithCeremony
 }
 
 /// The callout frame's edits (13c Stage 1 ladder, R2-2 — her A13(a):
@@ -353,6 +364,11 @@ nonisolated struct Capability: Identifiable, Sendable {
 nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // Structural (block scope)
     case divide, extract, makeBlock, merge, deleteInEveryTake, addBlockAtEnd
+    // 13j J4/J4b — the two ceremony doors, declared beside the verbs whose
+    // defaults they used to BE (her sitting round-4 ruling: the Block menu,
+    // the block context menu AND ⌘K, with ⌥⌘⇧D / ⌥⌘⇧M — the plain chord
+    // plus ⌥, the same "deliberate variant" modifier the ⌥⌘Z family wears).
+    case divideWithCeremony, mergeWithCeremony
     case insertBlockBelow  // 13b 4D (N28's second half; S4-13: native in BOTH editors)
     case deleteBlock       // 13c 1B (A8): the delete door where she writes
     // The take family (take scope)

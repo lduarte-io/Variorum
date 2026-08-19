@@ -163,6 +163,23 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: "⌘⇧D", takesAccess: .native,
             unavailableNote: "Dividing happens inside a note — open one first.",
             availability: divideAvailability),
+        // 13j J4 — **the divide CEREMONY's own door** (her sitting round-4
+        // ruling). The default flipped to the duplicating divide, so the W
+        // ceremony needs a summonable name and a key of its own; it keeps
+        // divide's own availability rule because it mounts on exactly the
+        // surfaces divide acts on (Write's editor AND both boards — the
+        // sheet has mounted there since 13d Batch 3, which is why this is
+        // `.native` rather than a carry). The FANNED precondition is the
+        // ACT's, not the context's: the registry cannot see a block's arity,
+        // so an unfanned target gets the operation-shaped refusal at the
+        // door (`FannedDefaultsCopy.divideCeremonyNeedsAFan`) — the
+        // `.showOriginBlock` split, P-2.
+        Capability(
+            id: .divideWithCeremony, verb: "Divide with Ceremony…", scope: .block,
+            doors: [.menuBar, .contextMenu, .palette],
+            shortcutLabel: "⌥⌘⇧D", takesAccess: .native,
+            unavailableNote: "Dividing happens inside a note — open one first.",
+            availability: divideAvailability),
         Capability(
             id: .extract, verb: "Extract Selection", scope: .block,
             doors: [.menuBar, .contextMenu, .bottomBar, .palette],
@@ -179,6 +196,16 @@ nonisolated enum CapabilityRegistry {
             id: .merge, verb: "Merge Blocks", scope: .block,
             doors: [.menuBar, .contextMenu, .bottomBar, .palette],
             shortcutLabel: "⌘⇧M", takesAccess: .moveAndExecute,
+            unavailableNote: "Merging happens inside a note — open one first.",
+            availability: structural),
+        // 13j J4b — **the merge CEREMONY's own door** (same ruling, same
+        // shape). It keeps `merge`'s availability and `moveAndExecute`
+        // access: the PAIRING sheet mounts in Write alone, so summoning it
+        // from a board carries the pair there exactly as ⌘⇧M always has.
+        Capability(
+            id: .mergeWithCeremony, verb: "Merge with Ceremony…", scope: .block,
+            doors: [.menuBar, .contextMenu, .palette],
+            shortcutLabel: "⌥⌘⇧M", takesAccess: .moveAndExecute,
             unavailableNote: "Merging happens inside a note — open one first.",
             availability: structural),
         Capability(
@@ -1130,6 +1157,9 @@ nonisolated enum CapabilityRegistry {
             case .extract: id = .extract
             case .makeBlock: id = .makeBlock
             case .merge: id = .merge
+            // 13j J4/J4b: the ceremony doors speak their own note.
+            case .divideWithCeremony: id = .divideWithCeremony
+            case .mergeWithCeremony: id = .mergeWithCeremony
             }
         case .deleteInEveryTake: id = .deleteInEveryTake
         case .commit: id = .commitTake

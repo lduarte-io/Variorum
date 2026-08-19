@@ -392,11 +392,16 @@ struct MergeSelectionTests {
         }
     }
 
-    @Test func aFannedPairCarriesToWriteForTheCeremony() async throws {
-        // THE CANON FENCE: the ruled threshold (S4-23(4) — any fan on either
-        // side opens the merge ceremony) is untouched by this door, and the
-        // ceremony mounts in Write, so the PAIR travels there. The
-        // quick/ceremony default flip is 13j's row 4b, not this batch's.
+    /// **A JUSTIFIED EDIT — 13j batch 4 (J4b), the flip this test's own
+    /// comment named.** It was `aFannedPairCarriesToWriteForTheCeremony`,
+    /// and its fence read: *"the quick/ceremony default flip is 13j's row
+    /// 4b, not this batch's."* Row 4b is here. Her 2026-08-09 ruling makes
+    /// the carry-all the default on EVERY merge door, and a carry-all needs
+    /// no sheet — so a fanned pair merges RIGHT HERE now, and the pin holds
+    /// the new letter: no mode switch, no intent parked, every take landed.
+    /// The PAIRING ceremony's own door (⌥⌘⇧M) is pinned in
+    /// `FannedDefaultsTests`.
+    @Test func aFannedPairMergesRightHereAndCarriesEveryTake() async throws {
         try await withBoardWorld(seedBlocks: ["First half.", "Second half."]) { world in
             let slots = world.model.projection.slots
             let secondVariant = try #require(slots[1].variantID)
@@ -412,26 +417,29 @@ struct MergeSelectionTests {
             world.model.toggleMergeSelection(slots[0].blockID)
             world.model.toggleMergeSelection(slots[1].blockID)
             await world.model.mergeSelectedBlocks()
-            await poll { world.session.commandRouter.pendingWriteIntent != nil }
 
-            let intent = try #require(world.session.commandRouter.pendingWriteIntent)
-            #expect(intent.blockID == slots[1].blockID,
-                    "the seam the pair means: above the SECOND block")
-            #expect(intent.offsetInBlock == 0)
-            #expect(intent.followUp == .structural(.merge))
-            #expect(modes == [.write], "the choreography moved, visibly (P-2)")
-            #expect(world.model.statusMessage?.contains("merge ceremony") == true)
-            // Nothing merged here — the ceremony has not been confirmed.
-            #expect(try world.storeSlots().count == 2)
-            #expect(world.session.undoStack.depth == 0)
+            #expect(world.session.commandRouter.pendingWriteIntent == nil,
+                    "there is nothing left to carry — the act happens here")
+            #expect(modes.isEmpty, "and no mode switch was performed")
+            let after = try world.storeSlots()
+            #expect(after.count == 1)
+            #expect(after[0].text == "First half. Second half.")
+            #expect(after[0].activeVariantCount == 2,
+                    "the joined take + the spare, carried whole")
+            #expect(world.session.undoStack.depth == 1)
+            #expect(world.model.mergeSelection.isEmpty, "the selection did its job")
+            #expect(world.model.statusMessage?.contains("came along whole") == true)
         }
     }
 
-    @Test func aFannedRunOfThreeMergesHereAndSaysWhatBecameOfTheOtherTakes() async throws {
-        // Write's own multi-block road has never consulted fan arity (its
-        // `.mergeChain` merges and SPEAKS), so neither does this one — R118:
-        // no surface is behind another. What must never happen is a fan
-        // folding away silently.
+    /// **A JUSTIFIED EDIT — 13j batch 4 (J4b), the same flip one arity up.**
+    /// The CLAIM is unchanged and is the one that mattered: *a fan must
+    /// never fold away silently, and this surface is never behind Write's*
+    /// (R118). What changed is the answer both surfaces now give — Write's
+    /// own `mergeChain` carries all through its links, so this one does too,
+    /// and the sentence about takes staying behind would be a lie because
+    /// none do.
+    @Test func aFannedRunOfThreeMergesHereAndCarriesEveryTakeAlong() async throws {
         try await withBoardWorld(seedBlocks: ["One.", "Two.", "Three."]) { world in
             let slots = world.model.projection.slots
             let secondVariant = try #require(slots[1].variantID)
@@ -443,10 +451,15 @@ struct MergeSelectionTests {
 
             await world.model.mergeSelectedBlocks()
 
-            #expect(try world.storeSlots().map(\.text) == ["One. Two. Three."])
+            let after = try world.storeSlots()
+            #expect(after.map(\.text) == ["One. Two. Three."])
+            #expect(after[0].activeVariantCount == 2,
+                    "the middle block's spare rode the whole chain")
             let spoken = try #require(world.model.statusMessage)
-            #expect(spoken.contains("1 other take stays with the released blocks"))
-            #expect(spoken.contains(TrayPath.originalsPath))
+            #expect(spoken.contains("Merged 3 blocks"))
+            #expect(spoken.contains("1 other take came along whole"))
+            #expect(!spoken.contains("stays with the released"),
+                    "nothing stays behind on this road")
         }
     }
 

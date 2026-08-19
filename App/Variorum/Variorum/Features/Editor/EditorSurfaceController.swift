@@ -156,11 +156,19 @@ final class EditorSurfaceController {
     /// Plans against the CURRENT selection and applies — the invoke re-plans
     /// even when a menu's enablement said yes (enablement can go stale under
     /// a remote seal/lock; the refusal then surfaces here, never silently).
-    func invokeGesture(_ command: StructuralGesturePlanner.Command) async {
+    ///
+    /// 13j J4/J4b: `ceremony` is the DOOR she used, not a shape the planner
+    /// answers — the plan is identical either way (the planner is pure over
+    /// the surface and says only "this block/pair carries a fan"); what
+    /// differs is what the fanned branch DOES. Defaulted so every existing
+    /// door and pin reads unchanged.
+    func invokeGesture(
+        _ command: StructuralGesturePlanner.Command, ceremony: Bool = false
+    ) async {
         guard let textView = model.textView else { return }
         let plan = StructuralGesturePlanner.plan(
             command, selection: textView.selectedRange(), world: model.gestureWorld())
-        await applyStructural(plan)
+        await applyStructural(plan, ceremony: ceremony)
     }
 
     /// THE one door for structural changes to the surface (plan ground
@@ -169,7 +177,9 @@ final class EditorSurfaceController {
     /// never pre-written optimistically; the rewrite renders the operation's
     /// known outcome, and the observation's later arrival is our own echo
     /// (`surfaceMatches` skips it).
-    func applyStructural(_ plan: StructuralGesturePlanner.Plan) async {
+    func applyStructural(
+        _ plan: StructuralGesturePlanner.Plan, ceremony: Bool = false
+    ) async {
         guard !structuralInFlight else {
             model.refuseFeedback("Another structural change is still landing.")
             return
@@ -178,23 +188,30 @@ final class EditorSurfaceController {
         case .refusal(let refusal):
             model.refuseFeedback(RefusalCopy.message(for: refusal))
 
-        case .divideW(_, let blockID, let activeCut):
-            // Contract item 3: the W ceremony is ONE sheet; the live editor
-            // is untouched for its whole duration. Opening touches no rows —
-            // confirm funnels back through this door.
-            await openDivideWCeremony(blockID: blockID, activeCut: activeCut)
+        case .divideW(let i, let blockID, let activeCut):
+            if ceremony {
+                // Contract item 3: the W ceremony is ONE sheet; the live
+                // editor is untouched for its whole duration. Opening
+                // touches no rows — confirm funnels back through this door.
+                // 13j J4: this is now the ⌥⌘⇧D door's road, not ⌘⇧D's.
+                await openDivideWCeremony(blockID: blockID, activeCut: activeCut)
+            } else {
+                // 13j J4 — **THE FLIPPED DEFAULT** (her Q-M2 ruling): the
+                // displayed take is cut across B and C and every other take
+                // duplicates whole onto both.
+                await runDuplicatingDivide(
+                    entryIndex: i, blockID: blockID, activeCut: activeCut)
+            }
 
         case .divide(let i, let blockID, let cut):
-            // Snap-and-proceed, visibly (contract item 2): the caret lands
-            // on the snapped cut as part of the one invoke.
-            visiblySnap(NSRange(
-                location: model.index.range(ofEntryAt: i).location + cut, length: 0))
-            _ = await runStructural { ops in
-                let result = try ops.divide(blockID, cut: cut)
-                return StructuralOutcome(
-                    caretBlockID: result.block.id, caretOffset: 0,  // the successor's start
-                    seam: .divide(entryIndex: i, sourceID: blockID, successorID: result.block.id))
+            guard !ceremony else {
+                // The ceremony door on an UNFANNED block: there is no fan to
+                // place cuts in, so the door speaks its real reason and names
+                // the one that acts (P-2 — a real refusal, not a lecture).
+                model.refuseFeedback(FannedDefaultsCopy.divideCeremonyNeedsAFan)
+                return
             }
+            await runPlainDivide(entryIndex: i, blockID: blockID, cut: cut)
 
         case .extract(let i, let blockID, let span, let edge, let otherTakes):
             let base = model.index.range(ofEntryAt: i).location
@@ -250,12 +267,27 @@ final class EditorSurfaceController {
             // pairs keep the instant path byte-unchanged. (The slots' arity
             // is the door's cheap gate; the open re-reads the true fans and
             // falls back to the instant path if the projection was stale.)
+            //
+            // **13j J4b — THE FLIPPED DEFAULT** (her 2026-08-09 ruling): the
+            // threshold still forks on the fan, but the fanned side no longer
+            // opens the ceremony by default — it CARRIES ALL (one pairing of
+            // the two displayed takes + every other active take whole,
+            // composed from this app's own `mergeCeremony`). The ceremony is
+            // ⌥⌘⇧M's road now, and behind that door it is byte-unchanged.
             let leadingArity = leadingIndex < model.slots.count
                 ? model.slots[leadingIndex].activeVariantCount : 1
             let trailingArity = trailingIndex < model.slots.count
                 ? model.slots[trailingIndex].activeVariantCount : 1
-            if leadingArity > 1 || trailingArity > 1 {
+            if ceremony {
+                guard leadingArity > 1 || trailingArity > 1 else {
+                    model.refuseFeedback(FannedDefaultsCopy.mergeCeremonyNeedsAFan)
+                    return
+                }
                 await openMergeCeremony(
+                    leadingIndex: leadingIndex, trailingIndex: trailingIndex,
+                    leadingID: leadingID, trailingID: trailingID)
+            } else if leadingArity > 1 || trailingArity > 1 {
+                await runCarryAllMerge(
                     leadingIndex: leadingIndex, trailingIndex: trailingIndex,
                     leadingID: leadingID, trailingID: trailingID)
             } else {
@@ -282,32 +314,15 @@ final class EditorSurfaceController {
                 lastEdge: edgeSnapshot(indices.upperBound))
 
         case .mergeChain(let indices, let blockIDs):
-            // N-way merge (author 2026-07-09, supersedes the binary rule):
-            // a left-to-right chain of the existing binary merges under ONE
-            // undo entry (withCompound, the Make Block pattern). A deliberate
-            // multi-block act takes the full-render door (seam: nil) — the
-            // differential seam edit stays the binary merge's.
-            let leadingLength = model.index.entries[indices.lowerBound].length
-            let chainOtherTakes = mergedAwayTakes(Array(indices))
-            let stack = model.session.undoStack
-            let chainLanded = await runStructural { ops in
-                try stack.withCompound(label: "Merge Blocks", operations: ops) {
-                    var mergedID = blockIDs[0]
-                    var mergedLength = 0
-                    for nextID in blockIDs.dropFirst() {
-                        let result = try ops.merge(mergedID, nextID)
-                        mergedID = result.block.id
-                        mergedLength = result.variant.workingText.utf16.count
-                    }
-                    // Caret at the FIRST join (merge keeps the leading text
-                    // verbatim, so the leading length still addresses it).
-                    return StructuralOutcome(
-                        caretBlockID: mergedID,
-                        caretOffset: min(leadingLength, mergedLength),
-                        seam: nil)
-                }
+            guard !ceremony else {
+                // The pairing ceremony is PAIRWISE by construction (S4-23) —
+                // it has two columns. A run of three or more has no ceremony
+                // to open, so the door says so and names the one that acts.
+                model.refuseFeedback(
+                    FannedDefaultsCopy.mergeCeremonyIsPairwise(blocks: blockIDs.count))
+                return
             }
-            if chainLanded { speakAboutMergedFans(chainOtherTakes) }
+            await runMergeChain(indices: indices, blockIDs: blockIDs)
         }
     }
 
@@ -356,6 +371,263 @@ final class EditorSurfaceController {
         }
         if landed { speakAboutMergedFans(otherTakes) }
         return landed
+    }
+
+    // MARK: - 13j J4 / J4b — the FANNED DEFAULTS (her Q-M2 and 2026-08-09
+    // rulings). Divide duplicates, merge carries all; both ceremonies live
+    // behind ⌥⌘⇧D / ⌥⌘⇧M, byte-unchanged.
+
+    /// The everyday in-place divide — the pre-13j `.divide` body verbatim,
+    /// extracted so the flipped road's stale-projection fallback runs THE
+    /// SAME code rather than a copy of it (the `deleteSelectedBlocks` /
+    /// `planWholeBlockDeletion` precedent from 13e/13j batch 1: two doors on
+    /// one act share the body or they drift).
+    private func runPlainDivide(entryIndex i: Int, blockID: String, cut: Int) async {
+        // Snap-and-proceed, visibly (contract item 2): the caret lands on the
+        // snapped cut as part of the one invoke. Re-resolved by BLOCK ID
+        // because the fallback road reaches here after a flush, and an index
+        // taken before a suspension can address a re-tiled surface.
+        if let j = model.index.entries.firstIndex(where: { $0.blockID == blockID }) {
+            visiblySnap(NSRange(
+                location: model.index.range(ofEntryAt: j).location + cut, length: 0))
+        }
+        _ = await runStructural { ops in
+            let result = try ops.divide(blockID, cut: cut)
+            return StructuralOutcome(
+                caretBlockID: result.block.id, caretOffset: 0,  // the successor's start
+                seam: .divide(entryIndex: i, sourceID: blockID, successorID: result.block.id))
+        }
+    }
+
+    /// **J4's road: the duplicate-shape divide.** The displayed take's halves
+    /// seed B and C; every other active take is duplicated WHOLE onto both;
+    /// A is released preserved. The operation does all of that
+    /// (`divideDuplicating`, shipped at mobile parity Stage A and dormant on
+    /// the Mac until now) — this is the routing, the receipt and the guards.
+    ///
+    /// **The fork is read from the STORE, never from the projection** (the
+    /// 13d ruled discipline; `openMergeCeremony`'s own words: "the threshold
+    /// rule reads truth, not the projection"). It matters more here than it
+    /// ever did for the ceremony: the ceremony's stale-projection fallback
+    /// merely showed a sheet, while acting on a stale "fanned" would RELEASE
+    /// A instead of keeping it — a different outcome, not a different view.
+    private func runDuplicatingDivide(
+        entryIndex i: Int, blockID: String, activeCut: Int?
+    ) async {
+        guard let cut = activeCut else {
+            // A one-word take has no interior cut. Exactly what an unfanned
+            // block answers for the same text (the planner's own
+            // `.nothingToDo`), plus the door that CAN act on it: parking a
+            // whole take at one end is the ceremony's vocabulary (S4-22).
+            model.refuseFeedback(RefusalCopy.message(for: .nothingToDo)
+                + " Divide with Ceremony (⌥⌘⇧D) can send a whole take to one side.")
+            return
+        }
+        // The take she is looking at: Write's full-document editor shows the
+        // CHOSEN take, so the entry's own variant IS the displayed one.
+        let displayedID = model.index.entries.first { $0.blockID == blockID }?.variantID
+        // Flush FIRST — the op validates against the store and the cut was
+        // placed against what she sees; after the flush those are the same
+        // text. `runStructural` flushes again below (idempotent when clean).
+        await model.autosave.flushNow()
+        guard !model.autosave.isDirty else {
+            model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
+            return
+        }
+        let fan: [Variant]
+        do {
+            fan = try await model.session.database.read { db in
+                try Queries.blockFan(db, blockID: blockID)
+                    .filter { $0.deletedAt == nil && $0.status == .active }
+            }
+        } catch {
+            model.showOperationError(error)
+            return
+        }
+        guard fan.count > 1 else {
+            // The projection said fanned; the store says otherwise. The
+            // ordinary in-place divide is the right act (A keeps its
+            // identity) — `openMergeCeremony`'s own fallthrough, same shape.
+            // The plain road edits a buffer, so a locked take refuses here
+            // exactly as the planner would have refused it.
+            let entry = model.index.entries.first { $0.blockID == blockID }
+            guard entry?.editable != false else {
+                model.refuseFeedback(RefusalCopy.message(for: .lockedVariant))
+                return
+            }
+            await runPlainDivide(entryIndex: i, blockID: blockID, cut: cut)
+            return
+        }
+        guard let displayedID, fan.contains(where: { $0.id == displayedID }) else {
+            // The F-3 guard (13d cold review): the take the caret was in has
+            // vanished from the live fan. A fallback would divide a take she
+            // was never in, at an offset from the one that died.
+            model.showStatus(FannedDefaultsCopy.takesChangedDivide)
+            return
+        }
+        if let j = model.index.entries.firstIndex(where: { $0.blockID == blockID }) {
+            visiblySnap(NSRange(
+                location: model.index.range(ofEntryAt: j).location + cut, length: 0))
+        }
+        _ = await runStructural { ops in
+            let result = try ops.divideDuplicating(
+                blockID, displayedVariantID: displayedID, cut: cut)
+            // seam nil: A vanishes and TWO fresh blocks stand where it stood,
+            // which no seam vocabulary describes — the ceremonial full
+            // re-render, exactly as the W confirm takes.
+            return StructuralOutcome(
+                caretBlockID: result.second.block.id, caretOffset: 0,
+                seam: nil,
+                // The count comes from the op's OWN result inside the flight
+                // (13e batch 3's receipt rule), never from a projection read
+                // taken beside the write.
+                note: FannedDefaultsCopy.divided(
+                    duplicated: max(0, result.first.variants.count - 1)))
+        }
+    }
+
+    /// **J4b's road: the carry-all merge.** ONE pairing of the two displayed
+    /// takes plus every other active take carried whole, composed from this
+    /// app's own `mergeCeremony` — zero core change, and the instant no-fan
+    /// merge above stays byte-unchanged behind its own threshold.
+    private func runCarryAllMerge(
+        leadingIndex: Int, trailingIndex: Int, leadingID: String, trailingID: String
+    ) async {
+        await model.autosave.flushNow()
+        guard !model.autosave.isDirty else {
+            model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
+            return
+        }
+        let fans: (leading: [Variant], trailing: [Variant])
+        do {
+            fans = try await liveActiveFans(leadingID, trailingID)
+        } catch {
+            model.showOperationError(error)
+            return
+        }
+        guard fans.leading.count > 1 || fans.trailing.count > 1 else {
+            // The store says unfanned — the instant merge, byte-unchanged
+            // (the ceremony door's own fallthrough, one road over).
+            await runInstantMerge(
+                leadingIndex: leadingIndex, trailingIndex: trailingIndex,
+                leadingID: leadingID, trailingID: trailingID)
+            return
+        }
+        guard let composition = CarryAllMerge.compose(
+            leadingDisplayedID: model.index.entries.first { $0.blockID == leadingID }?.variantID,
+            leadingFan: fans.leading,
+            trailingDisplayedID: model.index.entries.first { $0.blockID == trailingID }?.variantID,
+            trailingFan: fans.trailing)
+        else {
+            model.showStatus(FannedDefaultsCopy.takesChangedMerge)
+            return
+        }
+        let trailingLength = trailingIndex < model.index.entries.count
+            ? model.index.entries[trailingIndex].length : 0
+        _ = await runStructural { ops in
+            let result = try ops.mergeCeremony(
+                leadingID, trailingID,
+                pairings: [composition.pairing], carries: composition.carries)
+            // Caret at the join, the instant merge's own arithmetic: the
+            // chosen take IS the joined one (the core's rendered×rendered
+            // rule, and this composition always pairs exactly those two).
+            let joined = CarryAllMerge.joinedTake(of: result)
+            let join = max(0, (joined?.workingText.utf16.count ?? 0) - trailingLength)
+            return StructuralOutcome(
+                caretBlockID: result.block.id, caretOffset: join, seam: nil,
+                note: FannedDefaultsCopy.merged(
+                    carried: max(0, result.variants.count - 1)))
+        }
+    }
+
+    /// The N-way chain (author 2026-07-09, superseding the binary rule) — a
+    /// left-to-right run of binary merges under ONE undo entry
+    /// (`withCompound`, the Make Block pattern), now with **carry-all
+    /// links**: a link whose either side carries a fan composes through
+    /// `mergeCeremony` exactly as the pair road does, and an unfanned link
+    /// keeps `merge` byte-unchanged. A deliberate multi-block act takes the
+    /// full-render door (seam nil).
+    ///
+    /// The chain's fans are read ONCE, from the store, before the compound:
+    /// each link's LEADING side after the first is the previous link's own
+    /// result, so nothing needs re-reading mid-compound. The accepted
+    /// consequence, recorded rather than discovered: a carried take rides
+    /// whole and never receives the other blocks' text, so in a chain the
+    /// alternates end up standing alone beside a fully-joined chosen take —
+    /// the pair road's own consequence, applied twice ("quick to delete").
+    private func runMergeChain(indices: ClosedRange<Int>, blockIDs: [String]) async {
+        let leadingLength = indices.lowerBound < model.index.entries.count
+            ? model.index.entries[indices.lowerBound].length : 0
+        await model.autosave.flushNow()
+        guard !model.autosave.isDirty else {
+            model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
+            return
+        }
+        let fans: [String: [Variant]]
+        do {
+            fans = try await model.session.database.read { db in
+                var result: [String: [Variant]] = [:]
+                for id in blockIDs {
+                    result[id] = try Queries.blockFan(db, blockID: id)
+                        .filter { $0.deletedAt == nil && $0.status == .active }
+                }
+                return result
+            }
+        } catch {
+            model.showOperationError(error)
+            return
+        }
+        let displayed = Dictionary(
+            uniqueKeysWithValues: model.index.entries
+                .filter { blockIDs.contains($0.blockID) }
+                .map { ($0.blockID, $0.variantID) })
+        let stack = model.session.undoStack
+        _ = await runStructural { ops in
+            try stack.withCompound(label: "Merge Blocks", operations: ops) {
+                var mergedID = blockIDs[0]
+                var leadingFan = fans[blockIDs[0]] ?? []
+                var leadingDisplayedID = displayed[blockIDs[0]] ?? nil
+                var mergedLength = 0
+                // What LANDED on the merged block, counted from the ops'
+                // own answers — so a link that fell to the plain road
+                // (genuinely unfanned, or a take that vanished under the
+                // gesture) can never inflate the receipt.
+                var takesOnMerged = leadingFan.count
+                for nextID in blockIDs.dropFirst() {
+                    let trailingFan = fans[nextID] ?? []
+                    if leadingFan.count > 1 || trailingFan.count > 1,
+                       let composition = CarryAllMerge.compose(
+                        leadingDisplayedID: leadingDisplayedID, leadingFan: leadingFan,
+                        trailingDisplayedID: displayed[nextID] ?? nil,
+                        trailingFan: trailingFan) {
+                        let result = try ops.mergeCeremony(
+                            mergedID, nextID,
+                            pairings: [composition.pairing], carries: composition.carries)
+                        let joined = CarryAllMerge.joinedTake(of: result)
+                        mergedID = result.block.id
+                        leadingFan = result.variants
+                        leadingDisplayedID = joined?.id
+                        mergedLength = joined?.workingText.utf16.count ?? 0
+                        takesOnMerged = result.variants.count
+                    } else {
+                        let result = try ops.merge(mergedID, nextID)
+                        mergedID = result.block.id
+                        leadingFan = [result.variant]
+                        leadingDisplayedID = result.variant.id
+                        mergedLength = result.variant.workingText.utf16.count
+                        takesOnMerged = 1
+                    }
+                }
+                // Caret at the FIRST join (merge keeps the leading text
+                // verbatim, so the leading length still addresses it).
+                return StructuralOutcome(
+                    caretBlockID: mergedID,
+                    caretOffset: min(leadingLength, mergedLength),
+                    seam: nil,
+                    note: FannedDefaultsCopy.mergedChain(
+                        blocks: blockIDs.count, carried: max(0, takesOnMerged - 1)))
+            }
+        }
     }
 
     // MARK: - Insert block below (13b Stage 4, 4D — N28/S4-13)
@@ -1403,8 +1675,14 @@ final class EditorSurfaceController {
         }
     }
 
-    /// Names the fan and points at the door that can fold it deliberately —
-    /// the ⌘⇧M ceremony, where the takes are paired by hand (S4-23).
+    /// Names the fan and points at the doors that can fold it deliberately.
+    ///
+    /// **13j J4b updated the second sentence, and only that.** #34's ruling
+    /// stands verbatim — a keystroke won't fold a fan away — but ⌘⇧M no
+    /// longer pairs takes by hand: it CARRIES them all (her 2026-08-09
+    /// ruling), and the hand-pairing lives behind ⌥⌘⇧M. Copy that names a
+    /// behaviour the app no longer has is the J8 defect class, so the line
+    /// names both roads and what each one does.
     static func seamFanRefusal(leading: Int, trailing: Int) -> String {
         let subject: String
         switch (leading > 1, trailing > 1) {
@@ -1413,7 +1691,8 @@ final class EditorSurfaceController {
         default: subject = "The block below has takes"
         }
         return subject
-            + " — backspace won't fold a fan away. Use Merge Blocks (⌘⇧M) to pair the takes yourself."
+            + " — backspace won't fold a fan away. Merge Blocks (⌘⇧M) joins them and "
+            + "brings every take along; Merge with Ceremony (⌥⌘⇧M) pairs the takes yourself."
     }
 
     /// The merge ceremony's threshold read, shared by the ⌘⇧M door and the

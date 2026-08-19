@@ -510,7 +510,7 @@ server-shaped lands.
 | 1 | **The mini-round:** J7 (⌘Z→⌥⌘Z status-line hint) · J8 (copy truth: the receipt's interim honesty + the diagnosing `.crossesBlockBoundary` refusal) · J9 (whole-block-selection delete → the delete compound; ONE precise trace FIRST) | **DONE 2026-08-18** — record below (core 1254/135 · Mac **1433/258 FULLY GREEN** · spine 51/7 · mobile 314/60; the J9 trace: the paragraph-end SEPARATOR owned by no entry — the open tail was NOT the decliner; QUESTIONS #66 logged — (b) fanned-block delete and (c) the superseded Phase-11 join outcome are HER calls; ARCHITECT-VERIFIED against commits `152f3fc`/`cc51792`) |
 | 2 | **The tray (J2) + the graveyard removal (J6):** the context-bar door ("⌫ N", nonempty-only) + the two-section tray panel with Put back; the global unplaced section leaves the Library surface (pool door dies with it); the delete receipt/help copy graduates to naming the real tray + its door (J8(a)'s completion); **+ the batch-1 hand-off rider: the phone's two tray-promising receipts made TRUE on the phone's own terms** | **DONE 2026-08-18** — record below (core 1259/135 · Mac **1450/259 FULLY GREEN** · spine 51/7 · mobile 314/60; BOTH VERIFY-first flags answered — block-level archive is UNREACHABLE (section named "Deleted"), and `restoreBlock` places at the note's END, diverging from the round-5 design statement: **REPORTED, op UNTOUCHED, her call at QUESTIONS #67**; ARCHITECT-VERIFIED against `7e45d0d` — the core count REPRODUCED by the architect's own run, F2 ADJUDICATED into batch 3's rider, the Blocks-mode `traySection` consolidation held propose-only) |
 | 3 | **DONE 2026-08-18** — record below (core 1278/136 · Mac **1467/261 FULLY GREEN** · spine 51/7 · mobile 314/60; the bridge RECONCILED — the peek is the destination, `TrayRequest.revealBlockID` KEPT as the peek's second action; the archived-take road VERIFIED as `unarchiveVariant` and reused unchanged; the F2 rider BUILT with both roads pinned; the capture caught two copy defects and both are fixed; QUESTIONS #68 logged; **ARCHITECT-VERIFIED against `b331ef6` — the core count REPRODUCED by the architect's own run; F2 was RATIFIED by her at round 6 while this batch ran, so the rider ships ruled, not provisional**). Scope: **The lineage door (J3, as AMENDED round 5) + lens-fallback loudness (J5) + deleted-take recovery (round 5):** the context-menu item + ⌘K palette act, the read-only original peek with Put back / Open tray; **the History-face lineage row** (Write's CommitBar history + Takes' history sheet — the summoned "past" surface); the lens column's in-place archived-pick notice + one-click Restore; **the deleted-take restore op + deleted-takes query + the History face's quiet deleted-take rows with Put back** (zero schema); **+ the F2 placement rider** (`restoreBlock` flips the surviving placement row — adjudication above) | **DONE** |
-| 4 | **The defaults pair (J4/J4b):** divide default → `divideDuplicating` (the dormant core op wired); merge default → carry-all (composed from `mergeCeremony`, the phone's C5 the reference); "Divide with Ceremony…" ⌥⌘⇧D · "Merge with Ceremony…" ⌥⌘⇧M in Block menu + context menu + palette | pending |
+| 4 | **The defaults pair (J4/J4b):** divide default → `divideDuplicating` (the dormant core op wired); merge default → carry-all (composed from `mergeCeremony`, the phone's C5 the reference); "Divide with Ceremony…" ⌥⌘⇧D · "Merge with Ceremony…" ⌥⌘⇧M in Block menu + context menu + palette | **DONE 2026-08-18** — record below (core 1278/136 · Mac **1492/263 FULLY GREEN** · spine 51/7 · mobile NOT RUN, correctly — zero `Sources/`/`Shared/` lines; **the CHAIN-COMPOSITION answer: built, no edge beyond the brief's sentence** — each link composes through the one `CarryAllMerge` brain, unfanned links keep `ops.merge` byte-unchanged, the next link's displayed take is read off the op's own `sources` rather than inferred, and the compounding carry consequence is recorded at #69(a); the ⌥⌘⇧D/⌥⌘⇧M collision sweep found both FREE; five stale ceremony-default copy sites + three tutorial lessons aligned; ZERO core-op changes; QUESTIONS #69 logged with the ONE judgment call — the context menu's unconditional ceremony rows) |
 | 5 | **J11 — the savepoint cadence:** on-note-close auto-commit per edited take (deduped) + `idle_commit_hours` default 24→2 + the ONE enum setting ("Every session · Idle only · Only when I commit"-shaped) + the history view's quiet-run collapse (the legibility half) | pending |
 | 6 | **J1 — the Trash:** the surface reshape (rename to Trash; Archived keeps no clock; per-row "N days left" + Put back; sort/filter by kind + date **incl. the round-5 Takes filter — deleted takes ride the clock with block/note context**; Delete Now per row + Empty Trash, confirm-once, IN-TRASH ONLY — no full-delete door in any note context, ever; a note deleted whole lists as ONE note row, cascade victims never double-listed) + the 30-day leave-all-surfaces clock; **+ BLOCK-LEVEL ARCHIVE (round-7 ruling):** `archiveBlock`/`unarchiveBlock` on the ruled shape (release placement + stamp; tray section takes back "Deleted & archived"; no countdown on archived rows; Put back via the ratified F2 road; structural-undo entries; doors + registry + receipts); **+ the Blocks-mode `traySection` routed to the one panel (round-7 ruling)**; **the purge design memo authored here** (client+server mechanics, the horizon, the per-device pull cursor, the lineage-only-originals edge) → STOP: her explicit go gates any server-shaped build | pending |
 | 7 | **J10 — the tutorial deletion chapter** (walk-asserted per P-6: delete blocks in-tutorial, the tray, Put back, cross-block deletion, the Trash, the ceremony doors) + the whole-note-version-history design brief (round 2's deferral deliverable) | pending |
@@ -1651,3 +1651,260 @@ convention. The architect verifies before relying on it. **Ladder
 A follows this batch** (the plan's ladder shape), so leave the
 record especially clean: the cold reviewer's anchor is the batch
 records + dispositions.
+
+---
+
+## BATCH 4 RECORD — the defaults pair (J4/J4b) (2026-08-18; fresh Opus implementer)
+
+**Scope built, to the letter of the rulings:** J4 (the fanned divide default
+flips to `divideDuplicating`), J4's ceremony door ("Divide with Ceremony…"
+⌥⌘⇧D), J4b (the fanned merge default flips to the CARRY-ALL composed from
+`mergeCeremony`), J4b's ceremony door ("Merge with Ceremony…" ⌥⌘⇧M). **ZERO
+schema · ZERO `Sources/` lines of any kind · ZERO `Shared/` lines · ZERO
+core-op changes** — the whole batch is routing, doors, receipts, registry and
+copy, exactly as the brief fenced it. Two new capability rows
+(`.divideWithCeremony`, `.mergeWithCeremony`). No Release build, no
+`/Applications` refresh, no push.
+
+### THE CHAIN-COMPOSITION ANSWER (the brief's named question)
+
+**Verified, and BUILT — no edge beyond the brief's sentence appeared.**
+
+- **What the chain did before:** `applyStructural`'s `.mergeChain` (and the
+  Takes board's ⌘-click twin) ran `ops.merge` pairwise and NEVER consulted fan
+  arity — a fanned link folded its takes to lineage and spoke about it.
+- **What it does now:** each link composes through the same
+  `CarryAllMerge.compose` the pair road uses. A link whose either side carries
+  a live ACTIVE fan runs `mergeCeremony(pairings: [one], carries: [the rest])`;
+  an unfanned link keeps `ops.merge` **byte-unchanged**. Link *k*'s LEADING
+  side after the first is the previous link's own result, so the chain needs
+  exactly ONE store read (all N fans, before the compound) and never re-reads
+  mid-compound.
+- **The one inference removed:** the next link needs the previous merged
+  block's "displayed" take. Rather than assume index 0, `CarryAllMerge
+  .joinedTake(of:)` reads the op's own `sources` correspondence for the
+  `.pairing` entry — the core's chosen rule (`renderedPairing ?? 0`) always
+  selects exactly that take for a one-pairing carry-all, so this is the op's
+  answer, not ours.
+- **The accepted consequence, recorded rather than discovered:** a carried
+  take rides WHOLE and never receives the other side's text — the pair road's
+  own ruled consequence. In a chain it compounds: the chosen take is all N
+  chosen takes joined, while each source's alternates stand alone beside it.
+  That is the same consequence applied twice, not a new class; her doctrine
+  covers it ("quick to delete"). **Recorded for her ratify at QUESTIONS #69(a)**
+  in case she wants chains excluded.
+- **The receipt cannot lie about it:** the count is `takesOnMerged − 1`,
+  accumulated from each link's actual result, so a link that fell to the plain
+  road (genuinely unfanned, or a displayed take that vanished under the
+  gesture) simply is not counted.
+
+### WHAT SHIPPED
+
+**1 — J4, the divide default.** `applyStructural`'s `.divideW` arm forks on
+the DOOR: `ceremony` opens the W sheet exactly as before, the default runs
+`runDuplicatingDivide`. That road (a) refuses a nil cut — a one-word take —
+with the planner's own `.nothingToDo` copy plus the ceremony's parking road
+named; (b) **flushes, then reads the live ACTIVE fan FROM THE STORE**; (c)
+falls to the ordinary in-place divide when the store says unfanned (the
+stale-projection case — `openMergeCeremony`'s own fallthrough shape, with the
+locked-take refusal the planner would have given); (d) applies the F-3 guard
+(the displayed take must still be in the live fan); (e) runs
+`divideDuplicating` with `seam: nil` (A vanishes and two fresh blocks stand
+where it stood — no seam vocabulary describes that; the W confirm's precedent)
+and the caret at the SECOND successor's start, mirroring the plain divide's
+caret rule.
+
+**Why the store read is load-bearing here specifically, traced:** the planner's
+`fanArities` come from `model.slots`, which is deliberately frozen while the
+buffer is dirty. Before the flip a stale "fanned" merely showed a sheet that
+re-read and recovered. After it, acting on a stale "fanned" would RELEASE A
+instead of keeping it — a different OUTCOME, not a different view. Pinned from
+the other side by `TakesDivideTests
+.theForkIsReadFromTheStoreNotTheFrozenProjection`, which the flip makes
+stronger (see the pin note there).
+
+The plain `.divide` body was extracted to `runPlainDivide` so the fallback runs
+THE SAME code rather than a copy (the 13e `deleteSelectedBlocks` /
+`planWholeBlockDeletion` precedent), re-resolving its entry by BLOCK ID because
+the fallback arrives after a flush.
+
+**The Takes board's divide door flips with it** (13d Batch 3 made divide native
+there): `divideFocused(ceremony:)`, with `prepareDivide` already having flushed,
+read the store fan and verified the seed — so the board's road needs no second
+read. Same op, same receipt words, ring on the second successor's leading take.
+
+**2 — J4's ceremony door.** `.divideWithCeremony`, verb "Divide with
+Ceremony…", `doors: [.menuBar, .contextMenu, .palette]`, `shortcutLabel
+"⌥⌘⇧D"`, `takesAccess: .native` (the W sheet has mounted on both boards since
+13d Batch 3 — nothing to carry), availability `divideAvailability`. The FANNED
+precondition is the ACT's, not the context's — the registry cannot see arity —
+so an unfanned target gets an operation-shaped refusal at the door
+(`FannedDefaultsCopy.divideCeremonyNeedsAFan`, naming ⌘⇧D). This is the
+`.showOriginBlock` split (P-2), and the same words are spoken by Write and by
+the board.
+
+**3 — J4b, the merge default.** `.merge`'s arm forks the same way. The
+threshold is unchanged (any fan on either side); the fanned side now runs
+`runCarryAllMerge` instead of opening the sheet: flush → read both fans from
+the store → `CarryAllMerge.compose` → `mergeCeremony(pairings: [the two
+displayed takes under the CANON join], carries: [every other active take])`.
+**Zero core change.** The unfanned road runs `runInstantMerge`
+**byte-unchanged** (the brief's letter — `mergedAwayTakes` and
+`speakAboutMergedFans` are untouched with it), and the store-verified unfanned
+fallback lands there too. Caret at the join, by the instant merge's own
+arithmetic, off the joined take the op returns.
+
+**The Takes board's ⌘-click merge selection flips too** — the row her ruling
+names is "every merge door", and that door's own pre-13j comment named row 4b
+as the owner of the flip. Its fanned-pair branch used to CARRY the pair to
+Write for the sheet; there is nothing left to carry, so every pick — fanned or
+not — now merges right there through one chain body with carry-all links. The
+pairing ceremony still carries to Write, because that is where its sheet
+mounts.
+
+**4 — J4b's ceremony door.** `.mergeWithCeremony`, verb "Merge with
+Ceremony…", the same three doors, `shortcutLabel "⌥⌘⇧M"`, `takesAccess:
+.moveAndExecute`, availability `structural`. `openMergeCeremony` and
+`confirmMergeCeremony` are **byte-unchanged** behind it (its own
+stale-projection fallthrough to the instant merge included). An unfanned pair
+refuses (`mergeCeremonyNeedsAFan`); a run of THREE OR MORE refuses naming the
+chain road (`mergeCeremonyIsPairwise` — the pairing sheet has two columns by
+construction, S4-23).
+
+**THE COLLISION SWEEP (⌥⌘⇧D / ⌥⌘⇧M): both FREE.** Swept `EditorCommands
+.keyEquivalent`'s whole table, every `.keyboardShortcut(` call site in
+`Variorum/` and `Shared/` (58 distinct chords), every `NSMenuItem`
+keyEquivalent (there are none), and the one `performKeyEquivalent` override
+(⌘S, plus J7's non-consuming ⌘Z/⌘⇧Z hint arm). No `d` or `m` chord anywhere in
+the app carries ⌥; the only ones are ⌘⇧D and ⌘⇧M themselves. Her round-4
+reasoning holds literally: the plain chord + ⌥, the ⌥⌘Z family's modifier.
+
+**THE COPY SWEEP (the J8 doctrine — copy naming a behaviour the app no longer
+has is the defect class).** Five shipped sentences described the old defaults
+and now describe the ruled product: the **seam-backspace refusal**
+(`seamFanRefusal` — #34's ruling is untouched, but "Use Merge Blocks (⌘⇧M) to
+pair the takes yourself" was false; it now names both roads and what each
+does), the Takes bar's **Divide** and **Merge** helps, and the helper's
+**"divide / the take ceremony"** and **"merge"** dictionary entries. The
+helper's shortcut list gained ⌥⌘⇧D and ⌥⌘⇧M (the discoverability pin
+`everyDeclaredShortcutIsFindableInTheHelper` requires it) and ⌘⇧D/⌘⇧M's rows
+now say what they do to a fan.
+
+**TUTORIAL (P-6 — the spine stays green; 51/7 by TYPE name).** Three lessons'
+prose aligned, bounded and block-count-safe: **"divide"** gained a block
+stating the fanned default in her own terms and its "From Takes" block stopped
+claiming divide carries you to Write (false since 13d Batch 3 — a pre-existing
+staleness in the very act this batch owns); **"the take ceremony"** now teaches
+a SUMMONED door (⌥⌘⇧D) instead of the default; **"merge"** teaches carry-all
+first and the pairing ceremony as the by-hand road, keeping every word
+`TutorialWalkTests` pins ("pre-paired", "carry"). The staged spare take's own
+line says both. One walk pin's LOCATOR moved with the prose (annotated in
+place); its claim is byte-identical.
+
+### PINS + RED-ON-OLD EVIDENCE (behavioral revert, checksummed)
+
+One new file, **two suites, 25 tests**: `FannedDefaultsTests` (21) and
+`FannedDefaultsBoardTests` (4). Every revert restored to a byte-identical
+checksum, verified by `shasum -a 256` before and after.
+
+| Revert | Pins that went RED | Restored |
+|---|---|---|
+| **A** — `.divideW`'s arm back to opening the ceremony unconditionally | `aFannedDivideDuplicatesInsteadOfOpeningTheCeremony` (4 issues) · `theDuplicatedTakesLandOnBothSuccessorsWithTheirLabels` · `theDuplicatingDivideIsOneStructuralUndoEntry` (2) · `theDivideReceiptTellsTheDuplicateShapeTruth` · `aLockedTakeDoesNotRefuseTheDuplicatingDivide` (3) — **11 issues over 5 tests** | `EditorSurfaceController.swift` → `fc0e0fe093e3` (identical) |
+| **B** — `.merge`'s arm back to `openMergeCeremony` on any fan | `aFannedMergeCarriesEveryTakeOntoTheMergedBlock` (4) · `theCarriedTakesKeepTheirTextAndLabels` · `theMergeReceiptCountsWhatLanded` — **6 issues over 3 tests** | `EditorSurfaceController.swift` → `fc0e0fe093e3` (identical) |
+| **C** — `CarryAllMerge.compose` returning `carries: []` | `aFannedMergeCarriesEveryTakeOntoTheMergedBlock` · `theCarriedTakesKeepTheirTextAndLabels` · `theMergeReceiptCountsWhatLanded` (2) · `aChainWithAFannedLinkCarriesEveryTakeAlong` · `theCompositionCarriesEveryOtherActiveTake` — **6 issues over 5 tests** | `FannedDefaults.swift` → `5708d94f7e84` (identical) |
+| **D** — the three ceremony-door refusals deleted | `theDivideCeremonyDoorOnAnUnfannedBlockRefusesAndNamesThePlainDoor` (2) · `theMergeCeremonyDoorOnAnUnfannedPairRefuses` (2) · `theMergeCeremonyDoorOnAChainRefusesAndNamesTheChainRoad` (3) — **7 issues over 3 tests** | `EditorSurfaceController.swift` → `fc0e0fe093e3` (identical) |
+| **E** — the BOARD's divide fork removed (pre-flip: always the sheet) | `theBoardsDivideDoorDuplicatesByDefault` (3 issues) | `TakesStructureController.swift` → `48497b6b3080` (identical) |
+| **F** — the BOARD's merge links back to plain `ops.merge` | `aFannedPairMergesRightHereAndCarriesEveryTake` (2) · `aFannedRunOfThreeMergesHereAndCarriesEveryTakeAlong` (2) | `TakesStructureController.swift` → `48497b6b3080` (identical) |
+
+*(A first cut of revert E used `guard ceremony, false else` — which left the
+default road running and only reddened the ceremony pin. Recorded because it
+is the drill working: the revert was re-cut to the genuine pre-flip shape and
+the default pin went red as it must.)*
+
+**Consequential pin edits, each annotated IN PLACE** (the batch-2/3 precedent
+— a RULED change, never a quietly relaxed pin). Every one keeps its CLAIM and
+moves only its door or its outcome:
+
+- `MergeCeremonySheetTests` (whole suite): every ceremony opening moved to
+  ⌥⌘⇧M; TWO pins deliberately keep the default door with a note saying why
+  (`anUnfannedMergeStaysInstant`, `aThreeBlockChainBypassesTheCeremony` —
+  whose outcome moved with the ruling: the spare now rides the chain).
+- `DivideCeremonyCostTests` (whole suite, one header note): every opening moved
+  to ⌥⌘⇧D; every cost bound and scan count is measured on the same sheet.
+- `StructuralGestureTests`: `aFannedDivideRoutesToTheWCeremonyAndTouchesNoRows`
+  → the ceremony door; the `DivideWCeremonyTests` suite's ONE opener → the
+  ceremony door (a suite-level note); the round-2/3 fix suites' two openers;
+  the differential-apply discriminator's opener;
+  `contextMenuItemsFireAndSpeak`'s title literal gains the two ceremony rows.
+- `TakesDivideTests`: six ceremony openings → `divideFocused(ceremony: true)`;
+  **`theForkIsReadFromTheStoreNotTheFrozenProjection` got STRONGER** — its
+  evidence was "a sheet opened", and is now the ACT itself (the duplicate
+  shape, which the stale fan could not have produced).
+- `FanHandsTests`: `aFannedPairCarriesToWriteForTheCeremony` →
+  `aFannedPairMergesRightHereAndCarriesEveryTake` (the flip its own fence
+  named), and `aFannedRunOfThree…SaysWhatBecameOfTheOtherTakes` →
+  `…CarriesEveryTakeAlong` (the claim — a fan never folds away silently, and
+  this surface is never behind Write — is unchanged; both surfaces' answer
+  moved).
+- `BoundaryFluidityTests.mergeOnFannedBlocksSpeaksAboutTheFan` → the ceremony
+  door, where the lineage sentence still belongs (nothing goes to lineage on
+  the default road).
+- `EditorWindowSmokeTests`: two ceremony openings.
+- `OriginBlockDoorTests`: two board ceremony openings.
+- `TutorialWalkTests.theMergeCeremonyPairsAndCarriesTheStagedTakes`: the prose
+  LOCATOR moved from "opens a small CEREMONY" (no longer true, and that is the
+  point) to "Merge with Ceremony"; both promised words still asserted.
+
+### SUITE COUNTS (every "Test run with N tests" line confirmed)
+
+- core `swift test` — **1278 tests / 136 suites PASSED** (baseline exact; no
+  `Sources/` line was touched)
+- Mac (`-project` invocation) — **1492 tests / 263 suites PASSED, FULLY GREEN,
+  zero reds** (baseline 1467/261 + this batch's 25 tests in 2 new suites), run
+  AGAIN after every revert was restored
+- tutorial spine, by TYPE name (`TutorialBookShapeTests`, `TutorialDoorTests`,
+  `TutorialWritingActsTests`, `TutorialTakesActsTests`,
+  `TutorialStructureActsTests`, `TutorialLookingActsTests`,
+  `TutorialLibraryActsTests`) — **51 tests / 7 suites PASSED** (baseline exact)
+- mobile — **NOT RUN, correctly**: `git status` confirms zero files under
+  `Sources/` or `Shared/` and zero under `VariorumMobile/` (the brief's own
+  expectation)
+
+### FOR THE ARCHITECT / HER
+
+- **QUESTIONS #69 logged** (five lettered entries in her format): the chain's
+  compounding carry consequence; the ceremony doors' unfanned refusal (vs.
+  performing the plain act); the two ceremony rows rendering unconditionally in
+  Write's context menu; the one-word-take refusal naming the ceremony's
+  parking; and the divide receipt's wording.
+- **A JUDGMENT CALL, stated plainly with its alternative.** The two ceremony
+  rows render UNCONDITIONALLY in Write's block context menu, like every other
+  structural row there. That menu's grammar is the author's own 2026-07-09
+  fire-and-speak posture, recorded in `contextMenuItems` — it already renders
+  "Extract Selection" with no selection and "Merge Blocks" with no seam. The
+  alternative (render only on a fanned target, the `.showOriginBlock` shape)
+  is defensible under P-2 and is one condition away for divide; it is NOT
+  cheap for merge, whose precondition needs a planner run at menu-build time,
+  and rendering one conditionally and the other not would be two grammars for
+  one pair. #69(c) is hers.
+- **What is deliberately UNCHANGED:** `Operations.divideDuplicating` and
+  `Operations.mergeCeremony` (zero core lines); `runInstantMerge`,
+  `mergedAwayTakes`, `speakAboutMergedFans` (the brief's byte-unchanged
+  clause — they now speak zero in practice, since every road that reaches them
+  is store-verified unfanned; the two helpers are therefore effectively dead
+  and were left alone rather than removed inside a defaults flip);
+  `openMergeCeremony` / `confirmMergeCeremony` / the whole `DivideWCeremony`
+  state machine and both sheets; the seam-backspace REFUSAL rule (#34's
+  ruling — only its second sentence changed).
+- **PARITY LEDGER.** Nothing new is owed: the phone SHIPPED both shapes first
+  (parity Stage A's fanned divide, C5's carry-all merge) and this batch is the
+  Mac catching up to them. What the Mac now has that the phone does not is the
+  two CEREMONY doors (the phone has neither ceremony by her M-ruling) and the
+  carry-all inside an N-way CHAIN (the phone merges pairwise only) — both
+  deliberate, neither a debt.
+- **Environment.** No Variorum instance was running at any point in this batch
+  (`pgrep -fl 'Variorum.app/Contents/MacOS'` checked before every suite run and
+  before every revert); no kill, no quit, no `/Applications` write, no Release
+  build, no push. No other `xcodebuild` was active before any run.
+- **Nothing PENDING** — every count and every claim above is from a run in this
+  session.

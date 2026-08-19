@@ -93,7 +93,7 @@ struct OriginBlockDoorTests {
             try board.reload()
 
             board.focus(blockID: slot.blockID, variantID: chosen, caret: 11)
-            await board.model.divideFocused()
+            await board.model.divideFocused(ceremony: true)
             let ceremony = try #require(board.model.divideWCeremony)
             #expect(ceremony.takes.count(where: { !$0.marked }) == 2,
                     "the seed take alone is checked — two ride the original away")
@@ -116,7 +116,7 @@ struct OriginBlockDoorTests {
             try board.reload()
 
             board.focus(blockID: slot.blockID, variantID: chosen, caret: 11)
-            await board.model.divideFocused()
+            await board.model.divideFocused(ceremony: true)
             let ceremony = try #require(board.model.divideWCeremony)
             let second = try #require(ceremony.takes.first { $0.id != chosen })
             board.model.ceremony.toggleTake(second.id)

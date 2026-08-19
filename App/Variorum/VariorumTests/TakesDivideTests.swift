@@ -24,7 +24,18 @@
 //
 //  Scope is DIVIDE ONLY (the batch's brief): extract, make-block and merge
 //  keep the carry choreography, pinned here so a future session cannot
-//  widen the door by accident.
+//  widen the door by accident. *(13j J4b widened that one line: MERGE from
+//  the ⌘-click selection acts here too now — its pins live in
+//  `FanHandsTests`. The three carried acts named above are unchanged.)*
+//
+//  **13j batch 4 (J4) — A JUSTIFIED EDIT to the ceremony openings below.**
+//  Her 2026-08-03 ruling flipped ⌘⇧D on a fanned block to the DUPLICATING
+//  divide; the sheet is ⌥⌘⇧D's now (`divideFocused(ceremony: true)`). Every
+//  ceremony rule this suite pinned is pinned unchanged, through the door
+//  that opens it; the default road's own board pins live in
+//  `FannedDefaultsBoardTests`, and one pin here —
+//  `theForkIsReadFromTheStoreNotTheFrozenProjection` — got STRONGER by the
+//  flip (see its note).
 //
 
 import AppKit
@@ -258,7 +269,7 @@ struct TakesDivideTests {
             try board.reload()
 
             board.focus(blockID: slot.blockID, variantID: chosen, caret: 25)
-            await board.model.divideFocused()
+            await board.model.divideFocused(ceremony: true)
 
             let ceremony = try #require(board.model.divideWCeremony)
             #expect(ceremony.blockID == slot.blockID)
@@ -288,7 +299,7 @@ struct TakesDivideTests {
 
             // The caret sits in the NON-chosen take.
             board.focus(blockID: slot.blockID, variantID: other.id, caret: 7)
-            await board.model.divideFocused()
+            await board.model.divideFocused(ceremony: true)
 
             let ceremony = try #require(board.model.divideWCeremony)
             #expect(ceremony.activeVariantID == other.id,
@@ -309,7 +320,7 @@ struct TakesDivideTests {
             try board.reload()
 
             board.focus(blockID: slot.blockID, variantID: chosen, caret: 11)
-            await board.model.divideFocused()
+            await board.model.divideFocused(ceremony: true)
             let ceremony = try #require(board.model.divideWCeremony)
 
             // Mark and place the second take too, then confirm.
@@ -338,7 +349,7 @@ struct TakesDivideTests {
             try board.reload()
 
             board.focus(blockID: slot.blockID, variantID: chosen, caret: 11)
-            await board.model.divideFocused()
+            await board.model.divideFocused(ceremony: true)
             let ceremony = try #require(board.model.divideWCeremony)
             let length = ceremony.takes.first { $0.id == chosen }
                 .map { $0.variant.workingText.utf16.count } ?? 0
@@ -358,7 +369,7 @@ struct TakesDivideTests {
             try board.reload()
 
             board.focus(blockID: slot.blockID, variantID: chosen, caret: 25)
-            await board.model.divideFocused()
+            await board.model.divideFocused(ceremony: true)
             #expect(board.model.divideWCeremony != nil)
 
             board.model.ceremony.cancel()
@@ -386,10 +397,21 @@ struct TakesDivideTests {
 
             await board.model.divideFocused()
 
-            #expect(board.model.divideWCeremony != nil,
-                    "the ceremony opened: the fork read the STORE, not the stale fan")
-            let intact = try board.slots().count
-            #expect(intact == 1, "and nothing was cut behind her back")
+            // 13j J4 — A JUSTIFIED EDIT that STRENGTHENS this pin. Its claim
+            // is unchanged and is the one that matters: the fork is read from
+            // the STORE, never from the frozen projection. Before the flip
+            // the evidence was "a sheet opened"; now the fanned road ACTS, so
+            // the evidence is the act itself — the DUPLICATE shape (two fresh
+            // blocks, each carrying the arrived take) rather than the plain
+            // divide the stale fan would have produced (which would have kept
+            // this block's identity and left it holding one take).
+            #expect(board.model.divideWCeremony == nil, "the default road acts, it does not ask")
+            let after = try board.slots()
+            #expect(after.count == 2)
+            #expect(after.allSatisfy { $0.blockID != slot.blockID },
+                    "A was released whole — the duplicating divide, not the plain one")
+            #expect(after.allSatisfy { $0.activeVariantCount == 2 },
+                    "the take the projection could not see rode onto BOTH successors")
         }
     }
 
@@ -432,7 +454,7 @@ struct TakesDivideTests {
             _ = try board.session.operations.branchVariant(slot.blockID, from: variantID)
             try board.reload()
             board.focus(blockID: slot.blockID, variantID: variantID, caret: 25)
-            await board.model.divideFocused()
+            await board.model.divideFocused(ceremony: true)
             #expect(board.model.divideWCeremony != nil)
         }
     }

@@ -20,6 +20,14 @@
 //  and the per-slot view elements (`CutFlowRealization`) — because the
 //  restructure has to fix both or the sheet is merely less catastrophic.
 //
+//  **13j batch 4 (J4) — A JUSTIFIED EDIT to every opening in this file, and
+//  the DOOR moved rather than any claim.** Her 2026-08-03 ruling flipped the
+//  fanned default to the duplicating divide, so ⌘⇧D no longer summons this
+//  sheet; ⌥⌘⇧D does (`invokeGesture(.divideAtCursor, ceremony: true)`).
+//  Every cost bound, every scan count and every row rule below is measured
+//  on exactly the sheet it always measured — reached by the door that now
+//  opens it.
+//
 
 import AppKit
 import SwiftUI
@@ -75,7 +83,7 @@ struct DivideCeremonyCostTests {
 
         h.textView.setSelectedRange(NSRange(location: 400, length: 0))
         h.model.updateCaretContext()
-        await h.model.invokeGesture(.divideAtCursor)
+        await h.model.invokeGesture(.divideAtCursor, ceremony: true)
 
         let state = try #require(h.model.divideWCeremony, "the ceremony opened")
         #expect(state.takes.count == takes, "all \(takes) takes are in the checklist")
@@ -233,7 +241,7 @@ struct DivideCeremonyCostTests {
             try h.reload()
             h.textView.setSelectedRange(NSRange(location: 15, length: 0))
             h.model.updateCaretContext()
-            await h.model.invokeGesture(.divideAtCursor)
+            await h.model.invokeGesture(.divideAtCursor, ceremony: true)
             let state = try #require(h.model.divideWCeremony)
             let ceremony = h.model.divideWCeremonyController
 
@@ -292,7 +300,7 @@ struct DivideCeremonyCostTests {
 
             BoundaryScanCount.reset()
             let started = ContinuousClock.now
-            await h.model.invokeGesture(.divideAtCursor)
+            await h.model.invokeGesture(.divideAtCursor, ceremony: true)
             let elapsed = started.duration(to: .now)
             let mainThreadScans = BoundaryScanCount.current
             let ms = Double(elapsed.components.seconds) * 1000
@@ -335,7 +343,7 @@ struct DivideCeremonyRowTapTests {
         try h.reload()
         h.textView.setSelectedRange(NSRange(location: 15, length: 0))
         h.model.updateCaretContext()
-        await h.model.invokeGesture(.divideAtCursor)
+        await h.model.invokeGesture(.divideAtCursor, ceremony: true)
         _ = try #require(h.model.divideWCeremony)
         return h.model.divideWCeremonyController
     }

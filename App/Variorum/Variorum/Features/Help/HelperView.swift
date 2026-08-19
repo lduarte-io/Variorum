@@ -90,10 +90,13 @@ struct HelperView: View {
             ("⌘⇧B", "toggle block seams (dotted lines between blocks)"),
         ]),
         ShortcutGroup(title: "Structure", items: [
-            ("⌘⇧D", "divide the block at the cursor"),
+            ("⌘⇧D", "divide the block at the cursor — a block with takes cuts "
+                + "the take you're in and copies the rest onto both halves"),
+            ("⌥⌘⇧D", "divide with ceremony — place a cut in each take by hand"),
             ("⌘⇧E", "extract the selection into its own block"),
             ("⌘⇧K", "make a block from the selection"),
-            ("⌘⇧M", "merge blocks"),
+            ("⌘⇧M", "merge blocks — every take comes along"),
+            ("⌥⌘⇧M", "merge with ceremony — pair the two blocks' takes by hand"),
             ("⌘⇧⏎", "new block below the one you're in (Write and Takes alike)"),
         ]),
         // 13g batch 3 (L8): the formatting acts. The two chords her ruling
@@ -279,16 +282,22 @@ struct HelperView: View {
          + "Rule of thumb: mark = connect, duplicate = copy + connect. UNMARK deletes only "
          + "the connection — both notes stay exactly as they are."),
         ("divide / the take ceremony",
-         "Divide cuts a block in two at your cursor (⌘⇧D — works from Takes too; the "
-         + "app carries you to Write and cuts). When the block has SEVERAL takes, each "
-         + "take needs its own cut — the \"Divide into takes\" sheet lists every take, "
-         + "you place each cut, and confirm. Unchecked takes stay with the original; "
-         + "⌥⌘Z puts everything back."),
+         "Divide cuts a block in two at your cursor (⌘⇧D — works in Takes too, right "
+         + "where you are). When the block has SEVERAL takes, the take you're LOOKING "
+         + "at is the one that gets cut, and every other take is copied WHOLE onto both "
+         + "halves — nothing to hunt for afterwards, and the extra copies are quick to "
+         + "delete. Want to place a cut in each take by hand instead? That's the "
+         + "ceremony: ⌥⌘⇧D opens the \"Divide into takes\" sheet, where you check the "
+         + "takes to cut, place each cut, and confirm; unchecked takes stay with the "
+         + "original. Either way ⌥⌘Z puts everything back."),
         ("merge",
          "Join neighboring blocks into one (⌘⇧M): cursor at the seam, or a selection "
          + "across the run. From Takes it joins your block with the one above. The "
-         + "merged text is what you were LOOKING at; other takes stay with the released "
-         + "blocks — find them under \(TrayPath.originalsPathWithDoor), "
+         + "merged text is what you were LOOKING at on each side — and every OTHER take "
+         + "comes along whole onto the merged block, so nothing goes missing (extra "
+         + "copies are quick to delete). To pair takes by hand instead — this take with "
+         + "that one — use ⌥⌘⇧M, the merge ceremony. Archived takes stay behind with "
+         + "the released blocks; find them under \(TrayPath.originalsPathWithDoor), "
          + "or ⌥⌘Z brings everything straight back."),
         ("extract / make block",
          "Extract (⌘⇧E) pulls a selected span at a block's edge into its own block; "

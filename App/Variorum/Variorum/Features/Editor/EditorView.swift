@@ -267,7 +267,13 @@ extension EditorView {
             }
             return true
         case .structural(let act):
-            Task { await model.invokeGesture(EditorViewModel.plannerCommand(for: act)) }
+            // 13j J4/J4b: the ceremony acts plan through their twin's command
+            // and diverge at the fanned branch.
+            Task {
+                await model.invokeGesture(
+                    EditorViewModel.plannerCommand(for: act),
+                    ceremony: EditorViewModel.requestsCeremony(act))
+            }
             return true
         case .deleteInEveryTake:
             Task { await model.deleteInEveryTake() }

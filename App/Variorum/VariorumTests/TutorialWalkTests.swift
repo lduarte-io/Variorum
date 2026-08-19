@@ -1418,8 +1418,16 @@ struct TutorialStructureActsTests {
             let before = try await projection(db, lesson)
 
             // The lesson's prose PROMISES the ceremony's grammar.
+            //
+            // A JUSTIFIED EDIT (13j batch 4, J4b): the CLAIM is unchanged —
+            // the merge lesson must promise the ceremony's pairing grammar —
+            // but its locator moved. The prose no longer says merge "opens a
+            // small CEREMONY", because after her 2026-08-09 ruling it does
+            // not: ⌘⇧M carries every take along and the ceremony is the
+            // summoned ⌥⌘⇧M door. The locator is now the door's own name,
+            // and both promised words are asserted exactly as before.
             let ceremonyProse = try #require(before.slots.first {
-                $0.text?.contains("opens a small CEREMONY") == true
+                $0.text?.contains("Merge with Ceremony") == true
             }).text ?? ""
             #expect(ceremonyProse.contains("pre-paired"), "⏎ = the everyday join, promised")
             #expect(ceremonyProse.contains("carry"), "the carry option, promised")

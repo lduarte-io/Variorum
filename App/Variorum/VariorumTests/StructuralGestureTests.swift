@@ -148,6 +148,11 @@ struct StructuralRewriteDoorTests {
         }
     }
 
+    /// **A JUSTIFIED EDIT (13j batch 4, J4): the DOOR moved, the claim did
+    /// not.** ⌘⇧D on a fanned block now mints the duplicate shape (her
+    /// Q-M2 ruling — pinned in `FannedDefaultsTests`); ⌥⌘⇧D routes to the W
+    /// ceremony, which is what this pin has always been about, seed cut and
+    /// no-rows-touched included.
     @Test func aFannedDivideRoutesToTheWCeremonyAndTouchesNoRows() async throws {
         try await withEditor(seedBlocks: ["First sentence. Second one."]) { h in
             let slots = try h.storeSlots()
@@ -157,7 +162,7 @@ struct StructuralRewriteDoorTests {
 
             h.textView.setSelectedRange(NSRange(location: 19, length: 0))
             h.model.updateCaretContext()
-            await h.model.invokeGesture(.divideAtCursor)
+            await h.model.invokeGesture(.divideAtCursor, ceremony: true)
 
             let ceremony = try #require(h.model.divideWCeremony)
             #expect(ceremony.blockID == slots[0].blockID)
@@ -366,9 +371,16 @@ struct DivideExtractGestureTests {
             let items = h.model.contextMenuItems()
             // 2026-07-13 (#11b): "Delete in Every Take" joins the menu —
             // the deliberate NAMED command of the sitting ruling.
+            // 13j batch 4 (J4/J4b) — A JUSTIFIED EDIT: the two CEREMONY rows
+            // join the menu beside the verbs whose default they used to be
+            // (her sitting round-4 binding names this menu explicitly). The
+            // claim is unchanged and is asserted below: every row stays
+            // ENABLED and a refused one speaks.
             #expect(items.map(\.title) == [
-                "Divide Block at Cursor", "Extract Selection",
+                "Divide Block at Cursor", "Divide with Ceremony… (⌥⌘⇧D)",
+                "Extract Selection",
                 "Make Block from Selection", "Merge Blocks",
+                "Merge with Ceremony… (⌥⌘⇧M)",
                 "Delete in Every Take", "Show Takes",
             ])
             let allEnabled = items.allSatisfy(\.enabled)
@@ -595,6 +607,13 @@ struct MergeGestureTests {
 }
 
 
+/// **13j batch 4 (J4) — A JUSTIFIED EDIT to this suite's ONE opener, and the
+/// DOOR moved rather than any claim.** Her 2026-08-03 ruling flipped ⌘⇧D on
+/// a fanned block to the duplicating divide; ⌥⌘⇧D summons this sheet. Every
+/// rule Step 6 pinned — the pre-marked seed, the propagated proposals, the
+/// confirm's exact cuts, cancel touching nothing, the undo round-trip, the
+/// parking positions — is pinned here unchanged, reached by the door that
+/// now opens it.
 @MainActor
 @Suite("The W ceremony (Phase 9, Step 6)")
 struct DivideWCeremonyTests {
@@ -610,7 +629,7 @@ struct DivideWCeremonyTests {
         try h.reload()
         h.textView.setSelectedRange(NSRange(location: 15, length: 0))
         h.model.updateCaretContext()
-        await h.model.invokeGesture(.divideAtCursor)
+        await h.model.invokeGesture(.divideAtCursor, ceremony: true)
         return (slots[0].variantID!, v2.id)
     }
 
@@ -946,7 +965,9 @@ struct DifferentialApplyTests {
             h.textView.setSelectedRange(NSRange(
                 location: h.model.index.range(ofEntryAt: 20).location + 30, length: 0))
             h.model.updateCaretContext()
-            await h.model.invokeGesture(.divideAtCursor)   // fanned -> ceremony
+            // 13j J4: ⌥⌘⇧D is the ceremony's door now (⌘⇧D duplicates). The
+            // discriminator is unchanged — the W CONFIRM is the full path.
+            await h.model.invokeGesture(.divideAtCursor, ceremony: true)
             edited.setValue([])
             await h.model.confirmDivideWCeremony()
             let fullMax = edited.value.max() ?? 0
@@ -1112,7 +1133,9 @@ struct ReviewRound2FixTests {
             try h.reload()
             h.textView.setSelectedRange(NSRange(location: 15, length: 0))
             h.model.updateCaretContext()
-            await h.model.invokeGesture(.divideAtCursor)
+            // 13j J4: the ceremony's door is ⌥⌘⇧D now; the claim below is
+            // untouched.
+            await h.model.invokeGesture(.divideAtCursor, ceremony: true)
             #expect(h.model.divideWCeremony != nil)
 
             // A sync round lands an edit to the ACTIVE (marked) take while
@@ -1169,7 +1192,9 @@ struct ReviewRound3FixTests {
             try h.reload()
             h.textView.setSelectedRange(NSRange(location: 15, length: 0))
             h.model.updateCaretContext()
-            await h.model.invokeGesture(.divideAtCursor)
+            // 13j J4: the ceremony's door is ⌥⌘⇧D now; the claim below is
+            // untouched.
+            await h.model.invokeGesture(.divideAtCursor, ceremony: true)
             #expect(h.model.divideWCeremony != nil)
 
             // Flight A: a shortcut divide on block 1, suspended mid-flight.

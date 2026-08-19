@@ -766,4 +766,24 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint.**
 
-*(Next free number: **#69**.)*
+## Phase 13j (2026-08-18) — batch 4's calls (the defaults pair: divide duplicates, merge carries all)
+
+69. **2026-08-18 · Phase 13j batch 4 (J4/J4b — the fanned defaults flip + the two ceremony doors) · FIVE entries.** The BINDING record is the 13j plan's batch-4 section.
+
+    **WHAT SHIPPED, IN ONE SENTENCE:** your two rulings are now the Mac's behaviour — dividing a block that has takes cuts the take you're LOOKING at and copies every other take whole onto both halves, and merging blocks that have takes joins the two you're looking at and brings every other take along — with both ceremonies kept as deliberate doors you summon: **Divide with Ceremony… ⌥⌘⇧D** and **Merge with Ceremony… ⌥⌘⇧M**, in the Block menu, the block's right-click menu and ⌘K, exactly as you asked ("never only a buried menu item").
+
+    **(a) The N-way MERGE CHAIN carries all too, and the consequence compounds.** Selecting across three or more blocks merges them in one go, as always — but now each link brings its takes along instead of leaving them behind. The consequence, said plainly because it is yours to accept or refuse: a carried take rides WHOLE and never receives the other blocks' text, so after merging three blocks the chosen take is all three joined, while each block's alternates stand alone beside it. That is the same thing that happens on a two-block merge, twice over — "quick to delete", your own words for it. **The alternative:** leave chains as they were (a fan in a chain folds to lineage and the app says so), which would mean two merge gestures with two different answers.
+
+    **(b) The ceremony doors REFUSE where there is no ceremony, rather than quietly doing the plain thing.** ⌥⌘⇧D on a block with one take says *"This block has one take — ⌘⇧D divides it in place. The ceremony is for placing a cut in each take of a fan."* ⌥⌘⇧M on an unfanned pair, and on a run of three or more (the pairing sheet has two columns by construction), say their own versions. **The alternative:** have them just perform the plain act — the act happens, but the menu item promised a sheet and gave you something else.
+
+    **(c) Both ceremony rows show in the block's right-click menu ALWAYS, not only on a block that has takes.** That menu has rendered every structural row unconditionally since your 2026-07-09 ruling (it already shows "Extract Selection" with no selection, "Merge Blocks" with no seam) and a refused row speaks. The alternative — show them only where they can act — is one condition away for divide, but merge's condition needs real work to compute at menu-build time, and one row conditional beside one row not is two grammars for one pair. **The alternative:** conditional rendering for both, at the cost of that work.
+
+    **(d) Dividing a one-word take names the ceremony as the road.** A single word has no interior cut, so ⌘⇧D refuses there as it always has — and the refusal now adds *"Divide with Ceremony (⌥⌘⇧D) can send a whole take to one side"*, because parking a whole take at one end is exactly the ceremony's vocabulary. **The alternative:** the bare refusal.
+
+    **(e) The receipts say what happened, counted from the operation's own answer.** *"Block divided — the take you were in split across both blocks, and 2 other takes rode whole onto each. Extra copies are quick to delete; ⌥⌘Z undoes."* and *"Blocks merged — the takes you were looking at joined, and 1 other take came along whole…"*. They deliberately do NOT claim "nothing was left behind": ARCHIVED takes do stay with the released blocks, as they always have. **The alternative:** shorter receipts, or ones that mention the archived case.
+
+    **ALSO SWEPT, because copy naming a behaviour the app no longer has is the defect you reported in 13e:** the backspace-at-a-seam refusal used to say "Use Merge Blocks (⌘⇧M) to pair the takes yourself" — ⌘⇧M does not pair any more, so it now names both roads; the Takes bar's Divide and Merge tooltips; the field guide's "divide / the take ceremony" and "merge" entries; and three tutorial lessons (which also stopped claiming divide carries you to Write — untrue since 13d).
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#70**.)*

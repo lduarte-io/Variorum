@@ -1306,8 +1306,10 @@ final class EditorViewModel {
     func makeBlockFromSelection() { performGesture(.makeBlockFromSelection) }
     func mergeBlocks() { performGesture(.mergeBlocks) }
 
-    private func performGesture(_ command: StructuralGesturePlanner.Command) {
-        Task { await invokeGesture(command) }
+    private func performGesture(
+        _ command: StructuralGesturePlanner.Command, ceremony: Bool = false
+    ) {
+        Task { await invokeGesture(command, ceremony: ceremony) }
     }
 
     // ——— The gesture-execution band lives in `EditorSurfaceController`
@@ -1316,14 +1318,19 @@ final class EditorViewModel {
     // and pin call site reading unchanged. ———
 
     /// Plans against the CURRENT selection and applies (the controller's).
-    func invokeGesture(_ command: StructuralGesturePlanner.Command) async {
-        await structural.invokeGesture(command)
+    /// `ceremony` (13j J4/J4b) names the DOOR, not a plan shape.
+    func invokeGesture(
+        _ command: StructuralGesturePlanner.Command, ceremony: Bool = false
+    ) async {
+        await structural.invokeGesture(command, ceremony: ceremony)
     }
 
     /// THE one door for structural changes to the surface (the
     /// controller's).
-    func applyStructural(_ plan: StructuralGesturePlanner.Plan) async {
-        await structural.applyStructural(plan)
+    func applyStructural(
+        _ plan: StructuralGesturePlanner.Plan, ceremony: Bool = false
+    ) async {
+        await structural.applyStructural(plan, ceremony: ceremony)
     }
 
     // MARK: - Phase 11, A9: the boundary-fluidity package — forwards
@@ -1534,7 +1541,8 @@ final class EditorViewModel {
             guard let self else { return }
             switch followUp {
             case .structural(let act):
-                await invokeGesture(Self.plannerCommand(for: act))
+                await invokeGesture(
+                    Self.plannerCommand(for: act), ceremony: Self.requestsCeremony(act))
             case .deleteInEveryTake:
                 await deleteInEveryTake()
             }
@@ -1548,10 +1556,22 @@ final class EditorViewModel {
         for act: StructuralAct
     ) -> StructuralGesturePlanner.Command {
         switch act {
-        case .divide: .divideAtCursor
+        case .divide, .divideWithCeremony: .divideAtCursor
         case .extract: .extractSelection
         case .makeBlock: .makeBlockFromSelection
-        case .merge: .mergeBlocks
+        case .merge, .mergeWithCeremony: .mergeBlocks
+        }
+    }
+
+    /// 13j J4/J4b: which DOOR the act came from. The plan is identical for
+    /// an act and its ceremony twin — the planner is pure over the surface
+    /// and answers only "this block/pair carries a fan"; the ruling that
+    /// changed is what the fanned branch DOES, so the door travels beside
+    /// the command rather than inside it.
+    nonisolated static func requestsCeremony(_ act: StructuralAct) -> Bool {
+        switch act {
+        case .divideWithCeremony, .mergeWithCeremony: true
+        case .divide, .extract, .makeBlock, .merge: false
         }
     }
 
@@ -1640,6 +1660,9 @@ final class EditorViewModel {
     /// asserted against the contextMenu door set's Write half).
     nonisolated static let contextMenuCapabilities: [CapabilityID] = [
         .divide, .extract, .makeBlock, .merge, .deleteInEveryTake, .showTakes,
+        // 13j J4/J4b: the two ceremony doors — her round-4 binding names the
+        // block context menu explicitly, beside the Block menu and ⌘K.
+        .divideWithCeremony, .mergeWithCeremony,
         .showOriginBlock,  // 13f W10b — rendered only where an origin exists
         .callout,  // 13k K6 — the submenu this surface inserts beside Format
         // 13e E2 (A17) — rendered only while blocks are picked
@@ -1654,17 +1677,29 @@ final class EditorViewModel {
         // being silently swallowed. The planner verdict still drives the
         // button bar's dimming (`gestureAvailability`).
         func item(
-            _ title: String, _ command: StructuralGesturePlanner.Command
+            _ title: String, _ command: StructuralGesturePlanner.Command,
+            ceremony: Bool = false
         ) -> EditorTextView.StructuralMenuItem {
             .init(title: title, enabled: true) { [weak self] in
-                self?.performGesture(command)
+                self?.performGesture(command, ceremony: ceremony)
             }
         }
+        // 13j J4/J4b: the two ceremony rows sit beside their twins, rendered
+        // unconditionally like every other structural row on THIS menu — the
+        // 2026-07-09 fire-and-speak posture recorded above governs it (Merge
+        // renders with no seam in reach, Extract with no selection), and the
+        // ceremony's own honest refusal is what a wrong target gets. Their
+        // titles carry the chord because this menu is where a summoned door
+        // is most likely to be met for the first time.
         var items = [
             item("Divide Block at Cursor", .divideAtCursor),
+            item(CapabilityRegistry.capability(.divideWithCeremony).menuTitle(),
+                 .divideAtCursor, ceremony: true),
             item("Extract Selection", .extractSelection),
             item("Make Block from Selection", .makeBlockFromSelection),
             item("Merge Blocks", .mergeBlocks),
+            item(CapabilityRegistry.capability(.mergeWithCeremony).menuTitle(),
+                 .mergeBlocks, ceremony: true),
             // #11b (the sitting ruling, 2026-07-13): the deliberate, NAMED
             // command — not a planner gesture (it edits takes, not
             // structure); fire-and-speak like every door.
