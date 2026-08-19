@@ -5096,3 +5096,18 @@ to 13l's opening batch** (the 13e-reports-became-batch-1 precedent):
 receipt naming the Trash + clock, the pane navigating away
 choreographed, registry-declared, walk-asserted. Pullable earlier
 at her word.
+
+**Second report (same sitting): "is it clear to users from the
+tutorial what deleting a book means? that the notes will remain?
+make sure that we cover what deleting a book does as well. maybe
+the tutorial should also have a section where users are encouraged
+to create a book, chapter, and note within something (though that
+tutorial could be added in 13i)." → TWO dispositions: (1) FIXED AT
+ADJUDICATION, same turn — the books lesson's delete sentence never
+stated the load-bearing truth; it now says what deleting a book
+MEANS ("the book, its chapters, and its memberships go — THE NOTES
+STAY… The only way notes die is deleting the notes"); spine re-run
+green 63/8; landed BEFORE her Restore-Tutorial click so one click
+picks up everything. (2) The create-a-book/chapter/note-within
+tutorial section ROUTED TO 13i at her own suggestion — recorded in
+the 13i brief.**

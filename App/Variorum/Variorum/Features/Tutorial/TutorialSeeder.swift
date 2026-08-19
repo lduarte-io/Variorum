@@ -1124,10 +1124,13 @@ enum TutorialSeeder {
             + "target — this one wears one, so its shelf row shows progress. "
             + "A single note can wear its own target too: click the word "
             + "counts in the editor's bottom bar. Targets are a measure, "
-            + "never a wall. And deleting a book is recoverable: Library \u{25B8} "
-            + "Archived & Deleted holds the TRASH, where a deleted book waits "
-            + "30 days with a Put back door — chapters and membership come "
-            + "back with it.",
+            + "never a wall. And here is what deleting a book MEANS: the book, "
+            + "its chapters, and its memberships go — **the notes stay**, in "
+            + "your Library and in any other books that point at them, because "
+            + "a book only ever points at notes and never owns them. The "
+            + "deleted book waits 30 days in the Trash (Library \u{25B8} Archived & "
+            + "Deleted) with a Put back door — chapters and membership come "
+            + "back with it. The only way notes die is deleting the notes.",
         ])
 
         let scraps = try lesson(library, "pool & scraps", [

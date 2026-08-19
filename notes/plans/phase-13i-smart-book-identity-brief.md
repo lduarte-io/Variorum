@@ -159,3 +159,17 @@ conversion rulings + A31's two, all ratified 2026-07-28) ·
 `notes/plans/phase-13f-workspace.md` THE KICKOFF SITTING (W13's
 verbatim record + the round-3 ruling creating this phase) · AppSpec §9
 `convertSmartReadingToCurated`.
+
+## Author addition (2026-08-19, at the 13j close — her words)
+
+> "maybe the tutorial should also have a section where users are
+> encouraged to create a book, chapter, and note within something
+> (though that tutorial could be added in 13i)"
+
+Routed here at her own suggestion: 13i's scope gains a **books
+chapter for the tutorial** — the reader CREATES a book, adds a
+chapter, mints a note inside it (the walk asserts the flow, P-6),
+and meets membership-not-ownership by doing (add the same note to a
+second book; delete one book; watch the note survive — the 13j
+books-lesson sentence taught as an act). Sized at this phase's
+kickoff alongside its identity work.
