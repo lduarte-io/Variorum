@@ -2806,6 +2806,26 @@ schema); the purge rule itself stays the memo's.**
   Now/Empty Trash doors, the janitor; the sync-touching half
   seated per the standing Sync/ rider (Fable); the deploy window
   bundles the phone refresh (needs her + the tunnel).
+- **Round 9 addendum — the ONE-WINDOW sequencing (proposed to
+  her, standing unless she splits it):** batch 6b BUILDS and
+  tests the whole purge road headless (fake-server harness; the
+  client migration v1_14 + marker-7 code lands DORMANT — no
+  client writes what the mirror lacks, the §12 letter); the
+  DEPLOY executes at ONE closeout-adjacent window: mirror deploy
+  (marker 6→7, her pre-authorization) → fresh Mac Release into
+  `/Applications` (her closeout authorization; zero-instance +
+  A1 rail) → fresh PHONE build over the tunnel (the parity-round
+  mechanism; her presence needed) → closeout. Her daily builds
+  never stall longer than the window; she is needed ONCE. Her
+  three answers recorded: the phone refresh is THIS session's
+  act (the lockstep's own choreography; the mobile project's
+  documented tunnel steps followed, or that one act handed to
+  its session — same window either way); the Mac refresh
+  likewise; **Fragments needs NO update** (it never reads the
+  Variorum mirror; the bridge's purged-day behavior is
+  Variorum-side, designed in the memo; any Fragments-side
+  surprise routes through the contract file to her, never around
+  her).
 
 **PROCESS INCIDENT, self-reported (2026-08-19, the round-9
 commit):** the architect staged with `git add -A` while batch 6
