@@ -149,12 +149,17 @@ extension Queries {
     /// (S2), so everything here is one restore away until GC. `limit`: the
     /// tombstone listing grows forever — a held observation bounds it;
     /// one-shot callers omit.
-    public static func deletedReadings(_ db: Database, limit: Int? = nil) throws -> [Reading] {
+    /// `now` (13j J1): the 30-day window, required for the reason
+    /// `deletedPosts` states — a recovery listing must not show what it can
+    /// no longer recover.
+    public static func deletedReadings(
+        _ db: Database, now: Date, limit: Int? = nil
+    ) throws -> [Reading] {
         var sql = """
-            SELECT * FROM reading WHERE deleted_at IS NOT NULL
+            SELECT * FROM reading WHERE deleted_at IS NOT NULL AND deleted_at >= ?
             ORDER BY deleted_at DESC, id DESC
             """
-        var arguments: [(any DatabaseValueConvertible)?] = []
+        var arguments: [(any DatabaseValueConvertible)?] = [TrashWindow.cutoffStamp(now: now)]
         if let limit {
             sql += " LIMIT ?"
             arguments.append(limit)

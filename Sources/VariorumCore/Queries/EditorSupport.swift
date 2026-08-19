@@ -134,15 +134,21 @@ extension Queries {
     /// independently keeps its own stamp — so on a live block every tombstoned
     /// take is one `restoreVariant` can put back. Cost ∝ the block's own fan
     /// history (`idx_variant_block`), never the corpus.
-    public static func deletedTakes(_ db: Database, blockID: String) throws -> [Variant] {
+    ///
+    /// `now` (13j J1) is REQUIRED: a deleted take rides the same 30-day clock
+    /// as everything else she deleted, and past it the History face stops
+    /// offering a Put back it cannot honour.
+    public static func deletedTakes(
+        _ db: Database, blockID: String, now: Date
+    ) throws -> [Variant] {
         try Variant.fetchAll(
             db,
             sql: """
                 SELECT * FROM variant
-                WHERE block_id = ? AND deleted_at IS NOT NULL
+                WHERE block_id = ? AND deleted_at IS NOT NULL AND deleted_at >= ?
                 ORDER BY deleted_at DESC, id
                 """,
-            arguments: [blockID])
+            arguments: [blockID, TrashWindow.cutoffStamp(now: now)])
     }
 
     /// **What ONE block's History face shows besides its savepoints** (13j
@@ -165,9 +171,11 @@ extension Queries {
         public var isEmpty: Bool { deletedTakes.isEmpty && origins.isEmpty }
     }
 
-    public static func blockPast(_ db: Database, blockID: String) throws -> BlockPast {
+    public static func blockPast(
+        _ db: Database, blockID: String, now: Date
+    ) throws -> BlockPast {
         BlockPast(
-            deletedTakes: try deletedTakes(db, blockID: blockID),
+            deletedTakes: try deletedTakes(db, blockID: blockID, now: now),
             origins: try unplacedOrigins(db, ofBlock: blockID))
     }
 }
@@ -183,8 +191,10 @@ extension AppDatabase {
     /// A block's deleted takes, live (13j batch 3) — the observation the
     /// round-5 ruling's Put back needs so a restored take leaves the listing
     /// without a hand-rolled reload.
-    public func observeDeletedTakes(_ blockID: String) -> AsyncValueObservation<[Variant]> {
-        observe { try Queries.deletedTakes($0, blockID: blockID) }
+    public func observeDeletedTakes(
+        _ blockID: String, now: Date
+    ) -> AsyncValueObservation<[Variant]> {
+        observe { try Queries.deletedTakes($0, blockID: blockID, now: now) }
     }
 
     /// The block's past, live (13j batch 3). **Held only while the History
@@ -194,8 +204,10 @@ extension AppDatabase {
     /// by construction either way — cost ∝ this block's own fan history and
     /// its own lineage edges, never the corpus (P1) — and the face is a
     /// summoned panel, not ambient chrome.
-    public func observeBlockPast(_ blockID: String) -> AsyncValueObservation<Queries.BlockPast> {
-        observe { try Queries.blockPast($0, blockID: blockID) }
+    public func observeBlockPast(
+        _ blockID: String, now: Date
+    ) -> AsyncValueObservation<Queries.BlockPast> {
+        observe { try Queries.blockPast($0, blockID: blockID, now: now) }
     }
 }
 // (An observeBlockFan wrapper was dropped in the Phase 7 review round —

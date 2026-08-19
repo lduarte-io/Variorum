@@ -68,12 +68,17 @@ extension AppDatabase {
     public func observeArchivedPosts(limit: Int) -> AsyncValueObservation<[Queries.TimelineItem]> {
         observe { try Queries.archivedPosts($0, limit: limit) }
     }
+    // (No `now` here, and that is the point: ARCHIVE has no clock — 13j
+    // round 3's ruling keeps Archived a calm forever-section beside the
+    // Trash's countdown.)
 
     /// The deleted-posts recovery surface, live (Phase 10 —
     /// `restoreContainer`'s listing). `limit` REQUIRED — tombstones are
     /// forever under S2 (review round 1).
-    public func observeDeletedPosts(limit: Int) -> AsyncValueObservation<[Queries.TimelineItem]> {
-        observe { try Queries.deletedPosts($0, limit: limit) }
+    public func observeDeletedPosts(
+        now: Date, limit: Int
+    ) -> AsyncValueObservation<[Queries.TimelineItem]> {
+        observe { try Queries.deletedPosts($0, now: now, limit: limit) }
     }
 
     /// The live readings, live (Phase 10 — the readings-management face).
@@ -111,9 +116,9 @@ extension AppDatabase {
     /// A post's deleted-blocks tray, live. `limit` (13j ladder A, A6): a
     /// held observation passes `window + 1` — bounded in SQL, marker-safe.
     public func observeTray(
-        _ postID: String, limit: Int? = nil
+        _ postID: String, now: Date, limit: Int? = nil
     ) -> AsyncValueObservation<[Queries.TrayItem]> {
-        observe { try Queries.trayBlocks($0, postID: postID, limit: limit) }
+        observe { try Queries.trayBlocks($0, postID: postID, now: now, limit: limit) }
     }
 
     /// A post's PRESERVED ORIGINALS, live (13j J2 — the tray's second
@@ -129,8 +134,8 @@ extension AppDatabase {
     /// never reads `variant`, so an open note's badge does not re-run at
     /// autosave rate (P1).
     public func observeTrayCounts(
-        _ postID: String
+        _ postID: String, now: Date
     ) -> AsyncValueObservation<Queries.TrayCounts> {
-        observe { try Queries.trayCounts($0, postID: postID) }
+        observe { try Queries.trayCounts($0, postID: postID, now: now) }
     }
 }

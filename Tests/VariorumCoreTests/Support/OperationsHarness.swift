@@ -7,6 +7,14 @@ import GRDB
 /// dependencies: incrementing UUIDs, a clock that advances one second per
 /// read (so `updated_at` movement is observable and successive operations
 /// get distinct timestamps), and a seeded RNG for position jitter.
+/// **The harness world's "now"** (13j): the recovery queries take a required
+/// clock, because the 30-day Trash window is what "in the Trash" means. The
+/// fixtures here are stamped from 2026-07-01 and tick forward by seconds, so
+/// a listing asked as of this moment sees everything the test just deleted —
+/// and a test that wants the OTHER side of the window says so by passing its
+/// own date (`harnessNow.addingTimeInterval(31 * 86_400)`).
+let harnessNow = Date(timeIntervalSince1970: 1_782_864_000 + 3_600)
+
 func withOperations<T>(
     seed: UInt64 = 1,
     _ body: (Operations, AppDatabase) throws -> T

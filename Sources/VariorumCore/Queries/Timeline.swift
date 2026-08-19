@@ -204,15 +204,24 @@ extension Queries {
     /// delete (S2), so everything here is one restore away until GC.
     /// `limit` (review round 1): the tombstone listing grows forever under
     /// S2 — a held observation bounds it. One-shot callers omit.
-    public static func deletedPosts(_ db: Database, limit: Int? = nil) throws -> [TimelineItem] {
+    ///
+    /// `now` (13j J1) is REQUIRED, and required is the point: the 30-day
+    /// window is what "in the Trash" MEANS, so a caller must decide the clock
+    /// rather than inherit a listing that quietly shows things she can no
+    /// longer get back. Rows older than the window have left every surface;
+    /// removing them is the purge, which is sync-shaped and designed
+    /// separately (`TrashWindow`'s note).
+    public static func deletedPosts(
+        _ db: Database, now: Date, limit: Int? = nil
+    ) throws -> [TimelineItem] {
         var sql = """
             SELECT id AS post_id, title AS title, entry_date AS entry_date,
                    created_at AS created_at, deleted_at AS stamp
             FROM container
-            WHERE kind = 'post' AND deleted_at IS NOT NULL
+            WHERE kind = 'post' AND deleted_at IS NOT NULL AND deleted_at >= ?
             ORDER BY deleted_at DESC, id DESC
             """
-        var arguments: [(any DatabaseValueConvertible)?] = []
+        var arguments: [(any DatabaseValueConvertible)?] = [TrashWindow.cutoffStamp(now: now)]
         if let limit {
             sql += " LIMIT ?"
             arguments.append(limit)

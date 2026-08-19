@@ -428,7 +428,7 @@ struct RedoStackTests {
             try stack.undo(with: ops)
             try stack.redo(with: ops)
 
-            let tray = try db.read { db in try Queries.trayBlocks(db, postID: post.id) }
+            let tray = try db.read { db in try Queries.trayBlocks(db, postID: post.id, now: harnessNow) }
             #expect(tray.map(\.blockID) == [victim.block.id])
             #expect(tray.first?.text == "victim", "the preview reads through the re-stamped cascade")
             try ops.restoreBlock(victim.block.id)

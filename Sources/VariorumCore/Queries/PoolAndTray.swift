@@ -81,8 +81,13 @@ extension Queries {
     /// in SQL, not in memory — the caller passes `window + 1` so a
     /// truncation marker never false-positives. Defaulting nil keeps the
     /// one-shot callers unchanged.
+    ///
+    /// `now` (13j J1) is REQUIRED — the 30-day Trash window applies to the
+    /// tray too, because "it has left every surface" is what the clock
+    /// promises and a tray that kept listing an unrecoverable block would be
+    /// the one surface making the promise false.
     public static func trayBlocks(
-        _ db: Database, postID: String, limit: Int? = nil
+        _ db: Database, postID: String, now: Date, limit: Int? = nil
     ) throws -> [TrayItem] {
         var sql = """
             SELECT b.id AS block_id, b.deleted_at AS deleted_at,
@@ -92,6 +97,7 @@ extension Queries {
               ON dv.id = b.default_variant_id
              AND (dv.deleted_at IS NULL OR dv.deleted_at = b.deleted_at)
             WHERE b.last_container_id = :post AND b.deleted_at IS NOT NULL
+              AND b.deleted_at >= :cutoff
               AND NOT EXISTS (
                 SELECT 1 FROM container_block cb
                 JOIN container cc ON cc.id = cb.container_id
@@ -100,7 +106,9 @@ extension Queries {
                   AND cc.deleted_at = b.deleted_at)
             ORDER BY b.deleted_at DESC, b.id
             """
-        var arguments: StatementArguments = ["post": postID]
+        var arguments: StatementArguments = [
+            "post": postID, "cutoff": TrashWindow.cutoffStamp(now: now),
+        ]
         if let limit {
             sql += " LIMIT :limit"
             arguments += ["limit": limit]
@@ -170,6 +178,7 @@ extension Queries {
             LEFT JOIN variant dv
               ON dv.id = b.default_variant_id AND dv.deleted_at IS NULL
             WHERE b.last_container_id = :post AND b.deleted_at IS NULL
+              AND b.archived_at IS NULL
               AND NOT EXISTS (
                 SELECT 1 FROM container_block placed
                 WHERE placed.block_id = b.id AND placed.deleted_at IS NULL)
@@ -204,25 +213,37 @@ extension Queries {
         /// population) — the ONLY number the door shows (13j sitting round
         /// 5: preserved originals must not inflate an urgent-looking count).
         public let deleted: Int
-        /// Live-but-unplaced originals released from this note.
+        /// Live-but-unplaced originals released from this note. Archived
+        /// blocks are NOT in this number (13j, her round-7 ruling gave them
+        /// their own state and their own count below) — an archived block is
+        /// unplaced too, and counting it as a preserved original would call
+        /// a deliberate set-aside a leftover.
         public let preservedOriginals: Int
+        /// Blocks ARCHIVED out of this note (13j round 7). They wear no
+        /// clock: archive is kept-forever, which is exactly the distinction
+        /// the tray's first section now has to teach.
+        public let archived: Int
 
-        public init(deleted: Int, preservedOriginals: Int) {
+        public init(deleted: Int, preservedOriginals: Int, archived: Int = 0) {
             self.deleted = deleted
             self.preservedOriginals = preservedOriginals
+            self.archived = archived
         }
 
         /// Nothing to recover at all — the tray panel's empty state.
-        public var isEmpty: Bool { deleted == 0 && preservedOriginals == 0 }
+        public var isEmpty: Bool {
+            deleted == 0 && preservedOriginals == 0 && archived == 0
+        }
     }
 
-    public static func trayCounts(_ db: Database, postID: String) throws -> TrayCounts {
+    public static func trayCounts(_ db: Database, postID: String, now: Date) throws -> TrayCounts {
         let row = try Row.fetchOne(
             db,
             sql: """
                 SELECT
                   (SELECT COUNT(*) FROM block b
                     WHERE b.last_container_id = :post AND b.deleted_at IS NOT NULL
+                      AND b.deleted_at >= :cutoff
                       AND NOT EXISTS (
                         SELECT 1 FROM container_block cb
                         JOIN container cc ON cc.id = cb.container_id
@@ -231,15 +252,20 @@ extension Queries {
                           AND cc.deleted_at = b.deleted_at)) AS deleted_count,
                   (SELECT COUNT(*) FROM block b
                     WHERE b.last_container_id = :post AND b.deleted_at IS NULL
+                      AND b.archived_at IS NULL
                       AND NOT EXISTS (
                         SELECT 1 FROM container_block placed
                         WHERE placed.block_id = b.id AND placed.deleted_at IS NULL))
-                    AS original_count
+                    AS original_count,
+                  (SELECT COUNT(*) FROM block b
+                    WHERE b.last_container_id = :post AND b.deleted_at IS NULL
+                      AND b.archived_at IS NOT NULL) AS archived_count
                 """,
-            arguments: ["post": postID])
+            arguments: ["post": postID, "cutoff": TrashWindow.cutoffStamp(now: now)])
         return TrayCounts(
             deleted: row?["deleted_count"] ?? 0,
-            preservedOriginals: row?["original_count"] ?? 0)
+            preservedOriginals: row?["original_count"] ?? 0,
+            archived: row?["archived_count"] ?? 0)
     }
 
     /// One live-but-unplaced block (divide-W/merge lineage leftovers).

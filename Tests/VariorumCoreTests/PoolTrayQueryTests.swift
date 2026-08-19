@@ -67,10 +67,10 @@ struct PoolTrayQueryTests {
             try ops.deleteBlock(deletedHere.block.id)
             try ops.deleteBlock(deletedElsewhere.block.id)
 
-            let tray = try db.read { try Queries.trayBlocks($0, postID: post.id) }
+            let tray = try db.read { try Queries.trayBlocks($0, postID: post.id, now: harnessNow) }
             #expect(tray.map(\.blockID) == [deletedHere.block.id])
             #expect(tray[0].text == "deleted from post")
-            let otherTray = try db.read { try Queries.trayBlocks($0, postID: otherPost.id) }
+            let otherTray = try db.read { try Queries.trayBlocks($0, postID: otherPost.id, now: harnessNow) }
             #expect(otherTray.map(\.blockID) == [deletedElsewhere.block.id])
             _ = stillLive
         }
@@ -87,7 +87,7 @@ struct PoolTrayQueryTests {
             _ = merged
             // Both sources are now live-unplaced lineage; delete one.
             try ops.deleteBlock(first.block.id)
-            let tray = try db.read { try Queries.trayBlocks($0, postID: post.id) }
+            let tray = try db.read { try Queries.trayBlocks($0, postID: post.id, now: harnessNow) }
             #expect(tray.map(\.blockID) == [first.block.id])
         }
     }
@@ -105,11 +105,11 @@ struct PoolTrayQueryTests {
             // The whole post goes: the cascade tombstones the block with the
             // post's exact stamp.
             try ops.deleteContainer(post.id)
-            let tray = try db.read { try Queries.trayBlocks($0, postID: post.id) }
+            let tray = try db.read { try Queries.trayBlocks($0, postID: post.id, now: harnessNow) }
             #expect(tray.isEmpty)
             // And restoreContainer brings it back — the tray stays empty.
             try ops.restoreContainer(post.id)
-            let after = try db.read { try Queries.trayBlocks($0, postID: post.id) }
+            let after = try db.read { try Queries.trayBlocks($0, postID: post.id, now: harnessNow) }
             #expect(after.isEmpty)
             let rendered = try db.read { try Queries.renderPost($0, containerID: post.id) }
             #expect(rendered.map(\.blockID) == [block.block.id])
@@ -123,7 +123,7 @@ struct PoolTrayQueryTests {
             let newer = try ops.newBlock(in: post.id, text: "newer")
             try ops.deleteBlock(older.block.id)
             try ops.deleteBlock(newer.block.id)
-            let tray = try db.read { try Queries.trayBlocks($0, postID: post.id) }
+            let tray = try db.read { try Queries.trayBlocks($0, postID: post.id, now: harnessNow) }
             #expect(tray.map(\.blockID) == [newer.block.id, older.block.id])
         }
     }
@@ -141,10 +141,10 @@ struct PoolTrayQueryTests {
                 ids.append(made.block.id)
             }
             for id in ids { try ops.deleteBlock(id) }
-            let bounded = try db.read { try Queries.trayBlocks($0, postID: post.id, limit: 2) }
+            let bounded = try db.read { try Queries.trayBlocks($0, postID: post.id, now: harnessNow, limit: 2) }
             #expect(bounded.map(\.blockID) == [ids[3], ids[2]],
                     "the two newest deletions, and only those")
-            let unbounded = try db.read { try Queries.trayBlocks($0, postID: post.id) }
+            let unbounded = try db.read { try Queries.trayBlocks($0, postID: post.id, now: harnessNow) }
             #expect(unbounded.count == 4, "nil limit keeps the one-shot callers whole")
         }
     }
@@ -157,7 +157,7 @@ struct PoolTrayQueryTests {
             let post = try ops.createPost()
             let block = try ops.newBlock(in: post.id, text: "cascade text")
             try ops.deleteBlock(block.block.id)
-            let cascade = try db.read { try Queries.trayBlocks($0, postID: post.id) }
+            let cascade = try db.read { try Queries.trayBlocks($0, postID: post.id, now: harnessNow) }
             #expect(cascade[0].text == "cascade text")  // same-stamp victim previews
 
             // Re-stamp the default variant as an independent deletion.
@@ -166,7 +166,7 @@ struct PoolTrayQueryTests {
                     sql: "UPDATE variant SET deleted_at = '2026-07-06T23:59:59.000Z' WHERE id = ?",
                     arguments: [block.variant.id])
             }
-            let foreign = try db.read { try Queries.trayBlocks($0, postID: post.id) }
+            let foreign = try db.read { try Queries.trayBlocks($0, postID: post.id, now: harnessNow) }
             #expect(foreign[0].blockID == block.block.id)
             #expect(foreign[0].text == nil)  // restore wouldn't bring it back
         }
@@ -259,7 +259,7 @@ struct PoolTrayQueryTests {
     @Test func trayCountsSplitDeletedFromPreserved() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            #expect(try db.read { try Queries.trayCounts($0, postID: post.id) }.isEmpty)
+            #expect(try db.read { try Queries.trayCounts($0, postID: post.id, now: harnessNow) }.isEmpty)
 
             let gone = try ops.newBlock(in: post.id, text: "gone")
             try ops.deleteBlock(gone.block.id)
@@ -269,12 +269,12 @@ struct PoolTrayQueryTests {
             _ = try ops.divideW(
                 fanned.block.id, cuts: [fanned.variant.id: 10, take2.id: 10])
 
-            let counts = try db.read { try Queries.trayCounts($0, postID: post.id) }
+            let counts = try db.read { try Queries.trayCounts($0, postID: post.id, now: harnessNow) }
             #expect(counts.deleted == 1)
             #expect(counts.preservedOriginals == 1)
             #expect(!counts.isEmpty)
             // The two counts agree with the two listings they describe.
-            #expect(try db.read { try Queries.trayBlocks($0, postID: post.id) }.count
+            #expect(try db.read { try Queries.trayBlocks($0, postID: post.id, now: harnessNow) }.count
                 == counts.deleted)
             #expect(try db.read { try Queries.preservedOriginals($0, postID: post.id) }.count
                 == counts.preservedOriginals)
@@ -289,7 +289,7 @@ struct PoolTrayQueryTests {
             let post = try ops.createPost()
             _ = try ops.newBlock(in: post.id, text: "with the note")
             try ops.deleteContainer(post.id)
-            let counts = try db.read { try Queries.trayCounts($0, postID: post.id) }
+            let counts = try db.read { try Queries.trayCounts($0, postID: post.id, now: harnessNow) }
             #expect(counts.deleted == 0)
             #expect(counts.isEmpty)
         }

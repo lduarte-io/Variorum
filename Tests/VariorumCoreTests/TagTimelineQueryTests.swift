@@ -29,11 +29,11 @@ struct TagTimelineQueryTests {
             try ops.deleteContainer(a.id)
             try ops.deleteContainer(b.id)
             try ops.deleteContainer(pool.id)  // pools are not posts
-            let deleted = try db.read { try Queries.deletedPosts($0) }
+            let deleted = try db.read { try Queries.deletedPosts($0, now: harnessNow) }
             #expect(deleted.map(\.postID) == [b.id, a.id])
             // And restore drops the row from the listing.
             try ops.restoreContainer(a.id)
-            let after = try db.read { try Queries.deletedPosts($0) }
+            let after = try db.read { try Queries.deletedPosts($0, now: harnessNow) }
             #expect(after.map(\.postID) == [b.id])
         }
     }

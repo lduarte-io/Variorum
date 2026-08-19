@@ -61,6 +61,13 @@ public enum OperationError: Error, Equatable, Sendable {
     case blockNotPlaced(id: String)
     case blockNotDeleted(id: String)
 
+    // Block archive (13j, her round-7 ruling — the third verb beside delete
+    // and move-to-scraps). Both are the `variantNotDeleted` class: a door
+    // that silently succeeded on a block already in the state it asks for
+    // would teach that it did something.
+    case blockAlreadyArchived(id: String)
+    case blockNotArchived(id: String)
+
     // Reading membership.
     case postNotInReading(postID: String, readingID: String)
     case alreadyInReading(postID: String, readingID: String)

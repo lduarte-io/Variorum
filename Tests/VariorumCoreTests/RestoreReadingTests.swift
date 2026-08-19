@@ -42,7 +42,7 @@ struct RestoreReadingTests {
                 SELECT COUNT(*) FROM reading_post
                 WHERE reading_id = ? AND deleted_at IS NULL
                 """, [reading.id]) == 0)
-            let listedDeleted = try db.read { try Queries.deletedReadings($0) }
+            let listedDeleted = try db.read { try Queries.deletedReadings($0, now: harnessNow) }
             #expect(listedDeleted.map(\.id) == [reading.id],
                     "the deleted book is visible — the recovery surface's feed")
 
@@ -220,10 +220,10 @@ struct RestoreReadingTests {
             try ops.deleteReading(second.id)
             try ops.deleteReading(third.id)
 
-            let all = try db.read { try Queries.deletedReadings($0) }
+            let all = try db.read { try Queries.deletedReadings($0, now: harnessNow) }
             #expect(all.map(\.id) == [third.id, second.id, first.id],
                     "newest deletion first — smart books list too")
-            let bounded = try db.read { try Queries.deletedReadings($0, limit: 2) }
+            let bounded = try db.read { try Queries.deletedReadings($0, now: harnessNow, limit: 2) }
             #expect(bounded.map(\.id) == [third.id, second.id])
         }
     }

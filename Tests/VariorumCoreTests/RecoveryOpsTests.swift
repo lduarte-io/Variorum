@@ -336,7 +336,7 @@ struct RecoveryOpsTests {
             try ops.deleteVariant(second.id)
             try ops.deleteVariant(third.id)
 
-            let listing = try db.read { try Queries.deletedTakes($0, blockID: made.block.id) }
+            let listing = try db.read { try Queries.deletedTakes($0, blockID: made.block.id, now: harnessNow) }
             #expect(listing.map(\.id) == [third.id, second.id], "newest tombstone first")
             #expect(!listing.map(\.id).contains(kept.id))
             #expect(!listing.map(\.id).contains(made.variant.id))
