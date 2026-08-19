@@ -1851,6 +1851,70 @@ reaching length-1 spans would route around ruled authorizations.
 **All six flow findings: AGREE, unanimous.** The package returns
 to the reviewer for final calls + its own fix pass (next entry).
 
+### Sanity passes over the reviewer's fix diff (`d40e46a`; sequential, read-only)
+
+**Batch 3 (A1/A3/A6): CLEAR on all three.** A1 — the Group form
+cancels correctly on BOTH hosts (each host mounts the section
+conditionally, so the flagged `@State pastModel` retention is now
+inert; the `.task(id:)` re-fires on caret-block change because
+Write builds a new model). A3 — exact-flip byte-unchanged (the
+only body change is `return variant.status` from the fetched row;
+#68(b) holds precisely); the lens chain genuinely two-click. A6 —
+one-shot callers semantics-identical; the BlockTOC marker composes
+with the K11 pin trivially (different surface, no shared state).
+Two OBSERVATIONS recorded, neither a concern: (i) with the face
+open, caret moves don't rebuild the past region — PRE-EXISTING
+and identical to the savepoint list beside it (both halves move
+only at `loadCommitHistory`); (ii) `BlockTOCViewModel` reads
+`TrayViewModel.window` cross-module — the better trade vs a
+second 500; noted in case a later pass hoists the constant.
+
+**Batch 4 (A2/A5): CLEAR on both.** A2 — `fanFoldRoads` sits at
+the road-clause layer as specified; `seamFanRefusal`'s assembled
+output verified BYTE-IDENTICAL by hand-concatenation; the
+`hasSuffix(fanFoldRoads)` pin on both speakers is a structural
+close on the drift class itself; the record amendments name the
+precise miss without softening. A5 — `chainComposes` validates
+exactly the named class; the after-link-1 leading side re-proved
+non-nil under the `joinedTake` reasoning; the atomicity constraint
+satisfied BY CONSTRUCTION (refusal before `withCompound` opens);
+the gap-slot dismissal re-traced in both directions (typed throw
+before any join, whole compound rolled back); the one residual
+(non-empty fan, nil rendered id) is unreachable under I10 + the
+`default_variant_id` reassignment rule. One OBSERVATION, record
+only, pre-existing and outside both findings:
+**`noRenderableVariant` falls to `OpsRefusalCopy`'s `default:`
+arm — "Refused: \(error)", the standing enum-dump family** —
+loud and typed, but a raw dump as a sentence. **ARCHITECT
+ROUTING: a batch-6 rider** (the enum-dump family's next sweep;
+the phase's copy-truth bar makes it in-scope).
+
+**Batch 1 (A8): CLEAR** — the fence proven VACUOUS for texted
+entries algebraically (`starts[k] = ends[k] − length[k]` ⇒ any
+`length ≥ 1` match passes the fence), walked over the batch-1
+geometry pins concretely; the `length > 1` guard untouched
+(outside the diff); no leading-edge mirror; BEYOND the brief:
+no new nils possible (the inverting case is already guarded), and
+the pin's tail case proves the fence didn't over-reach — plus a
+second instance of the same class (`index([5,0])`, span `{0,6}`)
+verified closed by the same line. Its offer to also pass over the
+A2/A5 touches of batch-1 files was DECLINED with reasons: batch 4
+verified those diffs including the byte-identity of batch 1's
+clause split, and round 2 re-reviews everything — a fourth
+consultation on a double-verified copy change buys nothing.
+
+### ROUND 1 CLOSED (2026-08-18)
+
+1 BLOCKER · 1 MAJOR · 4 MINOR · 2 NIT → ALL fixed (6 by the
+reviewer per the cross-model flow, 2 at architect adjudication);
+zero disputes; three sanity passes CLEAR with record-only
+observations routed (the enum-dump straggler → batch 6 rider; the
+window-constant hoist + caret-staleness parity noted). End state
+verified by the architect's own run: core **1279/136**; the
+reviewer's runs: Mac **1499/263 FULLY GREEN** · spine 51/7 ·
+mobile 314/60. **ROUND 2 re-reviews fresh** (a real pass over the
+fixes and what they touched; new BLOCKER/MAJOR ⇒ round 3).
+
 ### LADDER A ROUND 1 — THE REVIEWER'S FIX PASS (2026-08-18; the same Fable session, authorized per the cross-model flow)
 
 **Final calls: ALL SIX findings CONFIRMED and FIXED; every
