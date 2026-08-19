@@ -19,9 +19,17 @@ public struct SyncPulledRow: Equatable, Sendable, Codable {
 /// current server row so the client can merge deterministically and push
 /// again. `rejected(current: nil)` is the degenerate mismatch where the
 /// server has no row at all for a non-zero base.
+///
+/// `purged` (Phase 13j — the memo's §2 ledger): the pushed row's id is in
+/// the account's content-free purged-ids ledger. The client DROPS the
+/// outbox entry and its local copy instead of retrying — a stale peer can
+/// never resurrect a purged row. This is what makes S2's one bent clause
+/// safe: a tombstone may be physically removed only with a ledger entry
+/// standing in its place.
 public enum SyncPushOutcome: Equatable, Sendable {
     case accepted(newVersion: Int, serverSeq: Int64)
     case rejected(current: SyncPulledRow?)
+    case purged
 }
 
 /// The transport seam (SyncSpec §2): exactly two endpoints. The in-process
@@ -48,7 +56,19 @@ public protocol SyncTransport: Sendable {
     /// State-based: each row appears once, in its current state, stamped
     /// with its latest seq — never an op log. `activeKeyID` as on `push`
     /// (both round halves are fenced).
-    func pull(since: Int64, limit: Int, activeKeyID: String) async throws -> [SyncPulledRow]
+    ///
+    /// `deviceID` (Phase 13j — the memo's §5b: the cursor upsert rides the
+    /// same round trip): non-nil on a round's FIRST window ONLY, where
+    /// `since` is the device's COMMITTED cursor — the server records it
+    /// monotonically into `device_cursor`, which is what makes the purge
+    /// horizon computable at all. Mid-round windows pass nil (their
+    /// `since` values are uncommitted fetch positions; recording one would
+    /// over-report what the device has integrated if the apply never
+    /// commits). A REQUIRED parameter, deliberately no default — wrappers
+    /// forward, fakes record (the schemaVersion doctrine): a wrapper that
+    /// silently dropped the device id would starve the horizon in every
+    /// test that composes it.
+    func pull(since: Int64, limit: Int, activeKeyID: String, deviceID: String?) async throws -> [SyncPulledRow]
 
     /// The mirror's deployed schema-version marker (SyncSpec §12's
     /// version-check mechanism — shipped with the Phase 11 lockstep event,
@@ -60,4 +80,75 @@ public protocol SyncTransport: Sendable {
     /// default: wrappers forward, fakes declare — a transport that cannot
     /// answer must not sync.
     func schemaVersion() async throws -> Int
+}
+
+// MARK: - The purge surface (Phase 13j batch 6b — the memo's §4b/§5b)
+
+/// One row a purge names — the (table, row) pair the janitor's family
+/// expansion produced, or a purge intent's root.
+public struct SyncPurgeTarget: Equatable, Hashable, Sendable, Codable {
+    public let table: String
+    public let rowID: String
+
+    public init(table: String, rowID: String) {
+        self.table = table
+        self.rowID = rowID
+    }
+}
+
+/// One purged-ids ledger entry: ids only, no words (the memo's §2 — the
+/// content-free ledger that fences a returner).
+public struct SyncPurgedRecord: Equatable, Sendable {
+    public let table: String
+    public let rowID: String
+    public let purgedSeq: Int64
+
+    public init(table: String, rowID: String, purgedSeq: Int64) {
+        self.table = table
+        self.rowID = rowID
+        self.purgedSeq = purgedSeq
+    }
+}
+
+/// A ledger page: the entries above the caller's scan point, plus the
+/// coverage FLOOR — the seq below which ledger completeness is no longer
+/// guaranteed (0 while ledger pruning is unbuilt; the future pruning rider
+/// advances it, and a client whose scan point is below the floor takes the
+/// SAY-SO-FIRST returner road, round 10).
+public struct SyncPurgeLedgerPage: Equatable, Sendable {
+    public let floor: Int64
+    public let entries: [SyncPurgedRecord]
+
+    public init(floor: Int64, entries: [SyncPurgedRecord]) {
+        self.floor = floor
+        self.entries = entries
+    }
+}
+
+/// The purge transport surface (Phase 13j): the three server doors the
+/// janitor needs beyond the round's push/pull. A SEPARATE protocol rather
+/// than three new `SyncTransport` requirements, deliberately: the janitor
+/// is the ONLY caller, so the dozens of test wrapper transports that feed
+/// engines (gates, fault injectors, spies) never carry dead conformances —
+/// while the real transport and the fake server conform to both, and the
+/// session layer wires a janitor exactly when its transport can answer.
+/// Within this protocol the standing doctrine holds: REQUIRED methods, no
+/// defaults — wrappers forward, fakes enforce.
+public protocol SyncPurgeTransport: Sendable {
+    /// The account's lowest live-device cursor (the memo's §2 horizon rule:
+    /// purge only what every device has already seen deleted). A device
+    /// unseen for 60 days leaves the horizon (her round-8 ruling); an
+    /// account with no recorded cursors answers 0 — and nothing is ≤ 0,
+    /// which is the janitor's safe no-op.
+    func syncHorizon(activeKeyID: String) async throws -> Int64
+
+    /// Ledger entries with `purged_seq > since`, plus the coverage floor.
+    func purgeLedger(since: Int64, activeKeyID: String) async throws -> SyncPurgeLedgerPage
+
+    /// Executes one family's purge server-side: deletes exactly the named
+    /// rows inside the caller's own partition and records every one in the
+    /// ledger, ONE transaction (the adjudication's note 1). Idempotent —
+    /// a janitor resuming mid-family re-runs it safely. Returns the
+    /// granted ledger seq (one per call: the purge is one event).
+    func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String) async throws -> Int64
 }

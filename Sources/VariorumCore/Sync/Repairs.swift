@@ -78,6 +78,13 @@ extension SyncEngine {
                 // Phase 11 (A1): same class for a lens's per-block pick.
                 resolved = try repairDuplicateCollision(
                     db, row, naturalKey: ["lens_id", "block_id"], touched: &touched)
+            case "purge_intent":
+                // Phase 13j (v1_14): two devices asking to purge the same
+                // row is not a conflict — the act is idempotent by nature.
+                // Pure duplicate on (table_name, row_id): keep the smaller
+                // id, tombstone the other (the memo's §5a repair rule).
+                resolved = try repairDuplicateCollision(
+                    db, row, naturalKey: ["table_name", "row_id"], touched: &touched)
             default:
                 break
             }

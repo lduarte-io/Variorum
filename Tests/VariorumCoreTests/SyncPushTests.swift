@@ -74,6 +74,11 @@ struct SyncPushTests {
             _ = try ops.setLensChoice(lens: lens.id, block: postBlock, variant: postVariant)
             // Phase 13 (A1): the lockstep event's table.
             _ = try ops.addBlockComment(to: postBlock, text: "note")
+            // Phase 13j (v1_14): the purge event's table — a real intent
+            // through the ops door (a deleted scrap is a legal target).
+            let doomed = try ops.newBlock(in: pool.id, text: "doomed", at: .end).block
+            try ops.deleteBlock(doomed.id)
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "block", rowID: doomed.id)])
         }
 
         try await a.push()
@@ -270,8 +275,8 @@ actor InterferingTransport: SyncTransport {
         return outcomes
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String) async throws -> [SyncPulledRow] {
-        try await inner.pull(since: since, limit: limit, activeKeyID: activeKeyID)
+    func pull(since: Int64, limit: Int, activeKeyID: String, deviceID: String?) async throws -> [SyncPulledRow] {
+        try await inner.pull(since: since, limit: limit, activeKeyID: activeKeyID, deviceID: deviceID)
     }
 
     func schemaVersion() async -> Int {

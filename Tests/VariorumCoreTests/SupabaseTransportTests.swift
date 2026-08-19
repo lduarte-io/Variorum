@@ -84,12 +84,21 @@ struct SupabaseTransportTests {
 
     @Test func pullRequestEncodesSnakeCaseParameters() throws {
         let data = try JSONEncoder().encode(
-            PullRequest(sinceSeq: 42, maxRows: 500, activeKeyID: "key-1"))
+            PullRequest(sinceSeq: 42, maxRows: 500, activeKeyID: "key-1", deviceID: "device-A"))
         let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
         #expect(json?["since_seq"] as? Int == 42)
         #expect(json?["max_rows"] as? Int == 500)
         // Phase 14c: the fence parameter rides the wire snake-cased too.
         #expect(json?["active_key_id"] as? String == "key-1")
+        // Phase 13j: the device-cursor report (10's device_id parameter).
+        #expect(json?["device_id"] as? String == "device-A")
+        // And a nil device still ENCODES (JSON null → the parameter's
+        // default server-side), so mid-round windows are explicit.
+        let nilData = try JSONEncoder().encode(
+            PullRequest(sinceSeq: 1, maxRows: 1, activeKeyID: "key-1", deviceID: nil))
+        let nilJSON = try JSONSerialization.jsonObject(with: nilData) as? [String: Any]
+        #expect(nilJSON?.keys.contains("device_id") == true)
+        #expect(nilJSON?["device_id"] is NSNull)
     }
 
     @Test func pushRequestEncodesTheFenceParameter() throws {
@@ -119,11 +128,19 @@ struct SupabaseTransportTests {
             + "\n"
             + String(contentsOf: root.appendingPathComponent("05_phase11_lockstep.sql"), encoding: .utf8)
             + "\n"
-            + String(contentsOf: root.appendingPathComponent("06_phase13_lockstep.sql"), encoding: .utf8))
+            + String(contentsOf: root.appendingPathComponent("06_phase13_lockstep.sql"), encoding: .utf8)
+            + "\n"
+            + String(contentsOf: root.appendingPathComponent("09_phase14c_multitenant.sql"), encoding: .utf8)
+            + "\n"
+            + String(contentsOf: root.appendingPathComponent("10_phase13j_purge.sql"), encoding: .utf8))
         // The deployed RPC bodies are the LAST rework in deploy order —
-        // 06's (Phase 13) since it re-creates both functions.
+        // 10's (Phase 13j) since it re-creates both functions (annotated
+        // pin edit, batch 6b: this read was 06's, stale since 09; the
+        // claim — the deployed allowlists carry the whole registry — is
+        // unchanged, and AuthRLSDDLTests' composition pins carry the
+        // deeper body checks).
         let rpc = try strippingComments(String(
-            contentsOf: root.appendingPathComponent("06_phase13_lockstep.sql"), encoding: .utf8))
+            contentsOf: root.appendingPathComponent("10_phase13j_purge.sql"), encoding: .utf8))
 
         for table in SyncSchema.tables {
             #expect(schema.contains("create table \(table.name) ("),
@@ -255,7 +272,7 @@ struct SupabaseTransportSessionTests {
             sessionProvider: provider, load: http.loader())
 
         await #expect(throws: UserSessionError.notSignedIn) {
-            _ = try await transport.pull(since: 0, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID)
+            _ = try await transport.pull(since: 0, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID, deviceID: nil)
         }
         await #expect(throws: UserSessionError.notSignedIn) {
             _ = try await transport.push([], activeKeyID: SyncTestKeys.corpusKeyID)
@@ -273,7 +290,7 @@ struct SupabaseTransportSessionTests {
             configuration: Self.projectConfiguration,
             sessionProvider: provider, load: http.loader())
 
-        let rows = try await transport.pull(since: 0, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID)
+        let rows = try await transport.pull(since: 0, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID, deviceID: nil)
         #expect(rows.isEmpty)
         #expect(provider.refreshCalls == 1)
         #expect(http.bearers == ["Bearer stale", "Bearer fresh"],
@@ -292,7 +309,7 @@ struct SupabaseTransportSessionTests {
             sessionProvider: provider, load: http.loader())
 
         await #expect(throws: SupabaseTransportError.httpFailure(status: 401, body: "expired")) {
-            _ = try await transport.pull(since: 0, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID)
+            _ = try await transport.pull(since: 0, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID, deviceID: nil)
         }
         #expect(http.requests.count == 2, "exactly one retry — never a loop")
         #expect(provider.refreshCalls == 1)
@@ -308,7 +325,7 @@ struct SupabaseTransportSessionTests {
             sessionProvider: provider, load: http.loader())
 
         await #expect(throws: UserSessionError.notSignedIn) {
-            _ = try await transport.pull(since: 0, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID)
+            _ = try await transport.pull(since: 0, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID, deviceID: nil)
         }
         #expect(http.requests.count == 1)
         #expect(provider.refreshCalls == 1)
@@ -327,7 +344,7 @@ struct SupabaseTransportSessionTests {
             sessionProvider: provider, load: http.loader())
 
         await #expect(throws: SupabaseTransportError.httpFailure(status: 503, body: "unavailable")) {
-            _ = try await transport.pull(since: 0, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID)
+            _ = try await transport.pull(since: 0, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID, deviceID: nil)
         }
         #expect(http.requests.count == 1)
         #expect(provider.refreshCalls == 0)
@@ -429,6 +446,11 @@ struct SupabaseTransportSessionTests {
                                     syncVersion: $0.row.syncVersion,
                                     serverSeq: $0.serverSeq, columns: $0.row.columns)
                             })
+                    case .purged:
+                        // Phase 13j: 10's per-row ledger refusal.
+                        return PushResult(
+                            status: "purged", newVersion: nil, serverSeq: nil,
+                            current: nil)
                     }
                 }
                 responseBody = try JSONEncoder().encode(results)
@@ -441,7 +463,7 @@ struct SupabaseTransportSessionTests {
                 let params = try JSONDecoder().decode(PullWire.self, from: body)
                 let rows = try await server.pull(
                     since: params.since_seq, limit: params.max_rows,
-                    activeKeyID: params.active_key_id)
+                    activeKeyID: params.active_key_id, deviceID: nil)
                 responseBody = try JSONEncoder().encode(rows.map {
                     PulledItem(
                         table: $0.row.table, rowID: $0.row.rowID,

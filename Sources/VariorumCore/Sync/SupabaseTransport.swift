@@ -9,6 +9,10 @@ import Foundation
 /// static single-user token; the paste-in's fixed token rides a
 /// `StaticSessionProvider` until Step 5 retires it into the real sign-in).
 ///
+/// Phase 13j: also the real `SyncPurgeTransport` — the three purge RPCs
+/// (`sync_horizon` / `sync_purge_ledger` / `sync_purge_execute`,
+/// 10_phase13j_purge.sql) over the same auth posture and plumbing.
+///
 /// The auth posture, pinned by `SupabaseTransportSessionTests`:
 ///  - **signed-out refuses before any request composes** (the provider's
 ///    throw propagates; the scheduler's offline posture keeps outbox and
@@ -22,7 +26,7 @@ import Foundation
 /// only wire mapping and HTTP plumbing. The integration pass against the
 /// real Supabase project is an **author-assist gate** (account, project,
 /// and session are hers).
-public struct SupabaseTransport: SyncTransport {
+public struct SupabaseTransport: SyncTransport, SyncPurgeTransport {
     public struct Configuration: Sendable {
         /// `https://<project>.supabase.co`
         public let projectURL: URL
@@ -81,10 +85,12 @@ public struct SupabaseTransport: SyncTransport {
         return try results.map { try $0.outcome() }
     }
 
-    public func pull(since: Int64, limit: Int, activeKeyID: String) async throws -> [SyncPulledRow] {
+    public func pull(since: Int64, limit: Int, activeKeyID: String, deviceID: String?) async throws -> [SyncPulledRow] {
         let data = try await rpc(
             "sync_pull",
-            body: PullRequest(sinceSeq: since, maxRows: limit, activeKeyID: activeKeyID))
+            body: PullRequest(
+                sinceSeq: since, maxRows: limit, activeKeyID: activeKeyID,
+                deviceID: deviceID))
         return try JSONDecoder().decode([PulledItem].self, from: data).map(\.pulledRow)
     }
 
@@ -118,6 +124,47 @@ public struct SupabaseTransport: SyncTransport {
                 "sync_schema_version returned '\(body)', not an integer")
         }
         return version
+    }
+
+    // MARK: - SyncPurgeTransport (Phase 13j — 10_phase13j_purge.sql)
+
+    public func syncHorizon(activeKeyID: String) async throws -> Int64 {
+        let data = try await rpc(
+            "sync_horizon", body: PurgeKeyOnlyRequest(activeKeyID: activeKeyID))
+        let body = String(data: data, encoding: .utf8)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard let horizon = Int64(body) else {
+            throw SupabaseTransportError.malformedResult(
+                "sync_horizon returned '\(body)', not an integer")
+        }
+        return horizon
+    }
+
+    public func purgeLedger(since: Int64, activeKeyID: String) async throws -> SyncPurgeLedgerPage {
+        let data = try await rpc(
+            "sync_purge_ledger",
+            body: PurgeLedgerRequest(sinceSeq: since, activeKeyID: activeKeyID))
+        let decoded = try JSONDecoder().decode(PurgeLedgerResult.self, from: data)
+        return SyncPurgeLedgerPage(
+            floor: decoded.floor,
+            entries: decoded.entries.map {
+                SyncPurgedRecord(table: $0.table, rowID: $0.rowID, purgedSeq: $0.purgedSeq)
+            })
+    }
+
+    public func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String) async throws -> Int64 {
+        let data = try await rpc(
+            "sync_purge_execute",
+            body: PurgeExecuteRequest(
+                rows: rows.map { PurgeExecuteItem(table: $0.table, rowID: $0.rowID) },
+                activeKeyID: activeKeyID))
+        let body = String(data: data, encoding: .utf8)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard let seq = Int64(body) else {
+            throw SupabaseTransportError.malformedResult(
+                "sync_purge_execute returned '\(body)', not an integer")
+        }
+        return seq
     }
 
     // MARK: - HTTP plumbing
@@ -256,9 +303,62 @@ struct PushResult: Codable {
             return .accepted(newVersion: newVersion, serverSeq: serverSeq)
         case "rejected":
             return .rejected(current: current?.pulledRow)
+        case "purged":
+            // Phase 13j: the ledger fence (10's per-row refusal) — the
+            // client drops the outbox entry and its local copy.
+            return .purged
         default:
             throw SupabaseTransportError.malformedResult("unknown status '\(status)'")
         }
+    }
+}
+
+// Phase 13j — the purge RPCs' wire DTOs (10_phase13j_purge.sql).
+
+struct PurgeKeyOnlyRequest: Encodable {
+    let activeKeyID: String
+    enum CodingKeys: String, CodingKey { case activeKeyID = "active_key_id" }
+}
+
+struct PurgeLedgerRequest: Encodable {
+    let sinceSeq: Int64
+    let activeKeyID: String
+    enum CodingKeys: String, CodingKey {
+        case sinceSeq = "since_seq"
+        case activeKeyID = "active_key_id"
+    }
+}
+
+struct PurgeLedgerResult: Decodable {
+    struct Entry: Decodable {
+        let table: String
+        let rowID: String
+        let purgedSeq: Int64
+        enum CodingKeys: String, CodingKey {
+            case table
+            case rowID = "row_id"
+            case purgedSeq = "purged_seq"
+        }
+    }
+    let floor: Int64
+    let entries: [Entry]
+}
+
+struct PurgeExecuteItem: Encodable {
+    let table: String
+    let rowID: String
+    enum CodingKeys: String, CodingKey {
+        case table
+        case rowID = "row_id"
+    }
+}
+
+struct PurgeExecuteRequest: Encodable {
+    let rows: [PurgeExecuteItem]
+    let activeKeyID: String
+    enum CodingKeys: String, CodingKey {
+        case rows
+        case activeKeyID = "active_key_id"
     }
 }
 
@@ -289,10 +389,23 @@ struct PullRequest: Encodable {
     let maxRows: Int
     /// Phase 14c: the vault-key-id fence parameter (both round halves).
     let activeKeyID: String
+    /// Phase 13j: the device-cursor report (10's `device_id` parameter) —
+    /// non-nil on a round's first window only. Encoded even when nil
+    /// (PostgREST maps a JSON null onto the parameter's default).
+    let deviceID: String?
 
     enum CodingKeys: String, CodingKey {
         case sinceSeq = "since_seq"
         case maxRows = "max_rows"
         case activeKeyID = "active_key_id"
+        case deviceID = "device_id"
+    }
+
+    func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(sinceSeq, forKey: .sinceSeq)
+        try container.encode(maxRows, forKey: .maxRows)
+        try container.encode(activeKeyID, forKey: .activeKeyID)
+        try container.encode(deviceID, forKey: .deviceID)
     }
 }

@@ -434,6 +434,16 @@ public enum SyncError: Error, Equatable, Sendable {
     /// old-key corpus poisons every later enrollment). Running the
     /// re-key door again completes the road and clears the marker.
     case accountRekeyIncomplete
+    /// Phase 13j (round 10 — the SAY-SO-FIRST returner): this device's
+    /// purge-ledger scan point sits BELOW the ledger's coverage floor —
+    /// it was away long enough that purge records it needs have been
+    /// pruned, so it cannot be reconciled row-by-row. The janitor refuses
+    /// (outbox intact, cursor unmoved — the §12 refusal grammar) and the
+    /// road forward is `SyncEngine.reonboardFromAccount()`: unsynced
+    /// writes pushed first, then the existing `resyncReinitialize`.
+    /// Unreachable in production until ledger pruning exists (the floor
+    /// stays 0); proven against the fake server's settable floor.
+    case deviceLeftBehindReloadRequired(floor: Int64, scanPoint: Int64)
 }
 
 extension SyncError: CustomStringConvertible {
@@ -473,6 +483,13 @@ extension SyncError: CustomStringConvertible {
             return "Sync paused: replacing this account's encryption keys didn't finish on "
                 + "this device. Run Replace Encryption Keys again (Account → Encryption) to "
                 + "complete it; nothing is lost while paused."
+        case .deviceLeftBehindReloadRequired:
+            // Her round-10 wording class, verbatim-faithful: "this phone
+            // has been away a while — it will reload from your account;
+            // anything written here first gets saved up".
+            return "This device has been away a while — it needs to reload from your "
+                + "account. Anything written here first gets saved up; nothing typed is "
+                + "lost. Nothing syncs until the reload runs."
         }
     }
 }

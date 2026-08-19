@@ -87,6 +87,8 @@ extension Queries {
                     SELECT id, title, entry_date, deleted_at
                     FROM container
                     WHERE kind = 'post' AND deleted_at IS NOT NULL AND deleted_at >= :cutoff
+                      AND NOT EXISTS (SELECT 1 FROM purge_intent pi
+                        WHERE pi.table_name = 'container' AND pi.row_id = container.id)
                     ORDER BY deleted_at DESC, id DESC
                     """,
                 arguments: ["cutoff": cutoff]
@@ -104,6 +106,8 @@ extension Queries {
                 sql: """
                     SELECT id, name, deleted_at FROM reading
                     WHERE deleted_at IS NOT NULL AND deleted_at >= :cutoff
+                      AND NOT EXISTS (SELECT 1 FROM purge_intent pi
+                        WHERE pi.table_name = 'reading' AND pi.row_id = reading.id)
                     ORDER BY deleted_at DESC, id DESC
                     """,
                 arguments: ["cutoff": cutoff]
@@ -135,6 +139,8 @@ extension Queries {
                         WHERE cb.block_id = b.id
                           AND cb.deleted_at = b.deleted_at
                           AND cc.deleted_at = b.deleted_at)
+                      AND NOT EXISTS (SELECT 1 FROM purge_intent pi
+                        WHERE pi.table_name = 'block' AND pi.row_id = b.id)
                     ORDER BY b.deleted_at DESC, b.id DESC
                     """,
                 arguments: ["cutoff": cutoff]
@@ -167,6 +173,8 @@ extension Queries {
                     LEFT JOIN container c ON c.id = b.last_container_id
                     WHERE v.deleted_at IS NOT NULL AND v.deleted_at >= :cutoff
                       AND b.deleted_at IS NULL
+                      AND NOT EXISTS (SELECT 1 FROM purge_intent pi
+                        WHERE pi.table_name = 'variant' AND pi.row_id = v.id)
                     ORDER BY v.deleted_at DESC, v.id DESC
                     """,
                 arguments: ["cutoff": cutoff]
@@ -244,6 +252,12 @@ extension Queries {
                 LEFT JOIN container c ON c.id = o.last_container_id
                 GROUP BY f.origin
                 HAVING live_count = 0 AND family_clock >= :cutoff
+                  -- 13j batch 6b: a family with a standing purge intent has
+                  -- left every surface (the doors' promise); its origin
+                  -- rides the purge and stops listing with it.
+                  AND SUM(CASE WHEN EXISTS (SELECT 1 FROM purge_intent pi
+                    WHERE pi.table_name = 'block' AND pi.row_id = f.id)
+                    THEN 1 ELSE 0 END) = 0
                 ORDER BY family_clock DESC, f.origin DESC
                 """,
             arguments: ["cutoff": cutoff]

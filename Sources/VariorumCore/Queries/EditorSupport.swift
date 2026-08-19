@@ -146,6 +146,8 @@ extension Queries {
             sql: """
                 SELECT * FROM variant
                 WHERE block_id = ? AND deleted_at IS NOT NULL AND deleted_at >= ?
+                  AND NOT EXISTS (SELECT 1 FROM purge_intent pi
+                    WHERE pi.table_name = 'variant' AND pi.row_id = variant.id)
                 ORDER BY deleted_at DESC, id
                 """,
             arguments: [blockID, TrashWindow.cutoffStamp(now: now)])

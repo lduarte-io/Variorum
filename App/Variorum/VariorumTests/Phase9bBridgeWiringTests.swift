@@ -67,7 +67,7 @@ private actor GatedSyncTransport: SyncTransport {
         return batch.map { _ in .rejected(current: nil) }
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String) async throws -> [SyncPulledRow] {
+    func pull(since: Int64, limit: Int, activeKeyID: String, deviceID: String?) async throws -> [SyncPulledRow] {
         await pass()
         return []
     }

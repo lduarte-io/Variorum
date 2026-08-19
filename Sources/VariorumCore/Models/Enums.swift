@@ -122,3 +122,27 @@ public enum SavepointCadence: String, Codable, Sendable, CaseIterable, DatabaseV
     /// Does the long-idle sweep still insure a note left open?
     public var savesWhenIdle: Bool { self != .onlyOnCommit }
 }
+
+/// **History pruning** (Phase 13j batch 6b — her round-9 ruling: the 90-day
+/// / keep-10 default *"plus a user setting with a 'Never prune' choice. it
+/// might be important for some users"*).
+///
+/// Stored in the synced `setting` table under `history_pruning` (document
+/// semantics, the `savepoint_cadence` class — one answer on every device,
+/// which is what makes "Never means never on every device" true, memo §4d).
+/// **E2EE-clean by construction:** two enum tokens, never prose, so
+/// `setting.value`'s PLAIN classification and its column-fenced disclosure
+/// promise hold unchanged.
+///
+/// It governs exactly one thing: whether the purge janitor MINTS savepoint
+/// purge intents (`SavepointPruning` is the brain; deliberate ⌘S commits
+/// are never prunable in either mode). Intents already minted — by this
+/// device earlier, or pulled from a peer — are honored regardless: an
+/// instruction that traveled is a fact, not a preference.
+public enum HistoryPruning: String, Codable, Sendable, CaseIterable, DatabaseValueConvertible {
+    /// Her default: quiet savepoints older than 90 days prune down to the
+    /// newest 10 per take.
+    case standard
+    /// Prune nothing, ever.
+    case never
+}

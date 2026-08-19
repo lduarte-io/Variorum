@@ -1,0 +1,127 @@
+import Dependencies
+import Foundation
+import GRDB
+
+// The purge-intent door (Phase 13j batch 6b — the memo's §4a: Delete Now
+// and Empty Trash "both do the same two things: write a purge intent …
+// remove the rows locally the moment the local horizon allows"). This op
+// is the FIRST thing: the intent write, through the operations API like
+// every mutation. The second — the physical removal — is the janitor's
+// (`PurgeJanitor`), horizon-gated, never a door's own act.
+extension Operations {
+    /// The tables an intent may name: the memo's four Trash roots plus
+    /// `commit_point` for savepoint pruning (§4d — "the janitor consults
+    /// [the setting] before minting any savepoint purge intent").
+    static let purgeableTables: Set<String> = [
+        "container", "reading", "block", "variant", "commit_point",
+    ]
+
+    /// **Write purge intents** — "this is going, everywhere." One
+    /// transaction for the whole batch (Empty Trash is one act); one
+    /// intent row per target, deduped against the live-unique
+    /// (table_name, row_id) pair, so asking twice is one purge (the act
+    /// is idempotent by nature — SyncSpec §7's pure-duplicate repair
+    /// covers the cross-device race the same way).
+    ///
+    /// Refusals: a LIVE container/reading/block/variant refuses
+    /// (`purgeTargetNotDeleted` — only things in the Trash purge; a
+    /// full-delete door must never exist in a note context, her round-3
+    /// rider); a MANUAL savepoint refuses
+    /// (`deliberateSavepointNeverPruned` — her round-9 ruling's belt); an
+    /// unknown table refuses (`unsupportedPurgeTarget`). A missing row
+    /// with a standing intent skips (already going); a missing row with
+    /// no intent refuses through the kind's own not-found error.
+    ///
+    /// **No undo entry, deliberately**: the confirm is the guard (round
+    /// 10 — Delete Now confirms EVERY time), and an undo whose inverse
+    /// raced the janitor would be a door that sometimes lies. Not a
+    /// recovery door either — it is the recovery story's deliberate END.
+    /// No touch, no churn: nothing content-shaped changed.
+    ///
+    /// Returns the number of intents actually minted (skips excluded).
+    @discardableResult
+    public func requestPurge(_ targets: [SyncPurgeTarget]) throws -> Int {
+        try database.write { db in
+            var minted = 0
+            let now = date.now
+            for target in targets {
+                guard Self.purgeableTables.contains(target.table) else {
+                    throw OperationError.unsupportedPurgeTarget(table: target.table)
+                }
+                let standing = try Bool.fetchOne(
+                    db,
+                    sql: """
+                        SELECT EXISTS (SELECT 1 FROM purge_intent
+                        WHERE table_name = ? AND row_id = ? AND deleted_at IS NULL)
+                        """,
+                    arguments: [target.table, target.rowID]) ?? false
+                if standing { continue }
+
+                // A row already GONE with any intent standing (live or
+                // completed) is already purged — skip, never re-mint (a
+                // fresh intent for a purged id would circulate forever
+                // with nothing to complete it).
+                guard try validatePurgeable(db, target) else { continue }
+
+                let intent = PurgeIntent(
+                    id: newID(),
+                    ownerId: currentOwnerID(),
+                    tableName: target.table,
+                    rowId: target.rowID,
+                    requestedAt: now,
+                    createdAt: now,
+                    updatedAt: now)
+                try intent.insert(db)
+                minted += 1
+            }
+            return minted
+        }
+    }
+
+    /// The target must be purgeABLE: tombstoned for the four Trash kinds,
+    /// a QUIET savepoint for commit_point. Returns whether an intent
+    /// should be MINTED — a row already gone with any intent standing
+    /// (live or completed) answers false (already purged — idempotence);
+    /// gone with no intent at all refuses through the kind's own error.
+    private func validatePurgeable(_ db: Database, _ target: SyncPurgeTarget) throws -> Bool {
+        func anyIntentStands() throws -> Bool {
+            try Bool.fetchOne(
+                db,
+                sql: "SELECT EXISTS (SELECT 1 FROM purge_intent WHERE table_name = ? AND row_id = ?)",
+                arguments: [target.table, target.rowID]) ?? false
+        }
+        switch target.table {
+        case "container", "reading", "block", "variant":
+            guard let row = try Row.fetchOne(
+                db, sql: "SELECT deleted_at FROM \(target.table) WHERE id = ?",
+                arguments: [target.rowID])
+            else {
+                if try anyIntentStands() { return false }  // already purged
+                switch target.table {
+                case "container": throw OperationError.containerNotFound(id: target.rowID)
+                case "reading": throw OperationError.readingNotFound(id: target.rowID)
+                case "block": throw OperationError.blockNotFound(id: target.rowID)
+                default: throw OperationError.variantNotFound(id: target.rowID)
+                }
+            }
+            guard (row["deleted_at"] as String?) != nil else {
+                throw OperationError.purgeTargetNotDeleted(table: target.table, id: target.rowID)
+            }
+            return true
+        case "commit_point":
+            guard let kind = try String.fetchOne(
+                db, sql: "SELECT kind FROM commit_point WHERE id = ?",
+                arguments: [target.rowID])
+            else {
+                if try anyIntentStands() { return false }
+                throw OperationError.commitNotFound(id: target.rowID)
+            }
+            guard kind == "auto" else {
+                throw OperationError.deliberateSavepointNeverPruned(id: target.rowID)
+            }
+            return true
+        default:
+            throw OperationError.unsupportedPurgeTarget(table: target.table)
+        }
+    }
+}

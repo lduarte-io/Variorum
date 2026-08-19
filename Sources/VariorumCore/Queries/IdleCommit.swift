@@ -34,6 +34,18 @@ extension Queries {
             .flatMap(SavepointCadence.init(rawValue:)) ?? .everySession
     }
 
+    /// **History pruning** (Phase 13j batch 6b, her round-9 ruling): does
+    /// the purge janitor mint savepoint purge intents? Absent or
+    /// unrecognized reads as her default, `.standard` — the
+    /// `savepointCadence` shape, for the same no-seed reason. The janitor
+    /// reads this before minting ANY savepoint intent (memo §4d), so
+    /// "Never" means never on every device (the setting syncs).
+    public static func historyPruning(_ db: Database) throws -> HistoryPruning {
+        try String
+            .fetchOne(db, sql: "SELECT value FROM setting WHERE key = 'history_pruning'")
+            .flatMap(HistoryPruning.init(rawValue:)) ?? .standard
+    }
+
     /// Containers plausibly owed a long-idle auto commit: live, unsealed,
     /// last touched inside the sweep window `(afterMark, cutoff]` (idle
     /// since `cutoff`; already insured up to `afterMark` by a previous

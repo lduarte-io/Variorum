@@ -32,6 +32,10 @@ struct SyncMirrorDumpAndResyncTests {
             // rows' ciphertext too (tombstones travel with their text).
             let doomed = try ops.newBlock(in: post.id, text: "Doomed prose.", at: .end)
             try ops.deleteBlock(doomed.block.id)
+            // Phase 13j (v1_14): a purge intent for it — the dump and the
+            // reinit walk must see the purge table too (all-plain: ids and
+            // enums only, nothing to seal).
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "block", rowID: doomed.block.id)])
 
             let tag = try ops.createTag(parent: nil, name: "life")
             let child = try ops.createTag(parent: tag.id, name: "goals")

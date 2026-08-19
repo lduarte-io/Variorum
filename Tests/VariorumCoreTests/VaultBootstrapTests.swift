@@ -277,8 +277,8 @@ struct VaultBootstrapTests {
             return try await wrapped.push(batch, activeKeyID: activeKeyID)
         }
 
-        func pull(since: Int64, limit: Int, activeKeyID: String) async throws -> [SyncPulledRow] {
-            try await wrapped.pull(since: since, limit: limit, activeKeyID: activeKeyID)
+        func pull(since: Int64, limit: Int, activeKeyID: String, deviceID: String?) async throws -> [SyncPulledRow] {
+            try await wrapped.pull(since: since, limit: limit, activeKeyID: activeKeyID, deviceID: deviceID)
         }
 
         func schemaVersion() async throws -> Int {

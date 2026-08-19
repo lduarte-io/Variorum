@@ -83,6 +83,9 @@ public struct SyncEngine: Sendable {
         /// yet (a straggler, SyncSpec §5) — left enqueued untouched; a pull
         /// brings the referent, then the next push retries.
         public var deferred = 0
+        /// Phase 13j: rows the server refused as PURGED (the ledger fence)
+        /// — outbox entry dropped, local family removed. Never retried.
+        public var purged = 0
         public var iterations = 0
         public init() {}
     }
@@ -151,6 +154,26 @@ public struct SyncEngine: Sendable {
                     var touched = TouchedRows()
                     for (pushed, outcome) in zip(chunk, outcomes) {
                         switch outcome {
+                        case .purged:
+                            // Phase 13j (the memo's §2 ledger): the server
+                            // says this id was PURGED. Drop the outbox
+                            // entry — and the local copy, family-complete,
+                            // or the two stores would never converge (the
+                            // row would linger here as a live orphan no
+                            // feed can ever correct, since its mirror rows
+                            // no longer exist). Runs inside the apply
+                            // transaction with the triggers muted, so the
+                            // family removal's survivor detachment and
+                            // intent completion enqueue EXPLICITLY (the
+                            // SyncSpec §7 repair-write discipline).
+                            let family = try PurgeFamily.expand(
+                                db,
+                                roots: [SyncPurgeTarget(table: pushed.table, rowID: pushed.rowID)])
+                            try PurgeFamily.deleteLocal(
+                                db, family: family, stamp: nowStamp(),
+                                enqueue: { try self.enqueueExplicitly(db, table: $0, rowID: $1) })
+                            try clearOutboxEntry(db, table: pushed.table, rowID: pushed.rowID)
+                            result.purged += 1
                         case .accepted(let newVersion, let serverSeq):
                             try recordAccepted(
                                 db, pushed: pushed, newVersion: newVersion, serverSeq: serverSeq)
@@ -200,7 +223,9 @@ public struct SyncEngine: Sendable {
                 report.accepted += processed.accepted
                 report.rejected += processed.rejected
                 report.deferred += processed.deferred
+                report.purged += processed.purged
                 madeProgress = madeProgress || processed.accepted > 0 || processed.rejected > 0
+                    || processed.purged > 0
             }
             guard madeProgress else { break }
         }
@@ -211,6 +236,7 @@ public struct SyncEngine: Sendable {
         var accepted = 0
         var rejected = 0
         var deferred = 0
+        var purged = 0
     }
 
     // MARK: - Pull (SyncSpec §5)
@@ -251,13 +277,25 @@ public struct SyncEngine: Sendable {
         let crypto = try roundCrypto()
         try await verifySchemaLockstep()
         let since = try await database.read { try cursor($0) }
+        let deviceID = try await database.read { db in
+            try String.fetchOne(db, sql: "SELECT value FROM sync_state WHERE key = 'device_id'")
+        }
         var pulled: [SyncPulledRow] = []
         var fetchCursor = since
         while true {
             // Phase 14c: the held key id rides the pull half too — both
             // round halves are fenced (THE DESIGN 2).
+            //
+            // Phase 13j: the device id rides the FIRST window only, where
+            // `since` is this device's COMMITTED cursor — the server's
+            // device_cursor upsert is what makes the purge horizon
+            // computable. Mid-round windows pass nil: their `since` values
+            // are uncommitted fetch positions, and recording one would
+            // over-report what this device has integrated if the apply
+            // below never commits.
             let window = try await transport.pull(
-                since: fetchCursor, limit: batchSize, activeKeyID: crypto.keys.corpusKeyID)
+                since: fetchCursor, limit: batchSize, activeKeyID: crypto.keys.corpusKeyID,
+                deviceID: fetchCursor == since ? deviceID : nil)
             guard !window.isEmpty else { break }
             // THE SEAM, pull half (Phase 14b): every arriving row is opened
             // BEFORE the apply transaction exists — a decrypt refusal

@@ -856,7 +856,7 @@ struct AccountDoorWiringTests {
         func push(_ batch: [SyncRow], activeKeyID: String) async throws -> [SyncPushOutcome] {
             batch.map { _ in .rejected(current: nil) }
         }
-        func pull(since: Int64, limit: Int, activeKeyID: String) async throws -> [SyncPulledRow] { [] }
+        func pull(since: Int64, limit: Int, activeKeyID: String, deviceID: String?) async throws -> [SyncPulledRow] { [] }
         func schemaVersion() async throws -> Int { SyncSchema.lockstepVersion }
     }
 
@@ -1083,7 +1083,7 @@ struct SyncLockedFaceTests {
             calls += 1
             return batch.map { _ in .rejected(current: nil) }
         }
-        func pull(since: Int64, limit: Int, activeKeyID: String) async throws -> [SyncPulledRow] {
+        func pull(since: Int64, limit: Int, activeKeyID: String, deviceID: String?) async throws -> [SyncPulledRow] {
             calls += 1
             return []
         }

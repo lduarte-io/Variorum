@@ -731,9 +731,9 @@ actor KeyIDRecordingTransport: SyncTransport {
         return try await inner.push(batch, activeKeyID: activeKeyID)
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String) async throws -> [SyncPulledRow] {
+    func pull(since: Int64, limit: Int, activeKeyID: String, deviceID: String?) async throws -> [SyncPulledRow] {
         pullKeyIDs.append(activeKeyID)
-        return try await inner.pull(since: since, limit: limit, activeKeyID: activeKeyID)
+        return try await inner.pull(since: since, limit: limit, activeKeyID: activeKeyID, deviceID: deviceID)
     }
 
     func schemaVersion() async throws -> Int {

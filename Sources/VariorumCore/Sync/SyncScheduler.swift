@@ -80,6 +80,16 @@ public actor SyncScheduler {
     @Dependency(\.date) private var date
 
     private let engine: SyncEngine
+    /// Phase 13j: the purge janitor "rides the existing sync scheduler"
+    /// (the memo's §4b) — nil where the composition's transport has no
+    /// purge surface (test wrappers; the session wires one exactly when
+    /// its transport conforms). A sweep runs after each CLEAN round, and
+    /// a sweep failure never fails the round: the round's data work
+    /// already landed, and the janitor's designed no-op conditions
+    /// (no horizon) return quietly rather than throwing. Genuine sweep
+    /// faults surface on the status row without erasing the round's
+    /// success stamp.
+    private let janitor: PurgeJanitor?
     private var running = false
     private var followUpRequested = false
     /// Set once by `retire()`; a retired scheduler never starts a round.
@@ -90,8 +100,9 @@ public actor SyncScheduler {
 
     public private(set) var status = Status()
 
-    public init(engine: SyncEngine) {
+    public init(engine: SyncEngine, janitor: PurgeJanitor? = nil) {
         self.engine = engine
+        self.janitor = janitor
     }
 
     // MARK: - Triggering
@@ -150,6 +161,19 @@ public actor SyncScheduler {
             status.lastError = nil
             status.lastErrorIsOffline = false
             status.lastSuccessAt = date.now
+            // Phase 13j: the janitor sweeps AFTER a clean round — the
+            // order her round-10 wording implies (unsynced writes pushed
+            // first; the sweep's say-so, if it ever fires, comes after
+            // the drain saved everything typed). A sweep fault surfaces
+            // on the status row but never un-succeeds the round.
+            if let janitor {
+                do {
+                    _ = try await janitor.sweep()
+                } catch {
+                    status.lastError = String(describing: error)
+                    status.lastErrorIsOffline = Self.isOfflineError(error)
+                }
+            }
         } catch {
             // Offline / protected-data / server hiccup: the round is
             // skipped, the outbox keeps everything, the next trigger

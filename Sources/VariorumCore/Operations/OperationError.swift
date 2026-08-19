@@ -216,6 +216,21 @@ public enum OperationError: Error, Equatable, Sendable {
     /// name reason.
     case duplicateBookName(name: String)
 
+    // The purge intent (Phase 13j batch 6b — the memo's §4a; her round-3
+    // ruling seats the doors in the Trash only).
+    /// `requestPurge` addressed a row that is not deleted: only things in
+    /// the Trash can be purged — a live row's road is delete first (and a
+    /// full-delete door must never exist in a note context, her rider).
+    case purgeTargetNotDeleted(table: String, id: String)
+    /// `requestPurge` was handed a table the purge design does not name
+    /// (the memo's roots: container / reading / block / variant, plus
+    /// commit_point for pruning). A programmer-error class, refused loudly.
+    case unsupportedPurgeTarget(table: String)
+    /// **Deliberate ⌘S commits are NEVER pruned, in either mode** (her
+    /// round-9 ruling) — the op-level belt behind `SavepointPruning`'s
+    /// quiet-only brain: an intent naming a manual savepoint refuses.
+    case deliberateSavepointNeverPruned(id: String)
+
     // Smart collection (taste checkpoint, Sitting 9 — R98).
     /// The smart reading's filter cannot be satisfied by tagging (date
     /// bounds, a profile mismatch, an archived post, a malformed spec, or

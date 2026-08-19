@@ -54,7 +54,7 @@ import Foundation
 /// with the suite key world's corpus key id — the fake twin of "setup
 /// wrote the vault before any round ran"); `connection(as:)` hands out
 /// per-account transports for the multi-tenant suites.
-actor FakeSyncServer: SyncTransport {
+actor FakeSyncServer: SyncTransport, SyncPurgeTransport {
     private struct StoredRow {
         var row: SyncRow          // payload; row.syncVersion == current version
         var serverSeq: Int64      // stamped on every accepted change
@@ -72,13 +72,29 @@ actor FakeSyncServer: SyncTransport {
     /// One account's world: its partition (the composite-PK twin), its
     /// key_vault corpus key id (the fence's comparand), its entitlement.
     private struct Account {
-        /// table → rowID → current state. Rows are never removed: a
-        /// tombstone is an ordinary accepted update (S2).
+        /// table → rowID → current state. Rows are never removed BY SYNC —
+        /// a tombstone is an ordinary accepted update (S2). Phase 13j's
+        /// `executePurge` is the ONE remover, exactly as 10's RPC is on
+        /// the real mirror, and every removal leaves a ledger entry.
         var tables: [String: [String: StoredRow]] = [:]
         /// nil = AUTO-ADOPT: the first round's presented key id becomes
         /// the vault's (the bootstrap-runner latitude — `setVaultKeyAutoAdopt`).
         var vaultCorpusKeyID: String?
         var entitled: Bool = true
+        /// Phase 13j: the per-device pull cursors (the `device_cursor`
+        /// twin) — device id → (last committed seq, seen-at clock tick).
+        var deviceCursors: [String: (lastSeq: Int64, seenAt: Int64)] = [:]
+        /// Phase 13j: the content-free purged-ids ledger (`purged_row`).
+        var purgedRows: [PurgedKey: Int64] = [:]
+        /// Phase 13j: the ledger's coverage floor — 0 on the real mirror
+        /// until ledger pruning exists; SETTABLE here so the returner road
+        /// is provable today (`setLedgerFloor`).
+        var ledgerFloor: Int64 = 0
+    }
+
+    struct PurgedKey: Hashable {
+        let table: String
+        let rowID: String
     }
 
     /// user id → account. The default account models the single-user era's
@@ -196,12 +212,28 @@ actor FakeSyncServer: SyncTransport {
         try push(batch, activeKeyID: activeKeyID, as: Self.defaultUserID)
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String) throws -> [SyncPulledRow] {
-        try pull(since: since, limit: limit, activeKeyID: activeKeyID, as: Self.defaultUserID)
+    func pull(since: Int64, limit: Int, activeKeyID: String, deviceID: String?) throws -> [SyncPulledRow] {
+        try pull(
+            since: since, limit: limit, activeKeyID: activeKeyID, deviceID: deviceID,
+            as: Self.defaultUserID)
     }
 
     func schemaVersion() -> Int {
         deployedLockstepVersion
+    }
+
+    // MARK: SyncPurgeTransport (default account)
+
+    func syncHorizon(activeKeyID: String) throws -> Int64 {
+        try syncHorizon(activeKeyID: activeKeyID, as: Self.defaultUserID)
+    }
+
+    func purgeLedger(since: Int64, activeKeyID: String) throws -> SyncPurgeLedgerPage {
+        try purgeLedger(since: since, activeKeyID: activeKeyID, as: Self.defaultUserID)
+    }
+
+    func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String) throws -> Int64 {
+        try executePurge(rows, activeKeyID: activeKeyID, as: Self.defaultUserID)
     }
 
     // MARK: The tenant-scoped halves (the 09 RPC bodies' fake twins)
@@ -258,6 +290,13 @@ actor FakeSyncServer: SyncTransport {
         let heldTransaction = holdingNextPush
         holdingNextPush = false
         return try batch.map { incoming in
+            // Phase 13j — THE LEDGER FENCE (10's per-row check, before any
+            // CAS work): a push naming a purged id answers 'purged'; the
+            // client drops the outbox entry and its local copy.
+            if accounts[userID]?.purgedRows[
+                PurgedKey(table: incoming.table, rowID: incoming.rowID)] != nil {
+                return .purged
+            }
             let current = accounts[userID]?.tables[incoming.table]?[incoming.rowID]
             let currentVersion = current?.row.syncVersion ?? 0
             guard incoming.syncVersion == currentVersion else {
@@ -283,9 +322,17 @@ actor FakeSyncServer: SyncTransport {
     }
 
     func pull(
-        since: Int64, limit: Int, activeKeyID: String, as userID: String
+        since: Int64, limit: Int, activeKeyID: String, deviceID: String? = nil,
+        as userID: String
     ) throws -> [SyncPulledRow] {
         let account = try gatedAccount(userID, activeKeyID: activeKeyID)
+        // Phase 13j — the device-cursor upsert (10's `device_id` arm):
+        // monotonic on last_seq, seen-at stamped with the logical clock.
+        if let deviceID {
+            let existing = accounts[userID]?.deviceCursors[deviceID]?.lastSeq ?? 0
+            accounts[userID]?.deviceCursors[deviceID] =
+                (lastSeq: max(existing, since), seenAt: clock)
+        }
         // Strictly the caller's partition — the composite identity's
         // subtract half comes free: the ten's stored payloads never
         // carried an owner, and the eight's carry the caller's own.
@@ -301,7 +348,84 @@ actor FakeSyncServer: SyncTransport {
                 .map { SyncPulledRow(row: $0.row, serverSeq: $0.serverSeq) })
     }
 
+    // MARK: The purge surface, tenant-scoped (10's three RPC bodies' twins)
+
+    /// The 60-day drop-out window (her round-8 ruling), in the fake's
+    /// LOGICAL CLOCK ticks — tests set it small and advance the clock to
+    /// model a device falling out of the horizon. The default keeps every
+    /// recorded cursor in-window (no test drops a device by accident).
+    private var horizonDropoutTicks: Int64 = .max / 4
+
+    func setHorizonDropoutTicks(_ ticks: Int64) {
+        horizonDropoutTicks = ticks
+    }
+
+    /// The returner-road test hook: the real mirror's floor stays 0 until
+    /// ledger pruning exists; the fake models a future-pruned state.
+    func setLedgerFloor(_ floor: Int64, for userID: String = FakeSyncServer.defaultUserID) {
+        accounts[userID]?.ledgerFloor = floor
+    }
+
+    func syncHorizon(activeKeyID: String, as userID: String) throws -> Int64 {
+        let account = try gatedAccount(userID, activeKeyID: activeKeyID)
+        let live = account.deviceCursors.values
+            .filter { $0.seenAt + horizonDropoutTicks > clock }
+            .map(\.lastSeq)
+        return live.min() ?? 0
+    }
+
+    func purgeLedger(
+        since: Int64, activeKeyID: String, as userID: String
+    ) throws -> SyncPurgeLedgerPage {
+        let account = try gatedAccount(userID, activeKeyID: activeKeyID)
+        let entries = account.purgedRows
+            .filter { $0.value > since }
+            .map { SyncPurgedRecord(table: $0.key.table, rowID: $0.key.rowID, purgedSeq: $0.value) }
+            .sorted {
+                ($0.purgedSeq, $0.table, $0.rowID) < ($1.purgedSeq, $1.table, $1.rowID)
+            }
+        return SyncPurgeLedgerPage(floor: account.ledgerFloor, entries: entries)
+    }
+
+    /// The purge-execution door: deletes exactly the named rows inside the
+    /// caller's partition and records every one in the ledger — idempotent
+    /// (a missing row deletes nothing; an existing ledger entry keeps its
+    /// original seq, the ON CONFLICT DO NOTHING twin). One granted seq per
+    /// call: the purge is one event.
+    func executePurge(
+        _ rows: [SyncPurgeTarget], activeKeyID: String, as userID: String
+    ) throws -> Int64 {
+        _ = try gatedAccount(userID, activeKeyID: activeKeyID)
+        seq += 1
+        let granted = seq
+        for target in rows {
+            accounts[userID]?.tables[target.table]?[target.rowID] = nil
+            let key = PurgedKey(table: target.table, rowID: target.rowID)
+            if accounts[userID]?.purgedRows[key] == nil {
+                accounts[userID]?.purgedRows[key] = granted
+            }
+        }
+        return granted
+    }
+
     // MARK: Test inspection (default account unless a user is named)
+
+    /// Phase 13j inspection: the recorded device cursors and the ledger.
+    func deviceCursor(
+        _ deviceID: String, for userID: String = FakeSyncServer.defaultUserID
+    ) -> Int64? {
+        accounts[userID]?.deviceCursors[deviceID]?.lastSeq
+    }
+
+    func purgedLedgerCount(for userID: String = FakeSyncServer.defaultUserID) -> Int {
+        accounts[userID]?.purgedRows.count ?? 0
+    }
+
+    func isPurged(
+        table: String, rowID: String, for userID: String = FakeSyncServer.defaultUserID
+    ) -> Bool {
+        accounts[userID]?.purgedRows[PurgedKey(table: table, rowID: rowID)] != nil
+    }
 
     var headSeq: Int64 { seq }
 
@@ -367,7 +491,7 @@ actor FakeSyncServer: SyncTransport {
 /// A device's authenticated handle on the fake server: the same transport
 /// protocol, bound to one account — the fake twin of the JWT the real
 /// transport carries per call.
-struct FakeSyncServerConnection: SyncTransport {
+struct FakeSyncServerConnection: SyncTransport, SyncPurgeTransport {
     let server: FakeSyncServer
     let userID: String
 
@@ -375,12 +499,26 @@ struct FakeSyncServerConnection: SyncTransport {
         try await server.push(batch, activeKeyID: activeKeyID, as: userID)
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String) async throws -> [SyncPulledRow] {
-        try await server.pull(since: since, limit: limit, activeKeyID: activeKeyID, as: userID)
+    func pull(since: Int64, limit: Int, activeKeyID: String, deviceID: String?) async throws -> [SyncPulledRow] {
+        try await server.pull(
+            since: since, limit: limit, activeKeyID: activeKeyID, deviceID: deviceID,
+            as: userID)
     }
 
     func schemaVersion() async throws -> Int {
         await server.schemaVersion()
+    }
+
+    func syncHorizon(activeKeyID: String) async throws -> Int64 {
+        try await server.syncHorizon(activeKeyID: activeKeyID, as: userID)
+    }
+
+    func purgeLedger(since: Int64, activeKeyID: String) async throws -> SyncPurgeLedgerPage {
+        try await server.purgeLedger(since: since, activeKeyID: activeKeyID, as: userID)
+    }
+
+    func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String) async throws -> Int64 {
+        try await server.executePurge(rows, activeKeyID: activeKeyID, as: userID)
     }
 }
 

@@ -365,7 +365,7 @@ actor ScriptedTransport: SyncTransport {
         batch.map { _ in .accepted(newVersion: 1, serverSeq: 0) }  // unused in these tests
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String) -> [SyncPulledRow] {
+    func pull(since: Int64, limit: Int, activeKeyID: String, deviceID: String?) -> [SyncPulledRow] {
         Array(rows.filter { $0.serverSeq > since }.prefix(limit))
     }
 

@@ -96,6 +96,19 @@ extension Operations {
         }
     }
 
+    /// **History pruning** (Phase 13j batch 6b — her round-9 ruling: the
+    /// Standard/Never pair beside the cadence setting). Synced document
+    /// semantics, E2EE-clean by its enum values (`HistoryPruning` carries
+    /// the reasoning). Governs MINTING only — the purge janitor consults it
+    /// before writing any savepoint purge intent; intents already minted
+    /// (or pulled from a peer) are honored regardless, and deliberate ⌘S
+    /// commits are never prunable in either mode.
+    public func setHistoryPruning(_ pruning: HistoryPruning) throws {
+        try database.write { db in
+            try upsertSetting(db, key: "history_pruning", value: pruning.rawValue)
+        }
+    }
+
     // MARK: - Shelf pins (R38)
 
     /// Pins a book to the shelf's top (appended to pin order); unpinning

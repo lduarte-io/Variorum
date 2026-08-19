@@ -91,14 +91,14 @@ struct FakeSyncServerTests {
             _ = try await server.push([containerRow(id: id, title: title, base: 0)], activeKeyID: SyncTestKeys.corpusKeyID)
         }
 
-        let firstWindow = try await server.pull(since: 0, limit: 2, activeKeyID: SyncTestKeys.corpusKeyID)
+        let firstWindow = try await server.pull(since: 0, limit: 2, activeKeyID: SyncTestKeys.corpusKeyID, deviceID: nil)
         #expect(firstWindow.map(\.row.rowID) == ["c1", "c2"])
         #expect(firstWindow.map(\.serverSeq) == [1, 2])
 
-        let rest = try await server.pull(since: firstWindow.last!.serverSeq, limit: 100, activeKeyID: SyncTestKeys.corpusKeyID)
+        let rest = try await server.pull(since: firstWindow.last!.serverSeq, limit: 100, activeKeyID: SyncTestKeys.corpusKeyID, deviceID: nil)
         #expect(rest.map(\.row.rowID) == ["c3"])
 
-        let empty = try await server.pull(since: rest.last!.serverSeq, limit: 100, activeKeyID: SyncTestKeys.corpusKeyID)
+        let empty = try await server.pull(since: rest.last!.serverSeq, limit: 100, activeKeyID: SyncTestKeys.corpusKeyID, deviceID: nil)
         #expect(empty.isEmpty)
     }
 
@@ -111,7 +111,7 @@ struct FakeSyncServerTests {
         _ = try await server.push([containerRow(id: "c2", title: "other", base: 0)], activeKeyID: SyncTestKeys.corpusKeyID)
         _ = try await server.push([containerRow(id: "c1", title: "final", base: 1)], activeKeyID: SyncTestKeys.corpusKeyID)
 
-        let all = try await server.pull(since: 0, limit: 100, activeKeyID: SyncTestKeys.corpusKeyID)
+        let all = try await server.pull(since: 0, limit: 100, activeKeyID: SyncTestKeys.corpusKeyID, deviceID: nil)
         #expect(all.map(\.row.rowID) == ["c2", "c1"], "re-accepted row moves to its new seq")
         let c1 = all.first { $0.row.rowID == "c1" }!
         #expect(c1.row.columns["title"] == .text("final"))
@@ -128,7 +128,7 @@ struct FakeSyncServerTests {
         guard case .accepted = result[0] else {
             Issue.record("tombstone update rejected"); return
         }
-        let pulled = try await server.pull(since: 1, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID)
+        let pulled = try await server.pull(since: 1, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID, deviceID: nil)
         #expect(pulled.count == 1)
         #expect(pulled[0].row.isTombstoned)
         #expect(await server.rowCount(table: "container") == 1, "tombstone never removes the row")

@@ -89,13 +89,13 @@ actor FaultInjectingTransport: SyncTransport {
         return outcomes
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String) async throws -> [SyncPulledRow] {
+    func pull(since: Int64, limit: Int, activeKeyID: String, deviceID: String?) async throws -> [SyncPulledRow] {
         pullCalls += 1
         if replayNextPull, !lastPullWindow.isEmpty {
             replayNextPull = false
             return lastPullWindow
         }
-        let window = try await server.pull(since: since, limit: limit, activeKeyID: activeKeyID)
+        let window = try await server.pull(since: since, limit: limit, activeKeyID: activeKeyID, deviceID: deviceID)
         if !window.isEmpty { lastPullWindow = window }
         return window
     }

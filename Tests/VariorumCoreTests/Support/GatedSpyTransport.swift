@@ -79,11 +79,11 @@ actor GatedSpyTransport: SyncTransport {
         return try await server.push(batch, activeKeyID: activeKeyID)
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String) async throws -> [SyncPulledRow] {
+    func pull(since: Int64, limit: Int, activeKeyID: String, deviceID: String?) async throws -> [SyncPulledRow] {
         calls.append(.pull)
         if failing { throw InjectedNetworkFault() }
         await passGate()
-        return try await server.pull(since: since, limit: limit, activeKeyID: activeKeyID)
+        return try await server.pull(since: since, limit: limit, activeKeyID: activeKeyID, deviceID: deviceID)
     }
 
     /// Forwards to the fake server. Deliberately unrecorded and ungated:
