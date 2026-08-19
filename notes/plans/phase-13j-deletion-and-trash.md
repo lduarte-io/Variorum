@@ -2807,6 +2807,23 @@ schema); the purge rule itself stays the memo's.**
   seated per the standing Sync/ rider (Fable); the deploy window
   bundles the phone refresh (needs her + the tunnel).
 
+**PROCESS INCIDENT, self-reported (2026-08-19, the round-9
+commit):** the architect staged with `git add -A` while batch 6
+was LIVE in the same tree — commit `492b4f8` swept the
+implementer's in-progress rig-hardening TEST files
+(`CanvasBankTests`/`CanvasDragTests`/`TakesSlotDragTests`, ~200
+lines) in with the round-9 records, and it is pushed. Harm
+assessed LOW: the swept files are the rider's test rigs only
+(product code untouched by that rider's letter); the tip stays
+correct as batch 6 continues and commits its final state; history
+carries one mislabeled intermediate. NOT reverted (reverting would
+clobber the implementer's live work — the never-checkout-over-
+uncommitted-work rule's spirit). Batch 6 notified so its record
+attributes the rig work accurately. **RULE SHARPENED, binding on
+this orchestrator from now on: while ANY implementer session is
+live in the tree, the architect stages by EXPLICIT PATH only —
+`git add -A`/`git add .` are off the table.**
+
 ## ARCHITECT ADJUDICATION after batch 5 (2026-08-19)
 
 Verified against the five commits (`2d534cf…9d19d7a`): tree clean,
