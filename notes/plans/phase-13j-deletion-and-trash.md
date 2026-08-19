@@ -5143,3 +5143,11 @@ hallucination guard), fix, and pin THE REAL PRESENTATION ROAD —
 a pin that mounts the actual Trash surface and drives the actual
 button (the no-adopt-seam lesson, now twice-taught); the ruled
 confirm-every-time stands unchanged as the letter.
+
+**FINAL ACT (2026-08-19 evening, at her word — "go ahead and
+refresh my app as your final act"):** zero-instance verified (her
+app quit), Release REBUILT (now carrying the books-lesson truth
+sentence), `/Applications` refreshed via ditto, codesign clean.
+Her one click — Help ▸ Restore Tutorial… — now lands the deletion
+chapter AND the books sentence together. The 13j session ends
+here; 13l runs fresh.
