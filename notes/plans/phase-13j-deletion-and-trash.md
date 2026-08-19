@@ -2849,6 +2849,41 @@ schema); the purge rule itself stays the memo's.**
   surprise routes through the contract file to her, never around
   her).
 
+## ARCHITECT ADJUDICATION after batch 6 (2026-08-19)
+
+Verified against the five commits (`c2f08f2`/`8318c1e`/`f9522ff`/
+`001e0be`/`ab12a67`): tree clean, core **1308/139 REPRODUCED by
+the architect's own run**, pushed. Noted in passing: TWO commits
+from a DIFFERENT session (hers — a "13q" delight-phase brief,
+`62d35a6`/`f5cac34`) interleaved in the log; not this phase's
+business, left alone. Batch highlights verified at the record
+level: the rig flake's REAL mechanism (NSHostingView refuses
+first mouse — a rig panel losing key swallows the mouse-down;
+re-assert key + poll + whole-attempt retry; ~12 full Mac runs
+zero drag-rig reds) — the flake class is CLOSED, the honesty line
+on FULLY-GREEN claims retires; revert J's found-by-checking-its-
+own-claim defect (the lineage door offered ARCHIVED blocks whose
+Put back would have placed a still-stamped block) fixed + pinned
+— the record-audit discipline working as designed.
+
+**The PURGE MEMO adjudicated (read in full by the architect):**
+faithful to every ruling; the S2 bend stated precisely; the
+Fragments answer clean (no update needed; deletions deliberately
+do NOT travel to Fragments — stated as a non-surprise; making
+them travel would be a contract-file conversation, not this
+design). TWO mechanical notes for the 6b builder, neither
+product-shaped: **(1)** the DDL's function list needs the
+MIRROR-SIDE PURGE-EXECUTION RPC (the janitor cannot physically
+DELETE mirror rows through CAS push; a tenant-scoped,
+definer-owned function per the 14c non-bypass pattern — same
+pre-authorized lockstep event); **(2)** `device_cursor.seen_at`
+discloses per-device activity timing (content-free) — the E2EE
+disclosure envelope gains one named line (the 14c I-1 precedent).
+The memo's TWO open items go to her now (round 10); its one
+honest statement (unreachable-but-on-disk between day 30 and the
+janitor) is repeated to her verbatim-faithful in the same
+exchange.
+
 **PROCESS INCIDENT, self-reported (2026-08-19, the round-9
 commit):** the architect staged with `git add -A` while batch 6
 was LIVE in the same tree — commit `492b4f8` swept the
