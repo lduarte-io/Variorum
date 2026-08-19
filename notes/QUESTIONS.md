@@ -806,4 +806,20 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint.**
 
-*(Next free number: **#71**.)*
+71. **2026-08-19 · Phase 13j batch 6 (J1 — the Trash, block archive, the purge memo) · FIVE entries.** The BINDING record is the 13j plan's batch-6 section, and the design that returns to you is `notes/plans/phase-13j-purge-memo.md`.
+
+    **WHAT SHIPPED, IN ONE SENTENCE:** everything you delete now rides one 30-day story — the Library's deleted listings became a **Trash** you can filter by kind and sort by date, every row says how many days are left and offers one **Put back**, the same countdown appears in a note's own tray, blocks can now be **archived** (kept forever, no clock) as well as deleted, and a preserved original whose blocks all go to the Trash visibly moves onto their clock instead of quietly promising permanence. **Delete Now and Empty Trash are NOT built yet** — they need the purge, which is the memo waiting for your go.
+
+    **(a) The ⌫ badge still counts DELETED blocks only, so archiving alone shows no badge.** That is your ratified #67(a) applied to the new state: the badge stays an urgent-looking count of things on a clock. Archived blocks appear in the tray's first section, and the archive receipt therefore names the `note ▾` menu item — a door that is always there — rather than a badge that might not be. **The alternative:** count archived blocks too, and the badge appears whenever a note has anything set aside.
+
+    **(b) The Library's door still reads "Archived & Deleted" while the section inside says "Trash".** The door names both halves it holds (the calm Archived section, and the Trash), and every piece of copy elsewhere in the app that points at that surface reads the same constant. **The alternative:** rename the door "Trash & Archived" — one edit, and every pointing sentence follows.
+
+    **(c) An ARCHIVED block is deliberately not a "preserved original" and not offered by the lineage door.** Archive is a set-aside you chose; a preserved original is a leftover from a divide or a merge. Keeping them apart is what lets the lineage door's Put back stay a simple placement — placing an archived block without clearing its stamp would leave a block that is both in the note and marked archived. **The alternative:** let the lineage door offer archived blocks too, and have it clear the stamp on the way.
+
+    **(d) The Trash's filter carries "Originals" as its own row.** A stranded preserved original is neither a deleted block nor a note, so it filters on its own and says "preserved original — goes with its deleted blocks" in the row. **The alternative:** fold it under "Blocks", where it is easier to miss.
+
+    **(e) A stranded original shows in BOTH its note's tray and the global Trash.** That is deliberate — the tray is where you see it MOVE (which is what your round-8b concern was about), and the Trash is where you would go looking for everything that is counting down. It is one row in each place, never two in the same place. **The alternative:** the Trash only.
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#72**.)*

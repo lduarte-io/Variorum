@@ -3008,3 +3008,260 @@ what shipped per item, the memo's existence + its open questions
 FOR HER, pins + revert evidence with checksums, the rig rider's
 repeat-run evidence, suite counts, hand-offs — then commit per
 convention. The architect verifies before relying on it.
+
+---
+
+## BATCH 6 RECORD — the Trash, block archive & the purge memo (2026-08-19; fresh Opus implementer)
+
+**Scope built, to the letter of the rulings** (rounds 3, 5, 7, 8b, 9 and the
+two mid-batch amendments the architect relayed): the Trash surface, the
+read-side 30-day clock, block-level archive, the Blocks-mode routing, the
+three riders, and **the purge design memo**
+(`notes/plans/phase-13j-purge-memo.md`). **ZERO schema** — no migration, no
+column, no index; `SyncSchema.lockstepVersion` still **6** — and **ZERO
+`Sources/VariorumCore/Sync/` lines**. One new capability row
+(`.archiveBlock`, two doors). No Release build, no `/Applications` refresh,
+no push.
+
+Commits: `c2f08f2` (core) · `8318c1e` (the app) · this record. **The rig
+rider landed across `492b4f8` (swept into the architect's records commit
+mid-flight — the self-reported incident) and the architect's subsequent
+records commits**, not in one clean commit of mine; its final state is in the
+tree and is what the runs below exercised.
+
+### THE RIG RIDER — what the flake actually was (built FIRST, per the brief)
+
+The adjudication called it a fixed-sleep anti-pattern and asked for
+poll-for-gesture-start. Polling alone did NOT close it; the trace went two
+steps further, and both steps are recorded because the first was my own
+regression:
+
+1. **A first cut put a full settle turn (layout + async suspension) between
+   the synthesized events.** The canvas pins then failed **~1 run in 3
+   STANDALONE** — worse than the load-only flake. Mechanism: a card's own
+   realization is recomputed mid-drag (`realizedCards` keeps a card only
+   while `dragOffsets[id] != .zero`, which is not yet true before the first
+   `onChanged`), so a layout pass + suspension mid-sequence can tear the
+   gesture's view down before it is recognized. **The event cadence is back
+   to bare pumps**; all waiting moved AFTER the sequence.
+2. **The real mechanism, and it is not timing per se:
+   `NSHostingView.acceptsFirstMouse` is false, so a mouse-down into an
+   INACTIVE window is swallowed as the activating click and never reaches the
+   SwiftUI gesture.** Suites run in PARALLEL in this target, and any other
+   hosted test making ITS window key takes key from the rig's panel
+   mid-test — which is exactly why these pins pass solo and fail
+   intermittently beside other suites, with a subset that varies run to run.
+   The rigs now **re-assert key before every attempt** (the panel is
+   non-activating, so it never steals focus from the machine's front app),
+   and the poll's redrive is a **whole retry** — up, down, drag — because a
+   lone drag event with no accepted down starts nothing.
+3. `TakesSlotDragTests` got a third fix from the same drill: the handle probe
+   SHORTENS the strip, which MOVES the handle, and one fixed settle turn was
+   not enough under load — it now **polls for the layout to come back** before
+   returning the point.
+
+**Repeat-run evidence (all post-hardening, final shape):** solo
+`CanvasDragTrackingTests` **6/6 green**; the three drag suites together
+**11 consecutive green** (3 + 8); and **~10 FULL Mac suite runs** across the
+batch with **zero drag-rig reds in any of them** (the reds those runs did
+show were this batch's own pins and test worlds, each traced and fixed —
+listed below). The last two full runs are clean end to end. Product code:
+untouched by this rider.
+
+### WHAT SHIPPED
+
+**1 — The Trash (J1, round 3).** `Queries.trash` is ONE listing over notes ·
+blocks · takes · books · stranded originals: filter by kind, sort newest or
+oldest, per-row preview, "from ‹note›" context (and *"also in the Trash"*
+when that note is gone too), one **Put back** verb routing to each kind's own
+road (`restoreContainer` / `restoreReading` / `restoreBlock` /
+`restoreVariant` / the tray's `placeBlock` composition), an **Open note**
+door only where the note is live. Windowed with the probe row.
+
+**What it deliberately does not list, each for one reason:** anything past
+the window; a CASCADE VICTIM (a note deleted whole is ONE row — its blocks
+come back with it, so a separate Put back would mean nothing); a stranded
+original whose note is itself in the Trash (it rides the note's one row —
+her round-8b letter).
+
+**2 — The 30-day clock, read-side, zero schema.** `Domain/TrashWindow` is
+the whole rule: `days = 30`, the boundary belongs to the thing being
+recovered, "N days left" counts whole days with the last day a whole one, an
+unparseable stamp reads as IN and wears no clock. **The fence is a REQUIRED
+`now:` parameter** on `deletedPosts`, `deletedReadings`, `trayBlocks`,
+`trayCounts`, `deletedTakes` and `blockPast` — required so a new surface must
+decide rather than inherit a listing that quietly shows what it can no longer
+recover. `archivedPosts` takes none, which is the archive distinction stated
+in the signature. **The Delete Now / Empty Trash doors are NOT built and NOT
+rendered greyed** (P-2, and the brief's fence); the surface's header says the
+window in words so a countdown is never a bare threat.
+
+**3 — Block-level archive (round 7).** `archiveBlock` releases the placement
+(tombstoned, stamp-matched to `archived_at`) and stamps the block;
+`unarchiveBlock` clears the stamp and revives THAT row (the ratified F2
+road), falling back to fresh-at-end. The note renders on with **no
+view-level filtering** — rendering walks live placements, so nothing had to
+learn a new rule. Refusals: `blockAlreadyArchived` / `blockNotArchived` (new
+cases, the `variantNotDeleted` class) and the seal in BOTH directions.
+Structural undo WITH redo (the `archiveVariant` class). Doors: the Block menu
++ the block context menu, declared once, native in Write, Takes and Lenses
+(R118). `archivedBlocks` gives the tray its listing; `preservedOriginals` now
+EXCLUDES archived blocks — a deliberate set-aside is not a leftover, and
+leaving them in would have let `placeBlock` re-place a block whose stamp was
+never cleared.
+
+**Two consequences named rather than assumed:** the ⌫ badge still counts
+DELETED blocks only (her ratified #67(a)), so a note with only archived
+blocks carries no badge — which is why the archive receipt names the `note ▾`
+item, a door that is always there. And archived blocks are excluded from
+`unplacedOrigins`' population by the same exclusion, so the lineage door
+never offers to place a block whose archive stamp would survive the placing.
+
+**4 — Her round-8b ruling, as derived state.** `originFamilyClocks` (per
+note — the recursion is seeded by that note's own originals, so a held tray
+observation costs those families and nothing else) and `strandedOriginals`
+(corpus-wide, on a deliberately-opened surface). An original is permanent
+while ANY descendant lives; when the last one is deleted its row MOVES into
+the tray's clock-bearing section and into the Trash, wearing the family's
+clock (the latest deletion among its descendants) and the words *"preserved
+original — goes with its deleted blocks"*. Put back of any descendant returns
+it to the forever section — pure derivation, pinned as a round trip. The
+delete that strands one says so in its own receipt at every delete door
+(`StrandedOriginals.note`, asked from the STORE after the delete lands).
+
+**THE ONE MECHANISM THAT SURPRISED ME, traced and pinned:** deleting a block
+cascade-tombstones its EDGES, so a family walk that required live edges found
+no family at all for exactly the case it existed to detect — every stranded
+original read as permanent. The walks now read `derived_from` past its
+tombstones (lineage is a fact about what happened; `derived_from` has no
+user-facing delete door), and revert B is that pin.
+
+**5 — The Blocks-mode routing (round 7).** The section is a one-line door
+opening This Note's Tray, and `BlockTOCViewModel.restoreBlock` — the second
+Restore door — retires with the listing it served.
+
+**6 — The riders.** (a) **R2-N2** absorbed as a VALUE
+(`TakesBottomBar.pastSectionTopPadding(pastEmpty:)`) so the decision is
+pinnable without measuring SwiftUI: the always-mounted A1 container keeps its
+life and the sheet stops paying a stack gap for a zero-size view; the A1
+no-adopt pin stayed green throughout. (b) **`noRenderableVariant`** gets a
+real sentence, with reachability re-verified on the gap-slot road (it is the
+last typed refusal those doors could still dump; `blockNotFound`, its sibling
+there, already spoke). (c) the rig hardening above.
+
+**7 — THE PURGE MEMO** — `notes/plans/phase-13j-purge-memo.md`, written TO
+her rounds-8/8b/9 rulings rather than as an options catalog: what the two
+halves of "really delete" mean; the horizon rule with the three binding sync
+facts; the 60-day drop-out and the content-free purged-ids ledger that fences
+a returner; Delete Now / Empty Trash mechanics; the janitor; family-complete
+purge including the lineage-only originals; savepoint pruning at her ruled
+90 days / keep-10 with its "Standard · Never" setting; the Fragments-bridge
+check; S2's exact bend; and **deploy-ready DDL** — client `v1_14`
+`purge_intent`, the mirror twin, `device_cursor`, `purged_row`,
+`sync_horizon()`, the RPC edits, marker 6 → 7 — with the phone-refresh
+consequence flagged for the deploy window.
+
+### PINS + RED-ON-OLD EVIDENCE (behavioral revert, checksummed)
+
+Two new suites, **22 tests**: `TrashAndArchiveTests` (12, core),
+`TrashSurfaceTests` (10, Mac). Every revert restored **byte-identical**
+(`shasum -a 256`, first 12 hex shown).
+
+| Revert | Pins that went RED | Restored |
+|---|---|---|
+| **A** — the tray's age fence removed | `aDeletedThingLeavesEVERYSurfaceAtThirtyDays` (day-31 tray still listed 1) | `PoolAndTray.swift` → `4cd46d5a4f4f` (identical) |
+| **B** — the family walk back to LIVE edges only | `anOriginalIsPermanentWhileADescendantLivesAndMovesWhenTheLastOneGoes` (the stranded listing came back empty) | `Trash.swift` → `ab8975b88b0b` (identical) |
+| **C** — archive stops RELEASING the placement | `archiveReleasesThePlacementAndStampsTheBlock` (the note still rendered it) · `theArchiveDoorsRefuseWhatTheyMust` (the seal no longer refused — no pointer change to refuse) | `Operations+BlockArchive.swift` → `bccbf64fd7fb` (identical) |
+| **D** — unarchive mints fresh at the end | `unarchivePutsTheBlockBackWhereItStood` (2 issues: `.endOfNote`, and the order) · `archiveIsOneStructuralEntryThatUndoesAndRedoes` | `Operations+BlockArchive.swift` → `bccbf64fd7fb` (identical) |
+| **E** — the Trash lists cascade victims | `aNoteDeletedWholeIsONERowAndItsBlocksAreNeverDoubleListed` (3) · `aBlockWhoseNoteDiedLaterSaysSo` (2) · `aStrandedOriginalRidesTheNotesOneRowWhenTheWholeNoteGoes` | `Trash.swift` → `ab8975b88b0b` (identical) |
+| **F** — the archive receipt silenced | `theWriteDoorArchivesTheCaretBlockAndSaysWhereItWent` (2) | `EditorSurfaceController.swift` → `68e0c85c27e4` (identical) |
+| **G** — R2-N2 un-absorbed | `theHistorySheetStopsPayingForAnEmptyPastSection` | `TakesBottomBar.swift` → `9f86a8dfcbe6` (identical) |
+| **H** — the enum dump restored | `theGapSlotRefusalSpeaksInsteadOfDumpingItsEnum` (3) | `OpsRefusalCopy.swift` → `363da0abfcfe` (identical) |
+| **I** — the stranding sentence removed | `theDeleteReceiptNamesAnOriginalItJustStranded` | `TrayPanel.swift` → `8705fb25e33a` (identical) |
+
+**Consequential pin edits, each annotated IN PLACE** (the batch-2/3/4/5
+precedent — a RULED change, never a quietly relaxed pin):
+`NoteTrayTests`' section-name pin GRADUATES (batch 2 named it "Deleted"
+because no op could produce an archived block; round 7 built the state, so
+the pin now asserts the heading may name "archived" only while the act is
+declared and the tray can list one); `StructuralGestureTests`'
+`contextMenuItemsFireAndSpeak` literal gains "Archive Block" (the ceremony
+rows' own precedent); `LifecycleFacesTests`' two recovery-face pins keep
+their claims through the Trash's shape (`adopt(archived:trash:)`, and the
+book's restore road is now the Trash row's one Put back);
+`BlockTOCTests`' restore arm runs the OP directly, since the mode's own
+Restore door retired by her ruling.
+
+**Three test-world fixes, called out because they are mine and they were
+FOUND BY THE SUITE, not by me:** `AppSession` now snapshots a read-side
+clock at construction, so three synthetic worlds that built a session outside
+any dependency scope (`RecoveryFaceCaptureTests`, `BookCarryTests`,
+`ShelfAndPaletteTests`' catalog filter) began reporting an unimplemented-date
+issue. Each names its clock now. A static sweep of every
+`AppSession(database:)` in the test target confirms none is left.
+
+### THE VISUAL LOOP
+
+**Not captured, measured rather than assumed — the batch-2/3 finding stands
+and now covers this batch's two surfaces:** `TrayPanel`, `OriginPeekPanel`
+and the Trash listing are SwiftUI `List`s (NSTableView-backed), and
+`ImageRenderer` draws its unsupported-view placeholder for them. Writing a
+capture arm would have produced a broken image, so none was written.
+
+**HAND-CHECK ITEMS for the next drive** (the batch's whole face): the Trash
+section — its filter menu, the sort toggle, a row's countdown beside its
+"from ‹note›" context, and the Open-note door; the tray's first section with
+all three row kinds visible at once (a deleted block with a countdown, an
+archived block saying "kept — no clock", a stranded original with the family
+clock and its sentence); the Blocks-mode one-line door; and the Takes history
+sheet's spacing with an EMPTY past region (R2-N2's absorption, which is the
+one item a screenshot answers better than a value pin).
+
+### SUITE COUNTS (every "Test run with N tests" line confirmed)
+
+- core `swift test` — **1307 tests / 139 suites PASSED** (baseline 1295/138
+  + 12 in 1 new suite)
+- Mac (`-project` invocation) — **1526 tests / 267 suites PASSED, FULLY
+  GREEN, zero reds** (baseline 1516/266 + 10 in 1 new suite), and **green on
+  two consecutive full runs**
+- tutorial spine, by TYPE name (the seven from the batch-1 record) —
+  **51 tests / 7 suites PASSED** (baseline exact)
+- mobile (`VariorumMobile`, iPhone 16e) — **314 tests / 60 suites PASSED**
+  (baseline exact). Run because core `Sources/` was touched.
+
+### FOR THE ARCHITECT / HER
+
+- **THE MEMO'S OPEN QUESTIONS, and they are two and small** (everything else
+  her rounds 8/8b/9 settled): **(i)** whether a device that returns after
+  falling out of the horizon should re-onboard SILENTLY or say so first (the
+  build's default: say so — a silent reload of a whole device is the kind of
+  thing this phase exists to stop hiding); **(ii)** whether Delete Now should
+  confirm every time or once per sitting (the build's default: every time).
+  The memo also states once, plainly, that between day 30 and the janitor a
+  thing is unreachable but its rows are still on disk — which is exactly what
+  the purge exists to end.
+- **QUESTIONS #71 logged** (five lettered entries in her format): the
+  badge's archived exclusion; the Library door still reading "Archived &
+  Deleted" while the section inside says "Trash"; the archived-blocks
+  exclusion from preserved originals and from the lineage door; the Trash's
+  kind filter carrying "Originals" as its own row; and the stranded row
+  appearing in BOTH the note's tray and the global Trash.
+- **BATCH 6b HAND-OFF.** The memo's §7 carries the build shape. Two seams it
+  can reuse: `TrashWindow` already answers "is this past the window", and
+  `Queries.trash` already enumerates exactly what Empty Trash would take.
+- **BATCH 7 HAND-OFF.** The tutorial's deletion chapter now has three verbs
+  to teach as one story — Archive (kept, this note's tray) · Delete (30-day
+  clock) · Move to scraps (material for anywhere) — and the archived-vs-Trash
+  distinction is the thing her round-5 statement asked be taught EXPLICITLY.
+- **PARITY LEDGER.** The phone inherits by construction: `TrashWindow`, the
+  fences, `Queries.trash`, `archiveBlock`/`unarchiveBlock`, `archivedBlocks`,
+  the stranded-original derivation — all core. It OWES the faces: a Trash
+  surface, the tray's countdown and archived rows, and the archive door.
+- **Environment.** Her real-store instance was NOT running for most of the
+  batch and WAS running (PID 65689, `/Applications`) for the final suite runs
+  — never touched: no kill, no quit, no `/Applications` write, no Release
+  build, no push. A `fragments`-project `xcodebuild` (another session's) was
+  observed running early in the batch; it was left alone, and every Mac suite
+  run reported below was started with no other `xcodebuild` active.
+- **Nothing PENDING** — every count and every claim above is from a run in
+  this session.
