@@ -54,6 +54,47 @@ from real two-device use, which the mobile project enables.
 - Whether candidates 3 and 4 are in scope.
 - Where the visible evidence lives (log vs face).
 
+## Recorded leans & facts for the kickoff (2026-08-18/19 — leans, not rulings; the sitting still decides)
+
+From the author's backup questions (2026-08-18 conversation, folded here at
+her 2026-08-19 instruction):
+
+- **Fact:** the app has backed itself up automatically since Phase 8 — the A1
+  WAL-safe snapshot (SQLite Online Backup API), checked hourly, written when
+  the newest copy is >24h old, keeping 14, integrity-pinned. The copies land
+  in `Backups/` beside the store — same disk, same container. **The real gap
+  is the second location, not the mechanism.**
+- **Lean — second-destination-first:** extend the EXISTING in-app scheduler to
+  a second (off-disk / iCloud Drive) destination rather than a personal
+  script or launchd job. Three grounds: the app already owns the correct
+  WAL-safe primitive and the correct sandboxed path (the 14c record has a
+  real wrong-container-path mishap from a hand-run backup); the store only
+  changes while the app runs, so an in-app timer misses nothing launchd would
+  catch; the brief already blesses one iCloud Drive copy (the 2026-07-06 ban
+  was build-artifact churn, not single files). This refines scope item 1's
+  "(launchd)" wording — the kickoff picks.
+- **Lean — button-as-adjunct:** a "Back Up Now…" button with a destination
+  picker is welcome ON TOP of the automatic job, never as the load-bearing
+  mechanism — a manual button is "the job that silently stopped" wearing a
+  different hat ("I forgot to press it for a month"). Freshness evidence
+  stays the load-bearing face.
+- **Fact (2026-08-19, hers):** she is on **Supabase Pro** now — the mirror
+  side has 7-day server backups. Deliberately OUT of this phase's scope
+  (local SQLite is truth; the mirror is a re-derivable peer, proven live at
+  the 14c gate) — recorded so the kickoff knows the server side is covered
+  and doesn't re-scope toward it. Note the mirror is ciphertext: a Supabase
+  backup recovers synced STATE, never readable prose without her passphrase —
+  one more reason the drill points at the local store.
+- **Interim, zero-effort (until this phase runs):** point Time Machine (or
+  any file-level backup she already runs) at the app container — the
+  `Backups/` snapshots are single self-contained `.sqlite` files, no WAL
+  sidecars, exactly the shape file-level tools copy safely.
+- **Context for the kickoff:** her 2026-08-19 message asked whether she can
+  return to real daily use NOW (she paused around Phase 14). The answer given
+  (and worth re-affirming at the sitting): yes — this phase hardens the
+  floor, it is not a precondition for use; real daily use is itself what
+  Phase 12 waits for.
+
 ## What this phase is NOT
 
 - Not Phase 12 (at-scale hardening stays there; 12 re-baselines on
