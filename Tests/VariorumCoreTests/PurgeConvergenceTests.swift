@@ -605,21 +605,72 @@ struct PurgeConvergenceTests {
                 "one synced member ⇒ the whole family waits (family-completeness)")
         #expect(try familyRowCount(a, post: family.post) > 0)
 
-        // The TRANSPORTED janitor's local arm is the same rule from the
-        // other side: a never-pushed family purges locally with no
-        // executePurge and no ledger entry, even signed in.
+        // The TRANSPORTED sweep's side of the same coin (round-1
+        // residuals, Obs 1 — the hardening): on a CONFIGURED chain,
+        // seq-absence is not proof of mirror absence (a reinit clears the
+        // seq table wholesale), so a seq-absent-but-outbox-pending family
+        // DEFERS — one round of latency — then drains, becomes synced,
+        // and purges through the LEDGERED road (the truer story for rows
+        // the mirror did see). The outbox-blind immediate purge belongs
+        // to LocalPurge alone (asserted above and in test 11).
         let fresh = try buildAndDeleteFamily(a)
         try a.with { ops, _ in
             _ = try ops.requestPurge([SyncPurgeTarget(table: "container", rowID: fresh.post)])
         }
-        let ledgerBefore = await server.purgedLedgerCount()
+        let held = try await sweep(a, server)
+        #expect(held.familiesDeferred >= 1,
+                "pending-but-seq-absent defers on the transported road")
+        #expect(try familyRowCount(a, post: fresh.post) > 0)
+        try await round(a)
+        try await round(a)
         let swept = try await sweep(a, server)
         #expect(swept.familiesPurged >= 1)
         #expect(try familyRowCount(a, post: fresh.post) == 0)
-        #expect(await server.purgedLedgerCount() == ledgerBefore,
-                "a local-only family writes no ledger entry")
-        #expect(await server.currentRow(table: "container", rowID: fresh.post) == nil,
-                "the mirror never saw it and never will")
+        #expect(await server.isPurged(table: "container", rowID: fresh.post),
+                "drained first ⇒ the purge is ledgered like any synced family's")
+        #expect(await server.currentRow(table: "container", rowID: fresh.post) == nil)
+    }
+
+    // MARK: - 14. Round-1 residuals (Obs 1): the reinit window — seq
+    // absence is NOT mirror absence on a configured chain
+
+    @Test func aReinitializedStoreNeverLocalPurgesItsSyncedFamilies() async throws {
+        let server = FakeSyncServer()
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+
+        // A synced, 30-day-old deleted family — the mirror holds it all.
+        let family = try buildAndDeleteFamily(a)
+        try backdate(a, from: family.deletedStamp, to: oldStamp)
+        try await round(a)
+        try await round(a)
+
+        // The reinit clears sync_row_seq WHOLESALE and re-enqueues every
+        // row — the mirror is untouched. A sweep in this window must not
+        // read the family as local-only: a local purge here would be a
+        // transient resurrection (the mirror re-serves the rows) and, on
+        // the old code, rows physically removed with the mirror copies
+        // still standing.
+        try await a.withAsync { _ in
+            try await a.engine().resyncReinitialize()
+        }
+        let inWindow = try await sweep(a, server)
+        #expect(inWindow.familiesPurged == 0,
+                "seq-absent + outbox-pending defers — never the local road")
+        #expect(try familyRowCount(a, post: family.post) > 0,
+                "nothing removed while the mirror still holds the family")
+        #expect(await server.currentRow(table: "container", rowID: family.post) != nil)
+        #expect(await server.purgedLedgerCount() == 0)
+
+        // The window self-closes: the next rounds re-record seqs (push
+        // re-accepts at CAS; pull records the rest), and the family then
+        // purges through the ledgered synced road.
+        try await round(a)
+        try await round(a)
+        let after = try await sweep(a, server)
+        #expect(after.familiesPurged >= 1)
+        #expect(try familyRowCount(a, post: family.post) == 0)
+        #expect(await server.isPurged(table: "container", rowID: family.post))
+        #expect(await server.currentRow(table: "container", rowID: family.post) == nil)
     }
 
     // MARK: - 12. 13j ladder B (B2): a returner's unpushed CHILD of a

@@ -221,6 +221,17 @@ extension Queries {
         /// their own state and their own count below) — an archived block is
         /// unplaced too, and counting it as a preserved original would call
         /// a deliberate set-aside a leftover.
+        ///
+        /// **FATE-BLIND, by design and now by contract (13j ladder B
+        /// round-1 residuals, item 1):** this count has no family
+        /// recursion, so it cannot tell a permanent original from a
+        /// `.gone` one (family expired, or intent-named) — the badge query
+        /// must stay cheap (it re-fires at delete/restore rate, never
+        /// autosave rate, but it is HELD per open note). No user-facing
+        /// copy may therefore promise anything about this number's rows —
+        /// the badge tooltip stopped naming it for exactly that reason;
+        /// fates live in `originFamilyClocks`, read by the panel that can
+        /// afford them.
         public let preservedOriginals: Int
         /// Blocks ARCHIVED out of this note (13j round 7). They wear no
         /// clock: archive is kept-forever, which is exactly the distinction

@@ -119,7 +119,6 @@ struct PaneHost<Content: View>: View {
                 trayFace: notePostID.map { _ in
                     ContextBar.TrayFace(
                         deletedCount: trayCounts.deleted,
-                        preservedCount: trayCounts.preservedOriginals,
                         onOpen: { trayShown = true })
                 },
                 onBack: onBack,

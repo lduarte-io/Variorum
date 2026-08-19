@@ -4385,9 +4385,17 @@ each:
   window; the direction stays interpolated (an ORDER BY keyword cannot
   bind), commented at the site.
 
-**Residual counts (this pass):** core `swift test` — **1349 tests /
-141 suites PASSED, FULLY GREEN** (+1: the reinit pin) · Mac — see the
-run below · spine 63/8 · mobile 314/60 (Sources/ touched — run).
+**Residual counts (this pass, every count line confirmed):** core
+`swift test` — **1349 tests / 141 suites PASSED, FULLY GREEN** (+1:
+the reinit pin) · Mac (`-project` invocation) — **1545 tests / 269
+suites PASSED, FULLY GREEN, zero reds** (baseline exact — the tooltip
+pin graduated in place, no net-new Mac tests) · tutorial spine, by
+TYPE name — **63 tests / 8 suites PASSED** · mobile (`VariorumMobile`,
+iPhone 16e) — **314 tests / 60 suites PASSED** (run — `Sources/` was
+touched; the phone inherits the verdict hardening and the bound-limit
+queries by construction; the tooltip surface is Mac chrome). No
+instance touched, no Release build, no `/Applications` write, no
+live-mirror contact, no push.
 
 ## Batch 7 brief — the tutorial's deletion chapter + the note-history brief (a FRESH Opus implementer; self-contained)
 

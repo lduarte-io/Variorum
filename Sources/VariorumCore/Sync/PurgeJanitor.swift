@@ -137,7 +137,8 @@ public struct PurgeJanitor: Sendable {
             if processed.contains(root) { continue }
             let staged: (PurgeFamily.Expansion, Self.FamilyVerdict) = try await database.read { db in
                 let family = try PurgeFamily.expand(db, roots: [root])
-                return (family, try Self.familyVerdict(db, family, horizon: horizon))
+                return (family, try Self.familyVerdict(
+                    db, family, horizon: horizon, road: .transported))
             }
             let expansion = staged.0
             var verdict = staged.1
@@ -378,16 +379,35 @@ public struct PurgeJanitor: Sendable {
         case stale
     }
 
+    /// Which sweep is asking (13j ladder B round-1 residuals, Obs 1): the
+    /// TRANSPORTED road treats a seq-absent-but-outbox-pending family as
+    /// `.deferred` — `sync_row_seq` absence is not proof of mirror absence
+    /// on a configured chain (`resyncReinitialize` clears the seq table
+    /// wholesale while the mirror still holds every row; a sweep in that
+    /// window would otherwise local-purge synced families into a transient
+    /// resurrection). Cost: ONE round of latency for a family minted and
+    /// deleted before it ever pushed — it drains, becomes synced, and
+    /// purges through the ledgered road, which is the truer story for rows
+    /// the mirror did see. The LOCAL road stays outbox-blind (her round-11
+    /// letter: the never-configured install's rows sit in the outbox
+    /// forever by construction, and no chain exists to have cleared seqs).
+    enum SweepRoad: Equatable {
+        case transported
+        case localOnly
+    }
+
     /// One consistent read-transaction verdict for a family (the fix
     /// placement the 6b response asked for): staleness first, then the
     /// local/synced split, then synced eligibility. `rowExists → skip`
     /// keeps its meaning — ABSENT is already-purged, proceed.
     static func familyVerdict(
-        _ db: Database, _ family: PurgeFamily.Expansion, horizon: Int64
+        _ db: Database, _ family: PurgeFamily.Expansion, horizon: Int64,
+        road: SweepRoad
     ) throws -> FamilyVerdict {
         let tombstonedKinds: Set<String> = ["container", "reading", "block", "variant"]
         var anySynced = false
         var allSyncedEligible = true
+        var anyPendingSeqAbsent = false
         for target in family.rows {
             let seq = try Int64.fetchOne(
                 db,
@@ -406,9 +426,13 @@ public struct PurgeJanitor: Sendable {
                 db,
                 sql: "SELECT EXISTS (SELECT 1 FROM sync_outbox WHERE table_name = ? AND row_id = ?)",
                 arguments: [target.table, target.rowID]) ?? false
+            if pending, seq <= 0 { anyPendingSeqAbsent = true }
             if pending || seq <= 0 || seq > horizon { allSyncedEligible = false }
         }
-        if !anySynced { return .eligibleLocalOnly }
+        if !anySynced {
+            if road == .transported, anyPendingSeqAbsent { return .deferred }
+            return .eligibleLocalOnly
+        }
         return allSyncedEligible ? .eligibleSynced : .deferred
     }
 
@@ -609,10 +633,18 @@ public struct PurgeJanitor: Sendable {
 /// no horizon, no `executePurge`. Only families whose EVERY row is
 /// `sync_row_seq`-absent purge here (the per-FAMILY discriminator she
 /// adopted): a family with one synced member has a mirror copy somewhere
-/// and WAITS for the transported janitor — which is also why running this
-/// beside a configured sync session is pointless rather than dangerous
-/// (the app gates on `SyncSession.isConfigured` instead of racing two
-/// sweeps). Stale intents complete here too (B1's rule is road-independent),
+/// and WAITS for the transported janitor. Racing a CONFIGURED chain would
+/// not corrupt but could cost (13j ladder B residuals, Obs 2 — the exact
+/// sentence): this road is outbox-blind, and after a `resyncReinitialize`
+/// (seq table cleared wholesale, mirror intact) it would read synced
+/// families as local-only — a local purge whose mirror copies re-arrive
+/// on the next pull, i.e. **transient resurrection converging to
+/// purged**. That is exactly why the app gates this road on
+/// `SyncSession.isConfigured` (a reinit implies a configured chain), and
+/// why the transported sweep carries the seq-absent-but-pending deferral
+/// this road deliberately does not (her round-11 letter: the
+/// never-configured install's outbox is full by construction).
+/// Stale intents complete here too (B1's rule is road-independent),
 /// and savepoint pruning mints by the same brain, so a local install's
 /// quiet history prunes exactly like a synced one's.
 public struct LocalPurge: Sendable {
@@ -661,7 +693,8 @@ public struct LocalPurge: Sendable {
                 try await database.write { db in
                     try db.execute(sql: "PRAGMA defer_foreign_keys = ON")
                     let family = try PurgeFamily.expand(db, roots: [root])
-                    let verdict = try PurgeJanitor.familyVerdict(db, family, horizon: 0)
+                    let verdict = try PurgeJanitor.familyVerdict(
+                        db, family, horizon: 0, road: .localOnly)
                     switch verdict {
                     case .stale:
                         let stale = try String.fetchAll(

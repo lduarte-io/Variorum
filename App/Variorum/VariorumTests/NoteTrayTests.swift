@@ -52,8 +52,13 @@ struct NoteTrayTests {
                 tagFace: ContextBar.TagFace(
                     tags: [], allTags: [], onApply: { _ in }, onRemove: { _ in }),
                 tagsFolded: false,
+                // (Ladder B round-1 residuals, item 1 — annotated pin
+                // edit: TrayFace dropped preservedCount with the tooltip's
+                // originals clause; `preserved` stays a parameter here so
+                // the CLAIM — the badge is deleted-only whatever originals
+                // exist — keeps its two-axis matrix.)
                 trayFace: ContextBar.TrayFace(
-                    deletedCount: deleted, preservedCount: preserved, onOpen: {}),
+                    deletedCount: deleted, onOpen: {}),
                 onBack: {}, onForward: {}, onOpenBook: { _ in }, onToggleTags: {})
         }
         #expect(!bar(deleted: 0, preserved: 0).trayDoorShown)
@@ -75,18 +80,27 @@ struct NoteTrayTests {
         #expect(ContextBarDoors.Icon.allCases.count == 4)
     }
 
-    /// The tooltip names both counts, because the glyph can name neither —
-    /// and a badge reading "3" over a four-row panel would read as a
-    /// miscount.
-    @Test func theBadgeTooltipNamesBothCountsHonestly() {
-        let onlyDeleted = WorkspaceNaming.trayDoorHelp(deleted: 1, preserved: 0)
-        #expect(onlyDeleted.contains("1 block deleted"))
-        #expect(!onlyDeleted.contains("original"), "nothing to mention: \(onlyDeleted)")
-        let both = WorkspaceNaming.trayDoorHelp(deleted: 3, preserved: 1)
-        #expect(both.contains("3 blocks deleted"))
-        #expect(both.contains("1 original"))
-        #expect(WorkspaceNaming.trayDoorHelp(deleted: 2, preserved: 2)
-            .contains("2 originals"), "plural stays plural")
+    /// The tooltip names the ONE number the badge shows — deleted blocks.
+    ///
+    /// **GRADUATED (13j ladder B round-1 residuals, item 1 — a RULED
+    /// change, never a quietly relaxed pin):** the old claim asserted the
+    /// "plus N originals" clause. That count came from the fate-blind
+    /// `trayCounts`, so a `.gone` original (family expired or Delete Now
+    /// named it) still counted — a number the panel truthfully does not
+    /// show, under the exact "put any of them back" promise the B5 call
+    /// ruled out. The clause is gone; this pin now asserts its ABSENCE at
+    /// every count, which is what makes it red if the clause ever
+    /// returns without a fate-aware source.
+    @Test func theBadgeTooltipNamesTheDeletedCountAndNeverOriginals() {
+        let one = WorkspaceNaming.trayDoorHelp(deleted: 1)
+        #expect(one.contains("1 block deleted"))
+        #expect(one.contains("put any of them back"))
+        let three = WorkspaceNaming.trayDoorHelp(deleted: 3)
+        #expect(three.contains("3 blocks deleted"), "plural stays plural")
+        for help in [one, three] {
+            #expect(!help.contains("original"),
+                    "the tooltip may not promise a fate it cannot see: \(help)")
+        }
     }
 
     // MARK: - The registry: ONE act, TWO doors (P-1)

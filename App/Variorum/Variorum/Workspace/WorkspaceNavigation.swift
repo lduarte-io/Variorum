@@ -452,21 +452,25 @@ nonisolated enum WorkspaceNaming {
     /// 13k K12 — the ＃ door's two states. Her ruling made folding a
     /// deliberate, sticky choice, so the door must say which way it goes.
     /// **The tray badge's tooltip** (13j J2). The glyph alone cannot say
-    /// what it opens, so the tooltip names the surface AND both counts —
-    /// the badge shows only the deleted number (sitting round 5), and a
-    /// panel with a fourth row under it would otherwise read as a miscount.
-    static func trayDoorHelp(deleted: Int, preserved: Int) -> String {
+    /// what it opens, so the tooltip names the surface and the ONE number
+    /// the badge shows — deleted blocks (sitting round 5).
+    ///
+    /// **The "plus N originals" clause is GONE (13j ladder B round-1
+    /// residuals, item 1 — the batch-6 sanity pass's find):** its count
+    /// came from `Queries.trayCounts`, which is fate-blind by design (the
+    /// badge query must stay cheap — no family recursion), so a `.gone`
+    /// original (family expired, or Delete Now named it) still counted —
+    /// a number the panel truthfully does not show, under the exact
+    /// "put any of them back" promise the B5 call ruled a `.gone` row
+    /// must not carry. The panel's own sections name their rows ("kept —
+    /// no clock", "goes with its deleted blocks"), so the extra rows
+    /// explain themselves where the fates are actually known — the J8
+    /// copy bar: a tooltip may not promise what a fate it cannot see.
+    static func trayDoorHelp(deleted: Int) -> String {
         let deletedPhrase = deleted == 1
             ? "1 block deleted from this note"
             : "\(deleted) blocks deleted from this note"
-        guard preserved > 0 else {
-            return "\(deletedPhrase) \u{2014} click to put any of them back"
-        }
-        let preservedPhrase = preserved == 1
-            ? "1 original a divide or merge kept whole"
-            : "\(preserved) originals a divide or merge kept whole"
-        return "\(deletedPhrase), plus \(preservedPhrase) \u{2014} "
-            + "click to put any of them back"
+        return "\(deletedPhrase) \u{2014} click to put any of them back"
     }
 
     static func tagsFoldHelp(folded: Bool) -> String {

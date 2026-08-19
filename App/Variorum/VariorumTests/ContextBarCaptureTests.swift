@@ -56,7 +56,7 @@ struct ContextBarCaptureTests {
         // so every state this harness already captured renders EXACTLY as it
         // did before the door existed (which is itself the claim her K11
         // ruling cares about: at rest, the bar is unchanged).
-        trayDeleted: Int = 0, trayPreserved: Int = 0
+        trayDeleted: Int = 0
     ) -> ContextBar {
         ContextBar(
             tokens: tokens, originLabel: origin, forwardLabel: forward, books: books,
@@ -65,7 +65,7 @@ struct ContextBarCaptureTests {
             },
             tagsFolded: folded,
             trayFace: tags == nil ? nil : .init(
-                deletedCount: trayDeleted, preservedCount: trayPreserved, onOpen: {}),
+                deletedCount: trayDeleted, onOpen: {}),
             onBack: {}, onForward: {}, onOpenBook: { _ in }, onToggleTags: {})
     }
 
@@ -111,7 +111,7 @@ struct ContextBarCaptureTests {
                      tags: tags, folded: false, trayDeleted: 1)),
                 ("8-tray-badge-with-originals-waiting",
                  bar(tokens: tokens, origin: "Orbit", forward: nil, books: one,
-                     tags: tags, folded: false, trayDeleted: 3, trayPreserved: 2)),
+                     tags: tags, folded: false, trayDeleted: 3)),
             ]
             for (name, state) in states {
                 try write(state, tokens: tokens, to: "\(voiceName)-\(name).png")

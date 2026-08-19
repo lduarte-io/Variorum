@@ -88,7 +88,13 @@ extension Queries {
         // the in-memory merge below compares — so per-arm LIMITs and the
         // merged prefix agree exactly (B4's tiebreak-coherence condition).
         let dir = oldestFirst ? "ASC" : "DESC"
-        let limitClause = limit.map { " LIMIT \($0)" } ?? ""
+        // :limit BINDS (round-1 residuals, item 3 — batch 6's observation):
+        // interpolating the Int was injection-safe but minted one cached
+        // statement per distinct window; the direction stays interpolated
+        // because an ORDER BY keyword cannot bind.
+        let limitClause = limit == nil ? "" : " LIMIT :limit"
+        var arguments: StatementArguments = ["cutoff": cutoff]
+        if let limit { arguments += ["limit": limit] }
         var items: [TrashItem] = []
 
         if kinds.contains(.note) {
@@ -109,7 +115,7 @@ extension Queries {
                           AND (pi.deleted_at IS NULL OR pi.deleted_at >= container.deleted_at))
                     ORDER BY deleted_at \(dir), id \(dir)\(limitClause)
                     """,
-                arguments: ["cutoff": cutoff]
+                arguments: arguments
             ).map { row in
                 TrashItem(
                     kind: .note, id: row["id"], deletedAt: row["deleted_at"],
@@ -129,7 +135,7 @@ extension Queries {
                           AND (pi.deleted_at IS NULL OR pi.deleted_at >= reading.deleted_at))
                     ORDER BY deleted_at \(dir), id \(dir)\(limitClause)
                     """,
-                arguments: ["cutoff": cutoff]
+                arguments: arguments
             ).map { row in
                 TrashItem(
                     kind: .book, id: row["id"], deletedAt: row["deleted_at"],
@@ -163,7 +169,7 @@ extension Queries {
                           AND (pi.deleted_at IS NULL OR pi.deleted_at >= b.deleted_at))
                     ORDER BY b.deleted_at \(dir), b.id \(dir)\(limitClause)
                     """,
-                arguments: ["cutoff": cutoff]
+                arguments: arguments
             ).map { row in
                 TrashItem(
                     kind: .block, id: row["block_id"], deletedAt: row["deleted_at"],
@@ -198,7 +204,7 @@ extension Queries {
                           AND (pi.deleted_at IS NULL OR pi.deleted_at >= v.deleted_at))
                     ORDER BY v.deleted_at \(dir), v.id \(dir)\(limitClause)
                     """,
-                arguments: ["cutoff": cutoff]
+                arguments: arguments
             ).map { row in
                 TrashItem(
                     kind: .take, id: row["variant_id"], deletedAt: row["deleted_at"],
@@ -245,7 +251,9 @@ extension Queries {
     ) throws -> [TrashItem] {
         let cutoff = TrashWindow.cutoffStamp(now: now)
         let dir = oldestFirst ? "ASC" : "DESC"
-        let limitClause = limit.map { " LIMIT \($0)" } ?? ""
+        let limitClause = limit == nil ? "" : " LIMIT :limit"  // binds (item 3)
+        var arguments: StatementArguments = ["cutoff": cutoff]
+        if let limit { arguments += ["limit": limit] }
         return try Row.fetchAll(
             db,
             sql: """
@@ -293,7 +301,7 @@ extension Queries {
                     THEN 1 ELSE 0 END) = 0
                 ORDER BY family_clock \(dir), f.origin \(dir)\(limitClause)
                 """,
-            arguments: ["cutoff": cutoff]
+            arguments: arguments
         ).map { row in
             TrashItem(
                 kind: .preservedOriginal, id: row["block_id"],

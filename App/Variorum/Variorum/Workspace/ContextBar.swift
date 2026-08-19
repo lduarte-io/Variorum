@@ -91,11 +91,11 @@ struct ContextBar: View {
     struct TrayFace {
         /// Blocks individually deleted from this note — **the only number
         /// the badge shows.** Sitting round 5, stated: preserved originals
-        /// appear in the panel but must not inflate an urgent-looking count.
+        /// appear in the panel but must not inflate an urgent-looking
+        /// count. (Ladder B round-1 residuals, item 1: the tooltip stopped
+        /// naming originals too — the badge's cheap count is fate-blind,
+        /// and the panel's own sections tell the fates truthfully.)
         var deletedCount: Int
-        /// …which the tooltip still mentions, because "3 deleted" beside a
-        /// panel holding four rows would read as a miscount.
-        var preservedCount: Int
         var onOpen: () -> Void
     }
 
@@ -307,8 +307,7 @@ struct ContextBar: View {
             }
         }
         .buttonStyle(.plain)
-        .help(WorkspaceNaming.trayDoorHelp(
-            deleted: face.deletedCount, preserved: face.preservedCount))
+        .help(WorkspaceNaming.trayDoorHelp(deleted: face.deletedCount))
     }
 
     /// K12's deliberate fold. Folded it carries the count (the shipped

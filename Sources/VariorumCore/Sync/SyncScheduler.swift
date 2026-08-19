@@ -162,7 +162,12 @@ public actor SyncScheduler {
         // orphan under a missing parent — the poison-row jam every peer's
         // pull would then stall on forever. The round's own pull→push
         // order (A3) is untouched: this is a purge-bookkeeping read+local
-        // drop, never engine work. The SAY-SO floor gate (round 10) now
+        // drop, never engine work. And it cannot starve the round's pull
+        // of anything (round-1 residuals, Obs 2): the changefeed is
+        // STATE-BASED (SyncSpec §2 — each row appears once, in its
+        // current state), so nothing the pre-pass drops locally was a
+        // feed event the pull needed; a dangling survivor it exposes is
+        // the §5 self-healing straggler class, already designed-for. The SAY-SO floor gate (round 10) now
         // refuses the WHOLE round — outbox intact, cursor unmoved, the
         // §12 grammar — instead of speaking only after one drain already
         // ran; any other pre-pass fault (offline, keys) is left for the
