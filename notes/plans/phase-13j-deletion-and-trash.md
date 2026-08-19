@@ -2703,3 +2703,168 @@ KnownIssues row. Nothing was changed in those rigs by this batch.
   the working tree.
 - **Nothing PENDING** — every count and every claim above is from a run in
   this session.
+
+## ARCHITECT ADJUDICATION after batch 5 (2026-08-19)
+
+Verified against the five commits (`2d534cf…9d19d7a`): tree clean,
+core **1295/138 REPRODUCED by the architect's own run**, pushed.
+
+- **The intermittent canvas reds (the batch's needs-your-call item)
+  — RULED: RIG HARDENING, a batch-6 rider.** The class (`midDrag
+  == nil` in synthesized-mouse drag rigs, subset varying by run,
+  proven PRE-EXISTING at `43192a9`) is a fixed-sleep anti-pattern
+  the Environment traps already outlaw in spirit ("async-poll,
+  never sync RunLoop pumping"): the rigs pump a fixed 0.03 s
+  instead of polling for gesture start. A flaky class corrodes
+  the zero-allowed-reds era faster than any single red — fix the
+  rigs (poll-for-condition), product code untouched. HONESTY
+  LINE, recorded: until the rider lands, Mac "FULLY GREEN" claims
+  are final-run-green subject to this load-dependent class; a
+  TEXTKIT2_NOTES §3 entry is NOT taken (the class is event
+  synthesis under load, not TK2).
+- The two canon deltas (OverallModel §3 five→SIX quiet occasions;
+  AppSpec §9 `closeAutoCommit` + §7's seed comment + the
+  `savepoint_cadence` setting) are CLOSEOUT duties — recorded on
+  the closeout checklist, applied at the ritual as always.
+- QUESTIONS #70's six entries join her checkpoint walk.
+
+## Batch 6 brief — the Trash, block archive & the purge memo (J1 + rounds 5/7; a FRESH Opus implementer; self-contained)
+
+**Read first, in full:** `CLAUDE.md` (+ the canon it loads —
+AppSpec §7's tombstone conventions, §9's delete/restore family,
+SyncSpec §2/§5/§9, and the KnownIssues "Tombstone GC" row are this
+batch's core reading — J1 designs WITH that row, one design never
+two); this plan file TOP TO BOTTOM (the constitution, sitting
+rounds 1–7 — rounds 3/5/7 are this batch's letter — the
+Environment traps, ALL batch records, the LADDER A record, both
+adjudications); the `architect-phase` skill's "Applying the
+constitution" notes.
+
+**Scope — five build items + one design deliverable:**
+
+1. **The Trash surface (round-3 rulings).** The Library recovery
+   surface reshapes: Archived (posts) stays its own calm
+   no-clock section; the deleted listings become **the Trash** —
+   ONE listing over every deleted thing (notes · blocks · takes ·
+   books), **sort/filter by kind + date**, per-row first-line
+   preview + when it went + **"N days left"** + **Put back**
+   (each kind's existing road: `restoreContainer` /
+   `restoreBlock` / `restoreVariant` / `restoreReading`). A note
+   deleted whole lists as ONE note row — cascade victims NEVER
+   double-listed (the exact-stamp discriminator). Deleted blocks
+   and takes carry note/block context ("from ‹note›"; if that
+   note is itself in the Trash, say so) with an open-there door
+   where the note is live. Windowed observations with visible
+   markers (the A6 discipline — `limit` into SQL). Names/copy:
+   "Trash" (the round-7 tray-name ruling keeps "This Note's
+   Tray" distinct).
+2. **The 30-day clock (read-side, ZERO schema).** Deleted things
+   LEAVE EVERY SURFACE at `deleted_at` + 30 days: the Trash
+   listings, the per-note tray's Deleted rows, and every recovery
+   query gain the age fence; "N days left" computed at render.
+   The per-note tray's Deleted rows now show the quiet countdown
+   too (batch 2 deferred it here); archived rows and preserved
+   originals NEVER show a clock. Restore surfaces stay honest
+   through the window: Put back works to day 30, and past it the
+   thing is unreachable — the bytes' physical removal is the
+   MEMO's (below), and nothing in this batch pretends otherwise.
+   **The Delete Now + Empty Trash doors are NOT built in this
+   batch** — they are ruled (round 3) but their backing is a
+   sync-visible purge-intent, which is schema-shaped and
+   STOP-gated: they land at her explicit go on the memo. Render
+   NO disabled doors (P-2).
+3. **Block-level archive (the round-7 ruling — the ruled shape
+   verbatim in that record).** `archiveBlock` releases the
+   placement (tombstoned, stamp-matched like `deleteBlock`'s
+   pattern) + stamps `block.archived_at`; the note renders on
+   with no view-level filtering; refuses under a sealed note (a
+   placement release is a pointer change the seal freezes) and
+   refuses the last-block case only if the operations family
+   already has such a guard (do NOT invent one — a note may go
+   empty by deletion today; verify and match). `unarchiveBlock`
+   mirrors: clears the stamp + revives the placement via the F2
+   flip road (fresh-at-end fallback). Both register structural
+   undo WITH redo halves (the archiveVariant class). The tray's
+   first section takes back its ruled name **"Deleted &
+   archived"** — archived rows listed, NO countdown, same Put
+   back verb. Doors: the block context menu + the Block menu
+   ("Archive Block"), registry-declared with honest receipts
+   naming the tray; NO multi-select archive (not ruled — record
+   as a walk candidate, don't build). `archived_at` is plain
+   metadata CAS under sync (the existing classification carries
+   the column — verify, don't re-classify).
+4. **The Blocks-mode `traySection` routing (round-7 ruling):**
+   the section becomes a one-line door opening This Note's Tray
+   (its own bounded listing retires; the K11 iconRow pin
+   untouched).
+5. **Riders:** (a) **R2-N2** — absorb the history sheet's
+   empty-past double gap into conditional spacing (the A1
+   container stays load-bearing; verify the A1 no-adopt pin
+   green); (b) **the enum-dump straggler** —
+   `noRenderableVariant` (and any sibling the gap merge road can
+   actually surface — verify reachability, word only the
+   reachable) gets a real sentence in `OpsRefusalCopy` instead of
+   the `default:` dump; (c) **the canvas drag-rig hardening**
+   (adjudication above) — the synthesized-mouse rigs poll for
+   gesture start instead of fixed 0.03 s pumps; product code
+   untouched; run the canvas suites repeatedly enough to show the
+   flake class closed (state your run count).
+6. **THE PURGE DESIGN MEMO — authored as a deliverable**
+   (`notes/plans/phase-13j-purge-memo.md`), NOT built: the
+   client+server purge mechanics folding the Tombstone-GC
+   KnownIssues row (ONE design); the horizon rule (purge only
+   what every device has pulled past — the changefeed visibility
+   skew and `sync_row_seq` facts bind); the server-side
+   per-device pull-cursor addition; the purge-intent shape that
+   backs Delete Now / Empty Trash (schema-shaped — options laid
+   out with tradeoffs, §12 lockstep implications named); what
+   purge does to the whole family incl. **lineage-only preserved
+   originals whose entire descendant family purges** (the
+   round-2 carried edge); the Fragments-bridge interaction (a
+   purged journal day vs the bridge's sweep); GC of `kind:'auto'`
+   savepoints (the J11 record's honest gap) as a candidate
+   rider; S2's precise bend, stated. Plain language, her-facing,
+   the P-5 memo form. **STOP discipline: nothing schema- or
+   server-shaped builds; the memo returns to the author.**
+
+**Constraints:** ZERO schema (the built half); zero
+`Sources/VariorumCore/Sync/` lines; the tutorial spine stays
+green (the deletion-chapter overhaul is batch 7's — but any
+existing lesson sentence the renames stale gets the bounded copy
+alignment); registry discipline for every new door; no invented
+product behavior — rounds 3/5/7 are the letter; the Environment
+traps bind verbatim (re-check instances; NEVER touch a real-store
+instance; kills by PID/bundle-id only; no Release builds or
+`/Applications` refreshes; you NEVER push). Before Mac suite
+runs, confirm no other `xcodebuild` run is active. **Build order
+inside the batch: the rig-hardening rider FIRST** (so your own
+canvas runs are trustworthy), then the rest.
+
+**Hallucination guard:** red-on-old pins by behavioral revert,
+checksums recorded. At minimum: the age fence (day-29 visible +
+restorable, day-31 gone from every surface); one-row-per-deleted-
+note (no cascade double-listing); the archive ops' exact
+state-transitions (both directions, seal refusal, undo/redo
+round-trip, the F2-road revival); the tray section's countdown
+on deleted rows only; the traySection door; each rider's pin
+(R2-N2's spacing, the worded refusal, the rig poll under a
+loaded run).
+
+**Verification (batch end, counts quoted):** core (baseline
+**1295/138**); Mac `-project` invocation (baseline **1516/266**
+— zero allowed reds once your rig rider lands; quote the rider's
+repeat-run evidence); spine by TYPE name (51/7); mobile — core
+`Sources/` IS touched (the archive ops + queries), so the MOBILE
+suite runs (baseline 314/60, iPhone 16e). Confirm every "Test
+run with N tests" line.
+
+**Parity note for the record:** the archive ops and the age
+fences are core (the phone inherits the brains); the phone owes
+the Trash/tray FACES + the archive doors — extend the standing
+hand-off line.
+
+**Record (repo-first):** append the BATCH 6 RECORD to this file —
+what shipped per item, the memo's existence + its open questions
+FOR HER, pins + revert evidence with checksums, the rig rider's
+repeat-run evidence, suite counts, hand-offs — then commit per
+convention. The architect verifies before relying on it.
