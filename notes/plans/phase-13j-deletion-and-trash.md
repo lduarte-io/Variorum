@@ -511,7 +511,7 @@ server-shaped lands.
 | 2 | **The tray (J2) + the graveyard removal (J6):** the context-bar door ("⌫ N", nonempty-only) + the two-section tray panel with Put back; the global unplaced section leaves the Library surface (pool door dies with it); the delete receipt/help copy graduates to naming the real tray + its door (J8(a)'s completion); **+ the batch-1 hand-off rider: the phone's two tray-promising receipts made TRUE on the phone's own terms** | **DONE 2026-08-18** — record below (core 1259/135 · Mac **1450/259 FULLY GREEN** · spine 51/7 · mobile 314/60; BOTH VERIFY-first flags answered — block-level archive is UNREACHABLE (section named "Deleted"), and `restoreBlock` places at the note's END, diverging from the round-5 design statement: **REPORTED, op UNTOUCHED, her call at QUESTIONS #67**; ARCHITECT-VERIFIED against `7e45d0d` — the core count REPRODUCED by the architect's own run, F2 ADJUDICATED into batch 3's rider, the Blocks-mode `traySection` consolidation held propose-only) |
 | 3 | **DONE 2026-08-18** — record below (core 1278/136 · Mac **1467/261 FULLY GREEN** · spine 51/7 · mobile 314/60; the bridge RECONCILED — the peek is the destination, `TrayRequest.revealBlockID` KEPT as the peek's second action; the archived-take road VERIFIED as `unarchiveVariant` and reused unchanged; the F2 rider BUILT with both roads pinned; the capture caught two copy defects and both are fixed; QUESTIONS #68 logged; **ARCHITECT-VERIFIED against `b331ef6` — the core count REPRODUCED by the architect's own run; F2 was RATIFIED by her at round 6 while this batch ran, so the rider ships ruled, not provisional**). Scope: **The lineage door (J3, as AMENDED round 5) + lens-fallback loudness (J5) + deleted-take recovery (round 5):** the context-menu item + ⌘K palette act, the read-only original peek with Put back / Open tray; **the History-face lineage row** (Write's CommitBar history + Takes' history sheet — the summoned "past" surface); the lens column's in-place archived-pick notice + one-click Restore; **the deleted-take restore op + deleted-takes query + the History face's quiet deleted-take rows with Put back** (zero schema); **+ the F2 placement rider** (`restoreBlock` flips the surviving placement row — adjudication above) | **DONE** |
 | 4 | **The defaults pair (J4/J4b):** divide default → `divideDuplicating` (the dormant core op wired); merge default → carry-all (composed from `mergeCeremony`, the phone's C5 the reference); "Divide with Ceremony…" ⌥⌘⇧D · "Merge with Ceremony…" ⌥⌘⇧M in Block menu + context menu + palette | **DONE 2026-08-18** — record below (core 1278/136 · Mac **1492/263 FULLY GREEN** · spine 51/7 · mobile NOT RUN, correctly — zero `Sources/`/`Shared/` lines; **the CHAIN-COMPOSITION answer: built, no edge beyond the brief's sentence** — each link composes through the one `CarryAllMerge` brain, unfanned links keep `ops.merge` byte-unchanged, the next link's displayed take is read off the op's own `sources` rather than inferred, and the compounding carry consequence is recorded at #69(a); the ⌥⌘⇧D/⌥⌘⇧M collision sweep found both FREE; five stale ceremony-default copy sites + three tutorial lessons aligned; ZERO core-op changes; QUESTIONS #69 logged with the ONE judgment call — the context menu's unconditional ceremony rows; ARCHITECT-VERIFIED against `55885ef` — #69(a) chain carry + #69(c) menu rows are her walk items) |
-| 5 | **J11 — the savepoint cadence:** on-note-close auto-commit per edited take (deduped) + `idle_commit_hours` default 24→2 + the ONE enum setting ("Every session · Idle only · Only when I commit"-shaped) + the history view's quiet-run collapse (the legibility half) | pending |
+| 5 | **J11 — the savepoint cadence:** on-note-close auto-commit per edited take (deduped) + `idle_commit_hours` default 24→2 + the ONE enum setting ("Every session · Idle only · Only when I commit"-shaped) + the history view's quiet-run collapse (the legibility half) | pending — brief below |
 | 6 | **J1 — the Trash:** the surface reshape (rename to Trash; Archived keeps no clock; per-row "N days left" + Put back; sort/filter by kind + date **incl. the round-5 Takes filter — deleted takes ride the clock with block/note context**; Delete Now per row + Empty Trash, confirm-once, IN-TRASH ONLY — no full-delete door in any note context, ever; a note deleted whole lists as ONE note row, cascade victims never double-listed) + the 30-day leave-all-surfaces clock; **+ BLOCK-LEVEL ARCHIVE (round-7 ruling):** `archiveBlock`/`unarchiveBlock` on the ruled shape (release placement + stamp; tray section takes back "Deleted & archived"; no countdown on archived rows; Put back via the ratified F2 road; structural-undo entries; doors + registry + receipts); **+ the Blocks-mode `traySection` routed to the one panel (round-7 ruling)**; **the purge design memo authored here** (client+server mechanics, the horizon, the per-device pull cursor, the lineage-only-originals edge) → STOP: her explicit go gates any server-shaped build | pending |
 | 7 | **J10 — the tutorial deletion chapter** (walk-asserted per P-6: delete blocks in-tutorial, the tray, Put back, cross-block deletion, the Trash, the ceremony doors) + the whole-note-version-history design brief (round 2's deferral deliverable) | pending |
 
@@ -1914,6 +1914,146 @@ verified by the architect's own run: core **1279/136**; the
 reviewer's runs: Mac **1499/263 FULLY GREEN** · spine 51/7 ·
 mobile 314/60. **ROUND 2 re-reviews fresh** (a real pass over the
 fixes and what they touched; new BLOCKER/MAJOR ⇒ round 3).
+
+## LADDER A — ROUND 2 (2026-08-18; fresh Fable cold reviewer) → LADDER A CLOSED
+
+**NO new BLOCKER or MAJOR — round 3 not triggered.** The round-2
+reviewer verified all eight round-1 findings genuinely closed AT
+THEIR MECHANISMS (its clean bill re-proved A1's both-host
+lifetime incl. the no-stale-model reload guard; A2's structural
+close with its own phrase-directed grep across App/Shared/mobile;
+A3's #68(b) byte-exactness with both production callers checked;
+A5's branch-by-branch trace of `chainComposes` against both chain
+bodies with every empty-side pass-through landing on a traced
+typed refusal; A6 class-complete by its own caller sweep; A8's
+fence probed beyond the pin; fix-pass count arithmetic checked;
+zero schema / zero `Sync/` re-verified in both fix commits; its
+own targeted suite runs green — 35/2 core, 92/8 + 22/2 + 38/2
+Mac). **Residue: TWO NITs, dispositioned:**
+
+- **R2-N1 — the A1 re-indent shipped one mis-indented closing
+  brace** (`BlockPastSection.swift:251`; compiles and behaves
+  correctly). **FIXED at architect adjudication** (whitespace-only
+  re-indent; clarity class, no pin).
+- **R2-N2 — the A1 zero-size container participates in stack
+  spacing:** the Takes history sheet's `VStack(spacing: 8)` now
+  renders a doubled (16 pt) gap when the block has NO past — the
+  common case; a bare ViewBuilder `if` contributed nothing. The
+  container is LOAD-BEARING for the fix (a `Group` rendering
+  nothing runs no `.task`; host-side start was correctly rejected
+  per the P1 constraint), so this is an accepted-consequence
+  candidate. `CommitBar`'s host is spacing-0, unaffected.
+  **ROUTED: a batch-6 rider** (absorb the section into the
+  sheet's conditional spacing; verified at the next screenshot
+  drive alongside the tray-panel hand-check).
+
+**LADDER A CLOSED 2026-08-18.** Two rounds, three reviewer
+sessions total this ladder (round 1 + its authorized fix pass in
+the same session + round 2), zero open findings, zero disputes
+all the way down. Post-ladder state: core **1279/136** · Mac
+**1499/263 FULLY GREEN** · spine **51/7** · mobile **314/60**.
+Batches 5–7 proceed; ladder B after batch 7.
+
+## Batch 5 brief — the savepoint cadence (J11; a FRESH Opus implementer; self-contained)
+
+**Read first, in full:** `CLAUDE.md` (+ the canon it loads —
+AppSpec §9's `commit`/`idleAutoCommit` entries and OverallModel
+§3's mutability rule are this batch's core reading); this plan
+file TOP TO BOTTOM (the constitution, sitting rounds 1–7 — round
+1's J11 rulings are the letter — the Environment traps, all batch
+records, the LADDER A record); the `architect-phase` skill's
+"Applying the constitution" notes.
+
+**The rulings (round 1, question mode):** cadence = **on-note-
+close + shorter idle backstop** ("every editing session that
+changed a note leaves one quiet savepoint per edited take when
+you close/leave it; the existing idle timer drops from 24h to ~2h
+as the backstop for notes that stay open; history reads as one
+row per sitting; an unchanged take never re-commits"); setting =
+**ONE simple enum** ("Every session (default) · Idle only · Only
+when I commit"-shaped, exact wording at build; synced; E2EE-clean
+— enum semantics, no prose, the `setting.value` column fence).
+
+**Scope — four items:**
+
+1. **On-close auto-savepoints.** When a note stops being the
+   open/live note (tab closed · note switched away · window
+   closed · app quit — map "close/leave" onto the app's ONE
+   liveness authority, `PaneTextAuthority`/`AppSession`; never a
+   second lifecycle mechanism), every DIRTY take under it gets
+   one quiet `commit(kind:'auto')` — **deduped: only if the text
+   changed since that variant's last commit** (the
+   `idleAutoCommit` guard's exact pattern). Never at keystroke
+   rate; off the main thread like autosave; a sealed note has no
+   dirty buffers by construction (no-op naturally). The quick
+   note and scraps follow the same rule through the same
+   authority. Flush-first ordering: the pending buffer lands
+   before the commit reads it (the standing copy-door precedent).
+2. **The idle backstop drops 24h → 2h.** The `setting` seed for
+   fresh stores AND a one-time value migration `'24'→'2'` **only
+   if the stored value is still exactly `'24'`** (no UI has ever
+   exposed it — but the guard keeps any hand-set value hers).
+   Ordinary synced-setting CAS metadata; ZERO schema.
+3. **The ONE cadence setting.** A synced setting key (e.g.
+   `savepoint_cadence`), enum values for the three modes;
+   Settings gets ONE row. Semantics: "Every session" (default) =
+   on-close + the 2h idle backstop; "Idle only" = idle timer
+   only; "Only when I commit" = BOTH cadence occasions off.
+   **The INSURANCE occasions are NOT governed by this setting
+   and stay ON in every mode** — post-seal, locking a dirty
+   take, structural-undo divergence insurance, bridge landings
+   (they insure what's about to become unreachable; OverallModel
+   §3's doctrine) — state this in the setting's help copy so the
+   setting never overclaims (the J8 bar).
+4. **The history view's quiet-run collapse (the legibility
+   half).** In BOTH history faces (Write's `CommitHistoryView` +
+   Takes' history sheet), consecutive `kind:'auto'` rows collapse
+   to one quiet line ("N quiet savepoints — show", expandable);
+   deliberate commits always render prominent. The collapse
+   grouping is a pure Domain-style brain with its own tests.
+   **Coordinate with batch 3's past region in the same faces —
+   the A1 no-adopt pin and the batch-3 pins must stay green**;
+   read the LADDER A record's A1 material before touching these
+   files (incl. R2-N2's routed spacing consequence — do not
+   absorb it here unless trivially adjacent; it is batch 6's
+   rider).
+
+**Constraints:** zero schema; zero `Sources/VariorumCore/Sync/`
+lines; the tutorial spine stays green (any lesson sentence
+describing commit behavior aligns to the ruled cadence — bounded,
+recorded; the deletion chapter stays batch 7's); no invented
+product behavior; the Environment traps bind verbatim (re-check
+instances; NEVER touch a real-store instance; kills by
+PID/bundle-id only; no Release builds or `/Applications`
+refreshes; you NEVER push). Before Mac suite runs, confirm no
+other `xcodebuild` run is active.
+
+**Hallucination guard:** red-on-old pins by behavioral revert,
+checksums recorded. At minimum: on-close commits exactly the
+dirty takes (clean → none; close-twice → one — the dedupe);
+the three modes' occasion matrix (insurance occasions fire in
+ALL modes); the 24→2 migration's only-if-default guard; the
+collapse brain's grouping; both history faces render the
+collapsed run and expand it.
+
+**Verification (batch end, counts quoted):** core (baseline
+**1279/136**); Mac `-project` invocation (baseline **1499/263**
+FULLY GREEN — zero allowed reds); spine by TYPE name (51/7);
+mobile — core `Sources/` IS touched (the seed/migration +
+setting), so the MOBILE suite runs (baseline 314/60, iPhone
+16e). Confirm every "Test run with N tests" line.
+
+**Parity note for the record:** the cadence SEMANTICS are
+document-level (synced settings), but the on-close HOOK is
+per-platform — the phone owes its own hook through its own
+lifecycle; write the hand-off line in your record (the closeout's
+MobileSoul row carries it).
+
+**Record (repo-first):** append the BATCH 5 RECORD to this file —
+what shipped per item, the lifecycle-mapping decision (where
+"close/leave" actually hooks), pins + revert evidence with
+checksums, suite counts, hand-offs — then commit per convention.
+The architect verifies before relying on it.
 
 ### LADDER A ROUND 1 — THE REVIEWER'S FIX PASS (2026-08-18; the same Fable session, authorized per the cross-model flow)
 
