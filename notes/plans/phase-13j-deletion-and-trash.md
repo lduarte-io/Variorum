@@ -2704,6 +2704,48 @@ KnownIssues row. Nothing was changed in those rigs by this batch.
 - **Nothing PENDING** — every count and every claim above is from a run in
   this session.
 
+### Sitting round 8 — the purge design's author calls, ruled EARLY at her offer (2026-08-19, while batch 6 runs)
+
+Her opening (verbatim): "what do you need to sak me about delete
+now and empty trash? can I help with that now so that the design
+can match the purge? or do we have to wait for batch 6?" — the
+architect put the four genuinely-hers calls in question mode;
+batch 6's memo is now written TO these rulings instead of as an
+options catalog.
+
+- **Purge-intent shape RULED: the ONE small synced `purge_intent`
+  table** (table · row-id · requested-at; additive). **AND — her
+  words, verbatim: "The small purge_intent table is fine and I'll
+  authorize the DDL and mirror deploy right now - that's fine for
+  them to have."** → Recorded as a PRE-AUTHORIZATION (the R53
+  class): once the memo firms the concrete DDL (the table + the
+  server-side content-free purged-ids ledger + the per-device
+  pull cursor), the §12 lockstep event (marker 6→7) executes
+  WITHOUT a further stop — mirror-first choreography unchanged.
+  **Consequence flagged to her in the same reply: the marker bump
+  makes her PHONE's marker-6 build visibly refuse to sync until a
+  fresh phone build installs** (safe by design — outbox intact,
+  offline free); the deploy window bundles the phone refresh (an
+  author-assist moment — the tunnel install).
+- **Horizon drop-out RULED: 60 days** — a device unseen that long
+  leaves the horizon; the purged-ids ledger fences a returner
+  (re-onboard, never resurrect).
+- **Empty Trash RULED: everything, always** — the confirm names
+  the full count; scoped removal = filter + per-row Delete Now.
+- **Quiet-savepoint pruning RULED INTO the purge design** — the
+  memo proposes the numbers ("once older than X, keep the newest
+  N quiet per take"; deliberate ⌘S commits NEVER pruned) for her
+  ratify.
+- **Baked in without a question (her round-2 instinct, restated
+  with objection invited, none raised): preserved originals whose
+  entire descendant family purges age out with that family.**
+- Scope discipline unchanged: batch 6 still BUILDS nothing
+  schema-shaped — its memo now carries the deploy-ready DDL draft;
+  the build (the lockstep execution + the Delete Now / Empty
+  Trash doors + the janitor halves) is a follow-up slot the
+  architect scopes at the memo's landing, cast per the standing
+  Sync/ rider where the engine is touched.
+
 ## ARCHITECT ADJUDICATION after batch 5 (2026-08-19)
 
 Verified against the five commits (`2d534cf…9d19d7a`): tree clean,
