@@ -4397,6 +4397,45 @@ queries by construction; the tooltip surface is Mac chrome). No
 instance touched, no Release build, no `/Applications` write, no
 live-mirror contact, no push.
 
+## LADDER B — ROUND 2 (2026-08-19; the fresh reviewer, resumed once after her API-limit interruption with its context intact) → NO new BLOCKER/MAJOR; round 3 NOT triggered
+
+The round-2 reviewer reproduced core **1349/141** itself, ran the
+touched Mac suites (37/4) + the spine (63/8) green, and verified
+every round-1 fix at its mechanism (the full clean bill is the
+transcript's; headlines: all three B1 nets independently
+verified with both door-pins named; B2 end-to-end through the
+production scheduler road; B3 + round 11 exact; the Obs-1
+hardening; B4's five arms with the SQLite-BINARY/Swift ordering
+agreement checked; B5 mirror-exact at day 29/31 on both surfaces;
+the mirror artifact untouched as claimed). **Residue: 3 MINOR +
+2 NIT, dispositioned to a FINAL RESIDUE PASS in the reviewer's
+own session (the 13e round-B precedent):**
+
+- **R2-M1** — the B3 receipt is false for a THIRD population
+  (signed-out WITH synced history: `.deferred` forever + no
+  janitor while signed out, yet the receipt claims local byte
+  removal). Pinnable red-on-current; fix: per-target wording on
+  has-any-synced-row. **FIX, with the pin.**
+- **R2-M2** — `reconcileLedger` bypasses the janitor's own
+  preflight discipline (rekey → keys → §12 lockstep); cannot bite
+  until the NEXT §12 event, then consumes a marker-N+1 ledger
+  under skew. **FIX: the same preflights, one call.**
+- **R2-M3** — the transported `.eligibleLocalOnly` arm deletes
+  without re-verdicting inside its write transaction (the correct
+  shape exists two paragraphs down in `LocalPurge`); doubly
+  narrow, honestly unpinnable (the race-endpoints class —
+  architectural rules apply). **FIX mechanically, justification
+  in place.**
+- **R2-N1** — the LocalPurge launch tick can run once before
+  `isConfigured` turns true; safe in every sub-case but the doc
+  overstates the gate. **Reviewer's call: the device_id skip or
+  the doc truth.**
+- **R2-N2** — the `boundOps` dependency escape holds
+  circumstantially (prepareDependencies-cache, not task-local);
+  a future wrapper would silently re-point pruning mints.
+  **Reviewer's call: the comment or minting through
+  `self.database`.**
+
 ## Batch 7 brief — the tutorial's deletion chapter + the note-history brief (a FRESH Opus implementer; self-contained)
 
 **Read first, in full:** `CLAUDE.md` (+ the canon it loads); this
