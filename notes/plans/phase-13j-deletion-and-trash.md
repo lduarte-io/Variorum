@@ -4141,6 +4141,26 @@ architect's DerivedData glob picked the worktree's old build —
 timestamps now verified on every install; the correct build went
 on minutes later, and re-installs again after this rename).
 
+### THE WINDOW COMPLETED (2026-08-19 — the round-12 rename landed end to end)
+
+- **The repair's first run hit 42501 — the 14c revoke-after-deploy
+  discipline WORKING** (`variorum_definer` holds no CREATE outside
+  windows; the ownership handoff needs it); transactional rollback
+  proven by the in-script probe; the file gained the 10/14c
+  grant→alter→revoke idiom (v2.1).
+- **Her second run: clean.** Deployed signature verified:
+  `for_device text DEFAULT NULL`, owner `variorum_definer`. The
+  full battery re-ran green over the renamed wire BEFORE the
+  installs (core **1350/141** · Mac **1546/269** · mobile
+  **314/60**; spine inside the Mac run).
+- **Both devices reinstalled with the renamed-wire builds**
+  (explicit paths, timestamps verified — the stale-glob lesson
+  applied): `/Applications` via ditto + codesign clean; the phone
+  via devicectl, clean return.
+- Remaining: her first live rounds on both devices → the
+  `device_cursor` two-row verification closes the deploy
+  checklist; then the closeout ritual.
+
 ### Sanity passes over the reviewer's ladder-B fix diff (`44c04d7`; sequential, read-only)
 
 **Batch 6b (B1/B2/B3/B7–B11): CLEAR on all**, re-traced against
