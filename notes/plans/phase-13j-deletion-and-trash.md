@@ -512,7 +512,7 @@ server-shaped lands.
 | 3 | **DONE 2026-08-18** — record below (core 1278/136 · Mac **1467/261 FULLY GREEN** · spine 51/7 · mobile 314/60; the bridge RECONCILED — the peek is the destination, `TrayRequest.revealBlockID` KEPT as the peek's second action; the archived-take road VERIFIED as `unarchiveVariant` and reused unchanged; the F2 rider BUILT with both roads pinned; the capture caught two copy defects and both are fixed; QUESTIONS #68 logged; **ARCHITECT-VERIFIED against `b331ef6` — the core count REPRODUCED by the architect's own run; F2 was RATIFIED by her at round 6 while this batch ran, so the rider ships ruled, not provisional**). Scope: **The lineage door (J3, as AMENDED round 5) + lens-fallback loudness (J5) + deleted-take recovery (round 5):** the context-menu item + ⌘K palette act, the read-only original peek with Put back / Open tray; **the History-face lineage row** (Write's CommitBar history + Takes' history sheet — the summoned "past" surface); the lens column's in-place archived-pick notice + one-click Restore; **the deleted-take restore op + deleted-takes query + the History face's quiet deleted-take rows with Put back** (zero schema); **+ the F2 placement rider** (`restoreBlock` flips the surviving placement row — adjudication above) | **DONE** |
 | 4 | **The defaults pair (J4/J4b):** divide default → `divideDuplicating` (the dormant core op wired); merge default → carry-all (composed from `mergeCeremony`, the phone's C5 the reference); "Divide with Ceremony…" ⌥⌘⇧D · "Merge with Ceremony…" ⌥⌘⇧M in Block menu + context menu + palette | **DONE 2026-08-18** — record below (core 1278/136 · Mac **1492/263 FULLY GREEN** · spine 51/7 · mobile NOT RUN, correctly — zero `Sources/`/`Shared/` lines; **the CHAIN-COMPOSITION answer: built, no edge beyond the brief's sentence** — each link composes through the one `CarryAllMerge` brain, unfanned links keep `ops.merge` byte-unchanged, the next link's displayed take is read off the op's own `sources` rather than inferred, and the compounding carry consequence is recorded at #69(a); the ⌥⌘⇧D/⌥⌘⇧M collision sweep found both FREE; five stale ceremony-default copy sites + three tutorial lessons aligned; ZERO core-op changes; QUESTIONS #69 logged with the ONE judgment call — the context menu's unconditional ceremony rows; ARCHITECT-VERIFIED against `55885ef` — #69(a) chain carry + #69(c) menu rows are her walk items) |
 | 5 | **J11 — the savepoint cadence:** on-note-close auto-commit per edited take (deduped) + `idle_commit_hours` default 24→2 + the ONE enum setting ("Every session · Idle only · Only when I commit"-shaped) + the history view's quiet-run collapse (the legibility half) | **DONE 2026-08-19** — record below (core 1295/138 · Mac **1516/266 FULLY GREEN** · spine 51/7 · mobile 314/60; the LIFECYCLE ANSWER: a note is left when no pane of a window shows it — one entry, `AppSession.savepointOnLeaving`, off four existing funnels, no second lifecycle mechanism; `closeAutoCommit` is the SIXTH quiet occasion, gated with `idleAutoCommit` while the four INSURANCE occasions stay ungoverned; ZERO schema — one seeded setting VALUE, marker 6 stands; the Mac's intermittent canvas reds TRACED to load-dependent mouse-event rigs and proven PRE-EXISTING on a worktree at `43192a9`; two canon deltas owed at closeout; QUESTIONS #70 logged) |
-| 6 | **J1 — the Trash:** the surface reshape (rename to Trash; Archived keeps no clock; per-row "N days left" + Put back; sort/filter by kind + date **incl. the round-5 Takes filter — deleted takes ride the clock with block/note context**; Delete Now per row + Empty Trash, confirm-once, IN-TRASH ONLY — no full-delete door in any note context, ever; a note deleted whole lists as ONE note row, cascade victims never double-listed) + the 30-day leave-all-surfaces clock; **+ BLOCK-LEVEL ARCHIVE (round-7 ruling):** `archiveBlock`/`unarchiveBlock` on the ruled shape (release placement + stamp; tray section takes back "Deleted & archived"; no countdown on archived rows; Put back via the ratified F2 road; structural-undo entries; doors + registry + receipts); **+ the Blocks-mode `traySection` routed to the one panel (round-7 ruling)**; **the purge design memo authored here** (client+server mechanics, the horizon, the per-device pull cursor, the lineage-only-originals edge) → STOP: her explicit go gates any server-shaped build | pending |
+| 6 | **J1 — the Trash:** the surface reshape (rename to Trash; Archived keeps no clock; per-row "N days left" + Put back; sort/filter by kind + date **incl. the round-5 Takes filter — deleted takes ride the clock with block/note context**; Delete Now per row + Empty Trash, confirm-once, IN-TRASH ONLY — no full-delete door in any note context, ever; a note deleted whole lists as ONE note row, cascade victims never double-listed) + the 30-day leave-all-surfaces clock; **+ BLOCK-LEVEL ARCHIVE (round-7 ruling):** `archiveBlock`/`unarchiveBlock` on the ruled shape (release placement + stamp; tray section takes back "Deleted & archived"; no countdown on archived rows; Put back via the ratified F2 road; structural-undo entries; doors + registry + receipts); **+ the Blocks-mode `traySection` routed to the one panel (round-7 ruling)**; **the purge design memo authored here** (client+server mechanics, the horizon, the per-device pull cursor, the lineage-only-originals edge) → STOP: her explicit go gates any server-shaped build | **DONE 2026-08-19** — record below (core **1308/139** — REPRODUCED by the architect · Mac **1526/267 FULLY GREEN** · spine 51/7 · mobile 314/60; the memo at `notes/plans/phase-13j-purge-memo.md`, adjudicated; the rig flake's REAL mechanism found + closed; revert J's self-audit defect fixed+pinned; QUESTIONS #71; ARCHITECT-VERIFIED against the five commits) |
 | 7 | **J10 — the tutorial deletion chapter** (walk-asserted per P-6: delete blocks in-tutorial, the tray, Put back, cross-block deletion, the Trash, the ceremony doors) + the whole-note-version-history design brief (round 2's deferral deliverable) | pending |
 
 Ladder shape (the 13e precedent): ladder A after batch 4, ladder B
@@ -2884,6 +2884,21 @@ honest statement (unreachable-but-on-disk between day 30 and the
 janitor) is repeated to her verbatim-faithful in the same
 exchange.
 
+### Sitting round 10 — the memo's last two calls (2026-08-19, question mode)
+
+- **The returner RULED: SAY SO FIRST** — a device older than the
+  whole ledger announces ("this phone has been away a while — it
+  will reload from your account; anything written here first gets
+  saved up"-shaped) before `resyncReinitialize`, unsynced writes
+  pushed first.
+- **Delete Now confirm RULED: EVERY TIME** — no session-scoped
+  don't-ask; Empty Trash is the one-confirm bulk road.
+- The memo's honest statement (unreachable-but-on-disk between
+  day 30 and the janitor) was put to her verbatim-faithful in the
+  same exchange; no objection — the purge build proceeds as the
+  answer to it. **THE MEMO'S EVERY QUESTION IS NOW CLOSED; batch
+  6b is fully specified.**
+
 **PROCESS INCIDENT, self-reported (2026-08-19, the round-9
 commit):** the architect staged with `git add -A` while batch 6
 was LIVE in the same tree — commit `492b4f8` swept the
@@ -3333,3 +3348,118 @@ one item a screenshot answers better than a value pin).
   run reported below was started with no other `xcodebuild` active.
 - **Nothing PENDING** — every count and every claim above is from a run in
   this session.
+
+## Batch 6b brief — the PURGE BUILD (a FABLE implementer — the standing Sync/ rider seats it; self-contained)
+
+**Cast note:** this batch's janitor lives in
+`Sources/VariorumCore/Sync/` — the standing CLAUDE.md rider makes
+it FABLE work; the phase's Opus-implementer default yields for
+this batch (recorded at rounds 9/10).
+
+**Read first, in full:** `CLAUDE.md` (+ the canon it loads —
+`notes/SyncSpec.md` COMPLETE is this batch's core reading);
+**`notes/sync-postmortem-fragments.md`** (MANDATORY before
+touching anything in `Sync/` — AppSpec §15 risk 3's own
+instruction); **`notes/plans/phase-13j-purge-memo.md` IN FULL —
+THE BINDING DESIGN**, every ruling closed (rounds 8/8b/9/10);
+this plan file TOP TO BOTTOM (the constitution, all sitting
+rounds, the Environment traps, all batch records, both ladder
+records, the ARCHITECT ADJUDICATION after batch 6 — its TWO
+mechanical notes are yours to land); the `architect-phase`
+skill's "Applying the constitution" notes.
+
+**Scope — the memo's §7 build shape, plus the adjudication's two
+notes:**
+
+1. **Migration `v1_14`** — the `purge_intent` table exactly as
+   the memo's §5a (live-unique index, §7 repair rule:
+   smaller-id-wins dedupe), the `SyncTable` classification
+   (every column PLAIN — no user words by design), the outbox
+   trigger. **A schema commit of its own** (CLAUDE.md's rule).
+   The client `lockstepVersion` moves 6→7 in code — her INSTALLED
+   builds are untouched until the deploy window, so nothing of
+   hers stalls; engine tests run against the fake server at
+   marker 7 both sides.
+2. **The janitor** (`VariorumCore/Sync/`): the memo's §4b —
+   horizon read (minus the visibility-skew margin), collection
+   (tombstones 30d+ published-before-horizon; live intents),
+   family-complete removal in ONE transaction per family (§4c —
+   incl. the lineage-originals rule), ledger recording, intent
+   tombstoning; idempotent, resumable, no-horizon ⇒ no-op. Local
+   purge is physical row removal on the CLIENT; mirror purge
+   executes through the NEW RPC (below). `sync_row_seq`
+   bookkeeping cleaned with the rows it describes.
+3. **The mirror artifact finalized, NOT deployed:**
+   `Server/supabase/10_phase13j_purge.sql` = the memo's §5b PLUS
+   the adjudication's note (1): a **purge-execution RPC** —
+   tenant-scoped, owned by the non-bypass `variorum_definer` role
+   (the 14c gate pattern), executing the family delete + ledger
+   insert server-side in one transaction; the pull-RPC cursor
+   UPSERT; the push-RPC's typed `purged` refusal (the client
+   drops that outbox entry, never retries); `sync_horizon()`; the
+   marker 6→7 UPDATE last. **The DEPLOY executes ONLY at the
+   architect's one-window (her pre-authorization is on record; the
+   window bundles the Mac + phone refreshes and needs her) — you
+   prepare and self-review the artifact, you never run it against
+   the live mirror.**
+4. **The two doors** — Delete Now (per row) + Empty Trash — in
+   the Trash surface ONLY (round 3's rider: never any door in
+   note context), **confirm EVERY time** (round 10); Empty Trash
+   names the full count by kind (the memo's wording shape). Rows
+   leave every surface immediately; local purge follows the
+   horizon. Registry-declared; receipts honest about what
+   happened NOW vs what the janitor finishes.
+5. **The pruning pass + its setting** — Standard (90d / keep
+   newest 10 quiet per take) · Never; deliberate ⌘S commits never
+   pruned in either mode; the janitor consults the setting before
+   minting savepoint intents; one Settings row beside the
+   batch-5 cadence row.
+6. **The returner road** — cursor older than the whole ledger ⇒
+   SAY SO FIRST (round 10; the memo's wording class), then the
+   existing `resyncReinitialize` with unsynced writes pushed
+   first.
+7. **The disclosure additions (adjudication note 2):** record in
+   your batch record + a memo addendum — `device_cursor.seen_at`
+   (per-device activity timing, content-free) and `purge_intent`
+   (ids/enums only) join the E2EE disclosure envelope's named
+   lines; the closeout's delta carries them to canon.
+
+**Tests (the memo's §7.6 + the engine discipline — any sync
+change not covered by a convergence test is unreviewed, AppSpec
+§15.3):** the fake-server harness gains a horizon + per-device
+cursors + the ledger + the typed `purged` reject; convergence
+suites gain at minimum — a purged row CANNOT be resurrected by a
+stale peer (push refused, outbox entry dropped, both devices
+converge); a device outside the 60-day window does not hold the
+horizon; an intent applied twice is ONE purge (idempotence); the
+janitor resumes cleanly mid-family; family-completeness leaves
+ZERO orphan rows (lineage originals included); pruning's two
+modes + ⌘S-never; the doors' confirms + the receipts' honesty.
+Red-on-old by behavioral revert with checksums where a defect-fix
+shape applies; state-transition tests for every new op-shaped
+write.
+
+**Constraints:** the `Sync/` prohibition is LIFTED for this batch
+ONLY (the rider seats you); ZERO product behavior beyond the memo
++ rulings; S2 bends exactly as the memo's §4f clause and not a
+word further; the Environment traps bind verbatim (re-check
+instances; NEVER touch a real-store instance; kills by
+PID/bundle-id only; no Release builds or `/Applications`
+refreshes; **never run anything against the LIVE mirror — the
+fake server is your whole world**; you NEVER push). Before Mac
+suite runs, confirm no other `xcodebuild` run is active.
+
+**Verification (batch end, counts quoted):** core (baseline
+**1308/139**); Mac `-project` invocation (baseline **1526/267**
+FULLY GREEN — zero allowed reds); spine by TYPE name (51/7);
+mobile MUST run — `Sources/` is touched (baseline 314/60, iPhone
+16e). Confirm every "Test run with N tests" line.
+
+**Record (repo-first):** append the BATCH 6b RECORD to this file
+— per-item what-shipped, the RPC's shape as landed, pins +
+revert evidence with checksums, convergence-suite additions
+enumerated, counts, the deploy-window checklist for the architect
+(exact artifact path, exact verification steps post-deploy),
+anything unverified marked PENDING — then commit per convention
+(the schema commit separate). The architect verifies before
+relying on it.
