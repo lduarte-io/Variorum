@@ -212,8 +212,10 @@ extension Operations {
 
     /// Un-tombstones the block-cascade children (variants, edges, block
     /// tags) that carry the block's exact deletion stamp. The placement row
-    /// is deliberately the caller's decision: `restoreBlock` re-places
-    /// fresh; undo's `revertDeleteBlock` flips the original row.
+    /// is deliberately the caller's decision: both `restoreBlock` (13j F2)
+    /// and undo's `revertDeleteBlock` flip the stamp-matched original row;
+    /// `restoreBlock` alone falls back to a fresh end-of-note placement
+    /// when no revivable row survives.
     func flipBlockCascadeTombstones(
         _ db: Database, blockID: String, stamp: String, now: Date
     ) throws {

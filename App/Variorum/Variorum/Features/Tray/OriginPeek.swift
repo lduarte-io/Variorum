@@ -88,10 +88,6 @@ nonisolated enum OriginPeekCopy {
         "This block wasn't divided or merged out of another one — there's no "
         + "original standing behind it."
 
-    /// The peek's own act receipts.
-    static let putBackDone = "Put back where it came from."
-    static let putBackDoneAtEnd = "Put back at the end of this note."
-
     /// The original went somewhere while the peek was open (it was put back
     /// from the tray in another pane, or a successor moved). One honest line
     /// rather than an empty panel.

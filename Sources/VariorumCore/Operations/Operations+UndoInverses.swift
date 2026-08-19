@@ -20,9 +20,10 @@ import GRDB
 // stack from under itself.
 extension Operations {
     /// Inverse of `deleteBlock`: flip the block, its cascade victims, AND the
-    /// original placement row (position + chosen variant intact). Differs
-    /// from the public `restoreBlock` tray gesture, which re-places fresh at
-    /// the end. The placement stays dead if its container has since died;
+    /// original placement row (position + chosen variant intact). The public
+    /// `restoreBlock` tray gesture flips the same stamp-matched row when it
+    /// survives (13j F2), minting fresh at the end only as its fallback.
+    /// The placement stays dead if its container has since died;
     /// a since-locked container refuses (resolve, then retry the undo).
     /// A block already alive (restored from the tray meanwhile) makes this
     /// entry obsolete — a quiet no-op success, so the pop happens and the

@@ -1655,6 +1655,103 @@ A follows this batch** (the plan's ladder shape), so leave the
 record especially clean: the cold reviewer's anchor is the batch
 records + dispositions.
 
+## LADDER A — ROUND 1 (2026-08-18; fresh Fable cold reviewer, REVIEW_PROMPT.md verbatim, zero framing; findings recorded here BEFORE any fix session sees them)
+
+The reviewer reproduced core **1278/136** with its own run and ran
+the six new Mac suites (78 tests) targeted. Findings,
+severity-ranked (compressed faithfully from the reviewer's report;
+the mechanism sentences are the reviewer's):
+
+- **A1 [BLOCKER] · `BlockPastSection.swift:141,201` — the History
+  face's "past" region (the round-5 lineage row + deleted-take
+  rows with Put back) can NEVER render in the real app: dead by
+  construction.** `BlockPastModel.past` initializes empty →
+  `isEmpty == true`; the body is `if !model.isEmpty { … .task {
+  await model.start() } }` — the `.task` that STARTS the
+  observation sits INSIDE the conditional that stays false until
+  the observation delivers. No other caller invokes `start()`
+  (`EditorViewModel.loadCommitHistory:2087`,
+  `TakesBottomBar.openHistory:398` construct, never start). The
+  green pins drove the declared `adopt` TEST SEAM directly —
+  which is exactly why the suite stayed green over dead
+  production wiring. Consequence: her ruled primary door for
+  deleted takes does not exist on screen; the lens-dangle notice
+  is the only live road. Fix shape: the `.task(id:)` outside the
+  conditional (or hosts start the model), with a red-on-old pin
+  that mounts against a real store WITHOUT calling `adopt` and
+  polls for the row.
+- **A2 [MAJOR] · `CrossBlockRefusal.swift:147–148` — a refusal
+  actively teaches the WRONG door since batch 4:**
+  `.seamBesideFan`'s road clause still says "use Merge Blocks
+  (⌘⇧M) to pair the takes yourself" — but J4b flipped ⌘⇧M to
+  carry-all; hand-pairing is ⌥⌘⇧M. Reachable: backspace on the
+  seam beside an empty-looking fanned block. The texted-seam twin
+  (`seamFanRefusal`) WAS updated by batch 4's sweep; this second
+  home of the same sentence — inside J8(b)'s own file — was
+  missed, and #69's "ALSO SWEPT" paragraph claims the seam
+  refusal was fixed. The J8 copy-truth class in the phase whose
+  bar is copy truth. Fix: word like the updated twin; pin red on
+  old.
+- **A3 [MINOR] · `BlockPastSection.swift:50,192–194` +
+  `LensFallbackCopy.restoredDeleted` — the `restoreVariant`
+  receipts claim the FAN for a take that revives ARCHIVED**
+  (archive→delete is a shipped road; the exact flip revives
+  `status` as it was — per ruling — so the take lands in the
+  archived listing, and a lens pick still dangles as `.archived`
+  after "showing its pick again"). Op right, copy wrong (J8
+  class). Fix: word to the revived status; pin red on old.
+- **A4 [MINOR] · ops doc comments contradict the F2 rider**
+  (`Operations+UndoInverses.swift:23–25`,
+  `Operations+Placement.swift:213–216` still describe
+  restoreBlock as fresh-at-end). Clarity class.
+- **A5 [MINOR] · `runMergeChain` + `mergeSelectedBlocks` — a
+  fanned chain link whose `CarryAllMerge.compose` returns nil
+  (cross-window take change between the one store read and the
+  compound) falls to plain `ops.merge`, silently folding that fan
+  to lineage** — the pair road refuses in exactly this state
+  (`takesChangedMerge`), and the pre-13j chain at least spoke.
+  Narrow race; a deterministic pin needs a small injection seam.
+  Fix: refuse the link as the pair road does, naming the retry.
+- **A6 [MINOR] · `TrayPanel.swift:187–191` /
+  `PoolAndTray.swift:78` — `trayBlocks` is observed UNBOUNDED**
+  (the 500-window applied in memory; the sibling
+  `preservedOriginals` takes `limit` into SQL). Cost ∝ the note's
+  whole deletion history. Fix: the `limit: window + 1` shape.
+- **A7 [NIT] · `OriginPeekCopy.putBackDone`/`.putBackDoneAtEnd`
+  dead + one duplicates a `TrayPath` string** (the drift trap the
+  file's own header warns against). Fix: delete.
+- **A8 [NIT] · `wholeBlockRun` can bracket one extra trailing
+  EMPTY entry when adjacent zero-length entries exist** (lengths
+  0,0,0, span `[0,2)` → run `0...2`). All-empty, undoable,
+  cosmetic; pinnable through the pure function.
+
+**Clean bill (headlines):** the F2 rider (one transaction,
+stamp+container keyed, sync-shaped); `restoreVariant` exact;
+ZERO schema / ZERO `Sync/` lines verified across the whole phase
+diff; the tray queries' P1 discipline (`trayCounts` never reads
+`variant`); J9 geometry preserving A7/#34 authorizations exactly;
+J7's fall-through; J4/J4b store-not-projection with the collision
+sweep independently re-checked; the J6 removal leaving no live
+copy pointing at the dead room; mobile receipts honest.
+
+### Round-1 dispositions (running)
+
+- **A4 + A7 — FIXED at architect adjudication** (the 13e NIT
+  precedent; clarity class, mechanisms re-verified by the
+  architect — the dead constants grep zero call sites; both ops
+  comments aligned to the F2 rider in place). No pins owed
+  (clarity class), justification: a future maintainer wiring a
+  new door to a documented behavior the op no longer has.
+- **A1, A2, A3, A5, A6, A8 — entering the CROSS-MODEL FLOW**
+  (CLAUDE.md: reviewer Fable, implementers Opus): findings go to
+  the owning batch implementers VERBATIM for agree/dispute with
+  rationale (batch 3: A1, A3, A6; batch 4: A2, A5; batch 1: A8);
+  responses return to the REVIEWER, which makes the final call
+  and implements its confirmed findings in its own session; suite
+  green; the implementers get one sanity pass over the reviewer's
+  diff; then ROUND 2 re-reviews fresh. Strictly sequential — one
+  agent at a time.
+
 ---
 
 ## BATCH 4 RECORD — the defaults pair (J4/J4b) (2026-08-18; fresh Opus implementer)
