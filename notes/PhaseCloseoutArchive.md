@@ -681,3 +681,46 @@ combined feel pass still owed.)*
 
 - **Phase 14c (closed 2026-08-11):** Multi-tenant hardening & the paid tier — the mirror reborn so strangers' accounts are safe,
  *[removed for publication]*
+
+---
+
+## Superseded pointer — rolled 2026-08-19 at the 13j closeout
+
+**→ PHASE 13E CLOSED 2026-08-18 — Takes & block management is DONE:
+all NINE batches + both review ladders ran in ONE overnight pass at
+her instruction, the suites are FULLY GREEN (core 1254/135 · Mac
+1413/256 — the tripwire era ENDED: its covariate was suite context,
+never lock state · mobile 314/60 · spine 51/7), and HER RESIDUALS +
+ratify list (QUESTIONS #56–#65) are compiled at the TOP of
+`notes/plans/phase-13e-takes-block-management.md` per her word.
+NEXT: at her word — 13h (folder bridge) · 13i (smart-book identity)
+· 13j (deletion & the Trash) · 13l (data safety) · 13m (the
+variorum edition), mobile Stage E / internal TestFlight, or the
+unslotted rows; the next plan is authored AT HER PICK (deliberate
+recorded deviation — the pick was genuinely open).** In one breath:
+the fan's missing hands (reorder-takes · ⌘-click merge selection ·
+take-to-block-below · takes-to-blocks under AR-1's
+mint-copy-source-ARCHIVED ruling · copy-all-takes ⌘⇧C) · block
+multi-select/multi-delete under one compound entry · the canvas
+bank + the MEASURED coordinate-space drag fix (her jitter finding —
+the gesture was reading its own applied offset) · margin-hover
+comments on the LEFT (the sweep proved no Mac straggler) · the
+listings' tag faces · Replace All in Every Take · the copy-door
+flush · **W26: ⌃⌥⌘N summons the quick note from ANY app,
+sandbox-verified** · duplicate-book-name refusal · the Keychain
+lazy-load fix ending the windowless-launch CAUSE · five KnownIssues
+rows resolved + the A47c tripwire dispositioned from evidence. Zero
+BLOCKER/MAJOR across both ladders; ZERO schema (marker 6 stands);
+ZERO `Sync/` lines. The BINDING record is the plan file; her
+checkpoint is `notes/handoffs/phase-13e-handoff.md`. **HER PICK LANDED
+the next morning (2026-08-18): 13j — and its plan is AUTHORED
+(`notes/plans/phase-13j-deletion-and-trash.md`, kickoff message at
+the top), folding her morning-after reports (the faceless
+deleted-blocks tray · the "graveyard" redesign · the ⌘Z→⌥⌘Z hint
+she ruled · copy truth · whole-paragraph-delete routing · the
+tutorial deletion chapter · the auto-commit cadence question) beside
+the row's standing items. She launches it at her word.**
+
+## Phase 13e closeout paragraph — rolled 2026-08-19 at the 13j closeout
+
+- **Phase 13e (closed 2026-08-18):** Takes & block management — the fan and the block list got their missing hands. Opened 2026-08-16 at her invocation under `/architect-phase` (cast, her amendment: ONE Fable orchestrating session · fresh Opus implementers per batch, never unlimited subagents · Fable cold reviews with her granted latitude), and closed in ONE overnight run at her instruction ("go all the way through phase closeout… leave residuals for me at the top"). **NINE batches:** (1) E1 callout swatches + the system emoji picker at every door / E13 duplicate-LIVE-book-name refusal (case-insensitive, DOOR-level by her ruling — no schema, no repair) / E11 the book-icon ascent declared (P-1); (2) E4 reorder-takes through the ONE ordered-list resolver + the fan-copy FIX-2 rider / E15 the Takes board policy-routed / E3 her ⌘-click merge selection (a fanned pair carries to Write's ceremony — S4-23 untouched); (3) E5 take-to-block-below + E6 copy-all-takes & takes-to-blocks under **AR-1** — the phase's one propose-first fork, ruled MINT-COPY with the source take ARCHIVED after the architect independently verified the row-move road opens a repair-less I10 hole in the sync repair layer; (4) E2 block multi-select/multi-delete under ONE compound entry (+ the batch-4 pkill incident, self-reported, independently verified harmless, rule re-sharpened); (5) E12 — her canvas-jitter finding TRACED to the default `.local` coordinate space feeding each drag event the view's own already-applied offset (halving travel with an alternating stall, her words exactly), measured three ways and pinned with the numbers + the canvas bank on the no-position shape; (6) E7 margin-hover comments on the LEFT with the all-surfaces sweep proving no Mac straggler + a dormant 13b hover-reveal bug fixed at its mechanism + E8 the listings' tag faces (one chip mechanism); (7) E9 Replace-All-in-Every-Take on the apply-and-report shape / E10 the copy-door flush-first alignment + the slot-handle rider pinned via the batch-5 drag rig; (8) E14/**W26 — ⌃⌥⌘N summons the quick note from any app, SANDBOX-VERIFIED** (two real fires, no prompt at any point) + the note-window clip traced UPSTREAM (the pre-13k bar inserting itself a runloop after presentation) and pinned; (9) the round-B-caught **Keychain lazy-load fix** (AuthSession first-use off-main; EncryptionSession custody hops off-main, semantics byte-preserved) — the windowless-launch CAUSE closed. **THE A47c TRIPWIRE DISPOSITIONED from the architect's own experiments:** the covariate was SUITE CONTEXT (the TK2 cull is load-dependent on 26.5.x — TEXTKIT2_NOTES §3 entry); the pin re-shaped to the outcome contract; the Mac suite FULLY GREEN for the first time since 13g. **Ladders:** A (2 MINOR · 2 NIT · 1 SPECULATIVE → all fixed/dispositioned incl. the P-9 `TakesStructureController` extraction with the zero-test-edit parity proof; round-2 verified every fix) and B (1 MINOR → batch 9 · 4 NIT → adjudication fixes · 1 SPECULATIVE → her hand-check); ZERO BLOCKER/MAJOR all phase; three Fable review sessions; the no-fourth-review judgment recorded for her ratify. **KnownIssues:** five rows resolved/removed (fan-copy remap · Takes-board policy · takes-aware F&R half · copy-door flush · note-window clip) + the tripwire row removed by disposition + the windowless row's observational survivors re-owned to v1-release-readiness + the six-brains row cautioned (applyTypedPath). ZERO schema · ZERO `Sources/VariorumCore/Sync/` lines · marker 6 stands. **Final counts:** core 1254/135 · Mac **1413/256 FULLY GREEN** · mobile 314/60 · spine 51/7. QUESTIONS #56–#65 are her ratify list; her residuals live at the TOP of the plan file by her instruction. **MOBILE PARITY LINE:** the phone owes — the reorder-takes door (core op shared) · the duplicate-name guard at its two book doors · a `UIPasteboard` copy-all-takes twin · E5/E6 doors · the ●n comment-placement design call · swatches/picker at her word (MobileSoul PL-10 is the row); batch 9's fix reached the phone by construction (`Shared/`). `/Applications` refreshed at the closeout behind the A1 rail (her pre-authorization; her app closed). Handoff: `notes/handoffs/phase-13e-handoff.md`. Next at her word.
