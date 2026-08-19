@@ -2055,6 +2055,10 @@ what shipped per item, the lifecycle-mapping decision (where
 checksums, suite counts, hand-offs — then commit per convention.
 The architect verifies before relying on it.
 
+**HELD (2026-08-18): her mid-flight instruction — "pause before
+launching batch 5." The brief above is complete and paste-ready;
+NO implementer is spawned. Batch 5 launches only at her word.**
+
 ### LADDER A ROUND 1 — THE REVIEWER'S FIX PASS (2026-08-18; the same Fable session, authorized per the cross-model flow)
 
 **Final calls: ALL SIX findings CONFIRMED and FIXED; every
