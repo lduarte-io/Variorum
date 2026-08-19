@@ -86,6 +86,18 @@ door of deletion, and to allow for command clicking to select
 multiple items and deleting all of them." Build, opening the phase
 (the 13e mini-round precedent):
 
+- **FIRST ACT — the DEAD Delete Now door (her live report,
+  2026-08-19 evening):** clicking Delete Now in the Trash produced
+  NO confirmation and NO effect (the item still listed after
+  leave-and-return — no intent minted, data safe). The confirm was
+  ruled (13j round 10) and built with green seam-pins — this is
+  the A1 pins-over-dead-wiring class ON the surface the
+  screenshot drive couldn't capture. TRACE the click's real
+  mechanism first; fix; the pin MOUNTS THE REAL TRASH SURFACE and
+  drives the real button (never the adopt/view-model seam). Check
+  Empty Trash's presentation road in the same trace — same file,
+  same dialog machinery, same suspicion.
+
 - **"Delete Note…" in the note ▾ menu — WITH CONFIRMATION** (her
   ruling); ordinary move-to-Trash ONLY (the round-3 rider stands:
   Delete Now never appears in note context); the receipt names the

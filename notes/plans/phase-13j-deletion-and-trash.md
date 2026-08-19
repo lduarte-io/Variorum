@@ -5120,3 +5120,26 @@ delete-all in the Library. Not run here (context); recorded in the
 tell-her-first item, M6 widened to external backups, the pool
 honesty check, the badge watch-item) and the Fragments
 deletion-travel decision surfaced at 13l kickoff decision 6.**
+
+**Third report (same evening — A LIVE DEFECT in the headline
+feature, verbatim):** "make a note that 13l will have to add in
+confirmation dialog for a delete from the trash. I did a delete
+from the trash (which should be a true delete) but nothing
+visually changed and the item is still there. It actually might
+just not have worked at all though because i left the trash and
+came back and it's still there even after clicking delete now."
+**The architect's honest framing: the confirm was RULED (round 10)
+and BUILT with green pins (TrashPurgeDoorsTests) — so a click
+producing NO dialog and NO effect means the door is DEAD ON THE
+REAL SURFACE while its pins pass at a seam: the ladder-A A1 class
+(pins green over dead production wiring), recurred in the one
+place a screenshot could not check (the Trash panel is on the
+List/ImageRenderer hand-check list — the drive that would have
+caught this is exactly the one still queued).** Data-safety fact:
+no intent row was minted (the fence would have hidden the row on
+her return), so nothing half-happened. ROUTED to 13l §8 as its
+FIRST act: trace the dead click's mechanism BEFORE any fix (the
+hallucination guard), fix, and pin THE REAL PRESENTATION ROAD —
+a pin that mounts the actual Trash surface and drives the actual
+button (the no-adopt-seam lesson, now twice-taught); the ruled
+confirm-every-time stands unchanged as the letter.
