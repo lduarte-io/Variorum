@@ -3999,6 +3999,46 @@ constraints the reviewer must weigh:
   siblings. **B11** — AGREE (the mechanism sentence is wrong;
   behavior accidentally right; comment fix only).
 
+**Batch 6's implementer (B4, B5): AGREE on both**, with
+corrections that change the fix shapes:
+
+- **B4** — AGREE ("my own doc comment states the opposite — false
+  as written, correct it with the fix"). Constraints: **the
+  top-N-over-top-Ns equivalence holds ONLY when the per-arm ORDER
+  BY follows `oldestFirst`** (the arms hard-code DESC today — a
+  naive `LIMIT` under oldest-first takes each arm's NEWEST rows
+  and presents the oldest of those: silently wrong where today is
+  merely slow); the tiebreak coherence (each arm's second key IS
+  `TrashItem.id`) must survive any projection change;
+  `strandedOriginals` needs the same treatment (additive optional
+  parameter — public query); the `window + 1` probe row survives
+  per-arm; the WHERE-clause exclusions don't interact.
+- **B5** — AGREE; the 30-day half reachable by time alone ("two
+  surfaces answering one state differently is exactly what this
+  phase exists to kill"); the intent-fence half is 6b-era from
+  its vantage (it EXISTS now — mirror it). Fix-seam correction:
+  **SQL, not `adopt`** (adopt-filtering removes the row from BOTH
+  lists — a live block with no surface, the round-2 orphan class
+  reborn; and `strandedClocks` is read in two places — SQL fixes
+  both at once). Its recommended OUTCOME — the expired family's
+  original "returns to Preserved originals as forever" — is
+  recorded WITH the architect's spec-anchored objection below.
+
+**ARCHITECT'S ADJUDICATION NOTE for the reviewer's B5 final call
+(spec-anchored, weighs against batch 6's recommended outcome):**
+under round 8b + the memo's §4c, a stranded original PURGES WITH
+its family on the ordinary 30-day road (the janitor's family
+expansion joins stranded originals to a fixpoint) — so a
+post-window original shown as "permanent" would sit in the
+forever-section and then VANISH at the janitor's pass: her
+round-8b trust violation reborn in the post-window gap. The
+spec-consistent outcome: **an expired family's original leaves
+BOTH tray buckets** — it rode a visible clock for 30 days and
+leaves every surface exactly when the clock said, the uniform
+story; unreachable-until-purge exactly like its family. The
+reviewer makes the final call with both positions in hand; the
+spec outranks all of us.
+
 ## Batch 7 brief — the tutorial's deletion chapter + the note-history brief (a FRESH Opus implementer; self-contained)
 
 **Read first, in full:** `CLAUDE.md` (+ the canon it loads); this
