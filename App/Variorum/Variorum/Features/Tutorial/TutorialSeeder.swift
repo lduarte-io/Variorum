@@ -72,6 +72,18 @@ enum TutorialSeeder {
         ("takes", ["your first take", "choosing & the board", "keeping takes safe"]),
         ("structure", ["divide", "the take ceremony", "extract & make block",
                        "merge", "the two undos"]),
+        // 13j J10 — **THE DELETION CHAPTER** (her instruction, verbatim:
+        // *"the tutorial also needs to be updated more throughly in 13j to
+        // encourage users to delete blocks during the tutorial … guide users
+        // through cross block deletion, restoral, etc."*). It sits where its
+        // prerequisites have just landed: blocks and takes exist, divide and
+        // the two undos were the last thing read, and the honest next
+        // question after "how do I cut this up" is "how do I throw a piece
+        // away — and how do I get it back". Every lesson has the reader
+        // delete something on purpose; the walk executes each act.
+        ("deleting & getting it back",
+         ["deleting blocks", "archive \u{B7} delete \u{B7} scraps",
+          "the tray & the Trash", "what a block leaves behind"]),
         ("ways of looking", ["lenses", "compare & versions",
                              "blocks \u{B7} canvas"]),
         ("the library of things", ["comments & tags", "books & the shelf",
@@ -202,6 +214,10 @@ enum TutorialSeeder {
         let writing = try ops.createSection(in: book.id, name: "writing")
         let takes = try ops.createSection(in: book.id, name: "takes")
         let structure = try ops.createSection(in: book.id, name: "structure")
+        // 13j J10: the deletion chapter, between the structural acts that
+        // make blocks and the ways of looking at them.
+        let deleting = try ops.createSection(
+            in: book.id, name: "deleting & getting it back")
         let looking = try ops.createSection(in: book.id, name: "ways of looking")
         let library = try ops.createSection(in: book.id, name: "the library of things")
 
@@ -312,12 +328,20 @@ enum TutorialSeeder {
             // K11/K12 and R4-1. The lesson now teaches the shipped bar: the
             // constant four-door icon row, tag cards visible by default,
             // the ＃ (and ⌘⇧I) folding the CARDS, never the bar.
+            // 13j batch 7 (the J10 content-refresh sweep): the bar's four
+            // constant doors are unchanged (K11), but J2 added a fifth thing
+            // to see there — the ⌫ tray badge, which appears only when the
+            // note has deleted blocks. A lesson that inventories the bar and
+            // omits a door that exists is the J8 bar's other half.
             "Above the page sits the CONTEXT BAR \u{2014} always the same four doors: "
             + "\u{2190} and \u{2192} walk back and forward through where this pane has "
             + "been (\u{2318}[ and \u{2318}] are the same doors), the book glyph opens "
             + "the book this note lives in at this very note, and \u{FF03} folds the "
             + "note's tag cards away and back (\u{2318}\u{21E7}I too \u{2014} they "
-            + "start visible, and the choice sticks).",
+            + "start visible, and the choice sticks). One more thing joins them "
+            + "only when there is something to say: a note that has deleted "
+            + "blocks wears a quiet \u{232B} badge with the count, and it opens "
+            + "that note's tray \u{2014} the deleting chapter has the whole story.",
 
             "Two more, for keeping and catching. Right-click any note or book \u{25B8} "
             + "\u{201C}\(StarCopy.verb)\u{201D} pins it to the sidebar's top \u{2014} up to five, "
@@ -529,6 +553,23 @@ enum TutorialSeeder {
             + "right under that block's takes. Open it and Unarchive puts the "
             + "take straight back in the fan — no leaving the board. (Write's "
             + "takes panel keeps the same archived list, if you're over there.)",
+
+            // 13j batch 7 (the J10 content-refresh sweep): J11 gave the app
+            // its own savepoint cadence and this lesson still described a
+            // history with nothing in it but ⌘S. The words follow
+            // `SavepointCadenceCopy` / `SavepointRuns` — the setting's own
+            // home — so the lesson and the switch cannot drift apart.
+            "You are not the only one keeping savepoints. LEAVING a note — "
+            + "closing it, switching away, quitting — quietly saves one "
+            + "savepoint for each take you changed while you were in it, and a "
+            + "note you leave open gets one after about two hours. A take you "
+            + "haven't changed is never saved twice. Those quiet ones are muted "
+            + "and fold into a single \u{201C}N quiet savepoints \u{B7} show\u{201D} "
+            + "line, so the ones you took yourself stay the ones you see. "
+            + "Settings (\u{2318},) \u{25B8} Writing has the one switch — every "
+            + "time you leave, only after a note sits untouched, or only when "
+            + "you press \u{2318}S — and whichever you pick, the app still saves "
+            + "a take right before anything could put your words out of reach.",
         ])
         try take(on: keeping.blocks[2],
             "This is the spare take — archive me: click into me, then \u{2318}\u{21E7}A.")
@@ -683,11 +724,23 @@ enum TutorialSeeder {
             + "undo — your typing, inside the take you're editing, as in any "
             + "editor.",
 
+            // 13j batch 7 (the J10 content-refresh sweep): structural REDO
+            // shipped at 13c (A10 — her *"i desperately need a 'redo'
+            // command"*) and this lesson never learned the chord; the J7 sign
+            // at the junction is 13j's, and this is where the two stacks are
+            // introduced, so both belong here.
             "\u{2325}\u{2318}Z is STRUCTURAL undo — divides, merges, extracts, moves, "
             + "deletions of blocks and takes. It never touches your typing; it "
             + "restores the shape. Every structural act in this book is one "
             + "\u{2325}\u{2318}Z away from undone, and the report of what was undone lands "
-            + "at the bottom of the window.",
+            + "at the bottom of the window. \u{21E7}\u{2325}\u{2318}Z is its redo: "
+            + "undo an undo, as many times as you like.",
+
+            "The two stacks never mix, and the app helps you at the junction: "
+            + "press \u{2318}Z when there is nothing left to undo in the text "
+            + "and a structural change is what you actually did last, and the "
+            + "status line says so and names \u{2325}\u{2318}Z. The key still does "
+            + "what \u{2318}Z always does — the app only puts up a sign.",
 
             "If a structural undo would overwrite words you typed AFTER the "
             + "act, the app ASKS FIRST — that is the one undo that sets "
@@ -698,6 +751,179 @@ enum TutorialSeeder {
             + "above, type a few words into the FIRST half, press "
             + "\u{2325}\u{2318}Z, answer the question, then look in history.",
         ])
+
+        // ———————————————————— deleting & getting it back ————————————————————
+        //
+        // 13j J10. Four lessons that ask the reader to DELETE things — the
+        // one act the book never encouraged before, and the one her morning
+        // report found most confusing. Every door named below is shipped and
+        // registry-declared, and `TutorialDeletionActsTests` executes each
+        // act against the seeded content.
+
+        let deletingBlocks = try lesson(deleting, "deleting blocks", [
+            "Deleting is meant to be easy here, because nothing you delete is "
+            + "gone the moment you delete it. A deleted block leaves the note "
+            + "keeping its takes and its savepoints, and it waits — first on "
+            + "\u{2325}\u{2318}Z, then in this note's tray, then in the Trash for "
+            + "30 days. This chapter has you delete things on purpose, so you "
+            + "know exactly where each one landed.",
+
+            "The everyday way is the way you already know: select a whole "
+            + "paragraph and press \u{232B}. Triple-click the next paragraph — "
+            + "or drag across it and a little past its end — then delete: the "
+            + "block goes, and the note closes over it. (Select only the words "
+            + "INSIDE a paragraph and delete, and you get exactly what you "
+            + "asked for instead: an empty block, still there, ready to type "
+            + "in.)",
+
+            "SCRATCH ONE: this paragraph exists to be deleted. Triple-click me "
+            + "and press \u{232B}.",
+
+            "Several at once: hold \u{2318} and click each block you want "
+            + "(\u{2318}\u{21E7}-click picks a whole run). A banner appears above "
+            + "the page counting what you picked, with Delete N Blocks on it; "
+            + "the right-click menu carries the same row. They all go under "
+            + "ONE undo — a multi-delete is one mistake to reverse, not five.",
+
+            "SCRATCH TWO: \u{2318}-click me and the paragraph below, then press "
+            + "Delete 2 Blocks.",
+
+            "SCRATCH THREE: I'm the other half of that pair.",
+
+            "\u{2325}\u{2318}Z is the undo for all of it — one press brings back "
+            + "one delete however many blocks it took, and \u{21E7}\u{2325}\u{2318}Z "
+            + "deletes them again. If you reach for \u{2318}Z out of habit and "
+            + "there is nothing left to undo in the text, the app says so at "
+            + "the bottom of the window and names \u{2325}\u{2318}Z for you: two "
+            + "undo stacks, kept separate on purpose, and a sign at the "
+            + "junction.",
+
+            "Everything you just deleted is in this note's tray. A note that "
+            + "has deleted blocks wears a quiet \u{232B} badge with the count in "
+            + "the context bar above the page; the note \u{25BE} menu in the "
+            + "bottom bar carries This Note's Tray\u{2026} whether or not the "
+            + "badge is showing. The next two lessons live there.",
+        ])
+        _ = deletingBlocks
+
+        let trio = try lesson(deleting, "archive \u{B7} delete \u{B7} scraps", [
+            "A block you don't want here has three different fates, and the "
+            + "difference between them is the thing to learn once. ARCHIVE "
+            + "keeps it forever — out of the note, in this note's tray, with "
+            + "no countdown. DELETE starts the 30-day clock: it waits in the "
+            + "Trash, and then it really is gone. MOVE OUT TO A POOL cuts the "
+            + "tie to this note altogether and leaves the block as a scrap you "
+            + "can drag into anything.",
+
+            "ARCHIVE ME: I'm worth keeping and I don't belong in this note "
+            + "today. Put your cursor in me and use Block \u{25B8} Archive "
+            + "Block — the right-click menu has the same row. I leave the page "
+            + "and wait in the tray's Deleted & archived section wearing "
+            + "\u{201C}kept — no clock\u{201D}, and Put back returns me to this "
+            + "exact spot.",
+
+            "DELETE ME: I've had my day. Block \u{25B8} Delete Block, or "
+            + "triple-click me and press \u{232B}. I go to the same tray with a "
+            + "countdown on me, and to the Trash in the Library, and in 30 days "
+            + "I'm gone for real.",
+
+            "MOVE ME OUT: I'm a decent line in the wrong note. Open Blocks "
+            + "(\u{2318}5), find my row, and use its \u{22EF} menu \u{25B8} Move "
+            + "out to a pool (leaves this note). I become a scrap in that pool "
+            + "— material for anywhere — and \u{2325}\u{2318}Z brings me back if "
+            + "that wasn't what you meant.",
+
+            "Which one? Archive when you want it kept and out of the way; "
+            + "delete when you mean it; move it out when the words are fine and "
+            + "the home is wrong. All three are one \u{2325}\u{2318}Z away for as "
+            + "long as this session is open — and the two that leave something "
+            + "behind put it somewhere you can find it.",
+        ])
+        _ = trio
+
+        _ = try lesson(deleting, "the tray & the Trash", [
+            "Every note keeps its own tray of what it set aside. Open it from "
+            + "note \u{25BE} \u{25B8} This Note's Tray\u{2026} in the bottom bar, "
+            + "or from the quiet \u{232B} badge in the context bar above the "
+            + "page. The badge counts DELETED blocks only and hides when there "
+            + "are none, which is exactly why the menu item is always there.",
+
+            "The tray has two sections. Deleted & archived holds the blocks "
+            + "that left this note: deleted ones counting their days down, "
+            + "archived ones saying \u{201C}kept — no clock\u{201D}. Preserved "
+            + "originals holds something else entirely — blocks that were never "
+            + "deleted at all, kept whole when a divide or a merge made new "
+            + "blocks out of them (the next lesson). One verb serves every row: "
+            + "Put back, and a block returns to the place it stood in.",
+
+            "The Library holds the other half. Library \u{25B8} \u{22EF} "
+            + "\u{25B8} Archived & Deleted opens two lists. Archived is calm and "
+            + "clockless: whole notes you archived, with Unarchive. The TRASH "
+            + "below it holds everything deleted anywhere — notes, blocks, "
+            + "takes, books — each row saying how many days it has left and "
+            + "which note it came from. Filter it by kind, sort oldest first, "
+            + "and Put back works on any row.",
+
+            "Two doors live in the Trash and nowhere else: Delete Now on a "
+            + "single row, and Empty Trash for all of it. Both ask first — "
+            + "Delete Now asks every single time, and Empty Trash's question "
+            + "names the full count by kind before it takes anything. No door "
+            + "inside a note ever deletes something for good; that is on "
+            + "purpose, and it is why the Trash is worth visiting once before "
+            + "you need it.",
+
+            "Practice, and it is safe: go to the Library, right-click this "
+            + "very lesson \u{25B8} Delete, then open Archived & Deleted and "
+            + "Put back the row you find in the Trash. The lesson comes back "
+            + "into this book, in this chapter, in its place. (And if you ever "
+            + "lose your nerve, Help \u{25B8} Restore Tutorial\u{2026} rebuilds "
+            + "the whole book.)",
+        ])
+
+        let past = try lesson(deleting, "what a block leaves behind", [
+            "A block remembers more than its text. In Write, put your cursor in "
+            + "one and open note \u{25BE} \u{25B8} History: its savepoints are "
+            + "listed, and under them sits a quiet region for the two things a "
+            + "block can leave behind — where it came from, and the takes it "
+            + "has deleted. Takes has the same face on its own bottom bar.",
+
+            "This block has two takes. Put your cursor in the middle of it and "
+            + "press \u{2318}\u{21E7}D: the take you are looking at splits across "
+            + "two new blocks, and the other take is copied whole onto both. "
+            + "What became of the block you cut? It was kept — whole, off to "
+            + "one side, not deleted.",
+
+            "Open History on either new block and a quiet row reads "
+            + "\u{201C}From a divide on \u{2039}date\u{203A} — the original is "
+            + "preserved\u{201D}. Click it — or right-click the block \u{25B8} "
+            + "See original from divide\u{2026}, or find it in \u{2318}K — and "
+            + "the original opens in a read-only peek with its takes and two "
+            + "buttons: Put back in note, and Open this note's tray. It is also "
+            + "sitting in that tray's Preserved originals section, with no "
+            + "clock, for as long as anything descended from it is alive.",
+
+            "Deleted TAKES wait in the same region, under Deleted takes. This "
+            + "paragraph carries a spare take for the experiment: open its "
+            + "takes (\u{2318}\u{21E7}T in Write), use the spare card's \u{22EF} "
+            + "menu \u{25B8} Delete, then open History — the take is listed with "
+            + "Put back, and it comes back with its label, its place in the fan "
+            + "and its savepoints intact. (A saved lens pointing at a take you "
+            + "archived or deleted says so right in its column, with a Restore "
+            + "button there.)",
+
+            "One honest thing about preserved originals, because it is the kind "
+            + "of promise that should never surprise you: an original stays "
+            + "permanent only while something descended from it is still alive. "
+            + "Delete the last of its descendants and the original MOVES — "
+            + "visibly, in that same tray — out of Preserved originals and onto "
+            + "the family's 30-day clock, labelled \u{201C}preserved original — "
+            + "goes with its deleted blocks\u{201D}. The delete that does it "
+            + "says so in its own receipt, while you are standing there.",
+        ])
+        try take(on: past.blocks[1],
+            "The other take of the dividing block: I ride WHOLE onto both halves when you press \u{2318}\u{21E7}D, and the block we came from is kept preserved.")
+        try take(on: past.blocks[3],
+            "the spare take — delete me from the \u{22EF} menu, then put me back from the block's History.")
 
         // ——————————————————————————— ways of looking ———————————————————————
 

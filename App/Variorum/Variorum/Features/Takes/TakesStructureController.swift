@@ -818,7 +818,12 @@ final class TakesStructureController {
                 }
             }
             model.clearMergeSelection()
-            model.speak(BlockSelectionCopy.deletedNote(chain.count))
+            // 13j batch 7: the stranding sentence rides the board's compound
+            // too — the same gap, the same fix, on the twin door (Write's
+            // `runBlockDeleteCompound` carries the trace).
+            model.speak(BlockSelectionCopy.deletedNote(chain.count)
+                + (await StrandedOriginals.note(
+                    session: model.session, blockIDs: chain) ?? ""))
         } catch {
             model.setStatus(TakesViewModel.message(for: error))
         }

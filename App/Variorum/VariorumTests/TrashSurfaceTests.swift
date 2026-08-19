@@ -207,6 +207,67 @@ struct TrashSurfaceTests {
         }
     }
 
+    /// **THE COMPOUND DOORS SAY IT TOO** (13j batch 7 — traced while the
+    /// deletion chapter was being written, fixed at both sites).
+    ///
+    /// Batch 6 wired the stranding sentence into the two SINGLE-block delete
+    /// doors and left the compound ones without it — and the compound is the
+    /// likeliest door to strand a preserved original: picking a divide's two
+    /// successors together and deleting them in one gesture is precisely how
+    /// a family's last live descendant goes. Her round-8b failure mode is
+    /// someone believing "the ancestor being there in that one ancestor tray
+    /// is their guaranteed backup", and a receipt that stayed silent in the
+    /// very case that moves it is the J8 defect exactly.
+    ///
+    /// RED ON OLD (behavioral revert, run and recorded in the batch-7
+    /// record): with both appends removed, Write's arm reported only
+    /// "2 blocks deleted — …" and the board's the same; both halves of this
+    /// test went red.
+    @Test func bothMultiDeleteDoorsNameAnOriginalTheyJustStranded() async throws {
+        try await withEditor(seedBlocks: ["First half. Second half.", "Beta two."]) { editor in
+            let blockID = try #require(editor.model.slots.first?.blockID)
+            let variantID = try #require(editor.model.slots.first?.variantID)
+            let w = try await editor.session.runner.run { ops -> Operations.DivideWResult in
+                _ = try ops.branchVariant(blockID, from: variantID)
+                return try ops.divideW(blockID, cuts: [variantID: 12])
+            }
+            try editor.reload()
+
+            // WRITE's compound: both successors picked, one gesture.
+            for successor in [w.first.block.id, w.second.block.id] {
+                let i = try #require(
+                    editor.model.index.entries.firstIndex { $0.blockID == successor })
+                #expect(editor.model.pickBlock(
+                    atOffset: editor.model.index.range(ofEntryAt: i).location,
+                    extending: false))
+            }
+            await editor.model.deleteSelectedBlocks()
+            await editor.flush()
+            let written = try #require(editor.model.statusMessage)
+            #expect(written.hasPrefix(BlockSelectionCopy.deletedNote(2)))
+            #expect(written.hasSuffix(BlockSelectionCopy.strandedOriginalNote(1)),
+                    "the receipt names the original it just put on the clock: \(written)")
+
+            // THE BOARD's compound: the same act, the same sentence. Put the
+            // pair back first so the board has the same world to delete.
+            try await editor.session.runner.run { (ops: Operations) in
+                _ = try ops.restoreBlock(w.first.block.id)
+                _ = try ops.restoreBlock(w.second.block.id)
+            }
+            let takes = TakesViewModel(session: editor.session, postID: editor.postID)
+            takes.adopt(try await editor.database.read { [postID = editor.postID] db in
+                try Queries.takesProjection(db, post: postID)
+            })
+            takes.toggleMergeSelection(w.first.block.id)
+            takes.toggleMergeSelection(w.second.block.id)
+            await takes.deleteSelectedBlocks()
+            let spoken = try #require(takes.statusMessage)
+            #expect(spoken.hasPrefix(BlockSelectionCopy.deletedNote(2)))
+            #expect(spoken.hasSuffix(BlockSelectionCopy.strandedOriginalNote(1)),
+                    "…and the board's door says the same thing: \(spoken)")
+        }
+    }
+
     // MARK: - The riders
 
     /// **R2-N2 absorbed** (LADDER A round 2): the always-mounted past section

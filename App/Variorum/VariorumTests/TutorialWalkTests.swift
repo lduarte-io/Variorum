@@ -2022,3 +2022,657 @@ struct TutorialLibraryActsTests {
         }
     }
 }
+
+// MARK: - deleting & getting it back (chapter acts — 13j J10)
+
+/// The chapter's name, in one place: the plan, the seeder's section and this
+/// suite all mean the same six words.
+private let deletionChapter = "deleting & getting it back"
+
+/// An editor over a lesson, wired exactly as `withEditor` wires one — the
+/// REAL `EditorTextView` through `EditorSurfaceDelegate`, so a selection and
+/// a Delete key travel `shouldChangeTextIn` → the planners → the compound,
+/// the same path her keyboard takes.
+@MainActor
+private func tutorialEditor(
+    _ session: AppSession, _ db: AppDatabase, postID: String
+) throws -> EditorHarness {
+    let model = EditorViewModel(session: session, postID: postID)
+    model.tailIdleSleep = { _ in throw CancellationError() }
+    model.longBlockLayout.sleep = { _ in throw CancellationError() }
+    let (scrollView, textView) = EditorTextView.makeEditor()
+    let delegate = EditorSurfaceDelegate(model: model)
+    delegate.wire(to: textView)
+    model.attach(textView: textView, scrollView: scrollView)
+    let harness = EditorHarness(
+        session: session, database: db, model: model,
+        textView: textView, surfaceDelegate: delegate, postID: postID)
+    try harness.reload()
+    return harness
+}
+
+/// The lesson's block whose text starts with `prefix` — the chapter stages
+/// its practice blocks with loud prefixes precisely so a walk (and a reader)
+/// can find them without counting.
+@MainActor
+private func staged(
+    _ harness: EditorHarness, _ prefix: String
+) throws -> Queries.RenderedBlock {
+    let slots = try harness.storeSlots()
+    guard let hit = slots.first(where: { $0.text?.hasPrefix(prefix) == true }) else {
+        throw TutorialWalkError.missingStagedContent(prefix)
+    }
+    return hit
+}
+
+@MainActor
+private func entryRange(_ harness: EditorHarness, _ blockID: String) throws -> NSRange {
+    guard let index = harness.model.index.entries.firstIndex(where: { $0.blockID == blockID })
+    else { throw TutorialWalkError.missingStagedContent(blockID) }
+    return harness.model.index.range(ofEntryAt: index)
+}
+
+/// **What a TRIPLE-CLICK selects**, asked of the text view itself rather than
+/// arithmetic'd: the lesson tells the reader to triple-click a paragraph (or
+/// drag past its end), and that is the gesture whose range this walk deletes.
+/// It matters that this is the view's own answer — a selection of the
+/// paragraph's characters ALONE is an ordinary in-block edit (it empties the
+/// block, the shipped behaviour the J9 pins characterize), and it is the
+/// paragraph's terminator riding along that makes the span cross-block and
+/// routes it to the delete compound.
+@MainActor
+private func tripleClickSelection(
+    _ harness: EditorHarness, _ blockID: String
+) throws -> NSRange {
+    let entry = try entryRange(harness, blockID)
+    return harness.textView.selectionRange(
+        forProposedRange: NSRange(location: entry.location, length: 0),
+        granularity: .selectByParagraph)
+}
+
+@MainActor
+@Suite("Tutorial acts — deleting & getting it back")
+struct TutorialDeletionActsTests {
+
+    // MARK: - The chapter names only doors the app actually has (the J8 bar)
+
+    /// **Every door the chapter promises, read from the door's OWN home.**
+    /// The lessons are written in plain prose (never string-interpolated from
+    /// the constants — a lesson that quoted the constant would assert
+    /// nothing), and this pin ties each promise to the place the app spells
+    /// it. A renamed door, a retired act or a re-worded section header makes
+    /// this red, which is the J8 bar in executable form: *a lesson may not
+    /// promise a door that isn't there.*
+    @Test func everyDoorTheChapterNamesIsADoorTheAppHas() async throws {
+        try await withTutorialWorld { _, db, bookID in
+            let titles = try #require(
+                TutorialSeeder.plan.first { $0.chapter == deletionChapter }?.lessons)
+            let prose = try await db.read { db -> [String: String] in
+                var out: [String: String] = [:]
+                for title in titles {
+                    out[title] = try Queries.renderedText(
+                        db, containerID: lessonID(db, bookID: bookID, title))
+                }
+                return out
+            }
+
+            let deleting = try #require(prose["deleting blocks"])
+            #expect(deleting.contains(TrayPath.menuLabel), "the tray's real name")
+            #expect(deleting.contains(TrayPath.doorGlyph), "the badge's real glyph")
+            #expect(deleting.contains(BlockSelectionCopy.deleteVerb(picked: 2)),
+                    "the multi-delete row's real words")
+            #expect(deleting.contains("\u{2325}\u{2318}Z") && deleting.contains("\u{21E7}\u{2325}\u{2318}Z"),
+                    "both structural chords, as the hint itself names them")
+
+            let trio = try #require(prose["archive \u{B7} delete \u{B7} scraps"])
+            #expect(trio.contains(CapabilityRegistry.capability(.archiveBlock).verb))
+            #expect(trio.contains(CapabilityRegistry.capability(.deleteBlock).verb))
+            #expect(trio.contains(TrayPath.deletedSection), "the tray section that holds two of the three")
+            #expect(trio.contains(TrayPath.archivedForever), "archive's own promise, in its own words")
+            #expect(trio.contains("Move out to a pool"), "the Blocks-mode row, verbatim")
+            #expect(trio.contains("\(TrashWindow.days) days"), "the ruled window, not a number of its own")
+
+            let trash = try #require(prose["the tray & the Trash"])
+            #expect(trash.contains(TrayPath.menuLabel))
+            #expect(trash.contains(TrayPath.originalsSection))
+            #expect(trash.contains(TrayPath.putBackVerb), "the one verb, both surfaces")
+            #expect(trash.contains(RecoveryPath.menuLabel), "how the Library door reads")
+            #expect(trash.contains(RecoveryPath.trashSection))
+            #expect(trash.contains(RecoveryPath.archivedSection))
+            #expect(trash.contains(CapabilityRegistry.capability(.deleteNow).verb))
+            #expect(trash.contains(CapabilityRegistry.capability(.emptyTrash).verb))
+
+            let past = try #require(prose["what a block leaves behind"])
+            #expect(past.contains(BlockPastCopy.deletedTakesHeader))
+            #expect(past.contains(OriginPeekCopy.doorVerb(op: "divide")),
+                    "the context row's ruled wording")
+            #expect(past.contains(OriginPeekCopy.putBackVerb))
+            #expect(past.contains(OriginPeekCopy.openTrayVerb))
+            #expect(past.contains("the original is preserved"),
+                    "the History face's lineage row, in the lesson's mouth")
+            #expect(past.contains(TrayPath.goesWithItsFamily),
+                    "the moving-over label, quoted from where it renders")
+        }
+    }
+
+    /// The staging the four lessons ask the reader to act on — the same
+    /// contract `actReadyStagingIsInPlace` keeps for the older chapters.
+    @Test func theChapterIsStagedForItsActs() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            let deleting = try await db.read { try lessonID($0, bookID: bookID, "deleting blocks") }
+            let deletingTexts = try await slots(db, deleting).compactMap(\.text)
+            for prefix in ["SCRATCH ONE", "SCRATCH TWO", "SCRATCH THREE"] {
+                #expect(deletingTexts.contains { $0.hasPrefix(prefix) },
+                        "\(prefix) is staged to be deleted")
+            }
+
+            let trio = try await db.read {
+                try lessonID($0, bookID: bookID, "archive \u{B7} delete \u{B7} scraps")
+            }
+            let trioTexts = try await slots(db, trio).compactMap(\.text)
+            for prefix in ["ARCHIVE ME", "DELETE ME", "MOVE ME OUT"] {
+                #expect(trioTexts.contains { $0.hasPrefix(prefix) }, "\(prefix) is staged")
+            }
+
+            let past = try await db.read {
+                try lessonID($0, bookID: bookID, "what a block leaves behind")
+            }
+            let pastProjection = try await projection(db, past)
+            let fanned = pastProjection.slots.filter {
+                (pastProjection.fans[$0.blockID]?.count ?? 0) == 2
+            }
+            #expect(fanned.count == 2,
+                    "one fanned block to divide, one carrying the spare take to delete")
+            _ = session
+        }
+    }
+
+    // MARK: - Lesson 1: deleting blocks
+
+    /// **The lesson's first ask, executed:** select one whole paragraph and
+    /// press ⌫. The block goes (never emptied, never merged), the receipt
+    /// speaks, the block is in the note's tray, and one ⌥⌘Z brings it back.
+    @Test func aWholeParagraphSelectionDeletesTheScratchBlockAndUndoBringsItBack() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            let lesson = try await db.read { try lessonID($0, bookID: bookID, "deleting blocks") }
+            let harness = try tutorialEditor(session, db, postID: lesson)
+            let before = try harness.storeSlots()
+            let scratch = try staged(harness, "SCRATCH ONE")
+
+            let selection = try tripleClickSelection(harness, scratch.blockID)
+            let scratchEntry = try entryRange(harness, scratch.blockID)
+            #expect(selection.length == scratchEntry.length + 1,
+                    """
+                    a triple-click takes the paragraph AND its terminator — \
+                    which is what makes this a delete rather than an emptying
+                    """)
+            harness.replace(selection, with: "")
+            await harness.flush()
+
+            let after = try harness.storeSlots()
+            #expect(after.count == before.count - 1)
+            #expect(!after.contains { $0.blockID == scratch.blockID },
+                    "the paragraph is gone — not emptied, not joined to a neighbour")
+            #expect(harness.model.statusMessage == BlockSelectionCopy.deletedNote(1),
+                    "the delete compound's own receipt, never the refusal")
+
+            // …and it is where the receipt says it is.
+            let trayed = try await db.read { [now = session.now] db in
+                try Queries.trayBlocks(db, postID: lesson, now: now)
+            }
+            #expect(trayed.contains { $0.blockID == scratch.blockID },
+                    "the block waits in this note's tray, exactly as the lesson promises")
+
+            ShellActions(session: session, shell: ShellRouter()).structuralUndo()
+            await poll { ((try? harness.storeSlots().count) ?? 0) == before.count }
+            let restored = try harness.storeSlots()
+            #expect(restored.map(\.blockID) == before.map(\.blockID),
+                    "one ⌥⌘Z puts the paragraph back where it stood")
+        }
+    }
+
+    /// **The lesson's second ask:** ⌘-click two blocks and use Delete 2
+    /// Blocks. Both go under ONE undo entry — "one mistake to reverse, not
+    /// five", which is what the prose promises.
+    @Test func theTwoScratchParagraphsGoUnderOneUndoEntry() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            let lesson = try await db.read { try lessonID($0, bookID: bookID, "deleting blocks") }
+            let harness = try tutorialEditor(session, db, postID: lesson)
+            let before = try harness.storeSlots()
+            let two = try staged(harness, "SCRATCH TWO")
+            let three = try staged(harness, "SCRATCH THREE")
+
+            // The ⌘-click door itself (the surface's own entry point).
+            #expect(harness.model.pickBlock(
+                atOffset: try entryRange(harness, two.blockID).location, extending: false))
+            #expect(harness.model.pickBlock(
+                atOffset: try entryRange(harness, three.blockID).location, extending: false))
+            #expect(harness.model.selectedBlocksInOrder == [two.blockID, three.blockID])
+            #expect(harness.model.contextMenuItems().contains {
+                $0.title == BlockSelectionCopy.deleteVerb(picked: 2)
+            }, "the row the lesson names is on the menu, with the count in it")
+
+            await harness.model.deleteSelectedBlocks()
+            await harness.flush()
+            let after = try harness.storeSlots()
+            #expect(after.count == before.count - 2)
+            #expect(harness.model.statusMessage?.hasPrefix(BlockSelectionCopy.deletedNote(2)) == true)
+            #expect(harness.session.undoStack.topLabel == "Delete Blocks",
+                    "ONE compound entry for the pair")
+
+            ShellActions(session: session, shell: ShellRouter()).structuralUndo()
+            await poll { ((try? harness.storeSlots().count) ?? 0) == before.count }
+            #expect(try harness.storeSlots().map(\.blockID) == before.map(\.blockID),
+                    "one press brings back the whole delete")
+        }
+    }
+
+    /// **The sign at the junction** (J7), met exactly where the lesson says
+    /// it will be: a real ⌘Z in a real key window, after a structural delete,
+    /// with nothing left in the text stack. The key is never consumed.
+    @Test func commandZAfterTheLessonsDeleteNamesTheStructuralUndo() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            let lesson = try await db.read { try lessonID($0, bookID: bookID, "deleting blocks") }
+            let harness = try tutorialEditor(session, db, postID: lesson)
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 600, height: 400),
+                styleMask: [.titled, .resizable], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer { window.orderOut(nil); window.close() }
+            let host = NSView(frame: NSRect(x: 0, y: 0, width: 600, height: 400))
+            host.addSubview(harness.textView)
+            window.contentView = host
+            window.makeKeyAndOrderFront(nil)
+            window.makeFirstResponder(harness.textView)
+
+            let scratch = try staged(harness, "SCRATCH ONE")
+            harness.replace(try tripleClickSelection(harness, scratch.blockID), with: "")
+            await harness.flush()
+            #expect(session.undoMenuState.topLabel == "Delete Blocks")
+
+            harness.textView.undoManager?.removeAllActions()
+            harness.model.showStatus("")
+            let event = NSEvent.keyEvent(
+                with: .keyDown, location: .zero, modifierFlags: .command, timestamp: 0,
+                windowNumber: 0, context: nil, characters: "z",
+                charactersIgnoringModifiers: "z", isARepeat: false, keyCode: 6)!
+            let claimed = harness.textView.performKeyEquivalent(with: event)
+
+            #expect(claimed == false, "⌘Z still does what ⌘Z does — the app only puts up a sign")
+            #expect(harness.model.statusMessage == EditorUndoHint.message(
+                for: .undo, textStackHasEntries: false,
+                structuralUndoLabel: "Delete Blocks", structuralRedoLabel: nil))
+        }
+    }
+
+    // MARK: - Lesson 2: archive · delete · scraps
+
+    /// **The trio, all three fates, on the lesson's own staged blocks.**
+    /// Archive keeps it with no clock; delete starts the 30-day countdown;
+    /// move out cuts the tie to the note and leaves a scrap in the pool.
+    @Test func theThreeVerbsSendTheirBlocksToThreeDifferentPlaces() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            let lesson = try await db.read {
+                try lessonID($0, bookID: bookID, "archive \u{B7} delete \u{B7} scraps")
+            }
+            let harness = try tutorialEditor(session, db, postID: lesson)
+            let keeper = try staged(harness, "ARCHIVE ME")
+            let doomed = try staged(harness, "DELETE ME")
+            let mover = try staged(harness, "MOVE ME OUT")
+
+            // ARCHIVE — the Block-menu / right-click door.
+            harness.textView.setSelectedRange(
+                NSRange(location: try entryRange(harness, keeper.blockID).location, length: 0))
+            harness.model.updateCaretContext()
+            await harness.model.archiveCaretBlock()
+            await harness.flush()
+            #expect(harness.model.statusMessage == BlockSelectionCopy.archivedNote)
+
+            // DELETE — the same menu, one row down.
+            try harness.reload()
+            harness.textView.setSelectedRange(
+                NSRange(location: try entryRange(harness, doomed.blockID).location, length: 0))
+            harness.model.updateCaretContext()
+            await harness.model.deleteCaretBlock()
+            await harness.flush()
+
+            // MOVE OUT — Blocks (⌘5), the row's ⋯ menu.
+            let pool = try await db.read { db in
+                try Queries.pools(db).first { $0.title == TutorialSeeder.scrapPoolTitle }
+            }
+            let poolID = try #require(pool).id
+            let toc = BlockTOCViewModel(session: session, postID: lesson)
+            await toc.moveToPool(mover.blockID, poolID: poolID,
+                                 poolTitle: TutorialSeeder.scrapPoolTitle)
+
+            let (archived, deleted, poolBlocks, noteBlocks) = try await db.read {
+                [now = session.now] db in
+                (try Queries.archivedBlocks(db, postID: lesson).map(\.blockID),
+                 try Queries.trayBlocks(db, postID: lesson, now: now),
+                 try Queries.renderPost(db, containerID: poolID).map(\.blockID),
+                 try Queries.renderPost(db, containerID: lesson).map(\.blockID))
+            }
+            #expect(archived == [keeper.blockID], "archived: kept, out of the note, no clock")
+            #expect(deleted.map(\.blockID) == [doomed.blockID], "deleted: in the tray, counting down")
+            #expect(TrashWindow.daysLeft(try #require(deleted.first).deletedAt, now: session.now)
+                    == TrashWindow.days,
+                    "…and the countdown starts at the full window")
+            #expect(poolBlocks.contains(mover.blockID), "moved out: a scrap in the pool now")
+            for gone in [keeper.blockID, doomed.blockID, mover.blockID] {
+                #expect(!noteBlocks.contains(gone), "all three left the page")
+            }
+
+            // ⌥⌘Z brings the move back, as the lesson says.
+            ShellActions(session: session, shell: ShellRouter()).structuralUndo()
+            await poll {
+                ((try? db.read { try Queries.renderPost($0, containerID: lesson) }) ?? [])
+                    .contains { $0.blockID == mover.blockID }
+            }
+            let backHome = try await db.read { try Queries.renderPost($0, containerID: lesson) }
+            #expect(backHome.contains { $0.blockID == mover.blockID },
+                    "the moved block comes home on one press")
+        }
+    }
+
+    // MARK: - Lesson 3: the tray & the Trash
+
+    /// **The tray's two sections and its one verb**, on the state lesson 2
+    /// just produced: a deleted block, an archived block, and (after a
+    /// fanned divide) a preserved original. Put back returns each of them to
+    /// the place it stood in.
+    @Test func theTrayPutsBackWhatTheNoteSetAside() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            let lesson = try await db.read {
+                try lessonID($0, bookID: bookID, "archive \u{B7} delete \u{B7} scraps")
+            }
+            let harness = try tutorialEditor(session, db, postID: lesson)
+            let order = try harness.storeSlots().map(\.blockID)
+            let keeper = try staged(harness, "ARCHIVE ME")
+            let doomed = try staged(harness, "DELETE ME")
+
+            harness.textView.setSelectedRange(
+                NSRange(location: try entryRange(harness, keeper.blockID).location, length: 0))
+            harness.model.updateCaretContext()
+            await harness.model.archiveCaretBlock()
+            await harness.flush()
+            try harness.reload()
+            harness.textView.setSelectedRange(
+                NSRange(location: try entryRange(harness, doomed.blockID).location, length: 0))
+            harness.model.updateCaretContext()
+            await harness.model.deleteCaretBlock()
+            await harness.flush()
+
+            let tray = TrayViewModel(session: session, postID: lesson)
+            tray.adopt(try await db.read { [now = session.now] db in
+                TrayViewModel.Snapshot(
+                    deleted: try Queries.trayBlocks(db, postID: lesson, now: now),
+                    archived: try Queries.archivedBlocks(db, postID: lesson),
+                    originals: try Queries.preservedOriginals(db, postID: lesson),
+                    strandedClocks: try Queries.originFamilyClocks(db, postID: lesson))
+            })
+            #expect(tray.deleted.map(\.blockID) == [doomed.blockID])
+            #expect(tray.archived.map(\.blockID) == [keeper.blockID])
+            #expect(!tray.isEmpty)
+
+            await tray.putBackDeleted(doomed.blockID)
+            #expect(tray.statusMessage == TrayPath.putBackWhereItWas)
+            await tray.putBackArchived(keeper.blockID)
+            #expect(tray.statusMessage == TrayPath.putBackWhereItWas)
+
+            let restored = try await db.read {
+                try Queries.renderPost($0, containerID: lesson).map(\.blockID)
+            }
+            #expect(restored == order,
+                    "both come back in their own places — the lesson's \u{201C}where it stood\u{201D}")
+        }
+    }
+
+    /// **The lesson's own practice, executed:** delete THIS lesson from the
+    /// library, find it in the Trash with its countdown, and Put it back —
+    /// into this book, in this chapter, in its place.
+    @Test func theLessonItselfGoesToTheTrashAndComesBackIntoItsChapter() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            let lesson = try await db.read {
+                try lessonID($0, bookID: bookID, "the tray & the Trash")
+            }
+            let before = try await db.read { [bookID] db in
+                (entries: try Queries.assembleReading(db, readingID: bookID).map(\.postID),
+                 assignments: try Queries.sectionAssignments(db, readingID: bookID))
+            }
+
+            // The library row's own door.
+            let library = LibraryViewModel(session: session)
+            await library.delete(postID: lesson)
+            let gone = try await db.read { db in
+                try Container.fetchOne(db, key: lesson)?.deletedAt != nil
+            }
+            #expect(gone == true)
+
+            // The Trash lists it, with the days it has left.
+            let recovery = RecoveryViewModel(session: session)
+            let listing = try await db.read { [now = session.now] db in
+                try Queries.trash(db, now: now)
+            }
+            recovery.adopt(archived: [], trash: listing)
+            let row = try #require(recovery.trash.first { $0.id == lesson })
+            #expect(row.kind == .note)
+            #expect(recovery.daysLeft(row) == TrashWindow.days,
+                    "a fresh tombstone wears the whole window")
+
+            await recovery.putBack(row)
+            #expect(recovery.lastError == nil)
+            let after = try await db.read { [bookID] db in
+                (entries: try Queries.assembleReading(db, readingID: bookID).map(\.postID),
+                 assignments: try Queries.sectionAssignments(db, readingID: bookID))
+            }
+            #expect(after.entries == before.entries, "back in the book, in its place")
+            #expect(after.assignments == before.assignments, "…and in its chapter")
+        }
+    }
+
+    /// **The two doors that live in the Trash and nowhere else**, exactly as
+    /// the lesson promises: registry-declared on ONE surface, and each
+    /// confirm asked EVERY time, naming what it takes.
+    @Test func thePurgeDoorsAreTrashOnlyAndAskEveryTime() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            // In-Trash only, by declaration (P-1) — the lesson's "no door
+            // inside a note ever deletes something for good".
+            for id in [CapabilityID.deleteNow, .emptyTrash] {
+                #expect(CapabilityRegistry.capability(id).doors == [.surface])
+                #expect(RecoveryView.surfaceCapabilities.contains(id))
+                #expect(!ContextBar.surfaceCapabilities.contains(id))
+                #expect(!CommitBar.renderedCapabilities.contains(id))
+                #expect(!TakesBottomBar.renderedCapabilities.contains(id))
+            }
+
+            let lesson = try await db.read {
+                try lessonID($0, bookID: bookID, "the tray & the Trash")
+            }
+            let library = LibraryViewModel(session: session)
+            await library.delete(postID: lesson)
+
+            let recovery = RecoveryViewModel(session: session)
+            recovery.adopt(archived: [], trash: try await db.read { [now = session.now] db in
+                try Queries.trash(db, now: now)
+            })
+            let row = try #require(recovery.trash.first { $0.id == lesson })
+
+            recovery.requestDeleteNow(row)
+            let first = try #require(recovery.pendingConfirm)
+            #expect(first.message == RecoveryPath.deleteNowConfirm(.note))
+            recovery.cancelPendingPurge()
+            recovery.requestDeleteNow(row)
+            #expect(recovery.pendingConfirm != nil,
+                    "asked EVERY time — there is no don't-ask-again to set")
+            recovery.cancelPendingPurge()
+
+            await recovery.requestEmptyTrash()
+            let bulk = try #require(recovery.pendingConfirm)
+            #expect(bulk.message.contains("1 note"),
+                    "the bulk confirm names the full count by kind before it takes anything")
+            recovery.cancelPendingPurge()
+        }
+    }
+
+    // MARK: - Lesson 4: what a block leaves behind
+
+    /// **The divide keeps the block it cut**, and the History face says so:
+    /// the lineage row, the peek's own heading, and Put back in note — all
+    /// on the lesson's own staged fanned block.
+    @Test func theDividedBlocksPastNamesItsPreservedOriginalAndPutsItBack() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            let lesson = try await db.read {
+                try lessonID($0, bookID: bookID, "what a block leaves behind")
+            }
+            let harness = try tutorialEditor(session, db, postID: lesson)
+            let before = try harness.storeSlots()
+            let dividing = try #require(before.first {
+                $0.text?.hasPrefix("This block has two takes") == true
+            })
+            let range = try entryRange(harness, dividing.blockID)
+
+            // ⌘⇧D, mid-block — the fanned default (J4): the shown take is
+            // cut across two blocks, the other rides whole onto both, and
+            // the block itself is kept preserved.
+            harness.textView.setSelectedRange(
+                NSRange(location: range.location + range.length / 2, length: 0))
+            harness.model.updateCaretContext()
+            await harness.model.invokeGesture(.divideAtCursor)
+            await harness.flush()
+
+            let after = try harness.storeSlots()
+            #expect(after.count == before.count + 1)
+            #expect(!after.contains { $0.blockID == dividing.blockID },
+                    "the original was released, not edited — it is preserved whole")
+            let successor = try #require(after.first {
+                $0.text?.hasPrefix("This block has two takes") == true
+            })
+
+            let past = try await db.read { [now = session.now] db in
+                try Queries.blockPast(db, blockID: successor.blockID, now: now)
+            }
+            let origin = try #require(past.origins.first)
+            #expect(origin.blockID == dividing.blockID)
+            #expect(OriginPeekCopy.lineageRow(op: origin.originOp, at: origin.at)
+                .contains("the original is preserved"),
+                    "the quiet row the lesson tells her to look for")
+            #expect(OriginPeekCopy.doorVerb(op: origin.originOp)
+                == "See original from divide\u{2026}", "the context row's ruled words")
+
+            // …and the tray holds it in the clockless section meanwhile.
+            let (originals, clocks) = try await db.read { db in
+                (try Queries.preservedOriginals(db, postID: lesson).map(\.blockID),
+                 try Queries.originFamilyClocks(db, postID: lesson))
+            }
+            #expect(originals.contains(dividing.blockID))
+            #expect(clocks[dividing.blockID] == nil, "permanent while its descendants live")
+
+            // The peek's first action.
+            let receipt = try await PreservedOriginPutBack.run(
+                session: session, postID: lesson, blockID: dividing.blockID)
+            #expect(receipt == TrayPath.putBackBeside)
+            let placed = try await db.read {
+                try Queries.renderPost($0, containerID: lesson).map(\.blockID)
+            }
+            #expect(placed.contains(dividing.blockID), "Put back in note does what it says")
+        }
+    }
+
+    /// **A deleted take waits in the same History face**, with Put back —
+    /// label, place in the fan and savepoints intact, exactly as the lesson
+    /// promises.
+    @Test func theDeletedSpareTakeWaitsInTheBlocksPastAndComesBack() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            let lesson = try await db.read {
+                try lessonID($0, bookID: bookID, "what a block leaves behind")
+            }
+            let projected = try await projection(db, lesson)
+            let host = try #require(projected.slots.first {
+                $0.text?.hasPrefix("Deleted TAKES wait") == true
+            })
+            let fan = try #require(projected.fans[host.blockID])
+            #expect(fan.count == 2, "the spare take is staged")
+            let spare = try #require(fan.first { $0.workingText.hasPrefix("the spare take") })
+
+            // The take card's ⋯ menu ▸ Delete (both takes surfaces run this
+            // one model door).
+            let takes = TakesViewModel(session: session, postID: lesson)
+            takes.adopt(projected)
+            await takes.deleteTake(spare.id)
+
+            let past = try await db.read { [now = session.now] db in
+                try Queries.blockPast(db, blockID: host.blockID, now: now)
+            }
+            #expect(past.deletedTakes.map(\.id) == [spare.id],
+                    "listed under \(BlockPastCopy.deletedTakesHeader)")
+
+            let model = BlockPastModel(session: session, blockID: host.blockID)
+            model.adopt(past)
+            await model.putBackTake(spare.id)
+            #expect(model.statusMessage == BlockPastCopy.takeRestored)
+
+            let back = try await projection(db, lesson)
+            let restored = try #require(back.fans[host.blockID]?.first { $0.id == spare.id })
+            #expect(restored.workingText == spare.workingText)
+            #expect(restored.fanPosition == spare.fanPosition,
+                    "its place in the fan came back with it")
+        }
+    }
+
+    /// **The honest sentence, executed** (her round-8b ruling): the original
+    /// is permanent only while a descendant lives. Delete the last one and
+    /// the row MOVES onto the family's clock — and the delete that does it
+    /// says so in its own receipt.
+    @Test func theOriginalMovesOntoTheFamilysClockWhenItsLastDescendantGoes() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            let lesson = try await db.read {
+                try lessonID($0, bookID: bookID, "what a block leaves behind")
+            }
+            let harness = try tutorialEditor(session, db, postID: lesson)
+            let wasThere = Set(try harness.storeSlots().map(\.blockID))
+            let dividing = try staged(harness, "This block has two takes")
+            let range = try entryRange(harness, dividing.blockID)
+            harness.textView.setSelectedRange(
+                NSRange(location: range.location + range.length / 2, length: 0))
+            harness.model.updateCaretContext()
+            await harness.model.invokeGesture(.divideAtCursor)
+            await harness.flush()
+            try harness.reload()
+
+            // The two blocks that stand where the divided one stood — the
+            // duplicating divide mints BOTH halves fresh (A is preserved).
+            let successors = try harness.storeSlots().filter { !wasThere.contains($0.blockID) }
+            #expect(successors.count == 2)
+
+            // Delete both — the second one strands the original.
+            for successor in successors {
+                #expect(harness.model.pickBlock(
+                    atOffset: try entryRange(harness, successor.blockID).location,
+                    extending: false))
+            }
+            await harness.model.deleteSelectedBlocks()
+            await harness.flush()
+
+            #expect(harness.model.statusMessage?.hasSuffix(
+                BlockSelectionCopy.strandedOriginalNote(1)) == true,
+                "the receipt names the original it just put on the clock")
+
+            let (clocks, originals) = try await db.read { db in
+                (try Queries.originFamilyClocks(db, postID: lesson),
+                 try Queries.preservedOriginals(db, postID: lesson))
+            }
+            #expect(clocks[dividing.blockID] != nil, "the original now rides the family's clock")
+
+            let tray = TrayViewModel(session: session, postID: lesson)
+            tray.adopt(TrayViewModel.Snapshot(
+                deleted: try await db.read { [now = session.now] db in
+                    try Queries.trayBlocks(db, postID: lesson, now: now)
+                },
+                archived: [], originals: originals, strandedClocks: clocks))
+            #expect(!tray.originals.contains { $0.blockID == dividing.blockID },
+                    "it has left the section that promised permanence")
+            #expect(tray.stranded.contains { $0.blockID == dividing.blockID },
+                    "…and it is visibly in the clock-bearing one, where she can see it go")
+        }
+    }
+}

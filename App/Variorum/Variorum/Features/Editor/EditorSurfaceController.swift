@@ -838,14 +838,31 @@ final class EditorSurfaceController {
     private func runBlockDeleteCompound(_ blockIDs: [String]) async -> Bool {
         let landing = caretLandingAfterRemoving(blockIDs)
         let stack = model.session.undoStack
-        return await runStructural { ops in
+        let landed = await runStructural { ops in
             try stack.withCompound(label: "Delete Blocks", operations: ops) {
                 for blockID in blockIDs { try ops.deleteBlock(blockID) }
             }
             return StructuralOutcome(
-                caretBlockID: landing.blockID, caretOffset: landing.offset, seam: nil,
-                note: BlockSelectionCopy.deletedNote(blockIDs.count))
+                caretBlockID: landing.blockID, caretOffset: landing.offset, seam: nil)
         }
+        // **13j batch 7 — the STRANDING sentence reaches this door too.**
+        // Traced while writing the deletion chapter: her round-8b ruling says
+        // the delete that strands a preserved original names it in its own
+        // receipt, and batch 6 wired that into the two SINGLE-block doors
+        // (`runDeleteBlock` here, `deleteFocusedBlock` on the board) — but
+        // not into the compound, which is the door most likely to strand one:
+        // picking a divide's two successors together and deleting them is
+        // exactly how a family's last live descendant goes. The receipt moved
+        // out of `StructuralOutcome.note` for the same reason its single-block
+        // sibling speaks after the flight: the store must be asked whether
+        // anything was stranded, and that answer only exists once the delete
+        // has landed.
+        if landed {
+            model.showStatus(BlockSelectionCopy.deletedNote(blockIDs.count)
+                + (await StrandedOriginals.note(
+                    session: model.session, blockIDs: blockIDs) ?? ""))
+        }
+        return landed
     }
 
     // MARK: - J9 (13j batch 1): a whole-block selection + Delete
