@@ -1752,6 +1752,105 @@ copy pointing at the dead room; mobile receipts honest.
   diff; then ROUND 2 re-reviews fresh. Strictly sequential — one
   agent at a time.
 
+### Cross-model flow — implementer responses (recorded before the reviewer sees them)
+
+**Batch 3's implementer (A1, A3, A6): AGREE on all three**, with
+fix-shaping context:
+
+- **A1 — AGREE unreservedly** ("the constitution's own
+  overlay/sink delivery law — I re-created the class"; the pins
+  missed it because all five drive the `adopt` seam and the
+  lifetime pin never asserts population — "a real hole in my own
+  test design"). Fix-shape constraints: **(i) prefer the
+  view-side task moved OUTSIDE the conditional (the Group form),
+  NOT host-side `start()`** — `TakesBottomBar` holds `pastModel`
+  in `@State` and never clears it on sheet dismissal, so a
+  host-side start would leave the `variant` observation running
+  after the sheet closes, breaking the held-only-while-on-screen
+  P1 property; the Group form preserves it exactly. **(ii)** the
+  proposed no-`adopt` red-on-old pin is the right shape;
+  `RecoveryFaceCaptureTests` keeps `adopt` (synthetic states by
+  design).
+- **A3 — AGREE** (its own core pin
+  `restoreVariantReturnsAnArchivedTakeArchived` asserts the exact
+  flip; the copy path was never crossed because its round-trip
+  test deleted an ACTIVE take). Constraints: **(i) the op's
+  exactness is RULED (#68(b)) — the fix is copy/face-side ONLY**
+  ("revive as active" would silently un-archive something she set
+  aside); **(ii)** the receipt needs the post-restore status the
+  op doesn't currently report — cheapest honest road: return the
+  revived status from `restoreVariant` (a this-batch signature,
+  no shipped caller depends on it); the lens notice truthfully
+  CHANGES from "deleted" to "archived" with Restore still
+  offered.
+- **A6 — AGREE, plus two additions:** (i) provenance — batch 2's
+  code (disposition wording the reviewer's call); (ii) **CLASS
+  COMPLETENESS: a SECOND instance** — `BlockTOCView.swift:92`
+  holds `observeTray(postID)`, the same unbounded `trayBlocks`
+  fetch as a standing Blocks-mode observation with NO window at
+  all. Fix shape: `limit:` defaulting `nil` keeps one-shot
+  callers + four test sites compiling; both held observations
+  pass `window + 1`.
+
+**Batch 4's implementer (A2, A5): AGREE on both**, verified
+read-only in its own session, with fix-shaping context:
+
+- **A2 — AGREE** (its own grep confirms the one surviving phrase;
+  "my copy sweep was site-directed, not phrase-directed — which
+  is exactly how a second home of one sentence survives").
+  Constraints: (i) the two homes are DELIBERATE (texted seam vs
+  empty-looking seam — different guards, same promise) — updating
+  the line restores truth, but a SHARED CONSTANT at the
+  road-clause layer is the stronger close (preserves the
+  causeClause/roadClause split batch 1's pin rides); (ii) the
+  complete fix is the sweep's CLOSING FORM — a table over every
+  user-facing site naming ⌘⇧M or ⌘⇧D, each cell
+  current-or-fixed, not one line; (iii) TWO RECORDS OVERCLAIM and
+  must be amended by whoever lands A2 — QUESTIONS #69's "ALSO
+  SWEPT" paragraph and the batch-4 record's copy-sweep paragraph
+  both say the seam refusal was fixed when only the texted twin
+  was.
+- **A5 — AGREE** ("the asymmetry is real, it is mine").
+  Constraints: (i) refuse-the-link is necessarily
+  REFUSE-THE-WHOLE-CHAIN (`withCompound` is atomic — the right
+  outcome, matching the pair road and the no-partial-acts
+  doctrine — but the copy must say the whole run refused); (ii) a
+  bare `throw` lands in the J8 enum-dump class (raw description
+  at BOTH call sites) — a typed error mapped to
+  `takesChangedMerge` in both catches would be needed; (iii) **its
+  recommendation, and the stronger shape: a PRE-COMPOUND
+  validation** — every failure mode is knowable before the
+  compound opens (validate each link's trailing side + the first
+  leading side against the one store read), no rows touched, no
+  new error type, and the pin needs NO injection seam (the
+  validation is a pure function a test calls directly); (iv) a
+  SECOND reachability candidate, board-only and UNVERIFIED: the
+  board's `mergeSelectedBlocks` has no gap-slot guard (existence
+  + contiguity only), so `displayed[id]` is nil for an unsynced
+  block with no race required — Write's planner refuses
+  `.gapSlot` for chains; whether the board's path reaches the
+  silent fold depends on `ops.merge` on a gap block, NOT
+  verified — a candidate for the reviewer to check, not a claim.
+
+**Batch 1's implementer (A8): AGREE** — reproduced the arithmetic
+from its own code (`starts=[0,1,2]`, `ends=[0,1,2]`, span `{0,2}`
+→ run `0...2`), and CORRECTED its own comment's reasoning: the
+"strictly increasing" note proves uniqueness WITHIN each lookup
+and says nothing about the primary and secondary lookups both
+having solutions — which collapse only for a zero-length entry
+(the primary then grabs an entry AT the span's boundary).
+Trailing-edge only (the leading edge has no mirror). NIT severity
+sustained by the implementer ("empty by construction — no prose
+reachable; one compound, one ⌥⌘Z; the receipt counts what went").
+Cleanly pinnable through the pure function (no store, no AppKit:
+`entries([0,0,0])`, span `{0,2}` → `0...2` today, `0...1` after).
+Boundary to keep: the `range.length > 1` guard fences this
+function off A7's carve and #34's seam — a disambiguation
+reaching length-1 spans would route around ruled authorizations.
+
+**All six flow findings: AGREE, unanimous.** The package returns
+to the reviewer for final calls + its own fix pass (next entry).
+
 ---
 
 ## BATCH 4 RECORD — the defaults pair (J4/J4b) (2026-08-18; fresh Opus implementer)
