@@ -390,6 +390,15 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // 13j J2: the per-note TRAY — what this note has deleted, and what a
     // divide/merge preserved whole (post scope; two doors, one act)
     case showNoteTray
+    // 13j batch 6b (J1 — her round-3 rider, verbatim: "have a delete now
+    // option WITHIN the trash (not from within the normal note) … but never
+    // accidental full delete from within a note, but an option for full
+    // delete without waiting"). TWO `.surface` acts rendered by the Trash
+    // surface ALONE — no other renderer may ever carry them, which the
+    // surface-walk union enforces by construction. Both confirm: Delete Now
+    // EVERY time (round 10 — no session-scoped don't-ask), Empty Trash once
+    // naming the FULL count by kind (round 8 — "everything, always").
+    case deleteNow, emptyTrash
     // Takes lifecycle completeness (13b Stage 3, 3D — T5/N1/N6)
     case unarchiveTake, labelTake, renameLens
     // 13j, sitting round 5 — DELETED takes get a door at last. The sweep at

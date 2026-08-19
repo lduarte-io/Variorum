@@ -44,3 +44,29 @@ nonisolated enum SavepointCadenceCopy {
         + "structural change over edits, and a journal entry arriving from "
         + "Fragments. Those aren't a schedule; they're insurance."
 }
+
+/// Phase 13j batch 6b — the words of the HISTORY PRUNING setting (her
+/// round-9 ruling, verbatim: *"I think 90 days, N=10 is fine for a default,
+/// but I think users should be able to choose to never prune. it might be
+/// important for some users."*). The one sentence it must never leave out:
+/// deliberate ⌘S savepoints are NEVER pruned, in either mode (the J8 bar —
+/// a pruning setting that read as "your savepoints get thinned" would be
+/// claiming a reach it doesn't have).
+nonisolated enum HistoryPruningCopy {
+    static let title = "Old quiet savepoints"
+
+    static func label(_ pruning: HistoryPruning) -> String {
+        switch pruning {
+        case .standard: return "Tidy them after \(SavepointPruning.ageDays) days (recommended)"
+        case .never: return "Keep every one, forever"
+        }
+    }
+
+    static let help =
+        "Tidy: once a take's quiet savepoints are older than "
+        + "\(SavepointPruning.ageDays) days, only the newest "
+        + "\(SavepointPruning.keepNewestQuiet) are kept — the rest are "
+        + "deleted for good, everywhere, once every synced device has seen "
+        + "them. Keep every one: nothing is ever thinned. Savepoints you "
+        + "took yourself with ⌘S are never touched, in either mode."
+}

@@ -319,6 +319,18 @@ nonisolated enum OpsRefusalCopy {
             // SUCCESS story told as a refusal, so it says so.
             case .variantNotDeleted:
                 return "That take is already back — it's in the block's fan."
+            // 13j batch 6b (J1): the purge op's three refusals, worded —
+            // never the raw dump (the J8 bar, in the phase whose bar is
+            // copy truth). The first is the honest impossible-door case:
+            // only things in the Trash can be deleted for good.
+            case .purgeTargetNotDeleted:
+                return "Only things in the Trash can be deleted for good — "
+                    + "delete it first, and it waits there \(TrashWindow.days) days."
+            case .deliberateSavepointNeverPruned:
+                return "That's a deliberate ⌘S savepoint — those are never pruned, "
+                    + "in any mode."
+            case .unsupportedPurgeTarget:
+                return "That isn't something the Trash can delete for good."
             case .lockedVariant:
                 return "That take is locked — unlock it or branch a new take."
             case .versionLinkNotFound:

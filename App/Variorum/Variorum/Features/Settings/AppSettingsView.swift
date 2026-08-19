@@ -69,6 +69,9 @@ private struct AppearancePane: View {
     /// like the segmentation default beside it.
     @State private var savepointCadence: SavepointCadence = .everySession
     @State private var cadenceNote: String?
+    /// 13j batch 6b (round 9): history pruning — synced like the cadence.
+    @State private var historyPruning: HistoryPruning = .standard
+    @State private var pruningNote: String?
 
     var body: some View {
         Form {
@@ -188,6 +191,27 @@ private struct AppearancePane: View {
                         .lineLimit(4)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                // 13j batch 6b (her round-9 ruling): history PRUNING —
+                // one row beside the cadence it exists because of. Synced
+                // like it, and "Never means never on every device".
+                Picker(HistoryPruningCopy.title, selection: Binding(
+                    get: { historyPruning },
+                    set: { setHistoryPruning($0) })) {
+                    ForEach(HistoryPruning.allCases, id: \.self) { pruning in
+                        Text(HistoryPruningCopy.label(pruning)).tag(pruning)
+                    }
+                }
+                Text(HistoryPruningCopy.help)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                if let pruningNote {
+                    Text(pruningNote)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(4)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
         }
         .formStyle(.grouped)
@@ -212,6 +236,16 @@ private struct AppearancePane: View {
                     try Queries.savepointCadence(db)
                 }) {
                     savepointCadence = value
+                }
+            } catch {}
+        }
+        // 13j batch 6b: and for the pruning setting, the same shape.
+        .task {
+            do {
+                for try await value in session.database.observe({ db in
+                    try Queries.historyPruning(db)
+                }) {
+                    historyPruning = value
                 }
             } catch {}
         }
@@ -247,6 +281,19 @@ private struct AppearancePane: View {
                 try await session.runner.run { try $0.setSavepointCadence(cadence) }
             } catch {
                 cadenceNote = OpsRefusalCopy.message(for: error)
+            }
+        }
+    }
+
+    /// 13j batch 6b — the pruning setter, its neighbours' exact shape.
+    private func setHistoryPruning(_ pruning: HistoryPruning) {
+        guard pruning != historyPruning else { return }
+        pruningNote = nil
+        Task {
+            do {
+                try await session.runner.run { try $0.setHistoryPruning(pruning) }
+            } catch {
+                pruningNote = OpsRefusalCopy.message(for: error)
             }
         }
     }

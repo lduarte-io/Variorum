@@ -45,17 +45,25 @@ struct TrashSurfaceTests {
         #expect(RecoveryPath.trashSection == "Trash")
     }
 
-    /// **NO disabled doors** (P-2, and the brief's own fence): Delete Now and
-    /// Empty Trash are RULED but their backing is schema-shaped, so this
-    /// batch renders neither — not even greyed. A door that cannot act is not
-    /// rendered at all.
-    @Test func noPurgeDoorIsRenderedBeforeItsBackingExists() {
-        let source = try? String(
-            contentsOfFile: "<home>/dev/variorum/App/Variorum/Variorum"
-                + "/Features/Library/RecoveryView.swift", encoding: .utf8)
-        let text = try? #require(source)
-        #expect(text?.contains("Button(\"Delete Now\"") != true)
-        #expect(text?.contains("Button(\"Empty Trash\"") != true)
+    /// GRADUATED at batch 6b (a consequential pin edit, annotated in place
+    /// — the batch-2/3 precedent): this pin shipped at batch 6 asserting NO
+    /// purge door existed, because their backing (the sync-visible purge
+    /// intent) was schema-shaped and STOP-gated. Batch 6b built the backing
+    /// (v1_14 + the janitor), so the claim graduates to its ruled form: the
+    /// doors EXIST, they are REGISTRY-DECLARED, and the Trash surface is
+    /// their ONLY renderer, forever (her round-3 rider — "never accidental
+    /// full delete from within a note"). The surface-walk union in
+    /// `CapabilityRegistryTests` enforces the only-renderer half by
+    /// construction; `TrashPurgeDoorsTests` carries the doors' behavior.
+    @Test func thePurgeDoorsExistAndLiveInTheTrashOnly() {
+        #expect(RecoveryView.surfaceCapabilities.contains(.deleteNow))
+        #expect(RecoveryView.surfaceCapabilities.contains(.emptyTrash))
+        for capability in CapabilityRegistry.all
+        where capability.id == .deleteNow || capability.id == .emptyTrash {
+            #expect(capability.doors == [.surface],
+                    "\(capability.id): a purge act may never grow a menu/bar/palette door — in-Trash only is her rider's letter")
+            #expect(capability.unavailableNote.contains("Trash"))
+        }
     }
 
     // MARK: - The listing's face

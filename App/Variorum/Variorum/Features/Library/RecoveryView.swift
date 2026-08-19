@@ -34,14 +34,17 @@
 //  · **The window is fixed at 30 days** — no setting; Delete Now is the
 //    impatience door.
 //
-//  **What is deliberately NOT here yet: Delete Now and Empty Trash.** They
-//  are ruled, and their backing is a sync-visible purge intent — schema- and
-//  server-shaped, and therefore hers to authorize (the purge design memo,
-//  `notes/plans/phase-13j-purge-memo.md`). A door that cannot act is not
-//  rendered (P-2), so this batch renders none: no greyed buttons promising a
-//  thing that does not exist. What the 30-day clock DOES today is honest on
-//  its own terms — a deleted thing leaves every surface at the boundary, and
-//  the bytes follow when the purge lands.
+//  ── 13j batch 6b: DELETE NOW & EMPTY TRASH, BUILT ────────────────────────
+//  The purge memo's every question closed (rounds 8/8b/9/10) and its DDL
+//  pre-authorized, so the doors exist now — IN-TRASH ONLY, forever (her
+//  round-3 rider: "never accidental full delete from within a note").
+//  Delete Now confirms EVERY time (round 10); Empty Trash confirms once,
+//  naming the FULL count by kind (round 8). Both write ONE thing — a purge
+//  INTENT (`Operations.requestPurge`) — and the row leaves every surface at
+//  once (the read-side fence); the invisible JANITOR (`PurgeJanitor`,
+//  riding the sync scheduler) then takes the bytes locally and from the
+//  mirror when the horizon says every device has seen the deletion. The
+//  receipts say exactly that split (the J8 bar).
 //
 
 import Foundation
@@ -110,6 +113,56 @@ nonisolated enum RecoveryPath {
     /// The stranded original's own line (her round-8b ruling — the same
     /// sentence the note's tray shows, from the tray's one home).
     static var goesWithItsFamily: String { TrayPath.goesWithItsFamily }
+
+    // MARK: The purge doors (13j batch 6b — J1's second half, built)
+
+    /// The per-row impatience door (her round-3 rider: in-Trash only,
+    /// never a note context; round 10: confirms EVERY time).
+    static let deleteNowVerb = "Delete Now"
+    static let emptyTrashVerb = "Empty Trash…"
+
+    /// Delete Now's confirm, per row — destructive, unrecoverable, asked
+    /// every time by her ruling.
+    static func deleteNowConfirm(_ kind: Queries.TrashItem.Kind) -> String {
+        "Delete this \(rowKind(kind)) for good? It skips the rest of its "
+            + "\(TrashWindow.days) days — there's no putting it back."
+    }
+
+    /// Empty Trash's confirm NAMES THE FULL COUNT BY KIND (her round-8
+    /// ruling: "everything, always — the confirm names the full count";
+    /// the memo's wording shape). Preserved originals are named when they
+    /// ride: they are the round-8b passengers, never separately purged.
+    static func emptyTrashConfirm(_ counts: [Queries.TrashItem.Kind: Int]) -> String {
+        let total = counts.filter { $0.key != .preservedOriginal }.values.reduce(0, +)
+        guard total > 0 else { return "The Trash is empty — nothing to delete." }
+        let order: [Queries.TrashItem.Kind] = [.note, .block, .take, .book]
+        let parts = order.compactMap { kind -> String? in
+            guard let count = counts[kind], count > 0 else { return nil }
+            let word = kindLabel(kind).lowercased()
+            let singular = rowKind(kind)
+            return count == 1 ? "1 \(singular)" : "\(count) \(word)"
+        }
+        var sentence = "Empty the Trash? \(total) thing\(total == 1 ? "" : "s") "
+            + "go\(total == 1 ? "es" : "") for good: \(parts.joined(separator: ", "))."
+        if let originals = counts[.preservedOriginal], originals > 0 {
+            sentence += " \(originals) preserved original\(originals == 1 ? " rides" : "s ride") along with "
+                + "\(originals == 1 ? "its" : "their") famil\(originals == 1 ? "y" : "ies")."
+        }
+        return sentence
+    }
+
+    /// The receipts tell the truth about NOW vs the janitor (the J8 bar):
+    /// the row left every surface the moment the intent was written; the
+    /// bytes follow once every device on the account has seen the deletion
+    /// (the horizon — the memo's rule; she never waits on it).
+    static func deleteNowReceipt(_ kind: Queries.TrashItem.Kind) -> String {
+        "The \(rowKind(kind)) is gone from the app now — the bytes follow "
+            + "once every synced device has caught up."
+    }
+    static func emptyTrashReceipt(_ total: Int) -> String {
+        "The Trash is emptied — \(total) thing\(total == 1 ? "" : "s") gone from the app now; "
+            + "the bytes follow once every synced device has caught up."
+    }
 }
 
 @MainActor
@@ -194,6 +247,105 @@ final class RecoveryViewModel {
         TrashWindow.daysLeft(item.deletedAt, now: session.now)
     }
 
+    // MARK: The purge doors (13j batch 6b)
+
+    /// What the surface is asking her to confirm. Delete Now asks EVERY
+    /// time (round 10 — no session-scoped don't-ask exists, deliberately);
+    /// Empty Trash asks once, naming the full count by kind (round 8).
+    enum PurgeConfirm: Equatable {
+        case deleteNow(Queries.TrashItem)
+        case emptyTrash(counts: [Queries.TrashItem.Kind: Int])
+
+        var message: String {
+            switch self {
+            case .deleteNow(let item):
+                return RecoveryPath.deleteNowConfirm(item.kind)
+            case .emptyTrash(let counts):
+                return RecoveryPath.emptyTrashConfirm(counts)
+            }
+        }
+    }
+
+    private(set) var pendingConfirm: PurgeConfirm?
+
+    /// The per-row door: raises the confirm — never acts directly.
+    func requestDeleteNow(_ item: Queries.TrashItem) {
+        guard item.kind != .preservedOriginal else {
+            // A preserved original has no purge door of its own — it rides
+            // its family (round 8b). The row renders no Delete Now, so
+            // this is a belt, not a face.
+            return
+        }
+        pendingConfirm = .deleteNow(item)
+    }
+
+    /// The bulk door: reads the UNWINDOWED counts AT ASK TIME (the listing
+    /// is windowed at 500; "everything, always" means everything), then
+    /// raises the confirm with the full count by kind.
+    func requestEmptyTrash() async {
+        lastError = nil
+        receipt = nil
+        do {
+            let now = session.now
+            let everything = try await session.database.read { db in
+                try Queries.trash(db, now: now)
+            }
+            var counts: [Queries.TrashItem.Kind: Int] = [:]
+            for item in everything { counts[item.kind, default: 0] += 1 }
+            if counts.filter({ $0.key != .preservedOriginal }).values.reduce(0, +) == 0 {
+                receipt = RecoveryPath.emptyTrashConfirm([:])
+                return
+            }
+            pendingConfirm = .emptyTrash(counts: counts)
+        } catch {
+            lastError = String(describing: error)
+        }
+    }
+
+    func cancelPendingPurge() {
+        pendingConfirm = nil
+    }
+
+    /// The confirmed act: ONE op (`requestPurge` — the intent write; rows
+    /// leave every surface at once via the read-side fence), and the
+    /// receipt says the NOW/janitor split honestly. The janitor rides the
+    /// next sync round — the intent's own outbox row triggers one.
+    func confirmPendingPurge() async {
+        guard let confirm = pendingConfirm else { return }
+        pendingConfirm = nil
+        lastError = nil
+        receipt = nil
+        do {
+            switch confirm {
+            case .deleteNow(let item):
+                try await session.runner.run { ops in
+                    _ = try ops.requestPurge(
+                        [SyncPurgeTarget(table: item.kind.purgeTable, rowID: item.id)])
+                }
+                receipt = RecoveryPath.deleteNowReceipt(item.kind)
+            case .emptyTrash:
+                // Re-read at ACT time (a confirm is a pause; the listing is
+                // a projection — the R3-1 lesson): everything currently in
+                // the Trash, unwindowed, minted in one transaction.
+                let now = session.now
+                let everything = try await session.database.read { db in
+                    try Queries.trash(db, now: now)
+                }
+                let targets = everything
+                    .filter { $0.kind != .preservedOriginal }
+                    .map { SyncPurgeTarget(table: $0.kind.purgeTable, rowID: $0.id) }
+                try await session.runner.run { ops in
+                    _ = try ops.requestPurge(targets)
+                }
+                receipt = RecoveryPath.emptyTrashReceipt(targets.count)
+            }
+        } catch let error as OperationError {
+            lastError = TrayRefusalCopy.message(for: error)
+        } catch {
+            lastError = String(describing: error)
+        }
+    }
+
     /// **Put back — one verb, each kind's own road** (13j J1). Every road
     /// already existed; what was missing was a place to stand where all four
     /// are offered together.
@@ -230,11 +382,31 @@ final class RecoveryViewModel {
     }
 }
 
+/// The Trash-row → purge-root table mapping (13j batch 6b). App-side beside
+/// its only renderer; the phone's future Trash face inherits the core op and
+/// will carry its own twin (the parity ledger's row).
+extension Queries.TrashItem.Kind {
+    nonisolated var purgeTable: String {
+        switch self {
+        case .note: return "container"
+        case .book: return "reading"
+        case .block: return "block"
+        case .take: return "variant"
+        case .preservedOriginal: return "block"  // rides its family; no own door
+        }
+    }
+}
+
 struct RecoveryView: View {
     let session: AppSession
     let library: LibraryViewModel
     var openPost: (String) -> Void
     @State private var model: RecoveryViewModel
+
+    /// 13j batch 6b (P-1): the Trash surface is the ONE renderer of the two
+    /// purge acts — the walk's union names every renderer by construction,
+    /// so a door leaking into any note context would fail the walk.
+    static let surfaceCapabilities: [CapabilityID] = [.deleteNow, .emptyTrash]
 
     init(
         session: AppSession, library: LibraryViewModel,
@@ -309,7 +481,8 @@ struct RecoveryView: View {
         .task(id: model.restartToken) { await model.startTrash() }
     }
 
-    /// Her round-3 ruling's two controls: filter by kind, sort by date.
+    /// Her round-3 ruling's two controls: filter by kind, sort by date —
+    /// and, since batch 6b, the Empty Trash door (in-Trash only, forever).
     private var controls: some View {
         HStack(spacing: 12) {
             Picker("Show", selection: Binding(
@@ -327,8 +500,30 @@ struct RecoveryView: View {
                 set: { model.oldestFirst = $0 }))
                 .toggleStyle(.checkbox)
             Spacer()
+            // 13j batch 6b (J1): the bulk purge door — rendered only when
+            // the Trash holds something (P-2: a door that cannot act is
+            // not rendered); the confirm names the full count by kind.
+            if !model.trash.isEmpty {
+                Button(RecoveryPath.emptyTrashVerb) {
+                    Task { await model.requestEmptyTrash() }
+                }
+                .controlSize(.small)
+                .help("Everything in the Trash goes for good — the confirm names the full count")
+            }
         }
         .font(.caption)
+        .confirmationDialog(
+            model.pendingConfirm?.message ?? "",
+            isPresented: Binding(
+                get: { model.pendingConfirm != nil },
+                set: { presented in if !presented { model.cancelPendingPurge() } }),
+            titleVisibility: .visible
+        ) {
+            Button("Delete for Good", role: .destructive) {
+                Task { await model.confirmPendingPurge() }
+            }
+            Button("Cancel", role: .cancel) { model.cancelPendingPurge() }
+        }
     }
 
     @ViewBuilder
@@ -378,6 +573,17 @@ struct RecoveryView: View {
             }
             .controlSize(.small)
             .help(putBackHelp(item))
+            // 13j batch 6b (J1 — her rider): the per-row impatience door.
+            // IN-TRASH ONLY, and never on a preserved original (it rides
+            // its family, round 8b — its row says so already). Confirms
+            // EVERY time (round 10).
+            if item.kind != .preservedOriginal {
+                Button(RecoveryPath.deleteNowVerb, role: .destructive) {
+                    model.requestDeleteNow(item)
+                }
+                .controlSize(.small)
+                .help("Skips the rest of the \(TrashWindow.days) days — asked to confirm every time")
+            }
         }
     }
 

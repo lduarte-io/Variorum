@@ -611,6 +611,27 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Open a note and its tray lists what it has deleted.",
             availability: noteScoped),
+        // 13j batch 6b (J1 — the purge doors, IN-TRASH ONLY forever: her
+        // round-3 rider's letter). `.surface` acts on the Trash's own rows
+        // and header; app scope because a Trash row can be any kind, and
+        // the surface itself is app chrome, not a mode. Both back onto ONE
+        // op (`requestPurge` — the intent write); the janitor takes the
+        // bytes when the horizon allows, and the receipts say exactly that
+        // split (the J8 honesty bar).
+        Capability(
+            id: .deleteNow, verb: "Delete Now", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Delete Now lives in the Trash — "
+                + "\(RecoveryPath.surface) holds it, never a note.",
+            availability: { _ in .act }),
+        Capability(
+            id: .emptyTrash, verb: "Empty Trash", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Empty Trash lives in the Trash — "
+                + "\(RecoveryPath.surface) holds it, never a note.",
+            availability: { _ in .act }),
 
         // MARK: Commit + undo
         Capability(

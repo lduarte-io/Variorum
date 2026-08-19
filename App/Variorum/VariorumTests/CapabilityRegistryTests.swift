@@ -287,6 +287,15 @@ struct CapabilityRegistryTests {
             // so both faces are covered by construction. The union names
             // every renderer, so a new builder is a new line here.
             .union(BlockPastSection.surfaceCapabilities)
+            // 13j batch 6b (A JUSTIFIED EDIT, the E2/E8/batch-3 class): the
+            // TRASH surface renders the two purge doors — Delete Now per
+            // row and Empty Trash — and it is their ONLY legal renderer,
+            // forever (her round-3 rider: "never accidental full delete
+            // from within a note"). The union names every renderer by
+            // construction, so a purge door leaking into any note context
+            // is a new line here — which is exactly the review this walk
+            // exists to force.
+            .union(RecoveryView.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

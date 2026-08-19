@@ -99,8 +99,17 @@ final class SyncSession {
             await old.awaitIdle()
         }
 
-        let scheduler = SyncScheduler(
-            engine: SyncEngine(transport: transport, keyProvider: keyProvider))
+        // Phase 13j (batch 6b): the purge janitor rides the scheduler —
+        // wired exactly when the transport carries the purge surface
+        // (`SupabaseTransport` does; test wrappers don't, so their worlds
+        // are untouched). The janitor sweeps after each clean round: the
+        // ledger reconciliation, the horizon-gated family purges, and the
+        // savepoint pruning mints — the memo's §4b, riding the existing
+        // scheduler as designed.
+        let engine = SyncEngine(transport: transport, keyProvider: keyProvider)
+        let janitor = (transport as? any SyncTransport & SyncPurgeTransport)
+            .map { PurgeJanitor(transport: $0, keyProvider: keyProvider) }
+        let scheduler = SyncScheduler(engine: engine, janitor: janitor)
         self.scheduler = scheduler
 
         // Status → the observable surface (+ the round-completion hook:
