@@ -76,16 +76,61 @@ rehearsal folded into the restore drill (scratch store, scratch
 account NEVER hers — or the fake-server road if a scratch account
 is disproportionate; the kickoff picks).
 
-### 8. OPENING MINI-ITEM (her post-13j-close live report, 2026-08-19): the in-note Delete Note door
+### 8. OPENING MINI-ITEM (her post-13j-close reports, 2026-08-19 — RULED same sitting): the note-deletion door set
 
 Her words: "also how do i even delete a note? I'm within a note I
-want to delete right now and I don't see how to delete it." There
-is NO in-note door — only the Library/Pool rows'. Build: "Delete
-Note…" in the note ▾ menu — ordinary move-to-Trash ONLY (her
-round-3 rider stands: Delete Now never appears in note context),
-the receipt naming the Trash and its clock, the pane's
-navigate-away choreographed, registry-declared, walk-asserted.
-This opens the phase (the 13e mini-round precedent).
+want to delete right now and I don't see how to delete it" → then
+her ruling: "make it a note for 13l to include delete note in the
+note menu with confirmation, to add a confirmation for the library
+door of deletion, and to allow for command clicking to select
+multiple items and deleting all of them." Build, opening the phase
+(the 13e mini-round precedent):
+
+- **"Delete Note…" in the note ▾ menu — WITH CONFIRMATION** (her
+  ruling); ordinary move-to-Trash ONLY (the round-3 rider stands:
+  Delete Now never appears in note context); the receipt names the
+  Trash and its clock; **navigate-away covers EVERY pane/window
+  showing the note** (13f workspace — the Library door shares this
+  choreography when the deleted note is open somewhere).
+- **The Library door gains the same confirmation** (her ruling) —
+  one wording, both doors.
+- **⌘-click multi-select in the Library + delete-all-selected**
+  (her ruling): ONE confirmation naming the count ("Delete 5
+  notes?"), ONE receipt; scope = Library note rows first (blocks
+  already ⌘-click since 13e; shelf books at her word); registry +
+  walk as always.
+- **The confirmation-consistency PRINCIPLE, written down** (13j
+  audit): notes confirm (container-scale, deliberate); blocks and
+  takes do NOT (in-flow acts — ⌥⌘Z + the tray/History cover them;
+  J9 exists precisely to unfriction paragraph deletion); Delete
+  Now/Empty Trash always confirm (unrecoverable). Future doors
+  inherit the rule instead of re-deciding it.
+
+### 8b. 13J-AUDIT ADDITIONS (the architect's close-of-day deletion audit, 2026-08-19 — recorded for this phase)
+
+- **The pre-13j deleted backlog (tell-her-first class):** anything
+  tombstoned >30 days BEFORE 13j left every surface at the upgrade
+  (the read-side fence grandfathers nothing) and becomes
+  purge-eligible once the horizon passes — for HER this is the
+  feature she asked for ("posts I don't want to have"), but 13l's
+  kickoff confirms she wants no last look; if she does, a ONE-TIME
+  amnesty listing (tombstoned-past-window, Put back offered) is a
+  bounded add here. For future USERS upgrading with old deletions,
+  the same moment deserves one honest sentence — kickoff decides
+  where.
+- **M6 WIDENS to external backups:** Time Machine (the brief's own
+  interim advice points it at the container) and any file-level
+  backup hold purged content OUTSIDE our retention — the runbook's
+  disclosure names external snapshots, not only our own files.
+- **Pool/scraps deletion honesty check:** verify a deleted POOL
+  reads honestly in the Trash (kind naming, cascade of its
+  scraps, Put back) — the story was built container-generic; the
+  check is that its FACE never calls a pool a note.
+- **Archived-blocks badge watch-item (no change ruled):** the ⌫
+  badge counts deleted only (round 5) — ruled before block archive
+  existed (round 7). A note with ONLY archived blocks shows no
+  badge; the note ▾ tray item is the road. Watch in her real use;
+  revisit only if she trips.
 
 ## Kickoff decisions (hers — the brief's list, plus this plan's)
 
@@ -100,6 +145,15 @@ This opens the phase (the 13e mini-round precedent).
    system fallback otherwise, or one uniform story).
 5. **M5's ruling** (accept-and-say-it recommended) + M3/M6 wording
    confirmations.
+6. **The Fragments second life of purged journal days (surfaced at
+   the 13j audit — decide or defer knowingly):** true delete does
+   NOT reach Fragments' copy of a journal day, and a LATER
+   Fragments-side edit re-lands that day as a fresh Variorum note
+   — purged content returning via the co-writer. The purge memo
+   §4e recorded it as the honest outcome; whether deletions should
+   TRAVEL to Fragments is a contract-file conversation
+   (`notes/fragments-bridge-contract.md`, she carries it). Her
+   call: rule it, or defer with eyes open.
 
 ## Binding constraints
 

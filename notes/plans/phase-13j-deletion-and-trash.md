@@ -5111,3 +5111,12 @@ green 63/8; landed BEFORE her Restore-Tutorial click so one click
 picks up everything. (2) The create-a-book/chapter/note-within
 tutorial section ROUTED TO 13i at her own suggestion — recorded in
 the 13i brief.**
+
+**Her ruling on the reports (same sitting): the 13l opening item
+GREW — Delete Note in the note menu WITH confirmation · the
+Library door gains the same confirmation · ⌘-click multi-select +
+delete-all in the Library. Not run here (context); recorded in the
+13l plan §8 with the audit's additions (§8b: the pre-13j backlog
+tell-her-first item, M6 widened to external backups, the pool
+honesty check, the badge watch-item) and the Fragments
+deletion-travel decision surfaced at 13l kickoff decision 6.**
