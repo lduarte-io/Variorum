@@ -786,4 +786,24 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint.**
 
-*(Next free number: **#70**.)*
+## Phase 13j (2026-08-19) — batch 5's calls (the savepoint cadence: your history stops being thin)
+
+70. **2026-08-19 · Phase 13j batch 5 (J11 — the savepoint cadence) · SIX entries.** The BINDING record is the 13j plan's batch-5 section.
+
+    **WHAT SHIPPED, IN ONE SENTENCE:** your ruling is now the app's behaviour — every time you leave a note (switching away, closing its window, quitting, filing a quick note) Variorum leaves one quiet savepoint for each take you changed; a note you leave open gets one after about two hours instead of twenty-four; Settings ▸ Writing has the one setting with three choices; and a run of those quiet savepoints shows in a take's history as one line you can open, so ⌘S savepoints still stand out.
+
+    **(a) WHERE "leaving" is drawn, and the three things that deliberately are NOT it.** A note is left when no pane of a window is showing it any more. So: navigating away, closing the split, a note being pushed out by "Open Beside", closing the window, and ⌘Q all leave a savepoint. What does NOT: **closing an Open-strip row with its ✕** (the pane goes on showing the note — its own rule is that ✕ closes a row and nothing else), **moving focus between two panes** (both notes are still on screen), and **switching modes inside a note** (Write ▸ Takes ▸ Canvas — the note is still open, only its surface changed). **The alternative** for the ✕ specifically: treat closing the row as leaving, which would savepoint a note you are still looking at.
+
+    **(b) A LONE quiet savepoint is not collapsed.** Runs fold from two upward; a single `auto` row renders as itself, because "1 quiet savepoint — show" would be a line hiding one line behind a click. **The alternative:** fold from one, for perfect uniformity.
+
+    **(c) The setting's help NAMES the four things it does not govern.** Sealing a note, locking a take with unsaved changes, undoing a structural change over edits, and a journal entry arriving from Fragments all still save a take first, in every mode including "Only when I press ⌘S" — they insure text about to become unreachable, which is not a schedule. The help says so in as many words, because a setting that reads as "nothing else writes savepoints" while four occasions still do is exactly the copy problem you reported in 13e. **The alternative:** shorter help that leaves it unsaid.
+
+    **(d) The two-hour backstop moves only if it was still the shipped default.** No screen has ever exposed `idle_commit_hours`, so in practice your store reads 24 and moves to 2 — but if a value had ever been set by hand it stays. **The alternative:** move it unconditionally.
+
+    **(e) A quick note gets a savepoint the moment it is filed.** The note it mints is open in no pane, so no other road would ever reach it, and a captured thought with no savepoint at all is the thin history you reported. **The alternative:** leave quick notes without one until they are opened and left.
+
+    **(f) With the same note open in TWO windows, leaving it in one savepoints it while the other still shows it.** The shown-notes signal is per window. The cost is one extra quiet savepoint of text that genuinely changed — which the run collapse then folds away — and the alternative is a cross-window check on every navigation to prevent it. **Recorded, not hidden**, in case you want it prevented.
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#71**.)*

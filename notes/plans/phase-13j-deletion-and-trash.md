@@ -511,7 +511,7 @@ server-shaped lands.
 | 2 | **The tray (J2) + the graveyard removal (J6):** the context-bar door ("⌫ N", nonempty-only) + the two-section tray panel with Put back; the global unplaced section leaves the Library surface (pool door dies with it); the delete receipt/help copy graduates to naming the real tray + its door (J8(a)'s completion); **+ the batch-1 hand-off rider: the phone's two tray-promising receipts made TRUE on the phone's own terms** | **DONE 2026-08-18** — record below (core 1259/135 · Mac **1450/259 FULLY GREEN** · spine 51/7 · mobile 314/60; BOTH VERIFY-first flags answered — block-level archive is UNREACHABLE (section named "Deleted"), and `restoreBlock` places at the note's END, diverging from the round-5 design statement: **REPORTED, op UNTOUCHED, her call at QUESTIONS #67**; ARCHITECT-VERIFIED against `7e45d0d` — the core count REPRODUCED by the architect's own run, F2 ADJUDICATED into batch 3's rider, the Blocks-mode `traySection` consolidation held propose-only) |
 | 3 | **DONE 2026-08-18** — record below (core 1278/136 · Mac **1467/261 FULLY GREEN** · spine 51/7 · mobile 314/60; the bridge RECONCILED — the peek is the destination, `TrayRequest.revealBlockID` KEPT as the peek's second action; the archived-take road VERIFIED as `unarchiveVariant` and reused unchanged; the F2 rider BUILT with both roads pinned; the capture caught two copy defects and both are fixed; QUESTIONS #68 logged; **ARCHITECT-VERIFIED against `b331ef6` — the core count REPRODUCED by the architect's own run; F2 was RATIFIED by her at round 6 while this batch ran, so the rider ships ruled, not provisional**). Scope: **The lineage door (J3, as AMENDED round 5) + lens-fallback loudness (J5) + deleted-take recovery (round 5):** the context-menu item + ⌘K palette act, the read-only original peek with Put back / Open tray; **the History-face lineage row** (Write's CommitBar history + Takes' history sheet — the summoned "past" surface); the lens column's in-place archived-pick notice + one-click Restore; **the deleted-take restore op + deleted-takes query + the History face's quiet deleted-take rows with Put back** (zero schema); **+ the F2 placement rider** (`restoreBlock` flips the surviving placement row — adjudication above) | **DONE** |
 | 4 | **The defaults pair (J4/J4b):** divide default → `divideDuplicating` (the dormant core op wired); merge default → carry-all (composed from `mergeCeremony`, the phone's C5 the reference); "Divide with Ceremony…" ⌥⌘⇧D · "Merge with Ceremony…" ⌥⌘⇧M in Block menu + context menu + palette | **DONE 2026-08-18** — record below (core 1278/136 · Mac **1492/263 FULLY GREEN** · spine 51/7 · mobile NOT RUN, correctly — zero `Sources/`/`Shared/` lines; **the CHAIN-COMPOSITION answer: built, no edge beyond the brief's sentence** — each link composes through the one `CarryAllMerge` brain, unfanned links keep `ops.merge` byte-unchanged, the next link's displayed take is read off the op's own `sources` rather than inferred, and the compounding carry consequence is recorded at #69(a); the ⌥⌘⇧D/⌥⌘⇧M collision sweep found both FREE; five stale ceremony-default copy sites + three tutorial lessons aligned; ZERO core-op changes; QUESTIONS #69 logged with the ONE judgment call — the context menu's unconditional ceremony rows; ARCHITECT-VERIFIED against `55885ef` — #69(a) chain carry + #69(c) menu rows are her walk items) |
-| 5 | **J11 — the savepoint cadence:** on-note-close auto-commit per edited take (deduped) + `idle_commit_hours` default 24→2 + the ONE enum setting ("Every session · Idle only · Only when I commit"-shaped) + the history view's quiet-run collapse (the legibility half) | pending — brief below |
+| 5 | **J11 — the savepoint cadence:** on-note-close auto-commit per edited take (deduped) + `idle_commit_hours` default 24→2 + the ONE enum setting ("Every session · Idle only · Only when I commit"-shaped) + the history view's quiet-run collapse (the legibility half) | **DONE 2026-08-19** — record below (core 1295/138 · Mac **1516/266 FULLY GREEN** · spine 51/7 · mobile 314/60; the LIFECYCLE ANSWER: a note is left when no pane of a window shows it — one entry, `AppSession.savepointOnLeaving`, off four existing funnels, no second lifecycle mechanism; `closeAutoCommit` is the SIXTH quiet occasion, gated with `idleAutoCommit` while the four INSURANCE occasions stay ungoverned; ZERO schema — one seeded setting VALUE, marker 6 stands; the Mac's intermittent canvas reds TRACED to load-dependent mouse-event rigs and proven PRE-EXISTING on a worktree at `43192a9`; two canon deltas owed at closeout; QUESTIONS #70 logged) |
 | 6 | **J1 — the Trash:** the surface reshape (rename to Trash; Archived keeps no clock; per-row "N days left" + Put back; sort/filter by kind + date **incl. the round-5 Takes filter — deleted takes ride the clock with block/note context**; Delete Now per row + Empty Trash, confirm-once, IN-TRASH ONLY — no full-delete door in any note context, ever; a note deleted whole lists as ONE note row, cascade victims never double-listed) + the 30-day leave-all-surfaces clock; **+ BLOCK-LEVEL ARCHIVE (round-7 ruling):** `archiveBlock`/`unarchiveBlock` on the ruled shape (release placement + stamp; tray section takes back "Deleted & archived"; no countdown on archived rows; Put back via the ratified F2 road; structural-undo entries; doors + registry + receipts); **+ the Blocks-mode `traySection` routed to the one panel (round-7 ruling)**; **the purge design memo authored here** (client+server mechanics, the horizon, the per-device pull cursor, the lineage-only-originals edge) → STOP: her explicit go gates any server-shaped build | pending |
 | 7 | **J10 — the tutorial deletion chapter** (walk-asserted per P-6: delete blocks in-tutorial, the tray, Put back, cross-block deletion, the Trash, the ceremony doors) + the whole-note-version-history design brief (round 2's deferral deliverable) | pending |
 
@@ -2461,3 +2461,245 @@ moves only its door or its outcome:
   build, no push. No other `xcodebuild` was active before any run.
 - **Nothing PENDING** — every count and every claim above is from a run in this
   session.
+
+---
+
+## BATCH 5 RECORD — the savepoint cadence (J11) (2026-08-19; fresh Opus implementer)
+
+**Scope built, to the letter of her sitting-round-1 rulings:** on-leaving
+auto-savepoints, the idle backstop 24 h → 2 h, the ONE cadence setting with
+the insurance occasions exempt, and the history faces' quiet-run collapse.
+**ZERO schema** (one seeded `setting` VALUE — no table, no column, no index;
+mirror untouched, `SyncSchema.lockstepVersion` still 6) · **ZERO
+`Sources/VariorumCore/Sync/` lines** · no new capability-registry rows (a
+Settings picker is not a routed door — the `defaultSegmentation` precedent
+beside it) · no Release build, no `/Applications` refresh, no push.
+
+Commits: `2d534cf` (the model half, on its own per CLAUDE.md's
+model-changes rule) · `5c38dba` (the core half) · `e84d8f2` (the app half)
+· `f092356` (the visual loop + the defect it caught).
+
+### THE LIFECYCLE MAPPING — where "close/leave" actually hooks (the brief's named question)
+
+**The definition, chosen and stated once: a note is LEFT when it stops being
+shown by a window.** Every road calls ONE entry —
+`AppSession.savepointOnLeaving(_:)` — and every RULE lives below it in
+`Operations.closeAutoCommit`. **No second lifecycle mechanism was added:**
+liveness stays `PaneTextAuthority`'s inside a surface and the per-post
+autosave registry's across surfaces; this reads what the workspace already
+knows.
+
+| Road | Hook | Why there |
+|---|---|---|
+| navigate a pane away · close the split · Open-Beside displacing a pane | `WorkspaceModel.reportingDepartures`, wrapping every mutation of the shown set | `select` is the door every navigation funnels through (its own 13f batch-4 contract), so the signal is complete without instrumenting each door — the same argument that made `visit` the ONE recording point |
+| a window closing | `SavepointOnLeave.windowClosing` from `RootView.onDisappear`; `SavepointOnLeave.leaving([postID])` from `NoteWindowView.onDisappear` | deliberately NOT routed through `onNotesLeft`: the workspace is not mutating, it is being torn down, and a teardown depending on a mutation firing is this phase's own ladder-A bug class |
+| ⌘Q | the quit registration inside `AppSession.autosave(forPost:)` | that ONE registration point has covered every open post since 13b 1a; the closure now flushes AND savepoints, so quit is covered by construction |
+| a quick note filing itself | `QuickNotePad.take()` — the one body its three triggers share | its note is open in no pane, so no other road would ever reach it, and a captured thought with no savepoint is the thin history she reported |
+
+**Deliberately NOT a leaving, each with its reason (all three pinned or
+stated in code):** closing an Open-strip row with ✕ (its own contract is
+"closes a ROW and nothing else" — the pane goes on showing the note);
+moving focus between two panes (both notes are on screen — the signal
+compares SETS, which is exactly why); switching modes inside a note.
+
+**WHY THE SIGNAL LIVES ON `WorkspaceModel` AND NOT IN A VIEW'S `.onChange`:**
+the workspace already owns the shown set, and — the reason that decided it —
+a view-side observer could not be driven by a test without mounting SwiftUI,
+which is precisely how a starting `.task` inside a false conditional shipped
+DEAD through five green pins at this phase's ladder A (finding A1). Every
+pin below drives a real door.
+
+**Flush-first is load-bearing, not tidiness:** `closeAutoCommit` reads
+`working_text` ROWS and a leaving arrives inside the autosave debounce by
+construction (she stops typing and navigates), so without the flush the
+savepoint preserves the text of half a second ago — the 13e E10 copy-door
+class, arriving at the cadence. It flushes the **existing** coordinator only
+(`postAutosaves[postID]?`): minting one would cache a coordinator AND a quit
+registration for a note that was never open, which is the quick note's case
+exactly (caught by `QuickNoteMintTests` on the batch's first full run, fixed
+at its cause rather than by moving the pin).
+
+### WHAT SHIPPED
+
+**1 — On-leaving savepoints.** `Operations.closeAutoCommit(_:)` is **the
+SIXTH quiet auto-commit occasion** (OverallModel §3's list gains one — a
+canon delta for the closeout, flagged below). Its body is `idleAutoCommit`'s
+shared `autoCommitDirtyVariants`, so the dedupe is the same guard: a take
+whose buffer already matches its latest commit writes nothing. What differs
+is the two REFUSALS, and both differ for one reason — **a lifecycle moment
+must never throw at a surface that is going away**: a vanished container and
+a SEALED one each answer `[]` rather than `containerNotFound`/`lockedPost`
+(sealing already insured its buffers, and seal-then-navigate-away is the
+ordinary case, where the idle sweep's throw is a genuine race guard on a
+candidate list). Locked takes are skipped, pools are accepted — both
+inherited unchanged.
+
+**2 — The backstop drops 24 h → 2 h.** `seedV1Settings` seeds `'2'`;
+`v1_13_savepoint_backstop` moves an existing store **only if its value is
+still exactly `'24'`**, so a hand-set value stays hers. `Queries
+.idleCommitHours`' fallback follows the seed to 2 (unset and default must
+mean one thing — the `defaultSegmentation` precedent). A data-only migration:
+no DDL, no mirror change, no lockstep event.
+
+**3 — The ONE cadence setting.** `SavepointCadence` (`every_session` ·
+`idle_only` · `only_on_commit`) under the synced key `savepoint_cadence`,
+**E2EE-clean by construction** — enum tokens, never prose, so `setting
+.value`'s PLAIN classification and its column-fenced disclosure promise hold
+untouched. **The gate lives INSIDE the two ops**, in their own write
+transactions, so a future door cannot miss it; `autoCommitDirtyVariants` sits
+BELOW the gate, which is what leaves the INSURANCE occasions (post-seal,
+lock-dirty-take, structural-undo divergence, bridge landings) on in every
+mode. Settings ▸ Writing gets one row beside the segmentation default, and
+its help NAMES those four occasions in as many words — a setting reading as
+"nothing else writes savepoints" while four occasions still do is the J8
+copy-truth defect, in the phase whose bar is copy truth.
+
+**4 — The quiet-run collapse.** `Domain/SavepointRuns` (core, so the phone
+inherits the brain and owes only a face) groups CONSECUTIVE quiet savepoints;
+it is generic over the row type because the two faces hold different values
+(Write's carries the pre-split warning; the sheet holds bare `CommitPoint`s)
+and show them in OPPOSITE orders (newest-first inline, oldest-first in the
+sheet) — neither difference belongs in a grouping rule, and a run is
+contiguous read either way. A deliberate savepoint is never folded into
+anything; **a LONE quiet savepoint stays its own row** (build-time call,
+#70(b) — "1 quiet savepoint — show" hides one line behind a click). Above it,
+app-side, `SavepointHistoryFace` (the per-row render decision) and
+`QuietRunRow` (the line) are shared by both faces — the `BlockPastSection`
+precedent one region down the same panel. **Batch 3's past region is
+untouched**: only the commit LIST changed in each face, and the A1 no-adopt
+pin plus every batch-3 pin stayed green throughout. **R2-N2's spacing
+consequence was NOT absorbed** — it is batch 6's rider and was not trivially
+adjacent (it lives in the sheet's `VStack(spacing:)` around the past section,
+not in the list).
+
+### PINS + RED-ON-OLD EVIDENCE (behavioral revert, checksummed)
+
+Three new suites, **23 tests**: `SavepointCadenceTests` (11) +
+`SavepointRunsTests` (5) in core; `SavepointOnLeaveTests` (10),
+`SavepointHistoryFaceTests` (6), `QuietRunRowCaptureTests` (1) on the Mac.
+Every revert restored **byte-identical**, verified by `shasum -a 256` AND
+`git diff --quiet` against the committed baseline.
+
+| Revert | Pins that went RED | Restored |
+|---|---|---|
+| **A** — the savepoint half of the entry removed (pre-13j: leaving flushed and nothing else) | `leavingFlushesThenSavepointsWhatSheJustTyped` · `leavingTwiceWithNothingTypedWritesOneSavepoint` · `aWiredWorkspaceSavepointsTheNoteSheNavigatedAwayFrom` · `aClosingWindowSavepointsEverythingItsPanesWereShowing` (2 issues) · `theQuitDoorSavepointsEveryOpenNote` — **5 tests, 6 issues** | `AppSession.swift` → `8162d0d85a6a…` (identical) |
+| **B** — flush-first dropped (savepoint without the flush) | `leavingFlushesThenSavepointsWhatSheJustTyped` · `theOnlyWhenICommitModeLeavesNothingBehind` (its "the flush still ran whatever the cadence says" half) · `aWiredWorkspaceSavepointsTheNoteSheNavigatedAwayFrom` · `aClosingWindowSavepointsEverythingItsPanesWereShowing` (2) · `theQuitDoorSavepointsEveryOpenNote` — **5 tests, 6 issues** | `AppSession.swift` → `8162d0d85a6a…` (identical) |
+| **C** — the workspace's departure signal silenced (`if !departed.isEmpty, false`) | `navigatingAPaneAwayReportsExactlyThatNote` (3) · `focusMovingBetweenPanesLeavesNothing` (its closeSplit half) · `aWiredWorkspaceSavepointsTheNoteSheNavigatedAwayFrom` — **3 tests, 5 issues** | `WorkspaceModel.swift` → `33103c54745e…` (identical) |
+| **D** — the quit registration back to flush-only | `theQuitDoorSavepointsEveryOpenNote` | `AppSession.swift` → `8162d0d85a6a…` (identical) |
+| **E** — the cadence gate removed from `closeAutoCommit` | core `theThreeModesGovernTheTwoCadenceOccasionsAndNothingElse` (2) · Mac `theOnlyWhenICommitModeLeavesNothingBehind` | `Operations+Variant.swift` → `f785af3bb6dc…` (identical) |
+| **F** — the collapse never fires (`run.count >= Int.max`) | `consecutiveQuietSavepointsCollapseAndDeliberateOnesNeverDo` (4) · `theGroupingIsOrderAgnostic` (2) · `theEdgesHoldEmptyAllQuietAllDeliberate` — **3 tests, 7 issues** | `SavepointRuns.swift` → `bfe3e1983ef5…` (identical) |
+| **G** — the migration body emptied | `theMigrationMovesAStoreStillAtTheShippedDefault` | `Migrations.swift` → `adc12521d667…` (identical) |
+| **H** — the lifecycle no-ops back to `idleAutoCommit`'s throwing guards | core `aSealedOrVanishedNoteIsAQuietNoOpNotARefusal` (caught `lockedPost`) | `Operations+Variant.swift` → `f785af3bb6dc…` (identical) |
+
+**Recorded because it is the pins working, not a gap:** revert F left the Mac
+`SavepointHistoryFaceTests` GREEN. That is correct and deliberate — those
+tests construct `SavepointRuns.Row` values directly, because the face
+RENDERS a row and does not group; grouping is core's concern and is pinned
+there. Two concerns, two pins, neither standing in for the other.
+
+**Two consequential pin edits, each annotated IN PLACE** (the batch-2/3/4
+precedent — a RULED change, never a quietly relaxed pin), plus one comment
+correction: `MigrationTests.settingsAreSeeded` and `IdleCommitSweepTests`'
+default-reading test each keep their CLAIM with the ruled number;
+`Phase8ServicesTests.notYetIdleUntouchedAndCleanPostsGetNoCommit` moves its
+two probes (23 h/26 h → 1 h/4 h) to straddle the new bar, claim
+byte-unchanged; its 26 h sibling's comment stops naming 24 as the bar (26 h
+was never the bar, only a time past it).
+
+### THE VISUAL LOOP — and the defect it caught
+
+`QuietRunRowCaptureTests`: three states × two voices, light only (13g batch
+2's finding), written to the sandboxed host's temp dir
+(`~/Library/Containers/io.lduarte.Variorum.debug/Data/tmp/variorum-13j-batch5-screens`).
+
+**It caught a real defect on its first run.** The collapsed line's verb was
+`.buttonStyle(.link)`, which is AppKit-backed: the capture rendered a yellow
+unsupported-view placeholder where "show" belongs — so the one inspectable
+piece of this batch's chrome could not have been inspected. `.link` was also
+off the app's own chrome vocabulary (P-8: `Theme/VoiceControls.swift` is THE
+vocabulary). One change closes both: `VoicedButtonStyle(role: .quiet)` with
+`tokens.chromeLabel`. **Inspected after the fix, both voices:** the run line
+reads as quiet grey chrome and sits visually SUBORDINATE to the deliberate
+savepoint row beneath it — which is the whole design requirement.
+
+**Hand-check items for the next drive** (measured, not assumed — batch 2's
+finding stands): the two history LISTS themselves are SwiftUI `List`s, i.e.
+NSTableView-backed, so `ImageRenderer` draws its placeholder for them; the
+collapse IN CONTEXT (a real run inside Write's inline history and inside the
+Takes sheet) and the new Settings ▸ Writing row are hand-checks.
+
+### THE MAC SUITE'S REDS — TRACED, AND NOT THIS BATCH'S (reported, per "any red is the batch's to explain")
+
+The batch's first full Mac run came back with a canvas red, and the phase's
+own rule is zero allowed reds. **Four full-suite runs plus one on a
+worktree at the PRE-BATCH commit settled it:**
+
+| Tree | Test set | Reds — every one a synthesized-mouse-event drag rig |
+|---|---|---|
+| batch 5 | full, 1516/266 | `CanvasDragTrackingTests.theResizeGripFollowsThePointerToo` |
+| batch 5 | full, run 2 | the same one |
+| batch 5 | full MINUS this batch's suites — 1499/263, the exact ladder-A test set | `CanvasDrag` ×2 **+** `CanvasBankTests.droppingACardOnTheStripReturnsItToTheBank` |
+| **pre-batch `43192a9`** (a read-only `git worktree`, removed after) | full, 1499/263 | `CanvasBank` ×1 **+** `TakesSlotDragTests.theSlotHeightHandleFollowsThePointerOneToOneInsteadOfHalfOfIt` |
+| batch 5 | full, final run | **NONE — 1516/266 FULLY GREEN** |
+
+**The mechanism:** every failing assertion is the `midDrag == nil` shape —
+the SwiftUI drag gesture had not begun when the rig's mid-drag closure ran.
+Those rigs synthesize real `NSEvent`s through `NSApp.sendEvent` and pump the
+runloop for fixed 0.03 s steps; under full-suite concurrency the events are
+not recognized inside that window. **Standalone every one of them passes**
+(verified). The subset differs run to run, and **the pre-batch tree fails the
+same class**, so this is neither this batch's product code nor its tests: it
+is a load/timing-dependent property of the mouse-event drag rigs on macOS
+26.5.x — the same class as the A47c disposition already recorded in
+TEXTKIT2_NOTES §3 (standalone green, full-suite red, load-dependent).
+**ARCHITECT'S CALL:** whether this earns a §3 entry of its own, a rig
+hardening (poll for gesture start instead of a fixed pump), or a
+KnownIssues row. Nothing was changed in those rigs by this batch.
+
+### SUITE COUNTS (every "Test run with N tests" line confirmed)
+
+- core `swift test` — **1295 tests / 138 suites PASSED** (baseline 1279/136 +
+  16 in 2 new suites)
+- Mac (`-project` invocation) — **1516 tests / 266 suites PASSED, FULLY
+  GREEN, zero reds** (baseline 1499/263 + 17 in 3 new suites)
+- tutorial spine, by TYPE name (the seven from the batch-1 record) —
+  **51 tests / 7 suites PASSED** (baseline exact)
+- mobile (`VariorumMobile`, iPhone 16e) — **314 tests / 60 suites PASSED**
+  (baseline exact). Run because core `Sources/` was touched.
+
+### FOR THE ARCHITECT / HER
+
+- **QUESTIONS #70** logged (six lettered entries in her format): where
+  "leaving" is drawn and the three things deliberately not it; the
+  no-collapse-of-one rule; the help copy naming the four insurance
+  occasions; the only-if-still-default migration guard; the quick note's
+  savepoint; and the two-windows consequence.
+- **TWO CANON DELTAS OWED AT CLOSEOUT** (recorded, not applied — canon edits
+  beyond an author's explicit ruling are not an implementer's):
+  **(i) OverallModel §3's "five quiet automatic exceptions" becomes SIX** —
+  her ruling adds leaving a note; **(ii) AppSpec §9 gains `closeAutoCommit`
+  beside `idleAutoCommit`, and §7's `setting` seed comment now reads
+  `('idle_commit_hours','2')`** with the new `savepoint_cadence` key beside
+  it. Both are her rulings' direct consequences; neither changes an invariant
+  or the schema.
+- **PARITY / the phone's owed hook.** The SEMANTICS are document-level and
+  the phone inherits them by construction: `closeAutoCommit`, the cadence
+  read/write, the 2 h backstop and the run-collapse brain are all core, and
+  the gate inside `idleAutoCommit` means the phone's shared
+  `IdleCommitScheduler` already obeys the setting. What the phone OWES is
+  **its own on-leaving HOOK** (its lifecycle is its own — scene phase, tab
+  stacks) plus two faces: the cadence row in `MobileSettingsView` and the
+  quiet-run collapse in its take history. `AppSession.savepointOnLeaving` is
+  deliberately OUTSIDE the `#if os(macOS)` fence so the phone's hook is one
+  call, never a second rule (MobileSoul's brains-in-core line).
+- **BATCH 6 HAND-OFF.** R2-N2's spacing rider is untouched and still batch
+  6's. Nothing in this batch touches the Trash, the tray or the clock.
+- **Environment.** No Variorum instance was running at any point in this
+  batch (`pgrep -fl 'Variorum.app/Contents/MacOS'` checked before every
+  suite run and before every revert); no kill, no quit, no `/Applications`
+  write, no Release build, no push. No other `xcodebuild` was active before
+  any run. The pre-batch worktree used for the red-trace was created under
+  the scratchpad and REMOVED (`git worktree list` clean); it never touched
+  the working tree.
+- **Nothing PENDING** — every count and every claim above is from a run in
+  this session.
