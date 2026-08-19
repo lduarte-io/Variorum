@@ -154,6 +154,15 @@ multiple items and deleting all of them." Build, opening the phase
   interim advice points it at the container) and any file-level
   backup hold purged content OUTSIDE our retention — the runbook's
   disclosure names external snapshots, not only our own files.
+  **AND the flip side, her ask (2026-08-19): a backup stored
+  elsewhere and OVERWRITTEN/rotated after a deletion will NOT have
+  the deleted thing** — the runbook states both directions: old
+  backups retain what you purged (until rotation), and rotated
+  backups lack what you deleted before they were taken; the
+  retention window is therefore ALSO the oops-recovery horizon
+  beyond the Trash's 30 days. Her ruling on the retain side:
+  external backups keeping deleted items "is fine and should be
+  that way." 
 - **Pool/scraps deletion honesty check:** verify a deleted POOL
   reads honestly in the Trash (kind naming, cascade of its
   scraps, Put back) — the story was built container-generic; the
@@ -163,6 +172,26 @@ multiple items and deleting all of them." Build, opening the phase
   existed (round 7). A note with ONLY archived blocks shows no
   badge; the note ▾ tray item is the road. Watch in her real use;
   revisit only if she trips.
+
+### 9. Journal-day deletions TRAVEL to Fragments (her ruling, 2026-08-19)
+
+Today the bridge's sweep reads LIVE days only, so a deleted
+Variorum journal day just goes silent Fragments-side — the entry
+stays, and a later Fragments edit re-lands the day as a fresh
+Variorum note (purged content returning via the co-writer). Her
+ruling: fix it. The design shape to size at kickoff: the bridge
+already keeps `bridge_day` hash rows, so it KNOWS which days it
+bridged — a bridged day that is no longer live pushes its deletion
+ONCE (the empty-body road the contract already speaks inbound);
+Put back self-heals (the sweep sees the day live again and
+re-pushes the body). Timing question for the kickoff: travel at
+DELETE time (mirrors her intent fastest; Put back re-lands it) —
+recommended — vs only at purge. Any Fragments-side need (how it
+renders a pushed deletion) is a contract-file ask
+(`notes/fragments-bridge-contract.md`, she carries it); nothing
+typed on either side is ever lost — the standing bridge doctrine
+binds (insurance commits before any overwrite). If this item
+bloats the phase, it becomes its own micro-slot at her word.
 
 ## Kickoff decisions (hers — the brief's list, plus this plan's)
 
@@ -177,15 +206,12 @@ multiple items and deleting all of them." Build, opening the phase
    system fallback otherwise, or one uniform story).
 5. **M5's ruling** (accept-and-say-it recommended) + M3/M6 wording
    confirmations.
-6. **The Fragments second life of purged journal days (surfaced at
-   the 13j audit — decide or defer knowingly):** true delete does
-   NOT reach Fragments' copy of a journal day, and a LATER
-   Fragments-side edit re-lands that day as a fresh Variorum note
-   — purged content returning via the co-writer. The purge memo
-   §4e recorded it as the honest outcome; whether deletions should
-   TRAVEL to Fragments is a contract-file conversation
-   (`notes/fragments-bridge-contract.md`, she carries it). Her
-   call: rule it, or defer with eyes open.
+6. **RULED IN DIRECTION (2026-08-19, her words: the Fragments
+   callout "was great to surface - I didn't realize it wouldn't
+   delete from fragments and that will have to be fixed"):**
+   journal-day deletions MUST travel to Fragments — scope item 9
+   below; the kickoff SIZES it (in this phase, or its own
+   micro-slot if it bloats).
 
 ## Binding constraints
 
