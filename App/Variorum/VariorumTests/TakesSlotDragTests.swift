@@ -94,13 +94,42 @@ private struct SlotDragRig {
 
     func settle(turns: Int = 3) async {
         for _ in 0..<turns {
-            hosting.layoutSubtreeIfNeeded()
-            window.layoutIfNeeded()
-            window.displayIfNeeded()
-            pump(0.03)
-            await Task.yield()
-            try? await Task.sleep(for: .milliseconds(15))
+            await turn()
         }
+    }
+
+    /// ONE settle turn (13j batch 6 — the same unit `CanvasDragRig` uses).
+    /// The DEFAULT keeps the pre-hardening cost exactly (0.03 s pump + a
+    /// 15 ms sleep): the rigs' settle waits were never the flake, and
+    /// shortening them would trade one timing bug for another. `poll` passes
+    /// a cheaper turn because it re-checks its condition every time round.
+    func turn(_ pumpFor: TimeInterval = 0.03, sleepMs: Int = 15) async {
+        hosting.layoutSubtreeIfNeeded()
+        window.layoutIfNeeded()
+        window.displayIfNeeded()
+        pump(pumpFor)
+        await Task.yield()
+        try? await Task.sleep(for: .milliseconds(sleepMs))
+    }
+
+    /// **POLL FOR THE CONDITION — never sleep a fixed slice** (13j batch 6,
+    /// the architect's rig-hardening ruling; the full trace is in
+    /// `CanvasDragTests`' copy of this helper). `redrive` re-sends the final
+    /// drag point, which is idempotent: SwiftUI measures a drag's
+    /// translation from the mouse-DOWN location.
+    @discardableResult
+    func poll(
+        until condition: () -> Bool, timeout: TimeInterval = 3,
+        redrive: () -> Void = {}
+    ) async -> Bool {
+        if condition() { return true }
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            redrive()
+            await turn(0.01, sleepMs: 5)
+            if condition() { return true }
+        }
+        return condition()
     }
 
     private func panes(in view: NSView) -> [PaneTextView] {
@@ -143,10 +172,28 @@ private struct SlotDragRig {
         var y = strip.minY - 2
         while y > strip.minY - 80 {
             let point = CGPoint(x: strip.midX, y: y)
-            await dragUp(from: point, by: 20, steps: 2, midDrag: {})
+            await dragUp(
+                from: point, by: 20, steps: 2,
+                // The probe's own condition IS the handle answering; a short
+                // wait, because most candidate points are not the handle.
+                started: { model.slotHeight(self.blockID) != nil },
+                startTimeout: 0.3, midDrag: {})
             if model.slotHeight(blockID) != nil {
                 model.resetSlotHeight(blockID)
-                await settle(turns: 1)
+                // 13j batch 6 — the second half of the rig hardening, and
+                // the mechanism a full-suite run caught while the first half
+                // was landing: the probe SHORTENS the strip, which MOVES the
+                // handle (it is a row below the strip). One fixed settle turn
+                // was enough on an idle machine and not under load, so the
+                // real drag's mouse-down could land where the handle no
+                // longer was — and a down that misses starts no gesture,
+                // which no amount of dragged-event redriving can rescue. Wait
+                // for the LAYOUT to come back instead of for a slice of time.
+                await poll(until: {
+                    guard let now = self.stripRectInWindow() else { return false }
+                    return abs(now.minY - strip.minY) < 0.5
+                        && abs(now.height - strip.height) < 0.5
+                })
                 return point
             }
             y -= 3
@@ -166,7 +213,40 @@ private struct SlotDragRig {
 
     /// A real drag UPWARD by `up` points (SwiftUI's y-down sense), in
     /// `steps` moves. `midDrag` runs after the last move, before mouse-up.
-    func dragUp(from start: CGPoint, by up: CGFloat, steps: Int = 5, midDrag: () -> Void) async {
+    ///
+    /// `started` is the gesture-start condition, polled for (13j batch 6)
+    /// instead of assumed: for this handle it is `slotHeight != nil`, which
+    /// the gesture's own `onChanged` writes. `startTimeout` is short for the
+    /// PROBE (a wrong candidate point never starts a gesture, and 26
+    /// candidates × a long wait would be a minute of nothing) and generous
+    /// for the real drag.
+    func dragUp(
+        from start: CGPoint, by up: CGFloat, steps: Int = 5,
+        started: () -> Bool = { true }, startTimeout: TimeInterval = 3,
+        midDrag: () -> Void
+    ) async {
+        let end = CGPoint(x: start.x, y: start.y + up)
+        sendDragSequence(from: start, by: up, steps: steps)
+        // The retry-shaped redrive — see `CanvasDragRig.sendDragSequence` for
+        // the measured reason the waiting lives here and not between events.
+        await poll(until: started, timeout: startTimeout, redrive: {
+            send(.leftMouseUp, end)
+            sendDragSequence(from: start, by: up, steps: steps)
+        })
+        midDrag()
+        send(.leftMouseUp, end)
+        pump(0.1)
+        await settle(turns: 2)
+    }
+
+    /// Down, `steps` moves upward, no up — the tight event cadence (bare
+    /// pumps, no layout pass or suspension between events).
+    func sendDragSequence(from start: CGPoint, by up: CGFloat, steps: Int) {
+        // KEY FIRST — see `CanvasDragRig.sendDragSequence` for the traced
+        // mechanism (an inactive window swallows the down as its activating
+        // click, because `NSHostingView` does not accept first mouse).
+        window.makeKeyAndOrderFront(nil)
+        pump(0.02)
         send(.leftMouseDown, start)
         pump(0.05)
         for step in 1...steps {
@@ -175,10 +255,6 @@ private struct SlotDragRig {
             send(.leftMouseDragged, CGPoint(x: start.x, y: start.y + up * fraction))
             pump(0.03)
         }
-        midDrag()
-        send(.leftMouseUp, CGPoint(x: start.x, y: start.y + up))
-        pump(0.1)
-        await settle(turns: 2)
     }
 }
 
@@ -242,7 +318,10 @@ struct TakesSlotDragTests {
             let found = await rig.findHandlePoint()
             let handle = try #require(found, "a real mouse drag grabbed the handle")
             var mid: CGFloat?
-            await rig.dragUp(from: handle, by: 200) {
+            await rig.dragUp(
+                from: handle, by: 200,
+                started: { rig.model.slotHeight(blockID) != nil }
+            ) {
                 mid = rig.model.slotHeight(blockID)
             }
 

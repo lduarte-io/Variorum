@@ -2780,6 +2780,33 @@ rides under the note's ONE Trash row (never double-listed).
 split, and the receipts are batch 6 BUILD items (read-side, zero
 schema); the purge rule itself stays the memo's.**
 
+### Sitting round 9 — pruning numbers + the #69 forks (2026-08-19, question mode)
+
+- **Pruning RULED: default 90 days / keep newest 10 quiet per
+  take — PLUS a user setting with a "Never prune" choice.** Her
+  words (verbatim): "what is the lift on making this a user
+  setting? I think 90 days, N=10 is fine for a default, but I
+  think users should be able to choose to never prune. it might
+  be important for some users." Architect's lift answer (given):
+  SMALL — one synced enum setting on the batch-5 shape
+  ("History pruning: Standard (90 days, keep 10) · Never",
+  default Standard, E2EE-clean); the purge janitor consults it
+  before minting any savepoint purge-intent. Deliberate ⌘S
+  commits never pruned in either mode. The memo carries the
+  setting in its design.
+- **#69(a) RATIFIED as shipped:** chains carry all too — one rule
+  everywhere; extras stay "quick to delete."
+- **#69(b) RATIFIED as shipped:** the ceremony chord always means
+  the ceremony — refuse-and-point on a fanless block.
+- **#69(c) RATIFIED as shipped:** both ceremony rows render
+  always, the menu's standing grammar.
+- Her batch-6b question answered in the same exchange: **the
+  purge BUILD lands THIS PHASE as batch 6b** (after the memo,
+  before batch 7/ladder B) — the lockstep execution, the Delete
+  Now/Empty Trash doors, the janitor; the sync-touching half
+  seated per the standing Sync/ rider (Fable); the deploy window
+  bundles the phone refresh (needs her + the tunnel).
+
 ## ARCHITECT ADJUDICATION after batch 5 (2026-08-19)
 
 Verified against the five commits (`2d534cf…9d19d7a`): tree clean,

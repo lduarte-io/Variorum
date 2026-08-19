@@ -784,7 +784,7 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **ALSO SWEPT, because copy naming a behaviour the app no longer has is the defect you reported in 13e:** the backspace-at-a-seam refusal used to say "Use Merge Blocks (⌘⇧M) to pair the takes yourself" — ⌘⇧M does not pair any more, so it now names both roads; the Takes bar's Divide and Merge tooltips; the field guide's "divide / the take ceremony" and "merge" entries; and three tutorial lessons (which also stopped claiming divide carries you to Write — untrue since 13d). *(CORRECTED at ladder A round 1, finding A2 — this paragraph overclaimed: the sweep fixed only the TEXTED-seam refusal, and the same sentence lived on in a second home — the empty-looking seam's diagnosis, `CrossBlockRefusal.roadClause(.seamBesideFan)`, inside J8(b)'s own file — still teaching "⌘⇧M pairs" until the reviewer's fix pass. Both speakers now end in ONE shared roads constant, `FannedDefaultsCopy.fanFoldRoads`, pinned so they cannot drift apart again.)*
 
-    **Status: open — walk at the checkpoint.**
+    **Status: (a), (b), (c) RULED at the 13j round-9 sitting, 2026-08-19 — all three RATIFIED as shipped (the 13j plan's run record is the binding text). The rest: walk at the checkpoint.**
 
 ## Phase 13j (2026-08-19) — batch 5's calls (the savepoint cadence: your history stops being thin)
 

@@ -323,18 +323,17 @@ struct CanvasBankHostedTests {
             let expected = rig.model.dropTarget(
                 atSurface: rig.surfacePointFromWindow(drop))
 
-            rig.send(.leftMouseDown, start)
-            rig.pump(0.05)
-            for step in 1...4 {
-                let fraction = CGFloat(step) / 4
-                rig.send(.leftMouseDragged,
-                         CGPoint(x: start.x + (drop.x - start.x) * fraction,
-                                 y: start.y + (drop.y - start.y) * fraction))
-                rig.pump(0.03)
-            }
-            rig.send(.leftMouseUp, drop)
-            rig.pump(0.1)
-            await rig.settle(turns: 3)
+            // 13j batch 6 — the rig hardening: the sequence runs through the
+            // rig's own polling `drag`, and the OUTCOME is polled for rather
+            // than assumed after three settle turns. The chip's in-flight
+            // state is `CanvasView`'s `@State bankDrag`, invisible from here
+            // (product code is untouched by the ruling), so this drag has no
+            // gesture-start condition to wait on — the placement it writes
+            // is the condition instead.
+            await rig.drag(
+                from: start, dx: drop.x - start.x, dy: start.y - drop.y, steps: 4,
+                midDrag: {})
+            await rig.poll(until: { rig.model.bankCards.isEmpty })
 
             let rows = try await db.read { db in
                 try Row.fetchAll(db, sql: "SELECT x, y FROM canvas_layout WHERE deleted_at IS NULL")
@@ -373,18 +372,15 @@ struct CanvasBankHostedTests {
             let target = rig.windowPointFromSurface(
                 CGPoint(x: strip.midX, y: strip.midY))
 
-            rig.send(.leftMouseDown, header)
-            rig.pump(0.05)
-            for step in 1...4 {
-                let fraction = CGFloat(step) / 4
-                rig.send(.leftMouseDragged,
-                         CGPoint(x: header.x + (target.x - header.x) * fraction,
-                                 y: header.y + (target.y - header.y) * fraction))
-                rig.pump(0.03)
-            }
-            rig.send(.leftMouseUp, target)
-            rig.pump(0.1)
-            await rig.settle(turns: 3)
+            // 13j batch 6 — the rig hardening: this one IS a card-header
+            // drag, so it has a real gesture-start condition to poll for
+            // (`dragOffsets`, written by the gesture's own `onChanged`), and
+            // the unplacement it commits is polled for after the drop.
+            await rig.drag(
+                from: header, dx: target.x - header.x, dy: header.y - target.y, steps: 4,
+                started: { rig.model.dragOffsets[blockID] != nil },
+                midDrag: {})
+            await rig.poll(until: { !rig.model.bankCards.isEmpty })
 
             #expect(try await db.read { db in
                 try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM canvas_layout WHERE deleted_at IS NULL")

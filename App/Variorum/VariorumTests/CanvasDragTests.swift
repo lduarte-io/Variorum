@@ -121,13 +121,58 @@ struct CanvasDragRig {
 
     func settle(turns: Int = 3) async {
         for _ in 0..<turns {
-            hosting.layoutSubtreeIfNeeded()
-            window.layoutIfNeeded()
-            window.displayIfNeeded()
-            pump(0.03)
-            await Task.yield()
-            try? await Task.sleep(for: .milliseconds(15))
+            await turn()
         }
+    }
+
+    /// ONE settle turn — layout, a pump, a yield. The unit both `settle`
+    /// and `poll` are built from, so "wait a moment" means one thing in this
+    /// rig. The DEFAULT keeps the pre-hardening cost exactly (0.03 s + 15 ms):
+    /// the settle waits were never the flake, and shortening them would trade
+    /// one timing bug for another. `poll` passes a cheaper turn because it
+    /// re-checks its condition every time round.
+    func turn(_ pumpFor: TimeInterval = 0.03, sleepMs: Int = 15) async {
+        hosting.layoutSubtreeIfNeeded()
+        window.layoutIfNeeded()
+        window.displayIfNeeded()
+        pump(pumpFor)
+        await Task.yield()
+        try? await Task.sleep(for: .milliseconds(sleepMs))
+    }
+
+    /// **POLL FOR THE CONDITION — never sleep a fixed slice** (13j batch 6,
+    /// the architect's rig-hardening ruling after batch 5).
+    ///
+    /// The trace it closes: batch 5 measured intermittent canvas reds whose
+    /// every failing assertion was the `midDrag == nil` shape — the SwiftUI
+    /// drag gesture had not been RECOGNIZED yet when the rig's mid-drag
+    /// closure ran. The rigs pumped a fixed 0.03 s per synthesized event and
+    /// then read; under full-suite concurrency that window is sometimes too
+    /// small, which is why the same tests pass standalone and the failing
+    /// SUBSET varies run to run (it reproduced on a pre-batch worktree, so it
+    /// was never any batch's product code). A fixed sleep is exactly the
+    /// anti-pattern the phase's Environment traps outlaw in spirit
+    /// ("async-poll, never sync RunLoop pumping"); this waits for the thing
+    /// itself.
+    ///
+    /// `redrive` runs each turn while the condition is false: for a drag,
+    /// re-sending the FINAL drag point is harmless and idempotent, because
+    /// SwiftUI measures a `DragGesture`'s translation from the mouse-DOWN
+    /// location — a repeat carries the identical value, so no assertion can
+    /// move because the rig waited.
+    @discardableResult
+    func poll(
+        until condition: () -> Bool, timeout: TimeInterval = 3,
+        redrive: () -> Void = {}
+    ) async -> Bool {
+        if condition() { return true }
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            redrive()
+            await turn(0.01, sleepMs: 5)
+            if condition() { return true }
+        }
+        return condition()
     }
 
     private var documentView: NSView? {
@@ -188,10 +233,61 @@ struct CanvasDragRig {
     /// A real drag: down, `steps` moves along (dx, dy) in SWIFTUI terms
     /// (y-down — the window's y is inverted for you), then up at the end.
     /// `midDrag` runs after the last move, before the mouse-up.
+    ///
+    /// `started` is the GESTURE-START condition (13j batch 6): the rig waits
+    /// for it — re-sending the final drag point each turn — before running
+    /// `midDrag`, instead of assuming a fixed pump was long enough. Callers
+    /// whose in-flight state is view-local (the bank chip's `@State`) leave
+    /// it at its default and poll their OUTCOME instead.
     func drag(
         from start: CGPoint, dx: CGFloat, dy: CGFloat, steps: Int = 5,
+        started: () -> Bool = { true },
         midDrag: () -> Void
     ) async {
+        let end = CGPoint(x: start.x + dx, y: start.y - dy)
+        sendDragSequence(from: start, dx: dx, dy: dy, steps: steps)
+        // The gesture-start poll — and its redrive is the WHOLE sequence
+        // again, not another dragged event: an attempt that produced no
+        // `onChanged` produced no gesture at all, and a lone drag event with
+        // no accepted mouse-down starts nothing. A retry is safe by the same
+        // fact — SwiftUI only ends a gesture it began, so the closing up
+        // lands on nothing — and it carries the identical translation,
+        // because the retry's own down is at `start`.
+        await poll(until: started, redrive: {
+            send(.leftMouseUp, end)
+            sendDragSequence(from: start, dx: dx, dy: dy, steps: steps)
+        })
+        midDrag()
+        send(.leftMouseUp, end)
+        pump(0.1)
+        await settle(turns: 2)
+    }
+
+    /// Down, `steps` moves, no up — the event cadence itself, kept TIGHT
+    /// (bare pumps, no layout pass and no async suspension between events).
+    ///
+    /// **Measured, 13j batch 6:** a first cut of the hardening put a full
+    /// settle turn between the synthesized events, and the canvas drag pins
+    /// then failed ~1 run in 3 STANDALONE — worse than the load-only flake
+    /// it was meant to close. The mechanism: the card's own realization is
+    /// recomputed while the drag is in flight (`realizedCards` keeps a card
+    /// only while `dragOffsets[id] != .zero`, which is not yet true before
+    /// the first `onChanged`), so a layout pass + suspension mid-sequence can
+    /// tear the gesture's view down before it is recognized. The waiting
+    /// belongs AFTER the sequence, where a retry can fix what a wait cannot.
+    func sendDragSequence(from start: CGPoint, dx: CGFloat, dy: CGFloat, steps: Int) {
+        // KEY FIRST, every attempt (13j batch 6 — the mechanism behind the
+        // load-dependence). `NSHostingView.acceptsFirstMouse` is false, so a
+        // mouse-down into an INACTIVE window is swallowed as the activating
+        // click and never reaches the SwiftUI gesture. Suites run in
+        // parallel in this target, and any other hosted test making ITS
+        // window key takes key away from this panel mid-test — which is
+        // exactly why these pins pass solo (6/6 measured) and fail
+        // intermittently beside other suites. Re-asserting key costs
+        // nothing: the panel is non-activating, so it never steals focus
+        // from the machine's real front app.
+        window.makeKeyAndOrderFront(nil)
+        pump(0.02)
         send(.leftMouseDown, start)
         pump(0.05)
         for step in 1...steps {
@@ -200,10 +296,6 @@ struct CanvasDragRig {
                  CGPoint(x: start.x + dx * fraction, y: start.y - dy * fraction))
             pump(0.03)
         }
-        midDrag()
-        send(.leftMouseUp, CGPoint(x: start.x + dx, y: start.y - dy))
-        pump(0.1)
-        await settle(turns: 2)
     }
 }
 
@@ -229,7 +321,10 @@ struct CanvasDragTrackingTests {
             let header = try #require(rig.windowPoint(boardX: card.x + 120, boardY: card.y + 17))
 
             var midDrag: CGSize?
-            await rig.drag(from: header, dx: 100, dy: 50) {
+            await rig.drag(
+                from: header, dx: 100, dy: 50,
+                started: { rig.model.dragOffsets[blockID] != nil }
+            ) {
                 midDrag = rig.model.dragOffsets[blockID]
             }
 
@@ -265,7 +360,10 @@ struct CanvasDragTrackingTests {
                 boardX: card.x + size.width - 7, boardY: card.y + size.height - 7))
 
             var midDrag: CGSize?
-            await rig.drag(from: grip, dx: 60, dy: 40) {
+            await rig.drag(
+                from: grip, dx: 60, dy: 40,
+                started: { rig.model.resizeOffsets[blockID] != nil }
+            ) {
                 midDrag = rig.model.resizeOffsets[blockID]
             }
 
