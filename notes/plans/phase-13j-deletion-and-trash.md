@@ -5077,3 +5077,22 @@ marker-7 entry); archives rolled; KnownIssues swept (Tombstone-GC
 RESOLVED; S4-28.3 slim row; the sweep-cost row owner 12);
 MobileSoul PL-11; QUESTIONS #66–#73 her walk. Next phase's plan
 AUTHORED at her pick: 13l.
+
+## POST-CLOSE LIVE REPORT (2026-08-19, minutes after the close — recorded verbatim-faithful; the 13e precedent)
+
+**Her report:** "also how do i even delete a note? I'm within a note
+I want to delete right now and I don't see how to delete it."
+TRACED, and her confusion is CORRECT: **there is NO in-note door to
+delete the note.** The only doors are the Library row's and the Pool
+listing's (`LibraryViewModel.delete(postID:)` — its two callers);
+the note ▾ menu (History · Seal · the Tray · Set date…) never
+gained one. Why it slipped: her round-3 rider banned DELETE NOW
+from note context — correctly — but ordinary move-to-Trash was
+never banned in-note; it was simply never built there, and every
+sitting round examined RECOVERY doors, not the entry door. **ROUTED
+to 13l's opening batch** (the 13e-reports-became-batch-1 precedent):
+"Delete Note…" in the note ▾ menu — ordinary move-to-Trash ONLY
+(the rider stands: no purge door in note context, ever), the
+receipt naming the Trash + clock, the pane navigating away
+choreographed, registry-declared, walk-asserted. Pullable earlier
+at her word.

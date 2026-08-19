@@ -76,6 +76,17 @@ rehearsal folded into the restore drill (scratch store, scratch
 account NEVER hers — or the fake-server road if a scratch account
 is disproportionate; the kickoff picks).
 
+### 8. OPENING MINI-ITEM (her post-13j-close live report, 2026-08-19): the in-note Delete Note door
+
+Her words: "also how do i even delete a note? I'm within a note I
+want to delete right now and I don't see how to delete it." There
+is NO in-note door — only the Library/Pool rows'. Build: "Delete
+Note…" in the note ▾ menu — ordinary move-to-Trash ONLY (her
+round-3 rider stands: Delete Now never appears in note context),
+the receipt naming the Trash and its clock, the pane's
+navigate-away choreographed, registry-declared, walk-asserted.
+This opens the phase (the 13e mini-round precedent).
+
 ## Kickoff decisions (hers — the brief's list, plus this plan's)
 
 1. Backup destination(s) + retention (propose: daily, 14 dailies +
