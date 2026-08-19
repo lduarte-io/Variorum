@@ -1093,7 +1093,9 @@ struct AuthRLSDDLTests {
         let sql = Self.strippingComments(try Self.sqlFile("10_phase13j_purge.sql"))
         #expect(sql.contains("drop function if exists sync_pull(bigint, text, int);"))
         #expect(sql.contains(
-            "create or replace function sync_pull(since_seq bigint, active_key_id text, max_rows int default 500, device_id text default null)"))
+            // RULED RENAME (2026-08-19): `for_device`, formerly `device_id`,
+            // which shadowed the device_cursor column (the live 42702).
+            "create or replace function sync_pull(since_seq bigint, active_key_id text, max_rows int default 500, for_device text default null)"))
         #expect(sql.contains("revoke execute on function sync_pull(bigint, text, int, text) from public, anon;"))
         #expect(sql.contains("grant execute on function sync_pull(bigint, text, int, text) to authenticated, service_role;"))
     }

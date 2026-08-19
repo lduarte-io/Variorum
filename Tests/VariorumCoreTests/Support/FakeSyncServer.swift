@@ -326,7 +326,7 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport {
         as userID: String
     ) throws -> [SyncPulledRow] {
         let account = try gatedAccount(userID, activeKeyID: activeKeyID)
-        // Phase 13j — the device-cursor upsert (10's `device_id` arm):
+        // Phase 13j — the device-cursor upsert (10's `for_device` arm):
         // monotonic on last_seq, seen-at stamped with the logical clock.
         if let deviceID {
             let existing = accounts[userID]?.deviceCursors[deviceID]?.lastSeq ?? 0

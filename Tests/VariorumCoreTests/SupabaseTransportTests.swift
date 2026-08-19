@@ -90,15 +90,18 @@ struct SupabaseTransportTests {
         #expect(json?["max_rows"] as? Int == 500)
         // Phase 14c: the fence parameter rides the wire snake-cased too.
         #expect(json?["active_key_id"] as? String == "key-1")
-        // Phase 13j: the device-cursor report (10's device_id parameter).
-        #expect(json?["device_id"] as? String == "device-A")
+        // Phase 13j: the device-cursor report — the wire key is
+        // `for_device` (RULED RENAME, 2026-08-19 in-window: the original
+        // `device_id` parameter shadowed the device_cursor COLUMN — the
+        // live 42702; her ruling: fix the name, never relax the policy).
+        #expect(json?["for_device"] as? String == "device-A")
         // And a nil device still ENCODES (JSON null → the parameter's
         // default server-side), so mid-round windows are explicit.
         let nilData = try JSONEncoder().encode(
             PullRequest(sinceSeq: 1, maxRows: 1, activeKeyID: "key-1", deviceID: nil))
         let nilJSON = try JSONSerialization.jsonObject(with: nilData) as? [String: Any]
-        #expect(nilJSON?.keys.contains("device_id") == true)
-        #expect(nilJSON?["device_id"] is NSNull)
+        #expect(nilJSON?.keys.contains("for_device") == true)
+        #expect(nilJSON?["for_device"] is NSNull)
     }
 
     @Test func pushRequestEncodesTheFenceParameter() throws {

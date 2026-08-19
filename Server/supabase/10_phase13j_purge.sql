@@ -47,8 +47,10 @@
 --   * sync_push REWRITTEN: the typed 'purged' per-row refusal (the
 --     ledger check before the CAS), and `purge_intent` joining the
 --     allowed + owner-carried arrays.
---   * sync_pull REWRITTEN with a NEW SIGNATURE: `device_id text default
---     null` — the cursor UPSERT rides the same round trip (memo §5b item
+--   * sync_pull REWRITTEN with a NEW SIGNATURE: `for_device text default
+--     null` (renamed same-day from `device_id`, which shadowed the
+--     device_cursor column — the 42702 the first live round caught; the
+--     wire key renames with it) — the cursor UPSERT rides the same round trip (memo §5b item
 --     5; MECHANICAL CORRECTION recorded there and in the batch record:
 --     the 14c signatures did NOT already carry the device — the
 --     parameter is added here, additive). The OLD signature is DROPPED
@@ -353,7 +355,7 @@ $$;
 
 -- ---------------------------------------------------------------------------
 -- 5. sync_pull — the 09 body VERBATIM plus exactly two changes: the NEW
---    `device_id text default null` parameter with its cursor UPSERT (one
+--    `for_device text default null` parameter with its cursor UPSERT (one
 --    round trip — the engine passes the device id with its FIRST window
 --    of a round, whose `since_seq` is the device's COMMITTED cursor;
 --    later windows pass null, so a mid-round crash can never over-report
@@ -362,22 +364,11 @@ $$;
 --    subtraction are preserved verbatim.
 -- ---------------------------------------------------------------------------
 
-create or replace function sync_pull(since_seq bigint, active_key_id text, max_rows int default 500, device_id text default null)
+create or replace function sync_pull(since_seq bigint, active_key_id text, max_rows int default 500, for_device text default null)
 returns jsonb
 language plpgsql security definer
 set search_path = public
 as $$
--- 42702 FIX (2026-08-19, the window's first live round — caught exactly
--- where the deploy checklist marked PENDING "only a live call proves the
--- Postgres side"): the `device_id` PARAMETER is visible inside the cursor
--- UPSERT's ON CONFLICT column list, and PL/pgSQL raises "column reference
--- device_id is ambiguous". The parameter CANNOT be renamed (PostgREST
--- passes named JSON keys — the name IS the wire contract), so columns win
--- by pragma; every variable read in this function's static SQL was swept
--- for same-named columns in scope (none exist — the sweep is in the 13j
--- plan's window record). Re-deployed via
--- maintenance/13j-window-pull-ambiguity.sql.
-#variable_conflict use_column
 declare
   allowed constant text[] := array[
     'container', 'block', 'variant', 'commit_point', 'edge',
@@ -389,7 +380,13 @@ declare
     'canvas_layout', 'lens', 'block_comment', 'purge_intent'];
   caller uuid;
   fence_key text;
-  dev text := device_id;
+  -- `for_device`, NOT `device_id` (2026-08-19, the window's first live
+  -- round): the parameter's original name shadowed the device_cursor
+  -- COLUMN inside the upsert's ON CONFLICT list — PL/pgSQL 42702, caught
+  -- by the strict variable_conflict default doing exactly its job. The
+  -- author's ruling: fix the NAME, never relax the policy — no RPC
+  -- parameter may shadow a column it writes (the standing naming rule).
+  dev text := for_device;
   tbl text;
   union_sql text := '';
   result jsonb;

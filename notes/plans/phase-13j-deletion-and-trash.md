@@ -4092,6 +4092,55 @@ readiness this sitting).
   rows; the janitor's first sweeps no-op until both cursors pass
   her existing tombstones (expected, the checklist's own note).
 
+### Sitting round 12 — the 42702 repair's SHAPE, ruled at her criterion (2026-08-19, in-window)
+
+The window's first live round failed: **42702 "column reference
+device_id is ambiguous"** — the new `sync_pull`'s parameter
+shadowed the `device_cursor` column inside the cursor upsert's ON
+CONFLICT list (the exact class the deploy checklist carried as
+PENDING-until-live; the fake harness cannot reach PL/pgSQL name
+resolution). The architect's first repair (the
+`#variable_conflict use_column` pragma — the textbook per-function
+policy knob) was prepared but **NEVER DEPLOYED — she asked for the
+tradeoffs first.** Put to her whole: pragma (name-robust, but
+silences the strict guard scope-wide in the one function most
+certain to be edited again — the per-tenant-seq event, pull
+windowing, the ledger floor all land there) vs constraint-name
+conflict target (surgical, name-coupled) vs the parameter RENAME
+(the root fix; blocked only by wire-contract churn — client key +
+pins + both device reinstalls, ~45 min, rehearsed this same
+window, with nothing working yet to break).
+
+**HER RULING (her words setting the criterion): "i'm worried that
+if we're relaxing the policy that another bug might slip through
+later… remember that with SQL decisions we're always looking for
+the decision that I will not hate my current self for in three
+years - we're trying to stay ahead of tech debt and spaghetti
+code." → THE RENAME.** The strict guard caught a naming mistake;
+the answer is fixing the mistake, not silencing the guard. **The
+standing rule is born: no RPC parameter may shadow a column it
+writes** (recorded here, in the artifact, and at the wire pin;
+future RPC signatures — the pruning rider's included — inherit
+it).
+
+**Executed:** parameter `device_id` → `for_device` (the wire key
+renames with it); the pragma edit REVERTED from the canonical
+`10_phase13j_purge.sql` (corrected in place — a future fresh
+deploy of 10 alone is right); the never-deployed pragma
+maintenance file retired;
+**`maintenance/13j-window-pull-rename.sql`** authored (DROP the
+deployed signature — Postgres cannot rename a parameter in
+place — CREATE the corrected function byte-identical to fixed 10,
+re-own to `variorum_definer`, re-grant); the transport's one
+CodingKey + both wire pins + the DDL signature pin updated,
+each annotated as the ruled rename; core **1350/141 FULLY
+GREEN**. Mac/mobile suites re-run before the device reinstalls
+(Sources/ touched). ALSO in this window, self-reported: the
+phone's first install was a STALE Aug-11 marker-6 product (the
+architect's DerivedData glob picked the worktree's old build —
+timestamps now verified on every install; the correct build went
+on minutes later, and re-installs again after this rename).
+
 ### Sanity passes over the reviewer's ladder-B fix diff (`44c04d7`; sequential, read-only)
 
 **Batch 6b (B1/B2/B3/B7–B11): CLEAR on all**, re-traced against

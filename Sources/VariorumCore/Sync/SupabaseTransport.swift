@@ -389,7 +389,10 @@ struct PullRequest: Encodable {
     let maxRows: Int
     /// Phase 14c: the vault-key-id fence parameter (both round halves).
     let activeKeyID: String
-    /// Phase 13j: the device-cursor report (10's `device_id` parameter) —
+    /// Phase 13j: the device-cursor report (10's `for_device` parameter —
+    /// renamed from `device_id` the day the first live round caught the
+    /// 42702 shadow; the standing rule: no RPC parameter shadows a column
+    /// it writes) —
     /// non-nil on a round's first window only. Encoded even when nil: an
     /// explicitly-passed JSON null arrives as SQL NULL (it does NOT take
     /// the parameter's default — 13j ladder B, B11), and the RPC's own
@@ -401,7 +404,7 @@ struct PullRequest: Encodable {
         case sinceSeq = "since_seq"
         case maxRows = "max_rows"
         case activeKeyID = "active_key_id"
-        case deviceID = "device_id"
+        case deviceID = "for_device"
     }
 
     func encode(to encoder: any Encoder) throws {
