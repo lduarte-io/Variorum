@@ -513,7 +513,8 @@ server-shaped lands.
 | 4 | **The defaults pair (J4/J4b):** divide default → `divideDuplicating` (the dormant core op wired); merge default → carry-all (composed from `mergeCeremony`, the phone's C5 the reference); "Divide with Ceremony…" ⌥⌘⇧D · "Merge with Ceremony…" ⌥⌘⇧M in Block menu + context menu + palette | **DONE 2026-08-18** — record below (core 1278/136 · Mac **1492/263 FULLY GREEN** · spine 51/7 · mobile NOT RUN, correctly — zero `Sources/`/`Shared/` lines; **the CHAIN-COMPOSITION answer: built, no edge beyond the brief's sentence** — each link composes through the one `CarryAllMerge` brain, unfanned links keep `ops.merge` byte-unchanged, the next link's displayed take is read off the op's own `sources` rather than inferred, and the compounding carry consequence is recorded at #69(a); the ⌥⌘⇧D/⌥⌘⇧M collision sweep found both FREE; five stale ceremony-default copy sites + three tutorial lessons aligned; ZERO core-op changes; QUESTIONS #69 logged with the ONE judgment call — the context menu's unconditional ceremony rows; ARCHITECT-VERIFIED against `55885ef` — #69(a) chain carry + #69(c) menu rows are her walk items) |
 | 5 | **J11 — the savepoint cadence:** on-note-close auto-commit per edited take (deduped) + `idle_commit_hours` default 24→2 + the ONE enum setting ("Every session · Idle only · Only when I commit"-shaped) + the history view's quiet-run collapse (the legibility half) | **DONE 2026-08-19** — record below (core 1295/138 · Mac **1516/266 FULLY GREEN** · spine 51/7 · mobile 314/60; the LIFECYCLE ANSWER: a note is left when no pane of a window shows it — one entry, `AppSession.savepointOnLeaving`, off four existing funnels, no second lifecycle mechanism; `closeAutoCommit` is the SIXTH quiet occasion, gated with `idleAutoCommit` while the four INSURANCE occasions stay ungoverned; ZERO schema — one seeded setting VALUE, marker 6 stands; the Mac's intermittent canvas reds TRACED to load-dependent mouse-event rigs and proven PRE-EXISTING on a worktree at `43192a9`; two canon deltas owed at closeout; QUESTIONS #70 logged) |
 | 6 | **J1 — the Trash:** the surface reshape (rename to Trash; Archived keeps no clock; per-row "N days left" + Put back; sort/filter by kind + date **incl. the round-5 Takes filter — deleted takes ride the clock with block/note context**; Delete Now per row + Empty Trash, confirm-once, IN-TRASH ONLY — no full-delete door in any note context, ever; a note deleted whole lists as ONE note row, cascade victims never double-listed) + the 30-day leave-all-surfaces clock; **+ BLOCK-LEVEL ARCHIVE (round-7 ruling):** `archiveBlock`/`unarchiveBlock` on the ruled shape (release placement + stamp; tray section takes back "Deleted & archived"; no countdown on archived rows; Put back via the ratified F2 road; structural-undo entries; doors + registry + receipts); **+ the Blocks-mode `traySection` routed to the one panel (round-7 ruling)**; **the purge design memo authored here** (client+server mechanics, the horizon, the per-device pull cursor, the lineage-only-originals edge) → STOP: her explicit go gates any server-shaped build | **DONE 2026-08-19** — record below (core **1308/139** — REPRODUCED by the architect · Mac **1526/267 FULLY GREEN** · spine 51/7 · mobile 314/60; the memo at `notes/plans/phase-13j-purge-memo.md`, adjudicated; the rig flake's REAL mechanism found + closed; revert J's self-audit defect fixed+pinned; QUESTIONS #71; ARCHITECT-VERIFIED against the five commits) |
-| 7 | **J10 — the tutorial deletion chapter** (walk-asserted per P-6: delete blocks in-tutorial, the tray, Put back, cross-block deletion, the Trash, the ceremony doors) + the whole-note-version-history design brief (round 2's deferral deliverable) | pending |
+| 6b | **The PURGE BUILD (created at rounds 8–10; FABLE seat — the Sync/ rider):** v1_14 `purge_intent` (own schema commit) · the janitor + PurgeFamily + the convergence battery · the finalized-NOT-deployed mirror artifact `10_phase13j_purge.sql` (incl. the adjudicated purge-execution RPC + the corrected `sync_pull` device signature) · Delete Now/Empty Trash in-Trash-only, confirm-every-time, structurally enforced · the pruning pass + Standard/Never setting · the say-so returner road · the intent fence on every recovery listing | **DONE 2026-08-19** — record below (core **1335/141** — REPRODUCED by the architect · Mac **1532/268 FULLY GREEN** · spine 51/7 · mobile 314/60; the drill-A pin found a REAL defect first run (the FK-SET-NULL/outbox-ABORT demotion — fixed at mechanism); FOUR memo corrections in the §6b addendum incl. the sync_pull-signature fact; mirror-side items PENDING by design until the one-window; the deploy checklist in the record; QUESTIONS #72; ARCHITECT-VERIFIED against `8f4c80f…7e78891`) |
+| 7 | **J10 — the tutorial deletion chapter** (walk-asserted per P-6: delete blocks in-tutorial, the tray, Put back, cross-block deletion, the Trash, the ceremony doors) + the whole-note-version-history design brief (round 2's deferral deliverable) | pending — brief below |
 
 Ladder shape (the 13e precedent): ladder A after batch 4, ladder B
 after batch 7 — fresh Fable cold reviewers on `REVIEW_PROMPT.md`
@@ -3811,3 +3812,98 @@ this batch's to run)
 - **Nothing else PENDING** — every count and claim above is from a run
   in this session; the deploy-window items are PENDING by design and
   listed in the checklist.
+
+## Batch 7 brief — the tutorial's deletion chapter + the note-history brief (a FRESH Opus implementer; self-contained)
+
+**Read first, in full:** `CLAUDE.md` (+ the canon it loads); this
+plan file TOP TO BOTTOM — the sitting rounds are the letter; the
+Environment traps, all batch records (batch 6b's included — the
+chapter teaches what IT built too), both ladder records, all
+adjudications; `notes/plans/phase-13j-purge-memo.md` (the chapter
+teaches its user-visible half honestly); the current tutorial
+content (`Features/Tutorial/` incl. `TutorialSeeder`) and the
+spine (`TutorialWalkTests.swift`) — read them WHOLE before
+writing a sentence; the `architect-phase` skill's "Applying the
+constitution" notes.
+
+**Her instruction (J10, verbatim):** "the tutorial also needs to
+be updated more throughly in 13j to encourage users to delete
+blocks during the tutorial, it should have a clearly reproducable
+path to that table of doom if it still exists (which it might idk
+why it even does), guide users through cross block deletion,
+restoral, etc." And her standing report: "the tutorial's actual
+content is still out of date because the tutorial doesn't make
+enough sense about it to me." (The "table of doom" is GONE — J6,
+ruled and shipped; the chapter teaches the roads that replaced
+it.)
+
+**Scope — two deliverables:**
+
+1. **The deletion chapter — a real overhaul, walk-asserted
+   (P-6).** The chapter has users DO the story, not read it:
+   delete a whole paragraph by selection (the batch-1 road);
+   multi-delete; meet the ⌘Z→⌥⌘Z hint; open This Note's Tray
+   (the ⌫ door) and Put back; meet the TRIO — **Archive** (kept
+   forever, this note's tray) · **Delete** (30 days in the Trash,
+   then really gone) · **Move to scraps** (material for
+   anywhere) — taught as ONE story (the round-7 ruling's letter);
+   visit the Trash (the clock, Put back, Delete Now/Empty Trash
+   named as in-Trash-only with their confirms); see a divide's
+   preserved original (the lineage door / the History face's
+   past region — deleted takes' Put back included) and the
+   visibly-moving-over rule in one honest sentence. Every path
+   REPRODUCIBLE — the lesson names the exact doors. Beyond the
+   chapter: the content-refresh sweep her report demands —
+   every existing lesson sentence that describes deletion,
+   history, or the old defaults gets the current truth (bounded,
+   each change recorded; the J8 bar — a lesson may not promise a
+   door that isn't there or miss one that is). The chapter's
+   flow joins the WALK (new spine tests beside the existing
+   seven suites — the spine count GROWS; report the new
+   baseline). Teach only what EXISTS in the build; the purge's
+   user-visible truth is "30 days, then really gone" (the
+   janitor's trailing is the memo's business, not a lesson's).
+2. **The whole-note-version-history DESIGN BRIEF** (round 2's
+   deferral deliverable, the S4-16 form — moved in time, never
+   into vagueness): `notes/plans/whole-note-history-brief.md` —
+   self-contained for a future design sitting: what the J11
+   cadence now makes derivable (the session-grain TEXT browser
+   over per-take savepoints — no schema); what true STRUCTURE
+   history would take (pointer-shaped note-snapshot rows, schema
+   + §12 lockstep, its GC interplay with the new purge design);
+   the design knots needing her rulings; her round-2 words as
+   the founding quote. Brief, honest about costs, binding
+   nothing.
+
+**Constraints:** zero schema; zero `Sources/VariorumCore/Sync/`
+lines; tutorial edits stale the REAL store's seeded field guide —
+DO NOT touch the real store; the closeout re-seeds via the
+product door behind the A1 rail (the standing rule — note it in
+your record); registry discipline for anything the chapter's
+lessons reference; no invented product behavior; the Environment
+traps bind verbatim (re-check instances; NEVER touch a
+real-store instance; kills by PID/bundle-id only; no Release
+builds or `/Applications` refreshes; you NEVER push). Before Mac
+suite runs, confirm no other `xcodebuild` run is active.
+
+**Hallucination guard:** the walk-asserts are the chapter's pins
+(each lesson step drives the real door it names); the
+content-refresh sweep lands as a table (site × verdict
+current-or-fixed) in your record; red-on-old by behavioral revert
+where a defect-fix shape applies.
+
+**Verification (batch end, counts quoted):** core (baseline
+**1335/141**); Mac `-project` invocation (baseline **1532/268**
+FULLY GREEN — zero allowed reds); the spine by TYPE name —
+baseline 51/7 PLUS your new chapter suites (report the new spine
+baseline explicitly); mobile ONLY if `Sources/`/`Shared/` is
+touched (baseline 314/60 — this batch should touch neither).
+Confirm every "Test run with N tests" line.
+
+**Record (repo-first):** append the BATCH 7 RECORD to this file —
+the chapter's lesson list, the refresh-sweep table, the new
+spine baseline, the brief's existence + its knots, pins, counts,
+hand-offs (the field-guide re-seed reminder for the closeout) —
+then commit per convention. **Ladder B follows this batch** over
+everything since ladder A (batches 5, 6, 6b, 7) — leave the
+record especially clean.
