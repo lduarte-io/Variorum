@@ -122,6 +122,75 @@ struct TrashPurgeDoorsTests {
         }
     }
 
+    // MARK: - R2-M1 (13j ladder B round 2): the THIRD population's receipt
+
+    @Test func aOnceSyncedFamilysLocalReceiptPromisesTheSignInRoadNotLocalCleanup() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two."]) { editor in
+            let blockID = try #require(editor.model.slots.first?.blockID)
+            // SIGNED OUT, WITH SYNCED HISTORY: no chain is configured
+            // (`syncConfigured` reads false in this harness — the exact
+            // signed-out read), but the store remembers the server once
+            // accepted this block (`sync_row_seq`). `LocalPurge` defers a
+            // family with any synced member FOREVER on this road, so the
+            // "app's own cleanup removes the bytes" sentence would be
+            // indefinitely false for exactly the row the receipt names —
+            // the B3 falsehood reborn one population over (the round-2
+            // finding). Red on the pre-R2-M1 code: the local wording was
+            // unconditional.
+            try await editor.session.runner.run { (ops: Operations) in
+                try ops.deleteBlock(blockID)
+            }
+            try await editor.database.write { db in
+                try db.execute(
+                    sql: """
+                        INSERT OR REPLACE INTO sync_row_seq (table_name, row_id, server_seq)
+                        VALUES ('block', ?, 7)
+                        """,
+                    arguments: [blockID])
+            }
+            let rows: [Queries.TrashItem] = try await editor.database.read { db in
+                try Queries.trash(db, now: harnessNow)
+            }
+            let row = try #require(rows.first { $0.kind == .block && $0.id == blockID })
+            let model = RecoveryViewModel(session: editor.session)
+            model.requestDeleteNow(row)
+            await model.confirmPendingPurge()
+            #expect(model.lastError == nil)
+
+            let receipt = try #require(model.receipt)
+            #expect(!receipt.contains("the app's own cleanup"),
+                    "a once-synced family is never promised a cleanup LocalPurge defers")
+            #expect(receipt.contains("sign in"),
+                    "the true road: the bytes wait for the janitor, after a sign-in")
+
+            // The wording matches the STORE's truth: the post-confirm
+            // local sweep deferred the once-synced family — bytes still
+            // here, intent still live for the future janitor to honor.
+            let bytes: Int = try await editor.database.read { db in
+                try Int.fetchOne(
+                    db, sql: "SELECT COUNT(*) FROM block WHERE id = ?",
+                    arguments: [blockID]) ?? 0
+            }
+            #expect(bytes == 1, "LocalPurge waits on a synced member — nothing removed")
+            let liveIntent: Int = try await editor.database.read { db in
+                try Int.fetchOne(
+                    db,
+                    sql: "SELECT COUNT(*) FROM purge_intent WHERE row_id = ? AND deleted_at IS NULL",
+                    arguments: [blockID]) ?? 0
+            }
+            #expect(liveIntent == 1, "the intent stands for the sign-in road")
+
+            // Empty Trash's arm of the same truth (unit — the conditional
+            // itself), and the never-synced local arm survives unchanged.
+            let mixed = RecoveryPath.emptyTrashReceipt(
+                2, synced: false, anyFamilyEverSynced: true)
+            #expect(mixed.contains("sign in") && !mixed.contains("the app's own cleanup"))
+            #expect(RecoveryPath.deleteNowReceipt(.block, synced: false)
+                .contains("the app's own cleanup"),
+                    "the never-synced population keeps its true local sentence")
+        }
+    }
+
     @Test func aPreservedOriginalRowHasNoPurgeDoorOfItsOwn() async throws {
         try await withEditor(seedBlocks: ["Alpha one."]) { editor in
             let model = RecoveryViewModel(session: editor.session)

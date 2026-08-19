@@ -4436,6 +4436,104 @@ own session (the 13e round-B precedent):**
   **Reviewer's call: the comment or minting through
   `self.database`.**
 
+### LADDER B — THE FINAL RESIDUE PASS (2026-08-19; the round-2 reviewer's own session, authorized per the 13e round-B precedent) → LADDER B CLOSES
+
+Disposition per item, each traced before touched:
+
+- **R2-M1 — FIXED + PINNED: the third population's receipt speaks
+  the SIGN-IN road.** The truth bit is
+  `PurgeJanitor.anyFamilyEverSynced` (new, public, FAMILY-WIDE —
+  a partial drain can sync a child under a never-accepted root,
+  and one synced member is all the verdict needs to wait);
+  `RecoveryPath.deleteNowReceipt`/`emptyTrashReceipt` gain a
+  third arm behind `familyEverSynced`/`anyFamilyEverSynced`
+  (defaulted false, so every existing call site and pin compiles
+  unchanged); the model reads the bit only when NO chain is
+  configured — per-target for Delete Now, batch-wide for Empty
+  Trash, BEFORE the intent write (which changes no seq rows).
+  Wordings: *"it once synced, so the bytes finish clearing after
+  you next sign in"* / *"anything that once synced finishes
+  clearing after you next sign in; the rest the app cleans up
+  now"* — the true road, no timing it cannot keep (eventual by
+  the horizon's own rules). Pin (Mac):
+  `aOnceSyncedFamilysLocalReceiptPromisesTheSignInRoadNotLocalCleanup`
+  — a deleted block with a `sync_row_seq` row in a chainless
+  world: the receipt never says "the app's own cleanup", says
+  "sign in", AND the store's truth matches the words (bytes still
+  present — the post-confirm LocalPurge DEFERRED the synced
+  family; the intent still live for the future janitor); the
+  never-synced population's local sentence asserted unchanged.
+  **Drill K**: the third arm disabled → the pin RED (2 issues —
+  the old unconditional local wording surfaced); restored by
+  reverse edit, `RecoveryView.swift` → `f7acaeae274e` (identical).
+- **R2-M2 — FIXED + PINNED: `reconcileLedger` carries the
+  janitor's own preflights** — rekey marker → keys → §12
+  lockstep, at the top, before any wire consumption — so the
+  scheduler's pre-round call can no longer consume the ledger or
+  advance `last_purge_seq` against a mirror this client refuses
+  to talk to (the skew that cannot bite until the NEXT §12 event,
+  then bites silently under possibly-renumbered seq semantics).
+  `sweep()`'s own preflight re-runs them (one cheap RPC, twice
+  per sweep — commented); a pre-pass refusal falls to the
+  scheduler's existing "the round's own attempt decides" arm,
+  which speaks the same §12 grammar. Pin (core):
+  `theLedgerPrePassRefusesASchemaSkewedMirror` — mirror deployed
+  at marker N+1: the pre-pass throws `schemaLockstepMismatch`,
+  NOTHING dropped, scan point unmoved; marker restored: the SAME
+  call consumes the ledger (the proof the refusal was all that
+  stood between the skewed mirror and the drop). **Drill L**: the
+  guard disabled → the pin RED (4 issues — family dropped + scan
+  point advanced under skew, no refusal); restored by reverse
+  edit, `PurgeJanitor.swift` → `2248b61d443f` (identical).
+- **R2-M3 — FIXED, NO pin (the architectural-finding rules; the
+  race-endpoints class):** `deleteFamilyLocally(root:road:)`
+  RE-VERDICTS inside its own write transaction — `LocalPurge`'s
+  standing shape, now on the transported road's local arm — and
+  returns nil when the family stopped reading
+  `.eligibleLocalOnly` in that snapshot; the sweep counts it
+  DEFERRED (re-collected next pass). Justification at the site:
+  the staged read is a different snapshot, and a restore racing
+  the read→write gap would otherwise be physically removed with
+  NO mirror copy anywhere — pure loss, with none of the
+  eligibleSynced arm's purge-wins justification. Unpinnable
+  without scheduling hooks; deterministic tests take the same
+  path as before (the re-verdict answers the same on an
+  uncontended store — suite counts confirm).
+- **R2-N1 — RECORDED; the hardening DECLINED with the reason in
+  code:** the `LocalPurge` doc now names the gate BEST-EFFORT
+  (the launch tick can precede chain composition while the lazy
+  auth restore is in flight; a normal store is safe there —
+  synced families defer, never-drained local families purging is
+  her round-11 letter; the reinit-crash sub-case converges as the
+  documented transient) and states why the `device_id`-skip
+  candidate was declined: it would stop never-synced trash from
+  purging on a SIGNED-OUT install, making the doors' local
+  receipt false there — a worse trade than a convergent,
+  invisible transient.
+- **R2-N2 — TAKEN, the structural form:** the pruning mint now
+  runs INSIDE the `withDependencies` scope (call, not just
+  construction) — `@Dependency` resolves captured-initials merged
+  with CALL-SITE task-locals, call-site preferred, so the old
+  escaped-op shape held only because the app installs
+  `\.database` through the prepareDependencies cache; in-scope,
+  the binding is structural. Mechanism stated at the site.
+
+**Counts (this pass, every "Test run with N tests" line
+confirmed):** core `swift test` — **1350 tests / 141 suites
+PASSED, FULLY GREEN** (+1: the M2 pin) · Mac (`-project`
+invocation, FULL suite) — **1546 tests / 269 suites PASSED,
+FULLY GREEN, zero reds** (+1: the M1 pin) · tutorial spine, by
+TYPE name (the eight suites) — **63 tests / 8 suites PASSED**
+(baseline exact) · mobile (`VariorumMobile`, iPhone 16e) —
+**314 tests / 60 suites PASSED** (baseline exact; run because
+`Sources/` was touched — the phone inherits the preflighted
+pre-pass, the in-write re-verdict, and the truth-bit query by
+construction; the receipt surface is Mac chrome). ZERO schema;
+the mirror artifact untouched; no instance touched, no Release
+build, no `/Applications` write, no live-mirror contact, no
+push from this session. **LADDER B CLOSES on this record; the
+deploy window follows.**
+
 ## Batch 7 brief — the tutorial's deletion chapter + the note-history brief (a FRESH Opus implementer; self-contained)
 
 **Read first, in full:** `CLAUDE.md` (+ the canon it loads); this

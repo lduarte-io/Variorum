@@ -159,21 +159,40 @@ nonisolated enum RecoveryPath {
     /// `synced` (13j ladder B, B3 — her round-11 ruling: receipts true for
     /// BOTH populations): with no sync chain configured there are no
     /// "synced devices" to catch up, and the app's OWN local cleanup takes
-    /// the bytes — never-synced things right away, anything that once
-    /// synced when its safety rule allows. The local wording says exactly
-    /// that and promises no timing it cannot keep.
-    static func deleteNowReceipt(_ kind: Queries.TrashItem.Kind, synced: Bool) -> String {
-        synced
-            ? "The \(rowKind(kind)) is gone from the app now — the bytes follow "
+    /// the bytes — never-synced things right away.
+    ///
+    /// `familyEverSynced` (R2-M1, 13j ladder B round 2 — the THIRD
+    /// population: signed OUT, with synced history): a once-synced family
+    /// is exactly what `LocalPurge` defers forever (one synced member ⇒
+    /// the family waits; no janitor exists while signed out), so the
+    /// local-cleanup sentence would be indefinitely false for it. The
+    /// truth bit is `PurgeJanitor.anyFamilyEverSynced`, read per-target
+    /// by the model; its wording promises the sign-in road and no timing
+    /// it cannot keep.
+    static func deleteNowReceipt(
+        _ kind: Queries.TrashItem.Kind, synced: Bool, familyEverSynced: Bool = false
+    ) -> String {
+        if synced {
+            return "The \(rowKind(kind)) is gone from the app now — the bytes follow "
                 + "once every synced device has caught up."
-            : "The \(rowKind(kind)) is gone from the app now — the app's own "
-                + "cleanup removes the bytes."
+        }
+        if familyEverSynced {
+            return "The \(rowKind(kind)) is gone from the app now — it once synced, "
+                + "so the bytes finish clearing after you next sign in."
+        }
+        return "The \(rowKind(kind)) is gone from the app now — the app's own "
+            + "cleanup removes the bytes."
     }
-    static func emptyTrashReceipt(_ total: Int, synced: Bool) -> String {
+    static func emptyTrashReceipt(
+        _ total: Int, synced: Bool, anyFamilyEverSynced: Bool = false
+    ) -> String {
         let head = "The Trash is emptied — \(total) thing\(total == 1 ? "" : "s") gone from the app now; "
-        return synced
-            ? head + "the bytes follow once every synced device has caught up."
-            : head + "the app's own cleanup removes the bytes."
+        if synced { return head + "the bytes follow once every synced device has caught up." }
+        if anyFamilyEverSynced {
+            return head + "anything that once synced finishes clearing after you "
+                + "next sign in; the rest the app cleans up now."
+        }
+        return head + "the app's own cleanup removes the bytes."
     }
 }
 
@@ -331,11 +350,22 @@ final class RecoveryViewModel {
             let synced = session.syncConfigured()
             switch confirm {
             case .deleteNow(let item):
-                try await session.runner.run { ops in
-                    _ = try ops.requestPurge(
-                        [SyncPurgeTarget(table: item.kind.purgeTable, rowID: item.id)])
+                let target = SyncPurgeTarget(table: item.kind.purgeTable, rowID: item.id)
+                // R2-M1: the signed-out-with-synced-history population —
+                // read the family's truth bit (before the intent lands;
+                // the intent write changes no seq rows) so the local
+                // wording never claims a cleanup LocalPurge will defer.
+                var familySynced = false
+                if !synced {
+                    familySynced = try await session.database.read { db in
+                        try PurgeJanitor.anyFamilyEverSynced(db, targets: [target])
+                    }
                 }
-                receipt = RecoveryPath.deleteNowReceipt(item.kind, synced: synced)
+                try await session.runner.run { ops in
+                    _ = try ops.requestPurge([target])
+                }
+                receipt = RecoveryPath.deleteNowReceipt(
+                    item.kind, synced: synced, familyEverSynced: familySynced)
             case .emptyTrash:
                 // Re-read at ACT time (a confirm is a pause; the listing is
                 // a projection — the R3-1 lesson): everything currently in
@@ -347,10 +377,20 @@ final class RecoveryViewModel {
                 let targets = everything
                     .filter { $0.kind != .preservedOriginal }
                     .map { SyncPurgeTarget(table: $0.kind.purgeTable, rowID: $0.id) }
+                // R2-M1: same truth bit, batch-wide — one once-synced
+                // family among the targets means the receipt must speak
+                // the sign-in road for that part of the batch.
+                var anyFamilySynced = false
+                if !synced {
+                    anyFamilySynced = try await session.database.read { db in
+                        try PurgeJanitor.anyFamilyEverSynced(db, targets: targets)
+                    }
+                }
                 try await session.runner.run { ops in
                     _ = try ops.requestPurge(targets)
                 }
-                receipt = RecoveryPath.emptyTrashReceipt(targets.count, synced: synced)
+                receipt = RecoveryPath.emptyTrashReceipt(
+                    targets.count, synced: synced, anyFamilyEverSynced: anyFamilySynced)
             }
             // 13j ladder B (B3): on a local-only install the cleanup IS
             // the app's — run it now, so Delete Now means what it says the

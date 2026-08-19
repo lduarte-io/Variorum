@@ -161,10 +161,16 @@ public struct PurgeJanitor: Sendable {
                 // `sync_row_seq`-absent — the mirror never saw any of it,
                 // so there is nothing to strand, nothing to fence, and no
                 // ledger entry to write. Local physical removal only.
-                let removed = try await deleteFamilyLocally(root)
-                report.familiesPurged += 1
-                report.rowsPurgedLocally += removed
-                processed.formUnion(expansion.rows)
+                // R2-M3: nil = the family stopped reading `.eligibleLocalOnly`
+                // between the staged read and the removal's own transaction
+                // (a restore raced the gap) — deferred, re-collected next pass.
+                if let removed = try await deleteFamilyLocally(root, road: .transported) {
+                    report.familiesPurged += 1
+                    report.rowsPurgedLocally += removed
+                    processed.formUnion(expansion.rows)
+                } else {
+                    report.familiesDeferred += 1
+                }
             case .eligibleSynced:
                 let grantedSeq = try await transport.executePurge(
                     expansion.orderedRows, activeKeyID: keyID)
@@ -231,11 +237,30 @@ public struct PurgeJanitor: Sendable {
     /// writing UNDER a purged family is discarded with the family.
     @discardableResult
     public func reconcileLedger() async throws -> Int {
+        // R2-M2 (13j ladder B round 2): the pre-pass carries the SAME
+        // preflight discipline as `sweep()` — the scheduler calls this
+        // BEFORE each round, so without its own gates the ledger would be
+        // consumed (rows dropped, `last_purge_seq` advanced) against a
+        // mirror this client has refused to talk to: a mid-re-key store,
+        // or a schema-skewed mirror whose seq semantics a future §12
+        // event may have changed (the recorded per-tenant-sequence event
+        // renumbers exactly what the floor and scan point compare).
+        // Disagreement means refusal, never improvisation (SyncSpec §12)
+        // — scan point unmoved, nothing dropped. When `sweep()` calls
+        // this the checks re-run (one cheap RPC, twice per sweep); the
+        // standalone scheduler entry is the one that must never be naked.
+        let rekeyIncomplete = try await database.read { try AccountRekeyMarker.isSet($0) }
+        guard !rekeyIncomplete else { throw SyncError.accountRekeyIncomplete }
         let keyID: String
         do {
             keyID = try keyProvider.currentKeys().corpusKeyID
         } catch {
             throw SyncError.encryptionKeysUnavailable
+        }
+        let server = try await transport.schemaVersion()
+        guard server == SyncSchema.lockstepVersion else {
+            throw SyncError.schemaLockstepMismatch(
+                client: SyncSchema.lockstepVersion, server: server)
         }
         let (scanPoint, acknowledgedFloor) = try await database.read { db in
             (try Self.stateValue(db, "last_purge_seq"),
@@ -462,6 +487,35 @@ public struct PurgeJanitor: Sendable {
         }
     }
 
+    // MARK: - The receipts' truth bit (R2-M1, 13j ladder B round 2)
+
+    /// Whether ANY row of these targets' families has ever been accepted
+    /// by the server (`sync_row_seq` present). The purge doors' receipts
+    /// read this when NO chain is configured: a SIGNED-OUT store may
+    /// still hold once-synced families, and for those `LocalPurge` defers
+    /// forever (one synced member ⇒ the whole family waits) while no
+    /// janitor exists — so a receipt claiming "the app's own cleanup
+    /// removes the bytes" would be indefinitely false for exactly the
+    /// rows it names. True ⇒ the bytes wait for a sign-in (the janitor's
+    /// road); false ⇒ the local road really does take them. Family-wide,
+    /// not root-only: a partial drain can sync a child under a
+    /// never-accepted root, and one synced member is all the verdict
+    /// needs to wait.
+    public static func anyFamilyEverSynced(
+        _ db: Database, targets: [SyncPurgeTarget]
+    ) throws -> Bool {
+        guard !targets.isEmpty else { return false }
+        let family = try PurgeFamily.expand(db, roots: targets)
+        for target in family.rows {
+            let seq = try Int64.fetchOne(
+                db,
+                sql: "SELECT server_seq FROM sync_row_seq WHERE table_name = ? AND row_id = ?",
+                arguments: [target.table, target.rowID]) ?? 0
+            if seq > 0 { return true }
+        }
+        return false
+    }
+
     // MARK: - Stale-intent completion + the local family removal
 
     /// Voids every live intent naming this root (13j ladder B, B1): the
@@ -486,11 +540,32 @@ public struct PurgeJanitor: Sendable {
         }
     }
 
-    private func deleteFamilyLocally(_ root: SyncPurgeTarget) async throws -> Int {
+    /// Physically removes a LOCAL-ONLY family — with the verdict
+    /// RE-CHECKED inside this write transaction (R2-M3, 13j ladder B
+    /// round 2): the staged read's verdict is a DIFFERENT snapshot, and a
+    /// restore (⌥⌘Z, or a peer's Put back applying) committing in the
+    /// read→write gap would otherwise be physically removed with NO
+    /// mirror copy anywhere — pure loss, with none of the eligibleSynced
+    /// arm's purge-wins justification (there the mirror has ALREADY
+    /// purged when the local write runs; here nothing external happened
+    /// at all). `LocalPurge` has always verdicted in-transaction — this
+    /// is the same shape on the transported road's local arm. Returns nil
+    /// when the family no longer reads `.eligibleLocalOnly` in THIS
+    /// snapshot; the sweep defers it. No pin, per the
+    /// architectural-finding rules: the race needs a user write landing
+    /// between two transactions of one sweep — unpinnable without
+    /// scheduling hooks (the recorded race-endpoints class); the traced
+    /// mechanism and this justification live here instead.
+    private func deleteFamilyLocally(
+        _ root: SyncPurgeTarget, road: SweepRoad
+    ) async throws -> Int? {
         let stamp = nowStamp()
         return try await database.write { db in
             try db.execute(sql: "PRAGMA defer_foreign_keys = ON")
             let family = try PurgeFamily.expand(db, roots: [root])
+            guard try Self.familyVerdict(db, family, horizon: 0, road: road)
+                == .eligibleLocalOnly
+            else { return nil }
             try PurgeFamily.deleteLocal(db, family: family, stamp: stamp)
             return family.rows.count
         }
@@ -639,11 +714,28 @@ public struct PurgeJanitor: Sendable {
 /// (seq table cleared wholesale, mirror intact) it would read synced
 /// families as local-only — a local purge whose mirror copies re-arrive
 /// on the next pull, i.e. **transient resurrection converging to
-/// purged**. That is exactly why the app gates this road on
+/// purged**. That is why the app gates this road on
 /// `SyncSession.isConfigured` (a reinit implies a configured chain), and
 /// why the transported sweep carries the seq-absent-but-pending deferral
 /// this road deliberately does not (her round-11 letter: the
 /// never-configured install's outbox is full by construction).
+///
+/// **The gate is best-effort, not a seal (R2-N1, 13j ladder B round 2 —
+/// recorded, deliberately not hardened):** at launch the first tick can
+/// run before a signed-in chain composes (`isConfigured` reads false
+/// while the lazy auth restore + adoption + configure are still in
+/// flight), so one sweep per launch may run over a configured-chain
+/// store. A normal store is safe there — synced families read
+/// `anySynced` and defer; a never-drained deleted family purging locally
+/// is her round-11 ruling's letter. The one wrong sub-case is a crash
+/// after `resyncReinitialize` before any re-drain (seqs cleared, mirror
+/// intact): that launch's sweep would local-purge synced TOMBSTONED rows
+/// and converge as the transient resurrection above — invisible-surface
+/// rows only, re-served then ledger-purged. The candidate hardening
+/// (skip whenever `sync_state.device_id` exists) was weighed and
+/// declined: it would also stop never-synced trash from purging on a
+/// SIGNED-OUT install, making the doors' local receipt false there — a
+/// worse trade than a convergent, invisible transient.
 /// Stale intents complete here too (B1's rule is road-independent),
 /// and savepoint pruning mints by the same brain, so a local install's
 /// quiet history prunes exactly like a synced one's.
@@ -736,14 +828,22 @@ public struct LocalPurge: Sendable {
             }
             if !prunable.isEmpty {
                 // The op bound to THIS sweep's store (the explicit-database
-                // fence above): never the ambient installed one.
-                let boundOps = withDependencies {
+                // fence above): never the ambient installed one. R2-N2
+                // (13j ladder B round 2): the CALL runs inside the
+                // `withDependencies` scope, not just the construction —
+                // `@Dependency` resolves as captured-initials merged with
+                // the CALL-SITE task-locals, call-site preferred, so an
+                // escaped op invoked under some future
+                // `withDependencies { $0.database = other }` scope would
+                // silently re-point the mint at the other store while the
+                // family removals above stayed bound. In-scope, the
+                // binding is structural, not circumstantial.
+                report.pruneIntentsMinted = try withDependencies {
                     $0.database = database
                 } operation: {
-                    Operations()
+                    try Operations().requestPurge(
+                        prunable.map { SyncPurgeTarget(table: "commit_point", rowID: $0) })
                 }
-                report.pruneIntentsMinted = try boundOps.requestPurge(
-                    prunable.map { SyncPurgeTarget(table: "commit_point", rowID: $0) })
             }
         }
         return report

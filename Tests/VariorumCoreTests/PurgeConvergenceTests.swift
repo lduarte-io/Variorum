@@ -760,4 +760,62 @@ struct PurgeConvergenceTests {
                 "one family, however many arms collected its root")
         #expect(try familyRowCount(a, post: family.post) == 0)
     }
+
+    // MARK: - 15. R2-M2 (13j ladder B round 2): the scheduler's pre-pass
+    // carries the janitor's own preflight discipline — a schema-skewed
+    // mirror's ledger is never consumed (SyncSpec §12: disagreement means
+    // refusal, never improvisation)
+
+    @Test func theLedgerPrePassRefusesASchemaSkewedMirror() async throws {
+        let server = FakeSyncServer()
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+
+        // A synced 30-day family, then a PEER's purge lands on the mirror:
+        // the ledger now names rows this store still holds.
+        let family = try buildAndDeleteFamily(a)
+        try backdate(a, from: family.deletedStamp, to: oldStamp)
+        try await round(a)
+        _ = try await server.executePurge(
+            [SyncPurgeTarget(table: "container", rowID: family.post)],
+            activeKeyID: SyncTestKeys.corpusKeyID)
+
+        // The mirror deploys the NEXT lockstep marker: this client is now
+        // BEHIND. The standalone pre-pass (the scheduler's pre-round call)
+        // must refuse before consuming anything — scan point unmoved,
+        // no local rows dropped. Red on the pre-R2-M2 code: reconcileLedger
+        // checked keys only, so the skewed mirror's ledger was consumed
+        // and the scan point advanced under semantics a future §12 event
+        // may have renumbered.
+        await server.setDeployedLockstepVersion(SyncSchema.lockstepVersion + 1)
+        let scanBefore = try a.db.fetchString(
+            "SELECT value FROM sync_state WHERE key = 'last_purge_seq'")
+        do {
+            _ = try await a.withAsync { _ in
+                try await PurgeJanitor(transport: server, keyProvider: a.keyProvider)
+                    .reconcileLedger()
+            }
+            Issue.record("a schema-skewed mirror must refuse the pre-pass")
+        } catch let error as SyncError {
+            guard case .schemaLockstepMismatch = error else {
+                Issue.record("the refusal must be the §12 mismatch, got \(error)")
+                return
+            }
+        }
+        #expect(try familyRowCount(a, post: family.post) > 0,
+                "nothing dropped under skew — the family still stands locally")
+        #expect(try a.db.fetchString(
+            "SELECT value FROM sync_state WHERE key = 'last_purge_seq'") == scanBefore,
+                "the scan point never moves under a refusal")
+
+        // Lockstep restored: the SAME call consumes the ledger — the claim
+        // the skew arm was fencing, and the proof the refusal was the only
+        // thing standing between the skewed mirror and the drop.
+        await server.setDeployedLockstepVersion(SyncSchema.lockstepVersion)
+        let dropped = try await a.withAsync { _ in
+            try await PurgeJanitor(transport: server, keyProvider: a.keyProvider)
+                .reconcileLedger()
+        }
+        #expect(dropped > 0)
+        #expect(try familyRowCount(a, post: family.post) == 0)
+    }
 }
