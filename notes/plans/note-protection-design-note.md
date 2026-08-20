@@ -132,6 +132,58 @@ suggests.
   not a redesign, PROVIDED the search design keeps the exclusion door in
   mind — which the pin guarantees.
 
+## The search interaction & the encryption spec (2026-08-20 — folded at her instruction: "make sure all the details you told me are in the 13p plan")
+
+**Why an index, and what it is.** Searching by scanning every note's
+text on every keystroke costs corpus-proportional time — the P1 sin —
+so 13o will almost certainly build an INDEX (SQLite FTS5): a separate
+structure like the index at the back of a book — every word, mapped to
+the notes containing it, maintained incrementally as she types; queries
+become instant lookups. The crucial property: **the index contains the
+actual words** — it is effectively a second copy of the entire text,
+reorganized by word. Today, with everything plaintext, that is a
+non-event (the index is no more exposed than the notes, same
+FileVault-protected file).
+
+**The one rule protection adds:** a protected note's words must NEVER
+enter the index — otherwise encrypting the note is theater (the words
+sit plaintext in the index while the note is ciphertext). Consequence,
+honest and small: **a locked note is not findable by library search.**
+In-note find still works once the note is unlocked and open (it reads
+the decrypted buffer in memory). This is exactly Apple Notes' behavior
+— locked notes don't surface in search — so users already carry the
+right intuition. That exclusion rule + one honest sentence in the
+search UI is the ENTIRE 13o interaction — small precisely because it
+was decided before the index exists (retrofit would mean scrubbing
+words out of a shipped structure, re-indexing, and a leak window).
+
+**What the encryption will be — nothing new.** 14b already built every
+hard part: AES-256-GCM, per-value random nonces, AAD binding, the
+account key vault, the passphrase/recovery custody, Keychain
+enrollment. Her synced data is ALREADY encrypted this way on the wire
+and the mirror. 13p extends the same sealing to the LOCAL rows of
+protected notes: the note's whole text family (takes, savepoints,
+comments) stored as ciphertext in the SQLite file, under a
+protected-notes CLASS key in the vault, held in the Keychain behind a
+biometric access-control gate — Face ID/Touch ID literally is the key
+release. **The lift, restated concretely:** the protection flag (one
+small §12 lockstep event) · the redaction sweep (the biggest half —
+every listing/tray/lens/export skips locked notes; enforced centrally
+in Queries, audited capability-matrix style) · the local seal/unseal
+seam on the editor's read/write path · the policy calls (bridge,
+exports, Trash) · pins that a locked note's content is genuinely
+unreadable in the store file. A real phase — but ZERO new cryptography.
+
+**Her use case (2026-08-20, verbatim):** "This will also be good bc I
+like to store passwords in my notes app so encryption on a per note
+basis would be nice." Honest caveat recorded with it: that habit is
+right ONCE 13P SHIPS — today those notes are plaintext locally (with
+FileVault guarding the disk) and encrypted only on the wire/mirror.
+
+**Her reading after the explainer (verbatim):** "I feel quite reassured
+and it seems like it won't be too difficult to add encrypted notes on
+particular notes locally after all, which is great."
+
 ## The honesty doctrine (hers)
 
 One true sentence in the feature's own settings description, always:
@@ -141,7 +193,13 @@ upgrades to the truth it earned — never before.
 
 ## Standing disposition
 
-Not v1 (her word). Not rushed (her word — "more of a design sitting").
-The decision checkpoint is the whole-library-search kickoff (the pin).
-The app lock (13l) covers the walk-by case in the meantime, so nothing
-is exposed by waiting.
+**SUPERSEDED IN TIMING (2026-08-19/20, her sequencing ruling):** 13p
+runs **PRE-V1** — her order 13l → 13p → 13o → 13i → the readiness
+phases — on the schema-before-strangers principle ("so that the last
+encryption changes are already live and users get the apps with only
+new features, not sql changes that might take sync offline"). What
+survives of the original disposition: "more of a design sitting and
+shouldn't be rushed out" — the DISCIPLINE stands (rulings before
+build), only the post-v1 slotting is superseded. The 13o kickoff pin
+stands but is expected to be moot (13p precedes 13o by her order); the
+app lock (13l) covers the walk-by case until 13p runs.
