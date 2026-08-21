@@ -654,3 +654,81 @@ standing product question on the MAC too; the trace names it
 not decided here. Her described gesture — deleting a paragraph at the
 end with multiple lines selected — lands INSIDE M11's coverage when the
 selection takes the paragraphs whole, which is the common case.
+
+---
+
+## 14. BATCH 1 BRIEF — the crash (M1, M2a–M2e; M2f measure-only)
+
+*Self-contained. The implementer reads THIS section, the four named
+records, and the code — never the architect's context.*
+
+**Read first, in full, yourself:** `CLAUDE.md`; §5 (the constitution)
+and §9 (environment) of this file; `notes/plans/mobile-round-2-crash-trace.md`
+(the whole thing — it carries the proof, the numeric example, the fix
+code, and the pin design); `notes/plans/mobile-round-2-stability-survey.md`
+§§1–3; `notes/TEXTKIT2_NOTES.md` §3.
+
+**Build exactly this, in this order:**
+
+1. **Part 1 — fallible mutators** in `App/Variorum/Shared/EditorBrain/BlockRangeIndex.swift`:
+   `applyBlockEdit`, `applyTailEdit`, **and the same treatment for
+   `openTail` (:353) and `closeTail` (:358)** — the stability survey
+   proves those are reachable by Return-at-end and Return-then-Backspace
+   (M2a/M2b). `@discardableResult … -> Bool`, `guard … else { return false }`,
+   no state mutated on the refusal road. **M-A binds: you are converting
+   a trap into a refusal, never deleting a guarantee.** The struct must
+   still be incapable of holding a negative length.
+2. **Part 2 — route refusals to `desyncRecovery()`** in BOTH
+   `MobileEditorViewModel.storageDidEdit` and the Mac's
+   `EditorViewModel.storageDidEdit` (the trace §9 names the Mac's
+   lines). The `break` is load-bearing: nothing may re-stamp or autosave
+   against bookkeeping just declared untrustworthy. Add the assertion
+   seam (`static var assertionHandler`, the `MobileFallbackCanary`
+   pattern already in `MobileEditorTextView.swift:48`) so the honest
+   road is testable in Debug — M2d.
+3. **Part 3 — bind the verdict to its edit** (the real fix). The trace
+   §6 Part 3 gives the code: carry `(verdict, range, documentLength)`,
+   consume only when it still describes the arriving report, else fall
+   through to `fallbackVerdict`. **Also clear the arming** in
+   `renderFull`, `applyDifferential` and `finishMint`'s `crystallize`
+   (one line each) — that closes the stale-index case structurally
+   rather than by predicate. Discard `pendingEditCost` on the same
+   condition.
+4. **M2e — the canary timer leak** (one line): `disarmCanary()` has only
+   test callers, so a 30-second repeating main-run-loop `Timer`
+   accumulates per note ever opened. Wire the production teardown.
+5. **M2f — MEASURE ONLY.** Add Read-surface coverage to
+   `MobilePerfWalkTests` at the 100k fixture (`MobileReadNoteView`
+   virtualizes per note, not within one; Read has zero perf coverage
+   today). **Record the number. Build no optimization** — if the number
+   earns a fix it becomes its own ledger row. No speculative work.
+
+**Pins — the binding rule.** Build P1–P4 exactly as the trace §7
+designs them, in a NEW file `VariorumMobileTests/MobileEditRoutingTests.swift`,
+plus the Mac twins in `VariorumTests/`. **P2/P3 kill the test process on
+the pre-fix tree by design** — keep them in their own file so a
+red-on-old verification run does not take the suite's report down, and
+say so in the file's header comment. **Every pin must be verified RED
+on the pre-fix code by behavioural revert and green after** — that
+verification is the deliverable, not a formality. P1 is the headline: it
+is a clean red with no process death and it proves Part 3 is the binding
+fix rather than a crash bandage.
+
+**Verification before you claim green:** mobile suite; **Mac suite**
+(you touched `Shared/` and the Mac view model — M-B); core; the
+tutorial spine. Baselines in §9. Report counts as `passed/skipped` and
+name any red with its identity.
+
+**Out of scope — do not build these here:** the phone's whole-block
+delete (M11, batch 1b); widening the partial-cross-block gesture (held
+for her); anything in `Sources/VariorumCore/Sync/`; any schema change.
+If you believe scope must widen, STOP and report — the architect rules
+in-batch forks (the implementer proposes, the architect rules).
+
+**Environment:** §9 of this file, verbatim and binding. Simulator
+`iPhone 17 Pro / OS=26.2`; **her device is 26.6** — a non-reproduction
+of the UIKit coalescing on 26.2 is a RUNTIME GAP, never a clean bill;
+if the coalesced-transaction pin cannot be driven through UIKit on the
+sim, drive it at the storage layer exactly as the trace's P2 does
+(`beginEditing`/`replaceCharacters`/`endEditing`), which is
+version-independent and is why the trace designed it that way.
