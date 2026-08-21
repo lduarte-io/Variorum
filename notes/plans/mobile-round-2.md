@@ -1881,3 +1881,53 @@ the same facts the code holds.
 **Consequence for the MAJOR 1 confirm question:** option (c) — no
 confirm at all — is materially more defensible than I framed it, and her
 answer should be re-offered against the corrected picture.
+
+---
+
+## 29. HER REMOTE STEER (2026-08-21) — three items
+
+**R10 — "the phone just needs a structural undo / redo? and a block
+restore door?"** Her words, and **she is right — this is a better answer
+than the confirm**, and the architect should have proposed it rather
+than reaching for ceremony first.
+
+**Why it is better, and why it is CHEAP:** the structural undo/redo
+STACK already lives in `Shared/` and already works on the phone — batch
+1b verified it against store bytes (one undo restores all N blocks in
+place, one redo removes them again, under one "Delete Blocks"
+compound). **What is missing is not machinery. It is a door.** The
+capability has been sitting there un-reachable, which is exactly the
+distinction §24's MAJOR turned on: *a capability verified at the API is
+not a capability until a door reaches it.*
+
+**RULED — build it, and build it as its own row rather than bolted to
+the delete:**
+
+| # | Item | Shape |
+|---|------|-------|
+| **M20** | **A structural UNDO/REDO door on the phone.** The stack is `Shared/` and live; the phone needs the affordance. **The receipt is the natural home** — the phone ALREADY shows "N blocks deleted." after a structural act, and an **Undo** action on that receipt is the standard iOS shape (and it serves EVERY structural gesture — divide, merge, extract, delete — not just this one). A persistent door (⋯ menu row carrying `topLabel`) is the companion for acts whose receipt has passed | this round, next batch |
+| **M21** | **A block restore door on the phone** — R3's per-note tray IS this (deleted + archived blocks + preserved originals, Put back), already batch 5. Her instinct and the parity inventory agree; **no new row needed, but it is now hers-requested rather than ledger-derived**, which raises it | batch 5 (R3), unchanged |
+
+**Consequence for §24's MAJOR 1 confirm — DO NOT settle it yet.** The
+fix session is mid-flight building the conservative uniform confirm.
+**Let it land** (it is one of nine items and interrupting a session
+mid-work to unbuild one is more disruptive than the waste it saves),
+then **re-decide the confirm WITH the undo door in hand** — at which
+point her option (c) becomes strongly defensible, because a
+one-keystroke delete you can immediately undo is an ordinary edit, not a
+hazard. Recorded so no session treats the confirm as settled.
+
+**R11 — she is confused by the "mid-paragraph selection" limitation, and
+the architect's explanation was the problem.** Recorded for the closeout
+and the handoff: this limitation must be explained CONCRETELY (an
+example with paragraphs, not the phrase "partial span"), because the
+phrase means nothing without one. The substance is unchanged; the
+explanation owes her a worked case.
+
+**R12 — the bar's air is now TOO MUCH.** Her words: *"it looks like the
+circles are now floating slightly high above the keyboard. i think the
+goal should just be for them to not be cut off but only be a bit above
+the [keyboard]."* The 10 pt air derived at §26 overshot. **This is a
+taste target stated in her own words and it is iterated VISUALLY against
+them** — not re-derived from a formula. The measured-constants pin stays
+(so a future iOS still trips it); only the air constant moves.
