@@ -310,6 +310,63 @@ nonisolated struct BlockRangeIndex: Equatable, Sendable {
         return first...last
     }
 
+    /// **The whole-block delete PLAN — the RULE half beside the geometry
+    /// half above.** Hoisted here at mobile round 2, batch 1b (R18 ≡ M11)
+    /// so the phone INHERITS it instead of copying it: it lived Mac-app-local
+    /// in `EditorSurfaceController.planWholeBlockDeletion` from 13j J9 until
+    /// a second platform needed the same answer, and MobileSoul §3's rule
+    /// (brains in core/`Shared/`, platforms own only faces) makes the copy
+    /// a parity defect at birth — the KnownIssues "six mobile brains are
+    /// byte-copies" row is the standing scar this avoids. Both platforms'
+    /// consumers are now one-line delegates.
+    ///
+    /// **DELETE, NEVER TYPE-OVER.** A replacement spanning whole blocks is a
+    /// DIFFERENT gesture and keeps the merge-then-edit / visible-take roads
+    /// it has always taken; the typed characters must never be dropped on
+    /// the floor by a delete compound.
+    ///
+    /// Purely geometric on purpose — it carries no content guards at all.
+    /// That is the 13c R3-1 lesson applied rather than re-learned: a
+    /// plan-time guard reading a projection is an ENABLEMENT hint, never an
+    /// authorization, because the projection is deliberately frozen for the
+    /// length of a typing burst. The authorization is `deleteBlock`'s own —
+    /// the STANDING unrestricted door (QUESTIONS #33(a): the block goes,
+    /// whatever it holds) — and a sealed note refuses at the first leg
+    /// through the operation itself, with nothing deleted.
+    func wholeBlockDeletion(covering range: NSRange, replacement: String) -> [String]? {
+        guard replacement.isEmpty, let run = wholeBlockRun(covering: range) else { return nil }
+        return run.map { entries[$0].blockID }
+    }
+
+    /// Where the caret goes when a whole SET of blocks leaves: the START of
+    /// the block below the last one removed, else the END of the block above
+    /// the first — the single-block rule, applied to the run's edges. Blocks
+    /// BETWEEN the edges are irrelevant: everything after the last removed
+    /// index survives by definition, as does everything before the first.
+    ///
+    /// Hoisted with its sibling above (round 2, batch 1b) from
+    /// `EditorSurfaceController`, where it was private. Answers by BLOCK ID
+    /// rather than by surface offset on purpose: the surface re-renders from
+    /// the store between the plan and the landing, so an offset computed here
+    /// would be stale by the time anyone could use it, while the ID of a
+    /// SURVIVING block is still true afterwards.
+    ///
+    /// On a run that takes every block there is no survivor — naming the
+    /// departed block is the honest answer and a harmless no-op at both
+    /// callers (the Mac's `applyStructuralResult`, the phone's
+    /// `rangeOfBlock` lookup, which simply finds nothing).
+    func caretLandingAfterRemoving(_ blockIDs: [String]) -> (blockID: String, offset: Int) {
+        let indices = blockIDs.compactMap { id in
+            entries.firstIndex { $0.blockID == id }
+        }.sorted()
+        guard let first = indices.first, let last = indices.last else {
+            return (blockIDs.first ?? "", 0)
+        }
+        if last + 1 < entries.count { return (entries[last + 1].blockID, 0) }
+        if first > 0 { return (entries[first - 1].blockID, entries[first - 1].length) }
+        return (entries[first].blockID, 0)
+    }
+
     // MARK: - #34 (13d batch 2): the texted seam
 
     /// Phase 13d, batch 2 — her QUESTIONS #34 ruling, option (ii): backspace

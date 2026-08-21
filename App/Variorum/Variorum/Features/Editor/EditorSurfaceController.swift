@@ -888,38 +888,37 @@ final class EditorSurfaceController {
         let blockIDs: [String]
     }
 
+    /// The rule moved to the shared brain at mobile round 2, batch 1b
+    /// (`BlockRangeIndex.wholeBlockDeletion` — R18 ≡ M11, the phone's face
+    /// for this same capability): delete-never-type-over plus the geometry,
+    /// one home, two platforms. This door is now the Mac's face on it, and
+    /// the pins below are unchanged — which is the proof the hoist moved
+    /// nothing but the address.
     func planWholeBlockDeletion(range: NSRange, replacement: String) -> WholeBlockDeletion? {
-        // Delete, never type-over: a replacement spanning whole blocks is a
-        // different gesture and keeps the merge-then-edit / visible-take
-        // roads it has always taken.
-        guard replacement.isEmpty,
-              let run = model.index.wholeBlockRun(covering: range)
+        guard let blockIDs = model.index.wholeBlockDeletion(
+            covering: range, replacement: replacement)
         else { return nil }
-        return WholeBlockDeletion(blockIDs: run.map { model.index.entries[$0].blockID })
+        return WholeBlockDeletion(blockIDs: blockIDs)
     }
 
     func runWholeBlockDeletion(_ plan: WholeBlockDeletion) async {
         _ = await runBlockDeleteCompound(plan.blockIDs)
     }
 
-    /// Where the caret goes when a whole SET of blocks leaves: the block
-    /// below the last one removed, else the block above the first — the
-    /// single-block rule, applied to the run's edges. Blocks between the
-    /// edges are irrelevant: everything after the last removed index
-    /// survives by definition, as does everything before the first.
+    /// Where the caret goes when a whole SET of blocks leaves — the rule
+    /// now lives in the shared brain beside the geometry it reads
+    /// (`BlockRangeIndex.caretLandingAfterRemoving(_:)`, hoisted at mobile
+    /// round 2 batch 1b so the phone's face inherits it). This stays as the
+    /// controller's spelling of it.
+    ///
+    /// *(Its single-INDEX sibling below is deliberately untouched: it serves
+    /// Mac-only doors — A7's empty-block carve, delete/archive-caret-block —
+    /// and the phone has no consumer for it, so hoisting it would be a Mac
+    /// refactor riding a mobile batch. Recorded rather than done.)*
     private func caretLandingAfterRemoving(
         _ blockIDs: [String]
     ) -> (blockID: String, offset: Int) {
-        let entries = model.index.entries
-        let indices = blockIDs.compactMap { id in
-            entries.firstIndex { $0.blockID == id }
-        }.sorted()
-        guard let first = indices.first, let last = indices.last else {
-            return (blockIDs.first ?? "", 0)
-        }
-        if last + 1 < entries.count { return (entries[last + 1].blockID, 0) }
-        if first > 0 { return (entries[first - 1].blockID, entries[first - 1].length) }
-        return (entries[first].blockID, 0)
+        model.index.caretLandingAfterRemoving(blockIDs)
     }
 
     /// Where the caret goes when entry `i` leaves: the START of the block

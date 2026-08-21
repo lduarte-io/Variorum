@@ -34,7 +34,14 @@
 //  STORE, never the projection (the 13d ruled discipline: a plan-time
 //  arity is an enablement hint, never an authorization).
 //
-//  Both doors FLUSH FIRST (the Takes board's `prepareDivide` contract:
+//  WHOLE-BLOCK DELETE (round 2, batch 1b — R18 ≡ M11; the Mac's 13j J9
+//  parity, inherited not invented): a text selection covering N WHOLE
+//  paragraphs plus delete routes here instead of refusing at the gate.
+//  The decision is the SHARED brain's (`BlockRangeIndex.wholeBlockDeletion`
+//  + `caretLandingAfterRemoving`, hoisted out of Mac app code by this
+//  batch); the door is the phone's face on it.
+//
+//  Every door FLUSHES FIRST (the Takes board's `prepareDivide` contract:
 //  the op validates against the store and the cut was placed against
 //  what she sees — after the flush those are the same text) and settle
 //  through the VM's one fresh-read door. Structural UNDO stays Mac-side
@@ -552,6 +559,86 @@ final class MobileStructuralController {
     /// reasoning; the receipt is the plain statement of what happened.
     /// Pinned static.
     static let blockDeletedStatus = "Block deleted."
+
+    // MARK: - Whole-block selection + Delete (round 2, batch 1b — R18 ≡ M11)
+
+    /// **Her gesture, made to WORK.** Select one or more whole paragraphs
+    /// and press delete: the blocks GO, through the same block-delete
+    /// compound the ⋯ menu's act uses, under ONE undo entry. Batch 1 turned
+    /// the crash into an honest refusal; this turns the refusal into the
+    /// act she was reaching for.
+    ///
+    /// The Mac ruled this at 13j J9 and its road is the reference
+    /// (`EditorSurfaceController.runBlockDeleteCompound`); the DECISION —
+    /// which blocks does the span cover whole, and where does the caret
+    /// land — is the shared brain's (`BlockRangeIndex.wholeBlockDeletion`,
+    /// `caretLandingAfterRemoving`), so the two platforms cannot drift on
+    /// it. What is per-platform here is only the flush contract, the
+    /// receipt's words, and the caret write.
+    ///
+    /// **No pre-checks, on purpose (P-2, fire-and-DO).** The seal, a locked
+    /// take, a block another pane deleted between the gesture and the press
+    /// — every one of those refuses through the OPERATION, inside the
+    /// compound, with nothing deleted, and the door speaks the ops layer's
+    /// real answer rather than guessing at one. The gate above already
+    /// stops a sealed note before the gesture is even armed; this door
+    /// carries no second copy of that judgement.
+    func deleteWholeBlockRun(_ blockIDs: [String]) async {
+        guard let model, !blockIDs.isEmpty else { return }
+        guard !structuralInFlight else {
+            model.report("Another structural change is still landing.")
+            return
+        }
+        structuralInFlight = true
+        defer { structuralInFlight = false }
+
+        // Flush FIRST, like every structural door (the Takes board's
+        // contract): the op validates against the store, and a tombstone
+        // landed past a refused flush would strand the typed bytes outside
+        // both the surface and the take they belong to.
+        guard await flushPendingText() else { return }
+        // The landing is read AFTER the flush, from the then-current index:
+        // the flush SUSPENDS, and a projection delivery landing in that
+        // window re-tiles the entries. It names a SURVIVING block by ID —
+        // never a surface offset, which the re-render would invalidate.
+        let landing = model.index.caretLandingAfterRemoving(blockIDs)
+        let stack = session.undoStack
+        do {
+            try await session.runner.run { ops in
+                // ONE compound: N paragraphs deleted is ONE mistake to
+                // reverse, not N (the Mac's "Delete Blocks" label, shared so
+                // a future undo door on this phone reads the same words).
+                // Every leg registers a redo, so the compound is redoable
+                // too (13c A10: a compound is redoable exactly when every
+                // leg is). A leg that throws after others landed unwinds
+                // them — no partial acts.
+                try stack.withCompound(label: "Delete Blocks", operations: ops) {
+                    for blockID in blockIDs { try ops.deleteBlock(blockID) }
+                }
+            }
+            model.report(Self.blocksDeletedStatus(blockIDs.count))
+            await model.refreshTakesFromStore()
+            if let range = model.rangeOfBlock(landing.blockID) {
+                model.textView?.selectedRange = NSRange(
+                    location: min(range.location + landing.offset, range.upperBound),
+                    length: 0)
+            }
+        } catch {
+            model.report(Self.refusalMessage(
+                error, act: blockIDs.count == 1 ? "delete the paragraph" : "delete the paragraphs"))
+        }
+    }
+
+    /// The whole-block-selection delete's receipt. It reuses the pinned
+    /// single-block sentence for N = 1 so the two doors can never fork, and
+    /// it keeps the phone's OWN words for the same reason that sentence has
+    /// them: the Mac's `BlockSelectionCopy.deletedNote` names ⌥⌘Z and the
+    /// tray, and this app has neither door yet (the tray is the ledger's
+    /// PL-11 row, a later batch) — 13j J8(a)'s doctrine, phone edition, that
+    /// a promise she cannot act on is not a fact she can use.
+    static func blocksDeletedStatus(_ count: Int) -> String {
+        count <= 1 ? blockDeletedStatus : "\(count) blocks deleted."
+    }
 
     // MARK: - Shared pieces
 

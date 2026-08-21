@@ -221,6 +221,23 @@ final class MobileEditorViewModel {
         // the other end, for every path that never reaches a teardown.)
         textView?.disarmCanary()
         afterDisarm()
+        // A gesture the gate refused so a compound could reproduce it
+        // (R18's whole-block delete) is scheduled, not immediate — and its
+        // only strong reference is this handle. The closure captures the
+        // model WEAKLY, and `MobileStructuralController.model` is weak too,
+        // so a compound that first runs after this object dies quietly does
+        // NOTHING: her paragraphs would stay. Today the pop path keeps the
+        // model alive across this method (`MobileWriteView.onDisappear`
+        // captures it strongly), so the act lands by ORDERING ACCIDENT —
+        // whichever suspension point below yields to it first. Awaiting it
+        // here makes it land by construction instead.
+        //
+        // NO PIN IS CLAIMED FOR THIS LINE, deliberately: the state it
+        // closes needs the model to die mid-teardown, which the one
+        // production caller cannot produce, and a pin whose red depends on
+        // a state the product cannot reach pins a fiction (batch 1's
+        // correction (a)). It is belt-and-braces over a traced mechanism.
+        await pendingGestureTask?.value
         await finish()
         if let autosaveToken {
             autosave.stopObserving(autosaveToken)
@@ -1036,6 +1053,41 @@ final class MobileEditorViewModel {
             bulkPending = false
             desyncRecovery()
             return false
+        case .refuse(.crossesBlockBoundary):
+            pendingEdit = nil
+            bulkPending = false
+            // **R18 ≡ M11 (round 2, batch 1b) — her gesture stops refusing
+            // and starts working.** A selection covering exactly N WHOLE
+            // blocks (N ≥ 1) plus Delete IS the delete gesture: it routes to
+            // the block-delete compound (ONE undo entry, redo carried)
+            // instead of speaking. The Mac ruled it at 13j J9 — her words,
+            // *"what kind of writing app won't let you delete a paragraph?"*
+            // — and the phone inherits the SAME brain
+            // (`BlockRangeIndex.wholeBlockDeletion`), never a copy.
+            //
+            // The keystroke is refused HERE (the storage must not
+            // half-apply it) and the compound reproduces its exact intent
+            // through the structural door — the Mac's own shape.
+            //
+            // THE HONEST LIMITATION, recorded so nobody reports it later as
+            // a bug: `wholeBlockRun` matches only spans covering blocks
+            // WHOLE, so a selection starting MID-paragraph and running to
+            // the document end still refuses — on BOTH platforms,
+            // identically. Whether a partial multi-block span should
+            // merge-then-edit instead is a standing product question the
+            // author holds; it is not this batch's to widen. Ranges of
+            // exactly one character are excluded inside the brain, so the
+            // seam keystrokes keep every case they were ruled (and a seam
+            // backspace costs nothing here — the length guard is the
+            // brain's first line, before any walk).
+            if let blockIDs = planWholeBlockDeletion(range: range, replacement: replacement) {
+                scheduleGestureCompound { [weak self] in
+                    await self?.structural.deleteWholeBlockRun(blockIDs)
+                }
+            } else {
+                refuse(message(for: .crossesBlockBoundary))
+            }
+            return false
         case .refuse(let refusal):
             pendingEdit = nil
             bulkPending = false
@@ -1053,6 +1105,40 @@ final class MobileEditorViewModel {
             return true
         }
     }
+
+    /// R18 ≡ M11 — the phone's face on the shared whole-block-delete plan
+    /// (the Mac's `EditorSurfaceController.planWholeBlockDeletion` twin).
+    /// Which blocks does this span cover WHOLE, if the edit is a delete?
+    /// Exposed (not private) so pins can assert what declines without
+    /// driving a store write.
+    func planWholeBlockDeletion(range: NSRange, replacement: String) -> [String]? {
+        index.wholeBlockDeletion(covering: range, replacement: replacement)
+    }
+
+    /// A gesture the GATE refused so a structural compound could reproduce
+    /// its intent (R18's whole-block delete today; the Mac's
+    /// `scheduleCrossBlockCompound` is the shape). The handle is held for
+    /// two reasons, both the Mac's: back-to-back gestures CHAIN instead of
+    /// racing — or being refused by the one-flight latch, which is meant for
+    /// a genuinely concurrent act, not for a queue of the user's own presses
+    /// — and a test can await the act it just drove rather than spinning on
+    /// a guess about when it landed.
+    @ObservationIgnored private(set) var pendingGestureTask: Task<Void, Never>?
+
+    private func scheduleGestureCompound(_ body: @escaping @MainActor () async -> Void) {
+        let previous = pendingGestureTask
+        let token = UUID()
+        pendingGestureToken = token
+        pendingGestureTask = Task { @MainActor [weak self] in
+            if let previous { await previous.value }
+            await body()
+            // "Pending" means pending: the completed handle clears unless a
+            // chained schedule already replaced it (the Mac's round-3 NIT).
+            if let self, self.pendingGestureToken == token { self.pendingGestureTask = nil }
+        }
+    }
+
+    @ObservationIgnored private var pendingGestureToken: UUID?
 
     /// The exact-changed-range report (NSTextStorage didProcessEditing,
     /// characters only). `editedRange` is the NEW characters' range; the
@@ -1673,10 +1759,16 @@ final class MobileEditorViewModel {
     func message(for refusal: BlockRangeIndex.Refusal) -> String {
         switch refusal {
         case .crossesBlockBoundary:
-            // PROVISIONAL batch-1 copy: the Mac's cross-block compounds
-            // (merge-then-edit, visible-take) and the M10 structural doors
-            // are LATER batches — until they land the refusal speaks
-            // plainly rather than promising machinery that isn't there.
+            // PROVISIONAL copy, NARROWED at round 2 batch 1b: the
+            // whole-block-selection DELETE road now lands (R18 ≡ M11), so
+            // this line no longer speaks for her commonest cross-block
+            // gesture — it speaks for what remains, which is a span
+            // covering some block only PARTIALLY, and a type-over of a
+            // whole-block span. Both keep today's behaviour by her ruling,
+            // and for both the sentence is still literally true. The Mac's
+            // other cross-block compounds (merge-then-edit, visible-take)
+            // are still LATER batches, so the copy still promises no
+            // machinery that isn't here.
             "This edit spans more than one block — edit inside one block for now."
         case .readOnlySlot:
             "This block hasn't fully synced; it is read-only for now."
