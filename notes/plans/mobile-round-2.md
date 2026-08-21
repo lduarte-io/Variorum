@@ -1432,3 +1432,12 @@ and the install is taken at the first opportunity.
 
 **NEXT: batch 1b (M11 ≡ R18) — the whole-block-selection delete**, so
 her gesture stops refusing and starts working.
+
+**Release build READY (2026-08-21, at batch 1's close):** `xcodebuild
+-scheme VariorumMobile -configuration Release -destination
+'generic/platform=iOS' build` → **BUILD SUCCEEDED**, carrying the whole
+of batch 1 (the crash fix, the ladder's MAJOR fix, the guard-3
+tightening, the completed audit, the canary teardown). Her iPhone 17 Pro
+reads **unavailable** to `devicectl`, so the install is not taken yet; a
+watch is armed to take it at the first reachable moment. **Per R3 this
+gates nothing** — batch 1b proceeds regardless.
