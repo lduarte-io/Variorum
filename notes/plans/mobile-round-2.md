@@ -1841,3 +1841,43 @@ questions (is a confirm right on a keystroke; should it soften once
 batch 4's Trash lands). The fix session builds the conservative default
 — uniform confirm, matching her sibling door — so the round is not
 blocked; her answer can flip it cheaply either way.
+
+---
+
+## 28. THE RECOVERY PICTURE, ESTABLISHED (2026-08-21 — her question, and a correction)
+
+She asked: *"will selecting multiple paragraphs and deleting go into the
+trash? will it be recoverable after this round?"* Established from the
+code, not from memory:
+
+- **Blocks ARE a first-class Trash kind.** `Queries.TrashItem.Kind` is
+  `note · book · block · take · preservedOriginal` — her own 13j J1
+  ruling, *"everything deleted rides ONE uniform 30-day story,
+  sortable/filterable by kind."* A deleted paragraph is a `block` row in
+  the Trash showing its text and its note.
+- **It is ALREADY recoverable TODAY — from the Mac.** `deleteBlock`
+  tombstones; the tombstone syncs; the Mac's `RecoveryView` lists block
+  rows and its **Put back is a live button** — `Button(putBackVerb) {
+  Task { await model.putBack(item) } }` at `:629`, calling
+  `ops.restoreBlock` at `:430`. **Architect-verified it is NOT on the
+  dead `pendingConfirm` road** that broke Delete Now / Empty Trash: only
+  those two use it.
+- **It is not recoverable ON THE PHONE** until R2 (Trash, batch 4) and
+  R3 (per-note tray, batch 5) land — both inside this round.
+- **After 30 days the janitor really purges it** (`TrashWindow.days =
+  30`, fixed by her round-3 ruling, no setting).
+
+**CORRECTION TO THE ARCHITECT'S OWN FRAMING.** In reporting §24's MAJOR
+I told her the gesture wipes a note *"with no way back"* and
+*"irrecoverable."* **That was overstated.** The accurate statement is
+*"no way back FROM THE PHONE"* — her Mac can already put it back, within
+30 days. The finding itself is unaffected (the phone genuinely has no
+undo and no restore door, and the reviewer said exactly that), but the
+SEVERITY CALCULUS she is deciding on changes: the choice is not
+"confirm or lose your work", it is "confirm, or walk to the Mac for 30
+days." Recorded because a decision she makes on my summary must rest on
+the same facts the code holds.
+
+**Consequence for the MAJOR 1 confirm question:** option (c) — no
+confirm at all — is materially more defensible than I framed it, and her
+answer should be re-offered against the corrected picture.
