@@ -75,7 +75,7 @@ nonisolated struct ArmedEdit {
 
     /// Does this arming still describe the edit the storage just reported?
     ///
-    /// Two things must hold, and it is worth being exact about which:
+    /// Three things must hold, and it is worth being exact about which:
     ///
     /// 1. **The index must not have moved underneath it.** A full render,
     ///    a differential rewrite or a crystallization replaces the tiling
@@ -93,9 +93,19 @@ nonisolated struct ArmedEdit {
     ///    somewhere the earlier magnitude-only bound could not see.
     /// 3. **The landing must start inside what was approved.** An arming
     ///    consumed by an edit somewhere else entirely is the
-    ///    armed-but-never-landed case; the upper bound is inclusive
-    ///    because an approved insertion's range is empty and lands
-    ///    exactly at its own location.
+    ///    armed-but-never-landed case. **The bound is ASYMMETRIC, and
+    ///    deliberately so** (round-2 ladder round 2, M15 Q2(b)): for a
+    ///    NON-EMPTY approved range the start must be strictly inside it
+    ///    (`< upperBound`), because no legitimate report begins at the
+    ///    character *after* the last character the gate approved — that is
+    ///    a different edit, and at `delta == 0` it binds with every other
+    ///    oracle satisfied, sending the WRONG block's text to
+    ///    `recordAutosave`. For an EMPTY range (an approved insertion) the
+    ///    bound must stay inclusive: such a range's `upperBound` IS its
+    ///    `location`, so a strict bound would reject every insertion the
+    ///    gate approves. Attribute fixing cannot reopen the hole from the
+    ///    other side — both measured iOS widenings keep `location` fixed
+    ///    and grow only `length`.
     ///
     /// **What is deliberately NOT policed, and why:** the report's
     /// EXTENT. `NSTextStorage` attribute fixing widens `editedRange`
@@ -120,8 +130,13 @@ nonisolated struct ArmedEdit {
         // constrains INSERTIONS too (for `delta >= 0` the old predicate was
         // vacuously true, so an arming could absorb unbounded growth).
         guard delta == replacementLength - range.length else { return false }
-        return editedRange.location >= range.location
-            && editedRange.location <= range.upperBound
+        guard editedRange.location >= range.location else { return false }
+        // Strictly inside a non-empty approval; inclusive for an empty one
+        // (see 3. above — an approved insertion lands exactly at its own
+        // location, and its `upperBound` is that same location).
+        return range.length > 0
+            ? editedRange.location < range.upperBound
+            : editedRange.location <= range.upperBound
     }
 }
 

@@ -591,6 +591,7 @@ final class MobileEditorViewModel {
         // crash fix): disarm STRUCTURALLY here rather than leaning on the
         // consume-time predicate alone.
         pendingEdit = nil
+        bulkPending = false  // armed BESIDE it; it goes with it (NIT 4)
         index = newIndex
         slots = new
         ledger.adopt(new)
@@ -620,6 +621,7 @@ final class MobileEditorViewModel {
             }
         }
         pendingEdit = nil // the tiling moved — see `renderFull`
+        bulkPending = false  // armed BESIDE it; it goes with it (NIT 4)
         index = BlockRangeIndex(slots: new, tail: hasOpenTail ? tailText : nil)
         slots = new
         ledger.adopt(new)
@@ -629,6 +631,12 @@ final class MobileEditorViewModel {
             textView?.undoManager?.removeAllActions()
         }
         auditIdentityProjection()
+        // TEXTKIT2_NOTES §4 practice 3: every road that writes storage checks
+        // the fallback canary at the mutation, not at the next keystroke or
+        // the ≤30 s tick. This was the one storage-writing road on the phone
+        // still missing it (round-2 ladder round 2, NIT 3) — `renderFull`,
+        // `programmaticReplace`'s callers and the take-swap door all check.
+        textView?.canaryCheckpointAfterMutation()
         textView?.refreshChrome()
     }
 
@@ -977,6 +985,7 @@ final class MobileEditorViewModel {
         // replaced", which is cheaper to keep than an explanation of why
         // one door is different.
         pendingEdit = nil
+        bulkPending = false  // armed BESIDE it; it goes with it (NIT 4)
         // The ledger learns what the surface now shows for the DISPLAYED
         // variant only — never a wholesale adopt, which would regress a
         // dirty neighbor's recorded text to its stale slot photograph.
@@ -1012,12 +1021,24 @@ final class MobileEditorViewModel {
             replacementIsSingleNewline: replacement == "\n",
             segmentation: header?.effectiveSegmentation ?? .paragraph)
         switch verdict {
+        // NIT 4 (round-2 ladder round 2): `bulkPending` is armed BESIDE the
+        // verdict off this same call, so every road that drops the arming
+        // drops the intent with it — the doctrine NIT 8 was ruled on,
+        // applied consistently rather than only where a bug was traced. The
+        // two `pendingEdit = nil` sites that deliberately do NOT clear it
+        // are named at their own lines: the consume road (which clears it
+        // only when the arming is DECLINED — a bound arming's paste must
+        // keep its semantics) and `finishCrystallization` (where a
+        // paste-during-mint's intent is being carried across the flight ON
+        // PURPOSE).
         case .refuse(.indexDesync):
             pendingEdit = nil
+            bulkPending = false
             desyncRecovery()
             return false
         case .refuse(let refusal):
             pendingEdit = nil
+            bulkPending = false
             refuse(message(for: refusal))
             return false
         default:
@@ -1202,6 +1223,7 @@ final class MobileEditorViewModel {
         EditorAssertionSeam.fire("mobile editor surface desynced from the block index")
         forceFullRender = true
         pendingEdit = nil
+        bulkPending = false  // armed BESIDE it; it goes with it (NIT 4)
         Task { [weak self] in
             guard let self else { return }
             await autosave.flushNow()
@@ -1388,6 +1410,12 @@ final class MobileEditorViewModel {
         // A verdict armed before the mint describes a tail that may no
         // longer exist (see `renderFull`) — the sharpest stale case, since
         // a `.tail` arming survives into a closed tail.
+        //
+        // `bulkPending` deliberately does NOT go with it here (the one
+        // exception to NIT 4's rule, beside the consume road's conditional
+        // clear): a paste that arrived DURING the mint parked its intent
+        // here on purpose, and `crystallizeIfNeeded()` below is the call
+        // that consumes it.
         pendingEdit = nil
         index.crystallize(
             minted: outcome.applied.map { ($0.blockID, $0.variantID, $0.text.utf16.count) },
@@ -1533,9 +1561,27 @@ final class MobileEditorViewModel {
     /// Walks the tiling after reconciliation and asserts the attribute
     /// PROJECTION agrees with the index AUTHORITY: every entry's range
     /// uniformly carries its block ID (no MISSING runs — the measured iOS
-    /// failure mode is pure absence, never bleed), separators and the tail
-    /// carry none, and the index tiles the storage exactly. O(blocks) per
-    /// edit, DEBUG-only.
+    /// failure mode is pure absence, never bleed), **every separator
+    /// position IS a separator** and carries no block ID, and the index
+    /// tiles the storage exactly. O(blocks) per edit, DEBUG-only.
+    ///
+    /// **Why the separator's CHARACTER is checked** (round-2 ladder round 2,
+    /// M15 Q2 — the reviewer's adopted home for the boundary check): the
+    /// two oracles that already exist are both blind to a tiling that has
+    /// slipped against the storage's real newlines. `documentLength ==
+    /// storage.length` compares TOTALS, which a mis-routed zero-net edit
+    /// leaves agreeing; and the attribute walk compares the projection to
+    /// the index, which `restampProjection` has by then made self-consistent
+    /// with the corrupted index. The character at an entry's upper bound
+    /// answers a question neither asks — *does the storage still agree that
+    /// a block ends here* — and it costs one O(1) read of an offset this
+    /// walk already computed.
+    ///
+    /// **It is deliberately PARTIAL, and that is not a defect.** Under I4
+    /// internal newlines are content, so a boundary that has slipped onto a
+    /// block-INTERNAL newline still reads `\n` and passes. It catches the
+    /// misalignment onto ordinary prose — which is the shape both traced
+    /// corruption cases produce — and claims nothing more.
     func auditIdentityProjection() {
         #if DEBUG
         guard let storage else { return }
@@ -1547,27 +1593,45 @@ final class MobileEditorViewModel {
             // blocks, real DEBUG milliseconds on the keystroke road.
             // Same ranges, same checks, one walk.
             var runningLocation = 0
+            let separatorScalar = EditorDocument.separator.utf16.first
+            // Hoisted, both of them: the walk must add no per-entry bridging
+            // (M15 Q2(c)'s implementation constraint). `characters` is the
+            // storage's own backing string — an O(1) accessor, never a copy,
+            // and never `storage.string`.
+            let characters = storage.mutableString
             for i in index.entries.indices {
                 let entry = index.entries[i]
                 let range = NSRange(location: runningLocation, length: entry.length)
                 runningLocation += entry.length + 1
-                guard range.length > 0 else { continue }
-                storage.enumerateAttribute(
-                    EditorDocument.blockIDAttribute, in: range
-                ) { value, _, stop in
-                    if (value as? String) != entry.blockID {
-                        clean = false
-                        stop.pointee = true
+                // An EMPTY entry has no attribute run to walk — but it still
+                // has a separator, and skipping the whole iteration left an
+                // empty block's boundary unaudited (round-2 ladder round 2,
+                // M15 Q2: the pre-existing hole). Only the attribute walk is
+                // conditional now.
+                if range.length > 0 {
+                    storage.enumerateAttribute(
+                        EditorDocument.blockIDAttribute, in: range
+                    ) { value, _, stop in
+                        if (value as? String) != entry.blockID {
+                            clean = false
+                            stop.pointee = true
+                        }
                     }
+                    if !clean { break }
                 }
-                if !clean { break }
                 // The separator after this entry (if any) is owned by no
-                // block.
+                // block — AND is a separator. Read through `mutableString`,
+                // never `storage.string`: the bridge would be O(document)
+                // per keystroke at the 100k fixture.
                 if i < index.entries.count - 1 || index.tailLength != nil {
                     let separatorAt = range.upperBound
-                    if separatorAt < storage.length,
-                       EditorDocument.blockID(at: separatorAt, in: storage) != nil {
-                        clean = false
+                    if separatorAt < storage.length {
+                        if EditorDocument.blockID(at: separatorAt, in: storage) != nil {
+                            clean = false
+                        } else if let separatorScalar,
+                                  characters.character(at: separatorAt) != separatorScalar {
+                            clean = false
+                        }
                     }
                 }
                 if !clean { break }

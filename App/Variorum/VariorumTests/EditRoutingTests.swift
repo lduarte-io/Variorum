@@ -95,6 +95,30 @@ struct ArmedEditTests {
             "one approved character cannot license forty")
     }
 
+    /// **Round-2 ladder round 2, M15 Q2(b) — the delta-0 half of the same
+    /// class.** Guard 3's upper bound used to be inclusive for every
+    /// approval, so a report starting exactly at a NON-EMPTY approval's
+    /// `upperBound` — i.e. at the separator after the last approved
+    /// character, the first offset that is no longer the approved block's —
+    /// still bound. At `delta == 0` nothing downstream can see it: the
+    /// mutator succeeds (a zero delta is always legal), `documentLength`
+    /// still agrees with storage, and `recordAutosave` then records the
+    /// APPROVED block's text while the block that actually changed is never
+    /// written. The bound is now strict for a non-empty approval.
+    ///
+    /// RED ON THE PRE-FIX PREDICATE (`location <= range.upperBound`):
+    /// 15 ≤ 15 passed, and every other guard passes on its own terms.
+    ///
+    /// The inclusive bound for an EMPTY approval is not collateral damage
+    /// of this fix and is pinned by `anOrdinaryInsertionIsDescribed` above,
+    /// whose report starts at `location == upperBound` by construction.
+    @Test func aLandingAtTheEndOfANonEmptyApprovalIsRejected() {
+        let edit = armed(NSRange(location: 14, length: 1), replacing: 1)
+        #expect(!edit.describes(
+            editedRange: NSRange(location: 15, length: 7), delta: 0, documentLength: 27),
+            "the character after the approval is a different block's, whatever the net")
+    }
+
     @Test func aLandingOutsideTheApprovedRangeIsRejected() {
         // The replacement length matches the delta, so ONLY the location
         // guard can reject this one — the pin keeps its original subject.
@@ -200,6 +224,66 @@ struct MacEditRoutingTests {
                 let stored = try harness.storeSlots().compactMap(\.text)
                 #expect(stored == ["Alpha", "Beta beta", "Gamma"],
                         "her paragraph was not overwritten with one character")
+            }
+        }
+    }
+
+    /// The BEHAVIOURAL twin of `aLandingAtTheEndOfANonEmptyApprovalIsRejected`
+    /// (round-2 ladder round 2, M15 Q2(b)): the same predicate hole, traced
+    /// to its consequence in the store.
+    ///
+    /// The gate approves the last character of block 1 (`(14,1)` → "A"),
+    /// so the approval's `upperBound` is 15 — the separator, which belongs
+    /// to no entry. A gate-less transaction then replaces `(15,7)`
+    /// ("\nGamma\n") with seven other characters: it starts exactly at 15
+    /// and nets to zero, which is exactly what the approval's own
+    /// arithmetic predicts.
+    ///
+    /// RED ON THE PRE-FIX PREDICATE, and MEASURED there (the fix reverted
+    /// to `<=`, this pin run): the arming binds,
+    /// `applyBlockEdit(at: 1, lengthDelta: 0)` succeeds, `documentLength`
+    /// still equals `storage.length`, block 1's ID is stamped over block 2's
+    /// characters, and `recordAutosave` writes block 1's UNCHANGED text.
+    /// The recorded reds are exactly the two halves of the harm:
+    /// `desyncRecoveryCount == 0` (nothing announced it) and the surface
+    /// reading **"Alpha\nBeta beta\nWORDS\ndelta"** while the store still
+    /// says "Gamma" — a silent divergence, which the delta-0 shape makes
+    /// invisible to every totals oracle. Today the arming is refused, the
+    /// report falls through to `fallbackVerdict`, which sees a span crossing
+    /// a boundary and takes the honest road.
+    @Test func aLandingAtTheEndOfAnApprovedBlockIsNotConsumed() async throws {
+        try await withEditor(seedBlocks: ["Alpha", "Beta beta", "Gamma"]) { harness in
+            try await withMacEditorAssertionsMuted {
+                fixture(harness)
+                let model = harness.model
+                let storage = try #require(harness.textView.textStorage)
+
+                #expect(model.shouldChangeText(
+                    in: NSRange(location: 14, length: 1), replacement: "A"))
+                storage.beginEditing()
+                storage.replaceCharacters(
+                    in: NSRange(location: 15, length: 7), with: "\nWORDS\n")
+                storage.endEditing()
+
+                #expect(model.desyncRecoveryCount == 1,
+                        "the landing at the approval's end took the honest road")
+                // Settle on the TEXT, not on the totals: this transaction
+                // nets to ZERO, so `documentLength == storage.length` holds
+                // the whole time and a totals-settle would return before the
+                // heal ever landed. That is the same blindness the fix is
+                // about, so the pin must not lean on it either.
+                await settleMacEditor(until: {
+                    harness.documentText == "Alpha\nBeta beta\nGamma\ndelta"
+                })
+                #expect(harness.documentText == "Alpha\nBeta beta\nGamma\ndelta",
+                        "the store is truth: the un-routable transaction did not stand")
+                #expect(model.index.documentLength == (harness.textView.textStorage?.length ?? -1))
+                await harness.flush()
+                let stored = try harness.storeSlots().compactMap(\.text)
+                // With the surface assertion above it: surface and store
+                // AGREE, which is exactly the half the pre-fix tree lost.
+                #expect(stored == ["Alpha", "Beta beta", "Gamma"],
+                        "the store is unchanged, and still agrees with the surface")
             }
         }
     }

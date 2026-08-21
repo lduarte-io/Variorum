@@ -748,6 +748,7 @@ final class EditorViewModel {
         // the crash fix): disarm STRUCTURALLY at the ONE rewrite door rather
         // than leaning on the consume-time predicate alone.
         pendingEdit = nil
+        bulkPending = false  // armed BESIDE it; it goes with it (NIT 4)
         self.index = index
         self.slots = slots
         adoptSurfaceTextMap(slots)
@@ -842,10 +843,20 @@ final class EditorViewModel {
             return false
         }
         switch verdict {
+        // NIT 4 (round-2 ladder round 2): `bulkPending` is armed BESIDE the
+        // verdict off this same call, so every road that drops the arming
+        // drops the intent with it — NIT 8's doctrine applied consistently
+        // rather than only where a bug was traced, and the phone's exact
+        // shape (M-B). The two sites that deliberately do NOT clear it are
+        // named at their own lines: the consume road (clears only when the
+        // arming is DECLINED) and `finishCrystallization` (a
+        // paste-during-mint's intent is carried across the flight on
+        // purpose).
         case .refuse(.indexDesync):
             // The index no longer describes the storage: recover from the
             // store instead of crashing (review round 1, MINOR 7).
             pendingEdit = nil
+            bulkPending = false
             desyncRecovery()
             return false
         case .refuse(.crossesBlockBoundary):
@@ -859,6 +870,7 @@ final class EditorViewModel {
             // ruled deviation: two blocks, NOT a join). Locked/gap/tail
             // spans keep the speaking refusal.
             pendingEdit = nil
+            bulkPending = false
             // QoL batch 3 (L6) — THE SAFETY CORE, and it runs before every
             // planner: a FIND-DRIVEN replacement never restructures the post.
             // Below this line a cross-block edit MERGES blocks
@@ -925,6 +937,7 @@ final class EditorViewModel {
             return false
         case .refuse(let refusal):
             pendingEdit = nil
+            bulkPending = false
             refuseFeedback(message(for: refusal))
             return false
         default:
@@ -1074,6 +1087,7 @@ final class EditorViewModel {
         EditorAssertionSeam.fire("editor surface desynced from the block index")
         forceFullRender = true
         pendingEdit = nil
+        bulkPending = false  // armed BESIDE it; it goes with it (NIT 4)
         Task { [weak self] in
             guard let self else { return }
             await autosave.flushNow()
@@ -1330,6 +1344,11 @@ final class EditorViewModel {
         // A verdict armed before the mint describes a tail that may no
         // longer exist (see `adoptRewrite`) — the sharpest stale case, since
         // a `.tail` arming survives into a closed tail.
+        //
+        // `bulkPending` deliberately does NOT go with it here (the one
+        // exception to NIT 4's rule, beside the consume road's conditional
+        // clear): a paste that arrived DURING the mint parked its intent
+        // here on purpose, and the crystallization re-run consumes it.
         pendingEdit = nil
         index.crystallize(
             minted: outcome.applied.map { ($0.blockID, $0.variantID, $0.text.utf16.count) },

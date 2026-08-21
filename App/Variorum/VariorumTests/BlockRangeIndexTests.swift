@@ -179,12 +179,20 @@ struct BlockRangeIndexTests {
 
     // MARK: - Mutations
 
+    // These two exercise the HAPPY road, where the mutators' answers are
+    // uninteresting by construction (each call is legal on the fixture, and
+    // the ranges asserted below are the real oracle). The mutators carry no
+    // `@discardableResult` on purpose — a caller that ignores a refusal is
+    // the bug MINOR 2 closed — so the discard is spelled out rather than
+    // waived, which keeps the compiler's warning meaningful for the call
+    // sites that must react (round-2 ladder round 2, NIT 1).
+
     @Test func blockEditsGrowAndShrinkTheOwner() {
         var index = threeBlocks()
-        index.applyBlockEdit(at: 1, lengthDelta: 5)
+        _ = index.applyBlockEdit(at: 1, lengthDelta: 5)
         #expect(index.range(ofEntryAt: 1) == NSRange(location: 4, length: 12))
         #expect(index.range(ofEntryAt: 2) == NSRange(location: 17, length: 5))
-        index.applyBlockEdit(at: 1, lengthDelta: -12)
+        _ = index.applyBlockEdit(at: 1, lengthDelta: -12)
         #expect(index.range(ofEntryAt: 1) == NSRange(location: 4, length: 0))
         #expect(index.documentLength == 3 + 1 + 0 + 1 + 5)
     }
@@ -192,12 +200,12 @@ struct BlockRangeIndexTests {
     @Test func tailLifecycle() {
         var index = threeBlocks()
         #expect(index.tailRange == nil)
-        index.openTail()
+        _ = index.openTail()
         #expect(index.tailRange == NSRange(location: 18, length: 0))
-        index.applyTailEdit(lengthDelta: 4)
+        _ = index.applyTailEdit(lengthDelta: 4)
         #expect(index.tailRange == NSRange(location: 18, length: 4))
-        index.applyTailEdit(lengthDelta: -4)
-        index.closeTail()
+        _ = index.applyTailEdit(lengthDelta: -4)
+        _ = index.closeTail()
         #expect(index.tailRange == nil)
         #expect(index.documentLength == 17)
     }

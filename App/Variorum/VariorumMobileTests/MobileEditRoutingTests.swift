@@ -292,6 +292,179 @@ struct MobileEditRoutingBindingTests {
             #expect(model.index.documentLength == storage.length)
             #expect(storage.string == "Alpha")
             #expect(model.desyncRecoveryCount == 0)
+            // The audit's separator-CHARACTER check runs on every one of
+            // these keystrokes, and a tail's separator opens and closes
+            // under it (round-2 ladder round 2, the M15 Q2 false-positive
+            // guard).
+            #expect(model.identityAuditFailures == 0)
+        }
+    }
+}
+
+// MARK: - M15 Q2: the DEBUG identity audit checks the separator's CHARACTER
+
+/// **The adopted half of M15's boundary check** (round-2 ladder round 2).
+/// `auditIdentityProjection` already read storage at every separator offset
+/// to assert the separator carries no block ID; it now also asserts the
+/// character there IS a separator, and it no longer skips an EMPTY entry's
+/// separator entirely.
+///
+/// **What this buys:** the two oracles that existed are both blind to a
+/// tiling that has slipped against the storage's real newlines —
+/// `documentLength == storage.length` compares totals (which a mis-routed
+/// zero-net edit leaves agreeing), and the attribute walk compares the
+/// projection to the index (which `restampProjection` has by then made
+/// self-consistent with the corrupted index). The two "fires" pins below
+/// construct exactly that state: BOTH old oracles satisfied, the new check
+/// the only thing that speaks. They are RED ON THE PRE-FIX AUDIT — it
+/// computes clean on both.
+///
+/// **What it costs is the false-positive risk, and that is the half worth
+/// pinning most**, because a DEBUG oracle that cries wolf on legitimate
+/// prose gets muted and then protects nothing. Under I4 internal newlines
+/// are CONTENT, so a block whose own text ends in a newline is ordinary and
+/// must stay silent; so must an empty block, the tail gestures
+/// (`theTailGesturesSurviveTheBinding` above), an iOS-widened attribute-fix
+/// report (`aWidenedAttributeFixReportNeverPoisonsTheSeparator` in
+/// `MobileMarkdownTests`, which drives a real widened report through the
+/// real surface), and the 100k typing walk (`MobilePerfWalkTests`).
+@MainActor
+@Suite("Mobile identity audit — the separator check (round 2, M15 Q2)")
+struct MobileIdentityAuditSeparatorTests {
+    /// Detaches the model onto a byte-for-byte copy of its own surface with
+    /// ONE character changed, attributes preserved. Nothing observes the
+    /// mutation (the copy carries no delegate until `attach`), so the model's
+    /// index still describes the pre-corruption document — which is the
+    /// point: it is the shape a mis-routed edit leaves behind, minus the
+    /// mis-routed edit.
+    private func corruptSeparator(
+        _ model: MobileEditorViewModel, _ storage: NSTextStorage, at offset: Int
+    ) -> NSTextStorage {
+        let copy = NSTextStorage(attributedString: storage)
+        copy.replaceCharacters(in: NSRange(location: offset, length: 1), with: "x")
+        model.attach(storage: copy)
+        return copy
+    }
+
+    @Test func aSeparatorOffsetLandingOnProseFires() async throws {
+        try await withEditorWorld { session, _ in
+            let postID = try await makePost(session, blocks: ["Alpha", "Beta"])
+            let (model, storage) = makeEditor(session, postID: postID)
+            await model.loadOnce()
+            #expect(storage.string == "Alpha\nBeta")
+            #expect(model.identityAuditFailures == 0)
+
+            let copy = corruptSeparator(model, storage, at: 5)
+
+            // BOTH pre-existing oracles are satisfied on this state — which
+            // is exactly why the character check had to be added.
+            #expect(model.index.documentLength == copy.length, "the totals still agree")
+            #expect(EditorDocument.blockID(at: 5, in: copy) == nil,
+                    "the boundary still carries no owner, so the attribute walk is clean")
+
+            await withEditorAssertionsMuted { model.auditIdentityProjection() }
+            #expect(model.identityAuditFailures == 1,
+                    "the index's boundary no longer sits on a separator")
+        }
+    }
+
+    /// The pre-existing hole, pinned: the walk used to `continue` past an
+    /// EMPTY entry before reaching its separator check, so an empty block's
+    /// boundary was never audited at all. RED ON THE PRE-FIX AUDIT for the
+    /// second reason — not merely the missing character comparison, but the
+    /// skipped iteration.
+    @Test func anEmptyEntrysSeparatorIsAuditedToo() async throws {
+        try await withEditorWorld { session, _ in
+            let postID = try await makePost(session, blocks: ["", "Beta"])
+            let (model, storage) = makeEditor(session, postID: postID)
+            await model.loadOnce()
+            #expect(storage.string == "\nBeta")
+            #expect(model.index.entries.map(\.length) == [0, 4])
+
+            let copy = corruptSeparator(model, storage, at: 0)
+            #expect(model.index.documentLength == copy.length)
+            #expect(EditorDocument.blockID(at: 0, in: copy) == nil)
+
+            await withEditorAssertionsMuted { model.auditIdentityProjection() }
+            #expect(model.identityAuditFailures == 1,
+                    "an empty block's boundary is audited like any other")
+        }
+    }
+
+    // MARK: The false-positive guard (the half that matters most)
+
+    /// **I4: internal newlines are CONTENT.** A block whose own text ends
+    /// with a newline puts a `\n` at the offset just before its separator
+    /// and another AT it — both legitimate. The check must stay silent
+    /// through ordinary typing in such a document.
+    @Test func aBlockWhoseTextEndsWithANewlineNeverFires() async throws {
+        try await withEditorWorld { session, _ in
+            let postID = try await makePost(session, blocks: ["Alpha\n", "Beta"])
+            let (model, storage) = makeEditor(session, postID: postID)
+            await model.loadOnce()
+            #expect(storage.string == "Alpha\n\nBeta")
+            #expect(model.index.entries.map(\.length) == [6, 4])
+
+            // Type in both blocks — the audit runs per keystroke.
+            typeEdit(model, storage, range: NSRange(location: 2, length: 0), replacement: "!")
+            typeEdit(model, storage, range: NSRange(location: storage.length, length: 0),
+                     replacement: "?")
+            #expect(storage.string == "Al!pha\n\nBeta?")
+            #expect(model.identityAuditFailures == 0)
+            #expect(model.desyncRecoveryCount == 0)
+        }
+    }
+
+    /// A block that is nothing BUT newlines — the same rule taken to its
+    /// edge (its whole range is separators-as-content).
+    @Test func aBlockOfNothingButNewlinesNeverFires() async throws {
+        try await withEditorWorld { session, _ in
+            let postID = try await makePost(session, blocks: ["Alpha", "\n\n", "Beta"])
+            let (model, storage) = makeEditor(session, postID: postID)
+            await model.loadOnce()
+            #expect(storage.string == "Alpha\n\n\n\nBeta")
+            #expect(model.index.entries.map(\.length) == [5, 2, 4])
+            typeEdit(model, storage, range: NSRange(location: 5, length: 0), replacement: "!")
+            #expect(model.identityAuditFailures == 0)
+            #expect(model.desyncRecoveryCount == 0)
+        }
+    }
+
+    /// Empty blocks — first, middle and last — typed into and around.
+    @Test func emptyBlocksNeverFire() async throws {
+        try await withEditorWorld { session, _ in
+            let postID = try await makePost(session, blocks: ["", "Beta", "", "Gamma", ""])
+            let (model, storage) = makeEditor(session, postID: postID)
+            await model.loadOnce()
+            #expect(storage.string == "\nBeta\n\nGamma\n")
+            #expect(model.index.entries.map(\.length) == [0, 4, 0, 5, 0])
+
+            // Type INTO the leading empty block, then into a middle one.
+            typeEdit(model, storage, range: NSRange(location: 0, length: 0), replacement: "A")
+            typeEdit(model, storage, range: NSRange(location: 7, length: 0), replacement: "M")
+            #expect(storage.string == "A\nBeta\nM\nGamma\n")
+            #expect(model.identityAuditFailures == 0)
+            #expect(model.desyncRecoveryCount == 0)
+        }
+    }
+
+    /// An empty block beside an OPEN TAIL — the last entry's separator is
+    /// the tail's, and an empty last entry is where the skipped iteration
+    /// and the tail rule meet.
+    @Test func anEmptyLastBlockUnderAnOpenTailNeverFires() async throws {
+        try await withEditorWorld { session, _ in
+            let postID = try await makePost(session, blocks: ["Alpha", ""])
+            let (model, storage) = makeEditor(session, postID: postID)
+            await model.loadOnce()
+            #expect(storage.string == "Alpha\n")
+
+            typeAtEnd(model, storage, "\n")      // opens the tail
+            typeAtEnd(model, storage, "delta")   // fills it
+            #expect(storage.string == "Alpha\n\ndelta")
+            #expect(model.index.tailLength == 5)
+            #expect(model.index.documentLength == storage.length)
+            #expect(model.identityAuditFailures == 0)
+            #expect(model.desyncRecoveryCount == 0)
         }
     }
 }

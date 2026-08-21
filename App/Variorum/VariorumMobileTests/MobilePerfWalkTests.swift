@@ -677,10 +677,33 @@ struct MobilePerfWalkTests {
                 recoveriesAfterTop,
                 mega.model.desyncRecoveryCount - recoveriesAfterTop,
                 megaTop.samples.count))
+            // …AND THE READOUT IS AN ORACLE (round-2 ladder round 2, NIT 5).
+            // "No budget" means no THRESHOLD is invented; it never meant the
+            // measured fact goes unasserted. Every leg measured exactly zero,
+            // so pinning zero is free — and without it the claim that these
+            // readouts make a regression announce itself is only true to a
+            // human reading the log. A red here is EVIDENCE FOR M12's row
+            // (13u), not automatically a defect in whatever turned it red:
+            // re-read the note above before treating it as either.
+            #expect(control.model.desyncRecoveryCount == 0,
+                    "ordinary typing on the control post took no recovery road")
+            #expect(recoveriesAfterTop == 0,
+                    "ordinary typing at the TOP of a 100k note took no recovery road")
+            #expect(mega.model.desyncRecoveryCount - recoveriesAfterTop == 0,
+                    "ordinary typing at the END of a 100k note took no recovery road")
 
             // The probe is real: the typed characters landed on the
             // surface (a dead probe must not pass silently).
             #expect((mega.surface.textView.text ?? "").contains("xxxx"))
+
+            // The M15 Q2 false-positive guard at SCALE (round-2 ladder
+            // round 2): the DEBUG identity audit now checks the CHARACTER
+            // at every separator offset, and it runs on every keystroke of
+            // both legs. 1,370 real paragraphs typed into at both ends of a
+            // 100k note is the widest legitimate input this harness can put
+            // under it — a cried-wolf oracle would show here first.
+            #expect(control.model.identityAuditFailures == 0)
+            #expect(mega.model.identityAuditFailures == 0)
         }
     }
 
@@ -752,6 +775,16 @@ struct MobilePerfWalkTests {
             print(String(
                 format: "PERF[sim] desyncRecovery(walk) — control %d · 100k %d (M12 measurement, no budget)",
                 control.model.desyncRecoveryCount, mega.model.desyncRecoveryCount))
+            // Asserted for the same reason as the typing test's readout
+            // (NIT 5): both legs measured exactly zero across the whole walk.
+            #expect(control.model.desyncRecoveryCount == 0,
+                    "the control post's open → type → full scroll took no recovery road")
+            #expect(mega.model.desyncRecoveryCount == 0,
+                    "the 100k post's open → type → full scroll took no recovery road")
+            // The M15 Q2 false-positive guard across the WALK (see the
+            // typing test's note).
+            #expect(control.model.identityAuditFailures == 0)
+            #expect(mega.model.identityAuditFailures == 0)
             #expect(
                 delta <= Self.walkDeltaCeilingMB,
                 "the 100k walk's footprint delta \(delta) MiB exceeds the \(Self.walkDeltaCeilingMB) MiB ceiling (PB2-2, armed at B3)")
