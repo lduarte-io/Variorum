@@ -1792,3 +1792,52 @@ shut down) — **the concurrent session was the architect's own device
 watch and build**. It re-targeted by UDID and verified no files outside
 its six were touched. Recorded as a live example of why the one-writer
 rule (§25) and UDID-targeting matter when batches run in parallel.
+
+---
+
+## 27. MID-ROUND RULINGS (2026-08-21, her remote check-in)
+
+**R8 — MAC-SIDE FIXES ARE AUTHORIZED for shared crashes and bugs.** Her
+words: *"and that's fine to fix things on the mac side if it's a shared
+crash / bug."* This **retroactively ratifies** what batches 1 and 1b
+already did (the `EditorViewModel` crash fix, the `BlockRangeIndex`
+mutators, the `EditorSurfaceController` hoist) and **standing-authorizes
+the same for the rest of the round**: where a defect's brain is shared,
+it is fixed once, on both platforms, and both suites run (principle
+M-B, now hers rather than merely the architect's).
+
+**The fence that survives:** this authorizes fixing SHARED DEFECTS, not
+building Mac FEATURES. A Mac-only capability, a Mac door change, or a
+behaviour change that only the Mac would notice is still out of a mobile
+round's scope and belongs to a Mac phase — the 13j whole-block-delete
+door is the model (the phone got its consumer; the Mac's doors were left
+exactly as 13j shipped them). §24's MINOR 3(a) is live under this fence:
+the gap decline is a shared-brain change the Mac inherits, which is why
+the fix session was told to PROPOSE its Mac consequence rather than
+decide it.
+
+**R9 — SHE WILL HAVE THE ROUND MERGED INTO `main` AT ITS END.** Her
+words: *"I'll be having you merge into main at the end of this
+process."* The standing rule (`mobile` → `main` at her word) is
+unchanged; this names WHEN that word is expected, which lets the round
+plan for it:
+
+- **The Mac's baselines move at that merge**, not before. The 13l plan's
+  Baselines section already carries the cross-phase note (written at her
+  instruction earlier today) and says the change lives on `mobile` until
+  the merge — **that note stays accurate and must be UPDATED WITH THE
+  FINAL COUNTS at closeout**, since the Mac total has moved twice more
+  since it was written (1546/269 → 1563/272 → 1568/272).
+- **She runs 13l next** (*"Im going to run 13l next, so thats fine"*), so
+  13l is the FIRST Mac phase to open against a merged tree. The closeout
+  must leave that plan's baselines correct, or 13l starts from a stale
+  number — which is the whole reason she asked for the note.
+- Closeout owes the merge a clean seam: both suites green on the merged
+  tree, the parity-ledger rows burned down, and `notes/` conflicts
+  resolved as the UNION of both sides' records (the c928a33 precedent).
+
+**Still open and NOT answered at this check-in:** §24's MAJOR 1 confirm
+questions (is a confirm right on a keystroke; should it soften once
+batch 4's Trash lands). The fix session builds the conservative default
+— uniform confirm, matching her sibling door — so the round is not
+blocked; her answer can flip it cheaply either way.
