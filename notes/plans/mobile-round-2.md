@@ -2173,3 +2173,63 @@ propose-don't-decide rule for canon.
 precedent applies — the architect asked to be shown wrong on a hunch and
 was; here the architect is declining to build his own earlier
 enthusiasm on the same evidence standard.
+
+---
+
+## 33. THREE MORE RULINGS (2026-08-21)
+
+**R18 — M24 DECLINED, her agreement.** Her words: *"okay I agree we
+don't need it - seems like trash and lineage have all of the potential
+loss cases covered."* **M24 closes: designed, not built, declined by the
+author on the architect's recommendation.** No canon change to
+OverallModel §3; the six quiet occasions stand. The design stays in §32
+should the question ever reopen — and her sentence names exactly why it
+should not: Trash and lineage between them cover the loss cases.
+
+**R19 — THE MAC'S MERGE AND DELETE ARE STILL TO BE USED.** Her words:
+*"the merge and delete that mac has should still be used though."*
+Confirms both parity rows against any misreading that declining M24
+softened them:
+- **M22 (merge-then-edit)** — batch 3, HIGH priority, unchanged.
+- **Batch 1b's whole-block delete** — shipped, unchanged.
+Declining the auto-commit removes an *extra* insurance layer; it does
+not touch the capabilities themselves, which are exactly what makes her
+selections behave like text.
+
+**R20 — 13l's FIRST ACT is a FABLE COLD REVIEW over this round's Mac
+changes.** Her words: *"i'd also update 13l that its first act will be
+running a fable cold reviewer over all the changes that happened to the
+mac app during this phase though - seems like we have several items
+hoisted out so they can be shared and reused."*
+
+**DONE — written into `notes/plans/phase-13l-data-safety-floor.md`**
+ahead of that phase's existing first act (the dead Delete Now door,
+which becomes the act that follows). It carries her words verbatim, the
+Fable cast per her instruction (with the note that this round ran
+all-Opus on low Fable credits, so the cast is a kickoff conversation not
+an assumption), a MANIFEST of every Mac-side change, and three things
+worth the reviewer's particular attention.
+
+**Why her instinct is right, recorded because it sharpens a rule this
+round already leaned on:** each hoist was proven by *the Mac suite
+riding unmodified*. That is a strong proof — but it proves **no test
+noticed**, not that **no case exists**. And no cold reviewer has read
+the Mac side of this work with Mac eyes: the round's own ladders
+reviewed it as mobile work, by reviewers briefed on a mobile round. She
+has identified a real gap in the review coverage, not merely asked for
+belt-and-braces.
+
+### CLOSEOUT OBLIGATION CREATED BY R20 (do not lose this)
+
+**The 13l manifest is PARTIAL and this round's closeout must complete
+it.** M22 will hoist `planCrossBlockEdit` / `runCrossBlockEdit` into
+`Shared/` exactly as batch 1b hoisted the delete pair, and any later
+batch may touch Mac code again under R8. **The closeout owes 13l:**
+
+1. the completed manifest (every Mac-side file, every hoist);
+2. the final Mac suite counts (the §27/R9 obligation — already noted
+   there, now doubly owed);
+3. confirmation of which hoists the Mac's own callers now delegate to.
+
+A manifest that is stale when her reviewer opens it would waste the
+review she asked for.
