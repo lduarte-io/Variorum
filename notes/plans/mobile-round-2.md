@@ -2016,3 +2016,95 @@ commitment.* R2 (the Trash surface) is batch 4 and R3 (the per-note
 tray — the "from a note" half she is asking about) is batch 5, both
 inside this round. **If anything threatens either, she is told before
 the round closes, not at it.**
+
+---
+
+## 31. HER DIRECTION — THE CROSS-BLOCK REFUSAL CLASS, AND INSURING MULTI-BLOCK EDITS (2026-08-21)
+
+**R15 — COPY FOLLOWS WHAT IS ON SCREEN.** Her words: *"copy should
+follow what's on the screen."* **This settles M18** (batch 2 shipped the
+export reading — chosen takes — as the architect's stated reading of R6;
+that reading is now superseded by hers).
+
+**Consequence to build (M23):** with a lens active or a take peeked, the
+copy takes what the SURFACE shows, not what the store has chosen. Note
+the implementer's M-C concern was that honouring the display needs a
+second selection rule — **it does not, if the rule is "ask the surface
+what it is displaying" rather than "re-derive a selection".** The
+surface already knows; the copy reads it. Scheduled this round (batch 6,
+beside the takes doors — same neighbourhood).
+
+**R16 — THE STANDING PRINCIPLE, in her words, recorded as canon-adjacent
+direction:**
+
+> *"if you have text selected, I lean towards the idea that you should
+> be able to copy or delete it… basically obvious and intuitive
+> operations like selecting a bunch of visible text and deleting should
+> be allowed - the refusing because of different blocks is more annoying
+> than it's worth."*
+
+**This is a product principle, not a bug report**, and it outranks the
+per-case refusals it touches. Recorded here and **owed to the canon at
+closeout** (it belongs beside OverallModel §7's block-size rules — the
+architect proposes the wording, she ratifies; it is not applied to canon
+autonomously).
+
+**Her question — "I can talk to the mac app about changing that
+behavior or the shared core can change?" — answered:**
+
+**The shared core is the right place, and mostly it is already
+scheduled.** The mechanism is not Mac-app property: `planCrossBlockEdit`
+is Mac-app-local today only by accident of where 13j put it, and **M22
+already hoists it to `Shared/`**, which means the phone and the Mac
+thereafter share one rule. **No Mac phase is needed for the common
+case.** Concretely, the refusal class breaks into four, and only one of
+them needs a Mac phase:
+
+| Case | Status after M22 | Owner |
+|---|---|---|
+| Cross-block span, **no takes** on any touched block | **WORKS** — merges then edits, one undo compound | M22, batch 3, this round |
+| Cross-block span covering blocks **whole** (delete) | **WORKS** — batch 1b shipped it | done |
+| Cross-block span where a touched block **HAS takes** | Still refuses. The Mac routes to a visible-take edit (#11a, 2026-07-13); what "merge two blocks that each have five takes" MEANS is a genuine design question — the fan cannot be cartesian-producted (OverallModel §7) | **her design sitting / a Mac phase** — the honest one to defer |
+| Cross-block span touching a **gap** (unsynced) or a **locked** block | Refuses, and SHOULD — deleting a paragraph the device has never seen, or one she deliberately locked, is not the "obvious and intuitive" case her principle is about | stays refused; §24's MINOR 3(a) makes it deliberate |
+
+So: **three of four cases are hers by the end of this round**, and the
+fourth is the one that genuinely needs her at a design table. That is
+the honest answer to "different Mac phase or shared core".
+
+**R17 — HER SAFETY IDEA, and it is a good one:** *"at the same time,
+maybe it should auto mint a commit of the state right before a multi
+block edit."*
+
+**Why it is more than belt-and-braces, stated precisely:** structural
+undo is **session-scoped and in-memory** (OverallModel §3 — deliberately,
+the cheap/nightmare line). A commit is **permanent**. So her idea is not
+a duplicate of undo — it converts a multi-block edit from
+*session-recoverable* into *permanently recoverable*, which is a
+different and stronger guarantee, and exactly the one a merge deserves
+because a merge RELEASES its source blocks to lineage.
+
+**It is in-doctrine, which is why it is worth taking seriously rather
+than treating as a new invention.** OverallModel §3 already lists six
+quiet automatic commit occasions, and one of them is *"a structural undo
+about to overwrite a buffer edited since the operation"* — described
+there as *"insure what's about to become unreachable."* Her proposal is
+the same doctrine applied one step earlier.
+
+**Status: HER LEAN, not yet a ruling** (she wrote "maybe"), and adding a
+**seventh quiet occasion is a CANON change to OverallModel §3** —
+author-only. So: **the architect designs it and brings her the ruling**
+rather than building it silently. **M24** carries the design; the two
+questions her ruling needs are already visible:
+
+1. **What is committed** — one savepoint per touched block's current
+   variant (N commits, each restorable independently), or one on the
+   merged result (1 commit, the state after)? *The first matches
+   "the state right before" literally and matches how commits are
+   per-variant; the second is cheaper and less noisy in history.*
+2. **Which edits count as "multi-block"** — merge-then-edit only, or
+   also the whole-block delete batch 1b shipped? *The delete arguably
+   needs it MORE (the blocks leave), and the tray/Trash already covers
+   that case, which is an argument the other way.*
+
+Both are hers. The design lands in the plan; the build waits on her
+word.
