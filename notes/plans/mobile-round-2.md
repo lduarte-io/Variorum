@@ -2108,3 +2108,68 @@ questions her ruling needs are already visible:
 
 Both are hers. The design lands in the plan; the build waits on her
 word.
+
+---
+
+## 32. M24 ANSWERED — and her safety net mostly already exists (2026-08-21)
+
+**Her rulings this turn:** *"I think there should be a save point per
+touched paragraph, restorable independently"* (question 1 answered) and
+*"the whole paragraph delete is covered by trash i think"* (question 2:
+**delete is EXCLUDED** — she is right, R2/R3 cover it). Both recorded.
+
+**Her question — "after they're merged, how would you see those pre
+merge commits?" — traced, and the answer reframes the whole row.**
+
+**What `runCrossBlockEdit` actually does** (`EditorSurfaceController.swift:1817`,
+read rather than assumed): it calls the REAL `ops.merge(mergedID, next)`
+in a left-to-right chain. So merge's own W-resolution semantics apply —
+**each source block is RELEASED TO LINEAGE, live and unplaced, with its
+text intact** (AppSpec §9: *"B, C released to lineage… fans are not
+cartesian-producted"*), and `derived_from` edges point from the merged
+block back to each source. The edit half touches only the MERGED
+variant: the `editTakesAtomically` leg is a no-op verification
+(`charDelta: 0`, `expectedText`), and the final `autosave` writes the
+merged variant alone. **The originals are never modified.**
+
+**Therefore: the pre-merge state is ALREADY preserved — as live text,
+not merely as a commit.** `Queries.preservedOriginals` reads
+`dv.working_text` off exactly those released blocks. Her safety net
+exists before any auto-commit is built.
+
+**The road to see it** (her literal question): the merged block carries
+`derived_from` edges → the preserved originals → each original's text.
+The Mac already wears this door — `Features/Tray/OriginPeek.swift` +
+`BlockPastSection`'s lineage row, from 13j, built for her own ruling
+that *"there needs to be some way to see unplaced blocks from a block
+that was derived from them."* **On the phone it is R15** (the lineage
+door / preserved-original peek), **batch 5, already scheduled.** To
+reach a *commit* specifically you would go one hop further — origin peek
+→ that block's History — which on the phone is R5, also batch 5.
+
+### The architect's recommendation on M24, offered honestly rather than built
+
+**The auto-commit's marginal value is smaller than it looked**, and I
+would rather say so than build a canon change that mostly duplicates an
+existing guarantee:
+
+- **Already covered without it:** the pre-merge text of every touched
+  paragraph, live and readable, via the lineage door.
+- **What the commit would ADD:** protection if a preserved original is
+  *later* edited or deleted. That is real but narrow.
+- **What it would COST:** a seventh quiet occasion in OverallModel §3
+  (a canon change), plus N commits per multi-block edit — history noise
+  on exactly the blocks whose history she is least likely to browse.
+
+**So my recommendation is: don't build M24 — and instead make sure R15
+lands well on the phone**, since that door is the thing that makes the
+existing preservation *visible*, and invisible preservation is what made
+her ask the question in the first place. **Her call, not mine** — the
+ruling stands available and the design above is complete if she wants
+it. Recorded as a recommendation with its reasoning, per the
+propose-don't-decide rule for canon.
+
+**M24 status: DESIGNED, NOT BUILT, recommendation = decline.** M15's
+precedent applies — the architect asked to be shown wrong on a hunch and
+was; here the architect is declining to build his own earlier
+enthusiasm on the same evidence standard.
