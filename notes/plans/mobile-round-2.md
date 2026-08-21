@@ -381,3 +381,11 @@ findings + dispositions → commits. Repo-first, same turn.)*
   clean — 13e, 13j, and 14d's cores are now in the tree, which is what
   makes the parity batches buildable at all.
 - Four investigations spawned in parallel before any build (§4).
+- **Post-fast-forward compile VERIFIED** (architect's own run, before any
+  batch): `xcodebuild build-for-testing -scheme VariorumMobile
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2'` →
+  **TEST BUILD SUCCEEDED, zero warnings**. The three Mac phases' core
+  changes (13e/13j/14d) cost the mobile target nothing to compile —
+  recorded because a 148-commit jump is exactly where a shared-API
+  break would hide, and finding it now is worth more than finding it
+  mid-batch.
