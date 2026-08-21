@@ -1931,3 +1931,88 @@ the [keyboard]."* The 10 pt air derived at §26 overshot. **This is a
 taste target stated in her own words and it is iterated VISUALLY against
 them** — not re-derived from a formula. The measured-constants pin stays
 (so a future iOS still trips it); only the air constant moves.
+
+---
+
+## 30. HER CORRECTION — MERGE-THEN-EDIT EXISTS, AND THE ARCHITECT WAS WRONG (2026-08-21)
+
+She asked: *"i thought we added cross block edits on the mac app when
+there are no takes, where it just auto merges? is that being used
+here?"*
+
+**She is right, and my §23/§24 framing was WRONG.** I told her the
+mid-paragraph-spanning selection *"still refuses, identically on both
+platforms"* and called it *"a standing product question"*. **It is
+neither identical nor open.** Verified in the code:
+
+`EditorSurfaceController.planCrossBlockEdit(range:replacement:)`
+(`:1768`) — the **ratified 2026-07-09 merge-then-edit**, cited as such
+in `EditorTextView.swift:119` (*"a cross-block edit with a replacement
+does not refuse on this editor — it routes to `planCrossBlockEdit`,
+which MERGES the blocks"*). Its conditions are **exactly the ones she
+described from memory**:
+
+- ≥2 touched entries, contiguous, the range inside the touched run, no
+  open tail;
+- every touched entry `variantID != nil` **and** `editable` (so gaps and
+  locked blocks are excluded — which is also §24's MINOR 3(a) already
+  solved upstream, and worth noting);
+- **`activeVariantCount == 1` on every touched entry — i.e. NO TAKES.**
+  The comment states the rule: *"A fanned block routes to the
+  VISIBLE-TAKE edit instead (the #11a sitting ruling, 2026-07-13 —
+  merge-then-edit stays the single×single behavior: the halves JOIN only
+  where no fan hangs on the seam)."*
+
+So on the Mac, selecting from the middle of paragraph 2 through
+paragraph 3 and typing/deleting **merges the run and applies the edit**,
+in one undo compound. The phone refuses. **That is a PARITY GAP, not a
+shared limitation.**
+
+**How I missed it, recorded honestly because the lesson is reusable:**
+the crash trace TOLD ME. Its §6 reads *"the Mac's `wholeBlockRun`
+(13j's J9) **and merge-then-edit** exist for exactly this, and the phone
+has neither wired."* I wired ONE of the two and carried the trace's
+"hers to rule" tail over to the other — but that tail was about
+*widening the gesture's semantics*, not about a capability the Mac had
+already shipped under a ratified ruling. **Under her standing R4
+("build it all"), inherited Mac behaviour is parity work, not a product
+question.** The failure was reading a two-item sentence as a one-item
+one, and then repeating the error to her twice in prose.
+
+### M22 — MERGE-THEN-EDIT ON THE PHONE (new row, parity)
+
+**The pattern is batch 1b's, exactly:** `planCrossBlockEdit` and its
+compound are Mac-app-local in `EditorSurfaceController`; the phone owes
+a consumer, so the brain **HOISTS to `Shared/EditorBrain/`** (never a
+byte-copy — MobileSoul §3) and the Mac's caller becomes a delegate, with
+the Mac suite expected to ride **unmodified** as the proof. Then the
+phone's gate routes `.crossesBlockBoundary` to it instead of refusing,
+under the same conditions (no takes, no gaps, no tail, contiguous).
+
+**Priority: HIGH — it is the real answer to her original crash gesture.**
+Batch 1b made whole-paragraph selections work; this makes the
+mid-paragraph ones work, which is the half she actually asked about
+first. **Batch 3** (ahead of the quick note), since she is using this
+build daily.
+
+**What survives as genuinely open:** a cross-block span where a touched
+block HAS takes. The Mac routes that to the visible-take edit
+(#11a, 2026-07-13); whether the phone does the same is the only piece
+that is still a question, and it is a small one.
+
+### Her two other rulings this turn
+
+**R13 — NO CONFIRM.** Her words: *"it's fine to have no confirm."*
+§24's MAJOR 1 is **settled: the confirm does not ship.** The fix session
+is mid-flight building it — it is being told to drop it (the waste is
+now certain rather than probable, which reverses §29's let-it-land
+call). The finding's substance is answered instead by **M20 (the undo
+door)** and **M21/R3 (the per-note tray)**, which is her own better
+answer from §29.
+
+**R14 — "the trash will be available from a note by the end of the
+round, correct?"** *Answered: yes, that is the plan and it is now a
+commitment.* R2 (the Trash surface) is batch 4 and R3 (the per-note
+tray — the "from a note" half she is asking about) is batch 5, both
+inside this round. **If anything threatens either, she is told before
+the round closes, not at it.**
