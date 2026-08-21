@@ -202,6 +202,110 @@ struct BlockRangeIndexTests {
         #expect(index.documentLength == 17)
     }
 
+    // MARK: - The mutators REFUSE instead of trapping (mobile round 2, M1)
+
+    /// Her two 2026-08-20 iPhone crashes were `precondition` failures in
+    /// this band, and `precondition` survives `-O` — so the shipped app
+    /// DIED where the surrounding design already had a name and a road for
+    /// the state (`Refusal.indexDesync` → the view model's re-render from
+    /// the store). The guarantee is unchanged and pinned here: the struct
+    /// still cannot hold a negative length, and a refused mutation leaves
+    /// the value BYTE-IDENTICAL. Only the delivery changed.
+    ///
+    /// RED ON THE PRE-FIX TREE by process death — today's code traps
+    /// inside the mutator instead of returning `false`.
+    ///
+    /// (The results are bound to locals before `#expect` sees them: the
+    /// macro decomposes its expression and cannot call a `mutating` member
+    /// on the value it captures.)
+    @Test func aBlockEditLargerThanItsEntryIsRefusedAndChangesNothing() {
+        var index = threeBlocks()
+        let refused = index.applyBlockEdit(at: 1, lengthDelta: -8)
+        #expect(refused == false)
+        #expect(index.entries.map(\.length) == [3, 7, 5], "a refusal mutates nothing")
+        #expect(index.documentLength == 17)
+        // The exact-fit boundary still applies (a block may go empty).
+        let emptied = index.applyBlockEdit(at: 1, lengthDelta: -7)
+        #expect(emptied)
+        #expect(index.entries.map(\.length) == [3, 0, 5])
+    }
+
+    @Test func anOutOfRangeBlockEditIsRefused() {
+        var index = threeBlocks()
+        let past = index.applyBlockEdit(at: 3, lengthDelta: 1)
+        let negative = index.applyBlockEdit(at: -1, lengthDelta: 1)
+        #expect(past == false)
+        #expect(negative == false)
+        #expect(index.entries.map(\.length) == [3, 7, 5])
+    }
+
+    @Test func aTailEditLargerThanTheTailIsRefused() {
+        var index = threeBlocks()
+        let opened = index.openTail()
+        #expect(opened)
+        let grew = index.applyTailEdit(lengthDelta: 5)
+        #expect(grew)
+        let refused = index.applyTailEdit(lengthDelta: -6)
+        #expect(refused == false)
+        #expect(index.tailLength == 5, "a refusal mutates nothing")
+        let emptied = index.applyTailEdit(lengthDelta: -5)
+        #expect(emptied)
+        #expect(index.tailLength == 0)
+    }
+
+    @Test func aTailEditWithNoOpenTailIsRefused() {
+        var index = threeBlocks()
+        #expect(index.tailLength == nil)
+        let refused = index.applyTailEdit(lengthDelta: 1)
+        #expect(refused == false)
+        #expect(index.tailLength == nil)
+    }
+
+    /// The two tail gates (reached by Return-at-the-end and
+    /// Return-then-Backspace — the two most ordinary gestures in the app
+    /// after typing, which is why the stability survey ranked them beside
+    /// the observed crash).
+    @Test func theTailGatesRefuseInsteadOfTrapping() {
+        var index = threeBlocks()
+        let closeWithNoTail = index.closeTail()
+        #expect(closeWithNoTail == false, "no tail to close")
+        let opened = index.openTail()
+        #expect(opened)
+        let reopened = index.openTail()
+        #expect(reopened == false, "already open")
+        #expect(index.tailLength == 0)
+        let grew = index.applyTailEdit(lengthDelta: 2)
+        #expect(grew)
+        let closedNonEmpty = index.closeTail()
+        #expect(closedNonEmpty == false, "only an EMPTY tail closes")
+        #expect(index.tailLength == 2)
+        // A tail-only index (no entries) never opens or closes: the tiling
+        // invariant says an entry-less document IS its tail.
+        var empty = BlockRangeIndex(entries: [], tailLength: 0)
+        let emptyClose = empty.closeTail()
+        let emptyOpen = empty.openTail()
+        #expect(emptyClose == false)
+        #expect(emptyOpen == false)
+        #expect(empty.tailLength == 0)
+    }
+
+    /// The disassembly of her crashed binary showed a live overflow trap
+    /// (`b.vs`) beside the sign test. An unrepresentable sum is exactly as
+    /// much "this delta does not describe me" as a negative one.
+    @Test func anOverflowingDeltaIsRefusedRatherThanTrapped() {
+        var index = threeBlocks()
+        let overflowed = index.applyBlockEdit(at: 0, lengthDelta: .max)
+        #expect(overflowed == false)
+        #expect(index.entries[0].length == 3)
+        let opened = index.openTail()
+        #expect(opened)
+        let grew = index.applyTailEdit(lengthDelta: .max)
+        #expect(grew)
+        let overflowedTail = index.applyTailEdit(lengthDelta: .max)
+        #expect(overflowedTail == false)
+        #expect(index.tailLength == Int.max)
+    }
+
     @Test func crystallizeConvertsTailPrefixIntoEntries() {
         var index = BlockRangeIndex(slots: [slot("a", text: "one")], tail: "para\nrest")
         index.crystallize(

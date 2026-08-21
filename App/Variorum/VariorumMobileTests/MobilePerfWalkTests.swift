@@ -730,4 +730,80 @@ struct MobilePerfWalkTests {
                 "the 100k walk's footprint delta \(delta) MiB exceeds the \(Self.walkDeltaCeilingMB) MiB ceiling (PB2-2, armed at B3)")
         }
     }
+
+    /// **M2f — MEASUREMENT ONLY (round 2, batch 1).** The Read surface had
+    /// ZERO perf coverage: `MobilePerfWalkTests` never mentioned Read, so
+    /// the 100k proving ground — the executable form of her bar — had never
+    /// been pointed at it. The stability survey's traced concern:
+    /// `MobileReadNoteView` virtualizes per NOTE (a `LazyVStack` over notes,
+    /// per-row lazy `.task`), which is right for a book of many notes, but
+    /// within ONE realized row it materializes the whole note — the full
+    /// rendered string, then `MarkdownRendering.render`'s second string plus
+    /// its runs array, then one `AttributedString` per display line, then a
+    /// SwiftUI `Text` per paragraph that the row must size.
+    ///
+    /// This measures exactly the part that is ours: the row's `.task` (the
+    /// store read + join) and the paragraph transform, with the footprint
+    /// across both. **NO OPTIMIZATION IS BUILT HERE AND NO BUDGET IS
+    /// ASSERTED** — the number is the deliverable; whether it earns a fix
+    /// (the survey's candidate: a per-note paragraph cap wearing the same
+    /// visible-truncation grammar the lists already use) is a ruling, and
+    /// the repo's guard forbids fixing on suspicion. The assertions below
+    /// only keep the probe honest: a dead probe must not pass silently.
+    @Test func theReadSurfaceAtTheHundredKBarIsMeasured() async throws {
+        let big = try PerfWorlds.big.get()
+        let megaID = try #require(big.seed.megaPostID)
+        let start = try #require(physFootprintMB(), "footprint readable on this host")
+
+        try await withPerfWorld(big) { session in
+            // Leg 1 — the row's `.task`, byte for byte what the view runs.
+            let t0 = CACurrentMediaTime()
+            let text: String? = try? await session.database.read { [id = megaID] db in
+                let slots = try Queries.renderPost(db, containerID: id)
+                return Queries.joinRenderedTexts(slots.compactMap(\.text))
+            }
+            let readMS = (CACurrentMediaTime() - t0) * 1000
+            let source = try #require(text)
+            let afterRead = physFootprintMB() ?? start
+
+            // Leg 2 — the paragraph transform (the AttributedString set the
+            // row then holds for its whole realized lifetime).
+            let t1 = CACurrentMediaTime()
+            let paragraphs = MobileReadPage.paragraphs(of: source, codeTint: nil)
+            let transformMS = (CACurrentMediaTime() - t1) * 1000
+            let afterTransform = physFootprintMB() ?? afterRead
+
+            // The control note, for the shape of the ratio (recorded, not
+            // asserted — the axis here is the note's OWN length, which the
+            // survey's concern is precisely about).
+            let controlText: String? = try? await session.database.read {
+                [id = big.seed.controlPostID] db in
+                let slots = try Queries.renderPost(db, containerID: id)
+                return Queries.joinRenderedTexts(slots.compactMap(\.text))
+            }
+            let controlSource = try #require(controlText)
+            let t2 = CACurrentMediaTime()
+            let controlParagraphs = MobileReadPage.paragraphs(of: controlSource, codeTint: nil)
+            let controlMS = (CACurrentMediaTime() - t2) * 1000
+
+            print(String(
+                format: "PERF[sim] READ(100k note) — source %d chars · read+join %.1f ms · paragraphs %d · transform %.1f ms · total %.1f ms",
+                (source as NSString).length, readMS, paragraphs.count, transformMS,
+                readMS + transformMS))
+            print(String(
+                format: "PERF[sim] READ(control note) — source %d chars · paragraphs %d · transform %.1f ms (ratio %.1fx on the note's own length)",
+                (controlSource as NSString).length, controlParagraphs.count, controlMS,
+                controlMS > 0 ? transformMS / controlMS : 0))
+            print(String(
+                format: "PERF[sim] READ memory — start %.0f MiB · after read+join %.0f MiB (+%.0f) · after transform %.0f MiB (+%.0f); ONE realized row holds the transform's result for its lifetime",
+                start, afterRead, afterRead - start,
+                afterTransform, afterTransform - afterRead))
+
+            // Probe liveness only (M2f is measure-only — no budget is
+            // asserted; the number above is the deliverable).
+            #expect((source as NSString).length > 400_000, "the 100k note really is the source")
+            #expect(paragraphs.count > 800, "the transform really produced the note's lines")
+            #expect(!controlParagraphs.isEmpty)
+        }
+    }
 }

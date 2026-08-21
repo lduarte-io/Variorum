@@ -98,15 +98,19 @@ final class MobileEditorViewModel {
     /// forget. `UITextView.delegate` is weak; this is the strong home.
     @ObservationIgnored private var gateDelegate: MobileEditorGateDelegate?
     @ObservationIgnored private var ledger = EditorSurfaceLedger()
-    @ObservationIgnored private var pendingVerdict: BlockRangeIndex.Verdict?
-    /// The policed edit's EXACT cost (old + new UTF-16 lengths, captured at
-    /// the gate). iOS's `didProcessEditing` report can WIDEN the coalesced
-    /// `editedRange` under attribute fixing (measured: a 5→6 replacement
-    /// reported length 7), so a policed edit's churn cost is taken from the
-    /// gate's own range + replacement; gate-less system paths fall back to
-    /// the report-derived cost (approximate is fine there — churn is
-    /// approximate by design, SyncSpec §6).
-    @ObservationIgnored private var pendingEditCost: Int?
+    /// The gate's approved edit, BOUND to what it approved (round 2, batch
+    /// 1 — the crash fix; `ArmedEdit`'s doc comment carries the whole
+    /// mechanism). This used to be a bare `Verdict?`: an identity with no
+    /// range, no document length and no expiry, consumed by whatever edit
+    /// reached storage next. It carries the EXACT churn cost too (old +
+    /// new UTF-16 lengths at the gate), because iOS's `didProcessEditing`
+    /// report can WIDEN the coalesced `editedRange` under attribute fixing
+    /// (measured: a 5→6 replacement reported length 7) — and it is
+    /// discarded on the same condition as the verdict, since a cost that
+    /// belongs to a different edit is no better than a verdict that does
+    /// (gate-less paths use the report-derived cost; churn is approximate
+    /// by design — SyncSpec §6).
+    @ObservationIgnored private var pendingEdit: ArmedEdit?
     @ObservationIgnored private var suppressEditProcessing = false
     @ObservationIgnored private(set) var mintInFlight = false
     @ObservationIgnored private var mintTask: Task<Void, Never>?
@@ -191,6 +195,15 @@ final class MobileEditorViewModel {
     /// (which outlives any one surface — the Mac's exact posture).
     func teardown() async {
         await finish()
+        // M2e (round 2): the TK2 canary's 30-second repeating main-run-loop
+        // `Timer` is armed at `attach` and had NO production disarm — only
+        // test callers — so one orphaned tick accumulated per note ever
+        // OPENED, for the process's life. The block captures weakly, so
+        // nothing leaked and nothing crashed; what accumulated was
+        // main-thread wakeups doing nothing, which is quiescence's enemy on
+        // a phone. The surface is going away here (the representable's view
+        // goes with the screen), so this is the arm's mirror.
+        textView?.disarmCanary()
         if let autosaveToken {
             autosave.stopObserving(autosaveToken)
             self.autosaveToken = nil
@@ -556,6 +569,10 @@ final class MobileEditorViewModel {
         suppressEditProcessing = true
         storage.setAttributedString(attributed)
         suppressEditProcessing = false
+        // The tiling the gate last answered against is gone (round 2, the
+        // crash fix): disarm STRUCTURALLY here rather than leaning on the
+        // consume-time predicate alone.
+        pendingEdit = nil
         index = newIndex
         slots = new
         ledger.adopt(new)
@@ -584,6 +601,7 @@ final class MobileEditorViewModel {
                 edited = true
             }
         }
+        pendingEdit = nil // the tiling moved — see `renderFull`
         index = BlockRangeIndex(slots: new, tail: hasOpenTail ? tailText : nil)
         slots = new
         ledger.adopt(new)
@@ -969,21 +987,22 @@ final class MobileEditorViewModel {
             segmentation: header?.effectiveSegmentation ?? .paragraph)
         switch verdict {
         case .refuse(.indexDesync):
-            pendingVerdict = nil
-            pendingEditCost = nil
+            pendingEdit = nil
             desyncRecovery()
             return false
         case .refuse(let refusal):
-            pendingVerdict = nil
-            pendingEditCost = nil
+            pendingEdit = nil
             refuse(message(for: refusal))
             return false
         default:
             if case .tail = verdict, isPaste {
                 bulkPending = true
             }
-            pendingVerdict = verdict
-            pendingEditCost = range.length + (replacement as NSString).length
+            pendingEdit = ArmedEdit(
+                verdict: verdict,
+                range: range,
+                documentLength: index.documentLength,
+                cost: range.length + (replacement as NSString).length)
             return true
         }
     }
@@ -995,13 +1014,37 @@ final class MobileEditorViewModel {
     /// with no pending verdict and route by `fallbackVerdict`.
     func storageDidEdit(_ editedRange: NSRange, changeInLength delta: Int) {
         guard !suppressEditProcessing else { return }
-        let verdict = pendingVerdict ?? fallbackVerdict(editedRange: editedRange, delta: delta)
-        pendingVerdict = nil
-        let exactCost = pendingEditCost
-        pendingEditCost = nil
+        // THE BINDING (round 2, batch 1 — the crash fix's real half): the
+        // gate's answer is consumed ONLY while it still describes the edit
+        // that arrived. Anything else — a coalesced transaction wider than
+        // the sub-edit the gate last saw, an arming whose edit never
+        // landed, an index that moved underneath it — falls through to
+        // `fallbackVerdict`, which recomputes against the pre-edit index
+        // and cannot produce a negative length for a deletion (the trace's
+        // §3a lemma). Rejecting an arming never refuses the EDIT; it only
+        // declines the shortcut.
+        let armed = pendingEdit
+        pendingEdit = nil
+        let bound = armed.flatMap {
+            $0.describes(
+                editedRange: editedRange, delta: delta,
+                documentLength: index.documentLength) ? $0 : nil
+        }
+        let verdict = bound?.verdict ?? fallbackVerdict(editedRange: editedRange, delta: delta)
+        let exactCost = bound?.cost
         switch verdict {
         case .block(let i):
-            index.applyBlockEdit(at: i, lengthDelta: delta)
+            // The mutators REFUSE rather than trap (BlockRangeIndex's
+            // mutation band). A refusal means the bookkeeping and the
+            // storage have already diverged, so nothing below may run
+            // against it — not the re-stamp, not the autosave, and not the
+            // audit/chrome tail after the switch: `desyncRecovery`'s
+            // re-render from the store redoes every one of them over the
+            // truth.
+            guard index.applyBlockEdit(at: i, lengthDelta: delta) else {
+                desyncRecovery()
+                return
+            }
             // THE iOS RE-STAMP (obligation 1): the inserted characters
             // arrived attribute-stripped; identity is re-derived from the
             // index, never inherited.
@@ -1010,17 +1053,26 @@ final class MobileEditorViewModel {
                 entryIndex: i, editedRange: editedRange, delta: delta,
                 exactCost: exactCost)
         case .tail:
-            index.applyTailEdit(lengthDelta: delta)
+            guard index.applyTailEdit(lengthDelta: delta) else {
+                desyncRecovery()
+                return
+            }
             restampProjection(over: editedRange)
             syncTailText()
             crystallizeIfNeeded()
             armTailIdleMint()
         case .openTail:
-            index.openTail()
+            guard index.openTail() else {
+                desyncRecovery()
+                return
+            }
             restampProjection(over: editedRange)
             tailText = ""
         case .closeTail:
-            index.closeTail()
+            guard index.closeTail() else {
+                desyncRecovery()
+                return
+            }
             tailText = ""
             tailIdleTask?.cancel()
         case .refuse:
@@ -1028,6 +1080,7 @@ final class MobileEditorViewModel {
             // UIKit path outside the policed ones). The store is truth:
             // drop local bookkeeping and re-render from the projection.
             desyncRecovery()
+            return
         }
         // Batch 2 (M11): the markdown face follows the keystroke, scoped to
         // the LINES the edit touched — the Mac's exact hook (P1's letter,
@@ -1074,7 +1127,7 @@ final class MobileEditorViewModel {
     ) {
         let entry = index.entries[entryIndex]
         guard let variantID = entry.variantID else {
-            assertionFailure("editable entry without a variant")
+            EditorAssertionSeam.fire("editable entry without a variant")
             return
         }
         let text = viewText(index.range(ofEntryAt: entryIndex))
@@ -1092,9 +1145,9 @@ final class MobileEditorViewModel {
 
     private func desyncRecovery() {
         desyncRecoveryCount += 1
-        assertionFailure("mobile editor surface desynced from the block index")
+        EditorAssertionSeam.fire("mobile editor surface desynced from the block index")
         forceFullRender = true
-        pendingVerdict = nil
+        pendingEdit = nil
         Task { [weak self] in
             guard let self else { return }
             await autosave.flushNow()
@@ -1278,6 +1331,10 @@ final class MobileEditorViewModel {
         for block in outcome.applied {
             ledger.recordEdit(variantID: block.variantID, text: block.text)
         }
+        // A verdict armed before the mint describes a tail that may no
+        // longer exist (see `renderFull`) — the sharpest stale case, since
+        // a `.tail` arming survives into a closed tail.
+        pendingEdit = nil
         index.crystallize(
             minted: outcome.applied.map { ($0.blockID, $0.variantID, $0.text.utf16.count) },
             remainingTailLength: outcome.newTail?.utf16.count)
@@ -1474,7 +1531,7 @@ final class MobileEditorViewModel {
         }
         if !clean {
             identityAuditFailures += 1
-            assertionFailure(
+            EditorAssertionSeam.fire(
                 "identity projection audit failed: block-ID attributes disagree with BlockRangeIndex")
         }
         #endif

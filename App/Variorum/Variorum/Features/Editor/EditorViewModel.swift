@@ -229,7 +229,18 @@ final class EditorViewModel {
     @ObservationIgnored private(set) weak var scrollView: NSScrollView?
     @ObservationIgnored let autosave: AutosaveCoordinator
     @ObservationIgnored private let canary = FallbackCanary()
-    @ObservationIgnored private var pendingVerdict: BlockRangeIndex.Verdict?
+    /// The gate's approved edit, BOUND to what it approved (mobile round 2,
+    /// batch 1 — `ArmedEdit`'s doc comment carries the mechanism). This was
+    /// a bare `Verdict?`: an identity with no range, no document length and
+    /// no expiry, consumed by whatever edit reached storage next. The crash
+    /// that class produces has only been OBSERVED on iOS, but the shape is
+    /// this file's line for line and it is shared-brain bookkeeping — the
+    /// Mac survived on three accidents (AppKit's near-1:1 typing contract,
+    /// cross-block spans answered by compounds rather than left to storage,
+    /// and `EditorFind`'s hand-written 1:1 discipline around the ONE AppKit
+    /// road that does coalesce), not on a guarantee. Latent, not prevented;
+    /// fixed here in the same change (M-B).
+    @ObservationIgnored private var pendingEdit: ArmedEdit?
     @ObservationIgnored private var suppressEditProcessing = false
     @ObservationIgnored private(set) var mintInFlight = false
     @ObservationIgnored private var mintTask: Task<Void, Never>?
@@ -733,6 +744,10 @@ final class EditorViewModel {
     func adoptRewrite(
         index: BlockRangeIndex, slots: [Queries.RenderedBlock], tailText: String?
     ) {
+        // The tiling the gate last answered against is gone (mobile round 2,
+        // the crash fix): disarm STRUCTURALLY at the ONE rewrite door rather
+        // than leaning on the consume-time predicate alone.
+        pendingEdit = nil
         self.index = index
         self.slots = slots
         adoptSurfaceTextMap(slots)
@@ -830,7 +845,7 @@ final class EditorViewModel {
         case .refuse(.indexDesync):
             // The index no longer describes the storage: recover from the
             // store instead of crashing (review round 1, MINOR 7).
-            pendingVerdict = nil
+            pendingEdit = nil
             desyncRecovery()
             return false
         case .refuse(.crossesBlockBoundary):
@@ -843,7 +858,7 @@ final class EditorViewModel {
             // loses its piece; fan, seam, and structure untouched — the
             // ruled deviation: two blocks, NOT a join). Locked/gap/tail
             // spans keep the speaking refusal.
-            pendingVerdict = nil
+            pendingEdit = nil
             // QoL batch 3 (L6) — THE SAFETY CORE, and it runs before every
             // planner: a FIND-DRIVEN replacement never restructures the post.
             // Below this line a cross-block edit MERGES blocks
@@ -909,7 +924,7 @@ final class EditorViewModel {
             }
             return false
         case .refuse(let refusal):
-            pendingVerdict = nil
+            pendingEdit = nil
             refuseFeedback(message(for: refusal))
             return false
         default:
@@ -919,7 +934,8 @@ final class EditorViewModel {
             if case .tail = verdict, textView?.isPasting == true {
                 bulkPending = true
             }
-            pendingVerdict = verdict
+            pendingEdit = ArmedEdit(
+                verdict: verdict, range: range, documentLength: index.documentLength)
             return true
         }
     }
@@ -935,25 +951,62 @@ final class EditorViewModel {
         // (`overlayLayoutDidSettle`), never runs against pre-layout frames.
         overlayGeometryGeneration &+= 1
         guard !suppressEditProcessing else { return }
-        let verdict = pendingVerdict ?? fallbackVerdict(editedRange: editedRange, delta: delta)
-        pendingVerdict = nil
+        // THE BINDING (mobile round 2, batch 1 — the shared crash fix): the
+        // gate's answer is consumed ONLY while it still describes the edit
+        // that arrived; anything else falls through to `fallbackVerdict`,
+        // which recomputes against the pre-edit index. The Mac's exposure is
+        // narrower than iOS's and stayed un-triggered on accidents rather
+        // than guarantees — AppKit's near-1:1 typing contract, cross-block
+        // spans answered by compounds instead of left to storage,
+        // `EditorSurfaceDelegate`'s multi-range gate refusing outright, and
+        // `EditorFind`'s hand-written 1:1 discipline around the ONE AppKit
+        // road that does coalesce. Any of the arm-then-hand-off sites
+        // (`MarkdownActs.apply`, `toggleCheckbox`,
+        // `insertNewlineContinuingLists`, `deleteWithoutNewline`) is one
+        // refactor away from separating an arming from its
+        // `replaceCharacters`; the binding makes that harmless.
+        let armed = pendingEdit
+        pendingEdit = nil
+        let bound = armed.flatMap {
+            $0.describes(
+                editedRange: editedRange, delta: delta,
+                documentLength: index.documentLength) ? $0 : nil
+        }
+        let verdict = bound?.verdict ?? fallbackVerdict(editedRange: editedRange, delta: delta)
         switch verdict {
         case .block(let i):
-            index.applyBlockEdit(at: i, lengthDelta: delta)
+            // The mutators REFUSE rather than trap. A refusal means the
+            // bookkeeping and the storage have already diverged, so nothing
+            // below may run against it — `desyncRecovery`'s re-render from
+            // the store redoes the attribute work and the caret context
+            // over the truth.
+            guard index.applyBlockEdit(at: i, lengthDelta: delta) else {
+                desyncRecovery()
+                return
+            }
             setBlockAttribute(index.entries[i].blockID, over: editedRange)
             recordAutosave(entryIndex: i, editedRange: editedRange, delta: delta)
         case .tail:
-            index.applyTailEdit(lengthDelta: delta)
+            guard index.applyTailEdit(lengthDelta: delta) else {
+                desyncRecovery()
+                return
+            }
             setBlockAttribute(nil, over: editedRange)
             syncTailText()
             crystallizeIfNeeded()
             armTailIdleMint()
         case .openTail:
-            index.openTail()
+            guard index.openTail() else {
+                desyncRecovery()
+                return
+            }
             setBlockAttribute(nil, over: editedRange)
             tailText = ""
         case .closeTail:
-            index.closeTail()
+            guard index.closeTail() else {
+                desyncRecovery()
+                return
+            }
             tailText = ""
             tailIdleTask?.cancel()
         case .refuse:
@@ -961,6 +1014,7 @@ final class EditorViewModel {
             // AppKit path outside the policed ones). The store is truth:
             // drop local bookkeeping and re-render from the projection.
             desyncRecovery()
+            return
         }
         // 13g batch 2 (L7, F-2): the markdown face follows the keystroke,
         // scoped to the LINES the edit touched — P1's letter, pinned by
@@ -989,7 +1043,7 @@ final class EditorViewModel {
     private func recordAutosave(entryIndex: Int, editedRange: NSRange, delta: Int) {
         let entry = index.entries[entryIndex]
         guard let variantID = entry.variantID else {
-            assertionFailure("editable entry without a variant")
+            EditorAssertionSeam.fire("editable entry without a variant")
             return
         }
         let text = viewText(index.range(ofEntryAt: entryIndex))
@@ -1005,9 +1059,9 @@ final class EditorViewModel {
 
     private func desyncRecovery() {
         desyncRecoveryCount += 1  // the Step 8 soak asserts this stays 0
-        assertionFailure("editor surface desynced from the block index")
+        EditorAssertionSeam.fire("editor surface desynced from the block index")
         forceFullRender = true
-        pendingVerdict = nil
+        pendingEdit = nil
         Task { [weak self] in
             guard let self else { return }
             await autosave.flushNow()
@@ -1261,6 +1315,10 @@ final class EditorViewModel {
         for block in outcome.applied {
             ledger.recordEdit(variantID: block.variantID, text: block.text)
         }
+        // A verdict armed before the mint describes a tail that may no
+        // longer exist (see `adoptRewrite`) — the sharpest stale case, since
+        // a `.tail` arming survives into a closed tail.
+        pendingEdit = nil
         index.crystallize(
             minted: outcome.applied.map { ($0.blockID, $0.variantID, $0.text.utf16.count) },
             remainingTailLength: outcome.newTail?.utf16.count)

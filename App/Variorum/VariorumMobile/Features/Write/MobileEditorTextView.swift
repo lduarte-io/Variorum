@@ -36,6 +36,10 @@ final class MobileFallbackCanary {
     private(set) var fired = false
     private var idleTimer: Timer?
 
+    /// Whether the idle tick is scheduled — the teardown pin's oracle
+    /// (round 2, M2e).
+    var isArmed: Bool { idleTimer != nil }
+
     /// Called on the main actor when the canary fires (release builds reach
     /// this; debug builds stop at the assertion first).
     var onFire: ((String) -> Void)?
@@ -737,6 +741,8 @@ final class MobileEditorTextView: UITextView {
 
     func armCanary() { canary.arm(for: self) }
     func disarmCanary() { canary.disarm() }
+    /// Test/teardown oracle (round 2, M2e).
+    var canaryIsArmed: Bool { canary.isArmed }
 
     /// The assert-after-mutation half of obligation 2 — the view model
     /// calls this after every processed storage edit.

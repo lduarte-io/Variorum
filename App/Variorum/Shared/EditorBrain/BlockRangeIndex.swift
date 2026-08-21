@@ -337,26 +337,62 @@ nonisolated struct BlockRangeIndex: Equatable, Sendable {
 
     // MARK: - Mutations (applied AFTER the change, per the verdict)
 
-    mutating func applyBlockEdit(at index: Int, lengthDelta: Int) {
-        precondition(entries[index].length + lengthDelta >= 0, "block length went negative")
-        entries[index].length += lengthDelta
+    // THE MUTATORS REFUSE; THEY DO NOT TRAP (mobile round 2, batch 1 — the
+    // crash her two 2026-08-20 iPhone logs recorded, traced in
+    // `notes/plans/mobile-round-2-crash-trace.md`). These four used to be
+    // `precondition`-guarded, and `precondition` survives `-O`, so the
+    // shipped app DIED where the surrounding design already had a name and
+    // a road for the state: `Refusal.indexDesync`'s own doc comment above
+    // says "Never a crash … the view model's recovery re-renders from the
+    // store, which is truth", and `StructuralGesturePlanner`'s header states
+    // the law outright — *the pure layer never asserts; impossible states
+    // answer with a refusal and the caller recovers.* The mutators were the
+    // only part of this brain that had never been brought to that standard.
+    //
+    // WHAT DID NOT CHANGE — and this is the point (round-2 principle M-A):
+    // the impossible state is still REFUSED. This struct still cannot hold
+    // a negative length, cannot open a tail that is already open, cannot
+    // close a non-empty one, and a caller that ignores the answer mutates
+    // NOTHING. Only the DELIVERY changed: a value instead of a process
+    // death. Both view models route a `false` to `desyncRecovery()`.
+    //
+    // Overflow is folded into the same guard (the disassembly of her
+    // crashed binary showed a live `b.vs` overflow trap beside the sign
+    // test): an addition that cannot be represented is exactly as much
+    // "this delta does not describe me" as a negative result, and answering
+    // it with `false` costs one branch.
+
+    @discardableResult
+    mutating func applyBlockEdit(at index: Int, lengthDelta: Int) -> Bool {
+        guard entries.indices.contains(index) else { return false }
+        let (length, overflow) = entries[index].length.addingReportingOverflow(lengthDelta)
+        guard !overflow, length >= 0 else { return false }
+        entries[index].length = length
+        return true
     }
 
-    mutating func applyTailEdit(lengthDelta: Int) {
-        precondition(tailLength != nil, "no open tail")
-        precondition((tailLength ?? 0) + lengthDelta >= 0, "tail length went negative")
-        tailLength = (tailLength ?? 0) + lengthDelta
+    @discardableResult
+    mutating func applyTailEdit(lengthDelta: Int) -> Bool {
+        guard let tail = tailLength else { return false }
+        let (length, overflow) = tail.addingReportingOverflow(lengthDelta)
+        guard !overflow, length >= 0 else { return false }
+        tailLength = length
+        return true
     }
 
     /// The typed newline that opened the tail IS the separator before it.
-    mutating func openTail() {
-        precondition(tailLength == nil && !entries.isEmpty, "tail already open")
+    @discardableResult
+    mutating func openTail() -> Bool {
+        guard tailLength == nil, !entries.isEmpty else { return false }
         tailLength = 0
+        return true
     }
 
-    mutating func closeTail() {
-        precondition(tailLength == 0 && !entries.isEmpty, "only an empty tail closes")
+    @discardableResult
+    mutating func closeTail() -> Bool {
+        guard tailLength == 0, !entries.isEmpty else { return false }
         tailLength = nil
+        return true
     }
 
     /// The leading-run attachment's bookkeeping (Phase 10, the 2026-07-12

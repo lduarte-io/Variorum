@@ -68,10 +68,11 @@ final class MobileTakesBrowserController {
     /// The pixels' hook: state or content changed — re-render the sheet.
     var onChanged: (() -> Void)?
 
-    /// The card gate's exact-cost capture (the VM's `pendingEditCost`
-    /// pattern): policed card edits carry the gate's own figure; gateless
-    /// system paths fall back to a length-delta approximation (churn is
-    /// approximate by design, SyncSpec §6).
+    /// The card gate's exact-cost capture (the VM's `ArmedEdit.cost`
+    /// pattern — named `pendingEditCost` there until round 2 folded it into
+    /// the arming it belongs to): policed card edits carry the gate's own
+    /// figure; gateless system paths fall back to a length-delta
+    /// approximation (churn is approximate by design, SyncSpec §6).
     private var pendingCardCost: Int?
     private var lastRecordedCardText: String?
 
