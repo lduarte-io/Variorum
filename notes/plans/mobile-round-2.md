@@ -1441,3 +1441,87 @@ tightening, the completed audit, the canary teardown). Her iPhone 17 Pro
 reads **unavailable** to `devicectl`, so the install is not taken yet; a
 watch is armed to take it at the first reachable moment. **Per R3 this
 gates nothing** — batch 1b proceeds regardless.
+
+---
+
+## 23. BATCH 1b RECORD (2026-08-21) — R18 ≡ M11, her gesture works
+
+**Counts:** core **1350/141** · Mac **1568/272** · Mac spine **63/8**
+(all three EXACT) · mobile **354/67** (+20/+2) · mobile spine **33/7**
+exact. Zero schema, zero `Sync/`.
+
+**The hoist is the headline, and its proof is a non-event.**
+`wholeBlockDeletion(covering:replacement:)` and
+`caretLandingAfterRemoving(_ blockIDs:)` were PRIVATE to the Mac's
+`EditorSurfaceController`; they now live in
+`Shared/EditorBrain/BlockRangeIndex.swift` and the Mac's two consumers
+are one-line delegates. **The Mac suite rode completely unmodified —
+1568/272 exact.** That zero-test-edit result is the parity proof this
+repo asks for (the 3C pattern): it means the hoist moved an address and
+changed no behaviour. A byte-copy would have been a parity defect at
+birth — the standing KnownIssues six-brains class.
+
+**One hoist deliberately NOT taken, and annotated at its line:** the
+Mac's single-INDEX `caretLandingAfterRemoving(_ i: Int)` sibling serves
+Mac-only doors (A7's empty-block carve, delete/archive-caret-block); the
+phone has no consumer, and converting it would be a Mac refactor riding
+a mobile batch. **Flagged honestly: the set-based rule and that one now
+express the same idea in two places, as they did before.** Not new debt,
+but named rather than hidden.
+
+**Behaviour observed rather than assumed:** undo came free from the
+`Shared/` stack (one entry labelled "Delete Blocks"; one undo restores
+all N in place, one redo removes them again — verified against store
+bytes); fanned blocks go takes and all, inherited from `deleteBlock`'s
+standing unrestricted door and matching her ratified #66(b); a sealed
+note's gate lock answer fires BEFORE the gesture is armed, so no seal
+pre-check was added to the door (P-2 — the door does not duplicate a
+refusal the road already delivers).
+
+**Honestly NOT pinned, stated plainly:** the caret landing DECISION is
+pinned; the caret WRITE is not — `makeEditor` is headless, so the write
+is a no-op in tests, and observing it needs a real
+`MobileEditorTextView` that no mobile test attaches. Recorded as a known
+gap rather than implied as coverage.
+
+**Cost measured, not argued:** `PERF[plan] wholeBlockDeletion @20k
+blocks — seam×1000 0.74 ms · gesture 4.5 ms`, pinned. The plan walks the
+ENTRY TILING (block count, never character count) at gesture cadence,
+and the one keystroke-cadence caller — a seam backspace — is answered by
+the brain's `range.length > 1` guard before any allocation. Her 100k
+fixture is ~1,370 paragraphs, ~14× smaller than the measured index.
+
+**It corrected its own wrong pin rather than the code.** Its first
+`caretLandingAfterRemoving(["b2","b0"])` assertion expected `"b1"`; the
+rule reads sorted edges and answers `"b0"`. It rewrote the pin as a real
+order-independence assertion instead of adjusting the expectation to
+whatever the code happened to do — the difference between a pin and a
+transcript.
+
+### Architect rulings on the two items it raised
+
+**(a) The teardown await — ACCEPTED, and its reasoning is exactly
+right.** Its change opened a hole: the scheduled compound's only strong
+reference is `pendingGestureTask`, and both the closure's model capture
+and `MobileStructuralController.model` are weak, so a compound first
+running after the VM died would quietly do nothing — her paragraphs
+would silently stay. Today it lands only by ORDERING ACCIDENT
+(`MobileWriteView.onDisappear` happens to capture the model strongly).
+`await pendingGestureTask?.value` in `teardown()` makes it land by
+construction. **It claimed no red-on-old pin and justified that by
+citing batch 1's own correction** — the state needs the model to die
+mid-teardown, which the one production caller cannot produce, and a pin
+whose red depends on an unreachable state pins a fiction. **That the
+sharpened rule propagated from one session's correction into a later
+session's reasoning is the records doing their job.**
+**Verified by the architect:** the await is placed AFTER batch 1's
+`disarmCanary()` first-line fix, so MINOR 3's ordering guarantee is
+intact.
+
+**(b) The limitation pinned as behaviour — ACCEPTED.** A span opening
+mid-paragraph and running on still refuses, identically on both
+platforms, and `aPartialSpanStillRefusesExactlyAsBefore` is now its
+characterization. It NARROWED (did not rewrite) the refusal copy's
+PROVISIONAL comment to say what it now speaks for. **Her standing
+product question is not widened anywhere** — which was the brief's
+explicit fence.
