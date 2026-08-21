@@ -1525,3 +1525,145 @@ characterization. It NARROWED (did not rewrite) the refusal copy's
 PROVISIONAL comment to say what it now speaks for. **Her standing
 product question is not widened anywhere** — which was the brief's
 explicit fence.
+
+---
+
+## 24. BATCH 1b LADDER — ROUND 1 FINDINGS (2026-08-21)
+
+Fresh cold reviewer, target `3590322`. **1 MAJOR · 5 MINOR · 2 NIT · 1
+SPECULATIVE.** Its clean bill independently re-verified the hoist
+behaviour-preserving (bodies byte-identical, `entries` merely re-rooted;
+both Mac doors pure delegates; no Mac test in the diff), hand-checked
+the run geometry across eleven edge shapes, and confirmed the teardown
+`await` cannot deadlock or delay dismissal (the awaited task is
+`@MainActor`, so awaiting from the main actor releases the actor rather
+than blocking; the one production caller never waits on it).
+
+### 1 · MAJOR — a one-keystroke bulk delete with NO confirmation, on a platform with NO way back. **ARCHITECT-VERIFIED, and it holds.**
+
+Select All (one edit-menu tap) → ⌫ → every block of the note is
+tombstoned, takes and comments included, with a receipt reading "N
+blocks deleted." **and no in-app road back.**
+
+**I verified both load-bearing facts myself rather than accept them:**
+- `grep` for a structural undo door in `VariorumMobile`: the ONLY hit is
+  `Spike/SpikeScenarios.swift`'s `tv.undoManager?.undo()` — the TEXT
+  view's undo, in spike code. **There is no reachable structural undo
+  door on the phone.**
+- `grep restoreBlock` in `VariorumMobile`: the only hit is
+  `restoreBlockComment`. **There is no block-restore door.**
+- The SIBLING door confirms. `MobileBlockMenu.deleteConfirmDetail` is
+  pinned static — *"The block leaves this note, with its takes. There's
+  no undo here."* — and its comment states the rule verbatim: *"This
+  phone has NO tray face and NO undo door (v1's recorded posture,
+  verified by sweep this batch)."*
+
+So the phone now has **two doors for the same act with opposite
+ceremony**, and the one without ceremony is a keystroke. Batch 1b's own
+report said "undo came free from the Shared stack" — true of the STACK
+API, which its pins exercised directly; **it is not true of any door a
+user can reach.** A capability verified at the API is not a capability
+until a door reaches it, and that gap is exactly what this finding
+names.
+
+**RULED — apply her existing rule, do not invent a new one.** The
+confirm lands, uniformly, matching the sibling door (a count-aware
+detail sentence; the `confirmDestructive` seam already exists). This is
+**not inventing product behaviour**: her recorded rule at the sibling
+door already says deleting even ONE block on this phone warrants a
+confirm, and a threshold ("confirm only above N blocks") would be my
+invention, not hers.
+
+**HELD FOR HER (§25's bundle), two questions:** (a) is a confirm right
+on a *keystroke*, or too heavy for the ordinary select-a-paragraph-and-
+delete case? (b) once batch 4 gives the phone a Trash and real recovery
+doors, should the confirm soften or go? Both are taste calls that her
+own recovery surfaces will change the answer to.
+
+**CONSEQUENCE FOR THE INSTALL — the calculus changed.** The Release
+build made at §22 carries this unconfirmed bulk delete. **It is NOT
+installed until the confirm lands.** The armed device watch stands, but
+the gate is now "batch 1b's fixes are in", not merely "the phone is
+reachable". Shipping her a one-keystroke unrecoverable note-wipe while
+she is away is precisely the thing this ladder exists to prevent.
+
+### 2 · MINOR — the door surfaces raw Swift enum dumps
+`refusalMessage` maps three cases; everything else falls to
+`String(describing:)`, and `OperationError` is a plain enum with no
+`LocalizedError`. Traced: a second ⌫ during the first compound's flush
+re-plans now-stale blockIDs, the leg throws `.blockNotFound`, and her
+status line reads `blockNotFound(id: "…")`. The Mac already treats this
+as a defect at this exact door (`OpsRefusalCopy`'s `blockGone`, written
+because *"the compound's atomic rollback means she meets it with NOTHING
+deleted — which is the fact the words must carry"*). **FIX:** a pinned
+phone sentence carrying "nothing was deleted", naming no Mac door.
+
+### 3 · MINOR — the run ignores `Entry.editable`, walking past two guards the gate enforces one entry over
+**(a) GAP SLOTS — the serious half.** A gap is a block whose variant has
+not arrived (`variantID == nil`, SyncSpec §5). Select-all tombstones it,
+and under tombstone-wins (SyncSpec §6) **the peer's paragraph goes with
+it when the variant lands** — content she has never seen, deleted behind
+a promise the gate makes in words one keystroke earlier ("This block
+hasn't fully synced; it is read-only for now"). The reviewer could find
+this recorded nowhere. **(b) LOCKED TAKES** is squarely covered by
+QUESTIONS #33(a)'s unrestricted-delete ruling and is Mac-inherited — no
+action.
+**RULED for (a): decline a run containing a gap entry.** Applying a
+promise the app already makes aloud is not inventing behaviour, and it
+costs one field read (`variantID == nil`), not a projection. **The
+implementer must REPORT what this means for the Mac** (the brain is
+shared, so the Mac's J9 inherits the decline) — architect adjudicates on
+that report rather than pre-ruling a Mac behaviour change from here.
+
+### 4 · MINOR — the hoisted doc asserts a property false for one of its two callers
+*"Blocks BETWEEN the edges are irrelevant"* is true for the contiguous
+run, false for the Mac's ⌘-click arbitrary pick, where `[b0,b2]` returns
+`b0` — **a block being deleted** — while `b1` survives and is the natural
+landing. Harmless today (the caller no-ops on a missing block) but it is
+now the shared brain's stated rule. **FIX:** scope the doc to contiguous
+runs AND pick the nearest surviving index.
+
+### 5 · MINOR — the perf claim covers the plan but not the landing
+`caretLandingAfterRemoving` does a linear scan per ID — O(N·M), on the
+MainActor, and a select-all makes M = N. The reviewer **reproduced the
+algorithm standalone** (`swiftc -O`): N=1,200 → 10 ms · N=5,000 → 59 ms
+· **N=20,000 → 913 ms**. Her 100k bar is ~1.2k blocks so the bar itself
+is fine — but 20,000 is the ceiling this batch's OWN pin adopts, and
+there it is ~0.9 s of main-thread work the pin does not see. **FIX:**
+one `[String: Int]` (or reuse the `ClosedRange<Int>` the plan already
+computed), and **extend the perf pin to the landing so both halves of
+the claim are measured.**
+
+### 6 · MINOR — the test header over-claims
+*"every behavioural pin below fails on the pre-batch tree"* — but three
+assert what already held pre-batch and cannot be red
+(`typingOverAWholeBlockSpanIsNotADelete`,
+`aSeamBackspaceIsNotAWholeBlockDelete`,
+`aSealedNoteRefusesAndDeletesNothing`). **FIX:** label them boundary
+characterizations and reword the header. *(Third batch running where a
+session's own honesty labelling needed tightening — worth noting the
+ladder catches it every time.)*
+
+### 7 · NIT — the receipt drops the Mac's stranded-original half
+Declining the Mac's sentence verbatim is RIGHT (it names "the Trash"),
+but the FACT is true on the phone and the read behind it is core's
+(`Queries.originalsStrandedBy`). Deleting a divide's two successors
+together is the commonest way to strand one. **FIX:** carry the fact in
+the phone's own words.
+
+### 8 · NIT — the phone's two delete doors disagree about the caret
+The new door lands by identity; the ⋯ door lands nothing. The hoisted
+function takes `[String]`, so the older door can use it with one ID.
+**FIX:** align them.
+
+### 9 · SPECULATIVE — same-note text drag-move is a delete-shaped edit that is not a delete gesture
+If a dragged selection covers whole paragraphs, the source deletion now
+plans a BLOCK delete while the drop lands the text as content (I4).
+Pre-batch it refused and left the source alone. **Unsettleable from the
+repo** — `MobileEditorTextView` configures no drag/drop delegate, so
+whether iPhone-local text drag is reachable is an on-device fact.
+**Experiment recorded** (long-press-drag a two-paragraph selection
+within one note; observe whether the source blocks vanish and whether
+the moved text lands as blocks or as content). **OWNER: this round's
+ledger as M16**, settled at the first device session — it must run on
+her hardware, not the simulator.
