@@ -1101,3 +1101,114 @@ is precisely the forbidden state. Owned here.
 mid-batch gets its owner IN THE SAME COMMIT that records it. §17's
 table was written without one; that is the slip, and the rule is
 restated here so the remaining batches do not repeat it.
+
+---
+
+## 20. LADDER ROUND 1 — FIXES APPLIED (2026-08-21)
+
+Fresh fix session, briefed from §18 alone. **All eight findings fixed;
+M13 and M12 closed alongside.** Suites: core **1350/141** (exact) · Mac
+**1566/272** · mobile **328/64** · Mac spine **63/8** · mobile spine
+**33/7** — the last two exact. All green.
+
+**MAJOR 1's red-on-old is the round's headline.** Reverting only the
+predicate line, the Mac twin printed the reviewer's traced consequence
+verbatim: **`stored → ["Alpha", "Beta beta", "G"]`** — her paragraph
+"Gamma" written to the store as ONE CHARACTER, through the ledger, with
+the totals still agreeing so nothing downstream noticed. A traced
+finding reproduced to the byte is the strongest form this ladder
+produces.
+
+### Architect rulings on the three things the session flagged
+
+**(a) The Mac `bulkPending` clear, done beyond the ask — ENDORSED, keep
+it.** The session applied M13's fix to the Mac as well, unasked, because
+the Mac's gate arms `bulkPending` off the same call and rejects armings
+identically. **That is exactly right, and it is the lesson of batch 1's
+own Mac verdict:** leaving one platform holding the bug the other just
+closed is the latent-twin shape that made this whole batch
+two-platform. An implementer generalizing a fix along a proven
+mechanism is doing the job; it would have been a finding next round
+otherwise.
+
+**(b) `teardown(afterDisarm:)` — the ordering seam. ACCEPTED, with the
+cost named.** The session could not build the hold-open flush seam the
+reviewer asked for without racy timing ("a pin that sometimes
+reproduces is not a pin" — correct), and substituted a defaulted
+synchronous observation parameter production never passes. It flagged
+this as a production-API cost for a test's benefit and asked for a
+ruling. **Ruled: keep it.** Three precedents exist in this codebase
+(`tailIdleSleep`, `sleep`, both canary `assertionHandler`s), the
+default means zero production behaviour change, and it makes a real
+ordering guarantee deterministically observable. **The stronger half is
+the `isolated deinit` it also added** — that closes the timer from the
+other end for every path that never reaches a teardown at all, which is
+belt to the seam's braces.
+
+**(c) `.serialized` would not have fixed finding 4 — the session is
+right and the reviewer's alternative was wrong.** `.serialized` orders
+tests WITHIN a suite; the leak described is cross-suite, so other
+top-level suites would still have run in parallel with the mute in
+force. The `@TaskLocal` is the correct remedy. Recorded because the
+ladder's value depends on findings being adjudicated against mechanism,
+not authority — the reviewer outranks nobody on a point like this.
+
+### M12 — measured, and the disposition is DECIDED
+
+```
+PERF[sim] desyncRecovery(typing) — control 0 · 100k top 0 · 100k end 0  (24 keystrokes/leg)
+PERF[sim] desyncRecovery(walk)   — control 0 · 100k 0
+```
+
+**Zero, everywhere.** With the session's own honest caveat, which is the
+important part: the walk drives the POLICED road (gate, then storage
+edit), so this is evidence about ordinary policed typing and **does not
+exercise the gate-less class M12 actually names** (autocorrect,
+dictation, marked-text commits), which the harness cannot drive.
+
+**RULED:** M12's condition in §19 was "a fix row if it fires in ordinary
+typing, re-owned to 13u if it does not". It does not fire in the road we
+CAN measure, and the road we cannot measure stays unmeasured on a
+simulator by nature. **M12 is re-owned to 13u** (her Feel & polish row —
+which already carries "non-editing pane stability… essential to the app
+feeling good", the same family) **with the caveat attached**, and the
+`desyncRecoveryCount` readouts stay in the perf walk permanently so any
+future regression announces itself. If she ever reports a flicker while
+typing, this row is the first place to look and the counter is already
+wired.
+
+### M15 — NEW ROW: the residue the new predicate leaves (and it may not be exotic)
+
+The session documented, honestly and prominently, what the exact-net
+predicate still admits: **a transaction that starts inside the approved
+range, RUNS PAST ITS END, and nets to exactly the approved change would
+still bind** — the same corruption class as MAJOR 1, narrowed to an
+exact-net coincidence.
+
+**The architect's concern, stated for round 2 to attack:** that
+coincidence may be considerably less improbable than "residue" suggests.
+Her crash's own frame is
+`_deleteBackwardAndNotify:reinsertText:overrideOriginalContextBeforeInputWith:`
+— an API whose PURPOSE is to delete a wider context and reinsert most of
+it. A transaction that deletes more and reinserts the surplus **nets to
+exactly the user's intended deletion by construction.** That is the
+shape the residue admits.
+
+Not a finding — a question, and labelled one. Her observed crashes had
+net −15 against an approved −5 (not exact), so the fixed predicate
+catches what we have actually seen. But nobody has established that the
+exact-net case cannot occur.
+
+**A candidate closure worth assessing, offered as a starting point:** an
+**O(1) boundary check** — after applying an edit, verify that the
+character at the edited block's computed upper bound is still a
+separator (newline) or the document end. Corruption of this class
+misaligns the tiling against the storage's actual newlines, and checking
+one character costs nothing and cannot violate P1. It would catch the
+class the length-agreement oracle provably cannot (both MAJOR 1's traced
+case and this residue leave `documentLength` agreeing).
+
+**OWNER: this round, decided after ladder round 2** — round 2's reviewer
+is briefed to assess the residue's reachability and the boundary-check
+candidate specifically. Deciding on a reviewer's independent read beats
+deciding on the architect's hunch.
