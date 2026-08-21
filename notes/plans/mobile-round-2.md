@@ -557,3 +557,100 @@ recommendation: "coordinate with the investigator holding the owned
 trap pair, since it's one patch"). M2e rides batch 1 (one line). **M2f
 is measurement-first** and rides batch 1's tail as a pin; any fix it
 earns becomes its own row.
+
+---
+
+## 13. THE CRASH TRACE LANDS (2026-08-21) — M1 is PROVEN, and M11 is born
+
+Record: `mobile-round-2-crash-trace.md` (732 lines).
+
+**The trap identities are PROVEN, not inferred.** The investigator
+symbolicated the CRASHED BINARY against its own dSYM (UUID match, built
+2026-08-19 — after the last commit to every file in the fault path, so
+its line numbers cite today's tree) → `BlockRangeIndex.swift:341` and
+`:347`. Line 341 is ambiguous (an array subscript and a precondition
+share it), so it **disassembled the shipped Release binary**: the
+faulting PC is reachable from exactly one branch — `tbnz` on the sign of
+`entries[i].length + delta` — and crash 2's PC is likewise the
+negative-length arm, which means **the tail was open and the deletion
+simply exceeded it**. Both `.ips` `instructionByteStream`s match the
+disassembly word for word. This is as settled as a diagnosis gets.
+
+**The mechanism, stated exactly:** `pendingVerdict` carries an IDENTITY
+(`.block(i)` / `.tail`) and nothing else — no range, no document
+length, no expiry. `storageDidEdit` takes the identity from the GATE
+and the magnitude from a DIFFERENT source (the storage report), and
+never checks that the two describe the same edit. The investigator
+further **proved arithmetically that the `fallbackVerdict` road cannot
+produce either trap**, so the crash REQUIRES a mismatched pending
+verdict. Frames 6–13 show a delete+reinsert composed inside one
+`coordinateEditing:` block, coalescing N mutations into one report
+carrying the net delta — and **the repo has already measured this exact
+class on AppKit** (`EditorFind.swift` M1/M1b: "the process died with
+*Fatal error: editor surface desynced*"). That link is high-confidence
+but labelled SUSPECTED; the record carries the 30-minute instrumented
+experiment that would settle it.
+
+**THE CRUX, and it is a bitter one:** in Release `precondition` is live
+while `assertionFailure` is compiled out — so `desyncRecovery()`, the
+road the code ALREADY names ("the store is truth"), would have been a
+silent re-render. **The crash fires one instruction before the healing
+road it already had.**
+
+**The fix (three parts, smallest first).** Part 1: the mutators return
+`Bool` instead of trapping — the impossible state is still refused, the
+struct still will not hold a negative length, only the DELIVERY changes
+from process death to a value. Part 2: route the `false` to
+`desyncRecovery()` (with a `break` — nothing may re-stamp or autosave
+against bookkeeping just declared untrustworthy), plus an assertion
+seam so the honest road is testable in Debug. Part 3, **the real fix**:
+bind the verdict to its range + document length and reject it
+otherwise, falling through to the proven-safe fallback — this kills the
+QUIETER bug too, where a stale verdict that happens not to go negative
+silently records the wrong block's length and the surface drifts with
+no trap to announce it.
+
+**Pins P1–P4 designed** in the record: P1 is a clean red-on-old with NO
+process death (the oracle for Part 3 — it proves the binding fix rather
+than a crash bandage); P2/P3 reproduce the two crashes exactly; P4
+covers the tail-closed sibling. P2/P3 die on the pre-fix tree by
+design, so they live in their own file — a red-on-old verification run
+must not take the suite's report down with it.
+
+**MAC VERDICT: LATENT, NOT PREVENTED.** `EditorViewModel.storageDidEdit`
+is the same shape line for line and survives on three accidents. **Both
+platforms are fixed in batch 1** (M-B).
+
+### M11 — WHOLE-BLOCK DELETE ON THE PHONE (new ledger row, born here)
+
+The trace flags a consequence the architect must not let pass silently:
+**after the fix, her gesture stops crashing and starts REFUSING.** That
+is strictly better and it is honest — but it is not what she was trying
+to do, which was to delete the text.
+
+The Mac already solved this. `BlockRangeIndex.wholeBlockRun` (13j's J9)
+is in the SHARED brain, and the Mac wires it at
+`EditorSurfaceController.swift:896` — `planWholeBlockDeletion` (pure
+geometry: which blocks does the span cover whole?) → `runWholeBlockDeletion`
+→ the block-delete compound. **The phone has no consumer at all.**
+Grep proves it: outside `BlockRangeIndex.swift` the only references are
+the Mac's controller and the Mac's tests.
+
+So this is **parity, not invention** — MobileSoul §3's inheritance case
+exactly: the brain exists, the Mac's consumer is the reference, the
+phone owes a face. **M11 rides BATCH 1b**, immediately after the crash
+fix, deliberately NOT inside batch 1 — batch 1 stays a tight,
+shippable stability patch she can install the moment it is green.
+
+**The honest limitation, recorded so nobody reports it later as a
+bug:** `wholeBlockRun` requires the span to cover blocks WHOLE (it
+matches on `starts[$0] == range.location`, or one past it for a span
+opened on the preceding separator). A selection that starts MID-block
+and runs to the document end is not a whole-block run, so it will still
+refuse — **on both platforms, identically**. Whether a partial
+multi-block span should merge-then-edit instead of refusing is a
+standing product question on the MAC too; the trace names it
+"13j/13e-shaped, and hers to rule". It is HELD for her sitting bundle,
+not decided here. Her described gesture — deleting a paragraph at the
+end with multiple lines selected — lands INSIDE M11's coverage when the
+selection takes the paragraphs whole, which is the common case.
