@@ -1667,3 +1667,52 @@ within one note; observe whether the source blocks vanish and whether
 the moved text lands as blocks or as content). **OWNER: this round's
 ledger as M16**, settled at the first device session — it must run on
 her hardware, not the simulator.
+
+---
+
+## 25. BATCH 1b FIX BRIEF (staged 2026-08-21; dispatched when batch 2 clears the shared files)
+
+*Self-contained. The fix session reads §24 (the findings, all
+adjudicated), §5, §9, §23 — and the code. Not the architect's context.*
+
+**Sequencing note, recorded as method:** this brief was written and held
+rather than dispatched immediately, because batch 2 was live in
+`MobileWriteView.swift`/`MobileEditorViewModel.swift` and the 1b fixes
+touch the latter. Two sessions in one file is the hazard §16 already
+recorded once this round (an `add -A` sweeping a half-written file).
+**One writer per file, always** — the cost of waiting is minutes; the
+cost of a collision is a corrupted record or a lost edit.
+
+**Fix all nine dispositions in §24.** Notes on the ones with judgement in
+them:
+
+- **MAJOR 1 — the confirm.** Uniform, matching
+  `MobileBlockMenu.deleteConfirmDetail`'s ceremony, through the existing
+  `confirmDestructive` seam, with a **count-aware** detail. Do NOT invent
+  a threshold; her recorded rule confirms for ONE block, so uniform is
+  hers and a threshold would be ours. The copy must obey the phone's
+  standing doctrine: name no Mac door (MobileSoul §4's no-redirect), do
+  not say "gone forever" (these are tombstones, not purges), and promise
+  no recovery the phone cannot deliver. **Pin it on the REAL surface
+  driving the REAL control** — §15's rule, and the reason the Mac's own
+  purge doors shipped dead.
+- **MINOR 3(a) — decline a run containing a gap entry**, then **REPORT
+  what the shared-brain decline means for the Mac** (its J9 inherits it).
+  Do not pre-decide the Mac's behaviour change; propose, and the
+  architect rules on your report.
+- **MINOR 5 — fix the O(N·M) landing AND extend the perf pin to cover
+  it.** A claim with half its surface unmeasured is how this got past
+  batch 1b in the first place.
+- **MINOR 6 — relabel the three boundary characterizations** and reword
+  the header. State honestly which pins are red-on-old and which are
+  regression guards on the new road.
+
+**Do not:** widen the partial-span behaviour (hers to rule); touch
+schema or `Sources/VariorumCore/Sync/`; commit.
+
+**Baselines:** core 1350/141 · Mac 1568/272 · mobile 354/67 · Mac spine
+63/8 · mobile spine 33/7. You touch `Shared/` and Mac code — run both
+platforms plus core and both spines.
+
+**Then the install unblocks:** a fresh Release build carrying the
+confirm is what finally goes to her phone (§24's changed calculus).
