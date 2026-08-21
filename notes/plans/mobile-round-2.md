@@ -389,3 +389,104 @@ findings + dispositions → commits. Repo-first, same turn.)*
   recorded because a 148-commit jump is exactly where a shared-API
   break would hide, and finding it now is worth more than finding it
   mid-batch.
+
+---
+
+## 11. ARCHITECT RULINGS — M5, the home-screen quick note (2026-08-21)
+
+The survey (`mobile-round-2-quicknote-survey.md`) enumerated eight
+forks. Ruled here, repo-first, BEFORE any implementer brief. Her R5
+model is untouched by all of it — these are the shape decisions
+underneath it.
+
+**A5-1 (F5, what ⏎ does) — ⏎ OPENS THE NOTE IN THE EDITOR, and a
+visible door does the same.** Her sentence names both: *"press a button
+to go into the particular note for it"* AND *"still enter to go into
+the full editor with takes and everything."* Both get built — ⏎ is the
+Mac bar's grammar (`QuickEntryBar.swift:68`) and she praised that bar
+by name. Consequence, deliberate: **a newline can never be typed into
+the box**, which collapses F1 in the common case.
+
+**A5-2 (F1, block structure) — ONE BLOCK, minted via `importPost`.**
+Option (a), with the mint routed through `importPost` rather than
+`newBlock` — same cost, strictly better: `importPost` segments whatever
+sits in the box AT MINT TIME, so newline-free typing yields exactly one
+block while a pre-mint PASTE of several paragraphs segments correctly
+for free (AppSpec's bulk-entry-segments-on-entry rule, honored rather
+than special-cased). A paste AFTER the mint lands as content in the one
+block — which is exactly what pasting into an existing block in the
+editor does (I4). REJECTED: (b) needs a one-block-into-N op that does
+not exist (a core change and a new brain — against M-C); **(c) would
+point a second surface at `BlockRangeIndex` during the very round that
+is fixing its crashes** (the survey's own flag, and M-A's spirit).
+
+**A5-3 (F3, the mint threshold) — the first NON-WHITESPACE character
+starts a ~1 s quiet clock, and FOUR occasions mint early:** ⏎ / the
+open door / the app backgrounding / navigating away. The 1 s is hers
+(the ruled model said "~1s" and she took it) and deliberately differs
+from the editor's 2 s idle clock — recorded with its reason rather than
+silently unified: her requirement is *"generous instant saving"*, and
+the editor's 2 s governs a note that is ALREADY durable, which is not
+this case. **The early-mint occasions are the load-bearing half** —
+they are what make her sentence true (*"if the user just closes the
+app, their note should still be saved!"*) instead of true-after-a-
+second.
+
+**A5-4 (F6, the flush) — option (c), the existing
+`AppSession.flushEveryOpenPost()` road; no new registry, and NOT
+`MobileLivenessAuthority`** (wrong category — registering would stand
+the real editor down from the shelf; the survey is right). Order is
+binding: **mint first, then flush** — the flush covers minted text, the
+mint covers the sub-mint window; reversed, the last word is lost.
+**Plus: wrap the background flush in `beginBackgroundTask`.** The
+survey found NONE exists anywhere in the app and `.inactive` is
+unhandled — so today's flush races iOS's suspension with no grant. That
+is a real robustness gap that also protects the EDITOR, so it lands
+here rather than waiting for a batch of its own.
+
+**A5-5 (F6b, the savepoint) — M5 calls the shared savepoint op at
+hand-off** (one line, exactly what the Mac pad does at
+`QuickNoteView.swift:95`); **the phone's general on-leaving FUNNEL
+stays M6's** (PL-11(e)). The op is core, the funnel is the platform's —
+the seam splits where MobileSoul §3 says it should, and M5 does not
+invent a funnel it would then have to un-invent.
+
+**A5-6 (F4, placement) — a FIXED row directly under the path line,
+outside the ScrollView**, so it never scrolls away and never displaces
+the Today button or the starred section (her constraint: the shelf's
+feel must not change around it). **NO AUTOFOCUS** — a deliberate,
+recorded divergence from the Mac's shelf (which opens with the cursor
+already in the bar, R102): raising a keyboard on every phone launch is
+hostile, and the phone's home screen is a place she also just *reads*.
+Tap to focus.
+
+**A5-7 (F7, the icon) — three states (typing → saving → saved),
+present from the first non-whitespace character** so it is continuous
+and never reads as broken by its own absence. It renders through
+`tokens.chromeLabel` like every string on that surface, carries a
+mandatory VoiceOver label (MobileSoul §5.6), and **NEVER mentions
+sync** — the survey's honesty finding stands: this indicator can truth-
+fully claim only "on this iPhone", because offline is normal and the
+sync row owns that state. The "saved" state's spoken label says so.
+
+**A5-8 (F8, navigation) — leaving mints and clears** (the pad's
+closing-files-it grammar). Tab switch, push, or background: the text
+becomes a real note and the box returns empty. Combined with A5-3 this
+closes the un-minted loss window at EVERY exit, which is the whole
+point of her ruling.
+
+**HELD FOR HER (not ruled autonomously) — F2, where a quick note
+lands.** Ruled for the build: **bookless**, the grammar of the Mac bar
+she praised (the Pool lists bookless notes — R29). But the Mac's two
+capture surfaces genuinely disagree (its floating pad files into
+Quicknotes via `fileAsQuicknote`, her own R6-4 ruling there), so
+"should phone quick notes file into a Quicknotes book instead?" is a
+taste call with her precedent on both sides. It is REVERSIBLE in one
+call, so the build proceeds bookless and the question rides the next
+sitting's bundle rather than blocking anything.
+
+**Recorded consequence, accepted:** a multi-paragraph capture typed on
+the MAC's bar and the same keystrokes on the PHONE can differ in block
+structure — but only via paste, since A5-1 makes typed newlines
+impossible in the box. Named here so no future session reports it as a
+bug.
