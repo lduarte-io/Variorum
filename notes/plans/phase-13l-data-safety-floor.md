@@ -255,6 +255,52 @@ spine **63/8** · mobile **314/60**. Mirror at lockstep marker
 the janitor's first sweeps no-op until the horizon passes her
 pre-13j tombstones — expected).
 
+### ⚠️ MAC CODE CHANGED IN THE GAP BETWEEN PHASES (2026-08-21) — her instruction to record it here
+
+**The 13j finals above are NO LONGER the Mac's baseline.** Mobile
+Round 2 (`notes/plans/mobile-round-2.md`, running in the
+`~/dev/variorum-mobile` worktree on branch `mobile`) fixed a crash
+whose brain lives in `App/Variorum/Shared/EditorBrain/` — shared by
+BOTH platforms — so the fix necessarily landed Mac-side too. The
+author asked for this note explicitly: *"is the normal discipline for
+the variorum mac app being handled in regards to phase count since
+this cross platform bug is being handled? please make a note in 13l's
+plan that changes came through in the gap between phases."*
+
+**What changed on the Mac, and why a mobile round touched it:** her
+iPhone crashed deleting a multi-line selection at a note's end
+(`BlockRangeIndex`'s mutators trapping on a stale edit verdict). The
+trace proved the Mac's `EditorViewModel.storageDidEdit` is the SAME
+shape line for line — **latent, not prevented** — and the ladder's
+Mac twin pins then went red on the pre-fix tree, upgrading that from
+suspicion to proof. Leaving the Mac unfixed would have meant
+knowingly shipping a proven crash road, so round-2 principle M-B (a
+shared brain changes once, and BOTH suites run) applied.
+
+**Mac-side files touched:** `Shared/EditorBrain/BlockRangeIndex.swift`
+(four mutators refuse instead of trapping), the new
+`Shared/EditorBrain/EditorEditRouting.swift` (`ArmedEdit` +
+`EditorAssertionSeam`), `Features/Editor/EditorViewModel.swift` (the
+armed-verdict binding + the desync routing), and
+`VariorumTests/{BlockRangeIndexTests,EditRoutingTests,EditRoutingCrashTests}.swift`.
+
+**Mac counts after batch 1: 1546/269 → 1563/272** (+17 tests, +3
+suites, all new pins). Green. *(A ladder fix round is in flight as
+this note is written and may move the number again — **verify with
+your own run**, which this section's own heading already tells you to
+do. That instruction is now load-bearing rather than routine.)*
+
+**Where it lives:** branch `mobile` only. It reaches `main` at the
+next `mobile` → `main` merge, which happens **at her word** (the
+standing rule in `notes/plans/mobile-app-plan.md`). If you are reading
+this on `main` and the files above do not carry the change, that merge
+has not happened yet — pull it or coordinate before assuming a
+baseline.
+
+**No 13l scope is affected** — nothing here touches backups, restore,
+deletion or the purge. The only cost to this phase is the count
+baseline, which is why the note sits in this section.
+
 ## Verification
 
 Per-batch: the standing loop (build → red-on-old pins → the spine
