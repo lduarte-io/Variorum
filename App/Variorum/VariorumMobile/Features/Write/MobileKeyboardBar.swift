@@ -83,6 +83,88 @@ final class MobileKeyboardBarController: NSObject {
     static let stripButtonHeight: CGFloat = 38
     static let stripSpacing: CGFloat = 2
 
+    // MARK: - The bar's VERTICAL geometry (round 2, batch 2 — M4 ≡ R7)
+
+    /// **HER COMPLAINT, verbatim: *"the buttons at the bottom, the three
+    /// of them, also need more generous spacing because they're kind of
+    /// touching the keyboard bar, which is annoying."*** Confirmed the
+    /// same sitting as the resting trio Aa · ⑂ · ⋯.
+    ///
+    /// **THE MECHANISM — measured twice, never guessed** (a windowed frame
+    /// dump of the live toolbar, plus live-simulator captures on
+    /// iPhone 17 Pro / iOS 26.2 via `xcrun simctl io booted screenshot`;
+    /// evidence in the batch record):
+    ///
+    /// 1. **The toolbar's content row is a FIXED 48 pt, anchored at the
+    ///    bar's TOP** — `_UIInheritedView frame=(16, 0, 370, 48)` at a
+    ///    78 pt bar AND at a 104 pt bar. It does NOT follow the bar's
+    ///    height.
+    /// 2. **iOS 26 wraps each item in a glass cell laid out against that
+    ///    48 pt row.** A plain item's cell measures **62 × 48 at y = 0**
+    ///    (`UIPlatformGlassInteractionView`; 52 pt button + the 5 pt
+    ///    inset a side — FIX-5's own horizontal numbers, now with their
+    ///    vertical twin), so it runs to **48 pt below the bar's top**.
+    ///    The expanded strip's cell is **284 × 88 at y = −20** — the
+    ///    capsule is CENTERED on the 48 pt row, so it overhangs 20 pt
+    ///    above and runs to **68 pt below the bar's top**.
+    /// 3. Against the old **44 pt** resting bar the resting cells
+    ///    overflowed 4 pt and the expanded capsule overflowed 24 pt —
+    ///    and the keyboard draws over the overflow. That is exactly what
+    ///    she saw: three circles with sliced bottoms sitting ON the
+    ///    keyboard, and (worse, unreported) the formatting strip's whole
+    ///    SECOND ROW — # · • · ☑ · ⇥ — half-hidden behind it.
+    ///
+    /// **ONE height, because the second one never reached the screen.**
+    /// The bar used to carry `restingBarHeight` 44 / `expandedBarHeight`
+    /// 84 and grow on expand by setting its own frame + `reloadInputViews`.
+    /// That mechanism is DEAD and was proven so: with the expanded height
+    /// set to **160 pt** the captured screen was pixel-for-pixel the 104 pt
+    /// capture (capsule top 436.7 pt, bottom 528.3 pt, keyboard top
+    /// 537.7 pt in both) — UIKit keeps an installed `inputAccessoryView`
+    /// at the height it had when the keyboard presented it, and the strip
+    /// resets to collapsed at every keyboard hide, so **the resting height
+    /// is the only height the screen ever sees**. The old expanded pin was
+    /// green over wiring that never reached a pixel — this round's own
+    /// §15 trap 1. So the grow-on-expand road is retired and ONE
+    /// `barHeight` serves both states, sized for the TALLER of the two
+    /// cells plus air.
+    ///
+    /// Why the trio is not folded into one customView capsule (the FIX-5
+    /// mechanism) instead: that would replace three separate circles with
+    /// one capsule — a LOOK change, and the look is hers to rule. A
+    /// spacing complaint is answered by spacing.
+    ///
+    /// **If a future iOS lays these cells out differently, re-measure**:
+    /// host `makeBar()` in a `UIWindow`, dump the subview frames, and
+    /// re-derive — the numbers below are observations, not contracts.
+    static let contentRowHeight: CGFloat = 48
+    /// A plain bar item's glass cell: 62 × 48 at y = 0 of the content row.
+    static let itemCellHeight: CGFloat = 48
+    /// The glass cell's inset around a customView item, per side.
+    static let stripCellInset: CGFloat = 5
+    /// The air below the lowest cell edge — her "more generous".
+    static let barVerticalAir: CGFloat = 10
+
+    /// The expanded capsule's intrinsic height, DERIVED from the row
+    /// table below (a future row grows the bar with no second edit).
+    static var stripFittedHeight: CGFloat {
+        let rows = CGFloat(formattingRowLabels.count)
+        return rows * stripButtonHeight + max(rows - 1, 0) * stripSpacing
+    }
+
+    /// How far the expanded capsule reaches below the bar's top edge:
+    /// the capsule is centered on the 48 pt content row (measured
+    /// y = −20 for an 88 pt capsule), so its bottom sits at
+    /// `(row + capsule) / 2`.
+    static var expandedCapsuleBottomEdge: CGFloat {
+        (contentRowHeight + stripFittedHeight + 2 * stripCellInset) / 2
+    }
+
+    /// The lowest edge any state draws — the number the bar must clear.
+    static var lowestCellEdge: CGFloat {
+        max(itemCellHeight, expandedCapsuleBottomEdge)
+    }
+
     /// **The strip grew ROWS at parity C4b item 2** (the markdown
     /// vocabulary's remaining acts — strikethrough · inline code · add
     /// link — join the strip INSIDE its capsule, per the brief's LK8
@@ -91,13 +173,13 @@ final class MobileKeyboardBarController: NSObject {
     /// the capsule holds TWO rows — the character acts (× B I S ⟨⟩ 🔗),
     /// then the line acts (# • ☑ ⇥) — the standing seven keeping their
     /// LK8 relative order and the three new acts landing exactly where
-    /// the Mac's act table puts them (after Italic). The bar itself
-    /// grows for the second row while expanded (`expandedBarHeight`;
-    /// `reloadInputViews` carries the new height to the keyboard) and
-    /// returns to the 44 pt resting bar at collapse — the resting bar
-    /// stays Aa · ⑂ · ⋯, byte-untouched.
-    static let restingBarHeight: CGFloat = 44
-    static let expandedBarHeight: CGFloat = 84
+    /// the Mac's act table puts them (after Italic). The bar does NOT
+    /// change height between the states — one `barHeight` hosts both,
+    /// sized for the taller cell plus air (M4 ≡ R7; the vertical-geometry
+    /// block above carries the measured mechanism and why the old
+    /// grow-on-expand road was retired). The resting bar stays
+    /// Aa · ⑂ · ⋯, byte-untouched in its DOORS.
+    static var barHeight: CGFloat { lowestCellEdge + barVerticalAir }
 
     /// The two states' acts, in bar order — one table per state so the
     /// bar and any test walk read the same truth (the registry-walk
@@ -137,8 +219,7 @@ final class MobileKeyboardBarController: NSObject {
     func makeBar() -> UIView {
         let face = MobileEditorStyle.face
         let bar = UIToolbar(frame: CGRect(
-            x: 0, y: 0, width: 320,
-            height: isFormattingExpanded ? Self.expandedBarHeight : Self.restingBarHeight))
+            x: 0, y: 0, width: 320, height: Self.barHeight))
         bar.autoresizingMask = [.flexibleWidth]
 
         let appearance = UIToolbarAppearance()
@@ -281,10 +362,12 @@ final class MobileKeyboardBarController: NSObject {
     }
 
     /// Aa opens the strip; × closes it — one door, two faces, swapping
-    /// the LIVE bar's items in place. Since C4b the expanded capsule is
-    /// two rows deep, so the BAR's height follows the state (the
-    /// keyboard itself never moves; the accessory grows upward and
-    /// `reloadInputViews` tells the input system).
+    /// the LIVE bar's items in place. The bar's HEIGHT does not move with
+    /// the state (M4 ≡ R7 — the geometry block's proven finding: an
+    /// installed `inputAccessoryView` keeps the height it was presented
+    /// at, so the old grow-on-expand road changed a frame and never a
+    /// pixel). `barHeight` already clears the two-row capsule, so the
+    /// swap is items only — and the keyboard never jumps.
     @objc func toggleFormattingDoor() {
         isFormattingExpanded.toggle()
         reloadBarItems()
@@ -292,18 +375,6 @@ final class MobileKeyboardBarController: NSObject {
 
     private func reloadBarItems() {
         bar?.items = barItems(face: MobileEditorStyle.face)
-        applyBarHeight()
-    }
-
-    /// The state's bar height, applied to the LIVE accessory (equality-
-    /// gated; `reloadInputViews` re-reads the accessory's frame).
-    private func applyBarHeight() {
-        guard let bar else { return }
-        let height = isFormattingExpanded
-            ? Self.expandedBarHeight : Self.restingBarHeight
-        guard abs(bar.frame.height - height) > 0.5 else { return }
-        bar.frame.size.height = height
-        textView?.reloadInputViews()
     }
 
     /// The reset-per-presentation half (the ruling's calm default).

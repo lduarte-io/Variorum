@@ -655,15 +655,21 @@ struct MobileMarkdownActsTests {
                 }
             }
 
-            // At rest: the three doors, in order — on the resting height.
+            // At rest: the three doors, in order — on the one bar height.
             #expect(!bar.isFormattingExpanded)
             #expect(labels() == MobileKeyboardBarController.restingActLabels)
             #expect(MobileKeyboardBarController.restingActLabels
                     == ["Formatting", "Takes", "Block"])
-            #expect(toolbar.frame.height == MobileKeyboardBarController.restingBarHeight)
+            #expect(toolbar.frame.height == MobileKeyboardBarController.barHeight)
 
-            // Aa expands IN PLACE (same toolbar instance, items swapped)
-            // — and the bar grows for the second row (C4b).
+            // Aa expands IN PLACE (same toolbar instance, items swapped).
+            // The HEIGHT no longer moves with the state (round 2 batch 2,
+            // M4 ≡ R7): this pin used to assert a taller expanded bar, and
+            // that assertion was green over wiring that never reached a
+            // pixel — an installed `inputAccessoryView` keeps the height
+            // it was presented at (proven: a 160 pt expanded height
+            // captured pixel-identical to 104). One height hosts both
+            // states, and `barHeight` clears the two-row capsule.
             bar.toggleFormattingDoor()
             #expect(bar.isFormattingExpanded)
             #expect(labels() == MobileKeyboardBarController.formattingActLabels)
@@ -671,13 +677,13 @@ struct MobileMarkdownActsTests {
                     == ["Hide Formatting", "Bold", "Italic", "Strikethrough",
                         "Inline Code", "Add Link",
                         "Heading", "Bullet List", "Checklist", "Indent"])
-            #expect(toolbar.frame.height == MobileKeyboardBarController.expandedBarHeight)
+            #expect(toolbar.frame.height == MobileKeyboardBarController.barHeight)
 
             // × collapses back — the round-trip, height included.
             bar.toggleFormattingDoor()
             #expect(!bar.isFormattingExpanded)
             #expect(labels() == MobileKeyboardBarController.restingActLabels)
-            #expect(toolbar.frame.height == MobileKeyboardBarController.restingBarHeight)
+            #expect(toolbar.frame.height == MobileKeyboardBarController.barHeight)
 
             // Reset-per-presentation: an expanded strip collapses when
             // the keyboard goes away, so the next raise starts calm.
@@ -687,6 +693,74 @@ struct MobileMarkdownActsTests {
                 name: UIResponder.keyboardDidHideNotification, object: nil)
             #expect(!bar.isFormattingExpanded)
             #expect(labels() == MobileKeyboardBarController.restingActLabels)
+        }
+    }
+
+    /// **M4 ≡ R7 — the bar clears every glass cell, with air under it.**
+    /// Her words: *"the buttons at the bottom, the three of them, also
+    /// need more generous spacing because they're kind of touching the
+    /// keyboard bar, which is annoying."*
+    ///
+    /// **RED ON OLD, and the mechanism is measured, not assumed.** A
+    /// windowed frame dump of this very toolbar shows iOS 26 laying every
+    /// item's glass cell against a FIXED 48 pt content row anchored at the
+    /// bar's top: a plain item's cell is 62 × 48 at y = 0 (bottom edge
+    /// 48 pt below the bar's top), and the expanded strip's capsule is
+    /// 284 × 88 at y = −20 (bottom edge 68). The pre-fix bar was **44 pt**
+    /// resting — so the resting cells overflowed 4 pt and the capsule
+    /// 24 pt into the keyboard, which drew over them: her three circles
+    /// had sliced bottoms, and the strip's whole SECOND ROW was half
+    /// hidden. On that tree `barHeight` (44) − `lowestCellEdge` (68) is
+    /// NEGATIVE, so every clearance assertion below fails.
+    ///
+    /// The one-height half is its own finding: the bar used to grow on
+    /// expand (44 → 84) by setting its frame and calling
+    /// `reloadInputViews`, and that never reached a pixel — an installed
+    /// `inputAccessoryView` keeps the height it was presented at (proven
+    /// by capture: an expanded height of 160 pt rendered pixel-identical
+    /// to 104). So the two states must share ONE height, and it is the
+    /// resting one, because the strip resets to collapsed at every
+    /// keyboard hide.
+    @Test func theBarClearsEveryGlassCellWithAirBeneathIt() async throws {
+        try await withEditorWorld { session, _ in
+            let postID = try await makePost(session, blocks: ["x"])
+            let (_, surface) = await makeSurfaceEditor(session, postID: postID)
+            let bar = MobileKeyboardBarController(textView: surface.textView)
+            guard let toolbar = bar.makeBar() as? UIToolbar else {
+                Issue.record("the bar is not a toolbar")
+                return
+            }
+
+            // The measured observations, stated so a future iOS that lays
+            // these out differently trips here and gets re-measured rather
+            // than quietly re-clipping her doors.
+            #expect(MobileKeyboardBarController.contentRowHeight == 48)
+            #expect(MobileKeyboardBarController.itemCellHeight == 48)
+            #expect(MobileKeyboardBarController.stripCellInset == 5)
+            #expect(MobileKeyboardBarController.lowestCellEdge
+                    == MobileKeyboardBarController.expandedCapsuleBottomEdge)
+            // "More generous" as a number, not a mood.
+            #expect(MobileKeyboardBarController.barVerticalAir >= 8)
+
+            // The law, on the REAL toolbar, in the state she named…
+            #expect(!bar.isFormattingExpanded)
+            #expect(toolbar.frame.height
+                    - MobileKeyboardBarController.lowestCellEdge
+                    >= MobileKeyboardBarController.barVerticalAir)
+            let resting = toolbar.frame.height
+
+            // …and in the expanded state, whose second row was clipped by
+            // the same defect and is fixed by the same height.
+            bar.toggleFormattingDoor()
+            #expect(bar.isFormattingExpanded)
+            #expect(toolbar.frame.height
+                    - MobileKeyboardBarController.lowestCellEdge
+                    >= MobileKeyboardBarController.barVerticalAir)
+            // ONE height: the grow-on-expand road is retired, so the two
+            // states measure the same (they differed 44 vs 84 before).
+            #expect(toolbar.frame.height == resting)
+            bar.toggleFormattingDoor()
+            #expect(toolbar.frame.height == resting)
         }
     }
 
@@ -740,12 +814,15 @@ struct MobileMarkdownActsTests {
             let tightestAvailable: CGFloat = 375 - 32 - 10
             #expect(strip.bounds.width <= tightestAvailable)
             #expect(strip.bounds.width > 0)
-            // The capsule fits the EXPANDED bar's height — the C4b
-            // second-row axis (a vertically clipped row is the FIX-5
-            // clip with extra steps).
+            // The capsule fits the bar's height — the C4b second-row axis
+            // (a vertically clipped row is the FIX-5 clip with extra
+            // steps). Its measured height IS the derived one the bar sizes
+            // itself from (M4 ≡ R7), so the two can never drift apart.
             #expect(strip.bounds.height > 0)
             #expect(strip.bounds.height
-                    <= MobileKeyboardBarController.expandedBarHeight)
+                    == MobileKeyboardBarController.stripFittedHeight)
+            #expect(strip.bounds.height
+                    <= MobileKeyboardBarController.barHeight)
 
             let rows = strip.arrangedSubviews.compactMap { $0 as? UIStackView }
             #expect(rows.count == 2)

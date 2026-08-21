@@ -643,15 +643,14 @@ final class MobileStructuralController {
     // MARK: - Shared pieces
 
     /// The Takes board's pending-text contract, verbatim (one declared
-    /// act, one contract, however many doors).
+    /// act, one contract, however many doors) — the contract itself moved
+    /// onto the VM at round 2 batch 2, where the copy door became its
+    /// third caller and the refusal sentence had already been written out
+    /// twice (`MobileEditorViewModel.flushPendingText`). Behaviour is
+    /// byte-identical; this is the forwarder its six call sites keep.
     private func flushPendingText() async -> Bool {
         guard let model else { return false }
-        await model.autosave.flushNow()
-        guard !model.autosave.isDirty else {
-            model.report("Unsaved changes couldn't be written — resolve that first, then retry.")
-            return false
-        }
-        return true
+        return await model.flushPendingText()
     }
 
     /// The entry whose CLOSED range [start, end] contains the caret (the

@@ -172,8 +172,14 @@ struct MobileWriteScreen: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel("Rename Note")
                 Spacer(minLength: 12)
-                findDoor
-                sealDoor
+                // The note-tool corner (M3 ≡ R6 joins it): copy · find ·
+                // seal, spaced so three small glyphs stay three separate
+                // taps.
+                HStack(spacing: 14) {
+                    copyDoor
+                    findDoor
+                    sealDoor
+                }
             }
             // The note's primary home reads alone (full width for
             // "in N books"); the FIVE identity chips — date · tags ·
@@ -391,6 +397,27 @@ struct MobileWriteScreen: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Lenses")
+    }
+
+    /// Copy the whole note (round 2 batch 2 — M3 ≡ R6; her ask: *"a button
+    /// added at the top that allows me to copy everything i've written in a
+    /// particular note"*). It sits in the masthead's note-tool corner
+    /// beside find and seal, because what it copies is the NOTE — the
+    /// bar's ⋯ is where block-level acts live, and this is not one.
+    /// Markdown, exactly what export writes; the model's `copyNote` owns
+    /// the flush-first contract and the receipt (this view sends an action
+    /// and nothing else). Works on a sealed note — copying is reading.
+    private var copyDoor: some View {
+        Button {
+            let model = model
+            Task { await model.copyNote() }
+        } label: {
+            Image(systemName: "doc.on.doc")
+                .font(tokens.small)
+                .foregroundStyle(tokens.faint)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Copy Note")
     }
 
     /// Find in note (parity C4b item 3): the masthead's trailing corner

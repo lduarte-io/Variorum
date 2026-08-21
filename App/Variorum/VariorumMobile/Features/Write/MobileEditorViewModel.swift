@@ -707,6 +707,35 @@ final class MobileEditorViewModel {
         statusMessage = message
     }
 
+    // MARK: - The pending-text contract
+
+    /// **ONE declared act, ONE contract, however many doors** — the Takes
+    /// board's rule, HOISTED here at round 2 batch 2. It was already
+    /// living in two places (`lockNote` and
+    /// `MobileStructuralController.flushPendingText`) with the sentence
+    /// written out twice; the copy door would have made three, which is
+    /// the copy-drift class MobileSoul §3 names. Both former homes now
+    /// call this.
+    ///
+    /// Why every door needs it: pending SURFACE bytes must reach the store
+    /// BEFORE a door that writes through an op (the op validates against
+    /// text she cannot see) or READS the store (the read hands back a note
+    /// missing her last seconds — the standing Mac defect, KnownIssues
+    /// "Copy doors read the store past a dirty buffer"). It speaks its own
+    /// refusal, so callers may simply `guard`.
+    static let unsavedChangesRefusal =
+        "Unsaved changes couldn't be written — resolve that first, then retry."
+
+    @discardableResult
+    func flushPendingText() async -> Bool {
+        await autosave.flushNow()
+        guard !autosave.isDirty else {
+            report(Self.unsavedChangesRefusal)
+            return false
+        }
+        return true
+    }
+
     // MARK: - Find in note (parity C4b item 3 — the ⌘F family's phone
     // face: the system find navigator on the Write surface)
 
@@ -717,6 +746,54 @@ final class MobileEditorViewModel {
     /// interaction through the system's own key commands.
     func presentFind() {
         textView?.findInteraction?.presentFindNavigator(showingReplace: false)
+    }
+
+    // MARK: - Copy the whole note (round 2 batch 2 — M3 ≡ R6)
+
+    /// **Her ask, verbatim: *"I also need a button added at the top that
+    /// allows me to copy everything i've written in a particular note."***
+    /// The masthead's ⧉ is the door; `MobileNoteClipboard` owns the shape,
+    /// the words, and the pasteboard (its header carries the reasoning —
+    /// the projection IS the `.md` export, title excluded).
+    ///
+    /// Three things this routing is responsible for, and all three are
+    /// exactly why the door lives here and not in the view:
+    /// 1. **It flushes first.** A copy READS the store, and the surface is
+    ///    deliberately buffer-authoritative while dirty — copying without
+    ///    the flush hands her a note missing the last seconds of typing
+    ///    (the standing Mac defect this app must not re-open; KnownIssues,
+    ///    "Copy doors read the store past a dirty buffer"). The shared
+    ///    contract speaks its own refusal, so a failed flush copies
+    ///    NOTHING and says why, rather than quietly copying stale prose.
+    /// 2. **It carries the open tail**, which no store read can supply
+    ///    (see the file header) — and it decides the tail is content by
+    ///    the app's own `mintableTail` rule, never a second one.
+    /// 3. **It works under the seal.** Nothing below writes a row, and
+    ///    reading stays free under a seal (AppSpec §9's letter) — so a
+    ///    locked note copies exactly like an open one.
+    func copyNote(to destination: MobileClipboard.Destination = .general) async {
+        guard await flushPendingText() else { return }
+        let openTail = mintableTail ? openTailText : ""
+        do {
+            let markdown = try await session.database.read { [postID] db in
+                try MobileNoteClipboard.markdown(
+                    db, postID: postID, openTail: openTail)
+            }
+            report(MobileNoteClipboard.copy(markdown, to: destination).message)
+        } catch {
+            report(MobileNoteClipboard.Outcome
+                .failed(String(describing: error)).message)
+        }
+    }
+
+    /// The open tail exactly as the surface holds it right now — read from
+    /// the storage, never from a cached copy, so a door asking mid-typing
+    /// gets the characters on screen. (`syncTailText` keeps `tailText` in
+    /// step for the crystallization brain; this is the same read, on
+    /// demand, and the two share one expression.)
+    var openTailText: String {
+        guard let range = index.tailRange else { return "" }
+        return viewText(range)
     }
 
     // MARK: - The block list's jump (parity C4b item 5 — the in-note
@@ -764,11 +841,7 @@ final class MobileEditorViewModel {
     /// class the flush-first contract exists to kill), and the seal's own
     /// auto-commit insurance can only insure what the store holds.
     func lockNote() async {
-        await autosave.flushNow()
-        guard !autosave.isDirty else {
-            report("Unsaved changes couldn't be written — resolve that first, then retry.")
-            return
-        }
+        guard await flushPendingText() else { return }
         await setSeal(locked: true)
     }
 
@@ -1532,11 +1605,7 @@ final class MobileEditorViewModel {
     }
 
     private func syncTailText() {
-        guard let range = index.tailRange else {
-            tailText = ""
-            return
-        }
-        tailText = viewText(range)
+        tailText = openTailText
     }
 
     /// The one mutating door for programmatic slot/tail replacement.
