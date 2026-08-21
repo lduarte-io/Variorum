@@ -490,3 +490,70 @@ the MAC's bar and the same keystrokes on the PHONE can differ in block
 structure — but only via paste, since A5-1 makes typed newlines
 impossible in the box. Named here so no future session reports it as a
 bug.
+
+---
+
+## 12. THE STABILITY SURVEY LANDS (2026-08-21) — M2's scope, set
+
+Record: `mobile-round-2-stability-survey.md`.
+
+**THE ARCHITECTURE VERDICT SHE ASKED FOR (answer it plainly in her
+handoff):** *solid — and the crashing is not evidence against it.*
+Identity lives in one pure value type, not in text attributes; every
+decision is pure, shared with the Mac, and tested headlessly; liveness
+is one authority with one live editor; every list is windowed with a
+probe row and a visible truncation marker; the 100k proving ground is
+armed with a 250 MiB ceiling. The trap surface is unusually clean —
+**zero `try!`**, one benign `as!`, nine force-unwraps (five Spike-only,
+two static URL literals, two on valid `URLComponents`), no dictionary
+force-lookups, no `first!`/`last!`/`removeFirst`. That cleanliness is
+precisely why the crash is *identifiable* rather than diffuse.
+
+**INDEPENDENT CORROBORATION OF THE MECHANISM.** This survey and the
+crash trace were run blind to each other and reached the same root
+cause: `shouldChangeText` computes a verdict against the PRE-edit index
+and parks it in one bare property (`pendingVerdict`); `storageDidEdit`
+consumes whatever is sitting there. **Nothing binds the verdict to the
+edit it was computed for** — no range, no document length, no
+generation counter. iOS batches autocorrect/dictation into replacements
+wider than the keystroke that triggered them (MobileSoul §5.2 names
+this a platform truth), and `MobileMarkdownActs` has an arming path
+with an early return that can leave the slot armed. `fallbackVerdict`
+cannot rescue it: it only runs when the slot is `nil`.
+
+**THE CRASH CLASS IS WIDER THAN HER REPORT** — which is exactly what
+she suspected (*"there might be more cases that trigger it"*). Two more
+reachable traps of the same mechanism, both everyday gestures:
+
+| # | Trap | Gesture that reaches it |
+|---|------|------------------------|
+| M2a | `BlockRangeIndex.swift:353` `openTail()` | **Return at the end of a note** |
+| M2b | `BlockRangeIndex.swift:358` `closeTail()` | **Return, then Backspace** (an ordinary correction) |
+| M2c | `MobileEditorViewModel.swift:1075` `index.entries[entryIndex]` | the same room's second door; `applyBlockEdit` traps first |
+
+**M2d — `desyncRecovery()` fires `assertionFailure` on the app's own
+HEALING path** (`MobileEditorViewModel.swift:1095`, and :1077's
+"editable entry without a variant"). Debug-only, but the consequence is
+sharp: **her Xcode drops crash on a state that Release silently and
+correctly recovers from**, so Debug crash reports may have been masking
+the real ones. The healing road must not assert — that is the road M-A
+sends refusals down.
+
+**M2e — the TK2 canary's 30-second repeating `Timer` is never
+invalidated in production** (`disarmCanary()` has only test callers):
+one orphaned main-run-loop timer accumulates **per note ever opened**.
+One line. Batch 1.
+
+**M2f — `MobileReadNoteView` virtualizes per NOTE, not within one** —
+a 100k-word note materializes a full `AttributedString` set plus a
+`Text` per paragraph, and `MobilePerfWalkTests` has **zero** Read
+coverage. Against MobileSoul §2's memory bar. **Measure before building
+anything** — the pin comes first, and the fix only if the number earns
+it (no speculative optimization).
+
+**Ledger update:** M2 resolves into **M2a–M2f above**, all owned. M2a–M2d
+ride BATCH 1 with M1 (one patch, one mechanism — the survey's own
+recommendation: "coordinate with the investigator holding the owned
+trap pair, since it's one patch"). M2e rides batch 1 (one line). **M2f
+is measurement-first** and rides batch 1's tail as a pin; any fix it
+earns becomes its own row.
