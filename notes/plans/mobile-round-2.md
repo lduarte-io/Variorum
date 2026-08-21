@@ -846,3 +846,105 @@ paths to one row raises confidence that batch 1b is correctly placed.
 **Standing instruction to every batch implementer from here:** the
 inventory record is the file-level truth for your rows; this table only
 says which batch owns them. Read your rows there in full.
+
+---
+
+## 17. BATCH 1 RECORD (2026-08-21) — the crash is fixed, both platforms
+
+**Built:** exactly §14's brief. Parts 1–3 + the assertion seam + M2e, in
+`BlockRangeIndex.swift`, the new `Shared/EditorBrain/EditorEditRouting.swift`
+(`ArmedEdit` + `EditorAssertionSeam` — Shared because both platforms
+need them, M-C), both view models, and `MobileEditorTextView`.
+
+**Two improvements on the brief, both justified and adopted:**
+- **Overflow folded into the same guard.** The disassembly of her
+  crashed binary showed a live `b.vs` overflow trap beside the sign
+  test; an unrepresentable sum is exactly as much "this delta does not
+  describe me" as a negative one, and it costs one branch.
+- **`return`, not `break`, on the desync road.** The post-switch work
+  (markdown restyle, identity audit, canary checkpoint, chrome refresh)
+  is follow-up for a SUCCESSFULLY routed edit, and `desyncRecovery()`
+  re-does every bit of it over the store's truth. Running the identity
+  audit against bookkeeping just declared untrustworthy would fire a
+  SECOND assertion on the honest road. The pre-existing `case .refuse:`
+  arm gets the same treatment.
+
+**RED-ON-OLD, verified by behavioural revert (the deliverable, not a
+formality).** P1 red with no process death (the Part-3 oracle: stale
+`.block(0)` applied to the wrong entry, `identityAuditFailures → 1`);
+**P2 and P3 red by process death with their `.ips` frames reproducing
+her 13:59:27 and 15:52:43 logs' frames 0–2 EXACTLY**; P4 red; M2e red;
+six pure mutator pins red, each isolated; **the Mac twins red the same
+way — the Mac's latent exposure is now PROVEN, not suspected.**
+
+**Honesty worth recording:** the implementer explicitly refused to count
+nine tests as pins because they are green on both trees by construction
+(six `ArmedEditTests` covering a type that does not exist pre-fix, and
+three "the fix is not a blanket discard" guards that exist to stop the
+binding from being satisfiable by throwing every arming away). Naming
+them as coverage rather than pins is exactly the discipline the
+hallucination guard asks for.
+
+**It also caught a flaw in the trace's own pin design:** P1 as written
+used `typeEdit(...)` for its second edit, which calls `shouldChangeText`
+and RE-ARMS the slot — overwriting the stale verdict before it could be
+consumed, so the pin could never have gone red. The mechanism only
+shows when the second edit is GATE-LESS (the real autocorrect /
+dictation / marked-text shape). Both P1s were rebuilt that way. Recorded
+because the trace is otherwise near-flawless and a future reader should
+not trust its §7 verbatim on this one point.
+
+**Suites (all green, no reds of any kind):** core **1350/141** (exact
+baseline) · Mac **1563/272** (+17 tests, +3 suites, all this batch's) ·
+mobile **323/63** (+9, +3) · Mac spine **63/8** (exact).
+
+**Mobile-spine count RECONCILED by the architect** (the implementer
+flagged the ambiguity and declined to claim it — correct): §9's baseline
+listed only "spine 63/8", which is the MAC spine. The mobile spine is
+`MobileTutorialWalkTests` (25 tests / 6 suites) **+** `MobileWalkTests`
+(8 / 1) = **33/7**, exactly the parity round's recorded figure. Nothing
+is missing and nothing regressed. §9's baseline line should name both
+spines explicitly from here.
+
+### M2f — the Read measurement (measure-only, as briefed; nothing built)
+
+Simulator iPhone 17 Pro / 26.2, the 100k proving-ground fixture:
+
+```
+READ(100k note)    source 632,468 chars · read+join 13.5 ms · 1,700 paragraphs
+                   · transform 312.0 ms · TOTAL 325.5 ms
+READ(control)      source  25,393 chars ·    69 paragraphs · transform  13.0 ms   (24.1×)
+READ memory        start 95 MiB → +1 after read+join → +1 after transform
+```
+
+**The finding is the TIME, not the memory** — which inverts the
+survey's suspicion and is why measure-first was the right call.
+Footprint moved 1 MiB at MiB granularity, so the `AttributedString` set
+is not a jetsam risk at this scale. But **312 ms of transform runs on
+the MAIN ACTOR** (`MobileReadNoteView`'s `.task` resumes there after the
+DB `await`) — a visible hitch when that row scrolls in, linear in the
+note's own length. Un-measured: the SwiftUI `Text`-per-paragraph sizing,
+which needs a rendered view.
+
+### New ledger rows born in this batch
+
+| # | Item | Why it is a row |
+|---|------|-----------------|
+| **M12** | A **gate-less INSERTION** whose widened `didProcessEditing` report overflows its owning entry cannot be routed by `fallbackVerdict` and takes a `desyncRecovery()` — an honest re-render, never a crash, and it behaves identically with and without batch 1. **Pre-existing and untouched.** The implementer MEASURED the platform difference behind it: iOS widens an insertion's report (a 1-char insert at offset 8 reported `{8, 9}`), AppKit does not; a deletion's report is exact on both. **This may be a real source of "the note flickered" on her phone.** Needs a ruling — a re-render is honest but it is not free | traced, measured, un-owned |
+| **M13** | `bulkPending` is armed at the gate for a `.tail` paste and is not cleared when that arming is later REJECTED at consume time — a state that could not exist before batch 1. Consequence: bulk segmentation semantics on a subsequent crystallization. Deliberately left alone (clearing it is a behaviour change beyond the brief) | new, small, honestly self-reported |
+| **M14** | The M2f Read hitch above: 312 ms main-actor transform per 100k-word Read row. **Measured, nothing built** — a fix only if the number earns it, and the decision is a P1/P3 call | measured, un-owned |
+
+**Corrections the implementer made to the RECORDS (verified, adopted):**
+the trace's §9 overstated one Mac exposure —
+`EditorSurfaceDelegate.shouldChangeTextInRanges:` already refuses
+`count != 1` outright, so the batched multi-range gate never arms a
+verdict for N ranges; the Mac's real residual is the arm-then-hand-off
+sites in `MarkdownActs`.
+
+**Deliberately NOT done, each with a reason:** no arming clear at the
+`suppressEditProcessing` early return (the binding plus three structural
+disarms cover it; a clear there would change programmatic-write
+behaviour with no traced need); `range(ofEntryAt:)`'s
+`preconditionFailure`, `transferTailPrefixToLastEntry` and `crystallize`
+untouched (survey-verified guarded, and the brief named four mutators);
+no Read optimization; no M11; no gesture widening.
