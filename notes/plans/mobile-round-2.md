@@ -1212,3 +1212,154 @@ case and this residue leave `documentLength` agreeing).
 is briefed to assess the residue's reachability and the boundary-check
 candidate specifically. Deciding on a reviewer's independent read beats
 deciding on the architect's hunch.
+
+---
+
+## 21. BATCH 1 LADDER — ROUND 2 (2026-08-21): the ladder CLOSES
+
+Fresh cold reviewer, `REVIEW_PROMPT.md` verbatim, target `5cc2f6f` and
+the batch as a whole. **NO new BLOCKER. NO new MAJOR. All eight round-1
+fixes hold.** Four NITs + the M15 verdict. Per the ladder rule (round 3
+is earned only by a NEW BLOCKER/MAJOR in round 2), **the ladder closes
+at round 2.** The NITs are fixed without a further round.
+
+It ran the pins itself again rather than trusting the record (Mac
+`MacEditRoutingTests` 4/1; mobile binding + bulk-arming + canary
+teardown 10/3; `ArmedEditTests` 8/1 — all TEST SUCCEEDED), and
+re-derived the predicate arithmetic by hand.
+
+### M15 — THE ARCHITECT'S CONCERN IS REFUTED. Row CLOSED, not built.
+
+I asked round 2 to attack my own hunch that
+`_deleteBackwardAndNotify:reinsertText:overrideOriginalContextBeforeInputWith:`
+would net to exactly the approved delta *by construction* and so make
+the residue the normal case. **It does not, and the reviewer showed
+precisely where the reasoning slips:**
+
+> `describes` never compares the report to the user's **intent** — it
+> compares it to **the arming's own** `replacementLength - range.length`.
+> In the composed case the arming is one sub-mutation, not the gesture.
+
+Three exhaustive cases, each traced:
+
+1. **One gate consult covering the union** — then `verdict(replacing:)`
+   already policed the union for containment (it refuses any range not
+   fully inside one region, and a refusal nils the arming), and `delta`
+   matches by construction. Correct, not residual.
+2. **The last of several per-sub-mutation consults** — the arming's
+   arithmetic is that SUB-mutation's while the report's delta is the
+   UNION's. They are equal only if every other sub-mutation nets zero —
+   **and that case is benign, traced on the fixture**: restoring the
+   crossed characters is exactly what `overrideOriginalContextBeforeInputWith:`
+   is for, and restoring them means the tiling never moved.
+3. **Backward widening** — the selector re-establishes context BEFORE
+   the input point *by its own name*, so the report's `location` is
+   EARLIER than the approved range and **guard 3 rejects it outright
+   whatever its net.** Worked example given.
+
+**What genuinely survives** is a forward-extending transaction netting
+exactly zero on the far side of a separator *without* being a
+byte-identical restoration. The reviewer can name no iOS road that does
+this and labels it SPECULATIVE, declining to prove a universal negative
+about UIKit. **The settling experiment is named** (log each consult's
+`(range, replacementLength)` and each report's `(editedRange, delta)`;
+flag any report whose OLD span extends past the last consult's
+`range.upperBound`) — and it **must run on her iOS 26.6 device, not the
+26.2 simulator**, since it is an input-path question (§9's recorded gap).
+
+**RULED: M15 is CLOSED as not-reachable.** No build row on reachability
+grounds — the reviewer's own verdict, and I accept it against my hunch.
+This is the ladder working: I declined to build on suspicion, asked, and
+was shown wrong with a mechanism. Recorded in full so no future session
+re-raises it without new evidence.
+
+### M15 Q2 — the boundary check: two of three adopted
+
+The check **does** catch what both existing oracles are blind to
+(verified: on MAJOR 1's traced corruption, `documentLength` agrees and
+the audit computes clean, but the character at the entry's upper bound
+is `a`, not `\n`). Three qualifications land it differently than I
+framed it:
+
+- **(a) It is partial** — under **I4** internal newlines are content, so
+  a boundary that slips onto a block-INTERNAL newline passes silently.
+- **(b) It is blind to the delta-0 half** — and there is a **strictly
+  cheaper, complementary fix**: guard 3's upper bound is inclusive, so a
+  report starting exactly at a non-empty approval's `upperBound` with a
+  matching net still binds, and at `delta == 0` every oracle passes
+  while the WRONG block's text reaches `recordAutosave`. **Tighten to
+  `editedRange.location < range.upperBound` when `range.length > 0`,
+  keeping `<=` for the empty/insertion case.** One token. Both measured
+  iOS widenings keep `location` fixed and grow only `length`, so no
+  legitimate report is lost.
+- **(c) "O(1)" needs three implementation constraints** or it becomes a
+  P1 hazard: hoist the offset `recordAutosave` ALREADY computes (which
+  removes a duplicate O(entries) walk — net cheaper); read through
+  `storage.mutableString.character(at:)`, never a `storage.string`
+  bridge (that would be O(document) per keystroke at the 100k fixture);
+  and place it BETWEEN the mutator returning true and
+  `restampProjection`/`recordAutosave`, since after them it reports a
+  corruption it already let through the ledger.
+
+**A better home, recommended and ADOPTED:** `auditIdentityProjection()`
+already walks the tiling per edit in DEBUG and **already reads storage
+at exactly this offset** — it asserts the separator carries no block ID
+but never that it IS a separator. One comparison: free, Release-
+stripped, catches MAJOR 1's class AND M15's, and fires the existing
+`identityAuditFailures` counter the pins already read — landing the
+alarm in her Xcode drops, which is where the seam's doc comment says
+this project wants to find these. **Plus a pre-existing hole to close
+while there:** the walk's `guard range.length > 0 else { continue }`
+skips an EMPTY entry's separator entirely, so an empty block's boundary
+is currently unaudited.
+
+**RULINGS:** adopt **(1)** the guard-3 tightening and **(2)** the DEBUG
+audit completion + the empty-entry hole — both cheap, both traced-value.
+**(3) the Release-side boundary check is HELD FOR HER** (§22): the
+reviewer frames it honestly as *defence-in-depth against an untraced
+class, not a fix for a live bug*, which is exactly the call the
+hallucination guard reserves — and "do I want a Release-side belt
+protecting my prose against a class nobody can reach today" is a
+risk-appetite question about her own writing, not an architect's.
+
+**Pin honesty, adopted verbatim:** no red-on-old pin exists for the
+residue because no input produces it — a pin written "for M15" is the
+hollow pin CLAUDE.md dismisses. **The valuable pin is the FALSE-POSITIVE
+guard**: the attribute-widening fixture, the tail gestures, a block
+whose text ends with a newline, an empty block, and the 100k typing walk
+must all leave the counter at zero.
+
+### The four NITs — ALL ACCEPTED
+
+1. **Six new compiler warnings** from removing `@discardableResult`
+   (verified by clean build into isolated DerivedData). The warning
+   finding 2 bought as a future signal arrives pre-diluted by six
+   permanent instances of itself. **Fix:** `_ =` at each, which also
+   makes the discard deliberate rather than incidental — the finding's
+   own reasoning.
+2. **The rewritten doc comment says "Two things must hold" then lists
+   THREE.** In the very comment rewritten to stop claiming a
+   completeness it lacked, in a file whose comments are load-bearing
+   records. **Fix:** "Three things".
+3. **`applyDifferential` is now the ONLY storage-writing road on the
+   phone with no canary checkpoint** — its siblings all have one, so a
+   TK2→TK1 downgrade caused by a differential rewrite is detected only
+   at the next keystroke or the ≤30 s tick, which is the exact latency
+   NIT 6 was filed to remove. Pre-existing, but NIT 6's fix claims to
+   close the obligation and this is the road left open. **Fix:** one
+   line.
+4. **`bulkPending`'s lifetime is bound to `pendingEdit`'s only on the
+   CONSUME road** — the gate refusals and the structural disarms leave
+   it armed. SPECULATIVE as a bug (the reviewer could trace no reachable
+   road), filed because it is precisely the shape NIT 8 was ruled on.
+   **Fix: clear it beside each `pendingEdit = nil`** — the same doctrine
+   I ruled for NIT 8, applied consistently rather than selectively.
+5. **§20's own claim overreaches, and the reviewer caught my record, not
+   the code.** I wrote that the `desyncRecoveryCount` readouts "stay in
+   the perf walk permanently so any future regression announces itself"
+   — but both are bare `print(…)` with **no oracle**, so a regression
+   announces itself only to a human reading that log line. **Fix: add
+   the `#expect`** (every leg measured exactly 0, so the oracle is free)
+   — which makes my sentence true, rather than softening the sentence to
+   match a weaker mechanism. A claim and its mechanism should not
+   disagree.
