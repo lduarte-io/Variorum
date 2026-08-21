@@ -948,3 +948,136 @@ behaviour with no traced need); `range(ofEntryAt:)`'s
 `preconditionFailure`, `transferTailPrefixToLastEntry` and `crystallize`
 untouched (survey-verified guarded, and the brief named four mutators);
 no Read optimization; no M11; no gesture widening.
+
+---
+
+## 18. BATCH 1 LADDER — ROUND 1 FINDINGS (2026-08-21)
+
+Fresh cold Opus reviewer, `notes/REVIEW_PROMPT.md` verbatim, zero
+framing, target `0926745`. **It ran the new pins itself** (mobile 8/3,
+Mac 36/4, both TEST SUCCEEDED) rather than trusting the record — the
+posture this ladder exists to buy.
+
+**ARCHITECT'S ADJUDICATION: all eight findings ACCEPTED. Zero disputes.**
+Finding 1 is a genuine MAJOR and is, on its own terms, **worse than the
+crash this batch fixed** — a crash is loud and loses nothing committed;
+this loses her prose silently.
+
+### 1 · MAJOR — `describes` bounds the report's MAGNITUDE and START, never its EXTENT → silent identity corruption + a wrong autosave
+
+`EditorEditRouting.swift:91–96`. A coalesced transaction that BEGINS
+inside the approved range and RUNS PAST the region's end is still
+consumed. Traced on the pins' own fixture: arm `.block(2)` for `(16,5)`;
+one transaction replaces `(16,11)` — crossing the tail separator — with
+7 characters, reporting `editedRange (16,7)`, `delta −4`. All three
+guards pass. `applyBlockEdit(at: 2, lengthDelta: −4)` succeeds.
+**`index.documentLength` and `storage.length` then AGREE at 23** — so
+the length check everything downstream leans on is satisfied — and
+`restampProjection` walks the corrupted index and stamps consistently
+with it, so **`auditIdentityProjection`'s Debug oracle computes clean
+and does not fire either.** Then `recordAutosave(entryIndex: 2, …)`
+reads `viewText((16,1))` and records **her paragraph "Gamma" overwritten
+with ONE CHARACTER**, through the ledger, so echo detection will not
+notice. **The same hole is open for insertions**: for `delta >= 0`,
+`-delta <= range.length` is vacuously true, so an arming can absorb
+unbounded growth.
+
+**Why this is not theoretical:** her own crash stack's frame 12 is
+`_deleteBackwardAndNotify:reinsertText:overrideOriginalContextBeforeInputWith:`
+— a delete COMPOSED WITH A REINSERTION — and her transactions
+demonstrably crossed two separators. A pure deletion is safe (guard 2
+catches over-deletion); it is precisely the delete-plus-reinsert shape
+**her logs name** that slips through. The predicate arithmetic and the
+downstream consequences are PROVEN by reading; whether iOS emits exactly
+this transaction is SUSPECTED, with her stack as the evidence.
+
+**The doc comment at `:66–89` claims completeness** ("Three questions,
+one per way the arming goes stale"). It is complete only for pure
+deletions — so the comment must change with the code.
+
+**RULED FIX** (the reviewer's, adopted): carry the approved
+replacement's UTF-16 length in `ArmedEdit` and require the net change to
+be **exactly what was approved** — `delta == replacementLength - range.length`.
+Both gates already have it in scope. Attribute-fixing widens
+`editedRange` but NEVER `delta`, so the measured iOS widening still
+binds (and `aReplacementWidenedByAttributeFixingIsStillDescribed` still
+passes). This SUBSUMES guard 2. Every composed transaction falls through
+to `fallbackVerdict`, which the trace's §3a proves safe.
+
+### 2 · MINOR — `@discardableResult` re-opens the hole by omission
+`BlockRangeIndex.swift:365/374/384/391`. All eight current call sites
+guard the Bool (grep-verified), so nothing is broken today. But Part 1's
+whole point is that a caller MUST react to a refusal, and the attribute
+tells the compiler not to warn when a future one doesn't — **which is
+exactly how the pre-fix `precondition`s shipped.** Nothing needs it.
+**Delete all four.**
+
+### 3 · MINOR — M2e's disarm sits after an unconditional `await`, and its pin structurally cannot see it
+`MobileEditorViewModel.swift:196–207`. `teardown()` awaits `finish()`
+(a real DB round trip) before `textView?.disarmCanary()`; `textView` is
+weak and the canary is the text view's. The only production path is a
+NavigationStack pop, where SwiftUI releases the representable
+concurrently — if the view goes first the disarm never runs and the
+30 s timer survives for the process's life, **which is the accumulation
+the row exists to close.** The pin holds the surface strongly across the
+await, so it cannot observe this. **Move the disarm to teardown's first
+line** (nothing in `finish()` uses the canary) and/or invalidate from
+`deinit`; pin the ordering with a controllable flush seam.
+
+### 4 · MINOR — the assertion seam is process-global state muted across `await`s in a PARALLEL runner
+`EditorEditRouting.swift:118–122`. The muting helpers set a global
+handler and run an async body; the crash suites mute across up to 400
+sleeps. Swift Testing parallelises suites and neither new suite is
+`.serialized`. **Any other `@MainActor` test scheduled during those
+suspensions runs with the editor's three Debug assertions silently
+disabled** — the oracle turned off nondeterministically in whichever
+tests interleave. **Fix: make the override a `@TaskLocal`** (it
+propagates into `desyncRecovery`'s `Task {}` and every synchronous
+fire), or mark both suites `.serialized`.
+
+### 5 · MINOR — M12/M13/M14 were recorded with NO batch and NO owner
+**This one is the architect's own slip**, and the reviewer is right to
+call it against §6's own heading ("every row owned") and CLAUDE.md's
+no-blank-owner rule. Fixed in §19 below. The reviewer also
+INDEPENDENTLY confirmed M13's consequence: `bulkPending` armed at `:999`
+is not cleared when the arming is rejected at `:1028`; a following
+`.refuse` returns early at `:1083` leaving it armed, and the next
+`crystallizeIfNeeded` mints `.bulk(mode)` instead of `.typing` — **a
+one-shot wrong segmentation kind, no data loss.**
+
+### 6 · NIT — the five new `return` roads skip `canaryCheckpointAfterMutation()` for a mutation that DID reach storage
+TEXTKIT2_NOTES §4 practice 3 makes the canary an obligation after every
+processed storage edit. A TK2→TK1 downgrade caused by that edit is now
+detected only when `desyncRecovery`'s async `renderFull` lands. Correct
+in the end, later than the obligation reads. One line before each
+`return`.
+
+### 7 · NIT — assertion messages lose their call-site `#file`/`#line`
+All three distinct Debug conditions now report `EditorEditRouting.swift`
+and become indistinguishable by location. `file: StaticString = #fileID,
+line: UInt = #line` on `fire` restores it at zero cost.
+
+### 8 · NIT — `displaySlot` is a fourth index-replacement door without the structural disarm
+`MobileEditorViewModel.swift:953`. A take flip to an EQUAL-LENGTH take
+leaves `documentLength` unchanged, so the consume-time guard cannot see
+the move. The reviewer could trace no wrong outcome and files it as
+consistency, not a bug. **ARCHITECT RULES: adopt the disarm anyway** —
+the fix's own doctrine is "clear the arming at every index-replacement
+door", and adding one line is cheaper than maintaining an explanation of
+why one door differs.
+
+### The clean bill (recorded — it tells later rounds where NOT to spend)
+
+Each mutator's new `guard` diffed against the precondition it replaced:
+**guarantees preserved exactly**, bounds and overflow are new refusals
+and not new permissions, M-A honoured. All eight call sites react to the
+Bool. The structural disarms cover every index-write door on the Mac
+(`self.index =` appears exactly once). **P4's structural belt is
+genuinely load-bearing** — after the idle mint `documentLength` is 27 on
+both sides, so that guard could not have caught the closed-tail arming.
+`fallbackVerdict` untouched, so the trace's safety lemma still holds as
+the escape road. `return`-not-`break` loses nothing permanent (every
+skipped step is re-run by the render paths). **No new P1 cost class** —
+`describes` adds one O(entries) walk to a gate that already did one per
+keystroke. M-D held: zero schema, zero `Sync/`. M2f is genuinely
+measure-only (the probe asserts liveness, no budget).
