@@ -86,7 +86,65 @@ door of deletion, and to allow for command clicking to select
 multiple items and deleting all of them." Build, opening the phase
 (the 13e mini-round precedent):
 
-- **FIRST ACT — the DEAD Delete Now door (her live report,
+- **FIRST ACT — A FABLE COLD REVIEW OVER EVERY MAC CHANGE MOBILE ROUND 2 MADE (author instruction, 2026-08-21).** Her words:
+
+  > *"i'd also update 13l that its first act will be running a fable
+  > cold reviewer over all the changes that happened to the mac app
+  > during this phase though - seems like we have several items hoisted
+  > out so they can be shared and reused."*
+
+  **Why she asked for it:** Mobile Round 2 fixed a crash whose brain is
+  shared, and in doing so it moved real logic OUT of Mac-app-local files
+  into `App/Variorum/Shared/EditorBrain/` so both platforms could use
+  one rule. Those hoists were each verified by the Mac suite riding
+  unmodified — a good proof that behaviour did not change — but **no
+  cold reviewer has ever read the Mac side of that work with Mac eyes.**
+  The mobile round's own ladders reviewed it as mobile work.
+
+  **Cast: FABLE, her word.** (Mobile Round 2 ran all-Opus because her
+  Fable credits were low; she has named Fable for this review
+  specifically. Confirm the cast at kickoff as always — if Fable is
+  still constrained, that is a kickoff conversation, not an assumption.)
+
+  **The reviewer runs `notes/REVIEW_PROMPT.md` VERBATIM** over the Mac
+  half of the round's diff, cold, with no framing.
+
+  **THE MANIFEST OF WHAT CHANGED MAC-SIDE** — *the mobile round's
+  closeout COMPLETES this list; it is partial until then, because that
+  round was still running when this section was written*:
+
+  - `Shared/EditorBrain/BlockRangeIndex.swift` — the four mutators
+    (`applyBlockEdit`, `applyTailEdit`, `openTail`, `closeTail`) now
+    REFUSE (return `Bool`) instead of trapping on a `precondition`;
+    bounds and overflow folded into the same guards. **Hoisted IN:**
+    `wholeBlockDeletion(covering:replacement:)` and
+    `caretLandingAfterRemoving(_ blockIDs:)`, lifted out of
+    `EditorSurfaceController`.
+  - `Shared/EditorBrain/EditorEditRouting.swift` — **NEW.** `ArmedEdit`
+    (the gate's verdict bound to the range, document length and
+    replacement length it was computed for) and `EditorAssertionSeam`.
+  - `Variorum/Features/Editor/EditorViewModel.swift` — consumes
+    `ArmedEdit`; routes a refused mutation to `desyncRecovery()`;
+    structural disarms; `bulkPending` cleared beside each arming clear.
+  - `Variorum/Features/Editor/EditorSurfaceController.swift` — its two
+    whole-block-delete functions became one-line delegates to the
+    hoisted versions. **EXPECTED TO GROW:** the round's M22 hoists
+    `planCrossBlockEdit` / `runCrossBlockEdit` (the ratified 2026-07-09
+    merge-then-edit) into `Shared/` the same way.
+  - `VariorumTests/` — new suites `EditRoutingTests`,
+    `EditRoutingCrashTests`; additions to `BlockRangeIndexTests`.
+
+  **What is worth her reviewer's attention in particular:** whether each
+  hoisted rule still means on the Mac exactly what it meant when it was
+  Mac-private (the mobile round's proof was "the Mac suite rides
+  unmodified", which proves no test noticed, not that no case exists);
+  whether the trap→refusal conversion left any Mac road that now
+  proceeds silently where it used to stop; and whether the shared
+  `EditorEditRouting` binding is correct for AppKit's edit reporting,
+  which differs from UIKit's in ways the round MEASURED (iOS widens an
+  insertion's reported range; AppKit does not).
+
+- **THEN — the DEAD Delete Now door (her live report,
   2026-08-19 evening):** clicking Delete Now in the Trash produced
   NO confirmation and NO effect (the item still listed after
   leave-and-return — no intent minted, data safe). The confirm was
