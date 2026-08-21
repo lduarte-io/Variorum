@@ -142,8 +142,42 @@ final class MobileKeyboardBarController: NSObject {
     static let itemCellHeight: CGFloat = 48
     /// The glass cell's inset around a customView item, per side.
     static let stripCellInset: CGFloat = 5
-    /// The air below the lowest cell edge — her "more generous".
-    static let barVerticalAir: CGFloat = 10
+    /// The air below the lowest cell edge.
+    ///
+    /// **HER CORRECTION (round 2, §29's R12), verbatim: *"it looks like
+    /// the circles are now floating slightly high above the keyboard. i
+    /// think the goal should just be for them to not be cut off but
+    /// only be a bit above the [keyboard]."*** The first pass's 10 pt
+    /// overshot; this is 4 pt, **arrived at by capture, not by
+    /// formula** — three builds photographed on iPhone 17 Pro / iOS
+    /// 26.2 and compared (captures in
+    /// `notes/plans/mobile-round-2-screens/r12/`):
+    ///
+    /// | air | bar | resting circles clear the keyboard by | expanded capsule clears by |
+    /// |----:|----:|--------------------------------------:|---------------------------:|
+    /// |  10 |  78 |                              31.3 pt |                    11.3 pt |
+    /// |   4 |  72 |                              25.3 pt |                     5.3 pt |
+    /// |   2 |  70 |                              23.3 pt |                     3.3 pt |
+    ///
+    /// 2 pt was **rejected**: it buys 2 pt on the resting trio — below
+    /// perception — and spends it making the EXPANDED capsule graze the
+    /// keyboard, which is her original complaint wearing the other
+    /// state's clothes.
+    ///
+    /// **THE FLOOR IS STRUCTURAL, AND IT IS 20 pt + this air.** The
+    /// resting cells run to 48 pt below the bar's top; the two-row
+    /// capsule runs to 68 pt (its 88 pt cell is CENTERED on the fixed
+    /// 48 pt content row, so it always hangs exactly 20 pt lower than a
+    /// resting cell). One bar height must serve both states (M17: an
+    /// installed `inputAccessoryView` keeps its presented height), so
+    /// the trio can never sit closer than 20 pt + air without hiding
+    /// the strip's second row. Repositioning the toolbar inside a taller
+    /// container does NOT escape it — the 20 pt rides the row, not the
+    /// bar. Getting the circles genuinely close needs one of two things,
+    /// **both of which change the LOOK and are therefore hers to rule**:
+    /// a shorter expanded capsule (one row, or shorter rows), or a
+    /// resting trio whose own cells are as tall as the capsule.
+    static let barVerticalAir: CGFloat = 4
 
     /// The expanded capsule's intrinsic height, DERIVED from the row
     /// table below (a future row grows the bar with no second edit).

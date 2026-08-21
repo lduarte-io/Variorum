@@ -713,6 +713,15 @@ struct MobileMarkdownActsTests {
     /// hidden. On that tree `barHeight` (44) − `lowestCellEdge` (68) is
     /// NEGATIVE, so every clearance assertion below fails.
     ///
+    /// **HER R12 CORRECTION (round 2) rides this same pin.** The first
+    /// pass's 10 pt of air cleared the clip but read as a float ("the
+    /// circles are now floating slightly high above the keyboard");
+    /// the air is now 4 pt, photographed rather than derived. The
+    /// clearance assertions below are UNCHANGED in kind — the bar still
+    /// must clear the lowest cell by the full air — and the air itself
+    /// is now bounded above as well as below, so re-inflating it trips
+    /// here just as clipping does.
+    ///
     /// The one-height half is its own finding: the bar used to grow on
     /// expand (44 → 84) by setting its frame and calling
     /// `reloadInputViews`, and that never reached a pixel — an installed
@@ -739,8 +748,18 @@ struct MobileMarkdownActsTests {
             #expect(MobileKeyboardBarController.stripCellInset == 5)
             #expect(MobileKeyboardBarController.lowestCellEdge
                     == MobileKeyboardBarController.expandedCapsuleBottomEdge)
-            // "More generous" as a number, not a mood.
-            #expect(MobileKeyboardBarController.barVerticalAir >= 8)
+            // The air as a NUMBER, not a mood — and since her R12
+            // correction ("the circles are now floating slightly high
+            // above the keyboard… the goal should just be for them to
+            // not be cut off but only be a bit above"), the number is
+            // bounded on BOTH sides: real clearance, never a float.
+            // 10 pt was the overshoot she reported; 2 pt made the
+            // expanded capsule graze the keyboard; 4 pt is the value
+            // arrived at by capture (the constant's own doc carries the
+            // three-build table and the 20 pt structural floor).
+            #expect(MobileKeyboardBarController.barVerticalAir > 0)
+            #expect(MobileKeyboardBarController.barVerticalAir <= 6)
+            #expect(MobileKeyboardBarController.barVerticalAir == 4)
 
             // The law, on the REAL toolbar, in the state she named…
             #expect(!bar.isFormattingExpanded)
@@ -814,14 +833,30 @@ struct MobileMarkdownActsTests {
             let tightestAvailable: CGFloat = 375 - 32 - 10
             #expect(strip.bounds.width <= tightestAvailable)
             #expect(strip.bounds.width > 0)
-            // The capsule fits the bar's height — the C4b second-row axis
+            // The capsule clears the KEYBOARD — the C4b second-row axis
             // (a vertically clipped row is the FIX-5 clip with extra
-            // steps). Its measured height IS the derived one the bar sizes
-            // itself from (M4 ≡ R7), so the two can never drift apart.
+            // steps). Its measured height IS the derived one the bar
+            // sizes itself from (M4 ≡ R7), so the two can never drift
+            // apart.
             #expect(strip.bounds.height > 0)
             #expect(strip.bounds.height
                     == MobileKeyboardBarController.stripFittedHeight)
-            #expect(strip.bounds.height
+            // **The edge that can actually be clipped is the capsule's
+            // BOTTOM, not the strip's height** (corrected at her R12
+            // retune, 2026-08-21 — mechanism from the batch-2 frame dump
+            // plus fresh captures at bar 78 AND bar 72): iOS 26 CENTERS
+            // the customView's 88 pt glass cell on the fixed 48 pt
+            // content row, so the capsule hangs 20 pt ABOVE the bar's
+            // top — over the text, un-clipped, since an accessory view
+            // does not clip its subviews — and reaches
+            // `expandedCapsuleBottomEdge` (68) below it. Only that lower
+            // edge meets the keyboard. The former proxy here
+            // (`strip.bounds.height <= barHeight`) passed at bar 78 by
+            // arithmetic coincidence — 78 == 78 — and would have refused
+            // her "only a bit above" on the strength of a number that
+            // was never the one the screen clips. Photographs at both
+            // heights show all ten acts whole either way.
+            #expect(MobileKeyboardBarController.expandedCapsuleBottomEdge
                     <= MobileKeyboardBarController.barHeight)
 
             let rows = strip.arrangedSubviews.compactMap { $0 as? UIStackView }
