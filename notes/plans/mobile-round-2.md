@@ -799,3 +799,50 @@ at birth. It gets HOISTED, not patched. Same treatment for the other
 Mac-local brains the record's §4(c) enumerates — the KnownIssues
 "six mobile brains" row is the standing precedent and should be updated
 as each is hoisted.
+
+---
+
+## 16. §15's BATCH MAP CORRECTED (2026-08-21) — against the inventory's FINAL numbering
+
+**Why this correction exists (recorded, not hidden):** §15 was written
+against an INTERMEDIATE draft of the parity inventory that the architect
+swept into a commit with `git add -A` while the surveyor was still
+writing — a break of the repo's standing explicit-path-staging rule
+while agents are live. The final record carries **24 rows, not 21**, and
+**renumbers** from R10 onward. §15's table is therefore superseded by
+this one; the two traps §15 records (the dead-door defect and
+pins-must-drive-the-real-button) are unaffected and still bind.
+
+**New in the final record, beyond renumbering:** the **Archived vs
+Trash two-section correction** (they are distinct surfaces, not one
+list), an **`ImageRenderer` cannot capture** warning for any
+screenshot-based verification, the observation symbols each surface
+needs, and a **fuller EIGHT-brain hoist table** (`ThemeStore` for synced
+settings · `applyTypedPath` · `CalloutPalette`/`CalloutMenu` · the five
+deletion-copy homes · `BlockSelection` · `TakesReplacePlan`).
+
+**Independent corroboration worth noting:** the inventory's **R18 —
+whole-block-selection delete routing** is the same capability the crash
+trace independently produced as **M11**, reached from the opposite
+direction (the trace from "what does her gesture do after the fix", the
+inventory from "what did 13j ship that the phone lacks"). Two blind
+paths to one row raises confidence that batch 1b is correctly placed.
+**M11 ≡ R18** — one row, built once, in batch 1b.
+
+### THE BINDING BATCH MAP (supersedes §7 rows 4–6 and §15's table)
+
+| Batch | Rows (final numbering) | Theme |
+|---|---|---|
+| **1** | M1 · M2a–M2e (M2f measure-only) | The crash — both platforms |
+| **1b** | **M11 ≡ R18** whole-block-selection delete routing | Her gesture stops refusing and starts working |
+| **2** | M3 copy-the-note door · M4 keyboard-bar air | Her two fast wins |
+| **3** | M5 the home-screen quick note | Capture, per §11's rulings |
+| **4** | **R1** delete a note · **R2** Trash + Archived (TWO sections) · **R4** delete a book · **R7** the on-leaving savepoint hook | **She can delete things, and get them back.** The most-owed batch in the round |
+| **5** | **R3** per-note tray · **R5** deleted takes / History past · **R6** archive/unarchive · **R14** lens-dangles notice + Restore · **R15** lineage door · **R22** the guide's deletion chapter | Per-note recovery — her 13j words: "see the archived blocks associated with a particular post" |
+| **6** | **R8** reorder takes · **R9** duplicate-book-name refusal · **R11** copy all takes · **R12** take→block below / takes→blocks · **R19** swatches + emoji picker · **R20** block multi-select + multi-delete · **R21** replace / replace-in-every-take | Takes & block management |
+| **7** | **R10** tag-chip grammar · **R13** cadence + pruning settings · **R16** PL-9's judgment acts · **R17** the rest of the document settings · **R23** the forked voice brain (HOIST, never patch) | Settings, tags, judgment, and the fork |
+| — | **R24** | HELD FOR HER — propose-only, bundled to a sitting |
+
+**Standing instruction to every batch implementer from here:** the
+inventory record is the file-level truth for your rows; this table only
+says which batch owns them. Read your rows there in full.
