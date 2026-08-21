@@ -1716,3 +1716,79 @@ platforms plus core and both spines.
 
 **Then the install unblocks:** a fresh Release build carrying the
 confirm is what finally goes to her phone (§24's changed calculus).
+
+---
+
+## 26. BATCH 2 RECORD (2026-08-21) — her copy door and the bar's air
+
+**Counts:** mobile **362/68** (from 354/67: +7 copy pins in a new suite,
++1 bar pin — exactly accounted) · mobile spine **33/7** exact. No
+`Shared/`, no `Sources/`, no schema, so Mac/core were correctly not run.
+
+**M3 — the copy door.** ⧉ in the masthead beside Find and Seal.
+Composes core's own `.md` export (`Queries.exportPost` through the one
+join brain) — **no second joining rule**, verified byte-identical to
+what export writes. The open tail (a paragraph still being typed, not
+yet a block) joins through the same brain **without being minted**,
+because a copy is a read. Sealed notes copy; an empty note refuses
+rather than silently clobbering her clipboard. Red-on-old: removing the
+flush guard reproduces the stale text exactly.
+
+**A hoist taken on its own initiative, and correctly:** the pending-text
+flush contract was already written out TWICE (`lockNote` and
+`MobileStructuralController.flushPendingText`), so adding a third copy
+was the drift class. It moved onto the VM with both former homes
+calling it — six call sites untouched, behaviour byte-identical. That
+is MobileSoul §3's rule applied without being told.
+
+**M4 — the bar.** Her complaint was **reproduced on screen before
+anything was changed**, and the before capture is unambiguous: the three
+glass circles are sliced along the bottom by the keyboard's top edge.
+"Touching" was literal. **The architect verified both captures
+personally** — before: circles clipped; after: whole circles with clear
+air above the keyboard.
+
+**TWO DEFECTS FELL OUT OF THE MEASUREMENT THAT SHE NEVER REPORTED:**
+
+1. The expanded strip's entire **second row (# · • · ☑ · ⇥) was
+   half-hidden behind the keyboard.** A resting-only fix — the literal
+   reading of her complaint — would have left it there.
+2. **The two-height mechanism was DEAD WIRING.** `expandedBarHeight` +
+   `reloadInputViews()` never reached a pixel; proven by setting the
+   expanded height to **160 pt** and capturing a **pixel-for-pixel
+   identical** screen (capsule top 436.7, bottom 528.3, keyboard top
+   537.7 in both). UIKit keeps an installed `inputAccessoryView` at its
+   presented height, and the strip resets to collapsed at every keyboard
+   hide, so the resting height is the only height the screen ever sees.
+   **AND AN EXISTING PIN WAS GREEN OVER IT** (`toolbar.frame.height ==
+   expandedBarHeight`).
+
+**That is §15's trap 1 for the THIRD time this round** — after the Mac's
+dead purge doors and the 13j pins that stayed green over them. The
+pattern is now unmistakable and worth stating as a rule of this
+codebase: **a pin that asserts a view model's number, or a view's
+configured property, proves nothing about what renders.** Pins on
+anything user-visible must drive the real surface and read the real
+geometry. It is written into every remaining batch brief.
+
+Fixed by retiring both heights for one **measured** `barHeight =
+lowestCellEdge + 10 pt air = 78 pt`, with the measured constants
+asserted in the pin so a future iOS trips here and gets **re-measured**
+rather than silently re-broken. FIX-5 untouched (the strip is still ONE
+`customView` item — folding the resting trio into one capsule would be a
+LOOK change, hers to rule).
+
+### New ledger rows from batch 2
+
+| # | Item | Owner |
+|---|------|-------|
+| **M17** | **The iOS 26 platform truth: an `inputAccessoryView` cannot resize after presentation.** Any future "grow the bar" idea needs a different mechanism (a custom input view, or a non-accessory container). This is exactly the class `notes/TEXTKIT2_NOTES.md` §3 exists to hold — **route it there at closeout** so the next session that tries to grow the bar reads it before spending a day | closeout (TEXTKIT2_NOTES §3) |
+| **M18** | **PROVISIONAL — copy vs. what's on screen.** With a lens active or a take peeked, the surface shows takes the store has not chosen; the copy takes the CHOSEN ones (export semantics — the architect's stated reading of R6, uncorrected by her). Defensible, and honouring the display would need a second selection rule (M-C forbids) — but it IS a case where copy ≠ screen | **HELD FOR HER** (§27's bundle) |
+| **M19** | Taste, not a defect: the glass cells' soft glow overhangs the bar's top edge slightly onto the last text line (unchanged in magnitude from before the fix). Visible in the after capture | **HELD FOR HER** (§27's bundle) |
+
+**Environment note worth carrying:** the batch reported the simulator
+set shifting under it mid-session (an `iPhone 17` booted while the Pro
+shut down) — **the concurrent session was the architect's own device
+watch and build**. It re-targeted by UDID and verified no files outside
+its six were touched. Recorded as a live example of why the one-writer
+rule (§25) and UDID-targeting matter when batches run in parallel.
