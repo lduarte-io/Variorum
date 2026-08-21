@@ -732,3 +732,70 @@ if the coalesced-transaction pin cannot be driven through UIKit on the
 sim, drive it at the storage layer exactly as the trace's P2 does
 (`beginEditing`/`replaceCharacters`/`endEditing`), which is
 version-independent and is why the trace designed it that way.
+
+---
+
+## 15. THE PARITY INVENTORY LANDS (2026-08-21) — batches 4–7 set
+
+Record: `mobile-round-2-parity-inventory.md` (21 rows R1–R21, every
+symbol grep-verified, every "the phone has no X" a verified sweep). Its
+sweep basis confirms exactly four closeouts since the 2026-08-11 seam —
+14c (PL-8, already closed), 14d (PL-9), 13e (PL-10), 13j (PL-11) — with
+no un-ledgered phase in the window. **The ledger's prose missed several
+capabilities inside those phases; §4(b) of the record names them and
+they are adopted below.**
+
+**THE HEADLINE, and it validates her instinct exactly:** *the phone
+cannot delete a note, and nothing it deletes can ever come back.* R1–R3
+are not polish; every other row is polish beside them. She said the
+trash row needed more than parity — the inventory shows it needs more
+than that: **there is no note-delete door on the phone anywhere.**
+
+### Two traps this round must not walk into
+
+**(1) THE DEAD-DOOR DEFECT — binding rule for batch 4.** The MAC's
+purge doors do not work at this tip (`RecoveryView.swift:573–577`): a
+`confirmationDialog` whose `isPresented` is a computed
+`Binding(get:set:)` reading an `@Observable` property **only inside the
+closure**, so SwiftUI registers no observation dependency, the getter is
+never re-asked, and the dialog never presents. True delete is currently
+unreachable from the Mac's UI entirely (the clock and janitor still
+purge; no data is at risk). 13l owns the fix and has not run.
+**RULE, stated loudly: the phone's Trash must NEVER present a
+destructive dialog through a `Binding(get:set:)` computed over an
+`@Observable` property.** Use `@Bindable` + `$model.pendingConfirm`, or
+the phone's existing UIKit `confirmDestructive` seam
+(`MobileEditorViewModel.swift:262–277`). Both of the phone's existing
+confirm roads are already immune — copy those, never the Mac's.
+
+**(2) PINS MUST DRIVE THE REAL BUTTON.** The 13j view-model seam pins
+stayed GREEN over that dead Mac wiring — which is precisely how the
+defect shipped. Every deletion door this round builds gets a pin that
+**mounts the real surface and drives the real control**, not the view
+model behind it. This is P-7 with a worked example attached.
+
+*(To relay at her next sitting: the phone's correct pattern can be the
+reference the Mac's 13l fix copies — the same workaround-becomes-the-
+Mac's-default road her divide and merge rulings already took.)*
+
+### Batch map (supersedes §7's rows 4–6; §7's 1–3 stand)
+
+| Batch | Rows | Theme |
+|---|---|---|
+| **4** | R1 delete a note · R2 the Trash · R4 delete a book · R7 the on-leaving savepoint funnel | **She can delete things, and get them back.** The round's largest and most-owed batch |
+| **5** | R3 the per-note tray · R5 deleted takes (History's past region) · R6 archive/unarchive · R13 the lineage door · R19 the guide's deletion chapter | Per-note recovery — "see the archived blocks associated with a particular post", her 13j words |
+| **6** | R8 reorder takes · R9 duplicate-book-name refusal · R10 copy all takes · R11 take→block below / takes→blocks · R16 callout swatches + emoji picker · R17 block multi-select + multi-delete · R18 in-note replace | Takes & block management (PL-10 + the 13e rows the ledger's prose missed) |
+| **7** | R12 savepoint/pruning settings · R14 PL-9's three judgment acts · R15 the rest of the document settings · R20 the forked voice brain | Settings, judgment, and the fork |
+
+**R21 — two design calls HELD FOR HER** (the ●n comment marker's side;
+the margin-comment door's tap shape): propose-only, bundled for a
+sitting, never decided autonomously.
+
+**R20 deserves naming out loud: the voice preference is a FORKED
+BRAIN** — the phone reads `UserDefaults` while the Mac reads the synced
+`theme_voice` setting. That is not a missing face, it is two
+implementations of one rule, which MobileSoul §3 calls a parity defect
+at birth. It gets HOISTED, not patched. Same treatment for the other
+Mac-local brains the record's §4(c) enumerates — the KnownIssues
+"six mobile brains" row is the standing precedent and should be updated
+as each is hoisted.
