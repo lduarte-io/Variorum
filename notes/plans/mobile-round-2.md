@@ -2233,3 +2233,94 @@ batch may touch Mac code again under R8. **The closeout owes 13l:**
 
 A manifest that is stale when her reviewer opens it would waste the
 review she asked for.
+
+---
+
+## 34. BATCH 1b FIX ROUND (2026-08-21) — and a testing discovery that outlives the batch
+
+**Counts:** core **1350/141** · Mac **1568/272** · Mac spine **63/8**
+(all exact) · mobile **371/68** · mobile spine **33/7**.
+
+**The confirm was BUILT, then REMOVED mid-flight on R13** — it was
+working, count-aware, pinned on the real surface and red-on-old verified
+when her ruling arrived. The session removed the road, its copy statics
+and its whole suite, and reverted `MobileBlockMenu` to HEAD. **It kept
+two things, and both were the right instinct:** comments at both sites
+recording that **no confirm is a RULING, not an oversight** (so a later
+session cannot re-add ceremony by reflex), and one pin —
+`theKeystrokeDeletesWithoutAskingAnything` — which installs a
+*recording* confirm seam and asserts the road asks nothing and deletes.
+**Her ruling now has a guard**, which is better than her ruling merely
+having been obeyed once.
+
+### M25 — THE PIN-DRIVING DISCOVERY (a platform truth, routed to canon at closeout)
+
+**Measured in this environment, first responder inside a key window:
+`UITextView.deleteBackward()` and `UITextInput.replace(_:withText:)`
+mutate the storage WITHOUT consulting the delegate at all.**
+
+A pin that drives them therefore exercises the **system-path /
+`fallbackVerdict`** road — desync-recover, re-render from the store,
+fire the Debug assertion seam — and **never reaches the gesture it
+believes it is testing.** Driving "the real control" on the phone means
+mounting `MobileWriteSurfaceView` and calling
+`textView.delegate?.textView?(_:shouldChangeTextIn:replacementText:)` —
+the exact call UIKit makes for ⌫. The keyboard's own dispatch remains
+the device round's obligation.
+
+**Why this matters beyond the batch, and why it is a ledger row:** this
+round has now hit the pins-green-over-nothing class **four times** — the
+Mac's dead purge doors, 13j's pins over them, the dead two-height bar
+mechanism, and now this. The first three were *pins asserting a stored
+value instead of a rendered result*. **This one is subtler and worse: a
+pin that drives a real API and still misses**, because the API bypasses
+the layer under test. §26's rule ("drive the real surface") is therefore
+necessary but NOT sufficient — the rule is now **"drive the real
+surface, and verify the path you drove is the path you meant."**
+Recorded in the test file itself; **routed to `notes/TEXTKIT2_NOTES.md`
+§3 at closeout beside M17**, where the next session writing a mobile
+editor pin will read it before losing a day.
+
+### The architect's rulings on what it raised
+
+**(a) The Mac consequence of the gap fence — ACCEPTED, no Mac code
+change.** Its trace: with the fence, a gap-bearing whole-block span
+falls through the Mac's if/else ladder (both `planCrossBlockEdit` and
+`planVisibleTakeEdit` already require `variantID != nil && editable`, so
+both decline) and lands on `CrossBlockRefusal.diagnose`, which returns
+`.unsyncedBlock` and speaks *"A block in this selection hasn't arrived
+yet. It stays read-only until it syncs."* **The Mac suite rode
+unmodified at 1568/272 exact.** Its argument is sound and I adopt it:
+**J9 was the ONLY planner in that ladder without the gap guard its two
+siblings already carry** — so this is parity-of-rule, not a new product
+rule, and SyncSpec §6's tombstone-wins is what makes it material. It
+does narrow a gesture, so **it goes on her list** (§35) as a
+notification, not a request.
+
+**(b) The boundary it deliberately did NOT touch — ENDORSED.** The Mac's
+⌘-click pick and BOTH platforms' ⋯ ▸ Delete Block still accept a gap
+block. Its reasoning: those are deliberate per-block acts on a block she
+is pointing at, where the run gesture is a sweep. **That distinction is
+right** — the fence exists because a sweep can take something she never
+saw, which is not true when she picks it. On her list too.
+
+**(c) M16 was named in §24's prose but never entered §6's ledger table —
+its catch, and correct.** Fixed below. *A row that exists only in prose
+is the unowned state under another name*, which is the same slip §19
+already corrected once this round. Recording the repeat because twice is
+a pattern: **every row gets its table entry in the commit that names
+it.**
+
+| # | Item | Owner |
+|---|------|-------|
+| **M16** | Same-note text drag-move is a delete-shaped edit that is not a delete gesture — if the dragged selection covers whole paragraphs it may now plan a BLOCK delete while the drop lands text as content (I4). Unsettleable from the repo (no drag/drop delegate is configured, so reachability is a device fact). **Experiment recorded in §24.9** | **the device round** — must run on her hardware, not the simulator |
+| **M25** | The pin-driving discovery above | **closeout** → TEXTKIT2_NOTES §3, beside M17 |
+
+**It also corrected three documentation falsehoods it inherited from the
+architect** — the test header, the gate comment and the refusal copy all
+claimed the mid-paragraph span *"refuses identically on both platforms"*
+and was *"a standing product question"*. Per §30 both halves are wrong;
+they now name `planCrossBlockEdit`, the ratified 2026-07-09 rule, and
+M22 as the owner. Behaviour untouched. **A comment asserting a fact the
+architect has since retracted is exactly the class MINOR 6 exists to
+catch, and it caught mine.**
