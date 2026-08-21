@@ -935,7 +935,8 @@ final class EditorViewModel {
                 bulkPending = true
             }
             pendingEdit = ArmedEdit(
-                verdict: verdict, range: range, documentLength: index.documentLength)
+                verdict: verdict, range: range, documentLength: index.documentLength,
+                replacementLength: (replacement as NSString).length)
             return true
         }
     }
@@ -971,6 +972,17 @@ final class EditorViewModel {
             $0.describes(
                 editedRange: editedRange, delta: delta,
                 documentLength: index.documentLength) ? $0 : nil
+        }
+        if armed != nil, bound == nil {
+            // M13's Mac twin (round-2 ladder round 1, MINOR 5): the paste's
+            // bulk-entry intent is armed BESIDE the verdict, off the same
+            // gate call, so a discarded arming takes it along. Otherwise
+            // the flag outlives the edit that never became the paste it
+            // described and the next crystallization mints `.bulk` instead
+            // of `.typing`. The finding traced the phone; the shape here is
+            // line for line the same, and a latent twin is what the whole
+            // batch-1 Mac verdict was about.
+            bulkPending = false
         }
         let verdict = bound?.verdict ?? fallbackVerdict(editedRange: editedRange, delta: delta)
         switch verdict {

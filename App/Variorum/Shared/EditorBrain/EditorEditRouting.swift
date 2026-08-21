@@ -50,47 +50,76 @@ nonisolated struct ArmedEdit {
     let range: NSRange
     /// `index.documentLength` at the moment the gate answered.
     let documentLength: Int
-    /// The policed edit's EXACT churn cost (old + new UTF-16 lengths,
-    /// captured at the gate because iOS's report can widen). Nil where a
-    /// platform derives cost from the report instead (the Mac).
-    let cost: Int?
+    /// The UTF-16 length of the replacement the gate approved. With
+    /// `range.length` it fixes the edit's NET change exactly — which is
+    /// what `describes` polices (round-2 ladder round 1, MAJOR 1).
+    let replacementLength: Int
+
+    /// The policed edit's EXACT churn cost — old + new UTF-16 lengths,
+    /// known at the gate and therefore immune to the report widening iOS
+    /// applies (measured: a 5→6 replacement reported length 7). Platforms
+    /// that derive cost from the report simply never read it (the Mac).
+    var exactCost: Int { range.length + replacementLength }
 
     init(
         verdict: BlockRangeIndex.Verdict,
         range: NSRange,
         documentLength: Int,
-        cost: Int? = nil
+        replacementLength: Int
     ) {
         self.verdict = verdict
         self.range = range
         self.documentLength = documentLength
-        self.cost = cost
+        self.replacementLength = replacementLength
     }
 
     /// Does this arming still describe the edit the storage just reported?
     ///
-    /// Three questions, one per way the arming goes stale:
+    /// Two things must hold, and it is worth being exact about which:
     ///
     /// 1. **The index must not have moved underneath it.** A full render,
     ///    a differential rewrite or a crystallization replaces the tiling
     ///    the verdict was computed against; a `.tail` verdict armed before
     ///    the tail closed is the sharpest case (its region no longer
     ///    exists at all).
-    /// 2. **A deletion can never remove more than was approved.** This is
-    ///    the coalescing guard, and the one her crashes needed: the gate
-    ///    approved a 5-character sub-range while the report carried a
-    ///    15-character net deletion.
+    /// 2. **The net change must be EXACTLY the one that was approved** —
+    ///    `delta == replacementLength - range.length`. The gate knows both
+    ///    numbers, so the arming can insist on its own arithmetic instead
+    ///    of merely bounding it. This is the guard her crashes needed (a
+    ///    5-character approval consumed by a 15-character net deletion),
+    ///    and it is the one that also catches the composed shape her stack
+    ///    actually names — `_deleteBackwardAndNotify:reinsertText:`, a
+    ///    delete COMPOSED WITH A REINSERTION, whose net change lands
+    ///    somewhere the earlier magnitude-only bound could not see.
     /// 3. **The landing must start inside what was approved.** An arming
     ///    consumed by an edit somewhere else entirely is the
     ///    armed-but-never-landed case; the upper bound is inclusive
     ///    because an approved insertion's range is empty and lands
     ///    exactly at its own location.
     ///
+    /// **What is deliberately NOT policed, and why:** the report's
+    /// EXTENT. `NSTextStorage` attribute fixing widens `editedRange`
+    /// beyond the characters that actually moved (measured on iOS: a
+    /// one-character insertion reported `{8, 9}`), so an extent bound
+    /// would reject ordinary keystrokes. Widening never touches `delta`,
+    /// which is why the net-change identity above is the right thing to
+    /// police. The residue this leaves is narrow but real: a transaction
+    /// that starts inside the approved range, runs past its end, and
+    /// nets to exactly the approved change would still bind. Nothing
+    /// observed produces that shape, and the honest road is one step away
+    /// if it ever appears — the mutators refuse and `desyncRecovery`
+    /// re-renders from the store.
+    ///
     /// A rejection is never a refusal of the EDIT — it only declines the
     /// shortcut, and the report is routed from scratch.
     func describes(editedRange: NSRange, delta: Int, documentLength current: Int) -> Bool {
         guard documentLength == current else { return false }
-        guard -delta <= range.length else { return false }
+        // Subsumes the earlier `-delta <= range.length` bound: an approved
+        // replacement's length is never negative, so an exact match can
+        // never remove more than the range held — and unlike the bound, it
+        // constrains INSERTIONS too (for `delta >= 0` the old predicate was
+        // vacuously true, so an arming could absorb unbounded growth).
+        guard delta == replacementLength - range.length else { return false }
         return editedRange.location >= range.location
             && editedRange.location <= range.upperBound
     }
@@ -115,9 +144,32 @@ nonisolated struct ArmedEdit {
 /// swaps it for its own scope and asserts the models' counters
 /// (`desyncRecoveryCount`, `identityAuditFailures`) instead, which is the
 /// stronger oracle anyway.
-@MainActor
+///
+/// **Why the handler is a `@TaskLocal` and not a `static var`** (round-2
+/// ladder round 1, MINOR 4): a plain static is PROCESS-GLOBAL state, and
+/// the suites that mute it hold the mute across hundreds of `await`s.
+/// Swift Testing runs suites in parallel, so any other `@MainActor` test
+/// scheduled during those suspensions would run with the editor's Debug
+/// assertions silently disabled — the oracle turned off nondeterministically
+/// in whichever tests happened to interleave. A task-local override is
+/// scoped to the muting task and the tasks it spawns (which is exactly the
+/// reach needed: `desyncRecovery` fires synchronously and then heals inside
+/// a `Task {}` created in the same scope), and is invisible to every other
+/// test running beside it.
 enum EditorAssertionSeam {
-    static var handler: @MainActor (String) -> Void = { assertionFailure($0) }
+    @TaskLocal static var handler: @Sendable @MainActor (String, StaticString, UInt) -> Void =
+        { assertionFailure($0, file: $1, line: $2) }
 
-    static func fire(_ message: String) { handler(message) }
+    /// `#fileID`/`#line` default to the CALL SITE and are handed to the
+    /// assertion itself, so the three distinct conditions stay
+    /// distinguishable by location instead of all reporting this file
+    /// (round-2 ladder round 1, NIT 7).
+    @MainActor
+    static func fire(
+        _ message: String,
+        file: StaticString = #fileID,
+        line: UInt = #line
+    ) {
+        handler(message, file, line)
+    }
 }

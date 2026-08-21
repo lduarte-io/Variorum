@@ -102,14 +102,14 @@ final class MobileEditorViewModel {
     /// 1 — the crash fix; `ArmedEdit`'s doc comment carries the whole
     /// mechanism). This used to be a bare `Verdict?`: an identity with no
     /// range, no document length and no expiry, consumed by whatever edit
-    /// reached storage next. It carries the EXACT churn cost too (old +
-    /// new UTF-16 lengths at the gate), because iOS's `didProcessEditing`
-    /// report can WIDEN the coalesced `editedRange` under attribute fixing
-    /// (measured: a 5→6 replacement reported length 7) — and it is
-    /// discarded on the same condition as the verdict, since a cost that
-    /// belongs to a different edit is no better than a verdict that does
-    /// (gate-less paths use the report-derived cost; churn is approximate
-    /// by design — SyncSpec §6).
+    /// reached storage next. It carries the approved replacement's length
+    /// too, which fixes the edit's exact net change (the binding) AND
+    /// yields the EXACT churn cost, immune to the widening iOS applies to
+    /// `didProcessEditing`'s range (measured: a 5→6 replacement reported
+    /// length 7). The cost is discarded on the same condition as the
+    /// verdict, since a cost belonging to a different edit is no better
+    /// than a verdict that does (gate-less paths use the report-derived
+    /// cost; churn is approximate by design — SyncSpec §6).
     @ObservationIgnored private var pendingEdit: ArmedEdit?
     @ObservationIgnored private var suppressEditProcessing = false
     @ObservationIgnored private(set) var mintInFlight = false
@@ -190,11 +190,17 @@ final class MobileEditorViewModel {
     /// read that STRADDLED a settle is re-signaled instead of adopted.
     @ObservationIgnored private var storeWriteGeneration = 0
 
-    /// The screen's teardown (onDisappear): the S1 backstop lands pending
-    /// work, then this surface stops listening to the SHARED coordinator
-    /// (which outlives any one surface — the Mac's exact posture).
-    func teardown() async {
-        await finish()
+    /// The screen's teardown (onDisappear): the surface's timer stops
+    /// FIRST, then the S1 backstop lands pending work, then this surface
+    /// stops listening to the SHARED coordinator (which outlives any one
+    /// surface — the Mac's exact posture).
+    ///
+    /// `afterDisarm` is a test seam and nothing else: production never
+    /// passes it. The ordering below is the whole of the finding-3 fix and
+    /// is otherwise unobservable from outside — a pin that holds the
+    /// surface across the await cannot see the pre-fix ordering at all,
+    /// which is exactly how that ordering survived its own pin.
+    func teardown(afterDisarm: () -> Void = {}) async {
         // M2e (round 2): the TK2 canary's 30-second repeating main-run-loop
         // `Timer` is armed at `attach` and had NO production disarm — only
         // test callers — so one orphaned tick accumulated per note ever
@@ -203,7 +209,19 @@ final class MobileEditorViewModel {
         // main-thread wakeups doing nothing, which is quiescence's enemy on
         // a phone. The surface is going away here (the representable's view
         // goes with the screen), so this is the arm's mirror.
+        //
+        // IT RUNS BEFORE THE AWAIT (round-2 ladder round 1, MINOR 3):
+        // `textView` is weak, `finish()` is a real DB round trip, and the
+        // only production caller is a NavigationStack pop — where SwiftUI
+        // releases the representable CONCURRENTLY. Disarming after the
+        // await meant that whenever the view lost that race the disarm
+        // silently did nothing, which is the accumulation this row exists
+        // to close. Nothing in `finish()` touches the canary, so first is
+        // free. (`MobileFallbackCanary.deinit` closes the same class from
+        // the other end, for every path that never reaches a teardown.)
         textView?.disarmCanary()
+        afterDisarm()
+        await finish()
         if let autosaveToken {
             autosave.stopObserving(autosaveToken)
             self.autosaveToken = nil
@@ -951,6 +969,14 @@ final class MobileEditorViewModel {
             length: (newText as NSString).length,
             editable: !slot.isGap && !slot.variantLocked)
         index = BlockRangeIndex(entries: entries, tailLength: index.tailLength)
+        // The FOURTH index-replacement door gets the structural disarm the
+        // other three have (round-2 ladder round 1, NIT 8). A take flip to
+        // an EQUAL-LENGTH take leaves `documentLength` unchanged, so the
+        // consume-time guard cannot see that the tiling moved — and the
+        // fix's own doctrine is "clear the arming wherever the index is
+        // replaced", which is cheaper to keep than an explanation of why
+        // one door is different.
+        pendingEdit = nil
         // The ledger learns what the surface now shows for the DISPLAYED
         // variant only — never a wholesale adopt, which would regress a
         // dirty neighbor's recorded text to its stale slot photograph.
@@ -1002,7 +1028,7 @@ final class MobileEditorViewModel {
                 verdict: verdict,
                 range: range,
                 documentLength: index.documentLength,
-                cost: range.length + (replacement as NSString).length)
+                replacementLength: (replacement as NSString).length)
             return true
         }
     }
@@ -1030,8 +1056,19 @@ final class MobileEditorViewModel {
                 editedRange: editedRange, delta: delta,
                 documentLength: index.documentLength) ? $0 : nil
         }
+        if armed != nil, bound == nil {
+            // M13 (round-2 ladder round 1, MINOR 5): the paste's bulk-entry
+            // intent was armed BESIDE this verdict, off the same gate call.
+            // A discarded arming takes it along — otherwise the flag
+            // survives an edit that never became the paste it described,
+            // and the next crystallization mints `.bulk` instead of
+            // `.typing`. A one-shot wrong segmentation kind, no data loss —
+            // and a state that could not exist before the binding, so it
+            // closes where it was opened.
+            bulkPending = false
+        }
         let verdict = bound?.verdict ?? fallbackVerdict(editedRange: editedRange, delta: delta)
-        let exactCost = bound?.cost
+        let exactCost = bound?.exactCost
         switch verdict {
         case .block(let i):
             // The mutators REFUSE rather than trap (BlockRangeIndex's
@@ -1042,7 +1079,7 @@ final class MobileEditorViewModel {
             // re-render from the store redoes every one of them over the
             // truth.
             guard index.applyBlockEdit(at: i, lengthDelta: delta) else {
-                desyncRecovery()
+                recoverFromUnroutableEdit()
                 return
             }
             // THE iOS RE-STAMP (obligation 1): the inserted characters
@@ -1054,7 +1091,7 @@ final class MobileEditorViewModel {
                 exactCost: exactCost)
         case .tail:
             guard index.applyTailEdit(lengthDelta: delta) else {
-                desyncRecovery()
+                recoverFromUnroutableEdit()
                 return
             }
             restampProjection(over: editedRange)
@@ -1063,14 +1100,14 @@ final class MobileEditorViewModel {
             armTailIdleMint()
         case .openTail:
             guard index.openTail() else {
-                desyncRecovery()
+                recoverFromUnroutableEdit()
                 return
             }
             restampProjection(over: editedRange)
             tailText = ""
         case .closeTail:
             guard index.closeTail() else {
-                desyncRecovery()
+                recoverFromUnroutableEdit()
                 return
             }
             tailText = ""
@@ -1079,7 +1116,7 @@ final class MobileEditorViewModel {
             // An edit reached the storage without a routable verdict (a
             // UIKit path outside the policed ones). The store is truth:
             // drop local bookkeeping and re-render from the projection.
-            desyncRecovery()
+            recoverFromUnroutableEdit()
             return
         }
         // Batch 2 (M11): the markdown face follows the keystroke, scoped to
@@ -1141,6 +1178,23 @@ final class MobileEditorViewModel {
         autosave.record(
             variantID: variantID, text: text,
             charDelta: exactCost ?? (oldLength + editedRange.length))
+    }
+
+    /// The recovery road taken from INSIDE `storageDidEdit`, where a
+    /// mutation has already reached storage and only its ROUTING failed.
+    ///
+    /// The checkpoint is owed here (round-2 ladder round 1, NIT 6):
+    /// TEXTKIT2_NOTES §4 practice 3 makes the canary an obligation after
+    /// every processed storage edit, and these roads `return` before the
+    /// method's own checkpoint. `desyncRecovery`'s re-render does check the
+    /// canary in the end — but the obligation reads "after the edit", not
+    /// "after the async heal lands", and a downgrade caused BY this edit is
+    /// exactly what the canary exists to attribute. It reads only
+    /// `textLayoutManager`, so it touches none of the bookkeeping the
+    /// refusal just declared untrustworthy.
+    private func recoverFromUnroutableEdit() {
+        textView?.canaryCheckpointAfterMutation()
+        desyncRecovery()
     }
 
     private func desyncRecovery() {

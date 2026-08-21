@@ -30,28 +30,33 @@ import VariorumCore
 
 @Suite("ArmedEdit — the binding rule (round 2, M1 part 3)")
 struct ArmedEditTests {
-    private func armed(_ range: NSRange, documentLength: Int = 27) -> ArmedEdit {
-        ArmedEdit(verdict: .block(index: 0), range: range, documentLength: documentLength)
+    private func armed(
+        _ range: NSRange, replacing replacementLength: Int, documentLength: Int = 27
+    ) -> ArmedEdit {
+        ArmedEdit(
+            verdict: .block(index: 0), range: range, documentLength: documentLength,
+            replacementLength: replacementLength)
     }
 
     @Test func anOrdinaryInsertionIsDescribed() {
-        let edit = armed(NSRange(location: 12, length: 0))
+        let edit = armed(NSRange(location: 12, length: 0), replacing: 1)
         #expect(edit.describes(
             editedRange: NSRange(location: 12, length: 1), delta: 1, documentLength: 27))
     }
 
     @Test func anOrdinaryDeletionIsDescribed() {
-        let edit = armed(NSRange(location: 11, length: 1))
+        let edit = armed(NSRange(location: 11, length: 1), replacing: 0)
         #expect(edit.describes(
             editedRange: NSRange(location: 11, length: 0), delta: -1, documentLength: 27))
     }
 
     @Test func aReplacementWidenedByAttributeFixingIsStillDescribed() {
         // The measured iOS wrinkle (a 5→6 replacement reporting length 7):
-        // widening only grows the report, and the guards are about the
-        // approved range's SIZE and the landing's START, so an ordinary
-        // widened report still binds.
-        let edit = armed(NSRange(location: 7, length: 3))
+        // attribute fixing widens the reported RANGE and never the DELTA,
+        // so an ordinary widened report still binds. This is the pin the
+        // finding-1 fix had to keep passing — the net change is policed,
+        // the extent deliberately is not.
+        let edit = armed(NSRange(location: 7, length: 3), replacing: 4)
         #expect(edit.describes(
             editedRange: NSRange(location: 7, length: 4), delta: 1, documentLength: 27))
     }
@@ -59,19 +64,47 @@ struct ArmedEditTests {
     @Test func aDeletionWiderThanTheApprovedRangeIsRejected() {
         // Her crash, in one line: the gate approved five characters and a
         // coalesced transaction removed fifteen.
-        let edit = armed(NSRange(location: 22, length: 5))
+        let edit = armed(NSRange(location: 22, length: 5), replacing: 0)
         #expect(!edit.describes(
             editedRange: NSRange(location: 12, length: 0), delta: -15, documentLength: 27))
     }
 
+    /// **Round-2 ladder round 1, MAJOR 1 — the hole the magnitude bound
+    /// left open.** A transaction that BEGINS inside the approved range and
+    /// runs PAST the region's end, replacing more than was approved with
+    /// fewer characters, satisfies every one of the old guards: it starts
+    /// where it should, and it deletes fewer characters than the approved
+    /// range held. The old predicate said yes, and the wrong block's length
+    /// was then recorded — silently, because the totals still agreed.
+    ///
+    /// RED ON THE PRE-FIX PREDICATE (`-delta <= range.length`): −4 ≤ 5.
+    @Test func aComposedTransactionWiderThanTheApprovalIsRejected() {
+        let edit = armed(NSRange(location: 16, length: 5), replacing: 0)
+        #expect(!edit.describes(
+            editedRange: NSRange(location: 16, length: 7), delta: -4, documentLength: 27),
+            "a delete composed with a reinsertion nets to something the approval never described")
+    }
+
+    /// The insertion half of the same hole: for `delta >= 0` the old
+    /// magnitude bound was VACUOUSLY true, so an arming could absorb
+    /// unbounded growth. RED ON THE PRE-FIX PREDICATE.
+    @Test func anInsertionLargerThanTheApprovedReplacementIsRejected() {
+        let edit = armed(NSRange(location: 12, length: 0), replacing: 1)
+        #expect(!edit.describes(
+            editedRange: NSRange(location: 12, length: 40), delta: 40, documentLength: 27),
+            "one approved character cannot license forty")
+    }
+
     @Test func aLandingOutsideTheApprovedRangeIsRejected() {
-        let edit = armed(NSRange(location: 0, length: 1))
+        // The replacement length matches the delta, so ONLY the location
+        // guard can reject this one — the pin keeps its original subject.
+        let edit = armed(NSRange(location: 0, length: 1), replacing: 2)
         #expect(!edit.describes(
             editedRange: NSRange(location: 8, length: 1), delta: 1, documentLength: 27))
     }
 
     @Test func aMovedIndexIsRejected() {
-        let edit = armed(NSRange(location: 22, length: 0))
+        let edit = armed(NSRange(location: 22, length: 0), replacing: 1)
         #expect(!edit.describes(
             editedRange: NSRange(location: 22, length: 1), delta: 1, documentLength: 22),
             "the tiling changed under the arming (a render or a crystallization)")
@@ -130,6 +163,47 @@ struct MacEditRoutingTests {
         }
     }
 
+    /// The Mac twin of the round-2 ladder's MAJOR 1: a coalesced
+    /// transaction that begins inside the approved range and runs PAST the
+    /// region's end is not consumed. The Mac's arm-then-hand-off sites
+    /// (`MarkdownActs.apply`, `toggleCheckbox`,
+    /// `insertNewlineContinuingLists`, `deleteWithoutNewline`) are one
+    /// refactor from separating an arming from its `replaceCharacters`, and
+    /// the binding is what makes that harmless — so it is pinned here for
+    /// the same reason batch 1's twins were.
+    ///
+    /// RED ON THE PRE-FIX PREDICATE (no process death): the stale
+    /// `.block(2)` is consumed, `entries[2]` becomes 1, and the totals
+    /// still agree — so nothing announces it.
+    @Test func aComposedTransactionWiderThanItsApprovalIsNotConsumed() async throws {
+        try await withEditor(seedBlocks: ["Alpha", "Beta beta", "Gamma"]) { harness in
+            try await withMacEditorAssertionsMuted {
+                fixture(harness)
+                let model = harness.model
+                let storage = try #require(harness.textView.textStorage)
+
+                #expect(model.shouldChangeText(
+                    in: NSRange(location: 16, length: 5), replacement: ""))
+                storage.beginEditing()
+                storage.replaceCharacters(
+                    in: NSRange(location: 16, length: 11), with: "Gamma??")
+                storage.endEditing()
+
+                #expect(model.desyncRecoveryCount == 1,
+                        "the un-described transaction took the honest road")
+                await settleMacEditor(until: {
+                    model.index.documentLength == (harness.textView.textStorage?.length ?? -1)
+                })
+                #expect(harness.documentText == "Alpha\nBeta beta\nGamma\ndelta",
+                        "the store is truth: the un-routable transaction did not stand")
+                await harness.flush()
+                let stored = try harness.storeSlots().compactMap(\.text)
+                #expect(stored == ["Alpha", "Beta beta", "Gamma"],
+                        "her paragraph was not overwritten with one character")
+            }
+        }
+    }
+
     /// The other half: an arming that still describes its edit is honored,
     /// so the fix is a binding and not a blanket discard.
     @Test func anArmingThatStillDescribesItsEditIsHonored() async throws {
@@ -158,10 +232,16 @@ func settleMacEditor(until condition: () -> Bool, spins: Int = 400) async {
 
 /// The Mac's mute helper (the phone's twin — `EditorAssertionSeam` is
 /// shared, so the pattern is one).
+///
+/// The mute is TASK-SCOPED (round-2 ladder round 1, MINOR 4): a
+/// process-global handler held across this body's hundreds of `await`s
+/// would disable the editor's Debug assertions inside whatever OTHER
+/// parallel suite happened to be scheduled during a suspension. The
+/// task-local binding reaches exactly what it should — this body, and the
+/// tasks the recovery road spawns inside it.
 @MainActor
 func withMacEditorAssertionsMuted<T>(_ body: () async throws -> T) async rethrows -> T {
-    let original = EditorAssertionSeam.handler
-    EditorAssertionSeam.handler = { _ in }
-    defer { EditorAssertionSeam.handler = original }
-    return try await body()
+    try await EditorAssertionSeam.$handler.withValue({ _, _, _ in }) {
+        try await body()
+    }
 }

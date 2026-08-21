@@ -65,16 +65,23 @@ func systemPathEdit(_ storage: NSTextStorage, range: NSRange, replacement: Strin
             string: replacement, attributes: [.font: MobileEditorStyle.baseFont]))
 }
 
-/// Runs `body` with the editor's debug assertions muted, restoring the
-/// handler afterwards (the `MobileFallbackCanary` N2 pattern). A pin that
-/// exercises an honest RECOVERY road must not be stopped by the assertion
-/// that announces it; the models' counters are the oracle instead.
+/// Runs `body` with the editor's debug assertions muted (the
+/// `MobileFallbackCanary` N2 pattern). A pin that exercises an honest
+/// RECOVERY road must not be stopped by the assertion that announces it;
+/// the models' counters are the oracle instead.
+///
+/// The mute is TASK-SCOPED (round-2 ladder round 1, MINOR 4): this body
+/// holds it across hundreds of `await`s, and Swift Testing runs suites in
+/// parallel — a process-global handler would silently disable the editor's
+/// Debug assertions inside whatever other `@MainActor` test was scheduled
+/// during a suspension. A task-local binding reaches this body and the
+/// tasks spawned inside it (which is exactly `desyncRecovery`'s heal) and
+/// nothing else.
 @MainActor
 func withEditorAssertionsMuted<T>(_ body: () async throws -> T) async rethrows -> T {
-    let original = EditorAssertionSeam.handler
-    EditorAssertionSeam.handler = { _ in }
-    defer { EditorAssertionSeam.handler = original }
-    return try await body()
+    try await EditorAssertionSeam.$handler.withValue({ _, _, _ in }) {
+        try await body()
+    }
 }
 
 /// Spins the main actor until `condition` holds or the budget runs out
@@ -165,6 +172,72 @@ struct MobileEditRoutingBindingTests {
         }
     }
 
+    /// **The round-2 ladder's MAJOR 1, pinned.** The first binding bounded
+    /// the report's MAGNITUDE and its START — never its EXTENT. So a
+    /// transaction that begins inside the approved range and runs PAST the
+    /// region's end was still consumed, as long as it removed no more
+    /// characters than the approval held.
+    ///
+    /// Her own stack names this shape:
+    /// `_deleteBackwardAndNotify:reinsertText:overrideOriginalContext…` is
+    /// a delete COMPOSED WITH A REINSERTION, and her transactions
+    /// demonstrably crossed two separators. Here the gate approves
+    /// `(16, 5)` → `""` (delete "Gamma", net −5) and one transaction
+    /// replaces `(16, 11)` — "Gamma\ndelta", crossing the tail separator —
+    /// with seven characters, reporting `editedRange (16, 7)`, `delta −4`.
+    ///
+    /// RED ON THE PRE-FIX TREE, and quietly: 4 ≤ 5 so the old guard
+    /// passed, `applyBlockEdit(at: 2, lengthDelta: −4)` succeeded (5 − 4 =
+    /// 1 ≥ 0, no trap), and afterwards `index.documentLength` and
+    /// `storage.length` AGREE at 23 — so the totals check everything
+    /// downstream leans on is satisfied, `restampProjection` stamps
+    /// consistently with the corrupted index, and the Debug identity audit
+    /// computes clean. Then `recordAutosave(entryIndex: 2, …)` reads
+    /// `viewText((16, 1))` and writes her whole paragraph "Gamma" to the
+    /// store as ONE CHARACTER — through the ledger, so echo detection
+    /// never notices. **That is worse than the crash this batch fixed: a
+    /// crash is loud and loses nothing committed; this loses her prose in
+    /// silence.**
+    ///
+    /// GREEN AFTER: the net change (−4) is not the approved one (−5), the
+    /// arming is declined, and `fallbackVerdict` recomputes `(16, 11)`
+    /// against the pre-edit index — a span crossing block 2 into the tail,
+    /// which no region contains — so the honest road runs and the store is
+    /// untouched.
+    @Test func aComposedTransactionWiderThanItsApprovalIsNotConsumed() async throws {
+        try await withEditorWorld { session, db in
+            try await withEditorAssertionsMuted {
+                let world = try await editRoutingFixture(session)
+                let model = world.model
+                let storage = world.storage
+                let before = try await storedBlockTexts(db, postID: world.postID)
+                #expect(before == ["Alpha", "Beta beta", "Gamma"])
+
+                // The gate approves deleting exactly the third block.
+                #expect(model.shouldChangeText(
+                    in: NSRange(location: 16, length: 5), replacement: ""))
+
+                // …and one coalesced transaction replaces eleven characters
+                // — across the tail separator — with seven.
+                storage.beginEditing()
+                storage.replaceCharacters(
+                    in: NSRange(location: 16, length: 11), with: "Gamma??")
+                storage.endEditing()
+
+                #expect(model.desyncRecoveryCount == 1,
+                        "the un-described transaction took the honest road")
+                await settleEditor(until: { model.index.documentLength == storage.length })
+                #expect(model.index.documentLength == storage.length,
+                        "the surface healed from the store")
+                #expect(storage.string == "Alpha\nBeta beta\nGamma\ndelta",
+                        "the store is truth: the un-routable transaction did not stand")
+                await model.autosave.flushNow()
+                #expect(try await storedBlockTexts(db, postID: world.postID) == before,
+                        "her paragraph was not overwritten with one character")
+            }
+        }
+    }
+
     /// The other half of the binding: an arming that DOES describe the
     /// edit that lands is still honored. Without this the pin above could
     /// be satisfied by throwing every arming away, which would retire the
@@ -223,6 +296,81 @@ struct MobileEditRoutingBindingTests {
     }
 }
 
+// MARK: - M13: the paste's bulk intent is discarded with its arming
+
+@MainActor
+@Suite("Mobile edit routing — a discarded arming takes its paste intent (round 2, M13)")
+struct MobileBulkArmingTests {
+    /// **M13** — a state batch 1's own binding created, and it closes
+    /// where it was opened. `bulkPending` is armed at the gate BESIDE the
+    /// verdict, off the same call (`.tail` + `isPaste`). When the binding
+    /// later declines that arming, the verdict goes and the flag stayed —
+    /// so the next crystallization ran as `.bulk` instead of `.typing`.
+    ///
+    /// The difference is visible in the store: `.typing` mints only
+    /// COMPLETED paragraphs (a tail with no newline mints nothing), while
+    /// `.bulk` segments the whole tail and closes the region. So a
+    /// half-typed sentence becomes a block early — a one-shot wrong
+    /// segmentation kind, no data loss, and exactly the kind of quiet
+    /// wrongness the binding exists to stop.
+    ///
+    /// RED ON THE PRE-FIX TREE: "delta!" mints as a fourth block.
+    @Test func aRejectedArmingClearsThePastesBulkIntent() async throws {
+        try await withEditorWorld { session, db in
+            let world = try await editRoutingFixture(session)
+            let model = world.model
+            let storage = world.storage
+
+            // A PASTE is approved into the open tail: the verdict AND the
+            // bulk-entry intent arm together.
+            #expect(model.shouldChangeText(
+                in: NSRange(location: 22, length: 5), replacement: "one\ntwo", isPaste: true))
+
+            // …but what lands is a different edit entirely (the gate-less
+            // system road), so the arming is declined.
+            systemPathEdit(storage, range: NSRange(location: 8, length: 1), replacement: "")
+            #expect(model.index.entries.map(\.length) == [5, 8, 5],
+                    "the landing routed by fallback to its own block")
+
+            // One ordinary keystroke in the tail now runs the
+            // crystallization the flag would have mis-kinded.
+            typeAtEnd(model, storage, "!")
+            await model.awaitMintSettle()
+
+            #expect(model.index.entries.count == 3,
+                    "typing mints nothing: the tail holds no completed paragraph")
+            #expect(model.index.tailLength == 6, "the tail is still open, holding 'delta!'")
+            await model.autosave.flushNow()
+            #expect(try await storedBlockTexts(db, postID: world.postID)
+                    == ["Alpha", "Bea beta", "Gamma"],
+                    "the half-typed tail did not become a block")
+        }
+    }
+
+    /// The other half, so the fix cannot be satisfied by never arming bulk
+    /// at all: an arming that IS honored keeps its paste semantics.
+    @Test func anHonoredPasteStillCrystallizesAsBulk() async throws {
+        try await withEditorWorld { session, db in
+            let world = try await editRoutingFixture(session)
+            let model = world.model
+            let storage = world.storage
+
+            // The paste lands exactly as approved (gate, then the edit).
+            #expect(typeEdit(
+                model, storage,
+                range: NSRange(location: 22, length: 5), replacement: "one\ntwo",
+                isPaste: true))
+            await model.awaitMintSettle()
+
+            #expect(model.index.tailLength == nil, "bulk entry closes the tail region")
+            await model.autosave.flushNow()
+            #expect(try await storedBlockTexts(db, postID: world.postID)
+                    == ["Alpha", "Beta beta", "Gamma", "one", "two"],
+                    "the pasted paragraphs segmented on entry (AppSpec §7)")
+        }
+    }
+}
+
 // MARK: - M2e: the canary's idle tick is disarmed at teardown
 
 @MainActor
@@ -252,5 +400,66 @@ struct MobileCanaryTeardownTests {
             // note ever opened, for the process's life.
             #expect(!surface.textView.canaryIsArmed, "the screen's teardown disarms it")
         }
+    }
+
+    /// **Round-2 ladder round 1, MINOR 3 — the ORDERING, which the pin
+    /// above structurally cannot see.** It holds the surface strongly
+    /// across `teardown()`'s await, so the disarm always lands whenever it
+    /// runs. Production does not: `textView` is weak, `finish()` is a real
+    /// DB round trip, and the only production caller is a NavigationStack
+    /// pop, where SwiftUI releases the representable CONCURRENTLY — so a
+    /// disarm sitting after the await silently did nothing whenever the
+    /// view lost that race, which is exactly the accumulation M2e exists
+    /// to close.
+    ///
+    /// The `afterDisarm` seam is what makes the ordering observable at all
+    /// (the pre-fix ordering cannot be caught by racing it — a race that
+    /// sometimes reproduces is not a pin). RED BY BEHAVIOURAL REVERT: move
+    /// `textView?.disarmCanary()` back below `await finish()` and the
+    /// observation reads `true`.
+    @Test func theDisarmIsTeardownsFirstAct() async throws {
+        try await withEditorWorld { session, _ in
+            let post = try await session.runner.run { ops in
+                try ops.createPost(title: "canary ordering", profile: .blog)
+            }
+            _ = try await session.runner.run { ops in
+                try ops.newBlock(in: post.id, text: "Alpha", at: .end)
+            }
+            let model = MobileEditorViewModel(
+                session: session, postID: post.id,
+                sleep: { _ in throw CancellationError() })
+            model.tailIdleSleep = { _ in throw CancellationError() }
+            let surface = MobileWriteSurfaceView()
+            model.attach(textView: surface.textView)
+            #expect(surface.textView.canaryIsArmed)
+
+            var armedAtFirstAwait: Bool?
+            await model.teardown(afterDisarm: {
+                armedAtFirstAwait = surface.textView.canaryIsArmed
+            })
+            #expect(armedAtFirstAwait == false,
+                    "the tick is gone before teardown ever suspends")
+        }
+    }
+
+    /// The other end of the same class: a canary that never reaches a
+    /// teardown at all — a failed load, a cancelled push, or the pop above
+    /// losing its race — still stops its tick. `Timer.scheduledTimer` hands
+    /// ownership to the run loop, so an un-invalidated tick outlives every
+    /// reference to it and keeps waking the main thread every 30 s for the
+    /// process's life.
+    ///
+    /// RED ON THE PRE-FIX TREE (no `deinit`): the timer is still valid
+    /// after its canary is gone. The pin holds the `Timer` itself, because
+    /// once the canary deallocates there is nothing else left to ask.
+    @Test func aCanaryThatDiesWithoutADisarmStillStopsItsTick() throws {
+        let surface = MobileWriteSurfaceView()
+        var canary: MobileFallbackCanary? = MobileFallbackCanary()
+        canary?.arm(for: surface.textView)
+        let timer = try #require(canary?.idleTimer, "the tick is scheduled")
+        #expect(timer.isValid)
+
+        canary = nil
+        #expect(!timer.isValid, "the tick dies with its canary")
     }
 }

@@ -361,8 +361,14 @@ nonisolated struct BlockRangeIndex: Equatable, Sendable {
     // test): an addition that cannot be represented is exactly as much
     // "this delta does not describe me" as a negative result, and answering
     // it with `false` costs one branch.
+    //
+    // NONE OF THESE FOUR CARRIES `@discardableResult`, DELIBERATELY
+    // (round-2 ladder round 1, MINOR 2). The whole point of the change is
+    // that a caller MUST react to a refusal; the attribute tells the
+    // compiler not to warn when one doesn't, which is precisely how the
+    // pre-fix `precondition`s shipped. Every call site guards the Bool
+    // today, and a future one that forgets should be told.
 
-    @discardableResult
     mutating func applyBlockEdit(at index: Int, lengthDelta: Int) -> Bool {
         guard entries.indices.contains(index) else { return false }
         let (length, overflow) = entries[index].length.addingReportingOverflow(lengthDelta)
@@ -371,7 +377,6 @@ nonisolated struct BlockRangeIndex: Equatable, Sendable {
         return true
     }
 
-    @discardableResult
     mutating func applyTailEdit(lengthDelta: Int) -> Bool {
         guard let tail = tailLength else { return false }
         let (length, overflow) = tail.addingReportingOverflow(lengthDelta)
@@ -381,14 +386,12 @@ nonisolated struct BlockRangeIndex: Equatable, Sendable {
     }
 
     /// The typed newline that opened the tail IS the separator before it.
-    @discardableResult
     mutating func openTail() -> Bool {
         guard tailLength == nil, !entries.isEmpty else { return false }
         tailLength = 0
         return true
     }
 
-    @discardableResult
     mutating func closeTail() -> Bool {
         guard tailLength == 0, !entries.isEmpty else { return false }
         tailLength = nil

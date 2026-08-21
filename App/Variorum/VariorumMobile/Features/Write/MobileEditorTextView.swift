@@ -34,11 +34,33 @@ final class MobileFallbackCanary {
     private static let log = Logger(subsystem: "io.lduarte.Variorum", category: "tk2-canary-ios")
 
     private(set) var fired = false
-    private var idleTimer: Timer?
+    /// The scheduled tick. `private(set)` rather than `private` because the
+    /// deinit pin needs a handle that OUTLIVES this object: once the canary
+    /// is gone there is no other way to ask whether its timer is still on
+    /// the run loop, which is the leak itself (round-2 ladder round 1,
+    /// MINOR 3).
+    private(set) var idleTimer: Timer?
 
     /// Whether the idle tick is scheduled — the teardown pin's oracle
     /// (round 2, M2e).
     var isArmed: Bool { idleTimer != nil }
+
+    /// The tick dies with its canary, whatever road got us here (round-2
+    /// ladder round 1, MINOR 3). `teardown()` disarms explicitly and does
+    /// it first — but the only production path is a NavigationStack pop,
+    /// where SwiftUI can release the surface concurrently, and a text view
+    /// released without a teardown at all (a failed load, a cancelled push)
+    /// never had one. `Timer.scheduledTimer` hands ownership to the run
+    /// loop, so an un-invalidated tick outlives everything that referenced
+    /// it and keeps waking the main thread every 30 s for the process's
+    /// life, doing nothing.
+    /// `isolated` because `Timer.invalidate()` must run on the run loop
+    /// that scheduled it; a plain deinit runs wherever the last reference
+    /// happens to drop.
+    isolated deinit {
+        idleTimer?.invalidate()
+        idleTimer = nil
+    }
 
     /// Called on the main actor when the canary fires (release builds reach
     /// this; debug builds stop at the assertion first).

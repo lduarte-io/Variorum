@@ -635,6 +635,7 @@ struct MobilePerfWalkTests {
             let topOffset = try #require(interiorOffset(mega.model, blockIndex: 1))
             let megaTop = typingSamples(mega.model, mega.surface, at: topOffset)
             #expect(megaTop.accepted == megaTop.samples.count)
+            let recoveriesAfterTop = mega.model.desyncRecoveryCount
 
             scrollToEnd(mega.surface)
             let endBlock = mega.model.index.entries.count - 2
@@ -656,6 +657,26 @@ struct MobilePerfWalkTests {
                 percentile(controlTyped.samples, 0.95),
                 percentile(megaTop.samples, 0.95),
                 percentile(megaEnd.samples, 0.95)))
+
+            // **M12 — MEASUREMENT ONLY (round-2 ladder round 1, finding 5's
+            // ownership).** A gate-less insertion whose iOS-widened report
+            // overflows its owning entry cannot be routed by
+            // `fallbackVerdict` and takes a `desyncRecovery()` — honest,
+            // never a crash, and unchanged by batch 1. It is a candidate
+            // cause of "the note flickered" on her phone, and the question
+            // its disposition waits on is simply: does it fire during
+            // ORDINARY TYPING? `desyncRecoveryCount` is already the oracle,
+            // so the walk reads it out over 24 keystrokes per leg at both
+            // ends of a 100k note. NO BUDGET IS ASSERTED — the number is
+            // the deliverable; the fix (if any) is a separate row decided
+            // on this evidence.
+            print(String(
+                format: "PERF[sim] desyncRecovery(typing) — control %d · 100k top %d · 100k end %d "
+                    + "(%d keystrokes per leg; M12 measurement, no budget)",
+                control.model.desyncRecoveryCount,
+                recoveriesAfterTop,
+                mega.model.desyncRecoveryCount - recoveriesAfterTop,
+                megaTop.samples.count))
 
             // The probe is real: the typed characters landed on the
             // surface (a dead probe must not pass silently).
@@ -725,6 +746,12 @@ struct MobilePerfWalkTests {
             print(String(
                 format: "PERF[sim] memory(100k walk) — start %.0f MiB · after open %.0f MiB · sampled peak %.0f MiB · walk delta %.0f MiB (phys_footprint; test-host absolutes — the on-device run is Stage D's gate)",
                 start, afterOpen, peak, delta))
+            // M12's second readout: the whole walk (open → type → full
+            // scroll) on both posts. Measurement only, no budget — see the
+            // typing test's note for what the number decides.
+            print(String(
+                format: "PERF[sim] desyncRecovery(walk) — control %d · 100k %d (M12 measurement, no budget)",
+                control.model.desyncRecoveryCount, mega.model.desyncRecoveryCount))
             #expect(
                 delta <= Self.walkDeltaCeilingMB,
                 "the 100k walk's footprint delta \(delta) MiB exceeds the \(Self.walkDeltaCeilingMB) MiB ceiling (PB2-2, armed at B3)")
