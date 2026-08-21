@@ -1081,3 +1081,23 @@ skipped step is re-run by the render paths). **No new P1 cost class** —
 `describes` adds one O(entries) walk to a gate that already did one per
 keystroke. M-D held: zero schema, zero `Sync/`. M2f is genuinely
 measure-only (the probe asserts liveness, no budget).
+
+---
+
+## 19. M12 / M13 / M14 — OWNED (fixing the architect's finding-5 slip)
+
+CLAUDE.md's rule is that nothing sits unowned: an owner is a phase
+number **or** a named project row, and a blank owner is the one
+forbidden state. §17 recorded these three as "traced, un-owned", which
+is precisely the forbidden state. Owned here.
+
+| # | Item | OWNER | Reasoning |
+|---|------|-------|-----------|
+| **M12** | The gate-less INSERTION whose iOS-widened report overflows its owning entry and takes a `desyncRecovery()` — an honest re-render, never a crash, unchanged by batch 1. Candidate cause of "the note flickered" | **BATCH 1 FIX ROUND — measurement only; then this round's ledger** | It is pre-existing and safe, so it is not a fix-now. But it is now CHEAP to observe: `desyncRecoveryCount` is already the oracle. The fix round adds a counter readout to the perf walk so we learn whether it fires in ordinary typing. **If it fires in ordinary use it becomes a fix row in this round; if it does not, it is recorded as rare and re-owned to 13u** (her Feel & polish row, which already carries "non-editing pane stability — essential to the app feeling good"). Deciding on evidence, not on suspicion |
+| **M13** | `bulkPending` left armed when its arming is rejected at consume time → one-shot wrong segmentation kind (`.bulk` instead of `.typing`), no data loss | **BATCH 1 FIX ROUND** | The reviewer independently traced it to the line. It is a two-line clear on a road batch 1 itself created, so it closes where it was opened rather than becoming debt |
+| **M14** | The Read hitch — 312 ms main-actor transform per 100k-word Read row (memory is fine: +1 MiB) | **THIS ROUND'S LEDGER, batch 7** *(re-owned there rather than fixed now)* | It is a real P1/P3 tension but it is NOT a regression and not in any batch's path. Batch 7 is the settings/judgment batch where a measured perf decision belongs. **Held for her as a question with the number attached**, since "is a 300 ms hitch on a 100k-word note worth an async transform" is a taste call about her own corpus. The un-measured half (SwiftUI `Text`-per-paragraph sizing) is measured there too |
+
+**Standing correction to §6's ledger heading practice:** a row born
+mid-batch gets its owner IN THE SAME COMMIT that records it. §17's
+table was written without one; that is the slip, and the rule is
+restated here so the remaining batches do not repeat it.
