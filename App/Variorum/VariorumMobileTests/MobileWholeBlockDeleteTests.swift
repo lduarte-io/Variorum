@@ -12,17 +12,40 @@
 //  `caretLandingAfterRemoving`, both HOISTED out of Mac app code by this
 //  batch — MobileSoul §3: parity is inheritance, never reimplementation).
 //
-//  RED-ON-OLD: every behavioural pin below fails on the pre-batch tree,
-//  where the gate's `.crossesBlockBoundary` arm refuses unconditionally —
-//  the store keeps all its blocks and `statusMessage` carries the
-//  "spans more than one block" line. Verified by behavioural revert; the
-//  record is in the batch report.
+//  WHICH PINS ARE RED ON WHICH TREE — stated precisely, because the batch
+//  header used to claim "every behavioural pin below fails on the pre-batch
+//  tree" and three of them could not (ladder round 1, MINOR 6). Three kinds
+//  live here, and each test says which it is in its own doc line:
 //
-//  THE HONEST LIMITATION, pinned as such rather than papered over: a span
-//  that covers a block only PARTIALLY is not a whole-block run and still
-//  refuses — identically on both platforms. Whether a partial multi-block
-//  span should merge-then-edit is a standing product question the author
-//  holds; `aPartialSpanStillRefusesExactlyAsBefore` is its characterization.
+//  1. RED ON THE PRE-BATCH TREE (the batch's own gesture): every pin that
+//     watches a whole-paragraph selection DELETE. Pre-batch the gate's
+//     `.crossesBlockBoundary` arm refused unconditionally — the store kept
+//     all its blocks and `statusMessage` carried the "spans more than one
+//     block" line.
+//  2. RED ON THE PRE-FIX TREE (the ladder's fixes, round 1): the gap-fence
+//     pins (MINOR 3(a) — a not-yet-arrived block was tombstoned), the
+//     nearest-surviving caret landing (MINOR 4 — an arbitrary pick named a
+//     departing block), the landing's cost at 20,000 entries (MINOR 5 —
+//     10.5 s measured on the pre-fix scan), the vanished-block sentence
+//     (MINOR 2 — a raw enum dump), the stranded-original half of the
+//     receipt (NIT 7), and the caret write at the ⋯ door (NIT 8).
+//  3. BOUNDARY CHARACTERIZATIONS, green on BOTH trees by design: the cases
+//     this road deliberately does NOT take — a partial span, a type-over, a
+//     seam keystroke, a sealed note. They are regression guards on the new
+//     road, never evidence that it works, and they are labelled as such
+//     rather than counted as red-on-old.
+//
+//  THE LIMITATION, RE-STATED TRUTHFULLY (her correction, 2026-08-21 —
+//  §30): a span covering a block only PARTIALLY is not a whole-block run
+//  and still refuses HERE. The batch header used to add "identically on
+//  both platforms… a standing product question", and both halves were
+//  wrong: the Mac routes exactly that span to the ratified 2026-07-09
+//  merge-then-edit (`EditorSurfaceController.planCrossBlockEdit` — no
+//  takes, no gaps, no tail, contiguous) and merges the run before applying
+//  the edit. So the phone's refusal is a PARITY GAP with its own row
+//  (M22), not a shared limitation and not an open question.
+//  `aPartialSpanStillRefusesExactlyAsBefore` characterizes today's phone
+//  behaviour and is expected to CHANGE when that row runs.
 //
 
 import Foundation
@@ -79,6 +102,20 @@ struct MobileWholeBlockDeleteBrainTests {
             tailLength: tail)
     }
 
+    /// The same tiling with entry `gap` still waiting for its variant — the
+    /// shape a sync arrival leaves behind (`variantID == nil`, `editable`
+    /// false: the editor renders the block and refuses to type into it).
+    private static func indexWithGap(_ lengths: [Int], gap: Int) -> BlockRangeIndex {
+        BlockRangeIndex(
+            entries: lengths.enumerated().map {
+                BlockRangeIndex.Entry(
+                    blockID: "b\($0.offset)",
+                    variantID: $0.offset == gap ? nil : "v\($0.offset)",
+                    length: $0.element, editable: $0.offset != gap)
+            },
+            tailLength: nil)
+    }
+
     /// The plan is the geometry PLUS one rule: delete, never type-over.
     @Test func thePlanNamesTheBlocksAWholeSpanCovers() {
         // "aa\nbbb\nc" — starts 0/3/7, ends 2/6/8.
@@ -97,6 +134,51 @@ struct MobileWholeBlockDeleteBrainTests {
         let index = Self.index([2, 3, 1])
         #expect(index.wholeBlockDeletion(
             covering: NSRange(location: 3, length: 4), replacement: "X") == nil)
+    }
+
+    /// **THE GAP FENCE (ladder MINOR 3(a)) — RED ON THE PRE-FIX TREE**,
+    /// where the run walked straight past `variantID == nil` and the plan
+    /// named the not-yet-arrived block for tombstoning. Under
+    /// tombstone-wins that takes the peer's paragraph when the variant
+    /// lands — text she has never seen — one keystroke after the editor
+    /// told her that block was read-only until it syncs.
+    @Test func aRunContainingANotYetArrivedBlockHasNoPlan() {
+        let index = Self.indexWithGap([2, 3, 1], gap: 1)
+        // "aa\nbbb\nc" — the whole document, geometry-perfect as a run.
+        let all = NSRange(location: 0, length: 8)
+        #expect(index.wholeBlockRun(covering: all) == 0...2,
+                "the GEOMETRY is a whole-block run — the fence is what declines")
+        #expect(index.wholeBlockDeletion(covering: all, replacement: "") == nil)
+        #expect(index.wholeBlockRunAwaitsSync(covering: all))
+
+        // The blocks that DID arrive still delete: the fence is the gap,
+        // never the neighbourhood of one.
+        #expect(index.wholeBlockDeletion(
+            covering: NSRange(location: 0, length: 3), replacement: "") == ["b0"])
+        #expect(!index.wholeBlockRunAwaitsSync(covering: NSRange(location: 0, length: 3)))
+    }
+
+    /// A LOCKED take is deliberately NOT fenced (QUESTIONS #33(a)'s
+    /// unrestricted delete — the ⋯ door has always taken a locked take's
+    /// block). Kind 3: green on both trees, and it is here so the gap fence
+    /// above can never quietly grow into an editability fence.
+    @Test func aRunContainingALockedTakeStillPlans() {
+        let locked = BlockRangeIndex(
+            entries: [
+                BlockRangeIndex.Entry(blockID: "b0", variantID: "v0", length: 2, editable: true),
+                BlockRangeIndex.Entry(blockID: "b1", variantID: "v1", length: 3, editable: false),
+            ],
+            tailLength: nil)
+        #expect(locked.wholeBlockDeletion(
+            covering: NSRange(location: 0, length: 6), replacement: "") == ["b0", "b1"])
+        #expect(!locked.wholeBlockRunAwaitsSync(covering: NSRange(location: 0, length: 6)))
+    }
+
+    /// A span that is not a run at all reports no gap either — the copy
+    /// chooser must not blame sync for a partial selection.
+    @Test func aSpanThatIsNoRunReportsNoGap() {
+        let index = Self.indexWithGap([2, 3, 1], gap: 1)
+        #expect(!index.wholeBlockRunAwaitsSync(covering: NSRange(location: 4, length: 4)))
     }
 
     /// Partial coverage answers nil — the limitation, stated in the brain.
@@ -132,6 +214,19 @@ struct MobileWholeBlockDeleteBrainTests {
         #expect(index.caretLandingAfterRemoving(["b0", "b1", "b2"]).offset == 0)
     }
 
+    /// **NEAREST SURVIVING, not "just past the edges" (ladder MINOR 4) —
+    /// RED ON THE PRE-FIX TREE**, which read only `last + 1` and
+    /// `first - 1` and so named `b0` here: a block being deleted, while
+    /// `b1` sat there surviving. The phone's own gesture is always
+    /// contiguous (where both readings agree); the Mac's ⌘-click pick is
+    /// not, and this is now the SHARED brain's stated rule.
+    @Test func anArbitraryPickLandsOnTheNearestSURVIVINGBlock() {
+        let index = Self.index([2, 3, 1])
+        let landing = index.caretLandingAfterRemoving(["b0", "b2"])
+        #expect(landing.blockID == "b1", "b1 survives between the picked pair")
+        #expect(landing.offset == 0)
+    }
+
     /// Order-independent: the rule reads the run's EDGES after sorting, not
     /// the caller's array order.
     @Test func theLandingReadsTheRunsEdgesNotTheCallersOrder() {
@@ -143,16 +238,21 @@ struct MobileWholeBlockDeleteBrainTests {
         #expect(backwards.offset == forwards.offset)
     }
 
-    /// **THE COST, measured rather than argued (P1/P-8).** The plan walks
-    /// the entry TILING — block count, never character count — and it does
-    /// so at GESTURE cadence, not keystroke cadence, because the one
-    /// keystroke-cadence caller of the arm that reaches it (a backspace at
-    /// a seam) is a ONE-CHARACTER range, which the brain's first guard
-    /// answers before any allocation. Both halves are pinned here: the
-    /// seam range costs nothing at 20,000 entries, and a real gesture over
-    /// the same index stays far under a generous ceiling — generous on
-    /// purpose, so the pin catches a quadratic regression (which at this
-    /// size would take seconds) without being a stopwatch.
+    /// **THE COST, measured rather than argued (P1/P-8) — BOTH HALVES OF
+    /// THE GESTURE (ladder MINOR 5).** The plan walks the entry TILING —
+    /// block count, never character count — and it does so at GESTURE
+    /// cadence, not keystroke cadence, because the one keystroke-cadence
+    /// caller of the arm that reaches it (a backspace at a seam) is a
+    /// ONE-CHARACTER range, which the brain's first guard answers before
+    /// any allocation.
+    ///
+    /// **The LANDING is measured here too, and it is why this pin grew.**
+    /// The batch measured only the plan; the landing was O(N·M) — a
+    /// `firstIndex` scan per block ID — and a Select All makes M = N, which
+    /// at this pin's own 20,000-entry ceiling was ~0.9 s of MAIN-ACTOR work
+    /// the pin could not see. A claim with half its surface unmeasured is
+    /// how that shipped, so the whole gesture is under the clock now: plan,
+    /// then landing over EVERY block the plan named.
     @Test func thePlanStaysCheapAtTwentyThousandBlocks() {
         let index = Self.index(Array(repeating: 40, count: 20_000))
         let seam = NSRange(location: 40, length: 1)
@@ -175,7 +275,30 @@ struct MobileWholeBlockDeleteBrainTests {
             covering: span, replacement: "") }
         #expect(planned?.count == 3)
         #expect(gestureCost < .milliseconds(50))
-        print("PERF[plan] wholeBlockDeletion @20k blocks — seam×1000 \(seamCost) · gesture \(gestureCost)")
+
+        // THE LANDING, at the worst shape the surface can produce: Select
+        // All, so the landing is asked about all 20,000 IDs at once (M = N).
+        // The pre-fix scan measured ~0.9 s here; one position map plus one
+        // survivor scan is linear, and the ceiling is generous enough to
+        // stay a regression detector rather than a stopwatch — a
+        // re-quadratic landing would take a hundred times it.
+        let everyID = index.entries.map(\.blockID)
+        var landing: (blockID: String, offset: Int)?
+        let landingCost = clock.measure { landing = index.caretLandingAfterRemoving(everyID) }
+        #expect(landing?.blockID == "b0", "nothing survives — the departed block, honestly named")
+        #expect(landingCost < .milliseconds(100))
+
+        // …and the everyday shape beside it: a three-block run out of
+        // 20,000, where the pre-fix scan was already 3 × 20,000 visits.
+        let runIDs = planned ?? []
+        let runLandingCost = clock.measure { _ = index.caretLandingAfterRemoving(runIDs) }
+        #expect(runLandingCost < .milliseconds(50))
+
+        print("""
+            PERF[plan] wholeBlockDeletion @20k blocks — seam×1000 \(seamCost) · \
+            gesture \(gestureCost) · landing(select-all) \(landingCost) · \
+            landing(3-run) \(runLandingCost)
+            """)
     }
 
     /// IDs the index no longer holds are dropped, never trapped on — a
@@ -316,11 +439,16 @@ struct MobileWholeBlockDeleteTests {
         }
     }
 
-    /// **THE HONEST LIMITATION, characterized.** A span that opens
-    /// MID-paragraph and runs on is not a whole-block run: it keeps today's
-    /// behaviour exactly — the cross-block refusal, nothing deleted. This
-    /// pin passes on BOTH trees by design; it exists so the boundary is
-    /// recorded as behaviour rather than discovered as a surprise.
+    /// **THE LIMITATION, characterized.** A span that opens MID-paragraph
+    /// and runs on is not a whole-block run: it keeps today's phone
+    /// behaviour exactly — the cross-block refusal, nothing deleted.
+    ///
+    /// **BOUNDARY CHARACTERIZATION (kind 3): green on both trees by
+    /// design**; it exists so the boundary is recorded as behaviour rather
+    /// than discovered as a surprise. **It is expected to change:** the Mac
+    /// merges-then-edits this exact span (the ratified 2026-07-09 rule),
+    /// and the phone owes that road at M22 — so this pin records a parity
+    /// gap, not a decision.
     @Test func aPartialSpanStillRefusesExactlyAsBefore() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedParagraphPost(session)
@@ -343,6 +471,10 @@ struct MobileWholeBlockDeleteTests {
     /// Typing OVER a whole-block span is a replacement, not a delete, and
     /// keeps its own road — the typed characters are never dropped on the
     /// floor by a delete compound.
+    ///
+    /// **BOUNDARY CHARACTERIZATION (kind 3): green on both trees.** A
+    /// type-over never deleted a block before this road existed either;
+    /// this pin guards the new road from widening onto it.
     @Test func typingOverAWholeBlockSpanIsNotADelete() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedParagraphPost(session)
@@ -365,6 +497,10 @@ struct MobileWholeBlockDeleteTests {
     /// one-character range never reaches this road (the brain excludes it
     /// before any walk), so backspace at a seam still refuses on the phone
     /// exactly as it did.
+    ///
+    /// **BOUNDARY CHARACTERIZATION (kind 3): green on both trees.** Its job
+    /// is to catch the new road stealing the seam geometry A7 and #34 own —
+    /// a regression guard, not evidence the gesture works.
     @Test func aSeamBackspaceIsNotAWholeBlockDelete() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedParagraphPost(session)
@@ -384,6 +520,10 @@ struct MobileWholeBlockDeleteTests {
     /// **A SEALED note refuses with NOTHING deleted** (P-2's letter: the
     /// gate's own lock answer stops the gesture before it is armed, and the
     /// compound's legs would refuse through the operation besides).
+    ///
+    /// **BOUNDARY CHARACTERIZATION (kind 3): green on both trees.** The
+    /// seal refused this keystroke before the road existed; the pin exists
+    /// so the road can never be built past the seal later.
     @Test func aSealedNoteRefusesAndDeletesNothing() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedParagraphPost(session)
@@ -403,6 +543,134 @@ struct MobileWholeBlockDeleteTests {
                 == ["Alpha one.", "Beta two.", "Gamma three."],
                     "the seal held — nothing deleted")
             #expect(model.statusMessage == "This note is locked — unlock it to edit.")
+        }
+    }
+
+    /// **THE GAP FENCE'S FACE (ladder MINOR 3(a)) — RED ON THE PRE-FIX
+    /// TREE**, where Select All → ⌫ tombstoned the not-yet-arrived block
+    /// along with the two she can read. Under tombstone-wins that takes the
+    /// peer's paragraph the moment its variant lands — text she has never
+    /// seen — one keystroke after this same editor told her the block was
+    /// read-only until it syncs. Now the gesture declines and says exactly
+    /// that; the arrived blocks are untouched too, because a run is one
+    /// act.
+    @Test func aRunCoveringANotYetArrivedBlockRefusesAndSaysWhy() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedParagraphPost(session)
+            // The SyncSpec §5 gap state, manufactured: the block row has
+            // arrived, its variant has not (only sync apply order produces
+            // this locally, so the seed writes the row state directly).
+            try await db.write { [blockID = seed.blockIDs[1]] db in
+                try db.execute(
+                    sql: "UPDATE variant SET deleted_at = ? WHERE block_id = ?",
+                    arguments: ["2026-08-21T00:00:00Z", blockID])
+            }
+            let (model, storage) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            #expect(model.index.entries[1].variantID == nil, "the middle slot is a gap")
+
+            let whole = NSRange(location: 0, length: model.index.documentLength)
+            #expect(model.planWholeBlockDeletion(range: whole, replacement: "") == nil)
+            await deleteSpan(model, storage, whole)
+
+            #expect(model.statusMessage == model.message(for: BlockRangeIndex.Refusal.readOnlySlot),
+                    "the refusal names sync, not a boundary problem that isn't there")
+            let live = try await db.read { [postID = seed.postID] db in
+                try Int.fetchOne(
+                    db,
+                    sql: """
+                        SELECT COUNT(*) FROM container_block
+                        WHERE container_id = ? AND deleted_at IS NULL
+                        """,
+                    arguments: [postID]) ?? -1
+            }
+            #expect(live == 3, "nothing was deleted — not the gap, and not its neighbours")
+        }
+    }
+
+    /// **A BLOCK THE STORE HAS ALREADY LOST speaks (ladder MINOR 2) — RED
+    /// ON THE PRE-FIX TREE**, where her status line read
+    /// `blockNotFound(id: "…")`. The race is real at this door: a second ⌫
+    /// during the first compound's flush re-plans now-stale IDs. The
+    /// compound's atomic rollback means she meets it with NOTHING deleted,
+    /// and the sentence has to carry that or a rolled-back gesture reads as
+    /// a half-done one.
+    @Test func aVanishedBlockRefusesInWordsAndSaysNothingWasDeleted() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedParagraphPost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            await model.structural.deleteWholeBlockRun([seed.blockIDs[0], "ghost-block"])
+
+            let status = try #require(model.statusMessage)
+            #expect(!status.contains("blockNotFound"), "never the raw enum")
+            #expect(status.contains("Nothing was deleted"))
+            #expect(!status.contains("Mac"))
+            #expect(try await liveTexts(db, postID: seed.postID)
+                == ["Alpha one.", "Beta two.", "Gamma three."],
+                    "the compound rolled back whole — which is what the words promise")
+        }
+    }
+
+    /// **THE STRANDING SENTENCE reaches the phone (ladder NIT 7) — RED ON
+    /// THE PRE-FIX TREE**, where the receipt said only "2 blocks deleted."
+    /// Deleting a divide's two successors together is the commonest way to
+    /// strand the original it preserved, and this door is what makes that
+    /// one keystroke. Her named failure mode is believing an ancestor is a
+    /// guaranteed backup, so the delete that changes that says so.
+    @Test func deletingBothHalvesOfADivideNamesTheStrandedOriginal() async throws {
+        try await withEditorWorld { session, db in
+            let post = try await session.runner.run { ops -> String in
+                let post = try ops.createPost(title: "stranded", profile: .blog)
+                let made = try ops.newBlock(in: post.id, text: "Alpha beta gamma.", at: .end)
+                // A fan, so the divide takes the duplicate-shape road that
+                // PRESERVES the original whole (her Q-M2 ruling).
+                _ = try ops.newBlankVariant(made.block.id)
+                _ = try ops.divideDuplicating(
+                    made.block.id, displayedVariantID: made.variant.id, cut: 6)
+                return post.id
+            }
+            let (model, storage) = makeEditor(session, postID: post)
+            await model.loadOnce()
+            #expect(model.index.entries.count == 2, "B and C stand where A did")
+
+            await deleteSpan(
+                model, storage, NSRange(location: 0, length: model.index.documentLength))
+
+            #expect(model.statusMessage
+                == "2 blocks deleted." + MobileStructuralController.strandedOriginalNote(1))
+            #expect(try await liveTexts(db, postID: post) == [])
+        }
+    }
+
+    /// **THE CARET WRITE, pinned at last (ladder NIT 8).** Batch 1b
+    /// recorded it as an honest gap — the headless harness has no text view,
+    /// so the write was a no-op there. The real surface has one, so both
+    /// delete doors are pinned on it now: the ⋯ menu's single-block act
+    /// (which landed the caret NOWHERE before this fix — RED ON THE PRE-FIX
+    /// TREE) and the selection gesture beside it.
+    @Test func bothDeleteDoorsLandTheCaretOnTheSurvivingBlock() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedParagraphPost(session)
+            let (model, surface) = await makeSurfaceEditor(session, postID: seed.postID)
+            surface.textView.selectedRange = NSRange(location: 0, length: 0)
+
+            // The ⋯ door: delete the MIDDLE block — the caret lands at the
+            // start of the block below it, which is now "Gamma three."
+            await model.structural.deleteBlock(blockID: seed.blockIDs[1])
+            let afterMenu = try #require(model.rangeOfBlock(seed.blockIDs[2]))
+            #expect(surface.textView.selectedRange
+                == NSRange(location: afterMenu.location, length: 0))
+
+            // The gesture: delete the LAST block — the caret lands at the
+            // END of the block above.
+            let gamma = try #require(model.rangeOfBlock(seed.blockIDs[2]))
+            await model.structural.deleteWholeBlockRun([seed.blockIDs[2]])
+            let alpha = try #require(model.rangeOfBlock(seed.blockIDs[0]))
+            #expect(surface.textView.selectedRange
+                == NSRange(location: alpha.upperBound, length: 0))
+            #expect(gamma.length > 0, "the block really was there before the gesture")
         }
     }
 
@@ -440,13 +708,52 @@ struct MobileWholeBlockDeleteTests {
     /// can say names the other platform, or a door this phone lacks.
     @Test func theReceiptsNameNothingThePhoneDoesNotHave() {
         for line in [MobileStructuralController.blocksDeletedStatus(1),
-                     MobileStructuralController.blocksDeletedStatus(3)] {
+                     MobileStructuralController.blocksDeletedStatus(3),
+                     MobileStructuralController.strandedOriginalNote(1),
+                     MobileStructuralController.strandedOriginalNote(2)] {
             #expect(!line.contains("Mac"))
             #expect(!line.lowercased().contains("tray"))
+            #expect(!line.lowercased().contains("trash"),
+                    "no Trash face on this phone yet — PL-11's row, a later batch")
+            #expect(!line.lowercased().contains("forever"),
+                    "these are tombstones, not purges")
             #expect(!line.contains("\u{2325}\u{2318}Z"), "there is no undo door on this phone yet")
         }
         #expect(MobileStructuralController.blocksDeletedStatus(1)
             == MobileStructuralController.blockDeletedStatus,
                 "N = 1 reuses the pinned sentence — the two doors cannot fork")
+    }
+
+    /// **THE GESTURE ASKS NOTHING, and that is her ruling** (2026-08-21,
+    /// round 2 ladder R13 — *"it's fine to have no confirm"*, superseding
+    /// the ladder's MAJOR 1). The ⋯ menu row still confirms; this road is a
+    /// keystroke and does not. Pinned so a later session cannot re-add
+    /// ceremony here by reflex: the answer to "no way back" is M20's
+    /// undo/redo door and M21's tray, not a dialog.
+    ///
+    /// Driven on the REAL surface, through the delegate `attach` installed
+    /// on the real text view — the same call UIKit makes for ⌫ — with a
+    /// confirm seam that would RECORD any question the road decided to ask.
+    @Test func theKeystrokeDeletesWithoutAskingAnything() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedParagraphPost(session)
+            let (model, surface) = await makeSurfaceEditor(session, postID: seed.postID)
+            var asked = 0
+            model.blockMenu.confirmDestructive = { _, _, _, completion in
+                asked += 1
+                completion(true)
+            }
+
+            let whole = NSRange(location: 0, length: model.index.documentLength)
+            surface.textView.selectedRange = whole
+            let allowed = surface.textView.delegate?.textView?(
+                surface.textView, shouldChangeTextIn: whole, replacementText: "")
+            await model.pendingGestureTask?.value
+
+            #expect(allowed == false, "the storage never half-applies a cross-block delete")
+            #expect(asked == 0, "no ceremony on the keystroke — her ruling")
+            #expect(try await liveTexts(db, postID: seed.postID) == [])
+            #expect(model.statusMessage == "3 blocks deleted.")
+        }
     }
 }

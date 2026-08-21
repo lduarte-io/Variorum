@@ -541,14 +541,22 @@ final class MobileStructuralController {
         defer { structuralInFlight = false }
 
         guard await flushPendingText() else { return }
+        // The landing is read BEFORE the tombstone, from the index that
+        // still holds the departing block (the run door's rule, applied to
+        // one ID — ladder NIT 8: the two delete doors answered the caret
+        // differently, and this one answered nothing at all).
+        let landing = model.index.caretLandingAfterRemoving([blockID])
         do {
             try await session.runner.run { ops in
                 try ops.deleteBlock(blockID)
             }
-            model.report(Self.blockDeletedStatus)
+            model.report(Self.blockDeletedStatus
+                + (await strandedOriginalsNote(blockIDs: [blockID]) ?? ""))
             await model.refreshTakesFromStore()
+            landCaret(landing)
         } catch {
-            model.report(Self.refusalMessage(error, act: "delete the block"))
+            model.report(Self.refusalMessage(
+                error, act: "delete the block", nothingWas: "deleted"))
         }
     }
 
@@ -583,6 +591,15 @@ final class MobileStructuralController {
     /// real answer rather than guessing at one. The gate above already
     /// stops a sealed note before the gesture is even armed; this door
     /// carries no second copy of that judgement.
+    ///
+    /// **NO CONFIRM, by her ruling** (author, 2026-08-21 — round 2 ladder
+    /// R13, superseding the ladder's MAJOR 1: *"it's fine to have no
+    /// confirm"*). The ⋯ menu's single-block door still asks, because that
+    /// is a menu row and asking there costs a tap she already spent; this
+    /// road is a keystroke, and the answer to "no way back" is the way
+    /// back — the structural undo/redo door (M20) and the per-note tray
+    /// (M21), both of which she asked for. The gate carries the same note
+    /// at the routing site.
     func deleteWholeBlockRun(_ blockIDs: [String]) async {
         guard let model, !blockIDs.isEmpty else { return }
         guard !structuralInFlight else {
@@ -616,17 +633,63 @@ final class MobileStructuralController {
                     for blockID in blockIDs { try ops.deleteBlock(blockID) }
                 }
             }
-            model.report(Self.blocksDeletedStatus(blockIDs.count))
+            model.report(Self.blocksDeletedStatus(blockIDs.count)
+                + (await strandedOriginalsNote(blockIDs: blockIDs) ?? ""))
             await model.refreshTakesFromStore()
-            if let range = model.rangeOfBlock(landing.blockID) {
-                model.textView?.selectedRange = NSRange(
-                    location: min(range.location + landing.offset, range.upperBound),
-                    length: 0)
-            }
+            landCaret(landing)
         } catch {
             model.report(Self.refusalMessage(
-                error, act: blockIDs.count == 1 ? "delete the paragraph" : "delete the paragraphs"))
+                error,
+                act: blockIDs.count == 1 ? "delete the paragraph" : "delete the paragraphs",
+                nothingWas: "deleted"))
         }
+    }
+
+    /// The caret write both delete doors share — by IDENTITY, over the
+    /// re-rendered surface (the landing named a SURVIVING block before the
+    /// tombstone; a landing whose block did not survive simply isn't found
+    /// and the caret stands still).
+    private func landCaret(_ landing: (blockID: String, offset: Int)) {
+        guard let model, let range = model.rangeOfBlock(landing.blockID) else { return }
+        model.textView?.selectedRange = NSRange(
+            location: min(range.location + landing.offset, range.upperBound), length: 0)
+    }
+
+    /// **Did this delete strand a preserved original?** (13j's round-8b
+    /// ruling (d), reaching the phone — ladder NIT 7.) Her named failure
+    /// mode was believing an ancestor waiting in lineage is a guaranteed
+    /// backup: when a delete takes the LAST live descendant of a divide's
+    /// preserved original, the original stops being permanent and rides the
+    /// family's fate — and deleting a divide's two successors together is
+    /// the commonest way to do it, which is exactly what the whole-block
+    /// run door makes easy.
+    ///
+    /// Asked AFTER the delete lands, from the STORE (`Queries`' own read —
+    /// no new brain): whether the deleted blocks were the last live
+    /// descendants is a fact about rows, never a guess from a projection.
+    /// Nil when nothing was stranded — the ordinary case, and no sentence
+    /// at all beats a reassuring one.
+    private func strandedOriginalsNote(blockIDs: [String]) async -> String? {
+        guard !blockIDs.isEmpty else { return nil }
+        let stranded = (try? await session.database.read { db in
+            try Queries.originalsStrandedBy(db, blockIDs: blockIDs)
+        }) ?? []
+        guard !stranded.isEmpty else { return nil }
+        return Self.strandedOriginalNote(stranded.count)
+    }
+
+    /// The stranding sentence, in the PHONE's words. The Mac's
+    /// (`BlockSelectionCopy.strandedOriginalNote`) says the original "rides
+    /// the Trash with it" because the Mac HAS a Trash to name; this app has
+    /// no Trash face yet (the ledger's PL-11 row, a later batch of this
+    /// round), so it carries the same FACT without naming a door she cannot
+    /// open — 13j J8(a)'s doctrine, phone edition. When the phone's Trash
+    /// lands, this sentence graduates exactly as the Mac's did.
+    /// Pinned static.
+    static func strandedOriginalNote(_ count: Int) -> String {
+        count == 1
+            ? " The original preserved from this block's divide goes with it."
+            : " \(count) preserved originals go with these blocks."
     }
 
     /// The whole-block-selection delete's receipt. It reuses the pinned
@@ -672,7 +735,16 @@ final class MobileStructuralController {
         (model?.index.entries.isEmpty ?? true) ? empty : tail
     }
 
-    static func refusalMessage(_ error: Error, act: String) -> String {
+    /// The everyday refusals in phone words; the rest is still the
+    /// operations layer's own message.
+    ///
+    /// `nothingWas` is the verb the ROLLBACK sentence needs — "deleted" at
+    /// the two delete doors, "changed" everywhere else. Every door here
+    /// runs ONE `session.runner.run` transaction, so a throw means nothing
+    /// landed; the word only decides how precisely the sentence can say so.
+    static func refusalMessage(
+        _ error: Error, act: String, nothingWas: String = "changed"
+    ) -> String {
         guard let error = error as? OperationError else {
             return String(describing: error)
         }
@@ -684,6 +756,24 @@ final class MobileStructuralController {
         case .invalidCut:
             return "No legal cut spot for that here — cuts land between words, "
                 + "at sentence ends, and at line breaks."
+        // **`blockNotFound`, in words** (round 2 batch 1b ladder, MINOR 2).
+        // It dumped the raw enum here because until the whole-block-run
+        // door existed, every phone door onto it named the ONE block the
+        // caret was in. The run door holds a list of IDs across a flush,
+        // and the store can move under it: a second ⌫ during the first
+        // compound's flush re-plans now-stale IDs, another surface deletes
+        // one, a sync arrival tombstones one. **The compound's atomic
+        // rollback means she meets it with NOTHING deleted — that is the
+        // fact the words must carry**, or a rolled-back gesture reads as a
+        // half-done one and she goes looking for the wreckage.
+        //
+        // It is the phone's OWN sentence, not the Mac's: the Mac's
+        // `BlockSelectionCopy.blockGone` says "the blocks you picked" and
+        // "pick again", which is ⌘-click vocabulary this phone has no door
+        // for. Same fact, this app's gesture.
+        case .blockNotFound:
+            return "One of these blocks is already gone — it may have been deleted "
+                + "since you selected it. Nothing was \(nothingWas); try again."
         default:
             return String(describing: error)
         }

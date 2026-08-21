@@ -325,24 +325,71 @@ nonisolated struct BlockRangeIndex: Equatable, Sendable {
     /// it has always taken; the typed characters must never be dropped on
     /// the floor by a delete compound.
     ///
-    /// Purely geometric on purpose — it carries no content guards at all.
-    /// That is the 13c R3-1 lesson applied rather than re-learned: a
-    /// plan-time guard reading a projection is an ENABLEMENT hint, never an
-    /// authorization, because the projection is deliberately frozen for the
-    /// length of a typing burst. The authorization is `deleteBlock`'s own —
-    /// the STANDING unrestricted door (QUESTIONS #33(a): the block goes,
-    /// whatever it holds) — and a sealed note refuses at the first leg
-    /// through the operation itself, with nothing deleted.
+    /// Purely geometric on purpose, with ONE fence — the gap (below). It
+    /// carries no other content guard at all: that is the 13c R3-1 lesson
+    /// applied rather than re-learned: a plan-time guard reading a
+    /// projection is an ENABLEMENT hint, never an authorization, because
+    /// the projection is deliberately frozen for the length of a typing
+    /// burst. The authorization is `deleteBlock`'s own — the STANDING
+    /// unrestricted door (QUESTIONS #33(a): the block goes, whatever it
+    /// holds) — and a sealed note refuses at the first leg through the
+    /// operation itself, with nothing deleted. A LOCKED take inside the
+    /// run is deliberately NOT fenced for exactly that reason (#33(a) is
+    /// the ruling; the ⋯ menu's single-block delete has always taken a
+    /// locked take's block).
+    ///
+    /// **THE GAP FENCE (mobile round 2, batch 1b ladder, MINOR 3(a)).** A
+    /// gap slot is a block whose variant has NOT ARRIVED (`variantID ==
+    /// nil`): the surface renders the block, the editor's own gate refuses
+    /// typing into it, and both platforms say so in words *("This block
+    /// hasn't fully synced…" / "A block in this selection hasn't arrived
+    /// yet")*. Tombstoning one is not the same class of act as deleting a
+    /// block she can read: under tombstone-wins (SyncSpec §6) the peer's
+    /// paragraph goes with it **when the variant finally lands** — text
+    /// she has never seen, deleted behind a promise the app made aloud one
+    /// keystroke earlier. So a run containing a gap declines here, and
+    /// each platform's face speaks its own read-only refusal. This is the
+    /// ONE fence, not the start of a fence family: it is not a guess about
+    /// content (the store's answer could differ) — it is the surface
+    /// declining to act on a slot it has already declared unwritable.
     func wholeBlockDeletion(covering range: NSRange, replacement: String) -> [String]? {
-        guard replacement.isEmpty, let run = wholeBlockRun(covering: range) else { return nil }
+        guard replacement.isEmpty, let run = wholeBlockRun(covering: range),
+              !runAwaitsSync(run)
+        else { return nil }
         return run.map { entries[$0].blockID }
     }
 
+    /// **Why a whole-block span declined: because a block in it has not
+    /// arrived.** The FACE's question, so a refusal can name the real
+    /// reason instead of the residual one (the phone's gate would
+    /// otherwise speak its cross-block line at a span that is a perfectly
+    /// good run; the Mac's `CrossBlockRefusal` already diagnoses
+    /// `.unsyncedBlock` for itself). One rule, two readers — the decline
+    /// above and the copy choice here read the same private predicate.
+    func wholeBlockRunAwaitsSync(covering range: NSRange) -> Bool {
+        guard let run = wholeBlockRun(covering: range) else { return false }
+        return runAwaitsSync(run)
+    }
+
+    private func runAwaitsSync(_ run: ClosedRange<Int>) -> Bool {
+        run.contains { entries[$0].variantID == nil }
+    }
+
     /// Where the caret goes when a whole SET of blocks leaves: the START of
-    /// the block below the last one removed, else the END of the block above
-    /// the first — the single-block rule, applied to the run's edges. Blocks
-    /// BETWEEN the edges are irrelevant: everything after the last removed
-    /// index survives by definition, as does everything before the first.
+    /// the nearest SURVIVING block below the run, else the END of the
+    /// nearest surviving block above it — the single-block rule, applied to
+    /// a set.
+    ///
+    /// **"Nearest surviving", not "just past the edges" (round 2 batch 1b
+    /// ladder, MINOR 4).** For the phone's gesture the removed set is a
+    /// CONTIGUOUS run, and for a contiguous run the two readings agree —
+    /// everything past the last removed index survives by definition. The
+    /// Mac's ⌘-click pick is not contiguous, and there the edge reading was
+    /// wrong: removing `[b0, b2]` out of `b0 b1 b2` named `b0` — a block
+    /// being deleted — while `b1` sat there surviving. Harmless at both
+    /// callers (a lookup of a departed block finds nothing and the caret
+    /// stands still), but this is the SHARED brain's stated rule now, so it
+    /// states the true one and answers `b1`.
     ///
     /// Hoisted with its sibling above (round 2, batch 1b) from
     /// `EditorSurfaceController`, where it was private. Answers by BLOCK ID
@@ -355,15 +402,27 @@ nonisolated struct BlockRangeIndex: Equatable, Sendable {
     /// departed block is the honest answer and a harmless no-op at both
     /// callers (the Mac's `applyStructuralResult`, the phone's
     /// `rangeOfBlock` lookup, which simply finds nothing).
+    ///
+    /// **Cost (same ladder, MINOR 5): ONE pass over the entries, then one
+    /// lookup per ID.** It used to `firstIndex` per ID — O(N·M), and a
+    /// select-all makes M = N, which measured ~0.9 s of MAIN-ACTOR work at
+    /// the 20,000 entries this feature's own perf pin adopts as its
+    /// ceiling. The position map is built once; the survivor scans walk the
+    /// entries at most once each.
     func caretLandingAfterRemoving(_ blockIDs: [String]) -> (blockID: String, offset: Int) {
-        let indices = blockIDs.compactMap { id in
-            entries.firstIndex { $0.blockID == id }
-        }.sorted()
-        guard let first = indices.first, let last = indices.last else {
-            return (blockIDs.first ?? "", 0)
+        var positions: [String: Int] = [:]
+        positions.reserveCapacity(entries.count)
+        for (i, entry) in entries.enumerated() where positions[entry.blockID] == nil {
+            positions[entry.blockID] = i  // first occurrence wins (`firstIndex`'s rule)
         }
-        if last + 1 < entries.count { return (entries[last + 1].blockID, 0) }
-        if first > 0 { return (entries[first - 1].blockID, entries[first - 1].length) }
+        let removed = Set(blockIDs.compactMap { positions[$0] })
+        guard let first = removed.min() else { return (blockIDs.first ?? "", 0) }
+        if let below = (first..<entries.count).first(where: { !removed.contains($0) }) {
+            return (entries[below].blockID, 0)
+        }
+        if let above = (0..<first).reversed().first(where: { !removed.contains($0) }) {
+            return (entries[above].blockID, entries[above].length)
+        }
         return (entries[first].blockID, 0)
     }
 

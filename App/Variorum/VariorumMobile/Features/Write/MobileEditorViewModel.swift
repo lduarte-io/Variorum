@@ -1142,21 +1142,45 @@ final class MobileEditorViewModel {
             // half-apply it) and the compound reproduces its exact intent
             // through the structural door — the Mac's own shape.
             //
-            // THE HONEST LIMITATION, recorded so nobody reports it later as
-            // a bug: `wholeBlockRun` matches only spans covering blocks
-            // WHOLE, so a selection starting MID-paragraph and running to
-            // the document end still refuses — on BOTH platforms,
-            // identically. Whether a partial multi-block span should
-            // merge-then-edit instead is a standing product question the
-            // author holds; it is not this batch's to widen. Ranges of
-            // exactly one character are excluded inside the brain, so the
-            // seam keystrokes keep every case they were ruled (and a seam
-            // backspace costs nothing here — the length guard is the
+            // THE LIMITATION, RE-STATED TRUTHFULLY (her correction,
+            // 2026-08-21 — round 2 §30; this comment previously claimed the
+            // two platforms refused "identically" and that the case was an
+            // open product question, and BOTH halves were wrong):
+            // `wholeBlockRun` matches only spans covering blocks WHOLE, so a
+            // selection starting MID-paragraph and running on still refuses
+            // HERE — while the Mac routes that same span to the ratified
+            // 2026-07-09 MERGE-THEN-EDIT (`planCrossBlockEdit`: no takes, no
+            // gaps, no tail, contiguous), merging the run and applying the
+            // edit under one compound. That is a PARITY GAP with its own row
+            // (M22), not a shared limitation — and not this road's to widen.
+            // Ranges of exactly one character are excluded inside the brain,
+            // so the seam keystrokes keep every case they were ruled (and a
+            // seam backspace costs nothing here — the length guard is the
             // brain's first line, before any walk).
+            //
+            // **NO CONFIRM HERE, and that is a RULING, not an oversight**
+            // (author, 2026-08-21 — round 2 ladder R13, superseding §24's
+            // MAJOR 1 disposition; her words: *"it's fine to have no
+            // confirm"*). The ladder's finding — a one-keystroke bulk
+            // delete on a phone with no way back — is answered by giving
+            // her the way back instead of ceremony: the structural
+            // undo/redo DOOR (M20; the stack is `Shared/` and already
+            // works here — one undo restores all N in place) and the
+            // per-note tray (M21/R3). A delete you can immediately undo is
+            // an ordinary edit. Do not re-add a confirm to this road
+            // without her word.
             if let blockIDs = planWholeBlockDeletion(range: range, replacement: replacement) {
                 scheduleGestureCompound { [weak self] in
                     await self?.structural.deleteWholeBlockRun(blockIDs)
                 }
+            } else if index.wholeBlockRunAwaitsSync(covering: range) {
+                // The gap fence's face (ladder MINOR 3(a)). The span IS a
+                // whole-block run — the geometry is fine and the
+                // cross-block line would send her looking for a boundary
+                // problem that isn't there. The block simply hasn't
+                // arrived, which is the sentence this editor already says
+                // when she types into one.
+                refuse(message(for: .readOnlySlot))
             } else {
                 refuse(message(for: .crossesBlockBoundary))
             }
@@ -1833,11 +1857,12 @@ final class MobileEditorViewModel {
             // this line no longer speaks for her commonest cross-block
             // gesture — it speaks for what remains, which is a span
             // covering some block only PARTIALLY, and a type-over of a
-            // whole-block span. Both keep today's behaviour by her ruling,
-            // and for both the sentence is still literally true. The Mac's
-            // other cross-block compounds (merge-then-edit, visible-take)
-            // are still LATER batches, so the copy still promises no
-            // machinery that isn't here.
+            // whole-block span. For both the sentence is still literally
+            // true, and it promises no machinery that isn't here — the
+            // Mac's other cross-block compounds (merge-then-edit,
+            // visible-take) are LATER rows on this phone (M22 for the
+            // first). When merge-then-edit lands, this line loses the
+            // partial-span case too and must be re-narrowed again.
             "This edit spans more than one block — edit inside one block for now."
         case .readOnlySlot:
             "This block hasn't fully synced; it is read-only for now."
