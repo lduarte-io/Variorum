@@ -173,6 +173,18 @@ multiple items and deleting all of them." Build, opening the phase
   badge; the note ▾ tray item is the road. Watch in her real use;
   revisit only if she trips.
 
+### 8c. SUPER-MINOR RIDER (author, 2026-08-21, added post-authoring): remove the left-margin comment ＋
+
+Her words, verbatim: "I need the comment + on the left removed …
+it's too crowded and I don't like the look of seeing it there …
+the comments + to the left is currently annoying me though so
+removing it can be a super minor 13l item." This is the 13e
+batch-6 margin-hover ADD-door (the ＋ that appears in the left
+margin on hover) — REMOVE the ＋ affordance; the margin-hover
+comment DISPLAY and the other add doors are untouched. Removal
+only, no redesign — the fuller comments-area rework is 13u's
+(item 3 on that row), deliberately NOT this phase's.
+
 ### 9. Journal-day deletions TRAVEL to Fragments (her ruling, 2026-08-19)
 
 Today the bridge's sweep reads LIVE days only, so a deleted
