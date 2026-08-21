@@ -2324,3 +2324,61 @@ they now name `planCrossBlockEdit`, the ratified 2026-07-09 rule, and
 M22 as the owner. Behaviour untouched. **A comment asserting a fact the
 architect has since retracted is exactly the class MINOR 6 exists to
 catch, and it caught mine.**
+
+---
+
+## 35. R12 DONE — and a STRUCTURAL FLOOR she needs to rule on
+
+**Shipped air 4 pt (bar 78 → 72).** Values measured off real captures,
+not derived: air 10 → circles clear the keyboard by 31.3 pt (her
+"floating"); **air 4 → 25.3 pt (shipped)**; air 2 → 23.3 pt
+(**rejected**, and the reasoning is good — it buys 2 pt on the resting
+trio, below perception, and spends it making the EXPANDED capsule graze
+the keyboard, which is *her original complaint wearing the other state's
+clothes*). Both rows of the expanded strip stay whole at 4.
+
+### THE FLOOR — for §36's bundle, and the honest ceiling on her request
+
+**The circles cannot come closer than 20 pt + air, at any value.** The
+mechanism, traced: the resting glass cells run to 48 pt below the bar's
+top, but the two-row capsule's 88 pt cell is **centered** on the fixed
+48 pt content row, so it reaches **68 pt — exactly 20 pt lower**. **One
+height must serve both states** because iOS will not let an
+`inputAccessoryView` resize after presentation (**M17**, measured in
+batch 2). So the resting trio inherits the capsule's depth, and
+repositioning inside a taller container does not escape it: **the 20 pt
+rides the content row, not the bar.**
+
+**So her ask is satisfied as far as it can be without a LOOK change.**
+The two roads below the floor are both hers:
+
+1. **A shorter expanded strip** — one row instead of two, or shorter
+   rows. Costs the 10-act strip its current shape.
+2. **Resting cells that are themselves capsule-height** — the trio grows
+   to match, and the floor disappears because both states share one
+   depth by construction.
+
+Neither is a bug fix; both change how it looks. **Recorded in the
+constant's own doc comment** as well as here, so the next session to
+receive "make it tighter" reads the floor before spending a day on it.
+
+**A pin corrected by TRACING, not guessing** — worth noting because it
+is the round's fourth pin-quality catch and this one was self-caught:
+the FIX-5 visibility pin asserted `strip.bounds.height <= barHeight`,
+**which was never the law.** Batch 2's own frame dump records the
+capsule at `y = −20`, and captures at both heights confirm it hangs
+~20 pt ABOVE the bar's top, over the text, un-clipped. The only edge the
+keyboard can clip is the capsule's BOTTOM. The clause became
+`expandedCapsuleBottomEdge <= barHeight` — still red on the original
+44 pt defect tree (68 ≤ 44 is false), now naming the edge that actually
+clips. **The air assertion is bounded on BOTH sides** (`> 0`, `<= 6`,
+`== 4`) so re-inflating trips it exactly as clipping does — a pin that
+guards the taste ruling in both directions.
+
+**Environment note, and a real cost of parallelism:** the tuning session
+could not use the shared simulator because the concurrent 1b fix round's
+`xcodebuild test` kept terminating its app; it created and deleted a
+throwaway iPhone 17 Pro sim and restored both originals as found. **The
+one-writer-per-file rule (§25) is not sufficient — parallel batches also
+contend for the SIMULATOR.** Future parallel dispatches either stagger
+device work or assign distinct simulators up front.
