@@ -1363,3 +1363,72 @@ must all leave the counter at zero.
    — which makes my sentence true, rather than softening the sentence to
    match a weaker mechanism. A claim and its mechanism should not
    disagree.
+
+---
+
+## 22. BATCH 1 CLOSES (2026-08-21)
+
+**Build → ladder round 1 (8 findings, all fixed) → ladder round 2 (no
+new BLOCKER/MAJOR, 4 NITs + M15's verdict, all fixed). CLOSED.**
+
+**Final counts:** core **1350/141** (unchanged all batch) · Mac
+**1568/272** · mobile **334/65** · Mac spine **63/8** · mobile spine
+**33/7** — both spines exact. All green, zero reds. Zero schema, zero
+`Sources/VariorumCore/Sync/` lines.
+
+**What shipped:** her delete-at-the-end crash is fixed at the mechanism
+on BOTH platforms; the quieter wrong-bookkeeping bug underneath it is
+fixed; a MAJOR that the fix itself introduced (silent prose loss) was
+caught by the ladder and fixed; a second silent-divergence hole
+(`delta == 0` landing at a block's end) was found and closed by one
+token; the DEBUG identity audit now catches the one corruption class
+both prior oracles were blind to; and the TK2 canary no longer leaks a
+timer per note opened.
+
+### Two corrections the fix session made to THIS RECORD (both adopted)
+
+**(a) §21's pin rationale for NIT 4 was wrong, and the correction is
+better.** I wrote that a `bulkPending` pin "would pass on both trees".
+The session showed it *could* be made red — but only by hand-driving a
+state production cannot reach: the phone has exactly ONE `isPaste`
+arming site, and UIKit performs the edit whenever that returns true, so
+a gated paste that never lands has no door. **The reason no pin is owed
+is the MANUFACTURED PRECONDITION, not both-trees-green.** That is a
+sharper statement of the hallucination guard than mine was, and it is
+the one that should be quoted in future: a pin whose red depends on a
+state the product cannot produce pins a fiction.
+
+**(b) `desyncRecovery` was outside my enumeration and the session
+cleared there anyway** — reading "**each** `pendingEdit = nil`" as the
+governing sentence, and offering to revert. **Ruled: keep it.** "Each"
+was indeed the governing word; the site is transitively covered
+(recovery routes through `renderFull`/`applyDifferential`, which now
+clear), so it is belt-and-braces at zero cost, and the doctrine NIT 4/8
+settled is "clear it wherever the arming is cleared", not "clear it at
+the four sites the architect happened to list".
+
+**Two sites are deliberately NOT cleared, each saying so at its own
+line** — the consume road (clearing unconditionally would strip an
+HONORED paste's bulk semantics, which `anHonoredPasteStillCrystallizesAsBulk`
+pins) and the paste-during-mint carry. That is M-A applied, not an
+omission.
+
+### A detail worth keeping (it will save a future session an hour)
+
+The guard-3 pin's first draft settled on `documentLength == storage.length`
+and **failed on the FIXED tree** — because that transaction nets to
+zero, the condition is true throughout, so the settle returned before
+the heal landed. **The pin was blinded by exactly the property the fix
+exists to address.** It now settles on the text. Recorded in the pin's
+own comment as well as here: when the bug is "the totals agree while the
+content is wrong", no oracle derived from the totals can witness it.
+
+### Her phone
+
+Release build started at batch close. `xcrun devicectl list devices`
+reports her iPhone 17 Pro **unavailable** (not reachable), so the
+install waits — **per R3 this gates nothing**; the build is made ready
+and the install is taken at the first opportunity.
+
+**NEXT: batch 1b (M11 ≡ R18) — the whole-block-selection delete**, so
+her gesture stops refusing and starts working.
