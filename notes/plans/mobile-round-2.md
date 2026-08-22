@@ -3179,3 +3179,49 @@ and the item flagged rather than assumed away. → her device round.
 Per §43's rule — *a batch is not done when it is committed, it is done
 when its ladder has closed* — batch 4 now owes a cold review like every
 other. It joins the consolidated fix round's queue.
+
+---
+
+## 47. R28 — THE BATCH LOOP IS SELF-CLOSING (2026-08-22). Her structural fix.
+
+Her words: *"also - do the batch 4 cold review. and make sure the next
+implementer does a phase, then the cold review, then continues
+automatically."*
+
+**This is the fix for the round's worst failure, and it is better than
+the rule I wrote.** §43 ruled that "a batch is not done until its ladder
+closes" — a *definition*. She has ruled the **mechanism**: the loop
+closes itself, without an orchestrator remembering to close it.
+
+**R28, binding on every future batch:**
+
+> **A batch dispatch is not "build". It is BUILD → COLD REVIEW →
+> FIX → CONTINUE, as one unit, dispatched together and completed
+> without a human in the middle.** The orchestrator does not decide,
+> after a build reports, whether to run a review. The review is inside
+> the batch.
+
+**Why this specifically is what failed:** five batches went unreviewed
+not because anyone decided to skip them, but because **each build ended
+in a report to her, her answer started the next thing, and the review
+step had no dispatcher.** It lived in §8's prose and in my intentions.
+Every safeguard this round added — the batch map, the review column,
+"the map is the only schedule" — still depends on someone *choosing* to
+act on it at the right moment. **Hers does not.** The step cannot be
+skipped because it is not a separate step.
+
+**Consequences to build into the handoff:**
+1. **Every batch brief carries its own review brief**, written at
+   dispatch time, not after.
+2. **The implementer's report is not the batch's end** — the
+   orchestrator dispatches the reviewer from the same turn, before
+   reporting anything to her.
+3. **A batch reaches her ONLY as build + review + dispositions**, so
+   what she hears is a closed unit rather than a half-open one.
+4. The batch map's review column stays, as the *audit* of a loop that
+   should never need auditing.
+
+**Batch 4's cold review is DISPATCHED** (the second half of her
+instruction), and the four owed reviews have landed (§44, §45). **Every
+batch of this round will have been reviewed** — late for five of them,
+which is exactly the cost R28 exists to prevent repeating.
