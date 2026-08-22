@@ -2472,3 +2472,86 @@ her rather than making her wait for the visible door.
 **option 1** (the one-row strip) — a one-row strip must now fit
 ELEVEN acts, not ten. That makes option 1 materially less likely to
 work, and her choice should be read with that in mind.
+
+---
+
+## 38. BATCH 3 + 3b LAND, AND R22 (2026-08-21)
+
+**M22 shipped** (§ commit `2ebb605`) — merge-then-edit on the phone, the
+parity gap she caught. **M5 shipped** (`33642fb`) — the home-screen quick
+note. Counts on the combined tree: core **1350/141** · Mac **1568/272**
+(exact, unmodified — the hoist proof) · Mac spine **63/8** · mobile
+**412/71** · mobile spine **33/7**.
+
+### THE FIND OF THE ROUND SO FAR — a P1 violation latent on the MAC since 2026-07-09
+
+M22's hoist exposed that `planCrossBlockEdit` called
+`index.range(ofEntryAt: i)` **inside its collection loop**, and that
+accessor walks from zero on every call. Measured at 20,000 entries:
+**23.8 SECONDS for one plan, and 23.3 s for a seam keystroke that plans
+nothing** — main-actor, keystroke road, cost proportional to the
+document. That is **P1's one prohibition**, and it has been shipped Mac
+behaviour for six weeks. At her own 100k-word bar (~1,400 paragraphs) it
+is still ~100 ms of freeze per cross-block keystroke.
+
+Fixed with one accumulation pass — `starts[i] = Σ(length+1)` is *by
+definition* what the accessor computes — **23.8 s → 0.003 s**, with
+equivalence pinned against the accessor itself on an irregular tiling
+including empty entries. **The Mac inherits the fix**, which makes it
+an R8 shared-defect fix (authorized) and an **R20 manifest item for
+13l's Fable reviewer.**
+
+**The lesson, worth stating:** the hoist did not CREATE this; it
+**revealed** it. Moving a rule into a shared brain forced someone to
+read it with fresh eyes and to measure it against the phone's bar, and
+six weeks of Mac use had never surfaced it because the Mac's own
+corpora never hit the shape. **That is an argument for the hoists
+themselves**, beyond parity.
+
+### Architect rulings on M22's three raised items
+
+**(a) A plan can span a GAP — Mac behaviour PRESERVED, correctly.** A
+not-yet-arrived block renders zero-length, so a selection can run past
+one and the plan names the two readable blocks — **doomed by
+construction** (`ops.merge` refuses on adjacency; one transaction;
+nothing lands). It fixed only the WORDS (it answered a raw enum dump
+before). **Preserving a ratified Mac road rather than quietly narrowing
+it was the right call** — declining earlier is a change to that road and
+goes on her list, not into a mobile batch.
+
+**(b) The zero-length arm is unreachable-as-a-plan** (a caret cannot
+touch two entries, since entries are separated by exactly one
+character). **Preserved verbatim and pinned as behaviour** rather than
+removed on a reading. Correct — a cleanliness candidate, not a bug.
+
+**(c) The parallel-fence recipe gains a THIRD requirement.** §35 learned
+distinct simulators; §36 applied it; M22 hit **shared DerivedData
+contention anyway** ("build input file cannot be found" as the other
+session moved a file; "build.db is locked"), and finished on a private
+`-derivedDataPath`. **The recipe is now: distinct files, distinct
+simulators, AND distinct DerivedData** — and for visual work, a private
+source copy (§37's options agent). Recorded so the next parallel
+dispatch starts there instead of rediscovering it a fourth time.
+
+### R22 — SHE RULES OPTION 1 (2026-08-21)
+
+Her words: *"agree: option 1 (one-row strip) is clearly better."*
+**Ruled with the cost already in view** — she was told before looking
+that M26's un-indent makes it ELEVEN acts, not ten.
+
+**Built together as one batch**, since both change the same strip:
+
+| # | Item | Shape |
+|---|------|-------|
+| **R22** | The expanded strip becomes ONE row; the bar drops 72 → ~52 pt. Her circles land 5.33 pt off the keyboard (the clearance she already accepted for the expanded state at R12) **and she gains ~20 pt of text back**, because the bar itself shrank | dispatched |
+| **M26** | The visible ⇤ un-indent joins the strip — now ELEVEN acts on one row | same batch |
+
+**The honest risk, and the instruction that goes with it:** ten acts
+measured at 34 pt wide; eleven lands near **31 pt**, under the 44 pt
+tap-target floor the constant's own doc comment protects (note the
+buttons are already only 38 pt TALL, so height was under the floor
+regardless). **The implementer must verify tappability on the real
+surface and report honestly if eleven at ~31 pt reads as cramped or
+mis-taps** — the answer "eleven does not fit legibly" is a finding to
+bring back, not a failure to hide. Her ruling settles the SHAPE; whether
+this many acts survive it is a measurement.
