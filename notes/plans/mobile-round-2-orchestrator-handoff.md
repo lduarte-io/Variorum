@@ -122,8 +122,8 @@ numbers — both run 1–24. This is §39's fix for a real confusion risk.)*
 | 7 | PR8 reorder takes · PR9 duplicate-book-name guard · PR11 copy all takes · PR12 take→block · **M23 copy-follows-screen** · PR19 swatches+emoji · PR20 block multi-select · PR21 replace | | ❌ owed |
 | 8 | PR10 tag-chip grammar · PR13 cadence/pruning settings · PR16 PL-9 judgment acts · PR17 document settings · **PR23 the forked voice brain (HOIST, never patch)** · **M14's UNMEASURED HALF** — the SwiftUI `Text`-per-paragraph sizing on the Read surface, which needs a rendered view (§19 promised it "is measured there too" and it had landed in no map; measurement only, no fix — the decision is hers, §6 item 1) | | ❌ owed |
 | — | **PR24** — her held design calls (the ●n comment marker's side; the margin-comment tap shape) | **propose-only, bundled to a sitting** | ❌ owed |
-| **REVIEW — the dedicated stability pass** (§8's second commitment; it lived only in prose until 2026-08-22 and §43's own accounting missed it) | ONE fresh cold reviewer whose ONLY brief is **the crash class and the editor's range/identity math** — adversarial, tasked to find the case the fix misses. *It reviews the FIX, not the feature*, so its target is batch 1 + batch 1b + M22's shared-brain work as one body: `Shared/EditorBrain/` (`BlockRangeIndex`, `EditorEditRouting`, `CrossBlockEditPlanner`) and both platforms' `storageDidEdit` consumers. **It OWNS M27** — the first typed edit after a DIVIDE is unroutable and takes `desyncRecovery` (§46, reproduced on the pre-batch tree, neither caused nor fixable in batch 4). **Read it beside B45-3** (`mobile-round-2-successor-first-acts.md`): that row owns the crash trace's six *unowned items* (E1, E2, the UIKit undo-replay path, the `supportsTextReplacement: false` fence note, the `MarkdownActs` Mac residual, M1's SUSPECTED status) as BUILD/EXPERIMENT work; this pass is the adversarial REVIEW of the fix itself. Neither discharges the other | not started | n/a (it IS a review) |
-| **REVIEW — the whole-round pass** (§8's third commitment; in no map and no closeout obligation until 2026-08-22) | ONE fresh cold reviewer over the round's **entire diff** (`46ffa0c..HEAD`), briefed on **nothing but the diff** — the round's own cold read, **after the LAST build batch** and after the consolidated fix round lands. Findings go in the plan with dispositions like any ladder round. **It is NOT discharged by ACT 1** of `mobile-round-2-successor-first-acts.md`: her Act-1 pass is an *earlier* cold read over batches 1–4 feeding batch 4.5, and §8's pass is the round's *closing* read over everything, batches 5–8 included. Two passes, two moments, both hers | not started | n/a (it IS a review) |
+| **REVIEW — the dedicated stability pass** (§8's second commitment; it lived only in prose until 2026-08-22 and §43's own accounting missed it) | ONE fresh cold reviewer whose ONLY brief is **the crash class and the editor's range/identity math** — adversarial, tasked to find the case the fix misses. *It reviews the FIX, not the feature*, so its target is batch 1 + batch 1b + M22's shared-brain work as one body: `Shared/EditorBrain/` (`BlockRangeIndex`, `EditorEditRouting`, `CrossBlockEditPlanner`) and both platforms' `storageDidEdit` consumers. **It OWNS M27** — the first typed edit after a DIVIDE is unroutable and takes `desyncRecovery` (§46, reproduced on the pre-batch tree, neither caused nor fixable in batch 4). **Read it beside B45-3** (`mobile-round-2-successor-first-acts.md`): that row owns the crash trace's six *unowned items* (E1, E2, the UIKit undo-replay path, the `supportsTextReplacement: false` fence note, the `MarkdownActs` Mac residual, M1's SUSPECTED status) as BUILD/EXPERIMENT work; this pass is the adversarial REVIEW of the fix itself. Neither discharges the other | **TRIGGER: batch 4.5's exit condition — 4.5 IS NOT DONE UNTIL THIS HAS RUN** | n/a (it IS a review) |
+| **REVIEW — the whole-round pass** (§8's third commitment; in no map and no closeout obligation until 2026-08-22) | ONE fresh cold reviewer over the round's **entire diff** (`46ffa0c..HEAD`), briefed on **nothing but the diff** — the round's own cold read, **after the LAST build batch** and after the consolidated fix round lands. Findings go in the plan with dispositions like any ladder round. **It is NOT discharged by ACT 1** of `mobile-round-2-successor-first-acts.md`: her Act-1 pass is an *earlier* cold read over batches 1–4 feeding batch 4.5, and §8's pass is the round's *closing* read over everything, batches 5–8 included. Two passes, two moments, both hers | **TRIGGER: the LAST build batch's exit condition — the round CANNOT CLOSE until this has run** | n/a (it IS a review) |
 
 **Not in a batch, deliberately — and each now lands somewhere that survives this round's close** (the 2026-08-22 audit's finding 8: "re-owned in prose" is the homeless state under another name):
 - **M12** the gate-less-insertion re-render — measured 0 in policed typing; **re-owned to 13u** with the caveat that the harness cannot drive the gate-less class. **It now has a `notes/KnownIssuesAndTechDebt.md` row owned by 13u**, so the ownership outlives this plan file; the closeout still names it on 13u's master-plan row.
@@ -136,6 +136,29 @@ numbers — both run 1–24. This is §39's fix for a real confusion risk.)*
 - **M18** (copy vs. what's on screen) — **SETTLED by R15**; the build is **M23**, batch 7. **M19** (the glow) — **CLOSED by R23**, nothing built.
 
 ---
+
+### ⚠️ THE TWO STANDALONE PASSES HAVE TRIGGERS, NOT DATES — read this
+
+The two rows above are the ONLY scheduled items in this round that are
+**not** dispatched by a batch. Every other review fires because R28
+makes it part of a batch's dispatch. **These two attach to nothing that
+fires on its own**, which is the exact shape that lost five reviews and
+six work rows in this round.
+
+**So they are bound as EXIT CONDITIONS rather than entries in a list:**
+
+| Pass | Cannot be skipped because… |
+|---|---|
+| **The dedicated stability pass** | **Batch 4.5 is not complete until it has run.** 4.5 fixes the crash-class findings; this pass is the adversarial read of *those fixes*. Marking 4.5 done without it is marking a batch done without its review — the thing R28 forbids |
+| **The whole-round pass** | **The round cannot close until it has run.** It is closeout obligation 0: before the parity ledger, before the master plan, before the handoff to her. If you are writing a closeout and this has not run, stop and run it |
+
+**Neither is discharged by anything that resembles it.** Her ACT 1 pass
+(`mobile-round-2-successor-first-acts.md`) is an *earlier* read over
+batches 1–4 feeding 4.5. **B45-3** owns the crash trace's unowned items
+as *build/experiment* work. Both look like the stability pass from a
+distance; neither replaces it. If you find yourself reasoning *"we
+already did a review like that"* — that reasoning is how this round lost
+five of them.
 
 ## 4. HER RULINGS — INDEX (all verbatim in `mobile-round-2.md`)
 
