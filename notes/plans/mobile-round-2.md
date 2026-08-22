@@ -4202,3 +4202,159 @@ mechanism, the one-line fix, and the reason no existing pin caught it**,
 so the phase she scheduled it into is strictly better off than before.
 *(Offered to her as a one-line alternative — it is her call to move, not
 the architect's.)*
+
+
+---
+
+## 58. SUB-BATCH 4.5a LANDS (2026-08-22) — her two BLOCKERs are fixed, and the architect's rulings on what it raised
+
+**Both quick-note BLOCKERs are closed at the mechanism**, plus Q3, Q4,
+Q5–Q9 and Act 1's A1-19. **52 passed / 0 skipped**, green. Hygiene as
+numbers: `git diff -- Sources/` **0 lines** · `Sync/` **0** ·
+`Variorum.xcodeproj` **0 lines** (no build configuration) ·
+`planVisibleTakeEdit` **0** · schema none. **Cold review DISPATCHED from
+the same turn as this report** (R28 — the batch is not done).
+
+**Q1's fix is a pure brain, which is the right shape.** The clamp is
+replaced by `applyingChange(frozenPrefix:from:to:)` returning a
+`BoundaryDecision`: **decompose the change by its common edges, apply the
+part that fell in the owned tail, refuse the part that reached into the
+frozen prefix.** The ordinary single-block capture is **byte-unchanged**
+(`new.hasPrefix("")` is always true), so 95% of captures never enter the
+new arm — a fix that cannot regress the common case.
+
+**Q2's fix closed a second road unasked, and correctly.** `file()` now
+resets only on a completed hand-off — and the same guard covers the case
+one step later, where `flushEveryOpenPost` leaves the coordinator dirty
+because the store refused the post-mint keystrokes. **Generalizing a fix
+along its proven mechanism is the job** (the §20(a) precedent).
+
+**The red-on-old table is the strongest this round has produced**, because
+several of its captures are the defect in her own words' shape:
+`box.text → "Kept.\n\n"` — **her second paragraph gone from the box**;
+`visibleLabels → [… "Quick note", "new note — just start typing · ⏎ opens
+it", "Saving." …]` — **the three contradictory faces captured verbatim
+from the real accessibility tree**; `box.text → ""` with
+`lastError → nil` **and `handOffCount → 1`** — *it announced a hand-off it
+had not made*. And it named honestly what it counted as **coverage rather
+than pins**, including one whose red *cannot be written* against the
+shipped API.
+
+**One pin it deliberately did NOT make red is the interesting one.**
+`theBoxHoldsAtTheBoundaryOfAlreadyMintedParagraphs` still passes its
+`["Kept.\n", ""]` expectation on the OLD code — *"that case's empty tail
+was never the defect."* Distinguishing the collateral it must fix from the
+collateral that was always correct is exactly the discrimination §55 asked
+for.
+
+### THE ARCHITECT'S RULINGS on the four things it raised
+
+**(1) Q1's design question — OPTION A CONFIRMED, PROVISIONAL stands.**
+It shipped A (hold at the boundary and *say so*) and proposed B and C.
+**B is refused on the model, not on taste:** `importPost` **trims** each
+segment, so a flat box text cannot be re-split back onto the stored
+blocks without an inference layer — **that is the diffing-recovers-
+identity road `OverallModel` §8 names as the project's foundational wrong
+turn**, and it contradicts A5-2's ONE BLOCK besides. **C is refused on
+her own doctrine:** being pushed into another screen *because you pressed
+backspace*, unrequested and mid-typing, is not fire-and-DO, it is
+fire-and-relocate. **A is the only option that destroys nothing, keeps
+the box and the note from diverging, and leaves the editor one tap away
+with the box saying so.** The residual cost is real and it goes on her
+list: *fixing a typo in the first paragraph of a pasted capture needs the
+editor.* That is a consequence of A5-2, which she ruled — but she has
+never seen it as a lived consequence, so she gets to look at it.
+
+**(2) The network leg's `isGranted` gate — DROP IT.** Its own analysis is
+what decides this: on device, an ungranted assertion already calls the
+expiration handler, which cancels, so the gate's only **distinct** effect
+is in worlds with no application to ask (`.none` — tests and previews).
+**A semantic that exists only in test worlds is one nobody can observe
+and everybody will later mis-read as intentional product behaviour.**
+Cancellation is the mechanism; keep one, not two. One line, and its own
+report offered it.
+
+**(3) B45-1 — MEASURED, and the measurement changed the priority, which
+is what measure-first is for.**
+
+```
+AppBootstrap.init (main thread, before first paint)
+  first launch — empty store, full migration set   54.0 ms
+  ordinary store — reopened                          5.0 ms
+  100k proving ground — 7.1 MiB on disk              3.6 ms
+```
+
+**It is flat in corpus size** (3.6 ms at 100k words vs 5.0 ms at twelve
+notes is noise) — the cost is O(migrations), not O(corpus). So the P2
+violation is real but **not a user-visible hang today**. What keeps it
+worth closing is the direction of travel: **the migration set only
+grows** — every future §12 lockstep event adds to that 54 ms — and
+simulator disk is host-SSD-fast, so **the device number is unknown**.
+*"Time a real cold first launch on her iPhone"* is added to the device
+queue, which is exactly right.
+
+**Its proposed fix is sound and I adopt the shape:** an `.opening` state,
+the file work on a detached task hopping back to MainActor for `install`
+plus the state write, `retry()` re-entering the same road, and a quiet
+launch view in both app roots. **The "UI can touch a store that is not
+ready" window cannot open by construction** — `AppSession` only exists
+inside `.ready`, the same property `MobileStoreFailureView` already
+relies on. **But it needs `Shared/AppBootstrap.swift`, which is outside
+its fence — so it stopped and reported, which is the rule working.**
+
+**(4) A1-15 and A1-21 both land in `Shared/AppSession.swift`, WHICH I
+FAILED TO GIVE ANYONE.** My §1 brief said 4.5a owned *"the `AppSession`
+lines it falsifies"* while **not listing `AppSession.swift` in its file
+list**, and told 4.5b the undo-door line in the same file was its. **Two
+writers, one file — the exact hazard the fence exists to prevent, written
+into my own brief.** 4.5a refused to reach across and reported instead.
+**The fence caught the architect's error, which is the strongest evidence
+it is worth having.**
+
+### THEREFORE: SUB-BATCH 4.5e IS BORN — the app-lifecycle files in `Shared/`
+
+Three findings converge on two unowned `Shared/` files, so they get one
+session rather than three fences.
+
+| | |
+|---|---|
+| **Owns** | `App/Variorum/Shared/AppBootstrap.swift` · `App/Variorum/Shared/AppSession.swift` (+ any Mac/mobile root arm the `.opening` state needs, and the tests for both) |
+| **Carries** | **B45-1's fix** to the adopted shape above · **A1-21** the `postAutosaves` removal path — its proposed shape is `releaseAutosave(forPost:)` called from the box's `reset()`, **with the trap it already traced**: the Mac registers a `quitFinalize` closure at mint time, so release-then-remint would register a second for the same post (`closeAutoCommit` dedupes it — noise, not corruption, but it must be deliberate) · **A1-15's two inverted comments** at `:89` and `:240-245` |
+| **Both platforms** | Every one of these is a `Shared/` change: **M-B binds** — core + Mac + both spines + mobile, all five reported, and every Mac-side line into 13l's manifest |
+| **Wave** | **3 — alone.** `AppBootstrap` and `AppSession` are compiled against by every target, exactly like 4.5c's editor brain, so it cannot share a tree with a session editing shared code |
+
+### The rest, recorded
+
+- **Q10 is the architect's**, correctly declined by the implementer —
+  records are mine. Batch 3b never got a record section; it needs the A5
+  rulings as realized, the four early-mint occasions, the boundary
+  anchor, and now 4.5a's five behaviour changes.
+- **§45's five quick-note NITs are UNRECOVERABLE, and the reason is the
+  consistency audit's finding 11**: §45 summarises them as *"5 NITs"* and
+  the reviewer's own text is nowhere in the repo. 4.5a swept its own
+  files instead and fixed four honesty-class items in their place, which
+  is the right substitute. **Recorded as a real cost of a review whose
+  output was compressed into a summary** — every 4.5 review's findings
+  land in full.
+- **An `Index out of range` in its second reverted pass did NOT
+  reproduce** on the restored tree (52/0, no crash) and its new brains
+  are index-safe by construction; timing and shape point at another
+  session's in-flight `MobileSurfaceDriver.swift`. **Flagged rather than
+  swallowed** — the right instinct, and the parallel-wave cost recorded
+  honestly.
+- **It did not run the full mobile suite, deliberately and correctly:**
+  the other two sessions' in-flight edits blocked its builds six separate
+  times, so a tree-wide count today would be neither green nor
+  attributable to it. **The 449/75 baseline is re-established by the
+  architect once all of wave 1 lands.**
+- **`MobilePerfWalkTests.swift` now carries a new `MobileLaunchPathTests`
+  suite** — fenced to 4.5a in this wave; later waves are told.
+- **Three items added to the device queue (4.5-device, brief §4b):**
+  **dictation into a multi-paragraph capture** (iOS replaces the whole
+  field as it refines, which falsifies `hasPrefix` — the fix makes this
+  *safe* where the shipped code destroyed the tail, but the interaction
+  is untested on hardware **and it is the same multi-paragraph case she is
+  currently hand-avoiding**); **the caret jumping to the end** on every
+  held change (inherited from the shipped clamp, not introduced —
+  invisible in tests, obvious in the hand); and **a real cold first
+  launch, timed on her iPhone** (B45-1's unknown).
