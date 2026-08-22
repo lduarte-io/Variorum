@@ -645,10 +645,74 @@ final class MobileStructuralController {
         }
     }
 
+    // MARK: - Merge-then-edit (round 2, batch 3 — M22)
+
+    /// **The ratified 2026-07-09 MERGE-THEN-EDIT, reaching the phone.** A
+    /// selection that opens mid-paragraph and closes in another one, plus
+    /// Delete (or typing over it), MERGES the touched run and applies the
+    /// edit to the merged buffer — one act, one undo entry. Her correction
+    /// is what brought it here (§30: *"i thought we added cross block edits
+    /// on the mac app when there are no takes, where it just auto merges? is
+    /// that being used here?"* — it was Mac-only, which was a parity gap),
+    /// and her principle is what it serves (§31/R16: *"selecting a bunch of
+    /// visible text and deleting should be allowed - the refusing because of
+    /// different blocks is more annoying than it's worth"*).
+    ///
+    /// The DECISION and the ARITHMETIC are the shared brain's
+    /// (`CrossBlockEditPlanner.plan` / `.apply`, hoisted out of Mac app code
+    /// by this batch — MobileSoul §3); this door is the phone's face on it:
+    /// the flight latch, the pre-op flush, the caret write, and the words a
+    /// refusal speaks.
+    ///
+    /// **No re-verify after the flush, deliberately — the compound carries a
+    /// stronger guard.** The divide/merge doors re-check their caret pair
+    /// because their plans are positional; this plan is a compare-and-set
+    /// against every touched take's plan-time text, checked INSIDE the
+    /// transaction (`editTakesAtomically`'s `expectedText`), so a buffer that
+    /// moved during the flush refuses the whole compound before a single row
+    /// changes. That is the Mac's own posture, byte for byte.
+    ///
+    /// **NO CONFIRM**, for the same reason its sibling delete door asks
+    /// nothing (R13): this is a keystroke, and it is the gesture that makes
+    /// her text behave like text.
+    func runCrossBlockEdit(_ edit: CrossBlockEditPlanner.Edit) async {
+        guard let model else { return }
+        guard !structuralInFlight else {
+            model.report("Another structural change is still landing.")
+            return
+        }
+        structuralInFlight = true
+        defer { structuralInFlight = false }
+
+        // Flush FIRST, like every structural door: the ops validate against
+        // the store, and the compound's compare-and-set is stated in terms
+        // of the SURFACE texts the plan captured — after the flush those are
+        // the same bytes.
+        guard await flushPendingText() else { return }
+        let stack = session.undoStack
+        do {
+            let landing = try await session.runner.run { ops in
+                try CrossBlockEditPlanner.apply(edit, ops: ops, undoStack: stack)
+            }
+            // Nothing to announce: the paragraphs joined and the selection
+            // vanished, which is exactly what she asked the keystroke for
+            // (the Mac says nothing here either). Clearing drops any stale
+            // refusal line from an earlier attempt.
+            model.report(nil)
+            await model.refreshTakesFromStore()
+            landCaret((blockID: landing.blockID, offset: landing.caretOffset))
+        } catch {
+            model.report(Self.refusalMessage(
+                error, act: "join these blocks", nothingWas: "changed"))
+        }
+    }
+
     /// The caret write both delete doors share — by IDENTITY, over the
     /// re-rendered surface (the landing named a SURVIVING block before the
     /// tombstone; a landing whose block did not survive simply isn't found
-    /// and the caret stands still).
+    /// and the caret stands still). M22's merge-then-edit lands through it
+    /// too: its landing names the MERGED block, which the re-render has by
+    /// then materialized.
     private func landCaret(_ landing: (blockID: String, offset: Int)) {
         guard let model, let range = model.rangeOfBlock(landing.blockID) else { return }
         model.textView?.selectedRange = NSRange(
@@ -774,6 +838,29 @@ final class MobileStructuralController {
         case .blockNotFound:
             return "One of these blocks is already gone — it may have been deleted "
                 + "since you selected it. Nothing was \(nothingWas); try again."
+        // **The compare-and-set refusal, in words (M22).** Merge-then-edit
+        // leans on it BY DESIGN — the keystroke is refused so a compound can
+        // reproduce it, and anything typed in that window makes the compound
+        // decline rather than clobber newer text. A designed, reachable
+        // refusal must not read as a Swift enum dump (the ladder MINOR 2
+        // class), and the sentence has to carry the rollback: nothing landed.
+        case .bufferChangedSinceGesture:
+            return "The text changed while that was landing — nothing was "
+                + "\(nothingWas). Try it again on the current text."
+        // **The adjacency refusal, in words (M22).** Reachable from every
+        // merge-shaped door, and the merge-then-edit road makes it easy to
+        // meet: a NOT-YET-ARRIVED block renders with zero length, so a
+        // selection can run straight past one without ever touching its
+        // characters — the plan then names the two blocks she can read, and
+        // the operations layer refuses because the gap sits between them.
+        // (It also covers the ordinary race: a block landing between the
+        // plan and the write.) Both readings are one sentence, and the
+        // sentence carries the rollback: the op is one transaction, so
+        // nothing landed.
+        case .blocksNotAdjacent:
+            return "Something sits between these paragraphs — a block that hasn't "
+                + "arrived yet, or one that landed since you selected. "
+                + "Nothing was \(nothingWas)."
         default:
             return String(describing: error)
         }

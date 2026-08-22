@@ -30,22 +30,22 @@
 //     (MINOR 2 — a raw enum dump), the stranded-original half of the
 //     receipt (NIT 7), and the caret write at the ⋯ door (NIT 8).
 //  3. BOUNDARY CHARACTERIZATIONS, green on BOTH trees by design: the cases
-//     this road deliberately does NOT take — a partial span, a type-over, a
+//     this road deliberately does NOT take — a type-over, a
 //     seam keystroke, a sealed note. They are regression guards on the new
 //     road, never evidence that it works, and they are labelled as such
 //     rather than counted as red-on-old.
 //
-//  THE LIMITATION, RE-STATED TRUTHFULLY (her correction, 2026-08-21 —
-//  §30): a span covering a block only PARTIALLY is not a whole-block run
-//  and still refuses HERE. The batch header used to add "identically on
-//  both platforms… a standing product question", and both halves were
-//  wrong: the Mac routes exactly that span to the ratified 2026-07-09
-//  merge-then-edit (`EditorSurfaceController.planCrossBlockEdit` — no
-//  takes, no gaps, no tail, contiguous) and merges the run before applying
-//  the edit. So the phone's refusal is a PARITY GAP with its own row
-//  (M22), not a shared limitation and not an open question.
-//  `aPartialSpanStillRefusesExactlyAsBefore` characterizes today's phone
-//  behaviour and is expected to CHANGE when that row runs.
+//  THE LIMITATION, AND ITS END (her correction, 2026-08-21 — §30; PAID at
+//  M22, round 2 batch 3): a span covering a block only PARTIALLY is not a
+//  whole-block run, so this file's road declines it. It used to REFUSE on
+//  the phone, and the header used to call that "identical on both platforms…
+//  a standing product question" — both halves wrong: the Mac routed exactly
+//  that span to the ratified 2026-07-09 merge-then-edit, which made the
+//  phone's refusal a PARITY GAP. The phone now runs the same shared brain
+//  (`CrossBlockEditPlanner`, hoisted at M22) and MERGES the run before
+//  applying the edit, so `aPartialSpanIsNotTheDeleteRoadButTheMergeRoad`
+//  guards the BOUNDARY between the two roads instead of a refusal that no
+//  longer exists. That road's own pins live in `MobileCrossBlockEditTests`.
 //
 
 import Foundation
@@ -439,17 +439,19 @@ struct MobileWholeBlockDeleteTests {
         }
     }
 
-    /// **THE LIMITATION, characterized.** A span that opens MID-paragraph
-    /// and runs on is not a whole-block run: it keeps today's phone
-    /// behaviour exactly — the cross-block refusal, nothing deleted.
+    /// **THE BOUNDARY BETWEEN THE TWO ROADS.** A span that opens
+    /// MID-paragraph and runs on is not a whole-block run: this file's
+    /// delete road declines it, and nothing here deletes a block.
     ///
-    /// **BOUNDARY CHARACTERIZATION (kind 3): green on both trees by
-    /// design**; it exists so the boundary is recorded as behaviour rather
-    /// than discovered as a surprise. **It is expected to change:** the Mac
-    /// merges-then-edits this exact span (the ratified 2026-07-09 rule),
-    /// and the phone owes that road at M22 — so this pin records a parity
-    /// gap, not a decision.
-    @Test func aPartialSpanStillRefusesExactlyAsBefore() async throws {
+    /// **ITS SECOND HALF WAS RETIRED AT M22, exactly as it predicted.** The
+    /// pin used to assert that such a span "still refuses exactly as
+    /// before", while recording that the Mac merges-then-edits it under the
+    /// ratified 2026-07-09 rule and that the phone owed that road. Batch 3
+    /// paid it: the span now MERGES the run and applies the edit
+    /// (`MobileCrossBlockEditTests` carries that road's pins). So what this
+    /// pin guards today is the boundary itself — the delete road must not
+    /// widen onto partial spans, and the merge road must not delete a block.
+    @Test func aPartialSpanIsNotTheDeleteRoadButTheMergeRoad() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedParagraphPost(session)
             let (model, storage) = makeEditor(session, postID: seed.postID)
@@ -457,14 +459,14 @@ struct MobileWholeBlockDeleteTests {
 
             // "one.\nBeta " — opens inside block 0, closes inside block 1.
             let span = NSRange(location: 6, length: 10)
-            #expect(model.planWholeBlockDeletion(range: span, replacement: "") == nil)
+            #expect(model.planWholeBlockDeletion(range: span, replacement: "") == nil,
+                    "not a whole-block run — the delete road declines")
             await deleteSpan(model, storage, span)
 
             #expect(try await liveTexts(db, postID: seed.postID)
-                == ["Alpha one.", "Beta two.", "Gamma three."],
-                    "nothing deleted — the partial case is untouched by this batch")
-            #expect(model.statusMessage
-                == model.message(for: BlockRangeIndex.Refusal.crossesBlockBoundary))
+                == ["Alpha two.", "Gamma three."],
+                    "the two paragraphs JOINED and the span went with the join (M22)")
+            #expect(model.statusMessage == nil, "and nothing was refused")
         }
     }
 

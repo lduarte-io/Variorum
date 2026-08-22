@@ -206,8 +206,22 @@ struct MobileEditorRoutingTests {
         }
     }
 
-    @Test func aCrossBlockEditRefusesAndSpeaks() async throws {
-        try await withEditorWorld { session, _ in
+    /// **RE-POINTED at mobile round 2, batch 3 (M22) — its "and speaks" half
+    /// is superseded by a ruling, not by a regression.** This pin drove the
+    /// exact span the author asked about (§30) — a deletion opening inside
+    /// one block and closing inside the next, neither of them fanned — and
+    /// asserted the editor refused it in words. That refusal is gone by
+    /// design: the phone now inherits the ratified 2026-07-09 merge-then-edit
+    /// (`CrossBlockEditPlanner`), so the run MERGES and the edit lands, and
+    /// speaking a refusal there would be the lie.
+    ///
+    /// What it still guards, unchanged and load-bearing: the GATE answers
+    /// false, and the storage never half-applies a cross-block edit — the
+    /// keystroke is refused precisely so a compound can reproduce it. The
+    /// refusal-speaks half lives on where refusals remain (a fanned span, a
+    /// gap, a lock): `MobileCrossBlockEditTests.aFannedSpanStillRefusesOnThePhone`.
+    @Test func aCrossBlockEditRefusesTheKeystrokeAndActsInstead() async throws {
+        try await withEditorWorld { session, db in
             let post = try await session.runner.run { ops in
                 try ops.createPost(title: "seam", profile: .blog)
             }
@@ -224,8 +238,13 @@ struct MobileEditorRoutingTests {
             let allowed = model.shouldChangeText(
                 in: NSRange(location: 2, length: 4), replacement: "")
             #expect(!allowed)
-            #expect(model.statusMessage != nil, "the refusal speaks, never silent")
             #expect(storage.string == "One.\nTwo.", "a refused edit never half-applies")
+            #expect(model.pendingGestureTask != nil,
+                    "the intent is reproduced by a compound, not answered with a sentence")
+            #expect(model.statusMessage == nil, "…and nothing is refused in words (M22)")
+            await model.pendingGestureTask?.value
+            #expect(try await storedBlockTexts(db, postID: post.id) == ["Onwo."],
+                    "the blocks joined and the selected span went with the join")
         }
     }
 

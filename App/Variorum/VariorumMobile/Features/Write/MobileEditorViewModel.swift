@@ -1142,21 +1142,27 @@ final class MobileEditorViewModel {
             // half-apply it) and the compound reproduces its exact intent
             // through the structural door — the Mac's own shape.
             //
-            // THE LIMITATION, RE-STATED TRUTHFULLY (her correction,
-            // 2026-08-21 — round 2 §30; this comment previously claimed the
-            // two platforms refused "identically" and that the case was an
-            // open product question, and BOTH halves were wrong):
-            // `wholeBlockRun` matches only spans covering blocks WHOLE, so a
-            // selection starting MID-paragraph and running on still refuses
-            // HERE — while the Mac routes that same span to the ratified
-            // 2026-07-09 MERGE-THEN-EDIT (`planCrossBlockEdit`: no takes, no
-            // gaps, no tail, contiguous), merging the run and applying the
-            // edit under one compound. That is a PARITY GAP with its own row
-            // (M22), not a shared limitation — and not this road's to widen.
-            // Ranges of exactly one character are excluded inside the brain,
-            // so the seam keystrokes keep every case they were ruled (and a
-            // seam backspace costs nothing here — the length guard is the
-            // brain's first line, before any walk).
+            // **M22 (round 2, batch 3) CLOSED THE OTHER HALF.** A span
+            // covering blocks WHOLE is the delete road above; a span opening
+            // MID-paragraph and running on is the ratified 2026-07-09
+            // MERGE-THEN-EDIT — it MERGES the touched run and applies the
+            // edit, under one compound. That road was Mac-only until this
+            // batch, which was a PARITY GAP (her correction, §30: *"i
+            // thought we added cross block edits on the mac app when there
+            // are no takes, where it just auto merges?"*) and is now the
+            // same shared brain on both platforms
+            // (`CrossBlockEditPlanner`), never a copy. Its conditions are
+            // unchanged and each is a ruling: no takes on any touched block
+            // (a fan routes to the Mac's visible-take edit — #11a,
+            // 2026-07-13, which stays Mac-side), no gaps, no locks, no tail,
+            // contiguous.
+            //
+            // Ranges of exactly one character are excluded inside the
+            // whole-block brain, so the seam keystrokes keep every case they
+            // were ruled (and a seam backspace costs nothing here — the
+            // length guard is that brain's first line, before any walk); a
+            // lone separator intersects NO entry, so it can never reach
+            // merge-then-edit either (the Mac's own pinned reasoning).
             //
             // **NO CONFIRM HERE, and that is a RULING, not an oversight**
             // (author, 2026-08-21 — round 2 ladder R13, superseding §24's
@@ -1180,7 +1186,30 @@ final class MobileEditorViewModel {
                 // problem that isn't there. The block simply hasn't
                 // arrived, which is the sentence this editor already says
                 // when she types into one.
+                //
+                // **It sits ABOVE merge-then-edit deliberately** (M22): a
+                // gap slot renders with ZERO length, so a run containing one
+                // can pass merge-then-edit's touched-entry guards without
+                // the gap ever being "touched" — and the merge chain would
+                // then reach across it and refuse at `ops.merge`'s adjacency
+                // check with a compound-level error. Both orders end in a
+                // refusal; this one names the real reason. The gap fence's
+                // own doctrine is what settles it: the surface already told
+                // her that block is read-only until it syncs, so the refusal
+                // says that and not something else.
                 refuse(message(for: .readOnlySlot))
+            } else if let compound = planCrossBlockEdit(range: range, replacement: replacement) {
+                // M22 — the ratified 2026-07-09 merge-then-edit, reaching
+                // the phone. The keystroke is refused HERE (the storage must
+                // not half-apply a cross-block edit) and the compound
+                // reproduces its exact intent: merge the run, then apply the
+                // edit to the merged buffer, ONE undo entry. Compare-and-set
+                // against the plan-time surface texts is inside the compound,
+                // so a keystroke landing in the scheduling window makes it
+                // refuse visibly rather than clobber newer text.
+                scheduleGestureCompound { [weak self] in
+                    await self?.structural.runCrossBlockEdit(compound)
+                }
             } else {
                 refuse(message(for: .crossesBlockBoundary))
             }
@@ -1210,6 +1239,24 @@ final class MobileEditorViewModel {
     /// driving a store write.
     func planWholeBlockDeletion(range: NSRange, replacement: String) -> [String]? {
         index.wholeBlockDeletion(covering: range, replacement: replacement)
+    }
+
+    /// M22 — the phone's face on the shared merge-then-edit plan (the Mac's
+    /// `EditorSurfaceController.planCrossBlockEdit` twin, over the same
+    /// `CrossBlockEditPlanner`). The arities come from `slots`, which may lag
+    /// `entries` during a mint window — a missing arity DECLINES inside the
+    /// brain, which is the shipped Mac rule and the safe one: this road
+    /// merges blocks, so an unknown fan is not a fan it may assume away.
+    /// Exposed (not private) so pins can assert what declines without
+    /// driving a store write.
+    func planCrossBlockEdit(
+        range: NSRange, replacement: String
+    ) -> CrossBlockEditPlanner.Edit? {
+        CrossBlockEditPlanner.plan(
+            replacing: range, with: replacement,
+            index: index,
+            fanArities: slots.map(\.activeVariantCount),
+            surfaceText: { [weak self] range in self?.viewText(range) ?? "" })
     }
 
     /// A gesture the GATE refused so a structural compound could reproduce

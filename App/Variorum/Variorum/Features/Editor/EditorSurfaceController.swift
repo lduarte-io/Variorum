@@ -1498,32 +1498,13 @@ final class EditorSurfaceController {
     /// Nil = not eligible — a FANNED span takes the VISIBLE-TAKE edit
     /// instead (the #11a sitting ruling, 2026-07-13); locked/gap/tail
     /// spans keep the speaking refusal.
-    struct CrossBlockEdit: Sendable, Equatable {
-        let blockIDs: [String]
-        /// The touched blocks' rendered variants + their PLAN-TIME surface
-        /// texts — the compound's compare-and-set inputs (a buffer that
-        /// moved since planning refuses the whole compound, visibly).
-        let pieces: [(variantID: String, text: String)]
-        /// The edit's start, intra the FIRST block (merge preserves the
-        /// leading text verbatim, so this addresses the merged text too).
-        let intraStart: Int
-        /// The edit's end, intra the LAST block.
-        let intraEndInLast: Int
-
-        static func == (lhs: CrossBlockEdit, rhs: CrossBlockEdit) -> Bool {
-            lhs.blockIDs == rhs.blockIDs
-                && lhs.pieces.elementsEqual(rhs.pieces, by: ==)
-                && lhs.intraStart == rhs.intraStart
-                && lhs.intraEndInLast == rhs.intraEndInLast
-                && lhs.lastPieceLength == rhs.lastPieceLength
-                && lhs.replacement == rhs.replacement
-        }
-        /// The last block's surface length at plan time (locates the tail
-        /// suffix in the merged text — derived from op output, never
-        /// re-guessed).
-        let lastPieceLength: Int
-        let replacement: String
-    }
+    ///
+    /// **The type and both halves of the act HOISTED** to
+    /// `Shared/EditorBrain/CrossBlockEditPlanner` at mobile round 2, batch 3
+    /// (M22), where the phone inherits them instead of copying them
+    /// (MobileSoul §3). The name survives here because it is what this
+    /// controller's callers and pins have always said.
+    typealias CrossBlockEdit = CrossBlockEditPlanner.Edit
 
     /// A7 (13c 1B): the narrow carve out of the cross-block refusal — a
     /// backspace/forward-delete of the ONE separator beside an EMPTY block
@@ -1765,100 +1746,27 @@ final class EditorSurfaceController {
         }
     }
 
+    /// The Mac's face on the shared plan (M22's hoist): the index, the
+    /// per-entry fan arities beside it, and the live surface text.
     func planCrossBlockEdit(range: NSRange, replacement: String) -> CrossBlockEdit? {
-        let entries = model.index.entries
-        var touched: [Int] = []
-        for i in entries.indices {
-            let entryRange = model.index.range(ofEntryAt: i)
-            if NSIntersectionRange(range, entryRange).length > 0
-                || (range.length == 0 && range.location >= entryRange.location
-                    && range.location <= entryRange.upperBound) {
-                touched.append(i)
-            }
-        }
-        guard touched.count >= 2, let first = touched.first, let last = touched.last else {
-            return nil
-        }
-        // Contiguity + no tail: the range must sit inside the touched run.
-        guard range.location >= model.index.range(ofEntryAt: first).location,
-              range.upperBound <= model.index.range(ofEntryAt: last).upperBound
-        else { return nil }
-        for i in touched {
-            guard entries[i].variantID != nil, entries[i].editable else { return nil }
-            // A fanned block routes to the VISIBLE-TAKE edit instead (the
-            // #11a sitting ruling, 2026-07-13 — merge-then-edit stays the
-            // single×single behavior: the halves JOIN only where no fan
-            // hangs on the seam).
-            guard i < model.slots.count, model.slots[i].activeVariantCount == 1 else { return nil }
-        }
-        let firstRange = model.index.range(ofEntryAt: first)
-        let lastRange = model.index.range(ofEntryAt: last)
-        return CrossBlockEdit(
-            blockIDs: touched.map { entries[$0].blockID },
-            pieces: touched.map {
-                (entries[$0].variantID!, model.viewText(model.index.range(ofEntryAt: $0)))
-            },
-            intraStart: max(0, range.location - firstRange.location),
-            intraEndInLast: min(lastRange.length, max(0, range.upperBound - lastRange.location)),
-            lastPieceLength: lastRange.length,
-            replacement: replacement)
+        CrossBlockEditPlanner.plan(
+            replacing: range, with: replacement,
+            index: model.index,
+            fanArities: model.slots.map(\.activeVariantCount),
+            surfaceText: { [model] range in model.viewText(range) })
     }
 
-    /// The compound itself: merge the touched run left-to-right, then apply
-    /// the intended edit to the merged buffer — ONE undo compound, one
-    /// serialized runner body, through the one structural door. The mapped
-    /// range's ends are anchored in the verbatim-preserved leading/trailing
-    /// pieces (`intraStart` from the first piece's start; the trailing keep
-    /// measured back from the last piece's end), so every join character
-    /// the merges minted falls inside the replaced span and is deleted
-    /// with it — the surface reads exactly "the selection vanished" (her
-    /// principle: text that looks like basic text behaves like basic
-    /// text).
+    /// The Mac's face on the shared compound (M22's hoist): this door owns
+    /// the flight (`runStructural` — the latch, the pre-op flush, the
+    /// re-render and the caret write); the merge chain and the merged-range
+    /// arithmetic are `CrossBlockEditPlanner.apply`'s, so the phone runs the
+    /// same rule rather than a second copy of it.
     func runCrossBlockEdit(_ edit: CrossBlockEdit) async {
         let stack = model.session.undoStack
         _ = await runStructural { ops in
-            try stack.withCompound(label: "Merge & Edit", operations: ops) {
-                // COMPARE-AND-SET first (the edit-during-await guard): a
-                // no-op TakeEdit with expectedText is a pure verification —
-                // any buffer that moved since planning refuses the whole
-                // compound before a single row changes. (The remaining
-                // verify→merge gap inside this ONE serialized runner body
-                // is the recorded ms-window sync-apply residual, the W
-                // drift check's class.)
-                _ = try ops.editTakesAtomically(
-                    edit.pieces.map {
-                        Operations.TakeEdit(
-                            variantID: $0.variantID, newText: $0.text,
-                            charDelta: 0, expectedText: $0.text)
-                    },
-                    undoLabel: "Merge & Edit")
-                var mergedID = edit.blockIDs[0]
-                var mergedVariantID: String?
-                var mergedText = ""
-                for next in edit.blockIDs.dropFirst() {
-                    let result = try ops.merge(mergedID, next)
-                    mergedID = result.block.id
-                    mergedVariantID = result.variant.id
-                    mergedText = result.variant.workingText
-                }
-                guard let variantID = mergedVariantID else {
-                    throw OperationError.blockNotFound(id: mergedID)
-                }
-                let merged = mergedText as NSString
-                let start = edit.intraStart
-                let end = merged.length - (edit.lastPieceLength - edit.intraEndInLast)
-                guard start >= 0, end >= start, end <= merged.length else {
-                    throw OperationError.invalidCut(variantID: variantID, cut: start)
-                }
-                let replaced = NSRange(location: start, length: end - start)
-                let newText = merged.replacingCharacters(in: replaced, with: edit.replacement)
-                let cost = replaced.length + (edit.replacement as NSString).length
-                try ops.autosave(variantID, text: newText, charDelta: cost)
-                return StructuralOutcome(
-                    caretBlockID: mergedID,
-                    caretOffset: start + (edit.replacement as NSString).length,
-                    seam: nil)
-            }
+            let landing = try CrossBlockEditPlanner.apply(edit, ops: ops, undoStack: stack)
+            return StructuralOutcome(
+                caretBlockID: landing.blockID, caretOffset: landing.caretOffset, seam: nil)
         }
     }
 
