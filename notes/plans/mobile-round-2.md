@@ -3015,3 +3015,100 @@ doors; a doc line describes a `default:` arm that is a raw enum dump).
 (it has ~727 uncommitted lines across 17 files) and will be dispatched
 as ONE consolidated fix round covering all five reviews — §25's
 one-writer rule, applied deliberately rather than learned again.
+
+---
+
+## 45. THE FOUR MISSING REVIEWS LAND — AND THE QUICK NOTE HAS TWO BLOCKERS (2026-08-22)
+
+**Her instinct is vindicated in the sharpest possible way.** The batch
+that shipped to her phone with no review is the one whose entire promise
+is *"nothing you type is lost"* — and that promise is **false in two
+traced ways.**
+
+### 🔴 BLOCKER Q1 — the clamp DESTROYS her stored text when she edits the first paragraph
+
+`MobileQuickNote.swift:286-306`. Traced, and the reviewer **executed the
+two pure functions to confirm it**:
+
+1. Paste `"Kept.\n\nEditable."` → the clock mints → `importPost`
+   segments it → `frozenPrefix == "Kept.\n\n"`, the box owns block 2.
+2. She fixes a typo in the **first** paragraph — a backspace, anything.
+3. `text.hasPrefix(frozenPrefix)` is now **false**, so the clamp fires:
+   it writes back the prefix, then `recordTail()` derives the tail from
+   the **clamped** text and gets `""`.
+4. The next flush writes `""` into the owned variant. **"Editable." is
+   gone from the box and from SQLite.**
+
+**Unrecoverable:** `autosave` registers no undo entry (text editing is
+excluded from structural undo), and no `commit_point` exists yet —
+`closeAutoCommit` only runs at a leaving, and a leaving resets the box.
+Two wrongs land together: her edit is silently reverted **and** the
+second paragraph is erased. The header comment and the pin both assert
+the clamp is only reachable after deleting back through the whole tail —
+**that is the only case tested, and it is not the only case reachable.**
+
+### 🔴 BLOCKER Q2 — a refused mint at a leaving wipes the box AND the error
+
+`MobileQuickNote.swift:483-506`. `file()` reaches `reset()`
+**unconditionally**, and `reset()` does `write("")` *and*
+`lastError = nil`. So when `mintNow` throws, her text is discarded and
+the refusal that caused it is erased with it. **The reachable input is
+the one this app's own comment names** (`VariorumMobileApp.swift:73-76`):
+*"If the device locks mid-round, file protection may cut the store
+off."* **Lock the phone with un-minted text in the box → box cleared, no
+note, no message.** The same road runs on an ordinary tab switch, where
+the app is not going away at all and she watches the box empty itself.
+
+### 🟠 MAJOR Q3 — an emptied box leaves a live, empty, untitled note
+Type `a` (mints a real post), delete it, leave → nothing tombstones the
+post. A blank date-titled note is permanently in the library. A5-3
+disclosed *"an abandoned one-word note"*; it did not sanction a note
+with **no content at all**, which is the case where she withdrew
+everything she typed.
+
+### 🟠 MAJOR Q4 — the background grant introduces a TERMINATION class that did not exist
+`MobileShellRouter.swift:86-88`. The grant is taken **asynchronously,
+one hop after the phase change** — Apple's doc names exactly this as the
+anti-pattern (*"don't call this at the very end of
+`applicationDidEnterBackground` and expect your app to continue
+running"*) — and **with no expiration handler**. Two documented
+consequences: an ungranted assertion means the flush writes SQLite
+unprotected (`0xdead10cc`, the "held a database lock during suspension"
+termination), and an overrun with no handler is **fatal** rather than
+recoverable (`0x2182bad2`) — and the flush's last leg is a **network**
+round. **Before this commit no grant existed and iOS simply suspended;
+this change created the termination class.**
+
+**Plus:** a stated red-on-old recipe that is false and an "order is
+binding" claim that isn't (Q5) · ⏎ over a **selection** is not
+recognised, so a literal newline lands where A5-1 says one can never
+exist (Q6) · a raw enum dump in the refusal (Q7) · an emptied box
+rendering three contradictory faces at once (Q8) · **no pin mounts the
+view at all** (Q9) · §38's one-sentence batch record (Q10) · 5 NITs.
+
+### The other two reviews
+
+**Batch 3 (M22) — 4 MAJOR.** The fan fence is enforced from a
+**deliberately frozen projection**, so a fanned block CAN be merged away
+while a buffer is dirty (the repo states this exact law 40 lines away,
+and the sibling seam road obeys it) · an **empty block** inside a span
+yields a plan that can never execute, refusing an ordinary gesture with
+a sentence naming a cause that isn't there · **the O(N²) twin survives
+in `planVisibleTakeEdit`**, one `else if` later, on a road that runs —
+so §38's "the Mac inherits the fix" is **overstated in three places** ·
+and the phone never wired A7/#34's seam carves, so backspace-to-join
+refuses (a fifth case §31's table omits).
+
+**Batch 2 + the bar family — 2 MAJOR.** The one-row strip **overflows a
+320 pt phone** (iPhone SE, or any iPhone with Display Zoom on): it needs
+338 pt where 288 is offered — **~25 pt off each edge, `×` and `⇤`
+effectively unreachable.** FIX-5's original defect verbatim, and a
+**regression** (the two-row shape fit with 4 pt to spare). The pin
+cannot see it because it compares to a literal `375` while its own
+toolbar is 320. **And the vertical geometry pins assert constants
+against themselves** — `air >= air` — so the recorded guarantee that "a
+future iOS trips here" **does not exist**. §15 trap 1, for the fifth
+time.
+
+**DISPOSITION: every finding accepted.** One consolidated fix round
+after batch 4, Q1/Q2 first.

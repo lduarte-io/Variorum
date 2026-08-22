@@ -89,20 +89,20 @@ batches 1/1b/2/3/3b + R12 + R22/M26. It does NOT yet have batch 4.
 *(Inventory rows are cited **PR**n to avoid colliding with her ruling
 numbers — both run 1–24. This is §39's fix for a real confusion risk.)*
 
-| Batch | Contents | State |
-|---|---|---|
-| 1 | M1 the crash · M2a–M2e | **DONE**, ladder closed round 2 |
-| 1b | M11 ≡ PR18 whole-block delete | **DONE**, ladder round 1 fixed |
-| 2 | M3 copy door · M4 bar air | **DONE** |
-| 3 | M22 merge-then-edit | **DONE** |
-| 3b | M5 the quick note | **DONE** |
-| — | R12 bar tuning · R22 one-row strip · M26 un-indent | **DONE** |
-| **4** | **M20 the undo/redo door (FIRST)** · PR1 delete a note · PR2 the Trash + Archived · PR4 delete a book · PR7 the on-leaving savepoint | **IN FLIGHT** |
+| Batch | Contents | Built | **Cold review** |
+|---|---|---|---|
+| 1 | M1 the crash · M2a–M2e | ✅ | ✅ rounds 1+2, closed |
+| 1b | M11 ≡ PR18 whole-block delete | ✅ | ✅ round 1 fixed · **round 2 landed 2026-08-22 → §44, 1 MAJOR + 7 open** |
+| 2 | M3 copy door · M4 bar air | ✅ | ⚠️ **reviewed 2026-08-22 → §45, 2 MAJOR open** |
+| 3 | M22 merge-then-edit | ✅ | ⚠️ **reviewed 2026-08-22 → §45, 4 MAJOR open** |
+| 3b | M5 the quick note | ✅ | ⏳ **in flight — reviewer C not yet reported** |
+| — | R12 bar tuning · R22 one-row strip · M26 un-indent | ✅ | ⚠️ **reviewed 2026-08-22 → §45, 2 MAJOR open** |
+| **4** | **M20 the undo/redo door (FIRST)** · PR1 delete a note · PR2 the Trash + Archived · PR4 delete a book · PR7 the on-leaving savepoint | ⏳ IN FLIGHT | ❌ owed |
 | **5 (queued, dispatch next)** | **R26/R27 the shelf layout** (quick note takes Today's Entry's box; books list bounded + scrolls past ~8; writing area ≈ half the screen; Today's Entry becomes a badge on the Journal row, no blinking cursor) · **R27b the starter Journal book** · **R24 "more info" → "info"** | queued behind batch 4 (same shelf files) |
-| 6 | PR3 per-note tray · PR5 deleted takes · PR6 archive/unarchive · PR14 lens-dangles notice · PR15 lineage door · PR22 guide deletion chapter | |
-| 7 | PR8 reorder takes · PR9 duplicate-book-name guard · PR11 copy all takes · PR12 take→block · **M23 copy-follows-screen** · PR19 swatches+emoji · PR20 block multi-select · PR21 replace | |
-| 8 | PR10 tag-chip grammar · PR13 cadence/pruning settings · PR16 PL-9 judgment acts · PR17 document settings · **PR23 the forked voice brain (HOIST, never patch)** | |
-| — | **PR24** — her held design calls (the ●n comment marker's side; the margin-comment tap shape) | **propose-only, bundled to a sitting** |
+| 6 | PR3 per-note tray · PR5 deleted takes · PR6 archive/unarchive · PR14 lens-dangles notice · PR15 lineage door · PR22 guide deletion chapter | | ❌ owed |
+| 7 | PR8 reorder takes · PR9 duplicate-book-name guard · PR11 copy all takes · PR12 take→block · **M23 copy-follows-screen** · PR19 swatches+emoji · PR20 block multi-select · PR21 replace | | ❌ owed |
+| 8 | PR10 tag-chip grammar · PR13 cadence/pruning settings · PR16 PL-9 judgment acts · PR17 document settings · **PR23 the forked voice brain (HOIST, never patch)** | | ❌ owed |
+| — | **PR24** — her held design calls (the ●n comment marker's side; the margin-comment tap shape) | **propose-only, bundled to a sitting** | ❌ owed |
 
 **Not in a batch, deliberately:**
 - **M12** the gate-less-insertion re-render — measured 0 in policed typing; **re-owned to 13u** with the caveat that the harness cannot drive the gate-less class.
@@ -133,8 +133,10 @@ tappable · R26/R27 the shelf layout + starter Journal.
 **Two fences she set personally, and they bind:**
 1. **`planVisibleTakeEdit` is HERS** — a cross-block span touching a
    block with takes must keep REFUSING on the phone. She is handling the
-   fanned case Mac-side. Verify with `git diff | grep planVisibleTakeEdit`
-   after any editor batch; it must be 0.
+   fanned case Mac-side. Verify with `git diff -- '*.swift' | grep planVisibleTakeEdit`
+   after any editor batch; it must be 0. **(Do NOT grep the whole diff:
+   `notes/*.md` contain the fence's own text, so an unfiltered grep
+   returns 5 and false-positives. Zero SWIFT hits is the test.)**
 2. **No Mac FEATURES.** R8 authorizes fixing shared defects, not
    building Mac capability.
 
