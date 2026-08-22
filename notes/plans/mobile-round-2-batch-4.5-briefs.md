@@ -332,6 +332,34 @@ layer short of the DECISIONS.**
 > named owner. **Do not report it done when only the easy half is done**;
 > that is a named failure mode of this round.
 
+**3b — 🟠 `MobileBlockMenu` fires TWELVE bare `Task { await … }` doors
+with no in-flight latch** (§53 finding 3). Lines 116, 123, 127, 131, 145,
+150, 158, 189, 197, 214, 269, 278; `grep -n "inFlight\|isRunning"` in
+that file returns **nothing**, while `MobileStructural` (`:55, :72,
+:191`) and the view model's `mintInFlight` both latch. Rapid double-taps
+run concurrent operations — **a lost update, never corruption**, which is
+why the stability survey ranked it lowest. **You own the file and it is
+about an hour**, and left alone it survives into **batch 7**, which adds
+more take/block rows to this same menu. Latch it the way its two
+siblings already do — **do not invent a third latching idiom.**
+
+**3c — 🟠 CLOSE `MobileSurfaceDriver`'s OTHER TWO BLIND SPOTS, or own
+them by name** (§53 finding 4). Its header records honestly that a
+SwiftUI `Menu`'s rows and a `.contextMenu`'s rows are **undrivable in
+process**, so the Library-row and shelf-row delete doors are pinned only
+at their model act plus their confirm's *presentation*.
+
+> **§49's MAJOR — the Library delete leaving a LIVE EDITOR on a tombstone
+> — lived in exactly this blind spot.** You are fixing that defect at
+> item 2; **fixing a defect without closing the blind spot that hid it
+> leaves the next one just as invisible**, and the same class covers
+> **batch 6's** PR3/PR5/PR6 context-menu doors. Item 1's settling
+> experiment (invoke the live `UIAlertAction`'s handler from the hosted
+> surface) closes half of it — **report what you learn about the other
+> half either way.** If a class genuinely cannot be driven in process,
+> say so plainly **and name what compensates** (a device-walk item, a
+> different seam), so the gap has an owner rather than a header comment.
+
 **4 — §49's four MINORs and four NITs, plus §44's NIT 7**, each with a
 written disposition: a no-flush justification the shell's architecture
 falsifies · a refusal spoken *behind* the presenting sheet · a rolled
@@ -462,6 +490,44 @@ the same method for a different reason without addressing it. Make the
 safety **structural rather than accidental**, and pin the shape a
 reorder would produce. *(§18's NIT 8 already ruled `displaySlot` gets
 the structural disarm; this is the other half of the same room.)*
+
+**6b — 🟠 THE MAC HAS NO IDENTITY-PROJECTION AUDIT AT ALL** (Act 2's
+sweep, `mobile-round-2.md` §53 finding 1 — **the most consequential item
+that sweep found**). The DEBUG per-keystroke oracle that catches the one
+corruption class both other oracles are blind to lives **only on the
+phone**: `auditIdentityProjection` + the M15 Q2 separator check at
+`MobileEditorViewModel.swift:1898–1920`, while
+`grep -rn "auditIdentityProjection\|identityAuditFailures" App/Variorum/Variorum`
+returns **ZERO hits**. The Mac has only `desyncRecoveryCount`, and it
+stamps identity itself (`EditorViewModel.swift:1012, 1361`) with nothing
+watching.
+
+**Why this outranks its severity label:** §18's MAJOR 1 was *silent prose
+overwrite with every total still agreeing*, and §20 **reproduced it
+Mac-side** — `stored → ["Alpha", "Beta beta", "G"]`, her paragraph
+written to the store as one character, through the ledger, with the
+totals agreeing so nothing downstream noticed. The Mac has a **pin** for
+that traced case and **no runtime oracle for the class**. And **13l opens
+against this merged tree with a Fable cold review of exactly this Mac
+code as its first act.**
+
+**HOIST it, do not copy it** (MobileSoul §3, and it is the third hoist of
+this round — the pattern is proven twice already). The audit is a pure
+walk over the tiling plus a storage read at a computed offset; **that is
+brain, not face.** Move it to `Shared/EditorBrain/` with both platforms'
+consumers calling it, keep the phone's counter semantics byte-identical
+(its pins read `identityAuditFailures` and must ride **unmodified** —
+zero test edits is the parity proof), and give the Mac the same
+Debug-only wiring. **Carry the empty-entry hole's fix with it** (§21
+found the walk's `guard range.length > 0 else { continue }` skips an
+EMPTY entry's separator entirely, so an empty block's boundary is
+unaudited) — if that is already fixed phone-side, verify rather than
+assume, and say which you found.
+
+**Pin it red-on-old on the MAC** by reproducing §20's traced corruption
+there and asserting the Mac oracle now fires. That is the whole point:
+the phone already catches it, the Mac does not, and a hoist without a
+Mac-side red proves nothing about the platform that lacked the oracle.
 
 **7 — B45-3: the crash trace's SIX unowned items.** Read that record's
 own sections; each is named there:
@@ -614,6 +680,34 @@ pins, which removes the contention entirely.
 **`ImageRenderer` cannot capture this surface** (the parity inventory's
 recorded warning) — use the real-surface frame-dump technique §26 used,
 not a rendered snapshot.
+
+---
+
+## 4b. THE DEVICE QUEUE — SUB-BATCH 4.5-device (B45-4, widened by Act 2)
+
+**Not a build session. A queue, run in ONE window when she offers her
+phone** — and her standing instruction (§50 sweep finding 2) is that the
+device-only queue runs in that window, **not just the install.** This
+round already spent one such offer on two installs while two of these
+sat runnable. **Her device is iOS 26.6; the newest simulator here is
+26.2**, and every item below is here precisely because a simulator
+cannot settle it.
+
+| # | Item | What settles it |
+|---|---|---|
+| **E1** | **The crash trace's instrumented experiment** — *the only thing that settles where the stale verdict comes from.* **M1's own status is recorded "high confidence, NOT PROVEN."** | Log each gate consult's `(range, replacementLength)` and each report's `(editedRange, delta)`; flag any report whose OLD span extends past the last consult's `range.upperBound`. **4.5c builds the instrumentation and leaves it RUNNABLE**, with arming and reading written for a session that will not have 4.5c's context |
+| **M16** | **Same-note text drag-move** — if a dragged selection covers whole paragraphs it may plan a BLOCK delete while the drop lands the text as content (I4). Unsettleable from the repo: no drag delegate is configured, so reachability is a **device fact** | §24.9's experiment: long-press-drag a two-paragraph selection within one note; observe whether the source blocks vanish and whether the moved text lands as blocks or as content |
+| **D3** | **The destructive colour on a deletion door** (§46, §53 finding 2a) — `MobileNoteActions.swift:175` records that in a `layer.render` capture *system semantic* colours render as default label colour, so "Delete Note…" read black rather than red. Most likely a capture artifact, **but it is a colour a deletion door leans on (M-E)**, so it was flagged rather than assumed away | Look at it on the real screen |
+| **D4** | **The quick note's PLATFORM half** (§53 finding 2b) — `MobileQuickNoteTests.swift:14–17`: the pins *"cannot reach that iOS really delivers `.background` before a swipe-kill, and that the `beginBackgroundTask` grant buys enough wall clock on real hardware."* **This is the device half of Q1/Q2/Q4's own promise** — 4.5a fixes the code and nothing verifies the platform contract the fix rests on | Type into the box, swipe-kill, relaunch: is the text there? Repeat with the device locking mid-round |
+| **D5** | **`Shared/SignInFlow.swift`'s iOS `presentationAnchor` arm** (§53 finding 2c, PL-9's third judgment act) — *"compiles but has never run on a device"* | Exercise the delegated bridge-connect door once, if the door stays |
+
+**R30 binds the install itself:** her words, *"i'll wait for my fresh
+build til these batches are all done"* — so the phone keeps the
+2026-08-21 23:49 build **with the three BLOCKERs live** until the round's
+remaining batches land. **The queue above does not wait on that.** E1's
+instrumentation needs a build to run on, so when a device window opens,
+say plainly which items need a fresh install and which do not, and let
+her choose.
 
 ---
 

@@ -558,6 +558,51 @@ went stale the first time. **If you are 13l's reviewer: check this
 section's own git history for edits later than the round's closeout
 commit before assuming it is complete.**
 
+**⚠️ HEADS-UP BEFORE YOUR FIRST ACT — the Mac suite is INTERMITTENTLY
+RED, and it is NOT this round's doing.**
+`VariorumTests/EditorWindowSmokeTests.rewriteStrategyLatencies(paragraphs: 250)`
+asserts the differential gesture stays under **50 ms at 50,000 words**,
+and this machine clears it by only a few percent — so it **reds under
+load and greens when quiet**. Measured on BOTH trees 2026-08-22
+(`mobile-round-2.md` §54): the **PRE-ROUND tree `46ffa0c` failed 1 of 4
+isolated runs at 51.95 ms**; the post-round tree passed 4 of 4. **It is
+pre-existing, it is not a regression, and it now has a
+`KnownIssuesAndTechDebt.md` row owned by Phase 12.** Recorded here so
+your Fable reviewer does not spend its budget on a red neither this
+round nor you caused. **If you meet it: re-run the suite isolated before
+concluding anything.**
+
+**TWO MAC RESIDUALS ADDED 2026-08-22 by Mobile Round 2's Act-2 sweep**
+(`notes/plans/mobile-round-2.md` §53) — **written here as they were
+found, per this section's own rule, not at closeout:**
+
+1. **THE MAC HAS NO IDENTITY-PROJECTION AUDIT AT ALL** (§53 finding 1).
+   The DEBUG per-keystroke oracle that catches the corruption class both
+   other oracles are blind to — the totals agree while the content is
+   wrong — exists **only on the phone**
+   (`MobileEditorViewModel.swift:1898–1920`);
+   `grep -rn "auditIdentityProjection\|identityAuditFailures" App/Variorum/Variorum`
+   returns **zero hits**. This matters to your review specifically:
+   round §18's MAJOR 1 was a **silent prose overwrite**, and §20
+   **reproduced it Mac-side** (`stored → ["Alpha", "Beta beta", "G"]`).
+   The Mac has a **pin** for that traced case and **no runtime oracle
+   for the class**. **Batch 4.5c is hoisting the audit into
+   `Shared/EditorBrain/` and wiring the Mac to it, with a Mac-side
+   red-on-old** — so by the time you read this it may be done; **check
+   the tree, not this sentence.**
+2. **A SECOND EXPRESSION OF THE CARET RULE SURVIVES, Mac-private**
+   (§53 finding 11). `EditorSurfaceController.swift:930` keeps the
+   single-index `caretLandingAfterRemoving(_ i: Int)` with three Mac
+   callers (`:770, :782, :1608`), beside the hoisted set-based
+   `BlockRangeIndex.caretLandingAfterRemoving(_ blockIDs:)` at `:412`.
+   Round §23 named this honestly at the time (*"the set-based rule and
+   that one now express the same idea in two places, as they did
+   before"*) and it never reached this manifest. **No divergence bug
+   today** — for one departing block the neighbour is always a survivor,
+   so the shipped correction does not change its answer — **but it is a
+   duplicate of the very rule you were asked to check**, and you should
+   meet it here rather than discover it.
+
 **AND ONE MAC DEFECT THIS ROUND CREATED** (§44's MAJOR): the gap fence
 makes the Mac **refuse**, but the Mac never got the fence's **FACE**, so
 the span falls through into merge-then-edit and dies as a **raw error

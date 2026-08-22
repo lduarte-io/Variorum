@@ -3640,7 +3640,11 @@ the full verification block. Nothing below was inherited on trust.
 | 18 | **B45-4 — THE ON-DEVICE SWEEP: E1 *and* M16 together, in ONE window on her phone.** **E1 must run on HER DEVICE (iOS 26.6), not the 26.2 simulator** — it is an input-path question and §9's runtime gap is recorded. **M16**: the same-note drag-move question, unsettleable from the repo (no drag delegate is configured, so reachability is a device fact). **Standing instruction (§50 sweep finding 2): when she offers her device, the device-only queue runs in that window — not just the install.** This round already spent one such offer on two installs while both of these sat runnable | her row | **4.5-device** |
 | 19–n | **The remaining MINORs and NITs**, each with its written disposition: §44's 2/4/5/6/7/8 · §45's Q5–Q10 + 5 NITs · §49's 4 MINOR + 4 NIT | §44 · §45 · §49 | by file, below |
 | **+** | **ACT 1's findings** — a fresh cold read over the round's WHOLE shipped diff (`46ffa0c..d62d820`), briefed on nothing but the diff plus this round's five known blind spots. **Dispatched 2026-08-22 before anything else, per her instruction** | her ACT 1 | **on arrival** |
-| **+** | **ACT 2's findings** — the never-became-work sweep over the four investigation records, the round's prose, and the diff's own TODO/PROVISIONAL/"not pinned" annotations. **Dispatched in parallel with ACT 1** | her ACT 2 | **on arrival** |
+| **+** | **ACT 2's findings — LANDED 2026-08-22, twelve orphans, full table and dispositions at §53.** The five that joined 4.5 are enumerated in the four rows below | her ACT 2 | **§53** |
+| 4.5+ | 🟠 **THE MAC HAS NO IDENTITY-PROJECTION AUDIT AT ALL** — the DEBUG oracle for the corruption class both other oracles are blind to exists only on the phone, while the Mac shares the brain, took the same crash fix, and had §18's MAJOR 1 **reproduced on it** at §20. **13l opens against this tree with a Fable Mac review as its first act** | §53 f1 | **4.5c** (HOIST, never copy — with a Mac-side red-on-old) |
+| 4.5+ | 🟠 **`MobileBlockMenu`'s twelve unlatched `Task { await … }` doors** — concurrent operations on a rapid double-tap (lost update, never corruption), in a file **batch 7 adds more rows to** | §53 f3 | **4.5b** |
+| 4.5+ | 🟠 **`MobileSurfaceDriver`'s other two blind spots** (SwiftUI `Menu` rows and `.contextMenu` rows undrivable in process) — **§49's MAJOR lived in exactly this gap**, and the same class covers batch 6's context-menu doors | §53 f4 | **4.5b** — close it, or own it by name |
+| 4.5+ | **THE DEVICE QUEUE WIDENS from two items to five** — E1 · M16 · the destructive colour on a deletion door · **the quick note's PLATFORM half** (the device half of Q1/Q2/Q4's own promise) · the iOS `presentationAnchor` arm | §53 f2 | **4.5-device** (brief §4b) |
 
 ### 52.2 — ONE ITEM IS THE ARCHITECT'S OWN, and it is fixed here rather than briefed
 
@@ -3710,3 +3714,184 @@ each brief and are never shared.
 - **Her real store**, and **her live Mac app** — it was running at
   cutover and is never quit; no Release build or `/Applications` refresh
   while it lives.
+
+---
+
+## 53. ACT 2'S SWEEP LANDS (2026-08-22) — TWELVE ORPHANS, and three of them share one shape
+
+Her ACT 2 instruction, verbatim: *"check through all notes and code
+changes for anything not yet included or that has been missed as well."*
+A cold sweeper read the round's whole record, the four investigation
+records, and the shipped diff, hunting the round's own failure mode: **an
+item recorded in prose that never became work.**
+
+**Twelve orphans, every one verified against the tree** — file and line
+quoted, or explicitly labelled record-only. Its calibration list (below)
+is as valuable as its findings: seven candidates it checked and found
+already discharged, so no later session re-opens them.
+
+### THE STRUCTURAL OBSERVATION, and it is the sharpest thing in the sweep
+
+> Items 1, 2 and 4 share a shape: **each is an obligation that a batch
+> discharged on ONE side and recorded honestly on the other** — the
+> audit oracle on the phone but not the Mac, the code fix without its
+> device verification, the pin harness with its named blind spots.
+> **That is this round's *"reported done when only the easy half was
+> done"* class in its most legible form, and none of the three had a
+> scheduled second half.**
+
+All three are now scheduled. Recording the shape as well as the items,
+because the shape is what the remaining batches must not repeat.
+
+### THE TWELVE, with the architect's disposition on each
+
+| # | The orphan | Verified | **DISPOSITION** |
+|---|---|---|---|
+| **1** | **THE MAC HAS NO IDENTITY-PROJECTION AUDIT AT ALL.** The DEBUG per-keystroke oracle that catches the one corruption class both other oracles are blind to exists **only on the phone**, though both platforms share `BlockRangeIndex` and both took the same crash fix | **REAL.** `auditIdentityProjection` + the M15 Q2 separator check at `MobileEditorViewModel.swift:1898–1920`; `grep -rn "auditIdentityProjection\|identityAuditFailures" App/Variorum/Variorum` → **ZERO hits**. The Mac has only `desyncRecoveryCount`, and it stamps identity itself (`EditorViewModel.swift:1012, 1361`) with no oracle over it | **BATCH 4.5c** — it already owns `Shared/EditorBrain/*` and both `storageDidEdit` consumers, which is the exact fence. **This is the most consequential item in the sweep:** §18's MAJOR 1 was *silent prose overwrite with every total still agreeing*, and §20 reproduced it **Mac-side** (`stored → ["Alpha","Beta beta","G"]`). The Mac has a *pin* for that traced case and **no runtime oracle for the class** — and **13l opens against this merged tree with a Fable Mac review as its first act** |
+| **2** | **The device-only queue is UNDER-SCOPED** — three more device-only obligations sit with prose owners, in the round that already spent one of her device windows on installs | **REAL.** (a) `MobileNoteActions.swift:175` — the destructive colour, *"a colour a DELETION door depends on (M-E)"*, flagged for a device look, no home. (b) `MobileQuickNoteTests.swift:14–17` — *"What they cannot reach is the platform half: that iOS really delivers `.background` before a swipe-kill, and that the `beginBackgroundTask` grant buys enough wall clock on real hardware."* (c) `Shared/SignInFlow.swift`'s iOS `presentationAnchor` arm — *"compiles but has never run on a device"*, parked in batch 8, which is not a device queue | **BATCH 4.5-device**, folded in beside E1 and M16. **(b) is the device half of Q1/Q2/Q4's own promise** — 4.5a fixes the code and nothing verifies the platform contract the fix rests on. *"The device round"* is exactly the owner closeout obligation 8 forbids |
+| **3** | **`MobileBlockMenu` fires TWELVE bare `Task { await … }` doors with no in-flight latch** — rapid double-taps run concurrent operations (lost update, never corruption) | **REAL.** Lines 116, 123, 127, 131, 145, 150, 158, 189, 197, 214, 269, 278 = **12**; `grep -n "inFlight\|isRunning"` in that file → **no matches**, while `MobileStructural` (`:55,72,191`) and the VM's `mintInFlight` both latch | **BATCH 4.5b** — it owns `MobileBlockMenu.swift` and the work is ~an hour. The survey ranked it lowest priority, but left alone it survives into **batch 7**, which adds more take/block rows to that same menu |
+| **4** | **`MobileSurfaceDriver`'s two OTHER honestly-recorded blind spots have no owner** — SwiftUI `Menu` rows and `.contextMenu` rows are undrivable in process, so the Library-row and shelf-row delete doors are pinned only at model-act + confirm-*presentation* | **REAL.** `MobileSurfaceDriver.swift:33–50`, verbatim in its header | **BATCH 4.5b.** **§49's MAJOR — the Library delete leaving a LIVE EDITOR on a tombstone — lived in precisely this blind spot.** 4.5b fixes that defect; nothing closes the coverage class, and the same class covers **batch 6's** PR3/PR5/PR6 context-menu doors. §49's own settling experiment (invoke the live `UIAlertAction` handler) closes half of it, and 4.5b is already told to run it |
+| **5** | **`MobileEditorStyle.storedVoice` is an unenforced `nonisolated(unsafe)` main-thread convention**, read from a `nonisolated` `MarkdownFace.style` | **REAL.** `MobileEditorStyle.swift:48`. *(The other `nonisolated(unsafe)` in the target — `MobileTakesBrowserView.swift:87` — is pre-existing, write-once and documented; not this class)* | **BATCH 8, named on PR23's row.** No live race today, but the survey's stated trip is *"a future off-main markdown pass (a plausible optimisation for the 100k Read surface)"* — **and M14's Read fix is exactly that candidate, also batch 8.** PR23 (the voice-fork HOIST) touches this exact storage, so the closer and the tripwire are already in one batch; the row just never said so |
+| **6** | **The shelf has NO keyboard-avoidance opt-out — and batch 5's R26/R27 grow a DWELLING text field into a bottom-anchored ~half-screen area inside that layout** | **REAL (code fact; rendered behaviour record-only).** `MobileShelfView.swift:101` carries only `.background(tokens.room.ignoresSafeArea())` — **no `.ignoresSafeArea(.keyboard)`**, unlike Write (`MobileWriteView.swift:130`) | **BATCH 5, written into its brief as a named deliverable.** Default SwiftUI avoidance insets the whole `VStack`, so the tab bar rides the keyboard and the bounded books list collapses — **the "about half the phone screen" proportion SHE RULED is the first casualty.** Designing for it beats discovering it at build time |
+| **7** | **The quick note's mint cost at corpus scale was never measured** — and R27 is about to make that box the shelf's main surface | **REAL.** `MobilePerfWalkTests.swift` has no quick-note leg; its `@Test`s cover open/typing/scroll/Read only. A 100k dev store already exists | **BATCH 5**, measured alongside the layout change; **a fix only if the number earns it.** Typing on the shelf schedules sync rounds at autosave rate against a held books observation, and this is the one new *typing* surface the round added that the proving ground has never been pointed at. MobileSoul §2: measure rather than expect |
+| **8** | **`MobileQuickNoteModel.charDelta` is a new mobile-local brain** whose hoist trigger lives only in a code comment and a plan file that closes | **REAL.** `MobileQuickNote.swift:218–222`, which says so honestly and weighs M-C. **Not** in the KnownIssues eight-brain row (that enumeration ends at `TakesReplacePlan`) | **CLOSEOUT → the `KnownIssuesAndTechDebt.md` forked-brains row**, owned by the mobile app project row. The decision is defensible; what is not defensible is a trigger recorded only where it will evaporate — **the exact shape the audit's finding 7 flagged when the six-brains row was deleted.** The paired question (*should the Mac's `QuickEntryBar` adopt mint-as-you-type?*) joins **handoff §6** |
+| **9** | **`notes/QUESTIONS.md` carries ZERO Mobile Round 2 entries**, and the closeout obligations never name it — so the round's ten held-for-her items live only in a file that closes | **REAL.** No round-2 hits; the file ends *"(Next free number: #74.)"*. Precedent is uniform: 13j = #66–#73, 13e = #58/#63, 13g = #52 | **NEW CLOSEOUT OBLIGATION 10.** CLAUDE.md's PROVISIONAL rule sends held items to QUESTIONS.md *"for the checkpoint's ratify list"*. The sweeper states its own uncertainty fairly — mobile rounds have used an end-bundle convention before (`mobile-parity-end-bundle.md`) — and it is right that **either home works and NO home is the defect** |
+| **10** | **Two standing riders live only in a plan file that closes** — the NAMED-coordinate-space rule for any future iOS drag, and the `CarryAllMerge` sibling-implementation note | **REAL.** Neither is in `MobileSoul.md` or KnownIssues. The drag rider is still preventive (`grep -rn "DragGesture"` → **zero**); the carry-all one is **live debt**: the Mac's `CarryAllMerge` (`FannedDefaults.swift:46`) and the phone's C5 composition are independent siblings | **CLOSEOUT.** The drag rider → `MobileSoul.md` §5 (platform truths), where a future editor session will meet it. The carry-all sibling → the KnownIssues forked-brains row |
+| **11** | **The Mac's private single-index `caretLandingAfterRemoving(_ i: Int)` is a SECOND expression of a rule now living in the shared brain** — named honestly at §23 and absent from 13l's manifest | **REAL.** `EditorSurfaceController.swift:930`, three Mac callers (`:770, :782, :1608`), beside the shared set-based `BlockRangeIndex.caretLandingAfterRemoving(_ blockIDs:)` at `:412` | **13l's MANIFEST — written there NOW, not at closeout**, per that file's own header rule and the standing instruction. No divergence bug today (for one departing block the neighbour is always a survivor), **but 13l's Fable Mac reviewer reads that manifest and would otherwise meet an undocumented duplicate of the very rule it was asked to check** |
+| **12** | **`CrossBlockEditPlanner.apply`'s verify→merge millisecond window** is recorded in code as a residual with no owner | **REAL, low.** `Shared/EditorBrain/CrossBlockEditPlanner.swift:228–231` | **THE DEDICATED STABILITY PASS** — its brief already names `CrossBlockEditPlanner` as a target. Genuinely the *honestly-unpinnable* class this repo parks elsewhere (`shelveInDailyJournalBook`'s twin). **If that pass declines it, it gets a KnownIssues row rather than silence** |
+
+### THE CALIBRATION LIST — checked and found NOT REAL (do not re-open)
+
+The sweeper's most useful output after the table, because it tells later
+sessions where **not** to spend:
+
+- **The `isDirty` honesty trap** (which her first-acts file named as a
+  live residue): **HANDLED.** `MobileQuickNote.swift:444–450` reads
+  `autosave.isDirty` directly, with the survey's own trap quoted in the
+  comment. *(4.5a is still told to verify what the indicator reads and
+  report either way — a second look at a closed item costs minutes; a
+  saved indicator that can lie costs her trust in the whole feature.)*
+- **`.inactive` unruled** (also named in her first-acts file): **RULED,
+  with a mechanism.** `MobileShellRouter.swift:152–154` — *"`.inactive`
+  stays deliberately unhandled — it is the app-switcher and Control
+  Centre peek, and a real leaving passes through `.background`."*
+- **The caret WRITE not pinned** (§23's honest gap): **CLOSED** at the 1b
+  fix round — `MobileWholeBlockDeleteTests.swift:649`.
+- **`MobileBlockMenu.deleteConfirmDetail` going stale**: **discharged at
+  batch 4** — `:263–265` now names the receipt's Undo and the ⋯ door.
+- **The phone's Trash inheriting the `ImageRenderer`/`List` capture
+  problem**: **not applicable** — `MobileTrashView.swift:59–66` is
+  `ScrollView`/`LazyVStack`, and batch 4 built a real-surface driver.
+- **Survey items the survey itself declined** (S3 note-metadata door
+  extraction, S4 crystallization hoist, T11 `AuthSession`'s PKCE
+  precondition, the `MobileEditorTextView` geometry split): **not
+  obligations.**
+
+### THE DIFF'S OWN ANNOTATION SWEEP — a clean result worth recording
+
+Across **53 Swift files and 10,336 added lines** there are **ZERO**
+`TODO`, `FIXME`, `XXX`, `HACK`, "for now", "workaround", "known gap",
+"known limitation", "unowned", "not covered" or "unpinnable" on any added
+line. Both `PROVISIONAL`s mark a *superseded* prior provisional. The one
+`NO PIN IS CLAIMED` (`MobileEditorViewModel.swift:263`) is justified by
+this round's own manufactured-precondition rule.
+
+**So the orphans are in the INVESTIGATION RECORDS and the SCHEDULE, not
+in the code comments** — the code annotations are unusually disciplined.
+That is a real finding about where this round's risk lives, and it
+matches §51's own read: *doors over good logic.*
+
+### ⚠️ ONE CORRECTION TO THE HANDOFF, caught by item 1 and made immediately
+
+Handoff **§6 item 7** (the Release-side boundary check, held for her)
+says *"The DEBUG half shipped."* **That is true of ONE PLATFORM.** She
+would have ruled a risk-appetite question about her own prose on a
+half-true premise. **Corrected in §6 in this same commit**, with item 1's
+finding attached — and note the two interact: if 4.5c gives the Mac the
+audit, the premise her decision rests on changes again, in her favour.
+
+
+---
+
+## 54. A CLAIM THIS ROUND HAS LEANED ON IS LESS SOLID THAN IT READS — the Mac suite is INTERMITTENTLY RED, and it is NOT this round's doing (2026-08-22)
+
+**Found by running it rather than inheriting it.** The handoff records
+Mac **1568/272** as *"exact and unmodified since batch 1's fixes — this
+is the hoist proof; if it moves, something changed Mac behaviour."* The
+count is right. **The suite is not reliably green.**
+
+The incoming architect's own baseline run came back **1568/272 with one
+failure**:
+
+```
+EditorWindowSmokeTests/rewriteStrategyLatencies(paragraphs: 250)
+Expectation failed: (differential → 54.026667) < (50 → 50.0)
+  "the differential gesture must stay flat in document size: 54.026667 ms at 50000 words"
+```
+
+**A latency budget, overshot by 8%.** Two concurrent Opus agents were
+live, so contention was the obvious suspect — and this round's own lesson
+is that *a mechanism traced by reading and never executed* is how six
+sessions repeated a wrong diagnosis. So it was **executed**, not
+reasoned about.
+
+### The measurement, and the verdict
+
+Isolated re-runs on the **current tree**: **58.47 ms FAIL, then pass,
+then pass, then pass.** So the pin sits **right at its budget boundary**
+and flips on machine load.
+
+Then the question that actually matters — *did this round make it
+slower?* Settled against the **pre-round tree** (`46ffa0c`) in a
+throwaway `git worktree`, so the two live agents' reading was never
+disturbed:
+
+| tree | runs | result |
+|---|---|---|
+| **pre-round `46ffa0c`** | 4 | **1 FAIL at 51.95 ms**, 3 pass |
+| **current `d62d820`** | 4 | **4 pass** |
+
+**VERDICT: the flake is PRE-EXISTING and this round did not cause it.**
+If anything the current tree measured better. **No 4.5 row on regression
+grounds** — the same standard §21 applied when the architect's own M15
+hunch was refuted.
+
+### But it is still a real finding, and it gets an owner
+
+**A perf pin that flips on machine load cannot do its job.** Its purpose
+is to catch a real regression in the differential gesture; at a budget
+its own hardware clears by ~4% it will red on load and green on quiet,
+and **every future session will spend what this one spent** deciding
+which it is. Three concrete costs:
+
+1. **It quietly weakens THIS round's load-bearing claim.** *"Mac 1568/272
+   exact"* has been the hoist proof three times (batches 1b, 3, 4). The
+   COUNT proof is untouched — a flaky pin does not change how many tests
+   exist — but *"and it was green"* is a claim about a suite that reds
+   about a quarter of the time under load, and nobody knew that until it
+   was run.
+2. **13l's first act is a Fable cold review of this round's Mac
+   changes**, run against this tree. Its reviewer will very likely meet
+   this red and spend its budget on it — on a defect that is neither
+   this round's nor 13l's.
+3. **Every 4.5 sub-batch that touches `Shared/` runs the Mac suite**
+   (M-B), and three of the four do. Each will meet it.
+
+**OWNER: Phase 12 (Hardening)** — it is a perf-budget calibration
+question, which is that phase's own material, and it already holds the
+adjacent rows (P1 benchmarks at scale, the corpus-shaped sweep). **A
+`KnownIssuesAndTechDebt.md` row is written for it**, so the owner
+outlives this plan file — the audit's finding-7 lesson applied
+prospectively rather than after the fact.
+
+**AND A HEADS-UP LINE GOES INTO 13l's PLAN**, beside the manifest, so its
+first act is not derailed by a red it did not cause. That is cheap
+insurance for the review she specifically asked for.
+
+**What is NOT proposed here:** raising the budget. The number is a
+performance guarantee about her editor, and moving a guarantee to make a
+test pass is exactly backwards — the honest fixes are to make the
+measurement robust (more iterations, a median rather than a single
+sample, or a quiet-machine gate) or to make the gesture genuinely
+faster. **Which one is a Phase 12 call with evidence, not a mobile
+round's to take.**

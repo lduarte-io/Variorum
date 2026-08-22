@@ -169,10 +169,10 @@ numbers — both run 1–24. This is §39's fix for a real confusion risk.)*
 | — | R12 bar tuning · R22 one-row strip · M26 un-indent | ✅ | ⚠️ **reviewed 2026-08-22 → §45, 2 MAJOR open** |
 | **4** | **M20 the undo/redo door (FIRST)** · PR1 delete a note · PR2 the Trash + Archived · PR4 delete a book · PR7 the on-leaving savepoint | ✅ `e7e2472` → §46 | ⏳ **DISPATCHED 2026-08-22** at her instruction (§47/R28); its findings join batch 4.5 |
 | **4.5 (THE CONSOLIDATED FIX ROUND — dispatch first)** | **Every finding from every cold review of batches 1–4, plus her four named rows and both successor Acts.** Full ordered enumeration: `mobile-round-2.md` **§52**. In brief, by consequence: **Q1** the quick-note clamp DESTROYS stored text · **Q2** a refused mint at a leaving wipes the box AND the error · **the batch-4 BLOCKER** — four confirm buttons read back state SwiftUI has already cleared (Delete Now · Empty Trash · Library-row Delete Note · Shelf-row Delete Book) and the A12 warning's **Undo CANCELS it** · then §45's MAJORs (the fan fence read from a frozen projection · the 320 pt strip overflow · the surviving O(N²) twin in `planVisibleTakeEdit` · the geometry pins asserting constants against themselves) · §49's two MAJORs · §44's MAJOR (the Mac gets the gap fence's REFUSAL but not its FACE) · **B45-1** `AppBootstrap` runs migrations synchronously on the MAIN THREAD before first paint (a **P2** violation) · **B45-2** the `displaySlot`/`slots[i]` coupling that batch 7's PR8 walks into · **B45-3** the crash trace's six unowned items · **B45-4** THE ON-DEVICE SWEEP (E1 + M16, ONE window) · **+ ACT 1's findings** (a fresh cold read over the round's whole shipped diff) **+ ACT 2's findings** (the never-became-work sweep) | ⏳ | **ITS EXIT CONDITION IS THE DEDICATED STABILITY PASS** (the row below). 4.5 is NOT done until that pass has run. Its own build half is reviewed under R28 like any batch |
-| **5 (queued, dispatch next)** | **R26/R27 the shelf layout** (quick note takes Today's Entry's box; books list bounded + scrolls past ~8; writing area ≈ half the screen; Today's Entry becomes a badge on the Journal row, no blinking cursor) · **R27b the starter Journal book** · **R24 "more info" → "info"** | queued behind batch 4 (same shelf files) | ❌ owed |
+| **5 (queued)** | **R26/R27 the shelf layout** (quick note takes Today's Entry's box; books list bounded + scrolls past ~8; writing area ≈ half the screen; Today's Entry becomes a badge on the Journal row, no blinking cursor) · **R27b the starter Journal book** · **R24 "more info" → "info"** · **NEW 2026-08-22 (§53 items 6 + 7): the shelf has NO keyboard-avoidance opt-out** (`MobileShelfView.swift:101` carries only `.background(tokens.room.ignoresSafeArea())`, unlike Write's `.ignoresSafeArea(.keyboard)`) **and R26/R27 pin a DWELLING text field into that layout** — default avoidance insets the whole `VStack`, so the tab bar rides the keyboard and the bounded books list collapses, making **her ruled "about half the phone screen" the first casualty**; plus **the quick note's mint cost at corpus scale, never measured** (`MobilePerfWalkTests` has no quick-note leg; the 100k dev store exists) — measure alongside the layout change, fix only if the number earns it | queued behind 4.5 (same shelf files) | ❌ owed |
 | 6 | PR3 per-note tray · PR5 deleted takes · PR6 archive/unarchive · PR14 lens-dangles notice · PR15 lineage door · PR22 guide deletion chapter | | ❌ owed |
 | 7 | PR8 reorder takes · PR9 duplicate-book-name guard · PR11 copy all takes · PR12 take→block · **M23 copy-follows-screen** · PR19 swatches+emoji · PR20 block multi-select · PR21 replace | | ❌ owed |
-| 8 | PR10 tag-chip grammar · PR13 cadence/pruning settings · PR16 PL-9 judgment acts · PR17 document settings · **PR23 the forked voice brain (HOIST, never patch)** · **M14's UNMEASURED HALF** — the SwiftUI `Text`-per-paragraph sizing on the Read surface, which needs a rendered view (§19 promised it "is measured there too" and it had landed in no map; measurement only, no fix — the decision is hers, §6 item 1) | | ❌ owed |
+| 8 | PR10 tag-chip grammar · PR13 cadence/pruning settings · PR16 PL-9 judgment acts · PR17 document settings · **PR23 the forked voice brain (HOIST, never patch)** — **and it closes §53's item 5 in the same act**: `MobileEditorStyle.storedVoice` is an unenforced `nonisolated(unsafe)` main-thread convention (`MobileEditorStyle.swift:48`) read from a `nonisolated` `MarkdownFace.style`. No live race today; the stated trip is *"a future off-main markdown pass"* — **which is M14's Read fix, also in this batch.** The tripwire and its closer are already in one batch; the row simply never said so · **M14's UNMEASURED HALF** — the SwiftUI `Text`-per-paragraph sizing on the Read surface, which needs a rendered view (§19 promised it "is measured there too" and it had landed in no map; measurement only, no fix — the decision is hers, §6 item 1) | | ❌ owed |
 | — | **PR24** — her held design calls (the ●n comment marker's side; the margin-comment tap shape) | **propose-only, bundled to a sitting** | ❌ owed |
 | **REVIEW — the dedicated stability pass** (§8's second commitment; it lived only in prose until 2026-08-22 and §43's own accounting missed it) | ONE fresh cold reviewer whose ONLY brief is **the crash class and the editor's range/identity math** — adversarial, tasked to find the case the fix misses. *It reviews the FIX, not the feature*, so its target is batch 1 + batch 1b + M22's shared-brain work as one body: `Shared/EditorBrain/` (`BlockRangeIndex`, `EditorEditRouting`, `CrossBlockEditPlanner`) and both platforms' `storageDidEdit` consumers. **It OWNS M27** — the first typed edit after a DIVIDE is unroutable and takes `desyncRecovery` (§46, reproduced on the pre-batch tree, neither caused nor fixable in batch 4). **Read it beside B45-3** (`mobile-round-2-successor-first-acts.md`): that row owns the crash trace's six *unowned items* (E1, E2, the UIKit undo-replay path, the `supportsTextReplacement: false` fence note, the `MarkdownActs` Mac residual, M1's SUSPECTED status) as BUILD/EXPERIMENT work; this pass is the adversarial REVIEW of the fix itself. Neither discharges the other | **TRIGGER: batch 4.5's exit condition — 4.5 IS NOT DONE UNTIL THIS HAS RUN** | n/a (it IS a review) |
 | **REVIEW — the whole-round pass** (§8's third commitment; in no map and no closeout obligation until 2026-08-22) | ONE fresh cold reviewer over the round's **entire diff** (`46ffa0c..HEAD`), briefed on **nothing but the diff** — the round's own cold read, **after the LAST build batch** and after the consolidated fix round lands. Findings go in the plan with dispositions like any ladder round. **It is NOT discharged by ACT 1** of `mobile-round-2-successor-first-acts.md`: her Act-1 pass is an *earlier* cold read over batches 1–4 feeding batch 4.5, and §8's pass is the round's *closing* read over everything, batches 5–8 included. Two passes, two moments, both hers | **TRIGGER: the LAST build batch's exit condition — the round CANNOT CLOSE until this has run** | n/a (it IS a review) |
@@ -304,11 +304,19 @@ that were promised a home and never got one):
    `fileAsQuicknote`, her own R6-4 ruling there. *Should phone quick
    notes file into a Quicknotes book instead?* Reversible in one call.
 7. **The Release-side boundary check** (§21's ruling (3)). The DEBUG
-   half shipped — the identity audit now catches the corruption class
-   both prior oracles were blind to. What is held is a **Release-side**
+   half shipped **ON THE PHONE ONLY — corrected 2026-08-22** (§53's
+   finding 1: `auditIdentityProjection` and its separator check live in
+   `MobileEditorViewModel`, and the Mac has **no identity-projection
+   audit at all**, though both platforms share the brain and took the
+   same crash fix). The phone's identity audit now catches the
+   corruption class both prior oracles were blind to. What is held is a **Release-side**
    belt: the reviewer framed it honestly as *defence-in-depth against an
    untraced class, not a fix for a live bug*, which makes it a
    risk-appetite question about her own prose, not an architect's.
+   **The premise moves before she rules:** 4.5c gives the Mac the
+   DEBUG oracle it never had, so by the time this reaches her the
+   "DEBUG half" will be true of both platforms — which is the version
+   of the question she should actually be answering.
 8. **The gap-fence Mac narrowing** (§34(a) — *"it goes on her list as a
    notification, not a request"*). A whole-block-delete run that
    contains a **gap** block (one whose text has not synced) is now
@@ -369,7 +377,29 @@ that were promised a home and never got one):
    note; observe whether the source blocks vanish and whether the moved
    text lands as blocks or as content), **or** it leaves this round with
    a named owner — a KnownIssues row, or 13u — exactly as M12 did.
-9. **R16 → THE CANON.** Her standing principle, recorded verbatim at
+10. **`notes/QUESTIONS.md` — THIS ROUND HAS NO ENTRIES IN IT** (§53's
+    finding 9, verified: zero round-2 hits; the file ends *"(Next free
+    number: #74.)"*). Every prior phase numbered its held items there —
+    13j = #66–#73, 13e = #58/#63, 13g = #52 — because CLAUDE.md's
+    PROVISIONAL rule sends them there *"for the checkpoint's ratify
+    list"*. **Ten items are currently held for her in §6 above, in a
+    file that closes at closeout.** Number them into QUESTIONS.md, or
+    into a round end-bundle on the `mobile-parity-end-bundle.md`
+    precedent — **either home works; NO home is the defect.**
+11. **TWO STANDING RIDERS OUT OF THE PLAN FILE** (§53's finding 10):
+    the **NAMED-coordinate-space rule for any future iOS drag** (parity
+    inventory §4(a), the 13e jitter rider — still preventive, `grep -rn
+    "DragGesture"` is zero) → **`notes/MobileSoul.md` §5 (platform
+    truths)**, where the next editor session will meet it; and the
+    **`CarryAllMerge` sibling-implementation note** (the Mac's
+    `FannedDefaults.swift:46` and the phone's C5 composition are
+    independent siblings, so a change to the carry-all rule silently
+    touches one) → **the KnownIssues forked-brains row**. That row also
+    gains **`MobileQuickNoteModel.charDelta`** (§53's finding 8 — a new
+    mobile-local brain whose hoist trigger lives only in a code comment
+    and this plan file), and its paired question — *should the Mac's
+    `QuickEntryBar` adopt mint-as-you-type?* — joins §6 above.
+12. **R16 → THE CANON.** Her standing principle, recorded verbatim at
    §31 and owed to the canon at closeout: *"if you have text selected, I
    lean towards the idea that you should be able to copy or delete it…
    basically obvious and intuitive operations like selecting a bunch of
