@@ -3112,3 +3112,70 @@ time.
 
 **DISPOSITION: every finding accepted.** One consolidated fix round
 after batch 4, Q1/Q2 first.
+
+---
+
+## 46. BATCH 4 LANDS (2026-08-22) — and corrects a diagnosis this round has been repeating
+
+**Mobile 449/75 (+35 pins) · core 1350/141 · Mac 1568/272 green.** M20
+(her dropped row), PR1, PR2, PR4, PR7 all built. Commit `e7e2472`.
+**The phone can now get things back.**
+
+**Its pin work is the round's best**, and it is the direct answer to the
+four-times-repeated green-over-nothing class: it built a real-surface
+driver and **measured what can actually be driven BEFORE building on
+it** — finding that a SwiftUI `Menu`'s rows are unreachable (empty
+accessibility tree), which is **why the ⋯ door is a sheet**: a
+deviation taken *because* the trap binds, not despite it. Its first row
+walker **missed every `LazyVStack` row and read as "door absent"** — the
+exact false-green shape, caught in its own harness. And its red-on-old
+includes **rewriting the phone's purge confirm in the Mac's dead pattern
+to turn both purge pins red** — the trap proven rather than assumed.
+
+### ⚠️ IT CORRECTS A DIAGNOSIS THIS ROUND HAS REPEATED SIX TIMES
+
+**The Mac's dead-door mechanism, as recorded, is probably WRONG.** §15
+and the parity inventory both state the Mac's purge doors fail because a
+`confirmationDialog`'s `isPresented` is a computed `Binding` over an
+`@Observable` property that `body` never reads. **Batch 4 reproduced
+that exact pattern on iOS 26.2 and it PRESENTS** — because the dialog's
+**title argument** reads `pendingConfirm` in `body`, which registers the
+dependency.
+
+**What this does and does not change:** the RULE was still right to
+follow (the phone uses `@Bindable` throughout and is immune either way),
+and **the author's live report stands** — she pressed Delete Now on her
+Mac and nothing happened, which is a fact about her machine, not a
+theory. But **13l must not start from this mechanism**; the cause needs
+re-deriving on macOS. Recorded here, and **owed to 13l's plan** so its
+first act does not chase a diagnosis that may be an artifact of reading
+rather than running.
+
+*(Note the shape: this round has warned five times that a pin proving a
+stored value proves nothing about what renders. This is the same error
+in prose — **a mechanism traced by reading and never executed.** The
+inventory said "confirmed still present" from the code pattern; nobody
+ran it.)*
+
+### Two more items it raised
+
+**A real PRE-EXISTING defect, reproduced on the pre-batch tree:** the
+**first typed edit after a DIVIDE is unroutable** and takes
+`desyncRecovery` — DEBUG trips the assertion seam, Release does a full
+re-render. Divide only; not delete, not a plain refresh. **Neither
+caused nor fixable in batch 4.** → **M27**, owned by the dedicated
+stability pass (§43's still-unscheduled one).
+
+**A visual item for her device eyes:** in a `layer.render` capture,
+*system semantic* colours render as the default label colour while a
+custom `Color` renders — so "Delete Note…" reads black rather than red.
+Verified four ways with a freshness probe; most likely a capture
+artifact of a presentation container, but **it is a colour a deletion
+door leans on (M-E)**, so `role: .destructive` + the tint were left in
+and the item flagged rather than assumed away. → her device round.
+
+### Batch 4's own ladder is OWED
+
+Per §43's rule — *a batch is not done when it is committed, it is done
+when its ladder has closed* — batch 4 now owes a cold review like every
+other. It joins the consolidated fix round's queue.
