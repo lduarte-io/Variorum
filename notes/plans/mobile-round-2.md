@@ -4358,3 +4358,318 @@ session rather than three fences.
   held change (inherited from the shipped clamp, not introduced —
   invisible in tests, obvious in the hand); and **a real cold first
   launch, timed on her iPhone** (B45-1's unknown).
+
+
+---
+
+## 59. 4.5a's COLD REVIEW (2026-08-22) — 5 MAJOR, and the mandatory twin-check pays for itself
+
+**R28's loop working exactly as she designed it:** the review was
+dispatched from the same turn as the build report, and it found **two
+defects the fix itself introduced** plus **one live data-loss bug on her
+Mac** that no per-batch review would ever have looked for. Its clean bill
+is unusually strong — it hand-executed `applyingChange` over four cases,
+traced the `text == frozenPrefix + tail` invariant as inductively
+maintained, and ran the suite itself: **469/77 passed**, the only two
+known issues being 4.5b's live work.
+
+**ALL THIRTEEN FINDINGS ACCEPTED. Zero disputes.**
+
+### 🟠 MAJOR 1 — Q3's withdrawal arm would tombstone a REAL multi-paragraph note, in exactly the state A1-19 creates
+
+`MobileQuickNote.swift:751-758`. The emptied-box arm is gated on
+`postID != nil && !mints` — but `adopt` sets `postID` **before** the
+`frozenPrefix` guard, so **A1-19's refusal arm exits with `postID` set,
+`variantID` nil, and the note it refused to own holding several real
+paragraphs of her prose.** From there: she clears the box → `mints` is
+false → she leaves → **`deleteContainer` tombstones a multi-paragraph
+note the box never owned a single character of.**
+
+**The reviewer's framing is the sharpest part, and it is right:** *this
+is the inverse of the fix A1-19 just made* — `frozenPrefix` was hardened
+to **refuse ownership rather than claim everything**, and `file()` then
+deletes the thing it refused to own. Two fixes, each correct alone,
+**wrong together** — the exact class Act 1's mandatory check 5 exists for,
+found one wave later inside a single sub-batch.
+
+**The `!mints` gate is safe ONLY when `frozenPrefix` is empty**, because a
+non-empty prefix is what makes `mints` un-emptyable — and A1-19's arm is
+precisely the state where the prefix is empty and the note is not.
+**FIX: gate on OWNERSHIP, not on `postID`.** No pin owed (reachable only
+through A1-19's own unconstructible state) — **the same class the brief
+authorized for A1-19, and consistency says close it the same way.**
+
+### 🟠 MAJOR 2 — Q2's AND Q7's TWINS SURVIVE ON THE MAC, in the surface she praised by name
+
+**Mandatory check #1 paying for itself.** `QuickEntryBar.submit()`
+(`:96-112`) does **`entryText = ""` at `:98`, BEFORE the mint at
+`:105-107`**, and its catch is `lastError = "New note refused: \(error)"`.
+**That is Q2 and Q7 in one method** — her text destroyed on a refusal
+*and* the reason delivered as a raw enum dump — **in the very bar A5-1
+names as the phone box's grammar and that she praised by name.**
+`QuickNotePad.take()` clears before `QuickNoteMint.file` too, though
+there the clear-first is deliberate and its copy does go through
+`OpsRefusalCopy`.
+
+**RULED: this is fixed in this round, not deferred.** R8's fence is
+*"shared defects, not Mac features"* — **this is a data-loss defect on her
+daily driver**, the phone's just-built fix is the reference shape, and the
+copy half is a one-line change to `OpsRefusalCopy.message(for:)` needing
+no design call. **Routed to 4.5e**, whose theme widens accordingly (below).
+*Note the asymmetry with the Mac's dead purge door, which I declined to
+take:* that one is **13l's scheduled scope by her ruling**; this one is
+scheduled nowhere and destroys text.
+
+### 🟠 MAJOR 3 — a REGRESSION: the box lets go without telling the face, so the keyboard stays up
+
+At HEAD an emptied box still returned `minted`, so `handOffCount` bumped
+and the box dropped focus. **Q3's new arm resets and returns `nil`,
+bumping nothing.** Trace: type `a` → delete it → tap the Library tab →
+the note is withdrawn, the box resets, **`focused` stays true and the
+keyboard sits over the Library.** That is the exact bug `handOffCount`'s
+own comment says *"was found by driving the real surface"*. **Red-on-old
+pinnable** (`handOffCount == 1` after the emptied leaving).
+
+### 🟠 MAJOR 4 — the expiration teeth exist on ONE construction road, and `isGranted` lies after `end()`
+
+`BackgroundAssertion.onExpire` is set **only** by
+`mobileScenePhaseChanged`; the self-minting road at `:194-195` — which
+`performBackgroundFlush`'s own doc advertises as keeping *"every existing
+call site honest"* — leaves it nil forever. And `end()` never resets
+`token`, so **`isGranted` still reads `true` afterwards.** Traced: iOS
+fires expiration → `onExpire` is a no-op → `end()` hands the token back →
+the flush continues → `guard held.isGranted, !Task.isCancelled` **passes
+on both clauses** → **a network round runs with the assertion already
+returned**, which is the exact inverse of Apple's `0xdead10cc` guidance.
+Latent today (only tests take that road, all with `.none`) — **but the
+type's own comment states a whole-type guarantee one of its two
+construction sites does not honor**, which is mandatory check 5.
+
+### 🟠 MAJOR 5 — `SPECULATIVE`, and it lands on Q1's PRIMARY PATH: the hold may relocate her typing
+
+The boundary hold calls `write()` inside `text`'s own `didSet`, so SwiftUI
+re-renders the `TextField` with a value different from what UIKit holds —
+and the documented behaviour for a rejected binding is that
+`selectedTextRange` **collapses to the end of the new text**. Consequence:
+she fixes a typo in paragraph 1 → the text is restored → **the caret is
+now at the end of "Editable." → her next characters are accepted and
+recorded into paragraph 2.** Silently relocated typing, on the road Q1's
+fix exists to make safe. `boundaryNote` mitigates but never says the
+cursor moved.
+
+**This sharpens 4.5a's own device-queue item D7** (*"the caret jumps to
+the end — inherited from the shipped clamp"*), which read as cosmetic and
+is not.
+
+**THE SPECULATIVE PROTOCOL BINDS:** build the pin FIRST, as the confirm.
+The hosted pin already mounts the real field, so a selection assertion
+after a held edit is cheap. **Red confirms and the fix proceeds; green
+means record-only.** Do not fix on suspicion. *(And the reviewer labelled
+its own uncertainty correctly: it could not run it, this is a UIKit
+input-path behaviour, and 26.2-vs-26.6 makes a non-reproduction a
+**runtime gap**, never a clean bill.)*
+
+### The MINORs and NITs — all accepted, with two worth naming here
+
+**MINOR 6 — the B45-1 numbers DISAGREE between sessions, and that is
+itself information.** 4.5a measured first launch at **54.0 ms**; the
+reviewer's own run measured **23.4 ms** (ordinary 4.5 ms, 100k 4.5 ms).
+**Both agree on the finding that matters** — the open is
+**corpus-independent** (4.5 ms at both the ordinary and the 100k store).
+The first-launch spread is host load, and it means **no single number
+should be quoted as *the* cost.** 4.5e re-measures and reports a range.
+Three scope caveats adopted: `defaultStoreURL` and the iOS-only
+`prepareStoreDirectoryProtection` run **outside** `openStore(at:)`, so the
+header over-claims; the numbers are simulator on Mac SSD, not device; and
+the corpus-independence is the useful finding.
+
+**MINOR 7 — a THIRD false line in `AppSession.swift`**, which the round
+had not enumerated: `:206-208` says *"Open posts are a handful by
+construction — this is not a corpus walk"*, now false for A1-21's own
+reason, **and Q3's withdrawal leaves a coordinator behind for a note that
+no longer exists.** → **4.5e**, beside A1-15's two.
+
+**MINOR 8** — a **fourth** phone-local refusal-copy home
+(`MobileQuickNoteCopy.refusal`), disclosed in-code and routed to 4.5b's
+hoist, **and the reviewer checked the thing that mattered**: `OpsRefusalCopy`
+is **Mac-app-local, not `Shared/`**, so no shared brain was bypassed and
+MobileSoul §3 is not violated — the hoist target simply has four callers
+now, not three. → **4.5b's brief updated.**
+
+**MINOR 9** — a refused leaving keeps her text but **schedules no
+retry**: the mint clock is cancelled and only re-arms on the next
+keystroke, so text refused because the device locked sits in an in-memory
+box with nothing trying again — **and a suspended app can be terminated**,
+while the fix's own copy promises *"try again in a moment"*. → fix round.
+
+**MINOR 10** — Q3's withdrawal does not reconcile with the mint's
+structural undo entry: `importPost` registers one, `deleteContainer`
+registers none, so undo **announces itself and changes nothing** while
+redo would **resurrect the blank note Q3 exists to prevent.** → fix round,
+with a written disposition either way.
+
+**MINOR 11** (a dead branch under the maintained invariant — say so or
+drop it) · **NIT 12** (`MainActor.assumeIsolated` is redundant: the
+parameter is already `@MainActor` and Apple's prose says the handler is
+called synchronously on the main thread — **and the reviewer confirmed the
+neighbouring comment's UIKit-contract claim is CORRECT**) · **NIT 13**
+(the header states an unqualified rule two of its own arms do not keep).
+
+### 4.5e's THEME WIDENS — and the reason is recorded so it does not read as scope creep
+
+4.5e was *"the app-lifecycle files in `Shared/`"*. **It becomes "the
+shared lifecycle files AND the Mac's quick-capture twins"**, gaining
+`Variorum/Features/Shelf/QuickEntryBar.swift` and
+`Features/QuickNote/QuickNoteView.swift` (MAJOR 2) plus MINOR 7's third
+line. **Why there and not a sub-batch of its own:** 4.5e already runs
+**alone** in wave 3 and already runs **both platforms' suites** (every
+item in it is a `Shared/` change), so the Mac files cost it no new fence
+and no new suite run — and the defect it is fixing is the twin of the one
+whose reference implementation it is reading anyway.
+
+
+---
+
+## 60. SUB-BATCH 4.5d LANDS (2026-08-22) — the bar fits every width, the tautologies are gone, and it found a CROSS-SESSION HAZARD
+
+**Both items fixed, the floor question answered by measurement, and its
+own report corrects two of the round's numbers.** Mobile **469/77
+passed**, spine **33/7 exact**, hygiene zero across the board, the
+throwaway harness deleted and the simulator left as found.
+
+### ⚠️ THE FINDING THAT OUTLIVES THIS SUB-BATCH — and it is live in another session's file RIGHT NOW
+
+**`UIWindow.makeKeyAndVisible()` in a test harness kills the full mobile
+run.** Its geometry harness used it; the full suite then died — **twice,
+reproducibly** — on
+`MobileEditorViewModel.swift:1540: Fatal error: mobile editor surface
+desynced from the block index`, with xcodebuild restarting and reporting
+only a 45-test tail.
+
+**It isolated the cause three ways rather than accepting the alarming
+reading**, which is the discipline this round has been asking for:
+
+| configuration | result |
+|---|---|
+| its files reverted, siblings' left in place | **463/76 clean** |
+| its **source change alone**, geometry test file held out | **464/76 clean** |
+| source **+** test file | **crash** |
+
+So: **harness interference, not a product defect** — a second key window
+stealing key status from a concurrently-driven editor surface.
+**`MobileSurfaceDriver.HostedSurface` — 4.5b's file — already calls
+`makeKeyAndVisible()`, and it is fine ALONE; adding a SECOND stealer is
+what breaks it.** Its own file now hosts with `window.isHidden = false`
+(visible, never key) — the glass cells materialize identically — and the
+mechanism is written into the file.
+
+**This is a live hazard for 4.5b and for batches 6 and 7**, which add more
+hosted-surface users. **And it reads as a random editor crash — exactly
+the shape that gets "fixed" in working code.** *(It is very likely also
+the `Index out of range` 4.5a saw in its second reverted pass and could
+not reproduce — §58 attributed that to another session's in-flight
+`MobileSurfaceDriver.swift`, and this is the mechanism.)*
+**Relayed to 4.5b while it is still live**, and it goes into every
+hosted-surface brief from here.
+
+### The fix, and why it is her ruled shape rather than a compromise
+
+The strip was sized once from a literal `tightestBarWidth = 375`. It is
+now **sized to the bar it is actually being built into**, capped at her
+ruled 28 pt — and **the `min` is the whole fix, deliberately asymmetric:
+every bar ≥ 375 pt renders BYTE-IDENTICALLY to before.** Only a bar too
+narrow for her strip narrows, to 23 pt. **One row, eleven acts, every one
+whole, nothing scrolls and nothing hides, and the bar's height does not
+move — so no text is traded (R23).**
+
+**It declined three things and each refusal is correct:** widening acts
+past 28 on big phones (a look change on her device, and the look is
+hers); scrolling the strip (contradicts FIX-5's adjudicated letter, and
+hides acts on the one width where she can already see least); dropping an
+act at 320 (an act-count change is hers).
+
+**A seam it found and closed while there:**
+`MobileEditorTextView.applyVoiceChrome()` calls `makeBar()` **again** at
+a voice switch and `isFormattingExpanded` survives it — so a fresh
+toolbar starting at a placeholder width **would have built her acts at
+23 pt on a 402 pt phone and stayed there until the next toggle.** Pinned,
+red-on-old.
+
+### THE MEASUREMENTS — and two corrections to this round's own numbers
+
+Pre-fix at 320: content row `(8, 0, 304, 48)`, capsule cell
+**`(−9, 0, 338, 48)`**, `×` at **x = −4.0**, `⇤` ending at **324.0** —
+clipped. Post-fix at 320: act 23 pt, capsule `(8, 0, 304, 48)`, `×` at
+23.7, `⇤` ending at 296.7. **At 375/393/402 the strip is unchanged at
+328 pt.**
+
+**(1) §45/§52 row 7's "338 where 288 is offered, ~25 pt off each edge" is
+OVERSTATED for this host.** Measured: the content row is **8 pt/side
+(304)**, not 16 — and the more interesting finding, **iOS does not clamp
+an oversized `customView` cell to the content row at all: it centres it
+on the BAR and lets it hang off both ends.** So the real clip is **9 pt
+per bar edge / 4 pt per outer act.** *The defect and its direction are
+exactly as reported; only the magnitude differs* — recorded because a
+number in a record gets quoted.
+
+**(2) `toolbarContentInset` 16 vs 8 is UNRESOLVED and recorded as such.**
+Batch 2's dump read 16 pt/side at 402; this session read 8 at all four
+widths. It kept **16 as a deliberately conservative allowance** (erring
+wide only narrows the strip, which cannot clip) and wrote both numbers
+into the constant's doc. **Naming an unresolved disagreement instead of
+picking silently is the right call.**
+
+### Item 3 — the floor, ANSWERED, and the brief's own premise was stale
+
+**The 20 pt penalty is gone — and the code already said so.** The brief
+told it the constant's doc records the floor as standing; **that was
+stale** (corrected at the R22 batch). What the doc lacked was **evidence**:
+the claim was *derived from the constants*, never measured. It verified by
+frame dump — **resting lowest drawn edge 48.0, expanded 48.0, air 4.0, at
+all four widths** — and added the measurement. **What still binds is the
+fixed 48 pt content row itself**; the 20 pt was a penalty on top of it.
+*A stale premise in the architect's own brief, caught by measuring rather
+than by trusting.*
+
+### The pins, and the demonstration the brief asked for
+
+Five pins in a **new dedicated file** — which also removes the
+`MobileMarkdownTests.swift` contention entirely, as the brief preferred.
+Every one drives a toolbar hosted in a real window and reads frames **in
+the toolbar's own coordinates**, asserting `bounds.width == barWidth`
+FIRST — *the defect's hiding place was a pin whose toolbar was not the
+width it reasoned about.*
+
+**The demonstration:** under the "iOS draws lower than the constants say"
+revert, the new air pin measures **`air → −6.0`** and fails — **and a
+replica of the exact pin it replaced PASSES under the same revert, in the
+same run.** That is the tautology proven hollow rather than asserted
+hollow.
+
+**And it declared pin 5 COVERAGE, not a pin**, because no grow-on-expand
+code exists to revert and manufacturing one would pin a fiction.
+
+### RUNTIME GAPS, recorded rather than papered over
+
+**The bar's real home — an `inputAccessoryView` on a presented keyboard —
+cannot be measured in process:** under `xcodebuild test` the software
+keyboard never presents, so the accessory view's `window` stays nil and
+its content never lays out. All measurement is in a plain window host.
+**Her device is 26.6; this simulator is 26.2.** Second limitation, also
+written into the file: **iOS 26's toolbar does not re-render an items
+swap made after the bar is on screen in this host**, so the pins expand
+before hosting (geometry frame-for-frame identical both ways).
+
+### THE ONE THING FOR HER — information, not a gate
+
+**At the 320 pt Display-Zoom width her acts render at 23 pt**, below the
+~31 pt she pre-ruled tappable at R25. **R25 pre-ruled the tap-target
+concern and the alternative was two acts off the screen entirely**, so it
+built and reported rather than stopping — correct.
+
+**ARCHITECT'S RULING: accept 23, and put it on her list as information.**
+The forks are hers and both cost more than they buy: **dropping an act at
+320** is an act-count change she ruled at eleven, and **scrolling**
+contradicts FIX-5 and hides acts *on the one width where she can already
+see least*. **23 pt whole beats 28 pt with two acts off the screen**, and
+it only ever happens on a phone whose owner has turned Display Zoom on.
