@@ -614,11 +614,12 @@ struct MobileMarkdownActsTests {
     /// The Aa condensation's pin set (parity A3 item 1 — HER RULING on
     /// the propose-first fork: the expanding row): the bar RESTS on
     /// three doors (Aa · ⑂ · ⋯); Aa expands the formatting strip
-    /// (× · B · I · # · • · ☑ · ⇥ — the LK8 order) IN PLACE on the same
+    /// (× · B · I · S · ⟨⟩ · 🔗 · # · • · ☑ · ⇥ · ⇤ since her R22 + M26
+    /// — LK8's relative order intact inside it) IN PLACE on the same
     /// toolbar; × collapses back (round-trip); a fresh keyboard
     /// presentation resets to collapsed (the keyboard-hide mechanism,
     /// posted deterministically — the A1 notification precedent). The
-    /// six acts fire byte-identically from the strip — the act pins
+    /// acts fire byte-identically from the strip — the act pins
     /// throughout this file drive the controller's own selectors, which
     /// are exactly what the strip's buttons target. (This pin's earlier
     /// flat-bar forms recorded LK8's arrivals; the condensation is the
@@ -633,9 +634,10 @@ struct MobileMarkdownActsTests {
                 return
             }
             // Since FIX-5 the expanded acts ride ONE strip container
-            // (seven separate items overflowed the bar) — and since C4b
-            // the capsule is two rows deep, so labels flatten row by
-            // row: both states still read in door order.
+            // (seven separate items overflowed the bar). The capsule
+            // holds ROW stacks — one row since her R22, two before it —
+            // so labels flatten row by row and keep reading in door
+            // order however the strip is split.
             func labels() -> [String] {
                 (toolbar.items ?? []).flatMap { item -> [String] in
                     if let strip = item.customView as? UIStackView,
@@ -673,10 +675,17 @@ struct MobileMarkdownActsTests {
             bar.toggleFormattingDoor()
             #expect(bar.isFormattingExpanded)
             #expect(labels() == MobileKeyboardBarController.formattingActLabels)
+            // ELEVEN acts on ONE row since her R22 + M26 — the two former
+            // rows flattened IN PLACE (so LK8's relative order of the
+            // standing seven and C4b's after-Italic placement of
+            // strike/code/link both survive untouched) with ⇤ landing
+            // beside the ⇥ it mirrors. The order is pinned so a later
+            // session cannot re-shuffle her strip by accident.
             #expect(MobileKeyboardBarController.formattingActLabels
                     == ["Hide Formatting", "Bold", "Italic", "Strikethrough",
                         "Inline Code", "Add Link",
-                        "Heading", "Bullet List", "Checklist", "Indent"])
+                        "Heading", "Bullet List", "Checklist", "Indent",
+                        "Outdent"])
             #expect(toolbar.frame.height == MobileKeyboardBarController.barHeight)
 
             // × collapses back — the round-trip, height included.
@@ -730,6 +739,20 @@ struct MobileMarkdownActsTests {
     /// to 104). So the two states must share ONE height, and it is the
     /// resting one, because the strip resets to collapsed at every
     /// keyboard hide.
+    ///
+    /// **HER R22 RULING RIDES THIS PIN TOO, and it makes the pin
+    /// STRONGER, not looser.** While the strip was two rows the capsule
+    /// bottomed out 20 pt lower than a resting cell, so the bar was
+    /// sized for the capsule and the resting trio inherited that depth —
+    /// the "structural floor" recorded on `barVerticalAir`. She ruled
+    /// the one-row strip, which dissolves it: a one-row capsule's cell
+    /// is exactly a plain item's cell, so **both states bottom out at
+    /// the SAME edge** and the bar drops 72 → 52. That equality is now
+    /// asserted as a law below — re-splitting the strip into two rows
+    /// silently would trip here — and `barHeight` is pinned to the
+    /// number she was promised, so quietly re-inflating the bar (and
+    /// eating the 20 pt of text she gained) trips exactly as clipping
+    /// does.
     @Test func theBarClearsEveryGlassCellWithAirBeneathIt() async throws {
         try await withEditorWorld { session, _ in
             let postID = try await makePost(session, blocks: ["x"])
@@ -761,6 +784,22 @@ struct MobileMarkdownActsTests {
             #expect(MobileKeyboardBarController.barVerticalAir <= 6)
             #expect(MobileKeyboardBarController.barVerticalAir == 4)
 
+            // **The 20 pt structural floor is DISSOLVED (R22), as a law.**
+            // A one-row capsule's glass cell is exactly a plain item's,
+            // so the expanded state can no longer reach below the
+            // resting one. Re-splitting the strip into two rows would
+            // push `expandedCapsuleBottomEdge` back to 68 and trip here
+            // — which is the guard she is owed, since the whole point of
+            // her ruling was the 20 pt of text that split was costing.
+            #expect(MobileKeyboardBarController.expandedCapsuleBottomEdge
+                    == MobileKeyboardBarController.itemCellHeight)
+            #expect(MobileKeyboardBarController.stripFittedHeight
+                    == MobileKeyboardBarController.stripButtonHeight)
+            // The bar height she was promised, as a number: 48 + 4.
+            // Bounded exactly, so a quiet re-inflation is as loud as a
+            // clip.
+            #expect(MobileKeyboardBarController.barHeight == 52)
+
             // The law, on the REAL toolbar, in the state she named…
             #expect(!bar.isFormattingExpanded)
             #expect(toolbar.frame.height
@@ -784,23 +823,37 @@ struct MobileMarkdownActsTests {
     }
 
     /// FIX-5's pin (Stage A ladder round 1.5 — the adjudicated MAJOR),
-    /// EXTENDED at parity C4b to the two-row capsule per the brief's own
+    /// EXTENDED at parity C4b to the two-row capsule and again at her
+    /// **R22 + M26** to the ONE row of **ELEVEN** acts, per the standing
     /// rule ("the FIX-5 frames-in-bounds visibility pin extends to
-    /// whatever the strip becomes"): ALL TEN strip acts sit fully
-    /// visible and tappable inside the bar. The original defect's
-    /// mechanism: as seven separate `UIBarButtonItem`s, iOS 26's
-    /// circle-per-item toolbar laid the row out at 478 pt against the
-    /// 402 pt bar — × and ⇥ clipped to edge slivers, and NO pin covered
-    /// on-screen visibility. The fix owns the geometry — the acts in
-    /// ONE measurable capsule (`kbar.formattingStrip`) — so this pin
-    /// holds windowless (the corrected machinery lesson's preferred
-    /// host): every ROW's width fits the TIGHTEST iPhone class's cell,
-    /// every button lies fully inside its row's bounds, every button is
-    /// a ≥44 pt tap target, the capsule's height fits the expanded
-    /// bar (no vertical clipping — the C4b axis), and the ten doors
-    /// read in the ruled order. NO act may leave the strip and NO
-    /// scroll may hide one (the FIX-5 adjudication's letter).
-    @Test func allTenStripActsSitFullyVisibleAndTappableInsideTheBar() async throws {
+    /// whatever the strip becomes"). The original defect's mechanism: as
+    /// seven separate `UIBarButtonItem`s, iOS 26's circle-per-item
+    /// toolbar laid the row out at 478 pt against the 402 pt bar — ×
+    /// and ⇥ clipped to edge slivers, and NO pin covered on-screen
+    /// visibility. The fix owns the geometry — the acts in ONE
+    /// measurable capsule (`kbar.formattingStrip`) — so this pin holds
+    /// windowless (the corrected machinery lesson's preferred host):
+    /// the strip's width fits the TIGHTEST iPhone class's cell, every
+    /// button lies fully inside its row's bounds vertically AND
+    /// horizontally, and all eleven doors read in the ruled order. NO
+    /// act may leave the strip and NO scroll may hide one (the FIX-5
+    /// adjudication's letter).
+    ///
+    /// **THE TAP-TARGET CLAUSE CHANGED, and the change is honest.** It
+    /// used to read `width >= 44` — the HIG floor. Eleven acts on one
+    /// row cannot satisfy it (11×44 + 10×2 = 504 against 333), and
+    /// **she ruled the shape knowing that**. So the clause becomes two
+    /// stricter things instead of one unsatisfiable one:
+    ///
+    /// 1. **Every button measures EXACTLY the derived width** — proof
+    ///    that nothing squeezed, stretched, or overflowed its share.
+    ///    The old `>=` could not have caught a button growing past its
+    ///    allotment and pushing the strip over the edge.
+    /// 2. **The derived width sits at or above the crowding tripwire.**
+    ///    A twelfth act computes 25 pt and trips here — so the next act
+    ///    to want a place on her row costs a ruling, not a constant
+    ///    edit. That is the guard the 44 pt number can no longer be.
+    @Test func allElevenStripActsSitFullyVisibleAndTappableInsideTheBar() async throws {
         try await withEditorWorld { session, _ in
             let postID = try await makePost(session, blocks: ["x"])
             let (_, surface) = await makeSurfaceEditor(session, postID: postID)
@@ -829,8 +882,13 @@ struct MobileMarkdownActsTests {
             // minus the measured chrome (the iOS 26 toolbar insets its
             // content row 16 pt a side and pads the customView's glass
             // cell 5 pt a side — the FIX-5 probe's own numbers):
-            // 375 − 32 − 10 = 333 pt available.
+            // 375 − 32 − 10 = 333 pt available. Stated here as the
+            // literal it has always been AND checked against the
+            // controller's own derivation, so the two can never drift
+            // (the strip's widths are computed FROM this number).
             let tightestAvailable: CGFloat = 375 - 32 - 10
+            #expect(MobileKeyboardBarController.tightestStripWidth
+                    == tightestAvailable)
             #expect(strip.bounds.width <= tightestAvailable)
             #expect(strip.bounds.width > 0)
             // The capsule clears the KEYBOARD — the C4b second-row axis
@@ -859,16 +917,31 @@ struct MobileMarkdownActsTests {
             #expect(MobileKeyboardBarController.expandedCapsuleBottomEdge
                     <= MobileKeyboardBarController.barHeight)
 
+            // The crowding tripwire — the 44 pt floor's replacement.
+            // Eleven acts sit exactly at 28; a twelfth computes 25 and
+            // fails here, which is the point: crowding her row further
+            // is a ruling, not a constant edit.
+            #expect(MobileKeyboardBarController.stripButtonWidth
+                    >= MobileKeyboardBarController.stripButtonCrowdingFloor)
+            #expect(MobileKeyboardBarController.stripButtonWidth == 28)
+
             let rows = strip.arrangedSubviews.compactMap { $0 as? UIStackView }
-            #expect(rows.count == 2)
+            // ONE row since R22 — asserted, because the vertical win
+            // (bar 72 → 52) is exactly the row count.
+            #expect(rows.count == 1)
             var seen: [String] = []
             for row in rows {
                 #expect(row.bounds.width <= tightestAvailable)
                 for button in row.arrangedSubviews {
                     #expect(button.frame.minX >= -0.5)
                     #expect(button.frame.maxX <= row.bounds.width + 0.5)
-                    #expect(button.frame.width + 0.5
-                            >= MobileKeyboardBarController.stripButtonMinWidth)
+                    // EXACTLY its derived share — see the doc comment.
+                    // A `>=` could not catch a button growing past its
+                    // allotment and pushing the strip off the edge,
+                    // which at 28 pt is a live risk (a wide glyph, a
+                    // larger chrome font) rather than a theoretical one.
+                    #expect(abs(button.frame.width
+                                - MobileKeyboardBarController.stripButtonWidth) <= 0.5)
                     // Vertically whole inside the capsule too.
                     let frameInStrip = row.convert(button.frame, to: strip)
                     #expect(frameInStrip.minY >= -0.5)
@@ -876,12 +949,86 @@ struct MobileMarkdownActsTests {
                     if let label = button.accessibilityLabel { seen.append(label) }
                 }
             }
-            #expect(seen.count == 10)
+            #expect(seen.count == 11)
             #expect(seen == MobileKeyboardBarController.formattingActLabels)
             // The row split itself is pinned truth, not an accident.
-            #expect(rows.map { $0.arrangedSubviews.count } == [6, 4])
+            #expect(rows.map { $0.arrangedSubviews.count } == [11])
             #expect(MobileKeyboardBarController.formattingRowLabels
-                    .map(\.count) == [6, 4])
+                    .map(\.count) == [11])
+        }
+    }
+
+    /// **M26 ≡ R21 — the visible ⇤, driven as a TAP on the real button.**
+    /// Her words: *"i think an indent to the left button should be added
+    /// to the set of formatting buttons though - there's an indent in
+    /// but not an un-indent."* Outdent already existed, was tested, and
+    /// was documented — as a LONG-PRESS on ⇥, which is invisible, and a
+    /// VoiceOver hint, which is not an affordance for sighted use. She
+    /// looked and reasonably concluded it did not exist.
+    ///
+    /// So this pin deliberately does NOT call `fireOutdent()`. It finds
+    /// the ⇤ button inside the REAL expanded strip and sends it the
+    /// touch-up the finger sends, which is the whole content of the
+    /// finding: **the act was never missing, the DOOR was.** A pin on
+    /// the selector would have been green throughout the months she
+    /// could not find it (§26's rule, and §34's correction — drive the
+    /// real surface, and verify the path you drove is the path you
+    /// meant: `sendActions` is exactly UIKit's own tap dispatch for a
+    /// target-action button, not an API that bypasses it).
+    ///
+    /// It then asserts the OTHER half of the ruling — that ⇥'s
+    /// long-press survives — through the same shared brain, so the two
+    /// doors are proven to be one act.
+    @Test func theVisibleOutdentButtonUnindentsOnAPlainTap() async throws {
+        try await withEditorWorld { session, db in
+            let postID = try await makePost(session, blocks: ["- milk", "  - eggs"])
+            let (model, surface) = await makeSurfaceEditor(session, postID: postID)
+            let view = surface.textView
+            let bar = MobileKeyboardBarController(textView: view)
+            guard let toolbar = bar.makeBar() as? UIToolbar else {
+                Issue.record("the bar is not a toolbar")
+                return
+            }
+            bar.toggleFormattingDoor()
+
+            let buttons = (toolbar.items ?? [])
+                .compactMap { $0.customView as? UIStackView }
+                .first { $0.accessibilityIdentifier == "kbar.formattingStrip" }?
+                .arrangedSubviews
+                .flatMap { ($0 as? UIStackView)?.arrangedSubviews ?? [$0] }
+                .compactMap { $0 as? UIButton } ?? []
+
+            // The door exists, is labelled with the capability
+            // registry's own verb, and speaks for VoiceOver.
+            let outdent = try #require(
+                buttons.first { $0.accessibilityIdentifier == "kbar.outdent" })
+            #expect(outdent.accessibilityLabel == "Outdent")
+            #expect(outdent.accessibilityHint == "Moves the line out one level")
+            #expect(outdent.currentTitle == "⇤")
+
+            // A TAP — UIKit's own dispatch — un-indents the caret's line
+            // through the ordinary policed input path…
+            view.selectedRange = NSRange(location: 12, length: 0) // in "eggs"
+            outdent.sendActions(for: .touchUpInside)
+            #expect(view.textStorage.string == "- milk\n- eggs")
+            // …and it is an ORDINARY edit, so the store has it.
+            await model.autosave.flushNow()
+            #expect(try await storedBlockTexts(db, postID: postID)
+                == ["- milk", "- eggs"])
+            #expect(model.identityAuditFailures == 0)
+
+            // ⇥'s long-press SURVIVES (four doors, one act): indent back
+            // in, then out again through the older door.
+            let indent = try #require(
+                buttons.first { $0.accessibilityIdentifier == "kbar.indent" })
+            #expect(indent.accessibilityHint == "Long-press to outdent")
+            #expect(indent.gestureRecognizers?
+                .contains { $0 is UILongPressGestureRecognizer } == true)
+            view.selectedRange = NSRange(location: 10, length: 0)
+            indent.sendActions(for: .touchUpInside)
+            #expect(view.textStorage.string == "- milk\n  - eggs")
+            bar.fireOutdent()
+            #expect(view.textStorage.string == "- milk\n- eggs")
         }
     }
 }

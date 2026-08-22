@@ -17,11 +17,22 @@
 //  never a second brain (P-1: the acts' law is the shared
 //  `MarkdownEditing`; this file only renders doors).
 //
-//  ⇥ carries BOTH directions (PROVISIONAL, batch 2 — the software keyboard
-//  has no Tab key at all, so the bar's ⇥ IS the phone's Tab): tap =
-//  indent, long-press = outdent. Hardware Tab/⇧Tab ride the text view's
-//  key commands; ⏎-on-an-empty-nested-item outdents too (K8's rule), so
-//  outdent has three doors and none of them is invented vocabulary.
+//  ⇥ carries BOTH directions (batch 2 — the software keyboard has no Tab
+//  key at all, so the bar's ⇥ IS the phone's Tab): tap = indent,
+//  long-press = outdent. Hardware Tab/⇧Tab ride the text view's key
+//  commands; ⏎-on-an-empty-nested-item outdents too (K8's rule).
+//
+//  **⇤ IS ITS OWN VISIBLE DOOR since round 2 (M26 ≡ R21 — HER RULING:
+//  *"i think an indent to the left button should be added to the set of
+//  formatting buttons though - there's an indent in but not an
+//  un-indent"*).** The batch-2 PROVISIONAL ("⇥ carries both directions")
+//  is SUPERSEDED as the *only* visible door: outdent existed, was tested,
+//  was documented — and the door did not reach her, because a long-press
+//  is invisible and a VoiceOver hint is not an affordance for sighted
+//  use. The long-press STAYS (four doors cost nothing and break no
+//  muscle memory) and the ACT is byte-unchanged — `MarkdownEditing`'s
+//  `.outdent`, the one shared brain, fired by the same `fireOutdent`.
+//  **A DOOR change, never vocabulary.**
 //
 
 import UIKit
@@ -42,11 +53,23 @@ final class MobileKeyboardBarController: NSObject {
     /// long-press picker, and ⇥'s two directions are byte-identical —
     /// which is exactly why the door is a button strip and never a
     /// UIMenu (menu rows carry no second gesture; a menu-form Aa would
-    /// amputate both ruled long-press doors). Since parity C4b the strip
-    /// is TWO ROWS inside the one capsule — **× · B · I · S · ⟨⟩ ·
-    /// link**, then **# · • · ☑ · ⇥** (the strike/code/link doors
-    /// joined the grammar; the standing seven keep their LK8 relative
-    /// order; `formattingRowLabels` below is the split's truth). The
+    /// amputate both ruled long-press doors).
+    ///
+    /// **Since round 2 the strip is ONE ROW of ELEVEN acts — × · B · I ·
+    /// S · ⟨⟩ · 🔗 · # · • · ☑ · ⇥ · ⇤ (HER R22 + M26).** It was two
+    /// rows from parity C4b until she ruled the one-row shape: *"agree:
+    /// option 1 (one-row strip) is clearly better."* What the shape buys
+    /// is VERTICAL and it is the whole point — a one-row capsule is
+    /// 48 pt deep instead of 68 (see `expandedCapsuleBottomEdge`), so the
+    /// resting trio and the expanded capsule now bottom out at the SAME
+    /// depth, the 20 pt structural floor documented below **disappears
+    /// by construction**, the bar drops 72 → 52 pt, and she gains those
+    /// 20 pt back as text. The reading order is the two rows flattened
+    /// unchanged, so LK8's relative order of the standing seven and
+    /// C4b's after-Italic placement of strike/code/link both survive
+    /// untouched, and ⇤ lands beside the ⇥ it mirrors.
+    /// `formattingRowLabels` below is still the row split's truth (one
+    /// row today; the machinery re-splits with no second edit). The
     /// bar is the `inputAccessoryView`, so expand/collapse happens with
     /// the keyboard up, in place; the strip RESETS TO COLLAPSED at each
     /// fresh keyboard presentation (the calm default — accepted at the
@@ -75,13 +98,91 @@ final class MobileKeyboardBarController: NSObject {
     /// window, which is exactly how the clip escaped A3's suite.
     private(set) var isFormattingExpanded = false
 
-    /// The strip's geometry constants (pinned): a 44 pt floor keeps
-    /// every act a full HIG tap target; the gap stays tight so the acts
-    /// read as one strip and each row keeps headroom on every supported
-    /// width.
-    static let stripButtonMinWidth: CGFloat = 44
+    /// The strip's geometry constants (pinned). The gap stays tight so
+    /// the acts read as one strip.
     static let stripButtonHeight: CGFloat = 38
     static let stripSpacing: CGFloat = 2
+
+    // MARK: - The strip's HORIZONTAL geometry (round 2 — R22 + M26)
+
+    /// **THE 44 pt TAP-TARGET FLOOR IS GONE, and this is what it cost.**
+    /// It used to be a hard constant here, with the doc comment "a 44 pt
+    /// floor keeps every act a full HIG tap target". Two of her rulings
+    /// arrived together and neither can hold it:
+    ///
+    /// - **R22** — the expanded strip becomes ONE row (the vertical win
+    ///   documented on `isFormattingExpanded`), so all the acts must
+    ///   share one line rather than two.
+    /// - **M26 ≡ R21** — a visible ⇤ joins them, making **eleven**.
+    ///
+    /// Eleven 44 pt targets need 11×44 + 10×2 = **504 pt**; the tightest
+    /// supported iPhone class offers **333** (below). The arithmetic is
+    /// not close, and **she ruled the shape knowing it** — she was told
+    /// before choosing that eleven acts land near 31 pt, under the
+    /// floor. The built number is **28**, not 31, because the strip is
+    /// sized to the TIGHTEST class rather than to the bar it happens to
+    /// be in (FIX-5's rule, below): a 402 pt phone would allow 31, and
+    /// spending FIX-5's construction-time safety to buy 3 pt was not a
+    /// trade worth making without her. Recorded plainly rather than
+    /// quietly deleted: the floor did not stop applying, it stopped
+    /// being satisfiable, and the honest guard is the crowding tripwire
+    /// below. **Measured on the live surface** (iPhone 17 Pro / iOS
+    /// 26.2): a 30.0 pt act-to-act pitch, every act whole, and a tap at
+    /// each act's centre fires that act.
+    ///
+    /// Note the buttons were never a full target VERTICALLY either —
+    /// `stripButtonHeight` has been 38 pt since the strip existed.
+    ///
+    /// The tightest supported iPhone class's bar width (the SE class;
+    /// iOS 26 still runs on 375 pt-wide hardware). FIX-5's rule is that
+    /// the strip's intrinsic width fits the TIGHTEST class, so overflow
+    /// is impossible on any device by construction — never a scroll,
+    /// never a clip.
+    static let tightestBarWidth: CGFloat = 375
+    /// The iOS 26 toolbar insets its content row by this much per side
+    /// (measured — FIX-5's probe).
+    static let toolbarContentInset: CGFloat = 16
+    /// What the customView's glass cell actually offers inside the
+    /// tightest bar: 375 − 2×16 − 2×5 = **333 pt**.
+    static var tightestStripWidth: CGFloat {
+        tightestBarWidth - 2 * toolbarContentInset - 2 * stripCellInset
+    }
+
+    /// **Each act's width is DERIVED from the act count**, not chosen:
+    /// the eleven acts and their ten 2 pt gaps divide the 333 pt the
+    /// tightest class offers, rounded down. Today that is **28 pt**
+    /// (11×28 + 10×2 = 328, five to spare).
+    ///
+    /// Deriving it is what keeps FIX-5's promise honest as the act list
+    /// moves: a twelfth act narrows the row instead of overflowing the
+    /// bar, and the tripwire below is what makes that narrowing loud
+    /// instead of silent.
+    ///
+    /// **It is an EXACT width, not a minimum, and that is a measured
+    /// correction rather than a preference.** The constraint used to be
+    /// `>=` — harmless while the number was 44, because nothing here is
+    /// that wide. At 28 it stopped working: a titled `UIButton(type:
+    /// .system)` reports an intrinsic width of **30 pt** whatever its
+    /// glyph (UIKit's own floor — measured: every titled act said 30.0
+    /// while the image-titled 🔗 said 22.3), so ten acts ignored the
+    /// minimum and the strip measured **348 pt against the 333 it must
+    /// fit**. `>=` also could never have caught it in the other
+    /// direction, which is why the pin now asserts the exact width.
+    static var stripButtonWidth: CGFloat {
+        let count = CGFloat(formattingActLabels.count)
+        guard count > 0 else { return 0 }
+        return ((tightestStripWidth - (count - 1) * stripSpacing) / count)
+            .rounded(.down)
+    }
+
+    /// **The crowding tripwire — the 44 pt floor's replacement, and NOT
+    /// a weakening of it.** The old constant asserted a HIG target her
+    /// ruling made unreachable; this one asserts that nothing may crowd
+    /// the strip FURTHER without her. Eleven acts sit exactly at it; a
+    /// twelfth would compute 25 pt and trip the pin, which is the point
+    /// — the next act to want a place on this row costs a ruling, not a
+    /// constant edit.
+    static let stripButtonCrowdingFloor: CGFloat = 28
 
     // MARK: - The bar's VERTICAL geometry (round 2, batch 2 — M4 ≡ R7)
 
@@ -164,19 +265,28 @@ final class MobileKeyboardBarController: NSObject {
     /// keyboard, which is her original complaint wearing the other
     /// state's clothes.
     ///
-    /// **THE FLOOR IS STRUCTURAL, AND IT IS 20 pt + this air.** The
-    /// resting cells run to 48 pt below the bar's top; the two-row
-    /// capsule runs to 68 pt (its 88 pt cell is CENTERED on the fixed
-    /// 48 pt content row, so it always hangs exactly 20 pt lower than a
-    /// resting cell). One bar height must serve both states (M17: an
-    /// installed `inputAccessoryView` keeps its presented height), so
-    /// the trio can never sit closer than 20 pt + air without hiding
-    /// the strip's second row. Repositioning the toolbar inside a taller
-    /// container does NOT escape it — the 20 pt rides the row, not the
-    /// bar. Getting the circles genuinely close needs one of two things,
-    /// **both of which change the LOOK and are therefore hers to rule**:
-    /// a shorter expanded capsule (one row, or shorter rows), or a
-    /// resting trio whose own cells are as tall as the capsule.
+    /// **THE 20 pt STRUCTURAL FLOOR IS GONE — she took the road that
+    /// dissolves it (R22).** While the strip was TWO rows, the resting
+    /// cells ran to 48 pt below the bar's top but the capsule's 88 pt
+    /// cell, CENTERED on the fixed 48 pt content row, reached 68 — so
+    /// the trio inherited the capsule's depth and could never sit
+    /// closer than 20 pt + air without hiding the strip's second row.
+    /// One height must serve both states (M17: an installed
+    /// `inputAccessoryView` keeps its presented height), and
+    /// repositioning inside a taller container never escaped it — the
+    /// 20 pt rode the content row, not the bar. Two roads were put to
+    /// her, both LOOK changes and therefore hers: a shorter expanded
+    /// capsule, or a resting trio as tall as the capsule. **She ruled
+    /// the first.** A one-row strip is 38 pt, its cell 48 — exactly a
+    /// plain item's — so `expandedCapsuleBottomEdge == itemCellHeight`
+    /// and the two states now bottom out at the SAME depth. The floor
+    /// did not shrink; it stopped existing. Measured consequence: her
+    /// three circles clear the keyboard by **5.33 pt** (the clearance
+    /// she already accepted for the expanded state at R12), and the bar
+    /// itself drops 72 → 52, handing 20 pt back to the text.
+    ///
+    /// The air stays **4** — untouched by the shape change, and still
+    /// the photographed value.
     static let barVerticalAir: CGFloat = 4
 
     /// The expanded capsule's intrinsic height, DERIVED from the row
@@ -199,34 +309,35 @@ final class MobileKeyboardBarController: NSObject {
         max(itemCellHeight, expandedCapsuleBottomEdge)
     }
 
-    /// **The strip grew ROWS at parity C4b item 2** (the markdown
-    /// vocabulary's remaining acts — strikethrough · inline code · add
-    /// link — join the strip INSIDE its capsule, per the brief's LK8
-    /// answer): ten 44 pt acts cannot sit on one line of any iPhone
-    /// class (10×44 + 9×2 = 458 pt against the tightest cell's 333), so
-    /// the capsule holds TWO rows — the character acts (× B I S ⟨⟩ 🔗),
-    /// then the line acts (# • ☑ ⇥) — the standing seven keeping their
-    /// LK8 relative order and the three new acts landing exactly where
-    /// the Mac's act table puts them (after Italic). The bar does NOT
-    /// change height between the states — one `barHeight` hosts both,
-    /// sized for the taller cell plus air (M4 ≡ R7; the vertical-geometry
-    /// block above carries the measured mechanism and why the old
-    /// grow-on-expand road was retired). The resting bar stays
-    /// Aa · ⑂ · ⋯, byte-untouched in its DOORS.
+    /// **72 → 52 at her R22 ruling.** The strip grew ROWS at parity C4b
+    /// (strikethrough · inline code · add link joined the capsule) —
+    /// ten 44 pt acts could not share one line of any iPhone class, so
+    /// the capsule went two rows deep and dragged the whole bar down
+    /// with it. R22 reverses that trade: the acts share ONE row (paid
+    /// for horizontally — see `stripButtonWidth`, where the 44 pt
+    /// target floor is spent), the capsule is a plain item's depth, and
+    /// `lowestCellEdge` falls 68 → 48. The bar does NOT change height
+    /// between the states — one `barHeight` hosts both, sized for the
+    /// lowest cell plus air (M4 ≡ R7; the vertical-geometry block above
+    /// carries the measured mechanism and why the old grow-on-expand
+    /// road was retired). The resting bar stays Aa · ⑂ · ⋯,
+    /// byte-untouched in its DOORS.
     static var barHeight: CGFloat { lowestCellEdge + barVerticalAir }
 
     /// The two states' acts, in bar order — one table per state so the
     /// bar and any test walk read the same truth (the registry-walk
     /// spirit). ⑂ = Takes (S2 batch 2); ⋯ = Block (S4 batch 1, with its
     /// block menu); Aa/× = the formatting door's two faces. The
-    /// formatting labels read in STRIP READING ORDER (row 1, then row
-    /// 2 — `formattingRowLabels` carries the split); the three C4b
-    /// arrivals wear the registry's own verbs.
+    /// formatting labels read in STRIP ORDER (`formattingRowLabels`
+    /// carries the row split — ONE row since R22, the two former rows
+    /// flattened in place so LK8's relative order and C4b's
+    /// after-Italic placement both survive); every act wears the
+    /// capability registry's own verb, ⇤'s "Outdent" included.
     static let restingActLabels = ["Formatting", "Takes", "Block"]
     static let formattingRowLabels: [[String]] = [
         ["Hide Formatting", "Bold", "Italic", "Strikethrough", "Inline Code",
-         "Add Link"],
-        ["Heading", "Bullet List", "Checklist", "Indent"],
+         "Add Link", "Heading", "Bullet List", "Checklist", "Indent",
+         "Outdent"],
     ]
     static var formattingActLabels: [String] { formattingRowLabels.flatMap(\.self) }
 
@@ -305,15 +416,18 @@ final class MobileKeyboardBarController: NSObject {
 
     /// The expanded formatting strip — ONE customView item (the FIX-5
     /// mechanism: owning the geometry is what makes overflow impossible
-    /// and the visibility pin holdable windowless), now a TWO-ROW
-    /// capsule (`kbar.formattingStrip`, parity C4b item 2 — the class
-    /// doc above has the arithmetic): the character acts
-    /// × · B · I · S · ⟨⟩ · link, then the line acts # · • · ☑ · ⇥.
+    /// and the visibility pin holdable windowless), a ONE-ROW capsule
+    /// since her R22 (`kbar.formattingStrip`; the class doc above has
+    /// the arithmetic): × · B · I · S · ⟨⟩ · 🔗 · # · • · ☑ · ⇥ · ⇤.
     /// Each button keeps its exact selector, label, and second gesture —
     /// the # picker and ⇥'s long-press outdent ride the same real
-    /// buttons they always did; the three arrivals fire the SAME shared
+    /// buttons they always did; the C4b arrivals fire the SAME shared
     /// brain acts the Mac's Format menu fires (.strikethrough · .code ·
-    /// .link — MarkdownSurfaceDoors, one computation both platforms).
+    /// .link — MarkdownSurfaceDoors, one computation both platforms),
+    /// and M26's ⇤ fires the SAME `.outdent` the long-press always did.
+    /// The `rows` table stays nested although it holds one row: it is
+    /// `stripFittedHeight`'s source, so a future re-split grows the bar
+    /// with no second edit.
     private func formattingStripItem(face: MobileEditorStyle.Face) -> UIBarButtonItem {
         func stripButton(
             _ title: String, _ label: String, _ selector: Selector
@@ -362,17 +476,20 @@ final class MobileKeyboardBarController: NSObject {
                 strikeButton(),
                 stripButton("⟨⟩", "Inline Code", #selector(fireCode)),
                 linkButton(),
-            ],
-            [
                 headingButton(face: face),
                 stripButton("•", "Bullet List", #selector(fireBullet)),
                 stripButton("☑", "Checklist", #selector(fireChecklist)),
                 indentButton(face: face),
+                outdentButton(face: face),
             ],
         ]
         for button in rows.flatMap(\.self) {
+            // EXACT, not `>=` — UIKit floors a titled system button's
+            // intrinsic width at 30 pt regardless of its glyph, so a
+            // minimum below 30 is silently ignored (see
+            // `stripButtonWidth`). Each act gets precisely its share.
             button.widthAnchor.constraint(
-                greaterThanOrEqualToConstant: Self.stripButtonMinWidth
+                equalToConstant: Self.stripButtonWidth
             ).isActive = true
             button.heightAnchor.constraint(
                 equalToConstant: Self.stripButtonHeight
@@ -511,6 +628,9 @@ final class MobileKeyboardBarController: NSObject {
     /// ⇥ needs a long-press (the outdent half), and a `UIBarButtonItem`
     /// can't carry one — so it has always been a real button. (Since
     /// FIX-5 it rides the one-cell strip; the wiring is byte-identical.)
+    /// The long-press SURVIVES M26's visible ⇤ — she has muscle memory
+    /// on nothing here, but a door that already works is never removed
+    /// to make room for a second one, and the hint stays honest.
     private func indentButton(face: MobileEditorStyle.Face) -> UIButton {
         let button = UIButton(type: .system)
         button.setTitle("⇥", for: .normal)
@@ -518,10 +638,30 @@ final class MobileKeyboardBarController: NSObject {
         button.setTitleColor(face.muted, for: .normal)
         button.accessibilityLabel = "Indent"
         button.accessibilityHint = "Long-press to outdent"
+        button.accessibilityIdentifier = "kbar.indent"
         button.addTarget(self, action: #selector(fireIndent), for: .touchUpInside)
         let longPress = UILongPressGestureRecognizer(
-            target: self, action: #selector(fireOutdent(_:)))
+            target: self, action: #selector(fireOutdentLongPress(_:)))
         button.addGestureRecognizer(longPress)
+        return button
+    }
+
+    /// **⇤ — M26 ≡ R21's visible un-indent, her ruled door.** The act is
+    /// the one it always was (`MarkdownEditing.outdent`, the shared
+    /// brain); what changed is that it is now VISIBLE. Its glyph mirrors
+    /// ⇥ and it sits immediately beside it, so the pair reads as a pair.
+    /// The hint names the other door rather than a gesture on this one —
+    /// this button needs no long-press, and saying so is what keeps the
+    /// long-press discoverable to VoiceOver at all.
+    private func outdentButton(face: MobileEditorStyle.Face) -> UIButton {
+        let button = UIButton(type: .system)
+        button.setTitle("⇤", for: .normal)
+        button.titleLabel?.font = face.chrome
+        button.setTitleColor(face.muted, for: .normal)
+        button.accessibilityLabel = "Outdent"
+        button.accessibilityHint = "Moves the line out one level"
+        button.accessibilityIdentifier = "kbar.outdent"
+        button.addTarget(self, action: #selector(fireOutdent), for: .touchUpInside)
         return button
     }
 
@@ -550,9 +690,13 @@ final class MobileKeyboardBarController: NSObject {
         textView?.performTabKey()
     }
 
-    @objc func fireOutdent(_ recognizer: UILongPressGestureRecognizer) {
+    /// ⇤'s tap and ⇥'s long-press are the SAME act through the SAME
+    /// brain — two doors, one computation (M26 is a door change).
+    @objc func fireOutdent() { fire(.outdent) }
+
+    @objc func fireOutdentLongPress(_ recognizer: UILongPressGestureRecognizer) {
         guard recognizer.state == .began else { return }
-        fire(.outdent)
+        fireOutdent()
     }
 
     /// ⑂ — the takes browser on the caret's block (S2 batch 2; LK8's

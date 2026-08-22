@@ -351,15 +351,16 @@ enum MobileTutorialSeeder {
 
             "The vocabulary is small: **bold**, *italic*, `inline code`, "
             + "~~struck words~~, and [links](https://commonmark.org). "
-            + "Aa on the bottom bar opens the strip — two rows of it now — "
-            + "and B or I wraps whatever you've selected. Press the same "
-            + "button again and it takes the marks off; the act reads what "
-            + "is already there rather than blindly adding.",
+            + "Aa on the bottom bar opens the strip — one row, every act "
+            + "on it — and B or I wraps whatever you've selected. Press the "
+            + "same button again and it takes the marks off; the act reads "
+            + "what is already there rather than blindly adding.",
 
-            "The first row's other three: S strikes a selection through, "
-            + "⟨⟩ marks it as inline code, and the link glyph wraps it as "
-            + "[text]() with the caret waiting between the parentheses for "
-            + "the address. Same toggle rule, same plain characters.",
+            "Three more character acts sit beside them: S strikes a "
+            + "selection through, ⟨⟩ marks it as inline code, and the link "
+            + "glyph wraps it as [text]() with the caret waiting between "
+            + "the parentheses for the address. Same toggle rule, same "
+            + "plain characters.",
 
             "## Headings are sizes",
 
@@ -375,8 +376,10 @@ enum MobileTutorialSeeder {
             "- [x] tap a box on the page to tick it — an ordinary edit, so "
             + "a sealed note refuses it",
 
-            "⇥ nudges a list line deeper; press and hold it to come back "
-            + "out. And when you open this book through read, the markers "
+            "⇥ nudges a list line deeper and ⇤ brings it back out — the "
+            + "two live side by side at the end of the strip. (Holding ⇥ "
+            + "still outdents too, if your thumb is already there.) And "
+            + "when you open this book through read, the markers "
             + "disappear — headings become sizes, boxes become boxes. "
             + "Everywhere you can write, you see the text exactly as it is "
             + "saved.",
