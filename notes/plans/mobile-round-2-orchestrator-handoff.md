@@ -67,17 +67,20 @@ them repeatedly):
 | core | 1350/141 | unchanged all round |
 | Mac | 1568/272 | **exact and unmodified since batch 1's fixes — this is the hoist proof; if it moves, something changed Mac behaviour** |
 | Mac spine | 63/8 | exact |
-| mobile | 414/71 | grew every batch |
+| mobile | 449/75 | grew every batch; last measured at batch 4's landing (§46) |
 | mobile spine | 33/7 | = `MobileTutorialWalkTests` (25/6) + `MobileWalkTests` (8/1) |
 
 **Hygiene held all round: ZERO schema, ZERO `Sources/VariorumCore/Sync/`
 lines, no build configuration added.** The mirror is at lockstep marker
 **7**. Keep all three true.
 
-**IN FLIGHT AT CUTOVER: batch 4** (undo door · delete a note · the Trash
-· delete a book · the on-leaving savepoint). The outgoing seat completes
-its orchestration — build, ladder, fixes, record — at her instruction.
-**Confirm it is committed and recorded before starting anything new.**
+**BATCH 4 LANDED** (undo door · delete a note · the Trash · delete a book
+· the on-leaving savepoint) — commit `e7e2472`, recorded in the plan's
+§46, mobile **449/75**. *(This line said "IN FLIGHT AT CUTOVER" when the
+handoff was written; the outgoing seat completed its orchestration as
+her instruction allowed.)* **Its own cold ladder is OWED** — §43's rule
+binds it like every other batch — and it joins the consolidated fix
+round's queue with the five reviews already reported (§44, §45).
 
 **Her phone** carries a Release build installed 2026-08-21 23:49 with
 batches 1/1b/2/3/3b + R12 + R22/M26. It does NOT yet have batch 4.
@@ -95,21 +98,26 @@ numbers — both run 1–24. This is §39's fix for a real confusion risk.)*
 | 1b | M11 ≡ PR18 whole-block delete | ✅ | ✅ round 1 fixed · **round 2 landed 2026-08-22 → §44, 1 MAJOR + 7 open** |
 | 2 | M3 copy door · M4 bar air | ✅ | ⚠️ **reviewed 2026-08-22 → §45, 2 MAJOR open** |
 | 3 | M22 merge-then-edit | ✅ | ⚠️ **reviewed 2026-08-22 → §45, 4 MAJOR open** |
-| 3b | M5 the quick note | ✅ | ⏳ **in flight — reviewer C not yet reported** |
+| 3b | M5 the quick note | ✅ | 🔴 **reviewed 2026-08-22 → §45, TWO BLOCKERs + 2 MAJOR + more.** *(This cell read "in flight — reviewer C not yet reported" when the handoff was written; C reported the same night, and its findings are the round's worst: the batch whose whole promise is "nothing you type is lost" breaks that promise in two traced ways. Q1/Q2 lead the consolidated fix round.)* |
 | — | R12 bar tuning · R22 one-row strip · M26 un-indent | ✅ | ⚠️ **reviewed 2026-08-22 → §45, 2 MAJOR open** |
-| **4** | **M20 the undo/redo door (FIRST)** · PR1 delete a note · PR2 the Trash + Archived · PR4 delete a book · PR7 the on-leaving savepoint | ⏳ IN FLIGHT | ❌ owed |
-| **5 (queued, dispatch next)** | **R26/R27 the shelf layout** (quick note takes Today's Entry's box; books list bounded + scrolls past ~8; writing area ≈ half the screen; Today's Entry becomes a badge on the Journal row, no blinking cursor) · **R27b the starter Journal book** · **R24 "more info" → "info"** | queued behind batch 4 (same shelf files) |
+| **4** | **M20 the undo/redo door (FIRST)** · PR1 delete a note · PR2 the Trash + Archived · PR4 delete a book · PR7 the on-leaving savepoint | ✅ `e7e2472` → §46 | ⏳ **DISPATCHED 2026-08-22** at her instruction (§47/R28); its findings join batch 4.5 |
+| **5 (queued, dispatch next)** | **R26/R27 the shelf layout** (quick note takes Today's Entry's box; books list bounded + scrolls past ~8; writing area ≈ half the screen; Today's Entry becomes a badge on the Journal row, no blinking cursor) · **R27b the starter Journal book** · **R24 "more info" → "info"** | queued behind batch 4 (same shelf files) | ❌ owed |
 | 6 | PR3 per-note tray · PR5 deleted takes · PR6 archive/unarchive · PR14 lens-dangles notice · PR15 lineage door · PR22 guide deletion chapter | | ❌ owed |
 | 7 | PR8 reorder takes · PR9 duplicate-book-name guard · PR11 copy all takes · PR12 take→block · **M23 copy-follows-screen** · PR19 swatches+emoji · PR20 block multi-select · PR21 replace | | ❌ owed |
-| 8 | PR10 tag-chip grammar · PR13 cadence/pruning settings · PR16 PL-9 judgment acts · PR17 document settings · **PR23 the forked voice brain (HOIST, never patch)** | | ❌ owed |
+| 8 | PR10 tag-chip grammar · PR13 cadence/pruning settings · PR16 PL-9 judgment acts · PR17 document settings · **PR23 the forked voice brain (HOIST, never patch)** · **M14's UNMEASURED HALF** — the SwiftUI `Text`-per-paragraph sizing on the Read surface, which needs a rendered view (§19 promised it "is measured there too" and it had landed in no map; measurement only, no fix — the decision is hers, §6 item 1) | | ❌ owed |
 | — | **PR24** — her held design calls (the ●n comment marker's side; the margin-comment tap shape) | **propose-only, bundled to a sitting** | ❌ owed |
+| **REVIEW — the dedicated stability pass** (§8's second commitment; it lived only in prose until 2026-08-22 and §43's own accounting missed it) | ONE fresh cold reviewer whose ONLY brief is **the crash class and the editor's range/identity math** — adversarial, tasked to find the case the fix misses. *It reviews the FIX, not the feature*, so its target is batch 1 + batch 1b + M22's shared-brain work as one body: `Shared/EditorBrain/` (`BlockRangeIndex`, `EditorEditRouting`, `CrossBlockEditPlanner`) and both platforms' `storageDidEdit` consumers. **It OWNS M27** — the first typed edit after a DIVIDE is unroutable and takes `desyncRecovery` (§46, reproduced on the pre-batch tree, neither caused nor fixable in batch 4). **Read it beside B45-3** (`mobile-round-2-successor-first-acts.md`): that row owns the crash trace's six *unowned items* (E1, E2, the UIKit undo-replay path, the `supportsTextReplacement: false` fence note, the `MarkdownActs` Mac residual, M1's SUSPECTED status) as BUILD/EXPERIMENT work; this pass is the adversarial REVIEW of the fix itself. Neither discharges the other | not started | n/a (it IS a review) |
+| **REVIEW — the whole-round pass** (§8's third commitment; in no map and no closeout obligation until 2026-08-22) | ONE fresh cold reviewer over the round's **entire diff** (`46ffa0c..HEAD`), briefed on **nothing but the diff** — the round's own cold read, **after the LAST build batch** and after the consolidated fix round lands. Findings go in the plan with dispositions like any ladder round. **It is NOT discharged by ACT 1** of `mobile-round-2-successor-first-acts.md`: her Act-1 pass is an *earlier* cold read over batches 1–4 feeding batch 4.5, and §8's pass is the round's *closing* read over everything, batches 5–8 included. Two passes, two moments, both hers | not started | n/a (it IS a review) |
 
-**Not in a batch, deliberately:**
-- **M12** the gate-less-insertion re-render — measured 0 in policed typing; **re-owned to 13u** with the caveat that the harness cannot drive the gate-less class.
-- **M14** the Read hitch (312 ms main-actor transform per 100k-word row; memory fine at +1 MiB) — **measured, decision held for her**, batch 8's neighbourhood.
-- **M16** same-note drag-move — **device-only**, settle on her hardware.
+**Not in a batch, deliberately — and each now lands somewhere that survives this round's close** (the 2026-08-22 audit's finding 8: "re-owned in prose" is the homeless state under another name):
+- **M12** the gate-less-insertion re-render — measured 0 in policed typing; **re-owned to 13u** with the caveat that the harness cannot drive the gate-less class. **It now has a `notes/KnownIssuesAndTechDebt.md` row owned by 13u**, so the ownership outlives this plan file; the closeout still names it on 13u's master-plan row.
+- **M14** the Read hitch (312 ms main-actor transform per 100k-word row; memory fine at +1 MiB) — **measured, the DECISION is held for her** (§6 item 1). Its **unmeasured half is now scheduled in batch 8** above, where §19 always said it belonged.
+- **M16** same-note drag-move — **device-only**, settle on her hardware. **Closeout obligation 8** binds it: settled at a device round, or re-owned with a named owner before the round closes.
 - **M17 / M25** — closeout obligations, → `notes/TEXTKIT2_NOTES.md` §3.
+- **M27** the post-divide unroutable edit — **owned by the dedicated stability pass**, now a real row in the map above.
+- **M9** the parity inventory's missed-capability sweep — **CLOSED 2026-08-22 against the inventory's own §4(b)**, which performed exactly that sweep and produced ten items: nine became rows (PR4 · PR10 · PR14 · PR17 · PR18 · PR20 · PR21 · PR22 · PR23), all of them in the map above, and the tenth (the `deleteConfirmDetail` promise going stale) was discharged at batch 4, which graduated the sentence when M20 made its second half false. Nothing is left for a second sweep to find.
 - **M15** (the predicate residue) and **M24** (auto-commit) — **CLOSED**, refuted and declined respectively. Do not reopen without new evidence; §21 and §32 carry the reasoning.
+- **M18** (copy vs. what's on screen) — **SETTLED by R15**; the build is **M23**, batch 7. **M19** (the glow) — **CLOSED by R23**, nothing built.
 
 ---
 
@@ -192,6 +200,47 @@ it fresh and measure it against the phone's harder bar.
    if she raises it.
 5. **M16** — the drag-move question, on her hardware.
 
+**Five more, folded in 2026-08-22** (the audit's finding 5: each was
+marked "held for her" and pointed at a bundle that **does not exist** —
+§21 sent one to "§22", §35 sent one to "§36's bundle", and neither
+section ever grew a list. They are not new questions; they are questions
+that were promised a home and never got one):
+
+6. **F2 — where a phone quick note lands** (§11's HELD FOR HER). It
+   ships **bookless**, the grammar of the Mac bar she praised (the Pool
+   lists bookless notes — R29). But the Mac's two capture surfaces
+   genuinely disagree: its floating pad files into Quicknotes via
+   `fileAsQuicknote`, her own R6-4 ruling there. *Should phone quick
+   notes file into a Quicknotes book instead?* Reversible in one call.
+7. **The Release-side boundary check** (§21's ruling (3)). The DEBUG
+   half shipped — the identity audit now catches the corruption class
+   both prior oracles were blind to. What is held is a **Release-side**
+   belt: the reviewer framed it honestly as *defence-in-depth against an
+   untraced class, not a fix for a live bug*, which makes it a
+   risk-appetite question about her own prose, not an architect's.
+8. **The gap-fence Mac narrowing** (§34(a) — *"it goes on her list as a
+   notification, not a request"*). A whole-block-delete run that
+   contains a **gap** block (one whose text has not synced) is now
+   declined on BOTH platforms, because the shared brain carries the
+   fence. It narrows a shipped Mac gesture. **Read it beside §44's
+   MAJOR 1**, which falsified the trace that made this look free: the
+   Mac gets the fence's REFUSAL but not its FACE, and she would read a
+   raw `blocksNotAdjacent(first:second:)` enum dump. The fix is in
+   13l's manifest; the narrowing itself is still hers to notice or
+   object to.
+9. **The ⋯-door gap boundary** (§34(b)). The Mac's ⌘-click pick and
+   BOTH platforms' ⋯ ▸ Delete Block still ACCEPT a gap block — the
+   fence covers the sweep, not the deliberate per-block act she is
+   pointing at. Endorsed as the right distinction; recorded for her
+   because it is a boundary, not an oversight.
+10. **The gap-spanning-plan decline** (§38(a)). On the Mac a
+    merge-then-edit plan may still SPAN a gap: the gap renders
+    zero-length, the plan names the two readable blocks, and `ops.merge`
+    refuses on adjacency so nothing lands. Mac behaviour was
+    **preserved** rather than quietly narrowed — declining earlier is a
+    change to a ratified road, so it goes on her list rather than into a
+    mobile batch.
+
 ---
 
 ## 7. CLOSEOUT OBLIGATIONS — do not lose these
@@ -206,12 +255,40 @@ it fresh and measure it against the phone's harder bar.
    delegate-bypassing input APIs).
 3. **The parity ledger** in `notes/MobileSoul.md` §6 — burn down PL-9,
    PL-10, PL-11; add this round's own line.
-4. **KnownIssues** — the six-brains row gains/loses entries as hoists
-   land (`applyTypedPath`, `ThemeStore`, `CalloutPalette`, `BlockSelection`,
-   `TakesReplacePlan`, the deletion-copy homes — the inventory's §4(c)).
+4. **KnownIssues — the forked-brains row.** It was **RESTORED
+   2026-08-22** (the audit's finding 7: it had been deleted at 13e's
+   closeout although that closeout records it as *"cautioned"*, leaving
+   the debt with no owner outside a plan file that closes). It now
+   carries the parity inventory's **EIGHT**-brain table, §4(c). The
+   closeout keeps it current as hoists land — batch 4 already
+   discharged the `RecoveryPath`/`TrayPath` half; `ThemeStore`,
+   `applyTypedPath`, `CalloutPalette`/`CalloutMenu`, `BlockSelection`
+   and `TakesReplacePlan` are still forked.
 5. **The master plan** — pointer, the mobile project row, the closeout
-   paragraph, and CLAUDE.md's **MOBILE PARITY LINE**.
+   paragraph, and CLAUDE.md's **MOBILE PARITY LINE**. **Plus: name M12
+   on 13u's row** (it is re-owned there; the row does not mention it,
+   and its KnownIssues row is the belt, not the braces).
 6. **The author handoff** (`notes/handoffs/…`) with her checklist at top.
 7. **The merge to `main` at her word** (R9) — she has said she will ask
    for it at the round's end, and **13l is the first Mac phase to open
    against the merged tree**.
+8. **M16 — settle it or own it.** *"The device round"* is not an owner.
+   It is settled on her hardware before the round closes (the §24.9
+   experiment: long-press-drag a two-paragraph selection within one
+   note; observe whether the source blocks vanish and whether the moved
+   text lands as blocks or as content), **or** it leaves this round with
+   a named owner — a KnownIssues row, or 13u — exactly as M12 did.
+9. **R16 → THE CANON.** Her standing principle, recorded verbatim at
+   §31 and owed to the canon at closeout: *"if you have text selected, I
+   lean towards the idea that you should be able to copy or delete it…
+   basically obvious and intuitive operations like selecting a bunch of
+   visible text and deleting should be allowed - the refusing because of
+   different blocks is more annoying than it's worth."* It belongs
+   **beside `notes/OverallModel.md` §7's block-size rules** (the
+   cut-may-fall-between-any-two-words family — the same "the gesture
+   should just work" doctrine). **The architect PROPOSES the wording;
+   she ratifies.** It is never applied to canon autonomously — canon
+   changes are the author-only list's first line. Three of the four
+   refusal cases §31 enumerates are hers by this round's end; the fourth
+   (a cross-block span touching a block with takes) is the one the
+   wording must be honest about.

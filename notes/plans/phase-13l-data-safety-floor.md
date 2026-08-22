@@ -111,7 +111,16 @@ multiple items and deleting all of them." Build, opening the phase
 
   **THE MANIFEST OF WHAT CHANGED MAC-SIDE** — *the mobile round's
   closeout COMPLETES this list; it is partial until then, because that
-  round was still running when this section was written*:
+  round was still running when this section was written*.
+
+  > **CAUGHT UP THROUGH BATCH 4 on 2026-08-22** (Mobile Round 2's cold
+  > consistency audit, finding 6: this manifest was missing **four**
+  > Mac-side changes, including the one behaviour NARROWING in the
+  > round). Batches 5–8, a consolidated fix round and two more review
+  > passes were still ahead of it at that date, so it is **still
+  > partial** — the round's closeout is what closes it. Everything
+  > added in that pass is marked at its own line, so what is new is
+  > visible rather than blended in.
 
   - `Shared/EditorBrain/BlockRangeIndex.swift` — the four mutators
     (`applyBlockEdit`, `applyTailEdit`, `openTail`, `closeTail`) now
@@ -120,6 +129,78 @@ multiple items and deleting all of them." Build, opening the phase
     `wholeBlockDeletion(covering:replacement:)` and
     `caretLandingAfterRemoving(_ blockIDs:)`, lifted out of
     `EditorSurfaceController`.
+
+    **THREE THINGS IN THIS FILE CHANGE MAC BEHAVIOUR, and the manifest
+    named none of them until 2026-08-22** (Mobile Round 2's cold
+    consistency audit, finding 6):
+
+    1. **THE GAP FENCE — a Mac behaviour NARROWING, and after the O(N²)
+       fix the most review-worthy item here.** `wholeBlockDeletion` now
+       **declines any run containing a GAP entry** (a block whose
+       variant has not arrived — `variantID == nil`, SyncSpec §5). The
+       reason is sound and is parity-of-rule, not a new product rule:
+       under tombstone-wins (SyncSpec §6) a sweep that takes a gap
+       deletes **the peer's paragraph when the variant lands — content
+       she has never seen** — one keystroke after the gate promised in
+       words that the block *"is read-only for now"*; and J9 was the
+       only planner in the Mac's if/else ladder **without** the
+       `variantID != nil` guard its two siblings already carry.
+       **But it narrows a shipped Mac gesture, and the Mac's half of it
+       is BROKEN.** Round 2's §34(a) adjudicated that the Mac would land
+       on `CrossBlockRefusal.diagnose` and speak *"A block in this
+       selection hasn't arrived yet…"* — **§44's MAJOR 1 falsified
+       that on two counts**: merge-then-edit intercepts first (a gap
+       renders **zero-length**, so `CrossBlockEditPlanner.plan`'s
+       `NSIntersectionRange(...).length > 0` collection can never touch
+       it, and the plan is accepted for the two readable blocks), and
+       `diagnose`'s own step 3 uses the same intersection test, so the
+       gap is invisible to it too. `ops.merge` then throws
+       `.blocksNotAdjacent` and `EditorViewModel.operationMessage` has
+       **no case for it** — she reads a raw
+       `blocksNotAdjacent(first: "…", second: "…")` enum dump. **The
+       phone is not exposed** (it got the fence face above
+       merge-then-edit and a real sentence); **the Mac got neither
+       half.** Three-part fix, each with a red-on-old pin available:
+       give the Mac the phone's fence arm · make `diagnose` step 3
+       treat a zero-length entry inside the span as touched · give the
+       Mac the `.blocksNotAdjacent` sentence its phone sibling has.
+       **This is R8 work** (a shared-defect consequence a mobile round
+       created Mac-side) and it is the reviewer's to confirm. *Also
+       worth checking deliberately: the fence reads ONLY
+       `variantID == nil` — never `editable`, never a fan count — so
+       **a block carrying takes is never fenced**, which is the author's
+       own `planVisibleTakeEdit` boundary and must stay intact.*
+    2. **`caretLandingAfterRemoving` was O(N·M) on the MainActor, and
+       its hoisted doc asserted a property FALSE for one of its two
+       Mac callers.** The linear scan per ID made M = N on a select-all;
+       reproduced standalone (`swiftc -O`): N=1,200 → 10 ms · N=5,000 →
+       59 ms · **N=20,000 → 913 ms**. Fixed with a dictionary/range
+       lookup, and the perf pin **extended to the landing** so both
+       halves of the claim are measured (the round's re-review
+       differential-tested the rewrite over **200,000 random tilings,
+       zero mismatches**, and reproduced the perf claim independently at
+       343 ms → 5.2 ms on its host). **The doc-scoping correction rides
+       it, and it is the Mac-visible half:** *"Blocks BETWEEN the edges
+       are irrelevant"* is true for the phone's contiguous run and
+       **false for the Mac's ⌘-click arbitrary pick**, where `[b0,b2]`
+       returned `b0` — *a block being deleted* — while `b1` survived and
+       was the natural landing. The doc is now scoped to contiguous
+       runs **and the rule picks the nearest surviving index**, which
+       changes the answer the Mac's own multi-select door gets.
+    3. **The Mac's residual arming sites are in `MarkdownActs`, not
+       where the crash trace said.** The trace's §9 named the batched
+       multi-range gate as a Mac exposure; the round CORRECTED that
+       (§17, adopted): `EditorSurfaceDelegate.shouldChangeTextInRanges:`
+       (`EditorView.swift:561–574`) **refuses `count != 1` outright**,
+       so it never arms a verdict for N ranges. **The Mac's real
+       residual is the arm-then-hand-off sites in
+       `Features/Formatting/MarkdownActs.swift`** — `apply`,
+       `toggleCheckbox`, `insertNewlineContinuingLists` and
+       `deleteWithoutNewline` each arm and then immediately
+       `replaceCharacters`: **1:1 today, and one refactor away from not
+       being.** Nothing was changed there, deliberately; it is recorded
+       here so the reviewer reads the residual the round actually
+       found rather than the one it first wrote down.
   - `Shared/EditorBrain/EditorEditRouting.swift` — **NEW.** `ArmedEdit`
     (the gate's verdict bound to the range, document length and
     replacement length it was computed for) and `EditorAssertionSeam`.
@@ -128,11 +209,50 @@ multiple items and deleting all of them." Build, opening the phase
     structural disarms; `bulkPending` cleared beside each arming clear.
   - `Variorum/Features/Editor/EditorSurfaceController.swift` — its two
     whole-block-delete functions became one-line delegates to the
-    hoisted versions. **EXPECTED TO GROW:** the round's M22 hoists
-    `planCrossBlockEdit` / `runCrossBlockEdit` (the ratified 2026-07-09
-    merge-then-edit) into `Shared/` the same way.
+    hoisted versions. **IT DID GROW, exactly as predicted:** the round's
+    M22 hoisted `planCrossBlockEdit` / `runCrossBlockEdit` (the ratified
+    2026-07-09 merge-then-edit) into `Shared/` the same way, and those
+    two Mac functions are now delegates too (commit `2ebb605`). The Mac
+    suite rode unmodified across both hoists.
   - `VariorumTests/` — new suites `EditRoutingTests`,
     `EditRoutingCrashTests`; additions to `BlockRangeIndexTests`.
+
+  - **BATCH 4's MAC-SIDE CHANGES — the deletion story's copy becomes
+    shared** (commit `e7e2472`, 2026-08-22; added to this manifest
+    2026-08-22, audit finding 6). The phone gained a Trash, so the
+    argument each of these files already made in its own comment —
+    *copy elsewhere promises the surface by name and would drift* —
+    stopped stopping at the platform boundary:
+    - **NEW: `Shared/RecoveryCopy.swift`** — the semantic half of the
+      Mac's `RecoveryPath` and `TrayPath` vocabularies (`trashSection`,
+      `archivedSection`, `putBackVerb`, `windowNote`, `kindLabel`,
+      `rowKind`, `daysLeftLabel`, `archivedForever`, `goesWithItsFamily`,
+      the three put-back receipts, `deleteNowConfirm`, the count-by-kind
+      `emptyTrashConfirm`, and both purge receipts' three honest
+      populations). **It also received two things that are not copy:**
+      `PreservedOriginPutBack` (the `@MainActor` read-then-place
+      composition, moved whole with its doc comment — the Mac's tray and
+      the J3 peek still call it, and now so does the phone) and the
+      `Queries.TrashItem.Kind → purge-table` mapping, which had been an
+      extension in `RecoveryView.swift`.
+    - **NEW: `Shared/StructuralUndoCopy.swift`** — the undo/redo door's
+      outcome sentences (`undone`/`redone`, `nothingToUndo`/`Redo`,
+      `undoCancelled`, `undoFailed`/`redoFailed`, the door titles, the
+      destructive-undo QUESTION). The Mac's `discardingUndoDetail`
+      deliberately did NOT move: its sentence names ⌘S, and a chord is
+      a platform fact.
+    - **`Variorum/Features/Library/RecoveryView.swift`**,
+      **`Variorum/Features/Tray/TrayPanel.swift`**,
+      **`Variorum/Registry/ShellActions.swift`** — the three now read
+      from those shared homes. **What the reviewer should check
+      deliberately:** that every moved string is byte-identical to what
+      the Mac shipped (the round's proof is the Mac suite riding
+      unmodified at **1568/272**, which proves no test noticed, not that
+      no case exists — her own R20 reasoning), and that the
+      chrome/semantic split each file's comment now claims is the split
+      it actually made.
+    - **No Mac test file was touched by this batch**, which is the same
+      zero-test-edit parity proof the earlier hoists lean on.
   - **`Shared/EditorBrain/CrossBlockEditPlanner.swift` — NEW, and it
     carries a MAC PERFORMANCE FIX the reviewer should check
     deliberately.** The mobile round hoisted the Mac's ratified
@@ -171,7 +291,36 @@ multiple items and deleting all of them." Build, opening the phase
   leave-and-return — no intent minted, data safe). The confirm was
   ruled (13j round 10) and built with green seam-pins — this is
   the A1 pins-over-dead-wiring class ON the surface the
-  screenshot drive couldn't capture. **MECHANISM TRACED (the
+  screenshot drive couldn't capture.
+
+  > ### ⛔️ DO NOT START FROM THE MECHANISM BELOW — RE-DERIVE IT ON macOS
+  >
+  > **The traced mechanism is probably WRONG** (Mobile Round 2, §46,
+  > 2026-08-22). That round's batch 4 **reproduced the exact pattern the
+  > trace blames — a `confirmationDialog` whose `isPresented` is a
+  > computed `Binding(get:set:)` over an `@Observable` property — on
+  > iOS 26.2, and IT PRESENTS**, because the dialog's **title argument**
+  > reads `pendingConfirm` in `body`, which registers the observation
+  > dependency the trace says is never registered.
+  >
+  > **What that does and does not change.** The RULE was still right to
+  > follow (the phone uses `@Bindable` throughout and is immune either
+  > way), and **the author's live report stands unshaken** — she pressed
+  > Delete Now on her Mac and nothing happened, which is a fact about
+  > her machine, not a theory. What is in doubt is the *cause*.
+  >
+  > **So 13l's first act on this door is to REPRODUCE IT RUNNING, on
+  > macOS, and trace what is actually happening** — not to write a fix
+  > against the reading below. The shape of the error is this round's own
+  > lesson turned on prose: it warned five times that *a pin proving a
+  > stored value proves nothing about what renders*, and then recorded a
+  > **mechanism traced by reading and never executed** — the inventory
+  > said "confirmed still present" from the code pattern, and **nobody
+  > ran it.** The reading is kept below as a hypothesis to test first,
+  > because it may still be right for AppKit's `confirmationDialog`,
+  > which is not the same implementation as UIKit's.
+
+  **MECHANISM TRACED — NOW A HYPOTHESIS, per the block above (the
   architect, read-only, 2026-08-19 — the fixer confirms red-on-old
   before touching it):** `RecoveryView`'s `.confirmationDialog`
   presents off `isPresented: Binding(get: { model.pendingConfirm
@@ -334,6 +483,15 @@ spine **63/8** · mobile **314/60**. Mirror at lockstep marker
 the janitor's first sweeps no-op until the horizon passes her
 pre-13j tombstones — expected).
 
+> **⚠️ THE MAC AND MOBILE FIGURES ABOVE ARE HISTORY, NOT THE
+> BASELINE.** They are 13j's finals, kept because that is what the
+> closeout handed over. The current numbers — and the reason they
+> moved — are in the section immediately below: **Mac 1568/272**,
+> mobile **449/75** as of Mobile Round 2's batch 4. Core (1350/141)
+> and the spine (63/8) are unchanged. The same warning is repeated in
+> the kickoff message's "verify the baselines with your own runs",
+> which is load-bearing here rather than routine.
+
 ### ⚠️ MAC CODE CHANGED IN THE GAP BETWEEN PHASES (2026-08-21) — her instruction to record it here
 
 **The 13j finals above are NO LONGER the Mac's baseline.** Mobile
@@ -356,18 +514,33 @@ suspicion to proof. Leaving the Mac unfixed would have meant
 knowingly shipping a proven crash road, so round-2 principle M-B (a
 shared brain changes once, and BOTH suites run) applied.
 
-**Mac-side files touched:** `Shared/EditorBrain/BlockRangeIndex.swift`
-(four mutators refuse instead of trapping), the new
-`Shared/EditorBrain/EditorEditRouting.swift` (`ArmedEdit` +
-`EditorAssertionSeam`), `Features/Editor/EditorViewModel.swift` (the
-armed-verdict binding + the desync routing), and
-`VariorumTests/{BlockRangeIndexTests,EditRoutingTests,EditRoutingCrashTests}.swift`.
+**Mac-side files touched — REFRESHED 2026-08-22 through Mobile Round
+2's batch 4** *(this list named batch 1's files only; the audit's
+finding 6 caught it stale. The manifest in §8 above is the detailed
+account — this is the file-level index)*:
 
-**Mac counts after batch 1: 1546/269 → 1563/272** (+17 tests, +3
-suites, all new pins). Green. *(A ladder fix round is in flight as
-this note is written and may move the number again — **verify with
-your own run**, which this section's own heading already tells you to
-do. That instruction is now load-bearing rather than routine.)*
+| File | What changed | Batch |
+|---|---|---|
+| `Shared/EditorBrain/BlockRangeIndex.swift` | the four mutators refuse instead of trapping; **hoisted IN** `wholeBlockDeletion` + `caretLandingAfterRemoving`; the **gap fence**; the caret rule's O(N·M) fix + its doc scoping | 1, 1b |
+| `Shared/EditorBrain/EditorEditRouting.swift` | **NEW** — `ArmedEdit` (the verdict bound to its range, document length and replacement length) + `EditorAssertionSeam` | 1 |
+| `Shared/EditorBrain/CrossBlockEditPlanner.swift` | **NEW** — the hoisted merge-then-edit, **carrying the O(N²) → O(N) Mac performance fix** | 3 |
+| `Shared/RecoveryCopy.swift` | **NEW** — the deletion story's semantic copy + `PreservedOriginPutBack` + the purge-table mapping | 4 |
+| `Shared/StructuralUndoCopy.swift` | **NEW** — the undo/redo door's outcome sentences | 4 |
+| `Variorum/Features/Editor/EditorViewModel.swift` | consumes `ArmedEdit`; routes a refused mutation to `desyncRecovery()`; structural disarms; `bulkPending` cleared beside each arming clear | 1 |
+| `Variorum/Features/Editor/EditorSurfaceController.swift` | four functions became delegates to the hoisted brains (the two whole-block-delete ones, then `planCrossBlockEdit`/`runCrossBlockEdit`) | 1b, 3 |
+| `Variorum/Features/Library/RecoveryView.swift` | reads its copy from `Shared/RecoveryCopy.swift`; the purge-table extension moved out | 4 |
+| `Variorum/Features/Tray/TrayPanel.swift` | same, plus `PreservedOriginPutBack` moved out | 4 |
+| `Variorum/Registry/ShellActions.swift` | speaks `Shared/StructuralUndoCopy.swift` | 4 |
+| `VariorumTests/` | new suites `EditRoutingTests`, `EditRoutingCrashTests`; additions to `BlockRangeIndexTests`. **No Mac test file was touched by batches 1b, 3 or 4** — the zero-test-edit parity proof | 1 |
+
+**Mac counts: 1546/269 (13j) → 1563/272 (batch 1) → 1568/272, where
+they have stood EXACTLY since batch 1's ladder fixes** — through the
+1b, 3 and 4 hoists, which is precisely the proof those hoists moved
+addresses and not behaviour. **Verify with your own run** — the mobile
+round is still live as this line is written, and its remaining batches
+(5–8, the fix round, and two more review passes) may move it again. If
+it has moved, something changed Mac behaviour and the reviewer should
+know what.
 
 **Where it lives:** branch `mobile` only. It reaches `main` at the
 next `mobile` → `main` merge, which happens **at her word** (the
@@ -376,9 +549,21 @@ this on `main` and the files above do not carry the change, that merge
 has not happened yet — pull it or coordinate before assuming a
 baseline.
 
-**No 13l scope is affected** — nothing here touches backups, restore,
-deletion or the purge. The only cost to this phase is the count
-baseline, which is why the note sits in this section.
+**~~No 13l scope is affected~~ — TRUE OF BATCH 1, NO LONGER TRUE OF THE
+ROUND** (corrected 2026-08-22, audit finding 6). Nothing in the mobile
+round touches **backups, restore or the purge machinery** — that half
+stands. But **batch 4 changed the Mac's deletion and recovery
+SURFACES**: `RecoveryView.swift` and `TrayPanel.swift` now read their
+copy from `Shared/RecoveryCopy.swift`, and `PreservedOriginPutBack` —
+the read-then-place composition behind the tray's originals section and
+the J3 peek — moved into `Shared/` with them. Those are the very files
+§8's opening mini-item works in. **Two consequences for this phase:**
+its dead-Delete-Now fix lands in a `RecoveryView` whose copy now lives
+somewhere else (rename in the shared home and both platforms move
+together — which is the point), and the phone now has a Trash, so any
+sentence 13l writes for the Mac's deletion doors should be checked
+against the shared home rather than typed fresh. The count baseline is
+no longer the only cost.
 
 ## Verification
 

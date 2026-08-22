@@ -271,25 +271,86 @@ scope until it has a ledger row.
 
 ---
 
-## 6. THE LEDGER (every row owned; nothing sits unowned)
+## 6. THE LEDGER — THE ROUND'S SINGLE ROW INDEX (M1–M27)
 
-| # | Item | Source | Batch | Status |
-|---|------|--------|-------|--------|
-| M1 | **The editor crash** — the `BlockRangeIndex` trap pair reached by deleting a multi-line selection at a document's end. Trace → smallest correct fix in `Shared/EditorBrain` → red-on-old pins → Mac exposure verdict | R2 + §3 | 1 | open |
-| M2 | The rest of the reachable-trap surface + the concurrency/lifecycle findings the stability survey proves | R2 (her "architecture is solid?" ask) | 1 | open — scope set by the survey |
-| M3 | **Copy the whole note** — a masthead door; markdown, chosen takes joined, receipt | R6 | 2 | open |
-| M4 | **Keyboard-bar spacing** — real air under Aa · ⑂ · ⋯ | R7 | 2 | open |
-| M5 | **Home-screen quick note** — mint-as-you-type, saved indicator, ⏎ opens the full editor; the Today button untouched | R5 | 3 | open |
-| M6 | **PL-11 — Trash, deletion & recovery faces**, INCLUDING the real deletion buttons the Mac itself does not yet have | R4 + PL-11 | 4 | open |
-| M7 | **PL-10 — Takes & block management doors** (reorder takes, copy-all-takes, take-to-block-below, takes-to-blocks, the duplicate-book-name guard) | R4 + PL-10 | 5 | open |
-| M8 | **PL-9 — The account sheet's phone judgment** (sheet reads right; the bridge-connect door decision; exercise the iOS `presentationAnchor` arm once) | R4 + PL-9 | 6 | open |
-| M9 | The parity inventory's MISSED-capability sweep (belt and braces — anything the ledger didn't record) | MobileSoul §6 protocol | assigned on arrival | open |
-| M10 | Round closeout — plan status, parity-ledger rows burned down, MobileSoul/KnownIssues/master-plan updates, the author handoff | CLAUDE.md ritual | last | open |
+**Brought current 2026-08-22** (the cold consistency audit's finding 9:
+this table had never been maintained — all ten original rows still read
+`open` while M1–M5 had shipped, three cited batch numbers that had been
+superseded, and M11–M27 were never added at all, so **the round had no
+index of its own rows**). It is now the complete M-row index, and it is
+maintained.
+
+**What this table is and is not.** It is the **INDEX** — every M row,
+what it is, and where it stands. It is **NOT the schedule**: §42's final
+rule stands unamended — *a row is not scheduled until it appears in the
+BINDING BATCH MAP under a numbered batch*, and that map now lives in
+`notes/plans/mobile-round-2-orchestrator-handoff.md` **§3**. The Batch
+column below CITES that map; it never competes with it.
+
+> **Batch numbers shifted once, and this table uses the current ones.**
+> §16's and §36's tables numbered the post-batch-4 work 5/6/7. When the
+> shelf layout (R26/R27/R27b/R24) became **batch 5**, everything after
+> it moved up one: the tray batch is **6**, takes & block doors **7**,
+> settings/tags/the voice fork **8**. The handoff's §3 map carries the
+> live numbering; §16's and §36's tables are superseded for numbering
+> only (their fences and reasons stand).
+
+| # | Item | Source | Batch (handoff §3) | Status |
+|---|------|--------|--------------------|--------|
+| **M1** | **The editor crash** — the `BlockRangeIndex` trap pair reached by deleting a multi-line selection at a document's end | R2 + §3 | 1 | **DONE** — fixed at the mechanism on both platforms (§17/§22); **CONFIRMED ON HER HARDWARE** (§37) |
+| **M2** | The rest of the reachable-trap surface + the stability survey's findings | R2 | 1 | **RESOLVED INTO M2a–M2f** (§12) |
+| M2a | `openTail()` trap — Return at the end of a note | §12 | 1 | DONE |
+| M2b | `closeTail()` trap — Return, then Backspace | §12 | 1 | DONE |
+| M2c | `index.entries[entryIndex]` — the same room's second door | §12 | 1 | DONE |
+| M2d | `desyncRecovery()` asserting on the app's own HEALING path | §12 | 1 | DONE |
+| M2e | The TK2 canary's un-invalidated 30 s `Timer` | §12 | 1 | DONE (+ the `isolated deinit` belt, §20(b)) |
+| M2f | Read-surface measurement at the 100k fixture — **measure only** | §12 | 1 | DONE — numbers in §17; it BORE M14 |
+| **M3** | **Copy the whole note** — masthead door, markdown, receipt | R6 | 2 | **BUILT** (§26). Its selection rule was superseded by R15 → **M23** |
+| **M4** | **Keyboard-bar spacing** — real air under Aa · ⑂ · ⋯ | R7 | 2 | **BUILT** (§26), retuned at **R12** (§35), reshaped by **R22** (§38). §45's 2 MAJOR open (the 320 pt overflow) |
+| **M5** | **Home-screen quick note** — mint-as-you-type, saved indicator, ⏎ opens the editor | R5 | 3b | **BUILT** (§38). **§45's Q1/Q2 BLOCKERs open** — first in the consolidated fix round |
+| **M6** | **PL-11 — Trash, deletion & recovery faces**, incl. the real deletion buttons | R4 + PL-11 | 4 (PR1·PR2·PR4·PR7) + 6 (PR3·PR5·PR6·PR14·PR15·PR22) | **HALF SHIPPED** — batch 4 landed (§46); the per-note recovery half is batch 6 |
+| **M7** | **PL-10 — Takes & block management doors** | R4 + PL-10 | 7 | scheduled |
+| **M8** | **PL-9 — the account sheet's phone judgment** | R4 + PL-9 | 8 (PR16) | scheduled |
+| **M9** | The parity inventory's MISSED-capability sweep | MobileSoul §6 protocol | — | **CLOSED 2026-08-22 against the inventory's §4(b)** — see the note below |
+| **M10** | Round closeout | CLAUDE.md ritual | last | open |
+| **M11 ≡ PR18** | **Whole-block-selection delete routing** on the phone | §13 (the trace) + PR18 | 1b | **BUILT** (§23); ladder round 1 fixed (§34), **round 2's 8 findings open** (§44) |
+| **M12** | The gate-less INSERTION whose iOS-widened report overflows its entry and takes a `desyncRecovery()` | §17 | — | **RE-OWNED TO 13u** (§20) — measured 0 in policed typing, and the harness cannot drive the gate-less class. **Now a `KnownIssuesAndTechDebt.md` row** so the owner outlives this file |
+| **M13** | `bulkPending` left armed when its arming is rejected at consume time | §17 | 1 (fix round) | **CLOSED** — fixed §20, on both platforms (§20(a)) |
+| **M14** | The Read hitch — 312 ms main-actor transform per 100k-word Read row | §17 (M2f) | 8 (the unmeasured half) | **MEASURED; the DECISION is HERS** (handoff §6 item 1). The SwiftUI `Text`-per-paragraph half is scheduled in batch 8 |
+| **M15** | The residue the exact-net predicate leaves | §20 | — | **CLOSED as not-reachable** (§21). Do not reopen without new evidence |
+| **M16** | Same-note text drag-move is a delete-shaped edit that is not a delete gesture | §24.9 | — | **UNSETTLED — device-only.** Experiment recorded §24.9; **closeout obligation 8** binds it: settle on her hardware, or leave with a named owner |
+| **M17** | Platform truth: an `inputAccessoryView` cannot resize after presentation | §26 | — | **CLOSEOUT** → `notes/TEXTKIT2_NOTES.md` §3 |
+| **M18** | PROVISIONAL — copy vs. what's on screen | §26 | — | **SETTLED by R15** (§31); the build is M23 |
+| **M19** | The glass cells' glow overhanging the bar's top edge | §26 | — | **CLOSED by R23** (§38) — accepted as-is, nothing built |
+| **M20** | **A structural UNDO/REDO door on the phone** (her own proposal) | R10 (§29) | 4 | **BUILT** (§46) — the receipt's Undo + the ⋯ sheet. *(Born at §29 from her own proposal and in no batch map until §39 caught it — the round's most consequential homeless row, because R13 removed the delete confirm on the strength of it.)* |
+| **M21** | A block restore door on the phone | R10 (§29) | 6 (PR3) | ≡ the per-note tray; scheduled, and now hers-requested rather than ledger-derived |
+| **M22** | **Merge-then-edit on the phone** — the parity gap SHE caught | §30 | 3 | **BUILT** (§38), with the Mac's O(N²) planner fix riding it. **§45's 4 MAJOR open** |
+| **M23** | **Copy follows what is on screen** | R15 (§31) | 7 | scheduled |
+| **M24** | An auto-commit before every multi-block edit | R17 (§31) | — | **DESIGNED, NOT BUILT, DECLINED BY HER** (R18, §33) |
+| **M25** | The pin-driving discovery — `deleteBackward()`/`replace(_:withText:)` bypass the delegate | §34 | — | **CLOSEOUT** → `notes/TEXTKIT2_NOTES.md` §3, beside M17 |
+| **M26** | **A visible ⇤ un-indent door** in the formatting strip | R21 (§37) | with R22 | **BUILT** (`c574acc`). §45's 2 MAJOR ride the same family |
+| **M27** | **The first typed edit after a DIVIDE is unroutable** and takes `desyncRecovery` — pre-existing, reproduced on the pre-batch tree | §46 | **the dedicated stability pass** | open — and that pass is now a real row in the handoff's map (it was §8 prose until 2026-08-22) |
+
+**M9's closure, with its reason** (the audit's finding 3: *"assigned on
+arrival"* is not an owner, so the row read as work nobody had). The
+parity inventory's **§4(b) — "Capabilities the ledger MISSED (my own
+closeout sweep)"** IS this sweep, performed and delivered: ten items,
+**nine of which became rows** — PR4 delete a book · PR10 tag-chip
+grammar · PR14 lens-dangles notice · PR17 document settings · PR18
+whole-block delete · PR20 block multi-select · PR21 replace · PR22 the
+guide's deletion chapter · PR23 the voice fork — **every one of them in
+the handoff's batch map**. The tenth was not a capability but a shipped
+PROMISE to maintain (`MobileBlockMenu.deleteConfirmDetail` going stale),
+and **batch 4 discharged it**: the sentence graduated the moment M20
+made *"There's no undo here"* false. A second sweep would re-walk the
+same four closeouts (14c/14d/13e/13j — the inventory's verified sweep
+basis) and find what §4(b) already found. **CLOSED, not deferred.**
 
 Design calls PL-10 holds for her (the phone's ●n comment-marker side;
 the margin-hover comment door's tap shape; callout swatches/emoji
 picker) are **held and bundled** for a sitting, not decided
-autonomously — the propose-only rule.
+autonomously — the propose-only rule. They are **PR24** in the batch
+map, and the handoff's §6 carries the full open-with-her list.
 
 ---
 
@@ -331,6 +392,18 @@ BATCH**, plus two extra passes:
   reviewer over the round's entire diff, briefed on nothing but the
   diff — the round's own cold read.
 
+> **⚠️ BOTH EXTRA PASSES ARE NOW SCHEDULED — they were prose until
+> 2026-08-22.** §43 caught that five of seven batches were never
+> cold-reviewed and fixed the per-batch half; **its own accounting
+> missed these two** (the audit's finding 2). Neither had ever appeared
+> in a batch map, which by §42's final rule means neither was scheduled
+> — *"the process step itself was scheduled in prose"*, one level up
+> from the homeless-row failure. **They are now real rows in the binding
+> batch map** (`mobile-round-2-orchestrator-handoff.md` §3), with their
+> targets and briefs written out. **The stability pass OWNS M27** (§46's
+> post-divide unroutable edit), which had been owned by "the dedicated
+> stability pass" while that pass existed nowhere.
+
 Every finding gets a written disposition here. Disputes are adjudicated
 by the architect against the canonical docs; the spec outranks both
 agents. The hallucination guard is absolute: no fix without a
@@ -353,10 +426,26 @@ red on the pre-fix code by behavioral revert.
   from the repo root; confirm the "Test run with N tests" line; zsh
   `pipestatus`.
 - **Mac tests** run from `App/Variorum/`; core via `swift test`.
-- **Baselines** (the 13j closeout, 2026-08-19 — CLAUDE.md's rule: the
-  previous closeout is the baseline; never run the full suite at
-  session start): core **1350/141** · Mac **1546/269 FULLY GREEN** ·
-  spine **63/8** · mobile **314/60** · mirror marker **7**.
+- **Baselines — CURRENT, updated 2026-08-22 through batch 4** (the
+  audit's finding 12: this line had never moved off the 13j closeout's
+  numbers and was five batches stale, though §17 recorded that it must
+  be updated and must name BOTH spines):
+
+  | suite | count | note |
+  |---|---|---|
+  | core | **1350/141** | unchanged all round — no `Sources/` line has moved |
+  | Mac | **1568/272** | exact and unmodified since batch 1's fixes. **This is the hoist proof: if it moves, something changed Mac behaviour** |
+  | Mac spine | **63/8** | `VariorumTests` tutorial spine — exact |
+  | mobile | **449/75** | grew every batch; last measured at batch 4's landing (§46) |
+  | mobile spine | **33/7** | `MobileTutorialWalkTests` (25/6) **+** `MobileWalkTests` (8/1) — §17's reconciliation, named here as it asked |
+
+  Mirror at lockstep marker **7**. *(The round OPENED against the 13j
+  closeout's figures — core 1350/141 · Mac 1546/269 · spine 63/8 ·
+  mobile 314/60 — which is what CLAUDE.md's "the previous closeout is
+  the baseline" rule means; they are kept here as the origin, not as
+  the current state.)* **The rule that does not change: never run the
+  full suite at session start** — verify against the row above when a
+  batch claims green.
 - **The A4 fence:** debug/simulator builds resolve the DEV store and
   never sync. NEVER point a debug build at the real store. Her phone
   installs **Release**:
@@ -2481,7 +2570,19 @@ work, and her choice should be read with that in mind.
 parity gap she caught. **M5 shipped** (`33642fb`) — the home-screen quick
 note. Counts on the combined tree: core **1350/141** · Mac **1568/272**
 (exact, unmodified — the hoist proof) · Mac spine **63/8** · mobile
-**412/71** · mobile spine **33/7**.
+**413/71** · mobile spine **33/7**.
+
+> **The mobile figure is CORRECTED from 412 to 413 (2026-08-22 — the
+> audit's finding 13).** This section originally recorded 412, and the
+> R22/M26 brief carried that number forward. The implementer of that
+> batch **stashed its work and re-ran the clean tree**, found the
+> baseline was **413**, and said so in `c574acc`'s message: *"the
+> baseline was 413, not the 412 in the brief, verified by stashing and
+> re-running the clean tree; +1 is exactly the new test."* A measured
+> re-run of the tree in question outranks a figure typed into a record,
+> so **413 stands** and 412 was a transcription slip here. It
+> reconciles forward exactly: 413 → 414 at `c574acc` (+1, the outdent
+> pin) → **449** at batch 4 (+35). Nothing is missing; one digit was.
 
 ### THE FIND OF THE ROUND SO FAR — a P1 violation latent on the MAC since 2026-07-09
 
@@ -3225,3 +3326,66 @@ skipped because it is not a separate step.
 instruction), and the four owed reviews have landed (§44, §45). **Every
 batch of this round will have been reviewed** — late for five of them,
 which is exactly the cost R28 exists to prevent repeating.
+
+---
+
+## 48. THE CONSISTENCY AUDIT'S DOCUMENT FIXES LAND (2026-08-22)
+
+`mobile-round-2-consistency-audit.md`'s 19 findings were commissioned
+because she said *"seems like a lot has been slipping through the
+cracks"* and was right. **Eleven of them are document work, and this
+section records where each one landed** — written so the successor can
+tell what has been remediated from what is still open, rather than
+re-doing the closed half. The auditor's own verdict was that *the plan
+file can be trusted for what it records; the handoff cannot yet be
+trusted as a standalone starting point.* These fixes are aimed at the
+second half of that sentence.
+
+**Every fix below was verified against the tree before it was written,
+not inherited from the audit's description** — which is this round's own
+lesson (§46: *a mechanism traced by reading and never executed*) applied
+to its own records.
+
+| Finding | What was wrong | Where it now lives |
+|---|---|---|
+| **2** | §8's **dedicated stability pass** and **whole-round pass** were scheduled in prose only, and §43's accounting of the missed reviews missed them both. **M27 was therefore owned by something that existed nowhere** | Both are **real rows in the binding batch map** (handoff §3), with targets and briefs. §8 above carries the pointer. The stability pass owns M27 and is fenced against B45-3; the whole-round pass is fenced against her Act-1 pass |
+| **3** | **M9** — the missed-capability sweep — read *"assigned on arrival"*, which is not an owner | **CLOSED against the parity inventory's §4(b)**, which performed exactly that sweep: nine of its ten items became rows, all in the batch map; the tenth was discharged at batch 4. The reasoning is in §6 |
+| **4** | **R16's canon obligation** — her standing principle, *owed to the canon at closeout* — was in no closeout list | **Closeout obligation 9** in the handoff: beside `OverallModel.md` §7's block-size rules, the architect proposing and **she ratifying**, never applied autonomously |
+| **5** | **Five "held for her" items pointed at bundles that do not exist** (§21 sent one to "§22", §35 to "§36's bundle"; neither section ever grew a list) | All five folded into the handoff's **OPEN WITH HER** as items 6–10: F2 bookless-vs-Quicknotes · the Release-side boundary check · the gap-fence Mac narrowing · the ⋯-door gap boundary · the gap-spanning-plan decline |
+| **6** | **13l's manifest was missing four Mac-side changes** and its file list and counts were stale — and it still opened from a mechanism §46 has since shown is probably wrong | `phase-13l-data-safety-floor.md`: the gap fence (with §44's MAJOR 1), the caret-landing O(N·M) fix + its doc-scoping correction, the `MarkdownActs` residual, and batch 4's Mac changes incl. the two new hoists; counts refreshed to **1568/272**; and the dead-door correction added **at the top of that bullet**, so its first act cannot start from a diagnosis nobody ran |
+| **7** | **The KnownIssues "six mobile brains" row DOES NOT EXIST** — deleted at 13e's closeout, though that closeout records it as *"cautioned"*. The forked-brain debt had **no owner outside a plan file that closes**: the blank-owner state CLAUDE.md forbids, inherited | **RESTORED** to `KnownIssuesAndTechDebt.md`, updated to the parity inventory's **EIGHT**-brain table (§4(c)), owned by the mobile app project row per the R2-7 owner rule, and honest about what batch 4 already discharged |
+| **8** | **M12 / M14 / M16 had no landing place** — 13u's row does not mention M12, none was in KnownIssues, and M14's promised `Text`-per-paragraph measurement was scheduled nowhere | M12 → a **KnownIssues row owned by 13u** (+ closeout obligation 5 to name it on that row); M14's unmeasured half → **batch 8** in the map, where §19 always said it belonged; M16 → **closeout obligation 8**: settled on her hardware, or left with a named owner |
+| **9** | **§6's ledger was abandoned** — ten rows all reading `open` after M1–M5 shipped, three superseded batch numbers, and M11–M27 never added. The round had no index of its own rows | §6 is now the **complete M1–M27 index**, with the batch-numbering shift (5/6/7 → 6/7/8) stated, and it cites the batch map rather than competing with it |
+| **12** | **§9's baselines were five batches stale** (still the 13j closeout's), though §17 recorded that they must move and must name both spines | §9 carries the current table: core 1350/141 · Mac **1568/272** · Mac spine 63/8 · mobile **449/75** · mobile spine 33/7, with the 13j figures kept as the round's *origin* |
+| **13** | **§38 recorded mobile 412; `c574acc` established 413** and the two were never reconciled | §38 corrected to **413**, with the reason: that batch **stashed and re-ran the clean tree** rather than trusting the brief. It reconciles forward exactly — 413 → 414 → 449 |
+| **15** | The 23:49 install was recorded **only in the handoff**, never in the round's own record | Recorded below |
+
+### The install the record never carried
+
+**A Release build went to her phone at 23:49 on 2026-08-21**, over the
+tunnel, carrying **batches 1 / 1b / 2 / 3 / 3b + R12 + R22/M26**. It
+supersedes the 21:41 install §36 records, which carried only batches
+1/1b/2 + R12 — so the phone she has been using since gained
+merge-then-edit, the home-screen quick note, the one-row strip and the
+visible un-indent that evening. **It does NOT carry batch 4**, so the
+undo door, the note/book delete doors and the Trash are not on her phone
+yet. *(Source: the orchestrator handoff's §2, written at 00:06 the same
+night. The install itself was never written into this file — which is
+why §45's finding lands as hard as it does: **the batch whose whole
+promise is "nothing you type is lost" reached her phone unreviewed, and
+this record could not even say when.**)*
+
+### What this section does NOT close
+
+The audit's remaining findings are **not** document work and are not
+touched here: **10** (R22 + M26 has no record section of its own — its
+facts live in `c574acc`'s message), **11** (six of eight dispatches have
+no brief in the record), **14** (the fence recipe's false positive —
+already fixed in the handoff's §4, and **re-verified here: 8 hits over
+the whole diff, ZERO over `'*.swift'`; the fence holds**), **16–18**
+(the ~20 investigation findings — now her **B45-1/B45-2/B45-3** rows and
+Act 2's sweep, in `mobile-round-2-successor-first-acts.md`), and **19**
+(`ZZProbe2Tests.swift` — **verified gone; the tree is clean**, so it can
+no longer move the count the successor is told to verify). **Finding 1**
+— the batch map's review column — was added at §43's rule; this pass
+completed the one row that was still missing its cell.
