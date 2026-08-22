@@ -74,9 +74,19 @@ struct VariorumMobileApp: App {
             // mid-round, file protection may cut the store off — the
             // scheduler treats that exactly like being offline (round
             // skipped, outbox intact, retry on next foreground).
+            // PR7 (round 2 batch 4): backgrounding is the phone's ⌘Q, so
+            // it is a LEAVING — every open note gets its quiet savepoint
+            // through the ONE shared entry (`AppSession.savepointOnLeaving`,
+            // 13j J11's sixth auto-commit occasion). The session is read
+            // here rather than held, because the scene handler is outside
+            // the bootstrap's switch.
+            var savepoint: (@MainActor (String) async -> Void)?
+            if case .ready(let session) = bootstrap.state {
+                savepoint = { postID in await session.savepointOnLeaving(postID) }
+            }
             mobileScenePhaseChanged(
                 phase, editors: shellRouter.editors, sync: services?.sync,
-                quickNote: shellRouter.quickNote)
+                quickNote: shellRouter.quickNote, savepoint: savepoint)
         }
     }
 

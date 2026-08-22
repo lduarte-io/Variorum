@@ -1,0 +1,241 @@
+//
+//  MobileUndoDoor.swift
+//  VariorumMobile
+//
+//  **M20 — THE STRUCTURAL UNDO/REDO DOOR, and it is HER OWN PROPOSAL**
+//  (round 2, §29's R10, verbatim: *"the phone just needs a structural undo /
+//  redo? and a block restore door?"*).
+//
+//  **Nothing here is machinery.** The stack is `UndoStack` in core, held
+//  session-scoped on `AppSession`, and the phone has been REGISTERING
+//  entries into it since parity C2 — divide, merge, extract, delete, the
+//  takes browser's verbs, and the whole "Delete Blocks" compound (batch 1b
+//  verified the round trip against store bytes: one undo restores all N
+//  blocks in place, one redo removes them again). What was missing was the
+//  AFFORDANCE, which is exactly the distinction §24's MAJOR turned on: *a
+//  capability verified at the API is not a capability until a door reaches
+//  it.*
+//
+//  This controller is that affordance's brain-free routing layer: it holds
+//  no rule of its own. LIFO, the redo future, the insurance class, the
+//  labels — all `UndoStack`'s, shared. What lives here is the phone's face
+//  on it: the flush contract, which surface is asking, and the words (the
+//  shared ones from `StructuralUndoCopy`).
+//
+//  **TWO DOORS, by her ruling and for two different moments:**
+//  · **THE RECEIPT** — the phone already shows "N blocks deleted." after a
+//    structural act, and an Undo beside it is the standard iOS shape. This
+//    is the one that matters, because it is where she is looking at the
+//    moment she wants it back. `MobileEditorViewModel.report(_:action:)`
+//    carries it; every structural door that registers an entry offers it.
+//  · **THE PERSISTENT DOOR** — the masthead's ⋯ sheet
+//    (`MobileNoteActions`), carrying the stack's live `topLabel` and
+//    `topRedoLabel`, for acts whose receipt has already passed.
+//
+//  **WHY THIS DOOR FLUSHES FIRST, and it is not tidiness.** The A12
+//  destructive-undo warning (her 13d ruling) is precisely the question
+//  *"has any take been edited SINCE the operation?"*, and
+//  `UndoStack.pendingUndoWarning` answers it by reading `working_text`
+//  ROWS. Inside the autosave debounce those rows do not yet hold what she
+//  typed, so an unflushed buffer makes the warning answer NO to a question
+//  whose true answer is YES — the warning would silently not fire in
+//  exactly the case it exists for. The flush is what makes it honest, and
+//  the phone's standing structural contract wanted it anyway.
+//
+
+import Foundation
+import Observation
+import VariorumCore
+
+@MainActor
+@Observable
+final class MobileUndoDoor {
+    /// Which surface raised the warning. Two `.alert` hosts exist (the
+    /// masthead's receipt and the ⋯ sheet), and only the one that ASKED may
+    /// present — a sheet is over the masthead, so two unconditioned hosts
+    /// would both try. The copy still lives in ONE place; only the host is
+    /// discriminated.
+    enum Surface: Equatable, Sendable {
+        case receipt
+        case sheet
+    }
+
+    struct PendingWarning: Equatable {
+        let warning: UndoStack.PendingUndoWarning
+        let surface: Surface
+    }
+
+    @ObservationIgnored private let session: AppSession
+    @ObservationIgnored weak var model: MobileEditorViewModel?
+
+    /// Non-nil while the A12 warning is being asked. `@Bindable`-friendly
+    /// (the phone's immune confirm road — never a `Binding(get:set:)`
+    /// computed over an `@Observable` property that `body` never reads,
+    /// which is the Mac's own dead-door defect at `RecoveryView.swift:573`).
+    var pendingWarning: PendingWarning?
+
+    /// **The two alert hosts' bindings — `@Bindable`-projected, never an
+    /// inline `Binding(get:set:)`** (§15's trap (a), the phone's rule stated
+    /// as code). Each is true only for the surface that ASKED, so the two
+    /// hosts are mutually exclusive by construction and the copy stays in
+    /// one place. Dismissal of any kind routes to `cancelPendingUndo`,
+    /// which is a no-op once the warning has been answered.
+    var warningAtReceipt: Bool {
+        get { pendingWarning?.surface == .receipt }
+        set { if !newValue { cancelPendingUndo() } }
+    }
+
+    var warningAtSheet: Bool {
+        get { pendingWarning?.surface == .sheet }
+        set { if !newValue { cancelPendingUndo() } }
+    }
+
+    /// One flight at a time — the structural doors' latch, same reason: an
+    /// inverse is a DB write, and a second press inside the first's
+    /// suspension would pop a second entry she never asked for.
+    private(set) var inFlight = false
+
+    init(session: AppSession) {
+        self.session = session
+    }
+
+    /// The stack's live ends, straight from the session's own projection
+    /// (`UndoMenuState`, refreshed by the stack's change observer). Read in
+    /// a SwiftUI body these track, so a door's words can never name an
+    /// entry that has since moved.
+    var undoLabel: String? { session.undoMenuState.topLabel }
+    var redoLabel: String? { session.undoMenuState.topRedoLabel }
+
+    // MARK: - Undo
+
+    /// The door's entry point. Flush (above), ask the stack whether this
+    /// undo is in the INSURANCE class, and either raise the warning or act.
+    func beginUndo(from surface: Surface) async {
+        guard let model else { return }
+        guard !inFlight else {
+            model.report(Self.anotherIsLanding)
+            return
+        }
+        inFlight = true
+        defer { inFlight = false }
+
+        guard await model.flushPendingText() else { return }
+        let stack = session.undoStack
+        do {
+            let warning = try await session.runner.run { ops in
+                stack.pendingUndoWarning(with: ops)
+            }
+            if let warning {
+                pendingWarning = PendingWarning(warning: warning, surface: surface)
+                return
+            }
+        } catch {
+            model.report(StructuralUndoCopy.undoFailed(Self.refusal(error)))
+            return
+        }
+        await runUndo()
+    }
+
+    /// The confirmed road (the warning was shown and she said yes).
+    func confirmPendingUndo() async {
+        guard pendingWarning != nil else { return }
+        pendingWarning = nil
+        guard !inFlight else { return }
+        inFlight = true
+        defer { inFlight = false }
+        await runUndo()
+    }
+
+    func cancelPendingUndo() {
+        guard pendingWarning != nil else { return }
+        pendingWarning = nil
+        model?.report(StructuralUndoCopy.undoCancelled)
+    }
+
+    private func runUndo() async {
+        guard let model else { return }
+        let stack = session.undoStack
+        do {
+            let label = try await session.runner.run { ops in
+                try stack.undo(with: ops)
+            }
+            // The surface is a projection of rows the inverse just moved —
+            // re-read through the ONE fresh-read door, exactly as every
+            // structural door settles.
+            await model.refreshTakesFromStore()
+            // A landed undo can itself be redone, so the receipt offers the
+            // OTHER direction — the ping-pong her R10 asked for, reachable
+            // without opening anything.
+            model.report(
+                label.map(StructuralUndoCopy.undone) ?? StructuralUndoCopy.nothingToUndo,
+                action: label == nil ? nil : .redo)
+        } catch {
+            // A failed inverse STAYS on the stack (the UndoStack doctrine):
+            // she resolves the refusal — unseal the note, say — and presses
+            // again, so the door keeps offering.
+            model.report(StructuralUndoCopy.undoFailed(Self.refusal(error)))
+        }
+    }
+
+    // MARK: - Redo
+
+    /// The undo door's exact mirror. No warning: redo re-applies from
+    /// do-time pre-images and discards nothing she typed (A12 named undo
+    /// alone, deliberately).
+    func redo() async {
+        guard let model else { return }
+        guard !inFlight else {
+            model.report(Self.anotherIsLanding)
+            return
+        }
+        inFlight = true
+        defer { inFlight = false }
+
+        guard await model.flushPendingText() else { return }
+        let stack = session.undoStack
+        do {
+            let label = try await session.runner.run { ops in
+                try stack.redo(with: ops)
+            }
+            await model.refreshTakesFromStore()
+            model.report(
+                label.map(StructuralUndoCopy.redone) ?? StructuralUndoCopy.nothingToRedo,
+                action: label == nil ? nil : .undo)
+        } catch {
+            model.report(StructuralUndoCopy.redoFailed(Self.refusal(error)))
+        }
+    }
+
+    // MARK: - Words
+
+    static let anotherIsLanding = "Another structural change is still landing."
+
+    /// **The A12 warning's DETAIL, in phone words.** The question is shared
+    /// (`StructuralUndoCopy.discardingUndoQuestion`); this half is not,
+    /// because the Mac's names ⌘S and a chord is a platform fact. The road
+    /// it names is the phone's own: the block's Take History sheet, which
+    /// is where a savepoint is read back here.
+    static func discardingUndoDetail(_ warning: UndoStack.PendingUndoWarning) -> String {
+        let subject = warning.bufferCount == 1
+            ? "One take has been edited since"
+            : "\(warning.bufferCount) takes have been edited since"
+        return "\(subject) — undoing puts back the text as it was BEFORE the "
+            + "\(warning.label.lowercased()), so that writing is set aside. "
+            + "It is saved first, so you can bring it back from the block's "
+            + "Take History at any time."
+    }
+
+    /// The everyday refusals in phone words; anything else is the
+    /// operations layer's own message (the phone's standing posture).
+    static func refusal(_ error: Error) -> String {
+        guard let error = error as? OperationError else { return String(describing: error) }
+        switch error {
+        case .lockedPost:
+            return "This note is locked — unlock it first."
+        case .lockedVariant:
+            return MobileEditorViewModel.lockedTakeRefusal
+        default:
+            return String(describing: error)
+        }
+    }
+}

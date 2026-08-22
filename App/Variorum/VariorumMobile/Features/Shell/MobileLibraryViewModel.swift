@@ -192,6 +192,53 @@ final class MobileLibraryViewModel {
         }
     }
 
+    // MARK: - Delete a note (round 2, batch 4 — PR1)
+
+    /// **The Library row's delete door.** The phone's OTHER note-delete
+    /// door is the note's own ⋯ sheet; this is the one for a note she is
+    /// not standing inside. Both move to Trash, both confirm, and both
+    /// speak `RecoveryCopy`'s one wording.
+    var pendingDeleteNote: Queries.TimelineItem?
+
+    /// The alert host's binding (`@Bindable`-projected — never a computed
+    /// `Binding(get:set:)`, §15's trap (a)).
+    var deleteNotePresented: Bool {
+        get { pendingDeleteNote != nil }
+        set { if !newValue { pendingDeleteNote = nil } }
+    }
+
+    func requestDeleteNote(_ item: Queries.TimelineItem) {
+        pendingDeleteNote = item
+    }
+
+    /// The confirmed act. No flush here, deliberately, and the difference
+    /// from the in-note door is the whole reason: this row deletes a note
+    /// NO surface on this phone has open, so there is no pending buffer to
+    /// land (`flushNow` on a coordinator nothing opened is a no-op with
+    /// nothing pending — `AppSession.runCopying`'s own recorded property).
+    /// The in-note door flushes because it always has one.
+    @discardableResult
+    func confirmDeleteNote() async -> Bool {
+        guard let item = pendingDeleteNote else { return false }
+        pendingDeleteNote = nil
+        do {
+            try await session.runner.run { ops in
+                try ops.deleteContainer(item.postID)
+            }
+            lastError = nil
+            receipt = RecoveryCopy.movedToTrashReceipt(.note)
+            return true
+        } catch {
+            receipt = nil
+            lastError = MobileEditorViewModel.deleteNoteRefusal(error)
+            return false
+        }
+    }
+
+    /// A landed act's own words — kept apart from `lastError` so a success
+    /// is never rendered in the red slot (the Mac recovery model's split).
+    private(set) var receipt: String?
+
     /// A listing row's display name — the ONE display brain (13k K1).
     nonisolated static func rowTitle(_ item: Queries.TimelineItem) -> String {
         DisplayTitle.note(

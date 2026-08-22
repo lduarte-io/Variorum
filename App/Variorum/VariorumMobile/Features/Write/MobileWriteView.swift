@@ -78,6 +78,11 @@ struct MobileWriteScreen: View {
     /// session-local (evaporates with this screen — M9's lifetime).
     @State private var lenses: MobileLensesModel
     @State private var lensesPresented = false
+    /// The session, held for the leaving road (PR7 — `savepointOnLeaving`
+    /// is `AppSession`'s, and `onDisappear` is one of the phone's two
+    /// leavings). Everything else here reaches the store through the models
+    /// built from it at init.
+    private let session: AppSession
     /// The shell's voice authority; nil in harness/preview use, where the
     /// stored preference read at init governs.
     private let router: MobileShellRouter?
@@ -89,16 +94,33 @@ struct MobileWriteScreen: View {
     /// Push another note on the owning stack (the diverged copy's landing
     /// — R67); nil in harness/preview use.
     private let onOpenNote: ((String) -> Void)?
+    /// **The note went (round 2 batch 4 — PR1).** A surface standing on a
+    /// tombstoned note is the one thing the delete door must never leave
+    /// behind, so the shell pops this screen off its OWNING stack. nil in
+    /// harness/preview use (the pins call the model door directly and
+    /// assert the callback fired).
+    private let onDeleted: (() -> Void)?
+    /// The ⋯ sheet (M20's persistent undo/redo door + PR1's Delete Note…).
+    @State private var noteActionsPresented = false
     private let fallbackVoice: ThemeVoice
     @Environment(\.colorScheme) private var scheme
 
+    /// `editor` is a TEST SEAM and nothing else: production passes nothing
+    /// and this screen mints its own model, exactly as it always has. The
+    /// pins hand in the model they already drove, so the surface under test
+    /// is the app's own screen showing the app's own state — which is the
+    /// whole of §15's trap (b): *mount the real surface and drive the real
+    /// control.* Without it a pin would host a SECOND model over the same
+    /// post and assert against a receipt nothing had written.
     init(
         session: AppSession, postID: String,
         router: MobileShellRouter? = nil, beginEditing: Bool = false,
         tab: MobileTab = .shelf,
-        onOpenNote: ((String) -> Void)? = nil
+        onOpenNote: ((String) -> Void)? = nil,
+        onDeleted: (() -> Void)? = nil,
+        editor injected: MobileEditorViewModel? = nil
     ) {
-        let editor = MobileEditorViewModel(session: session, postID: postID)
+        let editor = injected ?? MobileEditorViewModel(session: session, postID: postID)
         _model = State(initialValue: editor)
         _membership = State(initialValue: MobileMembershipModel(session: session, postID: postID))
         _noteTags = State(initialValue: MobileNoteTagsModel(session: session, postID: postID))
@@ -106,10 +128,12 @@ struct MobileWriteScreen: View {
         _blockList = State(initialValue: MobileBlockListModel(session: session, postID: postID))
         _lenses = State(initialValue: MobileLensesModel(
             session: session, postID: postID, editor: editor))
+        self.session = session
         self.router = router
         self.beginEditing = beginEditing
         self.tab = tab
         self.onOpenNote = onOpenNote
+        self.onDeleted = onDeleted
         // The live phone voice governs from the first materialization —
         // set BEFORE the surface exists (makeUIView runs later). With a
         // router the value is already authoritative (idempotent).
@@ -148,13 +172,33 @@ struct MobileWriteScreen: View {
             }
             .onDisappear {
                 let model = model
+                let session = session
                 router?.editors.deregister(model)
-                Task { await model.teardown() }
+                // **PR7 — the OTHER leaving road** (round 2 batch 4). The
+                // note is popped or replaced: land what is pending, then
+                // leave one quiet savepoint per take that changed, through
+                // the ONE shared entry (`AppSession.savepointOnLeaving`,
+                // 13j J11). It runs AFTER `teardown` because teardown is
+                // the S1 backstop that mints the open tail and attaches
+                // trailing runs — a savepoint taken before it would miss
+                // the paragraph she was still typing.
+                //
+                // `savepointOnLeaving` never throws (a leaving is not a
+                // moment to refuse at) and its own flush is a no-op on the
+                // coordinator teardown just drained.
+                Task {
+                    await model.teardown()
+                    await session.savepointOnLeaving(model.postID)
+                }
             }
     }
 
     private var masthead: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        // The documented `@Bindable` local (round 2 batch 4): `$door.…` is a
+        // REAL observation dependency, which is exactly what the Mac's
+        // computed-`Binding` purge dialogs lack (§15's trap (a)).
+        @Bindable var door = model.undoDoor
+        return VStack(alignment: .leading, spacing: 4) {
             HStack(alignment: .firstTextBaseline) {
                 // Rename note (parity C2 — "full app functionality"): the
                 // title IS the door; an alert confirms, so a stray tap
@@ -179,6 +223,7 @@ struct MobileWriteScreen: View {
                     copyDoor
                     findDoor
                     sealDoor
+                    noteActionsDoor
                 }
             }
             // The note's primary home reads alone (full width for
@@ -220,8 +265,28 @@ struct MobileWriteScreen: View {
                     .accessibilityLabel("Unlock Note")
                 }
             }
-            if let status = model.statusMessage {
-                Text(status).font(tokens.small).foregroundStyle(tokens.muted)
+            // **THE RECEIPT, and since round 2 batch 4 its ACTION** (M20 ≡
+            // her R10): *"the phone ALREADY shows a receipt after a
+            // structural act … and an Undo action on that receipt is the
+            // standard iOS shape."*
+            //
+            // The row renders for EITHER half. Several structural acts —
+            // divide, merge, Make Block, the cross-block edit — deliberately
+            // say nothing (the text rearranging on screen is the report),
+            // and they now carry a BARE Undo: the way back with no new
+            // chatter, which is both the calmer surface and the reason every
+            // shipped "this act says nothing" pin stays true.
+            //
+            // The button's WORDS come from the live stack, so it can never
+            // name an entry that has since moved, and it renders only while
+            // the stack really holds that end (P-2).
+            if model.statusMessage != nil || model.statusAction != nil {
+                HStack(spacing: 10) {
+                    if let status = model.statusMessage {
+                        Text(status).font(tokens.small).foregroundStyle(tokens.muted)
+                    }
+                    receiptAction
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -262,6 +327,30 @@ struct MobileWriteScreen: View {
         }
         .sheet(isPresented: $lensesPresented) {
             MobileLensSheet(model: lenses, tokens: tokens)
+        }
+        .sheet(isPresented: $noteActionsPresented) {
+            MobileNoteActionsSheet(
+                door: model.undoDoor, model: model, tokens: tokens,
+                onDeleted: { onDeleted?() })
+                .presentationDetents([.medium, .large])
+        }
+        // A12's destructive-undo warning for the RECEIPT's button (the ⋯
+        // sheet hosts its own twin; each binds to the surface that asked,
+        // so exactly one presents). The binding is `@Bindable`-projected —
+        // never the Mac's computed-Binding road (§15's trap (a)).
+        .alert(
+            model.undoDoor.pendingWarning.map(
+                { StructuralUndoCopy.discardingUndoQuestion($0.warning) }) ?? "",
+            isPresented: $door.warningAtReceipt
+        ) {
+            Button("Undo", role: .destructive) {
+                let door = model.undoDoor
+                Task { await door.confirmPendingUndo() }
+            }
+            Button("Cancel", role: .cancel) { model.undoDoor.cancelPendingUndo() }
+        } message: {
+            Text(model.undoDoor.pendingWarning.map(
+                { MobileUndoDoor.discardingUndoDetail($0.warning) }) ?? "")
         }
         .alert("Entry Date", isPresented: $datePresented) {
             TextField("2026-08-09", text: $dateField)
@@ -418,6 +507,61 @@ struct MobileWriteScreen: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Copy Note")
+    }
+
+    /// **The receipt's action** (M20). It offers the direction the last
+    /// act left available: Undo after a structural act, Redo right after an
+    /// undo (the ping-pong her R10 asked for). Rendered only when the stack
+    /// really holds that end — a receipt can outlive its entry, and a
+    /// button that would pop somebody else's act is worse than no button.
+    @ViewBuilder
+    private var receiptAction: some View {
+        switch model.statusAction {
+        case .undo:
+            if let label = model.undoDoor.undoLabel {
+                Button {
+                    let door = model.undoDoor
+                    Task { await door.beginUndo(from: .receipt) }
+                } label: {
+                    Text(tokens.chromeLabel("Undo"))
+                }
+                .font(tokens.small)
+                .foregroundStyle(tokens.accent)
+                .buttonStyle(.plain)
+                .accessibilityLabel(StructuralUndoCopy.undoDoorTitle(label))
+            }
+        case .redo:
+            if let label = model.undoDoor.redoLabel {
+                Button {
+                    let door = model.undoDoor
+                    Task { await door.redo() }
+                } label: {
+                    Text(tokens.chromeLabel("Redo"))
+                }
+                .font(tokens.small)
+                .foregroundStyle(tokens.accent)
+                .buttonStyle(.plain)
+                .accessibilityLabel(StructuralUndoCopy.redoDoorTitle(label))
+            }
+        case nil:
+            EmptyView()
+        }
+    }
+
+    /// The note's ⋯ (round 2 batch 4): the note-scale acts sheet — M20's
+    /// persistent undo/redo door and PR1's Delete Note…. It sits in the
+    /// note-tool corner beside copy · find · seal, because everything it
+    /// carries is the NOTE's (the bar's ⋯ is where BLOCK acts live).
+    private var noteActionsDoor: some View {
+        Button {
+            noteActionsPresented = true
+        } label: {
+            Image(systemName: "ellipsis")
+                .font(tokens.small)
+                .foregroundStyle(tokens.faint)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(MobileNoteActionsSheet.doorLabel)
     }
 
     /// Find in note (parity C4b item 3): the masthead's trailing corner

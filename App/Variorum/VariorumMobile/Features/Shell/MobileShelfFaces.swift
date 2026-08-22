@@ -114,4 +114,22 @@ nonisolated enum MobileShelfFaces {
             .sorted { $0.reading.name < $1.reading.name }
         return pinned + journals + others
     }
+
+    // MARK: - Delete a book (round 2, batch 4 — PR4)
+
+    /// The door's word, in ONE place: two doors offer it (the shelf row's
+    /// long-press and the book-details sheet) and they must not drift.
+    static let deleteBookDoorTitle = "Delete Book…"
+    static let deleteBookConfirmTitle = "Delete Book"
+
+    /// **The confirm names what goes AND what stays.** The second sentence
+    /// is the 13j books lesson she had to teach once already: deleting a
+    /// book does not delete its notes — only the ordered collection goes,
+    /// and it goes to the Trash for the window like everything else.
+    static func deleteBookConfirmDetail(name: String?) -> String {
+        let subject = name.map { "\"\($0)\" goes" } ?? "The book goes"
+        return "\(subject) to the \(RecoveryCopy.trashSection) for "
+            + "\(TrashWindow.days) days. \(RecoveryCopy.deleteBookKeepsItsNotes) "
+            + "You can put it back from \(RecoveryCopy.surfaceName) until then."
+    }
 }

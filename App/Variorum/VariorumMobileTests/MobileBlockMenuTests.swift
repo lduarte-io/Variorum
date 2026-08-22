@@ -281,9 +281,17 @@ struct MobileBlockMenuTests {
             // promise a user cannot act on is not a fact she can use. This
             // phone has no tray face and no undo door, so both strings now
             // say only what is true HERE.
+            //
+            // **ROUND 2 BATCH 4: the confirm's second half CHANGED, and the
+            // pin changed WITH the fact it pins.** M20 built the structural
+            // undo door, so "There's no undo here" became false — the same
+            // J8 failure this pin was written to prevent, arriving from the
+            // other direction. The receipt sentence is byte-unchanged; the
+            // tray is still unpromised.
             #expect(model.statusMessage == "Block deleted.")
             #expect(MobileBlockMenuController.deleteConfirmDetail
-                == "The block leaves this note, with its takes. There's no undo here.")
+                == "The block leaves this note, with its takes. "
+                    + "Undo is on the receipt afterwards, and in the note's ⋯.")
             for line in [MobileStructuralController.blockDeletedStatus,
                          MobileBlockMenuController.deleteConfirmDetail] {
                 // The no-redirect principle (MobileSoul §4) — unchanged.

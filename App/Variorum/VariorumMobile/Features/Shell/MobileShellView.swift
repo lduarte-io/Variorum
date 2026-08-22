@@ -34,6 +34,10 @@ enum MobileRoute: Hashable {
     /// contents screen's "Read" door, never by the book tap itself.
     case bookRead(String)
     case note(String, focus: Bool)
+    /// The recovery surface — "Archived & Deleted" (round 2 batch 4, PR2).
+    /// Pushed, never held: its stranded-originals arm walks lineage
+    /// families, so it is a deliberately-opened room (the Mac's own posture).
+    case recovery
 }
 
 enum MobileTab {
@@ -53,6 +57,9 @@ struct MobileShellView: View {
     @State private var libraryModel: MobileLibraryViewModel
     /// The scraps area's model (parity C3 — the Library's third filter).
     @State private var scrapsModel: MobileScrapsModel
+    /// The recovery surface's model (PR2) — one per shell, so the filter
+    /// and sort survive a push/pop the way the Library's do.
+    @State private var trashModel: MobileTrashModel
     /// The starred set (parity C3 — ONE model threaded to every surface
     /// carrying the star door, the Mac StarDoor discipline).
     @State private var starsModel: MobileStarsModel
@@ -70,6 +77,7 @@ struct MobileShellView: View {
         _shelfModel = State(initialValue: MobileShelfViewModel(session: session))
         _libraryModel = State(initialValue: MobileLibraryViewModel(session: session))
         _scrapsModel = State(initialValue: MobileScrapsModel(session: session))
+        _trashModel = State(initialValue: MobileTrashModel(session: session))
         _starsModel = State(initialValue: MobileStarsModel(session: session))
         // The quick-note box's session (round 2, M5). Bound HERE and not
         // in a `.task` deliberately: `bind` is idempotent and writes only
@@ -110,7 +118,8 @@ struct MobileShellView: View {
                     model: libraryModel, scraps: scrapsModel, stars: starsModel,
                     tokens: tokens,
                     tabBar: { tabBar },
-                    onOpen: { libraryPath.append($0) })
+                    onOpen: { libraryPath.append($0) },
+                    onOpenRecovery: { libraryPath.append(MobileRoute.recovery) })
             }
             .opacity(tab == .library ? 1 : 0)
             .allowsHitTesting(tab == .library)
@@ -171,7 +180,10 @@ struct MobileShellView: View {
             MobileBookView(
                 session: session, readingID: readingID, tokens: tokens,
                 onOpen: { push(.note($0, focus: false), in: owner) },
-                onRead: { push(.bookRead(readingID), in: owner) })
+                onRead: { push(.bookRead(readingID), in: owner) },
+                // PR4: the book went — never leave a contents list standing
+                // on a tombstone.
+                onDeleted: { pop(in: owner) })
         case .bookRead(let readingID):
             MobileReadView(
                 session: session, readingID: readingID, tokens: tokens,
@@ -180,7 +192,15 @@ struct MobileShellView: View {
             MobileWriteScreen(
                 session: session, postID: postID, router: router,
                 beginEditing: focus, tab: owner,
-                onOpenNote: { push(.note($0, focus: false), in: owner) })
+                onOpenNote: { push(.note($0, focus: false), in: owner) },
+                // PR1: the note went — pop, because a Write surface standing
+                // on a tombstoned note is exactly what the delete door must
+                // not leave behind.
+                onDeleted: { pop(in: owner) })
+        case .recovery:
+            MobileTrashView(
+                model: trashModel, tokens: tokens,
+                onOpen: { push(.note($0, focus: false), in: owner) })
         }
     }
 
@@ -203,6 +223,17 @@ struct MobileShellView: View {
             shelfPath.append(route)
         } else {
             libraryPath.append(route)
+        }
+    }
+
+    /// Its mirror (round 2 batch 4): a screen whose subject just went pops
+    /// off the OWNING stack, by the same rule — never the visible tab's.
+    /// Guarded, because a pop of an empty path traps.
+    private func pop(in owner: MobileTab) {
+        if owner == .shelf {
+            if !shelfPath.isEmpty { shelfPath.removeLast() }
+        } else {
+            if !libraryPath.isEmpty { libraryPath.removeLast() }
         }
     }
 

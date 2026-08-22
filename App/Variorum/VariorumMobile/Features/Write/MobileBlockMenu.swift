@@ -248,12 +248,21 @@ final class MobileBlockMenuController {
     ///
     /// It does NOT say "do it on the Mac" — the no-redirect principle
     /// (MobileSoul §4) — and it does not say "gone forever" either, because
-    /// the block is tombstoned, not purged. "There's no undo here" is
-    /// exactly what it is. The phone's own tray is the parity ledger's row.
+    /// the block is tombstoned, not purged.
+    ///
+    /// **ROUND 2 BATCH 4 — THE SENTENCE GRADUATES, because M20 made its
+    /// second half FALSE.** It used to end *"There's no undo here"*, which
+    /// was true when written and is the exact class J8 warns about from the
+    /// other side: a copy line that keeps saying no after the door opens.
+    /// The structural undo door (her R10) now stands on the receipt this
+    /// delete writes and in the note's ⋯, so the confirm names the road it
+    /// really has. The tray twin is still the ledger's (batch 5) and is
+    /// still not promised here.
     /// Pinned static — a promise made in a literal is a promise no test can
     /// keep.
     static let deleteConfirmDetail =
-        "The block leaves this note, with its takes. There's no undo here."
+        "The block leaves this note, with its takes. Undo is on the receipt "
+        + "afterwards, and in the note's ⋯."
 
     private func confirmDelete(blockID: String) {
         guard let confirmDestructive else {

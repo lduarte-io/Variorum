@@ -101,6 +101,22 @@ struct MobileShelfView<TabBar: View>: View {
         .background(tokens.room.ignoresSafeArea())
         .task { await model.start() }
         .task { await model.refreshTags() }
+        // PR4's confirm. `$model.deleteBookPresented` is a real `@Bindable`
+        // projection over the observable model — never a computed
+        // `Binding(get:set:)` (§15's trap (a), the Mac's dead purge doors).
+        .alert(
+            MobileShelfFaces.deleteBookConfirmTitle,
+            isPresented: $model.deleteBookPresented
+        ) {
+            Button(tokens.chromeLabel("Delete"), role: .destructive) {
+                let model = model
+                Task { await model.confirmDeleteBook() }
+            }
+            Button(tokens.chromeLabel("Cancel"), role: .cancel) {}
+        } message: {
+            Text(MobileShelfFaces.deleteBookConfirmDetail(
+                name: model.pendingDeleteBook?.reading.name))
+        }
     }
 
     /// "~/shelf · 6 books" (terminal) / "Shelf · 6 books" (study); the
@@ -187,6 +203,16 @@ struct MobileShelfView<TabBar: View>: View {
                 let stars = stars
                 Task { await stars.toggle(target, from: .shelf) }
             }
+            // Delete the book (round 2 batch 4 — PR4). The row's long-press
+            // is where its other acts already live; the confirm and the
+            // wording are the model's, so this door and the book-details
+            // door cannot describe one act two ways.
+            Button(
+                tokens.chromeLabel(MobileShelfFaces.deleteBookDoorTitle),
+                role: .destructive
+            ) {
+                model.requestDeleteBook(book)
+            }
         }
     }
 
@@ -221,6 +247,10 @@ struct MobileShelfView<TabBar: View>: View {
             case .book(let id): onOpenBook(id)
             case .note(let id, _): onOpenNote(id)
             case .bookRead(let id): onOpenBook(id)
+            // A star never names the recovery surface (PR2's route joined
+            // `MobileRoute` at round 2 batch 4) — stated rather than
+            // defaulted, so a future route has to be answered here.
+            case .recovery: break
             }
         } label: {
             HStack(alignment: .firstTextBaseline, spacing: 8) {

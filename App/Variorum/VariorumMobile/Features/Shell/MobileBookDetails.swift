@@ -24,9 +24,16 @@
 //    only (the Mac's exact render rule; P-2 — elsewhere the door could
 //    never mean what it says), the designation state shown when held.
 //
-//  Deliberately absent, as ruled: delete book (PL-3/13j) · extents
-//  (LK5's ranking) · chapters/reorder/sort/filter/convert (the Mac's
-//  coming book redefinition — the post-13i round's).
+//  · DELETE BOOK — **arrived at round 2 batch 4 (PR4)**, where the
+//    parity inventory's sweep found the phone could not delete a reading
+//    from anywhere. Move to Trash, confirmed, and the confirm says the
+//    thing she once had to teach: the book's NOTES stay in the library.
+//    (The shelf row's long-press carries the same door; both speak
+//    `MobileShelfFaces`' one wording.)
+//
+//  Deliberately absent, as ruled: extents (LK5's ranking) ·
+//  chapters/reorder/sort/filter/convert (the Mac's coming book
+//  redefinition — the post-13i round's).
 //
 
 import Foundation
@@ -116,6 +123,32 @@ final class MobileBookDetailsModel {
         await run { try $0.renameReading(id, name: trimmed) }
     }
 
+    /// **Delete the book** (round 2, batch 4 — PR4). Move to Trash: the
+    /// reading tombstones with its chapters and memberships by cascade, and
+    /// `restoreReading` waits on the other side for the window. Its NOTES
+    /// are untouched — they are pointed at, never contained.
+    ///
+    /// Returns whether it went, so the sheet can dismiss and the book
+    /// screen behind it can pop: a surface standing on a tombstoned book is
+    /// exactly what this door must not leave behind.
+    @discardableResult
+    func deleteBook() async -> Bool {
+        let id = readingID
+        do {
+            try await session.runner.run { ops in
+                try ops.deleteReading(id)
+            }
+            lastError = nil
+            return true
+        } catch let error as OperationError {
+            lastError = Self.refusal(error)
+            return false
+        } catch {
+            lastError = String(describing: error)
+            return false
+        }
+    }
+
     /// The daily-designation road (the Today door's refusals name it).
     func designateDaily() async {
         let id = readingID
@@ -152,14 +185,22 @@ final class MobileBookDetailsModel {
 struct MobileBookDetailsSheet: View {
     @State private var model: MobileBookDetailsModel
     let tokens: VoiceTokens
+    /// The book went — the screen behind this sheet must navigate away
+    /// (round 2 batch 4, PR4). nil in harness/preview use.
+    let onDeleted: (() -> Void)?
     @State private var renamePresented = false
     @State private var renameField = ""
+    @State private var deletePresented = false
     @Environment(\.dismiss) private var dismiss
 
-    init(session: AppSession, readingID: String, tokens: VoiceTokens) {
+    init(
+        session: AppSession, readingID: String, tokens: VoiceTokens,
+        onDeleted: (() -> Void)? = nil
+    ) {
         _model = State(initialValue: MobileBookDetailsModel(
             session: session, readingID: readingID))
         self.tokens = tokens
+        self.onDeleted = onDeleted
     }
 
     var body: some View {
@@ -181,6 +222,8 @@ struct MobileBookDetailsSheet: View {
                 if MobileBookDetailsModel.showsDailyDoor(book.reading) {
                     dailyRow
                 }
+                Divider().overlay(tokens.line)
+                deleteRow
             }
             if let error = model.lastError {
                 Text(error).font(tokens.small).foregroundStyle(.red)
@@ -202,6 +245,47 @@ struct MobileBookDetailsSheet: View {
             .disabled(!MobileBookDetailsModel.canRename(renameField))
             Button("Cancel", role: .cancel) {}
         }
+        // PR4's confirm — a real `@State` binding (§15's trap (a)).
+        .alert(
+            MobileShelfFaces.deleteBookConfirmTitle,
+            isPresented: $deletePresented
+        ) {
+            Button(tokens.chromeLabel("Delete"), role: .destructive) {
+                let model = model
+                Task {
+                    if await model.deleteBook() {
+                        dismiss()
+                        onDeleted?()
+                    }
+                }
+            }
+            Button(tokens.chromeLabel("Cancel"), role: .cancel) {}
+        } message: {
+            Text(MobileShelfFaces.deleteBookConfirmDetail(
+                name: model.book?.reading.name))
+        }
+    }
+
+    /// **Delete Book…** (PR4) — a plain Button, like every other act row
+    /// here, so it is a door a pin can actually drive (§15's trap (b)).
+    private var deleteRow: some View {
+        Button {
+            deletePresented = true
+        } label: {
+            HStack {
+                Text(tokens.chromeLabel(MobileShelfFaces.deleteBookDoorTitle))
+                    .font(tokens.body)
+                    .foregroundStyle(.red)
+                Spacer()
+                Text(tokens.chromeLabel(RecoveryCopy.deleteBookKeepsItsNotes))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(2)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(MobileShelfFaces.deleteBookDoorTitle)
     }
 
     /// The identity block — the name row IS the rename door (the

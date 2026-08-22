@@ -86,23 +86,26 @@ nonisolated enum TrayPath {
     static let deletedSection = "Deleted & archived"
     static let originalsSection = "Preserved originals"
     /// The one verb, both sections.
-    static let putBackVerb = "Put back"
+    ///
+    /// **Round 2 batch 4 (mobile): the SEMANTIC strings below now live in
+    /// `Shared/RecoveryCopy.swift`** and these are forwarders — this enum's
+    /// own "one home so receipts cannot drift" argument, applied across the
+    /// platform boundary now that the phone has recovery surfaces too. The
+    /// tray's pure chrome (the menu label, the ⌫ glyph, the door phrase,
+    /// the section headers) stays here, where only the Mac reads it.
+    static let putBackVerb = RecoveryCopy.putBackVerb
 
     /// **The countdown** (13j J1 — 30 days, her fixed window). Deleted rows
     /// wear it; ARCHIVED rows never do (archive is kept-forever, and that
     /// difference is the whole reason the two states share a section header
     /// that names them both).
     static func daysLeftLabel(_ days: Int) -> String {
-        switch days {
-        case 0: return "leaves today"
-        case 1: return "1 day left"
-        default: return "\(days) days left"
-        }
+        RecoveryCopy.daysLeftLabel(days)
     }
 
     /// What an ARCHIVED row says instead of a countdown — the promise stated,
     /// so the two row kinds in one section are never read as one thing.
-    static let archivedForever = "kept — no clock"
+    static let archivedForever = RecoveryCopy.archivedForever
 
     /// **The stranded original's label** (her round-8b ruling): an original
     /// whose whole descendant family is in the Trash rides the family's
@@ -110,7 +113,7 @@ nonisolated enum TrayPath {
     /// words, was believing "the ancestor being there in that one ancestor
     /// tray is their guaranteed backup" — so the row MOVES, visibly, and
     /// wears the reason.
-    static let goesWithItsFamily = "preserved original — goes with its deleted blocks"
+    static let goesWithItsFamily = RecoveryCopy.goesWithItsFamily
 
     static func doorLabel(deleted: Int) -> String { "\(doorGlyph) \(deleted)" }
 
@@ -122,15 +125,14 @@ nonisolated enum TrayPath {
     /// flips the placement row this deletion tombstoned, so a block normally
     /// comes back WHERE IT WAS — and the receipt says that instead of
     /// "at the end", which is what it had to say while the op minted fresh.
-    static let putBackWhereItWas = "Put back where it was."
-    static let putBackAtEnd = "Put back at the end of this note."
-    static let putBackBeside = "Put back where it came from."
+    static let putBackWhereItWas = RecoveryCopy.putBackWhereItWas
+    static let putBackAtEnd = RecoveryCopy.putBackAtEnd
+    static let putBackBeside = RecoveryCopy.putBackBeside
     /// The block is live again but has nowhere to land (its note is gone).
     /// Unreachable from the tray, which is always open ON a live note —
     /// worded anyway, because a receipt that cannot be produced is still a
     /// receipt a future door could produce.
-    static let putBackUnplaced =
-        "Put back — but its note is gone, so it's waiting unplaced."
+    static let putBackUnplaced = RecoveryCopy.putBackUnplaced
 
     /// **Where a released original waits, in one phrase** — the string every
     /// ceremony explainer, merge receipt and helper entry uses. It replaces
@@ -361,37 +363,11 @@ final class TrayViewModel {
     }
 }
 
-/// **The preserved original's PUT BACK, in ONE place** (13j batch 3): the
-/// tray's originals section and the J3 peek are two doors onto one act, and a
-/// second copy of the composition is a second place for the landing rule to
-/// drift.
-///
-/// It is a face-level composition over `placeBlock` — the W-reversibility
-/// primitive, exactly as the ceremony's "reversible by re-pointing at A"
-/// promises — and NO operation's semantics change for it.
-///
-/// The landing is re-read HERE, at act time, rather than taken from a
-/// listing: a listing is a projection, and an argument read from a projection
-/// is read from a snapshot (13c R3-1's lesson, applied at the only place it
-/// can bite — the successor could have moved or gone since the panel last
-/// rendered). The recorded corner is unchanged: if it moves in the
-/// sub-millisecond window between this read and the write, `placeBlock`
-/// refuses by name and she retries.
-@MainActor
-enum PreservedOriginPutBack {
-    /// Returns the receipt; refusals throw for the caller to word.
-    static func run(session: AppSession, postID: String, blockID: String) async throws -> String {
-        let landing = try await session.database.read { db in
-            try Queries.preservedOriginals(db, postID: postID)
-                .first { $0.blockID == blockID }?.landAfterBlockID
-        }
-        let insert: Operations.InsertPosition = landing.map { .after($0) } ?? .end
-        try await session.runner.run { ops in
-            _ = try ops.placeBlock(blockID, in: postID, at: insert)
-        }
-        return landing == nil ? TrayPath.putBackAtEnd : TrayPath.putBackBeside
-    }
-}
+// `PreservedOriginPutBack` MOVED to `Shared/RecoveryCopy.swift` at round 2
+// batch 4 (mobile), with its full doc comment: the phone's Trash needs the
+// identical read-then-place composition, and two copies of a read-then-write
+// is exactly what MobileSoul §3 forbids. The tray's two doors above still
+// call it; so does the phone's Trash.
 
 /// **Did this delete strand a preserved original?** (13j, her round-8b
 /// ruling (d) — the receipt names it.)
@@ -425,8 +401,7 @@ enum StrandedOriginals {
 /// out (the J8 doctrine): the tray still OPENS under a seal, because reading
 /// is free; it is putting back that the seal refuses.
 nonisolated enum TrayRefusalCopy {
-    static let sealed =
-        "This note is marked complete — unseal it to put this back."
+    static let sealed = RecoveryCopy.sealedPutBackRefusal
 
     static func message(for error: Error) -> String {
         if let error = error as? OperationError, case .lockedPost = error {

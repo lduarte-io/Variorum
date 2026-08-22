@@ -23,6 +23,9 @@ struct MobileLibraryView<TabBar: View>: View {
     let tokens: VoiceTokens
     @ViewBuilder let tabBar: () -> TabBar
     let onOpen: (MobileRoute) -> Void
+    /// The recovery surface's door (round 2 batch 4 — PR2). nil in
+    /// harness/preview use.
+    var onOpenRecovery: (() -> Void)?
 
     @State private var query = ""
 
@@ -41,6 +44,7 @@ struct MobileLibraryView<TabBar: View>: View {
                         MobileScrapsSection(model: scraps, tokens: tokens)
                     } else {
                         listingRows
+                        recoveryRow
                     }
                 }
                 .padding(.horizontal, 8)
@@ -49,6 +53,15 @@ struct MobileLibraryView<TabBar: View>: View {
                 Text(error)
                     .font(tokens.small)
                     .foregroundStyle(.red)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 4)
+            }
+            if let receipt = model.receipt {
+                // A landed act's own words, in the muted slot — never the
+                // red one (the Mac recovery model's split).
+                Text(tokens.chromeLabel(receipt))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
                     .padding(.horizontal, 20)
                     .padding(.bottom, 4)
             }
@@ -78,6 +91,43 @@ struct MobileLibraryView<TabBar: View>: View {
             if model.filter == .scraps { await scraps.start() }
         }
         .task(id: query) { await model.search(query) }
+        // PR1's confirm — a real `@Bindable` projection (§15's trap (a)).
+        .alert(
+            MobileEditorViewModel.deleteNoteConfirmTitle,
+            isPresented: $model.deleteNotePresented
+        ) {
+            Button(tokens.chromeLabel("Delete"), role: .destructive) {
+                let model = model
+                Task { await model.confirmDeleteNote() }
+            }
+            Button(tokens.chromeLabel("Cancel"), role: .cancel) {}
+        } message: {
+            Text(MobileEditorViewModel.deleteNoteConfirmDetail)
+        }
+    }
+
+    /// **The recovery surface's door** (round 2 batch 4 — PR2). It is the
+    /// listing's own trailing row, the `+ new book` precedent: a list of
+    /// notes ends with the way to the notes that left. The path line stays
+    /// two doors wide (P38's crowding lesson), and a row is a real Button —
+    /// a door a pin can drive (§15's trap (b)), which a `Menu` item is not.
+    @ViewBuilder
+    private var recoveryRow: some View {
+        if let onOpenRecovery {
+            Button(action: onOpenRecovery) {
+                HStack {
+                    Text(tokens.chromeLabel(RecoveryCopy.surfaceName))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.accent)
+                    Spacer()
+                }
+                .padding(.vertical, 11)
+                .padding(.horizontal, 12)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(RecoveryCopy.surfaceName)
+        }
     }
 
     private var pathLine: some View {
@@ -213,6 +263,15 @@ struct MobileLibraryView<TabBar: View>: View {
                     MobileStarsModel.doorTitle(starred: stars.isStarred(target)))) {
                     let stars = stars
                     Task { await stars.toggle(target, from: .library) }
+                }
+                // Delete the note (round 2 batch 4 — PR1): the row's
+                // long-press, beside Star, the phone's established
+                // row-menu grammar. Move to Trash; the model confirms.
+                Button(
+                    tokens.chromeLabel(MobileEditorViewModel.deleteNoteTitle),
+                    role: .destructive
+                ) {
+                    model.requestDeleteNote(item)
                 }
             }
         }

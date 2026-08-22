@@ -706,8 +706,17 @@ struct MobileWholeBlockDeleteTests {
         }
     }
 
-    /// The no-redirect principle holds on this batch's new copy: nothing it
-    /// can say names the other platform, or a door this phone lacks.
+    /// The no-redirect principle holds on this batch's copy: nothing it can
+    /// say names the other platform, or a door this phone lacks.
+    ///
+    /// **ROUND 2 BATCH 4 UPDATED TWO OF ITS CLAUSES, because the doors they
+    /// denied now exist.** The "no Trash" clause is replaced by its
+    /// positive: PR2 built the Trash, so the stranding sentence NAMES it
+    /// (13j J8(a) read forwards — withholding a destination she can now
+    /// reach would be the same defect wearing the other coat). The chord
+    /// clause stays, and stays for its real reason: the phone HAS an undo
+    /// door since M20, but it has no chord culture, so a receipt must never
+    /// name ⌥⌘Z. The tray clause is untouched — that face is batch 5's.
     @Test func theReceiptsNameNothingThePhoneDoesNotHave() {
         for line in [MobileStructuralController.blocksDeletedStatus(1),
                      MobileStructuralController.blocksDeletedStatus(3),
@@ -715,11 +724,15 @@ struct MobileWholeBlockDeleteTests {
                      MobileStructuralController.strandedOriginalNote(2)] {
             #expect(!line.contains("Mac"))
             #expect(!line.lowercased().contains("tray"))
-            #expect(!line.lowercased().contains("trash"),
-                    "no Trash face on this phone yet — PL-11's row, a later batch")
             #expect(!line.lowercased().contains("forever"),
                     "these are tombstones, not purges")
-            #expect(!line.contains("\u{2325}\u{2318}Z"), "there is no undo door on this phone yet")
+            #expect(!line.contains("\u{2325}\u{2318}Z"),
+                    "no chord culture on this phone — the undo door is a button")
+        }
+        for line in [MobileStructuralController.strandedOriginalNote(1),
+                     MobileStructuralController.strandedOriginalNote(2)] {
+            #expect(line.contains(RecoveryCopy.trashSection),
+                    "the destination is named now that she can open it")
         }
         #expect(MobileStructuralController.blocksDeletedStatus(1)
             == MobileStructuralController.blockDeletedStatus,

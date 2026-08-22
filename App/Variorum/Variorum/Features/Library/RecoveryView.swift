@@ -77,37 +77,31 @@ nonisolated enum RecoveryPath {
 
     /// **The Trash** (13j J1, her word). One listing over every deleted
     /// thing, on the 30-day clock.
-    static let trashSection = "Trash"
+    ///
+    /// **Round 2 batch 4 (mobile): the SEMANTIC half of this vocabulary now
+    /// lives in `Shared/RecoveryCopy.swift`** and these are forwarders. The
+    /// reason is this enum's own: copy elsewhere promises the surface by
+    /// name and would drift — and that argument does not stop at the
+    /// platform boundary, now that the phone has a Trash too. Renaming here
+    /// still works; renaming in the shared home reaches both platforms.
+    static let trashSection = RecoveryCopy.trashSection
     /// The other half: kept forever, no clock, deliberately calm.
-    static let archivedSection = "Archived"
+    static let archivedSection = RecoveryCopy.archivedSection
     /// The one verb in the Trash, whatever kind the row is.
-    static let putBackVerb = "Put back"
+    static let putBackVerb = RecoveryCopy.putBackVerb
 
     /// How the Trash explains itself in one line — the promise stated where
     /// she can read it, because a countdown with no sentence is a threat.
-    static let windowNote =
-        "Deleted things wait here for \(TrashWindow.days) days, then they're gone."
+    static let windowNote = RecoveryCopy.windowNote
 
     /// The kind filter's words.
     static func kindLabel(_ kind: Queries.TrashItem.Kind) -> String {
-        switch kind {
-        case .note: return "Notes"
-        case .book: return "Books"
-        case .block: return "Blocks"
-        case .take: return "Takes"
-        case .preservedOriginal: return "Originals"
-        }
+        RecoveryCopy.kindLabel(kind)
     }
 
     /// What ONE row calls itself, in the singular.
     static func rowKind(_ kind: Queries.TrashItem.Kind) -> String {
-        switch kind {
-        case .note: return "note"
-        case .book: return "book"
-        case .block: return "block"
-        case .take: return "take"
-        case .preservedOriginal: return "preserved original"
-        }
+        RecoveryCopy.rowKind(kind)
     }
 
     /// The stranded original's own line (her round-8b ruling — the same
@@ -118,37 +112,21 @@ nonisolated enum RecoveryPath {
 
     /// The per-row impatience door (her round-3 rider: in-Trash only,
     /// never a note context; round 10: confirms EVERY time).
-    static let deleteNowVerb = "Delete Now"
-    static let emptyTrashVerb = "Empty Trash…"
+    static let deleteNowVerb = RecoveryCopy.deleteNowVerb
+    static let emptyTrashVerb = RecoveryCopy.emptyTrashVerb
 
     /// Delete Now's confirm, per row — destructive, unrecoverable, asked
     /// every time by her ruling.
     static func deleteNowConfirm(_ kind: Queries.TrashItem.Kind) -> String {
-        "Delete this \(rowKind(kind)) for good? It skips the rest of its "
-            + "\(TrashWindow.days) days — there's no putting it back."
+        RecoveryCopy.deleteNowConfirm(kind)
     }
 
     /// Empty Trash's confirm NAMES THE FULL COUNT BY KIND (her round-8
-    /// ruling: "everything, always — the confirm names the full count";
-    /// the memo's wording shape). Preserved originals are named when they
-    /// ride: they are the round-8b passengers, never separately purged.
+    /// ruling: "everything, always — the confirm names the full count").
+    /// Preserved originals are named when they ride: they are the round-8b
+    /// passengers, never separately purged.
     static func emptyTrashConfirm(_ counts: [Queries.TrashItem.Kind: Int]) -> String {
-        let total = counts.filter { $0.key != .preservedOriginal }.values.reduce(0, +)
-        guard total > 0 else { return "The Trash is empty — nothing to delete." }
-        let order: [Queries.TrashItem.Kind] = [.note, .block, .take, .book]
-        let parts = order.compactMap { kind -> String? in
-            guard let count = counts[kind], count > 0 else { return nil }
-            let word = kindLabel(kind).lowercased()
-            let singular = rowKind(kind)
-            return count == 1 ? "1 \(singular)" : "\(count) \(word)"
-        }
-        var sentence = "Empty the Trash? \(total) thing\(total == 1 ? "" : "s") "
-            + "go\(total == 1 ? "es" : "") for good: \(parts.joined(separator: ", "))."
-        if let originals = counts[.preservedOriginal], originals > 0 {
-            sentence += " \(originals) preserved original\(originals == 1 ? " rides" : "s ride") along with "
-                + "\(originals == 1 ? "its" : "their") famil\(originals == 1 ? "y" : "ies")."
-        }
-        return sentence
+        RecoveryCopy.emptyTrashConfirm(counts)
     }
 
     /// The receipts tell the truth about NOW vs the janitor (the J8 bar):
@@ -163,36 +141,21 @@ nonisolated enum RecoveryPath {
     ///
     /// `familyEverSynced` (R2-M1, 13j ladder B round 2 — the THIRD
     /// population: signed OUT, with synced history): a once-synced family
-    /// is exactly what `LocalPurge` defers forever (one synced member ⇒
-    /// the family waits; no janitor exists while signed out), so the
-    /// local-cleanup sentence would be indefinitely false for it. The
-    /// truth bit is `PurgeJanitor.anyFamilyEverSynced`, read per-target
-    /// by the model; its wording promises the sign-in road and no timing
-    /// it cannot keep.
+    /// is exactly what `LocalPurge` defers forever, so the local-cleanup
+    /// sentence would be indefinitely false for it. The truth bit is
+    /// `PurgeJanitor.anyFamilyEverSynced`, read per-target by the model.
     static func deleteNowReceipt(
         _ kind: Queries.TrashItem.Kind, synced: Bool, familyEverSynced: Bool = false
     ) -> String {
-        if synced {
-            return "The \(rowKind(kind)) is gone from the app now — the bytes follow "
-                + "once every synced device has caught up."
-        }
-        if familyEverSynced {
-            return "The \(rowKind(kind)) is gone from the app now — it once synced, "
-                + "so the bytes finish clearing after you next sign in."
-        }
-        return "The \(rowKind(kind)) is gone from the app now — the app's own "
-            + "cleanup removes the bytes."
+        RecoveryCopy.deleteNowReceipt(
+            kind, synced: synced, familyEverSynced: familyEverSynced)
     }
+
     static func emptyTrashReceipt(
         _ total: Int, synced: Bool, anyFamilyEverSynced: Bool = false
     ) -> String {
-        let head = "The Trash is emptied — \(total) thing\(total == 1 ? "" : "s") gone from the app now; "
-        if synced { return head + "the bytes follow once every synced device has caught up." }
-        if anyFamilyEverSynced {
-            return head + "anything that once synced finishes clearing after you "
-                + "next sign in; the rest the app cleans up now."
-        }
-        return head + "the app's own cleanup removes the bytes."
+        RecoveryCopy.emptyTrashReceipt(
+            total, synced: synced, anyFamilyEverSynced: anyFamilyEverSynced)
     }
 }
 
@@ -440,20 +403,12 @@ final class RecoveryViewModel {
     }
 }
 
-/// The Trash-row → purge-root table mapping (13j batch 6b). App-side beside
-/// its only renderer; the phone's future Trash face inherits the core op and
-/// will carry its own twin (the parity ledger's row).
-extension Queries.TrashItem.Kind {
-    nonisolated var purgeTable: String {
-        switch self {
-        case .note: return "container"
-        case .book: return "reading"
-        case .block: return "block"
-        case .take: return "variant"
-        case .preservedOriginal: return "block"  // rides its family; no own door
-        }
-    }
-}
+// The Trash-row → purge-root table mapping MOVED to
+// `Shared/RecoveryCopy.swift` at round 2 batch 4 (mobile). It used to live
+// here "beside its only renderer", promising that "the phone's future Trash
+// face … will carry its own twin" — which is the six-brains drift class
+// stated as a plan. The phone's Trash face exists now, and there is ONE
+// mapping.
 
 struct RecoveryView: View {
     let session: AppSession

@@ -65,12 +65,38 @@ final class MobileEditorViewModel {
     @ObservationIgnored let blockMenu: MobileBlockMenuController
     /// The C4a sibling: the commit door + take-history sheet's brain.
     @ObservationIgnored let takeHistory: MobileTakeHistoryController
+    /// **M20's sibling (round 2, batch 4 — her R10):** the structural
+    /// undo/redo door. The STACK is `AppSession`'s, shared and already
+    /// live on this phone; this is the routing that reaches it.
+    @ObservationIgnored let undoDoor: MobileUndoDoor
 
     // MARK: - Observable UI state
 
     /// Refusals + operation errors, one voice (functional; styling is the
     /// look track's).
-    private(set) var statusMessage: String?
+    ///
+    /// **`didSet` clears the receipt's action (round 2, batch 4 — M20).**
+    /// A dozen sites assign this property directly, and a stale Undo
+    /// button left standing beside a NEW sentence would offer to reverse
+    /// something the sentence does not name. Clearing on every set makes
+    /// that structurally impossible; `report(_:action:)` sets the action
+    /// AFTER the message, which is why the pair survives.
+    private(set) var statusMessage: String? {
+        didSet { statusAction = nil }
+    }
+
+    /// **The receipt's action (M20 — her R10's ruled home):** *"the phone
+    /// ALREADY shows a receipt after a structural act … and an Undo action
+    /// on that receipt is the standard iOS shape."* It is an ENUM, not a
+    /// closure, deliberately: the button's WORDS are read live from the
+    /// stack (`MobileUndoDoor.undoLabel`) at render time, so a receipt that
+    /// outlives its entry can never name an act that has since moved.
+    enum StatusAction: Equatable, Sendable {
+        case undo
+        case redo
+    }
+
+    private(set) var statusAction: StatusAction?
     /// The canary's visible diagnostic (release posture — obligation 2).
     private(set) var canaryMessage: String?
     private(set) var isSealed = false
@@ -162,12 +188,14 @@ final class MobileEditorViewModel {
         self.structural = MobileStructuralController(session: session)
         self.blockMenu = MobileBlockMenuController(session: session)
         self.takeHistory = MobileTakeHistoryController(session: session)
+        self.undoDoor = MobileUndoDoor(session: session)
         takes.model = self
         takesBrowser.model = self
         comments.model = self
         structural.model = self
         blockMenu.model = self
         takeHistory.model = self
+        undoDoor.model = self
         // Multicast observers, never the single-owner closures: a shared
         // coordinator has several listeners (the Mac's own move for the
         // same reason) — a second same-post editor must not deafen the
@@ -703,8 +731,9 @@ final class MobileEditorViewModel {
     /// The status voice for sibling objects' refusals (the takes ✓ door;
     /// S2 batch 2 widened it to optional so a verb's SUCCESS clears the
     /// previous refusal — the Mac `run()`'s clearing posture).
-    func report(_ message: String?) {
+    func report(_ message: String?, action: StatusAction? = nil) {
         statusMessage = message
+        statusAction = action
     }
 
     // MARK: - The pending-text contract
@@ -875,6 +904,64 @@ final class MobileEditorViewModel {
             adoptHeader(header)
         } catch {
             report(String(describing: error))
+        }
+    }
+
+    // MARK: - Delete the note (round 2, batch 4 — PR1)
+
+    /// **The phone could not delete a note. At all, from anywhere.** The
+    /// parity inventory's headline finding: `deleteContainer` appeared in
+    /// `VariorumMobile/` exactly once, inside the tutorial seeder's own
+    /// cleanup. This is the door, and the masthead's ⋯ sheet + the Library
+    /// row's long-press are its two faces.
+    ///
+    /// **Move to Trash, and it says so.** The tombstone is recoverable for
+    /// `TrashWindow.days` through the phone's own Trash (batch 4's other
+    /// half) — so the confirm names the destination and the clock rather
+    /// than promising or threatening anything it cannot keep (J8's bar).
+    ///
+    /// **Flush FIRST, like every structural door.** `deleteContainer`
+    /// cascades to the note's blocks and their takes; a refused flush that
+    /// left typed bytes pending while the tombstone landed would strand
+    /// them outside both the surface and the rows they belong to — the
+    /// exact text-loss class `deleteBlock`'s contract exists to kill. A
+    /// refused flush refuses the delete, and speaks.
+    ///
+    /// Legal under the seal BY DESIGN (AppSpec §9: the seal is
+    /// content-level — the post "may still be … deleted (recoverable via
+    /// restoreContainer)"), so no seal guard is written here.
+    ///
+    /// Returns whether the note went, so the screen can navigate away — a
+    /// surface standing on a tombstoned note is the one thing this door
+    /// must never leave behind.
+    @discardableResult
+    func deleteNote() async -> Bool {
+        guard await flushPendingText() else { return false }
+        do {
+            try await session.runner.run { [postID] ops in
+                try ops.deleteContainer(postID)
+            }
+            report(RecoveryCopy.movedToTrashReceipt(.note))
+            return true
+        } catch {
+            report(Self.deleteNoteRefusal(error))
+            return false
+        }
+    }
+
+    /// The delete door's confirm words — the shared deletion vocabulary, so
+    /// the phone and the Mac cannot describe one clock two ways.
+    static let deleteNoteTitle = "Delete Note…"
+    static var deleteNoteConfirmTitle: String { "Delete Note" }
+    static var deleteNoteConfirmDetail: String { RecoveryCopy.moveToTrashDetail(.note) }
+
+    static func deleteNoteRefusal(_ error: Error) -> String {
+        guard let error = error as? OperationError else { return String(describing: error) }
+        switch error {
+        case .containerNotFound:
+            return "That note is already gone."
+        default:
+            return String(describing: error)
         }
     }
 

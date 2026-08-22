@@ -107,18 +107,20 @@ struct ShellActions {
                 if let warning {
                     let approved = confirm?(warning) ?? Self.confirmDiscardingUndo(warning)
                     guard approved else {
-                        status.speak("Undo cancelled — nothing changed.")
+                        status.speak(StructuralUndoCopy.undoCancelled)
                         return
                     }
                 }
                 let label = try await session.runner.run { ops in
                     try undoStack.undo(with: ops)
                 }
-                status.speak(label.map { "Undid: \($0)" } ?? "No structural change to undo.")
+                status.speak(label.map(StructuralUndoCopy.undone)
+                    ?? StructuralUndoCopy.nothingToUndo)
             } catch {
                 // A failed inverse stays on the stack (UndoStack doctrine);
                 // the user resolves (e.g. unseals the post) and retries.
-                status.speak("Undo failed: \(OpsRefusalCopy.message(for: error))")
+                status.speak(StructuralUndoCopy.undoFailed(
+                    OpsRefusalCopy.message(for: error)))
             }
         }
     }
@@ -133,9 +135,11 @@ struct ShellActions {
                 let label = try await session.runner.run { ops in
                     try undoStack.redo(with: ops)
                 }
-                status.speak(label.map { "Redid: \($0)" } ?? "No structural change to redo.")
+                status.speak(label.map(StructuralUndoCopy.redone)
+                    ?? StructuralUndoCopy.nothingToRedo)
             } catch {
-                status.speak("Redo failed: \(OpsRefusalCopy.message(for: error))")
+                status.speak(StructuralUndoCopy.redoFailed(
+                    OpsRefusalCopy.message(for: error)))
             }
         }
     }
@@ -293,7 +297,10 @@ struct ShellActions {
     nonisolated static func discardingUndoQuestion(
         _ warning: UndoStack.PendingUndoWarning
     ) -> String {
-        "Undo \(warning.label)?"
+        // Round 2 batch 4 (mobile): the QUESTION is shared — the phone's
+        // undo door asks the same one. The DETAIL below stays here because
+        // its sentence names ⌘S, and a chord is a platform fact.
+        StructuralUndoCopy.discardingUndoQuestion(warning)
     }
 
     nonisolated static func discardingUndoDetail(

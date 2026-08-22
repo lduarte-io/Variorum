@@ -58,6 +58,15 @@ final class MobileLivenessAuthority {
         entries.compactMap(\.editor)
     }
 
+    /// The notes those editors have open, DEDUPED (round 2 batch 4 — PR7).
+    /// Two tab stacks can hold the same note, and a leaving must savepoint
+    /// it once: `closeAutoCommit` is idempotent by its own dedupe rule, but
+    /// asking twice would still be two transactions for one leaving.
+    var registeredPostIDs: [String] {
+        var seen = Set<String>()
+        return registered.compactMap { seen.insert($0.postID).inserted ? $0.postID : nil }
+    }
+
     /// A screen's arrival: pushes only happen on the VISIBLE tab, so the
     /// newcomer takes liveness immediately (no refresh — it holds nothing
     /// yet; its arrival routine's `loadOnce` is the fresh read, and it

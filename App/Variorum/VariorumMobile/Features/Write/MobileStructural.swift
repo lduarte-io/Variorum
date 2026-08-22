@@ -175,7 +175,13 @@ final class MobileStructuralController {
         guard let model else { return }
         do {
             let landingBlockID = try await session.runner.run(body)
-            model.report(nil)
+            // **NO SENTENCE, an ACTION** (round 2 batch 4 — M20). Divide
+            // has always said nothing: the text rearranged on screen, which
+            // is the whole report. What it lacked was the way back, so the
+            // receipt slot carries the bare Undo and no new chatter — the
+            // calmest shape, and it leaves every shipped "says nothing"
+            // pin true.
+            model.report(nil, action: .undo)
             await model.refreshTakesFromStore()
             if let range = model.rangeOfBlock(landingBlockID) {
                 model.textView?.selectedRange = NSRange(location: range.location, length: 0)
@@ -291,7 +297,7 @@ final class MobileStructuralController {
         }
         do {
             let mergedBlockID = try await session.runner.run(body)
-            model.report(nil)
+            model.report(nil, action: .undo)  // the bare Undo — see divide
             await model.refreshTakesFromStore()
             // Caret at the join: right where the trailing half begins
             // (the Mac's instant-merge caret rule; the carry-all's chosen
@@ -363,7 +369,9 @@ final class MobileStructuralController {
                 // documented behavior — "the editor may hint"; the Mac's
                 // contract item 8 sentence, spoken through the phone's
                 // status line, its transient face. PROVISIONAL).
-                model.report(otherTakes > 0 ? Self.fannedExtractHint(otherTakes) : nil)
+                model.report(
+                    otherTakes > 0 ? Self.fannedExtractHint(otherTakes) : nil,
+                    action: .undo)
                 await model.refreshTakesFromStore()
                 if let landing = model.rangeOfBlock(result.block.id) {
                     model.textView?.selectedRange = NSRange(
@@ -391,7 +399,7 @@ final class MobileStructuralController {
                         return first.block.id
                     }
                 }
-                model.report(nil)
+                model.report(nil, action: .undo)  // the bare Undo — see divide
                 await model.refreshTakesFromStore()
                 if let landing = model.rangeOfBlock(middleID) {
                     model.textView?.selectedRange = NSRange(
@@ -516,7 +524,13 @@ final class MobileStructuralController {
     }
 
     /// The Mac door's own note, verbatim (one sentence, both platforms).
+    /// **No Undo rides it** (round 2 batch 4 — M20): `newBlock` registers
+    /// no structural undo entry (AppSpec §9's list does not include it), so
+    /// a button here would pop whatever entry happened to be on top — some
+    /// EARLIER act she never asked to reverse. Verified by reading the op,
+    /// not assumed.
     static let blockInsertedStatus = "New block added below — type away."
+
 
     // MARK: - Delete block (the ⋯ menu's destructive act — S4 ladder MAJOR 1)
 
@@ -550,8 +564,10 @@ final class MobileStructuralController {
             try await session.runner.run { ops in
                 try ops.deleteBlock(blockID)
             }
-            model.report(Self.blockDeletedStatus
-                + (await strandedOriginalsNote(blockIDs: [blockID]) ?? ""))
+            model.report(
+                Self.blockDeletedStatus
+                    + (await strandedOriginalsNote(blockIDs: [blockID]) ?? ""),
+                action: .undo)
             await model.refreshTakesFromStore()
             landCaret(landing)
         } catch {
@@ -633,8 +649,10 @@ final class MobileStructuralController {
                     for blockID in blockIDs { try ops.deleteBlock(blockID) }
                 }
             }
-            model.report(Self.blocksDeletedStatus(blockIDs.count)
-                + (await strandedOriginalsNote(blockIDs: blockIDs) ?? ""))
+            model.report(
+                Self.blocksDeletedStatus(blockIDs.count)
+                    + (await strandedOriginalsNote(blockIDs: blockIDs) ?? ""),
+                action: .undo)
             await model.refreshTakesFromStore()
             landCaret(landing)
         } catch {
@@ -698,7 +716,16 @@ final class MobileStructuralController {
             // vanished, which is exactly what she asked the keystroke for
             // (the Mac says nothing here either). Clearing drops any stale
             // refusal line from an earlier attempt.
-            model.report(nil)
+            //
+            // **AND SINCE ROUND 2 BATCH 4 IT OFFERS UNDO** (M20). This is
+            // the act that most needs it: R13 removed this road's confirm on
+            // the recorded justification that *"the answer to 'no way back'
+            // is the way back — the structural undo/redo door (M20)"*, and
+            // until now that replacement did not exist. The receipt stays
+            // WORDLESS — this fires at keystroke rate, from ⌫ or from typing
+            // over a selection, so a sentence would be noise — and the bare
+            // Undo is the whole affordance.
+            model.report(nil, action: .undo)
             await model.refreshTakesFromStore()
             landCaret((blockID: landing.blockID, offset: landing.caretOffset))
         } catch {
@@ -742,27 +769,31 @@ final class MobileStructuralController {
         return Self.strandedOriginalNote(stranded.count)
     }
 
-    /// The stranding sentence, in the PHONE's words. The Mac's
-    /// (`BlockSelectionCopy.strandedOriginalNote`) says the original "rides
-    /// the Trash with it" because the Mac HAS a Trash to name; this app has
-    /// no Trash face yet (the ledger's PL-11 row, a later batch of this
-    /// round), so it carries the same FACT without naming a door she cannot
-    /// open — 13j J8(a)'s doctrine, phone edition. When the phone's Trash
-    /// lands, this sentence graduates exactly as the Mac's did.
+    /// The stranding sentence, in the PHONE's words.
+    ///
+    /// **ROUND 2 BATCH 4: IT GRADUATES, exactly as its own comment promised
+    /// it would.** It used to withhold the destination — *"goes with it"* —
+    /// because the Mac's version named a Trash this phone did not have, and
+    /// 13j J8(a)'s doctrine forbids promising a door she cannot open. PR2
+    /// built that door, so the sentence now says where the original goes,
+    /// which is the whole point of telling her at all.
     /// Pinned static.
     static func strandedOriginalNote(_ count: Int) -> String {
         count == 1
-            ? " The original preserved from this block's divide goes with it."
-            : " \(count) preserved originals go with these blocks."
+            ? " The original preserved from this block's divide goes to the "
+                + "\(RecoveryCopy.trashSection) with it."
+            : " \(count) preserved originals go to the "
+                + "\(RecoveryCopy.trashSection) with these blocks."
     }
 
     /// The whole-block-selection delete's receipt. It reuses the pinned
     /// single-block sentence for N = 1 so the two doors can never fork, and
-    /// it keeps the phone's OWN words for the same reason that sentence has
-    /// them: the Mac's `BlockSelectionCopy.deletedNote` names ⌥⌘Z and the
-    /// tray, and this app has neither door yet (the tray is the ledger's
-    /// PL-11 row, a later batch) — 13j J8(a)'s doctrine, phone edition, that
-    /// a promise she cannot act on is not a fact she can use.
+    /// it keeps the phone's OWN words because the Mac's
+    /// (`BlockSelectionCopy.deletedNote`) names ⌥⌘Z and the note's tray:
+    /// this phone has no chord culture and its tray face is still the
+    /// ledger's PL-11 row (batch 5). What it HAS since round 2 batch 4 is
+    /// the undo door (M20) — which is why this receipt now carries an Undo
+    /// ACTION beside it rather than another sentence.
     static func blocksDeletedStatus(_ count: Int) -> String {
         count <= 1 ? blockDeletedStatus : "\(count) blocks deleted."
     }

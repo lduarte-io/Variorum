@@ -118,6 +118,59 @@ final class MobileShelfViewModel {
         }
     }
 
+    // MARK: - Delete a book (round 2, batch 4 — PR4)
+
+    /// **The phone could not delete a book either** — `deleteReading`
+    /// appeared in `VariorumMobile/` exactly once, in the tutorial seeder's
+    /// own cleanup (the parity inventory's R4; its tell is that the core's
+    /// Trash listing defines a `.book` kind the phone could never populate).
+    ///
+    /// Move to Trash, like every other deletion door outside the Trash
+    /// itself: `deleteReading` tombstones the reading and its chapters and
+    /// memberships by cascade, and `restoreReading` (S4-28.2, her reversal
+    /// of the no-restore-door boundary) is waiting on the other side for
+    /// `TrashWindow.days`.
+    ///
+    /// **The wording carries the 13j books lesson, which she had to teach
+    /// once already: deleting a book does NOT delete its notes.** The notes
+    /// keep living in the library; only the ordered collection goes.
+    var pendingDeleteBook: Queries.ShelfBook?
+
+    /// The alert host's binding (`@Bindable`-projected — never a computed
+    /// `Binding(get:set:)`, §15's trap (a)).
+    var deleteBookPresented: Bool {
+        get { pendingDeleteBook != nil }
+        set { if !newValue { pendingDeleteBook = nil } }
+    }
+
+    func requestDeleteBook(_ book: Queries.ShelfBook) {
+        pendingDeleteBook = book
+    }
+
+    /// The confirmed act. Returns whether it went, for the callers that
+    /// need to navigate away from it.
+    @discardableResult
+    func confirmDeleteBook() async -> Bool {
+        guard let book = pendingDeleteBook else { return false }
+        pendingDeleteBook = nil
+        do {
+            try await session.runner.run { ops in
+                try ops.deleteReading(book.reading.id)
+            }
+            lastError = nil
+            lastReport = RecoveryCopy.movedToTrashReceipt(.book)
+            return true
+        } catch let error as OperationError {
+            lastReport = nil
+            lastError = MobileBookDetailsModel.refusal(error)
+            return false
+        } catch {
+            lastReport = nil
+            lastError = String(describing: error)
+            return false
+        }
+    }
+
     /// Today's Entry (M7's button): create-or-open + the shared shelving
     /// door, in one composition. The entry ALWAYS opens; only the note
     /// changes. Returns the entry to navigate to.

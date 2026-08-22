@@ -111,12 +111,35 @@ func performBackgroundFlush(
     editors: MobileLivenessAuthority,
     sync: SyncSession?,
     quickNote: MobileQuickNoteModel? = nil,
+    savepoint: (@MainActor (String) async -> Void)? = nil,
     grant: BackgroundTaskGrant = .application
 ) async {
     let token = grant.begin("Variorum flush before suspension")
     defer { grant.end(token) }
     await quickNote?.fileOnLeaving()
     await editors.flushAll()
+    // **THE SAVEPOINT LEG (round 2 batch 4 — PR7).** *"unless you've been
+    // remembering to commit version history is kind of weak right now"* —
+    // her 13j words. 13j's answer was `AppSession.savepointOnLeaving`, the
+    // sixth quiet auto-commit occasion; it sits deliberately OUTSIDE the
+    // `#if os(macOS)` fence so a second platform owes a hook, never a
+    // rule. The phone had zero call sites until now.
+    //
+    // **On iOS, backgrounding IS ⌘Q** (MobileSoul §5.1: the app dies
+    // without warning), so this is the leaving that matters most — and it
+    // is the one the Mac's own hook could never cover.
+    //
+    // ORDER: after `flushAll` and BEFORE the sync round. `closeAutoCommit`
+    // reads `working_text` rows, so the flush must have landed them; and
+    // the savepoint's own rows must exist before the round pushes, or they
+    // wait for the next foreground. (`savepointOnLeaving` flushes again
+    // internally — a no-op on a coordinator this call just drained — so
+    // the two are not a duplicated flush, they are a guaranteed one.)
+    if let savepoint {
+        for postID in editors.registeredPostIDs {
+            await savepoint(postID)
+        }
+    }
     await sync?.flush()
 }
 
@@ -136,6 +159,7 @@ func mobileScenePhaseChanged(
     editors: MobileLivenessAuthority,
     sync: SyncSession?,
     quickNote: MobileQuickNoteModel? = nil,
+    savepoint: (@MainActor (String) async -> Void)? = nil,
     grant: BackgroundTaskGrant = .application
 ) -> Task<Void, Never>? {
     switch phase {
@@ -145,7 +169,8 @@ func mobileScenePhaseChanged(
     case .background:
         return Task {
             await performBackgroundFlush(
-                editors: editors, sync: sync, quickNote: quickNote, grant: grant)
+                editors: editors, sync: sync, quickNote: quickNote,
+                savepoint: savepoint, grant: grant)
         }
     default:
         return nil

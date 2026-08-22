@@ -31,17 +31,23 @@ struct MobileBookView: View {
     let onOpen: (String) -> Void
     /// The Read flow door (P35's inversion — Read is the door now).
     let onRead: () -> Void
+    /// The book went (round 2 batch 4 — PR4): pop this screen, because a
+    /// contents list of a tombstoned book is exactly what the delete door
+    /// must not leave behind. nil in harness/preview use.
+    let onDeleted: (() -> Void)?
 
     init(
         session: AppSession, readingID: String, tokens: VoiceTokens,
         onOpen: @escaping (String) -> Void,
-        onRead: @escaping () -> Void
+        onRead: @escaping () -> Void,
+        onDeleted: (() -> Void)? = nil
     ) {
         _model = State(initialValue: MobileBookViewModel(session: session, readingID: readingID))
         self.session = session
         self.tokens = tokens
         self.onOpen = onOpen
         self.onRead = onRead
+        self.onDeleted = onDeleted
     }
 
     var body: some View {
@@ -100,7 +106,8 @@ struct MobileBookView: View {
         }
         .sheet(isPresented: $detailsPresented) {
             MobileBookDetailsSheet(
-                session: session, readingID: model.readingID, tokens: tokens)
+                session: session, readingID: model.readingID, tokens: tokens,
+                onDeleted: { onDeleted?() })
                 .presentationDetents([.medium, .large])
         }
         .task { await model.start() }
