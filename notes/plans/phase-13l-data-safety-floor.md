@@ -521,9 +521,30 @@ of Mac-local code.
   forward to the hoisted copy
 
 **BEHAVIOUR changes on the Mac, as opposed to relocations:** the crash
-fix · the O(N²) fix · **the gap fence (a real narrowing — spans touching
-unsynced blocks now refuse)** · and the caret landing on ⌘-click
-multi-delete, which used to name a block being deleted.
+fix · the O(N²) fix · **the gap fence** · and the caret landing on
+⌘-click multi-delete, which used to name a block being deleted.
+
+**WHAT THE GAP FENCE ACTUALLY FENCES — stated precisely, because a
+looser wording misled the author and would mislead a reviewer.** A
+"gap" is `variantID == nil`: a block row that exists **with no text row
+at all**. That state has exactly ONE origin — **a sync PULL applied a
+block row before its variant row arrived** (SyncSpec §5's designed-for
+"referenced-but-not-yet-arrived rows across batches; render gaps, never
+crash"). It is **NOT** "a block that has not been pushed yet."
+- **A locally created block is NEVER a gap**, online or offline:
+  `mintBlock` (`Operations+Structural.swift:1069`) inserts the block,
+  inserts the `Variant`, and sets `defaultVariantId` **in one write** —
+  block and text are born together.
+- **The fence never reads push state.** Its predicate is literally
+  `entries[$0].variantID == nil`; it does not touch `sync_version`, the
+  outbox, or anything upload-related. **Everything written offline stays
+  fully deletable.**
+The narrowing is therefore: *a span touching a paragraph whose text has
+not yet arrived from another device refuses* — a half-received
+paragraph, never an un-uploaded one. Its purpose is that nobody deletes
+prose they have never been shown, and that the deletion does not
+propagate back and take the other device's copy (tombstone-wins,
+SyncSpec §6).
 
 **AND ONE MAC DEFECT THIS ROUND CREATED** (§44's MAJOR): the gap fence
 makes the Mac **refuse**, but the Mac never got the fence's **FACE**, so

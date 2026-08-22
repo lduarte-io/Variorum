@@ -109,6 +109,14 @@ crash's stale verdict comes from."*
 | **B45-2** | **The `displaySlot` / `slots[i]` coupling** — out-of-range-safe only by caller accident during the crystallization window. The survey said to make it explicit *"if the reorder-takes work touches this area"* — **PR8 reorder-takes is scheduled at batch 7**, so the schedule is walking straight into it. This round already touched the same method for a different reason and did not address it | A known hazard with a dated collision |
 | **B45-3** | **The crash trace's SIX unowned items**, and **E1 is the one she named**: the instrumented device experiment that settles **where the crash's stale verdict actually comes from** — M1's own status is recorded *"high confidence, NOT PROVEN"*. Also: **E2** (the CI gate/report fixture), **§8 path 8** (UIKit undo replaying a coalesced edit through the gaps between `removeAllActions()` calls — zero mentions anywhere in the round), **§8 path 11** (the `supportsTextReplacement: false` fence, recorded expressly *"so the fence is not removed later without re-reading this"*), **§9's Mac residual** (the `MarkdownActs` arm-then-hand-off sites, named once as *"the Mac's real residual"*), and **M1's SUSPECTED status itself** | The crash is the reason this round exists, and its cause is recorded as unproven |
 
+| **B45-4** | **THE ON-DEVICE SWEEP — E1 *and* M16 together, run in ONE window on her phone.** **E1**: the crash trace's instrumented experiment, the only thing that settles where the stale verdict comes from (M1 is recorded *"high confidence, NOT PROVEN"*). **M16**: the same-note drag-move question — if a dragged selection covers whole paragraphs it may now plan a BLOCK delete while the drop lands text as content (I4); unsettleable from the repo, since no drag delegate is configured, so reachability is a device fact. | **M16 was owned as a closeout obligation but was NOT in 4.5 and NOT paired with E1** — she caught that. Both need her hardware; asking twice costs her two windows |
+
+**THE STANDING INSTRUCTION THAT COMES WITH B45-4 (§50, sweep finding
+2):** when she makes her device available, **run the device-only queue
+in that window** — not just the install. The round already spent one
+such offer (*"my phone is here now, for whatever is needed for the
+device round"*) on two installs while both of these sat runnable.
+
 **E1 must run on HER DEVICE (iOS 26.6), not the 26.2 simulator** — it is
 an input-path question and §9's runtime gap is recorded. Fold it into
 her next device round rather than simulating it and calling it settled.
