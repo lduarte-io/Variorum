@@ -3895,3 +3895,73 @@ measurement robust (more iterations, a median rather than a single
 sample, or a quiet-machine gate) or to make the gesture genuinely
 faster. **Which one is a Phase 12 call with evidence, not a mobile
 round's to take.**
+
+---
+
+## 55. THE THREE BLOCKERS, ARCHITECT-VERIFIED AT THE CODE (2026-08-22)
+
+§45 and §49 are compressed summaries of reviewer output. **A brief that
+sends an implementer to a stale line number is worse than no brief**, and
+this round's own repeated lesson is that a mechanism traced by reading
+and never executed is how a wrong diagnosis survives six sessions. So all
+three BLOCKERs were opened and read before the briefs were finalised.
+**All three are real, correctly located, and the recorded mechanisms are
+exact.**
+
+**Q1 — the clamp.** `MobileQuickNote.applyOwnedChange()`:
+`guard text.hasPrefix(frozenPrefix) else { write(frozenPrefix);
+recordTail(); return }`. Confirmed: the clamp restores the prefix and
+**then derives the tail from the just-clamped text**, so the owned
+block's recorded tail becomes `""`. **And the comment above it is
+precisely the superseded-completeness class** — it asserts the road *"is
+only reachable after a multi-paragraph PASTE was minted… she has deleted
+back through the whole owned tail"*, while **any edit inside the frozen
+prefix falsifies `hasPrefix` just as well.** The comment must change with
+the code; the brief says so.
+
+**Q2 — the unconditional reset.** `file()` ends with `reset()` on every
+road, and `reset()` (verified line by line) does **`lastError = nil`**
+*and* **`write("")`**, alongside clearing `postID`, `variantID`,
+`frozenPrefix` and `saveState`. `mintNow`'s failure roads set `lastError`
+at three sites (`:372`, `:397`, `:414`). **So a refused mint discards her
+text and erases the reason, exactly as recorded.**
+
+**Q4 — the grant, both halves.** `MobileShellRouter`'s phase handler:
+`case .background: return Task { await performBackgroundFlush(…) }` —
+**the grant is taken INSIDE that `Task`**, i.e. asynchronously one hop
+after the phase change, which is the anti-pattern Apple names. And
+`BackgroundTaskGrant.application` calls
+`UIApplication.shared.beginBackgroundTask(withName: $0)` — **the
+single-argument form, with NO expiration handler.** Both halves confirmed.
+
+**The batch-4 BLOCKER — confirmed at both ends, and the fix shape is
+visible in the diff itself.** The model side: `MobileTrashModel`'s
+`purgeConfirmPresented` is `get { pendingConfirm != nil }` /
+`set { if !newValue { pendingConfirm = nil } }`, and
+`confirmPendingPurge()` opens with
+`guard let confirm = pendingConfirm else { return }`. The view side
+(`MobileTrashView.swift:101–107`):
+
+```swift
+Button(…, role: .destructive) {
+    let model = model
+    Task { await model.confirmPendingPurge() }
+}
+```
+
+**It captures the MODEL, not the VALUE.** SwiftUI clears
+`purgeConfirmPresented` synchronously inside tap handling; the `Task`
+cannot resume until that handling yields; `pendingConfirm` is `nil` by
+then and the guard returns. **Nothing is purged.** The same shape is at
+`MobileLibraryViewModel.swift:206–207/:222` and
+`MobileUndoDoor.swift:85/:90`.
+
+**The irony is worth keeping, because it is the round's lesson in one
+file.** `MobileTrashView`'s own header (`:26–28`) states the rule it was
+built to obey — *"The destructive dialog is `.alert(isPresented:)` over a
+real `@Bindable` projection. Never a `Binding(get:set:)` computed over an
+`@Observable` property (§15's trap (a) …)"* — and it **is** immune to
+that trap. **It then shipped a dead door by a different mechanism.**
+Following a rule is not the same as testing the outcome, which is exactly
+what "drive the real surface, and verify the path you drove is the path
+you meant" exists to say.
