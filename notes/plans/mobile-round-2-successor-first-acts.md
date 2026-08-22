@@ -91,6 +91,36 @@ under-owned:
 **Anything found joins BATCH 4.5.** Anything genuinely out of scope gets
 an owner named — a phase number or a project row — never a blank.
 
+## BATCH 4.5's SCOPE INCLUDES THESE BY NAME — her instruction, 2026-08-22
+
+She read Act 2's list and ruled these **into 4.5 as scope**, not as
+things to go looking for. Her words: *"this needs to be added to 4.5: a
+P2 violation where the app opens the database on the main thread before
+first paint, and a coupling that batch 7's reorder-takes work is walking
+straight into — landed nowhere. Same for six unowned items from the
+crash trace, including the one experiment that would settle where the
+crash's stale verdict comes from."*
+
+**These are ROWS, with owners, not sweep hints:**
+
+| # | Item | Why it is scope |
+|---|------|-----------------|
+| **B45-1** | **`AppBootstrap.init` opens the store and runs the migration set SYNCHRONOUSLY ON THE MAIN THREAD before first paint** (`VariorumMobileApp.swift` constructs it as `@State`). A **P2 violation** — OverallModel §5: all DB I/O off the main thread. Same family as the Keychain launch hop 13e batch 9 fixed. The survey said *"a measurement is one signpost away"*; no measurement was ever briefed | Her ask was *"performance and stability are key"*; this is the app's very first act, on every launch |
+| **B45-2** | **The `displaySlot` / `slots[i]` coupling** — out-of-range-safe only by caller accident during the crystallization window. The survey said to make it explicit *"if the reorder-takes work touches this area"* — **PR8 reorder-takes is scheduled at batch 7**, so the schedule is walking straight into it. This round already touched the same method for a different reason and did not address it | A known hazard with a dated collision |
+| **B45-3** | **The crash trace's SIX unowned items**, and **E1 is the one she named**: the instrumented device experiment that settles **where the crash's stale verdict actually comes from** — M1's own status is recorded *"high confidence, NOT PROVEN"*. Also: **E2** (the CI gate/report fixture), **§8 path 8** (UIKit undo replaying a coalesced edit through the gaps between `removeAllActions()` calls — zero mentions anywhere in the round), **§8 path 11** (the `supportsTextReplacement: false` fence, recorded expressly *"so the fence is not removed later without re-reading this"*), **§9's Mac residual** (the `MarkdownActs` arm-then-hand-off sites, named once as *"the Mac's real residual"*), and **M1's SUSPECTED status itself** | The crash is the reason this round exists, and its cause is recorded as unproven |
+
+**E1 must run on HER DEVICE (iOS 26.6), not the 26.2 simulator** — it is
+an input-path question and §9's runtime gap is recorded. Fold it into
+her next device round rather than simulating it and calling it settled.
+
+**The rest of Act 2's list stays a sweep** (the `isDirty` honesty trap,
+the shelf's missing keyboard avoidance under a dwelling field, the
+`nonisolated(unsafe)` tripwire, the twelve unlatched `Task {}` doors,
+the two un-hoisted brains, the ~20 Tier-3 findings) — **findable, and
+each gets a row or a named owner when found.**
+
+---
+
 ## ACT 3 — THEN BUILD BATCH 4.5
 
 **Batch 4.5 = every finding from every cold review of batches 1–4, plus
