@@ -4966,3 +4966,185 @@ No live conflict existed; the collision would have been in wave 3.
 | **MINOR 10** | The withdrawal leaves `importPost`'s undo entry on top: undo **announces itself and changes nothing** (the container is tombstoned), and redo would **resurrect the blank note Q3 exists to prevent**. **Every available fix needs a file outside every 4.5 fence** — `UndoStack` has no pop-the-top API and `removeAll()` would wipe her whole session, so it is either a core change to `deleteContainer` or a core UndoStack addition | **DECLINED here, and it gets a `KnownIssuesAndTechDebt.md` row.** The session's own argument is the deciding one: **13j's doctrine is that the Trash is the recovery door, not structural undo** — so giving `deleteContainer` an inverse is a 13j-shaped product call, not a mobile round's. The residual is narrow and no data is at risk |
 | **Item 2** | **A refused ⏎ leaves a stray newline in the field.** The ⏎ restore *must* be synchronous (the mint reads `text`; an async restore would mint the newline into two blocks, which `returnOpensTheNoteAndNeverTypesANewline` pins against), so on the narrow path where ⏎'s mint is refused the field keeps a newline the model does not have | **Held with MAJOR 5's caret** — both need the same `UIViewRepresentable` surface change, and one surface decision should answer both. On her list |
 | **Item 3** | A leaving from a **never-minted empty box** does not bump `handOffCount`, so the keyboard can stay up over the next tab — same symptom as MAJOR 3, different state, and the shipped pin asserts `handOffCount == 0` there **on purpose**. **Deliberately left alone**: flipping it changes a contract nobody reviewed | **ENDORSED.** Round 2's reviewer is the right place for it to be looked at with fresh eyes |
+
+
+---
+
+## 63. SUB-BATCH 4.5b LANDS (2026-08-22) — the BLOCKER is closed at all five hosts, and it falsified the settling experiment the round-1 reviewer AND the architect both specified
+
+**core 1350/141 · Mac 1569/272 (+1, its own pin) · mobile 475/77 · both
+spines green.** Hygiene zero across the board, `.bak-*` gone,
+`planVisibleTakeEdit` untouched. **Architect-verified at the code**: all
+three row doors now use `alert(_:isPresented:presenting:)`, the A12 door
+carries the `askedWarning` seam, and every hoisted symbol
+(`TrashPutBack`, `DeletionRefusal`, `landingReceipt`, `putBackReceipt`,
+`AccessibilityServer`, `actInFlight`, `tapAlertAction`) is present in
+both platforms' trees.
+
+### ⚠️ IT SELF-REPORTED THE BACKUP INCIDENT, FIRST, BEFORE ANYTHING ELSE — including a restore the architect did not know about
+
+*"The `.bak-*` directory restore the architect's third message describes
+was me."* It then gave the full blast radius rather than the comfortable
+half: `VariorumMobile/` restored **twice** (last 14:11:52) **and
+`Shared/` restored once at 14:17:20 — which the architect had not
+known.**
+
+**ARCHITECT'S VERIFICATION, traced rather than assumed** — the question
+is not *"was `Shared/` restored"* but *"did any session have PENDING
+`Shared/` work in that window":*
+
+| session | pending `Shared/` work at 13:57–14:17? |
+|---|---|
+| 4.5a | **No** — it reported `AppSession.swift` as *"NOT MINE, untouched"* and refused to reach across the fence |
+| 4.5c | **No** — not dispatched (wave 2) |
+| 4.5d | **No** — its fence is `MobileKeyboardBar.swift` only |
+| 4.5b itself | its own `RecoveryCopy.swift`, still modified |
+
+`git status -- App/Variorum/Shared/` shows **only `RecoveryCopy.swift`**,
+and `git diff -- Shared/EditorBrain/` is **empty, which is CORRECT** —
+batches 1–4's EditorBrain work is committed, so matching HEAD is the
+expected state, not evidence of loss. **NOTHING WAS LOST.** *The fence
+that made this safe is the one 4.5a followed when it refused to edit a
+file it had been told it owned.*
+
+**And it unwound both things it had done on the architect's false
+mechanism** before the correction arrived — the key-window hazard note it
+had written into `MobileSurfaceDriver.swift`, and a `HostGate`
+serializing all of `withHostedSurface`. The file now records only what
+was measured, names the three counter-example sites, and states
+explicitly that **a 1540 fatal is never to be read as harness noise.**
+**It also contributed a measured datum for whoever traces the real
+cause:** a counting probe over one full run found **two hosted surfaces
+alive at once in fifteen tests across four suites, all passing** —
+overlap is the normal green state, which independently supports §61's
+correction.
+
+### 🔴 THE SETTLING EXPERIMENT DOES NOT LAND WHERE IT WAS SPECIFIED — the sixth green-over-nothing, caught before it shipped
+
+§49's reviewer named the experiment (*"invoke the live `UIAlertAction`'s
+handler from the existing hosted surface and assert `purge_intent == 1`"*)
+and **the architect's brief repeated it as the instruction.** It drove it,
+and **it does not reproduce the bug:**
+
+| road driven | measured result |
+|---|---|
+| handler only | the action runs; **the write-back does not**; the alert stays up |
+| `dismiss(animated:false)` **then** handler | the handler **never runs** — SwiftUI refuses post-teardown |
+| handler **then** `dismiss(animated:false)` | write-back lands a runloop turn late; the `Task` already ran → **GREEN OVER NOTHING** |
+| **handler then write-back through the real binding, same turn** | **`sawAfterTask = <nil>` — the defect, executed** |
+| the same tap under `presenting:` | the value survives → the fix, proven |
+
+**The `isPresented` write-back comes from SwiftUI's DISMISSAL machinery,
+not from the handler.** So *a pin built exactly as both the reviewer and
+the architect specified would have passed on the pre-fix code* — **the
+round's sixth green-over-nothing, caught by driving it instead of
+trusting it.** It also measured that a `UIAlertController`'s action views
+are **inert to `accessibilityActivate()` at every level**, confirming
+batch 4's honest record: there is no in-process real tap. **Its
+`tapAlertAction(_:writeBack:)` invokes the real handler and performs the
+write-back through the very binding SwiftUI writes, in the same turn, and
+NAMES the one simulated step in the driver rather than hiding it.**
+
+### The BLOCKER's fix, and the reframing that makes it a seam rather than four patches
+
+Three row doors → `presenting:`, the act taking its subject as a
+parameter, read-back gone. **The A12 undo door got a SEAM fix instead**
+(`askedWarning` — authorization now outlives presentation) **and the
+reason is the better half of this batch:** that door has **two** alert
+hosts and one of them is `MobileWriteView.swift`, which is 4.5c's file. A
+seam fix immunizes both with **zero cross-fence lines** and cannot be
+re-broken by a third host.
+
+**The deeper defect it names:** *the binding setter was deciding a
+PRODUCT question ("she cancelled") from a MECHANICAL event ("the alert
+closed"), which it cannot know* — and both hosts already have an explicit
+Cancel button. **Every comment it wrote names the property, not the
+syntax:** *a binding setter must never clear state that an action's
+continuation will read back.* That is exactly the correction §56 asked
+for after the old rule named a shape and was obeyed into the same bug.
+
+### The enumeration is bigger than Act 1's, and there is a CANDIDATE SIXTH
+
+**31 real sites, not 27** (the tree grew this round). **5 affected, not
+4** — Act 1 counted the A12 door once; it has **two hosts**, both now
+fixed by the seam.
+
+**The candidate sixth: `MobileLenses.swift:419` "Rename Lens"** — a
+computed binding over `@State`, read back **synchronously inside the
+action** rather than after a `Task`. Its probe shows the handler runs
+*before* the write-back on the reachable road, so it is **not in the
+affected class — but it could not drive a genuine tap, so it is NOT
+PROVEN IMMUNE**, and it is not its file. **Reported both ways, which is
+the honest shape.** → **routed to 4.5c** (nearest owner) with the
+instruction to settle it or record it unsettled.
+
+**And a calibration worth keeping:** `MobileTagManager:353/:370` use
+`presenting:` and are **immune while BEING `Binding(get:set:)`** — *the
+round's old rule would have condemned them and cleared the four that were
+actually dead.*
+
+### 🟠 "Library delete leaves a live editor" — STOP AND REPORT, and the filed fix would NOT have worked
+
+§49 filed it as *"the Library row door passes no `onDeleted`"*. **That
+fix reaches nothing:** the stale editor is in the **other tab stack**, so
+popping the Library's stack does not touch it. The real fix is at the
+**liveness seam** — refuse or relinquish the pen for a tombstoned note —
+and needs `MobileLivenessAuthority.swift`, `MobileEditorViewModel.swift`,
+`MobileWriteView.swift` or `MobileShellView.swift`, **none of them its
+own.** Not attempted.
+
+**ROUTED TO 4.5c**, which owns two of those four files and runs alone in
+wave 2. *A finding whose filed remedy is wrong, caught by an implementer
+declining to build it — this is the fence and the propose-don't-decide
+rule doing the same job at once.*
+
+### The hoist, scoped honestly — and it found the Mac landing silently
+
+It hoisted **the drifting decision the finding named** — `TrashPutBack`
+into `Shared/`, adopted by both platforms, with `MobileTrashModel`'s
+statics kept as forwards so mobile pins ride **unedited**. **And it found
+that the Mac's Put back was landing SILENTLY:** `_ = try
+ops.restoreBlock(…)` discarded the landing while `RecoveryView` renders a
+receipt right beside `lastError`. Fixed; **Mac manifest item.**
+
+**What remains it reported AS HALF, which is exactly what it was told:**
+`PurgeConfirm`, `requestDeleteNow`, `requestEmptyTrash`,
+`confirmPendingPurge`, `startTrash`/`startArchived`, `daysLeft` — still
+duplicated. **Its reason for stopping is good and I accept it:** the rest
+refactors a Mac view model **whose parity proof is weak by A1-16's own
+finding**, and **13l opens on that surface imminently.** → the remaining
+hoist is **recorded for 13l** rather than forced into a mobile round.
+
+### Everything else, briefly
+
+**Item 0 (the accessibility harness) shipped BOTH halves** — armed from
+inside the bundle (verified working), **and the loud diagnostic**, which
+caught *the quiet half* nobody had named: **absence-asserting pins were
+passing vacuously over a dead tree.** It **dropped a once-per-run
+suppression it had first written**, because it would have left fifteen
+tests failing with the old confusing message and lost the one signpost
+among them — good judgement about which failure teaches.
+
+**It caught a pin pinning a fiction, in its own work:** the sheet-refusal
+pin used a *sealed* note, but **a seal does not refuse deletion**
+(AppSpec §9 — the seal is content-level; the post may still be deleted).
+It passed while proving nothing. Rebuilt on a real refusal.
+
+**§49's FOUR NITs are not enumerated anywhere in the record** — §49 says
+*"and 4 NIT"* and never lists them. **The second time this round a
+compressed review summary has cost real work** (§45's five quick-note
+NITs were the first). **Recorded as a standing cost of summarising a
+review instead of landing it in full.**
+
+### Routed out
+
+| item | route |
+|---|---|
+| The live editor over a tombstone (real fix at the liveness seam) | **4.5c** |
+| `MobileLenses.swift:419` — the candidate sixth confirm site | **4.5c** — settle it or record it unsettled |
+| `MobileEditorViewModel.deleteNoteRefusal:958` → `DeletionRefusal.words(error)` (one line) | **4.5c** |
+| The A1-15 test comment at `MobileCrossBlockEditTests.swift:598` (one line) | **4.5c** |
+| `commitNow` has no in-flight latch (`MobileTakeHistory.swift`) | **batch 7** — it is the takes surface's own file, and batch 7 is the takes batch |
+| `MobileQuickNoteTests.swift:752` constructs `HostedSurface` directly, bypassing `withHostedSurface` | **4.5a's round-2 reviewer** already has that file in scope; noted for its eyes |
+| The remaining decision-layer hoist | **13l**, recorded in its manifest — it opens on that surface, and A1-16 says the Mac parity proof there is weak |
+| §49's four unenumerated NITs | **unrecoverable, recorded** — like §45's five |

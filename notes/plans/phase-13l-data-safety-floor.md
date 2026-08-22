@@ -653,6 +653,33 @@ found, per this section's own rule, not at closeout:**
    duplicate of the very rule you were asked to check**, and you should
    meet it here rather than discover it.
 
+**A THIRD MAC RESIDUAL + A MAC FIX, added 2026-08-22 from Mobile Round 2's
+batch 4.5b (§63):**
+
+3. **`RecoveryView.swift` (39 ±) — the Mac's Put back was landing
+   SILENTLY, and now does not.** `RecoveryViewModel.putBack` did
+   `_ = try ops.restoreBlock(…)`, discarding the landing, while the view
+   renders a `receipt` right beside `lastError` — so the Mac never
+   answered *"where did it go?"* while the phone did. It now adopts the
+   hoisted `TrashPutBack` in `Shared/RecoveryCopy.swift` (both platforms,
+   one decision) and sets the receipt; its generic catch was a **raw
+   error dump** and now uses `DeletionRefusal.fallback`. `TrayRefusalCopy`
+   voice unchanged. One new pin in `VariorumTests/TrashSurfaceTests.swift`
+   (**Mac 1568/272 → 1569/272 — the only Mac count move this round, and
+   it is this pin**).
+4. **THE REMAINING DECISION-LAYER HOIST IS YOURS, and it was stopped
+   deliberately at half.** `MobileTrashModel` is still a near-verbatim
+   copy of `RecoveryViewModel` for `PurgeConfirm`, `requestDeleteNow`,
+   `requestEmptyTrash`, `confirmPendingPurge` (identical including the
+   synced/familySynced reads and `sweepLocalPurge`),
+   `startTrash`/`startArchived` and `daysLeft`. **The mobile round hoisted
+   the one decision that had already DRIFTED and reported the rest as
+   half rather than claiming the layer** — because finishing it refactors
+   a Mac view model **whose parity proof is weak** (the "Mac suite
+   unmoved ⇒ nothing changed" claim is falsified — see the note below)
+   **and because 13l opens on exactly this surface.** M-C forbids the
+   fork standing; it is yours to close with your own eyes on it.
+
 **AND ONE MAC DEFECT THIS ROUND CREATED** (§44's MAJOR): the gap fence
 makes the Mac **refuse**, but the Mac never got the fence's **FACE**, so
 the span falls through into merge-then-edit and dies as a **raw error
