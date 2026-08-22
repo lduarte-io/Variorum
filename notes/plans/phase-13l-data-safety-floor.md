@@ -492,6 +492,47 @@ pre-13j tombstones — expected).
 > the kickoff message's "verify the baselines with your own runs",
 > which is load-bearing here rather than routine.
 
+### THE MAC CHANGES, FROM GIT RATHER THAN MEMORY (author-requested summary, 2026-08-22)
+
+*She asked for this block to live where 13l sees it. It is the
+plain-language index to the manifest below.*
+
+**Ten files, 1,151 insertions. CORE IS UNTOUCHED — zero lines.**
+
+**Three shared-brain files** (both apps compile these):
+- `BlockRangeIndex.swift` — mutators refuse instead of trapping; the
+  whole-block delete and caret landing hoisted IN from Mac code; the gap
+  fence added
+- `EditorEditRouting.swift` — new; the armed-verdict binding and the
+  assertion seam
+- `CrossBlockEditPlanner.swift` — new; merge-then-edit hoisted in, plus
+  the O(N²) fix
+
+**Two more shared files from batch 4:** `RecoveryCopy.swift` and
+`StructuralUndoCopy.swift` — the deletion story's wording, hoisted out
+of Mac-local code.
+
+**Five Mac app files:**
+- `EditorViewModel.swift` — consumes the armed verdict, routes to
+  recovery
+- `EditorSurfaceController.swift` — its functions became delegates to
+  the hoisted versions (net **−181 lines**)
+- `RecoveryView.swift`, `TrayPanel.swift`, `ShellActions.swift` — now
+  forward to the hoisted copy
+
+**BEHAVIOUR changes on the Mac, as opposed to relocations:** the crash
+fix · the O(N²) fix · **the gap fence (a real narrowing — spans touching
+unsynced blocks now refuse)** · and the caret landing on ⌘-click
+multi-delete, which used to name a block being deleted.
+
+**AND ONE MAC DEFECT THIS ROUND CREATED** (§44's MAJOR): the gap fence
+makes the Mac **refuse**, but the Mac never got the fence's **FACE**, so
+the span falls through into merge-then-edit and dies as a **raw error
+dump**. Fix is in the mobile round's batch 4.5; if 13l's reviewer meets
+it first, this is why.
+
+---
+
 ### ⚠️ MAC CODE CHANGED IN THE GAP BETWEEN PHASES (2026-08-21) — her instruction to record it here
 
 **The 13j finals above are NO LONGER the Mac's baseline.** Mobile
