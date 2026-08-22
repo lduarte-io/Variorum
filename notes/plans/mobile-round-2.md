@@ -2801,3 +2801,58 @@ appear at all. i think that's fine."*
 **QUEUED with R26 behind batch 4** (same shelf files). Both dispatch
 together the moment batch 4 reports — they are one layout change and
 splitting them would mean two passes over the same view.
+
+---
+
+## 42. TWO MORE GAPS, FOUND BY HER SECOND AUDIT REQUEST (2026-08-22)
+
+She asked again whether everything is written up. **Two things were
+not.** Both found by checking rather than asserting.
+
+**(a) THE MAC PERFORMANCE FIX WAS NEVER WRITTEN INTO 13l's MANIFEST.**
+§38 said the O(N²) fix "belongs in R20's manifest for 13l's Fable
+reviewer" — and then nobody put it there. She asked about this
+specifically (*"did you write a note for that in the 13l plan as one of
+the items it'll have to check?"*), and the honest answer was **no**.
+**FIXED NOW:** `notes/plans/phase-13l-data-safety-floor.md`'s manifest
+gains `CrossBlockEditPlanner.swift` with the full account — the
+mechanism, the 23.8 s → 0.003 s measurement, that it is a **P1
+violation shipped on the Mac since 2026-07-09**, and that it is the ONE
+deviation from byte-identical in the whole hoist and therefore the item
+in that manifest most worth an independent read.
+
+**Why this one mattered more than an ordinary omission:** a
+"partial-until-closeout" manifest is only safe if something actually
+completes it. §33 created that obligation; §38 added an item to it in
+prose; **nothing carried the prose into the file.** The lesson is the
+same one this round keeps paying for — *a note that an item belongs
+somewhere is not the item being there.*
+
+**(b) R24 — the "more info" → "info" rename — IS IN NO BATCH.** §39
+said it "rides M26's batch or batch 4, whichever opens first"; M26's
+batch had **already been dispatched** when §39 was written, so it never
+received it, and batch 4's brief does not mention it. **The fifth
+homeless row this round.** *(And it sits on the exact collision §39
+warned about: the parity inventory's **PR24** is "her held design
+calls", while her ruling **R24** is this rename — two different things
+one line apart in the same file.)*
+**SCHEDULED: R24 joins the queued shelf batch with R26/R27.**
+
+### THE STANDING RULE, now stated once and for all
+
+Five rows have gone homeless this round (§19, §34, §36, §39's M20, and
+now R24). Every earlier tightening was necessary and insufficient:
+
+- "every row gets a table entry in the commit that names it" (§34) —
+  M20 HAD an entry;
+- "an entry must name a batch, and 'next batch' is not a batch" (§39) —
+  R24 named *"whichever opens first"*, which is the same evasion wearing
+  a different sentence.
+
+**THE RULE, final form: a row is not scheduled until it appears in the
+BINDING BATCH MAP under a numbered batch. Prose scheduling anywhere else
+— a ledger row's "owner" column, a §-record's sentence, a promise in a
+message to her — is a NOTE, not a schedule. The batch map is the only
+schedule.** Any session writing a row must edit the map in the same
+commit, and any session dispatching a batch must dispatch from the map,
+never from prose.

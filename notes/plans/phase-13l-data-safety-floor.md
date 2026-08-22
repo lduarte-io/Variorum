@@ -133,6 +133,27 @@ multiple items and deleting all of them." Build, opening the phase
     merge-then-edit) into `Shared/` the same way.
   - `VariorumTests/` — new suites `EditRoutingTests`,
     `EditRoutingCrashTests`; additions to `BlockRangeIndexTests`.
+  - **`Shared/EditorBrain/CrossBlockEditPlanner.swift` — NEW, and it
+    carries a MAC PERFORMANCE FIX the reviewer should check
+    deliberately.** The mobile round hoisted the Mac's ratified
+    2026-07-09 merge-then-edit (`planCrossBlockEdit` /
+    `runCrossBlockEdit`) into the shared brain so the phone could use
+    it; the Mac's two functions are now delegates and the Mac suite rode
+    unmodified. **In the process the hoist revealed that the planner
+    called `index.range(ofEntryAt: i)` INSIDE its collection loop, and
+    that accessor walks the tiling from zero on every call — an O(N²)
+    walk on the MAIN ACTOR, on a keystroke road, with cost proportional
+    to document length.** Measured at 20,000 entries: **23.8 s for one
+    plan, and 23.3 s for a seam keystroke that plans nothing.** That is
+    a **P1 violation** (`notes/OverallModel.md` §5), and it has been
+    shipped MAC behaviour since 2026-07-09 — six weeks — unnoticed
+    because the author's own documents never hit the shape. Fixed with
+    one accumulation pass (`starts[i] = Σ(length+1)` is by definition
+    what the accessor computes): **23.8 s → 0.003 s**, with equivalence
+    pinned against `range(ofEntryAt:)` itself on an irregular tiling
+    including empty entries. **This is the ONE deviation from
+    byte-identical in the whole hoist**, it is Mac-visible, and it is
+    the single thing in this manifest most worth an independent read.
 
   **What is worth her reviewer's attention in particular:** whether each
   hoisted rule still means on the Mac exactly what it meant when it was
