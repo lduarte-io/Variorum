@@ -4136,3 +4136,69 @@ passed in its full run.** And the confirm BLOCKER's blast radius is
 **exactly five hosts**, established by enumerating all 27 `isPresented:`
 sites: every other is a plain `@State` Bool and is immune — **which is
 precisely why a device walk would have shown deletion "working"**.
+
+
+---
+
+## 57. BATCH 4.5 DISPATCHED (2026-08-22) — wave 1 building, and why the waves are shaped this way
+
+**Both her Acts are complete and routed** (§53, §56), which is the
+condition her successor-first-acts file put on ACT 3. **4.5 is now
+building.**
+
+### The wave shape, and the reason is a compile fence rather than a theme
+
+§52.3 planned 4.5a · 4.5b · 4.5c together with 4.5d behind. **Corrected
+at dispatch, on a mechanism rather than a preference:** the round's
+parallel recipe (distinct files, distinct simulators, distinct
+DerivedData) fences *writes*, but it cannot fence *compiles* — **every
+mobile and Mac target compiles against `Shared/EditorBrain/`, and 4.5c
+lives there.** A session mid-edit of `BlockRangeIndex.swift` breaks every
+other session's build, which is §38(c)'s lesson pointed at source rather
+than at DerivedData.
+
+| wave | sub-batches | why |
+|---|---|---|
+| **1 — BUILDING** | **4.5a** (capture & lifecycle — **her two BLOCKERs, first, as she ordered**) · **4.5b** (the confirm BLOCKER + the deletion doors + **the accessibility-harness fix, its item 0**) · **4.5d** (the bar's geometry) | Three disjoint neighbourhoods, none of them the editor brain. 4.5a's one `Shared/` item (`AppSession`'s removal path) is **propose-before-fixing**, so the risky shared edit cannot land unruled |
+| **2** | **4.5c** (the editor & the shared brain) | **It gets the tree to itself.** It is also the largest and most dangerous sub-batch — everything in it is shared, in the machinery AppSpec §15 names the project's single riskiest subsystem — and it benefits from wave 1's fixes already being in the tree |
+
+**Each is a full R28 unit.** The implementer's report is not the batch's
+end: the cold reviewer is dispatched from the same turn, before anything
+is reported to her, and its findings return to a fresh fix session. **She
+hears about a sub-batch as build + review + dispositions, never as a
+half-open one.**
+
+**Every session was told the transient-collision rule explicitly**, which
+this round learned twice by paying for it: *a compile error naming a file
+outside your fence is another session's half-written edit, not your bug —
+wait and rebuild, never "fix" a file you do not own.*
+
+### What each was told to PROPOSE rather than decide
+
+The in-batch-fork rule (*the implementer proposes, the architect rules*),
+applied where the fork is real:
+
+- **4.5a — Q1's design question**: what editing the frozen prefix should
+  DO. Options with a traced consequence each. *Not open:* her text may
+  not be destroyed, and a silent revert of her keystrokes is its own
+  defect. **And A1-21's `Shared/AppSession` removal path**, because a
+  `Shared/` change is a both-platform change (M-B).
+- **4.5b — the `MobileTrashModel` hoist's SCOPE**, with the instruction
+  stated in the words this round has earned: *do not report it done when
+  only the easy half is done.* Hoist the drifting decision, report the
+  remainder as a proposal.
+- **4.5d — the mechanism, IF it changes how the bar LOOKS.** Her rulings
+  R22/R25/R23 settle the shape; a fit fix at her shape is built, a look
+  change is proposed and stops.
+
+### One boundary held rather than crossed
+
+**The Mac's FIFTH dead confirm site was NOT given to 4.5b.** Act 1 found
+it and derived its mechanism, and the fix is one line — **but 13l owns
+that door by her own ruling** (R20's first act), the code is Mac-app-local
+rather than shared, and R8's fence authorizes fixing shared defects, not
+taking a Mac phase's scheduled work. **13l's plan now carries the derived
+mechanism, the one-line fix, and the reason no existing pin caught it**,
+so the phase she scheduled it into is strictly better off than before.
+*(Offered to her as a one-line alternative — it is her call to move, not
+the architect's.)*
