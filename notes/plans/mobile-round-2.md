@@ -2665,3 +2665,59 @@ condition is preserved verbatim in the shared brain as
 `fanArities[i] == 1`. **A cross-block span touching a block with takes
 REFUSES on the phone.** The Mac's own behaviour — routing that case to a
 visible-take edit — was fenced off at her instruction and remains hers.
+
+---
+
+## 40. R26 — THE SHELF'S LAYOUT, HER RULING (2026-08-21)
+
+Her words: *"can you move the new note - just start typing to where
+today's entry currently is, and then make today's entry just a little
+button next to journal - like a clickable badge next to journal, with no
+blinking cursor?"*
+
+**Three changes, one shape:**
+
+1. **The quick-note box moves DOWN** — out of its fixed row under the
+   path line, to where the Today's Entry button sits today (below the
+   book list).
+2. **Today's Entry becomes a small clickable BADGE beside the Journal
+   book's row**, not a full-width button of its own.
+3. **The badge carries NO blinking cursor.**
+
+**Why (3) is more coherent than it looks, and worth recording:** the
+blinking block cursor is the TERMINAL VOICE's quick-entry idiom, and the
+Today's Entry button only ever borrowed it — `MobileShelfView`'s own
+header says so (*"the Today's Entry button (terminal's blinking block
+cursor riding it — the quick-entry idiom)"*). It was standing in for a
+quick-entry surface the phone did not yet have. **Now that the real
+quick-note box exists, the cursor belongs to IT and the badge drops
+it.** Her instinct restores the idiom to its owner rather than removing
+a flourish.
+
+**ARCHITECT'S READING ON THE ONE THING HER SENTENCE DOES NOT SETTLE —
+flagged for her rather than buried.** Today's Entry sits INSIDE the
+ScrollView, below the books; the quick-note box is currently a FIXED row
+outside it (A5-6). Moving the box "to where today's entry currently is"
+could mean either position. **Ruled: it stays PINNED — a fixed row at
+the shelf's BOTTOM, above the tab bar.** Reasons: for a short shelf that
+is visually the same place her sentence names; for a long one it stays
+reachable instead of scrolling away; and an always-present box is what
+makes "generous instant saving" and the satisfying-to-type-on-the-home-
+screen feel true, which is why A5-6 pinned it in the first place. **If
+she meant it should scroll with the list, it is one modifier to
+change.**
+
+**A consequence to handle, not to discover:** the badge hangs off the
+JOURNAL BOOK'S ROW, so the design needs an answer for **when no Journal
+book exists yet** (a fresh install shows *"no books yet — today's entry
+starts your journal."*). The door must still be reachable then —
+`shelveInDailyJournalBook` CREATES AND PINS the Journal book when none
+is designated (AppSpec §9, her 13d #37(iii) ruling), so the capability
+survives; what needs a home is the BADGE when its row does not exist.
+**Implementer proposes; architect rules.**
+
+**QUEUED, not dispatched — and the reason is the §25 rule, not
+hesitation.** Batch 4 is live in the shelf files right now (PR4 puts a
+delete door on the book rows; PR1/PR2 touch the shell's surfaces). Two
+writers in `MobileShelfView.swift` is the collision this round has
+already paid for once. **R26 dispatches the moment batch 4 reports.**
