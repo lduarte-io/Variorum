@@ -268,6 +268,19 @@ scope until it has a ledger row.
   Delete Now / Empty Trash are IN-TRASH-ONLY with confirm-every-time;
   ordinary note deletion is move-to-Trash and says so. A door that
   destroys must name what it destroys before it acts.
+  > **AMENDED 2026-08-22 — R13 CARVES OUT THE IN-EDITOR DELETE, and this
+  > clause is the carve-out** (§44's MINOR 3: a fresh implementer reads
+  > these principles before the code, and M-E as written still mandated
+  > the ceremony her ruling removed — so the code carried the guard
+  > while the principle contradicted it). **Her ruling, verbatim:**
+  > *"it's fine to have no confirm."* The **⌫ on a whole-block
+  > selection asks NOTHING and deletes** — that is a RULING, not an
+  > oversight, and `theKeystrokeDeletesWithoutAskingAnything` guards it.
+  > Its substance is answered instead by **M20** (the structural
+  > undo/redo door, shipped at batch 4) and **M21/PR3** (the per-note
+  > tray, batch 6). **M-E still binds every OTHER destructive door** —
+  > the purge doors, note and book deletion, Empty Trash. **Do not
+  > re-add ceremony to the keystroke by reflex.**
 
 ---
 
@@ -3576,3 +3589,114 @@ been finding real bugs in Mac code that had shipped for weeks (the
 O(N²) walk; the caret naming a departing block). **Doors over good
 logic is the round's shape, and it is why the fixes are small even when
 the findings are alarming.**
+
+---
+
+## 52. BATCH 4.5 — THE CONSOLIDATED FIX ROUND (opened 2026-08-22 by the incoming architect)
+
+**Her instruction created this batch** (`mobile-round-2-successor-first-acts.md`):
+*"the items found in the cold reviews should be batch 4.5. also leave a
+note for the next orchestrator that a number of items have been missed
+and before 4.5, it should start with a cold review over 1-4 to add to
+4.5 with, and check through all notes and code changes for anything not
+yet included or that has been missed as well."*
+
+**It is in the binding batch map** (handoff §3) — this section is its
+enumeration, not its schedule. **Its exit condition is the dedicated
+stability pass**: 4.5 is not done until that pass has run.
+
+### 52.0 — STATE VERIFIED BEFORE ANY OF THIS WAS WRITTEN
+
+Tip `d62d820`, tree clean, `origin/mobile` in sync. `git diff
+46ffa0c..HEAD -- Sources/` **empty**; zero `Sync/` lines; batch 4
+present at `e7e2472`; `ZZProbe2Tests.swift` gone. **No Swift moved after
+`e7e2472`**, so mobile **449/75** and Mac **1568/272** describe the
+current tree (the mobile figure re-run to confirm). Handoff §2 carries
+the full verification block. Nothing below was inherited on trust.
+
+### 52.1 — THE ORDER, and it is hers
+
+*"Order it by consequence; the two quick-note BLOCKERs come first."*
+
+| Rank | Item | Source | Sub-batch |
+|---|---|---|---|
+| **1** | 🔴 **Q1 — the quick-note clamp DESTROYS her stored text.** Editing the FIRST paragraph of a multi-paragraph capture falsifies `hasPrefix(frozenPrefix)`, the clamp writes back the prefix, `recordTail()` then derives the tail from the CLAMPED text and gets `""`, and the next flush writes `""` into the owned variant. Unrecoverable: `autosave` registers no undo entry and no `commit_point` exists yet | §45 | **4.5a** |
+| **2** | 🔴 **Q2 — a refused mint at a leaving wipes the box AND the error.** `file()` reaches `reset()` unconditionally; `reset()` does `write("")` *and* `lastError = nil`. Reachable by the app's own named input (device locks mid-round → file protection cuts the store off), and the same road runs on an ordinary tab switch | §45 | **4.5a** |
+| **3** | 🔴 **The batch-4 BLOCKER — four confirm buttons read back state SwiftUI has already cleared.** Delete Now · Empty Trash · Library-row Delete Note · Shelf-row Delete Book all enqueue `Task { await model.confirm() }` while the bound setter clears the very state `confirm()` guards on; **and the A12 destructive-undo warning's Undo CANCELS it**. Fix: capture before the `Task`, or `alert(_:isPresented:presenting:)` | §49 | **4.5b** |
+| 4 | 🟠 **The fan fence is enforced from a deliberately FROZEN projection** — so a block with takes can be merged away mid-typing. The repo states this exact law 40 lines away and the sibling seam road obeys it | §45 (batch 3) | **4.5c** |
+| 5 | 🟠 **The O(N²) twin SURVIVES in `planVisibleTakeEdit`**, one `else if` later, on a road that runs. §38's *"the Mac inherits the fix"* is **overstated in three places** — a fix claimed complete whose twin lives | §45 (batch 3) | **4.5c** |
+| 6 | 🟠 **§44's MAJOR — the Mac gets the gap fence's REFUSAL but not its FACE**, and §34(a)'s accepted trace is FALSE (merge-then-edit intercepts first; `diagnose` step 3 uses the same intersection test, so a zero-length gap is invisible to it too). She would read a raw `blocksNotAdjacent(first:second:)` enum dump. **Three parts, all pinnable** | §44 | **4.5c** |
+| 7 | 🟠 **The one-row strip OVERFLOWS a 320 pt phone** — needs 338 pt where 288 is offered, ~25 pt off each edge, `×` and `⇤` effectively unreachable. A regression (the two-row shape fit with 4 pt to spare). The pin cannot see it because it compares to a literal `375` while its own toolbar is 320 | §45 (bar family) | **4.5d** |
+| 8 | 🟠 **The vertical geometry pins assert constants against themselves** (`air >= air`) — so the recorded guarantee that *"a future iOS trips here"* **does not exist**. §15 trap 1, for the fifth time | §45 (bar family) | **4.5d** |
+| 9 | 🟠 **Q4 — the background grant introduced a TERMINATION class that did not exist.** Taken asynchronously one hop after the phase change (Apple names exactly this as the anti-pattern) and **with no expiration handler**: an ungranted assertion writes SQLite unprotected (`0xdead10cc`), an overrun with no handler is fatal (`0x2182bad2`) — and the flush's last leg is a network round | §45 | **4.5a** |
+| 10 | 🟠 **Q3 — an emptied box leaves a live, empty, untitled note.** A5-3 disclosed an abandoned ONE-WORD note; it did not sanction a note with no content at all | §45 | **4.5a** |
+| 11 | 🟠 **§49 — deleting a note from the Library leaves a LIVE EDITOR on the tombstone.** The in-note door pops the screen; the Library row door passes no `onDeleted`. Keystrokes there autosave into tombstoned variants and are **lost** | §49 | **4.5b** |
+| 12 | 🟠 **§49 — `MobileTrashModel` is a near-verbatim copy of the Mac's `RecoveryViewModel`.** M-C forbids it at birth and **it is already drifting on day one** (the two surfaces answer *"where did it go?"* differently). The batch hoisted the WORDS and stopped one layer short of the DECISIONS | §49 | **4.5b** |
+| 13 | 🟠 **B45-1 — `AppBootstrap.init` opens the store and runs the migration set SYNCHRONOUSLY ON THE MAIN THREAD before first paint** (`VariorumMobileApp.swift` constructs it as `@State`). A **P2 violation** — OverallModel §5. Same family as the Keychain launch hop 13e batch 9 fixed. *"A measurement is one signpost away"* and none was ever briefed — **measure, then fix** | her row, §Acts | **4.5a** |
+| 14 | 🟠 **B45-2 — the `displaySlot` / `slots[i]` coupling**, out-of-range-safe only by caller accident during the crystallization window. **PR8 reorder-takes is scheduled at batch 7**, so the schedule is walking straight into it. Make it explicit | her row, §Acts | **4.5c** |
+| 15 | 🟠 **Batch 3 — an EMPTY block inside a span** yields a plan that can never execute, refusing an ordinary gesture with a sentence naming a cause that isn't there | §45 | **4.5c** |
+| 16 | 🟠 **Batch 3 — the phone never wired A7/#34's seam carves**, so backspace-to-join refuses: a fifth refusal case §31's four-case table omits | §45 | **4.5c** |
+| 17 | **B45-3 — the crash trace's SIX unowned items.** **E1** the instrumented device experiment (the only thing that settles where the stale verdict comes from — **M1's own status is recorded "high confidence, NOT PROVEN"**) → device, see B45-4 · **E2** the CI gate/report fixture · **§8 path 8** UIKit undo replaying a coalesced edit through the gaps between `removeAllActions()` calls (zero mentions anywhere in the round) · **§8 path 11** the `supportsTextReplacement: false` fence, recorded expressly *"so the fence is not removed later without re-reading this"* · **§9's Mac residual** (the `MarkdownActs` arm-then-hand-off sites) · **M1's SUSPECTED status itself** | her row | **4.5c** (E1 → 4.5-device) |
+| 18 | **B45-4 — THE ON-DEVICE SWEEP: E1 *and* M16 together, in ONE window on her phone.** **E1 must run on HER DEVICE (iOS 26.6), not the 26.2 simulator** — it is an input-path question and §9's runtime gap is recorded. **M16**: the same-note drag-move question, unsettleable from the repo (no drag delegate is configured, so reachability is a device fact). **Standing instruction (§50 sweep finding 2): when she offers her device, the device-only queue runs in that window — not just the install.** This round already spent one such offer on two installs while both of these sat runnable | her row | **4.5-device** |
+| 19–n | **The remaining MINORs and NITs**, each with its written disposition: §44's 2/4/5/6/7/8 · §45's Q5–Q10 + 5 NITs · §49's 4 MINOR + 4 NIT | §44 · §45 · §49 | by file, below |
+| **+** | **ACT 1's findings** — a fresh cold read over the round's WHOLE shipped diff (`46ffa0c..d62d820`), briefed on nothing but the diff plus this round's five known blind spots. **Dispatched 2026-08-22 before anything else, per her instruction** | her ACT 1 | **on arrival** |
+| **+** | **ACT 2's findings** — the never-became-work sweep over the four investigation records, the round's prose, and the diff's own TODO/PROVISIONAL/"not pinned" annotations. **Dispatched in parallel with ACT 1** | her ACT 2 | **on arrival** |
+
+### 52.2 — ONE ITEM IS THE ARCHITECT'S OWN, and it is fixed here rather than briefed
+
+**§44's MINOR 3 — §5b's M-E still mandates the confirm R13 removed.** A
+fresh implementer reads the binding principles before the code, and M-E
+still says *"A door that destroys must name what it destroys before it
+acts."* **R13 carved that road out; the code carries the guard, the
+principle does not.** This is a plan-file edit, not implementer work —
+**done in this same commit** (see §5b's M-E, which now names R13 and
+points at M20/M21). Left to an implementer it would have been read as
+binding and quietly re-added the ceremony she removed.
+
+### 52.3 — THE DISPATCH PLAN — four sub-batches, real file fences
+
+Batch 4.5 is ~40 findings across four unrelated neighbourhoods. One
+session would hit the round's own signature failure (*only the easy half
+done*) and the ~500k degradation line. It splits by FILE OWNERSHIP —
+§25's one-writer rule made structural rather than remembered.
+
+**Each sub-batch is a full R28 unit: BUILD → COLD REVIEW → FIX →
+CONTINUE, dispatched as one, with the review brief written at dispatch
+time.** No sub-batch is complete at its commit.
+
+| Sub-batch | Theme | **Files it OWNS — and nothing else** |
+|---|---|---|
+| **4.5a** | **Capture & app lifecycle** — Q1, Q2 (the two BLOCKERs), Q3, Q4, Q5–Q10 + NITs, **B45-1** | `Features/Shell/MobileQuickNote.swift` · `Features/Shell/MobileShellRouter.swift` · `VariorumMobileApp.swift` · tests: `MobileQuickNoteTests.swift`, `MobileShellTests.swift` |
+| **4.5b** | **Deletion doors & the confirm BLOCKER** — §49's BLOCKER, its 2 MAJOR, its 4 MINOR + 4 NIT, §44's NIT 7 | `Features/Shell/MobileTrashView.swift` · `MobileTrashModel.swift` · `MobileLibraryView.swift` · `MobileLibraryViewModel.swift` · `MobileShelfView.swift` · `MobileShelfFaces.swift` · `MobileShelfViewModel.swift` · `MobileBookDetails.swift` · `Features/Write/MobileUndoDoor.swift` · `MobileNoteActions.swift` · `MobileBlockMenu.swift` · `Shared/RecoveryCopy.swift` · `Shared/StructuralUndoCopy.swift` · tests: `MobileTrashTests.swift`, `MobileDeletionTests.swift`, `MobileUndoDoorTests.swift`, `MobileBlockMenuTests.swift`, `MobileSurfaceDriver.swift` |
+| **4.5c** | **The editor & the shared brain** — the frozen-projection fan fence, the surviving O(N²) twin, §44's MAJOR + its MINORs, the empty-block plan, the seam carves, **B45-2**, **B45-3** (minus E1) | `Shared/EditorBrain/*` · `Features/Write/MobileEditorViewModel.swift` · `MobileStructural.swift` · `MobileWriteView.swift` · `MobileMarkdownActs.swift` · `Variorum/Features/Editor/EditorSurfaceController.swift` · `EditorViewModel.swift` · tests: `MobileEditRouting*.swift`, `MobileCrossBlockEditTests.swift`, `MobileWholeBlockDeleteTests.swift`, `MobileStructuralTests.swift`, `VariorumTests/EditRouting*.swift`, `BlockRangeIndexTests.swift` |
+| **4.5d** | **The keyboard bar's geometry** — the 320 pt overflow, the self-asserting pins | `Features/Write/MobileKeyboardBar.swift` · tests: `MobileMarkdownTests.swift`'s bar section (coordinate with 4.5c if it needs that file — **stop and report instead of sharing it**) |
+| **4.5-device** | **B45-4** — E1 + M16, ONE window, her hardware | no files; a device queue, run when she offers her phone |
+
+**THE FENCE RULE, binding and stated once:** a sub-batch that finds its
+fix needs a file outside its list **STOPS AND REPORTS** — the architect
+rules the fork (the implementer proposes, the architect rules). It does
+not reach across. This round has already paid twice for two writers in
+one file.
+
+**Parallel waves, with distinct simulators AND distinct DerivedData**
+(§5.3's recipe, learned three times): the fences above are disjoint by
+construction, so **4.5a · 4.5b · 4.5c dispatch together**; **4.5d
+follows** (its one file is small and its findings are the least
+consequential). Simulator UDIDs and DerivedData paths are assigned in
+each brief and are never shared.
+
+### 52.4 — WHAT 4.5 DOES **NOT** TOUCH
+
+- **`Sources/` — anything.** M-D: zero schema, zero
+  `Sources/VariorumCore/Sync/`. The mirror is at marker **7**.
+- **`planVisibleTakeEdit`'s ROUTING** — her personal fence: a cross-block
+  span touching a block with takes keeps REFUSING on the phone. *Item 5
+  above fixes that method's O(N²) WALK, not its routing* — the fence
+  test is `git diff -- '*.swift' | grep -c planVisibleTakeEdit` reading
+  a routing change, and the brief states the distinction explicitly.
+- **Mac FEATURES.** R8 authorizes fixing shared defects (item 6 is
+  exactly that), never building Mac capability.
+- **A build configuration.** Never add one (the 4G trap).
+- **Her real store**, and **her live Mac app** — it was running at
+  cutover and is never quit; no Release build or `/Applications` refresh
+  while it lives.

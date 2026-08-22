@@ -102,6 +102,29 @@ all, ordered by importance" (R4).
 **Branch `mobile`, tip should be at or after `c574acc`** (plus whatever
 batch 4 lands). Pushed. **Never push `main`.**
 
+> **VERIFIED BY THE INCOMING SEAT, 2026-08-22.** Tip **`d62d820`**,
+> working tree **clean**, `origin/mobile` in sync (0 ahead / 0 behind).
+> **`git diff 46ffa0c..HEAD -- Sources/` is EMPTY** and zero
+> `Sources/VariorumCore/Sync/` lines — both hygiene claims hold. **Batch
+> 4 landed** (`e7e2472`, in history). **`ZZProbe2Tests.swift` is gone**
+> (the audit's finding 19 — the tree is clean, so the count it would
+> have moved is trustworthy). **NO Swift moved after `e7e2472`**
+> (`git diff --stat e7e2472..d62d820 -- '*.swift'` is empty), so the
+> 449/75 and 1568/272 figures describe the current tree; the mobile
+> figure was re-run to confirm. **The Mac footprint of this round is TEN
+> files** — `Shared/EditorBrain/{BlockRangeIndex,CrossBlockEditPlanner,EditorEditRouting}.swift`,
+> `Shared/{RecoveryCopy,StructuralUndoCopy}.swift`,
+> `Variorum/Features/Editor/{EditorSurfaceController,EditorViewModel}.swift`,
+> `Variorum/Features/Library/RecoveryView.swift`,
+> `Variorum/Features/Tray/TrayPanel.swift`,
+> `Variorum/Registry/ShellActions.swift` — plus three `VariorumTests/`
+> files. That list is the 13l manifest's completeness check.
+>
+> **HER MAC APP IS LIVE** (`/Applications/Variorum.app`, pid observed at
+> cutover). It is her real-store daily drive: **never quit it, never
+> kill it, and no Release build or `/Applications` refresh while it
+> lives.**
+
 **Counts as last measured** (re-run them yourself; CLAUDE.md's rule is
 that the previous closeout is the baseline, but this round has moved
 them repeatedly):
@@ -145,6 +168,7 @@ numbers — both run 1–24. This is §39's fix for a real confusion risk.)*
 | 3b | M5 the quick note | ✅ | 🔴 **reviewed 2026-08-22 → §45, TWO BLOCKERs + 2 MAJOR + more.** *(This cell read "in flight — reviewer C not yet reported" when the handoff was written; C reported the same night, and its findings are the round's worst: the batch whose whole promise is "nothing you type is lost" breaks that promise in two traced ways. Q1/Q2 lead the consolidated fix round.)* |
 | — | R12 bar tuning · R22 one-row strip · M26 un-indent | ✅ | ⚠️ **reviewed 2026-08-22 → §45, 2 MAJOR open** |
 | **4** | **M20 the undo/redo door (FIRST)** · PR1 delete a note · PR2 the Trash + Archived · PR4 delete a book · PR7 the on-leaving savepoint | ✅ `e7e2472` → §46 | ⏳ **DISPATCHED 2026-08-22** at her instruction (§47/R28); its findings join batch 4.5 |
+| **4.5 (THE CONSOLIDATED FIX ROUND — dispatch first)** | **Every finding from every cold review of batches 1–4, plus her four named rows and both successor Acts.** Full ordered enumeration: `mobile-round-2.md` **§52**. In brief, by consequence: **Q1** the quick-note clamp DESTROYS stored text · **Q2** a refused mint at a leaving wipes the box AND the error · **the batch-4 BLOCKER** — four confirm buttons read back state SwiftUI has already cleared (Delete Now · Empty Trash · Library-row Delete Note · Shelf-row Delete Book) and the A12 warning's **Undo CANCELS it** · then §45's MAJORs (the fan fence read from a frozen projection · the 320 pt strip overflow · the surviving O(N²) twin in `planVisibleTakeEdit` · the geometry pins asserting constants against themselves) · §49's two MAJORs · §44's MAJOR (the Mac gets the gap fence's REFUSAL but not its FACE) · **B45-1** `AppBootstrap` runs migrations synchronously on the MAIN THREAD before first paint (a **P2** violation) · **B45-2** the `displaySlot`/`slots[i]` coupling that batch 7's PR8 walks into · **B45-3** the crash trace's six unowned items · **B45-4** THE ON-DEVICE SWEEP (E1 + M16, ONE window) · **+ ACT 1's findings** (a fresh cold read over the round's whole shipped diff) **+ ACT 2's findings** (the never-became-work sweep) | ⏳ | **ITS EXIT CONDITION IS THE DEDICATED STABILITY PASS** (the row below). 4.5 is NOT done until that pass has run. Its own build half is reviewed under R28 like any batch |
 | **5 (queued, dispatch next)** | **R26/R27 the shelf layout** (quick note takes Today's Entry's box; books list bounded + scrolls past ~8; writing area ≈ half the screen; Today's Entry becomes a badge on the Journal row, no blinking cursor) · **R27b the starter Journal book** · **R24 "more info" → "info"** | queued behind batch 4 (same shelf files) | ❌ owed |
 | 6 | PR3 per-note tray · PR5 deleted takes · PR6 archive/unarchive · PR14 lens-dangles notice · PR15 lineage door · PR22 guide deletion chapter | | ❌ owed |
 | 7 | PR8 reorder takes · PR9 duplicate-book-name guard · PR11 copy all takes · PR12 take→block · **M23 copy-follows-screen** · PR19 swatches+emoji · PR20 block multi-select · PR21 replace | | ❌ owed |
