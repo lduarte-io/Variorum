@@ -3474,3 +3474,68 @@ or miss.
 
 **ALL FINDINGS → BATCH 4.5.** The BLOCKER leads it, beside the two
 quick-note BLOCKERs.
+
+---
+
+## 50. THE TURN-BY-TURN CONVERSATION SWEEP (2026-08-22) — the one only the architect can do
+
+She asked twice for a sweep of the conversation and, the second time,
+whether I had actually done one. **I had not.** What I had run were
+REPO-consistency audits: greps of the plan, and a cold auditor over the
+repo. **Those check the plan against the code. Neither can check HER
+WORDS against the plan** — the auditor cannot see the conversation. The
+first sweep was therefore done from memory, which had already failed
+twice by then. Recorded plainly because the distinction is the lesson:
+**an audit of the records cannot find an ask that never reached the
+records.**
+
+Done properly now, turn by turn. **Twenty-six of her turns; every ask
+traced to a row, a ruling, or a commit.** Two things surfaced that no
+repo audit could have found:
+
+### ⚠️ SWEEP FINDING 1 — a live report of hers was never recorded
+
+Mid-round she pasted a **Mac crash report** and said *"I keep getting
+these crash reports."* It was investigated (all 18 in that cluster were
+the round's own red-on-old test runs — every one had a test frame; her
+pasted report's exception code matched a specific pin byte for byte) and
+answered in conversation. **It was never written into the plan.**
+
+The `/architect-phase` protocol is explicit that *"the author is a live
+finding source: her reports during a phase are findings — record
+verbatim, route to the owning batch."* This one was benign, so nothing
+was lost — but **"benign" was the conclusion, not a reason to skip the
+record**, and a later session re-encountering that cluster has no
+account of it. Recorded now.
+
+### ⚠️ SWEEP FINDING 2 — she offered her device and the device round was under-used
+
+When she returned she wrote: *"okay i'm back and my phone is here now,
+**for whatever is needed for the device round**."* What was actually
+done with that window: **two installs.** Nothing else.
+
+**Two device-only items were sitting available and were not run:**
+- **E1 — the crash trace's instrumented experiment**, which is *"the
+  only thing that settles where the crash's stale verdict comes from"*
+  — and **M1's own status is recorded "high confidence, NOT PROVEN."**
+  It must run on her **iOS 26.6** hardware, not the 26.2 simulator.
+- **M16 — the same-note drag-move question**, explicitly device-only
+  and unsettleable from the repo.
+
+Both are now in batch 4.5 (B45-3 carries E1). **But they were runnable
+at the moment she offered, and asking again costs her a second window
+that this round already had.** Recorded as a scheduling failure, not a
+finding: the device round was treated as "install builds" when she had
+offered it as "whatever is needed."
+
+**Standing instruction added for the successor:** when she makes her
+device available, the device-only queue is run in that window — E1 and
+M16 first — not just the install.
+
+### The rest of the sweep
+
+Every other ask is accounted for: R1–R28 recorded verbatim, each traced
+to code, a scheduled row, or an explicit closure. Her opening brief's
+seven items all shipped or are scheduled. Her "there's no real need to
+note that" (the crash-report reaction) was correctly NOT recorded, at
+her instruction. No ask was found that lacks a home.
