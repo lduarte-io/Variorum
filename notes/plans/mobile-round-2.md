@@ -2721,3 +2721,83 @@ hesitation.** Batch 4 is live in the shelf files right now (PR4 puts a
 delete door on the book rows; PR1/PR2 touch the shell's surfaces). Two
 writers in `MobileShelfView.swift` is the collision this round has
 already paid for once. **R26 dispatches the moment batch 4 reports.**
+
+---
+
+## 41. R27 — THE SHELF'S PROPORTIONS, AND A STARTER JOURNAL (2026-08-21)
+
+Her words: *"right now today's entry is under the + new book text - in
+its own separated little box. that's where I want the writing a note to
+go, so that there's a good amount of space. I would make sure that if
+you have more than ~8 books (which will take up a good amount of the top
+half of the screen) that you have to scroll through the books so that
+the main area still can be 'new note - just start typing' and there's
+enough room that you can type in that for about half the phone screen. I
+would also make a journal book with one entry in it for new users
+introducing users to their journal - and then if they delete that
+journal book or archive it, it just doesn't appear at all. i think
+that's fine"*
+
+**This AMENDS §40's R26 and supersedes the architect's "pinned at the
+bottom" reading with something more specific and better.** She is not
+describing a position; she is describing **PROPORTIONS**.
+
+### The shape, as ruled
+
+1. **The quick-note box takes Today's Entry's current place** — its own
+   separated box, below `+ new book`.
+2. **THE BOOKS LIST IS BOUNDED AND SCROLLS INSIDE ITSELF.** Past ~8
+   books the LIST scrolls; it does not push the writing area down. Her
+   reason, stated: ~8 books already fill "a good amount of the top half
+   of the screen", and the main area must stay the quick note.
+3. **THE WRITING AREA IS ABOUT HALF THE PHONE SCREEN** — *"enough room
+   that you can type in that for about half the phone screen."* This is
+   the load-bearing number and the reason the layout changes at all.
+
+**What this settles that R26 left open:** the architect had ruled "a
+fixed row at the bottom" to keep it reachable. Her answer is better —
+**bound the BOOKS instead**, and the writing area is generous by
+construction at any shelf size. Recorded as a correction: my reading
+solved reachability by shrinking the box; hers solves it by capping what
+sits above it.
+
+**ARCHITECT'S RULING on what her sentence implies but does not say:**
+**the box WRAPS AND GROWS** into that area rather than staying a single
+line. "Enough room to type for about half the screen" is meaningless for
+a one-line field. **⏎ is unchanged** — it still opens the editor (A5-1),
+so the box holds ONE wrapped paragraph, never several. That keeps A5-2's
+one-block mint exactly as designed; only the box's height follows its
+text, up to the ruled area.
+
+**The Today's Entry badge (R26.2) is unaffected** — it rides the Journal
+book's row inside the now-bounded, scrolling list.
+
+### R27b — A STARTER JOURNAL BOOK FOR NEW USERS (new capability)
+
+**Ruled:** a fresh install gets a **Journal book containing ONE entry
+that introduces the reader to their journal.** If she (or any user)
+**deletes or archives it, it never comes back** — *"it just doesn't
+appear at all. i think that's fine."*
+
+**Notes for the implementer, so this lands right:**
+- **Seed ONCE, and never re-seed.** The deleted/archived state must be
+  distinguishable from "never seeded" — a re-seed after a deliberate
+  delete is precisely what she is ruling out. The `MobileTutorialSeeder`
+  (the pocket guide) is the existing precedent for one-time seeding on
+  this platform; follow its shape rather than inventing one.
+- **It also solves R26's open consequence for free:** §40 flagged that
+  the Today's Entry badge needs a home when no Journal book row exists.
+  On a fresh install there now IS one. **The empty case still needs an
+  answer** (she deletes the book, or arrives from an existing account
+  with no Journal) — the door must stay reachable, since
+  `shelveInDailyJournalBook` creates and pins the book when none is
+  designated (AppSpec §9, her 13d #37(iii) ruling). Implementer
+  proposes; architect rules.
+- **THE ENTRY'S TEXT IS COPY, AND COPY IS HERS.** Per the 13s row she
+  writes the app's corpus in her own voice. **Draft it, mark it
+  PROVISIONAL, and put it on her list to rewrite** — do not treat a
+  drafted sentence as shipped voice.
+
+**QUEUED with R26 behind batch 4** (same shelf files). Both dispatch
+together the moment batch 4 reports — they are one layout change and
+splitting them would mean two passes over the same view.
