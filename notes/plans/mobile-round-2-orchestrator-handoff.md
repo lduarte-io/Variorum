@@ -33,6 +33,22 @@ which is the phase's own truth and is cited throughout.
 > in that batch map under a numbered batch — five rows went homeless
 > this round because prose said otherwise.
 >
+> **STANDING INSTRUCTION — 13l IS THE NEXT MAC PHASE, AND YOU FEED IT AS
+> YOU GO (her instruction, 2026-08-22).** This is a MOBILE round, but it
+> keeps changing Mac code — the crash lived in a shared brain, and every
+> hoist since has moved Mac-visible logic. **`notes/plans/phase-13l-data-safety-floor.md`
+> carries a MANIFEST of those changes** for the Fable cold review she
+> ruled as 13l's FIRST ACT (R20).
+>
+> **Write every Mac-important change and every Mac residual into that
+> manifest IN THE COMMIT THAT MAKES IT — never at closeout.** The
+> manifest went stale exactly once already, because a §-record said an
+> item "belongs there" and nobody carried the prose into the file. If
+> you change Mac behaviour, narrow a Mac gesture, hoist a Mac-local
+> rule, or leave a Mac residual behind, it lands in 13l's manifest the
+> same turn. **A stale manifest wastes the review she asked for**, and
+> 13l is the first Mac phase to open against this round's merged tree.
+>
 > Cast is ALL-OPUS at her ruling (R1), with the surplus spent on review
 > depth: a cold ladder per BATCH plus a whole-round pass. Her standing
 > instruction is that **nothing gates on installing to her phone** (R3);

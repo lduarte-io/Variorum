@@ -546,6 +546,18 @@ prose they have never been shown, and that the deletion does not
 propagate back and take the other device's copy (tombstone-wins,
 SyncSpec §6).
 
+**⚠️ THIS MANIFEST IS LIVE, NOT FINAL — MORE MAC CHANGES ARE COMING
+(author instruction, 2026-08-22).** The mobile round has not closed.
+**Batch 4.5 will make further Mac changes**, at minimum the three-part
+fix for the defect named below (a fence arm in `EditorViewModel`, a real
+sentence for `.blocksNotAdjacent`, and making `CrossBlockRefusal.diagnose`
+see zero-length entries), and its cold reviews may add more. **The
+mobile orchestrator writes each one into this manifest AS IT HAPPENS**,
+not at closeout — a manifest completed only at the end is how this one
+went stale the first time. **If you are 13l's reviewer: check this
+section's own git history for edits later than the round's closeout
+commit before assuming it is complete.**
+
 **AND ONE MAC DEFECT THIS ROUND CREATED** (§44's MAJOR): the gap fence
 makes the Mac **refuse**, but the Mac never got the fence's **FACE**, so
 the span falls through into merge-then-edit and dies as a **raw error
