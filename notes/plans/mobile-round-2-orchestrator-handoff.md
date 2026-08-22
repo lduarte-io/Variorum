@@ -16,43 +16,71 @@ which is the phase's own truth and is cited throughout.
 ## 0. PASTE-READY KICKOFF (the successor starts here)
 
 > You are the incoming architect/orchestrator for **Mobile Round 2** of
-> the Variorum iPhone app, taking over mid-round. Work in
-> `~/dev/variorum-mobile` on branch `mobile`.
+> the Variorum iPhone app, taking over mid-round from a seat that ran
+> out of context. Work in `~/dev/variorum-mobile` on branch `mobile`.
+> Run under `/architect-phase`.
 >
-> **Read, in full, yourself, before anything:** `CLAUDE.md` ·
-> `notes/MobileSoul.md` · `notes/plans/mobile-round-2.md` **in full**
-> (it is long; the reading rule is load-bearing and this round has paid
-> five times for schedule items that lived only in prose) · this file ·
-> `.claude/skills/architect-phase/SKILL.md`.
+> **READ FIRST, IN THIS ORDER, IN FULL, YOURSELF:**
+> 1. `notes/plans/mobile-round-2-successor-first-acts.md` — **her
+>    instruction for what you do before anything else.** Start here, not
+>    with the batch map.
+> 2. `CLAUDE.md` · `notes/MobileSoul.md` ·
+>    `.claude/skills/architect-phase/SKILL.md`
+> 3. `notes/plans/mobile-round-2.md` **in full** (long; the reading rule
+>    is load-bearing — this round paid six times for items that lived
+>    only in prose)
+> 4. **This file**, then
+>    `notes/plans/mobile-round-2-consistency-audit.md`
 >
-> **Then VERIFY, do not trust** (§2 below lists exactly what): the
-> branch tip, the suite counts, and whether batch 4 landed. The outgoing
-> seat's claims are claims until you have re-run them.
+> **THE ROUND'S ONE-LINE STATE:** batches 1–4 are built; **five of seven
+> shipped without a cold review** until the author asked three times;
+> when the reviews finally ran they found **three BLOCKERs** — two that
+> destroy or discard her text in the quick note, one that leaves four
+> confirm buttons inoperative. **Batch 4.5 exists to fix all of it.**
 >
-> **§3 is the ONLY schedule.** A row is not scheduled until it appears
-> in that batch map under a numbered batch — five rows went homeless
-> this round because prose said otherwise.
+> **VERIFY, DO NOT TRUST.** §2 lists what: the branch tip, the suite
+> counts, whether batch 4 landed. **Several diagnoses in this round were
+> traced by READING and never EXECUTED, and several were reported done
+> when only their easy half was done.** One of them — the Mac's
+> dead-door mechanism — was repeated six times before anyone ran it and
+> found it wrong. Inherit nothing; re-derive what you rely on.
+>
+> **§3 IS THE ONLY SCHEDULE.** A row is not scheduled until it appears
+> in that batch map under a numbered batch. Prose scheduling — an
+> "owner" column, a sentence in a record, a promise in a message to her
+> — is a NOTE, not a schedule. Write the map in the same commit that
+> names a row; dispatch from the map, never from prose.
+>
+> **R28 — THE BATCH LOOP IS SELF-CLOSING (her ruling, and it is the fix
+> for this round's worst failure).** A batch dispatch is
+> **BUILD → COLD REVIEW → FIX → CONTINUE**, as ONE unit, dispatched
+> together, completed without a human in the middle. You do not decide
+> after a build reports whether to review it. **The review is inside the
+> batch.** A batch reaches her only as build + review + dispositions.
 >
 > **STANDING INSTRUCTION — 13l IS THE NEXT MAC PHASE, AND YOU FEED IT AS
-> YOU GO (her instruction, 2026-08-22).** This is a MOBILE round, but it
-> keeps changing Mac code — the crash lived in a shared brain, and every
-> hoist since has moved Mac-visible logic. **`notes/plans/phase-13l-data-safety-floor.md`
-> carries a MANIFEST of those changes** for the Fable cold review she
-> ruled as 13l's FIRST ACT (R20).
+> YOU GO.** This is a MOBILE round that keeps changing Mac code (the
+> crash lived in a shared brain; every hoist since has moved Mac-visible
+> logic). `notes/plans/phase-13l-data-safety-floor.md` carries a
+> **MANIFEST** of those changes for the Fable cold review she ruled as
+> 13l's first act (R20). **Write every Mac-important change and every
+> Mac residual into that manifest IN THE COMMIT THAT MAKES IT — never at
+> closeout.** It went stale once already because a record said an item
+> "belongs there" and nobody carried it across.
 >
-> **Write every Mac-important change and every Mac residual into that
-> manifest IN THE COMMIT THAT MAKES IT — never at closeout.** The
-> manifest went stale exactly once already, because a §-record said an
-> item "belongs there" and nobody carried the prose into the file. If
-> you change Mac behaviour, narrow a Mac gesture, hoist a Mac-local
-> rule, or leave a Mac residual behind, it lands in 13l's manifest the
-> same turn. **A stale manifest wastes the review she asked for**, and
-> 13l is the first Mac phase to open against this round's merged tree.
+> **TWO REVIEWS ARE BOUND AS EXIT CONDITIONS, not list entries** (§3's
+> last two rows): the **dedicated stability pass** is batch 4.5's exit
+> condition, and the **whole-round pass** is closeout obligation ZERO.
+> Neither is discharged by anything that resembles it — if you catch
+> yourself thinking *"we already did a review like that,"* that is
+> exactly how this round lost five of them.
 >
-> Cast is ALL-OPUS at her ruling (R1), with the surplus spent on review
-> depth: a cold ladder per BATCH plus a whole-round pass. Her standing
-> instruction is that **nothing gates on installing to her phone** (R3);
-> take install windows opportunistically.
+> **CAST: ALL-OPUS** (R1), with the surplus spent on review depth.
+> **Her standing rule: nothing gates on installing to her phone** (R3) —
+> take install windows opportunistically. **And when she offers her
+> device, run the device-only queue in that window** (B45-4: E1 and
+> M16), not just the install — this round spent one such offer on two
+> installs while both sat runnable.
 
 ---
 
