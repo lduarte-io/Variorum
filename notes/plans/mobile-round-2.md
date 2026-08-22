@@ -2382,3 +2382,39 @@ throwaway iPhone 17 Pro sim and restored both originals as found. **The
 one-writer-per-file rule (§25) is not sufficient — parallel batches also
 contend for the SIMULATOR.** Future parallel dispatches either stagger
 device work or assign distinct simulators up front.
+
+---
+
+## 36. BATCH ORDER CORRECTED + PARALLEL DISPATCH (2026-08-21)
+
+**Her question — "did you add the quicknote box to the homescreen yet?"
+— exposed an ordering slip.** §30 moved M22 to "batch 3, ahead of the
+quick note" and never re-stated where M5 landed. It had been batch 3;
+after the displacement it belonged to no numbered batch at all. **A row
+displaced without a new home is the unowned state again** (the third
+instance this round — §19, §34, now this). Corrected:
+
+| Batch | Contents | State |
+|---|---|---|
+| 3 | **M22** merge-then-edit | dispatched |
+| **3b** | **M5** the home-screen quick note | **dispatched IN PARALLEL** |
+| 4 | R1 delete a note · R2 Trash + Archived · R4 delete a book · R7 the on-leaving savepoint hook | next |
+| 5 | R3 tray · R5 deleted takes · R6 archive · R14 lens-dangles notice · R15 lineage door · R22 guide chapter | |
+| 6 | R8 · R9 · R11 · R12 · **M23 copy-follows-screen** · R19 · R20 · R21 | |
+| 7 | R10 · R13 · R16 · R17 · **R23 the forked voice brain** | |
+
+**Parallel is safe here and the fences are explicit** (the §25
+one-writer rule, plus §35's simulator-contention lesson):
+- **M22 owns** `Shared/EditorBrain/`, `Features/Write/`,
+  `Variorum/Features/Editor/`.
+- **M5 owns** `Features/Shell/` and the app-lifecycle seam.
+- **Distinct simulators assigned up front** — M22 on iPhone 17 Pro, M5
+  on iPhone 17 (both iOS 26.2). §35's lesson applied rather than
+  re-learned.
+
+**The Release build carrying batches 1/1b/2 + R12 was INSTALLED on her
+phone at 21:41** (`devicectl` over the tunnel, bundle
+`io.lduarte.VariorumMobile`) — the §24 install gate (the confirm
+question) is resolved by R13, and her phone is present. The device round
+can begin: the crash gestures, the whole-paragraph delete, the copy
+door, and the bar's air on real hardware.
