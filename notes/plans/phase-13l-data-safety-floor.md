@@ -558,6 +558,56 @@ went stale the first time. **If you are 13l's reviewer: check this
 section's own git history for edits later than the round's closeout
 commit before assuming it is complete.**
 
+**🔴 YOUR FIRST ACT'S DIAGNOSIS IS SETTLED — READ THIS BEFORE THE DEAD
+DELETE-NOW DOOR (derived 2026-08-22, Mobile Round 2 §56).**
+
+**The Mac's Delete Now / Empty Trash doors are dead, and the recorded
+cause was wrong.** This project recorded for weeks that they fail because
+a `confirmationDialog`'s `isPresented` is a computed `Binding(get:set:)`
+over an `@Observable` property that `body` never reads, so no observation
+dependency registers. **§46 partially retracted that** (batch 4
+reproduced the pattern and it *presented*) and concluded *"the cause needs
+re-deriving on macOS."* **It has been re-derived, from the code, and it
+is a different mechanism one step later:**
+
+`RecoveryView.swift:299-309` and `:528-539`. The dialog **presents
+fine** — `titleVisibility: .visible` plus `model.pendingConfirm?.message`
+in the title argument *does* register the dependency. It dies at the
+**confirm→act edge**: the binding's setter
+(`set: { if !presented { model.cancelPendingPurge() } }`) **nils the
+payload synchronously inside tap handling**, while the action closure only
+*enqueues* `Task { await model.confirmPendingPurge() }` — which cannot
+resume until that turn yields. By then `pendingConfirm` is `nil` and the
+method's own `guard` returns. **Nothing is purged, no intent, no
+receipt.** Apple's contract is explicit: *"When the user presses or taps
+one of the alert's actions, the system sets this value to `false` and
+dismisses."*
+
+**Her live report is fully explained** — *"pressed Delete Now on my Mac,
+nothing happened."*
+
+**The fix is one line per site:** capture the payload synchronously inside
+the action closure (`let confirm = model.pendingConfirm` before the
+`Task`), or use `confirmationDialog(…, presenting:)` / `alert(_:isPresented:presenting:)`,
+which captures the value into the closure. **Every other value-carrying
+confirm in both codebases already uses `presenting:`.**
+
+**Why no test caught it, and what your pin must do:** every existing pin
+(including `VariorumTests/TrashPurgeDoorsTests.swift:79, 114, 157, 237`)
+calls the confirm method **directly while the pending value is still
+set**. Presentation is pinned end to end; **the confirm→act edge is the
+only edge with no coverage.** A red-on-old here has to drive the live
+`NSAlert` handler, not the model.
+
+**And the lesson that matters more than the fix:** the mobile round
+shipped **four more copies of this defect** while citing a rule — *never
+a computed `Binding(get:set:)`* — that names a **SYNTAX** rather than the
+property that matters. Its four phone sites obey that rule to the letter
+and are dead anyway. Mobile batch 4.5b is fixing all four; **the Mac's
+fifth is yours.**
+
+---
+
 **⚠️ HEADS-UP BEFORE YOUR FIRST ACT — the Mac suite is INTERMITTENTLY
 RED, and it is NOT this round's doing.**
 `VariorumTests/EditorWindowSmokeTests.rewriteStrategyLatencies(paragraphs: 250)`

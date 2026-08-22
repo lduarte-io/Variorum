@@ -438,6 +438,30 @@ red on the pre-fix code by behavioral revert.
 - **Mobile tests:** `xcodebuild test -project App/Variorum/Variorum.xcodeproj -scheme VariorumMobile -destination …`
   from the repo root; confirm the "Test run with N tests" line; zsh
   `pipestatus`.
+- **⚠️ THE SIMULATOR MUST HAVE THE ACCESSIBILITY SERVER ARMED, or 16
+  real pins fail as phantoms** (added 2026-08-22 — Act 1's MAJOR 4, and
+  it was never in this block, which is exactly why it bit):
+
+  ```
+  xcrun simctl spawn <UDID> defaults write com.apple.Accessibility ApplicationAccessibilityEnabled -bool true
+  ```
+
+  Without it every `HostedSurface` pin reports **`labels were []`** — the
+  accessibility tree comes back empty, so **every real door reads as
+  ABSENT.** Measured on one simulator, one suite, one tree: clean →
+  `labels were []` throughout; flag set → **10/10 passed**. The setting is
+  **machine-local and PER-SIMULATOR** — not in the repo, not in the
+  scheme. **All five simulators this round uses were armed and verified
+  `= 1` on 2026-08-22**, but a fresh simulator, a reset one, or another
+  machine starts clean.
+
+  **This is the round's green-over-nothing class INVERTED — red over
+  nothing — and it is more dangerous**, because the honest response to a
+  phantom failure is to change working code. **The durable fix is 4.5b's**
+  (arm from the test bundle; make `HostedSurface` fail LOUDLY with a
+  diagnostic when a surface known to have content yields an empty tree),
+  and until it lands **a mobile suite result from an unarmed simulator is
+  not a result.** Check first; do not diagnose second.
 - **Mac tests** run from `App/Variorum/`; core via `swift test`.
 - **Baselines — CURRENT, updated 2026-08-22 through batch 4** (the
   audit's finding 12: this line had never moved off the 13j closeout's
@@ -3965,3 +3989,150 @@ that trap. **It then shipped a dead door by a different mechanism.**
 Following a rule is not the same as testing the outcome, which is exactly
 what "drive the real surface, and verify the path you drove is the path
 you meant" exists to say.
+
+---
+
+## 56. ACT 1's COLD READ LANDS (2026-08-22) — the round's strongest review, and it answers a question §46 said had to be re-derived
+
+Her ACT 1: a fresh cold reviewer over the round's **whole shipped diff**
+(`46ffa0c..d62d820`, 53 files, 10,336 insertions), briefed on nothing but
+the diff plus the five known blind spots — the class the per-batch
+reviewers structurally could not catch. **3 BLOCKER · 10 MAJOR · 6 MINOR
+· 4 NIT**, plus a clean bill that is itself load-bearing.
+
+**It ran things rather than reading them**, which is why it found what it
+found: it executed the suite on its own simulator, isolated a cause,
+proved it both ways, and restored the machine as found.
+
+### 🔴 THE HEADLINE — the confirm defect is WIDER than §49, and its MAC mechanism is now DERIVED
+
+**§49 found four dead confirm doors on the phone. There are FIVE, and the
+fifth is on the Mac** — `RecoveryView.swift:299-309, 528-539`, which is
+**her own live report**: *"pressed Delete Now on my Mac, nothing
+happened."*
+
+**And the mechanism is not what this round has been saying.** §15 and the
+parity inventory recorded the Mac's dead door as a `Binding(get:set:)`
+computed over an `@Observable` property that `body` never reads, so no
+observation dependency is registered. **§46 partially retracted that**
+(batch 4 reproduced the pattern on iOS and it *presented*) and concluded:
+*"13l must not start from this mechanism; the cause needs re-deriving on
+macOS."*
+
+**Act 1 re-derived it.** The Mac dialog **presents fine** — its
+`titleVisibility: .visible` plus `model.pendingConfirm?.message` in the
+title argument *does* register the dependency. It dies one step later,
+for the same reason all four phone doors die: the `isPresented` setter
+nils the payload, synchronously inside tap handling, **before** the
+enqueued `Task` can resume and read it back.
+
+> **This is the diagnosis six sessions repeated wrongly, settled.** And
+> the sharpest part is the lesson: this round shipped **four more copies
+> of the defect** while citing a rule — *never a computed
+> `Binding(get:set:)`* — that names a **SYNTAX** rather than the property
+> that matters. **The phone's four sites obey that rule to the letter and
+> are dead anyway.** A rule that names a shape instead of a mechanism
+> will be obeyed into the same bug.
+
+**13l's plan is corrected in this same commit.** Its first act was
+pointed at a diagnosis that had been retracted-but-not-replaced; it now
+carries the derived mechanism and the one-line fix.
+
+### 🔴 THE OTHER TWO BLOCKERs are Q1 and Q2, independently re-traced
+
+Act 1 reached both without seeing §45 — Q1's clamp destroying stored
+prose on a first-paragraph edit, Q2's unconditional `reset()` wiping the
+box and the error. **Two independent traces of the same two defects
+raises confidence to the point where 4.5a's only open question is the
+shape of the fix, not the existence of the bug.** It adds one detail
+worth carrying: **Q1's own pin already encodes the collateral** —
+`storedBlockTexts == ["Kept.\n", ""]`, an empty trailing block left in a
+real note, asserted as if correct.
+
+### 🟠 THE FINDING THAT GATED DISPATCH — and the architect proved it before acting
+
+**MAJOR 4: the mobile suite is NOT green at HEAD by the documented
+command.** On the reviewer's assigned simulator: **449/75 with 36 issues,
+16 failures**, every one a `HostedSurface` pin, every one reporting
+**`labels were []`** — the accessibility tree comes back empty, so every
+real door reads as absent. The cause is a **machine-local, per-simulator**
+setting: `com.apple.Accessibility ApplicationAccessibilityEnabled`. Not
+in the repo, not in the scheme, **not in §9's environment block.**
+
+**The architect verified this independently before changing any plan**,
+because it contradicted his own verified-green baseline:
+
+| simulator | flag | result |
+|---|---|---|
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+
+Then proved it both ways on ONE simulator, ONE suite, ONE tree:
+*[removed for publication]*
+`defaults write … -bool true` → **10/10 passed**.
+
+**So the architect's own §52.0 "mobile 449/75 re-run green" was true and
+misleading at once** — green because that one simulator happened to carry
+a flag the batch-4 session set while building the driver. Recorded
+plainly: *verify-don't-trust caught the count and missed the
+precondition.*
+
+**Why this gated dispatch:** three of the four 4.5 sub-batches were
+assigned to simulators without the flag. **All three would have opened
+with 16 phantom failures** and either reported a regression that isn't,
+or — far worse — "fixed" real code to make imaginary failures go away.
+**It would have been this round's green-over-nothing class inverted into
+red-over-nothing, in the very batch built to end it.**
+
+**IMMEDIATE MITIGATION, done:** all five simulators armed and verified
+`= 1`. **§9's environment block now carries the requirement.**
+**DURABLE FIX → 4.5b**, which owns `MobileSurfaceDriver.swift`: arm it
+from the test bundle at launch (or a scheme variable) **and make
+`HostedSurface` fail loudly with a diagnostic when a surface known to
+have content yields an empty tree**, so *"not armed"* can never again
+read as *"door absent"*. The reviewer's own reproduction recipe is the
+red-on-old.
+
+### THE NEW FINDINGS — not in §44/§45/§49, and each now routed
+
+| # | Finding | **DISPOSITION** |
+|---|---|---|
+| **A1-5** | 🟠 **Merge-then-edit landed and the refusal copy carrying its own unexecuted instruction was never re-narrowed.** `MobileEditorViewModel.swift:1986-2000` says, verbatim: *"When merge-then-edit lands, this line loses the partial-span case too and **must be re-narrowed again**."* **M22 landed in batch 3 of this round** and the line is unchanged. The phone's remaining cross-block refusal now names **none** of its four real causes (a fan · a lock or a gap · the open tail · a seam backspace) and implies machinery is absent when three of the four have a specific cause the Mac states. The Mac's brain for exactly this, `CrossBlockRefusal.swift`, **stayed Mac-app-local while its two siblings were hoisted this round** | **4.5c — HOIST `CrossBlockRefusal` to `Shared/`** and call it from the phone's else-arm; the same move batch 1b and batch 3 already made twice |
+| **A1-16** | 🟠 **"The Mac suite unmoved at 1568/272 ⇒ the hoist moved an address, not behaviour" IS NOT A VALID PROOF — and this round holds the counterexample.** Batch 1b's hoist **did** change Mac behaviour (the new gap fence), and the count could not move **because no Mac test covers that case.** An unmoved count proves *"no covered behaviour changed"* | **ADOPTED AS A CORRECTION TO THIS ROUND'S OWN RECORDS.** It is the green-over-nothing lesson one level up, and it lands beside §54's finding that the *green* half of that claim is itself intermittent. The hoist proof is **weaker than stated three times** (§23, §38, §46) — the closeout must not repeat it unqualified |
+| **A1-17** | 🟠 **`FindReplaceGate` is Mac-app-local, and PR21 (in-note replace) is scheduled at batch 7.** The phone is safe **today** only because `MobileEditorTextView.swift:754` returns `supportsTextReplacement: false` — and the phone's gate now routes cross-block spans into merge-then-edit and whole-block deletion, so a machine-driven sweep must never restructure the post | **BATCH 7, named on PR21's row: HOIST `FindReplaceGate` WITH PR21, never after.** Same shape as B45-2 — a known hazard with a dated collision. *(It also confirms B45-3's §8-path-11 item: the `supportsTextReplacement: false` fence is load-bearing and must not be removed without reading this)* |
+| **A1-18** | **Three deletion refusal-wording homes on the phone** — `MobileEditorViewModel.deleteNoteRefusal:958`, `MobileTrashModel.refusal:351`, `MobileBookDetailsModel.refusal:171` — each mapping a different subset of `OperationError`, each falling back to `String(describing:)`, **after a batch whose stated purpose was one home for the deletion vocabulary** | **4.5b**, beside the `MobileTrashModel` hoist — it is the same finding one layer out |
+| **A1-15** | **Superseded copy in three places, one in a SHARED file:** `Shared/AppSession.swift:89` still says the phone has *"no undo UI yet"* (M20 shipped it); `:240-245` states an inverted reason (*"no buffer to flush and no reason to grow one"* — `MobileQuickNote.adopt` calls `session.autosave(forPost:)`, which mints **and caches** a coordinator); and a test comment asserts *"there is no undo door on this phone yet"* | **4.5a** owns the quick-note half and the `AppSession` lines it falsifies; **4.5b** owns the undo-door line. Behaviour is fine in all three — **the stated reasons are wrong, which is the class that makes the next reader wrong** |
+| **A1-21** | **`Shared/AppSession.postAutosaves` has no removal path** (no `removeValue` anywhere). Pre-existing and bounded for editors (notes opened), **but the quick note now adds one coordinator PER CAPTURE**, and `flushEveryOpenPost()` iterates all of them on every filing and every background flush | **4.5a** — it created the per-capture growth and owns the box. **Report the shape before fixing**: a removal path in `Shared/` is a both-platform change (M-B) |
+| **A1-19** | `SPECULATIVE` — **an unfound anchor makes the box own text it does not own.** `frozenPrefix` returns `""` both for the one-block case *and* when the backwards `range(of:)` fails at `blockCount > 1`, and **its own pin encodes that as intended.** The reviewer could construct no reachable input and says so | **4.5a — as a SHAPE fix, not a bug fix.** *The failure mode is wrong even though it is unreachable*: an unfound anchor should refuse ownership, never claim everything. Honest labelling; treat it as such and do not manufacture a pin |
+| **A1-14** | **`BlockRangeIndex` now has two mutator protocols and no stated rule about which is which** — the band header reads as a whole-band law (*"THE MUTATORS REFUSE; THEY DO NOT TRAP"*) while `transferTailPrefixToLastEntry`, `crystallize` and `range(ofEntryAt:)` still carry preconditions. **All call sites traced and currently guarded** — a hazard, not a live bug, but the survivors are exactly the class this round proved fatal in Release | **4.5c** — state the split explicitly, or make them fallible too |
+| **A1-23** | **§46's correction is not locatable in the tree** (the reproduction was a throwaway) — and it is **a claim about macOS established on iOS**, currently steering 13l's opening act | **SUPERSEDED by the BLOCKER above**, which gives 13l a mechanism it can read in `RecoveryView.swift`. **13l's plan corrected in this commit** |
+
+*(A1's findings 6, 7, 8, 9, 10, 11, 12, 13, 20 and 22 re-derive §44/§45/§49
+items already in §52 — several with sharper mechanisms, all folded into
+the owning sub-batch's brief. Two corrections worth keeping: the phone's
+`blocksNotAdjacent` sentence names *"a block that hasn't arrived yet"* but
+**not the commonest cause, an ordinary blank paragraph**; and the 320 pt
+overflow is reached via **Display Zoom** on any modern iPhone, not only
+an SE — the reviewer verified that 12 mini / 13 mini are 375 pt on iOS 26,
+correcting the round's own framing.)*
+
+### THE CLEAN BILL — where NOT to spend
+
+**The crash fix is the right fix and its pins are real.** `ArmedEdit.describes`
+hand-checked against all four verdicts — no arming it wrongly rejects or
+accepts. The crash pins drive `beginEditing`/`replaceCharacters`/`endEditing`,
+**the actual storage contract the crash arrives through**, not the
+delegate-bypassing APIs M25 warned about. Both platforms' `storageDidEdit`
+are line-for-line symmetric, every mutator refusal routes to
+`desyncRecovery()` with the load-bearing `return`. **M1's root remains
+"NOT PROVEN" (E1 unrun) — but that is a DIAGNOSTIC gap, not a correctness
+one: the binding rejects any mismatch, so a different root produces a
+visible re-render rather than a trap.** Zero `Sources/` lines, no schema,
+no `Sync/`; marker 7 by construction. **The hoists are real hoists.** No
+text is copied across entities anywhere in the diff. Nothing new scales
+with corpus size on a keystroke road. **P-6 holds — the tutorial spine
+passed in its full run.** And the confirm BLOCKER's blast radius is
+**exactly five hosts**, established by enumerating all 27 `isPresented:`
+sites: every other is a plain `@State` Bool and is immune — **which is
+precisely why a device walk would have shown deletion "working"**.
