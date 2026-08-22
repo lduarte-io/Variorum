@@ -2576,3 +2576,92 @@ similar questions later.
 out by measurement: iOS re-materialised the bar from the app's cream
 voice to a neutral system material. So there was no free version of this
 fix to reconsider.)*
+
+---
+
+## 39. THE AUDIT SHE ASKED FOR (2026-08-21) — including one real drop
+
+She asked, after a long away-from-the-desk stretch: *"can you run through
+the chat and tell me if anything i've proposed has gotten missed or mixed
+up… where are we at in the parity rounds? what has been done so far,
+what still needs to be done, are there more questions for me, and has
+anything quietly been dropped?"*
+
+Audited against the ledger and the batch map rather than from memory.
+
+### ⚠️ ONE REAL DROP — M20, THE UNDO DOOR, AND IT IS HERS
+
+**`M20` (a structural undo/redo door on the phone) was created in §29
+from HER OWN proposal and never entered any batch.** Its ledger row says
+"this round, next batch"; **§36's binding batch map — which I wrote
+AFTER it — omits it entirely.** Verified: zero occurrences of M20 in
+either batch map.
+
+**This is worse than an ordinary drop, and the reason matters.** §30's
+R13 removed the delete confirmation, and the recorded justification was
+that *"the finding's substance is answered instead by M20 (the undo
+door) and M21/R3 (the per-note tray)."* **So I removed a safety
+ceremony on the strength of a replacement I then failed to schedule.**
+The phone currently has neither the confirm nor the undo door — which is
+not what either of us decided.
+
+*(The exposure is bounded and unchanged from §28: deletes are
+tombstones, the Mac's Trash lists blocks, and Put back works there for
+30 days. So nothing is lost — but the phone-side answer she was promised
+is missing, and she was told it was coming.)*
+
+**SCHEDULED NOW: M20 is BATCH 4's first item**, ahead of the Trash
+surface — it is small (the stack is `Shared/` and live; only the
+affordance is missing), it serves every structural gesture, and it is
+the thing standing in for the ceremony that was removed.
+
+**The mechanism of the drop, recorded so it stops happening:** this is
+the FOURTH time this round a row has gone homeless when something was
+re-ordered (§19, §34, §36, now this). The first three were caught by a
+reviewer or by her. **The rule already stated at §34 — "every row gets
+its table entry in the commit that names it" — is necessary but was not
+enough, because M20 DID get a table entry; what it never got was a
+BATCH.** The rule tightens: **a row's table entry must name a batch, and
+"this round, next batch" is not a batch.**
+
+### A CONFUSION RISK worth naming: the R-number collision
+
+**Her rulings are numbered R1–R23. The parity inventory's rows are ALSO
+numbered R1–R24.** They are different things — R3 is both "never gate on
+the phone install" and "the per-note tray". Every reference so far has
+been unambiguous in context, and nothing has actually been mixed up
+(checked), but this is exactly the shape that produces a mixup at the
+closeout or in a fresh session. **From here: her rulings are cited as
+`R<n>` and inventory rows as `PR<n>` (parity row) wherever both could be
+read.** The batch map's rows are inventory rows.
+
+### R24 — "more info" → "info"
+
+Her words: *"can more info be replaced with just 'info'?"* The masthead
+chip currently reads "more info". **Ruled: rename to "info".** A string
+change; it rides M26's batch (the same surface family) or batch 4,
+whichever opens first. Chrome strings render through
+`tokens.chromeLabel`; the voice-cased form is what changes.
+
+### R25 — the eleven-act row is TAPPABLE, her call
+
+Her words: *"i also think that those buttons are clickable honestly."*
+**This answers §38's stated measurement risk before the measurement
+returns.** The one-row strip proceeds with all eleven acts at ~31 pt;
+the implementer's tappability finding is now INFORMATION rather than a
+gate. If it reports the row reads badly she still hears it, but she has
+pre-ruled the tap-target concern.
+
+### Her question on merge + takes — ANSWERED, and her understanding is correct
+
+She asked: *"the merge and then delete got added (without the mac
+behavior of when deleting across something with multiple takes opening a
+specific view, right? it just denies it if there are multiple takes?)"*
+
+**Correct, exactly as she describes.** Verified independently by the
+architect after M22 landed: `planVisibleTakeEdit` appears **zero** times
+in the diff; the Mac's visible-take path is untouched; and the no-takes
+condition is preserved verbatim in the shared brain as
+`fanArities[i] == 1`. **A cross-block span touching a block with takes
+REFUSES on the phone.** The Mac's own behaviour — routing that case to a
+visible-take edit — was fenced off at her instruction and remains hers.
