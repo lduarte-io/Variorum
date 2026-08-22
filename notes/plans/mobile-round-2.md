@@ -3389,3 +3389,88 @@ Act 2's sweep, in `mobile-round-2-successor-first-acts.md`), and **19**
 no longer move the count the successor is told to verify). **Finding 1**
 — the batch map's review column — was added at §43's rule; this pass
 completed the one row that was still missing its cell.
+
+---
+
+## 49. BATCH 4's COLD REVIEW — a BLOCKER, and it is the dead-door class ONE LAYER DOWN (2026-08-22)
+
+**Her R28 loop caught it on the very first batch to run under her
+instruction.** Batch 4 was the batch most warned about this exact class,
+that *proved* the Mac's dead-door trap by rewriting the phone's confirm
+in it — and it shipped its own dead doors by a different mechanism.
+
+### 🔴 BLOCKER — four confirm buttons read back state SwiftUI has already cleared
+
+Apple's contract: *"When the user presses or taps one of the alert's
+actions, the system sets this value to `false` and dismisses."* Each of
+these action closures does nothing but enqueue `Task { await
+model.confirm() }` — so **the write-back lands synchronously within tap
+handling, while the `Task` cannot resume until that handling yields.**
+Each bound setter clears exactly the state its confirm guards on:
+
+| Door | What actually happens |
+|---|---|
+| **Delete Now / Empty Trash** | `pendingConfirm = nil` → **nothing is purged**, no intent, no receipt |
+| **Library row → Delete Note** | `pendingDeleteNote = nil` → **the note is not deleted** |
+| **Shelf row → Delete Book** | `pendingDeleteBook = nil` → **the book is not deleted** |
+| **A12 warning → Undo** | `cancelPendingUndo()` → **pressing Undo CANCELS it** and reports *"Undo cancelled — nothing changed."* |
+
+**Why nothing caught it, and this is the important part:** the driver
+records honestly that a `UIAlertController`'s buttons cannot be
+activated in process — so every pin presents the alert and then calls
+the confirm method **directly, while the pending value is still set.**
+The confirm→act edge is the only edge where the binding setter and the
+deferred `Task` meet, **and it is the only edge with no coverage.**
+Presentation pinned end to end; effect never driven through the control.
+**The honestly-stated gap is where the defect lives.**
+
+**The asymmetry that would have hidden it from a device walk:** the ⋯
+sheet's Delete Note and book-details' Delete Book pass **no pending
+state** and **do work.** She would have tested deletion, seen it work,
+and never learned the purge doors and both row doors were dead.
+
+**Corroboration:** every other value-carrying confirm in BOTH codebases
+uses `presenting:`, which captures the value into the closure. These
+four are the first to read it back.
+
+**Fix (correct either way the experiment lands):** capture before the
+`Task`, or use `alert(_:isPresented:presenting:)`. **The reviewer named
+the settling experiment first** — invoke the live `UIAlertAction`'s
+handler from the existing hosted surface and assert
+`purge_intent == 1` — the hallucination guard applied to its own
+finding.
+
+### 🟠 MAJOR — deleting a note from the Library leaves a LIVE EDITOR on the tombstone
+Both tab stacks are alive by design. The in-note door pops the screen;
+**the Library row door passes no `onDeleted`.** So: open a note, switch
+tabs, delete it from the Library row → the editor stays mounted, gets
+re-granted liveness on return, blanks its title, and **remains editable
+over a deleted note.** Keystrokes there autosave into tombstoned
+variants and are **lost**. The batch's own in-note door handles this
+correctly; this one doesn't.
+
+### 🟠 MAJOR — `MobileTrashModel` is a near-verbatim copy of the Mac's `RecoveryViewModel`
+M-C forbids it at birth, and **it is already drifting on day one**: the
+phone words its receipt from `restoreBlock`'s landing; the Mac discards
+it. The two recovery surfaces already answer *"where did it go?"*
+differently. The batch hoisted the WORDS, the purge-table mapping and
+`PreservedOriginPutBack` — **then stopped one layer short of the
+decisions.**
+
+**Plus 4 MINOR** (a no-flush justification the shell's architecture
+falsifies · a refusal spoken *behind* the presenting sheet · a rolled
+observation duplicating the core wrapper · a success sentence in the red
+slot) **and 4 NIT.**
+
+**Its clean bill is substantial:** *"Its notes stay in the library"* is
+**verified true** at the trigger level; Put back is correct for all five
+kinds; the 30-day boundary agrees exactly and is clamped; Archived and
+Trash cannot double-list; **Empty Trash's count is genuinely unwindowed
+at ask time AND re-read at act time**; the purge doors really do exist
+nowhere else (grep + a pin asserting their absence); every new confirm's
+*presentation* is immune to the Mac's class; `newBlock` carrying no Undo
+is verified right against the op; and PR7's ordering cannot double-commit
+or miss.
+
+**ALL FINDINGS → BATCH 4.5.** The BLOCKER leads it, beside the two
+quick-note BLOCKERs.
