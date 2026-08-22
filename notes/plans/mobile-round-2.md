@@ -3672,6 +3672,16 @@ time.** No sub-batch is complete at its commit.
 | **4.5d** | **The keyboard bar's geometry** — the 320 pt overflow, the self-asserting pins | `Features/Write/MobileKeyboardBar.swift` · tests: `MobileMarkdownTests.swift`'s bar section (coordinate with 4.5c if it needs that file — **stop and report instead of sharing it**) |
 | **4.5-device** | **B45-4** — E1 + M16, ONE window, her hardware | no files; a device queue, run when she offers her phone |
 
+**THE BRIEFS ARE WRITTEN AND THEY ARE IN THE RECORD:**
+`notes/plans/mobile-round-2-batch-4.5-briefs.md` — all four, **plus
+their cold-review briefs, written at the same moment** (R28: the review
+is inside the batch, and its brief is written at dispatch time, never
+after). This closes the consistency audit's finding 11 for this batch:
+*six of eight dispatches in this round have no brief in the record*, so
+nobody could check a delivery against what it was told to build. They
+live in their own file rather than here because the plan file's
+read-in-full rule is load-bearing and this one is already 3,700 lines.
+
 **THE FENCE RULE, binding and stated once:** a sub-batch that finds its
 fix needs a file outside its list **STOPS AND REPORTS** — the architect
 rules the fork (the implementer proposes, the architect rules). It does
