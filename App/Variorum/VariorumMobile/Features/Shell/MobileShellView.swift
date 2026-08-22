@@ -71,6 +71,12 @@ struct MobileShellView: View {
         _libraryModel = State(initialValue: MobileLibraryViewModel(session: session))
         _scrapsModel = State(initialValue: MobileScrapsModel(session: session))
         _starsModel = State(initialValue: MobileStarsModel(session: session))
+        // The quick-note box's session (round 2, M5). Bound HERE and not
+        // in a `.task` deliberately: `bind` is idempotent and writes only
+        // `@ObservationIgnored` storage, so it cannot re-enter the view
+        // update — and doing it synchronously leaves no window in which a
+        // keystroke could find a box with no store to mint into.
+        router.quickNote.bind(session: session)
     }
 
     private var tokens: VoiceTokens {
@@ -81,11 +87,18 @@ struct MobileShellView: View {
         ZStack {
             stack(path: $shelfPath, owner: .shelf) {
                 MobileShelfView(
-                    model: shelfModel, stars: starsModel, tokens: tokens,
+                    model: shelfModel, stars: starsModel,
+                    quickNote: router.quickNote, tokens: tokens,
                     tabBar: { tabBar },
-                    onOpenBook: { shelfPath.append(MobileRoute.book($0)) },
-                    onOpenForWriting: { shelfPath.append(MobileRoute.note($0, focus: true)) },
-                    onOpenNote: { shelfPath.append(MobileRoute.note($0, focus: false)) },
+                    onOpenBook: { id in
+                        leavingShelf { shelfPath.append(MobileRoute.book(id)) }
+                    },
+                    onOpenForWriting: { id in
+                        leavingShelf { shelfPath.append(MobileRoute.note(id, focus: true)) }
+                    },
+                    onOpenNote: { id in
+                        leavingShelf { shelfPath.append(MobileRoute.note(id, focus: false)) }
+                    },
                     onSettings: { settingsPresented = true })
             }
             .opacity(tab == .shelf ? 1 : 0)
@@ -171,6 +184,18 @@ struct MobileShellView: View {
         }
     }
 
+    /// A5-8 — LEAVING MINTS AND CLEARS. Every road OFF the shelf root
+    /// files what is in the quick-note box first: the push happens
+    /// immediately (navigation must never wait on a write), and the filing
+    /// runs to completion on its own because the box's text lives on the
+    /// router's model, not on a view that is about to be covered. The box
+    /// comes back empty, which is the Mac pad's closing-files-it grammar.
+    private func leavingShelf(_ push: () -> Void) {
+        let quickNote = router.quickNote
+        Task { await quickNote.fileOnLeaving() }
+        push()
+    }
+
     /// One push door for the route builders — the OWNING stack's path,
     /// never the visible tab's (the S3 BLOCKER wiring rule).
     private func push(_ route: MobileRoute, in owner: MobileTab) {
@@ -206,7 +231,13 @@ struct MobileShellView: View {
             // pending text lands and the taker re-reads fresh BEFORE its
             // next keystroke can build on a stale photograph.
             let editors = router.editors
-            Task { await editors.tabDidBecomeVisible(target) }
+            // A5-8: a tab switch is a leaving, so the quick-note box files
+            // whatever is in it (a no-op when it is empty).
+            let quickNote = router.quickNote
+            Task {
+                await quickNote.fileOnLeaving()
+                await editors.tabDidBecomeVisible(target)
+            }
         } label: {
             Text(tokens.chromeLabel(label))
                 .font(tokens.small)

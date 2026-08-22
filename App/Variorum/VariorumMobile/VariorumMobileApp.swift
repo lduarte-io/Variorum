@@ -59,26 +59,24 @@ struct VariorumMobileApp: App {
             }
         }
         .onChange(of: scenePhase) { _, phase in
-            switch phase {
-            case .active:
-                services?.sync.triggerSync()
-            case .background:
-                // EVERY registered editor's pending autosave lands in the
-                // STORE first (`onDisappear` never fires on whole-app
-                // backgrounding — the Phase 8 review-round-2 finding,
-                // carried; the flush targets are the liveness authority's
-                // own bookkeeping since the S3 ladder's MAJOR 1, so a
-                // second open editor is covered too), then one sync round
-                // pushes it. If the device locks mid-round, file
-                // protection may cut the store off — the scheduler treats
-                // that exactly like being offline (round skipped, outbox
-                // intact, retry on next foreground).
-                let editors = shellRouter.editors
-                let sync = services?.sync
-                Task { await performBackgroundFlush(editors: editors, sync: sync) }
-            default:
-                break
-            }
+            // The routing lives in `mobileScenePhaseChanged` (round 2, M5)
+            // so it is pinnable, not merely readable. On `.background`:
+            // the HOME-SCREEN QUICK NOTE mints and files first (its text
+            // lives nowhere but the box until it does — her R5
+            // requirement), then EVERY registered editor's pending
+            // autosave lands in the STORE (`onDisappear` never fires on
+            // whole-app backgrounding — the Phase 8 review-round-2
+            // finding, carried; the flush targets are the liveness
+            // authority's own bookkeeping since the S3 ladder's MAJOR 1,
+            // so a second open editor is covered too), then one sync round
+            // pushes it — all of it inside a `beginBackgroundTask` grant
+            // (A5-4: there had never been one). If the device locks
+            // mid-round, file protection may cut the store off — the
+            // scheduler treats that exactly like being offline (round
+            // skipped, outbox intact, retry on next foreground).
+            mobileScenePhaseChanged(
+                phase, editors: shellRouter.editors, sync: services?.sync,
+                quickNote: shellRouter.quickNote)
         }
     }
 

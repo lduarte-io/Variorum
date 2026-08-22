@@ -10,8 +10,15 @@
 //  below. The settings door rides the path line's trailing edge
 //  (PROVISIONAL placement, recorded).
 //
-//  Reading is cheap: no live editor exists here at all (P3); the list is
-//  author-scale (a shelf holds books, not corpus).
+//  Reading is cheap: the one LIVE editor never lives here (P3); the list
+//  is author-scale (a shelf holds books, not corpus). Since round 2's M5
+//  the surface does carry ONE focusable control — the quick-note box's
+//  plain `TextField` — which is not an editor in the invariant's sense:
+//  it mounts no TK2 surface, holds no `BlockRangeIndex`, and is not a
+//  `MobileEditorViewModel`, so the one-live-ring invariant is not
+//  extended here, it is simply not engaged (the Mac pad's own reasoning,
+//  and the Library tab has shipped a `TextField` on this same composition
+//  since parity C3).
 //
 
 import SwiftUI
@@ -23,6 +30,9 @@ struct MobileShelfView<TabBar: View>: View {
     /// shelf's top + the book rows' star door (ONE model, threaded by
     /// the shell — the Mac StarDoor's one-value discipline).
     @Bindable var stars: MobileStarsModel
+    /// The home-screen quick note (round 2, M5). Owned by the shell router
+    /// so the app-lifecycle seam can reach it; the shelf only wears it.
+    @Bindable var quickNote: MobileQuickNoteModel
     let tokens: VoiceTokens
     @ViewBuilder let tabBar: () -> TabBar
     let onOpenBook: (String) -> Void
@@ -39,6 +49,12 @@ struct MobileShelfView<TabBar: View>: View {
     var body: some View {
         VStack(spacing: 0) {
             pathLine
+            // A5-6: a FIXED row under the path line and OUTSIDE the
+            // ScrollView — it never scrolls away, and nothing below it
+            // moves (the Today button and the starred section keep their
+            // order and their feel, which was her constraint).
+            MobileQuickNoteBox(
+                model: quickNote, tokens: tokens, onOpen: onOpenForWriting)
             ScrollView {
                 LazyVStack(spacing: 0) {
                     starredSection
