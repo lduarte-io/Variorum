@@ -2418,3 +2418,57 @@ phone at 21:41** (`devicectl` over the tunnel, bundle
 question) is resolved by R13, and her phone is present. The device round
 can begin: the crash gestures, the whole-paragraph delete, the copy
 door, and the bar's air on real hardware.
+
+---
+
+## 37. DEVICE ROUND — FIRST REPORT, AND R21 (2026-08-21)
+
+**M1 IS CONFIRMED ON HER HARDWARE.** Her words: *"seems like it's
+working to select and delete paragraphs at the end."* The crash that
+opened this round is fixed on the real device, on the real build, at the
+real gesture — the first end-to-end validation, after a diagnosis made
+entirely from two `.ips` files and a disassembly. Batches 1 and 1b are
+validated in use, not merely in suites.
+
+**R21 — SHE WANTS A VISIBLE UN-INDENT BUTTON.** Her words: *"i think an
+indent to the left button should be added to the set of formatting
+buttons though - there's an indent in but not an un-indent."*
+
+**Verified: outdent EXISTS and she could not find it.** It rides
+**long-press on ⇥** (`MobileKeyboardBar.swift:511–555`,
+`fireOutdent(_:)` on a `UILongPressGestureRecognizer`), with an
+accessibility hint — *"Long-press to outdent"* — and the header records
+three doors: the long-press, hardware ⇧Tab, and ⏎-on-an-empty-nested-
+item (K8).
+
+**So this is THIS ROUND'S RECURRING THEME AGAIN, in its purest form:
+the capability is built, tested, and documented — and the door does not
+reach her.** Long-press is invisible; a hint only VoiceOver speaks is
+not an affordance for sighted use; and the two other doors are a
+hardware keyboard and a side effect. She looked, and reasonably
+concluded it did not exist.
+
+**This SUPERSEDES the batch-2 PROVISIONAL** (*"⇥ carries BOTH
+directions… tap = indent, long-press = outdent"*, marked PROVISIONAL for
+her sitting). She has now effectively sat: **outdent gets its own
+visible button.**
+
+| # | Item | Shape | Owner |
+|---|------|-------|-------|
+| **M26** | **A visible un-indent (⇤) door in the formatting strip.** Row 2 becomes `# · • · ☑ · ⇥ · ⇤`. The long-press stays (three doors becoming four costs nothing and breaks no muscle memory); the ACT is unchanged — `MarkdownEditing`'s `.outdent`, already the one brain, already fired by `fireOutdent`. **This is a DOOR change, not vocabulary** | **queued — dispatched when the options agent releases `MobileKeyboardBar.swift`** |
+
+**Sequencing, and why it waits a few minutes:** `MobileKeyboardBar.swift`
+is currently held by the propose-only options agent (§36's third
+dispatch), which is building throwaway strip variants there and will
+revert them. Dispatching M26 into that file now is the §25 collision
+hazard, knowingly. It goes the moment that agent reports.
+
+**A useful consequence for her, immediately:** outdent works TODAY on
+the build now on her phone — **long-press the ⇥ button.** Worth telling
+her rather than making her wait for the visible door.
+
+**And a note for the options agent's result:** M26 adds a button to row
+2, which changes the strip's width and therefore interacts with
+**option 1** (the one-row strip) — a one-row strip must now fit
+ELEVEN acts, not ten. That makes option 1 materially less likely to
+work, and her choice should be read with that in mind.
