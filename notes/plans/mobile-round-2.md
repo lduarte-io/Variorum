@@ -3650,7 +3650,7 @@ the full verification block. Nothing below was inherited on trust.
 | 4 | 🟠 **The fan fence is enforced from a deliberately FROZEN projection** — so a block with takes can be merged away mid-typing. The repo states this exact law 40 lines away and the sibling seam road obeys it | §45 (batch 3) | **4.5c** |
 | 5 | 🟠 **The O(N²) twin SURVIVES in `planVisibleTakeEdit`**, one `else if` later, on a road that runs. §38's *"the Mac inherits the fix"* is **overstated in three places** — a fix claimed complete whose twin lives | §45 (batch 3) | **4.5c** |
 | 6 | 🟠 **§44's MAJOR — the Mac gets the gap fence's REFUSAL but not its FACE**, and §34(a)'s accepted trace is FALSE (merge-then-edit intercepts first; `diagnose` step 3 uses the same intersection test, so a zero-length gap is invisible to it too). She would read a raw `blocksNotAdjacent(first:second:)` enum dump. **Three parts, all pinnable** | §44 | **4.5c** |
-| 7 | 🟠 **The one-row strip OVERFLOWS a 320 pt phone** — needs 338 pt where 288 is offered, ~25 pt off each edge, `×` and `⇤` effectively unreachable. A regression (the two-row shape fit with 4 pt to spare). The pin cannot see it because it compares to a literal `375` while its own toolbar is 320 | §45 (bar family) | **4.5d** |
+| 7 | 🟠 **The one-row strip OVERFLOWS a 320 pt phone.** *(MAGNITUDE CORRECTED IN PLACE 2026-08-22 by measurement — §60: the content row is **8 pt/side (304)**, not 16, and **iOS does not clamp an oversized `customView` to the content row at all — it centres it on the BAR and lets it hang off both ends**, so the real clip is **9 pt per bar edge / 4 pt per outer act**, not ~25. The defect and its direction are exactly as first reported; only the number was wrong — corrected here because §52 is what every 4.5 session is told to read in full. The §48 in-place-correction precedent.)* As first written: needs 338 pt where 288 is offered, ~25 pt off each edge, `×` and `⇤` effectively unreachable. A regression (the two-row shape fit with 4 pt to spare). The pin cannot see it because it compares to a literal `375` while its own toolbar is 320 | §45 (bar family) | **4.5d** |
 | 8 | 🟠 **The vertical geometry pins assert constants against themselves** (`air >= air`) — so the recorded guarantee that *"a future iOS trips here"* **does not exist**. §15 trap 1, for the fifth time | §45 (bar family) | **4.5d** |
 | 9 | 🟠 **Q4 — the background grant introduced a TERMINATION class that did not exist.** Taken asynchronously one hop after the phase change (Apple names exactly this as the anti-pattern) and **with no expiration handler**: an ungranted assertion writes SQLite unprotected (`0xdead10cc`), an overrun with no handler is fatal (`0x2182bad2`) — and the flush's last leg is a network round | §45 | **4.5a** |
 | 10 | 🟠 **Q3 — an emptied box leaves a live, empty, untitled note.** A5-3 disclosed an abandoned ONE-WORD note; it did not sanction a note with no content at all | §45 | **4.5a** |
@@ -4537,7 +4537,15 @@ own report corrects two of the round's numbers.** Mobile **469/77
 passed**, spine **33/7 exact**, hygiene zero across the board, the
 throwaway harness deleted and the simulator left as found.
 
-### ⚠️ THE FINDING THAT OUTLIVES THIS SUB-BATCH — and it is live in another session's file RIGHT NOW
+### ⚠️ THE FINDING THAT OUTLIVES THIS SUB-BATCH — **ITS MECHANISM WAS FALSIFIED THE SAME DAY; READ §61 BEFORE THIS SECTION**
+
+> **CORRECTION BANNER, 2026-08-22.** Everything below about *"a second key
+> window steals key status"* is an **INFERENCE that a cold reviewer
+> falsified** (§61's MAJOR 1), and the architect propagated it as fact
+> into the briefs' binding preamble and into a closeout obligation before
+> anyone checked it. **The OBSERVATION and the isolation experiment stand
+> exactly as written. The MECHANISM does not.** §61 carries the
+> correction, the three counterexamples, and what survives as a rule.
 
 **`UIWindow.makeKeyAndVisible()` in a test harness kills the full mobile
 run.** Its geometry harness used it; the full suite then died — **twice,
@@ -4673,3 +4681,140 @@ The forks are hers and both cost more than they buy: **dropping an act at
 contradicts FIX-5 and hides acts *on the one width where she can already
 see least*. **23 pt whole beats 28 pt with two acts off the screen**, and
 it only ever happens on a phone whose owner has turned Display Zoom on.
+
+
+---
+
+## 61. 4.5d's COLD REVIEW (2026-08-22) — 2 MAJOR, and the first one is the ARCHITECT'S error, propagated repo-wide
+
+**ALL FOURTEEN FINDINGS ACCEPTED. Zero disputes.** Its clean bill is the
+most thorough of the round — it recomputed the fix's arithmetic
+independently at every width, **confirmed externally that no iOS-26
+iPhone renders narrower than 320 in portrait**, ran the suite on a
+**different device class** than the one the pins were authored against,
+and enumerated the twin-check rather than sampling it
+(`widthAnchor.constraint(equalToConstant:)` occurs **exactly once** in
+the entire mobile app).
+
+### 🟠 MAJOR 1 — I STATED AN INFERENCE AS A FACT AND PUT IT IN A BINDING PREAMBLE
+
+§60 recorded 4.5d's `makeKeyAndVisible()` finding **with its proposed
+mechanism attached** — *"a second key window steals key status from a
+concurrently-driven editor surface"* — and I then propagated that into
+**the briefs' §0 common preamble** (where every remaining 4.5 session
+reads it), into **a closeout obligation routing it to TEXTKIT2_NOTES §3
+as a platform truth**, and into **a live message to 4.5b**, which had
+already written it into `MobileSurfaceDriver.swift`'s header.
+
+**The reviewer falsified it from the committed tree, and I verified the
+counterexamples myself before accepting:**
+
+| pre-existing key-window host | last touched | in this round's diff? |
+|---|---|---|
+| `MobileTakesBrowserTests.swift:770` | `dd715c2` (pre-round) | **no** |
+| `MobileTakesBrowserTests.swift:946` | `dd715c2` (pre-round) | **no** |
+| `MobileLivenessTests.swift:199` | `dd715c2` (pre-round) | **no** |
+| `MobileSurfaceDriver.swift:253` | this round | yes |
+
+**Four simultaneous key-window hosts in a run that was green at 449/75.**
+*"A second stealer breaks it"* is false on its own terms.
+
+**What survives, and what does not:**
+- **SOUND:** the observation and the three-way isolation (files reverted →
+  clean; source alone → clean; source **+** that harness → crash), and
+  the remedy (`window.isHidden = false` fixed it).
+- **FALSIFIED:** key-window theft as the mechanism.
+- **NEVER CONSIDERED, and it is the leading candidate:** 4.5d's window has
+  **no `rootViewController`** — it bare-`addSubview`s a toolbar — unlike
+  every other host in the suite. **UNTRACED.**
+
+**THE HARMFUL HALF, and the reviewer named it exactly right.**
+`EditorAssertionSeam.fire` defaults to `assertionFailure` **whose entire
+purpose is to surface routing failures that `desyncRecovery()` then
+heals.** My preamble told every remaining session that a desync fatal is
+harness noise and *"do not fix the editor."* **That is this round's
+green-over-nothing failure INVERTED** — the next session to trip that
+assertion in a genuinely broken state would have filed it under §60 and
+moved on. **It is the same class as the Mac dead-door diagnosis this
+round repeated six times: a mechanism believed because it explained the
+symptom, never because anyone tested it.** I did it with the round's own
+lesson in front of me, in a document written to teach it.
+
+**CORRECTED IN THE SAME TURN, everywhere it went:** §60 carries a
+correction banner; the briefs' §0 now states measured-vs-inferred and
+names the three counterexamples; **the closeout obligation is withdrawn**
+— *an untraced observation is not a platform truth and does not enter
+`TEXTKIT2_NOTES` beside M17 and M25, both of which were traced to a
+mechanism*; and **a correction went to 4.5b while it was still live**,
+telling it plainly that `HostedSurface` is not implicated, that the
+"desync = noise" rule must not be adopted, that only the
+visible-not-key precaution survives — and that if it changed anything on
+my earlier word it should say so and I would unwind it, because the error
+is mine.
+
+### 🟠 MAJOR 2 — the sub-batch's ONE user-visible change is unseen, unqueued, and the register she reads now contradicts the tree
+
+Three ways, all correct:
+
+1. **Handoff §6 item 4 said *"the built width is 28"*** — made false by
+   this very fix, which introduces a second regime at 23. **Corrected in
+   place.**
+2. **No Display-Zoom row existed in the device queue**, though that queue
+   exists exactly for *"a simulator cannot settle it"* questions — **and
+   Display Zoom RESTARTS THE DEVICE**, so it must ride an install window.
+   **Added as D9.**
+3. **23 × 38 pt acts have never been rendered for a human.** The 28 pt
+   strip was **photographed on device with taps verified**; the 23 pt
+   strip has only frames-in-bounds in a plain window host — **and frame
+   containment is not legibility.** §26's standing rule is that anything
+   user-visible is verified on a real surface.
+
+**The framing that makes this a MAJOR rather than a NIT:** *R25 is a
+ruling about a number, and the number has moved 31 → 28 → 23 while the
+only register she reads still said 28.* My §60 ruling *"accept 23, and
+put it on her list as information"* — **and then it was not put there.**
+That is the round's own homeless-row failure, committed by the architect
+inside the sentence that ruled it.
+
+### The MINORs — all accepted
+
+- **The rebuild seam's correctness rests on an assignment ORDER at a call
+  site no pin drives.** `makeBar()` inherits width from `self.bar`, which
+  is **`weak`**; it survives only because `applyVoiceChrome` evaluates
+  `makeBar()` while the outgoing bar is still assigned. **A caller that
+  tidies up first — `inputAccessoryView = nil; inputAccessoryView =
+  makeBar()` — nils `self.bar`, and an open strip rebuilds at 23 pt on a
+  402 pt phone, sticky until the next Aa toggle.** The new pin cannot
+  witness it (it calls `makeBar()` with the old toolbar alive) and
+  `MobileEditorTextView.swift` is in no 4.5 fence. **Pinnable red-on-old.**
+- **The file's own arithmetic is wrong where a reader can now check it:**
+  *"a 402 pt phone would allow 31 … to buy 3 pt"* — recomputed against the
+  file's own function, `derived(402) = 30`, so **the trade is 2 pt, not
+  3.** The wording predates the sub-batch, but the sub-batch re-derived
+  every other number in the file and left this one. The same paragraph
+  **leads with superseded behaviour** (*"sized to the narrowest HARDWARE
+  class"*), with the correction two paragraphs later.
+- **The clearance pin dropped one of R12's three clauses while calling
+  itself "the R12 pattern".** The retired pin asserted `> 0`, `<= 6`,
+  **`== 4`**; the replacement asserts `> 0`, `<= 6`, `== barVerticalAir`.
+  The third is a genuinely better assertion (it verifies iOS *honours* the
+  constant) — but **nothing now pins her photographed value at 4**, so the
+  constant can drift 4 → 5 → 6 with every assertion passing. **One line.**
+- **The coverage test's doc makes the one claim this file exists to
+  retire** (*"asserted off the hosted bar rather than off the constant"* —
+  but the harness sets the frame height *from* the constant). Declaring it
+  coverage was honest; that sentence is not.
+- **One derivation spelled two ways**, in the file whose thesis is that
+  duplicated derivations drift.
+
+**Six NITs**, including the `supportedBarWidths` doc overstating its list
+(*substantively fine — `derived` is monotone, so `min(28, derived(w)) ==
+28` for **every** w ≥ 375, not merely the sampled three*), an inference
+stated as a measurement about bar-vs-content-row centring (**the data
+cannot distinguish them, since the insets are symmetric**), *"Display Zoom
+relaunches the app"* (it restarts the **device**), a dangling doc
+reference, muddled fixture ownership, and duplicated doc paragraphs.
+
+**And §52 row 7's stale magnitude is now CORRECTED IN PLACE** — the
+reviewer was right that §60 recording it was not enough, because **§52 is
+the section every 4.5 session is told to read in full.**

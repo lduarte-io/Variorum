@@ -291,9 +291,20 @@ it fresh and measure it against the phone's harder bar.
 3. **R27b's copy** — the starter journal entry's TEXT is hers to write
    (the 13s row); draft it PROVISIONAL, never ship a placeholder as
    voice.
-4. **The 28 pt strip** — she pre-ruled tappable at a quoted 31 pt; the
-   built width is **28**. She has seen it and not objected; re-offer only
-   if she raises it.
+4. **The strip's act width is now TWO REGIMES, not one — CORRECTED
+   2026-08-22** (§61's MAJOR 2: this item read *"the built width is 28"*,
+   which the 4.5d fix made false). She pre-ruled tappable at a quoted
+   **31 pt**; the built width is **28 pt on every phone ≥ 375 pt**
+   (byte-identical to what she has seen and not objected to) **and 23 pt
+   at the 320 pt Display-Zoom width.** The architect ruled **accept 23**
+   — the alternatives are dropping an act (an act-count change, and she
+   ruled eleven) or scrolling (contradicts FIX-5, and hides acts on the
+   one width where she can already see least). **This is INFORMATION for
+   her, not a gate** — but it is a ruling about a number, and the number
+   has moved 31 → 28 → 23 while this was the only register she reads.
+   **And 23 × 38 pt acts have never been rendered for a human** — the
+   28 pt strip was photographed on device; the 23 pt strip has only
+   frames-in-bounds in a plain window host. **Device-queue row D9.**
 5. **M16** — the drag-move question, on her hardware.
 
 **Five more, folded in 2026-08-22** (the audit's finding 5: each was
@@ -356,13 +367,18 @@ that were promised a home and never got one):
    to.** A stale manifest wastes the review she asked for.
 2. **M17, M25 AND THE HOSTED-SURFACE HARNESS HAZARD → `notes/TEXTKIT2_NOTES.md` §3** (an
    `inputAccessoryView` cannot resize after presentation; the
-   delegate-bypassing input APIs). **The third, added 2026-08-22
-   (§60):** `UIWindow.makeKeyAndVisible()` in a test harness kills the
-   full mobile suite by stealing key status from a concurrently-driven
-   editor surface — it surfaces as *"mobile editor surface desynced from
-   the block index"*, which reads as a product crash and is not one. Host
-   visible-not-key. **This belongs beside M25 because it is the same
-   family: a harness that drives something real and still misleads.**
+   delegate-bypassing input APIs). **A third candidate was proposed
+   2026-08-22 and DOES NOT QUALIFY as written** (§61's MAJOR 1): the
+   `makeKeyAndVisible()` harness interaction is a real, reproducible,
+   isolated-three-ways **observation**, but its stated MECHANISM was
+   falsified — three untouched key-window hosts already coexist in a
+   green run. **An untraced observation is not a platform truth and must
+   not be routed into TEXTKIT2_NOTES as one.** It stays in the round's
+   record and in the briefs' §0 as *what was measured*; it earns a
+   TEXTKIT2_NOTES entry only if someone traces the distinguishing factor
+   (the missing `rootViewController` is the leading, untraced candidate).
+   **Recording the distinction is the point:** M17 and M25 were each
+   traced to a mechanism, which is why they belong there.
 3. **The parity ledger** in `notes/MobileSoul.md` §6 — burn down PL-9,
    PL-10, PL-11; add this round's own line.
 4. **KnownIssues — the forked-brains row.** It was **RESTORED

@@ -61,19 +61,42 @@ Two more, both earned this round:
   When that is the bug, no oracle derived from the totals can witness
   it. Settle on the text.
 
-**⚠️ A HARNESS HAZARD THAT READS AS A PRODUCT CRASH** (found by 4.5d,
-`mobile-round-2.md` §60). **`UIWindow.makeKeyAndVisible()` in a test
-harness kills the full mobile suite run** — a second key window steals
-key status from a concurrently-driven editor surface, and it surfaces as
+**⚠️ A HARNESS INTERACTION — STATED AS WHAT WAS MEASURED, because the
+first version of this paragraph stated an inference as a fact and a cold
+reviewer falsified it** (`mobile-round-2.md` §60 as corrected, and §61).
+
+**What is ESTABLISHED:** one specific test harness — 4.5d's original
+geometry host, a window with **no `rootViewController`** that
+bare-`addSubview`s a toolbar and calls `makeKeyAndVisible()` — killed the
+full mobile suite run, reproducibly, surfacing as
 `MobileEditorViewModel.swift:1540: Fatal error: mobile editor surface
-desynced from the block index`, with xcodebuild restarting and reporting
-a short tail. **That crash is harness interference, not a product
-defect — do not "fix" the editor.** `MobileSurfaceDriver.HostedSurface`
-already calls it and is fine ALONE; a **second** stealer is what breaks
-it. **Host with `window.isHidden = false` (visible, never key)** if you
-add hosting of your own; 4.5d verified the glass cells materialize
-identically that way. *(This is almost certainly also the `Index out of
-range` 4.5a saw in a reverted pass and could not reproduce.)*
+desynced from the block index`. Isolated three ways (its files reverted →
+clean; its source change alone → clean; source **+** that harness →
+crash). **Removing `makeKeyAndVisible()` from that host fixed it.**
+
+**What is NOT established — and this is the part that was wrong:** that
+key-window theft is the mechanism, or that "a second key window" is the
+trigger. **The tree already contains three other key-window hosts**
+(`MobileTakesBrowserTests.swift:770` and `:946`,
+`MobileLivenessTests.swift:199`), untouched by this round, present when
+the suite was green at 449/75 alongside `MobileSurfaceDriver.swift:253`.
+**Four simultaneous hosts, one clean run.** The distinguishing factor was
+never traced; the missing `rootViewController` is the leading candidate
+and is UNTRACED.
+
+**THE RULE, in its safe form:** if you add a **new** hosting window,
+prefer `window.isHidden = false` (visible, never key) — 4.5d verified the
+glass cells materialize identically that way. **`HostedSurface`'s own
+`makeKeyAndVisible()` is not implicated** and is not to be changed on the
+strength of this note.
+
+**AND THE THING NOT TO CARRY FORWARD:** *"a desync fatal is harness
+noise."* **`EditorAssertionSeam.fire` defaults to `assertionFailure`
+precisely to surface routing failures that `desyncRecovery()` then
+heals.** A standing instruction to read it as noise is this round's
+green-over-nothing failure **inverted** — the next session to trip it in a
+genuinely broken state would file it under a plan section and move on.
+**If you hit that fatal, treat it as real until YOU have isolated it.**
 
 **RED-ON-OLD IS ABSOLUTE.** No bug-class fix lands without a pin proven
 **red on the pre-fix code by behavioural revert** and green after. That
@@ -871,6 +894,8 @@ cannot settle it.
 | **D6** | **Dictation into a MULTI-PARAGRAPH capture** (4.5a, §58) — iOS dictation replaces the whole field as it refines, which falsifies `hasPrefix`, so the box will hold at the boundary and refuse it. **4.5a's fix makes this SAFE** (the shipped code destroyed the tail in exactly this case) — but the interaction is untested on hardware, **and it is the same multi-paragraph case she is currently hand-avoiding** | Dictate into a box that already holds a pasted multi-paragraph capture; watch what the box does and what the note holds afterwards |
 | **D7** | **The caret jumps to the end** on every held change — **inherited from the shipped clamp, not introduced by the fix.** Invisible in tests, obvious in the hand | Edit the first paragraph of a pasted capture and watch where the caret goes |
 | **D8** | **A real cold FIRST launch, timed on her iPhone** (B45-1's unknown) — the simulator says **54.0 ms** for the full migration set, but simulator disk is host-SSD-fast and the device number has never been taken | Time a first launch after a fresh install |
+
+| **D9** | **THE 23 pt STRIP AT DISPLAY ZOOM — the one user-visible change of 4.5d, never seen by a human** (§61 MAJOR 2). The 28 pt strip was photographed on device with taps verified; **23 × 38 pt has only frames-in-bounds in a plain window host**, and frame containment is not legibility. **Display Zoom RESTARTS THE DEVICE**, so it must ride the same window as an install | Settings → Display & Brightness → Display Zoom → Larger Text; open a note, tap **Aa**, look at the eleven acts and **tap each one** — especially `×` and `⇤` at the ends |
 
 **R30 binds the install itself:** her words, *"i'll wait for my fresh
 build til these batches are all done"* — so the phone keeps the
