@@ -4818,3 +4818,151 @@ reference, muddled fixture ownership, and duplicated doc paragraphs.
 **And §52 row 7's stale magnitude is now CORRECTED IN PLACE** — the
 reviewer was right that §60 recording it was not enough, because **§52 is
 the section every 4.5 session is told to read in full.**
+
+
+---
+
+## 62. 4.5a's FIX ROUND (2026-08-22) — and MAJOR 5's verdict is the most valuable thing this round has produced
+
+**All thirteen §59 findings dispositioned. mobile 474/77 PASSED** (469 +
+exactly its 5 new tests), **spine 33/7 exact**, hygiene zero across the
+board, nothing committed. **The architect verified the tree himself
+afterwards** — every fix symbol present, and the §58(2) `isGranted`
+ruling executed with only explanatory comments left behind.
+
+### 🔴 MAJOR 5 — "GREEN", and the green was the bad news
+
+It built the pin first, as the protocol requires, mounted the real field,
+and drove `deleteBackward()` through UIKit's input path inside a frozen
+paragraph. **On the shipped 4.5a code the caret did not move.**
+
+**And then it asked WHY, which is the entire difference between a verdict
+and a transcript.** The caret did not move **because the restore never
+reached the field at all**: SwiftUI pushes a binding into `TextField`
+only when it differs from what it last *rendered*, and a hold written
+inside `text`'s own `didSet` ends the turn at the already-rendered value.
+Measured: **model `"Kept.\n\nEditable."`, field `"Kep.\n\nEditable."`.**
+
+**That divergence destroys her prose one keystroke later.** She types `!`
+at the end of the paragraph the box really owns; the change is reported
+field-old → field-new while `applyingChange` decomposes it against the
+**model's** old text; the common edges collapse; the surviving tail comes
+back `""`; the flush writes it. **Measured store: `["Kept.\n", ""]` —
+"Editable." gone, no undo entry, no `commit_point`.**
+
+> **That is Q1's BLOCKER arriving through Q1's own fix.** A green pin,
+> correctly built, correctly run — and the finding was *"the surface is
+> stranded on text the note does not hold"*, which no one had asked
+> about. **A SPECULATIVE finding investigated properly produced a
+> data-loss defect nobody suspected.** This is the strongest argument in
+> the round for the protocol her ladder enforces: *build the pin first
+> and then read what it actually says.*
+
+**Fixed** — the restore is delivered on the next main-actor turn, which is
+what makes SwiftUI render the rejected value once and then push the real
+one. **And with the restore landing, MAJOR 5's own mechanism is
+CONFIRMED**: the caret collapses to the end (offset 16 of 16). *It was
+real all along and was masked by a worse bug.* Nothing is misattributed —
+her next characters append to the block the box owns — **but the caret
+moved unasked.**
+
+**Putting the caret back needs caret control `TextField` does not offer**
+(a `UIViewRepresentable` text view). **That is a surface decision, not a
+fix round's to take** — correctly declined. **The pin asserts `== 16`
+deliberately, so a later fix has to come here and change it on purpose**,
+which is the right way to leave a known-wrong-but-safe behaviour. **The
+runtime gap stands: 26.2 here, 26.6 on her device — not a clean bill
+either way.**
+
+### The rest, all dispositioned
+
+**MAJOR 1** — the withdrawal arm is now gated on `ownsTheWholeNote`
+(`variantID != nil && frozenPrefix.isEmpty`), never on `postID`; an
+unowned note keeps every paragraph and the box simply lets go.
+**Declared coverage, not a pin**, per the ruling. **MAJOR 3** and
+**MAJOR 4** fixed and pinned red-on-old — MAJOR 4 in three parts, and it
+**executed §58(2)'s ruling** (the `isGranted` gate dropped, the property
+removed with it, **verified empirically that every existing caller passes
+`sync: nil`** so the gate had no product effect). **MINOR 6** — the
+launch-measurement header now carries all three scope caveats, the
+**range** rather than a single number (54.0 vs 23.4 ms across two runs),
+and an explicit closing line: **"B45-1 IS NOT CLOSED BY THIS SUITE."**
+**MINOR 9** fixed and pinned, and **bounded by construction** (`mintNow`
+cancels the clock as it runs, so a refusal buys exactly one retry, never
+a spin). **MINOR 11** answered by "say so", with the good distinction
+that the arm is dead *for the model's callers* and not for the pure
+function its own pins call directly. **NITs 12 and 13** fixed — 13 is a
+real catch: the copy's doc claimed *every* refusal promises "your text is
+still here" when two arms deliberately do not; it now states the rule the
+arms actually keep.
+
+**Two shipped pins were updated to the NEW TRUTH rather than to whatever
+the code does** — they settle on the restore, because it now lands a turn
+later *by necessity*. That distinction is the one this round keeps
+asking for.
+
+### ⚠️ IT CORRECTED AN ATTRIBUTION THE ARCHITECT MADE TWICE
+
+**§58 recorded an unexplained `Index out of range` and attributed it to
+another session's in-flight file; §60 then folded it into the
+`makeKeyAndVisible` story as *"almost certainly"* the same thing.**
+**Both were inferences, and this session found the mechanism by hitting
+it:** its own MINOR 9 pin read `posts[0]` after
+`#expect(posts.count == 1)`; **under the red-on-old revert that array is
+empty, and the index crash took the whole runner down** (25 of 33 tests
+reported). It changed the pin to `#require(posts.first)` and wrote the
+reason into it.
+
+**So the round has now attributed one symptom to two different wrong
+causes before someone reproduced it.** Recorded as the third instance of
+the class — after the Mac dead-door diagnosis (six repetitions) and the
+key-window mechanism (§61) — and the pattern is exact every time: **a
+cause that explains the symptom, adopted because it explains the symptom.**
+**A pin whose index can go out of range under its own revert is a
+red-on-old hazard in its own right** — several shipped pins in that file
+use the same `posts[0]` shape; it declined to churn them, correctly.
+
+### ⚠️ A LIVE CROSS-SESSION INCIDENT — whole-directory backup-and-restore
+
+Another session created `App/Variorum/.bak-Shared/` and
+`App/Variorum/.bak-VariorumMobile/` (whole-directory copies) **and
+restored from them over a fenced file it did not own**:
+`MobileQuickNote.swift`'s mtime went **backwards** and one live edit
+vanished, while its siblings survived. It cost one confusing build and
+**was caught only because a pin failed with pre-fix values.**
+
+**ARCHITECT'S VERIFICATION, done rather than assumed:** the `.bak-*`
+directories are **gone** from the tree; `git status` is clean of them;
+**every one of the fix round's symbols is present**; and the suites are
+green at 474/77 by its own run. **No work is lost.**
+
+**THE RULE, added to the briefs' §0 for every remaining session:**
+**a whole-directory backup-and-restore in a shared tree is a fence
+violation wearing another name** — restoring `.bak-VariorumMobile/`
+reverts every other session's files in that directory, silently, with no
+compile error to announce it. **Back up the files you own, by path, or
+use `git stash push -- <your paths>`; never a directory, never a
+restore that spans a fence.**
+
+### ⚠️ MY SECOND FENCE ERROR — `VariorumMobileApp.swift` was DOUBLE-OWNED
+
+§1 lists it as 4.5a's; **4.5e's brief claims "any Mac/mobile root arm the
+`.opening` state needs"**, which is that same file. **The first fence
+error (§58's `AppSession.swift`) was caught by an implementer refusing to
+reach across; this one was caught by an implementer noticing a file it
+did not edit had changed.** Twice now the fence has caught the
+architect's own brief.
+
+**RESOLVED: 4.5a's claim on that file is DISCHARGED** — its work there is
+complete, comment-only, and landed (verified: the diff is 15 insertions
+of doc describing Q4's and Q2's fixes, nothing else). **`VariorumMobileApp.swift`
+belongs to 4.5e from here**, which is the session that needs to change it.
+No live conflict existed; the collision would have been in wave 3.
+
+### Three items routed out
+
+| # | Item | Route |
+|---|---|---|
+| **MINOR 10** | The withdrawal leaves `importPost`'s undo entry on top: undo **announces itself and changes nothing** (the container is tombstoned), and redo would **resurrect the blank note Q3 exists to prevent**. **Every available fix needs a file outside every 4.5 fence** — `UndoStack` has no pop-the-top API and `removeAll()` would wipe her whole session, so it is either a core change to `deleteContainer` or a core UndoStack addition | **DECLINED here, and it gets a `KnownIssuesAndTechDebt.md` row.** The session's own argument is the deciding one: **13j's doctrine is that the Trash is the recovery door, not structural undo** — so giving `deleteContainer` an inverse is a 13j-shaped product call, not a mobile round's. The residual is narrow and no data is at risk |
+| **Item 2** | **A refused ⏎ leaves a stray newline in the field.** The ⏎ restore *must* be synchronous (the mint reads `text`; an async restore would mint the newline into two blocks, which `returnOpensTheNoteAndNeverTypesANewline` pins against), so on the narrow path where ⏎'s mint is refused the field keeps a newline the model does not have | **Held with MAJOR 5's caret** — both need the same `UIViewRepresentable` surface change, and one surface decision should answer both. On her list |
+| **Item 3** | A leaving from a **never-minted empty box** does not bump `handOffCount`, so the keyboard can stay up over the next tab — same symptom as MAJOR 3, different state, and the shipped pin asserts `handOffCount == 0` there **on purpose**. **Deliberately left alone**: flipping it changes a contract nobody reviewed | **ENDORSED.** Round 2's reviewer is the right place for it to be looked at with fresh eyes |

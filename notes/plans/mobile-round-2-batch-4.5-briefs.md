@@ -32,6 +32,18 @@ this round has already paid twice for two writers in one file — once
 corrupting a half-written record with `git add -A`, once with a session
 whose build kept being terminated by another's.
 
+**⚠️ NEVER BACK UP OR RESTORE A WHOLE DIRECTORY IN THIS TREE** (added
+2026-08-22 after a live incident — `mobile-round-2.md` §62). A session
+created `App/Variorum/.bak-VariorumMobile/` and restored from it over a
+fenced file it did not own: another session's `MobileQuickNote.swift`
+went **backwards in time** and one live edit vanished, caught only
+because a pin failed with pre-fix values. **A whole-directory
+backup-and-restore is a fence violation wearing another name** — it
+reverts every other session's files in that directory, silently, with no
+compile error to announce it. **Back up the files you own, BY PATH, or
+`git stash push -- <your paths>`. Never a directory. Never a restore that
+spans a fence.**
+
 **PIN QUALITY — the round's hardest-won rule, in final form.** This
 round hit "green over nothing" **five** times.
 
@@ -980,7 +992,19 @@ while you are there and make it say what item 2 makes true.
 `App/Variorum/Shared/AppBootstrap.swift` ·
 `App/Variorum/Shared/AppSession.swift` · the `.opening` arm in
 **both** app roots (`VariorumMobile/VariorumMobileApp.swift` and the Mac's
-root) · tests for both platforms.
+root) · **PLUS, added 2026-08-22 (§59's MAJOR 2 / §62):**
+`Variorum/Features/Shelf/QuickEntryBar.swift` and
+`Variorum/Features/QuickNote/QuickNoteView.swift` — **the Mac's
+quick-capture twins of Q2 and Q7**, which destroy her text on a refusal
+(`entryText = ""` BEFORE the mint) and report a raw enum dump. **The
+phone's just-shipped fix is your reference shape**; read
+`MobileQuickNote.file()` and `MobileQuickNoteCopy.refusal` before
+touching them, and route the copy through `OpsRefusalCopy.message(for:)`
+rather than inventing a sentence · tests for both platforms.
+**`VariorumMobileApp.swift` is unambiguously YOURS** — 4.5a's claim on it
+is discharged (its work there is complete, comment-only, and landed).
+That double-ownership was an architect brief error, caught by an
+implementer; it is resolved here so wave 3 cannot inherit it.
 **`MobilePerfWalkTests.swift` carries 4.5a's `MobileLaunchPathTests`** —
 you extend it; confirm with `git diff --name-only` that no other session
 is in it, and stop and report if one is.
