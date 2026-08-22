@@ -3539,3 +3539,40 @@ to code, a scheduled row, or an explicit closure. Her opening brief's
 seven items all shipped or are scheduled. Her "there's no real need to
 note that" (the crash-report reaction) was correctly NOT recorded, at
 her instruction. No ask was found that lacks a home.
+
+---
+
+## 51. HER HANDOFF DECISIONS (2026-08-22)
+
+**R29 — THE MERGE TO `main` WAITS FOR ALL REMAINING BATCHES.** Her
+words: *"we'll merge to main after the remaining batches are done."*
+This **sharpens R9** (which said "at the round's end"): the merge is
+after batches 4.5 through 8, not after any earlier milestone. **The
+practical reason it matters: three BLOCKERs are open**, and merging now
+would carry them into `main` and into 13l's tree — and 13l is the first
+Mac phase to open against it.
+
+**R30 — HER NEXT BUILD WAITS TOO.** Her words: *"i'll wait for my fresh
+build til these batches are all done."* So the build on her phone stays
+the 2026-08-21 23:49 one **with the three BLOCKERs live**. **The
+successor must not treat "install a build" as a routine courtesy** —
+she has ruled the next install to the end. *(Her working caveats stand
+in the meantime: no multi-paragraph pastes into the quick note; the
+Trash's purge doors and the row-delete doors silently do nothing.)*
+
+**HER READ ON THE ROUND, recorded because it is the frame the successor
+should work inside** — *"the app is still moving forward quickly, which
+is ultimately what I need, and we're finding bugs in variorum main but
+we're mostly building doors to high quality shared logic."*
+
+That is an accurate description of what this round actually is, and it
+explains why the finding count is high without the architecture being
+weak: **the phone is mostly composing brains that already exist and are
+already tested.** The defects cluster in the FACES — a confirm that
+reads cleared state, a clamp that re-derives from clamped text, a strip
+sized to the wrong width — and in the SEAMS where a shared brain meets a
+platform (the gap fence's missing Mac face). Meanwhile the hoists have
+been finding real bugs in Mac code that had shipped for weeks (the
+O(N²) walk; the caret naming a departing block). **Doors over good
+logic is the round's shape, and it is why the fixes are small even when
+the findings are alarming.**

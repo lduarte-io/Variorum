@@ -20,9 +20,17 @@ cold-reviewed** until the author asked, three times, whether things were
 slipping. When the four owed reviews finally ran they found, in code
 that had already been installed on her phone:
 
-- **two BLOCKERs in the quick note** — one that *destroys her stored
-  text* when she edits the first paragraph of a multi-paragraph capture,
-  one that *wipes the box and the error message* when a save is refused;
+- **THREE BLOCKERs.** Two in the quick note — one that *destroys her
+  stored text* when she edits the first paragraph of a multi-paragraph
+  capture, one that *wipes the box and the error message* when a save is
+  refused (**§45**). One in batch 4 — **four confirm buttons are
+  inoperative** (Delete Now, Empty Trash, the Library row's Delete Note,
+  the Shelf row's Delete Book), because each reads back state SwiftUI
+  has already cleared; **pressing Undo on the destructive-undo warning
+  CANCELS it** (**§49**). Note the asymmetry that hid it: the ⋯ sheet's
+  Delete Note and book-details' Delete Book **do** work, so a device
+  walk would have confirmed "deletion works" while the purge doors were
+  dead;
 - a **fan fence read from a deliberately frozen projection**, so a block
   with takes can be merged away mid-typing;
 - the **one-row keyboard strip overflowing a 320 pt phone** by ~25 pt
@@ -139,8 +147,7 @@ The findings are recorded in:
 - **§44** — batch 1b round 2 (1 MAJOR + 4 MINOR + 3 NIT)
 - **§45** — batches 2, 3, 3b and the bar family (**2 BLOCKER**, 8 MAJOR,
   and the rest)
-- **batch 4's review** — dispatched 2026-08-22; its record section is
-  the next one written
+- **§49** — batch 4 (**1 BLOCKER** + 2 MAJOR + 4 MINOR + 4 NIT)
 - **`mobile-round-2-consistency-audit.md`** — the 19 document findings
   (most already remediated; check before re-doing)
 
