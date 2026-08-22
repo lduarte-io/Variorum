@@ -2555,3 +2555,24 @@ surface and report honestly if eleven at ~31 pt reads as cramped or
 mis-taps** — the answer "eleven does not fit legibly" is a finding to
 bring back, not a failure to hide. Her ruling settles the SHAPE; whether
 this many acts survive it is a measurement.
+
+**R23 — THE GLOW STAYS; NO TEXT IS TRADED FOR IT (2026-08-21).** Her
+words: *"i dont think we should hide text to not have glow."*
+
+**M19 CLOSES: accepted as-is, nothing built.** The only cheap fix was a
+6 pt gap between the text view and the bar (one constraint constant),
+which lands the halo on blank page — at the cost of 6 pt of visible
+text. She declines the trade.
+
+**Her ruling is coherent with R22 and worth reading together with it:**
+she chose the one-row strip *partly because it returns ~20 pt of text to
+the page*. Spending 6 pt of that to soften a ~4 pt halo that lightens
+letters' feet without covering them would be trading in the direction
+she just rejected. **Text on screen outranks chrome polish** — recorded
+as a standing preference, not just this decision, because it will settle
+similar questions later.
+
+*(The other road — padding INSIDE the accessory view — was already ruled
+out by measurement: iOS re-materialised the bar from the app's cream
+voice to a neutral system material. So there was no free version of this
+fix to reconsider.)*
