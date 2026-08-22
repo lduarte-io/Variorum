@@ -854,6 +854,10 @@ cannot settle it.
 | **D4** | **The quick note's PLATFORM half** (§53 finding 2b) — `MobileQuickNoteTests.swift:14–17`: the pins *"cannot reach that iOS really delivers `.background` before a swipe-kill, and that the `beginBackgroundTask` grant buys enough wall clock on real hardware."* **This is the device half of Q1/Q2/Q4's own promise** — 4.5a fixes the code and nothing verifies the platform contract the fix rests on | Type into the box, swipe-kill, relaunch: is the text there? Repeat with the device locking mid-round |
 | **D5** | **`Shared/SignInFlow.swift`'s iOS `presentationAnchor` arm** (§53 finding 2c, PL-9's third judgment act) — *"compiles but has never run on a device"* | Exercise the delegated bridge-connect door once, if the door stays |
 
+| **D6** | **Dictation into a MULTI-PARAGRAPH capture** (4.5a, §58) — iOS dictation replaces the whole field as it refines, which falsifies `hasPrefix`, so the box will hold at the boundary and refuse it. **4.5a's fix makes this SAFE** (the shipped code destroyed the tail in exactly this case) — but the interaction is untested on hardware, **and it is the same multi-paragraph case she is currently hand-avoiding** | Dictate into a box that already holds a pasted multi-paragraph capture; watch what the box does and what the note holds afterwards |
+| **D7** | **The caret jumps to the end** on every held change — **inherited from the shipped clamp, not introduced by the fix.** Invisible in tests, obvious in the hand | Edit the first paragraph of a pasted capture and watch where the caret goes |
+| **D8** | **A real cold FIRST launch, timed on her iPhone** (B45-1's unknown) — the simulator says **54.0 ms** for the full migration set, but simulator disk is host-SSD-fast and the device number has never been taken | Time a first launch after a fresh install |
+
 **R30 binds the install itself:** her words, *"i'll wait for my fresh
 build til these batches are all done"* — so the phone keeps the
 2026-08-21 23:49 build **with the three BLOCKERs live** until the round's
@@ -861,6 +865,97 @@ remaining batches land. **The queue above does not wait on that.** E1's
 instrumentation needs a build to run on, so when a device window opens,
 say plainly which items need a fresh install and which do not, and let
 her choose.
+
+---
+
+## 4c. BRIEF — SUB-BATCH 4.5e · THE APP-LIFECYCLE FILES IN `Shared/` (wave 3, alone)
+
+**Born 2026-08-22** because three findings converge on two `Shared/`
+files that no sub-batch owned — and because the architect's §1 brief
+referred to `AppSession.swift` without listing it, which 4.5a correctly
+refused to act on. **The record is `mobile-round-2.md` §58.**
+
+**Read §0 above, then `mobile-round-2.md` §58 (your findings and the
+rulings already made on them), §56 (Act 1, which found A1-15 and A1-21),
+and §9's environment.** Also `notes/OverallModel.md` **§5 (P2: all DB I/O
+off the main thread)** — item 1 is a P2 violation and you should read the
+invariant in its own words.
+
+### Build
+
+**1 — 🟠 B45-1: `AppBootstrap.init` opens the store and runs the
+migration set SYNCHRONOUSLY ON THE MAIN THREAD before first paint.**
+`VariorumMobileApp.swift` constructs it as `@State`. **The shape is
+already ruled** (§58, adopted from 4.5a's proposal):
+
+> An `.opening` state; `init` sets it and starts the open; the file work
+> runs on a detached task and hops back to MainActor for `install` plus
+> the state write (**preserving the once-per-process `installed` flag**);
+> `retry()` re-enters the same road; both app roots gain an `.opening`
+> arm rendering a quiet launch view. **The "UI can touch a store that is
+> not ready" window cannot open by construction** — `AppSession` only
+> exists inside `.ready`, the same property `MobileStoreFailureView`
+> already relies on. Read that view before designing; it is the
+> precedent.
+
+**MEASURED ALREADY — do not re-derive, but DO re-measure after:**
+54.0 ms on a first launch (empty store, full migration set), 5.0 ms on an
+ordinary reopen, **3.6 ms at the 100k proving ground** — i.e. **flat in
+corpus size**, O(migrations) rather than O(corpus). 4.5a's
+`MobileLaunchPathTests` (in `MobilePerfWalkTests.swift`) is the harness;
+**report the after-numbers beside those three.** Note honestly what the
+harness cannot time: `init` also calls `AppDatabase.install` →
+`prepareDependencies`, a once-per-process door a test host cannot safely
+re-enter.
+
+**2 — 🟠 A1-21: `Shared/AppSession.postAutosaves` has NO removal path**
+(no `removeValue` anywhere). Bounded for editors (notes opened), **but
+the quick note adds one coordinator PER CAPTURE**, and
+`flushEveryOpenPost()` iterates every one on every filing and every
+background flush — so the cost of leaving the box grows with how much she
+has captured this session.
+
+**The shape 4.5a proposed, with the trap it already traced:**
+`releaseAutosave(forPost:)` on `AppSession`, called from the quick note's
+`reset()` — the box knows exactly when it is done, and it has already
+flushed and savepointed by then. **The trap:** on the Mac,
+`autosave(forPost:)` registers a `quitFinalize` closure at **mint** time,
+so release-then-remint would register a **second** for the same post — a
+duplicate `savepointOnLeaving`, which `closeAutoCommit` dedupes, so it is
+noise rather than corruption, **but it must be deliberate rather than
+discovered.** A mobile-only fix bypassing the session cache is available
+and is **refused**: it contradicts A5-4's ruled *"existing shared drain"*.
+
+**3 — A1-15: two comments in `AppSession.swift` state reasons that are
+FALSE**, and behaviour is fine in both cases — which is the class that
+makes the next reader wrong. `:89` says the phone registers structural
+entries *"with no undo UI yet"* (**M20 shipped it at batch 4**).
+`:240-245` says the quick note *"mints its note through the operations
+layer, so there is no buffer to flush and no reason to grow one"* —
+**inverted**: `MobileQuickNote.adopt` calls `session.autosave(forPost:)`,
+which mints **and caches** a coordinator, and every post-mint keystroke
+rides it. **It sits directly above the code item 2 is about**, so fix it
+while you are there and make it say what item 2 makes true.
+
+### Files you own — and nothing else
+`App/Variorum/Shared/AppBootstrap.swift` ·
+`App/Variorum/Shared/AppSession.swift` · the `.opening` arm in
+**both** app roots (`VariorumMobile/VariorumMobileApp.swift` and the Mac's
+root) · tests for both platforms.
+**`MobilePerfWalkTests.swift` carries 4.5a's `MobileLaunchPathTests`** —
+you extend it; confirm with `git diff --name-only` that no other session
+is in it, and stop and report if one is.
+
+### Environment
+**You are ALONE in the tree in wave 3** — these two files are compiled
+against by every target, which is exactly why. Simulator **iPhone 17 Pro,
+*[removed for publication]*
+`…/scratchpad/dd-45e` and `…/scratchpad/dd-45e-mac`.
+**Every item here is a `Shared/` change, so M-B binds without exception:**
+core + Mac + both spines + mobile, all five reported, **and every
+Mac-side line goes into 13l's manifest** via your report. Before running
+Mac suites check `pgrep -fl 'Variorum.app/Contents/MacOS'` — if her
+real-store app is live, **never quit it, never kill it.**
 
 ---
 
