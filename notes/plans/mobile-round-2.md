@@ -2927,3 +2927,91 @@ has closed.** The batch map (§16/§3 of the handoff) gains a **review
 column**, and no batch may be marked complete without it. The handoff
 carries this forward: *the map is the only schedule* now covers process
 steps, not just work items.
+
+---
+
+## 44. BATCH 1b LADDER ROUND 2 (2026-08-22) — and it falsifies an architect ruling
+
+The owed re-review, run at last. **1 MAJOR · 4 MINOR · 3 NIT.** Its
+clean bill is unusually strong: it **differential-tested the caret
+rewrite over 200,000 random tilings (zero mismatches)**, independently
+reproduced the perf claim (343 ms → 5.2 ms at N=20,000 on this host),
+verified the gap fence excludes **exactly** gaps (it reads only
+`variantID == nil`, never `editable`, never any fan count — **so a block
+carrying takes is never fenced**, her fence intact), and traced the
+red-on-old of four pins my own brief had wrongly told it did not exist.
+
+### 1 · MAJOR — the Mac gets the fence's REFUSAL but not its FACE, and §34(a)'s accepted trace is FALSE
+
+On the Mac, a span covering an interior **gap** block (one whose text
+has not synced) now: passes `wholeBlockDeletion`'s new fence
+(correctly), then **falls into merge-then-edit** — because
+`CrossBlockEditPlanner.plan` collects touched entries by
+`NSIntersectionRange(...).length > 0`, and **a gap renders zero-length,
+so it can never be touched.** The plan is accepted for the two readable
+blocks, `ops.merge` then reads the gap's placement as the next live one
+and throws `.blocksNotAdjacent`, and `EditorViewModel.operationMessage`
+has **no case for it** — so she reads
+`The operation was refused: blocksNotAdjacent(first: "…", second: "…")`.
+
+**This directly falsifies §34(a).** I adjudicated that ruling on the
+implementer's trace — *"lands on `CrossBlockRefusal.diagnose`, which
+returns `.unsyncedBlock`"* — and it does not, **on two counts**:
+merge-then-edit intercepts first, and `diagnose`'s own step 3 uses the
+same intersection test, so a zero-length gap is invisible to it too.
+**I accepted a Mac behavioural claim on an implementer's word with no
+reviewer checking it — which is exactly what five skipped ladders
+costs.** The phone is NOT exposed (batch 3 put the fence face above
+merge-then-edit and gave `.blocksNotAdjacent` a real sentence); **the
+Mac got neither half.**
+
+**Fix (three parts, all with red-on-old pins available):** give the Mac
+the phone's fence arm; make `diagnose` step 3 treat a zero-length entry
+inside the span as touched; give the Mac the `.blocksNotAdjacent`
+sentence its phone sibling has. **This is R8 work** (a shared-defect
+consequence the mobile round created Mac-side) and belongs in **13l's
+manifest** either way.
+
+### 2 · MINOR — a user-facing promise rests on a stated reason that is wrong
+`MobileStructural.swift:832` claims *"Every door here runs ONE
+`session.runner.run` transaction, so a throw means nothing landed."*
+`OperationsRunner.run` is an **actor hop, not a transaction**;
+`deleteBlock` opens its own `database.write`, so the compound is **N
+transactions** and "nothing landed" holds only via `withCompound`'s
+**best-effort** compensating unwind (which on a failed inverse `break`s
+and leaves survivors on the stack). The doc falsehood is traced;
+reachability of an actually-false promise is SPECULATIVE.
+
+### 3 · MINOR — §5b's M-E still mandates the confirm R13 removed
+A fresh implementer reads the **binding principles** before the code.
+M-E still says *"A door that destroys must name what it destroys before
+it acts."* R13 carved this road out; the code carries the guard, **the
+principle does not.** One clause naming R13 and pointing at M20/M21.
+
+### 4 · MINOR — the gap pin builds a gap production cannot produce
+`indexWithGap` sets `variantID: nil` but keeps a **non-zero length**;
+every real gap is length 0. The fence survives the real shape (verified)
+— but **this is why finding 1 was invisible from these pins**: at
+non-zero length `CrossBlockEditPlanner` *would* touch the entry and
+decline. The round's own "the pin drove something, just not the thing"
+class, load-bearing here. Same helper in `MobileCrossBlockEditTests`.
+
+### 5 · MINOR — the stranded-originals read is unmeasured and fails silently
+`Queries.originalsStrandedBy` is a two-stage recursive CTE bound with
+**one placeholder per deleted block**, run on every delete, while the
+perf pin covers plan + landing only and its doc now claims "the whole
+gesture is under the clock". `(try? …) ?? []` turns any failure —
+including a variable-count overflow — into the *reassuring* "nothing was
+stranded" receipt.
+
+### 6–8 · NITs
+The no-confirm guard only detects a confirm routed through the existing
+seam and covers only the delete road, not merge-then-edit's · the ⋯
+door's `confirmDelete` **fails open** when its seam is nil · two copy
+slips (`.blockNotFound` ignores `act:` and reads oddly at single-block
+doors; a doc line describes a `default:` arm that is a raw enum dump).
+
+**DISPOSITION: all eight accepted.** Fixes are HELD until batch 4 lands
+(it has ~727 uncommitted lines across 17 files) and will be dispatched
+as ONE consolidated fix round covering all five reviews — §25's
+one-writer rule, applied deliberately rather than learned again.
