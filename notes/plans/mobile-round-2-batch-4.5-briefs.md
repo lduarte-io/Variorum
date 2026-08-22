@@ -61,6 +61,20 @@ Two more, both earned this round:
   When that is the bug, no oracle derived from the totals can witness
   it. Settle on the text.
 
+**⚠️ A HARNESS HAZARD THAT READS AS A PRODUCT CRASH** (found by 4.5d,
+`mobile-round-2.md` §60). **`UIWindow.makeKeyAndVisible()` in a test
+harness kills the full mobile suite run** — a second key window steals
+key status from a concurrently-driven editor surface, and it surfaces as
+`MobileEditorViewModel.swift:1540: Fatal error: mobile editor surface
+desynced from the block index`, with xcodebuild restarting and reporting
+a short tail. **That crash is harness interference, not a product
+defect — do not "fix" the editor.** `MobileSurfaceDriver.HostedSurface`
+already calls it and is fine ALONE; a **second** stealer is what breaks
+it. **Host with `window.isHidden = false` (visible, never key)** if you
+add hosting of your own; 4.5d verified the glass cells materialize
+identically that way. *(This is almost certainly also the `Index out of
+range` 4.5a saw in a reverted pass and could not reproduce.)*
+
 **RED-ON-OLD IS ABSOLUTE.** No bug-class fix lands without a pin proven
 **red on the pre-fix code by behavioural revert** and green after. That
 verification is the deliverable, not a formality. Architectural or
