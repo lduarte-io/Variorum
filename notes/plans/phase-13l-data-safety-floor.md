@@ -653,6 +653,44 @@ found, per this section's own rule, not at closeout:**
    duplicate of the very rule you were asked to check**, and you should
    meet it here rather than discover it.
 
+**🔴 FOUR MAC-VISIBLE DEFECTS ARE RECORDED, ACCEPTED, AND NOT YET FIXED —
+READ THIS BEFORE YOU START (added 2026-08-23; the full account is
+`notes/plans/mobile-round-2.md` §65).** The mobile sub-batch that owns
+all four (4.5c, "the editor & the shared brain") **never ran** — the
+round's Opus budget ran out first. So this Mac code carries four
+findings that are already traced and already owned. **They are listed
+here so your review spends its budget on what nobody has looked at,
+rather than re-deriving what is written down:**
+
+1. **The merge-then-edit fan fence is read from a deliberately FROZEN
+   projection** — a block that gained a take during a dirty window can be
+   merged away by a keystroke, against the #11a ruling.
+   `BlockRangeIndex.wholeBlockDeletion`'s own doc states the law forty
+   lines away, and the sibling seam road obeys it.
+2. **The O(N²) twin SURVIVES in `planVisibleTakeEdit`**, one `else if`
+   after the one that was fixed, **on a road that runs** —
+   `index.range(ofEntryAt:)` inside a collection loop. The fixed twin
+   measured **23.8 s → 0.003 s at 20,000 entries**; this is a live P1
+   violation on the Mac.
+3. **The gap fence's REFUSAL reached the Mac; its FACE did not** — a span
+   covering an interior gap block dies as a raw
+   `blocksNotAdjacent(first:second:)` enum dump, because
+   `EditorViewModel.operationMessage` has no case for it. **This one the
+   mobile round CREATED Mac-side**, and it is the reason you may meet
+   that dump.
+4. **The Mac has no identity-projection audit at all** — the DEBUG oracle
+   for the corruption class both other oracles are blind to (*the totals
+   agree while the content is wrong*) exists only on the phone, though
+   both platforms share the brain and the mobile round **reproduced that
+   corruption Mac-side**.
+
+**AND ONE NON-DEFECT, for calibration:** the Mac suite is intermittently
+red at `EditorWindowSmokeTests/rewriteStrategyLatencies(paragraphs: 250)`
+— a latency budget this machine clears by a few percent. **Measured on
+both trees: the PRE-ROUND tree failed 1 of 4 isolated runs; the
+post-round tree passed 4 of 4.** Pre-existing, KnownIssues row owned by
+Phase 12. **Re-run it isolated before concluding anything.**
+
 **A THIRD MAC RESIDUAL + A MAC FIX, added 2026-08-22 from Mobile Round 2's
 batch 4.5b (§63):**
 

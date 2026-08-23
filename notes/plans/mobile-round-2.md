@@ -5148,3 +5148,67 @@ review instead of landing it in full.**
 | `MobileQuickNoteTests.swift:752` constructs `HostedSurface` directly, bypassing `withHostedSurface` | **4.5a's round-2 reviewer** already has that file in scope; noted for its eyes |
 | The remaining decision-layer hoist | **13l**, recorded in its manifest — it opens on that surface, and A1-16 says the Mac parity proof there is weak |
 | §49's four unenumerated NITs | **unrecoverable, recorded** — like §45's five |
+
+
+---
+
+## 64. THREE AGENTS DIED ON THE API LIMIT — and one left a revert in the tree (2026-08-23)
+
+4.5b's cold review, 4.5a's ladder round 2 and 4.5d's fix round all
+terminated on the same weekly API limit. **None produced anything
+recoverable** — two died before reading anything; the third had
+established baseline (475/77) and begun MAJOR 1's trace.
+
+**⚠️ AND THE THIRD LEFT A DELIBERATE TEMPORARY CORRUPTION BEHIND IT.**
+4.5d's fix round had restored `makeKeyAndVisible()` at **two** sites in
+`MobileKeyboardBarGeometryTests.swift` — marked `// EXPERIMENT B` — as a
+red-on-old trace, and died before undoing it. The **product** fix
+(`min(nominalStripButtonWidth, derivedStripButtonWidth(inBarOfWidth:))`)
+was intact; only the harness was mid-experiment.
+
+**Found by checking rather than assuming**, on the principle this round
+has paid for repeatedly. **Restored by the architect** to
+`window.isHidden = false` at both sites, **and the falsified-mechanism
+comment rewritten while there** — that was the dead session's own MAJOR 1
+and it never reached it. The comment now states what was MEASURED, names
+the three counter-example key-window hosts, records the untraced
+`rootViewController` difference, and ends with the sentence that matters:
+**never read a 1540 desync fatal as harness noise.**
+
+**Verified after the restore: `Test run with 475 tests in 77 suites
+passed` — TEST SUCCEEDED**, the two known issues being 4.5b's own
+intentional diagnostic pin.
+
+> **THE NEW LESSON, and it belongs beside the pin-quality rules: an agent
+> that dies mid-revert leaves the tree in a state nobody is watching.** A
+> red-on-old revert is a deliberate temporary corruption; when the
+> session performing it dies, **nothing announces it** — the suite may
+> even stay green, as it did here. **Check the tree after an agent FAILS,
+> not only after it succeeds.**
+
+---
+
+## 65. THE FOUR MAC-VISIBLE DEFECTS THAT ARE RECORDED, ACCEPTED, AND NOT YET FIXED (2026-08-23)
+
+**Written for 13l's Fable cold reviewer, and into 13l's manifest in the
+same commit.** 4.5c — the sub-batch that owns every one of these —
+**never ran**, so this round's Mac-side code goes to `main` (whenever she
+merges) carrying four known-open findings. **A reviewer who has to
+re-derive them spends its budget on what is already recorded rather than
+on what nobody has looked at**, which is the opposite of what her R20
+review is for.
+
+| # | Defect | Recorded at | Owner |
+|---|---|---|---|
+| 1 | **The merge-then-edit fan fence is enforced from a deliberately FROZEN projection** — a block that gained a take during a dirty window can be merged away by a keystroke, against the #11a ruling. `BlockRangeIndex.wholeBlockDeletion`'s own doc states the law forty lines away: *"a plan-time guard reading a projection is an ENABLEMENT hint, never an authorization"*, and the sibling seam road obeys it | §45 (batch 3) | **4.5c** |
+| 2 | **The O(N²) twin SURVIVES in `planVisibleTakeEdit`**, one `else if` after the one that was fixed, **on a road that runs** — `index.range(ofEntryAt:)` inside a collection loop, walking from zero every call. §38's *"the Mac inherits the fix"* is **overstated in three places**. The measured cost of the twin that WAS fixed: **23.8 s → 0.003 s at 20,000 entries** | §45 (batch 3), §38 | **4.5c** |
+| 3 | **The Mac gets the gap fence's REFUSAL but not its FACE.** A span covering an interior gap block passes the new fence, falls into merge-then-edit (a zero-length entry can never intersect, so it is never "touched"), and `ops.merge` throws `.blocksNotAdjacent` — for which `EditorViewModel.operationMessage` **has no case**. She reads a raw enum dump. **This is a defect this mobile round CREATED Mac-side** | §44 MAJOR 1 | **4.5c** |
+| 4 | **The Mac has NO identity-projection audit at all.** The DEBUG per-keystroke oracle that catches the one corruption class both other oracles are blind to — *the totals agree while the content is wrong* — exists only on the phone. Both platforms share `BlockRangeIndex` and took the same crash fix, **and §20 reproduced that corruption Mac-side** (`stored → ["Alpha", "Beta beta", "G"]`). The Mac has a pin for the traced case and no runtime oracle for the class | §53 finding 1 | **4.5c** (a HOIST, with a Mac-side red-on-old) |
+
+**Plus one recorded NON-defect worth the reviewer's calibration:** the
+Mac suite is **intermittently red** at
+`EditorWindowSmokeTests/rewriteStrategyLatencies(paragraphs: 250)` — a
+latency budget the machine clears by a few percent. **Measured on BOTH
+trees: the PRE-ROUND tree failed 1 of 4 isolated runs at 51.95 ms; the
+post-round tree passed 4 of 4.** Pre-existing, not a regression, KnownIssues
+row owned by 12 (§54). **Re-run isolated before concluding anything.**

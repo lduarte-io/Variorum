@@ -169,10 +169,11 @@ numbers — both run 1–24. This is §39's fix for a real confusion risk.)*
 | — | R12 bar tuning · R22 one-row strip · M26 un-indent | ✅ | ⚠️ **reviewed 2026-08-22 → §45, 2 MAJOR open** |
 | **4** | **M20 the undo/redo door (FIRST)** · PR1 delete a note · PR2 the Trash + Archived · PR4 delete a book · PR7 the on-leaving savepoint | ✅ `e7e2472` → §46 | ⏳ **DISPATCHED 2026-08-22** at her instruction (§47/R28); its findings join batch 4.5 |
 | **4.5 (THE CONSOLIDATED FIX ROUND — dispatch first)** | **Every finding from every cold review of batches 1–4, plus her four named rows and both successor Acts.** Full ordered enumeration: `mobile-round-2.md` **§52**. In brief, by consequence: **Q1** the quick-note clamp DESTROYS stored text · **Q2** a refused mint at a leaving wipes the box AND the error · **the batch-4 BLOCKER** — four confirm buttons read back state SwiftUI has already cleared (Delete Now · Empty Trash · Library-row Delete Note · Shelf-row Delete Book) and the A12 warning's **Undo CANCELS it** · then §45's MAJORs (the fan fence read from a frozen projection · the 320 pt strip overflow · the surviving O(N²) twin in `planVisibleTakeEdit` · the geometry pins asserting constants against themselves) · §49's two MAJORs · §44's MAJOR (the Mac gets the gap fence's REFUSAL but not its FACE) · **B45-1** `AppBootstrap` runs migrations synchronously on the MAIN THREAD before first paint (a **P2** violation) · **B45-2** the `displaySlot`/`slots[i]` coupling that batch 7's PR8 walks into · **B45-3** the crash trace's six unowned items · **B45-4** THE ON-DEVICE SWEEP (E1 + M16, ONE window) · **+ ACT 1's findings** (a fresh cold read over the round's whole shipped diff) **+ ACT 2's findings** (the never-became-work sweep) | ⏳ | **ITS EXIT CONDITION IS THE DEDICATED STABILITY PASS** (the row below). 4.5 is NOT done until that pass has run. Its own build half is reviewed under R28 like any batch |
-| ↳ **4.5a** capture & lifecycle (Q1 · Q2 · Q3 · Q4 · Q5–Q10 · A1-19 · B45-1 measured) | ✅ built → §58 | ✅ **reviewed → §59: 5 MAJOR + 6 MINOR + 2 NIT, all accepted, zero disputes.** ⏳ **fix round DISPATCHED** |
-| ↳ **4.5b** deletion doors & the confirm BLOCKER (+ the accessibility-harness fix) | ⏳ building | ⏳ owed at its report (R28) |
-| ↳ **4.5d** the keyboard bar's geometry | ✅ built → §60 | ⏳ **cold review DISPATCHED** |
-| ↳ **4.5c** the editor & the shared brain | **WAVE 2 — alone** (every target compiles against `Shared/EditorBrain/`) | ❌ owed |
+| ↳ **4.5a** capture & lifecycle (Q1 · Q2 · Q3 · Q4 · Q5–Q10 · A1-19 · B45-1 measured) | ✅ built → §58 · ✅ **FIXED** → §62 | ✅ round 1 → §59 (5 MAJOR, all accepted) · ❌ **ROUND 2 OWED** (dispatched, died on the API limit before reading anything) |
+| ↳ **4.5b** deletion doors & the confirm BLOCKER (+ the accessibility-harness fix, + the `TrashPutBack` hoist) | ✅ **built** → §63 | ❌ **COLD REVIEW OWED** (dispatched, died on the API limit before reading anything). **This is the only in-flight work touching `Shared/` and the Mac** |
+| ↳ **4.5d** the keyboard bar's geometry | ✅ built → §60 | ✅ reviewed → §61 (2 MAJOR + 6 MINOR + 6 NIT) · ❌ **FIX ROUND OWED** (dispatched, died on the API limit after establishing baseline; **it left an experimental revert in the tree, which the architect found and restored — see §64**) |
+| ↳ **4.5c** the editor & the shared brain — **THE LARGEST REMAINING RISK IN THE ROUND** | ❌ **NEVER RAN.** WAVE 2, alone (every target compiles against `Shared/EditorBrain/`) | ❌ owed |
+| ↳ **4.5e** the shared lifecycle files + the Mac's quick-capture twins | ❌ **NEVER RAN.** WAVE 3, alone | ❌ owed |
 | **4.5e (born 2026-08-22 — three findings converge on two `Shared/` files nobody owned)** | **B45-1's fix** (`AppBootstrap` opens the store and runs migrations synchronously on the main thread before first paint — a **P2** violation; MEASURED at 54.0 ms first launch / 5.0 ms reopen / 3.6 ms at 100k, so **flat in corpus size** and O(migrations), not a hang today, but the migration set only grows and the device number is unknown) · **A1-21** the `postAutosaves` removal path (the quick note adds one coordinator per capture) · **A1-15's** two inverted comments. **Owns `Shared/AppBootstrap.swift` + `Shared/AppSession.swift`.** Born because the architect's §1 brief gave 4.5a *"the `AppSession` lines"* without listing the file — 4.5a refused to reach across and reported, which is the fence catching the architect's own error | ⏳ **WAVE 3, alone** — those two files are compiled against by every target, exactly like 4.5c's editor brain | ❌ owed (R28) |
 | **5 (queued)** | **R26/R27 the shelf layout** (quick note takes Today's Entry's box; books list bounded + scrolls past ~8; writing area ≈ half the screen; Today's Entry becomes a badge on the Journal row, no blinking cursor) · **R27b the starter Journal book** · **R24 "more info" → "info"** · **NEW 2026-08-22 (§53 items 6 + 7): the shelf has NO keyboard-avoidance opt-out** (`MobileShelfView.swift:101` carries only `.background(tokens.room.ignoresSafeArea())`, unlike Write's `.ignoresSafeArea(.keyboard)`) **and R26/R27 pin a DWELLING text field into that layout** — default avoidance insets the whole `VStack`, so the tab bar rides the keyboard and the bounded books list collapses, making **her ruled "about half the phone screen" the first casualty**; plus **the quick note's mint cost at corpus scale, never measured** (`MobilePerfWalkTests` has no quick-note leg; the 100k dev store exists) — measure alongside the layout change, fix only if the number earns it | queued behind 4.5 (same shelf files) | ❌ owed |
 | 6 | PR3 per-note tray · PR5 deleted takes · PR6 archive/unarchive · PR14 lens-dangles notice · PR15 lineage door · PR22 guide deletion chapter | | ❌ owed |
@@ -440,3 +441,155 @@ that were promised a home and never got one):
    refusal cases §31 enumerates are hers by this round's end; the fourth
    (a cross-block span touching a block with takes) is the one the
    wording must be honest about.
+
+---
+---
+
+# SECOND ORCHESTRATOR HANDOFF — 2026-08-23
+
+**Written at the author's instruction after the second seat reached
+~571k context.** *"given that you're already at 571k tokens though, it's
+time for a handoff to a new orchestrator… you can probably just add to
+the one that I gave you, since a lot of the work in it is not yet
+complete."* Everything above this line still binds unless a row below
+supersedes it; this section updates state, not rules.
+
+**Her cast instruction for the successor: a FABLE orchestrator**
+(*"start a new Fable orchestrator up where you left off"*) — a change
+from R1's all-Opus, made because her Opus week ran out and reset
+differently. **R1's SUBSTANCE survives and is what matters: reviews get
+the surplus.** The standing Sync/ rider is moot here (this round has
+touched zero `Sources/` lines).
+
+## S1. WHAT THE SECOND SEAT DID (all committed and pushed)
+
+**Her successor-first-acts file, executed in order:**
+- **ACT 1** — a fresh cold read over the round's whole shipped diff → **§56**. It settled the Mac dead-door diagnosis §46 said had to be re-derived, found the confirm defect is FIVE sites not four, corrected the "Mac suite unmoved ⇒ nothing changed" claim, and caught that **the mobile suite is not green on a clean simulator** (an unrecorded per-simulator accessibility default) — which would have opened three of four sub-batches with sixteen phantom failures.
+- **ACT 2** — the never-became-work sweep → **§53**. Twelve verified orphans, all routed. Its structural finding is the one to carry: **three of them were obligations a batch discharged on ONE side and recorded honestly on the other.**
+- **ACT 3** — batch 4.5 built as four file-fenced sub-batches. **All three BLOCKERs are fixed** (§62, §63).
+
+**Also landed:** §54 (the Mac suite is intermittently red at a latency budget — pre-existing, measured on both trees, KnownIssues row owned by 12) · §55 (the three BLOCKERs verified at the code by the architect before briefing) · §57–§63 (per-sub-batch records) · **13l's manifest fed four times, in the commits that made each change** · two KnownIssues rows · the parity-ledger and closeout obligations updated.
+
+## S2. STATE AT THIS CUTOVER — VERIFY, DO NOT TRUST
+
+**Branch `mobile`, tip `407e978` + the architect's §64 restore commit. Pushed. Never push `main`.**
+
+| | |
+|---|---|
+| **Committed** | batches 1 · 1b · 2 · 3 · 3b · 4 · R12 · R22/M26, plus every record above |
+| **UNCOMMITTED, in the working tree (26 files)** | **4.5a** (build + fix round) · **4.5b** (build) · **4.5d** (build) — **all green together at `475/77`** |
+| **Never started** | **4.5c** (wave 2) · **4.5e** (wave 3) · batches 5–8 · both standalone review passes |
+
+**Suites, last measured on this tree:** core **1350/141** · Mac **1569/272** · Mac spine **8/8 suites** · mobile **475/77** · mobile spine **7/7 suites**. **Hygiene held all round: `git diff 46ffa0c..HEAD -- Sources/` is EMPTY, zero `Sync/` lines, no build configuration, zero schema. Mirror at marker 7.**
+
+**⚠️ Re-arm the accessibility flag on any simulator you use** (§56 / §9) or sixteen real pins fail as phantoms reading `labels were []`:
+`xcrun simctl spawn <UDID> defaults write com.apple.Accessibility ApplicationAccessibilityEnabled -bool true`. Five simulators were armed on 2026-08-22; a fresh or reset one is not.
+
+## S3. THE THREE DEAD AGENTS — what was lost, and one thing they left behind
+
+All three died on the same API weekly limit, **and none of them had produced anything recoverable**:
+
+| agent | how far it got |
+|---|---|
+| 4.5b's cold review | *"I'll start by building my own picture…"* — **nothing** |
+| 4.5a's ladder round 2 | *"Let me start a build/test run…"* — **nothing** |
+| 4.5d's fix round | established baseline (475/77) and began MAJOR 1's trace — **nothing written but one revert** |
+
+**⚠️ AND THE LAST ONE LEFT A REVERT IN THE TREE.** It had restored `makeKeyAndVisible()` in **two** places in `MobileKeyboardBarGeometryTests.swift` — marked `// EXPERIMENT B` — as a red-on-old trace, and died before undoing it. **The product fix was intact; only the harness was mid-experiment.** The architect found it by checking rather than assuming, restored both sites to `window.isHidden = false`, **and wrote the falsified-mechanism correction into that comment** (the fix round's own MAJOR 1, which it never reached). **Recorded as §64.**
+
+> **THE LESSON, and it is new:** *an agent that dies mid-revert leaves the tree in a state no one is watching.* A red-on-old revert is a deliberate temporary corruption; if the session performing it dies, nothing announces it. **Whoever dispatches a fix round should check the tree after any agent failure, not only after a success.**
+
+**Do NOT relaunch these three by resuming.** Dispatch fresh sessions from the briefs — everything they needed is in the repo (§59 / §61 / §2 of the briefs file), which is the point of repo-first.
+
+## S4. THE MERGE QUESTION — her direct question, answered with numbers
+
+> *"I know that this all hasn't been merged into main yet — but what parts touch shared code? … What's the lift on getting what's in flight merged into main? and are there elements that are unverified / untested that touch the shared core?"*
+
+### (a) `Sources/` — the core package — is UNTOUCHED. Zero lines, all round, committed and in flight.
+This is the strongest single fact for a merge decision: **nothing in Mobile Round 2 has changed `VariorumCore`.** No schema, no `Sync/`, no operations, no queries. The mirror stays at marker 7 by construction.
+
+### (b) COMMITTED `Shared/` + Mac — thirteen files, all reviewed, **but with KNOWN-OPEN findings against them**
+
+```
+Shared/EditorBrain/{BlockRangeIndex, CrossBlockEditPlanner, EditorEditRouting}.swift
+Shared/{RecoveryCopy, StructuralUndoCopy}.swift
+Variorum/Features/Editor/{EditorSurfaceController, EditorViewModel}.swift
+Variorum/Features/Library/RecoveryView.swift · Features/Tray/TrayPanel.swift
+Variorum/Registry/ShellActions.swift
+VariorumTests/{BlockRangeIndexTests, EditRoutingCrashTests, EditRoutingTests}.swift
+```
+
+**These are 13l's manifest, and the manifest is current.** What the manifest ALSO needs to say — and §65 now adds it — is that **four Mac-visible defects in this code are recorded, accepted, and NOT YET FIXED**, because the sub-batch that owns them (4.5c) never ran:
+
+1. **The fan fence is read from a deliberately FROZEN projection** — a block with takes can be merged away mid-typing, against the #11a ruling (§45, batch 3).
+2. **The O(N²) twin SURVIVES in `planVisibleTakeEdit`** — a P1 violation on a road that runs, on the Mac (§45; §38's "the Mac inherits the fix" is overstated in three places).
+3. **The Mac gets the gap fence's REFUSAL but not its FACE** — she meets a raw `blocksNotAdjacent(first:second:)` enum dump (§44 MAJOR 1).
+4. **The Mac has NO identity-projection audit at all** — the DEBUG oracle for the corruption class both other oracles are blind to exists only on the phone, though both platforms share the brain and §20 reproduced the corruption Mac-side (§53 finding 1).
+
+### (c) IN FLIGHT `Shared/` + Mac — exactly THREE files, and they are 4.5b's
+
+```
+ M App/Variorum/Shared/RecoveryCopy.swift              (the TrashPutBack hoist)
+ M App/Variorum/Variorum/Features/Library/RecoveryView.swift   (adopts it; Put back now sets a receipt)
+ M App/Variorum/VariorumTests/TrashSurfaceTests.swift  (+1 pin — the only Mac count move)
+```
+
+**Everything else in flight — 14 files — is iPhone-only.**
+
+**So the honest answer to "unverified/untested touching the shared core":** **one file, `Shared/RecoveryCopy.swift`, plus its two Mac consumers — and "unverified" means UNREVIEWED, not untested.** It carries red-on-old pins, both platforms' suites are green, and the Mac gained a pin for it (1568 → 1569). **The risk is real but small and bounded**; a cold review is owed and is a short job.
+
+### (d) THE LIFT — small mechanically, and here it is as a checklist
+
+1. Restore any dead agent's experiment (**done — §64**) and re-run the mobile suite green.
+2. `git add` the 26 in-flight files and commit as the 4.5 landing.
+3. Run all five suites on the committed tree; record the counts.
+4. `mobile` → `main` and `main` → `mobile`, **resolving `notes/` conflicts as the UNION of both sides** (the c928a33 precedent).
+5. Push both.
+
+**Perhaps an hour.** The lift is not the obstacle; **the judgement is.**
+
+## S5. WHAT WAVE 2 WAS — 4.5c, and why it is the largest remaining risk
+
+She asked directly: *"I'm not sure what wave 2 was for the editor brain."*
+
+**4.5c is "the editor & the shared brain" — the sub-batch that owns `Shared/EditorBrain/*`, both platforms' `storageDidEdit` consumers, and the Mac's editor files.** It was put in a wave of its own **on a mechanism, not a preference**: every mobile and Mac target compiles against `Shared/EditorBrain/`, so a session mid-edit there breaks every other session's build. **It never ran.** Its brief is `mobile-round-2-batch-4.5-briefs.md` §3, and it carries:
+
+- the four Mac-visible defects in S4(b) above (fan fence · the O(N²) twin · the gap fence's missing face · the missing identity audit — **a HOIST, with a Mac-side red-on-old**);
+- an **empty block inside a span** yielding a plan that can never execute;
+- the phone's **unwired A7/#34 seam carves** (backspace-to-join still refuses);
+- **B45-2** — the `displaySlot`/`slots[i]` coupling that **batch 7's PR8 reorder-takes walks straight into**;
+- **B45-3** — the crash trace's six unowned items, including **building E1's instrumentation** so a device session can run it (**M1's root cause is still recorded "high confidence, NOT PROVEN"**);
+- **A1-5** — `CrossBlockRefusal` never hoisted, so the phone's cross-block refusal names **none** of its four real causes;
+- routed in from 4.5b: **the live editor over a tombstone** (the filed remedy was wrong — the stale editor is in the *other* tab stack, so the real fix is at the liveness seam), the **candidate sixth confirm site** at `MobileLenses.swift:419`, and two owed one-liners.
+
+## S6. THE ARCHITECT'S RECOMMENDATION ON SEQUENCING — hers to overrule
+
+She wants to run 13l and start a fresh mobile orchestrator. **Both can happen soon; the one hard constraint is that TWO SESSIONS MUST NOT EDIT MAC EDITOR CODE CONCURRENTLY** — that is this round's most expensive lesson, at phase scale rather than file scale.
+
+**Recommended, and it gets her to 13l fastest without racing:**
+
+1. **Commit the in-flight 4.5 work and merge to `main` now.** It is green, all three BLOCKERs are fixed, and `Sources/` is untouched. 13l unblocks.
+2. **Run 13l.** Its Fable cold review reads the Mac changes **with S4(b)'s four known-open defects written into the manifest** (§65), so it spends its budget on what nobody has looked at rather than re-deriving what is already recorded. Its own first act — the dead Delete Now door — now has a **derived mechanism and a one-line fix** waiting for it (§56).
+3. **In parallel, the fresh mobile orchestrator does PHONE-ONLY work:** 4.5a's ladder round 2 (read-only), 4.5d's fix round (`MobileKeyboardBar` + its tests — iPhone-only), and 4.5b's cold review (read-only). **None of these writes a Mac or `Shared/` line**, so they cannot race 13l.
+4. **AFTER 13l closes:** 4.5c (wave 2), 4.5e (wave 3), and 4.5b's fix round — all of which touch `Shared/` or Mac code.
+
+**The one thing to weigh honestly before step 1:** merging now puts **4.5b's unreviewed `Shared/` hoist** and **4.5d's fourteen open findings** into `main`. Against that: her Mac app is her daily driver and 4.5b's Mac change is a small improvement (Put back was landing silently and now says where it went), R30 keeps the phone build frozen anyway, and **the alternative — holding the merge until 4.5c and 4.5e finish — is the longer wait she is trying to avoid.**
+
+**If she would rather not merge unreviewed `Shared/` code:** the cheapest variant is to have the fresh orchestrator run **4.5b's cold review FIRST, alone** (a few hours, read-only) and merge after. That buys back the only real exposure in S4(c).
+
+## S7. MACHINERY LESSONS ADDED THIS SEAT
+
+- **A rule that names a SHAPE will be obeyed into the same bug.** *Never a computed `Binding(get:set:)`* named a syntax; four doors obeyed it to the letter and were dead anyway, while two sites using that exact syntax were immune. Name the **property**: *a binding setter must never clear state an action's continuation will read back.*
+- **A mechanism that explains the symptom is not a mechanism that was tested.** This round attributed one symptom to two different wrong causes, and repeated a third for six sessions. **Twice the guilty party was the architect** (§61, §62). Isolate before you propagate — and *never* propagate a mechanism into a binding preamble before someone has checked it.
+- **A SPECULATIVE finding investigated properly is worth more than a confirmed one.** MAJOR 5 came back "green" — and asking *why* it was green found a data-loss path nobody suspected (§62).
+- **Never back up or restore a WHOLE DIRECTORY in a shared tree.** It is a fence violation wearing another name, it reverts other sessions' files silently, and nothing announces it (§62).
+- **Check the tree after an agent FAILS, not only after it succeeds** (§64).
+- **A compressed review summary costs real work later.** Twice this round a record said *"and N NITs"* without listing them, and the findings are unrecoverable (§62, §63). **Land every review's findings in full.**
+- **The fence caught the architect's own brief errors twice** — `AppSession.swift` (§58) and `VariorumMobileApp.swift` (§62), both double-owned. Per-file fences are worth their overhead.
+
+## S8. OPEN WITH HER — added this seat (the ten above still stand)
+
+11. **The 320 pt Display-Zoom strip renders her acts at 23 pt** — below the ~31 she pre-ruled tappable. The architect ruled *accept 23* (whole acts beat two acts off-screen; the alternatives are an act-count change, which is hers, or scrolling, which contradicts FIX-5). **Never seen by a human — device-queue row D9.**
+12. **Q1's residual cost:** fixing a typo in the FIRST paragraph of a pasted multi-paragraph capture now holds at the boundary and says so — that paragraph needs the editor, one tap away. A consequence of her own A5-2 one-block ruling, but she has never seen it as a lived consequence.
+13. **The caret collapses to the end after a boundary hold** (§62, confirmed) — safe, but it moves unasked, and putting it back needs a `UIViewRepresentable` text view. **A surface decision.** The stray-newline-on-a-refused-⏎ item wants the same decision.
+14. **The Mac's fifth dead confirm site** — 13l owns it by her ruling; the architect declined to take it and offered it. **Still hers.**
