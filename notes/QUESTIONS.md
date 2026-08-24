@@ -872,4 +872,22 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint.**
 
-*(Next free number: **#75**.)*
+75. **2026-08-24 · Phase 13l Act 5 (the faces — plain-text insurance, the sync-status line, the secret sanity check) · SIX entries.** The BINDING record is the 13l plan's "ACT 5 — RECORD". Every RULING you made was built as ruled; these are the shapes the brief left to the architect.
+
+    **WHAT SHIPPED, IN ONE SENTENCE:** Settings ▸ Data Safety gained the two lines your kickoff ruling 3 named — **every note as plain Markdown, written into your picked folder once a week** and kept 4 deep, and **an honest sync line** ("everything has reached your account" / "3 changes are still waiting"), which reads as perfectly normal when you are signed out — and Settings ▸ Sync ▸ Account ▸ **Encryption** gained the **check** you asked for in August: type your passphrase or the 12 words, and Variorum tries the real unlock and tells you yes or no, changing nothing.
+
+    **(a) The plain-text export's cadence and retention: WEEKLY, keep 4 — PROVISIONAL, both.** The brief left these unruled and named a lean; this is that lean. Weekly rather than daily because a full library export is bulky and the picked folder may be cloud-synced (a daily one would re-upload every note every day); keep 4 rather than 14 because their job is "the most recent prose exists in plain text", and REACH into the past is what the `.sqlite` snapshots beside them are for. Both are one number each. If you would rather have daily-and-keep-7, or monthly-and-keep-12, say which.
+
+    **(b) No picked folder means NO plain-text copies at all.** The exports go to `<your folder>/Variorum/md-exports/` and nowhere else, so until you pick a folder this does nothing and the pane says what turns it on. The reason is that the alternative — writing them inside the app's own sandbox container — puts plain text on the same disk as the library, in a folder you have no reason to open, dying with the container it is insuring against. **The alternative if you want it:** write them into the container too, so the insurance exists from the first launch.
+
+    **(c) The sync line has NO doors, deliberately.** It says what is true and stops; signing in and forcing a round live on the sync row at the bottom of the sidebar, which is where they have always been. Adding a "Sign in…" button here would be a second road to one act, and the pane's job is evidence. **The alternative:** give it the sign-in door so the answer and the fix sit together.
+
+    **(d) The "still waiting" line is the only one that wears a colour.** Signed out, dev build, and everything-sent all read quietly — a local-only Variorum is a complete Variorum, and a line that looked like a warning would be training you to ignore the colour. A real backlog turns orange. **And a fact worth knowing:** a never-synced store's outbox is never actually empty (the settings seeds sit in it), so a signed-out Mac honestly reports a few changes it would send.
+
+    **(e) The check is NOT declared in the capability registry, and the reason is structural rather than an omission.** `CapabilityID` lives in the Mac target; the whole Encryption surface lives in `Shared/` so the phone renders the same flows — so no door on that surface *can* consult the registry, and none ever has (Unlock, Regenerate, Change Passphrase, Replace Keys, Forget are all undeclared for this reason). Declaring only the new check there would have put an entry in a registry that the code rendering it cannot read. This widens #74(d)'s recorded gap with a mechanism: Settings is half-declared because half of it is Mac-only. **The alternative:** a later phase moves the whole Encryption surface's doors into the registry, which means giving `Shared/` a registry of its own.
+
+    **(f) The check's home is the ENROLLED state only.** In every other state — not enrolled, locked, keys replaced — a real Unlock door is already on screen, and using it verifies the secret by doing the thing. The check exists for the state where neither secret is ever exercised: this device unwrapped once, months ago, and the Keychain has carried it since. **The alternative:** offer it everywhere, and accept that it duplicates the door beside it.
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#76**.)*

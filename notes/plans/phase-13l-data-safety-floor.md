@@ -2480,9 +2480,9 @@ to one enum, and the reason it could not be done on the face is stated above.
 | 13 | The restore runbook (incl. M3/M6 sentences, external-snapshots widening) — **scope grew at her post-sitting rulings: + the SYNCED-restore warning pair (ordinary deletions return to the Trash; purged stays purged) in runbook AND restore face · + the backup-archaeology recipe (open a backup in a scratch copy, copy out AS NEW — the recovery-as-copy doctrine) · + the "WHAT DELETION MEANS" section (her clarity mandate below): the three stages defined plainly (delete → Trash 30 days → permanent delete/purge), the BOTH-SIDED backup truth, and the purge definition · + THE MIRROR SECTION (her 2026-08-24 overnight questions): why the mirror is a PEER, not a backup (it replicates mistakes at sync speed; frozen copies protect where converging ones can't), what it DOES cover (device loss — re-onboard + passphrase), and the TWO PROVEN mirror-recovery roads named with their artifacts (mirror lost → repush from local truth, run live at 14b twice + 14c; device lost → re-onboard from mirror, exercised live at the phone's onboarding) — the full hierarchy written in one place: local store → local backups (two destinations) → the mirror → Supabase Pro's 7-day platform backups as the under-everything last resort (ciphertext; hoped to die unused — her 2026-08-24 exchange)** | 1 | **DONE (Act 4, `642cdf1`, corrected by the drill in `dda9507`)** — `notes/DataSafetyRunbook.md`, eight sections to the full scope. The text lives ONCE, in code, pinned byte-equal to the repo file — and **every backup run drops a copy as `RESTORE.md` into both backup folders**, which is the reason it is in code at all: the moment you need a restore recipe is the moment the app may not open. **No Help-menu opener** (a door that cannot act, P-2) — PROVISIONAL at #74(a); the restore-face question answered at #74(b). 4 pins |
 | 14 | The rehearsed restore drill, end-to-end in SCRATCH | 1 | **DONE (Act 4, `dda9507`)** — her newest REAL backup copied out read-only, restored into the fenced dev store per the runbook's own recipe, and opened: her shelf whole, Sync off, Bridge off. Then the deletion legs through the operations layer: **M1** (returns tombstoned on its ORIGINAL stamp, first Trash row, "30 days left"), **M3** (a post-backup deletion undone), **M5** (a PURGED note — 4 rows physically removed — comes back; her accept-and-say-it ruling in the flesh), **M6** (its rows readable inside the backup the whole time). The rehearsal corrected the recipe in three places, which is what it is for. Her real container: zero files modified in the window. **A windowless launch RECURRED and was captured** — main thread idle in the run loop, so the 13e mechanism is gone and this is something else; KnownIssues row rewritten |
 | 15 | The deletion-aware restore matrix M1–M7, headless on the fake server | 1 | **DONE (Act 4, `7c3db60`)** — `RestoreMatrixTests`, 5 pins, `Tests/` only (zero `Sync/` lines). The harness learned to open a client on a FILE, so "restored" means a real `backup(to:)` snapshot reopened, carrying its own cursor, outbox and `device_id`. **M1/M2/M7** pinned; **M4 the centrepiece** — the restored store IS a returner, `reconcileLedger`'s pre-drain pass drops the purged family and the edit typed on the restored store with it — **probed**: skipping the pass reddened exactly the two assertions that matter, so the pin measures the mechanism. The second road (a bare push taking the typed `purged` refusal) is pinned beside it. M3/M5/M6 are the drill's, stated in the file's own header |
-| 16 | Bulk-`.md` plaintext insurance, automated | 1 | open |
-| 17 | The sync-status face | 1 | open |
-| 18 | The passphrase / recovery-phrase sanity check (read-only unwrap) | 1 | open |
+| 16 | Bulk-`.md` plaintext insurance, automated | 1 | **DONE (Act 5, `5f9e4c8`)** — `Shared/MarkdownInsurance.swift`, its own findable unit (13p has to be able to grep the ONE plaintext escape), riding `StoreBackup`'s existing run as a THIRD leg on its own weekly due-ness rather than minting a second clock. `ExportWriter` HOISTED out of the AppKit-importing `ExportModel.swift` so the manifest writer is composed, never copied. Cadence + retention PROVISIONAL at #75(a); no-folder-means-no-export at #75(b). 10 pins, TWO of them red-on-old against traps this leg could have sprung: a required record field would have silently emptied her whole backup log on first launch, and the file count riding `integrity` would have made every successful export report as a failed check |
+| 17 | The sync-status face | 1 | **DONE (Act 5, `5f9e4c8`)** — READ-SIDE ONLY, zero engine lines: the outbox count + the pull cursor in one transaction (`SyncSafetyFacts.read`), the five standings derived in `Shared/`, the WORDS in the Mac's `SyncSafetyWords.swift`. **The mobile no-redirect sweep caught the first shape and was right** — the sentences all said "this Mac" from `Shared/`, the `DataSafetyCopy` lesson exactly; the split leaves the phone a rendering job. No doors, deliberately (#75(c)); signed-out reads as normal, pinned against five alarm words |
+| 18 | The passphrase / recovery-phrase sanity check (read-only unwrap) | 1 | **DONE (Act 5, `5f9e4c8`)** — `Shared/SecretCheck.swift`: model + section, reusable by construction (a `Framing` value, no host knowledge) so 13p's R13p-9 reminder checks compose it. Composes `VaultEnrollment` READ-ONLY and discards the material; deliberately NOT `EncryptionSession.enroll`, whose job is adopting custody. **Red-on-old on the property the row is about:** the plausible wrong road (verify by re-wrapping under the same passphrase) still answers "correct" and silently rotates her salt — the pin catches it on the vault bytes AND on a non-GET request. Registry NOT declared, with the structural mechanism at #75(e) |
 | 19 | ~~The app lock + its fallback SETTING + honest wording~~ | 1 | **MOVED to 13p** (her ruling 2026-08-24 — the post-sitting record above; R13p-5's at-open modes are the lock born real; the system-password fallback retired with the move; the mobile Face ID twin rides 13p Batch 4) |
 | 20 | Item 9: journal-day deletions travel to Fragments at delete time | 1 (§9) | open |
 | 21 | The 8d recovery-story walk (every door, as a user) | 1 | open |
@@ -3452,3 +3452,272 @@ no platform at all.
 5. **The three registry declarations set a Settings precedent** (#74(d)).
    The walk passes because it names its renderers; the question is whether
    half-declared Settings is the right resting place.
+
+### ACT 5 — RECORD (Opus implementer, 2026-08-24)
+
+**Scope taken, exactly the three dispatched:** ledger rows **16–18**. Two
+commits, each staged by explicit path, nothing pushed. Working tree clean.
+
+**ZERO `Sources/` lines — not just zero `Sources/VariorumCore/Sync/`, zero
+`Sources/` of any kind** (`git status` verified at the close). Zero schema.
+`Crypto/` was touched READ-ONLY in the strongest sense: the sanity check
+COMPOSES `VaultEnrollment` and adds no function anywhere in core, so the
+brief's "if a verification road genuinely needs a new pure function in
+`Crypto/`" clause never fired. The +1 core-side change is **none**; the core
+suite's count is unmoved.
+
+**Her real store was never touched.** Nothing in this act runs a backup, an
+export, or a vault call outside test scratch: every test writes to its own
+temp directory and its own `UserDefaults` suite (never `.standard`, which is
+her real Mac while a suite runs), and the vault tests speak to an in-process
+responder over an invalid host.
+
+---
+
+#### Row 16 — the plain-text insurance, automated · **DONE**
+
+**What was built.** `App/Variorum/Shared/MarkdownInsurance.swift` — its own
+file, named so it can be found, because that is a requirement rather than
+tidiness: **this is the ONE place in the app that writes her prose to disk as
+plain text on a timer**, and 13p (note protection) has to be able to grep it
+in one go and decide what it does about protected notes. Everything else the
+app writes outside the store is either the store itself (as readable or
+unreadable as the store) or ciphertext on the mirror.
+
+- **It rides `StoreBackup`'s existing run as a THIRD LEG**, not a second
+  clock: one hourly tick, one run record, one log, one face. Its due-ness is
+  its OWN (weekly, not daily), so on six days out of seven the leg costs a
+  directory listing and answers `.upToDate`.
+- **Destination:** `<picked>/Variorum/md-exports/<UTC stamp>/`, one dated
+  folder per export, beside `Backups/` — the layout #74(c) already
+  anticipated. No picked folder ⇒ `.noDestination` and nothing written
+  (#75(b) records the alternative and the reason: a container copy would sit
+  on the same disk, in a folder she never opens, dying with the container it
+  insures against).
+- **Retention: keep 4 whole folders**, deliberately simpler than
+  `BackupRetention`'s 14+4. These are bulky and their job is "the most recent
+  prose exists in plain text"; REACH is the snapshots' job. PROVISIONAL with
+  the cadence at #75(a).
+- **`ExportWriter` was HOISTED** from `Features/Export/ExportModel.swift` to
+  `Shared/ExportWriter.swift`, unchanged. Not tidying: that file imports
+  AppKit, so everything in it is Mac-only by compilation, and the writer is
+  neither a Mac thing nor a face — it is the one place a
+  `Queries.ExportFile` manifest becomes files. Copying its twelve lines would
+  have minted exactly the forked-brain class the KnownIssues row is about.
+  `ExportModel` calls it unchanged and its pins rode unmodified.
+
+**TWO TRAPS THIS LEG COULD HAVE SPRUNG, both caught by their own pins and
+both verified RED-ON-OLD by behavioural revert:**
+
+1. **The persisted log would have emptied itself.** `BackupRunRecord` gained
+   a third leg, and the log lives in `UserDefaults` across launches.
+   Synthesized `Codable` uses `decode` (never `decodeIfPresent`) for a
+   non-Optional property **even when it has a default value**, so a required
+   `markdown` field makes every pre-Act-5 record fail to decode — and
+   `BackupLog.read` returns `[]` on a decode failure. Her entire backup
+   history would have vanished, silently, on this build's first launch, from
+   the one face whose job is proving backups happen. **Revert proof:** with
+   the field required, `aLogRecordFromBeforeTheThirdLegStillDecodes` reddens
+   at `records.count → 0`.
+2. **A successful export would have reported as a failed integrity check.**
+   The first shape put the file count in `Leg.integrity`, whose reader
+   `integrityFailed` means "a value that is not SQLite's ok". **Revert
+   proof:** the pin reddens at `leg.integrityFailed → true` and
+   `record.everythingWorked → false` on a run where everything worked — i.e.
+   an orange line in the Data Safety face, weekly, forever. Fixed by giving
+   the count its own `files` field: a field that must be fenced at every
+   reader is a field in the wrong place.
+
+**Pins (10):** the export writes her actual sentence into a real `.md` (not
+just a count — the whole row is about words on disk) · the weekly cadence,
+both arms · retention keeps four and prunes whole folders · **anything she
+put in that folder herself is neither counted nor pruned** · no folder ⇒
+`.noDestination`, never `.failed` (nothing is wrong; she just has not picked
+one) · an unreachable folder is REPORTED · the two red-on-old traps above ·
+a failed leg reaches the receipt · an up-to-date leg says nothing (a weekly
+job would otherwise add the same sentence to six receipts in seven, and a log
+line that always reads the same is a line nobody reads).
+
+**The runbook grew with it** (§1 gained the plain-text tier, §2 gained the
+folder and the *"readable by anything that can read the folder"* trade, §8
+gained the check below) — regenerated through the temp dump so
+`notes/DataSafetyRunbook.md` stays byte-equal to the shipped text, which its
+own pin enforces.
+
+---
+
+#### Row 17 — the sync-status face · **DONE**
+
+**READ-SIDE ONLY, and the boundary held completely:** the facts are the
+outbox's row count and the pull cursor, read in ONE transaction so they
+describe the same instant, plus the scheduler's own in-memory status. Nothing
+triggers, configures, schedules or observes a round. The read is raw SQL in
+one named place rather than a new `Queries` road, because `sync_outbox` and
+`sync_state` are local-only sync MACHINERY (SyncSpec §3) and putting them in
+the domain read layer would tell every future reader that a dirty-row set is
+a thing views traverse — `SyncSession`'s settle observation is the precedent.
+
+**THE MOBILE SWEEP CAUGHT THE FIRST SHAPE, AND IT WAS RIGHT.** The sentences
+started beside their facts in `Shared/`, and `MobileNoRedirectSweepTests`
+failed with six offenders: every line says *"this Mac"*, and `Shared/` means
+the phone compiles them. That is `DataSafetyCopy`'s Act-4 lesson arriving
+again from the other direction, and the fix is the same seam: **`Shared/`
+holds the FACTS and the five standings** (`SyncSafetyFacts`,
+`SyncSafetyStanding` — dev store · local-only · signed-in-not-syncing ·
+all-sent · waiting(n)), **the Mac holds the WORDS**
+(`Features/Settings/SyncSafetyWords.swift`). The phone's twin is then a
+rendering job: the read is done, the rule is done, only the nouns are its
+own. Recorded as a mechanism rather than a stumble, because it is the
+cheapest possible demonstration that the sweep earns its keep.
+
+**The copy's load-bearing half is the signed-out line.** A local-only
+Variorum is a COMPLETE Variorum, so its line must never read as an unfinished
+setup or a fault to clear — pinned against five alarm words ("error",
+"failed", "problem", "not set up", "warning"). Only a real backlog wears a
+colour (#75(d)).
+
+**No doors, deliberately** (#75(c)): signing in and forcing a round live on
+the sidebar's sync row where they always have. This section is evidence.
+
+**A fact the pins surfaced and the face now tells honestly:** a never-synced
+store's outbox is NOT empty — the schema's `setting` seeds go through the
+outbox triggers like every other write — so a signed-out Mac genuinely owes
+the server a few rows, and the backlog detail says so instead of claiming
+nothing is pending.
+
+**Pins (9):** the five standings as the shared half · signed-out reads as
+normal · the dev-store line names the build, not a fault · empty outbox
+answers the row's actual question · a backlog says waiting and never loss,
+singular and plural · "no round since Variorum opened" said out loud rather
+than shown as a blank · cursor nil and cursor 0 are the same fact · a
+signed-out backlog is named · the local read answers from the store
+(delta-based, for the seeds reason above).
+
+---
+
+#### Row 18 — the passphrase / recovery-phrase sanity check · **DONE**
+
+**How it verifies, and there is deliberately no second mechanism:** it runs
+the REAL unwrap — fetch the vault, derive with Argon2id under the vault's own
+stored parameters, attempt `unwrapMaster`. RFC 3394 authenticates, so a wrong
+secret cannot unwrap and **the attempt IS the verification**. There is no
+stored hash of the passphrase anywhere in this system and there must never be
+one: a comparable artifact is a thing an attacker can attack offline, and a
+"verified" answer from anything but the real unwrap is a guess wearing a
+checkmark. The recovery phrase verifies by its own wrap, the same way.
+
+**What it never does — and this is the row, not a caveat.** No vault write,
+no re-key, no Keychain adoption, no reset, no state change of any kind. It
+composes `VaultEnrollment` (core, 14b) and **discards the returned material
+on the spot**, and it deliberately does NOT route through
+`EncryptionSession.enroll`, whose entire job is adopting custody. The
+derivation runs inside `VaultEnrollment`'s `nonisolated async` methods — off
+the main actor by construction, per that type's own stated contract — so the
+deliberate wait never blocks the surface, and the UI says the wait is on
+purpose BEFORE it starts rather than apologising after.
+
+**RED-ON-OLD, and it is the interesting one.** The plausible wrong road is
+not sloppiness — it is verifying by re-wrapping master under the same
+passphrase (`changePassphrase(authorizedBy:.passphrase(x), newPassphrase: x)`),
+which reads as harmless and **answers `correct` perfectly**. Reverted to it,
+`aCheckChangesNothingAtAll` reddens twice: the vault row changes (756 → 755
+bytes — a fresh salt and wrap) and a non-`GET` reaches the server. So the
+wrong implementation would have rotated her KDF salt every time she checked
+her passphrase, invisibly, from a face whose entire promise is "without
+having to reset something else". **The custody half is structural rather
+than tested:** the model holds no `DeviceKeyStore` reference at all, so it
+cannot adopt; the pin asserts an observing device stays `notEnrolled` to
+document the intent.
+
+**Built as a reusable component, per the brief.** 13p's R13p-9 reminder
+checks are ruled to point at this face, so: the model knows nothing about
+where it renders; the words a host wraps it in are a `SecretCheckFraming`
+value (13p supplies its own — a reminder's framing differs from a sanity
+check's); the section is one drop-in view; and it lives in `Shared/` so the
+phone's twin is a face over the same model. **The seam 13p inherits is
+exactly three things:** `SecretCheckModel(client:)`, `check(_:entry:)` →
+`Result`, and `SecretCheckSection(framing:offersRecoveryPhrase:model:)`.
+
+**Home: the ENROLLED state of Settings ▸ Sync ▸ Account ▸ Encryption**
+(#75(f)) — the one state where neither secret is ever exercised, because the
+device unwrapped once and the Keychain has carried it since (the R-6
+cadence). Every other state already renders a real Unlock door that verifies
+by being used.
+
+**Registry (P-1): NOT declared, and the mechanism matters more than the
+call.** `CapabilityID` lives in the Mac target; the whole Encryption surface
+lives in `Shared/` so both platforms render it — therefore **no door on that
+surface can consult the registry, and none ever has** (Unlock, Regenerate,
+Change Passphrase, Replace Keys, Forget, the biometric toggle: all
+undeclared, all for this reason). Declaring only the new check would have put
+an entry in a registry the rendering code cannot read, and joining the walk's
+union from a Mac-side static would have implied a coverage that does not
+exist. This is recorded at #75(e) as a widening of #74(d)'s gap WITH its
+cause: Settings is half-declared because half of it is Mac-only. **Rows 16
+and 17 add no acts at all** — row 16's evidence points at no door (the manual
+bulk export already exists in the Library, and a second button for the same
+act would promote the one road this design demotes), row 17 renders none.
+
+**Pins (8):** the right passphrase answers yes and the derivation is measured
+· the wrong one answers no and costs nothing (the right one still works
+after) · the recovery phrase verifies by its own road · **a typo is said as a
+typo, never as a wrong phrase** (checksum failure is a different answer —
+one says fix the spelling, the other says find the right paper) · **an
+unreachable server is never reported as a wrong secret** (telling someone
+their passphrase is wrong because the network was down is how a person
+decides to reset something they did not need to) · an unconfigured project
+stays dormant · the changes-nothing pin above · the answers say "nothing was
+changed" and "nothing is locked out", because this face is used by someone
+already worried.
+
+---
+
+#### THE FOUR GATES — all green, counts quoted
+
+| gate | result | against baseline |
+|---|---|---|
+| core (`swift test`) | **1356 / 142** passed | unmoved (zero `Sources/` lines) |
+| Mac (full suite) | **1674 / 290** passed, FULLY GREEN | 1647/287 → **+27 / +3** (the act's three suites) |
+| Mac spine (by TYPE name) | **63 / 8** passed | unmoved |
+| mobile (iPhone 16e) | **486 / 78** passed | unmoved (2 pre-existing known issues) |
+
+**The two known flakes were watched and neither fired.** The Phase-12
+latency pin (`EditorWindowSmokeTests.rewriteStrategyLatencies`) and
+`CanvasDragTrackingTests` both passed in **two** full Mac runs (the second
+after the row-17 split), under `caffeinate -d` with no author at the machine.
+`CanvasDragTrackingTests` therefore stays at ONE recorded red — **it did not
+earn its KnownIssues row here.**
+
+---
+
+#### FOR THE END-OF-PHASE LADDER — what to attack hardest
+
+1. **The markdown leg runs INSIDE the backup run, off-main, and reads the
+   whole corpus** through `Queries.bulkExportManifest`. Weekly cadence keeps
+   it rare, but it is the heaviest thing the scheduler does and it holds a
+   reader for its duration. Check the ordering choice (it runs LAST,
+   deliberately — the snapshots are the restore road) and whether a very
+   large corpus deserves the P1 treatment the KnownIssues sweep rows get.
+2. **`BackupRunRecord` is persisted and now has an optional field.** Trap 1
+   above is fixed and pinned, but attack the NEXT one: what happens to a log
+   written by this build if a later build renames or re-types a leg field?
+   The answer today is "the whole log disappears silently", and the pin only
+   covers the one case that already happened.
+3. **Two security-scope claims now happen per run** (the snapshot leg's, then
+   the markdown leg's), sequentially. They are balanced in `defer`s, but the
+   pairing is worth a second pair of eyes — Act 4's list already flagged the
+   single-claim failure paths.
+4. **The sanity check's answer set is three-valued on purpose** (correct /
+   wrong / could-not-check). Attack the classification: which real errors
+   land in `couldNotCheck` that a user would read as "wrong", and vice
+   versa. A misclassification here has a real cost — it is what makes
+   someone reset a secret they still hold.
+5. **`SecretCheckModel` guards re-entry with `checking` and clears the
+   field on submit.** Check the double-tap and the mid-check navigation
+   away; and check that no path can leave `result` describing a different
+   secret than the one now selected (the picker's `onChange` resets it —
+   verify that is enough).
+6. **The Encryption surface remains registry-invisible** (#75(e)). The call
+   here was to record the mechanism rather than paper it; the ladder should
+   decide whether that resting place is right or whether `Shared/` needs a
+   registry of its own before 13p adds more doors to that tab.
