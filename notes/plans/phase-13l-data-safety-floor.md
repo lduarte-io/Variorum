@@ -1397,14 +1397,153 @@ queue (item B) is already discharged — the walk ran all nine rows
   question tool's short description, so the door was left open
   explicitly).
 
+### ACT 1 — THE FIRST-ACT FABLE COLD REVIEW: FINDINGS (returned 2026-08-23; recorded repo-first before any fix session)
+
+**Reviewer:** fresh Fable session, `REVIEW_PROMPT.md` verbatim, zero
+framing, over `git diff 46ffa0c..HEAD -- App/Variorum/Shared
+App/Variorum/Variorum App/Variorum/VariorumTests` (14 files) with 4.5b
+(`7fd2cd0`) explicitly in scope. **Verdict shape: 1 MAJOR · 2 MINOR ·
+2 NIT + a substantial clean bill** (all three plan foci answered; 53
+tests across the five touched/new suites green on HEAD; the
+calibration table honored — the four already-owned defects confirmed
+present exactly as recorded, zero budget re-derived; the intermittent
+latency pin not run, nothing concluded from it).
+
+**A1-MAJOR-1 · `App/Variorum/Shared/RecoveryCopy.swift:295` (with
+`:223`, `:280-302`) — the hoisted Trash put-back DISCARDS
+`restoreVariant`'s returned status, so an archived take's put-back
+issues a receipt that misdirects her** ("Take put back." while the
+take revives into the ARCHIVED listing, not the fan). Traced end to
+end: `TrashPutBack.run` writes `case .take: _ = try
+ops.restoreVariant(item.id)` and falls to the generic
+`putBackReceipt(.take)`; `restoreVariant`'s own contract
+(`Operations+Deletion.swift:94-99`) says a take archived-when-deleted
+comes back archived and "a receipt that assumed 'the fan' was lying
+for that row. The door reads the op's own answer instead of assuming
+one." The Mac's sibling door obeys it (`BlockPastModel.putBackTake`
+reads the status and speaks `BlockPastCopy.restored(status)`, incl.
+the archived edition). Reachable from the Trash: `deleteVariant`
+accepts an archived, unlocked, non-chosen take (no I10 refusal); the
+Trash query lists deleted variants with NO status filter
+(`Queries/Trash.swift:185-215`); put-back revives it `.archived`. Two
+doors onto one act answer "where did it go?" two different ways — the
+M-C drift class 4.5b's hoist exists to kill, re-shipped on the new
+door (13j ladder A's A3 fixed this class once on the tray already).
+Pre-4.5b the Mac showed NO receipt here — the misdirecting
+affirmative sentence is new, i.e. squarely the never-reviewed code.
+**Fix:** `case .take:` returns a status-aware receipt — read `try
+ops.restoreVariant(item.id)`, add an archived-edition receipt pair to
+`RecoveryCopy` (the `BlockPastCopy.restored` shape); both platforms
+inherit through the shared road. **Red-on-old pin:** archive a take,
+delete it, `RecoveryViewModel.putBack` from the REAL Trash rows,
+assert the receipt names the archived landing — fails on today's
+code. → **DISPOSITION: FIX NOW (the Act-1 fix round).**
+
+**A1-MINOR-1 · `Shared/EditorBrain/BlockRangeIndex.swift:355` (gap
+fence), `:412` (caret landing) vs `VariorumTests/WholeBlockDeleteTests.swift`
+— the two Mac-visible behavior changes in the shared brain are pinned
+ONLY in the mobile suite.** The gap fence (a recorded narrowing of the
+Mac's shipped J9 gesture) has no Mac-side pin (no `variantID == nil`
+fixture); the nearest-surviving caret-landing correction changes the
+answer of a MAC-ONLY door (⌘-click non-contiguous multi-delete,
+`EditorSurfaceController.swift:839`) while its `[b0, b2] → b1` pin
+lives in `MobileWholeBlockDeleteTests.swift`; the O(N²)-fix
+equivalence pin is likewise mobile-only. A Mac-suite-only regression
+run stays green over a regression in either. **Fix:** two cheap Mac
+pins (a gap-run `planWholeBlockDeletion` returns nil; the
+non-contiguous landing through the Mac door or brain). →
+**DISPOSITION: FIX NOW (the Act-1 fix round) — the architect's call
+over the offered fold-into-13u:** the gap fence's REFUSAL is
+tombstone-wins correctness (not 13u's refusal-policy territory), the
+caret landing is pure mechanics, and both pins make a Mac-only
+regression run honest. These are COVERAGE pins over existing correct
+behavior — green on HEAD by design, no red-on-old owed (the
+parity-pin class), and they must not touch 13u's semantics.
+
+**A1-MINOR-2 · `Variorum/Features/Library/RecoveryView.swift:212,
+229, 295, 366` — 4.5b taught exactly ONE of this surface's five
+generic catches to speak; the other four still dump raw errors**
+(`lastError = String(describing: error)`) — the two observation
+starters, `requestEmptyTrash`, and `confirmPendingPurge`: the PURGE
+half, the most consequence-laden acts on the surface. →
+**DISPOSITION: ROUTED to ledger item 4** (the decision-layer hoist —
+its scope now EXPLICITLY includes routing these four through
+`DeletionRefusal.fallback`), per the reviewer's own framing.
+
+**A1-NIT-1 · `Shared/RecoveryCopy.swift:334-355` —
+`DeletionRefusal.words` covers the "already gone" family but not the
+"already back" family** (`variantNotDeleted` / the other
+`*NotDeleted` refusals — the ordinary double-click-Put-back race,
+foreseeable, falls to the technical-name fallback). Mac exposure
+limited today (`putBack` routes `OperationError` through
+`TrayRefusalCopy`). → **DISPOSITION: ROUTED to ledger item 4** (add
+the family to the shared home when the layer is hoisted).
+
+**A1-NIT-2 · `Shared/RecoveryCopy.swift` (file shape) — a
+`…Copy.swift` file now carries two `@MainActor` act compositions +
+the purge-table mapping beside the sentences.** Defensible at this
+size, acknowledged in its header. → **DISPOSITION: ROUTED to ledger
+item 4** — when that item grows the decision layer, the compositions
+split into their own shared file so "Copy" stays copy.
+
+**Clean bill highlights (the full list is the reviewer's report;
+load-bearing for later acts):** the batch-4 copy hoist is
+byte-identical string-for-string and `CrossBlockEditPlanner`
+reproduces the old Mac planner condition-for-condition with only the
+recorded O(N²)→O(N) deviation · the trap→refusal conversion leaves NO
+silent road (all four mutator sites guard the Bool → `desyncRecovery()`)
+· `ArmedEdit.describes` is correct for AppKit's exact reporting incl.
+Replace All · structural disarm coverage complete · `apply`'s
+failure story rolls back via `UndoStack.withCompound` · the gap
+fence's predicate is exactly `variantID == nil` (never push state,
+never fan count) · zero `Sources/` lines in the round's whole diff ·
+the task-local assertion seam is parallel-safe · 4.5b's receipt pin
+is a real end-to-end pin.
+
+### ACT 1 FIX ROUND — the brief (fresh Opus session; self-contained with the findings above)
+
+**Scope: EXACTLY A1-MAJOR-1 + A1-MINOR-1. Nothing else** — the other
+three findings are routed to ledger item 4 and are NOT this round's.
+
+1. **A1-MAJOR-1:** re-trace the mechanism yourself (read
+   `TrashPutBack.run`, `restoreVariant`'s contract, and
+   `BlockPastModel.putBackTake` — the shape to follow). Build the
+   red-on-old pin FIRST and confirm it fails on the pre-fix code
+   (behavioral revert verification), then fix: the take case reads
+   the op's returned status and speaks a status-aware receipt; the
+   archived edition joins `RecoveryCopy` beside the existing
+   receipts (both platforms inherit through the shared road — check
+   the phone's Trash face renders the new sentence sensibly; a
+   mobile twin pin is welcome if natural).
+2. **A1-MINOR-1:** two Mac-side coverage pins, green on HEAD by
+   design (the parity-pin class, no red-on-old owed): (a) a gap-run
+   (`variantID == nil` fixture) `planWholeBlockDeletion` returns
+   nil, in the Mac suite; (b) the non-contiguous `[b0, b2] → b1`
+   nearest-surviving caret landing through the Mac door or the brain
+   from the Mac suite. Do NOT touch refusal wording or widen/narrow
+   any case — 13u owns that seam's semantics.
+
+**Discipline:** the 13j Environment traps bind by reference
+(`notes/plans/phase-13j-deletion-and-trash.md`, "Environment traps") —
+Mac tests via the `-project` invocation, suite-level `-only-testing`,
+never address a live Variorum instance, no custom build config, no
+push (the orchestrator pushes). `Shared/` is touched ⇒ run core + Mac
+full + Mac spine + mobile full; quote every count. Expected starting
+counts: core 1350/141 · Mac 1569/272 · spine 63/8 · mobile 484/78;
+the one intermittently-red Mac latency pin
+(`EditorWindowSmokeTests/rewriteStrategyLatencies`) is Phase 12's —
+re-run isolated before concluding anything. Record your result as a
+short report; the round-2 re-review (fresh Fable) follows per the
+ladder.
+
 ### THE LEDGER (every row owned; statuses updated as they move)
 
 | # | item | strand | status |
 |---|---|---|---|
-| 1 | The first-act Fable cold review (mobile round's Mac diff + 4.5b) | 3 | **dispatched** |
+| 1 | The first-act Fable cold review (mobile round's Mac diff + 4.5b) | 3 | **review returned (1 MAJOR · 2 MINOR · 2 NIT + clean bill); fix round dispatched; round 2 owed** |
 | 2 | The dead Delete Now / Empty Trash doors (pin-first at the real surface) | 2 | open |
 | 3 | The note-deletion door set: Delete Note… (note ▾, confirm) · Library door confirm · ⌘-click multi-select + delete-all | 1 (§8) | open |
-| 4 | The remaining decision-layer hoist (`RecoveryViewModel` ↔ `MobileTrashModel`) | 2 | open |
+| 4 | The remaining decision-layer hoist (`RecoveryViewModel` ↔ `MobileTrashModel`) — **scope grew at Act 1: + the four raw-error catches through `DeletionRefusal.fallback` (A1-MINOR-2) · + the `*NotDeleted` family in the shared home (A1-NIT-1) · + split the act compositions out of `RecoveryCopy` when the layer grows (A1-NIT-2)** | 2 | open |
 | 5 | Pool/scraps deletion honesty check (§8b) | 1 | open |
 | 6 | Remove the left-margin comment ＋ (§8c, removal only) | 1 | open |
 | 7 | **L-a** identity-projection audit: hoist + Mac wiring + Mac red-on-old + the empty-entry hole | 4 | open |
