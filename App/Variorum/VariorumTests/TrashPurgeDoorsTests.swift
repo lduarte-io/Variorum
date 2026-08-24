@@ -525,3 +525,91 @@ struct TrashPurgeDoorsTests {
             .contains("Trash"))
     }
 }
+
+/// **THE HOIST, PINNED** (13l Act 2, ledger item 4 — the decision layer
+/// mobile round 2's batch 4.5b stopped at half, plus the Act-1 review's two
+/// routed NITs).
+///
+/// The claim a hoist has to earn is that it moved an ADDRESS, not a
+/// behaviour, and this repo's usual proof is the other platform's suite
+/// riding unmodified. That proof is real here (no mobile test file was
+/// touched) but it is the weaker half — it shows no COVERED behaviour
+/// changed. These pins carry the other half: the rules themselves, asserted
+/// where they now live, plus the sentences the review found missing.
+@MainActor
+@Suite("The shared purge decision layer (13l Act 2, item 4)")
+struct TrashPurgeSharedLayerTests {
+    /// Both models' `PurgeConfirm` is now literally the same type, which is
+    /// the strongest statement of "one decision" available in the language.
+    @Test func bothSurfacesConfirmTypeIsTheSharedOne() {
+        #expect(RecoveryViewModel.PurgeConfirm.self == TrashPurge.Confirm.self)
+        // And the rule the belt rides on, at its one home.
+        let original = Queries.TrashItem(
+            kind: .preservedOriginal, id: "origin-1",
+            deletedAt: "2026-07-01T00:00:00.000Z", text: "the original")
+        #expect(TrashPurge.deleteNowConfirm(for: original) == nil,
+                "an original rides its family — no door, on either platform")
+        let block = Queries.TrashItem(
+            kind: .block, id: "b1", deletedAt: "2026-07-01T00:00:00.000Z")
+        #expect(TrashPurge.deleteNowConfirm(for: block) == .deleteNow(block))
+    }
+
+    /// The +1 probe's rule, which both listings ran as their own copy — a
+    /// rule whose bug (forgetting to DROP the probe row) is silent.
+    @Test func theWindowDropsItsProbeRowAndSaysSo() {
+        let exact = TrashListing.windowed(Array(1...5), window: 5)
+        #expect(exact.rows.count == 5)
+        #expect(!exact.truncated, "an exact-window read is not truncated")
+        let over = TrashListing.windowed(Array(1...6), window: 5)
+        #expect(over.rows == Array(1...5), "the probe row never reaches the listing")
+        #expect(over.truncated)
+        let empty = TrashListing.windowed([Int](), window: 5)
+        #expect(empty.rows.isEmpty && !empty.truncated)
+    }
+
+    /// **A1-NIT-1** — the "already BACK" family. **RED ON OLD**: every case
+    /// here fell to `fallback`, which prints the technical name, on the
+    /// ordinary double-click-Put-back race.
+    @Test func theAlreadyBackFamilySpeaksInsteadOfNamingItsEnumCase() {
+        let cases: [(OperationError, String)] = [
+            (.containerNotDeleted(id: "x"), "note is already back"),
+            (.readingNotDeleted(id: "x"), "book is already back"),
+            (.blockNotDeleted(id: "x"), "block is already back"),
+            (.variantNotDeleted(id: "x"), "take is already back"),
+        ]
+        for (error, expected) in cases {
+            let words = DeletionRefusal.words(error, act: .putBack)
+            #expect(words.contains(expected))
+            #expect(!words.contains("NotDeleted"), "never the enum case's name")
+            #expect(!words.contains("couldn't be done"), "never the fallback")
+        }
+        // The purge side of the same race names the rule it broke.
+        let purge = DeletionRefusal.words(
+            OperationError.purgeTargetNotDeleted(table: "block", id: "x"), act: .delete)
+        #expect(purge.contains(RecoveryCopy.trashSection))
+        #expect(!purge.contains("couldn't be done"))
+        // The "already gone" family it mirrors is untouched.
+        #expect(DeletionRefusal.words(OperationError.containerNotFound(id: "x"))
+            .contains("already gone"))
+    }
+
+    /// **A1-MINOR-2** — the four raw `String(describing:)` catches. Three
+    /// are unreachable without breaking the store, so the pin asserts what
+    /// is assertable: the surface's error slot never carries a bare
+    /// `String(describing:)` shape, and the ONE reachable arm speaks.
+    @Test func theSurfacesErrorSlotNeverCarriesARawDump() async throws {
+        try await withEditor(seedBlocks: ["Alpha one."]) { editor in
+            let model = RecoveryViewModel(session: editor.session)
+            // The reachable arm: a purge refused by the ops layer (a target
+            // that is NOT in the Trash — the `requestPurge` guard).
+            let live = try #require(editor.model.slots.first?.blockID)
+            model.requestDeleteNow(Queries.TrashItem(
+                kind: .block, id: live, deletedAt: "2026-07-01T00:00:00.000Z"))
+            await model.confirmPendingPurge(try #require(model.pendingConfirm))
+            let said = try #require(model.lastError)
+            #expect(!said.hasPrefix("purgeTargetNotDeleted"),
+                    "a refusal is a sentence, never the enum's description")
+            #expect(said.contains(RecoveryPath.trashSection) || said.contains("Trash"))
+        }
+    }
+}

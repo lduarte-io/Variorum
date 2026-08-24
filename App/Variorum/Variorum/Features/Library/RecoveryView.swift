@@ -204,12 +204,13 @@ final class RecoveryViewModel {
             for try await value in session.database.observeArchivedPosts(
                 limit: Self.window + 1
             ) {
-                archivedTruncated = value.count > Self.window
-                archived = archivedTruncated ? Array(value.prefix(Self.window)) : value
+                (archived, archivedTruncated) = TrashListing.windowed(
+                    value, window: Self.window)
             }
         } catch is CancellationError {
         } catch {
-            lastError = String(describing: error)
+            // A1-MINOR-2 (13l Act 1): a raw dump on an observation starter.
+            lastError = DeletionRefusal.fallback(error)
         }
     }
 
@@ -221,13 +222,13 @@ final class RecoveryViewModel {
                 now: session.now, kinds: kinds, oldestFirst: oldestFirst,
                 limit: Self.window + 1
             ) {
-                trashTruncated = value.count > Self.window
-                trash = trashTruncated ? Array(value.prefix(Self.window)) : value
+                (trash, trashTruncated) = TrashListing.windowed(
+                    value, window: Self.window)
                 await refreshPoolHomes()
             }
         } catch is CancellationError {
         } catch {
-            lastError = String(describing: error)
+            lastError = DeletionRefusal.fallback(error)
         }
     }
 
@@ -303,56 +304,41 @@ final class RecoveryViewModel {
 
     // MARK: The purge doors (13j batch 6b)
 
-    /// What the surface is asking her to confirm. Delete Now asks EVERY
-    /// time (round 10 — no session-scoped don't-ask exists, deliberately);
-    /// Empty Trash asks once, naming the full count by kind (round 8).
-    enum PurgeConfirm: Equatable {
-        case deleteNow(Queries.TrashItem)
-        case emptyTrash(counts: [Queries.TrashItem.Kind: Int])
-
-        var message: String {
-            switch self {
-            case .deleteNow(let item):
-                return RecoveryPath.deleteNowConfirm(item.kind)
-            case .emptyTrash(let counts):
-                return RecoveryPath.emptyTrashConfirm(counts)
-            }
-        }
-    }
+    /// What the surface is asking her to confirm. **The type is the SHARED
+    /// one now** (13l Act 2's hoist — `TrashPurge.Confirm`); this alias is
+    /// what keeps 13j's pins riding unmodified, the 3C parity pattern. Her
+    /// rulings are stated at the shared home: Delete Now asks EVERY time
+    /// (round 10 — no session-scoped don't-ask exists, deliberately), Empty
+    /// Trash asks once naming the full count by kind (round 8).
+    typealias PurgeConfirm = TrashPurge.Confirm
 
     private(set) var pendingConfirm: PurgeConfirm?
 
-    /// The per-row door: raises the confirm — never acts directly.
+    /// The per-row door: raises the confirm — never acts directly. The
+    /// original-rides-its-family belt (round 8b) is the shared rule's.
     func requestDeleteNow(_ item: Queries.TrashItem) {
-        guard item.kind != .preservedOriginal else {
-            // A preserved original has no purge door of its own — it rides
-            // its family (round 8b). The row renders no Delete Now, so
-            // this is a belt, not a face.
-            return
-        }
-        pendingConfirm = .deleteNow(item)
+        guard let confirm = TrashPurge.deleteNowConfirm(for: item) else { return }
+        pendingConfirm = confirm
     }
 
-    /// The bulk door: reads the UNWINDOWED counts AT ASK TIME (the listing
-    /// is windowed at 500; "everything, always" means everything), then
-    /// raises the confirm with the full count by kind.
+    /// The bulk door: the shared ask-time read (UNWINDOWED counts — the
+    /// listing is windowed at 500 and "everything, always" means
+    /// everything), then the confirm with the full count by kind. An empty
+    /// Trash says so quietly instead of confirming nothing.
     func requestEmptyTrash() async {
         lastError = nil
         receipt = nil
         do {
-            let now = session.now
-            let everything = try await session.database.read { db in
-                try Queries.trash(db, now: now)
-            }
-            var counts: [Queries.TrashItem.Kind: Int] = [:]
-            for item in everything { counts[item.kind, default: 0] += 1 }
-            if counts.filter({ $0.key != .preservedOriginal }).values.reduce(0, +) == 0 {
+            guard let confirm = try await TrashPurge.emptyTrashConfirm(session: session)
+            else {
                 receipt = RecoveryPath.emptyTrashConfirm([:])
                 return
             }
-            pendingConfirm = .emptyTrash(counts: counts)
+            pendingConfirm = confirm
         } catch {
-            lastError = String(describing: error)
+            // A1-MINOR-2 (13l Act 1): this was a raw `String(describing:)`
+            // dump, on the most consequence-laden act on the surface.
+            lastError = DeletionRefusal.fallback(error)
         }
     }
 
@@ -375,60 +361,12 @@ final class RecoveryViewModel {
         lastError = nil
         receipt = nil
         do {
-            let synced = session.syncConfigured()
-            switch confirm {
-            case .deleteNow(let item):
-                let target = SyncPurgeTarget(table: item.kind.purgeTable, rowID: item.id)
-                // R2-M1: the signed-out-with-synced-history population —
-                // read the family's truth bit (before the intent lands;
-                // the intent write changes no seq rows) so the local
-                // wording never claims a cleanup LocalPurge will defer.
-                var familySynced = false
-                if !synced {
-                    familySynced = try await session.database.read { db in
-                        try PurgeJanitor.anyFamilyEverSynced(db, targets: [target])
-                    }
-                }
-                try await session.runner.run { ops in
-                    _ = try ops.requestPurge([target])
-                }
-                receipt = RecoveryPath.deleteNowReceipt(
-                    item.kind, synced: synced, familyEverSynced: familySynced)
-            case .emptyTrash:
-                // Re-read at ACT time (a confirm is a pause; the listing is
-                // a projection — the R3-1 lesson): everything currently in
-                // the Trash, unwindowed, minted in one transaction.
-                let now = session.now
-                let everything = try await session.database.read { db in
-                    try Queries.trash(db, now: now)
-                }
-                let targets = everything
-                    .filter { $0.kind != .preservedOriginal }
-                    .map { SyncPurgeTarget(table: $0.kind.purgeTable, rowID: $0.id) }
-                // R2-M1: same truth bit, batch-wide — one once-synced
-                // family among the targets means the receipt must speak
-                // the sign-in road for that part of the batch.
-                var anyFamilySynced = false
-                if !synced {
-                    anyFamilySynced = try await session.database.read { db in
-                        try PurgeJanitor.anyFamilyEverSynced(db, targets: targets)
-                    }
-                }
-                try await session.runner.run { ops in
-                    _ = try ops.requestPurge(targets)
-                }
-                receipt = RecoveryPath.emptyTrashReceipt(
-                    targets.count, synced: synced, anyFamilyEverSynced: anyFamilySynced)
-            }
-            // 13j ladder B (B3): on a local-only install the cleanup IS
-            // the app's — run it now, so Delete Now means what it says the
-            // moment she reads it (never-synced families remove here; a
-            // configured chain's janitor owns the road instead).
-            await session.sweepLocalPurge()
+            receipt = try await TrashPurge.confirm(session: session, confirm)
         } catch let error as OperationError {
             lastError = TrayRefusalCopy.message(for: error)
         } catch {
-            lastError = String(describing: error)
+            // A1-MINOR-2 (13l Act 1): the other raw dump on this surface.
+            lastError = DeletionRefusal.fallback(error)
         }
     }
 

@@ -22,11 +22,17 @@
 //  `RecoveryPath` and `TrayPath` now FORWARD here, so the Mac's pins ride
 //  unmodified (the 3C parity pattern) and a rename lands once.
 //
-//  Two more things moved with the words because they are the same one
-//  brain, not chrome: the Trash-row → purge-root table mapping (whose own
-//  comment used to promise the phone "its own twin" — the drift class), and
-//  `PreservedOriginPutBack`, the read-then-place composition both recovery
-//  surfaces need.
+//  The Trash-row → purge-root table mapping moved with the words because it
+//  is the same one brain, not chrome (its own comment used to promise the
+//  phone "its own twin" — the drift class).
+//
+//  **13l Act 2 (A1-NIT-1's sibling, A1-NIT-2): the ACTS moved OUT.** The
+//  first-act cold review named the shape — a `…Copy` file carrying two
+//  `@MainActor` act compositions beside the sentences — and its disposition
+//  said they should split "when that item grows the decision layer". Item 4
+//  grew it, so `TrashPutBack`, `PreservedOriginPutBack`, `RecoveryRefusal`
+//  and `DeletionRefusal` now live in `Shared/RecoveryActs.swift` with the
+//  purge layer. This file is sentences again.
 //
 
 import Foundation
@@ -269,163 +275,6 @@ nonisolated enum RecoveryCopy {
         + "bring it back."
 }
 
-/// A recovery refusal that is not an `OperationError` — nothing was even
-/// attempted, so no operation ran to refuse it.
-enum RecoveryRefusal: Error {
-    /// A preserved original with no note recorded: placing needs somewhere
-    /// to place, and there is none.
-    case originalHasNoNote
-
-    var sentence: String {
-        switch self {
-        case .originalHasNoNote: return RecoveryCopy.originalHasNoNote
-        }
-    }
-}
-
-/// **PUT BACK — ONE DECISION, BOTH RECOVERY SURFACES** (batch 4.5b, §49's
-/// MAJOR: *`MobileTrashModel` is a near-verbatim copy of `RecoveryViewModel`
-/// and it is already drifting on day one*).
-///
-/// The drift the finding named was exactly here. Both surfaces ran the same
-/// five-road switch, but the phone read `restoreBlock`'s LANDING and said
-/// where the block went, while the Mac wrote `_ = try ops.restoreBlock(…)`
-/// and threw the answer away — so its Put back landed **silently**, and the
-/// two recovery surfaces already answered *"where did it go?"* two different
-/// ways in the same week. A shared vocabulary of sentences could not prevent
-/// that, because the divergence was in the DECISION about which sentence to
-/// say, one layer under the words batch 4 hoisted.
-///
-/// It is a HOIST, not a byte-copy: `MobileTrashModel.landingReceipt` and
-/// `.putBackReceipt` stay as forwards so the phone's pins ride unmodified
-/// (the 3C pattern), and the Mac adopts this road rather than keeping its
-/// own.
-///
-/// Refusals THROW — `OperationError` for anything an operation refused, and
-/// `RecoveryRefusal` for the one case where nothing was attempted — so each
-/// platform keeps its own voice for wording them, which is a face, not a
-/// decision.
-///
-/// **The take case discarded its answer too** (13l Act 1, A1-MAJOR-1). The
-/// hoist above fixed the BLOCK half and left the same shape one line down:
-/// `case .take: _ = try ops.restoreVariant(item.id)`, falling to the generic
-/// receipt. `restoreVariant` reports the revived take's STATUS for the same
-/// reason `restoreBlock` reports its landing, and the same drift followed —
-/// an archived take was told to her as *"Take put back."* while it landed in
-/// the archived listing. So the road now carries EVERY op's own answer out of
-/// the write, and the words are chosen after it, from one place.
-@MainActor
-enum TrashPutBack {
-    /// **What the act ANSWERED.** The ops that report where a thing went say
-    /// so here; the ones that have nothing of their own to report say `plain`.
-    /// Keeping this out of the write body is deliberate: the transaction picks
-    /// no words, and adding a kind that answers something forces a case here
-    /// rather than allowing a silent fall-through to the generic sentence —
-    /// which is exactly how both halves of this drift happened.
-    nonisolated enum Outcome: Equatable, Sendable {
-        /// `restoreBlock` names WHERE the block went (its old place, the end
-        /// of its note, or unplaced).
-        case block(Operations.BlockRestoreLanding)
-        /// `restoreVariant` names WHAT came back — active into the fan,
-        /// archived into the archived listing (the exact flip, #68(b)).
-        case take(VariantStatus)
-        /// The op reports no landing of its own.
-        case plain
-    }
-
-    /// Puts one Trash row back; returns the RECEIPT to show.
-    static func run(session: AppSession, item: Queries.TrashItem) async throws -> String {
-        // A preserved original was never DELETED — putting it back means
-        // PLACING it, which is the shared composition's job (it re-reads its
-        // landing at act time, because a listing is a projection).
-        if item.kind == .preservedOriginal {
-            guard let noteID = item.noteID else { throw RecoveryRefusal.originalHasNoNote }
-            return try await PreservedOriginPutBack.run(
-                session: session, postID: noteID, blockID: item.id)
-        }
-        let outcome = try await session.runner.run { ops -> Outcome in
-            switch item.kind {
-            case .note:
-                try ops.restoreContainer(item.id)
-                return .plain
-            case .book:
-                try ops.restoreReading(item.id)
-                return .plain
-            case .block:
-                return .block(try ops.restoreBlock(item.id))
-            case .take:
-                return .take(try ops.restoreVariant(item.id))
-            case .preservedOriginal:
-                return .plain  // handled above
-            }
-        }
-        switch outcome {
-        case .block(let landing): return RecoveryCopy.landingReceipt(landing)
-        case .take(let status): return RecoveryCopy.takeRestoredReceipt(status)
-        case .plain: return RecoveryCopy.putBackReceipt(item.kind)
-        }
-    }
-}
-
-/// **THE DELETION STORY'S REFUSALS, IN ONE HOME** (batch 4.5b — A1-18).
-///
-/// Batch 4's stated purpose was one home for the deletion vocabulary, and it
-/// hoisted the sentences above. The REFUSALS stayed behind in three separate
-/// mappings — `MobileEditorViewModel.deleteNoteRefusal`,
-/// `MobileTrashModel.refusal`, `MobileBookDetailsModel.refusal` (which the
-/// shelf's delete door borrowed) — each covering a *different subset* of
-/// `OperationError` and each falling back to a bare `String(describing:)`.
-/// So one refused act read three ways depending on which door she used, and
-/// any case none of the three had thought of reached her as a raw enum dump.
-///
-/// This is that home. Two rules it keeps:
-///
-/// - **The ACT decides the sentence, not just the error.** A sealed note
-///   refusing a *put back* and a sealed note refusing a *delete* are the same
-///   `OperationError` and want different words, so `Act` is a parameter
-///   rather than three functions with three overlapping tables.
-/// - **The fallback is a SENTENCE that still carries the technical name.**
-///   Never a bare dump (she should not read `lockedVariant` alone), and never
-///   a swallow either — a case arriving here is the signal to name it above.
-///   It deliberately claims nothing about what did or did not change: some
-///   callers are compositions, not single transactions.
-nonisolated enum DeletionRefusal {
-    /// Which door is speaking. The error is the same; the way out differs.
-    enum Act {
-        case delete
-        case putBack
-    }
-
-    static func words(_ error: Error, act: Act = .delete) -> String {
-        if let refusal = error as? RecoveryRefusal { return refusal.sentence }
-        guard let error = error as? OperationError else { return fallback(error) }
-        switch error {
-        case .lockedPost:
-            return act == .putBack
-                ? RecoveryCopy.sealedPutBackRefusal
-                : "This note is marked complete — unseal it first."
-        case .lockedReading:
-            return "This book is finished — reopen it first."
-        case .containerNotFound:
-            return "That note is already gone."
-        case .readingNotFound:
-            return "That book is already gone."
-        case .blockNotFound:
-            return "That block is already gone."
-        case .variantNotFound:
-            return "That take is already gone."
-        default:
-            return fallback(error)
-        }
-    }
-
-    /// The last resort — a sentence, with the name kept.
-    static func fallback(_ error: Error) -> String {
-        if let refusal = error as? RecoveryRefusal { return refusal.sentence }
-        return "That couldn't be done — \(String(describing: error))."
-    }
-}
-
 /// The Trash-row → purge-root table mapping. **Hoisted with the words**
 /// (round 2 batch 4): it lived beside the Mac's only renderer, and its own
 /// comment promised the phone "its own twin", which is the six-brains drift
@@ -439,40 +288,5 @@ extension Queries.TrashItem.Kind {
         case .take: return "variant"
         case .preservedOriginal: return "block"  // rides its family; no own door
         }
-    }
-}
-
-/// **The preserved original's PUT BACK, in ONE place** (13j batch 3; hoisted
-/// cross-platform at round 2 batch 4): the Mac tray's originals section, the
-/// J3 peek, and the phone's Trash are three doors onto one act, and a second
-/// copy of the composition is a second place for the landing rule to drift.
-///
-/// It is a face-level composition over `placeBlock` — the W-reversibility
-/// primitive, exactly as the ceremony's "reversible by re-pointing at A"
-/// promises — and NO operation's semantics change for it.
-///
-/// Putting a preserved original back is PLACING it, not flipping a tombstone.
-/// The landing is re-read HERE, at act time, rather than taken from a
-/// listing: a listing is a projection, and an argument read from a projection
-/// is read from a snapshot (13c R3-1's lesson, applied at the only place it
-/// can bite — the successor could have moved or gone since the panel last
-/// rendered). The recorded corner is unchanged: if it moves in the
-/// sub-millisecond window between this read and the write, `placeBlock`
-/// refuses by name and she retries.
-@MainActor
-enum PreservedOriginPutBack {
-    /// Returns the receipt; refusals throw for the caller to word.
-    static func run(
-        session: AppSession, postID: String, blockID: String
-    ) async throws -> String {
-        let landing = try await session.database.read { db in
-            try Queries.preservedOriginals(db, postID: postID)
-                .first { $0.blockID == blockID }?.landAfterBlockID
-        }
-        let insert: Operations.InsertPosition = landing.map { .after($0) } ?? .end
-        try await session.runner.run { ops in
-            _ = try ops.placeBlock(blockID, in: postID, at: insert)
-        }
-        return landing == nil ? RecoveryCopy.putBackAtEnd : RecoveryCopy.putBackBeside
     }
 }

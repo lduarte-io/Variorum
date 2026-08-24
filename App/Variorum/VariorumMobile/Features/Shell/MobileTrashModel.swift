@@ -89,12 +89,11 @@ final class MobileTrashModel {
                 now: session.now, kinds: kinds, oldestFirst: oldestFirst,
                 limit: window + 1
             ) {
-                trashTruncated = value.count > window
-                trash = trashTruncated ? Array(value.prefix(window)) : value
+                (trash, trashTruncated) = TrashListing.windowed(value, window: window)
             }
         } catch is CancellationError {
         } catch {
-            lastError = String(describing: error)
+            lastError = DeletionRefusal.fallback(error)
         }
     }
 
@@ -108,12 +107,12 @@ final class MobileTrashModel {
         do {
             let limit = window + 1
             for try await value in session.database.observeArchivedPosts(limit: limit) {
-                archivedTruncated = value.count > window
-                archived = archivedTruncated ? Array(value.prefix(window)) : value
+                (archived, archivedTruncated) = TrashListing.windowed(
+                    value, window: window)
             }
         } catch is CancellationError {
         } catch {
-            lastError = String(describing: error)
+            lastError = DeletionRefusal.fallback(error)
         }
     }
 
@@ -164,42 +163,11 @@ final class MobileTrashModel {
 
     // MARK: - True delete (IN-TRASH ONLY, confirm every time)
 
-    /// What the surface is asking her to confirm. Delete Now asks EVERY
-    /// time (her round-10 ruling — there is no don't-ask state anywhere in
-    /// the code and none may be added); Empty Trash asks once, naming the
-    /// full count by kind (round 8).
-    enum PurgeConfirm: Equatable {
-        case deleteNow(Queries.TrashItem)
-        case emptyTrash(counts: [Queries.TrashItem.Kind: Int])
-
-        var title: String {
-            switch self {
-            case .deleteNow:
-                return RecoveryCopy.deleteNowVerb
-            case .emptyTrash:
-                return RecoveryCopy.emptyTrashVerb
-            }
-        }
-
-        /// The confirm BUTTON's word, per act — the bulk door must not say
-        /// "Delete Now" over a question about emptying the whole Trash
-        /// (caught in the visual capture).
-        var confirmVerb: String {
-            switch self {
-            case .deleteNow: return RecoveryCopy.deleteNowVerb
-            case .emptyTrash: return "Empty Trash"
-            }
-        }
-
-        var message: String {
-            switch self {
-            case .deleteNow(let item):
-                return RecoveryCopy.deleteNowConfirm(item.kind)
-            case .emptyTrash(let counts):
-                return RecoveryCopy.emptyTrashConfirm(counts)
-            }
-        }
-    }
+    /// What the surface is asking her to confirm. **The type is the SHARED
+    /// one now** (13l Act 2's hoist — `TrashPurge.Confirm`, which took this
+    /// copy's two extra members with it); the alias keeps this batch's pins
+    /// riding unmodified, the 3C parity pattern.
+    typealias PurgeConfirm = TrashPurge.Confirm
 
     private(set) var pendingConfirm: PurgeConfirm?
 
@@ -229,13 +197,12 @@ final class MobileTrashModel {
         set { if !newValue { pendingConfirm = nil } }
     }
 
-    /// The per-row door: raises the confirm — never acts directly.
+    /// The per-row door: raises the confirm — never acts directly. The
+    /// original-rides-its-family belt (her round-8b ruling) is the shared
+    /// rule's.
     func requestDeleteNow(_ item: Queries.TrashItem) {
-        // A preserved original has no purge door of its own — it rides its
-        // family (her round-8b ruling). The row renders none, so this is a
-        // belt, not a face.
-        guard item.kind != .preservedOriginal else { return }
-        pendingConfirm = .deleteNow(item)
+        guard let confirm = TrashPurge.deleteNowConfirm(for: item) else { return }
+        pendingConfirm = confirm
     }
 
     /// The bulk door: reads the UNWINDOWED counts AT ASK TIME (the listing
@@ -245,17 +212,12 @@ final class MobileTrashModel {
         lastError = nil
         receipt = nil
         do {
-            let now = session.now
-            let everything = try await session.database.read { db in
-                try Queries.trash(db, now: now)
-            }
-            var counts: [Queries.TrashItem.Kind: Int] = [:]
-            for item in everything { counts[item.kind, default: 0] += 1 }
-            if counts.filter({ $0.key != .preservedOriginal }).values.reduce(0, +) == 0 {
+            guard let confirm = try await TrashPurge.emptyTrashConfirm(session: session)
+            else {
                 receipt = RecoveryCopy.emptyTrashConfirm([:])
                 return
             }
-            pendingConfirm = .emptyTrash(counts: counts)
+            pendingConfirm = confirm
         } catch {
             lastError = DeletionRefusal.fallback(error)
         }
@@ -277,52 +239,7 @@ final class MobileTrashModel {
         lastError = nil
         receipt = nil
         do {
-            let synced = session.syncConfigured()
-            switch confirm {
-            case .deleteNow(let item):
-                let target = SyncPurgeTarget(table: item.kind.purgeTable, rowID: item.id)
-                // The third population (signed OUT, with synced history):
-                // read the family's truth bit BEFORE the intent lands, so
-                // the local wording never claims a cleanup `LocalPurge`
-                // will defer forever.
-                var familySynced = false
-                if !synced {
-                    familySynced = try await session.database.read { db in
-                        try PurgeJanitor.anyFamilyEverSynced(db, targets: [target])
-                    }
-                }
-                try await session.runner.run { ops in
-                    _ = try ops.requestPurge([target])
-                }
-                receipt = RecoveryCopy.deleteNowReceipt(
-                    item.kind, synced: synced, familyEverSynced: familySynced)
-            case .emptyTrash:
-                // Re-read at ACT time (a confirm is a pause; the listing is
-                // a projection — the R3-1 lesson): everything currently in
-                // the Trash, unwindowed, minted in one transaction.
-                let now = session.now
-                let everything = try await session.database.read { db in
-                    try Queries.trash(db, now: now)
-                }
-                let targets = everything
-                    .filter { $0.kind != .preservedOriginal }
-                    .map { SyncPurgeTarget(table: $0.kind.purgeTable, rowID: $0.id) }
-                var anyFamilySynced = false
-                if !synced {
-                    anyFamilySynced = try await session.database.read { db in
-                        try PurgeJanitor.anyFamilyEverSynced(db, targets: targets)
-                    }
-                }
-                try await session.runner.run { ops in
-                    _ = try ops.requestPurge(targets)
-                }
-                receipt = RecoveryCopy.emptyTrashReceipt(
-                    targets.count, synced: synced, anyFamilyEverSynced: anyFamilySynced)
-            }
-            // On a local-only install the cleanup IS the app's — run it now,
-            // so Delete Now means what it says the moment she reads it (a
-            // configured chain's janitor owns the road instead).
-            await session.sweepLocalPurge()
+            receipt = try await TrashPurge.confirm(session: session, confirm)
         } catch {
             // A PURGE refusal, never a put-back one — the seal's way out
             // differs by act, which is why `Act` is a parameter (A1-18).
