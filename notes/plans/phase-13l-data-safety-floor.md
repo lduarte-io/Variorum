@@ -1872,16 +1872,303 @@ push. Expected starting counts: core 1350/141 · Mac 1572/272 · spine
 63/8 · mobile 485/78; the known flakes (the Phase-12 latency pin;
 `CanvasDragTrackingTests` once) — isolate before concluding.
 
+### ACT 2 — PARTIAL RECORD (seat 1) — Opus implementer, 2026-08-23/24
+
+**Why this record is partial, and it is NOT a scope judgment.** Two
+interruptions, neither about the work:
+
+1. **A transient server error (529 Overloaded) killed the session
+   mid-item-2**, between edits — it left the tree in a
+   *described-but-not-applied* state (the fix's doc comment written, the
+   behaviour still shipped-broken). The orchestrator caught it, the tree
+   was verified BY EYE on resume rather than from memory, and that state
+   turned out to be exactly the red-on-old baseline item 2 needed.
+2. **A CAST CORRECTION stopped the seat**: the author's cast for this
+   phase is Opus implementers, and the post-529 resume continued on the
+   wrong model. A fresh Opus session takes the remainder **from this
+   record**. The stop was taken at the nearest clean seam — item 3 had
+   made **zero edits** and stops as genuinely NOT STARTED, not as a
+   half-applied change.
+
+**Everything below is committed. The working tree is CLEAN, no probe or
+scratch files remain.** Four commits, in order: `b527b72` (item 2) ·
+`b0d35fa` (items 5 + 6) · `68cd28c` (item 4). *(`e2e6c6c`, `7d3a230`,
+`b862a5c` and `e5c6ceb` interleaved from the concurrent 13p planning
+session and are not this act's.)*
+
+---
+
+#### Item 2 — the dead Delete Now / Empty Trash doors · **DONE** (`b527b72`)
+
+**The settled diagnosis was RIGHT, and it was re-derived RUNNING rather
+than accepted from the page.** Three temporary probes (deleted before
+the commit; what they proved lives in the code's doc) measured on macOS
+26:
+
+- SwiftUI's `confirmationDialog` presents a real `_NSAlertPanel` sheet
+  with real `NSButton`s, reachable in process — **including from inside
+  a `List` row**, which is where `RecoveryView` applies it. **The
+  presentation hypothesis this project carried for weeks is dead**: a
+  computed `Binding(get:set:)` over an `@Observable` is immune here
+  because the title argument reads `pendingConfirm` during `body`.
+- `performClick(nil)` runs SwiftUI's action closure **and** SwiftUI's own
+  dismissal write-back in ONE turn — a faithful real press.
+- The action's `Task` resumes only after that turn yields. That is the
+  defect: `cancelPendingPurge()` had nilled the payload, and
+  `confirmPendingPurge()`'s `guard` returned. **No intent, no receipt,
+  the row still listed** — and both doors ride one host, so true delete
+  was unreachable from the UI entirely.
+
+**THE MAC PIN NEEDS NO SIMULATED STEP** — unlike the phone's
+`tapAlertAction(_:writeBack:)`, which must supply the write-back by
+hand, AppKit performs it. New suite
+**`VariorumTests/TrashConfirmEdgeTests`** (3 pins), mounting the
+SHIPPING modifier inside a `List` row:
+`pressingDeleteForGoodInTheRealDialogActuallyPurges` ·
+`pressingDeleteForGoodEmptiesTheWholeTrash` ·
+`pressingCancelInTheRealDialogWritesNothing`.
+
+**RED-ON-OLD, verified TWICE by behavioural revert — the second time
+against the FINAL pin** (the first draft lacked the bounded settle
+loop, so it was re-verified after that changed): both purge presses fail
+on the shipped shape (`receipt → nil`, `intents → 0`, the row still
+listed) while **`presented` stays TRUE** — proving the presentation half
+was never broken — and **Cancel passes on both sides**, which is the
+guard against a hollow finding.
+
+**The fix:** `View.purgeConfirmDialog(_:)` — the host extracted to a
+modifier so the RULE has somewhere to be written down and so the pin can
+drive the shipping wiring (the surface builds its own `@State` model,
+unreachable from a test). It rides `presenting:`;
+`confirmPendingPurge(_:)` takes the confirm as a parameter. The rule as
+written names **the property that matters, not a syntax**: *a binding
+setter must never clear state that an action's continuation will read
+back.*
+
+**Files:** `Variorum/Features/Library/RecoveryView.swift` ·
+`VariorumTests/TrashPurgeDoorsTests.swift`. **One recorded test edit:**
+the four existing pins now pass the confirm they had been leaving on the
+model — a no-arg road would have preserved the very read-back the defect
+lived in.
+
+#### Item 3 — the note-deletion door set · **NOT STARTED**
+
+**Zero edits. Read-only reconnaissance only**, and its findings are
+written here so the successor does not repeat them:
+
+- **The Library's delete door is `LibraryCatalogView.postRowMenu`'s
+  `Button("Delete", role: .destructive)`** → `library.delete(postID:)`
+  → `ops.deleteContainer`. No confirm, no receipt.
+- **The Pool's note rows carry the SAME door**
+  (`PoolPostsView.swift:239`), and both — plus the sidebar's Open strip —
+  render ONE grammar declared at
+  **`SidebarView.contextMenuCapabilities`**. So "one wording, both
+  doors" naturally reaches three renderers through one declaration.
+- **⌘-CLICK MULTI-SELECT ALREADY EXISTS**: `listBody` is
+  `List(selection: $selectedPosts)` and the note rows are `.tag(hit.id)`
+  — the bulk TAG menu already uses it (`selectedPosts.count > 1`). The
+  multi-delete needs the act and its confirm, **not** a selection
+  mechanism.
+- **The note ▾ menu is `CommitBar.noteMenu` AND
+  `TakesBottomBar`'s twin** — both bars declare `.showNoteTray`, so
+  `.deleteNote` wants both for R118 parity.
+- **The phone already owns the wording** —
+  `MobileEditorViewModel.deleteNoteTitle` / `.deleteNoteConfirmTitle` /
+  `.deleteNoteConfirmDetail` (`RecoveryCopy.moveToTrashDetail(.note)`)
+  and `RecoveryCopy.movedToTrashReceipt(.note)`. `RecoveryCopy`'s own
+  comment already says these were *"born shared because the phone built
+  the doors first and the Mac's 13l work will want the same words"*.
+  **The Mac cannot import a `VariorumMobile` file**, so the two title
+  constants need hoisting into `Shared/RecoveryCopy.swift` with the
+  phone forwarding (MobileSoul §3: a Mac phase touching a brain hoists
+  it then). The plural forms (count-naming confirm + one receipt) are
+  new copy.
+- **Registry shape considered, not built:** `.deleteNote` (scope
+  `.post`, doors `[.bottomBar, .contextMenu]`, availability
+  `noteScoped` — the row doors carry their own target, the standing
+  `.toggleStar` split); `.deleteSelectedNotes` (scope `.app`, door
+  `[.surface]`) **needs a new `CapabilityContext` field** (a
+  `selectedNoteCount`, the `openNoteCount`/`canOpenBeside` family) **and
+  a matching sampled context in `CapabilityRegistryTests`**, or
+  `noActIsUnavailableInEveryContext` cannot see it act.
+- **`MobileEditorViewModel.deleteNoteRefusal` is the FOURTH private
+  refusal table** A1-18 named, still falling to a raw
+  `String(describing:)`. Out of item 4's named scope (a mobile file);
+  **deferred out loud** — it is a two-line forward to
+  `DeletionRefusal.words` whenever a session is legitimately in that
+  file.
+
+#### Item 4 — the decision-layer hoist (+ its grown scope) · **DONE** (`68cd28c`)
+
+**New `App/Variorum/Shared/RecoveryActs.swift`.** What is shared is the
+DECISION, not the state or the voice — `@MainActor` statics over
+`AppSession`, the shape `TrashPutBack` established:
+
+- **`TrashPurge`** — `Confirm` (ONE type now; each model keeps a
+  `typealias PurgeConfirm` so both suites ride unmodified — the 3C
+  pattern; the phone's copy had grown `title`/`confirmVerb` the Mac's
+  had not) · `deleteNowConfirm(for:)` (the originals-ride-their-family
+  belt, round 8b) · `emptyTrashConfirm(session:)` (the unwindowed
+  ask-time read; `nil` = nothing to purge) · `confirm(session:_:)` (the
+  act: the three receipt populations read BEFORE the intent lands, the
+  intent write, then the local sweep).
+- **`TrashListing.windowed(_:window:)`** — the +1 probe rule both
+  listings ran privately, and whose bug (forgetting to DROP the probe
+  row) is silent.
+- **A1-NIT-2:** `TrashPutBack`, `PreservedOriginPutBack`,
+  `RecoveryRefusal` and `DeletionRefusal` moved OUT of
+  `RecoveryCopy.swift` — its disposition said *"when that item grows the
+  decision layer"*, and this was that item. The Copy file is sentences
+  again.
+- **A1-MINOR-2:** the four raw `String(describing:)` catches (both
+  observation starters, `requestEmptyTrash`, `confirmPendingPurge`) now
+  route through `DeletionRefusal`.
+- **A1-NIT-1:** the "already BACK" family
+  (`containerNotDeleted`/`readingNotDeleted`/`blockNotDeleted`/`variantNotDeleted`,
+  plus `purgeTargetNotDeleted`) joins `DeletionRefusal.words` — the
+  ordinary double-press race.
+
+**Pins:** new suite **`VariorumTests/TrashPurgeSharedLayerTests`** (4):
+`bothSurfacesConfirmTypeIsTheSharedOne` ·
+`theWindowDropsItsProbeRowAndSaysSo` ·
+`theAlreadyBackFamilySpeaksInsteadOfNamingItsEnumCase` ·
+`theSurfacesErrorSlotNeverCarriesARawDump`.
+**RED-ON-OLD** for A1-NIT-1 verified by behavioural revert: *"That
+couldn't be done — containerNotDeleted(id: "x")."* The other three are
+coverage/parity pins, green on HEAD by design and stated as such. **The
+hoist's parity proof:** no mobile test file was touched and both targets
+build — the honest half of that claim ("no COVERED behaviour changed")
+is why the pins assert the rules where they now live.
+
+**`daysLeft` deliberately NOT hoisted** and it is not an omission: both
+models' bodies are already a one-line forward to the shared
+`TrashWindow.daysLeft`, so a hoist would add a layer and remove nothing.
+
+#### Item 5 — the pool/scraps honesty check · **DONE, AND IT WAS NOT CLEAN** (`b0d35fa`)
+
+**What the check found:**
+
+- **A deleted POOL CONTAINER is unreachable, so it cannot be
+  mis-named** — `Queries.trash`'s note arm is fenced to `kind = 'post'`,
+  and **no door in either app deletes a pool** (`deleteContainer`'s only
+  Mac caller is `LibraryViewModel.delete(postID:)`, reached from the
+  Library's and the Pool's rows, both of which list `kind='post'` hits —
+  the surface named "Pool" holds BOOKLESS NOTES, R29). Now a pin rather
+  than an assumption.
+- **A deleted SCRAP is reachable, and the face called its pool a note
+  three ways** — all three fixed: the row named the home through
+  `DisplayTitle.note`, so a nameless pool read **"Untitled"** where
+  every other surface shows its created day (13k K2, *her own ruling*);
+  the row's door said **"Open note"**; and it routed `.post`, opening a
+  pool as a note pane. `putBackHelp`'s *"in its note"* went with them.
+
+**Pins:** new suite **`VariorumTests/TrashPoolHonestyTests`** (2) —
+`aDeletedScrapNamesItsScrapsAreaAndOpensThere` ·
+`noDoorPutsAPoolContainerInTheTrash`. **RED-ON-OLD** by behavioural
+revert of the two pool arms: `"Untitled"`, as shipped.
+
+**How, without touching `Sources/`:** the live pools are read on the
+FACE, riding the Trash's own observation — pools are structurally few
+(the Blocks area creates ONE and reuses it), the read is
+`deleted_at IS NULL`-bounded, and the Trash is a summoned surface, never
+a keystroke road. `RecoveryView` gained an optional `openPool` route
+(`RootView` passes `.pool(id)`; nil falls back to the pre-13l
+behaviour).
+
+> **🔴 RECORDED, NOT FIXED — and it needs `Sources/`, which this batch
+> is fenced out of.** The SHARED put-back receipts still say *"note"*
+> for a scrap: `RecoveryCopy.putBackAtEnd` (*"Put back at the end of
+> this note."*) and `.putBackUnplaced` (*"…its note is gone…"*).
+> Making them kind-aware requires `restoreBlock`'s landing (or the Trash
+> query) to report its container's KIND. **Rewording them
+> kind-agnostically would be worse**, not better: virtually every block
+> IS in a note, and *"at the end of this note"* is the better sentence
+> for that case. **Owner: this phase** (a later act may take it with a
+> `Sources/Queries` change at the orchestrator's word) **or 13u**, whose
+> item 5 is already the both-platform copy family.
+
+#### Item 6 — remove the left-margin comment ＋ · **DONE** (`b0d35fa`)
+
+13e E7's hover invitation is gone from `BlockDecor`
+(`renderAddChip`, `addChip`, `addChipBlockID`, `addChipSize`,
+`leftAddChipRect`, both call sites, the uninstall lines). **Removal
+only, per her wording:** the margin CARD and its narrow-gutter badge
+stay (a block with comments shows them, and they are the same door), so
+do the inline strip, the block menu, ⌘⇧', and the panel.
+
+**One deliberate extra, recorded rather than silent:** E7 had WIDENED
+the hover-tracking install condition from *"a drop door"* to *"a drop
+door or a comments door"* solely for this chip. With the chip gone that
+arm had no consumer, so it narrows back to `onMoveBlock != nil` —
+production-identical, which **E7's own comment recorded** (*"every
+production controller has both or neither"*), and the drag handle's
+reveal is asserted in the new pin so the shared tracking is proven
+intact.
+
+**Pin:** `MarginHoverCommentTests
+.hoveringAnUncommentedBlockOffersNoMarginPlus` (the suite renamed —
+*"The margin's comment faces (13e E7 · 13l 8c)"*). **RED-ON-OLD by
+construction**: E7's three pins asserted the exact opposite of every
+line in it, and they are gone with the door. Two other pins had their
+chip sections removed with an in-place note (`everyMarginCommentFaceSitsLeftOfTheText`'s
+third face; `CalmPageHoverTests`' invitation assertions — its drag-handle
+half, which is the bug that pin was written for, is untouched).
+
+---
+
+#### Verification at the stop
+
+**Targeted suites for everything touched — ALL GREEN.** Mac:
+`TrashConfirmEdgeTests` · `TrashPurgeDoorsTests` ·
+`TrashPurgeSharedLayerTests` · `TrashSurfaceTests` ·
+`TrashPoolHonestyTests` · `MarginHoverCommentTests` ·
+`CalmPageHoverTests` · `LibraryTagFaceTests` · `RecoveryDoorsTests` ·
+`CapabilityRegistryTests` — **79 tests in 10 suites passed**. Mobile:
+`MobileTrashTests` + `MobileDeletionTests` — **25 tests in 2 suites
+passed** (the 2 recorded issues are that suite's own `withKnownIssue`,
+exactly as the Act-1 record describes). Both targets
+`build-for-testing` clean.
+
+**THE FULL GATES ARE THE SUCCESSOR'S** (`Shared/` was touched, so all
+four are owed at batch end: core · Mac full · Mac spine · mobile full).
+**Expected movement to reconcile against:** Mac **1572 → 1581**
+(+3 `TrashConfirmEdgeTests`, +4 `TrashPurgeSharedLayerTests`,
++2 `TrashPoolHonestyTests`; the margin work is net-neutral in count —
+three E7 pins removed, one added, and two more edited in place — so
+1581 is the number to expect **before** item 3 adds any). Suite count
+**272 → 275** (three new suites). Core **1350/141** and the spine
+**63/8** are untouched by construction (zero `Sources/` lines). Mobile
+**485/78** unchanged (no mobile test file touched — the hoist's parity
+proof).
+
+**Known flakes: neither appeared.** The Phase-12 latency pin
+(`EditorWindowSmokeTests/rewriteStrategyLatencies`) and
+`CanvasDragTrackingTests` were not in any run here; the recorded
+disposition stands — a second `CanvasDragTrackingTests` red anywhere in
+this phase promotes it to a `KnownIssues` row (owner 12).
+
+**Sequencing note the brief asked for:** item 2's fix landed BEFORE the
+item-4 hoist, deliberately. The hoist rewrites `confirmPendingPurge`'s
+body, so fixing the confirm→act edge first meant the hoist inherited a
+correct method instead of relocating a broken one — and it keeps the
+red-on-old evidence attached to a small, readable diff.
+
+**Fences held:** zero `Sources/` lines · zero
+`Sources/VariorumCore/Sync/` lines · zero schema · 13u's editor seam
+untouched (no refusal wording, no `planVisibleTakeEdit`, no gap-fence
+face) · no shelf-book multi-select · nothing pushed · every commit
+staged by explicit path.
+
 ### THE LEDGER (every row owned; statuses updated as they move)
 
 | # | item | strand | status |
 |---|---|---|---|
 | 1 | The first-act Fable cold review (mobile round's Mac diff + 4.5b) | 3 | **review returned (1 MAJOR · 2 MINOR · 2 NIT + clean bill); FIX ROUND LANDED 2026-08-23 — A1-MAJOR-1 fixed with red-on-old pins on BOTH platforms, A1-MINOR-1's two Mac coverage pins in (record above); all four gates green; the other three findings sit in item 4; **ROUND 2 CLEAN — LADDER CLOSED** (zero findings; full Mac suite independently confirmed 1572/272). Orchestrator verification of the dead session's claims: commit `64ffd1a` exists, six files exactly (zero `Sources/`), all four claimed pin names present in the tree. **The one-off `CanvasDragTrackingTests` first-run red — architect's disposition: plan-record only, NO KnownIssues row yet** (isolated 2/2 green + full re-run fully green, diff cannot reach canvas; the gesture-timing flake family). **If it reds again anywhere in this phase it earns the row** (owner 12, beside the latency-pin calibration) — recorded so the next red is a promotion, not a re-derivation** |
-| 2 | The dead Delete Now / Empty Trash doors (pin-first at the real surface) | 2 | open |
-| 3 | The note-deletion door set: Delete Note… (note ▾, confirm) · Library door confirm · ⌘-click multi-select + delete-all | 1 (§8) | open |
-| 4 | The remaining decision-layer hoist (`RecoveryViewModel` ↔ `MobileTrashModel`) — **scope grew at Act 1: + the four raw-error catches through `DeletionRefusal.fallback` (A1-MINOR-2) · + the `*NotDeleted` family in the shared home (A1-NIT-1) · + split the act compositions out of `RecoveryCopy` when the layer grows (A1-NIT-2)** | 2 | open |
-| 5 | Pool/scraps deletion honesty check (§8b) | 1 | open |
-| 6 | Remove the left-margin comment ＋ (§8c, removal only) | 1 | open |
+| 2 | The dead Delete Now / Empty Trash doors (pin-first at the real surface) | 2 | **DONE (Act 2 seat 1, `b527b72`)** — the confirm→act edge fixed with `presenting:`; the diagnosis re-derived RUNNING (the presentation hypothesis is dead — it presents fine, incl. inside a `List`); `TrashConfirmEdgeTests` presses the REAL `_NSAlertPanel` button with **no simulated step**; red-on-old verified twice by behavioural revert, the second time against the final pin |
+| 3 | The note-deletion door set: Delete Note… (note ▾, confirm) · Library door confirm · ⌘-click multi-select + delete-all | 1 (§8) | **NOT STARTED — zero edits** (Act 2 seat 1 stopped at the cast correction). Its reconnaissance IS recorded in the partial record above: the three renderers share ONE declaration (`SidebarView.contextMenuCapabilities`), ⌘-click multi-select ALREADY EXISTS (`List(selection:)` — the bulk tag menu uses it), the phone owns the wording and it needs hoisting into `Shared/RecoveryCopy.swift`, and `.deleteSelectedNotes` needs a new `CapabilityContext` field + a sampled context or the walk cannot see it act |
+| 4 | The remaining decision-layer hoist (`RecoveryViewModel` ↔ `MobileTrashModel`) — **scope grew at Act 1: + the four raw-error catches through `DeletionRefusal.fallback` (A1-MINOR-2) · + the `*NotDeleted` family in the shared home (A1-NIT-1) · + split the act compositions out of `RecoveryCopy` when the layer grows (A1-NIT-2)** | 2 | **DONE (Act 2 seat 1, `68cd28c`)** — `Shared/RecoveryActs.swift` born: `TrashPurge` (ONE `Confirm` type behind a typealias on each model) + `TrashListing.windowed`; all three routed findings landed; `TrashPurgeSharedLayerTests` (4 pins), A1-NIT-1 red-on-old by revert. `daysLeft` deliberately NOT hoisted (already a one-line forward to core) |
+| 5 | Pool/scraps deletion honesty check (§8b) | 1 | **DONE — AND IT WAS NOT CLEAN (Act 2 seat 1, `b0d35fa`)**. A pool CONTAINER is unreachable (pinned), but a deleted SCRAP's face called its pool a note three ways — the home's display brain, the "Open note" label, and `.post` routing — all fixed on the face, `TrashPoolHonestyTests`, red-on-old by revert ("Untitled"). **ONE RESIDUAL RECORDED, NOT FIXED:** the shared put-back receipts still say "note" for a scrap — it needs the landing to report its container's kind, i.e. `Sources/`, which Act 2 is fenced out of |
+| 6 | Remove the left-margin comment ＋ (§8c, removal only) | 1 | **DONE (Act 2 seat 1, `b0d35fa`)** — 13e E7's hover ＋ gone from both margins; card, badge, inline strip, block menu, ⌘⇧' and the panel untouched; E7's now-consumerless hover-tracking widening narrowed back with the drag handle's reveal pinned intact. Red-on-old by construction (E7's three pins asserted the opposite) |
 | 7 | **L-a** identity-projection audit: hoist + Mac wiring + Mac red-on-old + the empty-entry hole | 4 | open |
 | 8 | **L-b** `QuickEntryBar` text destruction on refusal | 4 | open |
 | 9 | **L-c** `AppBootstrap` off-main migrations (`.opening` state, both roots) | 4 | open |
