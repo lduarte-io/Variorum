@@ -52,6 +52,16 @@ THAT SECTION WINS (it is canon; this is choreography).
 - **Item 1 — pane stability** ("the big one"): trace-first discipline —
   the TK2 geometry family (TEXTKIT2 §2) is the SUSPECT, not the
   verdict; the sitting sets the acceptance bar ("judged by her hands").
+  **A CAPTURED LEAD ARRIVES FROM 13l's recovery walk (2026-08-24,
+  ladder finding LR-MINOR-4's routing):** the app HUNG at 100% CPU in
+  Takes mode (margin-grid, takes panel open) — clicks, menus and the
+  AX tree all dead; the `sample` shows the main thread in SwiftUI
+  lazy layout with `PaneSurfaceRepresentable.updateNSView`
+  RE-ENTERING (`PaneSurface.swift:832`). One occurrence, unreproduced,
+  candidate mechanism honestly unproven — the capture is
+  `notes/plans/phase-13l-act7-screens/hang-sample-takes-margin-grid.txt`
+  (gitignored dir on the machine) and the 13l plan's Act 7 record has
+  the context. Start item 1's trace here rather than blind.
 - **Item 5 — cross-block edits**: the semantics are ALREADY RULED
   (refusals open; edge-join merges mid-paragraph, not at a paragraph
   break; the fanned case ruled — fanned MIDDLE deletes whole to the
