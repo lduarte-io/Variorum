@@ -336,8 +336,55 @@ what's-leaving of a note → the tray's leaving section. The two
 threads tied at this sweep: **BOOKS never archive by schema fact**
 (`reading` has no `archived_at` — a book's set-aside is FINISH, its
 end is Delete; consistent, and the Archive surface being notes-only
-already said so), and the **whole-note-history brief** is annotated
+already said so — **her ninth-sitting note, recorded:** *"when I do my
+future sitting on books I might add the ability to archive them but
+I'll handle that later if I do … if I do change it, the schema would
+change, but that's a later issue that i'm not handling soon"*), and the **whole-note-history brief** is annotated
 at closeout (row 13) as fulfilled-in-manual by this design.
+
+## THE LIFECYCLE TABLE (her ninth-sitting deliverable — the post-round truth, grain-ordered; EVERY row is verified and marked *completed* at the round's close; two found-items beneath it)
+
+*Scope note: placement moves (reorder, move-to-scraps, pool-drag) are
+ordinary reversible editing, not past-creating — excluded by design.*
+
+| # | Grain | Action | Where you act (doors) | Where the result lives | The result's capabilities | Status |
+|---|---|---|---|---|---|---|
+| T1 | take | Commit (savepoint) | ⌘S in the bottom chrome + the six quiet occasions | this take's savepoint run in **Block History** | restore-to-buffer (append-only; ⌘S ones never pruned) | pending |
+| T2 | take | Branch / new blank take | take card + growth doors | the fan, live | full editing; choosable | pending |
+| T3 | take | Choose ✓ | take card / board | the pointer (the note shows it everywhere) | re-choose anytime | pending |
+| T4 | take | Label · Lock | take ⋯ | on the take | unlock; edit-by-branch while locked | pending |
+| T5 | take | Archive | take ⋯ (Write panel + Takes mode, uniform per row 14) | **Block History → archived takes** — never global | Unarchive; Delete | pending |
+| T6 | take | Delete | take ⋯ + the archived row's Delete | **Block History → deleted takes** (clock shown) + the note-level trash's collapsed takes disclosure (the note-scoped AUDIT lens, row 20) — **never the global Trash** | Put back (status-aware receipt); **Delete Now** (note-level trash only); expires at 30 days (Empty Trash never touches it) | pending |
+| B1 | block | Archive | Block menu + every door that offers Delete (row 14) | **the note's tray only** — forever, no clock, never global | Put back (returns where it stood) | pending |
+| B2 | block | Delete | Block menu · ⋯/row menus · ⌘-click multi · editor gestures | the note's tray (leaving section) + **the global Trash, grouped under its note** (row 22) | Put back (where it was); Delete Now; its takes ride the family BOTH directions | pending |
+| B3 | block | Divide (duplicating default / the ceremony) | editor gestures + doors | successors in place; **the preserved ORIGINAL → lineage only** (each successor's Block History came-from) | the original: ONE-BUTTON restore (`placeBlock`); joins tray-leaving + Trash when its family dies (8b nets); plain single-take divide releases NO original (in-place) | pending |
+| B4 | block | Merge (carry-all default / pairing ceremony) | editor doors | merged block in place; **ALL N parents → lineage** (came-from, N-way) | per-parent restore button; family clock as B3 | pending |
+| B5 | block | Extract | the selection gesture | new block adjacent; the source SURVIVES in place | ordinary blocks; the lineage edge shows derivation | pending |
+| N1 | note | **Save a Version** | ⌘⇧S + its door | **Note ▸ Versions only** — born archived + SEALED; hidden from Library, Archive, and every global search | open/read; RESTORE; PROMOTE (→ a new first-class note); Delete (→ the Trash, grouped under its note — **FOUND-ITEM 1, derived, pending her ratify**) | pending |
+| N2 | note | Restore a version | the Versions listing | **the note becomes its past** — same identity, books, memberships; the outgoing blocks take the Delete Now road (no Trash noise); a fresh version of "now" appears first | fully repeatable — restore the restore | pending |
+| N3 | note | Archive | Library/note doors (**FOUND-ITEM 2:** the registry pass verifies a clear door exists) | **the Archived sidebar surface** + its own search | edit in place (it is a WORK); Unarchive → Library; Delete → Trash; **never rides any deletion** | pending |
+| N4 | note | Delete | note ▾ · Library · ⌘-click multi | **the Trash**, 30 days — its blocks and takes as family, its VERSIONS riding with it | Put back (family + versions whole); Delete Now; Empty Trash takes it (it is rowed) | pending |
+| N5 | note | Seal (complete) | note doors | in place, frozen (auto-commits first) | unseal; everything content-level refuses under it | pending |
+| N6 | note | Duplicate as version (live fork) | the compare/version doors | **the Library, first-class** + the `version_of` link for Compare | everything; archived-later = a WORK, never version history | pending |
+| K1 | book | Finish (lock) | shelf/book doors | the shelf, finished | unfinish; structure frozen while finished | pending |
+| K2 | book | Delete | shelf/book doors | **the Trash** (book rows) | Put back (`restoreReading` — chapters + memberships revive); Delete Now; member notes are NOT deleted (membership is pointers) | pending |
+| K3 | book | Archive | **— does not exist** (schema fact; a book's set-aside IS Finish) | — | her recorded future-maybe (V9): a books sitting may add it — schema change, deliberately later | standing fact |
+
+**FOUND-ITEM 1 (the table's catch — derived by the design's own rules,
+needs her ratify):** deleting ONE version from the listing. Versions
+hide from global surfaces *while archived-alive* — but a DELETED
+version is ON THE CLOCK, and the Trash is the deadline surface that
+shows what's leaving, whatever it was. So: **a deleted version rows in
+the Trash, grouped under its note, honestly labeled; Put back returns
+it to the Versions listing.** (The instant-hard-delete alternative was
+weighed and declined by derivation: a version's moment is
+UNRECAPTURABLE — unlike the restore's outgoing blocks, which had just
+been saved — so the 30-day regret net applies.)
+
+**FOUND-ITEM 2:** the archive-a-note door's home has never been
+walked — the round's registry pass verifies one clear door exists
+(the Library row menu is the natural candidate) and that its receipt
+names the Archived surface.
 
 ## Constraints
 
