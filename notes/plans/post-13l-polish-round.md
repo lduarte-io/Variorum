@@ -176,7 +176,7 @@ plus the archive/trash separation are expected to dissolve it.
 | 10 | C2 the side-panel lineage view, ALL originals | open |
 | 11 | D1 takes nested under context-parent block rows | open |
 | 12 | D2 the lesson edits + spine re-pins + her-store re-seed at closeout | open |
-| 13 | Closeout ritual: records · canonical deltas as ruled · MobileSoul parity notes (C2 mobile shape; PL-11's tray face follows C1's ruled shape) · QUESTIONS for any PROVISIONAL · the running-order row closed | open |
+| 13 | Closeout ritual: records · canonical deltas as ruled · MobileSoul parity notes (C2 mobile shape; PL-11's tray face follows C1's ruled shape; a Note ▸ Versions phone-face note) · QUESTIONS for any PROVISIONAL · the running-order row closed · **annotate `notes/plans/whole-note-history-brief.md`** (its manual half is FULFILLED by V-family; its automated future = her floated auto-rotating versions, feeding the same listing) · **🔴 HER INSTRUCTION (eighth sitting, verbatim-faithful): AT CLOSEOUT — AND ONLY AT CLOSEOUT, "not earlier in the process, so I don't burn tokens on every message by loading it first" — read `notes/MobileSoul.md` and UPDATE the mobile round's BATCH 6 plans** (the per-note tray · deleted takes/History past · archive doors · the lineage door · the guide's deletion chapter) **to the design this round built** — the tray panel + leaving section, the Block History pane, takes-never-global, the five-places map — so mobile inherits the ruled design and never builds the mid-design (*"It's really good we got such a strong design done before a mid design had propagated to mobile"*) | open |
 | 14 | **F1 — ARCHIVE RIDES BESIDE DELETE AT EVERY BLOCK DOOR** (her second morning report, 2026-08-24 — later softened: *"no, I see archive there too"*, so this is a VERIFICATION pass, not a rescue). The menu BAR's Block menu pairs them adjacently (13j's letter — verified in `EditorCommands.swift`); the pass confirms every OTHER door that offers a block Delete without the Archive twin (context/row menus — enumerate via the registry, the door-set is checkable). Same pass verifies the TAKE-card menus: Write's panel ⋯ carries Archive · Label · Lock · Delete (verified) — Takes mode's card grammar must match. **Context for the builder: the 13l walk's P-6 sentence ("the only door that deletes a take is inside the archived strip") is OVERSTATED — active take cards carry Delete; do not build against P-6's wording.** Her open musing, verbatim, for the round's checkpoint — *"I don't even know if we need take archiving if I'm not seeing it right now?"* — with the architect's recommendation recorded: KEEP the capability (her own morning argument — archive is forever-valuable and distinct from the clock — applies to takes exactly; the model's I10-rescue and pool-copy semantics also mint archived states), FIX the doors; retiring it is hers to rule if the fixed doors still don't earn it | open |
 | 15 | **F2 — RESOLVED BY HER OWN SECOND LOOK, folded into 17:** she FOUND the deleted take in the block's History past region (*"I actually do see the deleted take in history"*) — not a data bug; a DOOR-PLACEMENT problem (*"it's unclear that history is under Note, that makes it seem like the Note's history"*). No Trash-side trace owed (takes leave the Trash by D1-revised anyway). Row 17 is the fix | **resolved → 17** |
 | 16 | **G1 — THE WHOLE-NOTE VERSIONS DOOR (her ruling: "yes, in this round").** Her floated shape, adopted: *"an easy door would be to make a copy of the note, archive it, and then let you look through the archived copies made at points in time - not automated, but an easy door for people who want to save the whole note as it is."* **COMPOSE, don't build:** "Save a copy of this note as it is" = `duplicateAsVersion` (exists; mints the `version_of` edge) + note archive (exists) → a **"Versions of this note"** listing (dated, openable, restorable-by-copy) driven by the `version_of` lineage — one query, zero schema, zero new concepts. The copies also appear under the Archived-notes surface (B2) as ordinary archived notes. **`notes/plans/whole-note-history-brief.md` is the AUTOMATED future that later fills this same listing — read it so the manual door's shape doesn't foreclose it.** This is the round's headline: the Google-Docs answer ("my whole note at this point in time"), which her holistic worry named as the one thing people will conclude is missing | open |
@@ -275,11 +275,21 @@ container ever crosses the live/version line during a restore; the
 classifier never strains. **TWO ROADS, distinct meanings:** RESTORE =
 the note becomes its past (identity kept, always saves first) ·
 PROMOTE = unarchive(+unseal) a version — the past becomes a NEW
-first-class note (a fork, her "work with it" road). **Design detail
-flagged for the build, not solved here:** step 2's block mechanics —
-the outgoing live blocks are preserved inside the just-saved version,
-but their rows must leave without noising the Trash on every restore;
-the round designs the quiet shape within S2's letter.
+first-class note (a fork, her "work with it" road). **Step 2's block mechanics — RULED (author, eighth sitting):**
+*"since the whole note is being saved as a version at that moment
+right before restore, it's fine to just instantly hard delete those
+remaining blocks - … there's no loss risk, and it doesn't really
+make that much sense to not hard delete those blocks."* **The
+S2-safe implementation of her ruling, stated so nobody writes a raw
+row DELETE and breaks sync:** the outgoing blocks take the DELETE
+NOW road in the restore's own transaction — tombstone + purge
+intent per family — which is exactly "instant hard delete" as the
+system means it: **gone from every surface immediately** (the
+intent's read-side fence already hides intented rows from the Trash,
+the tray, everything), physically removed on the janitor's ordinary
+horizon (effectively at once on a single-device account). Zero new
+machinery; the purge memo's honest unreachable-until-swept sentence
+covers the interval as it covers every Delete Now.
 
 **V4b — VERSIONS ARE BORN SEALED AS WELL AS BORN ARCHIVED (her
 seventh-sitting question "can archived notes be edited?" — answer:
@@ -316,6 +326,18 @@ originals — in the Trash on one clock (the 13j 8b move + receipt),
 and Put back of any descendant reads the originals back to
 lineage-held automatically (the fences are read-side; the road is
 symmetric and self-healing).
+
+**V9 — The one-home completeness sweep (her closing question,
+answered YES with two threads tied):** every grain now has exactly
+one findable home — takes → Block History · blocks → the note's
+tray (+ the Trash while leaving) · originals → lineage until clocked
+· notes → Library/Archive/Trash · a note's moments → Versions ·
+what's-leaving of a note → the tray's leaving section. The two
+threads tied at this sweep: **BOOKS never archive by schema fact**
+(`reading` has no `archived_at` — a book's set-aside is FINISH, its
+end is Delete; consistent, and the Archive surface being notes-only
+already said so), and the **whole-note-history brief** is annotated
+at closeout (row 13) as fulfilled-in-manual by this design.
 
 ## Constraints
 
