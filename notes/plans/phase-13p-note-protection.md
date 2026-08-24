@@ -159,6 +159,23 @@ provisional; the kickoff sitting rules only the OPEN KNOTS section.
   Batch 4 as already planned. The 13l passphrase/recovery SANITY CHECK
   stays in 13l (her same message) — independent machinery, live
   forget-risk today.
+- **R13p-15 — A BATCH-1 DECISION FLAGGED FROM 13l (the 13l architect,
+  2026-08-24 — surfaced by the author's own question about the regret
+  road under encryption): THE PLAINTEXT BACKUP RETENTION TAIL.** 13l
+  ships a second backup destination with ~6 weeks of retention (14
+  dailies + 4 weeklies, her picked folder — likely iCloud-synced).
+  When 13p's migration encrypts the store and `backup(to:)` starts
+  writing ciphertext, **the pre-13p PLAINTEXT backups keep sitting in
+  BOTH destinations until rotation expires them — up to ~6 weeks of
+  readable prose outliving the encryption flip**, and longer under
+  Time Machine/external snapshots (outside our retention entirely).
+  Batch 1 / the kickoff decides: age-out-with-disclosure (13l's M6
+  framing already generalizes — "older backups are plaintext until
+  rotation") vs a deliberate rotate/delete-old-backups offer at
+  migration. The zero-plaintext acceptance pins the FRESH backup
+  either way; this decision is about the TAIL. *(Numbered as a
+  ruling-slot placeholder, not a ruling — it is a flagged decision,
+  the planning agent may re-home it to the open knots.)*
 
 ## NON-GOALS (named so they stay declined, not forgotten)
 
