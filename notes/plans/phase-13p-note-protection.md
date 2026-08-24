@@ -18,17 +18,21 @@ both-platform phase by construction — mobile's deliverable is named INSIDE
 it, §6's "design together" class); `notes/plans/note-protection-design-note.md`
 **as history** — its shapes A/B framing is SUPERSEDED by this plan's
 constitution (the note's own tail says so); `notes/plans/phase-13l-data-safety-floor.md`'s
-closeout (13l built the app lock and the backup/restore drill this phase
-upgrades — read what actually shipped, not what was planned).
+closeout (13l built the backup/restore drill this phase upgrades and the
+passphrase sanity-check face Batch 2 composes with — and the app lock did
+NOT ship there: it moved HERE unbuilt, R13p-14 — read what actually
+shipped, not what was planned).
 
-**What changed vs. the master plan's 13p row:** the row (and the design
-note) describe a shape-A→shape-B destination. The author's 2026-08-23/24
-conversation RULED a different destination — whole-store encryption as the
-substrate, per-note locks as access-gate faces, shape B retired to a named
-non-goal. The row was deliberately NOT edited on 2026-08-24 (the live 13l
-session owns the master plan file until its closeout); **this kickoff's
-first act is reconciling the 13p row to this plan** (a pointer sentence, not
-a rewrite — this file stays the binding record).
+**What changed vs. the master plan's 13p row:** the row's BODY (and the
+design note) describe a shape-A→shape-B destination. The author's
+2026-08-23/24 conversation RULED a different destination — whole-store
+encryption as the substrate, per-note locks as access-gate faces, shape B
+retired to a named non-goal. The row now carries a **POINTER RIDER**
+(added 2026-08-24, mid-13l, alongside the app-lock move) saying exactly
+that and "Read the PLAN, not this row"; the row's old body text was
+deliberately left standing under it. **This kickoff's first act is the
+full reconciliation of the 13p row to this plan** — replace the stale
+body, keep the rider's spirit (this file stays the binding record).
 
 First acts, in order: (1) reconcile the master-plan row as above;
 (2) verify the starting state (suites green at the then-current closeout
@@ -255,7 +259,10 @@ they all start after the stack exists. Re-lock (Locked-down dial): tear
 down observations, close the pool, drop key material; reopening rebuilds
 the stack through the composition root (this teardown/rebuild is real
 engineering and gets its own tests — ValueObservation lifecycles must not
-outlive the pool).
+outlive the pool). A **manual Lock Now act** (menu item + keybind; the
+phone twin) exists in the DEMANDED modes only — under Auto it would be
+theater (the key auto-releases at the next open), and R13p-14's whole
+point is that no theater ships.
 
 **The one-time migration** (existing stores): export-to-temp via
 `sqlcipher_export()` into a KEYED destination → verify the temp opens and
@@ -341,8 +348,12 @@ applies to it.
 Passphrase + recovery-phrase wraps (14b machinery reused; one secret,
 R13p-4); the escrow item + its dial (R13p-6); the three at-open modes
 (R13p-5) incl. the locked lobby and the deferred-start of
-sync/bridge/janitor; re-lock policy with the teardown/rebuild tests;
-reminder checks (R13p-9); the reset door (biometric-confirmed re-wrap,
+sync/bridge/janitor; re-lock policy with the teardown/rebuild tests, plus
+the manual Lock Now act (demanded modes only — see THE DESIGN); reminder
+checks (R13p-9 — compose with, likely reuse, 13l's shipped passphrase
+sanity-check face: the reminder is that same read-only unwrap attempt on
+a cadence, so one face should serve both rather than two faces teaching
+one act); the reset door (biometric-confirmed re-wrap,
 red-pinned: the old wrap must stop unwrapping); the Standard/Locked-down
 presets as dial-setters (R13p-7); settings copy in the honesty grammar
 (each mode says exactly what it does and does not protect). *(Amended
@@ -430,10 +441,15 @@ phone install (the standing ritual).
    one gate; nothing stacks in front of it. *(The knot's original
    text described 13l shipping the lock first under its
    plaintext-era fallback ruling; that never happened. Kept struck
-   as the record of why R13p-14 exists. What MIGHT remain for the
-   sitting, the planning agent's call: whether a re-lock-while-open
-   presence dial needs anything beyond R13p-7's existing re-lock
-   policy — likely nothing.)*
+   as the record of why R13p-14 exists. The residual it left — whether
+   the presence case needs anything beyond R13p-7's re-lock policy —
+   was RESOLVED by the planning agent's review pass, 2026-08-24:
+   NOTHING remains for the sitting. The re-lock dial (sleep / screen
+   lock / idle) covers unattended presence, and the one gap it had —
+   "I'm walking away RIGHT NOW" — is closed by the manual Lock Now
+   act added to THE DESIGN and Batch 2, demanded modes only. Under
+   Auto there is deliberately no presence gate of any kind: that is
+   the ruled Standard behavior, not a hole.)*
 
 ## WHY THIS PHASE IS SHAPED THIS WAY (one paragraph, for the cold reader)
 
