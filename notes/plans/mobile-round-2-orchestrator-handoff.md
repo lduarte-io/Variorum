@@ -445,151 +445,347 @@ that were promised a home and never got one):
 ---
 ---
 
-# SECOND ORCHESTRATOR HANDOFF — 2026-08-23
+# SUCCESSOR HANDOFF — written 2026-08-23, FOR A MOBILE SESSION THAT RESUMES AFTER 13l
 
-**Written at the author's instruction after the second seat reached
-~571k context.** *"given that you're already at 571k tokens though, it's
-time for a handoff to a new orchestrator… you can probably just add to
-the one that I gave you, since a lot of the work in it is not yet
-complete."* Everything above this line still binds unless a row below
-supersedes it; this section updates state, not rules.
+**Her instructions that shaped this document** (2026-08-23):
+*"let's do the merge, then I'll run 13l"* · *"I'll only resume variorum
+mobile work after 13l is done - I think that's cleaner"* · *"remove
+whatever is in there about spawning unlimited subagents because we're in
+a new week and I want to go back to the one subagent at a time
+approach"* · *"start a new Fable orchestrator up where you left off"*.
 
-**Her cast instruction for the successor: a FABLE orchestrator**
-(*"start a new Fable orchestrator up where you left off"*) — a change
-from R1's all-Opus, made because her Opus week ran out and reset
-differently. **R1's SUBSTANCE survives and is what matters: reviews get
-the surplus.** The standing Sync/ rider is moot here (this round has
-touched zero `Sources/` lines).
+**Everything above the double rule still binds** — the rulings index
+(§4), the machinery lessons (§5), the OPEN WITH HER list (§6) and the
+closeout obligations (§7) are unchanged unless a row below supersedes
+them. **The first handoff's §3 batch map remains THE ONLY SCHEDULE.**
 
-## S1. WHAT THE SECOND SEAT DID (all committed and pushed)
+---
 
-**Her successor-first-acts file, executed in order:**
-- **ACT 1** — a fresh cold read over the round's whole shipped diff → **§56**. It settled the Mac dead-door diagnosis §46 said had to be re-derived, found the confirm defect is FIVE sites not four, corrected the "Mac suite unmoved ⇒ nothing changed" claim, and caught that **the mobile suite is not green on a clean simulator** (an unrecorded per-simulator accessibility default) — which would have opened three of four sub-batches with sixteen phantom failures.
-- **ACT 2** — the never-became-work sweep → **§53**. Twelve verified orphans, all routed. Its structural finding is the one to carry: **three of them were obligations a batch discharged on ONE side and recorded honestly on the other.**
-- **ACT 3** — batch 4.5 built as four file-fenced sub-batches. **All three BLOCKERs are fixed** (§62, §63).
+## 0. PASTE-READY KICKOFF (a fresh session starts here)
 
-**Also landed:** §54 (the Mac suite is intermittently red at a latency budget — pre-existing, measured on both trees, KnownIssues row owned by 12) · §55 (the three BLOCKERs verified at the code by the architect before briefing) · §57–§63 (per-sub-batch records) · **13l's manifest fed four times, in the commits that made each change** · two KnownIssues rows · the parity-ledger and closeout obligations updated.
+> You are the architect/orchestrator for the remainder of **Mobile Round
+> 2** of the Variorum iPhone app. Work in `~/dev/variorum-mobile` on
+> branch `mobile`, under `/architect-phase`. **Phase 13l has run since
+> the last mobile session; verify what it changed before you plan.**
+>
+> **READ, IN FULL, YOURSELF, IN THIS ORDER:** `CLAUDE.md` ·
+> `notes/MobileSoul.md` · `.claude/skills/architect-phase/SKILL.md` ·
+> **this handoff (both sections)** · `notes/plans/mobile-round-2.md`
+> **in full** (long, and the reading rule is load-bearing — this round
+> paid six times for items that lived only in prose) ·
+> `notes/plans/mobile-round-2-batch-4.5-briefs.md` ·
+> `notes/plans/mobile-round-2-consistency-audit.md`.
+>
+> **CAST: FABLE. ONE SUBAGENT AT A TIME** — her 2026-08-23 ruling,
+> superseding R1's concurrency (§1 below). No parallel waves.
+>
+> **STATE IN ONE LINE:** all three of the round's BLOCKERs are fixed and
+> **merged to `main`**; **three review/fix steps are OWED** (4.5b's cold
+> review, 4.5d's fix round, 4.5a's ladder round 2) and **two sub-batches
+> never ran at all** (4.5c and 4.5e), then batches 5–8 and two standalone
+> review passes remain.
+>
+> **VERIFY, DO NOT TRUST** (§2). Several diagnoses in this round were
+> traced by READING and never EXECUTED; twice the architect propagated a
+> mechanism nobody had tested.
+>
+> **R28 still binds: BUILD → COLD REVIEW → FIX → CONTINUE as one unit.**
+> With one agent at a time this is a SEQUENCE, not a fan-out, and the
+> review is still inside the batch — you never decide afterwards whether
+> to run it.
 
-## S2. STATE AT THIS CUTOVER — VERIFY, DO NOT TRUST
+---
 
-**Branch `mobile`, tip `407e978` + the architect's §64 restore commit. Pushed. Never push `main`.**
+## 1. CAST AND CONCURRENCY — HER 2026-08-23 RULING, and what it changes
 
-| | |
+**R1 is amended.** Its original form (*"I have a lot of Opus credits…
+There should be more cold reviews to account for that fact"* and *"it's
+open season on opus credits"*) licensed an amplified, **parallel** ladder.
+Her new instruction: **one subagent at a time**, and the cast is **Fable**.
+
+| | before | **NOW** |
+|---|---|---|
+| model | all-Opus | **Fable** |
+| concurrency | many agents in parallel; three-wide waves | **ONE agent at a time, strictly sequential** — CLAUDE.md's standing exposure cap, restored |
+| review depth | a ladder per batch + two standalone passes | **UNCHANGED — this half of R1 survives and still binds** |
+
+**What this simplifies, and it is a real gain:** the elaborate wave
+structure (wave 1 / wave 2 / wave 3), the per-sub-batch simulator and
+DerivedData assignments, and the whole parallel-fence recipe existed
+**only** because several sessions shared one working tree. **With one
+agent at a time they are unnecessary.** The file fences in the briefs
+stay useful as **scope discipline** — they say what a session may touch —
+but they are no longer collision avoidance, and the sub-batches simply
+run in order.
+
+**What this costs:** wall-clock. Plan for it; do not compensate by
+skipping a review, which is the failure this round exists to correct.
+
+**Consequences to carry:**
+- **Ignore every "distinct simulator by UDID / distinct DerivedData /
+  another session is live in this tree" instruction** in the 4.5 briefs.
+  One simulator is fine. **Still re-arm the accessibility flag on it**
+  (§2) — that hazard is per-simulator, not per-session.
+- **§5.3's parallel-fence recipe is dormant**, not deleted. If she ever
+  re-authorizes parallelism, it is still correct.
+- **The whole-directory backup rule (§62) still binds absolutely.** It
+  caused a live incident, and a directory restore is destructive whether
+  or not anyone else is running.
+
+---
+
+## 2. STATE TO VERIFY — and 13l has run since this was written
+
+**Branch `mobile`. `main` and `mobile` were merged at this cutover, at
+her word** (*"let's do the merge"*) — the round's work through batch 4.5
+is on `main`, and `main`'s two 13u-ruling commits are on `mobile`.
+
+**Re-derive all of this yourself. 13l ran in between and its scope
+overlaps this round's Mac surface directly:**
+
+| check | how |
 |---|---|
-| **Committed** | batches 1 · 1b · 2 · 3 · 3b · 4 · R12 · R22/M26, plus every record above |
-| **UNCOMMITTED, in the working tree (26 files)** | **4.5a** (build + fix round) · **4.5b** (build) · **4.5d** (build) — **all green together at `475/77`** |
-| **Never started** | **4.5c** (wave 2) · **4.5e** (wave 3) · batches 5–8 · both standalone review passes |
+| Branch tips, and whether 13l advanced `main` | `git log --oneline -5 origin/main`; `git rev-list --count origin/main..HEAD` |
+| **What 13l changed in files this round touched** | `git diff --stat <this cutover's tip>..origin/main -- App/Variorum/Shared/ App/Variorum/Variorum/` — **this is the important one; see §5** |
+| Suite counts | run them; do not inherit. Last measured at this cutover: core **1350/141** · Mac **1569/272** · mobile **475/77** · both spines green |
+| Hygiene | `git diff -- Sources/` **must stay empty**; zero `Sync/`; no build configuration; marker **7** |
+| **The accessibility flag on your simulator** | `xcrun simctl spawn <UDID> defaults read com.apple.Accessibility ApplicationAccessibilityEnabled` — **if this is not `1`, sixteen real pins fail as phantoms reading `labels were []`** and every real door reads as absent. Arm it with `defaults write … -bool true` |
 
-**Suites, last measured on this tree:** core **1350/141** · Mac **1569/272** · Mac spine **8/8 suites** · mobile **475/77** · mobile spine **7/7 suites**. **Hygiene held all round: `git diff 46ffa0c..HEAD -- Sources/` is EMPTY, zero `Sync/` lines, no build configuration, zero schema. Mirror at marker 7.**
+**Her phone still carries the 2026-08-21 23:49 build** — R30 (*"i'll wait
+for my fresh build til these batches are all done"*). **The three
+BLOCKERs are fixed in the tree but NOT on her phone**, so her working
+caveats still stand until she takes a build: no multi-paragraph pastes
+into the quick note, and the Trash's purge doors and the row-delete doors
+silently do nothing on the installed build.
 
-**⚠️ Re-arm the accessibility flag on any simulator you use** (§56 / §9) or sixteen real pins fail as phantoms reading `labels were []`:
-`xcrun simctl spawn <UDID> defaults write com.apple.Accessibility ApplicationAccessibilityEnabled -bool true`. Five simulators were armed on 2026-08-22; a fresh or reset one is not.
+---
 
-## S3. THE THREE DEAD AGENTS — what was lost, and one thing they left behind
+## 3. THE REMAINING WORK, IN THE ORDER TO RUN IT
 
-All three died on the same API weekly limit, **and none of them had produced anything recoverable**:
+**Sequential, one agent at a time. Each numbered item is a full R28 unit
+unless it says otherwise.**
 
-| agent | how far it got |
+| # | Work | Why this position |
+|---|---|---|
+| **1** | **4.5b's COLD REVIEW** (owed; its dispatch died before reading anything) | **It is the only merged work that reached `Shared/` and the Mac without a review.** It is now on `main`. First, because everything else is phone-local |
+| **2** | **4.5d's FIX ROUND** — §61's 2 MAJOR + 6 MINOR + 6 NIT | Its findings are recorded and adjudicated; the work is `MobileKeyboardBar.swift` + its pins. **Read §64 first** — the architect already restored the experimental revert that round left behind and rewrote its MAJOR 1 comment |
+| **3** | **4.5a's LADDER ROUND 2** — a real re-review of §59's fixes | The fixes are substantial and one of them (§62's restore-a-turn-later) changed pin semantics. Round 2 is owed and was never run |
+| **4** | **4.5c — the editor & the shared brain** (§4 below) | **The largest remaining risk in the round.** Read §5's coordination flag BEFORE briefing it |
+| **5** | **4.5e — the shared lifecycle files + the Mac's quick-capture twins** (§4 below) | Includes a live data-loss defect on her Mac |
+| **6** | **THE DEDICATED STABILITY PASS** — batch 4.5's **exit condition** | 4.5 is not done until it runs. It owns **M27**. Nothing that resembles it discharges it |
+| **7** | **Batches 5 · 6 · 7 · 8** — the first handoff's §3 map, unchanged | Batch 5's brief must carry §53's two added deliverables (the shelf's missing keyboard avoidance under a dwelling field; the quick note's unmeasured mint cost) |
+| **8** | **THE WHOLE-ROUND PASS** — **closeout obligation ZERO** | The round cannot close until it runs |
+| **9** | **Closeout** — the first handoff's §7, all twelve obligations | Includes the parity ledger, R16 to canon (**she ratifies; never applied autonomously**), and 13l's manifest completed |
+
+---
+
+## 4. FULL SPECIFICS ON THE THREE SUB-BATCHES SHE ASKED ABOUT
+
+### 4.5b — BUILT AND MERGED, **COLD REVIEW OWED** (the only unreviewed `Shared/`+Mac work)
+
+**Brief:** `mobile-round-2-batch-4.5-briefs.md` §2. **Record:** §63.
+**Commit:** `7fd2cd0`.
+
+**What it shipped:** the round's third BLOCKER, closed at **five** hosts
+(Delete Now · Empty Trash · the Library row's Delete Note · the Shelf
+row's Delete Book · the A12 destructive-undo warning, whose Undo button
+*cancelled* the undo). Three row doors moved to
+`alert(_:isPresented:presenting:)`; **the A12 door got a SEAM fix**
+(`askedWarning` — authorization outlives presentation) because that door
+has **two** alert hosts, one of them in another fence.
+**Plus:** the accessibility harness armed from inside the test bundle and
+made to **fail loudly**; `MobileBlockMenuController.actInFlight`; the
+`TrashPutBack` hoist into `Shared/RecoveryCopy.swift`; `DeletionRefusal`
+as one home for deletion refusal copy; and **a Mac fix — `putBack` was
+landing silently**, discarding the result while the view renders a
+receipt (the only Mac count move this round, 1568 → 1569).
+
+**What its review must look at hardest:**
+1. **The `Shared/RecoveryCopy.swift` hoist** — does the Mac's suite ride
+   unmodified apart from the one new pin, and did the hoist move an
+   address rather than a behaviour? **Remember A1-16: an unmoved Mac
+   count proves only "no COVERED behaviour changed".**
+2. **The five confirm roads end to end, including Cancel.**
+3. **The `tapAlertAction` driver simulates ONE step** (the binding
+   write-back) because the real one is unreachable in process. **Is the
+   simulation faithful, and is it named rather than hidden?** It measured
+   four roads to find the one that reproduces — and in doing so it
+   **falsified the settling experiment both a reviewer and the architect
+   had specified**, which would have produced the round's sixth
+   green-over-nothing pin.
+4. **The candidate SIXTH affected site: `MobileLenses.swift:419`
+   ("Rename Lens")** — a computed binding read back synchronously inside
+   the action. Its probe suggests it is not in the affected class, **but
+   it could not drive a genuine tap and reported it unproven both ways.**
+   Settle it or record it unsettled.
+5. **The loud diagnostic** — can it fire spuriously, or suppress a real
+   failure?
+
+**Known open from it, already routed:** the remaining decision-layer
+hoist (**13l's manifest**), the live-editor-over-a-tombstone fix
+(**4.5c**), two owed one-liners (**4.5c**), `commitNow`'s missing latch
+(**batch 7**), and **§49's four NITs, which are unenumerated anywhere and
+unrecoverable.**
+
+### 4.5c — **NEVER RAN. The largest remaining risk in the round.**
+
+**Brief:** `mobile-round-2-batch-4.5-briefs.md` §3. **Enumeration:** §52.
+**Read §5 below BEFORE briefing it.**
+
+**It owns:** `App/Variorum/Shared/EditorBrain/*` ·
+`Features/Write/{MobileEditorViewModel, MobileStructural, MobileWriteView,
+MobileMarkdownActs}.swift` ·
+`Variorum/Features/Editor/{EditorSurfaceController, EditorViewModel}.swift`
+· the editor test suites on both platforms.
+
+**Its work, itemised:**
+
+| item | what |
 |---|---|
-| 4.5b's cold review | *"I'll start by building my own picture…"* — **nothing** |
-| 4.5a's ladder round 2 | *"Let me start a build/test run…"* — **nothing** |
-| 4.5d's fix round | established baseline (475/77) and began MAJOR 1's trace — **nothing written but one revert** |
+| **The fan fence is read from a FROZEN projection** | A block that gained a take during a dirty window can be **merged away by a keystroke**, against the #11a ruling. `BlockRangeIndex.wholeBlockDeletion`'s own doc states the law forty lines away; the sibling seam road obeys it. **Fix the fence's SOURCE, not its routing** — her `planVisibleTakeEdit` fence must keep refusing |
+| **The O(N²) twin SURVIVES in `planVisibleTakeEdit`** | One `else if` after the one that was fixed, **on a road that runs**. The fixed twin measured **23.8 s → 0.003 s at 20,000 entries**. Fix the same way (an accumulation pass), pin the equivalence against the accessor, **MEASURE**, and **sweep the class to completion** — every caller of `range(ofEntryAt:)` inside a loop, both platforms, each verdicted FIXED-with-a-pin or provably SAFE |
+| **The Mac gets the gap fence's REFUSAL but not its FACE** | §44's MAJOR. Three parts, all pinnable: the Mac's fence arm; `CrossBlockRefusal.diagnose` step 3 treating a zero-length entry as touched; the Mac's `.blocksNotAdjacent` sentence. **A defect this round CREATED Mac-side** |
+| **The Mac has NO identity-projection audit at all** | §53 f1. HOIST `auditIdentityProjection` + the separator check into `Shared/EditorBrain/`, wire the Mac, **carry the empty-entry hole's fix**, and pin it **red-on-old ON THE MAC** by reproducing §20's traced corruption there |
+| **An EMPTY block inside a span** | Yields a plan that can never execute, refusing an ordinary gesture with a sentence naming a cause that isn't there |
+| **The phone's unwired A7/#34 seam carves** | Backspace-to-join still refuses — a fifth refusal case §31's four-case table omits |
+| **B45-2 — the `displaySlot`/`slots[i]` coupling** | Out-of-range-safe only by caller accident. **Batch 7's PR8 reorder-takes walks straight into it.** Make the safety structural |
+| **B45-3 — the crash trace's six unowned items** | **E1** (build the instrumentation and leave it RUNNABLE for a device session that will not have your context — **M1's root is still "high confidence, NOT PROVEN"**) · **E2** · **§8 path 8** (UIKit undo replaying a coalesced edit — zero mentions anywhere in the round) · **§8 path 11** (the `supportsTextReplacement: false` fence — verify it stands and says why) · **§9's `MarkdownActs` Mac residual** · **M1's SUSPECTED status itself**. **Each leaves the session FIXED or with a named owner** |
+| **A1-5 — `CrossBlockRefusal` never hoisted** | Merge-then-edit landed and the refusal copy carrying **its own unexecuted instruction** was never re-narrowed, so the phone's cross-block refusal names **none** of its four real causes |
+| routed in from 4.5b | the **live editor over a tombstone** (the filed remedy was WRONG — the stale editor is in the *other* tab stack, so the fix is at the liveness seam), the **`MobileLenses.swift:419`** candidate, and two one-liners (`deleteNoteRefusal:958` → `DeletionRefusal.words(error)`; the A1-15 comment at `MobileCrossBlockEditTests.swift:598`) |
 
-**⚠️ AND THE LAST ONE LEFT A REVERT IN THE TREE.** It had restored `makeKeyAndVisible()` in **two** places in `MobileKeyboardBarGeometryTests.swift` — marked `// EXPERIMENT B` — as a red-on-old trace, and died before undoing it. **The product fix was intact; only the harness was mid-experiment.** The architect found it by checking rather than assuming, restored both sites to `window.isHidden = false`, **and wrote the falsified-mechanism correction into that comment** (the fix round's own MAJOR 1, which it never reached). **Recorded as §64.**
+**M-B binds every line of it:** core + Mac + both spines + mobile, and
+**every Mac-side change into 13l's manifest** — 13l will have closed, so
+**re-read what it did there first** and record against the current file.
 
-> **THE LESSON, and it is new:** *an agent that dies mid-revert leaves the tree in a state no one is watching.* A red-on-old revert is a deliberate temporary corruption; if the session performing it dies, nothing announces it. **Whoever dispatches a fix round should check the tree after any agent failure, not only after a success.**
+### 4.5e — **NEVER RAN.** Includes a live data-loss defect on her Mac
 
-**Do NOT relaunch these three by resuming.** Dispatch fresh sessions from the briefs — everything they needed is in the repo (§59 / §61 / §2 of the briefs file), which is the point of repo-first.
+**Brief:** `mobile-round-2-batch-4.5-briefs.md` §4c.
 
-## S4. THE MERGE QUESTION — her direct question, answered with numbers
+**It owns:** `App/Variorum/Shared/{AppBootstrap, AppSession}.swift` · the
+`.opening` arm in **both** app roots · **and the Mac's quick-capture
+twins** `Variorum/Features/Shelf/QuickEntryBar.swift` +
+`Features/QuickNote/QuickNoteView.swift`.
 
-> *"I know that this all hasn't been merged into main yet — but what parts touch shared code? … What's the lift on getting what's in flight merged into main? and are there elements that are unverified / untested that touch the shared core?"*
+| item | what |
+|---|---|
+| **B45-1 — a P2 violation on every launch** | `AppBootstrap.init` opens the store and runs the migration set **synchronously on the main thread before first paint**. **MEASURED:** 54.0 / 23.4 ms first launch, 5.0 ms reopen, **3.6 ms at 100k — flat in corpus size**, O(migrations) not O(corpus). **The shape is already ruled** (§58/§62): an `.opening` state, the file work detached, hopping back to MainActor for `install` + the state write (**preserving the once-per-process flag**), `retry()` re-entering, a quiet launch view in both roots. **The not-ready window cannot open by construction** — `AppSession` exists only inside `.ready`. **Re-measure after** |
+| **🔴 The Mac's `QuickEntryBar` DESTROYS HER TEXT on a refusal** | `submit()` does `entryText = ""` **before** the mint, and its catch is a raw `\(error)` dump — **Q2 and Q7 in one method, in the bar she praised by name and uses daily.** The phone's just-shipped fix is the reference shape; route the copy through `OpsRefusalCopy.message(for:)`. `QuickNotePad.take()` clears before filing too (deliberate there, and its copy does speak) |
+| **A1-21 — `postAutosaves` has no removal path** | The quick note adds one coordinator **per capture**, and `flushEveryOpenPost()` iterates all of them on every filing and every background flush. Shape proposed: `releaseAutosave(forPost:)` called from the box's `reset()` — **with the trap already traced**: the Mac registers a `quitFinalize` at *mint* time, so release-then-remint registers a second (deduped by `closeAutoCommit` — noise, not corruption, but it must be deliberate) |
+| **A1-15 + §61's third line** | Three comments in `AppSession.swift` state reasons that are FALSE while the behaviour is fine — `:89` ("no undo UI yet" — M20 shipped it), `:240-245` (inverted — the quick note DOES cache a coordinator), `:206-208` ("open posts are a handful by construction", now false for A1-21's reason) |
 
-### (a) `Sources/` — the core package — is UNTOUCHED. Zero lines, all round, committed and in flight.
-This is the strongest single fact for a merge decision: **nothing in Mobile Round 2 has changed `VariorumCore`.** No schema, no `Sync/`, no operations, no queries. The mirror stays at marker 7 by construction.
+---
 
-### (b) COMMITTED `Shared/` + Mac — thirteen files, all reviewed, **but with KNOWN-OPEN findings against them**
+## 5. ⚠️ THE COORDINATION FLAG THAT ARRIVED WITH THE MERGE — READ BEFORE BRIEFING 4.5c
 
-```
-Shared/EditorBrain/{BlockRangeIndex, CrossBlockEditPlanner, EditorEditRouting}.swift
-Shared/{RecoveryCopy, StructuralUndoCopy}.swift
-Variorum/Features/Editor/{EditorSurfaceController, EditorViewModel}.swift
-Variorum/Features/Library/RecoveryView.swift · Features/Tray/TrayPanel.swift
-Variorum/Registry/ShellActions.swift
-VariorumTests/{BlockRangeIndexTests, EditRoutingCrashTests, EditRoutingTests}.swift
-```
+**`main` carried in her 13u item 5 ruling (2026-08-21), and it names this
+round explicitly.** The master plan's 13u row is the binding text; the
+parts that change mobile work:
 
-**These are 13l's manifest, and the manifest is current.** What the manifest ALSO needs to say — and §65 now adds it — is that **four Mac-visible defects in this code are recorded, accepted, and NOT YET FIXED**, because the sub-batch that owns them (4.5c) never ran:
+1. **CROSS-BLOCK EDITS STOP REFUSING.** Her words: *"obvious and
+   intuitive operations like selecting a bunch of visible text and
+   deleting should be allowed - the refusing because of different blocks
+   is more annoying than it's worth."* This is R16 promoted from a
+   principle to a scheduled design.
+2. **The edge-join is RULED:** remainders **MERGE** when the cut ends sit
+   **mid-paragraph**; they do **NOT** merge at a paragraph break.
+3. **The fanned case is RULED** — a fanned **middle** block deletes whole
+   to the tray; a fanned **edge** block's edit touches the chosen take
+   only. *This round fenced the fanned case off as "hers"; she has now
+   ruled it.*
+4. **HER AUTO-COMMIT IS ADOPTED as the SEVENTH quiet occasion** — a quiet
+   commit of the affected takes right before a multi-block edit.
+   **⚠️ THIS ROUND DESIGNED THAT AS M24 AND SHE DECLINED IT AT R18**
+   (*"okay I agree we don't need it"*). **The decline is superseded, and
+   the reason changed rather than the fact:** R18 declined it standalone
+   because Trash and lineage already covered the loss cases; 13u adopts
+   it *inside the cross-block gesture*, where it is **"doubly right…
+   because the gesture mixes the text-undo and structural-undo worlds."*
+   **Do not treat §32/§33's decline as current.**
+5. **HER OWN COORDINATION FLAG, verbatim from the row:** *"mobile round
+   2's M1 crash (`BlockRangeIndex.applyBlockEdit` on multi-line delete)
+   is THIS EXACT SEAM — the crash fix is stability, the semantics are
+   ruled HERE, once, for both platforms; the mobile session should know
+   the direction before hardening any refusal."*
 
-1. **The fan fence is read from a deliberately FROZEN projection** — a block with takes can be merged away mid-typing, against the #11a ruling (§45, batch 3).
-2. **The O(N²) twin SURVIVES in `planVisibleTakeEdit`** — a P1 violation on a road that runs, on the Mac (§45; §38's "the Mac inherits the fix" is overstated in three places).
-3. **The Mac gets the gap fence's REFUSAL but not its FACE** — she meets a raw `blocksNotAdjacent(first:second:)` enum dump (§44 MAJOR 1).
-4. **The Mac has NO identity-projection audit at all** — the DEBUG oracle for the corruption class both other oracles are blind to exists only on the phone, though both platforms share the brain and §20 reproduced the corruption Mac-side (§53 finding 1).
+**WHAT THIS MEANS FOR 4.5c, concretely.** Its items split in two:
 
-### (c) IN FLIGHT `Shared/` + Mac — exactly THREE files, and they are 4.5b's
+- **UNAFFECTED — build them:** the O(N²) twin · the Mac identity-audit
+  hoist · the gap fence's Mac face · B45-2 · B45-3 · the live editor over
+  a tombstone. These are defects, not semantics.
+- **DOWNSTREAM OF HER RULING — do NOT harden these into place:** the
+  empty-block-in-a-span refusal · the unwired seam carves · `CrossBlockRefusal`'s
+  hoist and its refusal wording · the fan fence's shape. **Fixing the fan
+  fence's SOURCE (so it cannot be read from a stale projection) is still
+  right** — that is a correctness fix. **Re-writing what the refusals SAY,
+  or widening/narrowing which cases refuse, is 13u's.**
 
-```
- M App/Variorum/Shared/RecoveryCopy.swift              (the TrashPutBack hoist)
- M App/Variorum/Variorum/Features/Library/RecoveryView.swift   (adopts it; Put back now sets a receipt)
- M App/Variorum/VariorumTests/TrashSurfaceTests.swift  (+1 pin — the only Mac count move)
-```
+**Bring this to her at 4.5c's kickoff** and let her rule the boundary.
+The safe default if she is unavailable: **fix the mechanisms, leave the
+semantics, and record what you left.**
 
-**Everything else in flight — 14 files — is iPhone-only.**
+---
 
-**So the honest answer to "unverified/untested touching the shared core":** **one file, `Shared/RecoveryCopy.swift`, plus its two Mac consumers — and "unverified" means UNREVIEWED, not untested.** It carries red-on-old pins, both platforms' suites are green, and the Mac gained a pin for it (1568 → 1569). **The risk is real but small and bounded**; a cold review is owed and is a short job.
+## 6. WHAT 13l MAY HAVE CHANGED UNDER YOU
 
-### (d) THE LIFT — small mechanically, and here it is as a checklist
+13l's scope overlaps this round's Mac surface directly. **Before
+briefing 4.5b's review or 4.5c, diff what it did** to
+`Variorum/Features/Library/RecoveryView.swift`, `Features/Tray/TrayPanel.swift`,
+`Shared/RecoveryCopy.swift` and the editor files.
 
-1. Restore any dead agent's experiment (**done — §64**) and re-run the mobile suite green.
-2. `git add` the 26 in-flight files and commit as the 4.5 landing.
-3. Run all five suites on the committed tree; record the counts.
-4. `mobile` → `main` and `main` → `mobile`, **resolving `notes/` conflicts as the UNION of both sides** (the c928a33 precedent).
-5. Push both.
+**Specifically expect that 13l may have closed some of §65's four
+known-open Mac defects**, because they were written into its manifest for
+exactly that reason. **Check each before scheduling it in 4.5c** —
+building a fix for something 13l already fixed is the waste this flag
+exists to prevent, and building it *differently* is worse.
 
-**Perhaps an hour.** The lift is not the obstacle; **the judgement is.**
+Also: 13l owned **the Mac's fifth dead confirm site** (the architect
+declined to take it and offered it to her). §56 gave 13l the derived
+mechanism and the one-line fix. **Verify it landed**; if it did not, it
+is still open and belongs to whoever she says.
 
-## S5. WHAT WAVE 2 WAS — 4.5c, and why it is the largest remaining risk
+---
 
-She asked directly: *"I'm not sure what wave 2 was for the editor brain."*
+## 7. THE RULES THAT BIND, CONSOLIDATED
 
-**4.5c is "the editor & the shared brain" — the sub-batch that owns `Shared/EditorBrain/*`, both platforms' `storageDidEdit` consumers, and the Mac's editor files.** It was put in a wave of its own **on a mechanism, not a preference**: every mobile and Mac target compiles against `Shared/EditorBrain/`, so a session mid-edit there breaks every other session's build. **It never ran.** Its brief is `mobile-round-2-batch-4.5-briefs.md` §3, and it carries:
+Everything in the first handoff's §5 still holds. Added this seat:
 
-- the four Mac-visible defects in S4(b) above (fan fence · the O(N²) twin · the gap fence's missing face · the missing identity audit — **a HOIST, with a Mac-side red-on-old**);
-- an **empty block inside a span** yielding a plan that can never execute;
-- the phone's **unwired A7/#34 seam carves** (backspace-to-join still refuses);
-- **B45-2** — the `displaySlot`/`slots[i]` coupling that **batch 7's PR8 reorder-takes walks straight into**;
-- **B45-3** — the crash trace's six unowned items, including **building E1's instrumentation** so a device session can run it (**M1's root cause is still recorded "high confidence, NOT PROVEN"**);
-- **A1-5** — `CrossBlockRefusal` never hoisted, so the phone's cross-block refusal names **none** of its four real causes;
-- routed in from 4.5b: **the live editor over a tombstone** (the filed remedy was wrong — the stale editor is in the *other* tab stack, so the real fix is at the liveness seam), the **candidate sixth confirm site** at `MobileLenses.swift:419`, and two owed one-liners.
+- **A rule that names a SHAPE will be obeyed into the same bug.** Name
+  the **property**. (*Never a computed `Binding(get:set:)`* — four doors
+  obeyed it and were dead; two sites using that syntax are immune.)
+- **A mechanism that explains the symptom is not one that was tested.**
+  This round attributed one symptom to two wrong causes and repeated a
+  third for six sessions. **Twice the architect was the culprit.**
+  Isolate before you propagate; never put an untested mechanism into a
+  binding brief.
+- **A SPECULATIVE finding investigated properly beats a confirmed one.**
+  Build the pin first as the confirm; **then ask why it says what it
+  says.** The "green" caret pin found an unsuspected data-loss path.
+- **Check the tree after an agent FAILS, not only after it succeeds.** A
+  dead session left a red-on-old revert in the harness and **the suite
+  stayed green over it** (§64).
+- **Never back up or restore a whole DIRECTORY** (§62).
+- **Land every review's findings IN FULL.** Two summaries in this round
+  say *"and N NITs"* without listing them, and those findings are
+  **unrecoverable** (§62, §63).
+- **A pin that indexes a collection right after asserting its size takes
+  the whole runner down under its own revert.** Use `#require(x.first)`.
 
-## S6. THE ARCHITECT'S RECOMMENDATION ON SEQUENCING — hers to overrule
+---
 
-She wants to run 13l and start a fresh mobile orchestrator. **Both can happen soon; the one hard constraint is that TWO SESSIONS MUST NOT EDIT MAC EDITOR CODE CONCURRENTLY** — that is this round's most expensive lesson, at phase scale rather than file scale.
+## 8. OPEN WITH HER — the four added this seat (the ten in §6 still stand)
 
-**Recommended, and it gets her to 13l fastest without racing:**
-
-1. **Commit the in-flight 4.5 work and merge to `main` now.** It is green, all three BLOCKERs are fixed, and `Sources/` is untouched. 13l unblocks.
-2. **Run 13l.** Its Fable cold review reads the Mac changes **with S4(b)'s four known-open defects written into the manifest** (§65), so it spends its budget on what nobody has looked at rather than re-deriving what is already recorded. Its own first act — the dead Delete Now door — now has a **derived mechanism and a one-line fix** waiting for it (§56).
-3. **In parallel, the fresh mobile orchestrator does PHONE-ONLY work:** 4.5a's ladder round 2 (read-only), 4.5d's fix round (`MobileKeyboardBar` + its tests — iPhone-only), and 4.5b's cold review (read-only). **None of these writes a Mac or `Shared/` line**, so they cannot race 13l.
-4. **AFTER 13l closes:** 4.5c (wave 2), 4.5e (wave 3), and 4.5b's fix round — all of which touch `Shared/` or Mac code.
-
-**The one thing to weigh honestly before step 1:** merging now puts **4.5b's unreviewed `Shared/` hoist** and **4.5d's fourteen open findings** into `main`. Against that: her Mac app is her daily driver and 4.5b's Mac change is a small improvement (Put back was landing silently and now says where it went), R30 keeps the phone build frozen anyway, and **the alternative — holding the merge until 4.5c and 4.5e finish — is the longer wait she is trying to avoid.**
-
-**If she would rather not merge unreviewed `Shared/` code:** the cheapest variant is to have the fresh orchestrator run **4.5b's cold review FIRST, alone** (a few hours, read-only) and merge after. That buys back the only real exposure in S4(c).
-
-## S7. MACHINERY LESSONS ADDED THIS SEAT
-
-- **A rule that names a SHAPE will be obeyed into the same bug.** *Never a computed `Binding(get:set:)`* named a syntax; four doors obeyed it to the letter and were dead anyway, while two sites using that exact syntax were immune. Name the **property**: *a binding setter must never clear state an action's continuation will read back.*
-- **A mechanism that explains the symptom is not a mechanism that was tested.** This round attributed one symptom to two different wrong causes, and repeated a third for six sessions. **Twice the guilty party was the architect** (§61, §62). Isolate before you propagate — and *never* propagate a mechanism into a binding preamble before someone has checked it.
-- **A SPECULATIVE finding investigated properly is worth more than a confirmed one.** MAJOR 5 came back "green" — and asking *why* it was green found a data-loss path nobody suspected (§62).
-- **Never back up or restore a WHOLE DIRECTORY in a shared tree.** It is a fence violation wearing another name, it reverts other sessions' files silently, and nothing announces it (§62).
-- **Check the tree after an agent FAILS, not only after it succeeds** (§64).
-- **A compressed review summary costs real work later.** Twice this round a record said *"and N NITs"* without listing them, and the findings are unrecoverable (§62, §63). **Land every review's findings in full.**
-- **The fence caught the architect's own brief errors twice** — `AppSession.swift` (§58) and `VariorumMobileApp.swift` (§62), both double-owned. Per-file fences are worth their overhead.
-
-## S8. OPEN WITH HER — added this seat (the ten above still stand)
-
-11. **The 320 pt Display-Zoom strip renders her acts at 23 pt** — below the ~31 she pre-ruled tappable. The architect ruled *accept 23* (whole acts beat two acts off-screen; the alternatives are an act-count change, which is hers, or scrolling, which contradicts FIX-5). **Never seen by a human — device-queue row D9.**
-12. **Q1's residual cost:** fixing a typo in the FIRST paragraph of a pasted multi-paragraph capture now holds at the boundary and says so — that paragraph needs the editor, one tap away. A consequence of her own A5-2 one-block ruling, but she has never seen it as a lived consequence.
-13. **The caret collapses to the end after a boundary hold** (§62, confirmed) — safe, but it moves unasked, and putting it back needs a `UIViewRepresentable` text view. **A surface decision.** The stray-newline-on-a-refused-⏎ item wants the same decision.
-14. **The Mac's fifth dead confirm site** — 13l owns it by her ruling; the architect declined to take it and offered it. **Still hers.**
+11. **The 320 pt Display-Zoom strip renders her acts at 23 pt**, below
+    the ~31 she pre-ruled tappable. Architect ruled *accept 23*; **never
+    seen by a human — device-queue row D9**, and Display Zoom restarts
+    the phone so it must ride an install window.
+12. **Q1's residual cost:** fixing a typo in the FIRST paragraph of a
+    pasted multi-paragraph capture now holds at the boundary and says so.
+    A consequence of her own A5-2 one-block ruling, never seen as a lived
+    consequence.
+13. **The caret collapses to the end after a boundary hold** (confirmed,
+    safe, but unasked). Putting it back needs a `UIViewRepresentable`
+    text view — **a surface decision**, and the stray-newline-on-a-refused-⏎
+    item wants the same one.
+14. **The device queue is nine rows now** (§4b of the briefs), and **E1
+    is still the only thing that would settle M1's root cause.** When she
+    offers her phone, run the queue in that window — not just the install.

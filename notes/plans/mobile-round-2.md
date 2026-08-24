@@ -54,7 +54,21 @@ Three strands, in her priority order:
 
 ## 2. HER RULINGS (kickoff, 2026-08-21 — verbatim-faithful)
 
-**R1 — The cast is ALL-OPUS, and reviews get the surplus.** Her words:
+**R1 — The cast is ALL-OPUS, and reviews get the surplus.**
+> **⚠️ AMENDED 2026-08-23, and BOTH halves of the amendment matter.** Her
+> words: *"remove whatever is in there about spawning unlimited subagents
+> because we're in a new week and I want to go back to the one subagent
+> at a time approach"* and *"start a new Fable orchestrator up where you
+> left off."* **The cast is now FABLE, and concurrency returns to ONE
+> SUBAGENT AT A TIME** — CLAUDE.md's standing exposure cap. **The REVIEW
+> DEPTH half of R1 survives unchanged**: a ladder per batch plus the two
+> standalone passes still bind; they now run in SEQUENCE rather than in
+> parallel. Everything in §8 about the amplified ladder stands except its
+> parallelism, and the wave structure in §52.3/§57 is dissolved — with
+> one agent at a time, the file fences are scope discipline rather than
+> collision avoidance. The successor handoff's §1 is the full account.
+
+Her words:
 *"I have a lot of Opus credits at the moment and am running low on
 Fable credits, so this will be an opus only phase / work. There should
 be more cold reviews to account for that fact."* Later the same
@@ -5212,3 +5226,65 @@ latency budget the machine clears by a few percent. **Measured on BOTH
 trees: the PRE-ROUND tree failed 1 of 4 isolated runs at 51.95 ms; the
 post-round tree passed 4 of 4.** Pre-existing, not a regression, KnownIssues
 row owned by 12 (§54). **Re-run isolated before concluding anything.**
+
+
+---
+
+## 66. THE MERGE, AND WHAT CAME BACK ACROSS IT (2026-08-23)
+
+**`mobile` ⇄ `main` merged at her word** — *"let's do the merge, then
+I'll run 13l"*, with her sequencing rider: *"I'll only resume variorum
+mobile work after 13l is done - I think that's cleaner."* The 4.5 work
+was committed as **three separate sub-batch commits** (`c906627`
+4.5a · `7fd2cd0` 4.5b · `1fc3036` 4.5d) rather than one, so **13l's
+Fable reviewer can read them apart** — and so the one that is unreviewed
+is identifiable at a glance in the history.
+
+`main` had moved two commits since kickoff (notes only), so this was a
+real merge rather than a fast-forward; `phase-13l-data-safety-floor.md`
+was edited on both sides and **auto-merged clean** (main added §8d, the
+mobile round added the manifest updates).
+
+### ⚠️ AND IT CARRIED IN A RULING THAT SUPERSEDES ONE OF THIS ROUND'S
+
+**Her 13u item 5 (2026-08-21) landed on `main` while this round was
+running, and it names this round explicitly.** The master-plan row is the
+binding text. Four things change for mobile:
+
+1. **Cross-block edits stop refusing** — R16 promoted from a principle to
+   a scheduled design.
+2. **The edge-join is RULED:** merge when the cut ends sit mid-paragraph,
+   do not merge at a paragraph break.
+3. **The fanned case is RULED** — fanned middle blocks delete whole to
+   the tray; a fanned edge block's edit touches the chosen take only.
+   *This round fenced the fanned case off as "hers to rule"; she has
+   ruled it.*
+4. **🔴 HER AUTO-COMMIT IS ADOPTED AS THE SEVENTH QUIET OCCASION — which
+   this round designed as M24 and she DECLINED at R18.**
+
+**On M24, precisely, because a flat "she reversed herself" would be
+wrong.** R18 declined the auto-commit **standalone**, on the architect's
+own recommendation, with her reason recorded verbatim: *"seems like trash
+and lineage have all of the potential loss cases covered."* **13u adopts
+it INSIDE the cross-block gesture**, with a reason that did not exist in
+that conversation: the gesture **mixes the text-undo and structural-undo
+worlds**, which never interleave by design, and one compound entry plus
+insurance commits is what makes that safe. **The fact did not change; the
+context did.** §32 and §33's decline is **superseded and must not be
+quoted as current**.
+
+**And her own coordination flag, verbatim from the row:** *"mobile round
+2's M1 crash (`BlockRangeIndex.applyBlockEdit` on multi-line delete) is
+THIS EXACT SEAM — the crash fix is stability, the semantics are ruled
+HERE, once, for both platforms; the mobile session should know the
+direction before hardening any refusal."*
+
+**THE CONSEQUENCE FOR 4.5c, which never ran:** its items split. The
+**mechanisms** are still its work — the O(N²) twin, the Mac identity
+audit, the gap fence's Mac face, B45-2, B45-3, the live editor over a
+tombstone, and fixing the fan fence's *source* so it cannot be read from
+a stale projection. The **semantics** are 13u's — what the cross-block
+refusals SAY, and which cases refuse at all. **The successor brings the
+boundary to her at 4.5c's kickoff**; the safe default without her is
+*fix the mechanisms, leave the semantics, record what you left.* The full
+account is the successor handoff's §5.
