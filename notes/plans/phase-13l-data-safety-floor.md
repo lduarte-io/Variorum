@@ -175,6 +175,20 @@ multiple items and deleting all of them." Build, opening the phase
   | **L-c** | **`AppBootstrap.init` opens the store and runs the migration set SYNCHRONOUSLY ON THE MAIN THREAD before first paint** — a **P2 violation** (OverallModel §5) on **both** platforms, on every launch. **MEASURED on the simulator:** 54.0 / 23.4 ms first launch, 5.0 ms reopen, **3.6 ms at the 100k fixture — flat in corpus size**, O(migrations) not O(corpus). **THE SHAPE IS ALREADY RULED** (mobile §58/§62): an `.opening` state; the file work detached, hopping back to MainActor for `install` + the state write (**preserving the once-per-process flag**); `retry()` re-entering; a quiet launch view in **both** app roots. **The not-ready window cannot open by construction** — `AppSession` exists only inside `.ready`, the property `MobileStoreFailureView` already relies on. **A REAL DEVICE NUMBER may exist by the time you read this** (device-walk row D8) — check `notes/plans/mobile-round-2-device-walk.md`'s results table | Launch-path integrity, and it is `Shared/` — both platforms, one fix |
   | **L-d** | **`Shared/AppSession.postAutosaves` has no removal path** (no `removeValue` anywhere), so the phone's quick note adds one coordinator **per capture** and `flushEveryOpenPost()` iterates all of them on every filing and every background flush. **Shape proposed:** `releaseAutosave(forPost:)` called from the box's `reset()`. **The trap, already traced:** the Mac registers a `quitFinalize` closure at *mint* time, so release-then-remint registers a second for the same post — deduped by `closeAutoCommit`, so noise rather than corruption, **but it must be deliberate.** **Plus three FALSE comments in that file** (`:89` "no undo UI yet" — shipped; `:240-245` inverted — the quick note DOES cache a coordinator; `:206-208` "open posts are a handful by construction" — false for this very reason) | `Shared/`, both platforms, and it is unbounded growth in a flush path |
 
+
+  **⚠️ AND MOBILE WILL CHECK — so DEFER OUT LOUD, never silently.** These
+  items did not originate here; **they were moved OUT of mobile round 2
+  at her 2026-08-23 ruling**, on the stated understanding that *"the
+  mobile session shouldn't have mac / shared work to do when I return to
+  it."* The mobile successor handoff carries a **HANDBACK CHECKLIST**
+  (§2b) with a yes/no command per item and the value each returns while
+  the work is undone — **so a deferral here is not invisible; it lands
+  back on the phone session that was told it would not have to do it.**
+  **If this phase deliberately does not do one, RECORD THAT AND SAY WHY**
+  (in the closeout and in the item's own row), so mobile inherits a
+  decision rather than a discovery — and so she learns it from a record
+  rather than from a surprise two phases later.
+
   ### 13u TAKES THE REST (recorded here so this phase does not build them)
 
   **The editor-seam items go to 13u**, because **13u item 5 rewrites that

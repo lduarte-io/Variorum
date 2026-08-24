@@ -530,6 +530,15 @@ them. **The first handoff's §3 batch map remains THE ONLY SCHEDULE.**
 > traced by READING and never EXECUTED; twice the architect propagated a
 > mechanism nobody had tested.
 >
+> **AND RUN §2b BEFORE YOU PLAN ANYTHING — the HANDBACK CHECKLIST.** Nine
+> items left mobile for 13l and 13u on her ruling, on the understanding
+> that *"the mobile session shouldn't have mac / shared work to do when I
+> return to it."* §2b gives each one a **command that answers yes/no** and
+> **the value it returns while the work is undone**, so a matching value
+> means nobody did it. **Anything that did not land is MOBILE'S AGAIN —
+> put it in a batch in the commit that finds it, and tell her**, because
+> she ruled them out on the understanding they would be done.
+>
 > **R28 still binds: BUILD → COLD REVIEW → FIX → CONTINUE as one unit.**
 > With one agent at a time this is a SEQUENCE, not a fan-out, and the
 > review is still inside the batch — you never decide afterwards whether
@@ -598,6 +607,54 @@ BLOCKERs are fixed in the tree but NOT on her phone**, so her working
 caveats still stand until she takes a build: no multi-paragraph pastes
 into the quick note, and the Trash's purge doors and the row-delete doors
 silently do nothing on the installed build.
+
+---
+
+## 2b. 🔴 THE HANDBACK CHECKLIST — run this BEFORE you plan anything
+
+**Nine items left mobile for the Mac phases on her 2026-08-23 ruling. This
+section is how you confirm they actually landed — and what happens if
+one did not.**
+
+**Why it exists in this form:** "verify what the Mac phases built" appears
+three times in this handoff, and **an instruction to verify is not a
+verification.** This project's own failure mode is a row that everyone
+assumed someone else had. So each row below carries **a command that
+answers yes/no**, and **the value it returns TODAY, while the work is
+undone** — so a matching value means *nobody did it*, not *it is fine*.
+
+**THE RULE, and it is the point of the whole section:**
+
+> **If an item did NOT land, it is MOBILE'S AGAIN.** Do not assume a Mac
+> phase deferred it deliberately, and do not leave it for a third phase.
+> **Put it in a batch, in the binding map, in the commit that finds it**
+> — then tell her, because she ruled these out of mobile on the
+> understanding they would be done, and she should know if one came back.
+
+### 13l owed these four (L-a … L-d)
+
+| # | item | command | **TODAY (= not done)** | if it did not land |
+|---|---|---|---|---|
+| **L-a** | The Mac has no identity-projection audit — the DEBUG oracle for *the totals agree while the content is wrong*, which the round **reproduced Mac-side** | `grep -rl 'auditIdentityProjection' App/Variorum/Variorum \| wc -l` | **`0`** | **Highest-value of the nine.** It is a HOIST to `Shared/EditorBrain/` + Mac wiring + a Mac-side red-on-old. Take it back into 4.5c |
+| **L-b** | The Mac's `QuickEntryBar` **destroys her text on a refusal** (`entryText = ""` before the mint) and dumps a raw error | `grep -c 'New note refused' App/Variorum/Variorum/Features/Shelf/QuickEntryBar.swift` | **`1`** (and `entryText = ""` appears **2×**) | **A live data-loss bug on her daily driver.** If it survives 13l, tell her at once — do not wait for a batch boundary |
+| **L-c** | `AppBootstrap` runs migrations **synchronously on the main thread before first paint** (P2, both platforms) | `grep -c '\.opening' App/Variorum/Shared/AppBootstrap.swift` | **`0`** | Take it back into 4.5e. **The shape is already ruled** (§58/§62) and a real device number may exist — check the device walk's D8 row |
+| **L-d** | `Shared/AppSession.postAutosaves` has **no removal path**; the quick note adds one coordinator per capture | `grep -c 'removeValue\|releaseAutosave' App/Variorum/Shared/AppSession.swift` | **`0`** | Take it back into 4.5e, with the `quitFinalize` trap §62 traced |
+
+### 13u owed these five (its item 8), plus item 7
+
+| # | item | command | **TODAY (= not done)** | if it did not land |
+|---|---|---|---|---|
+| **U-1** | The fan fence is read from a **frozen projection** — a block that gained a take mid-typing can be merged away | read `CrossBlockEditPlanner`'s `fanArities` source: does it read the STORE at run time, or `slots`? | reads the frozen projection | **Its correctness half is safe to take back** (never authorize from stale state). **Its policy half is 13u's** — if 13u ruled and did not build, build to its rule |
+| **U-2** | The **O(N²) twin** in `planVisibleTakeEdit` — `range(ofEntryAt:)` inside a collection loop, on the keystroke road | `grep -c 'range(ofEntryAt:' App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift` | **`19`** — and check whether any remain *inside a loop* | **A live P1 violation.** It has a KnownIssues row owned by 13u; if 13u closed without it, **the row is orphaned and you either take it or re-own it** |
+| **U-3** | The gap fence's **missing Mac face** — she meets a raw `blocksNotAdjacent(first:second:)` dump | `grep -rl 'blocksNotAdjacent' App/Variorum/Variorum \| wc -l` | **`0`** | A defect **this round created Mac-side**. Take it back |
+| **U-4** | An **empty block inside a span** yields a plan that can never execute | read the planner's touched-entry collection for a zero-length arm | no zero-length arm | 13u item 5's population — if 13u ruled the semantics, build to them |
+| **U-5** | **`CrossBlockRefusal` never hoisted**, so the phone's refusal names none of its four real causes | `find App/Variorum/Shared -name 'CrossBlockRefusal*' \| wc -l` | **`0`** | The **hoist** is structural and safe to take back; **the wording** follows 13u's rule |
+| **U-7** | 13u item 7 — the Mac's **`MarkdownActs` arm-then-hand-off residual**, the Mac half of M1's root | read `Variorum/…/MarkdownActs.swift` for the arm-then-hand-off sites | present, unaddressed | **The iOS half (E1) is NOT this** — that is her device's, and its instrumentation was built 2026-08-23. Check the device walk's results before treating M1's root as open |
+
+### Two more things to confirm at the same time
+
+- **`KnownIssuesAndTechDebt.md`'s M12 is owned by 13u.** If 13u closed without resolving or re-owning it, **the row points at a closed phase** — the orphaned-entry state CLAUDE.md forbids. Re-own it or take it.
+- **13l's Fable review covered 4.5b** (commit `7fd2cd0`, the only merged work that reached `Shared/`+Mac unreviewed). **Read its findings before starting** — some may be yours, and this handoff's own second read of 4.5b is deliberate duplication at her word (*"it's for the best if we get more eyes on items"*), not an oversight.
 
 ---
 
