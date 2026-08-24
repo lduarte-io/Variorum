@@ -2183,6 +2183,19 @@ untouched (no refusal wording, no `planVisibleTakeEdit`, no gap-fence
 face) · no shelf-book multi-select · nothing pushed · every commit
 staged by explicit path.
 
+### OVERNIGHT AUTHORIZATION (author, 2026-08-24 evening — recorded for any successor seat)
+
+Her word before leaving: display stays on, login session unlocked
+(suite runs may proceed; the orchestrator caffeinates around them),
+**Variorum is QUIT — the `/Applications` refresh window is OPEN
+tonight** (A1 backup first, per the standing rail; re-check
+`pgrep -fl 'Variorum.app/Contents/MacOS'` immediately before the
+act anyway). She returns in the morning to: her checklist, any
+Fragments contract carry-items, and — hopefully — the authored 13u
+plan. Overnight discipline: PROVISIONAL-and-continue; author-only
+hard stops pause their single item and report; everything else
+proceeds.
+
 ### THE LEDGER (every row owned; statuses updated as they move)
 
 | # | item | strand | status |
