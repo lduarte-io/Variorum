@@ -229,6 +229,53 @@ struct NoteDeletionActTests {
     /// a sealed note "may still be … deleted (recoverable via
     /// restoreContainer)"). Pinned because a future guard here would look like
     /// tidiness and would be a product change.
+    /// **THE SCRAPS AREA IS NOT A NOTE** (13l Act 7 — the 8d walk's find, and
+    /// the worst thing it found).
+    ///
+    /// The walk fired this act from the scraps editor's own `note ▾` menu —
+    /// `CommitBar` hands it `model.postID`, which for that pane is the POOL's
+    /// id — confirmed the promise (*"The note goes to the Trash for 30 days.
+    /// You can put it back from Archived & Deleted until then"*), and watched
+    /// the container tombstone with the receipt *"Note moved to the Trash — 30
+    /// days to put it back."* Then: `Queries.trash`'s note arm is fenced to
+    /// `kind = 'post'` so no row appeared; the pool's 29 blocks were cascade
+    /// victims, which that listing deliberately never shows; and nothing in
+    /// either app calls `restoreContainer` on a pool. The Snippets surface
+    /// simply went from 30 scraps to 2.
+    ///
+    /// This pin holds the fence AND the invariant Act 2's own
+    /// `noDoorPutsAPoolContainerInTheTrash` asserted — an invariant that was
+    /// TRUE when it was written and that item 3 of the same batch silently
+    /// invalidated by giving four new doors a road to `deleteContainer`.
+    ///
+    /// **Red on old** (behavioural revert): delete the kind fence from
+    /// `NoteDeletion.run` and the pool tombstones, exactly as the walk saw.
+    @Test func theScrapsAreaCannotBeDeletedThroughTheNoteDoor() async throws {
+        try await withEditor(seedBlocks: ["Alpha one."]) { editor in
+            let pool = try editor.session.operations.createPool(title: "scraps")
+            let receipt = try await NoteDeletion.run(
+                session: editor.session, postIDs: [pool.id])
+            #expect(receipt == RecoveryCopy.notADeletableNote)
+            let state = try await editor.database.read { db in
+                (live: try Queries.containerHeader(db, containerID: pool.id) != nil,
+                 trash: try Queries.trash(db, now: harnessNow).map(\.id))
+            }
+            #expect(state.live, "the scraps area stays — it has no road back")
+            #expect(!state.trash.contains(pool.id),
+                    "and the Trash could not have listed it anyway")
+
+            // A MIXED pick deletes the notes and leaves the pool standing:
+            // one bad id must not cost her the gesture.
+            let mixed = try await NoteDeletion.run(
+                session: editor.session, postIDs: [pool.id, editor.postID])
+            #expect(mixed == RecoveryCopy.movedToTrashReceipt(notes: 1))
+            let after = try await editor.database.read { db in
+                try Queries.containerHeader(db, containerID: pool.id) != nil
+            }
+            #expect(after)
+        }
+    }
+
     @Test func aSealedNoteStillDeletes() async throws {
         try await withEditor(seedBlocks: ["Alpha one."]) { editor in
             try await editor.session.runner.run { [postID = editor.postID] ops in

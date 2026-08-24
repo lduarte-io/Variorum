@@ -87,6 +87,25 @@ enum NoteDeletion {
     /// refuses propagates and is spoken.
     static func run(session: AppSession, postIDs: [String]) async throws -> String {
         guard !postIDs.isEmpty else { return RecoveryCopy.notesAlreadyGone(0) }
+        // **THE KIND FENCE** (13l Act 7 — the 8d walk; the mechanism and the
+        // 28 lost scraps are written at `RecoveryCopy.notADeletableNote`).
+        // `deleteContainer` has no kind guard, and the scraps editor renders
+        // this act's door with the POOL's id, so the one gesture tombstoned a
+        // container the Trash cannot list and no door can restore. Read the
+        // kinds BEFORE the flush: a pool must not even have its buffers
+        // flushed on the way to a delete that must not happen.
+        //
+        // A missing or already-tombstoned container has no header and stays
+        // IN the list on purpose — `deleteContainer` throws
+        // `containerNotFound` for it below, which is the already-gone road
+        // this act has always spoken.
+        let notes = try await session.database.read { db in
+            try postIDs.filter { id in
+                try Queries.containerHeader(db, containerID: id)?.kind != .pool
+            }
+        }
+        guard !notes.isEmpty else { return RecoveryCopy.notADeletableNote }
+        let postIDs = notes
         for id in postIDs {
             await session.autosave(forPost: id).flushNow()
         }

@@ -306,6 +306,28 @@ nonisolated enum RecoveryCopy {
         count == 1 ? "That note is already gone." : "Those notes are already gone."
     }
 
+    /// **A scraps area is not a note, and the delete act says so** (13l Act 7
+    /// — the 8d walk's find).
+    ///
+    /// The walk fired `Delete Note…` from the scraps editor's `note ▾` menu
+    /// and watched the pool tombstone: the confirm promised the Trash, the
+    /// receipt said *"Note moved to the Trash — 30 days to put it back"*, and
+    /// then nothing listed it — `Queries.trash`'s note arm is fenced to
+    /// `kind = 'post'`, its blocks were cascade victims (never listed by
+    /// design), and no door anywhere calls `restoreContainer` on a pool. 28
+    /// scraps left the app with no way back, under a promise of recovery.
+    ///
+    /// The fence lives at the ACT because every one of the four doors passes
+    /// through it. **Hiding the door on a pool pane is the P-2 half and is
+    /// deliberately NOT built here** — it needs the editor's pane to publish
+    /// its container kind, and what that surface should offer INSTEAD (a
+    /// recoverable "delete the scraps area", or nothing at all) is a product
+    /// call. It is on the walk's propose-only list.
+    ///
+    /// **PROVISIONAL wording (QUESTIONS #77).**
+    static let notADeletableNote =
+        "That's the scraps area, not a note — it can't go to the Trash."
+
     // MARK: Put-back receipts, by kind and by landing (hoisted at 4.5b)
 
     /// What a put-back says when the op reports no landing of its own.

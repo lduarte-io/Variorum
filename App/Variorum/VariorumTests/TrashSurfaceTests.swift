@@ -76,8 +76,18 @@ struct TrashPoolHonestyTests {
 
             // RED ON OLD (behavioral revert: drop `homeIsPool`/`homeTitle`'s
             // pool arms). The query names the home with the NOTE brain…
-            #expect(scrapRow.noteTitle == DisplayTitle.placeholder,
-                    "the query's own answer is the note placeholder")
+            //
+            // **13l Act 7 edited this line, and it strengthens it.** The
+            // query's answer used to be the literal `"Untitled"` because the
+            // arm called `DisplayTitle.note` without a `createdAt:` — the
+            // walk's find, now fixed in all four arms. It is still the NOTE
+            // brain reading a POOL row (a pool has no `entry_date`, and 13k
+            // K2's rule for one is `DisplayTitle.pool`), which is exactly why
+            // the surface corrects it below. Asserting "the query answers
+            // SOMETHING, and the surface overrides it" is the fact this test
+            // is about; asserting the placeholder was asserting a defect.
+            #expect(scrapRow.noteTitle != nil,
+                    "the query answers with the note brain — the surface corrects it")
             // …and the surface corrects it to the pool's.
             #expect(model.homeIsPool(scrapRow))
             let shown = try #require(model.homeTitle(scrapRow))
