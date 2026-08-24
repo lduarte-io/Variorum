@@ -1475,6 +1475,23 @@ queue (item B) is already discharged — the walk ran all nine rows
   — it is independent of the lock and the forget-risk is live today.
   Her 13p planning agent reviews the change and tweaks as needed
   (her stated next step).
+- **CAST INCIDENT + CORRECTION (2026-08-24): Act 2's seat 1 ran as
+  FABLE after its resume — against the ruled Opus-implementer cast.**
+  Mechanism: the Act 2 implementer was SPAWNED with the explicit Opus
+  override, died mid-run on a 529, and was RESUMED by message — and
+  the resume continued it on the ORCHESTRATOR'S inherited model
+  (Fable), silently dropping the spawn-time override. Confirmed by
+  the author's own observation of the running agent (*"the model says
+  that it is currently Fable"*); her ruling re-affirmed: *"in the
+  future, the implementers should be Opus."* Correction: the seat was
+  ordered to WRAP AT THE NEAREST CLEAN SEAM (finish only the
+  in-progress item to a coherent committed state, honest partial
+  record, no new items); a FRESH explicit-Opus session takes the
+  remainder of Act 2 from that record. **The standing lesson, for
+  every future seat: a resumed background agent does NOT reliably
+  keep its model override — after any resume of a model-critical
+  seat, re-verify the model; when in doubt, wrap and re-dispatch
+  fresh with the model named.** (Also mirrored to session memory.)
 - **The suite-simulator question (her ask: why iPhone 16e, not 17):**
   answered — an iPhone 17 Pro sim EXISTS locally (iOS 26.2); 16e is
   the repo's standing convention since mobile v1, and every measured
