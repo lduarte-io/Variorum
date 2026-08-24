@@ -50,6 +50,16 @@ when only their easy half was done.** Verify; do not inherit.
 
 ---
 
+> ## ✅ STATUS, 2026-08-23 — THIS FILE'S ACTS ARE DONE
+>
+> **ACT 1** (the cold read over batches 1–4) ran → `mobile-round-2.md`
+> §56. **ACT 2** (the never-became-work sweep) ran → §53. **ACT 3**
+> (batch 4.5) was BUILT and MERGED — all three BLOCKERs fixed.
+> **B45-4's device sweep RAN on 2026-08-23: E1 FIRED and M1's root is
+> PROVEN** (§67); M16 is settled; all nine walk rows are answered.
+> **Every "NOT PROVEN" below is superseded.** The file is kept as the
+> record of her instruction and the reasoning behind it.
+
 ## ACT 1 — A FRESH COLD REVIEW OVER BATCHES 1–4 (before any build)
 
 **Dispatch a cold reviewer over the round's whole shipped diff**

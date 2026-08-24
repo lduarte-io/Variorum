@@ -1,5 +1,44 @@
 # Mobile round 2 — the delete-at-the-end crash, traced
 
+> # ✅ RESULT, 2026-08-23: **E1 RAN ON HER DEVICE AND THE SIGNATURE FIRED. M1's ROOT IS PROVEN.**
+>
+> **Everything below that calls the arming source SUSPECTED or "NOT
+> PROVEN" was true when written and is now SUPERSEDED.** The text is kept
+> unchanged because it is the reasoning that designed the experiment —
+> but read this first.
+>
+> **What her iPhone 17 Pro on iOS 26.6 recorded, in ordinary use:**
+>
+> ```
+> #50 GATE  at 178 len 0  repl 1 → armed
+> #51 EDIT  at 177 len 1  Δ+0  after 1 gate  ⚠ starts-before · net≠ · arming rejected
+> #52 EDIT  at 178 len 1  Δ+1  after 0 gates  ⚠ gate-less
+> ```
+>
+> **iOS consulted the delegate about inserting one character at offset
+> 178, then performed a DIFFERENT transaction at 177 with net zero, then
+> performed the real insertion at 178 without consulting at all.** That
+> is this document's §6 hypothesis observed directly: *the gate's verdict
+> and the storage report can describe different edits.* **Pre-fix,
+> `storageDidEdit` would have taken the identity from the gate and the
+> magnitude from the report and applied them together** — the wrong-block
+> write, and at the limit the negative-length trap that crashed her phone.
+>
+> **AND THE FIX CAUGHT IT:** `arming rejected`, with **`desync recoveries
+> 0`** — the `ArmedEdit` binding refused the mismatched consume and fell
+> through to `fallbackVerdict` without even a re-render. She noticed
+> nothing.
+>
+> **The honest limit:** one signature proves the mechanism **exists and
+> is reachable in ordinary use**. It does not prove it is the only source
+> of a stale verdict, and §21's residue remains unobservable by
+> construction. **What it settles is the question 13u needed settled
+> before building a larger gesture in this seam.**
+>
+> **Full analysis:** `mobile-round-2.md` **§67**. **Her verbatim trace and
+> report:** `notes/author-reports/2026-08-23-device-walk-and-product-asks.md`.
+
+
 **Status:** cold investigation, 2026-08-21. **Nothing was modified** — this file is the
 whole output. Every claim below carries an explicit label: **[PROVEN]** (from the crash
 logs, the shipped binary's own instructions, or code I read), **[DEDUCED]** (a closed

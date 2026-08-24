@@ -792,8 +792,7 @@ own sections; each is named there:
      past the last consult's `range.upperBound` — behind a flag that is
      inert in ordinary use. Say precisely how it is armed and read, in
      words a device session can follow without your context. **M1's own
-     status is recorded "high confidence, NOT PROVEN", and this is what
-     settles it.**
+     status was recorded "high confidence, NOT PROVEN".** **⚠️ SUPERSEDED 2026-08-23 — E1 RAN ON HER DEVICE AND FIRED; M1's ROOT IS PROVEN.** iOS consulted the delegate about an insert at offset 178, performed a different net-zero transaction at 177, then inserted at 178 without consulting — the gate's verdict and the storage report describing different edits, observed. **The binding REJECTED it, `desync recoveries 0`.** Full analysis `mobile-round-2.md` §67; the crash trace carries a result banner at its top; her verbatim trace is `notes/author-reports/2026-08-23-device-walk-and-product-asks.md`. **This item is DISCHARGED — the instrumentation shipped, she ran it, and the signature appeared.**
    - **E2** — the CI gate/report fixture.
    - **§8 path 8** — UIKit undo replaying a coalesced edit through the
      gaps between `removeAllActions()` calls. **Zero mentions anywhere
@@ -958,7 +957,7 @@ cannot settle it.
 
 | # | Item | What settles it |
 |---|---|---|
-| **E1** | **The crash trace's instrumented experiment** — *the only thing that settles where the stale verdict comes from.* **M1's own status is recorded "high confidence, NOT PROVEN."** | Log each gate consult's `(range, replacementLength)` and each report's `(editedRange, delta)`; flag any report whose OLD span extends past the last consult's `range.upperBound`. **4.5c builds the instrumentation and leaves it RUNNABLE**, with arming and reading written for a session that will not have 4.5c's context |
+| **E1** | **The crash trace's instrumented experiment** — *the only thing that settles where the stale verdict comes from.* **SUPERSEDED — E1 RAN 2026-08-23 AND FIRED; M1 is PROVEN (`mobile-round-2.md` §67).** | Log each gate consult's `(range, replacementLength)` and each report's `(editedRange, delta)`; flag any report whose OLD span extends past the last consult's `range.upperBound`. **4.5c builds the instrumentation and leaves it RUNNABLE**, with arming and reading written for a session that will not have 4.5c's context |
 | **M16** | **Same-note text drag-move** — if a dragged selection covers whole paragraphs it may plan a BLOCK delete while the drop lands the text as content (I4). Unsettleable from the repo: no drag delegate is configured, so reachability is a **device fact** | §24.9's experiment: long-press-drag a two-paragraph selection within one note; observe whether the source blocks vanish and whether the moved text lands as blocks or as content |
 | **D3** | **The destructive colour on a deletion door** (§46, §53 finding 2a) — `MobileNoteActions.swift:175` records that in a `layer.render` capture *system semantic* colours render as default label colour, so "Delete Note…" read black rather than red. Most likely a capture artifact, **but it is a colour a deletion door leans on (M-E)**, so it was flagged rather than assumed away | Look at it on the real screen |
 | **D4** | **The quick note's PLATFORM half** (§53 finding 2b) — `MobileQuickNoteTests.swift:14–17`: the pins *"cannot reach that iOS really delivers `.background` before a swipe-kill, and that the `beginBackgroundTask` grant buys enough wall clock on real hardware."* **This is the device half of Q1/Q2/Q4's own promise** — 4.5a fixes the code and nothing verifies the platform contract the fix rests on | Type into the box, swipe-kill, relaunch: is the text there? Repeat with the device locking mid-round |

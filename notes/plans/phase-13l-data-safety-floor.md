@@ -106,7 +106,8 @@ This replaces it.*
 > ### BASELINES — CURRENT, and the 13j figures are NOT
 >
 > core **1350/141** · Mac **1569/272** · Mac spine **63/8** · mobile
-> **475/77** · mobile spine **33/7** · mirror at lockstep marker **7**.
+> **484/78** · mobile spine **33/7** · mirror at lockstep marker **7**.
+> *(mobile moved 475/77 → 484/78 on 2026-08-23: E1's instrumentation added 9 tests. Mac, core and both spines are unchanged.)*
 > **Verify with your own runs.** *(The 13j closeout's figures — Mac
 > 1546/269, mobile 314/60 — are two rounds stale. The Mac +1 is mobile
 > batch 4.5b's single pin; do not read it as drift.)* **AND the Mac suite
@@ -222,7 +223,7 @@ multiple items and deleting all of them." Build, opening the phase
   installs while items sat runnable. **The one that matters most: E1**,
   the instrumented experiment that is *"the only thing that settles where
   the crash's stale verdict comes from"* — **the root cause is still
-  recorded "high confidence, NOT PROVEN"**, and **13u item 5 is about to
+  PROVEN as of 2026-08-23 — E1 fired on her device** *(see `mobile-round-2.md` §67; the "high confidence, NOT PROVEN" status this plan was written under is retired)*, and **13u item 5 is about to
   build a larger gesture in that exact seam.** *(E1's instrumentation is
   mobile's to build and has not been built, so a device window during
   this phase can run the other eight rows; E1 needs mobile's burst
@@ -753,7 +754,7 @@ pre-13j tombstones — expected).
 > moved — are in the section immediately below: **Mac 1568/272**
 > *(SUPERSEDED — the current figure is **1569/272**; see the correction
 > at the counts paragraph below)*,
-> mobile **475/77** *(corrected 2026-08-23 — 449/75 was batch 4's figure; batch 4.5 added 26 tests)* as of Mobile Round 2's batch 4. Core (1350/141)
+> mobile **484/78** *(corrected twice on 2026-08-23: 449/75 was batch 4's figure, batch 4.5 took it to 475/77, and E1's instrumentation added 9 more)*. Core (1350/141)
 > and the spine (63/8) are unchanged. The same warning is repeated in
 > the kickoff message's "verify the baselines with your own runs",
 > which is load-bearing here rather than routine.

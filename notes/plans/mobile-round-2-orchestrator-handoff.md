@@ -793,7 +793,7 @@ MobileMarkdownActs}.swift` ·
 | **An EMPTY block inside a span** | Yields a plan that can never execute, refusing an ordinary gesture with a sentence naming a cause that isn't there |
 | **The phone's unwired A7/#34 seam carves** | Backspace-to-join still refuses — a fifth refusal case §31's four-case table omits |
 | **B45-2 — the `displaySlot`/`slots[i]` coupling** | Out-of-range-safe only by caller accident. **Batch 7's PR8 reorder-takes walks straight into it.** Make the safety structural |
-| **B45-3 — the crash trace's six unowned items** | **E1** (build the instrumentation and leave it RUNNABLE for a device session that will not have your context — **M1's root is still "high confidence, NOT PROVEN"**) · **E2** · **§8 path 8** (UIKit undo replaying a coalesced edit — zero mentions anywhere in the round) · **§8 path 11** (the `supportsTextReplacement: false` fence — verify it stands and says why) · **§9's `MarkdownActs` Mac residual** · **M1's SUSPECTED status itself**. **Each leaves the session FIXED or with a named owner** |
+| **B45-3 — the crash trace's six unowned items** | **⚠️ E1 RAN 2026-08-23 AND FIRED — M1 IS PROVEN (§67; the crash trace's top banner). This item is DISCHARGED.** **E1** (build the instrumentation and leave it RUNNABLE for a device session that will not have your context — **M1's root is still "high confidence, NOT PROVEN"**) · **E2** · **§8 path 8** (UIKit undo replaying a coalesced edit — zero mentions anywhere in the round) · **§8 path 11** (the `supportsTextReplacement: false` fence — verify it stands and says why) · **§9's `MarkdownActs` Mac residual** · **M1's SUSPECTED status itself**. **Each leaves the session FIXED or with a named owner** |
 | **A1-5 — `CrossBlockRefusal` never hoisted** | Merge-then-edit landed and the refusal copy carrying **its own unexecuted instruction** was never re-narrowed, so the phone's cross-block refusal names **none** of its four real causes |
 | routed in from 4.5b | the **live editor over a tombstone** (the filed remedy was WRONG — the stale editor is in the *other* tab stack, so the fix is at the liveness seam), the **`MobileLenses.swift:419`** candidate, and two one-liners (`deleteNoteRefusal:958` → `DeletionRefusal.words(error)`; the A1-15 comment at `MobileCrossBlockEditTests.swift:598`) |
 
@@ -904,9 +904,7 @@ splits by platform, and only one half is Mac work:**
 | **The Mac half — the `MarkdownActs` arm-then-hand-off sites** | **A Mac session, and it is ROUTED TO 13u** (master plan, 13u item 7). The crash trace names it *"the Mac's real residual"*: a verdict armed and then handed off without being consumed. It lives in the same seam 13u item 5 rewrites |
 
 **So her instinct was right about half of it**, and that half now has a
-Mac home. **M1's status stays "high confidence, NOT PROVEN" until E1 runs
-on her hardware** — and E1 remains the single highest-value item in the
-device queue.
+Mac home. **⚠️ SUPERSEDED 2026-08-23 — E1 RAN ON HER DEVICE AND FIRED; M1's ROOT IS PROVEN.** iOS consulted the delegate about an insert at offset 178, performed a different net-zero transaction at 177, then inserted at 178 without consulting — the gate's verdict and the storage report describing different edits, observed. **The binding REJECTED it, `desync recoveries 0`.** Full analysis `mobile-round-2.md` §67; the crash trace carries a result banner at its top; her verbatim trace is `notes/author-reports/2026-08-23-device-walk-and-product-asks.md`. **The device queue's highest-value item is discharged.** *(The MAC half — the `MarkdownActs` arming residual — is unaffected and remains 13u item 7: E1 answered the iOS half.)*
 
 ---
 
