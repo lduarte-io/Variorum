@@ -220,12 +220,13 @@ if she prefers it off.
 
 | # | row | result |
 |---|---|---|
-| 1 | D8 cold launch | |
-| 2 | D3 destructive colour | |
-| 3 | D7 caret after a hold | |
-| 4 | D6 dictation | |
-| 5 | D4 swipe-kill + lock | |
-| 6 | **E1 the crash seam** | |
-| 7 | M16 drag-move | |
-| 8 | D5 bridge door | |
-| 9 | D9 Display-Zoom strip | |
+| 1 | D8 cold launch | ✅ **PASS** — *"felt pretty instant… a brief moment where i didn't and that brief moment wasn't there on relaunch but it was almost imperceptible."* B45-1/L-c stays worth doing, not urgent |
+| 2 | D3 destructive colour | ✅ **CLOSED** — *"delete note is red."* The capture was an artifact |
+| 3 | D7 caret after a hold | 🔴 **LOST PROSE — the walk's worst finding.** ⏎ stopped opening the note and started inserting newlines; the hand-off dropped the tail AND the prefix edits. *"complete disaster."* **A5-2 reopened → batch 4.6** |
+| 4 | D6 dictation | ✅ **PASS, and it NARROWED D7** — dictation and both paragraphs saved; *"one was only lost once i started clicking the cursor around"* |
+| 5 | D4 swipe-kill + lock | ✅ **PASS** — *"genuinely hard to get it to not save, and just locking my phone it still saved."* **The device half of Q2/Q4's promise holds** |
+| 6 | **E1 the crash seam** | 🔴✅ **POSITIVE — `SUSPECT SIGNATURE 1`. M1's ROOT IS PROVEN.** iOS asked about an insert at 178, performed a different net-zero transaction at 177, then inserted at 178 without asking. **The binding REJECTED it — batch 1's fix caught the real thing on her hardware, `desync recoveries 0`** |
+| 7 | M16 drag-move | ✅ **SETTLED** — *"i couldn't move it successfully."* The drop never lands, so the block-delete hazard cannot fire. **She reports the Mac is the same → 13u item 12** |
+| 8 | D5 bridge door | ✅ **CLOSED** — *"the browser sheet worked very smoothly."* **PL-9's iOS `presentationAnchor` arm works on a device**; the door stays |
+| 9 | D9 Display-Zoom strip | ✅ **ACCEPTED** — *"display zoom looks fine and is good to go."* The 23 pt strip is seen by a human and accepted |
+| + | **Raised unprompted** | 🟠 **Text selection is broken** — *"holding it down makes you scroll upwards, the exact opposite."* → **batch 9(e)** |
