@@ -2649,3 +2649,78 @@ by scenario; the runbook exists where she can find it under stress;
 freshness evidence is visible without her asking; the honesty
 sentences exist verbatim-in-meaning."* Append "ACT 4 — RECORD";
 flakes isolated before conclusions; explicit paths; never push.
+
+### ACT 5 — THE FACES: the brief (fresh Opus session; rows 16–18)
+
+Read: CLAUDE.md · this plan's kickoff rulings 2/3 + the brief's items
+3–5 · the Act 4 record (the face and scheduler this act extends) ·
+the Environment traps by reference.
+
+1. **Row 16 — bulk-`.md` insurance, automated.** The 11b one-gesture
+   bulk library export on a schedule, written to the picked second
+   destination (an `md-exports/` subfolder beside the backups).
+   Cadence + retention UNRULED — propose defaults (lean: weekly,
+   keep 4), mark PROVISIONAL, QUESTIONS entry. Fill the Data Safety
+   face's "last `.md` export" slot. The runbook already carries the
+   plaintext-privacy note (and R13p-8 makes this THE one deliberate
+   plaintext escape post-13p — build it as a clean, findable unit).
+2. **Row 17 — the sync-status face.** "Outbox empty / N pending ·
+   last push · last pull at …" in the Data Safety face's slot —
+   READ-SIDE ONLY (`sync_state` + the outbox count through existing
+   query roads; zero engine lines). Honest when signed out ("not
+   syncing — local only" reads as normal, never as broken).
+3. **Row 18 — the passphrase / recovery-phrase sanity check.**
+   Settings → Encryption: type the passphrase → Argon2id derive
+   OFF-MAIN (deliberately slow — say so in the UI) → attempt the
+   vault master-key unwrap → yes/no. The recovery phrase verifies by
+   its own unwrap path in the same face. **NO state changes, NO
+   re-key, NOTHING reset** — the unwrap attempt IS the verification
+   (GCM auth failure = wrong secret). The 14b `Crypto/` machinery is
+   the substrate; touch it read-only. **Build it as a reusable
+   component:** 13p's R13p-9 reminder checks are ruled to point at
+   THIS face ("one face serves both") — a clean seam now saves 13p a
+   rebuild.
+
+Registry (P-1) for every act; copy honest and PROVISIONAL (13s owns
+voice). **Mobile twins are NOT built here** — the status face + the
+sanity check phone twins are MobileSoul parity-ledger lines at the
+closeout (this is a Mac-first floor phase; the brains land in
+core/`Shared` where natural so the twins are faces, not rebuilds).
+Full gates; counts; "ACT 5 — RECORD"; the standing rules.
+
+### ACT 6 — ITEM 9, JOURNAL-DAY DELETIONS TRAVEL TO FRAGMENTS: the brief (fresh Opus session; row 20)
+
+Her ruling: deletions travel AT DELETE TIME (the tombstone, not the
+purge). Read: CLAUDE.md · Scope §9 above · the purge memo §4e (the
+current honest behavior this act changes) · `notes/fragments-bridge-contract.md`
+(the contract's empty-body semantics) · `Sources/VariorumCore/Bridge/`
+(the engine — its `bridge_day` hash rows are the design's hinge) ·
+the 9b closeout's insurance doctrine (nothing typed on either side is
+ever lost) · the Environment traps.
+
+**The shape (from the ruling + the sketch):** the sweep already knows
+which days it bridged (`bridge_day` rows). A bridged day that is NO
+LONGER LIVE pushes its deletion ONCE (the empty-body road); Put back
+self-heals (the day reads live again → the body re-pushes; the
+create-or-open landing rule is untouched).
+
+**The one design consideration you MUST handle and pin (the S5
+doctrine's letter):** a deletion push must never destroy prose SHE
+typed in Fragments after the Variorum deletion. Guard: push the
+deletion ONLY when the Fragments side still matches the last-pushed
+hash (no divergence since); if Fragments has diverged, the standing
+inbound road wins instead (her Fragments edit re-lands as a fresh
+note — the purge memo's documented outcome). Pin both directions.
+
+**Boundaries:** `Bridge/` module only — **zero
+`Sources/VariorumCore/Sync/` lines** (if the proof demands engine
+changes there, STOP and record); zero schema (bridge_day is
+local-only machinery — if a column seems needed, STOP: lockstep is
+hers); headless tests against the 9b fake-Fragments transport; the
+REAL bridge round exercises it only after the `/Applications`
+refresh, on her machine, in her use. **If Fragments needs ANYTHING
+on its side (rendering a pushed deletion, trim semantics), draft the
+ask as a contract-file note** (`notes/fragments-bridge-contract.md`
+— she carries it; it joins her morning checklist). Full gates
+(core-heavy; Mac/mobile should ride unmoved — say so if they move);
+"ACT 6 — RECORD"; the standing rules.
