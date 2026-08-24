@@ -2461,6 +2461,23 @@ to one enum, and the reason it could not be done on the face is stated above.
   session is legitimately in that file.
 - **Shelf-book multi-select** — the brief's explicit exclusion, at her word.
 
+### THE ARCHITECT'S ADJUDICATION OF P-0 (2026-08-24, on the walk's landing — recorded before the ladder dispatches)
+
+**P-0 is PROMOTED from propose-only to DEFECT.** The walk found her
+⌘-click multi-delete ruling to be a DEAD DOOR live (`postRow`'s
+`onTapGesture` swallows the click before `List(selection:)` sees it;
+`selectedPosts` never fills; the bulk bar cannot appear — and the
+older bulk TAG menu is unreachable the same way) while its pins stay
+green. That is not a taste question — it is a ruled deliverable
+(ledger item 3's third clause, her words) that does not work, in the
+pins-over-dead-wiring class this phase's own first act exists to
+kill. **The ladder's fix wave owns it**, with the pin standard the
+mobile round's 5.1 rule sets: drive the REAL surface (the AX/osascript
+road the walk itself used, if `List` selection cannot be unit-driven)
+— a pin that cannot reach the gesture routing must say so honestly
+and pair with the walk's captured evidence rather than pretend. The
+neighboring P-1…P-9 remain PROPOSE-ONLY for her, untouched.
+
 ### THE LEDGER (every row owned; statuses updated as they move)
 
 | # | item | strand | status |
