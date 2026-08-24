@@ -2478,6 +2478,71 @@ road the walk itself used, if `List` selection cannot be unit-driven)
 and pair with the walk's captured evidence rather than pretend. The
 neighboring P-1…P-9 remain PROPOSE-ONLY for her, untouched.
 
+### THE END-OF-PHASE LADDER — ROUND 1 (fresh Fable, 2026-08-24): findings + dispositions (recorded repo-first before the fix wave)
+
+**Verdict shape: 1 MAJOR · 3 MINOR · 2 NIT + an extensive clean bill**
+(fences verified from git; all suites re-run by the reviewer and
+matching Act 7's finals, fully green in its run incl. both flakes;
+the P-0 premise independently verified; every explicitly-flagged act
+item addressed — the `.tail` clamp ruled correctly
+defensive-without-repro, L-d's invariant checked against every
+caller, Act 6's guard attacked from first principles and held).
+
+**LR-MAJOR-1 · `BridgeEngine.swift:645` + `:1186-1194` + QUESTIONS
+#76(b) — days deleted BEFORE a restage are PERMANENTLY stranded by
+the re-push sentinel, and #76(b)'s author-facing claim ("the first
+round catches up EVERY day you ever deleted") is FALSE for exactly
+that population** — which includes any day she deleted before the
+14d migration act (2026-08-16): `stageRepushFromTruth`
+sentinel-stamps every `bridge_day` row incl. dead days; no road ever
+replaces a dead day's sentinel; `deletionCandidates`' guard excludes
+it forever. Silent permanent divergence + an over-broad record.
+Red-on-old pin specified (bridge → delete → restage → run twice →
+`deletionsPushed == 1`, fails today at 0). → **DISPOSITION: FIX
+WAVE** — correct #76(b)/(d); the pin; SURFACE stranded sentinel-days
+visibly (honesty, not product); measure her true backlog with a
+read-only SELECT **against the NEWEST BACKUP FILE, never her live
+store** (Act 4's copies are journal-normalized and self-contained;
+the app has been quit since evening so the backup is current);
+the ROAD OUT (may a deletion travel with no comparable agreement?)
+is HERS → a QUESTIONS entry.
+
+**LR-MINOR-2 · `NoteDeletion.swift:110` — the delete act MINTS an
+autosave coordinator (+ a Mac quit registration) for every deleted
+note incl. never-opened Library rows** — dead-weight session growth,
+the L-d class reintroduced one act over; its own comment claims
+otherwise. Pin specified (`openAutosaveCount == 0` after deleting a
+never-opened note). → **FIX WAVE** (existing-only flush per the
+`savepointOnLeaving` shape, or release-after-tombstone).
+
+**LR-MINOR-3 · `TEXTKIT2_NOTES.md:145` — the 13l widening entry
+REPLACED the 13e heading, mis-attributing the A47c bullet.** The
+architect's own edit error. → **FIXED BY THE ARCHITECT same turn**
+(the 13e heading restored above the A47c bullet; provenance whole).
+
+**LR-MINOR-4 · the walk's 100%-CPU hang is owner-pointed only inside
+this closing plan** — the blank-owner drift class. → **CLOSEOUT
+(architect)**: the hang (sample path, candidate mechanism, one
+occurrence unreproduced) written into the 13u plan's item 1 at the
+finals fill.
+
+**LR-NIT-4 · `MarkdownInsurance` has no P1-tension KnownIssues row**
+while its class siblings each carry one (owner 12). → **CLOSEOUT
+(architect)**: the row added, owner 12, beside the bridge-sweep row.
+
+**LR-NIT-5 · `BackupLog.read` whole-array decode returns `[]` on any
+one record's failure** — the next field change silently wipes the
+visible history again. → **FIX WAVE** (per-record lenient decode +
+pin).
+
+**P-0 (pre-adjudicated DEFECT)** → **FIX WAVE**: the ⌘-click
+multi-delete routing (`postRow`'s `onTapGesture` swallowing
+selection — the reviewer verified the premise at
+`LibraryCatalogView:586-587` incl. the Pool twin and the older bulk
+tag menu being unreachable the same way); pin standard per the
+adjudication (drive the real surface; honest pairing with the walk's
+evidence where unit roads can't reach the gesture).
+
 ### THE LEDGER (every row owned; statuses updated as they move)
 
 | # | item | strand | status |
