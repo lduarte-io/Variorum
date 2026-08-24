@@ -54,6 +54,12 @@ struct VariorumMobileApp: App {
                         services = fresh
                         await fresh.start()
                     }
+            case .opening:
+                // 13l L-c: the store opens off the main thread now, so there
+                // is a first frame with no session. Quiet by design — a
+                // spinner announcing 50 ms of work is worse than the calm
+                // ground the app opens onto anyway.
+                MobileStoreOpeningView()
             case .failed(let error):
                 MobileStoreFailureView(error: error) { bootstrap.retry() }
             }

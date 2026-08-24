@@ -79,6 +79,11 @@ struct VariorumApp: App {
                         // session is absent. See AppServices.
                         services?.triggerLifecycleRound()
                     }
+            case .opening:
+                // 13l L-c: the store opens off the main thread now, so there
+                // is a first frame with no session. Quiet by design — see
+                // StoreOpeningView.
+                StoreOpeningView()
             case .failed(let error):
                 StoreFailureView(error: error) { bootstrap.retry() }
             }
@@ -136,6 +141,8 @@ struct VariorumApp: App {
                 NoteWindowView(session: session, windows: windows, postID: postID)
             case (.failed(let error), _):
                 StoreFailureView(error: error) { bootstrap.retry() }
+            case (.opening, _):
+                StoreOpeningView()
             default:
                 // No note handed over (a restored window whose value did not
                 // come back): honest, not a blank pane.

@@ -11,6 +11,19 @@ import AppKit
 import SwiftUI
 import VariorumCore
 
+/// The first frame, while the store opens off the main thread (13l L-c).
+///
+/// **Deliberately silent.** The work behind it measured 54 ms at its worst,
+/// and the app opens onto a calm ground regardless; a spinner would announce
+/// a wait she does not have. What this view exists for is the honest
+/// STRUCTURE — there is now a moment with no session, and it renders as
+/// itself rather than as an empty window that looks broken.
+struct StoreOpeningView: View {
+    var body: some View {
+        Color(nsColor: .textBackgroundColor).ignoresSafeArea()
+    }
+}
+
 struct StoreFailureView: View {
     let error: AppDatabase.StoreOpenError
     let retry: () -> Void
