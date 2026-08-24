@@ -289,15 +289,25 @@ struct MobileUndoDoorTests {
                     == ["One two more", "three four."])
                 #expect(model.undoDoor.pendingWarning != nil)
 
-                // The confirmed road acts — and the writing it sets aside is
-                // insured by the op itself, exactly as the detail promises.
-                // (Driven on the model: a `UIAlertController`'s own buttons
-                // do not activate in process — measured, and recorded in
-                // `MobileSurfaceDriver`. The half that killed the Mac's
-                // doors is the PRESENTATION, and that half is pinned above.)
-                await model.undoDoor.confirmPendingUndo()
+                // **THE CONFIRM→ACT EDGE, DRIVEN** (batch 4.5b's BLOCKER).
+                // The shipped pin called `confirmPendingUndo()` directly,
+                // while the pending warning was still set — and that was the
+                // one edge with no coverage. Pressing the real **Undo**
+                // CANCELLED the undo: SwiftUI's `isPresented` write-back ran
+                // `cancelPendingUndo()` inside tap handling, so the enqueued
+                // `Task` found nothing to confirm and the receipt read
+                // "Undo cancelled — nothing changed."
+                //
+                // This taps the real action and lands the write-back in the
+                // same synchronous turn, which is what a tap is.
+                #expect(surface.tapAlertAction(
+                    "Undo", writeBack: { model.undoDoor.warningAtReceipt = false }),
+                        "the warning's Undo action must be drivable")
+                await surface.settle(40)
                 #expect(try await storedBlockTexts(db, postID: postID)
                     == ["One two three four."])
+                #expect(model.statusMessage != StructuralUndoCopy.undoCancelled,
+                        "pressing Undo must never report a cancellation")
             }
         }
     }
@@ -314,6 +324,52 @@ struct MobileUndoDoorTests {
             #expect(model.undoDoor.pendingWarning == nil, "no question was asked")
             #expect(try await storedBlockTexts(db, postID: postID)
                 == ["One two three four."])
+        }
+    }
+
+    /// **The REAL Cancel button still cancels** — the other half of 4.5b's
+    /// fix, and the half a careless fix would have broken. The setter no
+    /// longer decides that the alert closing means she cancelled (it cannot
+    /// know which button was pressed); the Cancel button decides, explicitly,
+    /// and it must still say so.
+    @Test func theRealCancelButtonStillCancelsAndSaysSo() async throws {
+        try await withEditorWorld { session, db in
+            let postID = try await makePost(session, blocks: ["One two three four."])
+            let (model, _) = await makeSurfaceEditor(session, postID: postID)
+            await model.structural.divide(atSurfaceCaret: 8)
+            // `.first`, never `[0]` — an index taken right after a size is a
+            // runner-killer under a red-on-old revert.
+            let sourceVariant = try #require(model.index.entries.first?.variantID)
+            model.autosave.record(
+                variantID: sourceVariant, text: "One two more", charDelta: 5)
+            await model.autosave.flushNow()
+            // **The surface catches up BEFORE the screen mounts, and this
+            // line is load-bearing rather than tidy.** This pin wrote through
+            // the autosave coordinator, not the text view, so the editor has
+            // not seen the new bytes; mounting over a surface that disagrees
+            // with the store is a desync by design and fires the editor's
+            // assertion seam (`MobileEditorViewModel.swift:1540`). Omitting
+            // it crashed this pin exactly that way once — a TRACED harness
+            // omission with the sibling pin's own recorded mechanism, never
+            // "assertion noise": that seam exists to surface routing
+            // failures, and reading a 1540 fatal as noise is the round's
+            // green-over-nothing failure inverted.
+            await model.refreshTakesFromStore()
+
+            try await withHostedSurface(
+                MobileWriteScreen(session: session, postID: postID, editor: model)
+            ) { surface in
+                #expect(surface.activate("Undo Divide"))
+                await surface.settle(40)
+                _ = try #require(surface.presentedAlert)
+                #expect(surface.tapAlertAction(
+                    "Cancel", writeBack: { model.undoDoor.warningAtReceipt = false }),
+                        "the warning's Cancel action must be drivable")
+                await surface.settle(40)
+            }
+            #expect(model.statusMessage == StructuralUndoCopy.undoCancelled)
+            #expect(try await storedBlockTexts(db, postID: postID)
+                == ["One two more", "three four."], "nothing moved")
         }
     }
 

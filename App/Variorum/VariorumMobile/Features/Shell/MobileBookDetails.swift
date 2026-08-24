@@ -167,16 +167,11 @@ final class MobileBookDetailsModel {
         await refresh()
     }
 
-    /// Phone words for the acts' refusals (no platform names).
+    /// **Forwards to the ONE deletion-refusal home** (A1-18) — this table
+    /// and the Trash's covered different subsets of the same errors, so one
+    /// refused act read two ways depending on the door.
     nonisolated static func refusal(_ error: OperationError) -> String {
-        switch error {
-        case .lockedReading:
-            return "This book is finished — reopen it first."
-        case .readingNotFound:
-            return "That book is gone."
-        default:
-            return "Refused: \(error)"
-        }
+        DeletionRefusal.words(error)
     }
 }
 

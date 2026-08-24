@@ -98,12 +98,16 @@ final class MobileTrashModel {
         }
     }
 
+    /// **Through the CORE's own wrapper**, not a rolled `observe { … }` over
+    /// the same query (§49's MINOR). `observeArchivedPosts` exists beside
+    /// `observeLibrary` and `observeTrash`, which this model already uses —
+    /// rolling the third by hand made one of three sibling reads take a
+    /// different road for no reason, and a change to the core observation's
+    /// shape would have reached two of them.
     func startArchived() async {
         do {
             let limit = window + 1
-            for try await value in session.database.observe({ db in
-                try Queries.archivedPosts(db, limit: limit)
-            }) {
+            for try await value in session.database.observeArchivedPosts(limit: limit) {
                 archivedTruncated = value.count > window
                 archived = archivedTruncated ? Array(value.prefix(window)) : value
             }
@@ -123,38 +127,21 @@ final class MobileTrashModel {
 
     // MARK: - Put back (one verb, each kind's own road)
 
+    /// **The act is the SHARED one** (`TrashPutBack` — batch 4.5b's hoist of
+    /// §49's named drift). This model keeps only the phone's face on it: the
+    /// two slots (receipt vs the red one) and the phone's refusal voice.
     func putBack(_ item: Queries.TrashItem) async {
         lastError = nil
         receipt = nil
         do {
-            // A preserved original was never DELETED — putting it back means
-            // PLACING it, which is the shared composition's job (it re-reads
-            // its landing at act time, because a listing is a projection).
-            if item.kind == .preservedOriginal {
-                guard let noteID = item.noteID else {
-                    lastError = RecoveryCopy.putBackUnplaced
-                    return
-                }
-                receipt = try await PreservedOriginPutBack.run(
-                    session: session, postID: noteID, blockID: item.id)
-                return
-            }
-            let landing = try await session.runner.run {
-                ops -> Operations.BlockRestoreLanding? in
-                switch item.kind {
-                case .note: try ops.restoreContainer(item.id)
-                case .book: try ops.restoreReading(item.id)
-                case .block: return try ops.restoreBlock(item.id)
-                case .take: _ = try ops.restoreVariant(item.id)
-                case .preservedOriginal: break  // handled above
-                }
-                return nil
-            }
-            receipt = landing.map(Self.landingReceipt) ?? Self.putBackReceipt(item.kind)
+            receipt = try await TrashPutBack.run(session: session, item: item)
         } catch let error as OperationError {
             lastError = Self.refusal(error)
         } catch {
-            lastError = String(describing: error)
+            // Includes `RecoveryRefusal` — nothing was attempted, so it is a
+            // refusal and never the `putBackUnplaced` RECEIPT the shipped
+            // code put in the red slot (§49's MINOR).
+            lastError = DeletionRefusal.fallback(error)
         }
     }
 
@@ -171,7 +158,7 @@ final class MobileTrashModel {
         } catch let error as OperationError {
             lastError = Self.refusal(error)
         } catch {
-            lastError = String(describing: error)
+            lastError = DeletionRefusal.fallback(error)
         }
     }
 
@@ -216,10 +203,27 @@ final class MobileTrashModel {
 
     private(set) var pendingConfirm: PurgeConfirm?
 
-    /// The alert host's binding (`@Bindable`-projected — never a computed
-    /// `Binding(get:set:)` over an `@Observable` property, which is the
-    /// MAC's own dead purge doors at `RecoveryView.swift:573`. That defect
-    /// is why this surface exists in this shape at all.)
+    /// The alert host's binding.
+    ///
+    /// **THE RULE, and it names the property that matters rather than a
+    /// shape** (batch 4.5b, the confirm BLOCKER): *a binding setter must
+    /// never clear state that an action's continuation will read back.*
+    ///
+    /// SwiftUI's contract is that tapping an alert action sets `isPresented`
+    /// to `false` — synchronously, inside tap handling — while an action's
+    /// `Task { … }` cannot resume until that handling yields. So a confirm
+    /// that opened `guard let confirm = pendingConfirm else { return }`
+    /// guarded on state this setter had already cleared: **the door
+    /// presented, she tapped Delete Now, and nothing was purged.**
+    ///
+    /// The rule this round had been citing — *never a computed
+    /// `Binding(get:set:)` over an `@Observable` property* — names a SYNTAX,
+    /// and this site obeyed it to the letter (`@Bindable`-projected, the
+    /// getter read in `body`) and was dead anyway. The fix is therefore not
+    /// a different binding shape: **the act's value rides into the action
+    /// closure** (`alert(_:isPresented:presenting:)`) and
+    /// `confirmPendingPurge(_:)` takes it as a parameter, so there is no
+    /// read-back left for any setter to beat.
     var purgeConfirmPresented: Bool {
         get { pendingConfirm != nil }
         set { if !newValue { pendingConfirm = nil } }
@@ -253,7 +257,7 @@ final class MobileTrashModel {
             }
             pendingConfirm = .emptyTrash(counts: counts)
         } catch {
-            lastError = String(describing: error)
+            lastError = DeletionRefusal.fallback(error)
         }
     }
 
@@ -264,8 +268,11 @@ final class MobileTrashModel {
     /// The confirmed act: ONE op (`requestPurge` — the intent write; rows
     /// leave every surface at once through the read-side fence), and the
     /// receipt tells the truth about the NOW/janitor split.
-    func confirmPendingPurge() async {
-        guard let confirm = pendingConfirm else { return }
+    ///
+    /// **The confirm is PASSED IN, never read back** — see the rule at
+    /// `purgeConfirmPresented`. The alert's action closure carries it in
+    /// (`presenting:`), so this method cannot be beaten by the dismissal.
+    func confirmPendingPurge(_ confirm: PurgeConfirm) async {
         pendingConfirm = nil
         lastError = nil
         receipt = nil
@@ -316,10 +323,10 @@ final class MobileTrashModel {
             // so Delete Now means what it says the moment she reads it (a
             // configured chain's janitor owns the road instead).
             await session.sweepLocalPurge()
-        } catch let error as OperationError {
-            lastError = Self.refusal(error)
         } catch {
-            lastError = String(describing: error)
+            // A PURGE refusal, never a put-back one — the seal's way out
+            // differs by act, which is why `Act` is a parameter (A1-18).
+            lastError = DeletionRefusal.words(error, act: .delete)
         }
     }
 
@@ -327,33 +334,23 @@ final class MobileTrashModel {
 
     static let unarchivedReceipt = "Unarchived — it's back in the library."
 
-    /// The block put-back's three landings, in the SHARED words (13j's one
-    /// home): `restoreBlock` answers WHERE it landed, and the receipt says
-    /// so rather than guessing.
+    /// **Forwards to the shared home** — hoisted at 4.5b so the Mac cannot
+    /// keep answering *"where did it go?"* differently. Kept as a forward so
+    /// this batch's pins ride unmodified (the 3C parity pattern).
     nonisolated static func landingReceipt(
         _ landing: Operations.BlockRestoreLanding
     ) -> String {
-        switch landing {
-        case .itsOldPlace: return RecoveryCopy.putBackWhereItWas
-        case .endOfNote: return RecoveryCopy.putBackAtEnd
-        case .unplaced: return RecoveryCopy.putBackUnplaced
-        }
+        RecoveryCopy.landingReceipt(landing)
     }
 
     static func putBackReceipt(_ kind: Queries.TrashItem.Kind) -> String {
-        "\(RecoveryCopy.rowKind(kind).prefix(1).uppercased())"
-            + "\(RecoveryCopy.rowKind(kind).dropFirst()) put back."
+        RecoveryCopy.putBackReceipt(kind)
     }
 
-    /// The one refusal this surface really meets — the seal — said as a
-    /// diagnosis with the way out (the J8 doctrine); the rest is the
-    /// operations layer's own message, the phone's standing posture.
+    /// **Forwards to the ONE deletion-refusal home** (A1-18): the seal said
+    /// as a diagnosis with the way out (the J8 doctrine), and everything else
+    /// in the shared table rather than a fourth private copy of it.
     static func refusal(_ error: OperationError) -> String {
-        switch error {
-        case .lockedPost: return RecoveryCopy.sealedPutBackRefusal
-        case .containerNotFound: return "That note is already gone."
-        case .readingNotFound: return "That book is already gone."
-        default: return String(describing: error)
-        }
+        DeletionRefusal.words(error, act: .putBack)
     }
 }

@@ -217,11 +217,18 @@ struct MobileTrashTests {
                 }
                 #expect(intents == 0)
 
-                // The confirmed act writes the intent AND — on a local-only
-                // install, which this world is — the app's own sweep takes
-                // the bytes right away, so Delete Now means what it says
-                // the moment she reads the receipt (13j ladder B, B3).
-                await model.confirmPendingPurge()
+                // **THE CONFIRM→ACT EDGE, DRIVEN** (batch 4.5b's BLOCKER).
+                // The shipped pin called `confirmPendingPurge()` directly,
+                // WHILE the pending value was still set — the one edge with
+                // no coverage, and the one the defect lived in. This taps the
+                // real action and lands SwiftUI's write-back in the same
+                // turn: on the pre-fix code the confirm read `pendingConfirm`
+                // back, found `nil`, and purged NOTHING.
+                #expect(surface.tapAlertAction(
+                    RecoveryCopy.deleteNowVerb,
+                    writeBack: { model.purgeConfirmPresented = false }),
+                        "the confirm's real action must be drivable")
+                await surface.settle(40)
                 let minted = try await db.read { db in
                     try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM purge_intent") ?? -1
                 }
@@ -272,7 +279,12 @@ struct MobileTrashTests {
                 #expect(message.contains("2 notes"))
                 #expect(message.contains("1 book"))
 
-                await model.confirmPendingPurge()
+                // The bulk door's confirm→act edge, driven the same way.
+                #expect(surface.tapAlertAction(
+                    "Empty Trash",
+                    writeBack: { model.purgeConfirmPresented = false }),
+                        "Empty Trash's real action must be drivable")
+                await surface.settle(40)
             }
             let intents = try await db.read { db in
                 try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM purge_intent") ?? -1
@@ -321,6 +333,29 @@ struct MobileTrashTests {
         }
     }
 
+    /// **A REFUSAL BELONGS IN THE RED SLOT AND A RECEIPT DOES NOT** (§49's
+    /// MINOR). A preserved original with no note recorded cannot be put back
+    /// — placing needs somewhere to place — so NOTHING happens. The shipped
+    /// code answered that with `putBackUnplaced`, which is the RECEIPT for a
+    /// block that really was restored but had nowhere to land: it read as a
+    /// success, in the red slot, over a row that had not moved.
+    ///
+    /// **Red on old:** restore `lastError = RecoveryCopy.putBackUnplaced` and
+    /// this pin fails on the sentence.
+    @Test func aPreservedOriginalWithNoNoteIsRefusedNotCongratulated() async throws {
+        try await withEditorWorld { session, _ in
+            let model = MobileTrashModel(session: session)
+            let orphan = Queries.TrashItem(
+                kind: .preservedOriginal, id: "block-1", deletedAt: "2026-08-01T00:00:00Z",
+                text: "The original whole.", noteID: nil)
+            await model.putBack(orphan)
+            #expect(model.receipt == nil, "nothing happened, so nothing is receipted")
+            #expect(model.lastError == RecoveryCopy.originalHasNoNote)
+            #expect(model.lastError != RecoveryCopy.putBackUnplaced,
+                    "never the RECEIPT for a block that really moved")
+        }
+    }
+
     /// A PRESERVED ORIGINAL never wears a Delete Now — it rides its
     /// family's clock (her round-8b ruling), and the belt refuses even if a
     /// caller asks.
@@ -335,7 +370,67 @@ struct MobileTrashTests {
         }
     }
 
+    // MARK: - The harness itself (batch 4.5b — Act 1's MAJOR 4)
+
+    /// **AN EMPTY ACCESSIBILITY TREE MUST READ AS "THE SERVER IS UNARMED",
+    /// NEVER AS "THE DOOR ISN'T THERE."**
+    ///
+    /// The whole real-surface harness rides one machine-local, per-simulator
+    /// default. Without it every walk returns nothing, so sixteen real pins
+    /// fail reporting `labels were []` — indistinguishable from sixteen
+    /// missing doors, and three of this round's four sub-batches were
+    /// dispatched onto simulators in exactly that state. That is the
+    /// green-over-nothing class inverted, and the honest response to a
+    /// phantom failure is to change working code.
+    ///
+    /// This drives the diagnostic on the only surface that yields an empty
+    /// tree on a HEALTHY machine — a genuinely empty view. The diagnostic
+    /// cannot tell "empty because unarmed" from "empty because there is
+    /// nothing", and this pin is the record of that trade: every real pin in
+    /// this suite mounts a surface with content, so the false positive has no
+    /// population, while the false NEGATIVE it prevents had sixteen.
+    ///
+    /// The other half — arming — is proven by the reviewer's own recipe
+    /// rather than by a pin: delete the default, run, watch the phantoms;
+    /// restore it, watch them pass.
+    @Test func anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor() async throws {
+        await withKnownIssue("the empty tree must be REPORTED as the server, not as a door") {
+            await withHostedSurface(EmptyView()) { surface in
+                #expect(surface.activate("A door that would exist on a real screen") == false)
+            }
+        }
+    }
+
     // MARK: - Copy
+
+    /// **ONE deletion-refusal home** (A1-18): before this batch the phone had
+    /// THREE — the editor's, the Trash's and book-details' (which the shelf
+    /// borrowed) — each mapping a different subset of `OperationError`, so
+    /// one refused act read differently depending on the door she used, and
+    /// anything none of the three had listed reached her as a raw enum dump.
+    @Test func theDeletionRefusalsHaveOneHome() async throws {
+        // The ACT decides the sentence, not just the error.
+        #expect(DeletionRefusal.words(OperationError.lockedPost(id: "p"), act: .putBack)
+            == RecoveryCopy.sealedPutBackRefusal)
+        #expect(DeletionRefusal.words(OperationError.lockedPost(id: "p"), act: .delete)
+            != RecoveryCopy.sealedPutBackRefusal)
+        // The two surfaces' own tables now answer identically.
+        #expect(MobileTrashModel.refusal(.containerNotFound(id: "c"))
+            == MobileBookDetailsModel.refusal(.containerNotFound(id: "c")))
+        #expect(MobileTrashModel.refusal(.readingNotFound(id: "r"))
+            == MobileBookDetailsModel.refusal(.readingNotFound(id: "r")))
+        // The fallback is a SENTENCE that still carries the name — never a
+        // bare dump, and never a swallow.
+        let fallback = DeletionRefusal.words(OperationError.lockedVariant(id: "v"))
+        #expect(fallback.hasSuffix("."))
+        #expect(fallback.contains("lockedVariant"), "the name is kept")
+        #expect(fallback != "lockedVariant(id: \"v\")", "but never bare")
+        // A refusal where nothing was even attempted is its own case, and it
+        // is NOT the `putBackUnplaced` RECEIPT (§49's MINOR).
+        #expect(DeletionRefusal.words(RecoveryRefusal.originalHasNoNote)
+            == RecoveryCopy.originalHasNoNote)
+        #expect(RecoveryCopy.originalHasNoNote != RecoveryCopy.putBackUnplaced)
+    }
 
     /// One vocabulary, shared with the Mac since this batch — the two
     /// platforms cannot describe one 30-day clock two ways.

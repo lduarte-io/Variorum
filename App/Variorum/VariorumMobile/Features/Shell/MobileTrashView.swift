@@ -23,9 +23,15 @@
 //  view-model pins. Visible buttons are also simply more discoverable in a
 //  room she will visit rarely and urgently.
 //
-//  **2. The destructive dialog is `.alert(isPresented:)` over a real
-//  `@Bindable` projection.** Never a `Binding(get:set:)` computed over an
-//  `@Observable` property (§15's trap (a) — `RecoveryView.swift:573`).
+//  **2. The destructive dialog is `.alert(isPresented:presenting:)` over a
+//  real `@Bindable` projection** — and BOTH halves are load-bearing. The
+//  projection keeps the dialog PRESENTING (never a `Binding(get:set:)`
+//  computed over an `@Observable` property — §15's trap (a)); `presenting:`
+//  keeps it ACTING, by carrying the pending confirm INTO the action closure
+//  instead of leaving it to be read back after the dismissal has cleared it.
+//  Batch 4 shipped only the first half and this door confirmed nothing at
+//  all: the rule it was obeying named a syntax, not the property that
+//  mattered. `MobileTrashModel.purgeConfirmPresented` states the real one.
 //
 //  Rows are read-cheap `Text` (P3: no editor ever lives here), the listing
 //  is windowed with a visible truncation marker (P1), and the filter/sort
@@ -93,24 +99,27 @@ struct MobileTrashView: View {
         .task(id: model.restartToken) { await model.startTrash() }
         .task { await model.startArchived() }
         // Delete Now / Empty Trash — ONE confirm host, over a REAL
-        // `@Bindable` projection (§15's trap (a)).
+        // `@Bindable` projection (§15's trap (a)) AND with the act's value
+        // riding into the action closure (`presenting:` — batch 4.5b's
+        // BLOCKER fix). The second half is the one that matters: the
+        // projection alone presented perfectly and then confirmed NOTHING,
+        // because SwiftUI clears `isPresented` inside tap handling and the
+        // action's `Task` read the cleared value back. See the rule at
+        // `MobileTrashModel.purgeConfirmPresented`.
         .alert(
             model.pendingConfirm?.title ?? "",
-            isPresented: $model.purgeConfirmPresented
-        ) {
-            Button(
-                tokens.chromeLabel(model.pendingConfirm?.confirmVerb
-                    ?? RecoveryCopy.deleteNowVerb),
-                role: .destructive
-            ) {
+            isPresented: $model.purgeConfirmPresented,
+            presenting: model.pendingConfirm
+        ) { confirm in
+            Button(tokens.chromeLabel(confirm.confirmVerb), role: .destructive) {
                 let model = model
-                Task { await model.confirmPendingPurge() }
+                Task { await model.confirmPendingPurge(confirm) }
             }
             Button(tokens.chromeLabel("Cancel"), role: .cancel) {
                 model.cancelPendingPurge()
             }
-        } message: {
-            Text(model.pendingConfirm?.message ?? "")
+        } message: { confirm in
+            Text(confirm.message)
         }
     }
 

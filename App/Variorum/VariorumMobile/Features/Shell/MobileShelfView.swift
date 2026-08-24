@@ -103,19 +103,27 @@ struct MobileShelfView<TabBar: View>: View {
         .task { await model.refreshTags() }
         // PR4's confirm. `$model.deleteBookPresented` is a real `@Bindable`
         // projection over the observable model — never a computed
-        // `Binding(get:set:)` (§15's trap (a), the Mac's dead purge doors).
+        // `Binding(get:set:)` (§15's trap (a), the Mac's dead purge doors) —
+        // AND the book rides into the action closure through `presenting:`,
+        // which is the half batch 4 was missing: read back after SwiftUI's
+        // dismissal, it was already `nil` and the book was never deleted
+        // (batch 4.5b's BLOCKER; the rule is at
+        // `MobileShelfViewModel.deleteBookPresented`). The message now names
+        // the book from the SAME captured value, so it can never blank
+        // mid-presentation either.
         .alert(
             MobileShelfFaces.deleteBookConfirmTitle,
-            isPresented: $model.deleteBookPresented
-        ) {
+            isPresented: $model.deleteBookPresented,
+            presenting: model.pendingDeleteBook
+        ) { book in
             Button(tokens.chromeLabel("Delete"), role: .destructive) {
                 let model = model
-                Task { await model.confirmDeleteBook() }
+                Task { await model.confirmDeleteBook(book) }
             }
             Button(tokens.chromeLabel("Cancel"), role: .cancel) {}
-        } message: {
+        } message: { book in
             Text(MobileShelfFaces.deleteBookConfirmDetail(
-                name: model.pendingDeleteBook?.reading.name))
+                name: book.reading.name))
         }
     }
 

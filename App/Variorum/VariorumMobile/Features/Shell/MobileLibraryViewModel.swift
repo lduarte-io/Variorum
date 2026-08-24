@@ -200,8 +200,19 @@ final class MobileLibraryViewModel {
     /// speak `RecoveryCopy`'s one wording.
     var pendingDeleteNote: Queries.TimelineItem?
 
-    /// The alert host's binding (`@Bindable`-projected — never a computed
-    /// `Binding(get:set:)`, §15's trap (a)).
+    /// The alert host's binding.
+    ///
+    /// **THE RULE (batch 4.5b's confirm BLOCKER): a binding setter must never
+    /// clear state that an action's continuation will read back.** SwiftUI
+    /// sets `isPresented` to `false` synchronously inside tap handling, while
+    /// an action's `Task { … }` cannot resume until that handling yields — so
+    /// a `confirmDeleteNote()` that opened by reading `pendingDeleteNote` back
+    /// found it already `nil` and **the note was never deleted.** The site
+    /// obeyed this round's stated rule (*never a computed `Binding(get:set:)`
+    /// over an `@Observable` property*) to the letter and was dead anyway:
+    /// that rule names a SYNTAX, this one names the property that matters.
+    /// The host therefore rides `presenting:` and the act takes its subject as
+    /// a parameter, so no read-back survives for a setter to beat.
     var deleteNotePresented: Bool {
         get { pendingDeleteNote != nil }
         set { if !newValue { pendingDeleteNote = nil } }
@@ -211,16 +222,28 @@ final class MobileLibraryViewModel {
         pendingDeleteNote = item
     }
 
-    /// The confirmed act. No flush here, deliberately, and the difference
-    /// from the in-note door is the whole reason: this row deletes a note
-    /// NO surface on this phone has open, so there is no pending buffer to
-    /// land (`flushNow` on a coordinator nothing opened is a no-op with
-    /// nothing pending — `AppSession.runCopying`'s own recorded property).
-    /// The in-note door flushes because it always has one.
+    /// The confirmed act. **The note is PASSED IN, never read back** — see
+    /// the rule at `deleteNotePresented`.
+    ///
+    /// **It flushes first, and the shipped no-flush justification was false**
+    /// (§49's MINOR). That justification read: *"this row deletes a note NO
+    /// surface on this phone has open, so there is no pending buffer to
+    /// land."* The shell's architecture falsifies it — BOTH tab stacks stay
+    /// alive by design (`MobileLivenessAuthority`: "two `MobileWriteScreen`s
+    /// can exist at once, and nothing about visibility ever fires
+    /// `onDisappear`"), so the commonest road to this very door is *open a
+    /// note → switch to Library → delete that row*, with the note's editor
+    /// still mounted and its debounce possibly still holding keystrokes.
+    /// `flushEveryOpenPost()` is the session's own door for exactly that and
+    /// is a no-op when nothing is pending, so the guarantee costs nothing on
+    /// the road the old comment described and saves the keystrokes on the one
+    /// it forgot. (It lands text into a note that is about to be tombstoned —
+    /// which is the point: a tombstone is recoverable for 30 days, and text
+    /// that never reached the store is not.)
     @discardableResult
-    func confirmDeleteNote() async -> Bool {
-        guard let item = pendingDeleteNote else { return false }
+    func confirmDeleteNote(_ item: Queries.TimelineItem) async -> Bool {
         pendingDeleteNote = nil
+        await session.flushEveryOpenPost()
         do {
             try await session.runner.run { ops in
                 try ops.deleteContainer(item.postID)
@@ -230,7 +253,7 @@ final class MobileLibraryViewModel {
             return true
         } catch {
             receipt = nil
-            lastError = MobileEditorViewModel.deleteNoteRefusal(error)
+            lastError = DeletionRefusal.words(error)
             return false
         }
     }

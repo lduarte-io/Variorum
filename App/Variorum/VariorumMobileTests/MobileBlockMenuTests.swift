@@ -259,6 +259,85 @@ struct MobileBlockMenuTests {
     // MARK: Delete block (flush-first; the tray's recovery door rides
     // PL-3/13j — the copy no longer redirects, parity C2)
 
+    // MARK: - The menu's own safety (batch 4.5b)
+
+    /// **A DESTRUCTIVE DOOR MUST NOT PROCEED BECAUSE ITS CONFIRM IS
+    /// MISSING** (§44's NIT 7). The shipped `confirmDelete` fell straight
+    /// through to the act when its seam was nil — a delete that happens
+    /// *because* nothing was there to ask, which is exactly backwards and the
+    /// one shape M-E cannot tolerate (R13's carve-out covers the in-editor ⌫
+    /// keystroke, never this menu row).
+    ///
+    /// Driven through the REAL Delete row's own handler — `menuElements` is
+    /// what both of this menu's doors render, and a `UIAction`'s installed
+    /// handler is the exact closure UIKit runs on a tap.
+    ///
+    /// **Red on old:** with the fall-through restored, the block is
+    /// tombstoned by this pin with no confirm anywhere in sight.
+    @Test func theDeleteRowRefusesWhenItHasNoConfirmToAskWith() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedTwoBlockPost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            model.blockMenu.confirmDestructive = nil
+
+            let elements = model.blockMenu.menuElements(
+                blockID: seed.blockA, includeTakes: true)
+            #expect(MenuActionHandler.activate(
+                MobileEditorStyle.chromeCase(MobileBlockMenuController.deleteTitle),
+                in: elements),
+                    "the Delete row's real handler must be drivable")
+            for _ in 0..<20 {
+                try? await Task.sleep(for: .milliseconds(10))
+                await Task.yield()
+            }
+
+            #expect(try await storedBlockTexts(db, postID: seed.postID).count == 2,
+                    "nothing was deleted without a confirm")
+            #expect(model.statusMessage == MobileBlockMenuController.deleteNeedsItsConfirm)
+        }
+    }
+
+    /// **ONE ACT AT A TIME** (§53 finding 3): every row here is a bare
+    /// `Task { await … }` off a `UIAction`, and a rapid double-tap ran two
+    /// concurrently. For `applyCallout` — a read-modify-write — that is a
+    /// LOST UPDATE: both read the pre-state, and the second silently discards
+    /// the first, so a toggle un-toggles and a colour does not stick.
+    ///
+    /// Its two siblings (`MobileStructuralController.structuralInFlight`,
+    /// `MobileUndoDoor.inFlight`) already latch; this is the same idiom, and
+    /// it lands before **batch 7 adds more rows to this same menu**.
+    ///
+    /// **Red on old:** without the latch the second call runs, reports
+    /// nothing, and its write lands over the first's.
+    @Test func aSecondBlockMenuActInsideTheFirstIsRefusedNotRun() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedTwoBlockPost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            async let first: Void = model.blockMenu.applyCallout(
+                blockID: seed.blockA, edit: .toggle)
+            async let second: Void = model.blockMenu.applyCallout(
+                blockID: seed.blockA, edit: .color("rose"))
+            _ = await (first, second)
+
+            // **The oracle is the STORE, not the message.** A landed act
+            // clears the status (`report(nil)`), so whichever finishes last
+            // decides what is on screen — asserting the sentence would pin
+            // the race rather than the fix. What the latch changes is what
+            // REACHES the row: the second act must not have written.
+            let presentation = try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT presentation FROM block WHERE id = ?",
+                    arguments: [seed.blockA])
+            }
+            #expect(presentation?.contains("rose") != true,
+                    "the second press never wrote — pre-fix it lands over the first")
+            #expect(model.blockMenu.actInFlight == false, "the latch always releases")
+        }
+    }
+
     @Test func deleteBlockTombstonesAndSpeaksTheTrayNote() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedTwoBlockPost(session)

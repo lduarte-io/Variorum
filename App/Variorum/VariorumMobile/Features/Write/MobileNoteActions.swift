@@ -71,6 +71,7 @@ struct MobileNoteActionsSheet: View {
             redoRow
             Divider().overlay(tokens.line)
             deleteRow
+            reportLine
             Spacer(minLength: 0)
         }
         .padding(20)
@@ -109,6 +110,33 @@ struct MobileNoteActionsSheet: View {
             Button(tokens.chromeLabel("Cancel"), role: .cancel) {}
         } message: {
             Text(MobileEditorViewModel.deleteNoteConfirmDetail)
+        }
+    }
+
+    /// **A refusal raised HERE is spoken HERE** (§49's MINOR: *a refusal
+    /// spoken behind the presenting sheet*).
+    ///
+    /// Every act on this sheet reports through `MobileEditorViewModel.report`,
+    /// which renders in the WRITE surface's masthead — and this sheet covers
+    /// the masthead. On the happy road that is invisible, because the sheet
+    /// dismisses: `deleteNote()` returning `true` dismisses, an undo that
+    /// lands dismisses nothing but is spoken after the alert closes. On a
+    /// REFUSAL the sheet deliberately STAYS UP (a refused delete must not
+    /// look like it went), so the sentence explaining why landed on a surface
+    /// she could not see — the door's own D2 rule, *spoken where the door
+    /// fired*, broken by a covering sheet.
+    ///
+    /// It reads the SAME one projection rather than keeping a copy: one
+    /// message, rendered wherever the acting door is standing.
+    @ViewBuilder
+    private var reportLine: some View {
+        if let message = model.statusMessage {
+            Text(tokens.chromeLabel(message))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .fixedSize(horizontal: false, vertical: true)
+                .lineLimit(4)
+                .accessibilityLabel(message)
         }
     }
 

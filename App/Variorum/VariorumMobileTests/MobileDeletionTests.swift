@@ -136,11 +136,117 @@ struct MobileDeletionTests {
                                          "the Library's confirm must present")
                 #expect(alert.title == MobileEditorViewModel.deleteNoteConfirmTitle)
                 #expect(alert.message == RecoveryCopy.moveToTrashDetail(.note))
+
+                // **THE CONFIRM→ACT EDGE, DRIVEN** (batch 4.5b's BLOCKER).
+                // The shipped pin called `confirmDeleteNote()` directly while
+                // the pending note was still set. Tapping the real action and
+                // landing SwiftUI's write-back in the same turn is what the
+                // defect needed: pre-fix, the act read `pendingDeleteNote`
+                // back, found `nil`, and deleted NOTHING.
+                #expect(surface.tapAlertAction(
+                    "Delete", writeBack: { library.deleteNotePresented = false }),
+                        "the Delete action must be drivable")
+                await surface.settle(40)
             }
 
-            #expect(await library.confirmDeleteNote())
-            #expect(try await isTombstoned(db, table: "container", id: postID))
+            #expect(try await isTombstoned(db, table: "container", id: postID),
+                    "the note really went to the Trash")
             #expect(library.receipt == RecoveryCopy.movedToTrashReceipt(.note))
+        }
+    }
+
+    /// **THE LIBRARY ROW'S DELETE FLUSHES FIRST — and the shipped comment
+    /// saying it need not was falsified by the shell's own architecture**
+    /// (§49's MINOR). That comment read: *"this row deletes a note NO surface
+    /// on this phone has open, so there is no pending buffer to land."* Both
+    /// tab stacks stay alive by design (`MobileLivenessAuthority`: two
+    /// `MobileWriteScreen`s can exist at once and nothing about visibility
+    /// fires `onDisappear`), so the commonest road to this door is *open a
+    /// note → switch to Library → delete that row* — with the note's editor
+    /// mounted and its debounce still holding keystrokes.
+    ///
+    /// A tombstone is recoverable for 30 days; text that never reached the
+    /// store is not. So the keystrokes must land BEFORE the tombstone.
+    ///
+    /// **Red on old:** drop the `flushEveryOpenPost()` and the typed bytes
+    /// are simply gone — the stored take still reads the pre-typing text.
+    @Test func theLibraryRowsDeleteLandsPendingKeystrokesFirst() async throws {
+        try await withEditorWorld { session, db in
+            let postID = try await makePost(session, blocks: ["Before typing."])
+            let (editor, _) = await makeSurfaceEditor(session, postID: postID)
+            // `.first`, never `[0]`: a collection indexed right after its
+            // size is taken is a runner-killer under a red-on-old revert.
+            let variantID = try #require(editor.index.entries.first?.variantID)
+            // Pending, NOT flushed — inside the debounce, exactly where a
+            // typing burst lives when she switches tabs.
+            editor.autosave.record(
+                variantID: variantID, text: "Before typing. And this too.", charDelta: 13)
+
+            let library = MobileLibraryViewModel(session: session)
+            let row = try #require(try await db.read { db in
+                try Queries.library(db, limit: 10).first { $0.postID == postID }
+            })
+            library.requestDeleteNote(row)
+            #expect(await library.confirmDeleteNote(row))
+
+            let stored = try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT working_text FROM variant WHERE id = ?",
+                    arguments: [variantID])
+            }
+            #expect(stored == "Before typing. And this too.",
+                    "the keystrokes reached the store before the tombstone")
+        }
+    }
+
+    /// **A REFUSAL RAISED ON THE ⋯ SHEET IS SPOKEN ON THE ⋯ SHEET** (§49's
+    /// MINOR: *a refusal spoken behind the presenting sheet*). Every act
+    /// there reports through the editor's status, which renders in the WRITE
+    /// masthead — and the sheet is over the masthead. On success the sheet
+    /// dismisses, so it never showed; on a REFUSAL the sheet deliberately
+    /// STAYS UP (a refused delete must not look like it went), and the
+    /// sentence explaining why landed where she could not see it.
+    ///
+    /// **The refusal had to be a state the product really produces**, and the
+    /// first attempt at this pin did not: a SEALED note does not refuse
+    /// deletion at all — the seal is content-level and AppSpec §9 says the
+    /// post itself may still be deleted (recoverable via `restoreContainer`).
+    /// That pin passed while pinning a fiction. The real road is the one the
+    /// refusal vocabulary already names: the note is **already gone**, which
+    /// is exactly what a second tab's delete leaves behind.
+    ///
+    /// **Red on old:** remove the sheet's `reportLine` and the refusal is
+    /// nowhere in the sheet's tree.
+    @Test func aRefusedDeleteIsSpokenOnTheSheetThatRaisedIt() async throws {
+        try await withEditorWorld { session, _ in
+            let postID = try await makePost(session, blocks: ["Already gone."])
+            let (model, _) = await makeSurfaceEditor(session, postID: postID)
+            // Deleted from elsewhere while this editor stands on it — the
+            // shell keeps both tab stacks alive, so this is an ordinary road.
+            try await session.runner.run { ops in try ops.deleteContainer(postID) }
+
+            try await withHostedSurface(
+                MobileWriteScreen(session: session, postID: postID, editor: model)
+            ) { surface in
+                #expect(surface.activate(MobileNoteActionsSheet.doorLabel))
+                await surface.settle(40)
+                #expect(surface.activate(MobileEditorViewModel.deleteNoteTitle),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(40)
+                #expect(surface.tapAlertAction("Delete", writeBack: {}),
+                        "the sheet's Delete confirm must be drivable")
+                await surface.settle(40)
+
+                // The sheet is STILL UP — a refused delete must not look like
+                // it went — which is exactly why the refusal must be here.
+                let labels = surface.visibleLabels
+                #expect(labels.contains(MobileEditorViewModel.deleteNoteTitle),
+                        "the sheet stayed up — labels were \(labels)")
+                let message = try #require(model.statusMessage, "the act refused in words")
+                #expect(message == "That note is already gone.")
+                #expect(labels.contains { $0.contains(message) },
+                        "the refusal is ON the sheet — labels were \(labels)")
+            }
         }
     }
 
@@ -200,8 +306,26 @@ struct MobileDeletionTests {
             }
             let book = try #require(shelfBook)
 
-            shelf.requestDeleteBook(book)
-            #expect(await shelf.confirmDeleteBook())
+            // **THE CONFIRM→ACT EDGE, DRIVEN** (batch 4.5b's BLOCKER) — the
+            // shelf row's long-press is undrivable in process, but its
+            // confirm is a real alert on a real surface, and the edge that
+            // killed this door is the confirm's, not the menu's.
+            try await withHostedSurface(
+                MobileShelfView(
+                    model: shelf, stars: MobileStarsModel(session: session),
+                    quickNote: MobileQuickNoteModel(), tokens: .terminalLight,
+                    tabBar: { EmptyView() },
+                    onOpenBook: { _ in }, onOpenForWriting: { _ in },
+                    onOpenNote: { _ in }, onSettings: {})
+            ) { surface in
+                shelf.requestDeleteBook(book)
+                await surface.settle(40)
+                _ = try #require(surface.presentedAlert, "the shelf's confirm must present")
+                #expect(surface.tapAlertAction(
+                    "Delete", writeBack: { shelf.deleteBookPresented = false }),
+                        "the Delete action must be drivable")
+                await surface.settle(40)
+            }
             #expect(try await isTombstoned(db, table: "reading", id: readingID))
             // Its NOTE is untouched — pointed at, never contained.
             #expect(try await isTombstoned(db, table: "container", id: postID) == false)

@@ -370,35 +370,30 @@ final class RecoveryViewModel {
     /// **Put back — one verb, each kind's own road** (13j J1). Every road
     /// already existed; what was missing was a place to stand where all four
     /// are offered together.
+    ///
+    /// **THE ACT IS NOW THE SHARED ONE** (`TrashPutBack` — batch 4.5b's hoist
+    /// of §49's MAJOR). The phone's Trash shipped a near-verbatim copy of
+    /// this model, and it had already drifted here in its first week: the
+    /// phone read `restoreBlock`'s LANDING and told her where the block went,
+    /// while this road wrote `_ = try ops.restoreBlock(…)` and discarded the
+    /// answer — so Put back landed **silently on the Mac** even though this
+    /// view renders `receipt` right beside `lastError`. Two recovery surfaces
+    /// answering *"where did it go?"* two ways is precisely what M-C forbids,
+    /// and no amount of shared WORDS could have stopped it, because the
+    /// divergence was in the decision about which word to say.
+    ///
+    /// The Mac keeps its own VOICE for refusals (`TrayRefusalCopy`) — a face,
+    /// not a decision.
     func putBack(_ item: Queries.TrashItem) async {
         lastError = nil
         receipt = nil
         do {
-            // A preserved original was never deleted — putting it back means
-            // PLACING it, which is the tray's own composition (it re-reads
-            // its landing at act time, because a listing is a projection).
-            if item.kind == .preservedOriginal {
-                guard let noteID = item.noteID else {
-                    lastError = TrayPath.putBackUnplaced
-                    return
-                }
-                receipt = try await PreservedOriginPutBack.run(
-                    session: session, postID: noteID, blockID: item.id)
-                return
-            }
-            try await session.runner.run { ops in
-                switch item.kind {
-                case .note: try ops.restoreContainer(item.id)
-                case .book: try ops.restoreReading(item.id)
-                case .block: _ = try ops.restoreBlock(item.id)
-                case .take: _ = try ops.restoreVariant(item.id)
-                case .preservedOriginal: break  // handled above
-                }
-            }
+            receipt = try await TrashPutBack.run(session: session, item: item)
         } catch let error as OperationError {
             lastError = TrayRefusalCopy.message(for: error)
         } catch {
-            lastError = String(describing: error)
+            // Includes `RecoveryRefusal` — a preserved original with no note.
+            lastError = DeletionRefusal.fallback(error)
         }
     }
 }

@@ -68,26 +68,55 @@ final class MobileUndoDoor {
     @ObservationIgnored private let session: AppSession
     @ObservationIgnored weak var model: MobileEditorViewModel?
 
-    /// Non-nil while the A12 warning is being asked. `@Bindable`-friendly
-    /// (the phone's immune confirm road — never a `Binding(get:set:)`
-    /// computed over an `@Observable` property that `body` never reads,
-    /// which is the Mac's own dead-door defect at `RecoveryView.swift:573`).
+    /// **THE ASK'S PRESENTATION.** Non-nil while the A12 warning is on
+    /// screen; the two host bindings below project it, and SwiftUI clears it
+    /// through them the instant an action is tapped.
     var pendingWarning: PendingWarning?
+
+    /// **THE ASK'S AUTHORIZATION — and it deliberately OUTLIVES the
+    /// presentation** (batch 4.5b's confirm BLOCKER).
+    ///
+    /// THE RULE, and it names the property that matters rather than a shape:
+    /// *a binding setter must never clear state that an action's continuation
+    /// will read back.* SwiftUI sets `isPresented` to `false` synchronously
+    /// inside tap handling, while an action's `Task { … }` cannot resume
+    /// until that handling yields. The shipped setter answered that write-back
+    /// with `cancelPendingUndo()` — so pressing **Undo** CANCELLED the undo
+    /// and reported *"Undo cancelled — nothing changed."*, while
+    /// `confirmPendingUndo()`'s `guard pendingWarning != nil` found the state
+    /// already gone.
+    ///
+    /// The deeper defect is the one that made it possible: **the setter was
+    /// deciding a PRODUCT question ("she cancelled") from a MECHANICAL event
+    /// ("the alert closed")**, which it cannot know — only the buttons know,
+    /// and both hosts already carry an explicit `Button("Cancel") {
+    /// cancelPendingUndo() }`. So the setter now clears the PRESENTATION and
+    /// nothing else, and this field is what the confirm and cancel roads both
+    /// stand on. Whichever order the setter and the button's closure run in,
+    /// the authorization is intact when the continuation reads it.
+    ///
+    /// **Why the fix is here and not at the hosts:** this door has TWO alert
+    /// hosts — the receipt's (`MobileWriteView`) and the ⋯ sheet's
+    /// (`MobileNoteActions`) — so a seam fix immunizes both and cannot be
+    /// re-broken by a third host later. The three value-carrying confirms
+    /// (Trash, Library row, shelf row) take the other shape, `presenting:`,
+    /// because their acts genuinely need the value.
+    private var askedWarning: PendingWarning?
 
     /// **The two alert hosts' bindings — `@Bindable`-projected, never an
     /// inline `Binding(get:set:)`** (§15's trap (a), the phone's rule stated
     /// as code). Each is true only for the surface that ASKED, so the two
     /// hosts are mutually exclusive by construction and the copy stays in
-    /// one place. Dismissal of any kind routes to `cancelPendingUndo`,
-    /// which is a no-op once the warning has been answered.
+    /// one place. **The setter clears the PRESENTATION only** — see
+    /// `askedWarning`.
     var warningAtReceipt: Bool {
         get { pendingWarning?.surface == .receipt }
-        set { if !newValue { cancelPendingUndo() } }
+        set { if !newValue { pendingWarning = nil } }
     }
 
     var warningAtSheet: Bool {
         get { pendingWarning?.surface == .sheet }
-        set { if !newValue { cancelPendingUndo() } }
+        set { if !newValue { pendingWarning = nil } }
     }
 
     /// One flight at a time — the structural doors' latch, same reason: an
@@ -118,6 +147,10 @@ final class MobileUndoDoor {
         }
         inFlight = true
         defer { inFlight = false }
+        // A fresh ask supersedes any authorization left behind by a warning
+        // that was dismissed without an answer (a sheet closing over its own
+        // alert is the only road there, and it must not authorize this one).
+        askedWarning = nil
 
         guard await model.flushPendingText() else { return }
         let stack = session.undoStack
@@ -126,7 +159,9 @@ final class MobileUndoDoor {
                 stack.pendingUndoWarning(with: ops)
             }
             if let warning {
-                pendingWarning = PendingWarning(warning: warning, surface: surface)
+                let asked = PendingWarning(warning: warning, surface: surface)
+                pendingWarning = asked
+                askedWarning = asked
                 return
             }
         } catch {
@@ -136,9 +171,12 @@ final class MobileUndoDoor {
         await runUndo()
     }
 
-    /// The confirmed road (the warning was shown and she said yes).
+    /// The confirmed road (the warning was shown and she said yes). It stands
+    /// on `askedWarning`, NOT on `pendingWarning` — the presentation is
+    /// already gone by the time this continuation runs.
     func confirmPendingUndo() async {
-        guard pendingWarning != nil else { return }
+        guard askedWarning != nil else { return }
+        askedWarning = nil
         pendingWarning = nil
         guard !inFlight else { return }
         inFlight = true
@@ -146,8 +184,12 @@ final class MobileUndoDoor {
         await runUndo()
     }
 
+    /// The Cancel button's road — the only road that means *she cancelled*.
+    /// It guards on the AUTHORIZATION, because the alert's dismissal may
+    /// already have cleared the presentation in the same synchronous turn.
     func cancelPendingUndo() {
-        guard pendingWarning != nil else { return }
+        guard askedWarning != nil else { return }
+        askedWarning = nil
         pendingWarning = nil
         model?.report(StructuralUndoCopy.undoCancelled)
     }

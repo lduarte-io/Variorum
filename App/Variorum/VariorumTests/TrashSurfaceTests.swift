@@ -114,6 +114,37 @@ struct TrashSurfaceTests {
         }
     }
 
+    /// **PUT BACK SAYS WHERE IT LANDED HERE TOO** — the hoist of the drift
+    /// §49's MAJOR named (mobile round 2, batch 4.5b).
+    ///
+    /// The phone's Trash shipped a near-verbatim copy of `RecoveryViewModel`
+    /// and it had already diverged in its first week, in exactly one place:
+    /// the phone read `restoreBlock`'s LANDING and told her where the block
+    /// went, while this model wrote `_ = try ops.restoreBlock(…)` and threw
+    /// the answer away — so Put back landed **silently on the Mac**, even
+    /// though `RecoveryView` renders `receipt` right beside `lastError`. Two
+    /// recovery surfaces answering *"where did it go?"* two different ways is
+    /// what M-C forbids, and shared WORDS could not have prevented it because
+    /// the divergence was one layer under them, in the decision about which
+    /// word to say. Both platforms now run `TrashPutBack`.
+    ///
+    /// **Red on old:** with the discarding `_ = try ops.restoreBlock(…)`
+    /// restored, `receipt` is nil and this pin fails.
+    @Test func putBackOnTheMacAlsoSaysWhereItLanded() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two."]) { editor in
+            let blockID = try #require(editor.model.slots.first?.blockID)
+            try await editor.session.runner.run { (ops: Operations) in try ops.deleteBlock(blockID) }
+            let rows: [Queries.TrashItem] = try await editor.database.read { db in
+                try Queries.trash(db, now: harnessNow)
+            }
+            let model = RecoveryViewModel(session: editor.session)
+            await model.putBack(try #require(rows.first))
+            #expect(model.lastError == nil)
+            #expect(model.receipt == RecoveryCopy.putBackWhereItWas,
+                    "the Mac repeats the op's own answer, exactly as the phone does")
+        }
+    }
+
     // MARK: - Block archive (her round-7 ruling), where she meets it
 
     @Test func theWriteDoorArchivesTheCaretBlockAndSaysWhereItWent() async throws {

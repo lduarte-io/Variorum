@@ -48,6 +48,37 @@ final class MobileBlockMenuController {
         (@MainActor (_ title: String, _ message: String, _ actionTitle: String,
                      _ completion: @escaping @MainActor (Bool) -> Void) -> Void)?
 
+    /// **ONE ACT AT A TIME — this controller's own latch** (batch 4.5b;
+    /// §53 finding 3). Every row here is a bare `Task { await … }` off a
+    /// `UIAction`, and a rapid double-tap runs two of them concurrently.
+    ///
+    /// Its two siblings already latch — `MobileStructuralController`'s
+    /// `structuralInFlight` and `MobileUndoDoor`'s `inFlight` — and this is
+    /// the same idiom, deliberately, rather than a third one.
+    ///
+    /// **What it covers, and what it does not, stated so the boundary is not
+    /// re-derived:** it guards the write roads this controller OWNS —
+    /// `applyCallout` (the callout submenu's toggle, four colours, remove and
+    /// emoji rows all land here) and `rename`. The structural rows (Insert
+    /// Below · Divide · Merge · Delete) hand straight to
+    /// `MobileStructuralController`, which latches them one layer down, and
+    /// double-latching would only change which of two identical sentences she
+    /// reads. Commit Take hands to `MobileTakeHistory.commitNow`, which
+    /// carries NO latch of its own — recorded, not fixed here, because that
+    /// file belongs to another sub-batch this round; a double-tap there mints
+    /// a duplicate savepoint (append-only, so never a loss).
+    ///
+    /// The exposure it closes is a LOST UPDATE, never corruption: two
+    /// concurrent `updateBlockPresentation` read-modify-writes each read the
+    /// pre-state, so the second silently discards the first — a toggle that
+    /// un-toggles, a colour that does not stick. **Batch 7 adds more take and
+    /// block rows to this same menu**, which is why the latch lands before
+    /// them rather than after.
+    private(set) var actInFlight = false
+
+    /// The latch's sentence — the siblings' copy, in this menu's terms.
+    static let anotherActIsLanding = "Another change to this block is still landing."
+
     init(session: AppSession) {
         self.session = session
     }
@@ -165,6 +196,12 @@ final class MobileBlockMenuController {
 
     func applyCallout(blockID: String, edit: MobileCallout.Edit) async {
         guard let model else { return }
+        guard !actInFlight else {
+            model.report(Self.anotherActIsLanding)
+            return
+        }
+        actInFlight = true
+        defer { actInFlight = false }
         do {
             try await session.runner.run { ops in
                 try ops.updateBlockPresentation(blockID) { existing in
@@ -218,6 +255,12 @@ final class MobileBlockMenuController {
 
     func rename(blockID: String, name: String?) async {
         guard let model else { return }
+        guard !actInFlight else {
+            model.report(Self.anotherActIsLanding)
+            return
+        }
+        actInFlight = true
+        defer { actInFlight = false }
         do {
             try await session.runner.run { ops in
                 try ops.setBlockName(blockID, name: name)
@@ -264,9 +307,22 @@ final class MobileBlockMenuController {
         "The block leaves this note, with its takes. Undo is on the receipt "
         + "afterwards, and in the note's ⋯."
 
+    static let deleteNeedsItsConfirm =
+        "Deleting a block needs its confirmation — nothing was deleted."
+
+    /// **It FAILS CLOSED when its seam is missing** (§44's NIT 7). This used
+    /// to fall through to `delete(blockID:)` with no confirm at all — a
+    /// destructive door proceeding *because* its confirm machinery was
+    /// absent, which is exactly backwards, and the one shape M-E cannot
+    /// tolerate (*a door that destroys must name what it destroys before it
+    /// acts*; R13's carve-out covers the in-editor ⌫ keystroke, never this
+    /// menu row). Production installs the seam at attach
+    /// (`MobileEditorViewModel`), so the refusal is unreachable there and
+    /// costs nothing; a harness that forgot to inject one now gets told so
+    /// instead of silently deleting a block.
     private func confirmDelete(blockID: String) {
         guard let confirmDestructive else {
-            Task { await delete(blockID: blockID) }
+            model?.report(Self.deleteNeedsItsConfirm)
             return
         }
         confirmDestructive(
@@ -301,7 +357,7 @@ final class MobileBlockMenuController {
         case .lockedPost:
             return "This note is locked — unlock it to \(act)."
         default:
-            return String(describing: error)
+            return DeletionRefusal.fallback(error)
         }
     }
 }

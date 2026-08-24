@@ -91,17 +91,23 @@ struct MobileLibraryView<TabBar: View>: View {
             if model.filter == .scraps { await scraps.start() }
         }
         .task(id: query) { await model.search(query) }
-        // PR1's confirm — a real `@Bindable` projection (§15's trap (a)).
+        // PR1's confirm — a real `@Bindable` projection (§15's trap (a))
+        // AND `presenting:`, which is the half batch 4 was missing: without
+        // it the note to delete was read back AFTER SwiftUI's dismissal had
+        // cleared it, so this door confirmed and deleted NOTHING (batch
+        // 4.5b's BLOCKER; the rule is at
+        // `MobileLibraryViewModel.deleteNotePresented`).
         .alert(
             MobileEditorViewModel.deleteNoteConfirmTitle,
-            isPresented: $model.deleteNotePresented
-        ) {
+            isPresented: $model.deleteNotePresented,
+            presenting: model.pendingDeleteNote
+        ) { item in
             Button(tokens.chromeLabel("Delete"), role: .destructive) {
                 let model = model
-                Task { await model.confirmDeleteNote() }
+                Task { await model.confirmDeleteNote(item) }
             }
             Button(tokens.chromeLabel("Cancel"), role: .cancel) {}
-        } message: {
+        } message: { _ in
             Text(MobileEditorViewModel.deleteNoteConfirmDetail)
         }
     }

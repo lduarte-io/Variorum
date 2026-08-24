@@ -106,8 +106,22 @@ nonisolated enum RecoveryCopy {
     static let putBackAtEnd = "Put back at the end of this note."
     static let putBackBeside = "Put back where it came from."
     /// The block is live again but has nowhere to land (its note is gone).
+    /// **A RECEIPT — something really happened.** Never a refusal: see
+    /// `originalHasNoNote` below, which is the sentence for the case where
+    /// nothing happened at all.
     static let putBackUnplaced =
         "Put back — but its note is gone, so it's waiting unplaced."
+
+    /// **The preserved original with no note to go back INTO** (batch 4.5b —
+    /// §49's MINOR: *a success sentence in the red slot*). Putting a
+    /// preserved original back means PLACING it, and placing needs a note;
+    /// with none recorded there is nowhere to put it, so nothing happens.
+    /// The shipped code answered that case with `putBackUnplaced` — a
+    /// RECEIPT, rendered in the red slot, reading as though the block had
+    /// been recovered when it had not moved at all.
+    static let originalHasNoNote =
+        "This original's note is gone, so there's nowhere to put it back — "
+        + "it stays here."
     /// The one refusal either recovery surface needs in its own voice: the
     /// listing still opens under a seal (reading is free); it is putting
     /// back that the seal refuses.
@@ -201,6 +215,149 @@ nonisolated enum RecoveryCopy {
     static func movedToTrashReceipt(_ kind: Queries.TrashItem.Kind) -> String {
         "\(rowKind(kind).prefix(1).uppercased())\(rowKind(kind).dropFirst()) moved to the "
             + "\(trashSection) — \(TrashWindow.days) days to put it back."
+    }
+
+    // MARK: Put-back receipts, by kind and by landing (hoisted at 4.5b)
+
+    /// What a put-back says when the op reports no landing of its own.
+    static func putBackReceipt(_ kind: Queries.TrashItem.Kind) -> String {
+        "\(rowKind(kind).prefix(1).uppercased())\(rowKind(kind).dropFirst()) put back."
+    }
+
+    /// **`restoreBlock` ANSWERS where it landed, and the receipt repeats the
+    /// answer rather than guessing** (13j's F2 shape). The three landings,
+    /// in the one home — this used to be a `MobileTrashModel` static while
+    /// the Mac discarded the landing entirely, which is the drift §49's
+    /// MAJOR names.
+    static func landingReceipt(_ landing: Operations.BlockRestoreLanding) -> String {
+        switch landing {
+        case .itsOldPlace: return putBackWhereItWas
+        case .endOfNote: return putBackAtEnd
+        case .unplaced: return putBackUnplaced
+        }
+    }
+}
+
+/// A recovery refusal that is not an `OperationError` — nothing was even
+/// attempted, so no operation ran to refuse it.
+enum RecoveryRefusal: Error {
+    /// A preserved original with no note recorded: placing needs somewhere
+    /// to place, and there is none.
+    case originalHasNoNote
+
+    var sentence: String {
+        switch self {
+        case .originalHasNoNote: return RecoveryCopy.originalHasNoNote
+        }
+    }
+}
+
+/// **PUT BACK — ONE DECISION, BOTH RECOVERY SURFACES** (batch 4.5b, §49's
+/// MAJOR: *`MobileTrashModel` is a near-verbatim copy of `RecoveryViewModel`
+/// and it is already drifting on day one*).
+///
+/// The drift the finding named was exactly here. Both surfaces ran the same
+/// five-road switch, but the phone read `restoreBlock`'s LANDING and said
+/// where the block went, while the Mac wrote `_ = try ops.restoreBlock(…)`
+/// and threw the answer away — so its Put back landed **silently**, and the
+/// two recovery surfaces already answered *"where did it go?"* two different
+/// ways in the same week. A shared vocabulary of sentences could not prevent
+/// that, because the divergence was in the DECISION about which sentence to
+/// say, one layer under the words batch 4 hoisted.
+///
+/// It is a HOIST, not a byte-copy: `MobileTrashModel.landingReceipt` and
+/// `.putBackReceipt` stay as forwards so the phone's pins ride unmodified
+/// (the 3C pattern), and the Mac adopts this road rather than keeping its
+/// own.
+///
+/// Refusals THROW — `OperationError` for anything an operation refused, and
+/// `RecoveryRefusal` for the one case where nothing was attempted — so each
+/// platform keeps its own voice for wording them, which is a face, not a
+/// decision.
+@MainActor
+enum TrashPutBack {
+    /// Puts one Trash row back; returns the RECEIPT to show.
+    static func run(session: AppSession, item: Queries.TrashItem) async throws -> String {
+        // A preserved original was never DELETED — putting it back means
+        // PLACING it, which is the shared composition's job (it re-reads its
+        // landing at act time, because a listing is a projection).
+        if item.kind == .preservedOriginal {
+            guard let noteID = item.noteID else { throw RecoveryRefusal.originalHasNoNote }
+            return try await PreservedOriginPutBack.run(
+                session: session, postID: noteID, blockID: item.id)
+        }
+        let landing = try await session.runner.run {
+            ops -> Operations.BlockRestoreLanding? in
+            switch item.kind {
+            case .note: try ops.restoreContainer(item.id)
+            case .book: try ops.restoreReading(item.id)
+            case .block: return try ops.restoreBlock(item.id)
+            case .take: _ = try ops.restoreVariant(item.id)
+            case .preservedOriginal: break  // handled above
+            }
+            return nil
+        }
+        return landing.map(RecoveryCopy.landingReceipt)
+            ?? RecoveryCopy.putBackReceipt(item.kind)
+    }
+}
+
+/// **THE DELETION STORY'S REFUSALS, IN ONE HOME** (batch 4.5b — A1-18).
+///
+/// Batch 4's stated purpose was one home for the deletion vocabulary, and it
+/// hoisted the sentences above. The REFUSALS stayed behind in three separate
+/// mappings — `MobileEditorViewModel.deleteNoteRefusal`,
+/// `MobileTrashModel.refusal`, `MobileBookDetailsModel.refusal` (which the
+/// shelf's delete door borrowed) — each covering a *different subset* of
+/// `OperationError` and each falling back to a bare `String(describing:)`.
+/// So one refused act read three ways depending on which door she used, and
+/// any case none of the three had thought of reached her as a raw enum dump.
+///
+/// This is that home. Two rules it keeps:
+///
+/// - **The ACT decides the sentence, not just the error.** A sealed note
+///   refusing a *put back* and a sealed note refusing a *delete* are the same
+///   `OperationError` and want different words, so `Act` is a parameter
+///   rather than three functions with three overlapping tables.
+/// - **The fallback is a SENTENCE that still carries the technical name.**
+///   Never a bare dump (she should not read `lockedVariant` alone), and never
+///   a swallow either — a case arriving here is the signal to name it above.
+///   It deliberately claims nothing about what did or did not change: some
+///   callers are compositions, not single transactions.
+nonisolated enum DeletionRefusal {
+    /// Which door is speaking. The error is the same; the way out differs.
+    enum Act {
+        case delete
+        case putBack
+    }
+
+    static func words(_ error: Error, act: Act = .delete) -> String {
+        if let refusal = error as? RecoveryRefusal { return refusal.sentence }
+        guard let error = error as? OperationError else { return fallback(error) }
+        switch error {
+        case .lockedPost:
+            return act == .putBack
+                ? RecoveryCopy.sealedPutBackRefusal
+                : "This note is marked complete — unseal it first."
+        case .lockedReading:
+            return "This book is finished — reopen it first."
+        case .containerNotFound:
+            return "That note is already gone."
+        case .readingNotFound:
+            return "That book is already gone."
+        case .blockNotFound:
+            return "That block is already gone."
+        case .variantNotFound:
+            return "That take is already gone."
+        default:
+            return fallback(error)
+        }
+    }
+
+    /// The last resort — a sentence, with the name kept.
+    static func fallback(_ error: Error) -> String {
+        if let refusal = error as? RecoveryRefusal { return refusal.sentence }
+        return "That couldn't be done — \(String(describing: error))."
     }
 }
 

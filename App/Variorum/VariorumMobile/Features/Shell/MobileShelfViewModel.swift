@@ -136,8 +136,18 @@ final class MobileShelfViewModel {
     /// keep living in the library; only the ordered collection goes.
     var pendingDeleteBook: Queries.ShelfBook?
 
-    /// The alert host's binding (`@Bindable`-projected — never a computed
-    /// `Binding(get:set:)`, §15's trap (a)).
+    /// The alert host's binding.
+    ///
+    /// **THE RULE (batch 4.5b's confirm BLOCKER): a binding setter must never
+    /// clear state that an action's continuation will read back.** SwiftUI
+    /// sets `isPresented` to `false` synchronously inside tap handling while
+    /// an action's `Task { … }` waits for that handling to yield, so a
+    /// `confirmDeleteBook()` that opened by reading `pendingDeleteBook` back
+    /// found `nil` and **the book was never deleted.** This site obeyed the
+    /// round's stated rule (*never a computed `Binding(get:set:)` over an
+    /// `@Observable` property*) exactly and was dead anyway — that rule names
+    /// a SYNTAX, this one names the property that matters. The host rides
+    /// `presenting:` and the act takes its subject as a parameter.
     var deleteBookPresented: Bool {
         get { pendingDeleteBook != nil }
         set { if !newValue { pendingDeleteBook = nil } }
@@ -148,10 +158,10 @@ final class MobileShelfViewModel {
     }
 
     /// The confirmed act. Returns whether it went, for the callers that
-    /// need to navigate away from it.
+    /// need to navigate away from it. **The book is PASSED IN, never read
+    /// back** — see the rule at `deleteBookPresented`.
     @discardableResult
-    func confirmDeleteBook() async -> Bool {
-        guard let book = pendingDeleteBook else { return false }
+    func confirmDeleteBook(_ book: Queries.ShelfBook) async -> Bool {
         pendingDeleteBook = nil
         do {
             try await session.runner.run { ops in
@@ -160,13 +170,12 @@ final class MobileShelfViewModel {
             lastError = nil
             lastReport = RecoveryCopy.movedToTrashReceipt(.book)
             return true
-        } catch let error as OperationError {
-            lastReport = nil
-            lastError = MobileBookDetailsModel.refusal(error)
-            return false
         } catch {
             lastReport = nil
-            lastError = String(describing: error)
+            // The ONE deletion-refusal home (A1-18) — this door used to
+            // borrow the book-details table, which covered a different subset
+            // of `OperationError` than the Trash's did.
+            lastError = DeletionRefusal.words(error)
             return false
         }
     }
