@@ -1180,8 +1180,10 @@ runbook exists where she can find it under stress; freshness
 evidence is visible without her asking; and the matrix's two
 honesty sentences (M3, M6) exist in the product/runbook verbatim.**
 Review shape: the author sets it at kickoff. The closeout writes the
-MobileSoul parity line (the lock's Face ID twin + any status-face twin
-are the obvious candidates) and runs the full closeout ritual.
+MobileSoul parity line (~~the lock's Face ID twin +~~ any status-face
+twin is the obvious candidate — *the lock moved to 13p 2026-08-24,
+whose own Batch 4 builds the Face ID twin inside the phase*) and runs
+the full closeout ritual.
 
 ### 🔴 AND THIS CLOSEOUT AUTHORS **13u**'s EXECUTION PLAN — her pick is already made
 
@@ -1328,7 +1330,11 @@ queue (item B) is already discharged — the walk ran all nine rows
    integrity result + last `.md` export + sync status), "Back Up
    Now…" as adjunct never load-bearing, the full log behind it.
 4. **App lock: the fallback story is a USER SETTING — not
-   biometric-only.** Her words: *"can we just make this a user
+   biometric-only.** *(⚠️ SUPERSEDED 2026-08-24 — the lock MOVED to
+   13p and the system-password fallback was RETIRED with the move;
+   see the post-sitting record below. The verbatim record here stands
+   as history and as the input knot 9 carried to 13p's sitting.)*
+   Her words: *"can we just make this a user
    setting? I just don't think we should only have biometric - but
    in the long run, we might add two factor auth or other options
    like that to login. it's true that on the disk it's still open,
@@ -1448,6 +1454,27 @@ queue (item B) is already discharged — the walk ran all nine rows
   restores, the on-disk-until-the-janitor honesty, and the
   outside-the-system boundary: backups/Time Machine/exports) is the
   runbook section's outline.
+- **RULED 2026-08-24 — THE APP LOCK MOVES TO 13p, and the
+  system-password fallback is RETIRED.** Her words: *"honestly, maybe
+  the lock should just be moved into 13p's plan. it was always an add
+  on to 13l"* → the architect's assessment agreed (13p's R13p-5
+  at-open modes ARE the lock made real — building it here would be
+  building what 13p immediately rebuilds; moving it means the interim
+  "adds no encryption" caveat never ships and the mobile Face ID twin
+  lands inside 13p's own Batch 4) → her ruling: *"I agree, and we
+  don't need system password allowed anymore - we have a better story
+  and a more cohesive approach now."* **Consequences:** ledger item
+  19 → MOVED to 13p (the deferral rule satisfied — 13p's plan IS the
+  authored design, R13p-5/R13p-7); **the 2026-08-23 sitting ruling #4
+  (fallback as a user setting, both fallbacks allowed by default) is
+  SUPERSEDED — the system login password is OUT of the gate's chain
+  entirely** (R13p-5's rule stands as THE story: biometric, passphrase
+  fallback, never the device password); knot 9 in the 13p plan
+  largely dissolves (one gate, subsumption — annotated there). **The
+  passphrase/recovery sanity check STAYS in 13l** (her same message)
+  — it is independent of the lock and the forget-risk is live today.
+  Her 13p planning agent reviews the change and tweaks as needed
+  (her stated next step).
 - **The suite-simulator question (her ask: why iPhone 16e, not 17):**
   answered — an iPhone 17 Pro sim EXISTS locally (iOS 26.2); 16e is
   the repo's standing convention since mobile v1, and every measured
@@ -1850,7 +1877,7 @@ push. Expected starting counts: core 1350/141 · Mac 1572/272 · spine
 | 16 | Bulk-`.md` plaintext insurance, automated | 1 | open |
 | 17 | The sync-status face | 1 | open |
 | 18 | The passphrase / recovery-phrase sanity check (read-only unwrap) | 1 | open |
-| 19 | The app lock + its fallback SETTING + honest wording | 1 | open |
+| 19 | ~~The app lock + its fallback SETTING + honest wording~~ | 1 | **MOVED to 13p** (her ruling 2026-08-24 — the post-sitting record above; R13p-5's at-open modes are the lock born real; the system-password fallback retired with the move; the mobile Face ID twin rides 13p Batch 4) |
 | 20 | Item 9: journal-day deletions travel to Fragments at delete time | 1 (§9) | open |
 | 21 | The 8d recovery-story walk (every door, as a user) | 1 | open |
 | 22 | The end-of-phase Fable ladder (combined diff) | — | open |

@@ -136,6 +136,25 @@ provisional; the kickoff sitting rules only the OPEN KNOTS section.
   18+, works with synced platform passkeys, the Bitwarden vault pattern),
   but the plain synced Keychain item achieves the same escrow with less
   machinery. Recorded as a credible future alternative, not built.
+- **R13p-14 — THE APP LOCK ARRIVES HERE, BORN REAL (author, 2026-08-24,
+  at the 13l sitting — added by the 13l architect executing her ruling;
+  her 13p planning agent reviews and tweaks).** Her words: *"honestly,
+  maybe the lock should just be moved into 13p's plan. it was always an
+  add on to 13l"* and, agreeing to the move: *"I agree, and we don't
+  need system password allowed anymore - we have a better story and a
+  more cohesive approach now."* Consequences: (a) 13l ships NO app lock
+  and NO interim "adds no encryption" caveat — the first lock a user
+  ever meets is R13p-5's at-open gate, backed by real key custody;
+  (b) **her 2026-08-23 13l ruling (fallback as a user setting with the
+  system login password allowed) is RETIRED** — R13p-5's chain (the
+  login password NEVER in it; the passphrase is the fallback) stands
+  as THE story, unconditionally; (c) the ONE gate is the at-open mode —
+  no separate app-lock feature exists to stack in front of it (the
+  Standard preset's Auto mode is the no-gate default, playing the old
+  "lock off by default" role); (d) the mobile Face ID twin ships inside
+  Batch 4 as already planned. The 13l passphrase/recovery SANITY CHECK
+  stays in 13l (her same message) — independent machinery, live
+  forget-risk today.
 
 ## NON-GOALS (named so they stay declined, not forgotten)
 
@@ -326,9 +345,10 @@ sync/bridge/janitor; re-lock policy with the teardown/rebuild tests;
 reminder checks (R13p-9); the reset door (biometric-confirmed re-wrap,
 red-pinned: the old wrap must stop unwrapping); the Standard/Locked-down
 presets as dial-setters (R13p-7); settings copy in the honesty grammar
-(each mode says exactly what it does and does not protect — including
-retiring 13l's "presence control, no encryption implied" caveat, which
-this batch makes obsolete BY FACT).
+(each mode says exactly what it does and does not protect). *(Amended
+2026-08-24 per R13p-14: there is no 13l caveat to retire — the lock
+moved HERE before 13l built it, so this batch SHIPS the gate faces
+outright rather than upgrading an existing lock's wording.)*
 
 ## BATCH 3 — THE LOCKED-NOTES FACE (after the sitting rules its knots)
 
@@ -401,24 +421,19 @@ phone install (the standing ritual).
    shape and place the gate in ONE brain, not per-surface.
 8. **The escrow setting's exact wording** (the one-sentence trust
    statements, each way) — copy taste, hers.
-9. **THE TWO GATES must become ONE story** *(added 2026-08-24 by the
-   13l architect at her "take a look" request — a cross-check between
-   the two live plans, not a new design)*: 13l is shipping the
-   APP-LEVEL LOCK under her same-day ruling that its fallback is a
-   USER SETTING **with the system login password allowed** (her
-   reasoning then: the disk is readable anyway, so refusing the login
-   password buys nothing — true in the plaintext era). R13p-5 rules
-   the AT-OPEN modes with the login password **NEVER in the chain**
-   (her significant-other threat — true in the encrypted era, where
-   exclusion finally MEANS something). Both rulings are right for
-   their eras, and Batch 2 already retires 13l's wording caveat — but
-   the SITTING should rule the merged face explicitly: does 13p's
-   at-open mode SUBSUME the 13l lock (one gate, one setting — the
-   lean), or do two gates stack (an app lock in front of a store
-   unlock — two prompts, two fallback stories)? And what happens to
-   the 13l lock setting's system-password fallback option once the
-   store is encrypted — retired, or surviving only in Auto mode where
-   the key releases silently anyway?
+9. ~~**THE TWO GATES must become ONE story**~~ — **DISSOLVED BY HER
+   RULING, 2026-08-24, hours after it was written** (R13p-14 above):
+   the lock MOVED here before 13l built it, the system-password
+   fallback is RETIRED (*"we don't need system password allowed
+   anymore - we have a better story and a more cohesive approach
+   now"*), and the answer is SUBSUMPTION — the at-open mode IS the
+   one gate; nothing stacks in front of it. *(The knot's original
+   text described 13l shipping the lock first under its
+   plaintext-era fallback ruling; that never happened. Kept struck
+   as the record of why R13p-14 exists. What MIGHT remain for the
+   sitting, the planning agent's call: whether a re-lock-while-open
+   presence dial needs anything beyond R13p-7's existing re-lock
+   policy — likely nothing.)*
 
 ## WHY THIS PHASE IS SHAPED THIS WAY (one paragraph, for the cold reader)
 

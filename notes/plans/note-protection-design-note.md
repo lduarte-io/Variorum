@@ -16,7 +16,11 @@ rules the rest.
 the same day (whole-app Touch ID/Face ID gate, passphrase fallback,
 honest wording; see the 13l brief, scope item 6). That item covers her
 named walk-by-snooping threat and ships independently of everything
-below.
+below. *(⚠️ SUPERSEDED 2026-08-24 — the lock MOVED to 13p unbuilt, at
+her ruling during 13l: the 13p plan's R13p-5 at-open modes ARE the
+lock, born real, and the system-password fallback was retired with the
+move. See `phase-13p-note-protection.md` R13p-14. The walk-by threat's
+answer until 13p ships is FileVault + the login password.)*
 
 ## Her words (2026-08-19, verbatim)
 
