@@ -191,6 +191,39 @@ what the lock does (hides from view), what it does not (no encryption;
 FileVault covers the files). If shape B ships for a class, the sentence
 upgrades to the truth it earned — never before.
 
+## Her whole-store question (2026-08-23, the 13l kickoff sitting — recorded for the 13p design sitting)
+
+Asked while ruling the 13l app lock's fallback setting, verbatim:
+
+> "as a question (not building it now), what's the lift on encrypting
+> everything on disk and decrypting it when the app is opened, so it's
+> unencrypted while the app is in use? i'm curious what the natural
+> extension would lead to - though then it would be another level to
+> the forgotten passphrase risk and we certainly aren't implementing
+> it right now."
+
+**The honest lift answer given at the sitting (Fable, 13l architect):**
+the shape she describes is full-database encryption, and the
+off-the-shelf road is SQLCipher — **GRDB ships an SQLCipher flavor**,
+so the mechanical half is bounded: swap the database stack to the
+encrypted variant, key it at open, one-time re-encrypt of the store.
+(It is actually better than "decrypt on open": pages decrypt in memory
+on read, so plaintext never lands on disk at all — her described UX
+with a stronger property.) **The real lift is everything around it:**
+where the open-key comes from (the E2EE passphrase is the natural
+candidate — and then a forgotten passphrase is a LOST CORPUS, the
+data-loss cliff the 13l app lock deliberately does not have); the A1
+backup primitive keeps working but backups become ciphertext (the
+bulk-`.md` insurance becomes the only plaintext escape, which inverts
+its privacy framing); exports/bridge/queries are unaffected (they read
+through the connection); a measurable page-crypto overhead to verify
+against P1. **And it is a different road than this note's shapes A/B:**
+whole-store crypto hinges everything on one secret and protects only
+against disk access, while shape B seals chosen classes at the column
+level. Whether the 13p destination is B alone, whole-store, or both
+layered is exactly the 13p design sitting's fork — this section is
+that sitting's input, nothing is decided by it.
+
 ## Standing disposition
 
 **SUPERSEDED IN TIMING (2026-08-19/20, her sequencing ruling):** 13p

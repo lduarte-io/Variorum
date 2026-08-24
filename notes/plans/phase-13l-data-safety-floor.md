@@ -1183,8 +1183,12 @@ say so:**
 
 - **IT IS A CROSS-PLATFORM PHASE — MobileSoul §6's "design together"
   class, and its ledger row PL-12 is ALREADY WRITTEN** (at design time,
-  as §6 requires). **Four of its eight items are inherently
-  both-platform:** the eager space-eater (**she reported it on BOTH
+  as §6 requires). **At least seven of its THIRTEEN items are inherently
+  both-platform** *(the row grew 8 → 13 on 2026-08-23 — items 9–13:
+  quick-capture ownership incl. shift-⏎ · starred scroll · paste
+  without newlines · multi-block drag · the title cut-off; the
+  `### 13u` master-plan section is authoritative, and 9/11/12 are
+  cross-platform calls too)*: the eager space-eater (**she reported it on BOTH
   apps**) · the derived display-name snippet (*"ONE brain… serving the
   Mac library, MOBILE'S LISTS, and capture alike"*) · cross-block edits
   (*"the semantics are ruled HERE, once, for BOTH platforms"*) · dark
@@ -1269,3 +1273,143 @@ stays true). Working tree clean at `609ae38`, `main` in sync with
   (expectations: core 1350/141 · Mac 1569/272 · spine 63/8; the
   latency pin's isolation rule noted — intermittent red is Phase 12's
   row, re-run isolated before concluding anything).
+
+**Mid-kickoff concurrency, recorded:** three commits from another
+session landed on `origin/main` during the kickoff (`ddf04e8`
+corrected this plan's stale baselines + the identity-audit
+double-ownership; `00bb376` traced her Fragments-bridge-on-the-phone
+question, §68; `f0eb9c5` created **13v** — the journal bridge on the
+phone — at her word). Merged cleanly (`02d1c45`); 13v changed the
+shape of scope item 9's sizing question, offered below.
+
+**Five kickoff flags raised at the sitting** (her ask: "if anything
+seems off or contradictory, please tell me"): (1) the concurrent
+commits above — resolved by merge; (2) **13u's "EIGHT items" wording
+is stale in three places** (the master-plan row, the running order's
+row 5, this plan's closeout section) — the `### 13u` section now
+carries THIRTEEN items; housekeeping fix executed this sitting, and
+the 13u plan will be authored from the full section; (3) the
+dead-door mechanism has two generations in this plan (the ⛔️
+re-derive block and the §56 SETTLED derivation) — consistent read in
+order, but the settled one was also derived by reading, so the fixer
+builds the red-on-old pin DRIVING THE REAL BUTTON first, confirms
+red, then fixes; (4) the manifest's "three `VariorumTests/` files"
+is four (`TrashSurfaceTests.swift`, 4.5b); (5) the device-window
+queue (item B) is already discharged — the walk ran all nine rows
+2026-08-23. None contested.
+
+### The kickoff sitting's rulings (2026-08-23, question-tool batches 1–2 — verbatim-faithful)
+
+1. **Backup second destination: a USER-PICKED LOCAL FOLDER.** Her
+   words: *"people should pick a local folder - they can always pick
+   a folder that's in icloud drive (like desktop is for me)."* No
+   dedicated cloud machinery — the folder picker is the door, and an
+   iCloud-synced folder gets off-site coverage for free. Retention at
+   the second destination: the proposed default stood unobjected —
+   daily copy, keep **14 dailies + 4 weeklies** (≈6 weeks; M6's
+   both-directions framing rode the question) — hers to adjust in
+   use.
+2. **Both candidates IN**: the bulk-`.md` plaintext insurance
+   (automated, to the backup destination; the runbook names the
+   plaintext-in-cloud trade where the picked folder is cloud-synced)
+   AND the sync-status face.
+3. **Freshness evidence: the small face + log** — a Data Safety
+   section in Settings (last backup time + destination + last
+   integrity result + last `.md` export + sync status), "Back Up
+   Now…" as adjunct never load-bearing, the full log behind it.
+4. **App lock: the fallback story is a USER SETTING — not
+   biometric-only.** Her words: *"can we just make this a user
+   setting? I just don't think we should only have biometric - but
+   in the long run, we might add two factor auth or other options
+   like that to login. it's true that on the disk it's still open,
+   but for most non technical people they'd never look at the disk
+   but might know the computer password."* Build shape: Touch ID
+   leads; a setting chooses the allowed fallback(s) — system
+   password and/or the encryption passphrase (when enrolled) —
+   **defaulting to both allowed** (the architect's default under her
+   setting ruling; hers to flip). **The honest-wording mandate,
+   sharpened in her words:** *"I do think that the app settings
+   should make it clear what level of protection this is - it's
+   against casual snooping, not full encryption of everything on the
+   disk. maybe we even name it anti snoop or something like that."*
+   (The name is FLOATED, not ruled — copy drafts honest; the naming
+   candidate goes to the checkpoint and 13s's voice pass.)
+   - **Her curiosity question, recorded NOT built**, verbatim: *"as
+     a question (not building it now), what's the lift on encrypting
+     everything on disk and decrypting it when the app is opened, so
+     it's unencrypted while the app is in use? i'm curious what the
+     natural extension would lead to - though then it would be
+     another level to the forgotten passphrase risk and we certainly
+     aren't implementing it right now."* Answered at the sitting
+     (the natural extension IS 13p's subject) and routed VERBATIM
+     into `notes/plans/note-protection-design-note.md` with the
+     honest lift assessment, so 13p's design sitting inherits it.
+5. **M5: ACCEPT-AND-SAY-IT.** Restore is time travel on a local-only
+   install; the restore flow's one honest sentence ships ("things
+   deleted after this backup's date will return — including
+   permanently deleted ones"), M3/M6's wording as presented (final
+   copy at build, same meaning; M6 carries BOTH directions plus the
+   external-snapshots widening from 8b).
+6. **Item 9: THIS PHASE, at DELETE time.** (Routing to the new 13v
+   was offered and declined; purge-time offered and declined.) A
+   bridged day no longer live pushes its deletion once; Put back
+   self-heals. `Bridge/` module — the Sync/ rider is not triggered.
+7. **Review shape: ONE end-of-phase Fable ladder over the phase's
+   combined diff** (the 13k precedent). The first-act review is
+   separate and settled (hers).
+8. **Standing, no re-ask:** multi-select delete scope = Library note
+   rows first (shelf books at her word — the plan's own ruling); the
+   pre-13j amnesty stays DECLINED; **M4's rehearsal road = the
+   fake-server harness** (the architect's proportionality pick,
+   flagged and unopposed — a scratch Supabase account is
+   disproportionate; the live half of the drill proves local restore
+   mechanics in scratch locations).
+9. **Cast confirmed** (her kickoff message): implementers **Opus for
+   the most part** · cold reviewers **Fable** · orchestrator
+   **Fable**. Reviewer-Fable over implementer-Opus ⇒ CLAUDE.md's
+   cross-model review flow governs disputes; anything firming toward
+   `Sources/VariorumCore/Sync/` STOPS per the binding constraints
+   regardless of cast.
+
+### THE LEDGER (every row owned; statuses updated as they move)
+
+| # | item | strand | status |
+|---|---|---|---|
+| 1 | The first-act Fable cold review (mobile round's Mac diff + 4.5b) | 3 | **dispatched** |
+| 2 | The dead Delete Now / Empty Trash doors (pin-first at the real surface) | 2 | open |
+| 3 | The note-deletion door set: Delete Note… (note ▾, confirm) · Library door confirm · ⌘-click multi-select + delete-all | 1 (§8) | open |
+| 4 | The remaining decision-layer hoist (`RecoveryViewModel` ↔ `MobileTrashModel`) | 2 | open |
+| 5 | Pool/scraps deletion honesty check (§8b) | 1 | open |
+| 6 | Remove the left-margin comment ＋ (§8c, removal only) | 1 | open |
+| 7 | **L-a** identity-projection audit: hoist + Mac wiring + Mac red-on-old + the empty-entry hole | 4 | open |
+| 8 | **L-b** `QuickEntryBar` text destruction on refusal | 4 | open |
+| 9 | **L-c** `AppBootstrap` off-main migrations (`.opening` state, both roots) | 4 | open |
+| 10 | **L-d** `AppSession.postAutosaves` removal path + the three false comments | 4 | open |
+| 11 | Backup second destination (picked folder) + retention + per-run integrity | 1 | open |
+| 12 | The Data Safety face + log (freshness evidence) | 1 | open |
+| 13 | The restore runbook (incl. M3/M6 sentences, external-snapshots widening) | 1 | open |
+| 14 | The rehearsed restore drill, end-to-end in SCRATCH | 1 | open |
+| 15 | The deletion-aware restore matrix M1–M7, headless on the fake server | 1 | open |
+| 16 | Bulk-`.md` plaintext insurance, automated | 1 | open |
+| 17 | The sync-status face | 1 | open |
+| 18 | The passphrase / recovery-phrase sanity check (read-only unwrap) | 1 | open |
+| 19 | The app lock + its fallback SETTING + honest wording | 1 | open |
+| 20 | Item 9: journal-day deletions travel to Fragments at delete time | 1 (§9) | open |
+| 21 | The 8d recovery-story walk (every door, as a user) | 1 | open |
+| 22 | The end-of-phase Fable ladder (combined diff) | — | open |
+| 23 | Closeout: author 13u's execution plan + kickoff | — | open |
+| 24 | Closeout: refresh `/Applications/Variorum.app` (zero-instance window) | — | open |
+| 25 | Housekeeping: the 13u "EIGHT items" count fix (3 places) + her disk-encryption question → the 13p note | — | **done this sitting** |
+
+### The batch plan (the architect's, within the mandate — acts may merge at dispatch; the ledger is the truth)
+
+**Act 1** (Fable, running): the first-act cold review. Findings land
+here repo-first; fixes via an Opus fix session with traced mechanisms
++ red-on-old pins; a fresh Fable round-2 re-review per the ladder
+rules. **Act 2** (Opus): the trash-surface mini-round — ledger 2–6
+(+ any Act-1 findings in those files, so `RecoveryView` is touched
+once). **Act 3** (Opus): the L-items, 7–10. **Act 4** (Opus): backups
++ drill + matrix, 11–15. **Act 5** (Opus): the faces, 16–19.
+**Act 6** (Opus): item 9, ledger 20. **Act 7**: the 8d walk (21),
+then the end-of-phase ladder (22), then closeout (23–24 + the full
+ritual).
