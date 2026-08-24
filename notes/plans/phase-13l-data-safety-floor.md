@@ -1396,6 +1396,26 @@ queue (item B) is already discharged — the walk ran all nine rows
   revises on the explanation (the ruling was made through the
   question tool's short description, so the door was left open
   explicitly).
+- **M5 CONFIRMED INFORMED after the explanation** (her words:
+  *"accept it and say it is fine"*).
+- **NEW RULING — the SYNCED-restore warning, M2/M4's user-facing
+  twin** (her words: *"I also think we need to warn the user that if
+  they deleted something, it will auto re-delete from their backup …
+  we need to tell the user it clearly either way"*): the restore
+  flow warns BOTH populations, not only M5's local-only one. The
+  synced sentence carries the machinery's real nuance: ordinary
+  deletions re-apply INTO THE TRASH (M2 — the re-pulled tombstone;
+  recoverable for the window's remainder), while permanently deleted
+  things STAY permanently deleted (M4 — the ledger). Rides ledger
+  items 13–15 (runbook + restore face + the matrix's sentences).
+- **HELD OPEN at her question — the REGRET ROAD** (what "backup"
+  should mean for a purged thing she wishes she hadn't deleted; her
+  words: *"do we need some kind of road where it doesn't [re-delete]?
+  or does it make sense to offer that? what if the entire issue is
+  that they permanently deleted something and wish they hadn't? I'm
+  conflicted on what 'backup' should mean here"*): the architect's
+  framing + options put to her the same turn; her ruling lands below
+  when made.
 
 ### ACT 1 — THE FIRST-ACT FABLE COLD REVIEW: FINDINGS (returned 2026-08-23; recorded repo-first before any fix session)
 
