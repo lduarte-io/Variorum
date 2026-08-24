@@ -149,24 +149,49 @@ struct BackupRunTests {
         #expect(record.everythingWorked)
     }
 
-    @Test func theIntegrityCheckNeverWritesTheFileItChecks() async throws {
-        let source = try populatedDatabase()
+    @Test func theCheckAnswersOnAWALFlaggedCopyAndLeavesItSelfContained() async throws {
         let dir = try temporaryDirectory()
         defer { try? FileManager.default.removeItem(at: dir) }
+        // An ON-DISK WAL source, not the in-memory double — and that is the
+        // whole point of this test rather than a detail of it. SQLite's
+        // backup API copies the source's header, so a copy of a WAL store is
+        // ITSELF flagged WAL, and a read-only open of a WAL database is the
+        // one shape that can fail for reasons a `DatabaseQueue` over a
+        // journal-mode file never shows. Measured during the 13l drill:
+        // reading one of the author's real backup copies is exactly what
+        // creates the `-wal`/`-shm` siblings that turn up beside them.
+        let storeURL = dir.appendingPathComponent("live.sqlite")
+        let source = try AppDatabase.openStore(at: storeURL)
+        try await source.write { db in
+            try db.execute(sql: """
+                INSERT INTO container (id, kind, title, created_at, updated_at)
+                VALUES ('c-wal', 'post', 'written under WAL', '2026-08-24T00:00:00.000Z',
+                        '2026-08-24T00:00:00.000Z')
+                """)
+        }
         let copy = dir.appendingPathComponent("variorum-backup-2026-08-24-000000.sqlite")
         try await Task.detached { try source.backup(to: copy) }.value
+        #expect(!FileManager.default.fileExists(atPath: copy.path + "-wal"),
+                "a closed backup copy is self-contained — no sidecar carries content")
 
-        let before = try FileManager.default.attributesOfItem(atPath: copy.path)
-        #expect(StoreBackup.integrityCheck(of: copy) == "ok")
-        let after = try FileManager.default.attributesOfItem(atPath: copy.path)
-        #expect((before[.modificationDate] as? Date) == (after[.modificationDate] as? Date),
-                "a read-only check must not touch the snapshot")
-        // And it leaves no journal siblings behind — the -wal/-shm files
-        // that make a restored file dangerous if they travel with it.
+        #expect(StoreBackup.integrityCheck(of: copy) == "ok",
+                "a WAL-flagged copy — which every real copy is — must be checkable")
+        // And it leaves no journal siblings behind: the -wal/-shm files that
+        // make a restored file dangerous if they travel with it, and that a
+        // read-only open of a WAL file needs and cannot create.
         for suffix in ["-wal", "-shm"] {
             #expect(!FileManager.default.fileExists(atPath: copy.path + suffix),
                     "the check left a \(suffix) sibling")
         }
+        // Self-contained afterwards: a READ-ONLY open now works, which is the
+        // property the runbook promises and the one that failed before.
+        var readOnly = GRDB.Configuration()
+        readOnly.readonly = true
+        let reopened = try DatabaseQueue(path: copy.path, configuration: readOnly)
+        let title = try reopened.inDatabase { db in
+            try String.fetchOne(db, sql: "SELECT title FROM container WHERE id = 'c-wal'")
+        }
+        #expect(title == "written under WAL", "and the content is untouched")
     }
 
     @Test func aCorruptedCopyIsReportedRatherThanCalledOK() async throws {

@@ -269,21 +269,66 @@ final class StoreBackup {
         return doomed.count
     }
 
-    /// `PRAGMA integrity_check` on a copy, opened READ-ONLY — a check must
-    /// never migrate, journal, or otherwise write the artifact it is
-    /// checking (opening through `AppDatabase.openStore` would run the
-    /// migrator against it). Returns SQLite's own answer, or the reason it
-    /// could not be asked; never throws.
+    /// `PRAGMA integrity_check` on a copy just written, plus the one step
+    /// that makes the copy genuinely self-contained. Returns SQLite's own
+    /// answer, or the reason it could not be asked; never throws, and never
+    /// runs the MIGRATOR against the artifact (which is why this opens a bare
+    /// `DatabaseQueue` rather than going through `AppDatabase.openStore`).
+    ///
+    /// **Why it does not simply open read-only, which is what it did first.**
+    /// SQLite's backup API copies the source's header, so a copy of a
+    /// WAL-mode store is itself flagged WAL — and a READ-ONLY open of a
+    /// WAL database needs a `-shm` file it is not allowed to create, so it
+    /// fails outright: *"SQLite error 14: unable to open database file"*.
+    /// Every real backup copy is that shape. Caught by this method's own test
+    /// during the 13l drill, before it had run on a real folder once; the
+    /// read-only version would have reported a failure on every copy the app
+    /// ever made.
+    ///
+    /// So the copy is opened read-write and moved to `journal_mode = DELETE`
+    /// FIRST. That is not a workaround, it is the artifact getting the
+    /// property the runbook already promises it has: after this, the `.sqlite`
+    /// file is the whole snapshot, it needs no companion files, and anything
+    /// — including a read-only tool on a locked volume — can open it. The
+    /// fallback below covers a copy that genuinely cannot be written (a
+    /// read-only destination): the check still runs, on whatever terms the
+    /// file allows.
     nonisolated static func integrityCheck(of url: URL) -> String {
         do {
-            var config = GRDB.Configuration()
-            config.readonly = true
-            let queue = try DatabaseQueue(path: url.path, configuration: config)
-            return try queue.read { db in
-                try String.fetchOne(db, sql: "PRAGMA integrity_check") ?? "no answer"
+            let answer: (mode: String?, integrity: String)
+            do {
+                let queue = try DatabaseQueue(path: url.path)
+                answer = try queue.inDatabase { db in
+                    // Checkpoints and removes the -wal, then leaves the file
+                    // in a journal mode a read-only open can always handle.
+                    let mode = try String.fetchOne(db, sql: "PRAGMA journal_mode = DELETE")
+                    let integrity = try String.fetchOne(db, sql: "PRAGMA integrity_check")
+                    return (mode, integrity ?? "no answer")
+                }
             }
+            // The connection is closed by here. Leaving WAL usually takes the
+            // sidecars with it, but the `-shm` has been observed to survive
+            // (measured, 13l Act 4) — and a stray sidecar beside a snapshot is
+            // exactly what makes a hand-copied restore dangerous. Once the
+            // file is out of WAL they carry nothing, so they go.
+            if answer.mode?.lowercased() != "wal" {
+                for suffix in ["-wal", "-shm"] {
+                    try? FileManager.default.removeItem(
+                        at: URL(fileURLWithPath: url.path + suffix))
+                }
+            }
+            return answer.integrity
         } catch {
-            return "could not be checked: \(error.localizedDescription)"
+            do {
+                var config = GRDB.Configuration()
+                config.readonly = true
+                let queue = try DatabaseQueue(path: url.path, configuration: config)
+                return try queue.read { db in
+                    try String.fetchOne(db, sql: "PRAGMA integrity_check") ?? "no answer"
+                }
+            } catch {
+                return "could not be checked: \(error.localizedDescription)"
+            }
         }
     }
 
