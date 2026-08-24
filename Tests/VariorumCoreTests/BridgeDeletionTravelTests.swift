@@ -9,7 +9,7 @@ import Testing
 /// a deleted day just went silent and the Fragments entry stayed forever.
 ///
 /// The leg's rules and the reasoning behind each guard live at
-/// `BridgeEngine.deletionCandidates`; these pins are the behavior. THE ONE
+/// `BridgeEngine.deletionScan`; these pins are the behavior. THE ONE
 /// THAT MATTERS MOST is `aFragmentsEditAfterTheDeletionIsNeverBlanked` —
 /// the S5 doctrine's letter, in the one place a deletion could break it.
 @Suite("Bridge deletion travel (Phase 13l, ledger 20)")

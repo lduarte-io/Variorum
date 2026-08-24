@@ -702,23 +702,29 @@ public struct BridgeEngine: Sendable {
         return scan
     }
 
-    static func deletionCandidates(_ db: Database) throws -> [PushCandidate] {
-        try deletionScan(db).candidates
-    }
-
     /// The one sentence a stranded population gets. Aggregate rather than
     /// per-day because the note recurs every round (the standing posture for
     /// an unresolved situation — the duplicate-day pause behaves the same
     /// way), and because a per-day note would make an old re-key read as a
     /// wall of failures.
+    ///
+    /// **The mechanism clause names BOTH populations** (13l, the ladder's
+    /// R2-3). It used to read *"their agreement was staged for a re-push from
+    /// truth while the note was already gone"*, which is true only of the days
+    /// deleted BEFORE a staging. The other half is staged-then-deleted — the
+    /// note was live when the re-key ran and she deleted it before the next
+    /// round consumed the sentinel — and for those the sentence described an
+    /// order of events that never happened, sending her looking for a deletion
+    /// older than the re-key that does not exist. What is true of both is the
+    /// replacement itself, so that is what it says.
     static func strandedDeletionNote(_ days: [String]) -> String {
         let named = days.prefix(5).joined(separator: ", ")
         let tail = days.count > 5 ? ", and \(days.count - 5) more" : ""
         return """
             \(days.count) deleted journal day\(days.count == 1 ? "" : "s") \
             can no longer be removed from Fragments by the bridge \
-            (\(named)\(tail)) — their agreement was staged for a re-push \
-            from truth while the note was already gone, so the bridge can no \
+            (\(named)\(tail)) — their agreement was replaced by a re-push \
+            marker before the deletion could travel, so the bridge can no \
             longer say what Fragments holds. Remove them in Fragments by \
             hand if you want them gone.
             """
