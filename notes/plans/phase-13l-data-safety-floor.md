@@ -2543,6 +2543,318 @@ tag menu being unreachable the same way); pin standard per the
 adjudication (drive the real surface; honest pairing with the walk's
 evidence where unit roads can't reach the gesture).
 
+### LADDER FIX WAVE — RECORD (fresh Opus session, 2026-08-24)
+
+**Scope taken, and it is exactly the four items dispatched:**
+**LR-MAJOR-1** · **LR-MINOR-2** · **LR-NIT-5** · **P-0**. LR-MINOR-3/4
+and LR-NIT-4 were the architect's and were not touched. Four commits,
+one per item, each staged by explicit path; **nothing pushed**. Working
+tree clean; the two scratch reverts and the click helper lived in the
+scratchpad and are gone.
+
+**Fences held:** zero `Sources/VariorumCore/Sync/` lines · zero schema ·
+one `Sources/` file touched and it is `Bridge/BridgeEngine.swift` · her
+real store never opened (the one read was of a COPY of a backup) · no
+Release build, no `/Applications` touch, no custom build configuration ·
+no live Variorum instance was ever quit or addressed by process name
+(`pgrep` clean at the start; the one instance that ran was the
+DEV-STORE Debug build this session launched and quit by bundle id).
+
+---
+
+#### LR-MAJOR-1 — the bridge's permanent silence · **TRACE CONFIRMED** (`e89363a`)
+
+**Traced myself, from the code, before touching it.**
+`stageRepushFromTruth` (`BridgeEngine.swift:1186`) is a bare
+`UPDATE bridge_day SET last_synced_hash = <sentinel> WHERE
+last_synced_hash IS NOT NULL` — it does not know, and cannot know,
+whether a day still has a note. A sentinel is replaced only by a
+successful push (`recordDay` after an accepted candidate), and the push
+half's scan reads `container … kind='post' AND profile='journal' AND
+deleted_at IS NULL`. **So for a day with no live note there is no road
+that replaces the sentinel, ever**, and `deletionCandidates`' third
+guard refuses that day on every round for the life of the store. The
+population is every day deleted BEFORE a staging as well as inside its
+window — including anything she deleted before the 14d migration act of
+2026-08-16.
+
+The Act 6 record and QUESTIONS #76(d) both described this as a window.
+It is not a window.
+
+**WHAT WAS BUILT — visibility and truth, and deliberately nothing more.**
+The disposition reserves the semantics for her, and it is right to:
+letting a deletion travel with no comparable agreement is "delete her
+writing somewhere else on a guess". So `deletionCandidates` became
+`deletionScan`, which returns the refused days as `stranded` beside the
+candidates; `PushReport` carries `strandedDeletionDays`; and ONE
+aggregate note names them in `report.notes` — which is
+`BridgeScheduler.issueNotes`, which is the "needs attention (N)" line
+with the notes as its tooltip (`BridgeStatusViews.swift:61-67`, checked
+rather than assumed). The note is emitted BEFORE the
+empty-candidates early return, because a round whose only news is a
+stranded day pushes nothing and is exactly the round that must speak.
+It recurs every round — the duplicate-day pause's posture, for the same
+reason: the situation is unresolved until she rules.
+
+The scan now runs on every push rather than only on a
+deletion-authorized one, because the stranded set is a fact about local
+state, not about a round's permissions. **Cost shape unchanged** — same
+one read of `bridge_day`, same O(journal-days) the sweep already pays,
+same transaction (the KnownIssues row, owner 12, is untouched).
+
+**PINS — 4 new, `BridgeDeletionTravelTests` (16 total in the suite):**
+`aDayDeletedBeforeARestageIsStrandedForeverAndSaysSo` (the lead) ·
+`aStrandedDayIsNamedEvenWhenTheRoundMayTravelNothing` ·
+`anOrdinaryDeletableDayIsNeverCalledStranded` ·
+`puttingTheNoteBackClearsTheStranding`.
+**RED ON OLD by behavioural revert** (drop the `stranded.append`):
+**3 pins red on 9 expectations**.
+
+**THE DEVIATION, SAID OUT LOUD.** The disposition specified the pin as
+"…run twice → `deletionsPushed == 1`, fails today at 0". **That pin
+cannot be built without implementing the road out** — the very thing the
+same disposition reserves for her — so it would have been red before AND
+after. What the lead pin does instead is assert the finding's real
+content: `deletionsPushed == 0` **three rounds running**, with the
+sentinel still in place at the end, which is the PERMANENCE the reviewer
+found and #76(d) denied. **That half is behavior, not a fix — it passes
+on both sides, and its own doc says so.** The red-on-old belongs to the
+visibility half, which is the half that was actually a defect (silence).
+
+**THE MEASUREMENT — HER TRUE STRANDED BACKLOG IS ZERO, AND SO IS THE
+CATCH-UP #76(b) WARNED ABOUT.** Read-only, against the NEWEST backup
+file, on a COPY made in the scratchpad — never her live store:
+`…/io.lduarte.Variorum/…/Variorum/Backups/variorum-backup-2026-08-24-013712.sqlite`
+(written 2026-08-23 19:37; the app has been quit since).
+
+```sql
+SELECT COUNT(*) FROM bridge_day d
+WHERE d.last_synced_hash = 'restaged:repush-from-truth'
+  AND NOT EXISTS (SELECT 1 FROM container c
+                  WHERE c.entry_date = d.day_key AND c.deleted_at IS NULL);
+```
+
+| what | count |
+|---|---|
+| `bridge_day` rows | **11** |
+| …carrying a hash | **11** |
+| …carrying the SENTINEL | **0** |
+| **STRANDED (sentinel + no live note)** | **0** |
+| agreed-EMPTY (already told) | 0 |
+| **would travel a deletion on the first round** | **0** |
+
+Every bridged day still has a live note, so the 14d staging was fully
+consumed by its re-push round and nothing was left behind. The first
+round after Act 6 ships will be quiet, not busy.
+
+**THE DOC-TRUTH HALF.** QUESTIONS **#76(b)** and **#76(d)** were
+corrected IN PLACE with dated correction banners (the repo's supersession
+convention — the wrong sentence is quoted, not silently replaced), each
+carrying the exception, the permanence, and the measurement above.
+**QUESTIONS #78 is the new entry** — *may a deletion travel with no
+comparable agreement?* — four shapes for her, **none built**: (a) leave
+it and say so, which is what ships; (b) stop STAGING days that have no
+note, so the real agreement survives (the narrow mechanical version, and
+the one I would put first — with its honest cost stated: after a re-key
+that agreement is true about the words and stale about the bytes);
+(c) travel with no agreement at all (argued against — it is the
+`sync_delete` posture Act 6 rejected on a traced mechanism); (d) a
+"clean up Fragments" act she presses.
+
+---
+
+#### LR-MINOR-2 — a delete minted a coordinator for a note nothing opened · **TRACE CONFIRMED** (`ef34f99`)
+
+`AppSession.autosave(forPost:)` mints on a miss: a `Hold` with
+`holders: 1` and, on macOS, a `quitFinalize.register` closure.
+`NoteDeletion.run` called it for every id — and can never release,
+because the note is gone a line later. So every deleted Library row left
+a permanent map entry for `flushEveryOpenPost` to walk and a ⌘Q closure
+for a tombstone; fifty rows under ⌘-click multi-select, fifty of each.
+The `Hold` doc named `NoteDeletion` as exactly this kind of caller, and
+the act's own doc claimed the rows "pay nothing for it" — true of the
+flush, false of everything around it.
+
+**Fix:** a named existing-only entry,
+`AppSession.flushExistingAutosave(forPost:)` — which is
+`savepointOnLeaving`'s own shape (it has carried the argument for it
+since 13j), hoisted so the two roads cannot drift; `savepointOnLeaving`
+now calls it. The flush loses nothing: a post no surface has opened has
+nothing pending, by construction.
+
+**Three comments corrected at their mechanisms** — the act's paragraph,
+the `Hold` doc, and the L-d pin that repeated it.
+**`ShellActions.toggleSeal` still mints and was deliberately left**, with
+the reason recorded in both places: it only ever names
+`router.activePostID`, a post that is open by definition, so its entry
+was going to exist anyway. (Named here rather than fixed because it is
+outside the finding's fence — the temptation goes in the record.)
+
+**PIN:** `NoteDeletionActTests.deletingANeverOpenedNoteMintsNothing` —
+three notes created through the operations layer and never opened, then
+deleted; both `openAutosaveCount` and `quitFinalize.count` must not move,
+with the receipt asserted so the pin cannot pass on a no-op.
+**RED ON OLD by behavioural revert:** both counts **1 → 4**.
+
+---
+
+#### LR-NIT-5 — one bad record emptied the whole log · **TRACE CONFIRMED** (`a5061f7`)
+
+`BackupLog.read` decoded `[BackupRunRecord]` in one shot, and
+`JSONDecoder` fails an ARRAY when any single element fails. The log is
+persisted in `UserDefaults` across launches, so one unreadable record
+returned `[]` — her entire visible backup history gone, silently, from
+the one face whose job is to prove backups are happening.
+
+**Act 5 met this trap once and answered half of it.** Making `markdown`
+Optional covers *newer build reads older record*. The mirror case needs
+no code change at all to occur: a newer build writes an `Outcome` case
+this one has never heard of, she rolls back a version, log empty.
+
+**Fix:** a private `LenientRecord` wrapper whose `init(from:)` is
+`try? BackupRunRecord(from: decoder)`, so `read` decodes
+`[LenientRecord]` and compact-maps. One unreadable run loses itself and
+only itself.
+
+**PIN:**
+`MarkdownInsuranceTests.oneUnreadableRecordLosesItselfAndNotTheHistory`
+— it appends three real runs, then rewrites the MIDDLE one's
+`primary.outcome` to `"teleported"` **through `JSONSerialization` on the
+actual persisted bytes**, rather than hand-building a JSON string that
+could drift from what the encoder writes. **RED ON OLD by behavioural
+revert:** **0 of 3 records survive** instead of 2.
+
+**A PROCESS NOTE WORTH KEEPING, because it nearly cost a false green.**
+My first red-on-old run reported `** TEST SUCCEEDED **` under the
+revert. It had run ZERO tests:
+`-only-testing:VariorumTests/DataSafetyFacesTests` names a FILE, and
+the identifier must be the SUITE TYPE (`MarkdownInsuranceTests`) — a
+`-only-testing` filter that matches nothing passes vacuously. The
+Environment traps' rule (*confirm the "Test run with N tests" line*) is
+what caught it, and it is the reason that rule exists.
+
+---
+
+#### P-0 — the ⌘-click multi-delete door was dead · **TRACE CONFIRMED** (`270bcc5`)
+
+**Traced myself:** `LibraryCatalogView.postRow` carried
+`.onTapGesture { onOpen(.post(hit.id)) }` over a full-row
+`.contentShape(Rectangle())`, inside `List(selection: $selectedPosts)`
+with each row `.tag(hit.id)`. A SwiftUI tap consumes the click before
+the List's own selection handling sees it, and a bare `TapGesture`
+cannot tell one modifier from another. So `selectedPosts` never filled,
+the bulk bar (`selectedPosts.count > 1`) could never appear, and the
+bulk TAG menu behind the same condition had been unreachable since long
+before 13l.
+
+**Fix — the routing was made REACHABLE rather than layered over.** A
+second gesture (`.highPriorityGesture(TapGesture().modifiers(.command))`,
+the walk's candidate) would have left two mechanisms deciding one
+question, with the answer depending on gesture-priority ordering and
+nothing able to drive it. Instead: `NoteRowSelection` (new,
+`Features/Library/`) is a pure rule — modifiers → intent, and
+intent + pick + list order → the new pick — and `LibraryCatalogModel`
+owns the pick, with `clickNoteRow(_:modifiers:)` answering **whether the
+click was an opening one**. The view's tap became one line that consults
+it. The one impure read (`NSEvent.modifierFlags`) is isolated in
+`NoteRowClickModifiers.current` and named as such.
+
+Riding with it: ⇧-click takes the run between two rows in the LIST's own
+order (a ⇧-click with no anchor picks that row rather than doing
+nothing); the pick moved off `@State` onto the model; and leaving the
+List mode drops it, because only that mode draws a selection and a
+destructive bulk door must never stand over one nothing on screen shows.
+
+**PINS — 11, in 2 suites** (`NoteRowSelectionRuleTests` ·
+`NoteRowRoutingTests`), driving the REAL model with real posts and the
+real listing order, including the seam the finding names
+(`twoPickedNotesReachTheBulkBarInListOrder`). **RED ON OLD by behavioural
+revert** (`clickNoteRow` returns `true` and touches nothing — precisely
+what the shipped gesture did): **4 pins red on 9 expectations.**
+
+**⚠️ TWO LINES CANNOT BE PINNED, AND ARE NOT PRETENDED AT.** The
+`.onTapGesture` attachment and `NSEvent.modifierFlags`' read. Nothing in
+this codebase can synthesize a ⌘-click into a SwiftUI `List` row and
+read the answer reliably, and the risk of leaving it there is precisely
+P-0's own class: green pins over dead wiring. **So they were verified by
+driving the RUNNING app** — the walk's road, with a `CGEvent` click
+helper for the modifier the AX road cannot express. Dev-store Debug
+build (`io.lduarte.Variorum.debug`), launched and quit by this session,
+`pgrep` clean before and after; her real store never involved; screens
+in the gitignored `notes/plans/phase-13l-ladder-p0-screens/`.
+
+| act | observed |
+|---|---|
+| ⌘-click two note rows | both rows highlight, **neither note opens**, and the header grows **"Tag 2 notes ⌄"** and **"Delete 2 notes…"** (`p0-03-cmdclick.png`) |
+| ⇧-click two rows below | the run fills to **four**, and **"Untag 4 notes"** appears beside the others because the pick now wears a tag (`p0-04-shift.png`) |
+| plain click a row | the note **opens** — "Walk note C - the second of the pair." (`p0-05-plain.png`) |
+| back to the Library | the bulk bar is **gone**: the plain click dropped the pick (`p0-06-crop2.png`) |
+
+**So `NSEvent.modifierFlags` does report ⌘ inside a SwiftUI tap handler
+on macOS 26.5**, and the bulk TAG menu that had never been reachable is
+reachable.
+
+**PROVISIONALs → QUESTIONS #79** (three shapes inside the gesture, none
+of them in her ruling): (a) a plain click DROPS the pick — Finder's
+behaviour, and without it a pick has no exit but deleting it; (b) ⇧-click
+semantics and ⌘⇧ resolving as ⌘; (c) leaving the List mode drops the
+pick, with the bigger alternative named — teach the Notes cards to draw
+a pick so multi-select works there too, which is design work and not a
+fix. **The Notes-mode card's twin `onTapGesture` was deliberately NOT
+changed**, for that reason.
+
+---
+
+#### THE FOUR GATES — all green, counts quoted from my own runs
+
+| gate | result | vs. the round-1 baseline |
+|---|---|---|
+| core (`swift test`) | **1373 tests / 143 suites — PASSED** (33.5 s) | 1369/143 → **+4** (the LR-MAJOR-1 pins) |
+| Mac full | **1688 / 292 — PASSED** (223.3 s), **zero reds** | 1675/290 → **+13 / +2 suites** (11 P-0 · 1 LR-MINOR-2 · 1 LR-NIT-5) |
+| Mac spine (8 `TutorialWalk*` types by name) | **63 / 8 — PASSED** (21.6 s) | unchanged |
+| mobile (iPhone 16e) | **486 / 78 — PASSED** (84.0 s), the 2 recorded `withKnownIssue`s only · **spine 33 / 7 PASSED** | unchanged — **no mobile source or test file was touched** |
+
+**NEITHER KNOWN FLAKE APPEARED** in the full Mac run — not the Phase-12
+latency pin (`EditorWindowSmokeTests/rewriteStrategyLatencies`), not
+`CanvasDragTrackingTests`. **`CanvasDragTrackingTests` therefore stays at
+ONE recorded red for the phase and is NOT promoted to a KnownIssues
+row.**
+
+**Mobile rode unmoved as predicted, and it was checked rather than
+assumed:** `BackupLog`/`AppSession` are `Shared/` but the phone renders
+no backup log and never reached `NoteDeletion` (a Mac file); the bridge
+change is core-side with no app consumer; `NoteRowSelection` is Mac-only.
+
+---
+
+#### DISPUTES: NONE
+
+All four findings were traced to a concrete mechanism I could state and
+then break on purpose. Nothing was dismissed as hollow.
+
+#### THINGS SEEN AND DELIBERATELY NOT FIXED (the fence, recorded)
+
+1. **`ShellActions.toggleSeal` still mints a coordinator** —
+   LR-MINOR-2's sibling call site, left with its reason written at both
+   ends (it only names an open post).
+2. **`AppSession.runCopying` mints too** (`autosave(forPost:).flushNow()`
+   on a post that may not be open) — the same class as LR-MINOR-2 at a
+   different door. Not named by the finding; not touched; recorded here
+   so a future sweep has a starting point. Its holder never releases
+   either, so a session that duplicates many library rows grows the map
+   the same way.
+3. **The Notes-mode card's `onTapGesture`** (`LibraryCatalogView:586-587`)
+   — the twin the reviewer's note points at. Making it multi-selectable
+   needs a selection highlight the `LazyVStack` does not give free; the
+   mode switch now drops the pick so the two modes cannot disagree, and
+   the bigger version is #79(c) for her.
+4. **The Library rows still read "Untitled"** for nameless notes (visible
+   in `p0-02-library.png`). Act 7's fix was the TRASH's four query arms;
+   `Queries.searchCatalog`'s `DisplayTitle` call is a different site.
+   **Not in any of the four items** — recorded because the walk's own
+   argument (13g R6-3 / 13k K1 retired that placeholder) applies here
+   too, and the next reader should not have to re-derive it.
+
 ### THE LEDGER (every row owned; statuses updated as they move)
 
 | # | item | strand | status |
