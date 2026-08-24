@@ -27,6 +27,20 @@ round has fixed and she has been working around by hand**:
 
 **So the working caveats she has been living with end at this install.**
 
+**INSTALLED 2026-08-23 19:18** — `io.lduarte.VariorumMobile`, Release,
+onto her iPhone 17 Pro over the tunnel. **Binary timestamp 19:17:49,
+i.e. from this build** (the standing check after a past incident where a
+stale product was installed and believed fresh).
+
+**One honest note the E1 session added, worth reading before row 6:** the
+predicate the crash trace specified turned out to be **silent on one of
+her two crashes**, and **as literally written it fires on every ordinary
+keystroke** because iOS widens the reported range of anything that
+inserts. So the instrument records **three** signatures rather than one,
+and scopes the widest to pure removals — where both her crashes live —
+**printing the denominator so a zero can never read as "tested and
+clean."*
+
 ---
 
 ## 1 · D8 — time the first launch *(must be the very first thing)*
@@ -114,12 +128,33 @@ should now **keep the text and say why** instead of clearing the box.
 
 ## 6 · E1 — the crash gesture, instrumented *(the big one)*
 
-**Do:** arm the instrumentation as the app's own arming step says — the
-walk step written into the build tells you where — then, in a note with
-several paragraphs, **select multiple lines at the very end and delete
-them.** That is the exact gesture that used to crash. Then do some
-ordinary typing with **autocorrect** doing its thing, and a bit of
-**dictation**.
+**Arm it:** **Settings ▸ Diagnostics ▸ "Record edit trace"** (on), then
+**"Edit trace…" ▸ Clear.** It survives a relaunch, so you can arm it and
+come back.
+
+**Then, in a note with several paragraphs** — type a couple of words
+first so the last paragraph is freshly typed — do these five, with a bit
+of ordinary typing between each:
+
+1. select from **mid-paragraph to the very end of the note**, ⌫ — *this
+   is the exact gesture that used to crash*
+2. select **two whole paragraphs in the middle**, ⌫
+3. the same as (1), but ending **one character short** of the end
+4. mistype a word and **accept the autocorrect**
+5. **dictate** a sentence
+
+**Read it:** **Settings ▸ Diagnostics ▸ "Edit trace…"** — the first six
+lines are the counters. **Tap Copy and paste it to me.**
+
+**What the answer looks like:**
+- **POSITIVE — this settles it:** `SUSPECT SIGNATURE` above 0, **or**
+  `most gate calls before one edit` above 1. Either one confirms M1 on
+  its own, and the event list names which gesture did it.
+- **NEGATIVE:** all zeros.
+- **NOT a finding:** `gate-less` above 0 — that is just autocorrect and
+  dictation, and it is expected.
+
+*(Detail holds about 150 edits; the counters stay complete beyond that.)*
 
 **Why:** the crash is fixed, but **why the wrong edit-verdict got used is
 still unproven** — the suspicion is that iOS bundles a delete and a
