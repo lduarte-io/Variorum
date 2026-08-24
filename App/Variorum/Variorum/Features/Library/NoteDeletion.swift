@@ -75,10 +75,17 @@ enum NoteDeletion {
     /// **Flush FIRST, like every structural door.** `deleteContainer`
     /// cascades to the note's blocks and their takes; a refused flush that
     /// left typed bytes pending while the tombstone landed would strand them
-    /// outside both the surface and the rows they belong to. `flushNow()` on a
-    /// post nothing has opened is a no-op with nothing pending, so the library
-    /// and pool rows — which routinely name notes that are not open at all —
-    /// pay nothing for it (`AppSession.runCopying`'s own note).
+    /// outside both the surface and the rows they belong to.
+    ///
+    /// **Through the EXISTING-ONLY entry** (13l, the ladder's LR-MINOR-2): a
+    /// post nothing has opened has nothing pending, so `autosave(forPost:)`'s
+    /// minting arm bought this act nothing — and cost it a permanent registry
+    /// entry plus a ⌘Q closure PER DELETED NOTE, for notes that were never
+    /// open. That is the L-d growth class, reintroduced by exactly the doors
+    /// most likely to name a never-opened note: a Library row, or fifty of
+    /// them under ⌘-click multi-select. The paragraph this replaced said the
+    /// rows "pay nothing for it", which was true of the flush and false of
+    /// everything around it.
     ///
     /// **A note that is ALREADY gone is skipped, not fatal.** The double-press
     /// and the second-window race both produce it, and refusing the whole
@@ -107,7 +114,7 @@ enum NoteDeletion {
         guard !notes.isEmpty else { return RecoveryCopy.notADeletableNote }
         let postIDs = notes
         for id in postIDs {
-            await session.autosave(forPost: id).flushNow()
+            await session.flushExistingAutosave(forPost: id)
         }
         let deleted = try await session.runner.run { ops -> Int in
             var landed = 0

@@ -163,6 +163,44 @@ struct NoteDeletionActTests {
         }
     }
 
+    /// **…AND IT FLUSHES WITHOUT MINTING** (13l, the end-of-phase ladder's
+    /// LR-MINOR-2 — the L-d growth class, reintroduced one act later by the
+    /// doors most likely to name a never-opened note).
+    ///
+    /// Traced: `autosave(forPost:)` MINTS on a miss — a `Hold` with
+    /// `holders: 1` and, on the Mac, a `quitFinalize` closure. `NoteDeletion`
+    /// never releases (it cannot: the note is gone), so every deleted Library
+    /// row left a permanent entry for `flushEveryOpenPost` to walk and a quit
+    /// closure for a tombstone. Fifty rows under ⌘-click multi-select, fifty
+    /// of each. The flush itself bought nothing there: a post no surface has
+    /// opened has nothing pending, by construction.
+    ///
+    /// **Red on old** (behavioural revert): restore
+    /// `await session.autosave(forPost: id).flushNow()` and both counts move
+    /// by three.
+    @Test func deletingANeverOpenedNoteMintsNothing() async throws {
+        try await withEditor(seedBlocks: ["Alpha one."]) { editor in
+            let entriesBefore = editor.session.openAutosaveCount
+            let quitBefore = editor.session.quitFinalize.count
+
+            // Three notes this session has never opened — the Library-row
+            // case, and the multi-select case.
+            let strangers = try await editor.session.runner.run {
+                (ops: Operations) -> [String] in
+                try (0..<3).map { try ops.createPost(title: "row \($0)").id }
+            }
+            let receipt = try await NoteDeletion.run(
+                session: editor.session, postIDs: strangers)
+            #expect(receipt == RecoveryCopy.movedToTrashReceipt(notes: 3),
+                    "they really were deleted — the pin is about the cost, not a no-op")
+
+            #expect(editor.session.openAutosaveCount == entriesBefore,
+                    "no coordinator was minted for a note nothing ever opened")
+            #expect(editor.session.quitFinalize.count == quitBefore,
+                    "and no ⌘Q closure was left behind for a tombstone")
+        }
+    }
+
     /// The double-press and the racing-second-window: a note already gone is
     /// SKIPPED, never fatal, and the receipt counts what actually went.
     @Test func aNoteThatIsAlreadyGoneIsSkippedRatherThanRefusingTheWholeGesture()

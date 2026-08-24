@@ -134,13 +134,19 @@ final class AppSession {
         /// How many callers have asked for this post's coordinator.
         ///
         /// **Over-counting is safe and under-counting is not**, which is
-        /// why this counts every call rather than trying to be clever.
-        /// Callers that take a coordinator transiently and never release
-        /// (`NoteDeletion`, `ShellActions` — they flush a post that may not
-        /// be open at all) simply keep the count above zero forever, which
-        /// is precisely the behaviour this map had before: the entry
-        /// stays. Only a caller that actually releases can bring it to
-        /// zero, and today there is exactly one.
+        /// why this counts every call rather than trying to be clever. A
+        /// caller that takes a coordinator transiently and never releases
+        /// simply keeps the count above zero forever, which is precisely
+        /// the behaviour this map had before: the entry stays. Only a
+        /// caller that actually releases can bring it to zero.
+        ///
+        /// *(13l, the ladder's LR-MINOR-2: this used to name `NoteDeletion`
+        /// and `ShellActions` as that kind of caller. `NoteDeletion` no
+        /// longer mints at all — it flushes through
+        /// `flushExistingAutosave(forPost:)`, because its doors routinely
+        /// name notes nothing ever opened. `ShellActions.toggleSeal` still
+        /// mints, but only for `router.activePostID` — a post that is open
+        /// by definition, so its entry was going to exist anyway.)*
         var holders: Int
     }
 
@@ -182,6 +188,27 @@ final class AppSession {
         }
         #endif
         return coordinator
+    }
+
+    /// **Flush a post's pending buffer WITHOUT minting a coordinator for it**
+    /// (13l, the end-of-phase ladder's LR-MINOR-2).
+    ///
+    /// The rule this exists for: a post NO surface has opened has nothing
+    /// pending, by construction — the only thing that fills a coordinator is a
+    /// surface recording into it. So a caller that only wants "land whatever is
+    /// unflushed" gains nothing from `autosave(forPost:)`'s minting arm and
+    /// pays for it twice: a permanent map entry `flushEveryOpenPost` walks
+    /// forever (the holder count can never reach zero — the caller does not
+    /// release), and on the Mac a `quitFinalize` closure registered for a note
+    /// nothing holds. `NoteDeletion` reaches this entry precisely because its
+    /// doors routinely name notes that were never open — a Library row, or
+    /// fifty of them under ⌘-click multi-select.
+    ///
+    /// This is `savepointOnLeaving`'s existing-only shape, made a named entry
+    /// so the two roads cannot drift; that method's own doc has always carried
+    /// the argument for it.
+    func flushExistingAutosave(forPost postID: String) async {
+        await postAutosaves[postID]?.coordinator.flushNow()
     }
 
     /// **Let go of a post's coordinator** (13l L-d).
@@ -337,7 +364,7 @@ final class AppSession {
         // through it, which is why its filing flushes before it savepoints
         // and why it now RELEASES the entry afterwards. The reasoning above
         // stands on its own; the example was simply wrong.)
-        await postAutosaves[postID]?.coordinator.flushNow()
+        await flushExistingAutosave(forPost: postID)
         _ = try? await runner.run { ops in
             try ops.closeAutoCommit(postID)
         }

@@ -96,9 +96,14 @@ struct AutosaveRegistryReleaseTests {
         }
     }
 
-    /// Over-counting is the safe direction, and it is the direction the
-    /// transient callers take (`NoteDeletion`/`ShellActions` flush a post
-    /// they never release). A second holder keeps the entry alive.
+    /// Over-counting is the safe direction, and it is the direction a
+    /// transient caller takes (`ShellActions.toggleSeal` flushes a post it
+    /// never releases — an OPEN one, so its entry exists regardless). A second
+    /// holder keeps the entry alive.
+    ///
+    /// *(13l, LR-MINOR-2: `NoteDeletion` used to be named here too and is no
+    /// longer a minting caller at all — see
+    /// `NoteDeletionDoorsTests.deletingANeverOpenedNoteMintsNothing`.)*
     @Test func aSecondHolderKeepsTheEntry() async throws {
         try await withSession { session, _ in
             let first = session.autosave(forPost: "p1")
