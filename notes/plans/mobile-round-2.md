@@ -5496,7 +5496,7 @@ question.**
 |---|---|---|
 | **(a)** | **Hide the door on the phone.** PL-9's own option | Honest about today, but leaves the Mac-must-be-open latency **invisible and unexplained** |
 | **(b)** | **Keep the door and make it SAY what it does** — e.g. *"Your journal syncs with Fragments from your Mac."* | Cheap, honest, and it converts a confusing door into an explanation. **The architect's recommendation as the floor**, whatever else she decides |
-| **(c)** | **Run the bridge on the phone too.** | Real scope: the phone would push to Fragments' `journal_entries` and land its edits, which touches `notes/fragments-bridge-contract.md` and **Fragments' own side**, plus the journal-class E2EE key on a second device. **A phase-sized decision, not a batch** |
+| **(c)** | **Run the bridge on the phone too.** **⚠️ THE ARCHITECT'S COST ESTIMATE HERE WAS WRONG, corrected 2026-08-23 at her push-back** (*"why would it change fragments?"*): the machinery is already SHARED — `BridgeSession` is in `Shared/`, the live journal-bridge key provider is in `Shared/EncryptionKeychain.swift` with **no platform fence**, the phone already enrols class keys, and it already holds a Fragments session. **It does NOT obviously need a Fragments-side change.** The real question is **Variorum's own**: two devices running rounds against one `journal_entries` table — who pushes a day, and what stops a double-push. **SHE RULED IT A PHASE: `13v` on the master plan** | Its own row, not a batch |
 
 **ROUTING:** the DOOR decision is already **PL-9's judgment act, batch 8**
 (the handoff's §3 row 16) — **and (b)'s copy belongs there regardless.**
