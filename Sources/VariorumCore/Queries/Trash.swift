@@ -25,6 +25,19 @@ extension Queries {
         /// the family's: the latest deletion among its descendants.
         public let deletedAt: String
         /// Notes and books show their name; blocks and takes show text.
+        ///
+        /// **A note's name here is the FULL display answer** (13l Act 7 — the
+        /// 8d walk). Every arm below carries `created_at` into
+        /// `DisplayTitle.note`, because the rule's third link is the created
+        /// DAY and a caller that omits it degrades to the literal
+        /// `"Untitled"` — the placeholder her 13g R6-3 / 13k K1 rulings
+        /// retired. The walk met it on the one surface where it costs the
+        /// most: a nameless note (every ⌘N and quick-entry note is one) read
+        /// **"Untitled"** in the Trash while its own masthead, its Library
+        /// row and its shelf card all read its date, so the row that must
+        /// answer *"which note am I putting back?"* was the only one that
+        /// could not. Same fix in all four arms: the block/take/original
+        /// arms name their HOME note through the same rule.
         public let title: String?
         public let text: String?
         /// Context for a block/take row: the note it came from.
@@ -101,7 +114,7 @@ extension Queries {
             items += try Row.fetchAll(
                 db,
                 sql: """
-                    SELECT id, title, entry_date, deleted_at
+                    SELECT id, title, entry_date, created_at, deleted_at
                     FROM container
                     WHERE kind = 'post' AND deleted_at IS NOT NULL AND deleted_at >= :cutoff
                       -- The fence is STAMP-AWARE (13j ladder B, B1): a LIVE
@@ -120,7 +133,8 @@ extension Queries {
                 TrashItem(
                     kind: .note, id: row["id"], deletedAt: row["deleted_at"],
                     title: DisplayTitle.note(
-                        title: row["title"], entryDate: row["entry_date"]))
+                        title: row["title"], entryDate: row["entry_date"],
+                        createdAt: row["created_at"]))
             }
         }
 
@@ -151,6 +165,7 @@ extension Queries {
                            dv.working_text AS text,
                            c.id AS note_id, c.title AS note_title,
                            c.entry_date AS note_entry_date,
+                           c.created_at AS note_created_at,
                            (c.deleted_at IS NOT NULL) AS note_deleted
                     FROM block b
                     LEFT JOIN variant dv
@@ -176,7 +191,8 @@ extension Queries {
                     text: row["text"], noteID: row["note_id"],
                     noteTitle: (row["note_id"] as String?).map { _ in
                         DisplayTitle.note(
-                            title: row["note_title"], entryDate: row["note_entry_date"])
+                            title: row["note_title"], entryDate: row["note_entry_date"],
+                            createdAt: row["note_created_at"])
                     },
                     noteIsDeleted: (row["note_deleted"] as Int?) == 1)
             }
@@ -193,6 +209,7 @@ extension Queries {
                            v.working_text AS text, v.block_id AS block_id,
                            c.id AS note_id, c.title AS note_title,
                            c.entry_date AS note_entry_date,
+                           c.created_at AS note_created_at,
                            (c.deleted_at IS NOT NULL) AS note_deleted
                     FROM variant v
                     JOIN block b ON b.id = v.block_id
@@ -211,7 +228,8 @@ extension Queries {
                     text: row["text"], noteID: row["note_id"],
                     noteTitle: (row["note_id"] as String?).map { _ in
                         DisplayTitle.note(
-                            title: row["note_title"], entryDate: row["note_entry_date"])
+                            title: row["note_title"], entryDate: row["note_entry_date"],
+                            createdAt: row["note_created_at"])
                     },
                     noteIsDeleted: (row["note_deleted"] as Int?) == 1,
                     blockID: row["block_id"])
@@ -282,7 +300,8 @@ extension Queries {
                        MAX(d.deleted_at) AS family_clock,
                        SUM(CASE WHEN d.deleted_at IS NULL THEN 1 ELSE 0 END) AS live_count,
                        dv.working_text AS text,
-                       c.id AS note_id, c.title AS note_title, c.entry_date AS note_entry_date
+                       c.id AS note_id, c.title AS note_title,
+                       c.entry_date AS note_entry_date, c.created_at AS note_created_at
                 FROM fam f
                 JOIN block d ON d.id = f.id
                 JOIN block o ON o.id = f.origin
@@ -309,7 +328,8 @@ extension Queries {
                 noteID: row["note_id"],
                 noteTitle: (row["note_id"] as String?).map { _ in
                     DisplayTitle.note(
-                        title: row["note_title"], entryDate: row["note_entry_date"])
+                        title: row["note_title"], entryDate: row["note_entry_date"],
+                        createdAt: row["note_created_at"])
                 })
         }
     }

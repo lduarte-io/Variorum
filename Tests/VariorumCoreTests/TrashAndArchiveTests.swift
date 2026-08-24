@@ -148,6 +148,85 @@ struct TrashAndArchiveTests {
         }
     }
 
+    /// **13l Act 7 — the 8d walk's find: the Trash was the ONE surface that
+    /// still said "Untitled".**
+    ///
+    /// A nameless note (every `⌘N` and every quick-entry note is one — the
+    /// mint stores `nil`, 13g's other half) has no `entry_date` either, so
+    /// `DisplayTitle.note`'s third link — the created DAY — is the only one
+    /// that answers. Every arm of `Queries.trash` called that rule while
+    /// omitting `createdAt:`, which is exactly the degraded path the rule's
+    /// own doc names ("every such caller degrades to the behaviour it had
+    /// before this existed"), so the row read `"Untitled"` — the placeholder
+    /// her 13g R6-3 and 13k K1 rulings retired — while the note's masthead,
+    /// its Library row and its shelf card all read its date.
+    ///
+    /// It matters HERE more than anywhere: this row is the one that has to
+    /// answer *"which note am I putting back?"*, and 8d's mandate is that
+    /// the recovery story hold from every door. All four arms carry the
+    /// stamp now; the block/take/original arms name their HOME note through
+    /// the same rule, so a block's context line cannot say "in Untitled"
+    /// either.
+    @Test func theTrashNamesANamelessNoteByItsDayAndNeverByThePlaceholder() throws {
+        try withOperations { ops, db in
+            // Nameless AND dateless — the quick-entry / ⌘N shape exactly.
+            let post = try ops.createPost()
+            let kept = try ops.newBlock(in: post.id, text: "keeps the note alive")
+            let block = try ops.newBlock(in: post.id, text: "a deleted block")
+            let take = try ops.branchVariant(kept.block.id, from: kept.variant.id)
+            try ops.deleteBlock(block.block.id)
+            try ops.deleteVariant(take.id)
+
+            // The original's arm, so all four are covered by one fixture.
+            let divided = try ops.newBlock(in: post.id, text: "First half. Second half.")
+            _ = try ops.branchVariant(divided.block.id, from: divided.variant.id)
+            let w = try ops.divideW(divided.block.id, cuts: [divided.variant.id: 12])
+            try ops.deleteBlock(w.first.block.id)
+            try ops.deleteBlock(w.second.block.id)
+
+            let stamp = try db.read { db -> String? in
+                try Row.fetchOne(
+                    db, sql: "SELECT created_at FROM container WHERE id = ?",
+                    arguments: [post.id])?["created_at"]
+            }
+            let day = try #require(DisplayTitle.day(fromStamp: #require(stamp)))
+            #expect(day != DisplayTitle.placeholder)
+
+            try db.read { db in
+                // The block/take/original arms first — the note is still LIVE,
+                // so its own arm has nothing to list yet.
+                let rows = try Queries.trash(db, now: harnessNow)
+                let byKind = Dictionary(grouping: rows, by: \.kind)
+                for kind in [Queries.TrashItem.Kind.block, .preservedOriginal] {
+                    let row = try #require(byKind[kind]?.first, "expected a \(kind) row")
+                    #expect(row.noteTitle == day,
+                            "a \(kind) row must name its home note by its day")
+                    #expect(row.noteTitle != DisplayTitle.placeholder)
+                }
+                // The TAKE arm is deliberately not asserted here, and the
+                // reason is a SEPARATE gap this walk recorded rather than
+                // fixed: that arm reaches its note through
+                // `block.last_container_id`, which a LIVE block has never
+                // carried (it is stamped when a block is deleted or
+                // released), so a take deleted from a live block names no
+                // note at all — `noteTitle` is nil, not "Untitled". Naming
+                // it needs a join through the live placement, which is a
+                // query change of its own; it is on the walk's propose-only
+                // list for the author.
+                #expect(byKind[.take]?.first?.noteTitle == nil,
+                        "recorded, not endorsed — see the note above")
+            }
+
+            // And the note's own arm, once it goes.
+            try ops.deleteContainer(post.id)
+            let noteRow = try db.read { db in
+                try Queries.trash(db, now: harnessNow, kinds: [.note]).first
+            }
+            #expect(try #require(noteRow).title == day)
+            #expect(try #require(noteRow).title != DisplayTitle.placeholder)
+        }
+    }
+
     @Test func aBlockWhoseNoteDiedLaterSaysSo() throws {
         try withOperations { ops, db in
             let post = try ops.createPost(title: "note")
