@@ -110,12 +110,12 @@ extension Operations {
         try database.write { db in
             let existing = try Block.fetchOne(db, key: id)
             guard let existing, existing.deletedAt == nil else {
-                if quietWhenGone { return .unplaced }
+                if quietWhenGone { return .unplaced(home: nil) }
                 throw OperationError.blockNotFound(id: id)
             }
             var block = existing
             guard let archivedAt = block.archivedAt else {
-                if quietWhenGone { return .unplaced }
+                if quietWhenGone { return .unplaced(home: nil) }
                 throw OperationError.blockNotArchived(id: id)
             }
             let stamp = DateFormatter.variorumISO8601.string(from: archivedAt)
@@ -125,10 +125,15 @@ extension Operations {
             block.updatedAt = now
             try block.update(db)
 
+            // 13l row 26: the home's KIND rides the answer here too — a scrap
+            // can be archived exactly as a note's block can, and the tray's
+            // receipt reads this landing.
+            let remembered = try block.lastContainerId
+                .flatMap { try Container.fetchOne(db, key: $0) }
             guard let lastContainerID = block.lastContainerId,
-                  let container = try Container.fetchOne(db, key: lastContainerID),
+                  let container = remembered,
                   container.deletedAt == nil
-            else { return .unplaced }
+            else { return .unplaced(home: remembered?.kind) }
 
             if let revivable = try ContainerBlock.fetchOne(
                 db,
@@ -144,12 +149,14 @@ extension Operations {
                 revived.deletedAt = nil
                 revived.updatedAt = now
                 try revived.update(db)
-                return .itsOldPlace
+                return .itsOldPlace(home: container.kind)
             }
-            guard try livePlacement(db, blockID: id) == nil else { return .itsOldPlace }
+            guard try livePlacement(db, blockID: id) == nil else {
+                return .itsOldPlace(home: container.kind)
+            }
             try ensureUnlocked(container)
             _ = try insertPlacementForUnarchive(db, blockID: id, containerID: lastContainerID)
-            return .endOfNote
+            return .endOfNote(home: container.kind)
         }
     }
 

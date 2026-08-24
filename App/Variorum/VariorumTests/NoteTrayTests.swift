@@ -230,7 +230,10 @@ struct NoteTrayTests {
 
             let model = TrayViewModel(session: editor.session, postID: editor.postID)
             await model.putBackDeleted(slot.blockID)
-            #expect(model.statusMessage == TrayPath.putBackAtEnd)
+            // 13l row 26 (a JUSTIFIED and STRENGTHENING pin edit): the
+            // sentence now names what it landed IN, so this asserts the home
+            // kind as well as the landing. A note's tray still says "note".
+            #expect(model.statusMessage == TrayPath.putBackAtEnd(.post))
             #expect(try editor.storeSlots().map(\.blockID).last == slot.blockID)
         }
     }

@@ -43,10 +43,16 @@ import VariorumCore
 ///   *"Untitled"* where every other surface shows its created day — 13k K2);
 ///   the row's door said **Open note**; and it routed `.post`, opening a pool
 ///   as a note pane.
-/// - **RECORDED, not fixed** (it needs the landing to report its container's
-///   kind, which is a `Sources/` change this batch is fenced out of): the
-///   shared put-back RECEIPTS still say "note" for a scrap —
-///   `RecoveryCopy.putBackAtEnd` / `.putBackUnplaced`.
+/// - **RECORDED, not fixed at seat 1** (it needs the landing to report its
+///   container's kind, which is a `Sources/` change that batch was fenced out
+///   of): the shared put-back RECEIPTS still said "note" for a scrap —
+///   `RecoveryCopy.putBackAtEnd` / `.putBackUnplaced`. **FIXED at seat 2**
+///   (ledger row 26, at the mechanism): `Operations.BlockRestoreLanding` now
+///   carries the home container's KIND, read inside the restore's own
+///   transaction, and `RecoveryCopy.landingReceipt` — the ONE place a landing
+///   becomes words — picks the noun from it. Pinned below through the real
+///   Trash model, and in core by `RecoveryOpsTests
+///   .restoreBlockNamesTheScrapsAreaItCameOutOf`.
 @MainActor
 @Suite("A scrap's home is a pool, and the Trash says so (13l §8b)")
 struct TrashPoolHonestyTests {
@@ -94,6 +100,70 @@ struct TrashPoolHonestyTests {
             #expect(!model.homeIsPool(noteRow))
             #expect(model.homeTitle(noteRow) == "Real note",
                     "a note still reads through the note brain")
+        }
+    }
+
+    /// **LEDGER ROW 26 — the put-back RECEIPT stops calling the scraps area a
+    /// note**, driven through the real Trash model rather than through the
+    /// copy function, because the whole defect was that the SURFACE could not
+    /// know the kind: it read a landing that did not carry one.
+    ///
+    /// The road is the reachable one. A merge in the scraps releases both
+    /// sources to lineage — their placement rows tombstone at RELEASE time,
+    /// with the merge's stamp — so a later `deleteBlock` leaves nothing
+    /// carrying the block's own tombstone and `restoreBlock` takes its
+    /// fresh-at-end fallback. That is the exact branch whose sentence was
+    /// *"Put back at the end of this note."* for a block that went back into
+    /// the Blocks area.
+    ///
+    /// **RED ON OLD:** on the pre-fix tree this receipt read
+    /// `RecoveryCopy.putBackAtEnd`'s single note-shaped constant, so the
+    /// "scraps" expectation fails and the negative assertion fails with it.
+    /// (Verified by behavioural revert — see the batch record.)
+    @Test func aScrapsPutBackReceiptNamesTheScrapsAndNeverTheNote() async throws {
+        try await withEditor(seedBlocks: ["Alpha one."]) { editor in
+            let released = try await editor.session.runner.run {
+                (ops: Operations) -> String in
+                let pool = try ops.createPool(title: "Scraps")
+                let one = try ops.newBlock(in: pool.id, text: "a loose sentence")
+                let two = try ops.newBlock(in: pool.id, text: "another one")
+                // The merge releases both sources; the delete then finds no
+                // live placement to stamp, so the put-back lands at the end.
+                _ = try ops.merge(one.block.id, two.block.id)
+                try ops.deleteBlock(one.block.id)
+                return one.block.id
+            }
+            let model = RecoveryViewModel(session: editor.session)
+            let rows: [Queries.TrashItem] = try await editor.database.read { db in
+                try Queries.trash(db, now: harnessNow)
+            }
+            let scrapRow = try #require(rows.first { $0.id == released })
+            await model.putBack(scrapRow)
+
+            #expect(model.lastError == nil)
+            let receipt = try #require(model.receipt)
+            #expect(receipt == RecoveryCopy.putBackAtEnd(.pool))
+            #expect(receipt.contains("scraps"), "it names where it actually went")
+            #expect(!receipt.contains("note"),
+                    "and never calls the scraps area a note — the row-26 defect")
+
+            // A NOTE's block on the same road still says "note", which is the
+            // guard against a fix that simply renamed the sentence.
+            let fromNote = try await editor.session.runner.run {
+                (ops: Operations) -> String in
+                let post = try ops.createPost(title: "Real note")
+                let one = try ops.newBlock(in: post.id, text: "first")
+                let two = try ops.newBlock(in: post.id, text: "second")
+                _ = try ops.merge(one.block.id, two.block.id)
+                try ops.deleteBlock(one.block.id)
+                return one.block.id
+            }
+            let after: [Queries.TrashItem] = try await editor.database.read { db in
+                try Queries.trash(db, now: harnessNow)
+            }
+            await model.putBack(try #require(after.first { $0.id == fromNote }))
+            #expect(model.receipt == RecoveryCopy.putBackAtEnd(.post))
+            #expect(model.receipt?.contains("note") == true)
         }
     }
 

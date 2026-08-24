@@ -109,14 +109,46 @@ nonisolated enum RecoveryCopy {
     // MARK: Put-back receipts (the three landings)
 
     static let putBackWhereItWas = "Put back where it was."
-    static let putBackAtEnd = "Put back at the end of this note."
     static let putBackBeside = "Put back where it came from."
-    /// The block is live again but has nowhere to land (its note is gone).
-    /// **A RECEIPT — something really happened.** Never a refusal: see
-    /// `originalHasNoNote` below, which is the sentence for the case where
-    /// nothing happened at all.
-    static let putBackUnplaced =
-        "Put back — but its note is gone, so it's waiting unplaced."
+
+    /// **WHAT A BLOCK CAME OUT OF, IN THE APP'S OWN WORDS** (13l Act 2,
+    /// ledger row 26). A block does not only live in a note: the scraps area
+    /// is a `kind='pool'` container holding ordinary blocks, and its blocks
+    /// reach the Trash by the same road. These two receipts said "note"
+    /// whatever the row was, which is the one lie the recovery story cannot
+    /// afford (§8d — intuitive from every door). The word comes from the
+    /// LANDING now (`Operations.BlockRestoreLanding.home`), which is the
+    /// transaction's own answer, never a projection's.
+    ///
+    /// "scraps" and not "pool": the SURFACE is named Scraps everywhere she
+    /// can see it (the row's own "Open scraps" door, the Blocks area), and
+    /// "pool" is the model's word (R29 gave the sidebar's Pool to bookless
+    /// NOTES, which is a different thing entirely — copy that said "pool"
+    /// here would point her at the wrong room).
+    static func homeWord(_ home: ContainerKind) -> String {
+        switch home {
+        case .post: return "note"
+        case .pool: return "scraps"
+        }
+    }
+
+    static func putBackAtEnd(_ home: ContainerKind) -> String {
+        switch home {
+        case .post: return "Put back at the end of this note."
+        case .pool: return "Put back at the end of the scraps."
+        }
+    }
+
+    /// The block is live again but has nowhere to land (its home is gone, or
+    /// it remembers none). **A RECEIPT — something really happened.** Never a
+    /// refusal: see `originalHasNoNote` below, which is the sentence for the
+    /// case where nothing happened at all.
+    static func putBackUnplaced(_ home: ContainerKind?) -> String {
+        guard let home else {
+            return "Put back — but it has no note to go back to, so it's waiting unplaced."
+        }
+        return "Put back — but its \(homeWord(home)) is gone, so it's waiting unplaced."
+    }
 
     /// **The preserved original with no note to go back INTO** (batch 4.5b —
     /// §49's MINOR: *a success sentence in the red slot*). Putting a
@@ -235,11 +267,17 @@ nonisolated enum RecoveryCopy {
     /// in the one home — this used to be a `MobileTrashModel` static while
     /// the Mac discarded the landing entirely, which is the drift §49's
     /// MAJOR names.
+    ///
+    /// **13l Act 2 (ledger row 26): the landing now also answers WHAT it went
+    /// back into**, and this is the one place that turns that answer into a
+    /// word — so the Trash, the note's tray and the phone cannot describe one
+    /// scrap three ways. `.itsOldPlace` needs no kind: "where it was" is true
+    /// of every home there is.
     static func landingReceipt(_ landing: Operations.BlockRestoreLanding) -> String {
         switch landing {
         case .itsOldPlace: return putBackWhereItWas
-        case .endOfNote: return putBackAtEnd
-        case .unplaced: return putBackUnplaced
+        case .endOfNote(let home): return putBackAtEnd(home)
+        case .unplaced(let home): return putBackUnplaced(home)
         }
     }
 

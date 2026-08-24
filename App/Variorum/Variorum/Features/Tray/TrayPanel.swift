@@ -125,14 +125,26 @@ nonisolated enum TrayPath {
     /// flips the placement row this deletion tombstoned, so a block normally
     /// comes back WHERE IT WAS — and the receipt says that instead of
     /// "at the end", which is what it had to say while the op minted fresh.
+    ///
+    /// **13l Act 2 (ledger row 26): the two landing-shaped receipts take the
+    /// home's KIND**, because a block can have come out of the SCRAPS area
+    /// and both sentences said "note" whatever the row was. The tray's own
+    /// two doors no longer switch over the landing at all — they call
+    /// `RecoveryCopy.landingReceipt`, the one place a landing becomes words
+    /// (the Trash surface already did), so the kind cannot be honoured in one
+    /// door and forgotten in the other.
     static let putBackWhereItWas = RecoveryCopy.putBackWhereItWas
-    static let putBackAtEnd = RecoveryCopy.putBackAtEnd
+    static func putBackAtEnd(_ home: ContainerKind) -> String {
+        RecoveryCopy.putBackAtEnd(home)
+    }
     static let putBackBeside = RecoveryCopy.putBackBeside
-    /// The block is live again but has nowhere to land (its note is gone).
+    /// The block is live again but has nowhere to land (its home is gone).
     /// Unreachable from the tray, which is always open ON a live note —
     /// worded anyway, because a receipt that cannot be produced is still a
     /// receipt a future door could produce.
-    static let putBackUnplaced = RecoveryCopy.putBackUnplaced
+    static func putBackUnplaced(_ home: ContainerKind?) -> String {
+        RecoveryCopy.putBackUnplaced(home)
+    }
 
     /// **Where a released original waits, in one phrase** — the string every
     /// ceremony explainer, merge receipt and helper entry uses. It replaces
@@ -313,11 +325,10 @@ final class TrayViewModel {
             let landing = try await session.runner.run { ops in
                 try ops.restoreBlock(blockID)
             }
-            statusMessage = switch landing {
-            case .itsOldPlace: TrayPath.putBackWhereItWas
-            case .endOfNote: TrayPath.putBackAtEnd
-            case .unplaced: TrayPath.putBackUnplaced
-            }
+            // 13l row 26: ONE place turns a landing into words, and it reads
+            // the home's kind the op now reports — so a scrap's Put back
+            // stops calling the scraps area a note.
+            statusMessage = RecoveryCopy.landingReceipt(landing)
         } catch let error as OperationError {
             statusMessage = TrayRefusalCopy.message(for: error)
         } catch {
@@ -335,11 +346,7 @@ final class TrayViewModel {
             let landing = try await session.runner.run { ops in
                 try ops.unarchiveBlock(blockID)
             }
-            statusMessage = switch landing {
-            case .itsOldPlace: TrayPath.putBackWhereItWas
-            case .endOfNote: TrayPath.putBackAtEnd
-            case .unplaced: TrayPath.putBackUnplaced
-            }
+            statusMessage = RecoveryCopy.landingReceipt(landing)
         } catch let error as OperationError {
             statusMessage = TrayRefusalCopy.message(for: error)
         } catch {

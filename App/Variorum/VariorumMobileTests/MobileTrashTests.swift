@@ -395,7 +395,10 @@ struct MobileTrashTests {
             await model.putBack(orphan)
             #expect(model.receipt == nil, "nothing happened, so nothing is receipted")
             #expect(model.lastError == RecoveryCopy.originalHasNoNote)
-            #expect(model.lastError != RecoveryCopy.putBackUnplaced,
+            // 13l row 26 (a JUSTIFIED pin edit — the receipt takes the home's
+            // kind now, so the comparison names one): never the RECEIPT for a
+            // block that really moved.
+            #expect(model.lastError != RecoveryCopy.putBackUnplaced(.post),
                     "never the RECEIPT for a block that really moved")
         }
     }
@@ -473,7 +476,7 @@ struct MobileTrashTests {
         // is NOT the `putBackUnplaced` RECEIPT (§49's MINOR).
         #expect(DeletionRefusal.words(RecoveryRefusal.originalHasNoNote)
             == RecoveryCopy.originalHasNoNote)
-        #expect(RecoveryCopy.originalHasNoNote != RecoveryCopy.putBackUnplaced)
+        #expect(RecoveryCopy.originalHasNoNote != RecoveryCopy.putBackUnplaced(.post))
     }
 
     /// One vocabulary, shared with the Mac since this batch — the two

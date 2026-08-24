@@ -321,7 +321,8 @@ struct TrashAndArchiveTests {
             try ops.archiveBlock(second.block.id)
             let landing = try ops.unarchiveBlock(second.block.id)
 
-            #expect(landing == .itsOldPlace, "the exact placement row revived (the F2 road)")
+            #expect(landing == .itsOldPlace(home: .post),
+                    "the exact placement row revived (the F2 road), in a note")
             let rendered = try db.read { try Queries.renderPost($0, containerID: post.id) }
             #expect(rendered.map(\.blockID)
                     == [first.block.id, second.block.id, third.block.id],

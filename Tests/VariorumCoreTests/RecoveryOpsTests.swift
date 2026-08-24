@@ -203,7 +203,10 @@ struct RecoveryOpsTests {
 
             try ops.deleteBlock(middle.block.id)
             let landing = try ops.restoreBlock(middle.block.id)
-            #expect(landing == .itsOldPlace)
+            // 13l row 26 (a JUSTIFIED and STRENGTHENING pin edit): the landing
+            // also answers WHAT it went back into, so the shared receipts stop
+            // calling a scraps area a note. A post's block says `.post`.
+            #expect(landing == .itsOldPlace(home: .post))
 
             let order = try db.read { try Queries.renderPost($0, containerID: post.id) }
             #expect(order.map(\.blockID)
@@ -259,7 +262,7 @@ struct RecoveryOpsTests {
             try ops.deleteBlock(made.block.id)
 
             let landing = try ops.restoreBlock(made.block.id)
-            #expect(landing == .endOfNote)
+            #expect(landing == .endOfNote(home: .post))
             let order = try db.read { try Queries.renderPost($0, containerID: post.id) }
             #expect(order.last?.blockID == made.block.id)
         }
@@ -275,10 +278,61 @@ struct RecoveryOpsTests {
             try ops.deleteContainer(post.id)
 
             let landing = try ops.restoreBlock(made.block.id)
-            #expect(landing == .unplaced)
+            // The container is DEAD, not absent — so it still answers what kind
+            // it was (13l row 26; nil is reserved for a block that remembers no
+            // home at all).
+            #expect(landing == .unplaced(home: .post))
             #expect(try db.deletedAt("block", made.block.id) == nil)
             #expect(try db.read { try Queries.unplacedBlocks($0) }.map(\.blockID)
                 == [made.block.id])
+        }
+    }
+
+    /// **13l Act 2, ledger row 26 — THE LANDING NAMES WHAT IT WENT BACK
+    /// INTO.** A block does not only come out of a note: the SCRAPS area is a
+    /// `kind='pool'` container holding ordinary blocks, and its blocks reach
+    /// the Trash by exactly the same road. The two landing-shaped receipts
+    /// (`putBackAtEnd`, `putBackUnplaced`) said "note" whatever the row was,
+    /// because the landing carried no way to know — seat 1 of this act
+    /// recorded that as unfixable on the face, since it needs the op's own
+    /// answer.
+    ///
+    /// The three roads, all in the scraps:
+    /// - **the fallback**: a merge releases its sources (their placement rows
+    ///   tombstone at RELEASE time, with the merge's stamp), so a later
+    ///   `deleteBlock` leaves nothing carrying the block's own tombstone —
+    ///   fresh-at-end, in a POOL;
+    /// - **the exact row**: an ordinary scrap deleted and put back;
+    /// - **unplaced**: the scraps container itself is dead, and the landing
+    ///   still says what kind it was.
+    ///
+    /// **RED ON OLD by construction:** before this change the enum had no
+    /// `home` at all, so none of these three assertions could be written.
+    @Test func restoreBlockNamesTheScrapsAreaItCameOutOf() throws {
+        try withOperations { ops, db in
+            let pool = try ops.createPool()
+            let one = try ops.newBlock(in: pool.id, text: "a loose sentence")
+            let two = try ops.newBlock(in: pool.id, text: "another one")
+
+            // The exact-row road, in the scraps.
+            try ops.deleteBlock(two.block.id)
+            #expect(try ops.restoreBlock(two.block.id) == .itsOldPlace(home: .pool))
+
+            // The fresh-at-end road: merge releases both sources to lineage,
+            // so the later delete has no placement row to stamp.
+            let merged = try ops.merge(one.block.id, two.block.id)
+            try ops.deleteBlock(one.block.id)
+            #expect(try ops.restoreBlock(one.block.id) == .endOfNote(home: .pool),
+                    "it lands at the end of the SCRAPS, and the op says which")
+            #expect(merged.block.id != one.block.id)
+
+            // The unplaced road: the scraps container itself is gone, and the
+            // landing still answers what kind it was.
+            let orphan = try ops.newBlock(in: pool.id, text: "orphan scrap")
+            try ops.deleteBlock(orphan.block.id)
+            try ops.deleteContainer(pool.id)
+            #expect(try ops.restoreBlock(orphan.block.id) == .unplaced(home: .pool))
+            #expect(try db.deletedAt("block", orphan.block.id) == nil)
         }
     }
 
@@ -312,10 +366,10 @@ struct RecoveryOpsTests {
             let last = try ops.newBlock(in: post.id, text: "Third.")
 
             try ops.deleteBlock(middle.block.id)
-            #expect(try ops.restoreBlock(middle.block.id) == .itsOldPlace)
+            #expect(try ops.restoreBlock(middle.block.id) == .itsOldPlace(home: .post))
             try ops.reorder(middle.block.id, to: .end)
             try ops.deleteBlock(middle.block.id)
-            #expect(try ops.restoreBlock(middle.block.id) == .itsOldPlace)
+            #expect(try ops.restoreBlock(middle.block.id) == .itsOldPlace(home: .post))
 
             let order = try db.read { try Queries.renderPost($0, containerID: post.id) }
             #expect(order.map(\.blockID)

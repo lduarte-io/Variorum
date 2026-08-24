@@ -237,15 +237,22 @@ enum PreservedOriginPutBack {
     static func run(
         session: AppSession, postID: String, blockID: String
     ) async throws -> String {
-        let landing = try await session.database.read { db in
-            try Queries.preservedOriginals(db, postID: postID)
-                .first { $0.blockID == blockID }?.landAfterBlockID
+        // 13l row 26: the home's KIND rides the same read the landing does —
+        // the "at the end" sentence names what it landed IN, and a scraps
+        // area is not a note. `.post` is the fallback only where the row has
+        // vanished between the listing and the act, which is the corner
+        // `placeBlock` refuses by name one line later anyway.
+        let (landing, home) = try await session.database.read {
+            db -> (String?, ContainerKind) in
+            (try Queries.preservedOriginals(db, postID: postID)
+                .first { $0.blockID == blockID }?.landAfterBlockID,
+             try Queries.containerHeader(db, containerID: postID)?.kind ?? .post)
         }
         let insert: Operations.InsertPosition = landing.map { .after($0) } ?? .end
         try await session.runner.run { ops in
             _ = try ops.placeBlock(blockID, in: postID, at: insert)
         }
-        return landing == nil ? RecoveryCopy.putBackAtEnd : RecoveryCopy.putBackBeside
+        return landing == nil ? RecoveryCopy.putBackAtEnd(home) : RecoveryCopy.putBackBeside
     }
 }
 

@@ -43,17 +43,43 @@ extension Operations {
 
     /// Where a `restoreBlock` put the block back — so the door that raised it
     /// can say the true thing (13j batch 3, the F2 rider).
+    ///
+    /// **AND WHAT IT WENT BACK INTO** (13l Act 2, ledger row 26). A block does
+    /// not only come out of a NOTE: the scraps area is a `kind='pool'`
+    /// container carrying ordinary blocks, and its blocks reach the Trash by
+    /// exactly the same road. The landing used to say only *where*, so every
+    /// receipt reading it had to guess the *what* — and both shared sentences
+    /// guessed "note" (*"Put back at the end of this note."*, *"…its note is
+    /// gone…"*), which is a lie for a scrap and the one kind of lie the
+    /// recovery story cannot afford (§8d: the story must be intuitive from
+    /// every door). The kind is a fact this transaction already holds — it
+    /// fetches the container to decide the landing at all — so it is reported
+    /// rather than re-derived by a face reading a projection.
+    ///
+    /// `home` is optional on `.unplaced` alone, and only there because the
+    /// case genuinely covers a block that remembers no container at all
+    /// (`last_container_id` unset). A container that has since DIED still
+    /// answers what kind it was.
     public enum BlockRestoreLanding: Sendable, Equatable {
         /// Its OWN place: the placement row this deletion tombstoned came
         /// back live, fractional position and chosen variant intact.
-        case itsOldPlace
+        case itsOldPlace(home: ContainerKind)
         /// The end of `last_container_id` — the fallback, when no revivable
         /// row exists (a block released to lineage and deleted later has no
         /// placement row carrying its tombstone's stamp).
-        case endOfNote
+        case endOfNote(home: ContainerKind)
         /// Live again, but with nowhere to go: `last_container_id` is unset
         /// or its container has since died.
-        case unplaced
+        case unplaced(home: ContainerKind?)
+
+        /// What it went back into — a note (`.post`) or the scraps area
+        /// (`.pool`); nil only where the block remembers no home at all.
+        public var home: ContainerKind? {
+            switch self {
+            case .itsOldPlace(let home), .endOfNote(let home): return home
+            case .unplaced(let home): return home
+            }
+        }
     }
 
     /// Undo a `deleteBlock` from the tray: clear the block's tombstone and
@@ -102,10 +128,16 @@ extension Operations {
             // naming it — a leftover intent must never claim it later.
             try voidPurgeIntents(db, table: "block", rowID: blockID)
 
+            // 13l row 26: the remembered home's KIND rides every answer —
+            // read once, from the row this transaction already needs. A dead
+            // container still says what kind it was; only a block that
+            // remembers none at all lands with nil.
+            let remembered = try block.lastContainerId
+                .flatMap { try Container.fetchOne(db, key: $0) }
             guard let lastContainerID = block.lastContainerId,
-                  let container = try Container.fetchOne(db, key: lastContainerID),
+                  let container = remembered,
                   container.deletedAt == nil
-            else { return .unplaced }
+            else { return .unplaced(home: remembered?.kind) }
 
             // The row this deletion took down, in the container the block
             // was deleted FROM. Both halves of the key matter: the stamp
@@ -126,10 +158,10 @@ extension Operations {
                 revived.deletedAt = nil
                 revived.updatedAt = now
                 try revived.update(db)
-                return .itsOldPlace
+                return .itsOldPlace(home: container.kind)
             }
             _ = try insertPlacement(db, blockID: blockID, containerID: lastContainerID, at: .end)
-            return .endOfNote
+            return .endOfNote(home: container.kind)
         }
     }
 
