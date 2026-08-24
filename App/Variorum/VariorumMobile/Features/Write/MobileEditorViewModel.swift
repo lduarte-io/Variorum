@@ -1901,100 +1901,25 @@ final class MobileEditorViewModel {
 
     // MARK: - The DEBUG identity audit (obligation 1's oracle)
 
-    /// Walks the tiling after reconciliation and asserts the attribute
-    /// PROJECTION agrees with the index AUTHORITY: every entry's range
-    /// uniformly carries its block ID (no MISSING runs — the measured iOS
-    /// failure mode is pure absence, never bleed), **every separator
-    /// position IS a separator** and carries no block ID, and the index
-    /// tiles the storage exactly. O(blocks) per edit, DEBUG-only.
+    /// Runs the shared walk and, on a disagreement, counts it and fires the
+    /// honest road's debug voice.
     ///
-    /// **Why the separator's CHARACTER is checked** (round-2 ladder round 2,
-    /// M15 Q2 — the reviewer's adopted home for the boundary check): the
-    /// two oracles that already exist are both blind to a tiling that has
-    /// slipped against the storage's real newlines. `documentLength ==
-    /// storage.length` compares TOTALS, which a mis-routed zero-net edit
-    /// leaves agreeing; and the attribute walk compares the projection to
-    /// the index, which `restampProjection` has by then made self-consistent
-    /// with the corrupted index. The character at an entry's upper bound
-    /// answers a question neither asks — *does the storage still agree that
-    /// a block ends here* — and it costs one O(1) read of an offset this
-    /// walk already computed.
-    ///
-    /// **It is deliberately PARTIAL, and that is not a defect.** Under I4
-    /// internal newlines are content, so a boundary that has slipped onto a
-    /// block-INTERNAL newline still reads `\n` and passes. It catches the
-    /// misalignment onto ordinary prose — which is the shape both traced
-    /// corruption cases produce — and claims nothing more.
+    /// **The walk itself is `IdentityProjectionAudit`, in
+    /// `Shared/EditorBrain/`** (13l L-a): it was written here, and the Mac —
+    /// same `BlockRangeIndex`, same crash fix, the same corruption
+    /// reproduced against it Mac-side — had no oracle for the one class its
+    /// other two are blind to. What stays here is the counter and the seam,
+    /// which is exactly the per-platform half (MobileSoul §3: brains
+    /// shared, faces per platform). The verdict, the message and the
+    /// counter's meaning are byte-unchanged by the move; the ONE difference
+    /// is that the empty-entry separator hole M15 Q2 closed here is now
+    /// closed for both platforms by construction.
     func auditIdentityProjection() {
         #if DEBUG
         guard let storage else { return }
-        var clean = index.documentLength == storage.length
-        if clean {
-            // Running-location walk (B3): `range(ofEntryAt: i)` is O(i),
-            // so the per-entry call made this per-keystroke audit
-            // O(entries²) — ~1.9M additions per keystroke at 1,370
-            // blocks, real DEBUG milliseconds on the keystroke road.
-            // Same ranges, same checks, one walk.
-            var runningLocation = 0
-            let separatorScalar = EditorDocument.separator.utf16.first
-            // Hoisted, both of them: the walk must add no per-entry bridging
-            // (M15 Q2(c)'s implementation constraint). `characters` is the
-            // storage's own backing string — an O(1) accessor, never a copy,
-            // and never `storage.string`.
-            let characters = storage.mutableString
-            for i in index.entries.indices {
-                let entry = index.entries[i]
-                let range = NSRange(location: runningLocation, length: entry.length)
-                runningLocation += entry.length + 1
-                // An EMPTY entry has no attribute run to walk — but it still
-                // has a separator, and skipping the whole iteration left an
-                // empty block's boundary unaudited (round-2 ladder round 2,
-                // M15 Q2: the pre-existing hole). Only the attribute walk is
-                // conditional now.
-                if range.length > 0 {
-                    storage.enumerateAttribute(
-                        EditorDocument.blockIDAttribute, in: range
-                    ) { value, _, stop in
-                        if (value as? String) != entry.blockID {
-                            clean = false
-                            stop.pointee = true
-                        }
-                    }
-                    if !clean { break }
-                }
-                // The separator after this entry (if any) is owned by no
-                // block — AND is a separator. Read through `mutableString`,
-                // never `storage.string`: the bridge would be O(document)
-                // per keystroke at the 100k fixture.
-                if i < index.entries.count - 1 || index.tailLength != nil {
-                    let separatorAt = range.upperBound
-                    if separatorAt < storage.length {
-                        if EditorDocument.blockID(at: separatorAt, in: storage) != nil {
-                            clean = false
-                        } else if let separatorScalar,
-                                  characters.character(at: separatorAt) != separatorScalar {
-                            clean = false
-                        }
-                    }
-                }
-                if !clean { break }
-            }
-        }
-        if clean, let tail = index.tailRange, tail.length > 0 {
-            storage.enumerateAttribute(
-                EditorDocument.blockIDAttribute, in: tail
-            ) { value, _, stop in
-                if value != nil {
-                    clean = false
-                    stop.pointee = true
-                }
-            }
-        }
-        if !clean {
-            identityAuditFailures += 1
-            EditorAssertionSeam.fire(
-                "identity projection audit failed: block-ID attributes disagree with BlockRangeIndex")
-        }
+        guard !IdentityProjectionAudit.isClean(index: index, storage: storage) else { return }
+        identityAuditFailures += 1
+        EditorAssertionSeam.fire(IdentityProjectionAudit.failureMessage)
         #endif
     }
 

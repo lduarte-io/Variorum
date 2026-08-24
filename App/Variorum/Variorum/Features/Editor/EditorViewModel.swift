@@ -267,6 +267,12 @@ final class EditorViewModel {
     /// Times `desyncRecovery` has fired this session — the Step 8 soak
     /// asserts ZERO (store == index == surface through every interleaving).
     @ObservationIgnored private(set) var desyncRecoveryCount = 0
+    /// Times the DEBUG identity audit found the attribute projection
+    /// disagreeing with the index (13l L-a — the phone's counter, arriving
+    /// on the Mac with the hoisted walk). Its meaning is the same as
+    /// `desyncRecoveryCount`'s: zero, always, and any other value is a bug
+    /// the pins are entitled to fail on.
+    @ObservationIgnored private(set) var identityAuditFailures = 0
     /// The surface-text truth per variant + word-count cache — the
     /// LEDGER (13b 1a, T3 slice: the echo-detection map moved into
     /// `EditorSurfaceLedger`, pure and unit-tested; the semantics are the
@@ -753,6 +759,11 @@ final class EditorViewModel {
         self.slots = slots
         adoptSurfaceTextMap(slots)
         if let tailText { self.tailText = tailText }
+        // 13l L-a: the ONE tiling-write door, so the phone's three
+        // index-replacement call sites (full render, differential, take
+        // flip) are covered here by one line — every executor writes the
+        // storage BEFORE it adopts, so the projection is settled by now.
+        auditIdentityProjection()
     }
 
     /// Holds the idle-mint clock for a structural flight (re-arm via
@@ -1009,14 +1020,21 @@ final class EditorViewModel {
                 desyncRecovery()
                 return
             }
-            setBlockAttribute(index.entries[i].blockID, over: editedRange)
-            recordAutosave(entryIndex: i, editedRange: editedRange, delta: delta)
+            // CLAMPED, and the clamp is the fix (13l L-a — found by the
+            // identity audit on its first Mac run; see `stampProjection`).
+            // One walk for both consumers: the range is the entry's, and
+            // `recordAutosave` needs exactly the same one.
+            let entryRange = index.range(ofEntryAt: i)
+            stampProjection(index.entries[i].blockID, reported: editedRange, within: entryRange)
+            recordAutosave(
+                entryIndex: i, entryRange: entryRange,
+                editedRange: editedRange, delta: delta)
         case .tail:
             guard index.applyTailEdit(lengthDelta: delta) else {
                 desyncRecovery()
                 return
             }
-            setBlockAttribute(nil, over: editedRange)
+            stampProjection(nil, reported: editedRange, within: tailProjectionRegion)
             syncTailText()
             crystallizeIfNeeded()
             armTailIdleMint()
@@ -1025,7 +1043,7 @@ final class EditorViewModel {
                 desyncRecovery()
                 return
             }
-            setBlockAttribute(nil, over: editedRange)
+            stampProjection(nil, reported: editedRange, within: tailProjectionRegion)
             tailText = ""
         case .closeTail:
             guard index.closeTail() else {
@@ -1050,6 +1068,9 @@ final class EditorViewModel {
         if let storage = textView?.textStorage {
             MarkdownStyling.restyle(storage, range: editedRange)
         }
+        // 13l L-a: the per-keystroke oracle, at the end of the road the
+        // corruption class travels (the phone's own call site, mirrored).
+        auditIdentityProjection()
         updateCaretContext()
     }
 
@@ -1065,13 +1086,53 @@ final class EditorViewModel {
             segmentation: header?.effectiveSegmentation ?? .paragraph)
     }
 
-    private func recordAutosave(entryIndex: Int, editedRange: NSRange, delta: Int) {
+    /// **The projection is a PROJECTION, and the report is a hint about
+    /// WHERE — never a licence over WHAT** (13l L-a).
+    ///
+    /// MEASURED on macOS 26 (the pin `aKeystrokeNeverStampsItsSeparator`):
+    /// `NSTextStorage` attribute fixing WIDENS the reported edited range to
+    /// the whole paragraph *including its terminator* — a one-character
+    /// insertion at offset 2 of "Alpha\n…" reports `{2, 5}`. Stamping the
+    /// block's ID over that report therefore wrote the block's identity onto
+    /// the SEPARATOR after it, on every keystroke in every non-last block,
+    /// silently breaking the doctrine `EditorDocumentCore` states as holding
+    /// "by construction": *the separator is owned by NEITHER neighbour, and
+    /// attribute ownership and range math therefore agree.*
+    ///
+    /// (The round-2 crash trace recorded "AppKit does not widen" from the
+    /// insertion cases it measured; this is the same measurement taken at a
+    /// paragraph END, where it does. `ArmedEdit.describes` was already right
+    /// not to police the report's EXTENT — this is the other half of that
+    /// same fact, at the site that consumes the extent.)
+    ///
+    /// Nothing legitimate is lost by clamping: a `.block(i)` verdict MEANS
+    /// the edit is owned entirely by entry `i`, so any part of the report
+    /// outside that entry describes characters the verdict never claimed.
+    private func stampProjection(_ blockID: String?, reported: NSRange, within region: NSRange) {
+        setBlockAttribute(blockID, over: NSIntersectionRange(reported, region))
+    }
+
+    /// Everything a tail edit may clear the block attribute over: the tail
+    /// itself PLUS its leading separator (which must carry no ID either).
+    /// Empty when there is no tail region — a widened report then stamps
+    /// nothing, which is the honest answer.
+    private var tailProjectionRegion: NSRange {
+        guard let tail = index.tailRange else {
+            return NSRange(location: index.documentLength, length: 0)
+        }
+        guard let separator = index.tailSeparatorOffset else { return tail }
+        return NSRange(location: separator, length: tail.upperBound - separator)
+    }
+
+    private func recordAutosave(
+        entryIndex: Int, entryRange: NSRange, editedRange: NSRange, delta: Int
+    ) {
         let entry = index.entries[entryIndex]
         guard let variantID = entry.variantID else {
             EditorAssertionSeam.fire("editable entry without a variant")
             return
         }
-        let text = viewText(index.range(ofEntryAt: entryIndex))
+        let text = viewText(entryRange)
         // The edited block's surface truth, for echo detection (Step 1):
         // this extraction is O(the edited block) and already paid for the
         // autosave itself.
@@ -1080,6 +1141,35 @@ final class EditorViewModel {
         autosave.record(
             variantID: variantID, text: text,
             charDelta: oldLength + editedRange.length)
+    }
+
+    // MARK: - The DEBUG identity audit (13l L-a — the phone's oracle, hoisted)
+
+    /// Runs the shared walk and, on a disagreement, counts it and fires the
+    /// honest road's debug voice.
+    ///
+    /// **Why the Mac needs this at all.** The editor already has two
+    /// oracles, and BOTH are satisfied by the corruption class this one
+    /// exists for: `documentLength == storage.length` compares TOTALS,
+    /// which a mis-routed ZERO-NET edit leaves agreeing, and
+    /// `desyncRecoveryCount` counts edits the router REFUSED, which is
+    /// precisely what a mis-routed edit is not. The mobile round reproduced
+    /// that shape against this view model — the gate's approval consumed by
+    /// a transaction landing one block over, block 1's ID stamped across
+    /// block 2's characters, and `recordAutosave` writing the wrong text to
+    /// the store through the ledger — with `desyncRecoveryCount == 0` and
+    /// the totals agreeing the whole time. Nothing announced it. This is
+    /// the thing that announces it.
+    ///
+    /// DEBUG-only and O(blocks): it runs at the per-keystroke road's end
+    /// and at every door that replaces the tiling.
+    func auditIdentityProjection() {
+        #if DEBUG
+        guard let storage = textView?.textStorage else { return }
+        guard !IdentityProjectionAudit.isClean(index: index, storage: storage) else { return }
+        identityAuditFailures += 1
+        EditorAssertionSeam.fire(IdentityProjectionAudit.failureMessage)
+        #endif
     }
 
     private func desyncRecovery() {
@@ -1361,6 +1451,9 @@ final class EditorViewModel {
                 setBlockAttribute(block.blockID, over: range)
             }
         }
+        // 13l L-a: crystallization mints entries and stamps their attributes
+        // by hand — the phone audits here for the same reason.
+        auditIdentityProjection()
         updateCaretContext()
         // New paragraphs may have completed during the flight — and a
         // paste-during-mint's still-armed bulk flag is honored here.
