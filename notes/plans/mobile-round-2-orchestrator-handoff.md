@@ -427,6 +427,23 @@ that were promised a home and never got one):
     mobile-local brain whose hoist trigger lives only in a code comment
     and this plan file), and its paired question — *should the Mac's
     `QuickEntryBar` adopt mint-as-you-type?* — joins §6 above.
+13. **🔴 THE SECOND MAC MANIFEST — created 2026-08-23 by the handoff
+    sweep, because nothing owned it.** R20 bought **ONE** Fable cold
+    review of this round's Mac changes, and it runs as **13l's first
+    act**, covering the work **through batch 4.5**. But **4.5c is heavily
+    Mac-side** (`EditorSurfaceController`, `EditorViewModel`, and two
+    hoists into `Shared/EditorBrain/`), **4.5e touches two Mac files**
+    (one of which destroys her text on a refusal), and **batches 5–8 may
+    add more** — **all of it landing AFTER 13l has closed.** So the
+    review she asked for covers the Mac work done up to 2026-08-23 and
+    **nothing done afterwards**, while the most Mac-visible mobile work is
+    still ahead. **This closeout hands a SECOND manifest forward** — same
+    shape as 13l's (every Mac-side file, every hoist, what the Mac's
+    callers now delegate to, the final counts) — **to the next Mac phase
+    that opens after mobile resumes: 13p on her current order, and a good
+    home on merit because on-device encryption is both-platform anyway.**
+    The reasoning is §6b. **Or she rules it unnecessary — but the round
+    may not close on silence here.**
 12. **R16 → THE CANON.** Her standing principle, recorded verbatim at
    §31 and owed to the canon at closeout: *"if you have text selected, I
    lean towards the idea that you should be able to copy or delete it…
