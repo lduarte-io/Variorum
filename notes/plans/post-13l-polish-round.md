@@ -196,9 +196,26 @@ versions would drown genuinely-archived notes. A version's ONE home is
 its note's Versions listing (its past lives where it lived); the
 Archived surface = deliberately-set-aside notes. Classification needs
 NO schema and NO "version" attribute (her lean confirmed): archived +
-`version_of`-edge-to-a-live-note IS the class, as a query. Honest
-edge, recorded: a deliberately-archived manual `version_of` sibling
-reads as a version — rare, and arguably not even wrong.
+`version_of`-edge-to-a-live-note IS the class, as a query. **THE CLASSIFIER — SHARPENED AT HER SIXTH-SITTING CATCH** (her
+concern: a user's working draft, archived later, must never read as
+version history — especially once V2 makes versions ride deletions):
+**version-history = BORN ARCHIVED** — the save-a-version door mints
+the copy archived in the SAME transaction (`archived_at ==
+created_at`, both stamps from one clock call — a same-row birth fact,
+never cross-device clock ordering, so the no-clock-trust doctrine is
+untouched and no CAS/repair rewrites the pair). **A note that was
+EVER live is NEVER version history**: a duplicate-as-version made to
+work with is live at birth — a first-class Library note; archived
+later it joins Archive and its search as a set-aside WORK, and **it
+never rides any deletion** (the covenant absolute for anything that
+ever lived). **Unarchiving a version PROMOTES it** — it goes live,
+leaves the Versions listing, becomes first-class forever (her "work
+with it as a new note" road, derived not built). The earlier
+"rare, arguably fine" ambiguity note is RETIRED — her catch was
+right that V2 made it destructive. **Optional explicitness upgrade,
+recorded not scheduled:** 13p's already-planned §12 lockstep (marker
+7→8) could carry an additive edge `origin_op` value for labeled
+classification; the round ships on the birth fact alone.
 **Fifth-sitting clarifications, at her questions:** (1) versions are
 NOT in the regular Library — they are archived at birth, and the
 Library lists live notes via the `archived_at` column **which EXISTS
@@ -218,8 +235,7 @@ worry answered structurally, zero schema).
 (fifth sitting): VERSIONS RIDE THE NOTE'S DELETION.** Her question —
 should a deleted note's version histories delete too? — has the
 recursive answer: versions ARE the note's past, and a thing's past
-goes where the thing goes. **The ruled-recommended shape (architect's
-opinion at her ask, awaiting her one-word ratify): deleting a note
+goes where the thing goes. **RATIFIED (author, sixth sitting: "I agree it should auto delete versions and not ask for a confirmation dialog") — the shape as recommended: deleting a note
 takes its versions INTO THE TRASH on the same clock** — recoverable
 for 30 days (the Trash's note-group, row 22, shows the note with its
 versions), purged together after. The Archive covenant is untouched
@@ -227,8 +243,8 @@ because versions never were "items in Archived" (V1 — their home is
 Note ▸ Versions, not the Archive surface); the Google-Docs intuition
 holds (delete the doc, its history goes); and V2's original
 "surface-when-unclaimed" conditional is UNNEEDED — an unclaimed
-version can no longer exist. **No extra question at delete time** (her
-"should the user be asked?" — recommended NO): the existing confirm
+version can no longer exist. **No extra question at delete time — RATIFIED with the shape** (her
+"should the user be asked?" answered in her own words above): the existing confirm
 gains one honest line ("its N saved versions go with it"); a
 mid-delete dialog nobody can answer well is friction, and the keep
 road is restoring the version live before (or Put back within 30
