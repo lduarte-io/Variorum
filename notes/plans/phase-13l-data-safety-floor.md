@@ -742,6 +742,21 @@ bloats the phase, it becomes its own micro-slot at her word.
 
 ## Baselines at open (verify with your own runs)
 
+> **⚠️ CORRECTED 2026-08-23 — THE 13j FINALS BELOW ARE NOT YOUR
+> BASELINE.** Mobile Round 2 ran and merged between 13j's close and this
+> phase's open. **USE THESE:** core **1350/141** · Mac **1569/272** ·
+> Mac spine **63/8** · mobile **484/78** · mobile spine **33/7** ·
+> marker **7**. **And "FULLY GREEN" is no longer true of the Mac suite:**
+> one latency pin (`EditorWindowSmokeTests/rewriteStrategyLatencies`) is
+> **intermittently red** at its own budget — pre-existing, measured on
+> both trees, KnownIssues row owned by Phase 12. **Re-run it isolated
+> before concluding anything.** The Mac's +1 over 1568 is mobile batch
+> 4.5b's single new pin; the mobile figure moved twice (batch 4.5, then
+> E1's instrumentation). *The 13j line below is kept as the historical
+> origin, which is what CLAUDE.md's "the previous closeout is the
+> baseline" rule points at — it is simply no longer the previous
+> closeout.*
+
 The 13j finals: core **1350/141** · Mac **1546/269 FULLY GREEN** ·
 spine **63/8** · mobile **314/60**. Mirror at lockstep marker
 **7**; the purge machinery live end-to-end (both devices cursored;
@@ -950,6 +965,22 @@ rather than re-deriving what is written down:**
    agree while the content is wrong*) exists only on the phone, though
    both platforms share the brain and the mobile round **reproduced that
    corruption Mac-side**.
+
+**⚠️ OWNERSHIP CORRECTED 2026-08-23 — this block was written when all four
+belonged to mobile's 4.5c, and her ruling has since moved them to the Mac
+phases. They are no longer "recorded but unowned":**
+
+| defect above | owner NOW |
+|---|---|
+| 1 · the frozen-projection fan fence | **13u item 8** |
+| 2 · the surviving O(N²) twin | **13u item 8** *(and a `KnownIssuesAndTechDebt.md` row points at 13u)* |
+| 3 · the gap fence's missing Mac face | **13u item 8** |
+| **4 · the missing identity-projection audit** | **🔴 THIS PHASE — it is L-a above.** It came here rather than to 13u because it is a **silent-prose-corruption detector**, which is this phase's own subject |
+
+**So three of the four are 13u's and your reviewer should not spend
+budget on them — but the fourth is YOURS TO BUILD.** *(If you meet the
+four listed as "not yet fixed" anywhere else, this table is the current
+answer.)*
 
 **AND ONE NON-DEFECT, for calibration:** the Mac suite is intermittently
 red at `EditorWindowSmokeTests/rewriteStrategyLatencies(paragraphs: 250)`
