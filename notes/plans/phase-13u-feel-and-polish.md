@@ -1,8 +1,8 @@
 # Phase 13u — Feel & Polish (EXECUTION PLAN)
 
-**STATUS: DRAFT — authored 2026-08-24 during 13l's night watch by the
-13l architect; FINALIZED at 13l's closeout** (the baselines section is
-filled there; everything else is complete). She runs this phase
+**STATUS: READY — authored 2026-08-24 during 13l's night watch and
+FINALIZED at 13l's closeout the same day** (finals filled; the hang
+lead in item 1 arrived from 13l's ladder). She runs this phase
 immediately after 13l per her ruling (*"my highest priority should be
 13l -> 13u"*; the order: 13l → 13u → mobile catch-up → 13p). Cast
 decided at kickoff as always; expected `/architect-phase 13u`.
@@ -176,12 +176,19 @@ loop.
 - The closeout ritual in full (master plan, archives, QUESTIONS,
   handoff, /Applications refresh, the next plan authored at her pick).
 
-## Baselines at open — FILLED AT 13l's CLOSEOUT
+## Baselines at open (13l's finals, written at its 2026-08-24 closeout — verify with your own runs)
 
-> *(The 13l closeout writes the finals here: core · Mac · Mac spine ·
-> mobile · mobile spine · marker. Verify with your own runs — the
-> latency pin's isolation rule and the CanvasDragTrackingTests
-> one-red disposition carry forward from 13l's record.)*
+core **1373/143** · Mac **1691/292 fully green** · Mac spine **63/8** ·
+mobile **486/78** (2 recorded `withKnownIssue`s) · mobile spine
+**33/7** · mirror at lockstep marker **7** · zero schema and zero
+`Sources/VariorumCore/Sync/` lines all phase. Carry-forward flake
+rules: the Phase-12 latency pin (`EditorWindowSmokeTests/
+rewriteStrategyLatencies`) is intermittently red at its own budget —
+re-run isolated before concluding anything; `CanvasDragTrackingTests`
+holds at ONE recorded non-reproducing red (13l's disposition: a
+second red promotes it to a KnownIssues row, owner 12). The installed
+`/Applications/Variorum.app` is fresh as of 13l's close (2026-08-24
+09:04).
 
 ## Environment
 

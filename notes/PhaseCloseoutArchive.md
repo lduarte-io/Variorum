@@ -724,3 +724,59 @@ the row's standing items. She launches it at her word.**
 ## Phase 13e closeout paragraph — rolled 2026-08-19 at the 13j closeout
 
 - **Phase 13e (closed 2026-08-18):** Takes & block management — the fan and the block list got their missing hands. Opened 2026-08-16 at her invocation under `/architect-phase` (cast, her amendment: ONE Fable orchestrating session · fresh Opus implementers per batch, never unlimited subagents · Fable cold reviews with her granted latitude), and closed in ONE overnight run at her instruction ("go all the way through phase closeout… leave residuals for me at the top"). **NINE batches:** (1) E1 callout swatches + the system emoji picker at every door / E13 duplicate-LIVE-book-name refusal (case-insensitive, DOOR-level by her ruling — no schema, no repair) / E11 the book-icon ascent declared (P-1); (2) E4 reorder-takes through the ONE ordered-list resolver + the fan-copy FIX-2 rider / E15 the Takes board policy-routed / E3 her ⌘-click merge selection (a fanned pair carries to Write's ceremony — S4-23 untouched); (3) E5 take-to-block-below + E6 copy-all-takes & takes-to-blocks under **AR-1** — the phase's one propose-first fork, ruled MINT-COPY with the source take ARCHIVED after the architect independently verified the row-move road opens a repair-less I10 hole in the sync repair layer; (4) E2 block multi-select/multi-delete under ONE compound entry (+ the batch-4 pkill incident, self-reported, independently verified harmless, rule re-sharpened); (5) E12 — her canvas-jitter finding TRACED to the default `.local` coordinate space feeding each drag event the view's own already-applied offset (halving travel with an alternating stall, her words exactly), measured three ways and pinned with the numbers + the canvas bank on the no-position shape; (6) E7 margin-hover comments on the LEFT with the all-surfaces sweep proving no Mac straggler + a dormant 13b hover-reveal bug fixed at its mechanism + E8 the listings' tag faces (one chip mechanism); (7) E9 Replace-All-in-Every-Take on the apply-and-report shape / E10 the copy-door flush-first alignment + the slot-handle rider pinned via the batch-5 drag rig; (8) E14/**W26 — ⌃⌥⌘N summons the quick note from any app, SANDBOX-VERIFIED** (two real fires, no prompt at any point) + the note-window clip traced UPSTREAM (the pre-13k bar inserting itself a runloop after presentation) and pinned; (9) the round-B-caught **Keychain lazy-load fix** (AuthSession first-use off-main; EncryptionSession custody hops off-main, semantics byte-preserved) — the windowless-launch CAUSE closed. **THE A47c TRIPWIRE DISPOSITIONED from the architect's own experiments:** the covariate was SUITE CONTEXT (the TK2 cull is load-dependent on 26.5.x — TEXTKIT2_NOTES §3 entry); the pin re-shaped to the outcome contract; the Mac suite FULLY GREEN for the first time since 13g. **Ladders:** A (2 MINOR · 2 NIT · 1 SPECULATIVE → all fixed/dispositioned incl. the P-9 `TakesStructureController` extraction with the zero-test-edit parity proof; round-2 verified every fix) and B (1 MINOR → batch 9 · 4 NIT → adjudication fixes · 1 SPECULATIVE → her hand-check); ZERO BLOCKER/MAJOR all phase; three Fable review sessions; the no-fourth-review judgment recorded for her ratify. **KnownIssues:** five rows resolved/removed (fan-copy remap · Takes-board policy · takes-aware F&R half · copy-door flush · note-window clip) + the tripwire row removed by disposition + the windowless row's observational survivors re-owned to v1-release-readiness + the six-brains row cautioned (applyTypedPath). ZERO schema · ZERO `Sources/VariorumCore/Sync/` lines · marker 6 stands. **Final counts:** core 1254/135 · Mac **1413/256 FULLY GREEN** · mobile 314/60 · spine 51/7. QUESTIONS #56–#65 are her ratify list; her residuals live at the TOP of the plan file by her instruction. **MOBILE PARITY LINE:** the phone owes — the reorder-takes door (core op shared) · the duplicate-name guard at its two book doors · a `UIPasteboard` copy-all-takes twin · E5/E6 doors · the ●n comment-placement design call · swatches/picker at her word (MobileSoul PL-10 is the row); batch 9's fix reached the phone by construction (`Shared/`). `/Applications` refreshed at the closeout behind the A1 rail (her pre-authorization; her app closed). Handoff: `notes/handoffs/phase-13e-handoff.md`. Next at her word.
+
+
+## Superseded pointer — rolled 2026-08-24 at the 13l closeout
+
+> **⚠️ POINTER RIDER, 2026-08-23 — READ BEFORE THE PARAGRAPH BELOW; ITS
+> COUNTS ARE STALE AND ITS "NEXT" IS SUPERSEDED.**
+>
+> **A MOBILE ROUND RAN AND IS STILL OPEN.** Mobile Round 2
+> (`notes/plans/mobile-round-2.md`) merged its work through batch 4.5 to
+> `main` on 2026-08-23 and is **paused, not closed** — its successor
+> handoff is the second half of
+> `notes/plans/mobile-round-2-orchestrator-handoff.md`.
+>
+> **CURRENT SUITE COUNTS — use these, not the paragraph's:** core
+> **1350/141** · Mac **1569/272** · Mac spine **63/8** · mobile
+> **475/77** · mobile spine **33/7**. *(The paragraph below says Mac
+> 1546/269 and mobile 314/60 — both are 13j-era. It also says "FULLY
+> GREEN"; the Mac suite now has one **intermittently red** latency pin,
+> pre-existing and measured on both trees, with a KnownIssues row owned
+> by Phase 12 — **re-run it isolated before concluding anything.**)*
+>
+> **HER ORDER, ruled 2026-08-23:** **13l → 13u → mobile catch-up → 13p**
+> (superseding 13l → 13p → 13o → 13i). Her reason: *"do the mac phases in
+> order so that the shared brain is 100% solid and stable… then return to
+> mobile work on a steadier base"* — because making mobile has repeatedly
+> uncovered latent Mac bugs. **13l and 13u carry mobile's Mac and
+> `Shared/` backlog** (13l's L-a…L-d; 13u's item 8) **so that mobile
+> returns with phone work only.** The full record is
+*[removed for publication]*
+
+**→ PHASE 13J CLOSED 2026-08-19 — Deletion, the Trash & the recovery
+story is DONE, and the PURGE IS LIVE: the author-attended sittings ran
+THIRTEEN rounds (every J-item ruled in question mode at her ask), seven
+build batches + the 6b purge build landed, BOTH review ladders closed
+(A: 1 BLOCKER/1 MAJOR → all fixed, zero disputes; B: 1 BLOCKER/2 MAJOR
+→ all fixed incl. the restore-vs-standing-intent hole and her ruled
+local-only purge road), the §12 lockstep event deployed (marker 6→7,
+her own hands on the trigger; the live-caught 42702 answered by HER
+RULED RENAME — the standing rule born: no RPC parameter may shadow a
+column it writes), both devices refreshed in the ONE window and
+verified rounding (device_cursor: two rows). Suites at close: core
+**1350/141** · Mac **1546/269 FULLY GREEN** · spine **63/8** (the
+deletion chapter joined it) · mobile **314/60**. Her walk list is
+QUESTIONS #66–#73; the handoff is
+`notes/handoffs/phase-13j-handoff.md`. NEXT — HER PICK, made at the
+window's close: **13l (the data-safety floor)** — its execution plan
+is AUTHORED (`notes/plans/phase-13l-data-safety-floor.md`, kickoff
+message at top) with her new requirement folded in as the
+DELETION-AWARE RESTORE MATRIX (backup restores must treat deleted and
+TRUE-deleted things in the expected way — the synced road proves the
+restored-store-is-a-returner machinery; the local-only road's
+time-travel is her kickoff taste call). She launches it at her word.**
+
+## Phase 13j closeout paragraph — rolled 2026-08-24 at the 13l closeout
+
+- **Phase 13j (closed 2026-08-19):** Deletion, the Trash & the recovery story — deleting things and getting them back became obvious, honest, and calm, and "really deleted" became TRUE. Opened 2026-08-18 via `/architect-phase` (cast, her round-4 ruling: the 13e shape — Fable architect · fresh Opus implementers per batch · Fable cold reviews; the 6b purge build seated FABLE per the standing Sync/ rider). THIRTEEN sitting rounds, all in question mode at her ask, ruled everything: the tray at the note's context bar (⌫ N, deleted-only) with two quiet sections; the J6 graveyard REMOVED; J3's lineage door (context menu + palette + the History-face past region, her round-5 amendment); deleted TAKES joined the uniform story (the round-5 gap find — restoreVariant); the Trash (one listing, kind/date filters, fixed 30-day read-side clock, Put back; Delete Now/Empty Trash in-Trash-only, confirm-every-time); BLOCK ARCHIVE ruled in and built (round 7); the divide/merge defaults flipped with the ceremonies behind ⌥⌘⇧D/⌥⌘⇧M (J4/J4b); the ⌘Z→⌥⌘Z hint; whole-block-selection delete routed to the delete compound (the paragraph-end-separator trace — NOT the open tail); the savepoint cadence (close+2h-backstop, ONE setting, insurance occasions exempt) with the history quiet-run collapse; the tutorial's 4-lesson deletion chapter (spine 51/7 → 63/8); stranded originals MOVE VISIBLY onto their family's clock (round 8b, her trust concern). THE PURGE: the memo written TO her rulings (rounds 8–10: purge_intent + her verbatim deploy pre-authorization · 60-day horizon dropout · Empty-Trash-everything · 90d/keep-10 pruning + a "Never" setting · say-so returner · confirm-every-time), batch 6b built it (janitor, ledger, per-family local-only road at round 11, the fake-server convergence battery), ladder B's BLOCKER (a standing intent outliving a restore) closed with THREE independently-drilled nets, and the marker 6→7 window executed END TO END — deploy (her hands, post-classifier-block), the live-caught 42702 resolved by HER RULED RENAME (round 12, the three-year criterion; standing rule: no RPC parameter shadows a column it writes), both devices refreshed and verified rounding. Ladders: A (1 BLOCKER — the History-face past region dead by construction; 1 MAJOR; 4 MINOR; 2 NIT) and B (1 BLOCKER; 2 MAJOR incl. her ruled local-purge road; 3 MINOR; 5 NIT) — every finding fixed with pinned red-on-old evidence, ZERO disputes across six implementer consultations, all sanity passes clear. KnownIssues: the Tombstone-GC row RESOLVED into the purge design (its S4-28.3 bulk-take-deletion half re-owned to 12); the corpus-shaped-sweep row added (owner 12). Two process incidents self-reported with rules sharpened (the git-add -A sweep; the stale-phone-install glob). Suites at close: core **1350/141** · Mac **1546/269 FULLY GREEN** · spine **63/8** · mobile **314/60**; marker **7**. Deferred WITH briefs: whole-note version history (`notes/plans/whole-note-history-brief.md`); ledger pruning + the returner face (the purge memo §6b — the pruning rider). **MOBILE PARITY LINE:** the phone INHERITED the brains by construction (the clock fences, the archive ops, restoreVariant, the janitor + local road, the verdict hardening) and owes the FACES — the tray, the Trash surface, the archive doors, the History-face past region, the lock's Face ID twin (13l's) — MobileSoul **PL-11** is the row. Her walk list: QUESTIONS #66–#73. Handoff: `notes/handoffs/phase-13j-handoff.md`. Next: 13l at her word (plan authored, her pick).
