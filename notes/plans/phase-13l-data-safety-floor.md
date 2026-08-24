@@ -1428,6 +1428,34 @@ queue (item B) is already discharged — the walk ran all nine rows
   to the closeout/handoff for her slotting (natural homes: a Phase 12
   assessment item or its own small row; the copy-out-as-new doctrine
   above is its one-paragraph design memo).
+- **HER CLARITY MANDATE on deletion semantics (next message, same
+  sitting — verbatim):** *"I feel like we need to be extremely clear
+  with users about : permanently deleted things stay permanently
+  deleted if you restore from a backup where they weren't deleted,
+  BUT they aren't deleted from the backup. the phrasing feels a bit
+  awkward but that's what's happening and I think clarity on what
+  exactly deletion means is paramount."* → The warning copy carries
+  the BOTH-SIDED truth as its own clause, and the runbook gains a
+  **"What deletion means"** section (ledger 13). **Draft copy
+  (final at build, meaning fixed):** *"Permanent deletion removes
+  writing from your library and your synced devices — not from
+  backup files. If you restore a backup made before a permanent
+  delete, the deleted writing does not come back into your library;
+  but it is still inside that backup file, and stays there until
+  the backup is rotated away or you delete the file."* The purge
+  definition given to her the same turn (the timeline, the horizon,
+  the content-free ledger as what makes the promise survive
+  restores, the on-disk-until-the-janitor honesty, and the
+  outside-the-system boundary: backups/Time Machine/exports) is the
+  runbook section's outline.
+- **The suite-simulator question (her ask: why iPhone 16e, not 17):**
+  answered — an iPhone 17 Pro sim EXISTS locally (iOS 26.2); 16e is
+  the repo's standing convention since mobile v1, and every measured
+  perf/geometry pin baseline was taken on it. Architect's
+  recommendation given: stay on 16e mid-phase; switch the fleet to
+  iPhone 17 Pro (matching her hardware) as a deliberate one-commit
+  re-baselining act at a clean boundary — 13u's kickoff offered —
+  at her word. Her ruling pending; no change made.
 
 ### ACT 1 — THE FIRST-ACT FABLE COLD REVIEW: FINDINGS (returned 2026-08-23; recorded repo-first before any fix session)
 
@@ -1584,7 +1612,7 @@ ladder.
 | 10 | **L-d** `AppSession.postAutosaves` removal path + the three false comments | 4 | open |
 | 11 | Backup second destination (picked folder) + retention + per-run integrity | 1 | open |
 | 12 | The Data Safety face + log (freshness evidence) | 1 | open |
-| 13 | The restore runbook (incl. M3/M6 sentences, external-snapshots widening) — **scope grew at her post-sitting rulings: + the SYNCED-restore warning pair (ordinary deletions return to the Trash; purged stays purged) in runbook AND restore face · + the backup-archaeology recipe (open a backup in a scratch copy, copy out AS NEW — the recovery-as-copy doctrine)** | 1 | open |
+| 13 | The restore runbook (incl. M3/M6 sentences, external-snapshots widening) — **scope grew at her post-sitting rulings: + the SYNCED-restore warning pair (ordinary deletions return to the Trash; purged stays purged) in runbook AND restore face · + the backup-archaeology recipe (open a backup in a scratch copy, copy out AS NEW — the recovery-as-copy doctrine) · + the "WHAT DELETION MEANS" section (her clarity mandate below): the three stages defined plainly (delete → Trash 30 days → permanent delete/purge), the BOTH-SIDED backup truth, and the purge definition** | 1 | open |
 | 14 | The rehearsed restore drill, end-to-end in SCRATCH | 1 | open |
 | 15 | The deletion-aware restore matrix M1–M7, headless on the fake server | 1 | open |
 | 16 | Bulk-`.md` plaintext insurance, automated | 1 | open |
