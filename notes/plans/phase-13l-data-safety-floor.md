@@ -2899,6 +2899,218 @@ findings and their dispositions:
 item 4 should be read with this annotation — the deferral outcome
 was right, the stated mechanism was not.)*
 
+### ROUND-2 FIX SESSION — RECORD (fresh Opus session, 2026-08-24)
+
+**Scope taken, and it is exactly the four items dispositioned FIX
+NOW:** **R2-1** · **R2-2** · **R2-3** · **R2-4**. R2-5 was already
+annotated by the architect and was not touched. Two code commits
+(`aeaa8b2` the Mac pair, `2d4a9c7` the bridge pair) plus this record;
+each staged by explicit path; **nothing pushed**.
+
+**Fences held:** zero `Sources/VariorumCore/Sync/` lines · zero
+schema · one `Sources/` file touched and it is
+`Bridge/BridgeEngine.swift` · no Release build, no `/Applications`
+touch, no custom build configuration · **no Variorum instance was
+ever launched, quit, or addressed** (`pgrep -fl Variorum` clean at
+the start; nothing this session needed the running app) · her real
+store never opened.
+
+---
+
+#### R2-1 — `runCopying` mints for never-opened sources · **TRACE CONFIRMED** (`aeaa8b2`)
+
+**Traced from the code before touching it.** `AppSession.runCopying`
+(`AppSession.swift`) opened with `await autosave(forPost: postID)
+.flushNow()`, and `autosave(forPost:)` MINTS on a miss: a `Hold` with
+`holders: 1` and, on macOS, a `quitFinalize.register` closure. Its
+callers are the Library and Pool duplicate rows
+(`LibraryViewModel.duplicateAsVersion`), the takes board's
+duplicate/promote rows, the membership chip, and `divergeForBook` —
+and the Library/Pool ones name posts **this session may never have
+opened**. Nothing releases, so each press left a permanent map entry
+for `flushEveryOpenPost` to walk and a ⌘Q closure for a post no
+surface holds. This is LR-MINOR-2's mechanism exactly, at the door the
+fix wave recorded in its own "seen and not fixed" fence (item 2) —
+the reviewer promoted it, correctly.
+
+**Fix:** one line — the route through
+`flushExistingAutosave(forPost:)`, which LR-MINOR-2 created for
+precisely this shape.
+**Semantics-preserving, and the suite is the proof rather than the
+claim:** an open source HAS an entry and still flushes; a never-opened
+one has nothing pending by construction. Under the red-on-old revert
+**every other `CopyDoorFlushTests` pin stayed green** — the five that
+assert the flush actually lands the pending text — so the only thing
+the change moves is the cost.
+
+**The doc comment, corrected at its mechanism.** The line
+*"`flushNow()` on a post that is not open is a no-op with nothing
+pending, so the entry is safe for the library and pool rows"* is the
+corrected falsehood the finding names — true of the FLUSH, false of
+everything around it. It is now quoted and answered where it stood
+(the repo's supersession convention), and `flushExistingAutosave`'s
+own caller enumeration gained `runCopying` so it is not stale by
+omission.
+
+**PIN:** `CopyDoorFlushTests.duplicatingANeverOpenedRowMintsNothing`
+— the LR-MINOR-2 shape: three posts created through the operations
+layer and never opened, each duplicated through the entry; both
+`openAutosaveCount` and `quitFinalize.count` must not move, **with the
+copies asserted** (`COUNT(*) == 6`) so the pin cannot pass on a door
+that simply stopped working.
+**RED ON OLD by behavioural revert** (restore `autosave(forPost:)
+.flushNow()`): both counts **0 → 3**, quoted from the run —
+`(session.openAutosaveCount → 3) == (entriesBefore → 0)` and
+`(session.quitFinalize.count → 3) == (quitBefore → 0)`.
+
+**Left standing, deliberately, and the reason is written at both
+ends:** `ShellActions.toggleSeal` still mints — it only ever names
+`router.activePostID`, a post open by definition. Unchanged from the
+fix wave's own disposition.
+
+---
+
+#### R2-2 — a pick outliving its listing · **TRACE CONFIRMED** (`aeaa8b2`)
+
+**Traced from the code.** `LibraryCatalogModel.search()` is the ONE
+place `hits` is assigned (`hits = filtered(all)`), and it runs on
+every typed query, every scope change, and after every bulk tag
+apply/remove and delete. Nothing touched `selectedPosts`. So a pick
+made under one query survived into a listing that does not draw those
+rows — and the P-0 fix is what made that reachable, which is the
+finding's real sting: the fix tripped its own standard on the path it
+newly opened.
+
+**The three consequences, all in the header the fix built:** the bulk
+bar's condition is `selectedPosts.count > 1`, so a **destructive**
+door could stand over notes nothing on screen highlights; the Tag and
+Untag menus act on `Array(selectedPosts)`, so they would reach them;
+and every label counts `selectedPosts` while the delete button builds
+its confirm from `selectedNotesInListOrder` — so "Delete 5 notes…"
+could delete 2.
+
+**FIX SHAPE — PRUNE, and the reason it is not the clear (the
+disposition offered either, and asked which composes cleaner).**
+`clearSelection()` on every `search()` is the shorter line and the
+wrong one: `search()` re-runs after a bulk tag apply and after a
+delete, so the pick would evaporate under the very act it was made
+for — pick three notes, tag them, and the pick is gone before she can
+delete them. Intersecting against the listed ids drops exactly the
+rows that left and leaves a pick whose rows are still drawn alone.
+**The mode rule stays a CLEAR**, because leaving List mode draws no
+selection at all — the two rules answer different questions and the
+model now says so. `pruneSelectionToListing()` also drops a dangling
+**anchor** (toggling the last row off leaves one behind, and a
+⇧-click aimed from an undrawn row is the same invisible-state
+hazard); the guard is on "pick or anchor", not on the pick alone.
+
+**PINS — 2, at the model like the other six**
+(`NoteRowRoutingTests`):
+`aPickDoesNotSurviveIntoAListingThatDoesNotShowIt` (the defect) and
+`aPickWhoseRowsAreStillListedSurvivesTheRefresh` (**the
+over-fix guard** — it is what makes "prune, not clear" a decision the
+suite holds rather than a comment).
+**RED ON OLD by behavioural revert** (drop the
+`pruneSelectionToListing()` call): the pick **survives at 2** and
+`(model.selectedPosts.count > 1) → true` over one drawn row — the
+destructive bar standing over an invisible note, quoted from the run.
+The over-fix guard stayed green under the same revert, as it must.
+
+---
+
+#### R2-3 — the stranded note's mechanism clause · **TRACE CONFIRMED** (`2d4a9c7`)
+
+Wording, and the mechanism is a wrong sentence rather than a wrong
+state. `strandedDeletionNote` read *"their agreement was staged for a
+re-push from truth while the note was already gone"*. **That is true
+of one of the two stranded populations only.** The other is
+staged-then-deleted: the note was LIVE when `stageRepushFromTruth`
+ran, and she deleted it before the next round replaced the sentinel
+(the window the guard's own prose calls "before (or during) a
+restage"). For those days the sentence describes an order of events
+that never happened — sending her to look for a deletion older than
+the re-key that does not exist, on a note whose whole job is to
+explain an unfixable divergence.
+
+**Fixed with the reviewer's suggested shape:** *"their agreement was
+**replaced by a re-push marker before the deletion could travel**"* —
+true of both populations, because the replacement is the fact they
+share. The instruction half (*"Remove them in Fragments by hand if you
+want them gone"*) is untouched, and both `Fragments` mentions survive,
+so `aDayDeletedBeforeARestageIsStrandedForeverAndSaysSo`'s substring
+assertions ride unmodified. The reasoning is recorded at the function.
+
+**No pin owed** (the hallucination guard's clarity class: no state
+changes). The mechanism is traced above and written where it lives.
+
+---
+
+#### R2-4 — the zero-caller wrapper · **TRACE CONFIRMED** (`2d4a9c7`)
+
+`BridgeEngine.deletionCandidates` became `try deletionScan(db)
+.candidates` when LR-MAJOR-1 widened the scan, and **nothing called
+it** — grep-verified across every `*.swift` in the tree: two hits, its
+own definition and a test's doc comment. A wrapper nobody calls is a
+second name for one behaviour that a future reader can reach for and a
+future change can leave behind; the doc comment pointing at it is the
+proof, since the file's own header sent readers to a function that no
+longer holds the rules. Deleted; `BridgeDeletionTravelTests.swift:12`
+now names `deletionScan`.
+
+**No pin owed** (same class). Deletion verified by the core suite
+compiling and running green.
+
+---
+
+#### THE FOUR GATES — all green, counts quoted from my own runs
+
+| gate | result | vs. the round-2 baseline |
+|---|---|---|
+| core (`swift test`) | **1373 tests / 143 suites — PASSED** (33.3 s) | 1373/143 → **unchanged** (R2-3/R2-4 add no pins) |
+| Mac full | **1691 / 292 — PASSED** (225.4 s), **zero reds** | 1688/292 → **+3** (1 R2-1 · 2 R2-2) |
+| Mac spine (8 `Tutorial*Tests` types by name) | **63 / 8 — PASSED** (21.1 s) | unchanged |
+| mobile (iPhone 16e) | **486 / 78 — PASSED** (83.6 s), the 2 recorded `withKnownIssue`s only · **spine 33 / 7 PASSED** | unchanged |
+
+**NEITHER KNOWN FLAKE APPEARED** in the full Mac run — not the
+Phase-12 latency pin (`EditorWindowSmokeTests/rewriteStrategyLatencies`),
+not `CanvasDragTrackingTests`. **`CanvasDragTrackingTests` therefore
+stays at ONE recorded red for the phase and is NOT promoted to a
+KnownIssues row.**
+
+**Mobile compiles `Shared/AppSession.swift`, so it was run rather than
+assumed** — and it rode unmoved: the phone has no `quitFinalize`
+registry and reaches `runCopying` through no door of its own;
+`LibraryCatalogModel` and `CopyDoorFlushTests` are Mac-only; the
+bridge change is core-side wording with no app consumer.
+
+**One environment trap met and answered, worth recording because it is
+the second time this phase:** `-only-testing:VariorumTests/
+NoteDeletionDoorsTests` matched NOTHING and the run reported success —
+the file is `NoteDeletionDoorsTests.swift` but the SUITE TYPE is
+`NoteDeletionActTests`. Caught by the "Test run with N tests" line
+(20 tests where 4 suites were named, and the arithmetic named the
+missing one). The fix-wave record met the same trap; the rule caught
+it both times.
+
+#### DISPUTES: NONE
+
+All four items were traced to a mechanism I could state, and the two
+behavioural ones were broken on purpose to prove it. Nothing was
+dismissed as hollow, and nothing was worked around.
+
+#### THINGS SEEN AND DELIBERATELY NOT FIXED (the fence, recorded)
+
+1. **`ShellActions.toggleSeal` still mints a coordinator** — the fix
+   wave's item 1, unchanged and still correctly reasoned (it only ever
+   names an open post). Re-checked while in the file rather than
+   assumed.
+2. **The Notes-mode card's `onTapGesture`** — the fix wave's item 3,
+   and R2-2 does not change it: the mode switch still clears the pick,
+   so the two modes cannot disagree. #79(c) is still hers.
+3. **`deletionsPushed == 0` for a stranded day remains behavior, not a
+   defect** — the road out is QUESTIONS #78 and it is a product call.
+   R2-3 changed only how it is DESCRIBED.
+
 ### THE LEDGER (every row owned; statuses updated as they move)
 
 | # | item | strand | status |
