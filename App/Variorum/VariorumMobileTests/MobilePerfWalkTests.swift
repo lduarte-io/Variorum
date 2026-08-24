@@ -867,3 +867,112 @@ struct MobilePerfWalkTests {
         }
     }
 }
+
+// MARK: - The launch path (4.5a, B45-1)
+
+/// **`AppBootstrap.init` OPENS THE STORE AND RUNS THE WHOLE MIGRATION SET
+/// SYNCHRONOUSLY, ON THE MAIN THREAD, BEFORE FIRST PAINT.**
+/// `VariorumMobileApp` constructs it as `@State`, so it is the app's very
+/// first act on every single launch — a P2 violation (OverallModel §5: all
+/// DB I/O off the main thread) on the launch path, the same family as the
+/// synchronous Keychain load 13e batch 9 moved off-main.
+///
+/// **The stability survey said *"a measurement is one signpost away"* and
+/// nobody ever briefed one. This is the signpost.** No budget is asserted
+/// and nothing is optimized here: the numbers are the deliverable, and the
+/// fix's shape is an architect call because `AppBootstrap` lives in
+/// `Shared/` and a change there is a both-platform change (M-B).
+///
+/// **What is timed is `openStore(at:)`, which is MOST of `AppBootstrap.init`
+/// but not all of it** — and the gap is stated because a number in a record
+/// gets quoted (4.5a's cold review, MINOR 6).
+///
+/// · `init` also calls `AppDatabase.install` → `prepareDependencies`, which
+///   a test host cannot safely re-enter (a once-per-process door).
+/// · **`defaultStoreURL` and the iOS-only `prepareStoreDirectoryProtection`
+///   run OUTSIDE `openStore(at:)`** and are therefore NOT in these numbers.
+///   The directory creation and the `DatabasePool` open and
+///   `AppDatabase.migrator.migrate` are. So the launch cost is **at least**
+///   what is printed below, never at most it.
+/// · **These are SIMULATOR numbers on a Mac SSD, not device numbers.** A
+///   real cold first launch timed on her iPhone is on the device queue for
+///   exactly this reason.
+/// · **The first-launch figure is host-load-dependent and must not be
+///   quoted as a single number**: 4.5a measured 54.0 ms and its cold
+///   reviewer measured 23.4 ms on the same code. Report a RANGE.
+///
+/// **The finding that both runs agree on, and the useful one: the open is
+/// CORPUS-INDEPENDENT** — ~4.5–5 ms at twelve notes and ~3.6–4.5 ms at the
+/// 100k proving ground. The cost is O(migrations), not O(corpus), and the
+/// migration set only grows.
+///
+/// **B45-1 IS NOT CLOSED BY THIS SUITE.** These are the measurement half
+/// only; the fix — an `.opening` state with the file work off the main
+/// thread — needs `Shared/AppBootstrap.swift`, which is outside 4.5a's
+/// fence, and it belongs to sub-batch 4.5e. Until that lands, the P2
+/// violation this suite documents is live on every launch.
+///
+/// The 100k store is the SAME fixture the walk above measures, written to
+/// disk through `AppDatabase.backup(to:)` — a plain self-contained file the
+/// recoverable-open path opens directly, which is what makes this the real
+/// launch cost of her real corpus's shape rather than a proxy for it.
+@MainActor
+@Suite("Mobile launch path (4.5a, B45-1 — the store open before first paint)", .serialized)
+struct MobileLaunchPathTests {
+
+    /// One `openStore` at `url`, timed. Median of `samples`; each open gets
+    /// its own pool, exactly as a fresh process would.
+    private func openMS(_ url: URL, samples: Int = 5) throws -> Double {
+        var timings: [Double] = []
+        for _ in 0..<samples {
+            let t0 = CACurrentMediaTime()
+            _ = try AppDatabase.openStore(at: url)
+            timings.append((CACurrentMediaTime() - t0) * 1000)
+        }
+        return median(timings)
+    }
+
+    @Test func theLaunchPathStoreOpenIsMeasured() throws {
+        let root = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("b45-1-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        // 1 — FIRST LAUNCH: an empty store, every migration applied from
+        // scratch. This is the cost the very first launch after an install
+        // pays, and it is all main-thread.
+        let freshURL = root.appendingPathComponent("fresh/variorum.sqlite")
+        let t0 = CACurrentMediaTime()
+        _ = try AppDatabase.openStore(at: freshURL)
+        let firstLaunchMS = (CACurrentMediaTime() - t0) * 1000
+
+        // 2 — THE ORDINARY STORE: a real corpus of the small world's shape
+        // (12 notes across six books + the control note), reopened the way
+        // every later launch reopens it.
+        let small = try PerfWorlds.small.get()
+        let smallURL = root.appendingPathComponent("ordinary/variorum.sqlite")
+        try small.db.backup(to: smallURL)
+        let ordinaryMS = try openMS(smallURL)
+
+        // 3 — THE 100k PROVING GROUND: the mega post + the 300-note corpus.
+        let big = try PerfWorlds.big.get()
+        let bigURL = root.appendingPathComponent("hundredk/variorum.sqlite")
+        try big.db.backup(to: bigURL)
+        let hundredKMS = try openMS(bigURL)
+
+        let bytes = (try? FileManager.default.attributesOfItem(atPath: bigURL.path)[.size]
+            as? Int) ?? 0
+        print(String(
+            format: "PERF[sim] LAUNCH(AppBootstrap.init body — MAIN THREAD, before first paint): "
+                + "first launch (empty store, full migration set) %.1f ms · "
+                + "ordinary store %.1f ms · 100k store %.1f ms (%.1f MiB on disk)",
+            firstLaunchMS, ordinaryMS, hundredKMS, Double(bytes) / 1_048_576))
+
+        // Liveness only — a dead probe must not pass silently. NO BUDGET is
+        // asserted: B45-1 is measure-then-fix, and the fix is the
+        // architect's fork (a `Shared/` file).
+        #expect(firstLaunchMS > 0)
+        #expect(ordinaryMS > 0)
+        #expect(hundredKMS > 0)
+        #expect(bytes > 1_000_000, "the 100k store really is a corpus on disk")
+    }
+}

@@ -62,6 +62,16 @@ enum MobileQuickNoteCopy {
     /// its doc comment names this very feature).
     static let undoLabel = "Quick Note"
 
+    /// **What the box says when it holds at the boundary** (4.5a, Q1). A
+    /// multi-paragraph capture's earlier paragraphs are REAL BLOCKS of a
+    /// real note; editing them is a structural act a capture box does not
+    /// perform. The hold used to be silent, which made the revert of her
+    /// keystrokes a second defect beside the data loss — so the box says
+    /// where that edit lives instead. PROVISIONAL copy (13s owns her
+    /// voice).
+    static let boundaryHold =
+        "earlier paragraphs live in the note — tap open ↵ to edit them"
+
     /// The indicator's face. `nil` before the first non-whitespace
     /// character — the row does not render at all until there is something
     /// to be honest about (A5-7's "present from the first non-whitespace
@@ -89,8 +99,42 @@ enum MobileQuickNoteCopy {
         }
     }
 
+    /// **A refusal in her words, not the enum's** (4.5a, Q7 — the raw
+    /// `\(error)` dump this used to be). Q2's fix is what lets any of these
+    /// sentences promise *"your text is still here"*: a leaving that fails
+    /// no longer clears the box.
+    ///
+    /// *(4.5a fix round, NIT 13 — this used to say EVERY sentence carries
+    /// that promise, and two of its own arms do not: `.lockedVariant` and
+    /// `.emptyImport` say nothing of the kind, deliberately. A locked take
+    /// is a refusal about the DESTINATION, and "there's nothing to save
+    /// yet" is about an empty box — reassuring either one about text it is
+    /// not holding would be noise. The rule the arms actually keep is the
+    /// one now stated: **no refusal here is ever reached by a road that
+    /// discarded her text.**)*
+    ///
+    /// PROVISIONAL copy (13s owns her voice). **If 4.5b hoists a shared
+    /// refusal vocabulary (A1-18 — three deletion homes today), these
+    /// sentences join it rather than becoming a fourth home.**
     static func refusal(_ error: Error) -> String {
-        "Quick note refused: \(error)"
+        guard let error = error as? OperationError else {
+            // Not an operations refusal — a store-level failure, and the
+            // app's own comment names the reachable one: the device locked
+            // mid-round and file protection cut the store off.
+            return "This note couldn't be saved just now. Your text is still here — try again in a moment."
+        }
+        switch error {
+        case .lockedPost:
+            return "This note is sealed, so it can't take new text. Unseal it in the note to keep writing."
+        case .lockedVariant:
+            return "This take is locked, so it can't take new text."
+        case .containerNotFound, .variantNotFound, .blockNotFound:
+            return "That note is gone, so this text has nowhere to land. Your words are still here."
+        case .emptyImport:
+            return "There's nothing to save yet."
+        default:
+            return "This note couldn't be saved just now. Your text is still here."
+        }
     }
 }
 
@@ -140,7 +184,23 @@ final class MobileQuickNoteModel {
     }
 
     private(set) var saveState: SaveState = .idle
+
+    /// What the STATUS ROW shows — deliberately not `saveState` (4.5a, Q8).
+    ///
+    /// A5-7 puts the indicator on screen *"from the first non-whitespace
+    /// character"*, and that rule reads in both directions: an emptied box
+    /// has nothing to be honest about. Before this, deleting a minted
+    /// capture back to nothing left the box rendering THREE contradictory
+    /// faces at once — the *"just start typing"* placeholder, a `✓ saved`
+    /// indicator, and an `open ↵` door that (since Q3) deletes the note
+    /// rather than opening it. The row now goes with the text.
+    var visibleState: SaveState { mints ? saveState : .idle }
+
     private(set) var lastError: String?
+    /// The box holding at a boundary it cannot cross (Q1) — a quiet note,
+    /// never the red error slot: nothing failed, and nothing was lost.
+    /// Cleared by the next change the box CAN take, and by a reset.
+    private(set) var boundaryNote: String?
     /// The minted note, once it exists (nil in the sub-mint window).
     private(set) var postID: String?
     /// Set when a hand-off wants the shell to open the note — the ⏎ road
@@ -170,6 +230,11 @@ final class MobileQuickNoteModel {
     @ObservationIgnored private var autosave: AutosaveCoordinator?
     @ObservationIgnored private var settleToken: UUID?
     @ObservationIgnored private var clockTask: Task<Void, Never>?
+    /// The pending boundary restore (`restore(_:)` — one turn late by
+    /// necessity). Held so a `reset()` can cancel it: a queued restore
+    /// landing in a box that has since let go would write a filed note's
+    /// text back into an empty box.
+    @ObservationIgnored private var restoreTask: Task<Void, Never>?
     @ObservationIgnored private var mintTask: Task<String?, Never>?
     @ObservationIgnored private var suppressChange = false
 
@@ -209,6 +274,35 @@ final class MobileQuickNoteModel {
 
     var mints: Bool { MobileQuickNoteModel.mints(text) }
 
+    /// **Does the box own EVERY character of the note it points at?**
+    /// (4.5a fix round, MAJOR 1 — the gate the withdrawal arm reads.)
+    ///
+    /// `postID != nil` answers a different question — *"is there a note"* —
+    /// and the two came apart the moment A1-19 shipped: `adopt` sets
+    /// `postID` BEFORE the `frozenPrefix` guard, so its refusal arm exits
+    /// with **a note that holds several real paragraphs and a box that owns
+    /// none of them.** Withdrawing on `postID` from that state tombstones
+    /// her prose. Ownership is the honest predicate, and it is two facts:
+    ///
+    /// · **`variantID != nil`** — the box took the note's last block and
+    ///   has been autosaving into it. Nil means it refused ownership
+    ///   (A1-19's arm) and the note's contents are none of its business.
+    /// · **`frozenPrefix.isEmpty`** — nothing sits ahead of the owned
+    ///   block, so *the note is exactly what the box was showing*, which is
+    ///   the whole of the withdrawal's safety argument (*"the note this
+    ///   could fail to remove is empty by construction"*).
+    ///
+    /// The second clause is **belt, and stated as belt**: a non-empty
+    /// prefix always carries non-whitespace (`SegmentationRules.bulkSegments`
+    /// never mints a blank piece), so `text == frozenPrefix + tail` makes
+    /// `mints` un-emptyable there — the arm's own guard would refuse first.
+    /// It is kept because the failure it fences is the destruction of her
+    /// prose, and because a safety argument that lives only in a comment is
+    /// one the next reader can quietly falsify.
+    private var ownsTheWholeNote: Bool {
+        variantID != nil && frozenPrefix.isEmpty
+    }
+
     /// Churn cost for one text change: characters removed + characters
     /// inserted, equal weight (AppSpec §10). A plain field reports no
     /// ranges, so the cost is recovered from the common prefix/suffix —
@@ -223,6 +317,25 @@ final class MobileQuickNoteModel {
     nonisolated static func charDelta(from old: String, to new: String) -> Int {
         let before = Array(old)
         let after = Array(new)
+        let edges = commonEdges(before, after)
+        return (before.count - edges.prefix - edges.suffix)
+            + (after.count - edges.prefix - edges.suffix)
+    }
+
+    /// **The ONE decomposition of a text change**, shared by every rule
+    /// below (the churn cost, the ⏎ test, and Q1's boundary decision) —
+    /// three readings of "what changed" would be three chances to
+    /// disagree. A plain `TextField` reports no ranges, so the changed
+    /// region is recovered from the common edges: the change replaced
+    /// `old[prefix ..< old.count - suffix]` with
+    /// `new[prefix ..< new.count - suffix]`.
+    ///
+    /// The suffix scan is clamped by the prefix on BOTH sides (never
+    /// double-counting a character), which is what makes the two ends a
+    /// partition rather than a heuristic.
+    nonisolated static func commonEdges(
+        _ before: [Character], _ after: [Character]
+    ) -> (prefix: Int, suffix: Int) {
         var prefix = 0
         while prefix < before.count, prefix < after.count, before[prefix] == after[prefix] {
             prefix += 1
@@ -232,23 +345,114 @@ final class MobileQuickNoteModel {
               before[before.count - 1 - suffix] == after[after.count - 1 - suffix] {
             suffix += 1
         }
-        return (before.count - prefix - suffix) + (after.count - prefix - suffix)
+        return (prefix, suffix)
     }
 
-    /// Was this change a single typed RETURN? A5-1 makes ⏎ open the note,
-    /// which means a newline can never be typed into the box — but A5-2's
-    /// whole benefit is that a pre-mint PASTE of several paragraphs
-    /// segments correctly, so newlines that ARRIVE IN BULK must survive.
-    /// One inserted character which is a newline is the return key; a
-    /// multi-character insertion is a paste and keeps every newline it
-    /// carries.
+    /// Was this change a RETURN? A5-1 makes ⏎ open the note, which means a
+    /// newline can never be typed into the box — but A5-2's whole benefit
+    /// is that a pre-mint PASTE of several paragraphs segments correctly,
+    /// so newlines that ARRIVE IN BULK must survive.
+    ///
+    /// **The test is on what was INSERTED, never on the length delta**
+    /// (4.5a, Q6). The old rule required `new.count == old.count + 1`, so
+    /// ⏎ over a SELECTION — which replaces the selected run with one
+    /// newline and usually SHRINKS the text — was not recognised at all,
+    /// and a literal newline landed in the box where A5-1 says one can
+    /// never exist. Exactly one inserted newline is the return key
+    /// whatever it replaced; anything longer is a paste and keeps every
+    /// newline it carries.
     nonisolated static func isTypedReturn(from old: String, to new: String) -> Bool {
-        guard new.count == old.count + 1 else { return false }
         let before = Array(old)
         let after = Array(new)
-        var prefix = 0
-        while prefix < before.count, before[prefix] == after[prefix] { prefix += 1 }
-        return after[prefix] == "\n"
+        let edges = commonEdges(before, after)
+        let inserted = after[edges.prefix..<(after.count - edges.suffix)]
+        return inserted.count == 1 && inserted.first == "\n"
+    }
+
+    // MARK: - The boundary rule (Q1's brain)
+
+    /// What one owned-block change MEANS. Pure, so the rule that decides
+    /// whether her prose survives is testable without a store.
+    struct BoundaryDecision: Equatable {
+        /// The text the box shows once the change is decided.
+        var text: String
+        /// The owned block's text — what the store must be told.
+        var tail: String
+        /// True when the change reached into the frozen prefix and the box
+        /// held at the boundary (the face says so; nothing is destroyed).
+        var heldAtBoundary: Bool
+    }
+
+    /// **THE FIX FOR THE DEFECT THAT DESTROYED HER PROSE** (4.5a, Q1 —
+    /// traced independently by two cold reads).
+    ///
+    /// The box owns the LAST minted block; `frozenPrefix` is everything
+    /// ahead of it, so the invariant is `text == frozenPrefix + tail`. The
+    /// shipped clamp fired whenever `hasPrefix` failed, wrote back the
+    /// PREFIX ALONE, and then derived the tail from the just-clamped
+    /// text — which is `""`. The next flush wrote that empty string into
+    /// the owned variant.
+    ///
+    /// The shipped comment (and the only pin) asserted the road was
+    /// *"only reachable after… she has deleted back through the whole owned
+    /// tail"*. **Any edit inside the frozen prefix falsifies `hasPrefix`
+    /// just as well** — so fixing a typo in the FIRST paragraph of a pasted
+    /// capture erased the SECOND one from the box and from SQLite, with no
+    /// undo entry and no `commit_point` to restore from.
+    ///
+    /// The rule that replaces it: **apply the part of the change that fell
+    /// in the owned tail; refuse the part that reached into the frozen
+    /// prefix.** Decomposing old→new by its common edges says exactly which
+    /// characters of the old tail the change touched, so:
+    ///
+    /// · a typo fixed inside the prefix leaves the tail untouched — the box
+    ///   restores the whole text (prefix AND tail) and says why;
+    /// · deleting back through the tail and into the prefix keeps the
+    ///   surviving tail — `""` in the shipped pin's case, which is why the
+    ///   store still hears the emptied tail and the box and the note never
+    ///   diverge;
+    /// · anything INSERTED by a change that crossed the boundary is
+    ///   dropped, because there is no honest answer to which side of the
+    ///   boundary it belongs on. That is a revert — but a spoken one
+    ///   (`boundaryHold`), never a silent one.
+    nonisolated static func applyingChange(
+        frozenPrefix: String, from old: String, to new: String
+    ) -> BoundaryDecision {
+        // The ordinary capture (one block ⇒ empty prefix) takes this arm
+        // every time: the box owns its whole text exactly, unchanged.
+        if new.hasPrefix(frozenPrefix) {
+            return BoundaryDecision(
+                text: new, tail: String(new.dropFirst(frozenPrefix.count)),
+                heldAtBoundary: false)
+        }
+        let before = Array(old)
+        let after = Array(new)
+        let edges = commonEdges(before, after)
+        // Where the owned tail starts in the OLD text.
+        let tailStart = min(frozenPrefix.count, before.count)
+        // The old characters the change did NOT touch: the common prefix
+        // and the common suffix. Intersect them with the tail's region.
+        var survivors: [Character] = []
+        // **UNREACHABLE FROM THE MODEL'S OWN CALLERS, AND KEPT ANYWAY**
+        // (4.5a fix round, MINOR 11 — say so rather than leave it looking
+        // load-bearing). Under the caller's invariant `old == frozenPrefix +
+        // tail`, this arm is dead: a common prefix reaching `tailStart`
+        // would mean `new` starts with `frozenPrefix`, which the `hasPrefix`
+        // arm above already returned on. It is NOT dead for the FUNCTION,
+        // which is pure, `nonisolated`, and called directly by its own pins
+        // with unconstrained arguments — this is what keeps the tail's
+        // untouched head from being dropped if `old` ever arrives not
+        // matching the invariant.
+        if edges.prefix > tailStart {
+            survivors += before[tailStart..<edges.prefix]
+        }
+        let suffixStart = max(before.count - edges.suffix, tailStart)
+        if suffixStart < before.count {
+            survivors += before[suffixStart...]
+        }
+        let tail = String(survivors)
+        return BoundaryDecision(
+            text: frozenPrefix + tail, tail: tail, heldAtBoundary: true)
     }
 
     // MARK: - The text pipeline
@@ -257,6 +461,12 @@ final class MobileQuickNoteModel {
         // ⏎ — strip the newline and hand off (A5-1). The strip happens
         // before anything else, so the newline never reaches the store,
         // never reaches the coordinator, and never reaches the mint.
+        //
+        // **Restoring `oldValue` restores a REPLACED SELECTION too**
+        // (Q6's case): ⏎ over a selection is a request to open the note,
+        // and the least-destructive reading of it keeps every character
+        // she had. The illegal newline is what gets dropped, never her
+        // prose.
         if MobileQuickNoteModel.isTypedReturn(from: oldValue, to: text) {
             write(oldValue)
             open()
@@ -264,47 +474,110 @@ final class MobileQuickNoteModel {
         }
 
         if variantID != nil {
-            applyOwnedChange()
+            applyOwnedChange(from: oldValue)
             return
         }
 
-        // NOT YET MINTED. The first non-whitespace character arms the
-        // clock; whitespace alone never mints (importPost refuses it).
+        // NOT YET MINTED — or minted and NOT OWNED (the A1-19 arm below,
+        // where the box refused ownership rather than claiming text it
+        // cannot name). The first non-whitespace character arms the clock;
+        // whitespace alone never mints (importPost refuses it).
         if mints {
             armMintClock()
-            if saveState == .idle { saveState = .typing }
+            // **`.saving` is the only state this must not overwrite** (a
+            // mint is genuinely in flight). Everything else — including
+            // `.saved`, which is what an unowned post-mint box would
+            // otherwise sit at while she types text nothing is recording —
+            // becomes `.typing`, because that is the honest word for text
+            // no write covers.
+            if saveState != .saving { saveState = .typing }
         } else {
             cancelMintClock()
             saveState = .idle
             lastError = nil
+            boundaryNote = nil
         }
     }
 
     /// One owned-block change: the box owns the last minted block's
     /// variant, and everything after the frozen prefix is that block's
     /// text.
-    private func applyOwnedChange() {
-        guard text.hasPrefix(frozenPrefix) else {
-            // THE CLAMP, and it is only reachable after a multi-paragraph
-            // PASTE was minted (the ordinary capture's prefix is empty):
-            // she has deleted back through the whole owned tail and into
-            // paragraphs that are already REAL BLOCKS of a real note.
-            // Removing those is a structural operation, which a capture
-            // box has no business performing — so the box holds at the
-            // boundary, and the editor one tap away is where a note's
-            // structure changes. Nothing is lost in either direction.
-            //
-            // **The record below is load-bearing, not tidiness.** She
-            // reached the boundary by emptying the owned tail, so the
-            // store has to hear that the tail is now empty — a clamp that
-            // only restored the text would leave the box showing one thing
-            // and the note holding another, which is the silent divergence
-            // this whole anchor exists to prevent. (Caught by its own pin.)
-            write(frozenPrefix)
-            recordTail()
-            return
+    /// One owned-block change, decided by `applyingChange` (Q1's brain,
+    /// which carries the whole reasoning).
+    ///
+    /// **The old value is a parameter, not re-derived**, because the
+    /// decision needs to know what the change TOUCHED — and the invariant
+    /// `old == frozenPrefix + tail` is what makes "the tail's surviving
+    /// characters" a fact rather than a guess.
+    ///
+    /// **The record is load-bearing, not tidiness.** When the surviving
+    /// tail differs from what the store was last told, the store has to
+    /// hear it — a hold that only restored the text would leave the box
+    /// showing one thing and the note holding another, which is the silent
+    /// divergence this whole anchor exists to prevent.
+    private func applyOwnedChange(from oldValue: String) {
+        let decision = MobileQuickNoteModel.applyingChange(
+            frozenPrefix: frozenPrefix, from: oldValue, to: text)
+        if decision.heldAtBoundary {
+            // Earlier paragraphs are REAL BLOCKS of a real note; removing
+            // or rewriting them is a structural operation, which a capture
+            // box has no business performing. So the box holds at the
+            // boundary — and SAYS so, because a silent revert of her
+            // keystrokes is its own defect (Q1's finding names both).
+            restore(decision.text)
+            boundaryNote = MobileQuickNoteCopy.boundaryHold
+        } else {
+            boundaryNote = nil
         }
-        recordTail()
+        record(tail: decision.tail)
+    }
+
+    /// **THE HOLD'S RESTORE HAS TO REACH THE FIELD, AND A SAME-TURN WRITE
+    /// DOES NOT** (4.5a fix round — found while building MAJOR 5's pin, and
+    /// MEASURED on the mounted surface rather than reasoned about).
+    ///
+    /// SwiftUI pushes a binding's value into `TextField` only when it
+    /// differs from the value SwiftUI last *rendered*. A hold that writes
+    /// back inside `text`'s own `didSet` ends the turn at the value SwiftUI
+    /// already rendered, so **it renders nothing and UIKit keeps the
+    /// rejected text.** Measured on the real field (iOS 26.2 simulator):
+    /// after one backspace inside a frozen paragraph the model read
+    /// `"Kept.\n\nEditable."` while the field read `"Kep.\n\nEditable."`.
+    ///
+    /// **That divergence destroys her prose one keystroke later**, and it is
+    /// the same loss Q1 exists to prevent, arriving through the fix's own
+    /// door: the next change is reported as field-old → field-new, while
+    /// `applyingChange` decomposes it against the MODEL's old text. Typing
+    /// `"!"` at the end of the owned paragraph decomposed to *"everything
+    /// after the prefix was touched"*, the surviving tail came back `""`,
+    /// and the flush wrote that into the variant — traced, and pinned
+    /// (`aHeldEditNeverStrandsTheFieldOnTextTheNoteDoesNotHold`), store
+    /// reading `["Kept.\n", ""]` on the pre-fix code.
+    ///
+    /// Delivering the restore on the NEXT main-actor turn is what fixes it,
+    /// and the mechanism is the same one that broke it: SwiftUI renders the
+    /// rejected value once (adopting it as its known value), then sees a
+    /// genuinely different value and pushes it into the field. One frame of
+    /// the rejected keystroke is what a refused edit honestly looks like,
+    /// and `boundaryNote` is on screen beside it.
+    ///
+    /// **The accepted, RECORDED consequence — and it is 4.5a's MAJOR 5,
+    /// confirmed:** once the restore lands, UIKit collapses the selection to
+    /// the end of the new text, so the caret leaves the paragraph she was
+    /// typing in. Measured (`selectedTextRange` at 16 of 16). Her next
+    /// characters therefore append to the block the box owns — recorded
+    /// correctly, never misattributed — but the caret moved without being
+    /// asked. Putting it back needs caret control this surface does not
+    /// have (`TextField` exposes none), i.e. a `UIViewRepresentable` text
+    /// view, which is a surface decision and not this fix's to take. It is
+    /// reported, and it rides the device queue's D7.
+    private func restore(_ value: String) {
+        restoreTask?.cancel()
+        restoreTask = Task { @MainActor [weak self] in
+            guard !Task.isCancelled else { return }
+            self?.write(value)
+            self?.restoreTask = nil
+        }
     }
 
     /// A programmatic write that must not re-enter the pipeline.
@@ -317,9 +590,15 @@ final class MobileQuickNoteModel {
     /// Hands the owned tail to the post's autosave coordinator — the
     /// ordinary road every note's text takes (A5-3: "autosaves like any
     /// note").
-    private func recordTail() {
+    ///
+    /// A tail the coordinator was already handed is not re-recorded: it
+    /// would schedule a write of identical bytes at zero churn and, worse,
+    /// read as `.saving` when nothing is in flight. (Reachable from Q1's
+    /// hold, where a refused prefix edit leaves the tail exactly as it
+    /// was.)
+    private func record(tail: String) {
         guard let variantID, let autosave else { return }
-        let tail = String(text.dropFirst(frozenPrefix.count))
+        guard tail != lastRecordedTail else { return }
         let delta = MobileQuickNoteModel.charDelta(from: lastRecordedTail, to: tail)
         lastRecordedTail = tail
         autosave.record(variantID: variantID, text: tail, charDelta: delta)
@@ -400,10 +679,33 @@ final class MobileQuickNoteModel {
         }
 
         postID = containerID
-        variantID = ownedVariant
-        frozenPrefix = MobileQuickNoteModel.frozenPrefix(
+        guard let prefix = MobileQuickNoteModel.frozenPrefix(
             of: snapshot, ownedText: owned.text ?? "", blockCount: blocks.count)
-        lastRecordedTail = String(snapshot.dropFirst(frozenPrefix.count))
+        else {
+            // **AN UNNAMEABLE BOUNDARY REFUSES OWNERSHIP** (4.5a, A1-19 —
+            // a SHAPE fix, not a bug fix: Act 1 could construct no
+            // reachable input and labelled it honestly, so no pin is
+            // manufactured for it).
+            //
+            // The anchor could not be found, so the box cannot say which
+            // characters belong to the block it owns. Claiming the WHOLE
+            // text — which is what an empty prefix means — would autosave
+            // earlier paragraphs into the last block's variant. The note
+            // holds everything that was minted; the box simply stops
+            // writing, and says where editing continues.
+            //
+            // Accepted consequence, recorded rather than papered over:
+            // keystrokes after this point are not captured by the box.
+            // That is a smaller loss than corrupting the note, and it
+            // cannot occur through any input Act 1 or this session could
+            // construct.
+            boundaryNote = MobileQuickNoteCopy.boundaryHold
+            saveState = .saved
+            return containerID
+        }
+        variantID = ownedVariant
+        frozenPrefix = prefix
+        lastRecordedTail = String(snapshot.dropFirst(prefix.count))
 
         let coordinator = session.autosave(
             forPost: containerID, debounce: autosaveDebounce,
@@ -418,25 +720,35 @@ final class MobileQuickNoteModel {
         saveState = .saved
         // Keystrokes that landed while the mint was in flight: the store
         // holds the snapshot, the box holds more, so hand the difference
-        // to the coordinator immediately.
-        if text != snapshot { applyOwnedChange() }
+        // to the coordinator immediately. The SNAPSHOT is the old value —
+        // it is what the store holds, so `frozenPrefix + tail` describes
+        // it exactly, which is what Q1's decision needs.
+        if text != snapshot { applyOwnedChange(from: snapshot) }
         return containerID
     }
 
     /// What the box does NOT own, computed from the mint's own result.
     ///
     /// One block (the ordinary capture, and every newline-free one) ⇒
-    /// nothing is frozen and the box owns the whole text exactly. Several
-    /// blocks (a pre-mint paste) ⇒ the owned block's stored text is a
-    /// contiguous piece of what was minted, so its LAST occurrence marks
+    /// `""`: nothing is frozen and the box owns the whole text exactly.
+    /// Several blocks (a pre-mint paste) ⇒ the owned block's stored text is
+    /// a contiguous piece of what was minted, so its LAST occurrence marks
     /// where the box's editable tail begins. Segmentation trims each
     /// piece's edges, so the anchor is searched rather than arithmetic'd
     /// off the end.
+    ///
+    /// **`nil` means "the boundary cannot be named"** (4.5a, A1-19). It
+    /// used to return `""` for that case too — the same value that means
+    /// *"the box owns everything"* — so an unfound anchor made the box
+    /// claim text it does not own and write earlier paragraphs into the
+    /// last block's variant. Two different answers now have two different
+    /// values, and the caller refuses ownership on `nil`.
     nonisolated static func frozenPrefix(
         of minted: String, ownedText: String, blockCount: Int
-    ) -> String {
-        guard blockCount > 1, !ownedText.isEmpty else { return "" }
-        guard let anchor = minted.range(of: ownedText, options: .backwards) else { return "" }
+    ) -> String? {
+        guard blockCount > 1 else { return "" }
+        guard !ownedText.isEmpty else { return nil }
+        guard let anchor = minted.range(of: ownedText, options: .backwards) else { return nil }
         return String(minted[..<anchor.lowerBound])
     }
 
@@ -453,6 +765,11 @@ final class MobileQuickNoteModel {
 
     /// ⏎ and the open door (A5-1): file the note, then ask the shell to
     /// open it. The box clears, so one capture opens one note.
+    ///
+    /// *(4.5a: "the box clears" is now conditional, and deliberately so —
+    /// a filing the store REFUSED keeps her text and hands nothing off, so
+    /// nothing navigates onto a note whose words are still in the box.
+    /// `file()` carries the whole rule.)*
     func open() {
         Task { [weak self] in
             guard let self else { return }
@@ -471,43 +788,146 @@ final class MobileQuickNoteModel {
     /// backgrounding all land here; combined with the mint clock this
     /// closes the un-minted loss window at EVERY exit, which is the whole
     /// point of her ruling.
+    ///
+    /// *(4.5a's two exceptions, both of which SERVE that ruling rather than
+    /// bending it: a leaving the store refused keeps her text instead of
+    /// clearing it (Q2), and a leaving from a WHOLLY emptied box withdraws
+    /// the note she abandoned instead of leaving a blank one behind (Q3).)*
     func fileOnLeaving() async {
         _ = await file()
     }
 
-    /// The ONE body every hand-off shares. Order is A5-4's and it is
-    /// binding: **mint first, then flush** — the flush covers text the
-    /// mint already wrote, the mint covers the sub-mint window; reversed,
-    /// the last word is lost.
+    /// The ONE body every hand-off shares. Order is A5-4's: **mint first,
+    /// then flush** — the mint covers the sub-mint window, the flush covers
+    /// text the mint already wrote.
+    ///
+    /// *(A5-4's stated reason — "reversed, the last word is lost" — does
+    /// not hold, and is corrected here rather than repeated: `mintNow`
+    /// reads the BOX's current text, so a flush-then-mint order lands the
+    /// same bytes today. The ruled order stays, because it is the one that
+    /// remains correct if the mint ever stops being a single read. 4.5a,
+    /// Q5.)*
+    ///
+    /// **THE BOX ONLY CLEARS WHEN THE HAND-OFF ACTUALLY COMPLETED**
+    /// (4.5a, Q2). `reset()` writes `""` AND nils `lastError`, and it used
+    /// to run on every road out of here — so a refused mint discarded her
+    /// text and erased the reason for it in the same breath. The reachable
+    /// input is the one this app's own scene handler names: the device
+    /// locks mid-round, file protection cuts the store off, `importPost`
+    /// throws. And the same road runs on an ordinary TAB SWITCH, where the
+    /// app is not going away at all and she would watch the box empty
+    /// itself. **A leaving that fails keeps her text and says why.**
     @discardableResult
     private func file() async -> String? {
         guard postID != nil || mints else {
+            // An empty (or whitespace-only) box that never minted: there
+            // is nothing to keep and nothing to file.
             reset()
             return nil
         }
         cancelMintClock()
+        guard let session else { return postID }
+
+        // **Q3 — AN EMPTIED BOX MUST NOT LEAVE A LIVE, EMPTY, UNTITLED
+        // NOTE.** She typed a word (which mints a real note), deleted it,
+        // and left: nothing tombstoned the note, so a blank date-titled
+        // row sat in her library permanently. A5-3 disclosed *"an
+        // abandoned one-word note"*; it never sanctioned a note with no
+        // content at all, which is precisely the case where she withdrew
+        // everything she typed.
+        //
+        // It composes the note's OWN delete road (`deleteContainer`, the
+        // door batch 4 shipped) — never a second deletion rule — so the
+        // note moves to the Trash on the ordinary 30-day clock and the
+        // purge janitor ends it like any other.
+        //
+        // FLUSH FIRST: the coordinator is holding the emptied tail, and a
+        // pending write landing on a tombstoned variant would be refused
+        // and stay dirty forever.
+        //
+        // Quiet on failure, on `savepointOnLeaving`'s own recorded
+        // precedent — *"a leaving is not a moment to refuse at"*. Nothing
+        // of hers is at stake here: the note this could fail to remove is
+        // empty by construction.
+        //
+        // **AND THE GATE IS OWNERSHIP, NEVER `postID`** (4.5a fix round,
+        // MAJOR 1 — the inverse of the fix A1-19 had just made, and each
+        // was correct alone). `adopt` sets `postID` before the
+        // `frozenPrefix` guard, so A1-19's refusal arm exits with a note
+        // holding several real paragraphs and a box owning none of them;
+        // from there an emptied box + a leaving deleted prose the box had
+        // never held a character of. `ownsTheWholeNote` is what makes
+        // *"empty by construction"* true rather than assumed. An unowned
+        // note simply falls through to the ordinary road below: it keeps
+        // every paragraph and the box lets go of it.
+        //
+        // **The hand-off is announced** (MAJOR 3): the withdrawal reset the
+        // box and returned `nil`, so `handOffCount` never bumped and the
+        // face kept the keyboard up — over the Library, after a tab switch,
+        // on a shelf nobody could see. Letting go is letting go, whichever
+        // road it takes.
+        if let postID, !mints, ownsTheWholeNote {
+            await session.flushEveryOpenPost()
+            _ = try? await session.runner.run { ops in
+                try ops.deleteContainer(postID)
+            }
+            reset()
+            handOffCount += 1
+            return nil
+        }
+
         let minted = await mintNow()
-        guard let session else { return minted }
+        guard let minted else {
+            // Q2: the mint was refused. Her text lives NOWHERE but this
+            // box, so the box keeps it — and keeps `lastError`, which
+            // `mintNow`'s failure roads have just set.
+            //
+            // **AND SOMETHING TRIES AGAIN** (4.5a fix round, MINOR 9). The
+            // refusal copy promises *"try again in a moment"*, and until
+            // now nothing did: `file()` had already cancelled the mint
+            // clock, so text refused because the device locked mid-round
+            // sat in an in-memory box with no scheduled retry — and a
+            // suspended app can be terminated. Re-arming the clock makes
+            // the promise true. Bounded by construction: `mintNow` cancels
+            // the clock as it runs, so a refusal buys exactly one retry,
+            // never a spin — and the ordinary re-arm on her next keystroke
+            // is unchanged.
+            armMintClock()
+            return nil
+        }
         // A5-4 option (c): the existing shared drain, no new registry and
         // NOT `MobileLivenessAuthority` (registering there would stand the
         // real editor down from the shelf — the wrong category).
         await session.flushEveryOpenPost()
-        if let minted {
-            // A5-5: the shared savepoint op at the hand-off — one line,
-            // exactly what the Mac pad does at its filing. A captured
-            // thought whose note no pane ever opened would otherwise carry
-            // no history at all. (The phone's GENERAL on-leaving funnel
-            // stays PL-11(e)/M6's; this is the box's own call.)
-            await session.savepointOnLeaving(minted)
+        // A5-5: the shared savepoint op at the hand-off — one line,
+        // exactly what the Mac pad does at its filing. A captured thought
+        // whose note no pane ever opened would otherwise carry no history
+        // at all. (The phone's GENERAL on-leaving funnel stays
+        // PL-11(e)/M6's; this is the box's own call.)
+        await session.savepointOnLeaving(minted)
+        guard autosave?.isDirty != true else {
+            // Q2's other half, same class and the same one-line guard: the
+            // note exists, but the store REFUSED the keystrokes that
+            // followed the mint (a seal that landed mid-typing) and
+            // `flushNow` put them back into `pending`. They exist only in
+            // this box, so the box keeps them and the coordinator's own
+            // error stands. Returning nil also keeps the box the single
+            // writer — nothing navigates onto a note whose text the box is
+            // still holding.
+            return nil
         }
         reset()
-        if minted != nil { handOffCount += 1 }
+        handOffCount += 1
         return minted
     }
 
     /// Back to an empty box, owning nothing.
     private func reset() {
         cancelMintClock()
+        // A boundary restore queued for the next turn would otherwise land
+        // AFTER this, writing a filed note's text back into an empty box.
+        restoreTask?.cancel()
+        restoreTask = nil
         if let settleToken { autosave?.stopObserving(settleToken) }
         settleToken = nil
         autosave = nil
@@ -516,6 +936,7 @@ final class MobileQuickNoteModel {
         frozenPrefix = ""
         lastRecordedTail = ""
         lastError = nil
+        boundaryNote = nil
         saveState = .idle
         write("")
     }
@@ -540,8 +961,22 @@ struct MobileQuickNoteBox: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             field
-            if let indicator = MobileQuickNoteCopy.indicator(model.saveState) {
+            // Q8: the row reads `visibleState`, not `saveState` — an
+            // emptied box has nothing to be honest about, and the indicator
+            // + the open door go with the text rather than sitting over a
+            // *"just start typing"* placeholder claiming `✓ saved`.
+            if let indicator = MobileQuickNoteCopy.indicator(model.visibleState) {
                 statusRow(indicator)
+            }
+            if let note = model.boundaryNote {
+                // Q1's hold, spoken. Deliberately NOT the red slot:
+                // nothing failed and nothing was lost — the box simply
+                // cannot restructure a real note.
+                Text(tokens.chromeLabel(note))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(3)
+                    .accessibilityLabel(note)
             }
             if let error = model.lastError {
                 // `lineLimit` beside a growing chrome text is standing law
@@ -599,9 +1034,9 @@ struct MobileQuickNoteBox: View {
         HStack(spacing: 12) {
             Text(tokens.chromeLabel(indicator))
                 .font(tokens.small)
-                .foregroundStyle(model.saveState == .saved ? tokens.accent : tokens.faint)
+                .foregroundStyle(model.visibleState == .saved ? tokens.accent : tokens.faint)
                 .accessibilityLabel(
-                    MobileQuickNoteCopy.spokenIndicator(model.saveState) ?? "")
+                    MobileQuickNoteCopy.spokenIndicator(model.visibleState) ?? "")
             Spacer()
             // P-2, fire-and-DO: the door is rendered only where it can act
             // (there is text to open), and it performs the whole hand-off.

@@ -70,10 +70,21 @@ struct VariorumMobileApp: App {
             // authority's own bookkeeping since the S3 ladder's MAJOR 1,
             // so a second open editor is covered too), then one sync round
             // pushes it — all of it inside a `beginBackgroundTask` grant
-            // (A5-4: there had never been one). If the device locks
-            // mid-round, file protection may cut the store off — the
-            // scheduler treats that exactly like being offline (round
-            // skipped, outbox intact, retry on next foreground).
+            // (A5-4: there had never been one).
+            //
+            // **The grant is taken SYNCHRONOUSLY inside
+            // `mobileScenePhaseChanged` itself, and it carries an
+            // expiration handler** (4.5a, Q4). It used to be taken one hop
+            // later, inside the Task — the anti-pattern Apple's own
+            // documentation names — and with no handler at all, which makes
+            // an overrun fatal rather than recoverable.
+            //
+            // If the device locks mid-round, file protection may cut the
+            // store off — the scheduler treats that exactly like being
+            // offline (round skipped, outbox intact, retry on next
+            // foreground). **The quick note now survives that too**: a
+            // leaving whose mint the store refuses KEEPS her text and its
+            // reason rather than clearing the box (4.5a, Q2).
             // PR7 (round 2 batch 4): backgrounding is the phone's ⌘Q, so
             // it is a LEAVING — every open note gets its quiet savepoint
             // through the ONE shared entry (`AppSession.savepointOnLeaving`,
