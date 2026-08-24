@@ -578,6 +578,45 @@ it**, and no Release build or `/Applications` refresh while it lives.
 
 ## 3. BRIEF — SUB-BATCH 4.5c · THE EDITOR & THE SHARED BRAIN
 
+> ### ⚠️ THIS BRIEF IS SUPERSEDED IN SCOPE — read before dispatching it
+>
+> **Two rulings landed after it was written (2026-08-23), and both change
+> what this sub-batch is:**
+>
+> **1 · ITS MAC AND `Shared/` WORK IS GONE — to the Mac phases.** Her
+> ruling: *"I thought I asked for 4.5c's mac work to be added to what 13l
+> is supposed to accomplish? so the mobile session shouldn't have mac /
+> shared work to do when I return to it"*, under her principle *"do the
+> mac phases in order so that the shared brain is 100% solid and
+> stable."* **13l took the data-safety-shaped items (L-a…L-d); 13u took
+> the editor-seam ones (its item 8).** **VERIFY WHAT THEY BUILT before
+> planning anything below** — the itemisation here is the record of the
+> FINDINGS, not your work list.
+>
+> **2 · 13u RULES THE CROSS-BLOCK SEMANTICS, AND IT RUNS FIRST.** Her 13u
+> item 5 ruling (2026-08-21, on `main`) settles what these gestures DO
+> for **both** platforms: cross-block edits **stop refusing**; the
+> edge-join **merges** mid-paragraph and **not** at a paragraph break;
+> and **the FANNED case is RULED OPEN** — a fanned *middle* block deletes
+> whole to the tray, a fanned *edge* block's edit touches the chosen take
+> only.
+>
+> **🔴 SO ONE INSTRUCTION BELOW IS NOW WRONG.** Where this brief says
+> *"she fenced the fanned case off herself… the fanned case must keep
+> refusing"* — **she has since ruled it open.** Fixing the fan fence's
+> **SOURCE** (never authorize from a stale projection) is still right and
+> still wanted; **hardening the fanned REFUSAL is not.** Compose to 13u's
+> rule.
+>
+> **3 · "Write it into 13l's manifest" is stale wherever it appears
+> here.** 13l will have CLOSED. New Mac-side work goes to the second
+> manifest — the successor handoff's §6b and closeout obligation 13.
+>
+> **What still stands:** the pin-quality rules, the hygiene rules, the
+> fence discipline, the review brief in §5, and every phone-local item.
+
+
+
 **The most dangerous sub-batch in 4.5**, because everything in it is
 shared: a mistake here is a mistake on both platforms, in the machinery
 AppSpec §15 names the project's single riskiest subsystem.
@@ -942,6 +981,45 @@ her choose.
 ---
 
 ## 4c. BRIEF — SUB-BATCH 4.5e · THE APP-LIFECYCLE FILES IN `Shared/` (wave 3, alone)
+
+> ### ⚠️ THIS BRIEF IS SUPERSEDED IN SCOPE — read before dispatching it
+>
+> **Two rulings landed after it was written (2026-08-23), and both change
+> what this sub-batch is:**
+>
+> **1 · ITS MAC AND `Shared/` WORK IS GONE — to the Mac phases.** Her
+> ruling: *"I thought I asked for 4.5c's mac work to be added to what 13l
+> is supposed to accomplish? so the mobile session shouldn't have mac /
+> shared work to do when I return to it"*, under her principle *"do the
+> mac phases in order so that the shared brain is 100% solid and
+> stable."* **13l took the data-safety-shaped items (L-a…L-d); 13u took
+> the editor-seam ones (its item 8).** **VERIFY WHAT THEY BUILT before
+> planning anything below** — the itemisation here is the record of the
+> FINDINGS, not your work list.
+>
+> **2 · 13u RULES THE CROSS-BLOCK SEMANTICS, AND IT RUNS FIRST.** Her 13u
+> item 5 ruling (2026-08-21, on `main`) settles what these gestures DO
+> for **both** platforms: cross-block edits **stop refusing**; the
+> edge-join **merges** mid-paragraph and **not** at a paragraph break;
+> and **the FANNED case is RULED OPEN** — a fanned *middle* block deletes
+> whole to the tray, a fanned *edge* block's edit touches the chosen take
+> only.
+>
+> **🔴 SO ONE INSTRUCTION BELOW IS NOW WRONG.** Where this brief says
+> *"she fenced the fanned case off herself… the fanned case must keep
+> refusing"* — **she has since ruled it open.** Fixing the fan fence's
+> **SOURCE** (never authorize from a stale projection) is still right and
+> still wanted; **hardening the fanned REFUSAL is not.** Compose to 13u's
+> rule.
+>
+> **3 · "Write it into 13l's manifest" is stale wherever it appears
+> here.** 13l will have CLOSED. New Mac-side work goes to the second
+> manifest — the successor handoff's §6b and closeout obligation 13.
+>
+> **What still stands:** the pin-quality rules, the hygiene rules, the
+> fence discipline, the review brief in §5, and every phone-local item.
+
+
 
 **Born 2026-08-22** because three findings converge on two `Shared/`
 files that no sub-batch owned — and because the architect's §1 brief

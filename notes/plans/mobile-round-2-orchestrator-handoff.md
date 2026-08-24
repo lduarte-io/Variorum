@@ -132,9 +132,9 @@ them repeatedly):
 | | count | note |
 |---|---|---|
 | core | 1350/141 | unchanged all round |
-| Mac | 1568/272 | **exact and unmodified since batch 1's fixes — this is the hoist proof; if it moves, something changed Mac behaviour** |
+| Mac | 1568/272 → **1569/272 (SUPERSEDED 2026-08-23; see the successor handoff's §2)** | ~~exact and unmodified since batch 1's fixes — this is the hoist proof; if it moves, something changed Mac behaviour~~ **The count HAS moved, for a known good reason: batch 4.5b's single new pin in `TrashSurfaceTests.swift`. Do NOT raise a false alarm on it.** And the round has since established that an unmoved count proves only *"no COVERED behaviour changed"* — it is weaker evidence than this line claimed |
 | Mac spine | 63/8 | exact |
-| mobile | 449/75 | grew every batch; last measured at batch 4's landing (§46) |
+| mobile | 449/75 → **475/77 (SUPERSEDED 2026-08-23)** | grew every batch; 449/75 was batch 4's landing (§46), 475/77 is post-4.5 |
 | mobile spine | 33/7 | = `MobileTutorialWalkTests` (25/6) + `MobileWalkTests` (8/1) |
 
 **Hygiene held all round: ZERO schema, ZERO `Sources/VariorumCore/Sync/`
@@ -236,8 +236,17 @@ R23 the glow stays, no text traded · R24 "info" · R25 the buttons are
 tappable · R26/R27 the shelf layout + starter Journal.
 
 **Two fences she set personally, and they bind:**
-1. **`planVisibleTakeEdit` is HERS** — a cross-block span touching a
-   block with takes must keep REFUSING on the phone. She is handling the
+1. **`planVisibleTakeEdit` is HERS — ⚠️ SUPERSEDED IN SCOPE 2026-08-23, and the tripwire below is redefined.** As set, it read: a cross-block span touching a
+   block with takes must keep REFUSING on the phone. **Her 13u item 5
+   ruling has since opened the fanned case** — a fanned *middle* block
+   deletes whole to the tray; a fanned *edge* block's edit touches the
+   chosen take only. **So the fence no longer means "keep refusing"; it
+   means the phone does not invent its own answer.** 13u rules the
+   semantics for both platforms and mobile composes to them. **The
+   tripwire is redefined:** a diff touching that method is fine when it
+   implements 13u's rule and is a finding when it invents one — **grep
+   for it and READ the change**, rather than treating any hit as a
+   violation. *(It still held at 0 Swift hits through this round.)* She is handling the
    fanned case Mac-side. Verify with `git diff -- '*.swift' | grep planVisibleTakeEdit`
    after any editor batch; it must be 0. **(Do NOT grep the whole diff:
    `notes/*.md` contain the fence's own text, so an unfiltered grep
@@ -361,7 +370,7 @@ that were promised a home and never got one):
 
 ## 7. CLOSEOUT OBLIGATIONS — do not lose these
 
-1. **13l's manifest must be COMPLETED** (`phase-13l-data-safety-floor.md`).
+1. **13l's manifest — COMPLETED THROUGH 13l's CLOSE ONLY** (`phase-13l-data-safety-floor.md`). **⚠️ AMENDED 2026-08-23:** as written this said "must be COMPLETED", which **becomes impossible the moment 13l closes** — and 13l runs before mobile resumes. **The rule now:** the manifest is complete as of 13l's close and is not edited afterwards; **anything Mac-side that mobile does LATER goes to the SECOND manifest (obligation 13)**, not into a closed phase's file. Every "write it into 13l's manifest" instruction elsewhere in these documents inherits this amendment.
    It carries the Mac-side changes for the Fable cold review she ruled as
    13l's first act (R20) — including the O(N²) fix — and it says PARTIAL.
    **Final Mac counts + every Mac file + which hoists the Mac delegates
@@ -405,6 +414,7 @@ that were promised a home and never got one):
    note; observe whether the source blocks vanish and whether the moved
    text lands as blocks or as content), **or** it leaves this round with
    a named owner — a KnownIssues row, or 13u — exactly as M12 did.
+9. *(There is no obligation 9 — a numbering slip from 2026-08-22, left rather than renumbered so existing cross-references keep resolving. **The list runs 1–8, then 10, 11, 13, 12** — thirteen obligations, and **13 sits before 12 deliberately** because 12 was reassigned. Count them, do not trust the last number.)*
 10. **`notes/QUESTIONS.md` — THIS ROUND HAS NO ENTRIES IN IT** (§53's
     finding 9, verified: zero round-2 hits; the file ends *"(Next free
     number: #74.)"*). Every prior phase numbered its held items there —
@@ -444,7 +454,7 @@ that were promised a home and never got one):
     home on merit because on-device encryption is both-platform anyway.**
     The reasoning is §6b. **Or she rules it unnecessary — but the round
     may not close on silence here.**
-12. **R16 → THE CANON.** Her standing principle, recorded verbatim at
+12. **R16 → THE CANON — ⚠️ REASSIGNED TO 13u, 2026-08-23.** **Her 13u item 5 IS R16 promoted from a principle to a scheduled design**, and 13u runs before mobile resumes — so the phase that BUILDS the behaviour should propose the canon wording, not a mobile round proposing wording for a behaviour another phase is defining. *(Its own caveat here is already stale: it said the fourth refusal case is "the one the wording must be honest about", and she has since ruled that case — the fanned one — open.)* **Mobile keeps a one-line pointer only.** Two sessions proposing canon wording for one principle, months apart, would cost her the same sitting twice. **Canon changes remain author-only either way.** The original text: Her standing principle, recorded verbatim at
    §31 and owed to the canon at closeout: *"if you have text selected, I
    lean towards the idea that you should be able to copy or delete it…
    basically obvious and intuitive operations like selecting a bunch of
@@ -577,7 +587,7 @@ overlaps this round's Mac surface directly:**
 | check | how |
 |---|---|
 | Branch tips, and whether 13l advanced `main` | `git log --oneline -5 origin/main`; `git rev-list --count origin/main..HEAD` |
-| **What 13l changed in files this round touched** | `git diff --stat <this cutover's tip>..origin/main -- App/Variorum/Shared/ App/Variorum/Variorum/` — **this is the important one; see §5** |
+| **What 13l changed in files this round touched** | `git diff --stat <this cutover's tip>..origin/main -- App/Variorum/Shared/ App/Variorum/Variorum/ App/Variorum/VariorumMobile/` — **the third path is not a typo:** 13l's manifest assigns it the remaining decision-layer hoist whose Mac twin is `MobileTrashModel.swift`, which lives under `VariorumMobile/`, so a Mac phase can and will change mobile files — **this is the important one; see §5** |
 | Suite counts | run them; do not inherit. Last measured at this cutover: core **1350/141** · Mac **1569/272** · mobile **475/77** · both spines green |
 | Hygiene | `git diff -- Sources/` **must stay empty**; zero `Sync/`; no build configuration; marker **7** |
 | **The accessibility flag on your simulator** | `xcrun simctl spawn <UDID> defaults read com.apple.Accessibility ApplicationAccessibilityEnabled` — **if this is not `1`, sixteen real pins fail as phantoms reading `labels were []`** and every real door reads as absent. Arm it with `defaults write … -bool true` |
@@ -658,7 +668,29 @@ hoist (**13l's manifest**), the live-editor-over-a-tombstone fix
 (**batch 7**), and **§49's four NITs, which are unenumerated anywhere and
 unrecoverable.**
 
-### 4.5c — **NEVER RAN. The largest remaining risk in the round.**
+### 4.5c — **NEVER RAN — and it SHRANK on 2026-08-23 to phone-local work only**
+
+> **Six of its items left for the Mac phases** (her ruling, §6b): the
+> frozen-projection fan fence, the O(N²) twin, the gap fence's Mac face,
+> the identity-audit hoist, the empty-block dead plan and
+> `CrossBlockRefusal`'s hoist → **13l (L-a) and 13u (item 8)**.
+> **VERIFY WHAT THEY BUILT before planning anything below** — the
+> itemisation that follows is the record of the FINDINGS, not a list of
+> your work.
+>
+> **What is still 4.5c's, and it is phone-local:** the unwired A7/#34
+> **seam carves** (the phone owes a consumer for brains that already
+> exist — but **13u item 5 rules what that gesture DOES**, so compose to
+> its rule) · **B45-2** the `displaySlot`/`slots[i]` coupling batch 7
+> walks into · **B45-3's** phone half (E2, §8 path 8, the
+> `supportsTextReplacement: false` fence, and M1's status — **E1's
+> instrumentation was built on 2026-08-23 for her device window; check
+> the device walk's results before treating M1 as unproven**) · the
+> **live editor over a tombstone** (the liveness seam is phone files) ·
+> the **`MobileLenses.swift:419`** candidate confirm site · the two
+> one-liners.
+
+### The findings as originally itemised (a record, not a work list)
 
 **Brief:** `mobile-round-2-batch-4.5-briefs.md` §3. **Enumeration:** §52.
 **Read §5 below BEFORE briefing it.**
@@ -688,7 +720,21 @@ MobileMarkdownActs}.swift` ·
 **every Mac-side change into 13l's manifest** — 13l will have closed, so
 **re-read what it did there first** and record against the current file.
 
-### 4.5e — **NEVER RAN.** Includes a live data-loss defect on her Mac
+### 4.5e — **NEVER RAN — and it is now almost entirely 13l's**
+
+> **Her 2026-08-23 ruling moved its Mac and `Shared/` work to 13l**
+> (§6b): **B45-1** (`AppBootstrap`'s main-thread migrations) → **L-c**;
+> **the Mac's `QuickEntryBar`/`QuickNoteView` twins**, including the one
+> that destroys her text on a refusal → **L-b**; **`AppSession`'s**
+> missing removal path and its three false comments → **L-d**.
+>
+> **What is left for mobile: essentially nothing but verification** —
+> confirm the `.opening` launch arm renders correctly on the phone and
+> that releasing an autosave coordinator at the quick note's `reset()`
+> behaves. **If 13l built it all, 4.5e closes as verified rather than
+> built.**
+
+### The findings as originally itemised (a record, not a work list)
 
 **Brief:** `mobile-round-2-batch-4.5-briefs.md` §4c.
 
@@ -812,7 +858,41 @@ is still open and belongs to whoever she says.
 
 ---
 
-## 6b. ⚠️ THE GAP NOBODY OWNED — who cold-reviews mobile's Mac changes made AFTER 13l
+## 6b. ⚠️ ~~THE GAP NOBODY OWNED~~ — **DISSOLVED 2026-08-23 BY HER RULING. Read this, then skip to §7.**
+
+> **Her correction, verbatim:** *"I thought I asked for 4.5c's mac work to
+> be added to what 13l is supposed to accomplish? so the mobile session
+> shouldn't have mac / shared work to do when I return to it (though it
+> may still find other items in which case they should be fixed, as
+> previously ruled)."*
+>
+> **MOBILE'S REMAINING MAC AND `Shared/` BACKLOG HAS MOVED TO THE MAC
+> PHASES.** 13l takes the four data-safety-shaped items (**L-a** the
+> Mac's missing identity-projection audit · **L-b** the Mac
+> `QuickEntryBar` that destroys her text on a refusal · **L-c**
+> `AppBootstrap`'s main-thread migrations · **L-d** `AppSession`'s
+> unbounded autosave map + its three false comments); **13u takes the
+> five editor-seam items** as its item 8 (the frozen-projection fan
+> fence · the surviving O(N²) twin · the gap fence's missing Mac face ·
+> the empty-block dead plan · `CrossBlockRefusal`'s hoist and wording),
+> because item 5 rewrites that seam and item 7 already owns the Mac's
+> `MarkdownActs` residual.
+>
+> **So the problem this section described no longer exists:** there is no
+> post-13l mobile Mac work for a second manifest to carry.
+> **Obligation 13 survives only as a TRIPWIRE** — if mobile *discovers*
+> new Mac/shared work under R8 (her rider keeps that permission alive),
+> it still hands it forward rather than fixing it silently.
+>
+> **WHAT THIS MEANS FOR 4.5c AND 4.5e:** they shrink to **phone-local
+> work only**. §4's itemisations are still accurate as a *record of the
+> findings*, but the Mac/`Shared/` rows in them are **no longer mobile's
+> to build** — verify what the Mac phases did instead.
+
+*(The original text is kept below because it is the reasoning that
+produced the ruling, and because the tripwire's shape comes from it.)*
+
+### The gap as originally found
 
 **Found by the architect's own handoff sweep, 2026-08-23, and it is the
 clearest dropped-ball candidate in the whole boundary.**

@@ -146,6 +146,59 @@ multiple items and deleting all of them." Build, opening the phase
   this phase can run the other eight rows; E1 needs mobile's burst
   first.)*
 
+  **🔴🔴 SCOPE ADDITION — author, 2026-08-23, AND IT IS BUILD WORK, NOT
+  JUST REVIEW WORK.** Her correction, verbatim: *"I thought I asked for
+  4.5c's mac work to be added to what 13l is supposed to accomplish? so
+  the mobile session shouldn't have mac / shared work to do when I return
+  to it."* Her principle, from the same day: *"do the mac phases in order
+  so that the shared brain is 100% solid and stable… then return to
+  mobile work on a steadier base."*
+
+  **THE RULE THIS SETS: mobile round 2's remaining MAC and `Shared/` work
+  moves to the MAC PHASES. When she returns to mobile, the phone session
+  should have PHONE work only.** *(Her rider, same message: mobile may
+  still FIND Mac/shared defects later, and those still get fixed — R8's
+  shared-defect authorization is untouched. What moves is the KNOWN
+  backlog, not the standing permission.)*
+
+  **THE ARCHITECT'S SPLIT ACROSS THE TWO MAC PHASES — because she said
+  "the mac phaseS, in order", and each item has a phase it actually fits.
+  Flagged for her to overrule; the default if she does not is what is
+  written here.**
+
+  ### 13l TAKES (this phase — all four are data-safety by nature)
+
+  | # | item | why it is THIS phase's |
+  |---|---|---|
+  | **L-a** | **The Mac has NO identity-projection audit at all.** The DEBUG per-keystroke oracle that catches *the totals agree while the content is wrong* exists only on the phone (`MobileEditorViewModel.swift:1898–1920`); `grep -rn "auditIdentityProjection\|identityAuditFailures" App/Variorum/Variorum` returns **ZERO**. Both platforms share `BlockRangeIndex` and took the same crash fix, **and the mobile round REPRODUCED that corruption Mac-side** — `stored → ["Alpha", "Beta beta", "G"]`, her paragraph written to the store as one character, through the ledger, with the totals agreeing so nothing downstream noticed. **HOIST it to `Shared/EditorBrain/` and wire the Mac; pin it red-on-old ON THE MAC** by reproducing that corruption there. **Carry the empty-entry hole** (the walk's `guard range.length > 0 else { continue }` skips an empty entry's separator, so an empty block's boundary is unaudited) | **It is a silent-prose-corruption detector.** This is the data-safety floor; a Mac with no oracle for the one class its other two oracles are blind to is exactly this phase's subject |
+  | **L-b** | **The Mac's `QuickEntryBar` DESTROYS HER TEXT on a refusal.** `Variorum/Features/Shelf/QuickEntryBar.swift` `submit()` does `entryText = ""` **before** the mint, and its catch is a raw `"New note refused: \(error)"` dump — **in the bar she praised by name and uses daily.** `QuickNotePad.take()` clears before filing too (deliberate there, and its copy does speak). **The phone's just-shipped fix is the reference shape** (`MobileQuickNote.file()` resets only on a completed hand-off); route the copy through `OpsRefusalCopy.message(for:)` | **A live data-loss defect on her daily driver.** If "data-safety floor" means anything it means this |
+  | **L-c** | **`AppBootstrap.init` opens the store and runs the migration set SYNCHRONOUSLY ON THE MAIN THREAD before first paint** — a **P2 violation** (OverallModel §5) on **both** platforms, on every launch. **MEASURED on the simulator:** 54.0 / 23.4 ms first launch, 5.0 ms reopen, **3.6 ms at the 100k fixture — flat in corpus size**, O(migrations) not O(corpus). **THE SHAPE IS ALREADY RULED** (mobile §58/§62): an `.opening` state; the file work detached, hopping back to MainActor for `install` + the state write (**preserving the once-per-process flag**); `retry()` re-entering; a quiet launch view in **both** app roots. **The not-ready window cannot open by construction** — `AppSession` exists only inside `.ready`, the property `MobileStoreFailureView` already relies on. **A REAL DEVICE NUMBER may exist by the time you read this** (device-walk row D8) — check `notes/plans/mobile-round-2-device-walk.md`'s results table | Launch-path integrity, and it is `Shared/` — both platforms, one fix |
+  | **L-d** | **`Shared/AppSession.postAutosaves` has no removal path** (no `removeValue` anywhere), so the phone's quick note adds one coordinator **per capture** and `flushEveryOpenPost()` iterates all of them on every filing and every background flush. **Shape proposed:** `releaseAutosave(forPost:)` called from the box's `reset()`. **The trap, already traced:** the Mac registers a `quitFinalize` closure at *mint* time, so release-then-remint registers a second for the same post — deduped by `closeAutoCommit`, so noise rather than corruption, **but it must be deliberate.** **Plus three FALSE comments in that file** (`:89` "no undo UI yet" — shipped; `:240-245` inverted — the quick note DOES cache a coordinator; `:206-208` "open posts are a handful by construction" — false for this very reason) | `Shared/`, both platforms, and it is unbounded growth in a flush path |
+
+  ### 13u TAKES THE REST (recorded here so this phase does not build them)
+
+  **The editor-seam items go to 13u**, because **13u item 5 rewrites that
+  seam and item 7 already owns the Mac's `MarkdownActs` residual** —
+  building them here would mean building refusal machinery 13u then
+  changes: **the fan fence read from a frozen projection** (its
+  *correctness* half — never authorize from stale state — is safe to do
+  either place; the *policy* half is item 5's) · **the surviving O(N²)
+  twin in `planVisibleTakeEdit`** · **the gap fence's missing Mac face**
+  · **the empty-block-in-a-span dead plan** · **`CrossBlockRefusal`'s
+  hoist and its wording**. **They are written into the 13u row of
+  `notes/DetailedPlanForPhases.md` as item 8.**
+
+  ### WHAT THIS DISSOLVES
+
+  **The "second Mac manifest" problem is GONE.** The mobile handoff's
+  §6b and its closeout obligation 13 existed because mobile's *later* Mac
+  work would land after 13l's review closed, with no Mac-eyed reviewer.
+  **With the Mac backlog moved to the Mac phases, mobile has no known Mac
+  work left**, so there is nothing for a second manifest to carry.
+  *(Obligation 13 is retained in reduced form only as a tripwire: if
+  mobile DISCOVERS new Mac/shared work under R8, it still hands it
+  forward.)*
+
   **🔴 SCOPE ADDITION — author, 2026-08-23. ONE PIECE OF THIS DIFF
   REACHED `Shared/` AND THE MAC WITHOUT EVER BEING COLD-REVIEWED, AND
   THIS REVIEW IS NOW ITS REVIEW.** Her instruction, verbatim: *"If 4.5b
@@ -604,7 +657,7 @@ pre-13j tombstones — expected).
 > moved — are in the section immediately below: **Mac 1568/272**
 > *(SUPERSEDED — the current figure is **1569/272**; see the correction
 > at the counts paragraph below)*,
-> mobile **449/75** as of Mobile Round 2's batch 4. Core (1350/141)
+> mobile **475/77** *(corrected 2026-08-23 — 449/75 was batch 4's figure; batch 4.5 added 26 tests)* as of Mobile Round 2's batch 4. Core (1350/141)
 > and the spine (63/8) are unchanged. The same warning is repeated in
 > the kickoff message's "verify the baselines with your own runs",
 > which is load-bearing here rather than routine.
