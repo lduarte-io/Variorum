@@ -1408,14 +1408,26 @@ queue (item B) is already discharged — the walk ran all nine rows
   recoverable for the window's remainder), while permanently deleted
   things STAY permanently deleted (M4 — the ledger). Rides ledger
   items 13–15 (runbook + restore face + the matrix's sentences).
-- **HELD OPEN at her question — the REGRET ROAD** (what "backup"
-  should mean for a purged thing she wishes she hadn't deleted; her
-  words: *"do we need some kind of road where it doesn't [re-delete]?
-  or does it make sense to offer that? what if the entire issue is
-  that they permanently deleted something and wish they hadn't? I'm
-  conflicted on what 'backup' should mean here"*): the architect's
-  framing + options put to her the same turn; her ruling lands below
-  when made.
+- **RULED — the REGRET ROAD: "Runbook recipe now, door later"** (her
+  question, verbatim: *"do we need some kind of road where it doesn't
+  [re-delete]? or does it make sense to offer that? what if the
+  entire issue is that they permanently deleted something and wish
+  they hadn't? I'm conflicted on what 'backup' should mean here. we
+  need to tell the user it clearly either way."* — answered with the
+  three-nets framing: the Trash is the protection against deletion
+  regret, backups are protection against LOSS, purge is the
+  deliberate exit; and the **recovery-as-copy doctrine** — any road
+  back from a backup mints FRESH identity, never resurrects ids, so
+  "really deleted" holds to the sync system in every option). Her
+  pick, the recommendation: **this phase ships the warnings (both
+  populations) + a runbook recipe** — open a backup in a scratch
+  copy of the app (the drill's own mechanism), read, copy out as
+  new — and **a friendly in-app door ("browse a backup, copy
+  something out as a new note") is recorded as a FUTURE-ROW
+  CANDIDATE at her word**, not built here. The candidate is carried
+  to the closeout/handoff for her slotting (natural homes: a Phase 12
+  assessment item or its own small row; the copy-out-as-new doctrine
+  above is its one-paragraph design memo).
 
 ### ACT 1 — THE FIRST-ACT FABLE COLD REVIEW: FINDINGS (returned 2026-08-23; recorded repo-first before any fix session)
 
@@ -1572,7 +1584,7 @@ ladder.
 | 10 | **L-d** `AppSession.postAutosaves` removal path + the three false comments | 4 | open |
 | 11 | Backup second destination (picked folder) + retention + per-run integrity | 1 | open |
 | 12 | The Data Safety face + log (freshness evidence) | 1 | open |
-| 13 | The restore runbook (incl. M3/M6 sentences, external-snapshots widening) | 1 | open |
+| 13 | The restore runbook (incl. M3/M6 sentences, external-snapshots widening) — **scope grew at her post-sitting rulings: + the SYNCED-restore warning pair (ordinary deletions return to the Trash; purged stays purged) in runbook AND restore face · + the backup-archaeology recipe (open a backup in a scratch copy, copy out AS NEW — the recovery-as-copy doctrine)** | 1 | open |
 | 14 | The rehearsed restore drill, end-to-end in SCRATCH | 1 | open |
 | 15 | The deletion-aware restore matrix M1–M7, headless on the fake server | 1 | open |
 | 16 | Bulk-`.md` plaintext insurance, automated | 1 | open |
