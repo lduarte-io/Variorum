@@ -96,11 +96,36 @@ nonisolated enum BackupLog {
     /// that the face never needs paging.
     static let capacity = 20
 
+    /// One element that decodes LENIENTLY: a record this build cannot read
+    /// becomes nil and takes only itself with it.
+    ///
+    /// **Why the array decode was the wrong shape** (13l, the end-of-phase
+    /// ladder's LR-NIT-5): `JSONDecoder` fails an ARRAY if any one element
+    /// fails, and this array is persisted across launches, so any change to
+    /// `BackupRunRecord`'s shape that one stored record disagrees with wiped
+    /// her ENTIRE visible backup history — silently, from the one face whose
+    /// job is to prove backups are happening. Act 5 met that trap once and
+    /// answered it for its own field (`markdown` is Optional, so
+    /// `decodeIfPresent` tolerates older records); that answer covers exactly
+    /// the additive case and nothing else. A renamed field, a required one, or
+    /// simply a NEWER build writing an `Outcome` case this one has never heard
+    /// of — she rolls back a version, and the log is empty again.
+    ///
+    /// Per-record is the honest granularity: one unreadable run is one row
+    /// missing from a diagnostic list, which is a loss of nothing. Losing all
+    /// twenty because of it is the failure this exists to prevent.
+    private struct LenientRecord: Decodable {
+        let record: BackupRunRecord?
+        init(from decoder: Decoder) throws {
+            record = try? BackupRunRecord(from: decoder)
+        }
+    }
+
     static func read(_ defaults: UserDefaults = .standard) -> [BackupRunRecord] {
         guard let data = defaults.data(forKey: defaultsKey),
-              let records = try? JSONDecoder().decode([BackupRunRecord].self, from: data)
+              let elements = try? JSONDecoder().decode([LenientRecord].self, from: data)
         else { return [] }
-        return records
+        return elements.compactMap(\.record)
     }
 
     /// Newest first, capped. Append never throws: a log that cannot be

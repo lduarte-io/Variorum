@@ -205,6 +205,56 @@ struct MarkdownInsuranceTests {
                 "a record with no markdown leg has nothing to have failed")
     }
 
+    /// **THE SAME TRAP, ONE LEVEL UP — and the Optional field only covered
+    /// the additive half of it** (13l, the end-of-phase ladder's LR-NIT-5).
+    ///
+    /// Traced: `JSONDecoder` fails an ARRAY if any single element fails, so
+    /// ONE unreadable record emptied the whole persisted log. Act 5's fix made
+    /// `markdown` Optional, which answers "a NEWER build reads an OLDER
+    /// record". It does nothing for the mirror case: an older build reading a
+    /// record a newer one wrote — here, an `Outcome` case that does not exist
+    /// yet — which is one version rollback away and needs no code change at
+    /// all to happen.
+    ///
+    /// **Red on old** (behavioural revert): decode `[BackupRunRecord]` in one
+    /// shot again and this reads 0 of 3.
+    @Test func oneUnreadableRecordLosesItselfAndNotTheHistory() throws {
+        let defaults = scratchDefaults()
+        let good = BackupRunRecord(
+            at: Date(timeIntervalSince1970: 782_900_000),
+            primary: .init(outcome: .written, file: "a.sqlite", integrity: "ok"),
+            secondary: .init(outcome: .noDestination))
+        for index in 0..<3 {
+            BackupLog.append(
+                BackupRunRecord(
+                    at: Date(timeIntervalSince1970: 782_900_000 + Double(index)),
+                    primary: .init(
+                        outcome: .written, file: "f\(index).sqlite", integrity: "ok"),
+                    secondary: good.secondary),
+                to: defaults)
+        }
+
+        // A future build's run, as it would actually arrive: an outcome this
+        // build has never heard of, written by a version she then rolled back
+        // from. Mutated in the stored JSON, so the pin drives the real
+        // persisted bytes rather than a hand-built string.
+        var json = try JSONSerialization.jsonObject(
+            with: defaults.data(forKey: BackupLog.defaultsKey)!) as! [[String: Any]]
+        #expect(json.count == 3)
+        var middle = json[1]
+        var leg = middle["primary"] as! [String: Any]
+        leg["outcome"] = "teleported"
+        middle["primary"] = leg
+        json[1] = middle
+        defaults.set(
+            try JSONSerialization.data(withJSONObject: json), forKey: BackupLog.defaultsKey)
+
+        let records = BackupLog.read(defaults)
+        #expect(records.count == 2, "the unreadable run lost itself, and only itself")
+        #expect(records.map(\.primary.file) == ["f2.sqlite", "f0.sqlite"],
+                "newest-first order survives the gap")
+    }
+
     /// The second trap, and it is why the count has its own field: `Leg`'s
     /// `integrityFailed` reads "a value that is not SQLite's ok". Putting
     /// "42 files" in `integrity` would have made every successful export
