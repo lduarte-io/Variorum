@@ -413,6 +413,25 @@ comment DISPLAY and the other add doors are untouched. Removal
 only, no redesign — the fuller comments-area rework is 13u's
 (item 3 on that row), deliberately NOT this phase's.
 
+### 8d. HER EMPHASIS (2026-08-21): the recovery story must be intuitive from EVERY door
+
+Her words, verbatim: the phase "has to ensure that the trash
+recovery story is well built and intuitive as ux from all its
+doors - lineage from one block, trash tray, recency of deletion
+filtering, etc." The WHY, recorded so the mandate's weight is
+understood: she has RULED cross-block select-and-delete open
+(13u item 5 — the master plan row has the full sketch; her goal:
+"not feel like a headache compared to using a different editor"),
+and that liberalization LEANS ON the Trash being a robust,
+legible safety net — deleting across blocks is only honest
+because everything is one Put back away and findable. So this
+phase's recovery-surface work is not polish; it is the
+load-bearing half of a ruling that lands later. Walk every door
+as a user: the per-note tray, the Trash with its recency
+filtering, the lineage door from a successor block, the History
+face rows — each must answer "where did my text go and how do I
+get it back" without her having to explain it.
+
 ### 9. Journal-day deletions TRAVEL to Fragments (her ruling, 2026-08-19)
 
 Today the bridge's sweep reads LIVE days only, so a deleted
