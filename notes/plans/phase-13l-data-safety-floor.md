@@ -1596,11 +1596,143 @@ re-run isolated before concluding anything. Record your result as a
 short report; the round-2 re-review (fresh Fable) follows per the
 ladder.
 
+### ACT 1 FIX ROUND — RECORD (fresh Opus implementer session, 2026-08-23)
+
+**Scope held exactly: A1-MAJOR-1 + A1-MINOR-1.** A1-MINOR-2 and both NITs
+untouched (they are ledger item 4's). Zero `Sources/` lines, zero
+`Sync/` lines, zero schema. Five files, all under `App/Variorum/`.
+
+**A1-MAJOR-1 — TRACE CONFIRMED, in my own reading of the four sites.**
+The finding holds exactly as written, and every step of its
+reachability claim is now pinned rather than argued:
+
+1. **An archived take can be DELETED.** `deleteVariant`'s I10 guard is
+   `ensureNotLastActive`, whose first line is `guard variant.status ==
+   .active else { return }` — an archived take is never "the last
+   active" one, so the guard returns early. Unlocked and non-chosen, it
+   tombstones.
+2. **The Trash LISTS it.** `Queries.trash`'s take arm
+   (`Queries/Trash.swift`) filters on `v.deleted_at IS NOT NULL`, the
+   cutoff, a live block, and no purge intent — **there is no `status`
+   predicate anywhere in it.** So the row is a `.take` row on the
+   surface like any other.
+3. **`restoreVariant` returns it ARCHIVED.** The op is the ruled exact
+   flip (#68(b)) and `@discardableResult ... -> VariantStatus`; its own
+   doc says a receipt that assumed "the fan" *"was lying for that row"*.
+4. **The door threw that answer away.** `TrashPutBack.run` wrote
+   `case .take: _ = try ops.restoreVariant(item.id)` and fell through to
+   `RecoveryCopy.putBackReceipt(item.kind)` → **"Take put back."** — an
+   affirmative sentence pointing her at the fan for something that
+   landed in the archived listing.
+
+The shape is the SAME discard the 4.5b hoist fixed one line up for
+`restoreBlock`'s landing: the hoist corrected the block half and left
+the take half beside it. Two other Mac doors onto this same act already
+read the op's answer — `BlockPastModel.putBackTake` →
+`BlockPastCopy.restored(status)`, and the lens board's
+`LensFallbackCopy.restoredDeletedButArchived` — both corrected at 13j
+ladder A's A3, which makes this door the odd one out rather than a new
+question.
+
+**THE FIX (`App/Variorum/Shared/RecoveryCopy.swift`):** the road now
+carries **every** op's own answer out of the write, and the words are
+chosen after it. `TrashPutBack.Outcome` (`.block(landing)` /
+`.take(status)` / `.plain`) replaces the `BlockRestoreLanding?` the
+closure used to return — deliberately an enum and not a second optional,
+because a kind that answers something must now be forced to declare it
+rather than falling silently through to the generic sentence, which is
+how BOTH halves of this drift happened. Copy: `RecoveryCopy
+.takeRestoredReceipt(_ status:)` + `takeRestoredArchived`. **The ACTIVE
+road is byte-unchanged** — it still returns `putBackReceipt(.take)`; the
+fix reads the answer, it does not reword the common case. Both platforms
+inherit through the shared road (the decision lives in `Shared/`).
+
+**RED-ON-OLD EVIDENCE — observed on BOTH platforms, not argued.** The
+copy was added FIRST as inert text (no road read it), so the pins
+compiled against the un-fixed decision and failed BEHAVIORALLY:
+
+- `VariorumTests/TrashSurfaceTests.putBackOfAnArchivedTakeFromTheTrashDoesNotClaimTheFan`
+  — pre-fix: `Expectation failed: (model.receipt → "Take put back.") ==
+  (RecoveryCopy.takeRestoredArchived → "Take put back — it was archived
+  when it was deleted, …")`, plus the `!=` guard failing on the same
+  value. Post-fix green.
+- `VariorumMobileTests/MobileTrashTests.puttingBackAnArchivedTakeSaysItCameBackArchived`
+  — verified by an explicit behavioral revert of the take case (restore
+  `_ = try ops.restoreVariant(…); return .plain`, run, restore the fix):
+  pre-fix `Expectation failed: (trash.receipt → "Take put back.")`.
+  Post-fix green. **One fix, two surfaces — which is the hoist's whole
+  claim, now pinned rather than asserted.**
+
+Both pins also assert the store side (`status == .archived` after the
+put-back: the exact flip stands, nothing was quietly un-archived) and
+the Mac pin carries the ACTIVE control in the same test.
+
+**The phone's face renders the new sentence sensibly** (checked as the
+brief asked): `MobileTrashView.reportLine` is `Text(tokens
+.chromeLabel(receipt))` at `tokens.small` in a leading `VStack` with
+`frame(maxWidth: .infinity)` — **no `lineLimit`, no `fixedSize`** — so
+the longer sentence wraps in the growing bottom report line rather than
+truncating. `RecoveryView`'s Mac receipt is the same shape
+(`Text(receipt).font(.caption)`, no limit). P-8's rule is not engaged:
+neither is a `fixedSize` chrome text.
+
+**A1-MINOR-1 — two Mac coverage pins, green on HEAD by design** (the
+parity-pin class; no red-on-old owed, none claimed). **Neither touches
+refusal wording, and neither widens or narrows a case — 13u owns that
+seam's semantics.** Both assert the SHIPPED rule:
+
+- `VariorumTests/WholeBlockDeleteTests.aRunContainingANotYetArrivedBlockHasNoPlanOnTheMacToo`
+  — the gap fence, with a Mac-side `indexWithGap` fixture mirroring the
+  phone's. It pins that the geometry IS a whole-block run (`0...2`) so
+  the FENCE is what declines, that `wholeBlockDeletion` returns nil and
+  `wholeBlockRunAwaitsSync` is true, that the arrived blocks still
+  delete, that a non-run reports no gap, and — the guard against the
+  fence quietly growing — that a LOCKED take still plans (#33(a)). The
+  predicate is `variantID == nil` and nothing else.
+- `VariorumTests/BlockManagementTests` (suite `WriteBlockSelectionTests`)
+  `aNonContiguousPickLandsTheCaretOnTheBlockThatSurvivedBetweenThem` —
+  through the MAC DOOR (⌘-click pick `[b0, b2]` → `deleteSelectedBlocks`
+  → `caretBlockID == b1`), beside the two contiguous cases already
+  pinned there. Those two agree under either reading, which is exactly
+  why a Mac-only run could not see this one; ⌘-click is the only
+  non-contiguous picker in either app.
+
+**FILES TOUCHED (5):** `App/Variorum/Shared/RecoveryCopy.swift` ·
+`App/Variorum/VariorumTests/TrashSurfaceTests.swift` (+ `import GRDB`
+for the store-side assert) · `App/Variorum/VariorumTests/WholeBlockDeleteTests.swift`
+· `App/Variorum/VariorumTests/BlockManagementTests.swift` ·
+`App/Variorum/VariorumMobileTests/MobileTrashTests.swift`.
+
+**SUITE COUNTS AT CLOSE (all four gates, `Shared/` was touched):**
+core **1350/141 green** (the baseline exactly — no core lines changed) ·
+Mac **1572/272 GREEN** (1569 + the 3 new Mac pins; suite count unchanged
+— the pins joined existing suites) · Mac spine **63/8 green** (run
+separately by TYPE name) · mobile **485/78 passed** (484 + the twin; the
+2 recorded issues are the suite's own `withKnownIssue`, and the run
+passed).
+
+**ONE INTERMITTENT RED, EXPLAINED AND NOT MINE — and it is NOT the
+known latency pin.** The FIRST full Mac run failed
+`CanvasDragTrackingTests.aCardFollowsThePointerOneToOneInsteadOfHalfOfIt`
+(4 issues: the mid-drag offset read `(80, 40)` instead of `(100, 50)`,
+and no `canvas_layout` row was written). Handled per the traps'
+"explain any red": re-run **isolated → green (2/2 tests)**; full Mac
+suite **re-run → 1572/272 fully green**, the failure not reproducing.
+The diff cannot reach it (nothing here touches canvas, drag, or layout
+persistence); it is a gesture-timing-sensitive pin in the recorded flake
+family (`PoolDragTests`' physical-⌥ read, the Phase-12-owned
+`rewriteStrategyLatencies`). **The known latency pin was GREEN in both
+full runs** — it never appeared in a failure list, so nothing is
+concluded from it either way. Recorded here rather than filed:
+whether it earns a `KnownIssues` row (owner 12, beside the latency-pin
+calibration row it resembles) is the orchestrator's call, not this
+scope-fenced fix round's.
+
 ### THE LEDGER (every row owned; statuses updated as they move)
 
 | # | item | strand | status |
 |---|---|---|---|
-| 1 | The first-act Fable cold review (mobile round's Mac diff + 4.5b) | 3 | **review returned (1 MAJOR · 2 MINOR · 2 NIT + clean bill); fix round dispatched; round 2 owed** |
+| 1 | The first-act Fable cold review (mobile round's Mac diff + 4.5b) | 3 | **review returned (1 MAJOR · 2 MINOR · 2 NIT + clean bill); FIX ROUND LANDED 2026-08-23 — A1-MAJOR-1 fixed with red-on-old pins on BOTH platforms, A1-MINOR-1's two Mac coverage pins in (record above); all four gates green; the other three findings sit in item 4; round 2 owed** |
 | 2 | The dead Delete Now / Empty Trash doors (pin-first at the real surface) | 2 | open |
 | 3 | The note-deletion door set: Delete Note… (note ▾, confirm) · Library door confirm · ⌘-click multi-select + delete-all | 1 (§8) | open |
 | 4 | The remaining decision-layer hoist (`RecoveryViewModel` ↔ `MobileTrashModel`) — **scope grew at Act 1: + the four raw-error catches through `DeletionRefusal.fallback` (A1-MINOR-2) · + the `*NotDeleted` family in the shared home (A1-NIT-1) · + split the act compositions out of `RecoveryCopy` when the layer grows (A1-NIT-2)** | 2 | open |

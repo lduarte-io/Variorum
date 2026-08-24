@@ -154,6 +154,50 @@ struct MobileTrashTests {
         }
     }
 
+    /// **The TAKE half of the same rule** (13l Act 1, A1-MAJOR-1 — the phone's
+    /// twin of the Mac pin, inherited through `TrashPutBack`). The restore is
+    /// an exact flip (#68(b)), so a take ARCHIVED when it was deleted comes
+    /// back archived, into its block's archived listing — and the shipped road
+    /// discarded `restoreVariant`'s status and said *"Take put back."*, which
+    /// sends her to the fan for something that is not there.
+    ///
+    /// **Red on old** on both platforms at once: the decision lives in
+    /// `Shared/`, which is exactly why one fix answers both surfaces.
+    @Test func puttingBackAnArchivedTakeSaysItCameBackArchived() async throws {
+        try await withEditorWorld { session, db in
+            let postID = try await makePost(session, blocks: ["Alpha."])
+            let (model, _) = await makeSurfaceEditor(session, postID: postID)
+            let blockID = model.index.entries[0].blockID
+            let chosen = try #require(model.index.entries[0].variantID)
+
+            // Archived-then-deleted is reachable: `deleteVariant` accepts it
+            // (I10's guard counts only ACTIVE takes) and `Queries.trash` lists
+            // deleted takes with no status filter.
+            let takeID = try await session.runner.run { ops -> String in
+                let take = try ops.branchVariant(blockID, from: chosen)
+                try ops.archiveVariant(take.id)
+                try ops.deleteVariant(take.id)
+                return take.id
+            }
+
+            let rows = try await db.read { [now = session.now] db in
+                try Queries.trash(db, now: now)
+            }
+            let row = try #require(rows.first { $0.kind == .take && $0.id == takeID })
+
+            let trash = MobileTrashModel(session: session)
+            await trash.putBack(row)
+            #expect(trash.lastError == nil)
+            #expect(trash.receipt == RecoveryCopy.takeRestoredArchived,
+                    "the phone repeats the op's own answer too — never \"the fan\" here")
+            let status = try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT status FROM variant WHERE id = ?", arguments: [takeID])
+            }
+            #expect(status == "archived", "the exact flip stands — nothing un-archived")
+        }
+    }
+
     /// Un-archive is the Archived section's one act, and it is a real
     /// button too. Archive has no clock, so this is a plain state flip.
     @Test func theRealUnarchiveButtonBringsANoteBack() async throws {

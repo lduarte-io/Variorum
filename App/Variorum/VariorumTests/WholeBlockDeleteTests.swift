@@ -107,6 +107,68 @@ struct WholeBlockDeleteTests {
             tailLength: tail)
     }
 
+    /// The same tiling with entry `gap` still waiting for its variant — the
+    /// shape a sync arrival leaves behind (`variantID == nil`, `editable`
+    /// false: the editor renders the block and refuses to type into it).
+    private static func indexWithGap(_ lengths: [Int], gap: Int) -> BlockRangeIndex {
+        BlockRangeIndex(
+            entries: lengths.enumerated().map {
+                BlockRangeIndex.Entry(
+                    blockID: "b\($0.offset)",
+                    variantID: $0.offset == gap ? nil : "v\($0.offset)",
+                    length: $0.element, editable: $0.offset != gap)
+            },
+            tailLength: nil)
+    }
+
+    /// **THE GAP FENCE, PINNED MAC-SIDE** (13l Act 1, A1-MINOR-1 — a COVERAGE
+    /// pin: green on HEAD by design, no red-on-old owed).
+    ///
+    /// The fence is a real NARROWING of the Mac's shipped J9 gesture, made in
+    /// the shared brain by the mobile round, and its only pin lived in the
+    /// phone's suite — so a Mac-suite-only regression run stayed green over a
+    /// regression in a Mac behaviour. That is what this closes; it asserts the
+    /// SHIPPED rule and touches no semantics (13u owns that seam's policy).
+    ///
+    /// The rule itself: a gap slot is a block whose variant has not arrived,
+    /// which both editors already declare read-only in words. Tombstoning one
+    /// takes the peer's paragraph when the variant lands (tombstone-wins,
+    /// SyncSpec §6) — text she has never seen — so a run containing one
+    /// declines, and ONLY the gap declines it.
+    @Test func aRunContainingANotYetArrivedBlockHasNoPlanOnTheMacToo() {
+        let index = Self.indexWithGap([2, 3, 1], gap: 1)
+        // "aa\nbbb\nc" — the whole document, geometry-perfect as a run.
+        let all = NSRange(location: 0, length: 8)
+        #expect(index.wholeBlockRun(covering: all) == 0...2,
+                "the GEOMETRY is a whole-block run — the fence is what declines")
+        #expect(index.wholeBlockDeletion(covering: all, replacement: "") == nil)
+        #expect(index.wholeBlockRunAwaitsSync(covering: all),
+                "…and the face can name the real reason rather than the residual one")
+
+        // The blocks that DID arrive still delete: the fence is the gap,
+        // never the neighbourhood of one.
+        #expect(index.wholeBlockDeletion(
+            covering: NSRange(location: 0, length: 3), replacement: "") == ["b0"])
+        #expect(!index.wholeBlockRunAwaitsSync(covering: NSRange(location: 0, length: 3)))
+
+        // A span that is no run at all reports no gap either — the copy
+        // chooser must never blame sync for a partial selection.
+        #expect(!index.wholeBlockRunAwaitsSync(covering: NSRange(location: 4, length: 4)))
+
+        // And a LOCKED take is deliberately NOT fenced (#33(a)'s unrestricted
+        // delete). Here so the gap fence can never quietly grow into an
+        // editability fence — the predicate is `variantID == nil`, nothing else.
+        let locked = BlockRangeIndex(
+            entries: [
+                BlockRangeIndex.Entry(blockID: "b0", variantID: "v0", length: 2, editable: true),
+                BlockRangeIndex.Entry(blockID: "b1", variantID: "v1", length: 3, editable: false),
+            ],
+            tailLength: nil)
+        #expect(locked.wholeBlockDeletion(
+            covering: NSRange(location: 0, length: 6), replacement: "") == ["b0", "b1"])
+        #expect(!locked.wholeBlockRunAwaitsSync(covering: NSRange(location: 0, length: 6)))
+    }
+
     @Test func wholeBlockRunClaimsAParagraphPlusEitherOfItsNewlines() {
         let index = Self.index([2, 3, 1])
         // Block 1 alone is [3,6); with its trailing newline [3,7); with its

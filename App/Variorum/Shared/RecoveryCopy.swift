@@ -236,6 +236,37 @@ nonisolated enum RecoveryCopy {
         case .unplaced: return putBackUnplaced
         }
     }
+
+    /// **`restoreVariant` ANSWERS what came back, and the take's receipt
+    /// repeats the answer instead of assuming the fan** (13l Act 1, the
+    /// first-act cold review's A1-MAJOR-1 — `landingReceipt`'s shape, one op
+    /// over, and the THIRD door to adopt it).
+    ///
+    /// The restore is an EXACT FLIP (#68(b), ruled), so a take that was
+    /// ARCHIVED when it was deleted comes back archived — into its block's
+    /// archived listing, never the fan. That row is reachable from the Trash
+    /// today: `deleteVariant` accepts an archived, unlocked, non-chosen take
+    /// (I10's guard counts only ACTIVE takes, so `ensureNotLastActive`
+    /// returns early), and `Queries.trash` lists deleted takes with NO status
+    /// filter. The shipped road wrote `_ = try ops.restoreVariant(…)` and
+    /// fell through to the generic `putBackReceipt(.take)`, so this surface
+    /// said *"Take put back."* while the take landed somewhere she would not
+    /// look — the same discard `BlockPastCopy.restored` (the block's History
+    /// face) and `LensFallbackCopy.restoredDeletedButArchived` (a lens's
+    /// dangling pick) were each corrected for at 13j ladder A's A3. Two doors
+    /// onto one act answering *"where did it go?"* two ways is the M-C drift
+    /// class the 4.5b hoist exists to kill.
+    static func takeRestoredReceipt(_ status: VariantStatus) -> String {
+        status == .archived ? takeRestoredArchived : putBackReceipt(.take)
+    }
+
+    /// The archived edition. Its two siblings word the same fact for the
+    /// surface each speaks on; this is the Trash's, and it is the one BOTH
+    /// platforms read.
+    static let takeRestoredArchived =
+        "Take put back — it was archived when it was deleted, so it's among "
+        + "its block's archived takes, not the fan. Unarchive it there to "
+        + "bring it back."
 }
 
 /// A recovery refusal that is not an `OperationError` — nothing was even
@@ -274,8 +305,34 @@ enum RecoveryRefusal: Error {
 /// `RecoveryRefusal` for the one case where nothing was attempted — so each
 /// platform keeps its own voice for wording them, which is a face, not a
 /// decision.
+///
+/// **The take case discarded its answer too** (13l Act 1, A1-MAJOR-1). The
+/// hoist above fixed the BLOCK half and left the same shape one line down:
+/// `case .take: _ = try ops.restoreVariant(item.id)`, falling to the generic
+/// receipt. `restoreVariant` reports the revived take's STATUS for the same
+/// reason `restoreBlock` reports its landing, and the same drift followed —
+/// an archived take was told to her as *"Take put back."* while it landed in
+/// the archived listing. So the road now carries EVERY op's own answer out of
+/// the write, and the words are chosen after it, from one place.
 @MainActor
 enum TrashPutBack {
+    /// **What the act ANSWERED.** The ops that report where a thing went say
+    /// so here; the ones that have nothing of their own to report say `plain`.
+    /// Keeping this out of the write body is deliberate: the transaction picks
+    /// no words, and adding a kind that answers something forces a case here
+    /// rather than allowing a silent fall-through to the generic sentence —
+    /// which is exactly how both halves of this drift happened.
+    nonisolated enum Outcome: Equatable, Sendable {
+        /// `restoreBlock` names WHERE the block went (its old place, the end
+        /// of its note, or unplaced).
+        case block(Operations.BlockRestoreLanding)
+        /// `restoreVariant` names WHAT came back — active into the fan,
+        /// archived into the archived listing (the exact flip, #68(b)).
+        case take(VariantStatus)
+        /// The op reports no landing of its own.
+        case plain
+    }
+
     /// Puts one Trash row back; returns the RECEIPT to show.
     static func run(session: AppSession, item: Queries.TrashItem) async throws -> String {
         // A preserved original was never DELETED — putting it back means
@@ -286,19 +343,27 @@ enum TrashPutBack {
             return try await PreservedOriginPutBack.run(
                 session: session, postID: noteID, blockID: item.id)
         }
-        let landing = try await session.runner.run {
-            ops -> Operations.BlockRestoreLanding? in
+        let outcome = try await session.runner.run { ops -> Outcome in
             switch item.kind {
-            case .note: try ops.restoreContainer(item.id)
-            case .book: try ops.restoreReading(item.id)
-            case .block: return try ops.restoreBlock(item.id)
-            case .take: _ = try ops.restoreVariant(item.id)
-            case .preservedOriginal: break  // handled above
+            case .note:
+                try ops.restoreContainer(item.id)
+                return .plain
+            case .book:
+                try ops.restoreReading(item.id)
+                return .plain
+            case .block:
+                return .block(try ops.restoreBlock(item.id))
+            case .take:
+                return .take(try ops.restoreVariant(item.id))
+            case .preservedOriginal:
+                return .plain  // handled above
             }
-            return nil
         }
-        return landing.map(RecoveryCopy.landingReceipt)
-            ?? RecoveryCopy.putBackReceipt(item.kind)
+        switch outcome {
+        case .block(let landing): return RecoveryCopy.landingReceipt(landing)
+        case .take(let status): return RecoveryCopy.takeRestoredReceipt(status)
+        case .plain: return RecoveryCopy.putBackReceipt(item.kind)
+        }
     }
 }
 

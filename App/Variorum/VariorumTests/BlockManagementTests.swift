@@ -247,6 +247,32 @@ struct WriteBlockSelectionTests {
         }
     }
 
+    /// **THE NON-CONTIGUOUS LANDING, PINNED AT THE MAC DOOR** (13l Act 1,
+    /// A1-MINOR-1 — a COVERAGE pin: green on HEAD by design, no red-on-old
+    /// owed).
+    ///
+    /// ⌘-click is the ONLY door in either app that picks a NON-CONTIGUOUS
+    /// set, and "nearest surviving" was corrected for exactly this case when
+    /// `caretLandingAfterRemoving` was hoisted into the shared brain by the
+    /// mobile round — where its only pin lives. The two contiguous cases
+    /// above agree under either reading (everything past a contiguous run
+    /// survives by definition), so a Mac-suite-only regression run could not
+    /// see this one at all: the edge reading answers `b0`, a block being
+    /// deleted, while `b1` sits there surviving.
+    @Test func aNonContiguousPickLandsTheCaretOnTheBlockThatSurvivedBetweenThem() async throws {
+        try await withEditor(seedBlocks: ["one", "two", "three"]) { h in
+            let ids = try h.storeSlots().map(\.blockID)
+            pick(h, entries: [0, 2])
+            #expect(h.model.index.caretLandingAfterRemoving([ids[0], ids[2]]).blockID == ids[1],
+                    "the brain's answer, read through the Mac's own index")
+            await h.model.deleteSelectedBlocks()
+            #expect(h.model.caretBlockID == ids[1],
+                    "b1 survived between the picked pair — the door lands there")
+            try h.reload()
+            #expect(try h.storeSlots().compactMap(\.text) == ["two"])
+        }
+    }
+
     @Test func aSealedNoteRefusesTheWholeGestureAndDeletesNothing() async throws {
         try await withEditor(seedBlocks: ["one", "two", "three"]) { h in
             pick(h, entries: [0, 1])

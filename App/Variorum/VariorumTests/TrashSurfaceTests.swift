@@ -17,6 +17,7 @@
 import AppKit
 import Dependencies
 import Foundation
+import GRDB
 import SwiftUI
 import Testing
 import VariorumCore
@@ -142,6 +143,66 @@ struct TrashSurfaceTests {
             #expect(model.lastError == nil)
             #expect(model.receipt == RecoveryCopy.putBackWhereItWas,
                     "the Mac repeats the op's own answer, exactly as the phone does")
+        }
+    }
+
+    /// **THE A1-MAJOR-1 PIN (13l Act 1 — red-on-old).** The hoisted put-back
+    /// read `restoreBlock`'s landing but DISCARDED `restoreVariant`'s status
+    /// (`case .take: _ = try ops.restoreVariant(item.id)`) and fell to the
+    /// generic receipt — so a take that comes back ARCHIVED, into its block's
+    /// archived listing, was told to her as *"Take put back."*, which sends
+    /// her to the fan to look for something that is not there.
+    ///
+    /// **The row is reachable, and this pin proves each step:** `deleteVariant`
+    /// accepts an archived take (I10's `ensureNotLastActive` counts only
+    /// ACTIVE takes), `Queries.trash` lists deleted takes with no status
+    /// filter, and the restore is the ruled exact flip (#68(b)) — so the take
+    /// revives archived. The Mac's sibling door (`BlockPastModel.putBackTake`)
+    /// has read the op's answer since 13j ladder A's A3; this door re-shipped
+    /// the class the hoist exists to kill.
+    ///
+    /// **Red on old:** with `_ = try ops.restoreVariant(item.id)` restored,
+    /// `receipt` is `RecoveryCopy.putBackReceipt(.take)` and the first
+    /// expectation fails.
+    @Test func putBackOfAnArchivedTakeFromTheTrashDoesNotClaimTheFan() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two."]) { editor in
+            let ops = editor.session.operations
+            let slot = try #require(try editor.storeSlots().first)
+            let chosen = try #require(slot.variantID)
+
+            let archived = try ops.branchVariant(slot.blockID, from: chosen)
+            try ops.archiveVariant(archived.id)
+            try ops.deleteVariant(archived.id)
+
+            let rows: [Queries.TrashItem] = try await editor.database.read { db in
+                try Queries.trash(db, now: harnessNow)
+            }
+            let takeRow = try #require(
+                rows.first { $0.kind == .take && $0.id == archived.id },
+                "an archived-then-deleted take IS a Trash row — no status filter")
+
+            let model = RecoveryViewModel(session: editor.session)
+            await model.putBack(takeRow)
+            #expect(model.lastError == nil)
+            #expect(model.receipt == RecoveryCopy.takeRestoredArchived,
+                    "the receipt reads restoreVariant's own status — never \"the fan\" here")
+            #expect(model.receipt != RecoveryCopy.putBackReceipt(.take))
+            let status = try await editor.database.read { [id = archived.id] db in
+                try Variant.fetchOne(db, key: id)?.status
+            }
+            #expect(status == .archived, "the exact flip stands — nothing un-archived")
+
+            // …and an ACTIVE deleted take keeps the plain receipt, unchanged:
+            // the fix reads the answer, it does not reword the common road.
+            let active = try ops.branchVariant(slot.blockID, from: chosen)
+            try ops.deleteVariant(active.id)
+            let after: [Queries.TrashItem] = try await editor.database.read { db in
+                try Queries.trash(db, now: harnessNow)
+            }
+            let activeRow = try #require(after.first { $0.kind == .take && $0.id == active.id })
+            await model.putBack(activeRow)
+            #expect(model.lastError == nil)
+            #expect(model.receipt == RecoveryCopy.putBackReceipt(.take))
         }
     }
 
