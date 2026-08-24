@@ -1728,6 +1728,81 @@ whether it earns a `KnownIssues` row (owner 12, beside the latency-pin
 calibration row it resembles) is the orchestrator's call, not this
 scope-fenced fix round's.
 
+### ACT 2 — THE TRASH-SURFACE MINI-ROUND: the brief (fresh Opus session; dispatches only after the Act-1 ladder closes — same files)
+
+**Scope: ledger items 2–6 + the grown item 4.** Read this brief, the
+findings/dispositions above (A1-MINOR-2, A1-NIT-1, A1-NIT-2 are YOURS
+via item 4), §8/§8b/§8c of this plan (her rulings — the letter), and
+the 13j Environment traps by reference. The registry discipline (P-1)
+and the tutorial spine (63/8 green) bind; `Shared/` is touched ⇒ all
+four gates run, counts quoted.
+
+1. **Item 2 — the dead Delete Now / Empty Trash doors.** The settled
+   mechanism is this plan's "🔴 YOUR FIRST ACT'S DIAGNOSIS IS
+   SETTLED" section (the confirm→act edge: the `isPresented` setter
+   nils `pendingConfirm` synchronously inside tap handling; the
+   action closure only enqueues, and resumes after the nil; sites
+   `RecoveryView.swift:299-309`/`:528-539` as of the derivation —
+   re-locate). **Discipline: build the pin FIRST, driving the REAL
+   dialog action — never the view-model seam** (every existing pin
+   in `TrashPurgeDoorsTests` calls the confirm method while the
+   value is still set; the confirm→act edge is the only uncovered
+   edge) — confirm it fails on today's code, THEN fix. Preferred fix
+   shape: `confirmationDialog(…, presenting:)` — "every other
+   value-carrying confirm in both codebases already uses
+   `presenting:`". **Read mobile 4.5b's four-door fix first**
+   (commit `7fd2cd0`: the `presenting:` moves, the A12 seam fix, and
+   its honestly-named one-step `tapAlertAction` driver).
+2. **Item 3 — the note-deletion door set** (her rulings, §8, the
+   letter): "Delete Note…" in the note ▾ menu WITH confirmation —
+   ordinary move-to-Trash ONLY (the round-3 rider: Delete Now never
+   appears in note context); the receipt names the Trash and its
+   clock; navigate-away covers EVERY pane/window showing the note
+   (the 13f workspace choreography — the Library door shares it).
+   The Library door gains the SAME confirmation, one wording, both
+   doors. ⌘-click multi-select in the Library + delete-all-selected:
+   ONE confirmation naming the count ("Delete 5 notes?"), ONE
+   receipt; scope = Library note rows FIRST (shelf books at her
+   word — do not build them). All three doors registry-declared
+   (P-1); the walk asserts them. **Write down the
+   confirmation-consistency principle** (§8's last bullet: notes
+   confirm; blocks/takes do not; Delete Now/Empty Trash always
+   confirm) as a doc comment at the registry's deletion acts, so
+   future doors inherit it.
+3. **Item 4 — the remaining decision-layer hoist, WITH its grown
+   scope.** Hoist the near-verbatim `RecoveryViewModel` ↔
+   `MobileTrashModel` decision layer (`PurgeConfirm`,
+   `requestDeleteNow`, `requestEmptyTrash`, `confirmPendingPurge`
+   incl. the synced/familySynced reads and `sweepLocalPurge`,
+   `startTrash`/`startArchived`, `daysLeft`) into `Shared/` — one
+   decision layer, both platforms' pins riding unmodified where the
+   move is pure (the 3C zero-test-edit parity proof). PLUS:
+   A1-MINOR-2 (the four raw-error catches route through
+   `DeletionRefusal.fallback`) · A1-NIT-1 (the `*NotDeleted`
+   "already back" family joins `DeletionRefusal`) · A1-NIT-2 (the
+   act compositions split OUT of `RecoveryCopy.swift` into their own
+   shared file — this hoist is exactly "when the layer grows").
+   Sequence item 2's fix BEFORE or WITH the hoist so the door fix
+   and the hoist don't fight over the same lines; your call, stated
+   in the record.
+4. **Item 5 — the pool/scraps honesty check** (§8b): verify a
+   deleted POOL reads honestly in the Trash (kind naming, cascade of
+   its scraps, Put back) — the check is that its FACE never calls a
+   pool a note. Fix with a pin if wrong; record clean if right.
+5. **Item 6 — remove the left-margin comment ＋** (§8c, her words in
+   the section): the 13e batch-6 margin-hover ADD-door's ＋
+   affordance goes; the margin-hover comment DISPLAY and the other
+   add doors are untouched. Removal only, no redesign (the fuller
+   comments rework is 13u's).
+
+**Out of scope, explicitly:** 13u's editor seam (refusal wording,
+`planVisibleTakeEdit`, the gap-fence face) · shelf-book multi-select ·
+anything in `Sources/VariorumCore/Sync/` · schema. Commit per
+convention (schema-free), append your batch record to this plan, never
+push. Expected starting counts: core 1350/141 · Mac 1572/272 · spine
+63/8 · mobile 485/78; the known flakes (the Phase-12 latency pin;
+`CanvasDragTrackingTests` once) — isolate before concluding.
+
 ### THE LEDGER (every row owned; statuses updated as they move)
 
 | # | item | strand | status |
