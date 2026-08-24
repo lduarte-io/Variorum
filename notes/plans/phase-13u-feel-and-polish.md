@@ -93,6 +93,20 @@ THAT SECTION WINS (it is canon; this is choreography).
   came-from with one-button restore) exist by then — the polish
   round builds them, which is what makes the liberalization honest
   (her 8d reasoning, completed).
+  **HER INCLINATION, jotted 2026-08-24 — an inclination, NOT a
+  ruling; her emphasis verbatim: "I still want the sitting though -
+  I don't want to get into it too much here but might as well jot
+  down where my thoughts are while it's present":** fanned EDGES
+  remain their own blocks; and if the user is DETERMINED to merge
+  them (*"mobile can't have the whole merge ceremony"*), the merge
+  is ONE block carrying everything — *"the two chosen are now
+  together in one block, each of their takes is now a take on the
+  new block."* **The architect's mapping note: this IS the standing
+  CARRY-ALL merge** (the phone's shipped C5 shape, adopted as the
+  Mac's own quick fanned-merge default at 13j J4b) — the determined
+  road would invoke it rather than refusing, zero new machinery.
+  Her take-count example is illustrative, not binding (4+4 → 1
+  merged + 6 carried). The sitting rules.
 - **Item 9 — the quick-capture ownership model, BOTH platforms**: does
   a capture surface own ONE block or MANY; what ⏎ / shift-⏎ do; what
   the hand-off carries. The phone's lost-prose evidence (A5-2
