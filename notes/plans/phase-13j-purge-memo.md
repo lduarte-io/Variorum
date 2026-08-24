@@ -189,6 +189,26 @@ holds). The janitor reads it before minting any savepoint purge intent, so
 
 ### 4e. The Fragments bridge (checked, and quiet)
 
+> **⚠️ SUPERSEDED IN PART, 2026-08-24 (Phase 13l Act 6, ledger row 20) — the
+> paragraph beginning "The one behavior worth stating plainly" below is
+> HISTORY, not current behavior.** It was written to state the pre-13l
+> truth honestly, and the author's answer on reading it (2026-08-19) was to
+> change the behavior: *"I didn't realize it wouldn't delete from fragments
+> and that will have to be fixed."* **Deleting a journal day in Variorum now
+> DOES delete it in Fragments** — the empty-body road, at DELETE time (the
+> round after the tombstone, never only at purge), guarded so it can never
+> blank prose she typed in Fragments after the deletion. The binding record
+> is the 13l plan's "ACT 6 — RECORD"; the mechanism lives at
+> `BridgeEngine.deletionCandidates`.
+>
+> **What in §4e still stands, unchanged:** everything about the PURGE. The
+> sweep still reads live entries only; purging still removes rows the sweep
+> stopped seeing; the purge still owes the bridge nothing. What changed is
+> that the TOMBSTONE — 30 days earlier — is no longer invisible to the
+> bridge. And the last sentence's *"if she wants deletions to travel to
+> Fragments, that is a contract-file conversation"* was answered exactly
+> that way: the carry-item at the end of `notes/fragments-bridge-contract.md`.
+
 **Nothing breaks, and nothing new is owed.** The bridge's push sweep already
 reads LIVE journal entries only (`deleted_at IS NULL`), so a journal day
 became invisible to it the moment it was tombstoned — 30 days before any

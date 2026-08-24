@@ -2484,7 +2484,7 @@ to one enum, and the reason it could not be done on the face is stated above.
 | 17 | The sync-status face | 1 | **DONE (Act 5, `5f9e4c8`)** — READ-SIDE ONLY, zero engine lines: the outbox count + the pull cursor in one transaction (`SyncSafetyFacts.read`), the five standings derived in `Shared/`, the WORDS in the Mac's `SyncSafetyWords.swift`. **The mobile no-redirect sweep caught the first shape and was right** — the sentences all said "this Mac" from `Shared/`, the `DataSafetyCopy` lesson exactly; the split leaves the phone a rendering job. No doors, deliberately (#75(c)); signed-out reads as normal, pinned against five alarm words |
 | 18 | The passphrase / recovery-phrase sanity check (read-only unwrap) | 1 | **DONE (Act 5, `5f9e4c8`)** — `Shared/SecretCheck.swift`: model + section, reusable by construction (a `Framing` value, no host knowledge) so 13p's R13p-9 reminder checks compose it. Composes `VaultEnrollment` READ-ONLY and discards the material; deliberately NOT `EncryptionSession.enroll`, whose job is adopting custody. **Red-on-old on the property the row is about:** the plausible wrong road (verify by re-wrapping under the same passphrase) still answers "correct" and silently rotates her salt — the pin catches it on the vault bytes AND on a non-GET request. Registry NOT declared, with the structural mechanism at #75(e) |
 | 19 | ~~The app lock + its fallback SETTING + honest wording~~ | 1 | **MOVED to 13p** (her ruling 2026-08-24 — the post-sitting record above; R13p-5's at-open modes are the lock born real; the system-password fallback retired with the move; the mobile Face ID twin rides 13p Batch 4) |
-| 20 | Item 9: journal-day deletions travel to Fragments at delete time | 1 (§9) | open |
+| 20 | Item 9: journal-day deletions travel to Fragments at delete time | 1 (§9) | **DONE (Act 6)** — the push half now projects the days its scan STOPPED seeing: a bridged day no live note claims pushes its emptiness ONCE (`BridgeEngine.deletionCandidates`), Put back self-heals with zero new code, and the wire form is byte-identical to the emptying push that has shipped since 9b — so **nothing is owed by Fragments** (the `sync_delete` road was rejected on a traced mechanism: their delete is unguarded and receipt-less, so it would destroy an unseen save silently). **THE GUARD is structural, in three layers** — the pull runs first and a diverged day re-creates itself out of the leg's reach (which is why `run()`, never a bare `push()`, authorizes it, and why a STALLED pull withdraws that authorization); only an intact, unspoken agreement travels; minimal LWW stamping + the `replaced` receipt cover the tie residual. **SEVEN behavioural reverts, each restored between**, every guard red-on-old (revert A blanked her Fragments prose in a pin stamped to TIE the deletion — exactly where the clock would not save her). 12 pins; **one HOLLOW pin caught by its own red-on-old check** and rewritten, which is what exposed the restage-resurrection corner now pinned as behavior (#76(c), recorded not fixed). Contract carry-item appended for her to carry (ONE confirmation asked); purge memo §4e carries a SUPERSEDED-IN-PART banner. Sweep cost shape UNCHANGED (same O(journal-days), same round, same transaction). Zero `Sync/`, zero schema |
 | 21 | The 8d recovery-story walk (every door, as a user) | 1 | open |
 | 22 | The end-of-phase Fable ladder (combined diff) | — | open |
 | 23 | Closeout: author 13u's execution plan + kickoff | — | **DRAFTED in the night's third window** (`notes/plans/phase-13u-feel-and-polish.md` — complete but for the baselines section, which the closeout fills with 13l's finals) |
@@ -3721,3 +3721,233 @@ earn its KnownIssues row here.**
    here was to record the mechanism rather than paper it; the ladder should
    decide whether that resting place is right or whether `Shared/` needs a
    registry of its own before 13p adds more doors to that tab.
+
+### ACT 6 — RECORD (Opus implementer, 2026-08-24)
+
+**Scope taken, and it is exactly the one dispatched:** ledger row **20** —
+item 9, journal-day deletions travel to Fragments at delete time. Two
+commits, both staged by explicit path, nothing pushed. **ZERO
+`Sources/VariorumCore/Sync/` lines · ZERO schema · `Bridge/` module only**
+(one file changed under `Sources/`, one new test file), exactly the fence.
+
+---
+
+#### THE SHAPE AS BUILT
+
+Her ruling (2026-08-19, on reading the purge memo's §4e callout — *"I didn't
+realize it wouldn't delete from fragments and that will have to be fixed"*)
+asked for one behavior. It landed as **~35 lines of engine plus its
+guards**, because the design turned out to compose almost entirely out of
+machinery that already existed.
+
+**One sentence:** the push half's scan reads LIVE journal notes, so a
+deleted day vanished from it and Fragments kept the last body forever —
+**the leg supplies the days the scan stopped seeing**, and their projection
+is emptiness.
+
+`BridgeEngine.deletionCandidates(_ db:)` reads `bridge_day` (the bridge's
+own record of every day it ever agreed on) and mints a `PushCandidate` with
+`body: ""` for each bridged day **no live note claims**. Nothing downstream
+knows the difference: the candidate rides the same poison check, the same
+minimal LWW stamp, the same `created_at` echo, the same `e1:` seal, the same
+`replaced`-receipt consumption, and the same `recordDay`. The report gains
+`deletionsPushed` (a SUBSET of `pushed`, documented as such).
+
+**Put back self-heals with zero new code** — the note is live again, its
+rendered text differs from the now-agreed-EMPTY hash, and the ordinary scan
+re-projects. Pinned (`putBackRePushesTheBody`).
+
+**The empty-body road was the only SAFE road, and that is a finding rather
+than a preference.** The brief named it; the work confirmed *why*. The
+contract already owns this exact wire semantic (standing ask (b): *"if the
+bridge pushes "" (a Variorum-side emptying of a previously-agreed day), it
+owns that semantic alone"*), so a travelled deletion is **byte-identical to
+the emptying push that has shipped since 9b** — no new wire behavior at all.
+The `sync_delete` alternative was rejected on a traced mechanism: their
+delete is **unguarded** (stamps `deleted_at` with no LWW comparison, emits
+no `replaced` receipt), so a bridge deleting that way would destroy an
+unseen Fragments save unconditionally and silently — the one forbidden
+outcome. The empty-body push loses LWW to anything newer and draws a receipt
+on the exact-tie residual.
+
+---
+
+#### THE ONE DESIGN CONSIDERATION — the guard, and its evidence
+
+The brief's requirement: *a deletion push must never destroy prose she typed
+in Fragments after the Variorum deletion.* **The guard is structural, not
+probabilistic**, in three layers:
+
+1. **The pull, run first, takes a diverged day out of reach.** A Fragments
+   edit made after the deletion lands through create-or-open, minting a
+   FRESH note for that day (the purge memo's own documented outcome). The
+   day is then claimed and the leg never sees it. *This is why `run()` —
+   never a bare `push()` — authorizes the leg, and why a STALLED pull
+   withdraws that authorization* (`push(travelDeletions:)` defaults to
+   **off**; `run()` passes `!landing.stalled`).
+2. **Only a day whose agreement is intact and unspoken travels:** non-NULL
+   `last_synced_hash` (the bridge saying "I know what Fragments holds"), not
+   the re-push sentinel, not already-agreed-EMPTY — the last of which is
+   what makes the deletion travel **ONCE**.
+3. **Minimal LWW stamping** (the existing `last_remote_stamp + 1s` rule)
+   means even an unpulled Fragments edit outranks the deletion and resolves
+   `.stale`; the exact-tie residual is covered by the `replaced` receipt,
+   whose no-landable-block arm preserves the destroyed body **durably**.
+
+**RED-ON-OLD, BY BEHAVIOURAL REVERT — every guard, one at a time, restored
+between each** (the feature itself is new, so the pins that matter are the
+guards, and each was proven to catch the thing it exists for):
+
+| revert | what was undone | what went red |
+|---|---|---|
+| **A** | `run()` pushes BEFORE it pulls | `aFragmentsEditAfterTheDeletionIsNeverBlanked` — **5 expectations**, including her Fragments body blanked and her words landing in the durable-preservation notes instead of on screen; plus `aStalledRoundTravelsNoDeletion` (3) |
+| **B** | the stall gate (`travelDeletions: true` unconditionally) | `aStalledRoundTravelsNoDeletion` — 3 expectations |
+| **C** | the ONCE rule (`agreed != emptyHash`) | `aDeletedBridgedDayTravelsItsDeletionOnce` — 3, incl. the server's accepted-write counter moving on a quiet round |
+| **D** | "claimed" narrowed to the journal scan | `aNoteThatGraduatedOutOfTheJournalIsNotADeletion` — 2 |
+| **E** | the re-push sentinel guard | `aRestagedDayDoesNotTravelItsDeletion` — 2 |
+| **F** | `travelDeletions` defaulted to `true` | `aBarePushNeverTravelsDeletions` — 2 |
+| **G** | the `last_synced_hash IS NOT NULL` filter | `aStampOnlyDayNeverTravelsADeletion` — **kills the test process** (GRDB cannot decode NULL into `String`) |
+
+**Revert A is the one that matters** and it is worth stating plainly: with
+push-before-pull, the round blanked a Fragments body she had typed after
+deleting the note, and the only remaining copy was a durable note asking her
+to save it by hand. With the shipped order, the same scenario ends with her
+words live in a fresh Variorum note AND intact in Fragments, nothing
+rescued, nothing preserved, nothing at risk. **The pin's Fragments write is
+stamped to TIE the deletion's own minimal stamp** (ties go to the pusher
+under their migration 7) — i.e. placed exactly where LWW would *not* save
+her, so the pin measures the guard and not the clock.
+
+**THE HOLLOW PIN THE PROCESS CAUGHT, recorded because it is the hallucination
+guard doing its job.** `aRestagedDayDoesNotTravelItsDeletion` passed on the
+first write **and passed under revert E** — a pin that proves nothing. The
+trace: with only one round before staging, the day's own pushed row was
+still ahead of the pull cursor, so the LANDING resurrected the day before
+the leg was ever reached. The pin now walks the cursor past that row (a
+second round) and asserts `landing.created == 0` so a future reader knows
+the leg is genuinely the thing under test. **Under revert E it now reddens.**
+
+---
+
+#### WHAT THE HOLLOW PIN EXPOSED — a corner of the RESTAGE machinery,
+#### recorded and NOT fixed (QUESTIONS #76(c))
+
+`stageRepushFromTruth` (the re-key door / the 14d migration act) replaces
+every agreed hash with a sentinel so truth re-pushes. **If a day is DELETED
+inside that window while its Fragments row is still ahead of the pull
+cursor, the row re-lands** — the sentinel matches no incoming hash, no live
+note exists, and create-or-open mints a fresh note carrying the day's own
+last projected body. Deleted content comes back, from Variorum's own
+projection rather than from anything she typed.
+
+**Pre-existing and independent of this act** (the leg never runs for a day
+the landing just re-claimed), narrow (only between a re-key and the next
+round), and lossless — but it is real, so it is now **pinned as behavior**
+(`aRestagedDeletedDayIsResurrectedByItsOwnRowReLanding`) rather than left to
+be re-discovered. Not fixed here because closing it means changing the
+landing classifier, which is neither this act's scope nor a mechanical call:
+"may Fragments ever resurrect a day you deleted?" is hers.
+
+---
+
+#### THE CONTRACT-FILE ASK — SHE CARRIES IT (prominent, per the brief)
+
+**Appended to `notes/fragments-bridge-contract.md`** as a dated carry-item
+at the file's end: *"CARRY-ITEM FOR FRAGMENTS (2026-08-24, Phase 13l Act 6)
+— journal-day DELETIONS now travel; ONE confirmation asked, NOTHING new
+owed."*
+
+**Nothing is owed** — the wire semantic is one they already own, unchanged;
+what changes is only how OFTEN empty bodies arrive. The note also records
+why the `sync_delete` road was rejected, so nobody re-proposes it.
+
+**The one ask, verbatim in the file:** *is the client-side
+EMPTY-BODY-AS-DELETION detection live?* Touchpoint #2 item 7 relocated it
+client-side (under E2EE the bridge encrypts even the empty body, so
+emptiness is a fact only a key-holding client can see — detect after
+decrypt); the 14d closing report confirmed journal-class E2EE live on both
+ends but **never said whether that relocation landed**. And: *what does the
+Day screen SHOW for a day whose decrypted body is empty* — absent, or
+present-but-blank? Either is fine for correctness; the answer is what lets
+her be told honestly what "delete it here and it goes there" means.
+
+**Also corrected, because it now states something false:** the purge memo's
+**§4e** carries a dated SUPERSEDED-IN-PART banner (the original paragraph
+kept verbatim as history — the repo's supersession convention). Its purge
+half stands unchanged; what changed is that the TOMBSTONE, 30 days earlier,
+is no longer invisible to the bridge.
+
+---
+
+#### THE SWEEP'S COST SHAPE — unchanged (the KnownIssues row, owner 12)
+
+The bridge-push-sweep row (O(journal-days) per round) is **not this act's to
+fix and was not touched**. The honest answer to the brief's question: **the
+cost shape is the same order it already was.** The leg adds, per round, one
+index-only scan of `container(entry_date, id) WHERE deleted_at IS NULL` (the
+existing partial index serves it exactly) and one full read of `bridge_day`
+— which is one row per bridged day, i.e. **the same O(journal-days) the
+sweep already pays**, on the same round cadence, in the same read
+transaction, off-main. No second sweep, no second cadence, no new clock. The
+one new fact for that row's eventual remedy: a day-set-diff remedy would
+have to cover this leg too, since it reads the same population.
+
+**One volume note, and it is a real-world first-run fact (QUESTIONS #76(b)):**
+the first round after this ships travels a deletion for **every** journal day
+she ever deleted, because `bridge_day` kept the record. Each is individually
+guarded; the round simply does more small pushes than usual, once.
+
+---
+
+#### THE FOUR GATES — counts quoted, measured this session
+
+| gate | result | vs. Act 5's baseline |
+|---|---|---|
+| **core** | **1368 tests / 143 suites — GREEN** | 1356/142 → **+12/+1, exactly the new suite** |
+| **Mac** | **1674 / 290** — first run 1 red, **re-run 1674/1674 PASSED** | **unmoved** (1674/290) |
+| **Mac spine** | **63 / 8 — all Passed** | **unmoved** |
+| **mobile** | **486 / 78 — passed** (2 pre-existing `withKnownIssue`) · **spine 33 / 7 all Passed** | **unmoved** (486/78 · 33/7) |
+
+**Mac/mobile rode unmoved as predicted** — the act is core-only, and neither
+app target reads `PushReport`'s fields (checked, not assumed: the bridge
+report has no consumer outside the engine and its tests; `BridgeScheduler`
+carries only `pausedDays`/`stalled`/`issueNotes`, none of which this act
+touches).
+
+**THE ONE MAC RED, named precisely because the brief asked:** it is **the
+known Phase-12 latency pin** —
+`EditorWindowSmokeTests.rewriteStrategyLatencies(paragraphs:)` at
+**54.29 ms** against its 50 ms budget — the flake with a standing
+KnownIssues row (owner 12). The isolated re-run passed 1674/1674. **It is
+NOT `CanvasDragTrackingTests`**, which stayed green in both runs — so that
+one-off remains at ONE recorded red and is **not** promoted to a
+KnownIssues row.
+
+---
+
+#### FOR THE END-OF-PHASE LADDER — what to attack hardest
+
+1. **The guard's completeness, from first principles.** I claim three layers
+   and that layer 1 does the real work. Try to construct a round where a
+   deletion candidate survives a COMPLETED pull while Fragments holds
+   something she typed. The shapes I could not build: the row is always
+   ahead of the cursor after her edit; create-or-open always claims the day;
+   the ~2 s visibility horizon is covered by minimal stamping + the receipt.
+   **If a fourth shape exists, it is a BLOCKER, not a nit.**
+2. **`deletionsPushed` is a SUBSET of `pushed`.** I documented it; a reader
+   who sums them double-counts. Judge whether the naming earns that risk.
+3. **The claimed-day breadth (`ANY live container`) vs the scan's own
+   predicate.** I argued the join key is the day. Push on the case I chose
+   NOT to serve: a graduated note keeps its Fragments body frozen forever
+   (pre-existing), which is arguably as surprising as blanking it — #76(e).
+4. **The restage corner (#76(c)).** I pinned it as behavior and declined to
+   fix it. Check that declining is right, and that the pin describes the
+   mechanism accurately rather than the symptom.
+5. **`aStampOnlyDayNeverTravelsADeletion` relies on the NULL filter to avoid
+   a TRAP, not just a wrong answer.** Consider whether an explicit optional
+   decode would be the honest form even with the filter in place.
+6. **Nothing was verified against the REAL Fragments.** Every pin is against
+   the 9b fake server. The first real round runs on her machine after the
+   `/Applications` refresh — and it is the round that catches up on her
+   whole deletion backlog. That is the highest-consequence untested moment
+   in this act.

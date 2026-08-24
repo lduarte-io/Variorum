@@ -890,4 +890,20 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint.**
 
-*(Next free number: **#76**.)*
+76. **2026-08-24 · Phase 13l Act 6 (journal-day deletions travel to Fragments) · FIVE entries.** The BINDING record is the 13l plan's "ACT 6 — RECORD". Your RULING was built as ruled; these are the shapes the brief left to the architect, plus one thing the work found.
+
+    **WHAT SHIPPED, IN ONE SENTENCE:** deleting a journal day in Variorum now deletes it in Fragments too — at delete time, once, and **never** when you have written that day in Fragments since (in which case your Fragments words come back to you as a fresh note instead, exactly as they always did).
+
+    **(a) A travelled deletion is SILENT — a count on the round, not a note.** The bridge's notes surface is the "needs attention" line, and a deletion that did what you asked is not attention. So a round reports how many deletions it sent, and says nothing on screen. **The alternative:** say it out loud the first time it happens ("3 days removed from Fragments"), which would be honest but would also mean your status row lights up the first time you run this after deleting anything.
+
+    **(b) THE FIRST ROUND AFTER THIS SHIPS WILL CATCH UP ON EVERY DAY YOU EVER DELETED.** Any journal day the bridge ever agreed on, whose note is gone, travels its deletion on the next round — including ones you deleted months ago, because the bridge kept its record of them. This is almost certainly what you want (it is the backlog your ruling was about), but it means one round doing many small pushes rather than none. Nothing is at risk in it: each one is guarded exactly like a fresh deletion. **The alternative:** only travel deletions made from today forward, and leave the backlog stale.
+
+    **(c) A CORNER THE WORK FOUND, in the RE-KEY machinery, and did NOT fix.** When you re-key your encryption (or when the 14d migration act ran), the bridge marks every day for a re-push from truth. If a day is **deleted inside that window** while its Fragments row is still ahead of the bridge's read position, that row lands again — and because the marker matches no body, the landing does what it always does with an unrecognised body: it makes a **fresh note** for that day, carrying the day's own last projected text. Content you deleted comes back — from Variorum's own projection, not from anything you typed. It is narrow (only between a re-key and the next round), nothing is lost, and the note is deletable. **I left it alone because fixing it means changing how landings are classified, which is not this act's, and because the alternative — a landing that refuses to re-create a day you deleted — is a product call about whether Fragments can ever resurrect a day at all.** Your call whether a later phase closes it.
+
+    **(d) In that same re-key window, a deletion does NOT travel.** A marked day has no comparable agreement (its Fragments body is sealed under the old key), and the guard's whole letter is "only when the Fragments side still matches what we last pushed" — so the leg refuses rather than guesses. Consequence: a day deleted in that one-round window keeps its stale Fragments row. **The alternative:** travel it anyway on the grounds that an old-key body is unreadable garbage on their side regardless.
+
+    **(e) "The day still has a note" means ANY note, not any JOURNAL note.** If a journal entry graduates into an ordinary note but keeps its date, its Fragments day is **not** blanked — it still exists, so it was not deleted. What it does instead is what it already did before this act: the Fragments day quietly freezes at its last body, because the push half only follows journal-profile notes. **The alternative** (and it is a real question, just not this act's): make the projection follow a graduated note too, so the day keeps updating.
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#77**.)*

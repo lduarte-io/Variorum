@@ -745,3 +745,52 @@ handoff):**
    overwrites them — the Variorum side sequences its own resumption
    around this; nothing for your side to do beyond point 9's standing
    stale-key honesty rule.
+
+---
+
+## CARRY-ITEM FOR FRAGMENTS (2026-08-24, Phase 13l Act 6) — journal-day
+## DELETIONS now travel; ONE confirmation asked, NOTHING new owed
+
+**What changed on the Variorum side, in one sentence:** deleting a journal
+day in Variorum now deletes it in Fragments too — at delete time (the round
+after the tombstone), not 30 days later at the purge.
+
+**Why you are being told rather than asked to build:** the wire semantic is
+**one you already own, unchanged**. A travelled deletion is byte-identical
+to the push standing ask (b) already describes — *"if the bridge pushes ""
+(a Variorum-side emptying of a previously-agreed day), it owns that semantic
+alone."* Same RPC, same deterministic id, same LWW stamping, same
+`replaced`-receipt behavior. **No `sync_delete`, no tombstone, no new
+column, no schema change** — the `journal_entries` freeze (standing ask #3)
+is untouched. The only difference from before is **frequency**: empty bodies
+will now arrive for deleted days, where previously they arrived only when
+she hand-emptied a day.
+
+**Why the tombstone road was NOT taken, recorded so nobody re-proposes it:**
+your `sync_delete` is deliberately unguarded (it stamps `deleted_at` with no
+LWW comparison, and emits no `replaced` receipt), so a bridge that deleted
+that way would destroy an unseen Fragments save unconditionally and
+silently. The empty-body push loses LWW to anything newer and draws a
+receipt on the exact-tie residual — it is the only road that cannot lose her
+words.
+
+**THE ONE ASK — confirm, please, and describe:**
+
+> **Is the client-side EMPTY-BODY-AS-DELETION detection live?** Touchpoint
+> #2 item 7 relocated it (server-side detection cannot operate on
+> ciphertext: under E2EE the bridge encrypts even the empty body, so "the
+> body is empty" is a fact only a key-holding client can see — **detect it
+> after decrypt**). The 14d closing report confirmed journal-class E2EE live
+> on both ends but did not say whether that relocation landed. **And say
+> what the Day screen actually SHOWS for a day whose decrypted body is
+> empty** — an absent day, or a present-but-blank one. Either is fine and
+> neither needs changing for the bridge's correctness; Variorum simply wants
+> to describe the outcome to the author honestly ("delete it here and it
+> goes there" should mean what she thinks it means).
+
+**Guarantee riding this, for your reassurance:** a deletion NEVER travels
+for a day Fragments has diverged on. Variorum's round pulls before it
+pushes, and a Fragments edit made after the Variorum deletion re-lands
+through create-or-open as a fresh Variorum note — which takes that day out
+of the deletion path entirely. A round whose pull stalled travels no
+deletions at all. Nothing typed in Fragments is at risk from this change.
