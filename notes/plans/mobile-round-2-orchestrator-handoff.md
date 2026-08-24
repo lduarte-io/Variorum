@@ -1,5 +1,25 @@
 # Mobile Round 2 — ORCHESTRATOR HANDOFF
 
+> # ⚠️ THIS FILE HAS TWO KICKOFFS. THE ONE BELOW IS HISTORY.
+>
+> **A fresh mobile session starts at the SECOND half of this file** —
+> **`# SUCCESSOR HANDOFF`**, and its **§0** is the paste-ready kickoff.
+> Jump there.
+>
+> **§0 of THIS first half is superseded** (it was written 2026-08-22 for
+> a seat that took over mid-round). It is kept because §3's batch map,
+> §4's rulings index, §5's machinery lessons, §6's open-with-her list and
+> §7's closeout obligations are all still live and are cited throughout
+> — **but its own kickoff paragraph describes a state that no longer
+> exists**: it says batch 4.5 is unbuilt (it is built and merged) and it
+> tells the session to feed 13l's manifest as it goes (13l will have
+> closed; see obligation 1's amendment).
+>
+> **Where things actually stand:** all three BLOCKERs fixed and merged ·
+> three review/fix steps owed · 4.5c and 4.5e never ran and have SHRUNK
+> (their Mac and `Shared/` work moved to 13l and 13u at her ruling) ·
+> then batches 5–8, two standing review passes, and closeout.
+
 **Written 2026-08-22 at the author's instruction.** The outgoing seat is
 past the ~500k context line (her call: *"I think I'm going to need you
 to write me up a plan file and then I'll start a new orchestrator,
@@ -13,7 +33,7 @@ which is the phase's own truth and is cited throughout.
 
 ---
 
-## 0. PASTE-READY KICKOFF (the successor starts here)
+## 0. ~~PASTE-READY KICKOFF~~ — **SUPERSEDED 2026-08-23; the live one is §0 of the SUCCESSOR HANDOFF, in the second half of this file.** Kept as the record of what the 2026-08-22 seat was told.
 
 > You are the incoming architect/orchestrator for **Mobile Round 2** of
 > the Variorum iPhone app, taking over mid-round from a seat that ran
@@ -668,12 +688,12 @@ unless it says otherwise.**
 | **1** | **4.5b's COLD REVIEW** (owed; its dispatch died before reading anything) | **It is the only merged work that reached `Shared/` and the Mac without a review.** It is now on `main`. First, because everything else is phone-local |
 | **2** | **4.5d's FIX ROUND** — §61's 2 MAJOR + 6 MINOR + 6 NIT | Its findings are recorded and adjudicated; the work is `MobileKeyboardBar.swift` + its pins. **Read §64 first** — the architect already restored the experimental revert that round left behind and rewrote its MAJOR 1 comment |
 | **3** | **4.5a's LADDER ROUND 2** — a real re-review of §59's fixes | The fixes are substantial and one of them (§62's restore-a-turn-later) changed pin semantics. Round 2 is owed and was never run |
-| **4** | **4.5c — the editor & the shared brain** (§4 below) | **The largest remaining risk in the round.** Read §5's coordination flag BEFORE briefing it |
-| **5** | **4.5e — the shared lifecycle files + the Mac's quick-capture twins** (§4 below) | Includes a live data-loss defect on her Mac |
+| **4** | **4.5c — now PHONE-LOCAL ONLY** (§4): the unwired A7/#34 seam carves · **B45-2** the `displaySlot` coupling batch 7 walks into · B45-3's phone half · the live editor over a tombstone · the `MobileLenses.swift:419` candidate · two one-liners | **Six of its items moved to 13l and 13u** at her ruling. **Run §2b's handback checklist first** — anything the Mac phases did not do is yours again. The cross-block SEMANTICS are 13u's; compose to its rule rather than inventing one |
+| **5** | **4.5e — probably VERIFICATION ONLY** (§4) | **Nearly all of it went to 13l** (L-c `AppBootstrap`, L-d `AppSession`, L-b the Mac's `QuickEntryBar`). What is left: confirm the `.opening` launch arm renders on the phone and that releasing an autosave coordinator at the quick note's `reset()` behaves. **If 13l built it all, 4.5e closes as verified rather than built** |
 | **6** | **THE DEDICATED STABILITY PASS** — batch 4.5's **exit condition** | 4.5 is not done until it runs. It owns **M27**. Nothing that resembles it discharges it |
-| **7** | **Batches 5 · 6 · 7 · 8** — the first handoff's §3 map, unchanged | Batch 5's brief must carry §53's two added deliverables (the shelf's missing keyboard avoidance under a dwelling field; the quick note's unmeasured mint cost) |
+| **7** | **Batches 5 · 6 · 7 · 8** — the first handoff's §3 map, unchanged. **5:** the shelf layout (R26/R27 — the quick note takes Today's Entry's box, the books list bounded, the writing area ≈ half the screen), the starter Journal book (R27b), "more info" → "info" (R24). **6:** the per-note tray · deleted takes / History past · archive-unarchive · the lens-dangles notice · the lineage door · the guide's deletion chapter. **7:** reorder takes · the duplicate-book-name guard · copy-all-takes · take→block · **M23 copy-follows-screen** · swatches + emoji · block multi-select · **PR21 replace, which HOISTS `FindReplaceGate` WITH it, never after**. **8:** tag-chip grammar · cadence/pruning settings · PL-9's judgment acts · document settings · **PR23 the forked voice brain (HOIST)** · **M14's unmeasured half** | **Batch 5's brief must carry §53's two added deliverables** (the shelf has NO keyboard-avoidance opt-out while R26/R27 pin a DWELLING text field into that layout — her ruled "half the phone screen" is the first casualty; and the quick note's mint cost at corpus scale was never measured). **Batch 7 walks into B45-2**, so 4.5c must close it first |
 | **8** | **THE WHOLE-ROUND PASS** — **closeout obligation ZERO** | The round cannot close until it runs |
-| **9** | **Closeout** — the first handoff's §7, all twelve obligations | Includes the parity ledger, R16 to canon (**she ratifies; never applied autonomously**), and 13l's manifest completed |
+| **9** | **Closeout** — the first handoff's §7. **Thirteen obligations, numbered 1–8, 10, 11, 13, 12** (there is no 9; 13 precedes 12 deliberately — count them, do not trust the last number) | Includes the **parity ledger** (PL-9/10/11 burned down, PL-12 answered, this round's own line added) · **QUESTIONS.md**, which still has ZERO round-2 entries while fifteen items are held for her · **obligation 1 as AMENDED** (13l's manifest is complete through 13l's close and is not edited after; later Mac work goes to the second manifest, obligation 13) · **obligation 12 REASSIGNED to 13u** (R16 → canon; the phase that builds the behaviour proposes the wording) |
 
 ---
 
