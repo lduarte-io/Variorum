@@ -188,7 +188,7 @@ struct VariorumApp: App {
         // the B1 global settings) and the TAG MANAGER's real home.
         Settings {
             if case .ready(let session) = bootstrap.state {
-                AppSettingsView(session: session)
+                AppSettingsView(session: session, services: services)
             } else {
                 Text("Open the main window first.")
                     .padding(24)

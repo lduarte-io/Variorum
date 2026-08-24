@@ -1201,6 +1201,30 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar, .palette],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "", availability: always),
+
+        // MARK: Data safety (13l Act 4 — Settings ▸ Data Safety)
+        // The `.deleteNow` shape exactly: `.surface`, app scope, always
+        // available as an ACT, with the per-gesture condition living on the
+        // pane. See the declaration comments in `Capability.swift` for why
+        // there are three and why none of them wears a palette door.
+        Capability(
+            id: .backUpNow, verb: "Back Up Now…", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "Backing up lives in Settings ▸ Data Safety.",
+            availability: always),
+        Capability(
+            id: .chooseBackupFolder, verb: "Choose Folder…", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "The backup folder is picked in Settings ▸ Data Safety.",
+            availability: always),
+        Capability(
+            id: .forgetBackupFolder, verb: "Stop Copying There", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "There is no second backup folder to stop copying to.",
+            availability: always),
     ]
 
     // MARK: - Lookup

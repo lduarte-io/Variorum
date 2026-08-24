@@ -17,11 +17,17 @@ import VariorumCore
 
 struct AppSettingsView: View {
     let session: AppSession
+    /// 13l Act 4: the Data Safety pane reads the backup scheduler and the
+    /// sync session. Optional for the same reason `RootView`'s is — the
+    /// Settings scene can open before the main window's composition has run,
+    /// and the pane says so honestly rather than rendering dashes.
+    let services: AppServices?
     @State private var theme: ThemeStore
     @State private var tags: TagsViewModel
 
-    init(session: AppSession) {
+    init(session: AppSession, services: AppServices? = nil) {
         self.session = session
+        self.services = services
         _theme = State(initialValue: ThemeStore(session: session))
         _tags = State(initialValue: TagsViewModel(session: session))
     }
@@ -32,8 +38,12 @@ struct AppSettingsView: View {
                 .tabItem { Label("Appearance", systemImage: "paintpalette") }
             TagManagerPane(session: session, tags: tags)
                 .tabItem { Label("Tags", systemImage: "tag") }
+            // 13l Act 4 (ledger row 12): backups, their freshness, and what
+            // restoring one does — including to things that were deleted.
+            DataSafetyPane(services: services)
+                .tabItem { Label("Data Safety", systemImage: "externaldrive.badge.timemachine") }
         }
-        .frame(width: 520, height: 440)
+        .frame(width: 560, height: 460)
         .task { await theme.start() }
         .task { await tags.start() }
     }

@@ -296,6 +296,18 @@ struct CapabilityRegistryTests {
             // is a new line here — which is exactly the review this walk
             // exists to force.
             .union(RecoveryView.surfaceCapabilities)
+            // 13l Act 4 (A JUSTIFIED EDIT, the E2/E8/batch-3/6b class):
+            // Settings ▸ Data Safety renders three acts — Back Up Now, Choose
+            // Folder and Stop Copying There. It is the FIRST Settings pane to
+            // declare anything, and that is worth naming rather than blending
+            // in: the Appearance and Tags panes have never declared their
+            // acts, so this is a new precedent, not a completion. It was
+            // taken here because these three touch her DATA (one copies the
+            // library, two decide where copies go), which is exactly what a
+            // registry of acts is for; the tag manager's create/rename/delete
+            // is the same class and is recorded as an unclosed gap rather
+            // than swept in silently by this act.
+            .union(DataSafetyPane.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

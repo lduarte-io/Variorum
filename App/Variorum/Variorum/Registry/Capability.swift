@@ -565,4 +565,22 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     case newPost, todaysEntry, findAnything, importFiles, exportLibrary
     case toggleSeams, helper
     case restoreTutorial
+    // 13l Act 4 (ledger rows 11–12) — Settings ▸ Data Safety's three acts.
+    // `.surface` for the `.deleteNow` reason: their target is the pane you
+    // are looking at, and their per-gesture conditions (is a folder set? is a
+    // run already going?) are that pane's own state, not app-scope context —
+    // the `.deleteSelectedNotes` precedent, which declined to push a
+    // surface's own selection into `CapabilityContext`.
+    //
+    // Three declarations rather than one, on the `.moveTakeEarlier` /
+    // `.moveTakeLater` grounds: each is its own button with its own
+    // enablement (you cannot stop copying to a folder you never picked), and
+    // one declaration could not say that.
+    //
+    // Deliberately NOT `.palette` or `.menuBar`: the automatic job is the
+    // mechanism and the freshness face is the evidence — advertising a
+    // manual button in ⌘K would promote the one road the design demotes
+    // ("I forgot to press it for a month" is the failure this phase exists
+    // to kill). Recorded so the omission reads as a decision, not a gap.
+    case backUpNow, chooseBackupFolder, forgetBackupFolder
 }
