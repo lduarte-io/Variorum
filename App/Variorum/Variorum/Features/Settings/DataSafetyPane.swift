@@ -6,10 +6,14 @@
 //
 //  Her kickoff ruling, in one line: **the small face + log** — last backup
 //  time, destination, last integrity result, "Back Up Now…" as an adjunct,
-//  the full log behind it. The slots for Act 5's two items (the automated
-//  `.md` export and the sync-status line) are deliberately NOT rendered as
-//  empty rows: a face that says "Last export: —" about a feature that does
-//  not exist is a lie in the shape of a placeholder (P-2).
+//  the full log behind it.
+//
+//  Phase 13l, Act 5 — the two slots ruling 3 named are FILLED, and neither
+//  was a placeholder waiting to be populated (Act 4 declined to render them
+//  empty, P-2): "Plain-text copies" (row 16) and "Your account" (row 17).
+//  Row 17 renders NO doors and is not meant to: the sync row in the main
+//  window is where syncing is acted on; this is evidence, and its job is to
+//  answer "is anything I have written still only on this Mac".
 //
 //  This pane is also the app's RESTORE FACE — the place where restoring is
 //  discussed — because restoring itself is a Finder operation, not a button
@@ -32,7 +36,13 @@ struct DataSafetyPane: View {
 
     init(services: AppServices?) {
         self.services = services
-        _model = State(initialValue: DataSafetyModel(backup: services?.backup))
+        _model = State(initialValue: DataSafetyModel(
+            backup: services?.backup,
+            sync: services?.sync,
+            database: services?.session.database,
+            // A closure rather than a captured value: the pane can outlive a
+            // sign-in, and the facts are re-read on every refresh.
+            signedIn: { services?.account.variorum != nil }))
     }
 
     var body: some View {
@@ -40,6 +50,8 @@ struct DataSafetyPane: View {
             if model.isWired {
                 copiesSection
                 folderSection
+                exportsSection
+                syncSection
                 restoreSection
                 logSection
             } else {
@@ -123,8 +135,69 @@ struct DataSafetyPane: View {
         }
     }
 
+    // MARK: - Plain text (13l Act 5, row 16)
+
+    /// The `.md` insurance's evidence. It has NO door of its own,
+    /// deliberately: the manual bulk export already exists in the Library
+    /// (⌘K "Export Library…"), and a second button here would be a second
+    /// road to the same act — while the road this section is about is the
+    /// automatic one, whose whole failure mode is that a manual button feels
+    /// like enough.
+    @ViewBuilder
+    private var exportsSection: some View {
+        Section("Plain-text copies") {
+            if let exports = model.exports {
+                folderRow(
+                    title: "Every note as Markdown",
+                    path: exports.displayPath, summary: exports,
+                    staleAfter: Self.exportStaleAfter)
+                Text("Written weekly, and the 4 most recent are kept. This is the copy "
+                     + "that survives a problem with the library file itself — plain "
+                     + "text any program can open, no Variorum required.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text("Note that these are readable by anything that can read the folder — "
+                     + "including whatever syncs it, if you picked a cloud folder.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else {
+                Text("Once you pick a folder above, Variorum also keeps a plain-text copy "
+                     + "of every note there — the copy that survives a problem with the "
+                     + "library file itself.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    // MARK: - Syncing (13l Act 5, row 17 — evidence only, no doors)
+
+    @ViewBuilder
+    private var syncSection: some View {
+        if let facts = model.syncFacts {
+            let face = SyncSafetyFace.face(facts)
+            Section("Your account") {
+                Text(face.headline)
+                    .font(.callout)
+                    .foregroundStyle(face.isCalm ? AnyShapeStyle(.primary) : AnyShapeStyle(Color.orange))
+                    .fixedSize(horizontal: false, vertical: true)
+                ForEach(face.details, id: \.self) { detail in
+                    Text(detail)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+    }
+
+    /// `staleAfter` is the row's own idea of overdue, because the two jobs
+    /// have different cadences (13l Act 5): a snapshot is daily, so two days
+    /// is late; a plain-text export is weekly, so two days is normal and
+    /// colouring it would train her to ignore the colour.
     private func folderRow(
-        title: String, path: String, summary: DataSafetyModel.FolderSummary
+        title: String, path: String, summary: DataSafetyModel.FolderSummary,
+        staleAfter: TimeInterval = DataSafetyPane.snapshotStaleAfter
     ) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title).font(.callout)
@@ -140,10 +213,20 @@ struct DataSafetyPane: View {
             } else {
                 Text(Self.freshness(summary))
                     .font(.caption)
-                    .foregroundStyle(summary.isStale ? AnyShapeStyle(Color.orange) : AnyShapeStyle(.secondary))
+                    .foregroundStyle(summary.isStale(after: staleAfter)
+                                     ? AnyShapeStyle(Color.orange) : AnyShapeStyle(.secondary))
             }
         }
     }
+
+    /// Two days: the snapshot job runs daily while the app is open, so two
+    /// days means either the app was closed or something stopped. A guess,
+    /// flagged at QUESTIONS #74(c).
+    static let snapshotStaleAfter: TimeInterval = 2 * 24 * 60 * 60
+    /// Nine days: the export job runs weekly, plus a couple of days' slack
+    /// for a week the app was mostly closed. The same guess, one cadence up
+    /// (#75).
+    static let exportStaleAfter: TimeInterval = 9 * 24 * 60 * 60
 
     // MARK: - Restoring (the warning pair — her post-sitting ruling)
 
@@ -220,12 +303,13 @@ struct DataSafetyPane: View {
 }
 
 extension DataSafetyModel.FolderSummary {
-    /// Older than two days is worth a colour: the job runs daily while the
-    /// app is open, so two days means either the app was closed or something
-    /// stopped — and the whole point of this face is that she finds out
-    /// which without having to wonder.
-    var isStale: Bool {
+    /// Older than the caller's cadence is worth a colour — the whole point
+    /// of this face is that she finds out a job stopped without having to
+    /// wonder. 13l Act 5 made the threshold a PARAMETER because the pane now
+    /// shows two jobs with two cadences; the snapshot's two days is
+    /// unchanged (`DataSafetyPane.snapshotStaleAfter`).
+    func isStale(after interval: TimeInterval) -> Bool {
         guard let newest else { return true }
-        return Date().timeIntervalSince(newest) > 2 * 24 * 60 * 60
+        return Date().timeIntervalSince(newest) > interval
     }
 }

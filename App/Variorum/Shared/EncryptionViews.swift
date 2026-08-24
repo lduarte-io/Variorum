@@ -96,12 +96,26 @@ struct EncryptionView: View {
     /// CF-11: the forget door's confirm.
     @State private var showingForgetConfirm = false
 
+    /// 13l Act 5 (row 18): the sanity check's own model — the vault client
+    /// straight from the composition root, never through
+    /// `EncryptionSession`, whose flows all adopt custody. Read-only by
+    /// construction.
+    @State private var secretCheck: SecretCheckModel
+
     /// Phase 14c (CF-8): the re-key door's gate.
     @State private var showingRekey = false
     @State private var rekeyAcknowledged = false
     @State private var rekeyPassphrase = ""
 
     private var encryption: EncryptionSession { services.encryption }
+
+    /// Explicit because of `secretCheck` (13l row 18), which has no default:
+    /// it needs the composition root's vault client. Every other piece of
+    /// state here keeps its default, and the one call site is unchanged.
+    init(services: AppServices) {
+        self.services = services
+        _secretCheck = State(initialValue: SecretCheckModel(client: services.keyVault))
+    }
 
     // MARK: - The copy (GATE RATIFY / her walk — the record carries these)
 
@@ -597,6 +611,17 @@ struct EncryptionView: View {
             }
             .disabled(encryption.busy)
         }
+
+        PageDivider(pageStyle)
+
+        // 13l Act 5 (ledger row 18) — the SANITY CHECK, her 2026-08-19 ask.
+        // It sits here, on the enrolled surface, because this is the state
+        // where neither secret is ever exercised: the device unwrapped once
+        // and the Keychain has carried it ever since (the R-6 cadence). In
+        // every other state a real unlock door is already on screen and
+        // verifies by being used. It writes nothing — see `SecretCheck.swift`.
+        SecretCheckSection(
+            framing: .sanityCheck, offersRecoveryPhrase: true, model: secretCheck)
 
         PageDivider(pageStyle)
 

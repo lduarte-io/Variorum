@@ -13,10 +13,15 @@ folder as `RESTORE.md` so it is beside the copies it describes.*
 2. **Backups — frozen copies of that file.** Two destinations: one
    beside the store, one in a folder you pick. They are frozen, which
    is the whole point: they do not follow a mistake.
-3. **The mirror (sync).** A PEER, not a backup. It converges — which
+3. **Plain-text copies.** Every note as Markdown, written weekly into
+   the folder you picked. These are not a restore road — they carry
+   the words and not the takes, the history or the books — but they
+   are the one copy that stays readable if the library file itself is
+   the problem, and they need no Variorum to open.
+4. **The mirror (sync).** A PEER, not a backup. It converges — which
    means it replicates a deletion or a bad edit at sync speed. It
    protects you from losing a DEVICE, not from losing writing.
-4. **The platform's own backups.** The sync provider keeps 7 days of
+5. **The platform's own backups.** The sync provider keeps 7 days of
    server backups. They hold ciphertext; without your encryption
    passphrase they are unreadable, including by them. This is the
    net under everything and it is meant to die unused.
@@ -33,6 +38,14 @@ device.** Reaching for the wrong one is how people lose things.
   In Finder: Go ▸ Go to Folder… and paste that path.
 - **In your folder** (once you pick one in Settings ▸ Data Safety):
   `<the folder you picked>/Variorum/Backups/`
+- **The plain-text copies**, in that same picked folder:
+  `<the folder you picked>/Variorum/md-exports/`
+  One dated folder per export, holding every note as a `.md` file.
+  Written weekly; the 4 most recent are kept.
+  **These are readable by anything that can read the folder** — you,
+  any program, and whatever syncs it if you picked a cloud folder.
+  That is the trade this copy exists to make, and it is worth knowing
+  you are making it.
 
 Files are named `variorum-backup-YYYY-MM-DD-HHMMSS.sqlite`, stamped
 **UTC**, so they sort oldest-to-newest by name. Each is a complete,
@@ -157,3 +170,11 @@ both are gone, the mirror's contents are unrecoverable — by anyone.
 Your local store and these backups are NOT encrypted by that key, so
 your writing is still here. Keep the recovery phrase somewhere you
 would find it in a year.
+
+**Check before you need to.** Neither secret is used day to day — the
+device unwraps once and remembers — so the first time you type one
+again may be the day it matters. There is a check for that: the sync
+line at the bottom of the sidebar → **Account…** → **Encryption**.
+Type a passphrase or the 12 words and Variorum tries the real unlock,
+then tells you yes or no. It changes nothing, resets nothing, and
+getting it wrong there costs nothing.

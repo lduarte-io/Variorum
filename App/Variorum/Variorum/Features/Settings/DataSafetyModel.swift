@@ -49,10 +49,24 @@ final class DataSafetyModel {
     /// folder reads happen off-main (P2 — a folder on a sleeping external
     /// drive can block for seconds).
     private let defaults: @Sendable () -> UserDefaults
+    /// 13l Act 5 (row 17): the sync-status face's two sources — the
+    /// scheduler's in-memory status, and a local read of the outbox + pull
+    /// cursor. READ-SIDE ONLY: nothing here triggers or configures a round.
+    private let sync: SyncSession?
+    private let signedIn: () -> Bool
+    private let database: AppDatabase?
 
     private(set) var primary: FolderSummary?
     private(set) var destination: Destination = .unset
+    /// 13l Act 5 (row 16): the plain-text exports in the picked folder, read
+    /// from the folder for the same reason the snapshots are — a schedule
+    /// can stop silently; a folder's newest entry cannot lie about its date.
+    private(set) var exports: FolderSummary?
     private(set) var log: [BackupRunRecord] = []
+    /// 13l Act 5 (row 17): the local half of the sync facts, refreshed with
+    /// everything else. nil until the first refresh (or when there is no
+    /// store to read).
+    private(set) var syncFacts: SyncSafetyFacts?
     private(set) var busy = false
     /// The last thing an act had to say — a receipt or a refusal, never a
     /// silent outcome (P-2's letter applied to a Settings pane).
@@ -60,10 +74,16 @@ final class DataSafetyModel {
 
     init(
         backup: StoreBackup?,
-        defaults: @escaping @Sendable () -> UserDefaults = { .standard }
+        defaults: @escaping @Sendable () -> UserDefaults = { .standard },
+        sync: SyncSession? = nil,
+        database: AppDatabase? = nil,
+        signedIn: @escaping () -> Bool = { false }
     ) {
         self.backup = backup
         self.defaults = defaults
+        self.sync = sync
+        self.database = database
+        self.signedIn = signedIn
     }
 
     /// True when this app can back up at all — false only when the store
@@ -74,6 +94,7 @@ final class DataSafetyModel {
     // MARK: - Reading the evidence
 
     func refresh() async {
+        await refreshSyncFacts()
         guard let backup else { return }
         let directory = backup.directory
         let defaults = self.defaults
@@ -81,11 +102,36 @@ final class DataSafetyModel {
             let store = defaults()
             return (primary: DataSafetyModel.summarize(directory),
                     secondary: DataSafetyModel.summarizeSecondDestination(in: store),
+                    exports: DataSafetyModel.summarizeExports(in: store),
                     log: BackupLog.read(store))
         }.value
         primary = read.primary
         destination = read.secondary
+        exports = read.exports
         log = read.log
+    }
+
+    /// 13l Act 5 (row 17). Two facts come from the store (the outbox's size,
+    /// the pull cursor) and three from the session; the store read goes
+    /// through the reader pool off-main like every other read (P2). A
+    /// FAILED read leaves the facts nil and the section says nothing — a
+    /// data-safety face that invents a reassuring line when it could not
+    /// read is worse than one that stays quiet.
+    private func refreshSyncFacts() async {
+        guard let sync else { return }
+        var local: (pending: Int, cursor: Int64?) = (0, nil)
+        if let database {
+            local = (try? await database.read { db in
+                try SyncSafetyFacts.read(db)
+            }) ?? (0, nil)
+        }
+        syncFacts = SyncSafetyFacts(
+            allowsSync: sync.allowsSync,
+            isConfigured: sync.isConfigured,
+            signedIn: signedIn(),
+            pending: local.pending,
+            cursor: local.cursor,
+            lastSuccessAt: sync.status.lastSuccessAt)
     }
 
     nonisolated static func summarize(_ directory: URL) -> FolderSummary {
@@ -114,6 +160,28 @@ final class DataSafetyModel {
         return .set(
             displayPath: BackupDestination.displayPath(resolved.picked),
             summary: summary)
+    }
+
+    /// 13l Act 5 (row 16): the plain-text exports, read from the folder.
+    /// nil = there is no picked folder, which is also the only state in
+    /// which no export can exist (the insurance writes only there — see
+    /// `MarkdownInsurance`'s header for why).
+    nonisolated static func summarizeExports(in defaults: UserDefaults) -> FolderSummary? {
+        guard BackupDestination.isSet(in: defaults),
+              let resolved = BackupDestination.resolve(in: defaults)
+        else { return nil }
+        let folder = MarkdownInsurance.exportsFolder(in: resolved.picked)
+        return BackupDestination.withAccess(to: resolved.picked) {
+            let display = BackupDestination.displayPath(folder)
+            guard FileManager.default.fileExists(atPath: folder.path) else {
+                return FolderSummary(displayPath: display, exists: false, count: 0)
+            }
+            let dated = ((try? MarkdownInsurance.existingExports(in: folder)) ?? [])
+                .compactMap(MarkdownInsurance.date(fromExportURL:))
+            return FolderSummary(
+                displayPath: display, exists: true, count: dated.count,
+                newest: dated.max(), oldest: dated.min())
+        }
     }
 
     // MARK: - The acts
@@ -188,6 +256,19 @@ final class DataSafetyModel {
         case .failed:
             parts.append("Your folder: \(record.secondary.detail ?? "unknown").")
         case .noDestination:
+            break
+        }
+        // 13l Act 5 (row 16): the plain-text leg. Silent when it was
+        // up to date — a weekly job would otherwise say "nothing due" in
+        // six receipts out of seven, and a log line that always reads the
+        // same is a line nobody reads.
+        switch record.markdown?.outcome {
+        case .written:
+            let count = record.markdown?.files ?? 0
+            parts.append("Plain-text copy written (\(count) file\(count == 1 ? "" : "s")).")
+        case .failed:
+            parts.append("Plain-text copy: \(record.markdown?.detail ?? "unknown").")
+        case .upToDate, .noDestination, nil:
             break
         }
         return parts.joined(separator: " ")

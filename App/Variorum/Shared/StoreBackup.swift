@@ -27,6 +27,12 @@
 //      a run that produced no file at all, which the files can never report.
 //  The restore side is `notes/DataSafetyRunbook.md`, rehearsed end to end.
 //
+//  Phase 13l, Act 5 (ledger row 16) — a THIRD leg: the plain-text
+//  insurance (`MarkdownInsurance`), on its own weekly due-ness, into the
+//  picked folder's `md-exports/`. It rides this run rather than minting a
+//  second clock, so there is one tick, one record, and one face. The unit
+//  itself lives in its own file on purpose — see its header.
+//
 
 import Foundation
 import GRDB  // the integrity check opens the COPY read-only, never migrating
@@ -41,6 +47,9 @@ final class StoreBackup {
         var keep: Int = 14
         /// The picked folder's rule (13l): longer reach, fewer files.
         var secondPolicy: BackupRetention.Policy = .secondDestination
+        /// 13l Act 5 (row 16): the plain-text insurance's cadence and
+        /// retention — PROVISIONAL (weekly, keep 4; QUESTIONS #75).
+        var markdownInsurance: MarkdownInsurance.Policy = .standard
         /// The restore recipe dropped beside the copies, when the platform
         /// has one to give. A PARAMETER rather than a Shared constant: the
         /// text is entirely Mac-shaped (container paths, Finder steps), and
@@ -191,7 +200,19 @@ final class StoreBackup {
         let secondary = performSecondLeg(
             directory: directory, configuration: configuration,
             defaults: defaults, now: now, force: force)
-        return BackupRunRecord(at: now, primary: primary, secondary: secondary)
+
+        // 13l Act 5 (row 16): the plain-text insurance rides this run rather
+        // than minting a second clock — one hourly tick, one record, one
+        // log, one face. Its DUE-NESS is its own (weekly), so on six days
+        // out of seven this costs a directory listing. It runs LAST because
+        // it is the heaviest leg and the least urgent: the snapshots are the
+        // restore road, and this is the "even if SQLite itself is the
+        // problem" net beside them.
+        let markdown = MarkdownInsurance.performRun(
+            database: database, defaults: defaults,
+            policy: configuration.markdownInsurance, now: now, force: force)
+        return BackupRunRecord(
+            at: now, primary: primary, secondary: secondary, markdown: markdown)
     }
 
     /// Drops `RESTORE.md` into a folder, only when its bytes would change —

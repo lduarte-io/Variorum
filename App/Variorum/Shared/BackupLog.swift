@@ -37,11 +37,19 @@ nonisolated struct BackupRunRecord: Codable, Sendable, Equatable, Identifiable {
     /// One destination's half of the run.
     nonisolated struct Leg: Codable, Sendable, Equatable {
         var outcome: Outcome
-        /// The snapshot's filename, when one was written.
+        /// The snapshot's filename, when one was written. For the 13l Act 5
+        /// markdown leg: the dated export FOLDER's name.
         var file: String?
         /// `PRAGMA integrity_check` on the file just written — "ok" or what
         /// SQLite said. nil when nothing was written to check.
         var integrity: String?
+        /// 13l Act 5 (the markdown leg): how many `.md` files landed. Its
+        /// OWN field rather than a second meaning for `integrity` above —
+        /// `integrityFailed` reads "a value that is not SQLite's ok", so
+        /// putting "42 files" there would have made every successful export
+        /// report as a failed check. A field that would have to be fenced at
+        /// every reader is a field in the wrong place.
+        var files: Int?
         /// Where this leg wrote, in her words (`~/Desktop/Variorum/Backups`).
         var destination: String?
         /// Files this leg's retention rule removed.
@@ -58,11 +66,23 @@ nonisolated struct BackupRunRecord: Codable, Sendable, Equatable, Identifiable {
     var at: Date
     var primary: Leg
     var secondary: Leg
+    /// 13l Act 5 (row 16): the plain-text insurance's leg — the bulk `.md`
+    /// export into the picked folder's `md-exports/`, on its own weekly
+    /// due-ness. OPTIONAL so records written before Act 5 still decode:
+    /// synthesized `Codable` uses `decodeIfPresent` for an Optional, and the
+    /// log is persisted across launches, so a required field here would have
+    /// silently emptied her whole backup log on this build's first launch.
+    var markdown: Leg?
 
     var everythingWorked: Bool {
         primary.succeeded && !primary.integrityFailed
-            && (secondary.outcome == .noDestination
-                || (secondary.succeeded && !secondary.integrityFailed))
+            && legWorked(secondary)
+            && (markdown.map(legWorked) ?? true)
+    }
+
+    /// A leg that either did its job or had no job to do.
+    private func legWorked(_ leg: Leg) -> Bool {
+        leg.outcome == .noDestination || (leg.succeeded && !leg.integrityFailed)
     }
 }
 

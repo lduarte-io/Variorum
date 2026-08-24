@@ -16,25 +16,11 @@ import SwiftUI
 import UniformTypeIdentifiers
 import VariorumCore
 
-/// Writes a bulk-export manifest under a root folder — creates the
-/// subfolders the relative paths name, one file each, atomically. Pure
-/// file I/O over pure data; tested directly.
-enum ExportWriter {
-    /// Nonisolated: the bulk gesture runs this DETACHED (round 1, NIT 3 —
-    /// file I/O never on the MainActor; the target defaults to MainActor
-    /// isolation).
-    @discardableResult
-    nonisolated static func write(_ files: [Queries.ExportFile], to root: URL) throws -> Int {
-        for file in files {
-            let destination = root.appendingPathComponent(file.relativePath)
-            try FileManager.default.createDirectory(
-                at: destination.deletingLastPathComponent(),
-                withIntermediateDirectories: true)
-            try Data(file.contents.utf8).write(to: destination, options: .atomic)
-        }
-        return files.count
-    }
-}
+// `ExportWriter` — the manifest-to-disk writer this model uses — moved to
+// `Shared/ExportWriter.swift` at 13l Act 5 (row 16), unchanged: the
+// automated plain-text insurance needs the same writer, and this file's
+// `import AppKit` made it Mac-only by compilation. Call sites below are
+// untouched.
 
 @MainActor
 @Observable
