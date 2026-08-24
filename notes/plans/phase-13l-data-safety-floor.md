@@ -1728,6 +1728,31 @@ whether it earns a `KnownIssues` row (owner 12, beside the latency-pin
 calibration row it resembles) is the orchestrator's call, not this
 scope-fenced fix round's.
 
+### ACT 1 ROUND 2 (fresh Fable, 2026-08-23) — CLEAN; THE ACT-1 LADDER IS CLOSED
+
+**Zero findings at any severity.** The round-2 reviewer independently
+re-traced A1-MAJOR-1's mechanism at all four sites, verified the fix
+correct and complete (the `Outcome` enum carries every op's answer
+out of the write transaction; the ACTIVE road byte-identical — same
+string, same op call, same transaction shape), confirmed BOTH
+platforms genuinely inherit (a repo-wide sweep found NO remaining
+`restoreVariant` call site discarding the status — the door set is
+now uniform with the two 13j-corrected siblings), verified the
+receipt is actionable on the phone (an archived-takes listing + an
+unarchive door exist), hand-verified both Mac coverage pins'
+geometry/algorithms (the gap-fence pin's brain-level target verified
+equivalent to the brief's named method — both Mac consumers are
+one-line delegates; the caret pin exceeds the brief, pinning brain
+AND the real ⌘-click door), and ran the suites itself: touched Mac
+suites 42/3 green, **the full Mac suite "1572 tests in 272 suites
+passed"** (latency pin and `CanvasDragTrackingTests` both green in
+that run), mobile `MobileTrashTests` passed with the suite's 2
+recorded known issues exactly as stated. Two honesty observations
+deliberately not filed (no traceable degradation): an unused
+`Equatable` on `Outcome`; the unreachable-by-construction
+`.preservedOriginal` arm (pre-existing shape, commented).
+**Verdict: no round 3. Ladder closed at round 2.**
+
 ### ACT 2 — THE TRASH-SURFACE MINI-ROUND: the brief (fresh Opus session; dispatches only after the Act-1 ladder closes — same files)
 
 **Scope: ledger items 2–6 + the grown item 4.** Read this brief, the
@@ -1807,7 +1832,7 @@ push. Expected starting counts: core 1350/141 · Mac 1572/272 · spine
 
 | # | item | strand | status |
 |---|---|---|---|
-| 1 | The first-act Fable cold review (mobile round's Mac diff + 4.5b) | 3 | **review returned (1 MAJOR · 2 MINOR · 2 NIT + clean bill); FIX ROUND LANDED 2026-08-23 — A1-MAJOR-1 fixed with red-on-old pins on BOTH platforms, A1-MINOR-1's two Mac coverage pins in (record above); all four gates green; the other three findings sit in item 4; round 2 DISPATCHED (fresh Fable). Orchestrator verification of the dead session's claims: commit `64ffd1a` exists, six files exactly (zero `Sources/`), all four claimed pin names present in the tree. **The one-off `CanvasDragTrackingTests` first-run red — architect's disposition: plan-record only, NO KnownIssues row yet** (isolated 2/2 green + full re-run fully green, diff cannot reach canvas; the gesture-timing flake family). **If it reds again anywhere in this phase it earns the row** (owner 12, beside the latency-pin calibration) — recorded so the next red is a promotion, not a re-derivation** |
+| 1 | The first-act Fable cold review (mobile round's Mac diff + 4.5b) | 3 | **review returned (1 MAJOR · 2 MINOR · 2 NIT + clean bill); FIX ROUND LANDED 2026-08-23 — A1-MAJOR-1 fixed with red-on-old pins on BOTH platforms, A1-MINOR-1's two Mac coverage pins in (record above); all four gates green; the other three findings sit in item 4; **ROUND 2 CLEAN — LADDER CLOSED** (zero findings; full Mac suite independently confirmed 1572/272). Orchestrator verification of the dead session's claims: commit `64ffd1a` exists, six files exactly (zero `Sources/`), all four claimed pin names present in the tree. **The one-off `CanvasDragTrackingTests` first-run red — architect's disposition: plan-record only, NO KnownIssues row yet** (isolated 2/2 green + full re-run fully green, diff cannot reach canvas; the gesture-timing flake family). **If it reds again anywhere in this phase it earns the row** (owner 12, beside the latency-pin calibration) — recorded so the next red is a promotion, not a re-derivation** |
 | 2 | The dead Delete Now / Empty Trash doors (pin-first at the real surface) | 2 | open |
 | 3 | The note-deletion door set: Delete Note… (note ▾, confirm) · Library door confirm · ⌘-click multi-select + delete-all | 1 (§8) | open |
 | 4 | The remaining decision-layer hoist (`RecoveryViewModel` ↔ `MobileTrashModel`) — **scope grew at Act 1: + the four raw-error catches through `DeletionRefusal.fallback` (A1-MINOR-2) · + the `*NotDeleted` family in the shared home (A1-NIT-1) · + split the act compositions out of `RecoveryCopy` when the layer grows (A1-NIT-2)** | 2 | open |
