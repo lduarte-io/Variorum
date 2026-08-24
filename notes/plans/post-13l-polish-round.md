@@ -188,6 +188,67 @@ plus the archive/trash separation are expected to dissolve it.
 | 22 | **G7 — TRASH BLOCK ROWS GROUP UNDER THEIR NOTE (the architect's proposal at her "will it be a bunch of blocks in the trash?" — PROVISIONAL, hers to unwind):** the global Trash's block rows gather under a small note-name header (the note itself only rows if IT is deleted), so a note with many deleted blocks reads as one group, not clutter. Composes with A3's naming; presentation only | open |
 
 
+## THE ARCHITECT'S REVIEW PASS (2026-08-24, closing the design sitting — her ask: "anything I'm not considering"; recommendations for the round's kickoff to ratify, plus one MUST-PIN trap)
+
+**V1 — Versions must NOT row in the Archived top-level (the recursive
+principle answers her own crowding worry).** A note with 15 saved
+versions would drown genuinely-archived notes. A version's ONE home is
+its note's Versions listing (its past lives where it lived); the
+Archived surface = deliberately-set-aside notes. Classification needs
+NO schema and NO "version" attribute (her lean confirmed): archived +
+`version_of`-edge-to-a-live-note IS the class, as a query. Honest
+edge, recorded: a deliberately-archived manual `version_of` sibling
+reads as a version — rare, and arguably not even wrong.
+
+**V2 — THE ORPHANED-VERSIONS HOLE (the real kink the sitting hadn't
+hit):** if versions hide under their live note (V1) and the note is
+DELETED/purged, its versions become unreachable — archived, hidden,
+homeless. **The fix rhymes with the preserved-originals rule: a
+version rows in the Archived top-level ONLY when no live note claims
+it** (exactly how originals stay lineage-held until the family dies).
+Read-side conditional, zero schema, self-healing on Put back.
+
+**V3 — THE BRIDGE DUPLICATE-DAY TRAP (MUST-PIN, not a taste call):** a
+version copy of a JOURNAL note may carry the copied `entry_date` — if
+the bridge's day scan sees it, the duplicate-day pause FIRES and her
+journal silently stops pushing that day. The round verifies which way
+`duplicateAsVersion` + the sweep compose and PINS it: version copies
+must never trip the bridge (exclude archived from the day scan, or
+drop `entry_date` on version copies — the design detail is the
+build's, the pin is mandatory).
+
+**V4 — Restore-as-swap (the recommended restore shape, PROVISIONAL):**
+restoring version V3 first SAVES A VERSION OF NOW, then makes a live
+copy of V3 the note — never clobbering, and the symmetry teaches
+itself (you can always restore your restore). The doctrine's letter:
+nothing is ever overwritten, rescue mints new.
+
+**V5 — The command: ⌘⇧S proposed** ("Save a Version" — the Mac's
+save-as chord, semantically exact) beside ⌘S's take-commit; the
+grain pairing (⌘S = this take's moment · ⌘⇧S = this note's moment) is
+itself teachable. The round verifies the chord is free.
+
+**V6 — No title mutation on copies** (her "maybe its name should have
+the date" mused): the Versions listing and Compare columns show the
+DATE via derived display; the copy's title stays untouched (nothing
+renamed, nothing denormalized — the 13u snippet-brain precedent).
+Compare auto-collapse of versions: parked as her later refinement.
+
+**V7 — The honest costs, named so they are chosen:** a version is a
+FULL family copy (blocks/takes/comments) — storage-proportional to
+use, fine at personal scale, and the AUTOMATED future (the
+whole-note-history brief) owes a retention policy this manual door
+does not; version copies SYNC (the phone's live-unarchived listings
+auto-hide them — a parity note verifies); search separation (her
+instinct) handles the rest.
+
+**V8 — Her confirmation, answered YES:** deleting the LAST descendant
+of preserved originals puts the whole family — descendant AND
+originals — in the Trash on one clock (the 13j 8b move + receipt),
+and Put back of any descendant reads the originals back to
+lineage-held automatically (the fences are read-side; the road is
+symmetric and self-healing).
+
 ## Constraints
 
 Zero schema (B2 is read-side over `archived_at`; if ANYTHING firms
