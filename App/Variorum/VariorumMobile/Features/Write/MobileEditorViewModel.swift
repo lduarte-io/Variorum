@@ -1180,6 +1180,13 @@ final class MobileEditorViewModel {
     /// from the view's flag so the tail's bulk-entry semantics arm exactly
     /// when a paste lands there.
     func shouldChangeText(in range: NSRange, replacement: String?, isPaste: Bool = false) -> Bool {
+        // E1 — the settling experiment's GATE half (`MobileEditTrace`, and
+        // its header carries the whole why). Inert unless armed from
+        // Settings ▸ Diagnostics; a pure append either way, so no routing,
+        // verdict, refusal or ordering below is touched.
+        MobileEditTrace.gate(
+            range: range,
+            replacementLength: (replacement as NSString?)?.length ?? -1)
         guard !suppressEditProcessing else { return true }
         // The liveness belt (S3 ladder BLOCKER): a stood-down surface is
         // read-tier — resigned and uneditable already; this refusal is the
@@ -1315,6 +1322,7 @@ final class MobileEditorViewModel {
                 range: range,
                 documentLength: index.documentLength,
                 replacementLength: (replacement as NSString).length)
+            MobileEditTrace.armedVerdict() // E1 — this consult parked a verdict
             return true
         }
     }
@@ -1377,7 +1385,12 @@ final class MobileEditorViewModel {
     /// bypassed the gate (autocorrect, dictation, marked text) arrive here
     /// with no pending verdict and route by `fallbackVerdict`.
     func storageDidEdit(_ editedRange: NSRange, changeInLength delta: Int) {
-        guard !suppressEditProcessing else { return }
+        guard !suppressEditProcessing else {
+            // E1 — recorded so nothing that reaches storage is invisible to
+            // the experiment (a pure append; the `return` is unchanged).
+            MobileEditTrace.suppressedReport(editedRange: editedRange, delta: delta)
+            return
+        }
         // THE BINDING (round 2, batch 1 — the crash fix's real half): the
         // gate's answer is consumed ONLY while it still describes the edit
         // that arrived. Anything else — a coalesced transaction wider than
@@ -1394,6 +1407,14 @@ final class MobileEditorViewModel {
                 editedRange: editedRange, delta: delta,
                 documentLength: index.documentLength) ? $0 : nil
         }
+        // E1 — the settling experiment's REPORT half: the numbers that
+        // decide whether the gate and the storage report are 1:1 inside one
+        // coordinated edit (`MobileEditTrace`'s header carries the whole
+        // why). `hadArming && !bound` is the binding's own refusal, which is
+        // the closest thing this code already had to an alarm.
+        MobileEditTrace.report(
+            editedRange: editedRange, delta: delta,
+            hadArming: armed != nil, bound: bound != nil)
         if armed != nil, bound == nil {
             // M13 (round-2 ladder round 1, MINOR 5): the paste's bulk-entry
             // intent was armed BESIDE this verdict, off the same gate call.
@@ -1536,6 +1557,7 @@ final class MobileEditorViewModel {
     }
 
     private func desyncRecovery() {
+        MobileEditTrace.desyncRecovery() // E1 — the honest road, counted
         desyncRecoveryCount += 1
         EditorAssertionSeam.fire("mobile editor surface desynced from the block index")
         forceFullRender = true

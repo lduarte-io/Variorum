@@ -38,6 +38,13 @@ struct MobileSettingsView: View {
     /// The tag manager's presentation (parity C3 — Settings is tag
     /// management's home, the Mac R52 placement mirrored).
     @State private var tagsPresented = false
+    /// E1's door state (temporary — mobile round 2's settling experiment;
+    /// the walk script is at the section itself, below). Seeded from the
+    /// recorder on appear (not in the initializer — a `View`'s stored
+    /// property initializer is nonisolated), so the row shows the persisted
+    /// arming after a relaunch.
+    @State private var traceArmed = false
+    @State private var tracePresented = false
     #if DEBUG
     @State private var spikePresented = false
     /// The tutorial doors' state: one door in flight at a time (the
@@ -137,6 +144,92 @@ struct MobileSettingsView: View {
             .padding(.vertical, 4)
             .accessibilityLabel("Manage Tags")
 
+            // ── E1, THE SETTLING EXPERIMENT (temporary; mobile round 2) ──
+            //
+            // ⚠️ THE WALK SCRIPT LIVES HERE, because the arming point is
+            // where someone will look for it.
+            //
+            // WHAT IT ANSWERS. Her delete-at-the-end crash is fixed, but the
+            // trace could not prove WHERE the stale verdict came from. The
+            // leading suspect is that iOS asks the editor's gate about one
+            // small edit and then performs a WIDER one in the same
+            // transaction. This records both halves so the answer stops
+            // being a guess. **It must run on HER device (iOS 26.6)** — the
+            // newest simulator here is 26.2, and a non-reproduction on an
+            // older runtime is a runtime gap, not an answer.
+            //
+            // HOW SHE RUNS IT.
+            //  1. Turn "Record edit trace" ON here. Tap Done.
+            //  2. Open any note with several paragraphs. Type a couple of
+            //     words first, so the last paragraph is freshly typed.
+            //  3. Do these five things, in order, with ordinary typing in
+            //     between:
+            //       a. select from the MIDDLE of a paragraph all the way to
+            //          the very end of the note, and press ⌫;
+            //       b. select two whole paragraphs in the middle, press ⌫;
+            //       c. the same as (a), but end the selection ONE CHARACTER
+            //          short of the end;
+            //       d. type a word wrong on purpose and accept the
+            //          autocorrect suggestion;
+            //       e. dictate a sentence with the microphone key.
+            //  4. Come back here → "Edit trace…". Read the first six lines.
+            //  5. Tap Copy and paste the whole thing into a message.
+            //
+            // WHAT THE NUMBERS MEAN.
+            //  · **"SUSPECT SIGNATURE" above 0 → confirmed.** The event
+            //    list underneath names the exact edit, and its ⚠ words say
+            //    which way it disagreed.
+            //  · **"most gate calls before one edit" above 1 → confirmed**
+            //    on its own: iOS asked more than once for a single edit.
+            //  · "gate-less" above 0 is EXPECTED and is not a finding —
+            //    that is autocorrect and dictation, which never ask.
+            //  · "of which overrun N of M testable" is the sub-signal the
+            //    round's record named by hand; M is smaller than the edit
+            //    count on purpose (iOS reports a wider range than it
+            //    changed for anything that INSERTS, so that sub-test is
+            //    only run on pure deletions).
+            //  · Everything at 0 after all five gestures → evidence AGAINST
+            //    the suspect on this iOS version, but not proof: it only
+            //    covers the gestures that were actually performed.
+            //
+            // Turning it back OFF makes it completely inert; leaving it on
+            // costs a few numbers per keystroke and nothing else.
+            Divider()
+                .overlay(tokens.line)
+                .padding(.vertical, 14)
+            Text(tokens.chromeLabel("Diagnostics"))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 4)
+            Button {
+                traceArmed.toggle()
+                MobileEditTrace.setArmed(traceArmed)
+            } label: {
+                Text(tokens.chromeLabel(
+                    traceArmed ? "Recording edit trace — tap to stop"
+                               : "Record edit trace"))
+                    .font(tokens.small)
+                    .foregroundStyle(traceArmed ? tokens.accent : tokens.muted)
+                    .lineLimit(2)
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 4)
+            .accessibilityLabel("Record edit trace")
+            .accessibilityValue(traceArmed ? "on" : "off")
+            Button {
+                tracePresented = true
+            } label: {
+                Text(tokens.chromeLabel("Edit trace…"))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 4)
+            .accessibilityLabel("Open the edit trace")
+
             #if DEBUG
             Divider()
                 .overlay(tokens.line)
@@ -221,6 +314,10 @@ struct MobileSettingsView: View {
         .sheet(isPresented: $tagsPresented) {
             MobileTagManagerSheet(session: session, tokens: tokens)
         }
+        .sheet(isPresented: $tracePresented) {
+            MobileEditTraceView(tokens: tokens)
+        }
+        .onAppear { traceArmed = MobileEditTrace.isArmed }
         #if DEBUG
         .fullScreenCover(isPresented: $spikePresented) { SpikeScreen() }
         .alert(MobileTutorialSeeder.replaceQuestion, isPresented: $confirmPresented) {

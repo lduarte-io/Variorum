@@ -707,6 +707,82 @@ struct MobilePerfWalkTests {
         }
     }
 
+    /// **E1's instrument, measured on the keystroke road it sits on.**
+    /// `MobileEditTrace` records every gate consult and every storage
+    /// report so the round can settle where a stale verdict came from
+    /// (its header carries the whole why). Two claims are made about it,
+    /// and neither is worth anything argued:
+    ///
+    /// 1. **DISARMED — the shipping state — it observes nothing.** One
+    ///    static `Bool` read and a return: no counter moves, no ring entry,
+    ///    no allocation, no log, at the 100k bar.
+    /// 2. **ARMED, it is QUIET on ordinary typing.** This is the pin that
+    ///    makes a negative result on her phone MEAN something. The
+    ///    predicate the round's record named — *"flag any report whose OLD
+    ///    span extends past the last consult's `range.upperBound`"* —
+    ///    reconstructs the old span from `length - delta`, and iOS widens
+    ///    the reported range of anything that INSERTS while leaving `delta`
+    ///    alone. Written literally it therefore fires on every keystroke,
+    ///    and her readout would be 100% noise. The carve-out (evaluate it
+    ///    only on pure removals) is checked HERE, at 1,370 real paragraphs,
+    ///    rather than reasoned about — §63's lesson: drive the experiment,
+    ///    do not trust its specification.
+    ///
+    /// The budget assertions are the typing test's; this one asserts the
+    /// trace's own behaviour and prints the armed/disarmed medians so any
+    /// future cost is visible in the record.
+    @Test func theEditTraceIsInertDisarmedAndQuietArmedAt100k() async throws {
+        let big = try PerfWorlds.big.get()
+        let megaID = try #require(big.seed.megaPostID)
+
+        // Both legs run against a recorder OF THIS TEST'S OWN. The app's
+        // store is process-global and Swift Testing runs suites in
+        // PARALLEL, so arming the global one and then suspending at an
+        // `await` would fold every other @MainActor editor suite's
+        // keystrokes into these counts — the MINOR-4 hazard, and the
+        // reason `MobileEditTrace` exposes a task-local override at all.
+        try await MobileEditTrace.$testRecorder.withValue(
+            MobileEditTrace.Recorder(armed: false)
+        ) {
+        try await withPerfWorld(big) { session in
+            // 1 — DISARMED.
+            let cold = await openSurface(session, postID: megaID)
+            let coldOffset = try #require(interiorOffset(cold.model, blockIndex: 1))
+            let coldTyped = typingSamples(cold.model, cold.surface, at: coldOffset)
+            #expect(coldTyped.accepted == coldTyped.samples.count)
+            #expect(MobileEditTrace.summary == MobileEditTrace.Summary(),
+                    "disarmed, the keystroke road records nothing at all")
+            #expect(MobileEditTrace.events.isEmpty)
+
+            // 2 — ARMED, on the same fixture at the same bar (the same
+            // bound recorder, flipped — nothing global moves).
+            MobileEditTrace.setArmed(true)
+            let hot = await openSurface(session, postID: megaID)
+            let hotOffset = try #require(interiorOffset(hot.model, blockIndex: 1))
+            let hotTyped = typingSamples(hot.model, hot.surface, at: hotOffset)
+            #expect(hotTyped.accepted == hotTyped.samples.count)
+
+            let s = MobileEditTrace.summary
+            #expect(s.consults >= hotTyped.samples.count, "every keystroke consulted the gate")
+            #expect(s.reports >= hotTyped.samples.count, "…and every one reported")
+            #expect(s.maxConsultsBeforeAReport == 1,
+                    "one consult per report on the SIMULATOR's road — the number her device is being asked about")
+            #expect(s.mismatches == 0,
+                    "ORDINARY TYPING RAISES NO SUSPECT SIGNATURE — the pin that makes a clean run on her phone mean something")
+            #expect(s.gatelessReports == 0, "the policed road consults every time")
+            #expect(s.desyncRecoveries == 0)
+            #expect(MobileEditTrace.events.count <= MobileEditTrace.ringCapacity,
+                    "bounded by construction (MobileSoul §2)")
+
+            print(String(
+                format: "PERF[sim] edit trace — keystroke median disarmed %.3f ms · armed %.3f ms "
+                    + "(100k post, %d keystrokes/leg) · suspect signatures %d · overrun %d of %d testable",
+                median(coldTyped.samples), median(hotTyped.samples),
+                hotTyped.samples.count, s.mismatches, s.overruns, s.overrunTestable))
+        }
+        }
+    }
+
     @Test func theFullScrollHoldsThePerStepBudgetAt100kAndTheWalkHoldsTheMemoryCeiling() async throws {
         // THE FULL 100k TRAVERSAL, once, carrying BOTH assertions (one
         // walk instead of two — the traversal is the expensive half,
