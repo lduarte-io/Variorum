@@ -1492,6 +1492,30 @@ queue (item B) is already discharged — the walk ran all nine rows
   keep its model override — after any resume of a model-critical
   seat, re-verify the model; when in doubt, wrap and re-dispatch
   fresh with the model named.** (Also mirrored to session memory.)
+  **⚠️ FALSIFIED 2026-08-24, hours later, by transcript evidence —
+  read this half, not the half above.** When SEAT 2 (spawned
+  explicitly Opus) ALSO showed as Fable in her view, the serving
+  models were extracted from all four agents' own transcripts
+  (`grep '"model"'` on the task output files — the authoritative
+  per-turn record): the reviewer 90/90 turns `claude-fable-5`; the
+  fix round 144/144 `claude-opus-5`; **seat 1 — the "incident"
+  agent — 247/247 real turns `claude-opus-5`, INCLUDING every
+  post-resume turn**; seat 2 65/65 `claude-opus-5`. **The resume
+  never dropped the override; the cast was never violated; zero
+  Fable was ever spent on implementation.** The observation was a
+  DISPLAY ARTIFACT: the terminal's agent view shows the PARENT
+  session's model (this Fable orchestrator) — proven by her
+  `/context` sent "to the agent" rendering in the orchestrator's
+  own output. **The real lessons, replacing the false one:** (1) a
+  terminal's agent-frame model label is NOT evidence — the
+  transcript's per-turn `"model"` field is, and it costs one grep;
+  (2) the machinery rule the record above violated is §5's own —
+  *a mechanism that explains the symptom is not one that was
+  tested* — and the orchestrator was the culprit this time,
+  writing an untested mechanism into a binding record. Seat 1's
+  stop was therefore unnecessary (modest cost: one wrap record +
+  one redispatch; no work lost). The memory note is rewritten to
+  the true lesson.
 - **The suite-simulator question (her ask: why iPhone 16e, not 17):**
   answered — an iPhone 17 Pro sim EXISTS locally (iOS 26.2); 16e is
   the repo's standing convention since mobile v1, and every measured
