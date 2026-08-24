@@ -45,6 +45,28 @@ final class MobileKeyboardBarController: NSObject {
     /// the Aa door can swap its items IN PLACE.
     private weak var bar: UIToolbar?
 
+    /// **The last real bar width this controller has BUILT AT — held
+    /// strongly, precisely because `bar` is not.**
+    ///
+    /// Without it the strip's width had a hidden precondition at a call
+    /// site no pin drove (4.5d's cold review): `makeBar()` read the
+    /// OUTGOING bar's width, which survives only because
+    /// `applyVoiceChrome` writes `inputAccessoryView =
+    /// keyboardBarController.makeBar()` — evaluating the new bar while the
+    /// old one is still assigned and therefore still retained. **A caller
+    /// that tidied up first (`inputAccessoryView = nil;
+    /// inputAccessoryView = makeBar()`) would release the outgoing bar,
+    /// nil this weak reference, and rebuild an OPEN strip at 23 pt on a
+    /// 402 pt phone — sticky until the next Aa toggle**, from a mechanism
+    /// nobody would look at again. A remembered width cannot be nilled by
+    /// a caller's assignment order.
+    ///
+    /// It can only ever be *stale*, never wrong-and-wider: it came from a
+    /// toolbar that really was that wide, and a running app's bar width
+    /// cannot change (portrait-locked iPhone; Display Zoom restarts the
+    /// device). Zero until the first real bar is seen.
+    private var lastBuiltBarWidth: CGFloat = 0
+
     /// **The Aa condensation (parity A3 item 1 — HER RULING, the
     /// architect's ADOPT of the proposed expanding row):** at rest the
     /// bar carries THREE doors — **Aa · ⑂ · ⋯** — and Aa expands the
@@ -84,18 +106,16 @@ final class MobileKeyboardBarController: NSObject {
     /// spaces to 12 pt gaps — 5×62 + 2×48 + 6×12 = **478 pt, centered
     /// in the 402 pt bar**, hanging 38 pt off EACH edge: × and ⇥
     /// rendered as edge slivers (the collapse door barely tappable, ⇥
-    /// effectively invisible). The fix owns the geometry: the seven
-    /// acts are real `UIButton`s in one `UIStackView`
-    /// (`kbar.formattingStrip`) carried by a single customView item —
-    /// 7×44 pt targets + 6×2 pt gaps = 320 pt intrinsic, inside the
-    /// tightest iPhone class's cell (measured windowed: the toolbar's
-    /// content row insets 16 pt a side and the customView's glass cell
-    /// pads 5 pt a side, so a 375 pt bar still offers 375−32−10 =
-    /// 333 pt), so overflow is impossible by construction, nothing
-    /// scrolls, and nothing hides. Our own stack also lays out
-    /// WINDOWLESS, which is what makes the visibility pin possible at
-    /// all — the toolbar's private item cells only materialize in a
-    /// window, which is exactly how the clip escaped A3's suite.
+    /// effectively invisible). The fix owns the geometry: the acts are
+    /// real `UIButton`s in one `UIStackView` (`kbar.formattingStrip`)
+    /// carried by a single customView item, sized so the capsule fits
+    /// **the bar it is actually being built into** — see
+    /// `stripButtonWidth(inBarOfWidth:)`. Overflow is impossible by
+    /// construction, nothing scrolls, and nothing hides. Our own stack
+    /// also lays out WINDOWLESS, which is what makes the visibility pin
+    /// possible at all — the toolbar's private item cells only
+    /// materialize in a window, which is exactly how the clip escaped
+    /// A3's suite.
     private(set) var isFormattingExpanded = false
 
     /// The strip's geometry constants (pinned). The gap stays tight so
@@ -115,48 +135,101 @@ final class MobileKeyboardBarController: NSObject {
     ///   share one line rather than two.
     /// - **M26 ≡ R21** — a visible ⇤ joins them, making **eleven**.
     ///
-    /// Eleven 44 pt targets need 11×44 + 10×2 = **504 pt**; the tightest
-    /// supported iPhone class offers **333** (below). The arithmetic is
-    /// not close, and **she ruled the shape knowing it** — she was told
-    /// before choosing that eleven acts land near 31 pt, under the
-    /// floor. The built number is **28**, not 31, because the strip is
-    /// sized to the TIGHTEST class rather than to the bar it happens to
-    /// be in (FIX-5's rule, below): a 402 pt phone would allow 31, and
-    /// spending FIX-5's construction-time safety to buy 3 pt was not a
-    /// trade worth making without her. Recorded plainly rather than
-    /// quietly deleted: the floor did not stop applying, it stopped
-    /// being satisfiable, and the honest guard is the crowding tripwire
-    /// below. **Measured on the live surface** (iPhone 17 Pro / iOS
-    /// 26.2): a 30.0 pt act-to-act pitch, every act whole, and a tap at
-    /// each act's centre fires that act.
+    /// Eleven 44 pt targets need 11×44 + 10×2 = **504 pt**; a 375 pt bar
+    /// offers **333** (below). The arithmetic is not close, and **she
+    /// ruled the shape knowing it** — she was told before choosing that
+    /// eleven acts land near 31 pt, under the floor.
+    ///
+    /// **THE RULE, since this round's fit fix: 28 pt is a CEILING, and
+    /// the strip is sized to the bar it is being built into.** An act is
+    /// her 28 wherever 28 fits, and narrower only where it does not
+    /// (`stripButtonWidth(inBarOfWidth:)`) — so every bar at or above
+    /// `nominalBarWidth` renders byte-identically to what she has been
+    /// looking at, and a **320 pt** Display-Zoom bar narrows to 23 rather
+    /// than hanging two acts off the edges (`narrowestBarWidth` carries
+    /// that measured clip). A WIDER bar deliberately does not get wider
+    /// acts: that would be a look change on the device she uses, and the
+    /// look is hers.
+    ///
+    /// Where the 28 comes from: it is what eleven acts derive at on
+    /// `nominalBarWidth`, the narrowest iPhone hardware class.
+    ///
+    /// *What widening would buy, RECOMPUTED against
+    /// `derivedStripButtonWidth` rather than quoted from the ruling's
+    /// estimate: a 402 pt bar derives **30**, so letting the acts grow
+    /// with the bar would buy **2 pt** on her phone. (This paragraph read
+    /// "would allow 31 … to buy 3 pt" until 4.5d's cold review recomputed
+    /// it — ~31 was the estimate she was quoted at R22, and the function
+    /// says 30. A file whose thesis is that duplicated derivations drift
+    /// had one of its own.)*
+    ///
+    /// Recorded plainly rather than quietly deleted: the floor did not
+    /// stop applying, it stopped being satisfiable, and the honest guard
+    /// is the crowding tripwire below. **Measured on the live surface**
+    /// (iPhone 17 Pro / iOS 26.2): a 30.0 pt act-to-act pitch, every act
+    /// whole, and a tap at each act's centre fires that act.
     ///
     /// Note the buttons were never a full target VERTICALLY either —
     /// `stripButtonHeight` has been 38 pt since the strip existed.
     ///
-    /// The tightest supported iPhone class's bar width (the SE class;
-    /// iOS 26 still runs on 375 pt-wide hardware). FIX-5's rule is that
-    /// the strip's intrinsic width fits the TIGHTEST class, so overflow
-    /// is impossible on any device by construction — never a scroll,
-    /// never a clip.
-    static let tightestBarWidth: CGFloat = 375
-    /// The iOS 26 toolbar insets its content row by this much per side
-    /// (measured — FIX-5's probe).
+    /// **THE NARROWEST WIDTH THE APP CAN BE SHOWN AT — and it is NOT a
+    /// hardware class.** 320 pt is what **Display Zoom** ("Larger Text
+    /// and Icons" in Display & Brightness) renders at: a 375 pt SE *and*
+    /// a 390/393/402 pt modern iPhone alike report a 320 pt window when
+    /// their owner turns it on. So this is an ACCESSIBILITY setting on
+    /// hardware anybody may carry, never a rare old phone.
+    ///
+    /// **This constant exists because the round shipped a strip that
+    /// overflowed here.** `nominalBarWidth` below used to be the only
+    /// width in this file, documented as "the tightest supported iPhone
+    /// class" — which is true of *hardware* (SE 2/3, 12 mini and 13 mini
+    /// are all 375 pt on iOS 26) and false of *rendered width*. Measured
+    /// on the pre-fix tree, hosted in a real window at 320 pt: the
+    /// strip's glass capsule laid out **338 × 48 at x = −9**, hanging
+    /// **9 pt off each edge of the bar**, with × at x = −4 and ⇤ ending
+    /// at 324 — **4 pt of each outer act off-screen and both rounded
+    /// capsule ends sliced.** That is FIX-5's own defect, smaller.
+    static let narrowestBarWidth: CGFloat = 320
+
+    /// The narrowest iPhone HARDWARE class (SE 2/3, 12 mini, 13 mini —
+    /// all 375 pt on iOS 26), and therefore the width her ruled **28 pt**
+    /// act comes from: it is what `nominalStripButtonWidth` derives at.
+    /// Bars at or above it get exactly the strip she ruled.
+    static let nominalBarWidth: CGFloat = 375
+
+    /// The allowance for the iOS 26 toolbar's own content-row inset, per
+    /// side — **deliberately conservative, and the two measurements that
+    /// bracket it are recorded rather than averaged.** Batch 2's frame
+    /// dump of the live bar read `_UIInheritedView frame=(16, 0, 370, 48)`
+    /// in a 402 pt bar (16 pt a side); this batch's windowed dump on
+    /// iPhone 16e / iOS 26.2 reads `(8, 0, 386, 48)` at the same width
+    /// (8 pt a side), and the same 8 at 320/375/393. **The real home — an
+    /// `inputAccessoryView` on a presented keyboard — could not be
+    /// measured in process** (the software keyboard never presents under
+    /// `xcodebuild test`, so the accessory view's `window` stays nil);
+    /// recorded as a RUNTIME GAP rather than resolved by guess. 16 is
+    /// kept because erring wide only ever makes the strip *narrower*
+    /// than it needs to be, which cannot clip, while erring narrow
+    /// clips — FIX-5's doctrine, applied to an uncertainty.
     static let toolbarContentInset: CGFloat = 16
-    /// What the customView's glass cell actually offers inside the
-    /// tightest bar: 375 − 2×16 − 2×5 = **333 pt**.
-    static var tightestStripWidth: CGFloat {
-        tightestBarWidth - 2 * toolbarContentInset - 2 * stripCellInset
+
+    /// What the customView's glass cell offers inside a bar of a given
+    /// width: the bar, less the content row's inset a side, less the
+    /// cell's own 5 pt padding a side. At 375 that is 375−32−10 = **333**
+    /// (the number this file carried as a constant); at 320 it is
+    /// 320−32−10 = **278**.
+    static func stripWidthAvailable(inBarOfWidth barWidth: CGFloat) -> CGFloat {
+        max(0, barWidth - 2 * toolbarContentInset - 2 * stripCellInset)
     }
 
     /// **Each act's width is DERIVED from the act count**, not chosen:
-    /// the eleven acts and their ten 2 pt gaps divide the 333 pt the
-    /// tightest class offers, rounded down. Today that is **28 pt**
-    /// (11×28 + 10×2 = 328, five to spare).
+    /// the eleven acts and their ten 2 pt gaps divide the width the bar
+    /// offers, rounded down.
     ///
     /// Deriving it is what keeps FIX-5's promise honest as the act list
     /// moves: a twelfth act narrows the row instead of overflowing the
-    /// bar, and the tripwire below is what makes that narrowing loud
-    /// instead of silent.
+    /// bar, and the crowding tripwire below is what makes that narrowing
+    /// loud instead of silent.
     ///
     /// **It is an EXACT width, not a minimum, and that is a measured
     /// correction rather than a preference.** The constraint used to be
@@ -167,12 +240,51 @@ final class MobileKeyboardBarController: NSObject {
     /// while the image-titled 🔗 said 22.3), so ten acts ignored the
     /// minimum and the strip measured **348 pt against the 333 it must
     /// fit**. `>=` also could never have caught it in the other
-    /// direction, which is why the pin now asserts the exact width.
-    static var stripButtonWidth: CGFloat {
+    /// direction, which is why the pin asserts the exact width.
+    static func derivedStripButtonWidth(inBarOfWidth barWidth: CGFloat) -> CGFloat {
         let count = CGFloat(formattingActLabels.count)
         guard count > 0 else { return 0 }
-        return ((tightestStripWidth - (count - 1) * stripSpacing) / count)
-            .rounded(.down)
+        let available = stripWidthAvailable(inBarOfWidth: barWidth)
+        return max(0, ((available - (count - 1) * stripSpacing) / count)
+            .rounded(.down))
+    }
+
+    /// **Her ruled act width: 28 pt** — eleven acts sharing the 333 pt a
+    /// 375 pt bar offers (11×28 + 10×2 = 328, five to spare). She ruled
+    /// the one-row shape knowing the arithmetic (R22, and R25 pre-ruled
+    /// the tap targets); this is the number that ruling produced, and it
+    /// is the number every bar wide enough to hold it still gets.
+    static var nominalStripButtonWidth: CGFloat {
+        derivedStripButtonWidth(inBarOfWidth: nominalBarWidth)
+    }
+
+    /// **THE FIT RULE — an act is her ruled 28 pt wherever 28 pt fits,
+    /// and narrower only where it does not.**
+    ///
+    /// The `min` is the whole of it, and it is deliberately asymmetric:
+    /// a bar at or above `nominalBarWidth` renders **byte-identically to
+    /// before this fix** (every act 28 pt, the strip 328 pt, the capsule
+    /// centred inside the content row), so nothing she has looked at
+    /// changes. Only a bar too narrow for that — today only the 320 pt
+    /// Display-Zoom width — narrows, to **23 pt** an act (11×23 + 10×2 =
+    /// 273 inside the 278 offered). It is her ruled SHAPE either way:
+    /// one row, eleven acts, every one whole and on screen, nothing
+    /// scrolling and nothing hidden. Widening past 28 on a big phone is
+    /// deliberately NOT done — that would be a look change on the
+    /// device she uses, and the look is hers (the same reasoning the
+    /// 28-vs-30 note above records).
+    ///
+    /// **Where `barWidth` comes from:** one resolver, `currentBarWidth()`,
+    /// which both the rebuild seam and the expand seam call — it carries
+    /// the reasoning about staleness and about why too-narrow is the only
+    /// safe direction to be wrong in. The app is portrait-locked iPhone
+    /// (MobileSoul §4's ruled exclusion), the accessory bar spans the
+    /// screen with or without a hardware keyboard, and changing Display
+    /// Zoom **restarts the device** (Settings warns before it does it) —
+    /// so a running app's bar width cannot change underneath a presented
+    /// strip.
+    static func stripButtonWidth(inBarOfWidth barWidth: CGFloat) -> CGFloat {
+        min(nominalStripButtonWidth, derivedStripButtonWidth(inBarOfWidth: barWidth))
     }
 
     /// **The crowding tripwire — the 44 pt floor's replacement, and NOT
@@ -182,6 +294,13 @@ final class MobileKeyboardBarController: NSObject {
     /// twelfth would compute 25 pt and trip the pin, which is the point
     /// — the next act to want a place on this row costs a ruling, not a
     /// constant edit.
+    ///
+    /// **It guards `nominalStripButtonWidth`, i.e. the ACT COUNT, and
+    /// deliberately not the per-bar width.** The narrowing a 320 pt bar
+    /// produces is the fit fix doing its job (23 pt, all eleven acts on
+    /// screen); a twelfth ACT is a crowding of her ruled row at every
+    /// width. Pointing the tripwire at the nominal width is what keeps
+    /// those two apart.
     static let stripButtonCrowdingFloor: CGFloat = 28
 
     // MARK: - The bar's VERTICAL geometry (round 2, batch 2 — M4 ≡ R7)
@@ -285,6 +404,22 @@ final class MobileKeyboardBarController: NSObject {
     /// she already accepted for the expanded state at R12), and the bar
     /// itself drops 72 → 52, handing 20 pt back to the text.
     ///
+    /// **CONFIRMED BY MEASUREMENT, not only by derivation (round 2,
+    /// sub-batch 4.5d).** The claim above was computed from these
+    /// constants; a windowed frame dump now backs it. Hosted at 320,
+    /// 375, 393 and 402 pt, iPhone 16e / iOS 26.2: the RESTING plain
+    /// cells lay out `62 × 48 at y = 0` and the EXPANDED one-row capsule
+    /// lays out `48` tall **also at y = 0** — no longer the `y = −20`
+    /// overhang the two-row capsule had — so both states' lowest drawn
+    /// edge measures **exactly 48**, and the bar's 52 leaves the ruled
+    /// 4 pt in both. `MobileKeyboardBarGeometryTests` asserts that off
+    /// real frames, so a silent re-split into two rows trips it.
+    ///
+    /// **What DOES still bind is the 48 pt content row itself** — it is
+    /// fixed and anchored at the bar's top, so no bar shorter than
+    /// `48 + air` can exist without clipping. The 20 pt was a *penalty
+    /// on top of* that floor, and it is the penalty that is gone.
+    ///
     /// The air stays **4** — untouched by the shape change, and still
     /// the photographed value.
     static let barVerticalAir: CGFloat = 4
@@ -314,8 +449,9 @@ final class MobileKeyboardBarController: NSObject {
     /// ten 44 pt acts could not share one line of any iPhone class, so
     /// the capsule went two rows deep and dragged the whole bar down
     /// with it. R22 reverses that trade: the acts share ONE row (paid
-    /// for horizontally — see `stripButtonWidth`, where the 44 pt
-    /// target floor is spent), the capsule is a plain item's depth, and
+    /// for horizontally — see `stripButtonWidth(inBarOfWidth:)`, where
+    /// the 44 pt target floor is spent), the capsule is a plain item's
+    /// depth, and
     /// `lowestCellEdge` falls 68 → 48. The bar does NOT change height
     /// between the states — one `barHeight` hosts both, sized for the
     /// lowest cell plus air (M4 ≡ R7; the vertical-geometry block above
@@ -353,8 +489,9 @@ final class MobileKeyboardBarController: NSObject {
             name: UIResponder.keyboardDidHideNotification, object: nil)
     }
 
-    /// The 44 pt accessory bar riding the keyboard (spike item 6's measured
-    /// home), now with its acts live — and, since batch 3, styled by the
+    /// The accessory bar riding the keyboard (spike item 6's measured
+    /// home; its height is `barHeight` — 44 pt when this comment was
+    /// written, measured to 52 since M4 ≡ R7 and R22), now with its acts live — and, since batch 3, styled by the
     /// LIVE VOICE (the look canon's kbar: the voice surface with a hairline
     /// top edge, act glyphs in the muted chrome ink, mono type in the
     /// terminal voice / the system sans in study — the mockups' own chrome
@@ -363,8 +500,15 @@ final class MobileKeyboardBarController: NSObject {
     /// per the Aa door's state (`barItems`).
     func makeBar() -> UIView {
         let face = MobileEditorStyle.face
+        // **The starting width comes from `currentBarWidth()`**, which is
+        // load-bearing rather than tidy: `applyVoiceChrome` calls this
+        // method again at an LK2 voice switch, and the controller's
+        // `isFormattingExpanded` survives it — so a rebuild that happens
+        // while the strip is OPEN sizes the strip from this frame, and a
+        // fresh bar that started at the narrowest width would silently
+        // narrow her acts on a wide phone until the next toggle.
         let bar = UIToolbar(frame: CGRect(
-            x: 0, y: 0, width: 320, height: Self.barHeight))
+            x: 0, y: 0, width: currentBarWidth(), height: Self.barHeight))
         bar.autoresizingMask = [.flexibleWidth]
 
         let appearance = UIToolbarAppearance()
@@ -381,11 +525,49 @@ final class MobileKeyboardBarController: NSObject {
         return bar
     }
 
+    /// **THE ONE PLACE the strip's width is resolved** — and it remembers.
+    ///
+    /// Both seams that build a strip need this number, and until 4.5d's
+    /// cold review they each spelled it out separately, in a file whose
+    /// whole thesis is that duplicated derivations drift.
+    ///
+    /// The order is narrowest-is-safe, because **too wide is the only
+    /// direction that clips**:
+    ///
+    /// 1. **The LIVE toolbar's own width** — always right, and the only
+    ///    source the ordinary paths ever need (the expanded strip can only
+    ///    be reached by tapping Aa on a bar already on screen).
+    /// 2. **The last width this controller built at** (`lastBuiltBarWidth`
+    ///    — its doc has the mechanism this arm exists for: a caller that
+    ///    releases the outgoing bar before asking for a new one).
+    /// 3. **`narrowestBarWidth`** — a true placeholder, and the deliberate
+    ///    default for a controller that has never seen a hosted bar. Only
+    ///    the RESTING items are built at that point, so it costs nothing;
+    ///    `.flexibleWidth` hands over the real width the moment UIKit
+    ///    installs the accessory view, and the next `barItems(face:)` call
+    ///    reads it.
+    ///
+    /// *Declined, and recorded rather than silently skipped: reading
+    /// `textView?.window?.bounds.width` as a fourth source. It is an
+    /// inference from the portrait-lock rather than a width this bar was
+    /// ever given, and if the inference ever failed it would fail in the
+    /// too-WIDE direction — the one that clips. Arm 2 is a width a real
+    /// toolbar actually had.*
+    private func currentBarWidth() -> CGFloat {
+        if let live = bar?.bounds.width, live > 0 {
+            lastBuiltBarWidth = live
+            return live
+        }
+        if lastBuiltBarWidth > 0 { return lastBuiltBarWidth }
+        return Self.narrowestBarWidth
+    }
+
     /// One state's items. The resting bar is three flexible-spaced
     /// doors; the expanded state is the ONE-cell strip (FIX-5 — seven
     /// separate items overflowed the bar, see the class doc), centered.
-    /// The strip's six acts are the SAME builders the flat bar carried —
-    /// byte-identical doors behind the one Aa gate.
+    /// The strip's acts are the SAME builders the flat bar carried —
+    /// byte-identical doors behind the one Aa gate (six of them when the
+    /// door was built; ELEVEN since her R22 + M26).
     private func barItems(face: MobileEditorStyle.Face) -> [UIBarButtonItem] {
         let titleAttributes: [NSAttributedString.Key: Any] = [
             .font: face.chrome, .foregroundColor: face.muted,
@@ -399,7 +581,15 @@ final class MobileKeyboardBarController: NSObject {
         }
 
         if isFormattingExpanded {
-            return [.flexibleSpace(), formattingStripItem(face: face), .flexibleSpace()]
+            // **The strip is sized to the bar it is going INTO** (this
+            // batch's fix — a strip sized to a 375 pt assumption hung
+            // 9 pt off each edge of a 320 pt Display-Zoom bar), through
+            // the one resolver both seams share.
+            return [
+                .flexibleSpace(),
+                formattingStripItem(face: face, barWidth: currentBarWidth()),
+                .flexibleSpace(),
+            ]
         }
         let acts: [UIBarButtonItem] = [
             act("Aa", "Formatting", #selector(toggleFormattingDoor)),
@@ -428,7 +618,9 @@ final class MobileKeyboardBarController: NSObject {
     /// The `rows` table stays nested although it holds one row: it is
     /// `stripFittedHeight`'s source, so a future re-split grows the bar
     /// with no second edit.
-    private func formattingStripItem(face: MobileEditorStyle.Face) -> UIBarButtonItem {
+    private func formattingStripItem(
+        face: MobileEditorStyle.Face, barWidth: CGFloat
+    ) -> UIBarButtonItem {
         func stripButton(
             _ title: String, _ label: String, _ selector: Selector
         ) -> UIButton {
@@ -483,13 +675,15 @@ final class MobileKeyboardBarController: NSObject {
                 outdentButton(face: face),
             ],
         ]
+        let actWidth = Self.stripButtonWidth(inBarOfWidth: barWidth)
         for button in rows.flatMap(\.self) {
             // EXACT, not `>=` — UIKit floors a titled system button's
             // intrinsic width at 30 pt regardless of its glyph, so a
             // minimum below 30 is silently ignored (see
-            // `stripButtonWidth`). Each act gets precisely its share.
+            // `derivedStripButtonWidth`). Each act gets precisely its
+            // share of THIS bar.
             button.widthAnchor.constraint(
-                equalToConstant: Self.stripButtonWidth
+                equalToConstant: actWidth
             ).isActive = true
             button.heightAnchor.constraint(
                 equalToConstant: Self.stripButtonHeight
@@ -647,8 +841,9 @@ final class MobileKeyboardBarController: NSObject {
     }
 
     /// **⇤ — M26 ≡ R21's visible un-indent, her ruled door.** The act is
-    /// the one it always was (`MarkdownEditing.outdent`, the shared
-    /// brain); what changed is that it is now VISIBLE. Its glyph mirrors
+    /// the one it always was (`MarkdownEditing.Act.outdent`, the shared
+    /// brain — this doc named it `MarkdownEditing.outdent`, a path that
+    /// does not exist, until 4.5d's cold review); what changed is that it is now VISIBLE. Its glyph mirrors
     /// ⇥ and it sits immediately beside it, so the pair reads as a pair.
     /// The hint names the other door rather than a gesture on this one —
     /// this button needs no long-press, and saying so is what keeps the
