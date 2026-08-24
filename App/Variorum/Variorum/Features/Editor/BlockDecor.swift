@@ -230,22 +230,13 @@ nonisolated enum BlockDecor {
     /// The clearance a left card leaves for the drag-handle lane.
     static let leftCardLane: CGFloat = 28
 
-    /// The hover add-a-comment chip's size (13e E7 — the margin-hover
-    /// grammar). Small deliberately: it is an invitation in a sacred margin
-    /// (R9), not a control.
-    static let addChipSize = CGSize(width: 44, height: 16)
-
-    /// Where the hover "+ //" sits: RIGHT-ALIGNED against the card lane, so
-    /// it appears exactly where that block's comment card would start
-    /// reading — the 13b-4D chip's own rule ("exactly where its margin card
-    /// would sit"), now on the LEFT and clear of the drag-handle lane like
-    /// `leftCardRect`.
-    static func leftAddChipRect(textLeft: CGFloat, blockTop: CGFloat) -> CGRect {
-        CGRect(
-            x: max(0, textLeft - Self.leftCardLane - Self.addChipSize.width),
-            y: blockTop,
-            width: Self.addChipSize.width, height: Self.addChipSize.height)
-    }
+    // 13l (her 8c rider, verbatim: *"I need the comment + on the left
+    // removed … it's too crowded and I don't like the look of seeing it
+    // there"*): 13e E7's hover add-a-comment chip is GONE, and its geometry
+    // with it. The margin-hover comment CARD and BADGE are untouched — they
+    // are what a block with comments shows, and the same door — and so is
+    // every other way in (the block menu, ⌘⇧', the comments panel). Only
+    // the invitation on an UNCOMMENTED block is retired.
 }
 
 // MARK: - The callout palette (token NAMES → colors; R1 forbids stored values)
@@ -366,12 +357,14 @@ final class BlockDecorOverlayController {
         self.onOpenComments = onOpenComments
         self.onMoveBlock = onMoveBlock
         // 13b 4D (S4-19): hover tracking exists only where a DOOR does —
-        // the read tier (nil doors) never tracks or reveals. 13e E7 widens
-        // the condition from "a drop door" to "a drop door or a comments
-        // door", because the hover margin now offers the comment invitation
-        // too; every production controller has both or neither, so nothing
-        // shipped changes shape.
-        if onMoveBlock != nil || onOpenComments != nil {
+        // the read tier (nil doors) never tracks or reveals. 13e E7 had
+        // widened this to "a drop door OR a comments door" for the margin's
+        // add-a-comment invitation; 13l retired that invitation (her 8c
+        // rider), so the condition narrows back to the door that still uses
+        // hover — the drag handle's reveal. Behaviourally identical in
+        // production, which E7's own note recorded: every production
+        // controller has both doors or neither.
+        if onMoveBlock != nil {
             let tracker = HandleHoverTracker()
             tracker.onHover = { [weak self, weak textView] windowPoint in
                 guard let self else { return }
@@ -409,7 +402,6 @@ final class BlockDecorOverlayController {
         for view in selectionViews { view.removeFromSuperview() }
         indicatorView?.removeFromSuperview()
         insertionBar?.removeFromSuperview()
-        addChip?.removeFromSuperview()
         seamViews = []
         calloutViews = []
         emojiLabels = []
@@ -418,8 +410,6 @@ final class BlockDecorOverlayController {
         selectionViews = []
         indicatorView = nil
         insertionBar = nil
-        addChip = nil
-        addChipBlockID = nil
     }
 
     // MARK: Render
@@ -433,7 +423,6 @@ final class BlockDecorOverlayController {
         renderIndicator(state, tokens: tokens, in: textView)
         renderSeams(state, tokens: tokens, in: textView)
         renderComments(state, tokens: tokens, in: textView)
-        renderAddChip(state, tokens: tokens, in: textView)
         renderHandles(state, in: textView)
     }
 
@@ -607,73 +596,26 @@ final class BlockDecorOverlayController {
         }
     }
 
-    // MARK: The margin add-a-comment door — 13e E7: the HOVER grammar, LEFT
+    // MARK: The margin add-a-comment door — RETIRED (13l, her 8c rider)
     //
-    // The history this door has, in order, because it explains its shape:
-    // 13b 4D shipped a quiet "+ //" in the RIGHT gutter at the CARET block
-    // (N35, answering "she couldn't find any way to leave a comment"); her
-    // R5-3 ruling retired it, verbatim: *"stop showing the comment + to the
-    // right completely, it conflicts with the take icon"* — the fan badge
-    // holds that corner, and two things wanted the same pixels.
+    // Her words, verbatim: *"I need the comment + on the left removed …
+    // it's too crowded and I don't like the look of seeing it there … the
+    // comments + to the left is currently annoying me though so removing it
+    // can be a super minor 13l item."*
     //
-    // 13e E7 is the rung 4D recorded as next ("the full every-block-hover
-    // mockup grammar"), built where her R5-3 objection cannot apply: the
-    // LEFT margin, which her sitting-Round-2 instruction made the comment
-    // side of the surface, and where nothing else lives at a block's top.
-    // Two deliberate narrowings keep the margin calm (R9):
+    // The door's whole history was one long argument about WHERE it could
+    // sit: 13b 4D shipped a quiet "+ //" in the RIGHT gutter at the caret
+    // block; her R5-3 ruling retired that (*"stop showing the comment + to
+    // the right completely, it conflicts with the take icon"*); 13e E7
+    // rebuilt it on the LEFT, hover-only, uncommented blocks only. This
+    // ruling ends the argument: the invitation is gone from both margins.
     //
-    //   - HOVER ONLY. No block wears a "+" at rest — the at-rest margin is
-    //     exactly what it was after R5-3, and it can never grow the rail of
-    //     buttons 4D was scoped away from. The caret-block always-on form
-    //     is NOT revived.
-    //   - UNCOMMENTED BLOCKS ONLY. A block that already carries a comment
-    //     shows its CARD there, and the card is the same door.
-    //
-    // Everything else is 4D's rule unchanged: margin-card mode only (the
-    // inline setting has its own strip grammar; a gutter too narrow for
-    // cards keeps the badge), the live editor only (the read tier has no
-    // comments door, so it can never render one), and one click opens the
-    // block's comments panel — the one door every comment face opens.
-
-    private var addChip: CommentCardView?
-    /// Test seam: which block the add door currently offers (nil = none).
-    private(set) var addChipBlockID: String?
-
-    private func renderAddChip(
-        _ state: BlockDecor.State, tokens: VoiceTokens, in textView: NSTextView
-    ) {
-        let eligible = onOpenComments != nil
-            && !state.appearance.inlineComments
-            && BlockDecor.gutterFitsCards(width: state.textLeft)
-        guard eligible, let blockID = hoveredBlockID,
-              state.comments[blockID]?.isEmpty ?? true,
-              let frame = state.frames.first(where: { $0.blockID == blockID })
-        else {
-            addChip?.removeFromSuperview()
-            addChip = nil
-            addChipBlockID = nil
-            return
-        }
-        let chip = addChip ?? {
-            let chip = CommentCardView()
-            addChip = chip
-            return chip
-        }()
-        if chip.superview == nil { textView.addSubview(chip) }
-        addChipBlockID = blockID
-        chip.onClick = onOpenComments.map { open in { open(blockID) } }
-        // The study voice carries no comment glyph (`commentPrefix` is ""),
-        // so the chip says "+" there rather than "+ " — one voice's idiom
-        // never prints another's punctuation.
-        let glyph = tokens.commentPrefix.trimmingCharacters(in: .whitespaces)
-        chip.present(
-            text: glyph.isEmpty ? "+" : "+ \(glyph)",
-            tint: .clear, ink: NSColor(tokens.faint),
-            style: .badge)
-        chip.toolTip = "Add a comment on this block (⌘⇧')"
-        chip.frame = BlockDecor.leftAddChipRect(
-            textLeft: state.textLeft, blockTop: frame.frame.minY)
-    }
+    // **What is NOT removed, deliberately** — every other way to leave a
+    // comment, and every way to READ one: the margin card and its narrow-
+    // gutter badge (what a block WITH comments shows, and itself the door),
+    // the inline strip grammar, the block menu's item, ⌘⇧', and the
+    // comments panel. Removal only; the fuller comments-area rework is
+    // 13u's item 3.
 
     private func renderHandles(_ state: BlockDecor.State, in textView: NSTextView) {
         // Handles exist only where a drop door does (the read tier renders
@@ -742,7 +684,7 @@ final class BlockDecorOverlayController {
     /// geometry; the walk stays viewport-proportional and stops again the
     /// moment the pointer leaves.
     func noteHover(atY y: CGFloat?) {
-        guard onMoveBlock != nil || onOpenComments != nil else { return }
+        guard onMoveBlock != nil else { return }
         onPointerInside?(y != nil)
         let id = y.flatMap { y in
             state.frames.first {
@@ -755,7 +697,6 @@ final class BlockDecorOverlayController {
         // next render after drag end settles the reveal.
         guard dragEntryIndex == nil, let textView else { return }
         renderHandles(state, in: textView)
-        renderAddChip(state, tokens: state.appearance.tokens, in: textView)
     }
 
     /// Grows/shrinks a view pool in place.

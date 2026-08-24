@@ -59,31 +59,27 @@ private func withTagSession<T>(
     }
 }
 
-// MARK: - E7: the margin-hover comment grammar (LEFT)
+// MARK: - The margin's comment faces (13e E7's card/badge; 13l retired its ＋)
 
 @MainActor
-@Suite("The margin's hover comment door (13e E7)", .serialized)
+@Suite("The margin's comment faces (13e E7 · 13l 8c)", .serialized)
 struct MarginHoverCommentTests {
-    /// The chip's geometry is pure, so where it sits is pinnable without a
-    /// pointer: right-aligned against the card lane, so it appears exactly
-    /// where that block's comment card would start reading.
-    @Test func theAddChipSitsWhereTheCardWouldRead() {
-        let chip = BlockDecor.leftAddChipRect(textLeft: 300, blockTop: 40)
-        let card = BlockDecor.leftCardRect(textLeft: 300, blockTop: 40, blockHeight: 30)
-        #expect(chip.maxX == card.maxX, "the chip ends where the card ends")
-        #expect(chip.maxX <= 300 - 22, "never under the drag handle")
-        #expect(chip.minX >= 0, "never off the left edge")
-        #expect(chip.origin.y == 40, "aligned to the block's top")
-        #expect(chip.width == BlockDecor.addChipSize.width)
-        #expect(chip.height == BlockDecor.addChipSize.height)
-    }
-
-    /// **RED ON OLD** (behavioral revert: drop `renderAddChip`'s call sites
-    /// in `render` and `noteHover`): before E7 the margin offered nothing at
-    /// all on hover — R5-3 retired the 13b-4D right-hand chip, and this is
-    /// the rung 4D recorded as next, built on the side her Round-2
-    /// instruction made the comment side.
-    @Test func hoveringAnUncommentedBlockOffersTheDoorInTheLeftMargin() async throws {
+    /// **THE REMOVAL, PINNED** (13l, her 8c rider: *"I need the comment +
+    /// on the left removed … it's too crowded and I don't like the look of
+    /// seeing it there"*).
+    ///
+    /// **RED ON OLD** by construction: 13e E7's three pins asserted the
+    /// opposite of every line here — that hovering an uncommented block
+    /// rendered a chip at `leftAddChipRect`, that clicking it opened that
+    /// block's comments, and that it was withheld in exactly three cases.
+    /// Those pins are gone with the door; this one stands where they stood,
+    /// so the invitation cannot come back unnoticed.
+    ///
+    /// It asserts the two halves of "removal only" together: nothing appears
+    /// on hover over an uncommented block, and everything that was NOT
+    /// removed still does — the commented block's CARD (itself the door)
+    /// and the drag handle's own hover reveal, which shared the tracking.
+    @Test func hoveringAnUncommentedBlockOffersNoMarginPlus() async throws {
         try await withEditor(seedBlocks: ["Alpha.", "Beta."]) { h in
             var opened: [String] = []
             let controller = BlockDecorOverlayController(
@@ -104,80 +100,29 @@ struct MarginHoverCommentTests {
             state.textRight = 640
             state.comments["b1"] = [.init(id: "c1", text: "a note")]
             controller.render(state)
-            #expect(controller.addChipBlockID == nil, "at rest the margin is calm")
 
+            @MainActor func faces() -> [CommentCardView] {
+                h.textView.subviews.compactMap { $0 as? CommentCardView }
+            }
+            // b1's CARD is the only comment face on the surface, at rest…
+            #expect(faces().count == 1, "the commented block's card — untouched")
+
+            // …and hovering the UNCOMMENTED block adds nothing to it.
             controller.noteHover(atY: 15)
-            #expect(controller.addChipBlockID == "b0",
-                    "the hovered UNCOMMENTED block offers the door")
-            let chips = h.textView.subviews.compactMap { $0 as? CommentCardView }
-                .filter { $0.frame.size == BlockDecor.addChipSize }
-            let chip = try #require(chips.first)
-            #expect(chip.frame.maxX <= state.textLeft, "LEFT of the text")
-            #expect(chip.frame.maxX <= state.textLeft - 22, "clear of the handle lane")
-            #expect(chip.frame.minY == 0, "at the hovered block's top")
+            #expect(controller.hoveredBlockID == "b0", "hover still resolves")
+            #expect(faces().count == 1,
+                    "no ＋ in the margin — her 8c ruling, and the card is unmoved")
+            #expect(opened.isEmpty, "there is no invitation left to click")
 
-            // It is a DOOR: one click opens that block's comments — the one
-            // door every comment face opens.
-            chip.onClick?()
-            #expect(opened == ["b0"])
+            // The handle's reveal shared that tracking and must survive it.
+            #expect(h.textView.subviews.compactMap { $0 as? DragHandleView }.count == 1,
+                    "S4-19's hover handle still reveals — only the ＋ went")
 
-            // A block that already carries a comment shows its CARD, which
-            // is the same door — no second invitation beside it.
+            // Hovering the COMMENTED block leaves its card alone too.
             controller.noteHover(atY: 55)
-            #expect(controller.addChipBlockID == nil)
-
-            // Pointer gone, margin calm again.
+            #expect(faces().count == 1)
             controller.noteHover(atY: nil)
-            #expect(controller.addChipBlockID == nil)
-        }
-    }
-
-    /// The three narrowings, each for its own recorded reason.
-    @Test func theDoorIsOfferedOnlyWhereItCouldBeUsed() async throws {
-        try await withEditor(seedBlocks: ["Alpha."]) { h in
-            var state = BlockDecor.State()
-            state.frames = [
-                .init(entryIndex: 0, blockID: "b0",
-                      frame: CGRect(x: 300, y: 0, width: 340, height: 30)),
-            ]
-            state.entryCount = 1
-            state.viewWidth = 900
-            state.textLeft = 300
-            state.textRight = 640
-
-            // (a) The READ tier has no comments door, so it can never offer
-            // one — and never tracks the pointer at all.
-            let quiet = BlockDecorOverlayController(
-                textView: h.textView, onOpenComments: nil, onMoveBlock: nil)
-            defer { quiet.uninstall() }
-            quiet.render(state)
-            quiet.noteHover(atY: 15)
-            #expect(quiet.addChipBlockID == nil)
-            #expect(quiet.hoveredBlockID == nil)
-
-            // (b) INLINE comments keep their own strip grammar (R7's
-            // setting) — the margin is not where they live.
-            let live = BlockDecorOverlayController(
-                textView: h.textView, onOpenComments: { _ in }, onMoveBlock: { _, _ in })
-            defer { live.uninstall() }
-            var inline = state
-            inline.appearance.inlineComments = true
-            live.render(inline)
-            live.noteHover(atY: 15)
-            #expect(live.addChipBlockID == nil)
-
-            // (c) A gutter too narrow for cards keeps the badge grammar —
-            // an invitation with nowhere to sit is not an invitation.
-            var narrow = state
-            narrow.textLeft = 40
-            narrow.frames = [
-                .init(entryIndex: 0, blockID: "b0",
-                      frame: CGRect(x: 40, y: 0, width: 340, height: 30)),
-            ]
-            live.render(narrow)
-            live.noteHover(atY: nil)
-            live.noteHover(atY: 15)
-            #expect(live.addChipBlockID == nil)
+            #expect(faces().count == 1, "the card is not a hover face")
         }
     }
 
@@ -219,14 +164,8 @@ struct MarginHoverCommentTests {
             #expect(faces().allSatisfy { $0.frame.maxX <= narrow.textLeft },
                     "the count badge stands in on the same side")
 
-            // 3 — the hover CHIP (uncommented block, wide gutter).
-            var uncommented = wide
-            uncommented.comments = [:]
-            controller.render(uncommented)
-            controller.noteHover(atY: 15)
-            #expect(!faces().isEmpty, "the hover door renders")
-            #expect(faces().allSatisfy { $0.frame.maxX <= uncommented.textLeft },
-                    "the hover invitation is on the comment side too")
+            // (13l, her 8c rider: the third face — E7's hover ＋ — is gone;
+            // its removal is pinned in `MarginHoverCommentTests` above.)
         }
     }
 }
@@ -290,14 +229,9 @@ struct CalmPageHoverTests {
             #expect(captured?.frames.isEmpty == false,
                     "geometry exists exactly while she is pointing at the page")
             #expect(controller.hoveredBlockID != nil, "the hovered block resolves")
-            // The comment invitation rides the same geometry, wherever the
-            // real surface's gutter is wide enough for a card at all (a
-            // narrow window keeps the badge grammar — pinned above).
-            let gutter = try #require(captured).textLeft
-            if BlockDecor.gutterFitsCards(width: gutter) {
-                #expect(controller.addChipBlockID == controller.hoveredBlockID,
-                        "and its comment invitation is offered")
-            }
+            // (13l, her 8c rider: E7's comment invitation rode this same
+            // geometry and is retired; the drag handle — 4D's S4-19 promise,
+            // which is the bug this pin was written for — still rides it.)
             let handles = h.textView.subviews.compactMap { $0 as? DragHandleView }
             #expect(handles.count == 1, "the drag handle reveals too — S4-19's promise, kept")
 
@@ -306,7 +240,6 @@ struct CalmPageHoverTests {
             pump()
             #expect(!h.model.pointerInEditor)
             #expect(captured?.frames.isEmpty == true)
-            #expect(controller.addChipBlockID == nil)
             #expect(h.textView.subviews.compactMap { $0 as? DragHandleView }.isEmpty,
                     "…and the handle goes with it")
         }

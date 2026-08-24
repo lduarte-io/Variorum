@@ -23,6 +23,103 @@ import Testing
 import VariorumCore
 @testable import Variorum
 
+/// **THE POOL/SCRAPS HONESTY CHECK** (13l Act 2, ledger item 5 — §8b:
+/// *"verify a deleted POOL reads honestly in the Trash (kind naming, cascade
+/// of its scraps, Put back) — the check is that its FACE never calls a pool
+/// a note"*).
+///
+/// What the check FOUND, and what each finding became:
+///
+/// - **A deleted POOL itself is not reachable at all**, so it cannot be
+///   mis-named: `Queries.trash`'s note arm fences `kind = 'post'`, and no
+///   door in either app deletes a pool container (`deleteContainer`'s only
+///   Mac caller is `LibraryViewModel.delete(postID:)`, reached from the
+///   Library's and the Pool's note rows — both of which list `kind='post'`
+///   hits, since the surface named "Pool" holds BOOKLESS NOTES, R29). Pinned
+///   below so the day something does delete one, this says so.
+/// - **A deleted SCRAP is reachable, and the face called its pool a note** —
+///   three ways, all fixed in this batch: the row named the home through
+///   `DisplayTitle.note` (a pool has no `entry_date`, so a nameless one read
+///   *"Untitled"* where every other surface shows its created day — 13k K2);
+///   the row's door said **Open note**; and it routed `.post`, opening a pool
+///   as a note pane.
+/// - **RECORDED, not fixed** (it needs the landing to report its container's
+///   kind, which is a `Sources/` change this batch is fenced out of): the
+///   shared put-back RECEIPTS still say "note" for a scrap —
+///   `RecoveryCopy.putBackAtEnd` / `.putBackUnplaced`.
+@MainActor
+@Suite("A scrap's home is a pool, and the Trash says so (13l §8b)")
+struct TrashPoolHonestyTests {
+    @Test func aDeletedScrapNamesItsScrapsAreaAndOpensThere() async throws {
+        try await withEditor(seedBlocks: ["Alpha one."]) { editor in
+            // A NAMELESS pool — the case where the two display brains part.
+            let poolID = try await editor.session.runner.run { (ops: Operations) -> String in
+                let pool = try ops.createPool(title: nil)
+                let scrap = try ops.newBlock(in: pool.id, text: "a loose sentence")
+                try ops.deleteBlock(scrap.block.id)
+                return pool.id
+            }
+            let model = RecoveryViewModel(session: editor.session)
+            let rows: [Queries.TrashItem] = try await editor.database.read { db in
+                try Queries.trash(db, now: harnessNow)
+            }
+            let scrapRow = try #require(rows.first { $0.kind == .block })
+            #expect(scrapRow.noteID == poolID, "its home is the pool it was deleted from")
+            model.adopt(archived: [], trash: rows)
+            await model.loadPoolHomesForTests()
+
+            // RED ON OLD (behavioral revert: drop `homeIsPool`/`homeTitle`'s
+            // pool arms). The query names the home with the NOTE brain…
+            #expect(scrapRow.noteTitle == DisplayTitle.placeholder,
+                    "the query's own answer is the note placeholder")
+            // …and the surface corrects it to the pool's.
+            #expect(model.homeIsPool(scrapRow))
+            let shown = try #require(model.homeTitle(scrapRow))
+            #expect(shown != DisplayTitle.placeholder,
+                    "a nameless pool shows its created day, never 'Untitled' (13k K2)")
+
+            // A note's row is untouched by any of it.
+            let notePost = try await editor.session.runner.run { (ops: Operations) -> String in
+                let post = try ops.createPost(title: "Real note")
+                let block = try ops.newBlock(in: post.id, text: "prose")
+                try ops.deleteBlock(block.block.id)
+                return post.id
+            }
+            let after: [Queries.TrashItem] = try await editor.database.read { db in
+                try Queries.trash(db, now: harnessNow)
+            }
+            model.adopt(archived: [], trash: after)
+            await model.loadPoolHomesForTests()
+            let noteRow = try #require(after.first { $0.noteID == notePost })
+            #expect(!model.homeIsPool(noteRow))
+            #expect(model.homeTitle(noteRow) == "Real note",
+                    "a note still reads through the note brain")
+        }
+    }
+
+    /// The other half of the check, pinned as the FACT it rests on: nothing
+    /// puts a pool CONTAINER in the Trash, so no row can call one a note.
+    /// If a pool-deleting door is ever built, this goes red and its Trash
+    /// story has to be designed with it.
+    @Test func noDoorPutsAPoolContainerInTheTrash() async throws {
+        try await withEditor(seedBlocks: ["Alpha one."]) { editor in
+            let poolID = try await editor.session.runner.run { (ops: Operations) -> String in
+                let pool = try ops.createPool(title: "Scraps")
+                _ = try ops.newBlock(in: pool.id, text: "a loose sentence")
+                try ops.deleteContainer(pool.id)
+                return pool.id
+            }
+            let rows: [Queries.TrashItem] = try await editor.database.read { db in
+                try Queries.trash(db, now: harnessNow)
+            }
+            #expect(!rows.contains { $0.id == poolID },
+                    "the note arm is fenced to kind='post' — a pool never lists")
+            #expect(rows.allSatisfy { $0.kind != .note },
+                    "and its scraps rode the cascade, so nothing strays either")
+        }
+    }
+}
+
 @MainActor
 @Suite("The Trash surface, block archive & the batch-6 riders (13j)")
 struct TrashSurfaceTests {

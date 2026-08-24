@@ -601,7 +601,10 @@ struct RootView: View {
         case .recovery:
             RecoveryView(
                 session: session, library: library,
-                openPost: { postID in openHere(.post(postID)) })
+                openPost: { postID in openHere(.post(postID)) },
+                // 13l (§8b): a scrap's row opens the SCRAPS area, not a note
+                // pane over a pool container.
+                openPool: { poolID in openHere(.pool(poolID)) })
         }
     }
 

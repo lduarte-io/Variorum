@@ -223,11 +223,71 @@ final class RecoveryViewModel {
             ) {
                 trashTruncated = value.count > Self.window
                 trash = trashTruncated ? Array(value.prefix(Self.window)) : value
+                await refreshPoolHomes()
             }
         } catch is CancellationError {
         } catch {
             lastError = String(describing: error)
         }
+    }
+
+    // MARK: A scrap's home is a POOL, and the surface says so (13l, §8b's
+    // pool/scraps honesty check)
+
+    /// The live pools, by id. **Why the surface holds this at all:** a block
+    /// or take deleted out of the SCRAPS area carries `last_container_id`
+    /// pointing at a `kind='pool'` container, and `Queries.trash` names that
+    /// home through `DisplayTitle.note` — the wrong display brain. A pool has
+    /// no `entry_date`, so a nameless one reads *"Untitled"* here while every
+    /// other surface shows the day it was created (13k K2, her ruling:
+    /// *"i think pools can show their created day"*). The row's own door was
+    /// wrong the same way: it said **Open note** and routed `.post`, opening a
+    /// pool as though it were a note.
+    ///
+    /// It is read on the FACE rather than added to the query deliberately —
+    /// this batch's fence keeps `Sources/` closed, and the fix does not need
+    /// it: pools are structurally few (the Blocks area creates ONE and reuses
+    /// it), the read is `deleted_at IS NULL`-bounded, and it rides the Trash's
+    /// own observation, which is a summoned surface, never a keystroke road.
+    /// *(What a face CANNOT reach is recorded rather than half-fixed: the
+    /// shared put-back RECEIPTS — "Put back at the end of this note", "its
+    /// note is gone" — still say "note" for a scrap, because the landing
+    /// would have to report its container's kind for them to know better.)*
+    private(set) var poolHomes: [String: Container] = [:]
+
+    private func refreshPoolHomes() async {
+        guard trash.contains(where: { $0.noteID != nil }) else {
+            poolHomes = [:]
+            return
+        }
+        do {
+            let pools = try await session.database.read { db in try Queries.pools(db) }
+            poolHomes = Dictionary(uniqueKeysWithValues: pools.map { ($0.id, $0) })
+        } catch {
+            poolHomes = [:]  // the row simply keeps the note wording
+        }
+    }
+
+    /// Tests drive the pool read directly, the `adopt` way — the listing is
+    /// adopted rather than observed there, so nothing would refresh it.
+    func loadPoolHomesForTests() async {
+        await refreshPoolHomes()
+    }
+
+    /// True when this row came out of the scraps area rather than a note.
+    func homeIsPool(_ item: Queries.TrashItem) -> Bool {
+        item.noteID.map { poolHomes[$0] != nil } ?? false
+    }
+
+    /// What the row calls the thing it came out of — each kind through its
+    /// OWN display brain (13k K2's rule, which the Trash had never been
+    /// told about).
+    func homeTitle(_ item: Queries.TrashItem) -> String? {
+        guard let noteID = item.noteID else { return nil }
+        if let pool = poolHomes[noteID] {
+            return DisplayTitle.pool(title: pool.title, createdAt: pool.createdAt)
+        }
+        return item.noteTitle
     }
 
     /// Internal so tests drive listings deterministically.
@@ -468,6 +528,10 @@ struct RecoveryView: View {
     let session: AppSession
     let library: LibraryViewModel
     var openPost: (String) -> Void
+    /// 13l (§8b): the scraps area's own route, so a scrap's row never opens
+    /// its pool as a note. nil falls back to `openPost` — the pre-13l
+    /// behaviour, for any host that has no pool route.
+    var openPool: ((String) -> Void)?
     @State private var model: RecoveryViewModel
 
     /// 13j batch 6b (P-1): the Trash surface is the ONE renderer of the two
@@ -477,11 +541,13 @@ struct RecoveryView: View {
 
     init(
         session: AppSession, library: LibraryViewModel,
-        openPost: @escaping (String) -> Void
+        openPost: @escaping (String) -> Void,
+        openPool: ((String) -> Void)? = nil
     ) {
         self.session = session
         self.library = library
         self.openPost = openPost
+        self.openPool = openPool
         _model = State(initialValue: RecoveryViewModel(session: session))
     }
 
@@ -598,7 +664,9 @@ struct RecoveryView: View {
             }
             // "from ‹note›" — the context her round-5 statement asked for,
             // with the honest addition when that note is in the Trash too.
-            if let noteTitle = item.noteTitle {
+            // 13l (§8b): the NAME comes from the home's own display brain,
+            // so a scrap says what the scraps area is actually called.
+            if let noteTitle = model.homeTitle(item) {
                 Text(item.noteIsDeleted
                      ? "from \(noteTitle) (also in the Trash)"
                      : "from \(noteTitle)")
@@ -618,11 +686,20 @@ struct RecoveryView: View {
             }
             Spacer()
             // The open-there door, only where the note is live (P-2: a door
-            // that cannot act is not rendered).
+            // that cannot act is not rendered). 13l (§8b): a scrap's home is
+            // the SCRAPS AREA — it says so, and it routes there, instead of
+            // opening a pool as though it were a note.
             if let noteID = item.noteID, !item.noteIsDeleted,
                item.kind != .note, item.kind != .book {
-                Button("Open note") { openPost(noteID) }
-                    .controlSize(.small)
+                let pool = model.homeIsPool(item)
+                Button(pool ? "Open scraps" : "Open note") {
+                    if pool, let openPool {
+                        openPool(noteID)
+                    } else {
+                        openPost(noteID)
+                    }
+                }
+                .controlSize(.small)
             }
             Button(RecoveryPath.putBackVerb) {
                 Task { await model.putBack(item) }
@@ -647,10 +724,12 @@ struct RecoveryView: View {
         switch item.kind {
         case .note: return "The note comes back with its blocks, its tags and its books"
         case .book: return "The book comes back whole — chapters and membership included"
-        case .block: return "The block goes back where it was in its note"
+        // 13l (§8b): note-agnostic on purpose — a block or take can have come
+        // out of the SCRAPS area, and the help was calling that pool a note.
+        case .block: return "The block goes back where it was"
         case .take: return "The take comes back in its block, exactly as it was"
         case .preservedOriginal:
-            return "Places the original back into its note — it stops counting down"
+            return "Places the original back where it came from — it stops counting down"
         }
     }
 
