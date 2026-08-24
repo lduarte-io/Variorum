@@ -2198,7 +2198,69 @@ here repo-first; fixes via an Opus fix session with traced mechanisms
 rules. **Act 2** (Opus): the trash-surface mini-round — ledger 2–6
 (+ any Act-1 findings in those files, so `RecoveryView` is touched
 once). **Act 3** (Opus): the L-items, 7–10. **Act 4** (Opus): backups
-+ drill + matrix, 11–15. **Act 5** (Opus): the faces, 16–19.
-**Act 6** (Opus): item 9, ledger 20. **Act 7**: the 8d walk (21),
-then the end-of-phase ladder (22), then closeout (23–24 + the full
-ritual).
++ drill + matrix, 11–15. **Act 5** (Opus): the faces, 16–18 (19 moved
+to 13p). **Act 6** (Opus): item 9, ledger 20. **Act 7**: the 8d walk
+(21), then the end-of-phase ladder (22), then closeout (23–24 + the
+full ritual).
+
+### ACT 3 — THE L-ITEMS: the brief (fresh Opus session; dispatches after Act 2 closes)
+
+**Scope: ledger rows 7–10 — mobile round 2's Mac/`Shared/` backlog,
+moved here at her 2026-08-23 ruling. The mobile handoff's §2b
+handback checklist will verify each; DEFER OUT LOUD, NEVER SILENTLY.**
+Read: CLAUDE.md · this plan's §"13l TAKES" table (L-a…L-d — the
+traced detail per item) · the 13j Environment traps by reference ·
+`notes/plans/mobile-round-2-orchestrator-handoff.md` §2b (the
+handback rows for L-a…L-d) and its §4/§5 where cited.
+
+1. **L-a (row 7) — the identity-projection audit reaches the Mac.**
+   HOIST `auditIdentityProjection` + the separator check
+   (`MobileEditorViewModel.swift:1898–1920`) into
+   `Shared/EditorBrain/`; wire the Mac's editor view model to it
+   (the DEBUG per-keystroke oracle for *the totals agree while the
+   content is wrong*); **carry the empty-entry hole's fix** (the
+   walk's `guard range.length > 0 else { continue }` skips an empty
+   entry's separator, leaving that boundary unaudited); pin
+   **red-on-old ON THE MAC** by reproducing the traced corruption
+   there (`stored → ["Alpha", "Beta beta", "G"]` — mobile round 2
+   §20 reproduced it Mac-side; drive the same road). The phone's
+   audit becomes a consumer of the hoisted brain (zero-test-edit on
+   the phone where the move is pure).
+2. **L-b (row 8) — `QuickEntryBar` stops destroying her text.**
+   `Variorum/Features/Shelf/QuickEntryBar.swift` `submit()` does
+   `entryText = ""` BEFORE the mint and its catch is a raw
+   `"New note refused: \(error)"` dump — in the bar she uses daily.
+   The phone's shipped fix is the reference shape
+   (`MobileQuickNote.file()` — reset ONLY on a completed hand-off);
+   route the copy through `OpsRefusalCopy.message(for:)`. Red-on-old:
+   a refused mint keeps the text AND speaks. (`QuickNotePad.take()`
+   clears deliberately and its copy speaks — leave it.)
+3. **L-c (row 9) — `AppBootstrap` off the main thread.** The init
+   opens the store and runs migrations SYNCHRONOUSLY on the main
+   thread before first paint (P2, both platforms). **The shape is
+   RULED** (mobile §58/§62): an `.opening` state; the file work
+   detached, hopping back to MainActor for `install` + the state
+   write (preserving the once-per-process flag); `retry()`
+   re-entering; a quiet launch view in BOTH app roots; the not-ready
+   window cannot open by construction (`AppSession` exists only
+   inside `.ready`). Context: D8's device number came back "almost
+   imperceptible" — worth-doing-not-urgent; re-measure after (the
+   sim numbers: 54.0/23.4 ms first, 5.0 reopen, 3.6 at 100k — flat).
+4. **L-d (row 10) — `AppSession.postAutosaves` gains its removal
+   path.** `releaseAutosave(forPost:)` called from the quick-note
+   box's `reset()`; **the traced trap must be handled deliberately**:
+   the Mac registers a `quitFinalize` closure at MINT time, so
+   release-then-remint registers a second for the same post (deduped
+   by `closeAutoCommit` — noise not corruption, but make it
+   deliberate and documented). Fix the THREE FALSE comments in that
+   file (`:89` "no undo UI yet" — shipped; `:240-245` inverted — the
+   quick note DOES cache a coordinator; `:206-208` "open posts are a
+   handful by construction" — false for exactly this reason).
+
+**Close of act:** run the §2b handback greps for L-a…L-d and QUOTE
+the flipped values in your record (they must all read "done" now);
+full four gates (this act is `Shared/`-heavy), counts quoted; the
+standing hard rules (no live-instance contact, explicit paths, no
+push, no schema, no `Sync/`, 13u's seam untouched — L-a's hoist is
+the AUDIT, never the refusal semantics); append "ACT 3 — RECORD" to
+this plan; the known flakes' isolation rule as always.
