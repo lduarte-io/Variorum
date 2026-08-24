@@ -128,6 +128,16 @@ public struct BridgeEngine: Sendable {
         /// Days holding two or more live entries — pushed NOTHING, visibly,
         /// until the author hand-merges (never newest-wins).
         public var pausedDays: [String] = []
+        /// Deleted bridged days whose deletion can NEVER travel — their
+        /// agreement is the re-push sentinel and nothing will ever replace
+        /// it (Phase 13l, the ladder's LR-MAJOR-1; the mechanism is at
+        /// `DeletionScan.stranded`). Reported every round, like the
+        /// duplicate-day pause, because the situation is unresolved until
+        /// she rules on the road out (QUESTIONS #78) or removes the day in
+        /// Fragments by hand. Carried whether or not the round was
+        /// authorized to travel deletions: it is a fact about local state,
+        /// not about this round's permissions.
+        public var strandedDeletionDays: [String] = []
         /// Unseen Fragments bodies destroyed by our own winning pushes and
         /// rescued as 'fragments' takes — 15.7 `replaced` receipts that
         /// survived the three discrimination rules (contract ask 13).
@@ -608,6 +618,13 @@ public struct BridgeEngine: Sendable {
     ///    ONCE. Put back self-heals for free: the note is live again, the
     ///    ordinary scan sees rendered text against an agreed-empty hash,
     ///    and the body re-projects.
+    ///    **The sentinel refusal is PERMANENT, not a window** (Phase 13l,
+    ///    the ladder's LR-MAJOR-1): only a successful push replaces a
+    ///    sentinel, and the push scan follows live notes, so a day deleted
+    ///    before (or during) a restage keeps its sentinel forever. Those
+    ///    days are collected as `DeletionScan.stranded` and SAID OUT LOUD
+    ///    in the round's notes rather than dropped silently; the road out
+    ///    is a product call and hers (QUESTIONS #78).
     /// 3. **Minimal LWW stamping** (`last_remote_stamp + 1s`, the existing
     ///    rule) means even an unpulled Fragments edit outranks the deletion
     ///    and resolves `.stale`; the sub-second/exact-tie residual is
@@ -621,7 +638,34 @@ public struct BridgeEngine: Sendable {
     /// still exists is not a deletion. (A note whose date MOVES, or is
     /// cleared, correctly leaves its old day unclaimed: that day genuinely
     /// has nothing left to project.)
-    static func deletionCandidates(_ db: Database) throws -> [PushCandidate] {
+    /// What one pass over `bridge_day` learns: the days whose deletion can
+    /// travel, and the days whose deletion NEVER can.
+    struct DeletionScan {
+        var candidates: [PushCandidate] = []
+        /// **STRANDED days** (Phase 13l, the end-of-phase ladder's
+        /// LR-MAJOR-1): a bridged day with no Variorum note left whose
+        /// agreement is the re-push sentinel. Guard 2 refuses it — correctly,
+        /// there is no comparable agreement — but unlike every other refusal
+        /// on this leg, **nothing will ever clear it**: the sentinel is only
+        /// ever replaced by a successful push, and the push scan follows LIVE
+        /// notes, which this day by definition has none of. So the refusal is
+        /// not a one-round window (as the guard's own prose implied and
+        /// QUESTIONS #76(d) said out loud) — it is permanent, and its
+        /// population is every day deleted BEFORE a `stageRepushFromTruth`
+        /// (a re-key, or 14d's migration act of 2026-08-16) as well as during
+        /// its window.
+        ///
+        /// This list exists so the divergence is not SILENT. Whether such a
+        /// deletion may travel anyway — on a pre-restage agreement, or with
+        /// none at all — is a product call and hers (QUESTIONS #78); the
+        /// engine's job here is to say what it cannot do, not to guess.
+        var stranded: [String] = []
+    }
+
+    /// ONE pass over `bridge_day`, answering both questions (Phase 13l, the
+    /// ladder's LR-MAJOR-1 — previously this returned candidates only and the
+    /// sentinel arm dropped its days on the floor without a word).
+    static func deletionScan(_ db: Database) throws -> DeletionScan {
         let emptyHash = BridgeHash.body("")
         let claimed = try Set(String.fetchAll(
             db,
@@ -637,19 +681,47 @@ public struct BridgeEngine: Sendable {
                 WHERE last_synced_hash IS NOT NULL
                 ORDER BY day_key ASC
                 """)
-        return bridged.compactMap { row in
+        var scan = DeletionScan()
+        for row in bridged {
             let day: String = row["day_key"]
             let agreed: String = row["last_synced_hash"]
-            guard !claimed.contains(day) else { return nil }       // still a note
-            guard agreed != emptyHash else { return nil }          // already told (ONCE)
-            guard agreed != restagedHashSentinel else { return nil }  // no comparable agreement
-            guard JournalDay.isValid(day) else { return nil }      // could never join
-            return PushCandidate(
+            guard !claimed.contains(day) else { continue }       // still a note
+            guard JournalDay.isValid(day) else { continue }      // could never join
+            guard agreed != emptyHash else { continue }          // already told (ONCE)
+            guard agreed != restagedHashSentinel else {
+                // No comparable agreement — and no road back to one.
+                scan.stranded.append(day)
+                continue
+            }
+            scan.candidates.append(PushCandidate(
                 day: day, body: "", hash: emptyHash, agreedHash: agreed,
                 remoteStamp: row["last_remote_stamp"],
                 remoteCreatedAt: row["remote_created_at"],
-                isDeletion: true)
+                isDeletion: true))
         }
+        return scan
+    }
+
+    static func deletionCandidates(_ db: Database) throws -> [PushCandidate] {
+        try deletionScan(db).candidates
+    }
+
+    /// The one sentence a stranded population gets. Aggregate rather than
+    /// per-day because the note recurs every round (the standing posture for
+    /// an unresolved situation — the duplicate-day pause behaves the same
+    /// way), and because a per-day note would make an old re-key read as a
+    /// wall of failures.
+    static func strandedDeletionNote(_ days: [String]) -> String {
+        let named = days.prefix(5).joined(separator: ", ")
+        let tail = days.count > 5 ? ", and \(days.count - 5) more" : ""
+        return """
+            \(days.count) deleted journal day\(days.count == 1 ? "" : "s") \
+            can no longer be removed from Fragments by the bridge \
+            (\(named)\(tail)) — their agreement was staged for a re-push \
+            from truth while the note was already gone, so the bridge can no \
+            longer say what Fragments holds. Remove them in Fragments by \
+            hand if you want them gone.
+            """
     }
 
     /// The projection half.
@@ -674,7 +746,8 @@ public struct BridgeEngine: Sendable {
         report.notes = try await database.read { try Self.unrescuedBodyNotes($0) }
         let now = DateFormatter.variorumISO8601.string(from: date.now)
 
-        let scan: (candidates: [PushCandidate], paused: [String], notes: [String]) =
+        let scan: (candidates: [PushCandidate], paused: [String], notes: [String],
+                   stranded: [String]) =
             try await database.read { db in
                 var candidates: [PushCandidate] = []
                 var paused: [String] = []
@@ -753,16 +826,28 @@ public struct BridgeEngine: Sendable {
                         remoteStamp: state?.remoteStamp ?? nil,
                         remoteCreatedAt: state?.remoteCreatedAt ?? nil))
                 }
+                // ONE pass, always: the stranded population is a fact about
+                // local state, so it is learned (and said) even on a round
+                // that has no authorization to travel deletions.
+                let deletions = try Self.deletionScan(db)
                 if travelDeletions {
-                    candidates.append(contentsOf: try Self.deletionCandidates(db))
+                    candidates.append(contentsOf: deletions.candidates)
                 }
-                return (candidates, paused, notes)
+                return (candidates, paused, notes, deletions.stranded)
             }
         report.pausedDays = scan.paused
+        report.strandedDeletionDays = scan.stranded
         // APPEND — the report already carries the re-surfaced unrescued
         // bodies loaded above; assignment here silently dropped them
         // (caught by the round-2 pin on first run).
         report.notes.append(contentsOf: scan.notes)
+        // BEFORE the empty-candidates early return below: a round whose only
+        // news is a stranded day pushes nothing, and that is exactly the
+        // round that must still speak (the ladder's LR-MAJOR-1 — silence is
+        // what made the divergence invisible).
+        if !scan.stranded.isEmpty {
+            report.notes.append(Self.strandedDeletionNote(scan.stranded))
+        }
 
         guard !scan.candidates.isEmpty else { return report }
 

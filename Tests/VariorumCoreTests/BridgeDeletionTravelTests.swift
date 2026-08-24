@@ -260,6 +260,12 @@ struct BridgeDeletionTravelTests {
     /// still matches the last-pushed hash", and a sentinel means the bridge
     /// cannot make that statement.
     ///
+    /// **How long the corner lasts is NOT what this pin's original prose
+    /// implied** — see `aDayDeletedBeforeARestageIsStrandedForeverAndSaysSo`
+    /// below (Phase 13l, the ladder's LR-MAJOR-1): for a day with no live
+    /// note the refusal is permanent, because only a successful push
+    /// replaces a sentinel and the push scan follows live notes.
+    ///
     /// The second round before staging is load-bearing and was found by
     /// this pin's own red-on-old check: it walks the cursor past the
     /// bridge's own pushed row, so the round under test pulls nothing. With
@@ -313,6 +319,126 @@ struct BridgeDeletionTravelTests {
             #expect(round.landing.created == 1)
             #expect(try bridge.rendered(day: "2026-07-09") == "Agreed once.")
             #expect(round.push.deletionsPushed == 0)
+        }
+    }
+
+    // MARK: The STRANDED population (Phase 13l, the end-of-phase ladder's
+    // LR-MAJOR-1)
+
+    /// **The corner above is permanent, and it now says so.**
+    ///
+    /// Traced mechanism: `stageRepushFromTruth` stamps the sentinel onto
+    /// EVERY `bridge_day` row carrying a hash — including rows for days whose
+    /// note is already deleted. A sentinel is only ever replaced by a
+    /// successful push, and the push half's scan reads LIVE journal notes, so
+    /// a dead day's sentinel is never replaced by anything, ever. Guard 2
+    /// then refuses that day's deletion on every round for the life of the
+    /// store. The population is every day deleted BEFORE a restage (a re-key,
+    /// or 14d's migration act of 2026-08-16) as well as inside its window.
+    ///
+    /// **Two halves, deliberately in one pin:**
+    /// - The PERMANENCE half (`deletionsPushed == 0`, round after round, the
+    ///   sentinel still in place) is **behavior, not a fix** — it passes
+    ///   before and after. Whether such a deletion may travel anyway is a
+    ///   product call and hers (QUESTIONS #78); this pin exists so the answer
+    ///   is chosen rather than inherited.
+    /// - The VISIBILITY half (`strandedDeletionDays`, and a note that names
+    ///   the day) is the fix, and it is red on old: before it, the day was
+    ///   dropped on the floor without a word — silent permanent divergence.
+    @Test func aDayDeletedBeforeARestageIsStrandedForeverAndSaysSo() async throws {
+        try await withBridge { bridge in
+            let entry = try bridge.makeEntry(day: "2026-07-09", text: "Agreed once.")
+            _ = try await bridge.engine.run()
+            _ = try await bridge.engine.run()  // the cursor passes our own push
+
+            // She deletes the note — and only THEN does a re-key stage every
+            // bridged day for a re-push from truth. The dead day is staged
+            // with the living ones.
+            try bridge.ops.deleteContainer(entry.container.id)
+            try await bridge.db.write { db in
+                _ = try BridgeEngine.stageRepushFromTruth(db)
+            }
+
+            // Round after round after round: nothing travels, nothing heals.
+            for _ in 0..<3 {
+                let round = try await bridge.engine.run()
+                #expect(round.landing.created == 0)  // the leg IS reached
+                #expect(round.push.deletionsPushed == 0)
+                #expect(try await bridge.fragmentsBody(day: "2026-07-09") == "Agreed once.")
+                // THE FIX: the day is named, every round, like the
+                // duplicate-day pause it resembles.
+                #expect(round.push.strandedDeletionDays == ["2026-07-09"])
+                #expect(round.push.notes.contains {
+                    $0.contains("2026-07-09") && $0.contains("Fragments")
+                })
+            }
+            // Permanence, stated at the mechanism: the sentinel is still
+            // there, and nothing in the engine can replace it.
+            #expect(try bridge.dayState("2026-07-09") == BridgeEngine.restagedHashSentinel)
+        }
+    }
+
+    /// The stranded fact is about LOCAL STATE, not about a round's
+    /// permissions: a bare `push()` may travel no deletions at all, and must
+    /// still say which ones it can never travel.
+    @Test func aStrandedDayIsNamedEvenWhenTheRoundMayTravelNothing() async throws {
+        try await withBridge { bridge in
+            let entry = try bridge.makeEntry(day: "2026-07-09", text: "Agreed once.")
+            _ = try await bridge.engine.run()
+            try bridge.ops.deleteContainer(entry.container.id)
+            try await bridge.db.write { db in
+                _ = try BridgeEngine.stageRepushFromTruth(db)
+            }
+
+            let report = try await bridge.engine.push()  // travelDeletions: off
+            #expect(report.deletionsPushed == 0)
+            #expect(report.strandedDeletionDays == ["2026-07-09"])
+            #expect(report.notes.contains { $0.contains("2026-07-09") })
+        }
+    }
+
+    /// A day that is merely deletable — sentinel-free — is never called
+    /// stranded, and a day nothing has happened to says nothing at all. (The
+    /// note recurs every round, so a false positive would become a permanent
+    /// alarm.)
+    @Test func anOrdinaryDeletableDayIsNeverCalledStranded() async throws {
+        try await withBridge { bridge in
+            let entry = try bridge.makeEntry(day: "2026-07-09", text: "Ordinary.")
+            let first = try await bridge.engine.run()
+            #expect(first.push.strandedDeletionDays.isEmpty)
+
+            try bridge.ops.deleteContainer(entry.container.id)
+            let travelled = try await bridge.engine.run()
+            #expect(travelled.push.deletionsPushed == 1)
+            #expect(travelled.push.strandedDeletionDays.isEmpty)
+
+            // And once told, the agreed-EMPTY day is quiet rather than
+            // stranded — the two refusals must not be confused.
+            let quiet = try await bridge.engine.run()
+            #expect(quiet.push.strandedDeletionDays.isEmpty)
+            #expect(quiet.push.notes.isEmpty)
+        }
+    }
+
+    /// Put back reaches even a stranded day: the note is live again, so it is
+    /// claimed, so it is not stranded — and the ordinary scan re-pushes truth
+    /// over the sentinel, which is the one thing that clears one.
+    @Test func puttingTheNoteBackClearsTheStranding() async throws {
+        try await withBridge { bridge in
+            let entry = try bridge.makeEntry(day: "2026-07-09", text: "Agreed once.")
+            _ = try await bridge.engine.run()
+            _ = try await bridge.engine.run()
+            try bridge.ops.deleteContainer(entry.container.id)
+            try await bridge.db.write { db in
+                _ = try BridgeEngine.stageRepushFromTruth(db)
+            }
+            #expect(try await bridge.engine.run().push.strandedDeletionDays == ["2026-07-09"])
+
+            try bridge.ops.restoreContainer(entry.container.id)
+            let healed = try await bridge.engine.run()
+            #expect(healed.push.strandedDeletionDays.isEmpty)
+            #expect(healed.push.pushed == 1)  // truth re-pushed over the sentinel
+            #expect(try bridge.dayState("2026-07-09") == BridgeHash.body("Agreed once."))
         }
     }
 
