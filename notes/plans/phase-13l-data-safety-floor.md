@@ -2855,6 +2855,50 @@ then break on purpose. Nothing was dismissed as hollow.
    argument (13g R6-3 / 13k K1 retired that placeholder) applies here
    too, and the next reader should not have to re-derive it.
 
+### THE END-OF-PHASE LADDER — ROUND 2 (fresh Fable, 2026-08-24): NO NEW BLOCKER/MAJOR — no round 3. 2 MINOR · 3 NIT, dispositions below
+
+The reviewer independently re-ran all gates (core 1373/143 · Mac
+1688/292 zero reds · mobile 486/78 — both flakes green, the canvas
+red stays at ONE), re-ran the backlog measurement on its own scratch
+copy (11 bridged · 0 sentinel · 0 stranded · 0 waiting — exact
+match), verified the MAJOR's pin deviation as TRUE-not-convenient
+(round 1's specified pin contradicted its own author-reservation;
+the wave resolved toward the do-not-invent rule), confirmed
+plain-click-still-opens by pin AND screenshot, found the sibling
+enumeration complete, and confirmed every architect item. Round-2
+findings and their dispositions:
+
+- **R2-1 (MINOR) · `AppSession.runCopying` mints for never-opened
+  sources + its doc still asserts the corrected falsehood** →
+  **FIX NOW (round-2 fix session):** the one-line route through
+  `flushExistingAutosave` (semantics-preserving by LR-MINOR-2's own
+  argument), the comment corrected, the LR-MINOR-2 pin shape.
+- **R2-2 (MINOR) · the revived pick survives listing changes** — the
+  bulk doors can stand over a selection nothing on screen shows
+  (the fix's own standard, tripped on the path it newly made
+  reachable) → **FIX NOW:** prune the pick against the listed ids
+  when hits change (or clear on query/scope change, matching the
+  mode rule), pinned at the model like the other six.
+- **R2-3 (NIT) · `strandedDeletionNote`'s mechanism clause wrong for
+  the staged-then-deleted half** → **FIX NOW** (the reviewer's
+  suggested both-population wording).
+- **R2-4 (NIT) · `deletionCandidates` survives as a zero-caller dead
+  wrapper** → **FIX NOW** (delete; point the stale test doc-comment
+  at `deletionScan`).
+- **R2-5 (NIT) · the fix-wave record's "Library Untitled" item
+  mis-describes the mechanism** (nameless notes show DATES since 13g
+  batch 7; what reads "Untitled" is the stored-literal legacy title
+  13k K1 ruled untouchable) → **ANNOTATED BY THE ARCHITECT below** —
+  no code change exists to make; a future session chasing that
+  "gap" would conflict with K1. **Also recorded at the reviewer's
+  ask: the Pool twin needs no P-0 fix** — `PoolPostsView`'s List has
+  no `selection:` binding, so nothing is swallowed and no bulk door
+  is dead there.
+
+*(R2-5's correction, standing: the fix-wave record's "not fixed"
+item 4 should be read with this annotation — the deferral outcome
+was right, the stated mechanism was not.)*
+
 ### THE LEDGER (every row owned; statuses updated as they move)
 
 | # | item | strand | status |
