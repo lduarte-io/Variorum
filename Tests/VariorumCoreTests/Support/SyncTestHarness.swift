@@ -43,12 +43,27 @@ final class SyncClient {
 
     /// `prefix` must be exactly two hex characters (e.g. "AA", "BB") — it
     /// leads every UUID the device mints, so two devices can never collide.
+    ///
+    /// `storeURL` (Phase 13l, Act 4 — the restore matrix): an ON-DISK store
+    /// instead of the in-memory default. That is what makes a RESTORED
+    /// device modelable without wall-clock tricks or hand-rolled snapshots:
+    /// take a real `AppDatabase.backup(to:)` of a converged device, copy the
+    /// file, and open a client on the copy. The restored client then carries
+    /// the backup's rows, its cursor, its outbox and — the part that matters
+    /// for M7 — its `sync_state.device_id`, because device identity lives in
+    /// the store and therefore travels inside a backup.
+    ///
+    /// Give a restored client its OWN `prefix`: the UUID counter restarts at
+    /// zero, so reusing the source device's prefix would mint ids it already
+    /// minted before the backup. Nothing in sync keys on the prefix.
     init(
         name: String, prefix: String, transport: any SyncTransport,
-        clockOffset: TimeInterval = 0, seed: UInt64 = 1, mintsRandomUUIDs: Bool = false
+        clockOffset: TimeInterval = 0, seed: UInt64 = 1, mintsRandomUUIDs: Bool = false,
+        storeURL: URL? = nil
     ) throws {
         precondition(prefix.count == 2 && prefix.allSatisfy(\.isHexDigit))
-        self.db = try AppDatabase.inMemory()
+        self.db = try storeURL.map { try AppDatabase.openStore(at: $0) }
+            ?? AppDatabase.inMemory()
         self.name = name
         self.devicePrefix = prefix
         self.mintsRandomUUIDs = mintsRandomUUIDs
@@ -182,4 +197,58 @@ func syncToQuiescence(
 
 enum SyncHarnessError: Error {
     case neverQuiesced(maxRounds: Int)
+}
+
+/// Phase 13l, Act 4 — a scratch folder plus the two file moves a restore
+/// actually is. Deliberately thin: the point of the restore matrix is that
+/// "restored" means *these bytes, from that moment*, not a fixture that
+/// approximates one.
+struct RestoreScratch {
+    let directory: URL
+
+    init() throws {
+        directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("variorum-restore-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+    }
+
+    func url(_ name: String) -> URL { directory.appendingPathComponent(name) }
+
+    func cleanUp() { try? FileManager.default.removeItem(at: directory) }
+
+    /// One consistent snapshot through the SAME door the app's scheduler
+    /// uses (`AppDatabase.backup(to:)` — SQLite's backup API, WAL-safe).
+    func snapshot(_ client: SyncClient, as name: String) throws -> URL {
+        let url = self.url(name)
+        try client.db.backup(to: url)
+        return url
+    }
+
+    /// THE RESTORE: put a snapshot's bytes somewhere and open a client on
+    /// them. The source device stays alive on its own file — the tests then
+    /// simply stop using it, which is what "this store was replaced" means.
+    func restore(
+        _ snapshot: URL, as name: String, prefix: String,
+        transport: any SyncTransport, clockOffset: TimeInterval = 0, seed: UInt64 = 9
+    ) throws -> SyncClient {
+        let url = self.url("\(name).sqlite")
+        if FileManager.default.fileExists(atPath: url.path) {
+            try FileManager.default.removeItem(at: url)
+        }
+        try FileManager.default.copyItem(at: snapshot, to: url)
+        return try SyncClient(
+            name: name, prefix: prefix, transport: transport,
+            clockOffset: clockOffset, seed: seed, storeURL: url)
+    }
+}
+
+extension SyncClient {
+    /// The device identity a backup carries with it (SyncSpec §3).
+    func deviceID() throws -> String? {
+        try db.fetchString("SELECT value FROM sync_state WHERE key = 'device_id'")
+    }
+
+    func cursor() throws -> Int64 {
+        Int64(try db.fetchString("SELECT value FROM sync_state WHERE key = 'last_server_seq'") ?? "0") ?? 0
+    }
 }
