@@ -199,14 +199,43 @@ NO schema and NO "version" attribute (her lean confirmed): archived +
 `version_of`-edge-to-a-live-note IS the class, as a query. Honest
 edge, recorded: a deliberately-archived manual `version_of` sibling
 reads as a version — rare, and arguably not even wrong.
+**Fifth-sitting clarifications, at her questions:** (1) versions are
+NOT in the regular Library — they are archived at birth, and the
+Library lists live notes via the `archived_at` column **which EXISTS
+and always has** (AppSpec §7 — the "attribute" her question reached
+for is a Phase-1 schema fact; what needs NO attribute is
+version-ness, which is archived + the `version_of` edge). The phone's
+listings hide them the same way today, zero new work. A compare-copy
+she makes and LEAVES LIVE is an ordinary Library note — live vs
+archived-at-birth is the whole difference. (2) **Search scopes, ruled
+input handed to 13o:** the main search = live notes; the Archived
+surface's search = archived NON-version notes; **versions are
+searchable only inside their note's Versions/Compare context** — so a
+ten-version note matches ONCE in every global scope (her crowding
+worry answered structurally, zero schema).
 
-**V2 — THE ORPHANED-VERSIONS HOLE (the real kink the sitting hadn't
-hit):** if versions hide under their live note (V1) and the note is
-DELETED/purged, its versions become unreachable — archived, hidden,
-homeless. **The fix rhymes with the preserved-originals rule: a
-version rows in the Archived top-level ONLY when no live note claims
-it** (exactly how originals stay lineage-held until the family dies).
-Read-side conditional, zero schema, self-healing on Put back.
+**V2 — THE ORPHANED-VERSIONS HOLE, DISSOLVED BY HER OWN QUESTION
+(fifth sitting): VERSIONS RIDE THE NOTE'S DELETION.** Her question —
+should a deleted note's version histories delete too? — has the
+recursive answer: versions ARE the note's past, and a thing's past
+goes where the thing goes. **The ruled-recommended shape (architect's
+opinion at her ask, awaiting her one-word ratify): deleting a note
+takes its versions INTO THE TRASH on the same clock** — recoverable
+for 30 days (the Trash's note-group, row 22, shows the note with its
+versions), purged together after. The Archive covenant is untouched
+because versions never were "items in Archived" (V1 — their home is
+Note ▸ Versions, not the Archive surface); the Google-Docs intuition
+holds (delete the doc, its history goes); and V2's original
+"surface-when-unclaimed" conditional is UNNEEDED — an unclaimed
+version can no longer exist. **No extra question at delete time** (her
+"should the user be asked?" — recommended NO): the existing confirm
+gains one honest line ("its N saved versions go with it"); a
+mid-delete dialog nobody can answer well is friction, and the keep
+road is restoring the version live before (or Put back within 30
+days after). Mechanical detail for the build: versions are separate
+containers, so the delete door's compound tombstones each and Put
+back of the note revives them via the version_of edges — the round
+designs the exact stamp story.
 
 **V3 — THE BRIDGE DUPLICATE-DAY TRAP (MUST-PIN, not a taste call):** a
 version copy of a JOURNAL note may carry the copied `entry_date` — if
@@ -217,7 +246,7 @@ must never trip the bridge (exclude archived from the day scan, or
 drop `entry_date` on version copies — the design detail is the
 build's, the pin is mandatory).
 
-**V4 — Restore-as-swap (the recommended restore shape, PROVISIONAL):**
+**V4 — Restore-as-swap — RATIFIED (author, fifth sitting: "I really like the restore as swap idea - ratified and added"):**
 restoring version V3 first SAVES A VERSION OF NOW, then makes a live
 copy of V3 the note — never clobbering, and the symmetry teaches
 itself (you can always restore your restore). The doctrine's letter:
