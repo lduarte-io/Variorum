@@ -2212,7 +2212,7 @@ proceeds.
 | 10 | **L-d** `AppSession.postAutosaves` removal path + the three false comments | 4 | open |
 | 11 | Backup second destination (picked folder) + retention + per-run integrity | 1 | open |
 | 12 | The Data Safety face + log (freshness evidence) | 1 | open |
-| 13 | The restore runbook (incl. M3/M6 sentences, external-snapshots widening) — **scope grew at her post-sitting rulings: + the SYNCED-restore warning pair (ordinary deletions return to the Trash; purged stays purged) in runbook AND restore face · + the backup-archaeology recipe (open a backup in a scratch copy, copy out AS NEW — the recovery-as-copy doctrine) · + the "WHAT DELETION MEANS" section (her clarity mandate below): the three stages defined plainly (delete → Trash 30 days → permanent delete/purge), the BOTH-SIDED backup truth, and the purge definition · + THE MIRROR SECTION (her 2026-08-24 overnight questions): why the mirror is a PEER, not a backup (it replicates mistakes at sync speed; frozen copies protect where converging ones can't), what it DOES cover (device loss — re-onboard + passphrase), and the TWO PROVEN mirror-recovery roads named with their artifacts (mirror lost → repush from local truth, run live at 14b twice + 14c; device lost → re-onboard from mirror, exercised live at the phone's onboarding)** | 1 | open |
+| 13 | The restore runbook (incl. M3/M6 sentences, external-snapshots widening) — **scope grew at her post-sitting rulings: + the SYNCED-restore warning pair (ordinary deletions return to the Trash; purged stays purged) in runbook AND restore face · + the backup-archaeology recipe (open a backup in a scratch copy, copy out AS NEW — the recovery-as-copy doctrine) · + the "WHAT DELETION MEANS" section (her clarity mandate below): the three stages defined plainly (delete → Trash 30 days → permanent delete/purge), the BOTH-SIDED backup truth, and the purge definition · + THE MIRROR SECTION (her 2026-08-24 overnight questions): why the mirror is a PEER, not a backup (it replicates mistakes at sync speed; frozen copies protect where converging ones can't), what it DOES cover (device loss — re-onboard + passphrase), and the TWO PROVEN mirror-recovery roads named with their artifacts (mirror lost → repush from local truth, run live at 14b twice + 14c; device lost → re-onboard from mirror, exercised live at the phone's onboarding) — the full hierarchy written in one place: local store → local backups (two destinations) → the mirror → Supabase Pro's 7-day platform backups as the under-everything last resort (ciphertext; hoped to die unused — her 2026-08-24 exchange)** | 1 | open |
 | 14 | The rehearsed restore drill, end-to-end in SCRATCH | 1 | open |
 | 15 | The deletion-aware restore matrix M1–M7, headless on the fake server | 1 | open |
 | 16 | Bulk-`.md` plaintext insurance, automated | 1 | open |
@@ -2301,3 +2301,86 @@ standing hard rules (no live-instance contact, explicit paths, no
 push, no schema, no `Sync/`, 13u's seam untouched — L-a's hoist is
 the AUDIT, never the refusal semantics); append "ACT 3 — RECORD" to
 this plan; the known flakes' isolation rule as always.
+
+### ACT 4 — BACKUPS, THE DRILL & THE MATRIX: the brief (fresh Opus session; the phase's heart)
+
+**Scope: ledger rows 11–15.** Read: CLAUDE.md · this plan's Scope §7
+(the matrix M1–M7 with her rulings in the table + the sequencing
+note) · the kickoff sitting's rulings 1/3/5/8 and EVERY post-sitting
+ruling above (the warning pair · the regret-road recipe · the
+clarity mandate's "What deletion means" · the mirror section — row
+13's grown scope is the runbook's table of contents) · the 13l BRIEF
+(`phase-13l-data-safety-brief.md` — the A1 facts + leans) · the
+purge memo + addenda (the machinery M4 proves) · the 13j Environment
+traps. **Her overnight authorization stands (section above): session
+unlocked tonight; take your own `caffeinate -d` for the drill's
+launch legs.**
+
+1. **Row 11 — the second backup destination.** Extend the EXISTING
+   in-app A1 scheduler (Phase 8's — hourly-checked, >24h cadence,
+   keep 14, integrity-pinned, in-container `Backups/`) with a second
+   destination: a USER-PICKED folder (her ruling — the picker is the
+   door; sandboxed ⇒ security-scoped bookmark, persisted
+   DEVICE-LOCALLY, NEVER in the synced `setting` table — a path is
+   device-specific and `setting.value` is enum-fenced by the 14b
+   E2EE rule; the `reference.file_bookmark` local-only precedent
+   governs). Daily copy of the freshest WAL-safe snapshot; retention
+   there 14 dailies + 4 weeklies (her unobjected default); per-run
+   `PRAGMA integrity_check` on the copy; UTC names per the A1
+   convention; all I/O off-main (P2). Unset destination = the face
+   says so honestly (her first morning act is picking it).
+2. **Row 12 — the Data Safety face.** A Settings section: last
+   backup time + destination + last integrity result (+ slots the
+   Act 5 items will fill: last `.md` export, sync status); "Back Up
+   Now…" as ADJUNCT never load-bearing (the recorded lean); the log
+   behind it. Registry discipline (P-1) for the acts; copy honest
+   and PROVISIONAL (her voice lands at 13s).
+3. **Row 13 — the runbook**, to its grown scope (the row is the
+   table of contents): the restore recipe · M3/M5's time-travel
+   sentence · M6 both directions + external snapshots · the synced
+   warning pair (ordinary → Trash; purged stays purged) · the
+   backup-archaeology recipe (scratch copy, copy out AS NEW —
+   recovery-as-copy) · the "What deletion means" section (the three
+   stages; the both-sided backup truth; the purge definition — the
+   post-sitting record has the ruled outline) · the mirror section
+   (peer-not-backup; the two proven roads with artifacts; the
+   hierarchy ending at the 7-day platform net). **Home, PROVISIONAL
+   (architect's call, hers to move):** `notes/DataSafetyRunbook.md`
+   + a Help-menu opener if cheap; else the file + a pointer in the
+   face. → QUESTIONS if you find grounds to differ.
+4. **Row 14 — the drill, rehearsed END TO END, all in SCRATCH.**
+   Copy a REAL backup file (read-only — reading a backup never
+   touches her store) to a scratch location; restore per the
+   runbook's own recipe; LAUNCH the app against the scratch store
+   (the dev-store/A4 fence machinery is the road — never her
+   container, never `/Applications`); spot-verify content. The
+   deletion-aware legs ride it: M1 (a tombstoned thing restores
+   tombstoned, same clock — verify in the scratch launch), M3 (the
+   scratch IS local-only: a post-backup deletion is undone — time
+   travel observed, the honest sentence confirmed against it), M6
+   (doc against the observed files). The runbook is corrected to
+   whatever the rehearsal actually required — the drill VALIDATES
+   the recipe, that's its whole point.
+5. **Row 15 — the matrix headless, on the fake server** (her ruled
+   road): M2 (a restored-older client re-pulls the deletion
+   tombstone → the thing re-enters the Trash on its original clock),
+   **M4 — the centerpiece** (purge after backup; the restored store
+   is EXACTLY a returner: `reconcileLedger` pre-drain re-drops the
+   purged families before anything pushes; a push naming a purged id
+   takes the typed refusal + local drop — "really deleted survives
+   backup restore" becomes a TESTED FACT), M7 (same device_id,
+   older local cursor → the server cursor never regresses, the
+   horizon stays sound). **Tests/ only — harness extensions live in
+   Tests/, zero `Sources/VariorumCore/Sync/` lines; if the proof
+   genuinely demands engine changes, STOP that item and report**
+   (the standing rider; the 6b convergence battery is the base to
+   extend). "Restored" clients are built from snapshotted
+   rows+cursor of a converged client — never wall-clock tricks.
+
+**Close of act:** full four gates with counts; the acceptance
+sentence this act must make true: *"a backup restores end-to-end in
+rehearsal with the deletion matrix's expectations holding scenario
+by scenario; the runbook exists where she can find it under stress;
+freshness evidence is visible without her asking; the honesty
+sentences exist verbatim-in-meaning."* Append "ACT 4 — RECORD";
+flakes isolated before conclusions; explicit paths; never push.
