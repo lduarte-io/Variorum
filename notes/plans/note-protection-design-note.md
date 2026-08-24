@@ -236,3 +236,20 @@ shouldn't be rushed out" — the DISCIPLINE stands (rulings before
 build), only the post-v1 slotting is superseded. The 13o kickoff pin
 stands but is expected to be moot (13p precedes 13o by her order); the
 app lock (13l) covers the walk-by case until 13p runs.
+
+**SUPERSEDED IN DESTINATION (2026-08-23/24 — the author's encryption
+design conversation; this note is now HISTORY + input):** the shapes
+A/B fork this note frames was RULED PAST. The destination is
+**whole-store encryption (SQLCipher via GRDB) as the substrate, with
+per-note locks as access-gate faces on top; shape B column sealing is
+retired to a named non-goal** — her words: "I don't think that we need
+shape B column sealing" and "I think I'm realizing that true
+encryption and privacy IS the story I want … it makes journaling
+genuinely feel safe - which is what I want for myself." The SQLCipher
+Community Edition dependency and the fork-GRDB + official Zetetic SPM
+package road were APPROVED by her 2026-08-24 ("I approve the license
+and the approach"). **The binding record is now the authored execution
+plan, `notes/plans/phase-13p-note-protection.md`** — its constitution
+(R13p-1…13), research record, batches, and the short open-knots list
+for the kickoff sitting. Read this note for the threat model's history
+and her verbatim path; read the plan for what 13p builds.
