@@ -2188,6 +2188,7 @@ staged by explicit path.
 | 23 | Closeout: author 13u's execution plan + kickoff | — | open |
 | 24 | Closeout: refresh `/Applications/Variorum.app` (zero-instance window) | — | open |
 | 25 | Housekeeping: the 13u "EIGHT items" count fix (3 places) + her disk-encryption question → the 13p note | — | **done this sitting** |
+| 26 | **The scrap put-back receipt names the wrong kind** (seat 1's row-5 residual: the shared put-back receipts say "note" for a scrap — the put-back LANDING must report its container's KIND, a small `Sources/` change Act 2's per-batch fence excluded) | 2 | **open — seat 2's; the architect exercises seat 1's named option IN-PHASE** (the recovery story must be honest from every door, §8d — this is that mandate's letter; core Operations/Queries only, a pin rides it, zero schema, zero `Sync/`) |
 
 ### The batch plan (the architect's, within the mandate — acts may merge at dispatch; the ledger is the truth)
 
