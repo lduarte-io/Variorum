@@ -29,6 +29,9 @@ struct TakesBottomBar: View {
     @State private var expandedRuns: Set<String> = []
     /// N15's class: the bar's measured width — the one/two-row switch.
     @State private var barWidth: CGFloat = 0
+    /// 13l Act 2 (item 3): the note-delete confirm's pending ask — Write's
+    /// bar's twin, so the two bars keep one grammar (R6-2's whole point).
+    @State private var pendingDelete: NoteDeleteConfirm?
     @Environment(\.openWindow) private var openWindow
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -43,6 +46,7 @@ struct TakesBottomBar: View {
             .insertBlockBelow,  // 13b 4D (N28/S4-13): the block menu's insert door
             .deleteBlock,  // 13c 1B (A8): the block menu's delete door
             .showNoteTray,  // 13j J2: the note ▾ menu's tray door
+            .deleteNote,  // 13l Act 2 (item 3): Write's bar's door, here too
         ]
         // 13k K7: the formatting toolbar rides BOTH bars — the acts are
         // `takesAccess: .native`, so Write must not be the only surface with
@@ -318,6 +322,15 @@ struct TakesBottomBar: View {
                 pickedDate = CommitBar.date(fromDay: model.projection.entryDate) ?? Date()
                 datePickerShown = true
             }
+            Divider()
+            // 13l Act 2 (item 3): Write's bar's door, in Takes too — R118's
+            // letter (no surface is privileged) and R6-2's one grammar.
+            Button(RecoveryCopy.deleteNoteTitle, role: .destructive) {
+                pendingDelete = NoteDeleteConfirm(postIDs: [model.postID])
+            }
+        }
+        .deleteNoteConfirmDialog($pendingDelete) { confirm in
+            NoteDeletion.fire(session: model.session, postIDs: confirm.postIDs)
         }
         .help("The note itself: this take's savepoints, its seal, its tray, its date")
         .popover(isPresented: $datePickerShown) {

@@ -611,6 +611,71 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Open a note and its tray lists what it has deleted.",
             availability: noteScoped),
+
+        // MARK: The deletion acts, and THE RULE THEY ALL INHERIT
+        //
+        // **THE CONFIRMATION-CONSISTENCY PRINCIPLE** (13j's close-of-day
+        // deletion audit; written down here at 13l Act 2 so a future door
+        // inherits it instead of re-deciding it):
+        //
+        //   · **NOTES CONFIRM.** A note is container-scale — it takes its
+        //     blocks, their takes, its tags and its book memberships with it —
+        //     and deleting one is a deliberate act, never a keystroke's side
+        //     effect. `.deleteNote` and `.deleteSelectedNotes` ask, and the
+        //     ask NAMES the Trash and its clock so the promise is readable
+        //     before the press, not only after it. Books ask for the same
+        //     reason (and add `deleteBookKeepsItsNotes`, because the scale
+        //     there is the thing people get wrong).
+        //   · **BLOCKS AND TAKES DO NOT.** They are in-flow acts inside the
+        //     writing gesture — ⌥⌘Z is right there, and the note's own tray
+        //     and the block's History list what went. J9 exists precisely to
+        //     UNFRICTION paragraph deletion; a confirm on it would put the
+        //     friction back where the ruling took it out.
+        //   · **DELETE NOW AND EMPTY TRASH ALWAYS CONFIRM**, every time, with
+        //     no don't-ask state anywhere in the code and none to be added
+        //     (her round-10 ruling). They are the only unrecoverable acts in
+        //     the app, which is the whole distinction: everything above is a
+        //     tombstone with a road back, and these two are not.
+        //
+        // The line the principle draws is RECOVERABILITY × SCALE, not
+        // destructiveness — every act named here is destructive.
+        //
+        // 13l Act 2 (ledger item 3) — **DELETE NOTE.** Her report at 13j's
+        // close: *"how do i even delete a note? I'm within a note I want to
+        // delete right now and I don't see how to delete it."* Four renderers
+        // of ONE act: the `note ▾` menu in both bottom bars (the door she was
+        // looking for, beside the tray item — R6-2's one grammar), and the
+        // note-row context menu the Library and the Pool share.
+        //
+        // The CONTEXT rule (`noteScoped`) governs the BAR door, which has no
+        // target of its own; the ROW doors carry theirs and apply their own
+        // per-target condition — the standing `.toggleStar` / `.openInNewWindow`
+        // split, stated so the reach is not read as an oversight.
+        Capability(
+            id: .deleteNote, verb: RecoveryCopy.deleteNoteTitle, scope: .post,
+            doors: [.bottomBar, .contextMenu],
+            // NO CHORD, deliberately. The obvious candidate is ⌘⌫, and a key
+            // that tombstones a whole note one finger-slip from ⌫ is exactly
+            // the class P-2 retired at #59(d) — her ruling named menus, and
+            // an invented chord would owe a collision sweep no ruling asked
+            // for. It confirms either way; that is not a reason to add a key.
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Deleting a note acts on an open one — open one, "
+                + "or use a note's row in the Library.",
+            availability: noteScoped),
+        // …and the BULK door (her ruling's third clause: *"allow for command
+        // clicking to select multiple items and deleting all of them"*). A
+        // `.surface` act on the Library's own list, the `.deleteNow` shape
+        // exactly: app scope, `always`, and the per-gesture condition — a
+        // selection exists — is the SURFACE's, because the selection is that
+        // list's `@State` and pushing it into the app-scope router would be
+        // wrong the moment a second window opens a second Library.
+        Capability(
+            id: .deleteSelectedNotes, verb: "Delete Selected Notes", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "\u{2318}-click notes in the Library to pick what goes.",
+            availability: always),
         // 13j batch 6b (J1 — the purge doors, IN-TRASH ONLY forever: her
         // round-3 rider's letter). `.surface` acts on the Trash's own rows
         // and header; app scope because a Trash row can be any kind, and

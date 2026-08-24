@@ -139,6 +139,8 @@ struct PoolPostsView: View {
     // environment — fall back to the leading voice's tokens.
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
+    /// 13l Act 2 (item 3): the pending delete ask, in the one shared host.
+    @State private var pendingDelete: NoteDeleteConfirm?
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
@@ -173,6 +175,9 @@ struct PoolPostsView: View {
         }
         .background(tokens.surface)
         .task { await model.start() }
+        .deleteNoteConfirmDialog($pendingDelete) { confirm in
+            NoteDeletion.fire(session: session, postIDs: confirm.postIDs)
+        }
         .overlay(alignment: .bottomLeading) {
             if let error = model.lastError {
                 Text(error)
@@ -236,8 +241,12 @@ struct PoolPostsView: View {
             }
             Divider()
             Button("Archive") { Task { await library.archive(postID: item.postID) } }
-            Button("Delete", role: .destructive) {
-                Task { await library.delete(postID: item.postID) }
+            // 13l Act 2 (item 3): the note-row grammar's delete door, with
+            // the confirmation her ruling gave the Library's — this row
+            // renders the SAME declaration (`SidebarView.contextMenuCapabilities`)
+            // and must therefore ask the same question in the same words.
+            Button(RecoveryCopy.deleteNoteTitle, role: .destructive) {
+                pendingDelete = NoteDeleteConfirm(postIDs: [item.postID])
             }
         }
     }

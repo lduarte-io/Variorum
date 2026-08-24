@@ -390,6 +390,18 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // 13j J2: the per-note TRAY — what this note has deleted, and what a
     // divide/merge preserved whole (post scope; two doors, one act)
     case showNoteTray
+    // 13l Act 2 (ledger item 3) — DELETE NOTE, at last. Her report at 13j's
+    // close was that she could not find a way to delete the note she was
+    // standing in; the Library and the Pool had a door and neither asked
+    // anything first. ONE act, four renderers: both bottom bars' `note ▾`
+    // menus and the two note-row lists.
+    case deleteNote
+    // …and its bulk twin, over the Library's ⌘-click selection (her ruling's
+    // third clause). Its own declaration rather than a mode on `.deleteNote`,
+    // for the `.moveTakeEarlier`/`.moveTakeLater` reason: it is its own door
+    // on its own surface with its own enablement (a selection exists), and one
+    // declaration could not say that.
+    case deleteSelectedNotes
     // 13j batch 6b (J1 — her round-3 rider, verbatim: "have a delete now
     // option WITHIN the trash (not from within the normal note) … but never
     // accidental full delete from within a note, but an option for full

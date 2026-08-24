@@ -42,6 +42,10 @@ struct NoteWindowView: View {
     @State private var router = ShellRouter()
     @State private var windowID = UUID()
     @State private var theme: ThemeStore
+    /// 13l Act 2 (item 3): its own AppKit window, so a delete of the one note
+    /// it shows can close it. Handed over by `WindowKeyReporter`, which
+    /// already reports it to the registry.
+    @State private var window: NSWindow?
     @Environment(\.colorScheme) private var scheme
 
     init(session: AppSession, windows: WindowRegistry, postID: String) {
@@ -108,8 +112,26 @@ struct NoteWindowView: View {
         }
         .background {
             WindowKeyReporter(
-                onWindow: { windows.attach($0, to: windowID) },
+                onWindow: {
+                    window = $0
+                    windows.attach($0, to: windowID)
+                },
                 onKey: { windows.noteKey(windowID) })
+        }
+        // 13l Act 2 (item 3) — the navigate-away, in the one shape this
+        // window has. It shows exactly one note and navigates NOWHERE (the
+        // ruling's (d)), so "get off the deleted note" can only mean CLOSING:
+        // there is no other destination, and a lightweight window rendering a
+        // tombstone is the standing-on-a-tombstone failure with no way out of
+        // it. `onDisappear` still runs, so its teardown savepoint is
+        // unaffected — and `closeAutoCommit` no-ops on a dead container by
+        // its own guard, so the leaving writes nothing for a note that just
+        // went.
+        .onReceive(NotificationCenter.default.publisher(for: .variorumNotesDeleted)) { note in
+            guard let ids = note.userInfo?["postIDs"] as? [String],
+                  ids.contains(postID)
+            else { return }
+            window?.close()
         }
         .task { await theme.start() }
         .onAppear {

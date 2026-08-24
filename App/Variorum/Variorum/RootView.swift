@@ -235,6 +235,17 @@ struct RootView: View {
             else { return }
             openBook(bookID, at: postID, in: router.workspace.focusedPane)
         }
+        // 13l Act 2 (item 3) — **THE NAVIGATE-AWAY, her ruling's letter:**
+        // *"navigate-away covers EVERY pane/window showing the note."* So
+        // this listener deliberately does NOT `claimBroadcast()`, which every
+        // other app-wide notification here does: those are NAVIGATIONS and
+        // exactly one window should perform them, while this is a FACT each
+        // window must act on for its own panes. A second window left standing
+        // on a tombstone is the failure this exists to prevent.
+        .onReceive(NotificationCenter.default.publisher(for: .variorumNotesDeleted)) { note in
+            guard let ids = note.userInfo?["postIDs"] as? [String] else { return }
+            router.workspace.notesDeleted(ids)
+        }
         .onChange(of: router.paletteRequested) { _, requested in
             guard requested else { return }
             paletteOpen = true

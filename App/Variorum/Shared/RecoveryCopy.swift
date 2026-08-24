@@ -255,6 +255,57 @@ nonisolated enum RecoveryCopy {
             + "\(trashSection) — \(TrashWindow.days) days to put it back."
     }
 
+    // MARK: The NOTE-deletion door set (13l Act 2, ledger item 3 — her
+    // post-13j ruling: *"include delete note in the note menu with
+    // confirmation, … add a confirmation for the library door of deletion,
+    // and … allow for command clicking to select multiple items and deleting
+    // all of them"*)
+
+    /// **THE MENU LABEL, HOISTED.** These three were `MobileEditorViewModel`
+    /// statics, and this file's own comment already said why they should not
+    /// be: they were *"born shared because the phone built the doors first and
+    /// the Mac's 13l work will want the same words"*. The Mac cannot import a
+    /// `VariorumMobile` file, so "want the same words" had exactly two
+    /// endings — a hoist, or a second copy of the sentence that describes one
+    /// 30-day clock. The phone's statics now forward here (MobileSoul §3: a
+    /// Mac phase touching a brain hoists it then).
+    static let deleteNoteTitle = "Delete Note\u{2026}"
+    /// The confirm's own title. Deliberately NOT a question for the single
+    /// case: the detail below carries the whole promise, and a title that
+    /// asks while the body answers reads as two questions.
+    static let deleteNoteConfirmTitle = "Delete Note"
+    static var deleteNoteConfirmDetail: String { moveToTrashDetail(.note) }
+
+    /// **The BULK confirm names the count** — her ruling's letter (*"ONE
+    /// confirmation naming the count ('Delete 5 notes?')"*), which is why
+    /// this one IS a question: the number is the fact she is being asked to
+    /// check, and it belongs where she reads first.
+    static func deleteNotesConfirmTitle(_ count: Int) -> String {
+        count == 1 ? deleteNoteConfirmTitle : "Delete \(count) notes?"
+    }
+
+    static func deleteNotesConfirmDetail(_ count: Int) -> String {
+        guard count != 1 else { return deleteNoteConfirmDetail }
+        return "The \(count) notes go to the \(trashSection) for \(TrashWindow.days) days. "
+            + "You can put them back from \(surfaceName) until then."
+    }
+
+    /// ONE receipt for the whole gesture (her ruling's second half), and it
+    /// says the same two facts the singular one does: where they went, and
+    /// how long there is to change her mind.
+    static func movedToTrashReceipt(notes count: Int) -> String {
+        guard count != 1 else { return movedToTrashReceipt(.note) }
+        return "\(count) notes moved to the \(trashSection) — "
+            + "\(TrashWindow.days) days to put them back."
+    }
+
+    /// Every named note was already gone (the double-press / racing-window
+    /// case). Nothing happened, so this is a refusal's voice, not a receipt's
+    /// — it goes where `DeletionRefusal`'s sentences go.
+    static func notesAlreadyGone(_ count: Int) -> String {
+        count == 1 ? "That note is already gone." : "Those notes are already gone."
+    }
+
     // MARK: Put-back receipts, by kind and by landing (hoisted at 4.5b)
 
     /// What a put-back says when the op reports no landing of its own.

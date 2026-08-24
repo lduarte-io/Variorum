@@ -127,8 +127,28 @@ final class LibraryViewModel {
     }
 
     /// Delete: a tombstone, recoverable via `restore` until GC (S2).
+    ///
+    /// **13l Act 2 (item 3): it FORWARDS to `NoteDeletion` now, and that is
+    /// the point rather than plumbing.** This method was the one road from a
+    /// face to a container tombstone, and it did nothing but write it — no
+    /// flush, so keystrokes inside the autosave debounce were tombstoned with
+    /// the row they never reached; no signal, so every pane showing the note
+    /// stayed mounted over it and the Open strip kept a row ⌘⇧n would
+    /// re-open. Leaving it beside the new act would have left a SECOND road
+    /// with none of that, which is the drift class exactly: the next door
+    /// would find this one.
+    ///
+    /// The CONFIRM stays at the face, deliberately — it is a question asked of
+    /// a person, and a view model is the wrong place for one (the Library's
+    /// and the Pool's rows and both `note ▾` menus ask it through the one
+    /// shared host).
     func delete(postID: String) async {
-        await run { ops in try ops.deleteContainer(postID) }
+        do {
+            _ = try await NoteDeletion.run(session: session, postIDs: [postID])
+            lastError = nil
+        } catch {
+            lastError = DeletionRefusal.words(error, act: .delete)
+        }
     }
 
     func restore(postID: String) async {

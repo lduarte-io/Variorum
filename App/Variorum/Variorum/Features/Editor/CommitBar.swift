@@ -13,6 +13,10 @@ struct CommitBar: View {
     let model: EditorViewModel
     @State private var datePickerShown = false
     @State private var pickedDate = Date()
+    /// 13l Act 2 (item 3): the note-delete confirm's pending ask. View-local
+    /// like the date picker's flag — the ACT is `NoteDeletion`'s, and the
+    /// wording and the dialog's shape are the shared modifier's.
+    @State private var pendingDelete: NoteDeleteConfirm?
     /// N15: the bar's measured width — the one-row/two-row switch.
     @State private var barWidth: CGFloat = 0
     @Environment(\.openWindow) private var openWindow
@@ -34,6 +38,9 @@ struct CommitBar: View {
             .insertBlockBelow,  // 13b 4D (N28/S4-13): editor parity — Write's bar door
             .deleteBlock,  // 13c 1B (A8): the delete door beside the insert door
             .showNoteTray,  // 13j J2: the note ▾ menu's tray door
+            // 13l Act 2 (item 3): the door she went looking for and could not
+            // find, beside the tray item in the same menu.
+            .deleteNote,
         ]
         // 13k K7: the formatting toolbar's own eight, from ITS table (the
         // cluster is rendered here, so its doors are declared here).
@@ -175,9 +182,20 @@ struct CommitBar: View {
                 pickedDate = Self.date(fromDay: model.header?.entryDate) ?? Date()
                 datePickerShown = true
             }
+            Divider()
+            // 13l Act 2 (item 3) — HER DOOR, in the menu she went looking in.
+            // It is ordinary move-to-Trash and NOTHING else: Delete Now never
+            // appears in a note context (her 13j round-3 rider), so the only
+            // way past the 30 days from here is the Trash itself.
+            Button(RecoveryCopy.deleteNoteTitle, role: .destructive) {
+                pendingDelete = NoteDeleteConfirm(postIDs: [model.postID])
+            }
         }
         .help("The note itself: its savepoints, its seal, its tray, its date")
         .popover(isPresented: $datePickerShown, content: datePickerPopover)
+        .deleteNoteConfirmDialog($pendingDelete) { confirm in
+            NoteDeletion.fire(session: model.session, postIDs: confirm.postIDs)
+        }
     }
 
     /// The one_block chip (its truth is the observed header).

@@ -951,9 +951,17 @@ final class MobileEditorViewModel {
 
     /// The delete door's confirm words — the shared deletion vocabulary, so
     /// the phone and the Mac cannot describe one clock two ways.
-    static let deleteNoteTitle = "Delete Note…"
-    static var deleteNoteConfirmTitle: String { "Delete Note" }
-    static var deleteNoteConfirmDetail: String { RecoveryCopy.moveToTrashDetail(.note) }
+    ///
+    /// **13l Act 2 (ledger item 3): HOISTED, and these are forwarders.** They
+    /// were born here with a comment saying they were *"born shared because
+    /// the phone built the doors first and the Mac's 13l work will want the
+    /// same words"* — and the Mac cannot import a `VariorumMobile` file, so
+    /// the Mac's note-delete doors would have had to re-write every one of
+    /// them. The words live in `Shared/RecoveryCopy.swift` now; the names stay
+    /// here so this file's own pins ride unmodified (the 3C parity pattern).
+    static let deleteNoteTitle = RecoveryCopy.deleteNoteTitle
+    static var deleteNoteConfirmTitle: String { RecoveryCopy.deleteNoteConfirmTitle }
+    static var deleteNoteConfirmDetail: String { RecoveryCopy.deleteNoteConfirmDetail }
 
     static func deleteNoteRefusal(_ error: Error) -> String {
         guard let error = error as? OperationError else { return String(describing: error) }

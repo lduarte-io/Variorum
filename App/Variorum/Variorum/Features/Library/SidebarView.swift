@@ -70,6 +70,19 @@ struct SidebarView: View {
         // 13f batch 6 (W4): the star door joins the note-row grammar, so
         // all three renderers get it from ONE declaration.
         .toggleStar,
+        // 13l Act 2 (item 3): DELETE NOTE joins it — the Library's row and
+        // the Pool's, which is where her ruling put the confirmation ("add a
+        // confirmation for the library door of deletion"), and where the door
+        // already lived without one.
+        //
+        // **The OPEN STRIP deliberately does not render it**, and that is a
+        // decision rather than an omission: the strip is pure view state and
+        // its own copy promises exactly that — "Close this row — the note
+        // itself is untouched" — so putting a tombstoning act one row above
+        // "Close" is the confusion that sentence exists to prevent. Her
+        // ruling named the note menu and the library door; a third door is
+        // hers to ask for.
+        .deleteNote,
     ]
 
     let session: AppSession

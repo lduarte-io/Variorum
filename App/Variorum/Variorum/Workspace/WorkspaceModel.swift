@@ -317,6 +317,35 @@ final class WorkspaceModel {
         openNotes.close(id)
     }
 
+    /// **NOTES HAVE BEEN DELETED — get off them** (13l Act 2, ledger item 3;
+    /// her ruling's *"navigate-away covers EVERY pane/window showing the
+    /// note"*). Called by every full window on the one signal, so a window
+    /// she is not looking at cannot be left standing on a tombstone either.
+    ///
+    /// Two halves, and both are needed. The panes showing a deleted note
+    /// move; the Open STRIP forgets it — otherwise its row survives and
+    /// ⌘⇧n re-opens a tombstone, which is the same dead door one keystroke
+    /// further away.
+    ///
+    /// **Where they land, and why the LIBRARY** rather than the pane's own
+    /// history: the note is in the Trash now, and the Library is the room
+    /// that holds the Trash's door — "where did it go?" is answerable from
+    /// where she lands. Walking history back would be prettier and is a trap:
+    /// a multi-delete's previous destination is frequently another note in
+    /// the same gesture, so back can land on a second tombstone. One
+    /// destination cannot.
+    ///
+    /// Returns whether this window showed any of them, so a caller can decide
+    /// whether it has anything to say.
+    @discardableResult
+    func notesDeleted(_ ids: [String]) -> Bool {
+        let gone = Set(ids)
+        let showing = panes.filter { selections[$0]?.noteID.map(gone.contains) == true }
+        for pane in showing { select(.library, in: pane) }
+        for id in ids { openNotes.close(id) }
+        return !showing.isEmpty
+    }
+
     /// The strip's manual reorder (her round-7 ruling) — session-only, per
     /// window, never a setting and never persisted.
     func moveOpenNotes(fromOffsets source: IndexSet, toOffset destination: Int) {

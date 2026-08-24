@@ -242,7 +242,12 @@ struct LibraryCatalogView: View {
     /// 13e E8: the note rows' tag doors (`＋` / `✕`) — the SECOND renderer
     /// of the one `.tagNote` act (the context bar's cards are the first),
     /// declared so the `.surface` walk covers them.
-    static let surfaceCapabilities: [CapabilityID] = [.tagNote]
+    ///
+    /// 13l Act 2 (item 3): the BULK delete's banner joins it — her ruling's
+    /// third clause, on the ⌘-click selection this list already had (the bulk
+    /// TAG menu has used it since 13e E8; what was missing was the act, never
+    /// the selection).
+    static let surfaceCapabilities: [CapabilityID] = [.tagNote, .deleteSelectedNotes]
 
     let session: AppSession
     let model: LibraryCatalogModel
@@ -272,6 +277,10 @@ struct LibraryCatalogView: View {
     @State private var tagSheetTarget: SidebarView.TagSheetTarget?
     @State private var renameTarget: String?
     @State private var renameTitle = ""
+    /// 13l Act 2 (item 3): the pending delete ask — one row's, or the whole
+    /// ⌘-click selection's. One piece of state for both, because it is one
+    /// act with one wording and one host.
+    @State private var pendingDelete: NoteDeleteConfirm?
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
@@ -320,6 +329,20 @@ struct LibraryCatalogView: View {
             }
             Button("Cancel", role: .cancel) {}
         }
+        // 13l Act 2 (item 3): ONE host for both asks — a row's and the whole
+        // selection's — so the wording cannot differ between them.
+        .deleteNoteConfirmDialog($pendingDelete) { confirm in
+            selectedPosts.subtract(confirm.postIDs)
+            NoteDeletion.fire(session: session, postIDs: confirm.postIDs)
+        }
+        // …and the listing catches up on the SIGNAL rather than after its own
+        // door, because this list's contents are a one-shot `search()` while a
+        // note can be deleted from the bar of a note open in another pane
+        // entirely (P-4: the signal says what happened, this decides what it
+        // means here — re-read).
+        .onReceive(NotificationCenter.default.publisher(for: .variorumNotesDeleted)) { _ in
+            Task { await model.search() }
+        }
         .overlay(alignment: .bottomLeading) {
             if let error = model.lastError ?? library.lastError {
                 Text(error)
@@ -329,6 +352,15 @@ struct LibraryCatalogView: View {
                     .padding(6)
             }
         }
+    }
+
+    /// The ⌘-click pick, in the order the LIST shows it (13l Act 2, item 3).
+    /// `selectedPosts` is a `Set`, and a set has no order — so a receipt and
+    /// a confirm built from it would name notes in whatever order the hash
+    /// happened to give, which is the surface telling her a different story
+    /// each time she looks. The list's own order is the one she is pointing at.
+    private var selectedNotesInListOrder: [String] {
+        model.hits.filter { $0.kind == .post && selectedPosts.contains($0.id) }.map(\.id)
     }
 
     private var header: some View {
@@ -405,6 +437,18 @@ struct LibraryCatalogView: View {
                         }
                         .font(tokens.small)
                     }
+                    // 13l Act 2 (item 3) — her ruling's third clause, built on
+                    // the selection this bar already reads. ONE confirmation
+                    // naming the count and ONE receipt, which is why the whole
+                    // pick goes to the host as one ask rather than N asks.
+                    Button(
+                        tokens.chromeLabel(
+                            "Delete \(selectedPosts.count) notes\u{2026}"),
+                        role: .destructive
+                    ) {
+                        pendingDelete = NoteDeleteConfirm(postIDs: selectedNotesInListOrder)
+                    }
+                    .font(tokens.small)
                 }
             }
         }
@@ -650,11 +694,13 @@ struct LibraryCatalogView: View {
                 await model.search()
             }
         }
-        Button("Delete", role: .destructive) {
-            Task {
-                await library.delete(postID: hit.id)
-                await model.search()
-            }
+        // 13l Act 2 (item 3) — HER RULING: *"add a confirmation for the
+        // library door of deletion."* It shipped as a bare `Delete` that
+        // tombstoned a whole note on one click, said nothing about where it
+        // went, and left every pane showing it standing on the tombstone.
+        // One wording with the note ▾ door, from the one shared host.
+        Button(RecoveryCopy.deleteNoteTitle, role: .destructive) {
+            pendingDelete = NoteDeleteConfirm(postIDs: [hit.id])
         }
     }
 
