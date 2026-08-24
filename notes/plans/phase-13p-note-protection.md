@@ -183,6 +183,18 @@ provisional; the kickoff sitting rules only the OPEN KNOTS section.
   — her ruling was expressly made as the only user — but nothing is
   owed beyond the disclosure.)*
 
+## A RIDER FROM 13l (2026-08-24, her disposition at QUESTIONS #78)
+
+The bridge's restage/sentinel seam: when this phase rebuilds re-key
+machinery, adopt **shape (b)** — `stageRepushFromTruth` stops stamping
+its sentinel onto `bridge_day` rows whose note is already dead, so
+their last agreement survives and their deletions still travel
+VERIFIED. Her words: *"we don't have to solve this right now …
+whatever you think is best could probably ride along then."* No
+Fragments-side change is needed; the stranded-days status note (13l's
+fix) then covers only the historical population, which is zero on her
+store today. QUESTIONS #78 has the full shape menu.
+
 ## NON-GOALS (named so they stay declined, not forgotten)
 
 - **Shape B column sealing.** The one threat it covers that this design
