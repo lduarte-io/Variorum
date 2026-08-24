@@ -2724,3 +2724,343 @@ ask as a contract-file note** (`notes/fragments-bridge-contract.md`
 — she carries it; it joins her morning checklist). Full gates
 (core-heavy; Mac/mobile should ride unmoved — say so if they move);
 "ACT 6 — RECORD"; the standing rules.
+
+### ACT 3 — RECORD (Opus implementer, 2026-08-24)
+
+**Scope taken, and it is exactly the four dispatched:** ledger rows
+**7–10** (L-a…L-d). Four commits, each staged by explicit path, nothing
+pushed: **`d6023a2`** (L-a) · **`9617737`** (L-b) · **`123818d`** (L-c) ·
+**`7d51342`** (L-d). Working tree clean; every behavioural-revert probe
+was taken on a scratchpad copy and restored, and each restoration was
+verified by `grep` returning zero probe markers plus a re-run of the
+suite it reddened.
+
+**ZERO `Sources/` lines, zero schema, zero `Sync/`.** Nothing in 13u's
+editor seam was touched: L-a hoists the AUDIT and clamps an attribute
+STAMP; it does not read, move or reword `CrossBlockRefusal`,
+`CrossBlockEditPlanner`, `planVisibleTakeEdit` or any refusal semantics.
+`pgrep -fl 'Variorum.app/Contents/MacOS'` returned nothing at open and
+was never contacted; no Release build, no `/Applications` touch.
+
+#### THE HANDBACK GREPS — §2b's four rows, run at the close and QUOTED
+
+| # | command | **§2b's "not done" value** | **NOW** |
+|---|---|---|---|
+| **L-a** | `grep -rl 'auditIdentityProjection' App/Variorum/Variorum \| wc -l` | `0` | **`1`** |
+| **L-b** | `grep -c 'New note refused' …/QuickEntryBar.swift` | `1` (and `entryText = ""` **2×**) | **`0`** (and `entryText` appears **once**, in the doc comment that records the defect — no code writes it) |
+| **L-c** | `grep -c '\.opening' App/Variorum/Shared/AppBootstrap.swift` | `0` | **`4`** |
+| **L-d** | `grep -c 'removeValue\|releaseAutosave' App/Variorum/Shared/AppSession.swift` | `0` | **`2`** |
+
+**All four flipped. Nothing was deferred, so mobile inherits no item of
+these four back.**
+
+---
+
+#### L-a (row 7) — the identity oracle reaches the Mac, AND FINDS A LIVE DEFECT
+
+**The trace, in my own words.** The editor carries two oracles and both
+are blind to the same class. `documentLength == storage.length` compares
+TOTALS, which a mis-routed ZERO-NET edit leaves agreeing;
+`desyncRecoveryCount` counts edits the router REFUSED, which is precisely
+what a mis-routed edit is not. So a tiling that has slipped against the
+storage — the wrong block's ID over the wrong characters, the wrong
+block's text going to the store through the ledger — announces itself
+nowhere. The mobile round reproduced that against THIS view model
+(`stored → ["Alpha", "Beta beta", "G"]`). The phone had a walk for it;
+the Mac had nothing.
+
+**What was built.** `App/Variorum/Shared/EditorBrain/IdentityProjectionAudit.swift`
+— `isClean(index:storage:)`, typed on `NSMutableAttributedString` so no
+platform UI framework enters `Shared/EditorBrain` (the
+`EditorDocumentCore` rule; `NSTextStorage` is AppKit on one side and
+UIKit on the other, and is a subclass of that Foundation type on both).
+The phone's `auditIdentityProjection()` became a five-line consumer
+keeping its own counter and seam; **the phone's own pins ride
+unmodified** — the zero-test-edit parity proof. The Mac gained
+`identityAuditFailures`, its own `auditIdentityProjection()`, and three
+call sites: `storageDidEdit`'s end (the per-keystroke road), the
+crystallization stamp, and **`adoptRewrite`** — which is the Mac's ONE
+tiling-write door, so the phone's three index-replacement sites (full
+render, differential, take flip) are covered by one line. Verified by
+reading all three executors that every one writes the storage BEFORE it
+adopts, so the projection is settled when the audit runs.
+
+**The empty-entry hole** was already closed on the phone (M15 Q2); the
+hoist carries the closed shape and the pin
+`anEmptyEntrysSeparatorIsAudited` fences it for both platforms.
+**RED-ON-OLD, measured:** restoring the old
+`guard range.length > 0 else { continue }` makes exactly that pin fail
+(9 of 10 still pass), because the empty block's separator goes unread.
+
+> **🔴 AND THE AUDIT FIRED ON ITS FIRST MAC RUN — a live shipped defect,
+> six weeks old at least, found by the thing built to find it.**
+>
+> **MEASURED, not inferred** (`DiagAudit` throwaway, then pinned):
+> `NSTextStorage` attribute fixing **WIDENS the reported edited range to
+> the whole paragraph INCLUDING its terminator on macOS 26** — a
+> ONE-character insertion at offset 2 of `"Alpha\nBeta beta\nGamma"`
+> reports **`{2, 5}`**, and one at offset 8 reports `{8, 10}`.
+> `storageDidEdit` then did `setBlockAttribute(blockID, over: editedRange)`
+> — so **every keystroke in every non-last block wrote that block's
+> identity onto the separator after it.** The attribute run went from
+> `0+5=b0 | 5+1=nil | 6+9=b1` to `0+7=b0 | 7+9=b1`: the separator
+> acquired an owner.
+>
+> This breaks the doctrine `EditorDocumentCore.swift` states as holding
+> **"by construction"** — *the separator is owned by NEITHER neighbouring
+> block, so attribute ownership and range math agree.* It also falsifies,
+> for macOS 26, the round-2 crash trace's recorded *"AppKit does not
+> widen"* (true for the insertion cases it measured; false at a paragraph
+> end — and `ArmedEdit.describes` was already right not to police the
+> report's EXTENT, this is the other half of that same fact at the site
+> that CONSUMES the extent).
+>
+> **Harm today: latent, not active.** `grep` for
+> `EditorDocument.blockID(at:)` finds **no production consumer** outside
+> the audit itself — the index is the routing authority and the
+> projection is the cross-check — which is exactly why it went unseen for
+> six weeks. **But it made the new oracle fire on every keystroke, so
+> fixing it was the price of having an oracle at all**, which is why it
+> is in this act rather than deferred.
+>
+> **The fix:** `stampProjection(_:reported:within:)` clamps the stamp to
+> the region the verdict actually named — the entry's own range for
+> `.block(i)`, and a `tailProjectionRegion` (the tail plus its leading
+> separator) for `.tail`/`.openTail`, so a widened report can never strip
+> a block's ID from the other direction either. Nothing legitimate is
+> lost: a `.block(i)` verdict MEANS the edit is owned entirely by entry
+> `i`. `recordAutosave` now takes the same range instead of walking for
+> it a second time, so the road pays ONE `range(ofEntryAt:)` where it
+> used to pay two.
+>
+> **RED-ON-OLD, and it is emphatic:** with the clamp reverted, the audit's
+> DEBUG assertion fires and **kills the test process** —
+> `Fatal error: identity projection audit failed` at the first keystroke
+> of `aStampedNeighbourIsCaughtOnTheNextKeystroke`.
+
+**Pins (15, two new suites).** `IdentityProjectionAuditWalkTests` (10):
+honest surfaces clean incl. an open tail and a block full of internal
+newlines (I4's letter); totals mismatch; **the traced shape — a block ID
+stamped over its neighbour with the totals still agreeing**; a missing
+run; an owned separator; **a tiling slipped against the real newlines**
+(two same-length blocks, so only the CHARACTER can tell); the empty-entry
+hole; a tail that acquired an ID. `MacIdentityAuditWiringTests` (5): the
+headline three-way comparison (`desyncRecoveryCount == 0` ∧ totals agree
+∧ `identityAuditFailures == 1`); the tiling-write door audits what it
+adopted; **`aKeystrokeNeverStampsItsSeparator`**;
+**`appKitWidensAnInsertionsReportedRangeToTheParagraph`** (pins AppKit's
+own behaviour so a point release that changes it is visible rather than
+mysterious — TEXTKIT2_NOTES §5 discipline); and ordinary typing +
+open-tail + crystallization leaving the counter at zero.
+
+**Whole-suite consequence, worth stating:** the audit now asserts across
+the entire Mac suite in DEBUG, and after the clamp **it fires nowhere
+else in 1,629 tests**. That is the strongest evidence available that the
+separator stamp was the only place the Mac's projection diverged.
+
+**PROVISIONAL (one, small):** the audit fires at `adoptRewrite` rather
+than at each of the three executors' ends. Options weighed: (a) one call
+at the shared write door — chosen, because it cannot be forgotten by a
+fourth door added later; (b) three calls at the executors, mirroring the
+phone's site-for-site shape; (c) both. (a) audits marginally earlier than
+(b) inside `renderFull` (before the scroll jump and `refreshBadges`),
+which touch no attributes. Recorded rather than assumed.
+
+#### L-b (row 8) — the bar she uses daily stops throwing her words away
+
+**The trace.** `submit()` did `entryText = ""` as its second statement,
+before `importPost` was ever called; the `catch` set
+`"New note refused: \(error)"`. So a refusal — the store cut off, a
+failure mid-round, anything the op throws — **discarded the paragraph she
+had just typed and printed an enum dump where the reason belonged.** Her
+text lives nowhere but that box until the mint returns.
+
+**What was built.** The phone's shape (`MobileQuickNote.file()`), adopted:
+the rule moved out of the view into `QuickEntryModel` — *a rule that
+exists only inside a `Task` in a `View` body cannot be pinned, and this
+one was wrong* — with `submit()` async and returning the note to open.
+The box resets ONLY on a completed hand-off; the empty/whitespace road
+still clears (nothing to keep) and drops a stale error with it; the copy
+goes through `OpsRefusalCopy.message(for:)` inside a new `QuickEntryCopy`
+home, ending on the half that is load-bearing and **now true**: *"Your
+text is still here — try again in a moment."* A non-`OperationError` is
+NAMED ("The store couldn't take it just now.") rather than dumped, since
+`OpsRefusalCopy` falls through to `String(describing:)` for those.
+
+**One judgment call, made and documented:** a success clears only what it
+actually filed — `if text == submitted { text = "" }`. Keystrokes that
+land DURING the mint are not in the note the mint made (it read
+`submitted`), so sweeping them away for tidiness would lose them; she
+sees them still there and a second ⏎ makes them a second note. Pinned
+(`typingDuringTheMintIsNotSweptAwayByItsSuccess`), staged from inside the
+mint closure, which is the only place that window really is.
+
+**`QuickNotePad.take()` was left alone**, deliberately and per the brief:
+that pad mints as you type, so the text is already a note when it files,
+and its copy already speaks.
+
+**Pins (6, new suite `QuickEntryBarTests`).** **RED-ON-OLD by behavioural
+revert** (pre-fix ordering + dump restored): **three pins fail on nine
+expectations** — the box reads `""` where it should hold
+`"the paragraph she just wrote"`, and the message reads
+`New note refused: lockedPost(id: "c1")` and
+`New note refused: Cutoff(detail: "NSCocoaErrorDomain 257")`.
+
+#### L-c (row 9) — the store stops opening on the main thread before first paint
+
+**The trace.** `AppBootstrap.init` called `open()` inline: resolve the
+URL, assert the iOS protection class, `openStore` (which runs the whole
+migration set), install, build the session — all synchronously on the
+main thread, before first paint, on every launch of both apps. P2's
+letter (OverallModel §5).
+
+**Built to the RULED shape** (mobile §58/§62, adopted verbatim there): an
+`.opening` state; the file work on a detached task; back to the MainActor
+for `install` + the state write with the once-per-process `installed`
+flag intact; `retry()` re-entering the same road; a quiet launch view in
+BOTH roots (`StoreOpeningView` / `MobileStoreOpeningView` — deliberately
+silent: a spinner would announce a wait she does not have, and D8 came
+back *"almost imperceptible"*). The not-ready window cannot open by
+construction — `AppSession` exists only inside `.ready`. Three switch
+sites gained arms (the Mac's two `WindowGroup`s and the phone's root);
+the four `if case .ready` sites needed nothing. The file work moved to a
+file-scope `nonisolated` function so the off-main-ness cannot be lost to
+a later refactor by accident. One addition beyond the ruled shape: the
+in-flight `Task` is held, so a second `retry()` cannot start a second
+race for the same store file (pinned).
+
+**RE-MEASURED, which was the other half of the ask** (§58's numbers were
+the simulator's; these are this Mac's, printed by
+`theLaunchCostIsMeasuredAgain`):
+
+```
+PERF[mac] AppBootstrap.init (MAIN THREAD, before first paint):  5.75 µs
+PERF[mac] openStore first (empty store, full migration set):   10.3 ms
+PERF[mac] openStore reopened:                                   0.89 ms
+```
+
+The 10 ms is what used to be paid on the main thread at every launch —
+and the migration set only grows.
+
+**The test seam, and why it is shaped as it is.** `init(testOpener:)`
+replaces the file work **and skips the process-global
+`prepareDependencies` installs with it.** That coupling is deliberate,
+not a shortcut: an injected opener means the store is a test's own, and
+installing it as the app's ambient one would poison every other test in
+the process (`prepareDependencies` may only be called before anything
+reads a dependency). Production has no way to reach it. The pins also
+open their store OUTSIDE the bootstrap, because `Task.detached` does not
+inherit a `withDependencies` scope — recorded because it is a real
+property of the road, not a test artifact.
+
+**Pins (4, new suite `AppBootstrapOffMainTests`). RED-ON-OLD by
+behavioural revert** (the open inline again): `initCost` **50.96 ms**
+instead of 5.75 µs, the state reads `.ready` where the pin requires
+`.opening`, and the re-entrancy pin counts **3** opens instead of 1.
+
+#### L-d (row 10) — the registry can let go, and three comments stop lying
+
+**The trace.** `postAutosaves` had no removal path. The phone's quick note
+calls `session.autosave(forPost:)` at `adopt` — **once per CAPTURE, and
+every capture is a different post** — so a day of jotting left a
+coordinator per jot, and `flushEveryOpenPost()` walked all of them at
+every filing and every background flush.
+
+**THE `quitFinalize` TRAP — CLOSED, not tolerated.** The brief said the
+Mac registers a quit closure at mint time, so release-then-re-mint would
+register a second for the same post, *"deduped by `closeAutoCommit` —
+noise not corruption, but make it deliberate."* `QuitFinalizeRegistry`
+already had `unregister(_:)`, so the deliberate answer available was
+better than accepting the noise: **the token rides in the entry and goes
+with it.** A re-mint registers exactly once and a released post leaves no
+closure behind. Pinned by count (`1 → 0 → 1`, where the tolerated design
+would read 2), which is why `QuitFinalizeRegistry` gained a `count`
+beside its `isEmpty` — the trap is a claim about a COUNT and a pin should
+read it, not infer it from a side effect.
+
+**The hazard I traced myself, and the shape that answers it.** A naive
+release would let a LATER acquirer mint a SECOND coordinator for a post
+another surface still holds — reintroducing exactly the two-pipelines
+class the map exists to prevent (13b 1a's N3; the S3 ladder's BLOCKER).
+And a plain refcount is not obviously safe here either, because two
+callers acquire TRANSIENTLY and never release (`NoteDeletion:91`,
+`ShellActions:70` — they flush a post that may not be open at all). The
+shape chosen holds under both: entries carry a **holder count that errs
+upward**. Over-counting keeps an entry alive (exactly the pre-L-d
+behaviour, so those two callers see no change at all); under-counting is
+the only dangerous direction and no caller releases more than it
+acquires, because **exactly one caller releases at all.** On top of that,
+a **dirty coordinator is never dropped** — `flushEveryOpenPost` and ⌘Q
+must still reach unflushed text, and dropping it is the one thing that
+could lose bytes.
+
+**The three false comments, each corrected at its mechanism** (not
+deleted): `:89`'s *"with no undo UI yet"* — M20 shipped the phone a
+receipt-based undo; what it lacks is REDO, and that is a mobile batch's
+fact, not this stack's. `:206-208`'s *"open posts are a handful by
+construction"* — untrue since the quick note, and true again now; the
+line states what the walk actually covers. `:240-245` — INVERTED: the
+box takes a real coordinator at `adopt` and autosaves its owned tail
+through it, which is why its filing flushes before it savepoints and why
+it now releases; the surrounding reasoning stands on its own, only the
+example was wrong.
+
+**Pins (6 Mac in `AutosaveRegistryReleaseTests` + 1 mobile).** The
+released post leaves the flush walk and a re-ask mints a NEW coordinator;
+the quit count is 1 across release-then-re-mint; **a dirty coordinator is
+never dropped and the same object comes back**; a second holder keeps the
+entry (the ONE-per-post guarantee intact); eight captures accumulate and
+then cost nothing; releasing an unknown post is a no-op. Mobile:
+`eachCaptureHandsItsCoordinatorBack` — three real captures minted, three
+real notes in the store, `openAutosaveCount == 0`. **RED-ON-OLD:** with
+the release call removed from `reset()`, that pin reads
+`openAutosaveCount → 3` where it expects `0`. (`openAutosaveCount` was
+added because the growth is a claim about a COUNT on BOTH platforms and
+only the Mac has `quitFinalize` to read it from.)
+
+#### THE FOUR GATES — all green, counts quoted
+
+| suite | Act 2 baseline | **Act 3 close** |
+|---|---|---|
+| core (`swift test`) | 1351 / 141 | **1351 / 141** — exact, untouched (zero `Sources/` lines) |
+| Mac full | 1598 / 279 | **1629 / 284** (+31 pins, +5 suites — this act's) |
+| Mac spine | 63 / 8 | **63 / 8** — exact |
+| mobile full | 485 / 78 | **486 / 78** (+1 pin) |
+| mobile spine | 33 / 7 | **33 / 7** — exact |
+
+The mobile run reports "2 known issues" in
+`MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`
+— those are `withKnownIssue` PASSES and are pre-existing (they read
+identically at the Act 2 baseline).
+
+**The known flakes did not appear.** `EditorWindowSmokeTests`'
+latency pin and `CanvasDragTrackingTests` were green in **both** full Mac
+runs this act (1613/281 mid-act and 1629/284 at the close). **So
+`CanvasDragTrackingTests` has NOT earned its KnownIssues row from this
+act** — the architect's standing condition (*"if it reds again anywhere
+in this phase it earns the row"*) was not met here, and this is recorded
+so the next session knows the count is still one, not two.
+
+#### FOR THE PHASE'S END-OF-PHASE LADDER — what to attack hardest
+
+1. **L-a's clamp is the one behavioural change to a keystroke road in
+   this act.** It is guarded by 15 new pins and the whole 1,629-test Mac
+   suite ran clean with the audit asserting throughout — but it changes
+   what characters carry a block's ID on every edit, and that deserves an
+   independent read.
+2. **`stampProjection`'s `.tail`/`.openTail` clamp is DEFENSIVE, not
+   measured.** The widening measured here goes FORWARD only, so no tail
+   removal was observed stripping a block's ID backwards. The clamp costs
+   nothing and states the invariant; a reviewer should decide whether
+   defensive-without-a-reproduction is the right call or should be a pin.
+3. **L-b changed a view into a view + model.** Both hosts
+   (`ShelfView:339`, `LibraryCatalogView:305`) call the same initializer,
+   which is unchanged in shape — worth confirming the shelf's `autofocus`
+   behaviour and the placeholder/cursor idiom still render as before,
+   since nothing here can pin what a `TextField` looks like.
+4. **L-c's `.opening` frame is silent.** If a machine ever makes the open
+   slow, she sees a blank window for that time. Judged right (the numbers
+   say milliseconds, and D8 says imperceptible); a reviewer may disagree.
+5. **L-d's holder count is a NEW invariant in a `Shared/` file.** The
+   argument that over-counting is safe is written at the type; it is
+   worth checking against every caller rather than trusting the list.
