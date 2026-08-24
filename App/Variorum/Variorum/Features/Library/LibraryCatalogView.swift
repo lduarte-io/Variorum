@@ -98,6 +98,35 @@ final class LibraryCatalogModel {
         if let anchor = selectionAnchor, postIDs.contains(anchor) { selectionAnchor = nil }
     }
 
+    /// **Keep the pick to what the list is SHOWING** (13l, the end-of-phase
+    /// ladder's R2-2 — `clearSelection`'s own standard, applied on the other
+    /// road that changes what is on screen).
+    ///
+    /// The pick outlived its listing: `search()` re-reads `hits` on every
+    /// typed query and scope change, and nothing touched `selectedPosts`. A
+    /// note picked under one query stayed picked under the next, where its
+    /// row is not drawn — so the bulk bar (`selectedPosts.count > 1`) could
+    /// stand over notes nothing on screen highlights, the Tag/Untag menus
+    /// would act on `Array(selectedPosts)` including them, and the counts in
+    /// all three labels could disagree with the delete button's own
+    /// `selectedNotesInListOrder` ("Delete 5 notes…" deleting 2).
+    ///
+    /// **Pruned, not cleared.** Clearing on every `search()` would be the
+    /// simpler line and the wrong one: `search()` also re-runs after a bulk
+    /// tag apply/remove and after a delete, so a pick would evaporate under
+    /// the very act it was made for. Intersecting drops exactly the rows that
+    /// left, and leaves a pick whose rows are still drawn alone. The mode
+    /// rule stays a CLEAR because leaving List mode draws no selection at all.
+    private func pruneSelectionToListing() {
+        // The anchor is checked even with an empty pick: toggling the last
+        // row off leaves an anchor behind, and a ⇧-click aimed from a row the
+        // list no longer draws is the same invisible-state hazard.
+        guard !selectedPosts.isEmpty || selectionAnchor != nil else { return }
+        let listed = Set(listedNoteIDs)
+        selectedPosts.formIntersection(listed)
+        if let anchor = selectionAnchor, !listed.contains(anchor) { selectionAnchor = nil }
+    }
+
     init(session: AppSession) {
         self.session = session
     }
@@ -114,6 +143,7 @@ final class LibraryCatalogModel {
             }
             guard generation == searchGeneration else { return }  // stale
             hits = filtered(all)
+            pruneSelectionToListing()   // R2-2: the pick follows the listing
             let postIDs = hits.filter { $0.kind == .post }.map(\.id)
             await loadTagChips(for: postIDs, generation: generation)
             await loadNoteCards(for: postIDs, generation: generation)

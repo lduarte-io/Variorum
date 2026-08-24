@@ -202,7 +202,9 @@ final class AppSession {
     /// release), and on the Mac a `quitFinalize` closure registered for a note
     /// nothing holds. `NoteDeletion` reaches this entry precisely because its
     /// doors routinely name notes that were never open — a Library row, or
-    /// fifty of them under ⌘-click multi-select.
+    /// fifty of them under ⌘-click multi-select. **`runCopying` reaches it for
+    /// the same reason** (13l, the ladder's R2-1): the library and pool
+    /// duplicate rows name posts that may not be open at all.
     ///
     /// This is `savepointOnLeaving`'s existing-only shape, made a named entry
     /// so the two roads cannot drift; that method's own doc has always carried
@@ -297,13 +299,24 @@ final class AppSession {
     /// The body is `divergeForBook`'s, which the 13f cold review (R1-4)
     /// wrote for the ONE door it was reviewing; 13e's row is the rest of
     /// the family arriving at the same rule rather than growing a second
-    /// copy of it. `flushNow()` on a post that is not open is a no-op with
-    /// nothing pending, so the entry is safe for the library and pool rows,
-    /// which duplicate posts that may not be open at all.
+    /// copy of it.
+    ///
+    /// **It flushes the EXISTING coordinator and never mints one** (13l, the
+    /// ladder's R2-1). The line here used to read *"`flushNow()` on a post
+    /// that is not open is a no-op with nothing pending, so the entry is safe
+    /// for the library and pool rows"* — true of the FLUSH and false of
+    /// everything around it, which is exactly the falsehood LR-MINOR-2
+    /// corrected at `NoteDeletion`'s door. `autosave(forPost:)` MINTS on a
+    /// miss: a map entry `flushEveryOpenPost` walks forever (this caller
+    /// never releases) plus, on the Mac, a `quitFinalize` closure for a note
+    /// nothing opened. The library and pool rows duplicate posts that may not
+    /// be open at all, so this door met that cost on every press.
+    /// Semantics are unchanged: an open source HAS an entry and still
+    /// flushes, and a never-opened one has nothing pending by construction.
     func runCopying<T: Sendable>(
         from postID: String, _ body: @escaping @Sendable (Operations) throws -> T
     ) async throws -> T {
-        await autosave(forPost: postID).flushNow()
+        await flushExistingAutosave(forPost: postID)
         return try await runner.run(body)
     }
 

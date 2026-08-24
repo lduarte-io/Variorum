@@ -200,6 +200,59 @@ struct NoteRowRoutingTests {
         }
     }
 
+    /// **R2-2 (the ladder's round 2): the pick follows the LISTING, not just
+    /// the mode.** `search()` re-reads `hits` on every typed query and scope
+    /// change; nothing touched `selectedPosts`, so a note picked under one
+    /// query stayed picked under the next — where its row is not drawn. The
+    /// bulk bar's condition is `selectedPosts.count > 1`, and the Tag/Untag
+    /// menus act on `Array(selectedPosts)`, so the doors stood over notes
+    /// nothing on screen highlighted and their labels disagreed with the
+    /// delete button's own `selectedNotesInListOrder`.
+    ///
+    /// **Red on old** (behavioural revert: drop the `pruneSelectionToListing()`
+    /// call after `hits = filtered(all)`) — the pick survives at 2 and the
+    /// bulk bar's condition stays true over one visible row.
+    @Test func aPickDoesNotSurviveIntoAListingThatDoesNotShowIt() async throws {
+        try await withCatalog { model, session in
+            let ids = try await seed(session, ["alpha one", "beta two"])
+            await model.search()
+            #expect(model.listedNoteIDs.count == 2)
+            model.clickNoteRow(ids[0], modifiers: .command_)
+            model.clickNoteRow(ids[1], modifiers: .command_)
+            #expect(model.selectedPosts.count > 1, "the bulk bar's own condition, before")
+
+            // She types a query that lists only one of them.
+            model.query = "beta"
+            await model.search()
+
+            #expect(model.listedNoteIDs == [ids[1]], "the premise: one row is drawn")
+            #expect(model.selectedPosts == [ids[1]],
+                    "the pick is exactly what the list is showing")
+            #expect((model.selectedPosts.count > 1) == false,
+                    "so the destructive bulk bar is gone with the rows it named")
+            #expect(model.selectedNotesInListOrder == [ids[1]],
+                    "and the count in the label can no longer disagree with what deletes")
+        }
+    }
+
+    /// The other half of R2-2, and the reason it PRUNES rather than clears:
+    /// `search()` also re-runs after a bulk tag apply and after a delete, so a
+    /// pick whose rows are all still listed must survive its own act.
+    @Test func aPickWhoseRowsAreStillListedSurvivesTheRefresh() async throws {
+        try await withCatalog { model, session in
+            _ = try await seed(session, ["one", "two", "three"])
+            await model.search()
+            let listed = model.listedNoteIDs
+            model.clickNoteRow(listed[0], modifiers: .command_)
+            model.clickNoteRow(listed[1], modifiers: .command_)
+
+            await model.search()   // what a bulk tag apply spawns
+
+            #expect(model.selectedNotesInListOrder == [listed[0], listed[1]])
+            #expect(model.selectionAnchor == listed[1], "the ⇧-range can still be aimed")
+        }
+    }
+
     /// The pick belongs to the LIST mode, which is the only mode that draws
     /// it. Carrying it into Notes or Timeline would leave a destructive bulk
     /// door standing over a selection nothing on screen shows.

@@ -180,6 +180,53 @@ struct CopyDoorFlushTests {
         }
     }
 
+    /// **R2-1 (13l, the end-of-phase ladder round 2): the entry flushes what
+    /// exists and MINTS NOTHING.** LR-MINOR-2's mechanism at a second door —
+    /// `autosave(forPost:)` mints on a miss, so every duplicate of a Library
+    /// or Pool row this session never opened left a permanent map entry for
+    /// `flushEveryOpenPost` to walk and a ⌘Q closure for a post no surface
+    /// holds. The copy is asserted too, so the pin cannot pass on a door that
+    /// simply stopped working.
+    ///
+    /// **Red on old** (behavioural revert to `autosave(forPost: postID)
+    /// .flushNow()`): both counts move 0 → 3.
+    @Test func duplicatingANeverOpenedRowMintsNothing() async throws {
+        try await withCopyWorld { session, db in
+            let entriesBefore = session.openAutosaveCount
+            let quitBefore = session.quitFinalize.count
+
+            // Three notes this session has never opened — the Library-row
+            // and Pool-row case the entry's own doc names.
+            let strangers = try await session.runner.run { (ops: Operations) -> [String] in
+                try (0..<3).map { index -> String in
+                    let post = try ops.createPost(title: "row \(index)")
+                    _ = try ops.newBlock(in: post.id, text: "Row \(index) text.")
+                    return post.id
+                }
+            }
+            for postID in strangers {
+                _ = try await session.runCopying(from: postID) { ops in
+                    try ops.duplicateAsVersion(postID)
+                }
+            }
+
+            let copies = try await db.read { db in
+                try Int.fetchOne(
+                    db,
+                    sql: """
+                        SELECT COUNT(*) FROM container
+                         WHERE kind = 'post' AND deleted_at IS NULL
+                        """) ?? 0
+            }
+            #expect(copies == 6, "they really were duplicated — the pin is about the cost")
+
+            #expect(session.openAutosaveCount == entriesBefore,
+                    "no coordinator was minted for a post nothing ever opened")
+            #expect(session.quitFinalize.count == quitBefore,
+                    "and no ⌘Q closure was left behind for it")
+        }
+    }
+
     /// **THE SWEEP'S FIND, pinned like the rest** (13e E10's class walk):
     /// `poolDragCopy` reads the SOURCE block's `working_text` too, and the
     /// source is a scrap that may be open in its own editor. The dropping
