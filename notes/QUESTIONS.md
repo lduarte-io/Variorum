@@ -936,4 +936,14 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint.**
 
-*(Next free number: **#79**.)*
+79. **⌘-click multi-select now works — and three small shapes inside it are yours.** *(P-0, the ladder's fix wave. The door you ruled at 13j's close — "allow for command clicking to select multiple items and deleting all of them" — was DEAD in the shipped build: a tap gesture on the row swallowed the click before the list's own selection saw it, so ⌘-click just opened the note and the bulk bar could never appear. That is fixed and **verified by ⌘-clicking the running app**, not only by tests: two rows highlight, "Tag 2 notes" and "Delete 2 notes…" appear, plain click still opens. The same swallow is why the bulk TAG menu had been unreachable since long before 13l — it works now too.)*
+
+    **(a) A plain click DROPS the pick. PROVISIONAL.** Pick three notes, then click a fourth to read it, and the first three are let go. Every Mac list behaves this way, and without it a pick has no exit but deleting it — the bar would follow you around until you ⌘-clicked each note off again. **The alternative:** leave the pick alone, so glancing at one note does not cost you the other three; the exit then has to be something else (Escape, or a click on empty space).
+
+    **(b) ⇧-click takes the run between two rows, and ⌘⇧-click is treated as ⌘.** The range runs from the last row you ⌘/⇧-clicked to the one you shift-click, in the order the list is showing — and a ⇧-click with nothing picked yet simply picks that row rather than doing nothing. ⌘⇧ together resolves as "toggle this one", because that is the gesture you were told about. None of this was in your ruling; it is what a Mac list does, offered rather than assumed.
+
+    **(c) Leaving the List mode drops the pick too.** Only the List mode draws the selection — the Notes cards and the Timeline do not — so carrying a pick into them would leave "Delete 4 notes…" standing over notes nothing on screen shows as picked. **The alternative** (and it is the bigger version of the same question): teach the Notes cards to show a pick, so multi-select works in the Apple-Notes-shaped list too. That is real design work, not a fix, which is why it is here rather than done.
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#80**.)*

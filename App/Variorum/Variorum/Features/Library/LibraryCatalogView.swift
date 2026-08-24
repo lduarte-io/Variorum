@@ -46,6 +46,58 @@ final class LibraryCatalogModel {
     /// per-keystroke tasks are unordered; only the NEWEST read may land.
     private var searchGeneration = 0
 
+    // MARK: - The ⌘-click pick (P-0, 13l's end-of-phase ladder)
+
+    /// The notes she has picked. **Model state, not the view's `@State`** —
+    /// the defect P-0 names was a routing decision buried in a gesture
+    /// closure, and the fix is only worth anything if the decision can be
+    /// driven. It lives here so it can be.
+    var selectedPosts: Set<String> = []
+    /// The last row a ⌘/⇧-click named — a ⇧-range's other end.
+    private(set) var selectionAnchor: String?
+
+    /// The note ids **as this list is showing them**. Both ordered answers
+    /// (the ⇧-range, and the confirm's list) come from here, because a `Set`
+    /// has none.
+    var listedNoteIDs: [String] {
+        hits.filter { $0.kind == .post }.map(\.id)
+    }
+
+    /// The pick in list order — what the confirm and the receipt name.
+    var selectedNotesInListOrder: [String] {
+        listedNoteIDs.filter { selectedPosts.contains($0) }
+    }
+
+    /// **A click on a note row. Returns whether the note should OPEN.**
+    ///
+    /// The whole of P-0's routing, in one place a test can call: the
+    /// modifiers decide, `NoteRowSelection` says what the pick becomes, and
+    /// the answer tells the row whether this was an opening click at all.
+    @discardableResult
+    func clickNoteRow(_ postID: String, modifiers: NoteRowClickModifiers) -> Bool {
+        let intent = NoteRowSelection.intent(for: modifiers)
+        let next = NoteRowSelection.apply(
+            intent, row: postID, to: selectedPosts,
+            anchor: selectionAnchor, order: listedNoteIDs)
+        selectedPosts = next.selection
+        selectionAnchor = next.anchor
+        return intent == .open
+    }
+
+    /// Drop the pick. Called when the list stops being the surface showing it
+    /// — a mode switch, or a delete that consumed it. A bar offering to delete
+    /// notes she cannot see highlighted is the invisible-selection hazard the
+    /// walk's own standard forbids.
+    func clearSelection() {
+        selectedPosts = []
+        selectionAnchor = nil
+    }
+
+    func deselect(_ postIDs: [String]) {
+        selectedPosts.subtract(postIDs)
+        if let anchor = selectionAnchor, postIDs.contains(anchor) { selectionAnchor = nil }
+    }
+
     init(session: AppSession) {
         self.session = session
     }
@@ -273,7 +325,6 @@ struct LibraryCatalogView: View {
     // environment — fall back to the leading voice's tokens.
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
-    @State private var selectedPosts: Set<String> = []
     @State private var tagSheetTarget: SidebarView.TagSheetTarget?
     @State private var renameTarget: String?
     @State private var renameTitle = ""
@@ -309,6 +360,11 @@ struct LibraryCatalogView: View {
         // 13g R5-6: switching INTO notes fills the cards; switching out
         // clears them, so a mode she is not in holds no derived text.
         .task(id: model.mode) { await model.refreshNoteCards() }
+        // P-0 (13l, the ladder): the pick is the LIST's, and only the List
+        // mode draws it. Carrying it into Notes or Timeline would leave the
+        // bulk bar offering to delete notes nothing on screen shows as
+        // picked — an invisible selection behind a destructive door.
+        .onChange(of: model.mode) { _, _ in model.clearSelection() }
         .sheet(item: $tagSheetTarget) { target in
             TagAssignmentSheet(session: session, postID: target.id, postTitle: target.title)
         }
@@ -332,7 +388,7 @@ struct LibraryCatalogView: View {
         // 13l Act 2 (item 3): ONE host for both asks — a row's and the whole
         // selection's — so the wording cannot differ between them.
         .deleteNoteConfirmDialog($pendingDelete) { confirm in
-            selectedPosts.subtract(confirm.postIDs)
+            model.deselect(confirm.postIDs)
             NoteDeletion.fire(session: session, postIDs: confirm.postIDs)
         }
         // …and the listing catches up on the SIGNAL rather than after its own
@@ -359,9 +415,11 @@ struct LibraryCatalogView: View {
     /// a confirm built from it would name notes in whatever order the hash
     /// happened to give, which is the surface telling her a different story
     /// each time she looks. The list's own order is the one she is pointing at.
-    private var selectedNotesInListOrder: [String] {
-        model.hits.filter { $0.kind == .post && selectedPosts.contains($0.id) }.map(\.id)
-    }
+    ///
+    /// *(P-0, the ladder: the pick and its ordering moved to the model, where
+    /// the routing that fills it can be driven. This reads through.)*
+    private var selectedPosts: Set<String> { model.selectedPosts }
+    private var selectedNotesInListOrder: [String] { model.selectedNotesInListOrder }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -457,7 +515,9 @@ struct LibraryCatalogView: View {
     }
 
     private var listBody: some View {
-        List(selection: $selectedPosts) {
+        List(selection: Binding(
+            get: { model.selectedPosts },
+            set: { model.selectedPosts = $0 })) {
             let grouped = Dictionary(grouping: model.hits, by: \.kind)
             if let books = grouped[.book], !books.isEmpty {
                 Section(tokens.chromeLabel("Books")) {
@@ -624,7 +684,14 @@ struct LibraryCatalogView: View {
             Spacer()
         }
         .contentShape(Rectangle())
-        .onTapGesture { onOpen(.post(hit.id)) }
+        // **P-0** (13l, the end-of-phase ladder): a bare tap swallowed the
+        // click before `List(selection:)` could see it AND could not tell one
+        // modifier from another, so ⌘-click opened the note and the bulk bar
+        // could never appear. The routing is `NoteRowSelection`'s now, and
+        // the row only opens when the click was an opening one.
+        .onTapGesture {
+            if model.clickNoteRow(hit.id, modifiers: .current) { onOpen(.post(hit.id)) }
+        }
         .draggable(hit.id)
         .contextMenu { postRowMenu(hit) }
     }
