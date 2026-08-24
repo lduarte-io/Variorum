@@ -2725,6 +2725,35 @@ ask as a contract-file note** (`notes/fragments-bridge-contract.md`
 (core-heavy; Mac/mobile should ride unmoved — say so if they move);
 "ACT 6 — RECORD"; the standing rules.
 
+### ACT 7 — THE 8d RECOVERY-STORY WALK: the brief (fresh Opus session; row 21)
+
+**Her mandate (§8d, verbatim there):** the trash recovery story must
+be "well built and intuitive as ux from ALL its doors" — because her
+ruled cross-block liberalization (13u item 5) LEANS on the Trash
+being a robust, legible net. **Walk every door AS A USER, in the
+running app** (the DEV-store Debug build — its container holds the
+seeded design corpus; NEVER her real store, NEVER `/Applications`;
+own `caffeinate -d`; screenshots to a gitignored dir):
+
+the per-note tray (⌫ N, both sections) · the Trash (filters, the
+recency/kind splits, Put back per kind incl. a scrap and an archived
+take — the Act 1/Act 2 receipts live now) · Delete Now / Empty Trash
+end-to-end (the fixed doors, real clicks) · the NEW note-deletion
+doors (note ▾, Library, ⌘-click multi — confirm wording, receipts,
+navigate-away with a second window open) · the lineage door from a
+successor block (J3) · the History face's past region · restore
+commit/take/block roads · the QuickEntryBar refusal (L-b's fix, as
+felt). At each: **"where did my text go and how do I get it back" —
+answerable without explanation?**
+
+**Output discipline:** UNAMBIGUOUS DEFECTS (dead door, wrong receipt,
+crash — the mechanism traceable) get fixed WITH pins in-act, recorded;
+everything taste-shaped is **PROPOSE-ONLY** — a findings list for her,
+severity-free, screenshots referenced, NOTHING built from it
+autonomously (her standing posture). Append "ACT 7 — WALK RECORD"
+(door-by-door: clean / fixed / proposed), full gates only if code
+moved; the standing rules.
+
 ### ACT 3 — RECORD (Opus implementer, 2026-08-24)
 
 **Scope taken, and it is exactly the four dispatched:** ledger rows
