@@ -41,10 +41,20 @@ final class StoreBackup {
         var keep: Int = 14
         /// The picked folder's rule (13l): longer reach, fewer files.
         var secondPolicy: BackupRetention.Policy = .secondDestination
+        /// The restore recipe dropped beside the copies, when the platform
+        /// has one to give. A PARAMETER rather than a Shared constant: the
+        /// text is entirely Mac-shaped (container paths, Finder steps), and
+        /// `Shared/` means both platforms compile it — so the machinery is
+        /// shared and the words are the caller's. nil = write nothing.
+        var runbookText: String?
     }
 
     nonisolated static let filePrefix = "variorum-backup-"
     nonisolated static let fileExtension = "sqlite"
+    /// The restore recipe's filename in a backup folder. Here rather than
+    /// with the text, because the WRITER owns the file's name and the
+    /// caller owns its words.
+    nonisolated static let runbookFilename = "RESTORE.md"
 
     private let database: AppDatabase
     /// The in-container `Backups/` folder — internal so the Data Safety face
@@ -176,7 +186,7 @@ final class StoreBackup {
         // The recipe rides beside the copies it is about (13l row 13). The
         // moment a restore recipe gets read is the moment the app may not
         // open, so a copy that lives only inside the app is not a runbook.
-        writeRunbook(into: directory)
+        writeRunbook(configuration.runbookText, into: directory)
 
         let secondary = performSecondLeg(
             directory: directory, configuration: configuration,
@@ -187,9 +197,9 @@ final class StoreBackup {
     /// Drops `RESTORE.md` into a folder, only when its bytes would change —
     /// a picked folder may be cloud-synced, and rewriting an identical file
     /// every hour would be upload churn for nothing.
-    nonisolated static func writeRunbook(into folder: URL) {
-        let url = folder.appendingPathComponent(DataSafetyCopy.runbookFilename)
-        let text = DataSafetyCopy.runbook
+    nonisolated static func writeRunbook(_ text: String?, into folder: URL) {
+        guard let text else { return }
+        let url = folder.appendingPathComponent(runbookFilename)
         if let existing = try? String(contentsOf: url, encoding: .utf8), existing == text {
             return
         }
@@ -220,7 +230,9 @@ final class StoreBackup {
                     at: target, withIntermediateDirectories: true)
                 // One step up from the snapshots — the folder she actually
                 // opens when she goes looking.
-                writeRunbook(into: BackupDestination.variorumFolder(in: resolved.picked))
+                writeRunbook(
+                    configuration.runbookText,
+                    into: BackupDestination.variorumFolder(in: resolved.picked))
                 // Due-ness is the FAR folder's own question: picking a folder
                 // today must seed it immediately even though the container's
                 // copy is hours old, and a run that copied yesterday must not

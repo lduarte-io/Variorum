@@ -57,6 +57,9 @@ struct VariorumApp: App {
                             session: session,
                             storeVariant: bootstrap.storeVariant,
                             backupEnabled: true,
+                            // 13l Act 4 (row 13): the Mac's own restore
+                            // recipe, dropped into every backup folder.
+                            backupRunbookText: DataSafetyCopy.runbook,
                             bridgeEnabled: true,  // Mac-side (Phase 9b scope)
                             // THE 14D UN-PAUSE (2026-08-16, the phase's
                             // deliberate act): the LIVE journal-bridge key

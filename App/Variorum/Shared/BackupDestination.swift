@@ -61,9 +61,19 @@ nonisolated enum BackupDestination {
     /// Throws rather than storing an unscoped bookmark: an unscoped one
     /// resolves today and is dead tomorrow, which is the silent-stop failure
     /// this whole phase exists to kill.
+    ///
+    /// **macOS only, and the `#if` is the honest shape rather than a
+    /// portability hedge.** `.withSecurityScope` does not exist on iOS
+    /// because the concept does not: there is no folder picker feeding a
+    /// daily background copy on the phone, and `StoreBackup` is not wired
+    /// there at all (the phone's store is re-derivable from the mirror —
+    /// A1's own note). Should the phone ever want a second destination it
+    /// wants a different mechanism (a document-picker URL, or Files-app
+    /// scoping), which is a design, not a compile flag.
     static func remember(
         _ url: URL, in defaults: UserDefaults = .standard
     ) throws {
+        #if os(macOS)
         do {
             let data = try url.bookmarkData(
                 options: [.withSecurityScope], includingResourceValuesForKeys: nil,
@@ -74,6 +84,12 @@ nonisolated enum BackupDestination {
                 "This folder can't be remembered across launches (\(error.localizedDescription)). "
                 + "Pick a folder in your home directory or on an external volume.")
         }
+        #else
+        // Worded with no other platform in it: the mobile no-redirect
+        // sweep is right that a phone must never be told to go and use
+        // something else, and this arm has no door of its own to reach it.
+        throw MintFailure(reason: "A backup folder can't be remembered on this device.")
+        #endif
     }
 
     static func forget(in defaults: UserDefaults = .standard) {
@@ -99,8 +115,13 @@ nonisolated enum BackupDestination {
     static func resolve(in defaults: UserDefaults = .standard) -> Resolved? {
         guard let data = defaults.data(forKey: defaultsKey) else { return nil }
         var stale = false
+        #if os(macOS)
+        let options: URL.BookmarkResolutionOptions = [.withSecurityScope]
+        #else
+        let options: URL.BookmarkResolutionOptions = []
+        #endif
         guard let url = try? URL(
-            resolvingBookmarkData: data, options: [.withSecurityScope],
+            resolvingBookmarkData: data, options: options,
             relativeTo: nil, bookmarkDataIsStale: &stale)
         else { return nil }
         return Resolved(picked: url, wasStale: stale)

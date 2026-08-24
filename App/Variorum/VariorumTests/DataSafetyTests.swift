@@ -211,11 +211,12 @@ struct BackupRunTests {
         let scratch = scratchDefaults()
         _ = await Task.detached {
             StoreBackup.performRun(
-                database: source, directory: dir, configuration: .init(),
+                database: source, directory: dir,
+                configuration: .init(runbookText: DataSafetyCopy.runbook),
                 defaults: scratch(),
                 now: Date(timeIntervalSince1970: 1_782_900_000), force: false)
         }.value
-        let runbook = dir.appendingPathComponent(DataSafetyCopy.runbookFilename)
+        let runbook = dir.appendingPathComponent(StoreBackup.runbookFilename)
         let text = try String(contentsOf: runbook, encoding: .utf8)
         #expect(text == DataSafetyCopy.runbook)
     }

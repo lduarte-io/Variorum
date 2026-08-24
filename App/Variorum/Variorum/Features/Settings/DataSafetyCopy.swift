@@ -1,6 +1,6 @@
 //
 //  DataSafetyCopy.swift
-//  Variorum (shared: Mac + Mobile)
+//  Variorum (MAC ONLY — deliberately not in Shared/)
 //
 //  Phase 13l, Act 4 (ledger row 13) — the RUNBOOK, and the three sentences
 //  from it that the app itself has to say.
@@ -15,6 +15,15 @@
 //  app may not open, and a document that only exists inside the broken app
 //  is not a runbook.
 //
+//  WHY IT IS NOT IN `Shared/`, having started there: this is a FACE, not a
+//  brain (MobileSoul §3's line), and every sentence in it names the Mac —
+//  the container path, the Finder steps, File ▸ New Window. The mobile
+//  no-redirect sweep caught it within the hour, correctly: `Shared/` means
+//  BOTH platforms compile it, and a phone that imported this would speak
+//  about a machine it is not running on. The runbook text reaches the
+//  backup writer as a parameter instead (`StoreBackup.Configuration`), so
+//  the machinery stays shared and the words stay the Mac's.
+//
 //  Voice is PROVISIONAL throughout (13s owns the copy pass). What is fixed
 //  here is MEANING: her clarity mandate, verbatim — *"I feel like we need to
 //  be extremely clear with users about: permanently deleted things stay
@@ -26,9 +35,6 @@
 import Foundation
 
 nonisolated enum DataSafetyCopy {
-    /// The file the app drops beside the snapshots.
-    static let runbookFilename = "RESTORE.md"
-
     // MARK: - The three sentences the app itself must say
 
     /// M2/M4 — the SYNCED population's restore warning (her post-sitting
@@ -122,9 +128,10 @@ nonisolated enum DataSafetyCopy {
 
         1. **Quit Variorum.** Completely — the store must not be open.
         2. **Copy the backup you want OUT of its folder**, to the Desktop.
-           Take only the `.sqlite` file. If files ending `-wal` or `-shm` sit
-           beside it, leave them; they are leftovers and are not part of the
-           snapshot.
+           Take only the `.sqlite` file. You may see files ending `-wal` or
+           `-shm` beside it: those appear whenever something opens a copy to
+           read it, they carry nothing, and they are not part of the snapshot.
+           Leave them where they are.
         3. **Move the current store aside — do not delete it.** In
            `…/Application Support/Variorum/`, rename `variorum.sqlite` to
            `variorum-before-restore.sqlite`, and move any `variorum.sqlite-wal`
@@ -140,6 +147,12 @@ nonisolated enum DataSafetyCopy {
 
         If the app does not open, quit it, put `variorum-before-restore.sqlite`
         back as `variorum.sqlite`, and you are exactly where you started.
+
+        **Two things that look wrong and are not.** An older backup is brought
+        up to the current version the first time it is opened — that is normal
+        and takes a moment. And if Variorum opens with no window at all,
+        choose **File ▸ New Window**: nothing is wrong with your library, the
+        app just did not open one.
 
         ## 4. What restoring does to things you deleted
 
@@ -173,21 +186,24 @@ nonisolated enum DataSafetyCopy {
 
         ## 6. Reading one backup without restoring it
 
-        Most of the time you do not want a restore. You want one note back.
-        Do this instead — nothing here touches your live store:
+        Most of the time you do not want a restore. You want one note back —
+        and you want everything written since to stay where it is. Do §3
+        twice:
 
-        1. Copy the backup to the Desktop as in §3 step 2.
-        2. Rename it `variorum.sqlite` and put it in a scratch folder.
-        3. Open it (§3 step 4, but into a copy of the app's store folder —
-           or ask for help doing this if it is not obvious).
-        4. Find what you want and **copy the text out**, into a new note in
-           your real library.
+        1. Follow §3 steps 1–5 to open the backup. Your real store is safely
+           aside as `variorum-before-restore.sqlite`; nothing is lost.
+        2. Find what you want and **select and copy the text**.
+        3. Quit Variorum. Put `variorum-before-restore.sqlite` back as
+           `variorum.sqlite` (moving its `-wal`/`-shm` back with it), and move
+           the backup copy out.
+        4. Open Variorum — you are exactly where you started — and **paste
+           into a new note.**
 
         **Always copy out as new.** Never try to re-insert an old note "as
-        itself". A restored copy of something you permanently deleted comes
-        back as a fresh note with a new identity, which is what you want: it
-        cannot fight with the record of what was deleted, and it cannot be
-        removed again by a rule that was about the old one.
+        itself". Anything that comes back this way is a fresh note with a new
+        identity, which is what you want: it cannot fight with the record of
+        what was deleted, and it cannot be removed again by a rule that was
+        about the old one.
 
         ## 7. If the mirror is lost, or a device is
 

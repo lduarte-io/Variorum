@@ -141,7 +141,8 @@ final class AppServices {
 
     init(
         session: AppSession, storeVariant: AppDatabase.StoreVariant,
-        backupEnabled: Bool, bridgeEnabled: Bool = false,
+        backupEnabled: Bool, backupRunbookText: String? = nil,
+        bridgeEnabled: Bool = false,
         auth: AuthSession? = nil, fragmentsAuth: AuthSession? = nil,
         encryption: EncryptionSession? = nil,
         bridgeMinimumRoundInterval: Duration = .seconds(60),
@@ -226,7 +227,12 @@ final class AppServices {
             backup = StoreBackup(
                 database: session.database,
                 directory: storeURL.deletingLastPathComponent()
-                    .appendingPathComponent("Backups", isDirectory: true))
+                    .appendingPathComponent("Backups", isDirectory: true),
+                // 13l Act 4: the recipe that rides beside the copies. The
+                // words are the Mac's (`DataSafetyCopy`), handed to shared
+                // machinery — see StoreBackup.Configuration.runbookText.
+                configuration: StoreBackup.Configuration(
+                    runbookText: backupRunbookText))
         } else {
             backup = nil
         }

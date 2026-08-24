@@ -149,9 +149,13 @@ struct DataSafetyPane: View {
 
     private var restoreSection: some View {
         Section("Restoring a copy") {
+            // No markdown emphasis here: this string is INTERPOLATED, and an
+            // interpolated `Text` is not a `LocalizedStringKey`, so `**…**`
+            // renders as literal asterisks. Caught in the drill's own
+            // screenshot of this pane.
             Text("Restoring is a Finder operation, not a button: quit Variorum, move "
                  + "the current library file aside, put the copy in its place, open "
-                 + "Variorum. The step-by-step is in **\(DataSafetyCopy.runbookFilename)**, "
+                 + "Variorum. The step-by-step is in “\(StoreBackup.runbookFilename)”, "
                  + "which sits in every backup folder above.")
                 .font(.callout)
             Text(syncing
