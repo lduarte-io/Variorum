@@ -5423,3 +5423,85 @@ fixed."*
 
 **A daily-use defect on the app's core surface**, found outside the walk.
 **Routed to batch 9.**
+
+
+---
+
+## 68. HER QUESTION ABOUT THE FRAGMENTS BRIDGE ON THE PHONE (2026-08-23) — traced, and it surfaces a gap nobody owns
+
+She asked, after D5: *"why did i have to log into the fragments bridge on
+my phone? shouldn't that sync? and through my computer doesn't it sync
+from fragments already? though i guess my computer has to be open for
+that."*
+
+**Traced at the code, three separate answers — and her last sentence is
+the important one.**
+
+### 1 · She did not have to. **That door has NO consumer on the phone.**
+
+`bridgeEnabled: true` is passed by **exactly one caller**:
+`Variorum/VariorumApp.swift:60`, commented `// Mac-side (Phase 9b
+scope)`. The mobile composition passes **false** — pinned in
+`Phase9cAuthWiringTests.swift:375` (*"The mobile composition
+(bridgeEnabled: false — Mac-only scope)"*). So
+`BridgeSession.allowsBridge` is false on the phone, and
+`BridgeSession.runRound`'s first line is `guard allowsBridge else {
+return }`. **The phone never runs a bridge round, in either direction.**
+
+**The door renders because the account sheet is SHARED code**
+(`Shared/AuthViews`, `SignInFlow`) — it is account plumbing that arrived
+by construction, exactly as PL-9 recorded. **The walk asked her to
+exercise it because its iOS `presentationAnchor` arm had never run on a
+device** — that is now answered (it works, smoothly) — **but nothing she
+did there changed what her phone does.**
+
+### 2 · The TOKEN should not sync, and that part is right.
+
+The Fragments session stores in the **Keychain**
+(`AppServices.swift:194`, service
+`io.lduarte.Variorum.fragments-auth`) — **per-device by design**, the
+same posture as 14b's E2EE class keys, which are deliberately
+enrollment-only per device. **A credential that rode the sync payload
+would be a credential in the mirror.** That is not the thing to change.
+
+**But her instinct is still pointing at something true:** since 14d there
+is **ONE Stargazing account**, and the *link* between that account and
+Fragments is account-level. **So a phone door that says "connect" reads
+as though the link is per-device when it is not.** That is a **copy and
+honesty gap, not a security one.**
+
+### 3 · 🔴 **HER LAST SENTENCE IS THE REAL FINDING, AND SHE FOUND IT HERSELF.**
+
+*"though i guess my computer has to be open for that."* **Correct, and it
+is a live consequence nobody has written down:**
+
+- **The bridge is a client-side engine that only runs while the Mac app
+  is running.** There is no server-side bridge.
+- **So a journal entry written on her PHONE reaches Fragments only after
+  her Mac next opens and runs a round** — and a Fragments edit reaches
+  Variorum on the same condition.
+- **The phone contributes nothing to the bridge either way**, while being
+  the device she explicitly writes journal entries on (*"the phone is
+  where she writes in bed, on the couch, away from the desk"* —
+  MobileSoul §1).
+
+**This is not a defect — it is Phase 9b's scope working as designed.**
+But **the design predates the phone being a daily driver**, and it
+predates 14d's one-account world. **The gap is that nobody owns the
+question.**
+
+### THE THREE OPTIONS, hers to rule — recorded, not chosen
+
+| | shape | cost |
+|---|---|---|
+| **(a)** | **Hide the door on the phone.** PL-9's own option | Honest about today, but leaves the Mac-must-be-open latency **invisible and unexplained** |
+| **(b)** | **Keep the door and make it SAY what it does** — e.g. *"Your journal syncs with Fragments from your Mac."* | Cheap, honest, and it converts a confusing door into an explanation. **The architect's recommendation as the floor**, whatever else she decides |
+| **(c)** | **Run the bridge on the phone too.** **⚠️ THE ARCHITECT'S COST ESTIMATE HERE WAS WRONG, corrected 2026-08-23 at her push-back** (*"why would it change fragments?"*): the machinery is already SHARED — `BridgeSession` is in `Shared/`, the live journal-bridge key provider is in `Shared/EncryptionKeychain.swift` with **no platform fence**, the phone already enrols class keys, and it already holds a Fragments session. **It does NOT obviously need a Fragments-side change.** The real question is **Variorum's own**: two devices running rounds against one `journal_entries` table — who pushes a day, and what stops a double-push. **SHE RULED IT A PHASE: `13v` on the master plan** | Its own row, not a batch |
+
+**ROUTING:** the DOOR decision is already **PL-9's judgment act, batch 8**
+(the handoff's §3 row 16) — **and (b)'s copy belongs there regardless.**
+**The bigger question — should the phone run the bridge at all — is
+HERS**, and it is added to the handoff's OPEN WITH HER list rather than
+decided here. *(If she wants (c), it is not a mobile batch: it is a
+conversation with the Fragments side first, on the standing rule that
+this repo's agents never touch `~/dev/fragments`.)*

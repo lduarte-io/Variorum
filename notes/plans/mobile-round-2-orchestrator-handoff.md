@@ -1058,6 +1058,7 @@ Everything in the first handoff's §5 still holds. Added this seat:
 14. **The device queue is nine rows now** (§4b of the briefs), and **E1
     is still the only thing that would settle M1's root cause.** When she
     offers her phone, run the queue in that window — not just the install.
+16. **THE FRAGMENTS BRIDGE DOES NOT RUN ON HER PHONE, AND SHE NOTICED** (§68). She asked why she had to sign in there; the answer is that **she did not have to — the door has no consumer.** `bridgeEnabled: true` has exactly one caller (the Mac app); the phone's composition passes false and is pinned that way. **The token is Keychain-per-device by design and should stay that way.** But **she identified the live consequence herself**: *"my computer has to be open for that."* **A journal entry written on her phone reaches Fragments only when her Mac next opens** — on the device MobileSoul §1 calls the one she writes journal entries on. **The DOOR's fate is batch 8's** (PL-9's judgment act) **and the honest-copy floor belongs there regardless**; **whether the phone should run the bridge at all is HERS** — it is phase-sized, touches the Fragments contract and their side, and would put the journal-class E2EE key on a second device.
 15. **🔴 HER PHONE IS RUNNING THREE FIXED BUGS, and R30 has quietly gone
     stale.** R30 (*"i'll wait for my fresh build til these batches are
     all done"*) was ruled when "these batches" meant days. **It now means
