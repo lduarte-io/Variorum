@@ -445,7 +445,17 @@ that were promised a home and never got one):
 ---
 ---
 
-# SUCCESSOR HANDOFF — written 2026-08-23, FOR A MOBILE SESSION THAT RESUMES AFTER 13l
+# SUCCESSOR HANDOFF — written 2026-08-23, FOR A MOBILE SESSION THAT RESUMES **AFTER 13l AND 13u**
+
+> **⚠️ THE RESUME TRIGGER MOVED, same day this was written.** It first
+> read *"after 13l"*. **Her ruling: `13l → 13u → mobile catch-up → 13p`**
+> — *"I think I'd rather do the mac phases in order so that the shared
+> brain is 100% solid and stable (up to this point, since making mobile
+> is proven to uncover latent mac bugs), then return to mobile work on a
+> steadier base."* **Read §5 with that in mind: the entangled half of
+> 4.5c should be SETTLED by 13u before you touch it, and several items
+> below may come back already built.** The full record is
+*[removed for publication]*
 
 **Her instructions that shaped this document** (2026-08-23):
 *"let's do the merge, then I'll run 13l"* · *"I'll only resume variorum
@@ -465,8 +475,12 @@ them. **The first handoff's §3 batch map remains THE ONLY SCHEDULE.**
 
 > You are the architect/orchestrator for the remainder of **Mobile Round
 > 2** of the Variorum iPhone app. Work in `~/dev/variorum-mobile` on
-> branch `mobile`, under `/architect-phase`. **Phase 13l has run since
-> the last mobile session; verify what it changed before you plan.**
+> branch `mobile`, under `/architect-phase`. **Phases 13l AND 13u have
+> run since the last mobile session — verify what they changed before
+> you plan anything.** 13u in particular is a cross-platform phase that
+> was told to write mobile's deliverable into itself, so some of the work
+> listed below may already be done, and the cross-block SEMANTICS are
+> settled by it rather than by you.
 >
 > **READ, IN FULL, YOURSELF, IN THIS ORDER:** `CLAUDE.md` ·
 > `notes/MobileSoul.md` · `.claude/skills/architect-phase/SKILL.md` ·
@@ -725,12 +739,48 @@ semantics, and record what you left.**
 
 ---
 
-## 6. WHAT 13l MAY HAVE CHANGED UNDER YOU
+## 5b. M1's ROOT — the question she asked, and how the answer splits
+
+She asked (2026-08-23): *"is M1 the mac issue? because if so, a mac
+session should settle that root."* **The precise answer, recorded because
+it governs who does what:**
+
+**M1 is NEITHER platform's — it is the SHARED editor brain.**
+`BlockRangeIndex` lives in `App/Variorum/Shared/EditorBrain/`. The crash
+**fired on her iPhone**; the Mac was proven **latent-not-prevented**, and
+that is not a guess — the Mac twin pins went **red on the pre-fix tree**
+(§17). Both platforms were fixed in batch 1.
+
+**The remaining ROOT question — where the stale verdict came from —
+splits by platform, and only one half is Mac work:**
+
+| half | who can settle it |
+|---|---|
+| **The iOS half — experiment E1** | **Her iPhone, iOS 26.6.** It is an input-path question about how UIKit coalesces a delete-plus-reinsert (`_deleteBackwardAndNotify:reinsertText:…`), and the newest simulator here is 26.2, so a non-reproduction is a **runtime gap, never a clean bill**. **A Mac session cannot settle it.** The instrumentation is 4.5c's to build and leave runnable |
+| **The Mac half — the `MarkdownActs` arm-then-hand-off sites** | **A Mac session, and it is ROUTED TO 13u** (master plan, 13u item 7). The crash trace names it *"the Mac's real residual"*: a verdict armed and then handed off without being consumed. It lives in the same seam 13u item 5 rewrites |
+
+**So her instinct was right about half of it**, and that half now has a
+Mac home. **M1's status stays "high confidence, NOT PROVEN" until E1 runs
+on her hardware** — and E1 remains the single highest-value item in the
+device queue.
+
+---
+
+## 6. WHAT 13l AND 13u MAY HAVE CHANGED UNDER YOU
 
 13l's scope overlaps this round's Mac surface directly. **Before
 briefing 4.5b's review or 4.5c, diff what it did** to
 `Variorum/Features/Library/RecoveryView.swift`, `Features/Tray/TrayPanel.swift`,
 `Shared/RecoveryCopy.swift` and the editor files.
+
+**And 13u is the bigger one.** It was told to write mobile's deliverable
+into itself for four items — the space-eater (both platforms), the
+derived display-name snippet (one brain, mobile's lists included), the
+cross-block semantics (ruled once for both), and dark mode (the phone's
+shipped look is the reference). **Check what landed before you schedule
+anything: you may owe faces rather than brains, or nothing at all.** And
+**§5's entangled half of 4.5c is 13u's to have settled** — if it did,
+your job there is composing to its rule, not writing refusal copy.
 
 **Specifically expect that 13l may have closed some of §65's four
 known-open Mac defects**, because they were written into its manifest for

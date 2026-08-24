@@ -109,6 +109,65 @@ multiple items and deleting all of them." Build, opening the phase
   **The reviewer runs `notes/REVIEW_PROMPT.md` VERBATIM** over the Mac
   half of the round's diff, cold, with no framing.
 
+  **🔴 SCOPE ADDITION — author, 2026-08-23. ONE PIECE OF THIS DIFF
+  REACHED `Shared/` AND THE MAC WITHOUT EVER BEING COLD-REVIEWED, AND
+  THIS REVIEW IS NOW ITS REVIEW.** Her instruction, verbatim: *"If 4.5b
+  had code reach shared unreviewed, the fable session at the start of 13l
+  should review it as part of its scope, so it won't stay unreviewed."*
+
+  **What it is:** mobile round 2's **sub-batch 4.5b**, commit
+  **`7fd2cd0`** — deliberately committed on its own so it is
+  identifiable at a glance. Its cold review was dispatched and **died on
+  an API limit before reading anything**, and the round merged before it
+  could be re-run. **Everything else in the round's Mac-side diff has
+  been through at least one ladder; this has not.**
+
+  **The three files, and they are small:**
+  - **`App/Variorum/Shared/RecoveryCopy.swift`** — the `TrashPutBack`
+    hoist (a read-then-place decision now shared by both platforms) plus
+    `DeletionRefusal`, one home for deletion refusal copy.
+  - **`App/Variorum/Variorum/Features/Library/RecoveryView.swift`** —
+    `RecoveryViewModel.putBack` adopts the hoist, **and now sets a
+    receipt it had been discarding** (`_ = try ops.restoreBlock(…)`
+    threw the landing away while the view renders a receipt right beside
+    `lastError`, so the Mac never answered *"where did it go?"* while the
+    phone did). Its generic catch was a raw error dump and now speaks.
+  - **`App/Variorum/VariorumTests/TrashSurfaceTests.swift`** — one new
+    pin, **the only Mac count move in the entire round** (1568 → 1569).
+
+  **What to attack hardest, in order:**
+  1. **Is the hoist an address change or a behaviour change?** The
+     repo's parity proof is the other platform's suite riding
+     **unmodified** — **but this round established that an unmoved Mac
+     count proves only *"no COVERED behaviour changed"***, and it holds
+     the counterexample (a hoist that added a real behavioural fence
+     which no Mac test covered). **Read it, do not infer it from the
+     count.**
+  2. **The receipt change** — `putBack` now surfaces where a restored
+     block landed. Is the wording true for all five `TrashItem.Kind`s,
+     and does it promise nothing the Mac cannot deliver?
+  3. **`DeletionRefusal` as one home** — does collapsing several refusal
+     vocabularies lose a distinction one of them was carrying? (A sealed
+     note refusing a *put back* and refusing a *delete* want different
+     words; the type has an `Act` for that.)
+
+  **What it is NOT your job to fix:** the *remaining* decision-layer
+  hoist. `MobileTrashModel` is still a near-verbatim copy of
+  `RecoveryViewModel` for `PurgeConfirm`, `requestDeleteNow`,
+  `requestEmptyTrash`, `confirmPendingPurge`, `startTrash`/`startArchived`
+  and `daysLeft`. **The mobile round hoisted the one decision that had
+  already DRIFTED and reported the rest as half rather than claiming the
+  layer** — deliberately, because finishing it refactors a Mac view model
+  and **this phase opens on exactly that surface.** It is listed in the
+  manifest below as yours to close **with your own eyes on it**, not as
+  something to fix inside a review.
+
+  *(The mobile round's successor handoff still carries its own note to
+  re-review 4.5b when mobile resumes. That duplication is deliberate at
+  her word — "honestly, it's for the best if we get more eyes on items."
+  Two independent reads of the only unreviewed shared code is a feature,
+  not a bookkeeping error.)*
+
   **THE MANIFEST OF WHAT CHANGED MAC-SIDE** — *the mobile round's
   closeout COMPLETES this list; it is partial until then, because that
   round was still running when this section was written*.
