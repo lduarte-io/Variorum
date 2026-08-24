@@ -12,27 +12,53 @@ kickoff as always (her standing preference this era: Opus
 implementers · Fable cold reviews). Numbering/slotting of the round
 is hers at kickoff; the master plan's running order carries its row.
 
-## Kickoff message (paste-ready)
+## Kickoff message (paste-ready — REWRITTEN at her ask after the second morning sitting, 2026-08-24)
 
-> You are running **the post-13l polish round** — the author's
-> morning-after rulings on 13l's recovery-walk findings plus an IA
-> pass she ruled the same sitting. READ IN FULL FIRST: `CLAUDE.md` +
-> the canon it loads · THIS FILE top to bottom (her rulings are the
-> letter) · the 13l plan's **Act 7 — WALK RECORD** (the P-1…P-9
-> details + the screenshot paths; `notes/plans/phase-13l-data-safety-floor.md`)
-> and its Act 2 record (the trash-surface work you build on) · the
-> 13j plan's **Environment traps** section (binding verbatim) ·
-> `notes/handoffs/phase-13l-handoff.md` (what just shipped). Copy the
-> P-1…P-9 constitution in verbatim per `/architect-phase`.
-> Baselines: 13l's finals (core 1373/143 · Mac 1691/292 · Mac spine
-> 63/8 · mobile 486/78 · mobile spine 33/7 · marker 7) plus one
-> post-close commit (`cad80b0`, the scraps-door removal — verified by
-> its two neighboring suites; your kickoff full runs are the standing
-> verification). Flake carry: the Phase-12 latency pin; and
+> You are running **the post-13l polish round** — the author's two
+> morning-after sittings (2026-08-24) turned into ONE round: her
+> rulings on the 13l recovery walk's findings, an IA pass, the
+> side-panel theme, and **THE RECOVERY MAP** — one home per kind of
+> past, ending in the whole-note VERSIONS door. Invoke via
+> `/architect-phase` NAMING THIS FILE (a bare invocation resolves to
+> the master-plan pointer). Cast at kickoff as always (her standing
+> era preference: Opus implementers · Fable cold reviews).
+>
+> **READ IN FULL FIRST:** `CLAUDE.md` + the canon it loads · THIS
+> FILE top to bottom (her rulings are the letter; the ledger is the
+> scope — note rows revised the same morning they were made: D1's
+> supersession and rows 15–19 are the CURRENT letter) · the 13l
+> plan's **Act 7 — WALK RECORD** and Act 2 record
+> (`notes/plans/phase-13l-data-safety-floor.md`) · the 13j plan's
+> **Environment traps** (binding verbatim) ·
+> `notes/handoffs/phase-13l-handoff.md` ·
+> `notes/plans/whole-note-history-brief.md` (the automated future
+> whose listing row 16's manual door creates now — don't foreclose
+> it). Copy the P-1…P-9 constitution in verbatim.
+>
+> **THE NORTH STAR (hers, this morning):** everything a user ever had
+> is in exactly ONE of five places — **where you left it · set aside
+> in Archive (forever) · in the Trash (30 days; notes · books ·
+> blocks ONLY) · in this note's VERSIONS (moments you saved) · in
+> this block's HISTORY (its takes and savepoints).** Every ledger row
+> serves that map; her stated fear is the reason it exists: *"people
+> are going to conclude that the one thing they really want (my whole
+> note at this point in time) … is way too hard to get, even though
+> we're actually offering infinitely more ways of saving your
+> ideas."* When a build choice is ambiguous, the five-places map is
+> the tiebreaker.
+>
+> **Baselines:** 13l's finals (core 1373/143 · Mac 1691/292 · Mac
+> spine 63/8 · mobile 486/78 · mobile spine 33/7 · marker 7) plus the
+> post-close commits (the scraps-door removal `cad80b0` and records);
+> your kickoff full runs are the verification. Flake carry: the
+> Phase-12 latency pin (isolate before concluding);
 > `CanvasDragTrackingTests` at ONE recorded red — **a second red
-> promotes it** to a KnownIssues row (owner 12), disposition standing.
-> ZERO schema expected anywhere in this round (the Archived surface
-> is read-side over `archived_at`); zero `Sources/VariorumCore/Sync/`.
+> promotes it** (owner 12). **ZERO schema anywhere** (anything
+> firming toward a column is a §12 lockstep STOP); zero
+> `Sources/VariorumCore/Sync/`. Her app is LIVE daily again —
+> instance checks before any install act; the closeout refreshes
+> `/Applications` behind the A1 rail and **RE-SEEDS her field guide**
+> (row 19/D2's lesson edits make this mandatory).
 
 ## HER RULINGS (2026-08-24 morning sitting — verbatim-faithful; the letter of the round)
 
@@ -106,17 +132,16 @@ panel as extra space is needed"*):
   here.
 
 **D · DELETED TAKES IN THE TRASH (her shape, chosen at the sitting):**
-- **D1:** takes NEST under their block's row — her words: *"nested
-  under their block, with a clear note or color change if the block
-  itself isn't deleted"* — i.e. when the BLOCK is alive and only the
-  take died, the parent row must visually read as context-not-victim
-  (a note line or color distinction, never the same face as a
-  deleted block). Top level of the Trash = notes · books · blocks
-  (+ context-parents); this satisfies her earlier *"trash should
-  default to showing blocks"* instinct by construction — record the
-  default's reasoning in the build; if she still wants a Blocks
-  default filter after seeing it, it is a one-line change at her
-  word.
+- **D1 (SUPERSEDED the same morning, second sitting — her revision,
+  confirmed via the question tool):** takes **NEVER appear as rows in
+  the Trash or any Archived surface.** Her words: *"I feel like takes
+  should never appear in trash or archived alone - even if their
+  parent block is live, it's really hard without context and a take
+  alone is so small."* **A take's ONE past-home is its block's
+  History face** (whose door row 17 makes findable). The Trash
+  becomes **notes · books · blocks**, each naming its context (A3).
+  The earlier nested-under-block shape is superseded; the deleted-take
+  Trash rows and their query arm's LISTING (not the data) come out.
 - **D2 — the tutorial consequence (the round's own catch, binding):**
   the tray DOOR moves (C1) and the Trash's shape changes (D1) — the
   field guide's deletion chapter teaches the OLD doors, and the
@@ -152,8 +177,12 @@ plus the archive/trash separation are expected to dissolve it.
 | 11 | D1 takes nested under context-parent block rows | open |
 | 12 | D2 the lesson edits + spine re-pins + her-store re-seed at closeout | open |
 | 13 | Closeout ritual: records · canonical deltas as ruled · MobileSoul parity notes (C2 mobile shape; PL-11's tray face follows C1's ruled shape) · QUESTIONS for any PROVISIONAL · the running-order row closed | open |
-| 14 | **F1 — ARCHIVE RIDES BESIDE DELETE AT EVERY BLOCK DOOR** (her second morning report, 2026-08-24: *"I only see delete this block in the block menu"*). The menu BAR's Block menu already pairs them adjacently (13j's letter — verified in `EditorCommands.swift`); the gap is every OTHER door that offers a block Delete without the Archive twin (context/row menus — enumerate via the registry, the door-set is checkable). Same pass verifies the TAKE-card menus: Write's panel ⋯ carries Archive · Label · Lock · Delete (verified) — Takes mode's card grammar must match. **Context for the builder: the 13l walk's P-6 sentence ("the only door that deletes a take is inside the archived strip") is OVERSTATED — active take cards carry Delete; do not build against P-6's wording.** Her open musing, verbatim, for the round's checkpoint — *"I don't even know if we need take archiving if I'm not seeing it right now?"* — with the architect's recommendation recorded: KEEP the capability (her own morning argument — archive is forever-valuable and distinct from the clock — applies to takes exactly; the model's I10-rescue and pool-copy semantics also mint archived states), FIX the doors; retiring it is hers to rule if the fixed doors still don't earn it | open |
-| 15 | **F2 — HER MISSING-TAKE REPORT: verify or trace.** She deleted a take from Write's take-card ⋯ and cannot find it in the Trash (*"it's not in trash"*) — and the block now shows no fan. The take MUST be findable in (a) the block's History-face past region (13j J3) and (b) the Trash (Takes/Everything). Reproduce on the dev store FIRST: if rows list but are unrecognizable, A3/D1 are the fix; **if a deleted take genuinely does not list, that is a DEFECT — trace it red-on-old** (the take arm's conditions: tombstone, cutoff, live block, no intent). Either way the checkpoint answers her plainly: where a deleted take goes, in one sentence, verified by driving it | open |
+| 14 | **F1 — ARCHIVE RIDES BESIDE DELETE AT EVERY BLOCK DOOR** (her second morning report, 2026-08-24 — later softened: *"no, I see archive there too"*, so this is a VERIFICATION pass, not a rescue). The menu BAR's Block menu pairs them adjacently (13j's letter — verified in `EditorCommands.swift`); the pass confirms every OTHER door that offers a block Delete without the Archive twin (context/row menus — enumerate via the registry, the door-set is checkable). Same pass verifies the TAKE-card menus: Write's panel ⋯ carries Archive · Label · Lock · Delete (verified) — Takes mode's card grammar must match. **Context for the builder: the 13l walk's P-6 sentence ("the only door that deletes a take is inside the archived strip") is OVERSTATED — active take cards carry Delete; do not build against P-6's wording.** Her open musing, verbatim, for the round's checkpoint — *"I don't even know if we need take archiving if I'm not seeing it right now?"* — with the architect's recommendation recorded: KEEP the capability (her own morning argument — archive is forever-valuable and distinct from the clock — applies to takes exactly; the model's I10-rescue and pool-copy semantics also mint archived states), FIX the doors; retiring it is hers to rule if the fixed doors still don't earn it | open |
+| 15 | **F2 — RESOLVED BY HER OWN SECOND LOOK, folded into 17:** she FOUND the deleted take in the block's History past region (*"I actually do see the deleted take in history"*) — not a data bug; a DOOR-PLACEMENT problem (*"it's unclear that history is under Note, that makes it seem like the Note's history"*). No Trash-side trace owed (takes leave the Trash by D1-revised anyway). Row 17 is the fix | **resolved → 17** |
+| 16 | **G1 — THE WHOLE-NOTE VERSIONS DOOR (her ruling: "yes, in this round").** Her floated shape, adopted: *"an easy door would be to make a copy of the note, archive it, and then let you look through the archived copies made at points in time - not automated, but an easy door for people who want to save the whole note as it is."* **COMPOSE, don't build:** "Save a copy of this note as it is" = `duplicateAsVersion` (exists; mints the `version_of` edge) + note archive (exists) → a **"Versions of this note"** listing (dated, openable, restorable-by-copy) driven by the `version_of` lineage — one query, zero schema, zero new concepts. The copies also appear under the Archived-notes surface (B2) as ordinary archived notes. **`notes/plans/whole-note-history-brief.md` is the AUTOMATED future that later fills this same listing — read it so the manual door's shape doesn't foreclose it.** This is the round's headline: the Google-Docs answer ("my whole note at this point in time"), which her holistic worry named as the one thing people will conclude is missing | open |
+| 17 | **G2 — THE BLOCK HISTORY DOOR (her ruling: block menu + side panel).** "History…" joins Archive and Delete in the block's own menu grammar — the three lifecycle verbs together (*end it · set it aside · see its past*) — and opens in the SIDE PANEL like the tray (C1) and lineage (C2). The Note menu keeps note-level things only (and once row 16 exists, note-level History means VERSIONS). The History face itself is 13j's J3 surface — this row moves its DOOR, not its content | open |
+| 18 | **G3 — THE "UNPLACED" WORDING FOLD (presentation YES, semantics NO — her fold question answered).** Her words: *"why do we have unplaced as separate from archived? should we fold those two concepts in?"* The SEMANTIC fold is declined with the reason recorded: a preserved original rides its FAMILY's purge clock (her own 13j round-8b ruling — "goes with its deleted blocks") while archived means NEVER purged; folding them breaks one promise or the other. The PRESENTATION folds completely: a preserved original reads as *"set aside automatically by the merge — kept until its family goes"*; the word **"unplaced" must never reach a user's eyes** (debug vocabulary only — sweep every surface and receipt for it) | open |
+| 19 | **G4 — THE FIVE-PLACES MAP taught.** The round's north star (below) lands in the tutorial's deletion chapter as part of D2's lesson edits: everything is *where you left it · set aside in Archive (forever) · in the Trash (30 days) · in this note's Versions · in this block's History*. One chapter, five sentences, walk-asserted | open |
 
 ## Constraints
 
