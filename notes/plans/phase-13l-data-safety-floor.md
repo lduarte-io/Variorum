@@ -740,6 +740,62 @@ bloats the phase, it becomes its own micro-slot at her word.
   registry discipline (P-1) and honest copy (the J8 bar) bind as
   everywhere.
 
+## The architectural rules (the 13b constitution, P-1…P-9 — copied verbatim per `/architect-phase`, 2026-08-23 kickoff; the skill file's application notes bind beside them)
+
+- **P-1 — One capability registry.** Every user-facing act is declared
+  exactly once: verb, scope (block/take/post/book), per-mode availability
+  rule, its doors (menu / context / bar / shortcut / palette), and its
+  refusal copy. Surfaces render their doors FROM the registry; gating is
+  data, never per-view if-statements. A registry-walk test asserts every
+  declared door exists and every rendered door is declared. This kills the
+  D3/D4 class structurally — the capability matrix stays green by
+  construction instead of by audit.
+- **P-2 — Fire-and-DO (R115).** A rendered door either performs the act —
+  including any mode-switch choreography, done visibly for the user — or
+  delivers the operations layer's real refusal. A door that can never act in
+  its context isn't rendered. Lecture-and-redirect is retired.
+- **P-3 — One text surface, one liveness authority.** ONE TK2 surface
+  component (live + read modes; one measurement brain — the width-gated
+  remeasure; the shared canary) that every pane composes; the live editor
+  core's identity machinery (`BlockRangeIndex`, crystallization) becomes its
+  live mode, not a sibling implementation. "What text does this pane show,
+  and is it live" is answered by ONE pure, unit-tested authority
+  (`PaneTextAuthority`); views never re-derive it. Its invariants stated as
+  code: exactly one live pane; the live pane is buffer-authoritative; read
+  panes are projection-authoritative once caught up.
+- **P-4 — Broadcasts carry signals, never decisions.** NotificationCenter
+  may announce that something happened (mode changed, post opened); no
+  listener derives business state or availability from a broadcast, and no
+  flow's correctness depends on broadcast ordering. Cross-feature flows
+  route through composition. (Stage 0's survey enumerates today's
+  notification bus; Stage 1 disciplines it.)
+- **P-5 — The friction doctrine (R116).** Repeated pushback against a rule
+  marks an under-architected feature. The response is never another patch:
+  write the feature's DESIGN MEMO — intended behavior whole, edge cases
+  enumerated on paper, refusal wordings, undo story — get the author's
+  rulings on the product-flavored edges, then build to the memo. Happy path
+  ships first, but the edges are *decided at design time*, not discovered by
+  the author. First two memos owed: **merge** and **the W ceremony**.
+- **P-6 — The tutorial is the executable spec (R113).** The guided tutorial
+  flow is the contract for every happy path. It stays green — automated
+  where the harness allows, screenshot-walked otherwise — and any change
+  that breaks a tutorial step is a regression by definition.
+- **P-7 — Find bugs before she does.** Every layer keeps a proactive
+  harness: the ops-layer soaks (exist), the board/view-model invariant soak
+  (Stage 1), the registry walk (P-1), the per-batch scripted screenshot
+  walkthrough. Red-on-old stays absolute: no bug-class fix without a pin
+  that fails on the pre-fix code.
+- **P-8 — Standing law, consolidated.** P1–P3 performance invariants bind
+  the rebuilt layer exactly as they bind the substrate (invalidation ∝
+  realized rows; one live editor; virtualized long views). Overlays, never
+  rendering attributes. Chrome `fixedSize` texts always carry a `lineLimit`
+  (the b6dae25 class). `Theme/VoiceControls.swift` is THE chrome vocabulary.
+  Complexity lives in the store; restraint lives in the UI.
+- **P-9 — No god objects in the frontend either.** A view model mixing
+  board layout, text authority, and gesture routing splits by concern
+  (`TakesViewModel` at 890 lines is the standing counterexample). Same
+  hygiene rule as the substrate, applied where it was being waived.
+
 ## Baselines at open (verify with your own runs)
 
 The 13j finals: core **1350/141** · Mac **1546/269 FULLY GREEN** ·
@@ -1124,3 +1180,61 @@ say so:**
 - **After 13u, mobile must have NO known Mac or `Shared/` work left** —
   that is the stated point of the two-phase order, and the mobile
   handoff's §2b will check it item by item.
+
+---
+
+## RUN RECORD
+
+### Kickoff (2026-08-23) — the opening sitting, author-attended
+
+Orchestrator: **Fable under `/architect-phase`**, at her invocation.
+Mandatory reading done IN FULL before anything else: CLAUDE.md + the
+canon it loads (AppSpec §14's 13j delta current) · this plan TOP TO
+BOTTOM · the 13l brief · the purge memo + both addenda ·
+the 13j plan's Environment-traps section (binding by reference) ·
+`notes/REVIEW_PROMPT.md` · the mobile round-2 orchestrator handoff
+BOTH halves (the §2b handback checklist, §4 the 4.5b review scope,
+§5 the coordination flag, §5b M1's split) · the device-walk results.
+Constitution copied in verbatim (section above). QUESTIONS.md next
+free number: **#74**.
+
+**Cast (her kickoff message, to be confirmed at the sitting):**
+architect/orchestrator **Fable** · implementers **Opus for the most
+part** · cold reviewers **Fable**. The first-act Fable cold review is
+HER RULING (R20 + the 2026-08-23 4.5b fold-in), not a cast question.
+Reviewer-Fable over implementer-Opus batches ⇒ CLAUDE.md's
+cross-model review flow governs those ladders.
+
+**Environment facts at kickoff:** NO Variorum instance live (`pgrep`
+empty — re-check before any Release/install act, never assume it
+stays true). Working tree clean at `609ae38`, `main` in sync with
+`origin/main` (0 ahead).
+
+**State verification (own commands, not inherited):**
+
+- `46ffa0c` (the mobile round's pre-round tree) **IS an ancestor of
+  `main`** — the merge through batch 4.5 landed as recorded. The
+  first-act reviewer's diff scope is
+  `git diff 46ffa0c..HEAD -- App/Variorum/Shared App/Variorum/Variorum
+  App/Variorum/VariorumTests`: **14 files, 1,899 insertions / 321
+  deletions.** One correction to the manifest's tally: it says "three
+  `VariorumTests/` files"; there are FOUR — `TrashSurfaceTests.swift`
+  joined at 4.5b (`7fd2cd0`), carrying the round's single Mac count
+  move. Not drift; recorded so the reviewer isn't surprised.
+- **Handback checklist greps (mobile handoff §2b) all read their
+  "not done" values**, as expected at open: L-a `0` · L-b `1` (and
+  `entryText = ""` present) · L-c `0` · L-d `0` · U-3 `0` (13u's,
+  listed for calibration only).
+- `7fd2cd0` confirmed in history, its own commit message marking the
+  cold review owed.
+- The Fragments bridge engine lives in `Sources/VariorumCore/Bridge/`
+  — its own module, NOT `Sync/`, so scope item 9 is not hard-bound to
+  Fable by the standing Sync/ rider (cast for it is the sitting's).
+- **The device-window queue (obligation B in §8) is DISCHARGED**: the
+  walk ran 2026-08-23 on her phone, all nine rows — E1 POSITIVE (M1's
+  root PROVEN), D8's launch "almost imperceptible" (L-c stays
+  worth-doing, not urgent — the shape is ruled, the urgency demoted).
+- Suite baselines: to verify by own runs at the first batch boundary
+  (expectations: core 1350/141 · Mac 1569/272 · spine 63/8; the
+  latency pin's isolation rule noted — intermittent red is Phase 12's
+  row, re-run isolated before concluding anything).
