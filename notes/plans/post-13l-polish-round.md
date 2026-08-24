@@ -262,11 +262,34 @@ must never trip the bridge (exclude archived from the day scan, or
 drop `entry_date` on version copies — the design detail is the
 build's, the pin is mandatory).
 
-**V4 — Restore-as-swap — RATIFIED (author, fifth sitting: "I really like the restore as swap idea - ratified and added"):**
-restoring version V3 first SAVES A VERSION OF NOW, then makes a live
-copy of V3 the note — never clobbering, and the symmetry teaches
-itself (you can always restore your restore). The doctrine's letter:
-nothing is ever overwritten, rescue mints new.
+**V4 — Restore-as-swap — RATIFIED (author, fifth sitting: "I really
+like the restore as swap idea - ratified and added") — and SHARPENED
+at her seventh-sitting catch: the restore is IDENTITY-PRESERVING.**
+Her trace was right: if restore swapped CONTAINER roles, the once-live
+note would be archived-later — never version-classed, orphaned from
+the listing, immune to riding deletions. **So restore never swaps
+containers: (1) save a version of NOW (a fresh born-archived copy),
+then (2) the live note's CONTENT becomes the chosen version's — same
+container, same identity, same books/memberships/sync rows.** No
+container ever crosses the live/version line during a restore; the
+classifier never strains. **TWO ROADS, distinct meanings:** RESTORE =
+the note becomes its past (identity kept, always saves first) ·
+PROMOTE = unarchive(+unseal) a version — the past becomes a NEW
+first-class note (a fork, her "work with it" road). **Design detail
+flagged for the build, not solved here:** step 2's block mechanics —
+the outgoing live blocks are preserved inside the just-saved version,
+but their rows must leave without noising the Trash on every restore;
+the round designs the quiet shape within S2's letter.
+
+**V4b — VERSIONS ARE BORN SEALED AS WELL AS BORN ARCHIVED (her
+seventh-sitting question "can archived notes be edited?" — answer:
+YES, archive is visibility, the SEAL is the guard — exposed this):**
+a version is a frozen moment, so the save door mints it archived +
+SEALED in one transaction (the seal already refuses edits/commits/
+pointer changes; reversible only as the deliberate PROMOTE act).
+Archived WORKS stay editable — correct, they are works. Three
+existing mechanisms, each doing its own job: the archive hides it,
+the seal freezes it, the edge classifies it.
 
 **V5 — The command: ⌘⇧S proposed** ("Save a Version" — the Mac's
 save-as chord, semantically exact) beside ⌘S's take-commit; the
