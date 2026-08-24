@@ -795,6 +795,49 @@ is still open and belongs to whoever she says.
 
 ---
 
+## 6b. ⚠️ THE GAP NOBODY OWNED — who cold-reviews mobile's Mac changes made AFTER 13l
+
+**Found by the architect's own handoff sweep, 2026-08-23, and it is the
+clearest dropped-ball candidate in the whole boundary.**
+
+Her R20 ruling bought **one** Fable cold review of this round's Mac-side
+work, and it runs as **13l's first act**. Its manifest is complete
+**through batch 4.5**. But:
+
+- **4.5c has not run, and it is heavily Mac-side** — it changes
+  `Variorum/Features/Editor/EditorSurfaceController.swift` and
+  `EditorViewModel.swift`, and it **hoists into
+  `Shared/EditorBrain/`** (the identity audit, `CrossBlockRefusal`).
+- **4.5e has not run**, and it changes `Shared/AppBootstrap.swift`,
+  `Shared/AppSession.swift` **and two Mac files** (`QuickEntryBar.swift`,
+  `QuickNoteView.swift` — one of which destroys her text on a refusal).
+- **Batches 5–8** may add more.
+
+**All of that lands AFTER 13l has closed.** So the review she asked for
+covers the Mac work done up to today and **nothing anybody does
+afterwards** — while the largest, most Mac-visible mobile work is still
+ahead. **No document named an owner for it.**
+
+**THE ARCHITECT'S PROPOSAL, for her to rule** (recorded rather than
+assumed, because R20 was hers and its extension should be too):
+
+> **Mobile's own closeout hands a SECOND manifest forward to the next Mac
+> phase that opens after mobile resumes — which, on her current order, is
+> 13p.** Same shape as 13l's: every Mac-side file, every hoist, what the
+> Mac's callers now delegate to, and the final counts. **13p is a good
+> home for it on merit, not just by position:** its own subject
+> (on-device encryption) is both-platform, so it already has to look at
+> the shared seam with both platforms in view.
+
+**Until she rules, this is written into closeout obligation 13 below**, so
+the round cannot close without either doing it or her saying it is not
+needed. **The alternative she may prefer: fold the second review into
+13u**, which runs sooner and touches the same editor seam — but 13u runs
+*before* 4.5c, so it would review work that does not exist yet. **That is
+why 13p is the proposal.**
+
+---
+
 ## 7. THE RULES THAT BIND, CONSOLIDATED
 
 Everything in the first handoff's §5 still holds. Added this seat:
@@ -839,3 +882,14 @@ Everything in the first handoff's §5 still holds. Added this seat:
 14. **The device queue is nine rows now** (§4b of the briefs), and **E1
     is still the only thing that would settle M1's root cause.** When she
     offers her phone, run the queue in that window — not just the install.
+15. **🔴 HER PHONE IS RUNNING THREE FIXED BUGS, and R30 has quietly gone
+    stale.** R30 (*"i'll wait for my fresh build til these batches are
+    all done"*) was ruled when "these batches" meant days. **It now means
+    two Mac phases plus the rest of the mobile round.** Meanwhile **all
+    three BLOCKERs are FIXED and merged**, so her installed build is the
+    only place they still exist — and she is **hand-avoiding them**
+    (no multi-paragraph pastes into the quick note; the Trash's purge
+    doors and both row-delete doors silently do nothing). **This is worth
+    re-offering rather than waiting on**, and nobody currently owns
+    re-offering it. *(A build also unblocks eight of the nine device-queue
+    rows.)*

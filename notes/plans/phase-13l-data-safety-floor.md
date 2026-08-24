@@ -109,6 +109,43 @@ multiple items and deleting all of them." Build, opening the phase
   **The reviewer runs `notes/REVIEW_PROMPT.md` VERBATIM** over the Mac
   half of the round's diff, cold, with no framing.
 
+  **🔴 TWO OBLIGATIONS THIS PHASE INHERITED IN CONVERSATION, WRITTEN DOWN
+  2026-08-23 BECAUSE THEY HAD REACHED NO RECORD.** *(The mobile round's
+  own §50 lesson, applied to itself: an audit of the records cannot find
+  an ask that never reached the records. Both of these were said in chat
+  and nowhere else.)*
+
+  **(A) THIS PHASE OWES THE `/Applications/Variorum.app` REFRESH — hers,
+  explicitly.** Her words, 2026-08-23: *"I'll wait for 13l to reinstall
+  my app."* **The installed build predates the whole of Mobile Round 2's
+  Mac-side work**, which reached `main` on 2026-08-23 and includes: the
+  **crash fix** (the `BlockRangeIndex` trap pair became refusals routed
+  to `desyncRecovery()` — the Mac was proven *latent-not-prevented*, its
+  twin pins red on the pre-fix tree), **a P1 fix worth 23.8 s → 0.003 s**
+  on a cross-block keystroke at 20,000 entries, `Put back` **finally
+  saying where it landed**, and the shared deletion/undo copy. **She is
+  running none of that today.** CLAUDE.md's standing rule already says a
+  session that changes the Mac app ends by refreshing it; the mobile
+  round could not (it was mid-flight and her app was live), so **it lands
+  here**: `xcodebuild -scheme Variorum -configuration Release build`, then
+  copy to `/Applications` — **at a zero-instance window, never while her
+  real-store app is running** (`pgrep -fl 'Variorum.app/Contents/MacOS'`).
+
+  **(B) IF SHE OFFERS HER IPHONE DURING THIS PHASE, THERE IS A QUEUE
+  WAITING FOR IT — and it lives in a file this phase has no reason to
+  open.** `notes/plans/mobile-round-2-batch-4.5-briefs.md` **§4b** holds
+  **nine device-only rows**, and the standing instruction (mobile round 2
+  §50) is that when she makes her device available the queue runs in that
+  window, **not just an install** — a previous offer was spent on two
+  installs while items sat runnable. **The one that matters most: E1**,
+  the instrumented experiment that is *"the only thing that settles where
+  the crash's stale verdict comes from"* — **the root cause is still
+  recorded "high confidence, NOT PROVEN"**, and **13u item 5 is about to
+  build a larger gesture in that exact seam.** *(E1's instrumentation is
+  mobile's to build and has not been built, so a device window during
+  this phase can run the other eight rows; E1 needs mobile's burst
+  first.)*
+
   **🔴 SCOPE ADDITION — author, 2026-08-23. ONE PIECE OF THIS DIFF
   REACHED `Shared/` AND THE MAC WITHOUT EVER BEING COLD-REVIEWED, AND
   THIS REVIEW IS NOW ITS REVIEW.** Her instruction, verbatim: *"If 4.5b
@@ -564,7 +601,9 @@ pre-13j tombstones — expected).
 > **⚠️ THE MAC AND MOBILE FIGURES ABOVE ARE HISTORY, NOT THE
 > BASELINE.** They are 13j's finals, kept because that is what the
 > closeout handed over. The current numbers — and the reason they
-> moved — are in the section immediately below: **Mac 1568/272**,
+> moved — are in the section immediately below: **Mac 1568/272**
+> *(SUPERSEDED — the current figure is **1569/272**; see the correction
+> at the counts paragraph below)*,
 > mobile **449/75** as of Mobile Round 2's batch 4. Core (1350/141)
 > and the spine (63/8) are unchanged. The same warning is repeated in
 > the kickoff message's "verify the baselines with your own runs",
@@ -845,8 +884,14 @@ account — this is the file-level index)*:
 | `Variorum/Registry/ShellActions.swift` | speaks `Shared/StructuralUndoCopy.swift` | 4 |
 | `VariorumTests/` | new suites `EditRoutingTests`, `EditRoutingCrashTests`; additions to `BlockRangeIndexTests`. **No Mac test file was touched by batches 1b, 3 or 4** — the zero-test-edit parity proof | 1 |
 
-**Mac counts: 1546/269 (13j) → 1563/272 (batch 1) → 1568/272, where
-they have stood EXACTLY since batch 1's ladder fixes** — through the
+**Mac counts: 1546/269 (13j) → 1563/272 (batch 1) → 1568/272 → **1569/272
+(CURRENT, and this is the number to expect from your own run)**.**
+*(Corrected 2026-08-23. The +1 is batch 4.5b's single new pin in
+`VariorumTests/TrashSurfaceTests.swift`, covering the `putBack` receipt
+fix — **the only Mac count move in the entire round**, which is itself
+the parity evidence. Do NOT read 1569 as "something changed
+unexpectedly".)* **They had stood EXACTLY at 1568/272 since batch 1's
+ladder fixes** — through the
 1b, 3 and 4 hoists, which is precisely the proof those hoists moved
 addresses and not behaviour. **Verify with your own run** — the mobile
 round is still live as this line is written, and its remaining batches

@@ -1,5 +1,27 @@
 # Mobile Round 2 — BATCH 4.5 SUB-BATCH BRIEFS
 
+> # ⚠️ READ THIS FIRST — PART OF THIS FILE IS REVOKED
+>
+> **Her ruling, 2026-08-23:** *"we're in a new week and I want to go back
+> to the one subagent at a time approach."* **Everything in this file
+> about running sub-batches in PARALLEL is revoked**, including every
+> *"another session is live in this tree"* warning, every per-sub-batch
+> **simulator UDID** and **DerivedData** assignment, and the **wave**
+> structure. There were fifteen such references; they are left in place
+> rather than stripped because they are the record of how the built
+> sub-batches actually ran — **but a session reading this file now must
+> not follow them.**
+>
+> **What survives, and it is most of the file:** the per-sub-batch WORK,
+> the file lists (now **scope discipline** rather than collision
+> avoidance), the pin-quality rules, the hygiene rules, the review
+> briefs, and §6's exit condition. **One simulator is fine — but STILL
+> ARM ITS ACCESSIBILITY FLAG** (that hazard is per-simulator, not
+> per-session, and without it sixteen real pins fail as phantoms).
+>
+> **The successor handoff's §1** (`mobile-round-2-orchestrator-handoff.md`)
+> is the full account.
+
 **Written 2026-08-22 by the incoming architect, BEFORE dispatch.**
 Repo-first: the consistency audit's finding 11 was that *six of eight
 dispatches in this round have no brief in the record*, so nobody could
