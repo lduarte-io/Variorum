@@ -2475,11 +2475,11 @@ to one enum, and the reason it could not be done on the face is stated above.
 | 8 | **L-b** `QuickEntryBar` text destruction on refusal | 4 | **DONE (Act 3, `9617737`)** — the rule moved out of the view into `QuickEntryModel` (the phone's shape); the box resets ONLY on a completed hand-off; copy through `OpsRefusalCopy` with the now-true reassurance; a success clears only what it actually filed. 6 pins; red-on-old by revert = 3 pins failing on 9 expectations |
 | 9 | **L-c** `AppBootstrap` off-main migrations (`.opening` state, both roots) | 4 | **DONE (Act 3, `123818d`)** — the ruled shape exactly, both roots, once-per-process flag intact, `retry()` re-entering, plus an in-flight guard so a second retry cannot race. RE-MEASURED: init **5.75 µs** (was the whole open), first open 10.3 ms, reopen 0.89 ms. 4 pins; red-on-old = 50.96 ms init and `.ready` where `.opening` is required |
 | 10 | **L-d** `AppSession.postAutosaves` removal path + the three false comments | 4 | **DONE (Act 3, `7d51342`)** — `releaseAutosave(forPost:)` from the box's `reset()`; **the `quitFinalize` trap CLOSED rather than tolerated** (the token rides in the entry, so a re-mint registers once — pinned by count); conservative by design (holder count errs upward, a dirty coordinator is never dropped, the ONE-per-post guarantee intact, the transient non-releasing callers unchanged). Three false comments corrected at their mechanisms. 6 Mac pins + 1 mobile; red-on-old = `openAutosaveCount → 3` |
-| 11 | Backup second destination (picked folder) + retention + per-run integrity | 1 | open |
-| 12 | The Data Safety face + log (freshness evidence) | 1 | open |
-| 13 | The restore runbook (incl. M3/M6 sentences, external-snapshots widening) — **scope grew at her post-sitting rulings: + the SYNCED-restore warning pair (ordinary deletions return to the Trash; purged stays purged) in runbook AND restore face · + the backup-archaeology recipe (open a backup in a scratch copy, copy out AS NEW — the recovery-as-copy doctrine) · + the "WHAT DELETION MEANS" section (her clarity mandate below): the three stages defined plainly (delete → Trash 30 days → permanent delete/purge), the BOTH-SIDED backup truth, and the purge definition · + THE MIRROR SECTION (her 2026-08-24 overnight questions): why the mirror is a PEER, not a backup (it replicates mistakes at sync speed; frozen copies protect where converging ones can't), what it DOES cover (device loss — re-onboard + passphrase), and the TWO PROVEN mirror-recovery roads named with their artifacts (mirror lost → repush from local truth, run live at 14b twice + 14c; device lost → re-onboard from mirror, exercised live at the phone's onboarding) — the full hierarchy written in one place: local store → local backups (two destinations) → the mirror → Supabase Pro's 7-day platform backups as the under-everything last resort (ciphertext; hoped to die unused — her 2026-08-24 exchange)** | 1 | open |
-| 14 | The rehearsed restore drill, end-to-end in SCRATCH | 1 | open |
-| 15 | The deletion-aware restore matrix M1–M7, headless on the fake server | 1 | open |
+| 11 | Backup second destination (picked folder) + retention + per-run integrity | 1 | **DONE (Act 4, `642cdf1` + `c963690`)** — the A1 scheduler gains a picked folder (app-scoped bookmark, DEVICE-LOCAL, claimed per run), the 14+4 retention rule as a pure brain, a per-run integrity check and a run record. The retention rule's own test caught a flaw reading would not have (a same-day second copy spent a weekly slot on an already-covered week). **And the integrity check shipped BROKEN and was caught by its own test before it ran once:** a backup copy inherits WAL from the store, and a read-only open of a WAL file needs a `-shm` it cannot create — every real copy would have reported `SQLite error 14`. Fixed by normalizing the copy to `journal_mode = DELETE` first, which is the self-containment the runbook already promised. 14 pins |
+| 12 | The Data Safety face + log (freshness evidence) | 1 | **DONE (Act 4, `642cdf1`)** — Settings ▸ Data Safety: each destination's newest copy date + count + reach (read from the FOLDERS, which cannot lie about a job that stopped), Back Up Now as an adjunct, the log behind a disclosure, and the restore warnings. Act 5's two slots are deliberately NOT rendered as empty rows (P-2). Three `.surface` acts declared on the `.deleteNow` model — **the first Settings pane to declare anything**, named as a precedent in the walk's union rather than blended in (#74(d)) |
+| 13 | The restore runbook (incl. M3/M6 sentences, external-snapshots widening) — **scope grew at her post-sitting rulings: + the SYNCED-restore warning pair (ordinary deletions return to the Trash; purged stays purged) in runbook AND restore face · + the backup-archaeology recipe (open a backup in a scratch copy, copy out AS NEW — the recovery-as-copy doctrine) · + the "WHAT DELETION MEANS" section (her clarity mandate below): the three stages defined plainly (delete → Trash 30 days → permanent delete/purge), the BOTH-SIDED backup truth, and the purge definition · + THE MIRROR SECTION (her 2026-08-24 overnight questions): why the mirror is a PEER, not a backup (it replicates mistakes at sync speed; frozen copies protect where converging ones can't), what it DOES cover (device loss — re-onboard + passphrase), and the TWO PROVEN mirror-recovery roads named with their artifacts (mirror lost → repush from local truth, run live at 14b twice + 14c; device lost → re-onboard from mirror, exercised live at the phone's onboarding) — the full hierarchy written in one place: local store → local backups (two destinations) → the mirror → Supabase Pro's 7-day platform backups as the under-everything last resort (ciphertext; hoped to die unused — her 2026-08-24 exchange)** | 1 | **DONE (Act 4, `642cdf1`, corrected by the drill in `dda9507`)** — `notes/DataSafetyRunbook.md`, eight sections to the full scope. The text lives ONCE, in code, pinned byte-equal to the repo file — and **every backup run drops a copy as `RESTORE.md` into both backup folders**, which is the reason it is in code at all: the moment you need a restore recipe is the moment the app may not open. **No Help-menu opener** (a door that cannot act, P-2) — PROVISIONAL at #74(a); the restore-face question answered at #74(b). 4 pins |
+| 14 | The rehearsed restore drill, end-to-end in SCRATCH | 1 | **DONE (Act 4, `dda9507`)** — her newest REAL backup copied out read-only, restored into the fenced dev store per the runbook's own recipe, and opened: her shelf whole, Sync off, Bridge off. Then the deletion legs through the operations layer: **M1** (returns tombstoned on its ORIGINAL stamp, first Trash row, "30 days left"), **M3** (a post-backup deletion undone), **M5** (a PURGED note — 4 rows physically removed — comes back; her accept-and-say-it ruling in the flesh), **M6** (its rows readable inside the backup the whole time). The rehearsal corrected the recipe in three places, which is what it is for. Her real container: zero files modified in the window. **A windowless launch RECURRED and was captured** — main thread idle in the run loop, so the 13e mechanism is gone and this is something else; KnownIssues row rewritten |
+| 15 | The deletion-aware restore matrix M1–M7, headless on the fake server | 1 | **DONE (Act 4, `7c3db60`)** — `RestoreMatrixTests`, 5 pins, `Tests/` only (zero `Sync/` lines). The harness learned to open a client on a FILE, so "restored" means a real `backup(to:)` snapshot reopened, carrying its own cursor, outbox and `device_id`. **M1/M2/M7** pinned; **M4 the centrepiece** — the restored store IS a returner, `reconcileLedger`'s pre-drain pass drops the purged family and the edit typed on the restored store with it — **probed**: skipping the pass reddened exactly the two assertions that matter, so the pin measures the mechanism. The second road (a bare push taking the typed `purged` refusal) is pinned beside it. M3/M5/M6 are the drill's, stated in the file's own header |
 | 16 | Bulk-`.md` plaintext insurance, automated | 1 | open |
 | 17 | The sync-status face | 1 | open |
 | 18 | The passphrase / recovery-phrase sanity check (read-only unwrap) | 1 | open |
@@ -3093,3 +3093,362 @@ so the next session knows the count is still one, not two.
 5. **L-d's holder count is a NEW invariant in a `Shared/` file.** The
    argument that over-counting is safe is written at the type; it is
    worth checking against every caller rather than trusting the list.
+
+### ACT 4 — RECORD (Opus implementer, 2026-08-24)
+
+**Scope taken, exactly the five dispatched:** ledger rows **11–15**. Four
+commits, each staged by explicit path, nothing pushed:
+**`642cdf1`** (rows 11–13) · **`7c3db60`** (row 15) · **`c963690`** (the
+integrity-check defect this act shipped and then caught) · **`dda9507`**
+(row 14's drill + the corrections it forced + the `Shared/` move).
+Working tree clean.
+
+**ZERO schema, ZERO `Sources/VariorumCore/Sync/` lines.** Row 15's harness
+extension lives in `Tests/` as the brief requires (`SyncTestHarness.swift`
+gained an on-disk `SyncClient` and a `RestoreScratch`); the engine was not
+touched, and no proof demanded that it be. The only `Sources/` change in the
+act is **none** — core is untouched; the +5 core tests are test-target only.
+
+**Her real store was READ and never written.** Verified at the close:
+`find` over her container returns nothing modified inside the drill's
+window, and her `Backups/` folder holds the same 66 entries with the same
+mtimes. Every act happened in the scratchpad or the fenced DEBUG container.
+
+---
+
+#### Row 11 — the second destination · **DONE** (`642cdf1`, corrected in `c963690`/`dda9507`)
+
+**What was built.** The Phase 8 A1 scheduler kept its shape and gained
+three things and no new clock:
+
+- **`BackupDestination`** — the picked folder, per her kickoff ruling
+  (*"people should pick a local folder - they can always pick a folder
+  that's in icloud drive"*). App-scoped security bookmark, persisted in
+  `UserDefaults`, **never** the synced `setting` table: a path is a fact
+  about one machine and `setting.value` is enum-fenced by the 14b
+  disclosure promise (the `reference.file_bookmark` precedent is named at
+  the type). The scope is claimed PER RUN and released on every path, not
+  held for the process's life — the reference panel already paid for that
+  accrual bug once. A mint that cannot take the security scope THROWS
+  rather than storing an unscoped bookmark that resolves today and is dead
+  tomorrow. Layout: `<picked>/Variorum/Backups/`, with `RESTORE.md` one
+  level up where she will actually see it.
+- **`BackupRetention`** — the 14-dailies-plus-4-weeklies rule as a pure
+  function over `(url, date)`. **Its own test caught a flaw a reading
+  would not have**: a day with two copies (the automatic one plus a
+  "Back Up Now") pushed its older twin into the weekly pass, which then
+  spent a weekly slot on a week the dailies already covered — fifteen
+  files and no extra reach. Fixed by seeding the covered-weeks set from
+  the kept dailies; the correction is written at the function, because the
+  word that fixed it ("not-yet-covered") is the whole rule.
+- **The run record** (`BackupRunRecord` / `BackupLog`, device-local, last
+  20) — the only thing that can report a run which produced NO FILE, which
+  is precisely the failure the files cannot show.
+
+**One deliberate shape worth naming:** the second destination receives a
+**copy of the primary file**, not a second `backup(to:)`. A second snapshot
+would be taken at a different instant, so the two folders would hold
+different states and neither would be the one the log names. Copying also
+makes the far integrity check meaningful — it checks the TRANSFER, which is
+the part that fails on an external volume or a cloud-synced folder.
+
+**THE DEFECT THIS ACT SHIPPED AND THEN CAUGHT (`c963690`) — red-on-old by
+construction, not by revert.** The per-run `PRAGMA integrity_check` opened
+the copy READ-ONLY, and its first test passed because it copied an
+**in-memory** store, which is not WAL. Pointing the same test at an ON-DISK
+source reddened it instantly:
+
+> `could not be checked: SQLite error 14: unable to open database file`
+
+**Traced:** SQLite's backup API copies the source's header, so a copy of a
+WAL store is itself flagged WAL, and a read-only open of a WAL database
+needs a `-shm` it is not permitted to create. **Every real backup copy is
+that shape**, so the shipped check would have reported failure on every
+copy the app ever made, forever, and the Data Safety face would have worn
+it. The fix is not a workaround: the copy is opened read-write, moved to
+`journal_mode = DELETE`, then checked — so the artifact gains the property
+the runbook already promises (the `.sqlite` file is the whole snapshot, no
+companion files, any read-only tool can open it). A read-only fallback
+covers a genuinely unwritable destination. The `-shm` was **measured**
+surviving the mode switch, so lingering sidecars are removed once the file
+is out of WAL — a stray sidecar beside a snapshot is exactly what makes a
+hand-copied restore dangerous. Pin: `theCheckAnswersOnAWALFlaggedCopyAnd
+LeavesItSelfContained`.
+
+**Pins (14):** `BackupRetentionTests` (6) — fourteen consecutive days all
+kept · beyond fourteen only one per week · **days-with-copies, not calendar
+days** (a fortnight away costs no history) · a same-day second copy never
+buys a fifteenth day · keep/prune partition the input exactly · the honest
+reach is 28–49 days. `BackupRunTests` (8) — the run checks the artifact and
+says so · the WAL-copy check above · a corrupted copy is reported, never
+called ok · the runbook rides beside the copies · **an unreachable folder is
+REPORTED, not skipped** · the log caps newest-first · **a run that wrote
+nothing still leaves evidence** · forcing writes when nothing is due.
+
+---
+
+#### Row 12 — the Data Safety face · **DONE** (`642cdf1`)
+
+Settings gains a third tab. Her ruling was "the small face + log", and the
+face's load-bearing half is a **read of the folders themselves** — newest
+copy's date, how many, how far back — because a schedule can stop silently
+and a folder's newest file cannot lie about its date. The persisted log
+sits behind a disclosure as the second half.
+
+- "Back Up Now…" is an **adjunct** (the recorded lean), and the copy under
+  it says the thing that matters: *"A day the app stayed closed has no copy
+  — which is why the dates above matter more than the schedule does."*
+- A destination older than two days turns **orange**. Two is a guess and is
+  flagged at #74(c).
+- **Act 5's two slots are NOT rendered as empty rows.** A face that says
+  "Last export: —" about a feature that does not exist is a lie in the
+  shape of a placeholder (P-2). Act 5 adds rows; it does not fill blanks.
+- **Registry discipline (P-1):** `.backUpNow`, `.chooseBackupFolder`,
+  `.forgetBackupFolder` declared as `.surface` acts on the `.deleteNow`
+  model (app scope, always available, the per-gesture condition living on
+  the pane — the `.deleteSelectedNotes` precedent that declined to push a
+  surface's own state into `CapabilityContext`). Three declarations rather
+  than one on the `.moveTakeEarlier`/`.moveTakeLater` grounds. **No palette
+  or menu-bar door, deliberately** — advertising the manual button would
+  promote the one road this design demotes; the omission is written at the
+  declaration so it reads as a decision. **This is the first Settings pane
+  to declare anything**, which is a precedent, and it is named as one in
+  the walk's own union comment rather than blended in — the Tags pane's
+  create/rename/delete stay undeclared, recorded at #74(d).
+
+**A defect the drill's screenshot caught:** `**RESTORE.md**` rendered as
+literal asterisks. An interpolated `Text` is not a `LocalizedStringKey`, so
+markdown never parses. Curly quotes instead, with the mechanism at the site.
+
+---
+
+#### Row 13 — the runbook · **DONE** (`642cdf1`, corrected `dda9507`)
+
+`notes/DataSafetyRunbook.md`, eight sections, to the grown scope: the
+hierarchy (local store → local backups → the mirror → the platform's 7-day
+backups) · where the files are and what retention really buys · the restore
+recipe · **the warning pair** · **"What deletion means"** with the three
+stages and her both-sided clause · **reading one backup without restoring
+it**, with the recovery-as-copy doctrine · **the mirror section** (a PEER,
+not a backup, with both proven roads) · the passphrase.
+
+**The shape decision, PROVISIONAL (#74(a)).** The text lives once, in code,
+and the repo file is pinned byte-equal to it — and **every backup run drops
+a copy as `RESTORE.md` into both backup folders**. That last part is the
+reason the text is in code at all: the moment you need a restore recipe is
+the moment the app may not open, and a document that only exists inside the
+broken app is not a runbook. **No Help-menu opener was built** — a menu item
+pointing at a repo path is a door that cannot act for anyone but her on this
+Mac (P-2), and a second copy of the text would be exactly the drift the docs
+rules forbid.
+
+**Where the "restore face" is (#74(b)).** Her ruling asks for the warning
+pair "in runbook AND restore face"; there is no restore *face*, because
+restoring is a Finder operation. So the warnings live in the Data Safety
+pane, which is where restoring is discussed. **Both always show**, the
+applicable one leading: she may sign in later, and a warning that arrives
+afterwards is not a warning.
+
+**Pins (4):** the shipped text and the repo file are one document (via
+`#filePath`, the `AuthRLSDDLTests` precedent — the test host can READ the
+repo, and cannot write it, which is why the file is generated through a
+temp dump rather than by the suite) · the runbook carries the three
+sentences the app says · both populations are warned and neither is
+softened (the synced one keeps "Trash" AND "permanently deleted"; the
+local one keeps "time travel") · every promised section heading is present.
+
+---
+
+#### Row 14 — THE DRILL, rehearsed end to end · **DONE** (`dda9507`)
+
+Everything below happened in SCRATCH: the scratchpad, and the DEBUG
+container's `Variorum-dev` store, which is fenced from sync and the bridge
+by construction (`allowsSync = storeVariant == .real`) — the launched app
+showed **"Sync off (dev store)"** and **"Bridge off"** the whole time. Her
+real store was read exactly once, read-only, to copy a backup FILE out.
+
+**Step by step, as actually executed:**
+
+1. `pgrep -fl 'Variorum.app/Contents/MacOS'` — no instance. Own
+   `caffeinate -d` taken.
+2. The dev store copied aside (all three files: `.sqlite`, `-wal`, `-shm`),
+   SHA-256 recorded.
+3. Her newest real backup — `variorum-backup-2026-08-24-013712.sqlite` —
+   copied to the scratchpad. **Read-only source; her folder untouched.**
+4. Headless verification of that copy: `integrity_check` **ok**; 81 live
+   posts, 1,103 blocks, 1,285 takes, 1,335 savepoints, 10 books; migrations
+   through `v1_14`.
+5. **Runbook §3 executed literally**: current store MOVED aside (with its
+   sidecars) to `variorum-before-restore.sqlite`; the backup put in place as
+   `variorum.sqlite`; app launched.
+6. **Her library came up whole** — `~/shelf · 5 books`, journal (9 notes ·
+   648w), quicknotes (smart), journal, my book :), the field guide
+   (27 notes · 7 ch · 167% of 4000w). Screenshot in the scratchpad.
+7. Settings ▸ Data Safety opened and read against real numbers:
+   *"Newest: Aug 24, 2026 at 4:13 AM · 11 copies · back to Aug 24, 2026"*,
+   the second folder honestly "Not set", and the full Restoring section
+   reachable by scrolling — the local-only warning leading, correct for a
+   store with no account.
+8. Quit. The deletion legs constructed through the operations layer
+   (scratchpad executable over `VariorumCore`, never hand-edited SQL):
+   mint X/Y/Z → **delete Z** → **snapshot B1** → **delete Y** → **delete +
+   purge X** (`requestPurge` + `LocalPurge.sweep()` — the never-synced
+   family's local road: *families=1, rows=4*).
+9. State compared on both sides before the restore. **Live store:** X GONE
+   (no row at all), Y tombstoned, Z tombstoned. **B1:** X **LIVE**, Y LIVE,
+   Z tombstoned at its original stamp.
+10. Runbook §3 executed again to restore B1. Relaunched.
+
+**The matrix's live legs, observed:**
+
+| # | what was observed |
+|---|---|
+| **M1** | Z is the Trash's first row: *"DRILL Z — deleted BEFORE the backup · note · deleted Aug 24, 2026 at 4:18 AM · **30 days left**"* — the ORIGINAL stamp, not the restore's. The clock did not restart, and Put back / Delete Now are both there |
+| **M3** | Y is back in the Library, alive. A local-only restore undoes a post-backup deletion — time travel, observed |
+| **M5** | X is back in the Library too — a note whose four rows were **physically removed** by the purge. Her accept-and-say-it ruling, in the flesh, on a store with no account |
+| **M6** | X's rows were readable inside B1 the entire time, which is the sentence the runbook makes |
+
+**What the rehearsal CORRECTED in the recipe** — the whole point of running
+it:
+
+1. **`-wal`/`-shm` beside a backup are real and have a cause.** Reading a
+   copy creates them (they are all over her own `Backups/` folder). The
+   recipe now says why, and says to leave them.
+2. **§6 was hand-waving** (*"or ask for help doing this if it is not
+   obvious"*). It is now the road actually walked: do §3, copy the text out,
+   put your own store back, paste as a new note.
+3. **Two things that look wrong and are not** were added: an older backup
+   migrates forward on first open (observed: `v1_10`…`v1_14` applied), and
+   **a launch can come up with no window** — which happened, and which reads
+   as *lost data* at exactly the wrong moment.
+
+**THE WINDOWLESS LAUNCH — captured, and it changes a KnownIssues row.** The
+first launch came up with the menu bar present, the process healthy
+(42 MB RSS) and **zero windows**. Per that row's own protocol: `sample`
+shows the main thread **idle in `__CFRunLoopServiceMachPort`** — nothing
+blocked, no securityd, no `AppBootstrap` frame. **So the 13e mechanism is
+genuinely gone and this is a different thing.** Two further facts, both new:
+`open` on the running app did NOT produce a window, while **File ▸ New
+Window did, instantly**; and the very next launch, after a clean quit, came
+up with one — where the failing launch followed a session that had
+**crashed** (another agent's DEBUG assertion probe, its Problem Report still
+on screen at 02:36, unrelated to this act). **Live hypothesis: window-state
+restoration after an unclean exit**, cheap to test next time. Row updated;
+owner unchanged (v1 release readiness).
+
+**Cleanup, verified:** the two backup copies the drill's launches wrote of
+HER corpus into the dev container were deleted (identified by size); the dev
+store was put back byte-identical (SHA-256 match) and re-opened to confirm
+the design corpus (236 live notes, 730 blocks). The scratchpad tool never
+entered the repo.
+
+---
+
+#### Row 15 — the matrix headless, on the fake server · **DONE** (`7c3db60`)
+
+`Tests/VariorumCoreTests/RestoreMatrixTests.swift`, 5 pins. **The harness
+learned to open a client on a FILE**, which is what makes "restored" mean
+what it says: a real `AppDatabase.backup(to:)` snapshot of a converged
+device, copied and reopened — carrying its own rows, cursor, outbox and
+**`device_id`**, because device identity lives in the store and therefore
+travels inside a backup. No wall-clock tricks, no hand-written rows.
+
+- **M1** — tombstoned at backup time returns tombstoned on its original
+  stamp, listed by `Queries.deletedPosts`, and `restoreContainer` brings its
+  writing back.
+- **M2** — a deletion made after the backup re-applies through the ordinary
+  changefeed and lands in the Trash on the DELETING device's stamp; the
+  mirror shows no resurrection.
+- **M4, the centrepiece** — the restored store IS a returner:
+  `reconcileLedger`'s pre-drain pass drops the purged family **and the edit
+  typed on the restored store goes with it**, which is the purge-wins
+  doctrine's letter. **Probed:** replacing the reconcile call with a
+  constant reddened exactly the two assertions that matter (family survives,
+  outbox entry survives) — so the pin measures the mechanism rather than
+  agreeing with it. The probe ran on a scratchpad copy; the file was
+  restored and re-verified green with zero probe markers.
+- **The second road, pinned beside it** — a bare push from a restored store
+  naming a purged id takes the typed `purged` refusal, drops the outbox
+  entry AND the local row, and lands nothing on the mirror.
+- **M7** — a restored store's older cursor never drags the server's back
+  (`max(existing, since)`), so the horizon does not regress and nothing
+  already purgeable becomes un-purgeable; the re-pull is harmless.
+
+**M3/M5/M6 are the drill's**, deliberately and stated in the file's own
+header table: two of them are what a store with no account DOES, and one is
+an assertion about files rather than rows.
+
+---
+
+#### THE FOUR GATES — all green, counts quoted
+
+| gate | result | vs. Act 3's finals |
+|---|---|---|
+| core (`swift test`) | **1356 / 142** ✔ | 1351/141 → **+5 / +1** (`RestoreMatrixTests`) |
+| Mac (full) | **1647 / 287** ✔ | 1629/284 → **+18 / +3** (the three DataSafety suites) |
+| Mac spine (by TYPE) | **63 / 8** ✔ | unchanged |
+| mobile (iPhone 16e) | **486 / 78** ✔ | unchanged (2 pre-existing `withKnownIssue`) |
+| mobile spine (by TYPE) | **33 / 7** ✔ | unchanged |
+
+**Neither known flake fired.** `EditorWindowSmokeTests/rewriteStrategy
+Latencies` passed in BOTH full Mac runs, and `CanvasDragTrackingTests`
+passed in both — so the one recorded canvas red does **not** get promoted by
+this act. The suites were run with no live instance.
+
+**The mobile suite caught something real on the way**, and it was right
+twice. First `.withSecurityScope` does not exist on iOS (the `Shared/` file
+compiles into both targets) — guarded with `#if os(macOS)`, with the reason
+written at the site: the phone has no folder picker feeding a daily copy and
+`StoreBackup` is not wired there at all. Then
+`MobileNoRedirectSweepTests.nothingUserFacingNamesTheMac` flagged
+`DataSafetyCopy` — **correctly**: it was in `Shared/`, and every sentence in
+it names the Mac. It moved to the Mac target (it is a FACE, not a brain —
+MobileSoul §3), and the runbook text now reaches the shared writer as
+`StoreBackup.Configuration.runbookText`, so the machinery stays shared and
+the words stay the Mac's. The sweep then flagged the iOS stub's refusal
+message for naming the Mac, which was also right; it was reworded to name
+no platform at all.
+
+#### THE ACCEPTANCE SENTENCE, made true
+
+> *"a backup restores end-to-end in rehearsal with the deletion matrix's
+> expectations holding scenario by scenario; the runbook exists where she
+> can find it under stress; freshness evidence is visible without her
+> asking; the honesty sentences exist verbatim-in-meaning."*
+
+- **A backup restores end to end in rehearsal** — on her own bytes, twice
+  (her corpus, then B1), with her shelf on screen both times. Row 14 above.
+- **The matrix holds scenario by scenario** — M1/M2/M4/M7 pinned headless
+  and green; M1/M3/M5/M6 observed live in the drill; M4 additionally
+  probed so the pin is known to measure its mechanism. Seven for seven.
+- **The runbook exists where she can find it under stress** — in the repo,
+  in the app, and **inside both backup folders as `RESTORE.md`**, which is
+  the copy that still exists when the app does not.
+- **Freshness evidence is visible without her asking** — Settings ▸ Data
+  Safety reads the folders themselves and leads with the newest copy's
+  date; the log behind it reports even the runs that wrote nothing.
+- **The honesty sentences exist verbatim-in-meaning** — both restore
+  warnings and her both-sided deletion clause, in the app and in the
+  runbook, pinned equal and pinned un-softened.
+
+#### FOR THE END-OF-PHASE LADDER — what to attack hardest
+
+1. **The integrity check now WRITES to the copy it checks** (journal-mode
+   normalization). The reasoning is at the method and the alternative was
+   worse, but it is a behaviour change to an artifact and deserves a second
+   opinion. #74(e).
+2. **`BackupRetention.keep` is the only thing standing between her and a
+   deleted backup.** Its flaw was found by a test, not by reading, which is
+   a fair warning about reading it. Attack the boundaries: zero files, one
+   file, a policy of zero weeklies, clock changes across a DST edge (it
+   works in UTC day/week indices on purpose — check that choice).
+3. **The security-scope claim is per run and released in a `defer`.** Check
+   the failure paths: a throw inside `withAccess`, a `copyItem` that fails
+   halfway, a destination that vanishes between `resolve` and the write.
+4. **`RestoreScratch.restore` leaves the SOURCE client alive** on its own
+   file while the tests stop using it. That models "this store was
+   replaced" and is stated in the type — but a reviewer should decide
+   whether any pin accidentally depends on the source still rounding.
+5. **The three registry declarations set a Settings precedent** (#74(d)).
+   The walk passes because it names its renderers; the question is whether
+   half-declared Settings is the right resting place.
