@@ -401,6 +401,24 @@ phone install (the standing ritual).
    shape and place the gate in ONE brain, not per-surface.
 8. **The escrow setting's exact wording** (the one-sentence trust
    statements, each way) — copy taste, hers.
+9. **THE TWO GATES must become ONE story** *(added 2026-08-24 by the
+   13l architect at her "take a look" request — a cross-check between
+   the two live plans, not a new design)*: 13l is shipping the
+   APP-LEVEL LOCK under her same-day ruling that its fallback is a
+   USER SETTING **with the system login password allowed** (her
+   reasoning then: the disk is readable anyway, so refusing the login
+   password buys nothing — true in the plaintext era). R13p-5 rules
+   the AT-OPEN modes with the login password **NEVER in the chain**
+   (her significant-other threat — true in the encrypted era, where
+   exclusion finally MEANS something). Both rulings are right for
+   their eras, and Batch 2 already retires 13l's wording caveat — but
+   the SITTING should rule the merged face explicitly: does 13p's
+   at-open mode SUBSUME the 13l lock (one gate, one setting — the
+   lean), or do two gates stack (an app lock in front of a store
+   unlock — two prompts, two fallback stories)? And what happens to
+   the 13l lock setting's system-password fallback option once the
+   store is encrypted — retired, or surviving only in Auto mode where
+   the key releases silently anyway?
 
 ## WHY THIS PHASE IS SHAPED THIS WAY (one paragraph, for the cold reader)
 
