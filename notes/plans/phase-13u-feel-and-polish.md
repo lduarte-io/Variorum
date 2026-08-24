@@ -142,11 +142,12 @@ THAT SECTION WINS (it is canon; this is choreography).
 5. Item 1's acceptance bar and any reproduction recipes she has.
 6. Dark-mode acceptance shape (her look reference; "no unreadable
    surface" is the bar).
-7. **The suite-simulator switch (13l's offered decision, hers):**
-   standardize the test fleet on iPhone 17 Pro (matching her hardware)
-   as a ONE-COMMIT re-baselining act at this kickoff — perf/geometry
-   pins re-measured in the same commit — or stay on 16e. (13l's
-   record has the reasoning; nothing was changed there.)
+7. ~~The suite-simulator switch~~ — **RULED 2026-08-24, the morning
+   after 13l's close (author, via the question tool): SWITCH.** The
+   test fleet standardizes on **iPhone 17 Pro** as a ONE-COMMIT
+   re-baselining act at this kickoff — perf and geometry pins
+   re-measured in the same commit, every moved number recorded. This
+   is now the kickoff's first mechanical act, not a sitting question.
 8. MOBILE'S DELIVERABLES named per item (2/4/5/6/9/11/12 are the
    both-platform set) — written INTO the batches, not parity rows.
 

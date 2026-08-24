@@ -182,13 +182,23 @@ struct CommitBar: View {
                 pickedDate = Self.date(fromDay: model.header?.entryDate) ?? Date()
                 datePickerShown = true
             }
-            Divider()
-            // 13l Act 2 (item 3) — HER DOOR, in the menu she went looking in.
-            // It is ordinary move-to-Trash and NOTHING else: Delete Now never
-            // appears in a note context (her 13j round-3 rider), so the only
-            // way past the 30 days from here is the Trash itself.
-            Button(RecoveryCopy.deleteNoteTitle, role: .destructive) {
-                pendingDelete = NoteDeleteConfirm(postIDs: [model.postID])
+            // 13l post-close, her #77 ruling (2026-08-24): the door renders in
+            // NOTE contexts only — the scraps editor composes this same bar
+            // with the POOL's id, and a door that can never act isn't rendered
+            // (P-2; the walk observed the pre-fence version tombstone the
+            // scraps area). The act-level kind fence in `NoteDeletion.run`
+            // stays as the belt; this is the braces. The availability rule is
+            // the header's own kind — nil (still loading) hides with it.
+            if model.header?.kind == .post {
+                Divider()
+                // 13l Act 2 (item 3) — HER DOOR, in the menu she went looking
+                // in. It is ordinary move-to-Trash and NOTHING else: Delete
+                // Now never appears in a note context (her 13j round-3 rider),
+                // so the only way past the 30 days from here is the Trash
+                // itself.
+                Button(RecoveryCopy.deleteNoteTitle, role: .destructive) {
+                    pendingDelete = NoteDeleteConfirm(postIDs: [model.postID])
+                }
             }
         }
         .help("The note itself: its savepoints, its seal, its tray, its date")
