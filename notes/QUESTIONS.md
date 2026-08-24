@@ -906,4 +906,16 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint.**
 
-*(Next free number: **#77**.)*
+## Phase 13l (2026-08-24) — Act 7's call (the 8d recovery-story walk)
+
+77. **The sentence the scraps area gets when you try to delete it.** The walk found that "Delete Note…" in the scraps editor's `note ▾` menu really did tombstone the scraps POOL — with a confirm promising the Trash, a receipt saying "Note moved to the Trash", nothing listing it anywhere, and 28 scraps gone with no door back. The act now refuses instead, and the sentence it says is **PROVISIONAL**: *"That's the scraps area, not a note — it can't go to the Trash."*
+
+    **(a) The wording is yours.** It has to carry two facts in one line — this isn't a note, and nothing happened — without sounding like a scolding. The alternative shapes: name the door you'd rather use ("Scraps go one at a time — delete the scraps themselves"), or say nothing at all and simply not render the door.
+
+    **(b) The DOOR is the real question, and it is deliberately unbuilt.** Refusing is the safe half. The other half — should that menu even offer a delete on the scraps area? — is yours: (i) **hide it** (the P-2 answer: a door that can never act isn't rendered; needs the editor pane to publish its container kind), (ii) **keep the refusal** so the menu stays identical everywhere and the app explains itself when you try, or (iii) **make it real** — a scraps area that can go to the Trash and come back, which means the Trash listing learns a sixth kind and `restoreContainer` gets a face. (iii) is the only one that answers "and if I *do* want to clear my scraps?"
+
+    **(c) Worth knowing either way: nothing else in the app deletes a pool.** The Library and Pool rows list `kind='post'` hits only, so this menu was the single road in. That is why it went unnoticed — and why the fence at the act closes the whole class rather than one surface.
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#78**.)*

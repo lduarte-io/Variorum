@@ -3951,3 +3951,258 @@ KnownIssues row.
    `/Applications` refresh — and it is the round that catches up on her
    whole deletion backlog. That is the highest-consequence untested moment
    in this act.
+
+### ACT 7 — WALK RECORD (Opus implementer, 2026-08-24)
+
+**What this was:** the 8d mandate walked, not read. The real app —
+the fenced DEV-store Debug build (`io.lduarte.Variorum.debug`, its own
+container's `Variorum-dev` store, which holds the seeded design corpus)
+— driven by hand through every recovery door, asking one question at
+each: *"where did my text go and how do I get it back"*, answerable
+without explanation? Her real store was never opened, no Release build
+ran, `/Applications` was never touched; `caffeinate -d` owned for the
+session; **68 screenshots + one `sample` capture in the gitignored
+`notes/plans/phase-13l-act7-screens/`** (added to `.gitignore` in this
+act).
+
+**Two commits, both staged by explicit path, nothing pushed:**
+`6d3f6bc` (the Trash's display name) · `cda5872` (the scraps-area
+delete fence). Working tree clean.
+
+---
+
+#### THE DOOR-BY-DOOR
+
+| door | verdict |
+|---|---|
+| The per-note tray, `⌫ N` badge | **CLEAN** — appeared the moment a block was deleted, gone again after Put back (calm at rest, her round-1 ruling) |
+| The tray's two sections | **CLEAN in structure, PROPOSED on legibility** (P-1) — both sections render, the empty "Preserved originals" explains itself |
+| Put back (block) | **CLEAN** — "Put back where it was.", the block returned to position 3 (F2's letter) |
+| Archive a block → tray | **CLEAN** — receipt names the note-menu door precisely *because* the badge is deleted-only (its own doc says so; her ratified #67(a)) |
+| Merge → preserved originals | **CLEAN in the tray**; **PROPOSED** (P-2: the merge itself says nothing about where the originals went) |
+| The J3 lineage door | **CLEAN — the best surface in the walk.** "See original from merge…" renders only where it can act; the peek says the original was *kept whole and set aside — not deleted*, shows its text, and offers Put back + Open this note's tray. **PROPOSED**: it shows one of a merge's TWO originals (P-3) |
+| J3 → tray reveal | **CLEAN** — the tray opened with the named row highlighted |
+| Put back (preserved original) | **CLEAN** — "Put back where it came from.", landed beside the block it became. **PROPOSED**: a stale "isn't in this note's tray" line appears in the same breath (P-4) |
+| The Trash — filters, kinds, sorts | **CLEAN** — Everything · Notes · Books · Blocks · Takes · Originals; the filter really filters. **PROPOSED**: the filtered-empty state says "The Trash is empty" (P-5) |
+| Trash rows — context by kind | **CLEAN, and it is good work**: a scrap read "from scraps" with **Open scraps**, a note's block read "from three ways of telling it" with **Open note** (Act 2's item 5 + row 26, working) |
+| Trash rows — the NAME | 🔴 **FIXED** (`6d3f6bc`) — read "Untitled" for a nameless note |
+| Delete Now | **CLEAN end-to-end with real clicks** — "Delete this block for good? It skips the rest of its 30 days — there's no putting it back." → the row goes → "The block is gone from the app now — the app's own cleanup removes the bytes." (Act 2 item 2's fix, alive) |
+| Empty Trash | **CLEAN end-to-end** — "Empty the Trash? 1 thing goes for good: 1 block." → "The Trash is emptied — 1 thing gone from the app now…"; the door un-renders when the Trash empties |
+| `Delete Note…` (note ▾) | **CLEAN** — confirm, receipt, and the navigate-away all fired |
+| The navigate-away | **CLEAN** — the pane left the tombstone for the Library and the Open strip forgot the row |
+| `Delete Note…` on the SCRAPS area | 🔴 **FIXED** (`cda5872`) — it tombstoned the pool and lost 28 scraps under a promise of recovery |
+| The Library row's delete | **not separately walked** — same host, same words (`View.deleteNoteConfirmDialog`), and its confirm was seen from the note door |
+| ⌘-click multi-select + delete | 🔴 **DEAD DOOR — PROPOSED, not fixed** (P-0, the walk's most consequential finding after the pool) |
+| Navigate-away with a SECOND window | **not walked** — covered by `NoteDeletionNavigateAwayTests`' four pins; the one-window case was walked and worked |
+| The History face | **CLEAN** — opened on the note, one `auto` row from `closeAutoCommit` (13j's cadence ruling, in the wild) with Restore beside it |
+| The History face's PAST region | **NOT REACHED, and why matters** (P-6): the only door that deletes a take is the `Delete` button on an ARCHIVED take's row inside the takes board, and in margin-grid style that strip is inside a narrow internally-scrolling panel |
+| Restore commit | **partially walked** — the row and its Restore button render; the press was not confirmed (the button sits at the far right edge) |
+| The QuickEntryBar | **HAPPY PATH CLEAN** (typed, ⏎, minted and opened). **The REFUSAL was not felt** — provoking one needs fault injection, and L-b already carries three red-on-old pins over nine expectations |
+
+---
+
+#### THE TWO FIXES, IN BRIEF
+
+**🔴 FIX 1 — the Trash called her notes "Untitled" (`6d3f6bc`, core).**
+`DisplayTitle.note` falls title → `entry_date` → the created DAY, and
+**all four arms** of `Queries.trash` called it without `createdAt:` —
+the degraded path the rule's own doc names. So a nameless note (every
+⌘N and quick-entry note: the mint stores `nil`) read the placeholder
+her 13g R6-3 / 13k K1 rulings retired, on the one surface that must
+answer *"which note am I putting back?"* — while its masthead, its
+Library row and its shelf card all read its date. Walked, then traced,
+then fixed in all four arms. **Pin:** core
+`TrashAndArchiveTests.theTrashNamesANamelessNoteByItsDayAndNeverByThePlaceholder`,
+covering the note, block and preserved-original arms. **Red on old** by
+behavioural revert (drop the four arguments): **6 failures, every one
+reading back `"Untitled"`.** One pin edit that STRENGTHENS what it
+asserts: `TrashSurfaceTests` had pinned the query's intermediate answer
+AS the placeholder — i.e. it pinned the defect; it now pins the fact the
+test is actually about (the query answers with the note brain, the
+surface corrects it to the pool's).
+
+**🔴 FIX 2 — "Delete Note…" destroyed the scraps area (`cda5872`, Mac +
+`Shared/`).** The scraps editor's `note ▾` menu carries the item, and
+`CommitBar` hands the act `model.postID` — the POOL's id there.
+**Walked with a backup taken first, and observed end to end:** the
+confirm promised the Trash; the pool tombstoned (`deleteContainer` has
+no kind guard); the receipt said *"Note moved to the Trash — 30 days to
+put it back"*; the Trash listed nothing (its note arm is fenced to
+`kind='post'`); the pool's blocks were cascade victims, which that
+listing deliberately never shows; **no door in either app calls
+`restoreContainer` on a pool**; Snippets went 30 scraps → 2. The store
+was restored from the backup immediately. This is also the exact
+invariant Act 2's own `noDoorPutsAPoolContainerInTheTrash` asserted — an
+invariant that was TRUE when written and that **item 3 of the same batch
+silently invalidated** by giving four new doors a road to
+`deleteContainer`. The fence lives at the ACT (all four doors pass
+through it) and reads kinds BEFORE the flush. **Pin:**
+`NoteDeletionActTests.theScrapsAreaCannotBeDeletedThroughTheNoteDoor`
+(refuses · the pool stays live · the Trash could not have listed it ·
+a MIXED pick still deletes the notes). **Red on old:** the pool
+tombstones and the receipt reads the Trash promise. **The refusal's
+wording is PROVISIONAL — QUESTIONS #77**, which also puts the DOOR
+question to her.
+
+---
+
+#### 🔵 THE PROPOSE-ONLY LIST — nothing here was built (numbered for her morning)
+
+**P-0. ⌘-click multi-select to delete several notes cannot be reached.**
+Her third clause from the 13j close (*"allow for command clicking to
+select multiple items and deleting all of them"*) has its act, its
+confirm, its receipt and its pins — and the door is dead in the shipped
+build. **Mechanism, traced:** `LibraryCatalogView.postRow` carries
+`.onTapGesture { onOpen(.post(hit.id)) }` over a
+`.contentShape(Rectangle())` covering the whole row. A SwiftUI
+`onTapGesture` swallows the click before `List(selection: $selectedPosts)`
+sees it, and it does not distinguish modifiers — so ⌘-click **opens**
+the note. Walked: plain-click opens; ⌘-click opens; ⌘-clicking two rows
+opened two notes and left `selectedPosts` empty, so the bulk bar
+("Delete N notes…", "Tag N notes") never appears. The same swallow makes
+the **bulk TAG menu** unreachable, which is older than this phase.
+**Candidate fix:** let a ⌘-modified tap route to the selection instead
+(`.highPriorityGesture(TapGesture().modifiers(.command)…)`) — one call
+site. **Not built, and the reason is the guard:** a gesture-routing
+change cannot carry a red-on-old unit pin in this codebase's style, so
+it wants a hands-on check rather than an overnight landing. Screens
+`72-full.png`, `74-crop.png`, `75-crop.png`, `76-crop.png`.
+
+**P-1. The tray row's preview is squeezed to about ten characters.**
+"Nobody warn…", "In the margin I…", "The sea took t…" — while the
+stamp ("deleted Aug 24,…") and "30 days left" keep their room. The
+preview limit is a generous 90 characters; this is LAYOUT: the row is
+an `HStack` and the flexible `Text` is what SwiftUI compresses first,
+inside a panel whose `minWidth` is 420. So the thing that identifies
+the block loses to the metadata beside it. Candidate: a `layoutPriority`
+on the preview, or a wider panel. Two preserved originals reading "The
+sea took t…" and "Some days the…" is where it bites. Screens
+`08-tray-open.png`, `12-tray-archived.png`, `15-tray-originals.png`.
+
+**P-2. A merge says nothing about where the two originals went.**
+Delete says *"…then in This Note's Tray — the ⌫ door in the note's
+bar"*; archive says *"…it's kept, with no countdown, in This Note's
+Tray (the note menu)"*; **merge says nothing at all** — `runInstantMerge`
+has no success feedback. Two blocks leave the page and the only way to
+learn they are in Preserved originals is to already know. The badge
+does not help: it counts DELETED blocks only, by her own #67(a) ruling.
+Screens `13-merged.png`, `14-merged2.png`, `15-tray-originals.png`.
+
+**P-3. The lineage door shows ONE of a merge's TWO originals.**
+`Queries.unplacedOrigins` returns an array and its doc says why ("a
+merge releases both sources, so A′ has two"); `EditorViewModel
+.caretBlockOrigin` takes `.first`. Nothing is stranded — the peek's
+"Open this note's tray" lists both — but the door's own copy says "the
+original is preserved" (singular) and the second one has no door of its
+own. Screens `16-block-context.png`, `17-lineage-door.png`,
+`18-tray-revealed.png`.
+
+**P-4. A successful Put back from a revealed row is followed by "The
+block you asked to see isn't in this note's tray."** Because it is now
+true — the row left the tray by succeeding. `revealMissing` is an
+arrival-time explanation (its doc names the case: an original released
+from a different note) evaluated live, so a success prints a
+not-found line under it. Candidates: latch it at load, or clear
+`revealBlockID` once its row is acted on. Screen `19-original-putback.png`.
+
+**P-5. Two smaller things on the same tray/Trash surfaces.**
+**(a)** The tray paints its status slot `.foregroundStyle(.red)` for
+every message class, so *"Put back where it was."* — a success — reads
+as an error; the Trash surface one file over already separates them
+(red for `lastError`, secondary for `receipt`). It is also a literal
+colour in a themed surface. **(b)** With a kind filter on, an empty
+result still says **"The Trash is empty"** when it is not, and the
+**Empty Trash…** button disappears with it (`!model.trash.isEmpty` reads
+the FILTERED list). Screens `09-put-back.png`, `19-original-putback.png`,
+`58-crop.png`.
+
+**P-6. The only door that deletes a take is inside the archived strip.**
+`deleteVariant`'s single Mac caller is the `Delete` button on an
+ARCHIVED take's row in the takes board — so a take must be archived
+before it can be deleted, and in margin-grid style that "▸ archived · n"
+disclosure lives inside a narrow internally-scrolling panel. Consequence
+for the recovery story: the walk could not reach the **History face's
+past region with deleted-take rows** through any door, so 13j's deleted-
+take recovery is pinned but unwalked. Not obviously wrong as a product
+choice — recorded because it is a gap in what 8d can be shown to cover.
+
+**P-7. A deleted take in the Trash never names its note.** Found by
+the new pin, recorded in it, and not fixed: that arm reaches its note
+through `block.last_container_id`, which a LIVE block has never carried
+(it is stamped when a block is deleted or released). So a take deleted
+from a live block shows no context at all — `noteTitle` is nil, not
+"Untitled". Naming it needs a join through the live placement.
+
+**P-8. Small honesty notes on the scraps editor**, all beside FIX 2 and
+none of them fixed: a deleted scrap's receipt says *"This Note's Tray —
+the ⌫ door in the note's bar"* on a surface that has neither; the
+scraps rows' own context menu in the Snippets list offers only "Tags…"
+(no delete — the door is the editor's bottom bar); and the block context
+menu there omits "Delete Block" while a note's carries it. Screens
+`45-crop.png`, `47-crop.png`, `49-crop.png`, `50-crop.png`.
+
+**P-9. Two names in one sentence.** The note-delete confirm reads *"The
+note goes to the **Trash** for 30 days. You can put it back from
+**Archived & Deleted** until then."* Both names are real (Trash is a
+section inside Archived & Deleted) and the sentence is honest; it asks
+the reader to hold two nouns for one road. Screen `37-delete-confirm.png`.
+
+---
+
+#### ⚠️ ONE THING THAT IS NOT A RECOVERY FINDING AND MATTERS MORE THAN MOST OF THEM
+
+**The app hung at 100% CPU and had to be killed.** In Takes mode,
+margin-grid style, with a block's takes panel open, after ordinary
+scrolling and a click on the `style:` control, the window stopped
+responding to every click, its menus stopped opening, and its
+accessibility tree went dark (`kAXErrorCannotComplete`). `ps` read
+**100.0% CPU**; a five-second `sample` shows the main thread inside
+SwiftUI's lazy-layout placement for the whole capture —
+`LazySubviewPlacements.placeSubviews` → `LazyStack.place` → …with
+`PaneSurfaceRepresentable.updateNSView` re-entering repeatedly, its
+hottest line `PaneSurface.swift:832`, which is the read-tier pane's
+`if !isLive, view.string != text { view.string = text }`.
+
+**Candidate mechanism, explicitly NOT proven:** a read pane whose
+`text` and `NSTextView.string` never converge would rewrite the string
+on every layout pass, and each write dirties layout. It could equally be
+a quadratic placement over many take-card panes. **I did not chase it,
+and deliberately:** it is not a recovery door, the fix lives in the
+editor/pane seam this act is fenced out of, and it is squarely 13u item
+1's family ("non-editing pane stability… essential to the app feeling
+good"). Recorded with its evidence so nobody has to reproduce it blind:
+**`notes/plans/phase-13l-act7-screens/hang-sample-takes-margin-grid.txt`**
+(the full sample), screens `21`–`27`, `29`–`32`. It happened ONCE, in
+one session; the state did not recover on its own over ~15 minutes; a
+relaunch cleared it and a second Takes session did not reproduce it.
+
+---
+
+#### THE FOUR GATES — all green, counts quoted from my own runs
+
+| suite | result | vs Act 6 |
+|---|---|---|
+| core (`swift test`) | **1369 tests / 143 suites — PASSED** (34.3 s) | 1368/143 → **+1** (the new Trash pin) |
+| Mac full | **1675 tests / 290 suites — PASSED** (221.6 s), zero reds | 1674/290 → **+1** (the new pool-fence pin) |
+| Mac spine (8 `TutorialWalkTests` types, by name) | **63 / 8 — PASSED** (21.1 s) | unchanged |
+| mobile full (iPhone 16e) | **486 / 78 — PASSED** (84.3 s), the 2 recorded `withKnownIssue`s only | unchanged — **no mobile test file was touched** (the parity proof: `Shared/RecoveryCopy.swift` gained a static and changed nothing existing) |
+
+**Neither known flake appeared** — not the Phase-12 latency pin
+(`EditorWindowSmokeTests/rewriteStrategyLatencies`), not
+`CanvasDragTrackingTests`. `CanvasDragTrackingTests` stays at ONE
+recorded red for the phase.
+
+**Fences held:** zero `Sources/VariorumCore/Sync/` lines · zero schema ·
+13u's editor seam untouched (no refusal wording, no `planVisibleTakeEdit`,
+no gap-fence face — the hang that lives there was recorded, not touched)
+· her real store never opened · no Release build · `/Applications`
+untouched · every commit staged by explicit path · nothing pushed.
+
+**Dev-store note for the next seat:** the walk left the dev store with
+its own residue — three extra notes, one merged block with a restored
+original beside it, an archived block and an archived take in *three
+ways of telling it*, and one scrap purged for good by the Delete Now
+walk. Nothing her real store touches. Act 4's scheduled backups are
+visibly running in that container (`…/Variorum-dev/Backups/`, 30 entries
+at the time of the walk), which is its own quiet confirmation that row
+11 works.
