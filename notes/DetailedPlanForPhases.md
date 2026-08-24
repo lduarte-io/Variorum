@@ -60,6 +60,48 @@ time-travel is her kickoff taste call). She launches it at her word.**
 
 *(The pointer THREAD — every superseded pointer paragraph, kept verbatim, newest first, plus the standing Phase 12 deferral paragraphs and the early out-of-band records — lives in `notes/PhaseCloseoutArchive.md` (the 2026-08-01 housekeeping rule: this section holds only the ACTIVE pointer; a superseded pointer moves to the archive at the closeout that supersedes it). Phase 12's standing condition — it kicks off only after a window of real daily use, re-baselining on the then-current counts — remains recorded on its phase-table row below.)*
 
+
+---
+
+## THE RUNNING ORDER (written 2026-08-23 at her ask — *"there's so many different plan files and things going on that I'm wondering if I'm missing anything"*)
+
+**Everything scheduled across BOTH apps, in time order.** Each row names
+the one file that governs it, so nothing needs hunting. **Rows marked
+🟣 need her.**
+
+| # | Where | What | Governed by | Leaves behind |
+|---|---|---|---|---|
+| **0** | 📱 her phone | **Release install** — carries all three BLOCKER fixes (the quick note no longer destroying her second paragraph; a refused save no longer wiping the box and its error; the four dead confirm doors) **+ E1's instrumentation** | — | The end of her hand-avoidance workarounds |
+| **1** | 🟣 📱 | **THE DEVICE WALK — nine rows only her phone can settle**, D8 first (needs the very first launch), D4 kills the app, D9 restarts the phone | `mobile-round-2-device-walk.md` | **E1 settles M1's root**, or names what it cannot settle; eight other answers |
+| **2** | repo | Results recorded, each dispositioned; push | `mobile-round-2.md` | The device queue empties |
+| **3** | 🟣 💻 **13l** | **THE DATA-SAFETY FLOOR — FOUR STRANDS.** (1) its own planned work: scheduled backups · the rehearsed restore drill + runbook · the app lock · **the deletion-aware restore matrix M1–M7** · the bulk-`.md` and sync-status candidates. (2) **work 13j should have delivered working** — the Mac's `Delete Now`/`Empty Trash` are UI-unreachable; the mechanism is now derived and the fix is one line per site. (3) **the cold reviews she assigned it** — R20's Fable read over every Mac-side change mobile round 2 made, **plus 4.5b**, the one piece that reached `Shared/` unreviewed. (4) **mobile's Mac backlog L-a…L-d** | `phase-13l-data-safety-floor.md` (kickoff at top) | True delete reachable · backups real · **the Fable review's findings** |
+| **4** | 💻 13l close | **Authors 13u's plan** · **refreshes `/Applications/Variorum.app`** (hers, explicitly) · MobileSoul parity line | same | 13u ready to run back-to-back |
+| **5** | 🟣 💻 **13u** | **FEEL & POLISH — AND CROSS-PLATFORM BY CONSTRUCTION.** Eight items: pane stability · **the space-eater (BOTH apps)** · the comments-area rework · the note-list snippet (**one brain, mobile's lists too**) · **cross-block edits — the semantics for both platforms** · **dark mode** (moved from 13s; the phone's is the look reference) · the Mac's `MarkdownActs` residual · **item 8, mobile's editor-seam backlog** (incl. a live P1 breach). **Mobile is IN the design sitting** — MobileSoul §6, ledger row **PL-12** | 13u's row + `MobileSoul.md` PL-12 | **Mobile has NO known Mac or `Shared/` work left** — the stated point of running both Mac phases first |
+| **6** | 📱 mobile resumes | Pull `main` · **RUN THE HANDBACK CHECKLIST FIRST** — nine yes/no commands confirming 13l and 13u actually did their items. **Anything that did not land is mobile's again**, into a batch in the commit that finds it, and she is told | handoff **§2b** | A verified starting line |
+| **7** | 📱 | **4.5b's cold review** — the only merged work that reached `Shared/`+Mac unreviewed *(13l's Fable read covers it too; the duplication is hers, "more eyes")* | handoff §3 row 1 | |
+| **8** | 📱 | **4.5d's fix round** — its 14 recorded findings | §61 | |
+| **9** | 📱 | **4.5a's ladder round 2** — a real re-review of the quick-note fixes | §59/§62 | |
+| **10** | 📱 | **4.5c — phone-local now** (seam carves · B45-2 · B45-3's phone half · the live editor over a tombstone · the lens candidate · two one-liners). **B45-2 must close before batch 7** | briefs §3 | |
+| **11** | 📱 | **4.5e — probably verification only** (nearly all of it went to 13l) | briefs §4c | |
+| **12** | 📱 | **THE DEDICATED STABILITY PASS — 4.5's exit condition.** Owns **M27**. Nothing that resembles it discharges it | handoff §3 row 6 | 4.5 closes |
+| **13** | 📱 | **Batch 5** — the shelf layout (R26/R27), the starter Journal book, "info" · **plus the shelf's missing keyboard avoidance and the quick note's unmeasured mint cost** | handoff §3 row 7 | |
+| **14** | 📱 | **Batch 6** — the per-note tray · deleted takes / History past · archive-unarchive · the lens-dangles notice · the lineage door · the guide's deletion chapter | same | |
+| **15** | 📱 | **Batch 7** — reorder takes · duplicate-book-name guard · copy-all-takes · take→block · copy-follows-screen · swatches+emoji · block multi-select · **replace, which HOISTS `FindReplaceGate` WITH it** | same | |
+| **16** | 📱 | **Batch 8** — tag-chip grammar · cadence/pruning settings · PL-9's judgment acts · document settings · **the forked voice brain (HOIST)** · M14's unmeasured half | same | |
+| **17** | 📱 | **THE WHOLE-ROUND PASS — closeout obligation ZERO.** The round cannot close until it runs | handoff §3 row 8 | |
+| **18** | 🟣 📱 | **CLOSEOUT — 13 obligations** (parity ledger · **QUESTIONS.md, still empty while 15 items are held for her** · R16 to canon, **reassigned to 13u** · TEXTKIT2 truths · the author handoff) **and the `mobile` → `main` MERGE at her word** | handoff §7 | **Mobile Round 2 closes** |
+| **19** | 🟣 💻 **13p** | **Note protection / on-device encryption** — and **a serious parity pass on mobile too**, her words, because it is both-platform by nature. A §12 lockstep event | 13p's row | |
+| **20** | 🟣 💻 **13o** | **Search** — full-corpus body text, filters, scoped. A **V1 GATE**. Its index must never contain what protection hides | 13o's row | |
+| **21** | 🟣 💻 **13i** | Smart-book identity (the hybrid) | 13i's row | |
+| **22** | 🟣 💻 **13r · 13s** | Distribution mechanics (Sparkle, notarized DMG, crash reporting, accessibility) · the voice & polish pass (**her copy, written outside the phase**) + the design review | their rows | |
+*[removed for publication]*
+
+**Two things that are NOT in this order and are hers to slot:** 13e's
+residuals and the unslotted rows (EPUB, Apple Notes import, grammar,
+more export). **And one standing fact:** her phone build and her Mac
+build both refresh inside this sequence — the phone at row 0, the Mac at
+row 4.
+
 ---
 
 ## Phase table
