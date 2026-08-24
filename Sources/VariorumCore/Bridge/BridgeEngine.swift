@@ -26,7 +26,10 @@ import GRDB
 ///   edit). A duplicate day (the documented offline race) pushes NOTHING,
 ///   visibly, until the author hand-merges — Fragments is DB-unique per
 ///   (user, date), so a slipped push would LWW-OVERWRITE one text with the
-///   other there, the one forbidden outcome.
+///   other there, the one forbidden outcome. **And, since Phase 13l, the
+///   push half also projects the days it STOPPED seeing** — a bridged day
+///   whose Variorum note is gone pushes its emptiness once (the deletion
+///   leg; see `push(travelDeletions:)`).
 ///
 /// State (local-only, v1_4): `bridge_day.last_synced_hash` is the hash of
 /// the last body BOTH surfaces agreed on — recorded on push-accept and on
@@ -108,6 +111,13 @@ public struct BridgeEngine: Sendable {
 
     public struct PushReport: Equatable, Sendable {
         public var pushed = 0
+        /// How many of `pushed` were DELETIONS — bridged days whose
+        /// Variorum note is gone, projecting their emptiness (Phase 13l,
+        /// ledger 20; her 2026-08-19 ruling). A SUBSET of `pushed`, not a
+        /// sibling total: a deletion is an ordinary accepted push, and the
+        /// counter exists so a round's outcome names the one push that
+        /// blanks rather than replaces.
+        public var deletionsPushed = 0
         /// LWW-skipped outcomes (their aggregate `skipped`): the server row
         /// is newer; the pull reconciles. (Ties go to the PUSHER under
         /// migration 7's `>=` — a skip means strictly older.)
@@ -133,11 +143,21 @@ public struct BridgeEngine: Sendable {
     }
 
     /// One bridge round: pull → land, then push.
+    ///
+    /// **The round is what authorizes deletions to travel** (Phase 13l,
+    /// ledger 20): the deletion leg may only run after a pull that
+    /// COMPLETED, because divergence is a thing the pull discovers — a
+    /// Fragments edit made after a Variorum deletion re-creates the day
+    /// (create-or-open, never blind create), which takes that day out of
+    /// the deletion leg's reach entirely. A STALLED pull left rows unread,
+    /// so the bridge has not finished learning what Fragments holds, and a
+    /// deletion is the one push that blanks rather than replaces. Stalling
+    /// is safe by design; guessing is the forbidden move.
     @discardableResult
     public func run() async throws -> RoundReport {
         var report = RoundReport()
         report.landing = try await pullAndLand()
-        report.push = try await push()
+        report.push = try await push(travelDeletions: !report.landing.stalled)
         return report
     }
 
@@ -517,8 +537,132 @@ public struct BridgeEngine: Sendable {
 
     // MARK: - Push (the projection half)
 
+    /// One day's projection, as the scan resolved it.
+    struct PushCandidate: Sendable {
+        let day: String
+        let body: String
+        let hash: String
+        /// The day's agreed hash BEFORE this push — the body the bridge
+        /// last pulled or pushed; discrimination rule (i)'s input for a
+        /// 15.7 `replaced` receipt riding the response.
+        let agreedHash: String?
+        /// The last landed row's client-LWW stamp for this day: the push
+        /// must outrank it or truth's re-projection is forever `.stale`
+        /// under a clock ahead of ours.
+        let remoteStamp: String?
+        /// The row's created_at as last pulled/pushed — echoed on every
+        /// push (created_at follows the WINNING push server-side).
+        let remoteCreatedAt: String?
+        /// The deletion leg's candidates (Phase 13l): the day has no
+        /// Variorum note left, so its projection is emptiness. Counted
+        /// apart in the report; identical on the wire to every other push.
+        var isDeletion = false
+    }
+
+    // MARK: - The deletion leg (Phase 13l, ledger 20)
+
+    /// **Her ruling, 2026-08-19** (on seeing the purge memo's §4e callout —
+    /// *"I didn't realize it wouldn't delete from fragments and that will
+    /// have to be fixed"*): deleting a journal day in Variorum must delete
+    /// it in Fragments too, **at DELETE time** — the round after the
+    /// tombstone, never only at the purge 30 days later.
+    ///
+    /// **The shape.** The push half's scan reads LIVE journal notes, so a
+    /// deleted day simply vanished from it and Fragments kept the last body
+    /// forever. This leg supplies the days the scan stopped seeing: a
+    /// `bridge_day` row is the bridge's own record that a day was bridged,
+    /// so a bridged day with no Variorum note left has a projection, and
+    /// that projection is EMPTINESS. Nothing else about the push changes —
+    /// the candidate rides the same poison check, the same minimal LWW
+    /// stamp, the same `created_at` echo, the same seal, the same `replaced`
+    /// receipt consumption, and the same `recordDay`.
+    ///
+    /// **The empty body is the road, and it is the only SAFE road.** The
+    /// contract already owns this exact wire semantic (standing ask (b):
+    /// *"if the bridge pushes "" (a Variorum-side emptying of a previously
+    /// agreed day), it owns that semantic alone"*), so a travelled deletion
+    /// is byte-identical to the emptying push that has shipped since 9b —
+    /// no new wire behavior, nothing new owed by Fragments. The `sync_delete`
+    /// tombstone road was rejected deliberately: their delete is UNGUARDED
+    /// (no LWW comparison, and no `replaced` receipt), so it would destroy
+    /// an unseen Fragments edit unconditionally and silently — the one
+    /// forbidden outcome. The empty-body push loses LWW to anything newer
+    /// and draws a receipt on the exact-tie residual.
+    ///
+    /// **THE GUARD — a deletion must never destroy prose she typed in
+    /// Fragments after the deletion.** Three layers, all structural:
+    ///
+    /// 1. **The pull, run first, takes a diverged day out of reach.** A
+    ///    Fragments edit made after the Variorum deletion lands through
+    ///    create-or-open, which mints a FRESH note for that day (the purge
+    ///    memo's documented outcome). The day is then claimed, so it is not
+    ///    a candidate here at all. This is the guard's main body, and it is
+    ///    why `run()` — never a bare `push()` — authorizes the leg, and why
+    ///    a STALLED pull withdraws that authorization.
+    /// 2. **Only a day whose agreement is intact and unspoken travels.** A
+    ///    non-NULL `last_synced_hash` is the bridge saying "I know what
+    ///    Fragments holds"; the leg refuses without one, refuses the
+    ///    re-push sentinel (a restaged day's wire body is sealed under a
+    ///    dead key — no comparable agreement exists), and refuses a day
+    ///    already agreed EMPTY, which is what makes the deletion travel
+    ///    ONCE. Put back self-heals for free: the note is live again, the
+    ///    ordinary scan sees rendered text against an agreed-empty hash,
+    ///    and the body re-projects.
+    /// 3. **Minimal LWW stamping** (`last_remote_stamp + 1s`, the existing
+    ///    rule) means even an unpulled Fragments edit outranks the deletion
+    ///    and resolves `.stale`; the sub-second/exact-tie residual is
+    ///    covered by the `replaced` receipt, whose no-landable-block arm
+    ///    preserves the destroyed body durably.
+    ///
+    /// **Claimed means claimed by ANY live note, not by a live JOURNAL
+    /// note.** The join key is the day: if any live container still holds
+    /// that `entry_date`, the day was not deleted — it graduated out of the
+    /// journal profile, and blanking her Fragments day for a note that
+    /// still exists is not a deletion. (A note whose date MOVES, or is
+    /// cleared, correctly leaves its old day unclaimed: that day genuinely
+    /// has nothing left to project.)
+    static func deletionCandidates(_ db: Database) throws -> [PushCandidate] {
+        let emptyHash = BridgeHash.body("")
+        let claimed = try Set(String.fetchAll(
+            db,
+            sql: """
+                SELECT DISTINCT entry_date FROM container
+                WHERE entry_date IS NOT NULL AND deleted_at IS NULL
+                """))
+        let bridged = try Row.fetchAll(
+            db,
+            sql: """
+                SELECT day_key, last_synced_hash, last_remote_stamp, remote_created_at
+                FROM bridge_day
+                WHERE last_synced_hash IS NOT NULL
+                ORDER BY day_key ASC
+                """)
+        return bridged.compactMap { row in
+            let day: String = row["day_key"]
+            let agreed: String = row["last_synced_hash"]
+            guard !claimed.contains(day) else { return nil }       // still a note
+            guard agreed != emptyHash else { return nil }          // already told (ONCE)
+            guard agreed != restagedHashSentinel else { return nil }  // no comparable agreement
+            guard JournalDay.isValid(day) else { return nil }      // could never join
+            return PushCandidate(
+                day: day, body: "", hash: emptyHash, agreedHash: agreed,
+                remoteStamp: row["last_remote_stamp"],
+                remoteCreatedAt: row["remote_created_at"],
+                isDeletion: true)
+        }
+    }
+
+    /// The projection half.
+    ///
+    /// `travelDeletions` (Phase 13l, ledger 20) opts THE DELETION LEG in —
+    /// the leg's rules and its guard are documented at the leg itself, in
+    /// the scan below. It defaults to **off** because a bare `push()` has
+    /// reconciled nothing: the guard against blanking prose she typed in
+    /// Fragments after a Variorum deletion IS the pull, and only `run()`
+    /// knows whether one completed. A caller that wants deletions must be
+    /// a round.
     @discardableResult
-    public func push() async throws -> PushReport {
+    public func push(travelDeletions: Bool = false) async throws -> PushReport {
         // Keys first (Phase 14b, L11): refuse before any network contact.
         let keys = try roundKeys()
         var report = PushReport()
@@ -530,25 +674,9 @@ public struct BridgeEngine: Sendable {
         report.notes = try await database.read { try Self.unrescuedBodyNotes($0) }
         let now = DateFormatter.variorumISO8601.string(from: date.now)
 
-        struct Candidate: Sendable {
-            let day: String
-            let body: String
-            let hash: String
-            /// The day's agreed hash BEFORE this push — the body the bridge
-            /// last pulled or pushed; discrimination rule (i)'s input for a
-            /// 15.7 `replaced` receipt riding the response.
-            let agreedHash: String?
-            /// The last landed row's client-LWW stamp for this day: the
-            /// push must outrank it or truth's re-projection is forever
-            /// `.stale` under a clock ahead of ours.
-            let remoteStamp: String?
-            /// The row's created_at as last pulled/pushed — echoed on every
-            /// push (created_at follows the WINNING push server-side).
-            let remoteCreatedAt: String?
-        }
-        let scan: (candidates: [Candidate], paused: [String], notes: [String]) =
+        let scan: (candidates: [PushCandidate], paused: [String], notes: [String]) =
             try await database.read { db in
-                var candidates: [Candidate] = []
+                var candidates: [PushCandidate] = []
                 var paused: [String] = []
                 var notes: [String] = []
                 // Live journal entries, day-grouped, in the notebook rule's
@@ -619,11 +747,14 @@ public struct BridgeEngine: Sendable {
                         // days — this guards the residual corners).
                         continue
                     }
-                    candidates.append(Candidate(
+                    candidates.append(PushCandidate(
                         day: day, body: rendered, hash: hash,
                         agreedHash: agreedHash,
                         remoteStamp: state?.remoteStamp ?? nil,
                         remoteCreatedAt: state?.remoteCreatedAt ?? nil))
+                }
+                if travelDeletions {
+                    candidates.append(contentsOf: try Self.deletionCandidates(db))
                 }
                 return (candidates, paused, notes)
             }
@@ -757,6 +888,7 @@ public struct BridgeEngine: Sendable {
                         remoteStamp: record.stamp, remoteCreatedAt: record.createdAt)
                 }
                 report.pushed += 1
+                if candidate.isDeletion { report.deletionsPushed += 1 }
             } else if let conflict = response.conflicts.first {
                 report.rejected += 1
                 if conflict.isUniqueViolation {
