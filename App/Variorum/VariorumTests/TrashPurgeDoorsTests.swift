@@ -25,6 +25,224 @@ import Testing
 import VariorumCore
 @testable import Variorum
 
+/// **THE CONFIRM→ACT EDGE, DRIVEN THROUGH THE REAL DIALOG** (13l Act 2,
+/// ledger item 2 — her live report: *"clicking Delete Now in the Trash
+/// produced NO confirmation and NO effect"*).
+///
+/// Every pin in `TrashPurgeDoorsTests` below calls the confirm method
+/// DIRECTLY while `pendingConfirm` is still set, so the one edge that was
+/// broken — SwiftUI's `isPresented` write-back racing the action's deferred
+/// `Task` — had no coverage at all, and the whole door set stayed green while
+/// true delete was unreachable in her hands.
+///
+/// This suite closes it with **no simulated step**. Three mechanism facts,
+/// measured here rather than assumed (and the reason a Mac pin can be
+/// stronger than the phone's, whose driver must supply the write-back by
+/// hand):
+///
+/// 1. SwiftUI's `confirmationDialog` on macOS 26 presents a real
+///    `_NSAlertPanel` as a sheet on the hosting window — with real
+///    `NSButton`s, reachable in process.
+/// 2. `performClick(nil)` on that button runs SwiftUI's action closure AND
+///    SwiftUI's own dismissal write-back, in one turn — exactly what a real
+///    press does. Nothing about the write-back is faked.
+/// 3. The action's `Task` resumes only after that turn yields, which is where
+///    the defect lived.
+///
+/// It mounts the SHIPPING modifier (`View.purgeConfirmDialog`) inside a
+/// `List` row, which is where `RecoveryView` applies it — measured to behave
+/// identically to a bare view, and the closest a test can stand to the real
+/// surface, whose `@State` model is unreachable from outside.
+@MainActor
+@Suite("The purge confirm's real button (13l Act 2)", .serialized)
+struct TrashConfirmEdgeTests {
+    /// The shipping modifier, over a model the test owns, in production's own
+    /// structural position (inside a `List` row).
+    private struct Host: View {
+        let model: RecoveryViewModel
+
+        var body: some View {
+            List {
+                Section("Trash") {
+                    HStack { Text("controls") }
+                        .purgeConfirmDialog(model)
+                }
+            }
+            .frame(width: 480, height: 320)
+        }
+    }
+
+    private func pump(_ seconds: TimeInterval = 0.3) {
+        RunLoop.main.run(until: Date().addingTimeInterval(seconds))
+    }
+
+    /// Every `NSButton` under a view, however deep.
+    private static func buttons(in view: NSView?) -> [NSButton] {
+        guard let view else { return [] }
+        var found: [NSButton] = []
+        if let button = view as? NSButton { found.append(button) }
+        for sub in view.subviews { found.append(contentsOf: buttons(in: sub)) }
+        return found
+    }
+
+    /// Presents the dialog, presses its REAL destructive button, and lets the
+    /// action's continuation resume. Returns false when no dialog appeared —
+    /// itself a finding, so callers assert on it rather than passing over
+    /// nothing.
+    @discardableResult
+    private func pressTheRealConfirmButton(
+        _ model: RecoveryViewModel, raise: () async -> Void
+    ) async -> Bool {
+        let window = NSWindow(
+            contentRect: NSRect(x: 60, y: 60, width: 520, height: 380),
+            styleMask: [.titled, .resizable], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        defer {
+            window.orderOut(nil)
+            window.close()
+        }
+        window.contentView = NSHostingView(rootView: Host(model: model))
+        window.orderFrontRegardless()
+        pump(0.4)
+        for _ in 0..<20 { await Task.yield() }
+
+        await raise()
+        pump(0.4)
+        for _ in 0..<20 { await Task.yield() }
+        pump(0.2)
+
+        guard let sheet = window.attachedSheet,
+              let confirm = Self.buttons(in: sheet.contentView)
+                  .first(where: { $0.title == "Delete for Good" })
+        else { return false }
+        // A REAL press: SwiftUI's action AND SwiftUI's dismissal write-back,
+        // in the same turn UIKit/AppKit gives a real click.
+        confirm.performClick(nil)
+        // The act is a real async transaction (intent write + the local
+        // sweep), so the pin waits for its ANSWER rather than for a fixed
+        // number of turns — bounded, so the shipped code's silence still
+        // fails rather than hangs.
+        await settle(until: { model.receipt != nil || model.lastError != nil })
+        return true
+    }
+
+    /// Pumps the runloop and yields until `done`, or the deadline passes.
+    private func settle(until done: () -> Bool, seconds: TimeInterval = 3) async {
+        let deadline = Date().addingTimeInterval(seconds)
+        while !done(), Date() < deadline {
+            pump(0.05)
+            for _ in 0..<10 { await Task.yield() }
+        }
+    }
+
+    @Test func pressingDeleteForGoodInTheRealDialogActuallyPurges() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two."]) { editor in
+            let blockID = try #require(editor.model.slots.first?.blockID)
+            try await editor.session.runner.run { (ops: Operations) in
+                try ops.deleteBlock(blockID)
+            }
+            let rows: [Queries.TrashItem] = try await editor.database.read { db in
+                try Queries.trash(db, now: harnessNow)
+            }
+            let row = try #require(rows.first { $0.kind == .block })
+            let model = RecoveryViewModel(session: editor.session)
+
+            let presented = await pressTheRealConfirmButton(model) {
+                model.requestDeleteNow(row)
+            }
+            #expect(presented, "the confirm must present — both purge doors ride this host")
+
+            // RED ON THE SHIPPED CODE: the dismissal nilled `pendingConfirm`
+            // before the action's `Task` could read it, so nothing below
+            // happened — no intent, no receipt, the row still listed.
+            #expect(model.lastError == nil)
+            #expect(model.receipt != nil, "a pressed confirm answers her")
+            let intents: Int = try await editor.database.read { db in
+                try Int.fetchOne(
+                    db, sql: "SELECT COUNT(*) FROM purge_intent WHERE row_id = ?",
+                    arguments: [blockID]) ?? 0
+            }
+            #expect(intents == 1, "the press wrote the intent the door promises")
+            let listed: [Queries.TrashItem] = try await editor.database.read { db in
+                try Queries.trash(db, now: harnessNow)
+            }
+            #expect(listed.isEmpty, "the row leaves the Trash on the press")
+        }
+    }
+
+    /// Empty Trash rides the SAME host, which is why one dead edge killed
+    /// both doors — so its press is pinned too, not inferred.
+    @Test func pressingDeleteForGoodEmptiesTheWholeTrash() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two."]) { editor in
+            let blockID = try #require(editor.model.slots.first?.blockID)
+            try await editor.session.runner.run { (ops: Operations) in
+                try ops.deleteBlock(blockID)
+                let doomed = try ops.createPost(title: "doomed")
+                try ops.deleteContainer(doomed.id)
+            }
+            let model = RecoveryViewModel(session: editor.session)
+            let presented = await pressTheRealConfirmButton(model) {
+                await model.requestEmptyTrash()
+            }
+            #expect(presented, "Empty Trash raises the same host")
+            #expect(model.lastError == nil)
+            #expect(model.receipt?.contains("Trash is emptied") == true)
+            let listed: [Queries.TrashItem] = try await editor.database.read { db in
+                try Queries.trash(db, now: harnessNow)
+            }
+            #expect(listed.isEmpty)
+        }
+    }
+
+    /// Cancel is the other half of the same edge: the dismissal must leave
+    /// nothing pending AND write nothing.
+    @Test func pressingCancelInTheRealDialogWritesNothing() async throws {
+        try await withEditor(seedBlocks: ["Alpha one."]) { editor in
+            let blockID = try #require(editor.model.slots.first?.blockID)
+            try await editor.session.runner.run { (ops: Operations) in
+                try ops.deleteBlock(blockID)
+            }
+            let rows: [Queries.TrashItem] = try await editor.database.read { db in
+                try Queries.trash(db, now: harnessNow)
+            }
+            let row = try #require(rows.first { $0.kind == .block })
+            let model = RecoveryViewModel(session: editor.session)
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 60, y: 60, width: 520, height: 380),
+                styleMask: [.titled, .resizable], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            window.contentView = NSHostingView(rootView: Host(model: model))
+            window.orderFrontRegardless()
+            pump(0.4)
+            for _ in 0..<20 { await Task.yield() }
+            model.requestDeleteNow(row)
+            pump(0.4)
+            for _ in 0..<20 { await Task.yield() }
+            let sheet = try #require(window.attachedSheet)
+            let cancel = try #require(Self.buttons(in: sheet.contentView)
+                .first { $0.title == "Cancel" })
+            cancel.performClick(nil)
+            pump(0.3)
+            for _ in 0..<40 { await Task.yield() }
+
+            #expect(model.pendingConfirm == nil)
+            let intents: Int = try await editor.database.read { db in
+                try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM purge_intent") ?? 0
+            }
+            #expect(intents == 0, "a cancelled confirm mints nothing")
+            let listed: [Queries.TrashItem] = try await editor.database.read { db in
+                try Queries.trash(db, now: harnessNow)
+            }
+            #expect(listed.count == 1, "the row is still there to put back")
+        }
+    }
+}
+
 @MainActor
 @Suite("The purge doors: Delete Now & Empty Trash (13j 6b)")
 struct TrashPurgeDoorsTests {
@@ -76,7 +294,7 @@ struct TrashPurgeDoorsTests {
             // STRONGER truth: intent completed, family physically gone,
             // and the receipt speaks the LOCAL wording (no "synced
             // devices" that don't exist).
-            await model.confirmPendingPurge()
+            await model.confirmPendingPurge(try #require(model.pendingConfirm))
             #expect(model.lastError == nil)
             let intentStates: (live: Int, completed: Int) = try await editor.database.read { db in
                 (try Int.fetchOne(
@@ -111,7 +329,7 @@ struct TrashPurgeDoorsTests {
                 .contains("every synced device"))
             // Asking again is one purge (idempotent through the op).
             model.requestDeleteNow(row)
-            await model.confirmPendingPurge()
+            await model.confirmPendingPurge(try #require(model.pendingConfirm))
             let stillOne: Int = try await editor.database.read { db in
                 try Int.fetchOne(
                     db,
@@ -154,7 +372,7 @@ struct TrashPurgeDoorsTests {
             let row = try #require(rows.first { $0.kind == .block && $0.id == blockID })
             let model = RecoveryViewModel(session: editor.session)
             model.requestDeleteNow(row)
-            await model.confirmPendingPurge()
+            await model.confirmPendingPurge(try #require(model.pendingConfirm))
             #expect(model.lastError == nil)
 
             let receipt = try #require(model.receipt)
@@ -234,7 +452,7 @@ struct TrashPurgeDoorsTests {
             #expect(message.contains("2 blocks"))
             #expect(message.contains("1 book"))
 
-            await model.confirmPendingPurge()
+            await model.confirmPendingPurge(try #require(model.pendingConfirm))
             #expect(model.lastError == nil)
             // LADDER B (B3), ANNOTATED PIN EDIT (the Delete Now test's
             // reason): this never-synced world purges immediately — one

@@ -304,8 +304,13 @@ final class RecoveryViewModel {
     /// leave every surface at once via the read-side fence), and the
     /// receipt says the NOW/janitor split honestly. The janitor rides the
     /// next sync round — the intent's own outbox row triggers one.
-    func confirmPendingPurge() async {
-        guard let confirm = pendingConfirm else { return }
+    ///
+    /// **The confirm is PASSED IN, never read back** (13l Act 2 — the rule
+    /// is written out at `View.purgeConfirmDialog`). The shipped version
+    /// opened `guard let confirm = pendingConfirm else { return }`, and the
+    /// dialog's own dismissal had already nilled it inside the same turn, so
+    /// this method returned without doing anything every single time.
+    func confirmPendingPurge(_ confirm: PurgeConfirm) async {
         pendingConfirm = nil
         lastError = nil
         receipt = nil
@@ -404,6 +409,60 @@ final class RecoveryViewModel {
 // face … will carry its own twin" — which is the six-brains drift class
 // stated as a plan. The phone's Trash face exists now, and there is ONE
 // mapping.
+
+/// **THE PURGE CONFIRM'S HOST — ONE PLACE, AND THE RULE LIVES WITH IT**
+/// (13l Act 2, ledger item 2 — her live report: *"clicking Delete Now in the
+/// Trash produced NO confirmation and NO effect"*).
+///
+/// **THE RULE, and it names the property that matters rather than a shape:**
+/// *a binding setter must never clear state that an action's continuation
+/// will read back.*
+///
+/// SwiftUI dismisses a confirmation dialog by writing `isPresented = false`
+/// **synchronously, inside the button's own click handling**, while an
+/// action's `Task { … }` cannot resume until that turn yields. The shipped
+/// host's setter called `cancelPendingPurge()` — nilling `pendingConfirm` —
+/// and `confirmPendingPurge()` opened by reading `pendingConfirm` back, so
+/// its `guard` always returned: **the dialog presented, she pressed Delete
+/// for Good, and nothing was purged — no intent, no receipt, the row still
+/// listed.** Both purge doors ride this one host, so true delete was
+/// unreachable from the UI entirely.
+///
+/// Two mechanism facts, MEASURED on macOS 26 in the test host rather than
+/// reasoned about (the pin below drives all of them):
+/// - The dialog **presents perfectly**, including from inside a `List` row,
+///   and including over a computed `Binding(get:set:)` — the title argument
+///   reads `pendingConfirm` during `body`, which registers the observation
+///   dependency. The long-recorded presentation hypothesis is dead.
+/// - A real click on the `_NSAlertPanel`'s button runs this closure and
+///   SwiftUI's write-back in ONE turn; the action's `Task` resumes after.
+///
+/// The fix is therefore not a different binding shape: **the act's value
+/// rides into the action closure** (`presenting:`) and
+/// `confirmPendingPurge(_:)` takes it as a parameter, so no read-back
+/// survives for any setter to beat. The phone's five hosts were corrected the
+/// same way at mobile round 2's batch 4.5b; this was the Mac's fifth.
+///
+/// It is a modifier rather than four lines inline so the rule has somewhere
+/// to be written down, and so the pin can drive the SHIPPING wiring (the
+/// surface builds its own `@State` model, which a test cannot reach).
+extension View {
+    func purgeConfirmDialog(_ model: RecoveryViewModel) -> some View {
+        confirmationDialog(
+            model.pendingConfirm?.message ?? "",
+            isPresented: Binding(
+                get: { model.pendingConfirm != nil },
+                set: { presented in if !presented { model.cancelPendingPurge() } }),
+            titleVisibility: .visible,
+            presenting: model.pendingConfirm
+        ) { confirm in
+            Button("Delete for Good", role: .destructive) {
+                Task { await model.confirmPendingPurge(confirm) }
+            }
+            Button("Cancel", role: .cancel) { model.cancelPendingPurge() }
+        }
+    }
+}
 
 struct RecoveryView: View {
     let session: AppSession
@@ -520,18 +579,7 @@ struct RecoveryView: View {
             }
         }
         .font(.caption)
-        .confirmationDialog(
-            model.pendingConfirm?.message ?? "",
-            isPresented: Binding(
-                get: { model.pendingConfirm != nil },
-                set: { presented in if !presented { model.cancelPendingPurge() } }),
-            titleVisibility: .visible
-        ) {
-            Button("Delete for Good", role: .destructive) {
-                Task { await model.confirmPendingPurge() }
-            }
-            Button("Cancel", role: .cancel) { model.cancelPendingPurge() }
-        }
+        .purgeConfirmDialog(model)
     }
 
     @ViewBuilder
