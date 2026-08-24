@@ -839,6 +839,27 @@ struct MobileQuickNoteTests {
         }
     }
 
+    /// **13l L-d — the box hands its coordinator back.** It took one per
+    /// CAPTURE and the session had no way to let go, so a day of jotting
+    /// left a coordinator per jot for `flushEveryOpenPost` to walk at every
+    /// filing and every background flush. RED ON THE PRE-L-d TREE: the count
+    /// climbs to three and stays there (there was no release path to call).
+    @Test func eachCaptureHandsItsCoordinatorBack() async throws {
+        try await withEditorWorld { session, db in
+            for i in 0..<3 {
+                let box = quietBox(session)
+                box.text = "jot \(i)"
+                await box.fileOnLeaving()
+                #expect(box.postID == nil)
+            }
+
+            let minted = try await livePosts(db)
+            #expect(minted.count == 3, "three real notes were minted")
+            #expect(session.openAutosaveCount == 0,
+                    "and the session is holding nothing for any of them")
+        }
+    }
+
     /// A leaving with an empty box costs nothing and mints nothing — the
     /// hook fires on every tab switch and every push, so it has to be free.
     @Test func leavingAnEmptyBoxMintsNothing() async throws {

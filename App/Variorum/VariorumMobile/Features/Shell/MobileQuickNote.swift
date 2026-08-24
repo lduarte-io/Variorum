@@ -930,6 +930,15 @@ final class MobileQuickNoteModel {
         restoreTask = nil
         if let settleToken { autosave?.stopObserving(settleToken) }
         settleToken = nil
+        // **13l L-d — hand the coordinator back.** The box took one per
+        // CAPTURE and the session had no way to let go, so a day of jotting
+        // left a coordinator per jot for `flushEveryOpenPost` to walk at
+        // every filing and every background flush. Releasing is safe here by
+        // construction and safe in the session by guard: this runs only on a
+        // completed hand-off or a withdrawal, both of which have just
+        // flushed, and `releaseAutosave` keeps any coordinator that still
+        // has something pending.
+        if let postID, autosave != nil { session?.releaseAutosave(forPost: postID) }
         autosave = nil
         variantID = nil
         postID = nil

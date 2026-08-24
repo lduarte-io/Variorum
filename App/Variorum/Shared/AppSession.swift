@@ -86,8 +86,12 @@ final class AppSession {
     /// never persisted. (On the Mac it wires to the Edit menu; the phone
     /// registers entries where its structural doors do — divide, merge,
     /// delete, the takes browser's archive/delete-variant, the chip's
-    /// diverge — with no undo UI yet: C2 ladder R1-4/R2-N1 corrected the
-    /// older "no structural ops on mobile" claim this line carried.)
+    /// diverge — and, since mobile round 2's M20, HAS a door of its own:
+    /// a receipt-based undo. **13l L-d corrects "with no undo UI yet",**
+    /// which this line still said after that shipped; what the phone has
+    /// no door for is REDO, and that is a mobile batch's, not a fact about
+    /// this stack. C2 ladder R1-4/R2-N1 had already corrected the older
+    /// "no structural ops on mobile" claim.)
     let undoStack: UndoStack
     let operations: Operations
     /// Serial off-main executor for every operations-layer write (P2), and
@@ -110,7 +114,35 @@ final class AppSession {
     /// MINTED — the cache means later callers share the first caller's
     /// clock, which is exactly what the test harness's deterministic
     /// sleep needs; production callers pass nothing.
-    private var postAutosaves: [String: AutosaveCoordinator] = [:]
+    ///
+    /// **13l L-d — the entries can now be RELEASED**, because one caller
+    /// grows this map without bound: the phone's home-screen quick note
+    /// takes a coordinator per CAPTURE, and every capture is a different
+    /// post, so a day of jotting left a coordinator per jot for
+    /// `flushEveryOpenPost` to walk at every filing and every background
+    /// flush. See `releaseAutosave(forPost:)`.
+    private var postAutosaves: [String: Hold] = [:]
+
+    /// One post's coordinator, with what it takes to let go of it.
+    private struct Hold {
+        let coordinator: AutosaveCoordinator
+        /// The Mac's ⌘Q registration, so releasing takes its registration
+        /// with it rather than leaving a closure for a post nothing holds
+        /// — and so a later re-mint of the SAME post registers once, not
+        /// twice (13l L-d: the traced trap, CLOSED rather than tolerated).
+        var quitToken: UUID?
+        /// How many callers have asked for this post's coordinator.
+        ///
+        /// **Over-counting is safe and under-counting is not**, which is
+        /// why this counts every call rather than trying to be clever.
+        /// Callers that take a coordinator transiently and never release
+        /// (`NoteDeletion`, `ShellActions` — they flush a post that may not
+        /// be open at all) simply keep the count above zero forever, which
+        /// is precisely the behaviour this map had before: the entry
+        /// stays. Only a caller that actually releases can bring it to
+        /// zero, and today there is exactly one.
+        var holders: Int
+    }
 
     func autosave(
         forPost postID: String,
@@ -118,10 +150,14 @@ final class AppSession {
         sleep: @escaping @Sendable (Duration) async throws -> Void =
             { try await Task.sleep(for: $0) }
     ) -> AutosaveCoordinator {
-        if let existing = postAutosaves[postID] { return existing }
+        if var existing = postAutosaves[postID] {
+            existing.holders += 1
+            postAutosaves[postID] = existing
+            return existing.coordinator
+        }
         let coordinator = AutosaveCoordinator(
             runner: runner, debounce: debounce, sleep: sleep)
-        postAutosaves[postID] = coordinator
+        postAutosaves[postID] = Hold(coordinator: coordinator, holders: 1)
         #if os(macOS)
         // The Mac-only riders: the quit door awaits every open post's
         // coordinator, and the W22 first-edit note is wired here because
@@ -138,7 +174,7 @@ final class AppSession {
         // "registered ONCE, covers every surface" property the flush half
         // has had since 13b 1a. `savepointOnLeaving` flushes first itself,
         // so the two halves are one call.
-        _ = quitFinalize.register { [weak self] in
+        postAutosaves[postID]?.quitToken = quitFinalize.register { [weak self] in
             await self?.savepointOnLeaving(postID)
         }
         coordinator.onFirstEdit = { [weak self] in
@@ -146,6 +182,51 @@ final class AppSession {
         }
         #endif
         return coordinator
+    }
+
+    /// **Let go of a post's coordinator** (13l L-d).
+    ///
+    /// The map is a cache with one guarantee — ONE coordinator per post, so
+    /// two surfaces editing one note can never run two debounced pipelines
+    /// and flush a stale buffer over a newer one (13b 1a's N3, and the S3
+    /// ladder's BLOCKER). Nothing ever let go of an entry, which was fine
+    /// while every entry was a note she had OPENED; the phone's quick note
+    /// broke that assumption by taking one per capture.
+    ///
+    /// Releasing is **deliberately conservative**: it drops the entry only
+    /// when the last holder lets go AND the coordinator has nothing
+    /// pending. A dirty coordinator keeps its place, because
+    /// `flushEveryOpenPost` and the ⌘Q registration must still be able to
+    /// reach unflushed text — dropping it is the one thing that could lose
+    /// bytes, so it is the one thing this refuses to do.
+    ///
+    /// **The traced trap is closed, not tolerated.** The Mac registers a
+    /// `quitFinalize` closure when a post's coordinator is minted, so
+    /// release-then-re-mint used to mean two registrations for one post
+    /// (harmless — `closeAutoCommit` dedupes — but noise nobody chose).
+    /// The token now rides in the entry and goes with it, so a re-mint
+    /// registers exactly once and a released post leaves no closure behind.
+    ///
+    /// Returns whether the entry was actually dropped.
+    /// How many posts this session is holding a coordinator for — the size
+    /// of the walk `flushEveryOpenPost` makes (13l L-d). The growth this
+    /// fix is about is a claim about a COUNT on BOTH platforms, and only
+    /// the Mac has a `quitFinalize` registry to read it from.
+    var openAutosaveCount: Int { postAutosaves.count }
+
+    @discardableResult
+    func releaseAutosave(forPost postID: String) -> Bool {
+        guard var hold = postAutosaves[postID] else { return false }
+        hold.holders -= 1
+        guard hold.holders <= 0, !hold.coordinator.isDirty else {
+            postAutosaves[postID] = hold
+            return false
+        }
+        #if os(macOS)
+        if let token = hold.quitToken { quitFinalize.unregister(token) }
+        #endif
+        postAutosaves[postID] = nil
+        return true
     }
 
     /// **THE SHARED DIVERGE ENTRY — every W23 door rides it** (13f cold
@@ -204,11 +285,18 @@ final class AppSession {
     /// being dragged lives in some pool the dropping editor cannot name.
     /// Flushing every open coordinator answers it without a lookup, and
     /// costs nothing when nothing is pending (`flushNow` returns
-    /// immediately on a clean coordinator). Open posts are a handful by
-    /// construction — this is not a corpus walk.
+    /// immediately on a clean coordinator).
+    ///
+    /// **What it actually walks** (13l L-d — the old line said "open posts
+    /// are a handful by construction", which stopped being true the moment
+    /// the phone's quick note began taking a coordinator per capture): every
+    /// post any surface has asked this session about and not released. That
+    /// is bounded by a session's activity, never by the corpus — and since
+    /// L-d the quick note lets its captures go, which was the one caller
+    /// that grew it without bound.
     func flushEveryOpenPost() async {
-        for coordinator in postAutosaves.values {
-            await coordinator.flushNow()
+        for hold in postAutosaves.values {
+            await hold.coordinator.flushNow()
         }
     }
 
@@ -240,10 +328,16 @@ final class AppSession {
         // The EXISTING coordinator, never a minted one: a post no surface
         // opened has nothing pending by construction, and minting here would
         // cache a coordinator — and, on the Mac, a quit registration — for a
-        // note that was never open. The quick note's filing is exactly that
-        // case: it mints its note through the operations layer, so there is
-        // no buffer to flush and no reason to grow one.
-        await postAutosaves[postID]?.flushNow()
+        // note that was never open.
+        //
+        // (13l L-d — the line that used to follow claimed the quick note was
+        // "exactly that case: it mints its note through the operations layer,
+        // so there is no buffer to flush". That is INVERTED. The phone's box
+        // takes a real coordinator at `adopt` and autosaves the tail it owns
+        // through it, which is why its filing flushes before it savepoints
+        // and why it now RELEASES the entry afterwards. The reasoning above
+        // stands on its own; the example was simply wrong.)
+        await postAutosaves[postID]?.coordinator.flushNow()
         _ = try? await runner.run { ops in
             try ops.closeAutoCommit(postID)
         }
@@ -398,6 +492,10 @@ final class QuitFinalizeRegistry {
     private var entries: [UUID: @MainActor () async -> Void] = [:]
 
     var isEmpty: Bool { entries.isEmpty }
+    /// How many closures are registered (13l L-d): the double-registration
+    /// trap is a claim about a COUNT, and a pin should be able to read it
+    /// rather than infer it from a side effect.
+    var count: Int { entries.count }
 
     func register(_ flush: @escaping @MainActor () async -> Void) -> UUID {
         let token = UUID()
