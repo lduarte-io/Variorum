@@ -539,6 +539,16 @@ multiple items and deleting all of them." Build, opening the phase
   the A1 pins-over-dead-wiring class ON the surface the
   screenshot drive couldn't capture.
 
+  > *(STATUS NOTE, 2026-08-23 kickoff — read this block as HISTORY: the
+  > re-derivation it demands HAPPENED. The settled mechanism is the
+  > "🔴 YOUR FIRST ACT'S DIAGNOSIS IS SETTLED" section further down —
+  > the confirm→act edge, §56's derivation — and the kickoff message
+  > says not to start from the presentation hypothesis below. This
+  > block survives as the record of why that hypothesis fell, and its
+  > discipline still binds: the fixer builds the red-on-old pin
+  > DRIVING THE REAL BUTTON first, because the settled derivation was
+  > also produced by reading, not by execution on macOS.)*
+  >
   > ### ⛔️ DO NOT START FROM THE MECHANISM BELOW — RE-DERIVE IT ON macOS
   >
   > **The traced mechanism is probably WRONG** (Mobile Round 2, §46,
@@ -1370,6 +1380,22 @@ queue (item B) is already discharged — the walk ran all nine rows
    cross-model review flow governs disputes; anything firming toward
    `Sources/VariorumCore/Sync/` STOPS per the binding constraints
    regardless of cast.
+
+### Post-sitting confirmations (her next message, same sitting)
+
+- **The housekeeping fixes are blessed** (*"yeah, you can go ahead and
+  fix the things that seem off"*) — the 13u counts were already fixed;
+  this message adds the status note on the old dead-door hypothesis
+  block (marked HISTORY, the settled derivation pointed at).
+- **The M4 rehearsal-road pick is CONFIRMED hers** (*"it's fine to
+  change m4"*) — the deletion-aware matrix's synced-restore scenario
+  rehearses on the fake-server road, not a scratch Supabase account.
+- **M5 explained at her ask** (*"what's the deal with m5? I don't know
+  what that is exactly"*) — the plain-language explanation given in
+  the same reply; her accept-and-say-it ruling STANDS unless she
+  revises on the explanation (the ruling was made through the
+  question tool's short description, so the door was left open
+  explicitly).
 
 ### THE LEDGER (every row owned; statuses updated as they move)
 
