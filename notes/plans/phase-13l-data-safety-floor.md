@@ -22,27 +22,109 @@ level i've still been a little afraid to fully trust in the app /
 sync / start REALLY using it and feeling secure that my data isn't
 being lost."*
 
-## Kickoff message (paste-ready for the orchestrator she invokes)
+## Kickoff message (paste-ready — REWRITTEN 2026-08-23)
 
-> You are running Variorum Phase 13l under the shape the author
-> picks at kickoff (confirm the cast, never assume; the brief notes
-> this phase is largely autonomous by nature — a low-attention
-> window fits it). Read IN FULL first: `CLAUDE.md` + the canon it
-> loads (AppSpec §14's 13j delta is the latest state), this plan
-> TOP TO BOTTOM, `notes/plans/phase-13l-data-safety-brief.md` (the
-> scope's origin — items 1–6, the kickoff decisions, the recorded
-> leans), `notes/plans/phase-13j-purge-memo.md` + its addenda (the
-> purge design this phase's drill must prove out), and the 13j
-> plan's Environment traps section (binding, as every phase — the
-> A1 rail, kills-by-PID-only, the real-store container path). Copy
-> the P-1…P-9 constitution into this file verbatim if running
-> under `/architect-phase`. Verify the baselines with your own
-> runs (13j finals: core **1350/141** · Mac **1546/269 FULLY
-> GREEN** · spine **63/8** · mobile **314/60**; mirror at lockstep
-> marker **7**). **OPEN WITH THE KICKOFF SITTING** (short — the
-> decisions below); nothing destructive-adjacent runs before the
-> A1 rail, and every restore-drill act happens in SCRATCH
-> locations, never against her real store.
+*The original kickoff was written at the 13j closeout, before this
+phase acquired three further strands and before its baselines moved.
+This replaces it.*
+
+> You are running **Variorum Phase 13l — the data-safety floor.** Confirm
+> the cast at kickoff (never assume); **the Fable cold review below is
+> HER ruling and is not a cast question.** The phase is largely
+> autonomous by nature — a low-attention window fits it.
+>
+> **READ IN FULL FIRST:** `CLAUDE.md` and the canon it loads (AppSpec
+> §14's 13j delta is the latest state) · **this plan, TOP TO BOTTOM** ·
+> `notes/plans/phase-13l-data-safety-brief.md` (the scope's origin —
+> items 1–6, the kickoff decisions, the recorded leans) ·
+> `notes/plans/phase-13j-purge-memo.md` + its addenda (the purge design
+> this phase's drill must PROVE) · the 13j plan's Environment-traps
+> section (binding — the A1 rail, kills-by-PID-only, the real-store
+> container path). Copy the P-1…P-9 constitution into this file verbatim
+> if running under `/architect-phase`.
+>
+> ### THIS PHASE HAS FOUR STRANDS. THREE OF THEM ARRIVED AFTER IT WAS PLANNED.
+>
+> **1 · ITS OWN WORK — the data-safety floor, as planned.** The brief's
+> six items (automated scheduled backups, second-destination-first per
+> the recorded lean · the rehearsed restore drill + runbook · the
+> bulk-`.md` plaintext insurance candidate · the sync-status face
+> candidate · the passphrase/recovery-phrase sanity check · the ruled-in
+> app-level lock with honest wording) **plus the 13j-born seventh, the
+> DELETION-AWARE RESTORE MATRIX** (M1–M7 in Scope below — her round-13
+> requirement: what a restore does to deleted things must be defined,
+> ruled where taste-shaped, tested headless, and rehearsed live).
+> **Her founding why, verbatim:** *"i feel like on some level i've still
+> been a little afraid to fully trust in the app / sync / start REALLY
+> using it and feeling secure that my data isn't being lost."*
+>
+> **2 · WORK THE DELETION PHASE SHOULD HAVE DELIVERED WORKING.**
+> **13j built true delete and its doors do not work.** `Delete Now` and
+> `Empty Trash` on the Mac are **UI-unreachable** — she pressed Delete
+> Now and nothing happened, and that is a live report, not a theory. The
+> clock and the janitor still purge, so no data is at risk, but **true
+> delete cannot be reached from the Mac's interface at all.**
+> **The mechanism is now DERIVED and waiting for you** (§ below, and
+> mobile round 2 §56): the dialog presents fine — it dies at the
+> confirm→act edge, because the `isPresented` setter nils the payload
+> synchronously inside tap handling while the action only *enqueues* the
+> work. **The fix is one line per site.** *This project recorded a
+> different cause for weeks and it was wrong; do not start from the old
+> one.* **And the mobile round fixed the same defect at four phone doors
+> — read what it did before you write yours.**
+>
+> **3 · COLD REVIEWS SHE ASSIGNED TO THIS PHASE.** Her R20 ruling: **a
+> FABLE cold reviewer over every Mac-side change Mobile Round 2 made**,
+> running `notes/REVIEW_PROMPT.md` verbatim, cold, no framing. Her
+> reason: those hoists were each proved by the Mac suite riding
+> unmodified, **but no cold reviewer has ever read the Mac side of that
+> work with Mac eyes.** The manifest is in this plan and is complete
+> through the round's batch 4.5. **Folded in at her later instruction
+> (2026-08-23): batch 4.5b (commit `7fd2cd0`) — the ONE piece of that
+> work that reached `Shared/` and the Mac and was never reviewed at all,
+> because its reviewer died on an API limit.** *"so it won't stay
+> unreviewed."* **Four Mac-visible defects are already recorded, owned by
+> 13u, and listed for you** — so your reviewer spends its budget on what
+> nobody has looked at rather than re-deriving what is written down.
+>
+> **4 · MOBILE'S MAC AND `Shared/` BACKLOG — moved here 2026-08-23 by her
+> ruling** (*"the mobile session shouldn't have mac / shared work to do
+> when I return to it"*, under *"do the mac phases in order so that the
+> shared brain is 100% solid and stable"*). **Four items, L-a…L-d**, all
+> data-safety-shaped, which is why they came HERE rather than to 13u:
+> **L-a** the Mac has no identity-projection audit (the oracle for
+> *the totals agree while the content is wrong* — a corruption the mobile
+> round REPRODUCED Mac-side) · **L-b** the Mac's `QuickEntryBar`
+> **destroys her text on a refusal** · **L-c** `AppBootstrap` runs
+> migrations on the main thread before first paint (P2, both platforms) ·
+> **L-d** `AppSession`'s autosave map has no removal path. **13u takes
+> the editor-seam five (its item 8).** **DEFER OUT LOUD, NEVER SILENTLY:**
+> the mobile handoff carries a HANDBACK CHECKLIST with a yes/no command
+> per item, so anything skipped lands back on the phone session that was
+> told it would not have to do it.
+>
+> ### BASELINES — CURRENT, and the 13j figures are NOT
+>
+> core **1350/141** · Mac **1569/272** · Mac spine **63/8** · mobile
+> **475/77** · mobile spine **33/7** · mirror at lockstep marker **7**.
+> **Verify with your own runs.** *(The 13j closeout's figures — Mac
+> 1546/269, mobile 314/60 — are two rounds stale. The Mac +1 is mobile
+> batch 4.5b's single pin; do not read it as drift.)* **AND the Mac suite
+> is INTERMITTENTLY RED** at one latency pin, pre-existing and measured
+> on both trees, with a KnownIssues row owned by Phase 12 — **re-run it
+> isolated before concluding anything.**
+>
+> ### TWO THINGS THIS PHASE OWES AT ITS CLOSE
+>
+> - **AUTHOR 13u's EXECUTION PLAN** — she runs it immediately after this
+>   one, and it is a **cross-platform phase** (see the closeout section).
+> - **REFRESH `/Applications/Variorum.app`** — hers, explicitly; the
+>   installed build predates the whole mobile round's Mac work.
+>
+> **OPEN WITH THE KICKOFF SITTING** (short — the decisions in Scope).
+> **Nothing destructive-adjacent runs before the A1 rail**, and every
+> restore-drill act happens in SCRATCH locations, never against her real
+> store.
 
 ## Scope
 
@@ -999,7 +1081,45 @@ deletion matrix's expectations holding scenario by scenario; the
 runbook exists where she can find it under stress; freshness
 evidence is visible without her asking; and the matrix's two
 honesty sentences (M3, M6) exist in the product/runbook verbatim.**
-Review shape: the author sets it at kickoff. The closeout authors
-the next phase's plan at her pick, writes the MobileSoul parity
-line (the lock's Face ID twin + any status-face twin are the
-obvious candidates), and runs the full closeout ritual.
+Review shape: the author sets it at kickoff. The closeout writes the
+MobileSoul parity line (the lock's Face ID twin + any status-face twin
+are the obvious candidates) and runs the full closeout ritual.
+
+### 🔴 AND THIS CLOSEOUT AUTHORS **13u**'s EXECUTION PLAN — her pick is already made
+
+Her 2026-08-23 ruling: **`13l → 13u → mobile catch-up → 13p`**, and
+*"my highest priority should be 13l -> 13u"* — **she runs them back to
+back**, so this closeout authors 13u's plan and its kickoff message per
+the standing ritual. **13u is not an ordinary 13 row and the plan must
+say so:**
+
+- **IT IS A CROSS-PLATFORM PHASE — MobileSoul §6's "design together"
+  class, and its ledger row PL-12 is ALREADY WRITTEN** (at design time,
+  as §6 requires). **Four of its eight items are inherently
+  both-platform:** the eager space-eater (**she reported it on BOTH
+  apps**) · the derived display-name snippet (*"ONE brain… serving the
+  Mac library, MOBILE'S LISTS, and capture alike"*) · cross-block edits
+  (*"the semantics are ruled HERE, once, for BOTH platforms"*) · dark
+  mode (**the PHONE's shipped dark mode is her named look reference** —
+  a Mac face catching up to a mobile one). **So mobile is IN its design
+  sitting, and the phase names mobile's deliverable INSIDE itself
+  rather than leaving parity rows behind.**
+- **IT INHERITS MOBILE'S EDITOR-SEAM BACKLOG as its item 8** — the
+  frozen-projection fan fence · **the surviving O(N²) violation in
+  `planVisibleTakeEdit`** (a live P1 breach on a keystroke road, whose
+  sibling measured 23.8 s → 0.003 s) · the gap fence's missing Mac face
+  · the empty-block dead plan · `CrossBlockRefusal`'s hoist. **Plus item
+  7**, the Mac's `MarkdownActs` arming residual — **the MAC half of
+  mobile's M1 root question** (the iOS half is E1 and needs her device).
+  **Two of these have KnownIssues rows pointing at 13u**, so if 13u
+  closes without them those rows are orphaned.
+- **ITS ITEM 5 SETTLES SEMANTICS MOBILE IS WAITING ON** — her
+  cross-block ruling (edits stop refusing; the edge-join merges
+  mid-paragraph and not at a paragraph break; **the fanned case is
+  OPEN**), and her own coordination flag says *the mobile session should
+  know the direction before hardening any refusal.*
+- **DARK MODE MOVED HERE FROM 13s** at her word, and its acceptance
+  clause moved with it.
+- **After 13u, mobile must have NO known Mac or `Shared/` work left** —
+  that is the stated point of the two-phase order, and the mobile
+  handoff's §2b will check it item by item.
