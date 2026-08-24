@@ -74,6 +74,25 @@ THAT SECTION WINS (it is canon; this is choreography).
   own batch row. **The 13l Act-3 finding binds here:** macOS 26
   attribute fixing WIDENS the post-fixing report (TEXTKIT2 §3) — any
   new stamping in this seam clamps to the verdict's range.
+  **HER LEGIBILITY MANDATE (2026-08-24, the post-13l design sittings
+  — binding on this item's sitting AND build):** the destination map
+  — middles → Trash always; edges → lineage when merged, in-place
+  when not — must be LEGIBLE: (1) every cross-block gesture's
+  RECEIPT names where each block went ("2 blocks to the Trash; A and
+  C merged — originals in the new block's History"); (2) the
+  sitting weighs the destination map's TEACHABILITY as a first-class
+  design constraint (her words: "at some point, the issue just is
+  complex, but the tutorial needs to handle it well… i want to make
+  sure someone owns it" — THIS ITEM owns it); (3) the tutorial's
+  TWO-EXITS lesson (built by the post-13l polish round, its row 27:
+  "deletion goes to the Trash; transformation goes to lineage")
+  gets UPDATED by this phase to cover the fanned matrix it builds —
+  her A/B/C×4-takes scenario is the sitting's worked example,
+  recorded in the polish round's eleventh-sitting record. The
+  recovery surfaces this leans on (the Trash, Block History's
+  came-from with one-button restore) exist by then — the polish
+  round builds them, which is what makes the liberalization honest
+  (her 8d reasoning, completed).
 - **Item 9 — the quick-capture ownership model, BOTH platforms**: does
   a capture surface own ONE block or MANY; what ⏎ / shift-⏎ do; what
   the hand-off carries. The phone's lost-prose evidence (A5-2
