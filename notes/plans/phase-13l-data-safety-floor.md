@@ -2196,13 +2196,278 @@ plan. Overnight discipline: PROVISIONAL-and-continue; author-only
 hard stops pause their single item and report; everything else
 proceeds.
 
+### ACT 2 — RECORD (seat 2 + batch close) — Opus implementer, 2026-08-24
+
+**Scope taken, and it is exactly the two items dispatched:** ledger **item
+3** (the note-deletion door set) and ledger **row 26** (seat 1's residual —
+the scrap put-back receipt naming the wrong kind, taken in-phase at the
+architect's word). Two commits, both staged by explicit path, nothing
+pushed: **`8017956`** (row 26) · **`39df794`** (item 3). The working tree is
+CLEAN — the two behavioural-revert scratch copies were made in the scratchpad
+and deleted.
+
+**Seat 1's recon was VERIFIED against the tree before it was used**, not
+taken from the record: the three note-row renderers do share
+`SidebarView.contextMenuCapabilities`; `listBody` really is
+`List(selection: $selectedPosts)` with the note rows `.tag(hit.id)` and the
+bulk tag menu already reading it; the Library's door really was
+`postRowMenu`'s bare `Button("Delete", role: .destructive)` and the Pool's
+its byte-twin; and the phone really did own the three delete-note words. One
+of its proposals was NOT adopted, with a reason — below.
+
+---
+
+#### Row 26 — the scrap put-back receipt names the wrong kind · **DONE** (`8017956`)
+
+**The mechanism, and why the face could not reach it.** `RecoveryCopy`'s two
+landing-shaped receipts — `putBackAtEnd` (*"Put back at the end of this
+note."*) and `putBackUnplaced` (*"…its note is gone…"*) — are chosen AFTER
+the write, from `Operations.BlockRestoreLanding`, which said only *where* a
+block landed and never *what it landed in*. Seat 1 corrected the Trash row's
+home NAME on the face by reading live pools there; no amount of that reaches
+a sentence the op's own answer selects.
+
+**The change (`Sources/VariorumCore`, Operations only — zero schema, zero
+`Sync/`):** `BlockRestoreLanding`'s three cases carry the home container's
+`ContainerKind`, read inside the restore's own transaction from the row it
+already fetches to decide the landing at all. `home` is optional on
+`.unplaced` alone, and only there because that case genuinely covers a block
+remembering no container; a container that has since DIED still answers what
+kind it was. `unarchiveBlock` takes the same change — it shares the type
+deliberately (*"so the two Put backs in one tray cannot describe their
+landings differently"*), and a scrap can be archived exactly as a note's
+block can.
+
+**One consolidation rode with it, and it was load-bearing rather than
+tidiness:** `TrayPanel`'s two doors each switched over the landing
+themselves. Left alone, the kind would have had to be honoured in three
+places; they call `RecoveryCopy.landingReceipt` now, which the Trash surface
+already did.
+
+**Files:** `Operations+Placement.swift` · `Operations+BlockArchive.swift` ·
+`Shared/RecoveryCopy.swift` · `Shared/RecoveryActs.swift`
+(`PreservedOriginPutBack` reads its home's kind in the read it already runs)
+· `Features/Tray/TrayPanel.swift`.
+
+**Pins:** core **`RecoveryOpsTests.restoreBlockNamesTheScrapsAreaItCameOutOf`**
+(all three roads in a pool: exact-row, fresh-at-end after a merge release,
+and unplaced under a dead scraps container) · Mac
+**`TrashPoolHonestyTests.aScrapsPutBackReceiptNamesTheScrapsAndNeverTheNote`**,
+which drives the REAL `RecoveryViewModel.putBack` rather than the copy
+function, *because the defect was that the surface could not know*.
+
+**RED ON OLD — behavioural revert** (the landing reporting `.post`
+regardless, which is precisely what the old enum could express): the core pin
+failed three ways, and the Mac pin read back the shipped sentence for a
+scrap, verbatim — *"Put back at the end of this note."* Both restored and
+re-run green.
+
+**Four pin edits, each STRENGTHENING what it asserts:** the three core
+landing comparisons and `NoteTrayTests`' receipt now name the home kind as
+well as the landing. Two mobile pins took the signature change
+(`putBackUnplaced` became a function); the mobile COUNT is unmoved.
+
+---
+
+#### Item 3 — the note-deletion door set · **DONE** (`39df794`)
+
+**Her three clauses, and the fourth thing none of them named.**
+
+1. **"Delete Note…" in the note ▾ menu WITH confirmation.** In BOTH bottom
+   bars, beside the tray item (R118: Takes is not behind Write; R6-2: one
+   `note ▾` grammar). Ordinary move-to-Trash ONLY — the round-3 rider holds,
+   and `noPurgeDoorLeaksIntoTheNoteDeletionDoorSet` pins it across both bars
+   and both row lists.
+2. **The Library door gains the SAME confirmation.** One wording, ONE host
+   (`View.deleteNoteConfirmDialog`), four renderers — the two bars, the
+   Library's rows (List row AND Notes card, which share `postRowMenu`) and
+   the Pool's rows, which render the same declaration and therefore owe the
+   same question in the same words.
+3. **⌘-click multi-select + delete-all.** On the selection the Library
+   already had. ONE confirm naming the count, ONE receipt. The pick goes in
+   the LIST's order, not the `Set`'s — a set has no order, and a surface that
+   names her notes in hash order tells a different story each time.
+4. **THE NAVIGATE-AWAY, which nothing in the app did at all.** No surface
+   reacted to a note being deleted: a pane kept its detail mounted over the
+   tombstone, a second window did too, and the Open strip kept a row ⌘⇧n
+   would re-open. The act now announces what it took; **every full window**
+   acts on it for its own panes (deliberately NOT `claimBroadcast()` — that
+   is right for a navigation and wrong for a fact), and a **note-only window**
+   showing one of them CLOSES, because a window whose whole content is that
+   note has nowhere else to go. Panes land in the **Library** — the note is in
+   the Trash and the Library holds the Trash's door; walking history back
+   would be prettier and is a trap, since back from one deleted note is
+   frequently the other one in the same gesture.
+
+**New file `Features/Library/NoteDeletion.swift`:** `NoteDeleteConfirm` (the
+value the dialog PRESENTS — item 2's rule, obeyed), `NoteDeletion.run/fire`
+(flush → delete → announce → receipt), `.variorumNotesDeleted`, and the one
+confirm host.
+
+**FLUSH FIRST**, and it is not tidiness: `deleteContainer` cascades to the
+note's blocks and their takes, so keystrokes inside the autosave debounce
+would be tombstoned with the row they never reached — Put back would return
+the note *without the sentence she typed last*.
+
+**`LibraryViewModel.delete(postID:)` FORWARDS here** rather than surviving
+beside it. It was the one road from a face to a container tombstone and did
+nothing but write one; left alone it would have been a second road with no
+flush and no signal, and the next door would have found it. The confirm stays
+at the FACE — a question asked of a person does not belong in a view model.
+The tutorial spine calls this method as *"the library row's own door"*, so
+the spine now exercises the real road; it rode unmodified.
+
+**NO UNDO ENTRY, and it is 13j's ruling rather than a gap** — pinned as such
+(`deletingNotesRegistersNothingOnTheStructuralStack`). `deleteContainer` has
+never registered one; the Trash is the recovery door for a note, and whether
+it should be undoable at all is the AUTHOR's product call (the standing
+KnownIssues row from mobile round 2 says so in those words). So the
+multi-delete deliberately does **not** reach for `UndoStack.withCompound` the
+way 13e's multi-BLOCK delete does: a compound over legs that register nothing
+collects nothing, and building the entry that would make it collect something
+is inventing the ruling.
+
+**The confirmation-consistency principle is WRITTEN DOWN at the registry's
+deletion acts** (§8's last bullet), as a `MARK:`-ed doc block a future door
+inherits: notes confirm (container-scale, deliberate) · blocks and takes do
+NOT (in-flow; J9 exists to unfriction exactly that) · Delete Now and Empty
+Trash always do (the only unrecoverable acts in the app). The line it draws is
+stated so it cannot be misread as squeamishness: **recoverability × scale, not
+destructiveness** — everything named there is destructive.
+
+**THE COPY HOIST (MobileSoul §3).** `deleteNoteTitle` /
+`deleteNoteConfirmTitle` / `deleteNoteConfirmDetail` moved from
+`MobileEditorViewModel` into `Shared/RecoveryCopy.swift`, whose own comment
+had already recorded that they were *"born shared because the phone built the
+doors first and the Mac's 13l work will want the same words"* — and the Mac
+cannot import a `VariorumMobile` file, so that sentence had exactly two
+endings. The phone's statics forward; **no mobile test file was touched for
+item 3 and the mobile count is unmoved** (the zero-test-edit parity proof).
+New plural copy beside them: `deleteNotesConfirmTitle/Detail`,
+`movedToTrashReceipt(notes:)`, `notesAlreadyGone`.
+
+**Registry (P-1):** `.deleteNote` (scope `.post`, doors
+`[.bottomBar, .contextMenu]`, `takesAccess: .native`, availability
+`noteScoped`, **no chord** — the obvious candidate ⌘⌫ is one finger-slip from
+⌫ and her ruling named menus) and `.deleteSelectedNotes` (scope `.app`, door
+`[.surface]`, `always`). Declared in `CommitBar` + `TakesBottomBar`
+(bottomBar), `SidebarView.contextMenuCapabilities` (the note-row grammar) and
+`LibraryCatalogView.surfaceCapabilities`. **The walk needed no new line** —
+its unions already name every one of those renderers — and passed unchanged
+(23/23).
+
+> **ONE DEVIATION FROM SEAT 1's RECON, stated with its reason.** Its note
+> said `.deleteSelectedNotes` *"needs a new `CapabilityContext` field (a
+> `selectedNoteCount`) AND a matching sampled context in
+> `CapabilityRegistryTests`, or `noActIsUnavailableInEveryContext` cannot see
+> it act."* **Not adopted.** The `.deleteNow`/`.emptyTrash` precedent is
+> exact: a `.surface` act on a LIST surface, app scope, `availability:
+> { _ in .act }`, whose per-row/per-gesture condition is the SURFACE's. And
+> the field would have been wrong on the merits, not merely unnecessary: the
+> selection is `LibraryCatalogView`'s own `@State`, so pushing it into the
+> app-scope `CommandRouter` breaks the moment a second window opens a second
+> Library — the exact per-window fault 13f batch 5b spent a batch fixing. The
+> walk sees it act with no new context.
+>
+> **ONE DOOR DELIBERATELY NOT BUILT, recorded rather than silent:** the
+> sidebar's **Open strip** renders the same note-row declaration and does NOT
+> get the delete item. Its own copy promises *"Close this row — the note
+> itself is untouched"*, and putting a tombstoning act one row above "Close"
+> is the confusion that sentence exists to prevent. Her ruling named the note
+> menu and the library door; a third door is hers to ask for.
+
+**Pins — new file `VariorumTests/NoteDeletionDoorsTests.swift`, 18 in 4
+suites:**
+- `NoteDeletionDeclarationTests` (5): the door's declaration + all four
+  renderers · the bulk twin's shape · **no purge door leaks into a note
+  context** · the confirmation-consistency principle as an assertion · the
+  shared words, singular and plural.
+- `NoteDeletionActTests` (6): the receipt names the Trash AND the clock ·
+  **the dirty buffer lands before the tombstone** · an already-gone note is
+  skipped not fatal · **no structural-undo entry** · the bulk receipt names
+  the count · a SEALED note still deletes (AppSpec §9's letter, pinned because
+  a future guard would look like tidiness and be a product change).
+- `NoteDeletionNavigateAwayTests` (4): every pane leaves and the strip
+  forgets · a multi-delete empties BOTH panes · a window showing none of them
+  is inert · the act announces what it deleted.
+- `NoteDeleteConfirmEdgeTests` (3, `.serialized`): **the REAL alert's REAL
+  button**, through the SHIPPING modifier inside a `List` row — seat 1's
+  standard, for its reason (a pin over the act alone would have stayed green
+  over exactly the dead confirm→act edge item 2 found one file away). Delete
+  reaches the act · Cancel writes nothing · the bulk ask carries every id in
+  ONE press.
+
+**RED ON OLD — two behavioural reverts, both bug-class halves:**
+- *the flush* — remove the `flushNow` loop from `NoteDeletion.run`:
+  `aDirtyBufferLandsBeforeTheTombstoneSoPutBackReturnsIt` fails (the restored
+  text is the pre-typing one). This IS the shipped Library door's behaviour.
+- *the navigate-away* — make `WorkspaceModel.notesDeleted` a no-op:
+  `everyPaneShowingADeletedNoteLeavesAndTheStripForgetsIt` fails 3 ways
+  (`selections[.primary] → .post("doomed")`, the strip still `["doomed",
+  "survivor"]`) and `aMultiDeleteEmptiesBothPanesRatherThanWalkingBackIntoATombstone`
+  fails 3 more. This is the pre-13l state exactly.
+
+The DOOR-EXISTS half is red on old **by construction** — `.deleteNote` had no
+id, so those pins would not compile on the pre-13l tree. Said plainly rather
+than dressed as a revert.
+
+---
+
+#### THE FULL GATES (all four, seat 2's own runs)
+
+| suite | result |
+|---|---|
+| core (`swift test`) | **1351 tests / 141 suites — PASSED** (49.6 s) |
+| Mac full | **1598 tests / 279 suites — PASSED** (231 s), zero reds |
+| Mac spine (the 8 `TutorialWalkTests` types, by name) | **63 / 8 — PASSED** (28 s) |
+| mobile full (iPhone 16e) | **485 / 78 — PASSED** (93 s), the 2 recorded `withKnownIssue`s only |
+
+**RECONCILIATION, and it corrects seat 1's projection by 2.** Seat 1 expected
+Mac **1581/275** before item 3. Suites land exactly: 279 − my 4 new suites =
+**275** ✔. Tests do not: 1598 − my **19** (1 for row 26 + 18 for item 3, both
+counted from their own isolated runs) = **1579**, not 1581. The two are seat
+1's margin work, whose own record says *"three E7 pins removed, one added, and
+two more edited in place"* — that arithmetic is **−2**, and the same sentence
+calls it *"net-neutral in count"*. The −2 reading is the one the counts
+support, and the suite count matching exactly is what makes the arithmetic
+trustworthy rather than a guess. **No test went missing.**
+
+**KNOWN FLAKES: neither reddened.** The Phase-12 latency pin
+(`EditorWindowSmokeTests/rewriteStrategyLatencies`) and
+`CanvasDragTrackingTests` both ran INSIDE the full Mac suite above and both
+passed — the run reported zero issues of any kind. So
+`CanvasDragTrackingTests`' recorded disposition stands unchanged: still ONE
+red, still plan-record-only, and a second red anywhere in this phase still
+earns it the `KnownIssues` row (owner 12).
+
+**Fences held:** zero schema · zero `Sources/VariorumCore/Sync/` lines ·
+13u's editor seam untouched (no `planVisibleTakeEdit`, no cross-block refusal
+wording, no gap-fence face) · no shelf-book multi-select (her word) · nothing
+pushed · every commit staged by explicit path · no Release build, no
+`/Applications` refresh, no custom configuration, and no Variorum instance was
+running at any point (`pgrep` checked at the start and before the full run).
+
+**`Sources/` WAS touched — deliberately and only for row 26**, which the
+architect authorized explicitly for this seat. It is Operations-only, additive
+to one enum, and the reason it could not be done on the face is stated above.
+
+**Deliberately NOT done, said out loud:**
+- **The Open strip's delete door** — see the boxed note above. A decision, not
+  an oversight.
+- **`MobileEditorViewModel.deleteNoteRefusal`**, the fourth private refusal
+  table seat 1 named. Still not forwarded to `DeletionRefusal.words`. It is a
+  MOBILE file and item 3's Mac work never needed to open it; seat 1's
+  "deferred out loud" stands, and it remains a two-line forward for whichever
+  session is legitimately in that file.
+- **Shelf-book multi-select** — the brief's explicit exclusion, at her word.
+
 ### THE LEDGER (every row owned; statuses updated as they move)
 
 | # | item | strand | status |
 |---|---|---|---|
 | 1 | The first-act Fable cold review (mobile round's Mac diff + 4.5b) | 3 | **review returned (1 MAJOR · 2 MINOR · 2 NIT + clean bill); FIX ROUND LANDED 2026-08-23 — A1-MAJOR-1 fixed with red-on-old pins on BOTH platforms, A1-MINOR-1's two Mac coverage pins in (record above); all four gates green; the other three findings sit in item 4; **ROUND 2 CLEAN — LADDER CLOSED** (zero findings; full Mac suite independently confirmed 1572/272). Orchestrator verification of the dead session's claims: commit `64ffd1a` exists, six files exactly (zero `Sources/`), all four claimed pin names present in the tree. **The one-off `CanvasDragTrackingTests` first-run red — architect's disposition: plan-record only, NO KnownIssues row yet** (isolated 2/2 green + full re-run fully green, diff cannot reach canvas; the gesture-timing flake family). **If it reds again anywhere in this phase it earns the row** (owner 12, beside the latency-pin calibration) — recorded so the next red is a promotion, not a re-derivation** |
 | 2 | The dead Delete Now / Empty Trash doors (pin-first at the real surface) | 2 | **DONE (Act 2 seat 1, `b527b72`)** — the confirm→act edge fixed with `presenting:`; the diagnosis re-derived RUNNING (the presentation hypothesis is dead — it presents fine, incl. inside a `List`); `TrashConfirmEdgeTests` presses the REAL `_NSAlertPanel` button with **no simulated step**; red-on-old verified twice by behavioural revert, the second time against the final pin |
-| 3 | The note-deletion door set: Delete Note… (note ▾, confirm) · Library door confirm · ⌘-click multi-select + delete-all | 1 (§8) | **NOT STARTED — zero edits** (Act 2 seat 1 stopped at the cast correction). Its reconnaissance IS recorded in the partial record above: the three renderers share ONE declaration (`SidebarView.contextMenuCapabilities`), ⌘-click multi-select ALREADY EXISTS (`List(selection:)` — the bulk tag menu uses it), the phone owns the wording and it needs hoisting into `Shared/RecoveryCopy.swift`, and `.deleteSelectedNotes` needs a new `CapabilityContext` field + a sampled context or the walk cannot see it act |
+| 3 | The note-deletion door set: Delete Note… (note ▾, confirm) · Library door confirm · ⌘-click multi-select + delete-all | 1 (§8) | **DONE (Act 2 seat 2, `39df794`)** — all three clauses plus the fourth thing none of them named: **nothing in the app reacted to a note being deleted**, so a pane kept its detail mounted over the tombstone, a second window did too, and the Open strip kept a row ⌘⇧n would re-open. New `Features/Library/NoteDeletion.swift` (flush → delete → announce → receipt, ONE confirm host on `presenting:`); `.deleteNote` + `.deleteSelectedNotes` declared and rendered by all four renderers with the walk needing no new line; `LibraryViewModel.delete` FORWARDS so no second road survives; the confirmation-consistency principle written at the registry's deletion acts; the three delete-note words HOISTED to `Shared/RecoveryCopy.swift` with the phone forwarding (mobile count unmoved). **NO undo entry — 13j's doctrine, pinned as a ruling.** 18 pins in 4 suites, the confirm pressing the REAL alert's REAL button; red-on-old by revert on both bug-class halves (the flush; the navigate-away). Seat 1's `CapabilityContext`-field proposal NOT adopted, with the reason recorded (the `.deleteNow` precedent, and a per-window fault it would have reintroduced) |
 | 4 | The remaining decision-layer hoist (`RecoveryViewModel` ↔ `MobileTrashModel`) — **scope grew at Act 1: + the four raw-error catches through `DeletionRefusal.fallback` (A1-MINOR-2) · + the `*NotDeleted` family in the shared home (A1-NIT-1) · + split the act compositions out of `RecoveryCopy` when the layer grows (A1-NIT-2)** | 2 | **DONE (Act 2 seat 1, `68cd28c`)** — `Shared/RecoveryActs.swift` born: `TrashPurge` (ONE `Confirm` type behind a typealias on each model) + `TrashListing.windowed`; all three routed findings landed; `TrashPurgeSharedLayerTests` (4 pins), A1-NIT-1 red-on-old by revert. `daysLeft` deliberately NOT hoisted (already a one-line forward to core) |
 | 5 | Pool/scraps deletion honesty check (§8b) | 1 | **DONE — AND IT WAS NOT CLEAN (Act 2 seat 1, `b0d35fa`)**. A pool CONTAINER is unreachable (pinned), but a deleted SCRAP's face called its pool a note three ways — the home's display brain, the "Open note" label, and `.post` routing — all fixed on the face, `TrashPoolHonestyTests`, red-on-old by revert ("Untitled"). **ONE RESIDUAL RECORDED, NOT FIXED:** the shared put-back receipts still say "note" for a scrap — it needs the landing to report its container's kind, i.e. `Sources/`, which Act 2 is fenced out of |
 | 6 | Remove the left-margin comment ＋ (§8c, removal only) | 1 | **DONE (Act 2 seat 1, `b0d35fa`)** — 13e E7's hover ＋ gone from both margins; card, badge, inline strip, block menu, ⌘⇧' and the panel untouched; E7's now-consumerless hover-tracking widening narrowed back with the drag handle's reveal pinned intact. Red-on-old by construction (E7's three pins asserted the opposite) |
@@ -2225,7 +2490,7 @@ proceeds.
 | 23 | Closeout: author 13u's execution plan + kickoff | — | open |
 | 24 | Closeout: refresh `/Applications/Variorum.app` (zero-instance window) | — | open |
 | 25 | Housekeeping: the 13u "EIGHT items" count fix (3 places) + her disk-encryption question → the 13p note | — | **done this sitting** |
-| 26 | **The scrap put-back receipt names the wrong kind** (seat 1's row-5 residual: the shared put-back receipts say "note" for a scrap — the put-back LANDING must report its container's KIND, a small `Sources/` change Act 2's per-batch fence excluded) | 2 | **open — seat 2's; the architect exercises seat 1's named option IN-PHASE** (the recovery story must be honest from every door, §8d — this is that mandate's letter; core Operations/Queries only, a pin rides it, zero schema, zero `Sync/`) |
+| 26 | **The scrap put-back receipt names the wrong kind** (seat 1's row-5 residual: the shared put-back receipts say "note" for a scrap — the put-back LANDING must report its container's KIND, a small `Sources/` change Act 2's per-batch fence excluded) | 2 | **DONE (Act 2 seat 2, `8017956`)** — fixed at the mechanism: `Operations.BlockRestoreLanding`'s three cases carry the home container's `ContainerKind`, read inside the restore's own transaction from the row it already fetches; `unarchiveBlock` takes the same change (it shares the type deliberately); `RecoveryCopy.landingReceipt` — the ONE place a landing becomes words — picks the noun, and `TrayPanel`'s two duplicated switches were folded into it so the kind could not be honoured in one door and forgotten in the other. Core pin (all three roads in a pool) + a Mac pin driving the REAL `RecoveryViewModel.putBack`; **red-on-old by behavioural revert**, reading back the shipped sentence for a scrap verbatim. Operations only — zero schema, zero `Sync/` |
 
 ### The batch plan (the architect's, within the mandate — acts may merge at dispatch; the ledger is the truth)
 
