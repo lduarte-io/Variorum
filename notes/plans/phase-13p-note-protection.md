@@ -173,9 +173,15 @@ provisional; the kickoff sitting rules only the OPEN KNOTS section.
   framing already generalizes — "older backups are plaintext until
   rotation") vs a deliberate rotate/delete-old-backups offer at
   migration. The zero-plaintext acceptance pins the FRESH backup
-  either way; this decision is about the TAIL. *(Numbered as a
-  ruling-slot placeholder, not a ruling — it is a flagged decision,
-  the planning agent may re-home it to the open knots.)*
+  either way; this decision is about the TAIL. **RULED — same
+  night, 2026-08-24 (author, verbatim): "im the only user right now
+  so just record that the aging out is fine."** Age-out-with-
+  disclosure it is: no rotation machinery; the disclosure sentence
+  (13l's M6 generalization — "older backups are plaintext until
+  rotation") ships in the migration's honest copy. *(If real
+  strangers exist by 13p's run, the kickoff may glance at this once
+  — her ruling was expressly made as the only user — but nothing is
+  owed beyond the disclosure.)*
 
 ## NON-GOALS (named so they stay declined, not forgotten)
 
