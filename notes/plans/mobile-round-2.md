@@ -5288,3 +5288,138 @@ refusals SAY, and which cases refuse at all. **The successor brings the
 boundary to her at 4.5c's kickoff**; the safe default without her is
 *fix the mechanisms, leave the semantics, record what you left.* The full
 account is the successor handoff's §5.
+
+
+---
+
+## 67. HER DEVICE WALK — AND **E1 IS POSITIVE: M1's ROOT IS PROVEN** (2026-08-23)
+
+**Her full report is stored VERBATIM at
+`notes/author-reports/2026-08-23-device-walk-and-product-asks.md`** at her
+instruction (*"I include a LOT of product desires, bugs, thoughts, etc.
+so please store this comment verbatim somewhere"*). Everything below
+cites it rather than paraphrasing it.
+
+### 🔴 E1 — **THE SIGNATURE FIRED. M1 IS NO LONGER "SUSPECTED".**
+
+Her trace: **`SUSPECT SIGNATURE 1`**, and the events name it exactly:
+
+```
+#50 GATE  at 178 len 0  repl 1 → armed
+#51 EDIT  at 177 len 1  Δ+0  after 1 gate  ⚠ starts-before · net≠ · arming rejected
+#52 EDIT  at 178 len 1  Δ+1  after 0 gates  ⚠ gate-less
+```
+
+**iOS consulted the delegate about inserting one character at offset
+178, then performed a DIFFERENT transaction at 177 with net zero, then
+performed the real insertion at 178 WITHOUT CONSULTING AT ALL.**
+
+**That is the mechanism, observed.** The crash trace's §6 stated it as a
+hypothesis — *"`pendingVerdict` carries an IDENTITY and nothing else…
+`storageDidEdit` takes the identity from the GATE and the magnitude from
+a DIFFERENT source, and never checks that the two describe the same
+edit"* — and here is iOS doing precisely that, on her hardware, on 26.6,
+during ordinary use. **Pre-fix, that pair would have applied offset 178's
+block identity with the report's +0-at-177 magnitude: the wrong-block
+write, and in the worst case the negative-length trap that crashed her
+phone.**
+
+**AND THE FIX CAUGHT IT — `arming rejected`.** The `ArmedEdit` binding
+built at batch 1 (and hardened at its ladder's MAJOR 1) refused the
+mismatched consume and fell through to `fallbackVerdict`. **`desync
+recoveries 0`** — it was handled without even a re-render. *She noticed
+nothing, which is the point.*
+
+**STATUS CHANGE, recorded:** M1's root was *"high confidence, NOT
+PROVEN"* through this entire round. **It is now PROVEN.** Every document
+that carries the NOT-PROVEN caveat should be read with this section
+beside it.
+
+**The honest limits, stated because a positive is easy to over-read:**
+one signature in one session proves **the mechanism exists and is
+reachable in ordinary use** — it does not prove it is the *only* source
+of a stale verdict, and §21's residue (a forward-extending transaction
+netting exactly the approved change) remains unobservable by
+construction. **What it does settle is the question 13u needed settled
+before building a larger gesture in this seam: the gate's verdict and
+the storage report genuinely can describe different edits, so any new
+cross-block compound must bind them the way this one does.**
+
+*(`most gate calls before one edit: 4` also exceeded its threshold, but
+reading the events it is benign — consults #2/#5/#7 pair with
+programmatic render writes, not with the coalescing shape. The signature
+at #51 is the finding.)*
+
+### THE WALK'S OTHER EIGHT ROWS
+
+| row | her words | disposition |
+|---|---|---|
+| **D8** cold launch | *"felt pretty instant… maybe a brief moment where i didn't and that brief moment wasn't there on relaunch but it was almost imperceptible"* | **PASS.** B45-1/L-c stays worth doing (the migration set only grows) but is **not urgent** — the device number matches the simulator's shape |
+| **D3** destructive colour | *"delete note is red"* | **CLOSED** — the capture was an artifact, as suspected |
+| **D4** swipe-kill + lock | *"unless I fully killed the app while it said typing still, it saved. it was genuinely hard to get it to not save, and just locking my phone it still saved"* | **PASS** — the background grant and the flush do their job on real hardware. **This is the device half of Q2/Q4's promise, and it holds** |
+| **D5** bridge door | *"the button is there, clicking on it worked… it detected that and validated and closed with me connected. so the browser sheet worked very smoothly"* | **CLOSED.** PL-9's third judgment act is answered: **the iOS `presentationAnchor` arm works on a device.** The door stays |
+| **D6** dictation | *"the dictation was saved AND both the first and second paragraph were saved"* | **PASS in itself** — and it **narrows D7**: the loss is not dictation's, it is the caret's (below) |
+| **D9** Display Zoom | *"I think display zoom looks fine and is good to go. it's still workable"* | **CLOSED — her acceptance of the 23 pt strip**, which the architect had ruled and flagged as never seen by a human. Now seen and accepted |
+| **M16** drag-move | *"no, I couldn't move it successfully. it looked like i would be able to move it and had a cursor for placement but then just didn't move there"* | **SETTLED: the gesture does not work.** The block-delete hazard M16 feared **cannot fire, because the drop never lands.** She adds: *"it doesn't seem like multi block paragraph drag is supported on mac either right now"* → **a 13u line, at her instruction** |
+| **D7** the quick note | **see below — the walk's worst finding** | 🔴 **BLOCKER-class, lost prose** |
+
+### 🔴 D7 — A LOST-PROSE DEFECT, AND THE BOUNDARY-HOLD DESIGN IS WHAT PRODUCED IT
+
+Her words: *"fixing a typo in the first paragraph gets me into a mode
+where i couldn't open it by hitting enter. i was just freely making new
+lines. the box said: earlier paragraphs live in the note - tap open to
+edit them, and then when i clicked the open button (since new enter
+wasn't working), my second line was NOT in the new note and neither were
+the edits to the first line. **complete disaster, lost prose class of
+bug.** we need full multi line editing clearly or some other solution
+because this was not it."*
+
+**And D6 narrows it precisely:** *"one was only lost once i started
+clicking the cursor around, and when the cursor stayed at the end, enter
+still worked to make a new note."*
+
+**So the traced shape:** moving the caret into the frozen prefix puts the
+box in a state where **⏎ stops opening the note and starts inserting
+newlines** — which A5-1 says can never happen — **and the subsequent
+hand-off drops both the tail and her prefix edits.** *This is the same
+surface 4.5a fixed twice; the fix stopped the store being corrupted, and
+this is the hand-off losing what the box was holding.*
+
+**THE DESIGN IS THE DEFECT, not just the code.** The boundary hold exists
+because **A5-2 ruled the box owns ONE block**. She has now met that ruling
+as a lived consequence and rejected it: *"we need full multi line editing
+clearly or some other solution."* **That is an author-only call and it
+reopens A5-2** — so it goes to a design sitting with options, not to an
+implementer. **Routed to the new batch 4.6 below, at the head of the
+mobile queue.**
+
+### 🟠 D7's SECOND FINDING — the quick note vanishes with no receipt
+
+*"I typed the note in, and swiped away, and when I came back it was gone
+and it actually had been saved to the library but there was no indication
+of that so it SEEMED like it was gone… if i had just swiped away for a
+detail it would've been super annoying that my quicknote was gone in a
+milisecond and now i have to open the library when the whole point is
+that it's a quicknote."*
+
+**Her proposed shape, recorded as hers:** *"maybe it needs to stay in
+that field for like three minutes when you swipe away, editable in that
+field? because that would be more convenient and distinguish it as a note
+taking app that there's on the homescreen note taking. **at the very
+least, a link to the one that was just created should pop up.**"*
+
+**Note what this reverses:** A5-8 ruled *"leaving mints and clears"* —
+the pad's closing-files-it grammar. **She has now used it and wants the
+opposite.** Also 4.5a's own MAJOR 3 fix (bumping `handOffCount` so the
+keyboard drops) is adjacent: the box letting go is exactly what she
+experienced as disappearance. **Also batch 4.6.**
+
+### 🟠 TEXT SELECTION IS BROKEN, and she raised it unprompted
+
+*"right now it is genuinely hard to copy and paste text because the
+copying and dragging up and down doesn't work correctly, holding it down
+makes you scroll upwards, the exact opposite. so that needs to be
+fixed."*
+
+**A daily-use defect on the app's core surface**, found outside the walk.
+**Routed to batch 9.**
