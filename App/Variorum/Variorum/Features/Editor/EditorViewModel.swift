@@ -119,6 +119,12 @@ final class EditorViewModel {
     /// with ONE observation, which is what makes "the pane is the one home"
     /// a fact about the code rather than a claim in a comment.)*
     var blockHistoryRequest: BlockHistoryRequest?
+    /// **THE VERSIONS PANE'S PENDING REQUEST** (the post-13l polish round,
+    /// ledger rows 16/23). Its named home is the post detail's inspector,
+    /// reached through the router; this is the FALLBACK sheet, for the reason
+    /// its two neighbours have one — this editor is also composed where no
+    /// post detail exists.
+    var versionsRequested = false
     /// Per-command gesture enablement (Phase 9) — recomputed on every caret/
     /// selection change from THE planner, so the menu bar, context menu, and
     /// shortcuts all read one brain's verdicts.
@@ -2290,6 +2296,26 @@ final class EditorViewModel {
             postID: postID, blockID: blockID, focusedVariantID: caretVariantID)
         if session.commandRouter.requestBlockHistory(request) { return }
         blockHistoryRequest = request
+    }
+
+    /// **THE VERSIONS DOOR** (the post-13l polish round, ledger rows 16/23).
+    /// Asks the router first — one pane wherever the door is pressed — and
+    /// falls back to its own sheet where no post detail is mounted, which is
+    /// `requestBlockHistory`'s shape and its reason.
+    func requestNoteVersions() {
+        if session.commandRouter.requestNoteVersions(postID: postID) { return }
+        versionsRequested = true
+    }
+
+    /// **⌘⇧S — save the whole note as it is.** The flush is the composition's
+    /// (`VersionActs`), because a moment missing the keystroke that summoned
+    /// it is not the moment she asked for.
+    func saveNoteVersion() async {
+        do {
+            showStatus(try await VersionActs.save(session: session, postID: postID))
+        } catch {
+            showStatus(VersionActs.words(error))
+        }
     }
 
     // MARK: - Fan (Step 6)

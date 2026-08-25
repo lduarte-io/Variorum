@@ -303,6 +303,13 @@ struct TakesBoardView: View {
             // The architect's adjudication 1: the ⌘K row onto the note's tray.
             model.requestNoteTray()
             return true
+        case .showNoteVersions:
+            // The post-13l polish round (rows 16/23): the note's saved moments.
+            model.requestNoteVersions()
+            return true
+        case .saveNoteVersion:
+            Task { await model.saveNoteVersion() }
+            return true
         case .find:
             // QoL batch 3 (L6): v1 finds across the POST's text, which is the
             // full-document editor's surface; a take card is one take. The

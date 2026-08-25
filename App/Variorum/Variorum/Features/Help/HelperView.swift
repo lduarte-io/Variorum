@@ -81,6 +81,9 @@ struct HelperView: View {
         ]),
         ShortcutGroup(title: "Writing", items: [
             ("⌘S", "commit — an immutable savepoint of the take you're in"),
+            // The post-13l polish round (rows 16/23): the pairing IS the
+            // lesson — this take's moment, and this note's.
+            ("⌘⇧S", "save a version — the whole note as it is, in Versions"),
             ("⌘Z", "text undo (typing only)"),
             ("⌥⌘Z", "structural undo (splits, merges, moves — never text)"),
             ("⇧⌥⌘Z", "structural redo — puts back what ⌥⌘Z undid"),

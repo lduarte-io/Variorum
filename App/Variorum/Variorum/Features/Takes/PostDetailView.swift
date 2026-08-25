@@ -119,11 +119,15 @@ struct PostDetailView: View {
     /// scoped to the block she is standing in and sections every take with the
     /// one she is IN expanded — a panel identity that forgot either fact would
     /// have to guess.
+    /// **…and — the post-13l polish round, ledger rows 16/23 — NOTE ▸
+    /// VERSIONS**, the round's headline. It carries no payload: the listing is
+    /// the note's, and this view already knows which note it is showing.
     enum InspectorPanel: Hashable {
         case references
         case scraps
         case tray(revealBlockID: String?)
         case blockHistory(BlockHistoryRequest)
+        case versions
 
         var isTray: Bool {
             if case .tray = self { return true }
@@ -264,6 +268,16 @@ struct PostDetailView: View {
                     })
                     .id("history-\(request.id)")
                     .inspectorColumnWidth(min: 280, ideal: 420)
+            case .versions:
+                // Rows 16/23: the same room the tray and the history pane got,
+                // for the same reason — a list of things with dates and verbs
+                // beside them needs the width or the preview loses (the walk's
+                // P-1 squeeze, one surface over).
+                NoteVersionsPane(
+                    session: session, postID: postID,
+                    onClose: { inspectorPanel = nil })
+                    .id("versions-\(postID)")
+                    .inspectorColumnWidth(min: 280, ideal: 420)
             case .tray(let revealBlockID):
                 // Her C1 ruling's whole point is the ROOM: the tray was a
                 // sheet whose rows squeezed their previews to ten characters
@@ -306,6 +320,12 @@ struct PostDetailView: View {
                 // bars' door and ⌘K reach THIS inspector by composition.
                 showBlockHistory: { request in
                     panel.wrappedValue = .blockHistory(request)
+                },
+                // Ledger rows 16/23: the same seam again for the Versions
+                // listing — the bars' door and ⌘K reach THIS inspector by
+                // composition, never a broadcast (P-4).
+                showVersions: {
+                    panel.wrappedValue = .versions
                 })
         }
         .onDisappear {

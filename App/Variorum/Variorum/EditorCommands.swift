@@ -77,6 +77,9 @@ struct EditorCommands: Commands {
     /// rendered).
     static let menuRendered: [CapabilityID] = [
         .newPost, .todaysEntry, .findAnything, .commitTake,
+        // The post-13l polish round (rows 16/23): ⌘⇧S, beside ⌘S in the File
+        // menu — the two moments, one grain apart.
+        .saveNoteVersion,
         .importFiles, .exportLibrary, .exportCaretBlock,
         .structuralUndo, .structuralRedo,
         .divide, .extract, .makeBlock, .merge, .deleteInEveryTake,
@@ -195,6 +198,13 @@ struct EditorCommands: Commands {
         // registry's declaration comment for why).
         case .formatBold: ("b", .command)
         case .formatItalic: ("i", .command)
+        // The post-13l polish round (rows 16/23). THE COLLISION SWEEP'S
+        // RESULT: ⌘⇧S is FREE — the only `s` chord anywhere in the app is
+        // ⌘S itself (swept across this table, every `.keyboardShortcut(` call
+        // site in `Variorum/` and `Shared/`, every `NSMenuItem` keyEquivalent
+        // and the one `performKeyEquivalent` override). It is the platform's
+        // own save-as chord, which is exactly what saving a whole moment is.
+        case .saveNoteVersion: ("s", [.command, .shift])
         case .helper: ("/", .command)
         // 13f batch 3 (W16). THE COLLISION SWEEP'S RESULT: ⌘[ and ⌘] are
         // FREE — swept across this table, every `.keyboardShortcut(` call
@@ -276,6 +286,13 @@ struct EditorCommands: Commands {
             Button(verb(.commitTake)) { actions?.commitTake() }
                 .keyboardShortcut("s", modifiers: .command)
                 .disabled(!enabled(.commitTake))
+            // The post-13l polish round (ledger rows 16/23) — **⌘⇧S, the
+            // whole-note version door.** The Mac's save-as chord, semantically
+            // exact, beside ⌘S's take-commit; the collision sweep at the
+            // kickoff found it free (the only `s` chord in the app is ⌘S).
+            Button(verb(.saveNoteVersion)) { actions?.saveNoteVersion() }
+                .keyboardShortcut("s", modifiers: [.command, .shift])
+                .disabled(!enabled(.saveNoteVersion))
         }
         // Phase 11b (B1): the File-menu export doors.
         CommandGroup(after: .importExport) {

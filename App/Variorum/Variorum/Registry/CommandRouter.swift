@@ -47,7 +47,8 @@ final class CommandRouter {
     func registerDetail(
         postID: String, mode: PostMode, applyMode: @escaping (PostMode) -> Void,
         showTray: ((TrayRequest) -> Void)? = nil,
-        showBlockHistory: ((BlockHistoryRequest) -> Void)? = nil
+        showBlockHistory: ((BlockHistoryRequest) -> Void)? = nil,
+        showVersions: (() -> Void)? = nil
     ) -> UUID {
         let token = UUID()
         detailToken = token
@@ -56,6 +57,7 @@ final class CommandRouter {
         self.applyMode = applyMode
         self.showTray = showTray
         self.showBlockHistory = showBlockHistory
+        self.showVersions = showVersions
         // The arriving detail consumes a tray request parked for IT — the
         // `pendingWriteIntent` choreography, one act over (see
         // `requestNoteTray`). Stamped, so a park for another post never
@@ -86,6 +88,7 @@ final class CommandRouter {
         applyMode = nil
         showTray = nil
         showBlockHistory = nil
+        showVersions = nil
         activePostID = nil
         activeMode = nil
         // A genuine teardown (no successor mounted yet): any parked
@@ -202,6 +205,29 @@ final class CommandRouter {
     func requestBlockHistory(_ request: BlockHistoryRequest) -> Bool {
         guard let showBlockHistory, activePostID == request.postID else { return false }
         showBlockHistory(request)
+        return true
+    }
+
+    // MARK: - The note's Versions pane (the post-13l polish round, rows 16/23)
+
+    /// How a Versions request reaches the mounted detail's INSPECTOR. Its own
+    /// seam beside the other two, for the identical ordering reason — the
+    /// detail owns the inspector, so the detail is what registers this.
+    @ObservationIgnored private var showVersions: (() -> Void)?
+
+    /// **Routes a Versions request to the mounted detail's inspector.**
+    ///
+    /// It carries no payload: the listing is the NOTE's, and the detail
+    /// already knows which note it is. It never parks, for
+    /// `requestBlockHistory`'s reason — the doors that raise it are rendered
+    /// by surfaces that are already mounted, so there is no focus change to
+    /// wait out, and a caller with its own sheet fallback must be told "no".
+    ///
+    /// Returns whether the panel was opened.
+    @discardableResult
+    func requestNoteVersions(postID: String) -> Bool {
+        guard let showVersions, activePostID == postID else { return false }
+        showVersions()
         return true
     }
 

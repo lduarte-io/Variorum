@@ -138,6 +138,16 @@ nonisolated enum RoutedCommand: Equatable, Sendable {
     /// exactly — the bar's door and the ⌘K row both have to ask whichever
     /// surface is mounted which block she is standing in.
     case showBlockHistory
+    /// The post-13l polish round (ledger rows 16/23) — the note's **VERSIONS**.
+    /// Routed for the same reason its two neighbours are: a bar door and a ⌘K
+    /// row both have to ask whichever surface is mounted which note it is
+    /// showing, and the panel lives in the post detail's inspector.
+    case showNoteVersions
+    /// …and **⌘⇧S**, the save door. Routed rather than acted directly so the
+    /// note it saves is always the one on screen — the same address ⌘S uses
+    /// one grain down (the pairing IS the teaching: this take's moment ·
+    /// this note's moment).
+    case saveNoteVersion
     /// …and the note's TRAY, routed (adjudication 1). Its NAMED door is the
     /// masthead icon, which needs no routing; this is the ⌘K row, and it is
     /// what gives a book spread's inline note a way in at all — that pane
@@ -411,6 +421,13 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // beside Commit, because *"history is quite similar to commit, it's the
     // natural pair to commit"*.
     case showBlockHistory
+    // The post-13l polish round (ledger rows 16/23, G1 + the V-family) — **THE
+    // WHOLE-NOTE VERSIONS DOOR**, her ruling: *"an easy door would be to make
+    // a copy of the note, archive it, and then let you look through the
+    // archived copies made at points in time."* Two acts, post scope: saving a
+    // moment (⌘⇧S) and opening the listing of them.
+    case saveNoteVersion
+    case showNoteVersions
     // 13l Act 2 (ledger item 3) — DELETE NOTE, at last. Her report at 13j's
     // close was that she could not find a way to delete the note she was
     // standing in; the Library and the Pool had a door and neither asked

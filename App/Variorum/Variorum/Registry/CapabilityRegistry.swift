@@ -765,6 +765,37 @@ nonisolated enum CapabilityRegistry {
                 + "and where it came from.",
             availability: takeFamily),
 
+        // **THE WHOLE-NOTE VERSIONS DOOR** (the post-13l polish round, ledger
+        // rows 16 and 23 — G1 and the V-family). Her ruling, verbatim: *"an
+        // easy door would be to make a copy of the note, archive it, and then
+        // let you look through the archived copies made at points in time —
+        // not automated, but an easy door for people who want to save the
+        // whole note as it is."*
+        //
+        // **TWO acts, and they are two on purpose.** Saving a moment is an
+        // instant, keyable thing (⌘⇧S, the Mac's save-as chord, semantically
+        // exact); opening the list of them is a panel. One declaration could
+        // not carry both a key and a surface, and the pairing that teaches is
+        // ⌘S↔⌘⇧S — this TAKE's moment beside this NOTE's — not save↔list.
+        //
+        // Both are POST-scoped and available wherever a note is: unlike the
+        // block family, neither needs a caret. Where no note is reachable at
+        // all they SPEAK the note below (P-2), never sit grey.
+        Capability(
+            id: .saveNoteVersion, verb: VersionsPath.saveVerb, scope: .post,
+            doors: [.menuBar, .bottomBar, .palette],
+            shortcutLabel: "\u{2318}\u{21E7}S", takesAccess: .native,
+            unavailableNote: "Saving a version acts on the note you have open "
+                + "— open one first.",
+            availability: noteScoped),
+        Capability(
+            id: .showNoteVersions, verb: VersionsPath.name, scope: .post,
+            doors: [.bottomBar, .palette],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "A note's saved moments live with the note — "
+                + "open one and its \(VersionsPath.name) lists them.",
+            availability: noteScoped),
+
         // MARK: The deletion acts, and THE RULE THEY ALL INHERIT
         //
         // **THE CONFIRMATION-CONSISTENCY PRINCIPLE** (13j's close-of-day
@@ -1481,6 +1512,8 @@ nonisolated enum CapabilityRegistry {
         case .takesToBlocks: id = .takesToBlocks
         case .showOriginBlock: id = .showOriginBlock
         case .showBlockHistory: id = .showBlockHistory
+        case .showNoteVersions: id = .showNoteVersions
+        case .saveNoteVersion: id = .saveNoteVersion
         case .showNoteTray: id = .showNoteTray
         case .find(let action):
             switch action {

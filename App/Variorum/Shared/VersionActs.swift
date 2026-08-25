@@ -1,0 +1,104 @@
+//
+//  VersionActs.swift
+//  Variorum (shared: Mac + Mobile)
+//
+//  **THE VERSIONS FAMILY'S ACTS — ONE DECISION LAYER** (the post-13l polish
+//  round, ledger rows 16 and 23), on `RecoveryActs`' shape and for its reason:
+//  the DECISION is shared (flush first; which receipt is true; which refusal a
+//  door speaks), the VOICE and the STATE are each surface's own.
+//
+//  **FLUSH FIRST is the load-bearing one, and it is not optional.** The editor
+//  debounces autosaves, so a version saved while a keystroke is still pending
+//  would be a moment missing the words that summoned it — and the RESTORE's
+//  save-of-now would be worse, because the restore then deletes the blocks
+//  those bytes belonged to. Every door here goes through the flush, which is
+//  why the doors do not each get to remember it (the `NoteDeletion` precedent,
+//  and its EXISTING-ONLY entry: a note nothing has opened has nothing pending
+//  and must not mint a coordinator for it — the 13l L-d growth class).
+//
+
+import Foundation
+import VariorumCore
+
+@MainActor
+enum VersionActs {
+    /// **⌘⇧S — save the whole note as it is.** Returns the receipt; refusals
+    /// throw for the caller to word.
+    @discardableResult
+    static func save(session: AppSession, postID: String) async throws -> String {
+        await session.flushExistingAutosave(forPost: postID)
+        _ = try await session.runner.run { ops in
+            try ops.saveNoteVersion(postID)
+        }
+        return VersionsPath.saved
+    }
+
+    /// **RESTORE — the note becomes its past, keeping its identity.** The op
+    /// saves the moment of NOW inside its own transaction; the flush is what
+    /// makes that moment complete.
+    @discardableResult
+    static func restore(
+        session: AppSession, postID: String, versionID: String
+    ) async throws -> String {
+        await session.flushExistingAutosave(forPost: postID)
+        _ = try await session.runner.run { ops in
+            try ops.restoreNoteVersion(postID, from: versionID)
+        }
+        return VersionsPath.restored
+    }
+
+    /// **PROMOTE — the moment becomes a note of its own, forever.** No flush:
+    /// a version is sealed and archived, so nothing is pending in it.
+    @discardableResult
+    static func promote(
+        session: AppSession, postID: String, versionID: String
+    ) async throws -> String {
+        try await session.runner.run { ops in
+            try ops.promoteNoteVersion(versionID, of: postID)
+        }
+        return VersionsPath.promoted
+    }
+
+    /// **DELETE one moment** — the ordinary move-to-Trash road (FOUND-ITEM 1,
+    /// ratified: *"agree that deleting a single version from the listing
+    /// should go into trash for 30 days"*). The instant-hard-delete
+    /// alternative was weighed and declined by derivation: a moment is
+    /// UNRECAPTURABLE, unlike the restore's outgoing blocks, which had just
+    /// been saved.
+    @discardableResult
+    static func delete(session: AppSession, versionID: String) async throws -> String {
+        try await session.runner.run { ops in
+            try ops.deleteContainer(versionID)
+        }
+        return VersionsPath.deleted
+    }
+
+    /// **How many moments go with a note** — read at ASK time, so the confirm's
+    /// one honest line is about the note as it is rather than as a listing
+    /// remembered it (the R3-1 lesson; a confirm is a pause).
+    static func versionCount(session: AppSession, postIDs: [String]) async -> Int {
+        guard !postIDs.isEmpty else { return 0 }
+        return (try? await session.database.read { db in
+            try postIDs.reduce(0) { $0 + (try Queries.noteVersionIDs(db, of: $1).count) }
+        }) ?? 0
+    }
+
+    /// The refusals, in the recovery family's own voice.
+    static func words(_ error: Error) -> String {
+        guard let error = error as? OperationError else {
+            return DeletionRefusal.fallback(error)
+        }
+        switch error {
+        case .notVersionHistory:
+            return "That isn't one of this note's saved versions any more."
+        case .lockedPost:
+            return "This note is marked complete — unseal it to restore a version."
+        case .postHasNoBlocks:
+            return "There's nothing in this note to save a version of yet."
+        case .containerNotFound:
+            return "That version is already gone."
+        default:
+            return DeletionRefusal.words(error)
+        }
+    }
+}

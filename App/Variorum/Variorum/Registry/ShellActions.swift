@@ -47,6 +47,17 @@ struct ShellActions {
         router.dispatch(.commit)
     }
 
+    /// **⌘⇧S — save a version of the whole note** (the post-13l polish round,
+    /// ledger rows 16/23; V5's chord, verified free at the kickoff). It is the
+    /// deliberate twin of ⌘S one grain up, and the pairing is itself the
+    /// teaching: this TAKE's moment · this NOTE's moment.
+    ///
+    /// It routes like ⌘S so the note it saves is always the one on screen; a
+    /// surface that cannot answer lets the registry's honest note speak (P-2).
+    func saveNoteVersion() {
+        router.dispatch(.saveNoteVersion)
+    }
+
     /// The seal door (palette + routed): the mounted surface runs its own
     /// teardown contract (Write finalizes the open tail first); with no
     /// surface handler but an open post, flush-and-toggle directly. The
@@ -431,6 +442,9 @@ struct ShellActions {
         // and — the architect's adjudication 1 — the note's TRAY, whose ⌘K
         // row is what gives a book spread's inline note a way in at all.
         .showBlockHistory, .showNoteTray,
+        // …and the note's own two time controls (ledger rows 16/23): saving a
+        // whole moment, and the list of the moments it has.
+        .saveNoteVersion, .showNoteVersions,
         // 13j J4/J4b (sitting round 4): the two ceremony doors, typeable —
         // her binding is "the Block menu, the block context menu, AND the
         // ⌘K palette; never only a buried item".
@@ -477,6 +491,8 @@ struct ShellActions {
         case .showOriginBlock: return { dispatch(.showOriginBlock) }
         case .showBlockHistory: return { dispatch(.showBlockHistory) }
         case .showNoteTray: return { dispatch(.showNoteTray) }
+        case .saveNoteVersion: return { saveNoteVersion() }
+        case .showNoteVersions: return { dispatch(.showNoteVersions) }
         case .restoreTutorial: return { restoreTutorial() }
         default:
             // NIT-1 (Stage 1 ladder): a future `paletteActs` entry without

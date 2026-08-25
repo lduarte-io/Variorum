@@ -330,6 +330,14 @@ extension EditorView {
             // a book spread's inline note a way into its tray at all.
             model.requestNoteTray()
             return true
+        case .showNoteVersions:
+            // The post-13l polish round (rows 16/23): the note's saved moments.
+            model.requestNoteVersions()
+            return true
+        case .saveNoteVersion:
+            // ⌘⇧S — the whole note as it is, addressed to the note on screen.
+            Task { await model.saveNoteVersion() }
+            return true
         case .find(let action):
             // QoL batch 3 (L6): the find bar lives in THIS editor's own scroll
             // view. The inline book/spread/pool editor owns none, so it

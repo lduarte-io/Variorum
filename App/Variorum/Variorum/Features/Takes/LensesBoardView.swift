@@ -243,6 +243,13 @@ struct LensesBoardView: View {
             // The architect's adjudication 1: the ⌘K row onto the note's tray.
             model.requestNoteTray()
             return true
+        case .showNoteVersions:
+            // The post-13l polish round (rows 16/23): the note's saved moments.
+            model.requestNoteVersions()
+            return true
+        case .saveNoteVersion:
+            Task { await model.saveNoteVersion() }
+            return true
         case .find:
             // QoL batch 3 (L6): find is the full-document editor's — a lens
             // column is one take's pane, not the post's text. Declining lets

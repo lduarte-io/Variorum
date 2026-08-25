@@ -55,7 +55,7 @@ final class TakesViewModel {
         }
         autosaveToken = autosave.observe(
             onError: { [weak self] error in
-                self?.statusMessage = Self.message(for: error)
+                self?.status = .refusal(Self.message(for: error))
             },
             // 13e E15: settle no longer ADOPTS the held photograph — it
             // settles through the ONE fresh-read path, exactly as both
@@ -112,14 +112,33 @@ final class TakesViewModel {
     @ObservationIgnored private(set) lazy var structure = TakesStructureController(model: self)
     /// Fanned blocks currently bloomed — the board's (forwarded).
     var expandedBlocks: Set<String> { board.expandedBlocks }
-    /// The board's transient outcome line. PRESENTATION is the shell's
-    /// StatusCenter (AD-14 — one placement, one auto-dismiss policy); the
-    /// property remains the tested truth and forwards on set.
-    private(set) var statusMessage: String? {
+    /// The board's transient outcome line, **CLASSED** (the post-13l polish
+    /// round, batch 5 — the architect's routed flag 2: ledger row 6's defect,
+    /// one surface over).
+    ///
+    /// Row 6 split the tray's single red slot because *"Put back where it
+    /// was."* — the whole point of that surface — read as an error.
+    /// `WriteTakesPanel`'s slot has the same shape: ONE line, painted
+    /// `tokens.accent` whatever it says, so a board receipt wears the colour a
+    /// refusal wears. Batch 4 deliberately did NOT sweep it into `alarm`,
+    /// because painting the whole slot alarm would make every receipt read as
+    /// an error — the defect, not the fix.
+    ///
+    /// So the class is decided **where the message is produced**, never
+    /// guessed by a view from its text, which is what makes the drift
+    /// impossible rather than merely unlikely.
+    ///
+    /// PRESENTATION is still the shell's StatusCenter (AD-14 — one placement,
+    /// one auto-dismiss policy).
+    private(set) var status: TrayViewModel.Status? {
         didSet {
-            if let statusMessage { session.status.speak(statusMessage) }
+            if let status { session.status.speak(status.text) }
         }
     }
+
+    /// The forwarder, so every shipped pin and every reader rides unmodified
+    /// (the 3C parity pattern — a hoist moves an address, not behaviour).
+    var statusMessage: String? { status?.text }
 
     // MARK: - Word counts (Stage 1 ladder MINOR-5 — P-8 binds P1 here)
 
@@ -291,7 +310,7 @@ final class TakesViewModel {
             }
         } catch is CancellationError {
         } catch {
-            statusMessage = "Takes observation failed: \(error)"
+            status = .refusal("Takes observation failed: \(error)")
         }
     }
 
@@ -595,7 +614,7 @@ final class TakesViewModel {
     /// unnamed column whose picks are exactly the minted takes.
     func addWriteColumn() async {
         guard columns.count < 4 else { return }
-        statusMessage = nil
+        status = nil
         do {
             let picks: [String: String] = try await session.runner.run { [postID] ops in
                 try ops.branchAllFans(post: postID)
@@ -604,7 +623,7 @@ final class TakesViewModel {
             columns.append(TakesColumn(kind: .scratch, picks: picks, name: nextAutoName()))
             saveMemory()
         } catch {
-            statusMessage = Self.message(for: error)
+            status = .refusal(Self.message(for: error))
         }
     }
 
@@ -642,7 +661,7 @@ final class TakesViewModel {
 
     func replaceColumnWithNewWrite(_ columnID: String) async {
         guard columns.contains(where: { $0.id == columnID }) else { return }
-        statusMessage = nil
+        status = nil
         do {
             let picks: [String: String] = try await session.runner.run { [postID] ops in
                 try ops.branchAllFans(post: postID)
@@ -652,7 +671,7 @@ final class TakesViewModel {
                 id: columnID, kind: .scratch, picks: picks, name: nextAutoName())
             saveMemory()
         } catch {
-            statusMessage = Self.message(for: error)
+            status = .refusal(Self.message(for: error))
         }
     }
 
@@ -722,7 +741,7 @@ final class TakesViewModel {
         guard let index = columns.firstIndex(where: { $0.id == columnID }) else { return }
         switch columns[index].kind {
         case .main:
-            statusMessage = "The main column shows the note's chosen takes — use ✓ to change them."
+            status = .receipt("The main column shows the note's chosen takes — use ✓ to change them.")
         case .scratch:
             columns[index].picks[blockID] = variantID
             saveMemory()
@@ -764,7 +783,7 @@ final class TakesViewModel {
     ) async -> Variant? {
         guard let index = columns.firstIndex(where: { $0.id == columnID }) else { return nil }
         let kind = columns[index].kind
-        statusMessage = nil
+        status = nil
         do {
             let take: Variant = try await session.runner.run { ops in
                 let take = try ops.branchVariant(blockID, from: fromVariantID)
@@ -779,7 +798,7 @@ final class TakesViewModel {
                 columnID: columnID, kind: kind, blockID: blockID, variantID: take.id)
             return take
         } catch {
-            statusMessage = Self.message(for: error)
+            status = .refusal(Self.message(for: error))
             return nil
         }
     }
@@ -793,7 +812,7 @@ final class TakesViewModel {
     private func blankIntoColumn(columnID: String, blockID: String) async -> Variant? {
         guard let index = columns.firstIndex(where: { $0.id == columnID }) else { return nil }
         let kind = columns[index].kind
-        statusMessage = nil
+        status = nil
         do {
             let take: Variant = try await session.runner.run { ops in
                 let take = try ops.newBlankVariant(blockID)
@@ -806,7 +825,7 @@ final class TakesViewModel {
                 columnID: columnID, kind: kind, blockID: blockID, variantID: take.id)
             return take
         } catch {
-            statusMessage = Self.message(for: error)
+            status = .refusal(Self.message(for: error))
             return nil
         }
     }
@@ -843,7 +862,7 @@ final class TakesViewModel {
               case .scratch = columns[index].kind
         else { return nil }
         let picks = columns[index].picks
-        statusMessage = nil
+        status = nil
         do {
             let lens: Lens = try await session.runner.run { [postID] ops in
                 let lens = try ops.createLens(post: postID, name: name)
@@ -859,7 +878,7 @@ final class TakesViewModel {
             }
             return lens
         } catch {
-            statusMessage = Self.message(for: error)
+            status = .refusal(Self.message(for: error))
             return nil
         }
     }
@@ -879,12 +898,12 @@ final class TakesViewModel {
     /// back is visible.
     func adoptColumn(_ columnID: String) async {
         guard let column = columns.first(where: { $0.id == columnID }) else { return }
-        statusMessage = nil
+        status = nil
         do {
             let preservation: Lens
             switch column.kind {
             case .main:
-                statusMessage = "This column IS the note — nothing to adopt."
+                status = .receipt("This column IS the note — nothing to adopt.")
                 return
             case .lens(let lensID):
                 preservation = try await session.runner.run { ops in
@@ -896,10 +915,11 @@ final class TakesViewModel {
                     try ops.adoptPicksPreservingChosen(post: postID, picks: picks)
                 }
             }
-            statusMessage =
+            status = .receipt(
                 "Adopted — the note now shows this column. The old chosen is kept as the lens “\(preservation.name)”."
+            )
         } catch {
-            statusMessage = Self.message(for: error)
+            status = .refusal(Self.message(for: error))
         }
     }
 
@@ -910,7 +930,7 @@ final class TakesViewModel {
     /// is). Fans ride by default, chosen-only offered at the gesture.
     func promoteColumn(_ columnID: String, carryFans: Bool = true, keepAsLens: Bool = false) async {
         guard let column = columns.first(where: { $0.id == columnID }) else { return }
-        statusMessage = nil
+        status = nil
         switch column.kind {
         case .main:
             await duplicateAsVersion()
@@ -938,10 +958,11 @@ final class TakesViewModel {
                     }
                     return result
                 }
-                statusMessage =
+                status = .receipt(
                     "Made a new note — “\(promoted.post.title ?? "untitled")” is now its own note, linked as a version."
+                )
             } catch {
-                statusMessage = Self.message(for: error)
+                status = .refusal(Self.message(for: error))
             }
         }
     }
@@ -957,15 +978,16 @@ final class TakesViewModel {
     /// lives in both tabs): mints the takes into each block's fan — no
     /// column, no lens — and says what happened.
     func writeNewTakesEverywhere() async {
-        statusMessage = nil
+        status = nil
         do {
             let picks: [String: String] = try await session.runner.run { [postID] ops in
                 try ops.branchAllFans(post: postID)
             }
-            statusMessage =
+            status = .receipt(
                 "New takes written on \(picks.count) block\(picks.count == 1 ? "" : "s") — open any fan to see them, or open them side by side in Lenses."
+            )
         } catch {
-            statusMessage = Self.message(for: error)
+            status = .refusal(Self.message(for: error))
         }
     }
 
@@ -977,7 +999,7 @@ final class TakesViewModel {
         let shown: [(String, String)] = projection.slots.compactMap { slot in
             slot.variantID.map { (slot.blockID, $0) }
         }
-        statusMessage = nil
+        status = nil
         do {
             let lens: Lens = try await session.runner.run { [postID] ops in
                 let lens = try ops.createLens(post: postID, name: name)
@@ -986,9 +1008,9 @@ final class TakesViewModel {
                 }
                 return lens
             }
-            statusMessage = "Saved — “\(lens.name)” now remembers these choices."
+            status = .receipt("Saved — “\(lens.name)” now remembers these choices.")
         } catch {
-            statusMessage = Self.message(for: error)
+            status = .refusal(Self.message(for: error))
         }
     }
 
@@ -1018,13 +1040,13 @@ final class TakesViewModel {
     /// the new take instantly, chosen untouched).
     @discardableResult
     func branchTake(blockID: String, from variantID: String) async -> Variant? {
-        statusMessage = nil
+        status = nil
         do {
             return try await session.runner.run { ops in
                 try ops.branchVariant(blockID, from: variantID)
             }
         } catch {
-            statusMessage = Self.message(for: error)
+            status = .refusal(Self.message(for: error))
             return nil
         }
     }
@@ -1034,13 +1056,13 @@ final class TakesViewModel {
     /// selected"); the new card gets the ring so you're typing instantly.
     @discardableResult
     func newBlankTake(blockID: String) async -> Variant? {
-        statusMessage = nil
+        status = nil
         do {
             return try await session.runner.run { ops in
                 try ops.newBlankVariant(blockID)
             }
         } catch {
-            statusMessage = Self.message(for: error)
+            status = .refusal(Self.message(for: error))
             return nil
         }
     }
@@ -1143,22 +1165,22 @@ final class TakesViewModel {
     /// board instead of promising a door it doesn't have.
     func archiveTake(_ variantID: String) async {
         await run { ops in try ops.archiveVariant(variantID) }
-        if statusMessage == nil {
+        if status == nil {
             switch host {
             case .takes:
-                statusMessage = "Take archived — never gone: "
-                    + "\u{201C}archived \u{B7} n\u{201D} under this block's takes brings it back."
+                status = .receipt("Take archived — never gone: "
+                    + "\u{201C}archived \u{B7} n\u{201D} under this block's takes brings it back.")
             case .lenses:
-                statusMessage = "Take archived — never gone: the archived list "
-                    + "under this block's takes on the Takes board (\u{2318}2) brings it back."
+                status = .receipt("Take archived — never gone: the archived list "
+                    + "under this block's takes on the Takes board (\u{2318}2) brings it back.")
             }
         }
     }
 
     func unarchiveTake(_ variantID: String) async {
         await run { ops in try ops.unarchiveVariant(variantID) }
-        if statusMessage == nil {
-            statusMessage = "Take unarchived — back in the block's fan."
+        if status == nil {
+            status = .receipt("Take unarchived — back in the block's fan.")
         }
     }
 
@@ -1187,8 +1209,8 @@ final class TakesViewModel {
         switch pick.state {
         case .archived:
             await run { ops in try ops.unarchiveVariant(pick.variantID) }
-            if statusMessage == nil {
-                statusMessage = LensFallbackCopy.restoredArchived
+            if status == nil {
+                status = .receipt(LensFallbackCopy.restoredArchived)
             }
         case .deleted:
             // 13j ladder A round 1, finding A3: the restore is an exact flip
@@ -1196,19 +1218,19 @@ final class TakesViewModel {
             // back archived — the pick then STILL dangles (as `.archived`,
             // Restore now offering unarchive) and "showing its pick again"
             // would be false. The receipt reads the op's own answer.
-            statusMessage = nil
+            status = nil
             do {
-                let status = try await session.runner.run { ops in
+                let restored = try await session.runner.run { ops in
                     try ops.restoreVariant(pick.variantID)
                 }
-                statusMessage = status == .archived
+                status = .receipt(restored == .archived
                     ? LensFallbackCopy.restoredDeletedButArchived
-                    : LensFallbackCopy.restoredDeleted
+                    : LensFallbackCopy.restoredDeleted)
             } catch {
-                statusMessage = Self.message(for: error)
+                status = .refusal(Self.message(for: error))
             }
         case .gone, .foreign:
-            statusMessage = LensFallbackCopy.nothingToRestore
+            status = .receipt(LensFallbackCopy.nothingToRestore)
         }
     }
 
@@ -1314,12 +1336,14 @@ final class TakesViewModel {
     /// Commit the FOCUSED take's buffer (⌘S in takes surfaces).
     func commitFocusedTake() async {
         guard let variantID = focusedPane?.variantID else {
-            statusMessage = "Click into a take first — ⌘S commits the take you're in."
+            status = .receipt("Click into a take first — ⌘S commits the take you're in.")
             return
         }
         await autosave.flushNow()
         await run { ops in _ = try ops.commit(variantID) }
-        if statusMessage == nil { statusMessage = "Committed — an immutable savepoint of this take." }
+        if status == nil {
+            status = .receipt("Committed — an immutable savepoint of this take.")
+        }
     }
 
     func toggleSeal() async {
@@ -1374,13 +1398,13 @@ final class TakesViewModel {
             try ops.setSegmentationDefault(postID, segmentation: mint ? nil : .oneBlock)
         }
         await refreshSegmentation()
-        if statusMessage == nil {
+        if status == nil {
             // 13d batch 4 (A16): the refresh has just re-read the EFFECTIVE
             // mode, so the note describes what the post now does rather than
             // what was asked for — turning ON under a global one_block
             // clears the override and still doesn't mint.
-            statusMessage = SegmentationFaceCopy.note(
-                asked: mint, effectivelyMints: newlinesMintBlocks)
+            status = .receipt(SegmentationFaceCopy.note(
+                asked: mint, effectivelyMints: newlinesMintBlocks))
         }
     }
 
@@ -1392,9 +1416,9 @@ final class TakesViewModel {
             try ops.setPostWordTarget(postID, wordTarget: target)
         }
         await refreshSegmentation()
-        if statusMessage == nil {
-            statusMessage = target.map(WordTargetFaceCopy.setNote)
-                ?? WordTargetFaceCopy.clearNote
+        if status == nil {
+            status = .receipt(target.map(WordTargetFaceCopy.setNote)
+                ?? WordTargetFaceCopy.clearNote)
         }
     }
 
@@ -1406,8 +1430,16 @@ final class TakesViewModel {
 
     /// The bar's speaking surface (9d fire-and-speak — a message, never a
     /// dead key).
+    ///
+    /// **It classes as a REFUSAL** (the post-13l polish round, batch 5 —
+    /// routed flag 2), and that is what it has always been: fire-and-speak
+    /// exists for the door that *cannot act in its context* and must say why
+    /// rather than sit grey (P-2). Every one of its callers is such a
+    /// sentence — *"Click into a block first…"*, *"This block has no
+    /// renderable take to divide."*, the registry's own unavailable notes.
+    /// A door that DID something reports through `setStatus`.
     func speak(_ message: String) {
-        setStatus(message)
+        setRefusal(message)
     }
 
     /// The ONE write into the board's status line, and the seam primitive
@@ -1415,7 +1447,14 @@ final class TakesViewModel {
     /// property's setter stays private to this type). `nil` clears the line
     /// before an act, exactly as the pre-move bodies did.
     func setStatus(_ message: String?) {
-        statusMessage = message
+        status = message.map { .receipt($0) }
+    }
+
+    /// …and its REFUSAL twin (routed flag 2). A door that ran an operation and
+    /// was told no says so in a refusal's voice — which is the whole point of
+    /// deciding the class where the message is produced.
+    func setRefusal(_ message: String) {
+        status = .refusal(message)
     }
 
     /// 13f W10b — the lineage door's act, identical to Write's, and given its
@@ -1476,6 +1515,24 @@ final class TakesViewModel {
         let request = TrayRequest(postID: postID)
         if session.commandRouter.requestNoteTray(request) { return }
         trayRequest = request
+    }
+
+    /// **The Versions pane** (ledger rows 16/23) — the router first, this bar's
+    /// sheet as the fallback. Write's twin carries the reasoning.
+    var versionsRequested = false
+
+    func requestNoteVersions() {
+        if session.commandRouter.requestNoteVersions(postID: postID) { return }
+        versionsRequested = true
+    }
+
+    /// **⌘⇧S — save the whole note as it is** (Write's twin, same composition).
+    func saveNoteVersion() async {
+        do {
+            status = .receipt(try await VersionActs.save(session: session, postID: postID))
+        } catch {
+            status = .refusal(VersionActs.words(error))
+        }
     }
 
     // MARK: - Fire-and-DO (13b 1b, R115/R118 — the D3 lecture's replacement)
@@ -1605,7 +1662,7 @@ final class TakesViewModel {
             speak("Click into a block first — the frame goes on the block you're in.")
             return
         }
-        statusMessage = nil
+        status = nil
         do {
             try await session.runner.run { ops in
                 try ops.updateBlockPresentation(target) {
@@ -1613,7 +1670,7 @@ final class TakesViewModel {
                 }
             }
         } catch {
-            statusMessage = Self.message(for: error)
+            status = .refusal(Self.message(for: error))
         }
     }
 
@@ -1777,16 +1834,17 @@ final class TakesViewModel {
 
     func restoreCommit(_ commit: CommitPoint) async {
         await run { ops in try ops.restoreCommit(commit.variantId, commitID: commit.id) }
-        if statusMessage == nil {
-            statusMessage =
+        if status == nil {
+            status = .receipt(
                 "Restored — the savepoint is back in the take's buffer. Nothing was lost: commits are append-only."
+            )
         }
     }
 
     /// The R90 power variant (⇧⌥⌘T — "open new blank take as chosen"):
     /// mint AND choose in one gesture, both halves in one serialized run.
     func newBlankTakeAsChosen(blockID: String, preferredColumnID: String? = nil) async {
-        statusMessage = nil
+        status = nil
         do {
             let take = try await session.runner.run { ops -> Variant in
                 let take = try ops.newBlankVariant(blockID)
@@ -1796,7 +1854,7 @@ final class TakesViewModel {
             revealChosenTake(
                 blockID: blockID, variantID: take.id, preferredColumnID: preferredColumnID)
         } catch {
-            statusMessage = Self.message(for: error)
+            status = .refusal(Self.message(for: error))
         }
     }
 
@@ -2001,7 +2059,7 @@ final class TakesViewModel {
         guard let pane = focusedPane,
               let slot = projection.slots.first(where: { $0.blockID == pane.blockID })
         else {
-            statusMessage = "Click into a take first — ⌃⌘← and ⌃⌘→ step through its siblings."
+            status = .receipt("Click into a take first — ⌃⌘← and ⌃⌘→ step through its siblings.")
             return
         }
         switch host {
@@ -2016,7 +2074,7 @@ final class TakesViewModel {
             guard let fan = projection.fans[slot.blockID], fan.count > 1,
                   let current = fan.firstIndex(where: { $0.id == pane.variantID })
             else {
-                statusMessage = "This block has one take — ⌘T branches a second."
+                status = .receipt("This block has one take — ⌘T branches a second.")
                 return
             }
             let next = min(max(current + delta, 0), fan.count - 1)
@@ -2031,11 +2089,13 @@ final class TakesViewModel {
     /// keyboard).
     func chooseFocusedTake() async {
         guard let pane = focusedPane else {
-            statusMessage = "Click into a take first — ⌘⏎ chooses the take you're in."
+            status = .receipt("Click into a take first — ⌘⏎ chooses the take you're in.")
             return
         }
         await choose(blockID: pane.blockID, variantID: pane.variantID)
-        if statusMessage == nil { statusMessage = "✓ chosen — the note shows this take everywhere." }
+        if status == nil {
+            status = .receipt("✓ chosen — the note shows this take everywhere.")
+        }
     }
 
     /// ⌘⇧T — toggle the focused (or first fanned) block's bloom.
@@ -2051,7 +2111,7 @@ final class TakesViewModel {
     /// `archiveTake`'s (one copy on every door — 3D/N1).
     func archiveFocusedTake() async {
         guard let pane = focusedPane else {
-            statusMessage = "Click into a take first — ⌘⇧A archives the take you're in."
+            status = .receipt("Click into a take first — ⌘⇧A archives the take you're in.")
             return
         }
         await archiveTake(pane.variantID)
@@ -2088,11 +2148,11 @@ final class TakesViewModel {
     /// Internal (13e round A, A-2) so the structure controller's doors run
     /// through the SAME body rather than growing a second copy of it.
     func run(_ body: @escaping @Sendable (Operations) throws -> Void) async {
-        statusMessage = nil
+        status = nil
         do {
             try await session.runner.run(body)
         } catch {
-            statusMessage = Self.message(for: error)
+            status = .refusal(Self.message(for: error))
         }
     }
 
@@ -2102,11 +2162,11 @@ final class TakesViewModel {
     /// every board door pay for a hazard only the copy doors carry, and
     /// would hide which doors mint copies.
     func runCopying(_ body: @escaping @Sendable (Operations) throws -> Void) async {
-        statusMessage = nil
+        status = nil
         do {
             try await session.runCopying(from: postID, body)
         } catch {
-            statusMessage = Self.message(for: error)
+            status = .refusal(Self.message(for: error))
         }
     }
 
@@ -2148,7 +2208,7 @@ extension TakesViewModel: DivideWCeremonyHost {
     func runDivideW(blockID: String, cuts: [String: Int]) async -> Bool {
         structuralInFlight = true
         defer { structuralInFlight = false }
-        statusMessage = nil
+        status = nil
         do {
             let result: Operations.DivideWResult = try await session.runner.run { ops in
                 try ops.divideW(blockID, cuts: cuts)
@@ -2156,10 +2216,10 @@ extension TakesViewModel: DivideWCeremonyHost {
             if let landing = result.first.variants.first {
                 choreography.parkFocus(onVariant: landing.id)
             }
-            statusMessage = "Divided into takes — ⌥⌘Z undoes it."
+            status = .receipt("Divided into takes — ⌥⌘Z undoes it.")
             return true
         } catch {
-            statusMessage = Self.message(for: error)
+            status = .refusal(Self.message(for: error))
             return false
         }
     }
@@ -2173,6 +2233,6 @@ extension TakesViewModel: DivideWCeremonyHost {
     }
 
     func speakCeremonyError(_ error: Error) {
-        statusMessage = Self.message(for: error)
+        status = .refusal(Self.message(for: error))
     }
 }
