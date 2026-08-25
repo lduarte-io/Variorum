@@ -3029,6 +3029,43 @@ neither phase rediscovers it.
    `Sources/VariorumCore/` and `App/Variorum/` is empty; the scratch probe file
    used to drive `PurgeFamily.expand` was never committed and is deleted.
 
+### THE END-OF-ROUND LADDER — ROUND 3 (fresh Fable re-reviewer, 2026-08-25): ALL WAVE-2 FIXES HOLD · the merge-leg correction judged SOUND · 3 NITs · THE LADDER IS CLOSED at the hard cap
+
+Reviewer's own verification: LR2-1's red-on-old independently
+reproduced by behavioural revert in a scratch worktree (the exact
+recorded counts and line numbers); core reproduced **1416/146**;
+the round-span `Sync/`+`Persistence/` diff verified EMPTY; the
+unmark guard's precision proven; LR2-2/LR2-3/LR2-5 all verified
+HOLDING with their pins run. **The merge-leg correction:
+corroborated three independent ways** (the descendant-set fixpoint;
+the revert's own failure pattern — the merged leg fails only the
+strict claim while the deleted-then-purged leg severs in full; the
+robustness argument) — "the hallucination guard applied correctly,
+cutting both ways for the second time this ladder."
+
+**Findings (recorded; nothing loops — the hard cap):**
+- **[NIT · LR3-1]** `RecoveryView.swift:681` — the LR1-10 class one
+  level down: `groupRows` still enumerates by `\.offset`. Identity
+  churn only. **ADJUDICATED: FIXED by the architect at
+  adjudication** (the skill's small-code allowance): one line,
+  `ForEach(group.rows, id: \.item.id)`; the touched suites re-run
+  green (evidence below).
+- **[NIT · LR3-2]** the owed-at-closeout inventory (adopted as the
+  closeout's checklist): the LR1-4 purge-family KnownIssues row ·
+  the two-panes observation row · the mobile batch-6 inheritance
+  note carrying LR2-4 AND LR1-3's dark window · the MobileSoul
+  parity line · the handoff note · her ratify items (LR1-7 ·
+  LR1-3's product half · batch-5 PROVISIONAL 1 · the
+  restore-confirm call · the LR1-9/LR2-2 hue PROVISIONAL).
+- **[NIT · LR3-3]** record naming looseness (the theme suite is
+  `ThemeTokenTests` in file `ThemeTests.swift`) — noted here; no
+  edit owed.
+
+**Clean bill (abridged):** "the fix is two lines because the
+architecture was right… the versions family leaves this ladder in
+materially better shape than any single round found it." ZERO
+disputes across all three rounds.
+
 ## Constraints
 
 Zero schema (B2 is read-side over `archived_at`; if ANYTHING firms

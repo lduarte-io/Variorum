@@ -678,7 +678,7 @@ struct RecoveryView: View {
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
         }
-        ForEach(Array(group.rows.enumerated()), id: \.offset) { _, row in
+        ForEach(group.rows, id: \.item.id) { row in
             trashRow(row.item, namesItsHome: false)
                 .padding(.leading, 16)
             nestedRows(row, indent: 32)
