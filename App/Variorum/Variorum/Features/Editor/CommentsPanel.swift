@@ -131,7 +131,7 @@ struct CommentsPanel: View {
             if let status = model.statusMessage {
                 Text(status)
                     .font(tokens.small)
-                    .foregroundStyle(.red)
+                    .alarmVoice()
                     .textSelection(.enabled)
             }
             List {

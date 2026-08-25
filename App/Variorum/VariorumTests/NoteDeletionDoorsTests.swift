@@ -322,6 +322,16 @@ struct NoteDeletionActTests {
             let receipt = try await NoteDeletion.run(
                 session: editor.session, postIDs: [pool.id])
             #expect(receipt == RecoveryCopy.notADeletableNote)
+            // **Her #77(a) ruling** (the post-13l polish round, ledger row
+            // 32): the refusal NAMES THE ROAD instead of only refusing. A
+            // JUSTIFIED, STRENGTHENING edit to a shipped pin — the claim it
+            // held (this door cannot tombstone the pool) is untouched and
+            // asserted above; what is added is the property her ruling asks
+            // for, which the constant alone could not carry.
+            #expect(receipt.contains("delete the scraps themselves"),
+                    "a refusal with no next step leaves her nowhere: \(receipt)")
+            #expect(!receipt.contains("can't go to the Trash"),
+                    "the refusal-only shape is retired")
             let state = try await editor.database.read { db in
                 (live: try Queries.containerHeader(db, containerID: pool.id) != nil,
                  trash: try Queries.trash(db, now: harnessNow).map(\.id))

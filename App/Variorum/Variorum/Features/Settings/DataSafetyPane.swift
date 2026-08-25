@@ -177,9 +177,21 @@ struct DataSafetyPane: View {
         if let facts = model.syncFacts {
             let face = SyncSafetyFace.face(facts)
             Section("Your account") {
-                Text(face.headline)
+                // Ledger row 31, her words: *"a gentle green on fully synced
+                // might look nice"*. The TONE is the standing's own decision
+                // (shared with the phone), and it is worn through the voice's
+                // vocabulary — the literal `Color.orange` that used to stand
+                // for "not calm" is gone, and signed-out stays quiet, which
+                // her #75(d) ratification asked for and a two-way `isCalm`
+                // could not express.
+                Group {
+                    switch face.tone {
+                    case .settled: Text(face.headline).positiveVoice()
+                    case .attention: Text(face.headline).alarmVoice()
+                    case .quiet: Text(face.headline)
+                    }
+                }
                     .font(.callout)
-                    .foregroundStyle(face.isCalm ? AnyShapeStyle(.primary) : AnyShapeStyle(Color.orange))
                     .fixedSize(horizontal: false, vertical: true)
                 ForEach(face.details, id: \.self) { detail in
                     Text(detail)

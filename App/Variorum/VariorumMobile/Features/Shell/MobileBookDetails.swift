@@ -221,7 +221,7 @@ struct MobileBookDetailsSheet: View {
                 deleteRow
             }
             if let error = model.lastError {
-                Text(error).font(tokens.small).foregroundStyle(.red)
+                Text(error).font(tokens.small).foregroundStyle(tokens.alarm)
             }
             Spacer(minLength: 0)
         }
@@ -270,7 +270,7 @@ struct MobileBookDetailsSheet: View {
             HStack {
                 Text(tokens.chromeLabel(MobileShelfFaces.deleteBookDoorTitle))
                     .font(tokens.body)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(tokens.alarm)
                 Spacer()
                 Text(tokens.chromeLabel(RecoveryCopy.deleteBookKeepsItsNotes))
                     .font(tokens.small)

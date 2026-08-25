@@ -152,7 +152,7 @@ struct BookView: View {
             if let error = model.lastError ?? structure.lastError {
                 Text(error)
                     .font(tokens.small)
-                    .foregroundStyle(.red)
+                    .alarmVoice()
                     .textSelection(.enabled)
                     .padding(4)
             }
@@ -1310,7 +1310,7 @@ struct BookSettingsSheet: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             if let parseError {
-                Text(parseError).font(.caption).foregroundStyle(.red)
+                Text(parseError).font(.caption).alarmVoice()
             }
             HStack {
                 Spacer()

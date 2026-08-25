@@ -123,7 +123,7 @@ struct MobileBookView: View {
                     .foregroundStyle(reading.locked ? tokens.accent : tokens.ink)
             }
             if let error = model.lastError {
-                Text(error).font(tokens.small).foregroundStyle(.red)
+                Text(error).font(tokens.small).foregroundStyle(tokens.alarm)
             }
         }
         .padding(.horizontal, 20)

@@ -159,7 +159,7 @@ struct ShelfView: View {
             if let error = model.lastError ?? readings.lastError {
                 Text(error)
                     .font(tokens.small)
-                    .foregroundStyle(.red)
+                    .alarmVoice()
                     .textSelection(.enabled)
                     .lineLimit(4)
                     .padding(6)
@@ -400,7 +400,7 @@ struct BookExtentSheet: View {
                 TextField("Note cap (max notes)", text: $maxPostsField)
             }
             if let parseError {
-                Text(parseError).font(.caption).foregroundStyle(.red)
+                Text(parseError).font(.caption).alarmVoice()
             }
             HStack {
                 Spacer()

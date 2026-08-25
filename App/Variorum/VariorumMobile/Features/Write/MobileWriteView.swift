@@ -242,7 +242,7 @@ struct MobileWriteScreen: View {
                 lensChip
             }
             if let canary = model.canaryMessage {
-                Text(canary).font(tokens.small).foregroundStyle(.red)
+                Text(canary).font(tokens.small).foregroundStyle(.red)  // CANARY: deliberately not the voice's alarm
             }
             if model.isSealed {
                 // The state line pairs with its door (the 13b fire-and-DO

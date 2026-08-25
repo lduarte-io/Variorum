@@ -60,7 +60,7 @@ struct WordTargetFace: View {
                     .foregroundStyle(.secondary)
                     .frame(width: 220, alignment: .leading)
                 if let parseError {
-                    Text(parseError).font(.caption).foregroundStyle(.red)
+                    Text(parseError).font(.caption).alarmVoice()
                 }
                 HStack {
                     Button("Clear") {

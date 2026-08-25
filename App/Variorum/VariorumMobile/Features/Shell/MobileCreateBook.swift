@@ -183,7 +183,7 @@ struct MobileCreateBookSheet: View {
             }
             Spacer(minLength: 0)
             if let error = model.lastError {
-                Text(error).font(tokens.small).foregroundStyle(.red)
+                Text(error).font(tokens.small).foregroundStyle(tokens.alarm)
             }
             Button {
                 Task {

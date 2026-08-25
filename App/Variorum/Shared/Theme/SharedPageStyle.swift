@@ -132,7 +132,7 @@ extension View {
     @ViewBuilder
     func pageCaptionError(_ style: SharedPageStyle?) -> some View {
         if let style {
-            self.font(style.tokens.small).foregroundStyle(Color.red)
+            self.font(style.tokens.small).foregroundStyle(style.tokens.alarm)
         } else {
             self.font(.caption).foregroundStyle(.red)
         }

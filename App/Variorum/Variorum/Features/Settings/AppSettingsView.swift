@@ -372,7 +372,7 @@ private struct TagManagerPane: View {
                     .disabled(promoteTags.isEmpty)
             }
             if let error = tags.lastError {
-                Text(error).font(.caption).foregroundStyle(.red)
+                Text(error).font(.caption).alarmVoice()
             }
         }
         .padding(12)
@@ -433,7 +433,7 @@ struct PromoteTagsSheet: View {
                 .pickerStyle(.radioGroup)
             }
             if let error {
-                Text(error).font(.caption).foregroundStyle(.red)
+                Text(error).font(.caption).alarmVoice()
             }
             HStack {
                 Spacer()

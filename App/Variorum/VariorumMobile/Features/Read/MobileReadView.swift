@@ -63,7 +63,7 @@ struct MobileReadView: View {
                             .padding(.top, 40)
                     }
                     if let error = model.lastError {
-                        Text(error).font(tokens.small).foregroundStyle(.red)
+                        Text(error).font(tokens.small).foregroundStyle(tokens.alarm)
                     }
                     ForEach(
                         Array(MobileReadPage.assemble(model.groupedRows).enumerated()),

@@ -137,7 +137,7 @@ struct TimelineView: View {
             if let error = model.lastError {
                 Text(error)
                     .font(.caption)
-                    .foregroundStyle(.red)
+                    .alarmVoice()
                     .textSelection(.enabled)
                     .padding(4)
             }

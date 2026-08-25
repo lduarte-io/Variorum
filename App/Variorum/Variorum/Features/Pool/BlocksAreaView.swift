@@ -82,7 +82,7 @@ struct BlocksAreaView: View {
             if let line = model.receipt ?? model.lastError {
                 Text(tokens.chromeLabel(line))
                     .font(tokens.small)
-                    .foregroundStyle(model.receipt != nil ? tokens.muted : tokens.accent)
+                    .foregroundStyle(model.receipt != nil ? tokens.muted : tokens.alarm)
                     // lineLimit beside fixedSize in chrome (the b6dae25 class).
                     .lineLimit(3)
                     .fixedSize(horizontal: false, vertical: true)
@@ -221,7 +221,7 @@ struct BlocksAreaView: View {
                 // chrome (the wedged-window class rule).
                 Text(lastError)
                     .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
+                    .foregroundStyle(tokens.alarm)
                     .lineLimit(3)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.bottom, 8)

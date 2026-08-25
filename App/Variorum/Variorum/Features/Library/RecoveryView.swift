@@ -610,7 +610,7 @@ struct RecoveryView: View {
             if let error = model.lastError ?? library.lastError {
                 Text(error)
                     .font(.caption)
-                    .foregroundStyle(.red)
+                    .alarmVoice()
                     .textSelection(.enabled)
                     .padding(4)
             } else if let receipt = model.receipt {

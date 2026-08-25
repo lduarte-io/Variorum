@@ -166,3 +166,53 @@ struct ChromeNotice: View {
             .textSelection(.enabled)
     }
 }
+
+// MARK: - The two signal voices (the post-13l polish round, rows 29 and 31)
+
+/// **A refusal, in the voice's own alarm** (ledger row 29 — her mid-round
+/// ruling: *"Add it this round"*).
+///
+/// Why a MODIFIER and not "pass `tokens.alarm` at every site": the ~30 error
+/// slots this replaces are scattered through nested private view structs, many
+/// of which hold no tokens at all and painted `.foregroundStyle(.red)` for
+/// exactly that reason — the literal was the path of least resistance, and a
+/// sweep that made each of them acquire a `ThemeStore` would be thirty chances
+/// to acquire it differently. This resolves the voice itself, at the one place
+/// the app already resolves it, so `.foregroundStyle(.red)` → `.alarmVoice()`
+/// is a one-token edit anywhere and cannot drift.
+///
+/// **Not for the fallback CANARY banners.** `EditorView` / `ReadPostView` /
+/// `PaneSurface` paint white-on-red blocks when TextKit 2 silently downgrades
+/// (TEXTKIT2 §4's third defensive practice). That is a build-integrity alarm
+/// aimed at a developer, deliberately the loudest thing the app can draw, and
+/// quieting it into the voice would be softening a signal whose whole job is
+/// to be impossible to miss. They keep their literal red, on purpose.
+struct AlarmVoice: ViewModifier {
+    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
+    @Environment(\.colorScheme) private var scheme
+
+    func body(content: Content) -> some View {
+        content.foregroundStyle(
+            (themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)).alarm)
+    }
+}
+
+/// **A settled state, in the voice's quiet positive** (ledger row 31 — her
+/// words: *"a gentle green on fully synced might look nice"*). Same resolution
+/// road as `AlarmVoice`, same reason.
+struct PositiveVoice: ViewModifier {
+    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
+    @Environment(\.colorScheme) private var scheme
+
+    func body(content: Content) -> some View {
+        content.foregroundStyle(
+            (themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)).positive)
+    }
+}
+
+extension View {
+    /// Paint this as a refusal — the voice's error/danger slot.
+    func alarmVoice() -> some View { modifier(AlarmVoice()) }
+    /// Paint this as a settled state — the voice's quiet positive slot.
+    func positiveVoice() -> some View { modifier(PositiveVoice()) }
+}

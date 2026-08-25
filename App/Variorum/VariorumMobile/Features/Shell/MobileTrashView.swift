@@ -144,7 +144,7 @@ struct MobileTrashView: View {
                     } label: {
                         Text(tokens.chromeLabel(RecoveryCopy.emptyTrashVerb))
                             .font(tokens.small)
-                            .foregroundStyle(.red)
+                            .foregroundStyle(tokens.alarm)
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel(RecoveryCopy.emptyTrashVerb)
@@ -231,7 +231,7 @@ struct MobileTrashView: View {
                         .foregroundStyle(tokens.muted)
                 }
                 if let error = model.lastError {
-                    Text(error).font(tokens.small).foregroundStyle(.red)
+                    Text(error).font(tokens.small).foregroundStyle(tokens.alarm)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -274,7 +274,7 @@ struct MobileTrashView: View {
                     } label: {
                         Text(tokens.chromeLabel(RecoveryCopy.deleteNowVerb))
                             .font(tokens.small)
-                            .foregroundStyle(.red)
+                            .foregroundStyle(tokens.alarm)
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel(

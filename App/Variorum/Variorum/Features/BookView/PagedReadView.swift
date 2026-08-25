@@ -126,7 +126,7 @@ struct PagedReadView: View {
             if let error = pages.lastError {
                 Text(error)
                     .font(tokens.small)
-                    .foregroundStyle(.red)
+                    .alarmVoice()
                     .textSelection(.enabled)
                     .padding(4)
             }

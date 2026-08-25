@@ -697,7 +697,7 @@ struct TrayPanel: View {
             if let status = model.status {
                 Text(status.text)
                     .font(tokens.small)
-                    .foregroundStyle(status.isRefusal ? tokens.accent : tokens.muted)
+                    .foregroundStyle(status.isRefusal ? tokens.alarm : tokens.muted)
                     .textSelection(.enabled)
             }
             if model.revealMissing {

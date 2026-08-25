@@ -82,7 +82,7 @@ struct MobileShelfView<TabBar: View>: View {
             if let error = model.lastError {
                 Text(error)
                     .font(tokens.small)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(tokens.alarm)
                     .padding(.horizontal, 20)
                     .padding(.bottom, 4)
             }

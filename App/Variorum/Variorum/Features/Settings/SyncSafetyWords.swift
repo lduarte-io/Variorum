@@ -30,6 +30,12 @@ nonisolated struct SyncSafetyFace: Equatable {
     /// True when the headline should be worn quietly rather than in a colour
     /// that asks for attention.
     var isCalm: Bool
+    /// **How the headline is painted** (the post-13l polish round, ledger row
+    /// 31 — her *"a gentle green on fully synced might look nice"*). The
+    /// decision is the STANDING's, shared with the phone
+    /// (`SyncSafetyStanding.tone`); this carries it to the pane so the view
+    /// renders a token and never re-derives a rule.
+    var tone: SyncSafetyStanding.Tone
 
     static func face(_ facts: SyncSafetyFacts) -> SyncSafetyFace {
         let standing = facts.standing
@@ -37,7 +43,8 @@ nonisolated struct SyncSafetyFace: Equatable {
         case .devStore:
             return SyncSafetyFace(
                 headline: "Sync is off in this build (development store).",
-                details: [Self.localOnlyReassurance], isCalm: standing.isCalm)
+                details: [Self.localOnlyReassurance], isCalm: standing.isCalm,
+                tone: standing.tone)
         case .localOnly, .signedInNotSyncing:
             // Both mean the same thing from here — nothing is leaving this
             // Mac — and the honest difference is only WHY.
@@ -47,12 +54,12 @@ nonisolated struct SyncSafetyFace: Equatable {
             return SyncSafetyFace(
                 headline: why,
                 details: [Self.localOnlyReassurance] + Self.backlogDetail(facts),
-                isCalm: standing.isCalm)
+                isCalm: standing.isCalm, tone: standing.tone)
         case .allSent:
             return SyncSafetyFace(
                 headline: "Everything written on this Mac has reached your account.",
                 details: Self.roundDetail(facts) + Self.cursorDetail(facts),
-                isCalm: standing.isCalm)
+                isCalm: standing.isCalm, tone: standing.tone)
         case .waiting(let pending):
             return SyncSafetyFace(
                 headline: pending == 1
@@ -60,7 +67,7 @@ nonisolated struct SyncSafetyFace: Equatable {
                     : "\(pending) changes are still waiting to go up.",
                 details: [Self.waitingReassurance] + Self.roundDetail(facts)
                     + Self.cursorDetail(facts),
-                isCalm: standing.isCalm)
+                isCalm: standing.isCalm, tone: standing.tone)
         }
     }
 

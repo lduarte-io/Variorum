@@ -992,7 +992,7 @@ struct MobileQuickNoteBox: View {
                 // (P-8, the b6dae25 class).
                 Text(error)
                     .font(tokens.small)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(tokens.alarm)
                     .lineLimit(3)
             }
         }

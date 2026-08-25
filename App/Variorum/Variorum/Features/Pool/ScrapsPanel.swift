@@ -98,7 +98,7 @@ struct ScrapsPanel: View {
             if let error = model.lastError {
                 Text(error)
                     .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
+                    .foregroundStyle(tokens.alarm)
                     .lineLimit(3)
                     .fixedSize(horizontal: false, vertical: true)
             }

@@ -397,6 +397,34 @@ struct SyncSafetyFaceTests {
         #expect(!SyncSafetyStanding.waiting(1).isCalm)
     }
 
+    /// **THE THREE TONES** (the post-13l polish round, ledger row 31 — her
+    /// words: *"a gentle green on fully synced might look nice"*).
+    ///
+    /// `isCalm` gives a two-way answer, and her ruling needs three: the
+    /// settled state wants a gentle POSITIVE, a backlog wants attention, and
+    /// **signed-out stays QUIET** — her #75(d) ratification, which a two-way
+    /// answer cannot express, because "calm" would paint a signed-out Mac the
+    /// same green as one that has sent everything, and being local-only is a
+    /// complete state rather than an accomplishment. The decision is the
+    /// standing's, shared with the phone; the pane renders a token from it.
+    @Test func onlyTheSettledStateWearsTheGentlePositiveAndSignedOutStaysQuiet() {
+        #expect(SyncSafetyStanding.allSent.tone == .settled)
+        #expect(SyncSafetyStanding.waiting(3).tone == .attention)
+        #expect(SyncSafetyStanding.localOnly.tone == .quiet)
+        #expect(SyncSafetyStanding.signedInNotSyncing.tone == .quiet)
+        #expect(SyncSafetyStanding.devStore.tone == .quiet)
+        // The face CARRIES it — a view never re-derives the rule.
+        #expect(SyncSafetyFace.face(facts(pending: 0)).tone == .settled)
+        #expect(SyncSafetyFace.face(facts(pending: 4)).tone == .attention)
+        #expect(SyncSafetyFace.face(
+            facts(isConfigured: false, signedIn: false)).tone == .quiet)
+        // …and `isCalm` still answers its own question beside it: a
+        // signed-out Mac is calm AND quiet; a settled one is calm AND green.
+        #expect(SyncSafetyFace.face(facts(pending: 0)).isCalm)
+        #expect(SyncSafetyFace.face(
+            facts(isConfigured: false, signedIn: false)).isCalm)
+    }
+
     /// The local read: both facts, one transaction, straight from the store.
     /// Zero engine lines — this is the whole of row 17's contact with sync.
     @Test func theLocalReadAnswersFromTheStore() async throws {

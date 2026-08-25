@@ -99,4 +99,33 @@ nonisolated enum SyncSafetyStanding: Equatable, Sendable {
         if case .waiting = self { return false }
         return true
     }
+
+    /// **How the line is PAINTED** (the post-13l polish round, ledger row 31
+    /// — her words: *"a gentle green on fully synced might look nice"*).
+    ///
+    /// `isCalm` was a two-way answer, and her ruling asks for three: the
+    /// settled state wants a gentle positive, a backlog wants attention, and
+    /// **signed-out stays quiet** (her #75(d) ratification — being local-only
+    /// is a complete, normal state, never a setup step owed). So the tone is
+    /// the standing's own decision, decided once here, and each platform
+    /// renders it through its voice vocabulary — never a literal colour.
+    ///
+    /// `isCalm` survives unchanged as the "does this ask for attention?"
+    /// question its own pins ask; this is the finer answer beside it.
+    enum Tone: Equatable, Sendable {
+        /// Nothing to say — the ordinary voice.
+        case quiet
+        /// Everything this device has written has reached the account.
+        case settled
+        /// A real backlog: worth noticing.
+        case attention
+    }
+
+    var tone: Tone {
+        switch self {
+        case .allSent: return .settled
+        case .waiting: return .attention
+        case .devStore, .localOnly, .signedInNotSyncing: return .quiet
+        }
+    }
 }

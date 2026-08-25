@@ -33,6 +33,34 @@ struct VoiceTokens {
     let muted: Color
     let faint: Color
     let accent: Color
+    /// **THE ERROR/DANGER SLOT** (the post-13l polish round, ledger row 29 —
+    /// her mid-round ruling: *"Add it this round"*).
+    ///
+    /// One named alarm per voice, so a refusal is a refusal in the app's own
+    /// register rather than the system red. It exists because the round kept
+    /// meeting the same two shapes of the same defect: a literal
+    /// `.foregroundStyle(.red)` in a themed surface (the tray's status slot,
+    /// the origin peek's, and ~30 error lines across both platforms), and —
+    /// where a surface DID reach for a token — `accent`, the app's own
+    /// positive colour, standing in for alarm because there was nothing else
+    /// (batch 1 shipped exactly that as a recorded PROVISIONAL).
+    ///
+    /// Deliberately QUIET rather than a stoplight: this is a calm-default
+    /// writing app, and the sentence carries the alarm — the colour only has
+    /// to say "this one is different". **The hues are placeholders revisable
+    /// at 13s's design review** (her ruling), and 13u's dark mode inherits
+    /// the slot by construction.
+    let alarm: Color
+    /// **THE QUIET POSITIVE SLOT** (ledger row 31 — her words on the sync
+    /// line: *"a gentle green on fully synced might look nice"*).
+    ///
+    /// Distinct from `chosen`, which marks the take a pointer names, and from
+    /// `accent`, which is the voice's own emphasis: this says *nothing is
+    /// outstanding*, which is a state and not an emphasis. Gentle in both
+    /// voices on purpose — a settled state should be readable at a glance and
+    /// forgettable the moment after (her #75(d) ratification: signed-out
+    /// stays quiet, so only THIS state wears it).
+    let positive: Color
 
     // MARK: Lines & marks
     /// Hairline separators.
@@ -123,6 +151,8 @@ extension VoiceTokens {
         muted: Color(hex: 0x8B9088),
         faint: Color(hex: 0xB3B6AE),
         accent: Color(hex: 0x2F7D5F),
+        alarm: Color(hex: 0xA33A2E),
+        positive: Color(hex: 0x2F7D5F),
         line: Color(hex: 0xE4E4DC),
         seam: Color(hex: 0xCFCFC5),
         wash: Color(hex: 0xEEF0EA),
@@ -154,6 +184,8 @@ extension VoiceTokens {
         muted: Color(hex: 0x8B9088),
         faint: Color(hex: 0x5B6058),
         accent: Color(hex: 0x6FBF94),
+        alarm: Color(hex: 0xE08A7C),
+        positive: Color(hex: 0x6FBF94),
         line: Color(hex: 0x242624),
         seam: Color(hex: 0x4A4D4A),
         wash: Color(hex: 0x1A211C),
@@ -186,6 +218,8 @@ extension VoiceTokens {
         muted: Color(hex: 0x8D8578),
         faint: Color(hex: 0xB5AD9E),
         accent: Color(hex: 0x3D6B8E),
+        alarm: Color(hex: 0x9B3B2F),
+        positive: Color(hex: 0x5A7D46),
         line: Color(hex: 0xE4DDD0),
         seam: Color(hex: 0xC9B998),
         wash: Color(hex: 0x3D6B8E).opacity(0.12),
@@ -218,6 +252,8 @@ extension VoiceTokens {
         muted: Color(hex: 0x948C7C),
         faint: Color(hex: 0x6B6456),
         accent: Color(hex: 0x82ABCC),
+        alarm: Color(hex: 0xD98A78),
+        positive: Color(hex: 0x93B57E),
         line: Color(hex: 0x2C2822),
         seam: Color(hex: 0x57544A),
         wash: Color(hex: 0x82ABCC).opacity(0.13),

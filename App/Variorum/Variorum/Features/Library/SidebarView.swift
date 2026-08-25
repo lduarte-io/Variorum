@@ -408,7 +408,7 @@ struct SidebarView: View {
             if let error = model.lastError ?? importer?.lastError {
                 Text(error)
                     .font(tokens.small)
-                    .foregroundStyle(.red)
+                    .alarmVoice()
                     .textSelection(.enabled)
                     .padding(4)
             } else if let status = importer?.lastReport {

@@ -182,7 +182,7 @@ struct PoolPostsView: View {
             if let error = model.lastError {
                 Text(error)
                     .font(tokens.small)
-                    .foregroundStyle(.red)
+                    .alarmVoice()
                     .textSelection(.enabled)
                     .padding(6)
             }

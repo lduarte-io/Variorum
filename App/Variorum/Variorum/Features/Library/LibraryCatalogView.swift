@@ -476,7 +476,7 @@ struct LibraryCatalogView: View {
             if let error = model.lastError ?? library.lastError {
                 Text(error)
                     .font(tokens.small)
-                    .foregroundStyle(.red)
+                    .alarmVoice()
                     .textSelection(.enabled)
                     .padding(6)
             } else if let receipt = library.receipt {

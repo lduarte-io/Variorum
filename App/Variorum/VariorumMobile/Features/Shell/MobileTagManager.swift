@@ -312,7 +312,7 @@ struct MobileTagManagerSheet: View {
             if let error = model.lastError {
                 Text(error)
                     .font(tokens.small)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(tokens.alarm)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }

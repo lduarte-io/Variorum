@@ -526,9 +526,15 @@ nonisolated enum RecoveryCopy {
     /// recoverable "delete the scraps area", or nothing at all) is a product
     /// call. It is on the walk's propose-only list.
     ///
-    /// **PROVISIONAL wording (QUESTIONS #77).**
+    /// **HER RULING (#77(a), the post-13l polish round — ledger row 32):
+    /// NAME THE ROAD INSTEAD.** The shipped sentence said what the act would
+    /// not do and stopped there, which leaves someone who wants the scraps
+    /// gone with a refusal and no next step. Hers says what to do instead, in
+    /// her own shape: *"Scraps go one at a time — delete the scraps
+    /// themselves."* The fence itself is unchanged (it lives at the ACT, so
+    /// every one of the four doors passes through it); this is what it says.
     static let notADeletableNote =
-        "That's the scraps area, not a note — it can't go to the Trash."
+        "Scraps go one at a time — delete the scraps themselves."
 
     // MARK: Put-back receipts, by kind and by landing (hoisted at 4.5b)
 
