@@ -173,3 +173,40 @@ and meets membership-not-ownership by doing (add the same note to a
 second book; delete one book; watch the note survive — the 13j
 books-lesson sentence taught as an act). Sized at this phase's
 kickoff alongside its identity work.
+
+## Author additions (2026-08-25, the launch-strategy conversation — her words)
+
+Her message named this phase directly: *"I want to add custom shelf
+order and I want the book and schema phase change to make books a bit
+more of a robust object - with examples like autoadding tags,
+potentially adding extensibility for templates within a book or a book
+of templates (not sure how templates fit into the overall plan, but
+it's something on my mind), letting books have a distinct order and
+also auto add, custom shelf order."*
+
+- **CUSTOM SHELF ORDER — ruled IN, must-have.** Her schedule note:
+  *"13i - book & schema change (CUSTOM SHELF ORDER MUST BE ADDED)"*;
+  her journal-content note, independently: *"option on shelf to have
+  custom order is a need during 13i."* The shelf today pins but has no
+  hand-order; a manual order that syncs wants a position on `reading`
+  (the §6 fractional-index convention) — a natural passenger on
+  whatever §12 lockstep event this phase already carries.
+- **Templates** — *"templates within a book or a book of templates"*;
+  her uncertainty preserved: *"not sure how templates fit into the
+  overall plan, but it's something on my mind."* A sitting CANDIDATE,
+  not a ruling. (Framing note for the sitting: the copy-with-lineage
+  machinery — `poolDragCopy` / `duplicateAsVersion` — is most of a
+  "new from template" door already; the design questions are what
+  MARKS a note or book as a template, what a copy strips — dates,
+  tags? — and where the door lives.)
+- **Distinct order AND auto-add** — her phrasing re-confirms the
+  hybrid this brief exists for (knots 1–6 above).
+- **Auto-adding tags** — already this brief's second direction
+  (2026-08-02, above); re-named in the same breath.
+- **SCHEMA-BUNDLING NOTE (the planning-ahead point of her 2026-08-25
+  message — she asked what breaks sync once users exist):** bundle
+  EVERY schema need this sitting rules in — the shelf position, any
+  hybrid/auto-tag columns, and the LIBRARIES dimension if she rules it
+  in and rules THIS sitting as its home (see the 13o row's 2026-08-25
+  pin) — into ONE §12 lockstep event, landed BEFORE strangers, while
+  the lockstep choreography is still a two-device family affair.

@@ -83,3 +83,41 @@ folder/markdown bridge; the MCP door is this phase. The two may share
 plumbing at build time (both are "an outside writer lands through
 ordinary operations"), but their design conversations are separate and
 13h's opens first only if she runs it first — no ordering is implied.
+
+## The chat question (author, 2026-08-25, the launch-strategy conversation — OPEN, nothing decided)
+
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+interesting to explore the angle of positioning it as an AI *editing*
+app instead of an AI writing app - your words stay yours"* — with her
+option idea: takes may be AI-edited by permission, **with a commit
+before and after so the owner can compare** (the insurance-commit
+doctrine extended to an AI edit — nearly free in the model, and worth
+naming at the sitting as a first-class demo).
+
+Candidate shape recorded 2026-08-25 (Fable assessment, not a ruling):
+**build the MCP server first exactly as this note describes, and treat
+any future in-app chat as ANOTHER CLIENT of the same server and the
+same grant grammar** — the chat's AI walks through the same doors,
+shows the same grants, gets refused by the same refusals. That keeps
+the permission story ONE story whether the client is Claude Code, a
+local LLM, or an embedded chat; it means the chat decision does not
+gate 13n and can be made after watching how the MCP launch lands; and
+it makes the only 13n-time obligation a cheap one: don't build
+anything that assumes the client is external (auth/token flow an
+embedded client could also use). If a chat is later ruled in, it is
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+undecided.

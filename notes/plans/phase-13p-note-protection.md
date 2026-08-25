@@ -206,6 +206,53 @@ Fragments-side change is needed; the stranded-days status note (13l's
 fix) then covers only the historical population, which is zero on her
 store today. QUESTIONS #78 has the full shape menu.
 
+## AUTHOR ADDITIONS (2026-08-25, the launch-strategy conversation)
+
+- **TWO OUTBOUND BRIEFS ARE PHASE DELIVERABLES (her instruction,
+  verbatim):** *"the phase for encryption needs to both write a brief
+  for the fragments agent and update the brief for the stargazing.tech
+  agent's privacy policy."* (a) A dated brief for the FRAGMENTS agent
+  via `notes/fragments-bridge-contract.md` (the standing carry channel
+  — she carries it): what Variorum's whole-store encryption means for
+  the suite's privacy story, and what — if anything — Fragments wants
+  for its own at-rest story. Standing facts the brief starts from: the
+  bridge's JOURNAL class is E2EE and live since 14d; the REST of
+  Fragments is server-readable BY DESIGN (the 14b ruling — its insights
+  are the product); whether Fragments adopts a 13p-style local store
+  encryption is that app's call, informed by this brief. Her stated
+  goal: finishing this encryption *"lets me finish fragments and have
+  a cohesive privacy policy."* (b) An UPDATE to the stargazing.tech
+  agent's privacy-policy brief so the policy states the whole-suite
+  story cohesively (what is E2EE, what is local-encrypted, what is
+  server-readable and why).
+- **Her backup/portability questions, answered where this plan already
+  does:** *"are we exposing the SQLite backup toggle?"* — 13l shipped
+  the user-facing Data Safety surface (destination picker, Back Up
+  Now, freshness face); this phase keeps it and RE-KEYS it (backups
+  become ciphertext — the research-record #10 trap). *"can we add in
+  addition to the plaintext save elsewhere a SQLite save in a
+  different folder?"* — the second-destination SQLite backup IS 13l's
+  shipped shape (14 dailies + 4 weeklies to her picked folder); under
+  this phase those copies become ciphertext, and the plaintext escape
+  narrows to the opt-in `.md` export per R13p-8's rider. *"how will
+  this work once encryption is present?"* — THE DESIGN's backup
+  paragraph + R13p-15's ruled age-out tail.
+- **OPEN KNOT 10 — the AirDrop / no-sync migration story (her
+  question, verbatim: "can someone airdrop their work to a new
+  computer, even if they don't want to pay for sync").** The substrate
+  says yes — rows-as-truth, one file; `openStore(at:)` is keyed in
+  Batch 1; the restore drill already proves the new-machine key leg
+  (passphrase / recovery phrase / escrow). What the sitting decides:
+  whether a deliberate user-facing "move your library" door ships in
+  this phase or is handed to 13r's distribution checklist, and the
+  sync-state hygiene of a moved store — a copied store carries
+  `sync_state.device_id`, so an adoption door should consider
+  resetting device identity so a later subscription on the new machine
+  never shares the old device's cursor. She intends to MARKET this
+  ("airdrop your corpus to your new computer and it will work" is in
+  her launch-video list), so the claim should be true by a built door,
+  not by luck.
+
 ## NON-GOALS (named so they stay declined, not forgotten)
 
 - **Shape B column sealing.** The one threat it covers that this design
