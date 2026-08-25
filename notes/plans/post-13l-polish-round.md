@@ -193,6 +193,7 @@ plus the archive/trash separation are expected to dissolve it.
 | 24 | **V3's MUST-PIN:** version copies of journal notes never trip the bridge's duplicate-day pause — verified whichever way the machinery composes, pinned either way | open |
 | 25 | Found-item 2: the archive-a-note door verified/ensured (one clear door, receipt naming the Archived surface) — rides B1's registry pass | open |
 | 26 | The tutorial chapter (row 19) teaches the VERSIONS story too: ⌘S vs ⌘⇧S — this take's moment vs this note's moment — the grain pairing as the lesson | open |
+| 28 | **THE Aa BOTTOM-CHROME CONDENSATION (her kickoff addition, 2026-08-24 — verbatim in the kickoff record; SCOPE RULED at the kickoff sitting via the question tool): FORMATTING ONLY BEHIND Aa.** The `FormatBar` cluster + the newlines chip condense into one Aa button; clicking Aa slides the formatting row out (the phone's Aa expanding-row idiom, now on the Mac — a reverse-parity face like dark mode). Block ▾ · Takes · commit ⌘S · **History (row 17's new door)** · note ▾ · comments · counts · ? all stay visible at rest — the "bar becomes the block's time controls" reading survives by construction. Both bars (`CommitBar` + `TakesBottomBar`) take the same treatment; registry discipline P-1 (doors move, declarations unchanged — the R6-2/13g slide-out precedent is exactly this class); expansion state is session UI state | open |
 | 27 | **THE TWO-EXITS LESSON (her eleventh-sitting mandate — "I deleted a paragraph, is it in deleted or in lineage? and lineage of what block" must be legible):** the chapter teaches **"Deletion goes to the Trash; transformation goes to lineage"** — a block you DELETED is on the clock, Put back real; a block that BECAME something else (merged, divided) lives in the new block's History came-from, one button back. Taught by DOING (her idea, adopted: the lesson walks the user through deleting a whole block, then making an edit that merges two — and finding each in its exit). Covers TODAY's truth incl. the shipped merge-then-edit; **the fanned cross-block matrix is 13u's** (its sitting + its own lesson update — the split is recorded there). The merge's own silence stays HER declined P-2 — the tutorial carries the teaching, not a per-merge message | open |
 
 
@@ -392,6 +393,151 @@ been saved — so the 30-day regret net applies.)
 walked — the round's registry pass verifies one clear door exists
 (the Library row menu is the natural candidate) and that its receipt
 names the Archived surface.
+
+## The architectural rules (the 13b constitution, P-1…P-9 — copied verbatim per `/architect-phase`, 2026-08-24 kickoff; the skill file's application notes bind beside them)
+
+- **P-1 — One capability registry.** Every user-facing act is declared
+  exactly once: verb, scope (block/take/post/book), per-mode availability
+  rule, its doors (menu / context / bar / shortcut / palette), and its
+  refusal copy. Surfaces render their doors FROM the registry; gating is
+  data, never per-view if-statements. A registry-walk test asserts every
+  declared door exists and every rendered door is declared. This kills the
+  D3/D4 class structurally — the capability matrix stays green by
+  construction instead of by audit.
+- **P-2 — Fire-and-DO (R115).** A rendered door either performs the act —
+  including any mode-switch choreography, done visibly for the user — or
+  delivers the operations layer's real refusal. A door that can never act in
+  its context isn't rendered. Lecture-and-redirect is retired.
+- **P-3 — One text surface, one liveness authority.** ONE TK2 surface
+  component (live + read modes; one measurement brain — the width-gated
+  remeasure; the shared canary) that every pane composes; the live editor
+  core's identity machinery (`BlockRangeIndex`, crystallization) becomes its
+  live mode, not a sibling implementation. "What text does this pane show,
+  and is it live" is answered by ONE pure, unit-tested authority
+  (`PaneTextAuthority`); views never re-derive it. Its invariants stated as
+  code: exactly one live pane; the live pane is buffer-authoritative; read
+  panes are projection-authoritative once caught up.
+- **P-4 — Broadcasts carry signals, never decisions.** NotificationCenter
+  may announce that something happened (mode changed, post opened); no
+  listener derives business state or availability from a broadcast, and no
+  flow's correctness depends on broadcast ordering. Cross-feature flows
+  route through composition. (Stage 0's survey enumerates today's
+  notification bus; Stage 1 disciplines it.)
+- **P-5 — The friction doctrine (R116).** Repeated pushback against a rule
+  marks an under-architected feature. The response is never another patch:
+  write the feature's DESIGN MEMO — intended behavior whole, edge cases
+  enumerated on paper, refusal wordings, undo story — get the author's
+  rulings on the product-flavored edges, then build to the memo. Happy path
+  ships first, but the edges are *decided at design time*, not discovered by
+  the author. First two memos owed: **merge** and **the W ceremony**.
+- **P-6 — The tutorial is the executable spec (R113).** The guided tutorial
+  flow is the contract for every happy path. It stays green — automated
+  where the harness allows, screenshot-walked otherwise — and any change
+  that breaks a tutorial step is a regression by definition.
+- **P-7 — Find bugs before she does.** Every layer keeps a proactive
+  harness: the ops-layer soaks (exist), the board/view-model invariant soak
+  (Stage 1), the registry walk (P-1), the per-batch scripted screenshot
+  walkthrough. Red-on-old stays absolute: no bug-class fix without a pin
+  that fails on the pre-fix code.
+- **P-8 — Standing law, consolidated.** P1–P3 performance invariants bind
+  the rebuilt layer exactly as they bind the substrate (invalidation ∝
+  realized rows; one live editor; virtualized long views). Overlays, never
+  rendering attributes. Chrome `fixedSize` texts always carry a `lineLimit`
+  (the b6dae25 class). `Theme/VoiceControls.swift` is THE chrome vocabulary.
+  Complexity lives in the store; restraint lives in the UI.
+- **P-9 — No god objects in the frontend either.** A view model mixing
+  board layout, text authority, and gesture routing splits by concern
+  (`TakesViewModel` at 890 lines is the standing counterexample). Same
+  hygiene rule as the substrate, applied where it was being waived.
+
+*(Note on the constitution's phase-specific names — D3/D4, Stage 0/1,
+`TakesViewModel` — they are the rules' provenance and worked examples,
+kept as written per the skill file; the rules themselves are general
+and binding here.)*
+
+## RUN RECORD
+
+### Kickoff (2026-08-24) — the opening sitting, author-attended
+
+Orchestrator: Fable under `/architect-phase`, at her invocation naming
+this file. Mandatory reading done IN FULL before anything else:
+CLAUDE.md + the canon it loads; THIS file top to bottom (the 27 ledger
+rows — the kickoff message's "1–26" predates row 27's eleventh-sitting
+addition; supersessions honored as marked); the 13l plan's Act 7 WALK
+RECORD + Act 2 record; the 13j Environment traps (bind verbatim by
+reference — `notes/plans/phase-13j-deletion-and-trash.md`, "Environment
+traps"); `notes/handoffs/phase-13l-handoff.md`;
+`notes/plans/whole-note-history-brief.md`. Constitution copied in
+verbatim (above).
+
+**Environment facts at kickoff:** git clean at `9772dc0`
+(main == origin/main); **no Variorum instance live at the check**
+(`pgrep -fl 'Variorum.app/Contents/MacOS'` empty) — her app is
+LIVE-daily this era, so the check re-runs before ANY install act;
+baselines launched at kickoff (results recorded below when green).
+
+**HER KICKOFF ADDITION (verbatim, the invocation message):** *"One
+element to add - for more space on the bottom chrome, please condense
+all the current options into an Aa style button that when clicked
+expands into the full bar"* — recorded as **ledger row 28**. Both
+bottom bars compose the same clusters (block ▾ · Takes/+take · commit
+· note ▾ · comments · the 13k K7 `FormatBar` · counts · ?), so the
+item applies to both; its SCOPE (what exactly condenses behind Aa,
+and how it composes with row 17's History-beside-Commit placement)
+was the sitting's question. **HER RULING (question tool, same
+sitting): "Formatting only behind Aa"** — the option's letter: Aa
+replaces just the formatting toolbar + newlines chip (the phone's
+Aa expanding-row idiom); block ▾ / Takes / note ▾ / comments /
+commit / History stay visible. Row 28 carries the built shape.
+
+**The sitting's other kickoff facts:** cast CONFIRMED as her
+invocation stated it — **Opus implementers · Fable cold reviews**
+(her standing era preference, named in the kickoff message).
+Numbering: the round stays unnumbered — "the post-13l polish
+round"; the master plan's running-order row 4b already carries it
+(she may assign a number at any time). **The C1 small call, made
+within the mandate:** the ⌫ N badge STAYS as the glance signal and
+clicking it opens the same side panel the new tray icon opens (a
+rendered signal that also acts — P-2; two doors, one panel, zero
+choreography drift), while the ICON beside scraps/reference is the
+named, always-present door per her ruling.
+
+**Baselines (the orchestrator's own runs, launched at kickoff):**
+core **1373/143 PASSED** (35.3 s) · Mac full **1691/292 PASSED,
+TEST SUCCEEDED** (223.8 s, zero reds; the spine's 8
+`TutorialWalkTests` types green INSIDE the run by inclusion — the
+13j kickoff precedent; batches quote it separately) · mobile:
+recorded below when its run lands. **Both known flakes silent** in
+the Mac run. The 13l finals reproduced exactly.
+
+**Build-fact verifications at kickoff:** **V5 — ⌘⇧S IS FREE**
+(`grep`: the only `"s"` chord is ⌘S at `EditorCommands.swift:277`)
+· the side-panel seam is `PostDetailView.InspectorPanel`
+(`.references` / `.scraps` — C1's tray and G2's History pane extend
+this enum) · **row 20's per-take Delete Now composes with ZERO
+schema** (`Operations.requestPurge` already accepts `variant`-rooted
+targets — 13j's shipped machinery).
+
+### The batch plan (the architect's, within the mandate — acts may merge at dispatch; the ledger is the truth)
+
+Cast per batch: a FRESH Opus implementer session, briefed ONLY by
+this file's named sections; ONE end-of-round Fable cold-review
+ladder over the combined diff (the 13k precedent), then closeout.
+Every batch: the standing loop (build → red-on-old pins for
+bug-class fixes, walk-driven pins for door moves → the spine green
+by TYPE name → full suites with counts quoted; mobile when
+`Shared/`/`Sources/` is touched). The 13j Environment traps bind
+verbatim in every brief.
+
+| batch | scope (ledger rows) | order rationale |
+|---|---|---|
+| **1 — the small fixes + IA floor** | 1–6 (A1–A6) · 7 (B1: Trash icon, Help-menu tutorial move, the ⋯ dissolves) · 25 (found-item 2 rides B1's registry pass). A7 stays DECLINED — nothing built; its one tutorial sentence lands in batch 6 (D2 touches the deletion chapter) | independent; smallest; retires the sloppiness class first |
+| **2 — the Trash reshaped + the Archived surface** | 8 (B2 notes-only Archived sidebar item) · 11 (D1 takes leave the Trash → notes·books·blocks) · 18 (G3 "unplaced" wording sweep) · 21 (G6 Empty Trash purges exactly what it rows) · 22 (G7 grouping + tenth-sitting ancestor nesting) | the global surfaces' new truth, which batches 3–5 reference |
+| **3 — the tray goes to the side panel** | 9 (C1 icon + panel + originals separated; the badge call as recorded above) · 20 (G5 the leaving section; collapsed takes disclosure; per-take Delete Now — confirm-every-time) | extends the inspector seam; D1's takes-audit lens lands where D1 removed the global rows |
+| **4 — the Block History pane + the bottom chrome** | 17 (G2 — the round's biggest single build; absorbs J3's peek, the History face's past region, the archived disclosure; came-from with per-original one-button `placeBlock` restore, wording drafted in-batch) · 10 (C2 folds in; its mobile parity note survives to closeout) · 14 (F1 verification pass + take-card menu parity) · 28 (the Aa condensation — same two bar files as G2's door) | needs 3's panel seam; the bar work lands in one hand |
+| **5 — the Versions family** | 16 (G1) · 23 (the full V-family per V1–V8: ⌘⇧S door · the listing · born archived+SEALED one transaction · identity-preserving restore, outgoing blocks on the Delete Now road · PROMOTE · versions ride deletion, one confirm line · deleted versions → Trash rows grouped · search-scope exclusions recorded for 13o) · 24 (V3's bridge MUST-PIN) | after 2 (the Trash grouping its deleted-version rows join) |
+| **6 — the tutorial** | 12 (D2 lesson edits + spine re-pins) · 19 (G4 the five-places chapter) · 26 (⌘S vs ⌘⇧S) · 27 (the two-exits lesson, taught by doing) — plus A7's one merge sentence in the deletion chapter | last: it teaches only built doors; P-6 makes it the acceptance spine |
+| **ladder + closeout** | ONE Fable cold ladder (combined diff, `notes/REVIEW_PROMPT.md` verbatim) → fixes → round 2 → row 13's closeout: records · canonical deltas as ruled (B2's R44 delta; G5's evolved purge-door rule; G6's Empty-Trash supersession) · the LIFECYCLE TABLE walked, every row flipped `completed` · MobileSoul + mobile batch-6 update AT CLOSEOUT ONLY (her token instruction) · the whole-note-history-brief annotation · her-store field-guide re-seed + `/Applications` refresh behind the A1 rail (instance check first) | the standing ritual |
 
 ## Constraints
 
