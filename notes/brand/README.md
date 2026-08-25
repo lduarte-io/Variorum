@@ -5,7 +5,9 @@ The choosing surface is **`variorum-family-sheet.svg`** (per mark: light ground 
 ground; `.png` twins of the sheets are pre-rendered copies for apps that balk at SVG).
 The pipeline that produced everything here is documented in **`PROCESS.md`** — new options
 the author drops in later get the same treatment; `sources/` archives the raw generations
-(C2PA metadata stripped) and `tools/` the scripts as they ran.
+(C2PA metadata stripped) and `tools/` the scripts as they ran. **`TASTE.md`** is the
+art-direction taste record compiled from her picks and words across the sessions —
+propose-only, written for the future design sitting.
 
 ## Provenance
 
