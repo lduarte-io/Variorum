@@ -149,6 +149,19 @@ worse") — the wispy direction is dead on arrival with her, always.
   while the tech marks depict the MECHANISM (nodes, branches) — and the mechanism is
   nobody's object of desire.
 
+## Where the sessions left it (2026-08-25, at her close)
+
+Her closing words: *"I feel like this was quite productive — I have a logo I like for the
+app now and a bunch of other fun and interesting art to consider."* The striped V ended
+the sessions affirmed three separate times (the top-pick declaration; the best-option
+round — "I like the idea of the red one… distinct and sharp and interesting"; the close).
+**Ratification status: a strong lean, not yet a formal decision** — one word from her
+converts the front-runner into THE mark; until then the sitting inherits the lean, the
+tested boundaries, and a finished exploration. The execution list that waits for the
+sitting: the wordmark in real type · the red-as-token question · the macOS 26 icon
+treatment (the two-reference chrome play) · favicon/menu-bar derivations from the
+one-color master.
+
 ## What this document is not
 
 Not binding, not a design system, not a decision record. The sitting rules; the author

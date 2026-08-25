@@ -79,6 +79,14 @@ reference-only; **the other six are "potentially usable if a bit overly surreal"
 live candidates. ⚠️ `poster-reading-together` contains AI-garbled tagline lettering
 ("Every drafts variants OPEN") — never ship the lettering.
 
+## Practicalities (flags, not legal advice — noted 2026-08-25)
+
+*[removed for publication]*
+- **Copyright vs. trademark:** purely AI-generated art carries limited copyright
+  protection under current US guidance — but a LOGO's real shield is **trademark**
+  (use in commerce + registration), which does not depend on authorship. Setting the
+  wordmark in real type adds a human-authored layer besides.
+
 ## Status / ownership
 
 Phase **13s** (voice & polish — app icon + brand assets row) consumes whichever mark
