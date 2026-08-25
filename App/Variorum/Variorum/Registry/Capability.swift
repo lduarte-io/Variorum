@@ -402,6 +402,16 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // on its own surface with its own enablement (a selection exists), and one
     // declaration could not say that.
     case deleteSelectedNotes
+    // The post-13l polish round (ledger row 25 — the review pass's
+    // FOUND-ITEM 2: *"the archive-a-note door's home has never been
+    // walked"*). ARCHIVE THIS NOTE: the third verb on a note row, beside
+    // delete and open, and until now the only one of the three nobody had
+    // declared. It shipped as an undeclared inline button in two row menus,
+    // acting in silence — which on a list that then drops the row reads
+    // exactly like a deletion. Declared so the door-set is checkable the way
+    // `.deleteNote`'s is, and so the receipt (`RecoveryCopy
+    // .archivedNoteReceipt`) names where the note went.
+    case archiveNote
     // 13j batch 6b (J1 — her round-3 rider, verbatim: "have a delete now
     // option WITHIN the trash (not from within the normal note) … but never
     // accidental full delete from within a note, but an option for full

@@ -180,12 +180,65 @@ extension Queries {
     /// arrives with Phases 10–11.
     /// `limit` (review round 1): a held observation must bound its
     /// standing fetch — archives accumulate over years. One-shot callers omit.
-    public static func archivedPosts(_ db: Database, limit: Int? = nil) throws -> [TimelineItem] {
+    ///
+    /// **VERSION HISTORY IS NEVER AN ARCHIVED NOTE** (the post-13l polish
+    /// round, ledger row 8 — the architect's V1 classifier, built here as the
+    /// EXCLUSION before the versions themselves exist).
+    ///
+    /// A saved version of a note is a full copy that is born archived, and
+    /// its ONE home is that note's own Versions listing: a note with fifteen
+    /// saved moments would otherwise drown the genuinely set-aside notes on
+    /// the Archived surface — her own crowding worry, answered structurally
+    /// rather than with a schema column.
+    ///
+    /// **The classifier needs no schema and no "version" attribute**, and it
+    /// is a CONJUNCTION on purpose:
+    ///
+    /// - **born archived** — `archived_at = created_at`, both stamps written
+    ///   by ONE clock call inside the save-a-version transaction. It is a
+    ///   same-row birth fact, never a comparison across devices, so the
+    ///   no-clock-trust doctrine is untouched and no CAS repair can rewrite
+    ///   the pair into a different meaning;
+    /// - **version-linked to a note that is still LIVE and UNARCHIVED** — the
+    ///   `version_of` edge `duplicateAsVersion` already mints, read exactly
+    ///   the way `versionPeerPosts` reads it (posts are edges-only across
+    ///   versions, I8, and edges are block-to-block, so the post link rides
+    ///   the blocks).
+    ///
+    /// A note that was ever LIVE is never version history — a duplicate she
+    /// made to work with is a first-class note at birth, and archiving it
+    /// later makes it a set-aside WORK. That is precisely what the born-
+    /// archived half tests, and why the two halves must both hold.
+    ///
+    /// The parameter defaults to TRUE because that is the product truth
+    /// wherever archived notes are listed; a caller that wants the raw
+    /// column (the core's own tombstone/archive pins) says so explicitly.
+    public static func archivedPosts(
+        _ db: Database, limit: Int? = nil, excludingVersionHistory: Bool = true
+    ) throws -> [TimelineItem] {
+        let versionFence = excludingVersionHistory ? """
+
+              AND NOT (
+                container.archived_at = container.created_at
+                AND EXISTS (
+                  SELECT 1 FROM edge e
+                  JOIN container_block mine
+                    ON mine.block_id IN (e.source_block_id, e.target_block_id)
+                   AND mine.container_id = container.id AND mine.deleted_at IS NULL
+                  JOIN container_block theirs
+                    ON theirs.block_id IN (e.source_block_id, e.target_block_id)
+                   AND theirs.block_id <> mine.block_id AND theirs.deleted_at IS NULL
+                  JOIN container peer
+                    ON peer.id = theirs.container_id AND peer.id <> container.id
+                   AND peer.kind = 'post' AND peer.deleted_at IS NULL
+                   AND peer.archived_at IS NULL
+                  WHERE e.type = 'version_of' AND e.deleted_at IS NULL))
+            """ : ""
         var sql = """
             SELECT id AS post_id, title AS title, entry_date AS entry_date,
                    created_at AS created_at, archived_at AS stamp
             FROM container
-            WHERE kind = 'post' AND deleted_at IS NULL AND archived_at IS NOT NULL
+            WHERE kind = 'post' AND deleted_at IS NULL AND archived_at IS NOT NULL\(versionFence)
             ORDER BY archived_at DESC, id DESC
             """
         var arguments: [(any DatabaseValueConvertible)?] = []

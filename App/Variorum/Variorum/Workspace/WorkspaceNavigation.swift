@@ -358,6 +358,8 @@ nonisolated enum WorkspaceNaming {
         case .poolPosts: return "Pool"
         case .blocks: return "Snippets"
         case .recovery: return RecoveryPath.menuLabel
+        // Ledger row 8 (B2): the fifth area, named from the one home.
+        case .archived: return RecoveryPath.archivedSurface
         case .post(let id): return resolved(id, in: titles) ?? "Untitled"
         case .pool(let id): return resolved(id, in: titles) ?? "Snippets"
         case .reading(let id): return resolved(id, in: titles) ?? "Book"

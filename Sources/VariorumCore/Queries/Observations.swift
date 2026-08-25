@@ -65,6 +65,12 @@ extension AppDatabase {
     /// The archived-posts recovery surface, live (Phase 10 — the face the
     /// Phase 4 closeout promised `unarchiveContainer`). `limit` REQUIRED —
     /// archives accumulate over years (review round 1).
+    ///
+    /// Version history never lists here (the post-13l polish round, ledger
+    /// row 8 — the V1 classifier; the reason is written out at
+    /// `Queries.archivedPosts`): a saved version's one home is its note's
+    /// Versions listing, so the surface that means *"notes I set aside"*
+    /// shows exactly those.
     public func observeArchivedPosts(limit: Int) -> AsyncValueObservation<[Queries.TimelineItem]> {
         observe { try Queries.archivedPosts($0, limit: limit) }
     }

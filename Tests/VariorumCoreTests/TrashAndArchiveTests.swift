@@ -556,4 +556,119 @@ struct TrashAndArchiveTests {
                 .isEmpty, "the fenced blocks are gone from the tray")
         }
     }
+
+    // MARK: - The post-13l polish round (ledger rows 8 + 22)
+
+    /// **VERSION HISTORY IS NOT AN ARCHIVED NOTE** (ledger row 8 — the V1
+    /// classifier, built as the EXCLUSION before batch 5 mints the versions
+    /// it excludes).
+    ///
+    /// Her B2 direction gave archive its own room, and her own worry about it
+    /// was crowding: a note with fifteen saved moments would drown the notes
+    /// she actually set aside. The answer needs no schema — a saved version
+    /// is BORN ARCHIVED (`archived_at = created_at`, one clock call inside
+    /// the save transaction) and carries a `version_of` edge to a note that
+    /// is still live, and that conjunction IS the class.
+    ///
+    /// The born-archived half is hand-seeded here, deliberately: the save
+    /// door arrives in batch 5, and the harness clock ticks once per read, so
+    /// nothing in the shipped ops can produce the equal pair today. What is
+    /// pinned is the CLASSIFIER, which batch 5 must then satisfy.
+    ///
+    /// **RED ON OLD** by behavioural revert (drop the `versionFence` from
+    /// `Queries.archivedPosts`): the first expectation reds, listing the
+    /// version copy among her archived notes.
+    @Test func versionHistoryNeverListsAmongTheArchivedNotes() throws {
+        try withOperations { ops, db in
+            let source = try ops.createPost(title: "the note")
+            _ = try ops.newBlock(in: source.id, text: "Prose.")
+            let plain = try ops.createPost(title: "a work I set aside")
+            _ = try ops.newBlock(in: plain.id, text: "More prose.")
+            try ops.archiveContainer(plain.id)
+
+            // The version copy: `duplicateAsVersion` mints the copy AND the
+            // `version_of` edge; the born-archived stamp is the half batch 5
+            // will write in the same transaction, seeded by hand.
+            let copy = try ops.duplicateAsVersion(source.id)
+            try db.write { db in
+                try db.execute(
+                    sql: "UPDATE container SET archived_at = created_at WHERE id = ?",
+                    arguments: [copy.post.id])
+            }
+
+            let listed = try db.read { try Queries.archivedPosts($0) }
+            #expect(!listed.map(\.postID).contains(copy.post.id),
+                    "a saved version's home is its note's Versions listing, never Archived")
+            #expect(listed.map(\.postID).contains(plain.id),
+                    "a note she set aside is exactly what this surface is for")
+
+            // The RAW column is still readable, so the exclusion is a
+            // product rule at a named door and never a lost row.
+            let raw = try db.read {
+                try Queries.archivedPosts($0, excludingVersionHistory: false)
+            }
+            #expect(raw.map(\.postID).contains(copy.post.id))
+        }
+    }
+
+    /// **A NOTE THAT WAS EVER LIVE IS NEVER VERSION HISTORY** (ledger row 8,
+    /// the classifier's other half — her sixth-sitting catch: a working draft
+    /// archived later must never read as version history, especially once
+    /// versions ride deletions).
+    ///
+    /// The same copy, version-linked exactly the same way, archived as a
+    /// SECOND act: `archived_at` is a later tick than `created_at`, so it is
+    /// a WORK she set aside and it lists.
+    @Test func aCopySheWorkedWithAndArchivedLaterIsAnArchivedNote() throws {
+        try withOperations { ops, db in
+            let source = try ops.createPost(title: "the note")
+            _ = try ops.newBlock(in: source.id, text: "Prose.")
+            let copy = try ops.duplicateAsVersion(source.id)
+            // Born LIVE (the fork road), archived later — two clock reads.
+            try ops.archiveContainer(copy.post.id)
+
+            let listed = try db.read { try Queries.archivedPosts($0) }
+            #expect(listed.map(\.postID).contains(copy.post.id),
+                    "archived-later is a WORK; only born-archived is version history")
+        }
+    }
+
+    /// **THE STRANDED ORIGINAL NAMES THE BLOCK WHOSE CLOCK IT RIDES**
+    /// (ledger row 22 — her tenth-sitting ruling: *"those ancestors [go]
+    /// under the live block that was most recently deleted … going to trash
+    /// shows you what you just deleted rather than suddenly being
+    /// overwhelmed by 31 random items"*).
+    ///
+    /// The Trash nests the original under that block's row, and the anchor is
+    /// the query's own answer rather than a stamp match at the face — which
+    /// matters exactly when several blocks are deleted in one gesture and
+    /// share a stamp.
+    ///
+    /// **RED ON OLD** by behavioural revert (drop `anchor_block_id` from
+    /// `strandedOriginals` and the argument that carries it): `anchorBlockID`
+    /// reads nil and both expectations red.
+    @Test func aStrandedOriginalNamesTheDeletionThatStrandedIt() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "the note")
+            let divided = try ops.newBlock(in: post.id, text: "First half. Second half.")
+            _ = try ops.branchVariant(divided.block.id, from: divided.variant.id)
+            let w = try ops.divideW(divided.block.id, cuts: [divided.variant.id: 12])
+            // The FIRST successor goes, then the second — so the family clock
+            // is the second deletion, and that is the row she just acted on.
+            try ops.deleteBlock(w.first.block.id)
+            try ops.deleteBlock(w.second.block.id)
+
+            let originals = try db.read {
+                try Queries.strandedOriginals($0, now: harnessNow)
+            }
+            let original = try #require(originals.first)
+            #expect(original.id == divided.block.id)
+            #expect(original.anchorBlockID == w.second.block.id,
+                    "the anchor is the deletion whose stamp IS the family clock")
+            #expect(original.deletedAt
+                == (try db.fetchString(
+                        "SELECT deleted_at FROM block WHERE id = ?", [w.second.block.id])),
+                    "…which is the same row the clock came from")
+        }
+    }
 }

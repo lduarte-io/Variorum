@@ -24,6 +24,13 @@ final class LibraryViewModel {
     private(set) var posts: [Queries.TimelineItem] = []
     private(set) var journal: [Queries.TimelineItem] = []
     private(set) var lastError: String?
+    /// **A SUCCESS SAYS SO** (the post-13l polish round, ledger row 25 — the
+    /// review pass's FOUND-ITEM 2). Kept apart from `lastError` for row 6's
+    /// reason one surface over: a receipt rendered in the error slot reads as
+    /// a failure. The only writers today are archive and unarchive, whose
+    /// visible effect is that the note LEAVES the list she is looking at —
+    /// the one shape that most needs a sentence.
+    private(set) var receipt: String?
 
     /// Bounded on purpose: a held observation's fetch must be viewport-shaped
     /// (P1) — `observeLibrary` requires a limit for exactly this reason.
@@ -117,13 +124,25 @@ final class LibraryViewModel {
 
     // MARK: - Post lifecycle (Phase 10 Step 8 — brief item 4)
 
-    /// Archive: kept, out of ambient view; the recovery surface lists it.
+    /// Archive: kept, out of ambient view; the **Archived** sidebar surface
+    /// lists it (the post-13l polish round, ledger row 8 — her B2 direction
+    /// gave archive its own room).
+    ///
+    /// **It says where the note went** (ledger row 25): the act removes the
+    /// row from the list she is standing in, and it had been doing that in
+    /// silence — which on the Library's own rows reads exactly like a
+    /// deletion. The sentence names the surface AND the absence of a clock,
+    /// because that is the whole difference from the verb beside it.
     func archive(postID: String) async {
-        await run { ops in try ops.archiveContainer(postID) }
+        await run(receipt: RecoveryCopy.archivedNoteReceipt) { ops in
+            try ops.archiveContainer(postID)
+        }
     }
 
     func unarchive(postID: String) async {
-        await run { ops in try ops.unarchiveContainer(postID) }
+        await run(receipt: RecoveryCopy.unarchivedNoteReceipt) { ops in
+            try ops.unarchiveContainer(postID)
+        }
     }
 
     /// Delete: a tombstone, recoverable via `restore` until GC (S2).
@@ -188,11 +207,20 @@ final class LibraryViewModel {
         }
     }
 
-    private func run(_ body: @escaping @Sendable (Operations) throws -> Void) async {
+    /// `receipt` (ledger row 25) is what to SAY when the act lands. It is a
+    /// parameter rather than something derived after the fact because only
+    /// the caller knows which sentence its act earned; a nil one clears any
+    /// previous receipt, so a later silent act never leaves an older one
+    /// standing under it.
+    private func run(
+        receipt: String? = nil, _ body: @escaping @Sendable (Operations) throws -> Void
+    ) async {
         do {
             try await session.runner.run(body)
             lastError = nil
+            self.receipt = receipt
         } catch {
+            self.receipt = nil
             lastError = String(describing: error)
         }
     }

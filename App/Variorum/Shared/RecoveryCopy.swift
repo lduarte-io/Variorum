@@ -50,6 +50,18 @@ nonisolated enum RecoveryCopy {
     /// The other half: kept forever, no clock, deliberately calm.
     static let archivedSection = "Archived"
     /// The surface that holds both, named the same on both platforms.
+    ///
+    /// **The MAC has split it** (the post-13l polish round, ledger rows 7–8 —
+    /// her B2 direction: *"archived should be a different item on the left
+    /// (like where library is, but it says archived)… separating archive and
+    /// trash more makes sense"*). There, Archived is its own sidebar surface
+    /// and the Trash is its own, reached by the Library's trash icon; the
+    /// Mac's `RecoveryPath.menuLabel` names the Trash plainly and nothing
+    /// reads this constant any more.
+    ///
+    /// It stays for the PHONE, whose recovery surface still holds both lists
+    /// — a face, and mobile's own round to move. **A parity note rides the
+    /// closeout**; the split is what the phone owes, not a second name.
     static let surfaceName = "Archived & Deleted"
 
     /// The one verb, whatever kind the row is, wherever it is offered.
@@ -141,8 +153,16 @@ nonisolated enum RecoveryCopy {
     /// **The stranded original's label** (her round-8b ruling): an original
     /// whose whole descendant family is in the Trash rides the family's
     /// clock, and says so where she can see it.
+    ///
+    /// **Reworded for G3** (the post-13l polish round, ledger row 18 — the
+    /// PRESENTATION half of her fold question, *"why do we have unplaced as
+    /// separate from archived?"*). The semantic fold is declined at the
+    /// ledger row and the reason is recorded there; what folds completely is
+    /// how it READS: a preserved original was set aside automatically by a
+    /// divide or a merge, and it is kept until its family goes. The old
+    /// sentence led with the internal noun and left the "why" to be guessed.
     static let goesWithItsFamily =
-        "preserved original — goes with its deleted blocks"
+        "set aside by a divide or merge \u{2014} kept until its family goes"
 
     // MARK: Put-back receipts (the three landings)
 
@@ -181,11 +201,20 @@ nonisolated enum RecoveryCopy {
     /// it remembers none). **A RECEIPT — something really happened.** Never a
     /// refusal: see `originalHasNoNote` below, which is the sentence for the
     /// case where nothing happened at all.
+    ///
+    /// **"unplaced" left these sentences at G3** (the post-13l polish round,
+    /// ledger row 18 — her fold question's presentation half): the word is
+    /// the MODEL's ("a live block with no placement"), it appears nowhere she
+    /// could have learned it, and the room it once named was removed at 13j
+    /// J6. The queries keep their names — `unplacedBlocks`, `unplacedOrigins`
+    /// are code — and no user-facing string says it any more.
     static func putBackUnplaced(_ home: ContainerKind?) -> String {
         guard let home else {
-            return "Put back — but it has no note to go back to, so it's waiting unplaced."
+            return "Put back \u{2014} but it remembers no note to go back into, "
+                + "so it's set aside on its own for now."
         }
-        return "Put back — but its \(homeWord(home)) is gone, so it's waiting unplaced."
+        return "Put back \u{2014} but its \(homeWord(home)) is gone, so it's set "
+            + "aside on its own for now."
     }
 
     /// **The preserved original with no note to go back INTO** (batch 4.5b —
@@ -220,10 +249,32 @@ nonisolated enum RecoveryCopy {
     /// Empty Trash's confirm NAMES THE FULL COUNT BY KIND (her round-8
     /// ruling). Preserved originals are named when they ride: they are the
     /// round-8b passengers, never separately purged.
+    ///
+    /// **AND IT NAMES WHAT IT DOES NOT TAKE** (the post-13l polish round,
+    /// ledger row 21 — her G6 ruling, which SUPERSEDES 13j round-8's
+    /// "everything, always"): *"a deleted take on a living block might be the
+    /// one item a user does want to keep… I just don't think a 'delete
+    /// everything' button in the trash should delete items that aren't being
+    /// shown."* Takes no longer row in the Trash (D1), so the door no longer
+    /// takes them — the door-shows-what-it-takes principle, in both
+    /// directions.
+    ///
+    /// **The honesty caveat is not optional**, and it is her own word on the
+    /// clock (*"i don't want it to be clock exempt"*): sparing is NOT keeping.
+    /// A spared take still runs out its own 30 days; putting it back is the
+    /// only road that keeps it. Saying "N takes stay" and stopping there
+    /// would be the reassuring half of a true sentence, which is the class
+    /// the J8 bar exists to refuse.
+    ///
+    /// The take count still arrives in `counts` — the ask-time read counts
+    /// everything the store holds — and this is the ONE place that decides
+    /// what each kind's number MEANS.
     static func emptyTrashConfirm(_ counts: [Queries.TrashItem.Kind: Int]) -> String {
-        let total = counts.filter { $0.key != .preservedOriginal }.values.reduce(0, +)
+        let total = counts
+            .filter { TrashScope.emptyTrashTakes($0.key) }
+            .values.reduce(0, +)
         guard total > 0 else { return "The Trash is empty — nothing to delete." }
-        let order: [Queries.TrashItem.Kind] = [.note, .block, .take, .book]
+        let order: [Queries.TrashItem.Kind] = [.note, .block, .book]
         let parts = order.compactMap { kind -> String? in
             guard let count = counts[kind], count > 0 else { return nil }
             let word = kindLabel(kind).lowercased()
@@ -235,6 +286,13 @@ nonisolated enum RecoveryCopy {
         if let originals = counts[.preservedOriginal], originals > 0 {
             sentence += " \(originals) preserved original\(originals == 1 ? " rides" : "s ride") along with "
                 + "\(originals == 1 ? "its" : "their") famil\(originals == 1 ? "y" : "ies")."
+        }
+        if let takes = counts[.take], takes > 0 {
+            sentence += " \(takes) deleted take\(takes == 1 ? "" : "s") on living blocks "
+                + "stay\(takes == 1 ? "s" : "") — but not kept: "
+                + "\(takes == 1 ? "it" : "each") still runs out its own "
+                + "\(TrashWindow.days) days, and putting "
+                + "\(takes == 1 ? "it" : "one") back is what keeps it."
         }
         return sentence
     }
@@ -295,6 +353,29 @@ nonisolated enum RecoveryCopy {
     static func moveToTrashDetail(_ kind: Queries.TrashItem.Kind) -> String {
         "The \(rowKind(kind)) goes to the \(trashSection) for \(TrashWindow.days) days. "
             + "You can put it back from there until then."
+    }
+
+    /// **ARCHIVING A NOTE SAYS WHERE IT WENT** (the post-13l polish round,
+    /// ledger row 25 — the review pass's FOUND-ITEM 2: *"the archive-a-note
+    /// door's home has never been walked"*). The door existed and acted in
+    /// silence, which on a surface that then removes the note from the
+    /// Library reads exactly like a deletion. It names the surface — and the
+    /// absence of a clock, because that is the whole difference between this
+    /// verb and the one beside it (N3's lifecycle row: archive is available
+    /// forever and rides no deletion).
+    static let archivedNoteReceipt =
+        "Note archived — it's kept in \(archivedSection), with no countdown."
+
+    /// The inverse, said the same way — the note is back where she looks for
+    /// it (N3's lifecycle row: Unarchive → Library).
+    static let unarchivedNoteReceipt =
+        "Note unarchived — it's back in the Library."
+
+    static func archivedNotesReceipt(_ count: Int) -> String {
+        count == 1
+            ? archivedNoteReceipt
+            : "\(count) notes archived — they're kept in \(archivedSection), "
+                + "with no countdown."
     }
 
     /// Deleting a BOOK is not deleting its notes — the 13j books lesson,

@@ -81,9 +81,12 @@ final class MobileTrashModel {
 
     // MARK: - The two listings
 
+    /// The kinds come from `TrashScope` (the post-13l polish round, ledger
+    /// row 11 — her D1 revision: takes never row in a global Trash, on either
+    /// platform). One decision, one adoption line; the phone's FACE (its
+    /// chip row and its two lists) is mobile's own round to reshape.
     func startTrash() async {
-        let kinds: Set<Queries.TrashItem.Kind> = kindFilter.map { [$0] }
-            ?? Set(Queries.TrashItem.Kind.allCases)
+        let kinds = TrashScope.kinds(filter: kindFilter)
         do {
             for try await value in session.database.observeTrash(
                 now: session.now, kinds: kinds, oldestFirst: oldestFirst,

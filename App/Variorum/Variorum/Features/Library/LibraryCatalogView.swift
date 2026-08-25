@@ -331,6 +331,48 @@ struct LibraryCatalogView: View {
     /// the selection).
     static let surfaceCapabilities: [CapabilityID] = [.tagNote, .deleteSelectedNotes]
 
+    /// **THE MASTHEAD'S DOORS — AND THE ⋯ MENU IS GONE** (the post-13l polish
+    /// round, ledger row 7 — her B1 ruling, verbatim: *"I want the ... menu in
+    /// the upper right of the library to be replaced with a trash icon"* and
+    /// *"open tutorial doesn't need to be under the ... menu, it could be
+    /// under help if anything"*).
+    ///
+    /// Both halves are honest. The Trash is a PLACE, and a place behind a ⋯ is
+    /// a place nobody finds, so it gets the clear icon. The tutorial door was
+    /// a DUPLICATE all along — **Help ▸ Open the Tutorial** has carried it
+    /// since 13b Stage 2 (`EditorCommands`' Help group) — so this is a
+    /// removal rather than a move: nothing to re-home, one door fewer for one
+    /// act, and ⌘K still types both by name. The view no longer takes an
+    /// `onOpenTutorial` callback at all, which is the compiler's own record
+    /// that the door left.
+    ///
+    /// **This array IS what the header renders** (the `showsEmptyTrashDoor`
+    /// precedent, one surface over): the masthead iterates it, so a pin over
+    /// it drives the decision the view makes rather than standing beside it.
+    /// These are NAVIGATION doors, which is why they are not registry
+    /// capabilities — the same rule `RootView.wirePaletteCommands` states for
+    /// the palette's Go-to rows.
+    enum MastheadDoor: Hashable, CaseIterable {
+        case trash
+
+        var destination: SidebarSelection {
+            switch self { case .trash: return .recovery }
+        }
+
+        /// 13f W10a's rule, kept: the label reads from `RecoveryPath`, which
+        /// is also what the copy pointing here says — one name, so the
+        /// sentence and the door can never drift apart.
+        var label: String {
+            switch self { case .trash: return RecoveryPath.menuLabel }
+        }
+
+        var icon: String {
+            switch self { case .trash: return "trash" }
+        }
+    }
+
+    static let mastheadDoors: [MastheadDoor] = MastheadDoor.allCases
+
     let session: AppSession
     let model: LibraryCatalogModel
     let library: LibraryViewModel
@@ -345,11 +387,12 @@ struct LibraryCatalogView: View {
     var onOpenInNewWindow: ((String) -> Void)? = nil
     /// 13f batch 6 (W4): the star door, from the one note-row grammar.
     var starDoor: StarDoor? = nil
-    /// 13b Stage 2 ladder, MINOR-D6: the tutorial door routes through the
-    /// shell's fire-and-DO act (`ShellActions.openTutorial` — failures
-    /// speak; the old inline `try?` swallowed them silently while the
-    /// ShellActions sibling spoke).
-    let onOpenTutorial: () -> Void
+    // The tutorial door's property LEFT with the \u{22EF} menu (the post-13l
+    // polish round, ledger row 7). It routed through the shell's fire-and-DO
+    // act (`ShellActions.openTutorial`) — and still does, from Help \u{25B8}
+    // Open the Tutorial, which is where her B1 ruling put it and where
+    // `EditorCommands` has rendered it since 13b Stage 2. A view that no
+    // longer renders a door does not carry its callback.
 
     // Optional: test hosts (and future embeddings) may lack the
     // environment — fall back to the leading voice's tokens.
@@ -436,6 +479,15 @@ struct LibraryCatalogView: View {
                     .foregroundStyle(.red)
                     .textSelection(.enabled)
                     .padding(6)
+            } else if let receipt = library.receipt {
+                // Ledger row 25: the archive door's own sentence. Its own slot
+                // and its own colour — a receipt in the red slot reads as a
+                // failure (row 6's finding, one surface over).
+                Text(receipt)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .textSelection(.enabled)
+                    .padding(6)
             }
         }
     }
@@ -461,20 +513,17 @@ struct LibraryCatalogView: View {
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
                 Spacer()
-                Menu {
-                    // 13f W10a: the label reads from `RecoveryPath`, which is
-                    // also what the copy pointing here says — one name, so
-                    // the sentence and the door can never drift apart.
-                    Button(RecoveryPath.menuLabel) { onOpen(.recovery) }
-                    // 13b Stage 2: the old entrance points at the tutorial
-                    // BOOK (find-or-seed, then open) — via the shell's one
-                    // fire-and-DO door (MINOR-D6: never a silent `try?`).
-                    Button("Open the Tutorial") { onOpenTutorial() }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
+                ForEach(Self.mastheadDoors, id: \.self) { door in
+                    Button {
+                        onOpen(door.destination)
+                    } label: {
+                        Image(systemName: door.icon)
+                    }
+                    .buttonStyle(.borderless)
+                    .help(door.label)
+                    .accessibilityLabel(door.label)
+                    .frame(width: 28)
                 }
-                .menuStyle(.borderlessButton)
-                .frame(width: 28)
             }
             HStack(spacing: 10) {
                 TextField(tokens.chromeLabel("Search books, notes, blocks…"),
@@ -785,7 +834,10 @@ struct LibraryCatalogView: View {
             Button("PDF…") { exportPostPDF(hit) }
         }
         Divider()
-        Button("Archive") {
+        // Ledger row 25 (FOUND-ITEM 2): the verb comes from its declaration
+        // now, and the act says where the note went (`LibraryViewModel
+        // .archive`'s receipt).
+        Button(CapabilityRegistry.capability(.archiveNote).verb) {
             Task {
                 await library.archive(postID: hit.id)
                 await model.search()

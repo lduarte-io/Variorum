@@ -48,9 +48,11 @@ struct MobileTrashView: View {
     /// "from ‹note›" context when that note is still live).
     let onOpen: (String) -> Void
 
-    /// The kind filter's doors, in the Mac picker's order.
+    /// The kind filter's doors, in the Mac picker's order — from the ONE
+    /// decision (the post-13l polish round, ledger row 11): a filter may
+    /// never offer a kind the listing no longer holds.
     static let filterKinds: [Queries.TrashItem.Kind?] =
-        [nil, .note, .book, .block, .take, .preservedOriginal]
+        [nil] + TrashScope.filterKinds.map { Optional($0) }
 
     static let allFilterWord = "All"
     static let emptyTrashLine = "Nothing in the Trash."

@@ -390,6 +390,7 @@ final class WorkspaceModel {
         case .poolPosts: return "poolPosts"
         case .blocks: return "blocks"
         case .recovery: return "recovery"
+        case .archived: return "archived"
         case .post(let id): return "post:\(id)"
         case .pool(let id): return "pool:\(id)"
         case .reading(let id): return "reading:\(id)"
@@ -436,7 +437,7 @@ final class WorkspaceModel {
                             uniquingKeysWith: { first, _ in first })
                     }
                     if let path = tagPaths?[id] { out[id] = path }
-                case .shelf, .library, .poolPosts, .blocks, .recovery:
+                case .shelf, .library, .poolPosts, .blocks, .archived, .recovery:
                     break  // these name themselves (WorkspaceNaming)
                 }
             }

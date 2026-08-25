@@ -240,7 +240,11 @@ struct PoolPostsView: View {
                 Task { await library.duplicateAsVersion(postID: item.postID) }
             }
             Divider()
-            Button("Archive") { Task { await library.archive(postID: item.postID) } }
+            // Ledger row 25: the same declaration the Library's row renders
+            // (`SidebarView.contextMenuCapabilities`), so both say one word.
+            Button(CapabilityRegistry.capability(.archiveNote).verb) {
+                Task { await library.archive(postID: item.postID) }
+            }
             // 13l Act 2 (item 3): the note-row grammar's delete door, with
             // the confirmation her ruling gave the Library's — this row
             // renders the SAME declaration (`SidebarView.contextMenuCapabilities`)

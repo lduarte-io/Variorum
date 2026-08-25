@@ -423,10 +423,29 @@ struct TrashPurgeDoorsTests {
 
     // MARK: - Empty Trash
 
-    @Test func emptyTrashsConfirmNamesTheFullCountByKindAndTheActTakesEverything() async throws {
-        try await withEditor(seedBlocks: ["Alpha one.", "Beta two."]) { editor in
+    /// **STRENGTHENED IN PLACE** (the post-13l polish round, ledger row 21 —
+    /// her G6 ruling, which SUPERSEDES 13j round-8's "everything, always").
+    /// The claim is now *everything it ROWS*, and the mechanism is stated so
+    /// the change reads as a ruling rather than a relaxation: takes no longer
+    /// row in the Trash (D1), so the bulk door no longer takes them —
+    /// *"I just don't think a 'delete everything' button in the trash should
+    /// delete items that aren't being shown."* This world gains a deleted
+    /// take on a LIVING block, which is exactly the row her ruling protects,
+    /// and asserts it survives the confirm that empties everything else.
+    @Test func emptyTrashsConfirmNamesTheFullCountByKindAndTheActTakesEverythingItRows() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two.", "Gamma three."]) { editor in
             let blockID = try #require(editor.model.slots.first?.blockID)
             let secondBlock = try #require(editor.model.slots.dropFirst().first?.blockID)
+            // The row her G6 ruling protects: a take deleted on a block that
+            // STAYS ALIVE, which the Trash never shows and the door may
+            // therefore never take.
+            let living = try #require(editor.model.slots.dropFirst(2).first)
+            let sparedTake = try await editor.session.runner.run { (ops: Operations) -> String in
+                let chosen = try #require(living.variantID)
+                let extra = try ops.branchVariant(living.blockID, from: chosen)
+                try ops.deleteVariant(extra.id)
+                return extra.id
+            }
             try await editor.session.runner.run { (ops: Operations) in
                 try ops.deleteBlock(blockID)
                 try ops.deleteBlock(secondBlock)
@@ -445,12 +464,19 @@ struct TrashPurgeDoorsTests {
             #expect(counts[.block] == 2)
             #expect(counts[.note] == 1)
             #expect(counts[.book] == 1)
+            // Ledger row 21: the take is COUNTED — the ask-time read sees
+            // everything the store holds — so the sentence can be honest
+            // about what stays. It is not part of the total.
+            #expect(counts[.take] == 1)
             let message = try #require(model.pendingConfirm?.message)
             // The memo's wording shape: the FULL count, by kind.
             #expect(message.contains("4 things go for good"))
             #expect(message.contains("1 note"))
             #expect(message.contains("2 blocks"))
             #expect(message.contains("1 book"))
+            #expect(!message.contains("1 take,"), "a take is never among the going")
+            #expect(message.contains("stays") && message.contains("not kept"),
+                    "her caveat: sparing is not keeping — \(message)")
 
             await model.confirmPendingPurge(try #require(model.pendingConfirm))
             #expect(model.lastError == nil)
@@ -463,7 +489,8 @@ struct TrashPurgeDoorsTests {
                  try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM purge_intent WHERE deleted_at IS NOT NULL") ?? 0)
             }
             #expect(intents.live == 0)
-            #expect(intents.completed == 4, "everything, always — one intent per Trash row")
+            #expect(intents.completed == 4,
+                    "one intent per Trash ROW — and the spared take is not one")
             let survivors: Int = try await editor.database.read { db in
                 (try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM block WHERE id IN (?, ?)",
                                   arguments: [blockID, secondBlock]) ?? 0)
@@ -471,11 +498,23 @@ struct TrashPurgeDoorsTests {
                 + (try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM container WHERE title = 'doomed'") ?? 0)
             }
             #expect(survivors == 0, "the bytes went with the confirm (round 11)")
+            // The SURFACE's listing is what empties — asked the way the
+            // surface asks it (ledger row 11: the Trash lists notes, books
+            // and blocks). The raw query still answers for takes, which is
+            // the next assertion's whole point.
             let listed: [Queries.TrashItem] = try await editor.database.read { db in
-                try Queries.trash(db, now: harnessNow)
+                try Queries.trash(db, now: harnessNow, kinds: TrashScope.listedKinds)
             }
             #expect(listed.isEmpty)
             #expect(model.receipt?.contains("4 things gone from the app now") == true)
+
+            // …and the row the door does not show is the row it does not take.
+            let takeAlive: Int = try await editor.database.read { db in
+                try Int.fetchOne(
+                    db, sql: "SELECT COUNT(*) FROM variant WHERE id = ?",
+                    arguments: [sparedTake]) ?? 0
+            }
+            #expect(takeAlive == 1, "G6: Empty Trash purges exactly what it rows")
         }
     }
 
@@ -491,15 +530,32 @@ struct TrashPurgeDoorsTests {
 
     // MARK: - The confirm copy (pure)
 
+    /// **STRENGTHENED IN PLACE** (ledger row 21): the take count no longer
+    /// joins the total or the going-list — it becomes the honest caveat. The
+    /// mechanism, stated: takes stopped rowing in the Trash at D1, and a door
+    /// may not take what it does not show; sparing is not keeping, so the
+    /// sentence says the clock keeps running.
     @Test func theEmptyTrashWordsCountByKindAndNameRidingOriginals() {
         let message = RecoveryPath.emptyTrashConfirm([
             .note: 12, .block: 24, .take: 3, .book: 2,
         ])
-        #expect(message.contains("41 things go for good"))
+        #expect(message.contains("38 things go for good"),
+                "the total counts what the door TAKES: \(message)")
         #expect(message.contains("12 notes"))
         #expect(message.contains("24 blocks"))
-        #expect(message.contains("3 takes"))
         #expect(message.contains("2 books"))
+        #expect(message.contains("3 deleted takes on living blocks stay"))
+        #expect(message.contains("not kept"))
+        #expect(message.contains("\(TrashWindow.days) days"),
+                "her ruling: NOT clock-exempt")
+        // One take reads in the singular, and still says the same two facts.
+        let one = RecoveryPath.emptyTrashConfirm([.note: 1, .take: 1])
+        #expect(one.contains("1 deleted take on living blocks stays"))
+        #expect(one.contains("putting it back is what keeps it"))
+        // Takes ALONE are nothing this door can act on — it says so quietly
+        // rather than confirming a purge of nothing.
+        #expect(RecoveryPath.emptyTrashConfirm([.take: 4])
+                == "The Trash is empty — nothing to delete.")
 
         let withOriginal = RecoveryPath.emptyTrashConfirm([.note: 1, .preservedOriginal: 1])
         #expect(withOriginal.contains("1 thing goes for good"))

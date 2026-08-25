@@ -856,25 +856,28 @@ enum TutorialSeeder {
             + "blocks out of them (the next lesson). One verb serves every row: "
             + "Put back, and a block returns to the place it stood in.",
 
-            "The Library holds the other half. Library \u{25B8} \u{22EF} "
-            + "\u{25B8} Archived & Deleted opens two lists. Archived is calm and "
-            + "clockless: whole notes you archived, with Unarchive. The TRASH "
-            + "below it holds everything deleted anywhere — notes, blocks, "
-            + "takes, books — each row saying how many days it has left and "
-            + "which note it came from. Filter it by kind, sort oldest first, "
-            + "and Put back works on any row.",
+            "The Library holds the other half, in two rooms. Archived is its "
+            + "own item in the sidebar: calm and clockless, whole notes you "
+            + "set aside, each with Unarchive. The Trash is behind the trash "
+            + "icon at the top of the Library, and it holds what is LEAVING — "
+            + "notes, books and blocks, each row saying how many days it has "
+            + "left and which note it came from. Filter it by kind, sort "
+            + "oldest first, and Put back works on any row. (A deleted TAKE "
+            + "never rows here: it waits in its own block\u{2019}s History, "
+            + "where its block and its fan are there to make sense of it.)",
 
             "Two doors live in the Trash and nowhere else: Delete Now on a "
-            + "single row, and Empty Trash for all of it. Both ask first — "
-            + "Delete Now asks every single time, and Empty Trash's question "
-            + "names the full count by kind before it takes anything. No door "
+            + "single row, and Empty Trash for everything it lists. Both ask "
+            + "first — Delete Now asks every single time, and Empty Trash's "
+            + "question names the full count by kind before it takes "
+            + "anything, and says what it leaves alone. No door "
             + "inside a note ever deletes something for good; that is on "
             + "purpose, and it is why the Trash is worth visiting once before "
             + "you need it.",
 
             "Practice, and it is safe: go to the Library, right-click this "
-            + "very lesson \u{25B8} Delete, then open Archived & Deleted and "
-            + "Put back the row you find in the Trash. The lesson comes back "
+            + "very lesson \u{25B8} Delete, then open the Trash and "
+            + "Put back the row you find there. The lesson comes back "
             + "into this book, in this chapter, in its place. (And if you ever "
             + "lose your nerve, Help \u{25B8} Restore Tutorial\u{2026} rebuilds "
             + "the whole book.)",
@@ -916,8 +919,9 @@ enum TutorialSeeder {
             + "permanent only while something descended from it is still alive. "
             + "Delete the last of its descendants and the original MOVES — "
             + "visibly, in that same tray — out of Preserved originals and onto "
-            + "the family's 30-day clock, labelled \u{201C}preserved original — "
-            + "goes with its deleted blocks\u{201D}. The delete that does it "
+            + "the family's 30-day clock, labelled \u{201C}set aside by a divide "
+            + "or merge \u{2014} kept until its family goes\u{201D}. The delete "
+            + "that does it "
             + "says so in its own receipt, while you are standing there.",
         ])
         try take(on: past.blocks[1],

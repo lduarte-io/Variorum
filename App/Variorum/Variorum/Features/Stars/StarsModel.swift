@@ -139,7 +139,7 @@ nonisolated enum StarTargeting {
         // A place is not a thing you can star — and neither is a scraps
         // container (the Open strip's notes-only scope, round 7.2, applied
         // to the same question).
-        case .shelf, .library, .poolPosts, .blocks, .recovery, .pool, .tag, nil:
+        case .shelf, .library, .poolPosts, .blocks, .archived, .recovery, .pool, .tag, nil:
             return nil
         }
     }

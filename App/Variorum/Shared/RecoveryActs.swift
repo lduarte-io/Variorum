@@ -328,10 +328,15 @@ enum TrashPurge {
         item.kind == .preservedOriginal ? nil : .deleteNow(item)
     }
 
-    /// The bulk door's ask-time read: the UNWINDOWED counts ("everything,
-    /// always" means everything, and both listings are windowed), then the
-    /// confirm with the full count by kind. `nil` = there is nothing to
-    /// purge, and the caller says so quietly instead of confirming nothing.
+    /// The bulk door's ask-time read: the UNWINDOWED counts (both listings
+    /// are windowed), then the confirm with the full count by kind. `nil` =
+    /// there is nothing this door takes, and the caller says so quietly
+    /// instead of confirming nothing.
+    ///
+    /// **It reads EVERY kind and then decides** (ledger row 21, her G6
+    /// ruling): the takes are counted so the confirm can say honestly that
+    /// they stay and that staying is not keeping, and `TrashScope` — not this
+    /// read — is what decides which of them the door actually takes.
     static func emptyTrashConfirm(session: AppSession) async throws -> Confirm? {
         let now = session.now
         let everything = try await session.database.read { db in
@@ -339,7 +344,8 @@ enum TrashPurge {
         }
         var counts: [Queries.TrashItem.Kind: Int] = [:]
         for item in everything { counts[item.kind, default: 0] += 1 }
-        guard counts.filter({ $0.key != .preservedOriginal }).values.reduce(0, +) > 0
+        guard counts.filter({ TrashScope.emptyTrashTakes($0.key) })
+            .values.reduce(0, +) > 0
         else { return nil }
         return .emptyTrash(counts: counts)
     }
@@ -376,8 +382,13 @@ enum TrashPurge {
             let everything = try await session.database.read { db in
                 try Queries.trash(db, now: now)
             }
+            // Ledger row 21 (G6): exactly what the surface ROWS — notes,
+            // books, blocks and their families. An original rides its family
+            // (round 8b) and a take on a living block is spared, because the
+            // Trash never showed it and a door may not take what it does not
+            // show. The clock still runs on a spared take; the confirm says so.
             let targets = everything
-                .filter { $0.kind != .preservedOriginal }
+                .filter { TrashScope.emptyTrashTakes($0.kind) }
                 .map { SyncPurgeTarget(table: $0.kind.purgeTable, rowID: $0.id) }
             var anyFamilySynced = false
             if !synced {
@@ -396,6 +407,168 @@ enum TrashPurge {
         // chain's janitor owns the road instead).
         await session.sweepLocalPurge()
         return receipt
+    }
+}
+
+/// **WHAT THE GLOBAL TRASH IS FOR — ONE DECISION, BOTH SURFACES** (the
+/// post-13l polish round, ledger rows 11 and 21).
+///
+/// Two of her rulings meet here, and both are about the same thing: a
+/// deadline surface must show exactly what is leaving, and a door must take
+/// exactly what it shows.
+///
+/// **D1 — takes never row here.** Her words: *"I feel like takes should
+/// never appear in trash or archived alone — even if their parent block is
+/// live, it's really hard without context and a take alone is so small."* A
+/// take's ONE past-home is its block's History face; the note-level trash
+/// section audits them per note. Nothing about the DATA changes: a deleted
+/// take is still deleted, still on its own 30-day clock, still restorable
+/// where it lives. What comes out is the LISTING.
+///
+/// **G6 — Empty Trash purges exactly what it rows.** Her words: *"a deleted
+/// take on a living block might be the one item a user does want to keep. I
+/// think that delete everything, including takes not displayed here, should
+/// be an alternative button if it even exists."* So the bulk door takes
+/// notes · books · blocks and their families (a rowed block's own takes go
+/// with it — family-complete and all rowed), and individually-deleted takes
+/// on LIVING blocks are untouched. **This supersedes 13j round-8's
+/// "everything, always"**, deliberately and by her ruling.
+///
+/// The honesty caveat rides the confirm's copy, because sparing is not
+/// keeping: a spared take still runs out its own 30 days, and putting it
+/// back is the way to keep it.
+nonisolated enum TrashScope {
+    /// The kinds the GLOBAL Trash lists. Preserved originals are here
+    /// because they ride a family clock and the deadline surface must show
+    /// what is leaving; takes are not, per D1.
+    static let listedKinds: Set<Queries.TrashItem.Kind> = [
+        .note, .book, .block, .preservedOriginal,
+    ]
+
+    /// The filter picker's rows, in the order both surfaces show them.
+    static let filterKinds: [Queries.TrashItem.Kind] = [
+        .note, .book, .block, .preservedOriginal,
+    ]
+
+    /// What ONE listing asks the query for: the picked kind, or everything
+    /// the Trash lists. A filter can never widen the listing past D1.
+    static func kinds(filter: Queries.TrashItem.Kind?) -> Set<Queries.TrashItem.Kind> {
+        guard let filter, listedKinds.contains(filter) else { return listedKinds }
+        return [filter]
+    }
+
+    /// Does Empty Trash take this row? A preserved original rides its family
+    /// (her round-8b ruling — never separately purged), and a take is spared
+    /// entirely (G6).
+    static func emptyTrashTakes(_ kind: Queries.TrashItem.Kind) -> Bool {
+        switch kind {
+        case .note, .book, .block: return true
+        case .take, .preservedOriginal: return false
+        }
+    }
+}
+
+/// **THE TRASH'S SHAPE ON SCREEN — ONE BRAIN, BOTH SURFACES** (the post-13l
+/// polish round, ledger rows 3 and 22).
+///
+/// **A3 (her ruling):** *"a deleted take definitely needs to name both note
+/// & block or it's kinda useless"* — rows must name their context. For the
+/// global Trash that is the note a block came out of, and the honest way to
+/// say it once for many rows is a **header**, not a suffix repeated on every
+/// line.
+///
+/// **G7:** block rows gather under a small note-name header (the note itself
+/// rows only if IT is deleted — then its own row heads the group), so a note
+/// with many deleted blocks reads as one group rather than clutter.
+///
+/// **G7's tenth-sitting extension:** an original stranded onto the family
+/// clock nests UNDER the block whose deletion stranded it — *"going to trash
+/// shows you what you just deleted rather than suddenly being overwhelmed by
+/// 31 random items"*. The anchor is the query's own answer
+/// (`TrashItem.anchorBlockID`), never guessed from stamps here.
+///
+/// Presentation only: the rows, their order and every act on them are
+/// unchanged — this decides what sits under what.
+nonisolated enum TrashGrouping {
+    /// One listed row, with the ancestors that died with it.
+    struct Row: Equatable {
+        let item: Queries.TrashItem
+        /// Preserved originals whose family clock is THIS row's deletion.
+        var nested: [Queries.TrashItem] = []
+    }
+
+    /// Rows that came out of one note, under its name.
+    struct Group: Equatable {
+        let noteID: String
+        /// The note's OWN Trash row, when the note is in the Trash too — it
+        /// heads its group instead of standing apart from its blocks.
+        var noteRow: Queries.TrashItem?
+        var rows: [Row] = []
+    }
+
+    /// The listing, in the order the query gave it, with groups placed where
+    /// their first row fell.
+    enum Entry: Equatable {
+        case group(Group)
+        /// A row with no note to gather under: a book, or a note whose blocks
+        /// are not separately listed.
+        case row(Row)
+    }
+
+    static func entries(_ items: [Queries.TrashItem]) -> [Entry] {
+        // A note only becomes a HEADER when something else in the listing
+        // points at it — otherwise a lone deleted note would render as a
+        // group of one, which says less than the row itself does.
+        let homes = Set(items.compactMap { $0.kind == .note ? nil : $0.noteID })
+        let listedBlockIDs = Set(items.filter { $0.kind == .block }.map(\.id))
+        var nestedUnder: [String: [Queries.TrashItem]] = [:]
+        for item in items where item.kind == .preservedOriginal {
+            guard let anchor = item.anchorBlockID, listedBlockIDs.contains(anchor)
+            else { continue }
+            nestedUnder[anchor, default: []].append(item)
+        }
+        let nestedIDs = Set(nestedUnder.values.joined().map(\.id))
+
+        var entries: [Entry] = []
+        var groupIndex: [String: Int] = [:]
+
+        func groupSlot(_ noteID: String) -> Int {
+            if let index = groupIndex[noteID] { return index }
+            entries.append(.group(Group(noteID: noteID)))
+            groupIndex[noteID] = entries.count - 1
+            return entries.count - 1
+        }
+
+        for item in items {
+            if nestedIDs.contains(item.id) { continue }  // it rides its anchor
+            if item.kind == .note, homes.contains(item.id) {
+                let slot = groupSlot(item.id)
+                guard case .group(var group) = entries[slot] else { continue }
+                group.noteRow = item
+                entries[slot] = .group(group)
+                continue
+            }
+            let row = Row(item: item, nested: nestedUnder[item.id] ?? [])
+            guard let noteID = item.noteID, homes.contains(noteID) else {
+                entries.append(.row(row))
+                continue
+            }
+            let slot = groupSlot(noteID)
+            guard case .group(var group) = entries[slot] else { continue }
+            group.rows.append(row)
+            entries[slot] = .group(group)
+        }
+        // A GROUP OF ONE says less than the row it wraps: the header repeats
+        // what the row's own "from ‹note›" already carries, and her G7 concern
+        // was clutter, not ceremony. So a lone block from a live note stays a
+        // plain row — grouping earns its header at two rows, or at one when
+        // the note itself is in the Trash and heads its own group.
+        return entries.map { entry in
+            guard case .group(let group) = entry,
+                  group.noteRow == nil, group.rows.count == 1
+            else { return entry }
+            return .row(group.rows[0])
+        }
     }
 }
 

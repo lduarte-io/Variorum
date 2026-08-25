@@ -714,6 +714,22 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "\u{2318}-click notes in the Library to pick what goes.",
             availability: always),
+        // The post-13l polish round (ledger row 25 — FOUND-ITEM 2). The THIRD
+        // verb on a note row, declared at last. It is `always` for
+        // `.deleteSelectedNotes`' exact reason: the target is the row she
+        // right-clicked, carried by the door, not derived from whatever mode a
+        // pane happens to be in — so `takesAccess: .native` is honest rather
+        // than an exemption (Takes is not behind Write where neither owns the
+        // row). Its two renderers are the Library's note rows and the Pool's,
+        // exactly the pair `.deleteNote` reaches.
+        Capability(
+            id: .archiveNote, verb: "Archive", scope: .post,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Archiving acts on a note's row \u{2014} "
+                + "right-click one in the Library. \(RecoveryPath.archivedSurface) keeps it, "
+                + "with no countdown.",
+            availability: always),
         // 13j batch 6b (J1 — the purge doors, IN-TRASH ONLY forever: her
         // round-3 rider's letter). `.surface` acts on the Trash's own rows
         // and header; app scope because a Trash row can be any kind, and

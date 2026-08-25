@@ -48,11 +48,26 @@ extension Queries {
         public let noteIsDeleted: Bool
         /// A take row's block, for the doors that need it.
         public let blockID: String?
+        /// **WHICH DELETED BLOCK'S CLOCK THIS ORIGINAL RIDES** — set only on
+        /// `preservedOriginal` rows (the post-13l polish round, ledger row 22;
+        /// her tenth-sitting ruling: *"those ancestors [go] under the live
+        /// block that was most recently deleted — so if you had 30 ancestors
+        /// on one live block's history and you delete that one live block,
+        /// going to trash shows you what you just deleted rather than
+        /// suddenly being overwhelmed by 31 random items"*).
+        ///
+        /// It is the family member whose tombstone IS `deletedAt` (the family
+        /// clock, `MAX(deleted_at)` over the descendants) — i.e. the block she
+        /// just deleted. The Trash nests the original under that block's row;
+        /// when the anchor is not itself listed (windowed out, or it died as a
+        /// cascade victim), the original rows on its own and nothing is lost.
+        public let anchorBlockID: String?
 
         public init(
             kind: Kind, id: String, deletedAt: String, title: String? = nil,
             text: String? = nil, noteID: String? = nil, noteTitle: String? = nil,
-            noteIsDeleted: Bool = false, blockID: String? = nil
+            noteIsDeleted: Bool = false, blockID: String? = nil,
+            anchorBlockID: String? = nil
         ) {
             self.kind = kind
             self.id = id
@@ -63,6 +78,7 @@ extension Queries {
             self.noteTitle = noteTitle
             self.noteIsDeleted = noteIsDeleted
             self.blockID = blockID
+            self.anchorBlockID = anchorBlockID
         }
     }
 
@@ -299,6 +315,18 @@ extension Queries {
                 SELECT f.origin AS block_id,
                        MAX(d.deleted_at) AS family_clock,
                        SUM(CASE WHEN d.deleted_at IS NULL THEN 1 ELSE 0 END) AS live_count,
+                       -- Ledger row 22 (her tenth-sitting ruling): the family
+                       -- member whose tombstone IS the family clock — the
+                       -- block she just deleted, which the Trash nests this
+                       -- original UNDER. Written as an explicit ordered
+                       -- correlated read rather than leaning on SQLite's
+                       -- bare-column-beside-MAX() convenience, so the answer
+                       -- is deterministic by the statement's own words.
+                       (SELECT d2.id FROM fam f2
+                          JOIN block d2 ON d2.id = f2.id
+                         WHERE f2.origin = f.origin AND d2.deleted_at IS NOT NULL
+                         ORDER BY d2.deleted_at DESC, d2.id DESC
+                         LIMIT 1) AS anchor_block_id,
                        dv.working_text AS text,
                        c.id AS note_id, c.title AS note_title,
                        c.entry_date AS note_entry_date, c.created_at AS note_created_at
@@ -330,7 +358,8 @@ extension Queries {
                     DisplayTitle.note(
                         title: row["note_title"], entryDate: row["note_entry_date"],
                         createdAt: row["note_created_at"])
-                })
+                },
+                anchorBlockID: row["anchor_block_id"])
         }
     }
 

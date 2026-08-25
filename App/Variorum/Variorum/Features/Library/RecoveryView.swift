@@ -66,14 +66,29 @@ import VariorumCore
 /// is the internal case name, and no surface has ever shown it — copy that
 /// named it would send her looking for a door that does not exist.
 nonisolated enum RecoveryPath {
-    /// The Library ⋯ menu's item, and the palette row. It names BOTH halves
-    /// of the surface, which is what it holds: the calm Archived section and
-    /// the Trash's countdown (13j J1 — her ruled name for the deleted half
-    /// is `trashSection` below).
-    static let menuLabel = "Archived & Deleted"
+    /// **THE SURFACE IS THE TRASH NOW, PLAINLY** (the post-13l polish round,
+    /// ledger rows 7–8 — her B1/B2 rulings). It used to name both halves,
+    /// because it held both: *"Archived & Deleted"*. Her direction split
+    /// them — *"archived should be a different item on the left (like where
+    /// library is, but it says archived)… separating archive and trash more
+    /// makes sense — archive is available forever and maybe still valuable
+    /// even if you don't want it in your current library"* — so Archived is
+    /// its own sidebar destination (`ArchivedView`) and what is left here is
+    /// the 30-day clock and nothing else.
+    ///
+    /// The name comes from the shared home rather than being re-typed, for
+    /// this enum's founding reason: copy elsewhere promises the surface by
+    /// name, and one string is what keeps the sentence and the label the same.
+    static let menuLabel = RecoveryCopy.trashSection
     /// The arrow is the shipped copy's own (`\u{2192}`, as the merge
     /// ceremony and the helper already write it) — one voice, not a new one.
+    /// The Trash's door lives in the Library's masthead (the trash icon her
+    /// B1 ruling put where the ⋯ menu was), so the path still reads through
+    /// the Library.
     static var surface: String { "Library \u{2192} \(menuLabel)" }
+    /// The OTHER destination, named once: the sidebar item that holds
+    /// archived notes. Its own sentence-and-label rule, same as above.
+    static let archivedSurface = RecoveryCopy.archivedSection
 
     /// **The Trash** (13j J1, her word). One listing over every deleted
     /// thing, on the 30-day clock.
@@ -234,9 +249,13 @@ final class RecoveryViewModel {
         }
     }
 
+    /// **The listing's kinds come from `TrashScope`** (the post-13l polish
+    /// round, ledger row 11 — her D1 revision: *"takes should never appear in
+    /// trash or archived alone… a take alone is so small"*). It used to ask
+    /// for `Kind.allCases`, which is the enum's business rather than the
+    /// surface's; one decision now answers for both platforms.
     func startTrash() async {
-        let kinds: Set<Queries.TrashItem.Kind> = kindFilter.map { [$0] }
-            ?? Set(Queries.TrashItem.Kind.allCases)
+        let kinds = TrashScope.kinds(filter: kindFilter)
         do {
             for try await value in session.database.observeTrash(
                 now: session.now, kinds: kinds, oldestFirst: oldestFirst,
@@ -259,7 +278,7 @@ final class RecoveryViewModel {
     func startTrashTotal() async {
         do {
             for try await value in session.database.observeTrash(
-                now: session.now, kinds: Set(Queries.TrashItem.Kind.allCases),
+                now: session.now, kinds: TrashScope.listedKinds,
                 oldestFirst: false, limit: 1
             ) {
                 trashIsEmptyUnfiltered = value.isEmpty
@@ -548,28 +567,19 @@ struct RecoveryView: View {
 
     var body: some View { list }
 
+    /// **THE LISTING'S SHAPE** (the post-13l polish round, ledger rows 3 + 22
+    /// — A3's naming folded into G7's grouping, which is the same fix twice:
+    /// a row must name what it came out of, and a note's rows say it once
+    /// together rather than each on its own line). The decision is
+    /// `TrashGrouping`'s; this renders it.
+    private var entries: [TrashGrouping.Entry] { TrashGrouping.entries(model.trash) }
+
     private var list: some View {
         List {
-            Section(RecoveryPath.archivedSection) {
-                if model.archived.isEmpty {
-                    Text("Nothing archived.").foregroundStyle(.secondary)
-                }
-                ForEach(model.archived, id: \.postID) { item in
-                    HStack {
-                        title(item)
-                        Spacer()
-                        Button("Open") { openPost(item.postID) }
-                        Button("Unarchive") {
-                            Task { await library.unarchive(postID: item.postID) }
-                        }
-                    }
-                }
-                if model.archivedTruncated {
-                    Text("Showing the \(RecoveryViewModel.window) most recently archived — older ones aren't listed.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
+            // Ledger row 8: the Archived half MOVED to its own sidebar
+            // surface (`ArchivedView`) at her B2 direction — *"separating
+            // archive and trash more makes sense"*. What is left here is the
+            // clock, which is what "Trash" means.
             Section(RecoveryPath.trashSection) {
                 Text(RecoveryPath.windowNote)
                     .font(.caption)
@@ -583,8 +593,11 @@ struct RecoveryView: View {
                         holdsOtherKinds: !model.trashIsEmptyUnfiltered))
                         .foregroundStyle(.secondary)
                 }
-                ForEach(model.trash) { item in
-                    trashRow(item)
+                ForEach(Array(entries.enumerated()), id: \.offset) { _, entry in
+                    switch entry {
+                    case .row(let row): plainRow(row)
+                    case .group(let group): groupRows(group)
+                    }
                 }
                 if model.trashTruncated {
                     Text("Showing the \(RecoveryViewModel.window) most recent — older ones aren't listed.")
@@ -608,13 +621,50 @@ struct RecoveryView: View {
                     .padding(4)
             }
         }
-        .task { await model.startArchived() }
         // Restarts when the filter or the sort changes — both are applied in
         // SQL, so the observation itself is what moves.
         .task(id: model.restartToken) { await model.startTrash() }
         // Ledger row 2: the unfiltered truth, on its own observation, which
         // deliberately does NOT restart with the filter.
         .task { await model.startTrashTotal() }
+    }
+
+    /// A row with nobody to gather under — it keeps its own "from ‹note›".
+    @ViewBuilder
+    private func plainRow(_ row: TrashGrouping.Row) -> some View {
+        trashRow(row.item, namesItsHome: true)
+        nestedRows(row, indent: 16)
+    }
+
+    /// One note's rows under one name. When the note itself is in the Trash
+    /// its OWN row is the header — the group is literally the note and what
+    /// went with it (her G7 words: *"a more visible UI for 'your ancestors
+    /// die with you'"*, one grain up).
+    @ViewBuilder
+    private func groupRows(_ group: TrashGrouping.Group) -> some View {
+        if let noteRow = group.noteRow {
+            trashRow(noteRow, namesItsHome: false)
+        } else if let first = group.rows.first, let title = model.homeTitle(first.item) {
+            Text("from \(title)")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+        }
+        ForEach(Array(group.rows.enumerated()), id: \.offset) { _, row in
+            trashRow(row.item, namesItsHome: false)
+                .padding(.leading, 16)
+            nestedRows(row, indent: 32)
+        }
+    }
+
+    /// Ledger row 22's tenth-sitting extension: the ancestors a deletion
+    /// stranded, shown UNDER the block that stranded them.
+    @ViewBuilder
+    private func nestedRows(_ row: TrashGrouping.Row, indent: CGFloat) -> some View {
+        ForEach(row.nested, id: \.id) { original in
+            trashRow(original, namesItsHome: false)
+                .padding(.leading, indent)
+        }
     }
 
     /// Her round-3 ruling's two controls: filter by kind, sort by date —
@@ -625,7 +675,11 @@ struct RecoveryView: View {
                 get: { model.kindFilter },
                 set: { model.kindFilter = $0 })) {
                 Text("Everything").tag(Queries.TrashItem.Kind?.none)
-                ForEach(Queries.TrashItem.Kind.allCases, id: \.self) { kind in
+                // Ledger row 11 (D1): the rows the Trash lists, from the ONE
+                // decision — so the picker can never offer a kind the listing
+                // no longer holds (a Takes filter over a takeless listing is
+                // the "The Trash is empty" lie one layer up, rebuilt).
+                ForEach(TrashScope.filterKinds, id: \.self) { kind in
                     Text(RecoveryPath.kindLabel(kind)).tag(Queries.TrashItem.Kind?.some(kind))
                 }
             }
@@ -670,8 +724,14 @@ struct RecoveryView: View {
         .purgeConfirmDialog(model)
     }
 
+    /// `namesItsHome` (ledger rows 3 + 22): a row inside a note's group is
+    /// already named by the group's header, and repeating "from ‹note›" on
+    /// every line is the clutter G7 exists to remove. A standalone row keeps
+    /// it — the naming never disappears, it just moves up one line.
     @ViewBuilder
-    private func trashRow(_ item: Queries.TrashItem) -> some View {
+    private func trashRow(
+        _ item: Queries.TrashItem, namesItsHome: Bool = true
+    ) -> some View {
         HStack(spacing: 6) {
             Text(item.title ?? TrayRowPreview.line(item.text))
                 .lineLimit(1)
@@ -688,7 +748,7 @@ struct RecoveryView: View {
             // with the honest addition when that note is in the Trash too.
             // 13l (§8b): the NAME comes from the home's own display brain,
             // so a scrap says what the scraps area is actually called.
-            if let noteTitle = model.homeTitle(item) {
+            if namesItsHome, let noteTitle = model.homeTitle(item) {
                 Text(item.noteIsDeleted
                      ? "from \(noteTitle) (also in the Trash)"
                      : "from \(noteTitle)")
@@ -755,12 +815,6 @@ struct RecoveryView: View {
         }
     }
 
-    private func title(_ item: Queries.TimelineItem) -> some View {
-        HStack(spacing: 6) {
-            Text(item.displayTitle)
-            if let date = item.entryDate {
-                Text(date).font(.caption).foregroundStyle(.secondary)
-            }
-        }
-    }
+    // The archived rows' `title(_:)` builder LEFT with them (ledger row 8) —
+    // `ArchivedView` renders that listing now, in its own room.
 }

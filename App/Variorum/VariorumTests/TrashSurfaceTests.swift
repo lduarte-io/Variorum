@@ -474,7 +474,16 @@ struct TrashSurfaceTests {
                 try Queries.strandedOriginals(db, now: harnessNow).map(\.id)
             }
             #expect(stranded == [blockID])
-            #expect(TrayPath.goesWithItsFamily.contains("goes with its deleted blocks"))
+            // **A JUSTIFIED PIN EDIT** (the post-13l polish round, ledger row
+            // 18 — her G3 ruling's PRESENTATION half, a ruled rewording and
+            // never a relaxed pin). The CLAIM is unchanged: the moved row
+            // wears a label that says it goes with its family. The words
+            // changed because the old ones led with the model's own noun
+            // ("preserved original") and left the "why" to be guessed; hers
+            // reads as what happened to it and how long it is kept.
+            #expect(TrayPath.goesWithItsFamily.contains("family"))
+            #expect(TrayPath.goesWithItsFamily.contains("set aside"))
+            #expect(!TrayPath.goesWithItsFamily.lowercased().contains("unplaced"))
         }
     }
 

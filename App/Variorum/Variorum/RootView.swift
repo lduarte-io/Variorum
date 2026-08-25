@@ -549,9 +549,7 @@ struct RootView: View {
                 onOpenBlock: { picked, blockID in open(picked, blockID: blockID, in: pane) },
                 onOpenBeside: { router.openBeside(.post($0)) },
                 onOpenInNewWindow: openInNewWindow,
-                starDoor: starDoor,
-                // MINOR-D6: the one fire-and-DO tutorial door (failures speak).
-                onOpenTutorial: { ShellActions(session: session, shell: router).openTutorial() })
+                starDoor: starDoor)
         case .poolPosts:
             PoolPostsView(
                 session: session, model: poolPosts, library: library,
@@ -616,6 +614,12 @@ struct RootView: View {
                 // 13l (§8b): a scrap's row opens the SCRAPS area, not a note
                 // pane over a pool container.
                 openPool: { poolID in openHere(.pool(poolID)) })
+        // The post-13l polish round, ledger row 8 (B2): archived notes, in
+        // their own room, apart from the Trash's clock.
+        case .archived:
+            ArchivedView(
+                session: session, library: library,
+                openPost: { postID in openHere(.post(postID)) })
         }
     }
 
@@ -705,8 +709,15 @@ struct RootView: View {
             ("Go to Shelf", { [self] in adopt(.shelf, in: router.workspace.focusedPane) }),
             ("Go to Library", { [self] in adopt(.library, in: router.workspace.focusedPane) }),
             ("Go to Pool", { [self] in adopt(.poolPosts, in: router.workspace.focusedPane) }),
+            // The post-13l polish round, ledger rows 7–8: the two halves of
+            // the old "Archived & Deleted" surface, now two destinations
+            // with two names. Both are NAVIGATION rows, which is why they
+            // live in composition rather than the registry (this method's
+            // own rule, one comment up).
             (RecoveryPath.menuLabel,
                 { [self] in adopt(.recovery, in: router.workspace.focusedPane) }),
+            (RecoveryPath.archivedSurface,
+                { [self] in adopt(.archived, in: router.workspace.focusedPane) }),
             // 13b Stage 2: the old modes-tutorial entrance points at the
             // one tutorial BOOK (find-or-seed, then open — fire-and-DO).
             ("Open the Tutorial — \(TutorialSeeder.bookName)", { actions.openTutorial() }),

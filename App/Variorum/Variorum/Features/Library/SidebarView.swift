@@ -36,6 +36,13 @@ nonisolated enum SidebarSelection: Hashable {
     /// call): Blocks is a 4TH AREA, not inline sidebar rows ("way too
     /// crowded"); standalone blocks are made THERE.
     case blocks
+    /// **The FIFTH area** (the post-13l polish round, ledger row 8 — her B2
+    /// direction: *"archived should be a different item on the left (like
+    /// where library is, but it says archived)"*). Archived NOTES, kept
+    /// forever, with their own search — deliberately apart from the Trash's
+    /// countdown, which is R44's sidebar meeting the model's own
+    /// archive/tombstone distinction (OverallModel §6) at last.
+    case archived
     case post(String)
     case tag(String)
     case reading(String)
@@ -55,7 +62,8 @@ nonisolated enum SidebarSelection: Hashable {
     var noteID: String? {
         switch self {
         case .post(let id), .pool(let id): return id
-        case .shelf, .library, .poolPosts, .blocks, .recovery, .tag, .reading: return nil
+        case .shelf, .library, .poolPosts, .blocks, .archived, .recovery, .tag, .reading:
+            return nil
         }
     }
 }
@@ -83,6 +91,13 @@ struct SidebarView: View {
         // ruling named the note menu and the library door; a third door is
         // hers to ask for.
         .deleteNote,
+        // The post-13l polish round (ledger row 25): ARCHIVE joins the same
+        // grammar and the same two renderers — the Library's rows and the
+        // Pool's. The Open strip does not render it, for `.deleteNote`'s
+        // reason written out above: the strip is pure view state, and a verb
+        // that removes the note from her Library does not belong one row
+        // above "Close".
+        .archiveNote,
     ]
 
     let session: AppSession
@@ -298,6 +313,18 @@ struct SidebarView: View {
                     Image(systemName: "square.on.square")
                 }
                 .tag(SidebarSelection.blocks)
+                // Ledger row 8 (B2): ARCHIVED, after the four — her
+                // direction's letter ("a different item on the left, like
+                // where library is"). It sits at the END of the standing
+                // group deliberately: Shelf · Library · Pool · Snippets is
+                // R44's ruled order and this is an addition to it, not a
+                // re-ranking of it.
+                Label {
+                    markedTitle(RecoveryPath.archivedSurface, .archived)
+                } icon: {
+                    Image(systemName: "archivebox")
+                }
+                .tag(SidebarSelection.archived)
             }
             // 13g L4 (WT-4), her walkthrough: *"i don't even konw if we need
             // that empty whitespace that says Variorum at the top - let's
