@@ -1340,6 +1340,71 @@ those read from the constants rather than from re-typed prose.
    (`NoteWindowView`, `QuickNoteView`).
 
 
+### BATCH 3 — THE TRAY GOES TO THE SIDE PANEL: the brief (fresh Opus session; dispatches after batch 2's record)
+
+**Read in full first:** `CLAUDE.md` + canon · THIS FILE top to bottom
+(your rulings: §C1, ledger rows 9 and 20; the LIFECYCLE TABLE rows
+B1, B2, B3, T6 are your acceptance shape) · the 13j **Environment
+traps** (binding verbatim) · the 13l plan's **ACT 7 — WALK RECORD**
+(the tray's walked state; P-1's squeezed-preview mechanism) ·
+batches 1–2's records above (batch 1's deferred items below are
+YOURS; batch 2's `TrashScope`/`TrashGrouping` and naming are your
+precedents).
+
+**Scope — ledger rows 9 (C1) · 20 (G5), plus batch 1's two deferred
+items routed here.** Fences: zero schema · zero `Sync/` · the Block
+History pane and came-from are batch 4's · versions batch 5's.
+
+- **Row 9 (C1, her words in §C):** the note tray becomes **an icon
+  beside the scraps and reference icons**, opening **in the side
+  panel** (`PostDetailView.InspectorPanel` gains `.tray`; the icon
+  toggles like its two siblings). The note ▾ menu's "This Note's
+  Tray…" item **follows the move** (removed — the icon is the named
+  door); the **⌫ N badge STAYS as the glance signal and clicking it
+  opens the same panel** (the kickoff call, recorded above).
+  Registry P-1: `.showNoteTray`'s doors update. The panel gets the
+  room her ruling names — the preview no longer loses to its
+  metadata (the walk's P-1 mechanism: the flexible `Text` compresses
+  first; give it `layoutPriority`/the panel's width).
+- **Row 20 (G5, her rulings verbatim in the ledger):** the tray
+  panel's sections become the map's letter:
+  - **Archived blocks** — kept, forever, no clock (B1's row).
+  - **The LEAVING section** — the complete per-note pre-purge
+    audit: every clocked thing of THIS note — deleted **blocks**;
+    **its deleted takes under a collapsed-by-default disclosure**
+    (each row naming its BLOCK — A3's discipline; each carrying
+    **Put back** (status-aware receipt — the restore machinery
+    exists from 13j) AND **Delete Now** with confirm-every-time
+    (the purge-door class; `requestPurge` takes `variant` targets —
+    verified at kickoff)); and **clocked originals** once their
+    family clock starts (the 13j 8b nets untouched — this is their
+    note-side face).
+  - **Unclocked preserved originals:** their RULED home is
+    lineage-only (batch 4's came-from). **To avoid a dark window,
+    KEEP the existing originals section listing them in this batch**,
+    marked in code for batch 4's removal — batch 4 deletes the
+    section the same commit came-from lands. Record this staging.
+  - Purge doors live in TRASH SURFACES only (the global Trash +
+    this leaving section) — never in the writing flow; nothing else
+    gains one.
+- **Batch 1's two deferred items (its record, "deliberately not
+  fixed"):** the ARCHIVE receipt still names the note-menu door —
+  rewrite to name the tray's NEW door (the icon); the scraps
+  editor's `note ▾` "This Note's Tray…" label — the scraps surface
+  takes the same icon door with home-kind-aware wording (the 13l
+  row-26 `BlockRestoreLanding` kind machinery is the precedent; a
+  pool's tray is the scraps area's own).
+
+**Discipline:** the standing loop — red-on-old by behavioural revert
+for bug-class fixes; walk-driven pins for the door moves (drive the
+real surface); spine green BY TYPE NAME (mechanical re-pins for the
+moved door are yours; lesson content is batch 6's); full four gates
+with counts quoted (mobile runs if `Shared/` is touched — baselines
+now core 1376/143 · Mac 1717/293 · spine 63/8 · mobile 486/78);
+instance check before build-adjacent acts; commits staged by
+explicit path, NEVER push. **Append "### BATCH 3 — RECORD"**, flip
+rows 9 and 20, and STOP.
+
 ## Constraints
 
 Zero schema (B2 is read-side over `archived_at`; if ANYTHING firms
