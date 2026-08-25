@@ -194,6 +194,7 @@ plus the archive/trash separation are expected to dissolve it.
 | 25 | Found-item 2: the archive-a-note door verified/ensured (one clear door, receipt naming the Archived surface) — rides B1's registry pass | **done** `47c0cb7` — the door existed in two row menus, undeclared and SILENT; now `.archiveNote` is declared, both renderers read its verb, and `LibraryViewModel` gained a receipt slot that names Archived and its absence of a clock |
 | 26 | The tutorial chapter (row 19) teaches the VERSIONS story too: ⌘S vs ⌘⇧S — this take's moment vs this note's moment — the grain pairing as the lesson | open |
 | 28 | **THE Aa BOTTOM-CHROME CONDENSATION (her kickoff addition, 2026-08-24 — verbatim in the kickoff record; SCOPE RULED at the kickoff sitting via the question tool): FORMATTING ONLY BEHIND Aa.** The `FormatBar` cluster + the newlines chip condense into one Aa button; clicking Aa slides the formatting row out (the phone's Aa expanding-row idiom, now on the Mac — a reverse-parity face like dark mode). Block ▾ · Takes · commit ⌘S · **History (row 17's new door)** · note ▾ · comments · counts · ? all stay visible at rest — the "bar becomes the block's time controls" reading survives by construction. Both bars (`CommitBar` + `TakesBottomBar`) take the same treatment; registry discipline P-1 (doors move, declarations unchanged — the R6-2/13g slide-out precedent is exactly this class); expansion state is session UI state | open |
+| 29 | **THE ERROR VOICE TOKEN (her mid-round ruling: "Add it this round"):** one named error/danger slot per voice in the shared token vocabulary; refusal/error surfaces adopt it through the voice (no literal reds return); both platforms share the file; hues revisable at 13s, dark mode (13u) inherits the slot. Builds in batch 4 | open |
 | 27 | **THE TWO-EXITS LESSON (her eleventh-sitting mandate — "I deleted a paragraph, is it in deleted or in lineage? and lineage of what block" must be legible):** the chapter teaches **"Deletion goes to the Trash; transformation goes to lineage"** — a block you DELETED is on the clock, Put back real; a block that BECAME something else (merged, divided) lives in the new block's History came-from, one button back. Taught by DOING (her idea, adopted: the lesson walks the user through deleting a whole block, then making an edit that merges two — and finding each in its exit). Covers TODAY's truth incl. the shipped merge-then-edit; **the fanned cross-block matrix is 13u's** (its sitting + its own lesson update — the split is recorded there). The merge's own silence stays HER declined P-2 — the tutorial carries the teaching, not a per-merge message | open |
 
 
@@ -540,6 +541,14 @@ Deleted" surface is now known-interim by her word) and extends it:
 the whole five-places design (Archive · Trash · tray/leaving · Block
 History · Versions) reaches the phone through that design-session
 road, not by silent inheritance.
+
+**SECOND RULING, same sitting (the batch-1 PROVISIONAL put to her
+via the question tool): "Add it this round" — the voice vocabulary
+GAINS an error/danger token.** One named slot per voice (Terminal +
+Study); refusal surfaces adopt it on both platforms; the exact hues
+stay revisable at 13s's design review, and 13u's dark mode inherits
+the slot. Recorded as **ledger row 29**, built in batch 4 (the
+chrome hand).
 
 ### The batch plan (the architect's, within the mandate — acts may merge at dispatch; the ledger is the truth)
 
