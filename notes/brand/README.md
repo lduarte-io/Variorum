@@ -1,6 +1,8 @@
 # Variorum — brand mark finalists
 
-Fourteen candidate logo marks, all production-clean vector, **unchosen** — the author picks.
+Fourteen production-clean vector marks. **THE LOGO IS CHOSEN: the striped V — ratified by
+the author 2026-08-25 ("yeah, that's going to be the logo").** The rest of the family
+stands as supporting cast (secondary marks, ornament, icon concepts), per TASTE.md.
 The choosing surface is **`variorum-family-sheet.svg`** (per mark: light ground over dark
 ground; `.png` twins of the sheets are pre-rendered copies for apps that balk at SVG).
 The pipeline that produced everything here is documented in **`PROCESS.md`** — new options
@@ -22,7 +24,7 @@ exactly what she picked.
 
 | mark | files | structure |
 |---|---|---|
-| **the striped V** (her top pick as of 2026-08-25) | `variorum-v-*` | true one-color compound path (`-master` = transparent); slits are real holes |
+| **the striped V** — **THE LOGO (ratified 2026-08-25)** | `variorum-v-*` | true one-color compound path (`-master` = transparent); slits are real holes |
 | **the cards** | `variorum-cards-*` | inherently two-tone (layered black + white paint); no transparent master by design. In `-white`, the dot flips to ink so it survives |
 | **the book** | `variorum-book-*` | inherently two-tone, same class as the cards |
 | **the flourish** | `variorum-flourish-*` | true one-color compound path |
@@ -79,7 +81,7 @@ reference-only; **the other six are "potentially usable if a bit overly surreal"
 live candidates. ⚠️ `poster-reading-together` contains AI-garbled tagline lettering
 ("Every drafts variants OPEN") — never ship the lettering.
 
-## Practicalities (flags, not legal advice — noted 2026-08-25)
+## Practicalities (flags, not legal advice — noted 2026-08-25; her findings same day)
 
 *[removed for publication]*
 - **Copyright vs. trademark:** purely AI-generated art carries limited copyright
