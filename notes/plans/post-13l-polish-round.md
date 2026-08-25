@@ -2689,6 +2689,92 @@ row still `open` is 13, the closeout ritual itself**, and 15 reads
    `App/Variorum/VariorumMobile/` and `Sources/VariorumCore/` returns only the
    two pre-existing doc comments (`NoteWindowView`, `QuickNoteView`).
 
+### THE END-OF-ROUND LADDER — ROUND 2 (fresh Fable re-reviewer, 2026-08-25): every round-1 fix HOLDS · the dispute SOUND · ONE NEW MAJOR ⇒ round 3
+
+Reviewer's own runs: core **1411/146** · Mac **1768/296 TEST
+SUCCEEDED** (xcresult-verified) · mobile **486/78** · red-on-old
+INDEPENDENTLY re-proven in a detached scratch worktree at the
+pre-fix tree (LR1-1's three legs red at the exact recorded counts;
+the dispute's guard pin green-on-old, confirming the rider was
+hollow exactly as recorded). Fences verified by diff. Per-finding:
+LR1-1/2/3/4/5/6/8/9/10 ALL HOLD (LR1-9 with a residue, below);
+LR1-7 correctly routed; the `versonOfNote` DISPUTE verdict: SOUND
+— "naming the hollow pin as hollow instead of dressing it as a fix
+is the hallucination guard applied correctly."
+
+**[MAJOR · LR2-1] `Operations+NoteVersions.swift:176,213-225` +
+`Queries/Lineage.swift:216-224` + `Sync/PurgeFamily.swift` (read
+only) — the LR1-1 fix's tombstone-reading cannot survive PHYSICAL
+PURGE, and `restoreNoteVersion`'s re-anchor misses exactly the
+versions LR1-1 keeps alive.** Restore's step-4 peers come from
+`versionPeerPosts`, which still fences all three liveness reads —
+so a version whose anchor was merged/archived/deleted is NOT
+re-anchored at restore (falsifying the op's own doc), survives
+only via the released original's tombstoned rows, and the
+restore's own Delete Now road then purges that original WITH its
+`version_of` edges (`joinStrandedOriginals` → `expandBlock` sweeps
+all edges): once the janitor executes — effectively at once on a
+single-device account — the moment silently unlinks: expelled from
+the listing, LISTED IN ARCHIVED as a sealed anonymous note,
+orphaned from V2's ride, Restore/Promote refusing. Self-inflicted
+by save-a-version → merge first block → restore. *Plain leg:* an
+anchor block purged at its ordinary 30-day clock severs a LIVE
+note's version links the same way — a second no-read-side-answer
+leg the new KnownIssues row's "moveBlock is the one leg" claim
+misses. **Fix (round 3's input): restore step 4 enumerates peers
+the CLASSIFIER's way** (`noteVersionIDs` read before step 2, union
+live compare peers — LR1-5's one-classifier doctrine applied to
+the op's own read); the KnownIssues row names the purge leg beside
+moveBlock with the same #19(c)/13w durable road (the plain leg's
+real fix is a schema call, hers — correctly parked).
+
+**[MINOR · LR2-2]** LR1-9's honesty fix stops one voice short:
+STUDY's `positive` equals STUDY's `chosen` too (all four voices
+wear the ✓-chosen hue on the settled line) while the rewritten doc
+concedes only Terminal; the pin never asserts the `chosen`
+relation. One doc sentence + extend the pin; hues stay 13s's.
+
+**[NIT · LR2-3]** `savedVersions(of:in:)` counts from the WINDOWED
+listing — past the window a note's Delete Now confirm can
+under-count its versions. Deliberate; record one sentence so
+12/13o don't rediscover it. **[NIT · LR2-4]** the phone's Put
+back/Delete Now accessibility labels are version-blind — one line
+in the closeout's mobile batch-6 inheritance note. **[NIT ·
+LR2-5]** the new KnownIssues row's "would list nowhere" under-
+describes (such moments LIST on Archived, sealed) — fix the
+wording with LR2-1's row edit.
+
+**Clean bill (abridged):** "the fix wave is disciplined, honest
+work… red-on-old genuine (reproduced to the digit)… the LR1-1
+predicate rewrite is architecturally right… fences held
+everywhere; nothing product-flavored leaked."
+
+**ROUTING:** fix wave 2 owns LR2-1's restore-leg fix + KnownIssues
+wording (incl. LR2-5), LR2-2, LR2-3's recorded sentence. LR2-4
+rides the closeout's mobile update. Round 3 (fresh Fable) then
+re-reviews the wave-2 fixes per the ladder's still-HIGH rule; hard
+cap reached after it — anything open lands recorded for her.
+
+### LADDER FIX WAVE 2: the brief (fresh Opus session)
+
+Read: `CLAUDE.md` + canon · THIS FILE top to bottom (ROUND 2's
+findings above are your letter; the fix-wave-1 record and LR1-1's
+mechanism are your map) · the 13j Environment traps. Scope:
+LR2-1's restore-leg fix exactly as proposed (classifier-read
+peers before step 2; op doc corrected; the KnownIssues 13w row
+gains the purge leg + the LR2-5 wording) · LR2-2 (doc + pin
+extension) · LR2-3 (one recorded sentence at the code + in your
+record). Fences: ZERO schema · ZERO `Sources/VariorumCore/Sync/`
+(PurgeFamily stays read-only — the fix is in the OP's read) ·
+nothing product-flavored. Discipline: trace first; red-on-old by
+behavioural revert (LR2-1's pin: save version → merge first block
+→ restore → every version of the note carries a live edge anchored
+on a live block, the listing still claims it — red on the current
+tree); four gates quoted (baselines core 1411/146 · Mac 1768/296 ·
+spine 68/9 · mobile 486/78); flake watch three candidates;
+explicit-path commits, NEVER push. Append "### LADDER FIX WAVE 2
+— RECORD", then STOP — round 3 dispatches next.
+
 ## Constraints
 
 Zero schema (B2 is read-side over `archived_at`; if ANYTHING firms
