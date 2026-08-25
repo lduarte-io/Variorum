@@ -1592,6 +1592,143 @@ check before build-adjacent acts; commits staged by explicit path,
 NEVER push. **Append "### BATCH 4 — RECORD"**, flip rows 10, 14,
 15, 17, 28, 29, 31, 32 (+ finish row 20's staging), and STOP.
 
+### THE ARCHITECT'S ADJUDICATION OF BATCH 4's FLAGGED ITEMS (2026-08-25, before batch 5 dispatches)
+
+1. **The live DerivedData-Release instance (PID 98884):** correctly
+   untouched (a Release product runs the REAL store — by store,
+   never addressed). Environment note standing: every later act
+   re-checks; the closeout's `/Applications` refresh gates on a
+   zero-instance window as always. **Checkpoint note for her:** her
+   running copy is a DerivedData product, not `/Applications` — a
+   DerivedData clean would take it; worth telling her.
+2. **`WriteTakesPanel`'s un-classed status slot → batch 5.** Row
+   6's class one surface over; her "the color: should be fixed"
+   covers the sibling. The fix is `TrayViewModel.Status`' split
+   applied to `TakesViewModel` — behavior-preserving classing, not
+   board surgery.
+3. **`BridgeStatusViews`' literal red → batch 5, fix-if-clean:**
+   adopt the tone/token plumbing if it lands cleanly in `Shared/`;
+   else RECORD with the closeout (owner: 13s's voice pass).
+4. **The canvas's missing block-delete door → PRODUCT CALL, hers**
+   — a surface that has never offered deletion gaining doors is
+   invented behavior; bundled for the checkpoint, not built.
+5. The two retired pins: accepted, reasons recorded in the batch
+   record. 6. The two PROVISIONALs (request-scoped pane; the
+   came-from tray door on every origin row): checkpoint bundle.
+
+**THE CHECKPOINT BUNDLE so far (hers, at the round's taste
+checkpoint):** the came-from wording draft ("Bring back") · the
+canvas delete-door question · pane request-scoped vs caret-following
+· the came-from tray door on unclocked rows · the DerivedData-copy
+note · the walk of everything built.
+
+### BATCH 5 — THE VERSIONS FAMILY: the brief (fresh Opus session; dispatches after batch 4's record)
+
+**Read in full first:** `CLAUDE.md` + canon · THIS FILE top to
+bottom — your letter is ledger rows **16 (G1) · 23 (the V-family) ·
+24 (V3's MUST-PIN) · 30 (ancestors disclosure)** plus the REVIEW
+PASS **V1–V9 in full** (it IS your spec: the classifier, the
+deletion ride, identity-preserving restore, born sealed, ⌘⇧S, no
+title mutation, the honest costs) and LIFECYCLE TABLE rows **N1,
+N2, N6 + FOUND-ITEM 1** (your acceptance shape) · the 13j
+**Environment traps** (binding verbatim) ·
+`notes/plans/whole-note-history-brief.md` (the AUTOMATED future —
+13w — that later fills the SAME listing; don't foreclose it: the
+listing must not assume manual-only) · batches 1–4's records
+(batch 2's classifier exclusion + `TrashGrouping`, batch 3–4's
+inspector idiom and walk-pin technique are your precedents).
+
+**Scope — rows 16, 23, 24, 30 + batch 4's routed flags 2 and 3
+(adjudication above).** Fences: **ZERO SCHEMA — hard.** V1's
+classifier is a BIRTH FACT (`archived_at == created_at`, ONE clock
+call, + the `version_of` edge), never a column; anything firming
+toward a column is a §12 STOP. Zero `Sources/VariorumCore/Sync/` —
+**and note V3 carefully: the bridge engine lives in `Sync/`-adjacent
+code; if the duplicate-day fix cannot land outside
+`Sources/VariorumCore/Sync/`, STOP that half and report — the
+standing rider routes engine surgery elsewhere.** Tutorial content
+is batch 6's.
+
+- **The save door (G1/V5/V4b):** "Save a Version" — **⌘⇧S** (free,
+  verified at kickoff) + a note ▾ menu item + a `.palette` door,
+  registry-declared. ONE transaction: a `duplicateAsVersion`-shaped
+  FULL family copy (blocks · takes · comments — V7's honest cost,
+  chosen) minted **ARCHIVED + SEALED at birth** (`archived_at ==
+  created_at` from one clock call — the classifier; the seal is the
+  freeze, the archive the hiding, the edge the classification —
+  V4b's three-mechanisms line). No title mutation (V6) — the
+  listing shows DATES via derived display. Compose as an
+  operations-layer composite (`Operations`), zero new concepts.
+- **The listing (G1):** **Note ▸ Versions** — an inspector occupant
+  on batches 3–4's idiom (the side-panel theme; propose differently
+  in-record if the IA argues), opened from note ▾ "Versions…" (+
+  palette). Dated rows, derived display, openable (read-tier),
+  **RESTORE** and **PROMOTE** per row, **Delete** per row (→ the
+  Trash, grouped under its note — FOUND-ITEM 1's ratified shape;
+  Put back returns it to the listing). The listing must render
+  AUTOMATED versions indistinguishably except labeling (13w's
+  future — the brief's constraint).
+- **RESTORE (V4, her eighth-sitting ruling made S2-safe — the
+  ledger row's letter):** identity-preserving, ONE transaction:
+  (1) save a fresh born-archived version of NOW first, (2) the
+  live note's content becomes the chosen version's — same
+  container, same identity, same books/memberships; the OUTGOING
+  blocks take the **DELETE NOW road** (tombstone + purge intent
+  per family, in the restore's own transaction — never a raw row
+  DELETE); the incoming content is a fresh family copied from the
+  version (the version itself stays sealed/archived/untouched).
+  Fully repeatable. Flush the pending buffer first (the batch-2
+  NoteDeletion flush precedent — the version of NOW must carry
+  the keystrokes).
+- **PROMOTE:** unarchive + unseal → the copy leaves the listing
+  and is first-class forever (the classifier holds by derivation:
+  a later re-archive stamps a NEW `archived_at ≠ created_at`).
+  Pin that derivation.
+- **VERSIONS RIDE THE NOTE'S DELETION (V2, ratified):** the
+  note-delete act extends — its compound tombstones each of the
+  note's version containers in the SAME transaction (design the
+  exact stamp story so `restoreContainer`/Put back revives the
+  note WITH its versions, and independently-dead versions stay
+  dead — the 13l exact-stamp doctrine); the confirm gains ONE
+  honest line ("its N saved versions go with it") — NO dialog
+  (her ruling verbatim in V2). Empty-versions notes read
+  unchanged. The Trash's note group shows the versions (batch 2's
+  `TrashGrouping` extends).
+- **Row 24 — V3's MUST-PIN:** a version copy of a JOURNAL note
+  must never trip the bridge's duplicate-day pause. VERIFY which
+  way `duplicateAsVersion` + the day sweep compose TODAY, then
+  pin it whichever way is true after your build (exclude archived
+  from the day scan, or drop `entry_date` on version copies — your
+  design detail, the pin is mandatory; mind the `Sync/` fence
+  above).
+- **Row 30:** the Trash's nested-ancestors run gains a
+  dropdown-arrow disclosure — EXPANDED by default, collapsible
+  (her ruling verbatim in the sitting record).
+- **Routed flag 2:** `TakesViewModel` adopts the
+  receipt-vs-refusal `Status` split (behavior-preserving; the
+  boards' slots stop reading receipts as alarms). **Routed flag
+  3:** `BridgeStatusViews`' literal red — fix via the tone/token
+  plumbing if clean, else record for the closeout.
+- **Search scopes (V1's fifth-sitting ruling):** verify the built
+  exclusions hold (main search = live; Archived search =
+  non-version — batch 2); versions searchable ONLY inside the
+  note's Versions context; write the 13o handoff note in your
+  record.
+
+**Discipline:** the standing loop — red-on-old by behavioural
+revert (the deletion-ride and restore are bug-class-adjacent:
+pin the exact-stamp revival, the flush, the Delete Now road's
+invisibility-at-once, the classifier edges); walk-driven pins on
+the real mounted surface (AppKit class names — the AX tree is
+empty in the test host); spine green BY TYPE NAME; full four gates
+with counts quoted (mobile runs — `Shared/` is touched; baselines
+now core 1384/144 · Mac 1741/294 · spine 63/8 · mobile 486/78);
+**a live real-store instance exists (DerivedData Release, PID
+98884) — by store: never address it, no install acts, suites may
+run beside it**; commits by theme, staged by explicit path, NEVER
+push. **Append "### BATCH 5 — RECORD"**, flip rows 16, 23, 24, 30,
+and STOP.
+
 ## Constraints
 
 Zero schema (B2 is read-side over `archived_at`; if ANYTHING firms
