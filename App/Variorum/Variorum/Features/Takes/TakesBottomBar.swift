@@ -242,7 +242,10 @@ struct TakesBottomBar: View {
                     model.blockHistoryRequest = nil
                     model.trayRequest = TrayRequest(
                         postID: model.postID, revealBlockID: blockID)
-                })
+                },
+                // Ledger row 33: the sheet host re-points the same way the
+                // inspector does — a new request in the same slot.
+                onJump: { request in model.blockHistoryRequest = request })
         }
         .sheet(item: Binding(
             get: { model.commentsRequest },

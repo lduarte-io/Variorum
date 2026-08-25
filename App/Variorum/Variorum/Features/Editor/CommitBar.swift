@@ -149,7 +149,10 @@ struct CommitBar: View {
                     model.blockHistoryRequest = nil
                     model.trayRequest = TrayRequest(
                         postID: model.postID, revealBlockID: blockID)
-                })
+                },
+                // Ledger row 33: the sheet host re-points the same way the
+                // inspector does — a new request in the same slot.
+                onJump: { request in model.blockHistoryRequest = request })
         }
         // Rows 16/23: the same fallback host for the Versions listing, and for
         // the same reason — this editor is composed where no inspector exists.

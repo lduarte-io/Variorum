@@ -265,6 +265,13 @@ struct PostDetailView: View {
                     // architect's adjudication 3) instead of moving house.
                     onOpenTray: { blockID in
                         inspectorPanel = .tray(revealBlockID: blockID)
+                    },
+                    // Ledger row 33: the jump re-points THIS column's
+                    // occupant — the same case, a new request — so the
+                    // `.id` below rebuilds the pane on the block she is in
+                    // without her closing and reopening anything.
+                    onJump: { request in
+                        inspectorPanel = .blockHistory(request)
                     })
                     .id("history-\(request.id)")
                     .inspectorColumnWidth(min: 280, ideal: 420)

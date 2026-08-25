@@ -52,6 +52,11 @@ final class CommandRouter {
     ) -> UUID {
         let token = UUID()
         detailToken = token
+        // A DIFFERENT note arriving makes the remembered caret a fact about
+        // somewhere else (ledger row 33): forget it rather than let a stale
+        // one offer a jump into a note that is no longer on screen. The same
+        // note re-registering keeps it — a remount is not a caret move.
+        if activePostID != postID { focusedBlock = nil }
         activePostID = postID
         activeMode = mode
         self.applyMode = applyMode
@@ -96,6 +101,33 @@ final class CommandRouter {
         pendingWriteIntent = nil
         pendingTakesLanding = nil
         pendingTrayRequest = nil
+        focusedBlock = nil
+    }
+
+    // MARK: - Where the caret is (the post-13l polish round, ledger row 33)
+
+    /// **The block the mounted writing surface is standing in.** A FACT, not a
+    /// request: nothing here decides anything, and the one reader — the Block
+    /// History pane's jump door — compares it against the block it is showing
+    /// (`BlockHistoryModel.jumpTarget`).
+    ///
+    /// Observable, because the door has to APPEAR when she clicks into another
+    /// block; cheap, because the surfaces report only when the block CHANGES,
+    /// so a caret walking inside one paragraph writes nothing at all.
+    private(set) var focusedBlock: FocusedBlock?
+
+    /// A mounted writing surface reports where its caret is. Ignored for any
+    /// note other than the one on screen — a background pane's caret is not
+    /// "the block you're in" for the panel beside the foreground one.
+    func noteFocusedBlock(_ blockID: String?, variantID: String?, postID: String) {
+        guard activePostID == postID else { return }
+        guard let blockID else {
+            focusedBlock = nil
+            return
+        }
+        let fact = FocusedBlock(postID: postID, blockID: blockID, variantID: variantID)
+        guard focusedBlock != fact else { return }  // assign only on a real change
+        focusedBlock = fact
     }
 
     /// The detail reports its mode truth (its own `@State` changed).

@@ -2536,6 +2536,14 @@ final class EditorViewModel {
         if appearance.indicator != .off, caretBlockID != previousCaretBlock {
             refreshDecorations()
         }
+        // Ledger row 33 — the Block History pane's jump door reads this fact.
+        // Reported on a BLOCK change only, in the same guard the decor pass
+        // uses and for the same reason: a caret walking inside one paragraph
+        // must cost nothing anywhere.
+        if caretBlockID != previousCaretBlock {
+            session.commandRouter.noteFocusedBlock(
+                caretBlockID, variantID: caretVariantID, postID: postID)
+        }
     }
 
     // MARK: - The overlay layout-settle trigger (N14, 13b Stage 3F)

@@ -428,6 +428,156 @@ struct BlockHistoryPaneTests {
         return mine + view.subviews.reduce(0) { $0 + countControls($1) }
     }
 
+    // MARK: - Row 33: the current-block jump
+
+    /// **THE DECISION, AS A PURE RULE.** Her 2026-08-25 refinement ratified the
+    /// request scoping and asked for the way out of it: *"if you've changed
+    /// blocks there should be a small button or something to show current
+    /// block's history, so you don't have to close it and reopen it."*
+    ///
+    /// So the rule is exactly "same note, different block", and everything
+    /// else is no door at all (P-2): an unknown caret, a caret in another
+    /// note, a caret in the block already on screen. The take she is standing
+    /// in rides the request, so her *"the focused take's expanded"* ruling
+    /// survives the jump.
+    @Test func theJumpOffersItselfOnlyWhenTheCaretIsInAnotherBlockOfThisNote() {
+        let here = FocusedBlock(postID: "N", blockID: "B1", variantID: "V1")
+        let there = FocusedBlock(postID: "N", blockID: "B2", variantID: "V2")
+        let elsewhere = FocusedBlock(postID: "OTHER", blockID: "B9", variantID: "V9")
+
+        #expect(BlockHistoryModel.jumpTarget(nil, postID: "N", blockID: "B1") == nil,
+                "no caret reported yet — nothing to offer")
+        #expect(BlockHistoryModel.jumpTarget(here, postID: "N", blockID: "B1") == nil,
+                "the caret is in the very block on screen — the door would do nothing")
+        #expect(BlockHistoryModel.jumpTarget(elsewhere, postID: "N", blockID: "B1") == nil,
+                "another note's caret is not \u{201C}the block you're in\u{201D} here")
+
+        let jump = BlockHistoryModel.jumpTarget(there, postID: "N", blockID: "B1")
+        #expect(jump == BlockHistoryRequest(
+            postID: "N", blockID: "B2", focusedVariantID: "V2"),
+                "the jump carries the take she is in, not just the block")
+    }
+
+    /// **The surfaces really report it, and only on a block change.** The
+    /// fact is observable and read during `body`, so a report at keystroke
+    /// rate would re-render the panel on every letter — which is why both
+    /// writing surfaces report inside a changed-block guard and the router
+    /// assigns only on a real change.
+    @Test func theCaretFactIsRecordedForTheOpenNoteAndNobodyElse() async throws {
+        try await withNote(["Alpha one.", "Beta two."]) { session, post, blocks in
+            let router = session.commandRouter
+            #expect(router.focusedBlock == nil, "nothing reported yet")
+
+            // No detail mounted ⇒ the report is not for a note on screen.
+            router.noteFocusedBlock(blocks[0], variantID: nil, postID: post)
+            #expect(router.focusedBlock == nil)
+
+            let token = router.registerDetail(postID: post, mode: .write, applyMode: { _ in })
+            router.noteFocusedBlock(blocks[0], variantID: "V", postID: post)
+            #expect(router.focusedBlock
+                == FocusedBlock(postID: post, blockID: blocks[0], variantID: "V"))
+            router.noteFocusedBlock(blocks[1], variantID: nil, postID: "another-note")
+            #expect(router.focusedBlock?.blockID == blocks[0],
+                    "a background pane's caret never speaks for the note on screen")
+            router.unregisterDetail(token)
+            #expect(router.focusedBlock == nil, "the note left; so did the fact")
+        }
+    }
+
+    /// **THE WRITING SURFACE REALLY REPORTS IT** — the plumbing behind the
+    /// door, driven through a REAL editor: move the caret into the next
+    /// paragraph and the router's fact follows, take and all.
+    @Test func movingTheCaretIntoAnotherBlockReportsItToTheRouter() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two."]) { h in
+            let router = h.session.commandRouter
+            let token = router.registerDetail(
+                postID: h.postID, mode: .write, applyMode: { _ in })
+            defer { router.unregisterDetail(token) }
+
+            h.textView.setSelectedRange(NSRange(location: 0, length: 0))
+            h.model.updateCaretContext()
+            let first = try #require(router.focusedBlock)
+            #expect(first.postID == h.postID)
+            #expect(first.variantID != nil, "the take rides, so the jump can expand it")
+
+            // "Alpha one.\nBeta two." — anything past the terminator is the
+            // second paragraph.
+            h.textView.setSelectedRange(NSRange(location: 13, length: 0))
+            h.model.updateCaretContext()
+            let second = try #require(router.focusedBlock)
+            #expect(second.blockID != first.blockID,
+                    "the fact followed the caret across the seam")
+            #expect(second.blockID == h.model.caretBlockID)
+        }
+    }
+
+    /// **WALK-DRIVEN: the real pane really draws the door, and only then.**
+    ///
+    /// The REAL `BlockHistoryPane` mounted in a real window twice — once with
+    /// the caret in the block it is showing, once with the caret in the block
+    /// next door — and the focusable controls counted in each subtree. The
+    /// second is exactly one higher: the door her ruling asked for, drawn when
+    /// and only when it can act.
+    ///
+    /// **Two mounts rather than one toggled in place, and the reason is
+    /// MEASURED, not assumed** (the same discipline batch 3's empty-AX finding
+    /// and batch 4's zero-`NSButton` finding come out of): in this headless
+    /// host an in-place `@Observable` change does not rebuild the hosted tree
+    /// within any settle window. I probed it with a change that has nothing to
+    /// do with row 33 — adopting a history carrying a deleted take, which adds
+    /// a Put back button — and the count stayed put at 1 through a full settle,
+    /// exactly as the caret report did. It is the HOST, not the read: mounted
+    /// fresh with the caret elsewhere, the pane draws the door every time. That
+    /// is also why `theRealBarDrawsFewerDoorsAtRestThanWithAaOpen` mounts its
+    /// bar twice instead of toggling the fold, one screen up in this file.
+    @Test func theMountedPaneDrawsItsJumpDoorOnlyWhenTheCaretIsElsewhere() async throws {
+        try await withNote(["Alpha one.", "Beta two."]) { session, post, blocks in
+            let here = try await Self.mountedPaneControls(
+                session: session, post: post, pane: blocks[0], caret: blocks[0])
+            let elsewhere = try await Self.mountedPaneControls(
+                session: session, post: post, pane: blocks[0], caret: blocks[1])
+            #expect(here > 0, "the pane is really mounted, not an empty tree")
+            #expect(elsewhere == here + 1,
+                    """
+                    the caret in the next block draws EXACTLY the jump door: \
+                    \(here) with the caret here, \(elsewhere) with it there
+                    """)
+        }
+    }
+
+    /// Mounts the REAL pane with the router's caret fact set, and counts the
+    /// focusable controls in its subtree (`mountedBarControls`' shape and its
+    /// reason: the doors are SwiftUI-drawn, so `KeyViewProxy` is the honest
+    /// probe and the AX tree this host would answer from is empty).
+    private static func mountedPaneControls(
+        session: AppSession, post: String, pane: String, caret: String
+    ) async throws -> Int {
+        let router = session.commandRouter
+        let token = router.registerDetail(postID: post, mode: .write, applyMode: { _ in })
+        defer { router.unregisterDetail(token) }
+        router.noteFocusedBlock(caret, variantID: nil, postID: post)
+
+        let window = NSWindow(
+            contentRect: NSRect(x: 60, y: 60, width: 460, height: 620),
+            styleMask: [.titled], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        defer {
+            window.orderOut(nil)
+            window.close()
+        }
+        let hosting = NSHostingView(
+            rootView: BlockHistoryPane(
+                session: session,
+                request: BlockHistoryRequest(postID: post, blockID: pane),
+                onJump: { _ in })
+                .environment(ThemeStore(session: session)))
+        hosting.frame = NSRect(x: 0, y: 0, width: 460, height: 620)
+        window.contentView = hosting
+        window.makeKeyAndOrderFront(nil)
+        await settle(window, hosting) { countControls(hosting) > 0 }
+        return countControls(hosting)
+    }
+
     // MARK: - Row 14 (F1): archive beside delete, and one take-card grammar
 
     /// **ARCHIVE RIDES BESIDE DELETE AT EVERY BLOCK DOOR** — her F1 rule,

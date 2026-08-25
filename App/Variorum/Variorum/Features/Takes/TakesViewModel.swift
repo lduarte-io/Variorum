@@ -515,6 +515,11 @@ final class TakesViewModel {
     // MARK: - Focus (the ONE live editor migrates)
 
     func focus(_ pane: PaneKey) {
+        // Ledger row 33 — the boards' half of "the block you're in", reported
+        // at the ONE authority door (P-3), so Takes and Lenses both feed the
+        // Block History pane's jump without a second liveness mechanism.
+        session.commandRouter.noteFocusedBlock(
+            pane.blockID, variantID: pane.variantID, postID: postID)
         switch authority.focus(pane) {
         case .unchanged:
             return

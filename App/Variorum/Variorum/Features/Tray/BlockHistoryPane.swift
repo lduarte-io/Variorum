@@ -112,6 +112,23 @@ nonisolated enum BlockHistoryPath {
         "Puts this original back into the note, beside the blocks it became — "
         + "it was kept whole and set aside, never deleted"
     static let openTrayVerb = "Open this note's tray"
+
+    /// **THE CURRENT-BLOCK JUMP** (the post-13l polish round, ledger row 33 —
+    /// her 2026-08-25 refinement on the ratified request scoping): *"i think
+    /// the history pane staying on the block you asked about is fine, but if
+    /// you've changed blocks there should be a small button or something to
+    /// show current block's history, so you don't have to close it and reopen
+    /// it."*
+    ///
+    /// The pane stays scoped to the block the REQUEST named — following the
+    /// caret would mean a panel that jumps while she types — so the door is
+    /// the way out of that scoping, and it renders ONLY while the two really
+    /// differ (a button that could not move the pane is a door that cannot
+    /// act, which P-2 says is not rendered at all).
+    static let jumpVerb = "Show the block you're in"
+    static let jumpHelp =
+        "Your cursor has moved to a different block — this points the panel at "
+        + "that block's history instead, without closing it"
 }
 
 /// **The words the block's past speaks about its TAKES**, in one home.
@@ -190,6 +207,23 @@ nonisolated struct BlockHistoryRequest: Identifiable, Hashable, Sendable {
     var id: String { "\(postID)#\(blockID)#\(focusedVariantID ?? "")" }
 }
 
+/// **WHERE THE WRITING SURFACE'S CARET IS** (ledger row 33) — a FACT the
+/// mounted surface reports, never a request.
+///
+/// It is the `BlockHistoryRequest`'s shape without being one, deliberately:
+/// the two are different kinds of thing (one is "open this", the other is
+/// "this is where I am"), and a fact that could be mistaken for a request
+/// would invite a surface to open a panel by reporting a caret move.
+///
+/// Reported only when the block CHANGES, which is what keeps it cheap: a
+/// caret walking within one paragraph writes nothing, so nothing observing it
+/// re-renders at keystroke rate.
+nonisolated struct FocusedBlock: Hashable, Sendable {
+    let postID: String
+    let blockID: String
+    var variantID: String?
+}
+
 @MainActor
 @Observable
 final class BlockHistoryModel {
@@ -262,6 +296,26 @@ final class BlockHistoryModel {
             return [focused]
         }
         return Set(history.activeTakes.first.map { [$0.id] } ?? [])
+    }
+
+    /// **Where the jump door would go, or nil** (ledger row 33). A pure rule,
+    /// so the DECISION is pinned without rendering anything: the caret's block
+    /// must be in the SAME note as this pane and a DIFFERENT block from the one
+    /// it is showing. Anything else — an unknown caret, a caret in another
+    /// note's pane, a caret in the very block on screen — is no jump, and the
+    /// door does not render (P-2).
+    ///
+    /// It returns a ready-made request rather than an id, so the take she is
+    /// standing in rides along and her *"the focused take's expanded"* ruling
+    /// survives the jump.
+    static func jumpTarget(
+        _ focused: FocusedBlock?, postID: String, blockID: String
+    ) -> BlockHistoryRequest? {
+        guard let focused, focused.postID == postID, focused.blockID != blockID
+        else { return nil }
+        return BlockHistoryRequest(
+            postID: postID, blockID: focused.blockID,
+            focusedVariantID: focused.variantID)
     }
 
     func predatesSplit(_ commit: CommitPoint) -> Bool {
@@ -407,6 +461,12 @@ struct BlockHistoryPane: View {
     /// sheets — which is what dissolves the peek's nested sheet
     /// (adjudication 3) instead of moving it.
     var onOpenTray: ((String) -> Void)?
+    /// **Where the current-block jump lands** (ledger row 33). The HOST
+    /// re-points its own occupant — the inspector swaps the panel's case, a
+    /// sheet host swaps its pending request — for `onOpenTray`'s reason: the
+    /// pane is scoped by its request, so re-scoping is the host's act and not
+    /// a second lifetime inside this view.
+    var onJump: ((BlockHistoryRequest) -> Void)?
     @State private var model: BlockHistoryModel
     /// Which take's savepoint run is open. Session UI state, like every other
     /// expansion in the app; seeded from her ruling by
@@ -422,11 +482,13 @@ struct BlockHistoryPane: View {
     init(
         session: AppSession, request: BlockHistoryRequest,
         onClose: (() -> Void)? = nil, onOpenTray: ((String) -> Void)? = nil,
+        onJump: ((BlockHistoryRequest) -> Void)? = nil,
         model: BlockHistoryModel? = nil
     ) {
         self.session = session
         self.onClose = onClose
         self.onOpenTray = onOpenTray
+        self.onJump = onJump
         _model = State(initialValue: model
             ?? BlockHistoryModel(
                 session: session, postID: request.postID, blockID: request.blockID,
@@ -452,6 +514,16 @@ struct BlockHistoryPane: View {
                 .foregroundStyle(tokens.faint)
                 .lineLimit(3)
                 .fixedSize(horizontal: false, vertical: true)
+            // Ledger row 33 — the current-block jump. It renders only while
+            // the caret really is somewhere else (the pure rule decides), and
+            // only where a host can act on it, so pressing it always moves
+            // the pane (P-2).
+            if let jump = jumpTarget, let onJump {
+                Button(tokens.chromeLabel(BlockHistoryPath.jumpVerb)) { onJump(jump) }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                    .controlSize(.small)
+                    .help(BlockHistoryPath.jumpHelp)
+            }
             if let status = model.status {
                 Text(status.text)
                     .font(tokens.small)
@@ -496,6 +568,15 @@ struct BlockHistoryPane: View {
 
     private func close() {
         if let onClose { onClose() } else { dismiss() }
+    }
+
+    /// Reading the router's observable fact HERE is what makes the door appear
+    /// the moment she clicks into another block: the dependency is registered
+    /// by `body`, and the fact only changes when the caret changes BLOCKS.
+    private var jumpTarget: BlockHistoryRequest? {
+        BlockHistoryModel.jumpTarget(
+            session.commandRouter.focusedBlock,
+            postID: model.postID, blockID: model.blockID)
     }
 
     // MARK: - Region 1 — every live take's saved moments
