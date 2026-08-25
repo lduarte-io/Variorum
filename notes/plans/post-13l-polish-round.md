@@ -506,9 +506,11 @@ named, always-present door per her ruling.
 core **1373/143 PASSED** (35.3 s) · Mac full **1691/292 PASSED,
 TEST SUCCEEDED** (223.8 s, zero reds; the spine's 8
 `TutorialWalkTests` types green INSIDE the run by inclusion — the
-13j kickoff precedent; batches quote it separately) · mobile:
-recorded below when its run lands. **Both known flakes silent** in
-the Mac run. The 13l finals reproduced exactly.
+13j kickoff precedent; batches quote it separately) · mobile
+**486/78 PASSED, TEST SUCCEEDED** (83.7 s, the 2 recorded
+`withKnownIssue`s only). **Both known flakes silent** in the Mac
+run. ALL FOUR baselines reproduce the 13l finals exactly, verified
+by the orchestrator's own runs.
 
 **Build-fact verifications at kickoff:** **V5 — ⌘⇧S IS FREE**
 (`grep`: the only `"s"` chord is ⌘S at `EditorCommands.swift:277`)
@@ -531,13 +533,79 @@ verbatim in every brief.
 
 | batch | scope (ledger rows) | order rationale |
 |---|---|---|
-| **1 — the small fixes + IA floor** | 1–6 (A1–A6) · 7 (B1: Trash icon, Help-menu tutorial move, the ⋯ dissolves) · 25 (found-item 2 rides B1's registry pass). A7 stays DECLINED — nothing built; its one tutorial sentence lands in batch 6 (D2 touches the deletion chapter) | independent; smallest; retires the sloppiness class first |
-| **2 — the Trash reshaped + the Archived surface** | 8 (B2 notes-only Archived sidebar item) · 11 (D1 takes leave the Trash → notes·books·blocks) · 18 (G3 "unplaced" wording sweep) · 21 (G6 Empty Trash purges exactly what it rows) · 22 (G7 grouping + tenth-sitting ancestor nesting) | the global surfaces' new truth, which batches 3–5 reference |
+| **1 — the small fixes** | 1 (A1) · 2 (A2) · 4 (A4) · 5 (A5) · 6 (A6) — every one with its traced mechanism already in the 13l Act 7 walk record (P-4, P-5a/b, P-8, P-9). A7 stays DECLINED — nothing built; its one tutorial sentence lands in batch 6. *(Dispatch note: rows 3, 7, 25 moved to batch 2 — A3's row-naming IS G7's grouping structurally, and B1's Trash icon lands with B2's split so the icon never fronts a combined surface.)* | independent; smallest; retires the sloppiness class first |
+| **2 — the IA pass + the Trash reshaped** | 7 (B1: Trash icon, Help-menu tutorial move, the ⋯ dissolves) · 8 (B2 notes-only Archived sidebar item) · 3 (A3 naming — folds into G7's headers; take-naming discipline rides batches 3–4's surfaces) · 11 (D1 takes leave the Trash → notes·books·blocks) · 18 (G3 "unplaced" wording sweep) · 21 (G6 Empty Trash purges exactly what it rows) · 22 (G7 grouping + tenth-sitting ancestor nesting) · 25 (found-item 2: the archive-a-note door + receipt naming the new surface) | the global surfaces' new truth, which batches 3–5 reference; may land as two commits (IA doors · the Trash reshape) |
 | **3 — the tray goes to the side panel** | 9 (C1 icon + panel + originals separated; the badge call as recorded above) · 20 (G5 the leaving section; collapsed takes disclosure; per-take Delete Now — confirm-every-time) | extends the inspector seam; D1's takes-audit lens lands where D1 removed the global rows |
 | **4 — the Block History pane + the bottom chrome** | 17 (G2 — the round's biggest single build; absorbs J3's peek, the History face's past region, the archived disclosure; came-from with per-original one-button `placeBlock` restore, wording drafted in-batch) · 10 (C2 folds in; its mobile parity note survives to closeout) · 14 (F1 verification pass + take-card menu parity) · 28 (the Aa condensation — same two bar files as G2's door) | needs 3's panel seam; the bar work lands in one hand |
 | **5 — the Versions family** | 16 (G1) · 23 (the full V-family per V1–V8: ⌘⇧S door · the listing · born archived+SEALED one transaction · identity-preserving restore, outgoing blocks on the Delete Now road · PROMOTE · versions ride deletion, one confirm line · deleted versions → Trash rows grouped · search-scope exclusions recorded for 13o) · 24 (V3's bridge MUST-PIN) | after 2 (the Trash grouping its deleted-version rows join) |
 | **6 — the tutorial** | 12 (D2 lesson edits + spine re-pins) · 19 (G4 the five-places chapter) · 26 (⌘S vs ⌘⇧S) · 27 (the two-exits lesson, taught by doing) — plus A7's one merge sentence in the deletion chapter | last: it teaches only built doors; P-6 makes it the acceptance spine |
 | **ladder + closeout** | ONE Fable cold ladder (combined diff, `notes/REVIEW_PROMPT.md` verbatim) → fixes → round 2 → row 13's closeout: records · canonical deltas as ruled (B2's R44 delta; G5's evolved purge-door rule; G6's Empty-Trash supersession) · the LIFECYCLE TABLE walked, every row flipped `completed` · MobileSoul + mobile batch-6 update AT CLOSEOUT ONLY (her token instruction) · the whole-note-history-brief annotation · her-store field-guide re-seed + `/Applications` refresh behind the A1 rail (instance check first) | the standing ritual |
+
+### BATCH 1 — THE SMALL FIXES: the brief (fresh Opus session)
+
+**Read in full first:** `CLAUDE.md` + the canon it loads · THIS FILE
+top to bottom (her rulings are the letter; the lifecycle table is the
+acceptance map) · the 13j plan's **Environment traps** (binding
+verbatim — `notes/plans/phase-13j-deletion-and-trash.md`) · the 13l
+plan's **ACT 7 — WALK RECORD** (`notes/plans/phase-13l-data-safety-floor.md`,
+§"ACT 7") — **every item below has its traced mechanism there
+already**; verify each trace against the tree before fixing (never
+trust, always verify).
+
+**Scope — ledger rows 1 · 2 · 4 · 5 · 6, nothing else.** Rows 3/7/25
+are batch 2's (see the dispatch note in the batch table). Do NOT
+touch: Empty Trash's purge SCOPE (G6, batch 2) · the tray's door
+placement (C1, batch 3) · anything in the takes/editor seam.
+
+- **Row 1 (A1, walk P-4):** a successful Put back from a revealed row
+  prints the stale *"The block you asked to see isn't in this note's
+  tray."* — `revealMissing` is an arrival-time explanation evaluated
+  live. Fix per the walk's candidates (latch at load, or clear
+  `revealBlockID` once its row is acted on) AND show a success
+  receipt per her ruling (*"it should show a success message if
+  anything"*). Bug-class → red-on-old pin.
+- **Row 2 (A2, walk P-5b):** with a kind filter on, an empty result
+  still says **"The Trash is empty"**, and **Empty Trash…**
+  disappears because `!model.trash.isEmpty` reads the FILTERED list.
+  Build her chip (*"a filters applied chip or something of the
+  sort"*) + honest filtered-empty wording; the Empty Trash button's
+  visibility reads the UNFILTERED truth. **Scope fence: the button's
+  visibility read only — what Empty Trash TAKES is G6, batch 2's.**
+  Bug-class (the visibility read) → red-on-old pin.
+- **Row 4 (A4, walk P-8 — all three sub-items; her "I'd fix whatever
+  this is"):** (a) a deleted scrap's receipt names *"This Note's Tray
+  — the ⌫ door in the note's bar"* on a surface that has neither —
+  name the REAL road (the Trash, where scraps row "from scraps");
+  the copy lives in the shared homes (`RecoveryCopy` — the phone
+  inherits; mobile gates apply). (b) the Snippets list rows' context
+  menu offers only "Tags…" — add the delete door. (c) the block
+  context menu there omits "Delete Block" while a note's carries it —
+  parity. New doors take registry discipline (P-1); **the #77 fence
+  is untouchable: no door may tombstone the POOL** (the act-level
+  fence stays the belt; walk-driven pins for the new doors).
+- **Row 5 (A5, walk P-9):** the note-delete confirm holds two nouns
+  for one road (*"…goes to the **Trash**… put it back from
+  **Archived & Deleted**…"*). Rewrite to ONE noun — the Trash —
+  in `Shared/RecoveryCopy.swift` (batch 2 renames the surface to
+  match; "the Trash" is forward-compatible). Copy-assertion pins
+  update in place (strengthening, not weakening).
+- **Row 6 (A6, walk P-5a):** the tray's status slot paints
+  `.foregroundStyle(.red)` for every message class — a success reads
+  as an error — and it is a literal colour in a themed surface. Fix
+  per the Trash surface's own precedent one file over (error red,
+  receipt secondary), through voice tokens. Red-on-old pin (the
+  success message's style class).
+
+**Discipline (the standing loop):** zero schema · zero
+`Sources/VariorumCore/Sync/` · red-on-old verified by behavioural
+revert for bug-class fixes · the spine green BY TYPE NAME
+(`TutorialWalkTests`) · full four gates with counts quoted (mobile
+runs — `Shared/RecoveryCopy.swift` is touched) · commits staged by
+explicit path, conventional trailer, NEVER push · instance check
+before anything build-adjacent (her app is live-daily). **Append
+your record as "### BATCH 1 — RECORD" below this brief** (per-row:
+mechanism verified · fix · pin · red-on-old evidence), flip the
+ledger rows, and STOP — the orchestrator reviews before batch 2.
 
 ## Constraints
 
