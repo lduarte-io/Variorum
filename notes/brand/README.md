@@ -54,6 +54,21 @@ Ink drawings (class D) are one-color by nature: each has `-master` (transparent 
   (candidate brand accent; rubrication precedent — red is the scholar's annotation ink).
 - **Ink `#111111`**, **cream `#F3EBD6` / `#F8F6E5`** (per-mark, as generated).
 
+## Concept art (`concept-art/`)
+
+Whimsical illustration pieces the author generated and liked (2026-08-25), archived as-is
+(C2PA metadata stripped) — **not** logo candidates and **not** processed into editions; no
+use decided (her words: "not sure where I'd use this, but I thought these were all cool").
+Natural future homes if ever wanted: the website/marketing, About screen, empty states,
+onboarding, 13q delight territory — hers to decide. Twelve pieces: `girl-and-the-fan`,
+`book-kite`, `the-muse` (a profile emerging from a book's pages), `butterfly-book`,
+`stepping-off-the-book`, `carrying-the-book`, `walking-reader`, `striding-reader`,
+`hanging-from-a-book`, `pushing-the-book` (a suited man heaving a giant fanned book
+upright), `the-crow-tree`, `standing-book-sketch`. Three are repeating **pattern tiles**
+(partial figures at the edges continue the motif): `girl-and-the-fan`,
+`stepping-off-the-book`, `hanging-from-a-book`. One incoming duplicate was dropped —
+her file (15) was byte-identical to (14).
+
 ## Status / ownership
 
 Phase **13s** (voice & polish — app icon + brand assets row) consumes whichever mark
