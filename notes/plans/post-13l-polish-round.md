@@ -167,12 +167,12 @@ plus the archive/trash separation are expected to dissolve it.
 
 | # | item | status |
 |---|---|---|
-| 1 | A1 the Put-back success message | open |
-| 2 | A2 the filters-applied chip | open |
+| 1 | A1 the Put-back success message | **done** `85e1a54` — `revealMissing` latched at arrival, so a successful Put back no longer prints a not-found line under its own receipt |
+| 2 | A2 the filters-applied chip | **done** `85e1a54` — her chip (clicking clears the filter), an honest filtered-empty sentence, and Empty Trash's visibility on a second unfiltered observation; purge SCOPE untouched (G6) |
 | 3 | A3 Trash rows name note (+block for takes) | open |
-| 4 | A4 scraps-editor wordings | open |
-| 5 | A5 the confirm's one-name sentence | open |
-| 6 | A6 success-in-error-color | open |
+| 4 | A4 scraps-editor wordings | **done** `85e1a54` — all three: the scrap receipt names the Trash (home-aware); a registry-declared `.deleteScrap` door on the Snippets rows (#77 fence by construction); `.deleteBlock` gains its context-menu door beside Archive |
+| 5 | A5 the confirm's one-name sentence | **done** `85e1a54` — one noun for one road across the whole move-to-Trash family, plus the phone's book confirm which carried the same shape |
+| 6 | A6 success-in-error-color | **done** `85e1a54` — `TrayViewModel.Status` classes receipts apart from refusals where they are produced; both colours are voice tokens (the `.red` literals go, tray + origin peek) |
 | 7 | B1 the Trash icon + Help-menu tutorial move | open |
 | 8 | B2 the Archived sidebar surface (notes only) + the R44 delta at closeout | open |
 | 9 | C1 the tray icon → side panel, originals separated | open |
@@ -606,6 +606,306 @@ before anything build-adjacent (her app is live-daily). **Append
 your record as "### BATCH 1 — RECORD" below this brief** (per-row:
 mechanism verified · fix · pin · red-on-old evidence), flip the
 ledger rows, and STOP — the orchestrator reviews before batch 2.
+
+### BATCH 1 — RECORD (Opus implementer, 2026-08-24)
+
+**Commit `85e1a54`**, staged by explicit path, not pushed. Tree clean at
+start (`22a3e43`) and at finish. **No Variorum instance at the instance
+check** (`pgrep -fl 'Variorum.app/Contents/MacOS'` empty), re-checked
+before the Mac suite; no Release/install act was owed or taken.
+
+**Gates — all four, my own runs:**
+
+| gate | result | baseline |
+|---|---|---|
+| core (`swift test`) | **1373 tests / 143 suites PASSED** (35.4 s) | 1373/143 ✔ exact |
+| Mac full (`-project`, `platform=macOS`) | **1699 / 292 PASSED — TEST SUCCEEDED** (229.2 s, zero reds) | 1691/292 → **+8**, my 8 new pins; suite count unmoved |
+| Mac spine (8 `TutorialWalkTests` types, suite-level `-only-testing`) | **63 / 8 PASSED — TEST SUCCEEDED** (23.9 s) | 63/8 ✔ exact |
+| mobile (`VariorumMobile`, iPhone 16e) | **486 / 78 PASSED — TEST SUCCEEDED** (85.2 s), the 2 recorded `withKnownIssue`s only | 486/78 ✔ exact |
+
+**Both known flakes were silent** in the full Mac run — the Phase-12
+latency pin (`EditorWindowSmokeTests/rewriteStrategyLatencies`) and
+`CanvasDragTrackingTests`. Neither needed isolating. **Zero schema, zero
+`Sources/VariorumCore/Sync/`, zero `Sources/` lines of any kind** — the
+whole batch is app-target + `Shared/` + tests.
+
+---
+
+#### Row 1 (A1, walk P-4) — the Put back that apologised
+
+**Mechanism, verified myself in the tree** (not taken from the record):
+`TrayViewModel.revealMissing` was a COMPUTED property over the live
+listings (`TrayPanel.swift:230-236` pre-fix). The observation re-emits
+after any act, so a successful Put back of the revealed row removed it
+from `deleted`/`originals` and `revealMissing` flipped to true **in the
+same breath as the receipt** — the sentence is an arrival-time
+explanation being asked of a listing she had just changed herself.
+
+**Fix:** `revealMissing` is a stored property decided ONCE, inside
+`adopt`, on the first loaded snapshot (`if !loaded, let revealBlockID`).
+Every later snapshot leaves it alone. Her ruling's second half — *"it
+should show a success message if anything"* — is served by the receipt
+that was always produced (`RecoveryCopy.landingReceipt`) and by row 6,
+which stops painting it as an error.
+
+**Pin:** `NoteTrayTests.aRevealThatSucceedsIsNotFollowedByTheNotFoundLine`
+— arrive with the row present, then adopt the listing a successful Put
+back produces.
+**RED ON OLD** (behavioural revert: restore the computed property and
+drop the `adopt` latch):
+`✘ Expectation failed: !((model → TrayViewModel).revealMissing → true → true)`
+at `NoteTrayTests.swift:461`.
+
+**Files:** `Features/Tray/TrayPanel.swift`.
+
+---
+
+#### Row 2 (A2, walk P-5b) — the filtered Trash
+
+**Mechanism, verified:** the kind filter is applied IN SQL
+(`observeTrash(kinds:)`), so `model.trash` is the FILTERED listing, and
+BOTH reads on the surface asked it — `if model.trash.isEmpty { Text("The
+Trash is empty.") }` (`RecoveryView.swift:521` pre-fix) and
+`if !model.trash.isEmpty { Button(emptyTrashVerb) }` (`:577` pre-fix).
+Consequence exactly as walked: **Notes** selected with a block in the
+Trash gave "The Trash is empty" AND hid a door that acts on the whole
+Trash.
+
+**Fix, three parts:**
+1. `RecoveryViewModel.trashIsEmptyUnfiltered`, fed by a **second,
+   deliberately tiny observation** (`startTrashTotal` — all kinds,
+   `limit: 1`) that is **never restarted by the filter**. It is not a
+   read riding the first observation on purpose: the filtered
+   observation only re-emits when the FILTERED set changes, so anything
+   deleted or purged in another kind would have left such a read stale —
+   the same bug one layer down. Its error path errs OPEN (never hide the
+   door; the ask-time read is the authority on what Empty Trash takes
+   and says "nothing to delete" honestly).
+2. `RecoveryCopy.trashEmptyLine(filteredBy:holdsOtherKinds:)` — three
+   readings, and only one of them is "The Trash is empty."
+3. Her chip: `RecoveryCopy.filterAppliedChip` renders whenever the
+   listing is narrowed (not only when narrowed-and-empty), and clicking
+   it clears the filter, so the signal is also the way out (P-2).
+   The Empty Trash visibility read is named
+   (`RecoveryView.showsEmptyTrashDoor`) so a pin drives the DECISION.
+
+**Scope fence honoured:** what Empty Trash TAKES is untouched — G6,
+batch 2's. This changes only whether the door is on screen.
+
+**Pins:** `TrashSurfaceTests.aKindFilterWithNoMatchesNeitherEmptiesTheTrashNorHidesItsDoor`
+(drives BOTH real observations against a real deleted block) +
+`anEmptyTrashStillSaysSoWithOrWithoutAFilter` (the over-correction
+guard — an empty Trash still says so, filtered or not).
+**RED ON OLD** (behavioural revert: `trashIsEmptyUnfiltered =
+trash.isEmpty`, `showsEmptyTrashDoor` → `!model.trash.isEmpty`, the
+literal empty line) — **5 issues**, reading back the whole defect:
+`!(model.trashIsEmptyUnfiltered → true)` · `(line → "The Trash is
+empty.") != "The Trash is empty."` · the two `contains` on that line ·
+`RecoveryView.showsEmptyTrashDoor(model)`.
+
+**Files:** `Features/Library/RecoveryView.swift`, `Shared/RecoveryCopy.swift`.
+
+---
+
+#### Row 4 (A4, walk P-8) — all three sub-items
+
+**(a) the scrap's receipt.** *Mechanism, verified:* the scraps editor is
+`PoolDetailView` → **`EditorView` over the pool container**
+(`CanvasView.swift:916`), so `EditorSurfaceController`'s delete doors
+run there and spoke `BlockSelectionCopy.deletedNote`, which hard-coded
+`"then in This Note's Tray — the ⌫ door in the note's bar."` I checked
+the walk's screen `50-crop.png` and reproduced the sentence from the
+code. Two facts settled the fix: the ⌫ badge is a note-bar face the
+scraps pane has no seam for, and a deleted scrap **really does row in
+the Trash**, labelled "from scraps" with an **Open scraps** door (13l
+§8b, walked CLEAN). *Fix:* `deletedNote(_:home:)`, `.post` defaulted so
+every shipped caller and pin rides byte-unmodified; the two
+`EditorSurfaceController` delete sites read `model.header?.kind`
+(observed — free).
+
+**(b) the Snippets row's delete door.** *Mechanism, verified:*
+`BlocksAreaView.scrapRow`'s `.contextMenu` held exactly one row,
+`Button("Tags…")` (`:142` pre-fix) — matching walk screen
+`45-crop.png`. *Fix:* `PoolViewModel.deleteScrap` (ordinary
+`deleteBlock`; receipt from the one home; refusal through
+`DeletionRefusal.words`), a registry-declared **`.deleteScrap`**
+capability, and the row. **Registry discipline (P-1):** its own act
+rather than a `.surface` door on `.deleteBlock`, for `.tagBlock`'s exact
+reason — `.deleteBlock`'s availability is `takeFamily` (it needs an open
+note) while a scrap row is POINTED AT DIRECTLY, so `availability:
+always`. It joins `.tagBlock` in the R118 exemption set with the reason
+written out. **The #77 fence rides by construction:** the act deletes a
+BLOCK and has no road to `deleteContainer`. `BlocksAreaView` also gained
+a status line — it rendered the MODEL's messages nowhere at all before —
+with the row-6 receipt/refusal split and a `lineLimit` beside its
+`fixedSize` (the b6dae25 class, P-8).
+
+**(c) the block context menu's missing delete.** *Mechanism, verified —
+and the walk's wording needs one correction for the record:* P-8 says
+*"the block context menu there omits 'Delete Block' while a note's
+carries it"*, which reads as a scraps-vs-note difference. It is not:
+`contextMenuItems()` is ONE shared method and **a NOTE's context menu
+omitted it too** — confirmed against walk screens `16-block-context.png`
+(a note) and `47-crop.png` (the scraps editor), which show the same nine
+rows. The real parity gap is **context menu vs the block ▾ bar menu**
+(`49-crop.png` shows the bar menu's "− Delete this block"), and sharper
+still: the context menu **carried `Archive Block` with no delete beside
+it** — the two verbs that exist to be told apart, one of them missing
+from the door you reach by right-clicking the block itself.
+`.archiveBlock`'s registry doors were `[.menuBar, .contextMenu]`;
+`.deleteBlock`'s were `[.menuBar, .bottomBar, .palette]`. *Fix:*
+`.contextMenu` joins `.deleteBlock`'s doors and `.deleteBlock` joins
+`EditorViewModel.contextMenuCapabilities`; the caret row renders **only
+when no blocks are picked** — because `deleteVerb(picked: 1)` is
+literally the string "Delete Block", so rendering both would put two
+identically-worded rows on one menu aiming at two different targets.
+
+**Pins:** `TrashSurfaceTests.deletingAScrapNamesTheTrashAndNotTheNotesTrayDoor`
+(a) · `.theSnippetsRowDeletesItsScrapAndNeverItsPool` (b — drives the
+act; asserts the block tombstoned, **the pool still live** (#77), and
+the row present in the Trash) · `.theBlockContextMenuCarriesDeleteBesideArchive`
+(c — both verbs present, and never two delete rows with or without a
+pick).
+**RED ON OLD** (reverts: drop the `.pool` arm; no-op the door; drop the
+`picked.isEmpty` arm) — **8 issues**, e.g.
+`(scrap → "Block deleted — ⌥⌘Z puts it back, then in This Note's Tray —
+the ⌫ door in the note's bar.").contains("Trash")` ·
+`Expectation failed: blockGone` ·
+`(titles → [… "Archive Block"]).contains(verb → "Delete Block")`.
+
+**Files:** `Registry/OpsRefusalCopy.swift`, `Registry/Capability.swift`,
+`Registry/CapabilityRegistry.swift`,
+`Features/Editor/EditorSurfaceController.swift`,
+`Features/Editor/EditorViewModel.swift`,
+`Features/Pool/PoolSection.swift`, `Features/Pool/BlocksAreaView.swift`,
+`VariorumTests/CapabilityRegistryTests.swift` (the exemption line).
+
+---
+
+#### Row 5 (A5, walk P-9) — one road, one noun
+
+**Mechanism, verified:** `RecoveryCopy.moveToTrashDetail` read *"The
+note goes to the **Trash** for 30 days. You can put it back from
+**Archived & Deleted** until then."* Both names are real, so nothing was
+false — the sentence asks the reader to hold two nouns for one road, in
+the confirm she reads while deciding whether to delete her writing.
+
+**Fix:** the place is named once; the second clause points back at it
+("from there"). Same for `deleteNotesConfirmDetail`. **"the Trash" is
+the forward-compatible half deliberately** — batch 2's IA pass gives the
+Trash its own icon and retires the ⋯ menu "Archived & Deleted" labels.
+**Also fixed, same shape, one line:** `MobileShelfFaces.deleteBookConfirmDetail`,
+a phone-local sibling carrying the identical two-noun ending — recorded
+here rather than left, because leaving it is the drift class the shared
+home exists to kill.
+
+**Pin:** `NoteDeletionDoorsTests.theMoveToTrashConfirmsNameTheRoadExactlyOnce`
+(the whole family — note, notes(5), block, book, take — so the shape
+cannot return one kind at a time).
+**Pin edited in place, STRENGTHENING:** `MobileDeletionTests.swift:99`
+asserted the message ALSO contained `surfaceName`, i.e. it pinned the
+defect; it now asserts the road is named once.
+**RED ON OLD** (revert the two sentences): **5 issues**, each reading
+back the two-noun sentence, e.g. `!((detail → "The note goes to the
+Trash for 30 days. You can put it back from Archived & Deleted until
+then.").contains("Archived & Deleted") → true)`.
+
+**Files:** `Shared/RecoveryCopy.swift`,
+`VariorumMobile/Features/Shell/MobileShelfFaces.swift`,
+`VariorumMobileTests/MobileDeletionTests.swift`.
+
+---
+
+#### Row 6 (A6, walk P-5a) — a receipt is not a refusal
+
+**Mechanism, verified:** `TrayPanel`'s status slot was
+`Text(status).foregroundStyle(.red)` (`:455` pre-fix) over ONE
+`statusMessage: String?` that receipts and refusals both wrote — so
+*"Put back where it was."*, the whole point of the surface, read as an
+error. The Trash surface one file over had already split them
+(`lastError` red beside `receipt` secondary).
+
+**Fix:** `TrayViewModel.Status` — `.receipt` / `.refusal`, **classed
+where the message is produced**, never guessed by the view from the
+text; `statusMessage` survives as a computed forwarder so every shipped
+pin rides unmodified (the 3C parity pattern — and it did: zero edits to
+the existing tray pins). Both colours are VOICE TOKENS
+(`tokens.accent` / `tokens.muted`), which is the second half of the
+defect the brief names — a literal colour in a themed surface.
+`OriginPeek`'s `.red` literal went the same way (it already told the two
+apart via `placed`; only the literal remained).
+
+**One PROVISIONAL, recorded:** the app has **no error/danger voice
+token** — `VoiceTokens` carries no alarm colour, and the two nearest
+themed surfaces (`BlocksAreaView`, `ScrapsPanel`) already use
+`tokens.accent` for their error slots, so that is the established themed
+alarm voice and this follows it. Adding a real `alarm` token would touch
+`Shared/Theme/VoiceTokens.swift` and every voice definition on both
+platforms — a design call, not a small fix. Flagged for the orchestrator.
+
+**Pin:** `NoteTrayTests.theTrayTellsAReceiptFromARefusal` (a landing
+classes as a receipt; a sealed refusal classes as a refusal, in the same
+slot; the forwarder still answers).
+**RED ON OLD** (revert: the three put-back doors set `.refusal(…)` on
+success — the pre-fix single red slot): **2 issues**,
+`(model.status → .refusal("Put back where it was.")) == .receipt("Put
+back where it was.")` and `(model.status?.isRefusal → true) == false`.
+
+**Files:** `Features/Tray/TrayPanel.swift`, `Features/Tray/OriginPeek.swift`.
+
+---
+
+#### TWO SHIPPED PINS EDITED IN PLACE — both justified, both caught by the full run
+
+Row 4(c) moved a door table, so two pins that asserted the OLD table
+went red. Neither was weakened:
+
+- **`StructuralGestureTests.contextMenuItemsFireAndSpeak`** asserted the
+  menu's exact title list. `"Delete Block"` appended, with the comment
+  the file's own convention wants — **and it is worth saying that this
+  list is where the defect was visible all along**: nine expected values
+  ending in `"Archive Block"`, with no delete anywhere.
+- **`BlockManagementTests.theContextRowRendersOnlyWithAPickAndNamesTheCount`**
+  asserted `deleteRows().isEmpty` with no selection. That is no longer
+  the fact; what the test is actually about — and what it asserts now —
+  is that there is **exactly one delete row, always**, and that a
+  standing pick REPLACES the caret's row rather than adding to it.
+
+---
+
+#### OBSERVATIONS — nothing built, for the orchestrator
+
+1. **The ARCHIVE receipt has row 4(a)'s exact defect and was deliberately
+   left.** `BlockSelectionCopy.archivedNote` names *"This Note's Tray
+   (the note menu)"* and the scraps editor reaches `archiveCaretBlock`
+   through the same context menu. It is NOT the same fix, though: an
+   archived scrap has no clock and never reaches the Trash, so its road
+   really is the tray — reachable there via `note ▾ → This Note's Tray…`,
+   which renders on a pool with no kind fence. The honest fix is the
+   tray's NAMING on a non-note surface, and **batch 3 (C1) is moving that
+   door entirely**, so fixing the sentence now would mean fixing it
+   twice.
+2. **The scraps editor's `note ▾` menu still says "This Note's Tray…" on
+   a pool** — same class, same owner (C1).
+3. **`TrayViewModel`'s generic catch still dumps `String(describing:)`**,
+   including for `RecoveryRefusal` (a preserved original with no note) —
+   the twin surface uses `DeletionRefusal.fallback`. I classed it
+   `.refusal` but did not change the words: out of the named scope, and
+   it is the A1-MINOR-2 class 13l Act 1 already fixed one file over.
+4. **The phone's Trash has row 2's defect verbatim** —
+   `MobileTrashView.swift:69` (`emptyTrashLine` on the filtered list) and
+   `:138` (the Empty Trash button on the same). I put the brain in
+   `RecoveryCopy` so the phone's adoption is one line, and did NOT touch
+   the phone's face: a chip plus a second observation is a mobile batch,
+   and mobile's round is paused. **A parity note for the closeout.**
+5. **Sibling scrap surfaces not given the new delete door:**
+   `ScrapsPanel`'s rows and the canvas cards carry `.tagBlock` with the
+   same "Tags…"-only menu. The walk named the Snippets list; row 14's F1
+   verification pass is the one that enumerates block-delete doors, so
+   these belong to it.
+6. **No behavioural-revert residue** — `grep -rn "REVERT"` over
+   `App/Variorum/Variorum/` and `App/Variorum/Shared/` returns only two
+   pre-existing doc comments (`NoteWindowView`, `QuickNoteView`).
 
 ## Constraints
 
