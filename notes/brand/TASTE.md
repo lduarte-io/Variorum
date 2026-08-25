@@ -37,7 +37,10 @@ worse") — the wispy direction is dead on arrival with her, always.
    pre-digital print culture: bookplates (ex libris), copper-plate engraving, printers'
    ornaments, deco book-jacket lettering, endpaper patterns, rubrication. Nothing she
    kept reads as tech-brand minimalism, gradient-SaaS, or abstract geometry. The brand's
-   home country is the library, not the app store.
+   home country is the library, not the app store. **TESTED AND CONFIRMED 2026-08-25** —
+   the technological direction was deliberately generated and rejected on sight (the
+   experiment entry below has her verdict verbatim); this through-line is no longer a
+   hypothesis.
 
 2. **The fan of pages is the image she never leaves.** Letterform (striped V, deco V),
    object (the book, fountain book), emblem (the engraving's rosette of open books),
@@ -112,6 +115,19 @@ worse") — the wispy direction is dead on arrival with her, always.
   curious to see what that would look like"). Prompts were provided. This is exactly the
   falsification test this document invites — if she loves the results, through-line 1
   ("the world of the printed book") needs rewriting, not her pick.
+  **RESULT (same day): REJECTED, in her words** — "i honestly feel like these just
+  aren't really looking that good… these logos just aren't working"; "I don't want my
+  logo to look like another tech company's app"; "modern tech logo isn't really as
+  appealing to me." A full batch ran (node-graph, commit-graph, pixel, voxel Vs) and
+  confirmed through-line 1 instead of falsifying it — the boundary is now evidence, not
+  assumption. Two refinements came out of the test: **(a)** "i love the terminal
+  aesthetic and tech look" remains true — the terminal is a VOICE the app speaks
+  (typography, idioms), never a costume the logo wears; the two coexist by register.
+  **(b)** her front-runner language sharpened: the red V "looks new and kind of art
+  nouveau"; the cards are "abstract and bold and cool"; the elegant family holds for
+  "their elegance." The likely why: her keepers depict the OBJECT (book, page, fan)
+  while the tech marks depict the MECHANISM (nodes, branches) — and the mechanism is
+  nobody's object of desire.
 
 ## What this document is not
 
