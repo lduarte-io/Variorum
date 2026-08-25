@@ -150,8 +150,11 @@ nonisolated enum RecoveryPath {
     /// ruling: "everything, always — the confirm names the full count").
     /// Preserved originals are named when they ride: they are the round-8b
     /// passengers, never separately purged.
-    static func emptyTrashConfirm(_ counts: [Queries.TrashItem.Kind: Int]) -> String {
-        RecoveryCopy.emptyTrashConfirm(counts)
+    /// (Batch 6's rider: `versions` names the saved moments among the notes.)
+    static func emptyTrashConfirm(
+        _ counts: [Queries.TrashItem.Kind: Int], versions: Int = 0
+    ) -> String {
+        RecoveryCopy.emptyTrashConfirm(counts, versions: versions)
     }
 
     /// The receipts tell the truth about NOW vs the janitor (the J8 bar):
@@ -177,10 +180,12 @@ nonisolated enum RecoveryPath {
     }
 
     static func emptyTrashReceipt(
-        _ total: Int, synced: Bool, anyFamilyEverSynced: Bool = false
+        _ total: Int, synced: Bool, anyFamilyEverSynced: Bool = false,
+        versions: Int = 0
     ) -> String {
         RecoveryCopy.emptyTrashReceipt(
-            total, synced: synced, anyFamilyEverSynced: anyFamilyEverSynced)
+            total, synced: synced, anyFamilyEverSynced: anyFamilyEverSynced,
+            versions: versions)
     }
 }
 

@@ -292,7 +292,11 @@ enum TrashPurge {
     /// unmodified — the 3C parity pattern.
     nonisolated enum Confirm: Equatable, Sendable {
         case deleteNow(Queries.TrashItem)
-        case emptyTrash(counts: [Queries.TrashItem.Kind: Int])
+        /// `versions` is how many of the `.note` rows are somebody's saved
+        /// moment (batch 6's rider): they ARE notes to the store and they DO
+        /// go, so the total is unchanged — what changes is that the sentence
+        /// names them, instead of counting a note's past as another note.
+        case emptyTrash(counts: [Queries.TrashItem.Kind: Int], versions: Int)
 
         var title: String {
             switch self {
@@ -315,8 +319,8 @@ enum TrashPurge {
             switch self {
             case .deleteNow(let item):
                 return RecoveryCopy.deleteNowConfirm(item.kind)
-            case .emptyTrash(let counts):
-                return RecoveryCopy.emptyTrashConfirm(counts)
+            case .emptyTrash(let counts, let versions):
+                return RecoveryCopy.emptyTrashConfirm(counts, versions: versions)
             }
         }
     }
@@ -347,7 +351,11 @@ enum TrashPurge {
         guard counts.filter({ TrashScope.emptyTrashTakes($0.key) })
             .values.reduce(0, +) > 0
         else { return nil }
-        return .emptyTrash(counts: counts)
+        // The moments among the notes (batch 6's rider) — the row itself knows,
+        // through the `version_of` link its projection already carries, so
+        // nothing is re-derived here.
+        return .emptyTrash(
+            counts: counts, versions: everything.count { $0.isVersion })
     }
 
     /// The confirmed act: ONE op (`requestPurge` — the intent write; rows
@@ -387,9 +395,12 @@ enum TrashPurge {
             // (round 8b) and a take on a living block is spared, because the
             // Trash never showed it and a door may not take what it does not
             // show. The clock still runs on a spared take; the confirm says so.
-            let targets = everything
-                .filter { TrashScope.emptyTrashTakes($0.kind) }
+            let taken = everything.filter { TrashScope.emptyTrashTakes($0.kind) }
+            let targets = taken
                 .map { SyncPurgeTarget(table: $0.kind.purgeTable, rowID: $0.id) }
+            // Read from the ACT-time listing, like the count beside it: the
+            // receipt says what really went, never what the confirm guessed.
+            let versionsTaken = taken.count { $0.isVersion }
             var anyFamilySynced = false
             if !synced {
                 anyFamilySynced = try await session.database.read { db in
@@ -400,7 +411,8 @@ enum TrashPurge {
                 _ = try ops.requestPurge(targets)
             }
             receipt = RecoveryCopy.emptyTrashReceipt(
-                targets.count, synced: synced, anyFamilyEverSynced: anyFamilySynced)
+                targets.count, synced: synced, anyFamilyEverSynced: anyFamilySynced,
+                versions: versionsTaken)
         }
         // On a local-only install the cleanup IS the app's — run it now, so
         // Delete Now means what it says the moment she reads it (a configured

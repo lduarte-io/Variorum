@@ -337,17 +337,43 @@ nonisolated enum RecoveryCopy {
     /// The take count still arrives in `counts` — the ask-time read counts
     /// everything the store holds — and this is the ONE place that decides
     /// what each kind's number MEANS.
-    static func emptyTrashConfirm(_ counts: [Queries.TrashItem.Kind: Int]) -> String {
+    /// **AND IT NAMES SAVED VERSIONS APART FROM NOTES** (the post-13l polish
+    /// round, batch 6 — the architect's adjudication of batch 5's PROVISIONAL
+    /// 3). A version IS a `.note`-kind row and it DOES go, so the total was
+    /// never wrong — but *"3 notes go for good"* over two notes and one of
+    /// their saved moments hides the very distinction the Trash's grouping
+    /// draws one line below it, and the door-shows-what-it-takes principle
+    /// (G6) is about what the sentence SAYS as much as what the act does.
+    ///
+    /// `versions` is a defaulted parameter deliberately: a Trash holding no
+    /// moments reads byte-identically to what shipped, so every ordinary
+    /// emptying — and every pin that asserts one — is untouched.
+    static func emptyTrashConfirm(
+        _ counts: [Queries.TrashItem.Kind: Int], versions: Int = 0
+    ) -> String {
         let total = counts
             .filter { TrashScope.emptyTrashTakes($0.key) }
             .values.reduce(0, +)
         guard total > 0 else { return "The Trash is empty — nothing to delete." }
         let order: [Queries.TrashItem.Kind] = [.note, .block, .book]
-        let parts = order.compactMap { kind -> String? in
-            guard let count = counts[kind], count > 0 else { return nil }
+        var parts = order.compactMap { kind -> String? in
+            // The notes' number is the notes' own: the moments are counted
+            // beside them, never inside them.
+            let raw = counts[kind] ?? 0
+            let count = kind == .note ? max(0, raw - versions) : raw
+            guard count > 0 else { return nil }
             let word = kindLabel(kind).lowercased()
             let singular = rowKind(kind)
             return count == 1 ? "1 \(singular)" : "\(count) \(word)"
+        }
+        if versions > 0 {
+            let phrase = versions == 1
+                ? "1 \(VersionsPath.trashRowKind)"
+                : "\(versions) \(VersionsPath.trashRowKind)s"
+            // Beside the notes, in the place the reader looks for them: a
+            // moment belongs to a note, so it is read right after one.
+            let afterNotes = (counts[.note] ?? 0) - versions > 0 ? 1 : 0
+            parts.insert(phrase, at: min(afterNotes, parts.count))
         }
         var sentence = "Empty the Trash? \(total) thing\(total == 1 ? "" : "s") "
             + "go\(total == 1 ? "es" : "") for good: \(parts.joined(separator: ", "))."
@@ -385,10 +411,18 @@ nonisolated enum RecoveryCopy {
             + "cleanup removes the bytes."
     }
 
+    /// `versions` names the moments among what went (batch 6's rider, the
+    /// confirm's twin): the receipt of a destructive act should read back the
+    /// same populations the question named. Defaulted, so a Trash with no
+    /// moments in it reads exactly as it shipped.
     static func emptyTrashReceipt(
-        _ total: Int, synced: Bool, anyFamilyEverSynced: Bool = false
+        _ total: Int, synced: Bool, anyFamilyEverSynced: Bool = false,
+        versions: Int = 0
     ) -> String {
-        let head = "The Trash is emptied — \(total) thing\(total == 1 ? "" : "s") gone from the app now; "
+        let moments = versions > 0
+            ? ", \(versions) of them saved version\(versions == 1 ? "" : "s")"
+            : ""
+        let head = "The Trash is emptied — \(total) thing\(total == 1 ? "" : "s")\(moments) gone from the app now; "
         if synced { return head + "the bytes follow once every synced device has caught up." }
         if anyFamilyEverSynced {
             return head + "anything that once synced finishes clearing after you "

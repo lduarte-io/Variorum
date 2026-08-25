@@ -342,7 +342,7 @@ struct IAAndTrashShapeTests {
             let model = RecoveryViewModel(session: editor.session)
             await model.requestEmptyTrash()
             let confirm = try #require(model.pendingConfirm)
-            guard case .emptyTrash(let counts) = confirm else {
+            guard case .emptyTrash(let counts, _) = confirm else {
                 Issue.record("Empty Trash raises its counting confirm")
                 return
             }
@@ -371,6 +371,56 @@ struct IAAndTrashShapeTests {
             }
             #expect(blockGone == 0, "the door took what it rowed")
             #expect(takeAlive == 1, "…and left what it did not")
+        }
+    }
+
+    // MARK: - Batch 6's rider: a note's moment is not another note
+
+    /// **EMPTY TRASH NAMES SAVED VERSIONS APART FROM NOTES** (the architect's
+    /// adjudication of batch 5's PROVISIONAL 3, which recorded the defect in
+    /// its own words: *"the sentence reads '3 notes go for good' when one is
+    /// a moment"*).
+    ///
+    /// A version IS a `.note`-kind row and it DOES go — the total was never
+    /// wrong. What was wrong is that the destructive question counted a note's
+    /// past as another note, in the one sentence where the door is supposed to
+    /// show exactly what it takes (G6). The Trash's own grouping says which
+    /// rows are moments one line below; the confirm now agrees with it.
+    ///
+    /// **RED ON OLD** by behavioural revert (`versions:` dropped at the confirm
+    /// and the receipt — batch 5's shipped behaviour): both readings red.
+    @Test func emptyTrashCountsANotesSavedMomentAsAMomentAndNotAsANote() async throws {
+        try await withEditor(seedBlocks: ["Alpha one."]) { editor in
+            let postID = editor.postID
+            try await editor.session.runner.run { (ops: Operations) in
+                _ = try ops.saveNoteVersion(postID)
+                try ops.deleteContainer(postID)  // V2: the moment rides with it
+            }
+
+            let model = RecoveryViewModel(session: editor.session)
+            await model.requestEmptyTrash()
+            let confirm = try #require(model.pendingConfirm)
+            guard case .emptyTrash(let counts, let versions) = confirm else {
+                Issue.record("Empty Trash raises its counting confirm")
+                return
+            }
+            #expect(counts[.note] == 2, "the store holds two note-kind rows…")
+            #expect(versions == 1, "…and knows one of them is a moment")
+
+            let message = confirm.message
+            #expect(message.contains("2 things go for good"),
+                    "the total is unchanged — both really go: \(message)")
+            #expect(message.contains("1 note"), "the note, counted as one: \(message)")
+            #expect(message.contains("1 \(VersionsPath.trashRowKind)"),
+                    "and its moment, named: \(message)")
+            #expect(!message.contains("2 notes"),
+                    "never a note's past counted as another note: \(message)")
+
+            await model.confirmPendingPurge(confirm)
+            #expect(model.lastError == nil)
+            let receipt = try #require(model.receipt)
+            #expect(receipt.contains("saved version"),
+                    "the receipt reads back the same populations: \(receipt)")
         }
     }
 

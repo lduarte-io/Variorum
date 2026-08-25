@@ -457,7 +457,7 @@ struct TrashPurgeDoorsTests {
             let model = RecoveryViewModel(session: editor.session)
 
             await model.requestEmptyTrash()
-            guard case .emptyTrash(let counts)? = model.pendingConfirm else {
+            guard case .emptyTrash(let counts, _)? = model.pendingConfirm else {
                 Issue.record("Empty Trash must raise its counting confirm")
                 return
             }
