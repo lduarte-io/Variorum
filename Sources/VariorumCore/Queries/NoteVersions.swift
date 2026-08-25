@@ -83,31 +83,105 @@ extension Queries {
         }
     }
 
-    /// **The version-history predicate, written ONCE.**
+    /// Which note the candidate must be a moment OF.
+    enum VersionHistoryPeer {
+        /// A NAMED note — the caller binds `:note`.
+        case note
+        /// ANY live note other than the candidate — the Archived surface's
+        /// fence, which must exclude exactly what `noteVersions` lists.
+        case anyLiveNote
+    }
+
+    /// **The version-history predicate, written ONCE — and read by EVERY
+    /// scope** (the ladder's LR1-5: the Archived surface's fence used to be
+    /// an inline near-copy of this, with real structural differences, so the
+    /// classifier could disagree with itself).
     ///
-    /// `:note` is the note whose versions are wanted; the candidate row is
-    /// aliased `v`. `liveOnly` fences the edge and both placements to live
-    /// rows — the ordinary reading; the deleted road passes `false` because a
-    /// whole-note deletion cascade-tombstones every placement and every edge,
-    /// and *lineage is a fact about what happened* (the `strandedOriginals`
-    /// doctrine, which this borrows verbatim).
-    static func versionHistoryPredicate(liveOnly: Bool) -> String {
-        let edgeLive = liveOnly ? "AND e.deleted_at IS NULL" : ""
-        let mineLive = liveOnly ? "AND mine.deleted_at IS NULL" : ""
-        let theirsLive = liveOnly ? "AND theirs.deleted_at IS NULL" : ""
+    /// The candidate row is aliased `alias` (`v` here, `container` on the
+    /// Archived surface). `peer` says which note it must be a moment of.
+    ///
+    /// ── WHY THE NOTE SIDE IS READ PAST TOMBSTONES (the ladder's LR1-1) ────
+    /// The post-level link RIDES a block-level edge anchored on the note's
+    /// FIRST block (I8 — posts are edges-only across versions, and edges are
+    /// block-to-block; the anchor is QUESTIONS #19's ratified shape). That
+    /// block is ordinary prose: **merge and divide-W release its placement,
+    /// `archiveBlock` releases it, `deleteBlock` cascade-tombstones the edge
+    /// itself.** Fencing this predicate to LIVE placements therefore made an
+    /// everyday join — the one the round's own tutorial teaches — expel every
+    /// saved moment from Note ▸ Versions, leak it onto the Archived surface,
+    /// orphan it from the deletion ride, and make Restore and Promote refuse.
+    ///
+    /// So the note side asks the question lineage's way: **was this block
+    /// this note's?** — a `container_block` row for the note, whatever its
+    /// tombstone says. That is the `strandedOriginals` doctrine verbatim
+    /// (*lineage is a fact about what happened*), and it is the same reading
+    /// `versionOfNote` below has always used. Liveness that still matters is
+    /// carried where it belongs: on the CONTAINERS (`v.deleted_at`, and the
+    /// peer's own `deleted_at` under `.anyLiveNote`).
+    ///
+    /// ── THE EDGE, AND WHY THE UNLINK STILL UNLINKS ───────────────────────
+    /// A `version_of` edge dies two ways, and they mean opposite things:
+    ///
+    /// - a **CASCADE** (`cascade_block_tombstone`) when an endpoint block is
+    ///   deleted — the copy still happened, so the moment is still the note's
+    ///   past. The cascade stamps the edge with its dead endpoint's OWN
+    ///   `deleted_at`, and that exact-stamp signature is what this reads past
+    ///   (the 13l exact-stamp doctrine, the same one `versionHistoryDeletedWith`
+    ///   leans on);
+    /// - a deliberate **`unmarkPostsAsVersions`**, which stamps a time no
+    ///   endpoint block shares — so it still unlinks, and the pair really does
+    ///   come apart (R60/R68's door, kept honest).
+    ///
+    /// `pastTombstones` drops even that: the deleted road passes it, because a
+    /// whole-note deletion tombstones every placement and every edge with one
+    /// stamp and the STAMP is what identifies the family there.
+    ///
+    /// **What this still cannot survive, recorded rather than hidden:**
+    /// `moveBlock` REWRITES the anchor's `container_id` in place (no
+    /// tombstone, no `last_container_id`), so moving a note's first block to
+    /// another container takes the moments with it — they read as the
+    /// destination's. Read-side means cannot tell that from a legitimate
+    /// re-home; the durable answer is QUESTIONS #19's option (c), a
+    /// post-level link, which is a schema call and hers. Pinned as documented
+    /// behaviour in `NoteVersionsTests` and owned by 13w in KnownIssues.
+    static func versionHistoryPredicate(
+        alias: String = "v", of peer: VersionHistoryPeer = .note,
+        pastTombstones: Bool = false
+    ) -> String {
+        let edgeFence = pastTombstones ? "" : """
+              AND (e.deleted_at IS NULL
+                   OR EXISTS (SELECT 1 FROM block cascaded
+                               WHERE cascaded.id IN (e.source_block_id, e.target_block_id)
+                                 AND cascaded.deleted_at = e.deleted_at))
+            """
+        let peerJoin: String
+        let peerWhere: String
+        switch peer {
+        case .note:
+            peerJoin = ""
+            peerWhere = "AND theirs.container_id = :note"
+        case .anyLiveNote:
+            peerJoin = """
+                  JOIN container peer
+                    ON peer.id = theirs.container_id AND peer.id <> \(alias).id
+                   AND peer.kind = 'post' AND peer.deleted_at IS NULL
+                """
+            peerWhere = ""
+        }
         return """
-              v.kind = 'post'
-              AND v.archived_at IS NOT NULL AND v.archived_at = v.created_at
+              \(alias).kind = 'post'
+              AND \(alias).archived_at IS NOT NULL
+              AND \(alias).archived_at = \(alias).created_at
               AND EXISTS (
                 SELECT 1 FROM edge e
                 JOIN container_block mine
                   ON mine.block_id IN (e.source_block_id, e.target_block_id)
-                 AND mine.container_id = v.id \(mineLive)
+                 AND mine.container_id = \(alias).id
                 JOIN container_block theirs
                   ON theirs.block_id IN (e.source_block_id, e.target_block_id)
-                 AND theirs.block_id <> mine.block_id \(theirsLive)
-                WHERE e.type = 'version_of' \(edgeLive)
-                  AND theirs.container_id = :note)
+                 AND theirs.block_id <> mine.block_id
+            \(peerJoin)
+                WHERE e.type = 'version_of' \(edgeFence) \(peerWhere))
             """
     }
 
@@ -133,7 +207,7 @@ extension Queries {
                      ORDER BY cb.position, cb.id LIMIT 1) AS preview
             FROM container v
             WHERE v.deleted_at IS NULL
-              AND \(versionHistoryPredicate(liveOnly: true))
+              AND \(versionHistoryPredicate())
             ORDER BY v.created_at DESC, v.id DESC
             """
         var arguments: StatementArguments = ["note": postID]
@@ -159,7 +233,7 @@ extension Queries {
             sql: """
                 SELECT v.id FROM container v
                 WHERE v.deleted_at IS NULL
-                  AND \(versionHistoryPredicate(liveOnly: true))
+                  AND \(versionHistoryPredicate())
                 ORDER BY v.id
                 """,
             arguments: ["note": postID])
@@ -176,7 +250,7 @@ extension Queries {
                 SELECT EXISTS (
                   SELECT 1 FROM container v
                   WHERE v.id = :version AND v.deleted_at IS NULL
-                    AND \(versionHistoryPredicate(liveOnly: true)))
+                    AND \(versionHistoryPredicate()))
                 """,
             arguments: ["version": versionID, "note": postID]) ?? false
     }
@@ -200,7 +274,7 @@ extension Queries {
             sql: """
                 SELECT v.id FROM container v
                 WHERE v.deleted_at = :stamp
-                  AND \(versionHistoryPredicate(liveOnly: false))
+                  AND \(versionHistoryPredicate(pastTombstones: true))
                 ORDER BY v.id
                 """,
             arguments: ["note": postID, "stamp": stamp])

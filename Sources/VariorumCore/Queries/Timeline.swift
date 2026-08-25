@@ -224,23 +224,15 @@ extension Queries {
     public static func archivedPosts(
         _ db: Database, limit: Int? = nil, excludingVersionHistory: Bool = true
     ) throws -> [TimelineItem] {
-        let versionFence = excludingVersionHistory ? """
-
-              AND NOT (
-                container.archived_at = container.created_at
-                AND EXISTS (
-                  SELECT 1 FROM edge e
-                  JOIN container_block mine
-                    ON mine.block_id IN (e.source_block_id, e.target_block_id)
-                   AND mine.container_id = container.id AND mine.deleted_at IS NULL
-                  JOIN container_block theirs
-                    ON theirs.block_id IN (e.source_block_id, e.target_block_id)
-                   AND theirs.block_id <> mine.block_id AND theirs.deleted_at IS NULL
-                  JOIN container peer
-                    ON peer.id = theirs.container_id AND peer.id <> container.id
-                   AND peer.kind = 'post' AND peer.deleted_at IS NULL
-                  WHERE e.type = 'version_of' AND e.deleted_at IS NULL))
-            """ : ""
+        // **ONE CLASSIFIER, READ — NEVER A SECOND COPY OF IT** (the ladder's
+        // LR1-5). This fence used to be an inline near-copy of
+        // `versionHistoryPredicate` that had drifted structurally from it, so
+        // the two scopes could disagree about the same row — and LR1-1's fix
+        // would have had to land twice. It now reads the one predicate, with
+        // the peer bound to "any live note" instead of a named one.
+        let versionFence = excludingVersionHistory
+            ? "\n  AND NOT (\(versionHistoryPredicate(alias: "container", of: .anyLiveNote)))"
+            : ""
         var sql = """
             SELECT id AS post_id, title AS title, entry_date AS entry_date,
                    created_at AS created_at, archived_at AS stamp

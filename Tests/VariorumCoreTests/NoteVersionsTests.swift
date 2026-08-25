@@ -376,6 +376,288 @@ struct NoteVersionsTests {
         }
     }
 
+    /// **A RESTORE REBASELINES THE CHURN** (the ladder's LR1-6). AppSpec §10's
+    /// meaningful-edit stamp measures `churn / max(baseline, 1)`, and a
+    /// restore replaces the note's WHOLE content — so leaving the old
+    /// baseline and the old accumulator in place runs the threshold against a
+    /// phantom: a long note restored to a short moment would cross on the
+    /// next typo, a short one restored to a long moment would never cross at
+    /// all. `copyPost` already rebaselines its copy for exactly this reason;
+    /// the restore is the same act on the same container.
+    @Test func restoringAVersionRebaselinesTheNotesChurn() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "the note")
+            let block = try ops.newBlock(in: note.id, text: "Short.")
+            let version = try ops.saveNoteVersion(note.id).post
+
+            // Grow the note well past the moment (this crosses the threshold
+            // and rebaselines onto the long text), then type a little more so
+            // an accumulator is actually standing when the restore lands.
+            let long = String(repeating: "a lot more prose. ", count: 20)
+            try ops.autosave(block.variant.id, text: long, charDelta: long.count)
+            try ops.autosave(block.variant.id, text: long + "tail", charDelta: 4)
+            let before = try #require(try db.read { try Container.fetchOne($0, key: note.id) })
+            #expect(before.churnAccumulator > 0)
+            #expect(before.baselineLength == long.count)
+
+            _ = try ops.restoreNoteVersion(note.id, from: version.id)
+
+            let after = try #require(try db.read { try Container.fetchOne($0, key: note.id) })
+            #expect(after.churnAccumulator == 0,
+                    "the churn was against text that is no longer here")
+            #expect(after.baselineLength == "Short.".count,
+                    "and the baseline is what the note now holds")
+        }
+    }
+
+    // MARK: - The seal insures what it protects (the ladder's LR1-2)
+
+    /// **A MOMENT IS SEALED, SO THE SEAL INSURES IT** — AppSpec §9's ruled
+    /// doctrine, applied rather than re-invented: *"locking a dirty buffer
+    /// first appends one quiet auto commit… the guard insures exactly what it
+    /// protects."*
+    ///
+    /// Copies never carry commits (the pool-drag rule, and right), so a saved
+    /// moment's takes were born with ZERO savepoints while the seal made that
+    /// invisible. PROMOTE takes the seal off — and one edit afterwards then
+    /// destroyed the moment's own text with nothing to restore and nothing in
+    /// the Trash. This is the sealing-a-post occasion (`lockPost`'s own
+    /// helper, called because the mint seals), not a seventh occasion.
+    @Test func aMomentsTakesAreInsuredAtBirthSoPromoteCannotDestroyThem() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "the note")
+            let block = try ops.newBlock(in: note.id, text: "The moment's words.")
+            _ = try ops.branchVariant(block.block.id, from: block.variant.id)
+
+            let version = try ops.saveNoteVersion(note.id).post
+
+            let takes = try db.read { db in
+                try Variant.fetchAll(
+                    db,
+                    sql: """
+                        SELECT v.* FROM variant v
+                        JOIN container_block cb ON cb.block_id = v.block_id
+                        WHERE cb.container_id = ? AND cb.deleted_at IS NULL
+                          AND v.deleted_at IS NULL
+                        ORDER BY v.fan_position, v.id
+                        """,
+                    arguments: [version.id])
+            }
+            #expect(takes.count == 2, "the whole fan rode along (V7's chosen cost)")
+            for take in takes {
+                let saved = try db.read { db in
+                    try String.fetchAll(
+                        db,
+                        sql: "SELECT text FROM commit_point WHERE variant_id = ? ORDER BY created_at",
+                        arguments: [take.id])
+                }
+                #expect(saved == [take.workingText],
+                        "every take of the moment carries a savepoint OF the moment")
+            }
+
+            // …and the promise it buys: promote, edit, and the moment is
+            // still one restore away.
+            try ops.promoteNoteVersion(version.id, of: note.id)
+            let first = try #require(takes.first)
+            try ops.autosave(first.id, text: "typed over it", charDelta: 13)
+            let commits = try db.read { try Queries.commitHistory($0, variantID: first.id) }
+            #expect(commits.map(\.text) == ["The moment's words."],
+                    "the moment survives the first edit after a promote")
+        }
+    }
+
+    /// An EMPTY take takes no savepoint — the landing's own rule (*"an empty
+    /// body — a landed deletion — takes no commit"*), inherited for free
+    /// because this is `lockPost`'s helper and `isDirty` already says so.
+    @Test func anEmptyTakeInAMomentTakesNoSavepoint() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "the note")
+            let block = try ops.newBlock(in: note.id, text: "Words.")
+            _ = try ops.newBlankVariant(block.block.id)
+
+            let version = try ops.saveNoteVersion(note.id).post
+
+            let rows = try db.read { db in
+                try Row.fetchAll(
+                    db,
+                    sql: """
+                        SELECT v.working_text AS text,
+                               (SELECT COUNT(*) FROM commit_point c WHERE c.variant_id = v.id)
+                                 AS saved
+                        FROM variant v
+                        JOIN container_block cb ON cb.block_id = v.block_id
+                        WHERE cb.container_id = ? AND cb.deleted_at IS NULL
+                          AND v.deleted_at IS NULL
+                        """,
+                    arguments: [version.id])
+            }
+            for row in rows {
+                let text: String = row["text"]
+                #expect((row["saved"] as Int) == (text.isEmpty ? 0 : 1))
+            }
+        }
+    }
+
+    // MARK: - The classifier survives ordinary work (the ladder's LR1-1)
+
+    /// **MERGING THE NOTE'S FIRST BLOCK MUST NOT EXPEL ITS MOMENTS.**
+    ///
+    /// The `version_of` edge is anchored on the note's FIRST block (I8 —
+    /// posts are edges-only across versions, and edges are block-to-block).
+    /// A merge RELEASES its source blocks to lineage: their placements are
+    /// tombstoned. If the classifier asked about a LIVE placement, an
+    /// ordinary join — the very gesture the round's own tutorial teaches —
+    /// would drop every saved moment out of Note ▸ Versions and into the
+    /// Archived surface, with Restore and Promote refusing on the way past.
+    ///
+    /// Lineage is a fact about what happened (the `strandedOriginals`
+    /// doctrine): the block WAS this note's, and the moment IS its past.
+    @Test func mergingTheNotesFirstBlockKeepsItsMoments() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "the note")
+            let first = try ops.newBlock(in: note.id, text: "One.")
+            let second = try ops.newBlock(in: note.id, text: "Two.")
+            let version = try ops.saveNoteVersion(note.id).post
+
+            _ = try ops.merge(first.block.id, second.block.id)
+
+            #expect(try db.read { try Queries.noteVersions($0, of: note.id) }
+                .map(\.postID) == [version.id],
+                "the moment is still this note's past")
+            #expect(!(try db.read { try Queries.archivedPosts($0) }
+                .map(\.postID).contains(version.id)),
+                "and it never leaks onto the Archived surface (V1, both ways)")
+            #expect(try db.read { try Queries.isVersionHistory($0, version.id, of: note.id) },
+                "so Restore and Promote still authorize")
+            #expect(try db.read { try Queries.noteVersionIDs($0, of: note.id) } == [version.id],
+                "and the deletion ride still claims it (V2)")
+        }
+    }
+
+    /// **ARCHIVING THE NOTE'S FIRST BLOCK MUST NOT EXPEL ITS MOMENTS** — the
+    /// same mechanism through the other everyday door (`archiveBlock`
+    /// tombstones the placement and stamps `last_container_id`).
+    @Test func archivingTheNotesFirstBlockKeepsItsMoments() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "the note")
+            let first = try ops.newBlock(in: note.id, text: "One.")
+            _ = try ops.newBlock(in: note.id, text: "Two.")
+            let version = try ops.saveNoteVersion(note.id).post
+
+            try ops.archiveBlock(first.block.id)
+
+            #expect(try db.read { try Queries.noteVersions($0, of: note.id) }
+                .map(\.postID) == [version.id])
+            #expect(!(try db.read { try Queries.archivedPosts($0) }
+                .map(\.postID).contains(version.id)))
+            #expect(try db.read { try Queries.isVersionHistory($0, version.id, of: note.id) })
+        }
+    }
+
+    /// **DELETING THE NOTE'S FIRST BLOCK MUST NOT EXPEL ITS MOMENTS.** This
+    /// leg breaks a different fence: the block tombstone's trigger cascade
+    /// tombstones the EDGE itself (`cascade_block_tombstone`), stamped with
+    /// the block's own `deleted_at`. That cascade signature is what the
+    /// classifier reads past — a deliberate `unmarkPostsAsVersions` carries
+    /// no such stamp and still unlinks (pinned below).
+    @Test func deletingTheNotesFirstBlockKeepsItsMoments() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "the note")
+            let first = try ops.newBlock(in: note.id, text: "One.")
+            _ = try ops.newBlock(in: note.id, text: "Two.")
+            let version = try ops.saveNoteVersion(note.id).post
+
+            try ops.deleteBlock(first.block.id)
+
+            #expect(try db.read { try Queries.noteVersions($0, of: note.id) }
+                .map(\.postID) == [version.id])
+            #expect(!(try db.read { try Queries.archivedPosts($0) }
+                .map(\.postID).contains(version.id)))
+            #expect(try db.read { try Queries.isVersionHistory($0, version.id, of: note.id) })
+
+            // …and Put back leaves it exactly as it was.
+            try ops.restoreBlock(first.block.id)
+            #expect(try db.read { try Queries.noteVersions($0, of: note.id) }
+                .map(\.postID) == [version.id])
+        }
+    }
+
+    /// **THE TRASH ROW'S GROUPING SURVIVES THE SAME GESTURES** (the ladder's
+    /// LR1-1 rider): a deleted moment must still name the note it is a moment
+    /// of after that note's first block has been merged away, or it rows in
+    /// the Trash as an anonymous note.
+    @Test func aDeletedMomentStillNamesItsNoteAfterAMerge() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "the note")
+            let first = try ops.newBlock(in: note.id, text: "One.")
+            let second = try ops.newBlock(in: note.id, text: "Two.")
+            let version = try ops.saveNoteVersion(note.id).post
+
+            _ = try ops.merge(first.block.id, second.block.id)
+            try ops.deleteContainer(version.id)
+
+            let now = Date(timeIntervalSince1970: 1_782_864_000)
+            let row = try #require(
+                try db.read { try Queries.trash($0, now: now) }.first { $0.id == version.id })
+            #expect(row.isVersion)
+            #expect(row.versionOfNoteID == note.id)
+            #expect(row.noteTitle == "the note")
+        }
+    }
+
+    /// **MOVING THE ANCHOR OUT OF THE NOTE IS THE ONE GESTURE READ-SIDE
+    /// MEANS CANNOT ANSWER — pinned as the DOCUMENTED behaviour it is.**
+    ///
+    /// `moveBlock` rewrites the placement's `container_id` in place: no
+    /// tombstone, no `last_container_id`, nothing left behind saying the
+    /// block was ever this note's. So the moments follow the anchor to its
+    /// new home, and no query can tell that from a legitimate re-home. The
+    /// durable answer is QUESTIONS #19's option (c) — a post-level link,
+    /// which is a schema call and hers (KnownIssues, owner 13w).
+    ///
+    /// This pin exists so the behaviour is a KNOWN one: if a later change
+    /// makes it right, this test says so out loud instead of passing quietly.
+    @Test func movingTheAnchorBlockTakesTheMomentsWithItAndThatIsRecorded() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "the note")
+            let first = try ops.newBlock(in: note.id, text: "One.")
+            _ = try ops.newBlock(in: note.id, text: "Two.")
+            let elsewhere = try ops.createPost(title: "the other note")
+            let version = try ops.saveNoteVersion(note.id).post
+
+            try ops.moveBlock(first.block.id, to: elsewhere.id)
+
+            #expect(try db.read { try Queries.noteVersions($0, of: note.id) }.isEmpty,
+                    "documented, not desired: the anchor left, so the link left with it")
+            #expect(try db.read { try Queries.noteVersions($0, of: elsewhere.id) }
+                .map(\.postID) == [version.id],
+                "…and it reads as the destination's moment")
+            #expect(!(try db.read { try Queries.archivedPosts($0) }
+                .map(\.postID).contains(version.id)),
+                "it is at least never LOOSE: some live note still claims it")
+        }
+    }
+
+    /// **THE UNLINK STILL UNLINKS.** Reading past the cascade's tombstone must
+    /// not read past a deliberate one: `unmarkPostsAsVersions` stamps the edge
+    /// with a time no endpoint block shares, so the pair really does come
+    /// apart (the R60/R68 door, kept honest by the exact-stamp signature).
+    @Test func adeliberateUnmarkStillUnlinksAVersion() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "the note")
+            _ = try ops.newBlock(in: note.id, text: "One.")
+            let version = try ops.saveNoteVersion(note.id).post
+
+            try ops.unmarkPostsAsVersions(note.id, version.id)
+
+            #expect(try db.read { try Queries.noteVersions($0, of: note.id) }.isEmpty,
+                    "an unmarked pair is not version history any more")
+            #expect(try db.read { try Queries.archivedPosts($0) }
+                .map(\.postID).contains(version.id),
+                "and what is left is an ordinary archived note")
+        }
+    }
+
     /// An ordinary note in the Trash is never mistaken for a moment.
     @Test func anOrdinaryDeletedNoteIsNotAVersionRow() throws {
         try withOperations { ops, db in

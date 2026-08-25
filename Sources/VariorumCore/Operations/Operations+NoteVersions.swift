@@ -25,7 +25,10 @@ extension Operations {
     /// - **born sealed** is the freeze (V4b, from her seventh-sitting question
     ///   *"can archived notes be edited?"* — yes, archive is visibility, so a
     ///   moment that must not drift needs the seal, which already refuses
-    ///   edits, commits and pointer changes);
+    ///   edits, commits and pointer changes) — **and the seal insures what it
+    ///   protects** (the ladder's LR1-2): one quiet auto commit per copied
+    ///   take, AppSpec §9's `lockPost` occasion applied, so a promoted moment
+    ///   is never one edit away from being unrecoverable;
     /// - **no title mutation** (V6): the listing shows the DATE by derived
     ///   display, and the copy's own title is never touched.
     ///
@@ -73,6 +76,22 @@ extension Operations {
         version.lockedAt = version.createdAt
         version.entryDate = nil  // V3 — see the door's comment above
         version.updatedAt = version.createdAt
+        // **THE SEAL INSURES WHAT IT PROTECTS** (the ladder's LR1-2) —
+        // AppSpec §9's ruled doctrine, APPLIED rather than re-invented. This
+        // is `lockPost`'s own helper, called for `lockPost`'s own reason: the
+        // line below seals the copy, and sealing a post auto-commits its
+        // dirty buffers first. Not a seventh quiet occasion — the same one.
+        //
+        // It matters because a COPY carries no commits (the pool-drag rule,
+        // and right): a moment's takes were born with zero savepoints, which
+        // the seal hid until PROMOTE took the seal off — and then one edit
+        // destroyed the moment's own text with nothing to restore it from and
+        // no Trash row to find. An EMPTY take still takes none (`isDirty`'s
+        // own answer, the landed-deletion rule).
+        //
+        // Ordered exactly as `lockPost` orders it: commit, then freeze. One
+        // per copied take, so the cost is the fan's, never the corpus's.
+        _ = try autoCommitDirtyVariants(db, containerID: version.id, now: version.createdAt)
         try version.update(db)
         return PostCopyResult(
             post: version, blockCopies: copied.blockCopies, versionEdge: copied.versionEdge)
@@ -205,9 +224,24 @@ extension Operations {
                 }
             }
 
-            // 5 — touch without churn (the structural-op rule, AppSpec §9).
+            // 5 — touch without churn (the structural-op rule, AppSpec §9),
+            // and REBASELINE (the ladder's LR1-6).
+            //
+            // The churn counters describe how far the note has drifted from a
+            // length (AppSpec §10: `churn / max(baseline, 1) ≥ threshold`).
+            // A restore replaces the note's whole content, so both numbers
+            // now describe text that is no longer here — a long note restored
+            // to a short moment would cross on the next typo; a short one
+            // restored to a long moment would never cross at all. `copyPost`
+            // rebaselines its copy for exactly this reason; this is the same
+            // act on the same container, off the same number the copy loop
+            // already returned. The `last_major_revision_at` stamp is
+            // deliberately NOT moved: restructuring must never reshuffle the
+            // meaningful sort, which is the same rule the touch obeys.
             var touched = post
             touched.lastTouchedAt = now
+            touched.churnAccumulator = 0
+            touched.baselineLength = landed.renderedLength
             touched.updatedAt = now
             try touched.update(db)
 
