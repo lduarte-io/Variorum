@@ -59,19 +59,22 @@ struct VoiceTokens {
     /// readable at a glance and forgettable the moment after (her #75(d)
     /// ratification: signed-out stays quiet, so only THIS state wears it).
     ///
-    /// **Where it currently RESOLVES, said plainly** (the ladder's LR1-9,
-    /// which caught this doc claiming a distinctness the leading voice does
-    /// not have): in **Terminal** `positive` is the same green as `accent`
-    /// and `chosen`, and that is deliberate — Terminal has ONE green, and a
-    /// second one beside it would read as a different signal rather than a
-    /// gentler one. In **Study** it is its own green beside a blue accent,
-    /// which is where the separate slot visibly earns itself.
+    /// **Where it currently RESOLVES, said plainly for ALL FOUR VOICES** (the
+    /// ladder's LR1-9 caught this doc claiming a distinctness the leading
+    /// voice does not have; LR2-2 caught the correction stopping one voice
+    /// short): **`positive` equals `chosen` in every voice today** — Terminal
+    /// light and dark, Study light and dark all wear the "✓ chosen" green on
+    /// the settled line. Where the voices differ is `accent`: Terminal's is
+    /// that SAME green (it has ONE green on purpose — a second beside it would
+    /// read as a different signal rather than a gentler one), while Study's is
+    /// blue, so there the slot is at least visibly not the emphasis colour.
     ///
     /// The slot exists so the three can move independently WITHOUT a sweep:
     /// hues are placeholders revisable at 13s's design review (her ruling on
     /// `alarm`, and it governs this one too), and 13u's dark mode inherits
-    /// them by construction. **PROVISIONAL:** whether Terminal's settled sync
-    /// line should wear a hue apart from "✓ chosen" is a taste call, hers.
+    /// them by construction. **PROVISIONAL:** whether a settled sync line
+    /// should wear a hue apart from "✓ chosen" — in ANY voice — is a taste
+    /// call, hers.
     let positive: Color
 
     // MARK: Lines & marks

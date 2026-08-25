@@ -560,6 +560,19 @@ nonisolated enum TrashGrouping {
     ///
     /// Zero for anything that is not a note, and zero for a saved version
     /// (a moment has no moments of its own).
+    ///
+    /// **RECORDED, because it is deliberate and would otherwise be
+    /// rediscovered** (the ladder's LR2-3): the listing it counts from is the
+    /// WINDOWED one (`observeTrash`'s bound — the `observeLibrary` P1
+    /// discipline, and the truncation marker that rides it). So a note whose
+    /// moments fall past the window can be UNDER-counted, and its Delete Now
+    /// confirm would then name fewer saved versions than really stay behind.
+    /// Counting the true total would mean a second corpus-shaped read on the
+    /// confirm's own path, which is exactly what the window exists to refuse —
+    /// and the sentence's PURPOSE is that the screen and the words agree, which
+    /// reading the screen's own listing guarantees by construction. The honest
+    /// fix belongs with the windowing affordance itself (KnownIssues' bounded-
+    /// view-windows row, owner 12) or with search's scoped reads (13o).
     static func savedVersions(of item: Queries.TrashItem, in items: [Queries.TrashItem]) -> Int {
         guard item.kind == .note, !item.isVersion else { return 0 }
         return items.count { $0.isVersion && $0.versionOfNoteID == item.id }

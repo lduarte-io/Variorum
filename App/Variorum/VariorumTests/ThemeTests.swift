@@ -61,30 +61,36 @@ struct ThemeTokenTests {
         #expect(VoiceTokens.studyLight.alarm != VoiceTokens.studyDark.alarm)
     }
 
-    /// **THE POSITIVE SLOT SAYS WHAT IT REALLY IS** (the ladder's LR1-9). Its
-    /// doc claimed distinctness from `accent` and `chosen`, and in the LEADING
-    /// voice that was false — Terminal's `positive`, `accent` and `chosen` are
-    /// one green, so the settled sync line wears the "✓ chosen" hue.
+    /// **THE POSITIVE SLOT SAYS WHAT IT REALLY IS** (the ladder's LR1-9, and
+    /// LR2-2 which caught the correction stopping one voice short). Its doc
+    /// claimed distinctness from `accent` and `chosen`; the truth is that
+    /// **`positive == chosen` in ALL FOUR voices** — every settled line wears
+    /// the "✓ chosen" hue — and only `accent` separates the voices, Terminal
+    /// sharing its one green while Study's accent is blue.
     ///
-    /// The hue is NOT nudged: Terminal has one green on purpose, hues are
+    /// The hues are NOT nudged: Terminal has one green on purpose, hues are
     /// 13s's by her ruling, and a second green would read as a different
     /// signal rather than a gentler one. What is fixed is the honesty — and
-    /// this pin is what keeps the doc checkable against the app rather than
-    /// against itself.
+    /// this pin asserts the `chosen` relation the LR1-9 pin never did, so the
+    /// doc stays checkable against the app rather than against itself.
     @Test func theQuietPositiveIsItsOwnSlotEvenWhereItSharesTheVoicesGreen() {
-        // Terminal: deliberately the voice's one green (the doc says so).
-        #expect(VoiceTokens.terminalLight.positive == VoiceTokens.terminalLight.accent)
-        #expect(VoiceTokens.terminalDark.positive == VoiceTokens.terminalDark.accent)
-        // Study: its own green beside a blue accent — where the slot visibly
-        // earns itself, which is why it is a slot and not a synonym.
-        #expect(VoiceTokens.studyLight.positive != VoiceTokens.studyLight.accent)
-        #expect(VoiceTokens.studyDark.positive != VoiceTokens.studyDark.accent)
-        // And in every voice it stays the settled state, never the alarm.
+        // The relation the doc now states for every voice — the one LR1-9's
+        // pin left unasserted, which is how the doc drifted a second time.
         for tokens in [
             VoiceTokens.terminalLight, .terminalDark, .studyLight, .studyDark,
         ] {
+            #expect(tokens.positive == tokens.chosen,
+                    "today the settled state wears the chosen mark's hue — in EVERY voice")
+            // And in every voice it stays the settled state, never the alarm.
             #expect(tokens.positive != tokens.alarm)
         }
+        // Terminal: deliberately the voice's one green (the doc says so).
+        #expect(VoiceTokens.terminalLight.positive == VoiceTokens.terminalLight.accent)
+        #expect(VoiceTokens.terminalDark.positive == VoiceTokens.terminalDark.accent)
+        // Study: not the emphasis colour, which is where the separate slot is
+        // at least visible today — its accent is blue.
+        #expect(VoiceTokens.studyLight.positive != VoiceTokens.studyLight.accent)
+        #expect(VoiceTokens.studyDark.positive != VoiceTokens.studyDark.accent)
     }
 
     @Test func terminalIdiomsAreCarried() {
