@@ -291,7 +291,12 @@ enum TrashPurge {
     /// not. Each model keeps a `typealias PurgeConfirm` so both suites ride
     /// unmodified — the 3C parity pattern.
     nonisolated enum Confirm: Equatable, Sendable {
-        case deleteNow(Queries.TrashItem)
+        /// `savedVersions` is how many of THIS note's saved moments are in
+        /// the Trash beside it (the ladder's LR1-4): the purge takes a
+        /// container's own family and never another container, so they stay
+        /// — and the door says so. Defaulted, so a block, a book, a take and
+        /// every shipped pin construct it exactly as before.
+        case deleteNow(Queries.TrashItem, savedVersions: Int = 0)
         /// `versions` is how many of the `.note` rows are somebody's saved
         /// moment (batch 6's rider): they ARE notes to the store and they DO
         /// go, so the total is unchanged — what changes is that the sentence
@@ -317,8 +322,9 @@ enum TrashPurge {
 
         var message: String {
             switch self {
-            case .deleteNow(let item):
-                return RecoveryCopy.deleteNowConfirm(item.kind)
+            case .deleteNow(let item, let savedVersions):
+                return RecoveryCopy.deleteNowConfirm(
+                    item.kind, isVersion: item.isVersion, savedVersions: savedVersions)
             case .emptyTrash(let counts, let versions):
                 return RecoveryCopy.emptyTrashConfirm(counts, versions: versions)
             }
@@ -328,8 +334,12 @@ enum TrashPurge {
     /// The per-row door's rule: an original has no purge door of its own —
     /// it rides its family (her round-8b ruling). The row renders none, so
     /// this is the belt behind that face, on both platforms.
-    nonisolated static func deleteNowConfirm(for item: Queries.TrashItem) -> Confirm? {
-        item.kind == .preservedOriginal ? nil : .deleteNow(item)
+    nonisolated static func deleteNowConfirm(
+        for item: Queries.TrashItem, savedVersions: Int = 0
+    ) -> Confirm? {
+        item.kind == .preservedOriginal
+            ? nil
+            : .deleteNow(item, savedVersions: savedVersions)
     }
 
     /// The bulk door's ask-time read: the UNWINDOWED counts (both listings
@@ -366,7 +376,7 @@ enum TrashPurge {
         let synced = session.syncConfigured()
         let receipt: String
         switch confirm {
-        case .deleteNow(let item):
+        case .deleteNow(let item, _):
             let target = SyncPurgeTarget(table: item.kind.purgeTable, rowID: item.id)
             // The third population (signed OUT, with synced history): read
             // the family's truth bit BEFORE the intent lands, so the local
@@ -520,11 +530,39 @@ nonisolated enum TrashGrouping {
 
     /// The listing, in the order the query gave it, with groups placed where
     /// their first row fell.
-    enum Entry: Equatable {
+    enum Entry: Equatable, Identifiable {
         case group(Group)
         /// A row with no note to gather under: a book, or a note whose blocks
         /// are not separately listed.
         case row(Row)
+
+        /// **A STABLE IDENTITY, NOT A POSITION** (the ladder's LR1-10). The
+        /// listing REORDERS under her hands — a Put back or a Delete Now
+        /// removes a row and everything below it shifts up — so identifying
+        /// entries by their index tells SwiftUI that every row below the
+        /// change became a different row. The store's ids never move.
+        /// (Prefixed, because a group is named by its note and that note may
+        /// also be a row somewhere else in the listing.)
+        var id: String {
+            switch self {
+            case .group(let group): return "group:\(group.noteID)"
+            case .row(let row): return "row:\(row.item.id)"
+            }
+        }
+    }
+
+    /// **How many of this row's saved moments are in the Trash beside it**
+    /// (the ladder's LR1-4): a note's Delete Now purges its own family and
+    /// never another container, so its versions stay — and the confirm says
+    /// so. Read from the listing she is looking at, which is also the listing
+    /// showing her those rows under this one's name (G7's grouping), so the
+    /// sentence and the screen can never disagree.
+    ///
+    /// Zero for anything that is not a note, and zero for a saved version
+    /// (a moment has no moments of its own).
+    static func savedVersions(of item: Queries.TrashItem, in items: [Queries.TrashItem]) -> Int {
+        guard item.kind == .note, !item.isVersion else { return 0 }
+        return items.count { $0.isVersion && $0.versionOfNoteID == item.id }
     }
 
     static func entries(_ items: [Queries.TrashItem]) -> [Entry] {

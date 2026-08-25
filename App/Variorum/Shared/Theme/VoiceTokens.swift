@@ -54,12 +54,24 @@ struct VoiceTokens {
     /// **THE QUIET POSITIVE SLOT** (ledger row 31 — her words on the sync
     /// line: *"a gentle green on fully synced might look nice"*).
     ///
-    /// Distinct from `chosen`, which marks the take a pointer names, and from
-    /// `accent`, which is the voice's own emphasis: this says *nothing is
-    /// outstanding*, which is a state and not an emphasis. Gentle in both
-    /// voices on purpose — a settled state should be readable at a glance and
-    /// forgettable the moment after (her #75(d) ratification: signed-out
-    /// stays quiet, so only THIS state wears it).
+    /// A slot of its OWN, saying *nothing is outstanding* — a state, not an
+    /// emphasis. Gentle in both voices on purpose: a settled state should be
+    /// readable at a glance and forgettable the moment after (her #75(d)
+    /// ratification: signed-out stays quiet, so only THIS state wears it).
+    ///
+    /// **Where it currently RESOLVES, said plainly** (the ladder's LR1-9,
+    /// which caught this doc claiming a distinctness the leading voice does
+    /// not have): in **Terminal** `positive` is the same green as `accent`
+    /// and `chosen`, and that is deliberate — Terminal has ONE green, and a
+    /// second one beside it would read as a different signal rather than a
+    /// gentler one. In **Study** it is its own green beside a blue accent,
+    /// which is where the separate slot visibly earns itself.
+    ///
+    /// The slot exists so the three can move independently WITHOUT a sweep:
+    /// hues are placeholders revisable at 13s's design review (her ruling on
+    /// `alarm`, and it governs this one too), and 13u's dark mode inherits
+    /// them by construction. **PROVISIONAL:** whether Terminal's settled sync
+    /// line should wear a hue apart from "✓ chosen" is a taste call, hers.
     let positive: Color
 
     // MARK: Lines & marks

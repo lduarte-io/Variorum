@@ -204,7 +204,12 @@ final class MobileTrashModel {
     /// original-rides-its-family belt (her round-8b ruling) is the shared
     /// rule's.
     func requestDeleteNow(_ item: Queries.TrashItem) {
-        guard let confirm = TrashPurge.deleteNowConfirm(for: item) else { return }
+        // The ladder's LR1-4, through the shared rule — the phone's Trash
+        // lists the same `.note`-kind rows the Mac's does, so its confirm
+        // tells the same truth without a face change.
+        guard let confirm = TrashPurge.deleteNowConfirm(
+            for: item, savedVersions: TrashGrouping.savedVersions(of: item, in: trash))
+        else { return }
         pendingConfirm = confirm
     }
 

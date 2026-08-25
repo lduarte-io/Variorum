@@ -424,6 +424,100 @@ struct IAAndTrashShapeTests {
         }
     }
 
+    /// **THE PER-ROW DOOR NAMES WHAT THE ROW IS AND WHAT IT LEAVES** (the
+    /// ladder's LR1-4, wording half). Two blindnesses, one confirm:
+    ///
+    /// - a saved moment is a `.note`-kind row, so its Delete Now called it
+    ///   *"this note"* while the grouping one line above called it a saved
+    ///   version;
+    /// - a NOTE's Delete Now does not take its moments (the purge family
+    ///   expands a container into its own rows, never into other containers),
+    ///   and said nothing about them.
+    ///
+    /// **RED ON OLD** by behavioural revert (drop `isVersion:`/`savedVersions:`
+    /// from the confirm's `message`): the version row reads "this note" and
+    /// the note's confirm says nothing about what stays.
+    @Test func theDeleteNowConfirmNamesAMomentAndSaysWhatItLeaves() async throws {
+        try await withEditor(seedBlocks: ["Alpha one."]) { editor in
+            let postID = editor.postID
+            try await editor.session.runner.run { (ops: Operations) in
+                _ = try ops.saveNoteVersion(postID)
+                try ops.deleteContainer(postID)  // V2: the moment rides with it
+            }
+
+            let model = RecoveryViewModel(session: editor.session)
+            let running = Task { await model.startTrash() }
+            defer { running.cancel() }
+            for _ in 0..<400 {
+                if model.trash.count >= 2 { break }
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(5))
+            }
+            let note = try #require(model.trash.first { $0.kind == .note && !$0.isVersion })
+            let moment = try #require(model.trash.first { $0.isVersion })
+
+            model.requestDeleteNow(moment)
+            let momentAsk = try #require(model.pendingConfirm).message
+            #expect(momentAsk.contains(VersionsPath.trashRowKind),
+                    "a moment is asked about as a moment: \(momentAsk)")
+            #expect(!momentAsk.contains("this note"),
+                    "…and never as the note it is the past of: \(momentAsk)")
+
+            model.requestDeleteNow(note)
+            let noteConfirm = try #require(model.pendingConfirm)
+            #expect(noteConfirm.message.contains("1 saved version"),
+                    "the door names what it leaves behind: \(noteConfirm.message)")
+            #expect(noteConfirm.message.contains("stays in the Trash"),
+                    "…and where it stays: \(noteConfirm.message)")
+
+            // The act is unchanged — this finding's other half (taking them
+            // WITH the note) lives in `PurgeFamily`, `Sync/`-fenced.
+            await model.confirmPendingPurge(noteConfirm)
+            #expect(model.lastError == nil)
+            for _ in 0..<400 {
+                if !model.trash.contains(where: { $0.id == note.id }) { break }
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(5))
+            }
+            #expect(!model.trash.contains { $0.id == note.id }, "the note went")
+            #expect(model.trash.contains { $0.id == moment.id },
+                    "the sentence told the truth: the moment really does stay")
+        }
+    }
+
+    /// **AN ENTRY IS IDENTIFIED BY THE STORE, NEVER BY ITS POSITION** (the
+    /// ladder's LR1-10). The listing reorders under her hands — a Put back or
+    /// a Delete Now removes a row and everything below it shifts up — so a
+    /// positional `id` told SwiftUI that every entry below the change had
+    /// become a different entry. Stable, unique, and it survives the shift.
+    @Test func trashEntriesCarryStableIdentitiesThatSurviveARemoval() {
+        let note = item(.note, "n")
+        let first = item(.block, "b1", note: "n")
+        let second = item(.block, "b2", note: "n")
+        let book = item(.book, "k")
+
+        let before = TrashGrouping.entries([book, note, first, second])
+        #expect(Set(before.map(\.id)).count == before.count, "unique across the listing")
+
+        // The book leaves; the group must still be the same group.
+        let after = TrashGrouping.entries([note, first, second])
+        #expect(after.map(\.id) == before.dropFirst().map(\.id),
+                "identity rides the store's ids, so nothing below a removal is renamed")
+        #expect(before.first?.id == "row:k")
+        #expect(before.last?.id == "group:n")
+    }
+
+    /// A block, a book and a take are asked about exactly as they were — the
+    /// defaults are what keep every other row byte-identical.
+    @Test func anOrdinaryRowsDeleteNowIsUnchanged() {
+        for kind in [Queries.TrashItem.Kind.block, .book, .take] {
+            #expect(RecoveryCopy.deleteNowConfirm(kind)
+                    == RecoveryCopy.deleteNowConfirm(kind, isVersion: false, savedVersions: 0))
+            #expect(RecoveryCopy.deleteNowConfirm(kind).contains(RecoveryCopy.rowKind(kind)))
+            #expect(!RecoveryCopy.deleteNowConfirm(kind).contains("saved version"))
+        }
+    }
+
     /// The scope rule, stated once: which kinds the bulk door takes, and why
     /// the two it refuses are refused for two different reasons.
     @Test func theBulkDoorsScopeIsNamedRatherThanInlined() {

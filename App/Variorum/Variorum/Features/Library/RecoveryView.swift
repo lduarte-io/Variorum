@@ -398,7 +398,12 @@ final class RecoveryViewModel {
     /// The per-row door: raises the confirm — never acts directly. The
     /// original-rides-its-family belt (round 8b) is the shared rule's.
     func requestDeleteNow(_ item: Queries.TrashItem) {
-        guard let confirm = TrashPurge.deleteNowConfirm(for: item) else { return }
+        // The ladder's LR1-4: the door names what it leaves behind. The count
+        // comes from the listing she is reading, which is the same listing
+        // showing those moments grouped under this note.
+        guard let confirm = TrashPurge.deleteNowConfirm(
+            for: item, savedVersions: TrashGrouping.savedVersions(of: item, in: trash))
+        else { return }
         pendingConfirm = confirm
     }
 
@@ -613,7 +618,10 @@ struct RecoveryView: View {
                         holdsOtherKinds: !model.trashIsEmptyUnfiltered))
                         .foregroundStyle(.secondary)
                 }
-                ForEach(Array(entries.enumerated()), id: \.offset) { _, entry in
+                // The ladder's LR1-10: identified by the store's ids, never by
+                // position — a Put back or a Delete Now shifts everything
+                // below it, and an index would call each of those a new row.
+                ForEach(entries) { entry in
                     switch entry {
                     case .row(let row): plainRow(row)
                     case .group(let group): groupRows(group)

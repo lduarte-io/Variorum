@@ -61,6 +61,32 @@ struct ThemeTokenTests {
         #expect(VoiceTokens.studyLight.alarm != VoiceTokens.studyDark.alarm)
     }
 
+    /// **THE POSITIVE SLOT SAYS WHAT IT REALLY IS** (the ladder's LR1-9). Its
+    /// doc claimed distinctness from `accent` and `chosen`, and in the LEADING
+    /// voice that was false — Terminal's `positive`, `accent` and `chosen` are
+    /// one green, so the settled sync line wears the "✓ chosen" hue.
+    ///
+    /// The hue is NOT nudged: Terminal has one green on purpose, hues are
+    /// 13s's by her ruling, and a second green would read as a different
+    /// signal rather than a gentler one. What is fixed is the honesty — and
+    /// this pin is what keeps the doc checkable against the app rather than
+    /// against itself.
+    @Test func theQuietPositiveIsItsOwnSlotEvenWhereItSharesTheVoicesGreen() {
+        // Terminal: deliberately the voice's one green (the doc says so).
+        #expect(VoiceTokens.terminalLight.positive == VoiceTokens.terminalLight.accent)
+        #expect(VoiceTokens.terminalDark.positive == VoiceTokens.terminalDark.accent)
+        // Study: its own green beside a blue accent — where the slot visibly
+        // earns itself, which is why it is a slot and not a synonym.
+        #expect(VoiceTokens.studyLight.positive != VoiceTokens.studyLight.accent)
+        #expect(VoiceTokens.studyDark.positive != VoiceTokens.studyDark.accent)
+        // And in every voice it stays the settled state, never the alarm.
+        for tokens in [
+            VoiceTokens.terminalLight, .terminalDark, .studyLight, .studyDark,
+        ] {
+            #expect(tokens.positive != tokens.alarm)
+        }
+    }
+
     @Test func terminalIdiomsAreCarried() {
         // R1's letter: "the little › on what's selected, the slashes,
         // the ~/shelf, the blinking cursor" — idiom SLOTS, not styling.

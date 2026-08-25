@@ -262,7 +262,7 @@ struct TrashPurgeDoorsTests {
 
             // The door NEVER acts directly — it raises the confirm.
             model.requestDeleteNow(row)
-            guard case .deleteNow(let confirmed)? = model.pendingConfirm else {
+            guard case .deleteNow(let confirmed, _)? = model.pendingConfirm else {
                 Issue.record("Delete Now must raise its confirm, never act")
                 return
             }

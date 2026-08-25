@@ -309,9 +309,44 @@ nonisolated enum RecoveryCopy {
     /// Delete Now's confirm, per row — destructive, unrecoverable, asked
     /// EVERY time by her round-10 ruling (there is no don't-ask state
     /// anywhere in the code, and none may be added).
-    static func deleteNowConfirm(_ kind: Queries.TrashItem.Kind) -> String {
-        "Delete this \(rowKind(kind)) for good? It skips the rest of its "
+    ///
+    /// **IT NAMES WHAT THE ROW IS, AND WHAT IT LEAVES BEHIND** (the ladder's
+    /// LR1-4, wording half). Two ways the sentence used to be blind:
+    ///
+    /// - a saved moment IS a `.note`-kind row (one road, one door set — the
+    ///   whole reason the versions family needed no new machinery), so its
+    ///   confirm called it *"this note"*. The door-shows-what-it-takes
+    ///   principle (G6) is about what the sentence SAYS as much as what the
+    ///   act does, and the Trash's own grouping one line away calls it a
+    ///   saved version;
+    /// - a NOTE's Delete Now does not take its saved versions with it: the
+    ///   purge family expands a container into its own blocks and rows, never
+    ///   into other containers. They stay in the Trash on the clock they
+    ///   already have. Saying so is the same principle from the other end —
+    ///   the door naming what it does NOT take.
+    ///
+    /// Both parameters default, so every shipped caller and pin reads
+    /// byte-identically (batch 6's `versions:` precedent).
+    ///
+    /// *(What is deliberately NOT claimed here: those version rows lose their
+    /// note's NAME once the note's blocks are physically gone, because the
+    /// link they are grouped by rode those blocks. Taking them WITH the note
+    /// is the honest repair and it lives in `PurgeFamily` — `Sync/`-fenced
+    /// this round, and carried to its owning phase in KnownIssues.)*
+    static func deleteNowConfirm(
+        _ kind: Queries.TrashItem.Kind, isVersion: Bool = false, savedVersions: Int = 0
+    ) -> String {
+        let noun = isVersion ? VersionsPath.trashRowKind : rowKind(kind)
+        var sentence = "Delete this \(noun) for good? It skips the rest of its "
             + "\(TrashWindow.days) days — there's no putting it back."
+        if savedVersions > 0 {
+            let one = savedVersions == 1
+            sentence += " Its \(savedVersions) saved version\(one ? "" : "s") "
+                + "\(one ? "isn't" : "aren't") taken with it — "
+                + "\(one ? "it stays" : "they stay") in the Trash with the "
+                + "\(TrashWindow.days) days \(one ? "it has" : "they have") left."
+        }
+        return sentence
     }
 
     /// Empty Trash's confirm NAMES THE FULL COUNT BY KIND (her round-8
