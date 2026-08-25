@@ -2126,6 +2126,159 @@ issues, reading the retired absolute and the missing merge sentence back.
    `App/Variorum/VariorumMobile/` and `Sources/VariorumCore/` returns only the
    two pre-existing doc comments (`NoteWindowView`, `QuickNoteView`).
 
+### THE END-OF-ROUND LADDER — ROUND 1 (fresh Fable cold reviewer, 2026-08-25): findings, recorded repo-first before any fix session sees them
+
+Reviewer ran `notes/REVIEW_PROMPT.md` verbatim (round-name
+substitution only), zero framing; its own suite runs: core 1402/146
+PASSED · Mac full TEST SUCCEEDED, zero reds, all three flake
+candidates silent.
+
+**[BLOCKER · LR1-1] `Queries/NoteVersions.swift:94–112` +
+`Queries/Timeline.swift:227–243` — the versions classifier rides
+the note's FIRST-BLOCK anchor through LIVE placements, so everyday
+gestures on the note's first block silently EXPEL every saved
+version from Note ▸ Versions into the Archived surface, orphan
+them from the V2 deletion ride, and make Restore/Promote refuse.**
+Mechanism (reviewer-traced, full detail in its report):
+`saveNoteVersion` → `copyPost` anchors the ONE `version_of` edge
+on the note's first block; the classifier requires a LIVE
+placement of that block in the note AND a live edge — but merge /
+divide-W tombstone the source placement, `archiveBlock` tombstones
+the placement, `deleteBlock` cascade-tombstones the EDGE,
+`moveBlock` rewrites `container_id`. Any of these on the first
+block (incl. the shipped seam-⌫ join the round's own tutorial
+teaches) flips the predicate: the version leaves `noteVersions`,
+LISTS in `archivedPosts` (V1 falsified both ways), escapes
+`noteVersionIDs` (V2's "an unclaimed version can no longer exist"
+falsified), and `isVersionHistory` refuses Restore/Promote;
+ArchivedView's Unarchive on the leaked row mints a live SEALED
+duplicate she never sealed. Only `restoreNoteVersion` re-anchors;
+no structural op does. Red-on-old shape: save a version → merge
+blocks 1+2 (or archive block 1) → assert the listing keeps it and
+Archived excludes it — fails on this tree. Proposed fix (zero
+schema, zero `Sync/`): classify the note side by container
+identity read PAST placement tombstones (the shape the deleted
+road already uses), the "live note" half carried by the
+container's own `deleted_at IS NULL`; and/or re-anchor on
+structural consumption. Rider: the same fragility mis-homes
+`versionOfNote` (Trash grouping) after an anchor moves container.
+*(The anchor fragility predates the round — QUESTIONS #19 — but
+the round built the classifier, exclusion, deletion ride, and two
+door authorizations on it; the stakes changed class.)*
+
+**[MAJOR · LR1-2] `Operations+NoteVersions.swift:72–73 / 241–253`
+— a version is SEALED without the seal doctrine's insurance
+commit, so PROMOTE hands back a note whose takes carry ZERO
+savepoints; one edit after promote can destroy the moment's text
+unrecoverably.** AppSpec §9's ruled doctrine (lockPost/lockVariant:
+"the guard insures exactly what it protects"). Concrete loss: T
+saved as version → note edited away from T → Promote → one edit →
+T gone, no savepoint, no Trash row. Fix: one quiet auto-commit per
+copied take in the mint's transaction (the sealing-a-post occasion
+APPLIED, not a new occasion), or insurance at promote before
+unsealing. Red-on-old: promote → each take carries a savepoint of
+the moment's text — red today.
+
+**[MAJOR · LR1-3] `MobileTrashModel.swift:81–90` + the batch-2
+record — the PHONE lost its only deleted-take surface for an
+OPEN-ENDED window; the record's "in-round only" transient claim is
+FALSE for the phone.** The shared `TrashScope` removed the phone's
+take rows; the Mac's replacement homes are Mac-only; the phone's
+equivalents are mobile batch 6, paused until after 13u by her
+ruling. A take deleted on the phone is invisible and
+un-restorable ON THE PHONE while its clock runs (Mac-recoverable).
+Fix half: correct the record; name the dark window in the
+closeout's mobile update + MobileSoul line + her handoff. Product
+half (interim phone rows vs wait for batch 6): HERS — handoff.
+
+**[MINOR · LR1-4]** per-row Delete Now is version-blind: a
+saved-version row's confirm says "note"; a NOTE's Delete Now
+doesn't take (or mention) its version rows (`expandContainer` is
+`Sync/`-fenced this round — versions linger their window, and
+post-purge the orphaned rows degrade to anonymous "note" labels).
+Fix the WORDING half now (an `isVersion` confirm arm + one honest
+clause); the purge-family expansion routes to a `Sync/`-owning
+phase via KnownIssues at closeout.
+
+**[MINOR · LR1-5]** the classifier is NOT written once —
+`archivedPosts`' fence is an inline near-copy of
+`versionHistoryPredicate` (with real structural differences); the
+BLOCKER's fix would have to land twice. Fold onto the shared
+predicate; correct batch 5's record before 13o inherits its claim.
+
+**[MINOR · LR1-6]** restore never rebaselines churn —
+`baseline_length`/`churn_accumulator` describe the pre-restore
+text after a whole-content swap (§10's threshold runs against a
+phantom baseline). One-line fix in step 5; pinnable.
+
+**[MINOR · LR1-7]** Promote is the pane's only permanent one-way
+act and the only row act with NO confirm (product-flavored — HERS;
+handoff, not fixed autonomously).
+
+**[MINOR · LR1-8]** ledger bookkeeping: rows 14, 17, 28, 29, 31,
+32 carry "done + hash" in the item cell while the STATUS column
+reads "open". Reconcile (mechanical).
+
+**[NIT · LR1-9]** Terminal's `positive` is byte-identical to
+`accent` (== `chosen`'s hex) while the token doc claims
+distinctness — the doc's claim is false for the leading voice, and
+the settled sync line wears the "✓ chosen" hue. Fix the doc's
+honesty (hues themselves are 13s's) or nudge the hue; the fixer's
+call, PROVISIONAL fine.
+
+**[NIT · LR1-10]** `RecoveryView.swift:617` `ForEach(…enumerated,
+id: \.offset)` — positional row identity in a reordering listing
+(identity churn only; disclosure state safely keyed). Small fix or
+record.
+
+**Clean bill (reviewer's, abridged):** fences held (zero schema,
+zero `Sync/` verified by diff; the classifier birth-fact
+mechanism sound); V3's pin real against the real engine;
+`restoreNoteVersion`'s transaction shape, S2-safety, re-anchor,
+refusals, repeatability all verified; the versions-ride in the
+OPERATION with exact-stamp both ways; `TrashScope`/G6/G7 honest
+and pure; confirm→act discipline honored at every new door;
+registry declarations real; the batch records "unusually honest —
+verified claims matched the tree everywhere probed."
+
+**THE ARCHITECT'S ROUTING (recorded before the fix wave):** the
+fix wave owns LR1-1 (+ its LR1-5 fold, ONE classifier), LR1-2,
+LR1-3's record half, LR1-4's wording half, LR1-6, LR1-8, LR1-9,
+LR1-10. HERS via the handoff: LR1-3's product half (interim phone
+take rows?), LR1-7 (Promote confirm), and batch-5 PROVISIONAL 1
+(the reviewer's emphasis: restore's Delete Now takes stranded
+ancestors whose fan texts then survive nowhere — "the sharpest
+thing on her list", verbatim into the handoff). CLOSEOUT:
+LR1-4's purge-family KnownIssues row (owner decided there).
+
+### THE LADDER FIX WAVE: the brief (fresh Opus session)
+
+**Read in full first:** `CLAUDE.md` + canon · THIS FILE top to
+bottom — the ROUND-1 FINDINGS + ROUTING above are your letter; the
+batch records are your map of what was built · the 13j
+**Environment traps** (binding verbatim). Scope: exactly the
+routed findings (LR1-1 with LR1-5's fold · LR1-2 · LR1-3's record
+correction · LR1-4's wording arm · LR1-6 · LR1-8 · LR1-9 ·
+LR1-10). Fences unchanged: ZERO schema · ZERO
+`Sources/VariorumCore/Sync/` (LR1-4's expansion half is
+explicitly NOT yours) · nothing product-flavored (the routed
+HERS items are not yours to build).
+
+**Discipline:** the hallucination guard at full strength — TRACE
+each finding's mechanism yourself before fixing (a finding you
+cannot reproduce/trace goes back as disputed-with-reasons, never
+silently dropped); every bug-class fix lands with a red-on-old pin
+VERIFIED BY BEHAVIOURAL REVERT (LR1-1's pin shape is written in
+the finding; LR1-2's likewise); the spine green BY TYPE NAME; full
+four gates with counts quoted (mobile runs — `Shared/` and the
+mobile record claim are touched; baselines: core 1402/146 · Mac
+1764/296 · spine 68/9 · mobile 486/78; flake watch: three
+candidates, a second red on any promotes at closeout); instance
+check; commits by theme, explicit paths, NEVER push. **Append
+"### LADDER FIX WAVE — RECORD"** with per-finding dispositions
+(FIXED + pin + revert evidence, or DISPUTED + trace), reconcile
+the ledger cells (LR1-8), and STOP — round 2 re-reviews next.
+
 ## Constraints
 
 Zero schema (B2 is read-side over `archived_at`; if ANYTHING firms
