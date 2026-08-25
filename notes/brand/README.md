@@ -71,6 +71,14 @@ upright), `the-crow-tree`, `standing-book-sketch`. Three are repeating **pattern
 `stepping-off-the-book`, `hanging-from-a-book`. One incoming duplicate was dropped —
 her file (15) was byte-identical to (14).
 
+**The poster series** (second drop, same day — nine `poster-*` pieces): bold flat
+silhouette figures wrestling the serif V and its fans on the red — the register where
+her editorial-red family and her figure whimsy meet (TASTE.md through-line 7). Archived
+as reference for the KIND, not for use as-is — her words: "these look a little too
+frustrated so I wouldn't want to use exactly them, but I think this kind of art is also
+cool." ⚠️ `poster-reading-together` contains AI-garbled tagline lettering ("Every drafts
+variants OPEN") — never ship the lettering.
+
 ## Status / ownership
 
 Phase **13s** (voice & polish — app icon + brand assets row) consumes whichever mark

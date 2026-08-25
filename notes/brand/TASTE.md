@@ -74,6 +74,18 @@ worse") — the wispy direction is dead on arrival with her, always.
    through the storybook register, never through the marks. Proposed as a deliberate
    rule of register separation: marks are objects; illustrations are people-and-objects.
 
+7. **The poster register (discovered 2026-08-25, second concept-art drop):** bold flat
+   silhouette figures wrestling the serif V and its fans ON THE RED — mid-century
+   poster/Saul Bass energy (`concept-art/poster-*`). Notable because it is the first
+   place two of her families MEET: the editorial-red boldness (register 1) carrying the
+   figure whimsy (register 3). The whimsy can wear the red. Archived as reference for
+   the KIND, not for use as-is — her caveat verbatim: "I think that these look a little
+   too frustrated so I wouldn't want to use exactly them, but I think this kind of art
+   is also cool." (The frustration reads strongest in the three card-clutching figures;
+   the fan-dancer and the V-wrestlers read effort/joy rather than strain.) One hard
+   flag: `poster-reading-together` contains AI-garbled tagline lettering ("Every drafts
+   variants OPEN") — the image may inspire, the lettering must never ship.
+
 ## Tensions and open questions for the sitting
 
 - **Calm surface vs. rich brand.** The shipped app is austere by canon (calm default,
@@ -103,6 +115,14 @@ worse") — the wispy direction is dead on arrival with her, always.
 - **The pixel pet (13q).** If it ships, decide whether pixel art is a deliberate fourth
   register or whether the pet gets drawn in the ink-figure storybook style instead —
   both defensible; flagged only so the sitting decides rather than inherits.
+  **HER INCLINATION LANDED (2026-08-25), verbatim:** "maybe the pet should be nicely
+  drawn ink, like an elegant little cat sitting on the edges, more stylized and cute but
+  not necessarily a pixel pet. i think that might feel more elegant and adult to me as
+  well — not a pixel pet, but a little companion with maybe a couple of frames of
+  movement." That is the ink-figure answer at inclination level: an elegant drawn
+  companion, minimal animation (a couple of frames), living at the edges. The 13q
+  brief's "pixel pet" wording predates this and should be read through it; the 13q
+  sitting still rules.
 - **The whimsy register, affirmed by her (2026-08-25, on reading this record):** told
   nothing in the app's theming owns the playful side yet, she answered *"maybe there
   should be."* An inclination, not a ruling. If it becomes one, note the two shapes it
