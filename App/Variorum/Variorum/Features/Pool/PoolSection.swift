@@ -139,6 +139,26 @@ final class PoolViewModel {
         }
     }
 
+    /// **ARCHIVE A SCRAP** — the third verb, beside the row's own delete (the
+    /// post-13l polish round, ledger row 14 / F1: *"archive rides beside
+    /// delete at every block door"*).
+    ///
+    /// A scrap IS a block, so `archiveBlock` is the same act it is anywhere
+    /// else — kept, no clock — and batch 3 already built the room it lands
+    /// in: the scraps area's own tray has an Archived section, reached by the
+    /// same icon a note's is. So this gives a shipped capability a door on
+    /// the surface that was offering only its harsher twin.
+    func archiveScrap(_ blockID: String) async {
+        lastError = nil
+        receipt = nil
+        do {
+            try await session.runner.run { ops in try ops.archiveBlock(blockID) }
+            receipt = BlockSelectionCopy.archivedNote(home: .pool)
+        } catch {
+            lastError = DeletionRefusal.words(error, act: .delete)
+        }
+    }
+
     /// The drag payload: the pool block's ID, under the custom type — the
     /// text itself never rides the pasteboard (review focus 6: the copy is
     /// the operation's, at the drop).

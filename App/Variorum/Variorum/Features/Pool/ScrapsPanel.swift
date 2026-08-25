@@ -41,7 +41,9 @@ struct ScrapsPanel: View {
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
     /// 13b 4D (N32(c) — S4-15): the panel rows' TAG door, registry-walked.
-    static let surfaceCapabilities: [CapabilityID] = [.tagBlock]
+    static let surfaceCapabilities: [CapabilityID] = [
+        .tagBlock, .archiveScrap, .deleteScrap,
+    ]
     @State private var tagSheetBlock: CanvasView.TagSheetBlock?
 
     init(session: AppSession) {
@@ -143,9 +145,23 @@ struct ScrapsPanel: View {
                 tagSheetBlock = CanvasView.TagSheetBlock(
                     id: item.block.blockID, preview: item.block.text)
             }
+            Divider()
+            // Ledger row 14 (F1): batch 1 gave the Snippets LIST rows the
+            // pair and named this panel's rows as F1's to enumerate — same
+            // scraps, a second listing of them, and a listing of a thing that
+            // offers no way to get rid of it is exactly the walk's P-8.
+            Button(CapabilityRegistry.capability(.archiveScrap).menuTitle()) {
+                Task { await model.archiveScrap(item.block.blockID) }
+            }
+            Button(
+                CapabilityRegistry.capability(.deleteScrap).menuTitle(),
+                role: .destructive
+            ) {
+                Task { await model.deleteScrap(item.block.blockID) }
+            }
         }
         .help("Drag into the page — a copy with lineage; ⌥ carries the whole fan; "
-            + "right-click to tag")
+            + "right-click to tag, set aside or delete")
     }
 
     private func preview(_ item: Queries.PoolItem) -> String {

@@ -428,6 +428,91 @@ struct BlockHistoryPaneTests {
         return mine + view.subviews.reduce(0) { $0 + countControls($1) }
     }
 
+    // MARK: - Row 14 (F1): archive beside delete, and one take-card grammar
+
+    /// **ARCHIVE RIDES BESIDE DELETE AT EVERY BLOCK DOOR** — her F1 rule,
+    /// checked against the registry's own door sets rather than by looking.
+    ///
+    /// The pass she asked for was a VERIFICATION (*"no, I see archive there
+    /// too"*), and it found exactly one class of straggler: every door table
+    /// that carried `.deleteBlock` carried `.archiveBlock` too, EXCEPT the
+    /// bars' `block ▾` menus and Blocks mode's row menu — the two doors she
+    /// actually reaches for while writing. So the two verbs that exist to be
+    /// told apart appeared together in the menu bar and the context menu and
+    /// separately where the work happens.
+    @Test func everyDoorThatDeletesABlockOffersToArchiveItToo() {
+        let deleteDoors = CapabilityRegistry.capability(.deleteBlock).doors
+        let archiveDoors = CapabilityRegistry.capability(.archiveBlock).doors
+        for door in deleteDoors where door != .palette {
+            #expect(archiveDoors.contains(door),
+                    "\(door) deletes a block and must offer to keep it: \(archiveDoors)")
+        }
+        // The one deliberate exception, stated so it is a decision and not a
+        // gap: ⌘K carries delete and not archive because a palette row is
+        // typed by name — someone who wants to archive types "Archive Block",
+        // and the act is one line away in the same list.
+        #expect(deleteDoors.contains(.palette))
+
+        // The four RENDERERS, each named: the menu bar's Block menu, the
+        // block context menu, both bars' `block ▾`, and Blocks mode's rows.
+        #expect(EditorCommands.menuRendered.contains(.archiveBlock))
+        #expect(EditorViewModel.contextMenuCapabilities.contains(.archiveBlock))
+        #expect(CommitBar.renderedCapabilities.contains(.archiveBlock))
+        #expect(TakesBottomBar.renderedCapabilities.contains(.archiveBlock))
+        #expect(BlockTOCView.surfaceCapabilities.contains(.archiveBlock))
+        // …and each of those five renders the DELETE beside it.
+        #expect(EditorCommands.menuRendered.contains(.deleteBlock))
+        #expect(EditorViewModel.contextMenuCapabilities.contains(.deleteBlock))
+        #expect(CommitBar.renderedCapabilities.contains(.deleteBlock))
+        #expect(TakesBottomBar.renderedCapabilities.contains(.deleteBlock))
+        #expect(BlockTOCView.surfaceCapabilities.contains(.deleteBlock))
+
+        // THE SCRAP ROWS are block doors too — a scrap IS a block — and batch
+        // 1 gave them the delete while naming these two listings as F1's to
+        // enumerate. Both carry the pair now.
+        for table in [
+            BlocksAreaView.surfaceCapabilities, ScrapsPanel.surfaceCapabilities,
+        ] {
+            #expect(table.contains(.deleteScrap))
+            #expect(table.contains(.archiveScrap))
+        }
+        #expect(CapabilityRegistry.capability(.archiveScrap).scope == .block)
+        #expect(CapabilityRegistry.capability(.archiveScrap).doors == [.surface])
+    }
+
+    /// **ONE TAKE-CARD GRAMMAR** — her F1 rule's second half: *"Write's panel
+    /// ⋯ carries Archive · Label · Lock · Delete — Takes mode's card grammar
+    /// must match."*
+    ///
+    /// What the pass found, and why nothing caught it: Write's panel has
+    /// rendered all four since Phase 7 and **declared none of them**, and
+    /// Takes mode's cards carried Archive and Label only. With no
+    /// declaration there was no door set for the walk to compare, so one
+    /// surface offering half of a grammar was invisible by construction.
+    /// Declaring `.lockTake` and `.deleteTake` is what makes this pin
+    /// possible at all.
+    @Test func theTakeCardsCarryTheSameFourActsOnBothSurfaces() {
+        let grammar: Set<CapabilityID> = [.archiveTake, .labelTake, .lockTake, .deleteTake]
+        #expect(grammar.isSubset(of: Set(WriteTakesPanel.surfaceCapabilities)),
+                "Write's panel: \(WriteTakesPanel.surfaceCapabilities)")
+        #expect(grammar.isSubset(of: Set(TakesCellView.contextMenuCapabilities)),
+                "the board's cards: \(TakesCellView.contextMenuCapabilities)")
+        // Both new acts are declared where they are rendered, and take-scoped.
+        for id in [CapabilityID.lockTake, .deleteTake] {
+            let act = CapabilityRegistry.capability(id)
+            #expect(act.scope == .take)
+            #expect(act.doors == [.contextMenu, .surface])
+            #expect(act.takesAccess == .native, "R118: not a Write privilege")
+            #expect(!act.unavailableNote.isEmpty)
+        }
+        // The lock row says WHICH WAY it points — a row reading "Lock" on a
+        // locked take is the small dishonesty this family of surfaces exists
+        // to end (Write's panel has always worded it this way).
+        #expect(TakeCardMenuCopy.lockVerb(locked: false).contains("Lock"))
+        #expect(TakeCardMenuCopy.lockVerb(locked: true).contains("Unlock"))
+        #expect(TakeCardMenuCopy.deleteTake.contains("Delete"))
+    }
+
     // MARK: - Harness
 
     private func withNote(

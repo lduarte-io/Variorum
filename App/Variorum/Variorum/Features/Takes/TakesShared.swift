@@ -97,6 +97,11 @@ struct TakesCellView: View {
     private func menuSpecs(
         resolved: (variantID: String, text: String)
     ) -> [PaneTextView.MenuItemSpec] {
+        // The take's own lock state, read off the projection the menu is
+        // built from — the row must say which way it points (F1's letter,
+        // and Write's panel's own wording).
+        let lockedNow = model.projection.fans[slot.blockID]?
+            .first { $0.id == resolved.variantID }?.locked ?? false
         var specs: [PaneTextView.MenuItemSpec] = [
             // R2-A: the cell KNOWS its column — on the Lenses host the
             // mint lands as THIS column's pick (the ring follows).
@@ -133,6 +138,24 @@ struct TakesCellView: View {
             // the bar hosts the sheet on both boards.
             .init(title: "Label take\u{2026}") {
                 model.requestTakeLabel(variantID: resolved.variantID)
+            },
+            // **Ledger row 14 (F1): the grammar made uniform.** Write's takes
+            // panel has carried Archive · Label · Lock · Delete on every
+            // card's ⋯ since Phase 7; these cards carried the first two. Her
+            // rule for this pass is that the card menus MATCH — so the other
+            // two land here, on the same explicitly-named target the rows
+            // above use (a right-click never moves the keyboard — 13k K6).
+            .init(title: TakeCardMenuCopy.lockVerb(locked: lockedNow)) {
+                Task {
+                    await model.setTakeLocked(
+                        resolved.variantID, locked: !lockedNow)
+                }
+            },
+            .init(title: TakeCardMenuCopy.deleteTake) {
+                // Takes do NOT confirm (13j's confirmation-consistency
+                // principle, second clause): ⌥⌘Z is right there and the
+                // block's History lists what went.
+                Task { await model.deleteTake(resolved.variantID) }
             },
             // 13e E6 (her A21's clipboard half): the whole fan as text. The
             // target is named EXPLICITLY — a right-click never moves the
@@ -250,6 +273,8 @@ struct TakesCellView: View {
     static let contextMenuCapabilities: [CapabilityID] = [
         .newTake, .blankTake, .chooseTake, .divergeHere, .archiveTake, .diffAgainstChosen,
         .labelTake,
+        // Ledger row 14 (F1): the take-card grammar's other two.
+        .lockTake, .deleteTake,
         .showOriginBlock,  // 13f W10b — rendered only where an origin exists
         .callout,  // 13k K6 — the frame door where the takes are
         // 13e E3 (A18) — rendered only on the Takes board with a selection
@@ -299,6 +324,20 @@ nonisolated enum TakeCardMenuCopy {
 
     static var takesToBlocks: String {
         CapabilityRegistry.capability(.takesToBlocks).menuTitle()
+    }
+
+    /// **The lock's two faces, in one place** (the post-13l polish round,
+    /// ledger row 14 / F1). The verb is the registry's; which WAY it points
+    /// is the take's, exactly as Write's panel has always worded it — a row
+    /// that said "Lock" on a locked take would be the small dishonesty this
+    /// family of surfaces exists to end.
+    static func lockVerb(locked: Bool) -> String {
+        locked ? "Unlock this take" : "Lock this take"
+    }
+
+    /// The delete row's words — the registry's verb, in the card's voice.
+    static var deleteTake: String {
+        CapabilityRegistry.capability(.deleteTake).menuTitle("Delete this take")
     }
 
     /// Every chorded row on the card, paired with the capability that

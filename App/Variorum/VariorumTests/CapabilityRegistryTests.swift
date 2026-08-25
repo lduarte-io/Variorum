@@ -169,6 +169,10 @@ struct CapabilityRegistryTests {
             // in-editor block delete is a DIFFERENT act (`.deleteBlock`),
             // which is `takeFamily` and fully parity-covered.
             .deleteScrap,
+            // …and its ARCHIVE twin (the post-13l polish round, ledger row 14
+            // / F1 — her *"archive rides beside delete at every block door"*).
+            // Same surface, same reason, same exemption.
+            .archiveScrap,
             // 13e E8: `.tagNote` joins `.tagBlock` for the reason stated
             // there, one scope up — tagging is not TEXT EDITING, and its
             // two renderers sit outside the post-mode row entirely: the
@@ -346,6 +350,12 @@ struct CapabilityRegistryTests {
             .union(PostDetailView.surfaceCapabilities)
             .union(PoolDetailView.surfaceCapabilities)
             .union(TrayPanel.surfaceCapabilities)
+            // The post-13l polish round, batch 4 (ledger row 14 / F1 — the
+            // same JUSTIFIED-EDIT class): Blocks mode's ROW MENU joins the
+            // walk. It has offered "Delete block" since 13c and declared
+            // nothing; the pass that gave it the Archive twin her rule asks
+            // for declared the pair, which is what a registry of acts is for.
+            .union(BlockTOCView.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

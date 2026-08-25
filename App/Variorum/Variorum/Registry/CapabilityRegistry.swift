@@ -257,7 +257,11 @@ nonisolated enum CapabilityRegistry {
         // carried both; the context menu carried half.
         Capability(
             id: .deleteBlock, verb: "Delete Block", scope: .block,
-            doors: [.menuBar, .bottomBar, .palette, .contextMenu],
+            // `.surface` = Blocks mode's row menu (the post-13l polish round,
+            // ledger row 14 / F1): the door has been there since 13c and
+            // undeclared the whole time; the pass that gave that row its
+            // ARCHIVE twin declares them both.
+            doors: [.menuBar, .bottomBar, .palette, .contextMenu, .surface],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Blocks live inside a note — open one first.",
             availability: takeFamily),  // the one named rule, not a copy
@@ -270,9 +274,25 @@ nonisolated enum CapabilityRegistry {
         // deliberately no shortcut and no bar button: it is a deliberate,
         // occasional act, and the bars are daily chrome (her not-daily-chrome
         // criterion, round 4, applied one act over).
+        //
+        // **THE `.bottomBar` DOOR JOINS THEM** (the post-13l polish round,
+        // ledger row 14 / F1 — her second morning report, softened to a
+        // verification pass: *"no, I see archive there too"*). The pass found
+        // exactly one class of straggler, and it is this one: both bars'
+        // `block ▾` menus carried *"− Delete this block"* with no archive
+        // beside it, so the two verbs that exist to be TOLD APART appeared
+        // together in the menu bar and the context menu and separately in the
+        // door she actually uses while writing. The not-daily-chrome argument
+        // above still holds for a bar BUTTON, and this is not one — it is a
+        // row inside a summoned menu, exactly where its twin already is.
         Capability(
             id: .archiveBlock, verb: "Archive Block", scope: .block,
-            doors: [.menuBar, .contextMenu],
+        // **The `.surface` door is Blocks mode's row menu** (the same round,
+        // the same pass): that menu has offered *"Delete block"* since 13c and
+        // never declared it — a listing of this note's blocks with one of the
+        // two verbs on it and neither in the registry. The pass that gives it
+        // the other verb declares them both.
+            doors: [.menuBar, .contextMenu, .bottomBar, .surface],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Blocks live inside a note — open one first.",
             availability: takeFamily),
@@ -325,7 +345,11 @@ nonisolated enum CapabilityRegistry {
             availability: takeFamilyPlusCanvas),
         Capability(
             id: .archiveTake, verb: "Archive Take", scope: .take,
-            doors: [.menuBar, .contextMenu],
+            // `.surface` = Write's takes-panel card ⋯ (the post-13l polish
+            // round, ledger row 14 / F1): the panel has rendered this row on
+            // every card since Phase 7 and declared nothing, which is why the
+            // grammar drift the pass went looking for was invisible.
+            doors: [.menuBar, .contextMenu, .surface],
             shortcutLabel: "⌘⇧A", takesAccess: .native,
             unavailableNote: "Archiving acts on the take you're in — open a note first.",
             availability: takeFamily),
@@ -361,6 +385,34 @@ nonisolated enum CapabilityRegistry {
         // `.surface` act: its target is the archived card itself, so no
         // routed context command exists (an archived take can never hold
         // the ring).
+        // **THE TAKE-CARD GRAMMAR'S OTHER TWO** (the post-13l polish round,
+        // ledger row 14 / F1). Her rule for this pass is that the card ⋯
+        // menus MATCH — Write's panel carries Archive · Label · Lock ·
+        // Delete, and Takes mode's cards must too. The pass found the Takes
+        // board's cards carrying Archive and Label only, and found the reason
+        // the drift was invisible: LOCK and DELETE had no declaration at all,
+        // so no walk could see that one surface rendered them and the other
+        // did not.
+        //
+        // Both are `.surface` + `.contextMenu` acts for `.unarchiveTake`'s
+        // reason: the target is the CARD you pointed at, never a routed
+        // context (a right-click never moves the keyboard — 13k K6's lesson).
+        // `.deleteTake` is the take grain of the confirmation-consistency
+        // principle's second clause: **takes do not confirm** — ⌥⌘Z is right
+        // there and the block's History lists what went (13j's recorded
+        // rule, and 13J's own comment above says so in as many words).
+        Capability(
+            id: .lockTake, verb: "Lock Take", scope: .take,
+            doors: [.contextMenu, .surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "A take's lock is on its own card — open a block's takes.",
+            availability: takeFamily),
+        Capability(
+            id: .deleteTake, verb: "Delete Take", scope: .take,
+            doors: [.contextMenu, .surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "A take is deleted on its own card — open a block's takes.",
+            availability: takeFamily),
         Capability(
             id: .unarchiveTake, verb: "Unarchive Take", scope: .take,
             doors: [.surface],
@@ -470,7 +522,9 @@ nonisolated enum CapabilityRegistry {
         // faces — the take card's context menu and the bar's block menu.
         Capability(
             id: .labelTake, verb: "Label Take…", scope: .take,
-            doors: [.contextMenu, .bottomBar],
+            // `.surface` = Write's takes-panel card ⋯ (row 14 / F1), the same
+            // undeclared-since-Phase-7 renderer as `.archiveTake` above.
+            doors: [.contextMenu, .bottomBar, .surface],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Labels live on a take inside a note — open one first.",
             availability: takeFamily),
@@ -531,6 +585,21 @@ nonisolated enum CapabilityRegistry {
             doors: [.surface],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "Scraps are deleted where you see them — the Snippets rows carry the door.",
+            availability: always),
+        // …and its THIRD VERB (the post-13l polish round, ledger row 14 /
+        // F1). Her rule is that archive rides beside delete at every block
+        // door, and a scrap is a block: `archiveBlock` keeps it forever with
+        // no clock, and batch 3 already built the room it lands in — the
+        // scraps area's own tray has an Archived section, reached by the same
+        // icon a note's is. Declared like `.deleteScrap` and for its reason
+        // (the target is the row you right-clicked, so `availability: always`),
+        // and it inherits that act's R118 exemption for the same reason: the
+        // Snippets area sits outside the post-mode row entirely.
+        Capability(
+            id: .archiveScrap, verb: "Archive Scrap", scope: .block,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "Scraps are set aside where you see them — the Snippets rows carry the door.",
             availability: always),
         // 13e E8 — NOTE tagging, declared (P-1's "the registry grows to
         // cover a surface door as work touches it"; her 2026-08-02 word:

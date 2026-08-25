@@ -46,6 +46,7 @@ struct TakesBottomBar: View {
             .labelTake,  // 13b Stage 3, 3D (N6): the block menu's label door
             .insertBlockBelow,  // 13b 4D (N28/S4-13): the block menu's insert door
             .deleteBlock,  // 13c 1B (A8): the block menu's delete door
+            .archiveBlock,  // the post-13l polish round (row 14 / F1): its twin
             // (`.showNoteTray` LEFT this bar at the post-13l polish round,
             // ledger row 9 — her C1 ruling; both bars lose it together, which
             // is R6-2's one-grammar point applied to a REMOVAL.)
@@ -131,6 +132,14 @@ struct TakesBottomBar: View {
                 // mints right under the block you're in and its pane takes
                 // the ring. The Takes trap's second half closes here.
                 Task { await model.insertBlockBelowFocused() }
+            }
+            // Ledger row 14 (F1): Write's bar's row, here too — and it
+            // finishes the sentence her 13c A8 report started, quoted right
+            // below: *"I don't seem to have the ability to delete / archive
+            // empty blocks?"* 13c answered the delete half in both bars and
+            // archive did not exist yet; this is the other half.
+            Button(CapabilityRegistry.capability(.archiveBlock).menuTitle()) {
+                Task { await model.archiveFocusedBlock() }
             }
             Button("− Delete this block") {
                 // 13c 1B (A8): her "I don't seem to have the ability to

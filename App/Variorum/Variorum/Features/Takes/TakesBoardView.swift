@@ -61,6 +61,9 @@ struct TakesBoardView: View {
     /// selection banner (E3/A18).
     static let surfaceCapabilities: [CapabilityID] = [
         .unarchiveTake, .moveTakeEarlier, .moveTakeLater, .mergeSelectedBlocks,
+        // The post-13l polish round (row 14 / F1): the archived card's own
+        // Delete, declared where it is rendered.
+        .deleteTake,
         // 13e E2 (A17): the same banner offers the delete door.
         .deleteSelectedBlocks,
     ]
@@ -1140,7 +1143,7 @@ struct TakesBoardView: View {
                 Button("Unarchive") { Task { await model.unarchiveTake(take.id) } }
                     .controlSize(.mini)
                     .help("Back into the fan — right here (the fan re-opens with it)")
-                Button("Delete", role: .destructive) {
+                Button(TakeCardMenuCopy.deleteTake, role: .destructive) {
                     Task { await model.deleteTake(take.id) }
                 }
                 .controlSize(.mini)

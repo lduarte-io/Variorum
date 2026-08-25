@@ -34,7 +34,15 @@ struct WriteTakesPanel: View {
 
     /// The registry ids this panel renders INLINE (13b Stage 3, 3D — the
     /// `.surface` door; walk-asserted): the archived list's Unarchive.
-    static let surfaceCapabilities: [CapabilityID] = [.unarchiveTake]
+    /// **…and, since the post-13l polish round (ledger row 14 / F1), the four
+    /// acts every card's ⋯ menu has rendered since Phase 7.** They were
+    /// undeclared the whole time, which is exactly why the drift F1 went
+    /// looking for was invisible: this panel carried Archive · Label · Lock ·
+    /// Delete and the Takes board's cards carried the first two, and no walk
+    /// could see it.
+    static let surfaceCapabilities: [CapabilityID] = [
+        .unarchiveTake, .archiveTake, .labelTake, .lockTake, .deleteTake,
+    ]
 
     init(session: AppSession, postID: String, blockID: String) {
         self.session = session
@@ -165,16 +173,18 @@ struct WriteTakesPanel: View {
                     .disabled(isChosen)
                     .help("Choose this take — the note shows it (everywhere); ⌘⏎")
                     Menu("⋯") {
-                        Button("Archive") { Task { await model.archiveTake(take.id) } }
+                        Button(TakeCardMenuCopy.archiveTake) {
+                            Task { await model.archiveTake(take.id) }
+                        }
                         Button("Label…") {
                             // 13b Stage 3 (3D — N6): the label door rides
                             // Write's panel too (one grammar everywhere).
                             model.requestTakeLabel(variantID: take.id)
                         }
-                        Button(take.locked ? "Unlock" : "Lock") {
+                        Button(TakeCardMenuCopy.lockVerb(locked: take.locked)) {
                             Task { await model.setTakeLocked(take.id, locked: !take.locked) }
                         }
-                        Button("Delete", role: .destructive) {
+                        Button(TakeCardMenuCopy.deleteTake, role: .destructive) {
                             Task { await model.deleteTake(take.id) }
                         }
                     }
@@ -204,7 +214,7 @@ struct WriteTakesPanel: View {
                 Spacer()
                 Button("Unarchive") { Task { await model.unarchiveTake(take.id) } }
                     .controlSize(.mini)
-                Button("Delete", role: .destructive) {
+                Button(TakeCardMenuCopy.deleteTake, role: .destructive) {
                     Task { await model.deleteTake(take.id) }
                 }
                 .controlSize(.mini)

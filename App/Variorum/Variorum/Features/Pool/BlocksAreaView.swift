@@ -32,7 +32,9 @@ struct BlocksAreaView: View {
     /// row you right-clicked. Her A4 ruling on the walk's P-8: a scrap's only
     /// way out was inside the scraps EDITOR's bottom bar, so throwing away a
     /// line you can already see meant opening the editor first.
-    static let surfaceCapabilities: [CapabilityID] = [.tagBlock, .deleteScrap]
+    static let surfaceCapabilities: [CapabilityID] = [
+        .tagBlock, .archiveScrap, .deleteScrap,
+    ]
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -167,6 +169,12 @@ struct BlocksAreaView: View {
                     id: item.block.blockID, preview: item.block.text)
             }
             Divider()
+            // Ledger row 14 (F1): ARCHIVE RIDES BESIDE DELETE, and it goes
+            // FIRST — the kept road before the clocked one, the order the
+            // menu bar's Block menu and the block context menu already use.
+            Button(CapabilityRegistry.capability(.archiveScrap).menuTitle()) {
+                Task { await model.archiveScrap(item.block.blockID) }
+            }
             // Ledger row 4(b): the way out, where the thing is. Ordinary
             // move-to-Trash — 30 days, ⌥⌘Z, the receipt says so — and NO
             // confirm, because block-scoped deletion never asks (13j's

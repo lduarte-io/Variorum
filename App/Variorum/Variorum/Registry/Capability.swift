@@ -444,6 +444,13 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     case deleteNow, emptyTrash
     // Takes lifecycle completeness (13b Stage 3, 3D — T5/N1/N6)
     case unarchiveTake, labelTake, renameLens
+    // The post-13l polish round (ledger row 14 / F1 — the take-card grammar
+    // made uniform): a take's LOCK and its DELETE. Both have been rendered
+    // since Phase 7 — Write's takes panel carries them on every card's ⋯ —
+    // and neither was ever declared, so the one grammar rule (Archive · Label
+    // · Lock · Delete) had nothing to hold it and the Takes board's cards
+    // quietly carried two of the four.
+    case lockTake, deleteTake
     // 13j, sitting round 5 — DELETED takes get a door at last. The sweep at
     // the sitting found there was no `restoreVariant` op and no deleted-take
     // query anywhere: a deleted take was unreachable forever, while the
@@ -499,6 +506,11 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // reason — the target is the row you right-clicked, never a caret in an
     // open note. See the registry's declaration for the whole argument.
     case deleteScrap
+    // The post-13l polish round (ledger row 14 / F1, her *"archive rides
+    // beside delete"*): the scrap row's third verb, declared exactly like
+    // its harsher twin above and for the same reason — the target is the
+    // row you right-clicked.
+    case archiveScrap
     // NOTE tagging (13e E8 — her 13f round-11 ask, both halves): the chips'
     // ＋ / ✕ doors, wherever they are rendered — the context bar (R6-1) and
     // the Library's note rows. ONE act, its renderers enumerated, on the

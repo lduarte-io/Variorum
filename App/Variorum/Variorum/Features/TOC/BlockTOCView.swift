@@ -231,6 +231,14 @@ final class BlockTOCViewModel {
         await run { ops in try ops.deleteBlock(blockID) }
     }
 
+    /// The post-13l polish round (ledger row 14 / F1): the kept road, on the
+    /// row that already offered the clocked one. Blocks mode is a listing of
+    /// this note's blocks, and archive is exactly the verb a listing wants —
+    /// set it aside without starting a countdown.
+    func archiveBlock(_ blockID: String) async {
+        await run { ops in try ops.archiveBlock(blockID) }
+    }
+
     // (The tray's own Restore door used to live here. 13j round 7 routed this
     // mode's tray section to the ONE panel — "one surface, one truth" — so
     // the door lives in `TrayPanel` and this model no longer carries a second
@@ -266,6 +274,20 @@ final class BlockTOCViewModel {
 }
 
 struct BlockTOCView: View {
+    /// **THE ROW MENU'S DECLARED ACTS** (the post-13l polish round, ledger row
+    /// 14 / F1). Blocks mode's per-row menu is a listing's menu, not a
+    /// context menu and not a bar — a `.surface` door in the 13b 3D sense:
+    /// the target is the row you opened it on. It has offered *"Delete
+    /// block"* since 13c with no declaration anywhere; the pass that gave it
+    /// the ARCHIVE twin her F1 rule asks for declares the pair.
+    ///
+    /// (Its other rows — move to top/bottom, move to ordinal, move out to a
+    /// pool — are placement moves, which the round's own scope note excludes
+    /// as ordinary reversible editing rather than past-creating acts. They
+    /// stay undeclared, and that is now a recorded gap rather than an
+    /// invisible one.)
+    static let surfaceCapabilities: [CapabilityID] = [.archiveBlock, .deleteBlock]
+
     let session: AppSession
     let postID: String
     /// Jump-to-block: the container switches to the Write editor with this
@@ -418,6 +440,12 @@ struct BlockTOCView: View {
                         }
                     }
                     Divider()
+                    // Ledger row 14 (F1): archive rides beside delete, and
+                    // before it — the same order the menu bar's Block menu,
+                    // the block context menu and both bars' `block ▾` use.
+                    Button(CapabilityRegistry.capability(.archiveBlock).verb) {
+                        Task { await model.archiveBlock(row.blockID) }
+                    }
                     Button("Delete block", role: .destructive) {
                         Task { await model.deleteBlock(row.blockID) }
                     }

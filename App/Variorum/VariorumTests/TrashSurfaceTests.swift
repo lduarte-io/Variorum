@@ -417,11 +417,18 @@ struct TrashSurfaceTests {
         }
     }
 
-    @Test func theArchiveActIsDeclaredWithBothItsDoors() {
+    /// **A JUSTIFIED EDIT** (the post-13l polish round, ledger row 14 / F1 —
+    /// her *"archive rides beside delete at every block door"*): the act
+    /// gained the two doors the pass found its twin standing alone at — both
+    /// bars' `block ▾` (`.bottomBar`) and Blocks mode's row menu
+    /// (`.surface`). The claim this pin holds is unchanged and is now checked
+    /// at more places: the act is declared once, everywhere it is rendered,
+    /// and it is honestly grey with no note open.
+    @Test func theArchiveActIsDeclaredWithAllItsDoors() {
         let capability = CapabilityRegistry.capability(.archiveBlock)
         #expect(capability.verb == "Archive Block")
         #expect(capability.scope == .block)
-        #expect(capability.doors == [.menuBar, .contextMenu])
+        #expect(capability.doors == [.menuBar, .contextMenu, .bottomBar, .surface])
         // It acts where blocks live, and is honestly grey with no note open.
         #expect(CapabilityRegistry.availability(
             .archiveBlock, in: CapabilityContext(mode: .write, writeEditorAttached: true))

@@ -49,6 +49,7 @@ struct CommitBar: View {
             .merge, .showTakes,
             .insertBlockBelow,  // 13b 4D (N28/S4-13): editor parity — Write's bar door
             .deleteBlock,  // 13c 1B (A8): the delete door beside the insert door
+            .archiveBlock,  // the post-13l polish round (row 14 / F1): its twin
             // (`.showNoteTray` LEFT this bar at the post-13l polish round,
             // ledger row 9 — her C1 ruling moved the tray to the masthead's
             // icon and the side panel, and *"the note ▾ menu's item follows
@@ -189,11 +190,18 @@ struct CommitBar: View {
             Button("＋ New block below this one (⌘⇧⏎)") {
                 Task { await model.insertBlockBelowCaret() }
             }
+            // Ledger row 14 (F1): the kept road, beside the clocked one and
+            // BEFORE it — the order the menu bar's Block menu and the block
+            // context menu already use, so the three doors read alike.
+            Button(CapabilityRegistry.capability(.archiveBlock).menuTitle()) {
+                Task { await model.archiveCaretBlock() }
+            }
             Button("− Delete this block") {
                 Task { await model.deleteCaretBlock() }
             }
         }
-        .help("Everything block-scoped: divide, extract, make block, merge, and the two block mints")
+        .help("Everything block-scoped: divide, extract, make block, merge, "
+            + "the two block mints, and the two ways to set a block aside")
     }
 
     /// The flat row's note half: `note ▾`, comments, the newlines chip — and
