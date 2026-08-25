@@ -78,13 +78,13 @@ worse") — the wispy direction is dead on arrival with her, always.
    silhouette figures wrestling the serif V and its fans ON THE RED — mid-century
    poster/Saul Bass energy (`concept-art/poster-*`). Notable because it is the first
    place two of her families MEET: the editorial-red boldness (register 1) carrying the
-   figure whimsy (register 3). The whimsy can wear the red. Archived as reference for
-   the KIND, not for use as-is — her caveat verbatim: "I think that these look a little
-   too frustrated so I wouldn't want to use exactly them, but I think this kind of art
-   is also cool." (The frustration reads strongest in the three card-clutching figures;
-   the fan-dancer and the V-wrestlers read effort/joy rather than strain.) One hard
-   flag: `poster-reading-together` contains AI-garbled tagline lettering ("Every drafts
-   variants OPEN") — the image may inspire, the lettering must never ship.
+   figure whimsy (register 3). The whimsy can wear the red. **Her verdict, corrected to
+   her actual position (2026-08-25):** the "too frustrated" caveat applies to the THREE
+   CARD-CLUTCHING pieces only ("only the ones with the cards were like that") — those
+   are reference-not-use; **the other six are "potentially usable if a bit overly
+   surreal"** — live candidates, with surreality the dial to watch, not the mood. One
+   hard flag: `poster-reading-together` contains AI-garbled tagline lettering ("Every
+   drafts variants OPEN") — the image may inspire, the lettering must never ship.
 
 ## Tensions and open questions for the sitting
 
