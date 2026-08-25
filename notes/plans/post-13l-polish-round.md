@@ -2240,6 +2240,11 @@ long savepoint runs reads all of them per re-run, so this pane's constant is
 larger than the tray's bounded listing. Both are off-main and both are
 summoned. **The closeout writes ONE KnownIssues row naming both panes.**
 
+*(Her confirmation landed mid-batch and matches what was built:
+**"Park for Phase 12"**, recorded at the adjudication itself in `e1a3714`.
+Nothing here changed for it — it is the same disposition, now with her
+authority behind it.)*
+
 ---
 
 #### OBSERVATIONS — nothing built, for the architect
