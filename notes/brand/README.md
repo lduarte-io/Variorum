@@ -1,6 +1,6 @@
 # Variorum — brand mark finalists
 
-Thirteen candidate logo marks, all production-clean vector, **unchosen** — the author picks.
+Fourteen candidate logo marks, all production-clean vector, **unchosen** — the author picks.
 The choosing surface is **`variorum-family-sheet.svg`** (per mark: light ground over dark
 ground; `.png` twins of the sheets are pre-rendered copies for apps that balk at SVG).
 The pipeline that produced everything here is documented in **`PROCESS.md`** — new options
@@ -16,7 +16,7 @@ specks removed, viewBoxes cropped to the mark +10% margin, and painted-on detail
 converted to real geometry where possible. Nothing was redrawn; the geometry is
 exactly what she picked.
 
-## The thirteen marks
+## The fourteen marks
 
 | mark | files | structure |
 |---|---|---|
@@ -33,6 +33,7 @@ exactly what she picked.
 | **the echo V** | `variorum-echo-v-*` | ink drawing: concentric V outlines with radiating spokes — kinetic, op-art energy |
 | **the deco V** | `variorum-deco-v-*` | ink drawing, ONE compound path: striped V with checkered ladder bands — the striped V's deco cousin |
 | **the engraving** | `variorum-engraving-*` | ink drawing (843 stippled paths): a rosette of OPEN BOOKS radiating around a serif V — perhaps the most literally on-brand image in the family |
+| **the fountain book** | `variorum-fountain-book-*` | ink drawing: an open book fanning upward into a V, scrolled column-capitals at the corners, pointed foot — deco bookplate energy |
 
 Ink drawings (class D) are one-color by nature: each has `-master` (transparent ink),
 `-white`, and `-dark` (white-on-black inversion).

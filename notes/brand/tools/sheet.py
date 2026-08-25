@@ -19,6 +19,7 @@ MANIFEST = [  # (label, light-ground file, dark-ground file, light cell bg)
     ("the echo V",        "variorum-echo-v-white.svg",           "variorum-echo-v-dark.svg",          "#FFFFFF"),
     ("the deco V",        "variorum-deco-v-white.svg",           "variorum-deco-v-dark.svg",          "#FFFFFF"),
     ("the engraving",     "variorum-engraving-white.svg",        "variorum-engraving-dark.svg",       "#FFFFFF"),
+    ("the fountain book", "variorum-fountain-book-white.svg",    "variorum-fountain-book-dark.svg",   "#FFFFFF"),
 ]
 
 S, P, LH, COLS = 170, 14, 18, 5

@@ -19,6 +19,7 @@ SPECS = {
     "echo-v":       "g7.svg",
     "deco-v":       "g8.svg",
     "engraving":    "g9.svg",
+    "fountain-book": "g10.svg",
 }
 
 for name, src in SPECS.items():
