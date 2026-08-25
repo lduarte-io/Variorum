@@ -583,7 +583,8 @@ struct LibraryCatalogView: View {
                             "Delete \(selectedPosts.count) notes\u{2026}"),
                         role: .destructive
                     ) {
-                        pendingDelete = NoteDeleteConfirm(postIDs: selectedNotesInListOrder)
+                        Task { pendingDelete = await NoteDeletion.ask(
+                            session: session, postIDs: selectedNotesInListOrder) }
                     }
                     .font(tokens.small)
                 }
@@ -849,7 +850,8 @@ struct LibraryCatalogView: View {
         // went, and left every pane showing it standing on the tombstone.
         // One wording with the note ▾ door, from the one shared host.
         Button(RecoveryCopy.deleteNoteTitle, role: .destructive) {
-            pendingDelete = NoteDeleteConfirm(postIDs: [hit.id])
+            Task { pendingDelete = await NoteDeletion.ask(
+                session: session, postIDs: [hit.id]) }
         }
     }
 

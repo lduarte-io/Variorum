@@ -184,7 +184,8 @@ struct ArchivedView: View {
             // N3's last road: Delete → the Trash, 30 days, one shared
             // wording with every other note-delete door.
             Button(RecoveryCopy.deleteNoteTitle, role: .destructive) {
-                pendingDelete = NoteDeleteConfirm(postIDs: [item.postID])
+                Task { pendingDelete = await NoteDeletion.ask(
+                    session: session, postIDs: [item.postID]) }
             }
             .controlSize(.small)
         }

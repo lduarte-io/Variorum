@@ -55,6 +55,10 @@ struct TakesBottomBar: View {
             // commit, on BOTH bars in the same commit — R6-2's one-grammar
             // rule, which matters most when a door moves.
             .showBlockHistory,
+            // The post-13l polish round (ledger rows 16/23): the NOTE's two
+            // time controls, in `note ▾` — Write's bar's pair, here too
+            // (R118's letter: no surface is privileged).
+            .saveNoteVersion, .showNoteVersions,
         ]
         // 13k K7: the formatting toolbar rides BOTH bars — the acts are
         // `takesAccess: .native`, so Write must not be the only surface with
@@ -267,6 +271,13 @@ struct TakesBottomBar: View {
                 Task { await model.setTakeLabel(request.variantID, label: label) }
             }
         }
+        // Rows 16/23: the Versions listing's fallback host, Write's bar's twin.
+        .sheet(isPresented: Binding(
+            get: { model.versionsRequested },
+            set: { model.versionsRequested = $0 })
+        ) {
+            NoteVersionsPane(session: model.session, postID: model.postID)
+        }
     }
 
     /// Take context + take acts (the block menu, + take, commit, history).
@@ -370,6 +381,13 @@ struct TakesBottomBar: View {
             // ledger row 17 — Write's bar lost it in the same commit. Her F2
             // report is the reason: a block's history reached through a menu
             // called `note ▾` reads as the NOTE's.)
+            // The post-13l polish round (ledger rows 16/23) — Write's bar's
+            // pair, in the same order, in the same commit (R6-2).
+            Button(CapabilityRegistry.capability(.saveNoteVersion).menuTitle()) {
+                Task { await model.saveNoteVersion() }
+            }
+            Button(VersionsPath.menuLabel) { model.requestNoteVersions() }
+            Divider()
             Button(model.projection.sealed ? "Unseal" : "Seal") {
                 Task { await model.toggleSeal() }
             }
@@ -382,7 +400,8 @@ struct TakesBottomBar: View {
             // 13l Act 2 (item 3): Write's bar's door, in Takes too — R118's
             // letter (no surface is privileged) and R6-2's one grammar.
             Button(RecoveryCopy.deleteNoteTitle, role: .destructive) {
-                pendingDelete = NoteDeleteConfirm(postIDs: [model.postID])
+                Task { pendingDelete = await NoteDeletion.ask(
+                    session: model.session, postIDs: [model.postID]) }
             }
         }
         .deleteNoteConfirmDialog($pendingDelete) { confirm in

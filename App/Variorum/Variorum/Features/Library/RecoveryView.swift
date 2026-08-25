@@ -123,6 +123,16 @@ nonisolated enum RecoveryPath {
     /// sentence the note's tray shows, from the tray's one home).
     static var goesWithItsFamily: String { TrayPath.goesWithItsFamily }
 
+    /// **The stranded-ancestor run's fold label** (the post-13l polish round,
+    /// ledger row 30 — her refinement on the ratified G7 nesting). It carries
+    /// the COUNT so the fold never hides its own size, and it says what the
+    /// run IS, because "3 more" under a deleted block would be a riddle.
+    static func strandedAncestorsDisclosure(_ count: Int) -> String {
+        count == 1
+            ? "1 original set aside by this block's lineage"
+            : "\(count) originals set aside by this block's lineage"
+    }
+
     // MARK: The purge doors (13j batch 6b — J1's second half, built)
 
     /// The per-row impatience door (her round-3 rider: in-Trash only,
@@ -537,6 +547,11 @@ struct RecoveryView: View {
     /// behaviour, for any host that has no pool route.
     var openPool: ((String) -> Void)?
     @State private var model: RecoveryViewModel
+    /// Ledger row 30: which deletions' stranded-ancestor runs she has folded
+    /// away. COLLAPSED-set rather than expanded-set, deliberately: her ruling
+    /// is *"not collapsed by default"*, and the default must not depend on
+    /// anything having been seeded.
+    @State private var collapsedAncestors: Set<String> = []
 
     /// 13j batch 6b (P-1): the Trash surface is the ONE renderer of the two
     /// purge acts — the walk's union names every renderer by construction,
@@ -659,11 +674,39 @@ struct RecoveryView: View {
 
     /// Ledger row 22's tenth-sitting extension: the ancestors a deletion
     /// stranded, shown UNDER the block that stranded them.
+    ///
+    /// **…AND THEY FOLD** (ledger row 30, her mid-round refinement on the
+    /// ratified shape): *"I think the ancestors should be collapsible with a
+    /// dropdown arrow style toggle or something like that optionally (not
+    /// collapsed by default)."* So the run is a `DisclosureGroup` that starts
+    /// OPEN — which is the whole point of the nesting she asked for (*"going to
+    /// trash shows you what you just deleted"*) — and closes at will. The label
+    /// carries the COUNT either way, because a fold that hides its own size is
+    /// not an audit (the tray's takes disclosure, same rule).
+    ///
+    /// Expansion is session UI state, keyed by the anchor row's id, so folding
+    /// one deletion's ancestors never folds another's.
     @ViewBuilder
     private func nestedRows(_ row: TrashGrouping.Row, indent: CGFloat) -> some View {
-        ForEach(row.nested, id: \.id) { original in
-            trashRow(original, namesItsHome: false)
-                .padding(.leading, indent)
+        if !row.nested.isEmpty {
+            DisclosureGroup(isExpanded: Binding(
+                get: { !collapsedAncestors.contains(row.item.id) },
+                set: { open in
+                    if open { collapsedAncestors.remove(row.item.id) }
+                    else { collapsedAncestors.insert(row.item.id) }
+                })
+            ) {
+                ForEach(row.nested, id: \.id) { original in
+                    trashRow(original, namesItsHome: false)
+                        .padding(.leading, indent)
+                }
+            } label: {
+                Text(RecoveryPath.strandedAncestorsDisclosure(row.nested.count))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+            .padding(.leading, indent)
         }
     }
 
@@ -735,7 +778,13 @@ struct RecoveryView: View {
         HStack(spacing: 6) {
             Text(item.title ?? TrayRowPreview.line(item.text))
                 .lineLimit(1)
-            Text(RecoveryPath.rowKind(item.kind))
+            // Ledger row 23 (FOUND-ITEM 1): a saved version is a note-kind
+            // row, and calling it "note" is the one thing that would make the
+            // group unreadable — the header IS a note, and so would every row
+            // under it be.
+            Text(item.isVersion
+                 ? VersionsPath.trashRowKind
+                 : RecoveryPath.rowKind(item.kind))
                 .font(.caption)
                 .foregroundStyle(.secondary)
             if item.kind == .preservedOriginal {
@@ -749,7 +798,9 @@ struct RecoveryView: View {
             // 13l (§8b): the NAME comes from the home's own display brain,
             // so a scrap says what the scraps area is actually called.
             if namesItsHome, let noteTitle = model.homeTitle(item) {
-                Text(item.noteIsDeleted
+                Text(item.isVersion
+                     ? VersionsPath.trashRowOf(noteTitle)
+                     : item.noteIsDeleted
                      ? "from \(noteTitle) (also in the Trash)"
                      : "from \(noteTitle)")
                     .font(.caption2)

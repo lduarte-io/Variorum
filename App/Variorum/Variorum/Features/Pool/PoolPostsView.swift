@@ -250,7 +250,8 @@ struct PoolPostsView: View {
             // renders the SAME declaration (`SidebarView.contextMenuCapabilities`)
             // and must therefore ask the same question in the same words.
             Button(RecoveryCopy.deleteNoteTitle, role: .destructive) {
-                pendingDelete = NoteDeleteConfirm(postIDs: [item.postID])
+                Task { pendingDelete = await NoteDeletion.ask(
+                    session: session, postIDs: [item.postID]) }
             }
         }
     }

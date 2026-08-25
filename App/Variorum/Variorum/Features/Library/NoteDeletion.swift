@@ -57,11 +57,30 @@ struct NoteDeleteConfirm: Identifiable, Equatable {
     /// The notes the gesture named, in the order the surface listed them.
     let postIDs: [String]
 
+    /// **The saved versions that go with them** (the post-13l polish round,
+    /// ledger row 23 — V2, ratified: *"I agree it should auto delete versions
+    /// and not ask for a confirmation dialog"*).
+    ///
+    /// Versions ARE the note's past, so they ride its deletion — the operation
+    /// takes them, on the same stamp, whichever door fired. What the CONFIRM
+    /// owes is **one honest line**, not a second question: a mid-delete dialog
+    /// nobody can answer well is friction, and the keep road is restoring the
+    /// version live before, or Put back within the window after.
+    ///
+    /// Read at ASK time through `NoteDeletion.ask` (a confirm is a pause and a
+    /// listing is a projection — the R3-1 lesson); zero means the line is
+    /// absent, so every empty-versions note reads exactly as it did.
+    var versionCount: Int = 0
+
     /// Stable across a re-render of the same ask.
     var id: String { postIDs.joined(separator: "|") }
 
     var title: String { RecoveryCopy.deleteNotesConfirmTitle(postIDs.count) }
-    var detail: String { RecoveryCopy.deleteNotesConfirmDetail(postIDs.count) }
+    var detail: String {
+        let base = RecoveryCopy.deleteNotesConfirmDetail(postIDs.count)
+        guard let rider = VersionsPath.versionsGoWithIt(versionCount) else { return base }
+        return base + " " + rider
+    }
 }
 
 // MARK: - The act
@@ -136,6 +155,16 @@ enum NoteDeletion {
             userInfo: ["postIDs": postIDs])
         guard deleted > 0 else { return RecoveryCopy.notesAlreadyGone(postIDs.count) }
         return RecoveryCopy.movedToTrashReceipt(notes: deleted)
+    }
+
+    /// **THE ASK, with its version count read at ask time** (V2's one honest
+    /// line). Every door raises its confirm through here, so none of them has
+    /// to remember that a note's past goes with it.
+    static func ask(session: AppSession, postIDs: [String]) async -> NoteDeleteConfirm {
+        NoteDeleteConfirm(
+            postIDs: postIDs,
+            versionCount: await VersionActs.versionCount(
+                session: session, postIDs: postIDs))
     }
 
     /// The doors' entry: run it, and SPEAK the outcome through the one

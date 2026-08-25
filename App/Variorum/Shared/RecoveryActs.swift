@@ -519,7 +519,16 @@ nonisolated enum TrashGrouping {
         // A note only becomes a HEADER when something else in the listing
         // points at it — otherwise a lone deleted note would render as a
         // group of one, which says less than the row itself does.
-        let homes = Set(items.compactMap { $0.kind == .note ? nil : $0.noteID })
+        //
+        // **A SAVED VERSION IS THE ONE NOTE ROW THAT HAS A HOME** (the
+        // post-13l polish round, ledger row 23 — FOUND-ITEM 1): it is a
+        // container, so it rides the `.note` arm and every `.note` door
+        // unchanged, but it is a MOMENT OF another note and gathers under it.
+        // So the question a row is asked here is not "are you a note" but
+        // "do you point at one", which is what `isVersion` answers.
+        let homes = Set(items.compactMap {
+            ($0.kind == .note && !$0.isVersion) ? nil : $0.noteID
+        })
         let listedBlockIDs = Set(items.filter { $0.kind == .block }.map(\.id))
         var nestedUnder: [String: [Queries.TrashItem]] = [:]
         for item in items where item.kind == .preservedOriginal {
@@ -541,7 +550,7 @@ nonisolated enum TrashGrouping {
 
         for item in items {
             if nestedIDs.contains(item.id) { continue }  // it rides its anchor
-            if item.kind == .note, homes.contains(item.id) {
+            if item.kind == .note, !item.isVersion, homes.contains(item.id) {
                 let slot = groupSlot(item.id)
                 guard case .group(var group) = entries[slot] else { continue }
                 group.noteRow = item

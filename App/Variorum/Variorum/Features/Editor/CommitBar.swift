@@ -62,6 +62,12 @@ struct CommitBar: View {
             // the natural pair to commit"* — so the bar carries the block's
             // two time controls side by side: write a moment, see the moments.
             .showBlockHistory,
+            // The post-13l polish round (ledger rows 16/23): the NOTE's two
+            // time controls, in the `note ▾` menu — ⌘⇧S saves the whole note as
+            // it is, and Versions… is the list of the moments it has. The
+            // grain pairing with commit/history one line up IS the teaching
+            // moment her G4 chapter names.
+            .saveNoteVersion, .showNoteVersions,
         ]
         // 13k K7: the formatting toolbar's own eight, from ITS table (the
         // cluster is rendered here, so its doors are declared here).
@@ -144,6 +150,14 @@ struct CommitBar: View {
                     model.trayRequest = TrayRequest(
                         postID: model.postID, revealBlockID: blockID)
                 })
+        }
+        // Rows 16/23: the same fallback host for the Versions listing, and for
+        // the same reason — this editor is composed where no inspector exists.
+        .sheet(isPresented: Binding(
+            get: { model.versionsRequested },
+            set: { model.versionsRequested = $0 })
+        ) {
+            NoteVersionsPane(session: model.session, postID: model.postID)
         }
     }
 
@@ -250,6 +264,14 @@ struct CommitBar: View {
             // was about: *"it's unclear that history is under Note, that makes
             // it seem like the Note's history."* It was the BLOCK's, and it is
             // now a door in the bar that says so.)
+            // The post-13l polish round (ledger rows 16/23): the note's own two
+            // time controls, in the menu that IS the note. They sit first
+            // because they are what the menu is most often opened for now.
+            Button(CapabilityRegistry.capability(.saveNoteVersion).menuTitle()) {
+                Task { await model.saveNoteVersion() }
+            }
+            Button(VersionsPath.menuLabel) { model.requestNoteVersions() }
+            Divider()
             Button(model.header?.locked == true ? "Unseal" : "Seal") {
                 model.toggleSeal()
             }
@@ -273,7 +295,8 @@ struct CommitBar: View {
                 // so the only way past the 30 days from here is the Trash
                 // itself.
                 Button(RecoveryCopy.deleteNoteTitle, role: .destructive) {
-                    pendingDelete = NoteDeleteConfirm(postIDs: [model.postID])
+                    Task { pendingDelete = await NoteDeletion.ask(
+                        session: model.session, postIDs: [model.postID]) }
                 }
             }
         }
