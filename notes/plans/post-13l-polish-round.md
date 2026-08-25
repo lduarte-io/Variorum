@@ -2775,6 +2775,260 @@ spine 68/9 · mobile 486/78); flake watch three candidates;
 explicit-path commits, NEVER push. Append "### LADDER FIX WAVE 2
 — RECORD", then STOP — round 3 dispatches next.
 
+### LADDER FIX WAVE 2 — RECORD (fresh Opus session, 2026-08-25)
+
+**Two commits, staged by explicit path, neither pushed.** Tree clean at start
+(`10d95c2`) and at finish.
+
+| commit | theme |
+|---|---|
+| `c9ea521` | the OPERATION's read — LR2-1 (+ LR2-5's wording, and the pool leg that made it checkable) |
+| `81d73f6` | the DOC half — LR2-2, LR2-3 |
+
+**Gates — all four, my own runs:**
+
+| gate | result | baseline |
+|---|---|---|
+| core (`swift test`) | **1416 tests / 146 suites PASSED** (34.8 s) | 1411/146 → **+5**, my five new core pins; suite count unmoved |
+| Mac full (`-project`, `platform=macOS`) | **1768 / 296 PASSED — TEST SUCCEEDED** (233.7 s); xcresult read directly: `"failedTests": 0`, `"expectedFailures": 0`, `"result": "Passed"` | 1768/296 ✔ exact (LR2-2 edits an EXISTING pin's body, so nothing was added) |
+| Mac spine (9 `TutorialWalkTests` types, suite-level `-only-testing`) | **68 / 9 PASSED — TEST SUCCEEDED** (27.2 s) | 68/9 ✔ exact |
+| mobile (`VariorumMobile`, iPhone 16e) | **486 / 78 PASSED — TEST SUCCEEDED** (84.6 s), the 2 recorded `withKnownIssue`s only | 486/78 ✔ exact |
+
+**ALL THREE FLAKE CANDIDATES SILENT** — the Phase-12 latency pin,
+`CanvasDragTrackingTests`, `TakesSlotDragTests`. The Mac run's xcresult reports
+zero failures of any kind, so there is no red to classify and nothing is
+promoted.
+
+**Fences held:** ZERO schema · **ZERO `Sources/VariorumCore/Sync/` lines**
+(`git diff --stat -- Sources/VariorumCore/Sync/ Sources/VariorumCore/Persistence/`
+is EMPTY — `PurgeFamily` was read only, and LR2-1's fix is in the OPERATION's
+read exactly as routed) · nothing product-flavored (LR1-3's product half, LR1-7
+and batch 5's PROVISIONAL 1 remain hers, untouched) · nothing under
+`notes/brand/` read, staged or touched · LR2-4 not touched (it rides the
+closeout's mobile update).
+
+**INSTANCE CHECKS.** `pgrep -fl 'Variorum.app/Contents/MacOS'` was EMPTY before
+every Mac and mobile run. No Release build, no `/Applications` act was owed or
+taken.
+
+---
+
+#### LR2-1 (MAJOR) — the restore re-anchored only what the OLD fence could see · **TRACE CONFIRMED · FIXED** (with one link of the reviewer's stated chain corrected, below)
+
+**Traced myself against the tree before touching anything, in the order the
+finding names.** `restoreNoteVersion` read its peers from
+`Queries.versionPeerPosts` (`Queries/Lineage.swift:206-229`), which fences
+**all three** liveness reads — `mine.deleted_at IS NULL`,
+`theirs.deleted_at IS NULL`, `e.deleted_at IS NULL`. That is the exact fence
+LR1-1 had to REMOVE from the classifier, for the exact reasons LR1-1 recorded:
+
+| gesture on the note's first block | what it does to the anchor | consequence for `versionPeerPosts` |
+|---|---|---|
+| `merge` / `divideW` | releases the source placement (tombstoned) | `mine` fails ⇒ the moment is not a peer |
+| `archiveBlock` | tombstones the placement | `mine` fails ⇒ not a peer |
+| `deleteBlock` | trigger-cascades the **EDGE** | `e` fails ⇒ not a peer |
+
+So the moments LR1-1 rescued were **precisely the ones step 4 skipped**, and
+the op's own doc-comment sentence — *"The peers are read while their links are
+still live"* — was describing a read that could not see them. Corrected in
+place, and the doc now carries the mechanism rather than the claim.
+
+**RED ON OLD, measured — and verified BOTH ways** (the pins were written first
+and run on `10d95c2`; then, after the fix landed, an explicit behavioural
+revert — `peers` back to `versionPeerPosts` alone — reproduced them against the
+final file, which is where these line numbers come from):
+
+- `restoringReAnchorsAMomentWhoseAnchorWasMergedAway` — **1 issue**:
+  `✘ Expectation failed: try db.read { try liveAnchoredLink($0, moment: moment, note: note.id) }`
+  at `NoteVersionsTests.swift:793` (the merged-away moment; the moment saved by
+  step 1 passes, which is the shape of the hole — only what the fence could see
+  got re-anchored).
+- `restoringReAnchorsAMomentWhoseAnchorWasArchived` — **1 issue**, same
+  expectation at `:831`.
+- `restoringReAnchorsAMomentWhoseAnchorWasDeletedAndThenPurged` — **3 issues**,
+  the whole severance after a real janitor sweep:
+  `✘ Set(try db.read { try Queries.noteVersions($0, of: note.id) }` at `:857` ·
+  `✘ try db.read { try liveAnchoredLink($0, moment: moment, note: note.id) }` at `:861` ·
+  `✘ try db.read { try Queries.archivedPosts($0) }.isEmpty` at `:863`.
+
+Restored, re-run green (30/1); `grep -rn "REVERT PROBE"` over
+`Sources/VariorumCore/` and `App/Variorum/` returns nothing.
+
+**The fix.** Two lines in the op, and they are the LR1-5 doctrine applied to
+the one reader that had been left out:
+
+```swift
+var peers = try Queries.noteVersionIDs(db, of: postID)
+peers.append(contentsOf: try Queries.versionPeerPosts(db, of: postID))
+```
+
+read BEFORE step 2 exactly where the old read was. `noteVersionIDs` IS the
+classifier (the same `versionHistoryPredicate` the listing, the Archived fence,
+`isVersionHistory` and the deletion ride all read), so what the listing keeps
+is now what the restore re-anchors — by construction, not by care. The union
+keeps the live compare peers, which are the version links that are NOT version
+history: `markPostsAsVersions` and `duplicateAsVersion`'s live forks. `Set(peers)`
+already deduped, and `insertVersionOfEdge`'s `versionLinkExists` already made a
+second pass a no-op, so the widening needed no other change.
+
+**THE UNMARK IS STILL RESPECTED, and it is pinned rather than assumed.** A
+wider enumeration could have re-minted a link she deliberately took apart. It
+cannot: `unmarkPostsAsVersions` stamps the edge with a time no endpoint block
+shares, so the classifier stops naming that pair and `noteVersionIDs` never
+returns it. `aRestoreNeverReMintsALinkSheDeliberatelyUnmarked` drives exactly
+that — an unmarked copy stays out of the listing, gets no new link from the
+restore, and remains an ordinary archived note.
+
+**ONE LINK OF THE FINDING'S STATED CHAIN IS CORRECTED, and it is recorded
+rather than quietly adopted** (the hallucination guard cuts both ways). The
+finding says the merge leg severs because *"the restore's own Delete Now road
+then purges that original WITH its `version_of` edges
+(`joinStrandedOriginals` → `expandBlock` sweeps all edges)"*. I drove that
+exact chain with a probe before writing anything, and **the released original
+does NOT strand today**: `joinStrandedOriginals` only joins an ancestor whose
+ENTIRE descendant set is inside the family, and the version's own block copy is
+a live `derived_from` descendant of that anchor (`copyPlacements` mints
+`insertLineageEdge(from: blockCopy, to: block)` per slot). Probe output:
+`stranded: []`. So the moment's own copy is, by accident, what keeps its own
+anchor out of the purge family — real, but a protection nobody designed and
+nothing pins.
+
+**The finding is a MAJOR regardless, and the delete leg is the proof**: there
+the anchor is tombstoned and purged as a ROOT (its own 30-day clock, or the
+Delete Now that pin drives), `expandBlock` takes the `version_of` edge
+physically, and the three red issues above are the full consequence — expelled
+from the listing, LISTED ON ARCHIVED sealed, no live anchor. That is the
+finding's *"plain leg"*, and it lands on the self-inflicted road too.
+
+**Pins** (`NoteVersionsTests`, +4 for this finding):
+`restoringReAnchorsAMomentWhoseAnchorWasMergedAway` (which also drives a real
+`PurgeFamily.expand` + `deleteLocal` sweep over the standing intents, so the
+survival claim is driven rather than argued) ·
+`restoringReAnchorsAMomentWhoseAnchorWasArchived` ·
+`restoringReAnchorsAMomentWhoseAnchorWasDeletedAndThenPurged` ·
+`aRestoreNeverReMintsALinkSheDeliberatelyUnmarked`. A shared
+`liveAnchoredLink` helper asks the op's own step-4 claim of the store — a LIVE
+`version_of` edge whose note-side endpoint is a block the note LIVE-PLACES —
+deliberately STRICTER than the listing's question, because *listed-but-not-
+anchored* is the state that silently expires.
+
+**Files:** `Sources/VariorumCore/Operations/Operations+NoteVersions.swift`
+(the read + its doc), `Tests/VariorumCoreTests/NoteVersionsTests.swift`.
+
+---
+
+#### LR2-5 (NIT) — the KnownIssues row's *"would list nowhere"* · **TRACE CONFIRMED · FIXED, and now CHECKABLE**
+
+**Verified rather than reasoned.** The Archived surface's fence excludes
+version history only under `.anyLiveNote`, whose peer join requires
+`peer.kind = 'post'`. A scraps area is `kind = 'pool'`, so moving a note's
+anchor there makes the fence stop holding and the moment RENDERS on Archived —
+sealed and unnamed. Pinned as behaviour
+(`movingTheAnchorToAPoolLeavesTheMomentLooseOnTheArchivedSurface`, green: the
+listing empties, `archivedPosts` contains it, `locked` is true), so the row's
+sentence is now checkable against the app instead of remembered.
+
+**The row was rewritten around LR2-1's second leg**, per the routing: its title
+and body now name **two** legs no read-side means can answer — `moveBlock`
+(unchanged) and **PHYSICAL PURGE** (new: tombstone tolerance needs the ROW, and
+the 13j purge deletes it; an anchor purged at its clock, by Delete Now, or as a
+stranded original severs a LIVE note's links). Both legs' pins are named in the
+row. The durable road is unchanged and correctly parked: **#19(c), a post-level
+link — a schema call, hers, and a §12 lockstep event** — with one sentence added
+saying why re-anchoring inside the purge is not the answer either (it would put
+version semantics inside `Sync/`'s deliberately dumb family expansion).
+
+**Files:** `notes/KnownIssuesAndTechDebt.md`,
+`Tests/VariorumCoreTests/NoteVersionsTests.swift`.
+
+---
+
+#### LR2-2 (MINOR) — the positive token's doc stopped one voice short · **TRACE CONFIRMED · FIXED (doc + the pin extension)**
+
+**Traced by reading the four voices' hexes.** `positive` equals `chosen` in
+**all four**: Terminal light `0x2F7D5F`, Terminal dark `0x6FBF94`, Study light
+`0x5A7D46`, Study dark `0x93B57E`. LR1-9's rewrite conceded only Terminal and
+described Study as *"its own green beside a blue accent"* — true about the
+ACCENT, and quietly implying a distinctness from `chosen` that Study does not
+have either. **And the LR1-9 pin never asserted the `chosen` relation at all**,
+which is exactly how a doc corrected once drifted a second time.
+
+**Fixed the DOC, not the hues** (unchanged reasoning, now stated for every
+voice): `positive == chosen` everywhere today; only `accent` separates the
+voices, Terminal sharing its one green while Study's accent is blue. The
+PROVISIONAL widens with it — whether a settled sync line should wear a hue
+apart from "✓ chosen" **in ANY voice** is taste, and 13s's.
+
+**Pin extended in place** (`ThemeTests.theQuietPositiveIsItsOwnSlotEvenWhereItSharesTheVoicesGreen`):
+the loop now asserts `tokens.positive == tokens.chosen` for all four voices
+beside the existing `!= alarm`, and the accent relations follow. No red-on-old
+is owed — this is the doc-honesty class, and its mechanism is the hex
+comparison above; the pin's job is to make the sentence checkable, which is why
+the *missing* assertion was the real defect.
+
+**Files:** `App/Variorum/Shared/Theme/VoiceTokens.swift`,
+`App/Variorum/VariorumTests/ThemeTests.swift`.
+
+---
+
+#### LR2-3 (NIT) — the version count reads the WINDOWED listing · **TRACE CONFIRMED · RECORDED**
+
+**Traced.** `RecoveryActs.savedVersions(of:in:)` counts `items` — the array the
+surface holds, which comes from `observeTrash`'s BOUNDED observation (the
+`observeLibrary` P1 discipline, with its truncation marker). So a note whose
+moments fall past the window is under-counted, and its Delete Now confirm would
+name fewer saved versions than really stay behind.
+
+**Recorded, not changed, and the reason is on the record:** counting the true
+total means a second corpus-shaped read on the confirm's own path, which is
+what the window exists to refuse — and the sentence's whole PURPOSE (LR1-4) is
+that the words and the screen agree, which reading the screen's own listing
+guarantees by construction. The honest fix belongs with the windowing
+affordance itself (KnownIssues' *bounded view windows show markers, not more*
+row, owner 12) or with 13o's scoped reads; both are named at the code so
+neither phase rediscovers it.
+
+**Files:** `App/Variorum/Shared/RecoveryActs.swift`.
+
+---
+
+#### ROUTED AWAY, AND NOT TOUCHED (so round 3 can check the fence rather than the intent)
+
+- **LR2-4** (the phone's version-blind Put back / Delete Now accessibility labels) — routed to the CLOSEOUT's mobile batch-6 inheritance note; nothing touched here.
+- **LR1-3's product half** (interim phone take rows vs waiting for batch 6) — hers.
+- **LR1-7** (Promote has no confirm) — product-flavored, hers.
+- **LR1-4's purge-family expansion** — `Sources/VariorumCore/Sync/PurgeFamily.swift`, read only again this wave; its KnownIssues row is still the CLOSEOUT's.
+- **Batch 5's PROVISIONAL 1** (restore's Delete Now road takes stranded ancestors) — untouched, hers.
+
+#### OBSERVATIONS — nothing built, for the architect
+
+1. **The accidental protection is worth knowing about, because it is not a
+   design.** A version's own block copy is a live `derived_from` descendant of
+   the note's anchor, which is what keeps a released anchor out of
+   `joinStrandedOriginals`' fixpoint. It is real today and it is why the merge
+   leg does not sever through the purge — but nothing states it, nothing pins
+   it as intent, and any future change to what `copyPlacements` mints (or to
+   the stranding rule) would remove it silently. The re-anchor fix makes the
+   question moot for the restore road; the KnownIssues row's purge leg is where
+   it would matter again.
+2. **The stale edge is left standing, deliberately.** After the fix, a
+   merged-away moment carries TWO live `version_of` edges — the old one on the
+   released original and the fresh one on the new first block. The predicate is
+   an `EXISTS`, `versionOfNote` is a deterministic `LIMIT 1`, and `uq_edge_live`
+   is per (source, target, type), so nothing collides. Removing the old one
+   would be a lineage erasure (*lineage is a fact about what happened*) for no
+   read-side gain; it also rides its anchor's fate for free, which is the right
+   coupling.
+3. **`unmarkPostsAsVersions` cannot reach a stale edge**, because its
+   cross-predicate fences both sides to LIVE placements. That was already true
+   before this wave (LR1-1 created the possibility), and it stays a
+   theoretical-only gap while version rows are archived and therefore absent
+   from the Compare board and the Library rows that offer the door. Recorded so
+   round 3 does not read it as new.
+4. **No behavioural-revert residue** — `grep -rn "REVERT PROBE"` over
+   `Sources/VariorumCore/` and `App/Variorum/` is empty; the scratch probe file
+   used to drive `PurgeFamily.expand` was never committed and is deleted.
+
 ## Constraints
 
 Zero schema (B2 is read-side over `archived_at`; if ANYTHING firms
