@@ -80,7 +80,6 @@ struct PaneHost<Content: View>: View {
     /// observation does not re-run at autosave rate on the table autosave
     /// writes (its own doc comment carries the reasoning).
     @State private var trayCounts = Queries.TrayCounts(deleted: 0, preservedOriginals: 0)
-    @State private var trayShown = false
 
     /// 13k K12: her deliberate, sticky fold — this Mac's own preference,
     /// read the way every other local UI setting in the app is read
@@ -116,10 +115,10 @@ struct PaneHost<Content: View>: View {
                         onRemove: { tag in remove(tag, from: postID) })
                 },
                 tagsFolded: tagsFolded,
-                trayFace: notePostID.map { _ in
+                trayFace: notePostID.map { postID in
                     ContextBar.TrayFace(
                         deletedCount: trayCounts.deleted,
-                        onOpen: { trayShown = true })
+                        onOpen: { openTray(postID) })
                 },
                 onBack: onBack,
                 onForward: onForward,
@@ -129,16 +128,12 @@ struct PaneHost<Content: View>: View {
                 },
                 onToggleTags: onToggleTags)
             if bar.hasContent {
+                // The badge's popover is GONE (the post-13l polish round,
+                // ledger row 9 — the kickoff's C1 small call): the badge stays
+                // as the glance signal and opens THE SAME side panel the
+                // masthead's tray icon opens. Two doors, one panel, zero
+                // choreography drift.
                 bar
-                    // 13j J2: the badge's own panel, anchored on the bar it
-                    // belongs to. The `note ▾` menus host their own (the
-                    // `CommentsPanel` precedent — one view, presented where
-                    // each door lives).
-                    .popover(isPresented: $trayShown, arrowEdge: .bottom) {
-                        if let postID = notePostID {
-                            TrayPanel(session: session, postID: postID)
-                        }
-                    }
                 Divider().overlay(tokens.line)
             }
             if split, !focused, let selection = workspace.selections[pane] {
@@ -158,6 +153,25 @@ struct PaneHost<Content: View>: View {
         .task(id: noteID) { await loadBooks() }
         .task(id: notePostID) { await loadTags() }
         .task(id: notePostID) { await watchTray() }
+    }
+
+    /// **The badge's act** (the post-13l polish round, ledger row 9): open
+    /// this pane's note's tray — in the SIDE PANEL, which is the detail's,
+    /// not this bar's.
+    ///
+    /// The pane is focused FIRST, and that is the whole subtlety: an
+    /// unfocused pane renders read-cheap, so there is no `PostDetailView`
+    /// mounted to hold an inspector. The request is parked on the router
+    /// (stamped with its post) and the arriving detail consumes it on
+    /// registration — the `pendingWriteIntent` choreography, one act over.
+    /// Focusing an already-focused pane is a no-op, so the ordinary case
+    /// costs nothing.
+    private func openTray(_ postID: String) {
+        let request = TrayRequest(postID: postID)
+        if session.commandRouter.requestNoteTray(request) { return }
+        // Not mounted: focus this pane and let the arriving detail consume it.
+        onFocus()
+        session.commandRouter.pendingTrayRequest = request
     }
 
     /// 13j J2 — the badge's live counts (see `trayCounts`' own note for why

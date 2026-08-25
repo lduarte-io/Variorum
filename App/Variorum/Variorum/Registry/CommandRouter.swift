@@ -34,17 +34,36 @@ final class CommandRouter {
 
     @ObservationIgnored private var detailToken: UUID?
     @ObservationIgnored private var applyMode: ((PostMode) -> Void)?
+    /// How a tray request reaches the mounted detail's INSPECTOR (the
+    /// post-13l polish round, ledger row 9 — her C1 move). See
+    /// `requestNoteTray` for why this is its own seam and not a handler.
+    @ObservationIgnored private var showTray: ((TrayRequest) -> Void)?
 
     /// The post detail registers itself on appear; `applyMode` is how a
     /// routed request reaches its `@State` (composition, not broadcast).
+    /// `showTray` is the same seam for the inspector's tray panel — defaulted
+    /// nil so a host that has no inspector (and every pin) registers exactly
+    /// as before.
     func registerDetail(
-        postID: String, mode: PostMode, applyMode: @escaping (PostMode) -> Void
+        postID: String, mode: PostMode, applyMode: @escaping (PostMode) -> Void,
+        showTray: ((TrayRequest) -> Void)? = nil
     ) -> UUID {
         let token = UUID()
         detailToken = token
         activePostID = postID
         activeMode = mode
         self.applyMode = applyMode
+        self.showTray = showTray
+        // The arriving detail consumes a tray request parked for IT — the
+        // `pendingWriteIntent` choreography, one act over (see
+        // `requestNoteTray`). Stamped, so a park for another post never
+        // opens a panel on this one.
+        if let parked = pendingTrayRequest, parked.postID == postID {
+            pendingTrayRequest = nil
+            showTray?(parked)
+        } else if pendingTrayRequest?.postID != postID {
+            pendingTrayRequest = nil
+        }
         // Staleness (round-1 MAJOR, half b): a parked choreography intent
         // for ANOTHER post has missed its round — the detail it targeted is
         // gone. Clear it here (register-ordering-proof: on a P→Q switch
@@ -63,12 +82,14 @@ final class CommandRouter {
         guard token == detailToken else { return }  // a stale teardown after the next mount
         detailToken = nil
         applyMode = nil
+        showTray = nil
         activePostID = nil
         activeMode = nil
         // A genuine teardown (no successor mounted yet): any parked
         // choreography intent's round is over (round-1 MAJOR, half b).
         pendingWriteIntent = nil
         pendingTakesLanding = nil
+        pendingTrayRequest = nil
     }
 
     /// The detail reports its mode truth (its own `@State` changed).
@@ -114,6 +135,43 @@ final class CommandRouter {
             return false
         }
         applyMode(mode)
+        return true
+    }
+
+    // MARK: - The note tray's one panel (the post-13l polish round, C1)
+
+    /// **A tray request parked across a pane focus change**, the
+    /// `pendingWriteIntent` choreography exactly: one-shot, STAMPED with its
+    /// post, consumed by the arriving detail's registration.
+    ///
+    /// Why parking is needed at all: the ⌫ badge lives on the pane's context
+    /// bar, ABOVE the detail, and an UNFOCUSED pane renders read-cheap — no
+    /// `PostDetailView`, no inspector, nothing registered. So the badge
+    /// focuses its pane first and the request waits the one runloop the mount
+    /// takes.
+    var pendingTrayRequest: TrayRequest?
+
+    /// **Routes a tray request to the mounted detail's inspector.**
+    ///
+    /// It is its OWN seam rather than a `RoutedCommand` through the handler
+    /// stack, and the reason is ordering: `EditorView` registers a handler
+    /// INSIDE the post detail and therefore later, so a LIFO dispatch would
+    /// reach the editor's own sheet first and the panel would open in the
+    /// wrong place — a coin-flip on mount order deciding where a door leads.
+    /// The detail owns the inspector; the detail is what registers this.
+    ///
+    /// **It never parks by itself**, deliberately: a caller that has its own
+    /// fallback (the bars' sheet hosts) must be told "no" rather than have a
+    /// request quietly wait and then open a second panel later. The ONE
+    /// caller that wants parking is the badge, which has just focused its
+    /// pane and knows a detail is arriving — it sets `pendingTrayRequest`
+    /// itself, which is why that property is visible.
+    ///
+    /// Returns whether the panel was opened.
+    @discardableResult
+    func requestNoteTray(_ request: TrayRequest) -> Bool {
+        guard let showTray, activePostID == request.postID else { return false }
+        showTray(request)
         return true
     }
 

@@ -783,7 +783,10 @@ final class EditorSurfaceController {
             return StructuralOutcome(
                 caretBlockID: landing.blockID, caretOffset: landing.offset, seam: nil)
         }
-        if landed { model.showStatus(BlockSelectionCopy.archivedNote) }
+        // The post-13l polish round (batch 1's deferred item): the road this
+        // names depends on WHAT this pane is over — the same read the delete
+        // receipt takes, one act up.
+        if landed { model.showStatus(BlockSelectionCopy.archivedNote(home: homeKind)) }
     }
 
     /// The one delete-block body both doors use: the menu/bar act above and

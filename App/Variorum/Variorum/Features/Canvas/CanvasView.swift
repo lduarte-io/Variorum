@@ -898,17 +898,40 @@ struct PoolDetailView: View {
 
     @State private var mode: Mode = .scraps
     @State private var pendingCaret: Int?
+    /// **The scraps area's own tray, in its own side panel** (the post-13l
+    /// polish round, ledger row 9 + batch 1's deferred item).
+    ///
+    /// The scraps editor composes the same bars over a `kind='pool'`
+    /// container, so it inherited the `note ▾` menu's *"This Note's Tray…"*
+    /// item — a door with the wrong noun on it. Her C1 ruling moved that door
+    /// to an icon, and this surface takes the same icon: a pool's tray is the
+    /// scraps area's own, and `TrayPath.menuLabel(for:)` is where the noun is
+    /// decided (13l row 26's kind machinery, applied to the door's own name).
+    @State private var trayShown = false
+
+    /// The `.surface` act this view renders (P-1). Same act, same walk — the
+    /// scraps area is the third renderer of the one tray door.
+    static let surfaceCapabilities: [CapabilityID] = [.showNoteTray]
 
     var body: some View {
         VStack(spacing: 0) {
-            Picker("Pool mode", selection: $mode) {
-                ForEach(Mode.allCases, id: \.self) { mode in
-                    Text(mode.rawValue).tag(mode)
+            HStack(spacing: 8) {
+                Picker("Pool mode", selection: $mode) {
+                    ForEach(Mode.allCases, id: \.self) { mode in
+                        Text(mode.rawValue).tag(mode)
+                    }
                 }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .frame(maxWidth: 220)
+                Spacer()
+                Button(TrayPath.menuLabel(for: .pool), systemImage: "tray") {
+                    trayShown.toggle()
+                }
+                .labelStyle(.iconOnly)
+                .help("What this scraps area has set aside: blocks it archived, "
+                    + "and everything of its own on the \(TrashWindow.days)-day clock")
             }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .frame(maxWidth: 220)
             .padding(6)
             Divider()
             switch mode {
@@ -920,6 +943,12 @@ struct PoolDetailView: View {
                 CanvasView(session: session, containerID: poolID, offersLensSave: false)
                     .id("canvas-\(poolID)")
             }
+        }
+        .inspector(isPresented: $trayShown) {
+            TrayPanel(
+                session: session, postID: poolID, home: .pool,
+                onClose: { trayShown = false })
+                .inspectorColumnWidth(min: 280, ideal: 420)
         }
         .onAppear {
             guard let initialBlockID else { return }

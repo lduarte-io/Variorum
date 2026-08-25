@@ -317,6 +317,29 @@ struct CapabilityRegistryTests {
             // is the same class and is recorded as an unclosed gap rather
             // than swept in silently by this act.
             .union(DataSafetyPane.surfaceCapabilities)
+            // The post-13l polish round, batch 3 (A JUSTIFIED EDIT, the
+            // E2/E8/batch-3/6b class — and the most consequential one of
+            // them, because it changes WHERE A PURGE DOOR MAY LIVE):
+            //
+            // · `PostDetailView` renders the tray's NAMED door, the masthead
+            //   icon her C1 ruling moved it to (the `note ▾` item that used
+            //   to carry it was a `.bottomBar` door and is gone);
+            // · `PoolDetailView` renders the same act for the scraps area,
+            //   whose tray is its own;
+            // · `TrayPanel` renders `.restoreTake` on its take rows and —
+            //   the line to read twice — **`.deleteNow`**, which 13j
+            //   declared in-Trash-only forever. Her G5 fourth-sitting ruling
+            //   supersedes that IN PART: takes left the global Trash (D1), so
+            //   the capability would have had no door at all, and she placed
+            //   one on the note's leaving section *"to keep the
+            //   capability"*. The rule in its place: purge doors live in
+            //   TRASH SURFACES — the global Trash and the note-level trash
+            //   section — never in the writing flow. That is exactly the
+            //   review this walk exists to force, and it is why the two
+            //   surfaces are named here one line apart.
+            .union(PostDetailView.surfaceCapabilities)
+            .union(PoolDetailView.surfaceCapabilities)
+            .union(TrayPanel.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

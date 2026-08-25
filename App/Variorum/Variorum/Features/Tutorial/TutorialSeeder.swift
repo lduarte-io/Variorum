@@ -798,11 +798,13 @@ enum TutorialSeeder {
             + "undo stacks, kept separate on purpose, and a sign at the "
             + "junction.",
 
-            "Everything you just deleted is in this note's tray. A note that "
-            + "has deleted blocks wears a quiet \u{232B} badge with the count in "
-            + "the context bar above the page; the note \u{25BE} menu in the "
-            + "bottom bar carries This Note's Tray\u{2026} whether or not the "
-            + "badge is showing. The next two lessons live there.",
+            "Everything you just deleted is in This Note's Tray. Open it with "
+            + "the tray icon at the top of the note, beside Scraps and "
+            + "References — it opens in the panel on the right, and it is "
+            + "always there. A note that has deleted blocks also wears a quiet "
+            + "\u{232B} badge with the count in the context bar above the page; "
+            + "clicking it opens the same panel. The next two lessons live "
+            + "there.",
         ])
         _ = deletingBlocks
 
@@ -818,14 +820,14 @@ enum TutorialSeeder {
             "ARCHIVE ME: I'm worth keeping and I don't belong in this note "
             + "today. Put your cursor in me and use Block \u{25B8} Archive "
             + "Block — the right-click menu has the same row. I leave the page "
-            + "and wait in the tray's Deleted & archived section wearing "
+            + "and wait in the tray's Archived section wearing "
             + "\u{201C}kept — no clock\u{201D}, and Put back returns me to this "
             + "exact spot.",
 
             "DELETE ME: I've had my day. Block \u{25B8} Delete Block, or "
-            + "triple-click me and press \u{232B}. I go to the same tray with a "
-            + "countdown on me, and to the Trash in the Library, and in 30 days "
-            + "I'm gone for real.",
+            + "triple-click me and press \u{232B}. I go to the same tray's "
+            + "Leaving section with a countdown on me, and to the Trash in the "
+            + "Library, and in 30 days I'm gone for real.",
 
             "MOVE ME OUT: I'm a decent line in the wrong note. Open Blocks "
             + "(\u{2318}5), find my row, and use its \u{22EF} menu \u{25B8} Move "
@@ -842,15 +844,18 @@ enum TutorialSeeder {
         _ = trio
 
         _ = try lesson(deleting, "the tray & the Trash", [
-            "Every note keeps its own tray of what it set aside. Open it from "
-            + "note \u{25BE} \u{25B8} This Note's Tray\u{2026} in the bottom bar, "
-            + "or from the quiet \u{232B} badge in the context bar above the "
-            + "page. The badge counts DELETED blocks only and hides when there "
-            + "are none, which is exactly why the menu item is always there.",
+            "Every note keeps its own tray of what it set aside. Open it with "
+            + "the tray icon at the top of the note — This Note's Tray, in the "
+            + "panel on the right — or from the quiet \u{232B} badge in the "
+            + "context bar above the page, which opens the same panel. The badge "
+            + "counts DELETED blocks only and hides when there are none, which "
+            + "is exactly why the icon is always there.",
 
-            "The tray has two sections. Deleted & archived holds the blocks "
-            + "that left this note: deleted ones counting their days down, "
-            + "archived ones saying \u{201C}kept — no clock\u{201D}. Preserved "
+            "The tray has three sections. Archived holds what you set aside on "
+            + "purpose: kept, with no clock, forever. Leaving holds everything "
+            + "of this note's that is counting down — the blocks it deleted, "
+            + "the takes deleted on their own (folded away until you open "
+            + "them), and any original riding a family's countdown. Preserved "
             + "originals holds something else entirely — blocks that were never "
             + "deleted at all, kept whole when a divide or a merge made new "
             + "blocks out of them (the next lesson). One verb serves every row: "

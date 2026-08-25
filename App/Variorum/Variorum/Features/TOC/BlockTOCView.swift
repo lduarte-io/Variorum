@@ -461,7 +461,13 @@ struct BlockTOCView: View {
     private var traySection: some View {
         VStack(alignment: .leading, spacing: 4) {
             Button {
-                trayShown = true
+                // Ledger row 9: the ONE panel, wherever the door is — the
+                // router opens the detail's inspector, and this mode's own
+                // sheet is the fallback for a host with no inspector.
+                let request = TrayRequest(postID: postID)
+                if !session.commandRouter.requestNoteTray(request) {
+                    trayShown = true
+                }
             } label: {
                 Text("\(TrayPath.menuLabel) — \(model.tray.count) deleted")
                     .font(.caption.weight(.semibold))

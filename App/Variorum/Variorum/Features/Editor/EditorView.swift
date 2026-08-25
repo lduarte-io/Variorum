@@ -130,9 +130,16 @@ struct EditorView: View {
             // 13j J2: this note's tray — what it has deleted, and what a
             // divide or merge preserved whole. One view, presented wherever
             // a door raises it (the `CommentsPanel` precedent).
+            //
+            // The post-13l polish round (ledger row 9): the tray's HOME is
+            // the post detail's side panel now, and this sheet is the
+            // fallback for hosts that have no inspector — including the
+            // scraps editor, which is why it hands down the container's KIND
+            // (a pool's tray is the scraps area's own).
             TrayPanel(
                 session: session, postID: request.postID,
-                revealBlockID: request.revealBlockID)
+                revealBlockID: request.revealBlockID,
+                home: model.header?.kind ?? .post)
         }
         .sheet(item: $model.originPeek) { request in
             // 13j J3: the released original itself, read-only, with Put back

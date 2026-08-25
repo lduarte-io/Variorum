@@ -213,10 +213,14 @@ struct TrashSurfaceTests {
         #expect(TrayPath.daysLeftLabel(1) == "1 day left")
         #expect(TrayPath.daysLeftLabel(0) == "leaves today")
         #expect(TrayPath.archivedForever.contains("no clock"))
-        // The tray's first section takes back the name her round-2 ruling
-        // gave it, because the state it names EXISTS now (batch 2 could not
-        // honestly use it — no op wrote `archived_at`).
-        #expect(TrayPath.deletedSection == "Deleted & archived")
+        // The tray's two block sections wear the distinction the labels
+        // above make: one section says the clock in its header, the other
+        // says there is none. (This asserted the single "Deleted & archived"
+        // header until her G5 ruling split it — the CLAIM is unchanged and
+        // is now checked at its strongest in
+        // `NoteTrayTests.theTraysSectionsNameOnlyStatesTheProductCanProduce`.)
+        #expect(TrayPath.leavingSection.contains("\(TrashWindow.days)-day"))
+        #expect(TrayPath.archivedSection.contains("no clock"))
         // The Trash surface names the window in words, so a countdown is
         // never a bare threat.
         #expect(RecoveryPath.windowNote.contains("30 days"))

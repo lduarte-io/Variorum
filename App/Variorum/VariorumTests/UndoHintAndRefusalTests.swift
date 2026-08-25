@@ -191,9 +191,14 @@ struct UndoHintAndRefusalTests {
         // The named surface is a DECLARED, RENDERED act — not a sentence.
         let act = CapabilityRegistry.capability(.showNoteTray)
         #expect(act.verb == TrayPath.menuLabel)
-        #expect(act.doors == [.surface, .bottomBar])
+        // GRADUATED at the post-13l polish round, batch 3 (her C1 ruling —
+        // the door moved to the masthead icon and the `note ▾` item went
+        // with it). The pin's own point survives exactly: the receipt may
+        // only name a surface that HAS a door, and here are its renderers.
+        #expect(act.doors == [.surface])
+        #expect(PostDetailView.surfaceCapabilities.contains(.showNoteTray))
         #expect(ContextBar.surfaceCapabilities.contains(.showNoteTray))
-        #expect(CommitBar.renderedCapabilities.contains(.showNoteTray))
+        #expect(!CommitBar.renderedCapabilities.contains(.showNoteTray))
         // …and the interim truth survives beside it: ⌥⌘Z is still named,
         // because the two roads are different promises (one dies with the
         // session, one does not).

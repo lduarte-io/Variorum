@@ -45,7 +45,9 @@ struct TakesBottomBar: View {
             .labelTake,  // 13b Stage 3, 3D (N6): the block menu's label door
             .insertBlockBelow,  // 13b 4D (N28/S4-13): the block menu's insert door
             .deleteBlock,  // 13c 1B (A8): the block menu's delete door
-            .showNoteTray,  // 13j J2: the note ▾ menu's tray door
+            // (`.showNoteTray` LEFT this bar at the post-13l polish round,
+            // ledger row 9 — her C1 ruling; both bars lose it together, which
+            // is R6-2's one-grammar point applied to a REMOVAL.)
             .deleteNote,  // 13l Act 2 (item 3): Write's bar's door, here too
         ]
         // 13k K7: the formatting toolbar rides BOTH bars — the acts are
@@ -313,10 +315,6 @@ struct TakesBottomBar: View {
             Button(model.projection.sealed ? "Unseal" : "Seal") {
                 Task { await model.toggleSeal() }
             }
-            Divider()
-            // 13j J2: the tray's NAMED door — Write's bar's item, here, so
-            // the two bars keep one grammar (R6-2's whole point).
-            Button("\(TrayPath.menuLabel)\u{2026}") { model.requestNoteTray() }
             Divider()
             Button(model.projection.entryDate.map { "Date: \($0)…" } ?? "Set date…") {
                 pickedDate = CommitBar.date(fromDay: model.projection.entryDate) ?? Date()

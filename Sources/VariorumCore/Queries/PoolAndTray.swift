@@ -285,6 +285,115 @@ extension Queries {
             archived: row?["archived_count"] ?? 0)
     }
 
+    // MARK: - The note-scoped deleted TAKES (the post-13l polish round, G5)
+
+    /// **One deleted take of THIS note**, for the tray's leaving section.
+    ///
+    /// Her third-sitting ruling: *"the tray of a note should have an honest
+    /// trash section with everything being deleted, so it's never a surprise
+    /// — and takes can be shown in that per note trash, albeit maybe not
+    /// shown by default, so you can always see a list of what will be
+    /// deleted."* Takes left the GLOBAL Trash by her D1 ruling (a take alone
+    /// is too small to make sense of); this is the note-scoped AUDIT lens
+    /// that replaces nothing and hides nothing.
+    ///
+    /// It carries its BLOCK's identity because a take row that does not name
+    /// its block is the uselessness her A3 ruling named — `name` and the
+    /// block's default text are both here so the face can run them through
+    /// `tocHandle`, the one block-naming rule, rather than inventing a
+    /// second one.
+    public struct TrayTake: Equatable, Sendable, Identifiable {
+        /// The variant row — the id `restoreVariant` and `requestPurge` take.
+        public let variantID: String
+        public let blockID: String
+        /// The tombstone that started this take's own 30-day clock.
+        public let deletedAt: String
+        /// The take's label, where it has one.
+        public let label: String?
+        /// The take's own text (the row's preview).
+        public let text: String
+        /// The block's explicit handle, where set.
+        public let blockName: String?
+        /// The block's DEFAULT take's text — `tocHandle`'s second link, so a
+        /// nameless block still names itself by its first sentence.
+        public let blockText: String?
+
+        public var id: String { variantID }
+
+        public init(
+            variantID: String, blockID: String, deletedAt: String, label: String? = nil,
+            text: String = "", blockName: String? = nil, blockText: String? = nil
+        ) {
+            self.variantID = variantID
+            self.blockID = blockID
+            self.deletedAt = deletedAt
+            self.label = label
+            self.text = text
+            self.blockName = blockName
+            self.blockText = blockText
+        }
+    }
+
+    /// Every take of this note's blocks that is on its OWN 30-day clock,
+    /// newest tombstone first.
+    ///
+    /// **Which takes it lists, and why each fence is there:**
+    /// · `v.deleted_at >= cutoff` — the same read-side clock every recovery
+    ///   surface reads: past the window it has left every surface, and a
+    ///   listing that kept offering Put back would make the clock a lie;
+    /// · `b.deleted_at IS NULL` — a take that died WITH its block carries the
+    ///   block's stamp and comes back with `restoreBlock`, so it is already
+    ///   represented, one section up, by the block's own row (the global
+    ///   Trash's cascade-victim rule, applied per note). Listing it here
+    ///   would offer a Put back that refuses;
+    /// · the purge-intent fence — the standing read-side rule: an intented
+    ///   row is gone from every surface at once;
+    /// · the home is the block's LIVE PLACEMENT, falling back to
+    ///   `last_container_id` — so a block moved to another note audits there,
+    ///   and a released original (live, unplaced) still audits in the note it
+    ///   was released from, which is where its row already is.
+    ///
+    /// Cost ∝ this note's own fan history (`idx_variant_block` and the
+    /// ownership index), never the corpus — and it is a DELIBERATELY-opened
+    /// panel's read, like its siblings above.
+    public static func trayTakes(
+        _ db: Database, postID: String, now: Date, limit: Int? = nil
+    ) throws -> [TrayTake] {
+        var sql = """
+            SELECT v.id AS variant_id, v.block_id AS block_id,
+                   v.deleted_at AS deleted_at, v.label AS label,
+                   v.working_text AS text,
+                   b.name AS block_name, dv.working_text AS block_text
+            FROM variant v
+            JOIN block b ON b.id = v.block_id
+            LEFT JOIN container_block cb
+              ON cb.block_id = b.id AND cb.deleted_at IS NULL
+            LEFT JOIN variant dv
+              ON dv.id = b.default_variant_id AND dv.deleted_at IS NULL
+            WHERE v.deleted_at IS NOT NULL AND v.deleted_at >= :cutoff
+              AND b.deleted_at IS NULL
+              AND COALESCE(cb.container_id, b.last_container_id) = :post
+              AND NOT EXISTS (SELECT 1 FROM purge_intent pi
+                WHERE pi.table_name = 'variant' AND pi.row_id = v.id
+                  AND (pi.deleted_at IS NULL OR pi.deleted_at >= v.deleted_at))
+            ORDER BY v.deleted_at DESC, v.id
+            """
+        var arguments: StatementArguments = [
+            "post": postID, "cutoff": TrashWindow.cutoffStamp(now: now),
+        ]
+        if let limit {
+            sql += " LIMIT :limit"
+            arguments += ["limit": limit]
+        }
+        return try Row.fetchAll(db, sql: sql, arguments: arguments).map {
+            TrayTake(
+                variantID: $0["variant_id"], blockID: $0["block_id"],
+                deletedAt: $0["deleted_at"], label: $0["label"],
+                text: $0["text"] ?? "", blockName: $0["block_name"],
+                blockText: $0["block_text"])
+        }
+    }
+
     /// One live-but-unplaced block (divide-W/merge lineage leftovers).
     ///
     /// **13j J6 — the room this fed is GONE.** Her round-2 ruling removed

@@ -103,14 +103,23 @@ struct NoteTrayTests {
         }
     }
 
-    // MARK: - The registry: ONE act, TWO doors (P-1)
+    // MARK: - The registry: ONE act, its doors (P-1)
 
-    @Test func theTrayIsDeclaredOnceWithBothItsDoors() {
+    /// **GRADUATED at the post-13l polish round, batch 3 (a JUSTIFIED PIN
+    /// EDIT — the ruled change IS the behaviour change).** Her C1 ruling:
+    /// *"the note tray should move to being an icon next to the scraps and
+    /// reference icon and open in the side bar"*, and *"the note ▾ menu item
+    /// and ⌫ badge choreography follow the move"*. So the `.bottomBar` door
+    /// is GONE and the act is `.surface`-only, with three renderers instead
+    /// of two. The pin's own claim is unchanged and is checked at the same
+    /// strength: one act, declared once, every renderer naming it.
+    @Test func theTrayIsDeclaredOnceWithAllItsDoors() {
         let act = CapabilityRegistry.capability(.showNoteTray)
         #expect(act.verb == TrayPath.menuLabel)
         #expect(act.scope == .post)
-        #expect(act.doors == [.surface, .bottomBar],
-                "the context bar's badge and the note ▾ item — declared together")
+        // The masthead icon, the ⌫ badge and the scraps area's own — all
+        // surfaces; the `note ▾` item moved with the panel.
+        #expect(act.doors == [.surface])
         #expect(act.takesAccess == .native, "R118: not a Write privilege")
         // Acts wherever a note is on screen; honestly grey at a place.
         #expect(CapabilityRegistry.availability(
@@ -123,18 +132,30 @@ struct NoteTrayTests {
             "the book-inline / pool editors carry no mode and still hold a note")
         #expect(!CapabilityRegistry.isEnabled(
             .showNoteTray, in: CapabilityContext(mode: nil)))
-        // Both renderers name it (the walk asserts the rest).
+        // Every renderer names it (the walk asserts the rest).
+        #expect(PostDetailView.surfaceCapabilities.contains(.showNoteTray))
         #expect(ContextBar.surfaceCapabilities.contains(.showNoteTray))
-        #expect(CommitBar.renderedCapabilities.contains(.showNoteTray))
-        #expect(TakesBottomBar.renderedCapabilities.contains(.showNoteTray))
+        #expect(PoolDetailView.surfaceCapabilities.contains(.showNoteTray))
+        #expect(!CommitBar.renderedCapabilities.contains(.showNoteTray))
+        #expect(!TakesBottomBar.renderedCapabilities.contains(.showNoteTray))
     }
 
-    /// The named door is the one that is ALWAYS there — a badge that hides
-    /// at zero cannot be the only way in, which is the whole reason the act
-    /// carries two doors.
-    @Test func theNoteMenuDoorRaisesTheTrayForThisNote() async throws {
+    /// **The FALLBACK road, and why it is not vestigial** (graduated at the
+    /// post-13l polish round, batch 3).
+    ///
+    /// The tray's home is the post detail's side panel now, so a door asks
+    /// the router first. This editor, though, is also composed where there is
+    /// no post detail and therefore no inspector — the scraps editor's own
+    /// hosts and the book-inline form — and a door that could not act in
+    /// those contexts would be a door that should not have been rendered
+    /// (P-2). So with no detail registered the request still lands: the
+    /// model's own sheet. The panel road is pinned over the REAL mounted
+    /// surface in `TrayPanelMoveTests`.
+    @Test func aTrayDoorWithNoSidePanelToOpenFallsBackToItsOwnSheet() async throws {
         try await withEditor(seedBlocks: ["Alpha."]) { editor in
             #expect(editor.model.trayRequest == nil)
+            #expect(editor.session.commandRouter.activePostID == nil,
+                    "no post detail is mounted in this harness")
             editor.model.requestNoteTray()
             let request = try #require(editor.model.trayRequest)
             #expect(request.postID == editor.postID)
@@ -165,23 +186,37 @@ struct NoteTrayTests {
         }
     }
 
-    /// **The section name, GRADUATED — the same claim, the other side of a
-    /// ruling** (13j batch 6; the batch-1→2 receipt pin's own precedent).
+    /// **The section names, GRADUATED TWICE — the same claim, the next side
+    /// of a ruling** (13j batch 6, then the post-13l polish round's row 20).
     ///
     /// Batch 2 verified that NO shipped operation wrote `block.archived_at`
     /// and named the section "Deleted" for it: naming a state the product
     /// cannot produce is the same defect as naming a door that does not
     /// exist. Her round-7 ruling BUILT the state (`archiveBlock`), so the
-    /// name her round-2 ruling wanted comes back with it — and the pin keeps
-    /// its claim in the stronger form: the heading may name "archived" only
-    /// while an op can actually produce one and the tray can list it.
-    @Test func theDeletedSectionNamesOnlyStatesTheProductCanProduce() {
-        #expect(TrayPath.deletedSection == "Deleted & archived")
-        // The state is real: the act is declared with its doors, and the
-        // tray has a listing to put an archived block in.
+    /// name her round-2 ruling wanted came back with it — as ONE header,
+    /// *"Deleted & archived"*, holding a forever-list and a countdown
+    /// together. Her G5 ruling splits them, for the reason her B2 ruling gave
+    /// one level up (*"separating archive and trash more makes sense"*), and
+    /// the pin keeps its claim in the stronger form: each heading may name
+    /// only what its own section can hold, and the clock is what tells them
+    /// apart.
+    @Test func theTraysSectionsNameOnlyStatesTheProductCanProduce() {
+        #expect(TrayPath.archivedSection.contains("no clock"),
+                "the forever section says so in its own header")
+        #expect(TrayPath.leavingSection.contains("\(TrashWindow.days)-day"),
+                "and the other one wears the clock")
+        #expect(!TrayPath.archivedSection.lowercased().contains("delet"),
+                "the two states never share a header again")
+        // The archived state is real: the act is declared with its doors, and
+        // the tray has a listing to put an archived block in.
         #expect(CapabilityRegistry.capability(.archiveBlock).verb == "Archive Block")
         #expect(TrayPath.archivedForever.contains("no clock"),
                 "…and the row says what makes it different from a deleted one")
+        // The leaving section says what it is FOR — her "never a surprise".
+        for word in ["blocks", "takes", "originals"] {
+            #expect(TrayPath.leavingExplainer.lowercased().contains(word),
+                    "the explainer names every population it holds: \(word)")
+        }
     }
 
     // MARK: - Put back
@@ -323,7 +358,19 @@ struct NoteTrayTests {
         #expect(BlockSelectionCopy.deletedNote(4).contains("in one go"))
         // The named door is a REAL, declared one.
         #expect(CapabilityRegistry.capability(.showNoteTray).verb == TrayPath.menuLabel)
-        #expect(TrayPath.doorPhrase.contains(TrayPath.doorGlyph))
+        // **GRADUATED at the post-13l polish round, batch 3** (a justified
+        // pin edit, and the claim gets STRONGER): this asserted the phrase
+        // named the ⌫ BADGE's glyph. Her C1 ruling made the masthead icon the
+        // named door, and the badge is deleted-only by her #67(a) ruling — so
+        // a receipt pointing at the badge can point at a door that is not on
+        // screen. What the pin holds now is the property that mattered all
+        // along: the phrase names a door that is ALWAYS there.
+        #expect(!TrayPath.doorPhrase.contains(TrayPath.doorGlyph),
+                "never the badge — it hides at zero")
+        #expect(TrayPath.doorPhrase == TrayPath.doorPhrase(for: .post))
+        #expect(TrayPath.doorPhrase.contains("icon"))
+        #expect(PostDetailView.inspectorDoors.contains { $0.panel.isTray },
+                "…and that icon is really rendered, from the masthead's table")
     }
 
     /// One receipt, every delete door — still true after the graduation

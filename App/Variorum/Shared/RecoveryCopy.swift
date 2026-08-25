@@ -164,6 +164,74 @@ nonisolated enum RecoveryCopy {
     static let goesWithItsFamily =
         "set aside by a divide or merge \u{2014} kept until its family goes"
 
+    // MARK: THE NOTE'S OWN TRAY — its three sections (the post-13l polish
+    // round, ledger rows 9 and 20: her C1 move to the side panel and her G5
+    // *"honest trash section"*)
+
+    /// **Archived blocks — kept, forever, no clock** (lifecycle row B1: the
+    /// note's tray only, never a global surface).
+    ///
+    /// It used to share a header with the deleted ones (*"Deleted &
+    /// archived"*), which asked her to hold the difference between a
+    /// forever-list and a countdown inside one section. Her B2 ruling split
+    /// exactly that pair one level up — *"separating archive and trash more
+    /// makes sense"* — and the same argument is true inside a note.
+    static let trayArchivedSection = "Archived \u{2014} kept, no clock"
+
+    /// **The leaving section** (her G5 ruling, verbatim: *"the tray of a note
+    /// should have an honest trash section with everything being deleted, so
+    /// it's never a surprise… so you can always see a list of what will be
+    /// deleted"*). Everything of THIS note that is on the 30-day clock.
+    static let trayLeavingSection = "Leaving \u{2014} on the \(TrashWindow.days)-day clock"
+
+    /// The one line under that header: what the section is FOR. Her word was
+    /// *"never a surprise"*, and a section that lists three different kinds of
+    /// thing owes one sentence saying so.
+    static var trayLeavingExplainer: String { trayLeavingExplainer(.post) }
+
+    /// The scraps area composes the same panel over a pool, so the sentence
+    /// takes the home's kind rather than calling a scraps area a note (13l
+    /// row 26's rule, which this whole family now keeps).
+    static func trayLeavingExplainer(_ home: ContainerKind) -> String {
+        "Everything this \(homeWord(home)) has on the clock: blocks it deleted, "
+        + "takes deleted on their own, and originals riding a family's "
+        + "countdown. Put back keeps a row; \(deleteNowVerb) ends its days early."
+    }
+
+    /// The tray's empty states, in the home's own noun.
+    static func trayNothingArchived(_ home: ContainerKind) -> String {
+        "Nothing archived from this \(homeWord(home)). Archiving a block keeps "
+        + "it here with no countdown."
+    }
+
+    static func trayNothingLeaving(_ home: ContainerKind) -> String {
+        "Nothing from this \(homeWord(home)) is on the clock."
+    }
+
+    /// The reveal's arrival-time explanation (`TrayViewModel.revealMissing`).
+    static func trayRevealMissing(_ home: ContainerKind) -> String {
+        "The block you asked to see isn't in this \(homeWord(home))'s tray."
+    }
+
+    /// The takes disclosure's label — **collapsed by default** (her *"albeit
+    /// maybe not shown by default"*), and it carries the count either way,
+    /// because a fold that hides its own size is not an audit.
+    static func trayTakesDisclosure(_ count: Int) -> String {
+        count == 1 ? "1 deleted take" : "\(count) deleted takes"
+    }
+
+    /// A take row NAMES ITS BLOCK (her A3 discipline: *"a deleted take
+    /// definitely needs to name both note & block or it's kinda useless"* —
+    /// the note is the panel, so the row owes the block).
+    static func trayTakeInBlock(_ blockHandle: String) -> String {
+        "in \(blockHandle)"
+    }
+
+    /// A take that has no label of its own says what it is, in the take's own
+    /// noun — the `BlockPastCopy.emptyTake` lesson, which caught an empty take
+    /// calling itself a block.
+    static let emptyTakeLabel = "(empty take)"
+
     // MARK: Put-back receipts (the three landings)
 
     static let putBackWhereItWas = "Put back where it was."

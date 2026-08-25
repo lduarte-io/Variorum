@@ -637,15 +637,22 @@ nonisolated enum CapabilityRegistry {
         // with a particular post, because just going to the library you get a
         // little lost."*
         //
-        // TWO doors for ONE act, which is the whole reason it is declared:
-        // the context bar's quiet `⌫ N` badge (`.surface`, rendered only
-        // when this note has deleted something — sitting round 1's "calm at
-        // rest") and the `note ▾` menu's item, which is named in words and
-        // is always there, because a badge that hides when the count is zero
-        // cannot be the only way in.
+        // THREE doors for ONE act, all of them `.surface` since her C1 ruling
+        // (the post-13l polish round, ledger row 9): *"the note tray should
+        // move to being an icon next to the scraps and reference icon and open
+        // in the side bar."* So the NAMED door is the post detail masthead's
+        // tray icon; the context bar's quiet `⌫ N` badge is the glance signal
+        // and opens the same panel (calm at rest — sitting round 1); the
+        // scraps area's own header carries the third, because it composes the
+        // same editor over a pool and its tray is the scraps area's.
+        //
+        // **The `note ▾` menu's `.bottomBar` item is GONE**, by her ruling:
+        // *"the note ▾ menu item and ⌫ badge choreography follow the move"*.
+        // Both bars lost it in the same commit — a removal is where R6-2's
+        // one-grammar rule matters most.
         Capability(
             id: .showNoteTray, verb: TrayPath.menuLabel, scope: .post,
-            doors: [.surface, .bottomBar],
+            doors: [.surface],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Open a note and its tray lists what it has deleted.",
             availability: noteScoped),
@@ -730,19 +737,30 @@ nonisolated enum CapabilityRegistry {
                 + "right-click one in the Library. \(RecoveryPath.archivedSurface) keeps it, "
                 + "with no countdown.",
             availability: always),
-        // 13j batch 6b (J1 — the purge doors, IN-TRASH ONLY forever: her
-        // round-3 rider's letter). `.surface` acts on the Trash's own rows
-        // and header; app scope because a Trash row can be any kind, and
-        // the surface itself is app chrome, not a mode. Both back onto ONE
+        // 13j batch 6b (J1 — the purge doors). `.surface` acts on the Trash's
+        // own rows and header; app scope because a Trash row can be any kind,
+        // and the surface itself is app chrome, not a mode. Both back onto ONE
         // op (`requestPurge` — the intent write); the janitor takes the
         // bytes when the horizon allows, and the receipts say exactly that
         // split (the J8 honesty bar).
+        //
+        // **THE IN-TRASH-ONLY RULE, EVOLVED** (the post-13l polish round,
+        // ledger row 20 — her G5 fourth-sitting addition). 13j's round-3 rider
+        // read *"inside the Trash only — never a door in a note or the editor,
+        // ever"*; takes then LEFT the global Trash by her D1 ruling, which
+        // would have left the capability with no door at all, so she placed
+        // one on the take rows in the note's own leaving section *"to keep the
+        // capability"*. The rule in its place, recorded for the closeout's
+        // delta: **purge doors live in TRASH SURFACES — the global Trash and
+        // the note-level trash section — and never in the writing flow.**
+        // `.emptyTrash` is untouched: it is the global door and stays global.
         Capability(
             id: .deleteNow, verb: "Delete Now", scope: .app,
             doors: [.surface],
             shortcutLabel: nil, takesAccess: .native,
-            unavailableNote: "Delete Now lives in the Trash — "
-                + "\(RecoveryPath.surface) holds it, never a note.",
+            unavailableNote: "Delete Now lives where things are already "
+                + "deleted — \(RecoveryPath.surface), and the Leaving section "
+                + "of a note's own tray. Never in the writing itself.",
             availability: { _ in .act }),
         Capability(
             id: .emptyTrash, verb: "Empty Trash", scope: .app,

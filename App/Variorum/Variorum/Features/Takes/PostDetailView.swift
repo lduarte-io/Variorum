@@ -43,6 +43,38 @@ struct PostDetailView: View {
     /// every call site and pin naming unchanged.
     typealias Mode = PostMode
 
+    /// **The masthead's inspector cluster, as a table** (the post-13l polish
+    /// round, ledger row 9). Her ruling put the tray *"next to the scraps and
+    /// reference icon"*, so the three are one row and the row is one value.
+    struct InspectorDoor: Hashable {
+        let panel: InspectorPanel
+        let title: String
+        let symbol: String
+        let help: String
+    }
+
+    static let inspectorDoors: [InspectorDoor] = [
+        InspectorDoor(
+            panel: .tray(revealBlockID: nil), title: TrayPath.menuLabel,
+            symbol: "tray",
+            help: "What this note has set aside: blocks it archived, "
+                + "everything of its own that is on the \(TrashWindow.days)-day "
+                + "clock, and the originals a divide or a merge kept whole"),
+        InspectorDoor(
+            panel: .scraps, title: "Scraps", symbol: "square.on.square.dashed",
+            help: "Show the scraps beside the draft — drag one into the page "
+                + "(⌥ carries its whole fan)"),
+        InspectorDoor(
+            panel: .references, title: "References", symbol: "books.vertical",
+            help: "Show the note's references (sources beside the draft)"),
+    ]
+
+    /// The `.surface` act this view renders (P-1's declared ⇔ rendered walk).
+    /// `.showNoteTray`'s NAMED door is the masthead icon since her C1 ruling —
+    /// the `note ▾` menu item moved with the panel, and the context bar's ⌫
+    /// badge is the second renderer of the same act, as it always was.
+    static let surfaceCapabilities: [CapabilityID] = [.showNoteTray]
+
     /// 13b 4D (S4-20, her reversal on the record): a post opens in WRITE
     /// the first time — supersedes the takes-first half of R72/R79
     /// (Sitting 9); the per-post mode MEMORY stands untouched: thereafter
@@ -62,9 +94,30 @@ struct PostDetailView: View {
     /// hybrid primitive fires in the editor — TK2 §3: no folding here).
     @State private var pendingCaret: Int?
     /// The inspector's occupant (session UI state): the reference panel
-    /// (Phase 11b B3 — per-post sources beside the draft) or — 13b Stage 3,
-    /// 3D (N19) — the SCRAPS panel, the drag-into-draft geometry.
-    enum InspectorPanel { case references, scraps }
+    /// (Phase 11b B3 — per-post sources beside the draft), the SCRAPS panel
+    /// (13b Stage 3, 3D — N19: the drag-into-draft geometry), or — the
+    /// post-13l polish round, ledger row 9 — **THIS NOTE'S TRAY**.
+    ///
+    /// Her C1 ruling, verbatim: *"the note tray should move to being an icon
+    /// next to the scraps and reference icon and open in the side bar, with
+    /// preserved originals separated from deleted… if it opened in a pane to
+    /// the right, it would have the space to let you scroll through them at a
+    /// more reasonable size and would keep the top bar from being crowded."*
+    ///
+    /// `revealBlockID` rides the case because the lineage door's landing
+    /// marks a row (`TrayRequest.revealBlockID`), and a panel identity that
+    /// forgot it would land the door somewhere true and say nothing about
+    /// which row it meant.
+    enum InspectorPanel: Hashable {
+        case references
+        case scraps
+        case tray(revealBlockID: String?)
+
+        var isTray: Bool {
+            if case .tray = self { return true }
+            return false
+        }
+    }
     @State private var inspectorPanel: InspectorPanel?
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -114,19 +167,19 @@ struct PostDetailView: View {
                     .help("This note's mode — Write · Takes · Lenses · Compare · "
                         + "Blocks · Canvas (⌘1–⌘6)")
                 }
-                Button("Scraps", systemImage: "square.on.square.dashed") {
-                    inspectorPanel = inspectorPanel == .scraps ? nil : .scraps
+                // The masthead's inspector cluster, rendered FROM its door
+                // table (the `LibraryCatalogView.mastheadDoors` precedent —
+                // the table is the render source, not a comment beside one),
+                // so "the tray icon sits with scraps and references" is a
+                // claim a pin can hold.
+                ForEach(Self.inspectorDoors, id: \.panel) { door in
+                    Button(door.title, systemImage: door.symbol) {
+                        toggle(door.panel)
+                    }
+                    .labelStyle(.iconOnly)
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                    .help(door.help)
                 }
-                .labelStyle(.iconOnly)
-                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                .help("Show the scraps beside the draft — drag one into the page "
-                    + "(⌥ carries its whole fan)")
-                Button("References", systemImage: "books.vertical") {
-                    inspectorPanel = inspectorPanel == .references ? nil : .references
-                }
-                .labelStyle(.iconOnly)
-                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                .help("Show the note's references (sources beside the draft)")
             }
             .frame(maxWidth: mastheadMeasure, alignment: .leading)
             .frame(maxWidth: .infinity)
@@ -177,6 +230,21 @@ struct PostDetailView: View {
             case .scraps:
                 ScrapsPanel(session: session)
                     .inspectorColumnWidth(min: 220, ideal: 300)
+            case .tray(let revealBlockID):
+                // Her C1 ruling's whole point is the ROOM: the tray was a
+                // sheet whose rows squeezed their previews to ten characters
+                // (the walk's P-1). It gets the widest ideal of the three
+                // panels, and the panel closes through the host — an
+                // inspector column is not a sheet, so `dismiss` is not the
+                // way out of it.
+                TrayPanel(
+                    session: session, postID: postID,
+                    revealBlockID: revealBlockID,
+                    onClose: { inspectorPanel = nil })
+                    // A reveal identifies its own request, so arriving at a
+                    // DIFFERENT row rebuilds the panel with its mark.
+                    .id("tray-\(postID)#\(revealBlockID ?? "")")
+                    .inspectorColumnWidth(min: 280, ideal: 420)
             case nil:
                 EmptyView()
             }
@@ -190,9 +258,16 @@ struct PostDetailView: View {
             mode = Self.rememberedMode(postID: postID)
             if let initialBlockID { jump(to: initialBlockID) }
             let binding = $mode
+            let panel = $inspectorPanel
             routerToken = session.commandRouter.registerDetail(
-                postID: postID, mode: mode
-            ) { binding.wrappedValue = $0 }
+                postID: postID, mode: mode,
+                applyMode: { binding.wrappedValue = $0 },
+                // Ledger row 9: the badge and any other door onto the tray
+                // reach THIS inspector by composition — the same seam the
+                // mode router uses, never a broadcast (P-4).
+                showTray: { request in
+                    panel.wrappedValue = .tray(revealBlockID: request.revealBlockID)
+                })
         }
         .onDisappear {
             if let routerToken {
@@ -221,6 +296,18 @@ struct PostDetailView: View {
             UserDefaults.standard.set(new.rawValue, forKey: "postMode.\(postID)")
             session.commandRouter.noteMode(new)
         }
+    }
+
+    /// One icon, one panel: pressing the door that is already open puts it
+    /// away (the shipped scraps/references idiom, now shared by three).
+    /// A tray door pressed while the tray shows a REVEAL closes it too — the
+    /// panel identity is the case, and the icon's case carries no reveal.
+    private func toggle(_ panel: InspectorPanel) {
+        if panel.isTray {
+            inspectorPanel = inspectorPanel?.isTray == true ? nil : panel
+            return
+        }
+        inspectorPanel = inspectorPanel == panel ? nil : panel
     }
 
     /// R67 — the post's identity, always visible and renameable in place.

@@ -70,20 +70,53 @@ import VariorumCore
 /// the label must be the same string or they drift apart. Rename here and
 /// every receipt follows.
 nonisolated enum TrayPath {
-    /// The note-menu item, and the panel's own title.
+    /// The panel's own title, and the name every receipt promises.
     static let menuLabel = "This Note's Tray"
+
+    /// **The same tray, on a surface that is not a note** (the post-13l
+    /// polish round, batch 1's deferred item: the scraps editor's `note ▾`
+    /// item said *"This Note's Tray…"* over a pool). A pool's tray is the
+    /// scraps area's own — the `BlockRestoreLanding` kind machinery's
+    /// precedent (13l row 26), applied to the door's own name.
+    static func menuLabel(for home: ContainerKind) -> String {
+        switch home {
+        case .post: return menuLabel
+        case .pool: return "This Scraps Area's Tray"
+        }
+    }
+
     /// The context bar's quiet badge — a backspace glyph and a count.
     static let doorGlyph = "\u{232B}"
-    /// How the receipts point at the badge. Named as a place in the note's
-    /// own chrome, never as a menu path: the badge is the door she will see
-    /// while she is standing where the delete happened.
-    static let doorPhrase = "the \(doorGlyph) door in the note's bar"
-    /// The first section's header — **"Deleted & archived"**, the name her
-    /// round-2 ruling gave it and batch 2 could not honestly use: no
-    /// operation wrote `block.archived_at` then, so the heading would have
-    /// named a state the product could not produce. Her round-7 ruling built
-    /// the state (`archiveBlock`), so the name comes back with it.
-    static let deletedSection = "Deleted & archived"
+
+    /// **How the receipts point at the door** — and since her C1 ruling the
+    /// door they point at is the ICON, not the badge.
+    ///
+    /// Her words: *"the note tray should move to being an icon next to the
+    /// scraps and reference icon and open in the side bar."* The badge
+    /// survives as the glance signal (the kickoff's small call — clicking it
+    /// opens the same panel), but a receipt must name a door that is ALWAYS
+    /// there, and the badge is deleted-only by her own #67(a) ruling: an
+    /// archived block would be pointed at a badge that is not on screen.
+    static let doorPhrase = doorPhrase(for: .post)
+
+    static func doorPhrase(for home: ContainerKind) -> String {
+        switch home {
+        case .post: return "the tray icon at the top of the note"
+        case .pool: return "the tray icon at the top of the scraps area"
+        }
+    }
+
+    /// **The tray's three sections** (the post-13l polish round, ledger rows
+    /// 9 and 20 — her C1 *"preserved originals separated from deleted"* and
+    /// her G5 leaving section). The names are SEMANTIC, so they live in the
+    /// shared home and the phone's batch-6 tray inherits them.
+    ///
+    /// *(The single `"Deleted & archived"` header these two replace held a
+    /// forever-list and a countdown under one name — the same blur her B2
+    /// ruling split one level up, inside one note.)*
+    static let archivedSection = RecoveryCopy.trayArchivedSection
+    static let leavingSection = RecoveryCopy.trayLeavingSection
+    static let leavingExplainer = RecoveryCopy.trayLeavingExplainer
     static let originalsSection = "Preserved originals"
     /// The one verb, both sections.
     ///
@@ -197,6 +230,22 @@ final class TrayViewModel {
     /// only hold things that will actually stay).
     private(set) var originals: [Queries.PreservedOriginal] = []
     private(set) var originalsTruncated = false
+    /// **The note's deleted TAKES** (the post-13l polish round, ledger row 20
+    /// — her G5 ruling: *"takes can be shown in that per note trash, albeit
+    /// maybe not shown by default, so you can always see a list of what will
+    /// be deleted"*). They left the GLOBAL Trash by her D1 ruling; this is the
+    /// note-scoped audit lens that replaces it, and the ONLY place a take
+    /// carries a purge door.
+    ///
+    /// They ride the SAME observation as the rest of the tray rather than a
+    /// second one started by the disclosure, deliberately: the panel's
+    /// existing arms already read `variant` (`trayBlocks` joins the default
+    /// take's text), so the observation already re-runs when a buffer is
+    /// saved — a second lifecycle would buy nothing and would cost the
+    /// collapsed section its count, and a fold that hides its own size is not
+    /// an audit.
+    private(set) var takes: [Queries.TrayTake] = []
+    private(set) var takesTruncated = false
     /// The originals whose last live descendant has been deleted: they have
     /// MOVED onto the family's clock, and the tray shows the move rather than
     /// letting a row quietly change meaning where she is not looking. Keyed
@@ -259,6 +308,13 @@ final class TrayViewModel {
 
     var isEmpty: Bool {
         deleted.isEmpty && archived.isEmpty && originals.isEmpty && stranded.isEmpty
+            && takes.isEmpty
+    }
+
+    /// Is anything on this note's clock? — the leaving section's own emptiness,
+    /// named so the face asks one question instead of three.
+    var nothingIsLeaving: Bool {
+        deleted.isEmpty && stranded.isEmpty && takes.isEmpty
     }
 
     /// True once the listings have loaded and the requested block was in
@@ -304,7 +360,11 @@ final class TrayViewModel {
                     // observation while the note is open, so its cost is P1's
                     // business (`Queries.originFamilyClocks`).
                     strandedFates: try Queries.originFamilyClocks(
-                        db, postID: postID, now: now))
+                        db, postID: postID, now: now),
+                    // Ledger row 20: the leaving section's third population,
+                    // bounded in SQL like its siblings.
+                    takes: try Queries.trayTakes(
+                        db, postID: postID, now: now, limit: Self.window + 1))
             }) {
                 adopt(value)
             }
@@ -319,6 +379,7 @@ final class TrayViewModel {
         var archived: [Queries.TrayItem] = []
         var originals: [Queries.PreservedOriginal] = []
         var strandedFates: [String: Queries.OriginFamilyFate] = [:]
+        var takes: [Queries.TrayTake] = []
     }
 
     /// Internal so tests drive the panel deterministically (the
@@ -328,6 +389,8 @@ final class TrayViewModel {
         deleted = deletedTruncated
             ? Array(snapshot.deleted.prefix(Self.window)) : snapshot.deleted
         archived = Array(snapshot.archived.prefix(Self.window))
+        (takes, takesTruncated) = TrashListing.windowed(
+            snapshot.takes, window: Self.window)
         strandedFates = snapshot.strandedFates
         // The SPLIT her round-8b ruling asked for, made where the two lists
         // are handed over: an original with a live descendant stays in the
@@ -430,6 +493,85 @@ final class TrayViewModel {
             status = .refusal(String(describing: error))
         }
     }
+
+    /// A deleted TAKE: `restoreVariant` — the recovery-door class (no undo
+    /// entry; the door IS the recovery). The receipt reads the op's OWN
+    /// answer, exactly as every other put-back road on this model does: the
+    /// restore is an exact flip (#68(b)), so a take that was archived when it
+    /// was deleted comes back archived, into the archived listing rather than
+    /// the fan, and one sentence for both would be false for one of them.
+    func putBackTake(_ variantID: String) async {
+        status = nil
+        do {
+            let restored = try await session.runner.run { ops in
+                try ops.restoreVariant(variantID)
+            }
+            status = .receipt(RecoveryCopy.takeRestoredReceipt(restored))
+        } catch let error as OperationError {
+            status = .refusal(TrayRefusalCopy.message(for: error))
+        } catch {
+            status = .refusal(DeletionRefusal.fallback(error))
+        }
+    }
+
+    // MARK: - Delete Now, on a take, HERE (her G5 fourth-sitting addition)
+
+    /// **The purge door's pending ask.** Her ruling gave the take rows in this
+    /// section a Delete Now *"to keep the capability"* — and the
+    /// confirmation-consistency principle binds it exactly as it binds the
+    /// Trash's: **it confirms EVERY time**, with no don't-ask state anywhere
+    /// and none to be added (her round-10 ruling).
+    ///
+    /// **This is the evolved in-Trash-only rule, not a breach of it.** The
+    /// 13j round-3 rider said purge doors live *"inside the Trash only —
+    /// never a door in a note or the editor, ever"*; her G5 ruling
+    /// supersedes it IN PART with the rule the round records: purge doors
+    /// live in TRASH SURFACES — the global Trash and this note-level trash
+    /// section — and never in the writing flow. This section is a trash
+    /// surface: it lists only what is already deleted and already counting
+    /// down.
+    private(set) var pendingPurge: TrashPurge.Confirm?
+
+    /// The per-row door: raises the confirm, never acts. The Trash's own
+    /// `requestDeleteNow` shape, and the same shared rule behind it.
+    func requestDeleteNowTake(_ take: Queries.TrayTake) {
+        guard let confirm = TrashPurge.deleteNowConfirm(for: trashItem(for: take))
+        else { return }
+        pendingPurge = confirm
+    }
+
+    func cancelPendingPurge() {
+        pendingPurge = nil
+    }
+
+    /// **The confirm is PASSED IN, never read back** — 13l Act 2's rule, and
+    /// the reason it is a rule: SwiftUI writes `isPresented = false`
+    /// synchronously inside the button's own click handling, before an
+    /// action's `Task` can resume, so a continuation that opened by reading
+    /// the pending value back returned without doing anything every time.
+    /// Four dead confirm doors were found that way; this door is born with
+    /// the fix.
+    func confirmPendingPurge(_ confirm: TrashPurge.Confirm) async {
+        pendingPurge = nil
+        status = nil
+        do {
+            status = .receipt(try await TrashPurge.confirm(session: session, confirm))
+        } catch let error as OperationError {
+            status = .refusal(TrayRefusalCopy.message(for: error))
+        } catch {
+            status = .refusal(DeletionRefusal.fallback(error))
+        }
+    }
+
+    /// The take, as the shared purge layer's row type. The purge machinery
+    /// speaks `Queries.TrashItem` because a purge target is a table and a row
+    /// id — and a take's are exactly `variant` and its own id, whichever
+    /// surface offered the door.
+    nonisolated func trashItem(for take: Queries.TrayTake) -> Queries.TrashItem {
+        Queries.TrashItem(
+            kind: .take, id: take.variantID, deletedAt: take.deletedAt,
+            text: take.text, noteID: postID, blockID: take.blockID)
+    }
 }
 
 // `PreservedOriginPutBack` MOVED to `Shared/RecoveryCopy.swift` at round 2
@@ -480,20 +622,56 @@ nonisolated enum TrayRefusalCopy {
     }
 }
 
+/// **THE TRAY'S REGISTRY DOORS** (P-1) — declared on the panel itself, the
+/// `RecoveryView`/`BlockPastSection` shape: the surface that renders an act
+/// inline is the surface that names it, and the walk's union names every
+/// renderer by construction.
+///
+/// **`.deleteNow` on this surface is the EVOLVED in-Trash-only rule, and it
+/// is worth reading the evolution rather than assuming a breach.** 13j's
+/// round-3 rider put the purge doors *"inside the Trash only — never a door
+/// in a note or the editor, ever"*, and the registry walk has enforced it by
+/// naming `RecoveryView` as their only renderer. Her G5 fourth-sitting ruling
+/// supersedes that IN PART: the take rows in the note's leaving section carry
+/// a Delete Now *"to keep the capability"*, because takes no longer row in
+/// the global Trash at all (D1) and a capability with no door is a capability
+/// removed. The rule the round records in its place: **purge doors live in
+/// TRASH SURFACES — the global Trash and this note-level trash section — and
+/// never in the writing flow.** This section qualifies by construction: every
+/// row in it is already deleted and already counting down.
 struct TrayPanel: View {
+    /// The registry ids this panel renders inline (see the note above).
+    static let surfaceCapabilities: [CapabilityID] = [.restoreTake, .deleteNow]
+
     let session: AppSession
     let postID: String
+    /// What this tray is the tray OF. A pool's tray is the scraps area's own
+    /// (batch 1's deferred item — the label said "This Note's Tray" over a
+    /// container that is not a note). Defaulted, so every note-side host and
+    /// every shipped pin rides unmodified.
+    var home: ContainerKind = .post
+    /// **How this panel closes.** In a sheet the environment's `dismiss` is
+    /// the answer; in the INSPECTOR (her C1 move) it is not — the panel is a
+    /// column the host puts away, so the host hands down the closing act.
+    var onClose: (() -> Void)?
     @State private var model: TrayViewModel
+    /// The takes fold — **collapsed by default**, her G5 words (*"albeit
+    /// maybe not shown by default"*). Session UI state like every other
+    /// expansion in the app; a fold is not document semantics.
+    @State private var takesShown = false
     @Environment(\.dismiss) private var dismiss
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
     init(
         session: AppSession, postID: String, revealBlockID: String? = nil,
+        home: ContainerKind = .post, onClose: (() -> Void)? = nil,
         model: TrayViewModel? = nil
     ) {
         self.session = session
         self.postID = postID
+        self.home = home
+        self.onClose = onClose
         _model = State(initialValue: model
             ?? TrayViewModel(session: session, postID: postID, revealBlockID: revealBlockID))
     }
@@ -505,11 +683,12 @@ struct TrayPanel: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(tokens.chromeLabel(TrayPath.menuLabel))
+                Text(tokens.chromeLabel(TrayPath.menuLabel(for: home)))
                     .font(tokens.heading)
                     .foregroundStyle(tokens.ink)
+                    .lineLimit(1)
                 Spacer()
-                Button("Close") { dismiss() }
+                Button("Close") { close() }
             }
             // Ledger row 6: a receipt reads as a receipt. The two classes
             // are the model's (`TrayViewModel.Status`), and both colours are
@@ -522,16 +701,38 @@ struct TrayPanel: View {
                     .textSelection(.enabled)
             }
             if model.revealMissing {
-                Text(tokens.chromeLabel(
-                    "The block you asked to see isn't in this note's tray."))
+                Text(tokens.chromeLabel(RecoveryCopy.trayRevealMissing(home)))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
             }
             List {
-                Section(tokens.chromeLabel(TrayPath.deletedSection)) {
-                    if model.deleted.isEmpty && model.archived.isEmpty
-                        && model.stranded.isEmpty {
-                        empty("Nothing deleted or archived from this note.")
+                // ── ARCHIVED (lifecycle row B1) ────────────────────────────
+                // Kept, forever, no clock, and now under its own header: her
+                // B2 ruling split archive from the Trash one level up for
+                // exactly this reason, and the pair blurs the same way inside
+                // a note.
+                Section(tokens.chromeLabel(TrayPath.archivedSection)) {
+                    if model.archived.isEmpty {
+                        empty(RecoveryCopy.trayNothingArchived(home))
+                    }
+                    ForEach(model.archived, id: \.blockID) { item in
+                        row(
+                            blockID: item.blockID, text: item.text,
+                            stamp: item.deletedAt, when: "archived", clock: nil,
+                            forever: true,
+                            help: "Kept out of the note, with no clock — Put back "
+                                + "returns it where it stood"
+                        ) {
+                            await model.putBackArchived(item.blockID)
+                        }
+                    }
+                }
+                // ── LEAVING (her G5 ruling) ────────────────────────────────
+                // The complete per-note pre-purge audit: blocks, takes, and
+                // the originals that have MOVED onto a family's clock.
+                Section {
+                    if model.nothingIsLeaving {
+                        empty(RecoveryCopy.trayNothingLeaving(home))
                     }
                     ForEach(model.deleted, id: \.blockID) { item in
                         row(
@@ -543,19 +744,6 @@ struct TrayPanel: View {
                                 + "no old place left, and lands at the end)"
                         ) {
                             await model.putBackDeleted(item.blockID)
-                        }
-                    }
-                    // Archived rows, NO countdown — her round-7 ruling's own
-                    // distinction, rendered rather than merely stated.
-                    ForEach(model.archived, id: \.blockID) { item in
-                        row(
-                            blockID: item.blockID, text: item.text,
-                            stamp: item.deletedAt, when: "archived", clock: nil,
-                            forever: true,
-                            help: "Kept out of the note, with no clock — Put back "
-                                + "returns it where it stood"
-                        ) {
-                            await model.putBackArchived(item.blockID)
                         }
                     }
                     // The originals that MOVED here (round 8b): their whole
@@ -576,7 +764,28 @@ struct TrayPanel: View {
                         }
                     }
                     if model.deletedTruncated { truncation("deleted") }
+                    if !model.takes.isEmpty { takesDisclosure }
+                } header: {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(tokens.chromeLabel(TrayPath.leavingSection))
+                        Text(tokens.chromeLabel(RecoveryCopy.trayLeavingExplainer(home)))
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.faint)
+                            .lineLimit(3)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
+                // ── PRESERVED ORIGINALS — **STAGED, BATCH 4 REMOVES IT** ───
+                //
+                // Her G5 ruling put the UNCLOCKED originals' home in LINEAGE
+                // (the Block History pane's came-from section): *"the tray
+                // audits what is LEAVING; lineage holds what is KEPT."* That
+                // pane is batch 4's, and deleting this section a batch early
+                // would leave the population with no door at all for the
+                // length of a batch — a dark window, which is the one thing a
+                // recovery surface may never have. So the section stays,
+                // marked, and batch 4 deletes it in the same commit that
+                // lands came-from.
                 Section(tokens.chromeLabel(TrayPath.originalsSection)) {
                     if model.originals.isEmpty {
                         empty("No originals are waiting here — a divide or a merge "
@@ -601,9 +810,76 @@ struct TrayPanel: View {
             .scrollContentBackground(.hidden)
         }
         .padding(12)
-        .frame(minWidth: 420, minHeight: 280)
+        // The panel lives in the INSPECTOR now (her C1 ruling), whose column
+        // width the host sets — so the minimum is the SHEET's floor for the
+        // hosts that still present it that way, and never a demand the
+        // inspector cannot meet.
+        .frame(minWidth: 280, minHeight: 280)
         .background(tokens.surface)
         .task { await model.start() }
+        .trayPurgeConfirmDialog(model)
+    }
+
+    private func close() {
+        if let onClose { onClose() } else { dismiss() }
+    }
+
+    /// **The takes fold** (her G5 ruling): collapsed at rest, complete when
+    /// opened, and carrying its count either way. Each row names its BLOCK
+    /// (A3's discipline — the note is the panel, so the row owes the block),
+    /// and carries the two doors her fourth sitting placed here: **Put back**
+    /// and **Delete Now**.
+    @ViewBuilder private var takesDisclosure: some View {
+        DisclosureGroup(isExpanded: $takesShown) {
+            ForEach(model.takes) { take in
+                takeRow(take)
+            }
+            if model.takesTruncated { truncation("deleted") }
+        } label: {
+            Text(tokens.chromeLabel(RecoveryCopy.trayTakesDisclosure(model.takes.count)))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .lineLimit(1)
+        }
+        .help("Takes deleted on their own — each on its own "
+            + "\(TrashWindow.days) days. They never show in the Library's Trash: "
+            + "a take alone is hard to place, so this is where they are audited.")
+    }
+
+    private func takeRow(_ take: Queries.TrayTake) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(TrayTakeFace.label(take))
+                .font(tokens.body)
+                .foregroundStyle(take.text.isEmpty ? tokens.muted : tokens.ink)
+                .lineLimit(2)
+            HStack(spacing: 8) {
+                Text(tokens.chromeLabel(TrayTakeFace.meta(
+                    take, now: session.now).joined(separator: " \u{B7} ")))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(1)
+                Spacer(minLength: 8)
+                Button(TrayPath.putBackVerb) {
+                    Task { await model.putBackTake(take.variantID) }
+                }
+                .controlSize(.small)
+                .help("Puts this take back exactly as it was — its label, its "
+                    + "place in the fan and its savepoints come back with it "
+                    + "(a take that was archived when it was deleted comes "
+                    + "back archived)")
+                // The purge door, on the ONE surface a take has one (her G5
+                // fourth-sitting addition). It confirms every time — no
+                // don't-ask state exists anywhere in the app, and none may
+                // be added (her round-10 ruling).
+                Button(RecoveryCopy.deleteNowVerb, role: .destructive) {
+                    model.requestDeleteNowTake(take)
+                }
+                .controlSize(.small)
+                .help("Ends this take's remaining days now. There is no putting "
+                    + "it back afterwards.")
+            }
+        }
+        .padding(.vertical, 2)
     }
 
     private func empty(_ line: String) -> some View {
@@ -620,47 +896,44 @@ struct TrayPanel: View {
             .foregroundStyle(tokens.muted)
     }
 
-    /// One row: a first-line preview, when it went, and the ONE verb.
+    /// One row: the preview on its OWN line, then everything about it.
     /// Read-cheap by construction — a `Text`, never a pane (P3).
+    ///
+    /// **THE PREVIEW GETS THE LINE** (the post-13l polish round, ledger row 9
+    /// — the 13l walk's P-1: *"the tray row's preview is squeezed to about ten
+    /// characters"*, `"Nobody warn…"`, `"The sea took t…"`, while the stamp and
+    /// the countdown kept their room).
+    ///
+    /// The mechanism the walk traced: the row was ONE `HStack`, and the
+    /// flexible `Text` is what SwiftUI compresses first — so the thing that
+    /// identifies the block lost to the metadata beside it, at a panel width
+    /// of 420. Her C1 move makes the container NARROWER, not wider (an
+    /// inspector column, not a sheet), so a `layoutPriority` alone would only
+    /// move the squeeze around. The row stacks instead: the preview owns a
+    /// full-width line (up to two), and the stamp, the clock and the label
+    /// share the quiet line under it with the verb. Nothing competes.
     private func row(
         blockID: String, text: String?, stamp: String?, when: String,
         clock: Int?, forever: Bool = false, note: String? = nil, help: String,
         putBack: @escaping () async -> Void
     ) -> some View {
-        HStack(spacing: 8) {
+        VStack(alignment: .leading, spacing: 2) {
             Text(TrayRowPreview.line(text))
                 .font(tokens.body)
                 .foregroundStyle(text?.isEmpty == false ? tokens.ink : tokens.muted)
-                .lineLimit(1)
-            if let note {
-                Text(tokens.chromeLabel(note))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .lineLimit(1)
-            }
-            if let stamp, let display = TrayRowPreview.stampText(stamp, verb: when) {
-                Text(tokens.chromeLabel(display))
+                .lineLimit(2)
+            HStack(spacing: 8) {
+                Text(tokens.chromeLabel(TrayRowFace.meta(
+                    note: note, stamp: stamp, when: when, clock: clock,
+                    forever: forever).joined(separator: " \u{B7} ")))
                     .font(tokens.small)
                     .foregroundStyle(tokens.faint)
                     .lineLimit(1)
+                Spacer(minLength: 8)
+                Button(TrayPath.putBackVerb) { Task { await putBack() } }
+                    .controlSize(.small)
+                    .help(help)
             }
-            // The clock, or the promise of no clock — one of the two, never
-            // both and never neither (13j J1 / round 7).
-            if let clock {
-                Text(tokens.chromeLabel(TrayPath.daysLeftLabel(clock)))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
-                    .lineLimit(1)
-            } else if forever {
-                Text(tokens.chromeLabel(TrayPath.archivedForever))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
-                    .lineLimit(1)
-            }
-            Spacer(minLength: 8)
-            Button(TrayPath.putBackVerb) { Task { await putBack() } }
-                .controlSize(.small)
-                .help(help)
         }
         .padding(.vertical, 2)
         // The reveal's mark: a long list still answers "which one"
@@ -668,6 +941,91 @@ struct TrayPanel: View {
         .listRowBackground(
             model.revealBlockID == blockID
                 ? Color.accentColor.opacity(0.18) : Color.clear)
+    }
+}
+
+/// **THE ROW'S TWO LINES, AS A VALUE** (ledger row 9's layout fix, stated
+/// where a pin can hold it): the preview is one thing, and everything that
+/// describes it is another. The squeeze the walk met was the two sharing one
+/// line box; this is the shape that cannot.
+nonisolated enum TrayRowFace {
+    /// The quiet line under the preview, in reading order: what the row IS,
+    /// when it went, and how long it has. Empty pieces drop out — a row never
+    /// wears a separator around nothing.
+    static func meta(
+        note: String?, stamp: String?, when: String, clock: Int?, forever: Bool
+    ) -> [String] {
+        var pieces: [String] = []
+        if let note, !note.isEmpty { pieces.append(note) }
+        if let stamp, let display = TrayRowPreview.stampText(stamp, verb: when) {
+            pieces.append(display)
+        }
+        // The clock, or the promise of no clock — one of the two, never both
+        // and never neither (13j J1 / round 7).
+        if let clock {
+            pieces.append(TrayPath.daysLeftLabel(clock))
+        } else if forever {
+            pieces.append(TrayPath.archivedForever)
+        }
+        return pieces
+    }
+}
+
+/// **A DELETED TAKE'S ROW, AS A VALUE** (ledger row 20). Its label, and the
+/// quiet line that names its BLOCK — her A3 discipline, which the note-scoped
+/// panel owes at the block grain because the panel itself is the note.
+nonisolated enum TrayTakeFace {
+    /// The take's own label where it has one, else its first line — and the
+    /// empty case says **take**, never "block" (the `BlockPastCopy.emptyTake`
+    /// lesson: a row in a fan that calls itself a block is the same small
+    /// dishonesty this family of surfaces exists to end).
+    static func label(_ take: Queries.TrayTake) -> String {
+        if let label = take.label, !label.isEmpty { return label }
+        let line = TrayRowPreview.line(take.text)
+        return line == TrayRowPreview.emptyBlock ? RecoveryCopy.emptyTakeLabel : line
+    }
+
+    /// Which block it came out of, when it went, and how long it has. The
+    /// block's handle runs through `Queries.tocHandle` — the ONE block-naming
+    /// rule (its explicit name, else its first sentence, derived at read time
+    /// and never stored) — rather than a second rule invented here.
+    static func meta(_ take: Queries.TrayTake, now: Date) -> [String] {
+        var pieces = [RecoveryCopy.trayTakeInBlock(
+            Queries.tocHandle(name: take.blockName, text: take.blockText))]
+        if let stamp = TrayRowPreview.stampText(take.deletedAt, verb: "deleted") {
+            pieces.append(stamp)
+        }
+        if let days = TrashWindow.daysLeft(take.deletedAt, now: now) {
+            pieces.append(TrayPath.daysLeftLabel(days))
+        }
+        return pieces
+    }
+}
+
+/// **THE TRAY'S PURGE CONFIRM HOST** — the same rule, written down again
+/// where the second host is (13l Act 2's finding: *a binding setter must
+/// never clear state that an action's continuation will read back*).
+///
+/// The confirm's value rides into the action closure through `presenting:`,
+/// and `confirmPendingPurge(_:)` takes it as a parameter — so no read-back
+/// survives for SwiftUI's synchronous dismissal write to beat. Four dead
+/// confirm doors were found across the two apps by not doing this; the fifth
+/// was the Mac's Delete Now itself.
+extension View {
+    func trayPurgeConfirmDialog(_ model: TrayViewModel) -> some View {
+        confirmationDialog(
+            model.pendingPurge?.message ?? "",
+            isPresented: Binding(
+                get: { model.pendingPurge != nil },
+                set: { presented in if !presented { model.cancelPendingPurge() } }),
+            titleVisibility: .visible,
+            presenting: model.pendingPurge
+        ) { confirm in
+            Button("Delete for Good", role: .destructive) {
+                Task { await model.confirmPendingPurge(confirm) }
+            }
+            Button("Cancel", role: .cancel) { model.cancelPendingPurge() }
+        }
     }
 }
 

@@ -1447,9 +1447,14 @@ final class TakesViewModel {
     /// it, where the comments sheet lives).
     var trayRequest: TrayRequest?
 
-    /// The `note ▾` menu's door onto the tray.
+    /// A door onto this note's tray — the router first (its home is the post
+    /// detail's side panel since her C1 ruling), this bar's sheet as the
+    /// fallback for hosts with no inspector. `EditorViewModel`'s twin carries
+    /// the full reasoning.
     func requestNoteTray() {
-        trayRequest = TrayRequest(postID: postID)
+        let request = TrayRequest(postID: postID)
+        if session.commandRouter.requestNoteTray(request) { return }
+        trayRequest = request
     }
 
     // MARK: - Fire-and-DO (13b 1b, R115/R118 — the D3 lecture's replacement)

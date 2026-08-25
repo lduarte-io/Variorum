@@ -261,13 +261,27 @@ nonisolated enum BlockSelectionCopy {
 
     /// **The ARCHIVE receipt** (13j, her round-7 ruling — the third verb).
     /// It says the thing that makes archive different from delete IN THE
-    /// SAME BREATH as the act: no clock. The road it names is the note menu
-    /// item, never the tray BADGE, because the badge counts DELETED blocks
-    /// only (her ratified #67(a)) and would stay hidden for a note that had
-    /// only archived something — a receipt must name a door she can see.
-    static let archivedNote =
+    /// SAME BREATH as the act: no clock.
+    ///
+    /// **The road it names moved with the door** (the post-13l polish round,
+    /// batch 1's deferred item + ledger row 9): it said *"(the note menu)"*,
+    /// and her C1 ruling took the tray out of that menu. The reasoning behind
+    /// the old wording is unchanged and is exactly why it must follow — the
+    /// receipt may never point at the tray BADGE, which counts DELETED blocks
+    /// only (her ratified #67(a)) and stays hidden for a note that has only
+    /// archived something. The icon is always there; the badge is not.
+    ///
+    /// And it takes the home's KIND for `deletedNote`'s reason, one act over:
+    /// the scraps editor archives blocks through the same menu, and an
+    /// archived scrap's road really IS the tray (it has no clock and never
+    /// reaches the Trash) — it is the tray's NOUN that was wrong there.
+    static var archivedNote: String { archivedNote(home: .post) }
+
+    static func archivedNote(home: ContainerKind) -> String {
         "Block archived — it's kept, with no countdown, in "
-        + "\(TrayPath.menuLabel) (the note menu). \u{2325}\u{2318}Z undoes this."
+        + "\(TrayPath.menuLabel(for: home)) \u{2014} "
+        + "\(TrayPath.doorPhrase(for: home)). \u{2325}\u{2318}Z undoes this."
+    }
 
     /// **The stranding sentence** (her round-8b ruling (d)): when a delete
     /// takes the LAST live descendant of a preserved original, the original

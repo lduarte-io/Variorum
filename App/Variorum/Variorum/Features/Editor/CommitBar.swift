@@ -37,9 +37,12 @@ struct CommitBar: View {
             .merge, .showTakes,
             .insertBlockBelow,  // 13b 4D (N28/S4-13): editor parity — Write's bar door
             .deleteBlock,  // 13c 1B (A8): the delete door beside the insert door
-            .showNoteTray,  // 13j J2: the note ▾ menu's tray door
+            // (`.showNoteTray` LEFT this bar at the post-13l polish round,
+            // ledger row 9 — her C1 ruling moved the tray to the masthead's
+            // icon and the side panel, and *"the note ▾ menu's item follows
+            // the move"*. The act is declared with `.surface` doors only now.)
             // 13l Act 2 (item 3): the door she went looking for and could not
-            // find, beside the tray item in the same menu.
+            // find, in the same menu.
             .deleteNote,
         ]
         // 13k K7: the formatting toolbar's own eight, from ITS table (the
@@ -173,11 +176,6 @@ struct CommitBar: View {
                 model.toggleSeal()
             }
             Divider()
-            // 13j J2: the tray's NAMED door. The context bar's ⌫ badge is
-            // the glance; this is the one that is always there, and it is
-            // where someone who has never seen the badge will look.
-            Button("\(TrayPath.menuLabel)\u{2026}") { model.requestNoteTray() }
-            Divider()
             Button(model.header?.entryDate.map { "Date: \($0)…" } ?? "Set date…") {
                 pickedDate = Self.date(fromDay: model.header?.entryDate) ?? Date()
                 datePickerShown = true
@@ -201,7 +199,8 @@ struct CommitBar: View {
                 }
             }
         }
-        .help("The note itself: its savepoints, its seal, its tray, its date")
+        .help("The note itself: its savepoints, its seal, its date "
+            + "(its tray is the tray icon at the top of the note)")
         .popover(isPresented: $datePickerShown, content: datePickerPopover)
         .deleteNoteConfirmDialog($pendingDelete) { confirm in
             NoteDeletion.fire(session: model.session, postIDs: confirm.postIDs)

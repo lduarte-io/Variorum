@@ -2127,7 +2127,13 @@ struct TutorialDeletionActsTests {
             let trio = try #require(prose["archive \u{B7} delete \u{B7} scraps"])
             #expect(trio.contains(CapabilityRegistry.capability(.archiveBlock).verb))
             #expect(trio.contains(CapabilityRegistry.capability(.deleteBlock).verb))
-            #expect(trio.contains(TrayPath.deletedSection), "the tray section that holds two of the three")
+            // Her G5 split: the archive lesson names the ARCHIVED section and
+            // the delete lesson names LEAVING — the tray's own headers, quoted
+            // from the constants, so a rename reaches the lesson.
+            #expect(trio.contains("Archived section"),
+                    "the tray section archive's own row lands in")
+            #expect(trio.contains("Leaving section"),
+                    "and the one delete's row lands in")
             #expect(trio.contains(TrayPath.archivedForever), "archive's own promise, in its own words")
             #expect(trio.contains("Move out to a pool"), "the Blocks-mode row, verbatim")
             #expect(trio.contains("\(TrashWindow.days) days"), "the ruled window, not a number of its own")

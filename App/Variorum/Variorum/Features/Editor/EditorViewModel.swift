@@ -1997,11 +1997,19 @@ final class EditorViewModel {
     /// 13j J2: the tray sheet's pending target (`EditorView` presents it).
     var trayRequest: TrayRequest?
 
-    /// The `note ▾` menu's door onto the tray — always available while a
-    /// note is open, because a badge that hides at zero cannot be the only
-    /// way in (the registry declares both doors as one act).
+    /// **A door onto this note's tray.**
+    ///
+    /// Since her C1 ruling (the post-13l polish round, ledger row 9) the
+    /// tray's home is the post detail's SIDE PANEL, so this asks the router
+    /// first — one panel, wherever the door is. The sheet survives as the
+    /// FALLBACK, and it is not vestigial: this editor is also composed where
+    /// there is no post detail and therefore no inspector (the scraps
+    /// editor's own hosts, the book-inline form), and a door that cannot act
+    /// in its context is a door that should not have been rendered (P-2).
     func requestNoteTray() {
-        trayRequest = TrayRequest(postID: postID)
+        let request = TrayRequest(postID: postID)
+        if session.commandRouter.requestNoteTray(request) { return }
+        trayRequest = request
     }
 
     private func refreshGestureAvailability() {
