@@ -1750,6 +1750,113 @@ run beside it**; commits by theme, staged by explicit path, NEVER
 push. **Append "### BATCH 5 — RECORD"**, flip rows 16, 23, 24, 30,
 and STOP.
 
+### THE ARCHITECT'S ADJUDICATION OF BATCH 5's FLAGGED ITEMS (2026-08-25, before batch 6 dispatches)
+
+1. **PROVISIONALs 1, 2, 4 (restore takes stranded ancestors on the
+   Delete Now road · a version put back alone becomes an ordinary
+   archived note · restore confirms):** all three STAND — each is a
+   derivation from her rulings (the eighth-sitting instant-hard-
+   delete + "ancestors die with you"; the classifier; the
+   confirmation-consistency principle's container-scale clause) —
+   and all three join the CHECKPOINT BUNDLE for her to feel and
+   strike at will.
+2. **PROVISIONAL 3 (Empty Trash counts a version as "a note") →
+   FIXED in batch 6** as a copy-honesty rider: the confirm/receipt
+   counts name saved versions when present (the
+   door-shows-what-it-takes principle, G6's letter).
+3. **The 1-of-3 `TakesSlotDragTests` red:** recorded as a THIRD
+   flake candidate (the real-mouse-drag class beside
+   `PoolDragTests` and the latency pin); passed isolated and on
+   re-run; nothing batch 5 touched reaches it. **A second red in
+   any later run this round promotes it to a KnownIssues row
+   (owner 12)** — the ladder and batch 6 watch for it.
+4. **The parity note (the phone owes a Versions face):** closeout's
+   mobile update (row 13), joining the archive/trash-separation
+   design-session note.
+5. **The 13o handoff** (the one classifier both search scopes
+   read): recorded in batch 5's record; the closeout carries it
+   into 13o's row/plan.
+
+**THE CHECKPOINT BUNDLE (final form — hers at the taste
+checkpoint):** the came-from wording ("Bring back") · the came-from
+tray door on unclocked rows · restore-takes-ancestors ·
+version-put-back-alone-goes-ordinary · restore's confirm · the
+walk of everything built (the pane, the tray panel, and the
+Versions listing are HAND-CHECK items — `ImageRenderer` cannot
+draw a `List`, so no automated screenshot covers them).
+
+### BATCH 6 — THE TUTORIAL: the brief (fresh Opus session; dispatches after batch 5's record; the round's LAST build batch)
+
+**Read in full first:** `CLAUDE.md` + canon · THIS FILE top to
+bottom — your letter is ledger rows **12 (D2) · 19 (G4) · 26 · 27 ·
+33**, §D2's binding catch, the NORTH STAR five-places map in the
+kickoff message, and EVERY batch record above (you are teaching
+what batches 1–5 built — the doors as they ARE, not as any older
+lesson remembers them) · the 13j **Environment traps** (binding
+verbatim) · the tutorial machinery itself (`TutorialSeeder`,
+`TutorialWalkTests` — P-6: the tutorial is the executable spec;
+your chapter GROWS the spine).
+
+**Scope — rows 12, 19, 26, 27, 33 + two riders: A7's one merge
+sentence (§A — her declined per-merge message; the tutorial
+carries the teaching instead) and adjudication 2 above (Empty
+Trash's counts name saved versions).** Fences: zero schema · zero
+`Sync/` · NO re-seed of her real store (that is the CLOSEOUT's,
+behind the A1 rail) · the fanned cross-block matrix is 13u's (row
+27's letter — teach today's truth including shipped
+merge-then-edit, and stop there).
+
+- **Row 33 FIRST (the small build):** the Block History pane's
+  current-block jump — when the caret sits in a different block
+  than the pane shows, a small in-pane button jumps to the current
+  block's history (her words in the sitting record: no
+  close-and-reopen). Walk-driven pin on the real surface.
+- **Row 12 (D2):** the field guide's deletion chapter teaches the
+  OLD doors — rewrite its content to the built truth: the tray
+  ICON + ⌫ badge (not the note ▾ item) · the Library's Trash icon
+  (not the ⋯ menu) · the Archived sidebar surface · takes never in
+  the global Trash (their homes: Block History + the tray's
+  leaving section) · Empty Trash's exact-rows scope. Spine
+  re-pins to the new content. A7's rider lands here: ONE sentence
+  on where a merge's originals live (the came-from region).
+- **Row 19 (G4, her words in the ledger):** a NEW chapter teaching
+  the FIVE PLACES — *where you left it · Archive (notes, forever)
+  · the Trash (notes·books·blocks, 30 days) · this note's
+  Versions · this block's History* — **each visited by the walk**
+  (the lesson takes the reader to each surface), plus the
+  take-savepoint story made EXPLICIT: the commit↔history
+  bottom-chrome pairing is the teaching moment (write a moment
+  with ⌘S, see the moments beside it).
+- **Row 26:** the same chapter teaches **⌘S vs ⌘⇧S** — this
+  TAKE's moment vs this NOTE's moment; the grain pairing is
+  itself the lesson.
+- **Row 27 (her eleventh-sitting mandate, verbatim in the
+  ledger):** the TWO-EXITS lesson, **taught by DOING** (her idea,
+  adopted): the lesson walks the user through (1) deleting a
+  whole block and finding it in the Trash/tray with Put back,
+  then (2) making an edit that merges two blocks and finding the
+  originals in the new block's History came-from, one button
+  back. "Deletion goes to the Trash; transformation goes to
+  lineage." Covers today's truth incl. shipped merge-then-edit;
+  the merge itself stays silent (her declined P-2).
+- **The Empty-Trash counts rider:** the confirm and receipt name
+  saved versions when the Trash holds them ("2 notes, 1 saved
+  version, 3 blocks go for good") — shared copy home, both
+  surfaces.
+
+**Discipline:** the standing loop — the spine green BY TYPE NAME
+and GROWN (the new chapter's steps are walk-asserted; a broken
+step is a regression by definition); red-on-old where bug-class;
+walk-driven pins for row 33 (AppKit class names — the AX tree is
+empty in the test host); full four gates with counts quoted
+(mobile runs if `Shared/` is touched; baselines now core 1402/146
+· Mac 1754/295 · spine 63/8 · mobile 486/78; the flake watch:
+`TakesSlotDragTests` at ONE recorded red — a second promotes it);
+instance check before build-adjacent acts; commits by theme,
+staged by explicit path, NEVER push. **Append "### BATCH 6 —
+RECORD"**, flip rows 12, 19, 26, 27, 33, and STOP — the ladder
+dispatches next, then the closeout.
+
 ## Constraints
 
 Zero schema (B2 is read-side over `archived_at`; if ANYTHING firms
