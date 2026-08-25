@@ -1785,6 +1785,27 @@ walk of everything built (the pane, the tray panel, and the
 Versions listing are HAND-CHECK items — `ImageRenderer` cannot
 draw a `List`, so no automated screenshot covers them).
 
+### OVERNIGHT AUTHORIZATION (author, 2026-08-25 — recorded verbatim-faithful for any successor)
+
+Her words: *"I'm going to sleep now, so proceed through the end
+without gating on questions for me. please leave a note with
+everything that I should look over - since your context is full, I
+tend to not wake large contexts on a cold cache. I'll look over
+everything and all the changes in the morning and probably handle
+any fixes in a new session or a different phsae."*
+
+What this authorizes and shapes: the round runs THROUGH THE END —
+batch 6 → the ladder → fixes → closeout — with NO author gating;
+ambiguity is PROVISIONAL-and-continue (the standing author-only
+hard stops still bind). **The CHECKPOINT BUNDLE converts to the
+AUTHOR HANDOFF NOTE** (`notes/handoffs/post-13l-polish-round-handoff.md`),
+self-contained for a fresh morning session — her checklist at the
+top, every look-over item, every PROVISIONAL, the hand-check
+surfaces, and the fixes-land-elsewhere expectation (a new session
+or another phase — this session is not to be woken). The
+`/Applications` refresh stays authorized (her earlier ruling);
+the A1 rail and zero-instance check bind as always.
+
 ### BATCH 6 — THE TUTORIAL: the brief (fresh Opus session; dispatches after batch 5's record; the round's LAST build batch)
 
 **Read in full first:** `CLAUDE.md` + canon · THIS FILE top to
