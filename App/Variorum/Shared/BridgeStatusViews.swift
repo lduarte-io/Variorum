@@ -13,6 +13,23 @@ import VariorumCore
 
 struct BridgeStatusRow: View {
     let bridge: BridgeSession
+    /// **The live voice's tokens** (the post-13l polish round, batch 5 —
+    /// the architect's routed flag 3: this row's *"Bridge error"* was the last
+    /// literal `.red` in a themed surface after batch 4's sweep).
+    ///
+    /// **Why a parameter and not a modifier.** This file compiles into BOTH
+    /// targets, and neither of the two roads batch 4 used reaches here: the
+    /// Mac's `.alarmVoice()` lives in `Variorum/Theme/VoiceControls.swift`
+    /// (Mac-only — the mobile target would not compile a call to it), and
+    /// `\.sharedPageStyle` is **nil on macOS BY CONSTRUCTION** — a pinned
+    /// one-seam law, so routing through `pageCaptionError` would have compiled
+    /// to the same literal red and dressed a no-op as a fix.
+    ///
+    /// Defaulted nil, so every existing caller and pin rides byte-unmodified
+    /// and the nil arm draws exactly what shipped; the ONE caller (the Mac
+    /// sidebar) passes the live voice, and the phone's future bridge face
+    /// inherits the seam rather than inventing one.
+    var tokens: VoiceTokens?
     /// The auth door for auth-shaped failures (Sitting 9, R94) — the Mac
     /// sidebar passes its account-sheet opener; absent = no door shown.
     var onOpenAccount: (() -> Void)?
@@ -40,7 +57,7 @@ struct BridgeStatusRow: View {
                 Text("Bridging…")
             } else if bridge.status.lastError != nil {
                 Text("Bridge error")
-                    .foregroundStyle(.red)
+                    .foregroundStyle(tokens?.alarm ?? .red)
                 Button("Retry") { bridge.trigger(manual: true) }
                 if let onOpenAccount,
                    ErrorPresentation.isAuthShaped(bridge.status.lastError ?? "") {
@@ -55,6 +72,10 @@ struct BridgeStatusRow: View {
                     // entries still count as the day's entries (archive is
                     // kept-out-of-view, not gone — QUESTIONS #14e), so the
                     // pause releases on delete or re-date, not archive.
+                    // The pause is a WARNING, not an error, and warning is a
+                    // third signal class she has not ruled on (batch 4's
+                    // record). It keeps its literal orange deliberately, with
+                    // the reason written here rather than left to be found.
                     Text("· \(bridge.status.pausedDays.joined(separator: ", ")) paused (two entries — delete or re-date one to resume)")
                         .foregroundStyle(.orange)
                 }

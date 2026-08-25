@@ -90,10 +90,16 @@ struct WriteTakesPanel: View {
                     .foregroundStyle(tokens.muted)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            if let status = model.statusMessage {
-                Text(status)
+            // The post-13l polish round, batch 5 (routed flag 2): a receipt is
+            // not a refusal. This slot painted `tokens.accent` whatever it
+            // said — and in the TERMINAL voice `accent` and `chosen` are the
+            // same hex, so every board receipt AND every board refusal wore
+            // the colour the "✓ chosen" mark wears. The class is the model's
+            // now, decided where the message is produced.
+            if let status = model.status {
+                Text(status.text)
                     .font(.caption)
-                    .foregroundStyle(tokens.accent)
+                    .foregroundStyle(status.isRefusal ? tokens.alarm : tokens.muted)
                     .textSelection(.enabled)
                     .fixedSize(horizontal: false, vertical: true)
             }

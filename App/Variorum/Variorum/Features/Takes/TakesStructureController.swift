@@ -76,7 +76,7 @@ final class TakesStructureController {
             model.choreography.parkFocus(onVariant: result.variant.id)
             model.setStatus("New block added at the end — type away.")
         } catch {
-            model.setStatus(TakesViewModel.message(for: error))
+            model.setRefusal(TakesViewModel.message(for: error))
         }
     }
 
@@ -101,7 +101,7 @@ final class TakesStructureController {
             model.choreography.parkFocus(onVariant: result.variant.id)
             model.setStatus("New block added below — type away.")
         } catch {
-            model.setStatus(TakesViewModel.message(for: error))
+            model.setRefusal(TakesViewModel.message(for: error))
         }
     }
 
@@ -145,7 +145,7 @@ final class TakesStructureController {
                 + (await StrandedOriginals.note(
                     session: model.session, blockIDs: [slot.blockID]) ?? ""))
         } catch {
-            model.setStatus(TakesViewModel.message(for: error))
+            model.setRefusal(TakesViewModel.message(for: error))
         }
     }
 
@@ -175,7 +175,7 @@ final class TakesStructureController {
             }
             model.setStatus(BlockSelectionCopy.archivedNote)
         } catch {
-            model.setStatus(TakesViewModel.message(for: error))
+            model.setRefusal(TakesViewModel.message(for: error))
         }
     }
 
@@ -334,7 +334,7 @@ final class TakesStructureController {
                 try Queries.blockFan(db, blockID: slot.blockID)
             }
         } catch {
-            model.setStatus(TakesViewModel.message(for: error))
+            model.setRefusal(TakesViewModel.message(for: error))
             return nil
         }
         let liveActive = fan.filter { $0.deletedAt == nil && $0.status == .active }
@@ -411,7 +411,7 @@ final class TakesStructureController {
             model.choreography.parkFocus(onVariant: result.variant.id)
             model.setStatus("Block divided — ⌥⌘Z undoes it.")
         } catch {
-            model.setStatus(TakesViewModel.message(for: error))
+            model.setRefusal(TakesViewModel.message(for: error))
         }
     }
 
@@ -443,7 +443,7 @@ final class TakesStructureController {
             model.setStatus(FannedDefaultsCopy.divided(
                 duplicated: max(0, result.first.variants.count - 1)))
         } catch {
-            model.setStatus(TakesViewModel.message(for: error))
+            model.setRefusal(TakesViewModel.message(for: error))
         }
     }
 
@@ -472,7 +472,7 @@ final class TakesStructureController {
                 try Queries.blockFan(db, blockID: blockID)
             }
         } catch {
-            model.setStatus(TakesViewModel.message(for: error))
+            model.setRefusal(TakesViewModel.message(for: error))
             return
         }
         let active = fan.filter { $0.status == .active }
@@ -497,7 +497,7 @@ final class TakesStructureController {
             model.speak(
                 "Take moved \(delta < 0 ? "earlier" : "later") — \u{2325}\u{2318}Z undoes it.")
         } catch {
-            model.setStatus(TakesViewModel.message(for: error))
+            model.setRefusal(TakesViewModel.message(for: error))
         }
     }
 
@@ -537,7 +537,7 @@ final class TakesStructureController {
             model.choreography.parkFocus(onVariant: result.variant.id)
             model.speak(TakeStructureCopy.movedNote)
         } catch {
-            model.setStatus(TakesViewModel.message(for: error))
+            model.setRefusal(TakesViewModel.message(for: error))
         }
     }
 
@@ -564,7 +564,7 @@ final class TakesStructureController {
             model.speak(TakeStructureCopy.convertedNote(
                 blocks: result.converted.count, skippedBlanks: result.skippedBlankTakes))
         } catch {
-            model.setStatus(TakesViewModel.message(for: error))
+            model.setRefusal(TakesViewModel.message(for: error))
         }
     }
 
@@ -622,7 +622,7 @@ final class TakesStructureController {
                 try Queries.renderPost(db, containerID: postID)
             }
         } catch {
-            model.setStatus(TakesViewModel.message(for: error))
+            model.setRefusal(TakesViewModel.message(for: error))
             return
         }
         let order = slots.map(\.blockID)
@@ -665,7 +665,7 @@ final class TakesStructureController {
                 return result
             }
         } catch {
-            model.setStatus(TakesViewModel.message(for: error))
+            model.setRefusal(TakesViewModel.message(for: error))
             return
         }
         // The take she is LOOKING at, per block: the board's own rendered
@@ -737,11 +737,11 @@ final class TakesStructureController {
             // was deleted") and `blockNotPlaced` fell to the raw-enum arm.
             let op = error as? OperationError
             if case .blockNotFound = op {
-                model.setStatus(BlockSelectionCopy.blockGoneForMerge)
+                model.setRefusal(BlockSelectionCopy.blockGoneForMerge)
             } else if case .blockNotPlaced = op {
-                model.setStatus(BlockSelectionCopy.blockGoneForMerge)
+                model.setRefusal(BlockSelectionCopy.blockGoneForMerge)
             } else {
-                model.setStatus(TakesViewModel.message(for: error))
+                model.setRefusal(TakesViewModel.message(for: error))
             }
         }
     }
@@ -788,7 +788,7 @@ final class TakesStructureController {
                 try Queries.renderPost(db, containerID: postID).map(\.blockID)
             }
         } catch {
-            model.setStatus(TakesViewModel.message(for: error))
+            model.setRefusal(TakesViewModel.message(for: error))
             return
         }
         // LADDER ROUND A (A-1): the picks are NOT pre-filtered against the
@@ -825,7 +825,7 @@ final class TakesStructureController {
                 + (await StrandedOriginals.note(
                     session: model.session, blockIDs: chain) ?? ""))
         } catch {
-            model.setStatus(TakesViewModel.message(for: error))
+            model.setRefusal(TakesViewModel.message(for: error))
         }
     }
 }

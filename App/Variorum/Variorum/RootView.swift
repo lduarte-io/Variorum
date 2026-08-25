@@ -148,7 +148,10 @@ struct RootView: View {
                         VStack(alignment: .leading, spacing: 0) {
                             Divider().overlay(theme.tokens(for: scheme).line)
                             SyncStatusRow(services: services)
-                            BridgeStatusRow(bridge: services.bridge) {
+                            BridgeStatusRow(
+                                bridge: services.bridge,
+                                tokens: theme.tokens(for: scheme)
+                            ) {
                                 accountSheetShown = true
                             }
                         }
