@@ -520,6 +520,27 @@ this enum) · **row 20's per-take Delete Now composes with ZERO
 schema** (`Operations.requestPurge` already accepts `variant`-rooted
 targets — 13j's shipped machinery).
 
+### Mid-round sitting (2026-08-24, during batch 3's run) — her mobile ruling
+
+**HER WORDS (verbatim):** *"the phone will also have archive and
+delete separated and on mimicking the surfaces that the mac has
+decided on, in some way that works for mobile (make a note that it
+can have a design session and propose different designs to me with
+html when the time comes)"*
+
+**What this rules:** the phone ADOPTS this round's separation —
+Archive and Trash as distinct surfaces, mimicking what the Mac
+decides here, **in a shape that works for mobile** (not a literal
+copy). The mobile shape is NOT designed in this round: it gets **its
+own design session, which proposes different designs to her as HTML
+mockups** — her explicit instruction, recorded for the closeout's
+mobile batch-6 update (row 13) and the MobileSoul parity line. This
+CONFIRMS batch 2's parity note (the phone's combined "Archived &
+Deleted" surface is now known-interim by her word) and extends it:
+the whole five-places design (Archive · Trash · tray/leaving · Block
+History · Versions) reaches the phone through that design-session
+road, not by silent inheritance.
+
 ### The batch plan (the architect's, within the mandate — acts may merge at dispatch; the ledger is the truth)
 
 Cast per batch: a FRESH Opus implementer session, briefed ONLY by
