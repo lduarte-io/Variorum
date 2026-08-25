@@ -160,6 +160,15 @@ struct CapabilityRegistryTests {
             // not "behind" anything here because there is no takes-side
             // canvas for it to be behind.
             .toggleCanvasBank, .returnCardToBank,
+            // The post-13l polish round (ledger row 4(b)): `.deleteScrap`
+            // joins `.tagBlock` for that act's exact reason, stated rather
+            // than inherited — the Snippets area is a surface OUTSIDE the
+            // post-mode row, its door is pointed at directly (the scrap row
+            // you right-clicked), and no editing mode owns it. Takes cannot
+            // be "behind Write" where Write has no scrap rows either. The
+            // in-editor block delete is a DIFFERENT act (`.deleteBlock`),
+            // which is `takeFamily` and fully parity-covered.
+            .deleteScrap,
             // 13e E8: `.tagNote` joins `.tagBlock` for the reason stated
             // there, one scope up — tagging is not TEXT EDITING, and its
             // two renderers sit outside the post-mode row entirely: the

@@ -231,7 +231,11 @@ struct OriginPeekPanel: View {
             if let status = model.statusMessage {
                 Text(status)
                     .font(tokens.small)
-                    .foregroundStyle(model.placed ? tokens.muted : .red)
+                    // Ledger row 6's second half, one file over: this slot
+                    // already told a receipt from a refusal (`placed`), but
+                    // the refusal's colour was a literal `.red` in a themed
+                    // surface. Same token pair as the tray's now.
+                    .foregroundStyle(model.placed ? tokens.muted : tokens.accent)
                     .textSelection(.enabled)
                     .lineLimit(3)
             }

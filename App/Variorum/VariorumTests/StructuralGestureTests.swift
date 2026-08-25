@@ -380,12 +380,21 @@ struct DivideExtractGestureTests {
             // ruling added block ARCHIVE, and her round-4 binding names the
             // block context menu as one of its two doors. The claim below is
             // untouched: every row stays ENABLED and a refused one speaks.
+            // The post-13l polish round (ledger row 4(c)) — A JUSTIFIED EDIT
+            // of exactly that kind, and the one this list ITSELF made
+            // visible: the menu carried "Archive Block" with no delete
+            // beside it, which is the walk's P-8 finding in one line of
+            // expected values. `deleteCaretBlock`'s row joins it (no
+            // selection standing here, so it is the caret row). The claim
+            // below is untouched: every row stays ENABLED and a refused one
+            // speaks.
             #expect(items.map(\.title) == [
                 "Divide Block at Cursor", "Divide with Ceremony… (⌥⌘⇧D)",
                 "Extract Selection",
                 "Make Block from Selection", "Merge Blocks",
                 "Merge with Ceremony… (⌥⌘⇧M)",
                 "Delete in Every Take", "Show Takes", "Archive Block",
+                "Delete Block",
             ])
             let allEnabled = items.allSatisfy(\.enabled)
             #expect(allEnabled)

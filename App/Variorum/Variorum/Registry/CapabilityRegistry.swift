@@ -248,9 +248,16 @@ nonisolated enum CapabilityRegistry {
         // A10, redoable; the deleted block also lands in the post's tray.
         // The destructive-action WARNING is her A12 and stays 13d — it is
         // cheap precisely once redo makes the mistake recoverable.
+        // **The post-13l polish round, ledger row 4(c)** — her A4 ruling on
+        // the 13l walk's P-8: the block's own CONTEXT menu had no way to
+        // delete a block, while it carried **Archive Block** two rows down.
+        // Those are the two verbs that must be told apart (one starts a
+        // 30-day clock, one keeps the block forever), and only one of them
+        // was where you right-click. The Block ▾ menu and the menu bar
+        // carried both; the context menu carried half.
         Capability(
             id: .deleteBlock, verb: "Delete Block", scope: .block,
-            doors: [.menuBar, .bottomBar, .palette],
+            doors: [.menuBar, .bottomBar, .palette, .contextMenu],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Blocks live inside a note — open one first.",
             availability: takeFamily),  // the one named rule, not a copy
@@ -493,6 +500,37 @@ nonisolated enum CapabilityRegistry {
             doors: [.surface],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "Tags go on a block where you see it — scrap rows and canvas cards carry the door.",
+            availability: always),
+        // **The post-13l polish round, ledger row 4(b)** — her A4 ruling on
+        // the 13l walk's P-8: *"I'd fix whatever this is"*. The walk
+        // right-clicked a scrap in the Snippets list and found exactly one
+        // row, "Tags…": every other listing of a thing in this app offers a
+        // way to get rid of it, and the scrap's only delete door was inside
+        // the scraps EDITOR's bottom bar — which means opening the editor to
+        // throw away a line you can already see.
+        //
+        // It is its own act rather than a `.surface` door on `.deleteBlock`
+        // for the reason `.tagBlock` is its own act: `.deleteBlock`'s
+        // availability is the take family's (it needs an open note), and a
+        // scrap row is POINTED AT DIRECTLY — the target is the row you
+        // right-clicked, so there is no context in which a rendered door
+        // cannot act. Same operation underneath (`deleteBlock`); the scrap
+        // lands in the Trash for its 30 days like every other deletion, and
+        // the receipt names that road.
+        //
+        // R118 exemption, recorded: the Snippets area sits OUTSIDE the
+        // post-mode row entirely, exactly as `.tagBlock`'s doors do — no
+        // editing mode is privileged over another, so Takes cannot be
+        // "behind Write" where Write has no door either.
+        //
+        // **The #77 fence is untouched by construction:** this deletes a
+        // BLOCK (`deleteBlock`), never the pool container — no door in this
+        // app may tombstone the scraps area, and this one has no road to.
+        Capability(
+            id: .deleteScrap, verb: "Delete Scrap", scope: .block,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "Scraps are deleted where you see them — the Snippets rows carry the door.",
             availability: always),
         // 13e E8 — NOTE tagging, declared (P-1's "the registry grows to
         // cover a surface door as work touches it"; her 2026-08-02 word:

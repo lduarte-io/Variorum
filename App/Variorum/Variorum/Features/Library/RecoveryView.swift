@@ -175,6 +175,26 @@ final class RecoveryViewModel {
     /// and "Deleted books" sections.
     private(set) var trash: [Queries.TrashItem] = []
     private(set) var trashTruncated = false
+    /// **IS THE TRASH ITSELF EMPTY — not this filtered view of it** (the
+    /// post-13l polish round, ledger row 2; her A2 ruling on the 13l walk's
+    /// P-5(b)).
+    ///
+    /// `trash` is the FILTERED listing (the kind filter is applied in SQL, as
+    /// it must be — a window applied before a filter would window the wrong
+    /// set), so `!trash.isEmpty` answers *"does this view show anything"* and
+    /// the surface was using it to answer *"does the Trash hold anything"*.
+    /// Two consequences she met: an empty **Notes** view said "The Trash is
+    /// empty" while blocks sat in it, and **Empty Trash…** — a door over the
+    /// WHOLE Trash — vanished with the filtered rows.
+    ///
+    /// It is a second, deliberately tiny observation rather than a read
+    /// riding the first: the filtered observation only re-emits when the
+    /// FILTERED set changes, so anything deleted or purged in another kind
+    /// would have left this stale — which is the same class of bug one layer
+    /// down. `limit: 1` is all the question needs, and the Trash is a
+    /// summoned surface, never a keystroke road (the `poolHomes` argument,
+    /// one property up).
+    private(set) var trashIsEmptyUnfiltered = true
     private(set) var lastError: String?
     /// A successful Put back's own words (the tray's receipts, from their one
     /// home) — kept apart from `lastError` so a success is never rendered in
@@ -230,6 +250,33 @@ final class RecoveryViewModel {
         } catch {
             lastError = DeletionRefusal.fallback(error)
         }
+    }
+
+    /// Ledger row 2: the UNFILTERED truth, live. One row is the whole
+    /// question, and this observation never restarts — no filter or sort
+    /// touches it, which is exactly why it can answer for the Trash as a
+    /// whole while `startTrash` answers for the view.
+    func startTrashTotal() async {
+        do {
+            for try await value in session.database.observeTrash(
+                now: session.now, kinds: Set(Queries.TrashItem.Kind.allCases),
+                oldestFirst: false, limit: 1
+            ) {
+                trashIsEmptyUnfiltered = value.isEmpty
+            }
+        } catch is CancellationError {
+        } catch {
+            // A failure here must never HIDE the door — the ask-time read
+            // (`TrashPurge.emptyTrashConfirm`) is the authority on what
+            // Empty Trash takes, and it says so honestly when there is
+            // nothing. Erring open costs one honest "nothing to delete".
+            trashIsEmptyUnfiltered = false
+        }
+    }
+
+    /// Tests drive this listing the `adopt` way.
+    func adoptTrashTotalIsEmpty(_ empty: Bool) {
+        trashIsEmptyUnfiltered = empty
     }
 
     // MARK: A scrap's home is a POOL, and the surface says so (13l, §8b's
@@ -477,6 +524,16 @@ struct RecoveryView: View {
     /// so a door leaking into any note context would fail the walk.
     static let surfaceCapabilities: [CapabilityID] = [.deleteNow, .emptyTrash]
 
+    /// **Is the bulk purge door on screen?** (the post-13l polish round,
+    /// ledger row 2.) Named rather than written inline so a pin can drive the
+    /// DECISION the view makes, not a property standing beside it — the
+    /// shipped expression was `!model.trash.isEmpty`, which asked about the
+    /// FILTERED view, and a door over the whole Trash vanished with a kind
+    /// filter that happened to match nothing.
+    static func showsEmptyTrashDoor(_ model: RecoveryViewModel) -> Bool {
+        !model.trashIsEmptyUnfiltered
+    }
+
     init(
         session: AppSession, library: LibraryViewModel,
         openPost: @escaping (String) -> Void,
@@ -519,7 +576,12 @@ struct RecoveryView: View {
                     .foregroundStyle(.secondary)
                 controls
                 if model.trash.isEmpty {
-                    Text("The Trash is empty.").foregroundStyle(.secondary)
+                    // Ledger row 2: an empty VIEW is not an empty Trash, and
+                    // the sentence now knows the difference.
+                    Text(RecoveryCopy.trashEmptyLine(
+                        filteredBy: model.kindFilter,
+                        holdsOtherKinds: !model.trashIsEmptyUnfiltered))
+                        .foregroundStyle(.secondary)
                 }
                 ForEach(model.trash) { item in
                     trashRow(item)
@@ -550,6 +612,9 @@ struct RecoveryView: View {
         // Restarts when the filter or the sort changes — both are applied in
         // SQL, so the observation itself is what moves.
         .task(id: model.restartToken) { await model.startTrash() }
+        // Ledger row 2: the unfiltered truth, on its own observation, which
+        // deliberately does NOT restart with the filter.
+        .task { await model.startTrashTotal() }
     }
 
     /// Her round-3 ruling's two controls: filter by kind, sort by date —
@@ -566,6 +631,18 @@ struct RecoveryView: View {
             }
             .pickerStyle(.menu)
             .frame(maxWidth: 220)
+            // Ledger row 2 (her A2 ruling): the FILTERS-APPLIED chip. It
+            // stands whenever the listing is narrowed — not only when the
+            // narrowed result is empty — so "the Trash is empty" can never be
+            // read off a view she forgot she had filtered; and it clears the
+            // filter, so the signal is also the door out (P-2).
+            if let kind = model.kindFilter {
+                Button(RecoveryCopy.filterAppliedChip(kind)) {
+                    model.kindFilter = nil
+                }
+                .controlSize(.small)
+                .help(RecoveryCopy.filterAppliedHelp)
+            }
             Toggle("Oldest first", isOn: Binding(
                 get: { model.oldestFirst },
                 set: { model.oldestFirst = $0 }))
@@ -574,7 +651,14 @@ struct RecoveryView: View {
             // 13j batch 6b (J1): the bulk purge door — rendered only when
             // the Trash holds something (P-2: a door that cannot act is
             // not rendered); the confirm names the full count by kind.
-            if !model.trash.isEmpty {
+            //
+            // **Ledger row 2, the visibility read.** This was
+            // `!model.trash.isEmpty` — the FILTERED listing — so a kind
+            // filter with no matches hid a door that acts on the WHOLE
+            // Trash. What Empty Trash TAKES is untouched here (that is G6,
+            // batch 2's); this decides only whether it is on screen, and it
+            // now asks the question the door is actually about.
+            if Self.showsEmptyTrashDoor(model) {
                 Button(RecoveryPath.emptyTrashVerb) {
                     Task { await model.requestEmptyTrash() }
                 }

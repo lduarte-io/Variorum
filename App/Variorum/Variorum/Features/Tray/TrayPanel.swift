@@ -205,7 +205,46 @@ final class TrayViewModel {
     /// leaves BOTH buckets, exactly as the Trash's twin arm reads the same
     /// state (the query's own doc carries the reasoning).
     private(set) var strandedFates: [String: Queries.OriginFamilyFate] = [:]
-    private(set) var statusMessage: String?
+
+    /// **A RECEIPT IS NOT A REFUSAL** (the post-13l polish round, ledger row
+    /// 6 — her A6 ruling on the 13l walk's P-5(a): *"the color: should be
+    /// fixed"*).
+    ///
+    /// The panel had ONE status slot and painted it `.foregroundStyle(.red)`
+    /// for every message class, so *"Put back where it was."* — a success,
+    /// the whole point of the surface — read as an error. The Trash surface
+    /// one file over had already split them (`lastError` red beside `receipt`
+    /// secondary); this is the tray's own split, through the voice tokens
+    /// rather than a literal colour in a themed surface.
+    ///
+    /// The message is CLASSED where it is produced, never guessed by the
+    /// view: the doors below know whether the op answered or refused, and a
+    /// view re-deriving that from the text would be exactly the projection
+    /// the model exists to prevent.
+    nonisolated enum Status: Equatable, Sendable {
+        /// Something happened, and this says what (a landing, a placement).
+        case receipt(String)
+        /// Nothing happened, and this says why (the seal, an op refusal).
+        case refusal(String)
+
+        var text: String {
+            switch self {
+            case .receipt(let line), .refusal(let line): return line
+            }
+        }
+
+        var isRefusal: Bool {
+            if case .refusal = self { return true }
+            return false
+        }
+    }
+
+    private(set) var status: Status?
+
+    /// The pre-existing read, kept as a forwarder so every shipped pin rides
+    /// unmodified (the 3C parity pattern — a zero-test-edit suite is the
+    /// proof the split moved a class and not a behaviour).
+    var statusMessage: String? { status?.text }
 
     /// The row the caller asked to be shown (the J3-family lineage door's
     /// landing). Consumed by the view for its highlight; `revealMissing`
@@ -222,18 +261,29 @@ final class TrayViewModel {
         deleted.isEmpty && archived.isEmpty && originals.isEmpty && stranded.isEmpty
     }
 
-    /// True once the listings have loaded and the requested block is in
+    /// True once the listings have loaded and the requested block was in
     /// neither of them — e.g. an original released from a DIFFERENT note
     /// (`last_container_id` names where it was released, and a successor can
     /// since have moved). One quiet line rather than a guess at the cause.
+    ///
+    /// **IT IS AN ARRIVAL-TIME EXPLANATION, AND IT IS LATCHED AT ARRIVAL**
+    /// (the post-13l polish round, ledger row 1 — her A1 ruling on the 13l
+    /// walk's P-4: *"that just seems sloppy, it should show a success message
+    /// if anything"*).
+    ///
+    /// The shipped version was a computed property re-evaluated live against
+    /// the observation, so a SUCCESSFUL Put back from the revealed row made
+    /// it true — the row had left the tray by succeeding — and the panel
+    /// printed *"The block you asked to see isn't in this note's tray."*
+    /// directly under the receipt that said it had just been put back. The
+    /// sentence answers "why is nothing marked when I got here?", which is a
+    /// question about arrival; asking it of a listing that has since changed
+    /// under her own hand is asking it at the wrong moment.
+    ///
+    /// So it is decided ONCE, on the first loaded snapshot, and never
+    /// revisited: an act of hers can no longer turn the explanation on.
     private(set) var loaded = false
-    var revealMissing: Bool {
-        guard loaded, let revealBlockID else { return false }
-        return !deleted.contains { $0.blockID == revealBlockID }
-            && !archived.contains { $0.blockID == revealBlockID }
-            && !originals.contains { $0.blockID == revealBlockID }
-            && !stranded.contains { $0.blockID == revealBlockID }
-    }
+    private(set) var revealMissing = false
 
     func start() async {
         let now = session.now
@@ -260,7 +310,7 @@ final class TrayViewModel {
             }
         } catch is CancellationError {
         } catch {
-            statusMessage = String(describing: error)
+            status = .refusal(String(describing: error))
         }
     }
 
@@ -294,6 +344,15 @@ final class TrayViewModel {
             if case .counting = strandedFates[$0.blockID] { return true }
             return false
         }
+        // Ledger row 1: the arrival-time answer, decided on ARRIVAL. Every
+        // later snapshot — including the one a successful Put back produces —
+        // leaves it exactly as the first listing found it.
+        if !loaded, let revealBlockID {
+            revealMissing = !deleted.contains { $0.blockID == revealBlockID }
+                && !archived.contains { $0.blockID == revealBlockID }
+                && !originals.contains { $0.blockID == revealBlockID }
+                && !stranded.contains { $0.blockID == revealBlockID }
+        }
         loaded = true
     }
 
@@ -320,7 +379,7 @@ final class TrayViewModel {
     /// saying "where it was" there would be the copy-truth defect one door
     /// over.
     func putBackDeleted(_ blockID: String) async {
-        statusMessage = nil
+        status = nil
         do {
             let landing = try await session.runner.run { ops in
                 try ops.restoreBlock(blockID)
@@ -328,11 +387,11 @@ final class TrayViewModel {
             // 13l row 26: ONE place turns a landing into words, and it reads
             // the home's kind the op now reports — so a scrap's Put back
             // stops calling the scraps area a note.
-            statusMessage = RecoveryCopy.landingReceipt(landing)
+            status = .receipt(RecoveryCopy.landingReceipt(landing))
         } catch let error as OperationError {
-            statusMessage = TrayRefusalCopy.message(for: error)
+            status = .refusal(TrayRefusalCopy.message(for: error))
         } catch {
-            statusMessage = String(describing: error)
+            status = .refusal(String(describing: error))
         }
     }
 
@@ -341,16 +400,16 @@ final class TrayViewModel {
     /// back, so the block lands where it stood. The receipt reads the op's
     /// own answer, exactly as the deleted row's does.
     func putBackArchived(_ blockID: String) async {
-        statusMessage = nil
+        status = nil
         do {
             let landing = try await session.runner.run { ops in
                 try ops.unarchiveBlock(blockID)
             }
-            statusMessage = RecoveryCopy.landingReceipt(landing)
+            status = .receipt(RecoveryCopy.landingReceipt(landing))
         } catch let error as OperationError {
-            statusMessage = TrayRefusalCopy.message(for: error)
+            status = .refusal(TrayRefusalCopy.message(for: error))
         } catch {
-            statusMessage = String(describing: error)
+            status = .refusal(String(describing: error))
         }
     }
 
@@ -358,14 +417,17 @@ final class TrayViewModel {
     /// through the ONE shared brain the peek also calls (13j batch 3 — two
     /// doors, one act).
     func putBackOriginal(_ blockID: String) async {
-        statusMessage = nil
+        status = nil
         do {
-            statusMessage = try await PreservedOriginPutBack.run(
-                session: session, postID: postID, blockID: blockID)
+            // The act's own contract: it RETURNS the receipt and THROWS its
+            // refusals, so the class is decided by which road we are on and
+            // never by reading the sentence back.
+            status = .receipt(try await PreservedOriginPutBack.run(
+                session: session, postID: postID, blockID: blockID))
         } catch let error as OperationError {
-            statusMessage = TrayRefusalCopy.message(for: error)
+            status = .refusal(TrayRefusalCopy.message(for: error))
         } catch {
-            statusMessage = String(describing: error)
+            status = .refusal(String(describing: error))
         }
     }
 }
@@ -449,10 +511,14 @@ struct TrayPanel: View {
                 Spacer()
                 Button("Close") { dismiss() }
             }
-            if let status = model.statusMessage {
-                Text(status)
+            // Ledger row 6: a receipt reads as a receipt. The two classes
+            // are the model's (`TrayViewModel.Status`), and both colours are
+            // VOICE TOKENS — the shipped slot painted a literal `.red` in a
+            // themed surface, which is the second half of the same defect.
+            if let status = model.status {
+                Text(status.text)
                     .font(tokens.small)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(status.isRefusal ? tokens.accent : tokens.muted)
                     .textSelection(.enabled)
             }
             if model.revealMissing {

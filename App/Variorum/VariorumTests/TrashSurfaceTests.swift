@@ -562,4 +562,199 @@ struct TrashSurfaceTests {
         #expect(!message.contains("Refused:"))
         #expect(message.contains("no text here yet"))
     }
+
+    // MARK: - The post-13l polish round (ledger row 2 — her A2 ruling)
+
+    /// **A FILTERED VIEW IS NOT AN EMPTY TRASH.** Her words on the walk's
+    /// P-5(b): *"it can say the trash is empty, but there should be a filters
+    /// applied chip or something of the sort to make it clear."*
+    ///
+    /// The walk selected **Notes**, saw nothing, and read *"The Trash is
+    /// empty"* — with a block sitting in it — while **Empty Trash…**
+    /// disappeared along with the filtered rows, because both reads asked
+    /// `model.trash`, which is filtered IN SQL.
+    ///
+    /// This drives the real observations: a block in the Trash, the filter on
+    /// Notes, so the filtered listing really is empty and the unfiltered one
+    /// really is not.
+    ///
+    /// **RED ON OLD** by behavioural revert — restore either shipped
+    /// expression (`trashIsEmptyUnfiltered = trash.isEmpty` in
+    /// `startTrashTotal`, or `!model.trash.isEmpty` inside
+    /// `showsEmptyTrashDoor`) and this reds, reading back the empty claim and
+    /// the vanished door.
+    @Test func aKindFilterWithNoMatchesNeitherEmptiesTheTrashNorHidesItsDoor() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two."]) { editor in
+            let blockID = try #require(editor.model.slots.first?.blockID)
+            try await editor.session.runner.run { (ops: Operations) in
+                try ops.deleteBlock(blockID)
+            }
+            let model = RecoveryViewModel(session: editor.session)
+            model.kindFilter = .note
+
+            // Both observations, driven for real — the filtered one and the
+            // deliberately-unfiltered one.
+            let filtered = Task { await model.startTrash() }
+            let total = Task { await model.startTrashTotal() }
+            defer { filtered.cancel(); total.cancel() }
+            // Bounded settle, the `EditorHarness.settle` shape.
+            for _ in 0..<400 {
+                if !model.trashIsEmptyUnfiltered { break }
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(5))
+            }
+
+            #expect(model.trash.isEmpty, "no NOTE is in the Trash")
+            #expect(!model.trashIsEmptyUnfiltered, "…but the Trash holds a block")
+
+            // 1. The sentence says which two facts are true at once.
+            let line = RecoveryCopy.trashEmptyLine(
+                filteredBy: model.kindFilter,
+                holdsOtherKinds: !model.trashIsEmptyUnfiltered)
+            #expect(line != "The Trash is empty.", "it is not: \(line)")
+            #expect(line.contains(RecoveryCopy.kindLabel(.note)))
+            #expect(line.contains("filter is on"))
+
+            // 2. The bulk door — over the WHOLE Trash — stays on screen.
+            #expect(RecoveryView.showsEmptyTrashDoor(model),
+                    "Empty Trash acts on the whole Trash — a kind filter cannot decide whether it exists")
+
+            // 3. The chip stands, and it names the filter that is on.
+            let chip = RecoveryCopy.filterAppliedChip(.note)
+            #expect(chip.contains(RecoveryCopy.kindLabel(.note)))
+        }
+    }
+
+    // MARK: - Ledger row 4 — the scraps editor's honesty (her A4 ruling)
+
+    /// **ROW 4(a): a deleted SCRAP is told where it actually went.**
+    ///
+    /// The scraps editor composes the same bar and the same controller over a
+    /// `kind='pool'` container, so deleting a scrap printed *"…then in **This
+    /// Note's Tray** — the ⌫ door in **the note's bar**"* on a surface that
+    /// is not a note and shows no ⌫ badge. The road a scrap really takes is
+    /// the one the walk watched work: the Trash, labelled "from scraps".
+    ///
+    /// **RED ON OLD** by behavioural revert (drop the `home:` argument at
+    /// both `EditorSurfaceController` delete sites, or the `.pool` arm in
+    /// `deletedNote`): this reds on the pool assertions, reading back the
+    /// note-bar road on a scrap.
+    @Test func deletingAScrapNamesTheTrashAndNotTheNotesTrayDoor() {
+        let scrap = BlockSelectionCopy.deletedNote(1, home: .pool)
+        #expect(scrap.contains(RecoveryCopy.trashSection),
+                "the road a scrap actually takes: \(scrap)")
+        #expect(!scrap.contains(TrayPath.menuLabel),
+                "the scraps area is not a note and has no note's tray door")
+        #expect(!scrap.contains(TrayPath.doorPhrase),
+                "…and no ⌫ badge in a note's bar")
+        #expect(scrap.contains("\u{2325}\u{2318}Z"),
+                "the immediate reversal is the same gesture wherever it lived")
+        // The plural door speaks the same road.
+        #expect(BlockSelectionCopy.deletedNote(3, home: .pool)
+            .contains(RecoveryCopy.trashSection))
+
+        // A NOTE's receipt is byte-identical to what it has always said —
+        // `.post` is the default, so no shipped caller moved.
+        #expect(BlockSelectionCopy.deletedNote(1, home: .post)
+            == BlockSelectionCopy.deletedNote(1))
+        #expect(BlockSelectionCopy.deletedNote(1).contains(TrayPath.doorPhrase))
+    }
+
+    /// **ROW 4(b): the Snippets row can get rid of the scrap it shows.**
+    ///
+    /// Her A4 ruling on the walk's P-8: right-clicking a scrap in the
+    /// Snippets list offered exactly one row, "Tags…" — the only delete door
+    /// was inside the scraps EDITOR's bottom bar, so throwing away a line you
+    /// could already see meant opening the editor first.
+    ///
+    /// Driven through the model the row calls, so the pin covers the ACT and
+    /// its receipt, not a menu string. **The #77 fence rides with it**: this
+    /// door deletes a BLOCK, and the pool it lived in must still be live.
+    ///
+    /// **RED ON OLD:** `PoolViewModel.deleteScrap` does not exist pre-fix, so
+    /// the behavioural revert is the door's own body — make it a no-op
+    /// (return before the op) and the pin reds on the tombstone assertion,
+    /// reading back a scrap that could not be deleted from its row.
+    @Test func theSnippetsRowDeletesItsScrapAndNeverItsPool() async throws {
+        try await withEditor(seedBlocks: ["Alpha one."]) { editor in
+            let (poolID, scrapID) = try await editor.session.runner.run {
+                (ops: Operations) -> (String, String) in
+                let pool = try ops.createPool(title: "Scraps")
+                let scrap = try ops.newBlock(in: pool.id, text: "a loose sentence")
+                return (pool.id, scrap.block.id)
+            }
+            let model = PoolViewModel(session: editor.session)
+            await model.deleteScrap(scrapID)
+
+            #expect(model.lastError == nil)
+            let receipt = try #require(model.receipt)
+            #expect(receipt == BlockSelectionCopy.deletedNote(1, home: .pool),
+                    "it speaks the scraps road from the ONE home")
+
+            let (blockGone, poolAlive) = try await editor.database.read { db in
+                (try Block.fetchOne(db, key: scrapID)?.deletedAt != nil,
+                 try Container.fetchOne(db, key: poolID)?.deletedAt == nil)
+            }
+            #expect(blockGone, "the scrap really went")
+            #expect(poolAlive,
+                    "#77's fence: no door may tombstone the scraps area itself")
+
+            // …and it rows in the Trash, which is the road the receipt named.
+            let rows: [Queries.TrashItem] = try await editor.database.read { db in
+                try Queries.trash(db, now: harnessNow)
+            }
+            #expect(rows.contains { $0.id == scrapID && $0.kind == .block })
+        }
+    }
+
+    /// **ROW 4(c): the block's own context menu carries BOTH verbs.**
+    ///
+    /// It shipped with **Archive Block** and no delete beside it — the two
+    /// acts that exist to be told apart (one starts the 30-day clock, one
+    /// keeps the block forever), and only one of them was on the door you
+    /// reach by right-clicking the block itself.
+    ///
+    /// The second half is not decoration: with ONE block picked,
+    /// `deleteVerb(picked: 1)` is the string "Delete Block", so rendering the
+    /// caret row beside the selection row would put two identically-worded
+    /// rows on one menu aiming at two different targets.
+    ///
+    /// **RED ON OLD** by behavioural revert (drop the `picked.isEmpty` arm):
+    /// this reds on the first assertion, reading back a menu that can archive
+    /// a block but not delete it.
+    @Test func theBlockContextMenuCarriesDeleteBesideArchive() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two."]) { editor in
+            editor.textView.setSelectedRange(NSRange(location: 2, length: 0))
+            editor.model.updateCaretContext()
+
+            let verb = CapabilityRegistry.capability(.deleteBlock).verb
+            let titles = editor.model.contextMenuItems().map(\.title)
+            #expect(titles.contains(verb), "menu was \(titles)")
+            #expect(titles.contains("Archive Block"), "…beside the verb it is told apart from")
+            #expect(titles.filter { $0 == verb }.count == 1)
+
+            // With a selection standing, the SELECTION's row is the one — and
+            // it is still exactly one delete row.
+            #expect(editor.model.pickBlock(atOffset: 2, extending: false))
+            let picked = editor.model.contextMenuItems().map(\.title)
+            #expect(picked.filter { $0 == verb }.count == 1,
+                    "never two identically-worded rows: \(picked)")
+        }
+    }
+
+    /// The other two readings of the same sentence, so the fix cannot
+    /// over-correct into never saying the plain truth: with no filter, and
+    /// with a filter over a genuinely empty Trash, "The Trash is empty" is
+    /// what it says.
+    @Test func anEmptyTrashStillSaysSoWithOrWithoutAFilter() {
+        #expect(RecoveryCopy.trashEmptyLine(filteredBy: nil, holdsOtherKinds: false)
+                == "The Trash is empty.")
+        #expect(RecoveryCopy.trashEmptyLine(filteredBy: .block, holdsOtherKinds: false)
+                == "The Trash is empty.",
+                "a filter over an empty Trash is still an empty Trash")
+        // …and an unfiltered listing never reaches the narrowed wording, even
+        // if something is somehow waiting (the guard's first clause).
+        #expect(RecoveryCopy.trashEmptyLine(filteredBy: nil, holdsOtherKinds: true)
+                == "The Trash is empty.")
+    }
 }

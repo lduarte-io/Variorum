@@ -428,4 +428,73 @@ struct NoteTrayTests {
             #expect(!present.revealMissing)
         }
     }
+
+    // MARK: - The post-13l polish round (ledger rows 1 and 6)
+
+    /// **ROW 1 (her A1 ruling on the walk's P-4).** A successful Put back
+    /// from a REVEALED row was followed by *"The block you asked to see isn't
+    /// in this note's tray."* — because by then it was true: the row had left
+    /// the tray by succeeding. Her word: *"that just seems sloppy, it should
+    /// show a success message if anything."*
+    ///
+    /// The line is an ARRIVAL-time explanation ("why is nothing marked when I
+    /// got here?"), so it is decided on the first loaded listing and never
+    /// revisited. This drives the exact sequence the walk did: arrive with the
+    /// row present (nothing missing), then let the listing lose it — which is
+    /// what a successful Put back produces — and the explanation must stay
+    /// off, leaving the receipt standing alone.
+    ///
+    /// **RED ON OLD** by behavioural revert (restore the computed
+    /// `revealMissing`): this reds on the second `#expect`, reading back the
+    /// stale not-found line under a success.
+    @Test func aRevealThatSucceedsIsNotFollowedByTheNotFoundLine() async throws {
+        try await withEditor(seedBlocks: ["Alpha."]) { editor in
+            let model = TrayViewModel(
+                session: editor.session, postID: editor.postID, revealBlockID: "b1")
+            model.adopt(TrayViewModel.Snapshot(
+                deleted: [Queries.TrayItem(blockID: "b1", deletedAt: "x", text: "t")]))
+            #expect(!model.revealMissing, "it is right there — nothing to explain")
+
+            // The listing after a successful Put back: the row is gone
+            // BECAUSE the act worked.
+            model.adopt(TrayViewModel.Snapshot())
+            #expect(!model.revealMissing,
+                    "a row that left by SUCCEEDING is not a row she could not find")
+        }
+    }
+
+    /// **ROW 6 (her A6 ruling on the walk's P-5(a): *"the color: should be
+    /// fixed"*).** The panel painted its one status slot red for every
+    /// message class, so the receipt that IS the surface's whole point read
+    /// as an error. The class is decided where the message is produced —
+    /// a landing is a receipt, a refusal is a refusal — and the view colours
+    /// from the class.
+    ///
+    /// **RED ON OLD** by behavioural revert (have the three put-back doors
+    /// set `.refusal(…)` on success, which is the pre-fix single red slot):
+    /// this reds on the first `#expect`, reading back a success classed as an
+    /// error.
+    @Test func theTrayTellsAReceiptFromARefusal() async throws {
+        try await withEditor(seedBlocks: ["First.", "Second."]) { editor in
+            let ops = editor.session.operations
+            let doomed = try #require(try editor.storeSlots().last).blockID
+            try ops.deleteBlock(doomed)
+
+            let model = TrayViewModel(session: editor.session, postID: editor.postID)
+            await model.putBackDeleted(doomed)
+            #expect(model.status == .receipt(TrayPath.putBackWhereItWas))
+            #expect(model.status?.isRefusal == false,
+                    "a success is not painted as an error")
+
+            // …and a real refusal still reads as one, in the same slot.
+            try ops.deleteBlock(doomed)
+            try ops.lockPost(editor.postID)
+            await model.putBackDeleted(doomed)
+            #expect(model.status == .refusal(TrayRefusalCopy.sealed))
+            #expect(model.status?.isRefusal == true)
+
+            // The forwarder keeps every shipped pin riding unmodified.
+            #expect(model.statusMessage == TrayRefusalCopy.sealed)
+        }
+    }
 }

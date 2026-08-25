@@ -96,7 +96,14 @@ struct MobileDeletionTests {
                 #expect(alert.title == MobileEditorViewModel.deleteNoteConfirmTitle)
                 #expect(alert.message == RecoveryCopy.moveToTrashDetail(.note))
                 #expect(alert.message?.contains(RecoveryCopy.trashSection) == true)
-                #expect(alert.message?.contains(RecoveryCopy.surfaceName) == true)
+                // **ONE NOUN FOR ONE ROAD** (the post-13l polish round,
+                // ledger row 5 — her A5 ruling). This line used to assert the
+                // message ALSO named "Archived & Deleted", i.e. it pinned the
+                // defect: one road, two nouns, in the confirm she reads while
+                // deciding whether to delete her writing. STRENGTHENED to the
+                // fact the test is actually about — the place is named once.
+                #expect(alert.message?.contains(RecoveryCopy.surfaceName) == false,
+                        "the confirm names the road ONCE — \(alert.message ?? "")")
                 #expect(surface.alertActionTitles.map { $0.lowercased() }
                     .contains("delete"))
                 #expect(surface.alertActionTitles.map { $0.lowercased() }

@@ -425,10 +425,20 @@ struct WriteBlockSelectionTests {
                     (1...9).contains { BlockSelectionCopy.deleteVerb(picked: $0) == title }
                 }
             }
-            #expect(deleteRows().isEmpty, "no selection, no door (P-2)")
+            // **A JUSTIFIED EDIT (the post-13l polish round, ledger row
+            // 4(c)).** With no selection the menu now carries the CARET
+            // block's own delete row — the walk's P-8 finding: it offered
+            // Archive Block and no delete at all. So "no selection, no door"
+            // is no longer the fact: what is, and what this test is about, is
+            // that there is never MORE THAN ONE delete row, and that with a
+            // pick standing it is the SELECTION's row (which the counted
+            // wording below proves). `deleteVerb(picked: 1)` is literally
+            // "Delete Block", so counting rows is the only honest assertion.
+            #expect(deleteRows().count == 1, "exactly one delete row, always")
 
             pick(h, entries: [0])
             #expect(titles().contains("Delete Block"))
+            #expect(deleteRows().count == 1, "the pick's row REPLACES the caret's")
 
             pick(h, entries: [1])
             #expect(titles().contains("Delete 2 Blocks"),

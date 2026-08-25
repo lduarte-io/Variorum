@@ -118,6 +118,34 @@ struct NoteDeletionDeclarationTests {
         #expect(RecoveryCopy.movedToTrashReceipt(notes: 1)
             == RecoveryCopy.movedToTrashReceipt(.note))
     }
+
+    /// **ONE NOUN FOR ONE ROAD** (the post-13l polish round, ledger row 5 —
+    /// her A5 ruling on the 13l walk's P-9: *"should be fixed"*).
+    ///
+    /// The shipped confirm read *"The note goes to the **Trash** for 30 days.
+    /// You can put it back from **Archived & Deleted** until then."* Both
+    /// names were real — the Trash IS a section inside that surface — so
+    /// nothing was false; what it asked was that the reader hold two nouns
+    /// for one road, in the sentence she reads while deciding whether to
+    /// delete her writing. The place is named once now and the second clause
+    /// points back at it ("from there").
+    ///
+    /// The pin covers every member of the family, not just the note's, so a
+    /// future sentence cannot re-introduce the shape one kind at a time.
+    @Test func theMoveToTrashConfirmsNameTheRoadExactlyOnce() {
+        for detail in [
+            RecoveryCopy.deleteNoteConfirmDetail,
+            RecoveryCopy.deleteNotesConfirmDetail(5),
+            RecoveryCopy.moveToTrashDetail(.block),
+            RecoveryCopy.moveToTrashDetail(.book),
+            RecoveryCopy.moveToTrashDetail(.take),
+        ] {
+            #expect(detail.contains(RecoveryCopy.trashSection),
+                    "the road is named: \(detail)")
+            #expect(!detail.contains(RecoveryCopy.surfaceName),
+                    "one road, ONE noun: \(detail)")
+        }
+    }
 }
 
 // MARK: - The act

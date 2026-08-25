@@ -1852,6 +1852,9 @@ final class EditorViewModel {
         .divideWithCeremony, .mergeWithCeremony,
         // 13j (her round-7 ruling): block archive — the Block menu's twin.
         .archiveBlock,
+        // The post-13l polish round, ledger row 4(c): archive's OWN twin,
+        // which this menu had been missing while carrying archive.
+        .deleteBlock,
         .showOriginBlock,  // 13f W10b — rendered only where an origin exists
         .callout,  // 13k K6 — the submenu this surface inserts beside Format
         // 13e E2 (A17) — rendered only while blocks are picked
@@ -1912,8 +1915,27 @@ final class EditorViewModel {
         // rendered only where it can act — with at least one block picked
         // (the `.showOriginBlock` per-target shape below, P-2). The count is
         // in the row's words so the menu says how much it will remove.
+        //
+        // **The post-13l polish round, ledger row 4(c):** the CARET block's
+        // own delete row joins it, because this menu carried **Archive
+        // Block** with no delete beside it — the two verbs that exist to be
+        // told apart, one of them missing from the door you reach by
+        // right-clicking the block itself.
+        //
+        // Exactly ONE of the two renders, and which one is not a style call:
+        // with a single block picked, `deleteVerb(picked: 1)` is the STRING
+        // "Delete Block", so rendering both would put two identically-worded
+        // rows on one menu aiming at two different targets. A standing
+        // selection is the more specific intent, so it wins the row.
         let picked = selectedBlocksInOrder
-        if !picked.isEmpty {
+        if picked.isEmpty {
+            items.append(.init(
+                title: CapabilityRegistry.capability(.deleteBlock).menuTitle(),
+                enabled: true
+            ) { [weak self] in
+                Task { await self?.deleteCaretBlock() }
+            })
+        } else {
             items.append(.init(
                 title: BlockSelectionCopy.deleteVerb(picked: picked.count), enabled: true
             ) { [weak self] in

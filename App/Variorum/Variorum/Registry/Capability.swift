@@ -461,6 +461,13 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // Scrap tagging (13b 4D — N32(c)/S4-15: the one canvas-only door grows
     // registry-declared siblings on the scrap rows)
     case tagBlock
+    // Scrap DELETION (the post-13l polish round, ledger row 4(b) — her A4
+    // ruling): "Tags…" was the only row a scrap's own context menu offered,
+    // so getting rid of a line you can see meant opening the scraps editor.
+    // Its own act rather than a door on `.deleteBlock` for `.tagBlock`'s
+    // reason — the target is the row you right-clicked, never a caret in an
+    // open note. See the registry's declaration for the whole argument.
+    case deleteScrap
     // NOTE tagging (13e E8 — her 13f round-11 ask, both halves): the chips'
     // ＋ / ✕ doors, wherever they are rendered — the context bar (R6-1) and
     // the Library's note rows. ONE act, its renderers enumerated, on the

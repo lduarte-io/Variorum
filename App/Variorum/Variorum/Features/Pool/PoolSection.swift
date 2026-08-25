@@ -111,6 +111,34 @@ final class PoolViewModel {
         }
     }
 
+    // MARK: Delete a scrap (the post-13l polish round, ledger row 4(b))
+
+    /// A successful delete's own words, kept apart from `lastError` so a
+    /// receipt is never rendered in the slot errors use (the same split
+    /// ledger row 6 gave the tray).
+    private(set) var receipt: String?
+
+    /// **Delete the scrap this row is** (her A4 ruling on the walk's P-8).
+    ///
+    /// The operation is the ordinary `deleteBlock` — so the scrap goes to
+    /// the Trash for its 30 days like every other deletion, ⌥⌘Z reverses it
+    /// like every other structural act, and the receipt names that road
+    /// through the one home rather than in this file's own words.
+    ///
+    /// **It deletes a BLOCK, never the container.** The #77 fence — no door
+    /// may tombstone the scraps area — is kept by construction here: there
+    /// is no road from this method to `deleteContainer`.
+    func deleteScrap(_ blockID: String) async {
+        lastError = nil
+        receipt = nil
+        do {
+            try await session.runner.run { ops in try ops.deleteBlock(blockID) }
+            receipt = BlockSelectionCopy.deletedNote(1, home: .pool)
+        } catch {
+            lastError = DeletionRefusal.words(error, act: .delete)
+        }
+    }
+
     /// The drag payload: the pool block's ID, under the custom type — the
     /// text itself never rides the pasteboard (review focus 6: the copy is
     /// the operation's, at the drop).

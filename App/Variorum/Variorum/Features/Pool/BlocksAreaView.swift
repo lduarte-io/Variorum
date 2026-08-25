@@ -26,7 +26,13 @@ struct BlocksAreaView: View {
 
     /// 13b 4D (N32(c) — S4-15): the scrap rows' TAG door, registry-walked
     /// (`.surface` — the target is the row itself).
-    static let surfaceCapabilities: [CapabilityID] = [.tagBlock]
+    ///
+    /// **The post-13l polish round, ledger row 4(b):** the DELETE door joins
+    /// it, declared the same way and for the same reason — the target is the
+    /// row you right-clicked. Her A4 ruling on the walk's P-8: a scrap's only
+    /// way out was inside the scraps EDITOR's bottom bar, so throwing away a
+    /// line you can already see meant opening the editor first.
+    static let surfaceCapabilities: [CapabilityID] = [.tagBlock, .deleteScrap]
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -68,6 +74,22 @@ struct BlocksAreaView: View {
                 let importModel = importer ?? ImportModel(session: session)
                 importer = importModel
                 return importModel.handleDrop(providers, into: .pool(pool.id))
+            }
+            // Ledger row 4(b): the row door's answer. A receipt and a refusal
+            // are told apart (ledger row 6's rule, applied where the new door
+            // is), and this area rendered the MODEL's messages nowhere at all
+            // before — the entry bar below carries only its own.
+            if let line = model.receipt ?? model.lastError {
+                Text(tokens.chromeLabel(line))
+                    .font(tokens.small)
+                    .foregroundStyle(model.receipt != nil ? tokens.muted : tokens.accent)
+                    // lineLimit beside fixedSize in chrome (the b6dae25 class).
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 28)
+                    .padding(.bottom, 6)
+                    .textSelection(.enabled)
             }
             entryBar
         }
@@ -143,6 +165,17 @@ struct BlocksAreaView: View {
             Button("Tags…") {
                 tagSheetBlock = CanvasView.TagSheetBlock(
                     id: item.block.blockID, preview: item.block.text)
+            }
+            Divider()
+            // Ledger row 4(b): the way out, where the thing is. Ordinary
+            // move-to-Trash — 30 days, ⌥⌘Z, the receipt says so — and NO
+            // confirm, because block-scoped deletion never asks (13j's
+            // recorded rule: notes confirm, blocks and takes do not).
+            Button(
+                CapabilityRegistry.capability(.deleteScrap).menuTitle(),
+                role: .destructive
+            ) {
+                Task { await model.deleteScrap(item.block.blockID) }
             }
         }
         .help("Drag into an open editor to copy it in (⌥ carries the whole fan); "

@@ -73,6 +73,44 @@ nonisolated enum RecoveryCopy {
         }
     }
 
+    // MARK: The filter says so (the post-13l polish round, ledger row 2 —
+    // her A2 ruling on the 13l walk's P-5(b): *"it can say the trash is
+    // empty, but there should be a filters applied chip or something of the
+    // sort to make it clear"*)
+
+    /// **The chip.** A kind filter narrows the listing IN SQL, so an empty
+    /// result under a filter looks exactly like an empty Trash — and the
+    /// walk met precisely that: **Notes** selected, nothing shown, "The Trash
+    /// is empty", with blocks sitting in it. The chip is the standing signal
+    /// that the view is narrowed; clicking it clears the filter, so the
+    /// signal is also the way out (P-2 — a rendered door acts).
+    static func filterAppliedChip(_ kind: Queries.TrashItem.Kind) -> String {
+        "filter: \(kindLabel(kind)) \u{2715}"
+    }
+
+    static let filterAppliedHelp =
+        "The listing is narrowed to one kind — click to show everything again."
+
+    /// **The empty state, told the truth about itself.** Three readings, and
+    /// only one of them is "the Trash is empty":
+    ///
+    /// - no filter → the Trash really is empty;
+    /// - a filter, and nothing else is waiting either → still empty, honestly
+    ///   (the chip alone says the view is narrowed);
+    /// - a filter, with other kinds waiting → NOT empty, and the sentence
+    ///   says which two facts are true at once.
+    ///
+    /// `holdsOtherKinds` is the UNFILTERED truth, which a filtered listing
+    /// cannot supply — that is the whole defect, so it is a parameter rather
+    /// than something derived here.
+    static func trashEmptyLine(
+        filteredBy kind: Queries.TrashItem.Kind?, holdsOtherKinds: Bool
+    ) -> String {
+        guard let kind, holdsOtherKinds else { return "The Trash is empty." }
+        return "No \(kindLabel(kind).lowercased()) in the Trash — the "
+            + "\(kindLabel(kind)) filter is on, and other things are waiting here."
+    }
+
     /// What ONE row calls itself, in the singular.
     static func rowKind(_ kind: Queries.TrashItem.Kind) -> String {
         switch kind {
@@ -240,9 +278,23 @@ nonisolated enum RecoveryCopy {
     /// shared because the phone built the doors first and the Mac's 13l
     /// work will want the same words (its note-delete door carries no
     /// confirmation at all today — the inventory's R1 finding).
+    ///
+    /// **ONE NOUN FOR ONE ROAD** (the post-13l polish round, ledger row 5 —
+    /// her A5 ruling on the 13l walk's P-9: *"should be fixed"*). The
+    /// sentence used to end *"You can put it back from **Archived & Deleted**
+    /// until then"* while it had already said **Trash** — both names are
+    /// real (the Trash is a section inside that surface) and the sentence was
+    /// honest, but it asked the reader to hold two nouns for one road, in a
+    /// confirm she reads while deciding whether to delete her writing. The
+    /// place is named ONCE and the second clause points back at it.
+    ///
+    /// "the Trash" is the forward-compatible half deliberately: this round's
+    /// IA pass gives the Trash its own icon door in the Library and retires
+    /// the ⋯ menu that "Archived & Deleted" labels, so a sentence built on
+    /// `surfaceName` would have to be rewritten again.
     static func moveToTrashDetail(_ kind: Queries.TrashItem.Kind) -> String {
         "The \(rowKind(kind)) goes to the \(trashSection) for \(TrashWindow.days) days. "
-            + "You can put it back from \(surfaceName) until then."
+            + "You can put it back from there until then."
     }
 
     /// Deleting a BOOK is not deleting its notes — the 13j books lesson,
@@ -286,8 +338,9 @@ nonisolated enum RecoveryCopy {
 
     static func deleteNotesConfirmDetail(_ count: Int) -> String {
         guard count != 1 else { return deleteNoteConfirmDetail }
+        // ONE noun, exactly as the singular above (ledger row 5).
         return "The \(count) notes go to the \(trashSection) for \(TrashWindow.days) days. "
-            + "You can put them back from \(surfaceName) until then."
+            + "You can put them back from there until then."
     }
 
     /// ONE receipt for the whole gesture (her ruling's second half), and it

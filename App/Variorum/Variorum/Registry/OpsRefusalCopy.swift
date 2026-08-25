@@ -226,8 +226,33 @@ nonisolated enum BlockSelectionCopy {
     /// immediate reversal that dies with the session; the tray is the one
     /// that survives a restart. Saying only the first is what made a delete
     /// feel permanent.
-    static func deletedNote(_ count: Int) -> String {
-        let road = "then in \(TrayPath.menuLabel) \u{2014} \(TrayPath.doorPhrase)."
+    /// **AND THE SCRAPS AREA GETS ITS OWN ROAD** (the post-13l polish round,
+    /// ledger row 4 — her A4 ruling on the 13l walk's P-8: *"I'd fix whatever
+    /// this is"*).
+    ///
+    /// The scraps editor composes this same bar over a `kind='pool'`
+    /// container, so deleting a scrap printed *"…then in **This Note's Tray**
+    /// — the ⌫ door in **the note's bar**"* on a surface that is not a note
+    /// and carries no ⌫ badge. The road it named was findable only if you
+    /// already knew that the note ▾ menu's tray item works on a pool too.
+    ///
+    /// The honest road for a scrap is the one the walk actually saw work: it
+    /// rows in the **Trash**, labelled *"from scraps"*, with an **Open
+    /// scraps** door beside it. So a pool home names that, and ⌥⌘Z — the
+    /// immediate reversal — survives either way, because it is the same
+    /// gesture wherever the block lived.
+    ///
+    /// `.post` is the default so every shipped caller and pin rides
+    /// unmodified: a note's receipt is byte-identical to what it has always
+    /// said.
+    static func deletedNote(_ count: Int, home: ContainerKind = .post) -> String {
+        let road: String
+        switch home {
+        case .post:
+            road = "then in \(TrayPath.menuLabel) \u{2014} \(TrayPath.doorPhrase)."
+        case .pool:
+            road = "then in the \(RecoveryCopy.trashSection)."
+        }
         return count == 1
             ? "Block deleted — \u{2325}\u{2318}Z puts it back, \(road)"
             : "\(count) blocks deleted — \u{2325}\u{2318}Z puts them all back in one go, "

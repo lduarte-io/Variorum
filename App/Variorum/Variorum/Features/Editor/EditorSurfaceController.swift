@@ -750,8 +750,18 @@ final class EditorSurfaceController {
             return
         }
         // 13j J8(a): the ONE shared receipt (see `BlockSelectionCopy`).
-        await runDeleteBlock(blockID, entryIndex: index, note: BlockSelectionCopy.deletedNote(1))
+        // Ledger row 4(a): the road depends on WHAT this pane is over — the
+        // scraps editor composes this same controller on a pool container,
+        // and the note-bar tray it used to name is not there.
+        await runDeleteBlock(
+            blockID, entryIndex: index,
+            note: BlockSelectionCopy.deletedNote(1, home: homeKind))
     }
+
+    /// The container this pane is over. The header is observed, so this costs
+    /// nothing; `.post` while it is still loading, which is what every
+    /// receipt said before this existed.
+    private var homeKind: ContainerKind { model.header?.kind ?? .post }
 
     /// **ARCHIVE the caret block** (13j, her round-7 ruling): the block
     /// leaves the note KEPT — its placement is released, `archived_at` is
@@ -858,7 +868,10 @@ final class EditorSurfaceController {
         // anything was stranded, and that answer only exists once the delete
         // has landed.
         if landed {
-            model.showStatus(BlockSelectionCopy.deletedNote(blockIDs.count)
+            // Ledger row 4(a): the same home-aware road as the single-block
+            // door — the compound is reachable from the scraps editor too.
+            model.showStatus(
+                BlockSelectionCopy.deletedNote(blockIDs.count, home: homeKind)
                 + (await StrandedOriginals.note(
                     session: model.session, blockIDs: blockIDs) ?? ""))
         }

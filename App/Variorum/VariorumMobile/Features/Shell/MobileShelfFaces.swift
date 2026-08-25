@@ -126,10 +126,16 @@ nonisolated enum MobileShelfFaces {
     /// is the 13j books lesson she had to teach once already: deleting a
     /// book does not delete its notes — only the ordered collection goes,
     /// and it goes to the Trash for the window like everything else.
+    /// ONE NOUN FOR ONE ROAD (the post-13l polish round, ledger row 5): the
+    /// last clause used to name **Archived & Deleted** after the sentence had
+    /// already said **Trash** — the same two-nouns-for-one-road shape her A5
+    /// ruling retired in `RecoveryCopy.moveToTrashDetail`, living on in this
+    /// phone-local sibling. Fixed here in the same breath so the two confirms
+    /// cannot describe one 30-day clock two ways.
     static func deleteBookConfirmDetail(name: String?) -> String {
         let subject = name.map { "\"\($0)\" goes" } ?? "The book goes"
         return "\(subject) to the \(RecoveryCopy.trashSection) for "
             + "\(TrashWindow.days) days. \(RecoveryCopy.deleteBookKeepsItsNotes) "
-            + "You can put it back from \(RecoveryCopy.surfaceName) until then."
+            + "You can put it back from there until then."
     }
 }
