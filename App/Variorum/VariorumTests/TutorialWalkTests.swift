@@ -2151,6 +2151,21 @@ struct TutorialDeletionActsTests {
             #expect(trash.contains(RecoveryPath.archivedSection))
             #expect(trash.contains(CapabilityRegistry.capability(.deleteNow).verb))
             #expect(trash.contains(CapabilityRegistry.capability(.emptyTrash).verb))
+            // **The post-13l polish round, ledger row 12 (D2).** This lesson
+            // taught *"No door inside a note ever deletes something for
+            // good"*, and her G5 ruling superseded it IN PART: the note's own
+            // Leaving section carries Delete Now on its take rows, *"to keep
+            // the capability"* after takes left the global Trash. The rule
+            // that replaced it is checkable against the two surfaces
+            // themselves, which is what makes this a lesson and not a slogan.
+            #expect(trash.contains("Leaving section"),
+                    "the second place a purge door lives, named")
+            #expect(!trash.contains("No door inside a note"),
+                    "…and the superseded absolute is gone")
+            #expect(TrayPanel.surfaceCapabilities.contains(.deleteNow),
+                    "the note's own trash section really carries it")
+            #expect(!BlockHistoryPane.surfaceCapabilities.contains(.deleteNow),
+                    "…and a block's history really does not, exactly as the lesson says")
 
             let past = try #require(prose["what a block leaves behind"])
             #expect(past.contains(BlockPastCopy.deletedTakesHeader))
@@ -2164,6 +2179,15 @@ struct TutorialDeletionActsTests {
                     "the History face's lineage row, in the lesson's mouth")
             #expect(past.contains(TrayPath.goesWithItsFamily),
                     "the moving-over label, quoted from where it renders")
+            // **A7's rider** (the post-13l polish round): her per-merge message
+            // is DECLINED — *"it's annoying to see that message every time"* —
+            // so the teaching it would have carried lands in the chapter
+            // instead, and it has to say BOTH halves: that the silence is
+            // deliberate, and where the joined blocks went.
+            #expect(past.contains("says nothing at the time"),
+                    "the declined message's teaching, in the lesson's mouth")
+            #expect(past.contains("BOTH"),
+                    "…and a merge's originals are ALL of them (her C2 ruling)")
         }
     }
 
@@ -2690,6 +2714,335 @@ struct TutorialDeletionActsTests {
             // CLOCK, in the section where she can watch it go.
             #expect(tray.stranded.contains { $0.blockID == dividing.blockID },
                     "…and it is visibly in the clock-bearing one, where she can see it go")
+        }
+    }
+}
+
+// MARK: - where things go (chapter acts — the post-13l polish round, G4)
+
+/// The map chapter's name, in one place — the plan, the seeder's section and
+/// this suite all mean the same three words.
+private let placesChapter = "where things go"
+
+/// **THE FIVE PLACES, EXECUTED.**
+///
+/// Her third-sitting expansion asked for a chapter that *"encouraged [the
+/// reader] to get comfortable with each of the"* places, and her stated fear
+/// is why: *"people are going to conclude that the one thing they really want
+/// (my whole note at this point in time) … is way too hard to get, even though
+/// we're actually offering infinitely more ways of saving your ideas."*
+///
+/// So this suite does what the deletion chapter's does one chapter up: it
+/// PERFORMS what the prose asks the reader to perform, against freshly-seeded
+/// content, and asserts the store outcomes the prose promises. A place the
+/// lesson names that the app does not have is a red test.
+@MainActor
+@Suite("Tutorial acts — where things go")
+struct TutorialWherePlacesActsTests {
+
+    /// **Every place and door the chapter names, read from its OWN home.** The
+    /// prose is written plainly (never interpolated from a constant it means
+    /// to assert), and this ties each promise to the place the app spells it —
+    /// so a renamed surface, a retired act or a re-worded region makes the
+    /// lesson red rather than merely wrong.
+    @Test func everyPlaceTheChapterNamesIsAPlaceTheAppHas() async throws {
+        try await withTutorialWorld { _, db, bookID in
+            let titles = try #require(
+                TutorialSeeder.plan.first { $0.chapter == placesChapter }?.lessons)
+            #expect(titles == ["the five places", "saving a moment", "the two exits"])
+            let prose = try await db.read { db -> [String: String] in
+                var out: [String: String] = [:]
+                for title in titles {
+                    out[title] = try Queries.renderedText(
+                        db, containerID: lessonID(db, bookID: bookID, title))
+                }
+                return out
+            }
+
+            // ONE — the map itself, all five named where a reader meets them.
+            let map = try #require(prose["the five places"])
+            #expect(map.contains(RecoveryPath.archivedSurface), "TWO: Archive's own name")
+            #expect(map.contains(CapabilityRegistry.capability(.archiveNote).verb))
+            #expect(map.contains(RecoveryCopy.trashSection), "THREE: the Trash's")
+            #expect(map.contains("\(TrashWindow.days)-day") || map.contains("\(TrashWindow.days) days"),
+                    "the ruled window, never a number of its own")
+            #expect(map.contains(VersionsPath.menuLabel), "FOUR: the door to a note's moments")
+            #expect(map.contains(VersionsPath.openVerb) && map.contains(VersionsPath.restoreVerb)
+                && map.contains(VersionsPath.promoteVerb),
+                    "…and the three things a moment offers")
+            #expect(map.contains(BlockHistoryPath.name), "FIVE: the panel's own name")
+            #expect(map.contains(BlockHistoryPath.doorLabel), "…and the door's word")
+            #expect(map.contains(BlockHistoryPath.cameFromSection))
+            // The take's one home, said in the map so the Trash's absence of
+            // takes is an answer rather than a hole (her D1 ruling).
+            #expect(map.contains("never rows"))
+
+            // TWO — the pair of keys (row 26). Both chords are read from the
+            // registry, so a re-bind reaches the lesson.
+            let saving = try #require(prose["saving a moment"])
+            let commitChord = try #require(
+                CapabilityRegistry.capability(.commitTake).shortcutLabel)
+            let versionChord = try #require(
+                CapabilityRegistry.capability(.saveNoteVersion).shortcutLabel)
+            #expect(commitChord != versionChord, "the pairing rests on them differing")
+            #expect(saving.contains(commitChord), "this take's moment")
+            #expect(saving.contains(versionChord), "…and this note's")
+            #expect(saving.contains(BlockHistoryPath.doorLabel)
+                && saving.contains("commit"),
+                    "the bottom-chrome pairing IS the teaching moment (her G4 words)")
+            #expect(saving.contains(VersionsPath.restoreVerb)
+                && saving.contains(VersionsPath.promoteVerb))
+
+            // THREE — the two exits (row 27), and the rule in her own shape.
+            let exits = try #require(prose["the two exits"])
+            #expect(exits.contains("DELETION GOES TO THE TRASH")
+                && exits.contains("TRANSFORMATION GOES TO LINEAGE"),
+                    "her eleventh-sitting mandate, in the lesson's mouth")
+            #expect(exits.contains(TrayPath.menuLabel), "the first exit's near listing")
+            #expect(exits.contains(RecoveryCopy.trashSection), "…and its far one")
+            #expect(exits.contains(TrayPath.putBackVerb))
+            #expect(exits.contains(BlockHistoryPath.cameFromSection),
+                    "the second exit's home")
+            #expect(exits.contains(BlockHistoryPath.bringBackVerb),
+                    "…and the one button back, by its real word")
+        }
+    }
+
+    /// The staging the three lessons act on — the same contract
+    /// `actReadyStagingIsInPlace` keeps for every older chapter.
+    @Test func theMapsChapterIsStagedForItsActs() async throws {
+        try await withTutorialWorld { _, db, bookID in
+            let map = try await db.read { try lessonID($0, bookID: bookID, "the five places") }
+            #expect(try await slots(db, map).compactMap(\.text)
+                .contains { $0.hasPrefix("PRACTICE ME") },
+                    "a block to visit with the history door")
+
+            let saving = try await db.read {
+                try lessonID($0, bookID: bookID, "saving a moment")
+            }
+            #expect(try await slots(db, saving).compactMap(\.text)
+                .contains { $0.hasPrefix("PRACTICE TAKE") },
+                    "a take to commit")
+
+            let exits = try await db.read { try lessonID($0, bookID: bookID, "the two exits") }
+            let exitProjection = try await projection(db, exits)
+            let texts = exitProjection.slots.compactMap(\.text)
+            #expect(texts.contains { $0.hasPrefix("EXIT ONE") }, "one to delete whole")
+            let first = try #require(exitProjection.slots.firstIndex {
+                $0.text?.hasPrefix("EXIT TWO, first half") == true
+            })
+            let second = try #require(exitProjection.slots.firstIndex {
+                $0.text?.hasPrefix("EXIT TWO, second half") == true
+            })
+            #expect(second == first + 1, "the pair to join must be ADJACENT")
+            for index in [first, second] {
+                let blockID = exitProjection.slots[index].blockID
+                #expect((exitProjection.fans[blockID]?.count ?? 1) == 1,
+                        """
+                        …and single-take: a cross-block edit joins the halves \
+                        only where no fan hangs on the seam (the #11a ruling)
+                        """)
+            }
+        }
+    }
+
+    /// **ALL FIVE PLACES, VISITED.** Each paragraph of the map lesson makes a
+    /// promise about where something lives; this executes them one after
+    /// another on the seeded content and asks the store where each thing went.
+    @Test func theFivePlacesAreFivePlacesTheAppReallyHas() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            let lesson = try await db.read { try lessonID($0, bookID: bookID, "the five places") }
+
+            // ONE — where you left it: the ordinary case is a real case.
+            let standing = try await slots(db, lesson)
+            #expect(!standing.isEmpty, "the note is where she left it")
+
+            // TWO — Archive: its own listing, no clock, and back again.
+            let library = LibraryViewModel(session: session)
+            await library.archive(postID: lesson)
+            let (archived, trashed) = try await db.read { [now = session.now] db in
+                (try Queries.archivedPosts(db).map(\.postID),
+                 try Queries.trash(db, now: now).map(\.id))
+            }
+            #expect(archived.contains(lesson), "ARCHIVED holds it")
+            #expect(!trashed.contains(lesson), "…and the Trash never does — no clock")
+            await library.unarchive(postID: lesson)
+            #expect(try await db.read { try Queries.library($0).map(\.postID) }
+                .contains(lesson), "Unarchive puts it back in the Library")
+
+            // THREE — the Trash: notes · books · blocks, each with its days.
+            let doomed = try #require(standing.last).blockID
+            try await session.runner.run { ops in try ops.deleteBlock(doomed) }
+            let rows = try await db.read { [now = session.now] db in
+                try Queries.trash(db, now: now)
+            }
+            let row = try #require(rows.first { $0.id == doomed })
+            #expect(row.kind == .block)
+            #expect(TrashWindow.daysLeft(row.deletedAt, now: session.now) == TrashWindow.days,
+                    "a fresh tombstone wears the whole window")
+            #expect(!TrashScope.listedKinds.contains(.take),
+                    "…and a deleted take never rows here (her D1 ruling)")
+
+            // FOUR — this note's Versions: ⌘⇧S's home, and NOT the Library's.
+            _ = try await VersionActs.save(session: session, postID: lesson)
+            let versions = try await db.read { try Queries.noteVersions($0, of: lesson) }
+            #expect(versions.count == 1, "the moment is listed with its note")
+            let versionID = try #require(versions.first).postID
+            let (inLibrary, inArchived) = try await db.read { db in
+                (try Queries.library(db).map(\.postID).contains(versionID),
+                 try Queries.archivedPosts(db).map(\.postID).contains(versionID))
+            }
+            #expect(!inLibrary && !inArchived,
+                    "a note's past is not another note — it stays out of both listings")
+
+            // FIVE — this block's History: the block's own time, in one place.
+            let opening = try #require(standing.first)
+            let host = opening.blockID
+            let variantID = try #require(opening.variantID)
+            _ = try await session.runner.run { ops in
+                try ops.commit(variantID, kind: .manual)
+            }
+            let history = try await db.read { [now = session.now] db in
+                try Queries.blockHistory(db, blockID: host, now: now)
+            }
+            #expect(history.savepoints[variantID]?.count == 1,
+                    "the moment ⌘S wrote is where the lesson says to look for it")
+        }
+    }
+
+    /// **ROW 26 — THE TWO SIZES OF MOMENT, both saved, each in its own home.**
+    /// The lesson's whole claim is that ⌘S and ⌘⇧S differ by one grain and one
+    /// shift key; this drives both doors and asks where each moment landed.
+    @Test func theTwoSavesKeepTwoSizesOfMoment() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            let lesson = try await db.read {
+                try lessonID($0, bookID: bookID, "saving a moment")
+            }
+            let harness = try tutorialEditor(session, db, postID: lesson)
+            let practice = try staged(harness, "PRACTICE TAKE")
+
+            // ⌘S — the take's moment, through the bar's own door.
+            harness.textView.setSelectedRange(
+                NSRange(location: try entryRange(harness, practice.blockID).location, length: 0))
+            harness.model.updateCaretContext()
+            let take = try #require(harness.model.caretVariantID)
+            harness.model.commitCaretVariant()
+            var committed = 0
+            for _ in 0..<200 {
+                committed = (try? await db.read { db in
+                    try Queries.commitHistory(db, variantID: take).count
+                }) ?? 0
+                if committed == 1 { break }
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(5))
+            }
+            #expect(committed == 1, "the bar's own commit door wrote the take's moment")
+
+            // ⌘⇧S — the note's moment, through the composition the door calls.
+            _ = try await VersionActs.save(session: session, postID: lesson)
+
+            let blocksInNote = try await slots(db, lesson).count
+            let (history, versions) = try await db.read { [now = session.now] db in
+                (try Queries.blockHistory(db, blockID: practice.blockID, now: now),
+                 try Queries.noteVersions(db, of: lesson))
+            }
+            #expect(history.savepoints[take]?.count == 1,
+                    "⌘S's moment is in the block's History, under this take")
+            #expect(versions.count == 1, "⌘⇧S's moment is in the note's Versions")
+            #expect(versions.first?.blockCount == blocksInNote,
+                    "…and it is the WHOLE note — every block, not the one she was in")
+            // The pairing the lesson teaches is only teachable while the two
+            // chords really are the shifted twins of each other.
+            #expect(CapabilityRegistry.capability(.commitTake).shortcutLabel == "\u{2318}S")
+            #expect(CapabilityRegistry.capability(.saveNoteVersion).shortcutLabel
+                == "\u{2318}\u{21E7}S")
+        }
+    }
+
+    /// **ROW 27 — THE TWO EXITS, TAUGHT BY DOING** (her eleventh-sitting
+    /// mandate: *"I deleted a paragraph, is it in deleted or in lineage? and
+    /// lineage of what block"* must be legible).
+    ///
+    /// The lesson walks the reader through both exits in order, so this walks
+    /// them too: a whole-paragraph delete lands in the tray AND the Trash with
+    /// Put back real; a cross-seam edit joins two blocks and BOTH of them turn
+    /// up in the joined block's came-from, one button from being back — with
+    /// no clock anywhere, because nothing was deleted.
+    @Test func theTwoExitsLandInTwoDifferentPlaces() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            let lesson = try await db.read { try lessonID($0, bookID: bookID, "the two exits") }
+            let harness = try tutorialEditor(session, db, postID: lesson)
+
+            // ── EXIT ONE: deletion goes to the Trash ──────────────────────
+            let doomed = try staged(harness, "EXIT ONE")
+            harness.replace(try tripleClickSelection(harness, doomed.blockID), with: "")
+            await harness.flush()
+
+            let (trayed, trashed) = try await db.read { [now = session.now] db in
+                (try Queries.trayBlocks(db, postID: lesson, now: now).map(\.blockID),
+                 try Queries.trash(db, now: now))
+            }
+            #expect(trayed.contains(doomed.blockID), "the near listing: this note's tray")
+            let row = try #require(trashed.first { $0.id == doomed.blockID })
+            #expect(row.kind == .block, "…and the far one: the Library's Trash")
+            #expect(TrashWindow.daysLeft(row.deletedAt, now: session.now) == TrashWindow.days,
+                    "leaving means a countdown, and the row says so")
+
+            // ── EXIT TWO: transformation goes to lineage ──────────────────
+            try harness.reload()
+            let first = try staged(harness, "EXIT TWO, first half")
+            let second = try staged(harness, "EXIT TWO, second half")
+            let firstRange = try entryRange(harness, first.blockID)
+            let secondRange = try entryRange(harness, second.blockID)
+            let span = NSRange(
+                location: firstRange.location + firstRange.length / 2,
+                length: (secondRange.location + secondRange.length / 2)
+                    - (firstRange.location + firstRange.length / 2))
+            let compound = try #require(
+                harness.model.planCrossBlockEdit(range: span, replacement: ""),
+                "two single-take neighbours: the lesson's own selection is eligible")
+            await harness.model.runCrossBlockEdit(compound)
+            await harness.flush()
+
+            let after = try harness.storeSlots().map(\.blockID)
+            #expect(!after.contains(first.blockID) && !after.contains(second.blockID),
+                    "the two became one — neither original stands on the page")
+            // The joined block is the one carrying what is left of both halves
+            // — the lesson's own marker survives the cut it asks for.
+            let standingSlots = try harness.storeSlots()
+            let joined = try #require(standingSlots.first {
+                $0.text?.contains("EXIT TWO") == true
+            }).blockID
+            #expect(after.contains(joined))
+
+            let history = try await db.read { [now = session.now] db in
+                try Queries.blockHistory(db, blockID: joined, now: now)
+            }
+            #expect(Set(history.origins.map(\.origin.blockID))
+                == Set([first.blockID, second.blockID]),
+                    "BOTH originals, in the block they became — not one of them")
+
+            // …and NOTHING about that is a deletion: no clock, no Trash row.
+            let (clocks, stillTrashed) = try await db.read { [now = session.now] db in
+                (try Queries.originFamilyClocks(db, postID: lesson, now: now),
+                 try Queries.trash(db, now: now).map(\.id))
+            }
+            for original in [first.blockID, second.blockID] {
+                #expect(clocks[original] == nil,
+                        "a preserved original has no clock while its descendant lives")
+                #expect(!stillTrashed.contains(original),
+                        "transformation never puts anything in the Trash")
+            }
+
+            // The one button back, through the door the lesson names.
+            let model = BlockHistoryModel(session: session, postID: lesson, blockID: joined)
+            model.adopt(history)
+            await model.bringBack(first.blockID)
+            #expect(model.status?.isRefusal != true)
+            #expect(try await db.read {
+                try Queries.renderPost($0, containerID: lesson).map(\.blockID)
+            }.contains(first.blockID),
+                    "Bring back really puts the original into the note again")
         }
     }
 }

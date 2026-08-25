@@ -84,6 +84,23 @@ enum TutorialSeeder {
         ("deleting & getting it back",
          ["deleting blocks", "archive \u{B7} delete \u{B7} scraps",
           "the tray & the Trash", "what a block leaves behind"]),
+        // THE POST-13L POLISH ROUND, ledger row 19 (G4) — **THE MAP**. Her
+        // third-sitting expansion, verbatim: *"the next polish session should
+        // definitely add a new tutorial chapter about this… the user should be
+        // encouraged to get comfortable with each of the"* places. And her
+        // stated fear is why it exists at all: *"people are going to conclude
+        // that the one thing they really want (my whole note at this point in
+        // time) … is way too hard to get, even though we're actually offering
+        // infinitely more ways of saving your ideas."*
+        //
+        // It sits AFTER the deletion chapter because it is that chapter's
+        // answer widened: the reader has just learned where a deleted block
+        // goes, and the honest next question is "so where does everything
+        // else go" — including the two places the round built (a note's
+        // Versions, a block's History) and the one the app never had to build
+        // (where you left it).
+        ("where things go",
+         ["the five places", "saving a moment", "the two exits"]),
         ("ways of looking", ["lenses", "compare & versions",
                              "blocks \u{B7} canvas"]),
         ("the library of things", ["comments & tags", "books & the shelf",
@@ -218,6 +235,9 @@ enum TutorialSeeder {
         // make blocks and the ways of looking at them.
         let deleting = try ops.createSection(
             in: book.id, name: "deleting & getting it back")
+        // The post-13l polish round (row 19): the map, right after the chapter
+        // that raises the question.
+        let places = try ops.createSection(in: book.id, name: "where things go")
         let looking = try ops.createSection(in: book.id, name: "ways of looking")
         let library = try ops.createSection(in: book.id, name: "the library of things")
 
@@ -872,14 +892,25 @@ enum TutorialSeeder {
             + "never rows here: it waits in its own block\u{2019}s History, "
             + "where its block and its fan are there to make sense of it.)",
 
-            "Two doors live in the Trash and nowhere else: Delete Now on a "
-            + "single row, and Empty Trash for everything it lists. Both ask "
-            + "first — Delete Now asks every single time, and Empty Trash's "
-            + "question names the full count by kind before it takes "
-            + "anything, and says what it leaves alone. No door "
-            + "inside a note ever deletes something for good; that is on "
-            + "purpose, and it is why the Trash is worth visiting once before "
-            + "you need it.",
+            // The post-13l polish round, ledger row 12 (D2): this paragraph
+            // taught "no door inside a note ever deletes something for good",
+            // which her G5 ruling superseded IN PART — the note's own Leaving
+            // section carries Delete Now on its take rows, *"to keep the
+            // capability"* after takes left the global Trash. The rule that
+            // replaced it is the one the lesson teaches now: purge doors live
+            // in TRASH SURFACES — the Library's Trash and this note's own
+            // trash section — and never in the writing flow.
+            "Ending something early is deliberate, and it lives in exactly two "
+            + "kinds of place: the Trash, and the Leaving section of a note's "
+            + "own tray. Delete Now ends one row's remaining days; Empty Trash "
+            + "takes everything the Trash lists at once. Both ask first — "
+            + "Delete Now asks every single time, there is no don't-ask to "
+            + "set — and Empty Trash's question names the full count by kind "
+            + "before it takes anything, and says what it leaves alone. "
+            + "Nowhere you WRITE has such a door: not the page, not the block "
+            + "menu, not a block's history. You have to go to where things are "
+            + "leaving to end anything for good, which is why the Trash is "
+            + "worth visiting once before you need it.",
 
             "Practice, and it is safe: go to the Library, right-click this "
             + "very lesson \u{25B8} Delete, then open the Trash and "
@@ -907,10 +938,22 @@ enum TutorialSeeder {
             + "itself — \u{201C}From a divide on \u{2039}date\u{203A} — the "
             + "original is preserved\u{201D} — with Bring back beside it. "
             + "Right-clicking the block \u{25B8} See original from "
-            + "divide\u{2026} and \u{2318}K land in the same place. A merge "
-            + "keeps every block it joined, so the region lists ALL of them, "
-            + "each with its own way back. They wait there, with no clock, for "
-            + "as long as anything descended from them is alive.",
+            + "divide\u{2026} and \u{2318}K land in the same place. They wait "
+            + "there, with no clock, for as long as anything descended from "
+            + "them is alive.",
+
+            // The post-13l polish round, her A7 ruling: the per-merge message
+            // is DECLINED (*"it's annoying to see that message every time"*)
+            // and the teaching lands here instead — one sentence, in the
+            // chapter about where things go when they leave a page.
+            "MERGING keeps its blocks the same way, and says nothing at the "
+            + "time — deliberately, because a message on every join would be "
+            + "noise. Merge two blocks (or select across them and delete the "
+            + "seam) and the block you get lists BOTH of the blocks it joined "
+            + "in \(BlockHistoryPath.cameFromSection), each with its own "
+            + "Bring back — three of them if you merged three. Nothing was "
+            + "deleted, so nothing is counting down; the next chapter has you "
+            + "do it and find them.",
 
             "Deleted TAKES wait in the same panel, under "
             + "\(BlockPastCopy.deletedTakesHeader), each with the days it has "
@@ -934,8 +977,191 @@ enum TutorialSeeder {
         ])
         try take(on: past.blocks[1],
             "The other take of the dividing block: I ride WHOLE onto both halves when you press \u{2318}\u{21E7}D, and the block we came from is kept preserved.")
-        try take(on: past.blocks[3],
+        // Index 4, not 3: A7's merge sentence joined this lesson at the
+        // post-13l polish round and sits between the lineage paragraph and
+        // this one. (The walk's `theChapterIsStagedForItsActs` holds the
+        // count of fanned blocks, and `theDeletedSpareTakeWaitsInTheBlocksPast`
+        // finds this one by its prose — both caught the shift.)
+        try take(on: past.blocks[4],
             "the spare take — delete me from the \u{22EF} menu, then put me back from the block's history panel.")
+
+        // ————————————————————————— where things go ——————————————————————————
+        //
+        // The post-13l polish round, ledger rows 19 (G4), 26 and 27. THE MAP,
+        // and the two lessons that make it usable: the pair of keys that save
+        // the two sizes of moment, and the two exits a paragraph can take.
+        // Every place named below is a surface this round built or verified,
+        // and `TutorialWherePlacesActsTests` visits each one.
+
+        _ = try lesson(places, "the five places", [
+            "Nothing here goes anywhere you can't find. At any moment, "
+            + "everything you have ever written is in exactly ONE of five "
+            + "places: where you left it \u{B7} in Archive \u{B7} in the Trash "
+            + "\u{B7} in this note's Versions \u{B7} in this block's History. "
+            + "This lesson visits all five, and the two after it teach the "
+            + "ones that are new.",
+
+            "ONE \u{2014} WHERE YOU LEFT IT. The ordinary case, said out loud "
+            + "because it is the one nobody thinks to say: a note you wrote "
+            + "and did nothing else to sits in your Library exactly as you "
+            + "left it, for as long as you keep it. The other four places "
+            + "exist only for things you deliberately set aside, deliberately "
+            + "changed, or deliberately saved.",
+
+            "TWO \u{2014} ARCHIVE: notes, forever, no clock. Right-click any "
+            + "note \u{25B8} Archive and it leaves the Library for ARCHIVED, "
+            + "its own item in the sidebar, with its own search. Nothing is "
+            + "counting down and nothing needs remembering \u{2014} it is "
+            + "still yours, still editable, still exportable; archiving is "
+            + "about your Library's attention, not about the note. Unarchive "
+            + "puts it back. (Blocks and takes archive too, and each waits "
+            + "where its context is: an archived block in its note's tray, an "
+            + "archived take in its block's History. A thing set aside stays "
+            + "next to what makes sense of it.)",
+
+            "THREE \u{2014} THE TRASH: what is leaving, for "
+            + "\(TrashWindow.days) days. Deleting a note, a book or a block "
+            + "starts the clock, and all three wait it out behind the trash "
+            + "icon at the top of the Library \u{2014} every row saying how "
+            + "many days are left and which note it came from, and Put back "
+            + "on any of them. A deleted TAKE is the one thing that never "
+            + "rows there: alone, out of its block, a take is too small to "
+            + "make sense of, so it waits in that block's History instead.",
+
+            "FOUR \u{2014} THIS NOTE'S VERSIONS: moments of the WHOLE note, "
+            + "saved by hand. \u{2318}\u{21E7}S saves one; note \u{25BE} "
+            + "\u{25B8} \(VersionsPath.menuLabel) lists them, newest first, "
+            + "each with Read, Restore and Promote. A saved version is frozen "
+            + "at birth and stays out of your way \u{2014} never in the "
+            + "Library, never in Archived \u{2014} because it is not another "
+            + "note, it is this note's past. The next lesson is about the key.",
+
+            "FIVE \u{2014} THIS BLOCK'S HISTORY: everything ONE block has "
+            + "been. The history door sits in the bottom bar right beside "
+            + "commit, and it opens the Block History panel: each live take's "
+            + "saved moments, the takes this block archived, the takes it "
+            + "deleted (with their clocks), and \(BlockHistoryPath.cameFromSection) "
+            + "\u{2014} the blocks it came out of. Two lessons live in there, "
+            + "and they are the two that follow.",
+
+            "PRACTICE ME: I'm here to be visited. Put your cursor in me and "
+            + "press history in the bottom bar to read my (empty) past \u{2014} "
+            + "then come back after the next lesson and look again.",
+
+            "A last honest word about the map: it is a map of PLACES, not of "
+            + "promises about time. Archive keeps forever; the Trash keeps for "
+            + "\(TrashWindow.days) days and then really does delete; a note's "
+            + "Versions and a block's History keep for as long as the note or "
+            + "the block does. Wherever something is, the surface it is on "
+            + "tells you which of those it is \u{2014} that is the whole "
+            + "design, and the reason there are five places instead of one.",
+        ])
+
+        // Row 26 + row 19's savepoint half: the grain pairing IS the lesson,
+        // and the commit↔history pairing in the bottom chrome is where it is
+        // taught (her: *"making it clear where commit / that particular
+        // history by the take is, is also important"*).
+        let saving = try lesson(places, "saving a moment", [
+            "Two keys save two different SIZES of the same idea, and the pair "
+            + "is worth learning together. \u{2318}S saves a moment of THIS "
+            + "TAKE \u{2014} the block you're in, the take you're looking at. "
+            + "\u{2318}\u{21E7}S saves a moment of THIS NOTE \u{2014} all of "
+            + "it, as it stands. One grain apart, one shift key apart.",
+
+            "\u{2318}S's moments live exactly where you'd look for them: press "
+            + "history in the bottom bar, immediately beside commit. That "
+            + "pairing is deliberate \u{2014} commit WRITES a moment, history "
+            + "SHOWS the moments, and the two sit together so the bar reads as "
+            + "the block's own time controls. Every live take of the block has "
+            + "its own run in there, with the take you're in already open.",
+
+            "PRACTICE TAKE: change a few words in me, press \u{2318}S, then "
+            + "press history. I'm where your moment will be listed.",
+
+            "Restore beside a moment loads it back into the take. It does not "
+            + "overwrite anything: moments only ever append, so restoring an "
+            + "old one and pressing \u{2318}S again just adds another. That is "
+            + "the whole promise of a savepoint here \u{2014} you can always "
+            + "come back, including from the coming back.",
+
+            "\u{2318}\u{21E7}S is the same idea one size up. It copies the "
+            + "whole note as it stands \u{2014} every block, every take "
+            + "\u{2014} and keeps it under \(VersionsPath.menuLabel) in the "
+            + "note \u{25BE} menu. Restore makes the note say that again, and "
+            + "it saves where the note is NOW first, so it is never a one-way "
+            + "door. Promote turns a moment into a note of its own, if you'd "
+            + "rather work with it than go back to it.",
+
+            "Which one to reach for? \u{2318}S when one paragraph is about to "
+            + "change and you might want this wording back. \u{2318}\u{21E7}S "
+            + "before a rewrite \u{2014} anything that will touch several "
+            + "blocks at once. And you are not the only one saving: leaving a "
+            + "note quietly saves a moment for each take you changed while you "
+            + "were in it, so the \u{2318}S you forget is mostly already taken "
+            + "for you.",
+        ])
+        _ = saving
+
+        // Row 27, her eleventh-sitting mandate — TAUGHT BY DOING (her idea):
+        // the reader deletes a whole block and finds it, then makes an edit
+        // that merges two and finds the originals. Both staged blocks below
+        // are single-take deliberately: a cross-block edit joins the halves
+        // only where no fan hangs on the seam (the #11a ruling).
+        let exits = try lesson(places, "the two exits", [
+            "A paragraph can leave a page two different ways, and telling them "
+            + "apart answers the question this whole chapter exists for: "
+            + "\u{201C}I deleted a paragraph \u{2014} where is it?\u{201D} The "
+            + "rule is four words long. DELETION GOES TO THE TRASH; "
+            + "TRANSFORMATION GOES TO LINEAGE.",
+
+            "THE FIRST EXIT \u{2014} you deleted it. Triple-click the "
+            + "paragraph below and press \u{232B}. It leaves the page onto a "
+            + "\(TrashWindow.days)-day clock, and it is now in TWO listings of "
+            + "the same fact: \(TrayPath.menuLabel) (the tray icon at the top "
+            + "of the note, Leaving section) and the Trash in the Library. Put "
+            + "back in either one returns it to the place it stood in. "
+            + "Deleted means LEAVING, and anything that is leaving always says "
+            + "how long it has.",
+
+            "EXIT ONE: triple-click me and press \u{232B}. I'm the deletion "
+            + "\u{2014} look for me in the tray's Leaving section, and in the "
+            + "Trash, and put me back from either.",
+
+            "THE SECOND EXIT \u{2014} it became something else. Select from "
+            + "the middle of the next paragraph to the middle of the one after "
+            + "it and press \u{232B}. The two become ONE, quietly, the way any "
+            + "editor would join them \u{2014} but the two blocks you started "
+            + "with were not deleted. They were kept whole, set aside, and the "
+            + "block they became remembers both.",
+
+            "EXIT TWO, first half: select from somewhere in me all the way "
+            + "into the paragraph below, and press \u{232B}.",
+
+            "EXIT TWO, second half: and what we become will remember us both, "
+            + "by name.",
+
+            "Now look. Put your cursor in the joined paragraph and press "
+            + "history: its \(BlockHistoryPath.cameFromSection) region lists "
+            + "BOTH originals \u{2014} not one of them \u{2014} each with its "
+            + "own text and a \(BlockHistoryPath.bringBackVerb) button that "
+            + "puts it into the note again, beside what it became. Nothing "
+            + "counted down. Nothing was in the Trash. Nothing announced "
+            + "itself at the time, on purpose: a message on every join would "
+            + "be noise, and this panel is the app keeping its side of that "
+            + "bargain.",
+
+            "So, whenever something is missing: if you DELETED it, look where "
+            + "things are leaving \u{2014} the note's tray, then the Trash. If "
+            + "you CHANGED it \u{2014} merged, divided \u{2014} look inside "
+            + "what it became, under \(BlockHistoryPath.cameFromSection). "
+            + "There is one place the two exits meet, and it is honest about "
+            + "itself: a preserved original has no clock only while something "
+            + "descended from it is alive, so deleting the last of those "
+            + "descendants MOVES it, visibly, into the tray and onto the "
+            + "family's clock \u{2014} and the delete that does it says so in "
+            + "its own receipt, while you are standing there.",
+        ])
+        _ = exits
 
         // ——————————————————————————— ways of looking ———————————————————————
 
@@ -1140,9 +1366,15 @@ enum TutorialSeeder {
             + "its chapters, and its memberships go — **the notes stay**, in "
             + "your Library and in any other books that point at them, because "
             + "a book only ever points at notes and never owns them. The "
-            + "deleted book waits 30 days in the Trash (Library \u{25B8} Archived & "
-            + "Deleted) with a Put back door — chapters and membership come "
-            + "back with it. The only way notes die is deleting the notes.",
+            // The post-13l polish round, ledger row 12: this sentence named a
+            // menu her B1 ruling dissolved. The Trash has its own icon at the
+            // top of the Library now, and Archived is its own sidebar item —
+            // a lesson naming a door that no longer exists is a P-6
+            // regression, chapters away from the one that moved it.
+            + "deleted book waits \(TrashWindow.days) days in the Trash "
+            + "(the trash icon at the top of the Library) with a Put back "
+            + "door — chapters and membership come back with it. The only way "
+            + "notes die is deleting the notes.",
         ])
 
         let scraps = try lesson(library, "pool & scraps", [
