@@ -1473,6 +1473,119 @@ instance check before build-adjacent acts; commits staged by
 explicit path, NEVER push. **Append "### BATCH 3 — RECORD"**, flip
 rows 9 and 20, and STOP.
 
+### THE ARCHITECT'S ADJUDICATION OF BATCH 3's FLAGGED ITEMS (2026-08-24, before batch 4 dispatches)
+
+1. **The book spread's missing tray door → `.showNoteTray` gains a
+   `.palette` door in batch 4.** The ⌘K palette is the standing
+   universal fallback (R15) and costs zero new surface; a book
+   pane's inline note reaches its tray through it. The icon stays
+   the named door on the detail surfaces.
+2. **The held-observation frequency class (the tray panel open
+   while typing reads `variant` at autosave rate) → RECORD-ONLY
+   with owner 12**, the standing P1-tension parking class (bounded
+   listing, off-main, P1's letter intact — the FREQUENCY changed,
+   not the scaling). Batch 4's Block History pane is the SAME class
+   — one verdict covers both; the closeout writes ONE KnownIssues
+   row naming both panes. No new debounce machinery this round.
+3. **`OriginPeek`'s nested tray sheet dissolves in batch 4** as the
+   pane absorbs J3 (already the plan; confirmed).
+
+### BATCH 4 — THE BLOCK HISTORY PANE + THE BOTTOM CHROME: the brief (fresh Opus session; dispatches after batch 3's record)
+
+**Read in full first:** `CLAUDE.md` + canon · THIS FILE top to
+bottom (your rulings: ledger rows 17, 10, 14, 28, 29, 31, 32 + the
+adjudication above; the LIFECYCLE TABLE rows T1, T5, T6, B3, B4 are
+your acceptance shape; row 15/F2 resolves through you) · the 13j
+**Environment traps** (binding verbatim) · the 13l plan's **ACT 7 —
+WALK RECORD** (P-3's single-original mechanism; P-6's context) ·
+batches 1–3's records (batch 3's staging note lists exactly what
+you delete when came-from lands; its `CommandRouter` seam and
+`inspectorDoors` table are your precedents).
+
+**Scope — ledger rows 17 (G2) · 10 (C2, folds in) · 14 (F1) · 28
+(Aa) · 29 (error token) · 31 (gentle green) · 32 (fence sentence),
+plus adjudications 1 and 3 above.** Fences: zero schema · zero
+`Sync/` · versions are batch 5's · the tutorial's content is batch
+6's (mechanical spine re-pins for moved doors are yours). Land in
+MULTIPLE commits by theme (the pane · the bars/Aa · the
+token+copy sweep · F1) — one giant commit is the failure mode.
+
+- **Row 17 (G2 — the round's biggest single build; her rulings
+  verbatim in the ledger):** the **Block History pane**.
+  - **The door: bottom chrome, beside Commit** (*"history is the
+    natural pair to commit — the bar becomes the block's time
+    controls"*). BOTH bars. The note ▾ "History" item and the
+    under-bar `CommitHistoryView` strip are ABSORBED — the pane is
+    the one home (this also resolves row 15/F2: *"it's unclear
+    that history is under Note"*). Registry: the history act's
+    doors move; a `.palette` door too.
+  - **The pane: ONE cohesive inspector occupant**
+    (`InspectorPanel.blockHistory`, batch 3's seam), scoped to the
+    CARET/focused block, four regions in order: **(1) savepoint
+    runs — ALL live takes, sectioned, the focused take's expanded**
+    (her ruling; restore-to-buffer per row, the existing
+    `restoreCommit` road); **(2) archived takes** (Unarchive; A3
+    naming); **(3) deleted takes** (clocks + Put back — NO purge
+    door here, row 21's letter: Block History carries no Delete
+    Now); **(4) came-from** — the lineage section: ALL of a
+    merge's originals (the FULL `Queries.unplacedOrigins` array —
+    the walk P-3 fix), each with its text peek and a **DIRECT
+    one-button restore** (`placeBlock`) — her too-wordy "add as
+    block again to the note" redrafted SHORT (draft it; candidate
+    family: "Bring back into the note"; record your draft for her
+    checkpoint) — plus Open this note's tray where the original is
+    clocked.
+  - **Absorptions, same commits:** `OriginPeek`'s nested tray sheet
+    dissolves (adjudication 3); the tray's STAGED Preserved-
+    originals section is REMOVED in the same commit came-from lands
+    (batch 3's staging note lists the pieces); C2's separate
+    lineage-view row folds in (its mobile parity note survives to
+    closeout untouched).
+  - **P3/P8 bind:** the pane is read-tier only (no live editor in
+    it), bounded queries, overlays never rendering attributes.
+    The held-observation frequency class: adjudication 2 —
+    record-only, no debounce machinery.
+- **Row 28 (Aa — her kickoff ruling, recorded above):** the
+  `FormatBar` cluster + the newlines chip condense into ONE **Aa**
+  button on both bars; clicking slides the formatting row out (the
+  phone's Aa expanding-row idiom); expansion is session UI state;
+  registry ids unchanged (rendering moved — the R6-2/13g class);
+  the freed room is where the History door lives.
+- **Row 14 (F1 — verification/parity pass; the take-archiving
+  musing is RESOLVED KEEP, no retirement question):** every door
+  offering block Delete has Archive beside it (enumerate via the
+  registry's door-sets; fix stragglers); the take-card grammar
+  UNIFORM (Write's panel ⋯ carries Archive · Label · Lock · Delete
+  — Takes mode's cards must match); batch 1's deferred enumeration:
+  `ScrapsPanel`/canvas scrap rows' delete-door parity. Record the
+  table (instance × door → OK/FIXED).
+- **Row 29 (error token — her ruling):** ONE named error/danger
+  slot per voice (Terminal + Study) in the shared vocabulary;
+  every refusal/error surface adopts it (sweep batch 1's and 3's
+  `tokens.accent` refusal slots, the Trash's error styling, any
+  literal reds left anywhere); hues are placeholders revisable at
+  13s — pick quiet, voice-consistent ones.
+- **Row 31 (gentle green — her words):** the sync-status line's
+  everything-sent state wears a gentle green via the vocabulary
+  (a quiet positive slot beside the error one; NO literal
+  colours). Signed-out stays quiet (her #75(d) ratification).
+- **Row 32 (fence sentence — her ruling):** the scraps-area delete
+  fence's refusal becomes *"Scraps go one at a time — delete the
+  scraps themselves."* — the shared home's string + its pin.
+- **Adjudication 1:** `.showNoteTray` gains its `.palette` door.
+
+**Discipline:** the standing loop — red-on-old by behavioural
+revert for bug-class fixes; walk-driven pins for door moves (drive
+the real mounted surface — batch 3's AppKit-class-names technique
+is the precedent; the AX tree is EMPTY in the test host, so an
+AX-based pin passes vacuously — do not use one); spine green BY
+TYPE NAME (mechanical re-pins yours); full four gates with counts
+quoted (mobile runs — `Shared/` is touched; baselines now core
+1383/144 · Mac 1728/294 · spine 63/8 · mobile 486/78); instance
+check before build-adjacent acts; commits staged by explicit path,
+NEVER push. **Append "### BATCH 4 — RECORD"**, flip rows 10, 14,
+15, 17, 28, 29, 31, 32 (+ finish row 20's staging), and STOP.
+
 ## Constraints
 
 Zero schema (B2 is read-side over `archived_at`; if ANYTHING firms
