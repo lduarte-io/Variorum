@@ -1,6 +1,6 @@
 # Variorum — brand mark finalists
 
-Six candidate logo marks, all production-clean vector, **unchosen** — the author picks.
+Seven candidate logo marks, all production-clean vector, **unchosen** — the author picks.
 The choosing surface is **`variorum-family-sheet.svg`** (faithful row over dark-mode row;
 `.png` twins of the sheets are pre-rendered copies for apps that balk at SVG).
 
@@ -13,7 +13,7 @@ specks removed, viewBoxes cropped to the mark +10% margin, and painted-on detail
 converted to real geometry where possible. Nothing was redrawn; the geometry is
 exactly what she picked.
 
-## The six marks
+## The seven marks
 
 | mark | files | structure |
 |---|---|---|
@@ -23,6 +23,7 @@ exactly what she picked.
 | **the flourish** | `variorum-flourish-*` | true one-color compound path |
 | **the thin flourish** | `variorum-flourish-thin-*` | true one-color compound path |
 | **the filigree V** | `variorum-filigree-v-*` | true one-color compound path (22 carve subpaths) — the flat cousin of the chrome app-icon concepts |
+| **the purple V** | `variorum-purple-v-*` | a vectorized RENDER (~1,100 shaded paths + gradients), not a flat mark — the purple-chrome filigree V isolated from its smoky background (44 background/smoke/speck paths removed geometrically). Polychrome by nature: no one-color master, no light edition; editions are `-master` (transparent), `-on-gradient` (the original's clean gradient ground), `-on-black`. The app-icon-treatment class, kept as a logo option at her word |
 
 ## Naming scheme
 
