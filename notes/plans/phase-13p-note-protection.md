@@ -251,7 +251,14 @@ store today. QUESTIONS #78 has the full shape menu.
   never shares the old device's cursor. She intends to MARKET this
   ("airdrop your corpus to your new computer and it will work" is in
   her launch-video list), so the claim should be true by a built door,
-  not by luck.
+  not by luck. **RESOLVED IN HOME, 2026-08-25 (her word, same
+  sitting): the door is PHASE 13X's** — a new pre-launch row created
+  at the sitting (*"it could be 13x I think, and should come in
+  before launch because it's a real promise"*). This phase still
+  delivers everything 13x rides on — the keyed `openStore(at:)`, the
+  ciphertext backups, and the drill-proven new-machine key legs — and
+  the knot collapses to: hand the adoption-door and device-identity
+  details to 13x's design.
 
 ## NON-GOALS (named so they stay declined, not forgotten)
 

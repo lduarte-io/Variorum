@@ -121,3 +121,38 @@ embedded client could also use). If a chat is later ruled in, it is
 *[removed for publication]*
 *[removed for publication]*
 undecided.
+
+## Her second round (2026-08-25, same sitting — leans and scope)
+
+- **The build order is ADOPTED:** *"I can build the MCP server as
+  planned, let power users explore it, and then build on the chat
+  element after."*
+- **The chat LEAN, recorded (a lean, not final):** *"I could also
+  potentially still offer a chat interface in the app but with BYOK
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  stays *"fully removable, off by default, and not the hero shot"*,
+  and *"positioning it as editing rather than writing is key."* The
+  chat remains its own later phase, decided after the MCP launch
+  lands.
+- **Scope, asked and answered at the sitting:** *"Do you think I'll
+  be able to add MCP quality of life features like making new books
+  for you, local AI reading through my journals and adding them to
+  books, etc. within the one phase? or do I need to promote the MCP
+  phase to be a bigger sitting? I want to do it well."* The recorded
+  answer (Fable): ONE phase, but PROMOTE THE SITTING — the grant
+  grammar is the product and should be designed once over the full
+  vocabulary. Her QoL cases are already inside use case 3's
+  book-scoped creative grants (create books/posts, apply tags) plus a
+  read grant over journals behind a deliberate consent (journals stay
+  excluded from "always" by the standing §9 guardrail — a local AI
+  reading journals is exactly the deliberate-grant case). The MCP
+  tools themselves are thin projections of the capability registry
+  and grow cheap once the grammar is ruled, so rungs can ship
+  incrementally inside the phase without redesign.
+- **Named commits ride the story:** her words — *"the commit right
+  before an AI edit and name the AI edit in the commit history is a
+  natural approach, as is saving the AI edited version as a take."*
+  The user-facing naming face lands at 13u (item 14, same sitting);
+  this phase's auto-commits then arrive named by construction.

@@ -206,7 +206,80 @@ also auto add, custom shelf order."*
 - **SCHEMA-BUNDLING NOTE (the planning-ahead point of her 2026-08-25
   message — she asked what breaks sync once users exist):** bundle
   EVERY schema need this sitting rules in — the shelf position, any
-  hybrid/auto-tag columns, and the LIBRARIES dimension if she rules it
-  in and rules THIS sitting as its home (see the 13o row's 2026-08-25
-  pin) — into ONE §12 lockstep event, landed BEFORE strangers, while
+  hybrid/auto-tag columns, and the LIBRARIES dimension (home confirmed
+  below) — into ONE §12 lockstep event, landed BEFORE strangers, while
   the lockstep choreography is still a two-device family affair.
+
+## Author rulings — the libraries design (2026-08-25, the launch-strategy sitting's SECOND round; home CONFIRMED here)
+
+She confirmed this sitting as the multiple-libraries question's home
+("confirm ... library questions home"). Her rulings and directions so
+far, verbatim-faithful — the sitting designs ON these, it does not
+re-open them:
+
+- **In-store, one schema:** *"I agree that different libraries can be
+  within the same store"* — and the motivation, hers: *"it's more for
+  a feeling of cleanliness and a search that isn't contaminated by
+  past notes."*
+- **Cross-library MOVE is possible, and COPY is also offered:**
+  *"cross library move should be possible, but make a copy and put it
+  in the other library should also be an option."* (Copy naturally
+  rides the copy-with-lineage machinery; whether the lineage edge
+  crosses libraries is a sitting detail — coarse edges tolerate it.)
+- **Per-library Archived and per-library Trash — both yes** (*"will
+  each library have an archived? that makes sense to me. And will
+  trash be per library? I also think that makes sense."*). Shape note
+  for the sitting: archived/deleted stay STATES on the note; the
+  SURFACES scope by the note's library — the state machinery (clocks,
+  purge, restore) stays global and single.
+- **Books never span libraries:** *"the whole point is that it's in a
+  separate library to have separation."*
+- **Merge-libraries as a rescue door — sitting candidate:** *"Maybe
+  the ability to merge libraries will be important to save users if
+  they realized it's a problem?"* (Cheap under the in-store shape: a
+  bulk re-stamp plus name-collision handling for books/tags.)
+- **The default library:** standard and UNDELETABLE, the home of
+  quick notes, the designated daily Journal book, and the tutorial
+  (*"I do think there should be a standard one that quicknotes,
+  journal, and the tutorial all live in that you can't delete"*).
+  **Its NAME is open** — her conflict recorded verbatim: *"since
+  library is a place you can be, should we name the default library
+  something more distinct? i'm a bit conflicted on what to name it"* —
+  and she floated reserving a name (*"I feel like we can reserve that
+  name"*). The collision to resolve at the sitting: the sidebar's
+  **Library** item means "all notes," and a LEVEL also called library
+  overloads the word. Candidates on the table (Fable's, for the
+  sitting): name the default **"Home"**, keep "library" as the
+  level's term, and rename the sidebar item "All Notes"; or reserve
+  **"Library"** as the default's name and rename the sidebar listing
+  instead. Hers.
+- **Mac UI sketch, hers:** *"the mac os UI would probably have what
+  library you're in (if you have multiple) right above the shelf,
+  with a drop down selector, for looking at your shelf."* (And her
+  earlier floated mobile twin: a selection at the top for whether
+  you're in library, archived, or a different library — the archived
+  half of that sketch is answered by the per-library-Archived ruling
+  above.)
+
+## Her books-communication mandate (same sitting — the tutorial must explain membership)
+
+Her words: *"I feel like the tutorial needs better communication
+about what being in a book means, what's going to happen when you
+edit a note in multiple books via tag (is it always make a copy? how
+would that even work? I feel like the book idea based on tags needs a
+bit more fleshing out and better descriptions in the tutorial."* And
+the lens over the whole sitting: *"I want some users to use my app to
+write their whole actual book - is there something missing there?"*
+
+The factual answer, recorded so the tutorial can teach it (nothing
+here changes behavior): editing a note that lives in several books
+edits THE note — every book shows the edit, because membership points
+and never copies; the deliberate fork is 13f's diverge door
+(duplicate-as-version + swap THIS book's slot, the original untouched
+in its other books). A tag-based smart book contains the note because
+the note CARRIES the tag; the tag rides the note, not the book, so
+there is no per-book copy anywhere in the story. The 2026-08-19
+tutorial-chapter addition above gains this as its core lesson:
+membership-not-ownership taught by doing, PLUS the multi-book edit
+story and the smart-book/tag story in plain words. The
+whole-actual-book lens joins the sitting's agenda.
