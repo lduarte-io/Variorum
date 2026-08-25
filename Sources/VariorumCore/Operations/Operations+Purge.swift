@@ -42,8 +42,25 @@ extension Operations {
     @discardableResult
     public func requestPurge(_ targets: [SyncPurgeTarget]) throws -> Int {
         try database.write { db in
+            try mintPurgeIntents(db, targets, now: date.now)
+        }
+    }
+
+    /// **The intent write, inside a caller's transaction** (the post-13l
+    /// polish round, ledger row 23 — V4's restore).
+    ///
+    /// `requestPurge` opens its own write, which is right for a door; a
+    /// COMPOSITE that must be one transaction cannot use it. Her eighth-sitting
+    /// ruling put the version restore's outgoing blocks on the Delete Now road
+    /// *"in the restore's own transaction"*, and a Delete Now is exactly a
+    /// tombstone plus this. So the body moves here and the public door keeps
+    /// its whole contract by calling it — one implementation of the refusals,
+    /// the dedup and the already-purged skip, never two.
+    @discardableResult
+    func mintPurgeIntents(
+        _ db: Database, _ targets: [SyncPurgeTarget], now: Date
+    ) throws -> Int {
             var minted = 0
-            let now = date.now
             for target in targets {
                 guard Self.purgeableTables.contains(target.table) else {
                     throw OperationError.unsupportedPurgeTarget(table: target.table)
@@ -75,7 +92,6 @@ extension Operations {
                 minted += 1
             }
             return minted
-        }
     }
 
     /// **The restore-side belt (13j ladder B, B1):** a restore door that

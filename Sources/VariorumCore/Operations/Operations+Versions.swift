@@ -596,14 +596,57 @@ extension Operations {
             createdAt: now, updatedAt: now)
         try copy.insert(db)
 
+        let outcome = try copyPlacements(
+            db, from: sourceID, into: copy.id,
+            chosenPicks: chosenPicks, carryFans: carryFans, now: now)
+
+        guard let (anchorSource, anchorCopy) = outcome.firstPair else {
+            throw OperationError.postHasNoBlocks(id: sourceID)
+        }
+        let versionEdge = try insertVersionOfEdge(
+            db, anchorSource, anchorCopy, originOp: "manual", now: now)
+
+        // The copy starts "clean": baseline = its rendered length, zero
+        // churn — first edits accumulate against real content, exactly like
+        // a post that just crossed a threshold (AppSpec §10's rebaseline).
+        copy.baselineLength = outcome.renderedLength
+        try copy.update(db)
+
+        return PostCopyResult(
+            post: copy, blockCopies: outcome.blockCopies, versionEdge: versionEdge)
+    }
+
+    /// What one run of the block-copy loop produced.
+    struct PlacementCopyOutcome {
+        var blockCopies: [(source: String, copy: String)] = []
+        var renderedLength = 0
+        /// `(source block, its copy)` for the FIRST slot that copied — the
+        /// `version_of` anchor's pair where a caller mints one.
+        var firstPair: (String, String)?
+    }
+
+    /// **The block-copy loop, over an EXISTING target container** (the
+    /// post-13l polish round, ledger row 23 — V4's identity-preserving
+    /// restore).
+    ///
+    /// It was `copyPost`'s body verbatim and is unchanged by the extraction:
+    /// `copyPost` still inserts its container, calls this, mints the
+    /// `version_of` anchor and rebaselines. What the split buys is the one
+    /// thing V4 needs and no copy operation had — copying a family INTO a
+    /// container that already exists, so *"the live note's CONTENT becomes the
+    /// chosen version's"* without the container ever crossing the live/version
+    /// line (her seventh-sitting catch, which is the whole reason restore is
+    /// not a swap).
+    func copyPlacements(
+        _ db: Database, from sourceID: String, into targetID: String,
+        chosenPicks: [String: String]?, carryFans: Bool, now: Date
+    ) throws -> PlacementCopyOutcome {
         let placements = try ContainerBlock
             .filter(Column("container_id") == sourceID && Column("deleted_at") == nil)
             .order(Column("position"), Column("id"))
             .fetchAll(db)
 
-        var blockCopies: [(source: String, copy: String)] = []
-        var renderedLength = 0
-        var firstPair: (String, String)?
+        var outcome = PlacementCopyOutcome()
 
         for placement in placements {
             guard let block = try Block.fetchOne(db, key: placement.blockId),
@@ -676,7 +719,7 @@ extension Operations {
             try blockCopy.update(db)
 
             try ContainerBlock(
-                id: newID(), containerId: copy.id, blockId: blockCopy.id,
+                id: newID(), containerId: targetID, blockId: blockCopy.id,
                 position: placement.position, chosenVariantId: chosenCopyID,
                 createdAt: now, updatedAt: now)
                 .insert(db)
@@ -687,28 +730,15 @@ extension Operations {
             // (duplicate-as-version AND promote — the plan's letter).
             try copyLiveComments(db, from: block.id, to: blockCopy.id, now: now)
 
-            if firstPair == nil { firstPair = (block.id, blockCopy.id) }
-            blockCopies.append((source: block.id, copy: blockCopy.id))
+            if outcome.firstPair == nil { outcome.firstPair = (block.id, blockCopy.id) }
+            outcome.blockCopies.append((source: block.id, copy: blockCopy.id))
             if let shownText = (chosenCopyID.flatMap { id in copiedVariants.first { $0.id == id } }
                                 ?? copiedVariants.first(where: { $0.id == defaultCopyID }))?
                 .workingText, !shownText.isEmpty {
-                renderedLength += shownText.count
+                outcome.renderedLength += shownText.count
             }
         }
-
-        guard let (anchorSource, anchorCopy) = firstPair else {
-            throw OperationError.postHasNoBlocks(id: sourceID)
-        }
-        let versionEdge = try insertVersionOfEdge(
-            db, anchorSource, anchorCopy, originOp: "manual", now: now)
-
-        // The copy starts "clean": baseline = its rendered length, zero
-        // churn — first edits accumulate against real content, exactly like
-        // a post that just crossed a threshold (AppSpec §10's rebaseline).
-        copy.baselineLength = renderedLength
-        try copy.update(db)
-
-        return PostCopyResult(post: copy, blockCopies: blockCopies, versionEdge: versionEdge)
+        return outcome
     }
 
     /// Inverse of the post-minting copy operations: tombstone the minted

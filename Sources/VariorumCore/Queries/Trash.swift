@@ -63,11 +63,31 @@ extension Queries {
         /// cascade victim), the original rows on its own and nothing is lost.
         public let anchorBlockID: String?
 
+        /// **THIS NOTE ROW IS A SAVED VERSION OF ANOTHER NOTE** (the post-13l
+        /// polish round, ledger row 23 — FOUND-ITEM 1, ratified: *"agree that
+        /// deleting a single version from the listing should go into trash for
+        /// 30 days"*).
+        ///
+        /// A version is a container, so it rides the `.note` arm and the
+        /// `.note` doors unchanged — Put back returns it to its note's Versions
+        /// listing, Delete Now ends its days, Empty Trash takes it because it
+        /// is rowed. What the FACE owes is context: the row says it is a saved
+        /// moment rather than a note, and it gathers under the note whose
+        /// moment it is (`noteID`/`noteTitle` carry that note, so
+        /// `TrashGrouping` needs no second rule).
+        ///
+        /// nil on every ordinary note row — including a note that HAS versions,
+        /// which is the group's head, not one of its members.
+        public let versionOfNoteID: String?
+
+        /// True for a saved-version row. The face's one question.
+        public var isVersion: Bool { versionOfNoteID != nil }
+
         public init(
             kind: Kind, id: String, deletedAt: String, title: String? = nil,
             text: String? = nil, noteID: String? = nil, noteTitle: String? = nil,
             noteIsDeleted: Bool = false, blockID: String? = nil,
-            anchorBlockID: String? = nil
+            anchorBlockID: String? = nil, versionOfNoteID: String? = nil
         ) {
             self.kind = kind
             self.id = id
@@ -79,6 +99,7 @@ extension Queries {
             self.noteIsDeleted = noteIsDeleted
             self.blockID = blockID
             self.anchorBlockID = anchorBlockID
+            self.versionOfNoteID = versionOfNoteID
         }
     }
 
@@ -130,7 +151,13 @@ extension Queries {
             items += try Row.fetchAll(
                 db,
                 sql: """
-                    SELECT id, title, entry_date, created_at, deleted_at
+                    SELECT id, title, entry_date, created_at, deleted_at,
+                           -- Ledger row 23 (FOUND-ITEM 1): the birth fact that
+                           -- makes a container version history. Selected rather
+                           -- than joined, so the peer lookup below runs ONLY for
+                           -- the rows that can possibly be versions.
+                           (archived_at IS NOT NULL AND archived_at = created_at)
+                             AS born_archived
                     FROM container
                     WHERE kind = 'post' AND deleted_at IS NOT NULL AND deleted_at >= :cutoff
                       -- The fence is STAMP-AWARE (13j ladder B, B1): a LIVE
@@ -145,12 +172,21 @@ extension Queries {
                     ORDER BY deleted_at \(dir), id \(dir)\(limitClause)
                     """,
                 arguments: arguments
-            ).map { row in
-                TrashItem(
+            ).map { row -> TrashItem in
+                // A saved version names the note whose moment it is, so the
+                // row reads as one and gathers under it (ledger row 23). The
+                // lookup is skipped for every ordinary note, which is every
+                // row that is not born archived.
+                let peer = (row["born_archived"] as Int?) == 1
+                    ? try versionOfNote(db, versionID: row["id"])
+                    : nil
+                return TrashItem(
                     kind: .note, id: row["id"], deletedAt: row["deleted_at"],
                     title: DisplayTitle.note(
                         title: row["title"], entryDate: row["entry_date"],
-                        createdAt: row["created_at"]))
+                        createdAt: row["created_at"]),
+                    noteID: peer?.id, noteTitle: peer?.title,
+                    versionOfNoteID: peer?.id)
             }
         }
 

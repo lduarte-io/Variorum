@@ -199,11 +199,19 @@ extension Queries {
     ///   same-row birth fact, never a comparison across devices, so the
     ///   no-clock-trust doctrine is untouched and no CAS repair can rewrite
     ///   the pair into a different meaning;
-    /// - **version-linked to a note that is still LIVE and UNARCHIVED** — the
-    ///   `version_of` edge `duplicateAsVersion` already mints, read exactly
-    ///   the way `versionPeerPosts` reads it (posts are edges-only across
+    /// - **version-linked to a note that is still LIVE** — the `version_of`
+    ///   edge `duplicateAsVersion` already mints, read exactly the way
+    ///   `versionPeerPosts` reads it (posts are edges-only across
     ///   versions, I8, and edges are block-to-block, so the post link rides
     ///   the blocks).
+    ///
+    /// *(Batch 5 dropped the peer's `archived_at IS NULL` clause, because this
+    /// fence and `Queries.noteVersions` must be exact COMPLEMENTS. With it,
+    /// archiving a note that had saved versions pushed every one of them onto
+    /// the Archived surface **while its own Versions pane still listed them**
+    /// — double-listed, and her crowding worry reborn on the very surface it
+    /// was answered for. An archived note is a WORK she set aside; its past
+    /// is still its own.)*
     ///
     /// A note that was ever LIVE is never version history — a duplicate she
     /// made to work with is a first-class note at birth, and archiving it
@@ -231,7 +239,6 @@ extension Queries {
                   JOIN container peer
                     ON peer.id = theirs.container_id AND peer.id <> container.id
                    AND peer.kind = 'post' AND peer.deleted_at IS NULL
-                   AND peer.archived_at IS NULL
                   WHERE e.type = 'version_of' AND e.deleted_at IS NULL))
             """ : ""
         var sql = """

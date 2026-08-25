@@ -361,9 +361,41 @@ extension Operations {
     /// Tombstone (S2). The trigger chain cascades: placements and their
     /// singly-owned blocks, those blocks' variants/edges/block_tags, plus the
     /// container's reading memberships, post tags, and references.
+    ///
+    /// **AND ITS SAVED VERSIONS GO WITH IT** (the post-13l polish round,
+    /// ledger row 23 — V2, ratified: *"I agree it should auto delete versions
+    /// and not ask for a confirmation dialog"*). Her own question had the
+    /// recursive answer: **versions ARE the note's past, and a thing's past
+    /// goes where the thing goes** — the Google-Docs intuition (delete the
+    /// doc, its history goes), and it dissolves the orphaned-version hole
+    /// rather than papering over it. They ride the SAME 30-day clock, row in
+    /// the Trash under their note's group, and come back with it.
+    ///
+    /// **It lives HERE, in the operation, and not in a door**, because a note
+    /// is deleted through five of them (the `note ▾` menus, the Library rows,
+    /// the Pool rows, ⌘-click multi-select, and a redo's re-apply). A rule
+    /// that any one of them could forget is a rule that gets forgotten.
+    ///
+    /// **ONE clock read for the whole compound**: the versions carry the
+    /// note's EXACT `deleted_at`, which is what lets `restoreContainer`
+    /// recognise them as its cascade victims and lets an independently-deleted
+    /// version stay dead (the 13l exact-stamp doctrine).
     public func deleteContainer(_ id: String) throws {
-        let now = date.now
-        try updateLiveContainer(id, now: now) { $0.deletedAt = now }
+        try database.write { db in
+            var container = try liveContainer(db, id)
+            let now = date.now
+            for versionID in try Queries.noteVersionIDs(db, of: id) {
+                guard var version = try Container.fetchOne(db, key: versionID),
+                      version.deletedAt == nil
+                else { continue }
+                version.deletedAt = now
+                version.updatedAt = now
+                try version.update(db)
+            }
+            container.deletedAt = now
+            container.updatedAt = now
+            try container.update(db)
+        }
     }
 
     /// Undo a `deleteContainer` (author decision 2026-07-05: deleted posts
@@ -374,8 +406,36 @@ extension Operations {
     /// Independently-deleted rows carry different stamps and stay dead, as
     /// do memberships/applications whose reading or tag died in the
     /// meantime (a live pointer under a dead parent helps nobody).
+    ///
+    /// **AND ITS VERSIONS COME BACK WITH IT** (the post-13l polish round,
+    /// ledger row 23 — V2's other half, and the exact-stamp story it asked
+    /// the round to design). A saved version is a separate CONTAINER, so it
+    /// is not reachable through the placement cascade the body below walks;
+    /// it is identified instead by the classifier plus the note's exact
+    /// `deleted_at`, and then restored through this very body — its own
+    /// blocks, takes, edges and lenses carry that same stamp, because one
+    /// transaction wrote them all.
+    ///
+    /// What stays dead is what diverged: a version she deleted on its own
+    /// earlier carries a different stamp, and so does one deleted after the
+    /// note. Both are ordinary Trash rows with their own Put back.
     public func restoreContainer(_ id: String) throws {
         try database.write { db in
+            let stamp = try Container.fetchOne(db, key: id)?.deletedAt
+                .map { DateFormatter.variorumISO8601.string(from: $0) }
+            try restoreContainerRows(db, id: id)
+            guard let stamp else { return }
+            for versionID in try Queries.versionHistoryDeletedWith(
+                db, note: id, stamp: stamp)
+            {
+                try restoreContainerRows(db, id: versionID)
+            }
+        }
+    }
+
+    /// One container's own restore — the body `restoreContainer` runs for the
+    /// note and then for each version that died with it.
+    private func restoreContainerRows(_ db: Database, id: String) throws {
             guard var container = try Container.fetchOne(db, key: id) else {
                 throw OperationError.containerNotFound(id: id)
             }
@@ -488,7 +548,6 @@ extension Operations {
                       AND block_id IN (SELECT id FROM block WHERE deleted_at IS NULL)
                     """,
                 arguments: [nowStamp, stamp, id])
-        }
     }
 
     private func updateLiveContainer(

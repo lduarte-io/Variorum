@@ -146,6 +146,15 @@ public enum OperationError: Error, Equatable, Sendable {
     /// joins their placed blocks).
     case postsAlreadyVersionLinked(a: String, b: String)
 
+    // The VERSIONS family (the post-13l polish round, ledger rows 16/23).
+    /// A restore or a promote named a container that is not this note's
+    /// saved version — the classifier's own answer, refused rather than
+    /// guessed at. **Version history is a BIRTH FACT and a live link**
+    /// (`archived_at = created_at` from one clock call, plus a live
+    /// `version_of` edge to the note): a note that was ever LIVE is a work,
+    /// never version history, and neither door may treat one as the other.
+    case notVersionHistory(version: String, note: String)
+
     // Deferred editor compounds (Phase 11, A9 — the #11 rulings).
     /// A compound planned against one surface found a newer buffer at
     /// execution (the edit-during-await class): the whole batch refuses —
