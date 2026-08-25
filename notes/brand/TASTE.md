@@ -100,6 +100,18 @@ worse") — the wispy direction is dead on arrival with her, always.
 - **The pixel pet (13q).** If it ships, decide whether pixel art is a deliberate fourth
   register or whether the pet gets drawn in the ink-figure storybook style instead —
   both defensible; flagged only so the sitting decides rather than inherits.
+- **The whimsy register, affirmed by her (2026-08-25, on reading this record):** told
+  nothing in the app's theming owns the playful side yet, she answered *"maybe there
+  should be."* An inclination, not a ruling. If it becomes one, note the two shapes it
+  could take: playful *moments* (13q's delight details — the recorded home) vs. a real
+  third theme **voice** — the latter touches the R1/R12 hold-at-exactly-two ratification
+  and is a canon change only a sitting should make.
+- **The technological direction, deliberately re-opened as an experiment (same day):**
+  the branching/"git for writers" family died unexplored in the original grid, and on
+  reading that observation she got curious ("i didn't think about [it]… i would be
+  curious to see what that would look like"). Prompts were provided. This is exactly the
+  falsification test this document invites — if she loves the results, through-line 1
+  ("the world of the printed book") needs rewriting, not her pick.
 
 ## What this document is not
 
