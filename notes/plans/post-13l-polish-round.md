@@ -176,28 +176,28 @@ plus the archive/trash separation are expected to dissolve it.
 | 7 | B1 the Trash icon + Help-menu tutorial move | **done** `47c0cb7` — the ⋯ dissolves; the masthead renders a trash icon from a door table the header iterates. **The tutorial half was a REMOVAL, not a move** — Help ▸ Open the Tutorial has carried it since 13b Stage 2 |
 | 8 | B2 the Archived sidebar surface (notes only) + the R44 delta at closeout | **done (build)** `47c0cb7` — `ArchivedView` + `SidebarSelection.archived` after Snippets, its own name search, Unarchive/Delete rows; the V1 classifier built as the EXCLUSION (`archivedPosts(excludingVersionHistory:)`, default true) with a hand-seeded pin. **The R44 canonical delta is still the CLOSEOUT's** |
 | 9 | C1 the tray icon → side panel, originals separated | **done** `29e9876` — `PostDetailView.InspectorPanel` gains `.tray(revealBlockID:)`; the masthead renders a three-door table (tray · scraps · references); the `note ▾` item is gone from BOTH bars and `.showNoteTray` is `.surface`-only with three renderers; the badge opens the same panel through a dedicated `CommandRouter` seam (parking for an unfocused pane); the walk's P-1 squeeze fixed by STACKING the row |
-| 10 | C2 the side-panel lineage view, ALL originals | open |
+| 10 | C2 the side-panel lineage view, ALL originals | **done** `06263d1` — FOLDED into 17 as planned: the Block History pane's **Came from** region reads the whole `unplacedOrigins` array (the 13l walk's P-3), each original with its text and a one-button way back. Her mobile parity note survives untouched to the closeout |
 | 11 | D1 takes nested under context-parent block rows | **done** `47c0cb7` — superseded shape built: takes NEVER row in the global Trash (`TrashScope`, shared, so the phone inherits). Data and clock untouched; known in-round transient recorded (no take listing until batches 3–4) |
 | 12 | D2 the lesson edits + spine re-pins + her-store re-seed at closeout | open |
 | 13 | Closeout ritual: records · canonical deltas as ruled · MobileSoul parity notes (C2 mobile shape; PL-11's tray face follows C1's ruled shape; a Note ▸ Versions phone-face note) · QUESTIONS for any PROVISIONAL · the running-order row closed · **annotate `notes/plans/whole-note-history-brief.md`** (its manual half is FULFILLED by V-family; its automated future = her floated auto-rotating versions, feeding the same listing) · **🔴 HER INSTRUCTION (eighth sitting, verbatim-faithful): AT CLOSEOUT — AND ONLY AT CLOSEOUT, "not earlier in the process, so I don't burn tokens on every message by loading it first" — read `notes/MobileSoul.md` and UPDATE the mobile round's BATCH 6 plans** (the per-note tray · deleted takes/History past · archive doors · the lineage door · the guide's deletion chapter) **to the design this round built** — the tray panel + leaving section, the Block History pane, takes-never-global, the five-places map — so mobile inherits the ruled design and never builds the mid-design (*"It's really good we got such a strong design done before a mid design had propagated to mobile"*) | open |
-| 14 | **F1 — ARCHIVE RIDES BESIDE DELETE AT EVERY BLOCK DOOR** (her second morning report, 2026-08-24 — later softened: *"no, I see archive there too"*, so this is a VERIFICATION pass, not a rescue). The menu BAR's Block menu pairs them adjacently (13j's letter — verified in `EditorCommands.swift`); the pass confirms every OTHER door that offers a block Delete without the Archive twin (context/row menus — enumerate via the registry, the door-set is checkable). Same pass verifies the TAKE-card menus: Write's panel ⋯ carries Archive · Label · Lock · Delete (verified) — Takes mode's card grammar must match. **Context for the builder: the 13l walk's P-6 sentence ("the only door that deletes a take is inside the archived strip") is OVERSTATED — active take cards carry Delete; do not build against P-6's wording.** Her open musing, verbatim, for the round's checkpoint — *"I don't even know if we need take archiving if I'm not seeing it right now?"* — with the architect's recommendation recorded: KEEP the capability (her own morning argument — archive is forever-valuable and distinct from the clock — applies to takes exactly; the model's I10-rescue and pool-copy semantics also mint archived states), FIX the doors; retiring it is hers to rule if the fixed doors still don't earn it | open |
-| 15 | **F2 — RESOLVED BY HER OWN SECOND LOOK, folded into 17:** she FOUND the deleted take in the block's History past region (*"I actually do see the deleted take in history"*) — not a data bug; a DOOR-PLACEMENT problem (*"it's unclear that history is under Note, that makes it seem like the Note's history"*). No Trash-side trace owed (takes leave the Trash by D1-revised anyway). Row 17 is the fix | **resolved → 17** |
+| 14 | **done** `200981f` — five block-door renderers verified/fixed, the scrap rows given the pair through a new `.archiveScrap`, and the take-card grammar made uniform; the pass's real finding was that FOUR acts (`.lockTake`, `.deleteTake`, and `.archiveTake`/`.labelTake`'s surface renderer) had been rendered UNDECLARED since Phase 7, which is why the drift was invisible. **F1 — ARCHIVE RIDES BESIDE DELETE AT EVERY BLOCK DOOR** (her second morning report, 2026-08-24 — later softened: *"no, I see archive there too"*, so this is a VERIFICATION pass, not a rescue). The menu BAR's Block menu pairs them adjacently (13j's letter — verified in `EditorCommands.swift`); the pass confirms every OTHER door that offers a block Delete without the Archive twin (context/row menus — enumerate via the registry, the door-set is checkable). Same pass verifies the TAKE-card menus: Write's panel ⋯ carries Archive · Label · Lock · Delete (verified) — Takes mode's card grammar must match. **Context for the builder: the 13l walk's P-6 sentence ("the only door that deletes a take is inside the archived strip") is OVERSTATED — active take cards carry Delete; do not build against P-6's wording.** Her open musing, verbatim, for the round's checkpoint — *"I don't even know if we need take archiving if I'm not seeing it right now?"* — with the architect's recommendation recorded: KEEP the capability (her own morning argument — archive is forever-valuable and distinct from the clock — applies to takes exactly; the model's I10-rescue and pool-copy semantics also mint archived states), FIX the doors; retiring it is hers to rule if the fixed doors still don't earn it | open |
+| 15 | **done** `06263d1` (via 17). **F2 — RESOLVED BY HER OWN SECOND LOOK, folded into 17:** she FOUND the deleted take in the block's History past region (*"I actually do see the deleted take in history"*) — not a data bug; a DOOR-PLACEMENT problem (*"it's unclear that history is under Note, that makes it seem like the Note's history"*). No Trash-side trace owed (takes leave the Trash by D1-revised anyway). Row 17 is the fix | **resolved → 17** |
 | 16 | **G1 — THE WHOLE-NOTE VERSIONS DOOR (her ruling: "yes, in this round").** Her floated shape, adopted: *"an easy door would be to make a copy of the note, archive it, and then let you look through the archived copies made at points in time - not automated, but an easy door for people who want to save the whole note as it is."* **COMPOSE, don't build:** "Save a copy of this note as it is" = `duplicateAsVersion` (exists; mints the `version_of` edge) + note archive (exists) → a **"Versions of this note"** listing (dated, openable, restorable-by-copy) driven by the `version_of` lineage — one query, zero schema, zero new concepts. The copies also appear under the Archived-notes surface (B2) as ordinary archived notes. **`notes/plans/whole-note-history-brief.md` is the AUTOMATED future that later fills this same listing — read it so the manual door's shape doesn't foreclose it.** This is the round's headline: the Google-Docs answer ("my whole note at this point in time"), which her holistic worry named as the one thing people will conclude is missing | open |
-| 17 | **G2 — THE ONE BLOCK HISTORY PANE (her second-sitting revision — supersedes the same morning's block-menu ruling, her words: "I know I just ruled that history should go in the block menu, but I think I'm changing my mind and it should be in the bottom chrome - my reasoning is that history is quite similar to commit, it's the natural pair to commit").** The door lives in the BOTTOM CHROME beside Commit (write a moment / see the moments — the bar becomes the block's time controls) and opens ONE cohesive side pane: **each live take's savepoint run (ALL takes, sectioned, the focused take's expanded — her ruling) · archived takes (Unarchive) · deleted takes (clocks + Put back) · came-from (the lineage section: a merge's ALL originals, each with a DIRECT restore button — her fourth-sitting ask: *"add as block again to the note (that's too wordy, you can reword the button, but the idea is that if you just merged something then realized you actually wanted a parent block, you should just be able to pull that parent block back into existence easily)"* — the op is `placeBlock`, the W-reversibility primitive; the round drafts the short wording)**. This pane ABSORBS three doors — J3's lineage peek, the History face's past region, the archived disclosure — and C2's separate lineage-view row FOLDS INTO IT (C2's mobile parity note survives unchanged). It is the round's biggest single build and the map's fifth place made real; her stated teaching intent binds the design: *"the 'Block history' pane will be a strong memory and the expectations are clear"* | open |
+| 17 | **done** `06263d1` — the pane built with all four regions, the door on both bars beside commit, the act declared BLOCK-scoped (F2's defect closed at the declaration), and THREE surfaces absorbed (Write's inline strip, the Takes history sheet, the J3 peek incl. its nested tray sheet). **G2 — THE ONE BLOCK HISTORY PANE (her second-sitting revision — supersedes the same morning's block-menu ruling, her words: "I know I just ruled that history should go in the block menu, but I think I'm changing my mind and it should be in the bottom chrome - my reasoning is that history is quite similar to commit, it's the natural pair to commit").** The door lives in the BOTTOM CHROME beside Commit (write a moment / see the moments — the bar becomes the block's time controls) and opens ONE cohesive side pane: **each live take's savepoint run (ALL takes, sectioned, the focused take's expanded — her ruling) · archived takes (Unarchive) · deleted takes (clocks + Put back) · came-from (the lineage section: a merge's ALL originals, each with a DIRECT restore button — her fourth-sitting ask: *"add as block again to the note (that's too wordy, you can reword the button, but the idea is that if you just merged something then realized you actually wanted a parent block, you should just be able to pull that parent block back into existence easily)"* — the op is `placeBlock`, the W-reversibility primitive; the round drafts the short wording)**. This pane ABSORBS three doors — J3's lineage peek, the History face's past region, the archived disclosure — and C2's separate lineage-view row FOLDS INTO IT (C2's mobile parity note survives unchanged). It is the round's biggest single build and the map's fifth place made real; her stated teaching intent binds the design: *"the 'Block history' pane will be a strong memory and the expectations are clear"* | open |
 | 18 | **G3 — THE "UNPLACED" WORDING FOLD (presentation YES, semantics NO — her fold question answered).** Her words: *"why do we have unplaced as separate from archived? should we fold those two concepts in?"* The SEMANTIC fold is declined with the reason recorded: a preserved original rides its FAMILY's purge clock (her own 13j round-8b ruling — "goes with its deleted blocks") while archived means NEVER purged; folding them breaks one promise or the other. The PRESENTATION folds completely: a preserved original reads as *"set aside automatically by the merge — kept until its family goes"*; the word **"unplaced" must never reach a user's eyes** (debug vocabulary only — sweep every surface and receipt for it) | **done** `47c0cb7` — exactly two user-facing sentences said it; both reworded, and `goesWithItsFamily` folded to her sense. Queries keep their names. |
 | 19 | **G4 — A NEW TUTORIAL CHAPTER teaches the map (her third-sitting expansion: "the next polish session should definitely add a new tutorial chapter about this… the user should be encouraged to get comfortable with each of the" places).** A NEW chapter (not just lines in the deletion chapter): the five places — *where you left it · Archive (notes, forever) · the Trash (what's leaving: notes·books·blocks, 30 days) · this note's Versions · this block's History* — each visited by the walk, **plus the take-savepoint story made explicit** (her: "making it clear where commit / that particular history by the take is, is also important" — the commit↔history bottom-chrome pairing is the teaching moment). Walk-asserted; D2's re-pin + her-store re-seed cover it | open |
-| 20 | **G5 — THE TRAY'S HONEST "LEAVING" SECTION (her third-sitting ruling):** *"the tray of a note should have an honest trash section with everything being deleted, so it's never a surprise - and takes can be shown in that per note trash, albeit maybe not shown by default, so you can always see a list of what will be deleted."* The note's tray panel (C1) gains the complete per-note pre-purge audit: every clocked thing of THIS note — blocks, AND its takes under a collapsed-by-default disclosure — plus clocked originals when their family clock starts (the 13j 8b nets untouched: the visible move, its receipt, the Trash row). **Her fourth-sitting addition: the take rows HERE carry a Delete Now button** (*"to keep the capability"* — confirm-every-time binds it like every purge door). **This supersedes-IN-PART the 13j round-3 rider** ("inside the Trash only — never a door in a note or the editor, ever"): the evolved rule, hers — **purge doors live in TRASH SURFACES (the global Trash AND this note-level trash section), never in the writing flow** — recorded for the closeout's delta. **Originals while UNCLOCKED are lineage-only** (the Block History pane's came-from section — her earlier instinct, now consistent: the tray audits what is LEAVING; lineage holds what is KEPT) | **done (staged)** `29e9876` — the three sections built (Archived · Leaving · Preserved originals); the note-scoped `Queries.trayTakes` rides a collapsed-by-default disclosure whose rows name their BLOCK and carry Put back + Delete Now (confirm every time, the payload riding `presenting:`). **The ORIGINALS section is STAGED, not removed** — batch 4 deletes it in the same commit came-from lands (the dark-window rule; marked in code) |
+| 20 | **G5 — THE TRAY'S HONEST "LEAVING" SECTION (her third-sitting ruling):** *"the tray of a note should have an honest trash section with everything being deleted, so it's never a surprise - and takes can be shown in that per note trash, albeit maybe not shown by default, so you can always see a list of what will be deleted."* The note's tray panel (C1) gains the complete per-note pre-purge audit: every clocked thing of THIS note — blocks, AND its takes under a collapsed-by-default disclosure — plus clocked originals when their family clock starts (the 13j 8b nets untouched: the visible move, its receipt, the Trash row). **Her fourth-sitting addition: the take rows HERE carry a Delete Now button** (*"to keep the capability"* — confirm-every-time binds it like every purge door). **This supersedes-IN-PART the 13j round-3 rider** ("inside the Trash only — never a door in a note or the editor, ever"): the evolved rule, hers — **purge doors live in TRASH SURFACES (the global Trash AND this note-level trash section), never in the writing flow** — recorded for the closeout's delta. **Originals while UNCLOCKED are lineage-only** (the Block History pane's came-from section — her earlier instinct, now consistent: the tray audits what is LEAVING; lineage holds what is KEPT) | **done (staged)** `29e9876` — the three sections built (Archived · Leaving · Preserved originals); the note-scoped `Queries.trayTakes` rides a collapsed-by-default disclosure whose rows name their BLOCK and carry Put back + Delete Now (confirm every time, the payload riding `presenting:`). ~~**The ORIGINALS section is STAGED, not removed**~~ — **STAGING FINISHED at batch 4** (`06263d1`): the section is gone in the same commit came-from landed, exactly as the dark-window rule required. `Snapshot.originals` stays (the STRANDED arm is derived from it — an original whose family died IS leaving), and `TrayPath.originalsPath` now names the pane's came-from region, which the eight quoting copy sites followed for free |
 | 21 | **G6 — EMPTY TRASH PURGES EXACTLY WHAT IT ROWS (her ruling, and it SUPERSEDES 13j round-8's "everything, always" — a canon change, hers, recorded for the closeout's delta):** *"should we make 'empty trash' not delete takes by default? … a deleted take on a living block might be the one item a user does want to keep. I think that delete everything, including takes not displayed here, should be an alternative button if it even exists."* Built shape: Empty Trash takes notes · books · blocks + their families (a rowed block's own takes go with it — family-complete, honest, all rowed); **individually-deleted takes on LIVING blocks are untouched by the door** and expire on their own 30-day janitor clock only. **The honesty caveat the copy must carry: sparing from Empty Trash is NOT keeping — the clock still runs; restoring the take is the keep road.** The "delete absolutely everything" alternative button is NOT built (her "if it even exists" lean; recorded — a future door at her word). Takes' Delete Now capability LIVES in the note-level trash (row 20 — her fourth-sitting placement; Block History still carries no purge door); the in-Trash-only rule evolves as row 20 records. Her confirmations, same sitting: NOT clock-exempt (*"i don't want it to be clock exempt"*), and the door-shows-what-it-takes principle stands (*"I just don't think a 'delete everything' button in the trash should delete items that aren't being shown"*) | **done** `47c0cb7` — `TrashScope.emptyTrashTakes` is the one rule; the confirm totals what it takes and carries her sparing-is-not-keeping caveat; two shipped pins strengthened in place. |
 | 22 | **G7 — TRASH BLOCK ROWS GROUP UNDER THEIR NOTE (the architect's proposal at her "will it be a bunch of blocks in the trash?" — PROVISIONAL, hers to unwind):** the global Trash's block rows gather under a small note-name header (the note itself only rows if IT is deleted), so a note with many deleted blocks reads as one group, not clutter. Composes with A3's naming; presentation only. **EXTENDED at her tenth-sitting ruling — the round's LAST refinement:** when deleting a live block strands its preserved ANCESTORS onto the family clock, **the Trash shows those ancestors NESTED UNDER the just-deleted block's row** — her words: *"those ancestors [go] under the live block that was most recently deleted - so if you had 30 ancestors on one live block's history and you delete that one live block, going to trash shows you what you just deleted rather than suddenly being overwhelmed by 31 random items … a more visible UI for 'your ancestors die with you' (lol)"*. The 8b nets (the move, its receipt) unchanged — this is their FACE | **done** `47c0cb7` — `TrashGrouping` (shared, pure): note headers, the deleted note heading its own group, groups-of-one flattened, and ancestors nested under the deletion that stranded them via a new query-supplied `anchorBlockID`. |
 | 23 | **THE VERSIONS FAMILY (the V-rulings built):** the ⌘⇧S Save-a-Version door (chord verified free) · the Note ▸ Versions listing (dated, derived display, no title mutation) · copies born ARCHIVED + SEALED in one transaction · RESTORE identity-preserving (saves-now-first; outgoing blocks on the Delete Now road) · PROMOTE (unarchive+unseal → first-class) · versions RIDE the note's deletion (one confirm line, no dialog) · deleted single versions → Trash rows grouped under their note (RATIFIED) · the search-scope exclusions (main = live; Archived = non-version; versions in-context only — handed to 13o) | open |
 | 24 | **V3's MUST-PIN:** version copies of journal notes never trip the bridge's duplicate-day pause — verified whichever way the machinery composes, pinned either way | open |
 | 25 | Found-item 2: the archive-a-note door verified/ensured (one clear door, receipt naming the Archived surface) — rides B1's registry pass | **done** `47c0cb7` — the door existed in two row menus, undeclared and SILENT; now `.archiveNote` is declared, both renderers read its verb, and `LibraryViewModel` gained a receipt slot that names Archived and its absence of a clock |
 | 26 | The tutorial chapter (row 19) teaches the VERSIONS story too: ⌘S vs ⌘⇧S — this take's moment vs this note's moment — the grain pairing as the lesson | open |
-| 28 | **THE Aa BOTTOM-CHROME CONDENSATION (her kickoff addition, 2026-08-24 — verbatim in the kickoff record; SCOPE RULED at the kickoff sitting via the question tool): FORMATTING ONLY BEHIND Aa.** The `FormatBar` cluster + the newlines chip condense into one Aa button; clicking Aa slides the formatting row out (the phone's Aa expanding-row idiom, now on the Mac — a reverse-parity face like dark mode). Block ▾ · Takes · commit ⌘S · **History (row 17's new door)** · note ▾ · comments · counts · ? all stay visible at rest — the "bar becomes the block's time controls" reading survives by construction. Both bars (`CommitBar` + `TakesBottomBar`) take the same treatment; registry discipline P-1 (doors move, declarations unchanged — the R6-2/13g slide-out precedent is exactly this class); expansion state is session UI state | open |
-| 32 | **THE FENCE SENTENCE (#77(a), her ruling "Name the road instead"):** the scraps-area delete fence's refusal becomes *"Scraps go one at a time — delete the scraps themselves."* — one string in the shared home, pin updated. Batch 4 | open |
-| 31 | **GENTLE GREEN ON FULLY SYNCED (#75(c) rider, her words: "a gentle green on fully synced might look nice"):** the sync-status line's everything-sent state wears a gentle green — via the voice vocabulary (a quiet positive tint beside row 29's error token; no literal colours). Batch 4 | open |
+| 28 | **done** `7220086` — nine controls behind one `Aa` chip on both bars, the row sliding out ABOVE the flat row; registry ids unchanged (the R6-2/13g class); measured 9 at rest / 18 open on the real mounted bar. **THE Aa BOTTOM-CHROME CONDENSATION (her kickoff addition, 2026-08-24 — verbatim in the kickoff record; SCOPE RULED at the kickoff sitting via the question tool): FORMATTING ONLY BEHIND Aa.** The `FormatBar` cluster + the newlines chip condense into one Aa button; clicking Aa slides the formatting row out (the phone's Aa expanding-row idiom, now on the Mac — a reverse-parity face like dark mode). Block ▾ · Takes · commit ⌘S · **History (row 17's new door)** · note ▾ · comments · counts · ? all stay visible at rest — the "bar becomes the block's time controls" reading survives by construction. Both bars (`CommitBar` + `TakesBottomBar`) take the same treatment; registry discipline P-1 (doors move, declarations unchanged — the R6-2/13g slide-out precedent is exactly this class); expansion state is session UI state | open |
+| 32 | **done** `014f409` — one string in the shared home, its pin strengthened to assert the road is named. **THE FENCE SENTENCE (#77(a), her ruling "Name the road instead"):** the scraps-area delete fence's refusal becomes *"Scraps go one at a time — delete the scraps themselves."* — one string in the shared home, pin updated. Batch 4 | open |
+| 31 | **done** `014f409` — the STANDING decides its own tone (`.quiet`/`.settled`/`.attention`, shared with the phone) and the pane renders a voice token; the literal `Color.orange` is gone and signed-out stays quiet (#75(d)). **GENTLE GREEN ON FULLY SYNCED (#75(c) rider, her words: "a gentle green on fully synced might look nice"):** the sync-status line's everything-sent state wears a gentle green — via the voice vocabulary (a quiet positive tint beside row 29's error token; no literal colours). Batch 4 | open |
 | 30 | **ANCESTORS COLLAPSIBLE (her mid-round refinement on the ratified G7):** the nested-ancestors run under a just-deleted block's Trash row gains a dropdown-arrow disclosure — expanded by default, collapsible at will. Builds in batch 5 (already in the grouping for version rows) | open |
-| 29 | **THE ERROR VOICE TOKEN (her mid-round ruling: "Add it this round"):** one named error/danger slot per voice in the shared token vocabulary; refusal/error surfaces adopt it through the voice (no literal reds return); both platforms share the file; hues revisable at 13s, dark mode (13u) inherits the slot. Builds in batch 4 | open |
+| 29 | **done** `014f409` — `alarm` + `positive` in all four voices, swept through `.alarmVoice()`/`.positiveVoice()` across 21 Mac and 12 mobile sites plus the `tokens.accent` refusal slots batch 1 and 3 shipped. **THE ERROR VOICE TOKEN (her mid-round ruling: "Add it this round"):** one named error/danger slot per voice in the shared token vocabulary; refusal/error surfaces adopt it through the voice (no literal reds return); both platforms share the file; hues revisable at 13s, dark mode (13u) inherits the slot. Builds in batch 4 | open |
 | 27 | **THE TWO-EXITS LESSON (her eleventh-sitting mandate — "I deleted a paragraph, is it in deleted or in lineage? and lineage of what block" must be legible):** the chapter teaches **"Deletion goes to the Trash; transformation goes to lineage"** — a block you DELETED is on the clock, Put back real; a block that BECAME something else (merged, divided) lives in the new block's History came-from, one button back. Taught by DOING (her idea, adopted: the lesson walks the user through deleting a whole block, then making an edit that merges two — and finding each in its exit). Covers TODAY's truth incl. the shipped merge-then-edit; **the fanned cross-block matrix is 13u's** (its sitting + its own lesson update — the split is recorded there). The merge's own silence stays HER declined P-2 — the tutorial carries the teaching, not a per-merge message | open |
 
 
@@ -1885,3 +1885,392 @@ assertions that read the retired constant were re-pinned to the new headers.
    `App/Variorum/Variorum/`, `App/Variorum/Shared/` and `Sources/VariorumCore/`
    returns only the two pre-existing doc comments (`NoteWindowView`,
    `QuickNoteView`).
+
+### BATCH 4 — RECORD (Opus implementer, 2026-08-24/25)
+
+**Four commits, staged by explicit path, none pushed.** Tree clean at start
+(`33f5234`) and at finish.
+
+| commit | theme |
+|---|---|
+| `014f409` | the token + copy sweep — rows 29, 31, 32 |
+| `06263d1` | the Block History pane — rows 17, 10, 15, adjudications 1 + 3, row 20's staging finished |
+| `7220086` | the Aa condensation — row 28 |
+| `200981f` | F1's parity pass — row 14 |
+
+**The order is not the brief's, and the reason is a dependency:** the pane's
+status slot needs row 29's `alarm` token, so the chrome hand landed first. It
+was verified in isolation — the pane file was held out of the tree for that
+build — so the sweep commit stands on its own suites.
+
+**Gates — all four, my own runs:**
+
+| gate | result | baseline |
+|---|---|---|
+| core (`swift test`) | **1384 tests / 144 suites PASSED** (36.8 s) | 1383/144 → **+1**, the new `Queries.blockHistory` pin |
+| Mac full (`-project`, `platform=macOS`) | **1741 / 294 PASSED — TEST SUCCEEDED** (230.7 s, zero reds) | 1728/294 → **+13**; suite count unmoved (`BlockHistoryPaneTests` in, `RecoveryFaceCaptureTests` out) |
+| Mac spine (8 `TutorialWalkTests` types, suite-level `-only-testing`) | **63 / 8 PASSED — TEST SUCCEEDED** (23.9 s) | 63/8 ✔ exact |
+| mobile (`VariorumMobile`, iPhone 16e) | **486 / 78 PASSED — TEST SUCCEEDED** (86.4 s), the 2 recorded `withKnownIssue`s only | 486/78 ✔ exact |
+
+**Both known flakes silent** in the full Mac run — the Phase-12 latency pin
+(`EditorWindowSmokeTests/rewriteStrategyLatencies`) and
+`CanvasDragTrackingTests`. Neither needed isolating; `CanvasDragTrackingTests`
+stays at ONE recorded red for the era.
+
+**Fences held:** ZERO schema · ZERO `Sources/VariorumCore/Sync/` lines · the
+one core change is a read-side query over existing tables · no version
+machinery (batch 5's) · tutorial edits are MECHANICAL door-path corrections
+only (batch 6 owns the re-teaching) · the pane is read-tier throughout (every
+take in it is a `Text`; no live editor, P3).
+
+**INSTANCE CHECKS.** `pgrep -fl 'Variorum.app/Contents/MacOS'` was empty before
+each `build-for-testing` and before the first three full Mac runs. **Before the
+final gate run a Variorum was live** — PID 98884, at
+`…/DerivedData/…/Build/Products/Release/Variorum.app`, i.e. a Release product
+outside `/Applications`. It was NOT addressed, quit or killed (the standing
+rule: never by process name, never at all for a real-store instance), and this
+batch took no Release build and no `/Applications` act, so nothing was owed.
+Recorded because the traps say a real-store instance is discriminated by STORE
+rather than path, and a Release product runs the real store — **the closeout's
+`/Applications` refresh must re-check before it acts.**
+
+---
+
+#### Row 29 (the error voice token) — a refusal was wearing the app's success green
+
+**Mechanism, traced myself:** with no alarm token, a themed surface that wanted
+one reached for `accent` — and in the TERMINAL voice `accent` and `chosen` are
+the SAME hex (`0x2F7D5F`), the colour the "✓ chosen" mark wears. So
+`TrayPanel`'s refusal slot painted *"This note is sealed…"* in the app's own
+success colour, and that was the closest thing to right that existed (batch 1
+shipped it as a recorded PROVISIONAL and flagged exactly this). Beside it,
+~30 error slots painted a literal `.foregroundStyle(.red)` in themed surfaces.
+
+**Build:** `VoiceTokens` gains `alarm` and `positive`, distinct per voice and
+per scheme. The sweep is a MODIFIER, not thirty token hand-offs —
+`.alarmVoice()` / `.positiveVoice()` resolve the voice where the app already
+resolves it, because most of those slots live in nested private structs that
+hold no tokens (which is exactly why they reached for the literal). **21 Mac
+sites · 12 mobile sites · `SharedPageStyle`'s error caption in its STYLED
+branch · the `tokens.accent` refusal slots in `TrayPanel`, `BlocksAreaView`
+and `ScrapsPanel`.**
+
+**DELIBERATELY LEFT, with the reason written at the modifier:** the TK2
+fallback CANARY banners (`EditorView`, `ReadPostView`, `PaneSurface`,
+`MobileWriteView`) keep white-on-red — a build-integrity alarm aimed at a
+developer, deliberately the loudest thing the app can draw. Also left, and
+recorded rather than swept: `DiffView`'s red/green (diff SEMANTICS, its own
+vocabulary), `MobileNoteActions`' swipe tint (a destructive-role control, not
+a message), and the `.orange` STALENESS slots in `DataSafetyPane` /
+`BlockTOCView` / the ceremony sheets — warning is a third signal class she has
+not ruled on, and inventing one would be inventing product behaviour.
+
+**Pin:** `ThemeTokenTests.everyVoiceNamesAnAlarmThatIsNobodyElsesColour`.
+**RED ON OLD** (behavioural revert: `alarm := accent`, batch 1's actual
+shipped behaviour): 3 issues, reading the collision back.
+
+**Files:** `Shared/Theme/VoiceTokens.swift`, `Shared/Theme/SharedPageStyle.swift`,
+`Theme/VoiceControls.swift`, + 21 Mac and 12 mobile surfaces.
+
+---
+
+#### Row 31 (gentle green) — and why `isCalm` could not carry it
+
+**Mechanism, verified:** the sync line asked `face.isCalm`, a TWO-WAY answer,
+and painted `Color.orange` for "not calm". Her ruling wants a gentle green on
+the settled state — but #75(d) also ratified that **signed-out stays quiet**,
+and "calm" would have painted a local-only Mac the same green as one that had
+sent everything. Being local-only is a complete state, not an accomplishment.
+
+**Build:** `SyncSafetyStanding.tone` — `.quiet` / `.settled` / `.attention` —
+decided once in `Shared/` so the phone inherits the rule, carried onto
+`SyncSafetyFace`, and rendered through the voice tokens. `isCalm` survives
+unchanged beside it, answering its own question; its pins ride unmodified.
+
+**Pin:** `SyncSafetyFaceTests.onlyTheSettledStateWearsTheGentlePositiveAndSignedOutStaysQuiet`.
+**RED ON OLD** (revert `tone` to derive from `isCalm`): 4 issues — every quiet
+standing reading back `.settled`.
+
+---
+
+#### Row 32 (the fence sentence) — naming the road
+
+The fence itself is untouched (it lives at the ACT, so all four doors pass
+through it); its words are hers: *"Scraps go one at a time — delete the scraps
+themselves."* **Pin edited in place, STRENGTHENING:**
+`NoteDeletionActTests.theScrapsAreaCannotBeDeletedThroughTheNoteDoor` kept its
+whole claim and gained the property her ruling asks for, which reading the
+constant alone could never carry. **RED ON OLD** (restore the refusal-only
+sentence): 2 issues.
+
+---
+
+#### Row 17 (G2) — the Block History pane
+
+**The door.** `history` beside `commit ⌘S` on BOTH bars; the `note ▾` item
+gone from both in the same commit (R6-2's one-grammar rule, which matters most
+for a removal). The act is declared **BLOCK-scoped**, which is her F2 report
+answered at the declaration rather than in copy: *"it's unclear that history is
+under Note, that makes it seem like the Note's history."* Doors
+`[.bottomBar, .palette]`; never disabled — with no block in reach it SPEAKS the
+registry's note (P-2).
+
+**The pane** (`Features/Tray/BlockHistoryPane.swift`), one occupant of batch
+3's `InspectorPanel` seam, four regions in her order: (1) **savepoints** — ALL
+live takes, sectioned, the focused one expanded, restore per row with the
+pre-split confirm; (2) **archived takes**, Unarchive; (3) **deleted takes**,
+clocks + Put back and **no purge door** (row 21's letter, with the deleted
+region's own copy naming where Delete Now does live); (4) **came from** — every
+original, its text, **Bring back**, and an Open-this-note's-tray door the HOST
+answers.
+
+**The read** is one new core projection, `Queries.blockHistory` +
+`observeBlockHistory`: the fan, each live take's savepoints, the split dates,
+the deleted takes, and the origins WITH their preview text. Cost is the
+block's, never the corpus (P1) — and the fact that it is proportional to this
+block's own history is stated at the query.
+
+**THE THREE ABSORPTIONS, and what each of them cost.**
+
+- **Write's inline `CommitHistoryView` strip** and **the Takes bar's history
+  sheet**: deleted with `BlockPastSection.swift`'s two types
+  (`BlockPastModel`, `BlockPastSection`), whose only two hosts they were.
+  `BlockPastCopy` MOVED into the pane's file unchanged — the sentences are
+  semantic and every one is still true, and `KnownIssuesAndTechDebt.md` names
+  it as a still-Mac-local deletion-copy home, which stays exactly as true.
+  `EditorViewModel` lost `commitList`, `pendingRestore`, `blockPast`,
+  `CommitListItem`, `commitListVariantID`, `toggleCommitHistory`,
+  `loadCommitHistory` and `restore` — three pieces of state for two faces that
+  each showed part of one block's time.
+- **The J3 peek**: `OriginPeekModel` and `OriginPeekPanel` deleted;
+  `OriginPeekCopy` stays as the lineage vocabulary (the registry's verb, the
+  context row, the pane's own region all read it). The nested tray sheet
+  DISSOLVES rather than moving — the pane raises the tray as a callback, so the
+  inspector swaps the column's occupant (adjudication 3).
+
+**Adjudication 1** landed with it: `.showNoteTray` gains a `.palette` door,
+for the one place batch 3 recorded the move as costing reach — a book spread's
+inline note, which mounts an editor with no masthead and no context bar.
+
+**Row 20's staging, finished in the same commit** as batch 3's note required:
+the tray's Preserved-originals section is gone. `Snapshot.originals` STAYS —
+`stranded` is derived from it, and an original whose family has died IS
+leaving. `revealMissing` reads the snapshot rather than a stored listing, so a
+reveal naming an unclocked original is still answered honestly.
+
+**A DESIGN FORK the brief did not settle, resolved and recorded:** the pane is
+scoped to the block the REQUEST names, not to a live caret. Following the caret
+would mean a panel that jumps while she types and an observation re-scoped at
+caret rate; re-pressing `history` opens the pane on the new block, and the
+request carries the focused take so her "the focused take's expanded" ruling
+has something to name. A second, smaller one: the came-from's **Open this
+note's tray** renders on EVERY origin row rather than only clocked ones — a
+door that can always act, and the clock is the tray's own face to wear.
+
+**Pins:** `BlockHistoryPaneTests` (9 at this commit) —
+`theHistoryActIsDeclaredOnBothBarsBesideCommit` ·
+`theHistoryPaneOffersPutBackAndUnarchiveAndNoPurgeDoor` ·
+**`theMountedDetailOpensTheHistoryPaneInItsRealSidePanel`** (walk-driven) ·
+`aHistoryRequestForAnUnmountedPostIsRefusedSoTheBarCanFallBack` ·
+`theCameFromRegionShowsEveryOriginOfAMerge` ·
+`everyLiveTakesSavepointRunIsInThePane` ·
+`anOrdinaryBlockHasAnEmptyHistoryAndTheCopySaysWhat` ·
+`aRestoreFlushesThePendingBufferBeforeItLands` ·
+`theRowFacesSayWhenAndWhatAndNothingElse` — plus core
+`TrashAndArchiveTests.theBlockHistoryProjectionCarriesEveryTakesRunAndItsOrigins`.
+
+**The walk-driven pin's evidence, and one honest correction to it.** It mounts
+the REAL `PostDetailView`, fires the router's request, and asserts the tree
+gained `InspectorStyleContext` + `SwiftUIOutlineListView` + `ListTableHeaderView`
+with `EditorTextView` still beside it. **Its settle predicate waits for the
+REGION HEADERS, not for the column** — measured, not guessed: settling on the
+column and reading immediately found the list built and its section views not
+yet, so the first version of the pin was asserting about a half-built panel.
+The harness block is also given a savepoint and a deleted take, so more than
+one region renders and "the four regions" is a claim the class names can carry.
+
+**RED ON OLD**, two behavioural reverts:
+- origins truncated to `.first` (the peek's actual shipped behaviour) — the
+  came-from pin reds TWICE, reading back one of two and one of three:
+  `Set(history.origins…) → ["…0007"] == ["…0007", "…000A"]`.
+- `flushExistingAutosave` dropped from `restore` — `(text → "words typed
+  since") == "the saved words"`: the restore lands and the pending flush
+  writes over it, exactly the race the absorbed strip flushed to avoid.
+
+**GRADUATED PINS** (claims kept, several strengthened): `EditorSessionTests`'
+NIT-12 restore-targeting (now STRUCTURAL — a row hands its own take to the
+act, so the caret is not part of the address) and the pre-split ask ·
+`RecoveryDoorsTests`' whole peek + past-region family (7 tests) ·
+`OriginBlockDoorTests` (2) · `NoteTrayTests` (3) · `TutorialWalkTests` (2) ·
+`CapabilityRegistryTests`' surface union · `TrayPanelMoveTests` +
+`UndoHintAndRefusalTests` (the tray's new palette door).
+
+**TWO PINS RETIRED, each with its reason written where it stood:**
+`TrashSurfaceTests.theHistorySheetStopsPayingForAnEmptyPastSection` (13j ladder
+A's R2-N2 — the sheet it defended is gone, and the pane's regions build nothing
+when empty, so there is no spacing left to defend and no constant left to
+hold), and **`RecoveryFaceCaptureTests`** (its own header records that
+`ImageRenderer` draws a placeholder for `List`-backed views, so the pane joins
+the tray panel and the peek as a **hand-check item** — named here rather than
+faked).
+
+---
+
+#### Row 28 (the Aa condensation)
+
+Nine controls behind one `Aa` chip on both bars; the formatting row slides out
+**above** the flat row, upward, away from the page's bottom edge — so nothing
+she was already reaching for moves under her cursor. `block ▾` · Takes ·
+commit · **history** · `note ▾` · comments · the counts · `?` all stay visible
+at rest, which is what keeps row 17's reading true.
+
+**Registry ids UNCHANGED**, deliberately — the R6-2/13g slide-out class:
+rendering a door behind an expansion is still rendering it.
+
+Two decisions worth naming. The fold is **per-bar session UI state**, seeded at
+birth through an init parameter so a pin can mount the bar in either state (a
+`@State` toggle is otherwise unreachable — the `TrayPanel(model:)` seam
+pattern). And the Takes bar's segmentation-refresh `.task` **moved off the chip
+onto the bar**: the chip is behind a fold now, and a setting that only learned
+the truth when she opened the fold would be a stale face wearing a confident
+one.
+
+**Pins:** `onlyFormattingCondensesBehindTheAaDoor` (her ruled scope as a
+VALUE — `FormattingDoor.condensed` IS `FormatBar`'s act table, so a ninth
+formatting act joins the fold automatically and a non-formatting act cannot
+wander in silently; plus what stays visible asserted per bar) ·
+**`theRealBarDrawsFewerDoorsAtRestThanWithAaOpen`**, walk-driven over the real
+mounted `CommitBar`: **9 focusable controls folded, 18 open.** The probe is
+`KeyViewProxy` and it was MEASURED rather than assumed — the doors are
+SwiftUI-drawn, so an `is NSButton` walk returned zero on a bar plainly full of
+doors, and this host's AX tree is empty (batch 3's finding).
+**RED ON OLD** (the cluster back in the flat row, no fold): **17 and 17**.
+
+---
+
+#### Row 14 (F1) — the parity pass, and its real finding
+
+Her pass was a VERIFICATION (*"no, I see archive there too"*), and it found one
+class of straggler in each half. **In both cases the reason nothing had caught
+it was the same: the acts were rendered and never declared**, so there was no
+door set for the registry walk to compare — which is the strongest argument for
+P-1 this round has produced.
+
+**THE BLOCK-DOOR TABLE (instance × door → verdict):**
+
+| surface | block Delete | block Archive | verdict |
+|---|---|---|---|
+| Menu bar ▸ Block | ✔ declared | ✔ declared, adjacent | **OK** |
+| Block context menu (notes AND the scraps editor — one shared builder) | ✔ (batch 1) | ✔ | **OK** |
+| `CommitBar` `block ▾` | ✔ | ✗ | **FIXED** — `.archiveBlock` gains `.bottomBar` |
+| `TakesBottomBar` `block ▾` | ✔ | ✗ | **FIXED** — same commit (R6-2) |
+| Blocks mode row menu (`BlockTOCView`) | ✔ but **undeclared since 13c** | ✗ | **FIXED** — the pair added AND declared; the view joins the surface walk |
+| ⌘K palette | ✔ | — | **OK by decision**, stated in the pin: a palette row is typed by name and "Archive Block" is one line away |
+| Snippets list rows (`BlocksAreaView`) | ✔ (batch 1) | ✗ | **FIXED** — new `.archiveScrap` |
+| Scraps side-panel rows (`ScrapsPanel`) | ✗ (Tags… only) | ✗ | **FIXED — both**; batch 1 named this listing as F1's to enumerate |
+| Canvas cards + bank rows (`CanvasView`) | ✗ — no delete door at all | ✗ | **OK by vacuity**, and RECORDED: the canvas offers Tags… · Place on the board · Return to bank · Reset size and no way to get rid of a block. F1's rule is satisfied because there is no Delete to ride beside; whether a canvas card SHOULD carry one is a product call, not this pass's |
+| Takes card ⋯ / Write's selection banner (`.deleteSelectedBlocks`) | ✔ (selection-scoped) | — | **RECORDED**: no bulk-archive act exists, and minting one is inventing product behaviour. The block-grain pair is one menu away in `block ▾` |
+
+**THE TAKE-CARD GRAMMAR (surface × act):**
+
+| surface | Archive | Label | Lock | Delete | verdict |
+|---|---|---|---|---|---|
+| `WriteTakesPanel` card ⋯ | ✔ | ✔ | ✔ | ✔ | rendered since Phase 7, **ALL FOUR UNDECLARED** → **FIXED** (declared) |
+| `TakesCellView` card menu (Takes **and** Lenses boards) | ✔ | ✔ | ✗ | ✗ | **FIXED** — the missing two added |
+| `WriteTakesPanel` archived card | — | — | — | ✔ | **OK** → declared |
+| `TakesBoardView` archived card | Unarchive ✔ | — | — | ✔ | **OK** → declared |
+
+New declarations: `.archiveScrap`, `.lockTake`, `.deleteTake`; new doors:
+`.archiveBlock` +`.bottomBar` +`.surface`, `.deleteBlock` +`.surface`,
+`.archiveTake` +`.surface`, `.labelTake` +`.surface`. The card rows now read
+their verbs from the registry (`TakeCardMenuCopy` gained `lockVerb(locked:)`
+and `deleteTake`), so a rename lands once — and the lock row says WHICH WAY it
+points, as Write's panel always did. **Takes do not confirm** (13j's
+confirmation-consistency principle, second clause), stated at the declaration.
+
+**Pins:** `everyDoorThatDeletesABlockOffersToArchiveItToo` ·
+`theTakeCardsCarryTheSameFourActsOnBothSurfaces`. **RED ON OLD** (archive's two
+new doors dropped; both take surfaces back to their pre-pass tables): **5
+issues** — the bar and the row menu reading back an archive that is not there,
+and the grammar reading back two of four on each surface.
+
+---
+
+#### THE CAME-FROM WORDING DRAFT — for her checkpoint
+
+Her fourth-sitting ask named the idea and rejected her own wording for it:
+*"add as block again to the note (that's too wordy, you can reword the button,
+but the idea is that if you just merged something then realized you actually
+wanted a parent block, you should just be able to pull that parent block back
+into existence easily)"*.
+
+**My draft: `Bring back`.**
+
+Two words, the verb first, and deliberately the tray's own **Put back** grammar
+one grain over — the same shape, a different word, because the two acts differ
+in a way she may want to feel: *Put back* returns something that was TAKEN
+AWAY, while *Bring back* returns something that was never deleted at all, only
+set aside whole. Its help sentence carries the rest so the button does not have
+to: *"Puts this original back into the note, beside the blocks it became — it
+was kept whole and set aside, never deleted."*
+
+Candidates weighed and not chosen, so she can see the space: **Put back** (one
+word from perfect, but it would make two different acts identical in the same
+panel family) · **Restore** (already means a savepoint in the region directly
+above it) · **Add back to the note** (four words, and "add" reads as minting
+something new — the one thing this act is not) · **Bring it back** (warmer, but
+a button that says "it" beside a list of several originals is ambiguous).
+
+---
+
+#### ADJUDICATION 2 — the frequency class, RECORDED (nothing built)
+
+The Block History pane is the SAME class the architect adjudicated for batch
+3's tray, and the verdict covers it unchanged: **record-only, owner 12, no
+debounce machinery.** Concretely, the pane's projection reads `variant` AND
+`commit_point`, so GRDB re-runs it whenever a buffer is autosaved — and as a
+side panel it can now stand open while she types, where the two faces it
+replaces were a sheet and a summoned strip.
+
+**P1 is not breached, and the distinction is worth keeping straight:** the
+re-read's cost is ∝ this block's own fan and savepoint history, never the
+note's length and never the corpus. What changed is the FREQUENCY, not the
+scaling. The one honest caveat beyond the tray's: a block with many takes and
+long savepoint runs reads all of them per re-run, so this pane's constant is
+larger than the tray's bounded listing. Both are off-main and both are
+summoned. **The closeout writes ONE KnownIssues row naming both panes.**
+
+---
+
+#### OBSERVATIONS — nothing built, for the architect
+
+1. **`WriteTakesPanel`'s status slot is still a single un-classed line**
+   (`tokens.accent` for receipts and refusals alike) — ledger row 6's exact
+   defect, one surface over. It was deliberately NOT swept into `alarm`:
+   `TakesViewModel.statusMessage` carries both classes, so painting it alarm
+   wholesale would make every receipt read as an error, which is the defect
+   row 6 fixed rather than the fix. The honest repair is `TrayViewModel
+   .Status`' split applied to `TakesViewModel`, which touches every board.
+   **Recorded, not attempted.**
+2. **`BridgeStatusViews`' "Bridge error" keeps its literal red.** It is in
+   `Shared/`, so it cannot use the Mac's `.alarmVoice()`, and it takes no
+   `SharedPageStyle` — the hoisted road that would give it a token. One line;
+   flagged rather than left silent.
+3. **The canvas has no way to delete a block** (observation row 9 of the F1
+   table). Not F1's to invent, and worth her eye: a surface that arranges
+   blocks spatially and cannot remove one is a door-shaped hole, and Blocks
+   mode's row menu is the nearest thing to a precedent.
+4. **`BlockTOCView`'s other row acts stay undeclared** — move to top/bottom,
+   move to ordinal, move out to a pool. The round's own scope note excludes
+   placement moves as *"ordinary reversible editing, not past-creating"*, and
+   the view's new declaration comment says so; it is now a recorded gap rather
+   than an invisible one.
+5. **The pane and the tray are hand-check items for the visual loop**, and
+   after `RecoveryFaceCaptureTests`' retirement nothing in the suite renders
+   either offscreen. `ImageRenderer` cannot draw a `List`; a capture harness
+   for these two would need a real window and a screenshot, which is the
+   walk's road, not a test's.
+6. **No behavioural-revert residue** — `grep -rn "REVERT"` over
+   `App/Variorum/Variorum/`, `App/Variorum/Shared/`,
+   `App/Variorum/VariorumMobile/` and `Sources/VariorumCore/` returns only the
+   two pre-existing doc comments (`NoteWindowView`, `QuickNoteView`).
