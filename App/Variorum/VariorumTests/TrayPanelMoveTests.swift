@@ -40,8 +40,15 @@ struct TrayPanelMoveTests {
     /// *"the note ▾ menu item and ⌫ badge choreography follow the move"*.
     @Test func theTrayIsDeclaredWithSurfaceDoorsOnlyAndTheBarsLostTheirItem() {
         let act = CapabilityRegistry.capability(.showNoteTray)
-        #expect(act.doors == [.surface],
-                "the `note ▾` item is gone; every remaining door is a surface")
+        // **A JUSTIFIED EDIT** (the architect's adjudication 1, batch 4): ⌘K
+        // joins the surfaces. The claim this pin was written for is the one
+        // it still makes — the `note ▾` item is GONE and neither bar carries
+        // it (asserted below) — and the palette row exists for the ONE place
+        // batch 3 recorded as the move's cost: a book spread's inline note,
+        // which mounts an editor with no masthead and no context bar.
+        #expect(act.doors == [.surface, .palette],
+                "the `note ▾` item is gone; the icon is the named door, ⌘K the fallback")
+        #expect(ShellActions.paletteActs.contains(.showNoteTray))
         #expect(act.verb == TrayPath.menuLabel)
         #expect(act.takesAccess == .native, "R118: not a Write privilege")
         // The three renderers, each naming it for itself (P-1's walk unions

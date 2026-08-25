@@ -108,13 +108,30 @@ struct PostDetailView: View {
     /// marks a row (`TrayRequest.revealBlockID`), and a panel identity that
     /// forgot it would land the door somewhere true and say nothing about
     /// which row it meant.
+    /// **…and — the post-13l polish round, ledger row 17 — THE BLOCK HISTORY
+    /// PANE.** Her second-sitting ruling put its door in the bottom chrome
+    /// beside Commit; what it opens is the fourth occupant of this column,
+    /// because a block's whole time is exactly the kind of thing her C1 note
+    /// said the side panel exists for — room to read a list at a reasonable
+    /// size without crowding the page.
+    ///
+    /// The request rides the case (like the tray's reveal) because the pane is
+    /// scoped to the block she is standing in and sections every take with the
+    /// one she is IN expanded — a panel identity that forgot either fact would
+    /// have to guess.
     enum InspectorPanel: Hashable {
         case references
         case scraps
         case tray(revealBlockID: String?)
+        case blockHistory(BlockHistoryRequest)
 
         var isTray: Bool {
             if case .tray = self { return true }
+            return false
+        }
+
+        var isBlockHistory: Bool {
+            if case .blockHistory = self { return true }
             return false
         }
     }
@@ -230,6 +247,23 @@ struct PostDetailView: View {
             case .scraps:
                 ScrapsPanel(session: session)
                     .inspectorColumnWidth(min: 220, ideal: 300)
+            case .blockHistory(let request):
+                // Row 17's pane, in the room her C1 ruling opened. It gets
+                // the tray's own width: both are lists of things with dates
+                // and verbs beside them, and the walk's P-1 squeeze was
+                // exactly what happens when such a list is given less.
+                BlockHistoryPane(
+                    session: session, request: request,
+                    onClose: { inspectorPanel = nil },
+                    // The came-from region's second door swaps the COLUMN's
+                    // occupant rather than stacking a sheet over a sheet —
+                    // which is how the peek's nested tray dissolves (the
+                    // architect's adjudication 3) instead of moving house.
+                    onOpenTray: { blockID in
+                        inspectorPanel = .tray(revealBlockID: blockID)
+                    })
+                    .id("history-\(request.id)")
+                    .inspectorColumnWidth(min: 280, ideal: 420)
             case .tray(let revealBlockID):
                 // Her C1 ruling's whole point is the ROOM: the tray was a
                 // sheet whose rows squeezed their previews to ten characters
@@ -267,6 +301,11 @@ struct PostDetailView: View {
                 // mode router uses, never a broadcast (P-4).
                 showTray: { request in
                     panel.wrappedValue = .tray(revealBlockID: request.revealBlockID)
+                },
+                // Ledger row 17: the same seam for the History pane — the
+                // bars' door and ⌘K reach THIS inspector by composition.
+                showBlockHistory: { request in
+                    panel.wrappedValue = .blockHistory(request)
                 })
         }
         .onDisappear {

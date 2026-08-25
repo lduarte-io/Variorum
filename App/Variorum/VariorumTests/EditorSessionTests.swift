@@ -569,23 +569,36 @@ struct ReviewRoundFixTests {
         }
     }
 
-    // NIT 12: restore targets the variant whose history is open, even if
-    // the caret moved after loading it.
-    @Test func restoreTargetsTheLoadedHistoryNotTheCaret() async throws {
+    /// **NIT 12, GRADUATED to the Block History pane** (the post-13l polish
+    /// round, ledger row 17). The claim is unchanged and is now STRUCTURAL:
+    /// a restore targets the take whose savepoint it is, never the caret's
+    /// current position.
+    ///
+    /// It used to be a rule the model had to keep — `commitListVariantID`
+    /// remembered which take the OPEN strip belonged to, because the strip
+    /// showed one take at a time and the caret could wander out from under
+    /// it. The pane sections EVERY take and each row hands its own take to
+    /// the act, so the caret is not part of the address at all. The pin
+    /// drives the same wander and asserts the same two facts.
+    @Test func restoreTargetsTheTakeTheRowBelongsToNotTheCaret() async throws {
         try await withEditor(seedBlocks: ["committed once", "elsewhere"]) { h in
             let slots = try h.storeSlots()
             _ = try h.session.operations.commit(slots[0].variantID!)
             try h.session.operations.autosave(
                 slots[0].variantID!, text: "changed since", charDelta: 5)
             try h.reload()
-            h.textView.setSelectedRange(NSRange(location: 0, length: 0))
-            h.model.updateCaretContext()
-            await h.model.loadCommitHistory()
-            let item = try #require(h.model.commitList?.first)
-            // The caret wanders to the OTHER block before confirming.
+            let history = BlockHistoryModel(
+                session: h.session, postID: h.postID, blockID: slots[0].blockID,
+                focusedVariantID: slots[0].variantID)
+            let now = h.session.now
+            history.adopt(try await h.database.read {
+                try Queries.blockHistory($0, blockID: slots[0].blockID, now: now)
+            })
+            let commit = try #require(history.history.savepoints[slots[0].variantID!]?.first)
+            // The caret wanders to the OTHER block before the restore fires.
             h.textView.setSelectedRange(NSRange(location: 15, length: 0))
             h.model.updateCaretContext()
-            h.model.restore(item)
+            await history.restore(commit, of: slots[0].variantID!)
             await h.settle()
             for _ in 0..<2000 {
                 if (try? h.storeSlots())?[0].text == "committed once" { break }
@@ -595,6 +608,7 @@ struct ReviewRoundFixTests {
             let restored = try h.storeSlots()
             #expect(restored[0].text == "committed once")
             #expect(restored[1].text == "elsewhere")               // untouched
+            #expect(history.status?.isRefusal == false)
         }
     }
 }
@@ -638,6 +652,11 @@ struct CommitFlowTests {
         #expect(CommitRules.predatesSplit(commitDate: later, splitDates: [split, Date(timeIntervalSince1970: 400)]))
     }
 
+    /// **GRADUATED to the Block History pane** with the door it guards (the
+    /// post-13l polish round, ledger row 17): the pre-split warning is the
+    /// pane's now, because the strip that carried it is absorbed. The claim
+    /// — AppSpec §9's documented behaviour, asked before it is honoured — is
+    /// word for word what it was.
     @Test func restoreOfAPreSplitCommitAsksFirst() async throws {
         try await withEditor(seedBlocks: ["First half here. Second half there."]) { h in
             let variantID = try h.storeSlots()[0].variantID!
@@ -645,13 +664,18 @@ struct CommitFlowTests {
             _ = try h.session.operations.divide(
                 try h.storeSlots()[0].blockID, cut: "First half here.".utf16.count)
             try h.reload()
-            h.textView.setSelectedRange(NSRange(location: 0, length: 0))
-            h.model.updateCaretContext()
-            await h.model.loadCommitHistory()
-            let item = try #require(h.model.commitList?.first)
-            #expect(item.predatesSplit)
-            h.model.restore(item)                                   // not confirmed
-            #expect(h.model.pendingRestore == item)                 // warning pending
+            let blockID = try h.storeSlots()[0].blockID
+            let history = BlockHistoryModel(
+                session: h.session, postID: h.postID, blockID: blockID,
+                focusedVariantID: variantID)
+            let now = h.session.now
+            history.adopt(try await h.database.read {
+                try Queries.blockHistory($0, blockID: blockID, now: now)
+            })
+            let commit = try #require(history.history.savepoints[variantID]?.first)
+            #expect(history.predatesSplit(commit))
+            await history.restore(commit, of: variantID)            // not confirmed
+            #expect(history.pendingRestore?.commit == commit)        // warning pending
             await h.settle()
             // Nothing restored yet: the buffer still holds the post-divide half.
             let postDivide = try h.storeSlots()

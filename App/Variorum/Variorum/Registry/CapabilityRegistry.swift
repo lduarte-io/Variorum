@@ -612,7 +612,14 @@ nonisolated enum CapabilityRegistry {
         // released the original.
         Capability(
             id: .showOriginBlock, verb: OriginPeekCopy.genericVerb, scope: .block,
-            doors: [.contextMenu, .palette, .surface],
+            // **The `.surface` door is GONE** (the post-13l polish round,
+            // ledger row 17): it was the quiet lineage ROW inside the History
+            // face, and the History face is now the Block History PANE, whose
+            // came-from region is where this act LANDS rather than a door onto
+            // it. Two doors remain, both summoned, exactly as her round-4
+            // criterion asked ("not part of the daily chrome, just accessible
+            // if needed").
+            doors: [.contextMenu, .palette],
             shortcutLabel: nil, takesAccess: .native,
             // 13j J6: the global "Unplaced blocks" listing this note used to
             // name is GONE (her round-2 ruling). Released originals live in
@@ -652,10 +659,42 @@ nonisolated enum CapabilityRegistry {
         // one-grammar rule matters most.
         Capability(
             id: .showNoteTray, verb: TrayPath.menuLabel, scope: .post,
-            doors: [.surface],
+            // **The `.palette` door** (the post-13l polish round, the
+            // architect's adjudication 1 of batch 3's flagged item): a book
+            // spread's inline note mounts an editor with NO post detail
+            // around it, so it has no masthead to carry the icon and no
+            // context bar to carry the badge — the tray was unreachable
+            // there. ⌘K is the standing universal fallback (R15) and costs
+            // zero new surface; the icon stays the NAMED door.
+            doors: [.surface, .palette],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Open a note and its tray lists what it has deleted.",
             availability: noteScoped),
+
+        // **THE BLOCK HISTORY PANE** (the post-13l polish round, ledger row
+        // 17 — G2). Her second-sitting ruling, verbatim: *"I know I just ruled
+        // that history should go in the block menu, but I think I'm changing
+        // my mind and it should be in the bottom chrome — my reasoning is that
+        // history is quite similar to commit, it's the natural pair to
+        // commit."*
+        //
+        // So the door is a `.bottomBar` one, beside `.commitTake`, and the
+        // pairing is the point: ⌘S writes a moment, this shows the moments.
+        // The ⌘K row rides beside it (a palette is summoned, not chrome).
+        //
+        // **It is BLOCK-scoped, and that is the defect it fixes.** Her F2
+        // report: *"it's unclear that history is under Note, that makes it
+        // seem like the Note's history."* The two faces this replaces were
+        // reached through a `note ▾` menu and showed one take's savepoints;
+        // this one is named for what it is and shows the whole block's time.
+        Capability(
+            id: .showBlockHistory, verb: BlockHistoryPath.name, scope: .block,
+            doors: [.bottomBar, .palette],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Put the caret in a block and its History shows "
+                + "that block's saved moments, its archived and deleted takes, "
+                + "and where it came from.",
+            availability: takeFamily),
 
         // MARK: The deletion acts, and THE RULE THEY ALL INHERIT
         //
@@ -1372,6 +1411,8 @@ nonisolated enum CapabilityRegistry {
         case .takeToBlockBelow: id = .takeToBlockBelow
         case .takesToBlocks: id = .takesToBlocks
         case .showOriginBlock: id = .showOriginBlock
+        case .showBlockHistory: id = .showBlockHistory
+        case .showNoteTray: id = .showNoteTray
         case .find(let action):
             switch action {
             case .show: id = .findInPost

@@ -104,13 +104,21 @@ final class EditorViewModel {
     private(set) var badges: [BlockBadge] = []
     /// The block whose fan panel is open (nil = closed).
     var fanPanel: FanPanelState?
-    /// Commit history for the caret variant (nil = panel closed).
-    var commitList: [CommitListItem]?
-    /// 13j batch 3 — the caret BLOCK's past (its lineage row and its deleted
-    /// takes), alive exactly while the history face is open. nil = closed.
-    var blockPast: BlockPastModel?
-    /// A restore that needs the pre-split warning confirmed first.
-    var pendingRestore: CommitListItem?
+    /// **THE BLOCK HISTORY PANE'S PENDING TARGET** (the post-13l polish
+    /// round, ledger row 17 — G2). Its NAMED home is the post detail's
+    /// inspector, reached through the router; this is the FALLBACK sheet, and
+    /// it is not vestigial for `trayRequest`'s exact reason: this editor is
+    /// also composed where no post detail exists (the scraps hosts, the book
+    /// spread's inline form), and a door that cannot act in its context is a
+    /// door that should not have been rendered (P-2).
+    ///
+    /// *(What this replaces: `commitList` + `pendingRestore` + `blockPast` —
+    /// the caret take's savepoint strip, its pre-split confirm, and the
+    /// block's past region, three pieces of state for two faces that showed
+    /// parts of one block's time. The pane owns all of it now, in ONE model
+    /// with ONE observation, which is what makes "the pane is the one home"
+    /// a fact about the code rather than a claim in a comment.)*
+    var blockHistoryRequest: BlockHistoryRequest?
     /// Per-command gesture enablement (Phase 9) — recomputed on every caret/
     /// selection change from THE planner, so the menu bar, context menu, and
     /// shortcuts all read one brain's verdicts.
@@ -207,12 +215,6 @@ final class EditorViewModel {
         var id: String { blockID }
     }
 
-    struct CommitListItem: Equatable, Identifiable {
-        let commit: CommitPoint
-        let predatesSplit: Bool
-        var id: String { commit.id }
-    }
-
     // MARK: - Editor internals (never observed)
 
     @ObservationIgnored private(set) var index = BlockRangeIndex(entries: [], tailLength: nil)
@@ -248,9 +250,6 @@ final class EditorViewModel {
     @ObservationIgnored private var pendingProjection: [Queries.RenderedBlock]?
     @ObservationIgnored private var forceFullRender = false
     @ObservationIgnored private var loaded = false
-    /// The variant a loaded commit history belongs to — restore targets
-    /// THIS, never the caret's current position (review round 1, NIT 12).
-    @ObservationIgnored private var commitListVariantID: String?
     /// The store→surface rewrite door (13b Stage 3, N10): the structural
     /// gesture-execution band + the projection executors live in
     /// `EditorSurfaceController` — a sibling under the Editor feature,
@@ -1951,48 +1950,43 @@ final class EditorViewModel {
             items.append(.init(
                 title: OriginPeekCopy.doorVerb(op: origin.originOp), enabled: true
             ) { [weak self] in
-                self?.revealOriginBlock(origin)
+                self?.revealCaretBlockOrigin()
             })
         }
         return items
     }
 
-    /// Fire-and-DO (P-2): show the released original.
+    /// Fire-and-DO (P-2): show the released original — the ⌘K row's body and
+    /// the context row's alike.
     ///
     /// **The door's history, because the record is the argument.** 13f W10b
     /// broadcast a signal the shell turned into a navigation to Library →
     /// Archived & Deleted → Unplaced blocks; her round-2 ruling removed that
     /// room ("what is that cursed table of lost hopes and dreams?"), so batch
-    /// 2 repointed the door at the note's OWN tray — released originals live
-    /// there because the release stamps `last_container_id` with the note
-    /// they left — and recorded that J3 owned the final form.
+    /// 2 repointed the door at the note's OWN tray. 13j J3 gave it a read-only
+    /// PEEK of the original itself, with Put back and Open this note's tray.
     ///
-    /// **13j J3 — THE FINAL FORM, and the batch-2 bridge reconciled.** The
-    /// bridge above kept the door honest while the room was gone; her rounds
-    /// 4 + 5 ruled what it should actually open, and this is that: a
-    /// read-only PEEK of the original itself, its takes visible, with exactly
-    /// two actions — **Put back in note** and **Open this note's tray**. The
-    /// tray landing SURVIVES as the peek's second action, which is what keeps
-    /// `TrayRequest.revealBlockID` earning its place instead of becoming a
-    /// seam nothing raises.
-    func revealOriginBlock(_ origin: Queries.UnplacedOrigin) {
-        originPeek = OriginPeekRequest(postID: postID, origin: origin)
-    }
-
-    /// The ⌘K row's body: the caret block's original, or the honest note
-    /// where it has none. A palette row carries no target, so it speaks
-    /// rather than sitting grey — the standing fire-and-speak posture for
-    /// every context-blind door.
+    /// **The post-13l polish round is its third and last landing** (ledger row
+    /// 17, and it is the honest end of the sequence): the peek is ABSORBED
+    /// into the Block History pane's came-from region, which answers the same
+    /// question with two things the peek could not manage —
+    ///
+    /// · **it shows ALL of them.** The peek took `.first` of an array whose
+    ///   own doc says a merge releases both sources, so the 13l walk found a
+    ///   door promising "the original" and showing one of two (P-3); and
+    /// · **its "Open this note's tray" is no longer a sheet over a sheet.**
+    ///   The pane is a side panel, so the tray takes the SAME column (the
+    ///   architect's adjudication 3 — dissolved, not moved).
+    ///
+    /// The act keeps its name, its verb and its two summoned doors; what
+    /// changed is where it lands.
     func revealCaretBlockOrigin() {
-        guard let origin = caretBlockOrigin else {
+        guard caretBlockOrigin != nil else {
             showStatus(OriginPeekCopy.noOriginHere)
             return
         }
-        revealOriginBlock(origin)
+        requestBlockHistory()
     }
-
-    /// 13j J3: the origin peek's pending target (`EditorView` presents it).
-    var originPeek: OriginPeekRequest?
 
     /// 13j J2: the tray sheet's pending target (`EditorView` presents it).
     var trayRequest: TrayRequest?
@@ -2273,75 +2267,29 @@ final class EditorViewModel {
                 try ops.commit(variantID, kind: .manual)
             }
             statusMessage = "Committed."
-            if commitList != nil { await loadCommitHistory() }
         } catch {
             showOperationError(error)
         }
     }
 
-    func toggleCommitHistory() {
-        if commitList != nil {
-            commitList = nil
-            commitListVariantID = nil
-            // 13j batch 3: the past's observation lives exactly as long as
-            // the face does (the view's `.task` tears it down; dropping the
-            // model here is the same fact stated from the model's side).
-            blockPast = nil
-        } else {
-            Task { await loadCommitHistory() }
-        }
-    }
-
-    func loadCommitHistory() async {
-        guard let variantID = caretVariantID, let blockID = caretBlockID else {
-            statusMessage = "Place the caret in a block to see its history."
+    /// **THE BLOCK HISTORY DOOR** (the post-13l polish round, ledger row 17).
+    ///
+    /// It asks the router first — one pane, wherever the door is pressed —
+    /// and falls back to its own sheet where no post detail is mounted, which
+    /// is `requestNoteTray`'s shape and its reason.
+    ///
+    /// The request carries the FOCUSED take as well as the block: her ruling
+    /// sections every take's savepoint run with *"the focused take's
+    /// expanded"*, and the caret is the only thing that knows which that is.
+    func requestBlockHistory() {
+        guard let blockID = caretBlockID else {
+            showStatus(CapabilityRegistry.capability(.showBlockHistory).unavailableNote)
             return
         }
-        do {
-            let (commits, splits) = try await session.database.read { db in
-                (try Queries.commitHistory(db, variantID: variantID),
-                 try Queries.splitDates(db, blockID: blockID))
-            }
-            commitList = commits.map {
-                CommitListItem(
-                    commit: $0,
-                    predatesSplit: CommitRules.predatesSplit(commitDate: $0.createdAt, splitDates: splits))
-            }
-            commitListVariantID = variantID
-            // 13j batch 3: the block's past, beside its savepoints — rebuilt
-            // per BLOCK, so re-opening the face on a different block never
-            // shows the previous one's deleted takes.
-            if blockPast?.blockID != blockID {
-                blockPast = BlockPastModel(session: session, blockID: blockID)
-            }
-        } catch {
-            statusMessage = "Could not load history: \(error)"
-        }
-    }
-
-    /// Restore honors the documented pre-split warning (AppSpec §9,
-    /// KnownIssues entry): a commit older than the newest divide/extract on
-    /// this block resurrects pre-split text — confirm first. The target is
-    /// the variant whose history is OPEN, not the caret's current position
-    /// (the caret may have moved since — review round 1, NIT 12).
-    func restore(_ item: CommitListItem, confirmed: Bool = false) {
-        if item.predatesSplit && !confirmed {
-            pendingRestore = item
-            return
-        }
-        pendingRestore = nil
-        guard let variantID = commitListVariantID else { return }
-        Task {
-            await autosave.flushNow()
-            do {
-                try await session.runner.run { ops in
-                    try ops.restoreCommit(variantID, commitID: item.commit.id)
-                }
-                statusMessage = "Restored commit."
-            } catch {
-                showOperationError(error)
-            }
-        }
+        let request = BlockHistoryRequest(
+            postID: postID, blockID: blockID, focusedVariantID: caretVariantID)
+        if session.commandRouter.requestBlockHistory(request) { return }
+        blockHistoryRequest = request
     }
 
     // MARK: - Fan (Step 6)

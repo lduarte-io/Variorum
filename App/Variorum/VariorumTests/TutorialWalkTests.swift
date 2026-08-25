@@ -2140,7 +2140,11 @@ struct TutorialDeletionActsTests {
 
             let trash = try #require(prose["the tray & the Trash"])
             #expect(trash.contains(TrayPath.menuLabel))
-            #expect(trash.contains(TrayPath.originalsSection))
+            // The post-13l polish round (ledger row 17): the lesson's path
+            // constant now names the Block History pane's came-from region,
+            // because that is where an unclocked original lives after her G5
+            // ruling. The lesson quotes the CONSTANT, so it followed for free.
+            #expect(trash.contains(BlockHistoryPath.cameFromSection))
             #expect(trash.contains(TrayPath.putBackVerb), "the one verb, both surfaces")
             #expect(trash.contains(RecoveryPath.menuLabel), "how the Library door reads")
             #expect(trash.contains(RecoveryPath.trashSection))
@@ -2152,8 +2156,10 @@ struct TutorialDeletionActsTests {
             #expect(past.contains(BlockPastCopy.deletedTakesHeader))
             #expect(past.contains(OriginPeekCopy.doorVerb(op: "divide")),
                     "the context row's ruled wording")
-            #expect(past.contains(OriginPeekCopy.putBackVerb))
-            #expect(past.contains(OriginPeekCopy.openTrayVerb))
+            // The pane's own verb, not the retired peek's (the post-13l
+            // polish round, ledger row 17): the came-from row's one button.
+            #expect(past.contains(BlockHistoryPath.bringBackVerb))
+            #expect(past.contains(BlockHistoryPath.cameFromSection))
             #expect(past.contains("the original is preserved"),
                     "the History face's lineage row, in the lesson's mouth")
             #expect(past.contains(TrayPath.goesWithItsFamily),
@@ -2608,15 +2614,16 @@ struct TutorialDeletionActsTests {
             await takes.deleteTake(spare.id)
 
             let past = try await db.read { [now = session.now] db in
-                try Queries.blockPast(db, blockID: host.blockID, now: now)
+                try Queries.blockHistory(db, blockID: host.blockID, now: now)
             }
             #expect(past.deletedTakes.map(\.id) == [spare.id],
                     "listed under \(BlockPastCopy.deletedTakesHeader)")
 
-            let model = BlockPastModel(session: session, blockID: host.blockID)
+            let model = BlockHistoryModel(
+                session: session, postID: lesson, blockID: host.blockID)
             model.adopt(past)
             await model.putBackTake(spare.id)
-            #expect(model.statusMessage == BlockPastCopy.takeRestored)
+            #expect(model.status == .receipt(BlockPastCopy.takeRestored))
 
             let back = try await projection(db, lesson)
             let restored = try #require(back.fans[host.blockID]?.first { $0.id == spare.id })
@@ -2676,8 +2683,11 @@ struct TutorialDeletionActsTests {
                     try Queries.trayBlocks(db, postID: lesson, now: now)
                 },
                 archived: [], originals: originals, strandedFates: clocks))
-            #expect(!tray.originals.contains { $0.blockID == dividing.blockID },
-                    "it has left the section that promised permanence")
+            // The post-13l polish round (ledger row 20's staging, finished at
+            // batch 4): the panel no longer LISTS unclocked originals at all
+            // — they live in lineage now — so what this pin holds is the half
+            // that still matters and always did: the row is visibly ON THE
+            // CLOCK, in the section where she can watch it go.
             #expect(tray.stranded.contains { $0.blockID == dividing.blockID },
                     "…and it is visibly in the clock-bearing one, where she can see it go")
         }

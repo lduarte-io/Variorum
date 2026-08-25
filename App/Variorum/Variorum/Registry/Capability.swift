@@ -127,7 +127,23 @@ nonisolated enum RoutedCommand: Equatable, Sendable {
     /// Routed because the ⌘K row has no target in hand — the surface names
     /// the block it is standing in, exactly as `.deleteBlock` does, and
     /// speaks the honest note where the block has no original (P-2).
+    ///
+    /// **The post-13l polish round (ledger row 17) changed WHERE IT LANDS,
+    /// not what it means:** the act opens the block's History pane at its
+    /// came-from region — which shows ALL of a merge's originals rather than
+    /// the first (the 13l walk's P-3) — instead of a peek sheet of its own.
     case showOriginBlock
+    /// The post-13l polish round (ledger row 17, G2): the caret/focused
+    /// block's **History pane**. Routed for `.showOriginBlock`'s reason
+    /// exactly — the bar's door and the ⌘K row both have to ask whichever
+    /// surface is mounted which block she is standing in.
+    case showBlockHistory
+    /// …and the note's TRAY, routed (adjudication 1). Its NAMED door is the
+    /// masthead icon, which needs no routing; this is the ⌘K row, and it is
+    /// what gives a book spread's inline note a way in at all — that pane
+    /// mounts an editor with no post detail around it, so it has no masthead
+    /// to carry the icon (batch 3's one recorded discoverability cost).
+    case showNoteTray
 }
 
 // MARK: - Choreography intents (the ONE mode-switch choreography's payloads)
@@ -390,6 +406,11 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // 13j J2: the per-note TRAY — what this note has deleted, and what a
     // divide/merge preserved whole (post scope; two doors, one act)
     case showNoteTray
+    // The post-13l polish round (ledger row 17, G2) — **THE BLOCK HISTORY
+    // PANE**, her second-sitting ruling: the door sits in the bottom chrome
+    // beside Commit, because *"history is quite similar to commit, it's the
+    // natural pair to commit"*.
+    case showBlockHistory
     // 13l Act 2 (ledger item 3) — DELETE NOTE, at last. Her report at 13j's
     // close was that she could not find a way to delete the note she was
     // standing in; the Library and the Pool had a door and neither asked

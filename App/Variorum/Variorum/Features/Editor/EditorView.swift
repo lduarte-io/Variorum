@@ -141,11 +141,6 @@ struct EditorView: View {
                 revealBlockID: request.revealBlockID,
                 home: model.header?.kind ?? .post)
         }
-        .sheet(item: $model.originPeek) { request in
-            // 13j J3: the released original itself, read-only, with Put back
-            // and the tray as its two actions.
-            OriginPeekPanel(session: session, request: request)
-        }
         .sheet(item: $model.commentsPanel) { panel in
             // Phase 13 C1 (R7): the block's comments — margin/inline faces
             // all open here; deleted comments visible + resurrectable.
@@ -179,21 +174,6 @@ struct EditorView: View {
             Text("The selection crosses \(state.blockCount) blocks. Variorum will "
                 + "cut the first and last blocks at the snapped edges and merge "
                 + "everything inside into ONE block — undo (⌥⌘Z) restores it all.")
-        }
-        .alert(
-            "This commit predates a split of this block",
-            isPresented: Binding(
-                get: { model.pendingRestore != nil },
-                set: { if !$0 { model.pendingRestore = nil } }),
-            presenting: model.pendingRestore
-        ) { item in
-            Button("Restore Anyway", role: .destructive) {
-                model.restore(item, confirmed: true)
-            }
-            Button("Cancel", role: .cancel) { model.pendingRestore = nil }
-        } message: { _ in
-            Text("Restoring will resurrect the full pre-split text into this "
-                + "block's buffer — the split-off half still exists next door.")
         }
     }
 }
@@ -335,8 +315,20 @@ extension EditorView {
             return true
         case .showOriginBlock:
             // 13j J3: the ⌘K row — the caret block's released original, or
-            // the honest note where it has none.
+            // the honest note where it has none. Since the post-13l polish
+            // round it lands in the Block History pane's came-from region,
+            // which shows ALL of them (the 13l walk's P-3).
             model.revealCaretBlockOrigin()
+            return true
+        case .showBlockHistory:
+            // The post-13l polish round (ledger row 17): the block she is
+            // standing in, and its whole time.
+            model.requestBlockHistory()
+            return true
+        case .showNoteTray:
+            // The architect's adjudication 1: the ⌘K row, which is what gives
+            // a book spread's inline note a way into its tray at all.
+            model.requestNoteTray()
             return true
         case .find(let action):
             // QoL batch 3 (L6): the find bar lives in THIS editor's own scroll

@@ -194,10 +194,13 @@ struct TakesCellView: View {
         if let origin = model.projection.unplacedOrigins[slot.blockID]?.first {
             specs.append(.init(
                 // 13j J3: her ruled wording — the row names the act that
-                // released the original ("See original from divide…").
+                // released the original ("See original from divide…"). The
+                // row still renders from the FIRST origin because that is
+                // what names the act; where it LANDS (the post-13l polish
+                // round, ledger row 17) shows every one of them.
                 title: OriginPeekCopy.doorVerb(op: origin.originOp)
             ) {
-                model.revealOriginBlock(origin)
+                model.revealOriginBlock(ofBlock: slot.blockID)
             })
         }
         if let fan = model.projection.fans[slot.blockID], fan.count > 1 {

@@ -427,6 +427,10 @@ struct ShellActions {
         // summoned, not chrome, so it sits inside her not-daily-chrome
         // criterion (the architect's call at the sitting, hers to strike).
         .showOriginBlock,
+        // The post-13l polish round: the Block History pane (ledger row 17)
+        // and — the architect's adjudication 1 — the note's TRAY, whose ⌘K
+        // row is what gives a book spread's inline note a way in at all.
+        .showBlockHistory, .showNoteTray,
         // 13j J4/J4b (sitting round 4): the two ceremony doors, typeable —
         // her binding is "the Block menu, the block context menu, AND the
         // ⌘K palette; never only a buried item".
@@ -471,6 +475,8 @@ struct ShellActions {
         case .toggleStar: return { toggleStarForCurrent() }
         case .quickNote: return { shell.quickNoteRequested = true }
         case .showOriginBlock: return { dispatch(.showOriginBlock) }
+        case .showBlockHistory: return { dispatch(.showBlockHistory) }
+        case .showNoteTray: return { dispatch(.showNoteTray) }
         case .restoreTutorial: return { restoreTutorial() }
         default:
             // NIT-1 (Stage 1 ladder): a future `paletteActs` entry without

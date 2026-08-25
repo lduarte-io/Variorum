@@ -295,7 +295,13 @@ struct CapabilityRegistryTests {
             // each of the two history hosts (the `MarkdownActs` precedent),
             // so both faces are covered by construction. The union names
             // every renderer, so a new builder is a new line here.
-            .union(BlockPastSection.surfaceCapabilities)
+            // The post-13l polish round, batch 4 (the same JUSTIFIED-EDIT
+            // class): `BlockPastSection` is GONE — its two hosts were the two
+            // history faces her G2 ruling absorbed — and the acts it rendered
+            // are the Block History pane's rows now. `.showOriginBlock` is no
+            // longer among them: the pane is where that act LANDS, not a door
+            // onto it, so it left the `.surface` door set entirely.
+            .union(BlockHistoryPane.surfaceCapabilities)
             // 13j batch 6b (A JUSTIFIED EDIT, the E2/E8/batch-3 class): the
             // TRASH surface renders the two purge doors — Delete Now per
             // row and Empty Trash — and it is their ONLY legal renderer,

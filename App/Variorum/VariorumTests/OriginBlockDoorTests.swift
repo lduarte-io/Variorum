@@ -62,9 +62,17 @@ struct OriginBlockDoorTests {
         // its section header read the same constants the sentence does, so
         // the copy cannot point at a label that isn't there. (Before J6 this
         // pointed at the Library's removed "Unplaced blocks" section.)
-        #expect(TrayPath.originalsPath.contains(TrayPath.menuLabel))
-        #expect(TrayPath.originalsPath.contains(TrayPath.originalsSection))
-        #expect(TrayPath.originalsPathWithDoor.contains(TrayPath.doorPhrase),
+        // **A JUSTIFIED EDIT** (the post-13l polish round, ledger row 17):
+        // the DESTINATION moved — her G5 ruling put unclocked originals in
+        // lineage, not the tray — and the eight copy sites followed the ONE
+        // constant for free, which is the whole argument for the constant,
+        // made good a second time. The CLAIM is unchanged: the sentence
+        // names a place that really has that name and that door.
+        #expect(TrayPath.originalsPath.contains(BlockHistoryPath.name))
+        #expect(TrayPath.originalsPath.contains(BlockHistoryPath.cameFromSection))
+        #expect(!TrayPath.originalsPath.contains(TrayPath.menuLabel),
+                "the tray no longer lists them — pointing there would be a lie")
+        #expect(TrayPath.originalsPathWithDoor.contains(BlockHistoryPath.doorPhrase),
                 "the teaching form names the way in, not just the place")
     }
 
@@ -142,7 +150,11 @@ struct OriginBlockDoorTests {
         // in `RecoveryDoorsTests`.
         #expect(door.verb == OriginPeekCopy.genericVerb)
         #expect(door.scope == .block)
-        #expect(door.doors == [.contextMenu, .palette, .surface])
+        // **A JUSTIFIED EDIT** (the post-13l polish round, ledger row 17):
+        // the `.surface` door was the History face's lineage ROW, and the
+        // face is now the pane this act LANDS in. Two summoned doors — which
+        // is what her round-4 criterion asked for in the first place.
+        #expect(door.doors == [.contextMenu, .palette])
         #expect(door.takesAccess == .native, "R118: not a Write privilege")
         // Acts where blocks are edited; honestly grey with no post open.
         #expect(CapabilityRegistry.availability(
@@ -248,20 +260,29 @@ struct OriginBlockDoorTests {
         }
     }
 
-    /// Fire-and-DO (P-2): invoking opens the READ-ONLY PEEK of the original
-    /// — 13j J3's final form, replacing batch 2's tray bridge (which itself
-    /// replaced 13f's navigation to the listing J6 removed). The tray
-    /// SURVIVES as the peek's second action, pinned in `RecoveryDoorsTests`.
-    @Test func theDoorOpensThePeekAtTheOrigin() async throws {
+    /// Fire-and-DO (P-2): invoking opens the block's HISTORY PANE, at its
+    /// came-from region — the door's THIRD and last landing (the post-13l
+    /// polish round, ledger row 17), after 13f's navigation to the listing J6
+    /// removed and 13j J3's own peek.
+    ///
+    /// **A JUSTIFIED EDIT to what the pin drives, and the claim is stronger
+    /// for it:** the peek showed `.first` of an array whose own doc says a
+    /// merge releases both sources, so the pin could only ever assert that
+    /// ONE original was reachable. The pane's region reads the whole array,
+    /// which is the 13l walk's P-3 fixed — and `theCameFromRegionShowsEveryOne`
+    /// in `RecoveryDoorsTests` is where that half is held.
+    @Test func theDoorOpensTheBlocksHistoryAtItsCameFrom() async throws {
         try await withEditor(seedBlocks: ["one"]) { editor in
-            #expect(editor.model.originPeek == nil)
-            editor.model.revealOriginBlock(
-                Queries.UnplacedOrigin(
-                    blockID: "origin-block", originOp: "divide", at: "2026-08-18T10:00:00Z"))
-            let request = try #require(editor.model.originPeek)
+            #expect(editor.model.blockHistoryRequest == nil)
+            let slot = try #require(try editor.storeSlots().first)
+            editor.textView.setSelectedRange(NSRange(location: 0, length: 0))
+            editor.model.updateCaretContext()
+            editor.model.requestBlockHistory()
+            let request = try #require(editor.model.blockHistoryRequest)
             #expect(request.postID == editor.postID, "the note she is standing in")
-            #expect(request.origin.blockID == "origin-block")
-            #expect(request.origin.originOp == "divide")
+            #expect(request.blockID == slot.blockID, "…and the block she is IN")
+            #expect(request.focusedVariantID == slot.variantID,
+                    "the take she is in, so its savepoint run opens expanded")
         }
     }
 
@@ -286,10 +307,12 @@ struct OriginBlockDoorTests {
                     "the board reads the origin off its ordinary projection")
             #expect(origins.first?.originOp == "divide")
 
-            board.model.revealOriginBlock(try #require(origins.first))
-            let request = try #require(board.model.originPeek)
+            board.model.revealOriginBlock(ofBlock: w.first.block.id)
+            let request = try #require(board.model.blockHistoryRequest)
             #expect(request.postID == board.postID)
-            #expect(request.origin.blockID == slot.blockID)
+            // The pane is scoped to the SUCCESSOR — the block she right-clicked
+            // — and its came-from region is what names the original.
+            #expect(request.blockID == w.first.block.id)
         }
     }
 

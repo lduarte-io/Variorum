@@ -18,15 +18,6 @@ struct TakesBottomBar: View {
     let model: TakesViewModel
     @State private var datePickerShown = false
     @State private var pickedDate = Date()
-    @State private var historyShown = false
-    @State private var history: [CommitPoint] = []
-    /// 13j batch 3: the block's PAST beside its savepoints — the lineage row
-    /// (J3, her round-5 amendment) and its deleted takes (the round-5 ruling),
-    /// through the one component Write's history face also composes.
-    @State private var pastModel: BlockPastModel?
-    /// 13j J11: which quiet savepoint runs this sheet has open. View-local,
-    /// like Write's — a fold is not document semantics.
-    @State private var expandedRuns: Set<String> = []
     /// N15's class: the bar's measured width — the one/two-row switch.
     @State private var barWidth: CGFloat = 0
     /// 13l Act 2 (item 3): the note-delete confirm's pending ask — Write's
@@ -49,6 +40,10 @@ struct TakesBottomBar: View {
             // ledger row 9 — her C1 ruling; both bars lose it together, which
             // is R6-2's one-grammar point applied to a REMOVAL.)
             .deleteNote,  // 13l Act 2 (item 3): Write's bar's door, here too
+            // The post-13l polish round (ledger row 17): **History**, beside
+            // commit, on BOTH bars in the same commit — R6-2's one-grammar
+            // rule, which matters most when a door moves.
+            .showBlockHistory,
         ]
         // 13k K7: the formatting toolbar rides BOTH bars — the acts are
         // `takesAccess: .native`, so Write must not be the only surface with
@@ -204,8 +199,20 @@ struct TakesBottomBar: View {
             .padding(.vertical, 6)
             .background(tokens.room)
         }
-        .sheet(isPresented: $historyShown) {
-            historySheet
+        // Ledger row 17: the FALLBACK host, Write's bar's twin — the pane's
+        // named home is the post detail's inspector, and this bar also rides
+        // surfaces that have none.
+        .sheet(item: Binding(
+            get: { model.blockHistoryRequest },
+            set: { model.blockHistoryRequest = $0 })
+        ) { request in
+            BlockHistoryPane(
+                session: model.session, request: request,
+                onOpenTray: { blockID in
+                    model.blockHistoryRequest = nil
+                    model.trayRequest = TrayRequest(
+                        postID: model.postID, revealBlockID: blockID)
+                })
         }
         .sheet(item: Binding(
             get: { model.commentsRequest },
@@ -222,14 +229,6 @@ struct TakesBottomBar: View {
             TrayPanel(
                 session: model.session, postID: request.postID,
                 revealBlockID: request.revealBlockID)
-        }
-        // 13j J3: the released original's peek, hosted beside the tray — one
-        // view, presented wherever a door raises it.
-        .sheet(item: Binding(
-            get: { model.originPeek },
-            set: { model.originPeek = $0 })
-        ) { request in
-            OriginPeekPanel(session: model.session, request: request)
         }
         .sheet(item: Binding(
             get: { model.takeLabelRequest },
@@ -270,6 +269,15 @@ struct TakesBottomBar: View {
         .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
         .disabled(model.projection.sealed)
         .help("An immutable savepoint of the take you're in")
+        // Ledger row 17 — the pair, Write's bar's twin. Never disabled: a
+        // sealed note's history is still readable (the seal freezes writing,
+        // not looking), and with no block in reach the act SPEAKS (P-2).
+        Button(tokens.chromeLabel(BlockHistoryPath.doorLabel)) {
+            model.requestBlockHistory()
+        }
+        .buttonStyle(VoicedButtonStyle(tokens: tokens))
+        .help("Everything this block has been: each take's saved moments, "
+            + "its archived and deleted takes, and the block it came out of")
     }
 
     /// The flat row's note half: `note ▾`, comments, and the newlines chip
@@ -311,7 +319,10 @@ struct TakesBottomBar: View {
     /// group, with the take's own history in the history slot.
     private var noteMenu: some View {
         VoicedMenu(tokens: tokens, label: "note") {
-            Button("History") { Task { await openHistory() } }
+            // (The "History" item LEFT this menu at the post-13l polish round,
+            // ledger row 17 — Write's bar lost it in the same commit. Her F2
+            // report is the reason: a block's history reached through a menu
+            // called `note ▾` reads as the NOTE's.)
             Button(model.projection.sealed ? "Unseal" : "Seal") {
                 Task { await model.toggleSeal() }
             }
@@ -330,7 +341,9 @@ struct TakesBottomBar: View {
         .deleteNoteConfirmDialog($pendingDelete) { confirm in
             NoteDeletion.fire(session: model.session, postIDs: confirm.postIDs)
         }
-        .help("The note itself: this take's savepoints, its seal, its tray, its date")
+        .help("The note itself: its seal and its date (a block's savepoints "
+            + "are the history door beside commit; its tray is the tray icon "
+            + "at the top of the note)")
         .popover(isPresented: $datePickerShown) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Entry date").font(.headline)
@@ -396,106 +409,5 @@ struct TakesBottomBar: View {
         // every slot's full text each time.
         parts.append("\(model.postWordCount.formatted())w note")
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
-    }
-
-    private func openHistory() async {
-        guard let pane = model.focusedPane else {
-            model.speak("Click into a take first — History shows that take's savepoints.")
-            return
-        }
-        let variantID = pane.variantID
-        history = (try? await model.session.database.read { db in
-            try Queries.commitHistory(db, variantID: variantID).reversed()
-        }) ?? []
-        // 13j batch 3: the block's past rides the same summoned face — one
-        // "past" surface per block (her round-5 words).
-        pastModel = BlockPastModel(session: model.session, blockID: pane.blockID)
-        historyShown = true
-    }
-
-    /// True while the block has nothing in its past — the A1 container is
-    /// mounted and zero-size, so the sheet's spacing must not pay for it.
-    private var pastIsEmpty: Bool { pastModel?.isEmpty ?? true }
-
-    /// **R2-N2's absorption, as a value** (13j batch 6): what the past
-    /// section's top padding must be so the sheet's own `spacing: 8` is not
-    /// paid twice for a zero-size view. Pure and static so a pin can hold the
-    /// decision without measuring SwiftUI: the stack puts a gap BEFORE this
-    /// child and another AFTER it, and an empty child means the reader sees
-    /// 16 pt of nothing under the title. Cancelling exactly one gap restores
-    /// the single space the sheet was designed with.
-    static func pastSectionTopPadding(pastEmpty: Bool) -> CGFloat {
-        pastEmpty ? -8 : 0
-    }
-
-    private var historySheet: some View {
-        // 13j batch 6 — LADDER A's R2-N2, absorbed. The past section's
-        // container is deliberately ALWAYS mounted (it carries the starting
-        // `.task`; a `Group` that renders nothing runs no task, which is the
-        // A1 BLOCKER this fixed), so on the common case — a block with no
-        // past — a zero-size view still takes a stack gap and the sheet
-        // showed a doubled 16 pt space under its title. The gap is the
-        // STACK's to decide, so the stack decides it: the section keeps its
-        // life, the spacing stops paying for a view with no height. (Write's
-        // host is spacing-0 and was never affected.)
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("Savepoints — this take").font(.headline)
-                Spacer()
-                Button("Close") { historyShown = false }
-            }
-            if let pastModel {
-                BlockPastSection(model: pastModel, tokens: tokens) { origin in
-                    historyShown = false
-                    model.revealOriginBlock(origin)
-                }
-                .padding(.top, Self.pastSectionTopPadding(pastEmpty: pastIsEmpty))
-            }
-            if history.isEmpty {
-                Text("No savepoints yet — ⌘S commits one.")
-                    .foregroundStyle(tokens.muted)
-            }
-            // 13j J11 — the same quiet-run collapse Write's face renders,
-            // through the same pure grouping and the same collapsed row.
-            // This face lists OLDEST-first (`openHistory` reverses the
-            // query's newest-first order) and the rule does not care: a run
-            // is contiguous read either way.
-            List {
-                ForEach(SavepointRuns.rows(
-                    history, isQuiet: { $0.kind == .auto }, id: { $0.id })
-                ) { row in
-                    let rendered = SavepointHistoryFace.rendered(row, expanded: expandedRuns)
-                    if let count = rendered.runCount {
-                        QuietRunRow(count: count, expanded: rendered.expanded, tokens: tokens) {
-                            expandedRuns = SavepointHistoryFace.toggling(row.id, in: expandedRuns)
-                        }
-                    }
-                    ForEach(rendered.items, id: \.id) { commitRow($0) }
-                }
-            }
-        }
-        .padding(12)
-        .frame(minWidth: 520, minHeight: 280)
-    }
-
-    @ViewBuilder
-    private func commitRow(_ commit: CommitPoint) -> some View {
-        HStack(spacing: 8) {
-            Text(commit.createdAt.formatted(date: .abbreviated, time: .standard))
-                .font(.caption)
-            Text(commit.kind == .auto ? "auto" : "manual")
-                .font(.caption2)
-                .foregroundStyle(commit.kind == .auto ? .secondary : .primary)
-            Spacer()
-            Text(String(commit.text.prefix(60)))
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-            Button("Restore") {
-                Task { await model.restoreCommit(commit) }
-            }
-            .controlSize(.small)
-            .disabled(model.projection.sealed)
-        }
     }
 }

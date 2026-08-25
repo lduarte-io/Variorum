@@ -291,6 +291,15 @@ struct TakesBoardView: View {
             // the honest note where there is none.
             model.revealFocusedBlockOrigin()
             return true
+        case .showBlockHistory:
+            // The post-13l polish round (ledger row 17): the focused block's
+            // whole time — the shared model machinery, same as Write.
+            model.requestBlockHistory()
+            return true
+        case .showNoteTray:
+            // The architect's adjudication 1: the ⌘K row onto the note's tray.
+            model.requestNoteTray()
+            return true
         case .find:
             // QoL batch 3 (L6): v1 finds across the POST's text, which is the
             // full-document editor's surface; a take card is one take. The

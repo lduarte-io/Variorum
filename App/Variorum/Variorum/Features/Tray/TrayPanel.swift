@@ -117,7 +117,10 @@ nonisolated enum TrayPath {
     static let archivedSection = RecoveryCopy.trayArchivedSection
     static let leavingSection = RecoveryCopy.trayLeavingSection
     static let leavingExplainer = RecoveryCopy.trayLeavingExplainer
-    static let originalsSection = "Preserved originals"
+    // (`originalsSection` is RETIRED — the post-13l polish round, batch 4:
+    // her G5 ruling moved unclocked originals to lineage, so the tray has no
+    // such section to name. The path constants below now point at the Block
+    // History pane's came-from region, which is where they went.)
     /// The one verb, both sections.
     ///
     /// **Round 2 batch 4 (mobile): the SEMANTIC strings below now live in
@@ -180,15 +183,20 @@ nonisolated enum TrayPath {
     }
 
     /// **Where a released original waits, in one phrase** — the string every
-    /// ceremony explainer, merge receipt and helper entry uses. It replaces
-    /// `RecoveryPath.unplacedBlocks`, which named the room J6 removed; the
-    /// arrow grammar is that string's own, so the voice does not change with
-    /// the destination. One constant, so eight copy sites cannot drift.
-    static var originalsPath: String { "\(menuLabel) \u{2192} \(originalsSection)" }
+    /// ceremony explainer, merge receipt and helper entry uses. It replaced
+    /// `RecoveryPath.unplacedBlocks`, which named the room J6 removed; ONE
+    /// constant, so eight copy sites cannot drift.
+    ///
+    /// **The destination MOVED at the post-13l polish round** (batch 4, her
+    /// G5 ruling: *"the tray audits what is LEAVING; lineage holds what is
+    /// KEPT"*), and the eight sites followed for free — which is the whole
+    /// argument for the constant, made good a second time. It now names the
+    /// Block History pane's came-from region.
+    static var originalsPath: String { BlockHistoryPath.cameFromPath }
 
     /// The same phrase with the door spelled out, for copy that has to teach
     /// the way in rather than merely name the place.
-    static var originalsPathWithDoor: String { "\(originalsPath) (\(doorPhrase))" }
+    static var originalsPathWithDoor: String { BlockHistoryPath.cameFromPathWithDoor }
 }
 
 /// A surface's pending request to show the tray — the `CommentsRequest`
@@ -225,11 +233,14 @@ final class TrayViewModel {
     /// the deleted ones — with no countdown, which is the difference the
     /// section header now names.
     private(set) var archived: [Queries.TrayItem] = []
-    /// The originals that are TRULY permanent: at least one descendant of
-    /// theirs is still live (her round-8b ruling — the forever-section may
-    /// only hold things that will actually stay).
-    private(set) var originals: [Queries.PreservedOriginal] = []
-    private(set) var originalsTruncated = false
+    // (The **Preserved originals** listing LEFT this model at the post-13l
+    // polish round, batch 4 — her G5 ruling: *"the tray audits what is
+    // LEAVING; lineage holds what is KEPT."* An UNCLOCKED original is not
+    // leaving anything, so its home is the Block History pane's came-from
+    // region, which also shows ALL of a merge's originals rather than the
+    // first. `Snapshot.originals` stays, because `stranded` below is derived
+    // from it: an original whose family has died IS leaving, and that row is
+    // still this panel's.)
     /// **The note's deleted TAKES** (the post-13l polish round, ledger row 20
     /// — her G5 ruling: *"takes can be shown in that per note trash, albeit
     /// maybe not shown by default, so you can always see a list of what will
@@ -307,8 +318,7 @@ final class TrayViewModel {
     }
 
     var isEmpty: Bool {
-        deleted.isEmpty && archived.isEmpty && originals.isEmpty && stranded.isEmpty
-            && takes.isEmpty
+        deleted.isEmpty && archived.isEmpty && stranded.isEmpty && takes.isEmpty
     }
 
     /// Is anything on this note's clock? — the leaving section's own emptiness,
@@ -400,9 +410,6 @@ final class TrayViewModel {
         // named it) appears in NEITHER (13j ladder B, B5): it rode its
         // visible clock and leaves every surface exactly when the clock
         // said, unreachable-until-purge like its family.
-        let forever = snapshot.originals.filter { strandedFates[$0.blockID] == nil }
-        originalsTruncated = forever.count > Self.window
-        originals = originalsTruncated ? Array(forever.prefix(Self.window)) : forever
         stranded = snapshot.originals.filter {
             if case .counting = strandedFates[$0.blockID] { return true }
             return false
@@ -411,10 +418,14 @@ final class TrayViewModel {
         // later snapshot — including the one a successful Put back produces —
         // leaves it exactly as the first listing found it.
         if !loaded, let revealBlockID {
+            // The snapshot's originals, not a stored listing: the panel no
+            // longer LISTS the unclocked ones (they moved to lineage), but a
+            // reveal that names one is still answerable — and answering "it
+            // isn't here" for a row that exists would be the arrival-time lie
+            // this sentence exists to avoid.
             revealMissing = !deleted.contains { $0.blockID == revealBlockID }
                 && !archived.contains { $0.blockID == revealBlockID }
-                && !originals.contains { $0.blockID == revealBlockID }
-                && !stranded.contains { $0.blockID == revealBlockID }
+                && !snapshot.originals.contains { $0.blockID == revealBlockID }
         }
         loaded = true
     }
@@ -774,36 +785,6 @@ struct TrayPanel: View {
                             .lineLimit(3)
                             .fixedSize(horizontal: false, vertical: true)
                     }
-                }
-                // ── PRESERVED ORIGINALS — **STAGED, BATCH 4 REMOVES IT** ───
-                //
-                // Her G5 ruling put the UNCLOCKED originals' home in LINEAGE
-                // (the Block History pane's came-from section): *"the tray
-                // audits what is LEAVING; lineage holds what is KEPT."* That
-                // pane is batch 4's, and deleting this section a batch early
-                // would leave the population with no door at all for the
-                // length of a batch — a dark window, which is the one thing a
-                // recovery surface may never have. So the section stays,
-                // marked, and batch 4 deletes it in the same commit that
-                // lands came-from.
-                Section(tokens.chromeLabel(TrayPath.originalsSection)) {
-                    if model.originals.isEmpty {
-                        empty("No originals are waiting here — a divide or a merge "
-                            + "that keeps one whole puts it in this section.")
-                    }
-                    ForEach(model.originals, id: \.blockID) { item in
-                        row(
-                            blockID: item.blockID, text: item.text,
-                            stamp: item.releasedAt, when: "released", clock: nil,
-                            forever: true,
-                            help: item.landAfterBlockID == nil
-                                ? "Puts the original back at the end of this note"
-                                : "Puts the original back beside the blocks it became"
-                        ) {
-                            await model.putBackOriginal(item.blockID)
-                        }
-                    }
-                    if model.originalsTruncated { truncation("released") }
                 }
             }
             .listStyle(.plain)

@@ -554,16 +554,16 @@ struct TrashSurfaceTests {
 
     // MARK: - The riders
 
-    /// **R2-N2 absorbed** (LADDER A round 2): the always-mounted past section
-    /// is zero-size on the common case, and the sheet's `spacing: 8` was
-    /// paying for it twice. The decision is a value, so it can be held
-    /// without measuring SwiftUI.
-    @Test func theHistorySheetStopsPayingForAnEmptyPastSection() {
-        #expect(TakesBottomBar.pastSectionTopPadding(pastEmpty: true) == -8,
-                "one stack gap cancelled — the doubled 16 pt space is gone")
-        #expect(TakesBottomBar.pastSectionTopPadding(pastEmpty: false) == 0,
-                "…and a section with content keeps the sheet's own spacing")
-    }
+    // **RETIRED — the surface it defended is gone** (the post-13l polish
+    // round, batch 4, ledger row 17). `theHistorySheetStopsPayingForAnEmptyPastSection`
+    // held 13j ladder A's R2-N2: the Takes bar's history SHEET stacked an
+    // always-mounted past section with `spacing: 8`, so an empty section cost
+    // 16 pt of nothing, and `pastSectionTopPadding` cancelled one gap. Her G2
+    // ruling absorbed that sheet — and Write's inline strip with it — into the
+    // Block History pane, whose regions render only when they have something
+    // to say (a `Section` that is not built takes no gap at all). There is no
+    // value left to hold and no spacing left to defend; retiring it is honest,
+    // and keeping a pin over a deleted constant would not be.
 
     /// **The enum-dump straggler, worded** (the round-1 sanity pass's routed
     /// observation): `noRenderableVariant` is reachable through every

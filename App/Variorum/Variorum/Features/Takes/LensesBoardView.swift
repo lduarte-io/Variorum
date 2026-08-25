@@ -234,6 +234,15 @@ struct LensesBoardView: View {
             // 13j J3: the shared model machinery, same as Takes and Write.
             model.revealFocusedBlockOrigin()
             return true
+        case .showBlockHistory:
+            // The post-13l polish round (ledger row 17): the focused block's
+            // whole time — the shared model machinery, same as Write.
+            model.requestBlockHistory()
+            return true
+        case .showNoteTray:
+            // The architect's adjudication 1: the ⌘K row onto the note's tray.
+            model.requestNoteTray()
+            return true
         case .find:
             // QoL batch 3 (L6): find is the full-document editor's — a lens
             // column is one take's pane, not the post's text. Declining lets

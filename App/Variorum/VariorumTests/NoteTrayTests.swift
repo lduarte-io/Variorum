@@ -118,8 +118,12 @@ struct NoteTrayTests {
         #expect(act.verb == TrayPath.menuLabel)
         #expect(act.scope == .post)
         // The masthead icon, the ⌫ badge and the scraps area's own — all
-        // surfaces; the `note ▾` item moved with the panel.
-        #expect(act.doors == [.surface])
+        // surfaces; the `note ▾` item moved with the panel. **A JUSTIFIED
+        // EDIT** (the post-13l polish round, the architect's adjudication 1):
+        // ⌘K joins them, because a book spread's inline note mounts an editor
+        // with no masthead and no context bar — the one place the tray was
+        // unreachable, named as batch 3's own discoverability cost.
+        #expect(act.doors == [.surface, .palette])
         #expect(act.takesAccess == .native, "R118: not a Write privilege")
         // Acts wherever a note is on screen; honestly grey at a place.
         #expect(CapabilityRegistry.availability(
@@ -165,9 +169,15 @@ struct NoteTrayTests {
 
     // MARK: - The two sections
 
-    /// The panel splits what it is handed exactly as her round-2 ruling
-    /// asked: deleted blocks and preserved originals, visibly apart.
-    @Test func theTraySplitsDeletedFromPreservedOriginals() async throws {
+    /// **GRADUATED, and the graduation IS her G5 ruling** (the post-13l
+    /// polish round, ledger row 20): her round-2 split put deleted blocks and
+    /// preserved originals in two visible sections of this panel; her G5
+    /// ruling moved the UNCLOCKED originals out entirely — *"the tray audits
+    /// what is LEAVING; lineage holds what is KEPT"* — so what this pin
+    /// asserts now is that the tray shows the deletion and does NOT show an
+    /// original that is not going anywhere. The original's own home is the
+    /// Block History pane's came-from, pinned in `RecoveryDoorsTests`.
+    @Test func theTrayListsWhatIsLeavingAndNotAnOriginalThatIsKept() async throws {
         try await withEditor(seedBlocks: ["Alpha one. Beta one."]) { editor in
             let ops = editor.session.operations
             let slot = try #require(try editor.storeSlots().first)
@@ -181,8 +191,16 @@ struct NoteTrayTests {
             let model = TrayViewModel(session: editor.session, postID: editor.postID)
             model.adopt(try Self.snapshot(editor))
             #expect(model.deleted.map(\.blockID) == [extra.block.id])
-            #expect(model.originals.map(\.blockID) == [slot.blockID])
+            #expect(model.stranded.isEmpty,
+                    "the original's family is alive, so it is not on any clock")
             #expect(!model.isEmpty)
+            // The original really EXISTS and is really unplaced — it simply
+            // is not this panel's to list any more.
+            let origins = try await editor.database.read {
+                [blockID = try editor.storeSlots()[0].blockID] db in
+                try Queries.unplacedOrigins(db, ofBlock: blockID)
+            }
+            #expect(origins.map(\.blockID) == [slot.blockID])
         }
     }
 
@@ -403,8 +421,16 @@ struct NoteTrayTests {
             #expect(!line.lowercased().contains("unplaced"),
                     "the room is gone; this sentence must not name it: \(line)")
         }
-        // …and the two that TEACH the road name the tray AND its door.
-        #expect(DivideWCeremony.checklistExplainer.contains(TrayPath.doorPhrase))
+        // …and the two that TEACH the road name the place AND its door.
+        // **A JUSTIFIED EDIT** (the post-13l polish round, ledger row 17):
+        // the DESTINATION moved — her G5 ruling puts an unclocked original in
+        // lineage, not the tray — so the ceremony's explainer names the Block
+        // History pane and its door instead. The claim is what it always was:
+        // a sentence that teaches a road names a place that exists and the
+        // way into it.
+        #expect(DivideWCeremony.checklistExplainer
+            .contains(BlockHistoryPath.doorPhrase))
+        #expect(DivideWCeremony.checklistExplainer.contains(BlockHistoryPath.name))
         #expect(CapabilityRegistry.capability(.showOriginBlock)
             .unavailableNote.contains(TrayPath.menuLabel))
     }

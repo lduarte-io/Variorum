@@ -44,6 +44,11 @@ struct CommitBar: View {
             // 13l Act 2 (item 3): the door she went looking for and could not
             // find, in the same menu.
             .deleteNote,
+            // The post-13l polish round (ledger row 17): **History**, beside
+            // commit. Her ruling — *"history is quite similar to commit, it's
+            // the natural pair to commit"* — so the bar carries the block's
+            // two time controls side by side: write a moment, see the moments.
+            .showBlockHistory,
         ]
         // 13k K7: the formatting toolbar's own eight, from ITS table (the
         // cluster is rendered here, so its doors are declared here).
@@ -101,10 +106,24 @@ struct CommitBar: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
             .background(tokens.room)
-            if model.commitList != nil {
-                CommitHistoryView(model: model)
-                    .frame(maxHeight: 180)
-            }
+        }
+        // Ledger row 17: the FALLBACK host. The pane's named home is the post
+        // detail's inspector; this editor is also composed where there is no
+        // detail (the scraps hosts, the book spread's inline form), and a door
+        // that cannot act in its context should not have been rendered (P-2).
+        .sheet(item: Binding(
+            get: { model.blockHistoryRequest },
+            set: { model.blockHistoryRequest = $0 })
+        ) { request in
+            BlockHistoryPane(
+                session: model.session, request: request,
+                onOpenTray: { blockID in
+                    // No inspector here either, so the tray takes the same
+                    // road this pane did — the bar's own sheet host.
+                    model.blockHistoryRequest = nil
+                    model.trayRequest = TrayRequest(
+                        postID: model.postID, revealBlockID: blockID)
+                })
         }
     }
 
@@ -122,6 +141,17 @@ struct CommitBar: View {
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
             .disabled(model.caretVariantID == nil || model.header?.locked == true)
             .help("An immutable savepoint of the take under the caret")
+        // Ledger row 17 — THE PAIR. It is never disabled: unlike commit,
+        // which needs a take to write into, a block always has a history to
+        // read, and where the caret is nowhere the act SPEAKS the registry's
+        // note rather than sitting grey (P-2, the standing fire-and-speak
+        // posture for a door with no target).
+        Button(tokens.chromeLabel(BlockHistoryPath.doorLabel)) {
+            model.requestBlockHistory()
+        }
+        .buttonStyle(VoicedButtonStyle(tokens: tokens))
+        .help("Everything this block has been: each take's saved moments, "
+            + "its archived and deleted takes, and the block it came out of")
     }
 
     /// **block ▾** (R6-2): the structural gestures plus the two block-scoped
@@ -168,10 +198,11 @@ struct CommitBar: View {
     /// a menu item cannot host one.
     private var noteMenu: some View {
         VoicedMenu(tokens: tokens, label: "note") {
-            Button(model.commitList == nil ? "History" : "Hide history") {
-                model.toggleCommitHistory()
-            }
-            .disabled(model.caretVariantID == nil && model.commitList == nil)
+            // (The "History" item LEFT this menu at the post-13l polish round,
+            // ledger row 17 — and its being here is exactly what her F2 report
+            // was about: *"it's unclear that history is under Note, that makes
+            // it seem like the Note's history."* It was the BLOCK's, and it is
+            // now a door in the bar that says so.)
             Button(model.header?.locked == true ? "Unseal" : "Seal") {
                 model.toggleSeal()
             }
@@ -199,8 +230,9 @@ struct CommitBar: View {
                 }
             }
         }
-        .help("The note itself: its savepoints, its seal, its date "
-            + "(its tray is the tray icon at the top of the note)")
+        .help("The note itself: its seal and its date (its tray is the tray "
+            + "icon at the top of the note; a block's savepoints are the "
+            + "history door beside commit)")
         .popover(isPresented: $datePickerShown, content: datePickerPopover)
         .deleteNoteConfirmDialog($pendingDelete) { confirm in
             NoteDeletion.fire(session: model.session, postIDs: confirm.postIDs)
@@ -311,88 +343,5 @@ struct CommitBar: View {
         components.day = parts[2]
         components.hour = 12
         return Calendar.current.date(from: components)
-    }
-}
-
-/// The caret variant's append-only history, newest first, with restore —
-/// and the documented pre-split warning (AppSpec §9) marked per row.
-///
-/// **13j batch 3:** the block's PAST sits above the savepoints — its lineage
-/// row (J3, her round-5 amendment: *"since it is lineage"*) and its deleted
-/// takes (the round-5 ruling: *"quiet rows in the block's History face …
-/// with Put back"*) — through the one component the Takes history sheet also
-/// composes, so the two faces cannot tell different stories about one block.
-struct CommitHistoryView: View {
-    let model: EditorViewModel
-    /// 13j J11: which quiet runs are open. View-local session state, like
-    /// every other expansion in the app — a fold is not document semantics.
-    @State private var expandedRuns: Set<String> = []
-    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
-    @Environment(\.colorScheme) private var scheme
-
-    private var tokens: VoiceTokens {
-        themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            if let past = model.blockPast {
-                BlockPastSection(model: past, tokens: tokens) { origin in
-                    model.revealOriginBlock(origin)
-                }
-            }
-            commitList
-        }
-    }
-
-    /// **13j J11 — the quiet-run collapse.** Leaving a note now leaves a
-    /// savepoint, so this list would fill with `auto` rows; consecutive ones
-    /// fold into one line she can open, and a deliberate ⌘S savepoint is
-    /// never folded into anything. The grouping is `SavepointRuns` (pure,
-    /// shared with the Takes sheet, which shows the same commits in the
-    /// opposite order).
-    private var commitList: some View {
-        List {
-            ForEach(SavepointRuns.rows(
-                model.commitList ?? [],
-                isQuiet: { $0.commit.kind == .auto },
-                id: { $0.id })
-            ) { row in
-                let rendered = SavepointHistoryFace.rendered(row, expanded: expandedRuns)
-                if let count = rendered.runCount {
-                    QuietRunRow(count: count, expanded: rendered.expanded, tokens: tokens) {
-                        expandedRuns = SavepointHistoryFace.toggling(row.id, in: expandedRuns)
-                    }
-                }
-                ForEach(rendered.items) { commitRow($0) }
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func commitRow(_ item: EditorViewModel.CommitListItem) -> some View {
-        HStack(spacing: 8) {
-            Text(item.commit.createdAt.formatted(date: .abbreviated, time: .standard))
-                .font(.caption)
-            Text(item.commit.kind == .auto ? "auto" : "manual")
-                .font(.caption2)
-                .foregroundStyle(item.commit.kind == .auto ? .secondary : .primary)
-            if let message = item.commit.message {
-                Text(message).font(.caption).lineLimit(1)
-            }
-            if item.predatesSplit {
-                Text("predates a split")
-                    .font(.caption2)
-                    .foregroundStyle(.orange)
-            }
-            Spacer()
-            Text(String(item.commit.text.prefix(60)))
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-            Button("Restore") { model.restore(item) }
-                .controlSize(.small)
-                .disabled(model.header?.locked == true)
-        }
     }
 }

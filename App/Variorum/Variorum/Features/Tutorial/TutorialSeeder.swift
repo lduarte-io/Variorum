@@ -540,10 +540,10 @@ enum TutorialSeeder {
             + "append; nothing ever overwrites one.",
 
             "Try it here: click into this paragraph, change a few words, press "
-            + "\u{2318}S, then open note \u{25BE} in the bottom bar and press "
-            + "History. Your savepoint is listed; Restore loads any savepoint "
-            + "back into the take — and "
-            + "committing again just adds another.",
+            + "\u{2318}S, then press history in the bottom bar, right beside "
+            + "commit. Your savepoint is listed under this take; Restore loads "
+            + "any savepoint back into the take — and committing again just "
+            + "adds another.",
 
             "The block below has a spare take to practice ARCHIVING on. Click "
             + "into the second take and press \u{2318}\u{21E7}A — it leaves the board, out "
@@ -851,15 +851,16 @@ enum TutorialSeeder {
             + "counts DELETED blocks only and hides when there are none, which "
             + "is exactly why the icon is always there.",
 
-            "The tray has three sections. Archived holds what you set aside on "
+            "The tray has two sections. Archived holds what you set aside on "
             + "purpose: kept, with no clock, forever. Leaving holds everything "
             + "of this note's that is counting down — the blocks it deleted, "
             + "the takes deleted on their own (folded away until you open "
-            + "them), and any original riding a family's countdown. Preserved "
-            + "originals holds something else entirely — blocks that were never "
-            + "deleted at all, kept whole when a divide or a merge made new "
-            + "blocks out of them (the next lesson). One verb serves every row: "
-            + "Put back, and a block returns to the place it stood in.",
+            + "them), and any original riding a family's countdown. One verb "
+            + "serves every row: Put back, and a block returns to the place it "
+            + "stood in. (A block kept whole by a divide or a merge is not "
+            + "leaving anything, so it is not here: it waits in the block it "
+            + "became, under \(BlockHistoryPath.cameFromSection) — the next "
+            + "lesson.)",
 
             "The Library holds the other half, in two rooms. Archived is its "
             + "own item in the sidebar: calm and clockless, whole notes you "
@@ -889,11 +890,11 @@ enum TutorialSeeder {
         ])
 
         let past = try lesson(deleting, "what a block leaves behind", [
-            "A block remembers more than its text. In Write, put your cursor in "
-            + "one and open note \u{25BE} \u{25B8} History: its savepoints are "
-            + "listed, and under them sits a quiet region for the two things a "
-            + "block can leave behind — where it came from, and the takes it "
-            + "has deleted. Takes has the same face on its own bottom bar.",
+            "A block remembers more than its text. Put your cursor in one and "
+            + "press history in the bottom bar — the pair to commit, and the "
+            + "same door on both bars. Everything this block has been opens in "
+            + "the panel on the right: every take's saved moments, the takes it "
+            + "archived, the takes it deleted, and where it came from.",
 
             "This block has two takes. Put your cursor in the middle of it and "
             + "press \u{2318}\u{21E7}D: the take you are looking at splits across "
@@ -901,29 +902,31 @@ enum TutorialSeeder {
             + "What became of the block you cut? It was kept — whole, off to "
             + "one side, not deleted.",
 
-            "Open History on either new block and a quiet row reads "
-            + "\u{201C}From a divide on \u{2039}date\u{203A} — the original is "
-            + "preserved\u{201D}. Click it — or right-click the block \u{25B8} "
-            + "See original from divide\u{2026}, or find it in \u{2318}K — and "
-            + "the original opens in a read-only peek with its takes and two "
-            + "buttons: Put back in note, and Open this note's tray. It is also "
-            + "sitting in that tray's Preserved originals section, with no "
-            + "clock, for as long as anything descended from it is alive.",
+            "Open history on either new block and its "
+            + "\(BlockHistoryPath.cameFromSection) region shows the original "
+            + "itself — \u{201C}From a divide on \u{2039}date\u{203A} — the "
+            + "original is preserved\u{201D} — with Bring back beside it. "
+            + "Right-clicking the block \u{25B8} See original from "
+            + "divide\u{2026} and \u{2318}K land in the same place. A merge "
+            + "keeps every block it joined, so the region lists ALL of them, "
+            + "each with its own way back. They wait there, with no clock, for "
+            + "as long as anything descended from them is alive.",
 
-            "Deleted TAKES wait in the same region, under Deleted takes. This "
-            + "paragraph carries a spare take for the experiment: open its "
-            + "takes (\u{2318}\u{21E7}T in Write), use the spare card's \u{22EF} "
-            + "menu \u{25B8} Delete, then open History — the take is listed with "
-            + "Put back, and it comes back with its label, its place in the fan "
-            + "and its savepoints intact. (A saved lens pointing at a take you "
-            + "archived or deleted says so right in its column, with a Restore "
-            + "button there.)",
+            "Deleted TAKES wait in the same panel, under "
+            + "\(BlockPastCopy.deletedTakesHeader), each with the days it has "
+            + "left. This paragraph carries a spare take for the experiment: "
+            + "open its takes (\u{2318}\u{21E7}T in Write), use the spare card's "
+            + "\u{22EF} menu \u{25B8} Delete, then press history — the take is "
+            + "listed with Put back, and it comes back with its label, its "
+            + "place in the fan and its savepoints intact. (A saved lens "
+            + "pointing at a take you archived or deleted says so right in its "
+            + "column, with a Restore button there.)",
 
             "One honest thing about preserved originals, because it is the kind "
             + "of promise that should never surprise you: an original stays "
             + "permanent only while something descended from it is still alive. "
             + "Delete the last of its descendants and the original MOVES — "
-            + "visibly, in that same tray — out of Preserved originals and onto "
+            + "visibly, into the note's tray — out of lineage and onto "
             + "the family's 30-day clock, labelled \u{201C}set aside by a divide "
             + "or merge \u{2014} kept until its family goes\u{201D}. The delete "
             + "that does it "
@@ -932,7 +935,7 @@ enum TutorialSeeder {
         try take(on: past.blocks[1],
             "The other take of the dividing block: I ride WHOLE onto both halves when you press \u{2318}\u{21E7}D, and the block we came from is kept preserved.")
         try take(on: past.blocks[3],
-            "the spare take — delete me from the \u{22EF} menu, then put me back from the block's History.")
+            "the spare take — delete me from the \u{22EF} menu, then put me back from the block's history panel.")
 
         // ——————————————————————————— ways of looking ———————————————————————
 

@@ -95,6 +95,67 @@ struct TrashAndArchiveTests {
         }
     }
 
+    /// **THE BLOCK'S WHOLE TIME, IN ONE PROJECTION** (the post-13l polish
+    /// round, ledger row 17 — the read behind her Block History pane).
+    ///
+    /// Two things it does that no shipped read did: it carries EVERY live
+    /// take's savepoint run (the two faces it replaces each showed one take's
+    /// at a time), and it carries the ORIGINALS with enough of their text to
+    /// recognise — which is what let a pane absorb a peek whose whole panel
+    /// existed to show that text. Its clock and its purge fence are
+    /// `deletedTakes`' own, unchanged.
+    @Test func theBlockHistoryProjectionCarriesEveryTakesRunAndItsOrigins() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "one block's time")
+            let a = try ops.newBlock(in: post.id, text: "Alpha.")
+            let b = try ops.newBlock(in: post.id, text: "Beta.")
+            let second = try ops.branchVariant(a.block.id, from: a.variant.id)
+            try ops.autosave(second.id, text: "Alpha, again.", charDelta: 0)
+            _ = try ops.commit(a.variant.id, kind: .manual)
+            _ = try ops.commit(second.id, kind: .manual)
+            _ = try ops.commit(second.id, kind: .auto)
+            let archived = try ops.branchVariant(a.block.id, from: a.variant.id)
+            try ops.archiveVariant(archived.id)
+            let doomed = try ops.branchVariant(a.block.id, from: a.variant.id)
+            try ops.deleteVariant(doomed.id)
+            let merged = try ops.merge(a.block.id, b.block.id)
+
+            let history = try db.read {
+                try Queries.blockHistory($0, blockID: merged.block.id, now: harnessNow)
+            }
+            // The merge released BOTH sources, and both are here with their
+            // text (the 13l walk's P-3 — the old door showed one).
+            #expect(Set(history.origins.map(\.origin.blockID)) == Set([a.block.id, b.block.id]))
+            #expect(history.origins.allSatisfy { $0.text?.isEmpty == false })
+
+            let source = try db.read {
+                try Queries.blockHistory($0, blockID: a.block.id, now: harnessNow)
+            }
+            #expect(source.activeTakes.map(\.id) == [a.variant.id, second.id])
+            #expect(source.archivedTakes.map(\.id) == [archived.id])
+            #expect(source.savepoints[a.variant.id]?.count == 1)
+            #expect(source.savepoints[second.id]?.count == 2,
+                    "every live take's run, not the caret take's alone")
+            #expect(source.deletedTakes.map(\.id) == [doomed.id])
+            #expect(!source.isEmpty)
+
+            // A block with one take and nothing behind it is EMPTY — the pane
+            // renders a region only where there is something in it.
+            let plain = try ops.newBlock(in: post.id, text: "ordinary")
+            #expect(try db.read {
+                try Queries.blockHistory($0, blockID: plain.block.id, now: harnessNow)
+            }.isEmpty)
+
+            // The clock and the purge fence are `deletedTakes`' own: past the
+            // window the deleted take leaves this projection too.
+            #expect(try db.read {
+                try Queries.blockHistory(
+                    $0, blockID: a.block.id,
+                    now: harnessNow.addingTimeInterval(31 * 86_400))
+            }.deletedTakes.isEmpty)
+        }
+    }
+
     // MARK: - The listing
 
     @Test func aNoteDeletedWholeIsONERowAndItsBlocksAreNeverDoubleListed() throws {

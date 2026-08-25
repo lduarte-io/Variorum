@@ -181,6 +181,113 @@ extension Queries {
             deletedTakes: try deletedTakes(db, blockID: blockID, now: now),
             origins: try unplacedOrigins(db, ofBlock: blockID))
     }
+
+    // MARK: - THE BLOCK'S WHOLE TIME (the post-13l polish round, ledger row 17)
+
+    /// **Everything ONE block's History pane shows**, in one projection.
+    ///
+    /// Her G2 ruling put the door in the bottom chrome beside Commit — *"history
+    /// is quite similar to commit, it's the natural pair to commit"* — and what
+    /// it opens is ONE cohesive pane with four regions: every live take's
+    /// savepoint run, the block's archived takes, its deleted takes, and where
+    /// the block CAME FROM. Three faces used to answer parts of that question
+    /// (Write's inline savepoint strip, the Takes bar's history sheet, the
+    /// lineage peek) and none answered all of it; this is the read behind the
+    /// one that does.
+    ///
+    /// ONE projection rather than four observations for the same reason
+    /// `BlockPast` was one rather than two: the regions are read together,
+    /// re-read together, and a pane whose regions could disagree about one
+    /// block is exactly the drift this round exists to end.
+    ///
+    /// **Cost is the BLOCK's, never the corpus (P1):** the fan comes from
+    /// `idx_variant_block`, each take's savepoints from
+    /// `idx_commit_variant`, the lineage from `idx_edge_source`. What it IS
+    /// proportional to is this block's own history — a block with ten takes
+    /// and a long savepoint run reads all of it — which is the same shape
+    /// every history face has had since Phase 7, and the pane is summoned,
+    /// never ambient.
+    public struct BlockHistory: Equatable, Sendable {
+        /// A released original this block came out of, with enough of its text
+        /// to recognise it. The peek's own read, folded into the projection so
+        /// the came-from region shows ALL of a merge's originals rather than
+        /// the first (the 13l walk's P-3).
+        public struct Origin: Equatable, Sendable, Identifiable {
+            public let origin: UnplacedOrigin
+            /// The original's default take's buffer — the row's preview.
+            public let text: String?
+            public var id: String { origin.blockID }
+
+            public init(origin: UnplacedOrigin, text: String?) {
+                self.origin = origin
+                self.text = text
+            }
+        }
+
+        /// The block's live fan in fan order, archived takes included with
+        /// their statuses (`blockFan`'s own contract).
+        public var takes: [Variant]
+        /// Every live take's savepoints, newest first, keyed by variant id.
+        public var savepoints: [String: [CommitPoint]]
+        /// The live divide/extract edge dates behind the pre-split warning
+        /// (AppSpec §9) — read once for the block, not once per take.
+        public var splitDates: [Date]
+        public var deletedTakes: [Variant]
+        public var origins: [Origin]
+
+        public init(
+            takes: [Variant] = [], savepoints: [String: [CommitPoint]] = [:],
+            splitDates: [Date] = [], deletedTakes: [Variant] = [],
+            origins: [Origin] = []
+        ) {
+            self.takes = takes
+            self.savepoints = savepoints
+            self.splitDates = splitDates
+            self.deletedTakes = deletedTakes
+            self.origins = origins
+        }
+
+        public var activeTakes: [Variant] { takes.filter { $0.status == .active } }
+        public var archivedTakes: [Variant] { takes.filter { $0.status == .archived } }
+
+        /// True when the pane has nothing at all to show — a block with one
+        /// take, no savepoints, no archived or deleted takes and no lineage.
+        public var isEmpty: Bool {
+            takes.allSatisfy { savepoints[$0.id]?.isEmpty ?? true }
+                && archivedTakes.isEmpty && deletedTakes.isEmpty && origins.isEmpty
+        }
+    }
+
+    public static func blockHistory(
+        _ db: Database, blockID: String, now: Date
+    ) throws -> BlockHistory {
+        let takes = try blockFan(db, blockID: blockID)
+        var savepoints: [String: [CommitPoint]] = [:]
+        for take in takes {
+            savepoints[take.id] = try commitHistory(db, variantID: take.id)
+        }
+        let origins = try unplacedOrigins(db, ofBlock: blockID)
+        return BlockHistory(
+            takes: takes,
+            savepoints: savepoints,
+            splitDates: try splitDates(db, blockID: blockID),
+            deletedTakes: try deletedTakes(db, blockID: blockID, now: now),
+            origins: try origins.map { origin in
+                BlockHistory.Origin(
+                    origin: origin,
+                    // The default take's buffer, read the way the tray's
+                    // originals section reads it — the block's representative
+                    // text absent a pointer context (AppSpec §9).
+                    text: try String.fetchOne(
+                        db,
+                        sql: """
+                            SELECT v.working_text FROM block b
+                            JOIN variant v ON v.id = b.default_variant_id
+                            WHERE b.id = ?
+                            """,
+                        arguments: [origin.blockID]))
+            })
+    }
 }
 
 // MARK: - Live projections
@@ -211,6 +318,18 @@ extension AppDatabase {
         _ blockID: String, now: Date
     ) -> AsyncValueObservation<Queries.BlockPast> {
         observe { try Queries.blockPast($0, blockID: blockID, now: now) }
+    }
+
+    /// The block's WHOLE time, live (the post-13l polish round, ledger row 17
+    /// — the Block History pane). Held only while the pane is on screen, for
+    /// `observeBlockPast`'s reason one step further: it reads `variant` AND
+    /// `commit_point`, so it re-runs whenever a buffer is autosaved. Bounded
+    /// by the block either way (see `Queries.blockHistory`), and the pane is
+    /// a summoned side panel rather than ambient chrome.
+    public func observeBlockHistory(
+        _ blockID: String, now: Date
+    ) -> AsyncValueObservation<Queries.BlockHistory> {
+        observe { try Queries.blockHistory($0, blockID: blockID, now: now) }
     }
 }
 // (An observeBlockFan wrapper was dropped in the Phase 7 review round —

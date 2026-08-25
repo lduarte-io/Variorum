@@ -1418,30 +1418,51 @@ final class TakesViewModel {
         statusMessage = message
     }
 
-    /// 13f W10b — the lineage door's act, identical to Write's, and given
-    /// its FINAL form with it at 13j J3: a read-only peek of the original,
-    /// its takes visible, with Put back and the note's tray as its two
-    /// actions. `EditorViewModel.revealOriginBlock` carries the full
-    /// reasoning and the door's whole history.
-    func revealOriginBlock(_ origin: Queries.UnplacedOrigin) {
-        originPeek = OriginPeekRequest(postID: postID, origin: origin)
+    /// 13f W10b — the lineage door's act, identical to Write's, and given its
+    /// THIRD and final landing with it at the post-13l polish round (ledger
+    /// row 17): the block's History pane, whose came-from region shows ALL of
+    /// a merge's originals rather than the first.
+    /// `EditorViewModel.revealCaretBlockOrigin` carries the whole history.
+    ///
+    /// The blockID is named EXPLICITLY by the card that raised it — a
+    /// right-click never moves the keyboard, so a routed target could name
+    /// another card's block (13k K6's lesson, same fix).
+    func revealOriginBlock(ofBlock blockID: String) {
+        requestBlockHistory(blockID: blockID)
     }
 
     /// The ⌘K row's body on the boards: the focused block's original, or the
     /// honest note where it has none (fire-and-speak — Write's twin).
     func revealFocusedBlockOrigin() {
         guard let slot = commandTargetSlot,
-              let origin = projection.unplacedOrigins[slot.blockID]?.first
+              projection.unplacedOrigins[slot.blockID]?.isEmpty == false
         else {
             speak(OriginPeekCopy.noOriginHere)
             return
         }
-        revealOriginBlock(origin)
+        revealOriginBlock(ofBlock: slot.blockID)
     }
 
-    /// 13j J3: the origin peek's pending target (`TakesBottomBar` presents
-    /// it, where the tray and comments sheets live).
-    var originPeek: OriginPeekRequest?
+    /// **The Block History pane's pending target** (ledger row 17) — the
+    /// router first, this bar's sheet as the fallback. Write's twin carries
+    /// the reasoning; the only difference here is which block is "the one
+    /// you're in".
+    var blockHistoryRequest: BlockHistoryRequest?
+
+    func requestBlockHistory(blockID: String? = nil) {
+        guard let slot = blockID.flatMap({ id in
+            projection.slots.first { $0.blockID == id }
+        }) ?? commandTargetSlot else {
+            speak(CapabilityRegistry.capability(.showBlockHistory).unavailableNote)
+            return
+        }
+        let request = BlockHistoryRequest(
+            postID: postID, blockID: slot.blockID,
+            focusedVariantID: focusedPane?.blockID == slot.blockID
+                ? focusedPane?.variantID : slot.variantID)
+        if session.commandRouter.requestBlockHistory(request) { return }
+        blockHistoryRequest = request
+    }
 
     /// 13j J2: the tray sheet's pending target (`TakesBottomBar` presents
     /// it, where the comments sheet lives).

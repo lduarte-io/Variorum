@@ -195,7 +195,11 @@ struct UndoHintAndRefusalTests {
         // the door moved to the masthead icon and the `note ▾` item went
         // with it). The pin's own point survives exactly: the receipt may
         // only name a surface that HAS a door, and here are its renderers.
-        #expect(act.doors == [.surface])
+        // **A JUSTIFIED EDIT** (the architect's adjudication 1, batch 4): the
+        // ⌘K row joins the three surfaces. What this pin is about is
+        // untouched — a receipt may only name a surface that HAS a door —
+        // and one more door can only make that more true.
+        #expect(act.doors == [.surface, .palette])
         #expect(PostDetailView.surfaceCapabilities.contains(.showNoteTray))
         #expect(ContextBar.surfaceCapabilities.contains(.showNoteTray))
         #expect(!CommitBar.renderedCapabilities.contains(.showNoteTray))

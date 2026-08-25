@@ -46,7 +46,8 @@ final class CommandRouter {
     /// as before.
     func registerDetail(
         postID: String, mode: PostMode, applyMode: @escaping (PostMode) -> Void,
-        showTray: ((TrayRequest) -> Void)? = nil
+        showTray: ((TrayRequest) -> Void)? = nil,
+        showBlockHistory: ((BlockHistoryRequest) -> Void)? = nil
     ) -> UUID {
         let token = UUID()
         detailToken = token
@@ -54,6 +55,7 @@ final class CommandRouter {
         activeMode = mode
         self.applyMode = applyMode
         self.showTray = showTray
+        self.showBlockHistory = showBlockHistory
         // The arriving detail consumes a tray request parked for IT — the
         // `pendingWriteIntent` choreography, one act over (see
         // `requestNoteTray`). Stamped, so a park for another post never
@@ -83,6 +85,7 @@ final class CommandRouter {
         detailToken = nil
         applyMode = nil
         showTray = nil
+        showBlockHistory = nil
         activePostID = nil
         activeMode = nil
         // A genuine teardown (no successor mounted yet): any parked
@@ -172,6 +175,33 @@ final class CommandRouter {
     func requestNoteTray(_ request: TrayRequest) -> Bool {
         guard let showTray, activePostID == request.postID else { return false }
         showTray(request)
+        return true
+    }
+
+    // MARK: - The block's history pane (the post-13l polish round, row 17)
+
+    /// How a Block History request reaches the mounted detail's INSPECTOR.
+    /// Its own seam beside `showTray`, for the identical ordering reason —
+    /// `EditorView` registers a handler INSIDE the detail and therefore
+    /// later, so a LIFO dispatch would reach the editor's own sheet first and
+    /// the same door would land in two different places depending on mount
+    /// order.
+    @ObservationIgnored private var showBlockHistory: ((BlockHistoryRequest) -> Void)?
+
+    /// **Routes a history request to the mounted detail's inspector.**
+    ///
+    /// It never parks, deliberately, and for a sharper reason than the tray's:
+    /// the doors that raise it (both bottom bars, ⌘K) are rendered by surfaces
+    /// that are ALREADY mounted and already know their block — there is no
+    /// focus change to wait out. A caller with its own sheet fallback must be
+    /// told "no" so it can use it; a caller with none gets the registry's
+    /// honest note through the dispatch road.
+    ///
+    /// Returns whether the panel was opened.
+    @discardableResult
+    func requestBlockHistory(_ request: BlockHistoryRequest) -> Bool {
+        guard let showBlockHistory, activePostID == request.postID else { return false }
+        showBlockHistory(request)
         return true
     }
 
