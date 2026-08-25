@@ -638,6 +638,33 @@ struct NoteVersionsTests {
         }
     }
 
+    /// **…and moved to a POOL the moment is not lost, it is LOOSE** (the
+    /// ladder's LR2-5, correcting the KnownIssues row's *"would list
+    /// nowhere"*). The Archived surface's fence excludes version history only
+    /// where the peer is a live `post`; a scraps area is a `pool`, so the
+    /// fence stops holding and the moment RENDERS THERE — a sealed, unnamed
+    /// stranger among her set-aside works. Recorded as behaviour so the
+    /// KnownIssues sentence is checkable rather than remembered.
+    @Test func movingTheAnchorToAPoolLeavesTheMomentLooseOnTheArchivedSurface() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "the note")
+            let first = try ops.newBlock(in: note.id, text: "One.")
+            _ = try ops.newBlock(in: note.id, text: "Two.")
+            let scraps = try ops.createPool(title: "scraps")
+            let version = try ops.saveNoteVersion(note.id).post
+
+            try ops.moveBlock(first.block.id, to: scraps.id)
+
+            #expect(try db.read { try Queries.noteVersions($0, of: note.id) }.isEmpty,
+                    "documented, not desired: the anchor left the note")
+            #expect(try db.read { try Queries.archivedPosts($0) }
+                .map(\.postID).contains(version.id),
+                "and with no live NOTE peer to fence it, it rows among the archived works")
+            let row = try #require(try db.read { try Container.fetchOne($0, key: version.id) })
+            #expect(row.locked, "…still sealed, which is what makes it read as a stranger")
+        }
+    }
+
     /// **THE UNLINK STILL UNLINKS.** Reading past the cascade's tombstone must
     /// not read past a deliberate one: `unmarkPostsAsVersions` stamps the edge
     /// with a time no endpoint block shares, so the pair really does come
@@ -671,6 +698,196 @@ struct NoteVersionsTests {
             let noteRow = try #require(rows.first { $0.id == note.id })
             #expect(!noteRow.isVersion && noteRow.versionOfNoteID == nil)
             #expect(rows.filter(\.isVersion).count == 1, "its one moment rode along")
+        }
+    }
+
+    // MARK: - The restore re-anchors what the classifier keeps (the ladder's LR2-1)
+
+    /// Does this moment carry a LIVE `version_of` edge whose note-side
+    /// endpoint is a block the note still LIVE-PLACES?
+    ///
+    /// This is `restoreNoteVersion`'s own step-4 claim, asked of the store —
+    /// and it is deliberately STRICTER than the listing's question. The
+    /// classifier reads the note side past its tombstones (LR1-1), so a
+    /// moment can list happily while its only link hangs off a block the note
+    /// released. That state is not stable: a released original is exactly what
+    /// the restore's own Delete Now road sweeps in
+    /// (`joinStrandedOriginals` → `expandBlock` takes EVERY edge of a stranded
+    /// original), and once the janitor executes there is no row left to read
+    /// past. **Listed-but-not-anchored is the state that silently expires**,
+    /// which is why the restore must leave nothing in it.
+    private func liveAnchoredLink(
+        _ db: Database, moment momentID: String, note noteID: String
+    ) throws -> Bool {
+        try Bool.fetchOne(
+            db,
+            sql: """
+                SELECT EXISTS (
+                  SELECT 1 FROM edge e
+                  JOIN container_block mine
+                    ON mine.block_id IN (e.source_block_id, e.target_block_id)
+                   AND mine.container_id = :moment AND mine.deleted_at IS NULL
+                  JOIN container_block theirs
+                    ON theirs.block_id IN (e.source_block_id, e.target_block_id)
+                   AND theirs.block_id <> mine.block_id
+                   AND theirs.container_id = :note AND theirs.deleted_at IS NULL
+                  JOIN block anchor
+                    ON anchor.id = theirs.block_id AND anchor.deleted_at IS NULL
+                  WHERE e.type = 'version_of' AND e.deleted_at IS NULL)
+                """,
+            arguments: ["moment": momentID, "note": noteID]) ?? false
+    }
+
+    /// Runs the janitor's physical removal over every standing intent — the
+    /// consequence driven rather than argued.
+    private func sweepStandingIntents(_ db: AppDatabase) throws {
+        try db.write { db in
+            try db.execute(sql: "PRAGMA defer_foreign_keys = ON")
+            let roots = try Row.fetchAll(
+                db,
+                sql: """
+                    SELECT table_name, row_id FROM purge_intent
+                    WHERE deleted_at IS NULL ORDER BY id
+                    """
+            ).map { SyncPurgeTarget(table: $0["table_name"], rowID: $0["row_id"]) }
+            guard !roots.isEmpty else { return }
+            let family = try PurgeFamily.expand(db, roots: roots)
+            try PurgeFamily.deleteLocal(
+                db, family: family, stamp: "2026-08-26T00:00:00.000Z")
+        }
+    }
+
+    /// **A MOMENT WHOSE ANCHOR WAS MERGED AWAY MUST BE RE-ANCHORED BY THE
+    /// RESTORE — the ladder's LR2-1.**
+    ///
+    /// LR1-1 taught the CLASSIFIER to read past the tombstones an ordinary
+    /// join leaves behind, so the moment stays in Note ▸ Versions. Step 4 of
+    /// the restore never learned the same lesson: it enumerated peers with
+    /// `versionPeerPosts`, which fences all three liveness reads, so exactly
+    /// the moments LR1-1 rescued were the ones it skipped. The link then went
+    /// on hanging off the released original — and the restore's own Delete Now
+    /// road strands that original into the purge family, edges and all.
+    ///
+    /// So the enumeration is now the classifier's own (`noteVersionIDs`,
+    /// unioned with the live compare peers): **one classifier, read by every
+    /// scope, the op's read included** (LR1-5's doctrine).
+    @Test func restoringReAnchorsAMomentWhoseAnchorWasMergedAway() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "the note")
+            let first = try ops.newBlock(in: note.id, text: "One.")
+            let second = try ops.newBlock(in: note.id, text: "Two.")
+            let version = try ops.saveNoteVersion(note.id).post
+
+            // Her ordinary prose — the seam join the round's own tutorial
+            // teaches. It releases the anchor to lineage.
+            _ = try ops.merge(first.block.id, second.block.id)
+
+            let result = try ops.restoreNoteVersion(note.id, from: version.id)
+            let savedNow = try #require(result.savedVersionID)
+
+            let listed = try db.read { try Queries.noteVersions($0, of: note.id) }
+                .map(\.postID)
+            #expect(Set(listed) == [version.id, savedNow],
+                    "the listing still claims every moment")
+            for moment in [version.id, savedNow] {
+                #expect(try db.read { try liveAnchoredLink($0, moment: moment, note: note.id) },
+                        "every moment leaves the restore anchored on a block the note places")
+            }
+
+            // The consequence, DRIVEN: the restore's Delete Now road strands
+            // the released original into the purge family, and `expandBlock`
+            // takes every edge it carries. A moment left un-re-anchored has
+            // nothing to read past once the janitor executes.
+            try sweepStandingIntents(db)
+            #expect(Set(try db.read { try Queries.noteVersions($0, of: note.id) }
+                .map(\.postID)) == [version.id, savedNow],
+                "…and they survive the sweep that follows")
+            #expect(try db.read { try Queries.archivedPosts($0) }.isEmpty,
+                    "so nothing leaks onto the Archived surface as a sealed stranger")
+            #expect(try db.read { try Queries.isVersionHistory($0, version.id, of: note.id) },
+                    "and Restore/Promote still authorize afterwards")
+        }
+    }
+
+    /// The same hole through `archiveBlock` — the placement is tombstoned, so
+    /// `versionPeerPosts` skipped the moment here too. The archived block is
+    /// never outgoing and never strands (archive rides no deletion — the
+    /// covenant), so nothing expires; what was wrong was the op's own claim
+    /// that *every* link is re-anchored, and a link left hanging on a block
+    /// the note no longer places is one gesture from the merge leg's fate.
+    @Test func restoringReAnchorsAMomentWhoseAnchorWasArchived() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "the note")
+            let first = try ops.newBlock(in: note.id, text: "One.")
+            _ = try ops.newBlock(in: note.id, text: "Two.")
+            let version = try ops.saveNoteVersion(note.id).post
+
+            try ops.archiveBlock(first.block.id)
+
+            let result = try ops.restoreNoteVersion(note.id, from: version.id)
+            let savedNow = try #require(result.savedVersionID)
+
+            for moment in [version.id, savedNow] {
+                #expect(try db.read { try liveAnchoredLink($0, moment: moment, note: note.id) })
+            }
+            #expect(Set(try db.read { try Queries.noteVersions($0, of: note.id) }
+                .map(\.postID)) == [version.id, savedNow])
+        }
+    }
+
+    /// And through `deleteBlock`, whose trigger cascade tombstones the EDGE
+    /// itself. This is LR2-1's *plain leg*: the deleted anchor is on its own
+    /// 30-day clock, and when that clock (or a Delete Now) runs, the edge row
+    /// is physically gone — so a moment never re-anchored is unlinked for
+    /// good. The restore is the door that can still fix it, and now does.
+    @Test func restoringReAnchorsAMomentWhoseAnchorWasDeletedAndThenPurged() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "the note")
+            let first = try ops.newBlock(in: note.id, text: "One.")
+            _ = try ops.newBlock(in: note.id, text: "Two.")
+            let version = try ops.saveNoteVersion(note.id).post
+
+            try ops.deleteBlock(first.block.id)
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "block", rowID: first.block.id)])
+
+            let result = try ops.restoreNoteVersion(note.id, from: version.id)
+            let savedNow = try #require(result.savedVersionID)
+
+            try sweepStandingIntents(db)
+            #expect(Set(try db.read { try Queries.noteVersions($0, of: note.id) }
+                .map(\.postID)) == [version.id, savedNow],
+                "the moments outlive the anchor's physical removal")
+            for moment in [version.id, savedNow] {
+                #expect(try db.read { try liveAnchoredLink($0, moment: moment, note: note.id) })
+            }
+            #expect(try db.read { try Queries.archivedPosts($0) }.isEmpty)
+        }
+    }
+
+    /// **THE UNMARK IS STILL RESPECTED BY THE RESTORE** — the guard that
+    /// proves the wider enumeration is precise rather than blanket. A pair she
+    /// deliberately came apart is not version history any more, so the
+    /// classifier does not name it and the restore does not re-mint its link.
+    @Test func aRestoreNeverReMintsALinkSheDeliberatelyUnmarked() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "the note")
+            _ = try ops.newBlock(in: note.id, text: "One.")
+            let kept = try ops.saveNoteVersion(note.id).post
+            let unmarked = try ops.saveNoteVersion(note.id).post
+            try ops.unmarkPostsAsVersions(note.id, unmarked.id)
+
+            let result = try ops.restoreNoteVersion(note.id, from: kept.id)
+            let savedNow = try #require(result.savedVersionID)
+
+            #expect(Set(try db.read { try Queries.noteVersions($0, of: note.id) }
+                .map(\.postID)) == [kept.id, savedNow],
+                "the unmarked copy stays out")
+            #expect(!(try db.read {
+                try liveAnchoredLink($0, moment: unmarked.id, note: note.id)
+            }), "and the restore mints it no new link")
+            #expect(try db.read { try Queries.archivedPosts($0) }
+                .map(\.postID) == [unmarked.id],
+                "what is left of it is an ordinary archived note")
         }
     }
 }

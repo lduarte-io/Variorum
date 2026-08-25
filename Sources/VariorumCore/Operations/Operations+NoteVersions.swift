@@ -141,9 +141,33 @@ extension Operations {
     /// link RIDES a block-level edge anchored on the note's first block (I8).
     /// Step 2 deletes that block — so without re-anchoring, restoring a version
     /// would silently sever the note from EVERY version it has, including the
-    /// one saved seconds earlier in step 1. The peers are read while their
-    /// links are still live and each gets one fresh edge to the new first
-    /// block; a peer that is already linked is skipped.
+    /// one saved seconds earlier in step 1. Each peer gets one fresh edge to
+    /// the new first block; a peer that is already linked is skipped.
+    ///
+    /// **And the peers are enumerated THE CLASSIFIER'S WAY** (the ladder's
+    /// LR2-1, correcting this doc's own earlier claim that they are "read
+    /// while their links are still live"). `versionPeerPosts` fences all three
+    /// liveness reads — the note-side placement, the peer-side placement, the
+    /// edge — which is exactly the fence LR1-1 had to remove from the
+    /// classifier, because merge, divide-W and `archiveBlock` release the
+    /// anchor's placement and `deleteBlock` cascade-tombstones its edge. So
+    /// the moments LR1-1 rescued were precisely the ones step 4 skipped: they
+    /// stayed listed while their only link went on hanging off a block the
+    /// note no longer places, which the tombstone-tolerant read can carry only
+    /// for as long as the ROW exists. It does not last: a deleted anchor rides
+    /// its own 30-day clock (or a Delete Now), and a released original strands
+    /// into a purge family the moment its last descendant goes — and
+    /// `PurgeFamily.expandBlock` takes every edge a purged block carries. Once
+    /// the janitor executes there is nothing left to read past, and the moment
+    /// silently unlinks: out of the listing, ONTO the Archived surface as a
+    /// sealed stranger, orphaned from the deletion ride, Restore and Promote
+    /// refusing.
+    ///
+    /// Hence `Queries.noteVersionIDs` — the classifier itself, asked before
+    /// step 2 takes anything — unioned with the live compare peers, which
+    /// carry the version links that are NOT version history (`markPostsAsVersions`
+    /// and `duplicateAsVersion`'s live forks). **One classifier, read by every
+    /// scope, this operation's read included** (LR1-5's doctrine).
     ///
     /// **What it deliberately leaves alone:** the note's ARCHIVED blocks and
     /// its preserved originals have no live placement, so they are not
@@ -171,9 +195,13 @@ extension Operations {
             }
             let now = date.now
 
-            // Read the links while they are still live (step 2 takes the
-            // block they are anchored on).
-            var peers = try Queries.versionPeerPosts(db, of: postID)
+            // Read the peers BEFORE step 2 takes the block they are anchored
+            // on — and read them the CLASSIFIER's way (the ladder's LR2-1):
+            // the moments this note HAS, whatever ordinary work has done to
+            // the anchor's placement or edge, plus the live compare peers
+            // that are not version history at all.
+            var peers = try Queries.noteVersionIDs(db, of: postID)
+            peers.append(contentsOf: try Queries.versionPeerPosts(db, of: postID))
 
             // 1 — the version of NOW.
             let outgoing = try ContainerBlock
