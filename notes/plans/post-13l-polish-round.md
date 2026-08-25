@@ -1487,6 +1487,12 @@ rows 9 and 20, and STOP.
    not the scaling). Batch 4's Block History pane is the SAME class
    — one verdict covers both; the closeout writes ONE KnownIssues
    row naming both panes. No new debounce machinery this round.
+   **AUTHOR-CONFIRMED 2026-08-25 (via the question tool, the
+   mechanism explained in full): "Park for Phase 12"** — the
+   adjudication stands with her authority; the other two flagged
+   items she asked about were already batch 4's to build (the
+   palette tray door; the nested-sheet dissolution), confirmed at
+   the same exchange.
 3. **`OriginPeek`'s nested tray sheet dissolves in batch 4** as the
    pane absorbs J3 (already the plan; confirmed).
 
