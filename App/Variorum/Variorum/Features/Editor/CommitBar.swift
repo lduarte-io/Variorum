@@ -11,6 +11,12 @@ import VariorumCore
 
 struct CommitBar: View {
     let model: EditorViewModel
+
+    init(model: EditorViewModel, formattingExpanded: Bool = false) {
+        self.model = model
+        _formattingShown = State(initialValue: formattingExpanded)
+    }
+
     @State private var datePickerShown = false
     @State private var pickedDate = Date()
     /// 13l Act 2 (item 3): the note-delete confirm's pending ask. View-local
@@ -19,6 +25,12 @@ struct CommitBar: View {
     @State private var pendingDelete: NoteDeleteConfirm?
     /// N15: the bar's measured width — the one-row/two-row switch.
     @State private var barWidth: CGFloat = 0
+    /// Ledger row 28: is the formatting row slid out? Session UI state, per
+    /// bar — a fold is not document semantics (`FormattingDoor`'s own note).
+    /// Seeded at birth so a pin can mount the bar in EITHER state and read
+    /// what is really drawn (the `TrayPanel(model:)` seam pattern, and its
+    /// reason: a `@State` toggle is unreachable from outside the view).
+    @State private var formattingShown: Bool
     @Environment(\.openWindow) private var openWindow
     // Phase 13 C1 (R11): the status line wears the voice; the word counts
     // are PROMINENT (the terminal mockup's liked idiom).
@@ -58,6 +70,13 @@ struct CommitBar: View {
     var body: some View {
         VStack(spacing: 0) {
             Divider().overlay(tokens.line)
+            // Ledger row 28: the formatting row slides out ABOVE the flat row
+            // — upward, away from the page's bottom edge — so the doors she
+            // was reaching for do not move under her cursor when it opens.
+            if formattingShown {
+                formattingRow
+                Divider().overlay(tokens.line)
+            }
             // Batch 9 (R101): the round-2 status-line grammar — quiet
             // voiced words on the room; every door stays. 13b 3F (N15):
             // the bar is ADAPTIVE — one row where it fits (the detail
@@ -185,12 +204,32 @@ struct CommitBar: View {
         Button(tokens.chromeLabel("comments")) { model.openCaretComments() }
             .buttonStyle(VoicedButtonStyle(tokens: tokens))
             .help("The caret block's comments — working remarks on a block, never per-take")
-        // 13b 4D (N34 — S4-14/S4-21): the one_block face's Write half — an
-        // in-view setting chip over the Phase-1 machinery; the header
-        // observation keeps `effectiveSegmentation` (and this chip) live.
-        newlinesChip
         StatusDot(tokens: tokens)
-        FormatBar(tokens: tokens, status: model.session.status)
+        // Ledger row 28 (her kickoff addition, scope ruled at the sitting):
+        // the eight formatting doors and the newlines chip condense to ONE
+        // Aa chip; everything else in this bar stays visible at rest.
+        VoicedChip(
+            tokens: tokens, text: FormattingDoor.label, on: formattingShown
+        ) {
+            formattingShown.toggle()
+        }
+        .help(FormattingDoor.help(expanded: formattingShown))
+    }
+
+    /// What Aa slides out: the formatting cluster, and the newlines chip
+    /// beside it (13b 4D — N34/S4-14/S4-21: the one_block face's Write half,
+    /// an in-view setting chip over the Phase-1 machinery; the header
+    /// observation keeps `effectiveSegmentation` and this chip live).
+    @ViewBuilder private var formattingRow: some View {
+        HStack(spacing: 10) {
+            FormatBar(tokens: tokens, status: model.session.status)
+            StatusDot(tokens: tokens)
+            newlinesChip
+            Spacer()
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 5)
+        .background(tokens.room)
     }
 
     /// **note ▾** (R6-2): history, the seal, the entry date. The date

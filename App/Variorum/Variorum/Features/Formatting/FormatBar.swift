@@ -103,3 +103,53 @@ struct FormatBar: View {
         CapabilityRegistry.capability(id).menuTitle()
     }
 }
+
+/// **THE Aa DOOR** (the post-13l polish round, ledger row 28 — her kickoff
+/// addition, verbatim: *"for more space on the bottom chrome, please condense
+/// all the current options into an Aa style button that when clicked expands
+/// into the full bar"*, with the SCOPE she ruled at the sitting: **formatting
+/// only behind Aa**).
+///
+/// The chip and the slide-out row live here rather than in each bar, for the
+/// same reason `FormatBar` itself does: this is one cluster with one grammar,
+/// and R6-2's whole point is that the two bars read as one. What it condenses
+/// is exactly what her ruling named — the eight formatting doors and the
+/// newlines chip — and `block ▾` · Takes · commit · **history** · `note ▾` ·
+/// comments · the counts · `?` all stay visible at rest, so *"the bar becomes
+/// the block's time controls"* survives by construction.
+///
+/// **Registry ids are UNCHANGED and that is deliberate** (P-1, the R6-2/13g
+/// slide-out class exactly): each bar's `renderedCapabilities` still declares
+/// the same eight formatting acts, because rendering them behind an expansion
+/// is still rendering them. Only WHERE they are drawn moved — the same
+/// property the two `note ▾` / `block ▾` groups established.
+///
+/// Expansion is SESSION UI STATE, held per bar: a fold is not document
+/// semantics (the tray's takes disclosure and every savepoint run say the
+/// same thing), and two bars that are never on screen at once have nothing
+/// to keep in step.
+nonisolated enum FormattingDoor {
+    /// The chip's face — the door's own name, in the app's mouth.
+    static let label = "Aa"
+
+    static func help(expanded: Bool) -> String {
+        expanded
+            ? "Put the formatting row away — bold, italics, sizes, lists, "
+                + "links and the newlines setting"
+            : "Bold, italics, sizes, lists, links — and whether ⏎ makes new "
+                + "blocks. They slide out here; the rest of the bar stays put."
+    }
+
+    /// **WHAT GOES BEHIND THE DOOR, AS A VALUE.** Her ruling at the kickoff
+    /// sitting was *"formatting only behind Aa"*, and a comment beside a view
+    /// body cannot be checked. This can: it is exactly `FormatBar`'s own act
+    /// table, so a ninth formatting act joins the fold automatically and a
+    /// NON-formatting act cannot wander into it without this line changing.
+    ///
+    /// (The newlines chip rides the row too and is deliberately NOT here: it
+    /// is a per-note SETTING rather than a declared act — the wash-chip class,
+    /// recorded not declared since 13b 4D — so it has no id to name.)
+    @MainActor static var condensed: Set<CapabilityID> {
+        Set(FormatBar.renderedCapabilities)
+    }
+}

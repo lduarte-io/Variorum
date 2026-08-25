@@ -325,6 +325,109 @@ struct BlockHistoryPaneTests {
         #expect(DeletedTakeFace.meta(live, now: now).isEmpty)
     }
 
+    // MARK: - Row 28: the Aa condensation
+
+    /// **FORMATTING ONLY BEHIND Aa** — her ruled scope, as a checkable value.
+    ///
+    /// Her kickoff addition asked for *"an Aa style button that when clicked
+    /// expands into the full bar"*, and the sitting's question was WHAT
+    /// condenses. Her answer was formatting only, and the bars are what would
+    /// quietly drift from it: a future act dropped into the fold "because it
+    /// fits there" is a bar she asked to stay legible getting shorter again.
+    @Test func onlyFormattingCondensesBehindTheAaDoor() {
+        #expect(FormattingDoor.label == "Aa")
+        #expect(FormattingDoor.help(expanded: false)
+            != FormattingDoor.help(expanded: true),
+                "the chip says which way it goes")
+        // What is behind the door is EXACTLY the formatting act table.
+        #expect(FormattingDoor.condensed == Set(FormatBar.renderedCapabilities))
+        #expect(FormattingDoor.condensed.contains(.formatBold))
+        #expect(FormattingDoor.condensed.contains(.formatBulletList))
+
+        // …and what her ruling says STAYS VISIBLE really does. `block ▾`,
+        // Takes, commit, HISTORY, `note ▾`, comments — the bar as the block's
+        // time controls, which is the reading row 17 depends on.
+        for bar in [CommitBar.renderedCapabilities, TakesBottomBar.renderedCapabilities] {
+            let visible = Set(bar).subtracting(FormattingDoor.condensed)
+            #expect(visible.contains(.commitTake))
+            #expect(visible.contains(.showBlockHistory), "the pair, at rest")
+            #expect(visible.contains(.blockComments))
+            #expect(visible.contains(.sealPost))
+            #expect(visible.contains(.deleteBlock))
+            #expect(visible.contains(.deleteNote))
+            #expect(Set(bar).intersection(FormattingDoor.condensed)
+                == FormattingDoor.condensed,
+                    "the whole cluster is still this bar's to render")
+        }
+        // **The registry ids are UNCHANGED** — the R6-2/13g slide-out class:
+        // rendering a door behind an expansion is still rendering it, so the
+        // declared ⇔ rendered walk is untouched by the fold.
+        #expect(Set(TakesBottomBar.renderedCapabilities)
+            .union(CommitBar.renderedCapabilities)
+            == CapabilityRegistry.doored(.bottomBar))
+    }
+
+    /// **WALK-DRIVEN: the real bar really is shorter at rest.**
+    ///
+    /// The value pin above holds what condenses; this holds that it condenses
+    /// — the same `CommitBar` mounted twice, folded and open, and the count of
+    /// real AppKit buttons in the subtree. (Class names are the honest probe
+    /// here for batch 3's measured reason: the AX tree is empty in this test
+    /// host, so a label-based pin would pass vacuously.)
+    @Test func theRealBarDrawsFewerDoorsAtRestThanWithAaOpen() async throws {
+        try await withEditor(seedBlocks: ["A block to stand in."]) { h in
+            let folded = try Self.mountedBarControls(h.model, expanded: false)
+            let open = try Self.mountedBarControls(h.model, expanded: true)
+            #expect(folded > 0, "the bar is really mounted, not an empty tree")
+            #expect(open > folded,
+                    "Aa slides doors OUT: \(folded) at rest, \(open) open")
+            // The cluster it hides is the formatting one, so the difference is
+            // at least its size — a fold that hid one button would be theatre.
+            #expect(open - folded >= FormatBar.renderedCapabilities.count - 2,
+                    "the whole cluster moved, not a token of it")
+        }
+    }
+
+    /// Mounts the REAL bar in a real window and counts the focusable controls
+    /// in its subtree.
+    private static func mountedBarControls(
+        _ model: EditorViewModel, expanded: Bool
+    ) throws -> Int {
+        let window = NSWindow(
+            contentRect: NSRect(x: 60, y: 60, width: 1200, height: 200),
+            styleMask: [.titled], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        defer {
+            window.orderOut(nil)
+            window.close()
+        }
+        let hosting = NSHostingView(
+            rootView: CommitBar(model: model, formattingExpanded: expanded)
+                .environment(ThemeStore(session: model.session)))
+        hosting.frame = NSRect(x: 0, y: 0, width: 1200, height: 200)
+        window.contentView = hosting
+        window.orderFrontRegardless()
+        for _ in 0..<20 {
+            hosting.layoutSubtreeIfNeeded()
+            window.displayIfNeeded()
+            pump(0.02)
+        }
+        return countControls(hosting)
+    }
+
+    /// How many focusable CONTROLS the mounted bar really has.
+    ///
+    /// `KeyViewProxy` is the AppKit view SwiftUI installs per focusable
+    /// control, and it is the honest probe available here: the bar's doors
+    /// are `VoicedButtonStyle` / `VoicedChip` — SwiftUI-drawn, so there is no
+    /// `NSButton` to count (measured, not assumed: an `is NSButton` walk
+    /// returned zero on a bar that is plainly full of doors), and the AX tree
+    /// this host would otherwise answer from is empty (batch 3's measurement).
+    private static func countControls(_ view: NSView) -> Int {
+        let mine = String(describing: type(of: view)).contains("KeyViewProxy") ? 1 : 0
+        return mine + view.subviews.reduce(0) { $0 + countControls($1) }
+    }
+
     // MARK: - Harness
 
     private func withNote(

@@ -16,10 +16,20 @@ import VariorumCore
 
 struct TakesBottomBar: View {
     let model: TakesViewModel
+
+    init(model: TakesViewModel, formattingExpanded: Bool = false) {
+        self.model = model
+        _formattingShown = State(initialValue: formattingExpanded)
+    }
+
     @State private var datePickerShown = false
     @State private var pickedDate = Date()
     /// N15's class: the bar's measured width — the one/two-row switch.
     @State private var barWidth: CGFloat = 0
+    /// Ledger row 28: is the formatting row slid out? Write's bar's twin —
+    /// session UI state, per bar (`FormattingDoor`'s own note), seeded at
+    /// birth for the same pin seam.
+    @State private var formattingShown: Bool
     /// 13l Act 2 (item 3): the note-delete confirm's pending ask — Write's
     /// bar's twin, so the two bars keep one grammar (R6-2's whole point).
     @State private var pendingDelete: NoteDeleteConfirm?
@@ -160,6 +170,12 @@ struct TakesBottomBar: View {
     var body: some View {
         VStack(spacing: 0) {
             Divider().overlay(tokens.line)
+            // Ledger row 28, Write's bar's twin: the formatting row slides out
+            // above the flat row, so nothing she was reaching for moves.
+            if formattingShown {
+                formattingRow
+                Divider().overlay(tokens.line)
+            }
             // Batch 9 (R101): the round-2 status-line grammar — quiet
             // voiced words on the room, never a bezel row. Every door
             // stays (R63); only the register changes. 13b 3F (N15's
@@ -199,6 +215,7 @@ struct TakesBottomBar: View {
             .padding(.vertical, 6)
             .background(tokens.room)
         }
+        .task(id: model.projection) { await model.refreshSegmentation() }
         // Ledger row 17: the FALLBACK host, Write's bar's twin — the pane's
         // named home is the post detail's inspector, and this bar also rides
         // surfaces that have none.
@@ -292,27 +309,48 @@ struct TakesBottomBar: View {
         Button(tokens.chromeLabel("comments")) { model.requestComments() }
             .buttonStyle(VoicedButtonStyle(tokens: tokens))
             .help("The block's comments — working remarks on a block, never per-take (⌘⇧')")
-        // 13b 4D (N34 — S4-14/S4-21): the one_block face — an in-view
-        // setting chip (the wash-chip class, recorded not declared) over
-        // the Phase-1 machinery; the honest consequence speaks on toggle.
-        // Refresh rides the bar at projection cadence (a segmentation
-        // change alone never moves the takes projection — the setter
-        // refreshes itself; an external change catches up next projection).
-        VoicedChip(
-            tokens: tokens,
-            text: model.newlinesMintBlocks
-                ? SegmentationFaceCopy.chipOn : SegmentationFaceCopy.chipOff,
-            on: model.newlinesMintBlocks
-        ) {
-            let mint = model.newlinesMintBlocks
-            Task { await model.setNewlinesMintBlocks(!mint) }
-        }
-        .task(id: model.projection) { await model.refreshSegmentation() }
-        .help(SegmentationFaceCopy.help)
-        // 13k K7: the formatting toolbar, in the same slot Write's bar gives
-        // it — one grammar across the two bars (R6-2's whole point).
         StatusDot(tokens: tokens)
-        FormatBar(tokens: tokens, status: model.session.status)
+        // Ledger row 28: Write's bar's Aa chip, here too — one grammar
+        // across the two bars (R6-2's whole point, and the reason the door
+        // and its row live in `FormattingDoor` rather than twice).
+        VoicedChip(
+            tokens: tokens, text: FormattingDoor.label, on: formattingShown
+        ) {
+            formattingShown.toggle()
+        }
+        .help(FormattingDoor.help(expanded: formattingShown))
+    }
+
+    /// What Aa slides out — Write's row, with this board's own newlines chip.
+    ///
+    /// 13b 4D (N34 — S4-14/S4-21): the one_block face — an in-view setting
+    /// chip (the wash-chip class, recorded not declared) over the Phase-1
+    /// machinery; the honest consequence speaks on toggle. Refresh rides the
+    /// bar at projection cadence (a segmentation change alone never moves the
+    /// takes projection — the setter refreshes itself; an external change
+    /// catches up next projection). **The refreshing `.task` rides the BAR,
+    /// not the row**, deliberately: the row is behind a fold now, and a chip
+    /// that only learned the truth once she opened the fold would be a stale
+    /// setting wearing a confident face.
+    @ViewBuilder private var formattingRow: some View {
+        HStack(spacing: 10) {
+            FormatBar(tokens: tokens, status: model.session.status)
+            StatusDot(tokens: tokens)
+            VoicedChip(
+                tokens: tokens,
+                text: model.newlinesMintBlocks
+                    ? SegmentationFaceCopy.chipOn : SegmentationFaceCopy.chipOff,
+                on: model.newlinesMintBlocks
+            ) {
+                let mint = model.newlinesMintBlocks
+                Task { await model.setNewlinesMintBlocks(!mint) }
+            }
+            .help(SegmentationFaceCopy.help)
+            Spacer()
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 5)
+        .background(tokens.room)
     }
 
     /// **note ▾** (R6-2): history, the seal, the entry date — Write's bar's
