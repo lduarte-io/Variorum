@@ -102,6 +102,17 @@ provisional; the kickoff sitting rules only the OPEN KNOTS section.
   door the encryption closed. (Grown from her *"allowing a non encrypted
   backup to be made … could also be an option"* + the adopted
   one-escape rule.)
+  **RIDER (author ruling, 2026-08-24 at the post-13l polish round's
+  #75 sitting — verbatim):** *"the automatic plaintext backup is
+  going to be ended 13p, when encryption is added, since it weakens
+  encryption. i think it can still be available to users that want
+  it, but it should be off by default once encryption is present."*
+  So: the 13l weekly `.md` insurance runs as shipped UNTIL this
+  phase; the moment encryption is present, the AUTOMATIC export
+  flips **OFF by default**, surviving as an opt-in for users who
+  want it (composing with this rider's own warn-under-Locked-down
+  sentence). The 13l unit was built grep-able for exactly this
+  moment (`MarkdownInsurance`).
 - **R13p-9 — Reminder checks + the reset door.** Periodic, dismissible
   "do you still remember your passphrase?" checks (her ask, the 1Password
   pattern), and the forgot-passphrase RESET door: any enrolled device
