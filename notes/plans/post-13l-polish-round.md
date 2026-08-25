@@ -907,6 +907,105 @@ went red. Neither was weakened:
    `App/Variorum/Variorum/` and `App/Variorum/Shared/` returns only two
    pre-existing doc comments (`NoteWindowView`, `QuickNoteView`).
 
+### BATCH 2 — THE IA PASS + THE TRASH RESHAPED: the brief (fresh Opus session; dispatches after batch 1's record)
+
+**Read in full first:** `CLAUDE.md` + canon · THIS FILE top to bottom
+(the rulings are the letter; the LIFECYCLE TABLE is the acceptance
+map — your rows are B2, K2, N3/N4's surface halves, T6's
+never-global clause) · the 13j **Environment traps** (binding
+verbatim) · the 13l plan's **ACT 7 — WALK RECORD** (context for A3's
+naming and the Trash surfaces) · batch 1's record above (its
+`RecoveryCopy` additions and `.deleteScrap` pattern are your
+precedents).
+
+**Scope — ledger rows 3 · 7 · 8 · 11 · 18 · 21 · 22 · 25.** May land
+as two commits (the IA doors · the Trash reshape). Fences: zero
+schema (EVERYTHING here is read-side over `archived_at`/existing
+rows) · zero `Sources/VariorumCore/Sync/` (`Queries`/`Operations`
+changes are fine) · G5/C1's tray panel is batch 3's · the Block
+History pane is batch 4's · versions are batch 5's (but see row 8's
+classifier note below — you build the EXCLUSION now).
+
+- **Row 7 (B1, her words in §B):** the Library's upper-right ⋯ menu
+  DISSOLVES — the Trash door becomes a **trash icon** in the Library
+  masthead; "Open the Tutorial" moves to the **Help menu** (the
+  shell's fire-and-DO act, unchanged). Registry P-1: doors move,
+  declarations updated. The tutorial SPINE may assert the old door
+  mechanically — re-pin the door path (mechanical only; lesson
+  CONTENT re-teaching is batch 6's/D2).
+- **Row 8 (B2, her words in §B):** **the Archived sidebar item —
+  archived NOTES only.** A sidebar item beside the standing four
+  (place it after Blocks — propose differently in-batch if the IA
+  argues otherwise: implementer proposes, architect rules). The
+  surface: archived, non-deleted, `kind='post'` notes, Library-shaped
+  (cards/list + the CATALOG-level search scoped to it — her
+  "search it separately"; body-text search stays 13o's).
+  **The V1 classifier, built here as the exclusion:** version
+  history = BORN ARCHIVED (`archived_at == created_at`, the
+  same-clock birth fact) AND carrying a `version_of` edge to a live
+  note — such rows NEVER list here (their home is Note ▸ Versions,
+  batch 5). Build the query arm + pin now (no such rows exist yet —
+  batch 5 mints them; your pin seeds one by hand). Unarchive →
+  Library; Delete → the Trash (N3's row). The naming through shared
+  copy homes. The recovery surface it leaves behind becomes **the
+  Trash, plainly** — `RecoveryPath`'s label and every sentence that
+  said "Archived & Deleted" follow (A5's one-noun confirm already
+  says the Trash — keep them aligned). Mobile gates run (shared copy
+  moves).
+- **Row 11 (D1, her ruling in §D):** **takes leave the global
+  Trash** — the deleted-take LISTING arm and its filter chip come
+  out (the DATA and the clock are untouched; T6's homes are batch
+  3's note-level audit + batch 4's Block History). The Trash lists
+  **notes · books · blocks**. Record the known transient: until
+  batches 3–4 land, deleted takes have no listing (mid-round state,
+  in-round only).
+- **Row 3 (A3) + row 22 (G7, incl. the tenth-sitting extension):**
+  block rows **group under a small note-name header** (the note
+  itself rows only if IT is deleted) — the grouping IS the naming;
+  "Open note" renders only where the home note is alive, legible
+  under named headers. **The ancestors clause:** when deleting a
+  live block strands preserved ANCESTORS onto the family clock, the
+  Trash shows those ancestors NESTED UNDER the just-deleted block's
+  row (her words: *"going to trash shows you what you just deleted
+  rather than suddenly being overwhelmed by 31 random items"*). The
+  8b nets (the move, its receipt) byte-unchanged — this is their
+  FACE.
+- **Row 21 (G6, her ruling verbatim in the ledger):** **Empty Trash
+  purges exactly what it rows** — notes · books · blocks + their
+  families (a rowed block's own takes go with it); individually-
+  deleted takes on LIVING blocks are untouched by the door and
+  expire on their own 30-day clock. The confirm counts what it
+  rows. **The honesty caveat in the copy:** sparing from Empty
+  Trash is NOT keeping — the clock still runs; restoring is the
+  keep road. NO "delete absolutely everything" button (her lean;
+  recorded, unbuilt). This SUPERSEDES 13j round-8's
+  everything-always — the canon delta is the CLOSEOUT's to write;
+  you build and pin the new scope. Red-on-old: the old scope's pin
+  flips — strengthen in place with the mechanism stated.
+- **Row 25 (found-item 2):** verify ONE clear archive-a-note door
+  exists (the Library row menu is the natural candidate — add it
+  there if missing, registry-declared); its receipt names the
+  Archived surface by its new name. N3's lifecycle row is your
+  acceptance: Archive → the Archived surface; Unarchive → Library;
+  Delete → Trash; never rides any deletion.
+- **Row 18 (G3):** sweep **"unplaced"** from every user-facing
+  surface, receipt, and menu label (debug vocabulary only — grep
+  the app targets; `Queries.unplacedBlocks`/`unplacedOrigins` etc.
+  KEEP their names, they are code). A preserved original reads as
+  *set aside by the merge — kept until its family goes* (draft the
+  final strings through the shared copy homes; her wording in the
+  ledger row is the sense, yours is the sentence). The SEMANTIC
+  fold is DECLINED (the ledger row records why) — presentation
+  only.
+
+**Discipline:** the standing loop — red-on-old by behavioural revert
+for bug-class fixes, walk-driven pins for door moves (drive the real
+surface — the 13l lesson) · spine green BY TYPE NAME · full four
+gates with counts quoted (mobile runs — shared copy is touched) ·
+instance check before build-adjacent acts · commits staged by
+explicit path, conventional trailer, NEVER push. **Append "### BATCH
+2 — RECORD" below this brief**, flip your ledger rows, and STOP.
+
 ## Constraints
 
 Zero schema (B2 is read-side over `archived_at`; if ANYTHING firms
