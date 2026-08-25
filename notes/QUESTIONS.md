@@ -947,4 +947,22 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint.**
 
-*(Next free number: **#80**.)*
+80. **2026-08-25 · THE POST-13L POLISH ROUND — your ratify bundle · SIX entries.** The BINDING record is `notes/plans/post-13l-polish-round.md` (the ledger, the ladder's three rounds, the batch records). Every RULING you made in the round's twelve-plus sittings was built as ruled; these are the shapes left to you, none blocking.
+
+    **(a) The came-from restore button's wording: "Bring back" — PROVISIONAL, drafted at batch 4.** Your ask: shorter than "add as block again to the note." The draft's reasoning: deliberately NOT "Put back" (that returns something taken away; this returns something never deleted, only set aside whole after a merge), not "Restore" (means a savepoint one region above). Rename at will — one string.
+
+    **(b) The Block History pane is REQUEST-SCOPED with your jump button — ratified by you mid-round; the residual shape is the came-from tray door rendering on every origin row** (not only clocked ones). Harmless (the tray simply shows its sections), but the door's copy reads best when the original is clocked. Batch 4's PROVISIONAL; one availability rule if you want it.
+
+    **(c) Promote is the Versions pane's only permanent one-way act with NO confirm** (ladder LR1-7). Restore confirms, Delete confirms; Promote fires instantly and version-hood is unrecoverable by pinned derivation. One mis-click beside Restore permanently removes a moment from the listing. The alternatives: a confirm (the confirmation-consistency principle reads either way — it is container-scale but also non-destructive), or leave it fast.
+
+    **(d) The RESTORE confirm exists (the scale clause) — yours to strike.** Batch 5 gave restore a confirm because it replaces the whole note's content; the counter-read: it always saves NOW first, so nothing is ever at risk and the confirm is friction on a safe act.
+
+    **(e) Batch 5's sharpest PROVISIONAL (the ladder's own emphasis): the restore's Delete Now road takes STRANDED ANCESTORS with it** — your instant-hard-delete ruling meeting your "ancestors die with you" ruling. Concretely: restoring a version hard-deletes the outgoing blocks; preserved originals whose whole family that was go with them, and their unshown FAN TEXTS then survive nowhere (the version of NOW copies only PLACED blocks' fans). Built to your rulings' letter; the alternative — routing restore's outgoing blocks through the ordinary Trash — is the "Trash noise" your eighth-sitting ruling declined. Say the word if the meeting of the two rulings lands differently than you pictured.
+
+    **(f) The phone's deleted-take DARK WINDOW (ladder LR1-3's product half): interim rows, or wait for mobile batch 6?** Takes left the global Trash on BOTH platforms in-round (your D1); the Mac's replacement homes shipped in the same round, but the phone's land at mobile batch 6 — until then a take deleted ON THE PHONE is invisible and un-restorable there (its clock runs; the Mac recovers it). The options: accept the window (batch 6 closes it), or a one-line interim (the phone's Trash temporarily lists takes again, against D1's letter). Your call on timing; the mobile plans (§69) and MobileSoul PL-14 carry the design either way.
+
+    **Also standing from the round, not questions:** the Terminal/Study hue overlap (positive == chosen in all four voices — 13s's palette pass, the doc now says so honestly); the LR1-4 purge-family row (a note's Delete Now spares its version rows — KnownIssues, owner 13w).
+
+    **Status: open — walk at your morning look-over.**
+
+*(Next free number: **#81**.)*

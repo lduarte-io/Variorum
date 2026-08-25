@@ -335,7 +335,7 @@ column below CITES that map; it never competes with it.
 | **M3** | **Copy the whole note** — masthead door, markdown, receipt | R6 | 2 | **BUILT** (§26). Its selection rule was superseded by R15 → **M23** |
 | **M4** | **Keyboard-bar spacing** — real air under Aa · ⑂ · ⋯ | R7 | 2 | **BUILT** (§26), retuned at **R12** (§35), reshaped by **R22** (§38). §45's 2 MAJOR open (the 320 pt overflow) |
 | **M5** | **Home-screen quick note** — mint-as-you-type, saved indicator, ⏎ opens the editor | R5 | 3b | **BUILT** (§38). **§45's Q1/Q2 BLOCKERs open** — first in the consolidated fix round |
-| **M6** | **PL-11 — Trash, deletion & recovery faces**, incl. the real deletion buttons | R4 + PL-11 | 4 (PR1·PR2·PR4·PR7) + 6 (PR3·PR5·PR6·PR14·PR15·PR22) | **HALF SHIPPED** — batch 4 landed (§46); the per-note recovery half is batch 6 |
+| **M6** | **PL-11 — Trash, deletion & recovery faces**, incl. the real deletion buttons | R4 + PL-11 | 4 (PR1·PR2·PR4·PR7) + 6 (PR3·PR5·PR6·PR14·PR15·PR22) | **HALF SHIPPED** — batch 4 landed (§46); the per-note recovery half is batch 6 — **⚠️ batch 6 now builds to the POST-13L POLISH ROUND's ruled design, §69 below (her token instruction) — read it BEFORE any PR3/PR5/PR6/PR15 work; the mid-design it supersedes must not reach the phone** |
 | **M7** | **PL-10 — Takes & block management doors** | R4 + PL-10 | 7 | scheduled |
 | **M8** | **PL-9 — the account sheet's phone judgment** | R4 + PL-9 | 8 (PR16) | scheduled |
 | **M9** | The parity inventory's MISSED-capability sweep | MobileSoul §6 protocol | — | **CLOSED 2026-08-22 against the inventory's §4(b)** — see the note below |
@@ -5505,3 +5505,65 @@ HERS**, and it is added to the handoff's OPEN WITH HER list rather than
 decided here. *(If she wants (c), it is not a mobile batch: it is a
 conversation with the Fragments side first, on the standing rule that
 this repo's agents never touch `~/dev/fragments`.)*
+
+## §69 — BATCH 6 INHERITS THE POST-13L POLISH ROUND's RULED DESIGN (written at that round's closeout, 2026-08-25, at her token instruction — *"It's really good we got such a strong design done before a mid design had propagated to mobile"*)
+
+**The binding record is `notes/plans/post-13l-polish-round.md`** (her
+ten-plus sittings' rulings verbatim, the V1–V9 review pass, THE
+LIFECYCLE TABLE — the post-round truth, grain-ordered). MobileSoul
+**PL-14** is the parity row. What batch 6 builds — and does NOT:
+
+1. **The FIVE-PLACES MAP is the design's north star** (tie-breaker for
+   every face call): everything a user ever had is in exactly ONE of —
+   where you left it · **Archive** (notes, forever) · **the Trash**
+   (what's leaving: notes·books·blocks, 30 days) · **this note's
+   VERSIONS** (moments you saved) · **this block's HISTORY** (its
+   takes, savepoints, and ancestry).
+2. **Takes NEVER row in a global Trash** (`TrashScope`, shared —
+   already live on the phone). **The phone currently has a
+   deleted-take DARK WINDOW** (invisible + un-restorable on-phone
+   until this batch's faces land; recoverable via the Mac) — recorded
+   at the round's ladder (LR1-3), OPEN and hers to time; her handoff
+   carries the interim question.
+3. **The per-note tray face** (PR3's true shape): three sections —
+   **Archived** (kept, forever, no clock) · **Leaving** (every clocked
+   thing of THIS note: blocks, plus its deleted takes under a
+   COLLAPSED-BY-DEFAULT disclosure, each take naming its block and
+   carrying **Put back** + **Delete Now** with confirm-EVERY-time) —
+   and **NO unclocked-originals section**: preserved originals while
+   unclocked are LINEAGE-ONLY (the Block History twin's came-from).
+   Clocked originals join Leaving when their family clock starts.
+4. **The Block History twin** (absorbs PR15's History-past region and
+   the lineage-door row): ONE cohesive face per block — every live
+   take's savepoint run (focused expanded) · archived takes
+   (Unarchive) · deleted takes (clocks + Put back; **NO purge door
+   here** — purge doors live in TRASH SURFACES only, her evolved
+   rule) · **came-from**: ALL of a merge's originals, each with a
+   one-button `placeBlock` restore (the Mac's wording draft: "Bring
+   back"). On the Mac this pairs with commit in the bottom chrome
+   ("history is the natural pair to commit") — the phone's placement
+   is a face call made under that teaching intent.
+5. **ARCHIVE/TRASH SEPARATION: do NOT improvise the phone's IA.** Her
+   ruling (verbatim in PL-14): the phone mimics the Mac's decided
+   surfaces *"in some way that works for mobile"*, settled at its
+   **own design session proposing different designs to her as HTML
+   mockups**. That session precedes (or opens) this batch's
+   surface-IA half; the phone's combined "Archived & Deleted" is
+   known-interim by her word.
+6. **The VERSIONS face** (new owe, PL-14(f)): Note ▸ Versions — the
+   ops are core (`saveNoteVersion` / `restoreNoteVersion` /
+   `promoteNoteVersion`; the born-archived+sealed classifier already
+   auto-hides versions from every phone listing). The phone's door
+   and listing shape is a design call (the same design session is the
+   natural home). One line owed regardless: the phone's Put
+   back/Delete Now accessibility labels are version-blind (LR2-4).
+7. **Free by construction, verify-don't-rebuild:** Empty Trash takes
+   exactly what it rows + the saved-version counts (shared copy);
+   the Trash's note-grouping brains (`TrashGrouping`, shared); the
+   alarm/positive voice tokens; the fence sentence; the evolved
+   purge-door rule binds the phone identically.
+8. **The guide's deletion chapter** (this batch's row): the Mac's
+   field guide now teaches the five places, ⌘S vs ⌘⇧S as two sizes
+   of moment, and the TWO EXITS taught by doing ("deletion goes to
+   the Trash; transformation goes to lineage") — the pocket guide
+   re-teaches to the same map in phone grammar.

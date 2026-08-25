@@ -1,5 +1,23 @@
 # Whole-note version history — a design brief
 
+**ANNOTATION (the post-13l polish round's closeout, 2026-08-25 — the
+row-13 obligation):** **the MANUAL half of this brief's question is
+FULFILLED** — her floated shape shipped as the round's Versions
+family (`saveNoteVersion` ⌘⇧S · Note ▸ Versions · identity-preserving
+restore · promote · versions riding the note's deletion; AppSpec §9's
+entry + `notes/plans/post-13l-polish-round.md` are the record). §3's
+load-bearing observation held up: no schema was needed because the
+manual door is a full family COPY, not a snapshot — the pointer-shaped
+snapshot of §4 remains the AUTOMATED future's question. **That future
+is now master-plan row 13w** (her floated auto-rotating versions),
+and the shipped listing carries a `cadence` slot precisely so 13w's
+automated rows fill the SAME surface with nothing redesigned; §4's
+purge knot and §5's retention knot (the manual door deliberately has
+none — V7's named cost) are 13w's design sitting's. §5 knot 5
+(naming) was answered by the round: the block's past is the **Block
+History pane** (beside commit), the note's moments are **Versions** —
+two names, two grains, taught as such.
+
 **Status: a BRIEF, binding nothing.** Written as a Phase 13j deliverable
 (batch 7) under the author's S4-16 deferral condition — *deferral moves work
 in time, never into vagueness*. It exists so a future design sitting can start
