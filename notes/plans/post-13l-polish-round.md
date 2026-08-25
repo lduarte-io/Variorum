@@ -194,6 +194,7 @@ plus the archive/trash separation are expected to dissolve it.
 | 25 | Found-item 2: the archive-a-note door verified/ensured (one clear door, receipt naming the Archived surface) — rides B1's registry pass | **done** `47c0cb7` — the door existed in two row menus, undeclared and SILENT; now `.archiveNote` is declared, both renderers read its verb, and `LibraryViewModel` gained a receipt slot that names Archived and its absence of a clock |
 | 26 | The tutorial chapter (row 19) teaches the VERSIONS story too: ⌘S vs ⌘⇧S — this take's moment vs this note's moment — the grain pairing as the lesson | open |
 | 28 | **done** `7220086` — nine controls behind one `Aa` chip on both bars, the row sliding out ABOVE the flat row; registry ids unchanged (the R6-2/13g class); measured 9 at rest / 18 open on the real mounted bar. **THE Aa BOTTOM-CHROME CONDENSATION (her kickoff addition, 2026-08-24 — verbatim in the kickoff record; SCOPE RULED at the kickoff sitting via the question tool): FORMATTING ONLY BEHIND Aa.** The `FormatBar` cluster + the newlines chip condense into one Aa button; clicking Aa slides the formatting row out (the phone's Aa expanding-row idiom, now on the Mac — a reverse-parity face like dark mode). Block ▾ · Takes · commit ⌘S · **History (row 17's new door)** · note ▾ · comments · counts · ? all stay visible at rest — the "bar becomes the block's time controls" reading survives by construction. Both bars (`CommitBar` + `TakesBottomBar`) take the same treatment; registry discipline P-1 (doors move, declarations unchanged — the R6-2/13g slide-out precedent is exactly this class); expansion state is session UI state | open |
+| 33 | **THE PANE'S CURRENT-BLOCK JUMP (her 2026-08-25 refinement on the ratified request-scoping):** when the caret has moved to a different block than the Block History pane shows, a small in-pane button jumps to the current block's history — no close-and-reopen. Batch 6 rider | open |
 | 32 | **done** `014f409` — one string in the shared home, its pin strengthened to assert the road is named. **THE FENCE SENTENCE (#77(a), her ruling "Name the road instead"):** the scraps-area delete fence's refusal becomes *"Scraps go one at a time — delete the scraps themselves."* — one string in the shared home, pin updated. Batch 4 | open |
 | 31 | **done** `014f409` — the STANDING decides its own tone (`.quiet`/`.settled`/`.attention`, shared with the phone) and the pane renders a voice token; the literal `Color.orange` is gone and signed-out stays quiet (#75(d)). **GENTLE GREEN ON FULLY SYNCED (#75(c) rider, her words: "a gentle green on fully synced might look nice"):** the sync-status line's everything-sent state wears a gentle green — via the voice vocabulary (a quiet positive tint beside row 29's error token; no literal colours). Batch 4 | open |
 | 30 | **ANCESTORS COLLAPSIBLE (her mid-round refinement on the ratified G7):** the nested-ancestors run under a just-deleted block's Trash row gains a dropdown-arrow disclosure — expanded by default, collapsible at will. Builds in batch 5 (already in the grouping for version rows) | open |
@@ -1618,9 +1619,29 @@ NEVER push. **Append "### BATCH 4 — RECORD"**, flip rows 10, 14,
 
 **THE CHECKPOINT BUNDLE so far (hers, at the round's taste
 checkpoint):** the came-from wording draft ("Bring back") · the
-canvas delete-door question · pane request-scoped vs caret-following
-· the came-from tray door on unclocked rows · the DerivedData-copy
-note · the walk of everything built.
+came-from tray door on unclocked rows · the walk of everything
+built. *(Three items RESOLVED at her 2026-08-25 sitting — below.)*
+
+### Her 2026-08-25 sitting rulings (mid-batch-5; verbatim-faithful)
+
+- **Canvas block-delete: NO** — *"I don't think canvas needs block
+  delete."* The F1 RECORDED item closes as a ruling: the canvas
+  keeps no deletion door; nothing built, nothing owed.
+- **The History pane's scoping RATIFIED with one refinement:**
+  *"i think the history pane staying on the block you asked about
+  is fine, but if you've changed blocks there should be a small
+  button or something to show current block's history, so you
+  don't have to close it and reopen it."* — request-scoped stands;
+  when the caret sits in a DIFFERENT block than the pane shows, a
+  small in-pane button jumps the pane to the current block.
+  **Ledger row 33**, batch 6 (a small build rider before the
+  teaching).
+- **The `/Applications` refresh authorized at the round's close:**
+  *"i've also closed the variorum i was running, you can refresh
+  applications when this whole note is done."* — her explicit
+  authorization for the closeout's refresh (behind the A1 rail,
+  zero-instance re-check as always). The DerivedData-copy note is
+  discharged — she closed it herself.
 
 ### BATCH 5 — THE VERSIONS FAMILY: the brief (fresh Opus session; dispatches after batch 4's record)
 
