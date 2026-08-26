@@ -246,13 +246,23 @@ re-open them:
   library is a place you can be, should we name the default library
   something more distinct? i'm a bit conflicted on what to name it"* —
   and she floated reserving a name (*"I feel like we can reserve that
-  name"*). The collision to resolve at the sitting: the sidebar's
-  **Library** item means "all notes," and a LEVEL also called library
-  overloads the word. Candidates on the table (Fable's, for the
-  sitting): name the default **"Home"**, keep "library" as the
-  level's term, and rename the sidebar item "All Notes"; or reserve
-  **"Library"** as the default's name and rename the sidebar listing
-  instead. Hers.
+  name"*). **RULED FURTHER, 2026-08-25 round 3: the sidebar KEEPS
+  "Library"** (*"I need the sidebar to keep library"* — "All Notes"
+  declined) **and the default instance IS named "Home"** (*"I do like
+  it being called Home"*). **What stays OPEN is the LEVEL's name** —
+  what each variorum instance/grouping is called (*"i'm conflicted on
+  what each variorum instance should be called"*; Obsidian's "vault"
+  noted, more suggestions asked). Candidates for the sitting
+  (Fable's): **Wing** (a library's wings — the Home wing, the Imports
+  wing; on-theme, zero collisions, "New Wing…"/"Move to Wing…" read
+  naturally), **Branch** (real library-system vocabulary — separate
+  locations, one system; slight git flavor), **Stacks** (library
+  stacks), **Vault** (Obsidian's word; collides with the suite's
+  internal key vault), **Space** (the safe generic), **Room**. Note
+  recorded with them: the choice is lower-stakes than it feels — with
+  the sidebar keeping Library and the switcher showing just "Home ▾",
+  the level's word surfaces mainly in Settings and menu verbs. Hers
+  at the sitting.
 - **Mac UI sketch, hers:** *"the mac os UI would probably have what
   library you're in (if you have multiple) right above the shelf,
   with a drop down selector, for looking at your shelf."* (And her
@@ -283,3 +293,64 @@ tutorial-chapter addition above gains this as its core lesson:
 membership-not-ownership taught by doing, PLUS the multi-book edit
 story and the smart-book/tag story in plain words. The
 whole-actual-book lens joins the sitting's agenda.
+
+## The ownership feel (her round 3, 2026-08-25): a book that really OWNS its notes
+
+Her words, verbatim-faithful: *"I think having a book where it's
+clear that book really owns every note in the book is what books are
+missing in FEEL to me - it should be a setting that you can do
+besides just locking it. Because if you're just seeing a bunch of
+notes in a row, and editing in the book view, where you see notes on
+top of each other, the idea that those notes have other membership is
+super unclear."* And: *"making books be able to fully own their notes
+I feel like is an important step somehow ... and equally knowing that
+it won't get edited outside of it. I feel like maybe I need an
+EXCLUSIVE type of book / note relationship? maybe that's what I
+want? help me think through the pros and cons here."* Plus the badge
+idea: *"maybe a small book icon per note when you're in the book
+view, only when they're in other books as well? or all the time?"*
+
+Her direct question, answered at the sitting (a fact, not a change):
+locking a book TODAY copies nothing and seals nothing — `reading.locked`
+freezes STRUCTURE only; text-immutability at book level is knot 10's
+floated shape (auto-diverge shared posts + seal sole members),
+unbuilt, this sitting's to rule.
+
+**The candidate shape sketched at the sitting (Fable — for the
+sitting to rule, refine, or reject): the per-book OWNED setting**,
+opt-in per book and never the default (pillar 3's many-books power
+stays the norm):
+
+1. Notes minted inside an owned book are born its own.
+2. Adding an outside note offers MOVE-in (if bookless) or COPY-in
+   (if shared elsewhere) — never a shared pointer.
+3. An owned book's notes refuse other memberships while owned.
+4. Opening one of its notes ANYWHERE opens it in the book's context —
+   the honest answer to "knowing that it won't get edited outside of
+   it": edits are always *in the book*, without hiding the note from
+   the Library (Library = everything, R32, survives).
+5. Un-owning / removing releases the note bookless (the Pool lists
+   it) — nothing destroyed; the pointer religion intact underneath.
+   OWNED is an operations-layer constraint plus a surface rule, never
+   containment in the schema.
+6. Knot: smart-book assembly vs ownership — does a smart book's
+   derived assembly SHOW an owned note (with a badge) or EXCLUDE it
+   (strong ownership)? Sitting call.
+7. Composition prize: locking an OWNED book needs no diverge ceremony
+   at all — sole-owned members just seal, so knot 10 simplifies.
+
+**Pros:** the whole-book author's mental model ("these notes ARE my
+book"); an honest editing home; simpler book-lock; exactly the FEEL
+she names. **Cons/costs:** it bends the deliberate
+posts-are-non-exclusive asymmetry (opt-in keeps the model whole, but
+the promise must be defended at every door); enforcement is op-level
+with an apply-time sync-repair rule (a cross-table constraint no
+partial index can carry — two devices racing an exclusive add need a
+deterministic repair, the SyncSpec §7 pattern); and the
+smart-assembly knot above.
+
+**The badge (separable — rides this phase either way):** a small book
+icon on a note in book view when it has OTHER memberships.
+Recommendation recorded: only-when-shared (the badge then MEANS
+something; all-the-time is noise), count/names on hover; the editor's
+membership chip is the existing sibling surface.
