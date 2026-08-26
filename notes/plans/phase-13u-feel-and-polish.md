@@ -1,5 +1,22 @@
 # Phase 13u — Feel & Polish (EXECUTION PLAN)
 
+> **⚠️ SPLIT BANNER (2026-08-26, the launch-strategy sitting — read
+> this before the plan body).** The author SPLIT this row into TWO
+> phases: **13u1 — the editor seam** (items 5, 7, 8, 9, 12) and
+> **13u2 — feel & faces** (items 1, 2, 3, 4, 6, 10, 11, 13, 14, 15,
+> 16 — items 14–16 joined 2026-08-25/26, after this plan was
+> authored), with **ONE shared kickoff sitting** ruling both halves
+> and 13u1 proposed first. Her words: *"it seems like 13u has gotten
+> really really big for one phase... I feel like it's too big for one
+> phase without at least one midphase cutover."* The binding split
+> record is the master plan's `### 13u` section (its SPLIT block at
+> the top). **The 13u1 kickoff's first act is executing this file's
+> split** — this plan's execution shape (reading order, sitting
+> agenda, batches, obligations) remains the raw material for both
+> halves. Sequencing note: the intro below predates two
+> re-sequencings — the running order now reads 13p → 13u1 → 13u2 →
+> 13i → … with mobile catch-up post-launch.
+
 **STATUS: READY — authored 2026-08-24 during 13l's night watch and
 FINALIZED at 13l's closeout the same day** (finals filled; the hang
 lead in item 1 arrived from 13l's ladder). She runs this phase

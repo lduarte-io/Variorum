@@ -261,8 +261,14 @@ re-open them:
   internal key vault), **Space** (the safe generic), **Room**. Note
   recorded with them: the choice is lower-stakes than it feels — with
   the sidebar keeping Library and the switcher showing just "Home ▾",
-  the level's word surfaces mainly in Settings and menu verbs. Hers
-  at the sitting.
+  the level's word surfaces mainly in Settings and menu verbs.
+  **RULED, 2026-08-26 (round 4): WING.** Her words: *"let's go with
+  Wing. It's architectural and a bit delightful - I also think that
+  it evokes more of a different room in the same house rather than
+  the true separation of a git branch."* So: the level is a **wing**;
+  the default wing is **Home**; the sidebar keeps **Library**. The
+  sitting's residue is only the vocabulary sweep (menu verbs,
+  settings copy, the tutorial's sentence).
 - **Mac UI sketch, hers:** *"the mac os UI would probably have what
   library you're in (if you have multiple) right above the shelf,
   with a drop down selector, for looking at your shelf."* (And her
@@ -354,3 +360,50 @@ icon on a note in book view when it has OTHER memberships.
 Recommendation recorded: only-when-shared (the badge then MEANS
 something; all-the-time is noise), count/names on hover; the editor's
 membership chip is the existing sibling surface.
+
+### Round 4 (2026-08-26) — her rulings on the sketch
+
+- **Book-level text immutability is REQUIRED scope, no longer a
+  floated knot** — her words: *"eek - we definitely need book level
+  text immutability."* Knot 10 graduates from agenda to deliverable:
+  this phase SHIPS the book-level lock (the sitting still rules its
+  exact shape — and the composition prize above stands: on an OWNED
+  book it needs no diverge ceremony at all).
+- **Opt-in confirmed, and the ASYMMETRY BEND ACCEPTED, verbatim:**
+  *"I think it's fine for it to bend the deliberate posts are non
+  exclusive asymmetry - right now the 'Book' concept is just a bit
+  too weak for it to feel useable, so notes will have to lose a
+  little ground to let books be stronger."*
+- **The conversion door is RULED IN:** *"you should be able to
+  convert a book to it and have it make copies of its [notes]"* —
+  converting an existing book to Owned COPIES its SHARED members
+  (mechanism note: per note this is exactly 13f's
+  `divergePostForReading` composite — the copy takes this book's
+  slot, the original keeps its other books); sole members become
+  owned in place, no copy needed.
+- **Un-owning, clarified at the sitting — BOTH doors exist:** (a)
+  removing ONE note from an owned book releases it bookless (what
+  sketch point 5 meant); (b) turning the whole book's Owned setting
+  OFF is the symmetric door — members stay members, the exclusivity
+  just lifts. Conversion-time copies persist as the independent
+  notes they are; nothing is destroyed by either door.
+- **The smart-book knot, walked at the sitting** (her question:
+  *"I don't see why a smart book couldn't be an owned book, but tell
+  me what you were thinking of"*): the dissolution is that ASSEMBLY
+  IS A VIEW and MEMBERSHIP IS ROWS. Smart assembly may SHOW anything
+  — an owned note appearing in a smart book is display, not
+  membership, and the badge marks it — while ownership constrains
+  membership rows. A FULLY-owned smart book (exclusive collection)
+  would break her own daily pattern: Journal-membered entries
+  carrying a period tag could not be collected by the period book.
+  What CAN exist as a designed option: **the CLAIMING smart book** —
+  an owned smart book that claims BOOKLESS tagged notes into real
+  owned membership on arrival (materialize-and-claim), leaving
+  already-membered notes alone (shown-with-badge or skipped —
+  sitting call). Recorded beside the plain rule for the sitting.
+- **Sketch point 4 (opens in the book's context) was EXPLAINED at
+  the sitting** — any door (Library, search, a tag listing) lands
+  you INSIDE the book at that note, the book's chrome present, so no
+  out-of-book editing surface exists for an owned note; the weaker
+  alternative (open standalone under a loud "part of [Book]" banner)
+  recorded beside it. Her word pending.
