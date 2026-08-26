@@ -406,4 +406,55 @@ membership chip is the existing sibling surface.
   you INSIDE the book at that note, the book's chrome present, so no
   out-of-book editing surface exists for an owned note; the weaker
   alternative (open standalone under a loud "part of [Book]" banner)
-  recorded beside it. Her word pending.
+  recorded beside it. **ANSWERED at round 5 (2026-08-26) — see THE
+  BOOK PANEL below: the strong shape is DECLINED as default
+  navigation** (*"clicking on a note from the library still brings
+  you into that note"* — the standalone view keeps canvas, takes,
+  and the fuller toolset, *"more strictly useful"*); **the panel is
+  the bridge**, and its click-through gives the
+  scrolled-into-the-book road on demand.
+
+### Round 5 (2026-08-26) — THE BOOK PANEL (her design: the step up from notes into books)
+
+Her words, verbatim-faithful: *"maybe the answer is rather than a
+banner or a simple chip, there's a book table of contents kind of
+view with chapters + notes that becomes available in the right side
+pane and you can reorder the notes / chapters and drag them within
+that view or click on it open the book view already scrolled into
+the note from there? I think that would make it feel more like it
+was within the book and should actually be available on all notes -
+but for notes that are shared between books, you switch out what
+book you're look at at the top of it."* And the crucial insight,
+hers: *"in a side panel it's collapsible, but that right now notes
+feel disconnected from books because the chip is the only insight -
+we need a better step up from notes into books that bridges the gap,
+while still being close able so the chrome stays clean for focused
+writing."*
+
+The shape, recorded as her DIRECTION (details the sitting's):
+
+- A **collapsible right-side-panel Book TOC** on EVERY membered note
+  (joining scraps / reference / tray as a panel icon): the current
+  book's chapters + notes, the open note marked.
+- **Reorder and drag INSIDE the panel** — notes and chapters alike;
+  pure composition over the existing ops (`reorder`,
+  `reorderSection`, `assignPostToSection` — the 13f drag machinery's
+  targets; no new semantics anywhere).
+- **Click-through**: a note row opens the BOOK VIEW already scrolled
+  to that note — the on-demand form of the declined always-navigate
+  shape.
+- **The book switcher at the panel's top** when the note is shared
+  between books.
+- **Closable** — the chrome stays clean for focused writing; the
+  membership chip remains the zero-space insight and the panel is
+  its step-up.
+- **Navigation unchanged**: the Library click opens the standalone
+  note, always.
+- Sitting notes: the in-book-view badge above composes with or falls
+  away beside the panel (different surfaces — both or one, her
+  call); the P3/pane discipline binds (bounded query, lightweight
+  rows — and the KnownIssues tray/Block-History refresh-frequency
+  row gains a sibling if the panel observes at autosave rate);
+  OWNED books keep their membership semantics underneath — **the
+  panel answers the FEEL half for ALL notes; ownership answers the
+  exclusivity half for owned ones.**
