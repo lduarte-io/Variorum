@@ -19,6 +19,23 @@
 > three review/fix steps owed · 4.5c and 4.5e never ran and have SHRUNK
 > (their Mac and `Shared/` work moved to 13l and 13u at her ruling) ·
 > then batches 5–8, two standing review passes, and closeout.
+>
+> **⚠️ RESUMPTION RE-SEQUENCED (2026-08-25/26, the launch-strategy
+> sitting — her confirmed order):** mobile now resumes **AFTER the Mac
+> v1 HARD LAUNCH and 13n**, not after 13u (the old 13l → 13u → mobile →
+> 13p order is superseded; the master plan's RUNNING ORDER governs).
+> What that changes for the resuming session: **(1)** 13u SPLIT into
+> **13u1** (the editor seam — items 5/7/8/9/12) and **13u2** (feel &
+> faces) — the §2b HANDBACK CHECKLIST now verifies BOTH halves' items;
+> **(2)** 13p ran BEFORE mobile and its **Batch 4 shipped the phone's
+> encryption faces inside that phase** (Face ID at open, the locked
+> lobby, settings/presets, locked-note gates) — verify landed, don't
+> rebuild; **(3)** more Mac phases (13i wings/Owned/Book-Panel, 13o
+> search, 13y, 13x) closed before resumption, so the PARITY LEDGER
+> (`notes/MobileSoul.md`) carries accrued rows the old batch map does
+> not know about — read the ledger before planning batches; **(4)** the
+> quick-capture ruling mobile batch 4.6 composes to is 13u1's item 9
+> now (not "13u's").
 
 **Written 2026-08-22 at the author's instruction.** The outgoing seat is
 past the ~500k context line (her call: *"I think I'm going to need you

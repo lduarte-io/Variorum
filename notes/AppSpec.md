@@ -249,7 +249,7 @@ CREATE UNIQUE INDEX uq_reading_post_live ON reading_post(reading_id, post_id) WH
 CREATE INDEX idx_reading_post_order ON reading_post(reading_id, position);
 CREATE INDEX idx_reading_post_post  ON reading_post(post_id);
 ```
-> Deliberate asymmetry with `container_block`: blocks are singly-owned; **posts are non-exclusively pointed at** by readings — this is what makes on-demand books work.
+> Deliberate asymmetry with `container_block`: blocks are singly-owned; **posts are non-exclusively pointed at** by readings — this is what makes on-demand books work. *(Ratified bend incoming — author, 2026-08-26 at the launch-strategy sitting, designed and built at Phase 13i: an OPT-IN per-book **Owned** relationship constrains membership for books that want it — her words, "notes will have to lose a little ground to let books be stronger." The non-exclusive DEFAULT and this asymmetry remain the norm; enforcement is operations-layer with an apply-time repair, never a schema containment. Design record: `notes/plans/phase-13i-smart-book-identity-brief.md`.)*
 
 ### reading_section — real chapters: ordered, reorderable groupings within a curated book (v1_10, Phase 13)
 ```sql

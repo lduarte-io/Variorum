@@ -517,5 +517,8 @@ The option space as it stands (for the sitting; NOTHING ruled):
    guesses).
 
 Status: OPEN — her words: *"I don't know if I love anything
-suggested yet."* The sitting owns it. The plain (un-owned) smart
-book and the ruled conversion shape are unaffected meanwhile.
+suggested yet"*, and her closing framing the same day: *"i'd save
+these trade offs and ideas for 13i. I think it'll take more of a
+design sitting to get to a place I'm totally happy with."* The
+sitting owns it. The plain (un-owned) smart book and the ruled
+conversion shape are unaffected meanwhile.
