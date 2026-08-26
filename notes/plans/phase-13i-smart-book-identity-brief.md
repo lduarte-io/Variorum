@@ -359,7 +359,11 @@ smart-assembly knot above.
 icon on a note in book view when it has OTHER memberships.
 Recommendation recorded: only-when-shared (the badge then MEANS
 something; all-the-time is noise), count/names on hover; the editor's
-membership chip is the existing sibling surface.
+membership chip is the existing sibling surface. **RULED IN,
+2026-08-26 round 7: *"I think the in book view badge still earns its
+place"*** — the badge ships beside the panel (different surfaces:
+the badge marks shared membership IN the book view; the panel is the
+note view's bridge).
 
 ### Round 4 (2026-08-26) — her rulings on the sketch
 
@@ -458,3 +462,60 @@ The shape, recorded as her DIRECTION (details the sitting's):
   OWNED books keep their membership semantics underneath — **the
   panel answers the FEEL half for ALL notes; ownership answers the
   exclusivity half for owned ones.**
+
+### Round 7 (2026-08-26) — owned SMART books: her further thinking (OPEN — now the sitting's sharpest knot)
+
+Her words, verbatim-faithful: *"I think there's honestly more ways
+than just what you described for smart books being owned. Another way
+would be for it to yank anything matching its tag out of wherever
+else it was, deleting other tags on it if necessary, or offering to
+delete its own tag from those items. I probably wouldn't make journal
+an owned book if I didn't want conflict like that - and tags are book
+ownership given the smart book system. I don't even think what I just
+said is the best way to do it because destroying tags would be
+necessary if two owned smart books fought, and that seems messy. I do
+think when you make a book with smart tags owned, that it could be
+kinda like flipping a regular book to owned - any item it had that
+was shared, an exclusive copy is made right then and there for it,
+and to add something to the book you have to remove its other tags.
+I'm a little conflicted on how to handle owned smart books still - I
+don't know if I love anything suggested yet."*
+
+The option space as it stands (for the sitting; NOTHING ruled):
+
+1. **Yank-on-match** (hers, self-critiqued in the same breath):
+   claim everything tagged, ripping other memberships/tags —
+   deterministic but destructive; two owned smart books on
+   overlapping tags WAR, and the resolution destroys tags. She
+   already named the mess.
+2. **Copy-on-arrival**: a tagged-but-membered note gets an exclusive
+   copy minted automatically — silent, unbounded duplication (the
+   fanned-extract class made ambient). Recorded to decline.
+3. **Claim-free-only** (round 4's "claiming" shape): auto-claim
+   bookless tagged notes, leave membered ones alone — non-destructive,
+   but the book's rule silently becomes "tagged AND unclaimed."
+4. **Her conversion shape — which stands under EVERY option**:
+   flipping to owned materializes the current assembly and
+   exclusive-copies the shared items right then (her ruling's
+   letter). The open question is only the ONGOING-arrivals rule —
+   and her "remove its other tags to add" rider is where tags stop
+   being labels and start being slots.
+5. **The DOORBELL reframe (Fable candidate, this round): for an
+   OWNED book, the tag is the FEED, never the MEMBERSHIP.** The book
+   is curated-owned at its core with an INTAKE RULE watching the
+   tag. A newly-tagged FREE note auto-claims (a dial); a tagged note
+   that lives elsewhere lands in the book's visible ARRIVALS section
+   — "matches, but lives elsewhere" — with per-note choices: claim
+   (move), copy in, or leave. Nothing is destroyed and no tag is
+   ever deleted by machinery; two owned books watching one tag both
+   see the doorbell (first claim wins; the other's arrival row says
+   "claimed by X"). Her "tags are book ownership" distortion
+   dissolves — for owned books, tags return to plural,
+   meaning-neutral labels; membership is always a CLAIMED row.
+   Composes with knot 5's materialize-on-arrival fork and the
+   friction doctrine (conflicts become visible choices, never
+   guesses).
+
+Status: OPEN — her words: *"I don't know if I love anything
+suggested yet."* The sitting owns it. The plain (un-owned) smart
+book and the ruled conversion shape are unaffected meanwhile.
