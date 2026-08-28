@@ -1,11 +1,16 @@
 # Phase 13p — Note Protection: Whole-Store Encryption & Locked Notes
 
-**STATUS: plan AUTHORED 2026-08-24, out-of-band** — written at the author's
-direct instruction at the close of her 2026-08-23/24 encryption design
-conversation (an author-attended Fable session, run while Phase 13l executed
-in a parallel session). The phase has NOT run. It launches at her word,
-expected via `/architect-phase 13p`; the cast is decided at that kickoff per
-the standing rule.
+**STATUS: OPEN — kicked off 2026-08-27 via `/architect-phase 13p`.**
+**Cast (her call, in the kickoff message): Fable architect/orchestrator ·
+Opus implementers (fresh session per batch) · ONE Fable cold review at
+phase end.** Any `Sources/VariorumCore/Sync/` line that proves necessary
+routes to Fable under the standing rider (Batch 1 expects zero). The RUN
+RECORD section at the bottom of this file is the running ledger.
+
+*(Original banner, for the record: plan AUTHORED 2026-08-24, out-of-band —
+written at the author's direct instruction at the close of her 2026-08-23/24
+encryption design conversation, an author-attended Fable session run while
+Phase 13l executed in a parallel session.)*
 
 ---
 
@@ -564,3 +569,107 @@ AI" sentence true by construction. The presets keep the normie cost at
 zero (auto-open, escrow on) while the Locked-down dials serve the
 journalist and the sensitive diary. One secret, four-to-five independent
 failures between her and loss, and one deliberate plaintext escape.
+
+---
+
+## THE ARCHITECT CONSTITUTION (P-1…P-9 — copied per the `/architect-phase` skill; byte-verbatim from `notes/plans/phase-13b-make-it-work.md`, BINDING on all 13p work beside R13p-1…15)
+
+- **P-1 — One capability registry.** Every user-facing act is declared
+  exactly once: verb, scope (block/take/post/book), per-mode availability
+  rule, its doors (menu / context / bar / shortcut / palette), and its
+  refusal copy. Surfaces render their doors FROM the registry; gating is
+  data, never per-view if-statements. A registry-walk test asserts every
+  declared door exists and every rendered door is declared. This kills the
+  D3/D4 class structurally — the capability matrix stays green by
+  construction instead of by audit.
+- **P-2 — Fire-and-DO (R115).** A rendered door either performs the act —
+  including any mode-switch choreography, done visibly for the user — or
+  delivers the operations layer's real refusal. A door that can never act in
+  its context isn't rendered. Lecture-and-redirect is retired.
+- **P-3 — One text surface, one liveness authority.** ONE TK2 surface
+  component (live + read modes; one measurement brain — the width-gated
+  remeasure; the shared canary) that every pane composes; the live editor
+  core's identity machinery (`BlockRangeIndex`, crystallization) becomes its
+  live mode, not a sibling implementation. "What text does this pane show,
+  and is it live" is answered by ONE pure, unit-tested authority
+  (`PaneTextAuthority`); views never re-derive it. Its invariants stated as
+  code: exactly one live pane; the live pane is buffer-authoritative; read
+  panes are projection-authoritative once caught up.
+- **P-4 — Broadcasts carry signals, never decisions.** NotificationCenter
+  may announce that something happened (mode changed, post opened); no
+  listener derives business state or availability from a broadcast, and no
+  flow's correctness depends on broadcast ordering. Cross-feature flows
+  route through composition. (Stage 0's survey enumerates today's
+  notification bus; Stage 1 disciplines it.)
+- **P-5 — The friction doctrine (R116).** Repeated pushback against a rule
+  marks an under-architected feature. The response is never another patch:
+  write the feature's DESIGN MEMO — intended behavior whole, edge cases
+  enumerated on paper, refusal wordings, undo story — get the author's
+  rulings on the product-flavored edges, then build to the memo. Happy path
+  ships first, but the edges are *decided at design time*, not discovered by
+  the author. First two memos owed: **merge** and **the W ceremony**.
+- **P-6 — The tutorial is the executable spec (R113).** The guided tutorial
+  flow is the contract for every happy path. It stays green — automated
+  where the harness allows, screenshot-walked otherwise — and any change
+  that breaks a tutorial step is a regression by definition.
+- **P-7 — Find bugs before she does.** Every layer keeps a proactive
+  harness: the ops-layer soaks (exist), the board/view-model invariant soak
+  (Stage 1), the registry walk (P-1), the per-batch scripted screenshot
+  walkthrough. Red-on-old stays absolute: no bug-class fix without a pin
+  that fails on the pre-fix code.
+- **P-8 — Standing law, consolidated.** P1–P3 performance invariants bind
+  the rebuilt layer exactly as they bind the substrate (invalidation ∝
+  realized rows; one live editor; virtualized long views). Overlays, never
+  rendering attributes. Chrome `fixedSize` texts always carry a `lineLimit`
+  (the b6dae25 class). `Theme/VoiceControls.swift` is THE chrome vocabulary.
+  Complexity lives in the store; restraint lives in the UI.
+- **P-9 — No god objects in the frontend either.** A view model mixing
+  board layout, text authority, and gesture routing splits by concern
+  (`TakesViewModel` at 890 lines is the standing counterexample). Same
+  hygiene rule as the substrate, applied where it was being waived.
+
+*(The skill's application notes — P-1's routed-vocabulary scope, P-3's two
+deliberate surface kinds, layer placement, the overlay/sink delivery law —
+bind by reference to `.claude/skills/architect-phase/SKILL.md`.)*
+
+---
+
+## RUN RECORD (the running ledger — newest at the bottom)
+
+### Kickoff, 2026-08-27 (the architect session)
+
+**First acts executed, per the kickoff section:**
+
+1. **Master-plan row RECONCILED** — the 13p row's stale shape-B body
+   replaced with the ruled whole-store shape; this file named as the
+   binding record; the pointer rider's job done. The row also records the
+   resequencing consequence for the mobile second manifest: mobile resumes
+   POST-LAUNCH, so its closeout's manifest lands on a post-launch Mac
+   phase, not this one — **verified at this kickoff: no second manifest
+   exists** (mobile round 2's closeout, which hands it, has not happened).
+2. **Starting state VERIFIED:**
+   - Baseline re-adopted from the latest closeout (the post-13l polish
+     round, 2026-08-25): core **1416/146** · Mac **1768/296 FULLY GREEN** ·
+     spine **68/9** · mobile **486/78**. Per the standing rule, suites run
+     at batch ends, never at session start — these are the baseline.
+   - Lockstep marker: `SyncSchema.lockstepVersion = 7`
+     (`Sources/VariorumCore/Sync/SyncSchema.swift:90`); highest mirror DDL
+     is `10_phase13j_purge.sql`. **The plan's 7→8 / `11_phase13p_protection.sql`
+     assumption HOLDS** — no intervening phase moved the marker.
+   - `grep -rn "mmap" Sources App` — **still empty** (research-record #4
+     re-confirmed).
+   - Working tree clean at `bff21d4` (the launch-strategy sitting's
+     closing sweep).
+3. **Cast recorded** (her kickoff call): Fable architect/orchestrator ·
+   Opus implementers, a fresh session per batch · ONE Fable cold review at
+   phase end. Sync/ rider standing.
+4. **A knot-7 PREMISE INVERSION, noted for the sitting:** knot 7 was
+   written under the pre-2026-08-25 order (13u before 13p) and asks to
+   "confirm 13u's shipped shape" for the snippet brain. 13p now runs
+   FIRST — 13u item 4's derived display-name brain does NOT exist yet.
+   The knot inverts: 13p defines the protection-display authority as ONE
+   brain (the R13p-10 pattern — a ruled input handed forward), and 13u
+   builds its snippet function to consult it. Presented at the sitting in
+   this corrected form.
+
+Next: the kickoff sitting (knots 1–8), then Batch 0.
