@@ -760,3 +760,45 @@ expects zero `Sync/` lines end to end.
 
 Remaining live knots — 3 (secure_delete), 4 (recovery-phrase UX),
 6 (tutorial chapter), 8 (escrow wording) — ruled in part 2 below.
+
+### The kickoff sitting, 2026-08-27 — part 2: knots 3, 6, 8 ruled; knot 4 opened into the first-launch question
+
+- **KNOT 3 RULED — secure_delete stays ON unless the spike breaches.**
+  Her pick of the recommended shape: deleted means overwritten (the 13j
+  "really deleted" synergy), and only a real P1-budget breach on the
+  delete/purge roads measured by spike Q2 brings the question back via
+  the decision memo. Otherwise it never returns to her.
+- **KNOT 6 RULED — YES, a short tutorial chapter joins the spine.** Her
+  instruction, verbatim: *"yes, short chapter, and make the options
+  that are in settings clear (require lock every time to open, don't,
+  what you need to reset it, saving it in keychain or not, etc.). It
+  should also be clear to a user everything they have to lose to lose
+  their writing AND that there's an option for a plaintext backup if
+  they want. basically give them their options in a non scary way, but
+  in a serious way (these 5 things have to ALL go wrong for you to lose
+  your stuff. unless it's on lock every time, then not having it in
+  keychain and not knowing it is enough."* Binding consequences for
+  Batch 4: the chapter teaches the SETTINGS OPTIONS themselves (the
+  at-open modes, the reset story, the escrow dial), states the LOSS
+  MATH **PER MODE** honestly (Standard's all-N-things-must-go-wrong vs.
+  the demanded modes' shorter chains — her own example: passphrase-
+  every-open with escrow off means forgetting the passphrase without
+  the phrase written down IS enough), names the opt-in plaintext
+  backup, and lands non-scary but serious. Placeholder copy now, her
+  voice at 13s per the standing split.
+- **KNOT 8 RULED — the plain-consequence pair.** ON: "A copy of your
+  key is kept in your iCloud Keychain — if you lose this Mac and forget
+  your passphrase, signing into iCloud on a new device can still unlock
+  your library." OFF: "Your key stays only on your enrolled devices.
+  Lose them, your passphrase, and your recovery phrase, and your
+  writing is unrecoverable — by anyone." Direction ruled; 13s may
+  re-voice the exact words.
+- **KNOT 4 OPENED INTO THE REAL QUESTION** — her words: *"they have to
+  set a passphrase, right? it should show to them on the screen where
+  they set their passphrase. or do they not have to set a passphrase
+  during the first launch of the app?"* One piece is ADOPTED as ruled
+  regardless of the answer: **wherever the passphrase-set screen
+  appears, the recovery phrase is generated and shown ON THAT SAME
+  screen** (one moment, two artifacts). The first-launch question
+  itself — whether Standard requires a passphrase at all — answered by
+  the architect and ruled by her in part 3 below.
