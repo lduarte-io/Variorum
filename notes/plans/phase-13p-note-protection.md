@@ -802,3 +802,90 @@ Remaining live knots — 3 (secure_delete), 4 (recovery-phrase UX),
   screen** (one moment, two artifacts). The first-launch question
   itself — whether Standard requires a passphrase at all — answered by
   the architect and ruled by her in part 3 below.
+
+### The kickoff sitting, 2026-08-27 — part 3: knot 4 ruled, the fork authorized, Batch 0 launched
+
+- **KNOT 4 RULED — NO passphrase at first launch.** Her words, verbatim:
+  *"I think it's nice that the first launch mints the random store key
+  and puts it in the device keychain - that's great for onboarding and
+  first impressions, and I do think that the recovery phrase should
+  generate and display when they choose a passphrase. I agree with your
+  recommendation."* The ruled shape: first launch mints the store key
+  silently into the device Keychain (Auto mode), escrow per preset — a
+  stranger is writing in an encrypted library in seconds, zero
+  ceremony. The passphrase-set screen is summoned by the doors that
+  need one (Biometric mode — its fallback IS the passphrase; Passphrase-
+  every-open; the Locked-down preset; escrow-off; sync enrollment), and
+  the recovery phrase generates and displays ON that same screen.
+  **HER AMENDMENT, same ruling:** *"I do think the standard nudge
+  should offer for them to create a passphrase though, even if it gives
+  them the recovery phrase."* So the Standard nudge (R13p-7) offers
+  BOTH: create a passphrase (opening the set-screen, phrase displayed
+  alongside) and the recovery phrase itself either way — Batch 2 builds
+  the nudge to this two-offer shape.
+- **The GRDB fork AUTHORIZED on her account** — her words: *"you can
+  run the fork via gh on my account."* **BLOCKED AT EXECUTION, machine
+  fact:** `gh` is not installed and no GitHub API credential exists on
+  this machine (git talks to GitHub over SSH only — pushes work, the
+  fork API doesn't). Her one-act options, either fine: `! brew install
+  gh && gh auth login` in this session, or one click of Fork on
+  `github.com/groue/GRDB.swift` in her browser. The moment the fork
+  exists the architect pushes the `variorum-sqlcipher` branch over SSH.
+  The spike proceeds meanwhile on the LOCAL-CLONE road (addendum,
+  amended) — nothing waits.
+- **BATCH 0 LAUNCHED at her word** (*"Go ahead and start batch 0"*) —
+  a fresh Opus implementer per the cast, briefed by the BATCH 0 section
+  plus the BATCH 0 ADDENDUM below. The decision memo lands at
+  `notes/plans/phase-13p-spike-memo.md` and is reviewed by the
+  architect, then brought to her, BEFORE any committed build work.
+- **Sitting CLOSED.** Every knot is now ruled or dissolved: 1/2/5/7
+  dissolved (R13p-16) · 3 ruled (secure_delete ON unless breach) ·
+  4 ruled (this part) · 6 ruled (the tutorial chapter, her loss-math
+  instruction) · 8 ruled (the plain-consequence pair) · 9 dissolved
+  pre-phase · 10 re-homed to 13x pre-phase.
+
+## BATCH 0 ADDENDUM (the architect, at launch — spike mechanics & environment)
+
+- **Scratch discipline:** throwaway spike work lives OUTSIDE the repo
+  (or in a gitignored dir); the repo's `Package.swift` on `main` is
+  untouched by the spike. The ONLY things the spike lands in `main` are
+  the decision memo `notes/plans/phase-13p-spike-memo.md` and this
+  file's record updates.
+- **The fork — LOCAL-CLONE road for the spike (amended at launch: the
+  GitHub fork is pending her one-click, part 3):** clone
+  `groue/GRDB.swift` at the current 7.x release, apply the
+  README-documented four-line uncomment (R13p-11's road) on a local
+  branch named `variorum-sqlcipher`, and pin the scratch work to the
+  LOCAL PATH + Zetetic's `SQLCipher.swift` ≥ 4.18.0. This proves every
+  mechanical fact (flags, builds, suites); the one residual — SPM
+  resolving the fork from its real GitHub URL — is re-verified in
+  minutes at Batch 1 once the fork exists, and the memo names it as
+  that residual. The local branch is push-ready for the fork.
+- **Q2's corpus and platforms:** measure against an encrypted copy of a
+  SEEDED real-scale corpus (the Phase 4 harness/seed machinery) — NEVER
+  the real store, not even a copy, for the spike (the A1 rail; Batch
+  1's migration drills are where a COPY of her real store enters,
+  behind a fresh backup). Mac real hardware is the spike's measurement
+  authority. The PHONE leg: expected-fast from architecture (hardware
+  AES on A-series); the spike records the expectation and Batch 4's
+  acceptance on her phone measures it for real — a device install is
+  not a spike act.
+- **Environment traps (the standing set, binding):** instance checks
+  via `pgrep -fl 'Variorum.app/Contents/MacOS'` discriminated by PATH;
+  NEVER quit/kill a real-store instance; NO Release builds or
+  `/Applications` refreshes; core tests via `swift test` from CLI; Mac
+  app tests from `App/Variorum/` with suite-level `-only-testing`;
+  NEVER add a custom build configuration (SPM deps compile RELEASE
+  under any configuration not named exactly "Debug", silently stripping
+  DEBUG-gated oracles — the 4G trap); zsh `pipestatus`; scratch and
+  screenshots in gitignored dirs; never `git checkout` over
+  uncommitted work; commit but do not push (the architect verifies and
+  pushes).
+- **The memo's contract (the Phase 6 pattern):** ONE decision memo
+  answering Q1–Q5, each with measured numbers/observed facts and a
+  recommendation; Q1's contingency (if FTS5 is absent from the prebuilt)
+  is RECOMMENDED in the memo and DECIDED by the architect + author
+  before Batch 1; Q2's secure_delete number feeds knot 3's ruled policy
+  (ON unless breach — only a breach brings it back to her); Q5's red
+  plaintext-backup proof is the red half of Batch 1's pin, cited by
+  path/method in the memo.
