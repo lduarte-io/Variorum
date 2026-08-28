@@ -1,4 +1,8 @@
-# Phase 13p — Note Protection: Whole-Store Encryption & Locked Notes
+# Phase 13p — Note Protection: Whole-Store Encryption
+
+*(Title until 2026-08-27: "… & Locked Notes". The locked-notes half was
+DROPPED at the kickoff sitting — R13p-16 below: per-note locks are not
+built, probably ever.)*
 
 **STATUS: OPEN — kicked off 2026-08-27 via `/architect-phase 13p`.**
 **Cast (her call, in the kickoff message): Fable architect/orchestrator ·
@@ -18,7 +22,9 @@ Phase 13l executed in a parallel session.)*
 
 Read, in order: this file top to bottom (it is self-contained); `CLAUDE.md`
 and the canon docs per the standing preflight; `notes/SyncSpec.md` §12 (this
-phase carries ONE lockstep event); `notes/MobileSoul.md` (this phase is a
+phase carries ONE lockstep event — **SUPERSEDED at the kickoff sitting,
+R13p-16: the phase now carries NO lockstep event; the marker stays 7**);
+`notes/MobileSoul.md` (this phase is a
 both-platform phase by construction — mobile's deliverable is named INSIDE
 it, §6's "design together" class); `notes/plans/note-protection-design-note.md`
 **as history** — its shapes A/B framing is SUPERSEDED by this plan's
@@ -67,6 +73,9 @@ provisional; the kickoff sitting rules only the OPEN KNOTS section.
   demand unlocking every time."* And the identity ruling: *"I think I'm
   realizing that true encryption and privacy IS the story I want … it makes
   journaling genuinely feel safe — which is what I want for myself."*
+  *(The "per-note locks ride on top" HALF is SUPERSEDED at the 2026-08-27
+  kickoff sitting — R13p-16: per-note locks are dropped. The whole-store
+  half stands untouched and is the phase.)*
 - **R13p-2 — Universal, never optional.** *"I agree the encryption should
   be universal - no real point in making it optional."* Every store is
   encrypted; the dials are custody and ceremony, never whether.
@@ -132,6 +141,11 @@ provisional; the kickoff sitting rules only the OPEN KNOTS section.
   input — 13o's old "index must never contain" constraint is dissolved
   by construction. Her words: *"it makes search / indexing better, it
   lessens the technical burden of 'individually locked notes'."*
+  *(DISSOLVED at the 2026-08-27 kickoff sitting — R13p-16: with per-note
+  locks dropped there is nothing to gate. The ruled input to 13o
+  simplifies further: the index may contain AND DISPLAY everything — the
+  store itself is the protection. The "lessens the technical burden"
+  motivation survives by removing the burden entirely.)*
 - **R13p-11 — The dependency is APPROVED (2026-08-24, her words: "I
   approve the license and the approach - I'm glad to know that this is
   all available and free").** SQLCipher **Community Edition** (BSD-style,
@@ -198,6 +212,41 @@ provisional; the kickoff sitting rules only the OPEN KNOTS section.
   strangers exist by 13p's run, the kickoff may glance at this once
   — her ruling was expressly made as the only user — but nothing is
   owed beyond the disclosure.)*
+- **R13p-16 — PER-NOTE LOCKS ARE DROPPED: BATCH 3 IS NOT BUILT, PROBABLY
+  EVER (author, 2026-08-27 at the kickoff sitting — ruled on her own
+  challenge to the layering).** Her words, verbatim: *"ok, we will not
+  add the per lock note - it's easy enough to add faceid or biometric to
+  opening the app (with a passphrase, not computer password) as the
+  backup. I plan on exposing all the apps on the appstore that offer
+  'lock' on opening their journals but are not actually encrypted as
+  part of my advertising for my app, so it would be bad if I added the
+  same security theater that they use. So I don't think we need to build
+  batch 3 at all, probably ever, because it makes users think privacy is
+  in place that just isn't."* The mechanism, traced at the sitting:
+  inside an already-unlocked app the store key is resident and the whole
+  database readable through the open connection, so a per-note gate is a
+  UI CURTAIN — real against the casual snoop, theater against anyone
+  serious. (Apple Notes' per-note lock is real precisely because it is
+  per-note CRYPTO — shape B, retired at R13p-3; given that retirement,
+  the curtain kind was the only buildable kind, and the honesty doctrine
+  cuts against it.) Her advertising angle makes shipping it actively
+  anti-brand. Consequences: **(a)** R13p-1's "per-note locks ride on
+  top" half is superseded — the at-open modes (R13p-5) + re-lock/Lock
+  Now ARE the whole gate story; **(b)** R13p-10's display rule dissolves
+  — search indexes AND displays everything; **(c)** Batch 3 dissolves
+  whole: NO `v1_15`, NO §12 lockstep event anywhere in this phase, the
+  marker STAYS 7 (13y's event becomes the next one), no mirror DDL, no
+  deploy window; **(d)** open knots 1, 2, 5, and 7 dissolve (no flag
+  semantics; no bridge asymmetry — the bridge is untouched; no
+  inside-or-after; no snippet gate — 13u's brain needs no protection
+  awareness); **(e)** the 13n corner closes by HER correction, not by a
+  flag — grants are allowlist-shaped (*"the AI grant will be based on
+  granting particular notes, not \*not granting\* locked notes"*), so
+  nothing needs a lock flag to stay unexposed; **(f)** Batch 4's mobile
+  deliverable narrows to the at-open/lobby/settings faces; **(g)** the
+  phase-wide expectation hardens: ZERO schema, ZERO lockstep, and
+  (per Batch 1) zero `Sync/` lines expected. Per-note locks join the
+  NON-GOALS so the decline stays named.
 
 ## A RIDER FROM 13l (2026-08-24, her disposition at QUESTIONS #78)
 
@@ -267,6 +316,13 @@ store today. QUESTIONS #78 has the full shape menu.
 
 ## NON-GOALS (named so they stay declined, not forgotten)
 
+- **Per-note locks (the former Batch 3 face) — DROPPED at the kickoff
+  sitting, probably permanently (R13p-16).** Inside an unlocked app they
+  are a curtain, not a boundary; shipping one would mirror the
+  lock-on-open theater her advertising exposes ("it makes users think
+  privacy is in place that just isn't"). If ever revisited, it re-opens
+  as a DESIGN question weighed against shape B's costs — never as a
+  quiet flag.
 - **Shape B column sealing.** The one threat it covers that this design
   does not: an attacker holding the app OPEN and UNLOCKED, reading notes
   whose per-note gates would have kept their plaintext out of reachable
@@ -281,9 +337,11 @@ store today. QUESTIONS #78 has the full shape menu.
   verified against the App Store Connect wizard at submission time.
 - **Key/credential rotation at scale** — stays on the v1 release
   readiness row.
-- **13n's grant grammar** — 13p only guarantees the protection flag is
-  readable so 13n can exclude protected notes by default (her standing
-  instinct on that row).
+- **13n's grant grammar** — ~~13p only guarantees the protection flag is
+  readable so 13n can exclude protected notes by default~~ *(superseded
+  at the kickoff — R13p-16(e): no flag exists, and none is needed; her
+  correction: grants are allowlist-shaped — "granting particular notes,
+  not not-granting locked notes" — so nothing is exposed until granted).*
 
 ## THE PRE-PHASE RESEARCH RECORD (2026-08-24 — what is already settled as fact)
 
@@ -384,18 +442,16 @@ zero-plaintext scan of the backup file (the 14b live-dump pattern). The
 13l restore drill/runbook gains the key leg: restoring onto a NEW machine
 requires passphrase, recovery phrase, or escrow.
 
-**The per-note lock** (the face): one additive synced column on
-`container` (shape settled at the sitting — flag vs stamp), migration
-`v1_15`, E2EE serializer classification PLAIN (ids/flags only — the 14b
-completeness walk will demand the classification at build time), **ONE
-SyncSpec §12 lockstep event, marker 7→8**, mirror DDL
-`Server/supabase/11_phase13p_protection.sql`, deployed in HER window per
-the 13j precedent. Gates are access-control + display rules (R13p-1's
-layer): the editor demands unlock to open a protected note; library/list
-cards, the snippet brain (13u item 4's Domain function), search results
-(R13p-10), Trash/tray listings, and lineage doors show existence without
-content per the sitting's ruled wordings. No crypto machinery per note —
-that is the point.
+**~~The per-note lock~~ — STRUCK at the kickoff sitting, 2026-08-27
+(R13p-16).** *(The struck design, compressed for the record: one additive
+synced column on `container`, migration `v1_15`, ONE §12 lockstep event
+marker 7→8 via `Server/supabase/11_phase13p_protection.sql`, and
+existence-without-content display rules across every content-showing
+surface. Its own closing line — "no crypto machinery per note, that is
+the point" — is exactly why it fell: inside an unlocked app such a gate
+is a curtain, not a boundary. Consequence: this phase now carries NO
+schema change and NO lockstep event; the marker stays 7 and `11_…` is
+unclaimed — 13y's event takes the next number.)*
 
 **Search speed** (her 2026-08-24 question, answered into the design): an
 FTS5 query walks the term's B-tree — it touches a tiny, bounded set of
@@ -466,16 +522,14 @@ presets as dial-setters (R13p-7); settings copy in the honesty grammar
 moved HERE before 13l built it, so this batch SHIPS the gate faces
 outright rather than upgrading an existing lock's wording.)*
 
-## BATCH 3 — THE LOCKED-NOTES FACE (after the sitting rules its knots)
+## BATCH 3 — ~~THE LOCKED-NOTES FACE~~ DISSOLVED AT THE KICKOFF SITTING (R13p-16)
 
-Migration `v1_15` + the §12 lockstep event (marker 7→8, mirror DDL, HER
-deploy window, both devices refreshed in-window — the 13j choreography);
-lock/unlock-note operations with refusal grammar (relationship to the
-SEAL and to archived/deleted states per the sitting); the gates across
-every content-showing surface — editor, cards, snippet brain, search
-display rule, Trash/tray, lineage doors — swept capability-matrix style
-(the 13b pattern: no silent doors, no lecturing doors); structural-op
-interactions per the sitting's rulings.
+Not built, probably ever — her ruling, recorded verbatim in the
+constitution. *(What it would have been, kept as the record of the
+decline: migration `v1_15` + the §12 lockstep event; lock/unlock-note
+operations with refusal grammar; existence-without-content gates swept
+capability-matrix style across every content-showing surface.)* The
+phase proceeds Batch 0 → 1 → 2 → 4.
 
 ## BATCH 4 — HONEST COPY, MOBILE FACES & ACCEPTANCE
 
@@ -484,7 +538,7 @@ The disclosure sentences per mode/preset (her voice can land later via
 (MobileSoul §6 — inside the phase, not a parity row)**: the phone inherits
 the substrate by construction (core `Persistence/`), and this batch builds
 its faces — Face ID at open, the locked lobby, the settings/preset
-surfaces, the locked-note gates on the phone's own surfaces; the
+surfaces *(the locked-note gates struck with Batch 3 — R13p-16(f))*; the
 whole-app acceptance walk; `/Applications/Variorum.app` refresh + her
 phone install (the standing ritual).
 
@@ -503,8 +557,10 @@ phone install (the standing ritual).
   and — unchanged from 14b — the mirror.
 - P1 pins within budget on the spike-measured numbers; the perf deltas
   recorded in the closeout.
-- The capability-matrix sweep of protected-note surfaces: no gate
-  leaks content, no gate refuses silently.
+- ~~The capability-matrix sweep of protected-note surfaces~~ *(dissolved
+  with Batch 3 — R13p-16; the at-open gate's acceptance lives in the
+  locked-lobby tests: NOTHING runs or renders before unlock in the
+  demanded modes).*
 - The tutorial spine: green; whether a privacy lesson JOINS the spine is
   a sitting call (open knot), never a silent skip.
 - MOBILE PARITY LINE per the closeout ritual — expected: "mobile's faces
@@ -512,6 +568,12 @@ phone install (the standing ritual).
   residue named.
 
 ## OPEN KNOTS FOR THE KICKOFF SITTING (the ONLY things not ruled)
+
+*(SITTING UPDATE, 2026-08-27 — knots 1, 2, 5, and 7 are DISSOLVED by
+R13p-16 (per-note locks dropped; the bridge untouched; nothing for the
+snippet brain to gate — and knot 7's premise had already inverted with
+the resequencing, 13p now running before 13u). Knots 3, 4, 6, and 8
+remain live; their rulings land in the RUN RECORD below.)*
 
 1. **The lock's semantics vs. the model**: what exactly carries the flag
    (`container` only, or may a READING/book be protected — the design
@@ -673,3 +735,28 @@ bind by reference to `.claude/skills/architect-phase/SKILL.md`.)*
    this corrected form.
 
 Next: the kickoff sitting (knots 1–8), then Batch 0.
+
+### The kickoff sitting, 2026-08-27 — part 1: her challenge, and R13p-16
+
+The sitting opened on knot 1's question batch. She stopped it at the
+premise — *"I'm confused - why is there a distinct protection flag?
+isn't the point of this phase that the whole store is being
+encrypted?"* — and, after the architect laid out the two layers (the
+file vs. the screen; the curtain-not-boundary mechanism; Apple Notes'
+per-note lock is real only because it is per-note CRYPTO, i.e. the
+retired shape B), pushed back on all three of the curtain's supports,
+each conceded: the at-open setting already serves the scared user
+(R13p-5); the 13n grant is allowlist-shaped (*"granting particular
+notes, not \*not granting\* locked notes"*); and an in-app gate over a
+resident key is *"the same security theater that day one is doing."*
+
+**Her RULING became R13p-16** (the constitution, above — her words
+verbatim there): Batch 3 is not built, probably ever. Consequences
+(a)–(g) executed the same turn: the master-plan 13p row amended, the
+13o row's handed input simplified, THE DESIGN's per-note paragraph and
+Batch 3 struck, the non-goals grown, knots 1/2/5/7 dissolved. The
+phase now carries ZERO schema, ZERO lockstep (marker stays 7), and
+expects zero `Sync/` lines end to end.
+
+Remaining live knots — 3 (secure_delete), 4 (recovery-phrase UX),
+6 (tutorial chapter), 8 (escrow wording) — ruled in part 2 below.
