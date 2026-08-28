@@ -350,8 +350,14 @@ record) plus direct repo checks established, so the phase does not
 re-derive:
 
 1. **The integration road** is R13p-11's, and it is the CURRENT documented
-   road: GRDB's master README + `Package.swift` carry the exact
-   fork-and-uncomment recipe pointing at `sqlcipher/SQLCipher.swift`
+   road *(SPIKE CORRECTION #1, memo Q4: the recipe is SIX sites across
+   three kinds of edit — four uncomments AND three deletions of the
+   `GRDBSQLite` product/target/dependency; "four-line uncomment" was the
+   plan's own shortening. And CORRECTION #2: `SQLITE_HAS_CODEC` is NOT
+   needed on consuming targets — tested both ways; the repo change is a
+   ONE-LINE dependency swap)*: GRDB's master README + `Package.swift`
+   carry the exact fork-and-uncomment recipe pointing at
+   `sqlcipher/SQLCipher.swift`
    (actively maintained by Zetetic, same-day releases with SQLCipher core;
    4.18.0 current). GRDB ≥ 7.9 renamed its codec flag to
    `SQLITE_HAS_CODEC`, making the pieces flag-compatible; baseline Swift
@@ -384,7 +390,11 @@ re-derive:
    (attach empty keyed DB → export → swap), in GRDB's own README.
 8. **FTS5 is NOT confirmed present in Zetetic's prebuilt binary** (it
    requires an explicit build flag; the prebuilt's flags are not
-   published). Spike question #1.
+   published). Spike question #1. **ANSWERED, memo Q1: PRESENT** —
+   `ENABLE_FTS5` in the binary's own compile_options AND exercised
+   end-to-end (virtual table, MATCH, `snippet()`, `rank`, GRDB's typed
+   `FTS5()` API) against a genuinely encrypted store. 13o is unblocked;
+   the contingency ladder is moot.
 9. **Apple platform facts, confirmed with citations**: biometric-gated
    Keychain items are ThisDeviceOnly by construction and cannot sync (the
    escrow item is necessarily separate — already the design);
@@ -397,7 +407,15 @@ re-derive:
    opens its destination as a bare `DatabaseQueue(path:)` — the SQLite
    backup API writes through the destination's pager, so under SQLCipher
    an UNKEYED destination produces a PLAINTEXT backup silently. Batch 1
-   keys the destination and pins it (see the batch).
+   keys the destination and pins it (see the batch). **SPIKE CORRECTION
+   #3 (memo Q5) — the trap is REAL but NOT this shape:** SQLCipher
+   REFUSES `sqlite3_backup` on a key mismatch (*"backup is not supported
+   with encrypted databases"* — a LOUD throw, no silent leak), while a
+   KEYED destination succeeds, yields ciphertext, and round-trips. So
+   the danger is not leakage but BREAKAGE: `backup(to:)` — and with it
+   13l's entire backup machinery — STOPS WORKING the moment the store is
+   keyed. The Batch 1 riders below carry the one-commit rule and the
+   corrected pin shape.
 
 ## THE DESIGN (technical shape — what the batches build)
 
@@ -503,6 +521,44 @@ the batch's acceptance pin. Expectation, stated so drift is visible:
 **zero `Sources/VariorumCore/Sync/` lines** (the engine reads through the
 connection); if any Sync/ line proves necessary, the standing Fable rider
 applies to it.
+
+**BATCH 1 RIDERS FROM THE SPIKE MEMO (2026-08-27 — binding; the memo is
+`notes/plans/phase-13p-spike-memo.md`):**
+- **THE ONE-COMMIT RULE (memo Q5, the hard sequencing instruction):**
+  keying the store and keying `backup(to:)` land in the SAME commit —
+  `backup(to:)` THROWS on a keyed store (*"backup is not supported with
+  encrypted databases"*), so 13l's scheduled backups, second destination,
+  freshness face, and restore drill all break at the first post-migration
+  run otherwise.
+- **The corrected pin shape:** RED on pre-fix code = the shipped
+  unkeyed-destination path THROWS against a keyed store (never "leaks
+  plaintext" — that assertion can't go red, the call throws first);
+  GREEN after = the same call succeeds, ciphertext header, byte-scan
+  finds no seeded prose, AND the file reopens with the key and reads the
+  prose back; the plaintext-store control (today's backup DOES contain
+  readable prose) keeps the green half non-vacuous.
+- **Key via the SQL pragma in `prepareDatabase`; NEVER
+  `db.usePassphrase`** — that method is the KDF road (measured 165 ms vs
+  ~1 ms; GRDB has no raw-key convenience). A comment at the call site
+  cites the number so nobody "tidies" it later.
+- **The `Package.swift` change is ONE LINE** (the dependency swap). No
+  `SQLITE_HAS_CODEC` on VariorumCore, no app-target build settings —
+  this rider supersedes the batch text's "app-target build settings"
+  phrase (memo Correction #2: an unused define invites a future reader
+  to think something depends on it).
+- **The fork's delta stays a pure recipe application** — `from: "4.11.0"`
+  already resolves 4.18.0; no version bump.
+- **Migration atomicity comes from the verified file swap, NEVER a
+  wrapping transaction** — ATTACH/DETACH cannot run inside one
+  (`sqlcipher_export()` runs via `writeWithoutTransaction`; measured
+  ~125 ms for a full 10k-block corpus).
+- **First act of the batch:** push the local `variorum-sqlcipher` branch
+  (`404dde041`, in `~/dev/scratch-13p-spike/GRDB.swift`) to the GitHub
+  fork once it exists, swap to the `url:` form, and re-verify resolution
+  — the memo's one named residual.
+- The spike's scratch branch `spike/13p-batch0` (`ea41482`) holds the
+  prototype keying seam and the Q2/Q5 harness as REFERENCE — it never
+  merges; Batch 1 writes its own production shapes.
 
 ## BATCH 2 — CUSTODY, MODES & RECOVERY
 
@@ -843,6 +899,39 @@ Remaining live knots — 3 (secure_delete), 4 (recovery-phrase UX),
   4 ruled (this part) · 6 ruled (the tutorial chapter, her loss-math
   instruction) · 8 ruled (the plain-consequence pair) · 9 dissolved
   pre-phase · 10 re-homed to 13x pre-phase.
+
+### Batch 0 — COMPLETE, 2026-08-27 (verdict: GO; memo `notes/plans/phase-13p-spike-memo.md`, commit `514b04c`)
+
+- All five questions answered with measured numbers on her M3 (the
+  memo's headline table). Architect spot-checks passed: `main` pristine
+  (memo-only commit; `Package.swift` diff empty; tree clean), the
+  scratch branch `spike/13p-batch0` present, the fork clone + probe
+  logs at `~/dev/scratch-13p-spike/`. One stale SourceKit diagnostic
+  (`usePassphrase` in `AppDatabase.swift`) traced to the spike branch's
+  cache and dismissed against the on-disk file (grep clean).
+- **KNOT 3 CLOSED WITHIN HER RULING'S TERMS** — `secure_delete` stays
+  ON: no P1-budget breach (~10 ms to securely erase 20,000 prose rows,
+  on the background janitor road, nowhere near a keystroke). Per the
+  ruling's own words, this does NOT return to her.
+- **Q1: FTS5 PRESENT** — 13o unblocked, the contingency ladder moot,
+  research record #8's open question retired.
+- **Three spike corrections annotated in place** (research records
+  #1/#8/#10; the six-site recipe, the no-consuming-define fact, the
+  loud-refusal backup shape) and the **BATCH 1 RIDERS** appended to the
+  batch — including the memo's one hard sequencing instruction: keying
+  the store and keying `backup(to:)` are ONE commit.
+- Suites at exact baseline against the fork on the spike branch: core
+  1416/146 · Mac 1768/296 fully green (the intermittent latency pin
+  passed in-suite) · mobile 486/78 (2 known issues) — the test factory
+  untouched, zero source changes to build VariorumCore on SQLCipher.
+- PENDING, honestly held: the GitHub-fork URL resolution (minutes at
+  Batch 1, after her one click) · Q3's codesigned re-confirmation
+  (Batch 2, not a Batch 1 gate) · the phone perf leg (Batch 4 on her
+  device, expectation recorded).
+- **GATE: Batch 1 awaits HER GO on the memo** — her kickoff
+  instruction: the decision memo comes to her before any committed
+  build work. The fork's one click is also hers, and Batch 1's first
+  act rides it.
 
 ## BATCH 0 ADDENDUM (the architect, at launch — spike mechanics & environment)
 
