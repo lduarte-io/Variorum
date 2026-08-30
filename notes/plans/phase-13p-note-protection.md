@@ -1999,3 +1999,99 @@ review may still differ). The AX sheet-driving limit is the recorded
 LADDER round 1 is LAUNCHED** — a fresh Fable reviewer on
 `REVIEW_PROMPT.md` verbatim; findings will land here repo-first before
 any fix session sees them.
+
+### THE COLD-REVIEW LADDER — round 1 findings + the architect's dispositions (2026-08-30)
+
+Fresh Fable reviewer, `REVIEW_PROMPT.md` verbatim, zero framing. **ZERO
+BLOCKERs · 3 MAJOR · 6 MINOR · 5 NIT**, with a substantial clean bill
+(its load-bearing lines: zero Sync/schema/server re-verified by the
+reviewer's own diff; the migration, one-commit rule, key hygiene,
+custody law, lobby, StoreBinding, flip, envelope, one-secret wiring,
+and honest copy all specifically checked solid; core 1452/153 re-run
+green by the reviewer). Every finding adjudicated by the architect
+against the docs; ALL CONFIRMED (no disputes — the mechanisms trace).
+The fix round runs as a fresh Fable session on THIS list; each fix
+owes trace + red-on-old by behavioral revert (copy pins count for copy
+findings).
+
+**R1-M1 (MAJOR, CONFIRMED) — the shipped RESTORE.md §8 still claims
+the store and backups are NOT encrypted** (`DataSafetyCopy.swift:244`
++ `notes/DataSafetyRunbook.md` §8) — false since Batch 1 in every
+mode, and its "your writing is still here" conclusion contradicts the
+ruled loss math under passphrase-every-open + escrow-off. Written into
+every backup folder each run. Batch 1's PROVISIONAL-5 edit corrected
+§1/§2 and missed §8. **FIX: rewrite §8 composed from
+`ProtectionCopy.lossLegs` (ONE brain, so it cannot drift again),
+per-mode; update the repo runbook + the byte-equality pin together.**
+
+**R1-M2 (MAJOR, CONFIRMED) — the phone's lock road skips the ruled
+teardown**: `onWillLock` is wired ONLY on the Mac
+(`VariorumApp.swift:81`); the phone's Lock Now flips to `.locked` and
+closes the pool with NO flush/savepoint leg (pending keystrokes race
+`StoreLockedError`), and mobile `services` are never stopped or
+released at lock (schedulers fire into typed refusals through a locked
+window; the stale pre-lock services object survives into the next
+`.ready` past the `guard services == nil`). **FIX: wire iOS's
+`onWillLock` mirroring the Mac's closure (flush editors + savepoints +
+stop/nil services); red pin on the scripted world (pending edit →
+lock → unlock → the edit SURVIVES).**
+
+**R1-M3 (MAJOR, CONFIRMED) — the keyed restore-drill acceptance item
+has no evidence, and behind it a doorless state**: the drill tests got
+only the mechanical `key: nil` edit; no composed keyed new-machine
+drill exists; and under DEFAULT dials an encrypted store whose
+Keychain item is gone lands in `.failed` with NO envelope road even
+when `variorum-keys.json` sits beside it — while the plan's own words
+claim "Batch 2's recovery roads re-derive". **RULING + FIX: (a) build
+the sidecar-present passphrase/recovery unlock road on the `.failed`
+surface (the plan's stated behavior, made true — same-machine scope);
+(b) run the scripted keyed drill end-to-end for the roads that exist
+(custody leg; lobby-passphrase leg; the new `.failed` envelope leg);
+(c) amend the VERIFICATION bullet honestly — the full new-machine
+ADOPTION door incl. escrow stays 13x's, and 13x's master-plan row
+gains one line naming exactly what it inherits.**
+
+**R1-m1 (MINOR, CONFIRMED)** — reconcile's escrow-OFF arm and
+`setEscrow(false)` call `deleteEscrow` on whatever envelope is present
+without `belongs(to:)` — a FOREIGN sidecar's escrow item gets deleted
+against the never-delete-foreign-legs rule. FIX: guard on ownership;
+red pin.
+**R1-m2 (MINOR, CONFIRMED)** — `canLock` reads un-observed
+`gate.dials` so the Lock Now door goes stale on a mode flip (Mac menu;
+worse, the phone sheet captures a `let canLock: Bool` — the exact
+staleness Batch 4 PROVISIONAL 5 warned about, one view lower). FIX:
+consult the observable `protection.dials.mode`; pass the sheet the
+controller, not a Bool.
+**R1-m3 (MINOR, CONFIRMED)** — the one-secret phrase-divergence
+corner's MIRROR direction is cheap: the vault's own phrase GENERATION
+has no hook landing the same words on the store envelope
+(`landRecoveryWrap`), though `onPassphraseChanged` establishes the
+pattern. RULING: WIRE the twin; if it cannot land whole, park at the
+v1-release-readiness row (the credential family's home) — never
+ownerless.
+**R1-m4 (MINOR, CONFIRMED)** — the tutorial's "what comes out is
+noise" overclaims during the ruled R13p-15 plaintext tail. FIX: one
+honest clause (pre-encryption backups stay readable until they age
+out); spine pin updates with it.
+**R1-m5 (MINOR, CONFIRMED)** — `performSecondLeg`'s DEFAULTED plain
+`artifactConfiguration` re-opens, one level up, the door
+`integrityCheck`'s required parameter closed. FIX: required there too.
+**R1-m6 (MINOR, CONFIRMED)** — no direct evidence for "convergence
+green over the encrypted store" (suites run in-memory/unkeyed). FIX:
+one engine-suite pass parameterized onto on-disk KEYED stores.
+
+**NITs (all CONFIRMED, all cheap):** R1-n1 `artifactConfiguration()`
+reads lock-state and key as two acquisitions — one `currentState()`
+read closes the race; R1-n2 `ProtectionCopy.message(for:)`'s default
+arm is a case-name dump — generic sentence; R1-n3 the double
+`loadEnvelope()` + indiscriminate notification-token removal; R1-n4
+`unlock(passphrase:)`'s misleading `trimmed` name (deliberately
+untrimmed — comment it); R1-n5 the fork pinned by BRANCH — **the
+architect pushes tag `v7.11.1+sqlcipher.1` at `404dde041` to the fork
+(done at this adjudication); the fix session re-pins `Package.swift`
+to the tag** (immovable under `swift package update`).
+
+**Also carried from the review's clean bill for the CLOSEOUT's
+obligations:** the scratch sweep reminder (her real prose sits
+plaintext under `~/dev/scratch-13p-spike/` until the ruled
+closeout sweep executes).
