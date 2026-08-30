@@ -966,15 +966,25 @@ final class MobileQuickNoteModel {
 
 // MARK: - The face
 
-/// A5-6: a FIXED row directly under the shelf's path line, outside the
-/// ScrollView — it never scrolls away, and it never displaces the Today
-/// button or the starred section (her constraint: the shelf's feel must
-/// not change around it). **No autofocus**, a deliberate divergence from
-/// the Mac shelf's R102 behaviour: raising a keyboard on every phone
-/// launch is hostile.
+/// A5-6: a FIXED row outside the shelf's books scroller — it never
+/// scrolls away. **No autofocus**, a deliberate divergence from the Mac
+/// shelf's R102 behaviour: raising a keyboard on every phone launch is
+/// hostile.
+///
+/// **Round 2, batch 5 — R27:** the box is now the shelf's MAIN AREA, and
+/// it sits BELOW the bounded books region rather than above it (her
+/// ruling: *"that's where I want the writing a note to go, so that
+/// there's a good amount of space"*). `writingHeight` is the region the
+/// shelf's own layout brain ruled for it; the field grows into that room
+/// and then scrolls inside itself. **⏎ is unchanged** (A5-1) — the box
+/// still holds ONE wrapped paragraph, so this is about WRAPPING, never
+/// about holding several paragraphs.
 struct MobileQuickNoteBox: View {
     @Bindable var model: MobileQuickNoteModel
     let tokens: VoiceTokens
+    /// The ruled writing region (`MobileShelfLayout.split`). `nil` keeps
+    /// the compact five-line box — the shape every other host would get.
+    var writingHeight: CGFloat?
     /// Where a hand-off lands — the shelf's own open-for-writing road.
     let onOpen: (String) -> Void
 
@@ -1020,6 +1030,15 @@ struct MobileQuickNoteBox: View {
         }
     }
 
+    /// R27: how far the field may wrap before it scrolls inside itself.
+    /// Derived from the ruled region, so the box fills its area on a big
+    /// phone and cannot overflow it on a small one (or with the keyboard
+    /// up, which is the same arithmetic on a smaller region — §53 row 6).
+    private var lineCap: Int {
+        guard let writingHeight else { return 5 }
+        return MobileShelfLayout.writingLineCap(writingHeight: writingHeight)
+    }
+
     private var field: some View {
         ZStack(alignment: .topLeading) {
             if model.text.isEmpty {
@@ -1038,11 +1057,27 @@ struct MobileQuickNoteBox: View {
                 .font(tokens.small)
                 .foregroundStyle(tokens.ink)
                 .focused($focused)
-                .lineLimit(1...5)
+                .lineLimit(1...lineCap)
                 .submitLabel(.return)
+                // **The FIELD takes the ruled room, not merely the box
+                // around it** (R27). Measured: with the height on the
+                // enclosing box instead, the field's own frame stayed one
+                // line tall at the top of a tall box — which reads as a
+                // one-line field in a big empty rectangle, and is not
+                // *"enough room that you can type in that for about half
+                // the phone screen"*. Putting it here also makes the whole
+                // area the field's own hit target, so a tap anywhere lands
+                // the caret rather than merely raising the keyboard.
+                .frame(
+                    maxWidth: .infinity, minHeight: fieldMinHeight,
+                    alignment: .topLeading)
                 .accessibilityLabel("Quick note")
                 .accessibilityHint("Type a note here. It saves itself. Return opens it in the editor.")
         }
+        // The dashed box OCCUPIES the ruled area rather than hugging the
+        // text: her *"a good amount of space"* is a visible invitation,
+        // and the whole of it is tappable to focus.
+        .frame(maxWidth: .infinity, alignment: .topLeading)
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
         .overlay(
@@ -1050,6 +1085,12 @@ struct MobileQuickNoteBox: View {
                 .stroke(tokens.faint, style: StrokeStyle(lineWidth: 1, dash: [4, 3])))
         .contentShape(Rectangle())
         .onTapGesture { focused = true }
+    }
+
+    /// What the box's own chrome leaves for the field.
+    private var fieldMinHeight: CGFloat? {
+        guard let writingHeight else { return nil }
+        return max(0, writingHeight - MobileShelfLayout.writingBoxChromeHeight)
     }
 
     private func statusRow(_ indicator: String) -> some View {

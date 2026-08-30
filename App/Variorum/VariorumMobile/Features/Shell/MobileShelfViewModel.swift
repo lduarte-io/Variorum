@@ -34,6 +34,16 @@ final class MobileShelfViewModel {
     /// The Today door's shelving note (not an error — rendered muted).
     private(set) var lastReport: String?
 
+    /// How many values the HELD books observation has delivered. Test
+    /// observability only — nothing renders it — and it exists because
+    /// §53 row 7's real hazard is structural rather than temporal: the
+    /// shelf is now a typing surface, so a capture that woke this
+    /// observation would re-run a books query at autosave rate. A tick
+    /// count is a fact about what the store notifies; a timing could pass
+    /// merely by being fast. (`@ObservationIgnored` deliberately: a
+    /// counter that itself invalidated the view would be its own defect.)
+    @ObservationIgnored private(set) var observationTicks = 0
+
     init(session: AppSession) {
         self.session = session
     }
@@ -55,6 +65,7 @@ final class MobileShelfViewModel {
                     pins: try Queries.shelfPins(db),
                     dailyBookID: try Queries.dailyJournalBookID(db))
             }) {
+                observationTicks += 1
                 books = value.books
                 pins = value.pins
                 dailyBookID = value.dailyBookID
@@ -85,11 +96,18 @@ final class MobileShelfViewModel {
         MobileShelfFaces.name(for: book)
     }
 
-    func rowMeta(for book: Queries.ShelfBook) -> String {
+    /// `showingDailyMarker` (round 2, batch 5 — R26.2): the shelf row that
+    /// wears the Today BADGE suppresses the word, because the badge is a
+    /// better daily marker than the word and phone width is scarce. Every
+    /// other caller keeps the marker by default, and the face BRAIN is
+    /// untouched — this is a per-row presentation call, not a rule change.
+    func rowMeta(
+        for book: Queries.ShelfBook, showingDailyMarker: Bool = true
+    ) -> String {
         MobileShelfFaces.meta(
             for: book,
             tagPaths: MobileShelfFaces.tagPaths(for: book, curatedTags: bookTags),
-            isDaily: book.reading.id == dailyBookID)
+            isDaily: showingDailyMarker && book.reading.id == dailyBookID)
     }
 
     /// Pin / unpin (parity C2 — the [B1] record's deliberately-deferred

@@ -161,6 +161,17 @@ struct MobileShellView: View {
             }
         }
         .task { await starsModel.start() }
+        // R27b (round 2, batch 5): the starter Journal, seeded ONCE on a
+        // genuinely new store. It lives HERE and not on the shelf view
+        // because the shell is the app's composition root — the shelf is
+        // hosted alone by several suites, and furniture must not appear
+        // in a pin's world. Idempotent by construction (a per-store-variant
+        // mark AND a virgin-store guard), so a second `.task` is a no-op.
+        .task {
+            await MobileStarterJournal.seedIfNeeded(
+                session: session,
+                storeVariant: bootstrap?.storeVariant ?? .real)
+        }
         #if DEBUG
         .fullScreenCover(isPresented: $spikePresented) { SpikeScreen() }
         #endif
