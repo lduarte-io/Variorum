@@ -82,6 +82,19 @@ struct VariorumMobileApp: App {
                                 services?.stop()
                                 services = nil
                             })
+                        // Phase 13p ladder R2-M1: the phone wires the SAME
+                        // four one-secret hooks the Mac wires (R13p-4 — one
+                        // passphrase, one phrase, both platforms). Until
+                        // this fix the phone presented the full shared
+                        // vault flows AND its own reset door with NONE of
+                        // them wired — a vault passphrase minted or changed
+                        // here never reached the store's sidecar, and a
+                        // phone reset skipped the vault half. Re-wired per
+                        // session exactly like the teardown above.
+                        wireOneSecretHooks(
+                            protection: bootstrap.protection,
+                            encryption: fresh.encryption,
+                            keyVault: fresh.keyVault, auth: fresh.auth)
                         await fresh.start()
                     }
             case .opening:

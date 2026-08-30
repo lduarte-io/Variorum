@@ -643,3 +643,247 @@ struct MobileQuickNoteUnderLockTests {
         }
     }
 }
+
+// MARK: - The one-secret hooks on the phone's composition (ladder R2-M1)
+
+/// A raw-JSON `key_vault` PostgREST responder — the Mac suite's
+/// `ScriptedVault` shape, needed here because the phone's pins drive the
+/// SAME vault flows over the same no-network discipline.
+private final class ScriptedVaultResponder: @unchecked Sendable {
+    private let lock = NSLock()
+    private var row: Data?
+
+    var hasRow: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return row != nil
+    }
+
+    var load: @Sendable (URLRequest) async throws -> (Data, URLResponse) {
+        { [weak self] request in
+            guard let self else { throw URLError(.cancelled) }
+            return self.respond(to: request)
+        }
+    }
+
+    private func respond(to request: URLRequest) -> (Data, URLResponse) {
+        lock.lock()
+        defer { lock.unlock() }
+        func response(_ status: Int, _ body: Data = Data()) -> (Data, URLResponse) {
+            (body, HTTPURLResponse(
+                url: request.url!, statusCode: status,
+                httpVersion: "HTTP/1.1", headerFields: nil)!)
+        }
+        guard request.url?.path.hasSuffix("/rest/v1/key_vault") == true else {
+            return response(404)
+        }
+        switch request.httpMethod {
+        case "GET":
+            guard let row else { return response(200, Data("[]".utf8)) }
+            return response(200, Data("[".utf8) + row + Data("]".utf8))
+        case "POST":
+            guard row == nil else {
+                return response(409, Data(#"{"code":"23505"}"#.utf8))
+            }
+            row = request.httpBody
+            return response(201)
+        case "PATCH":
+            guard row != nil, let body = request.httpBody else {
+                return response(200, Data("[]".utf8))
+            }
+            row = body
+            return response(200, Data("[".utf8) + body + Data("]".utf8))
+        default:
+            return response(405)
+        }
+    }
+}
+
+/// **LADDER R2-M1 — THE PHONE WIRES THE FOUR ONE-SECRET HOOKS.** Until
+/// this fix `VariorumMobileApp`'s `.task` wired NONE of them while the
+/// phone presented the full shared vault flows (Settings ▸ Account ▸
+/// Encryption) AND its own reset door — four silent divergences against
+/// R13p-4's "no second passphrase exists anywhere":
+///
+/// · a phone user could mint a DIFFERENT vault passphrase over a store
+///   wrap (no `storePassphraseGuard`);
+/// · a vault passphrase change made on the phone left the store sidecar
+///   holding the RETIRED passphrase (no `onPassphraseChanged`);
+/// · vault-minted twelve words opened the account but not the library
+///   (no `onRecoveryPhraseLanded`);
+/// · the phone's reset door re-wrapped the store and silently SKIPPED
+///   the vault (no `rewrapVaultPassphrase`).
+///
+/// Every pin below drives `wireOneSecretHooks` — the SAME shared factory
+/// production wires in the phone's `.task` (the `mobileWillLock`
+/// precedent) — over a scripted world: scripted gate/custody, a
+/// raw-JSON vault, an in-memory signed-in session. No Keychain, no
+/// network, no prompts.
+///
+/// RED ON OLD (behavioral revert executed): with the factory's body
+/// emptied — the pre-fix world, where the phone wires nothing — each pin
+/// fails on exactly its own mechanism.
+@MainActor
+@Suite("13p phone — the one-secret hooks ride the phone's composition")
+struct MobileOneSecretHooksTests {
+    private let vaultPassphrase = "orchard-lantern-13"
+
+    private struct World {
+        let controller: ProtectionController
+        let encryption: EncryptionSession
+        let vault: ScriptedVaultResponder
+        let client: KeyVaultClient
+        let envelopeBox: ScriptedEnvelopeBox
+        let backing: InMemoryStoreKeyGuardBacking
+        let key: StoreKey
+    }
+
+    /// The phone's composition, scripted: the same pieces
+    /// `VariorumMobileApp.task` hands the factory, minus the real
+    /// Keychain/network under each.
+    private func world() -> World {
+        let key = StoreKey.mint()
+        let backing = InMemoryStoreKeyGuardBacking(
+            auto: key, biometryAvailable: true, biometricSucceeds: true)
+        let envelopeBox = ScriptedEnvelopeBox(nil)
+        let gate = StoreLaunchGate.scripted(
+            dials: ScriptedDialsBox(ProtectionDials()), backing: backing,
+            envelope: envelopeBox)
+        let controller = ProtectionController(configuration: .init(
+            scope: "phone-one-secret", storeURL: nil, gate: gate,
+            isRealVariant: false, makeKDF: { fastKDF() }))
+        let vault = ScriptedVaultResponder()
+        let client = KeyVaultClient(
+            configuration: KeyVaultClient.Configuration(
+                projectURL: URL(string: "https://vault.test.invalid")!,
+                apiKey: "publishable-test-key"),
+            sessionProvider: StaticSessionProvider(
+                session: UserSession(accessToken: "token-1", userID: "user-phone")),
+            load: vault.load)
+        let encryption = EncryptionSession(
+            store: .inMemory(), client: client, signedIn: { true })
+        let auth = AuthSession(
+            configuration: AuthConfiguration(
+                projectURL: URL(string: "https://auth.test.invalid")!,
+                apiKey: "publishable-test-key"),
+            store: .inMemory(initial: AuthTokens(
+                accessToken: "token-1", refreshToken: "refresh-1",
+                expiresAt: Date(timeIntervalSinceNow: 86_400),
+                userID: "user-phone", email: "phone@test.invalid")),
+            http: { _ in throw URLError(.notConnectedToInternet) })
+
+        // Production's own wiring: the factory the phone's `.task` calls.
+        wireOneSecretHooks(
+            protection: controller, encryption: encryption,
+            keyVault: client, auth: auth)
+        return World(
+            controller: controller, encryption: encryption, vault: vault,
+            client: client, envelopeBox: envelopeBox, backing: backing, key: key)
+    }
+
+    /// **The GUARD (pin c):** a store-passphrase mismatch refuses vault
+    /// setUp with the one-secret sentence, and mints NO vault row; the
+    /// store's own passphrase sets up fine.
+    @Test func vaultSetupRefusesAPassphraseTheStoreWrapDoesNotOpen() async throws {
+        let w = world()
+        #expect(await w.controller.setPassphrase("store-sesame") == nil)
+
+        await w.encryption.setUp(passphrase: "a-different-one")
+        #expect(w.encryption.lastError == EncryptionSession.oneSecretMismatchMessage,
+                "the refusal is the one-secret sentence, on the phone too")
+        #expect(!w.vault.hasRow, "nothing was minted under the refused passphrase")
+
+        await w.encryption.setUp(passphrase: "store-sesame")
+        #expect(w.encryption.lastError == nil)
+        #expect(w.vault.hasRow, "the store's own passphrase is the one that serves both")
+    }
+
+    /// **The FOLLOW (pin a):** a vault passphrase change made on the
+    /// phone re-wraps the store sidecar — the retired passphrase stops
+    /// unwrapping, the new one takes over. Pre-fix, the sidecar kept the
+    /// retired passphrase.
+    @Test func aVaultPassphraseChangeOnThePhoneReWrapsTheStoreSidecar() async throws {
+        let w = world()
+        #expect(await w.controller.setPassphrase(vaultPassphrase) == nil)
+        await w.encryption.setUp(passphrase: vaultPassphrase)
+        #expect(w.encryption.lastError == nil)
+
+        await w.encryption.changePassphrase(
+            authorization: .passphrase(vaultPassphrase),
+            newPassphrase: "winter-harbor-7")
+        #expect(w.encryption.lastError == nil)
+
+        let envelope = try #require(w.envelopeBox.value)
+        #expect(try envelope.unwrapKey(passphrase: "winter-harbor-7") == w.key,
+                "the store wrap FOLLOWED the vault's change — one secret, kept")
+        #expect(throws: StoreKeyEnvelopeError.wrongPassphrase) {
+            _ = try envelope.unwrapKey(passphrase: self.vaultPassphrase)
+        }
+    }
+
+    /// **The PHRASE (the fourth mechanism):** vault-minted twelve words
+    /// land on the store envelope too, so the one phrase opens the
+    /// library as well as the account — on the phone's composition.
+    @Test func vaultMintedWordsOpenTheLibraryTooOnThePhone() async throws {
+        let w = world()
+        #expect(await w.controller.setPassphrase(vaultPassphrase) == nil)
+        await w.encryption.setUp(passphrase: vaultPassphrase)
+        #expect(w.encryption.lastError == nil)
+
+        let words = try #require(w.encryption.generatePhrase())
+        await w.encryption.landRecoveryWrap(confirmedWords: words, allowReplace: false)
+        #expect(w.encryption.lastError == nil)
+
+        let envelope = try #require(w.envelopeBox.value)
+        #expect(try envelope.unwrapKey(recoveryWords: words) == w.key,
+                "the vault's twelve words unwrap the STORE key too")
+    }
+
+    /// **The RESET's vault half (pin b, positive arm):** a phone reset
+    /// with a wired vault moves the VAULT to the new passphrase too —
+    /// the old one stops opening the account. Pre-fix, the reset
+    /// re-wrapped the store and skipped the vault entirely.
+    @Test func aPhoneResetMovesTheVaultToTheNewPassphraseToo() async throws {
+        let w = world()
+        #expect(await w.controller.setPassphrase(vaultPassphrase) == nil)
+        await w.encryption.setUp(passphrase: vaultPassphrase)
+        #expect(w.encryption.lastError == nil)
+
+        let refusal = await w.controller.resetPassphrase(to: "fresh-north-22")
+        #expect(refusal == nil, "the reset lands: \(refusal ?? "")")
+
+        // The VAULT moved: the new passphrase unwraps it, the retired one
+        // refuses — verified by the real enrollment unwrap.
+        let enrollment = VaultEnrollment(client: w.client)
+        _ = try await enrollment.enroll(passphrase: "fresh-north-22")
+        await #expect(throws: VaultEnrollmentError.wrongPassphrase) {
+            _ = try await enrollment.enroll(passphrase: self.vaultPassphrase)
+        }
+        // …and the STORE moved with it (the door's own half, unchanged).
+        let envelope = try #require(w.envelopeBox.value)
+        #expect(try envelope.unwrapKey(passphrase: "fresh-north-22") == w.key)
+    }
+
+    /// **The RESET's vault half (pin b, refuse-whole arm):** when the
+    /// vault half CANNOT run (custody forgotten — no held material), the
+    /// whole reset refuses and the store wrap stays untouched. Pre-fix,
+    /// the store half ran anyway and the two secrets diverged.
+    @Test func aPhoneResetRefusesWholeWhenTheVaultHalfCannotRun() async throws {
+        let w = world()
+        #expect(await w.controller.setPassphrase(vaultPassphrase) == nil)
+        await w.encryption.setUp(passphrase: vaultPassphrase)
+        #expect(w.encryption.lastError == nil)
+        await w.encryption.forgetDeviceKeys()
+
+        let refusal = await w.controller.resetPassphrase(to: "fresh-north-22")
+        #expect(refusal?.contains("nothing was changed") == true,
+                "the reset refuses WHOLE rather than diverging: \(refusal ?? "nil")")
+
+        let envelope = try #require(w.envelopeBox.value)
+        #expect(try envelope.unwrapKey(passphrase: vaultPassphrase) == w.key,
+                "the store wrap is untouched — the old passphrase still opens")
+        #expect(throws: StoreKeyEnvelopeError.wrongPassphrase) {
+            _ = try envelope.unwrapKey(passphrase: "fresh-north-22")
+        }
+    }
+}

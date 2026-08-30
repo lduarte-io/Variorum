@@ -651,3 +651,58 @@ nonisolated struct VaultRewrapNeedsUnlockedKeys: Error, CustomStringConvertible 
         + "and try again"
     }
 }
+
+// MARK: - The one-secret wiring (R13p-4 — ladder R2-M1, the shared factory)
+
+/// THE FOUR ONE-SECRET HOOKS, as ONE factory both compositions call
+/// (ladder R2-M1; the `mobileWillLock` precedent — production's own
+/// composition drivable by a scripted pin). Until this fix the block
+/// lived inline in the Mac's `VariorumApp.task` and the PHONE wired
+/// none of it while presenting the full shared vault flows AND its own
+/// reset door — four silent-divergence mechanisms against R13p-4's
+/// "no second passphrase exists anywhere":
+///
+/// · `storePassphraseGuard` — vault SETUP refuses a passphrase the
+///   store's own wrap does not open (a phone user could mint a
+///   DIFFERENT vault passphrase).
+/// · `onPassphraseChanged` — a vault setup/enrollment/change FOLLOWS
+///   into the store wrap (without it, a change made on the phone left
+///   the sidecar holding the retired passphrase).
+/// · `onRecoveryPhraseLanded` — the vault's twelve confirmed words land
+///   on the store envelope too (without it, vault-minted words opened
+///   the account but not the library — R1-m3's mechanism, phone-side).
+/// · `rewrapVaultPassphrase` — the reset door's vault half runs FIRST
+///   where a vault is wired, refusing WHOLE when it cannot (without it,
+///   a phone reset re-wrapped the store and silently skipped the vault).
+///
+/// Wired in each app's `.task`, re-wired per session exactly as the
+/// lock teardown is (the next unlock's fresh services get fresh hooks).
+@MainActor
+func wireOneSecretHooks(
+    protection: ProtectionController,
+    encryption: EncryptionSession,
+    keyVault: KeyVaultClient?,
+    auth: AuthSession
+) {
+    encryption.onPassphraseChanged = { passphrase in
+        await protection.followVaultPassphrase(passphrase)
+    }
+    encryption.onRecoveryPhraseLanded = { words in
+        _ = await protection.landRecoveryWrap(words: words)
+    }
+    encryption.storePassphraseGuard = { passphrase in
+        await protection.verifyPassphraseAgainstStore(passphrase)
+    }
+    if let vault = keyVault {
+        protection.rewrapVaultPassphrase = { newPassphrase in
+            // Signed out / no vault row ⇒ no vault half.
+            guard await auth.currentUserID != nil else { return }
+            guard try await vault.fetchVault() != nil else { return }
+            guard let material = await encryption.heldMaterial() else {
+                throw VaultRewrapNeedsUnlockedKeys()
+            }
+            try await VaultEnrollment(client: vault).rewrapPassphrase(
+                material: material, newPassphrase: newPassphrase)
+        }
+    }
+}

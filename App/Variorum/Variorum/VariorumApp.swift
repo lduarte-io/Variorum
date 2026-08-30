@@ -84,40 +84,19 @@ struct VariorumApp: App {
                             services = nil
                         }
                         // 13p one-secret wiring (R13p-4): the vault's
-                        // passphrase FOLLOWS into the store wrap; the store
+                        // passphrase FOLLOWS into the store wrap; the vault's
+                        // twelve words follow too (R1-m3's twin); the store
                         // wrap GUARDS vault setup; and the reset door's
                         // vault half re-wraps from held material (R13p-9 —
                         // an enrolled account that cannot follow refuses
-                        // the whole reset rather than diverging).
-                        let protection = bootstrap.protection
-                        fresh.encryption.onPassphraseChanged = { passphrase in
-                            await protection.followVaultPassphrase(passphrase)
-                        }
-                        // 13p ladder R1-m3 — the phrase twin: the vault's
-                        // own recovery-phrase generation lands the SAME
-                        // twelve words onto the store envelope, so the one
-                        // phrase opens BOTH (the passphrase hook's pattern,
-                        // completed in the phrase direction).
-                        fresh.encryption.onRecoveryPhraseLanded = { words in
-                            _ = await protection.landRecoveryWrap(words: words)
-                        }
-                        fresh.encryption.storePassphraseGuard = { passphrase in
-                            await protection.verifyPassphraseAgainstStore(passphrase)
-                        }
-                        if let vault = fresh.keyVault {
-                            let auth = fresh.auth
-                            let encryption = fresh.encryption
-                            protection.rewrapVaultPassphrase = { newPassphrase in
-                                // Signed out / no vault row ⇒ no vault half.
-                                guard await auth.currentUserID != nil else { return }
-                                guard try await vault.fetchVault() != nil else { return }
-                                guard let material = await encryption.heldMaterial() else {
-                                    throw VaultRewrapNeedsUnlockedKeys()
-                                }
-                                try await VaultEnrollment(client: vault).rewrapPassphrase(
-                                    material: material, newPassphrase: newPassphrase)
-                            }
-                        }
+                        // the whole reset rather than diverging). Extracted
+                        // to the SHARED factory at ladder R2-M1 so the phone
+                        // wires the SAME composition — see
+                        // `wireOneSecretHooks` (ProtectionController.swift).
+                        wireOneSecretHooks(
+                            protection: bootstrap.protection,
+                            encryption: fresh.encryption,
+                            keyVault: fresh.keyVault, auth: fresh.auth)
                         await fresh.start()
                     }
                     // 13p: the calm, dismissible protection notices (the
