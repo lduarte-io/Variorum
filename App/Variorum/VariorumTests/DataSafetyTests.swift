@@ -174,7 +174,11 @@ struct BackupRunTests {
         #expect(!FileManager.default.fileExists(atPath: copy.path + "-wal"),
                 "a closed backup copy is self-contained — no sidecar carries content")
 
-        #expect(StoreBackup.integrityCheck(of: copy) == "ok",
+        // 13p: the source is a keyed store now (openStore under the test
+        // custody), so its copy is ciphertext — the check carries the
+        // store's own artifact configuration, exactly as performRun does.
+        #expect(StoreBackup.integrityCheck(of: copy, using: source.artifactConfiguration())
+                    == "ok",
                 "a WAL-flagged copy — which every real copy is — must be checkable")
         // And it leaves no journal siblings behind: the -wal/-shm files that
         // make a restored file dangerous if they travel with it, and that a
@@ -185,7 +189,8 @@ struct BackupRunTests {
         }
         // Self-contained afterwards: a READ-ONLY open now works, which is the
         // property the runbook promises and the one that failed before.
-        var readOnly = GRDB.Configuration()
+        // (13p: with the store's key — the copy is ciphertext.)
+        var readOnly = source.artifactConfiguration()
         readOnly.readonly = true
         let reopened = try DatabaseQueue(path: copy.path, configuration: readOnly)
         let title = try reopened.inDatabase { db in
@@ -199,7 +204,7 @@ struct BackupRunTests {
         defer { try? FileManager.default.removeItem(at: dir) }
         let notADatabase = dir.appendingPathComponent("variorum-backup-2026-08-24-000001.sqlite")
         try Data("this is not a database".utf8).write(to: notADatabase)
-        let answer = StoreBackup.integrityCheck(of: notADatabase)
+        let answer = StoreBackup.integrityCheck(of: notADatabase, using: GRDB.Configuration())
         #expect(answer != "ok", "a broken file must never read as ok")
         #expect(answer.contains("could not be checked") || answer.contains("malformed"))
     }

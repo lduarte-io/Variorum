@@ -156,12 +156,12 @@ struct MigrationTests {
         let url = dir.appendingPathComponent("test.sqlite")
 
         // First open migrates; write a row so we can prove re-open keeps data.
-        let first = try AppDatabase.onDisk(url: url)
+        let first = try AppDatabase.onDisk(url: url, key: nil)
         try first.write { db in try Fixture.container(db, id: "c1") }
 
         // Second open re-runs the migrator: no error, schema intact, data intact,
         // seeds not duplicated.
-        let second = try AppDatabase.onDisk(url: url)
+        let second = try AppDatabase.onDisk(url: url, key: nil)
         let (containers, settings) = try second.read { db in
             (try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM container")!,
              try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM setting")!)

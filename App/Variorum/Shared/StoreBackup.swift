@@ -176,6 +176,11 @@ final class StoreBackup {
         defaults: UserDefaults, now: Date, force: Bool
     ) -> BackupRunRecord {
         dispatchPrecondition(condition: .notOnQueue(.main))
+        // Phase 13p: a keyed store's backups are ciphertext under the same
+        // key, so every artifact open below carries the store's own keyed
+        // configuration (an unkeyed open of a ciphertext copy would report
+        // "could not be checked" on every copy the app ever makes).
+        let artifactConfiguration = database.artifactConfiguration()
         var primary = BackupRunRecord.Leg(outcome: .upToDate)
         primary.destination = BackupDestination.displayPath(directory)
         do {
@@ -185,7 +190,7 @@ final class StoreBackup {
             if let written {
                 primary.outcome = .written
                 primary.file = written.lastPathComponent
-                primary.integrity = integrityCheck(of: written)
+                primary.integrity = integrityCheck(of: written, using: artifactConfiguration)
             }
         } catch {
             primary.outcome = .failed
@@ -199,7 +204,8 @@ final class StoreBackup {
 
         let secondary = performSecondLeg(
             directory: directory, configuration: configuration,
-            defaults: defaults, now: now, force: force)
+            defaults: defaults, now: now, force: force,
+            artifactConfiguration: artifactConfiguration)
 
         // 13l Act 5 (row 16): the plain-text insurance rides this run rather
         // than minting a second clock — one hourly tick, one record, one
@@ -231,9 +237,12 @@ final class StoreBackup {
 
     /// The picked folder's half. Never throws for the same reason: an
     /// unplugged drive is a thing to SAY, not a thing to crash on.
+    /// `artifactConfiguration` keys the far copy's integrity check exactly
+    /// as the primary's (13p — the copies are ciphertext now).
     nonisolated static func performSecondLeg(
         directory: URL, configuration: Configuration,
-        defaults: UserDefaults, now: Date, force: Bool
+        defaults: UserDefaults, now: Date, force: Bool,
+        artifactConfiguration: GRDB.Configuration = GRDB.Configuration()
     ) -> BackupRunRecord.Leg {
         var leg = BackupRunRecord.Leg(outcome: .noDestination)
         guard BackupDestination.isSet(in: defaults) else { return leg }
@@ -278,7 +287,7 @@ final class StoreBackup {
                 try FileManager.default.copyItem(at: source, to: destination)
                 leg.outcome = .written
                 leg.file = destination.lastPathComponent
-                leg.integrity = integrityCheck(of: destination)
+                leg.integrity = integrityCheck(of: destination, using: artifactConfiguration)
                 leg.pruned = try pruneSecond(
                     in: target, policy: configuration.secondPolicy)
             }
@@ -326,11 +335,20 @@ final class StoreBackup {
     /// fallback below covers a copy that genuinely cannot be written (a
     /// read-only destination): the check still runs, on whatever terms the
     /// file allows.
-    nonisolated static func integrityCheck(of url: URL) -> String {
+    /// Phase 13p: `using` is the SOURCE STORE's artifact configuration
+    /// (`AppDatabase.artifactConfiguration()`) — a keyed store's copies are
+    /// ciphertext and can only be opened with the same key. REQUIRED at the
+    /// call site so no future caller quietly checks a ciphertext copy with
+    /// a plaintext connection and reports every backup as uncheckable. For
+    /// a plaintext-era store the configuration is plain and behavior is
+    /// exactly what it was.
+    nonisolated static func integrityCheck(
+        of url: URL, using configuration: GRDB.Configuration
+    ) -> String {
         do {
             let answer: (mode: String?, integrity: String)
             do {
-                let queue = try DatabaseQueue(path: url.path)
+                let queue = try DatabaseQueue(path: url.path, configuration: configuration)
                 answer = try queue.inDatabase { db in
                     // Checkpoints and removes the -wal, then leaves the file
                     // in a journal mode a read-only open can always handle.
@@ -353,7 +371,7 @@ final class StoreBackup {
             return answer.integrity
         } catch {
             do {
-                var config = GRDB.Configuration()
+                var config = configuration
                 config.readonly = true
                 let queue = try DatabaseQueue(path: url.path, configuration: config)
                 return try queue.read { db in

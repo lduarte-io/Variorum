@@ -26,7 +26,7 @@ struct StoreRestoreDrillTests {
         // with a comment, a book with a chapter — written through the
         // operations layer against the ON-DISK store (WAL mode, like the
         // real thing; not the in-memory test double).
-        let live = try AppDatabase.onDisk(url: storeURL)
+        let live = try AppDatabase.onDisk(url: storeURL, key: nil)
         let world: (postID: String, blockID: String, readingID: String) =
             try withDependencies {
                 $0.database = live
@@ -114,7 +114,7 @@ struct StoreRestoreDrillTests {
         let storeURL = dir.appendingPathComponent("variorum.sqlite")
         let copyURL = dir.appendingPathComponent("variorum-backup-2026-07-18-020000.sqlite")
 
-        let live = try AppDatabase.onDisk(url: storeURL)
+        let live = try AppDatabase.onDisk(url: storeURL, key: nil)
         try live.write { db in try Fixture.container(db, id: "c1") }
         try live.backup(to: copyURL)
 

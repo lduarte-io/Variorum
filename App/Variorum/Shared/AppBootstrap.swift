@@ -153,7 +153,19 @@ private nonisolated func openStoreOffMain(
         #if os(iOS)
         prepareStoreDirectoryProtection(url)
         #endif
-        return .success(try AppDatabase.openStore(at: url))
+        // Phase 13p: custody is EXPLICIT here, and per-variant, on purpose —
+        // two load-bearing consequences. (1) The dev store and the real
+        // store never share key custody (the A4 fence extended to keys:
+        // each variant's key lives under its own Keychain account).
+        // (2) The app's own launch under a HOSTED TEST RUN still uses the
+        // real device Keychain rather than the test-context ephemeral
+        // custody — otherwise the host app would key its dev store under a
+        // key that dies with the test process, bricking the dev store for
+        // the next real run. Tests that open their OWN stores call
+        // `openStore(at:)` bare and get the in-memory test custody; this
+        // line is the app's store, which is real whichever process opens it.
+        return .success(try AppDatabase.openStore(
+            at: url, custody: .deviceKeychain(scope: variant.rawValue)))
     } catch let error as AppDatabase.StoreOpenError {
         return .failure(error)
     } catch {

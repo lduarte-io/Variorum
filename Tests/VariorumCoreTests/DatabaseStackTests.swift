@@ -23,7 +23,7 @@ struct DatabaseStackTests {
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: dir) }
 
-        let db = try AppDatabase.onDisk(url: dir.appendingPathComponent("test.sqlite"))
+        let db = try AppDatabase.onDisk(url: dir.appendingPathComponent("test.sqlite"), key: nil)
         let mode = try db.read { try String.fetchOne($0, sql: "PRAGMA journal_mode") }
         #expect(mode?.lowercased() == "wal")
     }

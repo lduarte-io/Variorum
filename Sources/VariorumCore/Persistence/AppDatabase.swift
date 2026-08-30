@@ -13,16 +13,30 @@ public struct AppDatabase: Sendable {
     /// below, never through the connection itself.
     private let writer: any DatabaseWriter
 
-    private init(_ writer: any DatabaseWriter) throws {
+    /// The store's SQLCipher key (Phase 13p, whole-store encryption —
+    /// R13p-1/R13p-2). Held so `backup(to:)` and `artifactConfiguration()`
+    /// key this store's ARTIFACTS with the same key; nil = an unkeyed store
+    /// (in-memory tests, and pre-migration plaintext).
+    private let key: StoreKey?
+
+    private init(_ writer: any DatabaseWriter, key: StoreKey? = nil) throws {
         self.writer = writer
+        self.key = key
         try AppDatabase.migrator.migrate(writer)
     }
 
     // MARK: - Factories
 
-    /// The canonical on-disk store (WAL journal, reader pool).
-    public static func onDisk(url: URL) throws -> AppDatabase {
-        try AppDatabase(DatabasePool(path: url.path, configuration: configuration()))
+    /// The canonical on-disk store (WAL journal, reader pool). `key` is
+    /// REQUIRED at the call site on purpose: every caller decides, visibly,
+    /// whether this store is encrypted — a defaulted nil would be a silent
+    /// plaintext door. Production stores are keyed (Phase 13p); nil exists
+    /// for tests that exercise the plaintext-era shape (and the migration's
+    /// own source fixtures).
+    public static func onDisk(url: URL, key: StoreKey?) throws -> AppDatabase {
+        try AppDatabase(
+            DatabasePool(path: url.path, configuration: configuration(key: key)),
+            key: key)
     }
 
     /// A private in-memory store, for tests.
@@ -30,13 +44,39 @@ public struct AppDatabase: Sendable {
         try AppDatabase(DatabaseQueue(configuration: configuration()))
     }
 
-    private static func configuration() -> Configuration {
+    /// Internal (not private) so `StoreEncryptionMigration` keys its verify
+    /// connection through the ONE keying implementation.
+    static func configuration(key: StoreKey? = nil) -> Configuration {
         var config = Configuration()
         // Explicit even though it is GRDB's default: FK enforcement is an
         // invariant backstop (AppSpec §6), never an accident of configuration.
         config.foreignKeysEnabled = true
         config.busyMode = .timeout(5)
+        if let key {
+            config.prepareDatabase { db in
+                // Phase 13p: the RAW-KEY pragma, on EVERY connection this
+                // configuration opens — pool writers AND readers. As SQL,
+                // deliberately, and NEVER GRDB's `usePassphrase(_:)`: that
+                // method is the KDF road (sqlite3_key → 256,000
+                // PBKDF2-HMAC-SHA512 iterations — measured 165 ms per open
+                // vs ~1 ms for this pragma; spike memo Q2), and GRDB offers
+                // no raw-key convenience. The x'…' hex literal hands the
+                // pager the 256-bit key directly, bypassing derivation.
+                try db.execute(sql: "PRAGMA key = \"x'\(key.hexEncoded)'\"")
+            }
+        }
         return config
+    }
+
+    /// A GRDB configuration keyed exactly as this store is keyed — for
+    /// opening THIS store's own artifacts (backup copies, integrity checks,
+    /// restore verifications) WITHOUT running the migrator. The key never
+    /// crosses the seam as bytes; it rides the configuration's
+    /// connection-preparation closure. For an unkeyed store this is the
+    /// plain configuration, so plaintext-era artifacts behave as they
+    /// always did.
+    public func artifactConfiguration() -> Configuration {
+        Self.configuration(key: key)
     }
 
     // MARK: - Access
@@ -61,13 +101,25 @@ public struct AppDatabase: Sendable {
 
     /// One consistent cold copy of the store at `url`, via SQLite's backup
     /// API — safe against an in-use WAL store (the copy is a single-point
-    /// snapshot; writers proceed). The destination is a plain, self-contained
+    /// snapshot; writers proceed). The destination is a self-contained
     /// database file the recoverable-open path (`openStore(at:)`) can open
     /// directly. Blocking — callers keep it off the main thread (P2).
+    ///
+    /// Phase 13p: the destination is opened WITH THIS STORE'S OWN KEY — so
+    /// a keyed store's backups are ciphertext under the same key, and a
+    /// plaintext store's stay plain. This is the spike memo's one hard
+    /// sequencing instruction made real: SQLCipher REFUSES `sqlite3_backup`
+    /// on a key mismatch ("backup is not supported with encrypted
+    /// databases"), so an unkeyed destination here would have broken 13l's
+    /// entire backup machinery — scheduled backups, the second destination,
+    /// the freshness face, the restore drill — at the first post-migration
+    /// run. Pinned in `StoreEncryptionTests` (red-on-old: the shipped
+    /// unkeyed path THROWS against a keyed store).
     public func backup(to url: URL) throws {
         try FileManager.default.createDirectory(
             at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-        let destination = try DatabaseQueue(path: url.path)
+        let destination = try DatabaseQueue(
+            path: url.path, configuration: artifactConfiguration())
         try writer.backup(to: destination)
     }
 

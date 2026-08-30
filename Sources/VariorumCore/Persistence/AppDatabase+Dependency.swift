@@ -69,16 +69,72 @@ extension AppDatabase {
 
     /// Opens (creating parent folders as needed) with the typed failure the
     /// shell renders. Every thrown error is a `StoreOpenError`.
-    public static func openStore(at url: URL) throws -> AppDatabase {
+    ///
+    /// Phase 13p (whole-store encryption): this is the KEYED open — the one
+    /// road the app, the restore drill, and 13x's adoption door all take.
+    /// The store key comes from `custody` (nil = the injected
+    /// `\.storeKeyCustody` dependency — the real device Keychain in the
+    /// app, an in-memory process key under test): a fresh store MINTS a key
+    /// into custody and is born encrypted; an encrypted store whose custody
+    /// holds no key REFUSES honestly (never minting a key that could not
+    /// open it — Batch 2's recovery roads are what re-derive one).
+    public static func openStore(
+        at url: URL, custody: StoreKeyCustody? = nil
+    ) throws -> AppDatabase {
         do {
             try FileManager.default.createDirectory(
                 at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-            return try AppDatabase.onDisk(url: url)
+            let presence = StoreFilePresence.classify(at: url)
+            if presence == .plaintext {
+                // 13p Batch 1 BRIDGE (commit 2 of the substrate): an
+                // existing plaintext store keeps opening unkeyed until the
+                // one-time migration lands — the next commit replaces this
+                // arm with migrate-then-open-keyed. Fresh stores are
+                // already born encrypted below.
+                return try AppDatabase.onDisk(url: url, key: nil)
+            }
+            let custody = custody ?? ambientStoreKeyCustody()
+            let key = try resolveStoreKey(at: url, presence: presence, custody: custody)
+            return try AppDatabase.onDisk(url: url, key: key)
         } catch let error as StoreOpenError {
             throw error
         } catch {
             throw StoreOpenError(storePath: url.path, reason: String(describing: error))
         }
+    }
+
+    /// The injected default custody. In the app process the shell passes
+    /// custody EXPLICITLY (per resolved store variant); this serves bare
+    /// `openStore(at:)` calls — the package's own `liveValue`, tests, and
+    /// artifact opens.
+    private static func ambientStoreKeyCustody() -> StoreKeyCustody {
+        @Dependency(\.storeKeyCustody) var custody
+        return custody
+    }
+
+    /// Load-or-mint, with the two honest refusals: an encrypted store whose
+    /// key is gone (refuse, do NOT mint over the emptiness), and a custody
+    /// that cannot KEEP a fresh mint (refuse to create a store that would
+    /// be unopenable at the next launch).
+    private static func resolveStoreKey(
+        at url: URL, presence: StoreFilePresence, custody: StoreKeyCustody
+    ) throws -> StoreKey {
+        if let held = custody.load() { return held }
+        if presence == .encryptedOrUnknown {
+            throw StoreOpenError(
+                storePath: url.path,
+                reason: "This library is encrypted, and its key is not available "
+                    + "on this device.")
+        }
+        let minted = StoreKey.mint()
+        guard custody.save(minted) else {
+            throw StoreOpenError(
+                storePath: url.path,
+                reason: "A key for this library could not be saved to the Keychain, "
+                    + "so an encrypted library was not created — a store whose key "
+                    + "cannot be kept would be unopenable at the next launch.")
+        }
+        return minted
     }
 
     /// Wires a successfully opened store as the live `\.database` dependency.
