@@ -2396,6 +2396,27 @@ DELETES the shadowing `v7.11.1` tag from the fork** (executed at this
 adjudication — the fork is ours; failure mode was loud-not-silent
 either way); the exact-tag pin stays.
 
+### Ladder round 2 fixes — the architect's verification (2026-08-30)
+
+**VERIFIED, ACCEPTED, PUSHED.** Five commits, clean tree, fences
+re-diffed EMPTY (zero `Sources/` lines in the whole wave — app-layer
+only). The shared `wireOneSecretHooks` factory with the Mac re-wired
+through it and zero Mac test edits is the 3C parity pattern applied
+exactly right; the dirty first revert probe caught-and-rerun is the
+hallucination guard working. **The latency pin, adjudicated by the
+ARCHITECT'S OWN RUNS, not the fix session's word:** two isolated
+re-runs on the settling machine read 56.03 ms then 51.26 ms against
+the 50 ms budget (load 3–6, 41 days uptime — and a condition NO prior
+baseline had: the REAL app deliberately alive). Magnitudes inside the
+KnownIssues row's documented fail band (51.95–58.47), zero
+editor-path lines in the ladder's diff, five full-suite passes across
+the phase's batches — **adjudicated PRE-EXISTING, its row's class;
+owner stays 12; the budget is NOT raised per the row's own rule. The
+closeout finals record this red honestly rather than claiming fully
+green, and the row gains the new covariate: a real-store instance now
+lives during test windows.** ROUND 3 LAUNCHED — a fresh Fable
+reviewer, the ladder's focused full pass over the wave-2 fixes.
+
 ### HER LEAN-DOCS RULING at this closeout (2026-08-30, mid-round-2 — executed at the closeout pass)
 
 Her words, verbatim: *"detailedplanforphases is now at 150.1k
