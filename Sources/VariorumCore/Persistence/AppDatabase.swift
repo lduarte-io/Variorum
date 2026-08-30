@@ -9,20 +9,71 @@ import GRDB
 /// which is the one choke point that keeps P2 (no main-thread DB I/O; reads
 /// never block writes) enforceable.
 public struct AppDatabase: Sendable {
-    /// Private on purpose: operations/queries reach SQLite through the methods
-    /// below, never through the connection itself.
-    private let writer: any DatabaseWriter
+    /// How this value reaches its connection (Phase 13p Batch 2 — the
+    /// re-lock design). `.direct` is every constructed store: the writer
+    /// and key ride the value, exactly as before Batch 2. `.bound` is the
+    /// app's AMBIENT view (`asRebindable()`): the connection lives in a
+    /// `StoreBinding` the composition root can LOCK (close the pool, drop
+    /// the key) and later re-point at a freshly opened store — which is
+    /// what lets every ambient holder (`@Dependency(\.database)` in
+    /// Operations, the sync engine, the janitor) survive a re-lock without
+    /// a single line of their own changing: their next access resolves
+    /// through the binding.
+    enum Storage: Sendable {
+        case direct(any DatabaseWriter, StoreKey?)
+        case bound(StoreBinding)
+    }
 
-    /// The store's SQLCipher key (Phase 13p, whole-store encryption —
-    /// R13p-1/R13p-2). Held so `backup(to:)` and `artifactConfiguration()`
-    /// key this store's ARTIFACTS with the same key; nil = an unkeyed store
-    /// (in-memory tests, and pre-migration plaintext).
-    private let key: StoreKey?
+    /// Internal (not private) so `StoreBinding.adopt` — same module, its
+    /// own file — can take a directly-opened store's parts.
+    let storage: Storage
 
     private init(_ writer: any DatabaseWriter, key: StoreKey? = nil) throws {
-        self.writer = writer
-        self.key = key
+        storage = .direct(writer, key)
         try AppDatabase.migrator.migrate(writer)
+    }
+
+    /// The bound view — no migration (the wrapped store already ran it).
+    init(bound binding: StoreBinding) {
+        storage = .bound(binding)
+    }
+
+    /// The connection, resolved per access. Throws `StoreLockedError`
+    /// while a bound store is locked — an access racing a re-lock gets a
+    /// typed refusal, never a crash and never a stale pool.
+    private func currentWriter() throws -> any DatabaseWriter {
+        switch storage {
+        case .direct(let writer, _):
+            return writer
+        case .bound(let binding):
+            guard let writer = binding.currentWriter() else { throw StoreLockedError() }
+            return writer
+        }
+    }
+
+    /// The store's SQLCipher key (Phase 13p, whole-store encryption —
+    /// R13p-1/R13p-2), resolved per access like the writer; nil = an
+    /// unkeyed store (in-memory tests, pre-migration plaintext) OR a
+    /// locked binding — `artifactConfiguration()` disambiguates.
+    private var key: StoreKey? {
+        switch storage {
+        case .direct(_, let key): return key
+        case .bound(let binding): return binding.currentKey()
+        }
+    }
+
+    /// Wrap this store for the composition root: the returned VIEW is
+    /// what gets installed as the ambient dependency; the BINDING is the
+    /// lock/adopt handle the root keeps. Wrapping a bound view returns it
+    /// unchanged with its existing binding.
+    public func asRebindable() -> (view: AppDatabase, binding: StoreBinding) {
+        switch storage {
+        case .direct(let writer, let key):
+            let binding = StoreBinding(writer: writer, key: key)
+            return (AppDatabase(bound: binding), binding)
+        case .bound(let binding):
+            return (self, binding)
+        }
     }
 
     // MARK: - Factories
@@ -75,26 +126,36 @@ public struct AppDatabase: Sendable {
     /// connection-preparation closure. For an unkeyed store this is the
     /// plain configuration, so plaintext-era artifacts behave as they
     /// always did.
+    ///
+    /// A LOCKED bound store yields a configuration whose every connection
+    /// REFUSES (`StoreLockedError` from `prepareDatabase`) — never the
+    /// plain configuration, which would silently open a keyed artifact as
+    /// "not a database" or, worse, create an unkeyed one.
     public func artifactConfiguration() -> Configuration {
-        Self.configuration(key: key)
+        if case .bound(let binding) = storage, binding.isLocked {
+            var config = Configuration()
+            config.prepareDatabase { _ in throw StoreLockedError() }
+            return config
+        }
+        return Self.configuration(key: key)
     }
 
     // MARK: - Access
 
     public func read<T>(_ value: (Database) throws -> T) throws -> T {
-        try writer.read(value)
+        try currentWriter().read(value)
     }
 
     public func read<T: Sendable>(_ value: @Sendable @escaping (Database) throws -> T) async throws -> T {
-        try await writer.read(value)
+        try await currentWriter().read(value)
     }
 
     public func write<T>(_ updates: (Database) throws -> T) throws -> T {
-        try writer.write(updates)
+        try currentWriter().write(updates)
     }
 
     public func write<T: Sendable>(_ updates: @Sendable @escaping (Database) throws -> T) async throws -> T {
-        try await writer.write(updates)
+        try await currentWriter().write(updates)
     }
 
     // MARK: - Backup (Phase 8, A1)
@@ -116,6 +177,7 @@ public struct AppDatabase: Sendable {
     /// run. Pinned in `StoreEncryptionTests` (red-on-old: the shipped
     /// unkeyed path THROWS against a keyed store).
     public func backup(to url: URL) throws {
+        let writer = try currentWriter()
         try FileManager.default.createDirectory(
             at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         let destination = try DatabaseQueue(
@@ -146,11 +208,35 @@ public struct AppDatabase: Sendable {
     public func observe<Value: Equatable & Sendable>(
         _ fetch: @escaping @Sendable (Database) throws -> Value
     ) -> AsyncValueObservation<Value> {
-        ValueObservation
+        guard let writer = try? currentWriter() else {
+            // A LOCKED bound store (Phase 13p Batch 2): the signature has
+            // no throwing arm, so the refusal is delivered THROUGH the
+            // sequence — an observation over a keyless in-memory stand-in
+            // whose fetch throws `StoreLockedError` on first iteration.
+            // Reachable only in the narrow race between a re-lock's state
+            // flip and a surface's `.task` teardown; the consumer's
+            // ordinary error/cancellation path ends the iteration.
+            return ValueObservation
+                .tracking { (_: Database) -> Value in throw StoreLockedError() }
+                .removeDuplicates()
+                .values(in: Self.lockedObservationStandIn)
+        }
+        return ValueObservation
             .tracking(fetch)
             .removeDuplicates()
             .values(in: writer)
     }
+
+    /// A tiny keyless in-memory queue serving ONLY locked-state
+    /// observations (nothing ever reads or writes it — the fetch closure
+    /// throws before touching the connection).
+    private static let lockedObservationStandIn: DatabaseQueue = {
+        do {
+            return try DatabaseQueue()
+        } catch {
+            fatalError("An in-memory DatabaseQueue could not be created: \(error)")
+        }
+    }()
 
     /// A write transaction with outbox echo suppression (SyncSpec §3): rows the
     /// sync engine applies from the server must not re-enqueue into
@@ -163,7 +249,7 @@ public struct AppDatabase: Sendable {
     /// never see a temp table. The flag row lives only inside this transaction;
     /// a rollback unwinds it too.
     public func applyingRemote<T>(_ updates: (Database) throws -> T) throws -> T {
-        try writer.write { db in
+        try currentWriter().write { db in
             try db.execute(sql: "INSERT INTO _sync_applying (applying) VALUES (1)")
             do {
                 let result = try updates(db)
@@ -185,7 +271,7 @@ public struct AppDatabase: Sendable {
     public func applyingRemote<T: Sendable>(
         _ updates: @escaping @Sendable (Database) throws -> T
     ) async throws -> T {
-        try await writer.write { db in
+        try await currentWriter().write { db in
             try db.execute(sql: "INSERT INTO _sync_applying (applying) VALUES (1)")
             do {
                 let result = try updates(db)
