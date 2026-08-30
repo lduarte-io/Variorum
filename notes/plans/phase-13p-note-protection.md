@@ -2635,3 +2635,26 @@ owner-12's.
   to the tested full-fix state before its own commit — recorded so the
   intermediate commit's shape reads as deliberate, not drift.
 - Unpushed per the standing rule — the architect verifies and pushes.
+
+### CLOSEOUT EXECUTED (2026-08-30) — the phase is CLOSED
+
+All ritual obligations discharged, each in its own pushed slice:
+QUESTIONS **#81** (her bundle) · KnownIssues (the latency covariate;
+the signing row at 13r with R3-m1 riding; the phrase-transit row at
+v1-readiness) · AppSpec (§14's 13p delta in, the post-13L delta rolled
+to the archive; the stack line records the encryption) · the master
+plan (the 13p pointer + closeout paragraph; the post-13l pair rolled
+verbatim; **her lean-docs ruling EXECUTED** — `notes/FuturePhases.md`
+born canon with the 18 far rows, the file 150.1k → ~104k chars; the
+13p row and running order marked done) · 13y's plan authored
+just-in-time · MobileSoul PL-15 already closed by Batch 4 · **the
+ruled sweep executed** (derived drill copies, build products, the
+scratch resolver, and the install worktree removed; KEPT for her word
+per #81(g): `pre-drill-backup/` and `install-backup-20260830T131907Z/`
+— note the correct timestamp; an earlier record line said 131927Z —
+plus the evidence logs and the fork clone) · the author handoff
+written (`notes/handoffs/phase-13p-handoff.md`, her checklist at the
+top). Still gated on her, deliberately: the final-tree install refresh
++ tutorial re-seed (#81(f) — the running app is never quit by a
+session) and the device-side acceptances (#81(e)). **HARD STOP: 13y
+kicks off at her word.**
