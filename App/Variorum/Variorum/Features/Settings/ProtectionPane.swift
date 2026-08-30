@@ -271,6 +271,13 @@ struct ProtectionPane: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
+            // The NAMED NON-GOAL (13p Batch 4's honest-copy sweep): a
+            // design that declined the per-note curtain on honesty grounds
+            // owes the sentence that says what is still readable.
+            Text(ProtectionCopy.openAppIsReadable)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
             if let error = controller.lastError {
                 Text(error).font(.caption).alarmVoice()
             }

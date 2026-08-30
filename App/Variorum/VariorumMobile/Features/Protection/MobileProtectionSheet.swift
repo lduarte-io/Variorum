@@ -252,6 +252,8 @@ struct MobileProtectionSheet: View {
             // Item (h): a phone-only library has ONE enrolled device, so
             // the chain above is shorter than a reader may assume — say so.
             prose(ProtectionCopy.oneDeviceNote)
+            // The named non-goal, said where the reader is choosing.
+            prose(ProtectionCopy.openAppIsReadable)
             if let error = controller.lastError {
                 alarm(error)
             }

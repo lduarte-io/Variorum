@@ -324,6 +324,21 @@ nonisolated enum ProtectionCopy {
         }
     }
 
+    /// **THE NAMED NON-GOAL, said out loud where the reader is choosing**
+    /// (13p Batch 4's honest-copy sweep). The plan names exactly one threat
+    /// this design declines: shape B (column sealing, R13p-3) would have
+    /// kept a note's plaintext out of reachable memory while the app is
+    /// OPEN — and R13p-16 then declined the per-note curtain that would
+    /// have LOOKED like that protection without being it (*"it makes users
+    /// think privacy is in place that just isn't"*). A design that refuses
+    /// theater on those grounds owes the sentence that says so.
+    static let openAppIsReadable =
+        "One thing no setting here changes: while Variorum is open and unlocked, "
+        + "everything in your library is readable — that is what open means. "
+        + "Locking is how you end that. There is deliberately no per-note lock: "
+        + "over an already-open library it would look like protection without "
+        + "being any."
+
     /// **The one-device honesty line** (13p Batch 4, the mobile-only-user
     /// expansion's item (h): *"a mobile-only user has ONE enrolled device,
     /// so their chain is shorter and the copy must say so"*). It reads
