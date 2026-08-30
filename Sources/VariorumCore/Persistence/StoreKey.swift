@@ -84,6 +84,12 @@ public struct StoreKeyCustody: Sendable {
 }
 
 extension StoreKeyCustody {
+    /// The device-Keychain SERVICE the store-key custody family lives
+    /// under — public so the app layer's gated item (Phase 13p Batch 2)
+    /// joins the same family by account rather than re-declaring the
+    /// string and drifting.
+    public static let deviceKeychainService = "io.lduarte.Variorum.store-key"
+
     /// The real device custody: one Keychain item per store scope (the
     /// store-variant raw value — `Variorum` vs `Variorum-dev` — so dev-build
     /// activity never shares key custody with her real library; the A4
@@ -95,6 +101,16 @@ extension StoreKeyCustody {
         StoreKeyCustody(
             load: { StoreKeyKeychain.load(scope: scope) },
             save: { StoreKeyKeychain.save($0, scope: scope) })
+    }
+
+    /// Remove the device-Keychain item for `scope` (Phase 13p Batch 2 —
+    /// the at-open mode transitions: entering Biometric or
+    /// Passphrase-every-open DELETES the silently-releasing Auto item,
+    /// because a gate whose key still releases silently is theater,
+    /// R13p-14's exact prohibition). The one deletion door; the guard's
+    /// custody choreography orders it AFTER the replacement custody lands.
+    public static func deviceKeychainRemove(scope: String) {
+        StoreKeyKeychain.delete(scope: scope)
     }
 
     /// A scriptable in-memory custody for tests and drills.
@@ -154,7 +170,7 @@ extension DependencyValues {
 /// batch brief: `WhenUnlockedThisDeviceOnly`, no access control (Auto mode
 /// releases silently; the demanded modes' gated item is Batch 2's).
 nonisolated enum StoreKeyKeychain {
-    static let service = "io.lduarte.Variorum.store-key"
+    static let service = StoreKeyCustody.deviceKeychainService
 
     static func load(scope: String) -> StoreKey? {
         var query = baseQuery(scope: scope)
@@ -183,6 +199,10 @@ nonisolated enum StoreKeyKeychain {
         return status == errSecSuccess
     }
 
+    static func delete(scope: String) {
+        SecItemDelete(baseQuery(scope: scope) as CFDictionary)
+    }
+
     private static func baseQuery(scope: String) -> [String: Any] {
         [
             kSecClass as String: kSecClassGenericPassword,
@@ -196,6 +216,7 @@ nonisolated enum StoreKeyKeychain {
     static func load(scope: String) -> StoreKey? { nil }
     @discardableResult
     static func save(_ key: StoreKey, scope: String) -> Bool { false }
+    static func delete(scope: String) {}
 }
 #endif
 

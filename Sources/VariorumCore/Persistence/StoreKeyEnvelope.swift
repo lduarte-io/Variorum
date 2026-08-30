@@ -48,6 +48,12 @@ public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
     /// The recovery-phrase wrap (RFC 3394 blob under the BIP-39-derived
     /// key) — absent until the phrase is generated and shown.
     public var recovery: Data?
+    /// A short public fingerprint of the wrapped KEY (first 8 bytes of
+    /// SHA-256, hex) — set whenever a wrap lands. Lets custody flips and
+    /// the locked lobby detect a FOREIGN envelope (a sidecar copied from
+    /// another library) without holding any secret; reveals nothing about
+    /// a random 256-bit key. nil on a wraps-less envelope.
+    public var keyFingerprint: String?
 
     public struct PassphraseWrap: Codable, Equatable, Sendable {
         /// The versioned KDF parameters this wrap's key was derived with
@@ -66,12 +72,27 @@ public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
         formatVersion: Int = StoreKeyEnvelope.currentFormatVersion,
         storeID: String = UUID().uuidString.lowercased(),
         passphrase: PassphraseWrap? = nil,
-        recovery: Data? = nil
+        recovery: Data? = nil,
+        keyFingerprint: String? = nil
     ) {
         self.formatVersion = formatVersion
         self.storeID = storeID
         self.passphrase = passphrase
         self.recovery = recovery
+        self.keyFingerprint = keyFingerprint
+    }
+
+    /// The public fingerprint of a key (see `keyFingerprint`).
+    public static func fingerprint(of key: StoreKey) -> String {
+        Data(SHA256.hash(data: key.data)).prefix(8)
+            .map { String(format: "%02x", $0) }.joined()
+    }
+
+    /// Does this envelope's fingerprint match `key`? A wraps-less envelope
+    /// (no fingerprint yet) matches — there is nothing to contradict.
+    public func belongs(to key: StoreKey) -> Bool {
+        guard let keyFingerprint else { return true }
+        return keyFingerprint == Self.fingerprint(of: key)
     }
 
     // MARK: - Wrapping (the heavy KDF call rides here — callers off-main)
@@ -98,6 +119,7 @@ public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
             let wrapped = try AES.KeyWrap.wrap(
                 SymmetricKey(data: key.data), using: wrapKey)
             self.passphrase = PassphraseWrap(kdf: kdf, wrapped: wrapped)
+            keyFingerprint = Self.fingerprint(of: key)
         } catch {
             throw StoreKeyEnvelopeError.wrapFailed
         }
@@ -111,6 +133,7 @@ public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
         let wrapKey = try RecoveryPhrase.recoveryWrapKey(words: words)
         do {
             recovery = try AES.KeyWrap.wrap(SymmetricKey(data: key.data), using: wrapKey)
+            keyFingerprint = Self.fingerprint(of: key)
         } catch {
             throw StoreKeyEnvelopeError.wrapFailed
         }
