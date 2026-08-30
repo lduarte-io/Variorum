@@ -71,6 +71,18 @@ struct VariorumApp: App {
                             // provider (no keys ⇒ the round refuses).
                             makeBridgeKeyProvider: { DeviceBridgeKeyProvider() })
                         services = fresh
+                        // Phase 13p (the re-lock teardown, THE DESIGN's
+                        // ruled order): a lock FLUSHES and SAVEPOINTS every
+                        // open note (⌘Q's leaving doctrine — the same
+                        // registry), STOPS the services, and lets them go —
+                        // the next unlock composes fresh ones over the
+                        // fresh session, which is exactly the "deferred
+                        // starts begin only after the stack exists" rule.
+                        bootstrap.onWillLock = { @MainActor in
+                            await session.quitFinalize.finalizeAll()
+                            services?.stop()
+                            services = nil
+                        }
                         await fresh.start()
                     }
                     .onReceive(NotificationCenter.default.publisher(
@@ -87,6 +99,10 @@ struct VariorumApp: App {
                 // is a first frame with no session. Quiet by design — see
                 // StoreOpeningView.
                 StoreOpeningView()
+            case .locked(let lobby):
+                // Phase 13p: the demanded at-open modes' lobby — no store,
+                // no session, no services until it unlocks (R13p-5).
+                StoreLockView(lobby: lobby)
             case .failed(let error):
                 StoreFailureView(error: error) { bootstrap.retry() }
             }
@@ -146,6 +162,11 @@ struct VariorumApp: App {
                 StoreFailureView(error: error) { bootstrap.retry() }
             case (.opening, _):
                 StoreOpeningView()
+            case (.locked, _):
+                // 13p: note windows never outlive a lock (the whole
+                // `.ready` tree tears down); a restored one says so.
+                Text("Variorum is locked — unlock it in the main window.")
+                    .padding(24)
             default:
                 // No note handed over (a restored window whose value did not
                 // come back): honest, not a blank pane.

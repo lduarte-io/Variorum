@@ -27,7 +27,9 @@ import GRDB
 
 /// A refused access on a locked store — typed, so surfaces can word it
 /// (and racing tasks can end quietly) instead of crashing.
-public struct StoreLockedError: Error, Equatable, Sendable {}
+public struct StoreLockedError: Error, Equatable, Sendable {
+    public init() {}
+}
 
 /// The lock/adopt handle the composition root keeps beside the installed
 /// ambient view. Thread-safe; `lock()` is blocking (GRDB's `close()`

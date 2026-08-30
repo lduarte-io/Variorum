@@ -60,6 +60,27 @@ struct VariorumMobileApp: App {
                 // spinner announcing 50 ms of work is worse than the calm
                 // ground the app opens onto anyway.
                 MobileStoreOpeningView()
+            case .locked:
+                // Phase 13p Batch 2: the demanded at-open modes live in the
+                // shared brains now, but NOTHING on the phone sets one until
+                // Batch 4 builds its protection faces (the dials are
+                // device-local and this device has no door that writes
+                // them) — so this arm is unreachable today. Honest words
+                // rather than a blank frame if that ever changes.
+                VStack(spacing: 12) {
+                    Image(systemName: "lock.fill")
+                        .font(.title)
+                        .foregroundStyle(.secondary)
+                    Text("This library is locked.")
+                        .font(.headline)
+                    Text("Unlocking on iPhone arrives with the protection "
+                         + "update — until then, this state can only be "
+                         + "reached on a Mac.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 32)
+                }
             case .failed(let error):
                 MobileStoreFailureView(error: error) { bootstrap.retry() }
             }

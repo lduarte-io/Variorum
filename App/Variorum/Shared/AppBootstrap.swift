@@ -14,6 +14,19 @@
 //  via the explicit opt-in. Both paths flow through the same recoverable
 //  `openStore(at:)`.
 //
+//  Phase 13p, Batch 2 — THE LOCKED LOBBY (R13p-5, THE DESIGN's keyed-stack
+//  paragraph). The launch ROUTES before any store open: under the demanded
+//  at-open modes it stops at `.locked(StoreLobby)` — no store, no
+//  migration, no session, no services (everything downstream exists only
+//  inside `.ready`) — and the lobby's unlock is the only door forward.
+//  RE-LOCK (`lock()`): the composition root's teardown — flush/stop via
+//  `onWillLock`, flip to the lobby (views and their observations tear
+//  down), then CLOSE the pool and DROP key material through the
+//  `StoreBinding` the first open installed. The ambient `\.database` is
+//  the binding's VIEW, so every ambient holder survives the re-lock and
+//  the re-open without changing a line; an access racing the lock gets
+//  the typed `StoreLockedError`.
+//
 
 import Foundation
 import Observation
@@ -44,6 +57,9 @@ final class AppBootstrap {
     enum State {
         /// The store is being opened and migrated, off the main thread.
         case opening
+        /// Phase 13p: a demanded at-open mode over an existing store —
+        /// nothing runs until the lobby unlocks.
+        case locked(StoreLobby)
         case ready(AppSession)
         case failed(AppDatabase.StoreOpenError)
     }
@@ -52,10 +68,23 @@ final class AppBootstrap {
     /// Which store home this process resolved to (A4) — surfaced so a dev
     /// build is visibly a dev build.
     let storeVariant: AppDatabase.StoreVariant
+    /// The launch-protection facts (13p) — real defaults/Keychain/sidecar
+    /// in production, scripted in tests.
+    @ObservationIgnored let gate: StoreLaunchGate
     /// `install` (prepareDependencies) must run exactly once per process;
     /// a retry after a failed first attempt still installs, a second success
     /// cannot happen (retry is only reachable from `.failed`).
     private var installed = false
+    /// The lock/adopt handle (13p): set at the FIRST successful open; the
+    /// ambient view routes through it forever after, so `lock()` closes
+    /// and a later unlock adopts without a second install.
+    @ObservationIgnored private var binding: StoreBinding?
+    /// The bound view installed as the ambient `\.database` (and handed to
+    /// every AppSession, so a session's captured database also survives).
+    @ObservationIgnored private var ambient: AppDatabase?
+    /// The composition root's pre-lock teardown (13p): flush pending
+    /// buffers, savepoint, stop services. Runs BEFORE the state flips.
+    @ObservationIgnored var onWillLock: (@MainActor () async -> Void)?
     /// The in-flight open, so a second `retry()` cannot start a second race
     /// for the same store. Test-visible so a pin can await the road rather
     /// than poll it.
@@ -67,21 +96,31 @@ final class AppBootstrap {
     /// means the store is a test's own, and installing a test's store as the
     /// app's ambient one would poison every other test in the process (and
     /// `prepareDependencies` may only be called before anything reads a
-    /// dependency). The state machine, the off-main hop and `retry()` are
-    /// otherwise exactly production's.
+    /// dependency). The state machine, the off-main hop, the lobby routing
+    /// and `retry()` are otherwise exactly production's. (The opener runs
+    /// for the unlock road too; the unlocked key reaches production's
+    /// opener as custody and is deliberately not threaded into the test
+    /// opener — lobby tests assert the choreography, the key's use is the
+    /// production road's own pins.)
     @ObservationIgnored private let testOpener:
         (@Sendable () -> Result<AppDatabase, AppDatabase.StoreOpenError>)?
 
-    init(variant: AppDatabase.StoreVariant = StoreLocation.resolve()) {
+    init(
+        variant: AppDatabase.StoreVariant = StoreLocation.resolve(),
+        gate: StoreLaunchGate = .live
+    ) {
         storeVariant = variant
+        self.gate = gate
         testOpener = nil
         beginOpening()
     }
 
     init(
-        testOpener: @escaping @Sendable () -> Result<AppDatabase, AppDatabase.StoreOpenError>
+        testOpener: @escaping @Sendable () -> Result<AppDatabase, AppDatabase.StoreOpenError>,
+        gate: StoreLaunchGate = .live
     ) {
         storeVariant = .dev
+        self.gate = gate
         self.testOpener = testOpener
         beginOpening()
     }
@@ -96,31 +135,127 @@ final class AppBootstrap {
         await opening?.value
     }
 
-    private func beginOpening() {
+    // MARK: - The open road (routes first — 13p)
+
+    private func beginOpening(unlockedKey: StoreKey? = nil) {
         guard opening == nil else { return }
         state = .opening
         let variant = storeVariant
         let testOpener = testOpener
+        let gate = gate
         opening = Task { [weak self] in
-            // OFF the main actor: `openStore` runs the migration set, which
-            // is the whole point of this task existing.
+            // OFF the main actor: routing (a defaults read + a 16-byte
+            // header classification), then — on the open routes only —
+            // `openStore`, which runs the migration set. The demanded
+            // routes DEFER all of that behind the lobby.
             let outcome = await Task.detached(priority: .userInitiated) {
-                testOpener?() ?? openStoreOffMain(variant: variant)
+                Self.routeAndOpen(
+                    variant: variant, gate: gate,
+                    unlockedKey: unlockedKey, testOpener: testOpener)
             }.value
             guard let self else { return }
             // …and back, for `install` (a process-global dependency
-            // installation) and the state write, both of which are
-            // MainActor by contract.
+            // installation) and the state write, both MainActor by contract.
             self.finish(outcome)
         }
     }
 
-    private func finish(_ outcome: Result<AppDatabase, AppDatabase.StoreOpenError>) {
+    private enum OpenOutcome: Sendable {
+        case ready(AppDatabase)
+        case locked(LobbyFacts)
+        case failed(AppDatabase.StoreOpenError)
+    }
+
+    private struct LobbyFacts: Sendable {
+        var demand: StoreAtOpenMode
+        var biometryOffered: Bool
+        var passphraseOffered: Bool
+        var recoveryOffered: Bool
+        var storeURL: URL?
+    }
+
+    private nonisolated static func routeAndOpen(
+        variant: AppDatabase.StoreVariant,
+        gate: StoreLaunchGate,
+        unlockedKey: StoreKey?,
+        testOpener: (@Sendable () -> Result<AppDatabase, AppDatabase.StoreOpenError>)?
+    ) -> OpenOutcome {
+        let scope = variant.rawValue
+        let storeURL = try? AppDatabase.defaultStoreURL(variant: variant)
+
+        // An unlocked key means the lobby already ran — go straight to the
+        // open with that key as custody.
+        if unlockedKey == nil {
+            let dials = gate.dials(scope)
+            // The one pre-unlock file contact: 16 bytes of presence. The
+            // test-opener path has no file of its own — it routes as
+            // "store present" so demanded gates are exercisable.
+            let presence: StoreFilePresence = testOpener != nil
+                ? .encryptedOrUnknown
+                : (storeURL.map(StoreFilePresence.classify(at:)) ?? .absent)
+            switch StoreLaunchRoute.resolve(dials: dials, presence: presence) {
+            case .open:
+                break
+            case .openResettingModeToAuto:
+                // PROVISIONAL (run record): the demanded gate outlived its
+                // store — reset the mode VISIBLY and proceed as a fresh
+                // first launch (its unlock secrets reference a key whose
+                // store is gone; the protection reconcile replaces the
+                // stale envelope on the same launch).
+                var dials = dials
+                dials.mode = .auto
+                gate.saveDials(dials, scope)
+            case .lobby(let demand):
+                let guardSeam = gate.guardFor(scope)
+                let envelope = loadedEnvelope(gate, storeURL)
+                return .locked(LobbyFacts(
+                    demand: demand,
+                    biometryOffered: demand == .biometric && guardSeam.gatedItemExists(),
+                    passphraseOffered: envelope?.passphrase != nil,
+                    recoveryOffered: envelope?.recovery != nil,
+                    storeURL: storeURL))
+            }
+        }
+
+        if let testOpener {
+            switch testOpener() {
+            case .success(let database): return .ready(database)
+            case .failure(let error): return .failed(error)
+            }
+        }
+        switch openStoreOffMain(
+            variant: variant,
+            custody: unlockedKey.map { StoreKeyCustody.inMemory(initial: $0) }
+        ) {
+        case .success(let database): return .ready(database)
+        case .failure(let error): return .failed(error)
+        }
+    }
+
+    private func finish(_ outcome: OpenOutcome) {
         opening = nil
         switch outcome {
-        case .success(let database):
+        case .ready(let database):
+            let view: AppDatabase
+            if let binding {
+                // The re-open after a lock: the SAME ambient view adopts
+                // the fresh pool — no second install, no new view.
+                do {
+                    try binding.adopt(database)
+                } catch {
+                    state = .failed(AppDatabase.StoreOpenError(
+                        storePath: "", reason: String(describing: error)))
+                    return
+                }
+                view = ambient ?? database
+            } else {
+                let wrapped = database.asRebindable()
+                binding = wrapped.binding
+                ambient = wrapped.view
+                view = wrapped.view
+            }
             if !installed, testOpener == nil {
-                AppDatabase.install(database)
+                AppDatabase.install(view)
                 // Phase 9c, Step 4/5: the live owner identity reads the
                 // persisted Variorum session per call — the Keychain is the
                 // truth AuthSession.adopt/signOut writes, so sign-in state
@@ -132,12 +267,82 @@ final class AppBootstrap {
                 })
                 installed = true
             }
-            state = .ready(AppSession(database: database))
-        case .failure(let error):
+            state = .ready(AppSession(database: view))
+        case .locked(let facts):
+            state = .locked(makeLobby(facts))
+        case .failed(let error):
             state = .failed(error)
         }
     }
 
+    private func makeLobby(_ facts: LobbyFacts) -> StoreLobby {
+        let guardSeam = gate.guardFor(storeVariant.rawValue)
+        let envelopeRoad = StoreLobby.envelopeRoad(
+            storeURL: facts.storeURL ?? URL(fileURLWithPath: "/dev/null"),
+            gate: gate)
+        return StoreLobby(
+            demand: facts.demand,
+            biometryOffered: facts.biometryOffered,
+            passphraseOffered: facts.passphraseOffered,
+            recoveryOffered: facts.recoveryOffered,
+            gatedRoad: { await guardSeam.unlockGated() },
+            envelopeRoad: envelopeRoad,
+            complete: { [weak self] key in
+                self?.beginOpening(unlockedKey: key)
+            })
+    }
+
+    // MARK: - Re-lock (13p — demanded modes only; Lock Now and the
+    // re-lock policy both land here)
+
+    /// Whether Lock Now is a real act right now (P-2: the door renders
+    /// only where it acts): ready, bound, and a demanded mode.
+    var canLock: Bool {
+        guard case .ready = state, binding != nil else { return false }
+        return gate.dials(storeVariant.rawValue).mode.isDemanded
+    }
+
+    /// The teardown, in the ruled order: flush/savepoint/stop (the
+    /// composition root's `onWillLock`), flip to the lobby (views and
+    /// their held observations tear down with the `.ready` subtree),
+    /// then CLOSE the pool and DROP the key — off the main actor, since
+    /// close blocks until in-flight accesses complete. Under Auto this
+    /// refuses silently: a lock whose key auto-releases at the next open
+    /// is theater, and no theater ships (R13p-14).
+    func lock() async {
+        guard case .ready = state, let binding else { return }
+        let scope = storeVariant.rawValue
+        let dials = gate.dials(scope)
+        guard dials.mode.isDemanded else { return }
+        await onWillLock?()
+        let gate = gate
+        let storeURL = try? AppDatabase.defaultStoreURL(variant: storeVariant)
+        let facts = await Task.detached(priority: .userInitiated) { () -> LobbyFacts in
+            let guardSeam = gate.guardFor(scope)
+            let envelope = loadedEnvelope(gate, storeURL)
+            return LobbyFacts(
+                demand: dials.mode,
+                biometryOffered: dials.mode == .biometric && guardSeam.gatedItemExists(),
+                passphraseOffered: envelope?.passphrase != nil,
+                recoveryOffered: envelope?.recovery != nil,
+                storeURL: storeURL)
+        }.value
+        state = .locked(makeLobby(facts))
+        _ = await Task.detached(priority: .userInitiated) {
+            binding.lock()
+        }.value
+    }
+}
+
+/// The envelope-beside-the-store read, tolerant of an absent URL (the
+/// scripted test gate ignores it) and of an unreadable sidecar (the
+/// lobby's roads re-load and WORD that refusal; the facts only decide
+/// which doors render).
+private nonisolated func loadedEnvelope(
+    _ gate: StoreLaunchGate, _ storeURL: URL?
+) -> StoreKeyEnvelope? {
+    let url = storeURL ?? URL(fileURLWithPath: "/dev/null")
+    return (try? gate.loadEnvelope(url)) ?? nil
 }
 
 /// The FILE work, and nothing else — resolve the URL, assert the iOS
@@ -145,8 +350,15 @@ final class AppBootstrap {
 /// runs off the main actor (13l L-c), and keeping it a free function makes
 /// that impossible to lose in a later refactor by accident. `install` and
 /// the state write deliberately stay behind, on the MainActor.
+///
+/// Phase 13p Batch 2: `custody` non-nil is the LOBBY's road — the unlocked
+/// key rides in as in-memory custody, so `openStore` (and the migration)
+/// runs with exactly the key the lobby unwrapped; the device-Keychain
+/// custody is deliberately NOT consulted on that road (under the demanded
+/// modes it holds nothing silently readable, by the custody law).
 private nonisolated func openStoreOffMain(
-    variant: AppDatabase.StoreVariant
+    variant: AppDatabase.StoreVariant,
+    custody: StoreKeyCustody? = nil
 ) -> Result<AppDatabase, AppDatabase.StoreOpenError> {
     do {
         let url = try AppDatabase.defaultStoreURL(variant: variant)
@@ -165,7 +377,7 @@ private nonisolated func openStoreOffMain(
         // `openStore(at:)` bare and get the in-memory test custody; this
         // line is the app's store, which is real whichever process opens it.
         return .success(try AppDatabase.openStore(
-            at: url, custody: .deviceKeychain(scope: variant.rawValue)))
+            at: url, custody: custody ?? .deviceKeychain(scope: variant.rawValue)))
     } catch let error as AppDatabase.StoreOpenError {
         return .failure(error)
     } catch {

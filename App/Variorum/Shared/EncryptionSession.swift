@@ -398,7 +398,9 @@ final class EncryptionSession {
 
     /// Split a typed-in phrase on any whitespace (the entry surface is one
     /// field; `RecoveryPhrase.validate` does the trimming/casefolding).
-    static func words(from text: String) -> [String] {
+    /// Nonisolated since 13p Batch 2 — a pure function the locked lobby's
+    /// off-main unwrap road also uses.
+    nonisolated static func words(from text: String) -> [String] {
         text.split(whereSeparator: \.isWhitespace).map(String.init)
     }
 

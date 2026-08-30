@@ -293,6 +293,20 @@ struct EditorCommands: Commands {
             Button(verb(.saveNoteVersion)) { actions?.saveNoteVersion() }
                 .keyboardShortcut("s", modifiers: [.command, .shift])
                 .disabled(!enabled(.saveNoteVersion))
+            // Phase 13p Batch 2 — the manual Lock Now act (THE DESIGN:
+            // demanded modes ONLY; under Auto the key auto-releases at the
+            // next open, so a lock there is theater and no theater ships,
+            // R13p-14). P-2: the door renders only where it acts.
+            // COLLISION SWEEP: ⌃⌘L is free — the only `l` chord anywhere
+            // in the app is ⌘⇧L (Save Choices as Lens); ⌃⌘Q (the system's
+            // own Lock Screen) is untouched.
+            if bootstrap.canLock {
+                Divider()
+                Button("Lock Library Now") {
+                    Task { await bootstrap.lock() }
+                }
+                .keyboardShortcut("l", modifiers: [.command, .control])
+            }
         }
         // Phase 11b (B1): the File-menu export doors.
         CommandGroup(after: .importExport) {
