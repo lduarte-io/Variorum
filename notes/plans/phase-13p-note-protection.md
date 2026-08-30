@@ -2658,3 +2658,48 @@ top). Still gated on her, deliberately: the final-tree install refresh
 + tutorial re-seed (#81(f) — the running app is never quit by a
 session) and the device-side acceptances (#81(e)). **HARD STOP: 13y
 kicks off at her word.**
+
+
+---
+
+## POST-CLOSEOUT — the signing gap closed (2026-08-30, the same afternoon)
+
+The phase's one hands item (#81(a), the Batch 2 FINDING) did not wait for
+13r: the author chose to handle it before release. What landed, and what
+it cost to learn:
+
+- **`Variorum.entitlements` gained `keychain-access-groups` =
+  `$(AppIdentifierPrefix)$(PRODUCT_BUNDLE_IDENTIFIER)`** — the VARIABLE,
+  deliberately, because Debug and Release build different bundle ids
+  (`io.lduarte.Variorum.debug` / `io.lduarte.Variorum`) and share ONE
+  entitlements file: a literal would have broken Debug signing and
+  collapsed the A4 dev fence at the key-custody layer. Xcode's own
+  capability UI writes the literal, and did — the repair is recorded in
+  the file's comment so nobody simplifies it back.
+- **The device registration was the real gate.** A Mac Development
+  profile embeds a device list, and this Mac had never been registered
+  (nothing in the project had ever needed a profile). `xcodebuild
+  -allowProvisioningUpdates` creates App IDs and profiles but will NOT
+  register a device — that is an account-level act behind Apple's UI.
+  This is the concrete reason CLAUDE.md keeps signing with the author:
+  not ceremony, a capability the CLI does not have.
+- **Proven, not assumed.** Both configurations' signed products carry
+  *[removed for publication]*
+  `application-identifier` and `keychain-access-groups`;
+  `Phase13pKeychainFactTests`' ACL probe was TIGHTENED from
+  either-outcome to `errSecSuccess` and passed — so the gated write
+  genuinely lands, and that pin is now the regression guard for the
+  identity (its failure message says so). The 11b entitlements-merge
+  pins still hold. `/Applications` was refreshed behind the A1 rail
+  (real store closed, verified by `lsof`; fresh ciphertext backup).
+- **What it ACTIVATED — the one honest consequence.** R3-m1 was parked
+  *with* this item because the -34018 fast-fail masked it: escrow writes
+  could not land, so the reconcile's MainActor interleave window had
+  nothing to lose. That mask is gone. R3-m1 is now a real (narrow,
+  launch/unlock-cadence) defect and carries its OWN KnownIssues row at
+  the v1-readiness owner. It was deliberately NOT fixed here: the
+  hallucination guard wants a red-on-old pin, and pinning an interleave
+  means scripting a dial flip inside the detached hop — a small batch
+  with a review, not a drive-by at a signing sitting.
+- **14b's CF-12 vault biometric gate is unblocked by the same change**
+  (same mechanism, refusing on the Mac since 14b).

@@ -17,7 +17,7 @@ ratify bundle is QUESTIONS #81, and the spike's numbers are
    of your store), and under the Standard/Auto default you will never
    feel it. Your writing is where you left it; backups are ciphertext
    now.
-2. **THE ONE HANDS ITEM — the Mac signing gap (#81(a)).** The app's
+2. **DONE 2026-08-30 — the Mac signing gap (#81(a)) is CLOSED.** You registered this Mac in your developer account; the entitlement, profiles, both builds, the `/Applications` refresh and the tightened regression pin all landed the same afternoon. Biometric mode and iCloud escrow can now land on the Mac, and 14b's vault biometric gate is unblocked with them. One consequence to know: the ladder's R3-m1 escrow-reconcile interleave was masked by the old fast-fail and is now real — it has its own KnownIssues row at the v1-readiness owner, unfixed deliberately (it needs a red-on-old pin of an interleave, which is a small batch, not a drive-by). Original entry: **the Mac signing gap.** The app's
    signing carries no data-protection-keychain identity, so BIOMETRIC
    mode's gated item and the iCloud ESCROW copy cannot land on the
    Mac yet (every door refuses honestly; passphrase mode and all

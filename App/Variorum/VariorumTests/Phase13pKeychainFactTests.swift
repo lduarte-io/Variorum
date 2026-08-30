@@ -70,22 +70,30 @@ struct Phase13pKeychainFactTests {
                 "the signed host writes plainly (got \(status))")
     }
 
-    /// Control C — AND A FINDING (2026-08-30, this batch, recorded in the
-    /// run record): an ACL'd item can only live in the DATA-PROTECTION
-    /// keychain, and on macOS that requires a keychain identity the app
-    /// does not carry today (`Variorum.entitlements` has no
-    /// keychain-access-groups / application-identifier — no provisioning
-    /// profile), so the write comes back `errSecMissingEntitlement`
-    /// (-34018) rather than landing. CONSEQUENCE, stated so nobody
-    /// discovers it at an acceptance walk: until the app's signing gains
-    /// a keychain identity, the Biometric mode's gated item (and likely
-    /// the synchronizable escrow item) cannot LAND on the Mac — every
-    /// door refuses HONESTLY at its own guard ("the Keychain refused…"),
-    /// no data is at risk, and the passphrase mode is unaffected. The
-    /// signing change is the author's call (CLAUDE.md: signing is hers).
-    /// This pin accepts EITHER outcome and asserts the write never
-    /// prompts; the question probe below discriminates regardless.
-    @Test func anACLGatedAddEitherLandsOrRefusesByEntitlement() {
+    /// Control C — THE FINDING, AND ITS CLOSE. An ACL'd item can only
+    /// live in the DATA-PROTECTION keychain, and on macOS an app is
+    /// admitted there only with a keychain access group — which is what
+    /// forces a provisioning profile onto the signature. Batch 2 found
+    /// the app carried NO such identity, so this write returned
+    /// `errSecMissingEntitlement` (-34018) and the Biometric mode's
+    /// gated item, the synchronizable escrow item, and 14b's CF-12 vault
+    /// gate all refused honestly on the Mac (QUESTIONS #81(a)).
+    ///
+    /// CLOSED 2026-08-30 by the author: `Variorum.entitlements` gained
+    /// `keychain-access-groups` = `$(AppIdentifierPrefix)$(PRODUCT_BUNDLE_IDENTIFIER)`
+    /// (per-config, so the dev fence survives), this Mac was registered
+    /// in her developer account, and automatic signing now embeds a Mac
+    /// Development profile — the signed app carries
+    *[removed for publication]*
+    /// `application-identifier` and `keychain-access-groups`.
+    ///
+    /// THE PIN IS THEREFORE TIGHTENED to assert the write LANDS: this is
+    /// now the regression guard for the identity itself. A -34018 here
+    /// means the entitlement, the profile, or the device registration
+    /// has been lost — read the failure that way rather than as a
+    /// keychain fault. It still asserts the write never prompts
+    /// (creation never does; only reading an ACL'd item's data would).
+    @Test func anACLGatedAddLandsBecauseTheAppCarriesAKeychainIdentity() {
         let account = "gated-\(UUID().uuidString)"
         defer { deleteProbe(account: account) }
         var error: Unmanaged<CFError>?
@@ -102,8 +110,8 @@ struct Phase13pKeychainFactTests {
         attributes[kSecValueData as String] = Data("probe".utf8)
         attributes[kSecAttrAccessControl as String] = control
         let status = SecItemAdd(attributes as CFDictionary, nil)
-        #expect(status == errSecSuccess || status == errSecMissingEntitlement,
-                "an ACL write lands where the app has a keychain identity and refuses -34018 where it doesn't (got \(status)) — never a prompt, never a hang")
+        #expect(status == errSecSuccess,
+                "the ACL'd write must LAND — the app carries a keychain identity since 2026-08-30 (got \(status); -34018 means the entitlement, the profile, or this Mac's device registration was lost)")
     }
 
     /// THE QUESTION (Q3): synchronizable + biometric ACL together —

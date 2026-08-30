@@ -11,5 +11,26 @@
 	     Phase 11b closeout — the EntitlementsTests pin guards the merge). -->
 	<key>com.apple.security.files.bookmarks.app-scope</key>
 	<true/>
+	<!-- 2026-08-30, the 13p signing gap (QUESTIONS #81(a), KnownIssues):
+	     the KEYCHAIN IDENTITY. An ACL'd item (Biometric mode's gated store
+	     key) or a synchronizable one (the iCloud escrow copy) can only live
+	     in the DATA-PROTECTION keychain, and a macOS app is admitted there
+	     only with a keychain access group — which is what forces a
+	     provisioning profile onto the signature. Without it both writes
+	     returned errSecMissingEntitlement (-34018) and every door refused
+	     honestly; the same mechanism had been refusing 14b's CF-12 vault
+	     biometric gate since 14b.
+	     THE VALUE IS THE VARIABLE, DELIBERATELY: Debug builds as
+	     io.lduarte.Variorum.debug and Release as io.lduarte.Variorum, and
+	     both configurations share THIS file — a literal would break Debug
+	     signing and collapse the dev fence. Per-config groups keep the A4
+	     dev-store fence whole down to key custody (StoreKey.swift's
+	     `Variorum` vs `Variorum-dev` scopes). A group is part of an item's
+	     identity and items never migrate between groups, so changing this
+	     string later strands what was written under the old one. -->
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	</array>
 </dict>
 </plist>
