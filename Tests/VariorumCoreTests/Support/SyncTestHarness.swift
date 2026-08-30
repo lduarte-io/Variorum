@@ -56,13 +56,19 @@ final class SyncClient {
     /// Give a restored client its OWN `prefix`: the UUID counter restarts at
     /// zero, so reusing the source device's prefix would mint ids it already
     /// minted before the backup. Nothing in sync keys on the prefix.
+    ///
+    /// `custody` (Phase 13p, ladder R1-m6 — the keyed convergence pass):
+    /// explicit per-client key custody for an on-disk store, so two
+    /// simulated devices can each hold their OWN store key (R13p-4's
+    /// per-store key) instead of sharing the ambient process-ephemeral
+    /// test key. nil keeps the ambient default.
     init(
         name: String, prefix: String, transport: any SyncTransport,
         clockOffset: TimeInterval = 0, seed: UInt64 = 1, mintsRandomUUIDs: Bool = false,
-        storeURL: URL? = nil
+        storeURL: URL? = nil, custody: StoreKeyCustody? = nil
     ) throws {
         precondition(prefix.count == 2 && prefix.allSatisfy(\.isHexDigit))
-        self.db = try storeURL.map { try AppDatabase.openStore(at: $0) }
+        self.db = try storeURL.map { try AppDatabase.openStore(at: $0, custody: custody) }
             ?? AppDatabase.inMemory()
         self.name = name
         self.devicePrefix = prefix
