@@ -598,6 +598,42 @@ surfaces *(the locked-note gates struck with Batch 3 — R13p-16(f))*; the
 whole-app acceptance walk; `/Applications/Variorum.app` refresh + her
 phone install (the standing ritual).
 
+**THE MOBILE-ONLY-USER EXPANSION (author rider at the Batch-1 GO,
+2026-08-30 — verbatim: "make sure that the mobile plan is thoroughly
+updated with what it'll need too in terms of autominting on keychain,
+setting passphrase, etc. some people will be mobile only users").** The
+phone is a FIRST-CLASS BIRTHPLACE of stores, never merely an inheritor
+of a Mac-migrated one. Batch 4's deliverable therefore includes, named
+at design time (the parity-ledger record is MobileSoul PL-15):
+- **(a) First launch ON THE PHONE mints the store key** silently into
+  the iOS Keychain (the knot-4 ruled shape verbatim on iOS: Auto
+  default, zero ceremony, escrow per preset) — a mobile-only stranger
+  gets the full Standard story with no Mac anywhere.
+- **(b) The phone's existing store migrates** via the same one-time
+  `sqlcipher_export` road on first keyed launch (her phone's real store
+  is such a store).
+- **(c) The at-open modes on iOS**: Auto / Face ID
+  (`.biometryCurrentSet`) / Passphrase, with the locked lobby — nothing
+  runs before unlock in the demanded modes (no sync round, no local
+  purge janitor, no capture surface writing).
+- **(d) The passphrase-set screen with same-screen recovery-phrase
+  display**, phone form factor (brains in core, faces per platform).
+- **(e) The Standard nudge's two-offer shape** (create a passphrase ·
+  take the recovery phrase either way).
+- **(f) The escrow dial** with the ruled plain-consequence pair (iCloud
+  Keychain is iOS-native; same two-item design).
+- **(g) Re-lock on background as the phone's re-lock dial** + the
+  manual Lock Now act in demanded modes (the hand-someone-your-phone
+  case — a REAL boundary here, key material dropped).
+- **(h) Reminder checks + the reset door on the phone** — and the loss
+  math stated honestly in the phone's settings copy: a mobile-only user
+  has ONE enrolled device, so their chain is shorter and the copy must
+  say so (her knot-6 per-mode instruction binds here identically).
+- **(i) A DESIGN EDGE flagged now so it is decided, not discovered:**
+  the home-screen quick note mints into the store, which requires the
+  key — under the demanded modes, quick capture must demand unlock
+  first (honest refusal; never a plaintext side-channel buffer).
+
 ## VERIFICATION (phase acceptance)
 
 - Full suites green BOTH platforms at the then-current baseline
@@ -956,6 +992,35 @@ Remaining live knots — 3 (secure_delete), 4 (recovery-phrase UX),
   the standing model policy reserves Fable for), Opus takes Batches 2
   and 4, the phase-end Fable cold review stands. Her call pending with
   the Batch 1 GO.
+
+### 2026-08-30 — HER GO; Batch 1 launched (Fable implementer)
+
+Her words, verbatim: *"GO, I approve your cast: fable implementation on
+batch 1 and whatever other batch calls for Fable. My variorum is closed,
+everything is ready, and I authorize any supabase pushes that need to
+happen (if any). make sure that the mobile plan is thoroughly updated
+with what it'll need too in terms of autominting on keychain, setting
+passphrase, etc. some people will be mobile only users."*
+
+- **Cast ratified:** Fable implements Batch 1; the architect holds her
+  latitude to assign Fable to any later batch that calls for it (Opus
+  otherwise, per the kickoff cast); the phase-end Fable cold review
+  stands.
+- **Zero-instance window OPEN at her word** (her Variorum is closed) —
+  still verified by pgrep before any real-store act, per the standing
+  trap list.
+- **Supabase authorization RECORDED and EXPECTED UNUSED** — R13p-16
+  left this phase with no lockstep event and no server-side act of any
+  kind; if a server need unexpectedly appears, that is a design
+  surprise and STOPS at the architect, her authorization
+  notwithstanding.
+- **Her mobile-only rider EXECUTED the same turn:** Batch 4 gained the
+  MOBILE-ONLY-USER EXPANSION (items a–i above) and MobileSoul's parity
+  ledger gained **PL-15**, written at design time per §6 — the phone as
+  a first-class birthplace of stores.
+- **Batch 1 LAUNCHED** — a fresh Fable implementer, briefed by the
+  BATCH 1 section + riders, the BATCH 0 ADDENDUM's environment traps,
+  and the spike memo. Its record lands below when it completes.
 
 ## BATCH 0 ADDENDUM (the architect, at launch — spike mechanics & environment)
 
