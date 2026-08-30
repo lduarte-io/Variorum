@@ -1341,3 +1341,101 @@ pin. The 4.5d agent ran it (drop `currentBarWidth()`'s remembered-width
 arm → 12 issues, the sibling pin still green) and it is a pin now. **An
 unverified pin committed on a dead session's behalf is the exact
 green-over-nothing class this round exists to correct.**
+
+---
+
+# §11. THE 2026-08-30 PARALLEL BOUT — WHAT LANDED, WHAT IS OWED
+
+**Her window:** ~2 hours, budget on Opus agents. **Her ask:** mobile
+parity work runnable *without* 13u, explicitly *"the 13u not being done
+should NOT be treated as an error."*
+
+## 11.1 WHAT LANDED ON `mobile` — verified merged, 513/86 → **568/92**
+
+Full suite run on the FULLY MERGED tree (not inherited from any branch):
+**568 tests / 92 suites passed**, zero real failures. Hygiene: `Sources/`
+diff **empty**, zero `Sync/`, zero build-configuration files, marker 7.
+Core **1453/154** and Mac **1843/312** both baseline-exact.
+
+| batch | what | evidence |
+|---|---|---|
+| **6a — the Block History twin** | Her four regions in her order (savepoint runs · archived+Unarchive · deleted+clock+Put back, **no purge door** · came-from with ALL originals + Bring back). **CLOSES THE DELETED-TAKE DARK WINDOW** — LR1-3's live data hole. Door renamed `Take History…` → **`Block History…`** | `Shared/BlockHistoryFace.swift` hoist; **Mac rode 1843/312 with zero Mac test files edited** — the hoist proof. Two KnownIssues forked-brain entries discharged |
+| **5 — the shelf** | Her twice-stated complaint fixed. Quick note takes Today's Entry's box; books bounded; **the box is ONE LINE at rest (70 pt) and 50% of the shelf focused (466 pt)**; Today's Entry became a badge with a fallback row so it is reachable in every state; starter Journal seeds once | The writing floor restated **in lines** (`6 × smallLineHeight + chrome = 140 pt`) and **pinned across 2,408 shelf states** — the promise, not the arithmetic. Worst case **144 vs 140** (SE-class, keyboard up, 40 books, AX5) |
+| **4.5d + PL-10(b)** | §61's fix round verified **already done** (13/14) — correctly NOT re-fixed. `assertBookNameIsFree` wired; `BookNameCopy` **hoisted** to `Shared/` | Revert-proved a real bug: **two live books with one name got through the rename door**. Four pre-existing book pins stayed green throughout, which is why it shipped unwired |
+| **the architecture review** | `notes/plans/mobile-architecture-review.md` — **0 BLOCKER · 2 MAJOR · 4 MINOR · 2 NIT** | Findings-only; **no simulator used** (static + a standalone `swiftc` harness), so none of it can carry the contamination below |
+| **the archive/trash design session** | `notes/plans/mobile-archive-trash-design/` — four options, local self-contained HTML | **SHE RULED: option 2, Two rooms** (§10.1), plus the Library-filter row (§10.2) |
+
+## 11.2 🔴 OWED — R28 REVIEWS. NOT DONE, AND NOT PRETENDED DONE.
+
+**Batch 6a and batch 5 have NO cold review.** R28 says a batch is
+BUILD → COLD REVIEW → FIX as one unit; the window closed with the builds
+landed and the reviews unrun. They are merged because the merge was
+verified green and the work is hers to use — but **merged is not
+reviewed**, and this round exists because that distinction was blurred
+before.
+
+**4.5d is the exception and only by accident:** its whole job was
+verifying someone else's fixes, so it *was* a review. Its own three new
+pins are unreviewed.
+
+**The architecture review's 2 MAJORs are unfixed by design** — she asked
+for findings, not fixes. **MAJOR 1 is half-closed already**: its guard
+half is exactly what 4.5d wired (the review read `HEAD`, before that
+merge). **The latch half — two taps mint two books — is open**, as is
+MAJOR 2, the liveness race that can leave a visible editor she cannot
+type in.
+
+## 11.3 ⚠️ MY OWN ERROR, STATED PROPERLY — `git commit` COMMITS THE WHOLE INDEX
+
+§10.4's rule was **not sharp enough and I proved it myself.** I told both
+main-tree agents "explicit-path staging, never `git add -A`" — and then
+**staged one explicit path and ran a bare `git commit`**, which swept
+four of the live agent's already-staged index entries into commit
+`a232455`: the `OriginPeek.swift` deletion (118 lines) and three renames.
+
+**Nothing was lost** (verified: `OriginPeekCopy` is absent Mac-side and
+present in `Shared/BlockHistoryFace.swift` at the tip; the content landed
+in the agent's own commit) and no history was rewritten. But
+`git log --follow` on those files is now misleading, which is why it is
+written here.
+
+**THE CORRECTED RULE: in a shared tree, `git add <path>` is not enough —
+the COMMIT must be pathspec-limited too.** Use `git commit -- <paths>`
+(or `--only`). A bare `git commit` publishes whatever is in the index,
+including work another agent staged seconds ago. The mockup agent got
+this right unprompted; I did not.
+
+## 11.4 ⚠️ THE SIMULATOR RULE, NOW WITH DECISIVE EVIDENCE
+
+§10.4 recorded this from one agent; a second **proved it by measurement**.
+Four runs on a shared device reported 560–564 tests including whole
+suites (*Shelf layout*, *Starter Journal R27b*) **that exist nowhere in
+that tree** — the other agent's. `strings` on the simulator's *installed
+bundle* found them; `strings` on its own linked product did not. **A
+`clean` and a `simctl uninstall` did not survive the next concurrent
+install.**
+
+**THE RULE: one simulator AND one `-derivedDataPath` per live session.**
+And note what it costs a *reviewer*: convincing evidence for findings
+that are not real.
+
+**Also: every iPhone 16-series simulator on this machine is iOS 18.3,
+below the iOS 26 deployment target, and is not a valid destination.** The
+valid iOS 26.2 devices are the iPhone 17 family, iPhone Air, and one
+*[removed for publication]*
+implementers found it before my correction reached them.
+
+## 11.5 WAITING ON HER
+
+- **PROVISIONALs:** batch 5's seven (record §3) — the badge's short word,
+  the starter-journal copy, the box's 11.5 pt type, starred inside the
+  bound, and the **new one her ruling opened: blur-with-text collapses
+  anyway** ("collapse only when empty" is equally defensible and is hers).
+- **The architecture review's 2 MAJORs** — hers to slot.
+- **R24** (`"more info"` → `"info"`) — the one undelivered batch-5 scope
+  item, fenced in `Features/Write/`; exact three sites + two pins written
+  out in its record. Minutes, for whoever next holds those files.
+- **Her device queue grew by two:** MAJOR 2's "does it fire in her
+  hands", and Read-mode memory at 100k on real hardware — **both batch
+  naturally with PL-15's outstanding Face ID walk**, which is the same
+  trip.
