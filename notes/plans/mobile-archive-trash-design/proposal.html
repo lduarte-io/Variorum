@@ -1,0 +1,960 @@
+<title>Archive &amp; Trash on iPhone</title>
+<style>
+  /* ──────────────────────────────────────────────────────────────────
+     The page is set in the app's STUDY voice; the mockups are drawn in
+     its TERMINAL voice. Both palettes are the shipped token values from
+     App/Variorum/Shared/Theme/VoiceTokens.swift, unmodified — the page
+     and the artifact are the app's two voices, side by side.
+     ────────────────────────────────────────────────────────────────── */
+  :root {
+    color-scheme: light;
+
+    /* Study, light — the page. */
+    --page:       #FAF8F3;
+    --page-card:  #FFFFFF;
+    --page-ink:   #29241C;
+    --page-muted: #8D8578;
+    --page-faint: #B5AD9E;
+    --page-accent:#3D6B8E;
+    --page-alarm: #9B3B2F;
+    --page-line:  #E4DDD0;
+    --page-seam:  #C9B998;
+    --page-wash:  #EDF0F4;
+
+    /* Terminal, light — the phone. */
+    --room:    #F6F6F1;
+    --surface: #FBFBF7;
+    --card:    #FDFDFA;
+    --ink:     #23272B;
+    --muted:   #8B9088;
+    --faint:   #B3B6AE;
+    --accent:  #2F7D5F;
+    --alarm:   #A33A2E;
+    --line:    #E4E4DC;
+    --seam:    #CFCFC5;
+    --wash:    #EEF0EA;
+
+    --bezel:  #C9B998;
+    --shadow: rgba(41, 36, 28, .16);
+
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "New York", Georgia, serif;
+    --sans:  ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    --mono:  ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --page:       #000000;
+      --page-card:  #1C1915;
+      --page-ink:   #E8E3D8;
+      --page-muted: #948C7C;
+      --page-faint: #6B6456;
+      --page-accent:#82ABCC;
+      --page-alarm: #D98A78;
+      --page-line:  #2C2822;
+      --page-seam:  #57544A;
+      --page-wash:  #16191C;
+
+      --room:    #000000;
+      --surface: #0C0D0C;
+      --card:    #161816;
+      --ink:     #D6DAD2;
+      --muted:   #8B9088;
+      --faint:   #5B6058;
+      --accent:  #6FBF94;
+      --alarm:   #E08A7C;
+      --line:    #242624;
+      --seam:    #4A4D4A;
+      --wash:    #1A211C;
+
+      --bezel:  #3E3A32;
+      --shadow: rgba(0, 0, 0, .7);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page:       #000000;
+    --page-card:  #1C1915;
+    --page-ink:   #E8E3D8;
+    --page-muted: #948C7C;
+    --page-faint: #6B6456;
+    --page-accent:#82ABCC;
+    --page-alarm: #D98A78;
+    --page-line:  #2C2822;
+    --page-seam:  #57544A;
+    --page-wash:  #16191C;
+
+    --room:    #000000;
+    --surface: #0C0D0C;
+    --card:    #161816;
+    --ink:     #D6DAD2;
+    --muted:   #8B9088;
+    --faint:   #5B6058;
+    --accent:  #6FBF94;
+    --alarm:   #E08A7C;
+    --line:    #242624;
+    --seam:    #4A4D4A;
+    --wash:    #1A211C;
+
+    --bezel:  #3E3A32;
+    --shadow: rgba(0, 0, 0, .7);
+  }
+
+  body {
+    background: var(--page);
+    color: var(--page-ink);
+    font: 17px/1.62 var(--serif);
+    margin: 0;
+    padding: 0 22px 96px;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; }
+  .col  { max-width: 66ch; }
+
+  h1 {
+    font: 600 34px/1.16 var(--serif);
+    margin: 52px 0 10px; text-wrap: balance; letter-spacing: -.005em;
+  }
+  h2 {
+    font: 600 25px/1.25 var(--serif);
+    margin: 0 0 4px; text-wrap: balance;
+  }
+  h3 { font: 600 18px/1.4 var(--serif); margin: 26px 0 4px; text-wrap: balance; }
+  p  { margin: 10px 0 14px; }
+  ol, ul { padding-left: 24px; }
+  li { margin: 7px 0; }
+  b, strong { font-weight: 600; }
+
+  .section { margin-top: 62px; padding-top: 26px; border-top: 1px solid var(--page-line); }
+  .section.plain { border-top: 0; padding-top: 0; }
+
+  .eyebrow {
+    font: 11px/1.5 var(--sans); letter-spacing: .11em; text-transform: uppercase;
+    color: var(--page-muted); margin: 0 0 9px;
+  }
+  .eyebrow .n {
+    display: inline-block; min-width: 1.6em;
+    color: var(--page-accent); font-weight: 700; letter-spacing: .04em;
+  }
+  .lede { font-size: 19px; line-height: 1.55; color: var(--page-muted); }
+  .thesis { font-size: 18.5px; line-height: 1.55; }
+  .quiet { color: var(--page-muted); }
+  .mono, code { font-family: var(--mono); font-size: .86em; }
+  .sans { font-family: var(--sans); }
+
+  .banner {
+    border-left: 3px solid var(--page-accent);
+    background: var(--page-wash);
+    padding: 16px 22px; margin: 24px 0;
+    max-width: 66ch; border-radius: 0 5px 5px 0;
+  }
+  .banner p:first-child { margin-top: 0; }
+  .banner p:last-child  { margin-bottom: 0; }
+  blockquote {
+    margin: 14px 0; padding-left: 18px;
+    border-left: 2px solid var(--page-seam);
+    color: var(--page-muted); font-style: italic;
+  }
+
+  .card {
+    background: var(--page-card); border: 1px solid var(--page-line);
+    border-radius: 4px; padding: 4px 26px 20px; margin: 22px 0; max-width: 74ch;
+  }
+
+  .tablewrap { overflow-x: auto; margin: 20px 0; max-width: 100%; }
+  table { border-collapse: collapse; font: 14px/1.5 var(--sans); min-width: 660px; }
+  th, td { text-align: left; padding: 10px 18px 10px 0; border-bottom: 1px solid var(--page-line); vertical-align: top; }
+  th {
+    color: var(--page-muted); font-weight: 600; white-space: nowrap;
+    font-size: 11px; letter-spacing: .09em; text-transform: uppercase;
+  }
+  td:first-child { white-space: nowrap; font-weight: 600; }
+
+  .worse {
+    border-left: 3px solid var(--page-alarm); padding-left: 18px;
+    margin: 22px 0; max-width: 66ch;
+  }
+  .worse .lbl {
+    font: 700 11px/1.5 var(--sans); letter-spacing: .11em; text-transform: uppercase;
+    color: var(--page-alarm); display: block; margin-bottom: 2px;
+  }
+
+  .gallery { display: flex; flex-wrap: wrap; gap: 30px; margin: 28px 0 6px; align-items: flex-start; }
+  .frame { width: 390px; max-width: 100%; }
+  .caption {
+    font: 13px/1.55 var(--sans); color: var(--page-muted); margin: 12px 3px 0;
+  }
+  .caption b { color: var(--page-ink); font-weight: 600; }
+
+  .tag {
+    display: inline-block; font: 600 10.5px/1.5 var(--sans); letter-spacing: .08em;
+    text-transform: uppercase; padding: 2px 9px; border-radius: 3px;
+    border: 1px solid var(--page-seam); color: var(--page-muted); vertical-align: 2px;
+  }
+  .tag.rec  { border-color: var(--page-accent); color: var(--page-accent); }
+  .tag.flag { border-color: var(--page-alarm);  color: var(--page-alarm); }
+
+  /* ── the phone ─────────────────────────────────────────────────── */
+  .phone {
+    width: 100%; border: 7px solid var(--bezel); border-radius: 34px;
+    background: var(--room); overflow: hidden;
+    box-shadow: 0 12px 30px var(--shadow);
+    font-family: var(--mono); color: var(--ink);
+    display: flex; flex-direction: column; min-height: 592px;
+  }
+  .statusbar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 9px 20px 3px; font-size: 10px; color: var(--faint);
+  }
+  .screen { flex: 1; display: flex; flex-direction: column; }
+  .scroll { flex: 1; padding: 0 8px; }
+
+  .pathline { display: flex; align-items: baseline; gap: 12px; padding: 8px 20px 6px; }
+  .path { font-size: 11.5px; color: var(--muted); }
+  .grow { flex: 1; }
+  .door { font-size: 11.5px; color: var(--accent); }
+  .door.glyph { font-size: 13px; }
+  .door.mutedDoor { color: var(--muted); }
+  .door.danger { color: var(--alarm); }
+
+  .search {
+    margin: 2px 20px 8px; padding: 6px 10px; border-radius: 7px;
+    background: var(--surface); border: 1px solid var(--line);
+    font-size: 11.5px; color: var(--faint);
+  }
+  .filters { display: flex; align-items: baseline; gap: 17px; padding: 2px 20px 9px; font-size: 11.5px; }
+  .filters .on  { color: var(--ink); }
+  .filters .off { color: var(--faint); }
+
+  .rowline { border-top: 1px solid var(--line); }
+  .row { padding: 11px 12px; border-bottom: 1px solid var(--line); display: flex; gap: 10px; align-items: baseline; }
+  .row:last-child { border-bottom: 0; }
+  .row .t { font-size: 13px; color: var(--ink); }
+  .row .clock { font-size: 10.5px; color: var(--alarm); white-space: nowrap; }
+  .row .keep  { font-size: 10.5px; color: var(--muted); white-space: nowrap; }
+  .row .chev  { font-size: 11px; color: var(--faint); }
+  .sub  { font-size: 10.5px; color: var(--muted); margin-top: 3px; }
+  .acts { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 7px; }
+  .acts span { font-size: 11px; color: var(--accent); }
+  .acts span.danger { color: var(--alarm); }
+  .stack { flex: 1; min-width: 0; }
+
+  .sectionhead { padding: 14px 12px 5px; font-size: 11.5px; color: var(--muted); display: flex; align-items: baseline; gap: 12px; }
+  .promise { padding: 0 12px 8px; font-size: 10.5px; color: var(--faint); line-height: 1.55; }
+  .hr { height: 1px; background: var(--line); margin: 10px 12px; }
+
+  .segments {
+    display: flex; margin: 4px 20px 10px;
+    border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface);
+  }
+  .segments div { flex: 1; text-align: center; padding: 6px 0; font-size: 11.5px; color: var(--faint); }
+  .segments div.on { background: var(--wash); color: var(--ink); }
+
+  .tabbar {
+    display: flex; justify-content: center; gap: 34px;
+    border-top: 1px solid var(--line); padding: 11px 0 15px; font-size: 11.5px; background: var(--room);
+  }
+  .tabbar .on  { color: var(--ink); }
+  .tabbar .off { color: var(--faint); }
+
+  .masthead { padding: 10px 20px 8px; }
+  .notetitle { font-size: 17px; font-weight: 600; color: var(--ink); }
+  .toolcorner { display: flex; gap: 15px; font-size: 12px; color: var(--faint); }
+  .chips { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; font-size: 11.5px; color: var(--muted); }
+  .prose { padding: 10px 20px; font-size: 13px; color: var(--ink); line-height: 1.8; }
+  .prose .dim { color: var(--faint); }
+  .bottombar {
+    border-top: 1px solid var(--line); padding: 11px 20px 15px;
+    display: flex; gap: 18px; font-size: 11.5px; color: var(--muted);
+  }
+
+  .sheet {
+    margin-top: auto; background: var(--surface);
+    border-top: 1px solid var(--seam); border-radius: 16px 16px 0 0; padding: 14px 0 18px;
+  }
+  .sheet .head { display: flex; align-items: baseline; padding: 0 18px 10px; font-size: 11.5px; color: var(--muted); }
+  .sheet .actrow { padding: 11px 18px; border-top: 1px solid var(--line); }
+  .sheet .actrow .t { font-size: 13px; color: var(--ink); }
+  .sheet .actrow .t.danger { color: var(--alarm); }
+  .sheet .actrow .t.grouphead { font-size: 11px; color: var(--muted); }
+  .sheet .actrow .d { font-size: 10.5px; color: var(--muted); margin-top: 3px; }
+  .dimmed { opacity: .32; }
+
+  .alert {
+    margin: auto 22px; background: var(--card); border: 1px solid var(--seam);
+    border-radius: 14px; padding: 17px 17px 10px; text-align: center;
+  }
+  .alert .t { font-size: 13.5px; color: var(--ink); }
+  .alert .m { font-size: 11px; color: var(--muted); margin-top: 7px; line-height: 1.6; }
+  .alert .btns { display: flex; border-top: 1px solid var(--line); margin-top: 13px; }
+  .alert .btns div { flex: 1; padding: 9px 0 2px; font-size: 12.5px; }
+  .alert .btns .c { color: var(--accent); }
+  .alert .btns .d { color: var(--alarm); }
+</style>
+
+<div class="wrap">
+
+<div class="col">
+  <h1>Archive &amp; Trash on iPhone</h1>
+  <p class="lede">Four ways the phone could separate <b>Archive</b> from <b>the Trash</b>, and finally give a note its
+  <b>Versions</b> — mimicking what the Mac decided, in a shape that is actually a phone.</p>
+
+  <div class="banner">
+    <p><b>This is propose-only.</b> Nothing here is built, and nothing here is decided. It exists because you reserved
+    the decision:</p>
+    <blockquote>“the phone will also have archive and delete separated and on mimicking the surfaces that the mac has
+    decided on, in some way that works for mobile (make a note that it can have a design session and propose different
+    designs to me with html when the time comes)”</blockquote>
+    <p class="quiet" style="font-size:15px">Mobile batch 6 is <b>split</b> because of it: 6a and 6b build what was
+    already ruled. <b>6c is this page</b>, and it waits for you.</p>
+  </div>
+</div>
+
+<div class="section">
+  <p class="eyebrow">Ground rules — not mine to revisit</p>
+  <h2>The five places</h2>
+  <div class="col">
+    <p>Everything anyone ever had is in exactly one of these. It is the tie-breaker for every call below.</p>
+  </div>
+  <div class="card">
+    <ol style="font-size:16.5px">
+      <li><b>Where you left it</b> — Shelf / Library</li>
+      <li><b>Archive</b> — notes, forever, <i>no clock</i></li>
+      <li><b>The Trash</b> — what is leaving: notes · books · blocks, 30 days</li>
+      <li><b>This note’s Versions</b> — moments you saved</li>
+      <li><b>This block’s History</b> — its takes, savepoints, ancestry</li>
+    </ol>
+    <p style="max-width:70ch">And the standing rules: takes <i>never</i> row in a global Trash · purge doors
+    (<span class="mono">Delete Now</span> / <span class="mono">Empty Trash</span>) live in <b>trash surfaces only</b>,
+    never in History and never in the writing flow · confirm every time · the phone is a complete app, not a smaller one.</p>
+  </div>
+
+  <h3>What the Mac actually did — because “mimicking” needs a target</h3>
+  <div class="tablewrap">
+  <table>
+    <tr><th>place</th><th>where it lives on the Mac</th><th>how it opens</th></tr>
+    <tr><td>Archive</td><td>a <b>fifth sidebar area</b> — <span class="mono">Shelf · Library · Pool · Blocks · Archived</span></td><td>a standing room, with its own search</td></tr>
+    <tr><td>The Trash</td><td>a <b>trash icon in the Library’s masthead</b> — it replaced the ⋯ menu</td><td>a utility you open</td></tr>
+    <tr><td>A note’s Versions</td><td>the <span class="mono">note ▾</span> menu → the side panel</td><td>beside the note</td></tr>
+    <tr><td>A block’s History</td><td>the bottom chrome, <b>beside Commit</b></td><td>beside the note</td></tr>
+    <tr><td>A note’s tray</td><td>a masthead icon → the side panel</td><td>beside the note</td></tr>
+  </table>
+  </div>
+  <div class="col">
+    <p><b>Notice the asymmetry — it is deliberate, and it is the most useful thing on this page.</b> Archive got a
+    <i>room</i>. The Trash got an <i>icon</i>. That is the Mac saying archive is still your library, and the Trash is a
+    utility. Every option below either honours that or knowingly breaks it.</p>
+  </div>
+</div>
+
+<div class="section">
+  <p class="eyebrow">The starting point</p>
+  <h2>What the phone has today, and why it is wrong</h2>
+
+  <div class="gallery">
+    <div class="frame">
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>▮▮▮</span></div>
+        <div class="screen">
+          <div class="pathline"><span class="path">~/library</span><span class="grow"></span><span class="door">+ new note</span></div>
+          <div class="search">search</div>
+          <div class="filters"><span class="on">all</span><span class="off">bookless</span><span class="off">scraps</span><span class="grow"></span><span class="door mutedDoor">sort ▾</span></div>
+          <div class="scroll rowline">
+            <div class="row"><div class="stack"><div class="t">On the shape of a week</div><div class="sub">aug 28 · 2 books</div></div></div>
+            <div class="row"><div class="stack"><div class="t">Notes toward the middle chapter</div><div class="sub">aug 27</div></div></div>
+            <div class="row"><div class="stack"><div class="t">Tuesday</div><div class="sub">aug 26 · journal</div></div></div>
+            <div class="row"><div class="stack"><div class="t">A paragraph I keep rewriting</div><div class="sub">aug 24</div></div></div>
+            <div class="row"><div class="stack"><div class="t">Reading notes — Berger</div><div class="sub">aug 21</div></div></div>
+            <div class="row"><div class="stack"><div class="t" style="color:var(--accent)">archived &amp; deleted</div></div></div>
+          </div>
+          <div class="tabbar"><span class="off">shelf</span><span class="on">library</span></div>
+        </div>
+      </div>
+      <p class="caption"><b>Today, screen one.</b> One door, at the very bottom of a scrolling list — findable only by
+      scrolling past every note you own.</p>
+    </div>
+
+    <div class="frame">
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>▮▮▮</span></div>
+        <div class="screen">
+          <div class="scroll" style="padding-top:6px">
+            <div class="sectionhead"><span>~/trash</span><span class="grow"></span><span class="door mutedDoor">sort ▾</span><span class="door danger">empty trash…</span></div>
+            <div class="filters" style="padding-left:12px"><span class="on">all</span><span class="off">notes</span><span class="off">books</span><span class="off">blocks</span></div>
+            <div class="row"><div class="stack"><div class="t">Half a chapter, abandoned</div><div class="sub">note</div><div class="acts"><span>put back</span><span class="danger">delete now</span></div></div><div class="clock">12 days left</div></div>
+            <div class="row"><div class="stack"><div class="t">“It had been raining since…”</div><div class="sub">block — from <i>Tuesday</i></div><div class="acts"><span>put back</span><span class="danger">delete now</span></div></div><div class="clock">3 days left</div></div>
+            <div class="hr"></div>
+            <div class="sectionhead"><span>~/archived</span></div>
+            <div class="row"><div class="stack"><div class="t">Old outline for the book</div><div class="acts"><span>unarchive</span><span class="danger">delete…</span></div></div><div class="keep">kept — no clock</div></div>
+            <div class="row"><div class="stack"><div class="t">2024 journal, closed</div><div class="acts"><span>unarchive</span><span class="danger">delete…</span></div></div><div class="keep">kept — no clock</div></div>
+          </div>
+        </div>
+      </div>
+      <p class="caption"><b>Today, screen two — the whole problem in one screenshot.</b> The Trash’s countdown and
+      Archive’s calm share a single scroll, separated by a hairline. <span class="mono">empty trash</span> sits a
+      thumb’s width above things that are never leaving. The shared code that writes these words already says this is
+      the phone’s to move.</p>
+    </div>
+  </div>
+</div>
+
+<div class="col" style="margin-top:56px">
+  <p class="eyebrow">How to read the four</p>
+  <p class="thesis">They are ordered by <b>how much of the phone’s shape moves</b> — from the insides of one screen,
+  out to the phone’s top level. Higher numbers are not better; they are bigger.</p>
+</div>
+
+<div class="section">
+  <p class="eyebrow"><span class="n">01</span> Changes one screen’s insides · no new doors</p>
+  <h2>One past screen, two segments</h2>
+  <div class="col">
+    <p class="thesis">Keep the single door the phone already has, and fix the real defect — that both lists are on
+    screen at once — with a segmented control instead of a second destination.</p>
+  </div>
+
+  <div class="gallery">
+    <div class="frame">
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>▮▮▮</span></div>
+        <div class="screen">
+          <div class="pathline"><span class="door">‹ library</span><span class="grow"></span></div>
+          <div class="segments"><div class="on">archived</div><div>trash</div></div>
+          <div class="promise" style="padding-left:20px">Notes you set aside. They keep, and nothing here is on a clock.</div>
+          <div class="search">search archived</div>
+          <div class="scroll rowline">
+            <div class="row"><div class="stack"><div class="t">Old outline for the book</div><div class="sub">archived jul 2</div><div class="acts"><span>unarchive</span><span class="danger">delete…</span></div></div><div class="keep">kept</div></div>
+            <div class="row"><div class="stack"><div class="t">2024 journal, closed</div><div class="sub">archived jan 8</div><div class="acts"><span>unarchive</span><span class="danger">delete…</span></div></div><div class="keep">kept</div></div>
+            <div class="row"><div class="stack"><div class="t">Essay draft — the long version</div><div class="sub">archived jun 19</div><div class="acts"><span>unarchive</span><span class="danger">delete…</span></div></div><div class="keep">kept</div></div>
+          </div>
+        </div>
+      </div>
+      <p class="caption"><b>1a.</b> The archived segment gets the whole screen — its own promise line, its own search,
+      no clock in sight.</p>
+    </div>
+
+    <div class="frame">
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>▮▮▮</span></div>
+        <div class="screen">
+          <div class="pathline"><span class="door">‹ library</span><span class="grow"></span><span class="door danger">empty trash…</span></div>
+          <div class="segments"><div>archived</div><div class="on">trash</div></div>
+          <div class="promise" style="padding-left:20px">Deleted things wait here for 30 days, then they’re gone.</div>
+          <div class="filters"><span class="on">all</span><span class="off">notes</span><span class="off">books</span><span class="off">blocks</span><span class="grow"></span><span class="door mutedDoor">sort ▾</span></div>
+          <div class="scroll rowline">
+            <div class="sectionhead" style="padding-bottom:2px"><span>tuesday</span></div>
+            <div class="row"><div class="stack"><div class="t">“It had been raining since…”</div><div class="sub">block</div><div class="acts"><span>put back</span><span class="danger">delete now</span><span>open note</span></div></div><div class="clock">3 days left</div></div>
+            <div class="row"><div class="stack"><div class="t">Half a chapter, abandoned</div><div class="sub">note · 2 saved versions go with it</div><div class="acts"><span>put back</span><span class="danger">delete now</span></div></div><div class="clock">12 days left</div></div>
+          </div>
+        </div>
+      </div>
+      <p class="caption"><b>1b.</b> Flipping the segment swaps everything — promise line, filters, header door. The two
+      lists never coexist.</p>
+    </div>
+  </div>
+
+  <div class="worse">
+    <span class="lbl">What it is worse at</span>
+    <p>One door still says <i>these two are the same kind of thing</i> — which is precisely the claim your ruling
+    separated. A segment is a weaker statement than a room: you have to press it to learn the difference, where a room
+    announces it. And the door needs a name that covers both, which is how <span class="mono">“Archived &amp;
+    Deleted”</span> got its awkward name in the first place. <b>It is the cheapest option and the least committed one.</b></p>
+  </div>
+</div>
+
+<div class="section">
+  <p class="eyebrow"><span class="n">02</span> Changes a screen’s doors · two new doors, two new screens</p>
+  <h2>Two rooms</h2>
+  <div class="col">
+    <p class="thesis">The Mac’s own asymmetry, translated literally. Archive becomes a room you browse; the Trash
+    becomes a utility you visit. Two doors, two destinations, nothing shared.</p>
+  </div>
+
+  <div class="gallery">
+    <div class="frame">
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>▮▮▮</span></div>
+        <div class="screen">
+          <div class="pathline"><span class="path">~/library</span><span class="grow"></span><span class="door glyph">🗑</span><span class="door">+ new note</span></div>
+          <div class="search">search</div>
+          <div class="filters"><span class="on">all</span><span class="off">bookless</span><span class="off">scraps</span><span class="grow"></span><span class="door mutedDoor">sort ▾</span></div>
+          <div class="scroll rowline">
+            <div class="row"><div class="stack"><div class="t">On the shape of a week</div><div class="sub">aug 28 · 2 books</div></div></div>
+            <div class="row"><div class="stack"><div class="t">Notes toward the middle chapter</div><div class="sub">aug 27</div></div></div>
+            <div class="row"><div class="stack"><div class="t">Tuesday</div><div class="sub">aug 26 · journal</div></div></div>
+            <div class="row"><div class="stack"><div class="t">A paragraph I keep rewriting</div><div class="sub">aug 24</div></div></div>
+            <div class="row"><div class="stack"><div class="t" style="color:var(--accent)">archive</div><div class="sub">kept notes, no clock</div></div></div>
+          </div>
+          <div class="tabbar"><span class="off">shelf</span><span class="on">library</span></div>
+        </div>
+      </div>
+      <p class="caption"><b>2a.</b> A 🗑 glyph joins the path line, and the trailing row narrows to
+      <span class="mono">archive</span> alone — it can finally say what it is.</p>
+    </div>
+
+    <div class="frame">
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>▮▮▮</span></div>
+        <div class="screen">
+          <div class="pathline"><span class="door">‹ library</span><span class="grow"></span></div>
+          <div class="masthead" style="padding-top:2px">
+            <div class="path" style="font-size:13px;color:var(--ink)">~/archive</div>
+            <div class="sub" style="margin-top:5px">Notes you set aside. They keep, and nothing here is on a clock.</div>
+          </div>
+          <div class="search">search archived</div>
+          <div class="scroll rowline">
+            <div class="row"><div class="stack"><div class="t">Old outline for the book</div><div class="sub">archived jul 2</div><div class="acts"><span>unarchive</span><span class="danger">delete…</span></div></div><div class="keep">kept</div></div>
+            <div class="row"><div class="stack"><div class="t">2024 journal, closed</div><div class="sub">archived jan 8</div><div class="acts"><span>unarchive</span><span class="danger">delete…</span></div></div><div class="keep">kept</div></div>
+            <div class="row"><div class="stack"><div class="t">Essay draft — the long version</div><div class="sub">archived jun 19</div><div class="acts"><span>unarchive</span><span class="danger">delete…</span></div></div><div class="keep">kept</div></div>
+          </div>
+        </div>
+      </div>
+      <p class="caption"><b>2b — Archive.</b> Its own screen, its own search, no countdown anywhere. Rows still open:
+      an archived note is a <i>work</i>, and stays editable.</p>
+    </div>
+
+    <div class="frame">
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>▮▮▮</span></div>
+        <div class="screen">
+          <div class="pathline"><span class="door">‹ library</span><span class="grow"></span><span class="door danger">empty trash…</span></div>
+          <div class="masthead" style="padding-top:2px">
+            <div class="path" style="font-size:13px;color:var(--ink)">~/trash</div>
+            <div class="sub" style="margin-top:5px">Deleted things wait here for 30 days, then they’re gone.</div>
+          </div>
+          <div class="filters"><span class="on">all</span><span class="off">notes</span><span class="off">books</span><span class="off">blocks</span><span class="grow"></span><span class="door mutedDoor">sort ▾</span></div>
+          <div class="scroll rowline">
+            <div class="sectionhead" style="padding-bottom:2px"><span>tuesday</span></div>
+            <div class="row"><div class="stack"><div class="t">“It had been raining since…”</div><div class="sub">block</div><div class="acts"><span>put back</span><span class="danger">delete now</span><span>open note</span></div></div><div class="clock">3 days left</div></div>
+            <div class="row"><div class="stack"><div class="t">“…and the light went orange.”</div><div class="sub">block · 2 ancestors ▾</div><div class="acts"><span>put back</span><span class="danger">delete now</span></div></div><div class="clock">3 days left</div></div>
+            <div class="sectionhead" style="padding-bottom:2px"><span>half a chapter, abandoned</span></div>
+            <div class="row"><div class="stack"><div class="t">Half a chapter, abandoned</div><div class="sub">note · 2 saved versions go with it</div><div class="acts"><span>put back</span><span class="danger">delete now</span></div></div><div class="clock">12 days left</div></div>
+          </div>
+        </div>
+      </div>
+      <p class="caption"><b>2c — the Trash.</b> Already built, only re-homed: kind filters, note grouping, nested
+      ancestors, clocks, and both purge doors. Nothing calm shares this screen.</p>
+    </div>
+  </div>
+
+  <div class="worse">
+    <span class="lbl">What it is worse at</span>
+    <p>It spends the phone’s two most crowded strips at once — the path line, which the code deliberately keeps two
+    doors wide, gains a third. And <b>the Archive door is still the last row of a scrolling list</b>: to find your kept
+    work you scroll past everything you didn’t archive. That is the phone’s version of the complaint that started all
+    of this — <i>“just going to the library you get a little lost.”</i> It fixes the conflation and leaves the
+    findability.</p>
+  </div>
+</div>
+
+<div class="section">
+  <p class="eyebrow"><span class="n">03</span> Changes the phone’s <i>areas</i> mechanism · one filter, one glyph, one row retires <span class="tag rec">recommended</span></p>
+  <h2>Follow the phone’s own precedent</h2>
+  <div class="col">
+    <p class="thesis">The phone already decided how a Mac sidebar area becomes a phone thing — <i>twice</i>. Archive is
+    the third application of a rule that is already shipped, not a new idea.</p>
+  </div>
+
+  <div class="card">
+    <h3>The precedent, exactly</h3>
+    <div class="tablewrap">
+    <table>
+      <tr><th>Mac sidebar area</th><th>what the phone did with it</th><th>status</th></tr>
+      <tr><td>Pool</td><td>the Library’s <span class="mono">bookless</span> filter</td><td>shipped</td></tr>
+      <tr><td>Blocks</td><td>the Library’s <span class="mono">scraps</span> filter</td><td>shipped</td></tr>
+      <tr><td><b>Archived</b></td><td>the Library’s <span class="mono">archived</span> filter</td><td><b>this proposal</b></td></tr>
+      <tr><td><i>not a sidebar area</i> — the Trash</td><td>a glyph in the path line → its own screen</td><td>this proposal — mirroring the Mac, whose Trash door is also a masthead icon</td></tr>
+    </table>
+    </div>
+    <p>The phone’s tab bar is <b>not</b> the Mac’s sidebar, and never was. The Mac has five areas; the phone has two
+    tabs and folds the rest into the Library’s filter row. This is the only option that does not have to argue for a
+    new rule.</p>
+  </div>
+
+  <div class="gallery">
+    <div class="frame">
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>▮▮▮</span></div>
+        <div class="screen">
+          <div class="pathline"><span class="path">~/library</span><span class="grow"></span><span class="door glyph">🗑</span><span class="door">+ new note</span></div>
+          <div class="search">search</div>
+          <div class="filters"><span class="on">all</span><span class="off">bookless</span><span class="off">scraps</span><span class="off">archived</span><span class="grow"></span><span class="door mutedDoor">↕</span></div>
+          <div class="scroll rowline">
+            <div class="row"><div class="stack"><div class="t">On the shape of a week</div><div class="sub">aug 28 · 2 books</div></div></div>
+            <div class="row"><div class="stack"><div class="t">Notes toward the middle chapter</div><div class="sub">aug 27</div></div></div>
+            <div class="row"><div class="stack"><div class="t">Tuesday</div><div class="sub">aug 26 · journal</div></div></div>
+            <div class="row"><div class="stack"><div class="t">A paragraph I keep rewriting</div><div class="sub">aug 24</div></div></div>
+            <div class="row"><div class="stack"><div class="t">Reading notes — Berger</div><div class="sub">aug 21</div></div></div>
+            <div class="row"><div class="stack"><div class="t">Tuesday, the week before</div><div class="sub">aug 19 · journal</div></div></div>
+          </div>
+          <div class="tabbar"><span class="off">shelf</span><span class="on">library</span></div>
+        </div>
+      </div>
+      <p class="caption"><b>3a.</b> The trailing <span class="mono">archived &amp; deleted</span> row <b>retires</b> —
+      both halves now have real homes, and the Library’s list ends with notes again. The sort door shrinks to a glyph
+      to pay for the fourth filter; <i>see question 2</i>.</p>
+    </div>
+
+    <div class="frame">
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>▮▮▮</span></div>
+        <div class="screen">
+          <div class="pathline"><span class="path">~/library</span><span class="grow"></span><span class="door glyph">🗑</span><span class="door">+ new note</span></div>
+          <div class="search">search archived</div>
+          <div class="filters"><span class="off">all</span><span class="off">bookless</span><span class="off">scraps</span><span class="on">archived</span><span class="grow"></span><span class="door mutedDoor">↕</span></div>
+          <div class="promise" style="padding-left:20px;padding-top:0">Set aside, and kept. Nothing here is on a clock.</div>
+          <div class="scroll rowline">
+            <div class="row"><div class="stack"><div class="t">Old outline for the book</div><div class="sub">archived jul 2</div><div class="acts"><span>unarchive</span><span class="danger">delete…</span></div></div><div class="keep">kept</div></div>
+            <div class="row"><div class="stack"><div class="t">2024 journal, closed</div><div class="sub">archived jan 8</div><div class="acts"><span>unarchive</span><span class="danger">delete…</span></div></div><div class="keep">kept</div></div>
+            <div class="row"><div class="stack"><div class="t">Essay draft — the long version</div><div class="sub">archived jun 19</div><div class="acts"><span>unarchive</span><span class="danger">delete…</span></div></div><div class="keep">kept</div></div>
+          </div>
+          <div class="tabbar"><span class="off">shelf</span><span class="on">library</span></div>
+        </div>
+      </div>
+      <p class="caption"><b>3b — Archive.</b> Same screen, same search box, scoped. <b>“Search it separately” comes
+      free</b>, and correctly: one search field, scoped by the filter you are standing in. The one-line promise carries
+      the whole distinction.</p>
+    </div>
+
+    <div class="frame">
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>▮▮▮</span></div>
+        <div class="screen">
+          <div class="pathline"><span class="door">‹ library</span><span class="grow"></span><span class="door danger">empty trash…</span></div>
+          <div class="masthead" style="padding-top:2px">
+            <div class="path" style="font-size:13px;color:var(--ink)">~/trash</div>
+            <div class="sub" style="margin-top:5px">Deleted things wait here for 30 days, then they’re gone.</div>
+          </div>
+          <div class="filters"><span class="on">all</span><span class="off">notes</span><span class="off">books</span><span class="off">blocks</span><span class="grow"></span><span class="door mutedDoor">sort ▾</span></div>
+          <div class="scroll rowline">
+            <div class="sectionhead" style="padding-bottom:2px"><span>tuesday</span></div>
+            <div class="row"><div class="stack"><div class="t">“It had been raining since…”</div><div class="sub">block</div><div class="acts"><span>put back</span><span class="danger">delete now</span><span>open note</span></div></div><div class="clock">3 days left</div></div>
+            <div class="row"><div class="stack"><div class="t">“…and the light went orange.”</div><div class="sub">block · 2 ancestors ▾</div><div class="acts"><span>put back</span><span class="danger">delete now</span></div></div><div class="clock">3 days left</div></div>
+            <div class="sectionhead" style="padding-bottom:2px"><span>half a chapter, abandoned</span></div>
+            <div class="row"><div class="stack"><div class="t">Half a chapter, abandoned</div><div class="sub">note · 2 saved versions go with it</div><div class="acts"><span>put back</span><span class="danger">delete now</span></div></div><div class="clock">12 days left</div></div>
+          </div>
+        </div>
+      </div>
+      <p class="caption"><b>3c — the Trash.</b> Unchanged from what is already built, minus the Archived section, plus
+      a real title and promise line. The only screen in the app with a purge door on it.</p>
+    </div>
+  </div>
+
+  <div class="worse">
+    <span class="lbl">What it is worse at</span>
+    <p>Three real costs. <b>One:</b> the filter row is at its width budget — four text doors plus a sort control at
+    390 pt is tight, and Dynamic Type, which this app has committed to, will break it before anything else does.
+    Something has to give: the sort shrinks to a glyph (drawn above), the row scrolls, or the sort moves.
+    <b>Two:</b> an archived note sits one tap from your live listing, so a mis-tap while browsing lands you in an
+    unfamiliar list — a separate room cannot do that. <b>Three:</b> the word “trash” leaves the Library’s surface and
+    becomes a glyph, and for a room visited rarely and urgently a picture is a worse door than a word.</p>
+  </div>
+</div>
+
+<div class="section">
+  <p class="eyebrow"><span class="n">04</span> Changes the phone’s top level · new permanent chrome</p>
+  <h2>The third tab</h2>
+  <div class="col">
+    <p class="thesis">You made Archive a top-level area on the Mac. The phone’s top level is the tab bar. So give it one.</p>
+  </div>
+
+  <div class="gallery">
+    <div class="frame">
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>▮▮▮</span></div>
+        <div class="screen">
+          <div class="pathline"><span class="path">~/keep</span><span class="grow"></span></div>
+          <div class="segments"><div class="on">archived</div><div>trash</div></div>
+          <div class="search">search archived</div>
+          <div class="scroll rowline">
+            <div class="row"><div class="stack"><div class="t">Old outline for the book</div><div class="sub">archived jul 2</div><div class="acts"><span>unarchive</span><span class="danger">delete…</span></div></div><div class="keep">kept</div></div>
+            <div class="row"><div class="stack"><div class="t">2024 journal, closed</div><div class="sub">archived jan 8</div><div class="acts"><span>unarchive</span><span class="danger">delete…</span></div></div><div class="keep">kept</div></div>
+            <div class="row"><div class="stack"><div class="t">Essay draft — the long version</div><div class="sub">archived jun 19</div><div class="acts"><span>unarchive</span><span class="danger">delete…</span></div></div><div class="keep">kept</div></div>
+          </div>
+          <div class="promise" style="border-top:1px solid var(--line);padding:10px 20px">A note’s own saved moments
+            live in the note. A block’s takes live in the block. This room holds whole notes only.</div>
+          <div class="tabbar"><span class="off">shelf</span><span class="off">library</span><span class="on">keep</span></div>
+        </div>
+      </div>
+      <p class="caption"><b>4a.</b> A third tab. That footer line is load-bearing — without it, a top-level “keep”
+      strongly implies the note-scale places are in here too, and they are not.</p>
+    </div>
+
+    <div class="frame">
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>▮▮▮</span></div>
+        <div class="screen">
+          <div class="pathline"><span class="path">~/keep</span><span class="grow"></span><span class="door danger">empty trash…</span></div>
+          <div class="segments"><div>archived</div><div class="on">trash</div></div>
+          <div class="filters"><span class="on">all</span><span class="off">notes</span><span class="off">books</span><span class="off">blocks</span><span class="grow"></span><span class="door mutedDoor">sort ▾</span></div>
+          <div class="scroll rowline">
+            <div class="sectionhead" style="padding-bottom:2px"><span>tuesday</span></div>
+            <div class="row"><div class="stack"><div class="t">“It had been raining since…”</div><div class="sub">block</div><div class="acts"><span>put back</span><span class="danger">delete now</span><span>open note</span></div></div><div class="clock">3 days left</div></div>
+            <div class="row"><div class="stack"><div class="t">Half a chapter, abandoned</div><div class="sub">note</div><div class="acts"><span>put back</span><span class="danger">delete now</span></div></div><div class="clock">12 days left</div></div>
+            <div class="row"><div class="stack"><div class="t">Winter reading</div><div class="sub">book · its notes are untouched</div><div class="acts"><span>put back</span><span class="danger">delete now</span></div></div><div class="clock">27 days left</div></div>
+          </div>
+          <div class="tabbar"><span class="off">shelf</span><span class="off">library</span><span class="on">keep</span></div>
+        </div>
+      </div>
+      <p class="caption"><b>4b.</b> One real upside, and it is not small: this is the <b>only</b> option where a deleted
+      <i>book</i> is reachable without leaving the tab you deleted it from.</p>
+    </div>
+  </div>
+
+  <div class="worse">
+    <span class="lbl">What it is worse at</span>
+    <p>It spends permanent chrome on a room visited rarely and urgently — against a two-word tab bar that is part of
+    the phone’s calm, deliberately. Worse, it is <b>the only option that misreports the map</b>: three of the five
+    places sit at the top level and two stay in context, so a new user reasonably concludes there are three. That
+    footer line is a patch over exactly this, and chrome that needs a sentence explaining itself is a sign the chrome
+    is wrong.</p>
+  </div>
+</div>
+
+<div class="section">
+  <p class="eyebrow">Unchanged by the choice</p>
+  <h2>The note-scale places</h2>
+  <div class="col">
+    <p>None of the four options changes these. They are drawn because the map is only true if all five places are
+    real — and because <b>Versions does not exist on the phone at all today</b>, while its three operations already do.</p>
+  </div>
+
+  <div class="gallery">
+    <div class="frame">
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>▮▮▮</span></div>
+        <div class="screen dimmed" style="flex:0">
+          <div class="masthead">
+            <div style="display:flex;align-items:baseline"><span class="notetitle">Tuesday</span><span class="grow"></span>
+              <span class="toolcorner"><span>⧉</span><span>⌕</span><span>🔒</span><span style="color:var(--ink)">⋯</span></span></div>
+            <div class="chips"><span>aug 26</span><span>journal</span><span>more info</span><span>blocks</span><span>lenses</span></div>
+          </div>
+          <div class="prose"><span class="dim">It had been raining since Sunday and the gutters had given up…</span></div>
+        </div>
+        <div class="sheet">
+          <div class="head"><span>note actions</span><span class="grow"></span><span class="door">done</span></div>
+          <div class="actrow"><div class="t">Save a Version</div><div class="d">saves this whole note as it is right now</div></div>
+          <div class="actrow"><div class="t">Versions…</div><div class="d">the moments of this note you have saved</div></div>
+          <div class="actrow"><div class="t">Undo “merge blocks”</div><div class="d">puts the last structural change back</div></div>
+          <div class="actrow"><div class="t danger">Delete Note…</div><div class="d">moves it to the Trash for 30 days</div></div>
+        </div>
+      </div>
+      <p class="caption"><b>Where Versions goes, in every option.</b> The note’s <span class="mono">⋯</span> gains the
+      note’s <b>two time controls</b>. See finding two below — this is the phone’s answer to ⌘S vs ⌘⇧S.</p>
+    </div>
+
+    <div class="frame">
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>▮▮▮</span></div>
+        <div class="screen">
+          <div class="pathline"><span class="door">‹ tuesday</span><span class="grow"></span><span class="door">save a version</span></div>
+          <div class="masthead" style="padding-top:2px">
+            <div class="path" style="font-size:13px;color:var(--ink)">~/tuesday/versions</div>
+            <div class="sub" style="margin-top:5px">Whole moments of this note, saved by hand. Opening one reads it;
+              restoring makes the note say that again — and saves where it is now first, so nothing is ever a one-way
+              door.</div>
+          </div>
+          <div class="scroll rowline">
+            <div class="row"><div class="stack"><div class="t">aug 26, 9:41 am</div><div class="sub">7 blocks · “It had been raining since Sunday…”</div></div><div class="chev">›</div></div>
+            <div class="row"><div class="stack"><div class="t">aug 24, 6:02 pm</div><div class="sub">5 blocks · “Rain, three days of it, and the…”</div></div><div class="chev">›</div></div>
+            <div class="row"><div class="stack"><div class="t">aug 21, 11:15 am</div><div class="sub">4 blocks · “Started this on the train.”</div></div><div class="chev">›</div></div>
+          </div>
+        </div>
+      </div>
+      <p class="caption"><b>Versions.</b> Rows are date, block count, and the note’s first words. <b>The tap is
+      “Read”</b> — the phone’s honest answer to a Mac side panel it cannot have; <i>see question 9</i>.</p>
+    </div>
+
+    <div class="frame">
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>▮▮▮</span></div>
+        <div class="screen">
+          <div class="pathline"><span class="door">‹ versions</span><span class="grow"></span></div>
+          <div class="masthead" style="padding-top:2px">
+            <div class="path" style="font-size:13px;color:var(--ink)">aug 24, 6:02 pm</div>
+            <div class="sub" style="margin-top:5px">5 blocks · a saved moment — it cannot be edited</div>
+          </div>
+          <div class="prose" style="flex:1">Rain, three days of it, and the gutters had given up somewhere above the
+            kitchen window.<br><br><span class="dim">I keep meaning to write about the sound instead of the water…</span></div>
+          <div class="bottombar"><span style="color:var(--accent)">restore</span><span style="color:var(--accent)">promote</span><span class="grow"></span><span style="color:var(--alarm)">delete…</span></div>
+        </div>
+      </div>
+      <p class="caption"><b>A moment.</b> Read-only by construction — a version is sealed at birth. The three verbs sit
+      on the moment, not on the row, so no list row has to carry four doors.</p>
+    </div>
+
+    <div class="frame">
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>▮▮▮</span></div>
+        <div class="screen">
+          <div class="alert">
+            <div class="t">Restore this moment?</div>
+            <div class="m">“Tuesday” goes back to saying what it said on aug 24. It keeps its name, its books and
+              everything pointing at it — and <b>where it is now is saved as a new moment first</b>.</div>
+            <div class="btns"><div class="c">Cancel</div><div class="d">Restore</div></div>
+          </div>
+        </div>
+      </div>
+      <p class="caption"><b>The restore confirm.</b> The whole point of the ask is that <i>“where it is now is saved
+      first”</i> is readable <b>before</b> the press. Not a warning — a promise.</p>
+    </div>
+
+    <div class="frame">
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>▮▮▮</span></div>
+        <div class="screen dimmed" style="flex:0">
+          <div class="masthead"><div class="notetitle">Tuesday</div></div>
+          <div class="prose"><span class="dim">It had been raining since Sunday and the gutters had given up…</span></div>
+        </div>
+        <div class="sheet">
+          <div class="head"><span>block history</span><span class="grow"></span><span class="door">done</span></div>
+          <div class="actrow"><div class="t grouphead">saved moments — this take</div></div>
+          <div class="actrow"><div class="t">aug 26, 9:38 am</div><div class="d">restore into the buffer</div></div>
+          <div class="actrow"><div class="t grouphead">archived takes</div></div>
+          <div class="actrow"><div class="t">“the gutters had quit”</div><div class="d">kept — no clock · unarchive</div></div>
+          <div class="actrow"><div class="t grouphead">deleted takes</div></div>
+          <div class="actrow"><div class="t">“rain, three days of it”</div><div class="d"><span style="color:var(--alarm)">9 days left</span> · put back</div></div>
+          <div class="actrow"><div class="t grouphead">came from</div></div>
+          <div class="actrow"><div class="t">“It had been raining.”</div><div class="d">set aside by a merge — kept until its family goes · bring back</div></div>
+        </div>
+      </div>
+      <p class="caption"><b>Block History</b> — already landing as batch 6a, drawn for completeness. Note what is
+      <b>not</b> here: no <span class="mono">delete now</span>. Purge doors live on trash surfaces only, and this is
+      the writing flow.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <p class="eyebrow">Side by side</p>
+  <h2>The four, compared</h2>
+  <div class="tablewrap">
+  <table>
+    <tr><th></th><th>Archive lives</th><th>the Trash lives</th><th>what moves</th><th>biggest cost</th></tr>
+    <tr><td>1 · One past screen</td><td>a segment</td><td>the other segment</td><td>one screen’s insides</td><td>one door still says the two are one thing — the conflation you separated</td></tr>
+    <tr><td>2 · Two rooms</td><td>own screen; door = the Library’s trailing row</td><td>own screen; door = a path-line glyph</td><td>a screen’s doors</td><td>two new doors in the two most crowded strips; Archive still findable only by scrolling</td></tr>
+    <tr><td>3 · Precedent <span class="tag rec">rec</span></td><td>a Library <b>filter</b></td><td>own screen; door = a path-line glyph</td><td>the phone’s areas mechanism</td><td>the filter row is at its width budget; “trash” becomes a glyph, not a word</td></tr>
+    <tr><td>4 · The third tab</td><td>a segment of a new tab</td><td>the other segment</td><td>the phone’s top level</td><td>permanent chrome for a rare room; implies only three places exist</td></tr>
+  </table>
+  </div>
+  <div class="col">
+    <h3>All four can express all five places — with one exception worth naming</h3>
+    <p><b>Option 4 can express them and still misreports them.</b> Putting three places in the tab bar and leaving two
+    in context is a legibility failure, not a capability one — which is exactly why its footer needs a sentence saying
+    what is <i>not</i> in the room. The other three make no claim about the note-scale places at all, which is the
+    honest shape: they live where their subject lives.</p>
+  </div>
+</div>
+
+<div class="section">
+  <p class="eyebrow">Independent of which option you pick</p>
+  <h2>Two findings</h2>
+
+  <div class="card">
+    <h3>One — a deleted <i>book</i> has no door from where books live</h3>
+    <p>Books live on the Shelf. A deleted book rows in the Trash. In options 1, 2 and 3 the Trash’s only door is in the
+    <b>Library</b> — so deleting a book from the Shelf means switching tabs to find it again. <b>This is inherited, not
+    introduced</b> (the Mac’s trash icon is in the Library masthead too), and option 4 is the only one that fixes it by
+    accident. <b>The cheap fix works in every option:</b> the Shelf’s path line renders the same 🗑 from the same door
+    table — one declaration, two renderers, no new surface.</p>
+  </div>
+
+  <div class="card">
+    <h3>Two — the phone has <i>two</i> ⋯ menus, and the grain pairing falls out for free</h3>
+    <p>The Mac teaches the two sizes of moment with two chords: <span class="mono">⌘S</span> saves this take’s moment,
+    <span class="mono">⌘⇧S</span> saves this note’s. <b>The phone has no chords</b>, so that teaching needs another
+    home — and it already has one, because the phone keeps block acts in the block ⋯ and note acts in the note ⋯:</p>
+    <p class="mono" style="font-size:14px;line-height:2;margin-left:6px">
+      block ⋯ &nbsp;→&nbsp; Commit Take &nbsp;&nbsp;+&nbsp; Block History…<br>
+      note&nbsp; ⋯ &nbsp;→&nbsp; Save a Version +&nbsp; Versions…
+    </p>
+    <p>Two menus, two grains, each holding its own <i>write a moment / see the moments</i> pair. Arguably a
+    <b>clearer</b> teaching surface than two chords, and the pocket guide’s natural lesson. It costs the note ⋯ sheet
+    two rows — question 5.</p>
+  </div>
+</div>
+
+<div class="section">
+  <p class="eyebrow">Honest limits</p>
+  <h2>What does not translate from the Mac</h2>
+  <div class="col">
+  <ol>
+    <li><b>The side panel.</b> Four of the Mac’s five recovery surfaces open <i>beside</i> the live editor. The phone
+    covers the page with a sheet and stands the editor down. This is already recorded for Block History — the Mac’s
+    “jump to the current block” door is meaningless on the phone and was correctly not ported. <b>Same class for
+    Versions:</b> the Mac reads a moment beside the note; the phone must cover it, so <i>Read</i> is a push, not a peek.</li>
+    <li><b>Hover.</b> There is none, and every act must be a visible button. Not aesthetic: a menu row is a door no
+    in-process test can drive — measured, its accessibility tree comes back empty — and this app has shipped dead purge
+    doors under green tests before.</li>
+    <li><b>Two search fields.</b> The Mac’s Archive has its own search box beside the Library’s. Option 3 gives the
+    phone one box, scoped by filter — arguably better, definitely different. <b>Search scoping is 13o’s to inherit</b>,
+    so the answer should be recorded either way.</li>
+    <li><b>The <span class="mono">note ▾</span> menu.</b> No menu bar on the phone. Its equivalent is a sheet of big
+    tappable rows, which is why two extra rows cost more there than two menu items cost the Mac.</li>
+    <li><b>⌘⇧S.</b> No chord culture on the phone. <i>Save a Version</i> has to be a visible row, and the grain pairing
+    gets taught by the two menus instead of the two chords.</li>
+  </ol>
+  </div>
+</div>
+
+<div class="section">
+  <p class="eyebrow">My call — yours to overrule</p>
+  <h2>Option 3 — Archive becomes a Library filter; the Trash gets the glyph and its own screen</h2>
+  <div class="col">
+    <ol>
+      <li><b>It is the only option grounded in a rule the phone already applied twice</b> rather than in taste. Pool
+      became <span class="mono">bookless</span>; Blocks became <span class="mono">scraps</span>; Archived becomes
+      <span class="mono">archived</span>. Nothing new has to be argued for.</li>
+      <li><b>It says what you said archive IS.</b> Your words: <i>“archive is available forever and maybe still
+      valuable even if you don’t want it in your current library.”</i> A filter says <i>still your library, differently
+      scoped</i>. A separate room says <i>gone</i>. The filter is the truer statement of your own sentence.</li>
+      <li><b>It keeps the Mac’s deliberate asymmetry</b> — Archive is a place, the Trash is a utility — without
+      pretending two tabs are five sidebar areas.</li>
+      <li><b>“Search it separately” comes free and correct</b>, and hands 13o one scoping rule instead of a second
+      search surface to reason about.</li>
+    </ol>
+    <p><b>The honest caveat:</b> its one real risk is the filter row’s width, which is a measurement question rather
+    than a taste one — so it is question 2 below, and not something quietly decided.</p>
+    <p class="quiet">If you dislike the filter idea, <b>option 2 is the safe second</b>: the most literal mimicry, no
+    width risk, paying purely in discoverability. Option 1 is the cheapest and least committed. Option 4 is the one I
+    would argue against — finding one is the only thing it has going for it, and finding one has a cheaper fix that
+    works everywhere.</p>
+  </div>
+</div>
+
+<div class="section">
+  <p class="eyebrow">Over to you</p>
+  <h2>Questions only you can answer</h2>
+  <div class="col">
+  <ol>
+    <li><b>Which option</b> — or which parts of which. They mix: option 3’s Archive with option 2’s labelled Trash row
+    is a coherent hybrid.</li>
+    <li><b>Does the Library’s filter row take a fourth door?</b> If yes, what gives — the sort shrinks to a glyph, the
+    row scrolls, or the sort moves into the search row? Only your hands can judge it, and it gets tighter at larger
+    text sizes.</li>
+    <li><b>The Trash’s door: a glyph, a labelled row, or both?</b> A glyph is tidier; a word is findable in a hurry.</li>
+    <li><b>Does Archive get its own search field, or share the Library’s scoped by filter?</b> 13o inherits the answer.</li>
+    <li><b>Do <span class="mono">Save a Version</span> and <span class="mono">Versions…</span> go in the note ⋯
+    sheet?</b> It grows a three-row sheet to five, and it buys the grain pairing.</li>
+    <li><b>Should the Shelf get a Trash door too</b>, so a deleted book is findable from where books live?</li>
+    <li><b>The word.</b> The Mac’s surface is <span class="mono">Archived</span>. Does the phone say <i>archived</i> or
+    <i>archive</i> — and does the name <span class="mono">“Archived &amp; Deleted”</span> retire entirely?</li>
+    <li><b>Where does the per-note tray’s door sit?</b> Candidates: a row in the note ⋯, or — the phone-native one —
+    the existing <span class="mono">blocks</span> chip’s sheet gains segments <span class="mono">in the note |
+    archived | leaving</span>: one subject in three states. <span class="tag flag">flagged</span> batch 6b may place
+    this door before you read this page; if it does, that answer stands. The tray’s <i>shape</i> is not in question —
+    it was already ruled.</li>
+    <li><b>On a version row, is the tap “Read”</b> with restore, promote and delete on the moment itself — or should
+    the row carry its own ⋯? Four verbs will not fit a phone row inline.</li>
+  </ol>
+  </div>
+</div>
+
+<div class="col" style="margin-top:60px;padding-top:24px;border-top:1px solid var(--page-line)">
+  <p class="quiet" style="font-size:14.5px">This page is set in the app’s <b>Study</b> voice; the mockups are drawn in
+  its <b>Terminal</b> voice. Both palettes are the shipped token values, unmodified — the page and the artifact are the
+  app’s own two voices, side by side. Dark follows your system appearance, and the dark frames are the phone’s real
+  black room, not an inversion.</p>
+</div>
+
+</div>
