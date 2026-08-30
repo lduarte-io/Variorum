@@ -1059,6 +1059,248 @@ passphrase, etc. some people will be mobile only users."*
   passphrase, exactly as she guessed. A sync user's lost device also
   always has the deepest leg: re-sync the corpus from the server.
 
+### Batch 1 — record (implementer: Fable, 2026-08-30)
+
+**COMPLETE. Five commits on `main` (unpushed — the architect verifies and
+pushes): `e341e74` (the swap) · `3a7a2f6` (keyed stack + keyed backups,
+ONE commit per the memo rule) · `89cad74` (the migration + drills) ·
+`ecc5db2` (the flip + acknowledgments) · `56696b3` (the Data Safety
+pane's plain-text sentences stop overclaiming — the honesty doctrine
+applied to the intermediate state; noted for Batch 2: the export
+evidence row's stale marker reads as alarm while the option is off,
+the toggle's face should own that state).** Zero `Sync/` lines end to end
+(diff-verified per commit and across the batch), zero schema, zero server
+acts — R13p-16's hardened expectation held without needing the rider.
+
+**What landed, per scope item:**
+
+1. **The dependency swap (`e341e74`)** — ONE line:
+   `github.com/lduarte-io/GRDB.swift.git`, `branch: "variorum-sqlcipher"`;
+   `Package.resolved` (root + Xcode workspace) pins the exact revision
+   `404dde04154ebcf4f2975a9b032548ee19023929` and SQLCipher.swift 4.18.0.
+   NO `SQLITE_HAS_CODEC` anywhere in our targets, no app-target build
+   settings (memo Correction #2 honored). The memo's one named PENDING —
+   URL-form resolution — retired by this commit's own resolution. Suites
+   green on the swap BEFORE any keying work, all three at exact baseline:
+   core 1416/146 · Mac 1768/296 fully green (the intermittent latency pin
+   passed in-suite) · mobile 486/78 (2 known issues). Zero source changes.
+
+2. **Store-key mint + Auto custody (`3a7a2f6`)** —
+   `Sources/VariorumCore/Persistence/StoreKey.swift`: `StoreKey` (32
+   random bytes via CryptoKit, hex form, REDACTED description so a key
+   can never ride a log interpolation), `StoreKeyCustody` as a
+   swift-dependencies key. `liveValue` = the device Keychain
+   (`io.lduarte.Variorum.store-key`, account = the store-variant scope,
+   `kSecAttrAccessibleWhenUnlockedThisDeviceOnly`, no access control —
+   the brief's Auto item exactly); `testValue` = a process-stable
+   in-memory key (never the Keychain — unsigned CLI runners cannot and
+   must not touch it; stable-per-process so concurrent tests' stores stay
+   mutually reopenable); `.inMemory()` for tests that script mint/save.
+   Batch 2 extends THIS seam (wraps, escrow, the gated item).
+
+3. **The keyed stack (`3a7a2f6`)** — `AppDatabase.configuration(key:)`
+   issues the raw-key `PRAGMA key = "x'…'"` in `prepareDatabase` on EVERY
+   connection (pool writers AND readers). NEVER `usePassphrase` — the
+   call site carries the mandated comment citing 165 ms vs ~1 ms
+   (sweep-verified: the identifier appears nowhere but that comment).
+   `onDisk(url:key:)` makes the key REQUIRED at every call site — no
+   defaulted-nil silent-plaintext door. `inMemory()` is byte-identical
+   and the suites prove it. `openStore(at:custody:)` resolves custody
+   (explicit parameter, else the injected dependency), MINTS into empty
+   custody for fresh stores (born encrypted), REFUSES an encrypted store
+   whose key is gone (never minting over the emptiness — Batch 2's
+   recovery roads re-derive), and REFUSES to create a store whose key
+   custody cannot keep. `AppBootstrap` passes explicit per-variant
+   Keychain custody — two load-bearing consequences documented at the
+   call site: the A4 dev/real fence extends to keys (separate Keychain
+   accounts), and the host-app-under-test uses REAL custody so hosted
+   suite runs can never key the dev store under a process-lifetime test
+   key. **Observed live during this batch's hosted runs:** the dev store
+   migrated to ciphertext under `store-key/Variorum-dev`; NO real-scope
+   item was minted; her real store untouched and still plaintext, as the
+   phase-end install plan requires.
+
+4. **The one-time migration (`89cad74`)** —
+   `StoreEncryptionMigration.migrateIfNeeded(at:key:faultInjector:)`:
+   `sqlcipher_export()` into a keyed temp via `writeWithoutTransaction`
+   (ATTACH/DETACH cannot run inside a transaction — the rider's pin;
+   atomicity comes from the verified file swap, never a wrapping
+   transaction) → source WAL TRUNCATE-checkpointed and PROVEN drained (a
+   non-empty survivor REFUSES the swap — the belt that closes the one
+   replay window: a ciphertext store beside a plaintext WAL) → the temp
+   verified by keyed reopen + per-table row-count equality + ciphertext
+   header → ONE POSIX `rename(2)` → drained-sidecar sweep. Idempotent and
+   re-runnable; the trigger is the file's own first 16 bytes
+   (`StoreFilePresence`), never recorded state. `openStore` composes it,
+   so a pre-13p plaintext store — including an old plaintext BACKUP
+   restored through the door — migrates on open. The SSD-remnant honesty
+   footnote is in the file header (no secure-erasure claim).
+
+5. **`backup(to:)` keyed — SAME COMMIT as the keyed stack (`3a7a2f6`,
+   the one-commit rule honored)** — the destination opens with the
+   store's own key via `artifactConfiguration()` (the key rides the
+   configuration closure, never crossing as bytes). 13l's machinery kept
+   whole: `StoreBackup.integrityCheck(of:using:)` now REQUIRES the
+   source's artifact configuration (both legs thread it), because a
+   keyed store's copies are ciphertext and an unkeyed check would have
+   read "could not be checked" on every copy the app ever makes — a
+   consequence of the one-commit rule the batch text had not named,
+   found by reading 13l's shipped code. Plaintext-era stores get the
+   plain configuration and behave byte-identically.
+
+6. **`openStore(at:)` keyed** — item 3's shape; 13l's restore road and
+   13x's future adoption door ride it. The restore recipe in the runbook
+   survives unchanged on the same machine (the Keychain holds the key,
+   and its "an older backup is brought up to the current version the
+   first time it is opened" sentence now also covers the migration).
+
+7. **The R13p-8 flip (`ecc5db2`)** — `MarkdownInsurance` gains the
+   device-local opt-in (`variorum.backup.markdownInsurance.enabled`,
+   default FALSE) and `performRun` gates on it FIRST — before the
+   destination and before `force`, so Back Up Now is not a plaintext
+   side door. New honest `BackupRunRecord.Outcome.disabled` (distinct
+   from `noDestination`; lenient-decode note recorded at the case so a
+   rollback drops one log row, never the log). The grep-able unit did
+   its job — one grep found it, exactly as 13l built it to be found.
+   Batch 2 builds the opt-in face + the Locked-down warning sentence.
+
+8. **The acknowledgments (`ecc5db2`)** — `AcknowledgmentsCopy` (Shared,
+   so Batch 4's phone face reuses the words) + Settings ▸
+   Acknowledgments on the Mac: the Zetetic copyright line and the
+   SQLCipher Community license VERBATIM from the resolved checkout,
+   SQLite's public-domain line (the checkout's own sentence — a
+   from-memory paraphrase was caught and replaced during the build),
+   GRDB MIT, swift-dependencies MIT, and the vendored CArgon2/BIP-39
+   provenance from their READMEs. Copy pinned by tests.
+
+**Suite counts (batch acceptance):**
+- Core: **1430 tests / 150 suites PASSED** (baseline 1416/146 + 14 new
+  tests in 4 new suites).
+- Mac: **1773 tests / 298 suites PASSED, FULLY GREEN** (baseline 1768/296 + 5 new: 3 flip + 2
+  acknowledgments).
+- Mobile: **486 tests / 78 suites PASSED, 2 known issues** (baseline 486/78, 2 known issues; no phone
+  faces built — Batch 4's, per the plan; the substrate reaches the phone
+  by construction and the simulator host's dev store migrates exactly as
+  the Mac's did).
+
+**The crash-drill matrix (REAL SIGKILL, on byte-copies of her real
+store — logs in `~/dev/scratch-13p-spike/batch1/`):** protocol honored —
+zero instances pgrep-verified by path AND `lsof` on the store; a fresh
+WAL-safe safety backup (byte-copy of db + `-wal` + `-shm` with the app
+closed, sha256-verified identical) taken to
+`batch1/pre-drill-backup/` BEFORE anything else; the live store never
+opened, written, or migrated (read-only `cp` was its only contact; it
+remains plaintext). Her real corpus on the copy: 8.5 MB, 26 tables,
+1659 blocks · 1843 variants · 2015 commits · 235 containers, a LIVE
+2.5 MB WAL (the realistic shape).
+
+| run | outcome | post-crash state | relaunch |
+|---|---|---|---|
+| full production road (`openStore`) | migrated + opened in **0.856 s wall** (whole process) | — | all 26 table counts EXACTLY match the plaintext baseline; zero-plaintext scan clean on the store AND its new WAL |
+| SIGKILL after `.exported` | exit 137 | store PLAINTEXT, old wal/shm intact (2.5 MB WAL uncheckpointed), stale `.encrypting` temp | re-migrated whole; counts exact; ciphertext |
+| SIGKILL after `.checkpointed` | exit 137 | store PLAINTEXT (WAL drained+closed), temp present | re-migrated whole; counts exact; ciphertext |
+| SIGKILL after `.verified` | exit 137 | store PLAINTEXT, verified temp present (rebuilt anyway — a partial temp is never trusted) | re-migrated whole; counts exact; ciphertext |
+| SIGKILL after `.swapped` | exit 137 | store CIPHERTEXT (random header), temp renamed away | no-op migration; opens keyed; counts exact |
+
+The unit-test twin of this matrix (`StoreEncryptionMigrationTests`, the
+4-case parameterized crash test + the corrupted-temp verification
+refusal) runs the same boundaries with a THROWN abort — the gentler
+sibling (an unwound throw still closes connections; SIGKILL does not) —
+which is why both exist and the record says so.
+
+**Pin inventory (each with its red-on-old evidence):**
+- **The backup pin** (`KeyedBackupTests.backupOfAKeyedStoreSucceedsAsCiphertextAndRoundTrips`,
+  the memo's corrected shape): behavioral revert executed — with the
+  shipped unkeyed destination restored, the pin failed with exactly
+  `SQLite error 1: backup is not supported with encrypted databases`;
+  with the fix, success + ciphertext header + no seeded prose + keyed
+  round-trip read-back. The plaintext control
+  (`backupOfAPlaintextStoreStillContainsReadableProse`) passed on BOTH
+  sides, keeping the green half non-vacuous exactly as designed.
+- **The flip pin** (`MarkdownInsuranceFlipTests.aDefaultRunWritesNoPlainTextEvenForced`):
+  behavioral revert executed — with the gate removed, the pin failed on
+  `.written` + prose on disk (the pre-13p behavior observed); restored,
+  `.disabled` + nothing lands. The opt-in twin proves the old road stays
+  reachable.
+- **The batch acceptance pin**
+  (`StoreEncryptionMigrationTests.migrationEncryptsInPlaceAndTheContentSurvivesWhole`):
+  zero-plaintext byte-scan of a migrated store — no SQLite magic, no
+  seeded prose, no `CREATE TABLE` DDL text — plus whole-content
+  read-back. (Red-on-old is structural here: the migration is NEW code;
+  the scan also ran against her real store's migrated copy in the drill.)
+- Refusal pins: unkeyed/wrong-key opens refused; encrypted-store-with-
+  empty-custody refused WITHOUT minting; unkeepable-custody refused
+  WITHOUT creating a store; WAL-not-drained refusal is the migration's
+  own guard (exercised structurally; the drill's checkpointed-kill
+  covers the drained road).
+
+**PROVISIONAL calls (2–3 options weighed, most defensible implemented,
+for the architect/author):**
+1. **`StoreKeyCustody.testValue` = ONE process-stable ephemeral key**
+   (vs per-test minting vs a real-Keychain test scope). Chosen because
+   Swift Testing runs concurrently and stores opened by one test must
+   stay reopenable while another test opens its own (a per-call key
+   makes cross-open tests flaky), and because unsigned `swift test`
+   CANNOT touch the Keychain (spike Q3's -34018 fact). Its `save`
+   accepts-and-discards; `load` never returns nil, so the mint road
+   never runs under the default custody — tests exercising mint inject
+   `.inMemory()` explicitly.
+2. **AppBootstrap's custody is EXPLICIT, not ambient** (vs reading the
+   dependency, vs a prepareDependencies override). The dependency's
+   test-context default would have had the HOST APP key its dev store
+   under a key that dies with the test process — bricking the dev store
+   for the next real run. Explicit custody keeps the app's store real in
+   every process that opens it. Consequence, observed and recorded: the
+   first hosted suite run migrated the dev store under the dev-scope
+   Keychain item (exactly what the next real dev launch would have done).
+3. **`.disabled` is SILENT in the Back Up Now receipt** (like
+   `.upToDate`) until Batch 2's face gives the setting its voice — the
+   alternative (a receipt sentence naming the off state) would speak on
+   every run about a designed default.
+4. **`integrityCheck(of:using:)` made the configuration REQUIRED** (vs
+   defaulted-plain): a future caller must decide, or every ciphertext
+   copy would silently read "could not be checked". Two 13l test call
+   sites updated deliberately.
+5. **The runbook truth edits landed now, minimal** (backups encrypted;
+   the R13p-15 age-out disclosure; the opt-in wording) — Batch 4 owns
+   the full honest-copy pass and 13s the voice; leaving the runbook
+   claiming weekly automatic plaintext would have been false the moment
+   this batch merged. `notes/DataSafetyRunbook.md` kept byte-equal (pin
+   green).
+
+**Findings / surprises (beyond the memo's):**
+- **The one-commit rule's blast radius includes `integrityCheck`** —
+  13l's per-run integrity check opens copies with a bare unkeyed
+  `DatabaseQueue`, so keying `backup(to:)` alone would have left every
+  keyed backup reporting "could not be checked" (and the WAL-copy test
+  red). Fixed in the same commit via `artifactConfiguration()`.
+- **`vault-bootstrap` (the 14b headless CLI tool) cannot open an
+  encrypted store**: it runs unsigned (no Keychain) in live context, so
+  post-phase-end it refuses honestly ("This library is encrypted, and
+  its key is not available on this device"). Its one gate act is
+  history; if it is ever needed again it needs a key road (env-var or
+  file custody) — recorded, not built.
+- **The Q3 unsigned-CLI Keychain fact bit in the designed place**: core
+  tests run keyed stores entirely through injected custody; no test
+  touches SecItem anywhere.
+
+**PENDING, honestly:**
+- **Her REAL store's migration is NOT run** — by design; it happens at
+  the phase-end install. The drill's copies prove the road on her exact
+  bytes.
+- **The scratch drill artifacts contain her real prose in plaintext**
+  (`batch1/pre-drill-backup/`, `batch1/drill-master/` — outside the
+  repo, same protection level as the store itself today). The
+  pre-drill-backup should stand until the phase-end migration has
+  succeeded; the architect decides when the set is swept.
+- **Batch 2 owed items touching this substrate**: the opt-in face for
+  the flip (+ Locked-down warning), the passphrase/recovery/escrow
+  wraps extending `StoreKeyCustody`, the Q3 codesigned re-confirmation,
+  the demanded modes + locked lobby.
+- The Mac latency pin (`rewriteStrategyLatencies`) passed IN-SUITE on
+  every full run this batch (the swap gate and the acceptance run) —
+  no isolated re-run was owed and no red needed adjudicating.
+
 ## BATCH 0 ADDENDUM (the architect, at launch — spike mechanics & environment)
 
 - **Scratch discipline:** throwaway spike work lives OUTSIDE the repo
