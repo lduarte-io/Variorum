@@ -305,6 +305,124 @@ struct MobileBookDetailsTests {
     }
 }
 
+/// **PL-10(b) — THE DUPLICATE-BOOK-NAME GUARD REACHES THE PHONE.**
+///
+/// `assertBookNameIsFree` and `BookNaming`'s rule have been in core since
+/// Phase 13e (her E13 ruling: *refuse at the door*, case-insensitively,
+/// against any LIVE book, with honest wording). The Mac refuses at five
+/// doors. **The phone had zero references to either symbol** — so the same
+/// name could be minted twice from the create sheet, and renamed onto an
+/// existing book from Book Details, on the device she actually writes on.
+///
+/// These pins drive the two doors' models against a real store, and they
+/// assert her SENTENCE as well as the refusal — the parity ledger's own
+/// point is that a refusal she cannot read is not a refusal.
+@MainActor
+@Suite("Mobile books — the duplicate-name guard (PL-10(b))")
+struct MobileBookNameGuardTests {
+    /// **RED ON OLD — RUN, not asserted.** With all three
+    /// `assertBookNameIsFree` lines removed from
+    /// `MobileCreateBookModel.create()`'s runner closures (i.e. the code as
+    /// it shipped), this pin fails with **7 issues**: `create()` returns a
+    /// non-nil id for every one of the three kinds, `lastError` is `nil`
+    /// where her sentence belongs, and the live `reading` count reads 4
+    /// against the 1 asserted. The four pre-existing book pins
+    /// (`MobileBookCreateTests`, `MobileBookDetailsTests`) stayed **green**
+    /// in the same run — which is why this gap survived to round 2.
+    ///
+    /// The collision is deliberately spelled with DIFFERENT CASING AND
+    /// SURROUNDING SPACE, because that is exactly what `BookNaming.key`
+    /// folds and what a `WHERE name = ?` guard would miss.
+    @Test func creatingRefusesAnExistingBookNameInEveryKind() async throws {
+        try await withEditorWorld { session, db in
+            _ = try await session.runner.run { ops in
+                try ops.createReading(name: "Ideas", kind: .curated)
+            }
+            let tagPath = try await session.runner.run { ops -> String in
+                try ops.createTag(name: "sea").path
+            }
+            let model = MobileCreateBookModel(session: session)
+
+            for kind in MobileCreateBookModel.BookKind.allCases {
+                model.name = "  ideas "
+                model.kind = kind
+                model.selectedTagPaths = [tagPath]
+                #expect(model.canCreate, "the face gate is not what refuses here")
+
+                #expect(await model.create() == nil,
+                        "\(kind) minted a second book named Ideas")
+                #expect(model.lastError == BookNameCopy.refusal(existing: "Ideas"),
+                        "\(kind) must speak her sentence, naming the book in ITS casing")
+            }
+
+            #expect(try await db.read { db in
+                try Int.fetchOne(
+                    db, sql: "SELECT COUNT(*) FROM reading WHERE deleted_at IS NULL")
+            } == 1, "nothing was minted by any of the three refusals")
+
+            // And the guard is a NAME guard, not a wall: a free name still
+            // mints from the same model, immediately after three refusals.
+            model.name = "Ideas II"
+            model.kind = .notes
+            let second = try #require(await model.create())
+            #expect(model.lastError == nil)
+            #expect(try await db.read { db in
+                try Queries.reading(db, id: second)?.name
+            } == "Ideas II")
+        }
+    }
+
+    /// The rename door's twin — and its `excluding:` half, which is the
+    /// clause that keeps the guard from refusing her a rename she is
+    /// entitled to.
+    ///
+    /// **RED ON OLD (1) — RUN.** With the `assertBookNameIsFree` line
+    /// removed from `MobileBookDetailsModel.rename` (the shipped code), the
+    /// first act lands: the store reads `IDEAS`, `lastError` is `nil`, and
+    /// `nameLine → "IDEAS"` — **two live books wearing one name, arrived at
+    /// through the door**, which is precisely what her E13 ruling forbids.
+    ///
+    /// **RED ON OLD (2) — RUN, and it is the discriminating half.** Keep the
+    /// line but drop `excluding: id` and the FIRST act still passes while
+    /// the SECOND fails: the store stays `Poems` and `lastError` reads
+    /// *"A book named “Poems” already exists"* — the book refused its own
+    /// name. Two reverts, two different failures, one line apart.
+    @Test func renamingRefusesAnotherBooksNameButNeverItsOwn() async throws {
+        try await withEditorWorld { session, db in
+            let poems = try await session.runner.run { ops -> String in
+                _ = try ops.createReading(name: "Ideas", kind: .curated)
+                return try ops.createReading(name: "Poems", kind: .curated).id
+            }
+            let model = MobileBookDetailsModel(session: session, readingID: poems)
+            await model.refresh()
+
+            await model.rename(" IDEAS ")
+            #expect(try await db.read { db in
+                try Queries.reading(db, id: poems)?.name
+            } == "Poems", "the rename never landed")
+            #expect(model.lastError == BookNameCopy.refusal(existing: "Ideas"))
+            #expect(model.nameLine == "Poems")
+
+            // Its OWN name, recased — not a collision with itself.
+            await model.rename("POEMS")
+            #expect(try await db.read { db in
+                try Queries.reading(db, id: poems)?.name
+            } == "POEMS", "a book may always be recased into its own name")
+            #expect(model.lastError == nil)
+            #expect(model.nameLine == "POEMS")
+        }
+    }
+
+    /// The sentence itself, pinned where both platforms can see it — it is
+    /// HOISTED to `Shared/`, not copied, so the Mac's `DoorSetTests` and
+    /// these compare against the same characters (MobileSoul §3).
+    @Test func theRefusalNamesTheExistingBookAndTheRoadOut() {
+        #expect(BookNameCopy.refusal(existing: "Ideas")
+                == "A book named \u{201c}Ideas\u{201d} already exists — pick a "
+                + "different name, or rename that one first.")
+    }
+}
+
 /// The suites' shared settle helper (the MobileShellTests polling shape).
 @MainActor
 func settle(

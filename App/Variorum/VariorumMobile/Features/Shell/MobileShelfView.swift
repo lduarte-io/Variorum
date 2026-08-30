@@ -5,10 +5,35 @@
 //  Mobile Stage 3, batch 1 — the shelf home (M7), the ratified mockup
 //  §1's shape: the voiced path line ("~/shelf · 6 books" / "Shelf · 6
 //  books"), the book rows with LK5's faces (note count + tags lead; ✓
-//  finished a STATE on the name), the Today's Entry button (terminal's
-//  blinking block cursor riding it — the quick-entry idiom), the tab bar
-//  below. The settings door rides the path line's trailing edge
-//  (PROVISIONAL placement, recorded).
+//  finished a STATE on the name), the tab bar below. The settings door
+//  rides the path line's trailing edge (PROVISIONAL placement, recorded).
+//
+//  ── ROUND 2, BATCH 5 — HER R26/R27 LAYOUT ─────────────────────────────
+//  She said it twice: *"I still see today's entry where i don't want it
+//  and the quick note where i don't want it."* Three changes, one shape
+//  (§40/§41 of `mobile-round-2.md`):
+//
+//  1. **The quick-note box takes Today's Entry's place** — its own
+//     separated box below `+ new book`, and it is the shelf's MAIN area.
+//  2. **The books list is BOUNDED and scrolls inside itself.** Past ~8
+//     books the LIST scrolls; it never pushes the writing area down.
+//  3. **The writing area is about half the phone screen.** The
+//     proportions are `MobileShelfLayout`'s — a pure brain, because they
+//     are a rule and not a modifier, and because the keyboard case (§53
+//     row 6) is exactly the same arithmetic with a smaller region.
+//  3b. **HER TWO 2026-08-30 REFINEMENTS, after reading the result:** the
+//     box is **one line until she clicks into it** (so the books have the
+//     room at rest, and the writing area opens exactly when it is wanted),
+//     and the shelf is **bounded so there is ALWAYS decent room to write**
+//     — the floor is now a GUARANTEE, pinned as a promise rather than as
+//     the arithmetic that happens to produce it.
+//  4. **Today's Entry is now a BADGE on the Journal book's row** (R26.2),
+//     carrying NO blinking cursor (R26.3 — the blinking block is the
+//     terminal voice's QUICK-ENTRY idiom, and now that a real quick-note
+//     box exists the cursor belongs to it; the badge was only ever
+//     borrowing it). When no book on the shelf is the daily journal, the
+//     door falls back to its own row at the end of the list, so it is
+//     reachable in every state (§40's open consequence, answered).
 //
 //  Reading is cheap: the one LIVE editor never lives here (P3); the list
 //  is author-scale (a shelf holds books, not corpus). Since round 2's M5
@@ -49,33 +74,43 @@ struct MobileShelfView<TabBar: View>: View {
     var body: some View {
         VStack(spacing: 0) {
             pathLine
-            // A5-6: a FIXED row under the path line and OUTSIDE the
-            // ScrollView — it never scrolls away, and nothing below it
-            // moves (the Today button and the starred section keep their
-            // order and their feel, which was her constraint).
-            MobileQuickNoteBox(
-                model: quickNote, tokens: tokens, onOpen: onOpenForWriting)
-            ScrollView {
-                LazyVStack(spacing: 0) {
-                    starredSection
-                    ForEach(model.orderedBooks, id: \.reading.id) { book in
-                        bookRow(book)
-                    }
-                    if model.orderedBooks.isEmpty {
-                        Text(tokens.chromeLabel("No books yet — Today's Entry starts your journal."))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
-                            .padding(.vertical, 24)
-                    }
-                    newBookRow
+            // R27: the books region and the writing region SHARE this
+            // space by rule. The reader is real — it already carries the
+            // safe areas, the path line, the status rows, the tab bar,
+            // and (the §53 row 6 case) the keyboard's own inset — so the
+            // brain never has to guess at any of them.
+            GeometryReader { proxy in
+                let split = MobileShelfLayout.split(
+                    region: proxy.size.height,
+                    bookRows: model.orderedBooks.count,
+                    starredRows: stars.items.count,
+                    extraRows: extraBooksRegionRows,
+                    // Her 2026-08-30 ruling: one line until she clicks in.
+                    writing: quickNote.isFocused ? .expanded : .collapsed)
+                VStack(spacing: 0) {
+                    booksRegion
+                        .frame(height: split.booksHeight)
+                        .accessibilityIdentifier("shelf.booksRegion")
+                    MobileQuickNoteBox(
+                        model: quickNote, tokens: tokens,
+                        writingHeight: split.writingHeight,
+                        onOpen: onOpenForWriting)
+                        .frame(height: split.writingHeight, alignment: .top)
+                        .accessibilityIdentifier("shelf.writingRegion")
                 }
-                .padding(.horizontal, 8)
-                todayButton
+                .frame(
+                    width: proxy.size.width, height: proxy.size.height,
+                    alignment: .top)
+                // The two shapes are a state change she asked for, so it
+                // reads as one motion rather than a jump. Chrome-only:
+                // nothing here wakes the text layer (P3).
+                .animation(.easeOut(duration: 0.18), value: quickNote.isFocused)
             }
             if let report = model.lastReport {
                 Text(tokens.chromeLabel(report))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
+                    .lineLimit(3)
                     .padding(.horizontal, 20)
                     .padding(.bottom, 4)
             }
@@ -83,6 +118,7 @@ struct MobileShelfView<TabBar: View>: View {
                 Text(error)
                     .font(tokens.small)
                     .foregroundStyle(tokens.alarm)
+                    .lineLimit(3)
                     .padding(.horizontal, 20)
                     .padding(.bottom, 4)
             }
@@ -93,6 +129,7 @@ struct MobileShelfView<TabBar: View>: View {
                 Text(tokens.chromeLabel(starsError))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
+                    .lineLimit(3)
                     .padding(.horizontal, 20)
                     .padding(.bottom, 4)
             }
@@ -124,6 +161,46 @@ struct MobileShelfView<TabBar: View>: View {
         } message: { book in
             Text(MobileShelfFaces.deleteBookConfirmDetail(
                 name: book.reading.name))
+        }
+    }
+
+    // MARK: - The books region (R27.2 — bounded, and it scrolls)
+
+    /// The trailing doors the region always or sometimes carries, counted
+    /// for the layout brain: `+ new book`, plus the Today fallback row
+    /// when no book on the shelf is the daily journal.
+    private var extraBooksRegionRows: Int {
+        showsTodayFallbackRow ? 2 : 1
+    }
+
+    /// R26.2's open consequence, answered: the badge hangs off the daily
+    /// journal's row, so the door needs a home when that row does not
+    /// exist — a fresh account with no Journal, or one she deleted.
+    /// (R27b seeds a Journal on a genuinely new store, so this is the
+    /// deliberate-deletion and arriving-from-an-existing-account case.)
+    private var showsTodayFallbackRow: Bool {
+        !model.orderedBooks.contains { $0.reading.id == model.dailyBookID }
+    }
+
+    private var booksRegion: some View {
+        ScrollView {
+            LazyVStack(spacing: 0) {
+                starredSection
+                ForEach(model.orderedBooks, id: \.reading.id) { book in
+                    bookRow(book)
+                }
+                if model.orderedBooks.isEmpty {
+                    Text(tokens.chromeLabel("No books yet — Today's Entry starts your journal."))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .padding(.vertical, 24)
+                }
+                newBookRow
+                if showsTodayFallbackRow {
+                    todayFallbackRow
+                }
+            }
+            .padding(.horizontal, 8)
         }
     }
 
@@ -164,35 +241,57 @@ struct MobileShelfView<TabBar: View>: View {
         .padding(.bottom, 6)
     }
 
+    /// One book's row. Since batch 5 the row is an HStack of two doors
+    /// rather than one Button — a Button nested inside another Button's
+    /// label is swallowed by the outer one, and R26.2 puts a real door
+    /// (the Today badge) on this row.
     private func bookRow(_ book: Queries.ShelfBook) -> some View {
-        Button {
-            onOpenBook(book.reading.id)
-        } label: {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                // Terminal reserves the selection-marker column (the
-                // mockup's alignment); the marker itself marks nothing at
-                // rest — rows are doors, not a selection.
-                if !tokens.selectionMarker.isEmpty {
-                    Text(tokens.selectionMarker)
-                        .font(tokens.body)
-                        .foregroundStyle(tokens.accent)
-                        .opacity(0)
+        let isDaily = book.reading.id == model.dailyBookID
+        return HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Button {
+                onOpenBook(book.reading.id)
+            } label: {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    // Terminal reserves the selection-marker column (the
+                    // mockup's alignment); the marker itself marks nothing
+                    // at rest — rows are doors, not a selection.
+                    if !tokens.selectionMarker.isEmpty {
+                        Text(tokens.selectionMarker)
+                            .font(tokens.body)
+                            .foregroundStyle(tokens.accent)
+                            .opacity(0)
+                    }
+                    Text(tokens.chromeLabel(model.rowName(for: book)))
+                        .font(tokens.body.weight(.semibold))
+                        .foregroundStyle(book.reading.locked ? tokens.accent : tokens.ink)
+                        .lineLimit(1)
+                    Spacer(minLength: 12)
+                    // The badge IS the daily marker, so the meta line does
+                    // not also say "daily" on the row that wears it — one
+                    // marker for one fact, and phone width is scarce.
+                    // (PROVISIONAL: a view-level call. The brain is
+                    // untouched, so every other surface still reads
+                    // `meta(…, isDaily:)` exactly as before.)
+                    Text(tokens.chromeLabel(model.rowMeta(for: book, showingDailyMarker: !isDaily)))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .lineLimit(1)
                 }
-                Text(tokens.chromeLabel(model.rowName(for: book)))
-                    .font(tokens.body.weight(.semibold))
-                    .foregroundStyle(book.reading.locked ? tokens.accent : tokens.ink)
-                    .lineLimit(1)
-                Spacer(minLength: 12)
-                Text(tokens.chromeLabel(model.rowMeta(for: book)))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .lineLimit(1)
+                // The padding rides INSIDE the button's label, so the whole
+                // row height is the tap target — and so the row's own
+                // accessibility frame is the row, not the text line inside
+                // it. (Measured: with the padding on the enclosing HStack
+                // the element came back 17 pt tall against a 39 pt row.)
+                .padding(.vertical, 11)
+                .padding(.leading, 12)
+                .contentShape(Rectangle())
             }
-            .padding(.vertical, 11)
-            .padding(.horizontal, 12)
-            .contentShape(Rectangle())
+            .buttonStyle(.plain)
+            if isDaily {
+                todayBadge
+            }
         }
-        .buttonStyle(.plain)
+        .padding(.trailing, 12)
         // Pin/unpin (parity C2): the long-press menu — the act belongs
         // where the list it orders lives (the Mac shelf row's own context
         // menu, the phone's long-press grammar). One state-mirroring door;
@@ -228,6 +327,11 @@ struct MobileShelfView<TabBar: View>: View {
     /// call: the Mac's sidebar-top placement mirrored onto the phone's
     /// home surface). Renders only when anything is starred; rows
     /// navigate — book to its contents, note into its page.
+    ///
+    /// It lives INSIDE the bounded books region by design (batch 5):
+    /// nothing above the writing area may grow without limit, which is
+    /// the whole of R27.2. *(Its placement is separately hers — batch 10
+    /// carries her "I don't like where it appears above the shelf".)*
     @ViewBuilder
     private var starredSection: some View {
         if !stars.items.isEmpty {
@@ -316,38 +420,62 @@ struct MobileShelfView<TabBar: View>: View {
         }
     }
 
-    /// "✎ today's entry ▊" — create-or-open, straight into the editor.
-    private var todayButton: some View {
+    // MARK: - Today's Entry (R26.2 — a badge, not a button of its own)
+
+    /// The badge beside the Journal book's name. NO blinking cursor
+    /// (R26.3): the block cursor is the quick-entry idiom and it went
+    /// home to the quick-note box. The words live on `MobileShelfFaces`
+    /// so this door and its fallback row cannot drift.
+    private var todayBadge: some View {
         Button {
-            Task {
-                if let postID = await model.openToday() {
-                    onOpenForWriting(postID)
-                }
-            }
+            openToday()
         } label: {
-            HStack(spacing: 2) {
-                Text(tokens.chromeLabel("✎ Today's Entry"))
+            Text(tokens.chromeLabel(MobileShelfFaces.todayDoorTitle))
+                .font(tokens.small)
+                .foregroundStyle(tokens.accent)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(tokens.surface)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(tokens.line, lineWidth: 1)))
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(MobileShelfFaces.todayDoorSpoken)
+    }
+
+    /// The same door as its own row, for the states in which no shelf row
+    /// can carry the badge. `shelveInDailyJournalBook` creates and pins
+    /// the Journal book when none is designated (AppSpec §9, her 13d
+    /// #37(iii) ruling), so pressing this is also how a shelf that lost
+    /// its Journal gets one back — deliberately, by her asking.
+    private var todayFallbackRow: some View {
+        Button {
+            openToday()
+        } label: {
+            HStack {
+                Text(tokens.chromeLabel(MobileShelfFaces.todayDoorRowTitle))
                     .font(tokens.small)
                     .foregroundStyle(tokens.accent)
-                if tokens.showsBlockCursor {
-                    BlinkingCursorBlock(color: tokens.accent)
-                }
+                Spacer()
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(tokens.surface)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(tokens.line, lineWidth: 1)))
+            .padding(.vertical, 11)
+            .padding(.horizontal, 12)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .padding(.horizontal, 20)
-        .padding(.top, 18)
-        .padding(.bottom, 10)
-        .accessibilityLabel("Today's Entry")
+        .accessibilityLabel(MobileShelfFaces.todayDoorSpoken)
+    }
+
+    private func openToday() {
+        Task {
+            if let postID = await model.openToday() {
+                onOpenForWriting(postID)
+            }
+        }
     }
 }
 

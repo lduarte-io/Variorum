@@ -115,6 +115,21 @@ nonisolated enum MobileShelfFaces {
         return pinned + journals + others
     }
 
+    // MARK: - Today's Entry (round 2, batch 5 — R26.2)
+
+    /// The door's words in ONE place. TWO surfaces offer it — the badge on
+    /// the daily journal's row, and its fallback row for the states in
+    /// which no such row exists — and they must not drift, exactly like
+    /// the delete-book pair below.
+    ///
+    /// The badge is SHORT by design: it rides a row that already carries a
+    /// name and a meta column, and phone width is the scarce thing.
+    /// *(PROVISIONAL — the abbreviation is a taste call. The SPOKEN form
+    /// stays the full name, so nothing an assistive reader hears changed.)*
+    static let todayDoorTitle = "✎ today"
+    static let todayDoorRowTitle = "✎ today's entry"
+    static let todayDoorSpoken = "Today's Entry"
+
     // MARK: - Delete a book (round 2, batch 4 — PR4)
 
     /// The door's word, in ONE place: two doors offer it (the shelf row's
