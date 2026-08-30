@@ -363,9 +363,18 @@ struct MobileProtectionNoticeBar: View {
                 }
                 if !controller.hasRecoveryWrap {
                     offer(ProtectionCopy.nudgeOfferPhrase) {
+                        // Ladder R2-m1: the offer consults the vault tie —
+                        // an account that already carries the twelve words
+                        // gets the EXTEND flow, never a second fresh
+                        // phrase (the shared `PhraseOffer` rule; one flow,
+                        // both platforms).
                         Task {
-                            if let words = await controller.generateAndLandRecoveryPhrase() {
-                                phraseWords = words
+                            switch await PhraseOffer.take(
+                                controller: controller,
+                                vaultTie: VaultTie.make(services: services)) {
+                            case .extend(let model): setSheetModel = model
+                            case .minted(let words): phraseWords = words
+                            case .refused: break
                             }
                         }
                     }

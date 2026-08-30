@@ -371,4 +371,65 @@ struct Phase13pControllerTests {
         #expect(model.result == .correct(.passphrase))
         #expect(model.message(for: .correct(.passphrase)).contains("this library's key"))
     }
+
+    // MARK: - The nudge's direct phrase offer (ladder R2-m1)
+
+    /// **Ladder R2-m1 — the offer consults the vault tie.** Until this
+    /// fix both notice bars fresh-minted through
+    /// `generateAndLandRecoveryPhrase()` gated only on the STORE's wrap —
+    /// so a vault whose twelve words already existed got a SECOND phrase
+    /// minted over them (the exact divergence the set-screen's own
+    /// `.extendExistingPhrase` routing prevents). Now the shared
+    /// `PhraseOffer` rule serves both platforms: vault-with-wrap ⇒ the
+    /// EXTEND flow and NO mint; no constraining vault ⇒ the fresh mint,
+    /// exactly as before.
+    ///
+    /// RED ON OLD (behavioral revert executed): with `PhraseOffer.take`
+    /// minting unconditionally — the pre-fix faces' behavior — the
+    /// vault-with-wrap arm returns `.minted` and the no-mint assertions
+    /// go red.
+    @Test func thePhraseOfferExtendsAnExistingVaultPhraseInsteadOfMintingASecond() async throws {
+        let w = world()
+        _ = await w.controller.setPassphrase("sesame")
+        #expect(!w.controller.hasRecoveryWrap, "the offer's own render gate")
+
+        // A vault that already carries the twelve words (the tie as
+        // `VaultTie.make` would project it for an enrolled account).
+        let vaultTie = VaultTie(
+            hasRecoveryWrap: true,
+            verifyPassphrase: { _ in .match },
+            verifyRecoveryWords: { _ in .match })
+        let outcome = await PhraseOffer.take(
+            controller: w.controller, vaultTie: vaultTie)
+        guard case .extend(let model) = outcome else {
+            Issue.record("a vault with the twelve words must route to the extend flow")
+            return
+        }
+        #expect(model.phase == .extendExistingPhrase,
+                "the sheet opens straight at the extend step")
+        #expect(!w.controller.hasRecoveryWrap,
+                "NO second phrase was minted over the account's — one secret")
+        #expect(w.envelopeBox.value?.recovery == nil,
+                "the store envelope carries no fresh wrap either")
+
+        // The extend flow lands the ACCOUNT's words on the store — the
+        // set-screen's own routing, reused by the offer.
+        let words = try RecoveryPhrase.generate()
+        await model.extendPhrase(typed: words.joined(separator: " "))
+        #expect(model.lastError == nil)
+        let envelope = try #require(w.envelopeBox.value)
+        #expect(try envelope.unwrapKey(recoveryWords: words) == w.key)
+
+        // The control: with NO constraining vault, the offer fresh-mints
+        // exactly as it always did.
+        let free = world()
+        _ = await free.controller.setPassphrase("sesame")
+        let minted = await PhraseOffer.take(controller: free.controller, vaultTie: nil)
+        guard case .minted(let fresh) = minted else {
+            Issue.record("no vault ⇒ the fresh mint, unchanged")
+            return
+        }
+        #expect(fresh.count == 12)
+        #expect(free.controller.hasRecoveryWrap)
+    }
 }

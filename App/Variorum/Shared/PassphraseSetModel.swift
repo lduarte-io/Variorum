@@ -111,16 +111,25 @@ final class PassphraseSetModel {
         case done
     }
 
-    private(set) var phase: Phase = .enterPassphrase
+    private(set) var phase: Phase
     private(set) var busy = false
     var lastError: String?
 
     private let controller: ProtectionController
     private let vaultTie: VaultTie?
 
-    init(controller: ProtectionController, vaultTie: VaultTie?) {
+    /// `startingAt` (ladder R2-m1): the nudge's direct phrase offer opens
+    /// the sheet straight at `.extendExistingPhrase` when the vault
+    /// already carries the twelve words — see `PhraseOffer`. Defaulted so
+    /// every existing call site (and the Mac suite's pins) rides
+    /// unmodified.
+    init(
+        controller: ProtectionController, vaultTie: VaultTie?,
+        startingAt phase: Phase = .enterPassphrase
+    ) {
         self.controller = controller
         self.vaultTie = vaultTie
+        self.phase = phase
     }
 
     var vaultConstrains: Bool { vaultTie != nil }
@@ -217,6 +226,51 @@ final class PassphraseSetModel {
 
     func acknowledgePhraseWritten() {
         phase = .done
+    }
+}
+
+// MARK: - The nudge's direct phrase offer (ladder R2-m1 — one flow, both platforms)
+
+/// **THE NUDGE'S "take the recovery phrase" OFFER, routed (ladder
+/// R2-m1).** Until this fix both notice bars called
+/// `generateAndLandRecoveryPhrase()` directly, gated only on the STORE's
+/// own wrap — so a vault-enrolled user whose account already carried the
+/// twelve words got a SECOND, different phrase fresh-minted over them,
+/// exactly the divergence the set-screen's own `.extendExistingPhrase`
+/// routing exists to prevent (one secret, R13p-4: never a second phrase).
+///
+/// The rule, written once for both platforms: the offer consults the
+/// vault tie FIRST — a vault that carries a recovery wrap routes to the
+/// EXTEND flow (the set-sheet opened straight at
+/// `.extendExistingPhrase`); only a vault-free (or wrap-free) world
+/// fresh-mints and hands the words back for display.
+@MainActor
+enum PhraseOffer {
+    enum Outcome {
+        /// The account's twelve words already exist — extend THEM over
+        /// this library (the sheet renders the extend flow); never a
+        /// second phrase.
+        case extend(PassphraseSetModel)
+        /// No vault phrase constrains — fresh words, landed on the store
+        /// envelope, handed back for the one display.
+        case minted([String])
+        /// Refused (worded in the controller's `lastError`, exactly as
+        /// the direct call always was).
+        case refused
+    }
+
+    static func take(
+        controller: ProtectionController, vaultTie: VaultTie?
+    ) async -> Outcome {
+        if let vaultTie, vaultTie.hasRecoveryWrap {
+            return .extend(PassphraseSetModel(
+                controller: controller, vaultTie: vaultTie,
+                startingAt: .extendExistingPhrase))
+        }
+        if let words = await controller.generateAndLandRecoveryPhrase() {
+            return .minted(words)
+        }
+        return .refused
     }
 }
 
