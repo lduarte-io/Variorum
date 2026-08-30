@@ -1,0 +1,208 @@
+//
+//  MobileStarterJournalTests.swift
+//  VariorumMobileTests
+//
+//  Mobile Round 2, batch 5 — R27b: THE STARTER JOURNAL, seeded once.
+//
+//  Her ruling: *"I would also make a journal book with one entry in it for
+//  new users introducing users to their journal - and then if they delete
+//  that journal book or archive it, it just doesn't appear at all."*
+//
+//  **The second clause is the whole difficulty, and it is what most of
+//  these pins are about.** A discover-by-name seeder would put the book
+//  back after she deleted it. Both guards are pinned independently — the
+//  per-store-variant mark AND the virgin-store guard — because either one
+//  alone would let the book return in a case she ruled out.
+//
+
+import Foundation
+import Testing
+import VariorumCore
+@testable import VariorumMobile
+
+/// A mark that lives in the test, never in this machine's defaults.
+@MainActor
+private final class Mark {
+    var seeded = false
+    var load: () -> Bool { { [self] in seeded } }
+    var save: (Bool) -> Void { { [self] in seeded = $0 } }
+}
+
+@Suite("Starter Journal — seeded once, and never again (R27b)")
+struct MobileStarterJournalTests {
+
+    /// A new user's store gets the book, the entry, the designation and
+    /// the pin — the same shape the core's own first-press creation makes.
+    @Test func aNewStoreGetsAJournalWithOneEntry() async throws {
+        try await withEditorWorld { session, db in
+            let mark = Mark()
+            let outcome = await MobileStarterJournal.seedIfNeeded(
+                session: session, storeVariant: .dev,
+                loadMark: mark.load, saveMark: mark.save)
+
+            guard case .seeded(let readingID) = outcome else {
+                Issue.record("expected a seed, got \(outcome)")
+                return
+            }
+            #expect(mark.seeded, "the mark must be set only after it lands")
+
+            let facts = try await db.read { db -> (String, String?, String?, Int, Bool) in
+                let book = try #require(try Queries.reading(db, id: readingID))
+                let daily = try Queries.dailyJournalBookID(db)
+                let members = try Queries.assembleReading(db, readingID: readingID)
+                return (book.name, book.profile, daily,
+                        members.count, book.kind == .curated)
+            }
+            #expect(facts.0 == Operations.defaultDailyJournalBookName)
+            #expect(facts.1 == "journal")
+            #expect(facts.2 == readingID, "the seeded book is the daily journal")
+            #expect(facts.3 == 1, "exactly ONE entry — her word")
+            #expect(facts.4, "curated, like the core's own")
+
+            let pins = try await db.read { db in try Queries.shelfPins(db) }
+            #expect(pins.contains(readingID), "and pinned, like the core's own")
+        }
+    }
+
+    /// **The entry carries NO `entry_date`, and that is load-bearing.** A
+    /// starter note stamped with today would be the note
+    /// `createOrOpenJournalEntry` hands her the first time she presses
+    /// Today's Entry — so her first real entry would open onto
+    /// introduction copy. Driven end to end: seed, then press Today.
+    @Test func theStarterEntryIsNotTodaysEntry() async throws {
+        try await withEditorWorld { session, db in
+            let mark = Mark()
+            let outcome = await MobileStarterJournal.seedIfNeeded(
+                session: session, storeVariant: .dev,
+                loadMark: mark.load, saveMark: mark.save)
+            guard case .seeded(let readingID) = outcome else {
+                Issue.record("expected a seed, got \(outcome)")
+                return
+            }
+
+            let shelf = MobileShelfViewModel(session: session)
+            let todayID = try #require(await shelf.openToday(day: "2026-08-30"))
+
+            let members = try await db.read { db in
+                try Queries.assembleReading(db, readingID: readingID)
+            }
+            let starter = try #require(
+                members.first { $0.title == MobileStarterJournal.entryTitle })
+            #expect(todayID != starter.postID,
+                    "today's entry must be a NEW note, not the introduction")
+            #expect(starter.entryDate == nil, "the starter note claims no day")
+            #expect(members.count == 2, "the day joined the book beside it")
+
+            // **The consequence of carrying no day, pinned as BEHAVIOUR
+            // rather than discovered later.** A journal book sorts by
+            // `entry_date` and `stampOrder` puts NULLs LAST, so the
+            // introduction settles at the END of the book once real days
+            // arrive. Deliberate: the alternative — giving it a fabricated
+            // past day so it sorts first — would make it a DAY, which the
+            // Fragments bridge pushes by `entry_date`, inventing a journal
+            // entry in her other app for a day she never wrote.
+            #expect(members.last?.postID == starter.postID,
+                    "the introduction sorts after the dated days")
+        }
+    }
+
+    /// **Her second clause.** Delete the book, ask again — and it stays
+    /// gone. (This is the pin a discover-by-name seeder fails.)
+    @Test func aDeletedStarterJournalNeverComesBack() async throws {
+        try await withEditorWorld { session, db in
+            let mark = Mark()
+            let first = await MobileStarterJournal.seedIfNeeded(
+                session: session, storeVariant: .dev,
+                loadMark: mark.load, saveMark: mark.save)
+            guard case .seeded(let readingID) = first else {
+                Issue.record("expected a seed, got \(first)")
+                return
+            }
+
+            try await session.runner.run { ops in
+                try ops.deleteReading(readingID)
+            }
+
+            let second = await MobileStarterJournal.seedIfNeeded(
+                session: session, storeVariant: .dev,
+                loadMark: mark.load, saveMark: mark.save)
+            #expect(second == .alreadySeeded)
+
+            let live = try await db.read { db in try Queries.readings(db) }
+            #expect(live.isEmpty, "the shelf stays as she left it")
+        }
+    }
+
+    /// The mark alone is not the whole guard. Even with a CLEARED mark —
+    /// a reinstall, a second device — a store that already holds her
+    /// writing is not a new user's, and gets no furniture.
+    @Test func aStoreWithContentIsNeverSeeded() async throws {
+        try await withEditorWorld { session, db in
+            _ = try await session.runner.run { ops in
+                try ops.createPost(title: "Something of mine")
+            }
+            let mark = Mark()   // never seeded on this device
+            let outcome = await MobileStarterJournal.seedIfNeeded(
+                session: session, storeVariant: .dev,
+                loadMark: mark.load, saveMark: mark.save)
+            #expect(outcome == .storeNotNew)
+            #expect(mark.seeded == false, "a refusal must not claim a seed")
+
+            let books = try await db.read { db in try Queries.readings(db) }
+            #expect(books.isEmpty)
+        }
+    }
+
+    /// The same guard the other way: a store carrying only BOOKS (an
+    /// account synced down before its notes arrive) is not new either.
+    @Test func aStoreWithOnlyBooksIsNeverSeeded() async throws {
+        try await withEditorWorld { session, _ in
+            _ = try await session.runner.run { ops in
+                try ops.createReading(name: "Essays", kind: .curated)
+            }
+            let mark = Mark()
+            let outcome = await MobileStarterJournal.seedIfNeeded(
+                session: session, storeVariant: .dev,
+                loadMark: mark.load, saveMark: mark.save)
+            #expect(outcome == .storeNotNew)
+        }
+    }
+
+    /// Two launches in a row — the ordinary case — seed exactly one book.
+    @Test func seedingIsIdempotentAcrossLaunches() async throws {
+        try await withEditorWorld { session, db in
+            let mark = Mark()
+            for _ in 0..<3 {
+                _ = await MobileStarterJournal.seedIfNeeded(
+                    session: session, storeVariant: .dev,
+                    loadMark: mark.load, saveMark: mark.save)
+            }
+            let books = try await db.read { db in try Queries.readings(db) }
+            #expect(books.count == 1)
+        }
+    }
+
+    /// The mark is scoped per store variant — debug and release share one
+    /// defaults domain, so an unscoped key would let a dev-store seed
+    /// suppress her real store's (the `IdleCommitScheduler` precedent).
+    @Test func theMarkIsScopedByStoreVariant() {
+        #expect(MobileStarterJournal.seededDefaultsKey(for: .real)
+                != MobileStarterJournal.seededDefaultsKey(for: .dev))
+        #expect(MobileStarterJournal.seededDefaultsKey(for: .real)
+                .hasSuffix(AppDatabase.StoreVariant.real.rawValue))
+    }
+
+    /// The seed leaves NO structural-undo entry: a first launch must not
+    /// put furniture she never placed on top of her undo stack. (The quiet
+    /// facade — `Operations(undoStack: nil)`, the tutorial seeder's shape.)
+    @Test func theSeedIsQuiet() async throws {
+        try await withEditorWorld { session, _ in
+            let mark = Mark()
+            _ = await MobileStarterJournal.seedIfNeeded(
+                session: session, storeVariant: .dev,
+                loadMark: mark.load, saveMark: mark.save)
+            #expect(session.undoStack.depth == 0,
+                    "the starter journal is not an act she can undo")
+        }
+    }
+}
