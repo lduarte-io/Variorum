@@ -1109,10 +1109,20 @@ only about 13l:
 | **the post-13l polish round** | 2026-08-25 | **RULED BATCH 6's ENTIRE DESIGN** before a mid-design could reach the phone — her token instruction, executed: `mobile-round-2.md` **§69**. Parity row **PL-14** |
 | **13p** | 2026-08-30 | **The phone's encryption faces SHIPPED INSIDE THE PHASE** (PL-15, her mobile-only-user rider; 19 pins, mobile 486/78 → 513/86). **No parity debt owed** — only her LIVE Face ID walk and the on-device perf leg, which only her hardware can give |
 
-**13i also ran** (wings + the Owned book — `CoreDescription` pillar 3 and
-`OverallModel` §2 carry the ratified additions). Its mobile consequences
-are not yet enumerated in the ledger; **that is an open item, not a
-finding against anyone.**
+**13i has NOT run — it is `pending`.** An earlier draft of this section
+said it had, and that was wrong; the error is corrected here rather than
+left to mislead. What happened is that **wings and the Owned book were
+RATIFIED INTO CANON** at the 2026-08-25/26 launch-strategy sitting
+(`CoreDescription` pillar 3, `OverallModel` §2) **ahead of the phase that
+builds them** — the canon wording "designed and built at Phase 13i" reads
+naturally as past tense and is not. **Measured: `Wing` appears in ZERO
+files across `Sources/`, `App/Variorum/Shared/`, the Mac target and the
+phone.** So there is **no 13i parity debt yet**, and the ledger is right
+to be silent. When 13i runs, its mobile consequences are real and large
+(a library level ABOVE books, plus a book relationship that bends the
+notes-in-many-books default) — **PL-12's "design together" test will
+almost certainly be met, so mobile should be IN that design sitting**
+rather than handed a parity row afterwards.
 
 **Baseline now: core 1453/154 · Mac 1843/312 · mobile 513/86 · spine
 71/10; marker 7.** The Mac's known intermittent latency pin is
