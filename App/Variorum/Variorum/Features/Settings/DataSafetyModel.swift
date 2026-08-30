@@ -245,6 +245,10 @@ final class DataSafetyModel {
             parts.append("The copy beside your library failed: \(record.primary.detail ?? "unknown").")
         case .noDestination:
             parts.append("No place to copy to.")
+        case .disabled:
+            // Unreachable for the snapshot legs (nothing turns them off);
+            // exhaustiveness keeps the compiler honest if that ever changes.
+            break
         }
         switch record.secondary.outcome {
         case .written where record.secondary.integrityFailed:
@@ -255,7 +259,7 @@ final class DataSafetyModel {
             parts.append("Your folder already has today's copy.")
         case .failed:
             parts.append("Your folder: \(record.secondary.detail ?? "unknown").")
-        case .noDestination:
+        case .noDestination, .disabled:
             break
         }
         // 13l Act 5 (row 16): the plain-text leg. Silent when it was
@@ -269,6 +273,11 @@ final class DataSafetyModel {
         case .failed:
             parts.append("Plain-text copy: \(record.markdown?.detail ?? "unknown").")
         case .upToDate, .noDestination, nil:
+            break
+        case .disabled:
+            // 13p (R13p-8's rider): off by default is the designed state —
+            // silent in the receipt, exactly like "nothing due". Batch 2's
+            // opt-in face is where the setting speaks.
             break
         }
         return parts.joined(separator: " ")

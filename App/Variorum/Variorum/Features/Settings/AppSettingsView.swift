@@ -42,6 +42,11 @@ struct AppSettingsView: View {
             // restoring one does — including to things that were deleted.
             DataSafetyPane(services: services)
                 .tabItem { Label("Data Safety", systemImage: "externaldrive.badge.timemachine") }
+            // 13p Batch 1 (R13p-11's attribution obligation): the Zetetic
+            // copyright line, the SQLCipher license text, and the
+            // dependency notices — user-accessible, functional over polish.
+            AcknowledgmentsPane()
+                .tabItem { Label("Acknowledgments", systemImage: "text.book.closed") }
         }
         .frame(width: 560, height: 460)
         .task { await theme.start() }
@@ -479,6 +484,40 @@ struct PromoteTagsSheet: View {
                 // was the last book-naming one still doing it).
                 self.error = OpsRefusalCopy.message(for: error)
             }
+        }
+    }
+}
+
+// MARK: - Acknowledgments (13p Batch 1 — R13p-11's attribution obligation)
+
+/// The dependency notices, verbatim from their checkouts — Zetetic's
+/// copyright line and SQLCipher license lead, per the ruling. Functional
+/// and honest is the bar here; 13s owns any voice pass over the intro line.
+private struct AcknowledgmentsPane: View {
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                Text(AcknowledgmentsCopy.intro)
+                    .font(.callout)
+                ForEach(AcknowledgmentsCopy.all) { notice in
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(notice.name)
+                            .font(.headline)
+                        Text(notice.role)
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                        Text(notice.text)
+                            .font(.system(size: 11, design: .monospaced))
+                            .textSelection(.enabled)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(Color.primary.opacity(0.04)))
+                }
+            }
+            .padding(16)
         }
     }
 }

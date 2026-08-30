@@ -12,12 +12,18 @@ folder as `RESTORE.md` so it is beside the copies it describes.*
    container. This is the truth; everything else is a copy of it.
 2. **Backups — frozen copies of that file.** Two destinations: one
    beside the store, one in a folder you pick. They are frozen, which
-   is the whole point: they do not follow a mistake.
-3. **Plain-text copies.** Every note as Markdown, written weekly into
-   the folder you picked. These are not a restore road — they carry
-   the words and not the takes, the history or the books — but they
-   are the one copy that stays readable if the library file itself is
-   the problem, and they need no Variorum to open.
+   is the whole point: they do not follow a mistake. Backups are
+   encrypted exactly as your library is, under the same key; copies
+   made before your library was encrypted stay readable plain files
+   until rotation ages them out.
+3. **Plain-text copies.** Every note as Markdown, into the folder you
+   picked — **off unless you turn it on**, now that the library is
+   encrypted (a scheduled plain-text copy re-opens the door the
+   encryption closed, so it is an opt-in). When on, these are not a
+   restore road — they carry the words and not the takes, the history
+   or the books — but they are the one copy that stays readable if
+   the library file itself is the problem, and they need no Variorum
+   to open.
 4. **The mirror (sync).** A PEER, not a backup. It converges — which
    means it replicates a deletion or a bad edit at sync speed. It
    protects you from losing a DEVICE, not from losing writing.
@@ -41,7 +47,8 @@ device.** Reaching for the wrong one is how people lose things.
 - **The plain-text copies**, in that same picked folder:
   `<the folder you picked>/Variorum/md-exports/`
   One dated folder per export, holding every note as a `.md` file.
-  Written weekly; the 4 most recent are kept.
+  Written weekly while the plain-text option is on (it is off unless
+  you turned it on); the 4 most recent are kept.
   **These are readable by anything that can read the folder** — you,
   any program, and whatever syncs it if you picked a cloud folder.
   That is the trade this copy exists to make, and it is worth knowing

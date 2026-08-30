@@ -32,6 +32,14 @@ nonisolated struct BackupRunRecord: Codable, Sendable, Equatable, Identifiable {
         case noDestination
         /// It was attempted and it failed. `detail` says how.
         case failed
+        /// The leg's feature is turned OFF (13p, R13p-8's rider: the
+        /// automatic plain-text export defaults off once encryption is
+        /// present, surviving as an opt-in). Honest, distinct from
+        /// `noDestination` — "off" and "nowhere to write" are different
+        /// truths. NOTE for rollbacks: an older build decodes a record
+        /// carrying this case as one leniently-dropped log row
+        /// (`BackupLog.LenientRecord`), never a wiped log.
+        case disabled
     }
 
     /// One destination's half of the run.
@@ -82,7 +90,8 @@ nonisolated struct BackupRunRecord: Codable, Sendable, Equatable, Identifiable {
 
     /// A leg that either did its job or had no job to do.
     private func legWorked(_ leg: Leg) -> Bool {
-        leg.outcome == .noDestination || (leg.succeeded && !leg.integrityFailed)
+        leg.outcome == .noDestination || leg.outcome == .disabled
+            || (leg.succeeded && !leg.integrityFailed)
     }
 }
 

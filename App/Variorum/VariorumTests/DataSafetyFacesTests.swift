@@ -153,6 +153,9 @@ struct MarkdownInsuranceTests {
     @Test func noPickedFolderMeansNoExportAndTheRunSaysSo() async throws {
         let source = try populatedDatabase()
         let defaults = scratchDefaults()
+        // 13p: the destination story sits behind the opt-in now (R13p-8's
+        // rider — the flip's own tests live in Phase13pSubstrateTests).
+        MarkdownInsurance.setEnabled(true, in: defaults)
         let leg = await Task.detached {
             MarkdownInsurance.performRun(
                 database: source, defaults: defaults, now: Date(), force: true)
@@ -168,6 +171,8 @@ struct MarkdownInsuranceTests {
         let dir = try temporaryDirectory()
         defer { try? FileManager.default.removeItem(at: dir) }
         let defaults = scratchDefaults()
+        // 13p: behind the opt-in, as above.
+        MarkdownInsurance.setEnabled(true, in: defaults)
         let doomed = dir.appendingPathComponent("gone", isDirectory: true)
         try FileManager.default.createDirectory(at: doomed, withIntermediateDirectories: true)
         let bookmark = try doomed.bookmarkData(

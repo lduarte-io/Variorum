@@ -47,6 +47,32 @@ nonisolated enum MarkdownInsurance {
     /// The subfolder inside `<picked>/Variorum/`, beside `Backups/`.
     static let folderName = "md-exports"
 
+    // MARK: - The 13p default flip (R13p-8's rider, author verbatim: "the
+    // automatic plaintext backup is going to be ended 13p, when encryption
+    // is added, since it weakens encryption. i think it can still be
+    // available to users that want it, but it should be off by default once
+    // encryption is present.")
+    //
+    // Encryption is present from Batch 1 on — every store `openStore`
+    // touches is keyed — so the AUTOMATIC weekly export is OFF unless the
+    // user turns it on. Batch 2 builds the opt-in face (and the
+    // Locked-down warning sentence that a scheduled plain-text export
+    // re-opens the door the encryption closed); this key is what that face
+    // flips. Device-local like the destination bookmark, and for the same
+    // reason.
+
+    /// The opt-in's defaults key.
+    static let enabledDefaultsKey = "variorum.backup.markdownInsurance.enabled"
+
+    /// OFF unless deliberately turned on — the R13p-8 rider's letter.
+    static func isEnabled(in defaults: UserDefaults) -> Bool {
+        defaults.bool(forKey: enabledDefaultsKey)
+    }
+
+    static func setEnabled(_ enabled: Bool, in defaults: UserDefaults) {
+        defaults.set(enabled, forKey: enabledDefaultsKey)
+    }
+
     /// `<picked>/Variorum/md-exports` — one export per dated subfolder.
     static func exportsFolder(in picked: URL) -> URL {
         BackupDestination.variorumFolder(in: picked)
@@ -72,6 +98,12 @@ nonisolated enum MarkdownInsurance {
         policy: Policy = .standard, now: Date, force: Bool
     ) -> BackupRunRecord.Leg {
         dispatchPrecondition(condition: .notOnQueue(.main))
+        // The 13p gate, FIRST — before the destination is even consulted,
+        // and before `force`: with the option off, Back Up Now must not
+        // write plaintext either (the door is the setting, not the button).
+        guard isEnabled(in: defaults) else {
+            return BackupRunRecord.Leg(outcome: .disabled)
+        }
         var leg = BackupRunRecord.Leg(outcome: .noDestination)
         guard BackupDestination.isSet(in: defaults) else { return leg }
         guard let resolved = BackupDestination.resolve(in: defaults) else {
