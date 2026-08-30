@@ -27,12 +27,19 @@ ratify bundle is QUESTIONS #81, and the spike's numbers are
    ladder's R3-m1 escrow-interleave rider landing alongside whenever
    signing does). This same gap likely explains 14b's vault biometric
    gate quietly refusing on the Mac all along.
-3. **The install gate (#81(f)).** The running app is the
-   accepted-mid-phase build; the final tree adds the custody/mode
-   faces, the ladder's fixes, and the tutorial's privacy chapter.
-   When convenient: quit Variorum → say the word → the final-tree
-   `/Applications` refresh + phone re-install + the field-guide
-   re-seed (behind the A1 rail) take minutes.
+3. **The install gate (#81(f)) — EXECUTED 2026-08-30 at your word,
+   after you quit the app.** `/Applications/Variorum.app` was rebuilt
+   Release from the FINAL tree (commit `5123580`, 14:27) and installed
+   at 14:33 — the installed binary's sha256 matches the build product
+   exactly, and it is signed at that time. The phone was re-installed
+   in the same run (`VariorumMobile 1.0 (1)`, confirmed on device). A
+   fresh pre-refresh backup was taken first per the A1 rail and is
+   CIPHERTEXT, which independently confirms your live store is
+   encrypted. **The one piece still owed is the field-guide re-seed,
+   and it is an in-app act:** `Help ▸ Restore Tutorial…` in the
+   refreshed build, which replaces the tutorial book with the current
+   lessons (the new privacy chapter). Press it whenever — nothing else
+   waits on it.
 4. **Your phone.** First open migrates its store (same drilled road,
    instant). Then the fun one: Settings → Protection → try BIOMETRIC
    mode — Face ID is expected to WORK on the phone (no signing gap
@@ -54,10 +61,16 @@ ratify bundle is QUESTIONS #81, and the spike's numbers are
    numbers (30-day reminder / ≥24 h nudge / 14-day snooze).
 8. **The kept plaintext backups (#81(g))**: two pre-migration
    byte-copies of your real store remain at
-   `~/dev/scratch-13p-spike/pre-drill-backup/` and
+   `~/dev/scratch-13p-spike/batch1/pre-drill-backup/` and
    `~/dev/scratch-13p-spike/install-backup-20260830T131907Z/`
-   (everything derived was swept at the closeout). Once you're
-   satisfied the encrypted world is good, say the word and they go.
+   (everything derived was swept at the closeout; the path of the
+   first was corrected 2026-08-30 — it sits under `batch1/`). Both
+   were verified plaintext-headed at the post-closeout sweep. A third
+   folder now sits beside them —
+   `pre-reseed-backup-20260830T202941Z/`, tonight's pre-refresh copy —
+   which is CIPHERTEXT and can go with them or stay as a spare. Once
+   you're satisfied the encrypted world is good, say the word and they
+   go.
 9. **Kick off 13y when ready** — plan authored:
    `notes/plans/phase-13y-per-tenant-seq.md` (all `Sync/` + server
    SQL, the standing Fable rider; marker 7→8 and the `11_` DDL number

@@ -1377,7 +1377,7 @@ done.
 
 **EXECUTED, same night — ALL THREE ACTS DONE:**
 - Zero instances pgrep-confirmed; fresh WAL-safe byte-copy backup at
-  `~/dev/scratch-13p-spike/install-backup-20260830T131927Z/`
+  `~/dev/scratch-13p-spike/install-backup-20260830T131907Z/`
   (sha256-verified identical to the live file; db 5.96 MB + wal
   2.54 MB + shm — the pre-migration plaintext state, kept with the
   batch-1 artifacts until closeout).

@@ -977,7 +977,7 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **(e) DEVICE-SIDE ACCEPTANCE, needs you:** the live Face ID walk (Mac half gated on (a); the PHONE's Biometric mode is expected to WORK — first real chance to see it); the phone's first open (its store migrates then, same drilled road); the phone perf leg on your hardware.
 
-    **(f) THE PHASE-END INSTALL GATE:** your Mac app has been running since the migration and is deliberately never quit by a session. When convenient: quit it → say the word → the final-tree refresh + phone re-install run in minutes, and the tutorial re-seed (the new privacy chapter) follows behind the A1 rail.
+    **(f) THE PHASE-END INSTALL GATE — EXECUTED 2026-08-30 (you quit the app and said the word).** `/Applications` was rebuilt Release from the FINAL tree (commit `5123580`) and installed at 14:33 — installed binary sha256 == build product, signed at that time; the phone was re-installed in the same run (`VariorumMobile 1.0 (1)`, confirmed on device); the A1-rail pre-refresh backup was taken first and is CIPHERTEXT, independently confirming the live store is encrypted. **Still owed, and it is yours to press:** the field-guide re-seed — `Help ▸ Restore Tutorial…` in the refreshed build, which replaces the tutorial book with the current lessons (the new privacy chapter). Nothing waits on it.
 
     **(g) THE KEPT PLAINTEXT BACKUPS:** `~/dev/scratch-13p-spike/` still holds the pre-migration byte-copies of your real store (the drill's safety backup + the install-night backup). Derived drill copies were swept at the closeout; these two are KEPT until you confirm the encrypted world is good — then say the word and they go.
 
