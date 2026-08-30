@@ -1399,6 +1399,19 @@ in the agent's own commit) and no history was rewritten. But
 `git log --follow` on those files is now misleading, which is why it is
 written here.
 
+**CORRECTION, added after batch 6a's cold review (which caught it): "nothing
+was lost" was one step short of the truth.** The sweep committed the
+*deletion* of `OriginPeek.swift` without the *addition* that replaced it,
+and `OriginPeekCopy` had **eight non-test reference sites** at `16ba929^`
+with no declaration anywhere in `App/`. **So the MAC TARGET COULD NOT
+COMPILE for the length of that window**, and the batch-6a commit repaired
+it as a side effect rather than as an intended change. Nothing was lost
+and the tip is correct — but the intermediate commit is broken, and a
+`git bisect` across it will fail to build for a reason that has nothing to
+do with what it is bisecting. **That is the real cost of a bare
+`git commit` in a shared tree, and it is worse than a confusing
+`git log --follow`.**
+
 **THE CORRECTED RULE: in a shared tree, `git add <path>` is not enough —
 the COMMIT must be pathspec-limited too.** Use `git commit -- <paths>`
 (or `--only`). A bare `git commit` publishes whatever is in the index,
