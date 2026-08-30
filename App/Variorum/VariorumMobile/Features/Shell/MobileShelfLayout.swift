@@ -73,11 +73,28 @@ nonisolated enum MobileShelfLayout {
     /// roughly the other half however many books exist.
     static let maximumBooksShare: CGFloat = 0.5
 
-    /// The floor under the writing area. Below this the box stops being a
-    /// place to write, so the books region yields further instead — the
-    /// small-phone and keyboard-up case her sentence did not have to name.
-    /// Four lines of prose plus the box's own chrome.
-    static let minimumWritingHeight: CGFloat = 132
+    /// **HER GUARANTEE (2026-08-30, after reading batch 5's result):**
+    /// *"the shelf should be bounded so it always has a decent amount of
+    /// room to write."* This raises what was a defensive floor to a
+    /// promise, and it is expressed in LINES because that is what "room to
+    /// write" means — a pixel count would drift the moment the type or the
+    /// chrome changed.
+    ///
+    /// `theWritingFloorIsAGuaranteeInEveryShelfState` pins the PROMISE
+    /// (`writing >= min(region, minimumWritingHeight)`, for every shelf
+    /// state this app can render) rather than the arithmetic that
+    /// currently produces it — so a later layout change that violates it
+    /// fails loudly instead of eroding it quietly.
+    static let guaranteedWritingLines = 6
+
+    /// The floor under the EXPANDED writing area, derived from her
+    /// guarantee. Below this the box stops being a place to write, so the
+    /// books region yields further instead — the small-phone,
+    /// large-Dynamic-Type and keyboard-up cases her sentence did not have
+    /// to name.
+    static var minimumWritingHeight: CGFloat {
+        CGFloat(guaranteedWritingLines) * smallLineHeight + writingBoxChromeHeight
+    }
 
     // MARK: - Row metrics (estimates — see the header)
 
@@ -103,6 +120,34 @@ nonisolated enum MobileShelfLayout {
     /// The field never caps below this, however cramped the room —
     /// a three-line box is still a box.
     static let minimumWritingLines = 3
+
+    // MARK: - At rest, the box is ONE LINE (her 2026-08-30 ruling)
+
+    /// Her words: *"the box should be one line until you click into it."*
+    ///
+    /// **This CLOSED batch 5's own PROVISIONAL** about a near-empty shelf
+    /// showing a large empty rectangle — she ruled it in this direction,
+    /// so the shelf now has two resting shapes rather than one.
+    ///
+    /// The two states are a LAYOUT fact, not a decoration: at rest the
+    /// books get everything above one collapsed line, and the ~8-row cap
+    /// does not apply — the cap exists only to protect a writing area, and
+    /// at rest there is none to protect. On focus the R27 split takes over
+    /// and her floor guarantee binds, which is exactly when writing room
+    /// matters most.
+    enum WritingState: Equatable {
+        /// Not focused: one line, anchored at the bottom of the shelf.
+        case collapsed
+        /// Focused: R27's proportions, and her floor guarantee.
+        case expanded
+    }
+
+    /// The collapsed box's whole region — one line plus the box's chrome
+    /// (its border padding, and the saved-indicator row that appears the
+    /// moment there is text to be honest about).
+    static var collapsedWritingHeight: CGFloat {
+        smallLineHeight + writingBoxChromeHeight
+    }
 
     // MARK: - The split
 
@@ -134,9 +179,18 @@ nonisolated enum MobileShelfLayout {
     /// The result always partitions it exactly (`books + writing == region`
     /// for any non-negative region), so nothing can fall off the bottom.
     static func split(
-        region: CGFloat, bookRows: Int, starredRows: Int, extraRows: Int
+        region: CGFloat, bookRows: Int, starredRows: Int, extraRows: Int,
+        writing state: WritingState = .expanded
     ) -> Split {
         guard region > 0 else { return Split(booksHeight: 0, writingHeight: 0) }
+
+        // AT REST (her one-line ruling): one line at the bottom, and the
+        // books take everything else. No cap here — capping the books
+        // against a collapsed box would only mint dead air above it.
+        if state == .collapsed {
+            let box = min(region, collapsedWritingHeight)
+            return Split(booksHeight: region - box, writingHeight: box)
+        }
 
         let natural = naturalBooksHeight(
             bookRows: bookRows, starredRows: starredRows, extraRows: extraRows)

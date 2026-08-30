@@ -229,6 +229,24 @@ final class MobileQuickNoteModel {
     /// the keyboard while she is still typing is worse than the bug.
     private(set) var handOffCount = 0
 
+    /// **Whether the box has the caret** — her 2026-08-30 ruling, *"the box
+    /// should be one line until you click into it"*, made reachable.
+    ///
+    /// This is view state on a view model, deliberately and with a reason:
+    /// the SHELF sizes its two regions from it, and a `@FocusState` lives
+    /// inside the box and cannot be read by a sibling view. Keeping it here
+    /// also makes the ruling drivable headlessly — a `@FocusState` cannot
+    /// be set from a pin, and the software keyboard never presents under
+    /// `xcodebuild test`, so a focus flag nothing can reach would be a
+    /// behaviour nothing can verify.
+    private(set) var isFocused = false
+
+    /// The box's own `@FocusState` reports here. Idempotent.
+    func setFocused(_ focused: Bool) {
+        guard isFocused != focused else { return }
+        isFocused = focused
+    }
+
     // MARK: Wiring (never observed — none of it renders)
 
     @ObservationIgnored private(set) var session: AppSession?
@@ -979,6 +997,19 @@ final class MobileQuickNoteModel {
 /// and then scrolls inside itself. **⏎ is unchanged** (A5-1) — the box
 /// still holds ONE wrapped paragraph, so this is about WRAPPING, never
 /// about holding several paragraphs.
+///
+/// **Her 2026-08-30 refinement — TWO SHAPES:** *"the box should be one
+/// line until you click into it."* At rest it is a single line anchored
+/// at the shelf's bottom, and the books have the room; on focus it opens
+/// into the ruled region. **On blur it collapses again, WITH TEXT STILL
+/// IN IT** — implemented literally, because her sentence is about focus
+/// and not about emptiness, because the text is already durable (the mint
+/// clock has fired, or leaving the shelf files it), and because a box
+/// that stayed open whenever it held something would make the shelf's
+/// layout depend on invisible state. The saved indicator and the
+/// `open ↵` door stay visible in the collapsed row, so nothing about the
+/// note goes quiet. *(PROVISIONAL — the alternative reading, "collapse
+/// only when empty", is defensible too and is recorded for her.)*
 struct MobileQuickNoteBox: View {
     @Bindable var model: MobileQuickNoteModel
     let tokens: VoiceTokens
@@ -1021,6 +1052,11 @@ struct MobileQuickNoteBox: View {
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 8)
+        .onChange(of: focused) { _, isFocused in
+            // Her 2026-08-30 ruling needs the SHELF to know: the two
+            // regions are sized from this, so focus has to leave the box.
+            model.setFocused(isFocused)
+        }
         .onChange(of: model.handOffCount) { _, _ in
             // The box has let go; the keyboard should let go with it.
             focused = false
@@ -1034,9 +1070,22 @@ struct MobileQuickNoteBox: View {
     /// Derived from the ruled region, so the box fills its area on a big
     /// phone and cannot overflow it on a small one (or with the keyboard
     /// up, which is the same arithmetic on a smaller region — §53 row 6).
+    ///
+    /// **AT REST IT IS ONE** (her 2026-08-30 ruling). See `collapsed`.
     private var lineCap: Int {
+        if collapsed { return 1 }
         guard let writingHeight else { return 5 }
         return MobileShelfLayout.writingLineCap(writingHeight: writingHeight)
+    }
+
+    /// Her ruling: *"the box should be one line until you click into it."*
+    ///
+    /// **Hosted WITHOUT a ruled region the box keeps its old five-line
+    /// shape** (`writingHeight == nil`) — nothing but the shelf asks for
+    /// the two-state behaviour, and the standalone hosts in
+    /// `MobileQuickNoteTests` must keep testing what they were written for.
+    private var collapsed: Bool {
+        writingHeight != nil && !model.isFocused
     }
 
     private var field: some View {
@@ -1087,9 +1136,10 @@ struct MobileQuickNoteBox: View {
         .onTapGesture { focused = true }
     }
 
-    /// What the box's own chrome leaves for the field.
+    /// What the box's own chrome leaves for the field. `nil` at rest —
+    /// a collapsed box asks for nothing and renders at one line.
     private var fieldMinHeight: CGFloat? {
-        guard let writingHeight else { return nil }
+        guard let writingHeight, !collapsed else { return nil }
         return max(0, writingHeight - MobileShelfLayout.writingBoxChromeHeight)
     }
 

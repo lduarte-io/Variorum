@@ -21,6 +21,12 @@
 //     proportions are `MobileShelfLayout`'s — a pure brain, because they
 //     are a rule and not a modifier, and because the keyboard case (§53
 //     row 6) is exactly the same arithmetic with a smaller region.
+//  3b. **HER TWO 2026-08-30 REFINEMENTS, after reading the result:** the
+//     box is **one line until she clicks into it** (so the books have the
+//     room at rest, and the writing area opens exactly when it is wanted),
+//     and the shelf is **bounded so there is ALWAYS decent room to write**
+//     — the floor is now a GUARANTEE, pinned as a promise rather than as
+//     the arithmetic that happens to produce it.
 //  4. **Today's Entry is now a BADGE on the Journal book's row** (R26.2),
 //     carrying NO blinking cursor (R26.3 — the blinking block is the
 //     terminal voice's QUICK-ENTRY idiom, and now that a real quick-note
@@ -78,7 +84,9 @@ struct MobileShelfView<TabBar: View>: View {
                     region: proxy.size.height,
                     bookRows: model.orderedBooks.count,
                     starredRows: stars.items.count,
-                    extraRows: extraBooksRegionRows)
+                    extraRows: extraBooksRegionRows,
+                    // Her 2026-08-30 ruling: one line until she clicks in.
+                    writing: quickNote.isFocused ? .expanded : .collapsed)
                 VStack(spacing: 0) {
                     booksRegion
                         .frame(height: split.booksHeight)
@@ -93,6 +101,10 @@ struct MobileShelfView<TabBar: View>: View {
                 .frame(
                     width: proxy.size.width, height: proxy.size.height,
                     alignment: .top)
+                // The two shapes are a state change she asked for, so it
+                // reads as one motion rather than a jump. Chrome-only:
+                // nothing here wakes the text layer (P3).
+                .animation(.easeOut(duration: 0.18), value: quickNote.isFocused)
             }
             if let report = model.lastReport {
                 Text(tokens.chromeLabel(report))

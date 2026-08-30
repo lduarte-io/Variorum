@@ -112,20 +112,61 @@ private func shelfRegions<V: View>(
     return (books, writing)
 }
 
+/// The quick-note field's own backing text view. SwiftUI's
+/// `TextField(axis: .vertical)` renders through a `UITextView` subclass
+/// (probed: `VerticalTextView` inside a
+/// `UIKitPlatformViewHost<PlatformViewRepresentableAdaptor<TextViewAdaptor>>`),
+/// so focus can be taken the way a tap takes it.
+@MainActor
+private func textInputView<V: View>(in surface: HostedSurface<V>) -> UIView? {
+    guard let root = surface.host.view else { return nil }
+    var found: UIView?
+    func walk(_ view: UIView) {
+        if found == nil, view is UITextView || view is UITextField { found = view }
+        for sub in view.subviews { walk(sub) }
+    }
+    walk(root)
+    return found
+}
+
 @MainActor
 private func shelfSurface(
-    _ session: AppSession, size: CGSize
+    _ session: AppSession, size: CGSize,
+    quickNote: MobileQuickNoteModel? = nil
 ) -> HostedSurface<MobileShelfView<EmptyView>> {
     let shelf = MobileShelfViewModel(session: session)
     let stars = MobileStarsModel(session: session)
-    let quickNote = MobileQuickNoteModel(session: session)
+    let box = quickNote ?? MobileQuickNoteModel(session: session)
     return HostedSurface(
         MobileShelfView(
-            model: shelf, stars: stars, quickNote: quickNote,
+            model: shelf, stars: stars, quickNote: box,
             tokens: .terminalLight, tabBar: { EmptyView() },
             onOpenBook: { _ in }, onOpenForWriting: { _ in },
             onOpenNote: { _ in }, onSettings: {}),
         size: size)
+}
+
+/// A hosted shelf whose box is already OPEN.
+///
+/// **Focus is driven through the model rather than through `@FocusState`,
+/// and that is a deliberate, recorded limit rather than a shortcut:** a
+/// `@FocusState` cannot be written from a pin, and the software keyboard
+/// never presents under `xcodebuild test` (the
+/// `MobileKeyboardBarGeometryTests` finding). So the pins below drive the
+/// *state* her ruling is about and measure the real rendered response;
+/// that the box's own `@FocusState` reaches that state is pinned
+/// separately, by driving the real control
+/// (`focusingTheRealFieldOpensTheBox`).
+@MainActor
+private func openShelfSurface(
+    _ session: AppSession, size: CGSize
+) async -> HostedSurface<MobileShelfView<EmptyView>> {
+    let box = MobileQuickNoteModel(session: session)
+    let surface = shelfSurface(session, size: size, quickNote: box)
+    await surface.settle(20)
+    box.setFocused(true)
+    await surface.settle(40)
+    return surface
 }
 
 @MainActor
@@ -182,6 +223,50 @@ struct MobileShelfLayoutBrainTests {
                     * MobileShelfLayout.bookRowHeight)
     }
 
+    // MARK: - Her 2026-08-30 ruling: one line until she clicks in
+
+    /// *"the box should be one line until you click into it."* At rest the
+    /// writing region is a single line's worth, whatever the shelf holds.
+    @Test func atRestTheBoxIsOneLine() {
+        for bookRows in [0, 2, 8, 40] {
+            let rest = MobileShelfLayout.split(
+                region: 746, bookRows: bookRows, starredRows: 0,
+                extraRows: 1, writing: .collapsed)
+            #expect(rest.writingHeight == MobileShelfLayout.collapsedWritingHeight,
+                    "books \(bookRows): \(rest.writingHeight)")
+        }
+    }
+
+    /// **Her stated consequence: a one-line box gives the books more
+    /// room** — and the ~8-row cap does NOT apply at rest, because the cap
+    /// exists only to protect a writing area there is none of. Capping
+    /// here would mint dead air above a collapsed box instead.
+    @Test func atRestTheBooksTakeEverythingElse() {
+        let rest = MobileShelfLayout.split(
+            region: 746, bookRows: 40, starredRows: 0, extraRows: 1,
+            writing: .collapsed)
+        let open = MobileShelfLayout.split(
+            region: 746, bookRows: 40, starredRows: 0, extraRows: 1,
+            writing: .expanded)
+        #expect(rest.booksHeight == 746 - MobileShelfLayout.collapsedWritingHeight)
+        #expect(rest.booksHeight > open.booksHeight,
+                "resting must give the books more room than writing does")
+    }
+
+    /// The collapsed box is itself never crushed: in a room too small even
+    /// for one line, it takes the whole room rather than going negative.
+    @Test func theCollapsedBoxIsNeverCrushed() {
+        for region in stride(from: 4.0, through: 200.0, by: 4.0) {
+            let rest = MobileShelfLayout.split(
+                region: CGFloat(region), bookRows: 9, starredRows: 3,
+                extraRows: 2, writing: .collapsed)
+            #expect(rest.writingHeight
+                    == min(CGFloat(region), MobileShelfLayout.collapsedWritingHeight))
+            #expect(rest.booksHeight >= 0)
+            #expect(abs((rest.booksHeight + rest.writingHeight) - CGFloat(region)) < 0.001)
+        }
+    }
+
     /// A short shelf does not reserve air it does not need — two books
     /// leave more room to write, not a gap.
     @Test func aShortShelfGivesTheWritingAreaMore() {
@@ -210,6 +295,112 @@ struct MobileShelfLayoutBrainTests {
                 "the writing area keeps its share of a smaller room: \(cramped.writingHeight / 410)")
         // And in absolute terms it stays a place to write.
         #expect(cramped.writingHeight >= MobileShelfLayout.minimumWritingHeight)
+    }
+
+    /// **HER GUARANTEE, PINNED AS A PROMISE** (2026-08-30): *"the shelf
+    /// should be bounded so it always has a decent amount of room to
+    /// write."*
+    ///
+    /// This asserts the PROMISE across every shelf state this app can
+    /// render — not the arithmetic that currently produces it. That is the
+    /// whole point: a later layout change is free to compute the split
+    /// differently, and it is not free to erode the floor. The grid spans
+    /// the real device envelope:
+    ///
+    /// · **regions** from the smallest supported phone with a keyboard up
+    ///   (an iPhone SE-class 375 × 667, or a 320 pt Display-Zoom screen,
+    ///   minus ~291 pt of keyboard and the shelf's own chrome) through a
+    ///   16 Pro Max with none;
+    /// · **books** from an empty shelf to two hundred;
+    /// · **stars** from none to forty (they ride inside the bound);
+    /// · **extra rows** for the `+ new book` door, with and without the
+    ///   Today fallback row beside it.
+    ///
+    /// The degenerate tail is honest rather than excluded: where the room
+    /// is smaller than the floor itself, writing takes ALL of it.
+    @Test func theWritingFloorIsAGuaranteeInEveryShelfState() {
+        var checked = 0
+        for region in stride(from: 60.0, through: 900.0, by: 20.0) {
+            for bookRows in [0, 1, 3, 8, 9, 20, 200] {
+                for starredRows in [0, 1, 7, 40] {
+                    for extraRows in [1, 2] {
+                        let split = MobileShelfLayout.split(
+                            region: CGFloat(region), bookRows: bookRows,
+                            starredRows: starredRows, extraRows: extraRows)
+                        checked += 1
+                        #expect(
+                            split.writingHeight
+                                >= min(CGFloat(region),
+                                       MobileShelfLayout.minimumWritingHeight) - 0.001,
+                            "region \(region) books \(bookRows) stars \(starredRows): writing \(split.writingHeight)")
+                        // And nothing may fall off the bottom while it holds.
+                        #expect(
+                            abs((split.booksHeight + split.writingHeight)
+                                - CGFloat(region)) < 0.001)
+                        #expect(split.booksHeight >= 0)
+                    }
+                }
+            }
+        }
+        print("PERF[sim] writing-floor guarantee — \(checked) shelf states checked, floor \(MobileShelfLayout.minimumWritingHeight) pt")
+        #expect(checked == 43 * 7 * 4 * 2)
+    }
+
+    /// **Why Dynamic Type cannot erode the guarantee, stated as the
+    /// property rather than as a hope.** The row heights are estimates,
+    /// and at large text sizes the real rows are TALLER than they say. The
+    /// books' share is `min(natural, caps)`, so an estimate that is too
+    /// small can only shrink `wanted` — which can only make the writing
+    /// region LARGER. The error is one-directional, and this is the pin
+    /// that says so.
+    @Test func underestimatingTheBooksOnlyEverGivesWritingMore() {
+        for region in stride(from: 200.0, through: 900.0, by: 50.0) {
+            var previous = CGFloat.infinity
+            for bookRows in [0, 1, 2, 4, 8, 16, 40] {
+                let split = MobileShelfLayout.split(
+                    region: CGFloat(region), bookRows: bookRows,
+                    starredRows: 0, extraRows: 1)
+                #expect(split.writingHeight <= previous + 0.001,
+                        "more books must never give writing MORE room")
+                previous = split.writingHeight
+            }
+        }
+    }
+
+    /// The guarantee in the units she stated it in: the floor really is
+    /// room to WRITE, not merely a number of points — six lines of prose
+    /// survive it, and the field's own cap agrees.
+    @Test func theFloorIsSixRealLinesOfWriting() {
+        let floor = MobileShelfLayout.minimumWritingHeight
+        #expect(MobileShelfLayout.writingLineCap(writingHeight: floor)
+                >= MobileShelfLayout.guaranteedWritingLines)
+        // A floor expressed in points would drift the moment the type or
+        // the box's chrome changed; this one is derived from both.
+        #expect(floor == CGFloat(MobileShelfLayout.guaranteedWritingLines)
+                * MobileShelfLayout.smallLineHeight
+                + MobileShelfLayout.writingBoxChromeHeight)
+    }
+
+    /// **FOCUSING MUST NOT PUSH THE WRITING AREA UNDER THE FLOOR** — the
+    /// interaction her two rulings create together, and the one place they
+    /// could have fought. The collapse gives the books more room; opening
+    /// takes it back, and the guarantee binds on the way in.
+    @Test func openingTheBoxNeverLandsBelowTheFloor() {
+        for region in stride(from: 60.0, through: 900.0, by: 20.0) {
+            let rest = MobileShelfLayout.split(
+                region: CGFloat(region), bookRows: 40, starredRows: 6,
+                extraRows: 1, writing: .collapsed)
+            let open = MobileShelfLayout.split(
+                region: CGFloat(region), bookRows: 40, starredRows: 6,
+                extraRows: 1, writing: .expanded)
+            #expect(open.writingHeight
+                    >= min(CGFloat(region),
+                           MobileShelfLayout.minimumWritingHeight) - 0.001,
+                    "region \(region): opened to \(open.writingHeight)")
+            // And opening never gives her LESS room than resting did.
+            #expect(open.writingHeight >= rest.writingHeight - 0.001,
+                    "region \(region): rest \(rest.writingHeight) open \(open.writingHeight)")
+        }
     }
 
     /// The floor wins when the room is genuinely small: the books yield
@@ -323,13 +514,14 @@ struct MobileShelfRenderedLayoutTests {
     @Test func theWritingRegionIsGenerousOnARealShelf() async throws {
         try await withEditorWorld { session, _ in
             try await makeBooks(session, count: 14, prefix: "Volume")
-            let surface = shelfSurface(
+            // OPEN — since her 2026-08-30 ruling this is the state R27's
+            // proportions describe; at rest the box is one line.
+            let surface = await openShelfSurface(
                 session, size: CGSize(width: 430, height: 932))
             defer { surface.tearDown() }
-            await surface.settle(40)
 
             let regions = try #require(shelfRegions(surface))
-            print("PERF[sim] shelf regions at 932 pt — books \(regions.books) · writing \(regions.writing) (\(regions.writing.height / 932 * 100)% of the screen)")
+            print("PERF[sim] shelf regions at 932 pt OPEN — books \(regions.books) · writing \(regions.writing) (\(regions.writing.height / 932 * 100)% of the screen)")
             // Her "about half the phone screen", measured on a 932 pt phone.
             #expect(regions.writing.height >= 400,
                     "the writing region measured \(regions.writing.height) pt")
@@ -349,14 +541,15 @@ struct MobileShelfRenderedLayoutTests {
     @Test func writingKeepsItsShareUnderAKeyboardSizedRegion() async throws {
         try await withEditorWorld { session, _ in
             try await makeBooks(session, count: 14, prefix: "Volume")
-            // 430 × 932 minus a ~336 pt keyboard.
-            let surface = shelfSurface(
+            // 430 × 932 minus a ~336 pt keyboard — and the box OPEN, which
+            // is the only way a keyboard is up in the first place. Her two
+            // rulings meet exactly here.
+            let surface = await openShelfSurface(
                 session, size: CGSize(width: 430, height: 596))
             defer { surface.tearDown() }
-            await surface.settle(40)
 
             let regions = try #require(shelfRegions(surface))
-            print("PERF[sim] shelf regions at 596 pt (keyboard-sized) — books \(regions.books) · writing \(regions.writing)")
+            print("PERF[sim] shelf regions at 596 pt (keyboard-sized, OPEN) — books \(regions.books) · writing \(regions.writing)")
             #expect(regions.writing.height >= MobileShelfLayout.minimumWritingHeight,
                     "the ruled writing area must survive the keyboard — got \(regions.writing.height) pt")
             #expect(regions.writing.height / 596 >= 0.42,
@@ -374,13 +567,12 @@ struct MobileShelfRenderedLayoutTests {
     @Test func fortyBooksDoNotMoveTheWritingField() async throws {
         try await withEditorWorld { session, _ in
             try await makeBooks(session, count: 40, prefix: "Tome")
-            let surface = shelfSurface(
+            let surface = await openShelfSurface(
                 session, size: CGSize(width: 430, height: 932))
             defer { surface.tearDown() }
-            await surface.settle(40)
 
             let regions = try #require(shelfRegions(surface))
-            print("PERF[sim] shelf regions with 40 books — books \(regions.books) · writing \(regions.writing)")
+            print("PERF[sim] shelf regions with 40 books OPEN — books \(regions.books) · writing \(regions.writing)")
             #expect(regions.writing.maxY <= 932 + 1,
                     "the writing region stayed on screen: \(regions.writing)")
             #expect(regions.writing.height >= 400,
@@ -391,6 +583,142 @@ struct MobileShelfRenderedLayoutTests {
                     <= CGFloat(MobileShelfLayout.visibleBookRowCap + 1)
                         * MobileShelfLayout.bookRowHeight + 1,
                     "the books region must stop at her ~8 rows: \(regions.books)")
+        }
+    }
+
+    // MARK: - Her 2026-08-30 rulings, on the real surface
+
+    /// **RED-ON-OLD (against batch 5's own first commit).** *"the box
+    /// should be one line until you click into it."* At rest the writing
+    /// region is one line's worth — it measured 466 pt before this
+    /// refinement — and the books have everything else.
+    @Test func atRestTheRenderedBoxIsOneLine() async throws {
+        try await withEditorWorld { session, _ in
+            try await makeBooks(session, count: 14, prefix: "Volume")
+            let surface = shelfSurface(
+                session, size: CGSize(width: 430, height: 932))
+            defer { surface.tearDown() }
+            await surface.settle(40)
+
+            let regions = try #require(shelfRegions(surface))
+            print("PERF[sim] shelf regions at 932 pt AT REST — books \(regions.books) · writing \(regions.writing)")
+            #expect(abs(regions.writing.height
+                        - MobileShelfLayout.collapsedWritingHeight) <= 1,
+                    "at rest the box is one line: \(regions.writing)")
+            // Her stated consequence, measured: the books have the room.
+            #expect(regions.books.height >= 700,
+                    "a collapsed box gives the books more room: \(regions.books)")
+        }
+    }
+
+    /// **THE REAL CONTROL, DRIVEN — the one link the model-driven pins
+    /// above would otherwise take on trust.**
+    ///
+    /// Focus is taken by calling `becomeFirstResponder()` on the field's
+    /// own backing text view, found by walking the view tree. That is
+    /// UIKit's real focus road, so this proves the whole chain her ruling
+    /// rides: tap → first responder → the box's `@FocusState` → the model
+    /// → the shelf's two regions.
+    ///
+    /// **`accessibilityActivate()` does NOT work here and the attempt is
+    /// recorded rather than quietly replaced:** it returns `false` on this
+    /// field (measured), joining `MobileSurfaceDriver`'s own list of what
+    /// that dispatch cannot reach. A pin that had silently fallen back to
+    /// setting the model would have proven nothing about the link.
+    @Test func focusingTheRealFieldOpensTheBox() async throws {
+        try await withEditorWorld { session, _ in
+            try await makeBooks(session, count: 14, prefix: "Volume")
+            let box = MobileQuickNoteModel(session: session)
+            let surface = shelfSurface(
+                session, size: CGSize(width: 430, height: 932), quickNote: box)
+            defer { surface.tearDown() }
+            await surface.settle(40)
+
+            let atRest = try #require(shelfRegions(surface)).writing.height
+            #expect(box.isFocused == false)
+
+            let field = try #require(
+                textInputView(in: surface), "no backing text view was rendered")
+            #expect(field.becomeFirstResponder(), "the field must take focus")
+            await surface.settle(60)
+
+            #expect(box.isFocused,
+                    "focusing the field must reach the model the shelf reads")
+            let opened = try #require(shelfRegions(surface)).writing.height
+            print("PERF[sim] focus opens the box — at rest \(atRest) pt · focused \(opened) pt")
+            #expect(opened > atRest + 100, "at rest \(atRest), focused \(opened)")
+            #expect(opened >= MobileShelfLayout.minimumWritingHeight)
+
+            // And letting go closes it again — her ruling in both
+            // directions, since "until you click into it" implies a
+            // resting state to return to.
+            field.resignFirstResponder()
+            await surface.settle(60)
+            #expect(box.isFocused == false)
+            let closed = try #require(shelfRegions(surface)).writing.height
+            #expect(abs(closed - atRest) <= 1,
+                    "blur must return the box to one line: \(closed) vs \(atRest)")
+        }
+    }
+
+    /// **HER GUARANTEE, MEASURED ACROSS THE DEVICE ENVELOPE** — every
+    /// screen this app can render on, with the box open and the shelf as
+    /// hostile as it gets (forty books, stars present, keyboard up).
+    ///
+    /// The heights are real: a 16 Pro Max, an iPhone 17, an SE-class 667,
+    /// and a 320 pt Display-Zoom screen — each with and without ~291–336
+    /// pt of keyboard.
+    @Test(arguments: [
+        CGSize(width: 430, height: 932), CGSize(width: 430, height: 596),
+        CGSize(width: 393, height: 852), CGSize(width: 393, height: 516),
+        CGSize(width: 375, height: 667), CGSize(width: 375, height: 376),
+        CGSize(width: 320, height: 693), CGSize(width: 320, height: 402),
+    ])
+    func theWritingRoomHoldsOnEveryScreen(size: CGSize) async throws {
+        try await withEditorWorld { session, _ in
+            try await makeBooks(session, count: 40, prefix: "Tome")
+            let surface = await openShelfSurface(session, size: size)
+            defer { surface.tearDown() }
+
+            let regions = try #require(shelfRegions(surface))
+            print("PERF[sim] guarantee at \(Int(size.width))×\(Int(size.height)) — books \(regions.books.height) · writing \(regions.writing.height)")
+            #expect(regions.writing.height
+                    >= MobileShelfLayout.minimumWritingHeight - 1,
+                    "\(Int(size.height)) pt screen left \(regions.writing.height) pt to write in")
+            #expect(regions.writing.maxY <= size.height + 1,
+                    "and it stayed on screen: \(regions.writing)")
+        }
+    }
+
+    /// **THE GUARANTEE AT THE LARGEST DYNAMIC TYPE SIZE**, on the
+    /// smallest screen, with the box open — the worst case the envelope
+    /// contains.
+    ///
+    /// The trait is overridden on the real `UIWindow` rather than injected
+    /// as a SwiftUI environment, so this exercises the same propagation a
+    /// device does. The Study voice's body type is `relativeTo: .body` and
+    /// really does scale; the terminal voice's is fixed. Either way the
+    /// books only ever want MORE than the estimate, and wanting more can
+    /// only make the writing region larger — see
+    /// `underestimatingTheBooksOnlyEverGivesWritingMore`.
+    @Test func theWritingRoomHoldsAtTheLargestTextSize() async throws {
+        try await withEditorWorld { session, _ in
+            try await makeBooks(session, count: 40, prefix: "Tome")
+            let box = MobileQuickNoteModel(session: session)
+            let surface = shelfSurface(
+                session, size: CGSize(width: 320, height: 693), quickNote: box)
+            defer { surface.tearDown() }
+            surface.window.traitOverrides.preferredContentSizeCategory =
+                .accessibilityExtraExtraExtraLarge
+            await surface.settle(20)
+            box.setFocused(true)
+            await surface.settle(50)
+
+            let regions = try #require(shelfRegions(surface))
+            print("PERF[sim] guarantee at AX5 on a 320×693 screen — books \(regions.books.height) · writing \(regions.writing.height)")
+            #expect(regions.writing.height
+                    >= MobileShelfLayout.minimumWritingHeight - 1,
+                    "largest text left \(regions.writing.height) pt to write in")
         }
     }
 

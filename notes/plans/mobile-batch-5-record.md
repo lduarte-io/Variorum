@@ -12,9 +12,15 @@ it."*
 
 ## 0. THE HEADLINE NUMBERS, up front
 
+> **⚠️ THIS FILE COVERS TWO PASSES.** The first built R26/R27/R27b. She
+> then read the result and ruled two refinements — **the box is one line
+> until she clicks into it**, and **the shelf is bounded so there is
+> always decent room to write** — which are §7 below. The numbers in this
+> section are the FINAL ones.
+
 | | |
 |---|---|
-| mobile suite | **545 tests / 91 suites — PASSED**, exit 0, zero restarts (baseline 513/86 ⇒ **+32 tests, +5 suites**) |
+| mobile suite | **556 tests / 91 suites — PASSED**, exit 0, zero restarts (baseline 513/86 ⇒ **+43 tests, +5 suites**) |
 | `git diff -- Sources/` | **empty** |
 | `Shared/` lines | **zero** — so the Mac suite is unaffected by construction |
 | `Sync/`, schema, marker | untouched; marker stays **7** |
@@ -26,10 +32,17 @@ it."*
 *[removed for publication]*
 on **iOS 18.3**, below this app's iOS 26 deployment target, so `xcodebuild`
 does not list it as a destination for the `VariorumMobile` scheme at all —
-nothing can run there. I used the round's own standing destination instead
-(§9's LK1 rule): **iPhone 17 Pro `<simulator-udid>`,
-iOS 26.2**, whose accessibility flag I verified `= 1` before running
-anything. **The 18.3 device was left booted and armed, untouched.**
+nothing can run there. **Every iPhone 16-series simulator on this machine
+is 18.3 and therefore invalid for this project.** The 18.3 device was left
+booted and armed, untouched.
+
+**All FINAL results here were produced on iPhone 17
+*[removed for publication]*
+*[removed for publication]*
+then reassigned this batch off that device because **two agents sharing one
+simulator contaminate each other invisibly — same bundle id, last installer
+*[removed for publication]*
+it, so no result in this file depends on the shared device.
 
 *(Geometry pins host the surface at an explicit 430 × 932 — iPhone 16 Pro
 Max points — so the simulator's own screen is not what they measure.)*
@@ -47,11 +60,12 @@ brain rather than a pile of modifiers, because she ruled a RULE:
 - **`visibleBookRowCap = 8`** — her *"more than ~8 books … you have to
   scroll through the books"*. Past it the LIST scrolls inside itself.
 - **`maximumBooksShare = 0.5`** — her *"about half the phone screen"*.
-- **`minimumWritingHeight = 132`** — a floor, so a small phone or a
-  keyboard cannot reduce the box to a line. When the floor bites, the
-  books yield further.
-- `split(region:bookRows:starredRows:extraRows:)` **partitions the region
-  exactly** (`books + writing == region` for every input, pinned).
+- **`minimumWritingHeight`** — a floor, so a small phone or a keyboard
+  cannot reduce the box to a line. When the floor bites, the books yield
+  further. *(Her 2026-08-30 ruling raised this to a GUARANTEE and
+  re-derived it from lines — 140 pt. See §7b.)*
+- `split(region:bookRows:starredRows:extraRows:writing:)` **partitions the
+  region exactly** (`books + writing == region` for every input, pinned).
 
 The region itself comes from a `GeometryReader` wrapped around exactly the
 books+writing area, so it already carries the safe areas, the path line,
@@ -196,15 +210,28 @@ The 2 known issues are the pre-existing deliberate `withKnownIssue` in
 `MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosed…` — not mine, not
 new.
 
-**⚠️ Flakiness seen and diagnosed, so nobody re-derives it:** two earlier
-full runs died with *"Simulator device failed to launch"* and *"Restarting
-after unexpected exit, crash, or test timeout"* at six unrelated tests. The
-author closed Xcode mid-run (she said so), and a second simulator
-(iPhone 16e) was booted by another agent at the same time — machine load,
-the same covariate `KnownIssuesAndTechDebt.md`'s latency row records. After
-a simulator restart the run was clean with **zero** restarts. **A restart
-cluster spread across unrelated suites is environmental; one that recurs at
-the same test is not.**
+**⚠️ Flakiness seen, and the diagnosis CORRECTED — read this before
+*[removed for publication]*
+*"Simulator device failed to launch"* and *"Restarting after unexpected
+exit, crash, or test timeout"* at six unrelated tests, and one reported a
+nonsense total (87 tests). I first attributed this to machine load — the
+author had closed Xcode mid-run, and another simulator was booted at the
+same time.
+
+**That was only half right.** The coordinator relayed a finding from
+another agent in this run: **two agents sharing one simulator contaminate
+each other invisibly.** DerivedData is genuinely per-worktree, so that is
+not the crossing point; the SIMULATOR is — same bundle id, **last installer
+wins**, so one agent's build runs under the other's test plan. Its
+symptoms were exactly mine (repeated `signal kill`, layout pins reading
+nonsense heights) plus one that settles it: a failing test **that did not
+exist in that worktree at all**. That retro-explains at least one of my two
+"environmental" run deaths and the 87-test total.
+
+**The rule to carry:** a restart cluster spread across unrelated suites is
+environmental, and *"environmental"* should mean **check who else is on
+your simulator** before it means machine load. On the reassigned device
+every run in this file was clean with **zero** restarts.
 
 ---
 
@@ -274,9 +301,115 @@ header too.
 `…/MobileShelfPerfTests.swift`
 
 **Modified:** `…/Shell/MobileShelfView.swift` (the layout, the badge, the
-fallback row, the row's tap target) · `…/Shell/MobileQuickNote.swift`
-(the box's `writingHeight` — face only; no model, no ⏎, no A5 rule
-touched) · `…/Shell/MobileShelfFaces.swift` (the Today door's words, one
-home) · `…/Shell/MobileShelfViewModel.swift` (`rowMeta(showingDailyMarker:)`
-defaulted true; `observationTicks` for the §53 row 7 structural pin) ·
-`…/Shell/MobileShellView.swift` (the seed `.task`).
+fallback row, the row's tap target, **the writing state**) ·
+`…/Shell/MobileQuickNote.swift` (the box's `writingHeight` and its **two
+shapes**, plus `isFocused`/`setFocused` — the ⏎ road, the mint clock and
+every A5 rule are untouched) · `…/Shell/MobileShelfFaces.swift` (the Today
+door's words, one home) · `…/Shell/MobileShelfViewModel.swift`
+(`rowMeta(showingDailyMarker:)` defaulted true; `observationTicks` for the
+§53 row 7 structural pin) · `…/Shell/MobileShellView.swift` (the seed
+`.task`).
+
+*(The refinements added no files — her two rulings landed inside the
+brain, the box and the shelf, and their pins joined the existing suites.)*
+
+## 7. HER TWO REFINEMENTS (2026-08-30, after reading the result)
+
+### 7a. *"the box should be one line until you click into it"*
+
+The shelf now has **two resting shapes**, and they are a layout fact
+rather than a decoration:
+
+| | books | writing |
+|---|---|---|
+| **at rest**, 430 × 932 | **774 pt** | **70 pt** — one line + chrome |
+| **focused**, same shelf | 378 pt | **466 pt (50.0%)** |
+
+At rest the **~8-row cap does not apply**, and that is deliberate: the cap
+exists only to protect a writing area, and at rest there is none to
+protect — capping there would mint dead air above a collapsed box. So her
+own stated consequence falls out exactly: *a one-line box at rest gives
+the books more room* (378 → 774 pt, measured).
+
+**The whole chain is driven, not assumed.** `focusingTheRealFieldOpensTheBox`
+takes focus by calling `becomeFirstResponder()` on the field's real
+backing text view, found by walking the view tree — UIKit's actual focus
+road — and measures **70 pt → 466 pt**, then resigns and measures the
+return to 70. *(Recorded because I tried the obvious thing first:
+`accessibilityActivate()` returns **false** on this field. It joins
+`MobileSurfaceDriver`'s own list of what that dispatch cannot reach. A pin
+that had silently fallen back to poking the model would have proven
+nothing about the link her ruling rides.)*
+
+**RED-ON-OLD:** with the previous always-expanded behaviour restored (one
+argument), at rest the writing region measured **466 pt** and books
+**378 pt**, and focusing changed nothing (466 → 466). Both new pins fail
+there and pass here.
+
+**The sub-question, decided and flagged: on blur WITH TEXT still in it,
+the box collapses anyway.** PROVISIONAL. Reasons for the literal reading:
+her sentence is about focus, not emptiness; the text is already durable
+(the mint clock has fired, or leaving the shelf files it); and a box that
+stayed open whenever it held something would make the shelf's layout
+depend on invisible state. The saved indicator and the `open ↵` door stay
+visible in the collapsed row, so nothing about the note goes quiet. **The
+alternative — collapse only when empty — is defensible and is hers to
+pick.**
+
+### 7b. *"the shelf should be bounded so it always has a decent amount of room to write"*
+
+Treated as raising the existing floor to a **guarantee**, and the floor is
+now stated **in lines**, because that is what "room to write" means and a
+pixel count would drift the moment the type or the chrome changed:
+
+```
+guaranteedWritingLines = 6
+minimumWritingHeight   = 6 × smallLineHeight + writingBoxChromeHeight = 140 pt
+```
+
+**The promise is pinned, not the arithmetic.**
+`theWritingFloorIsAGuaranteeInEveryShelfState` asserts
+`writing >= min(region, minimumWritingHeight)` across **2,408 shelf
+states** — regions from 60 to 900 pt, 0–200 books, 0–40 stars, with and
+without the Today fallback row — so a later layout change that computes
+the split differently fails loudly instead of eroding the floor quietly.
+
+**Measured on every screen in the device envelope**, box open, forty books,
+stars present:
+
+| screen | books | writing |
+|---|---:|---:|
+| 430 × 932 (16 Pro Max) | 378 | **466** |
+| 430 × 596 (keyboard up) | 254 | **254** |
+| 393 × 852 (17 / 16 Pro) | 378 | **386** |
+| 393 × 516 (keyboard up) | 214 | **214** |
+| 375 × 667 (SE-class) | 290 | **289** |
+| 375 × 376 (keyboard up) | 144 | **144** |
+| 320 × 693 (Display Zoom) | 296 | **296** |
+| 320 × 402 (keyboard up) | 150 | **150** |
+| 320 × 693 **at AX5** (largest Dynamic Type) | 296 | **296** |
+
+The worst case in the envelope is **144 pt against a 140 pt floor.**
+
+**Dynamic Type cannot erode it, and that is pinned as a property rather
+than hoped for:** the row heights are estimates and real rows are TALLER
+at large text sizes, but the books' share is `min(natural, caps)`, so an
+estimate that is too small can only shrink the books' share — which can
+only make the writing region *larger*. The error is one-directional
+(`underestimatingTheBooksOnlyEverGivesWritingMore`).
+
+**Their interaction, which was the one place the two rulings could have
+fought:** `openingTheBoxNeverLandsBelowTheFloor` sweeps every region and
+asserts that opening the box both clears the floor and never gives her
+*less* room than resting did.
+
+### 7c. PROVISIONALs her two rulings CLOSED
+
+- **§3 item 7 — "a short shelf leaves the box very tall", the large empty
+  dashed rectangle on a near-empty shelf.** She ruled it, in this
+  direction: one line at rest. **Closed.**
+- **§3 item 3's neighbour is untouched** — the badge, the meta word and
+  the starter copy are all still open.
+
+**Still open, and one new:** §3 items 1–6 stand, plus **the blur-with-text
+sub-question in 7a**.
