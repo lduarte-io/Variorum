@@ -151,9 +151,17 @@ struct DataSafetyPane: View {
                     title: "Every note as Markdown",
                     path: exports.displayPath, summary: exports,
                     staleAfter: Self.exportStaleAfter)
-                Text("Written weekly, and the 4 most recent are kept. This is the copy "
-                     + "that survives a problem with the library file itself — plain "
-                     + "text any program can open, no Variorum required.")
+                // 13p (R13p-8's rider): the automatic export is off by
+                // default now that the library is encrypted; Batch 2 builds
+                // the opt-in toggle here. These sentences carry the truth
+                // meanwhile — the evidence row above keeps reporting
+                // whatever files exist.
+                Text("Written weekly while the plain-text option is on — off by "
+                     + "default now that your library is encrypted, because a "
+                     + "scheduled plain-text copy re-opens the door encryption "
+                     + "closed. The 4 most recent are kept. When on, this is the "
+                     + "copy that survives a problem with the library file itself — "
+                     + "plain text any program can open, no Variorum required.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Text("Note that these are readable by anything that can read the folder — "
@@ -161,9 +169,10 @@ struct DataSafetyPane: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else {
-                Text("Once you pick a folder above, Variorum also keeps a plain-text copy "
-                     + "of every note there — the copy that survives a problem with the "
-                     + "library file itself.")
+                Text("Variorum can also keep a plain-text copy of every note in a folder "
+                     + "you pick — the copy that survives a problem with the library "
+                     + "file itself. It is off by default now that your library is "
+                     + "encrypted; the manual Export Library command is always there.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
             }
