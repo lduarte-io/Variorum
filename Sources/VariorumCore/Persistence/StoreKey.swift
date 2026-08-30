@@ -168,7 +168,19 @@ extension DependencyValues {
 /// The Keychain half — the `E2EEKeychainStorage` pattern, its own service
 /// so neither surface's clear can touch the other. The item class per the
 /// batch brief: `WhenUnlockedThisDeviceOnly`, no access control (Auto mode
-/// releases silently; the demanded modes' gated item is Batch 2's).
+/// releases silently; the demanded modes' gated item is Batch 2's).///
+/// **13p-fix R1-2 — what this class does NOT buy on macOS.** Apple's
+/// `kSecAttrAccessible` reference is explicit: *"You can use this
+/// attribute for macOS keychain items only if you also set a value of
+/// `true` for the `kSecUseDataProtectionKeychain` key, the
+/// `kSecAttrSynchronizable` key, or both."* This family sets neither (by
+/// design — see `KeychainPartition`), so the requested class is NOT in
+/// force: the file-based keychain governs by ACL, not by accessibility
+/// class. Consequence, recorded rather than implied: the item does not
+/// carry the "never leaves this device" property its class name
+/// promises. The decision and its owner live in
+/// `KnownIssuesAndTechDebt.md`; do not read the class name as a
+/// guarantee.
 nonisolated enum StoreKeyKeychain {
     static let service = StoreKeyCustody.deviceKeychainService
 

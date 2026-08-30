@@ -313,10 +313,15 @@ final class ProtectionController {
         guard let key = currentKey() else { return .refused(Self.keyUnavailable) }
         switch newMode {
         case .auto:
-            guard guardSeam.saveAuto(key) else {
+            // 13p-fix R1-1: verify the incoming item READS BACK before the
+            // outgoing one goes (see `CustodyHandover`).
+            guard CustodyHandover.perform(
+                write: { guardSeam.saveAuto(key) },
+                verify: { guardSeam.loadAuto() != nil },
+                deleteOutgoing: { guardSeam.deleteGated() })
+            else {
                 return .refused("The Keychain refused the change — nothing was altered.")
             }
-            guardSeam.deleteGated()
         case .biometric:
             guard biometryAvailable else {
                 return .refused("This \(ProtectionCopy.deviceName) has no "
@@ -325,10 +330,17 @@ final class ProtectionController {
             }
             // The gated item lands FIRST; only then does the silent item
             // go (never a keyless moment, never a silent one either).
-            guard guardSeam.saveGated(key) else {
+            // 13p-fix R1-1: "lands" means READS BACK, not "the write
+            // returned true" — that distinction cost the author her Auto
+            // item on 2026-08-30 (see `CustodyHandover`).
+            guard CustodyHandover.perform(
+                write: { guardSeam.saveGated(key) },
+                verify: { guardSeam.gatedItemExists() },
+                deleteOutgoing: { guardSeam.deleteAuto() },
+                rollBackIncoming: { guardSeam.deleteGated() })
+            else {
                 return .refused("The Keychain refused the gated item — nothing was altered.")
             }
-            guardSeam.deleteAuto()
         case .passphrase:
             guardSeam.deleteAuto()
             guardSeam.deleteGated()

@@ -111,6 +111,29 @@ struct Phase13pControllerTests {
         #expect(w.dialsBox.value.mode == .biometric, "the dial persisted")
     }
 
+    /// 13p-fix R1-1, THE RED-ON-OLD PIN. On 2026-08-30 a gated write
+    /// SUCCEEDED into the data-protection keychain while every read
+    /// searched the file-based one, so `saveGated` returned true, the
+    /// silent item was deleted on the strength of that alone, and no
+    /// Keychain road opened the author's library. The asymmetry is fixed,
+    /// but the SHAPE recurs on any identity regression — the access group
+    /// is part of an item's identity, so a bundle-id change or a
+    /// distribution profile missing the group reproduces it exactly.
+    /// The transition must therefore prove the incoming custody READS
+    /// BACK before releasing the outgoing one.
+    @Test func aGatedWriteThatCannotBeReadBackRefusesInsteadOfDestroyingTheSilentItem() async {
+        let w = world()
+        _ = await w.controller.setPassphrase("sesame")
+        w.backing.gatedWritesAreInvisible = true
+
+        #expect(await w.controller.setMode(.biometric) != .changed,
+                "a gated item nothing can find is not a landed gate")
+        #expect(w.backing.auto == w.key,
+                "the ONLY reachable copy of the key survives the refusal")
+        #expect(w.dialsBox.value.mode != .biometric,
+                "and the dial never moved — the app cannot claim a gate it does not have")
+    }
+
     @Test func passphraseModeLeavesNoSilentCustodyAtAll() async {
         let w = world()
         _ = await w.controller.setPassphrase("sesame")

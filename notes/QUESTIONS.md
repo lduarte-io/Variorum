@@ -983,4 +983,20 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint.**
 
-*(Next free number: **#82**.)*
+82. **2026-08-30 · PHASE 13p-fix — ONE DECISION, yours: should the store key be BOUND to this Mac?** *(The binding record is `notes/plans/phase-13p-fix-dp-keychain.md`; the mechanism is in `KnownIssuesAndTechDebt.md` at owner 13x.)*
+
+    **What we found while fixing the keychain bug.** The code asks for the store key to be stored `WhenUnlockedThisDeviceOnly` — a class whose name promises it never leaves this machine. On macOS that class only applies if the item also sets `kSecUseDataProtectionKeychain` or is synchronizable, and the plain items set neither **deliberately** (moving them would strand real data — including the key to your library). So the class is not in force, and two production comments said otherwise until today. They are corrected.
+
+    **What it means concretely.** In Auto mode the only key to your encrypted library lives in `~/Library/Keychains/login.keychain-db` — an ordinary file that **Migration Assistant and Time Machine carry to other hardware**. An encrypted-library backup restored on a second Mac, plus your account password, opens the library. Nothing is exposed to anyone who doesn't already have both.
+
+    **This may be exactly what you want** — it is also what will make 13x's "adopt the library on a new Mac" pleasant, and it is a *convenience/hardness* trade, not a bug. But it was never decided.
+
+    **(a) Leave it — the key travels with your account.** Convenient across your own machines; the threat it doesn't cover is someone who has both a backup and your account password. *This is what ships today.*
+
+    **(b) Bind it to the device** — migrate the plain items into the data-protection keychain (read without the flag → re-add with it → delete the old), per family, with a round-trip pin. Then a restored backup on new hardware needs your passphrase or recovery phrase, which you have. Costs: a migration touching the key to your library, and 13x's adoption story gets a ceremony.
+
+    **(c) Bind only the STORE key, leave E2EE custody as is** — the store key is the one that opens everything; the E2EE material is already re-derivable from your passphrase against the server vault.
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#83**.)*

@@ -98,14 +98,24 @@ nonisolated struct DeviceKeyStore: Sendable {
             },
             isBiometricGateOn: { E2EEKeychainStorage.gatedItemExists() },
             setBiometricGate: { on, material in
+                // 13p-fix R1-1: write, VERIFY it reads back, THEN delete the
+                // other half. A write's success is not proof anything can
+                // find the item again — see `CustodyHandover`.
                 if on {
-                    guard E2EEKeychainStorage.saveGated(material) else { return false }
-                    E2EEKeychainStorage.deletePlainItem()
+                    guard CustodyHandover.perform(
+                        write: { E2EEKeychainStorage.saveGated(material) },
+                        verify: { E2EEKeychainStorage.gatedItemExists() },
+                        deleteOutgoing: { E2EEKeychainStorage.deletePlainItem() },
+                        rollBackIncoming: { E2EEKeychainStorage.deleteGatedItem() })
+                    else { return false }
                     E2EELaunchKeyCache.shared.value = material
                     return true
                 }
-                guard E2EEKeychainStorage.save(material) else { return false }
-                E2EEKeychainStorage.deleteGatedItem()
+                guard CustodyHandover.perform(
+                    write: { E2EEKeychainStorage.save(material) },
+                    verify: { E2EEKeychainStorage.load() != nil },
+                    deleteOutgoing: { E2EEKeychainStorage.deleteGatedItem() })
+                else { return false }
                 E2EELaunchKeyCache.shared.value = nil
                 return true
             },
@@ -269,7 +279,11 @@ nonisolated private final class E2EELaunchKeyCache: @unchecked Sendable {
 /// own service so neither surface's clear touches the other.
 /// `AfterFirstUnlock` on the PLAIN item for the same background-round
 /// reason (a background sync round after reboot-then-unlock must find its
-/// keys). The GATED item (CF-12) instead carries a SecAccessControl —
+/// keys). **13p-fix R1-2: on macOS that class is NOT in force** —
+/// Apple requires `kSecUseDataProtectionKeychain` or
+/// `kSecAttrSynchronizable` for `kSecAttrAccessible` to apply, and this
+/// family sets neither deliberately. See `StoreKeyKeychain` for the same
+/// caveat and `KnownIssuesAndTechDebt.md` for the owner. The GATED item (CF-12) instead carries a SecAccessControl —
 /// `.biometryCurrentSet` alone — under `WhenUnlockedThisDeviceOnly`:
 /// background-before-unlock refusal is that mode's designed cost.
 nonisolated enum E2EEKeychainStorage {
@@ -394,24 +408,16 @@ nonisolated enum E2EEKeychainStorage {
         ]
     }
 
-    private static func gatedBaseQuery() -> [String: Any] {
+    /// Internal, not private, so `KeychainPartitionTests` can assert the
+    /// partition marker rides it — the drift guard for a family whose own
+    /// door cannot be exercised against the real Keychain (its account is
+    /// fixed, so a test write would land on real custody).
+    static func gatedBaseQuery() -> [String: Any] {
         [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: gatedAccount,
-            // 13p-fix (2026-08-30, MEASURED): on macOS an ACL'd or
-            // synchronizable write is routed to the DATA-PROTECTION
-            // keychain, while a read WITHOUT this flag searches the
-            // FILE-BASED one — so the item lands and is then invisible
-            // (probe: add 0 · read-without -25300 · read-with -25308).
-            // The flag rides the ONE builder every add/read/delete/probe
-            // in this family funnels through, so they can never disagree
-            // again. It is a no-op on iOS (only the data-protection
-            // keychain exists there). The PLAIN items deliberately do NOT
-            // carry it: they live in the file-based keychain today and
-            // flagging them would strand real data.
-            kSecUseDataProtectionKeychain as String: true,
-        ]
+        ].merging(KeychainPartition.dataProtection) { a, _ in a }
     }
 }
 

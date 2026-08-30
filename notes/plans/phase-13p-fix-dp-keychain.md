@@ -74,8 +74,19 @@ write:
   (*"a gate whose key still releases silently is theater"*) ⇒ **no
   Keychain road opens the store**; only the passphrase or recovery
   phrase does.
-- `saveEscrow` (synchronizable) vs `loadEscrow` — same asymmetry: the
-  escrow copy can never be read back.
+- ~~`saveEscrow` (synchronizable) vs `loadEscrow` — same asymmetry: the
+  escrow copy can never be read back.~~ **WRONG, and corrected at ladder
+  round 1 (R1-4).** The escrow family was NEVER asymmetric:
+  `kSecAttrSynchronizable` on its own already targets the
+  data-protection keychain (TN3137), and `escrowQuery` — the single
+  builder for load/save/delete — has carried it since 13p Batch 2, so
+  both sides always agreed. Corroborating in-repo evidence the original
+  diagnosis walked past: 13p's record has escrow failing at `-34018` (a
+  file-based write would not), and `reconcileEscrowOffMain` already does
+  read-back-then-write, which would have re-saved on every launch
+  forever had the read been blind. The partition marker rides
+  `escrowQuery` anyway as a belt, not a fix. **The two GATED families
+  are the whole defect.**
 
 **THE AUTHOR HIT BOTH, IN HER OWN HANDS, 2026-08-30**, and her report
 is the confirming trace (verbatim): *"i tried opening variorum and the
@@ -297,17 +308,34 @@ inventory returned empty from the test host for that reason alone — it is
 structurally blind to them, which is precisely the isolation the
 per-config group was chosen for at the signing change.
 
-*Consequence for the author, to carry into the handoff:* those orphans
-are reachable only through the product's own doors, and once the FIXED
-build is installed they become visible to it. Concretely — her Mac
-carries a gated E2EE item from the toggle that started this, alongside
-the plain item her passphrase re-enrollment restored, so
-`isBiometricGateOn()` will read TRUE and sync will ask for Touch ID.
-**With the fix that will WORK** (the gated item holds real material), and
-turning the toggle OFF cleans the state through the product's own door —
-which also exercises the fix. Shipping migration code for a state that
-existed on one machine for three hours would be cruft; the door is the
-road.
+*Consequence for the author — CORRECTED at ladder round 1 (R1-5), which
+caught this paragraph asserting as fact what the same page had just
+proved unobservable.* Stated properly, as an expectation to VERIFY:
+
+- **Predicted, not observed.** From the incident's own sequence her Mac
+  should now hold BOTH a gated E2EE item (her toggle wrote it and
+  deleted the plain one) AND a plain one (her passphrase re-enrollment
+  hit `save:`, whose `gatedItemExists()` read false through the broken
+  read, so it wrote plain). Nothing in this session could see either —
+  the test host is in a different access group.
+- **If that holds, the state is the one the custody law forbids.**
+  Post-fix, `load:` short-circuits on `gatedItemExists()` and
+  `isBiometricGateOn()` reads TRUE — while an ungated copy of the same
+  material sits in the file-based keychain, readable with no Touch ID,
+  under a UI claiming custody is gated. That is exactly *"a gate whose
+  key still releases silently is theater"* (`StoreKeyGuard.swift`).
+- **The clean-up is one deliberate act, through the product's own
+  door:** toggle the sync biometric requirement OFF (or ON and then
+  OFF). Either arm now deletes the other half, because both go through
+  `CustodyHandover`. That resolves the coexistence AND exercises the
+  fix. *(An earlier draft of this paragraph said the gated item "holds
+  real material" while the FIX section above called it stale — the
+  contradiction is resolved here: its content is almost certainly the
+  same key material, and it is the COEXISTENCE, not the content, that
+  is wrong.)*
+
+Shipping migration code for a state that existed on one machine for
+three hours would still be cruft; the door is the road.
 
 **Ledger 7 — a flake found, not caused.** The full run failed
 `CanvasDragTrackingTests.theResizeGripFollowsThePointerToo` (mid-drag
@@ -321,3 +349,57 @@ than being waved off as "probably fine".
 **Counts: Mac 1845 tests / 312 suites** (1843 + the two new pins), green
 but for the load-flake above. **No `Sources/VariorumCore/Sync/` lines.
 No schema. No lockstep — marker stays 7.**
+
+
+---
+
+## LADDER — ROUND 1 (fresh Opus cold reviewer, `REVIEW_PROMPT.md` verbatim, zero framing)
+
+14 findings: 5 MAJOR · 4 MINOR · 4 NIT. **Zero disputes** — every
+finding was traced by the architect before disposition, and the two that
+correct this phase's OWN record (R1-4, R1-5) were accepted as written.
+
+| # | sev | disposition |
+|---|---|---|
+| R1-1 | MAJOR | **FIXED.** The phase fixed the CAUSE and left the FAILURE MODE: both custody transitions still deleted the surviving plain item on a write's success alone. Now both go through the new `CustodyHandover` rule — write, VERIFY it reads back through the production read path, only then delete — with a best-effort roll-back of an unreadable write. **Red-on-old proven by behavioural revert:** with the guard removed, the new pin fails all three assertions and `backing.auto → nil` — the incident reproduced in a test. Reviewer's own proposed pin shape (an "invisible gated write" knob on the in-memory backing) adopted verbatim. |
+| R1-2 | MAJOR | **ACCEPTED; comments corrected, decision escalated.** Apple's `kSecAttrAccessible` reference confirms the plain items' protection class is inert on macOS without the DP flag or synchronizable, so `WhenUnlockedThisDeviceOnly` is not in force and the store key rides Migration Assistant to other hardware. Two production comments asserted otherwise; both fixed. The DECISION (bind the key to the device or not) is the author's — **QUESTIONS #82**, KnownIssues row at owner **13x**. |
+| R1-3 | MAJOR | **FIXED, by a different route than proposed — recorded.** The reviewer proposed parameterizing `E2EEKeychainStorage`'s fixed gated account so it could be pinned behaviourally. Rejected in favour of a STRUCTURAL pin (`KeychainPartitionTests`): it needs no restructuring of security-critical account naming, and it covers all THREE families — including escrow, which cannot be pinned behaviourally either (a real round trip would push test bytes into her iCloud Keychain). The three builders became `internal` for exactly this. The stated risk — "nothing fails if `gatedBaseQuery` loses the flag" — is now false. |
+| R1-4 | MAJOR | **ACCEPTED — the phase's own diagnosis was WRONG about escrow.** `kSecAttrSynchronizable` already targets the data-protection keychain, so that family was never asymmetric. The FINDING's third bullet is struck through and corrected in place (never deleted — a binding record that quietly loses its errors teaches nothing), and `escrowQuery`'s comment now says what the marker is there: a belt, not a fix. |
+| R1-5 | MAJOR | **ACCEPTED — record corrected.** The batch record asserted facts about her live custody two paragraphs after proving the session was structurally blind to them, and contradicted its own "stale material" wording. Restated as predictions to verify, with the theater state named and the one-act clean-up spelled out. |
+| R1-6 | MINOR | **FIXED.** The sibling "nothing landed" probe searched the file-based keychain for the absence of a DP-only item; it now carries the marker. |
+| R1-7 | MINOR | **FIXED.** The round-trip pin now asserts its own cleanup — a delete must reach the keychain the write reached, the third leg of the same round trip. |
+| R1-8 | MINOR | **FIXED.** The triplicated 12-line comment (including a plain-items sentence that was nonsense inside `escrowQuery`) is gone; the decision has ONE name, `KeychainPartition.dataProtection`, with the measurement stated once beside it, and the three builders merge it. This is also what gives R1-3's pin something enumerable to assert. |
+| R1-9 | MINOR | **ACCEPTED — owed at closeout.** Both edited `Shared/` files ship in `VariorumMobile`. The parity line will read *mobile-visible as a documented no-op*, with Apple's citation that other platforms behave as if the key were set and ignore it. |
+| R1-10 | MINOR | **ACCEPTED — and it outranks the phase.** See the GOVERNANCE section below. |
+| R1-11 | NIT | **FIXED** — suite renamed to what it now pins. |
+| R1-12 | NIT | **ACCEPTED, not reversible.** `48d047d` swept in `notes/ProactiveTechDebtReview-2026-08-30.md` (1,385 lines) — a CONCURRENT session's artifact, captured by `git add -A`. History rewrites are author-only, so the commit stands and this row is the record. Lesson taken: explicit paths, never `-A`, in a shared tree. |
+| R1-13 | NIT | **NOT THIS PHASE'S.** The stale line lives in that concurrent session's own in-flight artifact; editing another session's working file is how work gets lost. Raised to the author instead. |
+| R1-14 | NIT | **ACCEPTED — KnownIssues row at owner 13r.** A Developer ID build must carry the same `keychain-access-groups` or every gated item and escrow copy is unreachable for users; the new `CustodyHandover` guard turns that from a lockout into a visible refusal, but the profile still has to carry the group for the feature to exist.
+
+**Clean bill accepted as written** — notably its independent
+confirmation that the site enumeration is complete, that the change
+cannot strand existing data, and that no test touches the fixed-account
+E2EE door.
+
+---
+
+## GOVERNANCE — R1-10, and why it stops here
+
+The reviewer noticed an **uncommitted `CLAUDE.md` amendment in the
+working tree**, dated today, recording an author ruling: bug fixes and
+tech debt do NOT go in the master plan — they become lettered entries
+(**17a, 17b, 17c…**) in `notes/plans/phase-17-standing-fixes.md`, which
+never closes; `DetailedPlanForPhases.md` is **product advancement
+only**; and a 17-entry is a valid KnownIssues owner.
+
+**This phase is a bug fix.** Under that ruling its closeout belongs in
+the Phase 17 file as a lettered entry, NOT as a master-plan row — which
+is what ledger 6 currently plans.
+
+**It is not resolved autonomously, for a reason that is not
+squeamishness:** `notes/plans/phase-17-standing-fixes.md` is UNCOMMITTED
+and belongs to a session that is *still live in this tree* (its files
+moved during this phase's run). Two sessions writing one file is how
+work is lost, and this phase already learned that lesson the cheap way
+by sweeping that session's artifact into a commit (R1-12). **The author's
+sequencing call is the input this closeout waits on.**

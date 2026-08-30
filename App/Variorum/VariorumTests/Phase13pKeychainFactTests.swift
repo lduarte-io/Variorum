@@ -37,7 +37,7 @@ import VariorumCore
 
 @testable import Variorum
 
-@Suite("13p — Q3 codesigned: the two-item design is platform fact")
+@Suite("13p — keychain platform facts: the two-item design, and which keychain a family lives in")
 struct Phase13pKeychainFactTests {
     private static let probeService = "io.lduarte.Variorum.13p-q3-probe"
 
@@ -154,8 +154,13 @@ struct Phase13pKeychainFactTests {
                 "Apple refuses the COMBINATION (got \(status)) — the escrow item necessarily carries no biometric gate, exactly as R13p-6 designs")
 
         // And nothing landed: the refusal happened before creation.
+        // 13p-fix R1-6: the DP marker rides this probe too — without it
+        // this searched the FILE-BASED keychain for the absence of an item
+        // that could only ever land in the data-protection one, and would
+        // have passed identically had the combination been accepted.
         var probe = query(account: account)
         probe[kSecAttrSynchronizable as String] = kSecAttrSynchronizableAny
+        probe[kSecUseDataProtectionKeychain as String] = true
         probe[kSecReturnAttributes as String] = true
         #expect(SecItemCopyMatching(probe as CFDictionary, nil) == errSecItemNotFound)
     }
@@ -224,5 +229,12 @@ struct Phase13pKeychainFactTests {
                 "the ACL'd write lands (this half passed even before the fix)")
         #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope),
                 "and production's own probe must FIND it — the half that was broken")
+
+        // 13p-fix R1-7: the third leg of the same round trip — a DELETE
+        // must reach the keychain the WRITE reached. Unasserted cleanup is
+        // how this suite left invisible ACL'd litter on every run.
+        StoreKeyGuardKeychain.deleteGated(scope: scope)
+        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope) == false,
+                "the delete reaches the same keychain the write did")
     }
 }
