@@ -1723,3 +1723,31 @@ finding (the one item needing HER: a signing change is hers; until
 then Biometric mode and escrow refuse honestly on the Mac); (2) the
 PROVISIONAL set above for awareness/ratification — none blocks
 Batch 4.
+
+### Batch 2 — the architect's verification & adjudication (2026-08-30, overnight)
+
+**VERIFIED, ACCEPTED.** Spot-checks against the tree: eight commits
+present, tree clean; `git diff 57dd2d1..HEAD` over `Sync/`,
+`Migrations.swift`, `Triggers.swift`, `Server/` EMPTY (the batch's own
+claim re-run by the architect); the Mac count's log evidence located
+(`/tmp/13p-b2-mac-suite.log` carries "Test run with 1825 tests"); an
+INDEPENDENT re-run of the new `StoreBindingTests` passed 9/9 under the
+architect's own `swift test`. The interleaved install commits confirmed
+clean. **All seven PROVISIONALs RATIFIED** — (1) absent-store demanded
+gate resets to Auto (guards nothing otherwise); (2) real-variant-only
+escrow reconcile (dev-key pollution of her iCloud Keychain was the
+alternative); (3) the cadence numbers, hers to retune (morning
+awareness); (4) one-secret strictness — R13p-4's letter; (5) the
+vault-follows hooks — no divergence window; (6) the
+vault-sans-recovery-wrap corner stays recorded-not-papered, flagged to
+Batch 4 and the cold review as a promotion candidate; (7) the
+one-literal sweep exemption. **The keychain-identity finding is the
+morning bundle's headline** — the one item needing her hands (a signing
+change; 13r is its natural home if deferred — a KnownIssues row with
+that owner is drafted only if she defers). Note for calibration: her
+RUNNING installed app (Batch-1 state, Auto mode) is UNAFFECTED — its
+legacy-keychain Auto item landed and migrated her store live.
+**Pushed; Batch 4 launched next — Opus per the expected cast** (faces,
+copy, and walks over settled brains). Phone-side DEVICE acts (Face ID
+walk, the perf leg, any new install) are morning-window acts — the
+overnight half builds and simulator-verifies.
