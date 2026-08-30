@@ -63,8 +63,11 @@ final class MobileEditorViewModel {
     @ObservationIgnored let comments: MobileCommentsController
     @ObservationIgnored let structural: MobileStructuralController
     @ObservationIgnored let blockMenu: MobileBlockMenuController
-    /// The C4a sibling: the commit door + take-history sheet's brain.
-    @ObservationIgnored let takeHistory: MobileTakeHistoryController
+    /// The C4a sibling, widened at round 2 batch 6a: the commit door and
+    /// the BLOCK HISTORY face's brain (savepoint runs · archived takes ·
+    /// deleted takes · came-from — the polish round's ledger row 17, in the
+    /// phone's own shape).
+    @ObservationIgnored let blockHistory: MobileBlockHistoryController
     /// **M20's sibling (round 2, batch 4 — her R10):** the structural
     /// undo/redo door. The STACK is `AppSession`'s, shared and already
     /// live on this phone; this is the routing that reaches it.
@@ -187,14 +190,14 @@ final class MobileEditorViewModel {
         self.comments = MobileCommentsController(session: session)
         self.structural = MobileStructuralController(session: session)
         self.blockMenu = MobileBlockMenuController(session: session)
-        self.takeHistory = MobileTakeHistoryController(session: session)
+        self.blockHistory = MobileBlockHistoryController(session: session)
         self.undoDoor = MobileUndoDoor(session: session)
         takes.model = self
         takesBrowser.model = self
         comments.model = self
         structural.model = self
         blockMenu.model = self
-        takeHistory.model = self
+        blockHistory.model = self
         undoDoor.model = self
         // Multicast observers, never the single-owner closures: a shared
         // coordinator has several listeners (the Mac's own move for the
@@ -453,7 +456,7 @@ final class MobileEditorViewModel {
         // sheet too.
         takesBrowser.projectionDidChange()
         comments.projectionDidChange()
-        takeHistory.projectionDidChange()
+        blockHistory.projectionDidChange()
     }
 
     /// Teardown backstop: pending tail text mints (the idle plan — typed

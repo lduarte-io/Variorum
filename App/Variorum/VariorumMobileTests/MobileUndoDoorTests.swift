@@ -277,8 +277,15 @@ struct MobileUndoDoorTests {
                 #expect(alert.title == StructuralUndoCopy.discardingUndoQuestion(
                     .init(label: "Divide", bufferCount: 1)))
                 #expect(alert.title == "Undo Divide?")
-                #expect(alert.message?.contains("Take History") == true,
+                // Batch 6a renamed the door the sentence points at — "Take
+                // History…" became "Block History…", because the face it
+                // opens is the whole BLOCK's past. The pin follows the door
+                // and now reads the SHARED name, so the two can never drift
+                // again. Its claim is unchanged: the phone's detail names a
+                // phone road, never ⌘S.
+                #expect(alert.message?.contains(BlockHistoryPath.name) == true,
                         "the phone's detail names its own road, never ⌘S")
+                #expect(alert.message?.contains("⌘") == false)
                 #expect(surface.alertActionTitles.map { $0.lowercased() }
                     .contains("undo"))
                 #expect(surface.alertActionTitles.map { $0.lowercased() }

@@ -1,18 +1,23 @@
 //
-//  MobileTakeHistoryTests.swift
+//  MobileBlockHistoryTests.swift
 //  VariorumMobileTests
 //
-//  Parity round Stage C, batch C4a — the commit door + the take-history
-//  face: AppSpec §9's deliberate-savepoint pillar on the phone. Both
-//  doors ride the block ⋯ and act on the DISPLAYED take (the Mac's
-//  caret-variant semantics); history rows flag pre-split commits through
-//  the ONE core predicate, and the pre-split restore gates on a confirm
-//  (the §9 documented warning: the old commit resurrects pre-split text).
+//  **THE BLOCK HISTORY TWIN** (mobile round 2, batch 6a) — the phone's
+//  edition of the post-13l polish round's ledger row 17, and the end of the
+//  round's **deleted-take dark window** (LR1-3): before this batch a deleted
+//  take was invisible AND un-restorable on the phone, because `TrashScope`
+//  had correctly stopped rowing takes in the global Trash while only the Mac
+//  gained the take's new homes.
+//
+//  Grown out of `MobileTakeHistoryTests` (parity C4a), whose commit/restore
+//  pins ride here unchanged in substance — the face they exercise widened
+//  from one take's savepoints to the whole block's time.
 //
 
 import Dependencies
 import Foundation
 import GRDB
+import SwiftUI
 import Testing
 import UIKit
 import VariorumCore
@@ -58,11 +63,30 @@ private func commitRows(
     }
 }
 
+/// The savepoint rows the face is showing, for one take.
+private func savepoints(
+    _ rows: [MobileBlockHistoryController.Row], of variantID: String
+) -> [CommitPoint] {
+    rows.compactMap {
+        if case .savepoint(let id, let commit, _) = $0, id == variantID { return commit }
+        return nil
+    }
+}
+
+private func sectionTitles(_ rows: [MobileBlockHistoryController.Row]) -> [String] {
+    rows.compactMap {
+        if case .sectionHeader(let title, _) = $0 { return title }
+        return nil
+    }
+}
+
 // MARK: - The suite
 
 @MainActor
-@Suite("Mobile take history — commit · list · restore (parity C4a)")
-struct MobileTakeHistoryTests {
+@Suite("Mobile Block History — the block's whole time, in one face")
+struct MobileBlockHistoryTests {
+    // MARK: Commit — history's pair
+
     /// The commit door is FLUSH-FIRST: the savepoint holds exactly the
     /// bytes she sees (pending surface text included), kind manual, with
     /// the success spoken.
@@ -72,15 +96,13 @@ struct MobileTakeHistoryTests {
             let (model, _) = makeEditor(session, postID: seed.postID)
             await model.loadOnce()
 
-            // Pending, unflushed bytes on the displayed take (the one
-            // ledger + coordinator the page and the sheet share).
             let typed = "First sentence stays. Second sentence leaves. Typed."
             model.recordTakeEdit(variantID: seed.variantID, text: typed, charDelta: 7)
             #expect(model.autosave.isDirty)
 
-            await model.takeHistory.commitNow(blockID: seed.blockID)
+            await model.blockHistory.commitNow(blockID: seed.blockID)
 
-            #expect(model.statusMessage == MobileTakeHistoryController.committedStatus)
+            #expect(model.statusMessage == MobileBlockHistoryController.committedStatus)
             let commits = try await commitRows(db, variantID: seed.variantID)
             #expect(commits.map(\.kind) == ["manual"])
             #expect(commits.first?.text == typed,
@@ -99,7 +121,7 @@ struct MobileTakeHistoryTests {
 
             try await session.runner.run { ops in try ops.lockVariant(seed.variantID) }
             await model.refreshTakesFromStore()
-            await model.takeHistory.commitNow(blockID: seed.blockID)
+            await model.blockHistory.commitNow(blockID: seed.blockID)
             #expect(model.statusMessage == MobileEditorViewModel.lockedTakeRefusal)
 
             try await session.runner.run { ops in try ops.unlockVariant(seed.variantID) }
@@ -107,7 +129,7 @@ struct MobileTakeHistoryTests {
                 try ops.lockPost(postID)
             }
             await model.refreshTakesFromStore()
-            await model.takeHistory.commitNow(blockID: seed.blockID)
+            await model.blockHistory.commitNow(blockID: seed.blockID)
             #expect(model.statusMessage == "This note is locked — unlock it to commit this take.")
             // The one row is the SEAL's own auto-commit insurance
             // (lockPost insures dirty buffers — its designed behavior);
@@ -116,14 +138,55 @@ struct MobileTakeHistoryTests {
         }
     }
 
-    /// The list is newest-first with kinds marked, and commits older
-    /// than the newest divide/extract wear the pre-split flag — through
-    /// the ONE core predicate (`Queries.commitPredatesSplit`).
-    @Test func theHistoryListsNewestFirstWithKindsAndThePreSplitFlag() async throws {
-        try await withEditorWorld { session, db in
+    // MARK: Region 1 — every live take's savepoint run
+
+    /// **Her ruling, as the face's own content**: ALL live takes are
+    /// sectioned, and the take she is in is the one that opens expanded —
+    /// through the SHARED rule (`BlockHistoryExpansion`), so the phone can
+    /// never open a different take than the Mac would.
+    @Test func everyLiveTakesRunIsSectionedAndTheFocusedOneOpensExpanded() async throws {
+        try await withEditorWorld { session, _ in
             let seed = try await seedPost(session)
-            // Two pre-split savepoints (manual, then auto), then the
-            // divide, then a post-split savepoint.
+            let second = try await session.runner.run { ops -> Variant in
+                let take = try ops.branchVariant(seed.blockID, from: seed.variantID)
+                _ = try ops.commit(take.id, kind: .manual)
+                _ = try ops.commit(seed.variantID, kind: .manual)
+                return take
+            }
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            model.blockHistory.open(blockID: seed.blockID)
+            await model.blockHistory.refresh()
+
+            let history = model.blockHistory
+            #expect(history.focusedVariantID == seed.variantID)
+            let headers = history.rows().compactMap { row -> (String, Bool)? in
+                if case .takeHeader(let id, _, let focused, _, let expanded) = row {
+                    return (id, expanded && focused)
+                }
+                return nil
+            }
+            #expect(headers.count == 2, "BOTH live takes are sectioned")
+            #expect(Set(headers.map(\.0)) == [seed.variantID, second.id])
+            #expect(history.expandedTakes == [seed.variantID],
+                    "the take you're in is the one that opens")
+
+            // The chosen take's run is drawn; the other take's is folded.
+            #expect(savepoints(history.rows(), of: seed.variantID).count == 1)
+            #expect(savepoints(history.rows(), of: second.id).isEmpty)
+            history.toggleTake(second.id)
+            #expect(savepoints(history.rows(), of: second.id).count == 1,
+                    "opening the other take's section draws its own run")
+        }
+    }
+
+    /// Savepoint rows are newest-first with kinds marked, and commits older
+    /// than the newest divide/extract wear the pre-split flag — through the
+    /// ONE core predicate (`Queries.commitPredatesSplit`).
+    @Test func theRunReadsNewestFirstWithKindsAndThePreSplitFlag() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedPost(session)
             try await session.runner.run { ops in
                 _ = try ops.commit(seed.variantID, kind: .manual)
                 try ops.autosave(
@@ -136,16 +199,18 @@ struct MobileTakeHistoryTests {
             let (model, _) = makeEditor(session, postID: seed.postID)
             await model.loadOnce()
 
-            model.takeHistory.open(blockID: seed.blockID)
-            await model.takeHistory.refresh()
-            #expect(model.takeHistory.variantID == seed.variantID,
-                    "the sheet lists the DISPLAYED take's history")
+            model.blockHistory.open(blockID: seed.blockID)
+            await model.blockHistory.refresh()
 
-            let items = model.takeHistory.items
-            #expect(items.count == 3)
-            #expect(items.map(\.commit.kind) == [.manual, .auto, .manual],
-                    "newest first")
-            #expect(items.map(\.predatesSplit) == [false, true, true],
+            let history = model.blockHistory
+            let commits = savepoints(history.rows(), of: seed.variantID)
+            #expect(commits.count == 3)
+            #expect(commits.map(\.kind) == [.manual, .auto, .manual], "newest first")
+            let flags = history.rows().compactMap { row -> Bool? in
+                if case .savepoint(_, _, let predates) = row { return predates }
+                return nil
+            }
+            #expect(flags == [false, true, true],
                     "commits older than the newest split wear the flag; the post-split one doesn't")
         }
     }
@@ -166,39 +231,47 @@ struct MobileTakeHistoryTests {
             }
             let (model, storage) = makeEditor(session, postID: seed.postID)
             await model.loadOnce()
-            model.takeHistory.open(blockID: seed.blockID)
-            await model.takeHistory.refresh()
-            let items = model.takeHistory.items
-            let postSplit = try #require(items.first { !$0.predatesSplit })
-            let preSplit = try #require(items.first { $0.predatesSplit })
+            model.blockHistory.open(blockID: seed.blockID)
+            await model.blockHistory.refresh()
 
-            // The clean restore: buffer + surface read as the savepoint.
-            await model.takeHistory.restore(postSplit)
-            #expect(model.statusMessage == MobileTakeHistoryController.restoredStatus)
-            #expect(try await storedTakeText(db, variantID: seed.variantID) == postSplit.commit.text)
-            #expect(storage.string.contains(postSplit.commit.text))
+            let history = model.blockHistory
+            let rows = history.rows()
+            let postSplit = try #require(rows.compactMap { row -> CommitPoint? in
+                if case .savepoint(_, let c, let p) = row, !p { return c }
+                return nil
+            }.first)
+            let preSplit = try #require(rows.compactMap { row -> CommitPoint? in
+                if case .savepoint(_, let c, let p) = row, p { return c }
+                return nil
+            }.first)
+
+            // The clean restore: buffer + surface read as the savepoint, and
+            // the RECEIPT is classed as one (never guessed from its words).
+            await history.restore(postSplit, of: seed.variantID)
+            #expect(history.status == .receipt(BlockHistoryCopy.restoredSavepoint))
+            #expect(history.status?.isRefusal == false)
+            #expect(try await storedTakeText(db, variantID: seed.variantID) == postSplit.text)
+            #expect(storage.string.contains(postSplit.text))
 
             // The pre-split road GATES: nothing moves until the confirm.
-            await model.takeHistory.restore(preSplit)
-            #expect(model.takeHistory.pendingRestore == preSplit)
-            #expect(try await storedTakeText(db, variantID: seed.variantID) == postSplit.commit.text,
+            await history.restore(preSplit, of: seed.variantID)
+            #expect(history.pendingRestore?.commit == preSplit)
+            #expect(try await storedTakeText(db, variantID: seed.variantID) == postSplit.text,
                     "unconfirmed — the buffer is untouched")
 
-            // Cancel clears the gate; nothing happened.
-            model.takeHistory.cancelPendingRestore()
-            #expect(model.takeHistory.pendingRestore == nil)
+            history.cancelPendingRestore()
+            #expect(history.pendingRestore == nil)
 
-            // Confirmed: the full pre-split text resurrects into THIS
-            // buffer (the successor block still sits next door — the
-            // documented, warned outcome).
-            await model.takeHistory.restore(preSplit, confirmed: true)
-            #expect(model.statusMessage == MobileTakeHistoryController.restoredStatus)
+            await history.restore(preSplit, of: seed.variantID)
+            await history.confirmPendingRestore()
+            #expect(history.status == .receipt(BlockHistoryCopy.restoredSavepoint))
             #expect(try await storedTakeText(db, variantID: seed.variantID) == full)
             #expect(storage.string.contains(full))
         }
     }
 
-    /// Restore refuses under the seal, in phone words; the buffer stays.
+    /// Restore refuses under the seal, in phone words, and the refusal is
+    /// CLASSED as one so the face can wear its alarm token; the buffer stays.
     @Test func restoreUnderASealedNoteRefusesInPhoneWords() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedPost(session)
@@ -208,91 +281,370 @@ struct MobileTakeHistoryTests {
             }
             let (model, _) = makeEditor(session, postID: seed.postID)
             await model.loadOnce()
-            model.takeHistory.open(blockID: seed.blockID)
-            await model.takeHistory.refresh()
-            let item = try #require(model.takeHistory.items.first)
+            model.blockHistory.open(blockID: seed.blockID)
+            await model.blockHistory.refresh()
+            let commit = try #require(
+                savepoints(model.blockHistory.rows(), of: seed.variantID).first)
 
             try await session.runner.run { [postID = seed.postID] ops in
                 try ops.lockPost(postID)
             }
-            await model.takeHistory.restore(item)
-            #expect(model.statusMessage
-                    == "This note is locked — unlock it to restore this savepoint.")
+            await model.blockHistory.restore(commit, of: seed.variantID)
+            #expect(model.blockHistory.status
+                    == .refusal("This note is locked — unlock it to restore this savepoint."))
+            #expect(model.blockHistory.status?.isRefusal == true)
             #expect(try await storedTakeText(db, variantID: seed.variantID)
                     == "Edited past the savepoint.")
         }
     }
 
-    /// The copy statics — the promises the sheet and the ⋯ make, pinned;
-    /// no platform name anywhere in the family.
-    @Test func theHistoryCopyIsPinnedAndPlatformFree() async throws {
-        #expect(MobileTakeHistoryController.committedStatus
-                == "Committed — a savepoint of this take is kept.")
-        #expect(MobileTakeHistoryController.restoredStatus
-                == "Restored — the take now reads as that savepoint.")
-        #expect(MobileTakeHistoryController.predatesSplitRowFlag == "predates a split")
-        #expect(MobileTakeHistoryController.predatesSplitWarning
-                == "This commit predates a split of this block — restoring it brings back text from before the split.")
-        #expect(MobileBlockMenuController.commitTitle == "Commit Take")
-        #expect(MobileBlockMenuController.historyTitle == "Take History…")
-        for copy in [
-            MobileTakeHistoryController.committedStatus,
-            MobileTakeHistoryController.restoredStatus,
-            MobileTakeHistoryController.predatesSplitWarning,
-        ] {
-            #expect(!copy.contains("Mac"))
+    // MARK: Region 2 — archived takes
+
+    /// An archived take is listed with its no-clock promise and comes back
+    /// through the face's own Unarchive.
+    @Test func anArchivedTakeIsListedAndUnarchiveBringsItBack() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedPost(session)
+            let extra = try await session.runner.run { ops -> Variant in
+                let take = try ops.branchVariant(seed.blockID, from: seed.variantID)
+                try ops.archiveVariant(take.id)
+                return take
+            }
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            model.blockHistory.open(blockID: seed.blockID)
+            await model.blockHistory.refresh()
+
+            let history = model.blockHistory
+            #expect(sectionTitles(history.rows()).contains(BlockHistoryPath.archivedSection))
+            #expect(history.rows().contains {
+                if case .archivedTake(let take) = $0 { return take.id == extra.id }
+                return false
+            }, "the archived take is her information and it is on screen")
+
+            await history.unarchive(extra.id)
+            #expect(history.status == .receipt(BlockHistoryCopy.unarchivedTake))
+            let status = try await db.read { [id = extra.id] db in
+                try Variant.fetchOne(db, key: id)?.status
+            }
+            #expect(status == .active, "back in the fan")
+            #expect(!history.rows().contains {
+                if case .archivedTake = $0 { return true }
+                return false
+            }, "and out of the archived region")
         }
     }
 
-    /// The sheet's rows materialize LAZILY (parity D2 — the routed C4
-    /// NIT: every savepoint used to materialize as a UIView on every
-    /// render, unwindowed and without reuse, so a years-deep take paid
-    /// its whole history per delivery ingest). Fixed pitch makes the
-    /// arithmetic exact: content size derives from the COUNT, only the
-    /// near-viewport band builds, and the band follows her scrolling —
-    /// the far end materializes when she arrives, and the head lets go.
-    @Test func theHistorySheetsRowsMaterializeLazily() async throws {
+    // MARK: Region 3 — deleted takes (THE DARK WINDOW, closed)
+
+    /// **The hole this batch exists to close.** A deleted take rows nowhere
+    /// global by design (`TrashScope`), so before this face the phone could
+    /// neither SEE it nor GET IT BACK. Here it is listed with its clock, and
+    /// Put back really restores it.
+    @Test func aDeletedTakeIsVisibleAndPutBackRestoresIt() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedPost(session)
-            // A deep history: forty savepoints (idle auto-commits
-            // accrete over years — the routed finding's own scale note).
-            try await session.runner.run { [variantID = seed.variantID] ops in
-                for _ in 0..<40 { _ = try ops.commit(variantID, kind: .manual) }
+            let extra = try await session.runner.run { ops -> Variant in
+                let take = try ops.branchVariant(seed.blockID, from: seed.variantID)
+                try ops.deleteVariant(take.id)
+                return take
+            }
+            // The global Trash is NOT the take's home — that is the rule
+            // this face makes safe (the phone reads the shared TrashScope).
+            #expect(!TrashScope.listedKinds.contains(.take))
+
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            model.blockHistory.open(blockID: seed.blockID)
+            await model.blockHistory.refresh()
+
+            let history = model.blockHistory
+            #expect(sectionTitles(history.rows()).contains(BlockHistoryPath.deletedSection))
+            let row = try #require(history.rows().compactMap { row -> String? in
+                if case .deletedTake(let take, let meta) = row, take.id == extra.id {
+                    return meta
+                }
+                return nil
+            }.first)
+            #expect(row.contains("deleted"), "the row says when it went — \(row)")
+            #expect(row.contains("days left") || row.contains("leaves today"),
+                    "and how long it has — \(row)")
+
+            await history.putBackTake(extra.id)
+            #expect(history.status == .receipt(BlockPastCopy.takeRestored))
+            let alive = try await db.read { [id = extra.id] db in
+                try Variant.fetchOne(db, key: id)?.deletedAt
+            }
+            #expect(alive == nil, "the take is live again")
+        }
+    }
+
+    /// A take ARCHIVED when it was deleted comes back archived — the exact
+    /// flip (#68(b)) — and the receipt reads the op's OWN answer rather than
+    /// promising the fan.
+    @Test func aTakeArchivedWhenDeletedComesBackArchivedAndSaysSo() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedPost(session)
+            let extra = try await session.runner.run { ops -> Variant in
+                let take = try ops.branchVariant(seed.blockID, from: seed.variantID)
+                try ops.archiveVariant(take.id)
+                try ops.deleteVariant(take.id)
+                return take
+            }
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            model.blockHistory.open(blockID: seed.blockID)
+            await model.blockHistory.refresh()
+
+            await model.blockHistory.putBackTake(extra.id)
+            #expect(model.blockHistory.status == .receipt(BlockPastCopy.takeRestoredArchived))
+            let status = try await db.read { [id = extra.id] db in
+                try Variant.fetchOne(db, key: id)?.status
+            }
+            #expect(status == .archived, "the exact flip stands — nothing un-archived")
+        }
+    }
+
+    /// **NO PURGE DOOR ON THIS FACE** — her evolved rule (purge doors live
+    /// on TRASH SURFACES only). Asserted over the face's own rows, which is
+    /// where a stray Delete Now would have to appear, and over the phone's
+    /// explainer, which must not promise a road the phone lacks.
+    @Test func theDeletedRegionCarriesNoPurgeDoorAndPromisesNoneEither() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedPost(session)
+            _ = try await session.runner.run { ops -> Variant in
+                let take = try ops.branchVariant(seed.blockID, from: seed.variantID)
+                try ops.deleteVariant(take.id)
+                return take
+            }
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            model.blockHistory.open(blockID: seed.blockID)
+            await model.blockHistory.refresh()
+
+            // The face names what it renders, and `deleteNow` is absent.
+            #expect(!MobileBlockHistorySheetView.surfaceCapabilities.contains("deleteNow"))
+            let words = model.blockHistory.rows().flatMap { row -> [String] in
+                switch row {
+                case .sectionHeader(let a, let b): return [a, b]
+                case .quiet(let a): return [a]
+                case .deletedTake(_, let meta): return [meta]
+                default: return []
+                }
+            }
+            for line in words {
+                #expect(!line.contains(RecoveryCopy.deleteNowVerb),
+                        "no purge door, and no promise of one: \(line)")
+                #expect(!line.contains("Mac"), "no redirect anywhere: \(line)")
+            }
+            #expect(MobileBlockHistoryController.deletedExplainer
+                    == "On the \(TrashWindow.days)-day clock. Put one back here.")
+        }
+    }
+
+    // MARK: Region 4 — came from
+
+    /// **ALL of a merge's originals, never the first** (the 13l walk's P-3,
+    /// which is exactly the defect this region was designed against), each
+    /// with a one-button way back that really places the block.
+    @Test func cameFromShowsEveryOriginAndBringBackReallyPlacesOne() async throws {
+        try await withEditorWorld { session, db in
+            let post = try await session.runner.run { ops -> Container in
+                let post = try ops.createPost(title: "merged", profile: .blog)
+                _ = try ops.newBlock(in: post.id, text: "The first half.", at: .end)
+                _ = try ops.newBlock(in: post.id, text: "The second half.", at: .end)
+                return post
+            }
+            let (before, merged) = try await session.database.read { db -> ([String], String?) in
+                let ids = try String.fetchAll(
+                    db,
+                    sql: """
+                        SELECT block_id FROM container_block
+                        WHERE container_id = ? AND deleted_at IS NULL ORDER BY position
+                        """,
+                    arguments: [post.id])
+                return (ids, nil)
+            }
+            #expect(before.count == 2)
+            let mergedBlock = try await session.runner.run { ops -> String in
+                try ops.merge(before[0], before[1]).block.id
+            }
+            _ = merged
+
+            let (model, _) = makeEditor(session, postID: post.id)
+            await model.loadOnce()
+            model.blockHistory.open(blockID: mergedBlock)
+            await model.blockHistory.refresh()
+
+            let history = model.blockHistory
+            #expect(sectionTitles(history.rows()).contains(BlockHistoryPath.cameFromSection))
+            let origins = history.rows().compactMap { row -> String? in
+                if case .origin(let blockID, _, _) = row { return blockID }
+                return nil
+            }
+            #expect(Set(origins) == Set(before),
+                    "BOTH parents — the door that showed one of two is the defect this closes")
+
+            await history.bringBack(before[0])
+            #expect(history.status?.isRefusal == false)
+            let placed = try await db.read { [id = before[0]] db in
+                try String.fetchOne(
+                    db,
+                    sql: """
+                        SELECT container_id FROM container_block
+                        WHERE block_id = ? AND deleted_at IS NULL
+                        """,
+                    arguments: [id])
+            }
+            #expect(placed == post.id, "the original is back in the note")
+        }
+    }
+
+    // MARK: The empty case
+
+    /// An ordinary block has no past, and the face says exactly that rather
+    /// than drawing four empty regions.
+    @Test func anOrdinaryBlockHasNoPastAndTheCopySaysWhat() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedPost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            model.blockHistory.open(blockID: seed.blockID)
+            await model.blockHistory.refresh()
+
+            #expect(model.blockHistory.rows() == [.quiet(BlockHistoryPath.nothingHere)])
+        }
+    }
+
+    // MARK: The mounted face
+
+    /// **The real sheet, mounted over the real page**, showing all four
+    /// regions — and lazy BY CONSTRUCTION: a table never builds the rows
+    /// that are not near the viewport (P3's read-cheap tier; the hand-rolled
+    /// band this replaces proved the same thing with more machinery).
+    @Test func theMountedSheetDrawsTheFourRegionsAndStaysLazy() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedPost(session)
+            try await session.runner.run { ops in
+                // A deep run, an archived take, a deleted take.
+                for _ in 0..<40 { _ = try ops.commit(seed.variantID, kind: .manual) }
+                let archived = try ops.branchVariant(seed.blockID, from: seed.variantID)
+                try ops.archiveVariant(archived.id)
+                let deleted = try ops.branchVariant(seed.blockID, from: seed.variantID)
+                try ops.deleteVariant(deleted.id)
             }
             let (model, surface) = await makeSurfaceEditor(session, postID: seed.postID)
-            surface.layoutIfNeeded()
+            // **IN A REAL KEY WINDOW.** A `UITableView` asked to lay out
+            // outside the view hierarchy warns and reads unreliably — and a
+            // lazy claim measured on an unhosted table is exactly the
+            // vacuous pin §15's trap (b) is about. UIKit says so out loud;
+            // this listens.
+            let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 393, height: 700))
+            let host = UIViewController()
+            host.view.addSubview(surface)
+            surface.frame = host.view.bounds
+            window.rootViewController = host
+            window.makeKeyAndVisible()
+            defer { window.isHidden = true }
+            window.layoutIfNeeded()
 
-            model.takeHistory.open(blockID: seed.blockID)
-            await settle { model.takeHistory.items.count == 40 }
-            #expect(model.takeHistory.items.count == 40)
-            let sheet = try #require(surface.textView.takeHistorySheetView)
+            model.blockHistory.open(blockID: seed.blockID)
+            await settle { model.blockHistory.rows().count > 40 }
+            let sheet = try #require(surface.textView.blockHistorySheetView)
+            window.layoutIfNeeded()
+            #expect(!sheet.isHidden, "the sheet really mounted over the page")
+            #expect(!surface.textView.isEditable,
+                    "the page editor stands down while the face is up — one live editor, ever")
 
-            // The scroll knows the WHOLE history…
-            let pitch = MobileTakeHistorySheetView.rowPitch
-            #expect(sheet.rowsScrollForTesting.contentSize.height == 40 * pitch,
-                    "content size derives from the count — every row reachable")
-            // …but only the near-viewport band is BUILT.
-            #expect(sheet.rowViews.count < 40,
-                    "rows materialize lazily — never the whole history")
-            #expect(!sheet.rowViews.isEmpty)
-            let firstID = "history.row.\(model.takeHistory.items[0].commit.id)"
-            #expect(sheet.rowViews.contains {
-                $0.accessibilityIdentifier == firstID
-            }, "the visible head is materialized")
-            let lastID = "history.row.\(model.takeHistory.items[39].commit.id)"
-            #expect(!sheet.rowViews.contains { $0.accessibilityIdentifier == lastID },
-                    "the far end is not built until she scrolls there")
+            let titles = sectionTitles(sheet.renderedRows)
+            #expect(titles == [
+                BlockHistoryPath.savepointsSection,
+                BlockHistoryPath.archivedSection,
+                BlockHistoryPath.deletedSection,
+            ], "her regions, in her order — came-from is absent because this block has no origin")
 
-            // Scroll to the bottom: the band follows — the far row
-            // materializes, the head lets go (bounded either way).
-            let scroll = sheet.rowsScrollForTesting
-            scroll.contentOffset = CGPoint(
-                x: 0, y: scroll.contentSize.height - scroll.bounds.height)
-            #expect(sheet.rowViews.contains { $0.accessibilityIdentifier == lastID },
-                    "the band followed the scroll to the far end")
-            #expect(!sheet.rowViews.contains { $0.accessibilityIdentifier == firstID },
-                    "the head let go — the band is a window, not a ratchet")
-            #expect(sheet.rowViews.count < 40)
+            let table = sheet.tableForTesting
+            window.layoutIfNeeded()
+            #expect(table.window != nil, "the table is really in the hierarchy")
+            #expect(table.numberOfRows(inSection: 0) == sheet.renderedRows.count,
+                    "the table knows the WHOLE face — every row reachable")
+            #expect(table.visibleCells.count < sheet.renderedRows.count,
+                    "only the near-viewport band is BUILT")
+            #expect(!table.visibleCells.isEmpty)
+
+            // **NO PURGE DOOR, ON THE REAL DRAWN ROW.** The deleted take's
+            // cell is configured and its buttons read: exactly one act, and
+            // it is Put back. A stray Delete Now would have to appear here.
+            let deletedRow = try #require(sheet.renderedRows.first {
+                if case .deletedTake = $0 { return true }
+                return false
+            })
+            let cell = MobileBlockHistoryCell(
+                style: .default, reuseIdentifier: MobileBlockHistoryCell.reuseID)
+            cell.configure(deletedRow, face: MobileEditorStyle.face) { _ in }
+            let buttons = cell.contentView.subviews.compactMap { $0 as? UIButton }
+                .filter { !$0.isHidden }
+            #expect(buttons.count == 1, "one act on a deleted take's row")
+            #expect(buttons.first?.accessibilityIdentifier == "blockHistory.putBack")
+            #expect(buttons.first?.accessibilityLabel
+                    == "\(BlockPastCopy.putBackVerb) this take")
+
+            model.blockHistory.close()
+            #expect(sheet.isHidden)
+            #expect(surface.textView.isEditable, "and the page comes back")
         }
+    }
+
+    // MARK: Copy
+
+    /// The copy statics — the promises the face and the ⋯ make, pinned; no
+    /// platform name anywhere in the family, and the door NAMES THE BLOCK
+    /// (her F2 report, one noun over).
+    @Test func theHistoryCopyIsPinnedAndPlatformFree() async throws {
+        #expect(MobileBlockHistoryController.committedStatus
+                == "Committed — a savepoint of this take is kept.")
+        #expect(MobileBlockHistoryController.restoredStatus
+                == BlockHistoryCopy.restoredSavepoint)
+        #expect(MobileBlockHistoryController.predatesSplitRowFlag == "predates a split")
+        #expect(MobileBlockMenuController.commitTitle == "Commit Take")
+        #expect(MobileBlockMenuController.historyTitle == "Block History…")
+        #expect(MobileBlockMenuController.rowTitles.contains("Block History…"))
+        // The pairing her G2 ruling asked for, in the phone's grammar: the
+        // two doors are adjacent in the one block-acts menu.
+        let titles = MobileBlockMenuController.rowTitles
+        let commit = try #require(titles.firstIndex(of: MobileBlockMenuController.commitTitle))
+        let history = try #require(titles.firstIndex(of: MobileBlockMenuController.historyTitle))
+        #expect(history == commit + 1, "history is the natural pair to commit")
+
+        for copy in [
+            MobileBlockHistoryController.committedStatus,
+            MobileBlockHistoryController.restoredStatus,
+            MobileBlockHistoryController.predatesSplitWarning,
+            MobileBlockHistoryController.deletedExplainer,
+            MobileBlockHistoryController.noSavepoints,
+            BlockHistoryPath.explainer,
+            BlockHistoryPath.nothingHere,
+        ] {
+            #expect(!copy.contains("Mac"))
+            #expect(!copy.contains("⌘"), "no Mac chords in the phone's words: \(copy)")
+        }
+    }
+
+    /// **The words are SHARED, not copied** (MobileSoul §3): the phone reads
+    /// the same vocabulary the Mac's pane does, so the two faces cannot tell
+    /// different stories about one block.
+    @Test func theBlockHistoryVocabularyIsShared() async throws {
+        #expect(BlockHistoryPath.name == "Block History")
+        #expect(BlockHistoryPath.savepointsSection == "Savepoints")
+        #expect(BlockHistoryPath.archivedSection == "Archived takes")
+        #expect(BlockHistoryPath.deletedSection == "Deleted takes")
+        #expect(BlockHistoryPath.cameFromSection == "Came from")
+        #expect(BlockHistoryPath.bringBackVerb == "Bring back")
+        #expect(BlockPastCopy.putBackVerb == RecoveryCopy.putBackVerb)
+        // The lead half of the deleted explainer is one sentence with two
+        // endings — the Mac names its tray, the phone names nothing yet.
+        #expect(BlockHistoryCopy.deletedRegionExplainer(purgeRoad: "open the tray")
+                == "On the \(TrashWindow.days)-day clock. Put one back here; to end a "
+                + "take's remaining days early, open the tray.")
     }
 }

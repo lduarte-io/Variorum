@@ -86,6 +86,11 @@ nonisolated enum MobileEditorStyle {
         let chosenMark: UIColor
         /// Comment ink (R7's register) — the ●n marker's color (S4).
         let commentInk: UIColor
+        /// The one named alarm per voice (`VoiceTokens.alarm`) — a refusal
+        /// reads as a refusal in the app's own colours, never a literal red
+        /// (P-8). Added at mobile round 2 batch 6a, when the Block History
+        /// face gained a status line that can carry either kind.
+        let alarm: UIColor
         /// The markdown face's palette — the Mac `Palette(tokens:)`
         /// mapping verbatim: marker = muted, link = accent, chip =
         /// codeTint (13k K10's per-voice tint).
@@ -131,6 +136,7 @@ nonisolated enum MobileEditorStyle {
             takeLine = dynamic(\.takeLine)
             chosenMark = dynamic(\.chosen)
             commentInk = dynamic(\.commentInk)
+            alarm = dynamic(\.alarm)
             palette = MarkdownFace.Palette(
                 marker: dynamic(\.muted),
                 link: dynamic(\.accent),

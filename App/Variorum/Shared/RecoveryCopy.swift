@@ -123,7 +123,24 @@ nonisolated enum RecoveryCopy {
             + "\(kindLabel(kind)) filter is on, and other things are waiting here."
     }
 
-    /// What ONE row calls itself, in the singular.
+    /// **What ONE ROW calls itself** — the item overload, which is the one
+    /// every surface should reach for (mobile round 2 batch 6a, the polish
+    /// round's ladder finding **LR2-4**).
+    ///
+    /// A saved version is a `.note`-kind row (a container born archived and
+    /// sealed), so the kind overload below calls it *"note"* — and the Mac's
+    /// Trash row already worded around that inline (polish round ledger row
+    /// 23: *"calling it 'note' is the one thing that would make the group
+    /// unreadable"*). The phone's Put back / Delete Now ACCESSIBILITY labels
+    /// never got the same treatment, so VoiceOver announced *"Put back note"*
+    /// over a saved moment. One rule, one home, both platforms — rather than
+    /// a second inline ternary on the phone.
+    static func rowKind(_ item: Queries.TrashItem) -> String {
+        item.isVersion ? VersionsPath.trashRowKind : rowKind(item.kind)
+    }
+
+    /// What one row of a given KIND calls itself, in the singular. Prefer the
+    /// item overload above wherever the row itself is in hand.
     static func rowKind(_ kind: Queries.TrashItem.Kind) -> String {
         switch kind {
         case .note: return "note"
@@ -676,5 +693,35 @@ extension Queries.TrashItem.Kind {
         case .take: return "variant"
         case .preservedOriginal: return "block"  // rides its family; no own door
         }
+    }
+}
+
+/// **A RECOVERY SURFACE'S ONE MESSAGE SLOT — receipt or refusal**, hoisted at
+/// mobile round 2 batch 6a from `TrayViewModel.Status`, whose own doc gives
+/// the reason it must not live twice:
+///
+/// > The message is CLASSED where it is produced, never guessed by the view:
+/// > the doors know whether the op answered or refused, and a view
+/// > re-deriving that from the text would be exactly the projection the model
+/// > exists to prevent.
+///
+/// The phone's Block History face makes the same distinction (a receipt reads
+/// muted, a refusal reads in the alarm token), so the classification is one
+/// rule with two renderers rather than two rules.
+nonisolated enum RecoveryStatus: Equatable, Sendable {
+    /// Something happened, and this says what (a landing, a placement).
+    case receipt(String)
+    /// Nothing happened, and this says why (the seal, an op refusal).
+    case refusal(String)
+
+    var text: String {
+        switch self {
+        case .receipt(let line), .refusal(let line): return line
+        }
+    }
+
+    var isRefusal: Bool {
+        if case .refusal = self { return true }
+        return false
     }
 }

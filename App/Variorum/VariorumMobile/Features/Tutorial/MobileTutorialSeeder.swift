@@ -341,11 +341,12 @@ enum MobileTutorialSeeder {
 
             "Your writing is always autosaved; a SAVEPOINT is the "
             + "deliberate extra. Commit Take, in ⋯, keeps the exact text "
-            + "of the take you're in, forever — and Take History… lists "
-            + "every savepoint, newest first, with restore to bring one "
-            + "back into the take. A savepoint from before a divide says "
-            + "so, and asks first: restoring it brings back the whole "
-            + "pre-split text.",
+            + "of the take you're in, forever — and Block History… beside "
+            + "it opens everything this block has been: every take's saved "
+            + "moments, with restore; the takes it archived or deleted, with "
+            + "a way back; and the block it came out of. A savepoint from "
+            + "before a divide says so, and asks first: restoring it brings "
+            + "back the whole pre-split text.",
 
             "The page keeps a little room below the last line — typewriter "
             + "room — so what you're typing never sits against the bottom "

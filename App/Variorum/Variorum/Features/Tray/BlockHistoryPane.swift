@@ -54,13 +54,14 @@ import Observation
 import SwiftUI
 import VariorumCore
 
-/// **The ONE place the pane's name and its regions are spelled** (the
-/// `TrayPath` pattern, and for its reason: receipts, tutorial lessons and
-/// menu labels elsewhere promise this surface by name).
-nonisolated enum BlockHistoryPath {
-    /// The pane's title, the bar door's word, and the registry verb.
-    static let name = "Block History"
-
+/// **THE MAC'S OWN WORDS FOR THE BLOCK HISTORY DOOR.**
+///
+/// The vocabulary itself moved to `Shared/BlockHistoryFace.swift` at mobile
+/// round 2 batch 6a, when the phone grew its own Block History face. What
+/// stayed is exactly what names a MAC door or a MAC chord — a shared home is
+/// the wrong place for a sentence that points at one platform's bottom bar
+/// (MobileSoul §4.4's no-redirect rule, read from the other side).
+nonisolated extension BlockHistoryPath {
     /// The bar's door label. Lowercased by the voice like its neighbour
     /// ("commit ⌘S"); the pairing IS the teaching moment (her G4 chapter:
     /// write a moment · see the moments).
@@ -69,49 +70,9 @@ nonisolated enum BlockHistoryPath {
     /// How copy elsewhere points at the door.
     static let doorPhrase = "the history door in the note's bottom bar"
 
-    static let savepointsSection = "Savepoints"
-    static let archivedSection = "Archived takes"
-    static let deletedSection = "Deleted takes"
-    static let cameFromSection = "Came from"
-
-    /// What the whole pane says about itself, once, at the top.
-    static let explainer =
-        "Everything this block has been: each take's saved moments, the takes "
-        + "it set aside or deleted, and the block it came out of."
-
-    /// **The came-from region's path phrase** — the destination
-    /// `TrayPath.originalsPath` now names, since her G5 ruling moved unclocked
-    /// originals out of the tray and into lineage (*"the tray audits what is
-    /// LEAVING; lineage holds what is KEPT"*). One constant, so the eight copy
-    /// sites that quoted the tray's section follow for free.
-    static var cameFromPath: String { "\(name) \u{2192} \(cameFromSection)" }
     static var cameFromPathWithDoor: String { "\(cameFromPath) (\(doorPhrase))" }
 
-    /// A live take's heading: its own label where it has one, else its place
-    /// in the fan. Never the raw id (13g R5-4's rule, one surface over).
-    static func takeHeading(_ take: Variant, ordinal: Int, of total: Int) -> String {
-        if let label = take.label, !label.isEmpty { return label }
-        return total > 1 ? "take \(ordinal) of \(total)" : "this take"
-    }
-
-    static let focusedMark = "the take you're in"
-    static let noSavepoints = "No saved moments yet — \u{2318}S saves one."
-    static let nothingHere =
-        "This block has no past yet: one take, no saved moments, nothing set "
-        + "aside, and nothing it came out of."
-
-    /// The came-from row's one-button way back. Her fourth-sitting ask named
-    /// the idea and rejected her own wording for it: *"add as block again to
-    /// the note (that's too wordy, you can reword the button, but the idea is
-    /// that if you just merged something then realized you actually wanted a
-    /// parent block, you should just be able to pull that parent block back
-    /// into existence easily)"*. Two words, the verb first, and the same
-    /// grammar as the tray's own **Put back**.
-    static let bringBackVerb = "Bring back"
-    static let bringBackHelp =
-        "Puts this original back into the note, beside the blocks it became — "
-        + "it was kept whole and set aside, never deleted"
-    static let openTrayVerb = "Open this note's tray"
+    static let noSavepoints = "No saved moments yet \u{2014} \u{2318}S saves one."
 
     /// **THE CURRENT-BLOCK JUMP** (the post-13l polish round, ledger row 33 —
     /// her 2026-08-25 refinement on the ratified request scoping): *"i think
@@ -125,71 +86,14 @@ nonisolated enum BlockHistoryPath {
     /// the way out of that scoping, and it renders ONLY while the two really
     /// differ (a button that could not move the pane is a door that cannot
     /// act, which P-2 says is not rendered at all).
+    ///
+    /// **Mac-only by construction**: the phone's Block History is a sheet
+    /// that covers the page and stands its editor down, so its caret cannot
+    /// move while the face is open — there is no jump to offer.
     static let jumpVerb = "Show the block you're in"
     static let jumpHelp =
         "Your cursor has moved to a different block — this points the panel at "
         + "that block's history instead, without closing it"
-}
-
-/// **The words the block's past speaks about its TAKES**, in one home.
-///
-/// *(Kept verbatim from `BlockPastSection.swift`, which this pane replaced:
-/// the file's two types were the two absorbed history faces' renderer and
-/// model, and both of their hosts are gone — but the sentences are semantic
-/// and every one of them is still true, so they move rather than being
-/// rewritten. `KnownIssuesAndTechDebt.md` names `BlockPastCopy` as one of the
-/// deletion-copy homes still Mac-local and awaiting a hoist; that row stays
-/// exactly as true here.)*
-nonisolated enum BlockPastCopy {
-    static let deletedTakesHeader = BlockHistoryPath.deletedSection
-    static let putBackVerb = "Put back"
-    static let seeOriginVerb = "See original"
-
-    /// The receipt after a deleted take comes back. It names the fan,
-    /// because that is where she will look for it.
-    static let takeRestored = "Take put back — it's in this block's fan again."
-
-    /// **The archived edition** (13j ladder A round 1, finding A3): the
-    /// restore is an exact flip (#68(b), ruled), so a take that was ARCHIVED
-    /// when it was deleted comes back archived — into the archived listing,
-    /// not the fan — and the one receipt above was lying for that row. The
-    /// door reads `restoreVariant`'s own returned status and says which.
-    static let takeRestoredArchived =
-        "Take put back — it was archived, so it's in this block's archived "
-        + "takes, not the fan. Unarchive it there to bring it back."
-
-    static func restored(_ status: VariantStatus) -> String {
-        status == .archived ? takeRestoredArchived : takeRestored
-    }
-
-    /// The Put-back button's help, worded to the ROW's status (the row is a
-    /// `Variant`, so it knows): "its place in the fan" was false for an
-    /// archived take.
-    static func putBackHelp(_ take: Variant) -> String {
-        take.status == .archived
-            ? "Puts this take back among the block's archived takes, exactly "
-                + "as it was — it was archived when it was deleted"
-            : "Puts this take back in the block's fan, exactly as it was — "
-                + "its label, its place in the fan and its savepoints all "
-                + "come back with it"
-    }
-
-    /// A deleted take's row label: its own label where it has one, else the
-    /// take's first line (`TrayRowPreview`'s rule, which the tray's rows
-    /// already speak).
-    ///
-    /// The empty case says **take**, not "block" — caught by the 13j capture,
-    /// where an empty deleted take rendered as "(empty block)" because
-    /// `TrayRowPreview.line` was written for the tray's BLOCK rows and its
-    /// fallback names that noun. A row in a fan that calls itself a block is
-    /// the same small dishonesty this family of surfaces exists to end.
-    static let emptyTake = "(empty take)"
-
-    static func rowLabel(_ take: Variant) -> String {
-        if let label = take.label, !label.isEmpty { return label }
-        let line = TrayRowPreview.line(take.workingText)
-        return line == TrayRowPreview.emptyBlock ? emptyTake : line
-    }
 }
 
 /// A surface's pending request to open the pane — the `TrayRequest` shape,
@@ -286,16 +190,16 @@ final class BlockHistoryModel {
     var isEmpty: Bool { history.isEmpty }
 
     /// Which savepoint run this pane opens with (her ruling: every take is
-    /// sectioned, the one she is in is expanded). A pure rule so a pin holds
-    /// the decision without rendering: the focused take where the request
-    /// named one and it is still live, else the first live take.
+    /// sectioned, the one she is in is expanded).
+    ///
+    /// **The rule itself moved to `Shared/BlockHistoryExpansion` at mobile
+    /// round 2 batch 6a** — a phone that opened a different take than the Mac
+    /// would be answering one ruling twice. This is the forwarder, kept so
+    /// every shipped pin rides unmodified (the 3C parity pattern).
     static func initiallyExpanded(
         _ history: Queries.BlockHistory, focused: String?
     ) -> Set<String> {
-        if let focused, history.takes.contains(where: { $0.id == focused }) {
-            return [focused]
-        }
-        return Set(history.activeTakes.first.map { [$0.id] } ?? [])
+        BlockHistoryExpansion.initiallyExpanded(history, focused: focused)
     }
 
     /// **Where the jump door would go, or nil** (ledger row 33). A pure rule,
@@ -413,30 +317,15 @@ final class BlockHistoryModel {
     }
 }
 
-/// The pane's own receipts — beside `BlockPastCopy`'s, which the deleted-take
-/// region speaks.
-nonisolated enum BlockHistoryCopy {
-    static let restoredSavepoint =
-        "Saved moment restored into this take — the moments themselves are "
-        + "never overwritten, so nothing was lost."
-    static let unarchivedTake = "Take unarchived — it's back in this block's fan."
-    static let restoreVerb = "Restore"
-    static let unarchiveVerb = "Unarchive"
-    static let predatesSplitMark = "predates a split"
-    static let predatesSplitTitle = "This saved moment predates a split of this block"
-    static let predatesSplitDetail =
-        "Restoring will resurrect the full pre-split text into this take's "
-        + "buffer — the split-off half still exists next door."
-    static let restoreAnyway = "Restore Anyway"
-
+/// **THE MAC'S DELETED-REGION EXPLAINER.** The rest of `BlockHistoryCopy`
+/// moved to `Shared/BlockHistoryFace.swift` at batch 6a; this half stayed
+/// because it names *This Note's Tray*, which is a Mac surface (the phone's
+/// note-level trash section is its own batch).
+nonisolated extension BlockHistoryCopy {
     /// The deleted region's own explainer: **no purge door here**, and the
     /// honest place it does live (row 21's letter).
-    static let deletedExplainer =
-        "On the \(TrashWindow.days)-day clock. Put one back here; to end a "
-        + "take's remaining days early, open \(TrayPath.menuLabel) and use "
-        + "its leaving section."
-
-    static let archivedExplainer = "Set aside, out of the fan — kept, with no clock."
+    static let deletedExplainer = deletedRegionExplainer(
+        purgeRoad: "open \(TrayPath.menuLabel) and use its leaving section")
 }
 
 /// **THE BLOCK HISTORY PANE.** One occupant of the post detail's inspector
@@ -797,41 +686,3 @@ struct BlockHistoryPane: View {
     }
 }
 
-/// **A SAVEPOINT ROW'S QUIET LINE, AS A VALUE** — when it was saved, whether
-/// it was deliberate or quiet, its message, and the pre-split warning. Pure,
-/// so a pin holds what the row says without rendering it (`TrayRowFace`'s
-/// shape and its reason).
-nonisolated enum SavepointRowFace {
-    static func meta(_ commit: CommitPoint, predatesSplit: Bool) -> [String] {
-        var pieces = [
-            commit.createdAt.formatted(date: .abbreviated, time: .shortened),
-            commit.kind == .auto ? "quiet" : "saved by hand",
-        ]
-        if let message = commit.message, !message.isEmpty { pieces.append(message) }
-        if predatesSplit { pieces.append(BlockHistoryCopy.predatesSplitMark) }
-        return pieces
-    }
-}
-
-/// **A DELETED TAKE'S QUIET LINE, AS A VALUE** — when it went and how long it
-/// has. The tray's `TrayTakeFace` names the take's BLOCK because the panel is
-/// the note; here the pane IS the block, so the row owes the clock instead.
-nonisolated enum DeletedTakeFace {
-    static func meta(_ take: Variant, now: Date) -> [String] {
-        guard let deletedAt = take.deletedAt else { return [] }
-        var pieces = [
-            "deleted " + deletedAt.formatted(date: .abbreviated, time: .shortened)
-        ]
-        // The window's own arithmetic, over the ONE canonical stamp shape the
-        // rest of the recovery family reads (`TrashWindow.daysLeft` parses
-        // what the store holds; the record hands us the decoded date, so it
-        // is re-encoded through the same formatter rather than a second
-        // subtraction written here).
-        if let days = TrashWindow.daysLeft(
-            DateFormatter.variorumISO8601.string(from: deletedAt), now: now)
-        {
-            pieces.append(TrayPath.daysLeftLabel(days))
-        }
-        return pieces
-    }
-}

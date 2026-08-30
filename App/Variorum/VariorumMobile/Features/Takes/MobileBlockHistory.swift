@@ -1,35 +1,69 @@
 //
-//  MobileTakeHistory.swift
+//  MobileBlockHistory.swift
 //  VariorumMobile
 //
-//  Parity round Stage C, batch C4a — the COMMIT door + the take-history
-//  face: AppSpec §9's deliberate-savepoint pillar reaches the phone. A
-//  sibling type beside the takes controllers (the S1 NIT-3 law); pixels
-//  in `MobileTakeHistorySheetView`; the VM only routes.
+//  **THE BLOCK HISTORY TWIN** (mobile round 2, batch 6a) — the phone's
+//  edition of the post-13l polish round's ledger row 17 (G2), built to that
+//  round's RULED design rather than to the mid-design it superseded
+//  (`notes/plans/mobile-round-2.md` §69, MobileSoul PL-14).
 //
-//  THE SHAPE (the matrix row's "a note/block-level act + a see-your-data
-//  history list"): both doors ride the block ⋯ — the phone's one
-//  block-acts home — and act on the caret block's DISPLAYED (peek-aware)
-//  take, exactly the Mac's caret-variant semantics (⌘S commits the caret
-//  take; the CommitBar's History lists it). Flip/peek to a take first
-//  and the doors follow it — per-take history through composition, one
-//  door per act.
+//  ── WHAT IT CLOSES: A LIVE DATA HOLE ─────────────────────────────────────
+//  Takes stopped rowing in the global Trash when `TrashScope` shipped on both
+//  platforms — deliberately, because a deleted take on a living block is not
+//  a note leaving the library. The Mac gained the take's two new homes in the
+//  same round; the phone did not, so a deleted take was **invisible AND
+//  un-restorable on the phone** (the round's LR1-3, "the dark window"). This
+//  face is the take's home on this device, which is what makes the global
+//  rule safe here too.
 //
-//  - COMMIT TAKE — `Operations.commit(kind: .manual)`, FLUSH-FIRST (the
-//    op snapshots the STORE buffer; pending surface bytes must land
-//    first or the savepoint holds stale text — the structural doors'
-//    contract, applied to the act whose whole job is the exact bytes).
-//  - TAKE HISTORY… — `Queries.commitHistory` + `splitDates`, each row
-//    flagged through the ONE core predicate (`commitPredatesSplit` —
-//    hoisted at this batch; the Mac's CommitRules delegates to it).
-//  - RESTORE — `Operations.restoreCommit`; a PRE-SPLIT row gates on a
-//    confirm first (AppSpec §9's documented warning: the old commit
-//    still holds the full pre-split text and restoring resurrects both
-//    halves). The gate is inspectable state (`pendingRestore`) — the
-//    view presents it; headless tests drive `restore(confirmed:)`.
+//  ── ONE COHESIVE FACE PER BLOCK, HER FOUR REGIONS IN HER ORDER ───────────
+//    1. **Savepoint runs** — ALL live takes, sectioned, the take you're in
+//       expanded (her ruling, and the ONE shared rule decides which:
+//       `BlockHistoryExpansion`). Restore per row, quiet runs collapsed
+//       (13j J11, `SavepointRuns` + `SavepointHistoryFace`).
+//    2. **Archived takes** — set aside, no clock, with Unarchive.
+//    3. **Deleted takes** — the 30-day clock and Put back, and **NO PURGE
+//       DOOR** (her evolved rule: Delete Now lives on TRASH SURFACES only —
+//       never in the writing flow. The phone's note-level trash section is
+//       batch 6b's; until it lands the phone's deleted-region explainer says
+//       the clock and Put back and promises no door that isn't there).
+//    4. **Came from** — ALL of a merge's originals (never `.first` — the 13l
+//       walk's P-3), each with its text and a one-button `placeBlock` way
+//       back through the SHARED act (`PreservedOriginPutBack`).
 //
-//  Reads are refresh-on-event (the comments controller's discipline):
-//  at open, after every verb, and on projection ingests while open.
+//  ── WHAT IS SHARED AND WHAT IS THE PHONE'S ───────────────────────────────
+//  The projection is core (`Queries.blockHistory`). Every word, every row
+//  face and the expansion rule are `Shared/BlockHistoryFace.swift`, hoisted
+//  out of the Mac at this batch so the two faces cannot drift (MobileSoul
+//  §3). What is the phone's own: the ROW LIST below (a flat, table-shaped
+//  sequence, because the phone renders a `UITableView` where the Mac renders
+//  a SwiftUI `List` with sections), the flush-and-refusal idiom every phone
+//  door already speaks, and the door's placement.
+//
+//  ── THE DOOR ─────────────────────────────────────────────────────────────
+//  Her G2 ruling put the Mac's door in the bottom chrome *"beside Commit —
+//  history is the natural pair to commit"*. On the phone, Commit Take lives
+//  in the block ⋯ (the phone's ONE block-acts home) and the history door has
+//  always sat immediately beside it, so the pairing she asked for is already
+//  the phone's shape; what changed at this batch is the NAME — `Take
+//  History…` became `Block History…`, which is her F2 report answered at the
+//  door: *"it's unclear that history is under Note, that makes it seem like
+//  the Note's history."*
+//
+//  ── SCOPING, AND WHY THERE IS NO JUMP DOOR ───────────────────────────────
+//  The Mac's pane stands open beside a live editor, so its caret can wander
+//  off the block on screen and ledger row 33 gave it a jump button. The
+//  phone's sheet COVERS the page and stands its editor down (the comments/
+//  takes sheet posture), so the caret cannot move while the face is up: there
+//  is no jump to offer, and rendering one would be a door that cannot act
+//  (P-2). Recorded rather than ported.
+//
+//  Reads are refresh-on-event (the comments controller's discipline, kept
+//  from the take-history face this replaces): at open, after every verb, and
+//  on projection ingests while open. Deliberately NOT the Mac's held
+//  observation — that observation reads `variant` and `commit_point` and so
+//  re-runs at autosave rate, which the Mac accepts because its pane sits
+//  beside a live editor. The phone's does not.
 //
 
 import Foundation
@@ -37,26 +71,42 @@ import UIKit
 import VariorumCore
 
 @MainActor
-final class MobileTakeHistoryController {
+final class MobileBlockHistoryController {
     private let session: AppSession
     private var runner: OperationsRunner { session.runner }
     weak var model: MobileEditorViewModel?
 
-    /// The block the sheet is open on. nil = closed.
+    /// The block the face is open on. nil = closed.
     private(set) var openBlockID: String?
-    /// The take whose history the open sheet lists — the DISPLAYED take
-    /// captured at open (a peek's take while peeking; the shown chosen
-    /// otherwise). Deliberately held for the sheet's life: the list
-    /// names ONE take's history, and a remote flip mid-read must not
-    /// silently swap whose past you are reading (recorded).
-    private(set) var variantID: String?
-    private(set) var items: [HistoryItem] = []
+    /// The take she was in when the face opened — the DISPLAYED take (a
+    /// peek's take while peeking; the shown chosen otherwise). It decides
+    /// which savepoint run opens expanded (her ruling) and it is what the
+    /// Commit door acts on. Deliberately held for the face's life: a remote
+    /// flip mid-read must not silently swap whose past you are reading.
+    private(set) var focusedVariantID: String?
+
+    /// The whole block's time, in one core projection.
+    private(set) var history = Queries.BlockHistory()
+    private(set) var loaded = false
+
+    /// Which savepoint runs are open. Session UI state; seeded from her
+    /// ruling by the SHARED rule on the first loaded snapshot.
+    private(set) var expandedTakes: Set<String> = []
+    private var seededExpansion = false
+    /// Which collapsed quiet runs are open (13j J11, per take).
+    private(set) var expandedRuns: Set<String> = []
+
     /// The pre-split confirm's gate (AppSpec §9's warning): set when a
     /// flagged row's restore is requested; the view presents it, and
     /// `restore(_:confirmed: true)` / `cancelPendingRestore()` resolve.
-    private(set) var pendingRestore: HistoryItem?
+    private(set) var pendingRestore: PendingRestore?
 
-    /// The pixels' hook: state or content changed — re-render the sheet.
+    /// **A receipt is not a refusal** — the shared classification
+    /// (`RecoveryStatus`), so the face's line reads muted or in the alarm
+    /// token without any view re-deriving it from the words.
+    private(set) var status: RecoveryStatus?
+
+    /// The pixels' hook: state or content changed — re-render the face.
     var onChanged: (() -> Void)?
 
     var isOpen: Bool { openBlockID != nil }
@@ -65,22 +115,34 @@ final class MobileTakeHistoryController {
         self.session = session
     }
 
-    struct HistoryItem: Equatable {
+    struct PendingRestore: Equatable {
+        let variantID: String
         let commit: CommitPoint
-        let predatesSplit: Bool
     }
 
     // MARK: - Copy (pinned statics — promises tests can keep)
 
     static let committedStatus = "Committed — a savepoint of this take is kept."
-    static let restoredStatus = "Restored — the take now reads as that savepoint."
-    /// The row's flag word (the Mac history list's own tag).
-    static let predatesSplitRowFlag = "predates a split"
+    static var restoredStatus: String { BlockHistoryCopy.restoredSavepoint }
+    /// The row's flag word (the shared history vocabulary's own tag).
+    static var predatesSplitRowFlag: String { BlockHistoryCopy.predatesSplitMark }
     /// The confirm's message (AppSpec §9's documented warning class).
-    static let predatesSplitWarning =
-        "This commit predates a split of this block — restoring it brings back text from before the split."
+    static var predatesSplitWarning: String { BlockHistoryCopy.predatesSplitDetail }
 
-    // MARK: - The commit door (the ⋯'s "Commit Take")
+    /// **The phone's deleted-region explainer.** The lead half is shared;
+    /// the clause naming where Delete Now lives is each platform's, and the
+    /// phone's honest answer today is that it has no such door yet — so it
+    /// passes nil and the sentence ends after Put back. It must NEVER name
+    /// the Mac's tray: that is the no-redirect breach (MobileSoul §4.4).
+    static var deletedExplainer: String {
+        BlockHistoryCopy.deletedRegionExplainer(purgeRoad: nil)
+    }
+
+    /// The phone's edition of "no saved moments yet" — the Mac's names ⌘S,
+    /// and a chord is a platform fact.
+    static let noSavepoints = "No saved moments yet — Commit Take in ⋯ keeps one."
+
+    // MARK: - The commit door (the ⋯'s "Commit Take" — history's pair)
 
     /// Commits the caret block's DISPLAYED take — flush-first, so the
     /// savepoint holds exactly the bytes she sees.
@@ -106,17 +168,19 @@ final class MobileTakeHistoryController {
 
     // MARK: - Open / close
 
-    /// The ⋯'s "Take History…": opens on the block's displayed take.
+    /// The ⋯'s "Block History…": opens on the caret's block, remembering the
+    /// take she is in so its run opens expanded.
     func open(blockID: String) {
         guard let model, let slot = model.slot(for: blockID) else { return }
-        guard let displayed = slot.variantID else {
-            model.report("This block hasn't fully synced; it is read-only for now.")
-            return
-        }
         openBlockID = blockID
-        variantID = displayed
-        items = []
+        focusedVariantID = slot.variantID
+        history = Queries.BlockHistory()
+        loaded = false
+        seededExpansion = false
+        expandedTakes = []
+        expandedRuns = []
         pendingRestore = nil
+        status = nil
         onChanged?()
         Task { await refresh() }
     }
@@ -124,15 +188,20 @@ final class MobileTakeHistoryController {
     func close() {
         guard isOpen else { return }
         openBlockID = nil
-        variantID = nil
-        items = []
+        focusedVariantID = nil
+        history = Queries.BlockHistory()
+        loaded = false
+        seededExpansion = false
+        expandedTakes = []
+        expandedRuns = []
         pendingRestore = nil
+        status = nil
         onChanged?()
     }
 
     /// Every projection ingest routes here (VM routing): refresh an open
-    /// sheet (a restore/commit elsewhere lands live); close when the
-    /// block left the surface.
+    /// face (a restore/commit elsewhere lands live); close when the block
+    /// left the surface.
     func projectionDidChange() {
         guard let blockID = openBlockID else { return }
         if model?.slot(for: blockID) == nil {
@@ -142,73 +211,273 @@ final class MobileTakeHistoryController {
         }
     }
 
-    /// One coherent read: the take's commits + the block's split dates,
-    /// flagged through the one core predicate. Cost ∝ the take's own
-    /// history + the block's split edges (P1).
+    /// One coherent read: the whole block's time in ONE core projection —
+    /// the fan, every live take's savepoints, the split dates, the deleted
+    /// takes, and the origins with their preview text. Cost is the BLOCK's,
+    /// never the corpus (P1); `Queries.blockHistory` states it at the query.
     func refresh() async {
-        guard let blockID = openBlockID, let variantID else { return }
+        guard let blockID = openBlockID else { return }
         do {
-            let value = try await session.database.read { db in
-                (commits: try Queries.commitHistory(db, variantID: variantID),
-                 splits: try Queries.splitDates(db, blockID: blockID))
+            let value = try await session.database.read { [now = session.now] db in
+                try Queries.blockHistory(db, blockID: blockID, now: now)
             }
-            // BOTH captures must still govern (C4 ladder MINOR): a
-            // close→flip→reopen on the same block could let an in-flight
-            // first-open read land last and list the OLD take's history
-            // under the new capture. Honestly unpinnable (the read isn't
-            // seam-injectable) — the mechanism is the reviewer's trace,
-            // re-verified at the fix.
-            guard openBlockID == blockID, self.variantID == variantID
-            else { return }
-            items = value.commits.map {
-                HistoryItem(
-                    commit: $0,
-                    predatesSplit: Queries.commitPredatesSplit(
-                        commitDate: $0.createdAt, splitDates: value.splits))
-            }
-            onChanged?()
+            // The capture must still govern: a close→reopen on another block
+            // could let an in-flight read land under the new scope.
+            guard openBlockID == blockID else { return }
+            adopt(value)
         } catch {
-            model?.report(String(describing: error))
+            status = .refusal(String(describing: error))
+            onChanged?()
         }
     }
 
-    // MARK: - Restore (AppSpec §9's warning rides the pre-split road)
+    /// Internal so tests drive the face deterministically (the Mac
+    /// `BlockHistoryModel.adopt` seam, same reason).
+    func adopt(_ value: Queries.BlockHistory) {
+        history = value
+        loaded = true
+        if !seededExpansion {
+            seededExpansion = true
+            expandedTakes = BlockHistoryExpansion.initiallyExpanded(
+                value, focused: focusedVariantID)
+        }
+        onChanged?()
+    }
 
-    /// Restores a savepoint into the take's buffer. A PRE-SPLIT row
-    /// gates on the confirm first (`pendingRestore` — the view presents
-    /// it); the restore itself is flush-first like every door that
-    /// rewrites a buffer (a pending flush landing after it would
-    /// overwrite the restored text with the stale surface — the
-    /// stale-flush class).
-    func restore(_ item: HistoryItem, confirmed: Bool = false) async {
-        guard let model, let variantID else { return }
-        if item.predatesSplit && !confirmed {
-            pendingRestore = item
+    func toggleTake(_ variantID: String) {
+        if expandedTakes.contains(variantID) {
+            expandedTakes.remove(variantID)
+        } else {
+            expandedTakes.insert(variantID)
+        }
+        onChanged?()
+    }
+
+    func toggleRun(_ id: String) {
+        expandedRuns = SavepointHistoryFace.toggling(id, in: expandedRuns)
+        onChanged?()
+    }
+
+    func predatesSplit(_ commit: CommitPoint) -> Bool {
+        Queries.commitPredatesSplit(
+            commitDate: commit.createdAt, splitDates: history.splitDates)
+    }
+
+    // MARK: - THE ROWS (pure — the phone's table shape over her four regions)
+
+    /// One flat sequence, because the phone renders a `UITableView` where the
+    /// Mac renders a SwiftUI `List` of sections. Pure over the projection and
+    /// the two expansion sets, so a pin can hold what the face SAYS without
+    /// rendering a pixel — and so the "no purge door" promise is checkable as
+    /// a value rather than by reading a view body.
+    enum Row: Equatable {
+        case sectionHeader(title: String, explainer: String)
+        case takeHeader(variantID: String, title: String, focused: Bool, savepoints: Int,
+                        expanded: Bool)
+        case quietRun(id: String, count: Int, expanded: Bool)
+        case savepoint(variantID: String, commit: CommitPoint, predatesSplit: Bool)
+        case quiet(String)
+        case archivedTake(Variant)
+        case deletedTake(Variant, meta: String)
+        case origin(blockID: String, text: String, lineage: String)
+
+        var height: CGFloat {
+            switch self {
+            case .sectionHeader: return 52
+            case .takeHeader: return 34
+            case .quietRun: return 30
+            case .savepoint: return 62
+            case .quiet: return 34
+            case .archivedTake: return 56
+            case .deletedTake: return 62
+            case .origin: return 84
+            }
+        }
+    }
+
+    func rows() -> [Row] {
+        guard loaded else { return [] }
+        if history.isEmpty {
+            return [.quiet(BlockHistoryPath.nothingHere)]
+        }
+        var rows: [Row] = []
+
+        // 1 — savepoint runs: ALL live takes, sectioned, the focused one open.
+        let active = history.activeTakes
+        rows.append(.sectionHeader(
+            title: BlockHistoryPath.savepointsSection,
+            explainer: BlockHistoryPath.explainer))
+        for (index, take) in active.enumerated() {
+            let commits = history.savepoints[take.id] ?? []
+            let expanded = expandedTakes.contains(take.id)
+            rows.append(.takeHeader(
+                variantID: take.id,
+                title: BlockHistoryPath.takeHeading(
+                    take, ordinal: index + 1, of: active.count),
+                focused: take.id == focusedVariantID,
+                savepoints: commits.count,
+                expanded: expanded))
+            guard expanded else { continue }
+            if commits.isEmpty {
+                rows.append(.quiet(Self.noSavepoints))
+                continue
+            }
+            for run in SavepointRuns.rows(
+                commits, isQuiet: { $0.kind == .auto }, id: { $0.id })
+            {
+                let rendered = SavepointHistoryFace.rendered(run, expanded: expandedRuns)
+                if let count = rendered.runCount {
+                    rows.append(.quietRun(
+                        id: run.id, count: count, expanded: rendered.expanded))
+                }
+                for commit in rendered.items {
+                    rows.append(.savepoint(
+                        variantID: take.id, commit: commit,
+                        predatesSplit: predatesSplit(commit)))
+                }
+            }
+        }
+
+        // 2 — archived takes (Unarchive).
+        if !history.archivedTakes.isEmpty {
+            rows.append(.sectionHeader(
+                title: BlockHistoryPath.archivedSection,
+                explainer: BlockHistoryCopy.archivedExplainer))
+            rows.append(contentsOf: history.archivedTakes.map(Row.archivedTake))
+        }
+
+        // 3 — deleted takes: clock + Put back, and NO purge door (her rule).
+        if !history.deletedTakes.isEmpty {
+            rows.append(.sectionHeader(
+                title: BlockHistoryPath.deletedSection,
+                explainer: Self.deletedExplainer))
+            for take in history.deletedTakes {
+                rows.append(.deletedTake(
+                    take,
+                    meta: DeletedTakeFace.meta(take, now: session.now)
+                        .joined(separator: " \u{B7} ")))
+            }
+        }
+
+        // 4 — came from: EVERY original, never the first.
+        if !history.origins.isEmpty {
+            rows.append(.sectionHeader(
+                title: BlockHistoryPath.cameFromSection,
+                explainer: OriginPeekCopy.explainer))
+            for row in history.origins {
+                rows.append(.origin(
+                    blockID: row.origin.blockID,
+                    text: TrayRowPreview.line(row.text),
+                    lineage: OriginPeekCopy.lineageRow(
+                        op: row.origin.originOp, at: row.origin.at)))
+            }
+        }
+        return rows
+    }
+
+    // MARK: - Region 1: restore a savepoint
+
+    /// Restores a savepoint into its take's buffer. A PRE-SPLIT row gates on
+    /// the confirm first (`pendingRestore` — the view presents it); the
+    /// restore itself is FLUSH-FIRST like every phone door that rewrites a
+    /// buffer (a pending flush landing after it would overwrite the restored
+    /// text with the stale surface — the stale-flush class).
+    func restore(_ commit: CommitPoint, of variantID: String, confirmed: Bool = false)
+        async
+    {
+        guard let model else { return }
+        if !confirmed, predatesSplit(commit) {
+            pendingRestore = PendingRestore(variantID: variantID, commit: commit)
             onChanged?()
             return
         }
         pendingRestore = nil
+        status = nil
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {
-            model.report("Unsaved changes couldn't be written — resolve that first, then retry.")
+            report(.refusal(
+                "Unsaved changes couldn't be written — resolve that first, then retry."))
             return
         }
         do {
             try await runner.run { ops in
-                try ops.restoreCommit(variantID, commitID: item.commit.id)
+                try ops.restoreCommit(variantID, commitID: commit.id)
             }
-            model.report(Self.restoredStatus)
             await model.refreshTakesFromStore()
+            report(.receipt(BlockHistoryCopy.restoredSavepoint))
             await refresh()
-            onChanged?()
         } catch {
-            model.report(Self.refusalMessage(error, act: "restore this savepoint"))
+            report(.refusal(Self.refusalMessage(error, act: "restore this savepoint")))
         }
+    }
+
+    func confirmPendingRestore() async {
+        guard let pending = pendingRestore else { return }
+        await restore(pending.commit, of: pending.variantID, confirmed: true)
     }
 
     func cancelPendingRestore() {
         guard pendingRestore != nil else { return }
         pendingRestore = nil
+        onChanged?()
+    }
+
+    // MARK: - Region 2: unarchive
+
+    func unarchive(_ variantID: String) async {
+        status = nil
+        do {
+            try await runner.run { ops in try ops.unarchiveVariant(variantID) }
+            await model?.refreshTakesFromStore()
+            report(.receipt(BlockHistoryCopy.unarchivedTake))
+            await refresh()
+        } catch {
+            report(.refusal(Self.refusalMessage(error, act: "unarchive this take")))
+        }
+    }
+
+    // MARK: - Region 3: put a deleted take back (NO purge door here)
+
+    /// `restoreVariant` — the recovery-door class (no undo entry: the door IS
+    /// the recovery). The receipt reads the op's OWN answer, because the
+    /// restore is an exact flip (#68(b)) and a take archived when it was
+    /// deleted comes back archived.
+    func putBackTake(_ variantID: String) async {
+        status = nil
+        do {
+            let restored = try await runner.run { ops in
+                try ops.restoreVariant(variantID)
+            }
+            await model?.refreshTakesFromStore()
+            report(.receipt(BlockPastCopy.restored(restored)))
+            await refresh()
+        } catch {
+            report(.refusal(Self.refusalMessage(error, act: "put this take back")))
+        }
+    }
+
+    // MARK: - Region 4: bring an original back
+
+    /// The one-button `placeBlock` road, through the SHARED act the Mac's own
+    /// door calls (`PreservedOriginPutBack`) — so two platforms' doors onto
+    /// one act cannot drift on where the block lands or what the receipt says.
+    func bringBack(_ originBlockID: String) async {
+        guard let model else { return }
+        status = nil
+        do {
+            let receipt = try await PreservedOriginPutBack.run(
+                session: session, postID: model.postID, blockID: originBlockID)
+            report(.receipt(receipt))
+            await refresh()
+        } catch {
+            report(.refusal(Self.refusalMessage(error, act: "bring this original back")))
+        }
+    }
+
+    // MARK: - Status
+
+    private func report(_ status: RecoveryStatus) {
+        self.status = status
         onChanged?()
     }
 

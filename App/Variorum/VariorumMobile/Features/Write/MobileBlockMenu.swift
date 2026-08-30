@@ -3,7 +3,8 @@
 //  VariorumMobile
 //
 //  Mobile Stage 4, batch 1 — the ⋯ BLOCK MENU: Takes… · Comments… ·
-//  Callout ▸ · Name Block… · Commit Take · Take History… (parity C4a) ·
+//  Callout ▸ · Name Block… · Commit Take · Block History… (parity C4a,
+//  widened to the four-region face at round 2 batch 6a) ·
 //  Divide Block · Merge with Previous · Delete Block, on the caret's
 //  block, through TWO doors that cannot drift (the CalloutMenu
 //  one-vocabulary precedent): the keyboard bar's ⋯ and the extended edit
@@ -90,10 +91,20 @@ final class MobileBlockMenuController {
     static let calloutTitle = "Callout"
     static let nameTitle = "Name Block…"
     /// The savepoint pair (parity C4a — AppSpec §9's deliberate-commit
-    /// pillar reaches the phone: both act on the caret block's DISPLAYED
-    /// take through `MobileTakeHistoryController`).
+    /// pillar reaches the phone: Commit acts on the caret block's DISPLAYED
+    /// take, and History opens that block's whole past, both through
+    /// `MobileBlockHistoryController`).
     static let commitTitle = "Commit Take"
-    static let historyTitle = "Take History…"
+    /// **Renamed at round 2 batch 6a**: the door opens ONE cohesive face for
+    /// the whole BLOCK — every take's savepoint run, its archived and deleted
+    /// takes, and where it came from — so calling it "Take History" was the
+    /// same small dishonesty her F2 report caught on the Mac (*"it's unclear
+    /// that history is under Note, that makes it seem like the Note's
+    /// history"*), one noun over. It sits immediately beside Commit Take,
+    /// which is her G2 pairing (*"history is the natural pair to commit"*) in
+    /// the phone's grammar: the ⋯ is this phone's bottom chrome for block
+    /// acts.
+    static let historyTitle = "Block History…"
     /// The insert door (parity C4b item 1 — the registry's own verb).
     /// It heads the structural family: minting under the block is the
     /// gentlest structural act, so it reads before the knives.
@@ -144,10 +155,10 @@ final class MobileBlockMenuController {
         })
         elements.append(UIAction(title: cased(Self.commitTitle)) { [weak self] _ in
             guard let model = self?.model else { return }
-            Task { await model.takeHistory.commitNow(blockID: blockID) }
+            Task { await model.blockHistory.commitNow(blockID: blockID) }
         })
         elements.append(UIAction(title: cased(Self.historyTitle)) { [weak self] _ in
-            self?.model?.takeHistory.open(blockID: blockID)
+            self?.model?.blockHistory.open(blockID: blockID)
         })
         elements.append(UIAction(title: cased(Self.insertBelowTitle)) { [weak self] _ in
             guard let model = self?.model else { return }

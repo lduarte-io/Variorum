@@ -5567,3 +5567,238 @@ LIFECYCLE TABLE — the post-round truth, grain-ordered). MobileSoul
    of moment, and the TWO EXITS taught by doing ("deletion goes to
    the Trash; transformation goes to lineage") — the pocket guide
    re-teaches to the same map in phone grammar.
+
+---
+
+## §70 — BATCH 6a: THE BLOCK HISTORY TWIN (built 2026-08-30; the deleted-take dark window is CLOSED)
+
+**What this batch was for, in one line:** the phone grew its edition of the
+post-13l polish round's **ledger row 17 (G2)** — ONE cohesive face per block
+— and that closed a **live data hole**: a deleted take was **invisible AND
+un-restorable on the phone**.
+
+**Why the hole existed, stated so nobody re-derives it.** The polish round
+shipped `TrashScope` on BOTH platforms, and it correctly stopped rowing takes
+in the global Trash (her G6/D1 rulings — a deleted take on a living block is
+not a note leaving the library). The Mac gained the take's two new homes in
+the same round; the phone gained neither. The round recorded the consequence
+as **LR1-3** and left it open, hers to time (§69.2). This batch is the close.
+
+### What shipped
+
+**The face** — `MobileBlockHistorySheetView` + `MobileBlockHistoryController`
+(grown out of, and replacing, `MobileTakeHistorySheetView`/
+`MobileTakeHistoryController`), her four regions in her order:
+
+1. **Savepoint runs** — ALL live takes, sectioned, *the take you're in*
+   expanded, restore per row with the AppSpec §9 pre-split confirm, quiet
+   runs collapsed (13j J11's `SavepointRuns` + `SavepointHistoryFace`).
+2. **Archived takes** — set aside, no clock, **Unarchive**.
+3. **Deleted takes** — the 30-day clock and **Put back**, and **NO PURGE
+   DOOR** (her evolved rule: Delete Now lives on TRASH SURFACES only).
+4. **Came from** — **ALL** of a merge's originals (never `.first` — the 13l
+   walk's P-3 is the defect this region exists against), each with a
+   one-button **Bring back** through the SHARED `PreservedOriginPutBack`.
+
+**The door.** Her G2 pairing — *"history is the natural pair to commit"* —
+already exists on the phone in the phone's own grammar: Commit Take and the
+history door sit adjacent in the block ⋯, which IS this phone's bottom chrome
+for block acts. What changed is the NAME: **`Take History…` → `Block
+History…`**, which is her F2 report answered at the door, one noun over
+(*"it's unclear that history is under Note, that makes it seem like the
+Note's history"*). The two quoting copy sites followed —
+`MobileUndoDoor.discardingUndoDetail` and the pocket guide's savepoint
+lesson, the latter rewritten to teach what the face now holds.
+
+**The presentation shape, and one deliberate change of mechanism.** The face
+keeps the ratified sheet-over-page (LK4; the comments/takes sheets' posture,
+page editor stood down). Its rows now ride a **`UITableView`** where the old
+one-take sheet hand-rolled a fixed-pitch band (parity D2's fix): four regions
+of differently-shaped rows have no single pitch, and a table is lazy **by
+construction** — UIKit never builds a cell that is not near the viewport.
+Same P3 guarantee, less machinery to be wrong.
+
+### THE HOIST — eight brains moved, and the Mac's suite rode UNMODIFIED
+
+MobileSoul §3 forbids forking a brain, and `KnownIssuesAndTechDebt.md`'s
+forked-brains row names several of these by name as Mac-local deletion copy
+*awaiting a hoist*. So nothing here was copied. New shared home:
+**`App/Variorum/Shared/BlockHistoryFace.swift`** —
+
+| moved | from |
+|---|---|
+| `BlockHistoryPath` (the neutral vocabulary) | `Features/Tray/BlockHistoryPane.swift` |
+| `BlockPastCopy` | same |
+| `BlockHistoryCopy` (neutral) | same |
+| `SavepointRowFace`, `DeletedTakeFace` | same |
+| `BlockHistoryExpansion.initiallyExpanded` | `BlockHistoryModel`'s static (now a forwarder) |
+| `TrayRowPreview` | `Features/Tray/TrayPanel.swift` |
+| `OriginPeekCopy` (whole file) | `Features/Tray/OriginPeek.swift` — **deleted** |
+| `SavepointHistoryFace` | `Features/Editor/SavepointHistory.swift` (`QuietRunRow` stayed — it is a Mac SwiftUI view) |
+| `RecoveryStatus` | `TrayViewModel.Status` (now `typealias Status = RecoveryStatus`) → `Shared/RecoveryCopy.swift` |
+
+**WHAT DELIBERATELY DID NOT MOVE, and why it is not a fork.** Five strings
+and one rule stayed Mac-local, in a `nonisolated extension` beside the pane,
+because each names a **Mac door or a Mac chord**: `doorLabel`, `doorPhrase`,
+`cameFromPathWithDoor`, `noSavepoints` (it names ⌘S), the current-block
+jump's two strings, and `BlockHistoryCopy.deletedExplainer` (it names *This
+Note's Tray*). Sharing a sentence that points at one platform's door would be
+the no-redirect breach (MobileSoul §4.4) wearing a shared home's clothes.
+The deleted-region explainer is therefore ONE shared sentence with two
+endings — `deletedRegionExplainer(purgeRoad:)` — the Mac naming its tray, the
+phone passing `nil` because **the phone has no purge road yet** (batch 6b's
+note-level trash section) and must not promise one.
+
+**THE CURRENT-BLOCK JUMP (ledger row 33) IS DELIBERATELY NOT BUILT ON THE
+PHONE.** The Mac's pane stands open beside a live editor, so its caret can
+wander off the block on screen. The phone's sheet **covers the page and
+stands its editor down**, so the caret cannot move while the face is up:
+there is no jump to offer, and rendering one would be a door that cannot act
+(P-2). Recorded rather than ported.
+
+**The model was NOT hoisted, and that is a judgment worth stating.** The
+Mac's `BlockHistoryModel` classes its refusals through `TrayRefusalCopy` →
+`OpsRefusalCopy`, a large Mac-local registry file; the phone words the same
+refusals in phone terms *by standing policy*, because Mac refusals name Mac
+doors. Hoisting the model would have meant either dragging that registry
+across or injecting a wording seam through every Mac call site and pin. What
+is genuinely a RULE — the copy, the row faces, the expansion decision — is
+now shared; what is left is four four-line wrappers over core ops in each
+platform's own flush/refusal idiom.
+
+### LR2-4 — the version-blind doors, fixed (this batch's one bug-class fix)
+
+A saved version is a `.note`-kind Trash row (a container born archived and
+sealed), so the phone's Put back / Delete Now **accessibility labels**
+announced *"Put back note"* over one of her saved moments. The fix is one
+rule in one shared home — `RecoveryCopy.rowKind(_ item:)`, the item overload
+— which the Mac's display row now reads too, so the ternary it had inline
+cannot drift from the phone's labels.
+
+**RED ON OLD, reproduced to the words:** reverting the label to
+`rowKind(item.kind)` reds the new pin, reading back
+`labels → [… "Put back note", "Delete Now saved version" …]`.
+
+**AND IT FOUND A SECOND HALF while being pinned:** the phone's Trash row's
+own META LINE was version-blind too — *and* its `item.kind != .note` guard
+hid the parent note's name from exactly the row that most needs it (a version
+IS `.note`-kind). Both fixed with the shared rule + `VersionsPath.trashRowOf`,
+and pinned in the same test.
+
+### Verification — what was driven, not read
+
+- `MobileBlockHistoryTests` — **15 pins** (grown from the 7 of
+  `MobileTakeHistoryTests`, whose commit/restore claims ride here unchanged
+  in substance). Highlights: every live take sectioned with the focused one
+  expanded through the shared rule; the newest-first run with kinds and the
+  pre-split flag; restore + the pre-split gate + the sealed refusal *classed*
+  as a refusal; an archived take listed and unarchived; **a deleted take
+  visible and put back** (with `TrashScope.listedKinds` asserted NOT to carry
+  takes, which is the rule this face makes safe); the exact-flip archived
+  receipt; **no purge door and no promise of one**; **came-from showing BOTH
+  parents of a merge** with `Bring back` really placing the block; the empty
+  case.
+- **The mounted face, in a REAL KEY WINDOW.** The first version of that pin
+  laid the table out **outside the view hierarchy** — UIKit says so out loud
+  (*"UITableView was told to layout its visible cells … without being in the
+  view hierarchy"*), and a lazy claim measured there is exactly the vacuous
+  pin §15's trap (b) is about. It now hosts a `UIWindow`, asserts
+  `table.window != nil`, that the table knows every row, that only a band is
+  built, that the page editor really stood down, and that closing brings it
+  back. The deleted row's real configured cell is read for its buttons:
+  exactly one, and it is Put back.
+- `MobileUndoDoorTests.undoWarnsBeforeDiscardingWritingDoneSince` followed
+  the door it names and now reads the SHARED `BlockHistoryPath.name`, so the
+  pin and the door can never drift again; its claim (*names a phone road,
+  never ⌘S*) is unchanged and now also asserted negatively.
+
+### Counts, and the environment finding that cost this batch two hours
+
+| gate | result | baseline |
+|---|---|---|
+| core (`swift test`) | **1453 / 154** | 1453/154 ✔ exact (zero `Sources/` lines) |
+| mobile | **522 / 86** | 513/86 → **+9** exactly: −7 (the old take-history suite) +15 (Block History) +1 (the LR2-4 Trash pin); suite count unmoved because the suite was RENAMED, not added |
+| Mac | see below | 1843/312 |
+
+`git diff -- Sources/` is **empty**. Zero schema, zero `Sync/`, marker 7.
+
+> **⚠️ ENVIRONMENT FINDING — TWO SESSIONS SHARING ONE SIMULATOR SILENTLY SWAP
+> EACH OTHER'S TEST BUNDLES, AND THE COUNTS LIE.**
+>
+*[removed for publication]*
+> **560–564 tests** and a rotating cast of failures — including whole suites
+> (*"Shelf layout — the rendered surface"*, *"Starter Journal … (R27b)"*,
+> *"Shelf — Today's Entry as a badge (R26)"*) whose test names **exist
+> nowhere in this tree**: not in the 48 test sources, not in the 48 object
+> files, not in the linked product. They are the **batch-5 agent's**
+> tests, from its own worktree.
+>
+> The mechanism, measured rather than guessed: `strings` on the bundle
+> *installed in the simulator* found `Shelf layout` (1 hit); `strings` on
+> **my own linked product** found 0, and found my own new test instead.
+> `xcodebuild test` had run **the other session's installed bundle**. A
+> `clean`, and even a `simctl uninstall`, did not survive the next
+> concurrent install.
+>
+> **The fix, and the rule this batch would offer the round:** when two
+> sessions can build the same scheme, each needs its **own simulator device
+> AND its own `-derivedDataPath`**. This batch's real numbers come from a
+> private device (`Variorum-batch6a`, iPhone 17 Pro / iOS 26.2, created and
+> armed with `ApplicationAccessibilityEnabled`) and a private DerivedData.
+*[removed for publication]*
+> is not a valid destination for an iOS-26 deployment target at all.
+>
+> Two further load artifacts, both re-run isolated and green, both recorded
+> so they are not read as regressions: core's `kdfLatencyHarnessMac`
+> (median 5.34 s vs a 5.0 s budget under load; **1.154 s isolated**) and
+> mobile's `typingAtTheViewportHoldsThePerKeystrokeBudgetAt100k`. Several
+> runs also died with *"Test crashed with signal kill"* — the machine sat at
+> load average 20–75 with another session building, and the author closed
+> Xcode mid-run at one point.
+
+### ⚠️ A STAGING INCIDENT, REPORTED BECAUSE HISTORY NOW READS ODDLY
+
+Mid-batch, a second session working in this same tree committed with a
+sweeping `git add`, and **four of my staged index entries went into ITS
+commit**: `a232455` ("Her archive/trash ruling — Two rooms…") carries the
+`OriginPeek.swift` deletion and the three renames
+(`MobileTakeHistory` → `MobileBlockHistory`,
+`MobileTakeHistorySheetView` → `MobileBlockHistorySheetView`,
+`MobileTakeHistoryTests` → `MobileBlockHistoryTests`) as zero-line moves under
+a message about something else.
+
+**Nothing was lost** — only index entries were taken; every line of content was
+still unstaged in the working tree and is in batch 6a's own commit. **No
+history was rewritten** (author-only), so the moves simply live one commit
+early, under the wrong sentence. Recorded here so a `git log --follow` on those
+files is not a mystery, and as the second data point for the round's standing
+rule: **explicit-path staging while another session is live**, which this
+batch followed and which is exactly what kept the damage to four empty
+renames.
+
+### What batch 6a deliberately did NOT build
+
+- **The archive/trash IA separation on the phone** (§69.5) — her explicit
+  ruling: the phone mimics the Mac's decided surfaces *"in some way that
+  works for mobile"*, settled at its **own design session proposing HTML
+  mockups to her**. The combined "Archived & Deleted" is known-interim BY HER
+  WORD and was not restructured.
+- **The Versions face** (§69.6) — same design session.
+- **The per-note tray's three-section rework** (§69.3) — batch 6b.
+- **The guide's deletion chapter** (§69.8) — beyond the one savepoint lesson
+  this batch's door rename obliged.
+
+### For whoever picks this up
+
+- The phone's face reads `Queries.blockHistory` **refresh-on-event** (at
+  open, after every verb, on projection ingests) rather than the Mac's held
+  observation. Deliberate: that observation reads `variant` and
+  `commit_point`, so it re-runs at autosave rate — which the Mac accepts
+  because its pane sits beside a live editor, and the phone's does not.
+- `MobileBlockHistoryController.rows()` is **pure** over the projection and
+  the two expansion sets. That is what lets *"no purge door"* be checked as a
+  VALUE rather than by reading a view body — the strongest available form of
+  that promise short of walking pixels.
+- When batch 6b gives the phone its note-level trash section, the deleted
+  region's explainer gains its second half by passing that door's name to
+  `BlockHistoryCopy.deletedRegionExplainer(purgeRoad:)`. Nothing else moves.

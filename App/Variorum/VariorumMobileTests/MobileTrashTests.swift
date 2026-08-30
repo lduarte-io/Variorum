@@ -129,6 +129,58 @@ struct MobileTrashTests {
         }
     }
 
+    /// **A SAVED VERSION IS NOT A NOTE, AND VOICEOVER MUST SAY SO**
+    /// (the polish round's ladder finding **LR2-4**, this batch's one
+    /// bug-class fix).
+    ///
+    /// A saved version rides the Trash as a `.note`-kind row — it IS a
+    /// container, born archived and sealed — so both of this surface's
+    /// accessibility labels read `rowKind(item.kind)` and announced *"Put
+    /// back note"* / *"Delete Now note"* over one of her saved moments. The
+    /// Mac's DISPLAY line had been worded around this at the polish round
+    /// (ledger row 23) and the phone's labels never were; the fix is the one
+    /// rule in one shared home (`RecoveryCopy.rowKind(_:)` — the item
+    /// overload), which both platforms now read.
+    ///
+    /// **RED ON OLD** by behavioural revert: put `rowKind(item.kind)` back in
+    /// either label and this reds, reading "Put back note".
+    @Test func aSavedVersionsDoorsAnnounceThemselvesAsSavedVersions() async throws {
+        try await withEditorWorld { session, _ in
+            let noteID = try await makePost(session, blocks: ["The note itself."])
+            let version = try await session.runner.run { ops -> String in
+                try ops.saveNoteVersion(noteID).post.id
+            }
+            try await session.runner.run { ops in try ops.deleteContainer(version) }
+
+            let model = MobileTrashModel(session: session)
+            try await withHostedSurface(
+                MobileTrashView(model: model, tokens: .terminalLight, onOpen: { _ in })
+            ) { surface in
+                await surface.settle(40)
+                let row = try #require(model.trash.first { $0.id == version })
+                #expect(row.isVersion, "the listing knows what it is")
+                let labels = surface.visibleLabels
+                #expect(labels.contains(
+                    "\(RecoveryCopy.putBackVerb) \(VersionsPath.trashRowKind)"),
+                        "labels were \(labels)")
+                #expect(labels.contains(
+                    "\(RecoveryCopy.deleteNowVerb) \(VersionsPath.trashRowKind)"),
+                        "labels were \(labels)")
+                #expect(!labels.contains(
+                    "\(RecoveryCopy.putBackVerb) \(RecoveryCopy.rowKind(.note))"),
+                        "and never the note wording over a saved moment")
+                // Found while pinning the labels: the ROW's own line was
+                // version-blind too, and it hid the note this moment belongs
+                // to (a version IS `.note`-kind, so the "not a note" guard
+                // skipped exactly the row that needed the name).
+                #expect(labels.contains { $0.contains(VersionsPath.trashRowKind) },
+                        "the row says what it is — \(labels)")
+                #expect(labels.contains { $0.contains(VersionsPath.trashRowOf("md")) },
+                        "and whose moment it is — \(labels)")
+            }
+        }
+    }
+
     /// A deleted BLOCK comes back where it was, and the receipt says which
     /// of the three landings happened — `restoreBlock` answers it, the
     /// surface repeats it rather than guessing.

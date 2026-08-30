@@ -263,7 +263,7 @@ struct MobileTrashView: View {
                         .foregroundStyle(tokens.accent)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("\(RecoveryCopy.putBackVerb) \(RecoveryCopy.rowKind(item.kind))")
+                .accessibilityLabel("\(RecoveryCopy.putBackVerb) \(RecoveryCopy.rowKind(item))")
                 // **Delete Now lives HERE and nowhere else** (her round-3
                 // rider: never a full delete from inside a note). A
                 // preserved original never wears one — it rides its family
@@ -278,7 +278,7 @@ struct MobileTrashView: View {
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel(
-                        "\(RecoveryCopy.deleteNowVerb) \(RecoveryCopy.rowKind(item.kind))")
+                        "\(RecoveryCopy.deleteNowVerb) \(RecoveryCopy.rowKind(item))")
                 }
                 // Open its note, where there still is one to open.
                 if let noteID = item.noteID, !item.noteIsDeleted, item.kind != .note {
@@ -350,9 +350,19 @@ struct MobileTrashView: View {
         if item.kind == .preservedOriginal {
             parts.append(RecoveryCopy.goesWithItsFamily)
         } else {
-            parts.append(RecoveryCopy.rowKind(item.kind))
+            // The ITEM overload, so a saved version says "saved version"
+            // rather than "note" (LR2-4's rule; the Mac's display row has
+            // worded it this way since the polish round's ledger row 23, and
+            // this line is the phone's half of it, found while pinning the
+            // accessibility labels the finding named).
+            parts.append(RecoveryCopy.rowKind(item))
         }
-        if let noteTitle = item.noteTitle, item.kind != .note {
+        // A saved version's HOME is the note it is a moment of — and it is a
+        // `.note`-kind row, so the plain `item.kind != .note` guard hid that
+        // note's name from exactly the row that most needs it.
+        if let noteTitle = item.noteTitle, item.isVersion {
+            parts.append(VersionsPath.trashRowOf(noteTitle))
+        } else if let noteTitle = item.noteTitle, item.kind != .note {
             parts.append(item.noteIsDeleted
                 ? "from \(noteTitle) — also in the \(RecoveryCopy.trashSection)"
                 : "from \(noteTitle)")

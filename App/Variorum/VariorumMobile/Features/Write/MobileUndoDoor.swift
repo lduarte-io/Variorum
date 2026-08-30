@@ -255,7 +255,7 @@ final class MobileUndoDoor {
     /// **The A12 warning's DETAIL, in phone words.** The question is shared
     /// (`StructuralUndoCopy.discardingUndoQuestion`); this half is not,
     /// because the Mac's names ⌘S and a chord is a platform fact. The road
-    /// it names is the phone's own: the block's Take History sheet, which
+    /// it names is the phone's own: the block's Block History face, which
     /// is where a savepoint is read back here.
     static func discardingUndoDetail(_ warning: UndoStack.PendingUndoWarning) -> String {
         let subject = warning.bufferCount == 1
@@ -264,7 +264,7 @@ final class MobileUndoDoor {
         return "\(subject) — undoing puts back the text as it was BEFORE the "
             + "\(warning.label.lowercased()), so that writing is set aside. "
             + "It is saved first, so you can bring it back from the block's "
-            + "Take History at any time."
+            + "Block History at any time."
     }
 
     /// The everyday refusals in phone words; anything else is the

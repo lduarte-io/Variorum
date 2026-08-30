@@ -281,23 +281,12 @@ final class TrayViewModel {
     /// view: the doors below know whether the op answered or refused, and a
     /// view re-deriving that from the text would be exactly the projection
     /// the model exists to prevent.
-    nonisolated enum Status: Equatable, Sendable {
-        /// Something happened, and this says what (a landing, a placement).
-        case receipt(String)
-        /// Nothing happened, and this says why (the seal, an op refusal).
-        case refusal(String)
-
-        var text: String {
-            switch self {
-            case .receipt(let line), .refusal(let line): return line
-            }
-        }
-
-        var isRefusal: Bool {
-            if case .refusal = self { return true }
-            return false
-        }
-    }
+    /// **The type itself is `Shared/RecoveryStatus`** since mobile round 2
+    /// batch 6a — the phone's Block History face classes its messages the
+    /// same way, and a receipt/refusal split written twice is the drift this
+    /// very split exists to prevent. The name stays, so every shipped Mac
+    /// call site and pin rides unmodified (the 3C parity pattern).
+    typealias Status = RecoveryStatus
 
     private(set) var status: Status?
 
@@ -1010,32 +999,7 @@ extension View {
     }
 }
 
-/// The row's two derivations, pure so a pin can hold them without a view.
-nonisolated enum TrayRowPreview {
-    /// The FIRST LINE only — a multi-paragraph block's tray row must not
-    /// grow to the block's height, and its first line is what identifies it
-    /// (the `tocHandle` instinct, without borrowing its naming rules: a
-    /// tray row is not a heading).
-    /// The empty case's words, named so a caller in another scope can tell
-    /// it apart and say its OWN noun (13j batch 3: the History face's take
-    /// rows read "(empty block)" until the capture caught it).
-    static let emptyBlock = "(empty block)"
-
-    static func line(_ text: String?, limit: Int = 90) -> String {
-        guard let text, !text.isEmpty else { return emptyBlock }
-        let first = text.split(
-            separator: "\n", maxSplits: 1, omittingEmptySubsequences: false)[0]
-        let trimmed = first.trimmingCharacters(in: .whitespaces)
-        if trimmed.isEmpty { return emptyBlock }
-        return trimmed.count > limit ? String(trimmed.prefix(limit)) + "\u{2026}" : trimmed
-    }
-
-    /// "deleted 12 Aug" — the stored canonical stamp, read through the ONE
-    /// parser (`DateFormatter.variorumISO8601`), never re-parsed by hand.
-    /// A stamp that doesn't parse renders nothing at all rather than raw
-    /// ISO text.
-    static func stampText(_ stamp: String, verb: String) -> String? {
-        guard let date = DateFormatter.variorumISO8601.date(from: stamp) else { return nil }
-        return "\(verb) \(date.formatted(date: .abbreviated, time: .shortened))"
-    }
-}
+// (`TrayRowPreview` moved to `Shared/BlockHistoryFace.swift` at mobile
+//  round 2 batch 6a — the phone's Block History rows name takes and
+//  originals exactly as these rows name blocks. An address moved; the
+//  rule and every string are byte-identical.)

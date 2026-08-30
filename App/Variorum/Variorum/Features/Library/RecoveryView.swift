@@ -795,9 +795,10 @@ struct RecoveryView: View {
             // row, and calling it "note" is the one thing that would make the
             // group unreadable — the header IS a note, and so would every row
             // under it be.
-            Text(item.isVersion
-                 ? VersionsPath.trashRowKind
-                 : RecoveryPath.rowKind(item.kind))
+            // LR2-4's one rule, one home (batch 6a): `RecoveryCopy.rowKind(_:)`
+            // is this exact ternary, shared, so the phone's accessibility
+            // labels and this display line cannot drift.
+            Text(RecoveryCopy.rowKind(item))
                 .font(.caption)
                 .foregroundStyle(.secondary)
             if item.kind == .preservedOriginal {

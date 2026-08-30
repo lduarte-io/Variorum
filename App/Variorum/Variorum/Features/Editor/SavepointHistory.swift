@@ -21,37 +21,10 @@
 import SwiftUI
 import VariorumCore
 
-/// What a history face renders for ONE grouped row.
-nonisolated enum SavepointHistoryFace {
-    struct Rendered<Item> {
-        /// The collapsed line's count, where this row is a run — nil for a
-        /// lone savepoint, which renders as itself.
-        var runCount: Int?
-        /// Whether that line currently offers "hide" rather than "show".
-        var expanded: Bool
-        /// The savepoint rows to draw under it. A collapsed run draws none:
-        /// that is what collapsing IS, and stating it here rather than in a
-        /// view's `if` is what lets a test assert it.
-        var items: [Item]
-    }
-
-    static func rendered<Item>(
-        _ row: SavepointRuns.Row<Item>, expanded: Set<String>
-    ) -> Rendered<Item> {
-        guard let count = row.runCount else {
-            return Rendered(runCount: nil, expanded: false, items: row.items)
-        }
-        let open = expanded.contains(row.id)
-        return Rendered(runCount: count, expanded: open, items: open ? row.items : [])
-    }
-
-    /// The toggle both faces run — one rule for what a click on a run does.
-    static func toggling(_ id: String, in expanded: Set<String>) -> Set<String> {
-        var next = expanded
-        if next.contains(id) { next.remove(id) } else { next.insert(id) }
-        return next
-    }
-}
+// (`SavepointHistoryFace` moved to `Shared/BlockHistoryFace.swift` at
+//  mobile round 2 batch 6a: it was already the rule two Mac faces
+//  shared, and the phone's Block History is the third. `QuietRunRow`
+//  below is a Mac SwiftUI view and stayed.)
 
 /// The collapsed line, shared by BOTH faces so they cannot tell different
 /// stories about one run.

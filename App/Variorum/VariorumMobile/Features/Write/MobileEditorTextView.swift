@@ -163,9 +163,9 @@ final class MobileEditorTextView: UITextView {
     /// the comments sheet's pixels — the S2 pattern's siblings.
     private(set) var blockDecor: MobileBlockDecorController?
     private(set) var commentsSheetView: MobileCommentsSheetView?
-    /// The take-history sheet's pixels (parity C4a — the comments
-    /// sheet's sibling).
-    private(set) var takeHistorySheetView: MobileTakeHistorySheetView?
+    /// The BLOCK HISTORY sheet's pixels (parity C4a's sibling, widened at
+    /// round 2 batch 6a to her four regions).
+    private(set) var blockHistorySheetView: MobileBlockHistorySheetView?
     private(set) weak var editorModel: MobileEditorViewModel?
 
     /// Wires the takes surface onto this view (called from
@@ -206,10 +206,10 @@ final class MobileEditorTextView: UITextView {
         model.comments.onChanged = { [weak commentsView] in
             commentsView?.render()
         }
-        // C4a: the take-history sheet (the comments sheet's pattern).
-        let historyView = MobileTakeHistorySheetView(textView: self, model: model)
-        takeHistorySheetView = historyView
-        model.takeHistory.onChanged = { [weak historyView] in
+        // C4a, widened at 6a: the Block History sheet (comments' pattern).
+        let historyView = MobileBlockHistorySheetView(textView: self, model: model)
+        blockHistorySheetView = historyView
+        model.blockHistory.onChanged = { [weak historyView] in
             historyView?.render()
         }
     }
