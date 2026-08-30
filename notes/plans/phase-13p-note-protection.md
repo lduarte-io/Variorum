@@ -2326,3 +2326,21 @@ touched (its running instance unqueried — no act here needed it).
   finding's letter, NOT fixed here (scope discipline); recorded for
   round 2 / the closeout to adjudicate.
 - Unpushed per the standing rule — the architect verifies and pushes.
+
+### Ladder round 1 fixes — the architect's verification (2026-08-30)
+
+**VERIFIED, ACCEPTED, PUSHED.** Five commits on a clean tree; the
+fence diff (Sync/ · Migrations · Server/) EMPTY re-run by the
+architect; `swift build` clean under the architect's own run (the
+SourceKit stale-index noise dismissed against it); her real app alive
+and untouched throughout. Held items adjudicated: the regeneration
+aid is BLESSED (it is exactly what the one-brain composition needs
+when 13s re-words); the pocket-guide narrow reading of R1-m4 STANDS
+per its recorded rationale (round 2 may differ); the **mobile
+one-secret wiring gap goes to ROUND 2** for confirmation and sizing —
+if confirmed it is R13p-4's letter on the second platform and gets
+fixed in the round-2 wave, never parked ownerless. **ROUND 2
+LAUNCHED**: a brand-new cold Fable reviewer on `REVIEW_PROMPT.md`
+verbatim, anchored per the ladder rules on this file's recorded
+findings + dispositions + the fix record — a real pass over the fixes
+and what they touched.
