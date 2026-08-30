@@ -101,6 +101,28 @@ enum TutorialSeeder {
         // (where you left it).
         ("where things go",
          ["the five places", "saving a moment", "the two exits"]),
+        // PHASE 13p, knot 6 — **THE PRIVACY CHAPTER**. Her ruling,
+        // verbatim: *"yes, short chapter, and make the options that are in
+        // settings clear (require lock every time to open, don't, what you
+        // need to reset it, saving it in keychain or not, etc.). It should
+        // also be clear to a user everything they have to lose to lose
+        // their writing AND that there's an option for a plaintext backup
+        // if they want. basically give them their options in a non scary
+        // way, but in a serious way."*
+        //
+        // It sits right after "where things go" because that chapter is
+        // the recovery map, and this one is the same map's other face: the
+        // reader has just learned every place their writing is kept, and
+        // the honest next questions are "who else can read it" and "what
+        // would it take to lose it for good". Two lessons — SHORT, as she
+        // ruled.
+        //
+        // The loss-math lesson names the legs the SETTINGS pane names,
+        // because they come from one brain (`ProtectionCopy.lossLegs`);
+        // the walk asserts exactly that, so the chapter cannot drift away
+        // from the app's own sentences.
+        ("keeping it private",
+         ["your library is encrypted", "what you'd have to lose"]),
         ("ways of looking", ["lenses", "compare & versions",
                              "blocks \u{B7} canvas"]),
         ("the library of things", ["comments & tags", "books & the shelf",
@@ -238,6 +260,9 @@ enum TutorialSeeder {
         // The post-13l polish round (row 19): the map, right after the chapter
         // that raises the question.
         let places = try ops.createSection(in: book.id, name: "where things go")
+        // Phase 13p, knot 6: the privacy chapter — the recovery map's
+        // other face, right after it.
+        let privacy = try ops.createSection(in: book.id, name: "keeping it private")
         let looking = try ops.createSection(in: book.id, name: "ways of looking")
         let library = try ops.createSection(in: book.id, name: "the library of things")
 
@@ -1162,6 +1187,114 @@ enum TutorialSeeder {
             + "its own receipt, while you are standing there.",
         ])
         _ = exits
+
+        // ————————————————————————— keeping it private —————————————————————
+        //
+        // PHASE 13p, knot 6 — her ruled short chapter. Two lessons: what
+        // the encryption IS and which dials Settings offers, then the
+        // honest arithmetic of losing it, per mode, plus the one plain-text
+        // door. Non-scary, serious, and stated in the app's OWN sentences:
+        // the loss-math lesson names exactly the legs `ProtectionCopy`
+        // names, and the walk asserts that, so a re-worded pane cannot
+        // leave the lesson lying.
+
+        _ = try lesson(privacy, "your library is encrypted", [
+            "Everything in this app is encrypted where it lives. Not a switch "
+            + "you turned on: the library file itself is ciphertext, always, "
+            + "and it can only be read with a key this app holds. Copy the "
+            + "file, take the drive, open the backup folder \u{2014} what "
+            + "comes out is noise. That is the floor under every other page "
+            + "of this book.",
+
+            "What you CHOOSE is how the key is handed over when Variorum "
+            + "opens. Settings \u{25B8} Protection offers three. "
+            + "\u{201C}\(ProtectionCopy.modeLabel(.auto))\u{201D} \u{2014} this "
+            + "Mac's Keychain releases the key and the app just opens; the "
+            + "disk is protected, but anyone who can use this Mac as you can "
+            + "read. \u{201C}\(ProtectionCopy.modeLabel(.biometric))\u{201D} "
+            + "\u{2014} it asks every single time, and your login password "
+            + "can NOT open it; if the fingerprint won't take, the fallback "
+            + "is your passphrase. "
+            + "\u{201C}\(ProtectionCopy.modeLabel(.passphrase))\u{201D} "
+            + "\u{2014} you type it at every open, and nothing on this Mac "
+            + "opens the library silently.",
+
+            "Two presets set those dials for you. "
+            + "\u{201C}\(ProtectionCopy.presetTitle(.standard))\u{201D}: "
+            + "\(ProtectionCopy.presetBlurb(.standard)) "
+            + "\u{201C}\(ProtectionCopy.presetTitle(.lockedDown))\u{201D}: "
+            + "\(ProtectionCopy.presetBlurb(.lockedDown)) Presets set the "
+            + "dials; the dials rule \u{2014} move one by hand and the pane "
+            + "says so instead of pretending you picked a preset.",
+
+            "One dial decides whether a SPARE key exists. With the iCloud "
+            + "Keychain copy on, a copy of your key rides your iCloud "
+            + "Keychain, so signing into iCloud on a new device can still "
+            + "unlock your library. With it off, the key stays only on your "
+            + "enrolled devices. Locked-down turns it off on purpose: a "
+            + "spare with no fingerprint on it is a way around the gate you "
+            + "just asked for.",
+
+            "The passphrase is set in that same pane \u{2014} and the moment "
+            + "you set one, your recovery phrase (twelve words) appears on "
+            + "that same screen. It is shown once. Write it down somewhere "
+            + "real. AND YOU DO NOT NEED THE OLD PASSPHRASE TO CHANGE IT: "
+            + "\u{201C}Forgot It? Reset\u{2026}\u{201D} re-wraps the key "
+            + "under a new one after Touch ID confirms it's you. The key "
+            + "itself never changes; only what wraps it does. That is why "
+            + "forgetting is survivable.",
+
+            "Under the two asking modes, Variorum can also lock while you "
+            + "are away \u{2014} on sleep, on screen lock, after idle \u{2014} "
+            + "and \u{2303}\u{2318}L does it right now. "
+            + "\(ProtectionCopy.lockNowSentence) Under "
+            + "\u{201C}\(ProtectionCopy.modeLabel(.auto))\u{201D} there is "
+            + "deliberately no lock at all: a lock whose key re-releases at "
+            + "the next open protects nothing, and this app would rather "
+            + "offer you nothing than offer you theater.",
+        ])
+
+        _ = try lesson(privacy, "what you'd have to lose", [
+            "Encryption cuts both ways, so here is the arithmetic \u{2014} "
+            + "plainly, once, so that none of it is a surprise on a bad day.",
+
+            "On the everyday setting these are your ways back in: "
+            + ProtectionCopy.lossLegs(.auto, escrowOn: true)
+                .joined(separator: " \u{B7} ")
+            + ". ALL of them have to go wrong at once for your writing to be "
+            + "gone \u{2014} any single one of them gets you back in. That is "
+            + "a long chain on purpose.",
+
+            "Turn the dials up and the chain gets SHORTER, deliberately. "
+            + "Asking for the passphrase at every open means nothing on this "
+            + "Mac opens the library silently \u{2014} so with the iCloud "
+            + "copy off as well, forgetting your passphrase without the "
+            + "twelve words written down IS enough to lose your writing. "
+            + "That is not a flaw in the setting; it is the setting, and it "
+            + "is the right one for some people. Settings \u{25B8} Protection "
+            + "states the current chain under whichever mode you are on, and "
+            + "it updates as you move the dials.",
+
+            "Notice what that list does not contain: another computer. "
+            + "\(ProtectionCopy.oneDeviceNote)",
+
+            "There is exactly one deliberate way out of all this, and it is "
+            + "yours to open. Settings \u{25B8} Data Safety offers "
+            + "\u{201C}Keep a weekly plain-text copy of every note\u{201D}: "
+            + "every note as ordinary Markdown, in the folder you picked, "
+            + "readable by anything. It is OFF by default now that the "
+            + "library is encrypted \u{2014} because it re-opens the door the "
+            + "encryption closed \u{2014} and it is offered honestly rather "
+            + "than hidden, because some people want exactly that and it is "
+            + "their writing.",
+
+            "PRACTICE: open Settings \u{25B8} Protection and read the two "
+            + "sentences under the mode you are on. The first says what that "
+            + "mode protects and what it does not; the second is the chain "
+            + "above, kept current with your own dials. If either one ever "
+            + "reads better than the truth, that is a bug \u{2014} this app's "
+            + "whole claim here is that it says what is actually so.",
+        ])
 
         // ——————————————————————————— ways of looking ———————————————————————
 

@@ -1252,3 +1252,57 @@ struct MobileTutorialLibraryWalkTests {
         }
     }
 }
+
+// MARK: - keeping it private (the phone's privacy lesson — 13p, knot 6)
+
+/// **THE PHONE'S PRIVACY LESSON SAYS WHAT THE PHONE'S SETTINGS SAY.**
+///
+/// Her knot-6 ruling asked the tutorial to make the settings options clear
+/// and to state honestly what it would take to lose the writing. The Mac's
+/// field guide got a two-lesson chapter; the pocket guide gets ONE lesson,
+/// because the phone's Protection screen already states the per-mode
+/// sentence, the chain and the one-device fact live — the lesson's job is to
+/// send a reader there knowing what they will find.
+///
+/// It exists on the phone AT ALL because of her Batch-1 rider — *"some
+/// people will be mobile only users"*: a phone-only reader never opens the
+/// Mac's field guide, so a teaching that lived only there would not reach
+/// them. Same anti-drift discipline as the Mac's suite: the prose names the
+/// app's own words (`ProtectionCopy`, `MobileProtectionSheet.doorTitle`), so
+/// a re-worded pane makes this red rather than merely stale.
+@MainActor
+@Suite("Mobile tutorial walk — keeping it private")
+struct MobilePocketGuidePrivacyTests {
+    @Test func theChapterIsOneLessonAtTheEnd() {
+        #expect(MobileTutorialSeeder.plan.last?.chapter == "keeping it private")
+        #expect(MobileTutorialSeeder.plan.last?.lessons == ["your library is encrypted"])
+    }
+
+    @Test func theLessonNamesTheDoorsAndTheChainInTheAppsOwnWords() async throws {
+        try await withPocketGuideWorld { _, db, bookID in
+            let prose = try await db.read { db in
+                try Queries.renderedText(
+                    db, containerID: lessonID(db, bookID: bookID, "your library is encrypted"))
+            }
+            // The door a reader is sent to, by the word the sheet wears.
+            #expect(prose.contains(MobileProtectionSheet.doorTitle))
+            // All three at-open rows, as Settings shows them on the phone.
+            for mode in StoreAtOpenMode.allCases {
+                #expect(prose.contains(ProtectionCopy.modeLabel(mode)))
+            }
+            // The ruled fallback chain: the passcode is NEVER a road in.
+            #expect(prose.contains(ProtectionCopy.credentialName))
+            #expect(prose.contains("can NOT open it"))
+            #expect(prose.contains(ProtectionCopy.biometryName))
+            // The one moment the twelve words exist, and the reset road.
+            #expect(prose.contains("twelve words"))
+            #expect(prose.contains("no old passphrase needed"))
+            // The honest arithmetic, in her own non-scary-but-serious shape.
+            #expect(prose.contains("IS enough to lose your writing"))
+            #expect(prose.contains(ProtectionCopy.oneDeviceNote))
+            // …and nothing in it names the Mac (the no-redirect principle —
+            // this lesson is a phone-only reader's whole story).
+            #expect(!prose.contains("Mac"))
+        }
+    }
+}

@@ -3046,3 +3046,111 @@ struct TutorialWherePlacesActsTests {
         }
     }
 }
+
+// MARK: - keeping it private (chapter contract — Phase 13p, knot 6)
+
+/// The privacy chapter's name, in one place — the plan, the seeder's section
+/// and this suite all mean the same three words.
+private let privacyChapter = "keeping it private"
+
+/// **THE PRIVACY CHAPTER SAYS WHAT THE APP SAYS.**
+///
+/// Her knot-6 ruling asked for a short chapter that makes *"the options that
+/// are in settings clear (require lock every time to open, don't, what you
+/// need to reset it, saving it in keychain or not, etc.)"*, states *"everything
+/// they have to lose to lose their writing"*, names *"that there's an option
+/// for a plaintext backup if they want"*, and lands *"in a non scary way, but
+/// in a serious way."*
+///
+/// The DANGER with a chapter like this is drift: a settings pane re-worded at
+/// 13s and a lesson left behind is a lesson that lies about a security
+/// feature — the worst class of stale copy in the app. So the pins below tie
+/// the prose to the app's OWN sentences (`ProtectionCopy` — the same brain the
+/// pane renders and, for the loss math, the same `lossLegs` list). A re-worded
+/// mode label, a renamed preset or a changed chain makes this red rather than
+/// merely wrong.
+///
+/// It is a CONTRACT suite, not an acts suite, and deliberately so: every act
+/// this chapter could ask a reader to perform is a Keychain or biometric act,
+/// which no test may drive (the standing prompt rule). The behaviour those
+/// sentences describe is pinned where it lives — `Phase13pLobbyTests`,
+/// `Phase13pControllerTests`, `Phase13pProtectionBrainTests`.
+@MainActor
+@Suite("Tutorial contract — keeping it private")
+struct TutorialPrivacyChapterTests {
+    @Test func theChapterIsTwoLessonsInTheRightPlace() {
+        let index = try? #require(
+            TutorialSeeder.plan.firstIndex { $0.chapter == privacyChapter })
+        let places = try? #require(
+            TutorialSeeder.plan.firstIndex { $0.chapter == placesChapter })
+        #expect(index != nil && places != nil)
+        if let index, let places {
+            #expect(index == places + 1,
+                    "the recovery map raises the question this chapter answers")
+        }
+        #expect(TutorialSeeder.plan.first { $0.chapter == privacyChapter }?.lessons
+            == ["your library is encrypted", "what you'd have to lose"],
+                "SHORT, as she ruled — two lessons")
+    }
+
+    /// Every option Settings ▸ Protection offers is named in the lesson, in
+    /// the app's own words: the three at-open modes, both presets, the escrow
+    /// dial, the reset road, and the lock act's own sentence.
+    @Test func theOptionsLessonNamesEveryDialByItsRealWords() async throws {
+        try await withTutorialWorld { _, db, bookID in
+            let prose = try await db.read { db in
+                try Queries.renderedText(
+                    db, containerID: lessonID(db, bookID: bookID, "your library is encrypted"))
+            }
+            for mode in StoreAtOpenMode.allCases {
+                #expect(prose.contains(ProtectionCopy.modeLabel(mode)),
+                        "the lesson must name the row Settings shows: \(ProtectionCopy.modeLabel(mode))")
+            }
+            for preset in ProtectionPreset.allCases {
+                #expect(prose.contains(ProtectionCopy.presetTitle(preset)))
+                #expect(prose.contains(ProtectionCopy.presetBlurb(preset)))
+            }
+            // "saving it in keychain or not" — her own words for the dial.
+            #expect(prose.contains("iCloud Keychain"))
+            // "what you need to reset it" — the door, and the fact that makes
+            // forgetting survivable.
+            #expect(prose.contains("Forgot It? Reset"))
+            #expect(prose.contains("do not need the old passphrase".uppercased())
+                || prose.contains("DO NOT NEED THE OLD PASSPHRASE"))
+            // The recovery phrase's one moment.
+            #expect(prose.contains("twelve words"))
+            #expect(prose.contains("shown once"))
+            // The lock act, in the sentence the pane itself renders.
+            #expect(prose.contains(ProtectionCopy.lockNowSentence))
+            #expect(prose.contains("theater"),
+                    "R13p-14's rule is part of the teaching, not a footnote")
+        }
+    }
+
+    /// **ONE BRAIN.** The chain the lesson teaches is the chain the pane
+    /// states — every leg of `lossLegs`, verbatim — so the tutorial and the
+    /// settings copy cannot diverge (knot 6's letter).
+    @Test func theLossLessonNamesEveryLegTheAppNames() async throws {
+        try await withTutorialWorld { _, db, bookID in
+            let prose = try await db.read { db in
+                try Queries.renderedText(
+                    db, containerID: lessonID(db, bookID: bookID, "what you'd have to lose"))
+            }
+            for leg in ProtectionCopy.lossLegs(.auto, escrowOn: true) {
+                #expect(prose.contains(leg),
+                        "the everyday chain's legs come from the app's own list: \(leg)")
+            }
+            // The shorter chain, her own example carried into the lesson.
+            #expect(prose.contains("IS enough to lose your writing"))
+            // The one-device fact, in the sentence the pane renders.
+            #expect(prose.contains(ProtectionCopy.oneDeviceNote))
+            // "there's an option for a plaintext backup if they want" — named
+            // by the toggle's real words, and honest about its default.
+            #expect(prose.contains("Keep a weekly plain-text copy of every note"))
+            #expect(prose.contains("OFF by default"))
+            // Non-scary but serious: the chapter offers the reader something
+            // to do rather than only something to fear.
+            #expect(prose.contains("PRACTICE"))
+        }
+    }
+}

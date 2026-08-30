@@ -74,6 +74,16 @@ enum MobileTutorialSeeder {
         ("takes", ["your first take", "swipe & choose", "the browser", "lenses"]),
         ("structure", ["divide", "divide with takes", "merge"]),
         ("the library of things", ["comments & callouts", "the seal", "the voice switch"]),
+        // PHASE 13p, knot 6 — the privacy chapter's PHONE edition, ONE
+        // lesson. Her Batch-1 rider is why it is here at all: *"some
+        // people will be mobile only users"* — a phone-only reader meets
+        // no Mac and no field guide, so the teaching her knot-6 ruling
+        // asked for has to exist on this device too. It is deliberately
+        // SHORTER than the Mac's two-lesson chapter: the phone's Settings
+        // ▸ Protection screen states the per-mode sentence, the chain and
+        // the one-device fact live, so the lesson's job is to send the
+        // reader there knowing what they will find.
+        ("keeping it private", ["your library is encrypted"]),
     ]
 
     // MARK: - Discovery (reads — the doomed set for a wholesale replace)
@@ -196,6 +206,8 @@ enum MobileTutorialSeeder {
         let takes = try ops.createSection(in: book.id, name: "takes")
         let structure = try ops.createSection(in: book.id, name: "structure")
         let library = try ops.createSection(in: book.id, name: "the library of things")
+        // 13p, knot 6: the privacy chapter (phone edition — one lesson).
+        let privacy = try ops.createSection(in: book.id, name: "keeping it private")
 
         /// One lesson: a `.generic` note inside the book, tagged, blocks
         /// in order. Returns the minted blocks for act-ready staging.
@@ -627,6 +639,47 @@ enum MobileTutorialSeeder {
             + "where it was. The voice restyles every face of the app and "
             + "touches no text at all — what a note says and how the app "
             + "dresses are different things, and only you change either.",
+        ])
+
+        // ————————————————————————— keeping it private ————————————————————
+
+        _ = try lesson(privacy, "your library is encrypted", [
+            "Everything you write here is encrypted where it lives. Not a "
+            + "switch you turned on: the library file on this "
+            + "\(ProtectionCopy.deviceName) is ciphertext, always. Whatever "
+            + "reaches the disk, a backup, or a stolen phone is noise "
+            + "without the key.",
+
+            "Settings \u{25B8} \(MobileProtectionSheet.doorTitle) is where "
+            + "you decide how that key is handed over when the app opens. "
+            + "\u{201C}\(ProtectionCopy.modeLabel(.auto))\u{201D} just "
+            + "opens \u{2014} the disk is protected, but anyone holding "
+            + "this \(ProtectionCopy.deviceName) unlocked can read. "
+            + "\u{201C}\(ProtectionCopy.modeLabel(.biometric))\u{201D} "
+            + "asks every time, and your "
+            + "\(ProtectionCopy.credentialName) can NOT open it \u{2014} "
+            + "if \(ProtectionCopy.biometryName) won't take, the fallback "
+            + "is your passphrase. "
+            + "\u{201C}\(ProtectionCopy.modeLabel(.passphrase))\u{201D} "
+            + "asks for that passphrase itself, every time. Under the two "
+            + "asking modes the library can also lock when you leave the "
+            + "app, which is the answer to handing someone your phone.",
+
+            "Set a passphrase there and your recovery phrase \u{2014} "
+            + "twelve words \u{2014} appears on the same screen, once. "
+            + "Write it down somewhere real. Forgetting the passphrase "
+            + "later is survivable: the reset door re-wraps the key under a "
+            + "new one after \(ProtectionCopy.biometryName) confirms it's "
+            + "you, with no old passphrase needed.",
+
+            "And read the two sentences under whichever mode you are on. "
+            + "The first says what it protects and what it does not; the "
+            + "second lists every way back into your library, and it gets "
+            + "SHORTER as you turn the dials up \u{2014} on the strictest "
+            + "setting, forgetting your passphrase without the twelve words "
+            + "written down IS enough to lose your writing. That is the "
+            + "trade, stated plainly rather than hidden. "
+            + "\(ProtectionCopy.oneDeviceNote)",
         ])
 
         // The bookless practice note ("getting around" points at it):
