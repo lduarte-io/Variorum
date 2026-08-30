@@ -794,3 +794,57 @@ pushes, and a Fragments edit made after the Variorum deletion re-lands
 through create-or-open as a fresh Variorum note — which takes that day out
 of the deletion path entirely. A round whose pull stalled travels no
 deletions at all. Nothing typed in Fragments is at risk from this change.
+
+## CARRY-ITEM FOR FRAGMENTS (2026-08-30, Phase 13p) — Variorum's store is
+## now ENCRYPTED AT REST; the bridge is UNTOUCHED; one invitation, nothing owed
+
+**What changed on the Variorum side (context, not asks):** Phase 13p made
+Variorum's LOCAL store encrypted at rest as one unit — SQLCipher
+(Community, BSD) under GRDB, universal on every store on every device,
+with at-open modes (silent Keychain release by default; biometric or
+passphrase for those who dial it up) and ciphertext backups. Key custody
+is the ONE suite secret you already know from 14b: the same encryption
+passphrase and the same BIP-39 recovery phrase that wrap the sync vault
+now also wrap the store key. **Nothing about the bridge's wire changed**:
+the journal class stays E2EE end-to-end exactly as 14d left it, the
+`journal_entries` freeze stands, and no ask in this item requires a
+single Fragments-side line.
+
+**One design fact worth knowing because it answers a question before you
+ask it:** Variorum deliberately ships NO per-note locks (the author's
+R13p-16 ruling — inside an unlocked app a per-note gate is a curtain,
+not a boundary, and she declined to ship the lock-on-open theater her
+own marketing will critique). So there is no "locked day" state, and no
+day ever stops pushing to Fragments for protection reasons — the bridge
+sees exactly what it always saw.
+
+**THE INVITATION (the author's instruction — this is the item's point):**
+whether Fragments wants its OWN at-rest story for its local store is
+YOUR app's call, and she asked that this brief inform it. The framing
+that holds the suite coherent: **local at-rest encryption is orthogonal
+to the 14b server-readability ruling.** Fragments' non-journal content
+stays server-readable BY DESIGN (its insights are the product — that
+ruling is not reopened here); an encrypted local store on the client
+covers the stolen-device / copied-file threat while leaving the insight
+pipeline exactly as it is. Variorum's road (whole-store SQLCipher, raw
+key in device custody, wraps under the suite passphrase) is documented
+in `notes/plans/phase-13p-note-protection.md` + its spike memo if the
+pattern is useful; your stack and your call. Her stated goal, verbatim:
+finishing this encryption *"lets me finish fragments and have a
+cohesive privacy policy."*
+
+**The cohesive-policy half:** the suite privacy story is being briefed
+to the stargazing.tech agent in the same phase
+(`notes/stargazing-privacy-policy-brief-13p.md` in the Variorum repo —
+she carries it). Its three tiers name Fragments honestly: E2EE for the
+journal class · local-encrypted-at-rest where an app has built it ·
+server-readable by design for Fragments insights, with the why stated
+plainly. If any sentence there misdescribes Fragments, say so through
+this channel before the policy finalizes.
+
+**Also coming, separately:** Phase 13y (pre-release) will carry an
+abuse-limiting brief through this same channel (per-account
+quotas/rate-limit design shared across the suite) — noted so it is
+expected, not a surprise. And the 13l carry-item's ONE ASK above
+(empty-body-as-deletion detection + what the Day screen shows) is still
+open and still wanted; nothing here supersedes it.
