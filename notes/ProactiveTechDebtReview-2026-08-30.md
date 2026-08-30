@@ -1366,20 +1366,123 @@ Raw findings per lens before verification:
 - Verification was one adversarial pass per finding, not a panel. The single PLAUSIBLE finding (P8)
   is flagged as such because the verifier judged it needed a run to settle, not a read.
 
-## Suggested disposition
+## Audit — every finding tempered, checked, and homed
 
-Per the KnownIssues rule, an item either gets an owner or gets fixed now. A rough read on where these
-naturally fall, offered as a starting point and not as a decision:
+Built 2026-08-30 at the author's instruction: *"ensure all finder's findings have been tempered by
+verifiers and that what is in all of the plan files / documentation are correct… to ensure that
+everything has a home."*
 
-- **The credential cluster (P1, P2, P10, P11, P12, P13)** is one root cause and wants one fix, and it
-  is data-safety on the encryption layer that just shipped — a candidate for immediate attention
-  rather than a phase slot, since P1's road needs no user action to fire.
-- **The P1-violation cluster (P16-P22)** belongs with 13u1, which the master plan already says rewrites
-  this exact seam and already owns the known twin — fixing them elsewhere means fixing them twice.
-- **The churn-from-widened-report pair (P24, P25)** is a correctness bug in the 80%-sort with a
-  one-line shape, and sits in the same editor seam.
-- **The architecture and drift tier (T4)** is the natural companion to the existing "eight brains"
-  row — P40 and P41 name two forks that row's enumeration claims to have complete.
-- **The test-integrity tier (T5)** is cheap and is what makes every future review's red-on-old
-  discipline actually mean something.
+**What the audit found and fixed.** Every one of the 65 raw findings reached a verifier and
+received a verdict — **zero UNVERIFIED**, 15 refuted, 50 survived. But a real gap existed in the
+plan files: their entries were generated from the **finder's** mechanism text, while the verifier's
+corrections lived only in this document. **31 of the 50 verifier notes contain material
+tempering** — a refuted limb, a corrected number, a downgraded severity, an "already documented"
+— so a fresh session reading a plan file would have acted on the finder's unchecked claim. P39 was
+that failure mode caught by hand (its "20 mutual pairs" measured as 8).
 
+**The fix, applied to all 50:** every entry in `phase-17-standing-fixes.md` and in the 13u1 fold
+now carries the verifier's full trace inline, under an explicit precedence line — *where the two
+differ, the verifier wins, because it was written with the real code open and instructions to
+refute.* Severities in the plan files were already the verifier's corrected values, not the
+finder's.
+
+| P | Finder → Verifier severity | Verdict | Verifier tempered it | In plan, with temper | Home |
+|---|---|---|---|---|---|
+| P1 | MAJOR | CONFIRMED | **yes** | ✓ | 17a |
+| P2 | MAJOR | CONFIRMED | **yes** | ✓ | 17a |
+| P3 | MAJOR | CONFIRMED | no — confirmed as written | ✓ | 17a |
+| P4 | MAJOR | CONFIRMED | **yes** | ✓ | 17b |
+| P5 | MAJOR | CONFIRMED | **yes** | ✓ | 17b |
+| P6 | MAJOR | CONFIRMED | **yes** | ✓ | 17b |
+| P7 | MAJOR | CONFIRMED | no — confirmed as written | ✓ | 17b |
+| P8 | MAJOR | PLAUSIBLE | **yes** | ✓ | 17d |
+| P9 | MINOR | CONFIRMED | no — confirmed as written | ✓ | 17d |
+| P10 | MINOR | CONFIRMED | no — confirmed as written | ✓ | 17a |
+| P11 | MINOR | CONFIRMED | **yes** | ✓ | 17a |
+| P12 | MINOR | CONFIRMED | **yes** | ✓ | 17a |
+| P13 | MINOR | CONFIRMED | **yes** | ✓ | 17a |
+| P14 | MINOR | CONFIRMED | no — confirmed as written | ✓ | 17b |
+| P15 | MINOR | CONFIRMED | no — confirmed as written | ✓ | 17a |
+| P16 | MAJOR | CONFIRMED | **yes** | ✓ | 13u1 |
+| P17 | MINOR | CONFIRMED | **yes** | ✓ | 13u1 |
+| P18 | MAJOR | CONFIRMED | no — confirmed as written | ✓ | 17c |
+| P19 | MAJOR | CONFIRMED | **yes** | ✓ | 17c |
+| P20 | MINOR | CONFIRMED | **yes** | ✓ | 17c |
+| P21 | MINOR | CONFIRMED | **yes** | ✓ | 17c |
+| P22 | MINOR | CONFIRMED | **yes** | ✓ | 13u1 |
+| P23 | MAJOR | CONFIRMED | **yes** | ✓ | 17e |
+| P24 | MAJOR | CONFIRMED | no — confirmed as written | ✓ | 13u1 |
+| P25 | MAJOR | CONFIRMED | no — confirmed as written | ✓ | 13u1 |
+| P26 | MAJOR | CONFIRMED | **yes** | ✓ | 17e |
+| P27 | MINOR | CONFIRMED | **yes** | ✓ | 17e |
+| P28 | MINOR | CONFIRMED | no — confirmed as written | ✓ | 17d |
+| P29 | MINOR | CONFIRMED | **yes** | ✓ | 17e |
+| P30 | MINOR | CONFIRMED | **yes** | ✓ | 17d |
+| P31 | MINOR | CONFIRMED | **yes** | ✓ | 17d |
+| P32 | MINOR | CONFIRMED | **yes** | ✓ | 17e |
+| P33 | MINOR | CONFIRMED | no — confirmed as written | ✓ | 17e |
+| P34 | NIT | CONFIRMED | **yes** | ✓ | 17e |
+| P35 | NIT | CONFIRMED | **yes** | ✓ | 17e |
+| P36 | NIT | CONFIRMED | no — confirmed as written | ✓ | 17b |
+| P37 | NIT | CONFIRMED | no — confirmed as written | ✓ | 17e |
+| P38 | MINOR | CONFIRMED | no — confirmed as written | ✓ | 17e |
+| P39 | MINOR | CONFIRMED | **yes** | ✓ | *undecided — options recorded* |
+| P40 | MINOR | CONFIRMED | **yes** | ✓ | 13u1 |
+| P41 | MINOR | CONFIRMED | **yes** | ✓ | 13u1 |
+| P42 | NIT | CONFIRMED | no — confirmed as written | ✓ | 17f |
+| P43 | MINOR | CONFIRMED | **yes** | ✓ | 17f |
+| P44 | NIT | CONFIRMED | no — confirmed as written | ✓ | 17f |
+| P45 | NIT | CONFIRMED | no — confirmed as written | ✓ | 17f |
+| P46 | NIT | CONFIRMED | no — confirmed as written | ✓ | 17f |
+| P47 | MINOR | CONFIRMED | no — confirmed as written | ✓ | 17f |
+| P48 | MINOR | CONFIRMED | **yes** | ✓ | 17f |
+| P49 | MINOR | CONFIRMED | **yes** | ✓ | 17f |
+| P50 | NIT | CONFIRMED | **yes** | ✓ | 17f |
+
+**Totals:** 50 findings · 31 materially tempered by their verifier · 50/50 present in a plan file
+with the verifier's trace attached · 49 homed to a named entry, 1 (P39) recorded with options and
+awaiting the author's call. **No finding is represented anywhere by the finder alone.**
+
+*Severity shown is the VERIFIER's corrected value — which is what the plan files use. Where a
+verifier downgraded (P17, P40) or refuted a limb of a multi-part finding (P5, P16, P32, P39, P48),
+the plan entry now shows both the claim and the correction.*
+
+## Dispositions — ASSIGNED 2026-08-30
+
+Every finding has an owner. Assigned by the author the same day this sweep ran, so the KnownIssues
+rule ("no item without a named owner") is satisfied without this file having to act as a tracker.
+
+**This document is a dated snapshot and is NOT a tracking surface.** It is never edited to reflect
+progress. The live state lives in the owning plan files and in `KnownIssuesAndTechDebt.md`.
+
+| Owner | Items | P-numbers |
+|---|---|---|
+| **17a** | 8 | P1, P2, P3, P10, P11, P12, P13, P15 |
+| **17b** | 6 | P4, P5, P6, P7, P14, P36 |
+| **17c** | 4 | P18, P19, P20, P21 |
+| **17d** | 5 | P8, P9, P28, P30, P31 |
+| **17e** | 10 | P23, P26, P27, P29, P32, P33, P34, P35, P37, P38 |
+| **17f** | 9 | P42, P43, P44, P45, P46, P47, P48, P49, P50 |
+| **13u1** (folded into its plan file) | 7 | P16, P17, P22, P24, P25, P40, P41 |
+| **unslotted — needs her call** | 1 | P39 |
+
+**Where each owner's record lives:**
+
+- **17a–17f** → `notes/plans/phase-17-standing-fixes.md`, the standing-fix phase opened by the author
+  on 2026-08-30. Entries are independently scoped, cast, run and closed; the phase never closes. **17a
+  is the urgent one** — the 13p residue, live on the real encrypted store, no user action needed to
+  fire.
+- **13u1** → the fold section at the end of `notes/plans/phase-13u-feel-and-polish.md`. Routed there
+  and not to Phase 17 because 13u1's item 5 rewrites that exact seam; fixing them elsewhere means
+  fixing them twice. Deliberately NOT added to the master plan's `### 13u` section, which stays
+  product advancement only.
+- **P39** → unslotted, and named as such in the Phase 17 file rather than smuggled into an entry.
+  Architectural surgery (20 feature-to-feature pairs, a `Library`↔`Pool` view-model cycle) does not
+  belong in a standing *quick fix* phase — that would misrepresent its size, which is the same
+  pollution this arrangement exists to prevent, in the other direction. Three honest options are
+  recorded there; leaving it unowned is the one bad one.
+
+**Nothing here was fixed.** Every item carries a traced mechanism and a file:line and nothing more —
+**no red-on-old pin exists for any of the 50.** Under the hallucination guard, step zero for each is
+the pin that fails on the pre-fix tree, and a pin that passes on both sides dismisses the item as
+hollow rather than fixing it.

@@ -73,6 +73,20 @@ confirmed priority list.** **Rows marked 🟣 need her; 🚀 is the launch.**
 | 14 | 🟣 💻 **13h** | **Folder bridge & import** — building INTO the Imports library if 13i rules it | 13h's row + `notes/plans/phase-13h-folder-design-note.md` |
 | 15 | 🟣 💻 **13q** | **Delight** | 13q's row + brief |
 
+**⚠️ AMENDED 2026-08-30 (her stated plan, same day as the Phase 17 ruling).** The table above is
+superseded in its ORDER by her sequence below; the rows themselves are unchanged. Two moves: **13y
+drops from 3b to after 13x** (still pre-release, so its "cheap before strangers" rationale holds — it
+simply becomes the LAST sync-touching work before launch), and **13o moves ahead of 13r**. A new
+fix-phase step opens the sequence:
+
+> **13p-fix** (her live session — a defect found testing the refreshed 13p install) → **17a + a cold
+> review of 13p-fix** in one brief session, which also writes the **Fragments-encryption outbound
+> brief** and may carry **P39's rule refinement, 17c and 17f** → **13u1** → **13u2** → **13i** →
+> **13o** → **13r** → **13x** → **13y** → **13s** → 🚀 **release**
+
+Fix work is `notes/plans/phase-17-standing-fixes.md`'s, not this document's, per the same-day
+standing-fixes ruling — the letters appear here only so the ORDER is legible in one place.
+
 **Not in this order and hers to slot:** 13v (the phone's journal
 bridge) · 13w (automated versions) · 16 (images — post-v1 early) ·
 EPUB · Apple Notes import (naturally 13h-adjacent, into the Imports
@@ -195,6 +209,7 @@ Her instruction: *"I would add a note to 13u explaining that this impacts mobile
 **So this phase writes mobile's deliverable INTO itself** rather than leaving parity rows behind, and the kickoff sitting should have the phone's shape in view. **The mobile round's own analysis of the overlap is `notes/plans/mobile-round-2-orchestrator-handoff.md` §5** — it enumerates which mobile items are downstream of item 5's semantics and which are independent mechanisms.
 
 | — | **FUTURE PHASES → `notes/FuturePhases.md`** (her lean-docs ruling, 2026-08-30 at the 13p closeout: *"there could be a 'future phases' and only the next 3 or so phases, or phases that depend on each other, are in the detailed phases and they're moved in one at a time"*) | The far rows live VERBATIM in that file — **CANON, exactly as binding as this table**, just not context-loaded; a row there satisfies the KnownIssues owner rule exactly as a row here does | Currently there: 13h · 13m · 13n · 13o · 13q · 13r · 13s · 13t · 13v · 13w · 13x · 16 (Images) · the mobile project row · EPUB · grammar · more-export · Apple Notes import · v1 release readiness | Rows move BACK one at a time as their turn approaches — a standing closeout step from this ruling on | pending — see the file |
+| 17 | **STANDING FIXES → `notes/plans/phase-17-standing-fixes.md`** (author, 2026-08-30, verbatim: *"that phase will be standing quick bug fixes… when I notice a quick bug or issue or something that I want fixed, it'll be added as an entry like 17a, 17b, 17c"*) | Bug fixes and tech debt get real phase discipline and ONE cohesive home — **without polluting this document**, which stays PRODUCT ADVANCEMENT (her words: *"without it polluting the detailed plan for phases document with bug fixes / tech debt rather than product advancement"*). The companion axis to the same-day FuturePhases ruling: that one moves work out by TIME, this one by KIND | Lettered entries **17a, 17b, 17c…**, each independently scoped, cast, run and closed. A 17-entry is a valid OWNER under the KnownIssues rule, exactly as a phase number is. **This phase never closes** — its entries do. Currently open: 17a (the 13p residue — key custody + re-lock, URGENT) · 17b (text-loss doors) · 17c (read-layer P1) · 17d (purge/sync/bridge honesty — the `Sync/` Fable rider binds) · 17e (correctness singles) · 17f (dead code, canon corrections, test pins) | Per entry, at its own close: every item verdicted FIXED-with-a-pin, DISMISSED-as-hollow, or DEFERRED with a named owner | **standing — see the file** |
 
 Phases may subdivide when their just-in-time plans are written; the table then gains rows (e.g. 3a/3b) rather than rewriting history.
 
