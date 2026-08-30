@@ -1087,3 +1087,127 @@ Everything in the first handoff's §5 still holds. Added this seat:
     re-offering rather than waiting on**, and nobody currently owns
     re-offering it. *(A build also unblocks eight of the nine device-queue
     rows.)*
+
+---
+
+# §9. THE HANDBACK CHECKLIST — **RUN 2026-08-30. RESULTS BELOW.**
+
+*Written by the 2026-08-30 orchestrator session, at her instruction to
+find mobile parity work runnable **without 13u**. §2b said an
+instruction to verify is not a verification; this is the verification.*
+
+## 9.1 THE STATE THAT CHANGED UNDER THIS ROUND — read this first
+
+**`mobile` was 206 commits behind `main` and ZERO ahead** (fast-forwarded
+at the top of this session). **THREE Mac phases closed since the
+2026-08-23 cutover, not one**, and the handoff above was written knowing
+only about 13l:
+
+| phase | closed | what it means for mobile |
+|---|---|---|
+| **13l** | 2026-08-24 | **All four handback items LANDED** (9.2). Parity row **PL-13** born — the phone owes data-safety FACES |
+| **the post-13l polish round** | 2026-08-25 | **RULED BATCH 6's ENTIRE DESIGN** before a mid-design could reach the phone — her token instruction, executed: `mobile-round-2.md` **§69**. Parity row **PL-14** |
+| **13p** | 2026-08-30 | **The phone's encryption faces SHIPPED INSIDE THE PHASE** (PL-15, her mobile-only-user rider; 19 pins, mobile 486/78 → 513/86). **No parity debt owed** — only her LIVE Face ID walk and the on-device perf leg, which only her hardware can give |
+
+**13i also ran** (wings + the Owned book — `CoreDescription` pillar 3 and
+`OverallModel` §2 carry the ratified additions). Its mobile consequences
+are not yet enumerated in the ledger; **that is an open item, not a
+finding against anyone.**
+
+**Baseline now: core 1453/154 · Mac 1843/312 · mobile 513/86 · spine
+71/10; marker 7.** The Mac's known intermittent latency pin is
+red-under-load and pre-existing — its KnownIssues row says re-run it
+isolated before concluding anything.
+
+## 9.2 13l's FOUR — **ALL FOUR LANDED. Nothing comes back to mobile.**
+
+Commands are §2b's own, run against `main`'s tip (5123580). §2b gave the
+value each returns **while undone**; every one of them moved.
+
+| # | item | §2b said (= undone) | **MEASURED** | verdict |
+|---|---|---|---|---|
+| **L-a** | the identity-projection audit hoist | `0` | **`1`** | ✅ **landed** — and it earned its keep: its FIRST run caught the macOS-26 attribute-fixing widening now pinned in `TEXTKIT2_NOTES.md` §3 |
+| **L-b** | the Mac `QuickEntryBar` destroying her text on a refusal | `1` | **`0`** | ✅ **landed** — the live data-loss bug on her daily driver is gone |
+| **L-c** | `AppBootstrap` migrations on the main thread (P2) | `0` | **`4`** | ✅ **landed** |
+| **L-d** | `AppSession.postAutosaves` with no removal path | `0` | **`2`** | ✅ **landed** |
+
+**Consequence: 4.5e is verification-only, exactly as §3 row 5 predicted,
+and no 13l item returns to mobile under §2b's rule.**
+
+## 9.3 13u's — **NOT RUN. Every item still open, as expected.**
+
+13u has not run and **was SPLIT on 2026-08-26 into 13u1 (the editor
+seam) + 13u2 (feel & faces)**, sharing ONE kickoff sitting. **U-3** and
+**U-5** measured at their undone values (`0` and `0`). U-1, U-2, U-4 and
+U-7 are unchanged by construction.
+
+**This is not a defect and must not be treated as one** — the author's
+own framing, 2026-08-30: *"the 13u not being done should NOT be treated
+as an error."*
+
+**What 13u genuinely blocks, and ONLY this:**
+
+1. **Batch 4.6** (the quick note's second pass) — blocked on **13u item
+   9**, which settles the quick-capture ownership model for BOTH
+   platforms. Her ruling: *"it won't need a design sitting, the mac will
+   have decided it."* Building the phone's face before that ruling is
+   the divergence the two-Mac-phases-first order exists to prevent.
+2. **The cross-block SEMANTICS half of 4.5c** — 13u1's item 5.
+3. **U-1's policy half** (U-1's *correctness* half — never authorize
+   from stale state — was always safe to take back).
+
+**Everything else is unblocked.** Batches 5, 6, 7, 8, 9 and 10 do not
+depend on 13u at all.
+
+## 9.4 WHAT IS BLOCKED ON **HER**, NOT ON 13u — do not improvise it
+
+**PL-14(b) / §69.5 — the phone's ARCHIVE/TRASH IA SEPARATION**, and
+**§69.6 — the VERSIONS face's door and listing shape.** Her ruling,
+verbatim in PL-14: the phone mimics the Mac's decided surfaces *"in some
+way that works for mobile"*, settled at **its own design session
+proposing different designs to her as HTML mockups**. The phone's
+combined "Archived & Deleted" is **known-interim by her word**.
+
+**So batch 6 SPLITS, and the split is the useful finding:**
+
+- **6a / 6b — BUILDABLE NOW, design fully ruled by §69:** the Block
+  History twin (§69.4) · the per-note tray's three-section shape
+  (§69.3) · the verify-don't-rebuild set (§69.7) · the pocket guide's
+  deletion chapter (§69.8) · the version-blind accessibility labels
+  (PL-14(g), one line, owed regardless).
+- **6c — WAITS FOR HER:** the IA separation and the Versions face.
+
+## 9.5 THE DELETED-TAKE DARK WINDOW — the reason 6a goes first
+
+**PL-14(c) / §69.2: deleted takes are currently INVISIBLE and
+UN-RESTORABLE on the phone** — recoverable only via the Mac. `TrashScope`
+shipped on both platforms (takes never row in a global Trash, correctly),
+but the phone's Block History and tray faces — which are a deleted take's
+*only* home — have not landed. **The rule is right and the face is
+missing, so the phone has a data-visibility hole on her daily driver.**
+It is recorded OPEN and hers to time; this session builds 6a to close it.
+
+## 9.6 PL-10's FOUR DOORS — verified still missing, core ops all present
+
+Measured this session, so batch 7's brief does not have to re-derive it:
+
+| PL-10 | core op | phone door |
+|---|---|---|
+| (a) reorder takes | `reorderTake` — `Operations+Variant.swift` ✅ | **0 references** |
+| (b) duplicate-book-name guard | `assertBookNameIsFree` — `Operations+Reading.swift` ✅ | **0 references** |
+| (c) copy-all-takes | `Queries.blockTakes` ✅; `TakeClipboard` is **Mac-only** | needs a `UIPasteboard` twin — **HOIST, never copy** (§3) |
+| (d) take→block | `Operations+TakeStructure.swift` ✅ | Mac doors only |
+
+**B45-2's coupling sits at `MobileEditorViewModel.swift:1146`
+(`displaySlot`) with its callers in `MobileTakesController.swift`** — and
+batch 7's reorder-takes work walks straight into it, so it closes first.
+
+## 9.7 THIS SESSION'S CAST — a stated call, hers to overturn
+
+Her 2026-08-23 ruling was **Fable, one subagent at a time**. Her
+2026-08-30 instruction records the budget as *"33% of my weekly limit
+left mostly on Opus agents"*. **Called: Opus implementers, still strictly
+ONE AT A TIME** — coherent with 13p's own cast (Fable on substrate and
+custody, **Opus on faces**), and this session is all faces. **The
+one-at-a-time half of her ruling is untouched**; R28 (build → cold review
+→ fix as one unit) binds unchanged.
