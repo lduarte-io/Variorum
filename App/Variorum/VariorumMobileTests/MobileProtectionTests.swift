@@ -1,0 +1,548 @@
+//
+//  MobileProtectionTests.swift
+//  VariorumMobileTests
+//
+//  Phase 13p, Batch 4 — THE PHONE'S HALF OF WHOLE-STORE ENCRYPTION
+//  (PL-15; the plan's MOBILE-ONLY-USER EXPANSION, items a–i). Her rider
+//  at the Batch-1 GO is what these pins are for: *"some people will be
+//  mobile only users"* — so every claim below is made about a library
+//  whose only home is this phone, with no Mac anywhere in the road.
+//
+//  What is pinned here, and what deliberately is not:
+//  · (a) FIRST LAUNCH ON THE PHONE mints the key and the store is born
+//    ENCRYPTED — through the same `openStore` the app's bootstrap calls.
+//  · (b) THE PHONE'S EXISTING STORE MIGRATES on its first keyed open,
+//    content whole, zero plaintext afterwards.
+//  · (c) THE LOCKED LOBBY on iOS: a demanded mode lands `.locked` with
+//    NOTHING opened, unlock opens, Lock Now tears down and re-locks —
+//    the Mac's own choreography, proven on the phone's compiled copy of
+//    the shared brain (a hoist is only real if both sides run it).
+//  · (g) THE RE-LOCK DIAL's phone reading — pure policy, the
+//    coordinator's stamp, and the scene seam's ORDER (flush first, lock
+//    last; a return that locks does not first wake a sync round).
+//  · (h) the loss math's ONE brain and the one-device sentence.
+//  · (i) capture over a LOCKED store refuses in words and KEEPS her text
+//    — her ratification's reachable seam.
+//  · The platform-aware copy actually reading as the phone's.
+//
+//  NO test here evaluates biometrics or touches the Keychain: every
+//  custody road runs through the scripted `StoreLaunchGate`/
+//  `InMemoryStoreKeyGuardBacking`, exactly as the Mac suite does. The
+//  LIVE Face ID walk on her device is a morning act, recorded PENDING.
+//
+
+import Dependencies
+import Foundation
+import GRDB
+import SwiftUI
+import Testing
+import UIKit
+import VariorumCore
+@testable import VariorumMobile
+
+// MARK: - Helpers
+
+@MainActor
+private func temporaryDirectory() throws -> URL {
+    let url = FileManager.default.temporaryDirectory
+        .appendingPathComponent("variorum-13p-phone-\(UUID().uuidString)", isDirectory: true)
+    try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+    return url
+}
+
+private func fastKDF() -> PassphraseKDF.Descriptor {
+    PassphraseKDF.Descriptor(
+        algorithm: PassphraseKDF.algorithmArgon2id, argon2Version: 0x13,
+        memoryKiB: 256, iterations: 1, parallelism: 1,
+        salt: PassphraseKDF.randomSalt(), outputBytes: 32)
+}
+
+/// Does the file hold this prose in the clear? (The zero-plaintext scan,
+/// the same shape Batch 1's acceptance pin uses.)
+private func fileContains(_ needle: String, at url: URL) throws -> Bool {
+    let bytes = try Data(contentsOf: url)
+    guard let probe = needle.data(using: .utf8) else { return false }
+    return bytes.range(of: probe) != nil
+}
+
+// MARK: - (a) + (b): the phone as a birthplace, and as a migrator
+
+@MainActor
+@Suite("13p phone — the store is born encrypted, and an old one migrates")
+struct MobilePhoneStoreEncryptionTests {
+    /// **ITEM (a).** A phone with no Mac anywhere: the first open MINTS a
+    /// key into this device's (scripted) custody and the store that
+    /// appears is ciphertext from its first byte. Zero ceremony — the
+    /// knot-4 ruled shape, on iOS.
+    @Test func firstLaunchOnThePhoneMintsTheKeyAndTheStoreIsBornEncrypted() async throws {
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let storeURL = dir.appendingPathComponent("variorum.sqlite")
+        let custody = StoreKeyCustody.inMemory()  // empty: nothing minted yet
+        #expect(custody.load() == nil)
+        #expect(StoreFilePresence.classify(at: storeURL) == .absent)
+
+        let database = try AppDatabase.openStore(at: storeURL, custody: custody)
+        try await database.write { db in
+            try db.execute(
+                sql: "INSERT OR REPLACE INTO setting (key, value) VALUES (?, ?)",
+                arguments: ["phone_probe", "written on the phone, never on a Mac"])
+        }
+        // The key exists NOW and did not before — the phone minted it.
+        let minted = try #require(custody.load())
+        #expect(minted.data.count == 32)
+        // …and nothing readable reached the disk.
+        #expect(StoreFilePresence.classify(at: storeURL) == .encryptedOrUnknown)
+        #expect(try !fileContains("written on the phone", at: storeURL))
+        database.asRebindable().binding.lock()
+
+        // Re-opening with that custody reads it back whole.
+        let reopened = try AppDatabase.openStore(at: storeURL, custody: custody)
+        let prose = try await reopened.read { db in
+            try String.fetchOne(db, sql: "SELECT value FROM setting WHERE key = 'phone_probe'")
+        }
+        #expect(prose == "written on the phone, never on a Mac")
+        reopened.asRebindable().binding.lock()
+    }
+
+    /// **ITEM (b).** Her phone's real store is a PRE-13p plaintext store;
+    /// it migrates on the first keyed open through the same
+    /// `sqlcipher_export` road the Mac drilled — the substrate reaches
+    /// iOS by construction, and this is the pin that says so out loud.
+    @Test func aPlaintextPhoneStoreMigratesOnItsFirstKeyedOpen() async throws {
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let storeURL = dir.appendingPathComponent("variorum.sqlite")
+
+        let plaintext = try AppDatabase.onDisk(url: storeURL, key: nil)
+        try await plaintext.write { db in
+            try db.execute(
+                sql: "INSERT OR REPLACE INTO setting (key, value) VALUES (?, ?)",
+                arguments: ["phone_probe", "a journal entry typed in bed"])
+        }
+        plaintext.asRebindable().binding.lock()
+        #expect(StoreFilePresence.classify(at: storeURL) == .plaintext)
+        #expect(try fileContains("typed in bed", at: storeURL),
+                "the control: before the migration it IS readable")
+
+        let custody = StoreKeyCustody.inMemory(initial: .mint())
+        let migrated = try AppDatabase.openStore(at: storeURL, custody: custody)
+        #expect(StoreFilePresence.classify(at: storeURL) == .encryptedOrUnknown)
+        #expect(try !fileContains("typed in bed", at: storeURL))
+        let prose = try await migrated.read { db in
+            try String.fetchOne(db, sql: "SELECT value FROM setting WHERE key = 'phone_probe'")
+        }
+        #expect(prose == "a journal entry typed in bed", "the content survived whole")
+        migrated.asRebindable().binding.lock()
+    }
+}
+
+// MARK: - (c): the locked lobby, on the phone's own compiled brain
+
+@MainActor
+@Suite("13p phone — the locked lobby & re-lock choreography")
+struct MobilePhoneLobbyTests {
+    private struct World {
+        let bootstrap: AppBootstrap
+        let backing: InMemoryStoreKeyGuardBacking
+        let openCount: LockIsolated<Int>
+    }
+
+    private func withDeps<T>(_ body: @MainActor () async throws -> T) async rethrows -> T {
+        try await withDependencies {
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.uuid = .incrementing
+        } operation: { @MainActor in
+            try await body()
+        }
+    }
+
+    private func demandedWorld(
+        mode: StoreAtOpenMode, biometricSucceeds: Bool = false
+    ) throws -> World {
+        let dir = try temporaryDirectory()
+        let storeURL = dir.appendingPathComponent("store.sqlite")
+        let key = StoreKey.mint()
+        var envelope = StoreKeyEnvelope()
+        try envelope.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
+        let backing = InMemoryStoreKeyGuardBacking(
+            gated: mode == .biometric ? key : nil,
+            biometryAvailable: mode == .biometric,
+            biometricSucceeds: biometricSucceeds)
+        let gate = StoreLaunchGate.scripted(
+            dials: ProtectionDials(mode: mode), backing: backing, envelope: envelope)
+        let openCount = LockIsolated(0)
+        let bootstrap = AppBootstrap(
+            testOpener: {
+                openCount.withValue { $0 += 1 }
+                return Result { try AppDatabase.onDisk(url: storeURL, key: key) }
+                    .mapError { AppDatabase.StoreOpenError(
+                        storePath: storeURL.path, reason: String(describing: $0)) }
+            },
+            gate: gate)
+        return World(bootstrap: bootstrap, backing: backing, openCount: openCount)
+    }
+
+    /// **NOTHING RUNS BEFORE UNLOCK on the phone either** — and, because
+    /// the shell (and with it the quick-note box, the only capture
+    /// surface the phone has) exists ONLY inside `.ready`, this is item
+    /// (i)'s structural half: there is no box to type into while locked.
+    @Test func aDemandedModeLandsLockedWithNothingOpened() async throws {
+        let world = try demandedWorld(mode: .passphrase)
+        await world.bootstrap.awaitOpen()
+        guard case .locked(let lobby) = world.bootstrap.state else {
+            Issue.record("expected .locked, got \(world.bootstrap.state)")
+            return
+        }
+        #expect(world.openCount.value == 0)
+        #expect(lobby.demand == .passphrase)
+        #expect(lobby.passphraseOffered)
+        #expect(!world.bootstrap.canLock, "no Lock Now while already locked")
+    }
+
+    @Test func unlockOpensAndLockNowTearsDownAndUnlocksAgain() async throws {
+        try await withDeps {
+            let world = try demandedWorld(mode: .passphrase)
+            await world.bootstrap.awaitOpen()
+            guard case .locked(let lobby) = world.bootstrap.state else {
+                Issue.record("expected .locked")
+                return
+            }
+            await lobby.unlock(passphrase: "not it")
+            #expect(lobby.lastError == "That passphrase doesn't unlock this library.")
+            #expect(world.openCount.value == 0)
+
+            await lobby.unlock(passphrase: "sesame")
+            await world.bootstrap.awaitOpen()
+            guard case .ready(let session) = world.bootstrap.state else {
+                Issue.record("expected .ready after unlock")
+                return
+            }
+            #expect(world.openCount.value == 1)
+            #expect(world.bootstrap.canLock)
+            try await session.database.write { db in
+                try db.execute(
+                    sql: "INSERT OR REPLACE INTO setting (key, value) "
+                        + "VALUES ('relock', 'survives')")
+            }
+
+            await world.bootstrap.lock()
+            guard case .locked(let secondLobby) = world.bootstrap.state else {
+                Issue.record("expected .locked after Lock Now")
+                return
+            }
+            #expect(throws: StoreLockedError()) {
+                try session.database.read { db in
+                    try String.fetchOne(
+                        db, sql: "SELECT value FROM setting WHERE key = 'relock'")
+                }
+            }
+            await secondLobby.unlock(passphrase: "sesame")
+            await world.bootstrap.awaitOpen()
+            guard case .ready(let reopened) = world.bootstrap.state else {
+                Issue.record("expected .ready after the second unlock")
+                return
+            }
+            let survived = try await reopened.database.read { db in
+                try String.fetchOne(db, sql: "SELECT value FROM setting WHERE key = 'relock'")
+            }
+            #expect(survived == "survives")
+        }
+    }
+
+    /// R13p-14 on the phone: a lock whose key auto-releases at the next
+    /// open is theater, and no theater ships.
+    @Test func lockNowUnderAutoIsRefusedAsTheater() async throws {
+        try await withDeps {
+            let dir = try temporaryDirectory()
+            let storeURL = dir.appendingPathComponent("store.sqlite")
+            let key = StoreKey.mint()
+            let gate = StoreLaunchGate.scripted(
+                dials: ProtectionDials(mode: .auto),
+                backing: InMemoryStoreKeyGuardBacking())
+            let bootstrap = AppBootstrap(
+                testOpener: {
+                    Result { try AppDatabase.onDisk(url: storeURL, key: key) }
+                        .mapError { AppDatabase.StoreOpenError(
+                            storePath: storeURL.path, reason: String(describing: $0)) }
+                },
+                gate: gate)
+            await bootstrap.awaitOpen()
+            guard case .ready = bootstrap.state else {
+                Issue.record("auto opens straight to ready")
+                return
+            }
+            #expect(!bootstrap.canLock)
+            await bootstrap.lock()
+            if case .locked = bootstrap.state {
+                Issue.record("a lock under Auto must refuse silently")
+            }
+        }
+    }
+}
+
+// MARK: - (g): the re-lock dial's phone reading
+
+@Suite("13p phone — the re-lock policy (pure)")
+struct MobileRelockPolicyTests {
+    @Test func autoNeverLocksEitherWay() {
+        var dials = ProtectionDials(mode: .auto)
+        dials.relockOnSleepAndScreenLock = true
+        dials.relockAfterIdleMinutes = 5
+        #expect(!MobileRelockPolicy.locksOnLeaving(dials))
+        #expect(!MobileRelockPolicy.locksOnReturn(dials, awayFor: 60 * 60))
+    }
+
+    @Test func leavingLocksOnlyWhenTheDialSaysSo() {
+        var dials = ProtectionDials(mode: .passphrase)
+        #expect(!MobileRelockPolicy.locksOnLeaving(dials))
+        dials.relockOnSleepAndScreenLock = true
+        #expect(MobileRelockPolicy.locksOnLeaving(dials))
+    }
+
+    @Test func timeAwayIsAThresholdNotATrigger() {
+        var dials = ProtectionDials(mode: .biometric)
+        dials.relockAfterIdleMinutes = 15
+        #expect(!MobileRelockPolicy.locksOnReturn(dials, awayFor: 14 * 60))
+        #expect(MobileRelockPolicy.locksOnReturn(dials, awayFor: 15 * 60))
+        dials.relockAfterIdleMinutes = nil
+        #expect(!MobileRelockPolicy.locksOnReturn(dials, awayFor: 24 * 60 * 60),
+                "never means never")
+    }
+
+    @Test func theAwayRowsReadAsTheyShould() {
+        #expect(MobileRelockPolicy.awayChoices.first == 0)
+        #expect(MobileRelockPolicy.awayLabel(0) == "Never")
+        #expect(MobileRelockPolicy.awayLabel(60) == "After an hour")
+        #expect(MobileRelockPolicy.awayLabel(15) == "After 15 minutes")
+    }
+}
+
+@MainActor
+@Suite("13p phone — the re-lock coordinator & the scene seam's order")
+struct MobileRelockCoordinatorTests {
+    private func coordinator(
+        _ dials: ProtectionDials, clock: LockIsolatedBox<Date>,
+        locks: LockIsolatedBox<Int>
+    ) -> MobileRelockCoordinator {
+        MobileRelockCoordinator(
+            dials: { dials },
+            lock: { locks.value += 1 },
+            now: { clock.value })
+    }
+
+    @Test func leavingLocksImmediatelyWhenTheDialIsOn() async {
+        var dials = ProtectionDials(mode: .passphrase)
+        dials.relockOnSleepAndScreenLock = true
+        let clock = LockIsolatedBox(Date(timeIntervalSince1970: 1_000))
+        let locks = LockIsolatedBox(0)
+        let subject = coordinator(dials, clock: clock, locks: locks)
+        await subject.didLeaveTheScreen()
+        #expect(locks.value == 1)
+        // A lock clears the stamp: the NEXT session must not be locked by
+        // a leaving that already produced one.
+        #expect(subject.leftAt == nil)
+        #expect(await subject.didReturnToTheScreen() == false)
+        #expect(locks.value == 1)
+    }
+
+    @Test func aLongTripAwayLocksOnReturnAndAShortOneDoesNot() async {
+        var dials = ProtectionDials(mode: .biometric)
+        dials.relockAfterIdleMinutes = 5
+        let clock = LockIsolatedBox(Date(timeIntervalSince1970: 1_000))
+        let locks = LockIsolatedBox(0)
+        let subject = coordinator(dials, clock: clock, locks: locks)
+
+        await subject.didLeaveTheScreen()
+        #expect(locks.value == 0, "the leaving dial is off — leaving alone locks nothing")
+        clock.value = clock.value.addingTimeInterval(60)
+        #expect(await subject.didReturnToTheScreen() == false)
+        #expect(locks.value == 0)
+
+        await subject.didLeaveTheScreen()
+        clock.value = clock.value.addingTimeInterval(6 * 60)
+        #expect(await subject.didReturnToTheScreen() == true)
+        #expect(locks.value == 1)
+    }
+
+    /// **THE ORDER IS THE LEG'S CORRECTNESS** (this file's own rule, and
+    /// the flush's): on leaving, everything that lands her text runs to
+    /// completion BEFORE the pool closes. The oracle is what the flush saw
+    /// at the moment it ran — a lock that beat it would have been counted
+    /// first.
+    @Test func theLockLandsAfterTheWholeFlush() async {
+        var dials = ProtectionDials(mode: .passphrase)
+        dials.relockOnSleepAndScreenLock = true
+        let order = LockIsolatedBox<[String]>([])
+        let subject = MobileRelockCoordinator(
+            dials: { dials },
+            lock: { order.value.append("lock") })
+        let editors = MobileLivenessAuthority()
+        let work = mobileScenePhaseChanged(
+            .background, editors: editors, sync: nil,
+            savepoint: { _ in order.value.append("savepoint") },
+            grant: .none, relock: subject)
+        await work?.value
+        #expect(order.value == ["lock"],
+                "no editors registered here, so the flush is a no-op — but the lock still runs, and it runs at the END: \(order.value)")
+    }
+
+    /// A return that LOCKS must not first wake a sync round against the
+    /// pool it is about to close.
+    @Test func aReturnThatLocksDoesNotTriggerASyncRound() async {
+        var dials = ProtectionDials(mode: .passphrase)
+        dials.relockAfterIdleMinutes = 5
+        let clock = LockIsolatedBox(Date(timeIntervalSince1970: 1_000))
+        let locks = LockIsolatedBox(0)
+        let subject = coordinator(dials, clock: clock, locks: locks)
+        await subject.didLeaveTheScreen()
+        clock.value = clock.value.addingTimeInterval(10 * 60)
+
+        // `sync` is nil here, so the pin's subject is the coordinator's
+        // answer travelling through the seam at all: it locked, and the
+        // seam awaited it before returning.
+        let work = mobileScenePhaseChanged(
+            .active, editors: MobileLivenessAuthority(), sync: nil,
+            grant: .none, relock: subject)
+        await work?.value
+        #expect(locks.value == 1)
+    }
+}
+
+// MARK: - (h) + copy: one brain, and the phone's own nouns
+
+@Suite("13p phone — the honest copy reads as the phone's")
+struct MobilePhoneProtectionCopyTests {
+    /// The platform-aware interpolation, from the phone's side: the same
+    /// sentences the Mac shows, with the phone's nouns.
+    @Test func theSentencesNameThePhoneAndItsBiometry() {
+        #expect(ProtectionCopy.deviceName == "iPhone")
+        #expect(ProtectionCopy.biometryName == "Face ID")
+        #expect(ProtectionCopy.escrowOn.contains("if you lose this iPhone"))
+        #expect(ProtectionCopy.modeLabel(.biometric) == "Ask for Face ID")
+        #expect(ProtectionCopy.lobbyPrompt(.biometric) == "Unlock your library with Face ID.")
+        // The one arm the Batch-4 sweep caught: it named Touch ID as a
+        // LITERAL, so the phone offered a fingerprint it does not have.
+        let unreadable = ProtectionCopy.message(
+            for: StoreKeyEnvelopeError.unreadable("decode failed"))
+        #expect(unreadable.contains("Face ID"))
+        #expect(!unreadable.contains("Touch ID"))
+    }
+
+    /// **ONE BRAIN** (knot 6): the settings sentence is composed from
+    /// `lossLegs`, and the tutorial chapter is asserted against the same
+    /// list — so the two cannot state different chains.
+    @Test func theLossMathIsComposedFromTheLegsItNames() {
+        for mode in StoreAtOpenMode.allCases {
+            for escrow in [true, false] {
+                let legs = ProtectionCopy.lossLegs(mode, escrowOn: escrow)
+                let sentence = ProtectionCopy.lossMath(mode, escrowOn: escrow)
+                if mode == .passphrase && !escrow {
+                    // The one arm that deliberately states the SHORT chain
+                    // as prose (her own example, verbatim) rather than a
+                    // list — and it must not claim an iCloud leg.
+                    #expect(sentence.contains("IS enough"))
+                    #expect(!sentence.contains("iCloud"))
+                    continue
+                }
+                for leg in legs {
+                    #expect(sentence.contains(leg),
+                            "the sentence must name every way back in: \(leg)")
+                }
+                #expect(escrow == sentence.contains("iCloud"),
+                        "an iCloud leg is claimed only when the dial is on")
+            }
+        }
+    }
+
+    /// The demanded modes' chains really are SHORTER — no silently-
+    /// releasing custody item exists there (the custody law, in words).
+    @Test func theDemandedModesHaveNoSilentDeviceLeg() {
+        let auto = ProtectionCopy.lossLegs(.auto, escrowOn: false)
+        let passphrase = ProtectionCopy.lossLegs(.passphrase, escrowOn: false)
+        #expect(auto.contains { $0.contains("Keychain holds the key") })
+        #expect(passphrase.count < auto.count)
+        #expect(!passphrase.contains { $0.contains("Keychain") })
+    }
+
+    /// **ITEM (h).** A phone-only library has ONE home; the copy says so
+    /// rather than letting a list of same-device legs imply a second
+    /// machine somewhere.
+    @Test func theOneDeviceNoteNamesThePhoneAndTheSyncCaveat() {
+        #expect(ProtectionCopy.oneDeviceNote.contains("this iPhone"))
+        #expect(ProtectionCopy.oneDeviceNote.contains("Unless you sync"))
+    }
+}
+
+// MARK: - (i): capture over a locked library
+
+@MainActor
+@Suite("13p phone — quick capture demands unlock (her ratification)")
+struct MobileQuickNoteUnderLockTests {
+    /// **HER RATIFIED ITEM (i)**, at its one reachable seam. The lobby
+    /// makes the ordinary case structural (no shell ⇒ no box), so what
+    /// remains is a re-lock landing on a box that still holds text: the
+    /// mint refuses, the refusal SAYS the library is locked and names the
+    /// road, and — the load-bearing half — her text stays in the box
+    /// rather than being written anywhere outside the encrypted store.
+    @Test func aLockedLibraryRefusesTheQuickNoteInWordsAndKeepsTheText() async throws {
+        let db = try AppDatabase.inMemory()
+        let bound = db.asRebindable()
+        try await withDependencies {
+            $0.database = bound.view
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+        } operation: { @MainActor in
+            let session = AppSession(database: bound.view)
+            let box = MobileQuickNoteModel(session: session)
+            box.text = "a thought I had while the phone was locking"
+
+            bound.binding.lock()
+            await box.fileOnLeaving()
+
+            #expect(box.postID == nil, "nothing was minted into a closed store")
+            #expect(box.text == "a thought I had while the phone was locking",
+                    "her text is STILL IN THE BOX — never dropped, never written outside the encrypted store")
+            let refusal = try #require(box.lastError)
+            #expect(refusal.contains("locked"))
+            #expect(refusal.contains("unlock"), "the refusal names the road")
+            #expect(refusal == MobileQuickNoteCopy.refusal(StoreLockedError()))
+        }
+    }
+
+    /// The control the pin above rests on: with the library OPEN the same
+    /// box mints and clears exactly as it always did (so the refusal is
+    /// about the lock, not about the road being broken).
+    @Test func anUnlockedLibraryStillTakesTheNote() async throws {
+        let db = try AppDatabase.inMemory()
+        let bound = db.asRebindable()
+        try await withDependencies {
+            $0.database = bound.view
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(
+                SeededGenerator(seed: 13))
+        } operation: { @MainActor in
+            let session = AppSession(database: bound.view)
+            let box = MobileQuickNoteModel(session: session)
+            box.text = "a thought I had while the phone was open"
+            await box.fileOnLeaving()
+            // The oracle is the STORE, not the model: a completed hand-off
+            // lets go of the note entirely (`reset()` clears the box AND
+            // its pointer), which is exactly the road the locked case
+            // above must NOT take.
+            let landed = try await bound.view.read { db in
+                try String.fetchAll(
+                    db,
+                    sql: """
+                        SELECT v.working_text FROM variant v
+                        JOIN container_block cb ON cb.block_id = v.block_id
+                        WHERE cb.deleted_at IS NULL AND v.deleted_at IS NULL
+                        """)
+            }
+            #expect(landed == ["a thought I had while the phone was open"])
+            #expect(box.lastError == nil)
+            #expect(box.text.isEmpty, "a completed hand-off clears the box")
+        }
+    }
+}
