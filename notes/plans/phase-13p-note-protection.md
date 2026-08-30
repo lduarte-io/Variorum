@@ -1342,6 +1342,33 @@ this batch: the flip's opt-in face + Locked-down warning + the
 extending `StoreKeyCustody`; the Q3 codesigned re-confirmation; the
 demanded modes + locked lobby + re-lock/Lock Now.
 
+### 2026-08-30, overnight — HER AUTHORIZATION: the real migration + installs pulled forward
+
+Her words, verbatim (mid-Batch-2, via the session): *"go ahead and do
+the real store migration + applications refresh + phone install
+overnight. my screen won't lock."* This supersedes the phase-end hold
+on those three acts — her call, recorded as such.
+
+**The architect's execution shape, and why:** the installs build from
+the ACCEPTED Batch-1 commit **`57dd2d1`** via a separate git worktree —
+NOT the live tree, which Batch 2 is actively refactoring
+(`AppDatabase.swift` mid-rewrite at this moment). Rationale, stated so
+nobody re-litigates it: the one-way migration should run on the EXACT
+code that was SIGKILL-drilled on a byte-copy of her store — Batch 1's
+accepted state — not on an in-flight refactor no drill has touched.
+Batch 2's later landing then meets an already-encrypted store as an
+ordinary app update, and the STANDING phase-end refresh (after the cold
+review) still happens as the ritual requires. Protocol for the Mac act:
+zero-instance pgrep check → fresh WAL-safe byte-copy backup
+(sha256-verified) → Release build from the worktree (own DerivedData,
+the implementer's builds undisturbed) → copy to `/Applications` →
+launch → verify (process alive; store header ciphertext; sizes sane)
+→ leave the app RUNNING (the never-quit rule — her morning finds it
+open). The phone: Release build + install over the pairing; its
+migration runs at HER first open (launching needs the unlocked device
+— install ≠ launch, stated honestly). Outcomes recorded below when
+done.
+
 ## BATCH 0 ADDENDUM (the architect, at launch — spike mechanics & environment)
 
 - **Scratch discipline:** throwaway spike work lives OUTSIDE the repo
