@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/lduarte-io/GRDB.swift.git",
       "state" : {
-        "branch" : "variorum-sqlcipher",
-        "revision" : "404dde04154ebcf4f2975a9b032548ee19023929"
+        "revision" : "404dde04154ebcf4f2975a9b032548ee19023929",
+        "version" : "7.11.1+sqlcipher.1"
       }
     },
     {

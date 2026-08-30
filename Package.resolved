@@ -1,5 +1,5 @@
 {
-  "originHash" : "ec394862b4b42f72a2cb8452b9007288541bd0447546a5bf92fe65ebe6ab4b6e",
+  "originHash" : "a01a1fb03180a28b242fae16172a9da6ebd8a48b9af87b015e03e10912dcc394",
   "pins" : [
     {
       "identity" : "combine-schedulers",
@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/lduarte-io/GRDB.swift.git",
       "state" : {
-        "branch" : "variorum-sqlcipher",
-        "revision" : "404dde04154ebcf4f2975a9b032548ee19023929"
+        "revision" : "404dde04154ebcf4f2975a9b032548ee19023929",
+        "version" : "7.11.1+sqlcipher.1"
       }
     },
     {
