@@ -2419,3 +2419,154 @@ step). The superseded 2026-08-23 running-order table (pure history,
 kept-verbatim) rolls to `notes/PhaseCloseoutArchive.md`. Executed at
 the closeout pass, after the ladder ends, in the same commit family
 as the standing archives roll.
+
+### Ladder round 2 — the fix session's record (Fable, 2026-08-30)
+
+**COMPLETE. All four routed findings fixed per their dispositions —
+every mechanism SELF-TRACED at the cited sites before fixing, every
+finding CONFIRMED (zero dismissed-as-hollow), every pin verified
+red-on-old by BEHAVIORAL REVERT (probes applied, pins watched fail on
+exactly their own mechanisms, fixes restored; the restored
+`ProtectionController.swift` byte-compared identical to the tested
+state after the commit slicing).** Four commits, one per finding:
+`bd9cf99` (R2-M1) · `dc260bf` (R2-m1) · `6d19e79` (R2-m2) · `8050f06`
+(R2-n1). ZERO `Sources/VariorumCore/Sync/` lines, zero
+`Migrations.swift`/`Triggers.swift`/`Server/` lines (fence
+diff-verified EMPTY), zero core `Sources/` lines at all, zero schema,
+zero server acts, no Release builds, no installs; her running real app
+untouched throughout (never queried — no act needed it). R2-n2's tag
+deletion was the architect's, done at adjudication — nothing here.
+
+**Per finding — trace · fix · evidence:**
+
+- **R2-M1** — TRACED, all four mechanisms at the code: the phone's
+  `.task` (`VariorumMobileApp.swift`) wired NONE of the four hooks
+  while `MobileSettingsView` → `SyncStatusRow` → `AccountView` →
+  `EncryptionView` presents the full shared vault flows and
+  `MobilePassphraseResetSheet` presents the reset door —
+  `EncryptionSession.setUp`'s guard is `if let storePassphraseGuard`
+  (nil skips: a DIFFERENT vault passphrase mints), the two follow
+  hooks are optional-chained (nil: a change strands the sidecar on
+  the retired passphrase; vault-minted words never reach the
+  envelope), and `resetPassphrase`'s vault half is
+  `if let rewrapVaultPassphrase` (nil skips: a phone reset diverges
+  the two secrets). FIX: `wireOneSecretHooks(protection:encryption:
+  keyVault:auth:)` — a SHARED factory in `ProtectionController.swift`
+  (the `mobileWillLock` precedent), the Mac's inline block moved into
+  it VERBATIM (closure-for-closure; `VariorumApp`'s `.task` now calls
+  the factory — zero behavior change, no Mac test edited), the
+  phone's `.task` calling it beside the R1-M2 teardown wiring
+  (re-wired per session the same way). PINS
+  (`MobileOneSecretHooksTests`, 5, in the MOBILE target — the phone's
+  compiled copy proves the wiring, the R1-M2/hoist precedent;
+  scripted gate + custody + a raw-JSON vault + an in-memory signed-in
+  AuthSession; no Keychain, no network, no prompts): the guard's
+  one-secret refusal with NO vault row minted · the passphrase follow
+  (a vault change re-wraps the sidecar; the retired passphrase stops
+  unwrapping) · vault-minted words unwrap the store key · the reset's
+  vault half BOTH arms (vault moved to the new passphrase, old
+  refuses; custody-forgotten refuses WHOLE with the store wrap
+  untouched). REVERT: factory body emptied (`if true { return }` — a
+  first bare-`return` probe was caught DIRTY: `return` followed by an
+  assignment expression parses as `return (assignment)`, so the FIRST
+  hook still wired and the follow pin stayed green — recorded because
+  the probe's own bug looked exactly like a hollow pin and was not
+  one) → ALL FIVE pins red on exactly their mechanisms (setUp
+  succeeded + vault minted under mismatch; `wrongPassphrase` on the
+  new wrap; `noRecoveryWrap`; vault stranded on the old passphrase;
+  reset succeeded while diverging) → restored, green.
+- **R2-m1** — TRACED: both bars' phrase-offer buttons called
+  `controller.generateAndLandRecoveryPhrase()` directly, gated only
+  on `!controller.hasRecoveryWrap` (the STORE's wrap) — with a vault
+  carrying a recovery wrap, a SECOND phrase minted over it, while
+  `PassphraseSetModel.advanceToPhraseHalf`'s own
+  `.extendExistingPhrase` routing proves the rule the offer bypassed.
+  FIX: shared `PhraseOffer.take(controller:vaultTie:)` beside
+  `VaultTie` (vault-with-wrap ⇒ `.extend(model)` seeded at
+  `.extendExistingPhrase` via the model's new DEFAULTED `startingAt`
+  init parameter — every existing call site and pin rides unmodified;
+  else the fresh mint; else `.refused`, exactly the old nil-return);
+  both notice bars switch on the one outcome. PIN
+  (`Phase13pControllerTests.thePhraseOfferExtendsAnExistingVaultPhraseInsteadOfMintingASecond`):
+  vault-with-wrap ⇒ `.extend`, the sheet at the extend step, NO
+  second mint anywhere (controller wrap AND envelope both clean); the
+  extend flow lands the typed words on the envelope (they unwrap the
+  key); the no-vault control fresh-mints unchanged. REVERT: `take`
+  made to mint unconditionally (the pre-fix faces' behavior) → red at
+  the must-route guard (`.minted` observed) → restored, green (the
+  suite's other 22 tests rode both sides).
+- **R2-m2** — TRACED: `reconcile()` (MainActor; fired by AppBootstrap
+  at launch/unlock cadence once the stack is ready) ran the escrow
+  arm inline — `currentKey()`→`loadAuto` + `loadEscrow` + `saveEscrow`
+  (ON) or `loadAuto` + `deleteEscrow` (OFF) — synchronous SecItem
+  round-trips on the main thread, the 13e B-1 class re-introduced,
+  masked today by the -34018 fast-fail and REAL the moment her
+  signing lands. FIX: the whole arm moved into
+  `reconcileEscrowOffMain` (nonisolated static) run in ONE
+  `Task.detached` hop — same reads, same writes, same short-circuit
+  order (the OFF arm still reads the envelope BEFORE the key, exactly
+  as the inline `if let` chain did); the resident key is read on the
+  MainActor and carried in; `escrowLandingFailed` lands back on the
+  MainActor after (nil = untouched, the ON-no-key case); the envelope
+  helpers gained nonisolated twins the MainActor doors delegate to
+  (custody semantics byte-identical — the escrow-consistency and
+  foreign-sidecar pins ride unmodified as that half's proof). PIN
+  (`ProtectionReconcileOffMainTests` in `KeychainOffMainTests.swift`
+  — the row's named recording-seam shape, applied to `StoreKeyGuard`):
+  every guard call arrives off-main in BOTH dial states, with the
+  call NAMES and ORDER asserted (`loadAuto·loadEscrow·saveEscrow` /
+  `loadAuto·deleteEscrow`) and the semantics proven (item landed
+  under the envelope's storeID; leftover deleted). REVERT: the arm
+  inlined back onto the MainActor → red in both states with all three
+  calls recorded `onMainThread: true` → restored, green.
+- **R2-n1** — TRACED: the pocket guide's noise sentence
+  (`MobileTutorialSeeder`, "keeping it private") claimed "whatever
+  reaches … a backup … is noise without the key" — false for an
+  iCloud/computer DEVICE backup taken before the first keyed open,
+  which holds the plaintext store file and which no later encryption
+  reaches back into (the reviewer's accepted differ from R1-m4's
+  narrow phone reading: the phone ships no backup MACHINERY, but the
+  DEVICE-backup class exists regardless). FIX: the clause — "with one
+  honest exception: a device backup, in iCloud or made on a computer,
+  taken before the encryption arrived still holds the plain library
+  until a newer backup replaces it" (no "Mac"/"Finder" literal — the
+  no-redirect pin rides untouched). PIN:
+  `MobilePocketGuidePrivacyTests`' lesson contract gains the two
+  clause assertions. REVERT: clause stripped → both assertions red →
+  restored, green.
+
+**Final suite counts (all at/above the round's baseline):**
+- Core: **1453 / 154 PASSED** — exact baseline (zero core lines).
+- Mac: **1843 tests / 312 suites** (baseline 1841/311 + the R2-m1 pin
+  in the existing controller suite + the R2-m2 pin in its new suite)
+  — every suite green EXCEPT the ONE known intermittent latency pin
+  (adjudicated below).
+- Mobile: **513 / 86 PASSED, 2 known issues** (the standing pair;
+  baseline 508/85 + the five R2-M1 pins in 1 new suite).
+- Tutorial spine: **71 / 10 PASSED** (unchanged; R2-n1's clause lives
+  in the MOBILE pocket guide, whose pins count in the mobile suite).
+
+**The intermittent latency pin — re-run isolated per the standing
+rule, and ADJUDICATED, not ignored:**
+`EditorWindowSmokeTests.rewriteStrategyLatencies(paragraphs: 250)`
+read RED in the full run (51.11 ms vs 50) and in FOUR isolated
+re-runs (50.25 · 51.40 · 50.74 · 51.67 ms) — every reading 0.5–3.3%
+over budget on a machine whose load average never dropped below 4.7
+(41-day uptime, 33 sessions, her real app running — never touched;
+shutting the simulators down between runs made no difference). This
+is the KnownIssues row's exact documented class ("reds under load and
+greens when quiet"; prior recorded reds 51.95/54.03/58.47 on earlier
+trees). NOT a regression from this round, by DIFF not by claim: the
+round's whole footprint is protection/one-secret files + tests — zero
+editor-path lines. A quiet-machine green could not be obtained
+because the machine never got quiet; the row's remedy stays
+owner-12's.
+
+**PENDING / for the architect:**
+- Round 3 (the focused pass over these wave-2 fixes) per the ladder.
+- The commit-slicing note: `ProtectionController.swift` carries both
+  R2-M1 and R2-m2; the M1 slice was committed with the m2 half
+  temporarily reverted, then m2 re-applied and BYTE-COMPARED identical
+  to the tested full-fix state before its own commit — recorded so the
+  intermediate commit's shape reads as deliberate, not drift.
+- Unpushed per the standing rule — the architect verifies and pushes.
