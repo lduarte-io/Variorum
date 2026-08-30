@@ -745,5 +745,11 @@ func wireOneSecretHooks(
             try await VaultEnrollment(client: vault).rewrapPassphrase(
                 material: material, newPassphrase: newPassphrase)
         }
+    } else {
+        // Totality (ladder R3-n1): "re-wired per session" must hold for the
+        // long-lived controller hook too — a vault-less composition clears
+        // any prior session's closure rather than leaving its retired
+        // sessions captured across the locked window.
+        protection.rewrapVaultPassphrase = nil
     }
 }

@@ -2417,6 +2417,50 @@ green, and the row gains the new covariate: a real-store instance now
 lives during test windows.** ROUND 3 LAUNCHED — a fresh Fable
 reviewer, the ladder's focused full pass over the wave-2 fixes.
 
+### THE COLD-REVIEW LADDER — round 3 (final) + dispositions: THE LADDER CLOSES (2026-08-30)
+
+Fresh Fable reviewer, the focused full pass over the wave-2 commits.
+**NO BLOCKERs, NO MAJORs — 2 MINOR + 2 NIT**, and every wave-2 fix
+VERIFIED under the reviewer's own hand (the factory diff-read
+closure-for-closure against the Mac's pre-fix block; all pins re-run
+green incl. the mobile five on simulator; the fork's single-tag state
+verified live by `ls-remote`; fences re-diffed empty). Per the hard
+cap, nothing loops further; dispositions:
+
+- **R3-m1 (MINOR, CONFIRMED, recorded-not-looped):** the detached
+  escrow hop opens a narrow MainActor interleave window the inline
+  arm couldn't have (a dial flip mid-hop can be silently undone until
+  the next reconcile heals it); real mostly AFTER the signing change
+  replaces the -34018 fast-fail with true iCloud round-trips.
+  **Parked WITH the signing item on its new KnownIssues row** — the
+  staleness re-check (or busy-gating) lands with the signing change,
+  the moment it becomes real.
+- **R3-m2 (MINOR, CONFIRMED pre-existing family, not a wave
+  regression):** an ENROLLED vault with NO recovery wrap still
+  fresh-mints a store-only phrase that the vault's later generation
+  silently retires (the R2-m1 family, one arrow reversed; the
+  set-screen has always carried the rule). **Parked on a new
+  KnownIssues row, owner v1 release readiness** (the credential
+  family's home), with the reviewer's three candidate remedies
+  recorded.
+- **R3-n1 (NIT, FIXED AT ADJUDICATION by the architect):** the
+  factory's nil-vault branch made total (`else {
+  rewrapVaultPassphrase = nil }`) so "re-wired per session" holds for
+  the long-lived hook too — a hygiene/totality fix, unreachable as
+  behavior today (build-config-static), mechanism traced, no pin owed
+  per the standing architectural-finding rule; `Phase13pControllerTests`
+  23/23 green on the change.
+- **R3-n2 (NIT, RECORDED for honesty, no fix demanded — the
+  reviewer's own framing):** the composition-call class (a pin that
+  drives the factory itself cannot see a deleted `.task` call-site)
+  is named so it is never rediscovered; it matches the recorded
+  `mobileWillLock` precedent's shape.
+
+**THE LADDER IS COMPLETE: rounds 1 (14 findings, all fixed) → 2
+(every fix held; 1 MAJOR + 4 found, all fixed or ruled) → 3 (all
+wave-2 fixes held; nothing above MINOR; residue recorded with named
+owners). Zero disputes across all three rounds.**
+
 ### HER LEAN-DOCS RULING at this closeout (2026-08-30, mid-round-2 — executed at the closeout pass)
 
 Her words, verbatim: *"detailedplanforphases is now at 150.1k
