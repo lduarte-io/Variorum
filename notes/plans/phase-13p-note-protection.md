@@ -1022,6 +1022,43 @@ passphrase, etc. some people will be mobile only users."*
   BATCH 1 section + riders, the BATCH 0 ADDENDUM's environment traps,
   and the spike memo. Its record lands below when it completes.
 
+### 2026-08-30, before sleep — her ratification, the overnight posture, and the Batch 2 cast
+
+- **Batch 4 item (i) RATIFIED** — her words, verbatim: *"i think
+  that's fine on demanding unlock first, if a user wants to set the app
+  to force unlock on every open."* The quick-capture-demands-unlock
+  edge goes from flagged to RULED: under the demanded modes, the
+  home-screen quick note (and any capture surface) demands unlock
+  before minting — an honest refusal, never a plaintext side-channel.
+- **She is asleep; Remote Control connected.** The standing
+  away/overnight rule governs: PROVISIONAL-and-continue on anything
+  that doesn't hit an author-only hard stop; genuine hard stops are
+  HELD and bundled for morning. Explicitly NOT happening overnight:
+  her real store's migration (phase-end install act), any
+  `/Applications` refresh, any phone install, any Keychain/TCC prompt
+  path on her session, any GUI screenshot drive needing the unlocked
+  machine (deferred to a morning window if the screen locks).
+- **Batch 2 cast, the architect's call under her latitude:** FABLE —
+  the custody/wrap work and the re-lock teardown/rebuild
+  (ValueObservation lifecycles must not outlive the pool) are the
+  judgment-heavy halves of the phase after Batch 1. Batch 4 is
+  expected Opus.
+- **Her no-iCloud question, answered into the record (it sharpens
+  Batch 2's copy):** iCloud Keychain is never the bridge between a
+  user's phone and computer — the SYNC TIER is (content moves through
+  the E2EE mirror; a no-sync user's cross-machine story is 13x's
+  library-move door). Each device mints ITS OWN store key at its own
+  first launch (R13p-4's per-store key), so no store key ever needs to
+  travel between devices. Escrow is purely a SELF-recovery leg for a
+  device's own key. Without iCloud Keychain: the escrow dial simply has
+  nothing to ride (the settings copy must say so honestly rather than
+  pretend the dial works — a Batch 2 copy consequence); the user's legs
+  are the device Keychain + the recovery phrase + the passphrase once
+  set — and a second-device sync enrollment is BY PASSPHRASE (the 14b
+  road), so yes: a phone+computer user without iCloud uses the
+  passphrase, exactly as she guessed. A sync user's lost device also
+  always has the deepest leg: re-sync the corpus from the server.
+
 ## BATCH 0 ADDENDUM (the architect, at launch — spike mechanics & environment)
 
 - **Scratch discipline:** throwaway spike work lives OUTSIDE the repo
