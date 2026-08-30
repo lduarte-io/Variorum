@@ -25,6 +25,10 @@ struct MobileSettingsView: View {
     let session: AppSession
     let router: MobileShellRouter
     let services: AppServices?
+    /// 13p Batch 4: the launch/protection brain — Protection's own screen
+    /// and the acknowledgments the encryption obliges (R13p-11). Optional
+    /// like `services`: the sheet says nothing about what it does not have.
+    var bootstrap: AppBootstrap? = nil
     #if DEBUG
     /// FIX-B4 (Stage B ladder round 1, NIT 2 — fire-and-DO): the shell's
     /// door for "Open the pocket guide" — dismisses Settings and
@@ -38,6 +42,10 @@ struct MobileSettingsView: View {
     /// The tag manager's presentation (parity C3 — Settings is tag
     /// management's home, the Mac R52 placement mirrored).
     @State private var tagsPresented = false
+    /// 13p Batch 4: the protection screen and the acknowledgments, each a
+    /// nested sheet off this one (the tag-manager precedent).
+    @State private var protectionPresented = false
+    @State private var acknowledgmentsPresented = false
     /// E1's door state (temporary — mobile round 2's settling experiment;
     /// the walk script is at the section itself, below). Seeded from the
     /// recorder on appear (not in the initializer — a `View`'s stored
@@ -119,6 +127,53 @@ struct MobileSettingsView: View {
                     .foregroundStyle(tokens.faint)
                     .padding(.horizontal, 20)
             }
+
+            Divider()
+                .overlay(tokens.line)
+                .padding(.vertical, 14)
+
+            // 13p Batch 4 (PL-15): PROTECTION — the at-open modes, the
+            // escrow dial, the passphrase and the twelve words. The phone
+            // is a first-class birthplace of stores (her Batch-1 rider:
+            // *"some people will be mobile only users"*), so this is a
+            // full door, not a pointer at a Mac.
+            Text(tokens.chromeLabel("Protection"))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 4)
+            if bootstrap?.protection != nil {
+                Button {
+                    protectionPresented = true
+                } label: {
+                    Text(tokens.chromeLabel(MobileProtectionSheet.doorTitle))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.accent)
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 4)
+                .accessibilityLabel(MobileProtectionSheet.doorTitle)
+            } else {
+                Text(tokens.chromeLabel("Starting…"))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .padding(.horizontal, 20)
+            }
+            // R13p-11's attribution obligation reaches the phone too — it
+            // ships the same SQLCipher, so it owes the same notice. Same
+            // words as the Mac's pane (`AcknowledgmentsCopy`, Shared).
+            Button {
+                acknowledgmentsPresented = true
+            } label: {
+                Text(tokens.chromeLabel("Acknowledgments"))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 4)
+            .accessibilityLabel("Acknowledgments")
 
             Divider()
                 .overlay(tokens.line)
@@ -313,6 +368,16 @@ struct MobileSettingsView: View {
         .background(tokens.room.ignoresSafeArea())
         .sheet(isPresented: $tagsPresented) {
             MobileTagManagerSheet(session: session, tokens: tokens)
+        }
+        .sheet(isPresented: $protectionPresented) {
+            if let protection = bootstrap?.protection {
+                MobileProtectionSheet(
+                    controller: protection, services: services,
+                    canLock: bootstrap?.canLock ?? false, tokens: tokens)
+            }
+        }
+        .sheet(isPresented: $acknowledgmentsPresented) {
+            MobileAcknowledgmentsSheet(tokens: tokens)
         }
         .sheet(isPresented: $tracePresented) {
             MobileEditTraceView(tokens: tokens)

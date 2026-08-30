@@ -76,7 +76,7 @@ struct StoreLockView: View {
             Button {
                 Task { await lobby.unlockWithBiometrics() }
             } label: {
-                Label("Unlock with Touch ID", systemImage: "touchid")
+                Label("Unlock with \(ProtectionCopy.biometryName)", systemImage: "touchid")
             }
             .disabled(lobby.busy)
         }

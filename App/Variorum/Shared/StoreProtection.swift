@@ -267,29 +267,53 @@ nonisolated enum ProtectionCopy {
         }
     }
 
-    /// The per-mode loss math (knot 6, her example carried verbatim into
-    /// the demanded modes' sentence: "forgetting the passphrase without
-    /// the phrase written down IS enough").
-    static func lossMath(_ mode: StoreAtOpenMode, escrowOn: Bool) -> String {
+    /// **THE WAYS BACK IN, AS A LIST — the ONE brain** (13p Batch 4,
+    /// knot 6's letter: the tutorial chapter teaches the loss math and the
+    /// settings pane states it, so the two must not be able to diverge).
+    /// `lossMath` below composes its sentence from exactly these legs, and
+    /// the tutorial spine asserts the chapter names every one of them.
+    ///
+    /// Read it as a chain: every leg listed is a way IN, so losing the
+    /// writing means losing all of them at once. The demanded modes' lists
+    /// are SHORTER by construction (no silently-releasing Keychain item
+    /// exists there — the custody law), which is exactly her non-scary-
+    /// but-serious point.
+    static func lossLegs(_ mode: StoreAtOpenMode, escrowOn: Bool) -> [String] {
+        var legs: [String]
         switch mode {
         case .auto:
-            var legs = ["this \(deviceName) (its Keychain holds the key)",
-                        "your encryption passphrase (if you set one)",
-                        "your recovery phrase (if you saved it)"]
-            if escrowOn { legs.append("the copy in your iCloud Keychain") }
-            return "To lose your writing, ALL of these have to go wrong at once: "
-                + legs.joined(separator: " · ") + ". Any one of them gets you back in."
+            legs = ["this \(deviceName) (its Keychain holds the key)",
+                    "your encryption passphrase (if you set one)",
+                    "your recovery phrase (if you saved it)"]
         case .biometric:
-            var legs = ["this \(deviceName)'s fingerprint/face unlock",
-                        "your encryption passphrase",
-                        "your recovery phrase (if saved)"]
-            if escrowOn { legs.append("the iCloud Keychain copy") }
-            return "Your ways back in: " + legs.joined(separator: " · ")
+            legs = ["this \(deviceName)'s fingerprint/face unlock",
+                    "your encryption passphrase",
+                    "your recovery phrase (if saved)"]
+        case .passphrase:
+            // NO device leg: passphrase mode leaves neither Keychain item
+            // behind, so the typed secret and the twelve words are the
+            // whole same-device story (the custody law, in words).
+            legs = ["your encryption passphrase", "your recovery phrase (if saved)"]
+        }
+        if escrowOn { legs.append("the copy in your iCloud Keychain") }
+        return legs
+    }
+
+    /// The per-mode loss math (knot 6, her example carried verbatim into
+    /// the demanded modes' sentence: "forgetting the passphrase without
+    /// the phrase written down IS enough"). Composed from `lossLegs`.
+    static func lossMath(_ mode: StoreAtOpenMode, escrowOn: Bool) -> String {
+        let legs = lossLegs(mode, escrowOn: escrowOn).joined(separator: " · ")
+        switch mode {
+        case .auto:
+            return "To lose your writing, ALL of these have to go wrong at once: "
+                + legs + ". Any one of them gets you back in."
+        case .biometric:
+            return "Your ways back in: " + legs
                 + ". Lose every one of them and your writing is unrecoverable — by anyone."
         case .passphrase:
             if escrowOn {
-                return "Your ways back in: your passphrase · your recovery phrase "
-                    + "(if saved) · the iCloud Keychain copy. Forgetting the "
+                return "Your ways back in: " + legs + ". Forgetting the "
                     + "passphrase is not enough to lose your writing while the "
                     + "others stand — but it is the door you use every day."
             }
@@ -299,6 +323,16 @@ nonisolated enum ProtectionCopy {
                 + "point, and that is the price. Keep the twelve words somewhere real."
         }
     }
+
+    /// **The one-device honesty line** (13p Batch 4, the mobile-only-user
+    /// expansion's item (h): *"a mobile-only user has ONE enrolled device,
+    /// so their chain is shorter and the copy must say so"*). It reads
+    /// true on either platform — what it names is that a library with no
+    /// second home has no second home, which is the fact a list of
+    /// same-device legs can quietly let a reader forget.
+    static let oneDeviceNote =
+        "Your library lives on this \(deviceName). Unless you sync it, there is no "
+        + "copy of it anywhere else — so the ways back in above are the whole list."
 
     /// R13p-8's rider wearing Locked-down's face: enabling the scheduled
     /// plain-text export under a locked-down posture warns that it
@@ -324,6 +358,54 @@ nonisolated enum ProtectionCopy {
     static let reminderBody =
         "You never type it day to day, which is exactly how it slips away. Check it "
         + "here — nothing is changed or reset, this only answers yes or no."
+
+    // MARK: - The doors' own words (13p Batch 4 — shared so the phone's
+    // faces, the Mac's pane, and the tutorial chapter read ONE vocabulary;
+    // every one is byte-identical on macOS to the literal it replaced).
+
+    /// The at-open picker's rows. Platform-aware by the same interpolation
+    /// as every sentence above (the Mac reads "Touch ID", the phone
+    /// "Face ID").
+    static func modeLabel(_ mode: StoreAtOpenMode) -> String {
+        switch mode {
+        case .auto: return "Open silently (Keychain)"
+        case .biometric: return "Ask for \(biometryName)"
+        case .passphrase: return "Ask for the passphrase"
+        }
+    }
+
+    static func presetTitle(_ preset: ProtectionPreset) -> String {
+        switch preset {
+        case .standard: return "Standard"
+        case .lockedDown: return "Locked-down"
+        }
+    }
+
+    static func presetBlurb(_ preset: ProtectionPreset) -> String {
+        switch preset {
+        case .standard:
+            return "Opens silently. The disk is protected; recovery is easy."
+        case .lockedDown:
+            return "Asks every time it opens. No silent copies anywhere."
+        }
+    }
+
+    /// The manual lock act's word (demanded modes only — under Auto it
+    /// would be theater, R13p-14, and the door is not rendered).
+    static let lockNowLabel = "Lock Library Now"
+    static let lockNowSentence =
+        "Locking closes the library and forgets its key until you unlock it again."
+
+    /// The phone's re-lock dial (Batch 4, item (g)): backgrounding IS the
+    /// phone's leaving, and dropping the key there is a REAL boundary —
+    /// the hand-someone-your-phone answer.
+    static let relockOnBackgroundLabel = "Lock when Variorum leaves the screen"
+    static let relockOnBackgroundSentence =
+        "Whatever you were writing is saved first, then the library closes and its "
+        + "key is forgotten. Coming back asks again."
+    /// Its gentler sibling — the phone's reading of the idle dial: a short
+    /// trip away costs nothing, a long one re-asks.
+    static let relockAfterAwayLabel = "Lock after time away"
 
     /// The lobby's wording per demand.
     static func lobbyPrompt(_ mode: StoreAtOpenMode) -> String {
@@ -352,9 +434,13 @@ nonisolated enum ProtectionCopy {
             return "This library's key file was written by a newer Variorum — "
                 + "update the app to open it."
         case StoreKeyEnvelopeError.unreadable:
+            // 13p Batch 4's copy sweep: this one arm still named Touch ID
+            // as a literal, so on the phone it offered a fingerprint that
+            // does not exist there. It rides the same interpolation as
+            // every other sentence now.
             return "This library's key file exists but can't be read. Restore "
                 + "\(StoreKeyEnvelope.filename) from a backup folder, or unlock "
-                + "with Touch ID if it's offered."
+                + "with \(biometryName) if it's offered."
         case RecoveryPhraseError.checksumMismatch:
             return "That's not quite the phrase — one of the twelve words is off. "
                 + "Check them against what you wrote down."

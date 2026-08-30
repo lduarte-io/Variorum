@@ -117,6 +117,19 @@ enum MobileQuickNoteCopy {
     /// refusal vocabulary (A1-18 — three deletion homes today), these
     /// sentences join it rather than becoming a fourth home.**
     static func refusal(_ error: Error) -> String {
+        // **13p Batch 4, item (i) — RATIFIED by the author** (*"i think
+        // that's fine on demanding unlock first, if a user wants to set
+        // the app to force unlock on every open"*): under the demanded
+        // at-open modes, capture DEMANDS UNLOCK. The lobby normally makes
+        // that structural — while it is up there is no shell, so there is
+        // no box to type in — and this sentence covers the one reachable
+        // seam, the re-lock landing on a box whose mint had already been
+        // refused: the text stays in the box (Q2's rule), it is NOT
+        // written to any side channel, and the words name the road.
+        if error is StoreLockedError {
+            return "Your library is locked, so this note can't be saved yet. Your text "
+                + "is still here — unlock the library and it will save."
+        }
         guard let error = error as? OperationError else {
             // Not an operations refusal — a store-level failure, and the
             // app's own comment names the reachable one: the device locked

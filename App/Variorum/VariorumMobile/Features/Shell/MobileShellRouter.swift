@@ -279,6 +279,22 @@ func performBackgroundFlush(
 /// `.inactive` stays deliberately unhandled — it is the app-switcher and
 /// Control Center peek, and a real leaving passes through `.background`,
 /// which is where the grant and the flush live.
+///
+/// **13p Batch 4 — the RE-LOCK leg** (the mobile-only-user expansion's
+/// item (g)). `relock` is the phone's re-lock coordinator when one
+/// exists; it is consulted at BOTH edges and the ORDER is load-bearing:
+///
+/// · leaving ⇒ the flush runs to completion FIRST (quick note minted,
+///   editors flushed, savepoints landed, one sync round) and only then
+///   does the library lock. A lock that beat the flush would close the
+///   pool under her last keystrokes.
+/// · returning ⇒ the coordinator is asked BEFORE `triggerSync()`, because
+///   a return that locks must not first wake a round against a pool it is
+///   about to close. It says whether it locked, and the trigger is
+///   skipped when it did.
+///
+/// A nil coordinator (every pre-13p call site, and every test that does
+/// not care) behaves exactly as before.
 @MainActor
 @discardableResult
 func mobileScenePhaseChanged(
@@ -287,12 +303,20 @@ func mobileScenePhaseChanged(
     sync: SyncSession?,
     quickNote: MobileQuickNoteModel? = nil,
     savepoint: (@MainActor (String) async -> Void)? = nil,
-    grant: BackgroundTaskGrant = .application
+    grant: BackgroundTaskGrant = .application,
+    relock: MobileRelockCoordinator? = nil
 ) -> Task<Void, Never>? {
     switch phase {
     case .active:
-        sync?.triggerSync()
-        return nil
+        guard let relock else {
+            sync?.triggerSync()
+            return nil
+        }
+        return Task { @MainActor in
+            let locked = await relock.didReturnToTheScreen()
+            guard !locked else { return }
+            sync?.triggerSync()
+        }
     case .background:
         // **THE GRANT IS TAKEN HERE, SYNCHRONOUSLY, INSIDE THE PHASE-CHANGE
         // HANDLER** (4.5a, Q4). It used to be taken one hop later, inside
@@ -313,6 +337,12 @@ func mobileScenePhaseChanged(
             await performBackgroundFlush(
                 editors: editors, sync: sync, quickNote: quickNote,
                 savepoint: savepoint, holding: assertion)
+            // 13p Batch 4 (item g): the lock lands LAST, inside the same
+            // grant — everything above has already put her text in the
+            // store, so closing the pool now loses nothing. Deliberately
+            // NOT gated on `Task.isCancelled`: if iOS is taking the app
+            // away, dropping the key is the one leg that should still run.
+            await relock?.didLeaveTheScreen()
         }
         // The expiration handler's job: STOP, then hand the time back. No
         // handler at all is what makes an overrun fatal (`0x2182bad2`)

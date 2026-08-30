@@ -31,13 +31,26 @@ struct VariorumMobileApp: App {
     /// The shell's shared routing state: the active editor (for the
     /// background flush) + the one voice authority (LK2).
     @State private var shellRouter = MobileShellRouter()
+    /// 13p Batch 4 (item g): the phone's re-lock coordinator — the dials'
+    /// phone reading (lock on leaving · lock after time away), asked at
+    /// both scene edges. It only ever ends at `bootstrap.lock()`, which
+    /// refuses under Auto on its own, so nothing here can ship theater.
+    @State private var relock: MobileRelockCoordinator?
+    @Environment(\.colorScheme) private var scheme
+
+    /// The lobby's voice comes from the DEVICE preference, not the store —
+    /// the store is exactly what is not open yet.
+    private var lockedTokens: VoiceTokens {
+        .resolve(voice: MobileVoicePreference.current(), dark: scheme == .dark)
+    }
 
     var body: some Scene {
         WindowGroup {
             switch bootstrap.state {
             case .ready(let session):
                 MobileShellView(
-                    session: session, services: services, router: shellRouter)
+                    session: session, services: services,
+                    router: shellRouter, bootstrap: bootstrap)
                     // The app-switcher snapshot cover (SnapshotPrivacy —
                     // PROVISIONAL, pre-Stage-A): redacts exactly the
                     // privacySensitive spans (the 12 words, phrase entries)
@@ -60,26 +73,16 @@ struct VariorumMobileApp: App {
                 // spinner announcing 50 ms of work is worse than the calm
                 // ground the app opens onto anyway.
                 MobileStoreOpeningView()
-            case .locked:
-                // Phase 13p Batch 2: the demanded at-open modes live in the
-                // shared brains now, but NOTHING on the phone sets one until
-                // Batch 4 builds its protection faces (the dials are
-                // device-local and this device has no door that writes
-                // them) — so this arm is unreachable today. Honest words
-                // rather than a blank frame if that ever changes.
-                VStack(spacing: 12) {
-                    Image(systemName: "lock.fill")
-                        .font(.title)
-                        .foregroundStyle(.secondary)
-                    Text("This library is locked.")
-                        .font(.headline)
-                    Text("Unlocking on iPhone arrives with the protection "
-                         + "update.")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 32)
-                }
+            case .locked(let lobby):
+                // Phase 13p Batch 4 (item c): THE PHONE'S LOCKED LOBBY.
+                // While this renders there is no session, no services, no
+                // open store — and therefore no capture surface of any
+                // kind: the quick-note box lives inside `MobileShellView`,
+                // which exists only in `.ready`. That is item (i)'s
+                // structural half (her ratification: capture demands
+                // unlock first, never a plaintext side channel); the box's
+                // own worded refusal covers the re-lock seam.
+                MobileStoreLockView(lobby: lobby, tokens: lockedTokens)
             case .failed(let error):
                 MobileStoreFailureView(error: error) { bootstrap.retry() }
             }
@@ -123,11 +126,28 @@ struct VariorumMobileApp: App {
             }
             mobileScenePhaseChanged(
                 phase, editors: shellRouter.editors, sync: services?.sync,
-                quickNote: shellRouter.quickNote, savepoint: savepoint)
+                quickNote: shellRouter.quickNote, savepoint: savepoint,
+                relock: relockCoordinator())
         }
     }
 
     // (The protection-class pick lives in AppBootstrap.open() — Phase 8
     // review round 1: iOS data protection is inherited AT CREATION, so it
     // must precede the first open.)
+
+    /// The re-lock coordinator, minted once and kept: its ONE piece of
+    /// state is the leaving stamp, which a per-call construction would
+    /// throw away between the two scene edges that need to compare it.
+    /// It reads the dials FRESH at every fire (the Mac monitors' rule),
+    /// so a dial changed mid-session is honoured without re-wiring.
+    @MainActor
+    private func relockCoordinator() -> MobileRelockCoordinator {
+        if let relock { return relock }
+        let bootstrap = bootstrap
+        let fresh = MobileRelockCoordinator(
+            dials: { bootstrap.gate.dials(bootstrap.storeVariant.rawValue) },
+            lock: { await bootstrap.lock() })
+        relock = fresh
+        return fresh
+    }
 }

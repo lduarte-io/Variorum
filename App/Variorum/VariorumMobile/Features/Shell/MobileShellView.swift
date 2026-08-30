@@ -49,6 +49,11 @@ struct MobileShellView: View {
     let session: AppSession
     let services: AppServices?
     let router: MobileShellRouter
+    /// 13p Batch 4: the launch/protection brain — the protection screen's
+    /// controller, and `canLock` for the Lock Now door (P-2: a door that
+    /// cannot act is not rendered). Optional so any future composition
+    /// without one still builds; the app always passes it.
+    var bootstrap: AppBootstrap?
 
     @State private var tab: MobileTab = .shelf
     @State private var shelfPath = NavigationPath()
@@ -64,16 +69,24 @@ struct MobileShellView: View {
     /// carrying the star door, the Mac StarDoor discipline).
     @State private var starsModel: MobileStarsModel
     @State private var settingsPresented = false
+    /// 13p Batch 4: the protection screen, openable from the nudge/
+    /// reminder bar as well as from Settings (each presenter owns its own
+    /// state — the tag-manager precedent).
+    @State private var protectionPresented = false
     @Environment(\.colorScheme) private var scheme
     #if DEBUG
     // Stage 0 TK2 spike auto-run (KEPT — the executable §5 form).
     @State private var spikePresented = SpikeLaunch.autoRunRequested || SpikeLaunch.uiTestBenchRequested
     #endif
 
-    init(session: AppSession, services: AppServices?, router: MobileShellRouter) {
+    init(
+        session: AppSession, services: AppServices?, router: MobileShellRouter,
+        bootstrap: AppBootstrap? = nil
+    ) {
         self.session = session
         self.services = services
         self.router = router
+        self.bootstrap = bootstrap
         _shelfModel = State(initialValue: MobileShelfViewModel(session: session))
         _libraryModel = State(initialValue: MobileLibraryViewModel(session: session))
         _scrapsModel = State(initialValue: MobileScrapsModel(session: session))
@@ -125,8 +138,27 @@ struct MobileShellView: View {
             .allowsHitTesting(tab == .library)
             .accessibilityHidden(tab != .library)
         }
+        // 13p Batch 4 (item e): the Standard nudge / reminder, as a calm
+        // banner at the top — dismissible, NEVER modal (an offer that
+        // blocks the app is a demand). It sits above both tab stacks
+        // rather than inside either, so it survives a tab switch and never
+        // fights the tab bar for the bottom edge.
+        .safeAreaInset(edge: .top, spacing: 0) {
+            if let protection = bootstrap?.protection {
+                MobileProtectionNoticeBar(
+                    controller: protection, services: services, tokens: tokens,
+                    openProtection: { protectionPresented = true })
+            }
+        }
         .sheet(isPresented: $settingsPresented) {
             settingsSheet
+        }
+        .sheet(isPresented: $protectionPresented) {
+            if let protection = bootstrap?.protection {
+                MobileProtectionSheet(
+                    controller: protection, services: services,
+                    canLock: bootstrap?.canLock ?? false, tokens: tokens)
+            }
         }
         .task { await starsModel.start() }
         #if DEBUG
@@ -144,12 +176,15 @@ struct MobileShellView: View {
         #if DEBUG
         return MobileSettingsView(
             session: session, router: router, services: services,
+            bootstrap: bootstrap,
             onOpenTutorialBook: { bookID in
                 settingsPresented = false
                 shelfPath.append(MobileRoute.book(bookID))
             })
         #else
-        return MobileSettingsView(session: session, router: router, services: services)
+        return MobileSettingsView(
+            session: session, router: router, services: services,
+            bootstrap: bootstrap)
         #endif
     }
 
