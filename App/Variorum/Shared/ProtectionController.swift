@@ -128,12 +128,7 @@ final class ProtectionController {
     }
 
     private func loadEnvelope() -> StoreKeyEnvelope? {
-        guard let url = configuration.storeURL else { return scriptedLoad() }
-        return (try? gate.loadEnvelope(url)) ?? nil
-    }
-
-    private func scriptedLoad() -> StoreKeyEnvelope? {
-        (try? gate.loadEnvelope(URL(fileURLWithPath: "/dev/null"))) ?? nil
+        Self.loadEnvelope(gate: gate, storeURL: configuration.storeURL)
     }
 
     private func saveEnvelope(_ envelope: StoreKeyEnvelope) throws {
@@ -150,9 +145,26 @@ final class ProtectionController {
     /// that — a second disk read per act, and a doubled one in reconcile).
     private func ensuredEnvelope(for key: StoreKey)
         -> (envelope: StoreKeyEnvelope, onDisk: Bool) {
-        if let existing = loadEnvelope() {
+        Self.ensuredEnvelope(for: key, gate: gate, storeURL: configuration.storeURL)
+    }
+
+    // Nonisolated twins (13p ladder R2-m2): the reconcile's escrow arm
+    // runs its guard-seam work OFF the main actor, and these are the
+    // pieces it shares with the MainActor doors above — same reads, same
+    // writes, byte-identical semantics; only the executor differs. The
+    // gate's closures are `@Sendable` by construction.
+    nonisolated private static func loadEnvelope(
+        gate: StoreLaunchGate, storeURL: URL?
+    ) -> StoreKeyEnvelope? {
+        (try? gate.loadEnvelope(storeURL ?? URL(fileURLWithPath: "/dev/null"))) ?? nil
+    }
+
+    nonisolated private static func ensuredEnvelope(
+        for key: StoreKey, gate: StoreLaunchGate, storeURL: URL?
+    ) -> (envelope: StoreKeyEnvelope, onDisk: Bool) {
+        if let existing = loadEnvelope(gate: gate, storeURL: storeURL) {
             if existing.belongs(to: key) { return (existing, true) }
-            gate.setAsideEnvelope(configuration.storeURL ?? URL(fileURLWithPath: "/dev/null"))
+            gate.setAsideEnvelope(storeURL ?? URL(fileURLWithPath: "/dev/null"))
         }
         return (StoreKeyEnvelope(), false)
     }
@@ -439,38 +451,67 @@ final class ProtectionController {
         }
         refreshEnvelopeFacts()
         if configuration.isRealVariant {
-            if dials.escrowOn {
-                if let key = currentKey() {
-                    let ensured = ensuredEnvelope(for: key)
-                    let envelope = ensured.envelope
-                    if !ensured.onDisk {
-                        try? saveEnvelope(envelope)
-                    }
-                    if guardSeam.loadEscrow(envelope.storeID) != key {
-                        // The outcome feeds the dial's honesty line: an ON
-                        // dial whose item cannot land must SAY so (the Q3
-                        // codesigned finding — no keychain identity in
-                        // today's signing refuses the write).
-                        escrowLandingFailed =
-                            !guardSeam.saveEscrow(key, envelope.storeID)
-                    } else {
-                        escrowLandingFailed = false
-                    }
-                }
-            } else {
-                // The dial is OFF: a leftover item (a crashed flip) goes —
-                // but only OUR OWN (ladder R1-m1): a FOREIGN sidecar's
-                // storeID names another library's escrow copy, somebody's
-                // recovery leg, and this housekeeping must never take it.
-                // No key in hand ⇒ ownership unverifiable ⇒ the item stays.
-                if let envelope = loadEnvelope(),
-                   let key = currentKey(), envelope.belongs(to: key) {
-                    guardSeam.deleteEscrow(envelope.storeID)
-                }
-                escrowLandingFailed = false
-            }
+            // Ladder R2-m2: the escrow arm's guard-seam work — up to three
+            // synchronous SecItem round-trips (the silent item's read, the
+            // escrow read, the escrow write/delete) — hops OFF the main
+            // actor in ONE detached task, at this launch/unlock cadence
+            // (the 13e B-1 discipline: the hop moves the THREAD, never the
+            // meaning — same reads, same writes, same short-circuit order,
+            // inside one hop so nothing interleaves between them). The
+            // resident key is MainActor state, read here and carried in;
+            // the honesty flag lands back on the MainActor after.
+            let escrowOn = dials.escrowOn
+            let resident = residentKey
+            let gate = self.gate
+            let guardSeam = self.guardSeam
+            let storeURL = configuration.storeURL
+            let outcome = await Task.detached(priority: .userInitiated) {
+                Self.reconcileEscrowOffMain(
+                    escrowOn: escrowOn, residentKey: resident,
+                    gate: gate, guardSeam: guardSeam, storeURL: storeURL)
+            }.value
+            if let outcome { escrowLandingFailed = outcome }
         }
         refreshNotices(now: now)
+    }
+
+    /// The reconcile's escrow housekeeping, off-main (ladder R2-m2) —
+    /// byte-identical semantics to the inline arm it replaces. Returns the
+    /// new `escrowLandingFailed` reading; nil = leave it untouched (the
+    /// ON-arm-with-no-key case, exactly as before).
+    nonisolated private static func reconcileEscrowOffMain(
+        escrowOn: Bool, residentKey: StoreKey?,
+        gate: StoreLaunchGate, guardSeam: StoreKeyGuard, storeURL: URL?
+    ) -> Bool? {
+        if escrowOn {
+            guard let key = residentKey ?? guardSeam.loadAuto() else { return nil }
+            let ensured = ensuredEnvelope(for: key, gate: gate, storeURL: storeURL)
+            let envelope = ensured.envelope
+            if !ensured.onDisk {
+                try? gate.saveEnvelope(
+                    envelope, storeURL ?? URL(fileURLWithPath: "/dev/null"))
+            }
+            if guardSeam.loadEscrow(envelope.storeID) != key {
+                // The outcome feeds the dial's honesty line: an ON dial
+                // whose item cannot land must SAY so (the Q3 codesigned
+                // finding — no keychain identity in today's signing
+                // refuses the write).
+                return !guardSeam.saveEscrow(key, envelope.storeID)
+            }
+            return false
+        } else {
+            // The dial is OFF: a leftover item (a crashed flip) goes — but
+            // only OUR OWN (ladder R1-m1): a FOREIGN sidecar's storeID
+            // names another library's escrow copy, somebody's recovery
+            // leg, and this housekeeping must never take it. No key in
+            // hand ⇒ ownership unverifiable ⇒ the item stays.
+            if let envelope = loadEnvelope(gate: gate, storeURL: storeURL),
+               let key = residentKey ?? guardSeam.loadAuto(),
+               envelope.belongs(to: key) {
+                guardSeam.deleteEscrow(envelope.storeID)
+            }
+            return false
+        }
     }
 
     // MARK: - Notices

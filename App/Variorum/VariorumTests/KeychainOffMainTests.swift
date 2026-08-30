@@ -384,3 +384,92 @@ struct EncryptionCustodyThreadTests {
         #expect(log.anyOnMainThread == false)
     }
 }
+
+// MARK: - ProtectionController: the reconcile's escrow arm (13p ladder R2-m2)
+
+/// A real in-memory store-key guard with every SecItem-class call recorded
+/// (the row's named pin shape, applied to the 13p guard seam).
+private func recordingStoreKeyGuard(
+    _ log: KeychainCallLog, backing: InMemoryStoreKeyGuardBacking
+) -> StoreKeyGuard {
+    let inner = StoreKeyGuard.inMemory(backing: backing)
+    return StoreKeyGuard(
+        loadAuto: { log.note("loadAuto"); return inner.loadAuto() },
+        saveAuto: { log.note("saveAuto"); return inner.saveAuto($0) },
+        deleteAuto: { log.note("deleteAuto"); inner.deleteAuto() },
+        gatedItemExists: { log.note("gatedItemExists"); return inner.gatedItemExists() },
+        saveGated: { log.note("saveGated"); return inner.saveGated($0) },
+        deleteGated: { log.note("deleteGated"); inner.deleteGated() },
+        unlockGated: { await inner.unlockGated() },
+        biometryAvailable: { inner.biometryAvailable() },
+        loadEscrow: { log.note("loadEscrow"); return inner.loadEscrow($0) },
+        saveEscrow: { log.note("saveEscrow"); return inner.saveEscrow($0, $1) },
+        deleteEscrow: { log.note("deleteEscrow"); inner.deleteEscrow($0) },
+        confirmPresence: { await inner.confirmPresence($0) })
+}
+
+/// **Ladder R2-m2 — the launch/unlock road makes ZERO synchronous SecItem
+/// calls on the main thread.** `ProtectionController.reconcile()` runs at
+/// exactly that cadence (AppBootstrap fires it once the stack is ready),
+/// and its escrow arm made up to three synchronous guard-seam round-trips
+/// INLINE on the MainActor — the silent item's read, the escrow read, and
+/// the escrow write (or delete) — the 13e B-1 class re-introduced one type
+/// over, masked today only by the Mac's -34018 fast-fail and REAL the
+/// moment her signing lands a keychain identity. The arm now runs in ONE
+/// detached hop; the custody semantics are byte-identical (same reads,
+/// same writes, same short-circuit order — the escrow-consistency and
+/// foreign-sidecar pins in `Phase13pControllerTests` ride unmodified as
+/// that half's proof).
+///
+/// RED ON OLD (behavioral revert executed): with the arm inlined back onto
+/// the MainActor — the pre-fix shape — every recorded call lands
+/// main-thread and `anyOnMainThread` goes red in both dial states.
+@MainActor
+@Suite("The reconcile's escrow arm hops off the main thread (13p R2-m2)")
+struct ProtectionReconcileOffMainTests {
+    @Test func theEscrowArmsGuardSeamWorkArrivesOffMainInBothDialStates() async throws {
+        let log = KeychainCallLog()
+        let key = StoreKey.mint()
+        let backing = InMemoryStoreKeyGuardBacking(auto: key)
+        let recording = recordingStoreKeyGuard(log, backing: backing)
+        let dialsBox = ScriptedDialsBox(ProtectionDials(mode: .auto, escrowOn: true))
+        let envelopeBox = ScriptedEnvelopeBox(nil)
+        let stamps = ScriptedStampsBox()
+        let gate = StoreLaunchGate(
+            dials: { _ in dialsBox.value },
+            saveDials: { new, _ in dialsBox.value = new },
+            guardFor: { _ in recording },
+            loadEnvelope: { _ in envelopeBox.value },
+            saveEnvelope: { new, _ in envelopeBox.value = new },
+            setAsideEnvelope: { _ in envelopeBox.value = nil },
+            stamp: { leaf, _ in stamps.value[leaf] },
+            setStamp: { date, leaf, _ in stamps.value[leaf] = date })
+        let controller = ProtectionController(configuration: .init(
+            scope: "reconcile-off-main", storeURL: nil, gate: gate,
+            isRealVariant: true))
+        log.reset()  // construction reads no guard seam; belt anyway
+
+        // THE ON ARM (Standard's default): the silent item's read, the
+        // escrow read, the landing write — all off-main, and the escrow
+        // item really lands (the thread moved, never the meaning).
+        await controller.reconcile()
+        #expect(log.names == ["loadAuto", "loadEscrow", "saveEscrow"],
+                "the same three reads/writes, in the same order")
+        #expect(log.anyOnMainThread == false,
+                "ZERO synchronous SecItem calls on the main thread: \(log.calls)")
+        let storeID = try #require(envelopeBox.value?.storeID)
+        #expect(backing.escrow[storeID] == key, "the escrow copy landed")
+        #expect(!controller.escrowLandingFailed)
+
+        // THE OFF ARM: the leftover item goes (ownership-guarded, R1-m1)
+        // — same discipline, same evidence.
+        dialsBox.value.escrowOn = false
+        log.reset()
+        await controller.reconcile()
+        #expect(log.names == ["loadAuto", "deleteEscrow"],
+                "the ownership read then the delete, in order")
+        #expect(log.anyOnMainThread == false,
+                "the OFF arm hops too: \(log.calls)")
+        #expect(backing.escrow.isEmpty, "the leftover item went")
+    }
+}
