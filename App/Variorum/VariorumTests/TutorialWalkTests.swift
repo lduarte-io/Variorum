@@ -3124,6 +3124,13 @@ struct TutorialPrivacyChapterTests {
             #expect(prose.contains(ProtectionCopy.lockNowSentence))
             #expect(prose.contains("theater"),
                     "R13p-14's rule is part of the teaching, not a footnote")
+            // Ladder R1-m4: the noise claim carries the R13p-15 age-out
+            // disclosure — pre-encryption backups stay readable until
+            // rotation expires them, and a chapter about a security
+            // feature must not read better than the truth.
+            #expect(prose.contains(
+                "before the encryption arrived stay readable plain files"),
+                "the honest tail clause on the what-comes-out-is-noise sentence")
         }
     }
 

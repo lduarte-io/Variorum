@@ -61,7 +61,14 @@ final class AppBootstrap {
         /// nothing runs until the lobby unlocks.
         case locked(StoreLobby)
         case ready(AppSession)
-        case failed(AppDatabase.StoreOpenError)
+        /// `recovery` (13p ladder R1-M3 — the sidecar-present unlock road):
+        /// non-nil exactly when the failure is the encrypted-store-with-
+        /// empty-custody refusal AND a `variorum-keys.json` with wraps sits
+        /// beside the store — the failure surface then offers unlock by
+        /// passphrase / recovery phrase through the SAME lobby machinery
+        /// (same envelope road, never a new crypto road; same-machine
+        /// scope — the full new-machine adoption door is 13x's).
+        case failed(AppDatabase.StoreOpenError, recovery: StoreLobby?)
     }
 
     private(set) var state: State = .opening
@@ -185,7 +192,7 @@ final class AppBootstrap {
     private enum OpenOutcome: Sendable {
         case ready(AppDatabase, unlockedKey: StoreKey?)
         case locked(LobbyFacts)
-        case failed(AppDatabase.StoreOpenError)
+        case failed(AppDatabase.StoreOpenError, recovery: LobbyFacts?)
     }
 
     private struct LobbyFacts: Sendable {
@@ -242,7 +249,8 @@ final class AppBootstrap {
         if let testOpener {
             switch testOpener() {
             case .success(let database): return .ready(database, unlockedKey: unlockedKey)
-            case .failure(let error): return .failed(error)
+            case .failure(let error):
+                return failedOutcome(error, gate: gate, storeURL: storeURL)
             }
         }
         switch openStoreOffMain(
@@ -250,8 +258,37 @@ final class AppBootstrap {
             custody: unlockedKey.map { StoreKeyCustody.inMemory(initial: $0) }
         ) {
         case .success(let database): return .ready(database, unlockedKey: unlockedKey)
-        case .failure(let error): return .failed(error)
+        case .failure(let error):
+            return failedOutcome(error, gate: gate, storeURL: storeURL)
         }
+    }
+
+    /// 13p ladder R1-M3: a failed open lands `.failed` — and when the
+    /// failure is the encrypted-store-with-empty-custody refusal (typed:
+    /// `keyUnavailable`) with a wraps-bearing sidecar beside the store, it
+    /// carries the RECOVERY facts, so the failure surface can offer the
+    /// envelope's own unlock roads instead of a dead end. Before this,
+    /// that state was doorless while the plan's own words claimed
+    /// "Batch 2's recovery roads re-derive".
+    private nonisolated static func failedOutcome(
+        _ error: AppDatabase.StoreOpenError,
+        gate: StoreLaunchGate,
+        storeURL: URL?
+    ) -> OpenOutcome {
+        guard error.keyUnavailable else { return .failed(error, recovery: nil) }
+        let envelope = loadedEnvelope(gate, storeURL)
+        let passphrase = envelope?.passphrase != nil
+        let recovery = envelope?.recovery != nil
+        guard passphrase || recovery else { return .failed(error, recovery: nil) }
+        // `demand: .passphrase` names the roads this lobby renders (typed
+        // secrets only — no gated item exists, or the open would not have
+        // failed); the failure surface words its own frame.
+        return .failed(error, recovery: LobbyFacts(
+            demand: .passphrase,
+            biometryOffered: false,
+            passphraseOffered: passphrase,
+            recoveryOffered: recovery,
+            storeURL: storeURL))
     }
 
     private func finish(_ outcome: OpenOutcome) {
@@ -265,8 +302,10 @@ final class AppBootstrap {
                 do {
                     try binding.adopt(database)
                 } catch {
-                    state = .failed(AppDatabase.StoreOpenError(
-                        storePath: "", reason: String(describing: error)))
+                    state = .failed(
+                        AppDatabase.StoreOpenError(
+                            storePath: "", reason: String(describing: error)),
+                        recovery: nil)
                     return
                 }
                 view = ambient ?? database
@@ -295,13 +334,27 @@ final class AppBootstrap {
             // reconcile (escrow consistency, first-use stamp, notices) —
             // AFTER the stack exists, never before unlock.
             protection.adoptResident(unlockedKey)
+            // 13p ladder R1-M3: an unlocked key arriving under a
+            // NON-demanded mode is the failure surface's recovery road —
+            // the Auto item was gone (that is why the open failed), and
+            // the custody law says Auto keeps a silent item. Re-land the
+            // PROVEN key so the next launch opens silently instead of
+            // failing into the same surface. (The demanded modes' lobby
+            // road never lands custody — that is its own law.)
+            if let unlockedKey,
+               !gate.dials(storeVariant.rawValue).mode.isDemanded {
+                let guardSeam = gate.guardFor(storeVariant.rawValue)
+                Task.detached(priority: .utility) {
+                    _ = guardSeam.saveAuto(unlockedKey)
+                }
+            }
             if testOpener == nil {
                 Task { [weak protection] in await protection?.reconcile() }
             }
         case .locked(let facts):
             state = .locked(makeLobby(facts))
-        case .failed(let error):
-            state = .failed(error)
+        case .failed(let error, let recoveryFacts):
+            state = .failed(error, recovery: recoveryFacts.map(makeLobby))
         }
     }
 
@@ -327,9 +380,18 @@ final class AppBootstrap {
 
     /// Whether Lock Now is a real act right now (P-2: the door renders
     /// only where it acts): ready, bound, and a demanded mode.
+    ///
+    /// Reads the OBSERVABLE dials projection (ladder R1-m2): `gate.dials`
+    /// is an un-observed defaults read, so the Mac menu and the phone's
+    /// sheet never re-evaluated on a mode flip — the Lock Now door went
+    /// stale until the next unrelated state change. Every dial write goes
+    /// through the controller (and `reconcile` re-reads the persisted
+    /// truth for the one launch-route write that doesn't), so the
+    /// projection is current; `lock()` keeps consulting the persisted gate
+    /// as the ACTING authority.
     var canLock: Bool {
         guard case .ready = state, binding != nil else { return false }
-        return gate.dials(storeVariant.rawValue).mode.isDemanded
+        return protection.dials.mode.isDemanded
     }
 
     /// The teardown, in the ruled order: flush/savepoint/stop (the

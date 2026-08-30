@@ -373,7 +373,7 @@ struct MobileSettingsView: View {
             if let protection = bootstrap?.protection {
                 MobileProtectionSheet(
                     controller: protection, services: services,
-                    canLock: bootstrap?.canLock ?? false, tokens: tokens)
+                    bootstrap: bootstrap, tokens: tokens)
             }
         }
         .sheet(isPresented: $acknowledgmentsPresented) {

@@ -241,9 +241,14 @@ struct BackupRunTests {
         try FileManager.default.removeItem(at: doomed)
 
         let leg = await Task.detached {
+            // R1-m5 made the artifact configuration REQUIRED — this
+            // plaintext-era scenario passes the plain one DELIBERATELY
+            // (the store under test is unkeyed), which is now a visible
+            // decision rather than a silent default.
             StoreBackup.performSecondLeg(
                 directory: dir, configuration: .init(), defaults: defaults(),
-                now: Date(), force: false)
+                now: Date(), force: false,
+                artifactConfiguration: GRDB.Configuration())
         }.value
         #expect(leg.outcome == .failed)
         #expect(leg.detail?.isEmpty == false)
@@ -322,8 +327,21 @@ struct DataSafetyRunbookTests {
 
     @Test func theShippedRunbookAndTheRepoCopyAreOneDocument() throws {
         let onDisk = try String(contentsOf: repoRunbook, encoding: .utf8)
-        #expect(onDisk == DataSafetyCopy.runbook,
-                "notes/DataSafetyRunbook.md has drifted from DataSafetyCopy.runbook")
+        if onDisk != DataSafetyCopy.runbook {
+            // 13p ladder R1-M1 made §8 a COMPOSITION over
+            // `ProtectionCopy` (one brain), so a re-worded protection
+            // sentence now changes the rendered runbook and the repo file
+            // must follow. On mismatch, write the rendered text somewhere
+            // the fixer can copy from, and say where.
+            let rendered = FileManager.default.temporaryDirectory
+                .appendingPathComponent("DataSafetyRunbook-rendered.md")
+            try? DataSafetyCopy.runbook.write(
+                to: rendered, atomically: true, encoding: .utf8)
+            let hint = "notes/DataSafetyRunbook.md has drifted from "
+                + "DataSafetyCopy.runbook — the rendered text is at "
+                + "\(rendered.path); copy it over the repo file."
+            Issue.record(Comment(rawValue: hint))
+        }
     }
 
     @Test func theRunbookCarriesTheThreeSentencesTheAppSays() {
@@ -347,6 +365,46 @@ struct DataSafetyRunbookTests {
         // Her clarity mandate: the BOTH-SIDED truth, both sides present.
         #expect(DataSafetyCopy.bothSidedDeletionTruth.contains("not from backup files"))
         #expect(DataSafetyCopy.bothSidedDeletionTruth.contains("still inside that backup file"))
+    }
+
+    /// **Ladder R1-M1 — §8 tells the encrypted-era truth, composed from
+    /// the ONE brain.** The shipped RESTORE.md's §8 still claimed *"Your
+    /// local store and these backups are NOT encrypted by that key, so
+    /// your writing is still here"* — false since Batch 1 in every mode,
+    /// its conclusion contradicting the ruled loss math under
+    /// passphrase-every-open + escrow-off, and written into every backup
+    /// folder each run. §8 is now COMPOSED from `ProtectionCopy.lossLegs`
+    /// / `lossMath` (never a hand-written parallel claim), and this pin
+    /// holds it there.
+    ///
+    /// RED ON OLD (behavioral revert executed): the old §8 restored, the
+    /// stale-claim guard and every per-mode leg assertion go red.
+    @Test func sectionEightIsComposedFromTheProtectionBrainAndClaimsNothingStale() {
+        let runbook = DataSafetyCopy.runbook
+        // The stale claim is GONE — in either casing, in any wording that
+        // carries its two load-bearing phrases.
+        #expect(!runbook.contains("are NOT encrypted by that key"),
+                "the plaintext-era claim must not survive anywhere in the runbook")
+        #expect(!runbook.contains("your writing is still here"),
+                "the unconditional conclusion contradicts the ruled loss math")
+        // Every mode's chain, by the app's own words — the same
+        // `lossLegs` list the pane and the tutorial read.
+        for mode in StoreAtOpenMode.allCases {
+            #expect(runbook.contains(ProtectionCopy.modeLabel(mode)),
+                    "§8 names the mode by the row Settings shows: \(ProtectionCopy.modeLabel(mode))")
+            for leg in ProtectionCopy.lossLegs(mode, escrowOn: false) {
+                #expect(runbook.contains(leg),
+                        "§8's \(mode) chain carries the app's own leg: \(leg)")
+            }
+        }
+        // The escrow leg (the ON dial's extra way back in), same brain.
+        if let escrowLeg = ProtectionCopy.lossLegs(.auto, escrowOn: true).last {
+            #expect(runbook.contains(escrowLeg))
+        }
+        // And the demanded-mode truth the old conclusion contradicted —
+        // the pane's own sentence, verbatim.
+        #expect(runbook.contains(ProtectionCopy.lossMath(.passphrase, escrowOn: false)),
+                "the passphrase-every-open loss math lands verbatim from the one brain")
     }
 
     @Test func theRunbookCoversWhatItsTableOfContentsPromises() {

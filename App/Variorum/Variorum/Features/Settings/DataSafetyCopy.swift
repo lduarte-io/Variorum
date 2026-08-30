@@ -243,19 +243,38 @@ nonisolated enum DataSafetyCopy {
 
         ## 8. If you forget the passphrase
 
-        The mirror is encrypted with a key wrapped by your encryption
-        passphrase, with the 12-word recovery phrase as the second door. If
-        both are gone, the mirror's contents are unrecoverable — by anyone.
-        Your local store and these backups are NOT encrypted by that key, so
-        your writing is still here. Keep the recovery phrase somewhere you
-        would find it in a year.
+        Since the encryption update this is a question about your LIBRARY,
+        not just the mirror: the store on this Mac and every backup above
+        are encrypted under one store key, and the mirror is sealed the same
+        way. Your encryption passphrase and the 12-word recovery phrase do
+        not encrypt anything themselves — they are ways to hand that key
+        back to you when this Mac's own Keychain cannot.
+
+        So what losing them would cost depends on your at-open mode in
+        Settings ▸ Protection. These lists are the app's own — the same ones
+        that pane shows, kept current with your dials:
+
+        - **\(ProtectionCopy.modeLabel(.auto))** — your ways back in: \
+        \(ProtectionCopy.lossLegs(.auto, escrowOn: false).joined(separator: " · ")). \
+        Forgetting a secret costs nothing while this Mac still works: the
+        Keychain opens the library without asking.
+        - **\(ProtectionCopy.modeLabel(.biometric))** — your ways back in: \
+        \(ProtectionCopy.lossLegs(.biometric, escrowOn: false).joined(separator: " · ")).
+        - **\(ProtectionCopy.modeLabel(.passphrase))** — your ways back in: \
+        \(ProtectionCopy.lossLegs(.passphrase, escrowOn: false).joined(separator: " · ")). \
+        \(ProtectionCopy.lossMath(.passphrase, escrowOn: false))
+
+        With the iCloud Keychain copy on (Settings ▸ Protection), every list
+        above gains one more way back in: \
+        \(ProtectionCopy.lossLegs(.auto, escrowOn: true).last ?? "the copy in your iCloud Keychain"). \
+        Losing your writing means losing EVERY way back in at once — any
+        single one of them still standing gets you back in.
 
         **Check before you need to.** Neither secret is used day to day — the
         device unwraps once and remembers — so the first time you type one
-        again may be the day it matters. There is a check for that: the sync
-        line at the bottom of the sidebar → **Account…** → **Encryption**.
-        Type a passphrase or the 12 words and Variorum tries the real unlock,
-        then tells you yes or no. It changes nothing, resets nothing, and
-        getting it wrong there costs nothing.
+        again may be the day it matters. Settings ▸ Protection has a check
+        for exactly that: type the passphrase or the 12 words and Variorum
+        tries the real unlock, then tells you yes or no. It changes nothing,
+        resets nothing, and getting it wrong there costs nothing.
         """
 }

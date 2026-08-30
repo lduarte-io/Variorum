@@ -250,6 +250,103 @@ struct MobilePhoneLobbyTests {
         }
     }
 
+    /// **Ladder R1-M2 — the phone's lock runs the ruled teardown.** Until
+    /// this fix `onWillLock` was wired ONLY on the Mac: the phone's Lock
+    /// Now flipped to `.locked` and closed the pool with NO flush or
+    /// savepoint leg — a pending keystroke burst raced `StoreLockedError`
+    /// and was lost from the store — and the mobile services were never
+    /// stopped or released, so schedulers fired into typed refusals
+    /// through the locked window and the stale services object survived
+    /// past the next `.ready`'s `guard services == nil`.
+    ///
+    /// This pin drives the SAME factory production wires
+    /// (`mobileWillLock`) over the scripted world: a registered editor
+    /// with a pending edit → `lock()` → unlock → the edit SURVIVES, a
+    /// leaving savepoint landed, and the services stop hook ran.
+    ///
+    /// RED ON OLD (behavioral revert executed): with the factory's body
+    /// emptied — the pre-fix world, where nothing wires the teardown —
+    /// the pending edit dies with the pool and the survival assertion
+    /// goes red.
+    @Test func aLockFlushesPendingEditsAndStopsServicesBeforeThePoolCloses() async throws {
+        try await withDeps {
+            let world = try demandedWorld(mode: .passphrase)
+            await world.bootstrap.awaitOpen()
+            guard case .locked(let lobby) = world.bootstrap.state else {
+                Issue.record("expected .locked")
+                return
+            }
+            await lobby.unlock(passphrase: "sesame")
+            await world.bootstrap.awaitOpen()
+            guard case .ready(let session) = world.bootstrap.state else {
+                Issue.record("expected .ready after unlock")
+                return
+            }
+            // The test-opener road skips the process-global install, so the
+            // ambient database is bound here exactly where production's
+            // install would have bound it (plus the jitter generator the
+            // ops' fractional indexes read).
+            try await withDependencies {
+                $0.database = session.database
+                $0.withRandomNumberGenerator =
+                    WithRandomNumberGenerator(SeededGenerator(seed: 11))
+            } operation: { @MainActor in
+                let post = try await session.runner.run { ops in
+                    try ops.createPost(title: "locked mid-thought", profile: .blog)
+                }
+                let minted = try await session.runner.run { ops in
+                    try ops.newBlock(in: post.id, text: "A", at: .end)
+                }
+
+                // A registered editor with a PENDING edit (clocks off — the
+                // burst sits in the coordinator, not the store).
+                let editors = MobileLivenessAuthority()
+                let (editor, storage) = makeEditor(session, postID: post.id)
+                await editors.register(editor, tab: .shelf)
+                await editor.loadOnce()
+                typeEdit(
+                    editor, storage,
+                    range: NSRange(location: 1, length: 0), replacement: " typed")
+                #expect(editor.autosave.isDirty, "the edit is pending, not landed")
+
+                // Production's own wiring: the factory the app composes.
+                let stops = LockIsolated(0)
+                world.bootstrap.onWillLock = mobileWillLock(
+                    session: session, editors: editors,
+                    stopServices: { stops.withValue { $0 += 1 } })
+
+                await world.bootstrap.lock()
+                guard case .locked(let secondLobby) = world.bootstrap.state else {
+                    Issue.record("expected .locked after Lock Now")
+                    return
+                }
+                #expect(stops.value == 1,
+                        "the services stop-and-release hook runs at lock")
+
+                await secondLobby.unlock(passphrase: "sesame")
+                await world.bootstrap.awaitOpen()
+                guard case .ready(let reopened) = world.bootstrap.state else {
+                    Issue.record("expected .ready after the second unlock")
+                    return
+                }
+                let survived = try await reopened.database.read { db in
+                    try String.fetchOne(
+                        db, sql: "SELECT working_text FROM variant WHERE id = ?",
+                        arguments: [minted.variant.id])
+                }
+                #expect(survived == "A typed",
+                        "the pending keystrokes land BEFORE the pool closes — the ruled order")
+                let savepoints = try await reopened.database.read { db in
+                    try Int.fetchOne(
+                        db, sql: "SELECT COUNT(*) FROM commit_point WHERE variant_id = ?",
+                        arguments: [minted.variant.id]) ?? 0
+                }
+                #expect(savepoints >= 1,
+                        "the leaving savepoint landed (the ⌘Q registry's phone twin)")
+            }
+        }
+    }
+
     /// R13p-14 on the phone: a lock whose key auto-releases at the next
     /// open is theater, and no theater ships.
     @Test func lockNowUnderAutoIsRefusedAsTheater() async throws {

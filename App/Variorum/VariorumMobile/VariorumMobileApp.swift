@@ -65,6 +65,23 @@ struct VariorumMobileApp: App {
                             storeVariant: bootstrap.storeVariant,
                             backupEnabled: false)
                         services = fresh
+                        // Phase 13p ladder R1-M2: the phone's lock road
+                        // used to skip the ruled teardown entirely —
+                        // `onWillLock` was wired ONLY on the Mac, so Lock
+                        // Now closed the pool under pending keystrokes and
+                        // left this stale `services` object alive through
+                        // the locked window AND past the next `.ready`'s
+                        // guard above. The factory mirrors the Mac's
+                        // closure: flush + leaving savepoints, then stop
+                        // AND nil the services (the next unlock composes
+                        // fresh ones over the fresh session — the
+                        // deferred-starts rule).
+                        bootstrap.onWillLock = mobileWillLock(
+                            session: session, editors: shellRouter.editors,
+                            stopServices: {
+                                services?.stop()
+                                services = nil
+                            })
                         await fresh.start()
                     }
             case .opening:
@@ -83,8 +100,12 @@ struct VariorumMobileApp: App {
                 // unlock first, never a plaintext side channel); the box's
                 // own worded refusal covers the re-lock seam.
                 MobileStoreLockView(lobby: lobby, tokens: lockedTokens)
-            case .failed(let error):
-                MobileStoreFailureView(error: error) { bootstrap.retry() }
+            case .failed(let error, let recovery):
+                // 13p ladder R1-M3: `recovery` is the sidecar-present
+                // unlock road — same brain and roads as the Mac's surface.
+                MobileStoreFailureView(error: error, recovery: recovery) {
+                    bootstrap.retry()
+                }
             }
         }
         .onChange(of: scenePhase) { _, phase in

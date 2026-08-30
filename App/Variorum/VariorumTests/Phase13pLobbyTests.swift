@@ -24,6 +24,7 @@
 import Dependencies
 import Foundation
 import GRDB
+import Observation
 import Testing
 
 @testable import Variorum
@@ -290,6 +291,152 @@ struct Phase13pLobbyTests {
                 return
             }
             #expect(world.openCount.value == 1)
+        }
+    }
+
+    /// **Ladder R1-M3(a) — the sidecar-present unlock road on the `.failed`
+    /// surface.** An encrypted store whose key custody is EMPTY lands in
+    /// `.failed` (the typed `keyUnavailable` refusal) — and until this fix
+    /// that state was DOORLESS even when a wraps-bearing
+    /// `variorum-keys.json` sat beside the store, while the plan's own
+    /// words claimed "Batch 2's recovery roads re-derive". Now the failure
+    /// carries a recovery lobby (the SAME `StoreLobby` machinery, same
+    /// envelope road — never a new crypto road), unlocking opens, and —
+    /// under the Auto dials this state arises in — the proven key re-lands
+    /// as the silent custody item so the NEXT launch opens normally.
+    ///
+    /// RED ON OLD (behavioral revert executed): with `failedOutcome`
+    /// returning `recovery: nil` unconditionally — the pre-fix shape — the
+    /// recovery guard below records the doorless state.
+    @Test func aKeyGoneFailureWithASidecarOffersTheEnvelopeRoadAndUnlockOpens() async throws {
+        try await withDeps {
+            let dir = try temporaryDirectory()
+            defer { try? FileManager.default.removeItem(at: dir) }
+            let storeURL = dir.appendingPathComponent("store.sqlite")
+            let key = StoreKey.mint()
+            var envelope = StoreKeyEnvelope()
+            try envelope.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
+
+            // AUTO dials + empty custody: the route opens, the open fails
+            // with the typed key-gone refusal — scripted here; the drill
+            // (`Phase13pKeyedDrillTests`) proves the production `openStore`
+            // throws exactly this marker over real files.
+            let backing = InMemoryStoreKeyGuardBacking()
+            let gate = StoreLaunchGate.scripted(
+                dials: ProtectionDials(mode: .auto), backing: backing, envelope: envelope)
+            let openCount = LockIsolated(0)
+            let bootstrap = AppBootstrap(
+                testOpener: {
+                    let n = openCount.withValue { value -> Int in
+                        value += 1
+                        return value
+                    }
+                    guard n > 1 else {
+                        return .failure(AppDatabase.StoreOpenError(
+                            storePath: storeURL.path,
+                            reason: "This library is encrypted, and its key is not "
+                                + "available on this device.",
+                            keyUnavailable: true))
+                    }
+                    return Result { try AppDatabase.onDisk(url: storeURL, key: key) }
+                        .mapError { AppDatabase.StoreOpenError(
+                            storePath: storeURL.path, reason: String(describing: $0)) }
+                },
+                gate: gate)
+            await bootstrap.awaitOpen()
+            guard case .failed(let error, let recovery) = bootstrap.state else {
+                Issue.record("expected .failed, got \(bootstrap.state)")
+                return
+            }
+            #expect(error.keyUnavailable)
+            guard let recovery else {
+                Issue.record(
+                    "a wraps-bearing sidecar must open the recovery road — the doorless state is the finding")
+                return
+            }
+            #expect(recovery.passphraseOffered)
+            #expect(!recovery.biometryOffered, "no gated item exists on this road")
+
+            // A wrong secret refuses in words and stays failed.
+            await recovery.unlock(passphrase: "not it")
+            #expect(recovery.lastError == "That passphrase doesn't unlock this library.")
+            #expect(openCount.value == 1)
+
+            // The right passphrase unlocks THROUGH the failure surface.
+            await recovery.unlock(passphrase: "sesame")
+            await bootstrap.awaitOpen()
+            guard case .ready = bootstrap.state else {
+                Issue.record("expected .ready after the recovery unlock")
+                return
+            }
+            #expect(openCount.value == 2)
+
+            // The custody HEAL: under Auto the custody law says a silent
+            // item exists — the proven key re-lands (off-main; bounded wait,
+            // the house pattern) so the next launch opens silently instead
+            // of failing into the same surface.
+            var healed = false
+            for _ in 0..<400 where !healed {
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(1))
+                healed = backing.auto == key
+            }
+            #expect(healed, "the proven key re-lands as the Auto custody item")
+        }
+    }
+
+    /// **Ladder R1-m2 — the Lock Now door tracks the OBSERVABLE dials
+    /// projection, both ways.** `canLock` used to read `gate.dials` — an
+    /// un-observed defaults read — so the Mac menu (and the phone's sheet,
+    /// which worse still captured a `let canLock: Bool` at construction)
+    /// re-evaluated only when something ELSE changed: a mode flip through
+    /// the pane left a Lock Now door rendered that `lock()` then silently
+    /// refused, or a door missing that should have appeared.
+    ///
+    /// RED ON OLD (behavioral revert executed): with the un-observed read
+    /// restored, the flips below mutate only `protection.dials`, no
+    /// tracked access changes, and `onChange` never fires — both
+    /// `#expect(fired…)` lines go red.
+    @Test func canLockTracksAModeFlipBothWays() async throws {
+        try await withDeps {
+            let world = try demandedWorld(mode: .passphrase)
+            await world.bootstrap.awaitOpen()
+            guard case .locked(let lobby) = world.bootstrap.state else {
+                Issue.record("expected .locked")
+                return
+            }
+            await lobby.unlock(passphrase: "sesame")
+            await world.bootstrap.awaitOpen()
+            guard case .ready = world.bootstrap.state else {
+                Issue.record("expected .ready after unlock")
+                return
+            }
+            #expect(world.bootstrap.canLock)
+
+            // Demanded → Auto: the door must withdraw, OBSERVABLY — a
+            // renderer that read `canLock` must be invalidated by the flip.
+            let firedDown = LockIsolated(false)
+            withObservationTracking {
+                _ = world.bootstrap.canLock
+            } onChange: {
+                firedDown.setValue(true)
+            }
+            #expect(await world.bootstrap.protection.setMode(.auto) == .changed)
+            #expect(firedDown.value,
+                    "the demanded→auto flip must invalidate whatever renders the door")
+            #expect(!world.bootstrap.canLock)
+
+            // Auto → demanded: the door must come BACK the same way.
+            let firedUp = LockIsolated(false)
+            withObservationTracking {
+                _ = world.bootstrap.canLock
+            } onChange: {
+                firedUp.setValue(true)
+            }
+            #expect(await world.bootstrap.protection.setMode(.passphrase) == .changed)
+            #expect(firedUp.value,
+                    "the auto→demanded flip must invalidate it too")
+            #expect(world.bootstrap.canLock)
         }
     }
 

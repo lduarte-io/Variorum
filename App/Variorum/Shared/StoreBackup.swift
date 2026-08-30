@@ -265,11 +265,15 @@ final class StoreBackup {
     /// The picked folder's half. Never throws for the same reason: an
     /// unplugged drive is a thing to SAY, not a thing to crash on.
     /// `artifactConfiguration` keys the far copy's integrity check exactly
-    /// as the primary's (13p — the copies are ciphertext now).
+    /// as the primary's (13p — the copies are ciphertext now), and it is
+    /// REQUIRED (ladder R1-m5): a defaulted plain configuration re-opened,
+    /// one level up, the exact door `integrityCheck`'s required parameter
+    /// closed — a future caller quietly checking ciphertext copies with a
+    /// plain connection and reporting every one "could not be checked".
     nonisolated static func performSecondLeg(
         directory: URL, configuration: Configuration,
         defaults: UserDefaults, now: Date, force: Bool,
-        artifactConfiguration: GRDB.Configuration = GRDB.Configuration()
+        artifactConfiguration: GRDB.Configuration
     ) -> BackupRunRecord.Leg {
         var leg = BackupRunRecord.Leg(outcome: .noDestination)
         guard BackupDestination.isSet(in: defaults) else { return leg }

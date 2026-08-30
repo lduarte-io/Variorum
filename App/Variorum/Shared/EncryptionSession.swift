@@ -103,6 +103,17 @@ final class EncryptionSession {
     /// the composition root to `ProtectionController.followVaultPassphrase`.
     var onPassphraseChanged: ((String) async -> Void)?
 
+    /// Phase 13p ladder R1-m3 (one secret — the PHRASE's following
+    /// direction, `onPassphraseChanged`'s twin): fired with the twelve
+    /// CONFIRMED words after the vault's recovery wrap lands. Wired by the
+    /// composition root to `ProtectionController.landRecoveryWrap`, so the
+    /// STORE envelope carries the SAME words — without it, a
+    /// vault-enrolled user who generated their phrase through the vault
+    /// flow held "the" twelve words that opened the account but not the
+    /// library (the recorded Batch-2 phrase-divergence corner's mirror,
+    /// closed).
+    var onRecoveryPhraseLanded: (([String]) async -> Void)?
+
     /// Phase 13p Batch 2 (one secret — the GUARDING direction): does this
     /// passphrase match the STORE's own wrap? Consulted before SETUP
     /// mints a vault: nil/absent = nothing to guard; false = refuse — a
@@ -300,11 +311,15 @@ final class EncryptionSession {
             lastError = "This device holds no keys — unlock with your passphrase first."
             return
         }
-        await runFlow { enrollment in
+        let landed = await runFlow { enrollment in
             try await enrollment.landRecoveryWrap(
                 words: confirmedWords, material: material, allowReplace: allowReplace)
             self.state = .enrolled(hasRecoveryWrap: true)
         }
+        // 13p ladder R1-m3 (one secret): the store wrap follows the SAME
+        // words — only on a land that actually happened (`runFlow` returns
+        // nil on refusal, so a rejected replace fires nothing).
+        if landed != nil { await onRecoveryPhraseLanded?(confirmedWords) }
     }
 
     /// CHANGE PASSPHRASE (Round 7's scope addition): authorized by the

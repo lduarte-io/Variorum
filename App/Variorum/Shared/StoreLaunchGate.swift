@@ -224,9 +224,14 @@ final class StoreLobby {
     }
 
     func unlock(passphrase: String) async {
-        let trimmed = passphrase
-        guard !trimmed.isEmpty else { return }
-        await run(.passphrase(trimmed))
+        // DELIBERATELY UNTRIMMED (ladder R1-n4 — the old `trimmed` name
+        // claimed a trim that never happens): a passphrase may begin or end
+        // with a space — the floor forbids only the EMPTY passphrase, and a
+        // silent trim would refuse a secret the user really typed. The
+        // recovery road below DOES trim, because a phrase is a word LIST:
+        // whitespace there is a separator, never content.
+        guard !passphrase.isEmpty else { return }
+        await run(.passphrase(passphrase))
     }
 
     func unlock(recoveryText: String) async {

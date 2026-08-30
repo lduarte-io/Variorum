@@ -69,6 +69,43 @@ nonisolated enum MobileRelockPolicy {
     }
 }
 
+// MARK: - The lock teardown (the phone's onWillLock — ladder R1-M2)
+
+/// The phone's pre-lock teardown, mirroring the Mac's closure
+/// (VariorumApp.swift's `bootstrap.onWillLock`): a lock FLUSHES every
+/// registered editor and lands each open note's leaving savepoint BEFORE
+/// the pool closes, then stops and RELEASES the mobile services — so no
+/// pending keystroke races `StoreLockedError` into loss, no scheduler
+/// fires into a locked window, and no stale services object survives past
+/// the next `.ready`'s `guard services == nil`.
+///
+/// A FACTORY rather than an inline closure so the scripted world wires
+/// exactly what production wires (`MobilePhoneLobbyTests` pins the
+/// pending-edit-survives-a-lock round trip on this same function).
+///
+/// The quick-note box is DELIBERATELY not minted here: its worded refusal
+/// — the text STAYS in the box and the sentence names the lock and the
+/// road — is Batch 4's ruled behavior for the re-lock seam (her item (i)
+/// ratification), and a silent mint here would replace that ruling.
+@MainActor
+func mobileWillLock(
+    session: AppSession,
+    editors: MobileLivenessAuthority,
+    stopServices: @escaping @MainActor () -> Void
+) -> @MainActor () async -> Void {
+    {
+        // ORDER IS LOAD-BEARING (the Mac's ruled teardown order): the
+        // flush lands her text in the store, the savepoints insure it,
+        // and only then do the services stop — all before the state flips
+        // and the pool closes.
+        await editors.flushAll()
+        for postID in editors.registeredPostIDs {
+            await session.savepointOnLeaving(postID)
+        }
+        stopServices()
+    }
+}
+
 // MARK: - The coordinator (the scene seam's one holder)
 
 /// Holds the leaving stamp and asks the policy at each phase change. It

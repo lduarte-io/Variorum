@@ -93,6 +93,14 @@ struct VariorumApp: App {
                         fresh.encryption.onPassphraseChanged = { passphrase in
                             await protection.followVaultPassphrase(passphrase)
                         }
+                        // 13p ladder R1-m3 — the phrase twin: the vault's
+                        // own recovery-phrase generation lands the SAME
+                        // twelve words onto the store envelope, so the one
+                        // phrase opens BOTH (the passphrase hook's pattern,
+                        // completed in the phrase direction).
+                        fresh.encryption.onRecoveryPhraseLanded = { words in
+                            _ = await protection.landRecoveryWrap(words: words)
+                        }
                         fresh.encryption.storePassphraseGuard = { passphrase in
                             await protection.verifyPassphraseAgainstStore(passphrase)
                         }
@@ -136,8 +144,11 @@ struct VariorumApp: App {
                 // Phase 13p: the demanded at-open modes' lobby — no store,
                 // no session, no services until it unlocks (R13p-5).
                 StoreLockView(lobby: lobby)
-            case .failed(let error):
-                StoreFailureView(error: error) { bootstrap.retry() }
+            case .failed(let error, let recovery):
+                // 13p ladder R1-M3: `recovery` is the sidecar-present
+                // unlock road — non-nil when the key custody is empty but
+                // `variorum-keys.json` with wraps sits beside the store.
+                StoreFailureView(error: error, recovery: recovery) { bootstrap.retry() }
             }
         }
         .defaultSize(width: 1240, height: 840)
@@ -191,7 +202,10 @@ struct VariorumApp: App {
             switch (bootstrap.state, postID) {
             case (.ready(let session), .some(let postID)):
                 NoteWindowView(session: session, windows: windows, postID: postID)
-            case (.failed(let error), _):
+            case (.failed(let error, _), _):
+                // The note window shows the failure plainly; the MAIN
+                // window carries the recovery roads (one unlock surface,
+                // not two competing ones).
                 StoreFailureView(error: error) { bootstrap.retry() }
             case (.opening, _):
                 StoreOpeningView()

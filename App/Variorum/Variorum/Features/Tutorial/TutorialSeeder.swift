@@ -1199,12 +1199,19 @@ enum TutorialSeeder {
         // leave the lesson lying.
 
         _ = try lesson(privacy, "your library is encrypted", [
+            // Ladder R1-m4: the honest tail clause — the R13p-15 ruled
+            // age-out means backups made BEFORE the encryption arrived sit
+            // readable in the backup folders until rotation expires them
+            // (~6 weeks), and a lesson claiming pure noise during that
+            // window would overclaim about a security feature.
             "Everything in this app is encrypted where it lives. Not a switch "
             + "you turned on: the library file itself is ciphertext, always, "
             + "and it can only be read with a key this app holds. Copy the "
             + "file, take the drive, open the backup folder \u{2014} what "
-            + "comes out is noise. That is the floor under every other page "
-            + "of this book.",
+            + "comes out is noise. (One honest footnote: backups made "
+            + "before the encryption arrived stay readable plain files "
+            + "until rotation ages them out.) That is the floor under every "
+            + "other page of this book.",
 
             "What you CHOOSE is how the key is handed over when Variorum "
             + "opens. Settings \u{25B8} Protection offers three. "

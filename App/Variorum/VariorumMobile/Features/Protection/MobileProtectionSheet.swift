@@ -32,10 +32,16 @@ struct MobileProtectionSheet: View {
 
     @Bindable var controller: ProtectionController
     let services: AppServices?
-    /// Whether Lock Now is a real act right now (the bootstrap's
-    /// `canLock` — P-2: the door renders only where it acts).
-    let canLock: Bool
+    /// The bootstrap itself, NOT a captured `canLock` Bool (ladder R1-m2 —
+    /// the exact staleness Batch 4's PROVISIONAL 5 warned about, one view
+    /// lower: a Bool snapshot frozen at sheet construction kept the Lock
+    /// Now door stale while the user flipped the mode INSIDE this very
+    /// sheet). Reading `bootstrap.canLock` in the body tracks the
+    /// observable dials projection, so a mode flip re-renders the door.
+    let bootstrap: AppBootstrap?
     let tokens: VoiceTokens
+
+    private var canLock: Bool { bootstrap?.canLock ?? false }
 
     @Environment(\.dismiss) private var dismiss
 

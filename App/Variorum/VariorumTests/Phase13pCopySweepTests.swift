@@ -121,6 +121,20 @@ struct Phase13pCopySweepTests {
 
     /// The plain-text escape's warning exists and names the trade (R13p-8's
     /// rider: a scheduled export re-opens the door the encryption closed).
+    /// **Ladder R1-n2 — the unforeseen error speaks a sentence, never a
+    /// case name.** `message(for:)`'s default arm was
+    /// `String(describing:)` — a case-name dump on exactly the class of
+    /// error nobody predicted (R94's doctrine, applied to its last arm).
+    /// RED ON OLD: the describing dump contains the error type's name.
+    @Test func anUnforeseenErrorSpeaksASentenceNeverACaseName() {
+        struct UtterlyUnforeseenError: Error {}
+        let message = ProtectionCopy.message(for: UtterlyUnforeseenError())
+        #expect(!message.contains("UtterlyUnforeseen"),
+                "no case-name dumps on the refusal surface (R94)")
+        #expect(message.contains(StoreKeyEnvelope.filename),
+                "the one always-true recovery road is named")
+    }
+
     @Test func thePlainTextEscapeWarnsUnderLockedDown() {
         #expect(ProtectionCopy.plaintextExportUnderLockedDown
             .contains("re-opens the door"))

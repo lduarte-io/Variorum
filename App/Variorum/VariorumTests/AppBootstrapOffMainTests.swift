@@ -102,7 +102,7 @@ struct AppBootstrapOffMainTests {
             })
 
             await bootstrap.awaitOpen()
-            guard case .failed(let error) = bootstrap.state else {
+            guard case .failed(let error, _) = bootstrap.state else {
                 Issue.record("a failed open must land in .failed")
                 return
             }

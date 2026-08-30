@@ -153,6 +153,39 @@ struct Phase13pControllerTests {
         #expect(!w.dialsBox.value.escrowOn)
     }
 
+    /// **Ladder R1-m1 — escrow deletion is guarded on OWNERSHIP.** The
+    /// escrow-OFF arms (`setEscrow(false)` and the reconcile's
+    /// housekeeping) used to call `deleteEscrow` on whatever envelope was
+    /// present — so a FOREIGN sidecar (copied from another library; its
+    /// fingerprint contradicts our key) had ITS storeID's iCloud item
+    /// deleted: somebody's recovery leg, against the same
+    /// never-delete-foreign rule that makes `setAsideEnvelope` a move.
+    ///
+    /// RED ON OLD (behavioral revert executed): with the `belongs(to:)`
+    /// guard removed, both survival assertions go red — the foreign item
+    /// is taken by the unguarded delete.
+    @Test func escrowOffLeavesAForeignSidecarsItemAlone() async throws {
+        // A FOREIGN sidecar: wraps minted for ANOTHER library's key.
+        let foreignKey = StoreKey.mint()
+        var foreign = StoreKeyEnvelope()
+        try foreign.setPassphraseWrap(
+            key: foreignKey, passphrase: "other", kdf: fastKDF())
+        let w = world(envelope: foreign)
+        // The other library's escrow item, as iCloud Keychain would hold it.
+        w.backing.escrow[foreign.storeID] = foreignKey
+
+        // The dial flips OFF — the foreign item must SURVIVE.
+        #expect(await w.controller.setEscrow(false))
+        #expect(w.backing.escrow[foreign.storeID] == foreignKey,
+                "a foreign sidecar's escrow item survives escrow-off")
+        #expect(!w.dialsBox.value.escrowOn, "the dial itself still flips")
+
+        // The reconcile's escrow-OFF housekeeping obeys the same rule.
+        await w.controller.reconcile()
+        #expect(w.backing.escrow[foreign.storeID] == foreignKey,
+                "the launch reconcile never takes a foreign item either")
+    }
+
     // MARK: - Presets (R13p-7)
 
     @Test func lockedDownPresetNeedsThePassphraseThenSetsEverything() async {

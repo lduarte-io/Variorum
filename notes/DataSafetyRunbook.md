@@ -171,17 +171,29 @@ answer is §3 or §6, not the mirror.
 
 ## 8. If you forget the passphrase
 
-The mirror is encrypted with a key wrapped by your encryption
-passphrase, with the 12-word recovery phrase as the second door. If
-both are gone, the mirror's contents are unrecoverable — by anyone.
-Your local store and these backups are NOT encrypted by that key, so
-your writing is still here. Keep the recovery phrase somewhere you
-would find it in a year.
+Since the encryption update this is a question about your LIBRARY,
+not just the mirror: the store on this Mac and every backup above
+are encrypted under one store key, and the mirror is sealed the same
+way. Your encryption passphrase and the 12-word recovery phrase do
+not encrypt anything themselves — they are ways to hand that key
+back to you when this Mac's own Keychain cannot.
+
+So what losing them would cost depends on your at-open mode in
+Settings ▸ Protection. These lists are the app's own — the same ones
+that pane shows, kept current with your dials:
+
+- **Open silently (Keychain)** — your ways back in: this Mac (its Keychain holds the key) · your encryption passphrase (if you set one) · your recovery phrase (if you saved it). Forgetting a secret costs nothing while this Mac still works: the
+Keychain opens the library without asking.
+- **Ask for Touch ID** — your ways back in: this Mac's fingerprint/face unlock · your encryption passphrase · your recovery phrase (if saved).
+- **Ask for the passphrase** — your ways back in: your encryption passphrase · your recovery phrase (if saved). In this mode, forgetting your passphrase without the recovery phrase written down IS enough to lose your writing. Nothing on this Mac opens the library silently — that is the point, and that is the price. Keep the twelve words somewhere real.
+
+With the iCloud Keychain copy on (Settings ▸ Protection), every list
+above gains one more way back in: the copy in your iCloud Keychain. Losing your writing means losing EVERY way back in at once — any
+single one of them still standing gets you back in.
 
 **Check before you need to.** Neither secret is used day to day — the
 device unwraps once and remembers — so the first time you type one
-again may be the day it matters. There is a check for that: the sync
-line at the bottom of the sidebar → **Account…** → **Encryption**.
-Type a passphrase or the 12 words and Variorum tries the real unlock,
-then tells you yes or no. It changes nothing, resets nothing, and
-getting it wrong there costs nothing.
+again may be the day it matters. Settings ▸ Protection has a check
+for exactly that: type the passphrase or the 12 words and Variorum
+tries the real unlock, then tells you yes or no. It changes nothing,
+resets nothing, and getting it wrong there costs nothing.

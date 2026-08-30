@@ -144,13 +144,17 @@ final class ProtectionController {
     /// Load-or-create the envelope FOR `key`. A sidecar whose fingerprint
     /// contradicts the key is FOREIGN (copied from another library, or
     /// left behind by a deleted store) — it is set ASIDE, never deleted:
-    /// its wraps are somebody's recovery legs.
-    private func ensuredEnvelope(for key: StoreKey) -> StoreKeyEnvelope {
+    /// its wraps are somebody's recovery legs. `onDisk` says whether the
+    /// returned envelope is the one already sitting beside the store (13p
+    /// ladder R1-n3: callers used to re-`loadEnvelope()` to answer exactly
+    /// that — a second disk read per act, and a doubled one in reconcile).
+    private func ensuredEnvelope(for key: StoreKey)
+        -> (envelope: StoreKeyEnvelope, onDisk: Bool) {
         if let existing = loadEnvelope() {
-            if existing.belongs(to: key) { return existing }
+            if existing.belongs(to: key) { return (existing, true) }
             gate.setAsideEnvelope(configuration.storeURL ?? URL(fileURLWithPath: "/dev/null"))
         }
-        return StoreKeyEnvelope()
+        return (StoreKeyEnvelope(), false)
     }
 
     // MARK: - The passphrase (set · follow · reset)
@@ -161,7 +165,7 @@ final class ProtectionController {
     func setPassphrase(_ passphrase: String) async -> String? {
         guard !passphrase.isEmpty else { return "Type a passphrase first." }
         guard let key = currentKey() else { return Self.keyUnavailable }
-        var envelope = ensuredEnvelope(for: key)
+        var envelope = ensuredEnvelope(for: key).envelope
         let kdf = configuration.makeKDF()
         do {
             envelope = try await Task.detached(priority: .userInitiated) {
@@ -246,7 +250,7 @@ final class ProtectionController {
         }
         do {
             let words = try RecoveryPhrase.generate()
-            var envelope = ensuredEnvelope(for: key)
+            var envelope = ensuredEnvelope(for: key).envelope
             try envelope.setRecoveryWrap(key: key, words: words)
             try saveEnvelope(envelope)
             refreshEnvelopeFacts()
@@ -266,7 +270,7 @@ final class ProtectionController {
     func landRecoveryWrap(words: [String]) async -> String? {
         guard let key = currentKey() else { return Self.keyUnavailable }
         do {
-            var envelope = ensuredEnvelope(for: key)
+            var envelope = ensuredEnvelope(for: key).envelope
             try envelope.setRecoveryWrap(key: key, words: words)
             try saveEnvelope(envelope)
             refreshEnvelopeFacts()
@@ -318,6 +322,15 @@ final class ProtectionController {
             guardSeam.deleteGated()
         }
         dials.mode = newMode
+        // The key stays IN HAND across a mid-session transition (surfaced
+        // by ladder R1-m1's ownership guard): entering a demanded mode
+        // deletes the silent item, and every later key-needing act this
+        // session — the escrow dial's delete-with-ownership-proof, the
+        // set-screen, the phrase mint — reads `currentKey()`. The session
+        // that just HELD the key to make the transition keeps it as the
+        // resident, exactly as the unlock road adopts it; `lock()` drops
+        // it as always.
+        if newMode.isDemanded { residentKey = key }
         persistDials()
         return .changed
     }
@@ -332,10 +345,12 @@ final class ProtectionController {
                 lastError = Self.keyUnavailable
                 return false
             }
-            var envelope = ensuredEnvelope(for: key)
-            if loadEnvelope() != envelope {
+            let ensured = ensuredEnvelope(for: key)
+            let envelope = ensured.envelope
+            if !ensured.onDisk {
                 // A fresh envelope needs to exist on disk so its storeID
-                // names the item durably.
+                // names the item durably. (`onDisk` answers this from the
+                // ONE load — ladder R1-n3's doubled read retired.)
                 do { try saveEnvelope(envelope) } catch {
                     lastError = ProtectionCopy.message(for: error)
                     return false
@@ -348,7 +363,16 @@ final class ProtectionController {
             }
             escrowLandingFailed = false
         } else if let envelope = loadEnvelope() {
-            guardSeam.deleteEscrow(envelope.storeID)
+            // OWNERSHIP guard (ladder R1-m1): delete only OUR OWN escrow
+            // item. A FOREIGN sidecar's storeID names some other library's
+            // iCloud copy — one of somebody's recovery legs, which the
+            // never-delete-foreign rule protects (the same rule that makes
+            // `setAsideEnvelope` a move, never a delete). No key in hand ⇒
+            // ownership unverifiable ⇒ the item stays; the dial still
+            // flips, and a later owned act cleans up.
+            if let key = currentKey(), envelope.belongs(to: key) {
+                guardSeam.deleteEscrow(envelope.storeID)
+            }
             escrowLandingFailed = false
         }
         dials.escrowOn = on
@@ -403,6 +427,13 @@ final class ProtectionController {
     /// (real store only — see Configuration.isRealVariant), and refresh
     /// the notice state.
     func reconcile(now: Date = Date()) async {
+        // Re-read the persisted dials FIRST (ladder R1-m2's corner): the
+        // launch route can rewrite the stored dials WITHOUT this controller
+        // (`openResettingModeToAuto` writes through the gate off the main
+        // actor), and `canLock` + the panes read THIS observable projection
+        // — a stale projection would render a Lock Now door that `lock()`
+        // then silently refuses (a P-2 violation: a door that cannot act).
+        dials = gate.dials(scope)
         if gate.stamp(Self.firstUseStamp, scope) == nil {
             gate.setStamp(now, Self.firstUseStamp, scope)
         }
@@ -410,8 +441,9 @@ final class ProtectionController {
         if configuration.isRealVariant {
             if dials.escrowOn {
                 if let key = currentKey() {
-                    let envelope = ensuredEnvelope(for: key)
-                    if loadEnvelope() == nil || loadEnvelope() != envelope {
+                    let ensured = ensuredEnvelope(for: key)
+                    let envelope = ensured.envelope
+                    if !ensured.onDisk {
                         try? saveEnvelope(envelope)
                     }
                     if guardSeam.loadEscrow(envelope.storeID) != key {
@@ -425,9 +457,16 @@ final class ProtectionController {
                         escrowLandingFailed = false
                     }
                 }
-            } else if let envelope = loadEnvelope() {
-                // The dial is OFF: a leftover item (a crashed flip) goes.
-                guardSeam.deleteEscrow(envelope.storeID)
+            } else {
+                // The dial is OFF: a leftover item (a crashed flip) goes —
+                // but only OUR OWN (ladder R1-m1): a FOREIGN sidecar's
+                // storeID names another library's escrow copy, somebody's
+                // recovery leg, and this housekeeping must never take it.
+                // No key in hand ⇒ ownership unverifiable ⇒ the item stays.
+                if let envelope = loadEnvelope(),
+                   let key = currentKey(), envelope.belongs(to: key) {
+                    guardSeam.deleteEscrow(envelope.storeID)
+                }
                 escrowLandingFailed = false
             }
         }
@@ -524,7 +563,13 @@ final class ProtectionController {
     // MARK: - Re-lock monitors (Mac — sleep · screen lock · idle)
 
     #if os(macOS)
-    @ObservationIgnored private var monitorTokens: [NSObjectProtocol] = []
+    /// Tokens tracked BESIDE the center that minted them (ladder R1-n3):
+    /// the earlier one-array shape removed every token from BOTH centers —
+    /// harmless today only by accident of NotificationCenter tolerating
+    /// foreign tokens, and exactly the shape a future third monitor would
+    /// copy wrong.
+    @ObservationIgnored private var workspaceTokens: [NSObjectProtocol] = []
+    @ObservationIgnored private var distributedTokens: [NSObjectProtocol] = []
     @ObservationIgnored private var idleTask: Task<Void, Never>?
 
     /// Started by the production bootstrap only (never test instances):
@@ -533,12 +578,12 @@ final class ProtectionController {
     func startRelockMonitors() {
         stopRelockMonitors()
         let workspace = NSWorkspace.shared.notificationCenter
-        monitorTokens.append(workspace.addObserver(
+        workspaceTokens.append(workspace.addObserver(
             forName: NSWorkspace.willSleepNotification, object: nil, queue: .main
         ) { [weak self] _ in
             Task { @MainActor [weak self] in await self?.relockIfPolicySays() }
         })
-        monitorTokens.append(DistributedNotificationCenter.default().addObserver(
+        distributedTokens.append(DistributedNotificationCenter.default().addObserver(
             forName: Notification.Name("com.apple.screenIsLocked"),
             object: nil, queue: .main
         ) { [weak self] _ in
@@ -554,11 +599,12 @@ final class ProtectionController {
 
     func stopRelockMonitors() {
         let workspace = NSWorkspace.shared.notificationCenter
-        for token in monitorTokens {
-            workspace.removeObserver(token)
+        for token in workspaceTokens { workspace.removeObserver(token) }
+        for token in distributedTokens {
             DistributedNotificationCenter.default().removeObserver(token)
         }
-        monitorTokens = []
+        workspaceTokens = []
+        distributedTokens = []
         idleTask?.cancel()
         idleTask = nil
     }

@@ -490,7 +490,14 @@ nonisolated enum ProtectionCopy {
         case RecoveryPhraseError.invalidWordCount(let count):
             return "A recovery phrase is exactly 12 words — that was \(count)."
         default:
-            return String(describing: error)
+            // R94's floor for the unforeseen (ladder R1-n2): the old
+            // `String(describing:)` arm was a case-name dump — not a
+            // sentence, and on the one class of error nobody predicted.
+            // Generic and honest instead: it names what was being touched
+            // and the one recovery road that is always true.
+            return "Something unexpected went wrong with this library's key "
+                + "file. Try again — and if it keeps happening, restore "
+                + "\(StoreKeyEnvelope.filename) from a backup folder."
         }
     }
 }

@@ -336,6 +336,67 @@ struct CopyFlowRoundTests {
         #expect(session.state == .enrolled(hasRecoveryWrap: true))
     }
 
+    /// **Ladder R1-m3 — the phrase twin (one secret, the phrase's
+    /// following direction).** The vault's own recovery-phrase generation
+    /// had no hook landing the same words on the STORE envelope, though
+    /// `onPassphraseChanged` established the pattern — so a vault-enrolled
+    /// user could hold "the" twelve words that opened the account but not
+    /// the library. Now `landRecoveryWrap` fires the twin with the
+    /// CONFIRMED words on a land that happened (and NOT on a refused one),
+    /// and — composed exactly as the app wires it — the store envelope
+    /// ends up with a recovery wrap those same words unwrap.
+    ///
+    /// RED ON OLD (behavioral revert executed): with the hook's fire
+    /// removed — the pre-fix world, where no twin exists — the follow
+    /// assertion and the envelope unwrap both go red.
+    @Test func landingTheVaultPhraseFollowsIntoTheStoreEnvelope() async throws {
+        let store = DeviceKeyStore.inMemory()
+        let vault = ScriptedVault()
+        let session = makeEncryptionSession(store: store, vault: vault)
+        await session.setUp(passphrase: passphrase)
+
+        // The store side, composed as VariorumApp composes it: a real
+        // ProtectionController over a scripted gate whose envelope box we
+        // can read back.
+        let storeKey = StoreKey.mint()
+        let backing = InMemoryStoreKeyGuardBacking(auto: storeKey)
+        let envelopeBox = ScriptedEnvelopeBox(nil)
+        let gate = StoreLaunchGate.scripted(
+            dials: ScriptedDialsBox(ProtectionDials()), backing: backing,
+            envelope: envelopeBox)
+        let controller = ProtectionController(configuration: .init(
+            scope: "phrase-twin", storeURL: nil, gate: gate, isRealVariant: false,
+            makeKDF: {
+                PassphraseKDF.Descriptor(
+                    algorithm: PassphraseKDF.algorithmArgon2id, argon2Version: 0x13,
+                    memoryKiB: 256, iterations: 1, parallelism: 1,
+                    salt: PassphraseKDF.randomSalt(), outputBytes: 32)
+            }))
+        let followed = LockIsolated<[String]>([])
+        session.onRecoveryPhraseLanded = { words in
+            followed.setValue(words)
+            _ = await controller.landRecoveryWrap(words: words)
+        }
+
+        let words = try #require(session.generatePhrase())
+        await session.landRecoveryWrap(confirmedWords: words, allowReplace: false)
+        #expect(session.lastError == nil)
+        #expect(followed.value == words,
+                "the twin hands the SAME twelve words to the store side")
+        let envelope = try #require(envelopeBox.value,
+                "the store envelope landed beside the (scripted) store")
+        #expect(try envelope.unwrapKey(recoveryWords: words) == storeKey,
+                "the one phrase now opens the LIBRARY too — one secret, both directions")
+
+        // A REFUSED land fires nothing: replacing without authorization
+        // refuses at the vault, and the twin must not follow a refusal.
+        followed.setValue([])
+        let second = try #require(session.generatePhrase())
+        await session.landRecoveryWrap(confirmedWords: second, allowReplace: false)
+        #expect(session.lastError != nil, "the unauthorized replace refuses")
+        #expect(followed.value == [], "a refused land must not fire the twin")
+    }
+
     /// THE RE-KEY DRILL's step-0 pre-verification (the architect's mid-run
     /// handoff, 2026-08-04 — pinned BEFORE her live drill): a vault DELETED
     /// while local custody still EXISTS. `refresh()` maps the missing vault
