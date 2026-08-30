@@ -22,12 +22,19 @@ struct AppSettingsView: View {
     /// Settings scene can open before the main window's composition has run,
     /// and the pane says so honestly rather than rendering dashes.
     let services: AppServices?
+    /// 13p Batch 2: the protection brain (the bootstrap's — dials, modes,
+    /// escrow, the passphrase doors). Optional like `services`.
+    let protection: ProtectionController?
     @State private var theme: ThemeStore
     @State private var tags: TagsViewModel
 
-    init(session: AppSession, services: AppServices? = nil) {
+    init(
+        session: AppSession, services: AppServices? = nil,
+        protection: ProtectionController? = nil
+    ) {
         self.session = session
         self.services = services
+        self.protection = protection
         _theme = State(initialValue: ThemeStore(session: session))
         _tags = State(initialValue: TagsViewModel(session: session))
     }
@@ -38,6 +45,12 @@ struct AppSettingsView: View {
                 .tabItem { Label("Appearance", systemImage: "paintpalette") }
             TagManagerPane(session: session, tags: tags)
                 .tabItem { Label("Tags", systemImage: "tag") }
+            // 13p Batch 2: the at-open modes, presets, escrow, and the
+            // passphrase/recovery doors (R13p-5/6/7/9).
+            if let protection {
+                ProtectionPane(controller: protection, services: services)
+                    .tabItem { Label("Protection", systemImage: "lock.shield") }
+            }
             // 13l Act 4 (ledger row 12): backups, their freshness, and what
             // restoring one does — including to things that were deleted.
             DataSafetyPane(services: services)

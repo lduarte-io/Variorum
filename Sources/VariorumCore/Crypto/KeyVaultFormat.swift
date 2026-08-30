@@ -170,6 +170,34 @@ public struct KeyVaultFormat: Codable, Equatable, Sendable {
         return updated
     }
 
+    /// REPLACE the passphrase wrap using a HELD master (Phase 13p Batch 2
+    /// — the R13p-9 reset door's vault half: any enrolled device re-wraps
+    /// under a new passphrase after biometric confirmation, NO old
+    /// passphrase needed; the envelope's whole point). Verifies the
+    /// caller's master exactly as the recovery doors do — a mismatched
+    /// master must never become the wrap's content. The recovery wrap and
+    /// the class keys are untouched (R-7's soft door: a passphrase change
+    /// is a one-key re-wrap, never a corpus re-encrypt).
+    public func rewrappingPassphrase(
+        masterKey: SymmetricKey, passphraseKey: SymmetricKey,
+        kdf: PassphraseKDF.Descriptor
+    ) throws -> KeyVaultFormat {
+        try requireCurrentFormat()
+        guard let probe = classKeys.first else { throw KeyVaultError.noClassKeys }
+        guard (try? AES.KeyWrap.unwrap(probe.wrappedByMaster, using: masterKey)) != nil else {
+            throw KeyVaultError.masterKeyMismatch
+        }
+        var updated = self
+        updated.kdf = kdf
+        do {
+            updated.masterWrappedByPassphrase = try AES.KeyWrap.wrap(
+                masterKey, using: passphraseKey)
+        } catch {
+            throw KeyVaultError.wrapFailed
+        }
+        return updated
+    }
+
     // MARK: - Unwrap
 
     /// Unwrap master with the passphrase-derived key. A wrong passphrase

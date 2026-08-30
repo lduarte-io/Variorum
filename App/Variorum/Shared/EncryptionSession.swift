@@ -96,6 +96,27 @@ final class EncryptionSession {
     /// immediately instead of a stale reading).
     var onKeysChanged: (() -> Void)?
 
+    /// Phase 13p Batch 2 (R13p-4, one secret — the FOLLOWING direction):
+    /// fired with the passphrase after a successful setup, passphrase
+    /// enrollment, or passphrase change — the store-key envelope re-wraps
+    /// under the same passphrase so the two can never diverge. Wired by
+    /// the composition root to `ProtectionController.followVaultPassphrase`.
+    var onPassphraseChanged: ((String) async -> Void)?
+
+    /// Phase 13p Batch 2 (one secret — the GUARDING direction): does this
+    /// passphrase match the STORE's own wrap? Consulted before SETUP
+    /// mints a vault: nil/absent = nothing to guard; false = refuse — a
+    /// local-only user who set a store passphrase must not mint a
+    /// DIFFERENT one for the account ("no second passphrase exists
+    /// anywhere in the design").
+    var storePassphraseGuard: ((String) async -> Bool?)?
+
+    static let oneSecretMismatchMessage =
+        "This library already has an encryption passphrase, and your account "
+        + "must use the SAME one — one passphrase serves both. Type the "
+        + "library's passphrase here (check it under Settings ▸ Protection "
+        + "if you're unsure)."
+
     /// Phase 14c (CF-8): the re-key door's runner, injected by the
     /// composition root (AppServices wires the real `AccountRekey` brain
     /// with sync paused around it; nil = the door stays dormant, exactly
@@ -203,11 +224,19 @@ final class EncryptionSession {
     /// (CF-5): the resulting `enrolled(hasRecoveryWrap: false)` state IS
     /// step 4, and the surface cannot complete setup without landing it.
     func setUp(passphrase: String) async {
+        // 13p one-secret guard: a store wrap that this passphrase does
+        // NOT open refuses the setup before anything is minted.
+        if let storePassphraseGuard,
+           await storePassphraseGuard(passphrase) == false {
+            lastError = Self.oneSecretMismatchMessage
+            return
+        }
         await runFlow { enrollment in
             let material = try await enrollment.setUp(passphrase: passphrase)
             await self.adopt(material)
             self.state = .enrolled(hasRecoveryWrap: false)
         }
+        if case .enrolled = state { await onPassphraseChanged?(passphrase) }
     }
 
     /// ENROLLMENT (new device, R-4): passphrase → unwrap → Keychain. Under
@@ -220,6 +249,9 @@ final class EncryptionSession {
             let hasRecovery = (try? await enrollment.hasRecoveryWrap()) ?? false
             self.state = .enrolled(hasRecoveryWrap: hasRecovery)
         }
+        // 13p one-secret: this device just PROVED the vault passphrase —
+        // the store wrap follows, so the same secret opens the library.
+        if case .enrolled = state { await onPassphraseChanged?(passphrase) }
     }
 
     /// The disaster road: the 12 written words alone unwrap this device.
@@ -287,6 +319,8 @@ final class EncryptionSession {
             let hasRecovery = (try? await enrollment.hasRecoveryWrap()) ?? false
             self.state = .enrolled(hasRecoveryWrap: hasRecovery)
         }
+        // 13p one-secret: the store wrap follows the vault's change.
+        if case .enrolled = state { await onPassphraseChanged?(newPassphrase) }
     }
 
     // MARK: - The re-key door (Phase 14c, CF-8 — THE DESIGN 3)
@@ -395,6 +429,13 @@ final class EncryptionSession {
     }
 
     // MARK: - Plumbing
+
+    /// 13p Batch 2: the enrolled device's held material, off-main (the
+    /// reset door's vault half re-wraps from it — R13p-9's "any enrolled
+    /// device"). nil = not enrolled, or locked behind the biometric gate.
+    func heldMaterial() async -> DeviceKeyMaterial? {
+        await store.offMain { $0.load() }
+    }
 
     /// Split a typed-in phrase on any whitespace (the entry surface is one
     /// field; `RecoveryPhrase.validate` does the trimming/casefolding).

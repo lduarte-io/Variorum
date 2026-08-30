@@ -125,7 +125,11 @@ struct Phase13pLobbyTests {
             dials: { _ in ProtectionDials(mode: .passphrase) },
             saveDials: { _, _ in },
             guardFor: { _ in StoreKeyGuard.inMemory(backing: InMemoryStoreKeyGuardBacking()) },
-            loadEnvelope: { try StoreKeyEnvelope.load(at: StoreKeyEnvelope.url(besideStore: $0)) })
+            loadEnvelope: { try StoreKeyEnvelope.load(at: StoreKeyEnvelope.url(besideStore: $0)) },
+            saveEnvelope: { _, _ in },
+            setAsideEnvelope: { _ in },
+            stamp: { _, _ in nil },
+            setStamp: { _, _, _ in })
         let road = StoreLobby.envelopeRoad(storeURL: storeURL, gate: gate)
 
         guard case .failure(let refusal) = await road(.passphrase("wrong")) else {

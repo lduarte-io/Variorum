@@ -83,7 +83,40 @@ struct VariorumApp: App {
                             services?.stop()
                             services = nil
                         }
+                        // 13p one-secret wiring (R13p-4): the vault's
+                        // passphrase FOLLOWS into the store wrap; the store
+                        // wrap GUARDS vault setup; and the reset door's
+                        // vault half re-wraps from held material (R13p-9 —
+                        // an enrolled account that cannot follow refuses
+                        // the whole reset rather than diverging).
+                        let protection = bootstrap.protection
+                        fresh.encryption.onPassphraseChanged = { passphrase in
+                            await protection.followVaultPassphrase(passphrase)
+                        }
+                        fresh.encryption.storePassphraseGuard = { passphrase in
+                            await protection.verifyPassphraseAgainstStore(passphrase)
+                        }
+                        if let vault = fresh.keyVault {
+                            let auth = fresh.auth
+                            let encryption = fresh.encryption
+                            protection.rewrapVaultPassphrase = { newPassphrase in
+                                // Signed out / no vault row ⇒ no vault half.
+                                guard await auth.currentUserID != nil else { return }
+                                guard try await vault.fetchVault() != nil else { return }
+                                guard let material = await encryption.heldMaterial() else {
+                                    throw VaultRewrapNeedsUnlockedKeys()
+                                }
+                                try await VaultEnrollment(client: vault).rewrapPassphrase(
+                                    material: material, newPassphrase: newPassphrase)
+                            }
+                        }
                         await fresh.start()
+                    }
+                    // 13p: the calm, dismissible protection notices (the
+                    // Standard nudge's two-offer shape + the reminder).
+                    .safeAreaInset(edge: .bottom, spacing: 0) {
+                        ProtectionNoticeBar(
+                            controller: bootstrap.protection, services: services)
                     }
                     .onReceive(NotificationCenter.default.publisher(
                         for: NSApplication.didBecomeActiveNotification)) { _ in
@@ -212,7 +245,9 @@ struct VariorumApp: App {
         // the B1 global settings) and the TAG MANAGER's real home.
         Settings {
             if case .ready(let session) = bootstrap.state {
-                AppSettingsView(session: session, services: services)
+                AppSettingsView(
+                    session: session, services: services,
+                    protection: bootstrap.protection)
             } else {
                 Text("Open the main window first.")
                     .padding(24)

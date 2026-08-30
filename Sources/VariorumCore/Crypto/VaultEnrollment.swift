@@ -233,6 +233,29 @@ public struct VaultEnrollment: Sendable {
         return try material(from: vault, master: master)
     }
 
+    // MARK: - The reset door's vault half (Phase 13p Batch 2 — R13p-9)
+
+    /// Re-wrap master under a NEW passphrase using the device's HELD
+    /// material — NO old-passphrase authorization (the reset door's
+    /// letter: the device that holds the keys, after biometric
+    /// confirmation, is the authorization; a wrong/stale material refuses
+    /// as `masterKeyMismatch` rather than enshrining garbage). Fresh salt
+    /// + descriptor, CAS-guarded update like every vault write (R1-2).
+    /// The recovery wrap and class keys are untouched.
+    public func rewrapPassphrase(
+        material: DeviceKeyMaterial, newPassphrase: String
+    ) async throws {
+        guard !newPassphrase.isEmpty else { throw VaultEnrollmentError.emptyPassphrase }
+        let fetched = try await fetchRequiredVault()
+        let descriptor = PassphraseKDF.Descriptor.v1(salt: PassphraseKDF.randomSalt())
+        let newKey = try measuredDerive(passphrase: newPassphrase, descriptor: descriptor)
+        let updated = try fetched.format.rewrappingPassphrase(
+            masterKey: material.masterSymmetricKey,
+            passphraseKey: newKey,
+            kdf: descriptor)
+        try await client.updateVault(updated, expectedRevision: fetched.revision)
+    }
+
     // MARK: - Helpers
 
     private func fetchRequiredVault() async throws -> KeyVaultClient.FetchedVault {

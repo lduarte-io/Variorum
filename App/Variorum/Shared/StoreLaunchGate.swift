@@ -28,12 +28,30 @@ nonisolated struct StoreLaunchGate: Sendable {
     var saveDials: @Sendable (ProtectionDials, _ scope: String) -> Void
     var guardFor: @Sendable (_ scope: String) -> StoreKeyGuard
     var loadEnvelope: @Sendable (_ storeURL: URL) throws -> StoreKeyEnvelope?
+    /// Atomic write of the sidecar beside the store (the controller's
+    /// wrap-landing acts ride this; the lobby never writes).
+    var saveEnvelope: @Sendable (StoreKeyEnvelope, _ storeURL: URL) throws -> Void
+    /// Move a FOREIGN sidecar aside (never delete — its wraps are some
+    /// other library's recovery legs; see the controller's reconcile).
+    var setAsideEnvelope: @Sendable (_ storeURL: URL) -> Void
+    /// Reminder/nudge stamps (device-local, per scope).
+    var stamp: @Sendable (_ leaf: String, _ scope: String) -> Date?
+    var setStamp: @Sendable (Date?, _ leaf: String, _ scope: String) -> Void
 
     static let live = StoreLaunchGate(
         dials: { ProtectionDefaults.dials(scope: $0, in: .standard) },
         saveDials: { ProtectionDefaults.save($0, scope: $1, in: .standard) },
         guardFor: { StoreKeyGuard.keychain(scope: $0) },
-        loadEnvelope: { try StoreKeyEnvelope.load(at: StoreKeyEnvelope.url(besideStore: $0)) })
+        loadEnvelope: { try StoreKeyEnvelope.load(at: StoreKeyEnvelope.url(besideStore: $0)) },
+        saveEnvelope: { try $0.write(at: StoreKeyEnvelope.url(besideStore: $1)) },
+        setAsideEnvelope: { storeURL in
+            let url = StoreKeyEnvelope.url(besideStore: storeURL)
+            let aside = url.deletingPathExtension()
+                .appendingPathExtension("stale-\(Int(Date().timeIntervalSince1970)).json")
+            try? FileManager.default.moveItem(at: url, to: aside)
+        },
+        stamp: { ProtectionDefaults.date($0, scope: $1, in: .standard) },
+        setStamp: { ProtectionDefaults.setDate($0, $1, scope: $2, in: .standard) })
 
     /// A scripted gate for tests: fixed dials + an in-memory guard + an
     /// in-memory envelope box.
@@ -42,22 +60,65 @@ nonisolated struct StoreLaunchGate: Sendable {
         backing: InMemoryStoreKeyGuardBacking,
         envelope: StoreKeyEnvelope? = nil
     ) -> StoreLaunchGate {
-        let box = ScriptedEnvelopeBox(envelope)
-        return StoreLaunchGate(
-            dials: { _ in dials },
-            saveDials: { _, _ in },
+        scripted(
+            dials: ScriptedDialsBox(dials), backing: backing,
+            envelope: ScriptedEnvelopeBox(envelope))
+    }
+
+    /// The fully-scripted form: live boxes so tests observe writes.
+    static func scripted(
+        dials: ScriptedDialsBox,
+        backing: InMemoryStoreKeyGuardBacking,
+        envelope: ScriptedEnvelopeBox,
+        stamps: ScriptedStampsBox = ScriptedStampsBox()
+    ) -> StoreLaunchGate {
+        StoreLaunchGate(
+            dials: { _ in dials.value },
+            saveDials: { new, _ in dials.value = new },
             guardFor: { _ in StoreKeyGuard.inMemory(backing: backing) },
-            loadEnvelope: { _ in box.value })
+            loadEnvelope: { _ in envelope.value },
+            saveEnvelope: { new, _ in envelope.value = new },
+            setAsideEnvelope: { _ in
+                envelope.setAsideCount += 1
+                envelope.value = nil
+            },
+            stamp: { leaf, _ in stamps.value[leaf] },
+            setStamp: { date, leaf, _ in stamps.value[leaf] = date })
+    }
+}
+
+nonisolated final class ScriptedDialsBox: @unchecked Sendable {
+    private let lock = NSLock()
+    private var stored: ProtectionDials
+    init(_ initial: ProtectionDials) { stored = initial }
+    var value: ProtectionDials {
+        get { lock.lock(); defer { lock.unlock() }; return stored }
+        set { lock.lock(); defer { lock.unlock() }; stored = newValue }
+    }
+}
+
+nonisolated final class ScriptedStampsBox: @unchecked Sendable {
+    private let lock = NSLock()
+    private var stored: [String: Date] = [:]
+    init() {}
+    var value: [String: Date] {
+        get { lock.lock(); defer { lock.unlock() }; return stored }
+        set { lock.lock(); defer { lock.unlock() }; stored = newValue }
     }
 }
 
 nonisolated final class ScriptedEnvelopeBox: @unchecked Sendable {
     private let lock = NSLock()
     private var stored: StoreKeyEnvelope?
+    private var _setAsideCount = 0
     init(_ initial: StoreKeyEnvelope?) { stored = initial }
     var value: StoreKeyEnvelope? {
         get { lock.lock(); defer { lock.unlock() }; return stored }
         set { lock.lock(); defer { lock.unlock() }; stored = newValue }
+    }
+    var setAsideCount: Int {
+        get { lock.lock(); defer { lock.unlock() }; return _setAsideCount }
+        set { lock.lock(); defer { lock.unlock() }; _setAsideCount = newValue }
     }
 }
 

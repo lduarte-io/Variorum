@@ -71,6 +71,11 @@ final class AppBootstrap {
     /// The launch-protection facts (13p) — real defaults/Keychain/sidecar
     /// in production, scripted in tests.
     @ObservationIgnored let gate: StoreLaunchGate
+    /// The protection brain (13p Batch 2): dials, custody acts, notices,
+    /// the reset door, and — on the Mac — the re-lock monitors. Owned
+    /// here because the bootstrap is where the unlocked key passes
+    /// through (`adoptResident`) and where `lock()` lives.
+    let protection: ProtectionController
     /// `install` (prepareDependencies) must run exactly once per process;
     /// a retry after a failed first attempt still installs, a second success
     /// cannot happen (retry is only reachable from `.failed`).
@@ -112,6 +117,17 @@ final class AppBootstrap {
         storeVariant = variant
         self.gate = gate
         testOpener = nil
+        protection = ProtectionController(configuration: .init(
+            scope: variant.rawValue,
+            storeURL: try? AppDatabase.defaultStoreURL(variant: variant),
+            gate: gate,
+            isRealVariant: variant == .real))
+        protection.performLock = { [weak self] in await self?.lock() }
+        #if os(macOS)
+        // Production instances only: the monitors re-check the dials at
+        // fire time, so they are safe always-on listeners.
+        protection.startRelockMonitors()
+        #endif
         beginOpening()
     }
 
@@ -122,6 +138,12 @@ final class AppBootstrap {
         storeVariant = .dev
         self.gate = gate
         self.testOpener = testOpener
+        protection = ProtectionController(configuration: .init(
+            scope: AppDatabase.StoreVariant.dev.rawValue,
+            storeURL: nil,
+            gate: gate,
+            isRealVariant: false))
+        protection.performLock = { [weak self] in await self?.lock() }
         beginOpening()
     }
 
@@ -161,7 +183,7 @@ final class AppBootstrap {
     }
 
     private enum OpenOutcome: Sendable {
-        case ready(AppDatabase)
+        case ready(AppDatabase, unlockedKey: StoreKey?)
         case locked(LobbyFacts)
         case failed(AppDatabase.StoreOpenError)
     }
@@ -219,7 +241,7 @@ final class AppBootstrap {
 
         if let testOpener {
             switch testOpener() {
-            case .success(let database): return .ready(database)
+            case .success(let database): return .ready(database, unlockedKey: unlockedKey)
             case .failure(let error): return .failed(error)
             }
         }
@@ -227,7 +249,7 @@ final class AppBootstrap {
             variant: variant,
             custody: unlockedKey.map { StoreKeyCustody.inMemory(initial: $0) }
         ) {
-        case .success(let database): return .ready(database)
+        case .success(let database): return .ready(database, unlockedKey: unlockedKey)
         case .failure(let error): return .failed(error)
         }
     }
@@ -235,7 +257,7 @@ final class AppBootstrap {
     private func finish(_ outcome: OpenOutcome) {
         opening = nil
         switch outcome {
-        case .ready(let database):
+        case .ready(let database, let unlockedKey):
             let view: AppDatabase
             if let binding {
                 // The re-open after a lock: the SAME ambient view adopts
@@ -268,6 +290,14 @@ final class AppBootstrap {
                 installed = true
             }
             state = .ready(AppSession(database: view))
+            // 13p: the demanded modes' resident key (nil on the Auto
+            // road — its Keychain releases on demand), then the launch
+            // reconcile (escrow consistency, first-use stamp, notices) —
+            // AFTER the stack exists, never before unlock.
+            protection.adoptResident(unlockedKey)
+            if testOpener == nil {
+                Task { [weak protection] in await protection?.reconcile() }
+            }
         case .locked(let facts):
             state = .locked(makeLobby(facts))
         case .failed(let error):
@@ -328,6 +358,7 @@ final class AppBootstrap {
                 storeURL: storeURL)
         }.value
         state = .locked(makeLobby(facts))
+        protection.dropResident()
         _ = await Task.detached(priority: .userInitiated) {
             binding.lock()
         }.value

@@ -105,11 +105,37 @@ final class SecretCheckModel {
     /// check stays dormant exactly like every other vault flow.
     private let client: KeyVaultClient?
 
-    init(client: KeyVaultClient?) {
-        self.client = client
+    /// 13p Batch 2 — the LOCAL road's outcome vocabulary (the store-key
+    /// envelope's read-only unwrap; see `storeCheck`).
+    nonisolated enum LocalOutcome: Equatable, Sendable {
+        case correct
+        case wrong
+        case couldNotCheck(String)
     }
 
-    var isAvailable: Bool { client != nil }
+    /// 13p Batch 2 (R13p-9 — "one face serves both"): when set, `check`
+    /// runs THIS instead of the vault — the real unwrap of the STORE
+    /// key's sidecar wraps, local and offline-capable, which is what the
+    /// reminder checks (and a signed-out local-only user) need. The
+    /// mechanism contract is identical: a real unwrap, result discarded,
+    /// nothing written.
+    private let storeCheck:
+        (@Sendable (Secret, String) async -> LocalOutcome)?
+    /// What a result sentence names as the thing the secret unlocked —
+    /// the vault road's noun by default; the store road says the library.
+    nonisolated let targetNoun: String
+
+    init(
+        client: KeyVaultClient?,
+        storeCheck: (@Sendable (Secret, String) async -> LocalOutcome)? = nil,
+        targetNoun: String = "this account's vault"
+    ) {
+        self.client = client
+        self.storeCheck = storeCheck
+        self.targetNoun = targetNoun
+    }
+
+    var isAvailable: Bool { client != nil || storeCheck != nil }
 
     /// Runs the real unwrap and throws the keys away.
     ///
@@ -119,12 +145,26 @@ final class SecretCheckModel {
     /// the deliberate wait. `checking` is what the surface renders meanwhile.
     func check(_ secret: Secret, entry: String) async {
         guard !checking else { return }
+        let trimmedEntry = entry.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedEntry.isEmpty else { return }
+        // 13p: the local store road, when composed (the reminder face and
+        // the signed-out user) — same contract, no network, no vault.
+        if let storeCheck {
+            checking = true
+            result = nil
+            defer { checking = false }
+            switch await storeCheck(secret, trimmedEntry) {
+            case .correct: result = .correct(secret)
+            case .wrong: result = .wrong(secret)
+            case .couldNotCheck(let reason): result = .couldNotCheck(reason)
+            }
+            return
+        }
         guard let client else {
             result = .couldNotCheck("Encryption isn't configured in this build.")
             return
         }
-        let trimmed = entry.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
+        let trimmed = trimmedEntry
         checking = true
         result = nil
         defer { checking = false }
@@ -166,17 +206,28 @@ final class SecretCheckModel {
     // MARK: - The answers, as sentences (pinned; 13s owns the voice)
 
     nonisolated static func message(for result: Result) -> String {
+        message(for: result, target: "this account's vault")
+    }
+
+    /// 13p Batch 2: the noun parameterizes so the local store road says
+    /// what it actually unlocked; the vault default keeps the 13l pins.
+    nonisolated static func message(for result: Result, target: String) -> String {
         switch result {
         case .correct(let secret):
-            return "That is the right \(secret.noun) — it unlocked this account's vault. "
+            return "That is the right \(secret.noun) — it unlocked \(target). "
                 + "Nothing was changed."
         case .wrong(let secret):
-            return "That did not unlock this account's vault. Check the \(secret.noun) "
+            return "That did not unlock \(target). Check the \(secret.noun) "
                 + "and try again — nothing was changed, and nothing is locked out by "
                 + "getting it wrong here."
         case .couldNotCheck(let reason):
             return "Couldn't check: \(reason)"
         }
+    }
+
+    /// The instance form the section renders — this model's own noun.
+    nonisolated func message(for result: Result) -> String {
+        Self.message(for: result, target: targetNoun)
     }
 
     /// Why the wait is there, said before it starts rather than after.
@@ -270,7 +321,7 @@ struct SecretCheckSection: View {
 
     @ViewBuilder
     private func resultLine(_ result: SecretCheckModel.Result) -> some View {
-        let text = Text(SecretCheckModel.message(for: result))
+        let text = Text(model.message(for: result))
             .fixedSize(horizontal: false, vertical: true)
         switch result {
         case .correct:
