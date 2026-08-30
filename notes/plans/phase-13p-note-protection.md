@@ -2703,3 +2703,12 @@ it cost to learn:
   with a review, not a drive-by at a signing sitting.
 - **14b's CF-12 vault biometric gate is unblocked by the same change**
   (same mechanism, refusing on the Mac since 14b).
+- **The full Mac suite re-run after the change: 1843 tests in 312
+  suites, ALL PASSED (244.6 s)** — the phase's exact closing count, so
+  the new signature disturbed nothing in the test host (the concrete
+  worry: keychain-touching suites that had been fast-failing at -34018
+  could have started behaving differently; they did not — custody tests
+  inject in-memory backings by design, and the prompt-discipline rule
+  held). Note the known intermittent latency pin passed on THIS run;
+  that is evidence about machine load, not a fix — its KnownIssues row
+  stands unchanged.
