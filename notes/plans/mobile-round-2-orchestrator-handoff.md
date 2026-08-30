@@ -1221,3 +1221,123 @@ ONE AT A TIME** — coherent with 13p's own cast (Fable on substrate and
 custody, **Opus on faces**), and this session is all faces. **The
 one-at-a-time half of her ruling is untouched**; R28 (build → cold review
 → fix as one unit) binds unchanged.
+
+---
+
+# §10. HER RULINGS AND ONE HARD-WON MACHINERY FINDING (2026-08-30)
+
+## 10.1 🔴 THE ARCHIVE/TRASH IA IS **RULED: OPTION 2, "TWO ROOMS"**
+
+The design session ran (`notes/plans/mobile-archive-trash-design/` —
+four options as local self-contained HTML, propose-only). **She read it
+and ruled**, discharging PL-14(b)/§69.5's design-session gate:
+
+> *"i read the proposal and I want this option: **Two rooms** — The Mac's
+> own asymmetry, translated literally. Archive becomes a room you browse;
+> the Trash becomes a utility you visit. Two doors, two destinations,
+> nothing shared."*
+
+**Note this OVERRULES the proposal's own recommendation** (option 3, the
+Library-filter road). Her reasoning is recorded in 10.2 and is not
+merely a preference — it carries a scope consequence the proposal did
+not anticipate.
+
+**So batch 6c is UNBLOCKED and its shape is fixed:** two doors, two
+destinations, nothing shared; the combined "Archived & Deleted" surface
+retires. The five-places map (§69.1) still governs every remaining call.
+
+## 10.2 🔴 AND A NEW WORK ROW SHE CREATED IN THE SAME BREATH — **THE LIBRARY'S FILTER VOCABULARY**
+
+Her words, and the second half is the bigger item:
+
+> *"Archived is a comparatively rare option, and it needs the same
+> filters that the regular library has. the mockup only had bookless and
+> scraps but those are less useful than 'books' 'posts', etc. so I'd want
+> to see that kind of sorting on the library, **which is more important
+> because it's where you see everything**."*
+
+**Two distinct deliverables, and she ranked them:**
+
+1. **THE LIBRARY'S OWN FILTERS ARE THE PRIORITY** — *"more important
+   because it's where you see everything."* Today the phone's filter
+   vocabulary is `bookless` and `scraps` (`MobileLibraryViewModel`), both
+   of which are **provenance** filters. She wants **KIND** filters —
+   "books", "posts", etc. — because that is how you actually find a thing
+   in a listing of everything.
+2. **ARCHIVE INHERITS THE SAME FILTER SET.** Not a reduced one: *"it
+   needs the same filters that the regular library has."* This is a
+   direct consequence of choosing Two rooms — an Archive that is a
+   **room you browse** needs browsing tools, where a filter-chip Archive
+   would have inherited them for free. **She chose the option that costs
+   this and is paying for it deliberately.**
+
+**Design notes for whoever builds it, not decisions:** "books" and
+"posts"/notes are different *entity kinds* on the shelf-vs-library axis,
+so the filter row may be expressing two different things at once — worth
+settling before building. The proposal's own flagged risk stands and now
+matters more: **the filter row is at its width budget**, and this adds
+doors to it. That was a measurement question then and still is.
+
+**Ownership: mobile.** Not 13i — this is the phone's listing ergonomics,
+not smart-book identity. Slot it near batch 6c so Archive and the Library
+get one filter brain, not two.
+
+## 10.3 HER TWO SHELF REFINEMENTS (routed live to the batch-5 agent)
+
+> *"the box should be one line until you click into it"* — the quick-note
+> box sits collapsed at one line at rest and grows on focus. **This
+> settles batch 5's own PROVISIONAL** about the large empty box on a
+> near-empty shelf, in that direction.
+
+> *"the shelf should be bounded so it always has a decent amount of room
+> to write"* — batch 5 built a floor into `MobileShelfLayout`; she raised
+> it to a **guarantee**, to hold in every state (many books, starred
+> present, keyboard up, smallest screen, largest Dynamic Type). **Pin the
+> guarantee, not the arithmetic that currently produces it.**
+
+## 10.4 ⚠️ MACHINERY: **TWO AGENTS ON ONE SIMULATOR CONTAMINATE EACH OTHER INVISIBLY**
+
+**Found empirically by the 4.5d agent, 2026-08-30, and it cost real
+time.** This belongs beside §2's accessibility-flag warning — **same
+class, worse**, because the red names tests from someone else's branch.
+
+**DerivedData is NOT the crossing point** — it is genuinely separate per
+worktree (verified via `info.plist`'s `WorkspacePath`). **The SIMULATOR
+is:** same bundle id, **last installer wins.**
+
+**Observed symptoms, all of which vanished on an uncontended device:**
+repeated `signal kill`; layout pins reading nonsense heights
+(`field.height → 14.0`); and decisively, **a failing test that does not
+exist in the running worktree at all** (`grep -rn` returns nothing) —
+because it came from another branch's installed bundle.
+
+**THE RULE: one simulator per concurrent agent, always, with its
+accessibility flag armed.** And note the second-order danger, which is
+worse than lost time: a contaminated run hands a *reviewer* **phantom
+findings with convincing evidence** — precisely the hallucination class
+the guard exists to prevent.
+
+**This retro-explains at least one earlier "environmental" run death** in
+this session, and probably more than one.
+
+## 10.5 ⚠️ MACHINERY: A DYING AGENT LEAVES BOTH CORRUPTION *AND* WORK
+
+**§64 is WRONG and should be corrected in place** (it is cited in the
+batch map). It recorded that 4.5d's fixes did not exist. In fact
+**thirteen of §61's fourteen findings were already fixed** — sitting
+**uncommitted in the tree** when the session died, each carrying a fix
+comment naming the cold review as its source, and the architect committed
+them in `1fc3036`/`ad9d29a` **while writing the message saying they did
+not exist**.
+
+**The lesson, and it is §64's missing second half:** §64 correctly taught
+*check the tree after an agent fails* — and it found the harness revert
+by doing exactly that. **But it read the tree for CORRUPTION and never
+read it for WORK.** A dying agent leaves both.
+
+**The consequence that mattered:** one of those commits carried a
+**red-on-old pin that had never actually been run red** — a claim, not a
+pin. The 4.5d agent ran it (drop `currentBarWidth()`'s remembered-width
+arm → 12 issues, the sibling pin still green) and it is a pin now. **An
+unverified pin committed on a dead session's behalf is the exact
+green-over-nothing class this round exists to correct.**
