@@ -1439,3 +1439,53 @@ implementers found it before my correction reached them.
   hands", and Read-mode memory at 100k on real hardware — **both batch
   naturally with PL-15's outstanding Face ID walk**, which is the same
   trip.
+
+---
+
+# §12. HER CAST RULING, 2026-08-30 (evening) — PARALLEL DEVELOPMENT ENDS; PARALLEL REVIEWS STAY
+
+Her words, after the parallel bout landed:
+
+> *"from now on, don't do the several subagents and parallel simulators /
+> workers - my weekly limit has now reset and the overhead is no longer
+> worth the increased effectiveness. fwiw, it also did not use many
+> tokens at all. you can run the cold reviews in parallel if you'd like,
+> but no more parallel development."*
+
+**The ruling, precisely:**
+
+| | |
+|---|---|
+| **Development batches** | **ONE AT A TIME.** Strictly sequential. Her 2026-08-23 one-subagent ruling is restored for build work |
+| **Cold reviews** | **May run in parallel**, at the orchestrator's discretion |
+| **Her stated reason** | The weekly limit reset, so wall-clock parallelism no longer buys anything worth its **overhead** — and she noted explicitly that the bout *"did not use many tokens at all"*, so **cost was never the objection.** The objection is coordination overhead: simulators, DerivedData, fences, merges, and the machinery corrections they demanded |
+
+**What this retires:** worktree isolation for build batches, multi-simulator assignment for implementers, and the pre-merge-then-merge dance. **What it keeps:** the two machinery rules the bout proved (§11.3 pathspec-limited commits, §11.4 one simulator + one DerivedData per live session) — **these still bind wherever ANY two sessions are live at once, including two parallel reviewers in one tree, and including a Mac session running beside this one.**
+
+## 12.1 SHE IS RUNNING 13u1 ON THE MAC IN PARALLEL WITH THIS ROUND
+
+> *"I'm going to be starting 13ui shortly here on the mac side, but I
+> think parallel work shouldn't be an issue while you move through these
+> batches."*
+
+**Her call, and it is a reasonable one** — different branches, different
+surfaces. Two factual notes so nobody is surprised later, neither of them
+an objection:
+
+1. **13u1 IS the editor seam**, and mobile round 2's own editor-seam
+   backlog was moved INTO it as its item 8 (`CrossBlockRefusal`'s hoist,
+   the O(N²) twin, the gap fence's Mac face, the frozen-projection fan
+   fence, the empty-block dead plan). Those live in `App/Variorum/Shared/`
+   — **shared with the phone.** So the next `main` → `mobile` merge after
+   13u1 closes is the one that can actually conflict, and it is the one
+   to take carefully.
+2. **13u1 also RULES semantics this round must not pre-empt** — the
+   cross-block edit rules and, at item 9, the quick-capture ownership
+   model that **batch 4.6 is explicitly waiting on** (§3 row 5b). Batch
+   4.6 stays blocked until she has ruled, by her own instruction:
+   *"it won't need a design sitting, the mac will have decided it."*
+
+**Practical consequence for this round's remaining batches:** prefer work
+that does NOT touch `Shared/EditorBrain/` or the cross-block planner
+while 13u1 is live. The tray, the Two-rooms IA, the Library filters, and
+the takes/book doors are all clear of it.
