@@ -933,6 +933,30 @@ Remaining live knots — 3 (secure_delete), 4 (recovery-phrase UX),
   build work. The fork's one click is also hers, and Batch 1's first
   act rides it.
 
+### 2026-08-30 — the fork exists; the URL residual RETIRED; her pre-Batch-1 sanity check
+
+- **She forked GRDB.swift on GitHub.** The architect pushed
+  `variorum-sqlcipher` (`404dde041`) to `github.com/lduarte-io/GRDB.swift`
+  over SSH and proved URL-form resolution LIVE: a scratch package
+  depending on the fork's real URL resolved, built, and reported
+  `cipher_version: 4.18.0 community`. **The memo's one named PENDING is
+  retired** — Batch 1's dependency act reduces to the one-line swap in
+  the repo's `Package.swift`, already proven both ways.
+- **Her upstream-CI question, answered as fact:** the fork branches from
+  the **v7.11.1 release TAG** — the exact version `main`'s
+  `Package.resolved` has pinned all along — never from master tip, so
+  upstream master's failing build (the merged PR ~3 weeks back that she
+  saw) touches nothing we ship. The spike's three exact-baseline suites
+  ran against this very branch.
+- **Her sustainability sanity check** (the one-and-done question) and
+  her **cast offer** (Fable credits for Batch 1 if the architect judges
+  it complex) answered in the sitting; the architect's recommendation:
+  **Fable implements Batch 1** (the phase's single riskiest
+  implementation — her real store's one-way migration — the exact class
+  the standing model policy reserves Fable for), Opus takes Batches 2
+  and 4, the phase-end Fable cold review stands. Her call pending with
+  the Batch 1 GO.
+
 ## BATCH 0 ADDENDUM (the architect, at launch — spike mechanics & environment)
 
 - **Scratch discipline:** throwaway spike work lives OUTSIDE the repo
