@@ -58,6 +58,13 @@ final class ProtectionController {
     private(set) var hasRecoveryWrap = false
     private(set) var busy = false
     var lastError: String?
+    /// HONESTY about the escrow dial (the Q3 codesigned finding, this
+    /// batch): true when the dial reads ON but the last attempt to LAND
+    /// the iCloud item was refused by the Keychain (today's Mac signing
+    /// carries no data-protection keychain identity, so the write reads
+    /// -34018) — the pane says so instead of letting the dial imply a
+    /// copy that does not exist.
+    private(set) var escrowLandingFailed = false
 
     /// The resident key under the DEMANDED modes (adopted at unlock,
     /// dropped at lock). Under Auto the Keychain releases on demand and
@@ -335,10 +342,13 @@ final class ProtectionController {
             }
             guard guardSeam.saveEscrow(key, envelope.storeID) else {
                 lastError = "The Keychain refused the iCloud item — nothing was altered."
+                escrowLandingFailed = true
                 return false
             }
+            escrowLandingFailed = false
         } else if let envelope = loadEnvelope() {
             guardSeam.deleteEscrow(envelope.storeID)
+            escrowLandingFailed = false
         }
         dials.escrowOn = on
         persistDials()
@@ -404,12 +414,20 @@ final class ProtectionController {
                         try? saveEnvelope(envelope)
                     }
                     if guardSeam.loadEscrow(envelope.storeID) != key {
-                        _ = guardSeam.saveEscrow(key, envelope.storeID)
+                        // The outcome feeds the dial's honesty line: an ON
+                        // dial whose item cannot land must SAY so (the Q3
+                        // codesigned finding — no keychain identity in
+                        // today's signing refuses the write).
+                        escrowLandingFailed =
+                            !guardSeam.saveEscrow(key, envelope.storeID)
+                    } else {
+                        escrowLandingFailed = false
                     }
                 }
             } else if let envelope = loadEnvelope() {
                 // The dial is OFF: a leftover item (a crashed flip) goes.
                 guardSeam.deleteEscrow(envelope.storeID)
+                escrowLandingFailed = false
             }
         }
         refreshNotices(now: now)

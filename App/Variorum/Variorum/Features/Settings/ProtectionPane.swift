@@ -473,6 +473,15 @@ struct ProtectionPane: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
+            if controller.dials.escrowOn && controller.escrowLandingFailed {
+                Text("The copy could not actually be saved — this Mac's Keychain "
+                     + "refused it (the app's current signing can't reach the "
+                     + "iCloud-synced keychain). The dial is on, but no copy "
+                     + "exists yet; your other legs stand.")
+                    .font(.caption)
+                    .alarmVoice()
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             if controller.dials.escrowOn {
                 Text(ProtectionCopy.escrowNeedsICloudKeychain)
                     .font(.caption)
