@@ -74,8 +74,7 @@ struct VariorumMobileApp: App {
                     Text("This library is locked.")
                         .font(.headline)
                     Text("Unlocking on iPhone arrives with the protection "
-                         + "update — until then, this state can only be "
-                         + "reached on a Mac.")
+                         + "update.")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)

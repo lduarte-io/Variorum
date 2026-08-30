@@ -1070,6 +1070,18 @@ struct MobileNoRedirectSweepTests {
             appRoot.appendingPathComponent("VariorumMobile", isDirectory: true),
             appRoot.appendingPathComponent("Shared", isDirectory: true),
         ]
+        // THE ONE EXPLICIT EXEMPTION (13p Batch 2 — this walk's own caveat
+        // above: "exempt it explicitly here rather than narrowing the
+        // walk"): `ProtectionCopy.deviceName`'s macOS arm is the bare
+        // literal "Mac" inside `#if os(macOS)` — the protection copy is
+        // platform-aware by interpolation (the phone renders "iPhone" /
+        // "Face ID" through the same sentences), so the phone never shows
+        // it; the literal exists only so the MAC's ruled knot-8 sentences
+        // stay byte-identical. Only the exact bare word in that one file
+        // is exempt — a sentence naming the Mac still trips.
+        let exempt: [(file: String, literal: String)] = [
+            (file: "StoreProtection.swift", literal: "Mac"),
+        ]
         var walked = 0
         var offenders: [String] = []
         for root in roots {
@@ -1086,6 +1098,9 @@ struct MobileNoRedirectSweepTests {
                 let source = try String(contentsOf: url, encoding: .utf8)
                 for literal in Self.stringLiteralContents(of: source)
                 where literal.contains(Self.forbidden) {
+                    guard !exempt.contains(where: {
+                        $0.file == url.lastPathComponent && $0.literal == literal
+                    }) else { continue }
                     offenders.append("\(url.lastPathComponent): \"\(literal)\"")
                 }
             }

@@ -199,12 +199,29 @@ nonisolated enum StandardNudgePolicy {
 // MARK: - The honesty grammar (placeholder voice, honest content; 13s re-voices)
 
 nonisolated enum ProtectionCopy {
+    // The device words (13p Batch 2 — the mobile no-redirect sweep's
+    // catch, C5's principle): these sentences are SHARED and Batch 4
+    // renders them on the phone, so the platform's own nouns ride
+    // interpolation. On macOS every sentence below is BYTE-IDENTICAL to
+    // the ruled/pinned text (the knot-8 verbatim pin compares results in
+    // the Mac target). The one "Mac" literal here carries the sweep's
+    // explicit, documented exemption (its own caveat's road).
+    #if os(iOS)
+    static let deviceName = "iPhone"
+    static let biometryName = "Face ID"
+    static let credentialName = "passcode"
+    #else
+    static let deviceName = "Mac"
+    static let biometryName = "Touch ID"
+    static let credentialName = "login password"
+    #endif
+
     // The escrow dial's ruled plain-consequence pair — knot 8, VERBATIM
     // (direction ruled; 13s may re-voice the exact words).
     static let escrowOn =
-        "A copy of your key is kept in your iCloud Keychain — if you lose this Mac "
-        + "and forget your passphrase, signing into iCloud on a new device can still "
-        + "unlock your library."
+        "A copy of your key is kept in your iCloud Keychain — if you lose this "
+        + "\(deviceName) and forget your passphrase, signing into iCloud on a new "
+        + "device can still unlock your library."
     static let escrowOff =
         "Your key stays only on your enrolled devices. Lose them, your passphrase, "
         + "and your recovery phrase, and your writing is unrecoverable — by anyone."
@@ -215,9 +232,9 @@ nonisolated enum ProtectionCopy {
     /// Keychain on", so the sentence is conditional and always shown with
     /// the ON dial rather than guessed at.
     static let escrowNeedsICloudKeychain =
-        "This rides iCloud Keychain. If iCloud Keychain is off on this Mac, there is "
-        + "nothing for it to ride — the copy stays only on this Mac until it's turned "
-        + "on in System Settings."
+        "This rides iCloud Keychain. If iCloud Keychain is off on this \(deviceName), "
+        + "there is nothing for it to ride — the copy stays only on this "
+        + "\(deviceName) until it's turned on in System Settings."
 
     /// Honesty about the dial's interaction with a demanded gate: the
     /// escrow copy has no biometric gate on it (Apple does not sync
@@ -225,8 +242,8 @@ nonisolated enum ProtectionCopy {
     /// Mac it is a silently-readable copy beside the gate.
     static let escrowUnderDemandedMode =
         "Note: the iCloud copy has no fingerprint gate on it — someone using this "
-        + "Mac as you could recover the key from iCloud Keychain without passing "
-        + "the lock. Locked-down turns it off for exactly that reason."
+        + "\(deviceName) as you could recover the key from iCloud Keychain without "
+        + "passing the lock. Locked-down turns it off for exactly that reason."
 
     // What each mode does and does not protect (knot 6's non-scary-but-
     // serious instruction, per mode).
@@ -234,15 +251,15 @@ nonisolated enum ProtectionCopy {
     static func modeSentence(_ mode: StoreAtOpenMode) -> String {
         switch mode {
         case .auto:
-            return "Your library is encrypted on disk, and this Mac's Keychain opens "
-                + "it silently when Variorum opens. This protects the disk — a stolen "
-                + "drive, a copied file — but anyone who can use this Mac as you can "
-                + "open Variorum and read."
+            return "Your library is encrypted on disk, and this \(deviceName)'s "
+                + "Keychain opens it silently when Variorum opens. This protects the "
+                + "disk — a stolen drive, a copied file — but anyone who can use this "
+                + "\(deviceName) as you can open Variorum and read."
         case .biometric:
             return "Variorum asks for your fingerprint or face every time it opens, "
-                + "and when it locks. Your Mac's login password can NOT open it. If "
-                + "biometrics fail, the fallback is your encryption passphrase — "
-                + "which is why this mode requires one."
+                + "and when it locks. Your \(deviceName)'s \(credentialName) can NOT "
+                + "open it. If biometrics fail, the fallback is your encryption "
+                + "passphrase — which is why this mode requires one."
         case .passphrase:
             return "Variorum asks for your encryption passphrase every time it opens, "
                 + "and when it locks. Nothing opens it silently — not the Keychain, "
@@ -256,14 +273,14 @@ nonisolated enum ProtectionCopy {
     static func lossMath(_ mode: StoreAtOpenMode, escrowOn: Bool) -> String {
         switch mode {
         case .auto:
-            var legs = ["this Mac (its Keychain holds the key)",
+            var legs = ["this \(deviceName) (its Keychain holds the key)",
                         "your encryption passphrase (if you set one)",
                         "your recovery phrase (if you saved it)"]
             if escrowOn { legs.append("the copy in your iCloud Keychain") }
             return "To lose your writing, ALL of these have to go wrong at once: "
                 + legs.joined(separator: " · ") + ". Any one of them gets you back in."
         case .biometric:
-            var legs = ["this Mac's fingerprint/face unlock",
+            var legs = ["this \(deviceName)'s fingerprint/face unlock",
                         "your encryption passphrase",
                         "your recovery phrase (if saved)"]
             if escrowOn { legs.append("the iCloud Keychain copy") }
@@ -278,8 +295,8 @@ nonisolated enum ProtectionCopy {
             }
             return "In this mode, forgetting your passphrase without the recovery "
                 + "phrase written down IS enough to lose your writing. Nothing on "
-                + "this Mac opens the library silently — that is the point, and "
-                + "that is the price. Keep the twelve words somewhere real."
+                + "this \(deviceName) opens the library silently — that is the "
+                + "point, and that is the price. Keep the twelve words somewhere real."
         }
     }
 
@@ -294,10 +311,10 @@ nonisolated enum ProtectionCopy {
     // The Standard nudge (the two-offer shape, her amendment).
     static let nudgeHeadline = "Your library is encrypted. Two minutes makes it recoverable."
     static let nudgeBody =
-        "Right now this Mac's Keychain holds the only key. Set an encryption "
-        + "passphrase (your recovery phrase appears on the same screen), or just "
-        + "take the recovery phrase — either one means losing this Mac doesn't "
-        + "mean losing your writing."
+        "Right now this \(deviceName)'s Keychain holds the only key. Set an "
+        + "encryption passphrase (your recovery phrase appears on the same screen), "
+        + "or just take the recovery phrase — either one means losing this "
+        + "\(deviceName) doesn't mean losing your writing."
     static let nudgeOfferPassphrase = "Set a Passphrase…"
     static let nudgeOfferPhrase = "Show My Recovery Phrase…"
     static let nudgeLater = "Later"
@@ -312,7 +329,7 @@ nonisolated enum ProtectionCopy {
     static func lobbyPrompt(_ mode: StoreAtOpenMode) -> String {
         switch mode {
         case .auto: return ""  // no lobby exists under auto
-        case .biometric: return "Unlock your library with Touch ID."
+        case .biometric: return "Unlock your library with \(biometryName)."
         case .passphrase: return "Enter your encryption passphrase to unlock your library."
         }
     }

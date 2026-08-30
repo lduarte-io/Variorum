@@ -213,9 +213,9 @@ final class ProtectionController {
             return "No passphrase is set yet — use Set a Passphrase instead."
         }
         guard biometryAvailable else {
-            return "Resetting needs Touch ID to confirm it's you. Without it, use "
-                + "your recovery phrase: checking it here proves it still works, and "
-                + "the change-passphrase door accepts it."
+            return "Resetting needs \(ProtectionCopy.biometryName) to confirm it's "
+                + "you. Without it, use your recovery phrase: checking it here proves "
+                + "it still works, and the change-passphrase door accepts it."
         }
         guard await guardSeam.confirmPresence(
             "Confirm it's you to reset your encryption passphrase") else {
@@ -303,8 +303,9 @@ final class ProtectionController {
             guardSeam.deleteGated()
         case .biometric:
             guard biometryAvailable else {
-                return .refused("This Mac has no Touch ID to gate the key with — "
-                    + "use Passphrase at every open instead.")
+                return .refused("This \(ProtectionCopy.deviceName) has no "
+                    + "\(ProtectionCopy.biometryName) to gate the key with — use "
+                    + "Passphrase at every open instead.")
             }
             // The gated item lands FIRST; only then does the silent item
             // go (never a keyless moment, never a silent one either).
