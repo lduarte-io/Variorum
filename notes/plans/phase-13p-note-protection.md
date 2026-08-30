@@ -2343,4 +2343,30 @@ fixed in the round-2 wave, never parked ownerless. **ROUND 2
 LAUNCHED**: a brand-new cold Fable reviewer on `REVIEW_PROMPT.md`
 verbatim, anchored per the ladder rules on this file's recorded
 findings + dispositions + the fix record — a real pass over the fixes
-and what they touched.
+and what they touched. *(Round 2 died once on her Fable limit and was
+RESUMED at her word after credits restored — its cold isolation was
+intact, it had read only the plan record.)*
+
+### HER LEAN-DOCS RULING at this closeout (2026-08-30, mid-round-2 — executed at the closeout pass)
+
+Her words, verbatim: *"detailedplanforphases is now at 150.1k
+characters - I think that it should be reduced a bit in this closeout
+pass, in the same way that we've reduced it when needed before. if
+necessary given how many phases we have planned out, there could be a
+'future phases' and only the next 3 or so phases, or phases that
+depend on each other, are in the detailed phases and they're moved in
+one at a time."* **Adopted shape (the 2026-08-01 lean-docs pattern
+extended):** a new **`notes/FuturePhases.md`** — CANON, exactly as
+binding, not context-loaded — receives the pending phase rows
+VERBATIM beyond the near window; the master plan keeps the ACTIVE
+running order, the done-row history, and the next phases in running
+order — **13y · the 13u split (13u1/13u2 + its detail section) ·
+13i** (kept beyond next-3 by her "phases that depend on each other"
+clause: 13u2 item 17's scrolled-open door is 13i's Book Panel
+mechanism, and 13o's index waits on 13i's libraries ruling) — plus
+ONE stub row pointing at the future file; rows move BACK one at a
+time as their turn approaches (the closeout ritual's new standing
+step). The superseded 2026-08-23 running-order table (pure history,
+kept-verbatim) rolls to `notes/PhaseCloseoutArchive.md`. Executed at
+the closeout pass, after the ladder ends, in the same commit family
+as the standing archives roll.
