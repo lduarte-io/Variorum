@@ -236,6 +236,18 @@ nonisolated enum StoreKeyGuardKeychain {
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: StoreKeyCustody.deviceKeychainService,
             kSecAttrAccount as String: gatedAccount(scope: scope),
+            // 13p-fix (2026-08-30, MEASURED): on macOS an ACL'd or
+            // synchronizable write is routed to the DATA-PROTECTION
+            // keychain, while a read WITHOUT this flag searches the
+            // FILE-BASED one — so the item lands and is then invisible
+            // (probe: add 0 · read-without -25300 · read-with -25308).
+            // The flag rides the ONE builder every add/read/delete/probe
+            // in this family funnels through, so they can never disagree
+            // again. It is a no-op on iOS (only the data-protection
+            // keychain exists there). The PLAIN items deliberately do NOT
+            // carry it: they live in the file-based keychain today and
+            // flagging them would strand real data.
+            kSecUseDataProtectionKeychain as String: true,
         ]
     }
 
@@ -283,6 +295,18 @@ nonisolated enum StoreKeyGuardKeychain {
             kSecAttrService as String: escrowService,
             kSecAttrAccount as String: storeID,
             kSecAttrSynchronizable as String: true,
+            // 13p-fix (2026-08-30, MEASURED): on macOS an ACL'd or
+            // synchronizable write is routed to the DATA-PROTECTION
+            // keychain, while a read WITHOUT this flag searches the
+            // FILE-BASED one — so the item lands and is then invisible
+            // (probe: add 0 · read-without -25300 · read-with -25308).
+            // The flag rides the ONE builder every add/read/delete/probe
+            // in this family funnels through, so they can never disagree
+            // again. It is a no-op on iOS (only the data-protection
+            // keychain exists there). The PLAIN items deliberately do NOT
+            // carry it: they live in the file-based keychain today and
+            // flagging them would strand real data.
+            kSecUseDataProtectionKeychain as String: true,
         ]
     }
 }

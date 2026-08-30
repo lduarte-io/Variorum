@@ -33,6 +33,7 @@ import Foundation
 import LocalAuthentication
 import Security
 import Testing
+import VariorumCore
 
 @testable import Variorum
 
@@ -48,10 +49,17 @@ struct Phase13pKeychainFactTests {
         ]
     }
 
+    /// 13p-fix: an ACL'd add lands in the DATA-PROTECTION keychain, so a
+    /// delete without the flag searched the file-based one and could never
+    /// remove what this suite created — every run since the keychain
+    /// identity landed left an ACL'd item resident. Sweep BOTH keychains.
     private func deleteProbe(account: String, synchronizable: Bool = false) {
-        var q = query(account: account)
-        if synchronizable { q[kSecAttrSynchronizable as String] = kSecAttrSynchronizableAny }
-        SecItemDelete(q as CFDictionary)
+        for dataProtection in [false, true] {
+            var q = query(account: account)
+            if synchronizable { q[kSecAttrSynchronizable as String] = kSecAttrSynchronizableAny }
+            if dataProtection { q[kSecUseDataProtectionKeychain as String] = true }
+            SecItemDelete(q as CFDictionary)
+        }
     }
 
     /// Control A: a plain add SUCCEEDS in the signed host — the fact that
@@ -150,5 +158,71 @@ struct Phase13pKeychainFactTests {
         probe[kSecAttrSynchronizable as String] = kSecAttrSynchronizableAny
         probe[kSecReturnAttributes as String] = true
         #expect(SecItemCopyMatching(probe as CFDictionary, nil) == errSecItemNotFound)
+    }
+
+    // MARK: - 13p-fix (2026-08-30): the asymmetry, and the round trip
+
+    /// THE PLATFORM FACT the fix rides, pinned so the REASON survives.
+    /// On macOS an ACL'd add is routed to the data-protection keychain;
+    /// a read without `kSecUseDataProtectionKeychain` searches the
+    /// file-based one and cannot see it. Attributes only, non-interactive
+    /// — an ACL'd item's CREATION never prompts and nothing here reads
+    /// one's data, so this cannot hang a suite. Throwaway service; never
+    /// synchronizable, so no test byte can ride into iCloud Keychain.
+    @Test func anACLdAddIsInvisibleToAReadThatDoesNotAskForTheDataProtectionKeychain() {
+        let account = "asymmetry-\(UUID().uuidString)"
+        defer { deleteProbe(account: account) }
+        var error: Unmanaged<CFError>?
+        guard let control = SecAccessControlCreateWithFlags(
+            kCFAllocatorDefault,
+            kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+            .biometryCurrentSet,
+            &error)
+        else {
+            Issue.record("SecAccessControlCreateWithFlags refused: \(String(describing: error))")
+            return
+        }
+        var attributes = query(account: account)
+        attributes[kSecValueData as String] = Data("probe".utf8)
+        attributes[kSecAttrAccessControl as String] = control
+        #expect(SecItemAdd(attributes as CFDictionary, nil) == errSecSuccess)
+
+        func probe(dataProtection: Bool) -> OSStatus {
+            var q = query(account: account)
+            q[kSecReturnAttributes as String] = true
+            q[kSecMatchLimit as String] = kSecMatchLimitOne
+            let ctx = LAContext()
+            ctx.interactionNotAllowed = true
+            q[kSecUseAuthenticationContext as String] = ctx
+            if dataProtection { q[kSecUseDataProtectionKeychain as String] = true }
+            return SecItemCopyMatching(q as CFDictionary, nil)
+        }
+        #expect(probe(dataProtection: false) == errSecItemNotFound,
+                "the file-based keychain cannot see an ACL'd item")
+        #expect(probe(dataProtection: true) == errSecInteractionNotAllowed,
+                "the data-protection keychain HAS it (present, needs auth)")
+    }
+
+    /// THE RED-ON-OLD PIN, and the lesson of the verification gap that let
+    /// this ship: a custody pin asserts the ROUND TRIP — write through
+    /// production, then find it through production's OWN read path — never
+    /// the write alone. Before the fix `saveGated` succeeded and
+    /// `gatedItemExists` returned false, which is precisely how the author
+    /// lost her Auto store-key item to a mode switch that had "worked".
+    ///
+    /// Safe by construction: `StoreKeyGuardKeychain`'s gated item is scoped, so a
+    /// throwaway scope never touches real custody, and it is
+    /// ThisDeviceOnly — never synchronizable. (The E2EE gated item's
+    /// account is FIXED, so it is deliberately never exercised here: a
+    /// test write would land on the author's live custody.)
+    @Test func theGatedStoreKeyIsFoundByProductionsOwnProbeAfterProductionWritesIt() {
+        let scope = "13p-fix-probe-\(UUID().uuidString)"
+        defer { StoreKeyGuardKeychain.deleteGated(scope: scope) }
+        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope) == false,
+                "clean start")
+        #expect(StoreKeyGuardKeychain.saveGated(StoreKey.mint(), scope: scope),
+                "the ACL'd write lands (this half passed even before the fix)")
+        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope),
+                "and production's own probe must FIND it — the half that was broken")
     }
 }
