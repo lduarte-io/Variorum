@@ -1301,6 +1301,47 @@ for the architect/author):**
   every full run this batch (the swap gate and the acceptance run) —
   no isolated re-run was owed and no red needed adjudicating.
 
+### Batch 1 — the architect's verification & adjudication (2026-08-30)
+
+**VERIFIED, and the batch is ACCEPTED.** Spot-checks run against the
+tree, never the report: the three unpushed commits present on a clean
+tree; `git diff 3c7b8b2..HEAD -- Sources/VariorumCore/Sync/` EMPTY
+(zero Sync/ lines confirmed by diff, not by claim); Persistence's delta
+is four files, no schema; the Mac suite log's own tail reads "Test run
+with 1773 tests in 298 suites passed" + `MAC SUITE EXIT: 0`. **The
+store-state sweep, every `variorum.sqlite` on the machine
+header-checked:** her REAL store (`io.lduarte.Variorum` container,
+`Variorum/`) is **PLAINTEXT AND UNTOUCHED** ✔; the `.debug` container's
+fenced dev store (`Variorum-dev/`) is **CIPHERTEXT** ✔ (the
+implementer's observed live migration — the architect's first read
+mis-pathed the fence and briefly suspected the claim; the A4 fence's
+`Variorum-dev/` subdirectory resolves it); remaining stale dev/simulator
+stores are plaintext and will migrate on their next open, by design.
+
+**The five PROVISIONALs — all RATIFIED by the architect** (none is
+product-flavored enough to wake her; bundled for her morning AWARENESS,
+not decision): (1) the process-stable test key — sound on the
+concurrency + unsigned-CLI facts; (2) explicit custody in AppBootstrap
+— sound, and the observed dev-store migration is the fence working;
+(3) `.disabled` silent in the receipt until Batch 2's face — a designed
+default should not speak on every run; (4) `integrityCheck`'s required
+configuration — the no-silent-degradation shape; (5) the minimal
+runbook truth edits — the honesty doctrine forbade shipping the stale
+claims even one commit long.
+
+**Sweep ruling (the implementer's PENDING):** ALL drill artifacts
+(`batch1/` incl. `pre-drill-backup/` and the plaintext drill copies)
+are KEPT until phase close — the cold reviewer may want the drill
+evidence, and the pre-drill backup is genuine insurance for the
+phase-end real migration. Swept at closeout, recorded then.
+
+**Pushed through `origin/main` after verification.** Batch 2 launched
+next — Fable per the recorded cast call — carrying its owed items from
+this batch: the flip's opt-in face + Locked-down warning + the
+`.disabled` voice + the export-evidence stale-marker state; the wraps
+extending `StoreKeyCustody`; the Q3 codesigned re-confirmation; the
+demanded modes + locked lobby + re-lock/Lock Now.
+
 ## BATCH 0 ADDENDUM (the architect, at launch — spike mechanics & environment)
 
 - **Scratch discipline:** throwaway spike work lives OUTSIDE the repo
