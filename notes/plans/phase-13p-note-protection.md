@@ -1975,3 +1975,27 @@ simulation: what rendered was the real face over the real route.
   **NOT promoted**: doing it whole means a network ceremony plus a confirm
   on a screen the author's own state never reaches, and half of it is worse
   than none. It stays recorded for the cold review, unchanged.
+
+### Batch 4 — the architect's verification & adjudication (2026-08-30, overnight)
+
+**VERIFIED, ACCEPTED — the phase's build work is COMPLETE (0 → 1 → 2 →
+4, Batch 3 dissolved).** Spot-checks: seven commits on a clean tree;
+`git diff 2d01000..HEAD --stat -- Sources/` EMPTY re-run by the
+architect (a faces/copy/tutorial batch touching zero core source, as it
+should); the running real app (PID 35890) alive with its store still
+ciphertext after the walk; MobileSoul's PL-15 status updated by the
+batch (deliberate). Suites: core 1452/153 exact · Mac 1834/310 fully
+green · mobile 507/85 (+21/+7 — the phone faces' pins) · spine 71/10
+(the privacy chapter, both guides). **All six PROVISIONALs RATIFIED**,
+with (1) the text-forward chrome, (3) the top nudge banner, and (4) the
+one-lesson pocket guide flagged onto her TASTE list (her overrule
+welcome, none load-bearing); (2)/(5)/(6) are platform honesty and test
+hygiene. The walk's caught defect (the lobby's impossible-cause
+sentence → `ProtectionCopy.deadEnd(demand:)`, shared, red-pinned) is
+the walk doing its job. Batch 2's PROVISIONAL 6 non-promotion is
+SUSTAINED (the assessment matches the architect's read; the cold
+review may still differ). The AX sheet-driving limit is the recorded
+13b class — accepted as an environment fact. **Pushed. The COLD-REVIEW
+LADDER round 1 is LAUNCHED** — a fresh Fable reviewer on
+`REVIEW_PROMPT.md` verbatim; findings will land here repo-first before
+any fix session sees them.
