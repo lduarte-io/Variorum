@@ -2347,6 +2347,55 @@ and what they touched. *(Round 2 died once on her Fable limit and was
 RESUMED at her word after credits restored — its cold isolation was
 intact, it had read only the plan record.)*
 
+### THE COLD-REVIEW LADDER — round 2 findings + dispositions (2026-08-30)
+
+Fresh Fable reviewer (resumed once across her credit limit, isolation
+intact). **Every round-1 fix VERIFIED HOLDING** under the reviewer's
+own diffs and runs (its clean bill: the whole-phase fence diff empty
+by its own hand; core 1453/154 re-run; the five fix-wave pin suites
+re-run 42/5 green; every R1 fix read against its disposition). New
+findings: **1 MAJOR · 2 MINOR · 2 NIT — so ROUND 3 runs on the wave-2
+fixes per the ladder rule.** All adjudicated CONFIRMED by the
+architect (the R2-n1 differ from R1-m4's narrow reading is ACCEPTED —
+the device-backup reading is a genuine honesty gap):
+
+**R2-M1 (MAJOR, CONFIRMED — the routed item):** the phone's
+composition wires NONE of the four one-secret hooks the Mac wires
+(`storePassphraseGuard` · `onPassphraseChanged` ·
+`onRecoveryPhraseLanded` · `rewrapVaultPassphrase`) while presenting
+the full shared vault flows AND its own reset door — four traced
+silent-divergence mechanisms against R13p-4's letter (a phone user
+can mint a different vault passphrase; a vault change never follows
+into the phone's sidecar; vault-minted words open the account but not
+the library; a phone reset re-wraps the store and skips the vault).
+**FIX: mirror the Mac's wiring as a SHARED factory (the
+`mobileWillLock` precedent) wired in the phone's `.task`; red pins on
+the scripted composition (vault change → envelope follows; reset with
+a wired vault → vault half consulted or refused whole).**
+**R2-m1 (MINOR, CONFIRMED):** the nudge's direct phrase offer
+fresh-mints a SECOND phrase over an existing vault recovery wrap —
+BOTH platforms (gated only on the store's wrap; the set-screen's own
+`.extendExistingPhrase` routing proves the rule it bypasses). FIX:
+the offer consults `VaultTie` — vault has a wrap ⇒ the extend flow,
+never a fresh mint; red pin.
+**R2-m2 (MINOR, CONFIRMED):** reconcile's escrow arm makes up to
+three synchronous `SecItem` round-trips ON THE MAIN ACTOR at
+launch/unlock cadence — the 13e `KeychainOffMainTests` class
+re-introduced, currently masked by the -34018 fast-fail and REAL the
+moment her signing lands. FIX: the guard-seam work hops off-main;
+pin in the recording-seam pattern.
+**R2-n1 (NIT, CONFIRMED — the architect accepts the reviewer's
+differ):** the pocket guide's noise sentence gains the device-backup
+clause (an iCloud/Finder backup taken before the first keyed open
+holds the plaintext store); contract pin updates.
+**R2-n2 (NIT, CONFIRMED in its verified half):** the fork carries the
+inherited upstream `v7.11.1` tag beside `v7.11.1+sqlcipher.1`, and
+SemVer ignores build metadata for precedence — today's resolution
+picks ours by SPM behavior, not contract. **RULING: the architect
+DELETES the shadowing `v7.11.1` tag from the fork** (executed at this
+adjudication — the fork is ours; failure mode was loud-not-silent
+either way); the exact-tag pin stays.
+
 ### HER LEAN-DOCS RULING at this closeout (2026-08-30, mid-round-2 — executed at the closeout pass)
 
 Her words, verbatim: *"detailedplanforphases is now at 150.1k
