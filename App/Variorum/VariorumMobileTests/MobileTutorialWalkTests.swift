@@ -1311,6 +1311,12 @@ struct MobilePocketGuidePrivacyTests {
             // The honest arithmetic, in her own non-scary-but-serious shape.
             #expect(prose.contains("IS enough to lose your writing"))
             #expect(prose.contains(ProtectionCopy.oneDeviceNote))
+            // Ladder R2-n1: the noise claim's one honest exception — a
+            // DEVICE backup (iCloud, or one made on a computer) taken
+            // before the first keyed open holds the plaintext store, and
+            // the lesson says so instead of overclaiming.
+            #expect(prose.contains("taken before the encryption arrived"))
+            #expect(prose.contains("still holds the plain library"))
             // …and nothing in it names the Mac (the no-redirect principle —
             // this lesson is a phone-only reader's whole story).
             #expect(!prose.contains("Mac"))

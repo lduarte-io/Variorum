@@ -644,11 +644,19 @@ enum MobileTutorialSeeder {
         // ————————————————————————— keeping it private ————————————————————
 
         _ = try lesson(privacy, "your library is encrypted", [
+            // Ladder R2-n1: the noise claim carries its one honest
+            // exception — a DEVICE backup (iCloud Backup, or one made on
+            // a computer) taken before the first keyed open holds the
+            // plain library file, and no later encryption reaches back
+            // into it (the R13p-15 age-out doctrine, the phone's edition).
             "Everything you write here is encrypted where it lives. Not a "
             + "switch you turned on: the library file on this "
             + "\(ProtectionCopy.deviceName) is ciphertext, always. Whatever "
             + "reaches the disk, a backup, or a stolen phone is noise "
-            + "without the key.",
+            + "without the key — with one honest exception: a device "
+            + "backup, in iCloud or made on a computer, taken before the "
+            + "encryption arrived still holds the plain library until a "
+            + "newer backup replaces it.",
 
             "Settings \u{25B8} \(MobileProtectionSheet.doorTitle) is where "
             + "you decide how that key is handed over when the app opens. "
