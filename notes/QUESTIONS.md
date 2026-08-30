@@ -965,4 +965,22 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: RATIFIED — (c), (d), (e), (f) on 2026-08-25 and (b) on 2026-08-26, all at the launch-strategy sitting. Only (a) floats, by design: the "Bring back" string, renamed at will whenever.**
 
-*(Next free number: **#81**.)*
+81. **2026-08-30 · PHASE 13p (WHOLE-STORE ENCRYPTION) — your morning bundle · the BINDING record is `notes/plans/phase-13p-note-protection.md`'s RUN RECORD, and the checklist form is `notes/handoffs/phase-13p-handoff.md`.** The phase ran overnight at your GO: Batches 0→1→2→4 (Batch 3 dissolved by your R13p-16), a THREE-ROUND all-Fable cold-review ladder (zero disputes; round 3 nothing above MINOR), your real store migrated at your overnight authorization, and the phone installed. Nothing here blocks daily use; one item needs your HANDS and the rest are taste/awareness.
+
+    **(a) THE ONE ACTION ITEM — the Mac's keychain-identity/signing gap.** The app's signing carries no data-protection-keychain identity, so the BIOMETRIC mode's gated item and the iCloud ESCROW item cannot LAND on the Mac (every door refuses honestly meanwhile; passphrase mode, the lobby, re-lock, and the whole recovery story work; iOS is unaffected). The same mechanism likely explains 14b's vault biometric gate quietly refusing on the Mac since 14b. The fix is a signing/entitlements change — yours (likely minutes in Xcode). KnownIssues row parked at owner 13r pending your word; the ladder's R3-m1 (a narrow escrow-reconcile interleave window) deliberately rides the same row — it becomes real only when signing lands.
+
+    **(b) TASTE, overrule at will:** the phone's protection screen uses text-forward rows (the phone's own control grammar, no Toggles/Pickers); the Standard nudge sits at the TOP of the phone's shell; the pocket guide carries ONE privacy lesson to the Mac's two; the cadence numbers (30-day reminder · nudge ≥24h after first use · 14-day snooze) are shapes-to-your-words, retune freely.
+
+    **(c) AWARENESS — ratified PROVISIONALs:** eighteen across the batches, every one adjudicated with reasons in the run record (highlights: the test-custody shape; explicit AppBootstrap custody; the escrow reconcile real-variant-only; one-secret strictness refusing offline; the vault-follows hooks; the nudge's two-offer shape built as you ruled).
+
+    **(d) THE TWO OUTBOUND BRIEFS are drafted for your review + carry:** the Fragments carry-item (contract file — store encrypted at rest, bridge untouched, the at-rest invitation) and `notes/stargazing-privacy-policy-brief-13p.md` (the three-tier suite story the final policy builds from).
+
+    **(e) DEVICE-SIDE ACCEPTANCE, needs you:** the live Face ID walk (Mac half gated on (a); the PHONE's Biometric mode is expected to WORK — first real chance to see it); the phone's first open (its store migrates then, same drilled road); the phone perf leg on your hardware.
+
+    **(f) THE PHASE-END INSTALL GATE:** your Mac app has been running since the migration and is deliberately never quit by a session. When convenient: quit it → say the word → the final-tree refresh + phone re-install run in minutes, and the tutorial re-seed (the new privacy chapter) follows behind the A1 rail.
+
+    **(g) THE KEPT PLAINTEXT BACKUPS:** `~/dev/scratch-13p-spike/` still holds the pre-migration byte-copies of your real store (the drill's safety backup + the install-night backup). Derived drill copies were swept at the closeout; these two are KEPT until you confirm the encrypted world is good — then say the word and they go.
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#82**.)*
