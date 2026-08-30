@@ -645,6 +645,12 @@ at design time (the parity-ledger record is MobileSoul PL-15):
 - The migration drill AND the 13l restore drill re-run end-to-end with
   the key leg (ciphertext backup → new-machine-shaped restore via
   passphrase AND via recovery phrase AND via escrow when on).
+  *(AMENDED at the ladder's R1-M3 adjudication, 2026-08-30 — the
+  honest scope: the SAME-MACHINE legs are this phase's to prove
+  (custody · lobby-passphrase · the sidecar-present envelope road on
+  the failure surface, all composed in the scripted keyed drill); the
+  full NEW-MACHINE adoption drill — the escrow leg included — is
+  13x's, named as its inheritance on the master-plan row.)*
 - Zero-plaintext scans: the store file post-migration, a fresh backup,
   and — unchanged from 14b — the mirror.
 - P1 pins within budget on the spike-measured numbers; the perf deltas
