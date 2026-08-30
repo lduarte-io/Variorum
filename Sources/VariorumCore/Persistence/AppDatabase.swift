@@ -132,12 +132,22 @@ public struct AppDatabase: Sendable {
     /// plain configuration, which would silently open a keyed artifact as
     /// "not a database" or, worse, create an unkeyed one.
     public func artifactConfiguration() -> Configuration {
-        if case .bound(let binding) = storage, binding.isLocked {
-            var config = Configuration()
-            config.prepareDatabase { _ in throw StoreLockedError() }
-            return config
+        switch storage {
+        case .direct(_, let key):
+            return Self.configuration(key: key)
+        case .bound(let binding):
+            // ONE state read (13p ladder R1-n1): the earlier
+            // isLocked-then-`key` shape was two lock acquisitions, and a
+            // lock landing between them read "unlocked" and then a nil key
+            // — composing the PLAIN configuration for a keyed store, the
+            // exact silently-plain door this method's own contract forbids.
+            guard let state = binding.currentState() else {
+                var config = Configuration()
+                config.prepareDatabase { _ in throw StoreLockedError() }
+                return config
+            }
+            return Self.configuration(key: state.key)
         }
-        return Self.configuration(key: key)
     }
 
     // MARK: - Access

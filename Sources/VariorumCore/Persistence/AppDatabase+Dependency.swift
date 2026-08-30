@@ -33,10 +33,17 @@ extension AppDatabase {
         public let storePath: String
         /// The underlying error, preserved verbatim for the alert.
         public let reason: String
+        /// Phase 13p (ladder R1-M3): true for exactly ONE refusal class —
+        /// an ENCRYPTED store whose key custody holds nothing (the
+        /// `resolveStoreKey` refusal). The failure surface keys the
+        /// sidecar-present unlock road on this typed fact, never on
+        /// matching the reason's prose.
+        public let keyUnavailable: Bool
 
-        public init(storePath: String, reason: String) {
+        public init(storePath: String, reason: String, keyUnavailable: Bool = false) {
             self.storePath = storePath
             self.reason = reason
+            self.keyUnavailable = keyUnavailable
         }
     }
 
@@ -123,7 +130,8 @@ extension AppDatabase {
             throw StoreOpenError(
                 storePath: url.path,
                 reason: "This library is encrypted, and its key is not available "
-                    + "on this device.")
+                    + "on this device.",
+                keyUnavailable: true)
         }
         let minted = StoreKey.mint()
         guard custody.save(minted) else {

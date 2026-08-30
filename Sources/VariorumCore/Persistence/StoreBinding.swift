@@ -62,6 +62,19 @@ public final class StoreBinding: @unchecked Sendable {
         return key
     }
 
+    /// The writer and key as ONE acquisition (13p ladder R1-n1). A caller
+    /// composing "is it locked" and "what is the key" from two separate
+    /// reads can meet a lock BETWEEN them — `isLocked` answers false, the
+    /// lock lands, `currentKey()` answers nil — and conclude "unlocked,
+    /// unkeyed", which for a keyed store is the silently-plain state every
+    /// contract here forbids. nil = locked.
+    func currentState() -> (writer: any DatabaseWriter, key: StoreKey?)? {
+        mutex.lock()
+        defer { mutex.unlock() }
+        guard let writer else { return nil }
+        return (writer, key)
+    }
+
     /// LOCK: swap to the locked state FIRST (new accesses refuse from this
     /// instant), then close the pool outside the mutex (close blocks until
     /// in-flight accesses complete — holding the mutex through that wait
