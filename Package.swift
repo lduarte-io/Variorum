@@ -12,7 +12,16 @@ let package = Package(
         .library(name: "VariorumCore", targets: ["VariorumCore"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/groue/GRDB.swift.git", from: "7.0.0"),
+        // Phase 13p (R13p-11, author-approved): the author's GRDB fork with the
+        // README-documented SQLCipher recipe applied (branch `variorum-sqlcipher`,
+        // cut from the v7.11.1 release tag — the exact version the old
+        // `from: "7.0.0"` line had resolved all along). Pulls Zetetic's official
+        // prebuilt SQLCipher.swift (4.18.0 community). Deliberately NO
+        // `SQLITE_HAS_CODEC` here: the flag gates GRDB's own compilation (the
+        // fork sets it); a consuming target needs it only if its own source
+        // says `#if SQLITE_HAS_CODEC`, and ours keys with a SQL pragma
+        // (spike memo Correction #2 — an unused define invites false dependence).
+        .package(url: "https://github.com/lduarte-io/GRDB.swift.git", branch: "variorum-sqlcipher"),
         .package(url: "https://github.com/pointfreeco/swift-dependencies.git", from: "1.9.0"),
     ],
     targets: [
