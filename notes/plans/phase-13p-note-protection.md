@@ -1369,6 +1369,32 @@ migration runs at HER first open (launching needs the unlocked device
 — install ≠ launch, stated honestly). Outcomes recorded below when
 done.
 
+**EXECUTED, same night — ALL THREE ACTS DONE:**
+- Zero instances pgrep-confirmed; fresh WAL-safe byte-copy backup at
+  `~/dev/scratch-13p-spike/install-backup-20260830T131927Z/`
+  (sha256-verified identical to the live file; db 5.96 MB + wal
+  2.54 MB + shm — the pre-migration plaintext state, kept with the
+  batch-1 artifacts until closeout).
+- Mac Release built from the worktree at `57dd2d1` (own DerivedData;
+  the Batch 2 implementer's tree and builds untouched);
+  `/Applications/Variorum.app` replaced; launched.
+- **HER REAL STORE IS ENCRYPTED**: the migration ran on first launch
+  exactly as drilled — store header ciphertext, 5.1 MB (the old
+  main+WAL consolidated through export), fresh 66 KB WAL; smoke scan
+  zero `CREATE TABLE` strings; the app is ALIVE
+  (`/Applications/.../MacOS/Variorum`) and LEFT RUNNING for her
+  morning per the never-quit rule. (A window-presence check was
+  skipped — it needs accessibility/automation permission; the
+  known windowless-after-unclean-exit residual is documented in the
+  runbook and File ▸ New Window is its cure if ever met.)
+- **The phone install landed** on her iPhone 17 Pro (paired,
+  *[removed for publication]*
+  devicectl. The phone's store migrates at HER first open, on the
+  same drilled shared road.
+- The install worktree (`~/dev/scratch-13p-spike/install-worktree`)
+  stays registered until closeout, then is removed with the artifact
+  sweep.
+
 ## BATCH 0 ADDENDUM (the architect, at launch — spike mechanics & environment)
 
 - **Scratch discipline:** throwaway spike work lives OUTSIDE the repo
