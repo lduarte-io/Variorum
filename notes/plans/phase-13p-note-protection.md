@@ -1440,3 +1440,286 @@ done.
   (ON unless breach — only a breach brings it back to her); Q5's red
   plaintext-backup proof is the red half of Batch 1's pin, cited by
   path/method in the memo.
+
+### Batch 2 — record (implementer: Fable, 2026-08-30)
+
+**COMPLETE. Seven commits on `main` (unpushed — the architect verifies
+and pushes): `1b05e04` (envelope + lockable binding) · `436899e`
+(protection brains + custody guard) · `d9be4ca` (the locked lobby +
+Lock Now) · `141d39e` (ProtectionController + pane + set-screen +
+reset door) · `9d7d1a1` (the plain-text opt-in face + envelope rides
+the backups) · `817889f` (Q3 codesigned + THE ENTITLEMENT FINDING) ·
+`15b8301` (platform-aware copy — the mobile sweep's catch).** ZERO
+`Sources/VariorumCore/Sync/` lines, ZERO schema, ZERO server acts —
+verified by `git diff 57dd2d1..HEAD` over Sync/, Migrations.swift,
+Triggers.swift, and Server/ (EMPTY). The architect's mid-batch
+overnight-install commits (`d0f17ed`, `c09d28d`) interleave cleanly;
+nothing here touched her real store, real custody, or the running
+real-store instance (all tests ride scripted custody; the hosted host
+opens the dev store per the A4 fence).
+
+**Scope items landed, per the brief:**
+
+1. **The wraps (R13p-4, one secret)** — `StoreKeyEnvelope`
+   (`Sources/VariorumCore/Persistence/StoreKeyEnvelope.swift`): the
+   store key wrapped by the SAME Argon2id machinery (`PassphraseKDF`,
+   descriptor stored per wrap) and the SAME BIP-39 derivation
+   (`RecoveryPhrase.recoveryWrapKey`) as 14b's vault — RFC 3394
+   `AES.KeyWrap`, no new primitives. The wraps live in a NON-SECRET
+   sidecar beside the store (`variorum-keys.json`) so a signed-out
+   local-only user's recovery legs travel WITH the library (13x's
+   door, backup-folder restores); `storeID` names the escrow item
+   per store (several Macs share one iCloud Keychain);
+   `keyFingerprint` (8 bytes of SHA-256) lets flips and lobbies
+   detect a FOREIGN sidecar with no secret. Re-wrap REPLACES
+   wholesale; a corrupt sidecar THROWS (never reads as "no
+   passphrase"); passphrase change = re-wrap only, never re-encrypt.
+2. **The escrow item + dial (R13p-6)** — `StoreKeyGuard`
+   (`App/Variorum/Shared/StoreKeyGuard.swift`): the separate
+   synchronizable item, NO access control (Q3's platform fact),
+   account = storeID, `kSecAttrSynchronizable` in every query;
+   NEVER an open road (recovery only — under a demanded mode its
+   same-machine bypass nature is worded,
+   `ProtectionCopy.escrowUnderDemandedMode`). The dial's copy is the
+   knot-8 ruled pair VERBATIM (pinned byte-for-byte) + the no-iCloud
+   nothing-to-ride consequence (always shown with ON — no supported
+   API answers "is iCloud Keychain on", recorded) + the
+   `escrowLandingFailed` honesty line (see the finding below).
+3. **The three at-open modes + THE LOCKED LOBBY (R13p-5)** — the
+   launch ROUTES before any store open
+   (`StoreLaunchGate`/`StoreLaunchRoute`, AppBootstrap's
+   `routeAndOpen`): demanded modes stop at `.locked(StoreLobby)` —
+   no store, no migration, no session, no services (AppServices are
+   constructed only inside `.ready`, so sync/bridge/janitor/backups
+   literally cannot start; the one pre-unlock file contact is the
+   16-byte presence read). **The deferred-migration pin makes it
+   falsifiable**: a pre-13p plaintext fixture behind a demanded route
+   keeps its exact bytes; the same open migrates it at unlock
+   (`Phase13pLobbyTests`). Unlock roads: biometric (gated item;
+   prompts in production only), passphrase and recovery phrase (the
+   envelope, KDF off-main), all refusals worded; the fallback is
+   the PASSPHRASE, never the device password (pinned wording).
+   Custody law: Biometric mode lands the gated item THEN deletes the
+   silent one; Passphrase mode leaves NO silent custody; back-to-Auto
+   restores it (all pinned — R13p-14's theater prohibition made
+   structural).
+4. **Re-lock + Lock Now** — `StoreBinding`
+   (`Sources/VariorumCore/Persistence/StoreBinding.swift`):
+   AppDatabase storage became direct-or-BOUND; the composition root
+   installs the rebindable VIEW once and locks/adopts through the
+   binding, so every ambient holder (Operations' `@Dependency`, the
+   sync engine, the janitor) survives re-lock with zero lines
+   changed; a locked access gets typed `StoreLockedError`; a locked
+   `artifactConfiguration()` REFUSES connections (never silently
+   plain). `lock()`: flush+savepoint every open note (the ⌘Q leaving
+   registry), stop AND RELEASE services, flip to the lobby (views and
+   their observations tear down), close the pool off-main, drop the
+   key. **Its own tests** (`StoreBindingTests`, 10): typed refusals
+   on read/write/backup/observe, clean close, idempotent lock,
+   in-flight observation task ends under cancellation delivering
+   NOTHING post-lock, adopt reconnects THE SAME ambient view with
+   data intact; plus the bootstrap-level lock→unlock round-trip
+   (`Phase13pLobbyTests`). Lock Now: File menu + ⌃⌘L (collision-swept
+   free; ⌘⇧L is Save Choices as Lens, ⌃⌘Q stays the system's),
+   rendered only where it acts (`bootstrap.canLock`), and `lock()`
+   refuses under Auto (pinned). Re-lock monitors (Mac): sleep +
+   screen-lock notifications + a 30s idle poll over
+   `CGEventSource.secondsSinceLastEventType`, each re-checking the
+   dials at fire time; production bootstraps only.
+5. **The passphrase-set screen (knot 4)** — `PassphraseSetSheet` +
+   `PassphraseSetModel` (ProtectionPane.swift): NEVER at first
+   launch; summoned by the doors that need one (a demanded mode/
+   preset pick without a wrap signals `.needsPassphrase`, opens the
+   sheet, and retries after it lands); the recovery phrase generates
+   and displays ON THAT SAME SCREEN (one moment, two artifacts),
+   shown once, `privacySensitive`. The 13l SecretCheck face was NOT
+   rivaled — it is a CHECK surface and is reused for the reminder
+   (below); the set screen is the SET surface.
+6. **Reminder checks + the reset door (R13p-9)** — the reminder IS
+   13l's `SecretCheckSection` over a new LOCAL road:
+   `SecretCheckModel` gained an injectable `storeCheck` (the real
+   envelope unwrap, off-main, result discarded — works offline and
+   signed-out) + an honest `targetNoun`; the 13l vault pins hold
+   byte-unchanged (defaulted parameters). Cadence: 30 days, anchored
+   on newest-of(set, confirmed, dismissed); a confirmed check feeds
+   the cadence automatically (`recordReminderConfirmed` via the
+   pane's onChange). THE RESET DOOR: biometric-confirmed re-wrap
+   under a new passphrase, NO old passphrase; no-biometrics names the
+   recovery road (no dead ends); where a vault is wired its half runs
+   FIRST from held material (core gains
+   `KeyVaultFormat.rewrappingPassphrase` — master-verified, recovery
+   wrap and class keys untouched, pinned — and
+   `VaultEnrollment.rewrapPassphrase`, CAS-guarded), refusing WHOLE
+   when it cannot; a store-half failure heals on re-run (vault
+   re-wrap from held material is idempotent).
+7. **Presets as dial-setters (R13p-7) + the nudge** — pure
+   `ProtectionPreset.dials(biometryAvailable:)` (Locked-down =
+   biometric-or-passphrase · escrow off · re-lock on · reminders on;
+   pinned exact); every dial individually adjustable
+   (`matching` = nil highlights no preset, honest). The Standard
+   nudge in HER two-offer shape (create a passphrase AND the
+   recovery phrase either way), ≥24h after first use, snooze 14d /
+   dismiss forever, rendered as a calm bottom bar
+   (`ProtectionNoticeBar` via safeAreaInset — dismissible, never
+   modal).
+8. **The honesty grammar** — `ProtectionCopy`: per-mode
+   what-it-does-NOT-protect sentences + per-mode loss math with her
+   knot-6 example verbatim-faithful ("forgetting the passphrase
+   without the phrase written down IS enough" lands in
+   passphrase-mode-escrow-off), the R13p-8 Locked-down plaintext
+   warning, the lobby prompts, and worded envelope refusals (R94 —
+   typos name themselves). Platform-aware by interpolation
+   (deviceName/biometryName/credentialName) — byte-identical on
+   macOS (pins re-ran), phone-appropriate on iOS; the mobile
+   no-redirect sweep passes with its own documented ONE-literal
+   exemption (the bare deviceName arm; a sentence naming the Mac
+   still trips).
+9. **The Batch-1 owed items** — (a) the `.md` insurance OPT-IN
+   TOGGLE in Data Safety (disabled until a second folder exists;
+   turning on seeds the first export immediately; the Locked-down
+   warning speaks under a demanded mode); (b) the export-evidence
+   row drops the stale colour while OFF ("the files above are from
+   when it was on" — the commit-5 note's state, owned); (c) the
+   `.disabled` receipt stays silent BY PIN — the face is the voice
+   (Batch 1 PROVISIONAL 3 completed); (d) **Q3 codesigned
+   re-confirmed** — see the finding; (e) NEW, found by tracing the
+   restore story: **the envelope rides into every backup folder**
+   (primary + the picked folder's `Variorum/`, write-if-different) —
+   a ciphertext backup on a new machine is unopenable without the
+   wraps, so the passphrase/recovery restore legs are real only if
+   the sidecar travels (pinned: rides + refreshes + absent-is-quiet).
+
+**Suite counts (batch acceptance, at the final tree):**
+- Core: **1452 / 153 PASSED** (Batch 1's 1430/150 + 22 in 3 new
+  suites: envelope, binding, vault re-wrap).
+- Mac: **1825 / 308 PASSED, FULLY GREEN** (Batch 1's 1773/298 + 52 in
+  10 new suites; the intermittent latency pin passed in-suite on BOTH
+  full runs — no isolated re-run owed).
+- Mobile: **486 / 78 PASSED, 2 known issues** (exact baseline; the
+  no-redirect sweep green with the documented exemption).
+
+**Pin inventory (red-on-old evidence):**
+- **THE RESET DOOR'S RED PIN**
+  (`Phase13pControllerTests.resetRewrapsAndTheOldPassphraseStopsUnwrapping`)
+  — behavioral revert EXECUTED: with the envelope replace skipped, the
+  pin failed RED (`Caught error: wrongPassphrase` — the new passphrase
+  unwrapped nothing because the old wrap survived); restored, green.
+  The substrate half (`reWrapReplacesWholesale…`) pins replace-not-
+  shadow at the format level.
+- **THE DEFERRED-MIGRATION PIN**
+  (`Phase13pLobbyTests.theMigrationIsDeferredBehindTheLobbyAndRunsAfterUnlock`)
+  — a plaintext store behind a demanded route keeps its EXACT BYTES
+  (and no `.encrypting` temp appears); a refused unlock leaves it
+  untouched; the right passphrase unwraps the key and the same open
+  migrates, content read back whole. Structural red-on-old (the
+  routing is new code; without it the open always migrated).
+- **The custody law** — gated-lands-then-silent-goes / nothing-silent
+  under passphrase mode / back-to-auto restores; Lock-Now-under-Auto
+  refuses (`lockNowUnderAutoIsRefusedAsTheater`).
+- **The teardown/rebuild story** — StoreBindingTests' ten (typed
+  refusals, clean close, zero post-lock deliveries under
+  cancellation, adopt-reconnects-the-same-view) + the bootstrap
+  round-trip with pre-lock data surviving.
+- **Q3 codesigned** — `errSecParam` for synchronizable+ACL from the
+  SIGNED host with a succeeding plain control (nothing created,
+  pinned `errSecItemNotFound` after).
+- **Copy pins** — knot-8's pair byte-verbatim; per-mode honesty
+  sentences; the one-secret mismatch message; `.disabled` silent in
+  the receipt; the fallback-names-the-passphrase lobby wording.
+
+**FINDING — THE KEYCHAIN-IDENTITY GAP (held for the morning bundle;
+the Q3 suite's own doc comment carries it):** in the signed test host
+the ACL'd write returns `errSecMissingEntitlement` (-34018) — an
+ACL'd item lives only in the DATA-PROTECTION keychain, and
+`Variorum.entitlements` carries no keychain identity (no
+keychain-access-groups / application-identifier; no provisioning
+profile). Codesign dump of the built app confirms. CONSEQUENCES,
+stated precisely: until the app's signing gains a keychain identity,
+(a) the Biometric mode's gated item cannot LAND on the Mac —
+`setMode(.biometric)` refuses honestly at its own guard; (b) the
+synchronizable escrow item likely cannot land either — made VISIBLE
+per the honesty doctrine (`escrowLandingFailed` set by the dial's act
+AND the launch reconcile; the pane says "the dial is on, but no copy
+exists yet" instead of implying a copy); (c) **this also reaches 14b's
+CF-12 vault biometric gate** (`E2EEKeychainStorage.saveGated` — same
+mechanism), which has therefore likely been refusing on the Mac since
+14b (its door words the refusal; iOS is unaffected — iOS apps always
+carry the identity, so Batch 4's Face ID faces are NOT gated by
+this). The passphrase mode, the lobby, re-lock, the wraps, and the
+whole recovery story are UNAFFECTED. The fix is a signing change —
+the author's call (CLAUDE.md: signing is hers); 13r's distribution
+work is the natural home if she defers it.
+
+**PROVISIONAL calls (options weighed, most defensible implemented):**
+1. **Demanded gate over an ABSENT store ⇒ reset mode to Auto and
+   proceed as a fresh first launch** (visible via saveDials; the
+   stale sidecar is set aside at the next write-needing act).
+   Alternatives: refuse outright (bricks a fresh start over nothing);
+   a lobby over an empty library (guards nothing, and its secrets
+   reference a dead key).
+2. **The automatic escrow reconcile runs for the REAL variant only.**
+   The hosted test host boots the app over the DEV store; an
+   automatic reconcile there would write dev-key items into her
+   iCloud Keychain on every test run. The dial's DELIBERATE acts work
+   on any variant. Alternatives: all variants (pollution); never
+   automatic (Standard's ruled ON default would silently never land
+   for the knot-4 zero-ceremony stranger).
+3. **Cadence numbers**: reminder 30d with dismiss-snoozes-a-cadence;
+   nudge ≥24h after first use, snooze 14d. The ruled words are
+   shapes, not numbers ("after real use begins"; the 1Password
+   pattern) — hers to retune.
+4. **One-secret STRICTNESS**: a vault-tied passphrase set REFUSES
+   when the vault is unreachable (offline) rather than proceeding —
+   "one passphrase serves both, so setting it waits until it can
+   check." Alternatives (allow-with-note; best-effort) are silent
+   divergence, which R13p-4 forbids. Same posture at the reset door
+   (vault half first, refuse whole).
+5. **The vault-follows hooks**: vault setup/enroll/change
+   automatically land the store wrap under the same passphrase
+   (`onPassphraseChanged`), and vault SETUP is guarded by the store
+   wrap (mismatch refuses with the one-secret sentence). A device
+   that just PROVED the vault passphrase extends it to the library
+   for free — no divergence window.
+6. **A known one-secret corner, recorded not papered**: a signed-in
+   user whose vault has NO recovery wrap yet (14b's transient
+   Round-5 overnight state) who runs the set-screen gets a fresh
+   phrase wrapping the STORE only — if the vault later generates its
+   own, two phrases exist until either is retyped over the other.
+   Fix sketch: the set-screen lands the fresh words into the vault
+   too via `landRecoveryWrap` (needs held material + the confirm
+   ceremony); left unwired overnight because it adds a network
+   ceremony to a screen the author's own state (vault WITH wrap ⇒
+   the extend road) never hits. Batch 4 / the cold review may
+   promote it.
+7. **The one-literal sweep exemption** (`MobileStructuralTests`) —
+   the sweep's own caveat names explicit exemption as the road;
+   only the bare `"Mac"` deviceName arm in StoreProtection.swift is
+   exempt.
+
+**PENDING, honestly:**
+- **The biometric LIVE-read acceptance** — `unlockGated`,
+  `confirmPresence`, and the lobby's auto-ask all evaluate real
+  biometrics and are EXERCISED BY NO TEST (the overnight rule);
+  every prompt-capable road is seam-injected. A morning-window /
+  Batch 4 act with her present — AND it is gated on the
+  keychain-identity finding above (until the signing change, the
+  gated item cannot land to be read).
+- **The escrow item's live landing** on her real Mac — same gate;
+  the reconcile and the dial surface the refusal honestly meanwhile.
+- **The lobby/pane GUI walk** — no screenshot drive was run (her
+  machine's session was hers overnight); the faces are
+  functional-honest and Batch 4's acceptance walk owns the look.
+- **Batch 4 owes** (unchanged from the plan): the phone's faces
+  (a–i incl. Face ID at open, the phone lobby, quick-capture
+  demands unlock per her ratification), the tutorial chapter
+  (knot 6's loss-math instruction — the settings copy here already
+  carries the per-mode math it will teach), the whole-app acceptance
+  walk, the phone perf leg, and the install rituals.
+- The Mac latency pin passed in-suite on both full runs — nothing to
+  adjudicate.
+
+**Held for her morning bundle:** (1) the keychain-identity/signing
+finding (the one item needing HER: a signing change is hers; until
+then Biometric mode and escrow refuse honestly on the Mac); (2) the
+PROVISIONAL set above for awareness/ratification — none blocks
+Batch 4.
