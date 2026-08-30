@@ -232,7 +232,10 @@ final class AppServices {
                 // words are the Mac's (`DataSafetyCopy`), handed to shared
                 // machinery — see StoreBackup.Configuration.runbookText.
                 configuration: StoreBackup.Configuration(
-                    runbookText: backupRunbookText))
+                    runbookText: backupRunbookText,
+                    // 13p: the wraps sidecar rides into every backup folder
+                    // (the new-machine passphrase/recovery restore legs).
+                    keyEnvelopeSourceURL: StoreKeyEnvelope.url(besideStore: storeURL)))
         } else {
             backup = nil
         }

@@ -56,6 +56,15 @@ final class StoreBackup {
         /// `Shared/` means both platforms compile it — so the machinery is
         /// shared and the words are the caller's. nil = write nothing.
         var runbookText: String?
+        /// Phase 13p Batch 2: the store-key ENVELOPE (the wrapped-copies
+        /// sidecar beside the store) rides into every backup folder — a
+        /// ciphertext backup restored on a NEW machine is unopenable
+        /// without it, so "restore via passphrase / recovery phrase" is
+        /// true only if the wraps travel with the copies. Every byte in
+        /// the file is non-secret by design (wrapped blobs, salts, an
+        /// id), so a cloud-synced folder may hold it. nil = no envelope
+        /// (pre-passphrase stores have nothing to carry yet).
+        var keyEnvelopeSourceURL: URL?
     }
 
     nonisolated static let filePrefix = "variorum-backup-"
@@ -201,6 +210,8 @@ final class StoreBackup {
         // moment a restore recipe gets read is the moment the app may not
         // open, so a copy that lives only inside the app is not a runbook.
         writeRunbook(configuration.runbookText, into: directory)
+        // 13p: the recovery legs ride beside the recipe (see Configuration).
+        copyKeyEnvelope(configuration.keyEnvelopeSourceURL, into: directory)
 
         let secondary = performSecondLeg(
             directory: directory, configuration: configuration,
@@ -219,6 +230,22 @@ final class StoreBackup {
             policy: configuration.markdownInsurance, now: now, force: force)
         return BackupRunRecord(
             at: now, primary: primary, secondary: secondary, markdown: markdown)
+    }
+
+    /// Phase 13p Batch 2: copy the store-key envelope into a backup
+    /// folder, only when its bytes would change (the runbook's cloud-sync
+    /// churn rule). Quiet on failure like every leg-side write — the next
+    /// run retries; the snapshots themselves never depend on it.
+    nonisolated static func copyKeyEnvelope(_ source: URL?, into folder: URL) {
+        guard let source,
+              let bytes = try? Data(contentsOf: source) else { return }
+        let destination = folder.appendingPathComponent(source.lastPathComponent)
+        if let existing = try? Data(contentsOf: destination), existing == bytes {
+            return
+        }
+        try? FileManager.default.createDirectory(
+            at: folder, withIntermediateDirectories: true)
+        try? bytes.write(to: destination, options: .atomic)
     }
 
     /// Drops `RESTORE.md` into a folder, only when its bytes would change —
@@ -262,6 +289,11 @@ final class StoreBackup {
                 // opens when she goes looking.
                 writeRunbook(
                     configuration.runbookText,
+                    into: BackupDestination.variorumFolder(in: resolved.picked))
+                // 13p: the far folder gets the recovery legs too — this is
+                // the copy a NEW machine restores from.
+                copyKeyEnvelope(
+                    configuration.keyEnvelopeSourceURL,
                     into: BackupDestination.variorumFolder(in: resolved.picked))
                 // Due-ness is the FAR folder's own question: picking a folder
                 // today must seed it immediately even though the container's

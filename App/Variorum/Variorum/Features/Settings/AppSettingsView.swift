@@ -53,7 +53,7 @@ struct AppSettingsView: View {
             }
             // 13l Act 4 (ledger row 12): backups, their freshness, and what
             // restoring one does — including to things that were deleted.
-            DataSafetyPane(services: services)
+            DataSafetyPane(services: services, protection: protection)
                 .tabItem { Label("Data Safety", systemImage: "externaldrive.badge.timemachine") }
             // 13p Batch 1 (R13p-11's attribution obligation): the Zetetic
             // copyright line, the SQLCipher license text, and the

@@ -27,6 +27,10 @@ import VariorumCore
 
 struct DataSafetyPane: View {
     let services: AppServices?
+    /// 13p Batch 2: the protection dials — the plain-text opt-in's
+    /// Locked-down warning reads them (R13p-8's rider). Optional like
+    /// `services`; nil renders no warning (never a guessed one).
+    let protection: ProtectionController?
     @State private var model: DataSafetyModel
 
     /// P-1: the three acts this surface renders, declared once and walked.
@@ -34,8 +38,9 @@ struct DataSafetyPane: View {
         .backUpNow, .chooseBackupFolder, .forgetBackupFolder,
     ]
 
-    init(services: AppServices?) {
+    init(services: AppServices?, protection: ProtectionController? = nil) {
         self.services = services
+        self.protection = protection
         _model = State(initialValue: DataSafetyModel(
             backup: services?.backup,
             sync: services?.sync,
@@ -146,22 +151,48 @@ struct DataSafetyPane: View {
     @ViewBuilder
     private var exportsSection: some View {
         Section("Plain-text copies") {
+            // 13p Batch 2 (R13p-8's rider): THE opt-in — the one deliberate
+            // plaintext escape, off by default, a setting rather than a
+            // button (the gate is checked before force in the run itself).
+            Toggle("Keep a weekly plain-text copy of every note", isOn: Binding(
+                get: { model.insuranceEnabled },
+                set: { on in Task { await model.setInsurance(on) } }))
+                .disabled(model.destination == .unset && !model.insuranceEnabled)
+            if model.destination == .unset && !model.insuranceEnabled {
+                Text("Pick a second folder above first — the plain-text copies "
+                     + "only ever go there.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            if protection?.dials.mode.isDemanded == true {
+                // R13p-8's rider: under a locked-down posture the warning
+                // speaks whether she is about to turn it on or already has.
+                Text(ProtectionCopy.plaintextExportUnderLockedDown)
+                    .font(.caption)
+                    .alarmVoice()
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             if let exports = model.exports {
                 folderRow(
                     title: "Every note as Markdown",
                     path: exports.displayPath, summary: exports,
-                    staleAfter: Self.exportStaleAfter)
-                // 13p (R13p-8's rider): the automatic export is off by
-                // default now that the library is encrypted; Batch 2 builds
-                // the opt-in toggle here. These sentences carry the truth
-                // meanwhile — the evidence row above keeps reporting
-                // whatever files exist.
-                Text("Written weekly while the plain-text option is on — off by "
-                     + "default now that your library is encrypted, because a "
-                     + "scheduled plain-text copy re-opens the door encryption "
-                     + "closed. The 4 most recent are kept. When on, this is the "
-                     + "copy that survives a problem with the library file itself — "
-                     + "plain text any program can open, no Variorum required.")
+                    // While the option is OFF an old export is a fact, not
+                    // an alarm — the stale colour would train her to
+                    // ignore it (the option being off IS the explanation).
+                    staleAfter: model.insuranceEnabled
+                        ? Self.exportStaleAfter : .infinity)
+                if !model.insuranceEnabled && exports.count > 0 {
+                    Text("The automatic export is off — the files above are from "
+                         + "when it was on, and stay until you remove them.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Text("Written weekly while the option is on — off by default "
+                     + "now that your library is encrypted, because a scheduled "
+                     + "plain-text copy re-opens the door encryption closed. The "
+                     + "4 most recent are kept. When on, this is the copy that "
+                     + "survives a problem with the library file itself — plain "
+                     + "text any program can open, no Variorum required.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Text("Note that these are readable by anything that can read the folder — "

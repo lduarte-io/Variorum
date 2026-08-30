@@ -160,3 +160,109 @@ struct AcknowledgmentsCopyTests {
         }
     }
 }
+
+// MARK: - Batch 2 additions (the owed Batch-1 items)
+
+@Suite("13p Batch 2 — the key envelope rides the backups")
+struct Phase13pBackupEnvelopeTests {
+    private func temporaryDirectory() throws -> URL {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("variorum-13p-benv-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        return url
+    }
+
+    /// A ciphertext backup restored on a NEW machine is unopenable without
+    /// the wraps — so the sidecar must ride into the backup folder, and
+    /// refresh when it changes (a re-wrapped passphrase must not leave a
+    /// stale envelope in the recovery folder).
+    @Test func theEnvelopeRidesBesideTheCopiesAndRefreshes() async throws {
+        let sourceDir = try temporaryDirectory()
+        let backupDir = try temporaryDirectory()
+        defer {
+            try? FileManager.default.removeItem(at: sourceDir)
+            try? FileManager.default.removeItem(at: backupDir)
+        }
+        let storeURL = sourceDir.appendingPathComponent("variorum.sqlite")
+        let envelopeURL = StoreKeyEnvelope.url(besideStore: storeURL)
+        var envelope = StoreKeyEnvelope()
+        try envelope.write(at: envelopeURL)
+
+        let database = try AppDatabase.inMemory()
+        let suite = "variorum-13p-benv-\(UUID().uuidString)"
+        let record = await Task.detached {
+            StoreBackup.performRun(
+                database: database, directory: backupDir,
+                configuration: .init(keyEnvelopeSourceURL: envelopeURL),
+                defaults: UserDefaults(suiteName: suite)!,
+                now: Date(timeIntervalSince1970: 1_782_900_000), force: true)
+        }.value
+        #expect(record.primary.outcome == .written)
+        let carried = backupDir.appendingPathComponent(StoreKeyEnvelope.filename)
+        #expect(try StoreKeyEnvelope.load(at: carried) == envelope)
+
+        // The source gains a wrap (a set/reset) — the next run refreshes
+        // the carried copy rather than leaving the stale one.
+        envelope.recovery = Data([0x01, 0x02, 0x03])
+        try envelope.write(at: envelopeURL)
+        _ = await Task.detached {
+            StoreBackup.performRun(
+                database: database, directory: backupDir,
+                configuration: .init(keyEnvelopeSourceURL: envelopeURL),
+                defaults: UserDefaults(suiteName: suite)!,
+                now: Date(timeIntervalSince1970: 1_783_000_000), force: true)
+        }.value
+        #expect(try StoreKeyEnvelope.load(at: carried) == envelope)
+    }
+
+    @Test func noEnvelopeMeansNothingCarriedAndNothingBroken() async throws {
+        let backupDir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: backupDir) }
+        let database = try AppDatabase.inMemory()
+        let suite = "variorum-13p-benv-\(UUID().uuidString)"
+        let record = await Task.detached {
+            StoreBackup.performRun(
+                database: database, directory: backupDir,
+                configuration: .init(keyEnvelopeSourceURL: nil),
+                defaults: UserDefaults(suiteName: suite)!,
+                now: Date(timeIntervalSince1970: 1_782_900_000), force: true)
+        }.value
+        #expect(record.primary.outcome == .written)
+        #expect(!FileManager.default.fileExists(
+            atPath: backupDir.appendingPathComponent(StoreKeyEnvelope.filename).path))
+    }
+}
+
+@MainActor
+@Suite("13p Batch 2 — the plain-text opt-in's face state")
+struct Phase13pInsuranceFaceTests {
+    @Test func theToggleActWritesTheOneKeyAndTheStateFollows() async {
+        let suite = "variorum-13p-face-\(UUID().uuidString)"
+        let model = DataSafetyModel(
+            backup: nil, defaults: { UserDefaults(suiteName: suite)! })
+        await model.refresh()
+        #expect(!model.insuranceEnabled, "off by default — R13p-8's rider")
+        await model.setInsurance(true)
+        #expect(model.insuranceEnabled)
+        #expect(MarkdownInsurance.isEnabled(in: UserDefaults(suiteName: suite)!),
+                "the face flips exactly the key the run gates on")
+        await model.setInsurance(false)
+        #expect(!MarkdownInsurance.isEnabled(in: UserDefaults(suiteName: suite)!))
+    }
+
+    /// The receipt stays SILENT about the designed default (`.disabled`) —
+    /// the setting's face is where the state speaks (Batch 1 PROVISIONAL 3,
+    /// completed by this batch's toggle + captions).
+    @Test func theDisabledLegStaysSilentInTheReceipt() {
+        var record = BackupRunRecord(
+            at: Date(),
+            primary: BackupRunRecord.Leg(outcome: .written),
+            secondary: BackupRunRecord.Leg(outcome: .noDestination),
+            markdown: BackupRunRecord.Leg(outcome: .disabled))
+        record.primary.integrity = "ok"
+        let receipt = DataSafetyModel.receipt(record)
+        #expect(!receipt.localizedCaseInsensitiveContains("plain"),
+                "a designed default does not speak on every run")
+        #expect(receipt.contains("Copied"))
+    }
+}

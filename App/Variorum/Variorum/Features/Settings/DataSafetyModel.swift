@@ -63,6 +63,10 @@ final class DataSafetyModel {
     /// can stop silently; a folder's newest entry cannot lie about its date.
     private(set) var exports: FolderSummary?
     private(set) var log: [BackupRunRecord] = []
+    /// 13p Batch 2 (R13p-8's rider — the opt-in FACE's state): whether the
+    /// automatic weekly plain-text export is on. OFF by default since the
+    /// library became encrypted; the toggle below is the ONE door.
+    private(set) var insuranceEnabled = false
     /// 13l Act 5 (row 17): the local half of the sync facts, refreshed with
     /// everything else. nil until the first refresh (or when there is no
     /// store to read).
@@ -103,12 +107,32 @@ final class DataSafetyModel {
             return (primary: DataSafetyModel.summarize(directory),
                     secondary: DataSafetyModel.summarizeSecondDestination(in: store),
                     exports: DataSafetyModel.summarizeExports(in: store),
-                    log: BackupLog.read(store))
+                    log: BackupLog.read(store),
+                    insurance: MarkdownInsurance.isEnabled(in: store))
         }.value
         primary = read.primary
         destination = read.secondary
         exports = read.exports
         log = read.log
+        insuranceEnabled = read.insurance
+    }
+
+    /// 13p Batch 2: the opt-in's act. Turning it ON runs a backup pass so
+    /// the first export lands while she is looking (the chooseFolder
+    /// seed-immediately precedent); turning it OFF writes nothing more —
+    /// existing files stay until their own retention would have taken
+    /// them, and the face says so.
+    func setInsurance(_ enabled: Bool) async {
+        let defaults = self.defaults
+        await Task.detached(priority: .utility) {
+            MarkdownInsurance.setEnabled(enabled, in: defaults())
+        }.value
+        insuranceEnabled = enabled
+        if enabled, let backup {
+            let record = await backup.backUpNow()
+            note = Self.receipt(record)
+        }
+        await refresh()
     }
 
     /// 13l Act 5 (row 17). Two facts come from the store (the outbox's size,
