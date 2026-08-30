@@ -122,27 +122,10 @@ nonisolated enum WordTargetFaceCopy {
     }
 }
 
-/// 13e E13 — what a door says when the name is taken. ONE sentence, in ONE
-/// place, for the same reason `DivergeCopy` and `StarCopy` are enums rather
-/// than string literals: five doors name a book (the shelf's New Book and
-/// Rename, the navigator's Rename, Settings' Promote to Book, and the
-/// conversion offer's fresh collector), and a promise made in five `Text`
-/// literals is a promise no test can keep.
-///
-/// Her ruled wording is the model — *"A book named 'Ideas' already exists"* —
-/// with the road named after it, because a refusal that does not say what to
-/// do instead is the lecture-without-a-door class P-2 retired. The name
-/// quoted is the EXISTING book's, in its own casing, which is the answer to
-/// "but I don't have a book called that" when she typed different capitals.
-nonisolated enum BookNameCopy {
-    static func refusal(existing: String) -> String {
-        "A book named \u{201c}\(existing)\u{201d} already exists — pick a different "
-            + "name, or rename that one first."
-    }
-}
-
 /// 13e batch 3 — what the take↔block doors SAY when they act (her A20/A21,
-/// under architect ruling AR-1). ONE home, for the `BookNameCopy` reason:
+/// under architect ruling AR-1). ONE home, for the `BookNameCopy` reason
+/// (that enum now lives in `Shared/BookNameCopy.swift` — hoisted, not
+/// copied, when the phone's book doors needed the same sentence):
 /// both editor kinds render these doors (R118 — Write is never privileged),
 /// and a receipt written twice is a promise no test can keep.
 ///

@@ -116,11 +116,23 @@ final class MobileBookDetailsModel {
     /// Rename — free on a finished book (the Mac's renameReading has no
     /// lock guard; rename stays free under lock, the renameSection
     /// parallel). The face gates blank names.
+    ///
+    /// **THE DUPLICATE-NAME GUARD ARRIVES HERE AT PL-10(b)** (her 13e E13
+    /// ruling: *refuse at the door*), the create sheet's twin. `excluding:`
+    /// is THIS book's own row — renaming a book to the name it already has,
+    /// or only changing its casing, is not a collision with itself, and
+    /// without that argument this door could refuse her a rename it just
+    /// performed. The read rides INSIDE the runner closure with the write,
+    /// for the operation's own stated reason (runner bodies are
+    /// synchronous, so nothing lands between the read and the update).
     func rename(_ name: String) async {
         let trimmed = name.trimmingCharacters(in: .whitespaces)
         guard Self.canRename(trimmed) else { return }
         let id = readingID
-        await run { try $0.renameReading(id, name: trimmed) }
+        await run { ops in
+            try ops.assertBookNameIsFree(trimmed, excluding: id)
+            try ops.renameReading(id, name: trimmed)
+        }
     }
 
     /// **Delete the book** (round 2, batch 4 — PR4). Move to Trash: the
@@ -170,8 +182,19 @@ final class MobileBookDetailsModel {
     /// **Forwards to the ONE deletion-refusal home** (A1-18) — this table
     /// and the Trash's covered different subsets of the same errors, so one
     /// refused act read two ways depending on the door.
+    ///
+    /// **One arm sits in front of it** (PL-10(b)): a taken book name is not
+    /// a deletion refusal, so it is not `DeletionRefusal`'s to word — it has
+    /// its own shared home, `BookNameCopy`, which the Mac's five book doors
+    /// already speak. Routing here rather than copying the sentence is what
+    /// keeps the two platforms saying the same thing (MobileSoul §3);
+    /// without the arm it would fall to `DeletionRefusal.fallback`, whose
+    /// honest last resort still ends in a raw `duplicateBookName(name:)`.
     nonisolated static func refusal(_ error: OperationError) -> String {
-        DeletionRefusal.words(error)
+        if case .duplicateBookName(let existing) = error {
+            return BookNameCopy.refusal(existing: existing)
+        }
+        return DeletionRefusal.words(error)
     }
 }
 

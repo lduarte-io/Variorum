@@ -92,6 +92,20 @@ final class MobileCreateBookModel {
     /// Mints the book through the ONE core operation; returns the new
     /// book's id so the door can land on it (fire-and-DO — the created
     /// book opens as its contents front).
+    ///
+    /// **THE DUPLICATE-NAME GUARD ARRIVES HERE AT PL-10(b)** (her 13e E13
+    /// ruling: *refuse at the door*). `assertBookNameIsFree` has been in
+    /// core since 13e and the Mac has refused at five doors; the phone had
+    /// **zero references to it**, so the same name could be minted twice
+    /// from this sheet — the confusion her ruling is about, on the device
+    /// she writes on.
+    ///
+    /// **The read sits INSIDE the runner closure with the mint**, exactly as
+    /// the Mac's `ReadingsViewModel.create` does and for the operation's own
+    /// stated reason: runner bodies are synchronous, so no other door's
+    /// write can land between the read and the insert. The only surviving
+    /// race is the cross-device one her ruling deliberately tolerates
+    /// (`BookNaming`'s doc has the why-not-a-schema-rule).
     func create() async -> String? {
         guard canCreate else { return nil }
         let bookName = name.trimmingCharacters(in: .whitespaces)
@@ -100,13 +114,15 @@ final class MobileCreateBookModel {
             switch kind {
             case .notes:
                 id = try await session.runner.run { ops in
-                    try ops.createReading(name: bookName, kind: .curated)
+                    try ops.assertBookNameIsFree(bookName)
+                    return try ops.createReading(name: bookName, kind: .curated)
                 }.id
             case .journal:
                 // The Mac create alert's journal shape, byte-mirrored:
                 // curated, profile 'journal', dated order ascending.
                 id = try await session.runner.run { ops in
-                    try ops.createReading(
+                    try ops.assertBookNameIsFree(bookName)
+                    return try ops.createReading(
                         name: bookName, kind: .curated, profile: "journal",
                         sortField: .entryDate, sortDir: .asc)
                 }.id
@@ -115,11 +131,20 @@ final class MobileCreateBookModel {
                 let all = joinAll && paths.count > 1
                 let json = try Self.spec(paths: paths, joinAll: all).encodedJSON()
                 id = try await session.runner.run { ops in
-                    try ops.createReading(name: bookName, kind: .smart, querySpec: json)
+                    try ops.assertBookNameIsFree(bookName)
+                    return try ops.createReading(
+                        name: bookName, kind: .smart, querySpec: json)
                 }.id
             }
             lastError = nil
             return id
+        } catch OperationError.duplicateBookName(let existing) {
+            // Her sentence, from the ONE home — HOISTED to `Shared/` for
+            // this door rather than copied (MobileSoul §3). Without this arm
+            // the refusal reached her as `String(describing:)`'s raw enum
+            // dump, which is the lecture-without-a-door class P-2 retired.
+            lastError = BookNameCopy.refusal(existing: existing)
+            return nil
         } catch {
             lastError = String(describing: error)
             return nil
