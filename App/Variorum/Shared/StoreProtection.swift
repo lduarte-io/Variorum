@@ -431,6 +431,32 @@ nonisolated enum ProtectionCopy {
         }
     }
 
+    /// **The lobby's dead end, worded PER DEMAND** (13p Batch 4 — caught by
+    /// the acceptance walk, which drove a passphrase-demanding lobby with
+    /// no wraps and read a sentence blaming *"its fingerprint item is
+    /// gone"* — an item that never existed in that mode, and a false cause
+    /// on the one screen whose entire job is to tell a locked-out user the
+    /// truth about their own library).
+    ///
+    /// Practically unreachable through the app's own doors (the mode
+    /// transitions refuse to enter a demanded mode without a wrap), which
+    /// is exactly why it was wrong for so long — and exactly why it has to
+    /// be right: whoever meets it got here by a road nobody planned, and a
+    /// wrong cause sends them hunting for the wrong thing.
+    static func deadEnd(_ demand: StoreAtOpenMode) -> String {
+        let cause: String
+        switch demand {
+        case .biometric:
+            cause = "its \(biometryName) item is gone from this \(deviceName), and no "
+                + "passphrase or recovery phrase is on file beside the library"
+        case .passphrase, .auto:
+            cause = "no passphrase or recovery phrase is on file beside the library"
+        }
+        return "No way to unlock this library exists on this \(deviceName): \(cause). "
+            + "Restore the \(StoreKeyEnvelope.filename) file from a backup folder, or "
+            + "restore the whole library from a backup."
+    }
+
     /// The at-open wording for envelope refusals (typed → sentence; the
     /// R94 doctrine — a refusal that dumps a case name is forbidden).
     static func message(for error: any Error) -> String {

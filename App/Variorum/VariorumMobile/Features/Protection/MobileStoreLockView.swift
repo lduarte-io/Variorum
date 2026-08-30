@@ -179,11 +179,7 @@ struct MobileStoreLockView: View {
     /// render an empty room. The Mac's twin says the same thing; the file
     /// name it points at is the one both platforms write.
     private var deadEnd: some View {
-        Text("No way to unlock this library exists on this iPhone: its "
-             + "\(ProtectionCopy.biometryName) item is gone and no passphrase or "
-             + "recovery phrase is on file beside the library. Restore the "
-             + "\(StoreKeyEnvelope.filename) file from a backup, or restore the "
-             + "whole library from one.")
+        Text(ProtectionCopy.deadEnd(lobby.demand))
             .font(tokens.small)
             .foregroundStyle(tokens.alarm)
             .multilineTextAlignment(.center)

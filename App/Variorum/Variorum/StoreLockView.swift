@@ -123,11 +123,7 @@ struct StoreLockView: View {
     /// demanded mode without a wrap) — but a dead end must SAY so, never
     /// render an empty room.
     private var deadEnd: some View {
-        Text("No way to unlock this library exists on this device: its "
-             + "fingerprint item is gone and no passphrase or recovery "
-             + "phrase is on file beside the library. Restore the "
-             + "\(StoreKeyEnvelope.filename) file from a backup folder, or "
-             + "restore the whole library from a backup.")
+        Text(ProtectionCopy.deadEnd(lobby.demand))
             .font(.callout)
             .alarmVoice()
             .multilineTextAlignment(.center)

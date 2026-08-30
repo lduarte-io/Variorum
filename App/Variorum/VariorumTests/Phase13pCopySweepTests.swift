@@ -93,6 +93,32 @@ struct Phase13pCopySweepTests {
                 "…and the honest answer is offered beside it")
     }
 
+    /// **THE WALK'S CATCH.** The acceptance walk drove a passphrase-
+    /// demanding lobby with no wraps and read *"its fingerprint item is
+    /// gone"* — a cause that cannot exist in that mode, on the one screen
+    /// whose whole job is telling a locked-out user the truth about their
+    /// own library. The sentence is per-demand now, and this is the pin.
+    ///
+    /// **Red-on-old** (behavioural revert, executed): with the single
+    /// unconditional sentence restored, the passphrase arm names the
+    /// biometry item and this fails.
+    @Test func theDeadEndNamesOnlyCausesThatCanExistInItsMode() {
+        let underPassphrase = ProtectionCopy.deadEnd(.passphrase)
+        #expect(!underPassphrase.contains(ProtectionCopy.biometryName),
+                "a passphrase-demanding lobby never had a biometry item to lose")
+        #expect(underPassphrase.contains("no passphrase or recovery phrase is on file"))
+
+        let underBiometry = ProtectionCopy.deadEnd(.biometric)
+        #expect(underBiometry.contains(ProtectionCopy.biometryName),
+                "…and where one COULD exist, its absence is the first thing to say")
+
+        // Both roads end at the same two recoveries, named by real file.
+        for sentence in [underPassphrase, underBiometry] {
+            #expect(sentence.contains(StoreKeyEnvelope.filename))
+            #expect(sentence.contains("restore the whole library from a backup"))
+        }
+    }
+
     /// The plain-text escape's warning exists and names the trade (R13p-8's
     /// rider: a scheduled export re-opens the door the encryption closed).
     @Test func thePlainTextEscapeWarnsUnderLockedDown() {
