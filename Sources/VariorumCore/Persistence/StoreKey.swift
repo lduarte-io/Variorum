@@ -212,8 +212,9 @@ public enum StoreFilePresence: Equatable, Sendable {
     /// loudly).
     case encryptedOrUnknown
 
-    /// `SQLite format 3\0`
-    static let plaintextMagic = Data([
+    /// `SQLite format 3\0` — public so drills and verification tooling can
+    /// assert against the same sixteen bytes this classifier reads.
+    public static let plaintextMagic = Data([
         0x53, 0x51, 0x4C, 0x69, 0x74, 0x65, 0x20, 0x66,
         0x6F, 0x72, 0x6D, 0x61, 0x74, 0x20, 0x33, 0x00,
     ])

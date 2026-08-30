@@ -84,17 +84,16 @@ extension AppDatabase {
         do {
             try FileManager.default.createDirectory(
                 at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-            let presence = StoreFilePresence.classify(at: url)
-            if presence == .plaintext {
-                // 13p Batch 1 BRIDGE (commit 2 of the substrate): an
-                // existing plaintext store keeps opening unkeyed until the
-                // one-time migration lands — the next commit replaces this
-                // arm with migrate-then-open-keyed. Fresh stores are
-                // already born encrypted below.
-                return try AppDatabase.onDisk(url: url, key: nil)
-            }
             let custody = custody ?? ambientStoreKeyCustody()
-            let key = try resolveStoreKey(at: url, presence: presence, custody: custody)
+            let key = try resolveStoreKey(
+                at: url, presence: StoreFilePresence.classify(at: url), custody: custody)
+            // The one-time plaintext→encrypted migration (13p): a no-op on
+            // fresh and already-encrypted stores (it also sweeps a crashed
+            // attempt's stale temp), the verified export/swap road on a
+            // pre-13p plaintext store — including an old plaintext BACKUP
+            // being restored through this door, which is exactly how the
+            // R13p-15 aged-out plaintext tail comes back in encrypted.
+            try StoreEncryptionMigration.migrateIfNeeded(at: url, key: key)
             return try AppDatabase.onDisk(url: url, key: key)
         } catch let error as StoreOpenError {
             throw error
