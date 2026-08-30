@@ -1751,3 +1751,227 @@ legacy-keychain Auto item landed and migrated her store live.
 copy, and walks over settled brains). Phone-side DEVICE acts (Face ID
 walk, the perf leg, any new install) are morning-window acts — the
 overnight half builds and simulator-verifies.
+
+### Batch 4 — record (implementer: Opus, 2026-08-30)
+
+**COMPLETE. Six commits on `main` (unpushed — the architect verifies and
+pushes): `dd4489c` (the phone's faces + the hoist) · `2c04478` (the phone's
+pins) · `7900dd1` (the tutorial chapter, both guides) · `e820893` (the
+honest-copy sweep) · `bde564b` (the acceptance walk + the defect it caught)
+· `<this record>`.** **ZERO `Sources/` LINES END TO END** — verified by
+`git diff 2d01000..HEAD --stat -- Sources/`, which is EMPTY, so zero
+`Sync/`, zero schema, zero server by construction rather than by claim. The
+marker stays 7.
+
+**Scope items, each dispositioned:**
+
+- **(a) FIRST LAUNCH ON THE PHONE MINTS — DONE, and it was already true.**
+  The custody road is core (`openStore` mints into empty custody), so the
+  phone inherited it at Batch 1; what this batch owes is the PROOF, and it
+  is the pin
+  `MobilePhoneStoreEncryptionTests.firstLaunchOnThePhoneMintsTheKeyAndTheStoreIsBornEncrypted`
+  — an empty custody, an absent store, then a 32-byte key that exists NOW
+  and did not before, a ciphertext header, a zero-plaintext byte scan, and
+  a keyed read-back. No Mac anywhere in the road (her rider's letter).
+- **(b) THE PHONE'S EXISTING STORE MIGRATES — DONE, pinned on iOS**
+  (`aPlaintextPhoneStoreMigratesOnItsFirstKeyedOpen`), with the
+  pre-migration readable-prose CONTROL keeping the green half non-vacuous.
+  Simulator only, deliberately: her physical phone is a morning act.
+- **(c) THE AT-OPEN MODES + THE LOCKED LOBBY ON iOS — DONE.**
+  `MobileStoreLockView` (the lobby face over the shared `StoreLobby`) is
+  wired into the app's `.locked` arm, which until this batch rendered a
+  placeholder saying unlocking "arrives with the protection update".
+  `MobileProtectionSheet` carries the three modes, the presets, and every
+  disclosure. The lobby's claim is proven twice: by pins on the phone's own
+  compiled copy of the shared brain (`MobilePhoneLobbyTests` — `.locked`
+  with the opener never called, unlock opens, Lock Now tears down to typed
+  refusals and unlock returns the data, Lock-Now-under-Auto refuses as
+  theater) and by the WALK's screenshot of the Mac lobby with nothing else
+  on screen.
+- **(d) THE SET SCREEN WITH THE SAME-SCREEN PHRASE — DONE**
+  (`MobilePassphraseSetSheet`), composing the HOISTED `PassphraseSetModel`.
+- **(e) THE STANDARD NUDGE'S TWO-OFFER SHAPE — DONE**
+  (`MobileProtectionNoticeBar`, a calm dismissible banner at the TOP of the
+  shell — above both tab stacks, so it survives a tab switch and never
+  fights the tab bar for the bottom edge; never modal).
+- **(f) THE ESCROW DIAL — DONE**, knot 8's ruled pair rendered from the
+  shared constants (byte-identical to the Mac's), plus the no-iCloud rider
+  and the under-demanded-mode warning.
+- **(g) RE-LOCK ON BACKGROUND + LOCK NOW — DONE**, with the platform
+  mapping stated once in `MobileRelock.swift`'s header:
+  `relockOnSleepAndScreenLock` ⇒ lock when Variorum leaves the screen
+  (backgrounding IS the phone's ⌘Q); `relockAfterIdleMinutes` ⇒ lock on
+  RETURN after that long away (a suspended phone cannot poll, so the same
+  dial is read at the other edge — same intent, honest mechanism). Both
+  re-check the dials at fire time and both end at `bootstrap.lock()`, which
+  refuses under Auto by itself, so no road here can ship theater. ORDER is
+  pinned: the flush runs to completion FIRST and the lock lands last,
+  inside the same background grant; a return that locks never first wakes a
+  sync round.
+- **(h) REMINDER CHECKS + THE RESET DOOR + THE ONE-DEVICE MATH — DONE.**
+  The reminder is 13l's `SecretCheckSection` over the store road (one face,
+  as the plan requires), the reset door is the Face ID-confirmed re-wrap,
+  and `ProtectionCopy.oneDeviceNote` states the shorter chain — rendered on
+  BOTH platforms, because it reads true on both.
+- **(i) QUICK CAPTURE DEMANDS UNLOCK — DONE, her ratification honoured in
+  both halves.** STRUCTURAL: the shell (and with it the quick-note box, the
+  phone's only capture surface) exists only inside `.ready`, so while the
+  lobby is up there is no box to type into — seen in the walk's lobby
+  screenshot, pinned by `aDemandedModeLandsLockedWithNothingOpened`. WORDED:
+  the one reachable seam is a re-lock landing on a box that still holds
+  text, and there the mint refuses with a sentence naming the lock and the
+  road while her text STAYS IN THE BOX — never a side channel.
+
+**Beyond the named list, and worth the record:**
+
+- **THE HOIST** (MobileSoul §3, and the rule's own words — *"a capability
+  built Mac-side with its brain in app-local code is a parity defect at
+  birth"*): `VaultTie` + `PassphraseSetModel` moved from the Mac's
+  `ProtectionPane.swift` into `Shared/PassphraseSetModel.swift`, UNCHANGED.
+  The Mac's suite rode unmodified, which is the hoist's own proof (the 3C
+  parity pattern). Knot 4's choreography and R13p-4's one-secret
+  verification are now written once.
+- **THE ACKNOWLEDGMENTS REACH THE PHONE.** R13p-11's attribution obligation
+  is a SHIPPING obligation and the phone ships the same SQLCipher; Batch 1
+  had already put the words in `Shared/AcknowledgmentsCopy` naming this
+  face as the reason. `MobileAcknowledgmentsSheet` renders them.
+- **THE DOOR WORDS JOINED THE ONE VOCABULARY** — mode labels, preset titles
+  and blurbs, the Lock Now label and sentence moved into `ProtectionCopy`
+  (byte-identical on macOS), so the two faces cannot drift; `lossLegs`
+  became the ONE brain the loss math and the tutorial chapter both read.
+
+**THE TUTORIAL CHAPTER (knot 6) — spine 68/9 → 71/10.** The Mac's field
+guide gains **"keeping it private"**, TWO lessons, placed right after
+"where things go" (that chapter is the recovery map; this one is the same
+map's other face). Lesson 1 teaches the settings options themselves — the
+three at-open rows by the words Settings shows, both presets with their own
+blurbs, the escrow dial and why Locked-down turns it off, the
+twelve-words-shown-once moment, the reset door and the fact that makes
+forgetting survivable, re-lock and ⌃⌘L, and why Auto offers no lock at all.
+Lesson 2 is the loss math per mode in her non-scary-but-serious shape,
+including her own example verbatim, the one-device fact, and the opt-in
+weekly plain-text copy named by its real toggle and honest about its
+default. **The phone's pocket guide gains the same chapter with ONE
+lesson** — because of her Batch-1 rider: a phone-only reader never opens
+the Mac's guide, so a teaching that lived only there would not reach them.
+Both are CONTRACT suites rather than acts suites, deliberately: every act
+this chapter could ask for is a Keychain or biometric act, which no test may
+drive. The anti-drift discipline is the point — the pins read the app's OWN
+sentences (`ProtectionCopy`, and every leg of `lossLegs`), so a pane
+re-worded at 13s cannot leave a lesson lying about a security feature.
+
+**Suite counts (batch acceptance):**
+- Core: **1452 / 153 PASSED** — EXACT baseline (zero core lines).
+- Mac: **1834 / 310 PASSED, FULLY GREEN** (Batch 2's 1825/308 + 9 in 2 new
+  suites: the copy sweep 6, the tutorial contract 3). The intermittent
+  latency pin passed in-suite — no isolated re-run owed.
+- Mobile: **507 / 85 PASSED, 2 known issues** (Batch 2's 486/78 + 21 in 7
+  new suites: 19 protection + 2 pocket-guide privacy; the 2 known issues are
+  the standing pair). The no-redirect sweep is green with its one
+  documented exemption — the new mobile faces add no "Mac" literal.
+- Tutorial spine: **71 / 10** (68/9 + the privacy chapter's 3).
+
+**Pin inventory (red-on-old by behavioural revert, each restored after):**
+- **The `unreadable` refusal's Touch ID literal** — reverted, and the
+  phone's copy pin failed with the whole wrong sentence in its output
+  (a Mac fingerprint offered on a phone).
+- **The quick note's `StoreLockedError` arm** — removed, and the refusal
+  fell back to the generic sentence naming neither the lock nor the road.
+- **The flush's lock leg** — removed, and the ORDER pin saw no lock at all.
+- **The lobby's dead-end sentence** — see the walk's catch below; reverted
+  to the unconditional form and the passphrase arm named Touch ID.
+- Structural red-on-old (new code, no pre-fix behaviour to fail): the
+  phone's mint/migrate pins, the lobby choreography, the re-lock policy and
+  coordinator, the copy-completeness sweep, both tutorial contracts.
+
+**THE ACCEPTANCE WALK — and the defect it caught.** Driven against the Mac
+DEV app only (the Debug build over the fenced dev store), every act
+PID-targeted through a driver that REFUSES by construction to quit anything
+outside DerivedData. Her real-store instance (PID 35890) was pgrep-verified
+alive throughout and its store re-checked ciphertext at the end; it was
+never driven, captured, or signalled. Screenshots (gitignored) at
+`~/dev/scratch-13p-spike/batch4/shots/`: `00-shelf-dev` · `01/02-protection`
+· `03/04-set-passphrase` · `09-locked-lobby-deadend` (the defect, as found)
+· `10-locked-lobby-fixed` · `11-data-safety` · `12-acknowledgments`; the
+pane's full rendered copy is dumped as text at
+`batch4/logs/protection-pane-ax.txt`, so the evidence is the sentences
+themselves rather than a picture of them.
+
+**THE CATCH:** a passphrase-demanding lobby with no wraps rendered *"its
+fingerprint item is gone"* — a cause that cannot exist in that mode, on the
+one screen whose entire job is telling a locked-out user the truth about
+their own library. Now `ProtectionCopy.deadEnd(demand:)`, worded per demand
+and shared by both lobbies (the phone had inherited the same wrong
+sentence), red-pinned and re-verified in the running app.
+
+**Recorded environment limits, honestly:** SwiftUI button presses INSIDE
+THE SHEET could not be driven — not by AX press, not by the default-action
+Return, not by a synthetic click (the same class Phase 13b's Stage-0 drive
+recorded), and the AX bridge went unresponsive while the sheet was up. So
+the deeper ceremony states (the twelve words on screen, the mode flip from
+the pane, Lock Now) were NOT reached by driving. The lobby was reached
+instead through the app's OWN persisted state (the dev-scope at-open dial
+via its defaults domain, restored immediately after) — setup, not
+simulation: what rendered was the real face over the real route.
+
+**PROVISIONAL calls (options weighed, most defensible implemented):**
+1. **The phone's protection chrome is TEXT-FORWARD rows, not Toggles and
+   Pickers.** This app ships no `Toggle` or `Picker` anywhere on iOS,
+   deliberately; introducing a foreign control register on the one screen
+   about trust seemed worse than following the phone's own grammar.
+   Alternatives: native controls (phone-conventional, register-breaking) or
+   a Form (Mac-shaped). Hers to overrule on taste.
+2. **`relockAfterIdleMinutes` reads as "lock after time away" on RETURN.**
+   A suspended phone cannot poll idle time, so the alternatives were: drop
+   the dial on iOS (a dial that exists on one platform only), or a
+   background task (battery-dishonest for a gate). Same dial, same intent,
+   a mechanism the platform can actually keep.
+3. **The nudge banner sits at the TOP of the shell.** The Mac's is a bottom
+   bar; on the phone the bottom edge belongs to the tab bar, and a
+   safeAreaInset below it would read as a system banner under the app's own
+   chrome. Alternatives: inside the shelf's scroll content (scrolls away —
+   an offer she may never see), or above the tab bar inside each root
+   (two homes for one notice).
+4. **The phone's pocket guide gets ONE lesson to the Mac's two.** The
+   phone's Protection screen states the per-mode sentence, the chain and
+   the one-device fact live, so the lesson's job is to send a reader there
+   knowing what they'll find. The alternative — the Mac's full two-lesson
+   chapter — would be the longest chapter in a deliberately pocket-sized
+   guide whose surrounding IA (archive/trash) mobile has not designed yet.
+5. **`MobileShellView`/`MobileSettingsView` take the whole `AppBootstrap`**
+   (optional) rather than a controller plus a `canLock` snapshot: `canLock`
+   is dynamic, and a captured Bool would go stale the moment a mode
+   changed. The Mac's `EditorCommands` reads `bootstrap.canLock` the same
+   way.
+6. **The walk's caption assertions were DERIVED from the plan** rather than
+   re-transcribed when the privacy chapter broke them. A hand-copied table
+   of contents inside a test whose subject is the Read ASSEMBLY made adding
+   any chapter a test edit; the derived form still pins that Read captions
+   every chapter in book order, and one literal anchor keeps the LK9 frame
+   itself honest.
+
+**PENDING — the device-side morning acts, enumerated:**
+- **THE LIVE FACE ID WALK on her physical phone** — `unlockGated`,
+  `confirmPresence` and the lobby's auto-ask evaluate real biometrics and
+  are exercised by NO test (the standing prompt rule; every prompt-capable
+  road is seam-injected). iOS is NOT gated by the Mac's keychain-identity
+  finding — iOS apps carry the identity — so unlike the Mac, the phone's
+  Biometric mode is expected to WORK. This is the first real chance to see
+  it, and it needs her hands and her face.
+- **THE PHONE PERF LEG** (the spike's recorded expectation: hardware AES on
+  A-series). Measured on her device, not the simulator, per the Batch 0
+  addendum.
+- **THE PHONE INSTALL DECISION.** Her phone already carries the Batch-1
+  Release build (installed at the overnight authorization), so it is
+  already an encrypted-store client; whether to install a Batch-4 build now
+  or at the phase-end ritual after the cold review is the architect's call
+  with her. Nothing in this batch changes the substrate the installed build
+  runs — only faces, copy and the tutorial.
+- **The Mac's KEYCHAIN-IDENTITY FINDING is untouched by this batch** (Batch
+  2's morning headline): until the signing change, the Mac's Biometric mode
+  and the escrow item refuse honestly. Her call.
+- **Batch 2's PROVISIONAL 6** (the set-screen landing fresh recovery words
+  into a recovery-wrap-less vault via `landRecoveryWrap`) was assessed and
+  **NOT promoted**: doing it whole means a network ceremony plus a confirm
+  on a screen the author's own state never reaches, and half of it is worse
+  than none. It stays recorded for the cold review, unchanged.

@@ -1092,17 +1092,28 @@ struct MobileTutorialLibraryWalkTests {
 
             // The Read flow's assembly: the same chapters, the page meta.
             let chapters = MobileReadPage.assemble(book.groupedRows)
-            #expect(chapters.map(\.caption) == [
-                "I · WELCOME", "II · WRITING", "III · TAKES",
-                "IV · STRUCTURE", "V · THE LIBRARY OF THINGS",
-            ])
+            // DERIVED from the plan, not transcribed from it (13p Batch 4):
+            // the caption list used to be a hand-copied literal, so ADDING a
+            // chapter — the privacy chapter did exactly this — failed a test
+            // whose subject is the ASSEMBLY, not the table of contents. What
+            // this pins is that Read captions every chapter, in book order,
+            // in the ratified LK9 frame; the format itself keeps one literal
+            // anchor below so a change to the frame still trips.
+            #expect(chapters.map(\.caption)
+                    == MobileTutorialSeeder.plan.enumerated().map { index, chapter in
+                        "\(MobileReadPage.roman(index + 1).uppercased()) · "
+                        + chapter.chapter.uppercased()
+                    })
+            #expect(chapters.first?.caption == "I · WELCOME", "the LK9 frame itself")
             let slots = chapters.flatMap(\.notes)
             #expect(slots.count == lessonCount)
             #expect(slots.map(\.ordinal) == Array(1...lessonCount))
             let last = try #require(slots.last)
             #expect(MobileReadPage.pageMeta(
                 ordinal: last.ordinal, total: book.entries.count,
-                chapterIndex: last.chapterIndex) == "note 14 of 14 · v")
+                chapterIndex: last.chapterIndex)
+                == "note \(lessonCount) of \(lessonCount) · "
+                + MobileReadPage.roman(MobileTutorialSeeder.plan.count))
         }
     }
 
