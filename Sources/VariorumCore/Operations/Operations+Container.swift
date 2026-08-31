@@ -221,7 +221,9 @@ extension Operations {
         let book = Reading(
             id: newID(), ownerId: currentOwnerID(),
             name: Self.defaultDailyJournalBookName, kind: .curated,
-            profile: "journal", sortField: .entryDate, sortDir: .asc,
+            // The shared mint-mark: the Journal-keeper repair's predicate
+            // filters on exactly this constant (pre-13u Act 0).
+            profile: Queries.dailyJournalBookProfile, sortField: .entryDate, sortDir: .asc,
             createdAt: now, updatedAt: now)
         try book.insert(db)
         try setDailyJournalBook(db, book.id)

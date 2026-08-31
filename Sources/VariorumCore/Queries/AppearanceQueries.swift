@@ -166,6 +166,37 @@ extension Queries {
         try designatedBookID(db, key: "daily_journal_book")
     }
 
+    /// The profile the daily-Journal mint stamps — the durable row-level
+    /// mark of "born as the designated daily book" (pre-13u Act 0,
+    /// R-pre13u-1). `insertDailyJournalBook` mints with THIS constant and
+    /// `dailyJournalBookCandidates` filters on it, so the mint and the
+    /// SyncSpec §7 Journal-keeper repair share one predicate and cannot
+    /// drift.
+    public static let dailyJournalBookProfile = "journal"
+
+    /// **The Journal-keeper repair's "same book" predicate** (pre-13u
+    /// Act 0, R-pre13u-1): every live reading the daily-Journal mint could
+    /// have produced — curated, `profile = 'journal'` — sorted by id, so
+    /// index 0 is the deterministic keeper everywhere. Two rows here is the
+    /// offline-race state the repair heals: the ONLY writer of this profile
+    /// is `insertDailyJournalBook` (the one shared daily door — ⌘J, Today's
+    /// Entry, the bridge, and the phone's furniture all delegate to it),
+    /// which designates at birth, so the profile IS "was designated on its
+    /// own device" as a fact the setting CAS cannot erase. Deliberately NOT
+    /// the folded name: `BookNaming`'s E13 doctrine keeps deliberate
+    /// same-name books legal, and a rename must not shield a duplicate
+    /// daily book from healing.
+    public static func dailyJournalBookCandidates(_ db: Database) throws -> [String] {
+        try String.fetchAll(
+            db,
+            sql: """
+                SELECT id FROM reading
+                WHERE kind = 'curated' AND profile = ? AND deleted_at IS NULL
+                ORDER BY id
+                """,
+            arguments: [dailyJournalBookProfile])
+    }
+
     /// The designated QUICKNOTES book (13g batch 7 — her R6-4). The daily
     /// book's twin in every respect, including the dangling rule: an id
     /// pointing at a deleted book reads as none, which is exactly what lets

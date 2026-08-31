@@ -20,6 +20,13 @@ struct TouchedRows {
     /// Rows arriving in this batch already tombstoned — their tombstones are
     /// server-known, so direction 1 need not re-push them.
     var arrivingDeadIDs: [String: Set<String>] = [:]
+    /// Applied `reading` rows — the firing scope of the two FURNITURE
+    /// convergence repairs (pre-13u Act 0): the Journal keeper and the
+    /// sample-library dedupe both check only when a batch touched a book.
+    var readingIDs: Set<String> = []
+    /// True when the batch touched the daily-book designation setting —
+    /// the Journal keeper's second (belt) firing occasion.
+    var dailyDesignationTouched = false
     /// Inline (write-time) repair count, for reporting.
     var inlineRepairs = 0
 }
@@ -167,6 +174,10 @@ extension SyncEngine {
             }
         case "container_block":
             touched.placementIDs.insert(row.rowID)
+        case "reading":
+            touched.readingIDs.insert(row.rowID)
+        case "setting" where row.rowID == "daily_journal_book":
+            touched.dailyDesignationTouched = true
         default:
             break
         }
@@ -492,6 +503,107 @@ extension SyncEngine {
             try enqueueExplicitly(db, table: "block", rowID: blockID)
             repairs += 1
         }
+
+        // The two FURNITURE convergence repairs (pre-13u Act 0): each fires
+        // only when the batch touched a book — one small indexed check per
+        // fired batch, then real work only in the once-per-store-life event
+        // of two independently-seeded copies actually meeting.
+        if !touched.readingIDs.isEmpty || touched.dailyDesignationTouched {
+            repairs += try convergeDailyJournalDuplicates(db, touched: touched)
+        }
+        return repairs
+    }
+
+    // MARK: - The Journal keeper (pre-13u Act 0, R-pre13u-1)
+
+    /// Two designated daily-Journal books, each minted by a device that
+    /// correctly saw "no Journal exists yet", converge deterministically:
+    /// the `tag.path` pattern — **the smaller id keeps**, the loser's live
+    /// chapters and memberships move to the keeper (a membership whose post
+    /// the keeper already holds is a pure duplicate and tombstones —
+    /// `uq_reading_post_live`), the loser is tombstoned, and the daily-book
+    /// DESIGNATION converges to the keeper wherever it named a loser.
+    ///
+    /// The predicate is `Queries.dailyJournalBookCandidates` — the one
+    /// named function the mint also stamps by (see its doc for why the
+    /// profile, and deliberately never the name, identifies a daily book).
+    ///
+    /// What deliberately does NOT move, the tag.path class ("worst case a
+    /// lost rename, never corruption"): the loser's row metadata (a custom
+    /// name, extents, a finish) and its shelf-pin entry (which dangles
+    /// harmlessly — the pins read is liveness-filtered). A keeper that is
+    /// FINISHED still receives the loser's memberships: a repair is not
+    /// authoring, the resolveSyncConflict-under-seal doctrine.
+    func convergeDailyJournalDuplicates(_ db: Database, touched: TouchedRows) throws -> Int {
+        let candidates = try Queries.dailyJournalBookCandidates(db)
+        guard candidates.count > 1, let keeperID = candidates.first else { return 0 }
+        var repairs = 0
+        for loserID in candidates.dropFirst() {
+            let stamp = nowStamp()
+            // Chapters move whole — duplicate names and interleaved
+            // positions are both legal, so nothing is lost and membership
+            // `section_id` pointers stay meaningful.
+            let sections = try String.fetchAll(
+                db,
+                sql: "SELECT id FROM reading_section WHERE reading_id = ? AND deleted_at IS NULL",
+                arguments: [loserID])
+            for sectionID in sections {
+                try db.execute(
+                    sql: "UPDATE reading_section SET reading_id = ?, updated_at = ? WHERE id = ?",
+                    arguments: [keeperID, stamp, sectionID])
+                try enqueueExplicitly(db, table: "reading_section", rowID: sectionID)
+                repairs += 1
+            }
+            let memberships = try Row.fetchAll(
+                db,
+                sql: "SELECT id, post_id FROM reading_post WHERE reading_id = ? AND deleted_at IS NULL",
+                arguments: [loserID])
+            for membership in memberships {
+                let membershipID: String = membership["id"]
+                let keeperHasPost = try Bool.fetchOne(
+                    db,
+                    sql: """
+                        SELECT EXISTS (SELECT 1 FROM reading_post
+                        WHERE reading_id = ? AND post_id = ? AND deleted_at IS NULL)
+                        """,
+                    arguments: [keeperID, membership["post_id"] as String]) ?? false
+                if keeperHasPost {
+                    try db.execute(
+                        sql: "UPDATE reading_post SET deleted_at = ? WHERE id = ?",
+                        arguments: [stamp, membershipID])
+                } else {
+                    try db.execute(
+                        sql: "UPDATE reading_post SET reading_id = ? WHERE id = ?",
+                        arguments: [keeperID, membershipID])
+                }
+                try enqueueExplicitly(db, table: "reading_post", rowID: membershipID)
+                repairs += 1
+            }
+            // The loser retires. Its live children have all just moved, so
+            // the (still-active) cascade trigger finds nothing — the victim
+            // sweep is the §7 belt for anything it stamped anyway.
+            try db.execute(
+                sql: "UPDATE reading SET deleted_at = ?, updated_at = ? WHERE id = ?",
+                arguments: [stamp, stamp, loserID])
+            try enqueueExplicitly(db, table: "reading", rowID: loserID)
+            repairs += 1
+            repairs += try enqueueSuppressedCascadeVictims(
+                db, parent: ("reading", loserID, stamp),
+                arrivingDead: touched.arrivingDeadIDs)
+        }
+        // The designation converges to the keeper — but ONLY where it named
+        // a loser. One she deliberately moved to a different book is hers;
+        // the repair never overrides it. Plain UPDATE, never REPLACE:
+        // `sync_version` is the CAS token and must survive.
+        if let designated = try String.fetchOne(
+            db, sql: "SELECT value FROM setting WHERE key = 'daily_journal_book'"),
+           candidates.dropFirst().contains(designated) {
+            try db.execute(
+                sql: "UPDATE setting SET value = ? WHERE key = 'daily_journal_book'",
+                arguments: [keeperID])
+            try enqueueExplicitly(db, table: "setting", rowID: "daily_journal_book")
+            repairs += 1
+        }
         return repairs
     }
 
@@ -507,7 +619,13 @@ extension SyncEngine {
     /// own tombstone did not arrive in this batch. Mirrors Triggers.swift's
     /// cascade graph exactly; a container's stamped blocks recurse one level
     /// into the block cascade (same stamp throughout).
-    private func enqueueSuppressedCascadeVictims(
+    ///
+    /// Internal (not private) since pre-13u Act 0: the furniture repairs —
+    /// the Journal keeper above and the sample-library dedupe in
+    /// `SampleLibraryDedupe.swift` — mint parent tombstones of their own
+    /// inside apply mode, and this sweep is what keeps their cascades'
+    /// victims reaching the outbox (SyncSpec §7).
+    func enqueueSuppressedCascadeVictims(
         _ db: Database,
         parent: (table: String, rowID: String, stamp: String),
         arrivingDead: [String: Set<String>]
