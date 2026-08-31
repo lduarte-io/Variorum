@@ -227,7 +227,7 @@ scheduled is in exactly one row below.** Nothing is in both.
 | **4.5d** | The keyboard bar's geometry | ✅ | ✅ · **fix round DONE 2026-08-30** — and its finding was that **13 of 14 fixes already existed uncommitted**, so the right act was to fix nothing |
 | **5** | **The shelf layout** R26/R27/R27b — her twice-stated complaint — **plus her two live refinements** (one-line box; the writing room made a pinned guarantee across 2,408 states) | ✅ | ✅ |
 | **6a** | **The Block History twin** — closes the **deleted-take dark window** (deleted takes were invisible *and* un-restorable on the phone) | ✅ | ✅ |
-| **—** | **PL-10(b)** the duplicate-book-name guard — found a real bug: **two books could share one name through rename** | ✅ | ✅ (was 4.5d's) |
+| **—** | **PL-10(b)** the duplicate-book-name guard — the phone had zero sites where the Mac gates at five. **A UI courtesy gate, NOT a data defect** (author, 2026-08-30; no uniqueness exists on `reading.name`) | ✅ | ✅ (was 4.5d's) |
 | **—** | **The handback checklist**, actually run — 13l's four all landed; **nothing returned to mobile** | ✅ | n/a |
 | **—** | **The mobile app's FIRST architecture review** — 0 BLOCKER · 2 MAJOR · 4 MINOR · 2 NIT | ✅ | n/a (it *is* a review) |
 | **—** | **The archive/trash design session** — 4 IA options; **she ruled "Two rooms"** | ✅ | n/a |
