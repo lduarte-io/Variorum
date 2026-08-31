@@ -540,6 +540,83 @@ struct Phase13pControllerTests {
         #expect(w.dialsBox.value.mode == .auto, "and the dial never moved")
     }
 
+    // MARK: - R-pre13u-4/5: the nudge brain's legs + the VERIFIED escrow
+
+    /// The tier truth table — ONE brain both platforms consult (her
+    /// rider: "Both platforms invoke the same nudge brain"). The escrow
+    /// leg counts ONLY verified-landed; unknown facts claim no tier.
+    @Test func theLegsTierNeverCountsAnUnverifiedEscrow() {
+        func legs(
+            passphrase: Bool = false, recovery: Bool = false,
+            escrow: Bool? = nil, unknown: Bool = false
+        ) -> ProtectionLegs {
+            ProtectionLegs(
+                hasPassphraseWrap: passphrase, hasRecoveryWrap: recovery,
+                escrowVerifiedLanded: escrow, storeCustodyGated: false,
+                factsUnknown: unknown)
+        }
+        #expect(legs().tier == .exposed,
+                "Auto + no secrets + no verified escrow = only this device opens the work")
+        #expect(legs(escrow: nil).tier == .exposed,
+                "an UNVERIFIED escrow (nil — never checked) counts for NOTHING")
+        #expect(legs(escrow: false).tier == .exposed,
+                "an ON dial whose item did not verifiably land counts for nothing either")
+        #expect(legs(escrow: true).tier == .covered, "the verified net covers")
+        #expect(legs(passphrase: true).tier == .covered)
+        #expect(legs(recovery: true).tier == .covered)
+        #expect(legs(unknown: true).tier == .unknown,
+                "an unreadable sidecar claims NO tier — the nudge stays quiet (P1/P11)")
+        // The ways-back-in line composes from the same brain.
+        #expect(ProtectionCopy.waysBackInLine(legs(escrow: true))
+                    .contains("iCloud Keychain"))
+        #expect(!ProtectionCopy.waysBackInLine(legs(escrow: false))
+                    .contains("iCloud Keychain"),
+                "the pane never lists a net that did not verifiably land")
+    }
+
+    /// R-pre13u-4's escrow leg + R-pre13u-5's instrument: VERIFIED-LANDED
+    /// means the reconcile READ THE ITEM BACK equal to the key in hand —
+    /// a write's own success is never the proof (the 13p-fix lesson on
+    /// the safety net escrow becomes post-#82).
+    @Test func reconcileVerifiesTheEscrowItemReadsBackNeverAssumesTheWrite() async throws {
+        // Fresh write: verified by the read-back, not by the save's word.
+        let w = world(dials: ProtectionDials(mode: .auto, escrowOn: true))
+        #expect(w.controller.escrowVerifiedLanded == nil, "unknown until a reconcile runs")
+        await w.controller.reconcile()
+        let storeID = try #require(w.envelopeBox.value?.storeID)
+        #expect(w.backing.escrow[storeID] == w.key)
+        #expect(w.controller.escrowVerifiedLanded == true,
+                "the fresh write was READ BACK equal to the key")
+
+        // Steady state (the author-run check's green): the item already
+        // matches — the reconcile reads its own item back, writes nothing.
+        await w.controller.reconcile()
+        #expect(w.controller.escrowVerifiedLanded == true)
+
+        // A refused write is a NOT-landed net, said so.
+        let refused = world(dials: ProtectionDials(mode: .auto, escrowOn: true))
+        refused.backing.savesSucceed = false
+        await refused.controller.reconcile()
+        #expect(refused.controller.escrowVerifiedLanded == false,
+                "a net that could not land never reads as covered")
+        #expect(refused.controller.escrowLandingFailed)
+
+        // Dial OFF: no leg exists — false, never 'unknown, maybe covered'.
+        let off = world(dials: ProtectionDials(mode: .auto, escrowOn: false))
+        await off.controller.reconcile()
+        #expect(off.controller.escrowVerifiedLanded == false)
+        #expect(off.controller.legs.tier == .exposed,
+                "Auto with everything off IS the exposed state R-pre13u-4 hardens the copy for")
+
+        // Unreadable sidecar: the arm skips whole — the reading is left
+        // untouched (P1's refusal composes with the verification).
+        let unreadable = world(dials: ProtectionDials(mode: .auto, escrowOn: true))
+        unreadable.envelopeBox.unreadable = true
+        await unreadable.controller.reconcile()
+        #expect(unreadable.controller.escrowVerifiedLanded == nil)
+        #expect(unreadable.controller.legs.tier == .unknown)
+    }
+
     /// P10, THE RED-ON-OLD PIN. `setPassphrase` used to snapshot the
     /// envelope BEFORE suspending in the Argon2id derivation (hundreds of
     /// ms), then write the whole snapshot back — so a recovery wrap landed

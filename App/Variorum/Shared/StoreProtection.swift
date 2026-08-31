@@ -196,6 +196,55 @@ nonisolated enum StandardNudgePolicy {
     }
 }
 
+// MARK: - The ways back in, as FACTS (R-pre13u-4's detection half)
+
+/// **THE ONE NUDGE BRAIN — R-pre13u-4 (pre-13u Act 9), her ruling:
+/// "state aware nudge, but keep in mind that the phone has to invoke the
+/// same nudge and the language maybe should be 'this device'."** Which
+/// recovery legs actually exist, and the tier that follows. DETECTION
+/// only — the faces are Act 10's (Mac) and the mobile parity line's
+/// (phone); both platforms consult THIS brain so the tier can never
+/// diverge (her rider: "Both platforms invoke the same nudge brain").
+///
+/// The escrow leg is VERIFIED-LANDED, never assumed: it reads true only
+/// when the launch reconcile confirmed the iCloud item reads back equal
+/// to the key in hand (`ProtectionController.escrowVerifiedLanded`) — a
+/// dial that is merely ON, or a write that merely returned success,
+/// counts for nothing (the 13p-fix lesson, applied to the safety net).
+nonisolated struct ProtectionLegs: Equatable, Sendable {
+    var hasPassphraseWrap: Bool
+    var hasRecoveryWrap: Bool
+    /// nil = not verified this launch (no reconcile with the key in hand
+    /// has run yet) — treated as NOT a leg, because an unverified net is
+    /// exactly what must never count as one.
+    var escrowVerifiedLanded: Bool?
+    /// The at-open mode's own same-device leg (informational for the
+    /// ways-back-in listing; a demanded mode implies a passphrase wrap,
+    /// so the TIER never rides on this alone).
+    var storeCustodyGated: Bool
+    /// True while the sidecar is present-but-unreadable (P1/P11): the
+    /// wrap facts are UNKNOWN, and no tier may be claimed from unknowns.
+    var factsUnknown: Bool = false
+
+    enum Tier: Equatable, Sendable {
+        /// Any real leg exists — today's gentle nudge and cadence stand.
+        case covered
+        /// Auto + no secrets + escrow not verifiably landing: ONLY this
+        /// device opens the work. The hardened plain-truth copy renders
+        /// (never a modal, never a gate; cadence unchanged — her ruling).
+        case exposed
+        /// The sidecar is unreadable — nothing honest can be claimed;
+        /// the nudge stays quiet (the P1/P11 suppression).
+        case unknown
+    }
+
+    var tier: Tier {
+        if factsUnknown { return .unknown }
+        return (hasPassphraseWrap || hasRecoveryWrap || escrowVerifiedLanded == true)
+            ? .covered : .exposed
+    }
+}
+
 // MARK: - The honesty grammar (placeholder voice, honest content; 13s re-voices)
 
 nonisolated enum ProtectionCopy {
@@ -380,6 +429,40 @@ nonisolated enum ProtectionCopy {
         "Your settings are locked down — and a scheduled plain-text export re-opens "
         + "the door they closed: every note, readable, on a timer, in the folder you "
         + "picked. Turn it on only if that trade is one you mean."
+
+    // R-pre13u-4: the EXPOSED tier's hardened plain-truth copy —
+    // DEVICE-NEUTRAL by her rider ("the language maybe should be 'this
+    // device'"): the phone invokes the same brain and the same words.
+    // Functional copy for Act 10's faces to render; 13s re-voices. Never
+    // a modal, never a gate — the cadence numbers are untouched.
+    static let exposedNudgeHeadline =
+        "Right now, only this device can open your work."
+    static let exposedNudgeBody =
+        "No passphrase is set, no recovery phrase is written down, and no "
+        + "iCloud Keychain copy has verifiably landed — so if this device is "
+        + "lost or broken, your writing goes with it. Two minutes fixes that: "
+        + "set a passphrase (the recovery phrase appears on the same screen), "
+        + "or just take the recovery phrase."
+    /// The Encryption pane's standing "Ways back in" line (R-pre13u-4:
+    /// "counting the actual legs") — composed from the SAME brain, so the
+    /// pane and the nudge can never disagree about what exists.
+    static func waysBackInLine(_ legs: ProtectionLegs) -> String {
+        if legs.factsUnknown {
+            return "Ways back in: unknown — this library's key file exists "
+                + "but can't be read right now."
+        }
+        var existing: [String] = []
+        if legs.storeCustodyGated { existing.append("this device's \(biometryName) unlock") }
+        if legs.hasPassphraseWrap { existing.append("your encryption passphrase") }
+        if legs.hasRecoveryWrap { existing.append("your recovery phrase") }
+        if legs.escrowVerifiedLanded == true {
+            existing.append("the verified copy in your iCloud Keychain")
+        }
+        guard !existing.isEmpty else {
+            return "Ways back in: none beyond this device — see above."
+        }
+        return "Ways back in: " + existing.joined(separator: " · ") + "."
+    }
 
     // The Standard nudge (the two-offer shape, her amendment).
     static let nudgeHeadline = "Your library is encrypted. Two minutes makes it recoverable."

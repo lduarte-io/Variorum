@@ -24,6 +24,7 @@
 
 import Foundation
 import Observation
+import os
 import VariorumCore
 
 @MainActor
@@ -48,6 +49,9 @@ final class ProtectionController {
 
     private let configuration: Configuration
     private let guardSeam: StoreKeyGuard
+    /// R-pre13u-5: the escrow reconcile's Console-side evidence line rides
+    /// this (the author-run check reads it in Console/log stream).
+    private let logger = Logger(subsystem: "io.lduarte.Variorum", category: "protection")
     private var gate: StoreLaunchGate { configuration.gate }
     private var scope: String { configuration.scope }
 
@@ -71,6 +75,29 @@ final class ProtectionController {
     /// -34018) — the pane says so instead of letting the dial imply a
     /// copy that does not exist.
     private(set) var escrowLandingFailed = false
+    /// R-pre13u-4 (pre-13u Act 9) — ESCROW, VERIFIED-LANDED, never
+    /// assumed: true only when the launch reconcile READ the iCloud item
+    /// BACK equal to the key in hand (a dial that is ON, or a write that
+    /// returned success, counts for nothing — the 13p-fix lesson applied
+    /// to the safety net). nil until a reconcile with the key in hand has
+    /// run this launch; false when the dial is off, the item mismatches,
+    /// or a fresh write could not be read back. This observable is BOTH
+    /// the nudge brain's escrow leg AND the author-run escrow check's
+    /// instrument (R-pre13u-5); the reconcile logs the same fact for
+    /// Console-side confirmation.
+    private(set) var escrowVerifiedLanded: Bool?
+
+    /// R-pre13u-4: the ONE nudge brain's inputs, projected (the faces —
+    /// Act 10's pane and nudge, the phone's parity twin — read THIS; the
+    /// tier can never diverge between platforms because both read it).
+    var legs: ProtectionLegs {
+        ProtectionLegs(
+            hasPassphraseWrap: hasPassphraseWrap,
+            hasRecoveryWrap: hasRecoveryWrap,
+            escrowVerifiedLanded: escrowVerifiedLanded,
+            storeCustodyGated: dials.mode == .biometric,
+            factsUnknown: envelopeUnreadable)
+    }
 
     /// The resident key under the DEMANDED modes (adopted at unlock,
     /// dropped at lock). Under Auto the Keychain releases on demand and
@@ -567,7 +594,13 @@ final class ProtectionController {
                     escrowOn: escrowOn, residentKey: resident,
                     gate: gate, guardSeam: guardSeam, storeURL: storeURL)
             }.value
-            if let outcome { escrowLandingFailed = outcome }
+            if let outcome {
+                escrowLandingFailed = outcome.landingFailed
+                escrowVerifiedLanded = outcome.verifiedLanded
+                // R-pre13u-5: the author-run check's Console-side fact —
+                // "the reconcile reads its own item back" vs "re-writes".
+                logger.info("escrow reconcile: dial \(escrowOn ? "ON" : "OFF", privacy: .public) · item read back == current key: \(String(describing: outcome.verifiedLanded), privacy: .public) · wrote this pass: \(outcome.wrotePass, privacy: .public)")
+            }
             // P2: the escrow arm can set a foreign sidecar aside and mint
             // a fresh envelope; the projection (read above, BEFORE the
             // arm) follows the disk it just changed.
@@ -576,14 +609,27 @@ final class ProtectionController {
         refreshNotices(now: now)
     }
 
+    /// The reconcile's escrow reading — landing honesty + the R-pre13u-4
+    /// VERIFICATION fact (`wrotePass` feeds the author-check log line:
+    /// "reads its own item back" vs "re-writes").
+    nonisolated struct EscrowReconcileOutcome: Sendable {
+        var landingFailed: Bool
+        var verifiedLanded: Bool?
+        var wrotePass: Bool = false
+    }
+
     /// The reconcile's escrow housekeeping, off-main (ladder R2-m2) —
-    /// byte-identical semantics to the inline arm it replaces. Returns the
-    /// new `escrowLandingFailed` reading; nil = leave it untouched (the
-    /// ON-arm-with-no-key case, exactly as before).
+    /// byte-identical landing semantics to the inline arm it replaced,
+    /// plus the R-pre13u-4 verification leg: whatever this pass did, the
+    /// last word is a READ-BACK comparing the item to the key in hand —
+    /// a write's success is never proof (the 13p-fix lesson, applied to
+    /// the safety net escrow becomes post-#82). nil = leave every
+    /// projection untouched (the no-key and unreadable-sidecar cases,
+    /// exactly as before).
     nonisolated private static func reconcileEscrowOffMain(
         escrowOn: Bool, residentKey: StoreKey?,
         gate: StoreLaunchGate, guardSeam: StoreKeyGuard, storeURL: URL?
-    ) -> Bool? {
+    ) -> EscrowReconcileOutcome? {
         if escrowOn {
             guard let key = residentKey ?? guardSeam.loadAuto() else { return nil }
             // P1 (pre-13u Act 9) — THE LAUNCH-TIME OVERWRITE, closed: this
@@ -602,14 +648,25 @@ final class ProtectionController {
                 try? gate.saveEnvelope(
                     envelope, storeURL ?? URL(fileURLWithPath: "/dev/null"))
             }
-            if guardSeam.loadEscrow(envelope.storeID) != key {
+            if guardSeam.loadEscrow(envelope.storeID) == key {
+                // The steady state the author-run check looks for: the
+                // reconcile READ ITS OWN ITEM BACK, nothing re-written.
+                return EscrowReconcileOutcome(
+                    landingFailed: false, verifiedLanded: true, wrotePass: false)
+            }
+            guard guardSeam.saveEscrow(key, envelope.storeID) else {
                 // The outcome feeds the dial's honesty line: an ON dial
                 // whose item cannot land must SAY so (the Q3 codesigned
-                // finding — no keychain identity in today's signing
-                // refuses the write).
-                return !guardSeam.saveEscrow(key, envelope.storeID)
+                // finding's class).
+                return EscrowReconcileOutcome(
+                    landingFailed: true, verifiedLanded: false, wrotePass: true)
             }
-            return false
+            // VERIFIED-LANDED means the fresh write READS BACK — never the
+            // write's own word for it.
+            return EscrowReconcileOutcome(
+                landingFailed: false,
+                verifiedLanded: guardSeam.loadEscrow(envelope.storeID) == key,
+                wrotePass: true)
         } else {
             // The dial is OFF: a leftover item (a crashed flip) goes — but
             // only OUR OWN (ladder R1-m1): a FOREIGN sidecar's storeID
@@ -621,7 +678,9 @@ final class ProtectionController {
                envelope.belongs(to: key) {
                 guardSeam.deleteEscrow(envelope.storeID)
             }
-            return false
+            // No leg exists with the dial off — false, not nil (the brain
+            // must not read an off dial as "unknown, maybe covered").
+            return EscrowReconcileOutcome(landingFailed: false, verifiedLanded: false)
         }
     }
 
