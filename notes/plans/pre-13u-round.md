@@ -2346,14 +2346,21 @@ render-don't-re-derive (§9c item 3) binds every surface below.
    `theIndicatorRendersOnlyWhileTheChoiceIsUnmade` +
    `theIndicatorCopyNamesTheLockAndKeysNeverEncryptionOff`). RootView gained the
    defaulted `protection:` param; VariorumApp passes `bootstrap.protection`.
-8. **The ceremonies' copy — NOT STARTED.** Plan: PassphraseSetSheet gains
-   `var lockMoment: Bool = false`; the pane's `openSetSheet()` sets it true only when
-   summoned by a pending DEMANDED act; renders `ProtectionShapes.lockMomentFraming`.
-   EncryptionViews setup step 1 gains `ProtectionShapes.syncSignupFraming` (the ratified
-   sync sentence + device keystone) after `setupIntro`; the enrolled section's "This
-   device holds your encryption keys." line gains `deviceAsPowerfulAsPassphrase` beside
-   it. Verbatim carriage pinned by the explainer pin (piece 4) or its own copy pin.
-9. **The tutorial privacy chapter alignment (sixth wave (b)) — NOT STARTED.** Plan:
+8. **The ceremonies' copy — DONE (189c69c).** The set sheet renders `lockMomentFraming` ONLY when a
+   demanded pick summoned it; setup step 1 carries `syncSignupFraming`; the enrolled
+   section states the device keystone. Verbatim carriage is piece 4's keystone pin.
+9. **The tutorial privacy chapter alignment (sixth wave (b)) — DONE.** Content-only,
+   two lessons stay two (the contract's SHORT rule): the spare-key paragraph now
+   teaches the COUPLING (asking modes don't offer the spare; her why-sentence's logic)
+   + spare-key-is-a-key + never-pulls-from-the-server; the strictest-chain paragraph
+   drops the stale "with the iCloud copy off as well" (the shape carries no spare);
+   lesson 2 gains the sync leg with the ratified syncSentence VERBATIM (composed from
+   the brain) + the recipes in one breath; rewritten paragraphs shifted to "this
+   device" (full neutrality is bounded by the one-brain assertions, which interpolate
+   per-platform — recorded). The contract suite green 3/3. The MOBILE lesson checked:
+   it never names a spare under asking modes — no drift, no edit. The field-guide
+   RE-SEED stays the closeout's obligation. *(Superseded planning text below kept for
+   the audit trail:)* Plan:
    content-only edits to `TutorialSeeder.swift`'s two privacy lessons (~line 1201/1264):
    the spare-key paragraph updates to the COUPLING truth (asking modes don't offer the
    spare — today it says "Locked-down turns it off on purpose", now true of every asking

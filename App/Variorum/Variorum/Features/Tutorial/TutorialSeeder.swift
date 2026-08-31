@@ -1234,13 +1234,18 @@ enum TutorialSeeder {
             + "dials; the dials rule \u{2014} move one by hand and the pane "
             + "says so instead of pretending you picked a preset.",
 
-            "One dial decides whether a SPARE key exists. With the iCloud "
-            + "Keychain copy on, a copy of your key rides your iCloud "
-            + "Keychain, so signing into iCloud on a new device can still "
-            + "unlock your library. With it off, the key stays only on your "
-            + "enrolled devices. Locked-down turns it off on purpose: a "
-            + "spare with no fingerprint on it is a way around the gate you "
-            + "just asked for.",
+            // pre-13u ninth wave (memo §4 + §1's corollary): the coupling
+            // truth + spare-key-is-a-key, taught where the dial is taught.
+            "One dial decides whether a SPARE key exists — and it follows "
+            + "the mode. With the spare on, a copy of your key rides your "
+            + "iCloud Keychain: signing into iCloud on a new device can "
+            + "open a copy of your library. The spare is a key — never a "
+            + "backup, never the passphrase — and it can never pull your "
+            + "writing from the server. The asking modes don't offer it at "
+            + "all: anyone who has your computer password has your iCloud, "
+            + "so a spare there would be a way around the gate you just "
+            + "asked for. Your choice comes back when you return to "
+            + "opening silently.",
 
             "The passphrase is set in that same pane \u{2014} and the moment "
             + "you set one, your recovery phrase (twelve words) appears on "
@@ -1274,13 +1279,25 @@ enum TutorialSeeder {
 
             "Turn the dials up and the chain gets SHORTER, deliberately. "
             + "Asking for the passphrase at every open means nothing on this "
-            + "Mac opens the library silently \u{2014} so with the iCloud "
-            + "copy off as well, forgetting your passphrase without the "
-            + "twelve words written down IS enough to lose your writing. "
-            + "That is not a flaw in the setting; it is the setting, and it "
-            + "is the right one for some people. Settings \u{25B8} Protection "
-            + "states the current chain under whichever mode you are on, and "
-            + "it updates as you move the dials.",
+            + "device opens the library silently \u{2014} and the iCloud "
+            + "spare isn't kept in that shape \u{2014} so forgetting your "
+            + "passphrase without the twelve words written down IS enough "
+            + "to lose your writing. That is not a flaw in the setting; it "
+            + "is the setting, and it is the right one for some people. "
+            + "Settings \u{25B8} Protection leads with your ways back in, "
+            + "kept current as you move the dials.",
+
+            // pre-13u ninth wave: the sync leg + the ratified tier
+            // sentence (VERBATIM from the one brain) + the recipes in one
+            // breath — prose-lite, the memo's teaching aligned here.
+            "If sync is on, the chain grows its longest link: sign into "
+            + "your account on any device, type your passphrase (or the "
+            + "twelve words), and everything comes back, current. "
+            + ProtectionShapes.syncSentence
+            + " And the recipes read one way everywhere: any copy of your "
+            + "library opens with any one key; an unlocked, enrolled "
+            + "device is as powerful as your passphrase; your iCloud "
+            + "password alone opens nothing.",
 
             "Notice what that list does not contain: another computer. "
             + "\(ProtectionCopy.oneDeviceNote)",
