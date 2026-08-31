@@ -135,8 +135,13 @@ nonisolated enum CapabilityRegistry {
     /// pool editors that carry no mode at all. Whatever surface holds the
     /// keyboard is a surface ⌘B can act on, which is exactly why the door
     /// should not be grey there.
+    /// Wave 2c: READ is the one mode with NO editable surface anywhere in
+    /// it (the projection tier, P-3) — the family greys there honestly
+    /// rather than rendering enabled over nothing (the enabled-into-nil
+    /// class). INDEX keeps the TOC's truth: its expanded row edits.
     private static let editableText: @Sendable (CapabilityContext) -> Capability.Availability = { ctx in
-        ctx.writeEditorAttached || ctx.takesBoardAttached || ctx.mode != nil
+        ctx.writeEditorAttached || ctx.takesBoardAttached
+            || (ctx.mode != nil && ctx.mode != .read)
             ? .act : .unavailable
     }
 
@@ -537,7 +542,7 @@ nonisolated enum CapabilityRegistry {
             id: .renameLens, verb: "Rename Lens…", scope: .post,
             doors: [.contextMenu],
             shortcutLabel: nil, takesAccess: nil,
-            unavailableNote: "Lenses are renamed from their column header in Lenses (⌘3).",
+            unavailableNote: "Lenses are renamed from their column header in Lenses (⌘5).",
             availability: { ctx in ctx.mode == .lenses ? .act : .unavailable }),
         // 13b 4D (N32(c) — S4-15's trace made right): block TAGGING gets
         // doors where scraps live. `BlockTagAssignmentSheet` (11a A8) was
@@ -1165,9 +1170,9 @@ nonisolated enum CapabilityRegistry {
 
         // MARK: Modes + app scope
         Capability(
-            id: .switchMode, verb: "Switch Mode (⌘1–⌘6)", scope: .post,
+            id: .switchMode, verb: "Switch Mode (⌘1–⌘8)", scope: .post,
             doors: [.menuBar],
-            shortcutLabel: "⌘1–6", takesAccess: nil,
+            shortcutLabel: "⌘1–8", takesAccess: nil,
             unavailableNote: "Open a note first — the modes live inside a note.",
             availability: { ctx in ctx.mode != nil ? .act : .unavailable }),
         // MARK: The navigation core (13f batch 3 — W3/A27 + W16)
@@ -1320,7 +1325,7 @@ nonisolated enum CapabilityRegistry {
             id: .openPeerPost, verb: "Open", scope: .post,
             doors: [.surface],
             shortcutLabel: nil, takesAccess: nil,
-            unavailableNote: "Peer columns live on the Compare board (\u{2318}4).",
+            unavailableNote: "Peer columns live on the Compare board (\u{2318}6).",
             availability: { ctx in ctx.mode == .compare ? .act : .unavailable }),
         // 13f batch 5 — W23. Her round-10 item 4: *"'duplicate as version'
         // should be a button you can click, not just an FYI … that nicely

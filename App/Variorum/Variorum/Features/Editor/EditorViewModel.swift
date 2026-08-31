@@ -2392,7 +2392,7 @@ final class EditorViewModel {
                         _ = try ops.setLensChoice(lens: lens.id, block: blockID, variant: variantID)
                     }
                 }
-                showStatus("Saved — “\(name)” remembers these choices (open it in Lenses, ⌘3).")
+                showStatus("Saved — “\(name)” remembers these choices (open it in Lenses, ⌘5).")
             } catch {
                 showOperationError(error)
             }

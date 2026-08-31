@@ -18,13 +18,27 @@
 
 import Foundation
 
-/// The post detail's six modes (Sitting 9's row, minus Outline — retired
-/// into Compare at the Stage 4 kickoff, S4-3: Write · Takes · Lenses ·
-/// Compare · Blocks · Canvas). Raw values are the user-facing words —
-/// they also key the per-post mode memory (R79).
+/// The post detail's modes. Sitting 9's row minus Outline (retired into
+/// Compare at the Stage 4 kickoff, S4-3), PLUS the pre-13u Act 10 wave 2c
+/// pair (item 16, W8-1 — her rulings): **INDEX** ("obviously a need, seems
+/// more fundamental, let's put it in under Takes" — confirmed a NEW MODE
+/// TAB after Takes) and **READ** (the note READ surface, read-only,
+/// vertical/book-like — "that's the thing that notes have been missing
+/// relative to books, is the ability to read"). Read sits beside Index
+/// deliberately (implementer's recorded taste call): the row then reads
+/// as writing (Write · Takes), reading (Index · Read), comparing
+/// (Lenses · Compare), managing (Blocks · Canvas) — and Read's
+/// click-through lands in Index, so the neighbours are the pair.
+///
+/// Raw values are the user-facing words — they also key the per-post mode
+/// memory (R79). The ⌘1–⌘8 keys derive from THIS order (EditorCommands'
+/// ForEach), as do the sidebar rail and the masthead menu — one order,
+/// three renderers, no way to disagree.
 nonisolated enum PostMode: String, CaseIterable, Sendable {
     case write = "Write"
     case takes = "Takes"
+    case index = "Index"
+    case read = "Read"
     case lenses = "Lenses"
     case compare = "Compare"
     case blocks = "Blocks"

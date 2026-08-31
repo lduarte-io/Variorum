@@ -2730,4 +2730,12 @@ liveness through `PaneTextAuthority` only); P1 measured on the Sherlock corpus.
   Compare/Lenses/BookView surfaces). Build plan: (1) brains + core queries →
   (2) Index mode → (3) Read mode → (4) Blocks workbench → (5) Compare+Lenses →
   (6) tutorial + key sweep → item 18 verdict → full verification → records.
+- `8d11b05` — **BRAINS + QUERY LAYER: DONE.** `Shared/NoteIndexOutline` (pure
+  grouping: headings→sections on F-3's first-line letter; flat when headingless;
+  DRIFT PIN against `MarkdownRendering` so the cheap check and the one law can
+  never disagree silently) · core `Queries.blockWorkbench` + observation (item
+  16-C's per-row facts: takes/comments/lock/words/edited/tags, read-time
+  derived; `WorkbenchQueryTests` 3 green) · `FlowParagraph` HOISTED
+  BookView→`Core/Views` (hoist-at-next-touch; the Read mode is consumer #2;
+  every existing pin rode unmodified — the 3C proof shape).
 

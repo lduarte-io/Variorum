@@ -193,8 +193,8 @@ struct PostDetailView: View {
                                     Button(m.rawValue) { mode = m }
                                 }
                             }
-                            .help("This note's mode — Write · Takes · Lenses · Compare · "
-                                + "Blocks · Canvas (⌘1–⌘6)")
+                            .help("This note's mode — Write · Takes · Index · Read · "
+                                + "Lenses · Compare · Blocks · Canvas (⌘1–⌘8)")
                         }
                         // The masthead's inspector cluster, rendered FROM its
                         // door table (the `LibraryCatalogView.mastheadDoors`
@@ -227,6 +227,19 @@ struct PostDetailView: View {
             case .takes:
                 TakesBoardView(session: session, postID: postID)
                     .id("takes-\(postID)")
+            case .index:
+                // Wave 2c (item 16, W8-1): the block-TOC grown up — the
+                // standing index column beside the scroll-synced reading
+                // pane; arrives at the router's focused-block fact.
+                IndexModeView(session: session, postID: postID, onJump: { blockID in
+                    jump(to: blockID)
+                })
+                .id("index-\(postID)")
+            case .read:
+                // Wave 2c (item 16, W8-1): the read-only page — clicking a
+                // paragraph lands it in Index (the scrolled-open door).
+                ReadModeView(session: session, postID: postID)
+                    .id("read-\(postID)")
             case .lenses:
                 // Sitting 9 (R65/R86): the multi-column editor + lens
                 // machinery's one home — columns never share a surface
