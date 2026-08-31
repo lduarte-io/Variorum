@@ -924,3 +924,52 @@ prompting cycle; no cross-app level enforcement) plus answers to all seven §6 q
 findings (the free-page/WAL residue fix, the claims-table clauses, the visible-refusal replacement
 for the extinct pre-E2EE corner) — is **`notes/fragments-lockbox-reply-2026-08-31.md`**, written
 self-contained for the Fragments agent. She carries it; Batch A's hold lifts at her go.
+
+## CARRY ITEM (2026-08-31) — can a Fragments-only account ever enroll? (the passphrase-set ceremony question)
+
+**Provenance:** surfaced in the lockbox exchange ("some people will only use fragments"), carried by
+the author to the Variorum (pre-13u successor) architect the same night. Recorded here so it
+survives; NOT this round's build on either side. The suite-side facts below are the Variorum
+architect's, from canon.
+
+**The question, hers verbatim-faithful:** *"if fragments can't sign up and mint its own token,
+that's an issue for it, right? can i give fragments the ability to do that? or will it cause other
+issues?"* — plus the lockbox thread's sharper half: whether a Fragments-only account can set its
+suite passphrase anywhere outside the Variorum app; if not, a Fragments-only user can never enroll
+and therefore never lock.
+
+**Suite-side facts (Variorum canon, 14a/14b/14c/14d):**
+1. **Sign-up + tokens: ALREADY POSSIBLE without Variorum.** There is ONE stargazing account, whose
+   home and OAuth 2.1 issuer is the Variorum Supabase project; signups are OPEN with SMTP + branded
+   links (14d), and Fragments signs in DELEGATED through the suite issuer's browser flow. A
+   Fragments-only user can create the account and hold tokens today — IF Fragments' sign-in flow
+   surfaces the signup door. If it doesn't, that is a Fragments-side FACE fix over the same issuer,
+   not a suite change. **The forbidden shape is a second auth/account system** — that would
+   resurrect exactly what 14d retired ("there is a single stargazing account").
+2. **The vault EXISTS for new accounts** — per-user `key_vault` provisioning at signup was
+   generalized at 14c.
+3. **The passphrase-SET ceremony lives ONLY in Variorum today** — the answer to the lockbox
+   thread's question is currently NO. The ceremony is client-side crypto against the account's
+   RLS'd vault (Argon2id-derived wrap of the master key, BIP-39 recovery mint, CAS'd `revision`
+   writes — the 14b format); nothing SERVER-side prevents another client from performing it.
+4. Layer separation, so nothing gets conflated: the SUITE passphrase/vault (sync-payload E2EE,
+   14b) ≠ Variorum's store key (13p, device-bound per #82) ≠ Fragments' own at-rest lockbox (the
+   2026-08-31 reply above). The Fragments-only enrollment question concerns the FIRST layer only.
+
+**The roads (her design call — none is ruled):**
+- **(a) Fragments implements the SAME ceremony against the SAME vault, to a WRITTEN shared spec.**
+  Right if Fragments-only users are a real audience she wants enrolled/locked. Cost, named
+  honestly: a second implementation of the suite's most safety-critical custody flow — the
+  forked-brains drift class at suite scale. The mitigation is a FORMAT SPEC as a contract-file
+  deliverable (KDF params, wrap format, BIP-39 wordlist/derivation, the CAS discipline, and the
+  rotation/Replace-Keys semantics INCLUDING the new stale-copy recency-warning doctrine), so both
+  apps implement one written format and neither app's code is the de-facto spec. The Variorum side
+  owes that spec at her word (a future carry item; candidate moment: beside 13y's abuse brief).
+- **(b) Accept-and-state the degraded state:** Fragments-only users are unenrolled until they
+  first touch Variorum; Fragments' lockbox/journal-class behavior for the unenrolled must then be
+  DEFINED and honest (its side's call), never a silent difference.
+- **(c) A web-hosted ceremony on stargazing.tech is NOT recommended** — client-side crypto in a
+  browser is a different trust posture, and the v1 posture has no web app by ruling.
+
+**One-secret doctrine binds any road:** whatever sets the passphrase, both apps present ONE
+passphrase identity to the user — never a "Fragments passphrase" beside a "Variorum passphrase."
