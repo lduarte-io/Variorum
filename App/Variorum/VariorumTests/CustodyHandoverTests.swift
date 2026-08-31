@@ -82,11 +82,29 @@ struct CustodyHandoverTests {
     /// was altered" when something landed somewhere unreadable. Before the
     /// fix the seam returned a Bool, so this arm and a genuine refusal
     /// were the same sentence — on the family whose custody went missing.
+    ///
+    /// FULLY FAKED STORE (pre-13u Act 9, F1 — the state-dependent pin).
+    /// The earlier form drove `.keychain(custody: fake)`, which fakes the
+    /// TRANSITION only: its `load` is LIVE (`E2EELaunchKeyCache` → the
+    /// real `E2EEKeychainStorage`), and `setBiometricRequirement` guards
+    /// `store.load()` first — so on any machine without a readable plain
+    /// `e2ee-keys` item the fake seam was never consulted and the pin
+    /// went red on machine Keychain state. (Its green at 17g's close was
+    /// borrowed from the R3-1 drill's litter; the author's owed cleanup
+    /// turned it red.) A memberwise store consults nothing live — the pin
+    /// is about the SESSION's outcome→sentence mapping, and the factory's
+    /// transition mapping keeps its own pin above.
     @MainActor @Test func theE2EESurfaceNamesTheSymptomWhenAWriteLandsUnreadable() async {
+        let material = material()
         let session = EncryptionSession(
-            store: .keychain(custody: E2EECustodyStorage(
-                setGated: { _ in .wroteButUnreadable },
-                setPlain: { _ in .done })),
+            store: DeviceKeyStore(
+                load: { material },
+                save: { _ in true },
+                clear: {},
+                biometryAvailable: { true },
+                isBiometricGateOn: { false },
+                setBiometricGate: { _, _ in .wroteButUnreadable },
+                unlockWithBiometrics: { nil }),
             client: nil, signedIn: { true })
         await session.setBiometricRequirement(true)
         #expect(session.lastError == ProtectionCopy.wroteButUnreadable,
@@ -94,6 +112,12 @@ struct CustodyHandoverTests {
     }
 
     @Test func theE2EEGateTurnsOffOnlyWhenThePlainItemReadsBack() {
+        // R3-NIT rider (pre-13u Act 9): the `.done` arms of the real
+        // factory write the process-global `E2EELaunchKeyCache` — save and
+        // restore it so this test never leaks state into a neighbor.
+        let cacheBefore = E2EELaunchKeyCache.shared.value
+        defer { E2EELaunchKeyCache.shared.value = cacheBefore }
+
         let refusing = DeviceKeyStore.keychain(
             custody: E2EECustodyStorage(
                 setGated: { _ in .done },

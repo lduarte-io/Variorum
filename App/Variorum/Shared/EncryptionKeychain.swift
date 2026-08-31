@@ -303,7 +303,13 @@ nonisolated final class InMemoryKeyBacking: @unchecked Sendable {
 /// by every `.keychain()` store in the process (the session's and the sync
 /// provider's are the same custody by construction). Dies with the process
 /// — which is exactly what "unlock once per launch" means.
-nonisolated private final class E2EELaunchKeyCache: @unchecked Sendable {
+///
+/// Internal, not private, since the pre-13u custody batch (the 13p-fix
+/// ladder's R3-NIT rider): tests that drive the real `.keychain()` factory
+/// reach this process-global through the transition arms, so they must
+/// save/restore it around themselves — a leak here is cross-test order
+/// dependence. Production code outside this file never touches it.
+nonisolated final class E2EELaunchKeyCache: @unchecked Sendable {
     static let shared = E2EELaunchKeyCache()
     private let lock = NSLock()
     private var stored: DeviceKeyMaterial?
