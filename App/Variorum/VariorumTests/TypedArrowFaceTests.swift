@@ -113,6 +113,28 @@ struct TypedArrowFaceTests {
         }
     }
 
+    /// **The BURST case** (measured live with synthesized zero-gap
+    /// keystrokes): more text lands before the deferred pass runs. The
+    /// substitution is anchored at the typed pair, so it still lands and
+    /// everything typed after shifts with the 2-for-1 edit. RED on the
+    /// unanchored implementation, which read the live caret, saw "> ",
+    /// and declined.
+    @Test func aFastBurstStillEarnsItsArrow() async throws {
+        try await withEditor(seedBlocks: ["epsilon"]) { h in
+            let end = (h.documentText as NSString).length
+            // No pumps between keystrokes: the whole burst lands in one
+            // turn, exactly as a zero-gap synthesizer (or a very fast
+            // typist) delivers it.
+            h.type(" p ", at: end)
+            h.type("-")
+            h.type(">")
+            h.type(" q.")
+            pump()
+            #expect(h.documentText.contains("epsilon p \u{2192} q."))
+            await h.flush()
+        }
+    }
+
     @Test func longerDashRunsStayLiteralThroughTheFace() async throws {
         try await withEditor(seedBlocks: ["delta"]) { h in
             let end = (h.documentText as NSString).length

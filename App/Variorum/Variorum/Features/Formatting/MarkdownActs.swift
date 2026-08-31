@@ -291,26 +291,43 @@ enum MarkdownActs {
         // Only a lone typed terminator can complete a pair — a paste, a
         // find-replacement or an IME composition is not this gesture.
         guard typed == ">" || typed == "-", !textView.hasMarkedText() else { return }
+        // The pair's END, captured NOW: under a fast burst the next
+        // keystroke can land before the deferred pass runs, and a check
+        // against the LIVE caret would then read "> " and decline — a
+        // missed substitution under exactly the typing it exists for
+        // (measured with synthesized zero-gap keystrokes). The anchor makes
+        // the deferred pass ask about the pair where it LANDED; anything
+        // typed after it sits past the anchor and shifts automatically when
+        // the 2-for-1 replacement lands before it.
+        let anchor = textView.selectedRange().location
         RunLoop.main.perform { [weak textView] in
             guard let textView else { return }
             MainActor.assumeIsolated {
-                applyTypedArrowSubstitution(in: textView)
+                applyTypedArrowSubstitution(in: textView, pairEnd: anchor)
             }
         }
     }
 
     /// The deferred half: decide (the pure brain) and apply (the ordinary
     /// trio). Internal so the pins can drive it deterministically.
-    static func applyTypedArrowSubstitution(in textView: NSTextView) {
+    /// `pairEnd` is the UTF-16 offset just past the typed pair (defaulted
+    /// to the live caret for direct calls); the brain re-reads the document
+    /// there, so a beaten race — text deleted, the pair edited away —
+    /// simply declines.
+    static func applyTypedArrowSubstitution(
+        in textView: NSTextView, pairEnd: Int? = nil
+    ) {
         guard !textView.hasMarkedText() else { return }
         let caret = textView.selectedRange()
-        guard caret.length == 0, caret.location != NSNotFound else { return }
+        guard caret.location != NSNotFound else { return }
+        let end = pairEnd ?? caret.location
         let document = textView.string as NSString
-        guard caret.location <= document.length else { return }
-        let lines = document.lineRange(for: NSRange(location: caret.location, length: 0))
+        guard end >= 0, end <= document.length else { return }
+        let lines = document.lineRange(for: NSRange(location: max(0, end - 1), length: 0))
+        guard end >= lines.location, end <= lines.location + lines.length else { return }
         guard let sub = TypedArrows.substitution(
             line: document.substring(with: lines),
-            caret: caret.location - lines.location)
+            caret: end - lines.location)
         else { return }
         let range = NSRange(
             location: lines.location + sub.range.lowerBound, length: sub.range.count)
@@ -322,8 +339,9 @@ enum MarkdownActs {
         else { return }
         textView.replaceCharacters(in: range, with: sub.replacement)
         textView.didChangeText()
-        // AppKit leaves the selection at the end of the replaced text —
-        // immediately after the arrow, which is where typing continues.
+        // AppKit shifts any caret past the edit by the length delta itself;
+        // a caret exactly at the pair's end lands after the arrow, which is
+        // where typing continues.
     }
 
     // MARK: - K5: ⏎ continues a list
