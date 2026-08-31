@@ -680,6 +680,20 @@ struct TrayPanel: View {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
+    /// **The Act 10 item 1 rebuild.** Her screenshot showed the SECOND
+    /// section's header clipped to a sliver under a divider — the traced
+    /// class is the `List` section header itself: a plain macOS List
+    /// measures headers at a fixed height, and this panel's Leaving header
+    /// carries a title AND a multi-line explainer. The rebuild retires the
+    /// List for a ScrollView of calm cards (the W8-2 mockup grammar), where
+    /// headers are ordinary stacked views that cannot be clipped by a
+    /// header-height measurement — the mechanism dies by construction
+    /// (`TrayPanelShapeTests` pins the List's absence and the composition).
+    ///
+    /// Ordering (her "badly ordered / organized", judged in place under the
+    /// granted latitude): **LEAVING first** — what is counting down is what
+    /// she opened the tray for — then the takes fold, then ARCHIVED (kept
+    /// forever, no urgency, reads calmly below).
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -689,6 +703,7 @@ struct TrayPanel: View {
                     .lineLimit(1)
                 Spacer()
                 Button("Close") { close() }
+                    .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
             }
             // Ledger row 6: a receipt reads as a receipt. The two classes
             // are the model's (`TrayViewModel.Status`), and both colours are
@@ -705,32 +720,15 @@ struct TrayPanel: View {
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
             }
-            List {
-                // ── ARCHIVED (lifecycle row B1) ────────────────────────────
-                // Kept, forever, no clock, and now under its own header: her
-                // B2 ruling split archive from the Trash one level up for
-                // exactly this reason, and the pair blurs the same way inside
-                // a note.
-                Section(tokens.chromeLabel(TrayPath.archivedSection)) {
-                    if model.archived.isEmpty {
-                        empty(RecoveryCopy.trayNothingArchived(home))
-                    }
-                    ForEach(model.archived, id: \.blockID) { item in
-                        row(
-                            blockID: item.blockID, text: item.text,
-                            stamp: item.deletedAt, when: "archived", clock: nil,
-                            forever: true,
-                            help: "Kept out of the note, with no clock — Put back "
-                                + "returns it where it stood"
-                        ) {
-                            await model.putBackArchived(item.blockID)
-                        }
-                    }
-                }
-                // ── LEAVING (her G5 ruling) ────────────────────────────────
-                // The complete per-note pre-purge audit: blocks, takes, and
-                // the originals that have MOVED onto a family's clock.
-                Section {
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 6) {
+                    // ── LEAVING (her G5 ruling) ────────────────────────────
+                    // The complete per-note pre-purge audit: blocks, takes,
+                    // and the originals that have MOVED onto a family's
+                    // clock.
+                    CalmSectionHeader(
+                        tokens: tokens, title: TrayPath.leavingSection,
+                        detail: RecoveryCopy.trayLeavingExplainer(home))
                     if model.nothingIsLeaving {
                         empty(RecoveryCopy.trayNothingLeaving(home))
                     }
@@ -765,19 +763,30 @@ struct TrayPanel: View {
                     }
                     if model.deletedTruncated { truncation("deleted") }
                     if !model.takes.isEmpty { takesDisclosure }
-                } header: {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(tokens.chromeLabel(TrayPath.leavingSection))
-                        Text(tokens.chromeLabel(RecoveryCopy.trayLeavingExplainer(home)))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.faint)
-                            .lineLimit(3)
-                            .fixedSize(horizontal: false, vertical: true)
+                    // ── ARCHIVED (lifecycle row B1) ────────────────────────
+                    // Kept, forever, no clock, under its own header: her B2
+                    // ruling split archive from the Trash one level up for
+                    // exactly this reason, and the pair blurs the same way
+                    // inside a note.
+                    CalmSectionHeader(tokens: tokens, title: TrayPath.archivedSection)
+                        .padding(.top, 8)
+                    if model.archived.isEmpty {
+                        empty(RecoveryCopy.trayNothingArchived(home))
+                    }
+                    ForEach(model.archived, id: \.blockID) { item in
+                        row(
+                            blockID: item.blockID, text: item.text,
+                            stamp: item.deletedAt, when: "archived", clock: nil,
+                            forever: true,
+                            help: "Kept out of the note, with no clock — Put back "
+                                + "returns it where it stood"
+                        ) {
+                            await model.putBackArchived(item.blockID)
+                        }
                     }
                 }
+                .padding(.bottom, 8)
             }
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden)
         }
         .padding(12)
         // The panel lives in the INSPECTOR now (her C1 ruling), whose column
@@ -817,45 +826,47 @@ struct TrayPanel: View {
     }
 
     private func takeRow(_ take: Queries.TrayTake) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(TrayTakeFace.label(take))
-                .font(tokens.body)
-                .foregroundStyle(take.text.isEmpty ? tokens.muted : tokens.ink)
-                .lineLimit(2)
-            HStack(spacing: 8) {
-                Text(tokens.chromeLabel(TrayTakeFace.meta(
-                    take, now: session.now).joined(separator: " \u{B7} ")))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
-                    .lineLimit(1)
-                Spacer(minLength: 8)
-                Button(TrayPath.putBackVerb) {
-                    Task { await model.putBackTake(take.variantID) }
+        CalmCard(tokens: tokens) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(TrayTakeFace.label(take))
+                    .font(tokens.body)
+                    .foregroundStyle(take.text.isEmpty ? tokens.muted : tokens.ink)
+                    .lineLimit(2)
+                HStack(spacing: 8) {
+                    Text(tokens.chromeLabel(TrayTakeFace.meta(
+                        take, now: session.now).joined(separator: " \u{B7} ")))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.faint)
+                        .lineLimit(1)
+                    Spacer(minLength: 8)
+                    Button(TrayPath.putBackVerb) {
+                        Task { await model.putBackTake(take.variantID) }
+                    }
+                    .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary, compact: true))
+                    .help("Puts this take back exactly as it was — its label, its "
+                        + "place in the fan and its savepoints come back with it "
+                        + "(a take that was archived when it was deleted comes "
+                        + "back archived)")
+                    // The purge door, on the ONE surface a take has one (her G5
+                    // fourth-sitting addition). It confirms every time — no
+                    // don't-ask state exists anywhere in the app, and none may
+                    // be added (her round-10 ruling).
+                    Button(RecoveryCopy.deleteNowVerb, role: .destructive) {
+                        model.requestDeleteNowTake(take)
+                    }
+                    .buttonStyle(CalmButtonStyle(tokens: tokens, role: .danger, compact: true))
+                    .help("Ends this take's remaining days now. There is no putting "
+                        + "it back afterwards.")
                 }
-                .controlSize(.small)
-                .help("Puts this take back exactly as it was — its label, its "
-                    + "place in the fan and its savepoints come back with it "
-                    + "(a take that was archived when it was deleted comes "
-                    + "back archived)")
-                // The purge door, on the ONE surface a take has one (her G5
-                // fourth-sitting addition). It confirms every time — no
-                // don't-ask state exists anywhere in the app, and none may
-                // be added (her round-10 ruling).
-                Button(RecoveryCopy.deleteNowVerb, role: .destructive) {
-                    model.requestDeleteNowTake(take)
-                }
-                .controlSize(.small)
-                .help("Ends this take's remaining days now. There is no putting "
-                    + "it back afterwards.")
             }
         }
-        .padding(.vertical, 2)
     }
 
     private func empty(_ line: String) -> some View {
         Text(tokens.chromeLabel(line))
             .font(tokens.small)
             .foregroundStyle(tokens.muted)
+            .padding(.vertical, 2)
     }
 
     private func truncation(_ what: String) -> some View {
@@ -887,30 +898,29 @@ struct TrayPanel: View {
         clock: Int?, forever: Bool = false, note: String? = nil, help: String,
         putBack: @escaping () async -> Void
     ) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(TrayRowPreview.line(text))
-                .font(tokens.body)
-                .foregroundStyle(text?.isEmpty == false ? tokens.ink : tokens.muted)
-                .lineLimit(2)
-            HStack(spacing: 8) {
-                Text(tokens.chromeLabel(TrayRowFace.meta(
-                    note: note, stamp: stamp, when: when, clock: clock,
-                    forever: forever).joined(separator: " \u{B7} ")))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
-                    .lineLimit(1)
-                Spacer(minLength: 8)
-                Button(TrayPath.putBackVerb) { Task { await putBack() } }
-                    .controlSize(.small)
-                    .help(help)
+        // The reveal's mark rides the card's own selected grammar: a long
+        // list still answers "which one" (`RecoveryView`'s W10b idiom).
+        CalmCard(tokens: tokens, selected: model.revealBlockID == blockID) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(TrayRowPreview.line(text))
+                    .font(tokens.body)
+                    .foregroundStyle(text?.isEmpty == false ? tokens.ink : tokens.muted)
+                    .lineLimit(2)
+                HStack(spacing: 8) {
+                    Text(tokens.chromeLabel(TrayRowFace.meta(
+                        note: note, stamp: stamp, when: when, clock: clock,
+                        forever: forever).joined(separator: " \u{B7} ")))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.faint)
+                        .lineLimit(1)
+                    Spacer(minLength: 8)
+                    Button(TrayPath.putBackVerb) { Task { await putBack() } }
+                        .buttonStyle(CalmButtonStyle(
+                            tokens: tokens, role: .primary, compact: true))
+                        .help(help)
+                }
             }
         }
-        .padding(.vertical, 2)
-        // The reveal's mark: a long list still answers "which one"
-        // (`RecoveryView`'s own W10b idiom, which this surface inherits).
-        .listRowBackground(
-            model.revealBlockID == blockID
-                ? Color.accentColor.opacity(0.18) : Color.clear)
     }
 }
 
