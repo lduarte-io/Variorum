@@ -2312,28 +2312,24 @@ render-don't-re-derive (§9c item 3) binds every surface below.
    `checklistRows`; `unchosenIndicatorLabel/Detail` (NEVER "encryption off");
    `lockMomentFraming` + `syncSignupFraming` (the two ceremonies).
 2. **The coupling: DONE** (b177571, above).
-3. **The pane restructure (Mac ProtectionPane) — IN PROGRESS, NOT started in code beyond
-   the escrow section (which is DONE via b177571).** Remains: lead the pane with the live
-   checklist section (render `checklistRows(controller.legs, mode:)` + `tierSentence` +
-   `currentNeedState`); move the mode section's paragraph stack (oneDeviceNote,
-   openAppIsReadable) behind a ?-disclosure implemented as a NAMED extracted view (e.g.
-   `ModeHonestyDisclosure`) so the P47 pin can host it directly; keep modeSentence +
-   lossMath visible. **P47 RE-ANCHOR OWED:** `ProtectionSurfaceRenderTests
-   .theSettingsPaneShowsTheOpenAppIsReadableDisclosure` currently asserts those sentences
-   in the pane's dump — after the restructure, re-anchor with a supersession note naming
-   item 3's ?-disclosure ruling: assert the pane carries the door + still-visible
-   essentials, and host the extracted disclosure view directly for the moved sentences.
-   NEVER delete the pin.
-4. **The explainer tab — NOT STARTED.** Plan: `ProtectionExplainerView` (Shared, plain
-   styling) rendering: oneLaw → recipes (3 groups + the 2 new-device rows) → the shapes
-   table (3 rows, per-shape stops/what-ifs; Shape 3 marked not-offered) → the four
-   needStates → demandedFallbackTruth + spareKeyIsAKey + resetRoad + compoundWarning →
-   a pointer to the field guide's "keeping it private" chapter (BY NAME — a live
-   cross-scene door is a fork for the record; settings explains AND points, seventh wave
-   (iii)). Mount as a Settings TAB in `AppSettingsView` ("How Protection Works",
-   systemImage "questionmark.circle" or similar) + one pointer row in the ProtectionPane.
-   Add a P47-style pin hosting the explainer and asserting the keystones (verbatim
-   carriage — the render-don't-re-derive check).
+3. **The pane restructure (Mac ProtectionPane) — DONE.** The live checklist section
+   LEADS the pane (rows from `checklistRows` + `tierSentence` + the current-mode
+   what-you-need pair); the mode stack collapsed behind "More about what this protects"
+   — the NAMED `ModeHonestyDisclosure` view (oneDeviceNote + openAppIsReadable + the
+   demanded-arm `demandedFallbackTruth`); modeSentence + lossMath stay visible; the
+   explainer-pointer section closes the pane. **P47 RE-ANCHORED with the supersession
+   note** (`theSettingsPaneShowsTheOpenAppIsReadableDisclosure` asserts pane essentials
+   + the door, and hosts the disclosure view directly — never deleted); NEW pins
+   `thePaneLeadsWithTheLiveChecklist` + `theExplainerCarriesTheKeystonesVerbatim`.
+4. **The explainer tab — DONE.** `ProtectionExplainerView` (Shared, plain styling —
+   phone-legible) renders the whole memo brain: oneLaw → recipes + spare-key corollary →
+   opens-nothing-alone → the two new-device rows + resetRoad + the ratified syncSentence
+   → the three shapes as cards (Shape 3 badged "not offered") with per-shape
+   who-this-stops + BOTH what-ifs → the four needStates + demandedFallbackTruth +
+   compoundWarning → the field-guide pointer BY NAME (the live cross-scene door is
+   taste-fork 2). Mounted as Settings ▸ "How Protection Works";
+   `theExplainerCarriesTheKeystonesVerbatim` pins BOTH halves (byte-exact keystone
+   content + surface carriage) — piece 14's confirmation mechanism, already green.
 5. **T2 unknown rendering — PARTLY DONE** (the brain: tierSentence + escrowLegSentence +
    checklistRows' unknown arm, 232b090). Remains: the pane's checklist renders the
    unknown arm (piece 3); the phone sheet gains the standing ways-back-in line

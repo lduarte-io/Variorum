@@ -106,24 +106,99 @@ struct ProtectionSurfaceRenderTests {
             complete: { _ in })
     }
 
-    /// **The NAMED NON-GOAL is on the screen where the mode is chosen**
-    /// (R13p-16's honesty debt: a design that declined the per-note curtain
-    /// owes the sentence saying what is still readable). Red-on-old: delete
-    /// `Text(ProtectionCopy.openAppIsReadable)` from `ProtectionPane`'s mode
-    /// section and this fails — which nothing in the repo did before.
+    /// **The NAMED NON-GOAL stays reachable where the mode is chosen**
+    /// (R13p-16's honesty debt). **RE-ANCHORED (pre-13u Act 10 wave 2a —
+    /// item 3's ?-disclosure ruling, her amended copy doctrine):** the
+    /// pane's paragraph stack collapsed behind one DisclosureGroup, whose
+    /// collapsed content is absent from a composition dump — so this pin
+    /// now asserts BOTH halves: the pane carries the always-visible
+    /// essentials + the disclosure's DOOR, and the disclosure's NAMED
+    /// content view (hosted directly, as its expanded state renders it)
+    /// carries the moved sentences. The pin moved with the cheese; it was
+    /// never deleted.
     @Test func theSettingsPaneShowsTheOpenAppIsReadableDisclosure() async {
         let pane = ProtectionPane(controller: controller(), services: nil)
         await SurfaceComposition.host(pane, size: NSSize(width: 620, height: 800))
         let shown = SurfaceComposition.text(of: pane.body)
-        #expect(SurfaceComposition.carries(ProtectionCopy.openAppIsReadable, in: shown),
-                "the privacy pane no longer shows the named non-goal")
-        // The mode section's other two ruled sentences ride with it — the
-        // per-mode honesty grammar (R13p-5) and the one-device note — so a
-        // section that quietly stops rendering is caught whole.
+        // Always visible: the per-mode honesty grammar (R13p-5), the loss
+        // math, the checklist's tier sentence, and the disclosure door.
         #expect(SurfaceComposition.carries(ProtectionCopy.modeSentence(.auto), in: shown))
-        #expect(SurfaceComposition.carries(ProtectionCopy.oneDeviceNote, in: shown))
         #expect(SurfaceComposition.carries(
             ProtectionCopy.lossMath(.auto, escrowOn: true), in: shown))
+        #expect(shown.contains("More about what this protects"),
+                "the ?-door itself must be on the pane")
+        // The disclosure's content, exactly as its expanded state renders.
+        let depth = ModeHonestyDisclosure(mode: .auto)
+        await SurfaceComposition.host(depth, size: NSSize(width: 620, height: 400))
+        let disclosed = SurfaceComposition.text(of: depth.body)
+        #expect(SurfaceComposition.carries(ProtectionCopy.openAppIsReadable, in: disclosed),
+                "the named non-goal left the disclosure")
+        #expect(SurfaceComposition.carries(ProtectionCopy.oneDeviceNote, in: disclosed))
+        // Seventh wave (ii): the demanded arm carries the fallback truth.
+        let demandedDepth = ModeHonestyDisclosure(mode: .biometric)
+        let demandedShown = SurfaceComposition.text(of: demandedDepth.body)
+        #expect(SurfaceComposition.carries(
+            ProtectionShapes.demandedFallbackTruth, in: demandedShown))
+    }
+
+    /// **The live checklist is the pane's centerpiece** (item 3's sixth-wave
+    /// deliverable (a)): the actual legs render as rows, and T2's
+    /// three-value truth governs the tier sentence.
+    @Test func thePaneLeadsWithTheLiveChecklist() async {
+        let pane = ProtectionPane(controller: controller(), services: nil)
+        await SurfaceComposition.host(pane, size: NSSize(width: 620, height: 800))
+        let shown = SurfaceComposition.text(of: pane.body)
+        for row in ProtectionShapes.checklistRows(
+            ProtectionLegs(
+                hasPassphraseWrap: false, hasRecoveryWrap: false,
+                escrowVerifiedLanded: nil, storeCustodyGated: false),
+            mode: .auto
+        ) {
+            #expect(SurfaceComposition.carries(row.note, in: shown),
+                    "checklist row missing: \(row.name)")
+        }
+    }
+
+    /// **The explainer renders the memo brain — keystones VERBATIM**
+    /// (§9c item 3: almost-true paraphrase is the named failure mode; this
+    /// pin is the mechanism that catches it). Both halves: the keystone
+    /// CONTENT is byte-exact where the memo ruled words, and the explainer
+    /// SURFACE carries every one of them.
+    @Test func theExplainerCarriesTheKeystonesVerbatim() async {
+        // The ruled words themselves (the render-don't-re-derive floor).
+        #expect(ProtectionShapes.syncSentence ==
+            "Sync brings your writing back to any device — as long as you keep "
+            + "your passphrase or recovery phrase. We can never reset it for "
+            + "you: that's what end-to-end means.")
+        #expect(ProtectionShapes.deviceAsPowerfulAsPassphrase.hasPrefix(
+            "An unlocked, enrolled device is as powerful as your passphrase."))
+        #expect(ProtectionShapes.deviceAsPowerfulAsPassphrase.hasSuffix(
+            "guards this device — your passphrase is what lets a new device in."))
+        #expect(ProtectionShapes.spareKeyIsAKey.contains(
+            "a key — never a backup, never the passphrase"))
+        #expect(ProtectionShapes.spareKeyIsAKey.contains(
+            "It opens copies you already have, nothing more"))
+        #expect(ProtectionShapes.spareKeyIsAKey.contains(
+            "can never pull your writing from the server"))
+        #expect(ProtectionShapes.resetRoad.contains("Passphrase is still the path"))
+
+        let explainer = ProtectionExplainerView()
+        await SurfaceComposition.host(explainer, size: NSSize(width: 560, height: 460))
+        let shown = SurfaceComposition.text(of: explainer.body)
+        for keystone in [
+            ProtectionShapes.oneLaw,
+            ProtectionShapes.deviceAsPowerfulAsPassphrase,
+            ProtectionShapes.syncSentence,
+            ProtectionShapes.spareKeyIsAKey,
+            ProtectionShapes.resetRoad,
+            ProtectionShapes.compoundWarning,
+            ProtectionShapes.demandedFallbackTruth,
+            ProtectionShapes.newDeviceAdoptCopy,
+            ProtectionShapes.newDeviceSyncEnroll,
+        ] {
+            #expect(SurfaceComposition.carries(keystone, in: shown),
+                    "keystone missing from the explainer: \(keystone.prefix(48))…")
+        }
     }
 
     /// The locked lobby's DEAD END says so instead of rendering an empty room.

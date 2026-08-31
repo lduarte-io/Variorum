@@ -171,6 +171,10 @@ struct ProtectionPane: View {
 
     var body: some View {
         Form {
+            // Item 3's CENTERPIECE (her sixth-wave escalation): the LIVE
+            // ways-back-in checklist leads the pane — the actual legs this
+            // device/account has right now, truthfully, before any dial.
+            checklistSection
             presetSection
             modeSection
             escrowSection
@@ -179,6 +183,7 @@ struct ProtectionPane: View {
             }
             passphraseSection
             reminderSection
+            explainerPointerSection
         }
         .formStyle(.grouped)
         .task { await services?.encryption.refresh() }
@@ -190,6 +195,63 @@ struct ProtectionPane: View {
         }
         .sheet(isPresented: $resetSheetShown) {
             PassphraseResetSheet(controller: controller) { resetSheetShown = false }
+        }
+    }
+
+    // MARK: The live checklist (item 3's centerpiece)
+
+    /// The actual legs this device/account has RIGHT NOW — present/absent/
+    /// unknown, truthfully (ONE brain: `ProtectionShapes.checklistRows`,
+    /// which both platforms compose). Under an unreadable sidecar the wrap
+    /// rows are withheld and T2's unknown sentence stands in — "can't
+    /// tell" is never dressed as either comfort or alarm.
+    private var checklistSection: some View {
+        Section("Ways back in — right now") {
+            ForEach(
+                ProtectionShapes.checklistRows(
+                    controller.legs, mode: controller.dials.mode),
+                id: \.name
+            ) { row in
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Image(systemName: mark(for: row.present))
+                        .foregroundStyle(row.present == true
+                            ? AnyShapeStyle(.green) : AnyShapeStyle(.secondary))
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(row.name).font(.callout)
+                        Text(row.note)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+            Text(ProtectionShapes.tierSentence(controller.legs.tier))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            // The current mode's "what YOU need" (memo §5) — yours, not
+            // the whole matrix (the explainer tab carries all four).
+            let need = ProtectionShapes.currentNeedState(
+                mode: controller.dials.mode,
+                hasAnySecret: controller.hasPassphraseWrap || controller.hasRecoveryWrap,
+                syncOn: services?.sync.isConfigured ?? false)
+            Text("Day to day: \(need.daily) If this "
+                 + "\(ProtectionCopy.deviceName) dies: \(need.computerDies)")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(need.floor)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func mark(for present: Bool?) -> String {
+        switch present {
+        case true: return "checkmark.circle.fill"
+        case false: return "circle"
+        case nil: return "questionmark.circle"
         }
     }
 
@@ -263,21 +325,15 @@ struct ProtectionPane: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
-            // 13p Batch 4 (the mobile-only-user expansion's item (h), which
-            // reads true on either platform): a list of same-device legs
-            // can quietly let a reader assume a second machine holds a
-            // copy. It doesn't, unless sync is on.
-            Text(ProtectionCopy.oneDeviceNote)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-            // The NAMED NON-GOAL (13p Batch 4's honest-copy sweep): a
-            // design that declined the per-note curtain on honesty grounds
-            // owes the sentence that says what is still readable.
-            Text(ProtectionCopy.openAppIsReadable)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            // Item 3's ?-disclosure (her amended copy doctrine): the mode's
+            // longer honesty paragraphs collapse behind one door — nothing
+            // lost, nothing stacked. The content is a NAMED view so the
+            // P47 pin hosts it directly (the re-anchor's mechanism).
+            DisclosureGroup("More about what this protects") {
+                ModeHonestyDisclosure(mode: controller.dials.mode)
+                    .padding(.top, 4)
+            }
+            .font(.caption)
             if let error = controller.lastError {
                 Text(error).font(.caption).alarmVoice()
             }
@@ -435,6 +491,21 @@ struct ProtectionPane: View {
         }
     }
 
+    // MARK: The explainer pointer (seventh wave (iii): settings explains
+    // AND points; the deep teaching lives in the tutorial)
+
+    private var explainerPointerSection: some View {
+        Section("How protection works") {
+            Text("The full picture — the recipes for opening your writing, the "
+                 + "two shapes, and what you'd need on a bad day — is the "
+                 + "“How Protection Works” tab above. The field guide teaches "
+                 + "it in place: the “keeping it private” chapter.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
     // MARK: Acts
 
     private func openSetSheet() {
@@ -465,6 +536,42 @@ struct ProtectionPane: View {
         pendingAfterSet = nil
         guard controller.hasPassphraseWrap else { return }  // the sheet was cancelled
         await apply(act)
+    }
+}
+
+// MARK: - The mode-honesty disclosure (item 3's ?-depth, extracted)
+
+/// The mode section's longer honesty paragraphs — one-device, the named
+/// non-goal, and (under a demanded mode) the lobby-fallback truth. A NAMED
+/// view precisely so the P47 render pin can host it directly: collapsed
+/// disclosure content is absent from a composition dump, and a pin that
+/// cannot see the sentences cannot police them.
+struct ModeHonestyDisclosure: View {
+    let mode: StoreAtOpenMode
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // 13p Batch 4 (item (h)): a list of same-device legs can let a
+            // reader assume a second machine holds a copy. It doesn't,
+            // unless sync is on.
+            Text(ProtectionCopy.oneDeviceNote)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            // The NAMED NON-GOAL (13p Batch 4's honest-copy sweep).
+            Text(ProtectionCopy.openAppIsReadable)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            if mode.isDemanded {
+                // Seventh wave (ii): the demanded-mode fallback, stated
+                // truthfully where the mode is chosen.
+                Text(ProtectionShapes.demandedFallbackTruth)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
     }
 }
 
