@@ -274,6 +274,72 @@ order's row 3 and 13p's outbound-brief deliverable. 13p already drafted material
 
 **She carries it. This round does not send anything.**
 
+## Act 8 — THE DOUBLE TOUCH ID (author-reported 2026-08-30, in her own hands, minutes after the 13p-fix install)
+
+**Her report, verbatim:** *"it's driving me crazy that I unlock with the touchid, I get into an app
+that still doesn't have sync unlocked & the bridge shows that it's failing, and I have to use touchid
+AGAIN. how can we fix this issue? because it makes the app feel broken."*
+
+**She is right, and it is not a polish item — the app asks twice BY CONSTRUCTION.** There are two
+independently biometry-gated keychain items and each one evaluates its own `LAContext`:
+
+| # | item | evaluated at | door |
+|---|---|---|---|
+| 1 | the STORE key (13p `StoreKeyGuard`, `.biometric` at-open mode) | `StoreKeyGuard.swift:87` | the lobby — `StoreLockView` → `lobby.unlockWithBiometrics()` |
+| 2 | the E2EE device keys (14b CF-12) | `EncryptionKeychain.swift:425` | Settings ▸ Encryption — `EncryptionViews.swift:517`, a button she must find and press |
+
+So the shipped flow is: Touch ID at the lobby → the app opens → **sync and the bridge are still
+locked and SAY they are failing** → she has to go into Settings and press "Unlock with Touch ID"
+again. Nothing is broken in the sense of wrong; it is two gates wearing one name, and the second one
+is *manual*.
+
+### The mechanical fix — one prompt, and it is small
+
+`kSecUseAuthenticationContext` exists exactly for this: a successfully-evaluated `LAContext` satisfies
+further keychain reads without re-prompting (`touchIDAuthenticationAllowableReuseDuration` widens the
+window if the second read is later). Today each road builds its OWN context and evaluates, which is
+why there are two prompts.
+
+- **(A) WARM AT UNLOCK — recommended.** The lobby's successful unlock, while it still holds its
+  evaluated context, ALSO reads the E2EE gated item under that same context and fills
+  `E2EELaunchKeyCache`. One prompt; sync and the bridge are live the moment the app opens; nothing
+  else changes. Fires only when the E2EE gate is ON. Needs a composition seam from the lobby to the
+  E2EE custody — the plumbing is the work, not the logic.
+- **(B) HAND THE CONTEXT FORWARD.** The lobby stores its evaluated context; `unlockGatedItem` reuses
+  it instead of evaluating. Lazier (no keychain work if sync never runs) but the context has to still
+  be valid at use, so it inherits a reuse-window question (A) does not have.
+
+**Pin either shape by counting evaluations, not by watching prompts:** the existing seams already make
+this testable — one launch under a demanded mode with the E2EE gate ON must evaluate biometrics
+**exactly once**.
+
+### The doctrinal question underneath — HERS, and it may delete the work
+
+**R13p-16 says a gate inside an already-unlocked app is a curtain, not a boundary** — that is why
+per-note locks were dropped, in her words: *"it makes users think privacy is in place that just
+isn't."* The second Touch ID is arguably that exact shape. Once the store has been unlocked the
+library is already readable; the CF-12 gate then protects only the ability to *sync*, on a machine
+whose notes are already open. If R13p-16's reasoning binds here too, the honest answer is not "ask
+once instead of twice" but:
+
+- **(C) RETIRE the separate CF-12 biometric gate whenever the store's at-open mode is already
+  demanding** (Biometric or Passphrase). The app has ONE gate — the at-open mode — and the E2EE keys
+  ride the ordinary plain item behind it. The CF-12 toggle stays meaningful only under Auto, where it
+  is the sole gate.
+
+**This is an author call, not the round's.** (A) is the safe improvement that leaves the security
+posture exactly as it is; (C) is the coherent one if her R13p-16 doctrine reaches this gate too, and
+it also removes a toggle whose whole family caused the 13p-fix incident. **Ask her before building** —
+and note that (A) is not wasted if she later rules (C): warming the cache at unlock is the same
+plumbing either way.
+
+### Obligation
+
+Red-on-old pin (the evaluation count), the tutorial spine green, and the answer recorded in
+`QUESTIONS`. If (C) is ruled, `MobileSoul` gains a row — the phone has the same two gates.
+
+---
+
 ## Act 7 — Her carried items
 
 > **FILL AT KICKOFF — she supplies these once the session is underway, not before.** Her words,
