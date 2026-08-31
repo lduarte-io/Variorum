@@ -211,6 +211,44 @@ THAT SECTION WINS (it is canon; this is choreography).
 8. MOBILE'S DELIVERABLES named per item (2/4/5/6/9/11/12 are the
    both-platform set) — written INTO the batches, not parity rows.
 
+9. **THE DOUBLE TOUCH ID — her report, 2026-08-30, in her own hands:**
+   *"it's driving me crazy that I unlock with the touchid, I get into an
+   app that still doesn't have sync unlocked & the bridge shows that
+   it's failing, and I have to use touchid AGAIN… it makes the app feel
+   broken."* Structural, not polish: two separately biometry-gated
+   keychain items each evaluate their own `LAContext` — the store key
+   (13p at-open mode, via the lobby) and the **sync-keys gate** (14b's
+   "CF-12", via a button in Settings ▸ Encryption she has to find). The
+   traced mechanism, the one-prompt fix, and the doctrinal question sit
+   in **`notes/plans/pre-13u-round.md` Act 8** — read it rather than
+   re-deriving it. **Her inclination, recorded 2026-08-30 and NOT yet a
+   ruling:** *"I do think that it might be useful to have for the users
+   you described (that have auto)"* — i.e. **keep the sync-keys gate
+   meaningful under AUTO**, where it is the only gate and is a coherent
+   posture ("open my notes freely, but require Touch ID before this
+   device can push to the cloud"), and the live question is only what it
+   should do under the DEMANDED modes, where R13p-16's curtain argument
+   bites. The mechanical warming fix serves either answer, so it is not
+   wasted whichever way she rules.
+
+10. **QUESTIONS #82 — should the store key be BOUND to this Mac?** Her
+    decision, deliberately brought here rather than answered by a fix
+    round. Read **#82 itself** (corrected 2026-08-30 — its first draft
+    overstated the scope): this is an **AUTO-MODE** property, not a
+    property of her current setup, because the demanded modes delete the
+    plain item. What binding changes is that an Auto key stops
+    *travelling* to new hardware — the data-protection keychain does not
+    migrate, the login keychain does — so it is a convenience/hardness
+    trade about the DEFAULT, and about 13x's new-machine adoption road.
+    Three options with costs are written up; the architect's
+    recommendation is **(c)**, bind the store key only.
+
+**Note on 9 and 10:** these two are the "several issues to settle" she
+named on 2026-08-30 when she chose to start 13u rather than run the
+pre-13u round first. Both are AUTHOR CALLS in the CLAUDE.md sense — one
+is product behaviour, one is a security posture — so neither is decided
+in a batch.
+
 ## Batch sketch (the kickoff's to reshape)
 
 Batch A: item 8's defect set + item 7 (the editor seam's correctness

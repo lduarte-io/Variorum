@@ -359,6 +359,22 @@ order's row 3 and 13p's outbound-brief deliverable. 13p already drafted material
 
 ## Act 8 — THE DOUBLE TOUCH ID (author-reported 2026-08-30, in her own hands, minutes after the 13p-fix install)
 
+> **⚠️ THE RULING MOVED (author, 2026-08-30, same evening).** She chose to
+> start **13u** rather than run this round first, and asked that the two
+> open settling questions ride 13u's design sitting: this act's doctrinal
+> question and **QUESTIONS #82** are now agenda items **9 and 10** of
+> `notes/plans/phase-13u-feel-and-polish.md`. **Nothing here is removed** —
+> this act stays the traced record (the mechanism, the two mechanical
+> shapes, the doctrinal argument), and 13u's agenda points AT it rather
+> than restating it. If this round runs first anyway, it may still do the
+> mechanical warming fix, which serves either ruling — but it does **not**
+> decide the doctrinal question.
+>
+> **Her inclination, recorded and not yet a ruling:** keep the sync-keys
+> gate meaningful under **Auto**, where it is the only gate; the live
+> question is what it does under the demanded modes.
+
+
 **Her report, verbatim:** *"it's driving me crazy that I unlock with the touchid, I get into an app
 that still doesn't have sync unlocked & the bridge shows that it's failing, and I have to use touchid
 AGAIN. how can we fix this issue? because it makes the app feel broken."*
