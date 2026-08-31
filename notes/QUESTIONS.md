@@ -1021,4 +1021,40 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: BUILT (the seed half + the manifest artifact) 2026-08-31, Act 0's Opus half** — the seeder HOISTED to `App/Variorum/Shared/`, the phone seeding at the same first-write moment through the same gate, and `SampleLibraryManifest` (the per-note pristine predicate the dedupe repair consults). **The dedupe repair itself is the Fable `Sync/` session's; the RESTORE DOOR is Act 10 wave 1's** (Mac) and mobile's parity answer (phone) — neither is built here.
 
-*(Next free number: **#85**.)*
+85. **2026-08-31 · pre-13u Act 0, the Fable `Sync/` half — the two convergence repairs' judgment
+    calls, PROVISIONAL under the overnight away-run rules (built to best judgment, bundled here
+    for ratify; the binding record is the round plan's "ACT 0 FABLE-HALF RECORD").**
+
+    **(a) The Journal keeper's "same book" predicate: curated + `profile='journal'`, never the
+    name.** The one named function is `Queries.dailyJournalBookCandidates`; the mint stamps the
+    same constant, so mint and repair cannot drift. Chosen over the mint guard's folded-name leg
+    because `BookNaming`'s E13 doctrine keeps deliberate same-name books legal (a name-keyed
+    repair "would delete a book she made on her phone" — that doctrine's own words), and a
+    renamed real Journal must not shield a duplicate from healing. Pinned from both sides.
+    **The one behavioral corner worth your eyes:** restoring a SUPERSEDED old Journal from the
+    Trash while a new designated one lives makes two live journal-profile books again, and the
+    repair re-converges them at the next sync touch — the restored book's entries merge into the
+    keeper (smaller id) rather than standing as a separate book. Defensible under
+    one-daily-Journal (nothing is lost; every entry lands in THE Journal), but it means "restore
+    my old Journal as its own book" is not a state the system will hold. Ratify or redirect.
+
+    **(b) The pristine rule's engagement extension (R-pre13u-8).** Your ruled rule is per-note
+    rendered-text hashes. As built, a copy also reads EDITED on signals the render cannot see —
+    a fanned or archived take, a savepoint, a comment, a non-reserved tag, a membership in
+    another book, a seal/archive/entry-date, floating notes, a reference, book-level
+    extents/finish. Reasoning: a take fanned on shipped text leaves the hash pristine, and
+    retiring that copy would silently discard her take — exactly what "an edited copy is NEVER
+    silently retired" forbids. Every signal errs only toward keeping copies; the both-pristine
+    common case (two untouched seeds) is unaffected.
+
+    **(c) The tag.path loss class, inherited knowingly:** the Journal loser's row metadata (a
+    custom name, extents, a finish) and its shelf-pin entry do not travel to the keeper — the
+    "worst case a lost rename, never corruption" class the tag.path repair already accepted;
+    determinism outranks. The pin dangles harmlessly (liveness-filtered read).
+
+    **(d) The ≥3-copies generalization (sample library):** your ruling covers pairs; with three+
+    copies, every EDITED copy survives and PRISTINE copies retire beside ANY survivor (keeper =
+    smallest-id pristine only when nothing is edited). The uniform extension of both pair rules;
+    vanishingly rare (needs 3+ devices seeding offline).
+
+*(Next free number: **#86**.)*

@@ -528,6 +528,125 @@ size this act adds, and it is the same file the Mac already shipped.
 **Deferred / handed on:** the sample-library restore door (Act 10 wave 1 · mobile's parity answer,
 MobileSoul **PL-17**); both `Sync/` repairs (the Fable half); the empty-state copy's wording (13s).
 
+### ACT 0 FABLE-HALF RECORD (2026-08-31, the overnight run — the two `Sync/` convergence repairs)
+
+**Scope built (the standing rider's session):** the Journal-keeper repair (R-pre13u-1's second
+half) and the sample-library pristine-copy dedupe (R-pre13u-8), both as SyncSpec §7-class
+apply-time repairs inside `runPostApplyRepairs` — deterministic on every device, every repair
+write enqueued explicitly past the muted triggers, ordinary tombstones with exact stamps so the
+Trash/restore surfaces stay honest. **ZERO schema, marker stays 7, ZERO `Server/` lines and ZERO
+`Persistence/` lines (diff-verified against origin/main).** Commits: `a83a033` (Journal) ·
+`27905c4` (Sherlock + the seam) · `c183da7` (the wiring) · the records commit.
+
+**THE "SAME BOOK" PREDICATE — decided, and why.** ONE named function,
+`Queries.dailyJournalBookCandidates(_:)`: live + `kind='curated'` + `profile='journal'`, sorted by
+id (index 0 = the keeper everywhere). The mint (`insertDailyJournalBook`) now stamps
+`Queries.dailyJournalBookProfile` — the same constant the predicate filters on — so the mint and
+the repair share one symbol and cannot drift. The reasoning, recorded as the work order asks:
+**(a)** the plan's candidate was "designation + profile", and that is what this IS, with
+designation read as *provenance*: the only writer of reading-profile `'journal'` is the ONE shared
+daily-book mint (⌘J, Today's Entry, the bridge, the phone's furniture all delegate to
+`shelveInDailyJournalBook`'s ensure), which designates at birth — so the profile is the durable
+"was designated on its own device" fact, while the `setting` row itself cannot serve as the
+predicate: its CAS erases the loser's designation before any device can read both, and a
+predicate on the raced value would be nondeterministic across devices. **(b)** The Opus half's
+mint-guard precedent (designation + `BookNaming`-folded name) deliberately does NOT carry its
+NAME leg into the repair: `BookNaming`'s own E13 doctrine says the offline name race is LEGAL and
+a name-keyed repair "would delete a book she made on her phone" — and a renamed real Journal must
+not shield a duplicate from healing. The name belongs at the DOOR (one device, her intent
+visible); the profile belongs at the REPAIR (provenance the race cannot fake). Pinned from both
+sides: `aDeliberateBookNamedJournalIsNeverConverged` (her same-name book survives) and
+`twoOfflineMintedJournalBooksConvergeToTheSmallerIDKeeper`.
+
+**What the Journal repair does per loser (the explicit what-moves-with-the-loser spec the
+Fragments post-mortem demands):** live chapters move whole to the keeper (`reading_section`
+re-pointed — duplicate names and interleaved positions are both legal, and membership
+`section_id` pointers stay meaningful); live memberships re-point to the keeper, EXCEPT one whose
+post the keeper already holds, which tombstones as a pure duplicate (`uq_reading_post_live` — the
+tag.path application rule, pinned by `aPostAlreadyOnTheKeeperDedupesTheLosersMembershipInstead`);
+the loser reading tombstones (its cascade finds nothing — children just moved — and the §7 victim
+sweep is the belt); the DESIGNATION rewrites to the keeper ONLY where it currently names a loser
+(one she deliberately moved to another book is hers; plain UPDATE, never REPLACE — `sync_version`
+is the CAS token). What deliberately does NOT move, the tag.path "worst case a lost rename"
+class: the loser's row metadata (custom name, extents, a finish) and its shelf-pin entry (dangles
+harmlessly; the pins read is liveness-filtered). A FINISHED keeper still receives memberships —
+a repair is not authoring (the resolveSyncConflict-under-seal doctrine).
+
+**THE INJECTION SEAM (the architect's recommended shape, adopted — my reading of the engine
+agrees):** `SampleLibraryDedupeFacts` (new, `Sync/SampleLibraryDedupe.swift`), taken by
+`SyncEngine.init` exactly the way it takes `keyProvider` — **nil by default, and a nil-facts
+engine is INERT** (pinned: `noInjectedFactsMeansNoDedupe`), so no test world and no unwired
+composition can misidentify a book. The facts: the identity predicate (the seeder's own
+`discover` rule — EXACT live-name match, deliberately unfolded: a renamed copy reads as hers and
+is left alone), the reserved tag path, a **LAZY** `loadNoteHashes` closure (the ~0.5 MB parse
+runs only when two same-name copies actually coexist — about once in a store's life), and the
+hash recipe as a function reference (`BridgeHash.body` — a recipe drift reads everything as
+edited, which fails SAFE to both-survive). Wired at the ONE composition site both platforms
+share (`SyncSession.configure` in `Shared/`), from `SampleLibrarySeeder.dedupeFacts()` — so the
+Mac and the phone hand the engine identical facts by construction, and
+`SampleLibraryDedupeFactsTests` (Mac, 3 pins) binds the wired facts to the real bundled manifest
+and the one shared recipe — the drift core tests cannot see.
+
+**The PRISTINE rule as built — the ruled hash rule plus engagement, every extension erring in ONE
+direction.** A copy is pristine iff its live notes are EXACTLY the manifest's titles with
+matching per-note rendered-text hashes AND it shows no other sign of her hands: a fanned or
+archived take (invisible to the render — without this, a take she fanned on shipped text would
+be silently retired, exactly what "an edited copy is NEVER silently retired" forbids; pinned:
+`anUnrenderedTakeCountsAsEngagementAndProtectsTheCopy`), a savepoint, a comment, a tag beyond the
+reserved one, a membership in another book (without this, retiring the copy would tear its note
+out of a book she curated), a seal, an archive, an entry date, floating notes, a reference, or
+book-level extents/finish/grouping. Every signal reads SYNCED rows only (same verdict on every
+device once converged — the determinism the keeper choice rides on) and errs only toward EDITED,
+i.e. toward keeping copies. **INDETERMINATE + defer-whole-pass:** a copy whose rows are still in
+flight (a membership's post not yet arrived, a placement's block missing, a block with zero
+variant rows, zero membership rows at all, or fewer live notes than shipped with no tombstone
+evidence — the SyncSpec §5 straggler class) defers the ENTIRE pass with zero writes: classifying
+partial data could retire the wrong copy on one device and a different one on another (traced:
+a half-arrived pristine copy would read "edited" and beat the complete local pristine copy,
+breaking cross-device determinism). Deferring is free; a later batch completes the picture.
+A pruned-then-purged copy whose tombstone evidence is physically gone reads indeterminate
+forever — both copies survive, the safe direction, recorded.
+
+**Retirement mechanics:** the book first (its active cascade takes memberships + chapters at the
+exact stamp; the §7 victim sweep enqueues what the muted outbox triggers could not), then each
+member note via the container cascade (placements → blocks → variants, tags, references) — all
+ONE stamp per copy, so `restoreContainer`/`restoreReading` recognize the family. Ordinary
+tombstones, never purge intents: the Trash lists the retired copy and Put back works.
+
+**PINS — red-on-old evidence (test-first: the suites were written and RUN before any repair
+existed).** On the pre-repair tree, **7 of 11 core pins RED, observed and logged**: two live
+Journals persisting on both devices (`liveJournalBookIDs == [keeper]` read TWO ids), the loser
+never tombstoned, no repair outbox rows, the designation stuck on the loser, the shared post
+doubly membered; two sample copies persisting, no family retirement, and the PRISTINE copy
+surviving beside the edited one. The Sherlock reds ran against the seam-only tree (the facts
+struct had to exist to compile; the repair logic did not yet). The 4 green-on-old pins are
+boundary/documented-outcome pins whose value is holding AFTER the repair:
+`aDeliberateBookNamedJournalIsNeverConverged` (E13), `twoEditedCopiesBothSurvive` (the ruled
+documented outcome — BOTH survive, zero retirement writes, the §7 concurrent-divide class),
+`noInjectedFactsMeansNoDedupe` (inert default), `theRepairIsIdempotentOnceConverged` (dump-stable
+across further rounds; the Sherlock idempotence assertion rides
+`twoPristineCopiesConvergeToTheSmallerIDKeeper`). Convergence assertions throughout are the §7
+trio: deterministic outcome · same choice on both devices · byte-identical `syncedDump`.
+
+**Counts (the close, all three suites in order):** core **1475/158 PASSED** (baseline 1464/156 +
+11 tests/2 suites — `FurnitureConvergenceRepairTests` + `SampleLibraryDedupeRepairTests`); Mac
+**1908/323 PASSED** (baseline 1905/322 + the 3 wiring pins; the load-flaky latency pin GREEN this
+run, no adjudication needed; the tutorial spine green inside the run); mobile **602/97 PASSED +
+exactly the 2 standing known issues** (baseline exact — the phone's dedupe wiring rides the
+shared `SyncSession`, zero mobile-side deltas).
+
+**PROVISIONALs + documented corners → QUESTIONS #85** (the away-run bundle): the predicate
+choice's one behavioral corner (restoring a superseded old Journal from the Trash while a new
+designated one lives re-converges the two — memberships merge into the keeper; arguably correct
+under one-daily-Journal, hers to ratify), the engagement-signal extension of the ruled hash rule,
+the lost-metadata/pin-dangle class, and the ≥3-copies generalization (pristine copies retire
+beside ANY survivor).
+
+**Deferred / handed on:** **SyncSpec §7's canon delta (the two new repair rules) is the
+ARCHITECT's to write at closeout — deliberately not written here** (the work order's own
+instruction; this record is the source it composes from). The sample-library restore door stays
+Act 10 wave 1's (Mac) + mobile's parity answer (PL-17). Nothing else deferred; no owner changes.
+
 ---
 
 ## Act 1 — Cold review of 17g (the `13p-fix` session's work)
