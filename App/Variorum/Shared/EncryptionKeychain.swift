@@ -350,6 +350,10 @@ nonisolated enum E2EEKeychainStorage {
 
     @discardableResult
     static func save(_ material: DeviceKeyMaterial) -> Bool {
+        // F4 (pre-13u Act 9): fixed account ⇒ a test-process mutation is
+        // always the R3-1 incident's shape — refused before any SecItem
+        // call. See `KeychainTestTripwire`.
+        guard !KeychainTestTripwire.refusesFixedAccountMutation("save") else { return false }
         guard let data = try? JSONEncoder().encode(material) else { return false }
         var attributes = baseQuery()
         attributes[kSecValueData as String] = data
@@ -367,16 +371,19 @@ nonisolated enum E2EEKeychainStorage {
     /// gate flips route through here and the per-item deletes.
     @discardableResult
     static func clear() -> Bool {
+        guard !KeychainTestTripwire.refusesFixedAccountMutation("clear") else { return false }
         let plainGone = SecItemDelete(baseQuery() as CFDictionary) == errSecSuccess
         let gatedGone = SecItemDelete(gatedBaseQuery() as CFDictionary) == errSecSuccess
         return plainGone || gatedGone
     }
 
     static func deletePlainItem() {
+        guard !KeychainTestTripwire.refusesFixedAccountMutation("deletePlainItem") else { return }
         SecItemDelete(baseQuery() as CFDictionary)
     }
 
     static func deleteGatedItem() {
+        guard !KeychainTestTripwire.refusesFixedAccountMutation("deleteGatedItem") else { return }
         SecItemDelete(gatedBaseQuery() as CFDictionary)
     }
 
@@ -401,6 +408,7 @@ nonisolated enum E2EEKeychainStorage {
     /// never prompt (the prompt belongs to the unlock alone).
     @discardableResult
     static func saveGated(_ material: DeviceKeyMaterial) -> Bool {
+        guard !KeychainTestTripwire.refusesFixedAccountMutation("saveGated") else { return false }
         guard let data = try? JSONEncoder().encode(material) else { return false }
         var error: Unmanaged<CFError>?
         // Her ruling, in flags: `.biometryCurrentSet` ALONE — never

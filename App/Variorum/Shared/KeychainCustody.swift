@@ -5,11 +5,83 @@
 //  Phase 13p-fix — the two rules every keychain custody family obeys,
 //  each stated ONCE. Both were learned the same day, from the same
 //  incident, and both exist because a comment three files away is not a
-//  mechanism.
+//  mechanism. The pre-13u round added the THIRD rule below
+//  (`KeychainTestTripwire`) after the second lesson of that same day:
+//  the rule that WAS only a comment failed exactly as this header
+//  predicts.
 //
 
 import Foundation
 import Security
+
+/// A TEST PROCESS NEVER MUTATES A FIXED-ACCOUNT CUSTODY ITEM — the rule,
+/// made structural (pre-13u Act 9, F4).
+///
+/// `E2EEKeychainStorage`'s accounts are FIXED (`device-keys` /
+/// `device-keys-biometric`): there is no scope parameter, so ANY
+/// write/delete that reaches its leaves from a test process lands on the
+/// author's live custody. The 13p-fix plan's environment-traps section
+/// states exactly that — and on 2026-08-30 the sentence failed anyway
+/// (R3-1): a revert drill removed an injected seam's USE, the fake-driven
+/// pins fell through to the real leaves, and the author's live E2EE
+/// custody was overwritten with test material. A plan-file sentence is
+/// not a mechanism; this is the mechanism.
+///
+/// DEBUG-only by construction (release builds carry no XCTest and the
+/// probe compiles to `false`), armed by detecting the test harness in the
+/// process. The HOSTED app (booted as the suite's host) is armed too, and
+/// deliberately: its launch path never writes E2EE custody (enrollment
+/// and the gate toggle are user acts), so anything that trips here IS a
+/// test reaching real custody — the R3-1 shape, refused before any
+/// SecItem call. Scoped families (`StoreKeyGuard`'s `scope:`,
+/// `StoreKeyCustody`) stay unguarded: throwaway scopes are their safety,
+/// and the fact suite's probes ride their own throwaway service.
+///
+/// READS stay open (they are how pins observe the world and they damage
+/// nothing); `unlockGatedItem` — a read that PROMPTS — is deliberately
+/// not guarded either: a test reaching it hangs visibly, which is loud,
+/// and guarding reads would let a pin silently pass over real state.
+nonisolated enum KeychainTestTripwire {
+    #if DEBUG
+    /// Computed once: the XCTest session environment or the loaded XCTest
+    /// runtime marks a test process (Swift Testing runs inside the same
+    /// harness).
+    static let armed: Bool = {
+        let env = ProcessInfo.processInfo.environment
+        return env["XCTestConfigurationFilePath"] != nil
+            || env["XCTestSessionIdentifier"] != nil
+            || env["XCTestBundlePath"] != nil
+            || NSClassFromString("XCTestCase") != nil
+    }()
+    #else
+    static let armed = false
+    #endif
+
+    private static let tripLock = NSLock()
+    nonisolated(unsafe) private static var trips = 0
+
+    /// Observable for the pin: how many mutations have been refused.
+    static var tripCount: Int {
+        tripLock.lock()
+        defer { tripLock.unlock() }
+        return trips
+    }
+
+    /// Consulted FIRST by every fixed-account write/delete leaf: true =
+    /// refuse, recorded. Never fires in production. A REFUSAL rather than
+    /// a trap, deliberately: the leaf's `false`/no-op is observable (the
+    /// pin exercises the leaves themselves), while a trap would kill the
+    /// very run that proves the guard — the refused mutation is already
+    /// harmless by construction.
+    static func refusesFixedAccountMutation(_ leaf: String) -> Bool {
+        guard armed else { return false }
+        tripLock.lock()
+        trips += 1
+        tripLock.unlock()
+        NSLog("KeychainTestTripwire: refused E2EEKeychainStorage.%@ from a test process (the 13p-fix R3-1 class) — drive the injected seams instead", leaf)
+        return true
+    }
+}
 
 /// WHICH KEYCHAIN a family lives in — the decision, named.
 ///
