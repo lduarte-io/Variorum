@@ -666,6 +666,23 @@ record each here in her words as it does.
   UI just disappears - it feels a bit jumpy. not sure if we just neeed to smooth that animation or
   what"* → **Act 10 item 10.**
 
+**And later still (same sitting, her words), routed:**
+
+- *"checking one of the markdown boxes right now moves you to the absolute bottom of the note for an
+  unknown reason. that's also quite annoying"* → **Act 10 item 11** (trace-first — the mechanism is
+  unknown by her own words and must be traced, never guessed).
+- *"this is a really micro note, but when someone types an arrow like this -> i want it to fill in
+  with the arrow symbol: →. same for the left arrow. i can't think of a simple up and down arrow
+  option but i'd like them too, but definitely the autochange from this <- and this ->"* →
+  **Act 10 item 12** (left/right ruled; up/down wanted, typed form open).
+- *"i think that N more open should cap with total tabs at 20 - otherwise it's just going to be a
+  bit of a mess"* → **RULED into Act 10 item 9** (the cap).
+- *"i agree with the fact that regions shouldn't teleport - i like the idea of it being an 'extra
+  information' pane for items in the library that you've clicked on once though, I could see that
+  being super useful actually. book information or note information, that kind of thing. i really
+  like that and i want to see it built at the very least - context aware panel depending on the
+  item"* → **RULED into Act 10 item 10** (the panel is IN, not a screenshot-pair question).
+
 ---
 
 ## Act 9 — The custody batch: 17a + the CF-12/#82 builds + the routed review findings (Fable implementer)
@@ -801,15 +818,36 @@ doors.
    "N more open" affordance is a REAL DOOR (click → list → focus). The shape recommendation, hers to
    see in screenshots: the Open section follows the starred-items precedent (13u item 10's ruled
    shape) — visible up to ~7, then the section itself scrolls, no dead label; ⌘⇧1…9 stay bound to
-   the visible order. AUTO-CLOSE is held in reserve (open tabs are pointers — closing loses nothing —
-   so a soft LRU cap ~12 is defensible later at her word; not built now).
-10. **The note → library transition** (her report in Act 7's arrivals): the "This note" right region
-    must never teleport away — the panel animates out with the column width animating in sync, one
-    deliberate ease. The larger question is the implementer's to bring as a screenshot pair: whether
-    the right region keeps a CONTINUOUS identity across contexts (collapse gracefully vs. host a
-    library-context occupant such as a selected-note preview). Principle for the whole act: regions
-    visibly become things or visibly leave. Design this together with item 5 (the tags move) — one
-    coherent right edge, not two patches.
+   the visible order. **AUTO-CLOSE RULED (her word, same sitting): total open tabs cap at 20** —
+   opening the 21st quietly closes the least-recently-used unpinned open (a tab is a pointer;
+   nothing is lost — the note stays in the library).
+10. **The note → library transition + THE CONTEXT-AWARE RIGHT PANEL (ruled in, her word — no longer
+    a screenshot-pair question):** the "This note" right region never teleports — the transition
+    animates, column width in sync — AND the library's right region gains an **"extra information"
+    panel, context-aware by item kind**: *"book information or note information, that kind of thing…
+    i want to see it built at the very least."* Shape latitude is the implementer's (what each kind's
+    info card shows); ONE interaction fork must be reconciled deliberately and flagged to her if it
+    changes standing behavior: today a plain click in the Library OPENS a note (#79's ratified
+    gestures) — "items you've clicked on once" needs an answer for how select-for-info coexists with
+    click-opens (candidates: selection/arrow-keys drive the panel while click still opens; or single
+    click selects + shows info and open moves to double-click/⏎ — the latter CHANGES a ratified
+    gesture and is HERS to approve, not the batch's). Principle for the whole act: regions visibly
+    become things or visibly leave. Design together with item 5 (the tags move) — one coherent right
+    edge, not two patches.
+11. **Checking a markdown checkbox jumps to the absolute bottom of the note** (her report in Act 7's
+    arrivals; the mechanism is UNKNOWN — trace first, never guess). Candidate family for the tracer:
+    the toggle's storage rewrite resetting scroll/caret (the TK2 geometry class, TEXTKIT2 §2), but
+    the trace decides. Red-on-old pin: scroll position (and caret) preserved across a checkbox
+    toggle.
+12. **Typed-arrow substitution:** `->` becomes → and `<-` becomes ← as you type (ruled). Constraints:
+    a pure type-time text transform — content-level, both stored and rendered (markdown-as-content
+    untouched as a doctrine); NEVER inside code spans/blocks (arrows are syntax there); ordinary text
+    undo reverts it (the smart-quotes convention). ONE brain, built to be shareable with the phone.
+    If the implementer finds it entangled with `MarkdownActs`' arming flow, it DEFERS to 13u1 rather
+    than complicating a seam about to be rewritten — record the deferral. Up/down arrows: wanted,
+    typed form undecided (*"i can't think of a simple up and down arrow option but i'd like them
+    too"*) — the batch may PROPOSE candidates (e.g. `-^` / `-v`) as a note for her; nothing built
+    without her nod.
 
 ---
 
