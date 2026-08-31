@@ -29,8 +29,19 @@ import VariorumCore
 /// no pool at all there is still nothing to name, which is the only case the
 /// old "untitled pool" wording now covers.
 enum PoolNaming {
+    /// **The seeded default DISPLAYS as "Snippets"** (pre-13u Act 10 wave
+    /// 2b — item 17's ruled naming, the K5 precedent: UI strings only). The
+    /// app's own default-mint sites have always stored the literal title
+    /// "Pool" (`createPool(title: "Pool")` — both platforms), and no rename
+    /// door for groups existed before this wave, so a stored "Pool" is the
+    /// app's seeded literal, never a name she typed. It reads as the
+    /// surface's own name; the stored row is untouched.
+    ///
+    /// Recorded corner (display-only, vanishing odds): a group SHE renames
+    /// to exactly "Pool" through the new door would also display "Snippets".
     static func title(_ pool: Container?) -> String {
-        guard let pool else { return "no pool" }
+        guard let pool else { return "no group" }
+        if pool.title == "Pool" { return "Snippets" }
         return DisplayTitle.pool(title: pool.title, createdAt: pool.createdAt)
     }
 }
@@ -58,7 +69,9 @@ struct ScrapsPanel: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(tokens.path(["scraps"]))
+                // Item 17's ruled vocabulary (the K5 strings-only sweep):
+                // the scrap area speaks as "snippets" everywhere.
+                Text(tokens.path(["snippets"]))
                     .font(tokens.heading)
                     .foregroundStyle(tokens.accent)
                 if model.pools.count > 1 {
@@ -70,13 +83,13 @@ struct ScrapsPanel: View {
                             Button(PoolNaming.title(pool)) { model.select(poolID: pool.id) }
                         }
                     }
-                    .help("Which scraps container the panel shows")
+                    .help("Which snippet group the panel shows")
                 }
                 Spacer()
             }
             Text(tokens.chromeLabel(
-                "drag a scrap into the page — it lands as a copy with lineage; "
-                + "the scrap stays here. ⌥-drag carries its whole fan. "
+                "drag a snippet into the page — it lands as a copy with lineage; "
+                + "the snippet stays here. ⌥-drag carries its whole fan. "
                 + "Drops land where you can type: Write, or a book's open note."))
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
@@ -90,7 +103,7 @@ struct ScrapsPanel: View {
                     }
                     if model.items.isEmpty {
                         Text(tokens.chromeLabel(
-                            "No scraps in this pool — the Snippets area (sidebar) mints them."))
+                            "No snippets in this group — the Snippets area (sidebar) mints them."))
                             .font(tokens.small)
                             .foregroundStyle(tokens.muted)
                             .padding(.vertical, 16)

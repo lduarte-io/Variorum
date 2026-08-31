@@ -2,16 +2,29 @@
 //  BlocksAreaView.swift
 //  Variorum
 //
-//  Batch 12 (Sitting 9, her ruling): "blocks should just be a 4th area
-//  and you should be able to make blocks as stand alone entries, not just
-//  appended to one entry." The Blocks AREA: every scrap listed on its own
-//  page, a quick block-entry bar that mints a STANDALONE block (⏎ keeps
-//  it as a scrap — no post involved), drag-out preserved (the block-ID
-//  payload; the drop is still exactly `poolDragCopy`), drop-in import
-//  preserved. Supersedes the rows-in-the-sidebar build-time call — the
-//  sidebar was "way too crowded"; the recorded consequence: sidebar-to-
-//  editor scrap dragging retires with the rows (the pool editor and the
-//  canvas remain the side-by-side scrap surfaces).
+//  THE SNIPPETS AREA (the type name predates the vocabulary: batch 12
+//  minted it as the "Blocks area"; item 17's fifth-wave ruling made every
+//  UI string say SNIPPETS, and the identifier stays per the K5 precedent —
+//  strings only, code and model terms untouched).
+//
+//  pre-13u Act 10 wave 2b — the ruled refresh (her fourth-wave widening +
+//  W8-4, the mockup's Snippets tab as the style reference):
+//  · the OWNERSHIP ANSWER lives in the structure — the GROUPS RAIL lists
+//    snippet groups as flat siblings (no book or note owns one; the field
+//    guide's group sits beside the default as an equal);
+//  · the four management doors — new group · rename · delete (the
+//    ordinary deleteContainer/Trash road, its snippets riding the 30-day
+//    clock with it) · move snippets between groups;
+//  · search + tag/sort filters over the calm-card listing, with the W8-4
+//    takes-count badge, word counts, and edited days;
+//  · multi-select with a bulk bar (move / tag / archive / delete);
+//  · every pre-existing door survives: open-as-editor, drag-into-note
+//    (⌥ carries the fan), the drop-in import target, the footer
+//    new-snippet entry with its blinking cursor, the per-row tag door.
+//
+//  Click model (the item-10 ruling's grammar, judged in place): a card
+//  click SELECTS (the bulk bar appears); a DOUBLE-CLICK opens the
+//  Snippets editor; the header's "open as editor" stays the big door.
 //
 
 import SwiftUI
@@ -20,25 +33,32 @@ import VariorumCore
 
 struct BlocksAreaView: View {
     let session: AppSession
+    /// The panel/drag model — kept for `createPool` + the drag payload;
+    /// the page's own listing lives on `SnippetsAreaModel`.
     let model: PoolViewModel
-    /// Opens the scraps container in the detail editor.
+    /// Opens the snippets container in the detail editor.
     var openPool: (String) -> Void
 
-    /// 13b 4D (N32(c) — S4-15): the scrap rows' TAG door, registry-walked
-    /// (`.surface` — the target is the row itself).
-    ///
-    /// **The post-13l polish round, ledger row 4(b):** the DELETE door joins
-    /// it, declared the same way and for the same reason — the target is the
-    /// row you right-clicked. Her A4 ruling on the walk's P-8: a scrap's only
-    /// way out was inside the scraps EDITOR's bottom bar, so throwing away a
-    /// line you can already see meant opening the editor first.
+    /// 13b 4D (N32(c) — S4-15): the snippet rows' TAG door + the archive/
+    /// delete pair (the post-13l polish round, 4(b)/F1), registry-walked.
     static let surfaceCapabilities: [CapabilityID] = [
         .tagBlock, .archiveScrap, .deleteScrap,
     ]
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
+    @State private var area: SnippetsAreaModel
     @State private var importer: ImportModel?
+
+    init(
+        session: AppSession, model: PoolViewModel,
+        openPool: @escaping (String) -> Void
+    ) {
+        self.session = session
+        self.model = model
+        self.openPool = openPool
+        _area = State(initialValue: SnippetsAreaModel(session: session))
+    }
     @State private var entryText = ""
     @State private var cursorOn = true
     @FocusState private var entryFocused: Bool
@@ -46,158 +66,514 @@ struct BlocksAreaView: View {
     /// The tag sheet's target (the canvas card's exact idiom).
     @State private var tagSheetBlock: CanvasView.TagSheetBlock?
 
+    // The listing's filters (view state — projections, never truth).
+    @State private var searchText = ""
+    @State private var tagFilter: String?
+    @State private var sort: SnippetSort = .recent
+    /// The picked snippets (block ids) — session UI state.
+    @State private var selection: Set<String> = []
+    /// The bulk tag menu's rows, loaded when the bar appears.
+    @State private var bulkTags: [Tag] = []
+
+    // The group doors' state.
+    @State private var renameGroupTarget: Container?
+    @State private var groupNameField = ""
+    @State private var newGroupAsk = false
+    @State private var deleteGroupAsk: GroupDeleteConfirm?
+
+    /// What the delete-group confirm presents — the count read at ask time.
+    struct GroupDeleteConfirm: Identifiable, Equatable {
+        let groupID: String
+        let name: String
+        let snippets: Int
+        var id: String { groupID }
+    }
+
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
+    private var filtered: [Queries.PoolItem] {
+        SnippetFilter.apply(
+            area.items, groupID: area.selectedGroupID, query: searchText,
+            tagPath: tagFilter, sort: sort)
+    }
+
     var body: some View {
+        let area = self.area
         VStack(spacing: 0) {
-            header
+            masthead(area)
+            toolrow(area)
             Divider().overlay(tokens.line)
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 0) {
-                    ForEach(model.items, id: \.block.blockID) { item in
-                        scrapRow(item)
-                        Divider().overlay(tokens.line.opacity(0.6))
-                    }
-                    if model.items.isEmpty {
-                        Text(tokens.chromeLabel(
-                            "No blocks yet — type one below, or drop text here."))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
-                            .padding(24)
-                    }
-                }
-                .padding(.horizontal, 28)
-                .padding(.vertical, 10)
+            HStack(spacing: 0) {
+                rail(area)
+                Divider().overlay(tokens.line)
+                listing(area)
             }
-            .onDrop(of: [.fileURL, .plainText], isTargeted: nil) { providers in
-                guard let pool = model.activePool else { return false }
-                let importModel = importer ?? ImportModel(session: session)
-                importer = importModel
-                return importModel.handleDrop(providers, into: .pool(pool.id))
-            }
-            // Ledger row 4(b): the row door's answer. A receipt and a refusal
-            // are told apart (ledger row 6's rule, applied where the new door
-            // is), and this area rendered the MODEL's messages nowhere at all
-            // before — the entry bar below carries only its own.
-            if let line = model.receipt ?? model.lastError {
-                Text(tokens.chromeLabel(line))
-                    .font(tokens.small)
-                    .foregroundStyle(model.receipt != nil ? tokens.muted : tokens.alarm)
-                    // lineLimit beside fixedSize in chrome (the b6dae25 class).
-                    .lineLimit(3)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 28)
-                    .padding(.bottom, 6)
-                    .textSelection(.enabled)
-            }
-            entryBar
         }
         .background(tokens.surface)
-        .task { await model.start() }
+        .task { await area.start() }
         .sheet(item: $tagSheetBlock) { target in
             BlockTagAssignmentSheet(
                 session: session, blockID: target.id, preview: target.preview)
         }
-    }
-
-    private var header: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(tokens.path(["Snippets"]))
-                .font(tokens.heading)
-                .foregroundStyle(tokens.accent)
-            Text(tokens.chromeLabel("· \(model.items.count) blocks · standalone scraps"))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-            // 13b Stage 3 (3D — N19): several pools are all REACHABLE now —
-            // the area used to show only the oldest, so any later pool
-            // ("tutorial scraps") rendered nowhere.
-            if model.pools.count > 1 {
-                VoicedMenu(
-                    tokens: tokens,
-                    label: "pool: \(PoolNaming.title(model.activePool))"
-                ) {
-                    ForEach(model.pools, id: \.id) { pool in
-                        Button(PoolNaming.title(pool)) { model.select(poolID: pool.id) }
+        .alert(
+            "Rename Group",
+            isPresented: Binding(
+                get: { renameGroupTarget != nil },
+                set: { if !$0 { renameGroupTarget = nil } }),
+            presenting: renameGroupTarget
+        ) { group in
+            TextField("Name", text: $groupNameField)
+            Button("Rename") {
+                let name = groupNameField
+                Task { await area.renameGroup(group.id, to: name) }
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+        .alert("New Group", isPresented: $newGroupAsk) {
+            TextField("Name", text: $groupNameField)
+            Button("Create") {
+                let name = groupNameField
+                Task {
+                    if let id = await area.createGroup(named: name) {
+                        area.select(groupID: id)
                     }
                 }
-                // 13b 4D (N32(b)): pools-vs-tags, said plainly at the door.
-                .help("Which pool this area shows. Pools are CONTAINERS — a scrap "
-                    + "lives in exactly one; tags are LABELS — a scrap can wear many. "
-                    + "Right-click a scrap to tag it.")
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+        .confirmationDialog(
+            deleteGroupAsk.map { "Delete the group \u{201C}\($0.name)\u{201D}?" } ?? "",
+            isPresented: Binding(
+                get: { deleteGroupAsk != nil },
+                set: { if !$0 { deleteGroupAsk = nil } }),
+            titleVisibility: .visible,
+            presenting: deleteGroupAsk
+        ) { confirm in
+            Button("Delete", role: .destructive) {
+                deleteGroupAsk = nil
+                Task { await area.deleteGroup(confirm.groupID) }
+            }
+            Button("Cancel", role: .cancel) { deleteGroupAsk = nil }
+        } message: { confirm in
+            Text(confirm.snippets == 0
+                ? "The group is empty."
+                : "Its \(confirm.snippets == 1 ? "1 snippet goes" : "\(confirm.snippets) snippets go") "
+                    + "to the Trash with it — \(TrashWindow.days) days to put it back.")
+        }
+    }
+
+    // MARK: - Masthead + toolrow
+
+    private func masthead(_ area: SnippetsAreaModel) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(tokens.path([SnippetsCopy.pageTitle]))
+                .font(tokens.heading)
+                .foregroundStyle(tokens.accent)
+            Text(tokens.chromeLabel(SnippetsCopy.whereLine(
+                snippets: area.items.count, groups: area.pools.count)))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .lineLimit(1)
+            Spacer()
+        }
+        .padding(.horizontal, 24)
+        .padding(.top, 14)
+        .padding(.bottom, 8)
+    }
+
+    private func toolrow(_ area: SnippetsAreaModel) -> some View {
+        HStack(spacing: 8) {
+            // The mockup's squarish-rounded search field (W8-2).
+            HStack(spacing: 6) {
+                Text("⌕")
+                    .font(tokens.body)
+                    .foregroundStyle(tokens.muted)
+                TextField(SnippetsCopy.searchPrompt, text: $searchText)
+                    .textFieldStyle(.plain)
+                    .font(tokens.body)
+                    .foregroundStyle(tokens.ink)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .frame(maxWidth: 340)
+            .background(tokens.card, in: RoundedRectangle(cornerRadius: 8))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8).stroke(tokens.line, lineWidth: 1))
+            VoicedMenu(
+                tokens: tokens,
+                label: tagFilter.map(SnippetsCopy.tagFilter) ?? SnippetsCopy.tagAny,
+                role: tagFilter == nil ? .quiet : .primary
+            ) {
+                Button(SnippetsCopy.tagAny) { tagFilter = nil }
+                ForEach(SnippetFilter.tagPaths(area.items), id: \.self) { path in
+                    Button("#\(path)") { tagFilter = path }
+                }
+            }
+            VoicedMenu(
+                tokens: tokens, label: SnippetsCopy.sortLabel(sort), role: .quiet
+            ) {
+                ForEach(SnippetSort.allCases, id: \.self) { option in
+                    Button(option.rawValue) { sort = option }
+                }
             }
             Spacer()
-            if let pool = model.activePool {
-                Button(tokens.chromeLabel("open as editor")) { openPool(pool.id) }
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
-                    .help("The scraps container in the full editor — type, split, fan takes")
+            if let pool = area.activePool {
+                Button(tokens.chromeLabel(SnippetsCopy.openAsEditor)) { openPool(pool.id) }
+                    .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
+                    .help("The snippets container in the full editor — type, split, fan takes")
             }
         }
-        .padding(.horizontal, 28)
-        .padding(.vertical, 12)
+        .padding(.horizontal, 24)
+        .padding(.bottom, 10)
     }
 
-    private func scrapRow(_ item: Queries.PoolItem) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(scrapPreview(item))
-                .font(tokens.body)
-                .foregroundStyle(tokens.ink)
-                .lineLimit(3)
-                .multilineTextAlignment(.leading)
-            if !item.tagPaths.isEmpty {
-                Text(item.tagPaths.map { "#\($0)" }.joined(separator: " "))
+    // MARK: - The groups rail (the ownership answer, structurally)
+
+    private func rail(_ area: SnippetsAreaModel) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            CalmSectionHeader(tokens: tokens, title: SnippetsCopy.groupsHeader)
+                .help("Groups are free-standing — no book or note owns one. "
+                    + "A snippet lives in exactly one group; tags are labels it can wear many of.")
+            railRow(
+                name: SnippetsCopy.allGroups,
+                count: area.items.count,
+                selected: area.selectedGroupID == nil
+            ) {
+                area.select(groupID: nil)
+                selection = []
+            }
+            ForEach(area.pools, id: \.id) { pool in
+                groupRow(area, pool: pool)
+            }
+            Spacer(minLength: 8)
+            Button(tokens.chromeLabel(SnippetsCopy.newGroup)) {
+                groupNameField = ""
+                newGroupAsk = true
+            }
+            .buttonStyle(CalmButtonStyle(tokens: tokens))
+            .frame(maxWidth: .infinity)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .frame(width: 196)
+    }
+
+    private func groupRow(_ area: SnippetsAreaModel, pool: Container) -> some View {
+        railRow(
+            name: PoolNaming.title(pool),
+            count: area.counts[pool.id] ?? 0,
+            selected: area.selectedGroupID == pool.id
+        ) {
+            area.select(groupID: pool.id)
+            selection = []
+        }
+        .contextMenu { groupMenu(area, pool: pool) }
+        .overlay(alignment: .trailing) {
+            Menu {
+                groupMenu(area, pool: pool)
+            } label: {
+                Text("⋯")
                     .font(tokens.small)
-                    .foregroundStyle(tokens.accent.opacity(0.85))
-                    .lineLimit(1)
+                    .foregroundStyle(tokens.muted)
+            }
+            .menuStyle(.button)
+            .buttonStyle(.plain)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .padding(.trailing, 4)
+        }
+    }
+
+    @ViewBuilder
+    private func groupMenu(_ area: SnippetsAreaModel, pool: Container) -> some View {
+        Button(SnippetsCopy.renameGroupRow) {
+            groupNameField = pool.title == "Pool" ? "" : (pool.title ?? "")
+            renameGroupTarget = pool
+        }
+        Button(SnippetsCopy.newGroupRow) {
+            groupNameField = ""
+            newGroupAsk = true
+        }
+        Divider()
+        // The ruled delete door — the menu line says where its snippets go
+        // (the mockup's caption, held to what is TRUE: the Trash road; no
+        // ⌥⌘Z claim, deleteContainer registers no structural undo).
+        Button("\(SnippetsCopy.deleteGroupRow) \u{2014} \(SnippetsCopy.deleteGroupCaption)",
+               role: .destructive)
+        {
+            let name = PoolNaming.title(pool)
+            Task {
+                let count = await area.snippetCount(in: pool.id)
+                deleteGroupAsk = GroupDeleteConfirm(
+                    groupID: pool.id, name: name, snippets: count)
             }
         }
+    }
+
+    private func railRow(
+        name: String, count: Int, selected: Bool, action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Text(tokens.chromeLabel(name))
+                    .font(tokens.small)
+                    .foregroundStyle(selected ? tokens.accent : tokens.ink)
+                    .lineLimit(1)
+                Spacer(minLength: 4)
+                Text("\(count)")
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(1)
+                    .padding(.trailing, 14)
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 5)
+            .background(
+                selected ? AnyShapeStyle(tokens.wash) : AnyShapeStyle(Color.clear),
+                in: RoundedRectangle(cornerRadius: 6))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - The listing
+
+    private func listing(_ area: SnippetsAreaModel) -> some View {
+        VStack(spacing: 0) {
+            if !selection.isEmpty {
+                bulkBar(area)
+            }
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 6) {
+                    ForEach(filtered, id: \.block.blockID) { item in
+                        card(area, item)
+                    }
+                    if filtered.isEmpty {
+                        Text(tokens.chromeLabel(
+                            area.items.isEmpty
+                                ? SnippetsCopy.emptyListing : SnippetsCopy.emptySearch))
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
+                            .padding(.vertical, 20)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                    }
+                }
+                .padding(.horizontal, 18)
+                .padding(.vertical, 10)
+            }
+            .onDrop(of: [.fileURL, .plainText], isTargeted: nil) { providers in
+                dropIn(area, providers)
+            }
+            if let line = area.receipt ?? area.lastError ?? model.receipt ?? model.lastError {
+                Text(tokens.chromeLabel(line))
+                    .font(tokens.small)
+                    .foregroundStyle(
+                        (area.receipt ?? model.receipt) != nil ? tokens.muted : tokens.alarm)
+                    // lineLimit beside fixedSize in chrome (the b6dae25 class).
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 18)
+                    .padding(.bottom, 6)
+                    .textSelection(.enabled)
+            }
+            dropzone(area)
+            entryBar(area)
+        }
+    }
+
+    private func bulkBar(_ area: SnippetsAreaModel) -> some View {
+        HStack(spacing: 8) {
+            Text(tokens.chromeLabel(SnippetsCopy.selectedLine(selection.count)))
+                .font(tokens.small)
+                .fontWeight(.semibold)
+                .foregroundStyle(tokens.ink)
+                .lineLimit(1)
+            VoicedMenu(tokens: tokens, label: SnippetsCopy.bulkMove) {
+                ForEach(area.pools, id: \.id) { pool in
+                    Button(PoolNaming.title(pool)) {
+                        let picked = orderedSelection()
+                        selection = []
+                        Task { await area.moveSnippets(picked, to: pool.id) }
+                    }
+                }
+            }
+            VoicedMenu(tokens: tokens, label: SnippetsCopy.bulkTag) {
+                if bulkTags.isEmpty {
+                    Button("No tags yet — create one in Settings") {}.disabled(true)
+                }
+                ForEach(bulkTags, id: \.id) { tag in
+                    Button(tag.path) {
+                        let picked = orderedSelection()
+                        Task { await area.applyTag(tag.id, to: picked) }
+                    }
+                }
+            }
+            Spacer()
+            Button(tokens.chromeLabel(SnippetsCopy.bulkArchive)) {
+                let picked = orderedSelection()
+                selection = []
+                Task { await area.archiveSnippets(picked) }
+            }
+            .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
+            Button(tokens.chromeLabel(SnippetsCopy.bulkDelete)) {
+                let picked = orderedSelection()
+                selection = []
+                Task { await area.deleteSnippets(picked) }
+            }
+            .buttonStyle(CalmButtonStyle(tokens: tokens, role: .danger, compact: true))
+            Button(tokens.chromeLabel(SnippetsCopy.bulkClear)) { selection = [] }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+        }
+        .padding(.horizontal, 18)
         .padding(.vertical, 8)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(tokens.card)
+        .task { bulkTags = await area.allTags() }
+    }
+
+    /// The selection in LISTING order — bulk acts land in the order she
+    /// sees, not set order.
+    private func orderedSelection() -> [String] {
+        filtered.map(\.block.blockID).filter(selection.contains)
+    }
+
+    private func card(_ area: SnippetsAreaModel, _ item: Queries.PoolItem) -> some View {
+        let picked = selection.contains(item.block.blockID)
+        return CalmCard(tokens: tokens, selected: picked) {
+            HStack(alignment: .top, spacing: 10) {
+                Text(picked ? "✓" : "○")
+                    .font(tokens.small)
+                    .foregroundStyle(picked ? tokens.accent : tokens.faint)
+                    .padding(.top, 1)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(preview(item))
+                        .font(tokens.body)
+                        .foregroundStyle(tokens.ink)
+                        .lineLimit(3)
+                        .multilineTextAlignment(.leading)
+                    HStack(spacing: 6) {
+                        ForEach(item.tagPaths, id: \.self) { path in
+                            Text("#\(path)")
+                                .font(tokens.small)
+                                .foregroundStyle(tokens.accent.opacity(0.85))
+                                .lineLimit(1)
+                        }
+                        ForEach(
+                            SnippetCardFace.metadata(
+                                activeTakes: item.block.activeVariantCount,
+                                text: item.block.text,
+                                updatedAt: item.updatedAt),
+                            id: \.self
+                        ) { part in
+                            Text(tokens.chromeLabel(part))
+                                .font(tokens.small)
+                                .foregroundStyle(tokens.faint)
+                                .lineLimit(1)
+                        }
+                        // The all-groups view says which group each row
+                        // lives in — context only where it adds anything.
+                        if area.selectedGroupID == nil, area.pools.count > 1,
+                           let home = area.pools.first(where: { $0.id == item.poolID })
+                        {
+                            Text(tokens.chromeLabel("in \(PoolNaming.title(home))"))
+                                .font(tokens.small)
+                                .foregroundStyle(tokens.faint)
+                                .lineLimit(1)
+                        }
+                    }
+                }
+                Spacer(minLength: 6)
+                Text("⣿")
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .help("Drag into an open editor — a copy with lineage; ⌥ carries the whole fan")
+            }
+        }
         .contentShape(Rectangle())
         .onDrag { PoolViewModel.dragProvider(blockID: item.block.blockID) }
-        .onTapGesture {
-            if let pool = model.activePool { openPool(pool.id) }
+        .onTapGesture(count: 2) {
+            if let pool = area.activePool { openPool(pool.id) }
         }
-        // 13b 4D (N32(c) — S4-15, her scraps vision: "each scrap is an
-        // individual item - one that can have tags added to it"): the tag
-        // door, right on the row (the canvas card's exact sheet).
-        .contextMenu {
-            Button("Tags…") {
-                tagSheetBlock = CanvasView.TagSheetBlock(
-                    id: item.block.blockID, preview: item.block.text)
-            }
-            Divider()
-            // Ledger row 14 (F1): ARCHIVE RIDES BESIDE DELETE, and it goes
-            // FIRST — the kept road before the clocked one, the order the
-            // menu bar's Block menu and the block context menu already use.
-            Button(CapabilityRegistry.capability(.archiveScrap).menuTitle()) {
-                Task { await model.archiveScrap(item.block.blockID) }
-            }
-            // Ledger row 4(b): the way out, where the thing is. Ordinary
-            // move-to-Trash — 30 days, ⌥⌘Z, the receipt says so — and NO
-            // confirm, because block-scoped deletion never asks (13j's
-            // recorded rule: notes confirm, blocks and takes do not).
-            Button(
-                CapabilityRegistry.capability(.deleteScrap).menuTitle(),
-                role: .destructive
-            ) {
-                Task { await model.deleteScrap(item.block.blockID) }
-            }
-        }
-        .help("Drag into an open editor to copy it in (⌥ carries the whole fan); "
-            + "click to open the Snippets editor; right-click to tag "
-            + "(tags are labels — the pool it lives in is its container)")
+        .onTapGesture { toggle(item.block.blockID) }
+        .contextMenu { cardMenu(area, item) }
     }
 
-    /// The standalone-block entry (the quick-entry idiom, block-flavored):
-    /// ⏎ mints ONE block in the scraps container — born standalone, never
-    /// appended to a post.
-    private var entryBar: some View {
+    @ViewBuilder
+    private func cardMenu(_ area: SnippetsAreaModel, _ item: Queries.PoolItem) -> some View {
+        Button(SnippetsCopy.openRow) {
+            if let pool = area.activePool { openPool(pool.id) }
+        }
+        Button(SnippetsCopy.tagsRow) {
+            tagSheetBlock = CanvasView.TagSheetBlock(
+                id: item.block.blockID, preview: item.block.text)
+        }
+        if area.pools.count > 1 {
+            Menu(SnippetsCopy.moveRow) {
+                ForEach(area.pools.filter { $0.id != item.poolID }, id: \.id) { pool in
+                    Button(PoolNaming.title(pool)) {
+                        Task { await area.moveSnippets([item.block.blockID], to: pool.id) }
+                    }
+                }
+            }
+        }
+        Divider()
+        // Ledger row 14 (F1): archive rides beside delete, kept road first.
+        Button(CapabilityRegistry.capability(.archiveScrap).menuTitle()) {
+            Task { await model.archiveScrap(item.block.blockID) }
+        }
+        // Ledger row 4(b): ordinary move-to-Trash, no confirm (13j's rule:
+        // notes confirm, blocks and takes do not).
+        Button(
+            CapabilityRegistry.capability(.deleteScrap).menuTitle(),
+            role: .destructive
+        ) {
+            Task { await model.deleteScrap(item.block.blockID) }
+        }
+    }
+
+    private func toggle(_ blockID: String) {
+        if selection.contains(blockID) {
+            selection.remove(blockID)
+        } else {
+            selection.insert(blockID)
+        }
+    }
+
+    private func dropIn(_ area: SnippetsAreaModel, _ providers: [NSItemProvider]) -> Bool {
+        guard let pool = area.activePool ?? model.activePool else { return false }
+        let importModel = importer ?? ImportModel(session: session)
+        importer = importModel
+        return importModel.handleDrop(providers, into: .pool(pool.id))
+    }
+
+    private func dropzone(_ area: SnippetsAreaModel) -> some View {
+        Text(tokens.chromeLabel(SnippetsCopy.dropTarget))
+            .font(tokens.small)
+            .foregroundStyle(tokens.faint)
+            .lineLimit(1)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .strokeBorder(
+                        tokens.line, style: StrokeStyle(lineWidth: 1, dash: [5, 4]))
+            )
+            .padding(.horizontal, 18)
+            .padding(.bottom, 8)
+            .onDrop(of: [.fileURL, .plainText], isTargeted: nil) { providers in
+                dropIn(area, providers)
+            }
+    }
+
+    /// The standalone-snippet entry (the quick-entry idiom): ⏎ mints ONE
+    /// block in the selected group — born standalone, never appended to a
+    /// note.
+    private func entryBar(_ area: SnippetsAreaModel) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Divider().overlay(tokens.line)
-            Text(tokens.chromeLabel("new block — start typing · ⏎ keeps it as a standalone block"))
+            Text(tokens.chromeLabel(SnippetsCopy.entryCue))
                 .font(tokens.small)
                 .foregroundStyle(tokens.faint)
                 .padding(.top, 10)
@@ -208,7 +584,7 @@ struct BlocksAreaView: View {
                     .foregroundStyle(tokens.ink)
                     .focused($entryFocused)
                     .lineLimit(1...4)
-                    .onSubmit { submit() }
+                    .onSubmit { submit(area) }
                 if tokens.showsBlockCursor && entryText.isEmpty && !entryFocused {
                     Rectangle()
                         .fill(tokens.accent)
@@ -235,27 +611,27 @@ struct BlocksAreaView: View {
                     .padding(.bottom, 8)
             }
         }
-        .padding(.horizontal, 28)
+        .padding(.horizontal, 18)
         .background(tokens.card)
         .onTapGesture { entryFocused = true }
     }
 
-    private func scrapPreview(_ item: Queries.PoolItem) -> String {
+    private func preview(_ item: Queries.PoolItem) -> String {
         let text = item.block.text ?? ""
-        return text.isEmpty ? "(empty block)" : text
+        return text.isEmpty ? "(empty snippet)" : text
     }
 
-    private func submit() {
+    private func submit(_ area: SnippetsAreaModel) {
         let text = entryText
         entryText = ""
         lastError = nil
         Task {
             let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !trimmed.isEmpty else { return }
-            var poolID = model.activePool?.id
+            var poolID = area.activePool?.id ?? model.activePool?.id
             if poolID == nil { poolID = await model.createPool() }
             guard let poolID else {
-                lastError = "No blocks container could be created."
+                lastError = "No snippets group could be created."
                 return
             }
             do {
@@ -263,7 +639,7 @@ struct BlocksAreaView: View {
                     try ops.newBlock(in: poolID, text: text)
                 }
             } catch {
-                lastError = "New block refused: \(error)"
+                lastError = "New snippet refused: \(error)"
             }
         }
     }
