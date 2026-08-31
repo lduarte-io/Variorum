@@ -380,11 +380,15 @@ struct PostDetailView: View {
     /// A tray door pressed while the tray shows a REVEAL closes it too — the
     /// panel identity is the case, and the icon's case carries no reveal.
     private func toggle(_ panel: InspectorPanel) {
-        if panel.isTray {
-            inspectorPanel = inspectorPanel?.isTray == true ? nil : panel
-            return
+        // Act 10 item 10's principle — regions visibly become things or
+        // visibly leave: the column animates in and out instead of popping.
+        withAnimation(.easeInOut(duration: 0.2)) {
+            if panel.isTray {
+                inspectorPanel = inspectorPanel?.isTray == true ? nil : panel
+                return
+            }
+            inspectorPanel = inspectorPanel == panel ? nil : panel
         }
-        inspectorPanel = inspectorPanel == panel ? nil : panel
     }
 
     /// R67 — the post's identity, always visible and renameable in place.

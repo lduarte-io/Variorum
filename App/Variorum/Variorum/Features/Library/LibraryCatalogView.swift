@@ -68,20 +68,38 @@ final class LibraryCatalogModel {
         listedNoteIDs.filter { selectedPosts.contains($0) }
     }
 
-    /// **A click on a note row. Returns whether the note should OPEN.**
-    ///
-    /// The whole of P-0's routing, in one place a test can call: the
-    /// modifiers decide, `NoteRowSelection` says what the pick becomes, and
-    /// the answer tells the row whether this was an opening click at all.
-    @discardableResult
-    func clickNoteRow(_ postID: String, modifiers: NoteRowClickModifiers) -> Bool {
+    /// **The info panel's subject** (Act 10 item 10 — her ruled click
+    /// model): the row a body click selected, note or book. The panel
+    /// renders while this is set; navigation, a mode switch and a listing
+    /// that no longer shows the row all clear it.
+    var infoHit: Queries.CatalogHit?
+
+    /// **A click on a note row's BODY.** Her ruled model: a plain click
+    /// SELECTS and shows the info panel (never opens — the title and a
+    /// double-click are the opening clicks, routed at the view); ⌘ toggles
+    /// the pick; ⇧ extends the range. The modifiers decide,
+    /// `NoteRowSelection` says what the pick becomes, and the panel follows
+    /// the row she last touched.
+    func clickNoteRow(_ postID: String, modifiers: NoteRowClickModifiers) {
         let intent = NoteRowSelection.intent(for: modifiers)
         let next = NoteRowSelection.apply(
             intent, row: postID, to: selectedPosts,
             anchor: selectionAnchor, order: listedNoteIDs)
         selectedPosts = next.selection
         selectionAnchor = next.anchor
-        return intent == .open
+        infoHit = hits.first { $0.id == postID && $0.kind == .post }
+    }
+
+    /// A click on a BOOK row's body — same ruling, the book's facts.
+    func selectBook(_ hit: Queries.CatalogHit) {
+        selectedPosts = []
+        selectionAnchor = nil
+        infoHit = hit
+    }
+
+    /// The panel's own close door.
+    func closeInfo() {
+        infoHit = nil
     }
 
     /// Drop the pick. Called when the list stops being the surface showing it
@@ -91,6 +109,7 @@ final class LibraryCatalogModel {
     func clearSelection() {
         selectedPosts = []
         selectionAnchor = nil
+        infoHit = nil
     }
 
     func deselect(_ postIDs: [String]) {
@@ -118,6 +137,12 @@ final class LibraryCatalogModel {
     /// left, and leaves a pick whose rows are still drawn alone. The mode
     /// rule stays a CLEAR because leaving List mode draws no selection at all.
     private func pruneSelectionToListing() {
+        // The info panel follows the listing exactly as the pick does: a
+        // panel describing a row the list no longer draws is the same
+        // invisible-state hazard.
+        if let info = infoHit, !hits.contains(where: { $0.id == info.id }) {
+            infoHit = nil
+        }
         // The anchor is checked even with an empty pick: toggling the last
         // row off leaves an anchor behind, and a ⇧-click aimed from a row the
         // list no longer draws is the same invisible-state hazard.
@@ -472,6 +497,26 @@ struct LibraryCatalogView: View {
         .onReceive(NotificationCenter.default.publisher(for: .variorumNotesDeleted)) { _ in
             Task { await model.search() }
         }
+        // Act 10 item 10 — HER RULED PANEL: the library's right region, the
+        // note-side inspector's sibling (same column widths, so moving
+        // between a note and the library keeps the right edge one steady
+        // thing). Presented while a row-body click's subject stands.
+        .inspector(isPresented: Binding(
+            get: { model.infoHit != nil },
+            set: { if !$0 { model.closeInfo() } })
+        ) {
+            if let hit = model.infoHit {
+                LibraryInfoPanel(
+                    session: session, hit: hit,
+                    multiCount: model.selectedPosts.count,
+                    onOpen: {
+                        openHit(hit)
+                    },
+                    onClose: { model.closeInfo() })
+                    .id("info-\(hit.id)")
+                    .inspectorColumnWidth(min: 280, ideal: 420)
+            }
+        }
         .overlay(alignment: .bottomLeading) {
             if let error = model.lastError ?? library.lastError {
                 Text(error)
@@ -490,6 +535,14 @@ struct LibraryCatalogView: View {
                     .padding(6)
             }
         }
+    }
+
+    /// Open a hit at its own kind's destination — the one opening road the
+    /// title click, the double-click, the context menu and the panel's Open
+    /// door all take.
+    private func openHit(_ hit: Queries.CatalogHit) {
+        model.closeInfo()
+        onOpen(hit.kind == .book ? .reading(hit.id) : .post(hit.id))
     }
 
     /// The ⌘-click pick, in the order the LIST shows it (13l Act 2, item 3).
@@ -604,7 +657,11 @@ struct LibraryCatalogView: View {
                     ForEach(books, id: \.id) { hit in
                         HStack {
                             Image(systemName: "book").foregroundStyle(tokens.muted)
-                            Text(hit.title).font(tokens.body)
+                            // The TITLE opens instantly, as today (her click
+                            // model — the body selects, the words open).
+                            Text(hit.title)
+                                .font(tokens.body)
+                                .onTapGesture { openHit(hit) }
                             if let detail = hit.detail {
                                 Text(tokens.chromeLabel(detail))
                                     .font(tokens.small)
@@ -612,7 +669,13 @@ struct LibraryCatalogView: View {
                             }
                         }
                         .contentShape(Rectangle())
-                        .onTapGesture { onOpen(.reading(hit.id)) }
+                        // Double-click anywhere opens (before the single so
+                        // the two disambiguate); a body click selects and
+                        // shows the book's info panel — her ruled model.
+                        .onTapGesture(count: 2) { openHit(hit) }
+                        .onTapGesture { model.selectBook(hit) }
+                        .listRowBackground(
+                            model.infoHit?.id == hit.id ? tokens.wash : Color.clear)
                     }
                 }
             }
@@ -750,9 +813,12 @@ struct LibraryCatalogView: View {
 
     private func postRow(_ hit: Queries.CatalogHit) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
+            // The TITLE opens instantly, as today — her click model keeps
+            // this road exactly.
             Text(hit.title)
                 .font(tokens.body)
                 .foregroundStyle(tokens.ink)
+                .onTapGesture { openHit(hit) }
             if let date = hit.detail {
                 Text(date).font(tokens.small).foregroundStyle(tokens.muted)
             }
@@ -764,13 +830,14 @@ struct LibraryCatalogView: View {
             Spacer()
         }
         .contentShape(Rectangle())
-        // **P-0** (13l, the end-of-phase ladder): a bare tap swallowed the
-        // click before `List(selection:)` could see it AND could not tell one
-        // modifier from another, so ⌘-click opened the note and the bulk bar
-        // could never appear. The routing is `NoteRowSelection`'s now, and
-        // the row only opens when the click was an opening one.
+        // Act 10 item 10 — her click model, on P-0's reachable routing: a
+        // DOUBLE-CLICK anywhere opens (it weirdly didn't); a single body
+        // click routes through the model — select + info panel, or the
+        // ⌘/⇧ pick. The title's own tap (in the row above) still opens
+        // instantly.
+        .onTapGesture(count: 2) { openHit(hit) }
         .onTapGesture {
-            if model.clickNoteRow(hit.id, modifiers: .current) { onOpen(.post(hit.id)) }
+            model.clickNoteRow(hit.id, modifiers: .current)
         }
         .draggable(hit.id)
         .contextMenu { postRowMenu(hit) }

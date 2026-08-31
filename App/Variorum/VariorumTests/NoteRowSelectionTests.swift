@@ -51,7 +51,9 @@ private func withCatalog<T>(
 @Suite("What a click on a note row means (13l P-0)")
 struct NoteRowSelectionRuleTests {
     @Test func theModifiersDecide() {
-        #expect(NoteRowSelection.intent(for: .none) == .open)
+        // Act 10 item 10 — her click model: a plain body click SELECTS
+        // (the panel follows); the title and a double-click open.
+        #expect(NoteRowSelection.intent(for: .none) == .select)
         #expect(NoteRowSelection.intent(for: .command_) == .toggle)
         #expect(NoteRowSelection.intent(for: .shift_) == .extendRange)
         // ⌘ wins a ⌘⇧-click: "toggle this one" cannot surprise.
@@ -99,13 +101,15 @@ struct NoteRowSelectionRuleTests {
         #expect(pick.anchor == "b")
     }
 
-    /// PROVISIONAL (QUESTIONS #79) — pinned so the ruling has something to
-    /// change rather than something to discover.
-    @Test func aPlainClickDropsThePick() {
+    /// **#79's PROVISIONAL, RESOLVED by her Act 10 item 10 ruling:** a
+    /// plain click REPLACES the pick with the clicked row (select + show
+    /// info) — the pick still has its exit, and the panel always describes
+    /// the row she last touched.
+    @Test func aPlainClickReplacesThePickWithThatRow() {
         let pick = NoteRowSelection.apply(
-            .open, row: "c", to: ["a", "b"], anchor: "a", order: ["a", "b", "c"])
-        #expect(pick.selection.isEmpty)
-        #expect(pick.anchor == nil)
+            .select, row: "c", to: ["a", "b"], anchor: "a", order: ["a", "b", "c"])
+        #expect(pick.selection == ["c"])
+        #expect(pick.anchor == "c")
     }
 }
 
@@ -132,22 +136,25 @@ struct NoteRowRoutingTests {
             await model.search()
             #expect(Set(model.listedNoteIDs) == Set(ids))
 
-            #expect(model.clickNoteRow(ids[0], modifiers: .command_) == false,
-                    "a ⌘-click is not an opening click")
+            model.clickNoteRow(ids[0], modifiers: .command_)
             #expect(model.selectedPosts == [ids[0]])
 
-            #expect(model.clickNoteRow(ids[2], modifiers: .command_) == false)
+            model.clickNoteRow(ids[2], modifiers: .command_)
             #expect(model.selectedPosts == [ids[0], ids[2]])
         }
     }
 
-    /// …and a plain click still opens, which is the half that must not break.
-    @Test func aPlainClickStillOpens() async throws {
+    /// …and a plain body click SELECTS and feeds the info panel (Act 10
+    /// item 10 — her ruled model; opening moved to the title, the
+    /// double-click and the panel's own door).
+    @Test func aPlainClickSelectsAndShowsTheInfoPanel() async throws {
         try await withCatalog { model, session in
             let ids = try await seed(session, ["one", "two"])
             await model.search()
-            #expect(model.clickNoteRow(ids[0], modifiers: .none) == true)
-            #expect(model.selectedPosts.isEmpty)
+            model.clickNoteRow(ids[0], modifiers: .none)
+            #expect(model.selectedPosts == [ids[0]])
+            #expect(model.infoHit?.id == ids[0], "the panel follows the click")
+            #expect(model.infoHit?.kind == .post)
         }
     }
 
@@ -179,7 +186,7 @@ struct NoteRowRoutingTests {
             let listed = model.listedNoteIDs
 
             model.clickNoteRow(listed[0], modifiers: .command_)
-            #expect(model.clickNoteRow(listed[3], modifiers: .shift_) == false)
+            model.clickNoteRow(listed[3], modifiers: .shift_)
             #expect(model.selectedNotesInListOrder == listed)
         }
     }

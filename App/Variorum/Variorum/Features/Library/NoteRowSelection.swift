@@ -63,9 +63,19 @@ nonisolated struct NoteRowClickModifiers: Equatable, Sendable {
 }
 
 /// What the click means.
+///
+/// **Act 10 item 10 — HER CLICK MODEL, ruled at the sitting:** a click on
+/// the ROW BODY selects and shows the info panel (it used to be a dead
+/// highlight); a click on the TITLE TEXT still opens instantly, as today;
+/// a DOUBLE-CLICK anywhere on the row opens. The title and double-click
+/// roads call open directly at the view (no modifier logic to run), so the
+/// intent vocabulary here is the modifier-bearing single click's.
 nonisolated enum NoteRowIntent: Equatable, Sendable {
-    /// Plain click — open the note. The shipped behaviour, unchanged.
-    case open
+    /// Plain click on the row body — select this one row and show its info
+    /// panel (her ruling; supersedes the shipped plain-click-opens and
+    /// resolves QUESTIONS #79's PROVISIONAL: a plain click REPLACES the
+    /// pick with this row, so the pick still has its exit).
+    case select
     /// ⌘-click — add this row to the pick, or take it out again.
     case toggle
     /// ⇧-click — take everything from the anchor to here.
@@ -79,7 +89,7 @@ nonisolated enum NoteRowSelection {
         // "toggle this one" is the outcome that cannot surprise.
         if modifiers.command { return .toggle }
         if modifiers.shift { return .extendRange }
-        return .open
+        return .select
     }
 
     /// The pick and the anchor after a click on `row`.
@@ -90,11 +100,10 @@ nonisolated enum NoteRowSelection {
     ///   ordered answer has to come from the list).
     /// - A ⇧-click with no anchor picks that one row: there is no range yet,
     ///   and refusing would be a door that does nothing.
-    /// - A plain click CLEARS the pick. Every Mac list behaves that way, and
-    ///   without it a pick has no exit but deleting it — she would ⌘-click
-    ///   three notes, change her mind, and the bar would follow her around.
-    ///   **PROVISIONAL** (QUESTIONS #79): the alternative is to leave the pick
-    ///   alone so opening one note to look at it does not lose the other two.
+    /// - A plain click REPLACES the pick with this one row (her Act 10
+    ///   ruling — select + show info). Every Mac list behaves that way, and
+    ///   the pick keeps its exit: click anywhere else and the three she
+    ///   ⌘-picked collapse to the one she is looking at.
     static func apply(
         _ intent: NoteRowIntent,
         row: String,
@@ -103,8 +112,8 @@ nonisolated enum NoteRowSelection {
         order: [String]
     ) -> (selection: Set<String>, anchor: String?) {
         switch intent {
-        case .open:
-            return ([], nil)
+        case .select:
+            return ([row], row)
         case .toggle:
             var next = selection
             if next.contains(row) { next.remove(row) } else { next.insert(row) }
