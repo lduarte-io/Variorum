@@ -78,8 +78,12 @@ struct VariorumApp: App {
                         // the next unlock composes fresh ones over the
                         // fresh session, which is exactly the "deferred
                         // starts begin only after the stack exists" rule.
-                        bootstrap.onWillLock = { @MainActor in
-                            await session.quitFinalize.finalizeAll()
+                        // Pre-13u Act 9 (17a P3): via the factory, which
+                        // ALSO runs the active editor's full finalize —
+                        // the open tail and a pending cross-block compound
+                        // were dropped by the registry-only shape (see
+                        // MacWillLock.swift).
+                        bootstrap.onWillLock = macWillLock(session: session) {
                             services?.stop()
                             services = nil
                         }
