@@ -525,6 +525,7 @@ verifies the wave's diff. Adjudicated shapes:
    honestly — it passes today and that is its value.
 
 **ONE Opus fix session, the six items above, then this R28 unit CLOSES.**
+
 Fence and environment exactly as the batch brief (own armed simulator,
 private DerivedData, deleted after; full mobile suite at the end —
 baseline 659/98 + 2 known issues — final line quoted; the load-flaky perf
@@ -535,3 +536,259 @@ production or fixture — and per the record's own §4 rule, restore
 reverts from a pre-revert copy, never `git checkout --` on a file the
 wave also edits. Append a FIX WAVE RESULTS section to THIS file before
 the final message.
+
+---
+
+# FIX WAVE RESULTS (Opus fix session, 2026-08-31)
+
+**All six items EXECUTED; nothing declined, nothing beyond the six.** One
+adjudicated *mechanism* was traced not to fire and was replaced by one that
+does — named and justified under MINOR 2 below, because the ruled INTENT
+(host-level, never a per-verb cross-feature call) is what the substitute
+honours.
+
+## Dispositions
+
+| # | Item | Disposition | Where | Proof |
+|---|------|-------------|-------|-------|
+| **MINOR 1** | `stranded` neither windowed nor marked; two "all four" claims | **FIXED — shape (a), windowed** + the two claims made true + the Mac's identical gap RECORDED | `MobileNoteTray.swift` (`adopt`, `leavingSection`) · `MobileNoteTrayTests.swift` (`everyTrayListingIsWindowedAndSaysSo` + `seedCountingOriginals`) · `KnownIssuesAndTechDebt.md` (the Mac clause) · the record's §D1 | red-on-old, PRODUCTION revert, 3 issues |
+| **MINOR 2** | the lens fallback chip goes stale | **FIXED — host-level refresh at the blocks sheet's DISMISSAL** (the loud direction healed and driven end to end; the quiet direction stated, not silently claimed) | `MobileWriteView.swift` · new pin `puttingATakeBackClearsTheLensChipsFallbackMarker` | red-on-old, PRODUCTION revert, 2 issues |
+| **MINOR 3** | the `MobileTrayRowFace` fork lives only in a file that closes | **FIXED — two clauses on the tracked row** (+ a pointer from the record's residue list) | `KnownIssuesAndTechDebt.md` forked-brains row · the record's §5 | notes only — no code, no pin |
+| **NIT 1** | a vacuous assertion in the door pin | **FIXED — rewritten to the two assertions that carry the comment's meaning** | `MobileNoteTrayTests.swift:712-716` | liveness proven by PRODUCTION revert, 3 issues — and the same run demonstrates the old line would have stayed green |
+| **NIT 2** | the A2 red-on-old quote does not match the shipped tree | **FIXED — RE-CAPTURED SOLO** and the record's quote replaced, with the stacking named | the record's §2/A2 | the capture itself (below) |
+| **NIT 3** | the purge confirm is never driven in the real composition | **LANDED — labelled NEW COVERAGE** (it passes today; that is its value) | new pin `theDeleteNowConfirmDrivesInsideTheRealBlocksSheet` | no red claimed, and the pin's own docstring says so |
+
+## The reds, quoted — every one a BEHAVIOURAL revert of PRODUCTION code
+
+Zero fixture edits in any of the three. Each revert was restored from a
+**pre-revert copy** of its own file (`shasum`-verified against the copy), never
+with `git checkout --` — the record's §4 incident rule, which is the rule this
+wave inherited and used.
+
+### MINOR 1 — reverted: `MobileNoteTray.swift` back to the shipped shape
+
+`adopt`'s `stranded` back to the raw `snapshot.originals.filter { … }` and the
+`strandedTruncated` marker removed from `leavingSection` — i.e. exactly what
+shipped at `8a956b3`.
+
+```
+✘ Test everyTrayListingIsWindowedAndSaysSo() recorded an issue at
+  MobileNoteTrayTests.swift:546:13: Expectation failed:
+  (tray.stranded.count == 2 → false) && (tray.strandedTruncated → <not evaluated>)
+↳ stranded was 3, truncated false
+✘ Test everyTrayListingIsWindowedAndSaysSo() recorded an issue at
+  MobileNoteTrayTests.swift:557:17: Expectation failed:
+  (rendered.deletedTruncated → true) && (rendered.strandedTruncated → false)
+↳ deleted 2 / stranded 3
+✘ Test everyTrayListingIsWindowedAndSaysSo() recorded an issue at
+  MobileNoteTrayTests.swift:560:17: Expectation failed:
+  (surface.visibleLabels.filter { $0 == marker }.count → 1) == 2
+✘ Test run with 1 test in 1 suite failed after 1.476 seconds with 3 issues.
+```
+
+The third issue is the one that matters most and is worth reading twice: over a
+note with SIX deleted halves and THREE counting originals at a window of two,
+the shared filterless sentence appeared **once** — the deleted listing's — while
+three stranded rows rendered whole underneath it. The reverted run's own label
+dump shows exactly that: two `Put back deleted block` rows, **three** `Put back
+preserved original` rows, and one `Showing the first 2.`
+
+**The fixture had to come from the STORE, and that is recorded at the code.**
+`Queries.PreservedOriginal` carries no public initializer, so this listing
+cannot be hand-built the way `TrayItem`/`TrayTake` can, and adding one would be
+a `Sources/` edit — which is why the pin's `Snapshot` had `originals` empty in
+the first place and why the "all four" docstring went unchallenged. The new
+`seedCountingOriginals` helper mints them for real (fan → divide → delete both
+halves), which is the same state `anOriginalJoinsLeavingOnlyWhenItsFamilyStarts
+CountingDown` already exercises.
+
+**One residual is recorded rather than papered over**, at the code and on the
+KnownIssues row: the +1 probe row is consumed by the COUNTING filter, so the
+marker fires when the counting subset overflows the window — a note whose
+`window + 1` originals are mostly non-counting can still hide counting ones
+behind the SQL cut. Closing that means pushing the filter into
+`preservedOriginals`' own SQL, which is `Sources/` work.
+
+### MINOR 2 — reverted: `MobileWriteView.swift`, the blocks sheet's `onDismiss:` removed
+
+```
+✘ Test puttingATakeBackClearsTheLensChipsFallbackMarker() recorded an issue at
+  MobileNoteTrayTests.swift:847:17: Expectation failed: !((surface.visibleLabels →
+  ["Rename Note", "Copy Note", "Find in Note", "Lock Note", "Note Actions",
+  "Books holding this note", "Entry Date", "Tags", "More Info", "Blocks",
+  "Lenses — a pick fell back"]).contains(MobileWriteScreen.lensFallbackChipLabel →
+  "Lenses — a pick fell back") → true)
+✘ Test puttingATakeBackClearsTheLensChipsFallbackMarker() recorded an issue at
+  MobileNoteTrayTests.swift:850:17: Expectation failed: (surface.visibleLabels →
+  [… "Blocks", "Lenses — a pick fell back"]).contains("Lenses")
+✘ Test run with 1 test in 1 suite failed after 11.388 seconds with 2 issues.
+```
+
+That is the finding's loud direction, driven end to end through the REAL screen
+and its REAL sheets, exactly as the adjudication's script asks: look through a
+lens whose pick is deleted → close its sheet → the chip wears the fallback
+label → open `blocks ▸ leaving`, open the takes fold, **Put back** → close that
+sheet → the chip must be honest again **without reopening the lens sheet**. On
+the shipped tree it keeps announcing a fallback that no longer exists, to
+VoiceOver as well as to the eye.
+
+**THE ONE DEVIATION FROM THE ADJUDICATED LETTER, stated plainly.** The
+adjudication named `.task { await lenses.refresh() }` (or on-appear) on
+`MobileWriteScreen`. **Traced, that mechanism cannot fire for either
+direction**, and shipping it would have been a fix that fixes nothing:
+
+- presenting and dismissing a `.sheet` does **not** re-run the presenter's
+  `.task` (the presenter never disappears), so the refresh would happen once, at
+  mount, and never again — and the staleness is created *after* mount, by a door
+  inside a sheet;
+- at mount **no lens is active** (`activeLensID` is session-local `@State` and
+  starts nil), so `activeLensHasFallback` is `false` regardless of what `rows`
+  holds — a mount-time read could not change the marker in either direction.
+
+So the refresh rides the blocks sheet's **dismissal** instead. This keeps the
+adjudicated INTENT exactly — the HOST composes the two features and does the
+refresh, rather than the tray reaching into the lens model, which is the
+feature-to-feature call CLAUDE.md forbids and which the reviewer also declined —
+and it fires at precisely the moment the stale marker becomes visible, since the
+presented sheet covers the chip while it is up. Cost: one bounded post-scoped
+read per sheet close.
+
+**The quiet direction is NOT claimed fixed, and here is why** (the adjudication
+allowed "state so", and this states more than the pin): archiving a lens's
+picked take reaches the store only through the **takes browser**
+(`MobileTakesBrowserController.archive` / `.delete` — the block ⋯ has no
+take-archive row, only `Takes…`, which opens that browser). That browser is a
+UIKit `UIView` living *inside* the editor's text view, not a sheet: it is not
+`@Observable`, it publishes through an `onChanged` callback the UIKit view owns,
+and it never dismisses anything the host can hook. There is therefore **no
+host-level signal for it today**, and manufacturing one would mean either a
+cross-feature call from the browser (the shape both the reviewer and the
+adjudication declined) or a held observation on the lens model that would re-run
+at autosave rate while she types — which is the exact P1/P3 discipline this
+batch's own tray header is careful about. Recorded here rather than smuggled
+into a fix, and it is a strictly narrower stale window than the one just closed:
+the loud direction was created by doors THIS batch shipped.
+
+### NIT 1 — reverted: `MobileBlockList.swift`, the sheet's opening segment `.inTheNote` → `.archived`
+
+```
+✘ Test theBlocksSheetCarriesTheTrayInThreeSegments() recorded an issue at
+  MobileNoteTrayTests.swift:712:17: Expectation failed:
+  strip.contains { $0.contains("A fanned block") }
+↳ labels were ["blocks", "done", "in the note", "archived", "leaving",
+  "Archived — kept, no clock", "The block that stays.",
+  "archived jun 30, 2026 at 6:00 pm  ·  kept — no clock", "Put back archived block"]
+✘ Test theBlocksSheetCarriesTheTrayInThreeSegments() recorded an issue at
+  MobileNoteTrayTests.swift:714:17: Expectation failed:
+  !(strip.contains { $0.contains("The block that stays") } → <not evaluated>)
+✘ Test run with 1 test in 1 suite failed after 3.193 seconds with 3 issues.
+```
+
+**And the same run demonstrates the vacuity the NIT names**, which is worth more
+than an argument: the old line was
+`#expect(strip.contains { $0.contains("The block that stays") == false })`, and
+the label array above contains `"blocks"` — which does not contain that string —
+so the old predicate is **true under this very revert**. It would have stayed
+green while the sheet opened on the wrong segment; the replacement pair goes red.
+
+### NIT 2 — the A2 re-capture, taken SOLO
+
+`takesShown = true` at `MobileNoteTray.swift:457` applied to the **shipped**
+tree (before any of this wave's edits), nothing else changed, the file then
+restored from a pre-revert copy (`shasum` verified). The true output is now in
+the record at §2/A2, with a banner naming what happened: the old quote's second
+slot read `"kept — no clock"`, which the shipped `leavingSection` cannot render
+there — that capture had **A4** also applied. The red itself was always real and
+lands at the recorded `:180:17` with the recorded assertion.
+
+## New coverage (NIT 3), labelled as such
+
+`theDeleteNowConfirmDrivesInsideTheRealBlocksSheet` mounts the tray inside
+`MobileBlockListSheet`'s `ScrollView` → `LazyVStack` — production's own
+composition — switches to `leaving`, opens the disclosure, activates
+`Delete Now take`, requires a live `UIAlertController`, asserts `purge_intent`
+is still 0 (asking is not doing), drives the alert's own installed action via
+`tapAlertAction`, and asserts exactly one intent. **It passes on the shipped
+tree**, as the reviewer found; its docstring says so in those words. Its value
+is that the one composition this codebase's history says to pin (§15's trap (b);
+batch 4.5b's five dead confirm doors) was pinned nowhere.
+
+## Files touched
+
+**Production (2, both `VariorumMobile/Features/Write/`):**
+- `MobileNoteTray.swift` — `strandedTruncated`; `adopt` windows the counting
+  filter through `TrashListing.windowed`; `leavingSection` renders its marker;
+  the residual documented at the code.
+- `MobileWriteView.swift` — the blocks sheet's `onDismiss:` lens refresh, with
+  the whole reasoning (why the host, why dismissal) at the call site.
+
+**Tests (1):**
+- `MobileNoteTrayTests.swift` — `seedCountingOriginals` + `dismissSheet`
+  helpers; `everyTrayListingIsWindowedAndSaysSo` extended to four-of-four **and**
+  to the rendered marker; NIT 1's pair; two new pins. **+2 tests, +0 suites.**
+
+**Notes (3, not fenced):**
+- `KnownIssuesAndTechDebt.md` — the Mac's `TrayViewModel.adopt` gap on the
+  *"Bounded view windows show markers, not more"* row (owner 12); the
+  `TrayRowFace`/`TrayTakeFace` and `LensFallbackCopy` clauses on the
+  forked-brains row.
+- `notes/plans/mobile-batch-6b-record.md` — §D1's four-of-four annotated, §2/A2
+  re-captured, §5's residue pointed at the tracked row.
+- this file.
+
+## Suite, environment, fence
+
+**Final line, verbatim:**
+
+```
+✘ Test run with 661 tests in 98 suites passed after 298.285 seconds with 2 known issues.
+** TEST SUCCEEDED **
+```
+
+661 = the 659 baseline + this wave's 2 new pins; 98 suites unchanged. The **2
+known issues are the same single documented diagnostic test** as the baseline's
+(`MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsent
+Door`, one `withKnownIssue` block recording two) — no other test records an
+issue. **`MobilePerfWalkTests.typingAtTheViewportHoldsThePerKeystrokeBudgetAt
+100k`** — the known load-flaky pin — **passed**, so no isolated re-run was owed.
+
+**One aborted full run is reported rather than quietly re-run.** The first
+attempt died with *"Restarting after unexpected exit, crash, or test timeout"*
+inside `MobileFilterTests` — the filter batch's suite — and its truncated
+second-launch total (511/68) is what made that attempt read as `TEST FAILED`.
+Adjudicated **not this wave's**, on two independent grounds and not on
+plausibility: **(1) run order** — the crash landed at log line 1134, and
+`Suite "Mobile note tray …"` did not start until line 1378, so this wave's suite
+had not executed at all when it happened; **(2) isolation** — the whole
+`MobileFilterTests` suite re-ran **12/1 green** on the same simulator. This
+wave's diff is two Write-feature files and one test file, none of which the
+filter surface reads. The clean re-run above is the recorded result.
+
+**Environment:** own fresh simulator `Variorum-6b-fixwave` (iPhone 17 Pro, iOS
+26.2 — the only iOS-26 runtime here; every iPhone 16-series sim on this machine
+is iOS 18.3 and is not a valid destination for an iOS-26 deployment target),
+`ApplicationAccessibilityEnabled` armed and **read back `1`**; private
+`-derivedDataPath` under this session's scratchpad; the simulator **deleted at
+the end**. `Package.resolved` did **not** drift and nothing was swept in. No
+Release build, no install, no push; the real store untouched; the live Mac app
+never quit.
+
+**Fence, re-derived before the pathspec-limited commit:**
+
+```
+git diff --name-only -- Sources/ App/Variorum/Shared App/Variorum/Variorum \
+  "*.xcodeproj" "*.pbxproj"                    →  (empty)
+git status --porcelain -- Sources/ App/Variorum/Shared App/Variorum/Variorum \
+  "*.xcodeproj" "*.pbxproj"                    →  (empty — nothing untracked there)
+git status --porcelain -- …/EditorBrain        →  (empty)
+```
+
+Zero core, zero `Shared/`, zero Mac app, zero `EditorBrain/`, zero schema, zero
+build config, zero `Package.resolved`.
+
+## Nothing declined
+
+All six executed. The one substitution (MINOR 2's mechanism) is argued above
+rather than assumed, and the one thing NOT claimed — the quiet direction's
+heal — is named with its traced reason and left with no false promise anywhere
+in the code or the record.

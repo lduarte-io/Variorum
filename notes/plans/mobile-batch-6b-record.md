@@ -54,7 +54,17 @@ READ-only), `Shared/BlockHistoryFace.swift`, `Shared/RecoveryCopy.swift`,
   rooms' value) through the shared `TrashListing.windowed`, each with a
   visible truncation marker — the FILTERLESS rooms' shared sentence
   (`MobileRoomListing.truncationMarker(shown:)`), because the tray has no
-  filter to narrow.
+  filter to narrow. **⚠️ This sentence was TRUE OF THREE at ship and became
+  true of four at the cold review's fix wave** (2026-08-31, MINOR 1):
+  `stranded` was bounded in SQL but handed over raw — no `prefix`, no flag,
+  no marker — so a note with ≥ 201 counting originals rendered the probe row
+  as content and said nothing. P1 itself was never breached (the `LIMIT`
+  bounds the read either way); the visible-truncation half was. Fixed in
+  `adopt` + `leavingSection`, and `everyTrayListingIsWindowedAndSaysSo` now
+  asserts four of four *and* that the marker renders (its `Snapshot` had
+  never populated `originals` at all, which is why the gap was invisible).
+  The Mac carries the identical gap and is recorded, not fixed — the
+  KnownIssues *"Bounded view windows show markers, not more"* row, owner 12.
 - **The observation is HELD, and only while its segment is on screen.**
   `trayBlocks`/`trayTakes` read `variant`, so a held read re-runs at autosave
   rate — which costs nothing here because the sheet covers the page while it
@@ -252,18 +262,41 @@ counts as production — it is what the app seeds), never a test edit.
 **A2 — the takes fold OPEN by default** (`takesShown = true`), against her G5
 *"albeit maybe not shown by default"*:
 
+> **⚠️ RE-CAPTURED 2026-08-31, SOLO** — the cold review's **NIT 2**. The quote
+> this paragraph used to carry showed `"kept — no clock"` in the second slot,
+> which the shipped `leavingSection` cannot render there: it fills that slot
+> with `RecoveryCopy.trayLeavingExplainer`. That capture had been taken with a
+> second revert also in the tree (**A4**, *"the Leaving header rendered
+> `archivedForever`"* — the description that matches it), so a record
+> presenting nine reverts as an individually-captured set was, in one place,
+> presenting a stacked one. The red itself was never in doubt — the reviewer
+> reproduced it at the same `:180:17` with the same assertion. Below is the
+> true output, taken with **A2 alone** applied to the shipped tree
+> (`MobileNoteTray.swift:457`, `takesShown = true`, nothing else) and the file
+> then restored from a pre-revert copy, per §4's own rule.
+
 ```
 ✘ Test deletedTakesFoldClosedAndNameTheirBlockWhenOpened() recorded an issue at
-  MobileNoteTrayTests.swift:180:17: Expectation failed: !((closed → ["Leaving — on the
-  30-day clock", "kept — no clock", "1 deleted take", "the spare take",
+  MobileNoteTrayTests.swift:180:17: Expectation failed: !((closed → ["Leaving — on
+  the 30-day clock", "Everything this note has on the clock: blocks it deleted,
+  takes deleted on their own, and originals riding a family's countdown. Put back
+  keeps a row; Delete Now ends its days early.", "1 deleted take", "the spare take",
   "in a fanned block.  ·  deleted jun 30, 2026 at 6:00 pm  ·  30 days left",
   "Put back take", "Delete Now take"]).contains("\(RecoveryCopy.putBackVerb)
   \(RecoveryCopy.rowKind(.take))" → "Put back take") → true)
+✘ Test deletedTakesFoldClosedAndNameTheirBlockWhenOpened() recorded an issue at
+  MobileNoteTrayTests.swift:187:17: Expectation failed: (open → ["Leaving — on the
+  30-day clock", "Everything this note has on the clock: blocks it deleted, takes
+  deleted on their own, and originals riding a family's countdown. Put back keeps a
+  row; Delete Now ends its days early.", "1 deleted take"]).contains(
+  "\(RecoveryCopy.putBackVerb) \(RecoveryCopy.rowKind(.take))" → "Put back take")
+✘ Test run with 1 test in 1 suite failed after 2.363 seconds with 2 issues.
 ```
 
-*(It also reds the two disclosure-driving pins as collateral — activating a
-fold that starts open CLOSES it — which is recorded rather than trimmed
-because it is the same fact from the other side.)*
+*(The second issue is this same pin's other half, from the other side:
+activating a fold that starts OPEN closes it, so the doors that should appear
+disappear instead. It also reds the two disclosure-driving pins as collateral,
+which is recorded rather than trimmed for the same reason.)*
 
 **A3 — the empty take calls itself a BLOCK again** (`MobileTrayRowFace.takeLabel`
 dropped its `emptyTakeLabel` arm — the `BlockPastCopy.emptyTake` lesson):
@@ -524,6 +557,17 @@ Zero schema, zero migrations, zero build-config changes, zero
 
 *(6c left three; this batch adds two and does not clear any, because every
 road to them is fenced here.)*
+
+> **⚠️ ITEMS 4 AND 6 NOW LIVE ON THE TRACKED ROW TOO** (2026-08-31, the cold
+> review's **MINOR 3**). `KnownIssuesAndTechDebt.md`'s *"Mac app-local brains
+> are forked against mobile siblings"* row is the durable, owned home for this
+> class, and it was left untouched by this batch — so the `TrayRowFace` /
+> `TrayTakeFace` fork and `LensFallbackCopy`'s promotion from *"still
+> Mac-only"* to **FORKED** existed only in this file, which closes. That is
+> the precise state that row was restored (2026-08-22, round 2's finding 7) to
+> prevent: *"the forked-brain debt had no owner outside a plan file that
+> closes."* Both are clauses on its enumeration now; the list below stays as
+> the batch's own account.
 
 1. **`RecoveryCopy.surfaceName` still has no caller on either platform**
    (6c's item 1, unchanged — one line for the post-13u cleanup).

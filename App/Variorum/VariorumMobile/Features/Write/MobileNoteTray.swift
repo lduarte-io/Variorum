@@ -93,6 +93,7 @@ final class MobileNoteTrayModel {
     /// ruling). An original with a live descendant is not here — it is
     /// lineage's, in Block History ▸ Came from.
     private(set) var stranded: [Queries.PreservedOriginal] = []
+    private(set) var strandedTruncated = false
     private(set) var strandedFates: [String: Queries.OriginFamilyFate] = [:]
     private(set) var loaded = false
 
@@ -203,10 +204,28 @@ final class MobileNoteTrayModel {
         // it go; one whose family is GONE appears in neither (13j ladder B,
         // B5) — it rode a visible clock for its 30 days and left exactly when
         // the clock said.
-        stranded = snapshot.originals.filter {
-            if case .counting = strandedFates[$0.blockID] { return true }
-            return false
-        }
+        //
+        // **And then it is WINDOWED like the other three** (the 6b cold
+        // review's MINOR 1). It is the one listing the batch handed over
+        // raw, which meant a note holding 201 counting originals rendered
+        // 201 rows and said nothing — the +1 probe row, which exists so a
+        // cut can be DETECTED, rendered as content instead. P1 was never
+        // breached (the SQL `LIMIT` bounds the read either way); the
+        // VISIBLE-truncation half of the Phase 10 discipline was.
+        //
+        // Honest residual, recorded rather than papered over: the probe
+        // row is consumed by this FILTER, so the marker fires when the
+        // counting subset itself overflows the window — a note whose
+        // `window + 1` originals are mostly non-counting can still have
+        // counting ones beyond the SQL cut, unseen and unmarked. Closing
+        // that needs the filter pushed into `preservedOriginals`' own SQL,
+        // which is `Sources/` work.
+        (stranded, strandedTruncated) = TrashListing.windowed(
+            snapshot.originals.filter {
+                if case .counting = strandedFates[$0.blockID] { return true }
+                return false
+            },
+            window: window)
         loaded = true
     }
 
@@ -541,6 +560,9 @@ struct MobileNoteTraySection: View {
         }
         if model.deletedTruncated {
             quiet(MobileRoomListing.truncationMarker(shown: model.deleted.count))
+        }
+        if model.strandedTruncated {
+            quiet(MobileRoomListing.truncationMarker(shown: model.stranded.count))
         }
         if !model.takes.isEmpty { takesDisclosure }
     }

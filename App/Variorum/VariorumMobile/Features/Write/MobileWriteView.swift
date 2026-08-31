@@ -331,7 +331,35 @@ struct MobileWriteScreen: View {
         .sheet(isPresented: $referencesPresented) {
             MobileReferencesSheet(model: references, tokens: tokens)
         }
-        .sheet(isPresented: $blocksPresented) {
+        // **THE HOST HEALS THE LENS CHIP'S ⚠** (the 6b cold review's MINOR
+        // 2). The masthead's fallback marker reads `MobileLensesModel.rows`,
+        // and `rows` is written by `refresh()` alone — whose only external
+        // caller is the lens sheet's own `.task`. This batch then shipped
+        // two doors that change a pick's LIVE-ness without touching a lens:
+        // the tray's Put back on a deleted take, and its Delete Now. So a
+        // pick could stop dangling while the chip kept announcing a fallback
+        // that no longer existed — to VoiceOver as well as to the eye —
+        // until she happened to reopen the sheet.
+        //
+        // The refresh rides the sheet's DISMISSAL, and both halves of that
+        // are deliberate:
+        //   · **the HOST does it, not the tray.** A refresh fired from
+        //     `putBackTake` would be a feature-to-feature call; this screen
+        //     composes both features and is the only place allowed to know
+        //     they meet (CLAUDE.md's composition rule).
+        //   · **at dismissal, not at mount.** The chip is BEHIND the sheet
+        //     while it is up (the presented tree is the whole screen), so
+        //     the stale marker becomes visible at exactly this moment — and
+        //     a `.task` on this screen would not fire at all: presenting and
+        //     dismissing a sheet never re-runs the presenter's task, and at
+        //     mount no lens is active yet (`activeLensID` starts nil), so a
+        //     mount-time read could not change the marker either way.
+        // One bounded post-scoped read (`refresh()`'s own cost note), once
+        // per sheet close.
+        .sheet(isPresented: $blocksPresented, onDismiss: {
+            let lenses = lenses
+            Task { await lenses.refresh() }
+        }) {
             MobileBlockListSheet(model: blockList, tokens: tokens, tray: tray) { blockID in
                 blocksPresented = false
                 model.jumpToBlock(blockID)

@@ -44,6 +44,31 @@ private func seedTrayNote(
     }
 }
 
+/// **The fourth listing's fixture, and it has to come from the STORE.**
+/// `Queries.PreservedOriginal` carries no public initializer, so a snapshot
+/// cannot be hand-built the way `TrayItem`/`TrayTake` can — and reaching for
+/// one would be a `Sources/` edit. So the rows are minted: each pass fans a
+/// block, divides it (which preserves the original WHOLE and releases it),
+/// then deletes BOTH halves — which is exactly the state that MOVES an
+/// original onto its family's clock (her round-8b ruling).
+@MainActor
+private func seedCountingOriginals(
+    _ session: AppSession, postID: String, count: Int
+) async throws {
+    for i in 0..<count {
+        try await session.runner.run { ops in
+            let fanned = try ops.newBlock(
+                in: postID, text: "Original number \(i) here.", at: .end)
+            let spare = try ops.branchVariant(fanned.block.id, from: fanned.variant.id)
+            try ops.autosave(spare.id, text: "another take \(i)", charDelta: 8)
+            let halves = try ops.divideDuplicating(
+                fanned.block.id, displayedVariantID: fanned.variant.id, cut: 9)
+            try ops.deleteBlock(halves.first.block.id)
+            try ops.deleteBlock(halves.second.block.id)
+        }
+    }
+}
+
 @MainActor
 private func blockIsPlaced(_ db: AppDatabase, _ blockID: String) async throws -> Bool {
     try await db.read { db in
@@ -72,6 +97,18 @@ private func purgeIntents(_ db: AppDatabase) async throws -> Int {
     try await db.read { db in
         try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM purge_intent") ?? -1
     }
+}
+
+/// Close whichever sheet is up, through its own **Done** door. That door is
+/// VOICED chrome (`tokens.chromeLabel` lowercases in the Terminal register)
+/// and carries no explicit accessibility label, so the handle is matched
+/// case-insensitively rather than guessed at a voice.
+@MainActor
+private func dismissSheet<Content: View>(_ surface: HostedSurface<Content>) -> Bool {
+    guard let done = surface.visibleLabels.first(where: {
+        $0.caseInsensitiveCompare("Done") == .orderedSame
+    }) else { return false }
+    return surface.activate(done)
 }
 
 /// The tray's own segment of the blocks sheet, mounted alone — the surface
@@ -297,6 +334,57 @@ struct MobileNoteTrayTests {
         }
     }
 
+    /// **THE CONFIRM, DRIVEN IN THE REAL COMPOSITION** — the tray section
+    /// inside `MobileBlockListSheet`'s `ScrollView` → `LazyVStack`, which is
+    /// where production renders it. Every other purge pin here mounts the
+    /// section ALONE, and an `.alert` attached to a view inside a lazy
+    /// container is precisely the shape this app has been burned by: §15's
+    /// trap (b), and batch 4.5b's BLOCKER, which found dead confirm doors at
+    /// FIVE hosts under green view-model pins.
+    ///
+    /// **NEW COVERAGE, labelled honestly: it passes on the shipped tree**
+    /// (the 6b cold review wrote it, ran it, and filed NIT 3 as a coverage
+    /// gap rather than a defect). Its value is not a red — it is that the one
+    /// composition this codebase's own history says to pin was pinned nowhere.
+    @Test func theDeleteNowConfirmDrivesInsideTheRealBlocksSheet() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedTrayNote(session)
+            try await session.runner.run { [id = seed.spare] ops in
+                try ops.deleteVariant(id)
+            }
+            let list = MobileBlockListModel(session: session, postID: seed.postID)
+            let tray = MobileNoteTrayModel(session: session, postID: seed.postID)
+            try await withHostedSurface(
+                MobileBlockListSheet(
+                    model: list, tokens: .terminalLight, tray: tray, onJump: { _ in })
+            ) { surface in
+                await surface.settle(40)
+                #expect(surface.activate(MobileBlocksSegment.leaving.word),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(40)
+                #expect(surface.activate(RecoveryCopy.trayTakesDisclosure(1)),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(40)
+                #expect(surface.activate(
+                    "\(RecoveryCopy.deleteNowVerb) \(RecoveryCopy.rowKind(.take))"),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(40)
+                let alert = try #require(
+                    surface.presentedAlert,
+                    "the confirm must present from inside the real sheet, not only alone")
+                #expect(alert.title == RecoveryCopy.deleteNowVerb)
+                #expect(try await purgeIntents(db) == 0, "asking is not doing")
+
+                #expect(surface.tapAlertAction(
+                    RecoveryCopy.deleteNowVerb,
+                    writeBack: { tray.purgeConfirmPresented = false }),
+                        "the confirm's real action must be drivable here too")
+                await surface.settle(40)
+                #expect(try await purgeIntents(db) == 1, "one intent per thing purged")
+            }
+        }
+    }
+
     /// **THE PURGE DOOR EXISTS ON THE LEAVING SECTION AND NOWHERE ELSE IN A
     /// NOTE** — the evolved in-trash-only rule (purge doors live on TRASH
     /// SURFACES; the Leaving section is one because every row in it is
@@ -414,9 +502,27 @@ struct MobileNoteTrayTests {
     /// The window+probe discipline, on all four listings — bounded IN SQL at
     /// `window + 1` and truncated in ONE place (`TrashListing.windowed`), with
     /// the FILTERLESS rooms' shared marker (the tray has no filter to narrow).
+    ///
+    /// **The FOURTH listing joins this pin at the 6b fix wave** (the cold
+    /// review's MINOR 1). It shipped windowed nowhere and marked nowhere —
+    /// and this pin's own `Snapshot` never populated `originals`, so the
+    /// listing was not merely unasserted, it was absent from the fixture and
+    /// the docstring's "all four" was a claim no assertion carried. Both
+    /// halves are here now: the windowing at `adopt`, and the marker on the
+    /// screen.
     @Test func everyTrayListingIsWindowedAndSaysSo() async throws {
-        try await withEditorWorld { session, _ in
+        try await withEditorWorld { session, db in
             let seed = try await seedTrayNote(session)
+            // Three originals whose whole families are counting down.
+            try await seedCountingOriginals(session, postID: seed.postID, count: 3)
+            let originals = try await db.read { [postID = seed.postID] db in
+                try Queries.preservedOriginals(db, postID: postID, limit: 201)
+            }
+            let fates = try await db.read { [postID = seed.postID, now = session.now] db in
+                try Queries.originFamilyClocks(db, postID: postID, now: now)
+            }
+            #expect(originals.count == 3, "originals were \(originals.map(\.blockID))")
+
             let tray = MobileNoteTrayModel(session: session, postID: seed.postID, window: 2)
             let item = { (id: String) in
                 Queries.TrayItem(blockID: id, deletedAt: "2026-08-31T00:00:00Z", text: id)
@@ -424,6 +530,8 @@ struct MobileNoteTrayTests {
             tray.adopt(MobileNoteTrayModel.Snapshot(
                 deleted: [item("d1"), item("d2"), item("d3")],
                 archived: [item("a1"), item("a2"), item("a3")],
+                originals: originals,
+                strandedFates: fates,
                 takes: [
                     Queries.TrayTake(
                         variantID: "t1", blockID: "b", deletedAt: "2026-08-31T00:00:00Z"),
@@ -435,6 +543,23 @@ struct MobileNoteTrayTests {
             #expect(tray.deleted.count == 2 && tray.deletedTruncated)
             #expect(tray.archived.count == 2 && tray.archivedTruncated)
             #expect(tray.takes.count == 2 && tray.takesTruncated)
+            #expect(tray.stranded.count == 2 && tray.strandedTruncated,
+                    "stranded was \(tray.stranded.count), truncated \(tray.strandedTruncated)")
+
+            // …and the marker RENDERS for it, beside the deleted one. Over
+            // this note's real read BOTH listings overflow a window of two
+            // (six deleted halves, three counting originals), so the shared
+            // filterless sentence must appear TWICE — which is the assertion
+            // an unwindowed `stranded` cannot pass.
+            let rendered = MobileNoteTrayModel(session: session, postID: seed.postID, window: 2)
+            try await withHostedSurface(traySurface(rendered, .leaving)) { surface in
+                await surface.settle(40)
+                #expect(rendered.deletedTruncated && rendered.strandedTruncated,
+                        "deleted \(rendered.deleted.count) / stranded \(rendered.stranded.count)")
+                let marker = MobileRoomListing.truncationMarker(shown: 2)
+                #expect(surface.visibleLabels.filter { $0 == marker }.count == 2,
+                        "labels were \(surface.visibleLabels)")
+            }
         }
     }
 
@@ -577,8 +702,17 @@ struct MobileNoteTrayTests {
                 for option in MobileBlocksSegment.allCases {
                     #expect(strip.contains(option.word), "labels were \(strip)")
                 }
-                // It opens on the note's own blocks.
-                #expect(strip.contains { $0.contains("The block that stays") == false })
+                // **It opens on the note's own blocks** — the surviving
+                // block is listed and the ARCHIVED one is not.
+                //
+                // (This pair replaces a line that could not fail: a
+                // `contains { … == false }` over a label array that always
+                // holds the three segment words was true for any
+                // implementation — the 6b cold review's NIT 1.)
+                #expect(strip.contains { $0.contains("A fanned block") },
+                        "labels were \(strip)")
+                #expect(!strip.contains { $0.contains("The block that stays") },
+                        "labels were \(strip)")
                 #expect(!strip.contains { $0.contains(RecoveryCopy.archivedForever) })
 
                 #expect(surface.activate(MobileBlocksSegment.archived.word))
@@ -640,6 +774,81 @@ struct MobileNoteTrayTests {
                 #expect(surface.visibleLabels.contains {
                     $0.contains(RecoveryCopy.archivedForever)
                 }, "labels were \(surface.visibleLabels)")
+            }
+        }
+    }
+
+    /// **THE TRAY'S PUT BACK HEALS THE MASTHEAD'S ⚠** (the 6b cold review's
+    /// MINOR 2). The lens chip's fallback marker reads the lens model's
+    /// `rows`, which only `refresh()` writes — and its one external caller
+    /// was the lens sheet's own `.task`. This batch then shipped a door that
+    /// makes a dangling pick live again without touching a lens, so the chip
+    /// could keep announcing a fallback that no longer existed, to VoiceOver
+    /// as well as to the eye, until she happened to reopen the sheet.
+    ///
+    /// Driven end to end through the REAL screen and its REAL sheets: look
+    /// through the lens, close its sheet, see the marker; open blocks ▸
+    /// leaving, Put the take back, close that sheet; the marker must be gone
+    /// **without reopening the lens sheet**.
+    @Test func puttingATakeBackClearsTheLensChipsFallbackMarker() async throws {
+        try await withEditorWorld { session, _ in
+            // A lens whose ONE pick is a take this note then deletes.
+            let (postID, lensName) = try await session.runner.run { ops -> (String, String) in
+                let post = try ops.createPost(title: "lens tray world", profile: .blog)
+                _ = try ops.newBlock(in: post.id, text: "Chosen words here.", at: .end)
+                let b = try ops.newBlock(in: post.id, text: "A second block.", at: .end)
+                let spare = try ops.branchVariant(b.block.id, from: b.variant.id)
+                try ops.autosave(spare.id, text: "The other reading.", charDelta: 5)
+                let lens = try ops.createLens(post: post.id, name: "half gone")
+                try ops.setLensChoice(lens: lens.id, block: b.block.id, variant: spare.id)
+                try ops.deleteVariant(spare.id)
+                return (post.id, lens.name)
+            }
+            let (editor, _) = makeEditor(session, postID: postID)
+            await editor.loadOnce()
+            try await withHostedSurface(
+                MobileWriteScreen(session: session, postID: postID, editor: editor)
+            ) { surface in
+                await surface.settle(60)
+                // Calm before a lens drives the page.
+                #expect(surface.visibleLabels.contains("Lenses"),
+                        "labels were \(surface.visibleLabels)")
+
+                // Look through it: the pick is deleted, so the chip says so.
+                #expect(surface.activate("Lenses"))
+                await surface.settle(60)
+                #expect(surface.activate(lensName),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(60)
+                #expect(dismissSheet(surface), "labels were \(surface.visibleLabels)")
+                await surface.settle(60)
+                #expect(surface.visibleLabels.contains(
+                    MobileWriteScreen.lensFallbackChipLabel),
+                        "labels were \(surface.visibleLabels)")
+
+                // Put the take back, through the tray this batch shipped.
+                #expect(surface.activate("Blocks"),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(60)
+                #expect(surface.activate(MobileBlocksSegment.leaving.word),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(40)
+                #expect(surface.activate(RecoveryCopy.trayTakesDisclosure(1)),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(40)
+                #expect(surface.activate(
+                    "\(RecoveryCopy.putBackVerb) \(RecoveryCopy.rowKind(.take))"),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(40)
+                #expect(dismissSheet(surface), "labels were \(surface.visibleLabels)")
+                await surface.settle(60)
+
+                // The marker is gone, and the chip is honest again.
+                #expect(!surface.visibleLabels.contains(
+                    MobileWriteScreen.lensFallbackChipLabel),
+                        "labels were \(surface.visibleLabels)")
+                #expect(surface.visibleLabels.contains("Lenses"),
+                        "labels were \(surface.visibleLabels)")
             }
         }
     }
