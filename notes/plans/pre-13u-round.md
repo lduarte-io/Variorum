@@ -57,6 +57,53 @@ because it is exactly the class the sweep could not reach (the sweep read code; 
 **Obligation:** every finding gets a written disposition in 17g's entry. Anything real and unfixed
 lands in `KnownIssuesAndTechDebt.md` with an owner.
 
+### Act 1 scope addendum — FOR THE ORCHESTRATOR, **not** to be passed to the reviewer
+
+*(Added 2026-08-30 by the 13p-fix session at the author's instruction — her words: the next round
+"will include a Fable cold review of all of the items from today as well, so ensure they've all been
+clearly documented." This block is bookkeeping and SCOPE, deliberately not review foci: written after
+the implementation, any description of the work would carry implementation context and break the
+isolation this act depends on. Hand the reviewer the prompt and the repo, nothing from here.)*
+
+**The review's scope is TODAY IN FULL, which is wider than 17g's own commits.** Two separate pieces of
+work landed on 2026-08-30, and only the second is 17g:
+
+| # | commit | what it is |
+|---|---|---|
+| 1 | `b4f453d` | the 13p signing gap closed (`keychain-access-groups`, device registration, the tightened ACL pin) |
+| 2 | `8b017ec` | the post-signing full-suite record |
+| 3 | `48d047d` | 17g's first commit *(⚠️ also swept in a concurrent session's `notes/ProactiveTechDebtReview-2026-08-30.md` — recorded at R1-12; history rewrites are author-only so it stands)* |
+| 4 | `edcbc1c` | the canvas-flake KnownIssues row |
+| 5 | `3779e77` | ladder round 1's fixes |
+| 6 | `9b1669c` | ladder round 2's fixes |
+| 7 | `64fe30b` | ladder round 3's fixes + the 17g entry |
+
+Piece 1 is what MADE the 17g defect reachable, so a review that reads only 17g's diff sees a fix
+without its cause. Both are documented — piece 1 in `notes/plans/phase-13p-note-protection.md`'s
+POST-CLOSEOUT (with its own dated correction pointing at 17g), in `QUESTIONS #81(a)`, and in the
+13p handoff's item 2.
+
+**Where the documentation for all of it lives** (so the orchestrator can confirm completeness before
+spending a reviewer on it): `notes/plans/phase-13p-fix-dp-keychain.md` (the FINDING with its
+measurement, the fix design, the ledger, three full ladder rounds with per-finding dispositions),
+the **17g** entry in this file's sibling `phase-17-standing-fixes.md`, `QUESTIONS #81(a)` and
+**#82**, `MobileSoul` **PL-16**, and six `KnownIssuesAndTechDebt.md` rows (owners 17a ×2, 13x ×2,
+13r, 12).
+
+**Three things the orchestrator should carry into the round, because they are open by design:**
+
+1. **A verification gap, if it is still open.** Round 3's changes had targeted suites green (30/2) but
+   the full Mac suite run was interrupted twice; the last measured full run is **1853/314 at
+   `9b1669c`**, which predates them. If the 13p-fix session's final run did not land, **run it first** —
+   a review over an unverified tree wastes the reviewer.
+2. **`QUESTIONS #82` is an author decision, not a defect** — the store key's protection class is inert
+   on macOS, so it rides Migration Assistant to other hardware. A reviewer may re-find the mechanism;
+   it is owned and escalated, not missed.
+3. **17g broke its own environment trap and says so** (R3-1): a revert drill overwrote the author's
+   live E2EE custody with test material. The remediation is hers (delete + re-enroll) and the rule is
+   now in that plan's traps section. If a reviewer flags the incident, the correct disposition is
+   "already recorded" — but a reviewer flagging that the *rule* is missing or weak is a real finding.
+
 ## Act 2 — P39: refine the rule, then hand the code fix to 13u2
 
 **The finding, corrected.** CLAUDE.md binds *"cross-feature interactions route through parent

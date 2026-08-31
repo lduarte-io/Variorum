@@ -484,3 +484,32 @@ here is RECORDED WITH AN OWNER and not looped on.
 **Clean bill accepted**, including its independent full-suite run at
 `9b1669c` — 1853/314 fully green, canvas flake included — which
 corroborates this phase's own measurement.
+
+
+---
+
+## CLOSE — the owed verification and the install (2026-08-30, at her word)
+
+**The verification gap is CLOSED.** Round 3's changes had only targeted
+suites green when the record was written, and the full run was
+interrupted three times as a background task (foreground runs completed
+without trouble both times — recorded as an environment note, not a
+finding). Measured in the foreground on the final tree:
+
+**Mac 1854 tests / 314 suites — ALL PASSED**, `CanvasDragTrackingTests`
+included. That is 1853 + the R3-2 pin; suites unchanged. Against the
+1843/312 baseline the phase adds **+11 tests, +2 suites**, every one
+named in the ladder records.
+
+**`/Applications` refreshed** behind the A1 rail: zero instances and the
+real store `lsof`-verified closed, a fresh ciphertext backup taken first
+(`pre-13pfix-install-backup-20260831T010328Z`, sha256-matched), installed
+binary hash-matched to the build product, `keychain-access-groups =
+*[removed for publication]*
+`wroteButUnreadable` copy confirmed present in the shipped binary. **Her
+daily-drive build now carries the fix**, so the E2EE re-enrollment she
+owes lands on the guarded build rather than needing to be done twice.
+
+**Still hers, and only these:** delete the drill's `e2ee-keys` item and
+re-enroll with her passphrase (R3-1); the two-step biometric clean-up if
+that orphan is still present; QUESTIONS **#82**.

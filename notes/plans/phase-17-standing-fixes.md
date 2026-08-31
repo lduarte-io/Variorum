@@ -988,9 +988,14 @@ writing was ever at risk.
   delete → confirm gone); three direct outcome tests; two E2EE transition
   pins; a structural guard covering all three families. Every bug-class
   fix red-on-old by **behavioural revert**, not assertion.
-- **Counts: Mac 1853 / 314** (baseline 1843/312; +10 tests, +2 suites,
-  arithmetic checked). Zero `Sources/VariorumCore/Sync/` lines, zero
-  schema, no lockstep — marker stays 7.
+- **Counts: Mac 1854 / 314 — ALL PASSED** on the final tree, canvas
+  flake included (baseline 1843/312; +11 tests, +2 suites, arithmetic
+  checked). Zero `Sources/VariorumCore/Sync/` lines, zero schema, no
+  lockstep — marker stays 7.
+- **`/Applications` refreshed** behind the A1 rail (ciphertext backup
+  first, hash-matched install, keychain identity and the new refusal copy
+  both confirmed in the shipped binary), so her E2EE re-enrollment lands
+  on the guarded build.
 
 ### The three rounds, in one line each
 
