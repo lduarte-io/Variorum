@@ -136,17 +136,17 @@ fence-blocked hoist items above unblock, the 13u-owned items (4.6, the
 cross-block semantics, U-items, arch MINORs 1–2) get verified
 built-or-returned via §2b's handback discipline, and the round can close.
 
-## 4. ONE QUESTION HELD FOR HER (do not improvise it)
+## 4. ~~ONE QUESTION HELD FOR HER~~ — **RULED 2026-08-31 (QUESTIONS #94)**
 
-**The Shared-hoist fence vs four owed parity items.** Her seat fence
-("not… doing work on the shared core") blocks the four hoist-shaped items
-in batches 7/8 (FindReplaceGate · TakeClipboard · applyTypedPath ·
-ThemeStore — all `App/Variorum/Shared/` moves, none in EditorBrain). The
-outgoing seat's recommendation: **defer all four to post-13u-merge**
-(hoists into a tree 13u1 is rewriting invite exactly the conflict the
-fence exists to prevent), building batches 7/8's phone-local halves now.
-The alternative — she allows narrow non-EditorBrain hoists — is hers to
-grant. Bundle it with the PROVISIONALs at her next touchpoint.
+**The four Shared-hoist parity items are DEFERRED to the post-13u merge.**
+Her words: *"i agree that those four hoists should just be deferred to the
+post 13u merge - seems cleaner that way."* So: **FindReplaceGate (and with
+it PR21 replace, which must never build without it) · TakeClipboard
+(copy-all-takes) · applyTypedPath (the tag-chip grammar) · ThemeStore
+(PR23, and arch MINOR 3's structural half)** all wait for the merge;
+batches 7 and 8 build their phone-local halves only, and the deferral is
+recorded on each batch's record so the post-merge session inherits a
+decision, not a discovery.
 
 ## 5. MACHINERY — the rules this seat re-proved or added
 
