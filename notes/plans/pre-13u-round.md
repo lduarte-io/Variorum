@@ -85,7 +85,7 @@ She invoked `/architect-phase` on this round. Her items, verbatim-faithful, each
 | 9 (custody) | Act 1's custody-layer fixes + **17a** (8 items) + the CF-12 build per ruling + the #82 build per ruling | **Fable** — the "exceptionally tricky machinery" clause; this subsystem is why 13p-fix-on-Opus went wrong | rides the final ladder |
 | 0 | The B1 fix per ruling | Opus (mobile app layer); **Fable for any `Sync/` repair half** (the standing rider) | rides the final ladder |
 | 3+4 | Sherlock seed, then 17c measured on that corpus | Opus | Opus cold review (midpoint) |
-| 10 | The UI/UX pass (tray · Pool · protection/settings surfaces · eye peek · trash/archived sweep) | Opus, screenshot-verified | Opus cold review (midpoint) |
+| 10 | The UI/UX pass (tray · Pool · protection/settings surfaces · eye peek · trash/archived sweep · tags placement · bottom bar) | **Fable**, screenshot-verified — her mid-sitting re-cast: *"I want Fable taste + judgement on that phase because there's a variety of UI/UX improvements needed"* | Opus cold review (midpoint) |
 | 5 | 17f (9 items) | Opus | Opus cold review (midpoint) |
 | 2, 6 | P39 amendment · the Fragments brief | the architect | — |
 | end | The whole round diff | — | **Fable cold-review ladder** (fresh reviewer per round, cap 3) |
@@ -97,7 +97,48 @@ agent at a time.
 
 ### RULINGS (recorded verbatim as they land at the sitting)
 
-*(to be filled)*
+**R-pre13u-1 — B1, RULED: "First write + repair."** Seed-on-first-write: the mobile starter furniture
+(Journal book, designation, pin, starter note) is minted by her first WRITE, never by launch — sign
+in before typing and the real Journal simply arrives; the 20-second bounded wait is deleted. PLUS the
+SyncSpec §7-class convergence repair: two designated Journal books converge by deterministic keeper
+(the `tag.path` pattern — smaller id keeps, memberships re-pointed, loser tombstoned; the "same book"
+predicate is the batch's design item, designation + profile the candidate). The repair is `Sync/`
+work — **Fable**, per the standing rider. Empty-state copy rides the seed-on-write change so a fresh
+install doesn't read as broken. Her ruling lands in `QUESTIONS.md` at close per the Act 0 obligation.
+
+**R-pre13u-2 — CF-12, her direction verbatim (translation confirmed below):** *"My inclination is
+that this should be a setting that is by default off for everyone - you can force a separate unlock
+for sync if you want, regardless of the keychain, or not. If it being a setting would cause issues
+with handing the context forward, then I think it being a setting for only those with auto mode
+enabled on keychain login is fine, but it shouldn't be required for them either. Someone who chose
+keychain auto PROBABLY wants sync to also be auto, but maybe they don't I suppose."* Translation
+(pending her confirm): the sync-keys gate becomes an OPT-IN setting, **DEFAULT OFF for everyone**.
+OFF ⇒ no separate sync unlock — the E2EE keys ride the plain custody item behind the app's own
+at-open gate, whatever the mode; under Auto, sync is auto too. ON ⇒ a separate sync unlock honored
+regardless of at-open mode (two prompts is what opting in asks for). If demanded-mode availability
+proves technically fraught, Auto-only visibility of the setting is acceptable to her — but it is
+never required-on for anyone. **CONFIRMED at the sitting: "Yes, build that"** — including the reset
+of existing checked boxes by the semantics change (her own device ends with no second prompt; one
+click re-enables the separate gate if ever wanted).
+
+**R-pre13u-3 — #82, RULED at the sitting: BIND THE STORE KEY ONLY (option c).** Her words: *"I agree
+with binding the store key only - it closes the last gap where only a computer password is enough to
+get your text, which is consistent."* Builds in Act 9 (the Fable custody batch): the TN3137
+read→re-add-with-flag→delete-old migration for the store-key family only, round-trip pinned; E2EE
+custody stays as-is. **Rider adopted with it: the one author-run iCloud-escrow verification check is
+PULLED INTO THIS ROUND** (escrow ON → relaunch → confirm the reconcile reads its own item back) —
+escrow becomes the load-bearing Auto safety net post-binding, so it gets proven, not assumed; the
+KnownIssues R3-7 row re-homes here.
+
+**R-pre13u-4 — the follow-on she opened (PENDING): is the nudge enough for Auto users without iCloud
+Keychain, post-binding?** Her words: *"This is making me wonder for auto users if we need to rethink
+the nudge if they don't use iCloud keychain or the iCloud escrow copy. I like people being able to
+write without any complex setup but I dunno... is a nudge really enough for 'only this device can
+open your work until you set a passphrase if you don't have icloud keychain on?' It's hard to be a
+super secure app without forcing users to go through some kind of setup for their own security I
+guess. But at the same time, I think maybe that is ok? when does the nudge come up? and how much of a
+nudge is it? … I'm kind of questioning our overall approach."* Architect proposal at the sitting:
+STATE-AWARE nudging (see the sitting reply); her ruling to land here.
 
 ---
 
@@ -558,11 +599,19 @@ Standing rules bind hard here: pin before fix; behavioral-revert verification; *
 author's live keychain items or her real store** (the 17g R3-1 incident is the cautionary record —
 its rule lives in `phase-13p-fix-dp-keychain.md`'s traps section and every custody brief carries it).
 
-## Act 10 — The UI/UX pass: the tray, the Pool, and the protection surfaces (Opus implementer)
+## Act 10 — The UI/UX pass: the tray, the Pool, and the protection surfaces (**Fable** implementer)
 
-Screenshot-verified against her five screenshots. Her phrasing rider binds throughout: **she will
-rewrite copy later — keep every capability and button present**; restructure and de-clutter, never
-delete doors. Taste calls beyond her stated direction go to her as propose-only screenshot pairs.
+**Re-cast mid-sitting by the author (2026-08-30):** *"make Batch 10's UI/UX improvements a Fable
+implementer actually. I want the taste to be better and there's some latitude in redesign to make the
+user experience better (tags as a column or not, different way of organizing the pool and adding to
+book button, etc.) … I want Fable taste + judgement on that phase because there's a variety of UI/UX
+improvements needed."* **The latitude is real and granted:** within the two voices and the standing
+copy rider, the implementer redesigns rather than merely tidies — screenshot pairs still ride
+anything genuinely taste-forked, but the default is exercise the judgment, don't queue it.
+
+Screenshot-verified against her screenshots. Her phrasing rider binds throughout: **she will rewrite
+copy later — keep every capability and button present**; restructure and de-clutter, never delete
+doors.
 
 1. **This Note's Tray** — elements cut off (a section header visibly clipped under a divider in her
    screenshot), ordering/organization poor. Fix layout, spacing, section order; nothing clipped at
@@ -581,7 +630,20 @@ delete doors. Taste calls beyond her stated direction go to her as propose-only 
    ones.
 4. **The trash/encryption/archived sweep** — a general pass over the 13j/13l/13p-era surfaces (Trash,
    Archived, the lobby, the reminder/nudge family) for the same crowding/jank class; anything
-   taste-shaped lands on a propose-only list for her, per the standing posture.
+   taste-shaped beyond the granted latitude lands on a propose-only list for her.
+5. **Tags move out of the navigation bar** (her mid-sitting item, verbatim): *"I also want the tags
+   moved from where they are in the top bar to being under the scraps / outside reference / tray
+   button - they look cluttered up there in the navigation bar and I think they'd look nicer on the
+   far right, across from what books an item is in."* And the affordance label: *"maybe instead of
+   just a + it should have like + tag or something so it's clear - not sure if that would be a lot of
+   chrome clutter there that's not worth it"* — **her uncertainty preserved; the "+ tag" vs "+" call
+   is explicitly delegated to Fable taste** at build time, judged in place. (History note for the
+   implementer: the 13k compact context/nav bar ruled tag cards default-visible in the nav bar — this
+   ruling SUPERSEDES that placement; record the supersession in the batch record.)
+6. **The bottom bar spreads back out** (her screenshot: the two-row cramped state — "block 1/10 ·
+   block ▾ · Takes · commit ⌘S · history / note ▾ · comments · Aa"): *"this bottom bar should be
+   spread out again, unless the window is small and it needs to be collapsed."* One row at ordinary
+   widths; the collapse is a width-responsive fallback, not the default.
 
 ---
 
