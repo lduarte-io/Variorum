@@ -601,3 +601,127 @@ run, by that fence's own argument.
   asserted in one pin so a later change cannot trade the focus release for a
   counter bump: nothing was handed off, and a counter claiming otherwise would
   make the box lie about a filing it never made.
+
+---
+
+# R28 ROUND 2 — THE FIX DIFF'S COLD REVIEW (2026-08-30; Opus, cold, target `caa79ef..fc73882`)
+
+*Landed IN FULL by the orchestrator (the compressed-summary rule: two
+summaries in this round lost findings forever). The reviewer ran the four
+named suites four times green on its own armed simulator (65/4 each), the
+full mobile suite at the claimed **588/93 + 2 known issues** exact, verified
+the fence and F7's zero-production-change claim by git, re-traced F1's
+mechanism at every layer independently, hunted for a SECOND falsifier of the
+class argument and found none (`MobileMembership.diverge` refused by
+`postNotInReading` in-transaction; `copyNote` writes no rows), and verified
+O2's un-buildable-window claim by `git log --diff-filter=D`. **0 BLOCKER ·
+0 MAJOR · 3 MINOR · 4 NIT** — per the ladder rule (round 3 only on a NEW
+BLOCKER/MAJOR), NO round 3 is owed; the items below get ONE fix wave.*
+
+**One environment fact from its run, promoted to a standing note: a mobile
+`xcodebuild test` run BUMPS `Package.resolved` (four dependency pins
+drifted; the reviewer reverted it).** This is why the pathspec-limited
+commit rule matters — `fc73882` correctly excluded it, and every future
+session should expect the drift and never sweep it into a commit.
+
+## The findings (verbatim-faithful)
+
+**R2-1 [MINOR] · `MobileSoul.md` PL-14 status cell (written by F3) ·
+MEASURED.** F3's rewritten cell carried the PRE-session wording forward —
+*"(b) the archive/trash separation, hers to design in its own session with
+HTML mockups"* — while three places in this same tree record the
+design-session gate DISCHARGED by her Two-rooms ruling (#84; PL-11's own
+cell edited in the same commit; the handoff §7.1). Two adjacent ledger rows
+edited in one commit disagree about whether a design session is owed. What
+is still owed is the separation being BUILT, not designed. Fix: PL-14(b)
+becomes "the archive/trash SEPARATION is unbuilt — its IA is RULED ('Two
+rooms', QUESTIONS #84, 2026-08-30), so the design-session gate is
+DISCHARGED; batch 6c."
+
+**R2-2 [MINOR] · `MobileQuickNote.swift:910-943` · READ-ONLY (traced).**
+F6 closed one of the THREE no-hand-off leaving roads; the two REFUSAL
+roads return without `reset()` (by design — Q2 keeps her text) and
+therefore without dropping focus: the refused mint (`guard let minted else
+{ armMintClock(); return nil }`) and the dirty-autosave seal road. `tabDoor`
+assigns `tab` synchronously and both stacks stay alive, so the keyboard
+stands over the Library, over an invisible box holding un-filed text and an
+error she cannot see — the finding's own symptom, from the two remaining
+states. Nothing in the diff says whether the exception is deliberate.
+Red-on-old is cheap (the ABORT-trigger world + the mounted-field responder
+assertion the new pin already demonstrates).
+
+**R2-3 [MINOR] · `MobileStarterJournal.swift:188-201` +
+`VariorumMobileApp.swift:129-137` · READ-ONLY (traced).** F2 gates on a
+fact the seed already receives: `allowsSync` is a `let` derived from
+`storeVariant == .real`, so the new conjunct restates the parameter through
+a fourth closure — and the UNSAFE combination (`storeVariant: .real,
+allowsSync: { false }`) is unpinned and would SEED into an account store
+(the batch-5 MAJOR's own direction) the day `allowsSync` stops being a pure
+function of the variant (a future "pause sync" toggle is its natural home).
+`SyncGate.unowned`'s doc is now half-stale too. Fix: single-source — `if
+storeVariant == .real, gate.belongsToAnAccount() { … }` inside
+`seedIfNeeded`; `SyncGate` reverts to its two honest account facts;
+behaviourally identical today (verified: `.dev` never waits, `.real`
+unchanged); makes `.real + no transport → seed` unconstructible; add one
+`storeVariant: .real` fence pin; update `unowned`'s doc.
+
+**R2-4 [NIT] · `MobileLivenessTests.swift:178-260` · READ-ONLY.** The two
+interior-arm pins' recorded red removed BOTH post-suspension guards, so
+the record does not establish that each pin drives its OWN arm (by trace
+they do discriminate — `SupersedeOnSettle(at: 1)` is caught by the
+takeLiveness-flush guard, `at: 2` only by the refresh-flush guard). Fix:
+run and record the per-guard reverts, one line each.
+
+**R2-5 [NIT] · `MobileWriteLatchTests.swift:243-267` · READ-ONLY traced /
+MEASURED 4 green runs.** The adopt pin's red depends on Task interleaving
+nothing forces, and it has a silent-green direction: if flight 2 ever
+scheduled entirely after flight 1 completed, the self-healed peeks empty
+`displayedDivergences`, `adoptViewOnce` returns at `guard !picks.isEmpty`,
+and the pin passes WITH the latch removed — green-over-nothing. (Family
+NIT: the three pre-existing latch pins share the shape; do not churn them.)
+Fix: `adoptView` returns `runIfFree`'s Bool (`@discardableResult`); the pin
+asserts `first == true && second == false` — proving the second flight was
+DECLINED, not that the count came out right.
+
+**R2-6 [NIT] · this file's FIX ROUND RESULTS + the sweep baseline table ·
+MEASURED.** "The two documented 4.5b diagnostic pins" is ONE pin
+(`MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`)
+whose single `withKnownIssue` block records two known issues. Fix the
+wording in both places.
+
+**R2-7 [NIT] · `notes/QUESTIONS.md:923-924` · MEASURED.** Two consecutive
+list items are both numbered `78.` (the CONFIRMED wrapper + the original
+entry) — pre-existing, but O1's own goal was ending double numbering
+histories, and renderers silently renumber everything below. Fix: fold the
+wrapper into a single `78.` block (the #77/#79 pattern).
+
+**Clean bill highlights (full text in the session record):** fence exact by
+git; all four test files purely additive; the four original gate pins and
+all four `handOffCount == 0` sites ride unmodified; F1 completely fixed at
+the door with the latch persisting across sheet presentations
+(`@State`-built-once verified); the `saveIntoActiveLens` exclusion correct
+(a genuine converging upsert); F2's real-store behaviour byte-identical;
+F6's fix idempotent, drop-only, unreachable from `.inactive`; every record
+correction faithful, O2's claim git-proven; the #92 marker arithmetic
+correct (83 genuinely absent, nothing above 91).
+
+## ADJUDICATION (the orchestrator) — ALL SEVEN ACCEPTED, ZERO DISPUTES
+
+R2-2's fork is ruled the FIRST way: drop focus on the two refusal roads too
+(text and `lastError` untouched — the principle IS "a leaving is a leaving
+of the shelf surface, focus included", and a keyboard over an invisible box
+holding an invisible error serves nobody; her text and the reason are still
+there when she returns to the Shelf). R2-3's single-sourcing is adopted as
+proposed — the reviewer's shape is strictly safer than the shipped one, and
+the shipped one is mine to own: the fix brief offered the AND-composition
+as an example and the fixer took it; the round-2 catch is the ladder doing
+its job. R2-5's family NIT is recorded, not churned. R2-7's fold must not
+renumber anything — it merges two blocks under ONE `78.`, the #77/#79
+pattern, and nothing else in the file moves.
+
+**WAVE 2 — one Opus fix session, the seven items above, then this R28 unit
+CLOSES** (no round 3 — no new BLOCKER/MAJOR). Fence and environment as the
+first fix brief. New pins proven red by behavioural revert with quoted
+output; R2-4 is a RECORD act (two single-guard reverts run and quoted, then
+restored). Append a WAVE 2 RESULTS section to this file; commit
+pathspec-limited; do not push.
