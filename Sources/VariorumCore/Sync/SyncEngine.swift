@@ -35,15 +35,24 @@ public struct SyncEngine: Sendable {
     /// many times; anything still dirty stays in the outbox for the next
     /// call. Bounded by design — retry/backoff hardening is Phase 12.
     public var maxPushIterations: Int
+    /// The sample-library dedupe's injected facts (pre-13u Act 0,
+    /// R-pre13u-8) — the `keyProvider` pattern: the identity predicate and
+    /// per-note manifest live in app-target code this module cannot see,
+    /// so the app layer hands them in at wiring (`SyncSession.configure`,
+    /// shared by both platforms). nil — the default — leaves that repair
+    /// INERT: an engine nobody wired facts into cannot misidentify a book.
+    public let sampleLibraryFacts: SampleLibraryDedupeFacts?
 
     public init(
         transport: any SyncTransport, batchSize: Int = 200, maxPushIterations: Int = 5,
-        keyProvider: any SyncKeyProviding = UnenrolledKeyProvider()
+        keyProvider: any SyncKeyProviding = UnenrolledKeyProvider(),
+        sampleLibraryFacts: SampleLibraryDedupeFacts? = nil
     ) {
         self.transport = transport
         self.batchSize = batchSize
         self.maxPushIterations = maxPushIterations
         self.keyProvider = keyProvider
+        self.sampleLibraryFacts = sampleLibraryFacts
     }
 
     /// Ladder R1-1: the persisted rekey-in-progress marker's round guard —

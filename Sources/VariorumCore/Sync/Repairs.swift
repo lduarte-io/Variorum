@@ -511,6 +511,9 @@ extension SyncEngine {
         if !touched.readingIDs.isEmpty || touched.dailyDesignationTouched {
             repairs += try convergeDailyJournalDuplicates(db, touched: touched)
         }
+        if !touched.readingIDs.isEmpty {
+            repairs += try dedupeSampleLibraryCopies(db, touched: touched)
+        }
         return repairs
     }
 

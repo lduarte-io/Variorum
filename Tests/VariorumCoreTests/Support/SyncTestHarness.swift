@@ -40,6 +40,11 @@ final class SyncClient {
     /// device (`LockedSyncKeyProvider`) mid-life; the next engine call
     /// binds it.
     var keyProvider: any SyncKeyProviding = FixedSyncKeyProvider()
+    /// The sample-library dedupe's injected facts (pre-13u Act 0) — nil by
+    /// default, exactly like production: the repair is inert unless a
+    /// scenario wires facts in. Mutable so a scenario binds it; the next
+    /// engine call carries it.
+    var sampleLibraryFacts: SampleLibraryDedupeFacts?
 
     /// `prefix` must be exactly two hex characters (e.g. "AA", "BB") — it
     /// leads every UUID the device mints, so two devices can never collide.
@@ -124,7 +129,7 @@ final class SyncClient {
     func engine(batchSize: Int = 200, maxPushIterations: Int = 5) -> SyncEngine {
         SyncEngine(
             transport: transport, batchSize: batchSize, maxPushIterations: maxPushIterations,
-            keyProvider: keyProvider)
+            keyProvider: keyProvider, sampleLibraryFacts: sampleLibraryFacts)
     }
 
     @discardableResult
