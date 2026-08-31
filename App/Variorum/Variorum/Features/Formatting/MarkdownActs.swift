@@ -244,8 +244,20 @@ enum MarkdownActs {
         // because it landed on a box and moving the caret there instead would
         // be answering a different gesture.
         if textView.shouldChangeText(in: edit.range, replacementString: edit.replacement) {
-            textView.replaceCharacters(in: edit.range, with: edit.replacement)
-            textView.didChangeText()
+            // Act 10 item 11: this is a CLICK's edit, not typing — with the
+            // caret elsewhere (the end of the note, after a writing session),
+            // β1's caret clearance in `didChangeText` scrolled the view to
+            // the caret's line at the absolute bottom. Suppressed for exactly
+            // this mutation; the trace and the pin are `CheckboxScrollTests`.
+            let mutate = {
+                textView.replaceCharacters(in: edit.range, with: edit.replacement)
+                textView.didChangeText()
+            }
+            if let editor = textView as? EditorTextView {
+                editor.withoutCaretFollow(mutate)
+            } else {
+                mutate()
+            }
             // The replacement is the same length as what it replaces, so the
             // caret can simply go back where it was.
             textView.setSelectedRange(selection)

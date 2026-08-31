@@ -43,6 +43,23 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
         return body()
     }
 
+    /// **Act 10 item 11 — TRUE only while a CLICK's programmatic edit is
+    /// being applied** (the checkbox toggle). `didChangeText` consults it
+    /// before running β1's caret clearance: the clearance follows the caret
+    /// while she TYPES, but a click's edit lands wherever the click did —
+    /// with the caret still at the end of the note, following it scrolled
+    /// the view to the absolute bottom (her report; the traced mechanism and
+    /// the pin are `CheckboxScrollTests`). Same never-sticky shape as
+    /// `isSoftNewline`/`isPasting`: the single writer's `defer` clears it on
+    /// every path.
+    private(set) var suppressesCaretFollow = false
+
+    func withoutCaretFollow<T>(_ body: () -> T) -> T {
+        suppressesCaretFollow = true
+        defer { suppressesCaretFollow = false }
+        return body()
+    }
+
     /// SHIFT-Return exactly: Return (or keypad Enter) with shift and no
     /// other MEANING-BEARING modifier. Control-Return keeps its own
     /// `insertLineBreak:` binding untouched, ⌥⏎ keeps
@@ -342,6 +359,9 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
         // differing heights in practice, which the filter admits anyway.)
         appliedHeight = 0
         super.didChangeText()
+        // Act 10 item 11: a CLICK's edit (the checkbox toggle) never drags
+        // the view to the caret — β1's clearance is typing's alone.
+        guard !suppressesCaretFollow else { return }
         (enclosingScrollView as? TypewriterScrollView)?.keepCaretClearance(in: self)
     }
 
