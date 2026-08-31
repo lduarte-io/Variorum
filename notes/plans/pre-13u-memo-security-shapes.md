@@ -220,13 +220,22 @@ is next touched: before a re-key re-push, compare recency (the server's newest c
 copy's) and WARN when the server is ahead — one honest sentence, not a refusal. Also verify the
 adjacent corner: a re-key from a near-EMPTY store must not silently push emptiness over a full
 server. **Route: the final ladder should look at this door; if unguarded, a KnownIssues row with an
-owner.**
+owner.** *(Refined at her question, same close: the warning can be CONCRETE without keys — ids,
+dates and sequence numbers are deliberately plain in the disclosure envelope, so a keyless machine
+can COUNT the notes the server has that this copy lacks, count the ones with newer changes, and name
+the newest date — "12 notes this copy doesn't have, newer versions of 9 others, latest Aug 28" —
+while reading no content. Her instruction: emphasize the count-and-dates form; a concrete number
+stops a click-through where an abstract warning doesn't.)*
 
 **T2 — the covered/exposed verdict needs an honest UNKNOWN.** The escrow read-back is verified on
 ONE machine (hers). On machines we have never seen — iCloud Keychain off, no Apple ID, managed
 devices — the probe may simply not know. The nudge tiers must not map "can't tell" onto either
 "covered" (false comfort) or "exposed" (crying wolf): unknown is its own state with its own gentle
 sentence. Act 10's rendering should honor the three-value truth the Act 9 brain already carries.
+*(Her routing, same close — the SPLIT is deliberate: the RENDERING half (three states in the copy)
+stays in Act 10 now, since the brain already carries them and a deferred rendering would quietly
+ship a binary; the VERIFICATION half (proving the probe on a machine that isn't hers) rides her
+Sparkle / fresh-download walk — the first real stranger machine the project will have.)*
 
 ## 10. WHAT THE SUCCESSOR BUILDS FROM THIS
 
