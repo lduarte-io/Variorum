@@ -5819,6 +5819,7 @@ not exist.
 | **The mobile app's first architecture review** | `notes/plans/mobile-architecture-review.md` |
 | **The archive/trash design session** (four IA options; she ruled **Two rooms**) | `notes/plans/mobile-archive-trash-design/` (`proposal.html` + `README.md`) |
 | **The session's own handoff + THE WHOLE-ROUND STATUS TABLE** | `notes/plans/mobile-round-2-handoff-2026-08-30.md` — **§7 is authoritative over the batch map's cells** |
+| **THE FABLE SWEEP REVIEW (2026-08-30, at her resumption ruling — a Fable orchestrator took the seat; ONE Fable cold reviewer sweeps the Opus-era work + docs BEFORE any §4 batch runs; its findings go to ONE Opus fix session under R28)** | brief: `notes/plans/mobile-fable-sweep-review-brief.md` · findings: `notes/plans/mobile-fable-sweep-review.md` — it also discharges the OWED five-MAJOR-round review and 4.5a's owed ladder round 2, to the extent its record says it covered them; it does NOT discharge the stability pass or the whole-round pass |
 
 **Suites moved 513/86 → 582/93.** Hygiene held: zero schema, zero
 `Sources/`, zero `Sync/`, marker 7.
