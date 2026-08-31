@@ -351,8 +351,11 @@ struct BlocksAreaView: View {
                         card(area, item)
                     }
                     if filtered.isEmpty {
+                        // An empty SCOPE with no filters typed is an empty
+                        // listing, not a failed search (caught in the wave's
+                        // own dev walk: a fresh group read "Nothing matches.").
                         Text(tokens.chromeLabel(
-                            area.items.isEmpty
+                            searchText.isEmpty && tagFilter == nil
                                 ? SnippetsCopy.emptyListing : SnippetsCopy.emptySearch))
                             .font(tokens.small)
                             .foregroundStyle(tokens.muted)
