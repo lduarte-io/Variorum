@@ -488,3 +488,23 @@ additive migration **and** a SyncSpec §12 lockstep event — a phase's work, an
 nobody's to improvise. *(Today's near-neighbours: FINISH the book — `locked`,
 which the shelf already renders as " ✓" — or delete it, which the Trash holds
 for 30 days.)*
+
+---
+
+## HER TWO RULINGS ON THIS RECORD (2026-08-31, verbatim — QUESTIONS #93)
+
+> *"i think the question of book archiving is going to be handled in 13i,
+> for the record. All should be a book + notes union - otherwise it just
+> doesn't make sense."*
+
+- **§5's book-archiving candidate is OWNED: 13i.** The Archive room's
+  two-door set stands until that phase's design sitting rules; nothing
+  further is mobile's here.
+- **PROVISIONAL 3 is OVERTURNED: the Library's `All` IS the books + notes
+  union** (the Trash room's own kind-filter grammar, which the PROVISIONAL
+  itself named as the alternative). Builds in this batch's FIX WAVE. The
+  one unspecified detail — how a book's stamp interleaves against notes
+  under the active sort — lands PROVISIONAL with the build (a book carries
+  `created_at`/`updated_at`; map each sort to the book's nearest stamp,
+  record the mapping, pin it). The Archive room is untouched by the ruling
+  (its union is forced: everything archivable there is a note).
