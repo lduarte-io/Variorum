@@ -1,0 +1,178 @@
+# DESIGN MEMO — the security shapes, the recipes, and the one law
+### (the founding sitting's nine-wave security-clarity thread, 2026-08-30 → 31)
+
+**Provenance:** authored 2026-08-31 by the pre-13u round's FOUNDING orchestrator at the author's
+instruction (*"go ahead and make a design memo where all of this information and several verbatim
+exchanges from both of us are saved - this was a high value session and I do want it saved"*). This
+is a P-5 design memo: the intended presentation whole, the edges enumerated, her rulings verbatim.
+**She carries it to the SUCCESSOR orchestrator herself, with the ninth-wave successor block.** The
+build it specifies is mostly **wording and structure** (her framing: *"it's mostly just a tutorial +
+settings wording update and not a real change"*) and lands on Act 10 item 3's spec; the ONE behavior
+change ruled is the escrow/posture coupling; ONE future question is deferred (Shape 3, below).
+
+---
+
+## 1. THE ONE LAW (everything else derives from it)
+
+> **The passphrase protects the SERVER's copy of your writing. A readable copy in someone's hands is
+> already access — no passphrase can retroactively guard a copy that opens. An enrolled device is a
+> pre-assembled recipe: copy + key + sync custody, kept live.**
+
+Corollary, ruled ultra-clear at the ninth wave (hers): **the iCloud spare key does NOT work as a
+remote sync key** — it opens copies you already have, nothing more; it can never pull writing from
+the server. Stated everywhere the spare key is described.
+
+And the re-entry rule, in her closing words: *"we make it clear you don't get stuff from the server
+with no passphrase. if you have a backup + key, you can change your passphrase and THATS how you get
+back into sync - passphrase is still the path."*
+
+## 2. THE FOUR CREDENTIALS
+
+| credential | what it grants | nature |
+|---|---|---|
+| an enrolled, unlocked device | everything, on that device (incl. rotating secrets) | the keys themselves, behind the at-open gate |
+| encryption passphrase | open any copy + enroll any device into sync — the master secret | in your head; works FULLY LOCALLY, no account needed |
+| recovery phrase | identical — the twin | on paper |
+| iCloud spare key (escrow) | open a SURVIVING COPY on a device signed into your iCloud | a key — never a backup, never the passphrase |
+
+The Touch ID sentence (from her sharpest question): **"An unlocked, enrolled device is as powerful
+as your passphrase. Touch ID guards this device — your passphrase is what lets a new device in."**
+
+## 3. THE RECIPES (the user-facing format — recipes + short paragraphs; NO grand matrix)
+
+**Open your writing (any one suffices):** an enrolled device through its gate · any copy +
+passphrase · any copy + recovery phrase · any copy + the iCloud spare key on a Mac in your iCloud.
+
+**Open nothing alone:** your iCloud password (a key with nothing to unlock) · your computer password
+under a lock mode · a backup drive (post-#82) · us — the server never holds a key to anything.
+
+**Bring sync to a new device:** account sign-in + passphrase (the front door) — or any open-recipe
++ account sign-in via Replace Encryption Keys (the reset road: new passphrase, your copy becomes the
+truth). *Passphrase is still the path — the reset road just lets you mint a new one from possession.*
+
+**The compound warning (ships in copy):** backups in iCloud Drive + the spare key ON = your Apple
+account is everything (and with an iCloud address as your account email, sync too). For the person
+who wants Apple to hold it all, that is the feature; for everyone else it must be a read sentence.
+
+## 4. THE THREE SAFETY LEVELS AND THE SHAPES
+
+Safe from **the Variorum server (us)** · from **someone in your iCloud** · from **someone at your
+unlocked computer**. Every shape is which levels you keep:
+
+- **Shape 1 — You hold the keys** (passphrase + recovery set; demanded at-open; NO iCloud spare):
+  keeps ALL THREE. Doesn't stop: someone holding your secrets — or you forgetting both, which is
+  the flip side of maximum security, said plainly.
+- **Shape 2 — This device + a spare key in iCloud** (the default): keeps the first two — the iCloud
+  level CONDITIONALLY (the compound warning) — gives up the desk level. Stops the iCloud-phishing
+  attacker (they get a key with nothing to open); does not stop someone at your unlocked Mac.
+- **Shape 3 — iCloud holds everything: DEFERRED, her ruling (see §8).** The roundabout route
+  already exists: backups in iCloud + the spare key = the normie recovery, no custody surgery.
+
+**Escrow follows the posture (RULED):** demanded modes do not offer the iCloud spare. Her
+why-sentence, near-verbatim for the copy: *"anyone who has your computer password has your iCloud,
+so the extra lock wouldn't be providing extra protection, so I don't offer this."*
+
+## 5. WHAT *YOU* NEED, BY MODE (the four real states)
+
+1. **Just writing (Auto, nothing set up):** daily — nothing. Computer dies — **a copy of your store
+   + iCloud Keychain.** Neither: gone, which is normal for un-backed-up local software (the honest
+   softener: automatic backups guard corruption/mistakes; a same-machine backup dies with the
+   machine). The state-aware nudge exists to move you up from here.
+2. **Auto + a secret set (the nudged state):** any copy + any one of your three keys.
+3. **Sync on** (passphrase guaranteed at signup): a dead computer costs nothing — sign in anywhere +
+   passphrase (or phrase) = everything, current. **What sync can never survive: losing every device
+   AND both secrets — the server's copy is then sealed forever.** The ratified tier sentence:
+   *"Sync brings your writing back to any device — as long as you keep your passphrase or recovery
+   phrase. We can never reset it for you: that's what end-to-end means."*
+4. **Biometric / Passphrase lock:** daily — **this device's Touch ID or your passphrase — never
+   iCloud, never the computer password.** Computer dies — sync, or copy + secret. Both secrets
+   forgotten while the device lives: Touch ID still opens it — set a new passphrase NOW (why
+   rotation stays open, §7). Both gone + device gone: **gone forever, everywhere — the deal this
+   shape chooses, in those words.**
+
+## 6. THE PRESENTATION MACHINERY (Act 10 item 3's spec, extended)
+
+The two decision ceremonies — **the lock moment** and **sync signup** (her flow: start writing
+instantly; the choice arrives when you reach for the lock; sync signup asks which path). The
+prominent **unchosen-state indicator** (bottom-left family) — NEVER "encryption off" (the store is
+always encrypted, R13p-2; what is unchosen is the lock and the keys). Per-shape **"Who this protects
+you from"** + the TWO what-ifs (*"what if I forget my passphrase" / "what if my computer explodes"*)
+under every shape (drafted in the sitting replies — render, don't re-derive). Settings explains and
+points at the field guide's privacy chapter. Her copy doctrine binds: structure and generous
+targets; a sentence only where truly necessary.
+
+## 7. RULED AT THIS SITTING (beyond the shapes)
+
+- **Rotation stays open** — hers: *"in the touchid / biometric lock… you had to have touchid or the
+  passphrase to get to the point where you can change the passphrase, so it's probably you."* The
+  memo states the Auto corner out loud: under Auto, a session-borrower can rotate too — inherent to
+  Shape 2's threat model, whose security never rested on the passphrase.
+- **The state-aware nudge** (R-pre13u-4, built in Act 9): covered = gentle; exposed (Auto + no
+  secrets + escrow not landing) = plain truth, device-neutral, both platforms.
+- The demanded-modes escrow exclusion (§4) — the one behavior change this memo carries.
+
+## 8. DEFERRED — SHAPE 3, her ruling verbatim
+
+> *"I would say we're deferring a shape 3 where sync without variorum login is created - not making
+> it now, I feel fairly satisfied with where things are at."*
+
+Earlier leaning, same wave: *"idk if we even need to offer that icloud holds everything shape -
+especially since the backup in icloud + icloud key + variorum sign in is an option."* The deferred
+question, if ever reopened: sync custody riding iCloud Keychain for a declared profile (would bend
+14b R-4/R-6 for that shape only — her call then), vs making the roundabout route deliberate-and-
+legible (a backup-destination chooser that says what iCloud placement means). Also deferred with it:
+posture-switching semantics. **No owner slotted — at her word, 13x-adjacent by nature.** Nothing
+that exists changes meanwhile.
+
+## 9. THE VERBATIM EXCHANGES (why this memo exists — the turns that did the work)
+
+**Her opening escalation:** *"I need a way clearer chart and table of what settings you can have /
+what passphrase or autominted key or icloud key or whatever / what you need to log in / where. I'm
+still confused which, again, it's normally a bad sign when I'm confused because it will mean my
+users will be hopeless confused + scared of the worst possible thing, which is losing all of their
+work. now that there are all these conditionals about Auto and when you use your password and stuff,
+goodness gracious."*
+
+**The question that surfaced the law:** *"if my sycned writing hangs on a secret only i hold - why
+is my touchid enough to change that secret?"* → the architect's answer that became copy: an
+enrolled, unlocked device holds the keys themselves; Touch ID guards the device, the passphrase
+lets new devices in.
+
+**The architect's correction that reframed sync** (she flagged it as the clarifier): her claim —
+*"the sync they're paying for is NOT protection against loss - if they lost the logged in device,
+they wouldn't have anything?"* — was wrong in the common case: sync IS device-loss protection,
+conditioned on the passphrase surviving; what it cannot survive is the compound loss. The corrected
+sentence is §5.3's.
+
+**Her three-shapes convergence:** *"It sounds like we have options 1 & 2, but not 3 (whatever, just
+throw it all in my icloud). am i correct that the device + icloud wouldn't be enough to stop someone
+at your unlocked computer, if icloud escrow is on at all?"* (Correct — hence §4's coupling.)
+
+**Her recipes insight:** *"so we've got to be clear that there are RECIPES for access (icloud key +
+copy of store = full access). I think this recipes idea is good, I think a table will be too
+confusing… I feel like someone might not realize that a copy of their store in icloud + an icloud
+key = free access, basically."* → and the architect's confirmation that closed the loop: store copy
++ iCloud key = read everything; + account password = sync too, via Replace Keys — which is exactly
+why the law leads the presentation.
+
+**Her "who this stops" instinct:** *"I think clarifying more with 'Who this stops' would be good -
+and we can clarify that we have two of the shapes and that the third needs to be built out still,
+without changing what we even currently have."*
+
+**The device-vs-copy distinction, hers:** *"a copy of the store + icloud is enough, so we need to be
+clear if it's a device or literally just a copy of the store. right now it's unclear."* → the
+architect's line that answered it: **an enrolled device is a pre-assembled recipe; a copy is
+ingredients.**
+
+**Her sign-off:** *"ok, I do think that things have ended up being prettyyyy clear… they need to
+know for THEIR mode, what they need to be safe… I think things are starting to make a lot of sense
+to me, which is a good sign. this was insanely thorny at the beginning - I can't believe we've gone
+through so many iterations."*
+
+## 10. WHAT THE SUCCESSOR BUILDS FROM THIS
+
+Everything in §§1–6 as **wording + structure** on Act 10 item 3 (settings, the tutorial's privacy
+chapter + re-seed, the indicator, the ceremonies' copy) — plus the ONE behavior change (§4's
+escrow/posture coupling). §8 stays deferred with no build. The ninth-wave successor block she
+carries names the same items; where the block and this memo differ, **this memo is the fuller
+record and wins.**
