@@ -125,6 +125,19 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
         MarkdownActs.indentLists(MarkdownEditing.Act.outdent, in: self) { super.insertBacktab(sender) }
     }
 
+    /// **Act 10 item 12 — typed arrows.** The keystroke itself is untouched
+    /// (`super` runs first, so routing, crystallization and every refusal
+    /// see exactly the character she typed); the substitution is a SECOND
+    /// ordinary edit afterwards, the K5 lead-insertion shape. The decision
+    /// is `TypedArrows`' (core Domain — one brain, shareable with the
+    /// phone); the guard rails (single typed terminator, no marked text,
+    /// never in a code span, `-->` stays literal) live with it.
+    override func insertText(_ string: Any, replacementRange: NSRange) {
+        super.insertText(string, replacementRange: replacementRange)
+        guard !isPasting, !isFindReplacing else { return }
+        MarkdownActs.substituteTypedArrow(afterTyping: string, in: self)
+    }
+
     /// **QoL batch 3 (L6) — TRUE only while a FIND-BAR replacement is being
     /// applied**, and only ever by `EditorFind`'s own application loop. Never
     /// sticky: the single writer is `withFindReplace`, whose `defer` clears it

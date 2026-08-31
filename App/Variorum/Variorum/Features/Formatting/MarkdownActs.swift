@@ -265,6 +265,67 @@ enum MarkdownActs {
         return true
     }
 
+    // MARK: - Act 10 item 12: typed arrows
+
+    /// **`->` becomes → and `<-` becomes ← as you type** (pre-13u Act 10
+    /// wave 1, item 12 — ruled). The decision is `TypedArrows`' (one pure
+    /// brain, shareable with the phone); this is the Mac's application of
+    /// its answer through the ordinary input path — the K5 lead-insertion
+    /// shape exactly: `shouldChangeText` → `replaceCharacters` →
+    /// `didChangeText`, so a sealed note or a locked take refuses in its
+    /// own words with no new refusal code.
+    ///
+    /// Called by the two writing surfaces AFTER the keystroke's own
+    /// insertion lands. **The substitution is applied on its OWN runloop
+    /// pass** (`RunLoop.main.perform` — the next pass runs before the next
+    /// key event is dispatched): a same-turn edit registers into the
+    /// keystroke's own undo group no matter how the coalescing is broken
+    /// (measured — one ⌘Z took back the whole typing run), and its own pass
+    /// is what makes ⌘Z revert JUST the substitution, restoring the typed
+    /// `->` (the smart-quotes convention, her ruled shape). The deferred
+    /// application re-reads the caret and the document, so a beaten race
+    /// simply declines — the conservative outcome is a missed substitution,
+    /// never a wrong edit.
+    static func substituteTypedArrow(afterTyping string: Any, in textView: NSTextView) {
+        let typed = (string as? String) ?? (string as? NSAttributedString)?.string
+        // Only a lone typed terminator can complete a pair — a paste, a
+        // find-replacement or an IME composition is not this gesture.
+        guard typed == ">" || typed == "-", !textView.hasMarkedText() else { return }
+        RunLoop.main.perform { [weak textView] in
+            guard let textView else { return }
+            MainActor.assumeIsolated {
+                applyTypedArrowSubstitution(in: textView)
+            }
+        }
+    }
+
+    /// The deferred half: decide (the pure brain) and apply (the ordinary
+    /// trio). Internal so the pins can drive it deterministically.
+    static func applyTypedArrowSubstitution(in textView: NSTextView) {
+        guard !textView.hasMarkedText() else { return }
+        let caret = textView.selectedRange()
+        guard caret.length == 0, caret.location != NSNotFound else { return }
+        let document = textView.string as NSString
+        guard caret.location <= document.length else { return }
+        let lines = document.lineRange(for: NSRange(location: caret.location, length: 0))
+        guard let sub = TypedArrows.substitution(
+            line: document.substring(with: lines),
+            caret: caret.location - lines.location)
+        else { return }
+        let range = NSRange(
+            location: lines.location + sub.range.lowerBound, length: sub.range.count)
+        // Seal the typing run's coalesced action on both sides, so the next
+        // keystroke starts its own run rather than joining across the arrow.
+        textView.breakUndoCoalescing()
+        defer { textView.breakUndoCoalescing() }
+        guard textView.shouldChangeText(in: range, replacementString: sub.replacement)
+        else { return }
+        textView.replaceCharacters(in: range, with: sub.replacement)
+        textView.didChangeText()
+        // AppKit leaves the selection at the end of the replaced text —
+        // immediately after the arrow, which is where typing continues.
+    }
+
     // MARK: - K5: ⏎ continues a list
 
     /// **The ⏎ door** (13k K5, her ruling), shared by both text-surface

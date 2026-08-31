@@ -319,6 +319,16 @@ final class PaneTextView: NSTextView, MarkdownFormattable {
         super.keyDown(with: event)
     }
 
+    /// **Act 10 item 12 — typed arrows on the pane surface too.** A live
+    /// take/lens pane is a writing surface (the formatting acts' own
+    /// premise), so `->` earns its arrow here exactly as in the full editor;
+    /// the trio routes through this pane's coordinator like every other
+    /// formatting edit.
+    override func insertText(_ string: Any, replacementRange: NSRange) {
+        super.insertText(string, replacementRange: replacementRange)
+        MarkdownActs.substituteTypedArrow(afterTyping: string, in: self)
+    }
+
     /// **13k K5 — ⏎ continues a list**, through the one shared door. A
     /// pane's newline is ordinary text (no open tail, no crystallization),
     /// so the only thing this adds is the lead — and it adds it exactly the
