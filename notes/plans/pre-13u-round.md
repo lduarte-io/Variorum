@@ -1,7 +1,11 @@
 # The pre-13u round (EXECUTION PLAN)
 
-**Status: READY — authored 2026-08-30, immediately after the proactive tech-debt sweep.**
-Runs after her live `13p-fix` session (Phase 17 entry **17g**) and before **13u1**.
+**Status: OPEN — the `/architect-phase` kickoff sitting is underway (2026-08-30 evening).**
+Authored 2026-08-30 immediately after the proactive tech-debt sweep; **WIDENED the same evening by the
+author's kickoff message** (the KICKOFF section below). Runs after her live `13p-fix` session (**17g**)
+and before **13u1**. Runs under `/architect-phase`: the P-1…P-9 constitution in
+`.claude/skills/architect-phase/SKILL.md` **binds this round by reference** (bound by pointer rather
+than copied verbatim — a deliberate leanness deviation, recorded per the skill's own deviation rule).
 
 ## What this round is — and why it is not a numbered phase
 
@@ -22,6 +26,80 @@ them also feed each other — Act 3 builds the corpus Act 4 measures against.
 > the concurrent `13p-fix` session when this plan was authored, so this plan deliberately does not
 > touch it. **First act of this round: re-read that file** — 17g exists by now, and this round's
 > cross-references into it (Acts 1, 4, 5) must be added there, not assumed.
+
+---
+
+## KICKOFF (2026-08-30 evening — the `/architect-phase` sitting; the author's message, itemized)
+
+She invoked `/architect-phase` on this round. Her items, verbatim-faithful, each routed:
+
+1. **Cast (her instruction):** *"start with a Fable cold review, use Opus implementers (unless a
+   piece of machinery is exceptionally tricky), and Opus cold review when you think is right + end
+   with Fable cold review at the end or also at a few intermediate points if it makes sense. Be
+   judicious in use of tokens but use them where needed, because doing too much with Opus led to a
+   lot of the messiness in this phase."* Her hindsight on 13p-fix: *"the 13p-fix phase ran on Opus
+   only, and I think that was a mistake in hindsight (I thought it would be just signing into the
+   account, but it turns out there were more issues)."* The CAST table below executes this.
+2. **A test fails on clean main** — `CustodyHandoverTests.theE2EESurfaceNamesTheSymptomWhenAWriteLandsUnreadable`,
+   proven by the mobile session on a clean detached worktree at `origin/main` (*"Pre-existing on main,
+   in the 13p-fix work"*). Yet 17g's close recorded **1854/314 ALL PASSED** on its final tree — so
+   the failure is environment- or state-dependent, and BOTH facts are inputs: the fix wave must trace
+   WHY it reds there and passed at 17g's close (candidates: the R3-NIT process-global
+   `E2EELaunchKeyCache` leak; machine keychain state), not merely re-green it.
+3. **main did not build for iOS for the whole 13p-fix run** — R3-2's `wroteButUnreadable` was placed
+   in the `#else` (macOS-only) arm while three `Shared/` sites reference it unconditionally. The
+   mobile session proved it pre-existing and fixed it at the merge (`43a35ef`). Two consequences:
+   (a) the mobile merge's Mac/`Shared` deltas JOIN Act 1's review scope; (b) **the round gains a
+   standing verification gate: the iOS target must build at every batch close** — the Mac suite
+   passing gave zero signal (the MobileSoul §3 class, live demonstration).
+4. **17a joins the roster** (it was not in the original draft): the 13p custody residue, URGENT
+   run-first per the register — the same subsystem as the CF-12/#82 rulings, so it runs as ONE
+   Fable custody batch with them (Act 9).
+5. **The three standing questions are put to her AT THIS SITTING** — this supersedes the same-day
+   routing to 13u's agenda (`7661504`) at her own word: Act 0's B1 residual, Act 8's CF-12
+   doctrinal question, and QUESTIONS #82. Rulings land in the RULINGS block below as they arrive.
+6. **Her carried items ARRIVED (Act 7 fills):** (i) an eye/peek toggle on the encryption-passphrase
+   set screen — *"it's annoying to have no option to glimpse at it"*; (ii) This Note's Tray UI —
+   *"weird and janky UI where elements are cut off and it's badly ordered / organized"* (screenshot
+   on file: a section header clipped under a divider); (iii) the Pool page — *"looks dated and
+   doesn't feel good to use - the add to book as the dropdown on the far right is kinda bleh. there's
+   no search in that book dropdown either so it'll get tiresome. I think tag might look better as a
+   column? maybe not, but this isn't good"*; (iv) *"all of the setting pages are a mess for a user to
+   look at - I do have to write my own copy, but look at how crowded this is and how it gives a user
+   just a lack of clarity"* (the Encryption pane, the Account pane, the Opening Variorum pane —
+   screenshots on file); (v) *"I'm concerned that the overall UI / UX with the trash / encryption /
+   archived pass didn't get enough love and would like a general sweep + fix of those. I'll update
+   the phrasing later and make sure the buttons stay available"*; (vi) the at-open explainer stack —
+   *"this info is all good, and I certainly do need to convey it to users somehow, but this is so
+   confusing to look at"*. All routed to **Act 10**.
+7. **Sherlock stays in** (*"the inclusion of sherlock holmes in the library"*) — Act 3 as ruled.
+8. **Environment caveat from the mobile merge, recorded:** the merged history contains one commit
+   where a staging sweep left the Mac target un-buildable — **a `git bisect` across it fails to
+   build for reasons unrelated to what it bisects.** Carried into every batch brief.
+
+### CAST (executes her instruction)
+
+| Act | Work | Implementer | Review |
+|---|---|---|---|
+| 1 | Cold review of 2026-08-30 IN FULL (signing + 17g + ladder fixes) **+ the mobile merge's Mac/`Shared` deltas + the failing custody test** | — | **Fable cold reviewer** (REVIEW_PROMPT verbatim, zero framing) |
+| 9 (custody) | Act 1's custody-layer fixes + **17a** (8 items) + the CF-12 build per ruling + the #82 build per ruling | **Fable** — the "exceptionally tricky machinery" clause; this subsystem is why 13p-fix-on-Opus went wrong | rides the final ladder |
+| 0 | The B1 fix per ruling | Opus (mobile app layer); **Fable for any `Sync/` repair half** (the standing rider) | rides the final ladder |
+| 3+4 | Sherlock seed, then 17c measured on that corpus | Opus | Opus cold review (midpoint) |
+| 10 | The UI/UX pass (tray · Pool · protection/settings surfaces · eye peek · trash/archived sweep) | Opus, screenshot-verified | Opus cold review (midpoint) |
+| 5 | 17f (9 items) | Opus | Opus cold review (midpoint) |
+| 2, 6 | P39 amendment · the Fragments brief | the architect | — |
+| end | The whole round diff | — | **Fable cold-review ladder** (fresh reviewer per round, cap 3) |
+
+**Sequence:** sitting rulings → Act 1 (Fable review) → Act 9 (Fable custody batch) → Acts 3+4 →
+Act 10 → Act 5 → Act 0 per ruling → the Opus midpoint review + fixes over the Opus-built surface →
+the final Fable ladder → closeout (Acts 2 and 6 land architect-side along the way). Strictly one
+agent at a time.
+
+### RULINGS (recorded verbatim as they land at the sitting)
+
+*(to be filled)*
+
+---
 
 ## Reading order (do this first, in this order)
 
@@ -186,6 +264,11 @@ the **17g** entry in this file's sibling `phase-17-standing-fixes.md`, `QUESTION
    live E2EE custody with test material. The remediation is hers (delete + re-enroll) and the rule is
    now in that plan's traps section. If a reviewer flags the incident, the correct disposition is
    "already recorded" — but a reviewer flagging that the *rule* is missing or weak is a real finding.
+4. **(Added at the kickoff sitting.)** The review scope WIDENS twice: the mobile merge's Mac/`Shared`
+   deltas (`fa522d6` + `43a35ef` — the R3-2 iOS-build fix among them) join the diff under review, and
+   the failing `CustodyHandoverTests.theE2EESurfaceNamesTheSymptomWhenAWriteLandsUnreadable` is a
+   known-red input for the FIX WAVE (trace why it reds on clean main yet passed at 17g's close —
+   never merely re-green it). Both stay orchestrator-side; the reviewer gets the prompt and the repo.
 
 ## Act 2 — P39: refine the rule, then hand the code fix to 13u2
 
@@ -456,6 +539,50 @@ Red-on-old pin (the evaluation count), the tutorial spine green, and the answer 
 > *(Standing environment note worth carrying: test runs pop windows onto her screen. Prefer running
 > suites when she is not trying to use the app, and say when you are about to.)*
 
+**FILLED at the kickoff sitting — see KICKOFF item 6; all six routed to Act 10.** More may arrive;
+record each here in her words as it does.
+
+---
+
+## Act 9 — The custody batch: 17a + the CF-12 and #82 builds (Fable implementer)
+
+ONE Fable batch over the key-custody subsystem, composed of: **17a's eight items** (P1, P2, P3, P10,
+P11, P12, P13, P15 — the register's entry is the brief; six of eight share the `try?`-swallows-typed-
+errors root cause, P3 is the re-lock's missing `finalizeWork()`, P15 is the key-in-SQL-error channel),
+**the CF-12 build per the sitting ruling** (Act 8 carries the mechanism and both mechanical shapes),
+**the #82 build per the sitting ruling** (the TN3137 read→re-add-with-flag→delete-old migration, per
+family, round-trip pinned — IF ruled), and **whatever custody-layer findings Act 1's review adds**.
+Also from Act 1's fix scope: the failing `CustodyHandoverTests` red on clean main, traced then fixed.
+
+Standing rules bind hard here: pin before fix; behavioral-revert verification; **never touch the
+author's live keychain items or her real store** (the 17g R3-1 incident is the cautionary record —
+its rule lives in `phase-13p-fix-dp-keychain.md`'s traps section and every custody brief carries it).
+
+## Act 10 — The UI/UX pass: the tray, the Pool, and the protection surfaces (Opus implementer)
+
+Screenshot-verified against her five screenshots. Her phrasing rider binds throughout: **she will
+rewrite copy later — keep every capability and button present**; restructure and de-clutter, never
+delete doors. Taste calls beyond her stated direction go to her as propose-only screenshot pairs.
+
+1. **This Note's Tray** — elements cut off (a section header visibly clipped under a divider in her
+   screenshot), ordering/organization poor. Fix layout, spacing, section order; nothing clipped at
+   any pane width. (P-8: chrome `fixedSize` texts always carry a `lineLimit` — the b6dae25 class is
+   exactly this family; check it first.)
+2. **The Pool page** — the far-right "Add to Book" dropdown retired in favor of a book picker WITH
+   SEARCH; her floated tag-as-column explored as a screenshot pair for her ruling (*"maybe not"* is
+   preserved uncertainty, not a decision); general de-dating (row grammar, spacing, affordances)
+   within the two voices.
+3. **The protection/settings surfaces** — the Encryption pane, the Account pane, the Opening Variorum
+   pane: crowded → grouped and scannable, progressive disclosure where honest (the at-open explainer
+   stack conveys several rulings' worth of consequence text in one undifferentiated column — group by
+   the question each paragraph answers, collapse detail, lose nothing). **The eye/peek toggle lands
+   on the passphrase set screen** — and on its SecureField siblings on the same surfaces for
+   consistency (`SecretCheck`, the lobby's passphrase field), one shared control, not three ad-hoc
+   ones.
+4. **The trash/encryption/archived sweep** — a general pass over the 13j/13l/13p-era surfaces (Trash,
+   Archived, the lobby, the reminder/nudge family) for the same crowding/jank class; anything
+   taste-shaped lands on a propose-only list for her, per the standing posture.
+
 ---
 
 # Obligations at close
@@ -480,6 +607,11 @@ Red-on-old pin (the evaluation count), the tutorial spine green, and the answer 
    the sweep artifact, which is a dated snapshot and not a tracking surface.
 9. **`/Applications/Variorum.app` refreshed** if any Mac app code changed, per CLAUDE.md — and note
    that she does not quit the running app on request, so coordinate.
+10. **The iOS target builds** at every batch close and at round end — the R3-2 lesson: the Mac suite
+    alone is ZERO signal for `Shared/`.
+11. **The three sitting rulings** (B1 · CF-12 · #82) recorded verbatim in the KICKOFF's RULINGS block
+    and in `notes/QUESTIONS.md`, and built as ruled.
+12. **17a closed in `phase-17-standing-fixes.md`** with per-item dispositions, alongside 17c and 17f.
 
 # Verification at close
 
