@@ -2448,23 +2448,61 @@ render-don't-re-derive (§9c item 3) binds every surface below.
     AuthViews is SHARED, so restructure там must stay phone-legible), group by the
     question each element answers, ?-disclosure for depth, NEVER delete a door. The
     reminder/nudge family rides piece 6.
-12. **Screenshots — NOT DONE** (dev-store Debug build ONLY; gitignored
-    `notes/plans/pre-13u-act10-screens/`; wave 1's capture pattern). Owed: the rebuilt
-    pane (auto + demanded states), the explainer tab, the lobby's peek eye, the nudge's
-    exposed state if drivable, Trash/Archived/Account after the sweep.
-13. **Full verification at close — NOT RUN** (owed exactly as briefed): FULL Mac suite
-    (baseline 1919/327 + this wave's pins; latency pin per its KnownIssues row if red;
-    canvas suite isolated if load-flaky); core `swift test` if `Sources/` touched (T1
-    probe does touch it; baseline 1484/159); FULL mobile suite (Shared touched; baseline
-    602/97 + 2 standing). iOS build subsumed by the mobile run.
-14. **Keystone-lines-verbatim confirmation — PENDING** (assert at close: the memo's
-    keystones appear byte-close in ProtectionShapes; the explainer pin is the mechanism).
-15. **MOBILE PARITY note for the closeout** (piece for the record's close): the coupling
-    + checklist + tier sentences are ONE brain (`Shared/`) — one account, ONE posture,
-    both platforms (R-pre13u-8(f)); the phone's sheet renders the same sentences; the
-    phone's nudge FACE and checklist face are mobile's to compose at its resumption
-    (named surfaces: MobileProtectionSheet mode section's ways-back-in line — DONE here
-    if piece 5's phone line lands; the exposed-nudge face — mobile's).
+12. **Screenshots — DONE (dev-store Debug walk; gitignored pre-13u-act10-screens/):**
+    `30-main.png` — the UNCHOSEN-STATE INDICATOR LIVE bottom-left (alarm ink, the
+    exposed headline; caught + fixed a label truncation, lineLimit 1 → 2);
+    `32-protection-pane.png` — the checklist LEADING the pane with T2's three-value
+    truth live ("iCloud spare key — not checked yet this launch");
+    `33/33b/34` — the explainer tab, keystones legible (one law leading, recipes,
+    new-device split). NOT walked (pinned instead): the demanded-state escrow section
+    (needs a passphrase ceremony on the dev store; `thePaneSpeaksTheWhySentence…` pins
+    it), the lobby eye, the exposed nudge. **Walk incident, recorded:** the dev build
+    raised a KEYCHAIN ACL PROMPT for its own legacy dev-scope e2ee item
+    ("io.lduarte.Variorum.e2ee-keys") — DENIED, nothing entered, her keychain untouched
+    (the dev app handles refusal honestly); dev-app quit cleanly after, zero instances.
+13. **Full verification at close — RUN, GREEN (with one adjudicated red):**
+    · **Core `swift test`: 1489 tests / 160 suites GREEN** — baseline 1484/159 + exactly
+      the probe suite (+5/+1).
+    · **Mac: 1936 tests / 330 suites — the ONLY red is the KNOWN load-flaky latency
+      pin** (`rewriteStrategyLatencies`, its KnownIssues row): ADJUDICATED PRE-EXISTING
+      by the row's own PAIRED protocol — isolated ×3 on this tree (54.3 / 56.2 /
+      57.9 ms) vs isolated ×2 on the PRE-WAVE baseline worktree at 6732864 (53.7 /
+      56.4 ms), statistically identical, and this wave's diff has ZERO editor-path
+      lines. The 13p covariate held (a loaded box — this session built/tested for
+      hours beside her live real-store app). Arithmetic exact: +17 tests / +3 suites
+      over the 1919/327 baseline = EscrowPostureCoupling 7 + ProtectionTierFace 4 +
+      RekeyGuardFace 4 + the two render pins, in 3 new suites. The canvas suite passed
+      in-suite (no isolation needed). The tutorial spine green inside the run. ONE
+      moved-cheese pin re-anchored DELIBERATELY with its supersession note:
+      `KeychainOffMainTests.everyTransitionArmsGuardSeamWorkArrivesOffMain` — the
+      coupling's escrow calls joined each transition's expected off-main list; the
+      anyOnMainThread LAW never went red (the calls arrived off-main, exactly as that
+      suite polices).
+    · **Mobile: 602 tests / 97 suites PASSED + the 2 standing known issues** — the
+      baseline exactly; the iOS build subsumed.
+14. **Keystone-lines-verbatim confirmation — CONFIRMED, mechanized.**
+    `theExplainerCarriesTheKeystonesVerbatim` asserts BOTH halves and is green: the
+    ratified sync sentence BYTE-EXACT ("Sync brings your writing back to any device —
+    as long as you keep your passphrase or recovery phrase. We can never reset it for
+    you: that's what end-to-end means."), the Touch-ID keystone's exact head and tail
+    ("An unlocked, enrolled device is as powerful as your passphrase." … "guards this
+    device — your passphrase is what lets a new device in."), key-not-backup + opens-
+    copies-only + never-pulls-from-the-server, "Passphrase is still the path" — and
+    that the explainer SURFACE carries every one. E2EE never appears as user-facing
+    vocabulary (seventh wave (iv)); "end-to-end" appears only inside the ratified
+    sentence itself.
+15. **MOBILE PARITY note (for the closeout's line — R-pre13u-7(f)/R-pre13u-8(f)):**
+    ONE posture per account, made structural: the coupling, the checklist rows, the
+    tier sentences, the recipes/shapes brain (`ProtectionShapes`), the peek field, and
+    the explainer view all live in `Shared/` — the phone's sheet ALREADY renders the
+    coupling (no dial under demanded modes, her why-sentence), the compound warning,
+    and the standing ways-back-in line from the same brain. Mobile's own deliverables
+    at its resumption (faces, not semantics — never re-decided): the exposed-nudge
+    FACE (the brain + copy are shared and tier-ready), a checklist face if the sheet
+    wants rows over the line, mounting `ProtectionExplainerView` in the phone's
+    settings chrome, and the phone's own re-key door face already inherits the T1
+    guard through the shared EncryptionView. The phone's tutorial lesson was checked —
+    no coupling drift, no edit needed.
 
 ## Taste forks so far (for the morning bundle)
 

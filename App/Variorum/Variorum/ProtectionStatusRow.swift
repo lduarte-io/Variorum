@@ -46,7 +46,8 @@ struct ProtectionStatusRow: View {
                             .font(tokens.small)
                             .fontWeight(.semibold)
                             .foregroundStyle(tokens.ink)
-                            .lineLimit(1)
+                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
                         Text(exposed
                              ? ProtectionCopy.exposedNudgeHeadline
                              : ProtectionShapes.unchosenIndicatorDetail)

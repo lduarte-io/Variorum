@@ -459,26 +459,39 @@ struct ProtectionSetModeOffMainTests {
         #expect(await controller.setPassphrase("sesame") == nil)
         log.reset()  // the setup's own seam reads are not this pin's subject
 
+        // SUPERSESSION (pre-13u Act 10 wave 2a — the escrow/posture
+        // coupling, memo §4): `setMode` now ALSO reconciles the escrow
+        // item to the new posture at the act, so each arm's expected list
+        // grows by the coupling's escrow calls — which arrive OFF-MAIN
+        // through the same detached-hop discipline this pin polices (the
+        // `anyOnMainThread == false` half is the law; the lists moved
+        // with the cheese, deliberately).
+
         // INTO BIOMETRIC: the key read, the gated landing, its read-back
-        // verify, the silent item's release — all off-main, in order.
+        // verify, the silent item's release — then the coupling removes
+        // the spare (the demanded posture keeps none) — all off-main.
         #expect(await controller.setMode(.biometric) == .changed)
-        #expect(log.names == ["loadAuto", "saveGated", "gatedItemExists", "deleteAuto"],
+        #expect(log.names == ["loadAuto", "saveGated", "gatedItemExists", "deleteAuto",
+                              "deleteEscrow"],
                 "the same reads and writes, in the same order — only the thread moves")
         #expect(log.anyOnMainThread == false,
                 "ZERO synchronous SecItem calls on the main thread: \(log.calls)")
 
         // INTO PASSPHRASE (the resident key stands in — no key read):
-        // both verified releases (17h R3-5), off-main.
+        // both verified releases (17h R3-5) + the coupling's spare
+        // removal, off-main.
         log.reset()
         #expect(await controller.setMode(.passphrase) == .changed)
-        #expect(log.names == ["deleteGated", "deleteAuto"])
+        #expect(log.names == ["deleteGated", "deleteAuto", "deleteEscrow"])
         #expect(log.anyOnMainThread == false, "\(log.calls)")
 
         // BACK TO AUTO: the landing, its identity verify, the gate's
-        // release — off-main.
+        // release — then the coupling RE-LANDS the stored escrow choice
+        // (read → save → verify read-back), off-main.
         log.reset()
         #expect(await controller.setMode(.auto) == .changed)
-        #expect(log.names == ["saveAuto", "loadAuto", "deleteGated"])
+        #expect(log.names == ["saveAuto", "loadAuto", "deleteGated",
+                              "loadEscrow", "saveEscrow", "loadEscrow"])
         #expect(log.anyOnMainThread == false, "\(log.calls)")
     }
 }
