@@ -197,6 +197,10 @@ final class EncryptionSession {
     /// database — `AccountRekeyMarker`). nil = never set (unconfigured /
     /// tests that predate the marker).
     var rekeyIncompleteCheck: (@Sendable () async -> Bool)?
+    /// T1's guard (pre-13u Act 10 wave 2a — memo §9b): the READ-ONLY
+    /// recency probe the re-key door consults before acting. nil =
+    /// unwired (no sync composition) — the door proceeds as before.
+    var rekeyRecencyProbe: (() async throws -> RekeyRecencyReport)?
     /// Ladder R1-1: true when a re-key started on THIS device and never
     /// completed — the marker survives crash and relaunch, so the surface
     /// re-speaks the rerun road here (the banner + its direct Replace
@@ -410,6 +414,13 @@ final class EncryptionSession {
     /// mandatory-phrase step: the new 12 words are generated, written
     /// down, and confirmed exactly as at setup. The old phrase died with
     /// the old master, honestly.
+    /// T1's guard: one recency read before the act. nil = unwired.
+    /// Throws are the CALLER's to word (couldn't-compare, never a block).
+    func assessRekeyRecency() async throws -> RekeyRecencyReport? {
+        guard let rekeyRecencyProbe else { return nil }
+        return try await rekeyRecencyProbe()
+    }
+
     func rekeyAccount(passphrase: String) async {
         guard let rekeyRunner else {
             lastError = "Project keys not configured (ProjectConfig.swift)"

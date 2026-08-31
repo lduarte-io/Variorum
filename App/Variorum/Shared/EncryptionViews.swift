@@ -106,6 +106,10 @@ struct EncryptionView: View {
     @State private var showingRekey = false
     @State private var rekeyAcknowledged = false
     @State private var rekeyPassphrase = ""
+    /// T1's guard (Act 10 wave 2a): the recency warning standing between
+    /// the first press and the act — and whether the assessment ran.
+    @State private var rekeyRecencyNote: String?
+    @State private var rekeyAssessed = false
 
     private var encryption: EncryptionSession { services.encryption }
 
@@ -207,6 +211,51 @@ struct EncryptionView: View {
         + "writing on this device is untouched. Every OTHER device will pause syncing and "
         + "say its keys were replaced — re-enroll each one with your passphrase. Your "
         + "current recovery phrase stops working; you'll write down a new one right after."
+
+    /// T1's guard (Act 10 wave 2a — her ruled emphasis, the
+    /// COUNT-AND-DATES form essentially verbatim): "a concrete number
+    /// stops a click-through where an abstract warning doesn't."
+    static func recencyWarning(_ report: RekeyRecencyReport) -> String {
+        var clauses: [String] = []
+        if report.notesOnlyOnServer > 0 {
+            let n = report.notesOnlyOnServer
+            clauses.append("\(n) note\(n == 1 ? "" : "s") this copy doesn't have")
+        }
+        if report.notesNewerOnServer > 0 {
+            let m = report.notesNewerOnServer
+            clauses.append(report.notesOnlyOnServer > 0
+                ? "newer versions of \(m) other\(m == 1 ? "" : "s")"
+                : "newer versions of \(m) of your note\(m == 1 ? "" : "s")")
+        }
+        let latest = Self.displayDate(report.latestServerChange)
+            .map { ", the latest from \($0)" } ?? ""
+        return "The server holds " + clauses.joined(separator: ", and ") + latest
+            + ". Re-keying replaces the server's copy with this one — those "
+            + "would be lost. If you can remember your passphrase, that road "
+            + "keeps them."
+    }
+
+    /// The probe's failure arm — one honest sentence, never a block (the
+    /// reset road must stay open to the person it exists for).
+    static let recencyUncomparable =
+        "The server's copy couldn't be compared just now — you may be "
+        + "offline, or sync may be unavailable. Replacing keys still makes "
+        + "THIS copy the truth: anything only on the server would be lost."
+
+    /// ISO-8601 stamp → a human date ("Aug 28, 2026"); nil in, nil out.
+    static func displayDate(_ stamp: String?) -> String? {
+        guard let stamp, stamp.count >= 10 else { return nil }
+        let dayFormatter = DateFormatter()
+        dayFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dayFormatter.dateFormat = "yyyy-MM-dd"
+        guard let day = dayFormatter.date(from: String(stamp.prefix(10))) else {
+            return String(stamp.prefix(10))
+        }
+        let display = DateFormatter()
+        display.dateStyle = .medium
+        display.timeStyle = .none
+        return display.string(from: day)
+    }
 
     /// CF-8's understanding checkbox (the CF-7 grammar applied to this
     /// door — friction per the 14b precedent).
@@ -746,24 +795,60 @@ struct EncryptionView: View {
         #endif
         PeekableSecretField(label: "Encryption passphrase", text: $rekeyPassphrase)
             .pageFieldChrome(pageStyle)
+        if let rekeyRecencyNote {
+            // T1's warning: concrete counts and dates, standing between
+            // the press and the act — one honest sentence, never a
+            // refusal (the second press proceeds).
+            Text(rekeyRecencyNote)
+                .pageCaptionWarning(pageStyle)
+                .fixedSize(horizontal: false, vertical: true)
+        }
         HStack {
-            PageDoor("Replace Keys and Re-upload", form: .destructive, style: pageStyle) {
-                let passphrase = rekeyPassphrase
-                rekeyPassphrase = ""
-                Task {
-                    await encryption.rekeyAccount(passphrase: passphrase)
-                    if encryption.lastError == nil {
-                        showingRekey = false
-                        rekeyAcknowledged = false
-                    }
-                }
+            PageDoor(rekeyRecencyNote == nil
+                     ? "Replace Keys and Re-upload"
+                     : "Replace the Server's Copy Anyway",
+                     form: .destructive, style: pageStyle) {
+                Task { await confirmRekey() }
             }
             .disabled(encryption.busy || rekeyPassphrase.isEmpty || !rekeyAcknowledged)
             PageDoor("Cancel", form: .inlineAct, style: pageStyle) {
                 showingRekey = false
                 rekeyAcknowledged = false
                 rekeyPassphrase = ""
+                rekeyRecencyNote = nil
+                rekeyAssessed = false
             }
+        }
+    }
+
+    /// T1's guard, at the door (Act 10 wave 2a — memo §9b): before the
+    /// wipe-and-repush, ONE read-only recency comparison; a server-ahead
+    /// answer interposes the count-and-dates warning; a probe failure
+    /// interposes the couldn't-compare sentence; the SECOND press always
+    /// proceeds — the guard warns, never refuses.
+    private func confirmRekey() async {
+        if !rekeyAssessed {
+            do {
+                let report = try await encryption.assessRekeyRecency()
+                if case .warnFirst = RekeyGuardRule.decide(report), let report {
+                    rekeyRecencyNote = Self.recencyWarning(report)
+                    rekeyAssessed = true
+                    return
+                }
+            } catch {
+                rekeyRecencyNote = Self.recencyUncomparable
+                rekeyAssessed = true
+                return
+            }
+        }
+        let passphrase = rekeyPassphrase
+        rekeyPassphrase = ""
+        await encryption.rekeyAccount(passphrase: passphrase)
+        if encryption.lastError == nil {
+            showingRekey = false
+            rekeyAcknowledged = false
+            rekeyRecencyNote = nil
+            rekeyAssessed = false
         }
     }
 

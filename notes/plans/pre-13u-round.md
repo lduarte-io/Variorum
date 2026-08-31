@@ -2372,7 +2372,31 @@ render-don't-re-derive (§9c item 3) binds every surface below.
    **Check `MobileTutorialSeeder.swift` line ~647** (the phone's privacy lesson does NOT
    use lossLegs — deliberate; align its coupling-truth wording if it names the spare
    under asking modes).
-10. **T1 — the stale-copy re-key guard: NOT STARTED (the ATTEMPT is owed).** The design
+10. **T1 — the stale-copy re-key guard: BUILT AND GUARDED (the attempt succeeded).**
+    The verdict for the ladder: **the door is guarded, with evidence.**
+    `Sources/VariorumCore/Sync/RekeyRecencyProbe.swift` — the READ-ONLY read seam
+    exactly to the settled design below (deviceID nil on EVERY window ⇒ no server-side
+    cursor, no horizon effect; local DB read-only; plain columns only, zero decryption;
+    anchored on the local copy's own cursor so the near-empty corner reports through the
+    same numbers) + the pure `RekeyGuardRule` (warn when server-ahead, never refuse).
+    Wired: `EncryptionSession.rekeyRecencyProbe` beside the rekeyRunner (AppServices —
+    ordinary transport + the engine's key provider); the door's confirm runs the probe
+    on FIRST press, interposes the COUNT-AND-DATES warning (her ruled emphasis,
+    essentially verbatim: "12 notes this copy doesn't have, and newer versions of 9
+    others, the latest from Aug 28, 2026. Re-keying replaces the server's copy with this
+    one — those would be lost. If you can remember your passphrase, that road keeps
+    them."), retitles the confirm "Replace the Server's Copy Anyway", and the SECOND
+    press proceeds; a probe failure interposes the honest couldn't-compare sentence and
+    proceeds — the guard warns, never blocks (the reset road stays open). Pins: core
+    `RekeyRecencyProbeTests` (5 — the stale-copy scenario with the read-only proof on
+    BOTH sides incl. the fake server's device_cursor unchanged; the fresh-store/near-
+    empty corner; current-copy silence; copy-ahead silence; the rule) — **REVERT-
+    VERIFIED RED-ON-OLD** (rule → always-proceed: 2 issues red, restored green);
+    Mac `RekeyGuardFaceTests` (4 — the count-and-dates form + arms + date formatting;
+    found + fixed a MainActor isolation crash in the first run: view statics are
+    isolated, the suite is @MainActor now). `Sync/` lines under the Fable rider:
+    ONE new read-only file, zero engine-write-path changes (the postmortem was read
+    before any of it). *(The settled design below kept for the audit trail:)* The design
     (settled by this session's reading, recorded so the successor need not re-derive):
     a READ-ONLY `RekeyRecencyProbe` in `Sources/VariorumCore/Sync/` (Fable rider
     honored; `notes/sync-postmortem-fragments.md` was read in full) — fetch loop over

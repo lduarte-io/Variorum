@@ -25,6 +25,7 @@
 //  against the live suite provider).
 //
 
+import Dependencies  // the T1 probe's database binding (Act 10 wave 2a)
 import Foundation
 import Observation
 import VariorumCore
@@ -267,6 +268,21 @@ final class AppServices {
             // own rounds refuse on the same `sync_state` key).
             encryption.rekeyIncompleteCheck = { [database = session.database] in
                 (try? await database.read { try AccountRekeyMarker.isSet($0) }) ?? false
+            }
+            // T1's guard (Act 10 wave 2a): the READ-ONLY recency probe the
+            // re-key door consults — the ordinary transport + the engine's
+            // own key provider, deviceID nil on every window (no cursor,
+            // no horizon effect; the probe's own doc is the contract).
+            encryption.rekeyRecencyProbe = { [weak self] in
+                guard let self else { throw CancellationError() }
+                let probe = RekeyRecencyProbe(
+                    transport: self.makeSyncTransport(self.auth),
+                    keyProvider: self.makeSyncKeyProvider())
+                return try await withDependencies {
+                    $0.database = self.session.database
+                } operation: {
+                    try await probe.assess()
+                }
             }
         }
         await auth.setOnChange { [weak self] tokens in
