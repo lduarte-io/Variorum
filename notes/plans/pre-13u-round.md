@@ -228,6 +228,20 @@ explaining the encryption by the way"):** BOTH Act 10 waves are Fable, and the n
 encryption-explanation build (the memo's rendering, item 3) is explicitly Fable-implemented —
 consistent with her mid-sitting re-cast, now unambiguous.
 
+**HER OVERNIGHT CHECK-IN (2026-08-31, during Act 10 wave 1 — recorded as a live finding + its
+verification):** *"why did variorum want permission to record my screen? i gave it permission for
+now but I don't get why it had that question and users definitely shouldn't see it. I think maybe
+it's fine though and i'ts just for the design pass?"* **Verified by the architect same turn: the
+SHIPPING PRODUCT has ZERO screen-capture code** — `grep` over `App/`, `Sources/`, and every test
+target for `CGWindowListCreateImage` / `ScreenCaptureKit` / `SCScreenshotManager` /
+`CGDisplayCreateImage` / `XCUIScreen` / `screencapture` returns NOTHING — so no user can ever be
+shown that prompt by the app itself. The prompt was the DESIGN PASS's screenshot verification
+capturing the running dev-store Debug build, which carries the same "Variorum" identity, so macOS
+named the prompt after it. Dev-machinery-only, exactly her guess. **Routed:** the midpoint review
+and the ladder confirm no capture code lands in any production target (the grep is the check);
+the morning bundle notes she may revoke the grant afterward (System Settings ▸ Privacy & Security
+▸ Screen & System Audio Recording) — nothing in the product needs or requests it.
+
 **THE NINTH WAVE'S CLOSING RIDERS (2026-08-31, pre-sleep — the memo's §9b/§9c, carried by her;
 the memo is the full text, this block is the ROUTING):**
 - **T1, the stale-copy re-key clobber** → **Act 10 wave 2 ATTEMPTS the guard** (the recency
