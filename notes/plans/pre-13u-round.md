@@ -46,6 +46,89 @@ rider binds any file under it.
 
 # The roster
 
+## Act 0 — OPEN HERE: the mobile B1 residual — a design discussion first, then the fix
+
+**The author's instruction (2026-08-30):** this round OPENS with a discussion of, and suggestions for,
+the residual below; **this session handles the fix.** Discussion before build — the friction doctrine
+(P-5): the edges get decided on paper, not discovered by her.
+
+### What was already fixed, and why it was a fix rather than a mitigation
+
+*(Her account, preserved — it is the load-bearing context for the residual.)*
+
+> It wasn't gated. The race was removed. The seed moved out of the `.task` that was a sibling of the
+> one building `AppServices`, and now runs from `VariorumMobileApp` after `await start()`. That's why
+> it's a fix rather than a mitigation — there is no longer an ordering to lose.
+>
+> On top of that, a `SyncGate` of two injected facts, and both are more careful than they look:
+> **`belongsToAnAccount`** — a composed sync chain *or* a signed-in session whose chain hasn't
+> composed yet. The second half is the interesting one: owner adoption can fail and leave a signed-in
+> device unconfigured, and that device's store still belongs to the account. `isConfigured` alone
+> reads the unsafe direction. **`hasSyncedCleanly`** — a round that finished without error, i.e. a
+> pull-to-head actually landed. A failed round is not an answer — otherwise a network stumble looks
+> like "nothing's here, seed away."
+>
+> Then a 20-second bounded wait and a re-ask of `storeIsNew`. Timing out declines without consuming
+> the mark, so the next launch asks again — declining is free, seeding wrongly isn't. And it polls
+> rather than subscribing, because `onRoundCompleted` is a single closure already owned by the
+> Fragments bridge, and furniture must not be able to break the bridge.
+
+### The residual the gate cannot close
+
+> B1 has a residual the gate can't close. Fresh install, nobody signed in → seeds correctly. If you
+> then sign in from Settings, your real Journal arrives beside the starter one. Closing that needs
+> either an explicit first-run moment or a post-sign-in reconciliation — a product call, not a bug fix.
+>
+> The decisive part: the sign-in door lives inside the shell (`MobileSettingsView` →
+> `Shared/AuthViews.swift`), so on a fresh install **there is no ordering in which you could have
+> signed in first.**
+>
+> What that means concretely: install on a new phone against your existing account and it mints a
+> Journal, designates it, pins it, and mints a note — all ordinary **synced inserts that propagate to
+> every device.** This directly falsifies the file's own header claim that the virgin-store guard
+> "protects a phone syncing an existing account down."
+
+### The framing worth putting to her first
+
+**Furniture that syncs is furniture that duplicates per device.** The gate can only help if the device
+knows about the account *before* seeding, and the sign-in door's placement makes that impossible on a
+fresh install. So the question underneath is not "how do we time the seed better" — it is **should
+first-run furniture be synced content at all**, and if it must be, **what converges two devices that
+each correctly decided "no Journal exists yet"?**
+
+### Candidate shapes (for her to rule; none is built before she does)
+
+1. **An explicit first-run moment.** Nothing is seeded until she answers *"Sign in"* or *"Start
+   fresh."* Honest, conventional, and it makes the ordering impossible rather than unlikely. Cost: a
+   first-run screen on a phone whose whole design avoids ceremony — and it puts a wall in front of the
+   fastest capture path she has.
+2. **Seed on first WRITE, not first launch.** The mark is consumed by intent, not by app start:
+   nothing exists until she types. Sign in before typing and the real Journal simply arrives. No
+   screen, no wait, and it deletes the 20-second bounded wait entirely. Cost: "empty app" on first
+   open — which may read as broken without a little empty-state copy.
+3. **An apply-time convergence repair — the SyncSpec §7 class.** Treat two designated Journal books as
+   the duplicate-creation problem §7 already solves for `tag.path`: deterministic keeper (smaller
+   `id`), re-point the loser's memberships, tombstone it. This is the only shape that fixes the case
+   where the duplication *already happened* — including on devices already in the wild — and it needs
+   no first-run UX at all. Cost: a real repair rule, and `reading` has no natural key today, so the
+   "same book" predicate has to be defined (designation + profile is the candidate).
+4. **Post-sign-in reconciliation.** Seed anyway; when a sign-in later brings a real Journal down,
+   retire the starter. Cost: the starter may have been *written in* by then, so this needs merge
+   semantics — the weakest option, and named here mainly so the round can say why it declined it.
+
+**A recommendation to bring, not to assume: (2) + (3).** (2) removes the common case with less
+machinery than the gate it replaces; (3) is the only one that heals devices where it has already
+happened, and it is a shape this codebase already knows how to reason about. (1) stays the honest
+fallback if she wants the moment to be explicit.
+
+### Obligation
+
+Her ruling recorded verbatim in `QUESTIONS` before any build; red-on-old pin for whichever shape;
+`MobileSoul` row; and the mobile file's header claim about the virgin-store guard **corrected**, since
+it is now known to be false.
+
+---
+
 ## Act 1 — Cold review of 17g (the `13p-fix` session's work)
 
 A fresh reviewer running `notes/REVIEW_PROMPT.md` **verbatim**, with zero implementation context, over
