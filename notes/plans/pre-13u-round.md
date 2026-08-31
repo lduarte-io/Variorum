@@ -97,51 +97,88 @@ it, and it is wrong. Check this explicitly and record the check.
 
 ## Act 3 — The sample library: *The Adventures of Sherlock Holmes*
 
-**Her ask, 2026-08-30, verbatim in substance:** the complete Sherlock Holmes adventures added to the
-default store as a **book, each short story its own note, each story a chapter** — so that new users
-get *"a familiar lens through which to explore the app, while also seeing how fast it is"*, and so she
-can measure **100k words in a book + 10k words in a note on her own device**.
+**Her ask, 2026-08-30:** the Sherlock Holmes adventures added to the store as a **book, each short
+story its own note, each story a chapter** — so new users get *"a familiar lens through which to
+explore the app, while also seeing how fast it is"* — and so she can measure **100k words in a book +
+10k words in a note on her own device.**
 
-**Why the fit is better than it looks.** *The Adventures of Sherlock Holmes* (1892) is **12 stories at
-roughly 8–10k words each, ~105k words total** — which lands almost exactly on both of her stated
-targets at once. Confirm the real counts at ingest rather than trusting this note.
+### Her rulings (2026-08-30 — made after the first draft of this plan asked; they are settled)
 
-### Decisions for her at kickoff (do not guess these)
+**IT SHIPS IN EVERY READER'S STORE. Default-on, not opt-in.** The draft recommended opt-in and she
+overruled it, with the reasoning recorded because it is the design argument, not just the verdict:
 
-| # | Question | Recommendation |
+> *"it'll only be about 10 notes, fewer than the tutorial, and it can be tagged sherlock holmes. it's
+> easy to delete if they want but it makes the power of the app clear in a way that the tutorial just
+> doesn't — one is made to be digestible, the other is meant to show scale."*
+
+**Two things follow from that, and they are the acceptance bar for this act.** The tutorial and the
+sample library have **different jobs**: the tutorial teaches and is deliberately small; Sherlock exists
+to make *scale* legible — a real book, real chapters, a 10k-word note that opens instantly. If the
+seeded library does not feel fast, this act has failed at its actual purpose and that is a finding, not
+a polish item.
+
+**And her structural observation, which is a verification item:** *"the Pool is the library for items
+not in a book — that'll be blank for new users."* Because every seeded story is a **member of the
+book**, the Pool stays empty on a fresh store, which is the correct first impression. **Check this
+explicitly** — a seeding bug that leaves stories bookless would fill a new user's Pool with twelve
+strangers on first launch.
+
+**The stories are TAGGED `sherlock holmes`** — her word — so the whole library is findable and
+removable as a set.
+
+**Gutenberg handling: standard practice, ratified.** Strip the PG header/footer and ship the
+public-domain text with a plain source attribution. The stories are US public domain; the PG trademark
+licence attaches to their edition, not to the work.
+
+| # | Decision | State |
 |---|---|---|
-| A | **Which text?** *Adventures* (12 stories, ~105k) vs *Adventures + Memoirs* (~24 stories, ~230k) | **Adventures alone** — it hits both targets and 230k in one book is a different (and later) test |
-| B | **Gutenberg boilerplate** | **Strip the PG header/footer** and ship the public-domain text with a plain source attribution. The stories are US public domain; the PG *trademark licence* attaches to their edition, not the work. **Licensing is an author call — do not decide it in-session.** |
-| C | **Default-on or opt-in?** | **Opt-in, one gesture**, mirroring the tutorial's own restore door in `ShellActions`. 105k words appearing unbidden in a new user's library is the Apple-Notes clutter she designed against — but she said *"default store"*, so **this one is hers to overrule.** |
-| D | **Where does it live?** | A curated book in the default wing now; **13i's wings ruling is its real home** — record a line for 13i saying the sample library should become its own wing, removable in one gesture |
-| E | **Bundle cost** | ~600KB of text in the app bundle. State the measured number at close. |
+| A | Which text | *Adventures* (1892) — **12 stories, ~105k words**, which lands on both her targets at once. Her *"about 10 notes"* matches. Confirm real counts at ingest. |
+| B | Gutenberg boilerplate | **RULED** — strip, attribute, ship |
+| C | Default-on vs opt-in | **RULED — default-on, every reader's store** |
+| D | Where it lives | Curated book in the default wing now; **record a line for 13i**: it should become its own wing, removable in one gesture |
+| E | Bundle cost | ~600KB of text. **State the measured number at close.** |
 
 ### Build shape
 
-Mirror `TutorialSeeder` exactly — it is the proven precedent (`enum TutorialSeeder` with
-`discover` / `findOrSeed` / `restore` / `cleanup` / `seed`, driven from `ShellActions`). A
-`SampleLibrarySeeder` beside it, same shape, same idempotence discipline.
+Mirror `TutorialSeeder` exactly — the proven precedent (`enum TutorialSeeder` with `discover` /
+`findOrSeed` / `restore` / `cleanup` / `seed`, driven from `ShellActions`). A `SampleLibrarySeeder`
+beside it, same shape, same idempotence discipline.
 
 Per story: `importPost(title:text:)` — which segments on entry by the global mode, so each paragraph
-becomes a block — then `addPostToReading`, `createSection` (one chapter per story), and
-`assignPostToSection`.
+becomes a block — then `addPostToReading`, `createSection` (one chapter per story),
+`assignPostToSection`, and `applyTag` for `sherlock holmes`.
 
-**Three traps, named:**
+### Traps — and default-on makes the first one serious
 
-1. **`importPost` registers a structural undo entry per call.** Twelve calls would put twelve "Import"
-   entries on her session stack, so a single ⌥⌘Z after seeding does something surprising. Check what
-   `TutorialSeeder` does about this and do the same.
-2. **Idempotence.** Seeding twice must not mint a second book. `TutorialSeeder.discover` is the pattern.
-3. **This is the first time `reading_section` carries a real book at scale** — 12 chapters with real
-   memberships. Watch it, and say what you saw.
+1. **FIRST-LAUNCH SEEDING COST IS NOW ON EVERY NEW USER'S CRITICAL PATH.** ~105k words segmenting into
+   the low thousands of blocks, plus 12 posts, 12 sections, 12 memberships and 12 tag applications — a
+   substantial write that did not exist when this was opt-in. **P2 binds: no DB I/O on the main
+   thread**, and this app already has a KnownIssues row for windowless launches and launch-path
+   robustness. **Seed off-main, after the window is up, never blocking first paint** — and measure
+   first-launch wall time on a fresh store, before and after. A first launch that stalls is a worse
+   first impression than no sample library at all, which would invert the entire point of the act.
+2. **`importPost` registers a structural undo entry per call.** Twelve calls put twelve "Import"
+   entries on the session stack, so a new user's first ⌥⌘Z does something surprising. Check what
+   `TutorialSeeder` does and do the same.
+3. **Idempotence.** Seeding twice must not mint a second book. `TutorialSeeder.discover` is the pattern.
+   This matters more now: the seeder runs for everyone, on every fresh store, including hers.
+4. **It is the first time `reading_section` carries a real book at scale** — 12 chapters with real
+   memberships. Watch it and say what you saw.
+5. **It syncs.** A signed-in new user pushes ~105k words of ciphertext on first sync. Not a blocker;
+   worth one line in the closeout because it is now the baseline every account starts from, and **13y**
+   is about to design per-account quotas against exactly that baseline.
+6. **The phone is a first-class birthplace of stores** (13p, MobileSoul PL-15). A store created ON the
+   phone must reach a deliberate answer — seed there too, or arrive by sync. **This is the act's mobile
+   parity line**, and default-on is what makes it a real question rather than a footnote.
 
 ### What it is for, beyond the content
 
 **This corpus is Act 4's instrument.** Seed it before running 17c so the read-layer measurements happen
-against a real 105k-word book instead of a synthetic fixture. That is the reason Act 3 precedes Act 4.
+against a real 105k-word book instead of a synthetic fixture. That is why Act 3 precedes Act 4.
 
 Report, on her device: book open, scroll, and book-view assembly at 105k; note open and typing latency
-in a ~10k-word story; and whether P1 holds — cost proportional to viewport and edit, never to corpus.
+in a ~10k-word story; first-launch wall time on a fresh store; and whether P1 holds — cost proportional
+to viewport and edit, never to corpus.
 
 ## Act 4 — 17c: the read layer's P1 debt
 
@@ -192,10 +229,20 @@ order's row 3 and 13p's outbound-brief deliverable. 13p already drafted material
 
 ## Act 7 — Her carried items
 
-> **FILL AT KICKOFF.** She has *"a couple of other issues I've noted"* that ride along rather than
-> earning their own entry. Record each here in her words, with a traced mechanism where she has one, and
-> disposition each at close like everything else. **An item with no traced mechanism is not ready to be
-> built** — it is a note, and it goes to `QUESTIONS.md` or to a later entry.
+> **FILL AT KICKOFF — she supplies these once the session is underway, not before.** Her words,
+> 2026-08-30: *"I'll just tell the other session the other items once the session is underway - I have
+> to have a bit of time with the app to find them and I can't do that right now while the test suites
+> are running because they pop up very annoyingly on my computer screen."*
+>
+> **So this act starts empty by design, and the round must not treat that as nothing to do.** Two
+> consequences for whoever runs it: **(a)** do not schedule this act first — she needs quiet hands-on
+> time with the app to find the items, and a running suite steals her screen; **(b)** when the items
+> arrive, record each here **in her words**, with a traced mechanism where she has one, and disposition
+> each at close like everything else. **An item with no traced mechanism is not ready to be built** —
+> it is a note, and it goes to `QUESTIONS.md` or to a later entry.
+>
+> *(Standing environment note worth carrying: test runs pop windows onto her screen. Prefer running
+> suites when she is not trying to use the app, and say when you are about to.)*
 
 ---
 
@@ -209,11 +256,14 @@ order's row 3 and 13p's outbound-brief deliverable. 13p already drafted material
    recorded: both real defects still violate the refined rule.
 4. **`phase-13u-feel-and-polish.md` updated** with P39's two code items on 13u2's roster.
 5. **Act 3's measurements reported on her device**, not on a test fixture — 105k in a book, ~10k in a
-   note, with P1 stated as held or not.
+   note, **first-launch wall time on a fresh store**, and P1 stated as held or not.
+5b. **The Pool is verified BLANK on a fresh seeded store** (her structural check — every story is a
+   book member), and the `sherlock holmes` tag selects the whole set.
 6. **A line recorded for 13i**: the sample library should become its own wing.
-7. **MOBILE PARITY LINE** — required by CLAUDE.md's closeout ritual. The sample library is the likely
-   candidate (does the phone get it, or see it through sync?); if nothing is mobile-visible, say the
-   words *"nothing mobile-visible"* explicitly.
+7. **MOBILE PARITY LINE** — required by CLAUDE.md's closeout ritual, and **Act 3 makes it a real
+   question**: the phone is a first-class birthplace of stores since 13p, so a store created there
+   either seeds Sherlock or receives it by sync, and the round must say which. *"Nothing
+   mobile-visible"* is not available as an answer for this round.
 8. **Anything deferred lands in `KnownIssuesAndTechDebt.md` with an owner.** Never dropped back into
    the sweep artifact, which is a dated snapshot and not a tracking surface.
 9. **`/Applications/Variorum.app` refreshed** if any Mac app code changed, per CLAUDE.md — and note
