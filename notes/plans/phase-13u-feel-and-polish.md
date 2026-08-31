@@ -469,3 +469,23 @@ WINS — it was written with the real code open and with instructions to refute.
 4. Any item this phase declines is recorded in `KnownIssuesAndTechDebt.md` with an owner, per that
    file's rule — never dropped back into the sweep artifact, which is a dated snapshot and not a
    tracking surface.
+
+---
+
+## ADDENDUM 2026-08-30 (the pre-13u round, Act 2) — P39's two real defects join 13u2's roster
+
+The cross-feature rule was REFINED in CLAUDE.md this day (pre-13u Act 2; the sweep's P39): the
+prohibition now binds STATE AND OWNERSHIP — constructing or holding a sibling feature's view model,
+calling its business logic, owning its lifecycle — while a view RENDERING a sibling's view is legal
+composition, and shared components gained a binding placement clause (move to `Core/Views`/`Shared/`
+at next touch). **The falsifiable check passed: both items below are still violations under the
+refined rule** — which is what makes them 13u2's to fix rather than casualties of the clarification.
+
+**13u2 gains two roster items** (both touch `RootView` composition and `@State` lifecycle — why they
+land here, where that surface is already open, rather than in the pre-13u round):
+
+- **P39a — break the `Library` ↔ `Pool` view-model cycle.** Pool stops holding `LibraryViewModel`;
+  `duplicateAsVersion` and `archive` become closures passed by `RootView`. (Violates "never holds a
+  reference to a sibling's view model.")
+- **P39b — `Editor/WriteTakesPanel.swift:51` stops constructing `TakesViewModel`.** Construction is
+  lifecycle ownership; `RootView` constructs, features receive. (Violates "never constructs.")

@@ -323,6 +323,39 @@ the **17g** entry in this file's sibling `phase-17-standing-fixes.md`, `QUESTION
    known-red input for the FIX WAVE (trace why it reds on clean main yet passed at 17g's close —
    never merely re-green it). Both stay orchestrator-side; the reviewer gets the prompt and the repo.
 
+### ACT 1 RECORD — the Fable cold review's findings (returned 2026-08-30 late evening; recorded
+### verbatim-faithful BEFORE any fix session; dispositions at right)
+
+The reviewer confirmed no Review-foci section exists in either anchor; the known-red custody test was
+independently found and traced. Findings:
+
+| # | sev | finding (condensed — the reviewer's full trace is in the session record; mechanisms restated in the routing target) | routed to |
+|---|---|---|---|
+| F1 | MAJOR | `CustodyHandoverTests.theE2EESurfaceNamesTheSymptomWhenAWriteLandsUnreadable` (CustodyHandoverTests.swift:85) **depends on the author's live Keychain state**: `DeviceKeyStore.keychain(custody:)` fakes the TRANSITION only — its `load` is live (`E2EELaunchKeyCache.shared.value` → real `E2EEKeychainStorage.gatedItemExists()`/`load()`), and `setBiometricRequirement` short-circuits at `guard let material = store.load() else { return .noMaterial }` (EncryptionSession.swift:436), so the fake seam is never consulted on any machine without a readable plain `e2ee-keys` item. **Its green at 17g's close was borrowed from the R3-1 drill's litter** (a readable plain sentinel); the author's owed cleanup is what turned it red. Reviewer demonstrated the red live. Production behavior is correct; the defect is pure test isolation, and it breaks the phase's own keychain-test trap in the READ direction. Fix: fully faked store — memberwise `DeviceKeyStore` with `load: { material() }` (or extend the seam to carry `load`) so the pin never consults the live Keychain. | **Act 9** |
+| F2 | MAJOR | **MobileSoul PL-16 carries a falsified verification claim**: *"Verified at the ladder, not assumed: `xcodebuild build -scheme VariorumMobile` succeeded…"* — impossible for the tree it describes (PL-16 shipped in `64fe30b`, the same commit whose R3-2 change broke the iOS build entirely; proven by `43a35ef`'s clean-worktree check). Fix: dated in-place correction on PL-16. | **architect, this turn** — DONE below |
+| F3 | MINOR | The closed 17g entry contradicts itself about the install: "Owed to the author" item 4 still says the fixed build is NOT in `/Applications`, while the CLOSE record says it was refreshed, hash-matched. Fix: mark item 4 DONE with the CLOSE's evidence. | **architect, this turn** — DONE below |
+| F4 | MINOR | **The only guard between test code and the author's live E2EE custody is a plan-file sentence — and it already failed once** (the R3-1 incident's class is structural, the remedy procedural). Fix sketch: a DEBUG-only test-process tripwire on `E2EEKeychainStorage`'s fixed-account write/delete leaves (fact-suite exempt via its throwaway-service path); pinnable (a test asserting the tripwire fires from a test process fails on pre-fix code). | **Act 9** (the reviewer's own owner call) |
+| F5 | NIT | `Phase13pKeychainFactTests.swift:5–16` header still describes the pre-signing world in the present tense. | **Act 9** (same files) |
+| F6 | NIT | `StoreProtection.swift:225–228` — `wroteButUnreadable` is spoken by BOTH surfaces but answers only the store-key one ("still open your library" is non-responsive when the E2EE **sync** toggle fails; that road back is passphrase re-enrollment of sync custody). | **Act 9** — the CF-12 rework rebuilds this exact surface; give the E2EE arm its own responsive sentence (functional copy; her voice pass re-words later) |
+| F7 | NIT | `TrayPanel.swift` (merge delta) ends without a trailing newline. | **architect, this turn** — DONE below |
+
+**Clean bill highlights (the load-bearing ones):** site enumeration independently re-verified (the
+partition flag has exactly one production definition; the plain families verifiably don't carry it —
+no stranding); `CustodyHandover.perform` semantics verified by reading AND by running its pins (31/32
+green; the one red is F1, not production); the count arithmetic re-derived from the diffs and exact;
+zero `Sync/` lines / zero schema / marker 7 across all eight commits; the merge pair's Mac/`Shared`
+deltas are disciplined hoists with the forked-brains row updated accurately; every ladder disposition
+promising an owner has its row; `43a35ef`'s fix minimal and correct; the entitlements mechanism right
+with the tightened pin a genuine regression guard.
+
+**Adjudication (architect):** all seven accepted; no disputes. F1's disposition SATISFIES the
+kickoff's demand (trace why red on clean main yet green at close — answered: the drill's litter was
+the green's precondition). F2 is the process finding with teeth: a "verified, not assumed" sentence
+in a ledger a future session trusts was false — the correction lands now, and the standing iOS-build
+gate (KICKOFF item 3) is the structural answer.
+
+---
+
 ## Act 2 — P39: refine the rule, then hand the code fix to 13u2
 
 **The finding, corrected.** CLAUDE.md binds *"cross-feature interactions route through parent
@@ -360,6 +393,21 @@ must still be violations.** If either becomes legal, the amendment relaxed the r
 it, and it is wrong. Check this explicitly and record the check.
 
 **No code changes in this act.** It is a canon amendment plus a plan edit.
+
+**ACT 2 EXECUTED (2026-08-30, architect — the author asked for and received the architect's second
+opinion at the sitting before this landed; her Opus implementer proposed the refinement, the
+architect concurred with two sharpenings).** The CLAUDE.md bullet now: binds construction / held
+references / business-logic calls / lifecycle ownership; legalizes rendering; carries the rationale
+in-text (the clarification-vs-relaxation tell); and the placement clause is NORMATIVE with named
+homes (`Core/Views` for Mac chrome, `Shared/` for cross-platform) and the hoist-at-next-touch rule —
+the two sharpenings: (1) placement normative-with-a-home rather than advisory, (2) the boundary
+stated as construction-and-ownership so a view cannot smuggle coupling by taking a sibling VM it
+minted itself. **The falsifiable check, run and recorded: the `Library`↔`Pool` cycle still violates
+("never holds"), and `WriteTakesPanel` constructing `TakesViewModel` still violates ("never
+constructs") — the amendment clarifies, it does not relax.** `phase-13u-feel-and-polish.md` gained
+the P39a/P39b addendum on 13u2's roster. AppSpec §2's one-line mirror of the old wording is left
+untouched deliberately: it remains true read at the ownership level, and CLAUDE.md's refined bullet
+is the precise, governing form (recorded here so nobody reads the difference as drift).
 
 ## Act 3 — The sample library: *The Adventures of Sherlock Holmes*
 
@@ -597,19 +645,72 @@ record each here in her words as it does.
 
 ---
 
-## Act 9 — The custody batch: 17a + the CF-12 and #82 builds (Fable implementer)
+## Act 9 — The custody batch: 17a + the CF-12/#82 builds + the routed review findings (Fable implementer)
 
-ONE Fable batch over the key-custody subsystem, composed of: **17a's eight items** (P1, P2, P3, P10,
-P11, P12, P13, P15 — the register's entry is the brief; six of eight share the `try?`-swallows-typed-
-errors root cause, P3 is the re-lock's missing `finalizeWork()`, P15 is the key-in-SQL-error channel),
-**the CF-12 build per the sitting ruling** (Act 8 carries the mechanism and both mechanical shapes),
-**the #82 build per the sitting ruling** (the TN3137 read→re-add-with-flag→delete-old migration, per
-family, round-trip pinned — IF ruled), and **whatever custody-layer findings Act 1's review adds**.
-Also from Act 1's fix scope: the failing `CustodyHandoverTests` red on clean main, traced then fixed.
+**THE BATCH BRIEF (self-contained; the implementer reads THIS section + the named sources, nothing
+briefed from any session's context).** ONE Fable batch over the key-custody subsystem. Work in this
+order, committing per numbered group:
 
-Standing rules bind hard here: pin before fix; behavioral-revert verification; **never touch the
-author's live keychain items or her real store** (the 17g R3-1 incident is the cautionary record —
-its rule lives in `phase-13p-fix-dp-keychain.md`'s traps section and every custody brief carries it).
+1. **F1 — the state-dependent custody pin, first** (it reds every suite run until fixed): the full
+   trace is the ACT 1 RECORD table above. Fix per the reviewer's sketch: the pin gets a fully faked
+   store — memberwise `DeviceKeyStore` with `load: { material() }` (or extend the
+   `keychain(custody:)` seam to carry `load`) — so it never consults the live Keychain. Verify it
+   passes regardless of machine keychain state; note the OLD form's red-on-clean-main is the
+   behavioral evidence (already demonstrated by the reviewer — do not re-litter the keychain to
+   re-prove it). Sweep the suite for siblings with the same live-`load` dependency while there
+   (the R3-NIT `E2EELaunchKeyCache` save/restore rider from KnownIssues' 17a row rides here too).
+2. **17a's eight items** (P1, P2, P3, P10, P11, P12, P13, P15) — the entry in
+   `notes/plans/phase-17-standing-fixes.md` is the per-item brief (finder claim + verifier trace);
+   six of eight share the `try?`-swallows-typed-errors root cause, P3 is the re-lock's missing
+   `finalizeWork()`, P15 is the key-in-SQL-error channel. Pin before fix, per item; a pin green on
+   both sides dismisses the item as hollow, recorded not fixed.
+3. **F4 — the test-process tripwire**: DEBUG-only guard on `E2EEKeychainStorage`'s fixed-account
+   write/delete leaves (test process detected → refuse/trap), fact-suite exempt via its
+   throwaway-service path; pinned (the tripwire fires from a test process; red on pre-fix code).
+4. **The CF-12 rework per R-pre13u-2** (the RULINGS block above; Act 8 carries the mechanism): the
+   sync-keys gate becomes an opt-in setting, DEFAULT OFF for everyone; OFF ⇒ the E2EE keys ride the
+   plain custody item behind the app's own at-open gate (transition via `CustodyHandover` discipline
+   both directions); ON ⇒ the separate unlock honored regardless of at-open mode. Existing stored
+   values RESET to the new default (the semantics changed; her confirm covers this — her device ends
+   with one prompt). The surfaces live in `Shared/` (`EncryptionViews`), so both platforms inherit;
+   pin the one-prompt outcome by counting biometric evaluations (one launch under Biometric mode
+   with the setting OFF evaluates exactly once). **F6 rides here**: give `wroteButUnreadable`'s E2EE
+   arm its own responsive sentence (that surface's road back is passphrase re-enrollment of sync
+   custody, not "open your library"); functional copy, her voice pass re-words later.
+5. **The #82 build per R-pre13u-3**: TN3137 migration (read without the flag → re-add with
+   `kSecUseDataProtectionKeychain` → delete old) for the STORE-KEY family only, round-trip pinned;
+   E2EE custody untouched. The migration must be idempotent and crash-tolerant (a half-migrated
+   state re-heals on next launch), and `CustodyHandover`'s write-verify-then-delete IS the
+   transition discipline. Update the two corrected production comments' successors if wording now
+   changes again.
+6. **The nudge tier-detection half of R-pre13u-4** (detection here; faces are Act 10's): ONE shared
+   brain answering "which legs exist" — passphrase wrap · recovery wrap · escrow VERIFIED-LANDED
+   (not assumed: the reconcile confirms its own item reads back) · biometric/gated custody — and the
+   derived tier (covered / exposed). Device-neutral language hooks ("this device"). **The escrow
+   verification observable serves double duty:** it is BOTH the nudge's escrow leg AND the
+   author-run check (R-pre13u-5) — surface the verified/not-landing fact where the Encryption pane
+   can render it (Act 10 styles it). When the probe is ready, STOP and report the exact steps for
+   her escrow check (she is around and has agreed to run it this batch); the architect relays.
+7. **F5** — the `Phase13pKeychainFactTests.swift:5–16` header rewrite (post-signing world).
+
+**Sources to read first, in order:** this file's KICKOFF + RULINGS + ACT 1 RECORD + Act 8;
+`notes/plans/phase-17-standing-fixes.md` (the 17a entry + standing rules); the environment-traps
+section of `notes/plans/phase-13p-fix-dp-keychain.md` (BINDING — especially the R3-1 rule);
+`CLAUDE.md`. The 14b/13p custody architecture reads from
+`App/Variorum/Shared/{EncryptionKeychain,EncryptionSession,ProtectionController,StoreProtection}.swift`
+and `Sources/VariorumCore/Persistence/{StoreKey,StoreKeyEnvelope}.swift`.
+
+**Hard rules:** pin before fix with behavioral-revert verification; **never touch the author's live
+keychain items, her iCloud Keychain, or her real store** (the 17g R3-1 incident is the cautionary
+record; F3's tripwire exists because the rule alone failed once — build it early and let it protect
+the rest of the batch); zero `Sources/VariorumCore/Sync/` lines (nothing here needs them — any
+exception stops and reports); no schema; no product invention (unresolved behavior → QUESTIONS.md).
+
+**Verification at batch close:** targeted custody suites green + the FULL Mac suite green (state
+counts vs 1854/314), **the iOS target BUILDS** (the standing gate — `xcodebuild build -scheme
+VariorumMobile`), mobile suite green (582/93 baseline), tutorial spine green, the two known
+load-flaky suites re-run isolated before concluding anything from a red. Record per-item
+dispositions in the 17a entry (it closes) + a batch record in this file.
 
 ## Act 10 — The UI/UX pass: the tray, the Pool, and the protection surfaces (**Fable** implementer)
 

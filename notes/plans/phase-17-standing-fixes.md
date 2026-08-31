@@ -1050,5 +1050,6 @@ outcome check instead — same red, zero real-world traffic.
 2. **The two-step clean-up** if the biometric-gate orphan is still there:
    unlock FIRST, then toggle off. The one-step version refuses.
 3. **QUESTIONS #82.**
-4. **The install refresh** — the fixed build is not in `/Applications`;
-   that is a zero-instance window and her call.
+4. **The install refresh — DONE at the CLOSE (`8490ac3`):** `/Applications` was refreshed behind the
+   A1 rail, hash-matched, the guard confirmed in the shipped binary. *(This item predated the CLOSE
+   and stood uncorrected beside it — struck at the pre-13u round's Act 1 cold review, finding F3.)*
