@@ -199,3 +199,78 @@ leg) which **only her phone can give**.
    self-reported one hollow pin — both are the guard working.
 7. **A dying agent leaves WORK as well as corruption** (§10.5) — read a
    failed agent's tree for both.
+
+---
+
+# 7. 🔵 THE WHOLE-ROUND STATUS TABLE (written 2026-08-30 at her ask)
+
+*Her words: "I'm still unsure of what has been done and what remains to
+be done, knowing that the mac will be completing a fix round, then all
+of 13u, before mobile is resumed."*
+
+**Read the two tables as one story: everything mobile round 2 ever
+scheduled is in exactly one row below.** Nothing is in both.
+
+## 7.1 ✅ DONE — built AND cold-reviewed unless the cell says otherwise
+
+| # | What | Built | Reviewed |
+|---|---|---|---|
+| **1** | M1 **the editor crash** (the round's reason) · M2a–M2e | ✅ | ✅ rounds 1+2 closed |
+| **1b** | M11/PR18 whole-block-selection delete | ✅ | ✅ rounds 1+2 |
+| **2** | M3 the copy door · M4 bar air | ✅ | ✅ |
+| **3** | M22 **merge-then-edit** (its hoist exposed a P1 violation shipped on the Mac since 2026-07-09 — 23.8 s → 0.003 s) | ✅ | ✅ |
+| **3b** | M5 **the home-screen quick note** | ✅ | ✅ (found 2 BLOCKERs) |
+| **—** | R12 bar tuning · R22 one-row strip · M26 un-indent | ✅ | ✅ |
+| **4** | M20 the undo door · delete a note · **the Trash** · delete a book · the on-leaving savepoint | ✅ | ✅ (found 1 BLOCKER) |
+| **4.5a** | Capture & lifecycle — **Q1/Q2, two of the round's three BLOCKERs** (the quick note destroying stored text; a refused save wiping the box AND its error) | ✅ built + fixed | ⚠️ round 1 done · **ROUND 2 OWED** |
+| **4.5b** | Deletion doors — **the third BLOCKER** (four dead confirm buttons; the A12 warning whose Undo *cancelled* it) + the accessibility harness + the `TrashPutBack` hoist | ✅ | ✅ **discharged by 13l's Fable review** |
+| **4.5d** | The keyboard bar's geometry | ✅ | ✅ · **fix round DONE 2026-08-30** — and its finding was that **13 of 14 fixes already existed uncommitted**, so the right act was to fix nothing |
+| **5** | **The shelf layout** R26/R27/R27b — her twice-stated complaint — **plus her two live refinements** (one-line box; the writing room made a pinned guarantee across 2,408 states) | ✅ | ✅ |
+| **6a** | **The Block History twin** — closes the **deleted-take dark window** (deleted takes were invisible *and* un-restorable on the phone) | ✅ | ✅ |
+| **—** | **PL-10(b)** the duplicate-book-name guard — found a real bug: **two books could share one name through rename** | ✅ | ✅ (was 4.5d's) |
+| **—** | **The handback checklist**, actually run — 13l's four all landed; **nothing returned to mobile** | ✅ | n/a |
+| **—** | **The mobile app's FIRST architecture review** — 0 BLOCKER · 2 MAJOR · 4 MINOR · 2 NIT | ✅ | n/a (it *is* a review) |
+| **—** | **The archive/trash design session** — 4 IA options; **she ruled "Two rooms"** | ✅ | n/a |
+| **—** | **The five-MAJOR fix round** — B1 the starter-Journal seeding before sign-in (**could pollute her real synced corpus**) · C2 fanned blocks reporting "one take" · A1's latch · A2 the liveness race · C1 truncated explainers | ✅ | ⚠️ **its own R28 review OWED** |
+| **—** | **`main` did not build for iOS** — R3-2's sentence placed in the macOS-only branch of a `Shared/` conditional. Proven pre-existing, fixed | ✅ | n/a |
+
+**Suites: 513/86 → 582/93.** Hygiene held the whole round: **zero
+schema, zero `Sources/`, zero `Sync/`, marker 7.**
+
+## 7.2 ⏳ REMAINING — and the fence is the point
+
+**Column "needs Mac?" is the answer to her question.** 🔴 rows cannot
+start until 13u lands; 🟢 rows could run tomorrow.
+
+| # | What | needs Mac? |
+|---|---|---|
+| **6c** | **The Two-rooms IA** — her ruling; retires the combined "Archived & Deleted" surface | 🟢 no |
+| **—** | **The Library's filter vocabulary** — kind filters ("books", "posts") replacing provenance-only (`bookless`, `scraps`); **Archive inherits the same set.** She ranked this **above** the archive work | 🟢 no |
+| **6b** | **The per-note tray** — §69.3's ruled three-section shape | 🟢 no |
+| **9** | The editor's ⋯ menu · structural undo **and redo** doors · take history moves to the per-take ⋯ · the merge vocabulary (**propose-only**) · **🟠 TEXT SELECTION IS BROKEN** — *"holding it down makes you scroll upwards"* | 🟢 no |
+| **4.5c** | **Phone-local half only** — **B45-2 first** (batch 7 walks into it) · the A7/#34 seam carves · live-editor-over-a-tombstone · `MobileLenses:419` · 2 one-liners | 🟢 no |
+| **7** | Reorder takes · copy-all-takes · take→block · copy-follows-screen · swatches + emoji · block multi-select · **replace, which HOISTS `FindReplaceGate` with it** | 🟢 no |
+| **10** | **Swipe shelf↔library** (*"it's killing me"*) · a home-screen starred-notes face (**she ruled: a phone face, NOT a smart book**) · new-note + new-chapter buttons inside a book | 🟢 no |
+| **8** | Tag-chip grammar (**HOIST `applyTypedPath`**) · cadence/pruning settings · PL-9's judgment acts · document settings · the forked voice brain (HOIST) · M14's unmeasured half | 🟢 no |
+| **—** | The three reviews' **MINORs/NITs** + architecture **MINOR 3** (unsynchronised `voice` global) and **MINOR 4** (refusal copy's ten homes, 71 raw dumps) | 🟢 no |
+| **—** | **4.5a's ladder round 2** · **the 5-MAJOR round's own review** · **4.5e verification** · **R24** (3 sites, minutes) | 🟢 no |
+| **—** | **PL-13/PL-14/PL-9 faces** — data-safety twin, remaining recovery faces, the bridge-door judgment | 🟢 no |
+| **—** | **The dedicated stability pass** — 4.5's **exit condition**; owns **M27** | 🟢 no |
+| **—** | **The whole-round pass** — closeout obligation **ZERO** | 🟢 no |
+| **—** | **Closeout** — 13 obligations; **QUESTIONS.md still has ZERO round-2 entries** while ~15 items are held for her | 🟢 no |
+| **4.6** | **The quick note's second pass** — a **live lost-prose defect**. Waits on **13u item 9** to rule quick-capture ownership for both platforms | 🔴 **13u** |
+| **4.5c** | Its **cross-block semantics** half | 🔴 **13u item 5** |
+| **—** | Architecture **MINOR 1** — the O(N²) in `Shared/EditorBrain/BlockRangeIndex.swift` | 🔴 **13u item 8** (it *is* that row) |
+| **—** | Architecture **MINOR 2** — refusal vocabulary forked across both targets | 🔴 13u-adjacent |
+| **—** | **U-1 … U-5, U-7** — the handback checklist's 13u half | 🔴 **13u items 7–8** |
+| **—** | **The `main` → `mobile` merge** | 🔴 **after 13u** |
+| **—** | **PL-15's device items** — the live Face ID walk · Read-mode memory at 100k. **Only her phone can give these** | 🟣 **her device** |
+
+## 7.3 THE ONE-LINE ANSWER TO HER QUESTION
+
+**Fifteen of the remaining twenty-one rows do not need the Mac at all.**
+Only **six** wait on 13u, and every one of them is in the editor seam —
+which is exactly the seam 13u exists to settle. **The round's three
+BLOCKERs are all fixed and merged**; what remains is one live defect
+(4.6's lost prose, blocked by design), breadth (batches 7–10), and the
+round's own closing discipline (two standalone passes + closeout).
