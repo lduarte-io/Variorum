@@ -190,10 +190,20 @@ struct MobileShelfView<TabBar: View>: View {
                     bookRow(book)
                 }
                 if model.orderedBooks.isEmpty {
-                    Text(tokens.chromeLabel("No books yet — Today's Entry starts your journal."))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                        .padding(.vertical, 24)
+                    // Act 0: a fresh install now genuinely holds nothing
+                    // until she writes, so the empty shelf names BOTH
+                    // roads — start one, or bring yours down.
+                    VStack(spacing: 6) {
+                        Text(tokens.chromeLabel(MobileEmptyStoreCopy.noBooks))
+                        Text(tokens.chromeLabel(MobileEmptyStoreCopy.signIn))
+                            .foregroundStyle(tokens.faint)
+                    }
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 24)
                 }
                 newBookRow
                 if showsTodayFallbackRow {

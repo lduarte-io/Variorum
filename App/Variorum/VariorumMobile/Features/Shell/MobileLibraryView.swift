@@ -239,7 +239,28 @@ struct MobileLibraryView<TabBar: View>: View {
         .accessibilityAddTraits(model.filter == target ? .isSelected : [])
     }
 
+    @ViewBuilder
     private var listingRows: some View {
+        // Act 0: the Library had NO empty state at all — an empty store
+        // showed a path line, a search field, a filter row and nothing
+        // else, which reads as a broken app rather than a new one. It
+        // matters more now that a fresh install holds nothing until she
+        // writes. Only the plain listing speaks; the Scraps filter has its
+        // own line, and a search's "Nothing found." is a different fact.
+        if model.visible.isEmpty, model.filter != .scraps {
+            VStack(spacing: 6) {
+                Text(tokens.chromeLabel(MobileEmptyStoreCopy.noNotes))
+                Text(tokens.chromeLabel(MobileEmptyStoreCopy.noNotesDoor))
+                Text(tokens.chromeLabel(MobileEmptyStoreCopy.signIn))
+                    .foregroundStyle(tokens.faint)
+            }
+            .font(tokens.small)
+            .foregroundStyle(tokens.muted)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 24)
+        }
         ForEach(model.visible, id: \.postID) { item in
             Button {
                 onOpen(.note(item.postID, focus: false))
