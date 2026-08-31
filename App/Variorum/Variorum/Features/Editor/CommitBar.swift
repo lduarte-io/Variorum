@@ -25,6 +25,20 @@ struct CommitBar: View {
     @State private var pendingDelete: NoteDeleteConfirm?
     /// N15: the bar's measured width — the one-row/two-row switch.
     @State private var barWidth: CGFloat = 0
+
+    /// **Act 10 item 6 (her ruling: "this bottom bar should be spread out
+    /// again, unless the window is small and it needs to be collapsed").**
+    /// The shipped threshold was 1080 — an ordinary editor pane collapsed,
+    /// which is exactly her screenshot. The clusters' one-row content
+    /// measures ~800 pt in the wider (Terminal, monospace) voice, so 840
+    /// keeps one row wherever it genuinely fits and the collapse becomes
+    /// the genuinely-small fallback her ruling wants. Pure, so the decision
+    /// is pinned (`CommitBarLayoutTests`), not observed.
+    nonisolated static let twoRowThreshold: CGFloat = 840
+
+    nonisolated static func usesTwoRows(width: CGFloat) -> Bool {
+        width > 0 && width < twoRowThreshold
+    }
     /// Ledger row 28: is the formatting row slid out? Session UI state, per
     /// bar — a fold is not document semantics (`FormattingDoor`'s own note).
     /// Seeded at birth so a pin can mount the bar in EITHER state and read
@@ -106,16 +120,21 @@ struct CommitBar: View {
             // are rendered moved (`renderedCapabilities` is unchanged, and
             // the registry walk proves it).
             Group {
-                if barWidth > 0, barWidth < 1080 {
+                if Self.usesTwoRows(width: barWidth) {
+                    // The width-responsive FALLBACK (Act 10 item 6 — her
+                    // ruling: one row at ordinary widths; collapse only when
+                    // the window is genuinely small). The counts ride the
+                    // first row's right side — her screenshot's collapsed
+                    // state left it empty while both rows packed left.
                     VStack(alignment: .leading, spacing: 2) {
                         HStack(spacing: 10) {
                             identityCluster
                             Spacer()
+                            trailingCluster
                         }
                         HStack(spacing: 10) {
                             postCluster
                             Spacer()
-                            trailingCluster
                         }
                     }
                 } else {
