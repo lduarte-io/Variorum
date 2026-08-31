@@ -767,14 +767,29 @@ struct MobileBlockHistoryTests {
                 == BlockHistoryCopy.restoredSavepoint)
         #expect(MobileBlockHistoryController.predatesSplitRowFlag == "predates a split")
         #expect(MobileBlockMenuController.commitTitle == "Commit Take")
-        #expect(MobileBlockMenuController.historyTitle == "Block History…")
-        #expect(MobileBlockMenuController.rowTitles.contains("Block History…"))
-        // The pairing her G2 ruling asked for, in the phone's grammar: the
-        // two doors are adjacent in the one block-acts menu.
-        let titles = MobileBlockMenuController.rowTitles
-        let commit = try #require(titles.firstIndex(of: MobileBlockMenuController.commitTitle))
-        let history = try #require(titles.firstIndex(of: MobileBlockMenuController.historyTitle))
-        #expect(history == commit + 1, "history is the natural pair to commit")
+
+        // **SANCTIONED FLIP (batch 9) — HER MOVE, held from both sides.**
+        // This assertion used to read `MobileBlockMenuController.historyTitle
+        // == "Block History…"` plus `rowTitles.contains(…)` plus her G2
+        // adjacency (`history == commit + 1`). Her letter moved the door:
+        // *"take history should move into the three ... menu on each take
+        // rather than the main three dot menu."*
+        //
+        // So the pin holds the NEW fact and the precondition that still
+        // constrains it: the word is the SHARED face's own name — not a
+        // second literal minted on the way over — and it is nowhere in the
+        // block ⋯'s vocabulary any more.
+        #expect(MobileTakesBrowserController.historyTitle == "Block History…")
+        #expect(MobileTakesBrowserController.historyTitle
+                == "\(BlockHistoryPath.name)…",
+                "the row's word is composed from the shared name, never rewritten")
+        #expect(!MobileBlockMenuController.rowTitles.contains { $0.contains("History") },
+                "the block ⋯ carries no history row: \(MobileBlockMenuController.rowTitles)")
+        // Commit STAYS on the block ⋯ (she moved the listing, not the act),
+        // so her G2 commit/history adjacency is deliberately over — recorded
+        // here rather than silently dropped with the assertion.
+        #expect(MobileBlockMenuController.rowTitles
+                .contains(MobileBlockMenuController.commitTitle))
 
         for copy in [
             MobileBlockHistoryController.committedStatus,

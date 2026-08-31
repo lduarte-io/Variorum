@@ -414,6 +414,10 @@ final class MobileTakesBrowserView: UIView {
             },
             onLabel: { [weak self] in
                 self?.model?.takesBrowser.requestLabel(variantID: variantID)
+            },
+            onHistory: { [weak self] in
+                guard let model = self?.model else { return }
+                Task { await model.takesBrowser.openHistory(variantID: variantID) }
             })
         cardsScroll.addSubview(view)
         cardViews[variantID] = view
@@ -511,6 +515,7 @@ final class MobileTakesCardView: UIView {
     private let onDelete: () -> Void
     private let onSetLocked: (Bool) -> Void
     private let onLabel: () -> Void
+    private let onHistory: () -> Void
 
     /// The live editor's card height (functional; the look rounds rule).
     static let editorHeight: CGFloat = 120
@@ -522,7 +527,8 @@ final class MobileTakesCardView: UIView {
         onArchive: @escaping () -> Void,
         onDelete: @escaping () -> Void,
         onSetLocked: @escaping (Bool) -> Void = { _ in },
-        onLabel: @escaping () -> Void = {}
+        onLabel: @escaping () -> Void = {},
+        onHistory: @escaping () -> Void = {}
     ) {
         self.variantID = variantID
         self.onEdit = onEdit
@@ -530,6 +536,7 @@ final class MobileTakesCardView: UIView {
         self.onDelete = onDelete
         self.onSetLocked = onSetLocked
         self.onLabel = onLabel
+        self.onHistory = onHistory
         super.init(frame: .zero)
         accessibilityIdentifier = "takes.card.\(variantID)"
         layer.cornerRadius = 10
@@ -615,7 +622,19 @@ final class MobileTakesCardView: UIView {
         // (parity C4a — the seal glyph's one-reversible-tap grammar,
         // menu-rowed) and a voice flip reaches an already-built card.
         let locked = card.isLocked
+        // **BATCH 9 — `Block History…` JOINS THIS MENU, at her instruction**
+        // (*"take history should move into the three ... menu on each take
+        // rather than the main three dot menu"*), and it leads: the two rows
+        // above the divide are about IDENTITY and STATE, this one is the
+        // take's whole past, and reading before acting is the calmer order.
+        // The title is the shared face's own name
+        // (`MobileTakesBrowserController.historyTitle`), and pressing it
+        // closes this browser before the face opens — the reasons are at
+        // `openHistory(variantID:)`.
         menuButton.menu = UIMenu(children: [
+            UIAction(title: chromeCase(MobileTakesBrowserController.historyTitle)) {
+                [onHistory] _ in onHistory()
+            },
             UIAction(title: chromeCase("Label Take…")) { [onLabel] _ in onLabel() },
             UIAction(title: chromeCase(locked ? "Unlock Take" : "Lock Take")) {
                 [onSetLocked] _ in onSetLocked(!locked)
@@ -734,6 +753,17 @@ final class MobileArchivedTakeCardView: UIView {
 
         menuButton.setTitleColor(face.muted, for: .normal)
         menuButton.titleLabel?.font = face.chrome.withSize(14)
+        // **NO `Block History…` ROW HERE, and the absence is deliberate**
+        // (batch 9). Her letter says *"each take"*, and an archived take is
+        // one — but the door's whole gain over the retired block-⋯ row is
+        // that it FOCUSES the take it was pressed on, and an archived take
+        // has no savepoint run to focus: `BlockHistoryExpansion` would take
+        // the id (it reads `history.takes`, which carries archived rows) and
+        // then find no `takeHeader` for it, because `rows()` sections the
+        // ACTIVE takes only — so the face would open with nothing expanded,
+        // which is worse than the default. The archived listing is itself
+        // one of the face's four regions, and every archived take on this
+        // card is already visible in it. On her sitting list.
         menuButton.menu = UIMenu(children: [
             UIAction(title: chromeCase("Unarchive Take")) { [onUnarchive] _ in onUnarchive() },
             UIAction(title: chromeCase("Label Take…")) { [onLabel] _ in onLabel() },

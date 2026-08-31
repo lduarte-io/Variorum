@@ -225,6 +225,46 @@ final class MobileTakesBrowserController {
         }
     }
 
+    // MARK: - History (batch 9 — HER MOVE: the door leaves the block ⋯ and
+    // lands on each take's own card)
+
+    /// The card ⋯'s history row, verbatim her instruction: *"take history
+    /// should move into the three ... menu on each take rather than the main
+    /// three dot menu."*
+    ///
+    /// **The word is COMPOSED from the shared face's own name, never written
+    /// again** (`BlockHistoryPath.name`, `Shared/BlockHistoryFace.swift`) —
+    /// the block ⋯ carried a `"Block History…"` literal, and moving a row is
+    /// exactly the moment a literal becomes two literals. It still reads
+    /// `Block History…` byte-for-byte, which is also the honest word for
+    /// what opens: the face is the BLOCK's whole past (batch 6a's F2
+    /// rename), reached from a take rather than scoped to one.
+    static var historyTitle: String { "\(BlockHistoryPath.name)…" }
+
+    /// Opens the Block History face on the open block, with THIS take's
+    /// savepoint run expanded.
+    ///
+    /// **It closes the browser first, and that is the phone's own established
+    /// grammar rather than a compromise:** the note ⋯'s `Versions…` row
+    /// dismisses its sheet and then asks the shell to push. Two reasons make
+    /// it the right one here too. The mechanical one: both faces are overlay
+    /// views installed lazily as SIBLINGS on the page's host, so their z-order
+    /// is whichever opened FIRST in the session — a history sheet raised over
+    /// a live browser would render under it for anyone who had opened the
+    /// browser first, and neither view is `accessibilityViewIsModal`, so both
+    /// surfaces' labels would sit in one tree. The product one: the browser
+    /// is where you CHOOSE a take and the history face is where you read what
+    /// a block has been — one subject at a time is the phone's calm default.
+    ///
+    /// `close()` also flushes (through `refreshTakesFromStore`), so a card
+    /// edited a keystroke ago is in the store before the face reads it — the
+    /// standing flush-first contract, and the reason this is async.
+    func openHistory(variantID: String) async {
+        guard let model, let blockID = openBlockID else { return }
+        await close()
+        model.blockHistory.open(blockID: blockID, focused: variantID)
+    }
+
     /// Back into the fan — the road the archive refusals name.
     func unarchive(variantID: String) async {
         guard let model else { return }

@@ -93,20 +93,21 @@ struct MobileBlockMenuTests {
             // uncased comparison is the SANCTIONED flip.
             let cased = { MobileEditorStyle.chromeCase($0) }
 
-            // The bar's ⋯ renders the WHOLE row set (Takes… first).
-            let barElements = model.blockMenu.menuElements(
-                blockID: seed.blockA, includeTakes: true)
+            // The bar's ⋯ renders the WHOLE row set.
+            let barElements = model.blockMenu.menuElements(blockID: seed.blockA)
             let barTitles = barElements.map(\.title)
             #expect(barTitles == MobileBlockMenuController.rowTitles.map(cased))
-            #expect(barTitles.first == "takes…", "terminal chrome lowercases")
+            #expect(barTitles.first == "comments…", "terminal chrome lowercases")
 
-            // The edit menu's Block submenu renders the SAME rows minus
-            // the flat Takes… item it already carries (one builder — the
-            // doors cannot drift).
-            let submenuElements = model.blockMenu.menuElements(
-                blockID: seed.blockA, includeTakes: false)
+            // **SANCTIONED FLIP (batch 9):** the two doors now render the
+            // IDENTICAL list. The `includeTakes:` split existed only to keep
+            // `Takes…` out of the edit menu's Block submenu, which carries
+            // its own flat one — and her letter retired the row, so the
+            // split had nothing left to suppress. One builder, one list,
+            // no arm.
+            let submenuElements = model.blockMenu.menuElements(blockID: seed.blockA)
             #expect(submenuElements.map(\.title)
-                == Array(MobileBlockMenuController.rowTitles.dropFirst()).map(cased))
+                == MobileBlockMenuController.rowTitles.map(cased))
 
             // The callout submenu's words are the Mac CalloutMenu's rows,
             // mirrored (toggle · five colors · emoji · remove).
@@ -131,8 +132,7 @@ struct MobileBlockMenuTests {
             // register follows the voice, never a hardcoded lowering).
             MobileEditorStyle.voice = .study
             defer { MobileEditorStyle.voice = .terminal }
-            let studyTitles = model.blockMenu.menuElements(
-                blockID: seed.blockA, includeTakes: true).map(\.title)
+            let studyTitles = model.blockMenu.menuElements(blockID: seed.blockA).map(\.title)
             #expect(studyTitles == MobileBlockMenuController.rowTitles)
         }
     }
@@ -281,8 +281,7 @@ struct MobileBlockMenuTests {
             await model.loadOnce()
             model.blockMenu.confirmDestructive = nil
 
-            let elements = model.blockMenu.menuElements(
-                blockID: seed.blockA, includeTakes: true)
+            let elements = model.blockMenu.menuElements(blockID: seed.blockA)
             #expect(MenuActionHandler.activate(
                 MobileEditorStyle.chromeCase(MobileBlockMenuController.deleteTitle),
                 in: elements),
@@ -447,8 +446,7 @@ struct MobileBlockMenuTests {
                      range: NSRange(location: range.upperBound, length: 0),
                      replacement: " Typed.")
 
-            let elements = model.blockMenu.menuElements(
-                blockID: seed.blockA, includeTakes: true)
+            let elements = model.blockMenu.menuElements(blockID: seed.blockA)
             #expect(MenuActionHandler.activate(
                 MobileEditorStyle.chromeCase(MobileBlockMenuController.archiveTitle),
                 in: elements),

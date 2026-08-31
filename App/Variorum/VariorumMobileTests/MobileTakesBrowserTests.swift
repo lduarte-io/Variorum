@@ -751,9 +751,16 @@ struct MobileTakesBrowserSurfaceTests {
             // takes-completeness doors; the two-row comparison is that
             // batch's sanctioned pin flip) — VOICE-CASED since parity A3
             // (P26/P43's ruled flip; the world runs terminal).
+            //
+            // **SANCTIONED FLIP (batch 9):** `block history…` LEADS the
+            // menu now — her letter moved the door here from the block ⋯
+            // (*"take history should move into the three ... menu on each
+            // take"*), and it reads before the identity/state rows because
+            // looking is the calmer act to offer first.
             let menu = try #require((subview(chosenCard, "takes.card.menu") as? UIButton)?.menu)
             #expect(menu.children.compactMap { ($0 as? UIAction)?.title }
-                    == ["label take…", "lock take", "archive take", "delete take"])
+                    == ["block history…", "label take…", "lock take",
+                        "archive take", "delete take"])
         }
     }
 

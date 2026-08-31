@@ -755,8 +755,7 @@ final class MobileKeyboardBarController: NSObject {
                         attributes: .disabled) { _ in }])
                     return
                 }
-                completion(model.blockMenu.menuElements(
-                    blockID: blockID, includeTakes: true))
+                completion(model.blockMenu.menuElements(blockID: blockID))
             },
         ])
         return UIBarButtonItem(customView: button)

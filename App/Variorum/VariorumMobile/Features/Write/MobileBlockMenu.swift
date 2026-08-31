@@ -2,14 +2,42 @@
 //  MobileBlockMenu.swift
 //  VariorumMobile
 //
-//  Mobile Stage 4, batch 1 — the ⋯ BLOCK MENU: Takes… · Comments… ·
-//  Callout ▸ · Name Block… · Commit Take · Block History… (parity C4a,
-//  widened to the four-region face at round 2 batch 6a) ·
-//  Divide Block · Merge with Previous · Delete Block, on the caret's
-//  block, through TWO doors that cannot drift (the CalloutMenu
-//  one-vocabulary precedent): the keyboard bar's ⋯ and the extended edit
-//  menu both render `menuElements` — ONE builder decides the words and
-//  the order.
+//  Mobile Stage 4, batch 1 — the ⋯ BLOCK MENU: Comments… · Callout ▸ ·
+//  Name Block… · Commit Take · New Block Below · Divide Block · Merge
+//  with Previous · Archive Block · Delete Block, on the caret's block,
+//  through TWO doors that cannot drift (the CalloutMenu one-vocabulary
+//  precedent): the keyboard bar's ⋯ and the extended edit menu both
+//  render `menuElements` — ONE builder decides the words and the order.
+//
+//  **TWO ROWS LEFT THIS MENU AT ROUND 2 BATCH 9, BOTH BY HER LETTER**
+//  (2026-08-23, `notes/author-reports/2026-08-23-device-walk-and-product-
+//  asks.md`), and the absences are recorded here rather than left to be
+//  re-derived from a diff:
+//
+//  · **`Takes…` is GONE** — her words: *"i also don't think takes needs to
+//    be an option on the three dot menu, it's already the middle bar."* It
+//    literally is: the keyboard bar rests on **Aa · ⑂ · ⋯** and ⑂ is the
+//    middle act, opening the same browser on the same caret block
+//    (`MobileKeyboardBarController.fireTakes`). The row was a second door
+//    onto one surface, one inch away from the first. The
+//    `includeTakes:` parameter went with it — it existed ONLY to keep this
+//    row out of the edit menu's Block submenu, which carries its own flat
+//    `Takes…` (`MobileEditMenu.takesTitle`, untouched: that door is the
+//    SELECTION's, not this menu's, and she did not name it).
+//  · **`Block History…` MOVED** — her words: *"take history should move
+//    into the three ... menu on each take rather than the main three dot
+//    menu."* Its home is now every live take card's own ⋯ in the takes
+//    browser (`MobileTakesBrowserController.historyTitle`, composed from
+//    the SHARED `BlockHistoryPath.name` so the word did not fork on the
+//    way over). One consequence is recorded at that door: the face is no
+//    longer reachable on a GAP block, because the browser refuses to open
+//    on one.
+//
+//  **Her G2 commit/history pairing therefore ends here, deliberately and
+//  visibly.** `Commit Take` stays: it is a block-scale act on the caret's
+//  DISPLAYED take, and she asked for the listing to move, not the act.
+//  The pairing survives one grain up — the note ⋯ keeps its own
+//  `Save a Version` + `Versions…` twin (batch 6c's finding 2).
 //
 //  Every row performs a STANDING act or delivers the ops' real refusal
 //  (P-2): Takes/Comments open their sheets; Callout rides the mirrored
@@ -99,7 +127,6 @@ final class MobileBlockMenuController {
 
     // MARK: - The row vocabulary (one builder, two doors)
 
-    static let takesTitle = "Takes…"
     static let commentsTitle = "Comments…"
     static let calloutTitle = "Callout"
     static let nameTitle = "Name Block…"
@@ -108,16 +135,6 @@ final class MobileBlockMenuController {
     /// take, and History opens that block's whole past, both through
     /// `MobileBlockHistoryController`).
     static let commitTitle = "Commit Take"
-    /// **Renamed at round 2 batch 6a**: the door opens ONE cohesive face for
-    /// the whole BLOCK — every take's savepoint run, its archived and deleted
-    /// takes, and where it came from — so calling it "Take History" was the
-    /// same small dishonesty her F2 report caught on the Mac (*"it's unclear
-    /// that history is under Note, that makes it seem like the Note's
-    /// history"*), one noun over. It sits immediately beside Commit Take,
-    /// which is her G2 pairing (*"history is the natural pair to commit"*) in
-    /// the phone's grammar: the ⋯ is this phone's bottom chrome for block
-    /// acts.
-    static let historyTitle = "Block History…"
     /// The insert door (parity C4b item 1 — the registry's own verb).
     /// It heads the structural family: minting under the block is the
     /// gentlest structural act, so it reads before the knives.
@@ -139,8 +156,7 @@ final class MobileBlockMenuController {
 
     /// The flat titles both doors must agree on (the drift pin's oracle).
     static var rowTitles: [String] {
-        [takesTitle, commentsTitle, calloutTitle, nameTitle,
-         commitTitle, historyTitle,
+        [commentsTitle, calloutTitle, nameTitle, commitTitle,
          insertBelowTitle, divideTitle, mergeTitle, archiveTitle, deleteTitle]
     }
 
@@ -152,20 +168,16 @@ final class MobileBlockMenuController {
             + [calloutEmojiTitle, calloutRemoveTitle]
     }
 
-    /// The menu's elements for one block — consumed by the bar's ⋯
-    /// (whole) and the edit menu's Block submenu (minus Takes…, which
-    /// already rides flat there — S2's own item, byte-untouched).
+    /// The menu's elements for one block — consumed by the bar's ⋯ and by
+    /// the edit menu's Block submenu, which since batch 9 render the SAME
+    /// list with no arm between them (the `includeTakes:` split died with
+    /// the row it existed for — see the header).
     /// Displayed titles are VOICE-CASED (P26/P43, parity A3 — the flip
     /// of P26/P43's recorded system-register posture): `rowTitles` stays
     /// the canonical vocabulary, `chromeCase` is the render register.
-    func menuElements(blockID: String, includeTakes: Bool) -> [UIMenuElement] {
+    func menuElements(blockID: String) -> [UIMenuElement] {
         let cased = MobileEditorStyle.chromeCase
         var elements: [UIMenuElement] = []
-        if includeTakes {
-            elements.append(UIAction(title: cased(Self.takesTitle)) { [weak self] _ in
-                self?.model?.openTakesBrowser(blockID: blockID)
-            })
-        }
         elements.append(UIAction(title: cased(Self.commentsTitle)) { [weak self] _ in
             self?.model?.openComments(blockID: blockID)
         })
@@ -176,9 +188,6 @@ final class MobileBlockMenuController {
         elements.append(UIAction(title: cased(Self.commitTitle)) { [weak self] _ in
             guard let model = self?.model else { return }
             Task { await model.blockHistory.commitNow(blockID: blockID) }
-        })
-        elements.append(UIAction(title: cased(Self.historyTitle)) { [weak self] _ in
-            self?.model?.blockHistory.open(blockID: blockID)
         })
         elements.append(UIAction(title: cased(Self.insertBelowTitle)) { [weak self] _ in
             guard let model = self?.model else { return }

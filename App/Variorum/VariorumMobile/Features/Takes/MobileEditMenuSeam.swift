@@ -49,8 +49,17 @@ enum MobileEditMenu {
     /// The composed menu: the system's suggested actions, then Takes…
     /// where a block resolves — the SELECTION acts where a selection
     /// exists (C4b) — and, since S4, the Block submenu (the ⋯ menu's
-    /// same rows from the ONE builder, minus Takes…, which already
-    /// rides flat here). Displayed titles are VOICE-CASED (P26/P43,
+    /// same rows from the ONE builder).
+    ///
+    /// **THIS door's flat `Takes…` SURVIVED batch 9's removal of the block
+    /// ⋯'s row, deliberately.** Her letter names *"the three ... menu"*,
+    /// and her reason is that the takes door is already the keyboard bar's
+    /// middle act one inch away from it. Nothing about that reasoning
+    /// reaches HERE: this is the SELECTION's menu, summoned on the text she
+    /// is holding, and its Takes… is the only takes door in that gesture's
+    /// reach. The `includeTakes:` parameter it used to pass is gone because
+    /// the block builder no longer has a row to suppress.
+    /// Displayed titles are VOICE-CASED (P26/P43,
     /// parity A3 — one register with the block menu's rows).
     static func menu(
         model: MobileEditorViewModel?, range: NSRange, suggested: [UIMenuElement]
@@ -75,7 +84,7 @@ enum MobileEditMenu {
         }
         custom.append(UIMenu(
             title: cased(blockTitle),
-            children: model.blockMenu.menuElements(blockID: blockID, includeTakes: false)))
+            children: model.blockMenu.menuElements(blockID: blockID)))
         return UIMenu(children: suggested + custom)
     }
 }
