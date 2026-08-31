@@ -93,9 +93,16 @@ nonisolated struct StoreKeyGuard: Sendable {
     static func inMemory(backing: InMemoryStoreKeyGuardBacking) -> StoreKeyGuard {
         StoreKeyGuard(
             loadAuto: { backing.auto },
-            saveAuto: { backing.auto = $0; return backing.savesSucceed },
+            // R2-6: guard FIRST, like saveGated/saveEscrow below — a
+            // Keychain that reports a failed write never also changed the
+            // item, and a double that does makes the refusal arms untestable.
+            saveAuto: {
+                guard backing.savesSucceed else { return false }
+                backing.auto = $0
+                return true
+            },
             deleteAuto: { backing.auto = nil },
-            gatedItemExists: { backing.gated != nil },
+            gatedItemExists: { !backing.gatedWritesAreInvisible && backing.gated != nil },
             saveGated: {
                 guard backing.savesSucceed else { return false }
                 backing.gated = $0
@@ -124,6 +131,11 @@ nonisolated final class InMemoryStoreKeyGuardBacking: @unchecked Sendable {
     private var _biometryAvailable: Bool
     private var _biometricSucceeds: Bool
     private var _savesSucceed = true
+    /// 13p-fix R1-1: reproduce the shape that cost the author her key —
+    /// a gated WRITE that succeeds while the gated READ cannot find it
+    /// (the data-protection/file-based split, and every future identity
+    /// regression that behaves like it).
+    private var _gatedWritesAreInvisible = false
 
     init(
         auto: StoreKey? = nil, gated: StoreKey? = nil,
@@ -158,6 +170,10 @@ nonisolated final class InMemoryStoreKeyGuardBacking: @unchecked Sendable {
     var savesSucceed: Bool {
         get { lock.lock(); defer { lock.unlock() }; return _savesSucceed }
         set { lock.lock(); defer { lock.unlock() }; _savesSucceed = newValue }
+    }
+    var gatedWritesAreInvisible: Bool {
+        get { lock.lock(); defer { lock.unlock() }; return _gatedWritesAreInvisible }
+        set { lock.lock(); defer { lock.unlock() }; _gatedWritesAreInvisible = newValue }
     }
 }
 
@@ -231,12 +247,15 @@ nonisolated enum StoreKeyGuardKeychain {
         return StoreKey(data: data)
     }
 
-    private static func gatedQuery(scope: String) -> [String: Any] {
+    /// Internal (see `EncryptionKeychain.gatedBaseQuery`): the partition
+    /// marker is asserted structurally, for every family, by
+    /// `KeychainPartitionTests`.
+    static func gatedQuery(scope: String) -> [String: Any] {
         [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: StoreKeyCustody.deviceKeychainService,
             kSecAttrAccount as String: gatedAccount(scope: scope),
-        ]
+        ].merging(KeychainPartition.dataProtection) { a, _ in a }
     }
 
     // MARK: The escrow item (R13p-6)
@@ -277,12 +296,19 @@ nonisolated enum StoreKeyGuardKeychain {
 
     /// `kSecAttrSynchronizable` rides EVERY escrow query — a search
     /// without it does not match synchronizable items.
-    private static func escrowQuery(storeID: String) -> [String: Any] {
+    /// NOTE (13p-fix ladder R1-4 — the escrow leg of the original
+    /// diagnosis was WRONG and is corrected here): this family was never
+    /// asymmetric. `kSecAttrSynchronizable` ALREADY targets the
+    /// data-protection keychain on its own, so load/save/delete have
+    /// always agreed. The partition marker rides anyway, per Apple's
+    /// set-it-everywhere guidance and so all three families are visibly
+    /// one rule — a belt, not a fix.
+    static func escrowQuery(storeID: String) -> [String: Any] {
         [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: escrowService,
             kSecAttrAccount as String: storeID,
             kSecAttrSynchronizable as String: true,
-        ]
+        ].merging(KeychainPartition.dataProtection) { a, _ in a }
     }
 }

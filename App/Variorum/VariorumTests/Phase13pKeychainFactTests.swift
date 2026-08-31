@@ -33,10 +33,11 @@ import Foundation
 import LocalAuthentication
 import Security
 import Testing
+import VariorumCore
 
 @testable import Variorum
 
-@Suite("13p — Q3 codesigned: the two-item design is platform fact")
+@Suite("13p — keychain platform facts: the two-item design, and which keychain a family lives in")
 struct Phase13pKeychainFactTests {
     private static let probeService = "io.lduarte.Variorum.13p-q3-probe"
 
@@ -48,10 +49,17 @@ struct Phase13pKeychainFactTests {
         ]
     }
 
+    /// 13p-fix: an ACL'd add lands in the DATA-PROTECTION keychain, so a
+    /// delete without the flag searched the file-based one and could never
+    /// remove what this suite created — every run since the keychain
+    /// identity landed left an ACL'd item resident. Sweep BOTH keychains.
     private func deleteProbe(account: String, synchronizable: Bool = false) {
-        var q = query(account: account)
-        if synchronizable { q[kSecAttrSynchronizable as String] = kSecAttrSynchronizableAny }
-        SecItemDelete(q as CFDictionary)
+        for dataProtection in [false, true] {
+            var q = query(account: account)
+            if synchronizable { q[kSecAttrSynchronizable as String] = kSecAttrSynchronizableAny }
+            if dataProtection { q[kSecUseDataProtectionKeychain as String] = true }
+            SecItemDelete(q as CFDictionary)
+        }
     }
 
     /// Control A: a plain add SUCCEEDS in the signed host — the fact that
@@ -70,22 +78,30 @@ struct Phase13pKeychainFactTests {
                 "the signed host writes plainly (got \(status))")
     }
 
-    /// Control C — AND A FINDING (2026-08-30, this batch, recorded in the
-    /// run record): an ACL'd item can only live in the DATA-PROTECTION
-    /// keychain, and on macOS that requires a keychain identity the app
-    /// does not carry today (`Variorum.entitlements` has no
-    /// keychain-access-groups / application-identifier — no provisioning
-    /// profile), so the write comes back `errSecMissingEntitlement`
-    /// (-34018) rather than landing. CONSEQUENCE, stated so nobody
-    /// discovers it at an acceptance walk: until the app's signing gains
-    /// a keychain identity, the Biometric mode's gated item (and likely
-    /// the synchronizable escrow item) cannot LAND on the Mac — every
-    /// door refuses HONESTLY at its own guard ("the Keychain refused…"),
-    /// no data is at risk, and the passphrase mode is unaffected. The
-    /// signing change is the author's call (CLAUDE.md: signing is hers).
-    /// This pin accepts EITHER outcome and asserts the write never
-    /// prompts; the question probe below discriminates regardless.
-    @Test func anACLGatedAddEitherLandsOrRefusesByEntitlement() {
+    /// Control C — THE FINDING, AND ITS CLOSE. An ACL'd item can only
+    /// live in the DATA-PROTECTION keychain, and on macOS an app is
+    /// admitted there only with a keychain access group — which is what
+    /// forces a provisioning profile onto the signature. Batch 2 found
+    /// the app carried NO such identity, so this write returned
+    /// `errSecMissingEntitlement` (-34018) and the Biometric mode's
+    /// gated item, the synchronizable escrow item, and 14b's CF-12 vault
+    /// gate all refused honestly on the Mac (QUESTIONS #81(a)).
+    ///
+    /// CLOSED 2026-08-30 by the author: `Variorum.entitlements` gained
+    /// `keychain-access-groups` = `$(AppIdentifierPrefix)$(PRODUCT_BUNDLE_IDENTIFIER)`
+    /// (per-config, so the dev fence survives), this Mac was registered
+    /// in her developer account, and automatic signing now embeds a Mac
+    /// Development profile — the signed app carries
+    *[removed for publication]*
+    /// `application-identifier` and `keychain-access-groups`.
+    ///
+    /// THE PIN IS THEREFORE TIGHTENED to assert the write LANDS: this is
+    /// now the regression guard for the identity itself. A -34018 here
+    /// means the entitlement, the profile, or the device registration
+    /// has been lost — read the failure that way rather than as a
+    /// keychain fault. It still asserts the write never prompts
+    /// (creation never does; only reading an ACL'd item's data would).
+    @Test func anACLGatedAddLandsBecauseTheAppCarriesAKeychainIdentity() {
         let account = "gated-\(UUID().uuidString)"
         defer { deleteProbe(account: account) }
         var error: Unmanaged<CFError>?
@@ -102,8 +118,8 @@ struct Phase13pKeychainFactTests {
         attributes[kSecValueData as String] = Data("probe".utf8)
         attributes[kSecAttrAccessControl as String] = control
         let status = SecItemAdd(attributes as CFDictionary, nil)
-        #expect(status == errSecSuccess || status == errSecMissingEntitlement,
-                "an ACL write lands where the app has a keychain identity and refuses -34018 where it doesn't (got \(status)) — never a prompt, never a hang")
+        #expect(status == errSecSuccess,
+                "the ACL'd write must LAND — the app carries a keychain identity since 2026-08-30 (got \(status); -34018 means the entitlement, the profile, or this Mac's device registration was lost)")
     }
 
     /// THE QUESTION (Q3): synchronizable + biometric ACL together —
@@ -131,16 +147,101 @@ struct Phase13pKeychainFactTests {
         let status = SecItemAdd(attributes as CFDictionary, nil)
         // Parameter validation runs BEFORE the entitlement check (the
         // spike's own discrimination logic, now re-confirmed codesigned):
-        // the plain control succeeds and the ACL control reads -34018 in
-        // this environment, while THIS combination reads -50 — a genuine
-        // rejection of the parameters, not of the environment.
+        // the plain control succeeds and the ACL control now LANDS (it
+        // read -34018 until the keychain identity arrived on 2026-08-30 —
+        // corrected here at 13p-fix ladder round 2), while THIS
+        // combination reads -50 — a genuine rejection of the parameters,
+        // not of the environment.
         #expect(status == errSecParam,
                 "Apple refuses the COMBINATION (got \(status)) — the escrow item necessarily carries no biometric gate, exactly as R13p-6 designs")
 
         // And nothing landed: the refusal happened before creation.
+        // 13p-fix R1-6: the DP marker rides this probe too — without it
+        // this searched the FILE-BASED keychain for the absence of an item
+        // that could only ever land in the data-protection one, and would
+        // have passed identically had the combination been accepted.
         var probe = query(account: account)
         probe[kSecAttrSynchronizable as String] = kSecAttrSynchronizableAny
+        probe[kSecUseDataProtectionKeychain as String] = true
         probe[kSecReturnAttributes as String] = true
         #expect(SecItemCopyMatching(probe as CFDictionary, nil) == errSecItemNotFound)
+    }
+
+    // MARK: - 13p-fix (2026-08-30): the asymmetry, and the round trip
+
+    /// THE PLATFORM FACT the fix rides, pinned so the REASON survives.
+    /// On macOS an ACL'd add is routed to the data-protection keychain;
+    /// a read without `kSecUseDataProtectionKeychain` searches the
+    /// file-based one and cannot see it. Attributes only, non-interactive
+    /// — an ACL'd item's CREATION never prompts and nothing here reads
+    /// one's data, so this cannot hang a suite. Throwaway service; never
+    /// synchronizable, so no test byte can ride into iCloud Keychain.
+    @Test func anACLdAddIsInvisibleToAReadThatDoesNotAskForTheDataProtectionKeychain() {
+        let account = "asymmetry-\(UUID().uuidString)"
+        defer { deleteProbe(account: account) }
+        var error: Unmanaged<CFError>?
+        guard let control = SecAccessControlCreateWithFlags(
+            kCFAllocatorDefault,
+            kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+            .biometryCurrentSet,
+            &error)
+        else {
+            Issue.record("SecAccessControlCreateWithFlags refused: \(String(describing: error))")
+            return
+        }
+        var attributes = query(account: account)
+        attributes[kSecValueData as String] = Data("probe".utf8)
+        attributes[kSecAttrAccessControl as String] = control
+        #expect(SecItemAdd(attributes as CFDictionary, nil) == errSecSuccess)
+
+        func probe(dataProtection: Bool) -> OSStatus {
+            var q = query(account: account)
+            q[kSecReturnAttributes as String] = true
+            q[kSecMatchLimit as String] = kSecMatchLimitOne
+            let ctx = LAContext()
+            ctx.interactionNotAllowed = true
+            q[kSecUseAuthenticationContext as String] = ctx
+            if dataProtection { q[kSecUseDataProtectionKeychain as String] = true }
+            return SecItemCopyMatching(q as CFDictionary, nil)
+        }
+        #expect(probe(dataProtection: false) == errSecItemNotFound,
+                "the file-based keychain cannot see an ACL'd item")
+        // R2-5: NOT-absent is the discriminating fact. Production's own
+        // probe accepts `errSecSuccess || errSecInteractionNotAllowed`, so
+        // hard-asserting one of them would red this pin for a
+        // non-regression on a point release that returns the other.
+        // Measured here today: -25308.
+        #expect(probe(dataProtection: true) != errSecItemNotFound,
+                "the data-protection keychain HAS it")
+    }
+
+    /// THE RED-ON-OLD PIN, and the lesson of the verification gap that let
+    /// this ship: a custody pin asserts the ROUND TRIP — write through
+    /// production, then find it through production's OWN read path — never
+    /// the write alone. Before the fix `saveGated` succeeded and
+    /// `gatedItemExists` returned false, which is precisely how the author
+    /// lost her Auto store-key item to a mode switch that had "worked".
+    ///
+    /// Safe by construction: `StoreKeyGuardKeychain`'s gated item is scoped, so a
+    /// throwaway scope never touches real custody, and it is
+    /// ThisDeviceOnly — never synchronizable. (The E2EE gated item's
+    /// account is FIXED, so it is deliberately never exercised here: a
+    /// test write would land on the author's live custody.)
+    @Test func theGatedStoreKeyIsFoundByProductionsOwnProbeAfterProductionWritesIt() {
+        let scope = "13p-fix-probe-\(UUID().uuidString)"
+        defer { StoreKeyGuardKeychain.deleteGated(scope: scope) }
+        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope) == false,
+                "clean start")
+        #expect(StoreKeyGuardKeychain.saveGated(StoreKey.mint(), scope: scope),
+                "the ACL'd write lands (this half passed even before the fix)")
+        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope),
+                "and production's own probe must FIND it — the half that was broken")
+
+        // 13p-fix R1-7: the third leg of the same round trip — a DELETE
+        // must reach the keychain the WRITE reached. Unasserted cleanup is
+        // how this suite left invisible ACL'd litter on every run.
+        StoreKeyGuardKeychain.deleteGated(scope: scope)
+        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope) == false,
+                "the delete reaches the same keychain the write did")
     }
 }

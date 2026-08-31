@@ -313,10 +313,23 @@ final class ProtectionController {
         guard let key = currentKey() else { return .refused(Self.keyUnavailable) }
         switch newMode {
         case .auto:
-            guard guardSeam.saveAuto(key) else {
+            // 13p-fix R1-1: verify the incoming item READS BACK before the
+            // outgoing one goes (see `CustodyHandover`).
+            switch CustodyHandover.perform(
+                write: { guardSeam.saveAuto(key) },
+                // Identity, not presence (R2-4): a stale item under the
+                // same service/account — an earlier access group's orphan —
+                // satisfies `!= nil` and would pass custody to a key that
+                // may not open the store.
+                verify: { guardSeam.loadAuto() == key },
+                deleteOutgoing: { guardSeam.deleteGated() },
+                rollBackIncoming: { guardSeam.deleteAuto() }) {
+            case .done: break
+            case .writeRefused:
                 return .refused("The Keychain refused the change — nothing was altered.")
+            case .wroteButUnreadable:
+                return .refused(ProtectionCopy.wroteButUnreadable)
             }
-            guardSeam.deleteGated()
         case .biometric:
             guard biometryAvailable else {
                 return .refused("This \(ProtectionCopy.deviceName) has no "
@@ -325,10 +338,22 @@ final class ProtectionController {
             }
             // The gated item lands FIRST; only then does the silent item
             // go (never a keyless moment, never a silent one either).
-            guard guardSeam.saveGated(key) else {
+            // 13p-fix R1-1: "lands" means READS BACK, not "the write
+            // returned true" — that distinction cost the author her Auto
+            // item on 2026-08-30 (see `CustodyHandover`).
+            switch CustodyHandover.perform(
+                write: { guardSeam.saveGated(key) },
+                // Presence only — reading an ACL'd item's DATA prompts, and
+                // a write must never prompt (R2-4's stated exception).
+                verify: { guardSeam.gatedItemExists() },
+                deleteOutgoing: { guardSeam.deleteAuto() },
+                rollBackIncoming: { guardSeam.deleteGated() }) {
+            case .done: break
+            case .writeRefused:
                 return .refused("The Keychain refused the gated item — nothing was altered.")
+            case .wroteButUnreadable:
+                return .refused(ProtectionCopy.wroteButUnreadable)
             }
-            guardSeam.deleteAuto()
         case .passphrase:
             guardSeam.deleteAuto()
             guardSeam.deleteGated()

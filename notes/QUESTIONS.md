@@ -967,7 +967,7 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
 81. **2026-08-30 · PHASE 13p (WHOLE-STORE ENCRYPTION) — your morning bundle · the BINDING record is `notes/plans/phase-13p-note-protection.md`'s RUN RECORD, and the checklist form is `notes/handoffs/phase-13p-handoff.md`.** The phase ran overnight at your GO: Batches 0→1→2→4 (Batch 3 dissolved by your R13p-16), a THREE-ROUND all-Fable cold-review ladder (zero disputes; round 3 nothing above MINOR), your real store migrated at your overnight authorization, and the phone installed. Nothing here blocks daily use; one item needs your HANDS and the rest are taste/awareness.
 
-    **(a) THE ONE ACTION ITEM — the Mac's keychain-identity/signing gap.** The app's signing carries no data-protection-keychain identity, so the BIOMETRIC mode's gated item and the iCloud ESCROW item cannot LAND on the Mac (every door refuses honestly meanwhile; passphrase mode, the lobby, re-lock, and the whole recovery story work; iOS is unaffected). The same mechanism likely explains 14b's vault biometric gate quietly refusing on the Mac since 14b. The fix is a signing/entitlements change — yours (likely minutes in Xcode). KnownIssues row parked at owner 13r pending your word; the ladder's R3-m1 (a narrow escrow-reconcile interleave window) deliberately rides the same row — it becomes real only when signing lands.
+    *[removed for publication]*
 
     **(b) TASTE, overrule at will:** the phone's protection screen uses text-forward rows (the phone's own control grammar, no Toggles/Pickers); the Standard nudge sits at the TOP of the phone's shell; the pocket guide carries ONE privacy lesson to the Mac's two; the cadence numbers (30-day reminder · nudge ≥24h after first use · 14-day snooze) are shapes-to-your-words, retune freely.
 
@@ -983,4 +983,22 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: open — walk at the checkpoint.**
 
-*(Next free number: **#82**.)*
+82. **2026-08-30 · PHASE 13p-fix — ONE DECISION, yours: should the store key be BOUND to this Mac?** *(The binding record is `notes/plans/phase-13p-fix-dp-keychain.md`; the mechanism is in `KnownIssuesAndTechDebt.md` at owner 13x.)*
+
+    **What we found while fixing the keychain bug.** The code asks for the store key to be stored `WhenUnlockedThisDeviceOnly` — a class whose name promises it never leaves this machine. On macOS that class only applies if the item also sets `kSecUseDataProtectionKeychain` or is synchronizable, and the plain items set neither **deliberately** (moving them would strand real data — including the key to your library). So the class is not in force, and two production comments said otherwise until today. They are corrected.
+
+    **What it means concretely — AND THE SCOPE IS NARROWER THAN THIS ENTRY FIRST SAID (corrected 2026-08-30; the first draft overstated it).** This is **an AUTO-MODE property, not a property of your setup.** Under Auto the plain key item lives in `~/Library/Keychains/login.keychain-db`, which your login password unlocks at login and which **Migration Assistant and Time Machine carry to other hardware** — so a restored backup on a second Mac plus your account password opens the library. Under the DEMANDED modes the plain item is **deleted** by the custody law ("a gate whose key still releases silently is theater"), so that road does not exist: the key lives only in the ACL'd data-protection item behind Touch ID, plus the passphrase/recovery wraps in the envelope sidecar. **You are in Biometric mode and your plain item is verifiably gone**, so nothing of yours is riding the login keychain today. What this decides is what AUTO buys — for the default every future user gets, and for you if you ever switch back.
+
+    **What binding would actually change (stated properly):** the data-protection keychain **does not migrate to new hardware**; the login keychain does. So (b)/(c) do NOT put a prompt in front of Auto — Auto stays silent on this Mac. They mean an Auto key stops *travelling*: a Time Machine restore onto a new Mac would ask for your passphrase (which you have) instead of opening silently, and 13x's adoption road would use the passphrase leg.
+
+    **This may be exactly what you want** — it is also what will make 13x's "adopt the library on a new Mac" pleasant, and it is a *convenience/hardness* trade, not a bug. But it was never decided.
+
+    **(a) Leave it — the key travels with your account.** Convenient across your own machines; the threat it doesn't cover is someone who has both a backup and your account password. *This is what ships today.*
+
+    **(b) Bind it to the device** — migrate the plain items into the data-protection keychain (read without the flag → re-add with it → delete the old), per family, with a round-trip pin. Then a restored backup on new hardware needs your passphrase or recovery phrase, which you have. Costs: a migration touching the key to your library, and 13x's adoption story gets a ceremony.
+
+    **(c) Bind only the STORE key, leave E2EE custody as is.** The store key is the one that opens everything, so it is the one worth surgery. The E2EE device keys are **not a device-unique secret**: they are a local copy of class keys that live wrapped in the `key_vault` table on the account, and your encryption passphrase (or the recovery phrase) unwraps them — that IS what "enrolling a device" does, and it is exactly what you did tonight after the drill clobbered that item. So losing the local E2EE copy costs one passphrase entry; losing the store key with no envelope would cost the library. (c) binds the one that matters and leaves the cheap one alone, which also halves what the migration has to touch.
+
+    **Status: open — walk at the checkpoint.**
+
+*(Next free number: **#83**.)*

@@ -40,6 +40,33 @@ import VariorumCore
 
 /// Persistence seam for the device's unwrapped key material (tests inject
 /// in-memory; production is the Keychain) — the `AuthTokensStore` pattern.
+/// The custody TRANSITION for the E2EE device keys, behind a seam so it
+/// can be pinned (13p-fix R2-1). Both arms run the `CustodyHandover`
+/// rule: write, verify through the production read path, only then
+/// delete the other half.
+nonisolated struct E2EECustodyStorage: Sendable {
+    var setGated: @Sendable (DeviceKeyMaterial) -> CustodyHandover.Outcome
+    var setPlain: @Sendable (DeviceKeyMaterial) -> CustodyHandover.Outcome
+
+    static let live = E2EECustodyStorage(
+        setGated: { material in
+            CustodyHandover.perform(
+                write: { E2EEKeychainStorage.saveGated(material) },
+                // Presence only: reading an ACL'd item's DATA prompts, and
+                // a write must never prompt (R2-4's forced exception).
+                verify: { E2EEKeychainStorage.gatedItemExists() },
+                deleteOutgoing: { E2EEKeychainStorage.deletePlainItem() },
+                rollBackIncoming: { E2EEKeychainStorage.deleteGatedItem() })
+        },
+        setPlain: { material in
+            CustodyHandover.perform(
+                write: { E2EEKeychainStorage.save(material) },
+                verify: { E2EEKeychainStorage.load() == material },
+                deleteOutgoing: { E2EEKeychainStorage.deleteGatedItem() },
+                rollBackIncoming: { E2EEKeychainStorage.deletePlainItem() })
+        })
+}
+
 nonisolated struct DeviceKeyStore: Sendable {
     /// Non-prompting read: the plain item — or, under the biometric gate,
     /// this launch's unlocked cache (nil until `unlockWithBiometrics` or a
@@ -60,14 +87,26 @@ nonisolated struct DeviceKeyStore: Sendable {
     var isBiometricGateOn: @Sendable () -> Bool
     /// CF-12: re-persist the material under the given policy (ON ⇒ the
     /// `.biometryCurrentSet` item; OFF ⇒ the plain item).
-    var setBiometricGate: @Sendable (Bool, DeviceKeyMaterial) -> Bool
+    /// 13p-fix R3-2: carries the OUTCOME, not a Bool. Collapsing
+    /// `.writeRefused` and `.wroteButUnreadable` into `false` made the
+    /// E2EE surface say "nothing was altered" in exactly the case R2-2
+    /// called a lie — on the family whose item actually went missing.
+    var setBiometricGate: @Sendable (Bool, DeviceKeyMaterial) -> CustodyHandover.Outcome
     /// CF-12: evaluate biometrics (NEVER the device passcode — her ruling)
     /// and unlock this launch. nil = failed / cancelled / unavailable /
     /// invalidated-by-re-enrollment — the passphrase road is the fallback,
     /// spoken by the caller's surface.
     var unlockWithBiometrics: @Sendable () async -> DeviceKeyMaterial?
 
-    static func keychain() -> DeviceKeyStore {
+    /// 13p-fix ladder R2-1: the custody TRANSITION as an injectable seam.
+    /// The handover rule lived inside this factory's closure, which no
+    /// test can construct (`DeviceKeyStore.inMemory` maps straight to its
+    /// backing), so the half of R1-1's fix guarding the E2EE item — THE
+    /// ITEM THAT ACTUALLY WENT MISSING on 2026-08-30 — had no pin at all:
+    /// deleting its guard left the whole suite green. This is the smallest
+    /// seam that closes that. Account naming is untouched, so R1-3's
+    /// rejection of parameterizing the fixed gated account still stands.
+    static func keychain(custody: E2EECustodyStorage = .live) -> DeviceKeyStore {
         DeviceKeyStore(
             load: {
                 if let cached = E2EELaunchKeyCache.shared.value { return cached }
@@ -97,17 +136,26 @@ nonisolated struct DeviceKeyStore: Sendable {
                     .deviceOwnerAuthenticationWithBiometrics, error: nil)
             },
             isBiometricGateOn: { E2EEKeychainStorage.gatedItemExists() },
-            setBiometricGate: { on, material in
+            setBiometricGate: { [custody] on, material in
+                // 13p-fix R1-1: write, VERIFY it reads back, THEN delete the
+                // other half. A write's success is not proof anything can
+                // find the item again — see `CustodyHandover`.
                 if on {
-                    guard E2EEKeychainStorage.saveGated(material) else { return false }
-                    E2EEKeychainStorage.deletePlainItem()
+                    // Presence only — reading an ACL'd item's data prompts.
+                    let outcome = custody.setGated(material)
+                    guard outcome == .done else { return outcome }
                     E2EELaunchKeyCache.shared.value = material
-                    return true
+                    return .done
                 }
-                guard E2EEKeychainStorage.save(material) else { return false }
-                E2EEKeychainStorage.deleteGatedItem()
+                // Identity, not presence (R2-4), and the OFF arm gets the
+                // roll-back its ON twin has (R2-3): without it a failed
+                // verify leaves the plain item written AND the gated item
+                // alive — a silently-readable copy under a UI reporting a
+                // gate, which is the theater this codebase forbids.
+                let outcome = custody.setPlain(material)
+                guard outcome == .done else { return outcome }
                 E2EELaunchKeyCache.shared.value = nil
-                return true
+                return .done
             },
             unlockWithBiometrics: {
                 guard let material = await E2EEKeychainStorage.unlockGatedItem() else {
@@ -166,7 +214,7 @@ nonisolated struct DeviceKeyStore: Sendable {
             clear: { backing.clear() },
             biometryAvailable: { backing.biometryIsAvailable() },
             isBiometricGateOn: { backing.isGated() },
-            setBiometricGate: { backing.setGate($0, $1) },
+            setBiometricGate: { backing.setGate($0, $1) ? .done : .writeRefused },
             unlockWithBiometrics: { backing.unlock() })
     }
 }
@@ -269,7 +317,11 @@ nonisolated private final class E2EELaunchKeyCache: @unchecked Sendable {
 /// own service so neither surface's clear touches the other.
 /// `AfterFirstUnlock` on the PLAIN item for the same background-round
 /// reason (a background sync round after reboot-then-unlock must find its
-/// keys). The GATED item (CF-12) instead carries a SecAccessControl —
+/// keys). **13p-fix R1-2: on macOS that class is NOT in force** —
+/// Apple requires `kSecUseDataProtectionKeychain` or
+/// `kSecAttrSynchronizable` for `kSecAttrAccessible` to apply, and this
+/// family sets neither deliberately. See `StoreKeyKeychain` for the same
+/// caveat and `KnownIssuesAndTechDebt.md` for the owner. The GATED item (CF-12) instead carries a SecAccessControl —
 /// `.biometryCurrentSet` alone — under `WhenUnlockedThisDeviceOnly`:
 /// background-before-unlock refusal is that mode's designed cost.
 nonisolated enum E2EEKeychainStorage {
@@ -394,12 +446,16 @@ nonisolated enum E2EEKeychainStorage {
         ]
     }
 
-    private static func gatedBaseQuery() -> [String: Any] {
+    /// Internal, not private, so `KeychainPartitionTests` can assert the
+    /// partition marker rides it — the drift guard for a family whose own
+    /// door cannot be exercised against the real Keychain (its account is
+    /// fixed, so a test write would land on real custody).
+    static func gatedBaseQuery() -> [String: Any] {
         [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: gatedAccount,
-        ]
+        ].merging(KeychainPartition.dataProtection) { a, _ in a }
     }
 }
 
