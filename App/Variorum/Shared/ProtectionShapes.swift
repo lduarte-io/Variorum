@@ -258,6 +258,66 @@ nonisolated enum ProtectionShapes {
         }
     }
 
+    // MARK: - The live "ways back in" checklist (item 3's centerpiece —
+    // the actual legs THIS device/account has right now, truthfully)
+
+    struct ChecklistRow: Equatable, Sendable {
+        let name: String
+        /// nil = UNKNOWN (T2's three-value truth — never dressed as
+        /// present or absent).
+        let present: Bool?
+        let note: String
+    }
+
+    /// ONE brain for both platforms' checklists (the waysBackInLine's
+    /// grown-up form; R-pre13u-4's "counting the actual legs"). Under
+    /// `factsUnknown` the caller renders `tierSentence(.unknown)` instead
+    /// of claiming wrap rows it cannot read — only the device row (whose
+    /// truth is the mode's, not the sidecar's) survives.
+    static func checklistRows(
+        _ legs: ProtectionLegs, mode: StoreAtOpenMode
+    ) -> [ChecklistRow] {
+        var rows: [ChecklistRow] = []
+        switch mode {
+        case .auto:
+            rows.append(ChecklistRow(
+                name: "This \(ProtectionCopy.deviceName)", present: true,
+                note: "its Keychain opens the library silently"))
+        case .biometric:
+            rows.append(ChecklistRow(
+                name: "This \(ProtectionCopy.deviceName)", present: true,
+                note: "\(ProtectionCopy.biometryName) unlocks it — the "
+                    + "computer password never does"))
+        case .passphrase:
+            rows.append(ChecklistRow(
+                name: "This \(ProtectionCopy.deviceName)", present: false,
+                note: "nothing here opens the library silently — that is "
+                    + "this mode's point"))
+        }
+        guard !legs.factsUnknown else { return rows }
+        rows.append(ChecklistRow(
+            name: "Encryption passphrase", present: legs.hasPassphraseWrap,
+            note: legs.hasPassphraseWrap
+                ? "opens any copy, and lets a new device into sync"
+                : "not set"))
+        rows.append(ChecklistRow(
+            name: "Recovery phrase", present: legs.hasRecoveryWrap,
+            note: legs.hasRecoveryWrap
+                ? "the twelve words — the passphrase's twin, on paper"
+                : "not saved"))
+        if mode.isDemanded {
+            rows.append(ChecklistRow(
+                name: "iCloud spare key", present: false,
+                note: "not offered while Variorum asks at open"))
+        } else {
+            rows.append(ChecklistRow(
+                name: "iCloud spare key",
+                present: legs.escrowVerifiedLanded,
+                note: escrowLegSentence(legs.escrowVerifiedLanded)))
+        }
+        return rows
+    }
+
     // MARK: - The unchosen-state indicator (memo §6)
 
     /// NEVER "encryption off" — the store is always encrypted (R13p-2).
