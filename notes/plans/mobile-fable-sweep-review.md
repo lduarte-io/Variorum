@@ -805,3 +805,52 @@ above).
   `notes/plans/mobile-batch-6c-brief.md` (mtime 23:24, minutes before this
   session's simulator was created — not this session's work). The commit is
   pathspec-limited, so it could not be swept in.
+
+---
+
+# LADDER CLOSED (the orchestrator, 2026-08-30/31)
+
+**The pre-batch mandate she set — thorough sweep → one Fable cold review →
+Opus fixes — is COMPLETE.** Round 1 (the sweep): 1 MAJOR · 5 MINOR · 2 NIT,
+all fixed at `fc73882`. Round 2 (cold review of the fixes): 0 BLOCKER ·
+0 MAJOR · 3 MINOR · 4 NIT, all fixed at `8e81112` (wave 2). No new
+BLOCKER/MAJOR at round 2 ⇒ no round 3, per the ladder rule. Final:
+**mobile 592/93 green** (+2 known issues from the one R2-6 diagnostic
+test), fence clean at every commit, `Package.resolved` never swept.
+
+**Wave-2 adjudications (the orchestrator; all endorsed):**
+
+1. **R2-4's execution FALSIFIED round 2's read-trace** — guard-1-only
+   removal reds nothing (the two post-suspension guards sit in series on a
+   refreshing grant), so the reviewer's claimed per-arm discrimination was
+   wrong. The fixer's added pin (`register`'s refreshless production shape,
+   red under guard-1-only removal with siblings green) is ENDORSED as the
+   correct closing form — executed evidence outranks a read trace, and
+   recording "unpinned" while able to pin it would have left the finding's
+   own goal unmet. *Process note, standing: an in-batch widening like this
+   is normally proposed before built (the implementer proposes, the
+   architect rules); endorsed post-hoc here because the alternative was a
+   record act that recorded a falsehood.*
+2. **The four gate pins' `.dev` → `.real` move is a semantics-forced
+   adaptation, not churn**: after single-sourcing, only a `.real` store
+   consults the gate, so a `.dev`-variant pin would pass while asserting
+   nothing — the exact vacuous-pin class this round polices. Each pin's
+   CLAIM (what the account gate does) is preserved.
+3. **R2-2's recorded consequence** — `open()` shares `file()`'s body, so a
+   refused ⏎ now also drops the keyboard (text + error kept, one tap
+   re-focuses) — ACCEPTED and recorded at the code; it rides the
+   blur-with-text family already held for her at QUESTIONS #89.
+4. **Finding 7's third arm is closed by reason, not by pin**:
+   `isLive` defaults true and `takeLiveness` never stands down its own
+   taker, so a superseded `register`'s newcomer is live-by-default —
+   an UNOBSERVABLE difference, recorded at the pin. Accepted.
+
+**What this whole exercise leaves standing for the round** (already owned,
+listed for the closeout's convenience): the batch 5 / 6a MINORs+NITs and
+architecture MINOR 3/MINOR 4/NIT 1/NIT 2 (work-list row 9) · the
+`commitNow` latch-if-it-gets-a-button rider (carried into 6b/9's briefs) ·
+the sixteen un-traced unlatched doors (adopt-as-touched, per the corrected
+class argument) · the collapsed-box overflow MINOR (batch-5 review, row 9)
+· the two standalone passes, untouched and binding.
+
+**Batch 6c opens next** — brief: `notes/plans/mobile-batch-6c-brief.md`.
