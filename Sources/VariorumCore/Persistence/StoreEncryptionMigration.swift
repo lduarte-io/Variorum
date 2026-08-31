@@ -96,9 +96,23 @@ public enum StoreEncryptionMigration {
         do {
             let source = try DatabaseQueue(path: url.path)
             try source.writeWithoutTransaction { db in
-                try db.execute(
-                    sql: "ATTACH DATABASE ? AS encrypted KEY \"x'\(key.hexEncoded)'\"",
-                    arguments: [temp.path])
+                // P15 (pre-13u Act 9): catch-and-sanitize — a throwing
+                // ATTACH (unwritable temp, SQLITE_CANTOPEN, the
+                // attached-db limit) is the one traceable road where a
+                // key-bearing statement fails, and GRDB's error
+                // description carries the executed SQL verbatim. The
+                // scrubbed text still names the cause; the key never
+                // rides any description channel.
+                do {
+                    try db.execute(
+                        sql: "ATTACH DATABASE ? AS encrypted KEY \"x'\(key.hexEncoded)'\"",
+                        arguments: [temp.path])
+                } catch {
+                    throw MigrationError(reason:
+                        "the encrypted temp could not be attached "
+                        + "(\(key.redactedDescription(of: error))); "
+                        + "the original store is untouched")
+                }
                 try db.execute(sql: "SELECT sqlcipher_export('encrypted')")
                 try db.execute(sql: "DETACH DATABASE encrypted")
             }

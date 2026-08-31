@@ -198,4 +198,70 @@ struct StoreEncryptionMigrationTests {
         }
         #expect(title == Self.canary)
     }
+
+    // MARK: - The key-in-SQL error channel (pre-13u Act 9 — 17a P15)
+
+    /// P15, RED ON OLD: a throwing ATTACH (here: an immovable DIRECTORY
+    /// squats on the temp path — the sweep cannot remove it and SQLite
+    /// cannot open a database there, SQLITE_CANTOPEN's class) used to
+    /// escape with GRDB's DatabaseError, whose description appends the
+    /// executed SQL verbatim — `ATTACH … KEY "x'<the full 64-hex store
+    /// key>'"` — onto the store-failure screen (selectable text) and into
+    /// the backup log. The error is now caught and rethrown scrubbed.
+    @Test func aFailedAttachNeverCarriesTheKeyHexInAnyErrorChannel() throws {
+        let dir = try temporaryDirectory()
+        let url = dir.appendingPathComponent("locked-down.sqlite")
+        try makePlaintextStore(at: url)
+        let key = StoreKey.mint()
+        // The squatter: a non-empty, non-writable directory at the temp
+        // path — `removeArtifacts` cannot take it, ATTACH cannot open it.
+        let squatter = URL(fileURLWithPath: url.path + ".encrypting")
+        try FileManager.default.createDirectory(at: squatter, withIntermediateDirectories: true)
+        try Data("occupied".utf8).write(to: squatter.appendingPathComponent("f"))
+        try FileManager.default.setAttributes(
+            [.posixPermissions: 0o555], ofItemAtPath: squatter.path)
+        defer {
+            try? FileManager.default.setAttributes(
+                [.posixPermissions: 0o755], ofItemAtPath: squatter.path)
+            try? FileManager.default.removeItem(at: dir)
+        }
+        do {
+            _ = try StoreEncryptionMigration.migrateIfNeeded(at: url, key: key)
+            Issue.record("an unopenable temp must fail the export")
+        } catch {
+            let described = String(describing: error)
+            #expect(!described.contains(key.hexEncoded),
+                    "no error channel may carry the raw store key")
+            #expect(!error.localizedDescription.contains(key.hexEncoded))
+            #expect(described.contains("untouched"),
+                    "the sanitized refusal still speaks (cause named, original safe)")
+        }
+        // The original is genuinely untouched and re-runnable once the
+        // condition clears — the migration road's standing promise.
+        try FileManager.default.setAttributes(
+            [.posixPermissions: 0o755], ofItemAtPath: squatter.path)
+        try FileManager.default.removeItem(at: squatter)
+        #expect(StoreFilePresence.classify(at: url) == .plaintext)
+        #expect(try StoreEncryptionMigration.migrateIfNeeded(at: url, key: key))
+        #expect(StoreFilePresence.classify(at: url) == .encryptedOrUnknown)
+    }
+
+    /// The helper's own contract, pinned pure: every occurrence scrubbed,
+    /// and the replacement error speaks the same text on BOTH channels.
+    @Test func redactionScrubsEveryOccurrenceOnBothChannels() {
+        let key = StoreKey.mint()
+        struct Leaky: Error, CustomStringConvertible {
+            let text: String
+            var description: String { text }
+        }
+        let leaky = Leaky(text: "while executing KEY \"x'\(key.hexEncoded)'\" then again \(key.hexEncoded)")
+        let scrubbed = key.redactedDescription(of: leaky)
+        #expect(!scrubbed.contains(key.hexEncoded))
+        #expect(scrubbed.contains("<store key redacted>"))
+        let replacement = RedactedKeyedStatementError(description: scrubbed)
+        #expect(!String(describing: replacement).contains(key.hexEncoded))
+        #expect(!replacement.localizedDescription.contains(key.hexEncoded))
+        #expect(replacement.localizedDescription == scrubbed,
+                "localizedDescription carries the scrubbed text, not a generic Foundation sentence")
+    }
 }

@@ -59,6 +59,30 @@ extension StoreKey: CustomStringConvertible, CustomDebugStringConvertible {
     /// way of an interpolation.
     public var description: String { "StoreKey(256-bit, redacted)" }
     public var debugDescription: String { description }
+
+    /// P15 (pre-13u Act 9, 17a): exactly two statements embed this key as
+    /// a literal — the raw-key `PRAGMA key` (which SQLite cannot bind a
+    /// parameter into) and the migration's `ATTACH … KEY` — and GRDB's
+    /// `DatabaseError.description` appends the executed SQL verbatim, so
+    /// an error thrown BY either statement carried the full hex onto the
+    /// store-failure screen (selectable text) and into the backup log's
+    /// UserDefaults record. Both sites catch-and-sanitize through this:
+    /// the error's text with every occurrence of the hex scrubbed.
+    public func redactedDescription(of error: any Error) -> String {
+        String(describing: error)
+            .replacingOccurrences(of: hexEncoded, with: "<store key redacted>")
+    }
+}
+
+/// P15: the sanitized replacement thrown where a key-bearing statement
+/// failed. Its `description` AND `localizedDescription` carry the scrubbed
+/// text, so every downstream channel (`String(describing:)` into
+/// `StoreOpenError.reason`, `error.localizedDescription` into the backup
+/// log) reads the same key-free sentence.
+public struct RedactedKeyedStatementError: Error, CustomStringConvertible, LocalizedError, Sendable {
+    public let description: String
+    public var errorDescription: String? { description }
+    public init(description: String) { self.description = description }
 }
 
 /// Persistence seam for the store key — the `DeviceKeyStore` pattern

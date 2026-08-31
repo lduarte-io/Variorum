@@ -113,7 +113,19 @@ public struct AppDatabase: Sendable {
                 // vs ~1 ms for this pragma; spike memo Q2), and GRDB offers
                 // no raw-key convenience. The x'…' hex literal hands the
                 // pager the 256-bit key directly, bypassing derivation.
-                try db.execute(sql: "PRAGMA key = \"x'\(key.hexEncoded)'\"")
+                //
+                // P15 (pre-13u Act 9): catch-and-sanitize — GRDB's
+                // DatabaseError.description appends the executed SQL, so a
+                // failure HERE would carry the full key hex onto the
+                // store-failure screen and into the backup log. (PRAGMA
+                // key rarely errors — SQLCipher defers key validation to
+                // the first page read — but the channel must not exist.)
+                do {
+                    try db.execute(sql: "PRAGMA key = \"x'\(key.hexEncoded)'\"")
+                } catch {
+                    throw RedactedKeyedStatementError(
+                        description: key.redactedDescription(of: error))
+                }
             }
         }
         return config
