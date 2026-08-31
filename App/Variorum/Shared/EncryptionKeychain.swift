@@ -326,8 +326,13 @@ nonisolated final class E2EELaunchKeyCache: @unchecked Sendable {
 /// keys). **13p-fix R1-2: on macOS that class is NOT in force** —
 /// Apple requires `kSecUseDataProtectionKeychain` or
 /// `kSecAttrSynchronizable` for `kSecAttrAccessible` to apply, and this
-/// family sets neither deliberately. See `StoreKeyKeychain` for the same
-/// caveat and `KnownIssuesAndTechDebt.md` for the owner. The GATED item (CF-12) instead carries a SecAccessControl —
+/// family sets neither deliberately. **The STORE-KEY family's twin caveat
+/// is CLOSED (#82, R-pre13u-3 — `StoreKeyKeychain` is device-bound via
+/// the TN3137 migration); her ruling covered THAT family ONLY, so this
+/// one stays file-based on purpose** — the vault re-derives E2EE custody
+/// by passphrase on any machine, so device-binding it was never the
+/// gap the store key's was. `KnownIssuesAndTechDebt.md` carries what
+/// remains. The GATED item (CF-12) instead carries a SecAccessControl —
 /// `.biometryCurrentSet` alone — under `WhenUnlockedThisDeviceOnly`:
 /// background-before-unlock refusal is that mode's designed cost.
 nonisolated enum E2EEKeychainStorage {

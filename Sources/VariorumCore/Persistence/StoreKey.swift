@@ -194,23 +194,117 @@ extension DependencyValues {
 /// batch brief: `WhenUnlockedThisDeviceOnly`, no access control (Auto mode
 /// releases silently; the demanded modes' gated item is Batch 2's).
 ///
-/// **13p-fix R1-2 — what this class does NOT buy on macOS.** Apple's
-/// `kSecAttrAccessible` reference is explicit: *"You can use this
-/// attribute for macOS keychain items only if you also set a value of
-/// `true` for the `kSecUseDataProtectionKeychain` key, the
-/// `kSecAttrSynchronizable` key, or both."* This family sets neither (by
-/// design — see `KeychainPartition`), so the requested class is NOT in
-/// force: the file-based keychain governs by ACL, not by accessibility
-/// class. Consequence, recorded rather than implied: the item does not
-/// carry the "never leaves this device" property its class name
-/// promises. The decision and its owner live in
-/// `KnownIssuesAndTechDebt.md`; do not read the class name as a
-/// guarantee.
+/// **#82 (R-pre13u-3, pre-13u Act 9) — THE STORE KEY IS DEVICE-BOUND
+/// NOW.** The 13p-fix R1-2 finding: `kSecAttrAccessible` is inert on
+/// macOS without `kSecUseDataProtectionKeychain` (or synchronizable), so
+/// this family's `…ThisDeviceOnly` class was NOT in force — the only key
+/// to the encrypted library sat in `login.keychain-db`, which Migration
+/// Assistant and Time Machine carry to OTHER HARDWARE, so a library
+/// backup plus the account password opened it elsewhere. Her ruling:
+/// *"binding the store key only — it closes the last gap where only a
+/// computer password is enough to get your text."* Every query in this
+/// family now merges the DP flag (see `KeychainPartition`'s app-layer
+/// twin), and `load` runs the TN3137 read→re-add-with-flag→delete-old
+/// migration for the pre-#82 file-based item: idempotent (the DP hit
+/// short-circuits), crash-tolerant (a half-migrated state re-heals — a
+/// lingering legacy copy is swept at the next DP hit, once per scope per
+/// process), and the key is returned even when the migration itself is
+/// refused (opening her store never hinges on the move; the next launch
+/// retries). The write-verify-then-delete order is the app layer's
+/// `CustodyHandover` discipline, restated here because core cannot see
+/// that type — a write's success is never proof the item reads back.
+///
+/// SCOPE OF THE RULING: this family ONLY. The E2EE custody item and the
+/// auth tokens stay file-based (their move is not ruled); the escrow item
+/// is synchronizable BY DESIGN (the ruled recovery net, verified this
+/// round); the gated items were always DP-resident.
+///
+/// Recorded consequence (the access group is part of a DP item's
+/// identity): the migrated item belongs to the build configuration that
+/// migrated it — `…io.lduarte.Variorum` for Release, `….debug` for
+/// Debug — exactly as the gated family already does (the KnownIssues
+/// Developer-ID row). The rare debug-build-with-real-store opt-in road
+/// therefore reads no silent key post-migration and lands on the
+/// sidecar-unlock recovery surface rather than opening silently; the
+/// A4 fence keeps the two stores' scopes apart as always.
 nonisolated enum StoreKeyKeychain {
     static let service = StoreKeyCustody.deviceKeychainService
 
+    /// The BOUND item's account — distinct from the legacy account on
+    /// purpose (the gated family's "the account carries the policy"
+    /// pattern, `-biometric`'s sibling). MEASURED at this round's own
+    /// pins: a PLAIN (no-ACL) data-protection item under the same
+    /// service/account IS matched by a no-flag SecItemDelete — unlike the
+    /// ACL'd items 13p-fix measured — so a shared account would let the
+    /// legacy sweep destroy the bound item it had just verified. Distinct
+    /// accounts make the two families structurally unable to touch each
+    /// other, whatever a point release decides about cross-visibility.
+    static func boundAccount(scope: String) -> String { "\(scope)-bound" }
+
     static func load(scope: String) -> StoreKey? {
-        var query = baseQuery(scope: scope)
+        if let bound = read(scope: scope, dataProtection: true) {
+            // Idempotent steady state — and the crash-window heal: a
+            // legacy copy left by a crash between the DP add and the
+            // legacy delete is swept here (once per scope per process;
+            // leaving it would keep the Migration-Assistant gap open).
+            sweepLegacyOnce(scope: scope)
+            return bound
+        }
+        // The TN3137 migration road: the pre-#82 item lives file-based.
+        guard let legacy = read(scope: scope, dataProtection: false) else { return nil }
+        migrateLegacyItem(legacy, scope: scope)
+        return legacy
+    }
+
+    @discardableResult
+    static func save(_ key: StoreKey, scope: String) -> Bool {
+        guard add(key, scope: scope) else { return false }
+        // A fresh save supersedes any legacy copy outright (same
+        // Migration-Assistant reasoning as the load-road sweep).
+        deleteItem(scope: scope, dataProtection: false)
+        return true
+    }
+
+    static func delete(scope: String) {
+        // BOTH keychains: a lingering legacy item under a demanded mode
+        // would be a silently-readable copy — the theater R13p-14 forbids.
+        deleteItem(scope: scope, dataProtection: true)
+        deleteItem(scope: scope, dataProtection: false)
+    }
+
+    // MARK: - The #82 migration (write → VERIFY → delete old)
+
+    private static func migrateLegacyItem(_ key: StoreKey, scope: String) {
+        guard add(key, scope: scope) else { return }
+        guard read(scope: scope, dataProtection: true) == key else {
+            // The CustodyHandover rule's middle step: an unreadable write
+            // releases nothing — roll the DP copy back best-effort and
+            // leave the legacy item as the working custody; the next
+            // launch retries.
+            deleteItem(scope: scope, dataProtection: true)
+            return
+        }
+        deleteItem(scope: scope, dataProtection: false)
+    }
+
+    private static func add(_ key: StoreKey, scope: String) -> Bool {
+        var attributes = baseQuery(scope: scope, dataProtection: true)
+        attributes[kSecValueData as String] = key.data
+        // IN FORCE now that the DP flag rides the query (#82's point).
+        attributes[kSecAttrAccessible as String] =
+            kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+        let status = SecItemAdd(attributes as CFDictionary, nil)
+        if status == errSecDuplicateItem {
+            let update: [String: Any] = [kSecValueData as String: key.data]
+            return SecItemUpdate(
+                baseQuery(scope: scope, dataProtection: true) as CFDictionary,
+                update as CFDictionary) == errSecSuccess
+        }
+        return status == errSecSuccess
+    }
+
+    private static func read(scope: String, dataProtection: Bool) -> StoreKey? {
+        var query = baseQuery(scope: scope, dataProtection: dataProtection)
         query[kSecReturnData as String] = true
         query[kSecMatchLimit as String] = kSecMatchLimitOne
         var result: AnyObject?
@@ -220,33 +314,41 @@ nonisolated enum StoreKeyKeychain {
         return StoreKey(data: data)
     }
 
-    @discardableResult
-    static func save(_ key: StoreKey, scope: String) -> Bool {
-        var attributes = baseQuery(scope: scope)
-        attributes[kSecValueData as String] = key.data
-        attributes[kSecAttrAccessible as String] =
-            kSecAttrAccessibleWhenUnlockedThisDeviceOnly
-        let status = SecItemAdd(attributes as CFDictionary, nil)
-        if status == errSecDuplicateItem {
-            let update: [String: Any] = [kSecValueData as String: key.data]
-            return SecItemUpdate(
-                baseQuery(scope: scope) as CFDictionary, update as CFDictionary)
-                == errSecSuccess
-        }
-        return status == errSecSuccess
+    private static func deleteItem(scope: String, dataProtection: Bool) {
+        SecItemDelete(baseQuery(scope: scope, dataProtection: dataProtection) as CFDictionary)
     }
 
-    static func delete(scope: String) {
-        SecItemDelete(baseQuery(scope: scope) as CFDictionary)
-    }
-
-    private static func baseQuery(scope: String) -> [String: Any] {
-        [
+    private static func baseQuery(scope: String, dataProtection: Bool) -> [String: Any] {
+        var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrAccount as String: scope,
+            kSecAttrAccount as String:
+                dataProtection ? boundAccount(scope: scope) : scope,
         ]
+        // The one rule the whole 13p-fix incident taught: a DP-resident
+        // family merges the flag on EVERY query, or reads and writes
+        // disagree about which keychain they mean. (The app layer's
+        // `KeychainPartition` states it; core restates it here.)
+        if dataProtection {
+            query[kSecUseDataProtectionKeychain as String] = true
+        }
+        return query
     }
+
+    // MARK: - The once-per-process legacy sweep
+
+    private static let sweepLock = NSLock()
+    nonisolated(unsafe) private static var sweptScopes: Set<String> = []
+
+    private static func sweepLegacyOnce(scope: String) {
+        sweepLock.lock()
+        let alreadySwept = !sweptScopes.insert(scope).inserted
+        sweepLock.unlock()
+        guard !alreadySwept else { return }
+        deleteItem(scope: scope, dataProtection: false)
+    }
+    // (No test-reset hook: pins use a FRESH throwaway scope per run, so
+    // the per-scope sweep is always unconsumed where a pin needs it.)
 }
 #else
 nonisolated enum StoreKeyKeychain {

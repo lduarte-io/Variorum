@@ -100,11 +100,14 @@ nonisolated enum KeychainTestTripwire {
 /// itself. It is a documented no-op on iOS, which has only the
 /// data-protection keychain.
 ///
-/// **The plain families deliberately do NOT merge it** (the store key's
-/// silent item, the E2EE custody item, the auth tokens): those items
-/// exist in the file-based keychain today, and moving them would strand
-/// real data — including the key to the library. See
-/// `KnownIssuesAndTechDebt.md` for the consequence that carries.
+/// **Two plain families deliberately do NOT merge it** (the E2EE custody
+/// item, the auth tokens): those items exist in the file-based keychain
+/// today, and moving them is unruled — the vault re-derives both by
+/// passphrase/sign-in, so neither is the gap the store key's was. **The
+/// store key's silent item DOES merge it since #82 (R-pre13u-3)** — core's
+/// `StoreKeyKeychain` runs the TN3137 read→re-add-with-flag→delete-old
+/// migration so the existing item moves instead of stranding, and the
+/// `…ThisDeviceOnly` class is finally in force for the key to the library.
 nonisolated enum KeychainPartition {
     /// Computed, not stored: `[String: Any]` is not `Sendable`, and a
     /// fresh dictionary per call costs nothing beside a Keychain round
