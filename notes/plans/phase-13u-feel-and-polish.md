@@ -508,6 +508,8 @@ already basically look like this"* — with the sidebar's liquid-glass floating 
 cohesive"*). The pre-13u round's Act 10 restyles the surfaces it touches; **13u2 inherits the
 app-wide continuation** — every surface it opens conforms to the reference grammar (spacing scale,
 squarish-rounded controls, calm cards over hairline grids, solid geometric sidebar), judged against
-the PRESERVED reference artifact `notes/plans/pre-13u-mockups/blocks-and-snippets.html` (local,
-gitignored — do not delete). Anything the pre-13u round's item 18 (book Outline glowup + index-like
-book view) defers lands here with it; the pre-13u closeout will say which.
+the PRESERVED reference artifact `notes/plans/pre-13u-mockups/blocks-and-snippets.html` (COMMITTED
+to the repo at her follow-up ruling — an artifact that needs to survive). Anything the pre-13u
+round's item 18 (book Outline glowup + index-like book view) defers lands here with it — and item
+18 defers WHOLE if it defers at all (her ruling: one cohesive Book redesign, never split); the
+pre-13u closeout will say which.

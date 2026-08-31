@@ -1096,8 +1096,8 @@ doors.
     The sidebar's Pool (bookless notes) KEEPS its name — the collision dissolves from the other
     side; if she ever wants that renamed too, her word. The deeper "what is this page for" question
     stays recorded as open. **Eighth wave (W8-4): the snippets direction is ruled GOOD; the
-    takes-count badge on snippet rows joins the build; "group" proceeds as the working container
-    noun (hers to override); the mockup's Snippets tab is the style reference.**
+    takes-count badge on snippet rows joins the build; the container noun "group" is RULED fine
+    (her follow-up); the mockup's Snippets tab is the style reference.**
 
 **Act 10 sizing (her authorization at the sitting):** the act is deliberately allowed to be
 "more significantly sized." It runs as **up to two sequential Fable implementer waves** at the
@@ -1178,6 +1178,8 @@ workbench page were EXCELLENT. So I've decided I need both."*
 - **Index goes in as a mode:** *"index page - obviously a need, seems more fundamental, let's put
   it in under Takes."* (The architect's reading, stated to her in-turn: a NEW MODE TAB slotted
   after Takes in the mode row — correctable at her word if she meant inside the Takes mode.)
+  **CONFIRMED at her follow-up, verbatim: "yeah - I did mean a new mode tab slotted after takes in
+  the mode row."**
 - **AND a note READ surface:** *"a Reading surface SHOULD be added! not the book surface (wouldn't
   make sense for a note like it does for a book) within a book, but the Read surface that you
   can't edit it (but clicking on it brings you to that sentence within index, already open, and
@@ -1205,6 +1207,9 @@ app just all has to get more cohesive."* → Act 10's item 8 mandate now has a C
 hairline grid); Act 10 restyles the surfaces it touches; **13u2 inherits the app-wide
 continuation** (addendum written in the 13u plan this turn). The mockup file
 `notes/plans/pre-13u-mockups/blocks-and-snippets.html` is the reference artifact — PRESERVE it.
+**Her follow-up ruling: the file is COMMITTED to the repo** (*"let's make sure the mockup file is
+also committed to the notes repo as is normal for artifacts that need to survive"*) — the
+gitignore line removed, the file tracked from this commit on.
 
 **W8-3 — LIQUID GLASS RETIRED ON THE SIDEBAR; solid geometric lines.** Her words (with her
 screenshot of the mockup's sidebar, manifest row 13): *"I liked how on the left even, it doesn't
@@ -1220,7 +1225,7 @@ is a standalone block living in its group until moved/archived/deleted; editing 
 place (the "edited" metadata) and it STAYS listed; dragging into a note mints a lineage COPY and
 the original snippet remains — edits to the note's copy never touch the snippet. **The container
 noun stays open** — she engaged with the mockup's "group" without objecting; "group" proceeds as
-the working noun, hers to override.
+the working noun, hers to override. **RULED at her follow-up: "group is also fine."**
 
 **W8-5 — NEW ITEM 18: the BOOK view's Outline glowup + an index-like book view.** Her words (with
 her screenshot of the current book Outline on the field guide, manifest row 14): *"I'm also
@@ -1239,7 +1244,11 @@ collapsible sections, outline visible" — fixed spacing, the open-right fixed, 
 to the SIDE never below the opening paragraphs; (b) an index-like view for books (the note Index's
 sibling — share the outline brain where honest); (c) the book view sharing an outline with Outline
 mode. Runs in Act 10 wave 2 IF it fits; else DEFERRED to 13u2 with the restyle continuation
-(recorded either way — never dropped).
+(recorded either way — never dropped). **HER FOLLOW-UP RULING: (a)/(b)/(c) run TOGETHER as ONE
+cohesive Book redesign** — verbatim: *"let's make usre that the index view for books + c (how the
+index view reconciles with the small outline pane) go together, since they're all UI changes in
+the same Book area, it should be a single cohesive book redesign."* Item 18 never splits across
+waves or phases; if it defers, it defers WHOLE.
 
 ---
 
