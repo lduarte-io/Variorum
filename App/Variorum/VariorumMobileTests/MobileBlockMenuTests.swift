@@ -138,6 +138,37 @@ struct MobileBlockMenuTests {
                 == ["Toggle Callout", "Blue", "Green", "Sand", "Violet", "Rose",
                     "Emoji…", "Remove Callout"])
 
+            // **PR19 (batch 7) — THE DRIFT PIN IS EXTENDED, NEVER
+            // WEAKENED.** The row WORDS above are untouched: no row was
+            // added, an image was hung on four that existed. What is new is
+            // the composition claim — the COLOUR rows wear a swatch and the
+            // non-colour rows do not, which is the Mac `CalloutMenu.Row`'s
+            // own `swatch` nil-ness rule (nil on toggle, emoji and Remove:
+            // Remove takes a frame AWAY rather than choosing one).
+            //
+            // **Red on old (behavioural revert):** drop `image:` from the
+            // colour rows' `UIAction` in `calloutSubmenu` and the first
+            // half reds; hang one on Remove and the second half does.
+            let colourWords = Set(MobileCallout.names.map { cased($0.capitalized) })
+            for row in callout.children.compactMap({ $0 as? UIAction }) {
+                if colourWords.contains(row.title) {
+                    #expect(row.image != nil,
+                            "a colour row wears its colour (PR19)")
+                } else {
+                    #expect(row.image == nil,
+                            "\(row.title) names no colour, so it wears no swatch")
+                }
+            }
+            // And the swatch is a PREVIEW of the one palette, never a second
+            // source of truth: it is built from `MobileCallout.color(_:)`,
+            // and it must NOT be a template image — UIKit would recolour a
+            // template to the menu's tint, which is the one thing a colour
+            // chip must not be (the Mac's `isTemplate = false`, exactly).
+            let swatch = MobileCallout.swatchImage(for: "sand")
+            #expect(swatch.renderingMode == .alwaysOriginal)
+            #expect(swatch.size == CGSize(width: MobileCallout.swatchSize,
+                                          height: MobileCallout.swatchSize))
+
             // Delete is the destructive row (the card-⋯ grammar).
             let delete = try #require(
                 barElements.first {
@@ -231,6 +262,113 @@ struct MobileBlockMenuTests {
             #expect(model.presentations[seed.blockA] == nil)
             // The neighbor never moved.
             #expect(try await storedPresentation(db, blockID: seed.blockB) == nil)
+        }
+    }
+
+    // MARK: - PR19's emoji road (batch 7)
+
+    /// **The RULE, pinned against fakes.** `UITextInputMode` has no public
+    /// initializer, so the selection rule is lifted out of
+    /// `MobileEmojiTextField.textInputMode` into a pure function — which is
+    /// exactly where a typo would silently disable the whole feature (the
+    /// override would just keep returning `super`, i.e. the ordinary
+    /// keyboard, and nothing would look broken).
+    ///
+    /// **Red on old (behavioural revert):** change `emojiLanguage` to
+    /// anything else, or `first { … == }` to `first { … != }`, and both
+    /// halves red.
+    @Test func theEmojiKeyboardRuleFindsTheEmojiModeAndFallsBackWhenThereIsNone() {
+        struct Mode { let language: String? }
+        let withEmoji = [Mode(language: "en-US"), Mode(language: "emoji"),
+                         Mode(language: "fr-FR")]
+        #expect(MobileEmojiKeyboard.emojiMode(
+            in: withEmoji, primaryLanguage: \.language)?.language == "emoji")
+
+        // THE FALLBACK ARM, which is the one that ships to a user who
+        // removed the emoji keyboard: nil, so the field returns
+        // `super.textInputMode` — the ordinary keyboard, i.e. exactly the
+        // prompt that shipped before this batch. Structural, not promised.
+        let withoutEmoji = [Mode(language: "en-US"), Mode(language: nil)]
+        #expect(MobileEmojiKeyboard.emojiMode(
+            in: withoutEmoji, primaryLanguage: \.language) == nil)
+        #expect(MobileEmojiKeyboard.emojiMode(
+            in: [Mode](), primaryLanguage: \.language) == nil)
+    }
+
+    /// **The SEAM's fallback, and the Mac's semantics travelling with the
+    /// new chrome.** `promptForEmoji` is a separate seam so the emoji
+    /// keyboard can ride a field we own — and it falls back to
+    /// `promptForText` when nothing installed one, which is what keeps every
+    /// harness that injects only the old seam driving this door.
+    ///
+    /// **Red on old (behavioural revert):** delete the `promptForText`
+    /// fallback arm in `promptEmoji` and the first half reds (the glyph
+    /// never lands); make `land` treat `""` as a cancel and the third does.
+    @Test func theEmojiRowFallsBackToTheTextPromptAndKeepsTheMacsSemantics() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedTwoBlockPost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            await model.blockMenu.applyCallout(blockID: seed.blockA, edit: .toggle)
+
+            // ONLY the old seam is installed — no `promptForEmoji`.
+            var asked: [String] = []
+            var answer: String?
+            model.blockMenu.promptForText = { title, message, _, completion in
+                asked.append(title)
+                #expect(message == MobileBlockMenuController.emojiPromptMessage)
+                completion(answer)
+            }
+            model.blockMenu.promptForEmoji = nil
+
+            answer = "🕯"
+            model.blockMenu.promptEmoji(blockID: seed.blockA)
+            try await Task.sleep(nanoseconds: 40_000_000)
+            #expect(asked == [MobileBlockMenuController.emojiPromptTitle])
+            #expect(try await storedPresentation(db, blockID: seed.blockA)
+                == #"{"color":"blue","emoji":"🕯","kind":"callout"}"#)
+
+            // EMPTY is a REAL answer — "no glyph" (the Mac
+            // `CalloutMenu.promptEmoji` rule, travelling with the chrome).
+            answer = ""
+            model.blockMenu.promptEmoji(blockID: seed.blockA)
+            try await Task.sleep(nanoseconds: 40_000_000)
+            #expect(try await storedPresentation(db, blockID: seed.blockA)
+                == #"{"color":"blue","kind":"callout"}"#)
+
+            // CANCEL does nothing at all.
+            await model.blockMenu.applyCallout(blockID: seed.blockA, edit: .emoji("🌙"))
+            answer = nil
+            model.blockMenu.promptEmoji(blockID: seed.blockA)
+            try await Task.sleep(nanoseconds: 40_000_000)
+            #expect(try await storedPresentation(db, blockID: seed.blockA)
+                == #"{"color":"blue","emoji":"🌙","kind":"callout"}"#)
+        }
+    }
+
+    /// The new seam WINS when it is installed — otherwise the emoji keyboard
+    /// would never be reached in production, where both seams exist.
+    ///
+    /// **Red on old (behavioural revert):** reorder `promptEmoji` so the
+    /// `promptForText` arm is tried first and this reds.
+    @Test func theEmojiSeamIsPreferredOverTheTextPromptWhenBothExist() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedTwoBlockPost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            var textAsked = 0
+            var emojiAsked = 0
+            model.blockMenu.promptForText = { _, _, _, completion in
+                textAsked += 1
+                completion(nil)
+            }
+            model.blockMenu.promptForEmoji = { _, _, completion in
+                emojiAsked += 1
+                completion(nil)
+            }
+            model.blockMenu.promptEmoji(blockID: seed.blockA)
+            #expect(emojiAsked == 1)
+            #expect(textAsked == 0)
         }
     }
 

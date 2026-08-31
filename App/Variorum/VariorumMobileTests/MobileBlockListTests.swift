@@ -158,3 +158,309 @@ struct MobileBlockListTests {
         }
     }
 }
+
+// MARK: - PR20 — block multi-select (round 2, batch 7)
+
+@MainActor
+@Suite("Mobile block selection — pick several, delete once (batch 7 · PR20)")
+struct MobileBlockSelectionTests {
+    private func seedFourBlockNote(
+        _ session: AppSession
+    ) async throws -> (post: String, ids: [String]) {
+        try await session.runner.run { ops in
+            let post = try ops.createPost(title: "picks", profile: .blog)
+            var ids: [String] = []
+            for text in ["Alpha here.", "Beta here.", "Gamma here.", "Delta here."] {
+                ids.append(try ops.newBlock(in: post.id, text: text, at: .end).block.id)
+            }
+            return (post.id, ids)
+        }
+    }
+
+    private func liveBlockTexts(_ db: AppDatabase, post: String) async throws -> [String] {
+        try await db.read { db in
+            try Queries.renderPost(db, containerID: post).map { $0.text ?? "" }
+        }
+    }
+
+    /// **THE PURE RULE.** Toggle, order, prune — the parts that must not
+    /// exist twice, and the parts a face cannot get right on its own. P1's
+    /// letter rides here too: ids, never text.
+    @Test func theSelectionTogglesReadsTheNotesOrderAndPrunesGhosts() {
+        var selection = MobileBlockSelection()
+        #expect(selection.isEmpty)
+
+        selection.toggle("c")
+        selection.toggle("a")
+        #expect(selection.count == 2)
+        #expect(selection.contains("a"))
+
+        // The NOTE's order is the only order that means anything.
+        #expect(selection.inOrder(["a", "b", "c", "d"]) == ["a", "c"])
+        // A pick the order does not hold never reaches an act.
+        #expect(selection.inOrder(["a", "b"]) == ["a"])
+
+        // A second toggle un-picks.
+        selection.toggle("a")
+        #expect(!selection.contains("a"))
+        #expect(selection.count == 1)
+
+        // Pruning drops what the world no longer holds — a selection that
+        // outlives its blocks offers acts on ghosts.
+        selection.toggle("d")
+        selection.prune(to: ["c"])
+        #expect(selection.inOrder(["a", "b", "c", "d"]) == ["c"])
+
+        selection.clear()
+        #expect(selection.isEmpty)
+    }
+
+    /// Entering picking mode changes what a row TAP MEANS, and leaving drops
+    /// the picks — so a forgotten highlight never follows her around.
+    @Test func pickingModeChangesWhatATapMeansAndLeavingDropsThePicks() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedFourBlockNote(session)
+            let model = MobileBlockListModel(session: session, postID: seed.post)
+            await model.refresh()
+
+            // At rest, a toggle does NOTHING: the row's tap is the jump.
+            model.toggle(seed.ids[0])
+            #expect(model.selection.isEmpty)
+
+            model.enterSelection()
+            model.toggle(seed.ids[2])
+            model.toggle(seed.ids[0])
+            #expect(model.pickedInOrder == [seed.ids[0], seed.ids[2]])
+
+            model.exitSelection()
+            #expect(!model.isSelecting)
+            #expect(model.selection.isEmpty)
+        }
+    }
+
+    /// **A remote delete PRUNES the picks — and the assertion that matters is
+    /// the COUNT, not the act's target.**
+    ///
+    /// **The first version of this pin was HOLLOW and it is recorded rather
+    /// than quietly fixed.** It asserted `pickedInOrder`, which passes with
+    /// the prune REMOVED: `inOrder` already filters to blocks the note's
+    /// order holds, so the act could never address a ghost either way. What
+    /// the prune actually protects is what she READS — `selection.count`
+    /// feeds the banner AND the delete verb, so an unpruned pick makes the
+    /// door say *"Delete 2 Blocks…"* over a gesture that can only reach one.
+    /// That is the Mac's own stated reason for the rule, verbatim: *"the
+    /// count in the banner would be a lie."*
+    ///
+    /// **Red on old (behavioural revert):** drop the `selection.prune(...)`
+    /// line from `adopt` and the count/verb assertions red while the
+    /// `pickedInOrder` control stays green — which is exactly the finding.
+    @Test func aBlockDeletedElsewhereDropsOutOfThePicksAndOutOfTheCount() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedFourBlockNote(session)
+            let model = MobileBlockListModel(session: session, postID: seed.post)
+            await model.refresh()
+            model.enterSelection()
+            model.toggle(seed.ids[1])
+            model.toggle(seed.ids[3])
+            #expect(model.selection.count == 2)
+
+            try await session.runner.run { [id = seed.ids[1]] ops in
+                try ops.deleteBlock(id)
+            }
+            await model.refresh()
+
+            // The ACT could never have reached the ghost (the control —
+            // `inOrder` reads the note's order).
+            #expect(model.pickedInOrder == [seed.ids[3]])
+            // What the prune is FOR: the number she reads is true.
+            #expect(model.selection.count == 1)
+            #expect(MobileBlockSelectionCopy.deleteVerb(picked: model.selection.count)
+                == "Delete Block…")
+            #expect(MobileBlockSelectionCopy.bannerLabel(picked: model.selection.count)
+                == "1 block picked")
+        }
+    }
+
+    /// **THE ACT, DRIVEN INSIDE THE REAL SHEET, END TO END** — the Select
+    /// door, two row taps, the delete door, the REAL confirm, and the store.
+    ///
+    /// The confirm's PRESENTATION is real; its EFFECT rides
+    /// `tapAlertAction(_:writeBack:)` — the harness's recorded split, because
+    /// a `UIAlertController`'s own buttons measurably do not activate in
+    /// process.
+    ///
+    /// **Red on old (behavioural revert):** make the row's tap always call
+    /// `onJump` (drop the `model.isSelecting` arm) and the picks never form,
+    /// so the delete door never appears — this reds at the `activate` for it.
+    @Test func pickingTwoBlocksAndConfirmingDeletesExactlyThoseTwo() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedFourBlockNote(session)
+            let list = MobileBlockListModel(session: session, postID: seed.post)
+            var deleted: [String] = []
+            try await withHostedSurface(
+                MobileBlockListSheet(
+                    model: list, tokens: .terminalLight,
+                    onDeleteBlocks: { ids in
+                        deleted = ids
+                        try? await session.runner.run { [stack = session.undoStack] ops in
+                            try stack.withCompound(
+                                label: "Delete Blocks", operations: ops
+                            ) {
+                                for id in ids { try ops.deleteBlock(id) }
+                            }
+                        }
+                    },
+                    onJump: { _ in })
+            ) { surface in
+                await surface.settle(40)
+                // The door is CHROME and it is there.
+                #expect(surface.activate(MobileBlockSelectionCopy.selectLabel),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(40)
+
+                // Two rows, tapped by their real handles.
+                #expect(surface.activate(MobileBlockListModel.handle(list.rows[1])))
+                await surface.settle(40)
+                #expect(surface.activate(MobileBlockListModel.handle(list.rows[3])))
+                await surface.settle(40)
+                #expect(list.selection.count == 2)
+
+                // The banner's act names the count.
+                let verb = MobileBlockSelectionCopy.deleteVerb(picked: 2)
+                #expect(verb == "Delete 2 Blocks…")
+                #expect(surface.activate(verb), "labels were \(surface.visibleLabels)")
+                await surface.settle(40)
+
+                // ONE confirm, real, and ASKING IS NOT DOING.
+                let alert = try #require(surface.presentedAlert)
+                #expect(alert.title == "Delete 2 Blocks")
+                #expect(try await liveBlockTexts(db, post: seed.post).count == 4)
+
+                #expect(surface.tapAlertAction(
+                    MobileBlockSelectionCopy.confirmActionTitle,
+                    writeBack: { list.deleteConfirmPresented = false }))
+                await surface.settle(80)
+
+                // Exactly those two, in the NOTE's order.
+                #expect(deleted == [seed.ids[1], seed.ids[3]])
+                #expect(try await liveBlockTexts(db, post: seed.post)
+                    == ["Alpha here.", "Gamma here."])
+                // …and picking mode is put away on the success road.
+                #expect(!list.isSelecting)
+            }
+        }
+    }
+
+    /// **ONE compound undo entry over every picked block** — a multi-delete
+    /// is ONE mistake to reverse (#59(g)), which is what makes deleting
+    /// several safe at all. Composed from `deleteWholeBlockRun`, whose
+    /// compound this is; the pin guards against a future second road.
+    @Test func theBulkDeleteIsOneUndoEntryThatBringsThemAllBack() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedFourBlockNote(session)
+            let model = MobileEditorViewModel(
+                session: session, postID: seed.post,
+                sleep: { _ in throw CancellationError() })
+            model.tailIdleSleep = { _ in throw CancellationError() }
+            let surface = MobileWriteSurfaceView()
+            surface.frame = CGRect(x: 0, y: 0, width: 393, height: 700)
+            model.attach(textView: surface.textView)
+            await model.loadOnce()
+            let before = session.undoStack.depth
+
+            await model.structural.deleteWholeBlockRun([seed.ids[0], seed.ids[2]])
+
+            #expect(try await liveBlockTexts(db, post: seed.post)
+                == ["Beta here.", "Delta here."])
+            #expect(session.undoStack.depth == before + 1, "one mistake, one entry")
+            #expect(session.undoStack.topLabel == "Delete Blocks")
+
+            _ = try await session.runner.run { [stack = session.undoStack] ops in
+                try stack.undo(with: ops)
+            }
+            #expect(try await liveBlockTexts(db, post: seed.post)
+                == ["Alpha here.", "Beta here.", "Gamma here.", "Delta here."])
+        }
+    }
+
+    /// **THE CONFIRM IS IN-DOCTRINE, and its words compose the single-block
+    /// door's own promise** — the two delete doors must not promise
+    /// different roads back. It also must never name a Mac chord: this
+    /// phone's undo road is the receipt's button and the note ⋯.
+    @Test func theConfirmComposesTheOneRoadBackAndNamesNoChord() {
+        let one = MobileBlockSelectionCopy.confirmDetail(picked: 1)
+        let many = MobileBlockSelectionCopy.confirmDetail(picked: 3)
+        #expect(one.hasPrefix("The block leaves this note"))
+        #expect(many.hasPrefix("3 blocks leave this note"))
+        for line in [one, many] {
+            #expect(line.contains(MobileNoteTrayModel.putBackRoadPhrase.dropFirst()))
+            #expect(line.contains("\(TrashWindow.days) days"))
+            #expect(!line.contains("⌥"))
+            #expect(!line.contains("⌘"))
+            #expect(!line.contains("Mac"))
+        }
+        // The banner teaches no gesture this phone does not have.
+        let banner = MobileBlockSelectionCopy.bannerLabel(picked: 2)
+        #expect(banner == "2 blocks picked")
+        #expect(!banner.contains("⌘"))
+        #expect(!banner.contains("click"))
+    }
+
+    /// **AT REST THE SHEET IS EXACTLY AS CALM AS THE ONE THAT SHIPPED**
+    /// (#59(l)'s rule): no banner, no delete door, no pick marks — and an
+    /// absence claim over a POPULATED surface, since the rows and the
+    /// Select door are both right there.
+    @Test func atRestThereIsNoBannerAndNoDeleteDoor() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedFourBlockNote(session)
+            let list = MobileBlockListModel(session: session, postID: seed.post)
+            try await withHostedSurface(
+                MobileBlockListSheet(
+                    model: list, tokens: .terminalLight,
+                    onDeleteBlocks: { _ in }, onJump: { _ in })
+            ) { surface in
+                await surface.settle(40)
+                let labels = surface.visibleLabels
+                // POPULATED: the rows and the entry door are on screen.
+                #expect(labels.contains(MobileBlockListModel.handle(list.rows[0])))
+                #expect(labels.contains(MobileBlockSelectionCopy.selectLabel))
+                // ABSENT: nothing about picking.
+                #expect(!labels.contains(MobileBlockSelectionCopy.deleteVerb(picked: 1)))
+                #expect(!labels.contains(MobileBlockSelectionCopy.doneSelectingLabel))
+                #expect(surface.presentedAlert == nil)
+            }
+        }
+    }
+
+    /// **MERGE SELECTED IS DELIBERATELY NOT BUILT** — batch 9's proposal (A)
+    /// recommends it, but it is PROPOSE-ONLY and awaits her ruling. This
+    /// pins the absence so a later batch adds it by DECISION rather than
+    /// discovering the gap; the selection brain carries no `isContiguousRun`
+    /// for the same reason (a merge precondition with no merge).
+    @Test func thereIsNoMergeSelectedDoorAndTheAbsenceIsRuled() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedFourBlockNote(session)
+            let list = MobileBlockListModel(session: session, postID: seed.post)
+            try await withHostedSurface(
+                MobileBlockListSheet(
+                    model: list, tokens: .terminalLight,
+                    onDeleteBlocks: { _ in }, onJump: { _ in })
+            ) { surface in
+                await surface.settle(40)
+                #expect(surface.activate(MobileBlockSelectionCopy.selectLabel))
+                await surface.settle(40)
+                #expect(surface.activate(MobileBlockListModel.handle(list.rows[0])))
+                await surface.settle(40)
+                #expect(surface.activate(MobileBlockListModel.handle(list.rows[1])))
+                await surface.settle(40)
+                // Two ADJACENT blocks picked — the exact shape a merge door
+                // would light up for. The delete door is there; no merge is.
+                #expect(list.selection.count == 2)
+                let labels = surface.visibleLabels.map { $0.lowercased() }
+                #expect(labels.contains(
+                    MobileBlockSelectionCopy.deleteVerb(picked: 2).lowercased()))
+                #expect(!labels.contains { $0.contains("merge") })
+            }
+        }
+    }
+}

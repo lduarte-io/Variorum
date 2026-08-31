@@ -360,7 +360,20 @@ struct MobileWriteScreen: View {
             let lenses = lenses
             Task { await lenses.refresh() }
         }) {
-            MobileBlockListSheet(model: blockList, tokens: tokens, tray: tray) { blockID in
+            // PR20's act is injected HERE, not called from inside the sheet:
+            // this screen composes the block list and the structural
+            // controller, and it is the only place allowed to know they meet
+            // (CLAUDE.md's composition rule — a call from the list into
+            // `model.structural` would be feature-to-feature). The road
+            // itself is the one that already exists: `deleteWholeBlockRun`
+            // carries the ONE compound undo entry, the flight latch, the
+            // flush-first contract, the caret landing and the receipt.
+            MobileBlockListSheet(
+                model: blockList, tokens: tokens, tray: tray,
+                onDeleteBlocks: { blockIDs in
+                    await model.structural.deleteWholeBlockRun(blockIDs)
+                }
+            ) { blockID in
                 blocksPresented = false
                 model.jumpToBlock(blockID)
             }

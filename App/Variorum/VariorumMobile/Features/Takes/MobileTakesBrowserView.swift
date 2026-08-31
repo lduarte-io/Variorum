@@ -53,6 +53,13 @@ final class MobileTakesBrowserView: UIView {
     private let footerLabel = UILabel()
     private let branchButton = UIButton(type: .custom)
     private let blankButton = UIButton(type: .custom)
+    /// **BATCH 7 — the sheet's ACTIONS ROW** (PL-10(d), E6b's one door).
+    /// A block-scoped act among take-scoped ones, so it gets its own line
+    /// above the mint footer rather than a fourth word crowding it, and it
+    /// renders ONLY while a fan exists (P-2: `canTurnTakesIntoBlocks`) — so
+    /// the calm one-take sheet is byte-identical to the one that shipped and
+    /// gives up no card height. PROVISIONAL placement, recorded.
+    private let takesToBlocksButton = UIButton(type: .custom)
 
     /// THE one live card editor (P3): a single instance that moves onto
     /// whichever card is being edited.
@@ -138,7 +145,18 @@ final class MobileTakesBrowserView: UIView {
                 guard let model = self?.model else { return }
                 Task { await model.takesBrowser.newBlank() }
             }, for: .touchUpInside)
-        for view in [footerLabel, branchButton, blankButton] { sheetView.addSubview(view) }
+        takesToBlocksButton.accessibilityIdentifier = "takes.browser.takesToBlocks"
+        takesToBlocksButton.accessibilityLabel =
+            MobileTakesBrowserController.takesToBlocksTitle
+        takesToBlocksButton.isHidden = true
+        takesToBlocksButton.addAction(
+            UIAction { [weak self] _ in
+                guard let model = self?.model else { return }
+                Task { await model.takesBrowser.takesToBlocks() }
+            }, for: .touchUpInside)
+        for view in [footerLabel, branchButton, blankButton, takesToBlocksButton] {
+            sheetView.addSubview(view)
+        }
 
         cardEditor.accessibilityIdentifier = "takes.browser.cardEditor"
         cardEditor.delegate = self
@@ -304,10 +322,42 @@ final class MobileTakesBrowserView: UIView {
             x: branchButton.frame.maxX + 14, y: footerY,
             width: blankButton.bounds.width, height: 32)
 
+        // BATCH 7's actions row, directly above the mint footer. Hidden —
+        // and costing NO card height — whenever there is nothing to convert.
+        //
+        // **AND IT STANDS DOWN WHILE A CARD IS LIVE, which is a real rule
+        // rather than a workaround, and it was caught by the A1 gate
+        // defect's own pin** (`theKeyboardNeverStrandsTheCardListFooterOr
+        // LiveCard`): with the keyboard up, the unoccluded band is barely
+        // taller than one live card, so 30 pt spent on chrome left the live
+        // card's top cut off — the exact class of her report *"i could make
+        // a new take but i couldn't scroll down through the list of takes to
+        // edit it better."* The mint footer stays because minting is the
+        // ADJACENT act; converting the whole fan is not something she is
+        // doing mid-keystroke. So while a take is being written, the sheet's
+        // job is typing room, and this row's geometry is byte-identical to
+        // the sheet that shipped.
+        let showTakesToBlocks = browser.canTurnTakesIntoBlocks
+            && browser.editingVariantID == nil
+        takesToBlocksButton.isHidden = !showTakesToBlocks
+        var listBottom = footerY - 8
+        if showTakesToBlocks {
+            takesToBlocksButton.setTitle(
+                chromeCase(MobileTakesBrowserController.takesToBlocksTitle), for: .normal)
+            takesToBlocksButton.setTitleColor(face.accent, for: .normal)
+            takesToBlocksButton.titleLabel?.font = chrome
+            takesToBlocksButton.sizeToFit()
+            let actionsY = footerY - 30
+            takesToBlocksButton.frame = CGRect(
+                x: 20, y: actionsY,
+                width: takesToBlocksButton.bounds.width, height: 26)
+            listBottom = actionsY - 8
+        }
+
         cardsScroll.frame = CGRect(
             x: 16, y: 44,
             width: sheetView.bounds.width - 32,
-            height: max(footerY - 52, 0))
+            height: max(listBottom - 44, 0))
     }
 
     private func renderCards(_ browser: MobileTakesBrowserController) {
@@ -323,7 +373,10 @@ final class MobileTakesBrowserView: UIView {
             let isLive = browser.editingVariantID == card.variantID
             view.apply(
                 card: card, face: face, live: isLive,
-                chromeCase: chromeCase(_:))
+                chromeCase: chromeCase(_:),
+                canMoveUp: browser.canMoveTake(variantID: card.variantID, by: -1),
+                canMoveDown: browser.canMoveTake(variantID: card.variantID, by: 1),
+                fanned: cards.count > 1)
             if isLive {
                 attachCardEditor(to: view, text: card.text, face: face)
             }
@@ -418,6 +471,14 @@ final class MobileTakesBrowserView: UIView {
             onHistory: { [weak self] in
                 guard let model = self?.model else { return }
                 Task { await model.takesBrowser.openHistory(variantID: variantID) }
+            },
+            onMove: { [weak self] delta in
+                guard let model = self?.model else { return }
+                Task { await model.takesBrowser.moveTake(variantID: variantID, by: delta) }
+            },
+            onTakeToBlock: { [weak self] in
+                guard let model = self?.model else { return }
+                Task { await model.takesBrowser.takeToBlockBelow(variantID: variantID) }
             })
         cardsScroll.addSubview(view)
         cardViews[variantID] = view
@@ -516,6 +577,8 @@ final class MobileTakesCardView: UIView {
     private let onSetLocked: (Bool) -> Void
     private let onLabel: () -> Void
     private let onHistory: () -> Void
+    private let onMove: (Int) -> Void
+    private let onTakeToBlock: () -> Void
 
     /// The live editor's card height (functional; the look rounds rule).
     static let editorHeight: CGFloat = 120
@@ -528,7 +591,9 @@ final class MobileTakesCardView: UIView {
         onDelete: @escaping () -> Void,
         onSetLocked: @escaping (Bool) -> Void = { _ in },
         onLabel: @escaping () -> Void = {},
-        onHistory: @escaping () -> Void = {}
+        onHistory: @escaping () -> Void = {},
+        onMove: @escaping (Int) -> Void = { _ in },
+        onTakeToBlock: @escaping () -> Void = {}
     ) {
         self.variantID = variantID
         self.onEdit = onEdit
@@ -537,6 +602,8 @@ final class MobileTakesCardView: UIView {
         self.onSetLocked = onSetLocked
         self.onLabel = onLabel
         self.onHistory = onHistory
+        self.onMove = onMove
+        self.onTakeToBlock = onTakeToBlock
         super.init(frame: .zero)
         accessibilityIdentifier = "takes.card.\(variantID)"
         layer.cornerRadius = 10
@@ -584,7 +651,10 @@ final class MobileTakesCardView: UIView {
         card: MobileTakesBrowserController.Card,
         face: MobileEditorStyle.Face,
         live: Bool,
-        chromeCase: (String) -> String
+        chromeCase: (String) -> String,
+        canMoveUp: Bool = false,
+        canMoveDown: Bool = false,
+        fanned: Bool = false
     ) {
         backgroundColor = card.isPeeked ? face.takeTint : face.card
         layer.borderColor = (card.isChosen ? face.chosenMark : face.line)
@@ -631,19 +701,62 @@ final class MobileTakesCardView: UIView {
         // (`MobileTakesBrowserController.historyTitle`), and pressing it
         // closes this browser before the face opens — the reasons are at
         // `openHistory(variantID:)`.
-        menuButton.menu = UIMenu(children: [
+        // **BATCH 7 — THREE ROWS JOIN** (PL-10(a) + PL-10(d)), and the ORDER
+        // is the menu's existing grammar continued: read (history), then the
+        // card's own identity facts — its name, and its PLACE in the fan
+        // beside the ordinal the meta row shows — then state (lock), then
+        // the three ways a take LEAVES this fan, gentlest first (into a block
+        // of its own · archived aside · deleted).
+        //
+        // **The move pair is absent on a ONE-TAKE fan and DISABLED at the end
+        // it cannot reach** — #57(e)'s ruled shape, in menu-row register: the
+        // Mac greys the end arrow rather than vanishing it, so the card's
+        // furniture never jumps as takes move, and a fanless block draws no
+        // arrows at all. `.disabled` is UIKit's own greying, and the
+        // enablement is a projection HINT — `moveTake` re-decides from the
+        // store, and speaks if the fan moved underneath.
+        //
+        // The order lives ONCE, in `cardRowTitles`, which the drift pin reads.
+        var rows: [UIMenuElement] = [
             UIAction(title: chromeCase(MobileTakesBrowserController.historyTitle)) {
                 [onHistory] _ in onHistory()
             },
-            UIAction(title: chromeCase("Label Take…")) { [onLabel] _ in onLabel() },
-            UIAction(title: chromeCase(locked ? "Unlock Take" : "Lock Take")) {
-                [onSetLocked] _ in onSetLocked(!locked)
+            UIAction(title: chromeCase(MobileTakesBrowserController.labelRowTitle)) {
+                [onLabel] _ in onLabel()
             },
-            UIAction(title: chromeCase("Archive Take")) { [onArchive] _ in onArchive() },
+        ]
+        if fanned {
+            rows += [
+                UIAction(
+                    title: chromeCase(MobileTakesBrowserController.moveUpTitle),
+                    attributes: canMoveUp ? [] : .disabled
+                ) { [onMove] _ in onMove(-1) },
+                UIAction(
+                    title: chromeCase(MobileTakesBrowserController.moveDownTitle),
+                    attributes: canMoveDown ? [] : .disabled
+                ) { [onMove] _ in onMove(1) },
+            ]
+        }
+        rows += [
+            UIAction(title: chromeCase(
+                locked ? MobileTakesBrowserController.unlockTitle
+                       : MobileTakesBrowserController.lockTitle)
+            ) { [onSetLocked] _ in onSetLocked(!locked) },
+            // E5. NOT `.destructive`: nothing is destroyed — the take becomes
+            // a block and the original is archived (AR-1), which is exactly
+            // what separates it from the row two below.
+            UIAction(title: chromeCase(MobileTakesBrowserController.takeToBlockTitle)) {
+                [onTakeToBlock] _ in onTakeToBlock()
+            },
+            UIAction(title: chromeCase(MobileTakesBrowserController.archiveTitle)) {
+                [onArchive] _ in onArchive()
+            },
             UIAction(
-                title: chromeCase("Delete Take"), attributes: .destructive
+                title: chromeCase(MobileTakesBrowserController.deleteTitle),
+                attributes: .destructive
             ) { [onDelete] _ in onDelete() },
-        ])
+        ]
+        menuButton.menu = UIMenu(children: rows)
 
         bodyLabel.text = card.text.isEmpty ? chromeCase("(Empty take)") : card.text
         bodyLabel.font = face.body

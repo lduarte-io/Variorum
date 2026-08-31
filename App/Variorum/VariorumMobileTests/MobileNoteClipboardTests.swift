@@ -194,4 +194,125 @@ struct MobileNoteClipboardTests {
             }
         }
     }
+
+    // MARK: - M23 ≡ R15 — copy follows what is on the screen (batch 7)
+
+    /// **HER RULING, PINNED:** *"copy should follow what's on the screen."*
+    /// With a take PEEKED — which is also what a lens activation drives —
+    /// the copy carries the DISPLAYED take, not the store's chosen.
+    ///
+    /// **RED ON OLD (behavioural revert):** make `displayedTextByBlock`
+    /// return `[:]` unconditionally (its pre-batch-7 behaviour, i.e. the
+    /// door not asking the surface at all) and the peeked half reds while
+    /// every other pin in this file — including `aFannedBlockCopiesThe
+    /// ChosenTake` directly above — stays green. That contrast IS the
+    /// finding: nothing about the ordinary road moved.
+    @Test func aPeekedTakeIsWhatTheCopyCarries() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await session.runner.run { ops -> (post: String, block: String) in
+                let post = try ops.createPost(title: "m23", profile: .blog)
+                let block = try ops.newBlock(in: post.id, text: "The chosen one.", at: .end)
+                _ = try ops.newBlock(in: post.id, text: "A plain neighbour.", at: .end)
+                let branch = try ops.branchVariant(block.block.id, from: block.variant.id)
+                try ops.autosave(branch.id, text: "The peeked one.", charDelta: 0)
+                return (post.id, block.block.id)
+            }
+            let (model, _) = await makeSurfaceEditor(session, postID: seed.post)
+
+            // BEFORE the peek: byte-identical to the store's export — the
+            // half of the ruling that must not have moved.
+            try await withBoard("copy.m23.chosen") { board in
+                await model.copyNote(to: board)
+                #expect(board.pasteboard.string
+                        == "The chosen one.\n\nA plain neighbour.")
+            }
+
+            // The surface now DISPLAYS the other take.
+            model.takes.flip(blockID: seed.block, forward: true)
+            #expect(model.takes.isPeeking(seed.block))
+
+            try await withBoard("copy.m23.peeked") { board in
+                await model.copyNote(to: board)
+                #expect(board.pasteboard.string
+                        == "The peeked one.\n\nA plain neighbour.",
+                        "copy follows the screen (R15)")
+            }
+
+            // Flipping back to truth ENDS the peek, and the copy is the
+            // store's again — the rule is "ask the surface", so it needs no
+            // separate un-doing.
+            model.takes.flip(blockID: seed.block, forward: false)
+            #expect(!model.takes.isPeeking(seed.block))
+            try await withBoard("copy.m23.back") { board in
+                await model.copyNote(to: board)
+                #expect(board.pasteboard.string
+                        == "The chosen one.\n\nA plain neighbour.")
+            }
+        }
+    }
+
+    /// **The no-divergence road is the SHIPPED road, and that is structural
+    /// rather than a claim.** With nothing peeked the surface hands over an
+    /// empty answer and `markdown` takes `Queries.exportPost` verbatim — so
+    /// "byte-identical to today" is guaranteed by which function runs, not
+    /// by two projections happening to agree.
+    @Test func withNothingPeekedTheCopyIsTheStoredExportVerbatim() async throws {
+        try await withEditorWorld { session, db in
+            let postID = try await makePost(
+                session, blocks: ["One.", "Two.", "Three."])
+            let (model, _) = await makeSurfaceEditor(session, postID: postID)
+            #expect(model.displayedTextByBlock.isEmpty)
+
+            let stored = try await db.read { db in
+                try Queries.exportPost(db, postID: postID)
+            }
+            let composed = try await db.read { db in
+                try MobileNoteClipboard.markdown(db, postID: postID, displayed: [:])
+            }
+            #expect(composed == stored)
+        }
+    }
+
+    /// **THE RECORDED CORNER, pinned as documented behaviour rather than
+    /// left to be discovered.** A note carrying a CALLOUT frame takes the
+    /// stored road even while something is peeked, because the callout →
+    /// blockquote mapper (`Queries.exportMapped`) is `internal` to
+    /// VariorumCore and re-implementing it here would fork a core brain
+    /// (MobileSoul §3). The honest fallback is the shipped behaviour, never
+    /// a document whose framed blocks silently lose their `> `.
+    ///
+    /// **This pin exists so that the one-word core fix (`public` on
+    /// `exportMapped`) announces itself here instead of passing quietly.**
+    @Test func aCalloutNoteKeepsTheStoredRoadEvenWhilePeeking() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await session.runner.run { ops -> (post: String, block: String) in
+                let post = try ops.createPost(title: "m23-callout", profile: .blog)
+                let block = try ops.newBlock(in: post.id, text: "The chosen one.", at: .end)
+                let framed = try ops.newBlock(in: post.id, text: "Framed.", at: .end)
+                try ops.setBlockPresentation(
+                    framed.block.id, BlockPresentation(color: "blue", emoji: nil))
+                let branch = try ops.branchVariant(block.block.id, from: block.variant.id)
+                try ops.autosave(branch.id, text: "The peeked one.", charDelta: 0)
+                return (post.id, block.block.id)
+            }
+            let (model, _) = await makeSurfaceEditor(session, postID: seed.post)
+            model.takes.flip(blockID: seed.block, forward: true)
+            #expect(model.takes.isPeeking(seed.block))
+
+            let stored = try await db.read { db in
+                try Queries.exportPost(db, postID: seed.post)
+            }
+            #expect(stored.contains("> Framed."), "the frame maps in the stored road")
+
+            try await withBoard("copy.m23.callout") { board in
+                await model.copyNote(to: board)
+                // DOCUMENTED: the chosen take, and the frame intact — the
+                // fallback, not the ruling. When `exportMapped` becomes
+                // reachable this expectation FLIPS to "The peeked one."
+                #expect(board.pasteboard.string == stored)
+                #expect(board.pasteboard.string?.contains("The chosen one.") == true)
+                #expect(board.pasteboard.string?.contains("> Framed.") == true)
+            }
+        }
+    }
 }

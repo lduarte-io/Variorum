@@ -430,6 +430,33 @@ final class MobileEditorViewModel {
                 root.present(alert, animated: true)
             }
         }
+        // PR19: the emoji row's own plumbing — a small OWNED sheet rather
+        // than the alert its siblings use, and the divergence is the whole
+        // point of the row (PROVISIONAL, recorded).
+        //
+        // **Why not the alert:** `UIAlertController` hands out its own
+        // `UITextField` and there is no public way to replace it or to name
+        // its input mode — and the emoji KEYBOARD is precisely what needs a
+        // field we own (`MobileEmojiTextField`). The two roads that keep the
+        // alert are both worse: overlaying our field on the alert's private
+        // view hierarchy is brittle across OS versions, and a hand-rolled
+        // emoji grid as an `inputView` would invent a curated glyph list the
+        // system already has. `MobileEmojiPromptController` is public API
+        // only, matches the phone's sheet grammar, and — a real gain — its
+        // buttons ARE drivable in process, which a `UIAlertController`'s
+        // measurably are not (the surface driver's own recorded finding).
+        if blockMenu.promptForEmoji == nil {
+            blockMenu.promptForEmoji = { [weak textView] title, message, completion in
+                guard let root = textView?.window?.rootViewController else {
+                    completion(nil)
+                    return
+                }
+                root.present(
+                    MobileEmojiPromptController(
+                        title: title, message: message, completion: completion),
+                    animated: true)
+            }
+        }
         if blockMenu.confirmDestructive == nil {
             blockMenu.confirmDestructive = { [weak textView] title, message, actionTitle, completion in
                 guard let root = textView?.window?.rootViewController else {
@@ -947,16 +974,49 @@ final class MobileEditorViewModel {
     func copyNote(to destination: MobileClipboard.Destination = .general) async {
         guard await flushPendingText() else { return }
         let openTail = mintableTail ? openTailText : ""
+        let displayed = displayedTextByBlock
         do {
             let markdown = try await session.database.read { [postID] db in
                 try MobileNoteClipboard.markdown(
-                    db, postID: postID, openTail: openTail)
+                    db, postID: postID, openTail: openTail, displayed: displayed)
             }
             report(MobileNoteClipboard.copy(markdown, to: destination).message)
         } catch {
             report(MobileNoteClipboard.Outcome
                 .failed(String(describing: error)).message)
         }
+    }
+
+    /// **M23 ≡ R15 — what this surface is DISPLAYING, block by block.**
+    ///
+    /// Her ruling: *"copy should follow what's on the screen."* This is the
+    /// ruled SHAPE of it — **ask the surface what it is displaying**, never
+    /// a second selection-derivation rule (§31). There is no derivation
+    /// here to get wrong: `slots` IS the display. A peek (and a lens
+    /// activation, which drives the same primitive) swaps the slot's variant
+    /// and text inside `MobileTakesController.overlay(_:)` BEFORE the VM
+    /// ever sees the projection, so a displayed slot already holds the
+    /// displayed take.
+    ///
+    /// **EMPTY when nothing is peeked, and that is load-bearing:** the copy
+    /// door then takes the road that shipped, byte for byte — the surface's
+    /// own `peeks` dictionary is the cheap, exact answer to "is anything on
+    /// screen other than the store's chosen", so the no-lens case needs no
+    /// proof beyond it.
+    ///
+    /// Text resolves LEDGER-FIRST, the peek overlay's own rule, so a take
+    /// edited a keystroke ago copies the bytes on screen. (The door flushes
+    /// first, which makes that a no-op on the ordinary road and the honest
+    /// answer on a refused one.)
+    var displayedTextByBlock: [String: String] {
+        guard !takes.peeks.isEmpty else { return [:] }
+        var displayed: [String: String] = [:]
+        for slot in slots {
+            guard let variantID = slot.variantID else { continue }
+            displayed[slot.blockID] = surfaceKnownText(variantID: variantID)
+                ?? slot.text ?? ""
+        }
+        return displayed
     }
 
     /// The open tail exactly as the surface holds it right now — read from

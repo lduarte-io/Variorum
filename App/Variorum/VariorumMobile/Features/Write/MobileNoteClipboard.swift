@@ -101,13 +101,65 @@ enum MobileNoteClipboard {
     /// `nonisolated` because it runs INSIDE the reader pool's closure, off
     /// the main thread (P2) — it is a pure projection read and touches no
     /// UIKit.
+    ///
+    /// ── **M23 ≡ R15 — COPY FOLLOWS WHAT IS ON THE SCREEN** ──────────────
+    ///
+    /// Her ruling, verbatim: *"copy should follow what's on the screen."*
+    /// With a take PEEKED or a LENS active, the surface is showing something
+    /// other than the store's chosen, and the copy carries what it shows.
+    ///
+    /// **The rule's shape is the ruled one — ASK THE SURFACE WHAT IT IS
+    /// DISPLAYING, never a second selection-derivation** (§31's exact
+    /// wording). `displayed` is that answer, handed in by the caller from
+    /// `model.slots`, which IS the surface's display: the takes controller's
+    /// `overlay(_:)` swaps a peeked slot's variant and text before the VM
+    /// ever sees the projection, and a lens activation drives the same
+    /// primitive. Nothing here re-decides which take anything shows.
+    ///
+    /// **EMPTY `displayed` takes the road that shipped, verbatim** — so a
+    /// note with no peek and no lens copies byte-identically to before, and
+    /// that is a fact the caller can guarantee cheaply (`takes.peeks.isEmpty`)
+    /// rather than a claim this function has to prove.
     nonisolated static func markdown(
-        _ db: Database, postID: String, openTail: String = ""
+        _ db: Database, postID: String, openTail: String = "",
+        displayed: [String: String] = [:]
     ) throws -> String {
         var pieces: [String] = []
-        let stored = try Queries.exportPost(db, postID: postID)
+        let stored = try displayed.isEmpty
+            ? Queries.exportPost(db, postID: postID)
+            : displayedProjection(db, postID: postID, displayed: displayed)
         if !stored.isEmpty { pieces.append(stored) }
         if !openTail.isEmpty { pieces.append(openTail) }
+        return Queries.joinRenderedTexts(pieces)
+    }
+
+    /// `exportPost`'s projection with the SURFACE's displayed text in place
+    /// of each slot's stored chosen — same walk, same join brain, same
+    /// drop-the-empties discipline.
+    ///
+    /// ⚠️ **ONE RECORDED CORNER, and it is a fence collision rather than a
+    /// design choice: a note that carries CALLOUT FRAMES takes the stored
+    /// road instead.** `exportPost` maps a callout block to a blockquote
+    /// through `Queries.exportMapped`, which is `internal` to VariorumCore —
+    /// so this app cannot ask for "this text, mapped for that frame", and
+    /// re-implementing the mapper here would FORK A CORE BRAIN, which
+    /// MobileSoul §3 forbids outright. The honest fallback is the shipped
+    /// behaviour (chosen takes), never a document whose framed blocks
+    /// silently lose their `> ` while its plain ones follow the screen.
+    ///
+    /// **The fix is one word** — `public` on `Queries.exportMapped`, zero
+    /// behaviour change — and it is a `Sources/` edit this batch is fenced
+    /// out of. Owner named on the record's residue list. The corner needs a
+    /// peek or a lens AND a callout in the same note to be reachable at all.
+    private nonisolated static func displayedProjection(
+        _ db: Database, postID: String, displayed: [String: String]
+    ) throws -> String {
+        guard try Queries.blockPresentations(db, containerID: postID).isEmpty else {
+            return try Queries.exportPost(db, postID: postID)
+        }
+        let pieces = try Queries.renderPost(db, containerID: postID)
+            .map { displayed[$0.blockID] ?? $0.text ?? "" }
+            .filter { !$0.isEmpty }
         return Queries.joinRenderedTexts(pieces)
     }
 

@@ -230,8 +230,23 @@ final class MobileBlockMenuController {
                 Task { await self?.applyCallout(blockID: blockID, edit: .toggle) }
             },
         ]
+        // **PR19 — THE COLOUR ROWS WEAR THEIR COLOUR** (the Mac's 13e E1,
+        // phone-imaged through `MobileCallout.swatchImage`, which resolves
+        // the SAME `color(_:)` the block's own frame does — a preview, never
+        // a second source of truth, and the stored value is still the NAME).
+        //
+        // **The word stays beside the chip, deliberately** — the Mac's own
+        // reason, which binds here twice over: a swatch alone would be the
+        // one control in the app that cannot be read aloud (R93's legibility
+        // mandate, and MobileSoul §5.6's VoiceOver expectation), and the
+        // words are what the drift pin compares against `CalloutMenu`'s.
+        // So `calloutRowTitles` is UNCHANGED by this batch: no row was
+        // added, only an image hung on four that existed.
         rows += MobileCallout.names.map { name in
-            UIAction(title: cased(name.capitalized)) { [weak self] _ in
+            UIAction(
+                title: cased(name.capitalized),
+                image: MobileCallout.swatchImage(for: name)
+            ) { [weak self] _ in
                 Task { await self?.applyCallout(blockID: blockID, edit: .color(name)) }
             }
         }
@@ -269,16 +284,38 @@ final class MobileBlockMenuController {
         }
     }
 
-    private func promptEmoji(blockID: String) {
-        guard let promptForText else { return }
-        promptForText(
-            "Callout Emoji",
-            "A leading glyph for this callout (leave empty for none).",
-            nil
-        ) { [weak self] glyph in
+    static let emojiPromptTitle = "Callout Emoji"
+    static let emojiPromptMessage = "A leading glyph for this callout (leave empty for none)."
+
+    /// **PR19's emoji road.** The seam is SEPARATE from `promptForText` and
+    /// **falls back to it when nothing installed one** — so the emoji
+    /// keyboard is a strict upgrade over the prompt that shipped, and every
+    /// harness that injects only `promptForText` keeps driving this door
+    /// unchanged (the fallback is structural, not promised).
+    ///
+    /// Semantics are the Mac `CalloutMenu.promptEmoji`'s exactly, and both
+    /// arms honour them: cancel = nil (nothing happens); EMPTY is a real
+    /// answer ("no glyph"), which is why the completion cannot collapse the
+    /// two.
+    var promptForEmoji:
+        (@MainActor (_ title: String, _ message: String,
+                     _ completion: @escaping @MainActor (String?) -> Void) -> Void)?
+
+    /// Internal, not private, for the `requestLabel` reason: the menu row is
+    /// a one-line forward to this, `UIMenu` rows are not invocable in
+    /// process, and the ROW's presence is pinned separately by the callout
+    /// drift pin — so this is where the door's behaviour is driven.
+    func promptEmoji(blockID: String) {
+        let land: @MainActor (String?) -> Void = { [weak self] glyph in
             guard let glyph else { return } // cancelled
             Task { await self?.applyCallout(blockID: blockID, edit: .emoji(glyph)) }
         }
+        if let promptForEmoji {
+            promptForEmoji(Self.emojiPromptTitle, Self.emojiPromptMessage, land)
+            return
+        }
+        guard let promptForText else { return }
+        promptForText(Self.emojiPromptTitle, Self.emojiPromptMessage, nil, land)
     }
 
     // MARK: - Name (the block's handle — `setBlockName`)

@@ -757,10 +757,20 @@ struct MobileTakesBrowserSurfaceTests {
             // (*"take history should move into the three ... menu on each
             // take"*), and it reads before the identity/state rows because
             // looking is the calmer act to offer first.
+            //
+            // **SANCTIONED FLIP (batch 7):** three rows join — the fan-order
+            // pair (PL-10(a)) between Label and Lock, where the card's other
+            // identity fact lives, and `take to new block below` (PL-10(d))
+            // heading the three ways a take leaves this fan. The literal list
+            // moves to the CONTROLLER (`cardRowTitles`), which the batch-7
+            // suite pins by value, so this door and that vocabulary cannot
+            // drift apart again — the `historyTitle` lesson applied to the
+            // whole row set.
             let menu = try #require((subview(chosenCard, "takes.card.menu") as? UIButton)?.menu)
             #expect(menu.children.compactMap { ($0 as? UIAction)?.title }
-                    == ["block history…", "label take…", "lock take",
-                        "archive take", "delete take"])
+                    == MobileTakesBrowserController
+                        .cardRowTitles(fanned: true, locked: false)
+                        .map { MobileEditorStyle.chromeCase($0) })
         }
     }
 

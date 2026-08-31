@@ -82,13 +82,62 @@ final class MobileBlockListModel {
         Queries.tocHandle(name: row.name, text: row.text)
     }
 
+    // MARK: - Multi-select (round 2, batch 7 — PR20, the 13e E2 twin)
+
+    /// True while the list is picking blocks instead of jumping to them.
+    private(set) var isSelecting = false
+    /// The picks — ids only (`MobileBlockSelection`; P1).
+    private(set) var selection = MobileBlockSelection()
+    /// The bulk delete's confirm, presented by the sheet.
+    var deleteConfirmPresented = false
+
+    /// **THE ENTRY DOOR IS A CHROME BUTTON, and the call is recorded.** The
+    /// brief offered a block ⋯ row or a long-press; a long-press is
+    /// **undrivable in process** (`MobileSurfaceDriver`'s measured finding —
+    /// a `.contextMenu` row's tree comes back empty), which alone decides it
+    /// against a destructive gesture's only entrance. And a ⋯ row would be a
+    /// SECOND door onto this surface, one inch from the first — the shape
+    /// batch 9 retired when it removed `Takes…` from the block ⋯ (*"a second
+    /// door onto one surface"*). This sheet's subject already IS this note's
+    /// blocks; the door belongs in its chrome. **PROVISIONAL.**
+    func enterSelection() {
+        guard !isSelecting else { return }
+        isSelecting = true
+        selection.clear()
+    }
+
+    /// Leaves picking mode and drops the picks. A selection that outlived
+    /// its surface would offer acts on blocks she is no longer looking at.
+    func exitSelection() {
+        isSelecting = false
+        selection.clear()
+    }
+
+    func toggle(_ blockID: String) {
+        guard isSelecting else { return }
+        selection.toggle(blockID)
+    }
+
+    /// The picked blocks in the NOTE's order — what the act addresses.
+    var pickedInOrder: [String] { selection.inOrder(rows.map(\.blockID)) }
+
+    /// Adopts a fresh listing and PRUNES picks it no longer holds (the Mac's
+    /// own rule: a selection that outlives its blocks offers acts on ghosts,
+    /// and the banner's count would be a lie). The held observation delivers
+    /// here, so a remote delete or a sync arrival reaches the picks.
+    private func adopt(_ value: [Queries.TOCRow]) {
+        rows = value
+        status = nil
+        if isSelecting { selection.prune(to: Set(value.map(\.blockID))) }
+    }
+
     func refresh() async {
         do {
             let postID = postID
-            rows = try await session.database.read { db in
+            let value = try await session.database.read { db in
                 try Queries.blockTOC(db, post: postID)
             }
-            status = nil
+            adopt(value)
         } catch {
             status = String(describing: error)
         }
@@ -108,13 +157,83 @@ final class MobileBlockListModel {
             for try await value in session.database.observe({ db in
                 try Queries.blockTOC(db, post: postID)
             }) {
-                rows = value
-                status = nil
+                adopt(value)
             }
         } catch is CancellationError {
         } catch {
             status = String(describing: error)
         }
+    }
+}
+
+/// **WHAT THE BLOCK SELECTION SAYS** (round 2, batch 7 — PR20).
+///
+/// ONE home, for the Mac `BlockSelectionCopy`'s own reason: the banner, the
+/// act's verb and the confirm are one promise, and a promise written twice
+/// is one no test can keep. **A recorded FORK of that enum** — it lives in
+/// the Mac target this batch is fenced out of (#94) — and, like every fork
+/// this app carries, it differs only where the phone's truth differs:
+///
+/// · the Mac's banner TEACHES ⌘⇧-click ("pick a whole run"); this phone has
+///   no chord to teach, so the banner states the count and stops.
+/// · the Mac's receipt ends "⌥⌘Z brings them all back at once"; the phone's
+///   undo road is the receipt's own Undo BUTTON — so the DELETE itself is
+///   composed from `MobileStructuralController`, whose receipt already says
+///   the true thing (`blocksDeletedStatus` + `action: .undo`) and is not
+///   rewritten here.
+nonisolated enum MobileBlockSelectionCopy {
+    static let selectTitle = "Select"
+    static let doneSelectingTitle = "Done"
+    /// The VoiceOver names. They are DISTINCT from the rendered words on
+    /// purpose: while picking, this button and the sheet's dismiss both read
+    /// "Done", and two identically-named doors in one tree is the shape a
+    /// walk cannot tell apart.
+    static let selectLabel = "Select blocks"
+    static let doneSelectingLabel = "Done picking"
+
+    /// The banner's line — the count, and nothing it cannot deliver.
+    static func bannerLabel(picked: Int) -> String {
+        picked == 0
+            ? "Tap blocks to pick them."
+            : (picked == 1 ? "1 block picked" : "\(picked) blocks picked")
+    }
+
+    /// The act's verb. The ellipsis is load-bearing — it promises the
+    /// confirm below.
+    static func deleteVerb(picked: Int) -> String {
+        picked <= 1 ? "Delete Block…" : "Delete \(picked) Blocks…"
+    }
+
+    static let confirmActionTitle = "Delete"
+
+    /// **A CONFIRM, and it is IN-DOCTRINE rather than a divergence from
+    /// #59(i).** The Mac ruled NO prompt for its multi-delete; her R13
+    /// ruling on THIS phone drew the line that governs here, and drew it
+    /// explicitly: *the ⋯ menu's single-block door still asks, because that
+    /// is a menu row and asking there costs a tap she already spent; this
+    /// road is a keystroke.* The Mac's road IS a keystroke (⌘-click then
+    /// ⌫ in the editor). **This road is a deliberate button press in a
+    /// sheet** — the menu-row class, where this phone already confirms
+    /// (`MobileBlockMenuController.confirmDelete`). Same line, other side.
+    ///
+    /// The detail composes the single-block confirm's own promise, so the
+    /// two doors cannot promise different roads back.
+    /// `@MainActor` because it COMPOSES the tray's road phrase rather than
+    /// re-typing it, and `MobileNoteTrayModel` is main-actor isolated —
+    /// which is the right trade: the two delete confirms promising different
+    /// roads back is the drift this composition exists to prevent.
+    @MainActor
+    static func confirmDetail(picked: Int) -> String {
+        let subject = picked == 1 ? "The block leaves" : "\(picked) blocks leave"
+        return "\(subject) this note, with their takes. "
+            + "\(MobileNoteTrayModel.putBackRoadPhrase.prefix(1).uppercased())"
+            + "\(MobileNoteTrayModel.putBackRoadPhrase.dropFirst()) for "
+            + "\(TrashWindow.days) days; Undo is on the receipt afterwards, "
+            + "and in the note's ⋯."
+    }
+
+    static func confirmTitle(picked: Int) -> String {
+        picked <= 1 ? "Delete Block" : "Delete \(picked) Blocks"
     }
 }
 
@@ -158,17 +277,26 @@ struct MobileBlockListSheet: View {
     let tokens: VoiceTokens
     /// The per-note tray's model (batch 6b). nil = the pre-6b sheet.
     var tray: MobileNoteTrayModel?
+    /// **PR20's act, injected by the HOST** — `MobileWriteView` composes the
+    /// block list and the structural controller; a call from here into
+    /// another feature would be the feature-to-feature road CLAUDE.md
+    /// forbids. nil = a host with no delete road, and then the Select door
+    /// does not render at all (P-2).
+    var onDeleteBlocks: (([String]) async -> Void)?
     let onJump: (String) -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var segment: MobileBlocksSegment = .inTheNote
 
     init(
         model: MobileBlockListModel, tokens: VoiceTokens,
-        tray: MobileNoteTrayModel? = nil, onJump: @escaping (String) -> Void
+        tray: MobileNoteTrayModel? = nil,
+        onDeleteBlocks: (([String]) async -> Void)? = nil,
+        onJump: @escaping (String) -> Void
     ) {
         self.model = model
         self.tokens = tokens
         self.tray = tray
+        self.onDeleteBlocks = onDeleteBlocks
         self.onJump = onJump
     }
 
@@ -179,12 +307,38 @@ struct MobileBlockListSheet: View {
                     .font(tokens.title)
                     .foregroundStyle(tokens.ink)
                 Spacer()
+                // PR20's entry door: chrome, and only where there is a
+                // delete road to reach and blocks to pick (P-2). It swaps
+                // to "Done" while picking, which is also how she leaves.
+                if onDeleteBlocks != nil, segment == .inTheNote, !model.rows.isEmpty {
+                    Button(tokens.chromeLabel(
+                        model.isSelecting
+                            ? MobileBlockSelectionCopy.doneSelectingTitle
+                            : MobileBlockSelectionCopy.selectTitle)
+                    ) {
+                        if model.isSelecting { model.exitSelection() }
+                        else { model.enterSelection() }
+                    }
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+                    .buttonStyle(.plain)
+                    // An EXPLICIT label, because while picking this button
+                    // and the sheet's dismiss both render the word "Done".
+                    // The dismiss keeps its implicit label untouched — a
+                    // shipped door's VoiceOver name is not this batch's to
+                    // move (and pins ride it).
+                    .accessibilityLabel(
+                        model.isSelecting
+                            ? MobileBlockSelectionCopy.doneSelectingLabel
+                            : MobileBlockSelectionCopy.selectLabel)
+                }
                 Button(tokens.chromeLabel("Done")) { dismiss() }
                     .font(tokens.small)
                     .foregroundStyle(tokens.accent)
                     .buttonStyle(.plain)
             }
             if tray != nil { segmentStrip }
+            if model.isSelecting, segment == .inTheNote { selectionBanner }
             if let tray, segment != .inTheNote {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 10) {
@@ -203,6 +357,77 @@ struct MobileBlockListSheet: View {
         // delivery — a remote divide landing mid-read appears; the task
         // cancels the observation at dismissal.
         .task { await model.start() }
+        // PR20's confirm. Its PRESENTATION is pinnable end to end (a real
+        // `UIAlertController` in the window); its EFFECT is driven through
+        // the model, because a `UIAlertController`'s own buttons measurably
+        // do not activate in process — the harness's recorded split.
+        .alert(
+            MobileBlockSelectionCopy.confirmTitle(picked: model.selection.count),
+            isPresented: $model.deleteConfirmPresented
+        ) {
+            Button(MobileBlockSelectionCopy.confirmActionTitle, role: .destructive) {
+                Task { await deletePicked() }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text(MobileBlockSelectionCopy.confirmDetail(picked: model.selection.count))
+        }
+    }
+
+    /// The act. **It composes `MobileStructuralController.deleteWholeBlockRun`
+    /// through the host** (`onDeleteBlocks`) rather than opening a second
+    /// delete road: that door already carries the ONE compound undo entry
+    /// (`UndoStack.withCompound(label: "Delete Blocks")`), the flight latch,
+    /// the flush-first contract, the caret landing, the stranded-originals
+    /// note and the receipt with its Undo action. A second road would be a
+    /// second promise.
+    ///
+    /// The picks are read **in the NOTE's order** and the selection is left
+    /// alone until the act returns — a refusal KEEPS her picks (#59(k)),
+    /// because there is nothing to re-tap; a success finds them pruned away
+    /// by the held observation's own delivery.
+    private func deletePicked() async {
+        guard let onDeleteBlocks else { return }
+        let picked = model.pickedInOrder
+        guard !picked.isEmpty else { return }
+        await onDeleteBlocks(picked)
+        // A DETERMINISTIC prune, not a hope: the held observation's delivery
+        // is asynchronous, so the outcome is read through the one listing
+        // door instead (the takes browser's own "verbs end in a fresh read"
+        // discipline — correct with or without the observation running, and
+        // its delivery is then an echo). The compound is all-or-nothing, so
+        // an empty selection afterwards means it LANDED; anything left means
+        // it refused, and her picks stay for the retry (#59(k)).
+        await model.refresh()
+        if model.selection.isEmpty { model.exitSelection() }
+    }
+
+    /// **PR20's banner.** It states the count and offers the one act; it
+    /// renders only while picking, so at rest the sheet is exactly as calm
+    /// as the one that shipped (#59(l)'s rule, which is batch 2's applied).
+    ///
+    /// The delete door is a plain `Button` — drivable — and it is absent
+    /// with nothing picked (P-2: never an inert act).
+    private var selectionBanner: some View {
+        HStack(spacing: 14) {
+            Text(tokens.chromeLabel(
+                MobileBlockSelectionCopy.bannerLabel(picked: model.selection.count)))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+            Spacer(minLength: 0)
+            if !model.selection.isEmpty {
+                Button(tokens.chromeLabel(
+                    MobileBlockSelectionCopy.deleteVerb(picked: model.selection.count))
+                ) {
+                    model.deleteConfirmPresented = true
+                }
+                .font(tokens.small)
+                .foregroundStyle(tokens.alarm)
+                .buttonStyle(.plain)
+                .accessibilityLabel(
+                    MobileBlockSelectionCopy.deleteVerb(picked: model.selection.count))
+            }
+        }
     }
 
     /// Plain doors in a row — the Library/Trash filter row's grammar, never a
@@ -237,10 +462,27 @@ struct MobileBlockListSheet: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 ForEach(model.rows, id: \.placementID) { row in
+                    let picked = model.selection.contains(row.blockID)
                     Button {
-                        onJump(row.blockID)
+                        // PR20: while picking, a tap TOGGLES instead of
+                        // jumping. One row, two meanings — and the mode is
+                        // visible in the chrome, the banner and the row's
+                        // own mark, so which meaning is in force is never
+                        // invisible state.
+                        if model.isSelecting { model.toggle(row.blockID) }
+                        else { onJump(row.blockID) }
                     } label: {
                         HStack(alignment: .firstTextBaseline, spacing: 8) {
+                            if model.isSelecting {
+                                // The pick's mark. The Mac's wash-plus-border
+                                // (#59(e)) is a full-width editor band; a
+                                // list row's phone-native equivalent is a
+                                // leading mark plus the same soft wash, and
+                                // the mark is what a walk can read.
+                                Text(picked ? "◉" : "○")
+                                    .font(tokens.small)
+                                    .foregroundStyle(picked ? tokens.accent : tokens.faint)
+                            }
                             // The handle derives IN the row body —
                             // lazy rows derive only what they show.
                             Text(MobileBlockListModel.handle(row))
@@ -256,10 +498,13 @@ struct MobileBlockListSheet: View {
                             }
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, model.isSelecting ? 2 : 0)
+                        .background(picked ? tokens.accent.opacity(0.12) : .clear)
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel(MobileBlockListModel.handle(row))
+                    .accessibilityAddTraits(picked ? .isSelected : [])
                 }
                 if let status = model.status {
                     Text(status)
