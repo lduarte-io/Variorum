@@ -79,10 +79,11 @@ struct StoreFailureView: View {
                 .font(.callout.weight(.semibold))
             if lobby.passphraseOffered {
                 HStack {
-                    SecureField("Encryption passphrase", text: $passphrase)
+                    PeekableSecretField(
+                        label: "Encryption passphrase", text: $passphrase,
+                        onSubmit: { submitPassphrase(lobby) })
                         .textFieldStyle(.roundedBorder)
                         .frame(maxWidth: 280)
-                        .onSubmit { submitPassphrase(lobby) }
                     Button("Unlock") { submitPassphrase(lobby) }
                         .disabled(lobby.busy || passphrase.isEmpty)
                 }

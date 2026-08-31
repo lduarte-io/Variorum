@@ -169,9 +169,9 @@ struct MobilePassphraseSetSheet: View {
     }
 
     private func secureField(_ prompt: String, _ text: Binding<String>) -> some View {
-        SecureField(prompt, text: text)
-            .textInputAutocapitalization(.never)
-            .autocorrectionDisabled()
+        // The ONE eye/peek control (Act 10 item 3) — chrome stays this
+        // surface's own.
+        PeekableSecretField(label: prompt, text: text)
             .font(tokens.body)
             .foregroundStyle(tokens.ink)
             .padding(EdgeInsets(top: 11, leading: 12, bottom: 11, trailing: 12))
@@ -280,9 +280,8 @@ struct MobilePassphraseResetSheet: View {
     }
 
     private func field(_ prompt: String, _ text: Binding<String>) -> some View {
-        SecureField(prompt, text: text)
-            .textInputAutocapitalization(.never)
-            .autocorrectionDisabled()
+        // The ONE eye/peek control (Act 10 item 3).
+        PeekableSecretField(label: prompt, text: text)
             .font(tokens.body)
             .foregroundStyle(tokens.ink)
             .padding(EdgeInsets(top: 11, leading: 12, bottom: 11, trailing: 12))

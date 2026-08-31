@@ -323,9 +323,9 @@ struct EncryptionView: View {
             Text(Self.setupIntro)
                 .pageCaption(pageStyle)
                 .fixedSize(horizontal: false, vertical: true)
-            SecureField("Encryption passphrase", text: $setupPassphrase)
+            PeekableSecretField(label: "Encryption passphrase", text: $setupPassphrase)
                 .pageFieldChrome(pageStyle)
-            SecureField("Repeat the passphrase", text: $setupConfirm)
+            PeekableSecretField(label: "Repeat the passphrase", text: $setupConfirm)
                 .pageFieldChrome(pageStyle)
             if !setupPassphrase.isEmpty, setupPassphrase.count < 12 {
                 Text("Short passphrase — under 12 characters is easier to brute-force.")
@@ -548,8 +548,9 @@ struct EncryptionView: View {
     @ViewBuilder
     private func unlockRoads(offerPhraseRoad: Bool) -> some View {
         if !usePhraseInstead {
-            SecureField("Encryption passphrase", text: $enrollPassphrase)
-                .onSubmit { enrollNow() }
+            PeekableSecretField(
+                label: "Encryption passphrase", text: $enrollPassphrase,
+                onSubmit: { enrollNow() })
                 .pageFieldChrome(pageStyle)
             PageDoor("Unlock", style: pageStyle) { enrollNow() }
                 .disabled(encryption.busy || enrollPassphrase.isEmpty)
@@ -732,7 +733,7 @@ struct EncryptionView: View {
         #if os(macOS)
         .toggleStyle(.checkbox)
         #endif
-        SecureField("Encryption passphrase", text: $rekeyPassphrase)
+        PeekableSecretField(label: "Encryption passphrase", text: $rekeyPassphrase)
             .pageFieldChrome(pageStyle)
         HStack {
             PageDoor("Replace Keys and Re-upload", form: .destructive, style: pageStyle) {
@@ -763,8 +764,9 @@ struct EncryptionView: View {
         Text("Your encryption passphrase authorizes a new phrase — the same proof as changing it. The phrase you have now keeps working until the new one is confirmed.")
             .pageCaption(pageStyle)
             .fixedSize(horizontal: false, vertical: true)
-        SecureField("Encryption passphrase", text: $regeneratePassphrase)
-            .onSubmit { regenerateNow() }
+        PeekableSecretField(
+            label: "Encryption passphrase", text: $regeneratePassphrase,
+            onSubmit: { regenerateNow() })
             .pageFieldChrome(pageStyle)
         HStack {
             PageDoor("Verify and Generate New Phrase", style: pageStyle) {
@@ -854,7 +856,7 @@ struct EncryptionView: View {
         Text("Change encryption passphrase")
             .pageProse(pageStyle)
         if !changeUseRecovery {
-            SecureField("Current passphrase", text: $changeCurrent)
+            PeekableSecretField(label: "Current passphrase", text: $changeCurrent)
                 .pageFieldChrome(pageStyle)
             // CF-3: her live find, verbatim — "it really is very unclear
             // that it's a button". A real bordered button now (the styled
@@ -868,9 +870,9 @@ struct EncryptionView: View {
             PageDoor("Back to current-passphrase entry", form: .bordered,
                      style: pageStyle) { changeUseRecovery = false }
         }
-        SecureField("New passphrase", text: $changeNew)
+        PeekableSecretField(label: "New passphrase", text: $changeNew)
             .pageFieldChrome(pageStyle)
-        SecureField("Repeat the new passphrase", text: $changeNewConfirm)
+        PeekableSecretField(label: "Repeat the new passphrase", text: $changeNewConfirm)
             .pageFieldChrome(pageStyle)
         if !changeNew.isEmpty, changeNew.count < 12 {
             Text("Short passphrase — under 12 characters is easier to brute-force.")

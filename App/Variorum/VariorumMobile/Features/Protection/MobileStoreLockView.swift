@@ -108,11 +108,10 @@ struct MobileStoreLockView: View {
         }
         if lobby.passphraseOffered {
             VStack(spacing: 10) {
-                SecureField("Encryption passphrase", text: $passphrase)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
+                PeekableSecretField(
+                    label: "Encryption passphrase", text: $passphrase,
+                    onSubmit: { submitPassphrase() })
                     .submitLabel(.go)
-                    .onSubmit { submitPassphrase() }
                     .font(tokens.body)
                     .foregroundStyle(tokens.ink)
                     .padding(EdgeInsets(top: 11, leading: 12, bottom: 11, trailing: 12))

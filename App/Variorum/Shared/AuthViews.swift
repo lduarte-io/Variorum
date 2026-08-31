@@ -394,7 +394,9 @@ struct AccountView: View {
         TextField("Type “\(Self.deleteConfirmationPhrase)” to continue", text: $deleteConfirmationEntry)
             .autocorrectionDisabled()
             .pageFieldChrome(pageStyle)
-        SecureField("Encryption passphrase (if encryption is set up)", text: $deletePassphrase)
+        PeekableSecretField(
+            label: "Encryption passphrase (if encryption is set up)",
+            text: $deletePassphrase)
             .pageFieldChrome(pageStyle)
         HStack {
             PageDoor("Delete Account Permanently", form: .destructive, style: pageStyle) {

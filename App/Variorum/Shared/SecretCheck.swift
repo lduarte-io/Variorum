@@ -293,7 +293,7 @@ struct SecretCheckSection: View {
     private var entryField: some View {
         switch secret {
         case .passphrase:
-            SecureField("Encryption passphrase", text: $entry)
+            PeekableSecretField(label: "Encryption passphrase", text: $entry)
                 .pageFieldChrome(pageStyle)
         case .recoveryPhrase:
             // The `EncryptionView.phraseEntryField` shape: autocorrect off,

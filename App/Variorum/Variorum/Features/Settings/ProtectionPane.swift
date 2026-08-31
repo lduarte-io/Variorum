@@ -50,9 +50,9 @@ struct PassphraseSetSheet: View {
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
-                SecureField("Encryption passphrase", text: $passphrase)
+                PeekableSecretField(label: "Encryption passphrase", text: $passphrase)
                     .textFieldStyle(.roundedBorder)
-                SecureField("Type it again", text: $confirmation)
+                PeekableSecretField(label: "Type it again", text: $confirmation)
                     .textFieldStyle(.roundedBorder)
                 HStack {
                     Button("Cancel") { onDone() }
@@ -489,9 +489,9 @@ struct PassphraseResetSheet: View {
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
-            SecureField("New encryption passphrase", text: $newPassphrase)
+            PeekableSecretField(label: "New encryption passphrase", text: $newPassphrase)
                 .textFieldStyle(.roundedBorder)
-            SecureField("Type it again", text: $confirmation)
+            PeekableSecretField(label: "Type it again", text: $confirmation)
                 .textFieldStyle(.roundedBorder)
             if let error {
                 Text(error).font(.callout).alarmVoice()

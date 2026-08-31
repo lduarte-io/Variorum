@@ -163,10 +163,11 @@ struct StoreLockView: View {
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
             } else {
                 VStack(spacing: 8) {
-                    SecureField("Encryption passphrase", text: $passphrase)
+                    PeekableSecretField(
+                        label: "Encryption passphrase", text: $passphrase,
+                        onSubmit: { submitPassphrase() })
                         .textFieldStyle(.roundedBorder)
                         .frame(maxWidth: 300)
-                        .onSubmit { submitPassphrase() }
                     Button("Unlock") { submitPassphrase() }
                         .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
                         .keyboardShortcut(.defaultAction)

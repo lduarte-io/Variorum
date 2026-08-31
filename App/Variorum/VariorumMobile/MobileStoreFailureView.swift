@@ -68,11 +68,10 @@ struct MobileStoreFailureView: View {
             Text("The key file beside your library can still unlock it.")
                 .font(.callout.weight(.semibold))
             if lobby.passphraseOffered {
-                SecureField("Encryption passphrase", text: $passphrase)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
+                PeekableSecretField(
+                    label: "Encryption passphrase", text: $passphrase,
+                    onSubmit: { submitPassphrase(lobby) })
                     .submitLabel(.go)
-                    .onSubmit { submitPassphrase(lobby) }
                     .textFieldStyle(.roundedBorder)
                 Button("Unlock") { submitPassphrase(lobby) }
                     .disabled(lobby.busy || passphrase.isEmpty)
