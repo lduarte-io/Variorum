@@ -453,7 +453,10 @@ nonisolated enum E2EEKeychainStorage {
 
     /// CF-12: persist custody behind the biometric gate. Delete-then-add:
     /// updating an ACL item would demand interactive auth, and WRITING must
-    /// never prompt (the prompt belongs to the unlock alone).
+    /// never prompt (the prompt belongs to the unlock alone). 17h R2-7:
+    /// the forced order's window — an add failing AFTER the delete left
+    /// no custody — is narrowed to probe width via
+    /// `GatedSaveChoreography` (see its doc for what survives).
     @discardableResult
     static func saveGated(_ material: DeviceKeyMaterial) -> Bool {
         guard !KeychainTestTripwire.refusesFixedAccountMutation("saveGated") else { return false }
@@ -469,11 +472,36 @@ nonisolated enum E2EEKeychainStorage {
             .biometryCurrentSet,
             &error)
         else { return false }
-        deleteGatedItem()
-        var attributes = gatedBaseQuery()
-        attributes[kSecValueData as String] = data
-        attributes[kSecAttrAccessControl as String] = control
-        return SecItemAdd(attributes as CFDictionary, nil) == errSecSuccess
+        return GatedSaveChoreography.run(
+            sweepProbe: { SecItemDelete(gatedProbeQuery() as CFDictionary) },
+            addProbe: {
+                var attributes = gatedProbeQuery()
+                attributes[kSecValueData as String] = Data("probe".utf8)
+                attributes[kSecAttrAccessControl as String] = control
+                return SecItemAdd(attributes as CFDictionary, nil) == errSecSuccess
+            },
+            releaseExisting: { deleteGatedItem() },
+            addIncoming: {
+                var attributes = gatedBaseQuery()
+                attributes[kSecValueData as String] = data
+                attributes[kSecAttrAccessControl as String] = control
+                return SecItemAdd(attributes as CFDictionary, nil) == errSecSuccess
+            })
+    }
+
+    /// 17h R2-7: the probe item's account — a sibling of the gated one,
+    /// same service, same DP partition, same ACL class; holds dummy bytes
+    /// for the milliseconds between its add and its sweep. FIXED like its
+    /// sibling, and reachable only through `saveGated`, whose tripwire
+    /// entry guard covers it from test processes.
+    private static let gatedProbeAccount = "device-keys-biometric-probe"
+
+    private static func gatedProbeQuery() -> [String: Any] {
+        [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: gatedProbeAccount,
+        ].merging(KeychainPartition.dataProtection) { a, _ in a }
     }
 
     /// CF-12: the once-per-launch unlock — evaluate biometrics (ONLY), then

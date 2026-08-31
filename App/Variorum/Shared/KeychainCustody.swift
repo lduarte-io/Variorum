@@ -132,6 +132,53 @@ nonisolated enum KeychainPartition {
     }
 }
 
+/// RE-WRITING a gated (ACL'd) item — the probe-first rule (17h, 13p-fix
+/// ladder R2-7).
+///
+/// A gated item cannot be updated in place: updating an ACL'd item
+/// demands interactive auth, and a WRITE must never prompt — so both
+/// gated families are forced into delete-then-add. That order carries a
+/// window: a `SecItemAdd` that fails AFTER the forced delete leaves no
+/// gated custody at all (reached from `DeviceKeyStore.save` whenever a
+/// gated item already exists — a passphrase re-unwrap's re-save). The
+/// KnownIssues row's swap remedy (add under a temp account → rename) is
+/// unsound under the same platform rule — `SecItemUpdate` of an ACL'd
+/// item's attributes is an update too — so the window is NARROWED
+/// instead of state-machined: prove the keychain accepts an identical
+/// ACL'd add RIGHT NOW (a probe item under a sibling account, same ACL,
+/// dummy data, deleted immediately), and only then release the existing
+/// item and add the real one.
+///
+/// The probe genuinely exercises every stable failure mode — keychain
+/// identity/access group, data-protection admission, ACL acceptance,
+/// biometry enrollment state, disk, securityd health — so what SURVIVES
+/// is only a failure arising in the milliseconds between two identical
+/// adds, plus the crash-between-syscalls window that always existed
+/// (both recorded, pinned as behavior in `GatedSaveChoreographyTests`).
+/// When the window does fire, the incoming material is in hand at the
+/// caller and the surfaces already word the refusal; the vault
+/// re-derives custody by passphrase — a re-enrollment prompt, never
+/// lost writing. Probe litter from a crash is swept at the next run's
+/// leading sweep.
+nonisolated enum GatedSaveChoreography {
+    /// `sweepProbe` deletes the probe item (leading: a crashed prior
+    /// run's litter; trailing: this run's own). `releaseExisting` answers
+    /// the R3-5 released-semantics — a refusal stops the save with the
+    /// existing custody intact.
+    static func run(
+        sweepProbe: () -> Void,
+        addProbe: () -> Bool,
+        releaseExisting: () -> Bool,
+        addIncoming: () -> Bool
+    ) -> Bool {
+        sweepProbe()
+        guard addProbe() else { return false }  // adds don't land right now — nothing released
+        sweepProbe()
+        guard releaseExisting() else { return false }
+        return addIncoming()
+    }
+}
+
 /// MOVING custody between two items — the three-step rule.
 ///
 /// Every mode transition that hands the key from one keychain item to

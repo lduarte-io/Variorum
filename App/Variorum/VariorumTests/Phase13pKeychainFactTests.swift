@@ -245,8 +245,46 @@ struct Phase13pKeychainFactTests {
         // 13p-fix R1-7: the third leg of the same round trip — a DELETE
         // must reach the keychain the WRITE reached. Unasserted cleanup is
         // how this suite left invisible ACL'd litter on every run.
-        StoreKeyGuardKeychain.deleteGated(scope: scope)
-        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope) == false,
-                "the delete reaches the same keychain the write did")
+        // (17h R3-5: the delete now ANSWERS, so the leg asserts directly.)
+        #expect(StoreKeyGuardKeychain.deleteGated(scope: scope),
+                "the delete reaches the same keychain the write did — and says so")
+        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope) == false)
+    }
+
+    /// 17h R2-7 — the probe-first RE-SAVE round trip against the real
+    /// data-protection keychain in the signed host: a second `saveGated`
+    /// over an existing gated item runs the full choreography (leading
+    /// probe sweep, probe add, trailing sweep, verified release, real
+    /// add) and ends with the item present and no probe litter. Throwaway
+    /// scope, ThisDeviceOnly, never synchronizable — the standing safety
+    /// construction.
+    @Test func aGatedReSaveOverAnExistingItemLandsAndLeavesNoProbeLitter() {
+        let scope = "17h-resave-probe-\(UUID().uuidString)"
+        defer { StoreKeyGuardKeychain.deleteGated(scope: scope) }
+        #expect(StoreKeyGuardKeychain.saveGated(StoreKey.mint(), scope: scope),
+                "the first gated save lands")
+        #expect(StoreKeyGuardKeychain.saveGated(StoreKey.mint(), scope: scope),
+                "the RE-SAVE over an existing item lands through the probe-first choreography")
+        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope),
+                "production's own probe finds the re-saved item")
+
+        // No probe litter: the probe account's item was swept within the
+        // call (attributes-only, non-interactive — the standing probe
+        // discipline).
+        var probe: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: StoreKeyCustody.deviceKeychainService,
+            kSecAttrAccount as String: StoreKeyGuardKeychain.probeAccount(scope: scope),
+            kSecUseDataProtectionKeychain as String: true,
+        ]
+        probe[kSecReturnAttributes as String] = true
+        let ctx = LAContext()
+        ctx.interactionNotAllowed = true
+        probe[kSecUseAuthenticationContext as String] = ctx
+        #expect(SecItemCopyMatching(probe as CFDictionary, nil) == errSecItemNotFound,
+                "the probe item is swept before the call returns")
+
+        #expect(StoreKeyGuardKeychain.deleteGated(scope: scope))
+        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope) == false)
     }
 }

@@ -229,6 +229,13 @@ nonisolated enum StoreKeyGuardKeychain {
     /// unlock alone). `.biometryCurrentSet` ALONE: never `.devicePasscode`,
     /// never an `.or` escape — re-enrolled biometry invalidates the item
     /// BY DESIGN under this threat model; the passphrase road recovers.
+    /// 17h R2-7: the forced order's window is narrowed to probe width via
+    /// `GatedSaveChoreography` (see its doc for what survives). In this
+    /// family every production road reaches here with the gated item
+    /// ABSENT (`setMode` refuses same-mode re-entry, and the custody law
+    /// keeps the item absent outside Biometric) — the probe still runs,
+    /// because ONE choreography for both gated families is the point, and
+    /// an R3-5-class lingering item is exactly when it earns its keep.
     @discardableResult
     static func saveGated(_ key: StoreKey, scope: String) -> Bool {
         var error: Unmanaged<CFError>?
@@ -238,11 +245,34 @@ nonisolated enum StoreKeyGuardKeychain {
             .biometryCurrentSet,
             &error)
         else { return false }
-        deleteGated(scope: scope)
-        var attributes = gatedQuery(scope: scope)
-        attributes[kSecValueData as String] = key.data
-        attributes[kSecAttrAccessControl as String] = control
-        return SecItemAdd(attributes as CFDictionary, nil) == errSecSuccess
+        return GatedSaveChoreography.run(
+            sweepProbe: { SecItemDelete(probeQuery(scope: scope) as CFDictionary) },
+            addProbe: {
+                var attributes = probeQuery(scope: scope)
+                attributes[kSecValueData as String] = Data("probe".utf8)
+                attributes[kSecAttrAccessControl as String] = control
+                return SecItemAdd(attributes as CFDictionary, nil) == errSecSuccess
+            },
+            releaseExisting: { deleteGated(scope: scope) },
+            addIncoming: {
+                var attributes = gatedQuery(scope: scope)
+                attributes[kSecValueData as String] = key.data
+                attributes[kSecAttrAccessControl as String] = control
+                return SecItemAdd(attributes as CFDictionary, nil) == errSecSuccess
+            })
+    }
+
+    /// 17h R2-7: the probe item's account — the gated account's sibling
+    /// (the account-carries-the-policy pattern), same service, same DP
+    /// partition, dummy bytes, swept within the same call.
+    static func probeAccount(scope: String) -> String { "\(scope)-biometric-probe" }
+
+    private static func probeQuery(scope: String) -> [String: Any] {
+        [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: StoreKeyCustody.deviceKeychainService,
+            kSecAttrAccount as String: probeAccount(scope: scope),
+        ].merging(KeychainPartition.dataProtection) { a, _ in a }
     }
 
     /// 17h (R3-5): released = deleted, or never there. Anything else is a
