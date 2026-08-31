@@ -224,6 +224,29 @@ eighth wave superseded the old screenshot-pair plan with a style guide she loved
 the mockup's card/metadata-chip grammar as the default, judges the column question in place, and
 notes the alternative in the morning bundle only if genuinely torn.
 
+**THE NINTH WAVE'S CLOSING RIDERS (2026-08-31, pre-sleep — the memo's §9b/§9c, carried by her;
+the memo is the full text, this block is the ROUTING):**
+- **T1, the stale-copy re-key clobber** → **Act 10 wave 2 ATTEMPTS the guard** (the recency
+  comparison reading the disclosure envelope's plain facts — ids/dates/seqs — and the
+  COUNT-AND-DATES warning she ruled emphasized: "12 notes this copy doesn't have, newer versions
+  of 9 others, latest Aug 28"; plus the near-empty-store corner). The wave is Fable, so any
+  `Sync/` lines ride the standing rider; if the guard proves entangled, the deferral is recorded.
+  **EITHER WAY the final ladder verdicts the door: guarded, or a KnownIssues row with an owner.**
+- **T2, the honest UNKNOWN tier** → the SPLIT is hers: the **rendering half joins Act 10 item 3
+  NOW** (three-value truth — covered/exposed/unknown each with its own sentence; the Act 9
+  `ProtectionLegs` brain already carries the three states; a deferred rendering would quietly
+  ship a binary); the **verification half routes to 13r** (her Sparkle/fresh-download walk — the
+  first real stranger machine); the closeout records the 13r line.
+- **§9c item 3, render-don't-re-derive** → BINDING review discipline for the Act 10 waves, the
+  Opus midpoint, and the ladder: the keystone lines (key-not-backup · the sync sentence ·
+  Touch-ID-guards-this-device) land essentially verbatim from the memo — almost-true paraphrase
+  is the named failure mode.
+- **§9c item 4, the marketing pull** → no build; stands in the memo as the named pressure
+  (13s/copy-phase adjacent; R13p-16 is the defense).
+- **§9c item 5, promote to canon** → NEW CLOSEOUT OBLIGATION (13, below): the closeout anchors
+  the memo from the canonical docs (an AppSpec delta pointer) so 13x/13y/the tier inherit the
+  shapes model rather than re-derive it.
+
 **THE TENTH WAVE (2026-08-31, after Acts 3+4's close — her replies to the three parity calls;
 the two pending items since RULED as R-pre13u-8 above):**
 
@@ -1419,6 +1442,11 @@ companion, index as the full view.
 11. **The three sitting rulings** (B1 · CF-12 · #82) recorded verbatim in the KICKOFF's RULINGS block
     and in `notes/QUESTIONS.md`, and built as ruled.
 12. **17a closed in `phase-17-standing-fixes.md`** with per-item dispositions, alongside 17c and 17f.
+13. **The security-shapes memo ANCHORED FROM CANON** (memo §9c item 5, her carry): the closeout's
+    AppSpec §14 delta names `notes/plans/pre-13u-memo-security-shapes.md` as the binding design
+    record of the security shapes/recipes model, so future phases touching these seams (13x, 13y,
+    the tier) inherit it rather than re-derive it. Plus the T2 verification line recorded for 13r,
+    and the T1 door's ladder verdict (guarded, or a KnownIssues row with an owner).
 
 # Verification at close
 
