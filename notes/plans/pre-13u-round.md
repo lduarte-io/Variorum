@@ -683,6 +683,46 @@ record each here in her words as it does.
   like that and i want to see it built at the very least - context aware panel depending on the
   item"* → **RULED into Act 10 item 10** (the panel is IN, not a screenshot-pair question).
 
+**Third wave (same sitting, her words), routed — and her scope authorization recorded verbatim:
+*"I know that Act 10 has a number of items in it already… It's ok if Act 10 is more significantly
+sized - it seems like we're moving through items well, and this just needs to be fixed."***
+
+- *"what do you mean pin? I don't see such a thing as a pinned tab, only the option to star"* —
+  **she is right; the architect imported a browser concept that doesn't exist here.** Tabs have no
+  pin; star is a different surface (the sidebar Starred section) and book-pinning lives on the
+  shelf. Item 9's cap wording CORRECTED: the 21st open closes the least-recently-used open, full
+  stop.
+- The Starred sidebar row (her screenshot): *"there should only be a star on one side though - i
+  like the blue star, the right side is probably better for it. also, it has to handle super long
+  titles and should do a stereo style scroll when hovered over, the rest of the time showing that
+  it's been cut off when the items are too long. there's also not enough padding above it"* →
+  **Act 10 item 13.**
+- The library row's click model — *"clicking on a library item not on the text of the item merely
+  highlights the row in blue, and doesn't do anything, even double clicking. clicking on the text of
+  the name results in instantly going inside. so i think that should be addressed / could be the
+  answer: a click on the whole body highlights it in blue and shows you data maybe (if it's locked,
+  associated tag, that kind of thing…) and a click on the text could still instantly open it. a
+  double click on the blue should lead to going into it though, it's just weird that it doesn't"* →
+  **RULED into Act 10 item 10 — this ANSWERS the interaction fork** (no ratified gesture changes:
+  text-click still opens; the dead body-click becomes select-for-info; double-click opens).
+- *"please look at how unhelpful this 'mark as versions with' element is. this is a disaster - it's
+  not useful at all tbh"* (her screenshot: a flat submenu enumerating the whole corpus) → **Act 10
+  item 14** (the ONE searchable note-picker component).
+- *"things are equally unhelpful in the compare tab - this is a mess UX / UI wise and should be
+  cleaned up as well… the compare flow is so confusing right now, + make outline note + note is
+  confusing, how you select things is confusing, the whole thing is a bit of a mess"* → **Act 10
+  item 15.**
+- The Blocks page: *"feels half baked and semi useless right now, i don't even know what to say
+  specifically for feedback on it other than it's hard to imagine exactly why someone would use it.
+  maybe it should look more like the 'book' page, but for within this note? like have that index
+  like outline view? or let you read just the note with reading tools and the title of it should be
+  renamed from blocks? … I'm not even sure how to fix it"* → **Act 10 item 16 (proposal-first).**
+- Snippets: *"there's also no door to making a new pool and it's confusing what the pool even means /
+  how it got there / what the whole concept is. that might be a bigger change that shouldn't be done
+  in Act 10, but a BIT of a refresh, a search, more of a library esque view, idk, something could
+  maybe be added because what even is this page? feels compeltely half baked"* → **Act 10 item 17
+  (the bounded refresh; the concept question flagged, not solved).**
+
 ---
 
 ## Act 9 — The custody batch: 17a + the CF-12/#82 builds + the routed review findings (Fable implementer)
@@ -819,21 +859,21 @@ doors.
    see in screenshots: the Open section follows the starred-items precedent (13u item 10's ruled
    shape) — visible up to ~7, then the section itself scrolls, no dead label; ⌘⇧1…9 stay bound to
    the visible order. **AUTO-CLOSE RULED (her word, same sitting): total open tabs cap at 20** —
-   opening the 21st quietly closes the least-recently-used unpinned open (a tab is a pointer;
-   nothing is lost — the note stays in the library).
-10. **The note → library transition + THE CONTEXT-AWARE RIGHT PANEL (ruled in, her word — no longer
-    a screenshot-pair question):** the "This note" right region never teleports — the transition
-    animates, column width in sync — AND the library's right region gains an **"extra information"
-    panel, context-aware by item kind**: *"book information or note information, that kind of thing…
-    i want to see it built at the very least."* Shape latitude is the implementer's (what each kind's
-    info card shows); ONE interaction fork must be reconciled deliberately and flagged to her if it
-    changes standing behavior: today a plain click in the Library OPENS a note (#79's ratified
-    gestures) — "items you've clicked on once" needs an answer for how select-for-info coexists with
-    click-opens (candidates: selection/arrow-keys drive the panel while click still opens; or single
-    click selects + shows info and open moves to double-click/⏎ — the latter CHANGES a ratified
-    gesture and is HERS to approve, not the batch's). Principle for the whole act: regions visibly
-    become things or visibly leave. Design together with item 5 (the tags move) — one coherent right
-    edge, not two patches.
+   opening the 21st quietly closes the least-recently-used open (a tab is a pointer; nothing is
+   lost — the note stays in the library). *(Wording corrected at her question — there is no
+   pinned-tab concept in this app and none is being invented; star is a different surface.)*
+10. **The note → library transition + THE CONTEXT-AWARE RIGHT PANEL (ruled in — AND the interaction
+    fork is RULED, by her, on the app's own existing behavior):** the "This note" right region never
+    teleports — the transition animates, column width in sync — AND the library's right region gains
+    an **"extra information" panel, context-aware by item kind**. **The click model, hers verbatim
+    at the sitting (it resolves the fork with ZERO change to #79's ratified gestures):** a click on
+    the **row body** (today a dead highlight) selects and shows the info panel; a click on the
+    **title text** still opens instantly, as today; a **double-click anywhere on the row** opens
+    (today it weirdly doesn't). Panel content latitude is the implementer's — her direction: what
+    makes a library mini-view useful — *"if it's locked, associated tag… # of words? notes? last
+    edited? the type of thing people want in a library"* — per kind (note vs book). Principle for
+    the whole act: regions visibly become things or visibly leave. Design together with item 5 (the
+    tags move) — one coherent right edge, not two patches.
 11. **Checking a markdown checkbox jumps to the absolute bottom of the note** (her report in Act 7's
     arrivals; the mechanism is UNKNOWN — trace first, never guess). Candidate family for the tracer:
     the toggle's storage rewrite resetting scroll/caret (the TK2 geometry class, TEXTKIT2 §2), but
@@ -848,6 +888,43 @@ doors.
     typed form undecided (*"i can't think of a simple up and down arrow option but i'd like them
     too"*) — the batch may PROPOSE candidates (e.g. `-^` / `-v`) as a note for her; nothing built
     without her nod.
+13. **The Starred sidebar row** (her screenshot shows TWO stars, one each side): exactly ONE star —
+    the blue one, on the RIGHT ("probably better", her lean — the batch may confirm in place); long
+    titles truncate with a visible ellipsis at rest and **marquee-scroll on hover** ("stereo style",
+    her word); more padding above the Starred section. P-8 binds (`lineLimit` on chrome text).
+14. **ONE searchable note-picker component** — built once, used everywhere a note is chosen from the
+    corpus: the "Mark as Versions with" submenu (her screenshot: a flat menu enumerating every note —
+    "a disaster"), item 2's Add-to-Book door, and Compare's "Choose a note…". Shape: search-as-you-
+    type, contextually ranked (version peers first where versions are the subject; recent first
+    otherwise), snippet/date context per row so five "2026-08-23"s are tellable apart. The derived
+    display-name rule (13u item 4) is the ranking's natural friend but is NOT built early here —
+    titles as they are, ranked well, is this act's bar.
+15. **The Compare surface cleanup** — her verbatim in Act 7's arrivals. FACE-level only: the lens
+    semantics (13b's rebuild) are untouched; what changes is legibility — the empty state teaches
+    the flow (pick a note → columns appear; version peers first), the picker becomes item 14's
+    component, "make outline note" / "+ note" get affordances that say what they do, the toggle-chip
+    row reads as settings rather than mystery pills, and how-you-select-things becomes visible.
+    Screenshot-verified; anything that would CHANGE a flow (not just clarify it) comes back to her.
+16. **The Blocks page — PROPOSAL-FIRST, never built blind** (her own words: "I'm not even sure how
+    to fix it"): the batch produces 2–3 concrete directions as mockups/screenshots for her ruling —
+    her floated candidates seed them: (a) a book-page-like **in-note index/outline** (the block-TOC
+    idea grown up: names/first-sentences, jump, collapse); (b) a **read-the-note view with reading
+    tools**; (c) a rename away from "Blocks" either way. She picks; the build follows her pick
+    (this act if timing allows, else the deferral is recorded with its owner). No silent redesign
+    of a mode's purpose — that is a product call.
+17. **Snippets — the BOUNDED refresh** (her own scoping: "that might be a bigger change that
+    shouldn't be done in Act 10, but a BIT of a refresh"): a door to create a new pool; search over
+    scraps; a more library-esque listing. **PLUS the naming collision flagged for her, not solved:**
+    the page's chip literally reads "pool: Pool" — `container.kind='pool'` (scrap areas) and the
+    sidebar's Pool (bookless notes, R29) share one word for two concepts, and her "it's confusing
+    what the pool even means / how it got there" is that collision speaking. Renaming either is
+    product vocabulary = HERS; the batch brings candidates. The deeper "what is this page for"
+    question is recorded as open, not answered here.
+
+**Act 10 sizing (her authorization at the sitting):** the act is deliberately allowed to be
+"more significantly sized." It runs as **up to two sequential Fable implementer waves** at the
+architect's discretion — wave 1 the mechanical/polish items, wave 2 the surface redesigns (14–17,
+the panel, the lobby) — with a clean handoff seam between; one wave if it fits.
 
 ---
 
