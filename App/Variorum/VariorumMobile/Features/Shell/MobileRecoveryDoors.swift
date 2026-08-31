@@ -66,6 +66,21 @@ nonisolated enum MobileRoomListing {
     static func truncationMarker(shown: Int) -> String {
         "Showing the first \(shown)."
     }
+
+    /// **The TWO-NUMBER form, for a listing that knows its exact total** (the
+    /// filter batch's cold review, m4).
+    ///
+    /// The one-number sentence above is honest where the total genuinely is
+    /// not known: those rooms bound their FETCH at `window + 1`, so all they
+    /// hold is *"there is at least one more"*. A listing whose delivery is
+    /// WHOLE and whose window is a RENDER window knows exactly how many there
+    /// are — the Library's books listing (`Queries.bookshelf` takes no limit)
+    /// and the scraps area, which already speaks a two-number sentence of its
+    /// own. Saying less than is known would be the omission, not the
+    /// restraint.
+    static func truncationMarker(shown: Int, of total: Int) -> String {
+        "Showing the first \(shown) of \(total)."
+    }
 }
 
 /// **The trash door, one renderer for both path lines.** A real `Button`

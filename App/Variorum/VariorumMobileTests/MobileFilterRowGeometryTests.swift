@@ -105,6 +105,40 @@ private let measuredTypeSizes: [DynamicTypeSize] = [
     .large, .xxxLarge, .accessibility1, .accessibility3, .accessibility5,
 ]
 
+// MARK: - Reading frames off the REAL surface (the cold review's M1)
+
+/// **The same frame reader, over `HostedSurface`** — the harness that mounts
+/// the app's own views.
+///
+/// M1's finding, in one sentence: every geometry pin in this file measured a
+/// hand-built stand-in for the sort door, so a ruling about the SHIPPED
+/// door's width rested on a substitution. The component cases stay (they are
+/// the cheap ones and they trip on a future door), and the fit law now also
+/// runs over the real `MobileLibraryView`, whose sort door is a real
+/// SwiftUI `Menu`.
+@MainActor
+extension HostedSurface {
+    /// `accessibilityFrame` is SCREEN space; `HostedSurface` builds its window
+    /// at the origin with no transform and the host fills it, so screen space
+    /// and the host's own space coincide. The pins assert
+    /// `host.view.bounds.width == width` before reading a frame either way —
+    /// the 4.5d rule.
+    func frame(ofDoorLabelled label: String) -> CGRect? {
+        visibleElements.first { $0.accessibilityLabel == label }?.accessibilityFrame
+    }
+
+    /// Every element as `label @ minX…maxX (w×h)` — the dump a later session
+    /// re-runs to get these numbers again.
+    var frameDump: [String] {
+        visibleElements.compactMap { element in
+            guard let label = element.accessibilityLabel else { return nil }
+            let frame = element.accessibilityFrame
+            return "\(label)=\(Int(frame.minX))…\(Int(frame.maxX))"
+                + "(w\(String(format: "%.1f", frame.width)))"
+        }
+    }
+}
+
 // MARK: - The pins
 
 @MainActor
@@ -135,10 +169,13 @@ struct MobileFilterRowGeometryTests {
     /// FIXED in SwiftUI (only text styles and `.custom(…, relativeTo:)`
     /// scale) — so the filter row measures identically at every AX size, and
     /// an unchanging measurement is indistinguishable from a harness that
-    /// never applied the setting at all. This control is a `Text` in the SAME
-    /// hosted tree under the SAME `.dynamicTypeSize`, in a font that DOES
-    /// scale; when it grows and the doors do not, the doors' constancy is a
-    /// fact about the font rather than about the harness.
+    /// never applied the setting at all. This control is a `Text` under the
+    /// SAME `.dynamicTypeSize`, through the SAME HARNESS — a second window
+    /// built by `withHostedRow`, not literally the same tree as the row (the
+    /// cold review's n9: the earlier wording overstated it, and the
+    /// experiment is real either way) — in a font that DOES scale; when it
+    /// grows and the doors do not, the doors' constancy is a fact about the
+    /// font rather than about the harness.
     private static let controlLabel = "dynamic type control"
 
     private func typeSizeControl(_ typeSize: DynamicTypeSize) -> some View {
@@ -354,6 +391,172 @@ struct MobileFilterRowGeometryTests {
                 #expect(!labels.contains(MobileListingFilter.bookless.word))
                 #expect(!labels.contains(MobileListingFilter.scraps.word))
             }
+        }
+    }
+
+    // MARK: - THE REAL SURFACE (the cold review's M1)
+
+    /// A real Library, ready to host: the app's own view over real models,
+    /// with the shelf model driven the way the app drives it (its held loop
+    /// belongs to the shelf root's `.task`, so a harness mounting the Library
+    /// alone must start it — the fact is written at `MobileLibraryView.books`).
+    @MainActor
+    private struct RealLibrary {
+        let view: MobileLibraryView<EmptyView>
+        let observing: Task<Void, Never>
+    }
+
+    private func realLibrary(_ session: AppSession) async -> RealLibrary {
+        let library = MobileLibraryViewModel(session: session)
+        let scraps = MobileScrapsModel(session: session)
+        let stars = MobileStarsModel(session: session)
+        let shelf = MobileShelfViewModel(session: session)
+        let observing = Task { await shelf.start() }
+        await shelf.refreshTags()
+        return RealLibrary(
+            view: MobileLibraryView(
+                model: library, scraps: scraps, stars: stars, books: shelf,
+                tokens: .terminalLight, tabBar: { EmptyView() },
+                onOpen: { _ in }, onOpenTrash: {}, onOpenArchive: {}),
+            observing: observing)
+    }
+
+    /// **THE FIT LAW, OVER THE SHIPPED DOOR** — the cold review's M1.
+    ///
+    /// Every case above measures `MobileFilterRow` with a hand-built `Image`
+    /// standing in for the sort door. The SHIPPED door is
+    /// `MobileLibraryView.sortMenu` — a SwiftUI **`Menu`**, which is a
+    /// different UIKit thing entirely and may report a different (larger) hit
+    /// region than a bare glyph. Her #92(b) is a WIDTH ruling, so its proof
+    /// must not rest on a substitution: this case hosts the REAL
+    /// `MobileLibraryView` at the narrowest width the app is ever shown at
+    /// and reads the real Menu's own frame.
+    ///
+    /// **What it holds, and each is the real thing:** the row fits (nothing
+    /// hangs off either edge), the doors keep their order and their one
+    /// baseline band, the sort door is LAST — and **nothing is shrunk**, the
+    /// oracle being each door's own width on the same real surface at 402 pt
+    /// (never a literal — the 4.5d rule, so a font or wording change moves
+    /// both sides together). Her ruling is fit-WITHOUT-shrink, so a real
+    /// element large enough to spend `minimumScaleFactor` would be a real
+    /// defect and would fail here.
+    ///
+    /// **RED ON OLD by a PRODUCTION revert — and naming which, because M1's
+    /// whole finding is that the batch's own RED ON OLD (2) did not.** Put
+    /// the shipped text door back as the `Menu`'s label in
+    /// `MobileLibraryView.sortMenu` (production, not this file) and this case
+    /// fails with FIVE issues at 320 pt: the real door measures 44 pt against
+    /// its 78.3 pt ideal, `Bookless` collapses 57 → 34.7 and `Scraps` 42.7 →
+    /// 39 as the row spends its scale factor, and a shrunken label leaves the
+    /// one baseline band. **Under that same revert the three component cases
+    /// above stay GREEN** — they measure a hand-built `Image`, which the
+    /// production edit never touches. That contrast IS the finding, and it is
+    /// quoted in the batch record.
+    ///
+    /// **The reviewer's speculative tail is FALSIFIED by the measurement:** a
+    /// SwiftUI `Menu` labelled by a glyph reports a **16 pt** accessibility
+    /// frame here, not a ≥44 pt hit region, so the shipped row was never
+    /// spending its scale factor and no layout fix was owed.
+    @Test func theRealLibrarysRowFitsWithoutShrinkingAtDisplayZoom() async throws {
+        try await withEditorWorld { session, _ in
+            try await session.runner.run { ops in
+                _ = try ops.createPost(title: "A note")
+                _ = try ops.createReading(name: "Poems", kind: .curated)
+            }
+            let sortLabel = MobileSortDoor.label(
+                sortWord: MobileLibraryViewModel.sortWord(.lastTouched))
+            let measured = MobileListingFilter.libraryDoors.map(\.word) + [sortLabel]
+            var dump: [String] = []
+
+            // The ideal widths, off the REAL surface at an ordinary width.
+            var ideal: [String: CGFloat] = [:]
+            let wide = await realLibrary(session)
+            defer { wide.observing.cancel() }
+            try await withHostedSurface(
+                wide.view, size: CGSize(width: 402, height: 852)
+            ) { surface in
+                await surface.settle(50)
+                #expect(surface.host.view.bounds.width == 402)
+                for label in measured {
+                    ideal[label] = surface.frame(ofDoorLabelled: label)?.width
+                }
+                dump.append("402 pt · real: " + surface.frameDump
+                    .filter { line in measured.contains { line.hasPrefix("\($0)=") } }
+                    .joined(separator: " "))
+            }
+
+            // And the law, at Display Zoom.
+            let narrow = await realLibrary(session)
+            defer { narrow.observing.cancel() }
+            try await withHostedSurface(
+                narrow.view, size: CGSize(width: 320, height: 852)
+            ) { surface in
+                await surface.settle(50)
+                #expect(surface.host.view.bounds.width == 320)
+                dump.append("320 pt · real: " + surface.frameDump
+                    .filter { line in measured.contains { line.hasPrefix("\($0)=") } }
+                    .joined(separator: " "))
+                // **m6's measurement, kept because it is the reason a
+                // property was deleted rather than adopted:** the row carried
+                // an `accessibilityIdentifier` claiming *"the identifier the
+                // geometry pins find this row by"*, and nothing ever found
+                // anything by it. This prints `[]` — a container's identifier
+                // never reaches the accessibility tree — so a row-level frame
+                // bound was never available, and the doors are what get
+                // measured. If this ever prints a non-empty list, the claim
+                // becomes buildable again.
+                let identifiers = surface.visibleElements
+                    .compactMap { ($0 as? UIAccessibilityIdentification)?.accessibilityIdentifier }
+                    .filter { !$0.isEmpty }
+                dump.append("identifiers on the real surface: \(identifiers)")
+
+                for label in measured {
+                    let frame = try #require(
+                        surface.frame(ofDoorLabelled: label),
+                        "the \(label) door does not render on the real Library at 320 pt")
+                    #expect(frame.width > 0, "\(label) renders with no width")
+                    #expect(frame.minX >= -0.5,
+                            "\(label) hangs off the left of the real 320 pt surface at x=\(frame.minX)")
+                    #expect(frame.maxX <= 320.5,
+                            "\(label) hangs off the right of the real 320 pt surface, ending at \(frame.maxX)")
+                    // NOTHING IS SHRUNK — her ruling is fit-without-shrink,
+                    // and the real trailing element is the one that could
+                    // spend the row's scale factor.
+                    let wideWidth = try #require(ideal[label])
+                    #expect(abs(frame.width - wideWidth) <= 0.5,
+                            """
+                            \(label) renders \(frame.width) pt on the real \
+                            Library at 320 against its \(wideWidth) pt ideal — \
+                            the shipped row is spending its scale factor
+                            """)
+                }
+
+                let xs = MobileListingFilter.libraryDoors
+                    .compactMap { surface.frame(ofDoorLabelled: $0.word)?.minX }
+                #expect(xs == xs.sorted(), "the real row re-flowed at 320 pt: \(xs)")
+                let sort = try #require(surface.frame(ofDoorLabelled: sortLabel))
+                #expect(sort.minX > (xs.last ?? 0), "the real sort door is not last")
+                let ys = MobileListingFilter.libraryDoors
+                    .compactMap { surface.frame(ofDoorLabelled: $0.word)?.minY }
+                    + [sort.minY]
+                #expect((ys.max() ?? 0) - (ys.min() ?? 0) <= 1,
+                        "a door left the real row's one baseline band at 320 pt: \(ys)")
+
+                // **AND THE SHIPPED DOOR IS A GLYPH, not a sentence** —
+                // #92(b) measured where it actually lives. The bound is the
+                // longest stamp word's own cost: the text door drew up to
+                // "sort: last meaningful edit", and the component case's 30 pt
+                // bound is repeated here against the REAL element rather than
+                // the stand-in.
+                #expect(sort.width <= 30,
+                        """
+                        the SHIPPED sort door measures \(sort.width) pt at \
+                        320 pt — #92(b) shrank it to a glyph, and the longest \
+                        stamp word it used to draw is \
+                        "\(MobileLibraryViewModel.sortWord(.lastMajorRevision))"
+                        """)
+            }
+            print("REAL-FILTER-ROW-GEOMETRY\n" + dump.joined(separator: "\n"))
         }
     }
 

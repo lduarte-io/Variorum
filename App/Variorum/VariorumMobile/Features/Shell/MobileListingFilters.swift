@@ -78,14 +78,12 @@ nonisolated enum MobileListingFilter: String, CaseIterable, Sendable, Hashable {
         }
     }
 
-    /// Whether this door's listing is the NOTE listing (so the Archived
-    /// trailing row — a door to archived NOTES — belongs under it).
-    var isNoteListing: Bool {
-        switch self {
-        case .all, .notes, .bookless: return true
-        case .books, .scraps: return false
-        }
-    }
+    // *(There was an `isNoteListing` flag here, and the cold review's m3
+    // retired it: the ONE site that read it — `MobileLibraryView.archiveRow`
+    // — sits inside the branch that already excludes books and scraps, so
+    // the clause could never be false. A guard that cannot fail reads as a
+    // rule and is not one; the rule is the branch, and the pin
+    // `theArchivedDoorTrailsNoteListingsOnly` proves the branch.)*
 
     // MARK: The per-room door sets
 
@@ -152,10 +150,15 @@ struct MobileFilterRow<Trailing: View>: View {
     /// surface rather than recomputing this number.
     static var doorSpacing: CGFloat { 11 }
 
-    /// The identifier the geometry pins find this row by. Chrome carries no
-    /// label of its own (it is a container, not a door), so an identifier is
-    /// the honest handle.
-    static var identifier: String { "listing.filterRow" }
+    // *(There was an `identifier` here — *"the identifier the geometry pins
+    // find this row by"* — and the cold review's m6 caught that no pin ever
+    // found anything by it. It is deleted rather than adopted because the
+    // claim turned out to be UNBUILDABLE, not merely unbuilt: the row is a
+    // container, not an accessibility element, so its identifier never
+    // reaches the tree at all. MEASURED on the real Library at 320 pt —
+    // `identifiers on the real surface: []`, printed by
+    // `theRealLibrarysRowFitsWithoutShrinkingAtDisplayZoom`, which is also
+    // the case that now bounds the row by measuring every door in it.)*
 
     var body: some View {
         HStack(spacing: Self.doorSpacing) {
@@ -179,7 +182,6 @@ struct MobileFilterRow<Trailing: View>: View {
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 6)
-        .accessibilityIdentifier(Self.identifier)
     }
 }
 

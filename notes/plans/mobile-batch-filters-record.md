@@ -71,7 +71,7 @@ rooms, which is her §10.2 note's letter (*"one filter brain, not two"*):
 
 | | the declaration | the renderer |
 |---|---|---|
-| what | `MobileListingFilter` (`all · books · notes · bookless · scraps`), its per-room door sets, `isNoteListing`, the books listing's empty line | `MobileFilterRow` — plain `Button` doors, one visible row, a `@ViewBuilder` trailing slot |
+| what | `MobileListingFilter` (`all · books · notes · bookless · scraps`), its per-room door sets, ~~`isNoteListing`~~ *(deleted at the fix wave — m3)*, the books listing's empty line | `MobileFilterRow` — plain `Button` doors, one visible row, a `@ViewBuilder` trailing slot |
 | also | `MobileSortDoor` (the glyph + the spoken verb, a DECLARATION not a view — the `MobileRecoveryDoors` precedent) | an `EmptyView` convenience init for the Archive's trailing-less shape |
 
 `MobileLibraryViewModel.Filter` became a `typealias` of it, so no call site had
@@ -200,9 +200,12 @@ control · xxxLarge: width=90   control · accessibility3: width=155
                                control · accessibility5: width=204
 ```
 
-The control is a `Text` in the SAME hosted tree under the SAME
-`.dynamicTypeSize`, in a font that DOES scale — it grows 69 → 204 pt, so the
-setting is reaching the host. The row does not move because `VoiceTokens.small`
+The control is a `Text` under the SAME `.dynamicTypeSize`, through the SAME
+harness — *(precision, fix wave n9: it is a second hosted window built by the
+same helper, not literally the same tree as the row; the experiment is real
+and the cold reviewer reproduced it, and the earlier "the SAME hosted tree"
+overstated the setup)* — in a font that DOES scale: it grows 69 → 204 pt, so
+the setting is reaching the host. The row does not move because `VoiceTokens.small`
 is `Font.system(size: 11.5)`, which is **fixed** in SwiftUI (only text styles
 and `.custom(…, relativeTo:)` scale).
 
@@ -232,14 +235,47 @@ ideal — quoted in §4.
    useful"*, not wrong, and removing a shipped door is a bigger act than adding
    the kind doors (the R22/R25 precedent: door-count changes are hers). The row
    was measured rather than trimmed, and it fits with the door in it.
-3. **`All` and `Notes` show the SAME rows in BOTH rooms — and the alternative
-   is hers to rule.** The Library's listing IS the note listing, so under her
-   #92(a) vocabulary the two doors name one set. The alternative — `All` =
-   books THEN notes, which is the app's own kind-filter grammar in the Trash
-   room (All is the union of the kinds) — **would change the resting surface
-   she looks at every day**, which she did not ask for, so the built answer is
-   the one that changes nothing she has. *(In the Archive room the coincidence
-   is forced rather than chosen: everything archivable is a note — §0.)*
+3. ~~**`All` and `Notes` show the SAME rows in BOTH rooms — and the
+   alternative is hers to rule.**~~ **OVERTURNED by her #93(b), 2026-08-31,
+   and BUILT at the fix wave** (verbatim: *"All should be a book + notes
+   union - otherwise it just doesn't make sense"*). The shipped answer was
+   `.all` = the note listing, chosen to change nothing at rest; the ruling
+   takes the alternative this PROVISIONAL itself named — the Trash room's
+   own All-is-the-union grammar — and the Library's `.all` now interleaves
+   books with notes under the active sort. **The LIBRARY only:** in the
+   Archive room the coincidence is FORCED rather than chosen (everything
+   archivable there is a note — §0), so that room is untouched by the
+   ruling. The interleave's stamp mapping lands PROVISIONAL in its place —
+   see the FIX WAVE RESULTS in `mobile-batch-filters-cold-review.md`.
+   *(The cold review's m5 folds in here: the batch deleted three Archive
+   doors on P-2 grounds while `Notes` sat beside `All` as a visible no-op.
+   The ruling ends that in the Library — `Notes` now names one kind where
+   `All` names two. **What SURVIVES for her bundle is the ARCHIVE's two
+   same-set doors**, which #93(a) has already parked: book archiving is
+   13i's, so until that phase rules, that room's `All` and `Notes` name one
+   set by a model fact nothing here can change.)*
+3b. **The BOOKS listing's truncation sentence — amended at the fix wave
+   (m4).** It shipped speaking the filterless rooms' one-number sentence
+   (*"Showing the first N."*) though this listing's delivery is WHOLE and its
+   exact total is in hand; it now speaks the two-number form
+   (`MobileRoomListing.truncationMarker(shown:of:)` — *"Showing the first 2
+   of 3."*), which is what its same-surface neighbour, the scraps area,
+   already did. **And a PRE-EXISTING silence is recorded rather than fixed:
+   the resting NOTE listing (`listingRows`) has no truncation marker at
+   all** — `observeLibrary`'s `limit:` cuts silently at 200 — which is not
+   this batch's doing and is not this batch's to fix: its home is the
+   standing **"Bounded view windows show markers, not more"** row in
+   `KnownIssuesAndTechDebt.md`, owner 12.
+
+3c. **A LOOK divergence, chosen rather than missed (n8).** A book's name
+   renders `tokens.body` in the Library and `tokens.body.weight(.semibold)`
+   on the Shelf. The FACES are one brain (`MobileShelfFaces`) and stay one;
+   what differs is weight, and the reason is that the Shelf is a shelf of
+   books where a book's name is the row, while the Library is a listing of
+   many kinds where a book's name sits beside note titles at the same
+   weight. Recorded so a look round has the choice in front of it rather
+   than reading it as an oversight.
+
 4. **The books listing's window is a RENDER window, not a fetch window.**
    `Queries.bookshelf` takes no limit and the Shelf holds it unbounded, because
    core's own header calls it author-scale (*"reading rows + counted joins"*).
@@ -248,8 +284,9 @@ ideal — quoted in §4.
    where `count > window` is exact truth rather than a probe approximation.
    If she ever wants the fetch bounded too, that is a core seam, not a face.
 5. **The sort stays a `.all`-only affordance**, per the brief — so `.notes`,
-   which shows the `.all` rows, has no sort door. One line if she wants it
-   under `.notes` as well; it stays absent under books/bookless/scraps for the
+   which shows the note HALF of `.all`'s union *(amended at the fix wave: the
+   two doors no longer name one SET, but they still share one ORDER)*, has no
+   sort door. One line if she wants it under `.notes` as well; it stays absent under books/bookless/scraps for the
    standing P-2 reason (their orders are the Shelf's and the core queries'
    own).
 6. **The Archive room's reduced door set** (`all · notes`) — the narrowing is
@@ -274,7 +311,9 @@ ideal — quoted in §4.
 
 **+16 tests, +2 suites** (613/94 → **629/96**), exactly accounted for:
 `MobileFilterTests` **10** (new suite) · `MobileFilterRowGeometryTests` **6**
-(new suite).
+(new suite). *(The fix wave added **3** more into the same two suites — 629 →
+**632/96**; its own accounting is in `mobile-batch-filters-cold-review.md`'s
+FIX WAVE RESULTS.)*
 
 Four of them are proven by BEHAVIOURAL REVERT, with the failure quoted; the
 rest are honestly labelled NEW COVERAGE, because this batch adds capability and
@@ -302,10 +341,29 @@ re-worded to name both causes.)*
 
 ### RED ON OLD (2) — the sort glyph IS the width ruling
 
+> **⚠️ CORRECTED 2026-08-31 at the fix wave (the cold review's M1), and the
+> correction is the point.** The reds quoted below are real, but the revert
+> that produced them edited **the TEST FIXTURE, not production**: at the time
+> this section was written, *every* geometry case measured a hand-built
+> `Image` inside `MobileFilterRowGeometryTests.libraryRow`, and the shipped
+> door — `MobileLibraryView.sortMenu`, a SwiftUI `Menu` — was measured by
+> nothing. So the sentence *"the shipped text door put back as the `Menu`'s
+> label"* describes a production edit these pins could not have seen.
+> **Proven at the fix wave, both directions:** reverting PRODUCTION's
+> `sortMenu` to the text door leaves all three component cases GREEN, and
+> reds only the new real-surface case
+> (`theRealLibrarysRowFitsWithoutShrinkingAtDisplayZoom`, 5 issues — quoted
+> in this file's FIX WAVE RESULTS). **The standing rule this cost:
+> a red-on-old claim NAMES what was reverted, production or fixture, every
+> time.** *(The reviewer's speculative tail — that a real `Menu` might report
+> a ≥44 pt hit region and spend the row's scale factor — was FALSIFIED by
+> measuring it: the shipped door reports **16.0 pt**, ending flush at x=300
+> inside a 320 pt surface, and no layout fix was owed.)*
+
 The shipped text door (`Text(chromeLabel("sort: last touched"))`) put back as
-the `Menu`'s label. **Its accessibility label is unchanged by that revert** —
-the modifier overrides the composed one either way — which is exactly why a
-LABEL pin could not have seen this and a WIDTH pin can:
+the FIXTURE `Menu`'s label. **Its accessibility label is unchanged by that
+revert** — the modifier overrides the composed one either way — which is
+exactly why a LABEL pin could not have seen this and a WIDTH pin can:
 
 ```
 ✘ Test theSortDoorMeasuresAsAGlyphRatherThanASentence() recorded an issue at
@@ -455,7 +513,25 @@ suites passed after 180.841 seconds with 2 known issues."*
 Arithmetic exact: 613 + 16 = 629; 94 + 2 = 96. The **2 known issues are the
 same single documented diagnostic test** as the baseline's —
 `anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`, which records
-two issues from one `withKnownIssue` block. No other test records an issue.
+two issues from one `withKnownIssue` block. ~~No other test records an issue.~~
+
+> **⚠️ AMENDED 2026-08-31 at the fix wave (the cold review's M2 — the line
+> above is not a baseline a next session can rely on).** The cold reviewer ran
+> the full suite TWICE on this same tree and both runs ended
+> `** TEST FAILED **` at
+> `MobilePerfWalkTests.typingAtTheViewportHoldsThePerKeystrokeBudgetAt100k`
+> (**13.169 ms** and **12.936 ms** against a 12.0 ms budget, one with a runner
+> restart) — and **2/2 GREEN in isolation** (9.4–10.8 ms, 12–22% headroom).
+> **It is the load-flaky class, not this batch's doing:** the fence is
+> git-clean and the diff carries zero editor-path lines. It is also the pin's
+> **second recorded load-red** — `notes/plans/mobile-round-2.md` §70 already
+> logged it as a load artifact of batch 6a, re-run isolated and green.
+> **It now has a KnownIssues row** (owner 12, beside `CanvasDragTrackingTests`
+> and the Mac `rewriteStrategyLatencies` pin), which is what it was missing:
+> its two class-siblings had rows and it did not, so each session that met it
+> re-derived the verdict from scratch. **The standing instruction is on that
+> row: a red here on a full-suite run is re-run ISOLATED and BOTH results
+> reported.**
 
 **Environment:** worktree `~/dev/variorum-mobile`, branch `mobile`. Private
 simulator `Variorum-filters` (iPhone 17 Pro, iOS 26.2,

@@ -131,3 +131,185 @@ end (expect the M2 flake possible under load — if it reds, re-run it
 isolated and report both, per its new row); quote the final line;
 `Package.resolved` never swept; pathspec-limited commit; no pushes.
 Append FIX WAVE RESULTS to THIS file before the final message.
+
+---
+
+# FIX WAVE RESULTS (2026-08-31)
+
+**All nine items landed, plus her #93(b) union. +3 tests, 629/96 →
+632/96, no suite added. Fence git-clean.** Every revert below is
+labelled **PRODUCTION** or **FIXTURE** — the standing rule M1 bought.
+
+| item | verdict | what landed, and the proof |
+|---|---|---|
+| **M1** | **FIXED — and the record CORRECTED** | New case `theRealLibrarysRowFitsWithoutShrinkingAtDisplayZoom` hosts the REAL `MobileLibraryView` at 402 and 320 pt (`withHostedSurface` gained a `size:`, default unchanged) and reads the real `Menu`'s own frame. **RED ON OLD, PRODUCTION revert** (`sortMenu`'s label → the shipped `Text`): 5 issues, quoted below — while **all three component cases stayed GREEN under that same revert**, which is M1's finding proven from both sides. Record §4's RED ON OLD (2) now carries a dated correction naming the fixture. **The speculative tail is FALSIFIED:** the real Menu reports **16.0 pt**, not ≥44. |
+| **M2** | **RECORDED — pin never touched** | Record §7's *"No other test records an issue"* struck and replaced with the observed red + isolation result; **new `KnownIssuesAndTechDebt.md` row**, owner 12, beside `CanvasDragTrackingTests` and the Mac `rewriteStrategyLatencies` pin, naming this as the pin's **second** load-red (`mobile-round-2.md` §70 was the first) and carrying the standing re-run-isolated-and-report-both instruction. *(It passed on this wave's full-suite run: 0.879 s.)* |
+| **#93(b)** | **BUILT — the union** | See the two paragraphs below. **RED ON OLD, PRODUCTION revert** ×2. |
+| **m3** | **FIXED** | The dead `model.filter.isNoteListing` clause is gone from `archiveRow`, and `MobileListingFilter.isNoteListing` with it — that clause was its ONE reader. The rule is the BRANCH, said so at the branch. **No red available and none claimed** (removing a clause that can never be false is behaviour-preserving by construction); `theArchivedDoorTrailsNoteListingsOnly` still proves the branch and stays green. |
+| **m4** | **FIXED + RECORDED** | `MobileRoomListing.truncationMarker(shown:of:)` added beside the one-number form with the reason for both; the books listing speaks it. **RED ON OLD, PRODUCTION revert.** The note listing's PRE-EXISTING silence is recorded in the record (new PROVISIONAL 3b) and routed to the standing *"Bounded view windows show markers, not more"* KnownIssues row, owner 12. |
+| **m5** | **FOLDED into the record** | PROVISIONAL 3 struck through and rewritten as OVERTURNED-and-built; the surviving half — the **Archive's two same-set doors** — is named there as hers, already parked by #93(a) at 13i. |
+| **m6** | **DELETED with its claim** | `MobileFilterRow.identifier` and its `.accessibilityIdentifier` are gone. Not adopted, because the claim is **unbuildable, not merely unbuilt**: MEASURED on the real surface, `identifiers on the real surface: []` — a container's identifier never reaches the accessibility tree, so a row-level frame bound was never available. The probe stays in the new case as the reason. |
+| **n7** | **FIXED** | `bookRow(_:)` extracted (one rule, both doors) with `name`/`meta` hoisted to `let`s — one `MobileShelfFaces` pass per row, so a smart book pays ONE query-spec decode. |
+| **n8** | **RECORDED** | New PROVISIONAL 3c: the Library's `body` vs the Shelf's `body.weight(.semibold)` is a chosen divergence with its reason, so a look round sees a choice rather than an oversight. |
+| **n9** | **FIXED, both copies** | *"the SAME hosted tree"* → *"through the SAME harness"* in the record's §2 and in the pin's own doc, each naming what it overstated. |
+
+## The union, as built
+
+**The Library's `.all` now interleaves her books with her notes under the
+active sort** — one pure brain (`MobileLibraryViewModel.union`) over rows
+each kind already had: a book row in the union is `bookRow(_:)`, the same
+row the `.books` door renders, with the same Shelf faces, the same
+`onOpen(.book(id))` landing, and the same window and (now two-number)
+truncation sentence. `.notes` and `.bookless` pass an empty book set and
+are byte-unchanged; **the ARCHIVE room is untouched**, its `all`/`notes`
+coincidence being forced by the model fact rather than chosen.
+
+**The PROVISIONAL mapping (hers to ratify — the ruling left it
+unspecified):** a book contributes `created_at` under **created** and under
+**entry date** (a book has no entry date, so it behaves exactly as an
+undated note does under core's own COALESCE), and `updated_at` under **last
+touched** and **last meaningful edit** (a book has no churn stamp).
+Descending, matching the listing's `direction: .desc`; ties break
+note-before-book, then source order, so nothing depends on sort stability.
+One inherited wart, stated: under entry date a note's stamp may be a bare
+day while a book's is a full ISO instant, so a book created on a day sorts
+just above a note dated that day — the same lexicographic wart core already
+has between dated and undated notes. Pinned by
+`theUnionOrdersABookByTheStampTheSortNames`.
+
+## The reds, quoted
+
+**M1 — PRODUCTION revert** (`MobileLibraryView.sortMenu`'s label back to
+`Text(tokens.chromeLabel("sort: " + sortWord(model.sort)))`):
+
+```
+✘ Test theRealLibrarysRowFitsWithoutShrinkingAtDisplayZoom() recorded an issue
+  at MobileFilterRowGeometryTests.swift:511:21: Expectation failed:
+  (abs(frame.width - wideWidth) → 22.333333333333343) <= 0.5
+↳ Bookless renders 34.66666666666666 pt on the real Library at 320 against its
+  57.0 pt ideal — the shipped row is spending its scale factor
+✘ … ↳ Scraps renders 39.0 pt … against its 42.66666666666666 pt ideal
+✘ … ↳ Sort: last touched renders 44.0 pt … against its 78.33333333333331 pt ideal
+✘ … ((ys.max() ?? 0) - (ys.min() ?? 0) → 22.666666666666657) <= (1 → 1.0)
+↳ a door left the real row's one baseline band at 320 pt:
+  [154.5, 154.5, 154.5, 156.66666666666666, 155.16666666666666, 134.0]
+✘ … (sort.width → 44.0) <= (30 → 30.0)
+↳ the SHIPPED sort door measures 44.0 pt at 320 pt — #92(b) shrank it to a
+  glyph, and the longest stamp word it used to draw is "last meaningful edit"
+✘ Test theRealLibrarysRowFitsWithoutShrinkingAtDisplayZoom() failed after 3.196
+  seconds with 5 issues.
+```
+
+and — **this is the half that proves M1** — under that same PRODUCTION
+revert:
+
+```
+✔ Test everyFilterDoorLandsWhollyInsideTheSurfaceAtEveryWidth() passed after 2.673 seconds.
+✔ Test noFilterDoorIsShrunkToFitEvenAtDisplayZoom() passed after 0.892 seconds.
+✔ Test theSortDoorMeasuresAsAGlyphRatherThanASentence() passed after 1.333 seconds.
+```
+
+**#93(b) — PRODUCTION revert** (`rows(books:)` → `books: []`, the shipped
+note-only listing):
+
+```
+✘ Test theLibrarysAllDoorIsTheBooksAndNotesUnion() recorded an issue at
+  MobileFilterTests.swift:342:17: Expectation failed:
+  labels.contains { $0.hasPrefix("Poems") }
+↳ her book does not row under All — labels were ["~/library", "Trash",
+  "New Note", "search notes, books…", "All", "Books", "Notes", "Bookless",
+  "Scraps", "Sort: last touched", "Newer note", "Older note", "Archived"]
+✘ … MobileFilterTests.swift:348:32: Expectation failed:
+  labels.firstIndex { $0.hasPrefix("Poems") } → nil
+✘ Test theLibrarysAllDoorIsTheBooksAndNotesUnion() failed after 1.823 seconds
+  with 2 issues.
+```
+
+**The stamp mapping — PRODUCTION revert** (`bookStamp` ignores the sort and
+always reads `created_at`):
+
+```
+✘ Test theUnionOrdersABookByTheStampTheSortNames() recorded an issue at
+  MobileFilterTests.swift:407:9: Expectation failed:
+  (MobileLibraryViewModel.union(notes: [note], books: [book],
+   sort: .lastTouched).map(\.id) → ["note:note", "book:book"])
+  == ["book:book", "note:note"]
+✘ … sort: .lastMajorRevision … → ["note:note", "book:book"])
+  == ["book:book", "note:note"]
+✘ Test theUnionOrdersABookByTheStampTheSortNames() failed after 0.007 seconds
+  with 2 issues.
+```
+
+**m4 — PRODUCTION revert** (the books line back to the one-number
+sentence):
+
+```
+✘ Test theBooksListingIsWindowedAndSaysSo() recorded an issue at
+  MobileFilterTests.swift:224:17: Expectation failed:
+  (labels → [… "Aster, 0 notes", "Basil, 0 notes", "Showing the first 2."])
+  .contains(MobileRoomListing.truncationMarker(shown: 2, of: 3)
+  → "Showing the first 2 of 3.")
+✘ … MobileFilterTests.swift:226:17: Expectation failed:
+  !((labels → […]).contains(MobileRoomListing.truncationMarker(shown: 2)
+  → "Showing the first 2.") → true)
+↳ the books listing still speaks the one-number sentence
+✘ Test theBooksListingIsWindowedAndSaysSo() failed after 1.564 seconds with 2
+  issues.
+```
+
+## The real surface's measurements (M1's dump, re-runnable under `REAL-FILTER-ROW-GEOMETRY`)
+
+```
+402 pt · real: All=20…41(w21.3) Books=52…88(w35.7) Notes=99…134(w35.7) Bookless=145…202(w57.0) Scraps=213…256(w42.7) Sort: last touched=366…382(w16.0)
+320 pt · real: All=20…41(w21.3) Books=52…88(w35.7) Notes=99…134(w35.7) Bookless=145…202(w57.0) Scraps=213…256(w42.7) Sort: last touched=284…300(w16.0)
+identifiers on the real surface: []
+```
+
+Every door renders at its 402 pt ideal width at 320 pt — **nothing is
+shrunk on the shipped surface**, which is her fit-without-shrink ruling
+measured where it lives; the real sort door ends flush at x=300 inside the
+280 pt content box (320 − 20 pt padding a side). The component dump's
+`sort=285…298` and this `284…300` differ by exactly the stand-in's 13 pt vs
+the real Menu's 16 pt — the substitution M1 named, now bounded on both
+sides.
+
+## Counts and environment
+
+**Baseline:** the record's own final line — *"Test run with 629 tests in 96
+suites passed after 244.000 seconds with 2 known issues."*
+
+**This wave's final line, quoted:**
+
+```
+✘ Test run with 632 tests in 96 suites passed after 232.305 seconds with 2 known issues.
+** TEST EXECUTE SUCCEEDED **
+```
+
+Arithmetic exact: 629 + 3 = 632, no suite added —
+`theRealLibrarysRowFitsWithoutShrinkingAtDisplayZoom` (geometry),
+`theLibrarysAllDoorIsTheBooksAndNotesUnion` and
+`theUnionOrdersABookByTheStampTheSortNames` (behaviour). The 2 known issues
+are the same single documented diagnostic
+(`anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`, two
+issues from one `withKnownIssue` block). **The M2 pin passed on this run**
+(0.879 s) — reported per its new row, which asks for both numbers whenever
+it reds.
+
+**Environment:** worktree `~/dev/variorum-mobile`, branch `mobile`. Private
+simulator `Variorum-filterfix` (iPhone 17 Pro, iOS 26.2,
+`ApplicationAccessibilityEnabled` armed and read back `1`), private
+`-derivedDataPath` under this session's scratchpad; the simulator was
+**deleted at the end**. Fence verified before the commit —
+`git diff --name-only -- Sources/ App/Variorum/Shared App/Variorum/Variorum
+"*.xcodeproj" "*.pbxproj" EditorBrain Package.resolved Package.swift`
+returned empty. No Release build, no install, no push; the real store
+untouched, the live Mac app never quit.
+
+## For her bundle
+
+- **The union's stamp mapping is PROVISIONAL** (the table above) — one
+  switch if she wants a book ordered otherwise.
+- **The Archive's two same-set doors** survive m5, and #93(a) already owns
+  the reason: book archiving is 13i's.
+- Everything else in the record's PROVISIONAL list stands as it did, with
+  3 rewritten, 3b/3c added, and 5 amended.

@@ -519,13 +519,20 @@ enum AlertActionHandler {
 }
 
 /// Mount, run, tear down.
+///
+/// **`size:` exists so a WIDTH pin can host the REAL surface** (the filter
+/// batch's cold review, M1): a geometry case that measures a hand-built
+/// stand-in proves things about the stand-in, so the fit law needs the real
+/// view at a real narrow width. The default is the harness's own 393 × 852,
+/// so every existing caller is byte-unchanged.
 @MainActor
 func withHostedSurface<Content: View, T>(
     _ view: Content,
+    size: CGSize = CGSize(width: 393, height: 852),
     sourceLocation: SourceLocation = #_sourceLocation,
     _ body: (HostedSurface<Content>) async throws -> T
 ) async rethrows -> T {
-    let surface = HostedSurface(view)
+    let surface = HostedSurface(view, size: size)
     defer {
         // Before anything is torn down: did this surface ever see a single
         // accessibility element? A surface that never did was walking a dead

@@ -77,11 +77,19 @@ struct MobileLibraryView<TabBar: View>: View {
                         // #92(a): her books themselves, as openable rows.
                         bookRows
                     } else {
+                        // Notes — and, under `.all`, her books INTERLEAVED
+                        // with them (#93(b)'s union).
                         listingRows
                         // The Archived room's door belongs under a NOTE
                         // listing — it opens archived NOTES (§0's model
                         // fact: a book cannot be archived at all), so it
                         // does not trail the books or scraps listings.
+                        // **The rule is this BRANCH**, not a guard inside
+                        // the row: the two listings that are not note
+                        // listings are rendered above, so a clause on
+                        // `filter` here could never be false (the cold
+                        // review's m3 — a dead guard reads as a rule and
+                        // is not one).
                         archiveRow
                     }
                 }
@@ -163,7 +171,7 @@ struct MobileLibraryView<TabBar: View>: View {
     /// two-noun name existed. Deletion's door is the path line's 🗑.
     @ViewBuilder
     private var archiveRow: some View {
-        if let onOpenArchive, model.filter.isNoteListing {
+        if let onOpenArchive {
             Button(action: onOpenArchive) {
                 HStack {
                     Text(tokens.chromeLabel(MobileRecoveryDoors.archiveLabel))
@@ -246,10 +254,12 @@ struct MobileLibraryView<TabBar: View>: View {
     /// unchanged**: `.all` only. Bookless keeps the core query's own order,
     /// scraps are pointer-ordered, books order as the SHELF orders (pins
     /// first, then journals, then names — `MobileShelfFaces.ordered`), and
-    /// `.notes` shows the `.all` listing, so a sort door on any of them could
-    /// not mean what it says. *(PROVISIONAL, logged: `.notes` renders the same
-    /// rows as `.all` and therefore loses the sort by that rule — one line if
-    /// she wants it back.)*
+    /// `.notes` shows the note HALF of `.all`'s union in `.all`'s own order,
+    /// so a sort door on any of them could not mean what it says.
+    /// *(PROVISIONAL, logged: `.notes` is ordered by the sort `.all` is set
+    /// to and cannot change it — one line if she wants the door there too.
+    /// The union — her #93(b) — sharpened this rather than settling it: the
+    /// two doors no longer name one SET, but they still share one ORDER.)*
     private var filterRow: some View {
         MobileFilterRow(
             doors: MobileListingFilter.libraryDoors,
@@ -319,91 +329,149 @@ struct MobileLibraryView<TabBar: View>: View {
                 .accessibilityLabel(MobileListingFilter.noBooksLine)
         }
         ForEach(windowed.rows, id: \.reading.id) { book in
-            Button {
-                onOpen(.book(book.reading.id))
-            } label: {
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text(tokens.chromeLabel(books.rowName(for: book)))
-                        .font(tokens.body)
-                        .foregroundStyle(
-                            book.reading.locked ? tokens.accent : tokens.ink)
-                        .lineLimit(1)
-                    Spacer(minLength: 12)
-                    Text(tokens.chromeLabel(books.rowMeta(for: book)))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                        .lineLimit(1)
-                }
-                .padding(.vertical, 10)
-                .padding(.horizontal, 12)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            // Plain, and it carries the META as well as the name — an
-            // explicit label REPLACES the one SwiftUI would compose from the
-            // row's children, so a name-only label would have dropped the
-            // count and tags out of the accessibility tree while the Shelf's
-            // own rows still spoke them (measured; the rule is
-            // `MobileShelfFaces.spokenRow`).
-            .accessibilityLabel(MobileShelfFaces.spokenRow(
-                name: books.rowName(for: book), meta: books.rowMeta(for: book)))
+            bookRow(book)
         }
+        booksTruncationLine(windowed)
+    }
+
+    /// **ONE BOOK ROW, ONE RULE** — rendered identically under the `.books`
+    /// door and inside `.all`'s union (#93(b)), because a book that read two
+    /// ways depending on which door found it would be exactly the second
+    /// row-rendering rule this batch refused to grow.
+    ///
+    /// The faces are the SHELF's (`MobileShelfFaces` through the shelf
+    /// model), and each is computed ONCE per row — the cold review's n7: a
+    /// body that asked `rowName`/`rowMeta` twice made a smart book pay two
+    /// JSON decodes of its query spec on every evaluation, and the Shelf's
+    /// own row already computes once.
+    private func bookRow(_ book: Queries.ShelfBook) -> some View {
+        let name = books.rowName(for: book)
+        let meta = books.rowMeta(for: book)
+        return Button {
+            onOpen(.book(book.reading.id))
+        } label: {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(tokens.chromeLabel(name))
+                    .font(tokens.body)
+                    .foregroundStyle(
+                        book.reading.locked ? tokens.accent : tokens.ink)
+                    .lineLimit(1)
+                Spacer(minLength: 12)
+                Text(tokens.chromeLabel(meta))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(1)
+            }
+            .padding(.vertical, 10)
+            .padding(.horizontal, 12)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        // Plain, and it carries the META as well as the name — an
+        // explicit label REPLACES the one SwiftUI would compose from the
+        // row's children, so a name-only label would have dropped the
+        // count and tags out of the accessibility tree while the Shelf's
+        // own rows still spoke them (measured; the rule is
+        // `MobileShelfFaces.spokenRow`).
+        .accessibilityLabel(MobileShelfFaces.spokenRow(name: name, meta: meta))
+    }
+
+    /// **THE BOOKS LISTING'S TRUNCATION SENTENCE — TWO NUMBERS** (the cold
+    /// review's m4). The filterless rooms say *"Showing the first N."*
+    /// because their windows sit over a probe (`window + 1`) and the total is
+    /// genuinely unknown. This listing's is not: the books arrive WHOLE
+    /// (`Queries.bookshelf` takes no limit — author-scale by core's own
+    /// contract) and the window is a RENDER window, so the exact total is in
+    /// hand and its same-surface neighbour, the scraps area, already speaks
+    /// the two-number form. Saying less than is known is the omission this
+    /// fixes.
+    @ViewBuilder
+    private func booksTruncationLine(
+        _ windowed: (rows: [Queries.ShelfBook], truncated: Bool)
+    ) -> some View {
         if windowed.truncated {
-            // The filterless rooms' one sentence, from its one home. (The
-            // Library's kind filter cannot narrow a books listing further —
-            // "books" IS the narrowing — so the Trash's "narrow the filter"
-            // half would be a road that does not exist here.)
-            Text(tokens.chromeLabel(
-                MobileRoomListing.truncationMarker(shown: windowed.rows.count)))
+            let marker = MobileRoomListing.truncationMarker(
+                shown: windowed.rows.count, of: books.orderedBooks.count)
+            Text(tokens.chromeLabel(marker))
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
                 .padding(.vertical, 16)
                 .padding(.horizontal, 12)
-                .accessibilityLabel(
-                    MobileRoomListing.truncationMarker(shown: windowed.rows.count))
+                .accessibilityLabel(marker)
         }
     }
 
+    /// **THE LISTING — notes, and under `.all` HER BOOKS WITH THEM**
+    /// (#93(b), verbatim: *"All should be a book + notes union - otherwise it
+    /// just doesn't make sense"*).
+    ///
+    /// The interleave is the model's pure brain (`MobileLibraryViewModel
+    /// .union` — the stamp mapping is PROVISIONAL and recorded there); what
+    /// this body does is render each kind through the row rule it already
+    /// had. Under `.notes` and `.bookless` the book set is empty, so those
+    /// doors show exactly what they showed before.
+    ///
+    /// The books half keeps the `.books` filter's own WINDOW, and its
+    /// truncation sentence rides the union too — a book that is not loaded is
+    /// not loaded under either door.
+    ///
+    /// *(The NOTE half carries no marker at all, and that is PRE-EXISTING
+    /// rather than this batch's: `observeLibrary`'s `limit:` cuts silently.
+    /// Its home is the standing "Bounded view windows show markers, not more"
+    /// row in `KnownIssuesAndTechDebt.md`, owner 12.)*
+    @ViewBuilder
     private var listingRows: some View {
-        ForEach(model.visible, id: \.postID) { item in
-            Button {
-                onOpen(.note(item.postID, focus: false))
-            } label: {
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text(MobileLibraryViewModel.rowTitle(item))
-                        .font(tokens.body)
-                        .foregroundStyle(tokens.ink)
-                        .lineLimit(1)
-                    Spacer(minLength: 12)
-                    if let day = item.entryDate {
-                        Text(day)
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
-                    }
-                }
-                .padding(.vertical, 10)
-                .padding(.horizontal, 12)
-                .contentShape(Rectangle())
+        let shelved: (rows: [Queries.ShelfBook], truncated: Bool) =
+            model.filter == .all
+            ? model.windowedBooks(books.orderedBooks)
+            : (rows: [], truncated: false)
+        ForEach(model.rows(books: shelved.rows)) { row in
+            switch row {
+            case .note(let item): noteRow(item)
+            case .book(let book): bookRow(book)
             }
-            .buttonStyle(.plain)
-            // Star (parity C3, her ruling 10): the note row's long-press
-            // — the Mac's own row-menu placement, the phone's grammar.
-            .contextMenu {
-                let target = StarTarget.post(item.postID)
-                Button(tokens.chromeLabel(
-                    MobileStarsModel.doorTitle(starred: stars.isStarred(target)))) {
-                    let stars = stars
-                    Task { await stars.toggle(target, from: .library) }
+        }
+        booksTruncationLine(shelved)
+    }
+
+    private func noteRow(_ item: Queries.TimelineItem) -> some View {
+        Button {
+            onOpen(.note(item.postID, focus: false))
+        } label: {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(MobileLibraryViewModel.rowTitle(item))
+                    .font(tokens.body)
+                    .foregroundStyle(tokens.ink)
+                    .lineLimit(1)
+                Spacer(minLength: 12)
+                if let day = item.entryDate {
+                    Text(day)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
                 }
-                // Delete the note (round 2 batch 4 — PR1): the row's
-                // long-press, beside Star, the phone's established
-                // row-menu grammar. Move to Trash; the model confirms.
-                Button(
-                    tokens.chromeLabel(MobileEditorViewModel.deleteNoteTitle),
-                    role: .destructive
-                ) {
-                    model.requestDeleteNote(item)
-                }
+            }
+            .padding(.vertical, 10)
+            .padding(.horizontal, 12)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        // Star (parity C3, her ruling 10): the note row's long-press
+        // — the Mac's own row-menu placement, the phone's grammar.
+        .contextMenu {
+            let target = StarTarget.post(item.postID)
+            Button(tokens.chromeLabel(
+                MobileStarsModel.doorTitle(starred: stars.isStarred(target)))) {
+                let stars = stars
+                Task { await stars.toggle(target, from: .library) }
+            }
+            // Delete the note (round 2 batch 4 — PR1): the row's
+            // long-press, beside Star, the phone's established
+            // row-menu grammar. Move to Trash; the model confirms.
+            Button(
+                tokens.chromeLabel(MobileEditorViewModel.deleteNoteTitle),
+                role: .destructive
+            ) {
+                model.requestDeleteNote(item)
             }
         }
     }

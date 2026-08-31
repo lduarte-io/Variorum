@@ -217,8 +217,14 @@ struct MobileFilterTests {
                 #expect(labels.contains { $0.hasPrefix("Basil") })
                 #expect(!labels.contains { $0.hasPrefix("Cedar") },
                         "the window is not applied")
-                #expect(labels.contains(MobileRoomListing.truncationMarker(shown: 2)),
+                // **TWO NUMBERS, not one** (the cold review's m4): this
+                // listing's delivery is WHOLE, so the exact total is in hand
+                // and the filterless rooms' probe-shaped sentence would be
+                // saying less than is known.
+                #expect(labels.contains(MobileRoomListing.truncationMarker(shown: 2, of: 3)),
                         "no truncation marker — labels were \(labels)")
+                #expect(!labels.contains(MobileRoomListing.truncationMarker(shown: 2)),
+                        "the books listing still speaks the one-number sentence")
             }
         }
     }
@@ -282,6 +288,147 @@ struct MobileFilterTests {
                 #expect(surface.visibleLabels.contains(MobileRecoveryDoors.archiveLabel))
             }
         }
+    }
+
+    // MARK: - THE UNION (#93(b))
+
+    /// **`ALL` IS THE BOOKS + NOTES UNION** — her ruling, verbatim: *"All
+    /// should be a book + notes union - otherwise it just doesn't make
+    /// sense."* It overturns the batch's shipped PROVISIONAL 3, which built
+    /// `.all` as the note listing alone.
+    ///
+    /// Driven on the real Library: `.all` shows BOTH kinds and interleaves
+    /// them under the active stamp (the book is created between the two
+    /// notes, so a union that merely appended one kind to the other would
+    /// fail the ORDER assertion while passing every presence one); `.notes`
+    /// shows notes and no book; and a book row found under `.all` opens that
+    /// book, so the union's rows are the `.books` filter's rows and not a
+    /// second, weaker rendering.
+    @Test func theLibrarysAllDoorIsTheBooksAndNotesUnion() async throws {
+        try await withEditorWorld { session, _ in
+            // Created oldest first — the harness's clock ticks one second per
+            // stamp — so the resting (last-touched, newest first) order is
+            // Newer note · Poems · Older note.
+            let bookID = try await session.runner.run { ops -> String in
+                _ = try ops.createPost(title: "Older note")
+                let book = try ops.createReading(name: "Poems", kind: .curated)
+                _ = try ops.createPost(title: "Newer note")
+                return book.id
+            }
+            let library = MobileLibraryViewModel(session: session)
+            let scraps = MobileScrapsModel(session: session)
+            let stars = MobileStarsModel(session: session)
+            let (shelf, observing) = await startedShelf(session)
+            defer { observing.cancel() }
+            let opened = LockIsolatedBox<String?>(nil)
+
+            try await withHostedSurface(
+                MobileLibraryView(
+                    model: library, scraps: scraps, stars: stars, books: shelf,
+                    tokens: .terminalLight, tabBar: { EmptyView() },
+                    onOpen: { route in
+                        if case .book(let id) = route { opened.value = id }
+                    },
+                    onOpenTrash: {}, onOpenArchive: {})
+            ) { surface in
+                await surface.settle(60)
+                #expect(library.filter == .all)
+                let labels = surface.visibleLabels
+
+                // BOTH KINDS, on the resting surface.
+                #expect(labels.contains { $0.contains("Older note") },
+                        "labels were \(labels)")
+                #expect(labels.contains { $0.contains("Newer note") })
+                #expect(labels.contains { $0.hasPrefix("Poems") },
+                        "her book does not row under All — labels were \(labels)")
+
+                // INTERLEAVED, not appended: the book was made between the
+                // two notes, so it must sit between them.
+                let newer = try #require(labels.firstIndex { $0.contains("Newer note") })
+                let book = try #require(labels.firstIndex { $0.hasPrefix("Poems") })
+                let older = try #require(labels.firstIndex { $0.contains("Older note") })
+                #expect(newer < book && book < older,
+                        """
+                        the union is not interleaved under the active stamp — \
+                        newer=\(newer) book=\(book) older=\(older); labels \
+                        were \(labels)
+                        """)
+
+                // A UNION ROW IS A BOOK ROW: it carries the Shelf's meta and
+                // it opens the book it names.
+                #expect(labels.contains { $0.hasPrefix("Poems") && $0.contains("0 notes") },
+                        "the union's book row lost the shelf faces — labels were \(labels)")
+                let row = try #require(labels.first { $0.hasPrefix("Poems") })
+                #expect(surface.activate(row))
+                await surface.settle(20)
+                #expect(opened.value == bookID)
+
+                // AND `.notes` STAYS NOTES — the union is `.all`'s, so the
+                // door beside it still names one kind.
+                #expect(surface.activate(MobileListingFilter.notes.word))
+                await surface.settle(40)
+                #expect(!surface.visibleLabels.contains { $0.hasPrefix("Poems") },
+                        "a book rows under the notes filter — labels were \(surface.visibleLabels)")
+                #expect(surface.visibleLabels.contains { $0.contains("Older note") })
+            }
+        }
+    }
+
+    /// **THE BOOK'S STAMP FOLLOWS THE SORT — the PROVISIONAL mapping, pinned**
+    /// (her ruling left the interleaving detail unspecified; the built answer
+    /// is `MobileLibraryViewModel.bookStamp`'s table, and a pin is what makes
+    /// it a decision rather than an accident).
+    ///
+    /// Pure: a book whose `created_at` and `updated_at` disagree lands on
+    /// DIFFERENT sides of one note depending on which stamp the sort names.
+    /// A mapping that ignored the sort would put it on the same side twice.
+    @Test func theUnionOrdersABookByTheStampTheSortNames() async throws {
+        let day = { (iso: String) in
+            DateFormatter.variorumISO8601.date(from: iso)!
+        }
+        // Made long ago, touched yesterday.
+        let book = Queries.ShelfBook(
+            reading: Reading(
+                id: "book", name: "Poems", kind: .curated,
+                createdAt: day("2020-01-01T00:00:00.000Z"),
+                updatedAt: day("2026-08-30T00:00:00.000Z")),
+            postCount: 0, sectionCount: 0)
+        // One note, stamped between the two.
+        let note = Queries.TimelineItem(
+            postID: "note", title: "A note", entryDate: nil,
+            createdAt: "2023-01-01T00:00:00.000Z", stamp: "2023-01-01T00:00:00.000Z")
+
+        // CREATED: the book is the older of the two, so it sorts BELOW.
+        #expect(
+            MobileLibraryViewModel.union(
+                notes: [note], books: [book], sort: .createdAt).map(\.id)
+            == ["note:note", "book:book"])
+        // LAST TOUCHED: `updated_at` is the newer, so it sorts ABOVE.
+        #expect(
+            MobileLibraryViewModel.union(
+                notes: [note], books: [book], sort: .lastTouched).map(\.id)
+            == ["book:book", "note:note"])
+        // LAST MEANINGFUL EDIT rides `updated_at` too (a book has no churn
+        // stamp), and ENTRY DATE rides `created_at` (a book has no entry
+        // date, so it behaves as an undated note does).
+        #expect(
+            MobileLibraryViewModel.union(
+                notes: [note], books: [book], sort: .lastMajorRevision).map(\.id)
+            == ["book:book", "note:note"])
+        #expect(
+            MobileLibraryViewModel.union(
+                notes: [note], books: [book], sort: .entryDate).map(\.id)
+            == ["note:note", "book:book"])
+
+        // And the tie rule is deterministic: an exactly-equal stamp puts the
+        // NOTE first, so the resting surface keeps its shape.
+        let tied = Queries.TimelineItem(
+            postID: "tied", title: "Tied", entryDate: nil,
+            createdAt: "2026-08-30T00:00:00.000Z", stamp: "2026-08-30T00:00:00.000Z")
+        #expect(
+            MobileLibraryViewModel.union(
+                notes: [tied], books: [book], sort: .lastTouched).map(\.id)
+            == ["note:tied", "book:book"])
     }
 
     // MARK: - The sort glyph (#92(b))
