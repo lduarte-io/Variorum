@@ -124,6 +124,46 @@ legible (a backup-destination chooser that says what iCloud placement means). Al
 posture-switching semantics. **No owner slotted — at her word, 13x-adjacent by nature.** Nothing
 that exists changes meanwhile.
 
+*[removed for publication]*
+*[removed for publication]*
+
+**Name: APPLE-HELD RECOVERY (Shape 3).** The declared profile where recovery requires only the
+user's Apple identity — no passphrase memorized, no phrase on paper: *"keep iCloud on and you can't
+lose your writing."* The machinery it would add, enumerated so a future kickoff can size it:
+
+1. **A third wrap in the vault** (the suite-coherent core): a random wrapping key lives in iCloud
+   Keychain (synchronizable, no ACL); the account's `key_vault` gains an apple-held wrap of the
+   master beside the passphrase and recovery wraps. New device, zero secrets: read the wrapping key
+   from iCloud Keychain → unwrap the master from the vault → class keys → content pulls from the
+   server. The server vault stays the single authoritative custody store; iCloud holds only the
+   wrapping key. **This is the deliberate bend of 14b R-4/R-6 (enrollment-by-passphrase), scoped to
+   this declared profile only.**
+2. **The profile itself**: a per-account choice with consent copy (*"anyone fully in your iCloud
+   can reach your writing"*), offered at the sync-signup ceremony as the third path — never the
+   default. **Posture switching both ways**, and the honest downgrade: leaving Apple-held mode
+   re-keys (a copied key cannot be un-copied; retiring the item is not enough).
+3. **Surfaces**: the shapes copy gains the third shape for real; the nudge tiers update (Apple-held
+   = covered while iCloud Keychain is ON; iCloud Keychain OFF becomes that profile's exposed
+   state); the recipes gain the row.
+4. **For sync users this completes recovery with ZERO other machinery** — the server is the copy;
+   no backup story needed. Local-only users keep the existing roundabout (escrow + reachable
+   backups).
+5. **Fragments inherits by construction** if built at the vault level (the unwrap chain is shared);
+   its only work is skipping the passphrase prompt when the apple-held wrap exists.
+6. **Security accounting, stated**: the E2EE claim widens from "only your passphrase" to "your
+   passphrase OR your Apple identity" — the server still reads nothing, but the trust base grows to
+   include Apple's iCloud Keychain security AND Apple's account-recovery chain (their processes for
+   "convince us you're you" become a road to the writing). That is the step down, and it is the
+   price of the promise.
+7. **Cost shape**: engine enrollment path + vault payload evolution (Fable — `Sync/`-adjacent;
+   possibly one §12 lockstep event if the vault payload needs a format version), the custody items,
+   the profile/ceremony/copy work, and two drills (zero-secret enrollment on a fresh device; the
+   downgrade re-key). A small phase, not a patch.
+
+Her standing word: **not now** (*"that is another step down in security, right? so not adding that
+for now"* — and the same-day Fragments ruling deferred its cousin identically). This section exists
+so the future decision starts from a scope, not a memory.
+
 ## 9. THE VERBATIM EXCHANGES (why this memo exists — the turns that did the work)
 
 **Her opening escalation:** *"I need a way clearer chart and table of what settings you can have /
