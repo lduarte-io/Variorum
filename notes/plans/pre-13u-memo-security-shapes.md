@@ -237,6 +237,40 @@ stays in Act 10 now, since the brain already carries them and a deferred renderi
 ship a binary; the VERIFICATION half (proving the probe on a machine that isn't hers) rides her
 Sparkle / fresh-download walk — the first real stranger machine the project will have.)*
 
+## 9c. THE FIVE CLOSING ITEMS, VERBATIM (the architect's session-close answer to her "anything else
+## you want to say, traps you see, or things for me to keep in mind?" — saved at her instruction:
+## "if it matters, it should never just live in session history." Items 1–2 are §9b's T1/T2 in
+## their delivered form; 3–5 exist ONLY here.)
+
+**1. The stale-copy re-key clobber — the one genuine trap left.** Tonight's model made Replace
+Encryption Keys the universal reset road: possession + account → new passphrase → *local becomes
+truth*. But "local" might be a month-old backup — someone recovers an old copy, re-keys, and the
+re-push flattens everything the server learned since. Local-as-truth is right by design;
+local-as-truth *when local is stale* is data loss wearing the design's clothes. The guard is one
+recency comparison and one honest warning sentence before the re-push. Routed to the final ladder's
+attention; if it's unguarded, it gets a KnownIssues row.
+
+**2. The covered/exposed verdict needs an honest "unknown."** The escrow round-trip is proven on
+exactly one machine: hers. On machines we've never seen, the probe may simply not know — and "can't
+tell" must not be dressed as either comfort or alarm. Three-value truth, three sentences.
+
+**3. Render, don't re-derive — hold that line when reviewing the built surfaces.** The model is
+right in the memos; the failure mode from here is a batch paraphrasing the tables into sentences
+that are *almost* true. The keystone lines — key-not-backup, the sync sentence,
+Touch-ID-guards-this-device — should land essentially verbatim. Almost-true is how the original
+confusion got built in the first place.
+
+**4. The marketing will pull against Shape 2's honest sentence.** The advertising angle is
+no-theater — and the temptation, months from now, will be to imply Shape 1's properties while
+shipping Shape 2's defaults. The sentence "while it's open, someone at your computer can read it —
+that's what open means" has to survive contact with the landing page. Her own R13p-16 instinct is
+the defense; the pressure is named here in advance.
+
+**5. Promote the model to canon at the round's closeout.** This memo is binding but lives in
+`notes/plans/` — a future phase (13x, 13y, the tier) touching these seams should *inherit* the
+shapes model, not re-derive it. The pre-13u closeout should anchor this memo from the canonical
+docs so it can't be drifted past.
+
 ## 10. WHAT THE SUCCESSOR BUILDS FROM THIS
 
 Everything in §§1–6 as **wording + structure** on Act 10 item 3 (settings, the tutorial's privacy
