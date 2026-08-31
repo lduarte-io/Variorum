@@ -273,6 +273,49 @@ struct ShellActions {
         }
     }
 
+    /// **Help ▸ Restore the Sample Library** (pre-13u Act 10 — the
+    /// tenth-wave ruling: *"Restore door - yes, let's do it"*; Sherlock is
+    /// field-guide-class seeded content, and the field guide has restore).
+    ///
+    /// Deliberately UNLIKE the tutorial's replace: `SampleLibrarySeeder`'s
+    /// seed is RESUMABLE — it mints only what is MISSING (a deleted book
+    /// comes back whole; a half-deleted one gets its missing stories back;
+    /// her own edits to surviving copies are untouched) — so nothing of
+    /// hers can be destroyed and no confirm gates the door. Fire-and-DO:
+    /// it restores AND opens the book; failures speak.
+    func restoreSampleLibrary() {
+        Task { @MainActor in
+            do {
+                let stories = try await Task.detached(priority: .utility) {
+                    try SampleLibrarySeeder.loadStories()
+                }.value
+                let existing = try await session.database.read { db in
+                    try SampleLibrarySeeder.discover(db)
+                }
+                if existing.isComplete(for: stories.map(\.title)),
+                   let bookID = existing.bookID {
+                    shell.pendingSelection = .reading(bookID)
+                    status.speak(
+                        "The sample library is already whole — "
+                        + "\u{201C}\(SampleLibrarySeeder.bookName)\u{201D} is on your shelf.")
+                    return
+                }
+                let outcome = try await SampleLibrarySeeder.seed(
+                    session: session, stories: stories, existing: existing)
+                if case .seeded(let readingID, let minted) = outcome {
+                    shell.pendingSelection = .reading(readingID)
+                    status.speak(
+                        "Restored \u{201C}\(SampleLibrarySeeder.bookName)\u{201D} — "
+                        + "\(minted) \(minted == 1 ? "story" : "stories") came back.")
+                }
+            } catch {
+                status.speak(
+                    "Restoring the sample library failed: "
+                    + OpsRefusalCopy.message(for: error))
+            }
+        }
+    }
+
     /// The open entrance (⌘K row, Library door): an existing book opens;
     /// none ⇒ seed one first — through the restore path (confirm and all)
     /// when a bookless store still holds tutorial residue (MINOR-D5).
@@ -427,6 +470,9 @@ struct ShellActions {
         .divide, .extract, .makeBlock, .merge, .addBlockAtEnd, .insertBlockBelow, .deleteBlock,
         .showTakes, .newTake, .blankTake, .chooseTake,
         .saveChoicesAsLens, .toggleSeams, .restoreTutorial,
+        // pre-13u Act 10: the sample library's restore, typeable like the
+        // tutorial's.
+        .restoreSampleLibrary,
         // 13f batch 5 (W20 b), repointed by 13k K12: the tag cards' fold,
         // typeable.
         .toggleTagChips,
@@ -494,6 +540,7 @@ struct ShellActions {
         case .saveNoteVersion: return { saveNoteVersion() }
         case .showNoteVersions: return { dispatch(.showNoteVersions) }
         case .restoreTutorial: return { restoreTutorial() }
+        case .restoreSampleLibrary: return { restoreSampleLibrary() }
         default:
             // NIT-1 (Stage 1 ladder): a future `paletteActs` entry without
             // a wired case must never compile into a silent no-op row —

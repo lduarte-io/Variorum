@@ -632,6 +632,12 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     case newPost, todaysEntry, findAnything, importFiles, exportLibrary
     case toggleSeams, helper
     case restoreTutorial
+    /// pre-13u Act 10 (the tenth wave's ruling — "Restore door - yes,
+    /// let's do it"): the sample library's tutorial-style restore. Unlike
+    /// the tutorial's replace, this door only MINTS WHAT IS MISSING
+    /// (`SampleLibrarySeeder`'s resumable seed) — nothing of hers is ever
+    /// deleted, so no confirm gates it.
+    case restoreSampleLibrary
     // 13l Act 4 (ledger rows 11–12) — Settings ▸ Data Safety's three acts.
     // `.surface` for the `.deleteNow` reason: their target is the pane you
     // are looking at, and their per-gesture conditions (is a folder set? is a

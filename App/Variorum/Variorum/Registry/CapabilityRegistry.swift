@@ -1412,6 +1412,14 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar, .palette],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "", availability: always),
+        // pre-13u Act 10 (the tenth-wave ruling): the sample library's
+        // restore — mint-what's-missing, never a replace, so no confirm.
+        Capability(
+            id: .restoreSampleLibrary, verb: "Restore the Sample Library",
+            scope: .app,
+            doors: [.menuBar, .palette],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "", availability: always),
 
         // MARK: Data safety (13l Act 4 — Settings ▸ Data Safety)
         // The `.deleteNow` shape exactly: `.surface`, app scope, always

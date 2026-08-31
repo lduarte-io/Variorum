@@ -108,6 +108,9 @@ struct EditorCommands: Commands {
         // 13k K8: the nesting rows (Tab / ⇧Tab's menu twins).
         .formatIndent, .formatOutdent,
         .toggleSeams, .switchMode, .helper, .restoreTutorial,
+        // pre-13u Act 10: the sample library's restore, beside the
+        // tutorial's (the tenth-wave ruling).
+        .restoreSampleLibrary,
         // 13f batch 3 (W3/A27 + W16): the navigation core's menu doors.
         .openNote, .navigateBack, .navigateForward,
         // 13f batch 4 (W1/A25): the split's.
@@ -717,6 +720,10 @@ struct EditorCommands: Commands {
                 .disabled(!canReachCreationTarget)
             Button(verb(.restoreTutorial)) { creationActions()?.restoreTutorial() }
                 .disabled(!canReachCreationTarget)
+            Button(verb(.restoreSampleLibrary)) {
+                creationActions()?.restoreSampleLibrary()
+            }
+            .disabled(!canReachCreationTarget)
         }
     }
 
