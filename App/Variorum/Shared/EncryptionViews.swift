@@ -323,6 +323,12 @@ struct EncryptionView: View {
             Text(Self.setupIntro)
                 .pageCaption(pageStyle)
                 .fixedSize(horizontal: false, vertical: true)
+            // The SYNC-SIGNUP ceremony (memo §6): which deal is being
+            // chosen, said before any secret is typed — the ratified tier
+            // sentence + the device keystone, verbatim from the brain.
+            Text(ProtectionShapes.syncSignupFraming)
+                .pageCaption(pageStyle)
+                .fixedSize(horizontal: false, vertical: true)
             PeekableSecretField(label: "Encryption passphrase", text: $setupPassphrase)
                 .pageFieldChrome(pageStyle)
             PeekableSecretField(label: "Repeat the passphrase", text: $setupConfirm)
@@ -588,6 +594,11 @@ struct EncryptionView: View {
     private var enrolledSection: some View {
         Text("This device holds your encryption keys.")
             .pageProse(pageStyle)
+        // Her sharpest question's answer, standing where the fact it
+        // explains is stated (memo §2's keystone).
+        Text(ProtectionShapes.deviceAsPowerfulAsPassphrase)
+            .pageCaption(pageStyle)
+            .fixedSize(horizontal: false, vertical: true)
         if let seconds = encryption.lastKDFSeconds {
             // L12: the on-device KDF number, readable straight off the flow.
             Text(String(format: "Passphrase key derivation took %.2f s on this device.", seconds))

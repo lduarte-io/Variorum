@@ -28,6 +28,10 @@ import VariorumCore
 
 struct PassphraseSetSheet: View {
     @Bindable var model: PassphraseSetModel
+    /// Memo §6 — THE LOCK MOMENT: true only when this sheet was summoned
+    /// by a demanded-mode pick (the choice arrives when you reach for the
+    /// lock); the nudge's and the plain set door's summons stay unframed.
+    var lockMoment: Bool = false
     var onDone: () -> Void
 
     @State private var passphrase = ""
@@ -40,6 +44,14 @@ struct PassphraseSetSheet: View {
             case .enterPassphrase:
                 Text("Set your encryption passphrase")
                     .font(.title3.weight(.semibold))
+                if lockMoment {
+                    // The lock-moment ceremony (memo §6): what asking-at-
+                    // open MEANS, said where the lock is being reached for.
+                    Text(ProtectionShapes.lockMomentFraming)
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 Text(model.vaultConstrains
                      ? "Your account already has an encryption passphrase, and one "
                        + "passphrase serves both — type that same one here to make it "
@@ -158,6 +170,9 @@ struct ProtectionPane: View {
     let services: AppServices?
 
     @State private var setSheetModel: PassphraseSetModel?
+    /// Memo §6: whether the set sheet was summoned by a demanded pick (the
+    /// lock moment) — frames the sheet's opening sentence.
+    @State private var setSheetIsLockMoment = false
     /// A demanded pick waiting on the passphrase-set sheet — retried the
     /// moment the sheet lands its wrap.
     @State private var pendingAfterSet: PendingAct?
@@ -188,7 +203,7 @@ struct ProtectionPane: View {
         .formStyle(.grouped)
         .task { await services?.encryption.refresh() }
         .sheet(item: $setSheetModel) { model in
-            PassphraseSetSheet(model: model) {
+            PassphraseSetSheet(model: model, lockMoment: setSheetIsLockMoment) {
                 setSheetModel = nil
                 Task { await retryPendingAct() }
             }
@@ -508,7 +523,8 @@ struct ProtectionPane: View {
 
     // MARK: Acts
 
-    private func openSetSheet() {
+    private func openSetSheet(lockMoment: Bool = false) {
+        setSheetIsLockMoment = lockMoment
         setSheetModel = PassphraseSetModel(
             controller: controller,
             vaultTie: VaultTie.make(services: services))
@@ -525,7 +541,7 @@ struct ProtectionPane: View {
             controller.lastError = nil
         case .needsPassphrase:
             pendingAfterSet = act
-            openSetSheet()
+            openSetSheet(lockMoment: true)
         case .refused(let message):
             controller.lastError = message
         }
