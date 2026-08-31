@@ -2517,3 +2517,25 @@ render-don't-re-derive (§9c item 3) binds every surface below.
 3. **The Trash keeps its engineered layout** (see piece 11): the polish round already
    grouped it and pinned the shapes; the calm-card restyle rides 13u2's app-wide
    continuation rather than risking pinned rendering for look alone.
+
+---
+
+# ACT 10 WAVE 2b RECORD (2026-08-31 — the library-ish surfaces, Fable implementer)
+
+**Scope:** item 14 (ONE searchable note-picker, wired at Mark-as-Versions + the Pool's
+Add-to-Book) · item 2 (the Pool page redesign) · item 17 (the Snippets refresh to the ruled
+mockup direction). Style guide W8-2/W8-3 binds; her amended copy doctrine binds; every
+door survives.
+
+## LIVE STATUS (updated per commit — the checkpoint protocol)
+
+- `103ad38` — **CORE LAYER: DONE.** `Queries.notePickerNotes` (bounded, LIKE-escaped,
+  snippet+day context per row, subject excluded, archived/deleted/versions fenced) ·
+  `PoolItem` + `poolID`/`updatedAt` · `allPoolsListing` + `poolCounts` +
+  `observeAllPoolItems` · **`TrashItem.Kind.snippetGroup` + the pool arm in
+  `Queries.trash`** (the ruled delete-group door's honesty — #77's lesson; Put back =
+  `restoreContainer`, snippets ride the exact-stamp cascade). Pins:
+  `SnippetsAndPickerQueryTests` (9), the group-arm pair REVERT-VERIFIED red-on-old.
+- NEXT: the Shared/faces half of the group kind (RecoveryActs/RecoveryCopy/RecoveryView),
+  then the picker component + Mark/Unmark wiring, then the Pool page, then Snippets.
+
