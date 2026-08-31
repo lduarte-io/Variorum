@@ -2541,5 +2541,13 @@ door survives.
   vocabulary; RecoveryView help + "Open snippets"; the phone composes from the shared
   brains (zero mobile edits). `NoteDeletion.run`'s kind fence deliberately untouched.
   Pins: `SnippetGroupTrashTests` (2). Mac build + suite green.
-- NEXT: the picker component + Mark/Unmark wiring, then the Pool page, then Snippets.
+- `2986356` — **ITEM 14, THE PICKER: DONE (version doors wired).**
+  `Core/Views/NotePicker.swift` (the shared Mac-chrome home minted per the placement
+  rule): data-blind `NotePickerSheet` + pure `NotePickerRanking` + three sources
+  (corpusNotes peers-first · versionPeers exactly-the-linked · curatedBooks). The
+  Library's Mark/Unmark corpus submenus retired; acts byte-identical. **The 2c seam:**
+  Compare's "Choose a note…" = `.corpusNotes(session:excluding:versionPeersOf:
+  peerAnnotation:)` + its own onPick — no component change needed. Pins:
+  NotePickerRankingTests (3) · NotePickerSourceTests (3) · the core ids-overload pin.
+- NEXT: the Pool page (item 2) with the book-picker door, then Snippets (item 17).
 

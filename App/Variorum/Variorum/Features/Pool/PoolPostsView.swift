@@ -146,6 +146,15 @@ struct PoolPostsView: View {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
+    /// pre-13u Act 10 wave 2b (item 2): which note the Add-to-Book picker
+    /// was opened FOR — a value the sheet presents.
+    struct BookPickTarget: Identifiable, Equatable {
+        let postID: String
+        var id: String { postID }
+    }
+
+    @State private var bookPickTarget: BookPickTarget?
+
     var body: some View {
         VStack(spacing: 0) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
@@ -156,27 +165,53 @@ struct PoolPostsView: View {
                     "\(model.posts.count) notes in no book — most things belong in one"))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
+                    .lineLimit(1)
                 Spacer()
             }
             .padding(.horizontal, 24)
-            .padding(.vertical, 12)
+            .padding(.vertical, 14)
             Divider().overlay(tokens.line)
-            List {
-                ForEach(model.posts, id: \.postID) { item in
-                    row(item)
+            // Item 2 + the W8-2 restyle: the hairline List retires for calm
+            // cards — the mockup's card/metadata-chip grammar (her granted
+            // latitude: chips on the metadata line, not a tag column; the
+            // column judged in place and not missed — the chips ARE doors,
+            // which a column of text could not be).
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 6) {
+                    ForEach(model.posts, id: \.postID) { item in
+                        row(item)
+                    }
+                    if model.posts.isEmpty {
+                        Text(tokens.chromeLabel("Every note lives in a book. The pool is empty."))
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
+                            .padding(.vertical, 18)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                    }
                 }
-                if model.posts.isEmpty {
-                    Text(tokens.chromeLabel("Every note lives in a book. The pool is empty."))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
             }
-            .scrollContentBackground(.hidden)
         }
         .background(tokens.surface)
         .task { await model.start() }
         .deleteNoteConfirmDialog($pendingDelete) { confirm in
             NoteDeletion.fire(session: session, postIDs: confirm.postIDs)
+        }
+        // Item 2's ruled door: the every-row "Add to Book ▾" dropdown
+        // retires for the ONE searchable picker (item 14's component); the
+        // CAPABILITY is byte-identical — the pick fires the same
+        // `model.addToBook`, and the standing gate's refusals still speak.
+        .sheet(item: $bookPickTarget) { target in
+            NotePickerSheet(
+                tokens: tokens,
+                title: "Add to Book",
+                prompt: "search books",
+                emptyState: "No books match.",
+                source: .curatedBooks(readings.readings)
+            ) { row in
+                Task { await model.addToBook(target.postID, readingID: row.id) }
+            }
         }
         .overlay(alignment: .bottomLeading) {
             if let error = model.lastError {
@@ -190,33 +225,47 @@ struct PoolPostsView: View {
     }
 
     private func row(_ item: Queries.TimelineItem) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(item.displayTitle)
-                .font(tokens.body)
-                .foregroundStyle(tokens.ink)
-            // 13e E8: the note's own chip grammar (colour · leaf · ✕ off ·
-            // ＋ types one on), identical to the Library's rows and the
-            // context bar's cards.
-            NoteTagsRow(
-                tokens: tokens,
-                tags: model.postTags[item.postID] ?? [],
-                allTags: tags.tags,
-                onApply: { path in
-                    Task { await model.applyTypedPath(path, to: item.postID) }
-                },
-                onRemove: { tag in
-                    Task { await model.removeTag(tag.id, from: item.postID) }
-                })
-            Spacer()
-            Menu(tokens.chromeLabel("Add to Book")) {
-                ForEach(readings.readings.filter { $0.kind == .curated }, id: \.id) { reading in
-                    Button(reading.name) {
-                        Task { await model.addToBook(item.postID, readingID: reading.id) }
+        CalmCard(tokens: tokens) {
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        Text(item.displayTitle)
+                            .font(tokens.body)
+                            .foregroundStyle(tokens.ink)
+                            .lineLimit(1)
+                        // The quiet day — suppressed when the title already
+                        // IS the day (the picker's one detail rule).
+                        if let day = NotePickerRanking.detail(
+                            title: item.displayTitle,
+                            day: DisplayTitle.day(fromStamp: item.stamp))
+                        {
+                            Text(tokens.chromeLabel(day))
+                                .font(tokens.small)
+                                .foregroundStyle(tokens.faint)
+                                .lineLimit(1)
+                        }
                     }
+                    // 13e E8: the note's own chip grammar (colour · leaf ·
+                    // ✕ off · ＋ types one on) — the ruled metadata-line
+                    // chips, identical to the Library's rows.
+                    NoteTagsRow(
+                        tokens: tokens,
+                        tags: model.postTags[item.postID] ?? [],
+                        allTags: tags.tags,
+                        onApply: { path in
+                            Task { await model.applyTypedPath(path, to: item.postID) }
+                        },
+                        onRemove: { tag in
+                            Task { await model.removeTag(tag.id, from: item.postID) }
+                        })
                 }
+                Spacer(minLength: 8)
+                Button(tokens.chromeLabel("add to book")) {
+                    bookPickTarget = BookPickTarget(postID: item.postID)
+                }
+                .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
+                .help("Into a book — the pool's whole point. Search opens; finished books say so.")
             }
-            .font(tokens.small)
-            .frame(width: 140)
         }
         .contentShape(Rectangle())
         .onTapGesture { onOpen(.post(item.postID)) }
