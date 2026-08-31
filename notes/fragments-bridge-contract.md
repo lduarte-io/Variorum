@@ -848,3 +848,69 @@ quotas/rate-limit design shared across the suite) — noted so it is
 expected, not a surprise. And the 13l carry-item's ONE ASK above
 (empty-body-as-deletion detection + what the Day screen shows) is still
 open and still wanted; nothing here supersedes it.
+
+## CARRY-ITEM FOR FRAGMENTS (2026-08-30, the pre-13u round, Act 6) — the
+## ENGINEERING BRIEF for Fragments' own at-rest encryption (extends the
+## 13p invitation directly above; still your call, still nothing owed)
+
+The item above is the invitation; this is the transferable engineering,
+so that if Fragments takes it up, it starts from Variorum's measured
+facts instead of re-learning them. Her running order pairs this with
+Fragments' launch tasks (row 3: *"fragments encryption"* means your own
+at-rest/local story beyond the shared journal class — her confirmation
+2026-08-25).
+
+**The road Variorum proved, in the order that mattered:**
+
+1. **Dependency shape:** SQLCipher Community (BSD) via a four-line GRDB
+   fork (tag-pinned) + Zetetic's official SPM package (4.18.0). Any new
+   dependency is your author-approval item exactly as it was here.
+2. **Key the connection RAW, never by passphrase:** `PRAGMA key =
+   "x'<hex>'"` on EVERY connection. `usePassphrase` runs a ~165 ms KDF
+   per open (measured; pinned at the call site here). Derivation happens
+   once, in key custody — never per-connection.
+3. **The one-time migration is `sqlcipher_export()`**, built crash-safe
+   at every boundary and SIGKILL-drilled on a byte-copy of the real
+   store BEFORE the real store is touched (<1 s at Variorum's corpus).
+   The drill is the acceptance gate, not the suite.
+4. **Backups become ciphertext, and every backup/integrity code path
+   that re-opens the store now needs the key** — Variorum's spike found
+   this as a LOUD refusal, not a silent leak, but only because the
+   backup road was audited first (the "one-commit rule"). Audit yours
+   before flipping.
+5. **Zero-plaintext claims need a WAL checkpoint first** — the WAL can
+   hold plaintext pages after the main file is ciphertext; scan after
+   checkpointing or the scan lies (a Variorum test-pin lesson).
+6. **Measured costs, for expectation-setting:** ~1.0× keystroke
+   overhead, ~1 ms keyed open, `secure_delete` ON with no measurable
+   breach, FTS5 present in the prebuilt.
+
+**Key custody — the suite-coherent option:** Fragments already trusts
+the suite account and its 14b vault, so its store key can be wrapped by
+the SAME encryption passphrase + BIP-39 recovery phrase rather than
+inventing a new secret — the suite's one-secret doctrine (Variorum's
+R13p-4) extended rather than forked. The simplest v1 is Variorum's
+default: silent device-Keychain mint at first launch, no ceremony, with
+the passphrase/recovery wraps as the recovery legs. The at-open-modes
+family (biometric/passphrase gates, lobby, re-lock) is OPTIONAL
+Variorum-shaped furniture — whether Fragments wants any of it is a
+product call, not part of the invitation.
+
+**Keychain lessons paid for this week, so you don't pay twice:** on
+macOS, a write carrying a biometry ACL or `kSecAttrSynchronizable`
+lands in the DATA-PROTECTION keychain, but a read without
+`kSecUseDataProtectionKeychain` searches the FILE-BASED one — writes
+"succeed" and reads miss (iOS is immune; it has only the one keychain).
+And the custody rule that incident produced: **never delete a key's old
+home on the strength of a write alone — verify the new item reads back
+through the production read path first** (Variorum's `CustodyHandover`).
+Also decided here 2026-08-30 (QUESTIONS #82): Variorum BINDS its store
+key to the device so it stops riding login-keychain migration/backups —
+on iOS you get that for free.
+
+**Reference implementations** (Variorum repo, read-only to you as ever):
+`notes/plans/phase-13p-note-protection.md`, `notes/plans/phase-13p-spike-memo.md`,
+`Sources/VariorumCore/Persistence/StoreEncryptionMigration.swift`,
+`StoreKey.swift`, and `notes/plans/phase-13p-fix-dp-keychain.md` for the
+keychain incident. Questions come back through this channel; she
+carries everything.
