@@ -189,6 +189,48 @@ settled product ruling; 13x-adjacent by nature if ever reopened). **(d)** Preced
 memo and her carried successor block differ, THE MEMO WINS (its own §10). **(e)** The memo's
 tutorial-privacy-chapter wording changes make the field-guide re-seed obligation live at closeout.
 
+**THE TENTH WAVE (2026-08-31, after Acts 3+4's close — her replies to the three parity calls;
+two settled, two pending her confirm):**
+
+- **PHONE SHERLOCK — her directive, verbatim: "hmmm can you explore any way that the phoen COULD
+  get sherlock but if it synced it could just check for a duplicate and not include it? like if a
+  book's hash was identical or something? some people will be phone only users and they should
+  get to experience it."** The architect's PROPOSED shape (presented to her in-turn, pending her
+  confirm — becomes R-pre13u-8 on her word): the phone seeds Sherlock at **R-pre13u-1's
+  first-write moment** through the same gate as the Journal furniture (an account-owned store
+  skips the local seed and waits for sync — arrive-by-sync stays the common account path); the
+  race where two seeded copies meet converges by a **pristine-copy dedupe** beside Act 0's
+  Journal-keeper repair: the sample library is identifiable by the seeder's own `discover`
+  predicate, and a copy is PRISTINE when its per-note rendered text matches the bundled source's
+  manifest hashes (her hash idea, sharpened to per-note). Rule: both pristine → deterministic
+  keeper (smaller id), the other retired (nothing lost — byte-identical); one edited → the EDITED
+  copy is kept, the pristine one retired; both edited → BOTH survive (the documented
+  concurrent-divide class — an edited copy is NEVER silently retired). Zero schema; the repair
+  emits ordinary tombstones with explicit outbox rows; **`Sync/` work → Fable, riding Act 0's
+  existing Fable half**; the phone seed rides Act 0's Opus half.
+- **The never-lands corner — ACCEPTED (her word: "i think it's fine for an account-owned store
+  whose sync never lands to not seed ? I'm not syre how the sync would never land").** Her
+  question answered in-turn: the corner is a signed-in device that cannot complete a clean
+  pull-to-head (long offline stretch, unreachable server, or a §12 lockstep refusal on an
+  outdated build) — the gate can't tell "account has nothing" from "couldn't look", so it
+  declines; Sherlock simply arrives with the rest of the account's content when sync first lands.
+- **The restore door — HER UNCERTAINTY PRESERVED, verbatim: "you're talking about a tutorial
+  style restore, right? i guess if it's only restoring sherlock holmes it's not necessary? but
+  might be nice? feeling a bit conflicted on these calls honestly."** The architect's
+  recommendation (pending her nod): ADD the door — Sherlock is field-guide-class seeded content
+  and the field guide has restore (the seeder already mirrors TutorialSeeder's
+  `discover`/`findOrSeed`/`restore` shape, so the door is nearly free); the starter-journal
+  "deletion is final" precedent doesn't apply, that being user-writing scaffold, not demo
+  content. Not built without her word.
+- **MOBILE MUST DESIGN FOR THE NEW MODES — her note, verbatim, routed to the parity line: "i'd
+  also make a note for mobile that with the new act 10 edits to notes to have that block page &
+  outline + pages/google doc looking page + a read page, that mobile is going to have to think
+  of how to handle all of those items."** → joins obligation 7's MOBILE PARITY LINE: the
+  closeout's MobileSoul row names the Act 10 mode additions (Index · Read + minimal companion
+  outline · the Blocks powerhouse · the cohesive Book redesign) as surfaces the phone must
+  deliberately answer — its own shapes, per MobileSoul's smaller-surface discipline, decided at
+  mobile's resumption, never bolted on.
+
 ---
 
 ## Reading order (do this first, in this order)
