@@ -1619,7 +1619,7 @@ final class MobileEditorViewModel {
             return
         }
         let mode = header?.effectiveSegmentation ?? .paragraph
-        crystallizeIfNeeded(forcedKind: mode == .oneBlock ? .oneBlock : .idle(.paragraph))
+        crystallizeIfNeeded(forcedKind: CrystallizationPlanner.kindForDurabilityMint(mode: mode))
     }
 
     /// The leading-run attachment (the 2026-07-12 rule; the Mac's exact
@@ -1663,7 +1663,7 @@ final class MobileEditorViewModel {
         }
         let mode = header?.effectiveSegmentation ?? .paragraph
         let kind: CrystallizationPlanner.Kind = forcedKind
-            ?? (bulkPending ? .bulk(mode) : (mode == .oneBlock ? .oneBlock : .typing))
+            ?? CrystallizationPlanner.kindForTailEdit(mode: mode, bulkPending: bulkPending)
         guard let plan = CrystallizationPlanner.plan(kind, tail: tailText) else {
             if forcedKind == nil { bulkPending = false } // consumed: nothing to mint
             return

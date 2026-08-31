@@ -214,10 +214,13 @@ final class EditorViewModel {
         var id: String { blockID }
     }
 
+    /// Which block the takes sheet is open on — nothing more. The sheet
+    /// (`WriteTakesPanel`) drives every act through its own `TakesViewModel`
+    /// and reads only `blockID`, so the `variants`/`chosenVariantID` fields
+    /// this once carried were written on every open and read nowhere
+    /// (17f/P43 — retired with the store read that filled them).
     struct FanPanelState: Equatable, Identifiable {
         let blockID: String
-        var variants: [Variant]
-        var chosenVariantID: String?
         var id: String { blockID }
     }
 
@@ -556,8 +559,7 @@ final class EditorViewModel {
             let tail = self.hasOpenTail ? self.tailText : ""
             guard !tail.allSatisfy(\.isWhitespace) else { return }
             let mode = self.header?.effectiveSegmentation ?? .paragraph
-            let kind: CrystallizationPlanner.Kind =
-                mode == .oneBlock ? .oneBlock : .idle(.paragraph)
+            let kind = CrystallizationPlanner.kindForDurabilityMint(mode: mode)
             guard let plan = CrystallizationPlanner.plan(kind, tail: tail) else { return }
             let post = self.postID
             do {
@@ -1292,7 +1294,7 @@ final class EditorViewModel {
         let mode = header?.effectiveSegmentation ?? .paragraph
         // The .idle kind (round 1, MAJOR 2): the durability mint must never
         // collapse a pending typed gap — the trailing run survives.
-        crystallizeIfNeeded(forcedKind: mode == .oneBlock ? .oneBlock : .idle(.paragraph))
+        crystallizeIfNeeded(forcedKind: CrystallizationPlanner.kindForDurabilityMint(mode: mode))
     }
 
     /// The leading-run attachment (author ruling 2026-07-12; Phase 10
@@ -1341,7 +1343,7 @@ final class EditorViewModel {
         }
         let mode = header?.effectiveSegmentation ?? .paragraph
         let kind: CrystallizationPlanner.Kind = forcedKind
-            ?? (bulkPending ? .bulk(mode) : (mode == .oneBlock ? .oneBlock : .typing))
+            ?? CrystallizationPlanner.kindForTailEdit(mode: mode, bulkPending: bulkPending)
         guard let plan = CrystallizationPlanner.plan(kind, tail: tailText) else {
             if forcedKind == nil { bulkPending = false } // consumed: nothing to mint
             return
@@ -2331,23 +2333,12 @@ final class EditorViewModel {
         openFan(blockID: blockID)
     }
 
+    /// Opens the takes sheet on a block. Synchronous since 17f/P43: the fan
+    /// itself is read by `WriteTakesPanel`'s own `TakesViewModel`, so the
+    /// async `Queries.blockFan` read this used to perform on every open fed
+    /// nothing but two unread fields.
     func openFan(blockID: String) {
-        Task { await loadFan(blockID: blockID) }
-    }
-
-    /// The awaitable core of the fan door (split out in 9d so tests can
-    /// await the panel deterministically).
-    func loadFan(blockID: String) async {
-        do {
-            let variants = try await session.database.read { db in
-                try Queries.blockFan(db, blockID: blockID)
-            }
-            let chosen = index.entries.first { $0.blockID == blockID }?.variantID
-            fanPanel = FanPanelState(
-                blockID: blockID, variants: variants, chosenVariantID: chosen)
-        } catch {
-            statusMessage = "Could not load the fan: \(error)"
-        }
+        fanPanel = FanPanelState(blockID: blockID)
     }
 
     // MARK: - Caret take shortcuts (Sitting 9, R73/R90 — the keyboard
@@ -2444,49 +2435,12 @@ final class EditorViewModel {
         textView.scrollRangeToVisible(NSRange(location: range.location, length: 0))
     }
 
-    func fanAction(_ action: FanAction) {
-        guard let panel = fanPanel else { return }
-        let blockID = panel.blockID
-        Task {
-            await autosave.flushNow()
-            do {
-                try await session.runner.run { ops in
-                    switch action {
-                    case .branch(let sourceVariantID):
-                        _ = try ops.branchVariant(blockID, from: sourceVariantID)
-                    case .newBlank:
-                        _ = try ops.newBlankVariant(blockID)
-                    case .choose(let variantID):
-                        try ops.chooseVariant(blockID, variantID: variantID)
-                    case .archive(let variantID):
-                        try ops.archiveVariant(variantID)
-                    case .unarchive(let variantID):
-                        try ops.unarchiveVariant(variantID)
-                    case .delete(let variantID):
-                        try ops.deleteVariant(variantID)
-                    case .lock(let variantID):
-                        try ops.lockVariant(variantID)
-                    case .unlock(let variantID):
-                        try ops.unlockVariant(variantID)
-                    }
-                }
-                openFan(blockID: blockID) // refresh the panel
-            } catch {
-                showOperationError(error)
-            }
-        }
-    }
-
-    enum FanAction {
-        case branch(from: String)
-        case newBlank
-        case choose(String)
-        case archive(String)
-        case unarchive(String)
-        case delete(String)
-        case lock(String)
-        case unlock(String)
-    }
+    // (17f/P43: `fanAction` + `enum FanAction` lived here — eight operations
+    // dispatched from a panel retired at Sitting 9 (R87). Their only caller
+    // in the tree was a test that had to hand-construct a `FanPanelState` no
+    // UI road can produce; the live takes acts are `WriteTakesPanel` →
+    // `TakesViewModel`, and the editor's own refusal wording is pinned
+    // through a live door — `archiveCaretTake` in `EditorSessionTests`.)
 
     // MARK: - Caret + badges
 

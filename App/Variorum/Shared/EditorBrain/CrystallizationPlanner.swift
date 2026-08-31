@@ -92,6 +92,49 @@ nonisolated enum CrystallizationPlanner {
         }
     }
 
+    // MARK: - Which kind an occasion asks for (the ONE rule)
+
+    /// The segmentation-mode → kind rule for an ORDINARY TAIL EDIT — the
+    /// keystroke/paste road: a pending bulk entry segments by the effective
+    /// mode, a one-block post mints THE block verbatim, everything else
+    /// crystallizes paragraph-by-paragraph as you type past them (AppSpec §7's
+    /// type-time crystallization).
+    ///
+    /// **Hoisted at 17f/P42** (the pre-13u round's Act 5). This mapping used
+    /// to be written out five times — three in the Mac's `EditorViewModel`
+    /// (teardown, idle tick, tail edit) and two in the phone's
+    /// `MobileEditorViewModel` — byte-identical, with nothing pinning them
+    /// together, so a rule change (a new segmentation mode; a ruling that the
+    /// idle mint behaves differently under `one_block`) landing at one site
+    /// would leave the others on the old rule and the two platforms would
+    /// crystallize differently with nothing announcing it. The standing
+    /// remedy for that class is the HOIST (KnownIssues' forked-brains row):
+    /// one brain, both platforms calling it.
+    ///
+    /// Both factories switch EXHAUSTIVELY (no `default`), so a fourth
+    /// segmentation mode is a build failure here — at the one place that
+    /// decides — instead of five silent fall-throughs.
+    static func kindForTailEdit(mode: Segmentation, bulkPending: Bool) -> Kind {
+        if bulkPending { return .bulk(mode) }
+        switch mode {
+        case .oneBlock: return .oneBlock
+        case .paragraph, .sentence: return .typing
+        }
+    }
+
+    /// The same rule for the DURABILITY mints — the idle tick and the
+    /// teardown/quit finalize. Deliberately different from a tail edit in one
+    /// way and one way only (author ruling 2026-07-12; Phase 10 review round
+    /// 1, MAJOR 2): outside `one_block` the mint is `.idle(.paragraph)` — the
+    /// trailing typed newline run survives the mint instead of collapsing —
+    /// and PARAGRAPH granularity regardless of the mode's sentence setting.
+    static func kindForDurabilityMint(mode: Segmentation) -> Kind {
+        switch mode {
+        case .oneBlock: return .oneBlock
+        case .paragraph, .sentence: return .idle(.paragraph)
+        }
+    }
+
     /// Plans the given kind over an open-tail text. Nil = nothing to mint.
     static func plan(_ kind: Kind, tail: String) -> Plan? {
         switch kind {

@@ -116,6 +116,60 @@ struct CrystallizationPlannerTests {
         #expect(plan?.remainingTail == nil)
         #expect(CrystallizationPlanner.plan(.oneBlock, tail: "  \n ") == nil)
     }
+
+    // MARK: - The kind rule (17f/P42 — hoisted from five sites)
+
+    /// The mode → kind rule is now ONE brain both platforms call
+    /// (`EditorViewModel` at its three occasions, `MobileEditorViewModel` at
+    /// its two). Before the hoist the mapping was written out five times with
+    /// nothing pinning them together; this is the pin that was missing.
+    @Test func theTailEditKindFollowsTheEffectiveSegmentationMode() {
+        #expect(CrystallizationPlanner.kindForTailEdit(mode: .oneBlock, bulkPending: false)
+                == .oneBlock)
+        #expect(CrystallizationPlanner.kindForTailEdit(mode: .paragraph, bulkPending: false)
+                == .typing)
+        // Sentence mode still crystallizes by PARAGRAPH while typing
+        // (SegmentationRules.crystallizedBoundary's own doctrine) — `.typing`
+        // carries no mode, and that is the rule, not an omission.
+        #expect(CrystallizationPlanner.kindForTailEdit(mode: .sentence, bulkPending: false)
+                == .typing)
+    }
+
+    @Test func aPendingBulkEntryOverridesEveryModeIntoBulk() {
+        // Paste/import/drop: the whole tail segments by the effective mode —
+        // including under one_block, where "the whole tail" is one block.
+        #expect(CrystallizationPlanner.kindForTailEdit(mode: .paragraph, bulkPending: true)
+                == .bulk(.paragraph))
+        #expect(CrystallizationPlanner.kindForTailEdit(mode: .sentence, bulkPending: true)
+                == .bulk(.sentence))
+        #expect(CrystallizationPlanner.kindForTailEdit(mode: .oneBlock, bulkPending: true)
+                == .bulk(.oneBlock))
+    }
+
+    @Test func theDurabilityMintKindIsIdleParagraphOutsideOneBlock() {
+        // The idle tick and the teardown/quit finalize: PARAGRAPH granularity
+        // in every mode (author ruling 2026-07-12) and `.idle`, so a trailing
+        // typed newline run survives the mint.
+        #expect(CrystallizationPlanner.kindForDurabilityMint(mode: .paragraph)
+                == .idle(.paragraph))
+        #expect(CrystallizationPlanner.kindForDurabilityMint(mode: .sentence)
+                == .idle(.paragraph))
+        #expect(CrystallizationPlanner.kindForDurabilityMint(mode: .oneBlock) == .oneBlock)
+    }
+
+    @Test func theTwoOccasionsDifferOnlyInWhatTheyDoOutsideOneBlock() {
+        // The one behavioural difference between the occasions, stated as a
+        // pin so a future edit to either factory has to face it: under
+        // one_block they agree exactly; outside it, a tail edit crystallizes
+        // as you type and a durability mint takes the whole tail with the run
+        // preserved.
+        for mode in [Segmentation.paragraph, .sentence] {
+            #expect(CrystallizationPlanner.kindForTailEdit(mode: mode, bulkPending: false)
+                    != CrystallizationPlanner.kindForDurabilityMint(mode: mode))
+        }
+        #expect(CrystallizationPlanner.kindForTailEdit(mode: .oneBlock, bulkPending: false)
+                == CrystallizationPlanner.kindForDurabilityMint(mode: .oneBlock))
+    }
 }
 
 @MainActor
