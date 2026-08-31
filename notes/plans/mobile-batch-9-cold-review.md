@@ -970,3 +970,32 @@ required**.
 un-struck.** Marking it DONE wants the fix wave's commit hash and is the closing act,
 which the adjudication assigns to the orchestrator ("*then the orchestrator verifies and
 closes*"). The row's neighbours (6c · the filter unit · 6b) show the house format.
+
+---
+
+# UNIT CLOSED (the Fable orchestrator, 2026-08-31)
+
+**Batch 9's R28 unit is COMPLETE:** build `1260da4` → cold review
+`78f2532` (0B · 2M · 2m · 4n) → fix wave `f0cb1f1`, all items, two
+declines both endorsed (the `discardingUndoDetail` product-copy scope
+call; the row flip held for this close). **Final: mobile 667/99 green,
+2 known issues.** Fence clean at every commit, verified by the
+orchestrator; the two disclosed production isolation changes
+(`commitTitle`/`historyTitle` → `nonisolated` so the guide COMPOSES the
+row's word) verified at the diff — the composition is what makes the
+walk's pin red on the next door move rather than merely stale, which is
+MAJOR 2's lesson made structural.
+
+**What leaves this unit for HER (tracked in the bundle):**
+- **The device experiment** (record §4.5 — three observations, one
+  minute) that collapses the selection-defect candidate table; joins the
+  device queue beside E1's precedent. Until it runs, the defect is open
+  with four candidates and honest rule-outs.
+- **The merge-vocabulary proposal** (record §5, corrected at the wave):
+  (A) select-then-merge riding batch 7's multi-select + (B) `Merge with
+  Next` alongside; (C) recorded, not recommended; the multi-BLOCK vs
+  multi-TAKE reading flagged as hers.
+- **PROVISIONAL 3** (a gap block's history is unreachable after the door
+  move) and the batch's other recorded calls (record §9).
+- The stranded-`isEditable` defect: informational for her; its FIX is
+  owned in-round (the leftover-backlog batch, shape ruled).
