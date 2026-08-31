@@ -231,6 +231,11 @@ struct AccountView: View {
         }
 
         // MARK: The Variorum session (the suite identity)
+        // Act 10 wave 2a (item 4 — manifest row 04's de-crowding): the tab
+        // groups by the question each element answers — who am I · what
+        // does sync do · the journal bridge — and the DESTRUCTIVE door
+        // moves to the very end, no longer parked mid-column between the
+        // tier and the bridge. Every door survives; only order moved.
         if let signedIn = services.account.variorum {
             HStack(alignment: pageStyle != nil ? .firstTextBaseline : .center) {
                 Text("Signed in\(signedIn.email.map { " as \($0)" } ?? "")")
@@ -246,16 +251,6 @@ struct AccountView: View {
             // Phase 14c batch 3 (L7): the tier's real home — CF-14's own
             // words made good ("account will one day show payment").
             HostedSyncSection(services: services)
-
-            if showingDeleteAccount {
-                deleteAccountSection
-            } else {
-                PageDoor("Delete Account…", form: .destructive, style: pageStyle) {
-                    showingDeleteAccount = true
-                    Task { await services.refreshSubscriptionNote() }
-                }
-                .disabled(services.account.busy)
-            }
         } else if creatingAccount {
             signUpSection
         } else {
@@ -310,6 +305,21 @@ struct AccountView: View {
             .disabled(!ProjectConfig.fragmentsConfigured || services.account.busy)
             Text("Opens a quick browser sign-in with the same Stargazing account; only the session is kept.")
                 .pageCaption(pageStyle)
+        }
+
+        // The dangerous door, LAST (item 4's ordering): reachable, never
+        // in the middle of the ordinary questions.
+        if services.account.variorum != nil {
+            PageDivider(pageStyle)
+            if showingDeleteAccount {
+                deleteAccountSection
+            } else {
+                PageDoor("Delete Account…", form: .destructive, style: pageStyle) {
+                    showingDeleteAccount = true
+                    Task { await services.refreshSubscriptionNote() }
+                }
+                .disabled(services.account.busy)
+            }
         }
 
         if services.account.busy {

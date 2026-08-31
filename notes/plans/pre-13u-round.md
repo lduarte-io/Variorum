@@ -2427,7 +2427,19 @@ render-don't-re-derive (§9c item 3) binds every surface below.
     composition pin that a server-ahead report renders the count-and-dates sentence.
     **EITHER WAY the final ladder verdicts this door** (guarded with evidence, or a
     KnownIssues row with an owner — the riders block).
-11. **Item 4 — the trash/encryption/archived sweep: NOT STARTED.** Coordinates (relayed
+11. **Item 4 — the trash/encryption/archived sweep: DONE (judged scope, recorded).**
+    ARCHIVED: the hairline-row grammar retired for W8-2 calm cards (List kept — the
+    window is 500, virtualization stays; separators gone; CalmCard rows with generous
+    CalmButtonStyle doors — Open · Unarchive-primary · Delete-danger; every door
+    byte-identical). ACCOUNT (manifest row 04): grouped by question — identity+sync →
+    bridge → the DESTRUCTIVE door LAST behind its own divider (it sat mid-column
+    between the tier and the bridge); zero copy changes, zero doors lost; shared file,
+    phone-legible (PageDoor vocabulary throughout). TRASH: judged ALREADY-GROUPED — the
+    polish round's ledger did this surface's de-crowding (G7 grouping, the filter chip,
+    the window notes, the fold-able ancestor runs, each behaviour pinned); a card-
+    grammar restyle there would touch pinned rendering decisions for pure look and is
+    left to 13u2's app-wide continuation (taste fork 3). The reminder/nudge family rode
+    piece 6 (tier faces). The encryption-pane crowding was pieces 3–4's centerpiece. Coordinates (relayed
     recon): Mac Trash = `Features/Library/RecoveryView.swift` (plain List; copy via
     `Shared/RecoveryCopy.swift`); Archived = `Features/Library/ArchivedView.swift`
     (plain List; local statics :143-146); Account pane = `Shared/AuthViews.swift` 37-438
@@ -2464,3 +2476,6 @@ render-don't-re-derive (§9c item 3) binds every surface below.
 2. **The field-guide door from Settings points BY NAME** (chapter "keeping it private")
    rather than a live cross-scene button — routing from the Settings scene into the main
    window's book view is 13u2-adjacent machinery; the pointer is honest meanwhile.
+3. **The Trash keeps its engineered layout** (see piece 11): the polish round already
+   grouped it and pinned the shapes; the calm-card restyle rides 13u2's app-wide
+   continuation rather than risking pinned rendering for look alone.

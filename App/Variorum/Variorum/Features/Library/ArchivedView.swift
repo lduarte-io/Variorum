@@ -145,49 +145,70 @@ struct ArchivedView: View {
     static let emptyLine = "Nothing archived."
     static let noMatchesLine = "No archived note matches that."
 
+    /// Act 10 wave 2a (item 4): the hairline-row grammar retires for the
+    /// W8-2 calm cards — a `List` still carries the rows (the window is
+    /// 500; virtualization stays), the separators go, and each note is one
+    /// card with generous doors. Every door survives byte-identical.
     private var list: some View {
         List {
             if model.archived.isEmpty {
                 Text(Self.emptyLine).foregroundStyle(.secondary)
+                    .listRowSeparator(.hidden)
             } else if shown.isEmpty {
                 Text(Self.noMatchesLine).foregroundStyle(.secondary)
+                    .listRowSeparator(.hidden)
             }
             ForEach(shown, id: \.postID) { item in
                 row(item)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(
+                        top: 3, leading: 12, bottom: 3, trailing: 12))
             }
             if model.archivedTruncated {
                 Text("Showing the \(RecoveryViewModel.window) most recently archived — older ones aren't listed.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .listRowSeparator(.hidden)
             }
         }
+        .listStyle(.plain)
         .scrollContentBackground(.hidden)
     }
 
     private func row(_ item: Queries.TimelineItem) -> some View {
-        HStack(spacing: 6) {
-            Text(item.displayTitle).lineLimit(1)
-            if let date = item.entryDate {
-                Text(date).font(.caption).foregroundStyle(.secondary)
+        CalmCard(tokens: tokens) {
+            HStack(spacing: 8) {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(item.displayTitle)
+                        .font(tokens.body)
+                        .foregroundStyle(tokens.ink)
+                        .lineLimit(1)
+                    HStack(spacing: 6) {
+                        if let date = item.entryDate {
+                            Text(date).font(tokens.small).foregroundStyle(tokens.muted)
+                        }
+                        if let stamp = TrayRowPreview.stampText(item.stamp, verb: "archived") {
+                            Text(stamp).font(tokens.small).foregroundStyle(tokens.faint)
+                        }
+                    }
+                    .lineLimit(1)
+                }
+                Spacer(minLength: 8)
+                Button("Open") { openPost(item.postID) }
+                    .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
+                Button("Unarchive") {
+                    Task { await library.unarchive(postID: item.postID) }
+                }
+                .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary, compact: true))
+                .help("Puts it back in the Library")
+                // N3's last road: Delete → the Trash, 30 days, one shared
+                // wording with every other note-delete door.
+                Button(RecoveryCopy.deleteNoteTitle) {
+                    Task { pendingDelete = await NoteDeletion.ask(
+                        session: session, postIDs: [item.postID]) }
+                }
+                .buttonStyle(CalmButtonStyle(tokens: tokens, role: .danger, compact: true))
             }
-            if let stamp = TrayRowPreview.stampText(item.stamp, verb: "archived") {
-                Text(stamp).font(.caption2).foregroundStyle(.tertiary)
-            }
-            Spacer()
-            Button("Open") { openPost(item.postID) }
-                .controlSize(.small)
-            Button("Unarchive") {
-                Task { await library.unarchive(postID: item.postID) }
-            }
-            .controlSize(.small)
-            .help("Puts it back in the Library")
-            // N3's last road: Delete → the Trash, 30 days, one shared
-            // wording with every other note-delete door.
-            Button(RecoveryCopy.deleteNoteTitle, role: .destructive) {
-                Task { pendingDelete = await NoteDeletion.ask(
-                    session: session, postIDs: [item.postID]) }
-            }
-            .controlSize(.small)
         }
     }
 }
