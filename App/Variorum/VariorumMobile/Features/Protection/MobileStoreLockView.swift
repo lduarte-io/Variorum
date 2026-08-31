@@ -176,10 +176,11 @@ struct MobileStoreLockView: View {
 
     /// Practically unreachable (the mode transitions refuse to enter a
     /// demanded mode without a wrap) — but a dead end must SAY so, never
-    /// render an empty room. The Mac's twin says the same thing; the file
-    /// name it points at is the one both platforms write.
+    /// render an empty room. The Mac's twin says the same thing; the
+    /// sentence is the lobby's ONE brain (P11: an unreadable sidecar gets
+    /// its true cause, never the absent-wraps one).
     private var deadEnd: some View {
-        Text(ProtectionCopy.deadEnd(lobby.demand))
+        Text(lobby.deadEndMessage)
             .font(tokens.small)
             .foregroundStyle(tokens.alarm)
             .multilineTextAlignment(.center)

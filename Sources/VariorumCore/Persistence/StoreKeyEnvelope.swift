@@ -112,17 +112,38 @@ public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
         key: StoreKey, passphrase: String,
         kdf: PassphraseKDF.Descriptor = .v1(salt: PassphraseKDF.randomSalt())
     ) throws {
-        try requireCurrentFormat()
+        try requireCurrentFormat()  // first, exactly as before the split
+        let wrap = try Self.makePassphraseWrap(key: key, passphrase: passphrase, kdf: kdf)
+        try adoptPassphraseWrap(wrap, key: key)
+    }
+
+    /// The wrap COMPUTATION alone — the heavy Argon2id derivation with no
+    /// envelope in hand (pre-13u Act 9, P10): callers derive off-main
+    /// first, then read the envelope FRESH and `adoptPassphraseWrap`, so a
+    /// wrap landed during the derivation is never clobbered by a
+    /// pre-derivation snapshot.
+    public static func makePassphraseWrap(
+        key: StoreKey, passphrase: String,
+        kdf: PassphraseKDF.Descriptor = .v1(salt: PassphraseKDF.randomSalt())
+    ) throws -> PassphraseWrap {
         guard !passphrase.isEmpty else { throw StoreKeyEnvelopeError.emptyPassphrase }
         let wrapKey = try PassphraseKDF.deriveKey(passphrase: passphrase, descriptor: kdf)
         do {
             let wrapped = try AES.KeyWrap.wrap(
                 SymmetricKey(data: key.data), using: wrapKey)
-            self.passphrase = PassphraseWrap(kdf: kdf, wrapped: wrapped)
-            keyFingerprint = Self.fingerprint(of: key)
+            return PassphraseWrap(kdf: kdf, wrapped: wrapped)
         } catch {
             throw StoreKeyEnvelopeError.wrapFailed
         }
+    }
+
+    /// Land a precomputed passphrase wrap (P10's second half). Carries the
+    /// same format guard as every mutating door — a newer-format envelope
+    /// still refuses, exactly as `setPassphraseWrap` always has.
+    public mutating func adoptPassphraseWrap(_ wrap: PassphraseWrap, key: StoreKey) throws {
+        try requireCurrentFormat()
+        passphrase = wrap
+        keyFingerprint = Self.fingerprint(of: key)
     }
 
     /// Set (or replace) the recovery wrap from the twelve words. Phrase

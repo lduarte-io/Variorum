@@ -121,9 +121,11 @@ struct StoreLockView: View {
 
     /// Practically unreachable (the mode transitions refuse to enter a
     /// demanded mode without a wrap) — but a dead end must SAY so, never
-    /// render an empty room.
+    /// render an empty room. The sentence is the lobby's ONE brain
+    /// (P11: an unreadable sidecar gets its true cause, never the
+    /// absent-wraps one).
     private var deadEnd: some View {
-        Text(ProtectionCopy.deadEnd(lobby.demand))
+        Text(lobby.deadEndMessage)
             .font(.callout)
             .alarmVoice()
             .multilineTextAlignment(.center)

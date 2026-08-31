@@ -455,4 +455,133 @@ struct Phase13pControllerTests {
         #expect(fresh.count == 12)
         #expect(free.controller.hasRecoveryWrap)
     }
+
+    // MARK: - The unreadable-sidecar family (pre-13u Act 9 — 17a P1/P11)
+
+    /// P1, THE RED-ON-OLD PIN for the launch-time overwrite. Escrow
+    /// defaults ON and the reconcile runs on every ready launch, so an
+    /// unreadable sidecar used to be read as ABSENT here — a fresh
+    /// wrap-less envelope was written OVER the file (destroying the
+    /// passphrase and recovery wraps where they were intact on disk) and
+    /// a new escrow item landed under the fresh storeID, orphaning the
+    /// old one. No user action was needed. The reconcile now refuses to
+    /// touch an unreadable sidecar.
+    @Test func reconcileNeverOverwritesAnUnreadableSidecar() async {
+        let w = world(dials: ProtectionDials(mode: .auto, escrowOn: true))
+        w.envelopeBox.unreadable = true
+        await w.controller.reconcile()
+        #expect(w.envelopeBox.value == nil,
+                "NOTHING is written over an unreadable sidecar — the wraps on disk may be intact")
+        #expect(w.backing.escrow.isEmpty,
+                "and no escrow item lands under a fresh storeID (the old one stays un-orphaned)")
+        #expect(w.controller.envelopeUnreadable,
+                "the projection carries the truth: unreadable, not absent")
+        #expect(w.controller.notice != .nudge,
+                "the nudge stays quiet — it cannot honestly claim 'no passphrase' over unknown wraps")
+    }
+
+    /// P11(b): the set screen refuses over an unreadable sidecar — the
+    /// old road wrapped the key into a fresh BLANK envelope and wrote it
+    /// with `.atomic`, obliterating the `recovery` blob (her twelve
+    /// written-down words) and the escrow-naming storeID with no word
+    /// said. Foreign is a MOVE; unreadable is a REFUSAL.
+    @Test func setPassphraseRefusesOverAnUnreadableSidecarInsteadOfOverwritingIt() async {
+        let w = world()
+        w.envelopeBox.unreadable = true
+        let refusal = await w.controller.setPassphrase("sesame")
+        #expect(refusal == ProtectionCopy.message(
+            for: StoreKeyEnvelopeError.unreadable("scripted unreadable sidecar")),
+                "the refusal names the TRUE cause — the file exists and can't be read")
+        #expect(w.envelopeBox.value == nil, "nothing was written")
+
+        // The same rule at every envelope-writing door.
+        #expect(await w.controller.generateAndLandRecoveryPhrase() == nil)
+        #expect(w.controller.lastError != nil)
+        #expect(await w.controller.setEscrow(true) == false,
+                "the escrow dial refuses too — its ensure would mint over the file")
+        #expect(w.envelopeBox.value == nil, "still nothing written")
+
+        // And the reset door names the real problem instead of the false
+        // "No passphrase is set yet".
+        let reset = await w.controller.resetPassphrase(to: "new one")
+        #expect(reset == ProtectionCopy.message(
+            for: StoreKeyEnvelopeError.unreadable("")))
+    }
+
+    /// P2, THE RED-ON-OLD PIN: entering a demanded mode is authorized by
+    /// a FRESH disk read, never the cached `hasPassphraseWrap` projection.
+    /// The road: a FOREIGN sidecar (its wraps are another key's) reads as
+    /// "Passphrase — Set" at init; the reconcile's escrow arm then sets
+    /// it aside and writes a fresh WRAP-LESS envelope without refreshing;
+    /// the stale `true` used to pass `setMode`'s guard and delete BOTH
+    /// Keychain items — no copy of the store key existed anywhere, the
+    /// library permanently unopenable.
+    @Test func aModeChangeAuthorizesFromTheDiskNotTheCachedProjection() async throws {
+        let foreignKey = StoreKey.mint()
+        var foreign = StoreKeyEnvelope()
+        try foreign.setPassphraseWrap(key: foreignKey, passphrase: "theirs", kdf: fastKDF())
+        let w = world(dials: ProtectionDials(mode: .auto, escrowOn: true), envelope: foreign)
+        #expect(w.controller.hasPassphraseWrap,
+                "init reads the foreign envelope — the projection says a wrap exists")
+
+        // The envelope changes UNDER the projection — in production the
+        // reconcile's escrow arm (or `setEscrow(true)`) sets the foreign
+        // sidecar aside and writes a fresh wrap-less one; both now refresh
+        // as a BELT, so the pin mutates the box directly to isolate the
+        // AUTHORIZATION half: whatever went stale, the act must re-read.
+        w.envelopeBox.value = StoreKeyEnvelope()
+        #expect(w.controller.hasPassphraseWrap, "the projection is now stale — the trap is set")
+
+        let outcome = await w.controller.setMode(.passphrase)
+        #expect(outcome == .needsPassphrase,
+                "a wrap-less envelope cannot authorize a demanded mode — stale 'true' deleted both Keychain items here")
+        #expect(w.backing.auto == w.key,
+                "the silent item SURVIVES — the refused transition changed nothing")
+        #expect(w.dialsBox.value.mode == .auto, "and the dial never moved")
+    }
+
+    /// P10, THE RED-ON-OLD PIN. `setPassphrase` used to snapshot the
+    /// envelope BEFORE suspending in the Argon2id derivation (hundreds of
+    /// ms), then write the whole snapshot back — so a recovery wrap landed
+    /// during that window (the main window's nudge phrase door beside the
+    /// Settings window's set sheet, two doors over ONE controller) was
+    /// silently overwritten and the SHOWN twelve words stopped opening the
+    /// library. The `makeKDF` hook below stands in for the concurrent
+    /// land: it runs between the old snapshot and the save either way, so
+    /// old code clobbers it and fixed code (fresh read AFTER the
+    /// derivation) preserves it.
+    @Test func aRecoveryWrapLandedDuringTheKDFSurvivesSetPassphrase() async throws {
+        let key = StoreKey.mint()
+        let backing = InMemoryStoreKeyGuardBacking(
+            auto: key, biometryAvailable: true, biometricSucceeds: true)
+        let dialsBox = ScriptedDialsBox(ProtectionDials())
+        let envelopeBox = ScriptedEnvelopeBox(nil)
+        let stamps = ScriptedStampsBox()
+        let gate = StoreLaunchGate.scripted(
+            dials: dialsBox, backing: backing, envelope: envelopeBox, stamps: stamps)
+        let words = try RecoveryPhrase.generate()
+        let controller = ProtectionController(configuration: .init(
+            scope: "Variorum", storeURL: nil, gate: gate, isRealVariant: true,
+            makeKDF: {
+                // The concurrent land, deterministically inside the window:
+                // the phrase door writes the recovery wrap while the set
+                // door is deriving.
+                var landed = envelopeBox.value ?? StoreKeyEnvelope()
+                try? landed.setRecoveryWrap(key: key, words: words)
+                envelopeBox.value = landed
+                return PassphraseKDF.Descriptor(
+                    algorithm: PassphraseKDF.algorithmArgon2id, argon2Version: 0x13,
+                    memoryKiB: 256, iterations: 1, parallelism: 1,
+                    salt: PassphraseKDF.randomSalt(), outputBytes: 32)
+            }))
+
+        #expect(await controller.setPassphrase("sesame") == nil)
+        let envelope = try #require(envelopeBox.value)
+        #expect(envelope.recovery != nil,
+                "the recovery wrap landed mid-derivation SURVIVES the passphrase save")
+        #expect(try envelope.unwrapKey(recoveryWords: words) == key,
+                "and the shown twelve words still open the library")
+        #expect(try envelope.unwrapKey(passphrase: "sesame") == key,
+                "beside the freshly-set passphrase — both artifacts stand")
+    }
 }

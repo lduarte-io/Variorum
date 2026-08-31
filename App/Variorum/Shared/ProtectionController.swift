@@ -56,6 +56,12 @@ final class ProtectionController {
     /// The envelope's projected facts (the pane and the notices read these).
     private(set) var hasPassphraseWrap = false
     private(set) var hasRecoveryWrap = false
+    /// P1/P11 (pre-13u Act 9): the sidecar EXISTS but could not be read.
+    /// While true, both wrap facts above are UNKNOWN (held false), the
+    /// nudge stays quiet (it cannot honestly claim "no passphrase"), and
+    /// every door that would write the envelope refuses with the
+    /// unreadable sentence instead of overwriting the file.
+    private(set) var envelopeUnreadable = false
     private(set) var busy = false
     var lastError: String?
     /// HONESTY about the escrow dial (the Q3 codesigned finding, this
@@ -122,13 +128,18 @@ final class ProtectionController {
     }
 
     private func refreshEnvelopeFacts() {
-        let envelope = loadEnvelope()
-        hasPassphraseWrap = envelope?.passphrase != nil
-        hasRecoveryWrap = envelope?.recovery != nil
+        let reading = readEnvelope()
+        envelopeUnreadable = reading.isUnreadable
+        hasPassphraseWrap = reading.envelope?.passphrase != nil
+        hasRecoveryWrap = reading.envelope?.recovery != nil
     }
 
     private func loadEnvelope() -> StoreKeyEnvelope? {
-        Self.loadEnvelope(gate: gate, storeURL: configuration.storeURL)
+        readEnvelope().envelope
+    }
+
+    private func readEnvelope() -> EnvelopeReading {
+        gate.readEnvelope(configuration.storeURL)
     }
 
     private func saveEnvelope(_ envelope: StoreKeyEnvelope) throws {
@@ -143,9 +154,17 @@ final class ProtectionController {
     /// returned envelope is the one already sitting beside the store (13p
     /// ladder R1-n3: callers used to re-`loadEnvelope()` to answer exactly
     /// that — a second disk read per act, and a doubled one in reconcile).
-    private func ensuredEnvelope(for key: StoreKey)
+    ///
+    /// THROWS `.unreadable` on a present-but-undecodable sidecar (P1/P11,
+    /// pre-13u Act 9): the old `try?` swallow made unreadable read as
+    /// absent, and this method's fresh-blank return then let every caller
+    /// OVERWRITE the file — destroying wraps that may be perfectly intact
+    /// on disk (a transient I/O failure is the strict destruction case)
+    /// and orphaning the escrow item under a fresh storeID. Foreign is a
+    /// MOVE; unreadable is a REFUSAL; only true absence mints.
+    private func ensuredEnvelope(for key: StoreKey) throws
         -> (envelope: StoreKeyEnvelope, onDisk: Bool) {
-        Self.ensuredEnvelope(for: key, gate: gate, storeURL: configuration.storeURL)
+        try Self.ensuredEnvelope(for: key, gate: gate, storeURL: configuration.storeURL)
     }
 
     // Nonisolated twins (13p ladder R2-m2): the reconcile's escrow arm
@@ -153,20 +172,19 @@ final class ProtectionController {
     // pieces it shares with the MainActor doors above — same reads, same
     // writes, byte-identical semantics; only the executor differs. The
     // gate's closures are `@Sendable` by construction.
-    nonisolated private static func loadEnvelope(
-        gate: StoreLaunchGate, storeURL: URL?
-    ) -> StoreKeyEnvelope? {
-        (try? gate.loadEnvelope(storeURL ?? URL(fileURLWithPath: "/dev/null"))) ?? nil
-    }
-
     nonisolated private static func ensuredEnvelope(
         for key: StoreKey, gate: StoreLaunchGate, storeURL: URL?
-    ) -> (envelope: StoreKeyEnvelope, onDisk: Bool) {
-        if let existing = loadEnvelope(gate: gate, storeURL: storeURL) {
+    ) throws -> (envelope: StoreKeyEnvelope, onDisk: Bool) {
+        switch gate.readEnvelope(storeURL) {
+        case .loaded(let existing):
             if existing.belongs(to: key) { return (existing, true) }
             gate.setAsideEnvelope(storeURL ?? URL(fileURLWithPath: "/dev/null"))
+            return (StoreKeyEnvelope(), false)
+        case .absent:
+            return (StoreKeyEnvelope(), false)
+        case .unreadable(let detail):
+            throw StoreKeyEnvelopeError.unreadable(detail)
         }
-        return (StoreKeyEnvelope(), false)
     }
 
     // MARK: - The passphrase (set · follow · reset)
@@ -177,15 +195,26 @@ final class ProtectionController {
     func setPassphrase(_ passphrase: String) async -> String? {
         guard !passphrase.isEmpty else { return "Type a passphrase first." }
         guard let key = currentKey() else { return Self.keyUnavailable }
-        var envelope = ensuredEnvelope(for: key).envelope
         let kdf = configuration.makeKDF()
         do {
-            envelope = try await Task.detached(priority: .userInitiated) {
-                [envelope] () throws -> StoreKeyEnvelope in
-                var updated = envelope
-                try updated.setPassphraseWrap(key: key, passphrase: passphrase, kdf: kdf)
-                return updated
+            // P10 (pre-13u Act 9): the heavy KDF derives the WRAP first,
+            // envelope-free — the envelope is read FRESH after the
+            // derivation returns, and the read→write pair below is
+            // awaitless on the MainActor. The old shape read the envelope
+            // BEFORE suspending in the derivation (hundreds of ms), so a
+            // recovery wrap landed during that window (the main window's
+            // nudge phrase door beside the Settings window's set sheet —
+            // both MainActor doors over ONE controller) was overwritten by
+            // the stale snapshot and the shown twelve words stopped
+            // opening the library. Every MainActor envelope writer is now
+            // read→write with no suspension between, so no such window
+            // exists between any two of them.
+            let wrap = try await Task.detached(priority: .userInitiated) {
+                try StoreKeyEnvelope.makePassphraseWrap(
+                    key: key, passphrase: passphrase, kdf: kdf)
             }.value
+            var envelope = try ensuredEnvelope(for: key).envelope
+            try envelope.adoptPassphraseWrap(wrap, key: key)
             try saveEnvelope(envelope)
             gate.setStamp(Date(), Self.passphraseSetAtStamp, scope)
             refreshEnvelopeFacts()
@@ -207,6 +236,13 @@ final class ProtectionController {
     /// ONE SECRET, the guarding direction: does `passphrase` unwrap the
     /// STORE wrap? nil = no wrap exists (nothing to guard); the vault
     /// setup uses this to refuse minting a SECOND passphrase.
+    ///
+    /// Recorded corner (P1/P11's sweep, deliberately unchanged): an
+    /// UNREADABLE sidecar answers nil here — vault setup then proceeds
+    /// unguarded, exactly as over an absent sidecar. Refusing would need a
+    /// third answer in the guard's vocabulary (a design act, not a fix);
+    /// the write doors all refuse over unreadable regardless, so no
+    /// overwrite can follow from it.
     func verifyPassphraseAgainstStore(_ passphrase: String) async -> Bool? {
         guard let envelope = loadEnvelope(), envelope.passphrase != nil else { return nil }
         return await Task.detached(priority: .userInitiated) {
@@ -225,6 +261,13 @@ final class ProtectionController {
     @discardableResult
     func resetPassphrase(to newPassphrase: String) async -> String? {
         guard !newPassphrase.isEmpty else { return "Type the new passphrase first." }
+        // P1/P11: over an unreadable sidecar the wrap facts are UNKNOWN —
+        // "No passphrase is set yet" would be a false cause steering into
+        // the set screen (whose write now refuses too; this refusal names
+        // the real problem first).
+        if envelopeUnreadable {
+            return ProtectionCopy.message(for: StoreKeyEnvelopeError.unreadable(""))
+        }
         guard hasPassphraseWrap else {
             return "No passphrase is set yet — use Set a Passphrase instead."
         }
@@ -262,7 +305,7 @@ final class ProtectionController {
         }
         do {
             let words = try RecoveryPhrase.generate()
-            var envelope = ensuredEnvelope(for: key).envelope
+            var envelope = try ensuredEnvelope(for: key).envelope
             try envelope.setRecoveryWrap(key: key, words: words)
             try saveEnvelope(envelope)
             refreshEnvelopeFacts()
@@ -282,7 +325,7 @@ final class ProtectionController {
     func landRecoveryWrap(words: [String]) async -> String? {
         guard let key = currentKey() else { return Self.keyUnavailable }
         do {
-            var envelope = ensuredEnvelope(for: key).envelope
+            var envelope = try ensuredEnvelope(for: key).envelope
             try envelope.setRecoveryWrap(key: key, words: words)
             try saveEnvelope(envelope)
             refreshEnvelopeFacts()
@@ -308,6 +351,20 @@ final class ProtectionController {
     func setMode(_ newMode: StoreAtOpenMode) async -> ModeChangeOutcome {
         guard newMode != dials.mode else { return .changed }
         if newMode.isDemanded {
+            // P2 (pre-13u Act 9): the authorization reads the DISK at the
+            // act, never the cached projection. Two doors (`setEscrow(true)`
+            // and the reconcile's escrow arm) can set a foreign sidecar
+            // aside and mint a fresh wrap-less envelope without refreshing
+            // the projection, and a stale `hasPassphraseWrap == true` here
+            // authorized deleting BOTH Keychain items over an envelope with
+            // no wraps — a permanently unopenable library. Same doctrine as
+            // `deleteBlock`'s in-transaction precondition: a precondition
+            // read stale is no precondition.
+            refreshEnvelopeFacts()
+            if envelopeUnreadable {
+                return .refused(
+                    ProtectionCopy.message(for: StoreKeyEnvelopeError.unreadable("")))
+            }
             guard hasPassphraseWrap else { return .needsPassphrase }
         }
         guard let key = currentKey() else { return .refused(Self.keyUnavailable) }
@@ -382,7 +439,17 @@ final class ProtectionController {
                 lastError = Self.keyUnavailable
                 return false
             }
-            let ensured = ensuredEnvelope(for: key)
+            let ensured: (envelope: StoreKeyEnvelope, onDisk: Bool)
+            do {
+                ensured = try ensuredEnvelope(for: key)
+            } catch {
+                // P1/P11: an unreadable sidecar refuses the dial — writing
+                // a fresh envelope over it would destroy wraps that may be
+                // intact on disk.
+                lastError = ProtectionCopy.message(for: error)
+                refreshEnvelopeFacts()
+                return false
+            }
             let envelope = ensured.envelope
             if !ensured.onDisk {
                 // A fresh envelope needs to exist on disk so its storeID
@@ -414,6 +481,11 @@ final class ProtectionController {
         }
         dials.escrowOn = on
         persistDials()
+        // P2: this door's `ensuredEnvelope` can set a foreign sidecar
+        // aside and write a fresh envelope — the projection follows the
+        // disk it just changed, so no later act authorizes from a stale
+        // reading (the pane's "Passphrase — Set" line included).
+        refreshEnvelopeFacts()
         return true
     }
 
@@ -496,6 +568,10 @@ final class ProtectionController {
                     gate: gate, guardSeam: guardSeam, storeURL: storeURL)
             }.value
             if let outcome { escrowLandingFailed = outcome }
+            // P2: the escrow arm can set a foreign sidecar aside and mint
+            // a fresh envelope; the projection (read above, BEFORE the
+            // arm) follows the disk it just changed.
+            refreshEnvelopeFacts()
         }
         refreshNotices(now: now)
     }
@@ -510,7 +586,17 @@ final class ProtectionController {
     ) -> Bool? {
         if escrowOn {
             guard let key = residentKey ?? guardSeam.loadAuto() else { return nil }
-            let ensured = ensuredEnvelope(for: key, gate: gate, storeURL: storeURL)
+            // P1 (pre-13u Act 9) — THE LAUNCH-TIME OVERWRITE, closed: this
+            // arm runs on every ready launch with escrow defaulting ON, and
+            // the old absent-or-unreadable conflation made a transiently
+            // unreadable sidecar mint a fresh WRAP-LESS envelope here,
+            // save it over the file, and orphan the escrow item under the
+            // fresh storeID — silently, with no user action. An unreadable
+            // sidecar now SKIPS the arm whole (the honesty flag is left
+            // untouched: its sentence names a Keychain refusal, which this
+            // is not; the controller's facts carry the unreadable truth).
+            guard let ensured = try? ensuredEnvelope(
+                for: key, gate: gate, storeURL: storeURL) else { return nil }
             let envelope = ensured.envelope
             if !ensured.onDisk {
                 try? gate.saveEnvelope(
@@ -530,7 +616,7 @@ final class ProtectionController {
             // names another library's escrow copy, somebody's recovery
             // leg, and this housekeeping must never take it. No key in
             // hand ⇒ ownership unverifiable ⇒ the item stays.
-            if let envelope = loadEnvelope(gate: gate, storeURL: storeURL),
+            if let envelope = gate.readEnvelope(storeURL).envelope,
                let key = residentKey ?? guardSeam.loadAuto(),
                envelope.belongs(to: key) {
                 guardSeam.deleteEscrow(envelope.storeID)
@@ -551,7 +637,11 @@ final class ProtectionController {
             notice = .reminderDue
             return
         }
-        if StandardNudgePolicy.isEligible(
+        // P1/P11: while the sidecar is unreadable the wrap facts are
+        // UNKNOWN — a nudge claiming "the Keychain holds the only key"
+        // over a library that may have both wraps on disk is a false
+        // steer into the set screen (whose write refuses anyway).
+        if !envelopeUnreadable, StandardNudgePolicy.isEligible(
             now: now,
             firstUseAt: gate.stamp(Self.firstUseStamp, scope),
             dismissedForever: gate.stamp(Self.nudgeDismissedStamp, scope) != nil,

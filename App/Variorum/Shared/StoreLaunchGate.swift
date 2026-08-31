@@ -38,6 +38,32 @@ nonisolated struct StoreLaunchGate: Sendable {
     var stamp: @Sendable (_ leaf: String, _ scope: String) -> Date?
     var setStamp: @Sendable (Date?, _ leaf: String, _ scope: String) -> Void
 
+    /// The ONE tri-state sidecar read (pre-13u Act 9, P1/P11 — 17a's
+    /// shared root cause). `StoreKeyEnvelope.load` throws `.unreadable`
+    /// precisely so corruption is never read as absence, and BOTH
+    /// production readers used to discard it with `try?` — which let the
+    /// lobby assert "no passphrase or recovery phrase is on file" over a
+    /// sidecar holding both, and let the reconcile/set doors OVERWRITE an
+    /// unreadable envelope with a fresh wrap-less one (destroying the
+    /// passphrase and recovery wraps, and orphaning the escrow item under
+    /// a new storeID). Every consumer now reads through this, and the
+    /// unreadable case REFUSES rather than minting.
+    func readEnvelope(_ storeURL: URL?) -> EnvelopeReading {
+        do {
+            guard let envelope = try loadEnvelope(
+                storeURL ?? URL(fileURLWithPath: "/dev/null"))
+            else { return .absent }
+            return .loaded(envelope)
+        } catch StoreKeyEnvelopeError.unreadable(let detail) {
+            return .unreadable(detail)
+        } catch {
+            // Any other throw is still a file that exists-but-refused —
+            // never absence (the P1/P11 rule, applied to the seam's whole
+            // error surface).
+            return .unreadable(String(describing: error))
+        }
+    }
+
     static let live = StoreLaunchGate(
         dials: { ProtectionDefaults.dials(scope: $0, in: .standard) },
         saveDials: { ProtectionDefaults.save($0, scope: $1, in: .standard) },
@@ -76,7 +102,16 @@ nonisolated struct StoreLaunchGate: Sendable {
             dials: { _ in dials.value },
             saveDials: { new, _ in dials.value = new },
             guardFor: { _ in StoreKeyGuard.inMemory(backing: backing) },
-            loadEnvelope: { _ in envelope.value },
+            loadEnvelope: { _ in
+                // P1/P11: the scripted gate can now script UNREADABILITY —
+                // the case the verifier found "entirely unexercised"
+                // (every controller/lobby test drove a closure that could
+                // not throw).
+                if envelope.unreadable {
+                    throw StoreKeyEnvelopeError.unreadable("scripted unreadable sidecar")
+                }
+                return envelope.value
+            },
             saveEnvelope: { new, _ in envelope.value = new },
             setAsideEnvelope: { _ in
                 envelope.setAsideCount += 1
@@ -84,6 +119,24 @@ nonisolated struct StoreLaunchGate: Sendable {
             },
             stamp: { leaf, _ in stamps.value[leaf] },
             setStamp: { date, leaf, _ in stamps.value[leaf] = date })
+    }
+}
+
+/// What a sidecar read found — absent, loaded, or PRESENT-BUT-UNREADABLE
+/// (the case the `try?` swallow used to erase; P1/P11).
+nonisolated enum EnvelopeReading: Sendable {
+    case absent
+    case loaded(StoreKeyEnvelope)
+    case unreadable(String)
+
+    var envelope: StoreKeyEnvelope? {
+        if case .loaded(let envelope) = self { return envelope }
+        return nil
+    }
+
+    var isUnreadable: Bool {
+        if case .unreadable = self { return true }
+        return false
     }
 }
 
@@ -111,6 +164,7 @@ nonisolated final class ScriptedEnvelopeBox: @unchecked Sendable {
     private let lock = NSLock()
     private var stored: StoreKeyEnvelope?
     private var _setAsideCount = 0
+    private var _unreadable = false
     init(_ initial: StoreKeyEnvelope?) { stored = initial }
     var value: StoreKeyEnvelope? {
         get { lock.lock(); defer { lock.unlock() }; return stored }
@@ -119,6 +173,12 @@ nonisolated final class ScriptedEnvelopeBox: @unchecked Sendable {
     var setAsideCount: Int {
         get { lock.lock(); defer { lock.unlock() }; return _setAsideCount }
         set { lock.lock(); defer { lock.unlock() }; _setAsideCount = newValue }
+    }
+    /// P1/P11: scripts a PRESENT-but-undecodable sidecar — the gate's
+    /// loadEnvelope throws `.unreadable` while this is true.
+    var unreadable: Bool {
+        get { lock.lock(); defer { lock.unlock() }; return _unreadable }
+        set { lock.lock(); defer { lock.unlock() }; _unreadable = newValue }
     }
 }
 
@@ -161,6 +221,11 @@ final class StoreLobby {
     let passphraseOffered: Bool
     /// Whether the forgot-road renders (a recovery wrap exists).
     let recoveryOffered: Bool
+    /// P11 (pre-13u Act 9): the sidecar EXISTS but could not be read —
+    /// distinct from absent, so the dead end can say the TRUE cause
+    /// instead of "no passphrase or recovery phrase is on file" over a
+    /// file that holds both.
+    let envelopeUnreadable: Bool
 
     private(set) var busy = false
     var lastError: String?
@@ -170,6 +235,17 @@ final class StoreLobby {
     /// mode-transition choreography, which refuses to enter a demanded
     /// mode without a wrap; stated rather than assumed).
     var noRoadExists: Bool { !biometryOffered && !passphraseOffered && !recoveryOffered }
+
+    /// The ONE dead-end brain both faces render (P11): an unreadable
+    /// sidecar gets the sentence that already existed for it
+    /// (`StoreKeyEnvelopeError.unreadable`'s arm — restore the file from
+    /// a backup folder) instead of the absent-wraps cause, which is false
+    /// in exactly that case.
+    var deadEndMessage: String {
+        envelopeUnreadable
+            ? ProtectionCopy.message(for: StoreKeyEnvelopeError.unreadable(""))
+            : ProtectionCopy.deadEnd(demand)
+    }
 
     // The roads (injected).
     private let gatedRoad: @Sendable () async -> StoreKey?
@@ -193,6 +269,7 @@ final class StoreLobby {
         biometryOffered: Bool,
         passphraseOffered: Bool,
         recoveryOffered: Bool,
+        envelopeUnreadable: Bool = false,
         gatedRoad: @escaping @Sendable () async -> StoreKey?,
         envelopeRoad: @escaping @Sendable (Secret) async -> Result<StoreKey, StoreLobby.Refusal>,
         complete: @escaping @MainActor (StoreKey) -> Void
@@ -201,6 +278,7 @@ final class StoreLobby {
         self.biometryOffered = biometryOffered
         self.passphraseOffered = passphraseOffered
         self.recoveryOffered = recoveryOffered
+        self.envelopeUnreadable = envelopeUnreadable
         self.gatedRoad = gatedRoad
         self.envelopeRoad = envelopeRoad
         self.complete = complete

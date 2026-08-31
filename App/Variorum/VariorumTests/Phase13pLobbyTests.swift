@@ -194,6 +194,42 @@ struct Phase13pLobbyTests {
         return World(bootstrap: bootstrap, backing: backing, openCount: openCount, key: key)
     }
 
+    /// P11(a) (pre-13u Act 9), RED-ON-OLD: an UNREADABLE sidecar behind a
+    /// demanded mode used to read as absent — no roads offered, and the
+    /// dead end asserted the FALSE cause "no passphrase or recovery
+    /// phrase is on file beside the library" over a file holding both.
+    /// The lobby now carries the unreadable fact and its dead end speaks
+    /// the sentence that always existed for it (restore the key file from
+    /// a backup folder).
+    @Test func anUnreadableSidecarLobbySaysTheTrueCauseNeverTheAbsentOne() async throws {
+        let backing = InMemoryStoreKeyGuardBacking()
+        let dialsBox = ScriptedDialsBox(ProtectionDials(mode: .passphrase))
+        let envelopeBox = ScriptedEnvelopeBox(nil)
+        envelopeBox.unreadable = true
+        let gate = StoreLaunchGate.scripted(
+            dials: dialsBox, backing: backing, envelope: envelopeBox)
+        let openCount = LockIsolated(0)
+        let bootstrap = AppBootstrap(
+            testOpener: {
+                openCount.withValue { $0 += 1 }
+                return .failure(AppDatabase.StoreOpenError(
+                    storePath: "", reason: "must not be reached"))
+            },
+            gate: gate)
+        await bootstrap.awaitOpen()
+        guard case .locked(let lobby) = bootstrap.state else {
+            Issue.record("expected .locked, got \(bootstrap.state)")
+            return
+        }
+        #expect(openCount.value == 0, "nothing opens before unlock, unreadable or not")
+        #expect(lobby.envelopeUnreadable, "the lobby knows the sidecar exists-but-refused")
+        #expect(lobby.noRoadExists, "no doors render — the facts are unknown")
+        #expect(lobby.deadEndMessage == ProtectionCopy.message(
+            for: StoreKeyEnvelopeError.unreadable("")),
+                "the dead end names the TRUE cause (restore the key file), never the absent-wraps one")
+        #expect(lobby.deadEndMessage != ProtectionCopy.deadEnd(.passphrase))
+    }
+
     @Test func aDemandedModeLandsLockedWithoutOpeningAnything() async throws {
         let world = try demandedWorld(mode: .passphrase)
         await world.bootstrap.awaitOpen()

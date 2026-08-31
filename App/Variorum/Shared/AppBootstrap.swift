@@ -200,6 +200,9 @@ final class AppBootstrap {
         var biometryOffered: Bool
         var passphraseOffered: Bool
         var recoveryOffered: Bool
+        /// P11: present-but-unreadable sidecar — the lobby's dead end says
+        /// the true cause instead of "no passphrase … is on file".
+        var envelopeUnreadable: Bool = false
         var storeURL: URL?
     }
 
@@ -236,12 +239,13 @@ final class AppBootstrap {
                 gate.saveDials(dials, scope)
             case .lobby(let demand):
                 let guardSeam = gate.guardFor(scope)
-                let envelope = loadedEnvelope(gate, storeURL)
+                let reading = gate.readEnvelope(storeURL)
                 return .locked(LobbyFacts(
                     demand: demand,
                     biometryOffered: demand == .biometric && guardSeam.gatedItemExists(),
-                    passphraseOffered: envelope?.passphrase != nil,
-                    recoveryOffered: envelope?.recovery != nil,
+                    passphraseOffered: reading.envelope?.passphrase != nil,
+                    recoveryOffered: reading.envelope?.recovery != nil,
+                    envelopeUnreadable: reading.isUnreadable,
                     storeURL: storeURL))
             }
         }
@@ -276,7 +280,12 @@ final class AppBootstrap {
         storeURL: URL?
     ) -> OpenOutcome {
         guard error.keyUnavailable else { return .failed(error, recovery: nil) }
-        let envelope = loadedEnvelope(gate, storeURL)
+        // P11 disposition note: an UNREADABLE sidecar reads as no roads
+        // here — the failure surface stays doorless for it (unchanged
+        // behavior; the StoreOpenError's own reason renders). The lobby
+        // and the controller doors carry the unreadable honesty; widening
+        // this surface would be new design, not a fix.
+        let envelope = gate.readEnvelope(storeURL).envelope
         let passphrase = envelope?.passphrase != nil
         let recovery = envelope?.recovery != nil
         guard passphrase || recovery else { return .failed(error, recovery: nil) }
@@ -368,6 +377,7 @@ final class AppBootstrap {
             biometryOffered: facts.biometryOffered,
             passphraseOffered: facts.passphraseOffered,
             recoveryOffered: facts.recoveryOffered,
+            envelopeUnreadable: facts.envelopeUnreadable,
             gatedRoad: { await guardSeam.unlockGated() },
             envelopeRoad: envelopeRoad,
             complete: { [weak self] key in
@@ -411,12 +421,13 @@ final class AppBootstrap {
         let storeURL = try? AppDatabase.defaultStoreURL(variant: storeVariant)
         let facts = await Task.detached(priority: .userInitiated) { () -> LobbyFacts in
             let guardSeam = gate.guardFor(scope)
-            let envelope = loadedEnvelope(gate, storeURL)
+            let reading = gate.readEnvelope(storeURL)
             return LobbyFacts(
                 demand: dials.mode,
                 biometryOffered: dials.mode == .biometric && guardSeam.gatedItemExists(),
-                passphraseOffered: envelope?.passphrase != nil,
-                recoveryOffered: envelope?.recovery != nil,
+                passphraseOffered: reading.envelope?.passphrase != nil,
+                recoveryOffered: reading.envelope?.recovery != nil,
+                envelopeUnreadable: reading.isUnreadable,
                 storeURL: storeURL)
         }.value
         state = .locked(makeLobby(facts))
@@ -425,17 +436,6 @@ final class AppBootstrap {
             binding.lock()
         }.value
     }
-}
-
-/// The envelope-beside-the-store read, tolerant of an absent URL (the
-/// scripted test gate ignores it) and of an unreadable sidecar (the
-/// lobby's roads re-load and WORD that refusal; the facts only decide
-/// which doors render).
-private nonisolated func loadedEnvelope(
-    _ gate: StoreLaunchGate, _ storeURL: URL?
-) -> StoreKeyEnvelope? {
-    let url = storeURL ?? URL(fileURLWithPath: "/dev/null")
-    return (try? gate.loadEnvelope(url)) ?? nil
 }
 
 /// The FILE work, and nothing else — resolve the URL, assert the iOS
