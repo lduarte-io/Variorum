@@ -49,8 +49,11 @@ struct IndexModeView: View {
     @State private var filter = ""
     /// The pane's scroll request — set on COLUMN selection and on the
     /// arrival seed, never on a pane click (clicking what you can see must
-    /// not move it under you).
+    /// not move it under you). The COLUMN keeps its own one-shot channel:
+    /// two consumers of one nil-after-scroll request race each other (the
+    /// walk caught exactly that — the pane consumed, the column starved).
     @State private var paneTarget: String?
+    @State private var columnTarget: String?
     @State private var seeded = false
     @State private var totalWords = 0
     @State private var renameTarget: Queries.TOCRow?
@@ -200,7 +203,10 @@ struct IndexModeView: View {
 
     private func select(_ blockID: String, scrollPane: Bool, report: Bool = true) {
         selectedBlockID = blockID
-        if scrollPane { paneTarget = blockID }
+        if scrollPane {
+            paneTarget = blockID
+            columnTarget = blockID
+        }
         if report {
             session.commandRouter.noteFocusedBlock(
                 blockID, variantID: rowsByID[blockID]?.variantID, postID: postID)
@@ -226,11 +232,12 @@ struct IndexModeView: View {
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
                 }
-                .onChange(of: paneTarget) { _, target in
+                .onChange(of: columnTarget) { _, target in
                     // The seed also lands the COLUMN on its row (a long
                     // note's landing must be visible on both sides).
                     guard let target else { return }
                     proxy.scrollTo("ixr-\(target)", anchor: .center)
+                    columnTarget = nil
                 }
             }
             columnFooter

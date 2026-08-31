@@ -2768,4 +2768,30 @@ liveness through `PaneTextAuthority` only); P1 measured on the Sherlock corpus.
   adopt visibly primary). The two modes now tell apart by STRUCTURE (notes+
   relationships vs ways-of-looking+adopt). Semantics byte-untouched; Compare/
   Takes suites green unmodified.
+- `6a42071` — **THE FIELD GUIDE LEARNS THE ROW.** "getting around" enumerates
+  the eight modes + ⌘1–⌘8; every seeder key literal swept to the new ordinals;
+  NEW LESSON "index · read" opens ways-of-looking (the walk's plan⇔seed
+  contract EXTENDED, never rewritten); the blocks·canvas lesson teaches the
+  workbench honestly. Spine green: 71/10. The live re-seed stays the round
+  closeout's per the standing rule.
+- **SESSION SEAM (machinery honesty):** the wave's implementer died to its
+  session limit after 6a42071 with three fixes uncommitted in the tree; a
+  CONTINUATION Fable session adopted them by reading the diffs (this
+  record's successor-map purpose, exercised for real). The next entry is the
+  continuation's first commit.
+- (continuation) — **THE WALK'S TWO FIXES + THE P1 SANITY PIN, adopted and
+  committed.** (a) The workbench row's stacked `.modifiers(...)` TapGestures
+  dead-stalled EVERY click (the gesture graph waits on unmet modifier
+  requirements instead of failing them) → ONE tap handler reading
+  `NSEvent.modifierFlags` at the event — wave 1's `NoteRowSelection` idiom,
+  routing into 13e's `BlockSelection` brain unchanged; count-2 + plain is
+  the standing codebase idiom (LibraryCatalogView). (b) Index's one-shot
+  scroll request had TWO consumers racing on one nil-after-scroll channel
+  (the pane consumed, the column starved) → the column got its own
+  `columnTarget` channel; each channel now has exactly one consumer.
+  (c) `WorkbenchP1SanityTests` — the new modes' query layer at the Sherlock
+  note scale (120 blocks / ~10k words): blockWorkbench **16.4 ms** cold ·
+  blockTOC **1.9 ms**; the asserted ceiling is a 1 s sanity bound two orders
+  above measured (the latency-pin lesson: a pin that reds under load cannot
+  do its job), the real numbers stated here not asserted.
 

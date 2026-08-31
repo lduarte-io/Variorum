@@ -562,15 +562,20 @@ private struct WorkbenchRowShell<Content: View>: View {
             }
             .contentShape(Rectangle())
             .onHover { hovering = $0 }
-            // Most-specific first: the combined chord, then singles, then
-            // the double, then the plain click.
-            .gesture(TapGesture().modifiers([.command, .shift]).onEnded {
-                onClick([.command, .shift])
-            })
-            .gesture(TapGesture().modifiers(.command).onEnded { onClick(.command) })
-            .gesture(TapGesture().modifiers(.shift).onEnded { onClick(.shift) })
-            .gesture(TapGesture(count: 2).onEnded { onDoubleClick() })
-            .onTapGesture { onClick([]) }
+            // ONE tap handler reading the keyboard's live modifier state
+            // (the walk caught the stacked `.modifiers(...)` TapGestures
+            // dead-stalling every click on the row — the gesture graph
+            // waits on the unmet modifier requirements instead of failing
+            // them; the codebase idiom is count-2 + plain, chords read at
+            // the event).
+            .onTapGesture(count: 2) { onDoubleClick() }
+            .onTapGesture {
+                let flags = NSEvent.modifierFlags
+                var mods: EventModifiers = []
+                if flags.contains(.command) { mods.insert(.command) }
+                if flags.contains(.shift) { mods.insert(.shift) }
+                onClick(mods)
+            }
     }
 
     private var background: AnyShapeStyle {
