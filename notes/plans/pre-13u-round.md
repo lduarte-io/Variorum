@@ -1108,6 +1108,16 @@ contents + her verbatim issue + the routed item; pixels in the gitignored
 `notes/plans/pre-13u-screens/` where recoverable). **The mockup agent and every Act 10 wave brief
 FROM the manifest + this file's items — never from any session's chat.**
 
+**SUCCESSOR KICKOFF RECORD (2026-08-31, the successor orchestrator's first turn).** State verified
+against git (tip `709ee27`; Act 9 close, escrow PASS, handoff, and seventh wave all present; tree
+clean, synced). The screens dir holds **2 files** — she did not run the copy command, so the
+manifest's descriptions carry for the other nine, the case the manifest was written for. **Her
+concurrency authorization at kickoff, verbatim: "Since the html taste agent is a subagent that
+won't be making code changes, you can start other codework and that subagent simultaneously."** —
+the one-agent-at-a-time rule stands for CODE agents; the no-code mockup agent runs beside 17h at
+her word. Mockup HTML lands untracked in `notes/plans/pre-13u-mockups/` (gitignored with its
+screens sibling), path printed for her — never published.
+
 ---
 
 # Obligations at close
