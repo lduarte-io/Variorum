@@ -1633,3 +1633,26 @@ tripwire: ZERO** Swift hits in the diff (the surviving Mac P1 violation is
 13u1's, and this wave went nowhere near it).
 
 **No PENDING marks are left in this section.**
+
+---
+
+# UNIT CLOSED (the Fable orchestrator, 2026-08-31)
+
+**Batch 4.5c-phone's R28 unit is COMPLETE, and it took the FULL ladder:**
+build `4788a95` (through two session deaths — an auth outage and the
+account limit — survived on the survival-record posture, `df97677`) →
+round-1 cold review `ad88752` (0B · 2M · 4m · 4n, both MAJORs measured
+in the liveness seam) → fix wave `06d6163` → round-2 focused re-review
+`526f6a0` (0B · 0M · 3m · 2n — one of them the wave's own sticky
+sentence) → wave 2 `6eec90e`. **Final: mobile 678/99 green, 2 known
+issues.** Fence clean at every commit, verified by the orchestrator.
+The liveness seam now refuses NOTHING without store confirmation, heals
+on Put back in the same visit, and speaks when it refuses.
+
+**Held/owned out of this unit:** the seam carves deferred to post-13u
+(by ruling, recorded); the sync-road silent keyboard drop owned on the
+leftover-backlog row (mechanism) + her bundle (the voice half); MINOR
+4's isEditable-photograph variant folded into the same owned row; the
+`observeHeader` terminal-catch recorded as context. The scratchpad
+prerevert-collision hazard is now standing machinery (unique dirs +
+diff-verified restores) — carried in every subsequent brief.
