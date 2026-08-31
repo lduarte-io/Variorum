@@ -93,7 +93,14 @@ nonisolated struct StoreKeyGuard: Sendable {
     static func inMemory(backing: InMemoryStoreKeyGuardBacking) -> StoreKeyGuard {
         StoreKeyGuard(
             loadAuto: { backing.auto },
-            saveAuto: { backing.auto = $0; return backing.savesSucceed },
+            // R2-6: guard FIRST, like saveGated/saveEscrow below — a
+            // Keychain that reports a failed write never also changed the
+            // item, and a double that does makes the refusal arms untestable.
+            saveAuto: {
+                guard backing.savesSucceed else { return false }
+                backing.auto = $0
+                return true
+            },
             deleteAuto: { backing.auto = nil },
             gatedItemExists: { !backing.gatedWritesAreInvisible && backing.gated != nil },
             saveGated: {

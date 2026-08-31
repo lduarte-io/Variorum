@@ -31,8 +31,11 @@ struct KeychainPartitionTests {
         }
     }
 
-    /// The rule is one shared constant, not three hand-written entries —
-    /// so a fourth family inherits it by merging rather than remembering.
+    /// The rule has ONE name, so the three families cannot drift apart by
+    /// editing one comment. Stated honestly (R2-NIT): this enumerates
+    /// three families BY HAND, so a fourth DP-resident builder that forgets
+    /// to merge the marker fails no test here — the guard is against drift
+    /// among the known families, not against omission in a new one.
     @Test func theMarkerIsOneSharedConstant() {
         #expect(KeychainPartition.dataProtection[kSecUseDataProtectionKeychain as String]
                 as? Bool == true)

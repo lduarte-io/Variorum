@@ -2712,3 +2712,29 @@ it cost to learn:
   held). Note the known intermittent latency pin passed on THIS run;
   that is evidence about machine load, not a fix — its KnownIssues row
   stands unchanged.
+
+---
+
+### ⚠️ CORRECTION, same day — the section above stops one step short (13p-fix)
+
+**Read `notes/plans/phase-13p-fix-dp-keychain.md` before trusting the
+"Proven, not assumed" bullet above.** That bullet is TRUE and
+INSUFFICIENT, and the difference cost the author her custody twice
+within three hours of the signing change landing.
+
+The proof was that the ACL'd write LANDS (`SecItemAdd ==
+errSecSuccess`). It never checked that anything could READ THE ITEM
+BACK. On macOS an ACL'd or synchronizable write is routed to the
+DATA-PROTECTION keychain while a read without
+`kSecUseDataProtectionKeychain` searches the FILE-BASED one, and that
+flag appeared nowhere in the codebase — so both gated custody paths
+wrote an item nothing could find and then **deleted the surviving plain
+copy on the strength of the write alone**. Her Auto store-key item went
+to a Biometric-mode switch; her E2EE custody went to the sync toggle.
+Both were recovered by passphrase; no writing was lost.
+
+**The rule taken from it, now enforced in code (`CustodyHandover`):**
+write, VERIFY it reads back through the production read path, only then
+delete the outgoing item. **And the rule for pins: a custody pin asserts
+the ROUND TRIP, never the write alone** — a feature that writes to one
+keychain and reads from another passes a write-only proof while broken.

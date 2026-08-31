@@ -324,11 +324,20 @@ proved unobservable.* Stated properly, as an expectation to VERIFY:
   material sits in the file-based keychain, readable with no Touch ID,
   under a UI claiming custody is gated. That is exactly *"a gate whose
   key still releases silently is theater"* (`StoreKeyGuard.swift`).
-- **The clean-up is one deliberate act, through the product's own
-  door:** toggle the sync biometric requirement OFF (or ON and then
-  OFF). Either arm now deletes the other half, because both go through
-  `CustodyHandover`. That resolves the coexistence AND exercises the
-  fix. *(An earlier draft of this paragraph said the gated item "holds
+- **The clean-up is TWO steps, and round 2 caught the first draft of
+  this sentence prescribing an act that refuses (R2-9).** Post-fix the
+  orphan gated item becomes findable, so `DeviceKeyStore.load` returns
+  nil (locked, not absent) and the toggle's own door opens with
+  `guard let material = store.load() else { return .noMaterial }` —
+  i.e. *"Unlock this device's keys first."* So: **(1) UNLOCK** — Touch
+  ID, or the passphrase road; the surface lands in `.enrolledLocked`,
+  which offers both — **(2) then toggle the sync biometric requirement
+  OFF.** Both arms now delete the other half through `CustodyHandover`,
+  so that resolves the coexistence AND exercises the fix. *Named branch:
+  if the orphan is biometry-invalidated, the passphrase road re-adopts
+  through `save:`, which sees a gated item and keeps the gate ON — so
+  the toggle-off must come AFTER the unlock, not be replaced by
+  re-enrollment.* *(An earlier draft of this paragraph said the gated item "holds
   real material" while the FIX section above called it stale — the
   contradiction is resolved here: its content is almost certainly the
   same key material, and it is the COEXISTENCE, not the content, that
@@ -346,8 +355,18 @@ verdict depends on machine load — the same family as the standing
 latency-pin row, and it gets its own KnownIssues row at owner 12 rather
 than being waved off as "probably fine".
 
-**Counts: Mac 1845 tests / 312 suites** (1843 + the two new pins), green
-but for the load-flake above. **No `Sources/VariorumCore/Sync/` lines.
+**Counts (corrected at round 2 — R2-8 caught them stale):** the round-1
+figure `1845/312` was true at commit `48d047d` and was never updated when
+`3779e77` added three more tests and a suite. Baseline `1843/312`; this
+phase adds **8 tests and 2 suites** across both rounds — `+2`
+`Phase13pKeychainFactTests`, `+1` `Phase13pControllerTests`, `+2`
+`KeychainPartitionTests` (new suite), `+5`… **MEASURED FINAL: Mac
+1853 tests / 314 suites**, green but for the known `CanvasDragTrackingTests`
+load flake (3/3 green isolated, both runs, both tests — its KnownIssues row
+at owner 12 now covers the suite rather than one assertion). Arithmetic
+checks: 1843 + 10 = 1853 and 312 + 2 = 314, where the 10 are +2
+`Phase13pKeychainFactTests`, +1 `Phase13pControllerTests`, +2
+`KeychainPartitionTests` (new), +5 `CustodyHandoverTests` (new). **No `Sources/VariorumCore/Sync/` lines.
 No schema. No lockstep — marker stays 7.**
 
 
@@ -403,3 +422,31 @@ moved during this phase's run). Two sessions writing one file is how
 work is lost, and this phase already learned that lesson the cheap way
 by sweeping that session's artifact into a commit (R1-12). **The author's
 sequencing call is the input this closeout waits on.**
+
+
+---
+
+## LADDER — ROUND 2 (fresh Opus cold reviewer; anchor = the round-1 record)
+
+14 findings: **1 MAJOR** · 9 MINOR · 4 NIT. Zero disputes. The MAJOR is a
+NEW finding, so **round 3 is owed** under CLAUDE.md's ladder.
+
+| # | sev | disposition |
+|---|---|---|
+| R2-1 | MAJOR | **FIXED — and the finding is exactly right.** Round 1's behavioural revert proved the STORE-KEY guard and the record said "both … proven". It did not prove the E2EE guard, which no test could reach: `DeviceKeyStore.inMemory` maps `setBiometricGate` straight to its backing, and only `keychain()`'s closure ran the rule, so deleting BOTH `CustodyHandover` calls left the whole suite green. **That untested half is the one that bit the author** — `e2ee-keys` is the item that went missing. Fixed by the reviewer's own proposal (2): a small `E2EECustodyStorage` seam (`DeviceKeyStore.keychain(custody:)`), defaulting to live, with account naming untouched so R1-3's rejection still stands. Now pinned twice — three direct unit tests of `CustodyHandover.perform`'s outcomes, and two E2EE transition pins driven by a fake. **Red-on-old proven by behavioural revert of the E2EE half specifically:** restore the pre-fix two-liner and both E2EE pins fail. |
+| R2-2 | MINOR | **FIXED.** `perform` returns a typed `Outcome`; the `wroteButUnreadable` arm no longer claims "nothing was altered" (it was false in exactly the case the guard exists to surface) and instead names the keychain-identity symptom with the road back. |
+| R2-3 | MINOR | **FIXED.** The gate-OFF and `.auto` arms gained the `rollBackIncoming` their twins had; without it a failed verify left a readable ungated copy beside a live gate — theater arrived at through the OFF door. |
+| R2-4 | MINOR | **FIXED.** The plain arms verify IDENTITY (`== key` / `== material`) rather than presence, so a stale orphan under the same service/account cannot satisfy the guard. The gated arms stay presence-only — reading an ACL'd item's data prompts, and a write must never prompt — and `CustodyHandover`'s doc now states that exception instead of leaving the weaker check reading as uniform policy. |
+| R2-5 | MINOR | **FIXED.** The platform-fact pin asserted `== errSecInteractionNotAllowed` where production itself accepts either that or `errSecSuccess`; it now asserts `!= errSecItemNotFound` (the discriminating fact), with today's measured -25308 kept in the comment. Avoids reding for a non-regression on a point release. |
+| R2-6 | MINOR | **FIXED.** `InMemoryStoreKeyGuardBacking.saveAuto` mutated before returning the failure verdict — a Keychain that reports a failed write never also changed the item. Guards first now, like its siblings. |
+| R2-7 | MINOR | **OWNED, not fixed — 17a.** `saveGated`'s delete-then-add window is pre-existing since 14b and is FORCED (updating an ACL'd item prompts). Recorded with its mechanism, its mitigation, and a remedy sketch on a KnownIssues row at **17a**, whose own title is this exact subsystem. |
+| R2-8 | MINOR | **FIXED.** The counts were stale by 3 tests and a suite; corrected and re-measured. |
+| R2-9 | MINOR | **FIXED, and it mattered.** The prescribed clean-up (*"toggle the requirement OFF"*) would have REFUSED with "Unlock this device's keys first", because post-fix the findable orphan makes `load` return nil. Restated as two steps with the invalidated-biometry branch named. |
+| R2-10 | MINOR | **FIXED.** 13p's POST-CLOSEOUT and the author handoff — the two documents actually read — still presented the write-only proof as the conclusion, and neither mentioned this phase. Both now carry a dated correction; the handoff's item 2 says plainly that custody was lost hours later and recovered. |
+| R2-NITs | NIT | **ALL FIXED** — the mangled `).///` doc comment, the run-on line, the stale "-34018" comment three tests above a pin that now asserts success, and the partition test's doc, which now claims only what it guards (three families by hand, drift not omission). |
+
+**Clean bill accepted as written**, including its independent
+re-verification of the site enumeration, the no-stranding argument, and
+the R1-4 escrow correction — plus one useful new fact: the previously
+unreachable DP orphans are now not just readable but **deletable**
+(`E2EEKeychainStorage.clear()`'s gated leg could never fire before).

@@ -40,6 +40,33 @@ import VariorumCore
 
 /// Persistence seam for the device's unwrapped key material (tests inject
 /// in-memory; production is the Keychain) — the `AuthTokensStore` pattern.
+/// The custody TRANSITION for the E2EE device keys, behind a seam so it
+/// can be pinned (13p-fix R2-1). Both arms run the `CustodyHandover`
+/// rule: write, verify through the production read path, only then
+/// delete the other half.
+nonisolated struct E2EECustodyStorage: Sendable {
+    var setGated: @Sendable (DeviceKeyMaterial) -> CustodyHandover.Outcome
+    var setPlain: @Sendable (DeviceKeyMaterial) -> CustodyHandover.Outcome
+
+    static let live = E2EECustodyStorage(
+        setGated: { material in
+            CustodyHandover.perform(
+                write: { E2EEKeychainStorage.saveGated(material) },
+                // Presence only: reading an ACL'd item's DATA prompts, and
+                // a write must never prompt (R2-4's forced exception).
+                verify: { E2EEKeychainStorage.gatedItemExists() },
+                deleteOutgoing: { E2EEKeychainStorage.deletePlainItem() },
+                rollBackIncoming: { E2EEKeychainStorage.deleteGatedItem() })
+        },
+        setPlain: { material in
+            CustodyHandover.perform(
+                write: { E2EEKeychainStorage.save(material) },
+                verify: { E2EEKeychainStorage.load() == material },
+                deleteOutgoing: { E2EEKeychainStorage.deleteGatedItem() },
+                rollBackIncoming: { E2EEKeychainStorage.deletePlainItem() })
+        })
+}
+
 nonisolated struct DeviceKeyStore: Sendable {
     /// Non-prompting read: the plain item — or, under the biometric gate,
     /// this launch's unlocked cache (nil until `unlockWithBiometrics` or a
@@ -67,7 +94,15 @@ nonisolated struct DeviceKeyStore: Sendable {
     /// spoken by the caller's surface.
     var unlockWithBiometrics: @Sendable () async -> DeviceKeyMaterial?
 
-    static func keychain() -> DeviceKeyStore {
+    /// 13p-fix ladder R2-1: the custody TRANSITION as an injectable seam.
+    /// The handover rule lived inside this factory's closure, which no
+    /// test can construct (`DeviceKeyStore.inMemory` maps straight to its
+    /// backing), so the half of R1-1's fix guarding the E2EE item — THE
+    /// ITEM THAT ACTUALLY WENT MISSING on 2026-08-30 — had no pin at all:
+    /// deleting its guard left the whole suite green. This is the smallest
+    /// seam that closes that. Account naming is untouched, so R1-3's
+    /// rejection of parameterizing the fixed gated account still stands.
+    static func keychain(custody: E2EECustodyStorage = .live) -> DeviceKeyStore {
         DeviceKeyStore(
             load: {
                 if let cached = E2EELaunchKeyCache.shared.value { return cached }
@@ -97,25 +132,22 @@ nonisolated struct DeviceKeyStore: Sendable {
                     .deviceOwnerAuthenticationWithBiometrics, error: nil)
             },
             isBiometricGateOn: { E2EEKeychainStorage.gatedItemExists() },
-            setBiometricGate: { on, material in
+            setBiometricGate: { [custody] on, material in
                 // 13p-fix R1-1: write, VERIFY it reads back, THEN delete the
                 // other half. A write's success is not proof anything can
                 // find the item again — see `CustodyHandover`.
                 if on {
-                    guard CustodyHandover.perform(
-                        write: { E2EEKeychainStorage.saveGated(material) },
-                        verify: { E2EEKeychainStorage.gatedItemExists() },
-                        deleteOutgoing: { E2EEKeychainStorage.deletePlainItem() },
-                        rollBackIncoming: { E2EEKeychainStorage.deleteGatedItem() })
-                    else { return false }
+                    // Presence only — reading an ACL'd item's data prompts.
+                    guard custody.setGated(material) == .done else { return false }
                     E2EELaunchKeyCache.shared.value = material
                     return true
                 }
-                guard CustodyHandover.perform(
-                    write: { E2EEKeychainStorage.save(material) },
-                    verify: { E2EEKeychainStorage.load() != nil },
-                    deleteOutgoing: { E2EEKeychainStorage.deleteGatedItem() })
-                else { return false }
+                // Identity, not presence (R2-4), and the OFF arm gets the
+                // roll-back its ON twin has (R2-3): without it a failed
+                // verify leaves the plain item written AND the gated item
+                // alive — a silently-readable copy under a UI reporting a
+                // gate, which is the theater this codebase forbids.
+                guard custody.setPlain(material) == .done else { return false }
                 E2EELaunchKeyCache.shared.value = nil
                 return true
             },

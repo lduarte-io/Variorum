@@ -315,12 +315,20 @@ final class ProtectionController {
         case .auto:
             // 13p-fix R1-1: verify the incoming item READS BACK before the
             // outgoing one goes (see `CustodyHandover`).
-            guard CustodyHandover.perform(
+            switch CustodyHandover.perform(
                 write: { guardSeam.saveAuto(key) },
-                verify: { guardSeam.loadAuto() != nil },
-                deleteOutgoing: { guardSeam.deleteGated() })
-            else {
+                // Identity, not presence (R2-4): a stale item under the
+                // same service/account — an earlier access group's orphan —
+                // satisfies `!= nil` and would pass custody to a key that
+                // may not open the store.
+                verify: { guardSeam.loadAuto() == key },
+                deleteOutgoing: { guardSeam.deleteGated() },
+                rollBackIncoming: { guardSeam.deleteAuto() }) {
+            case .done: break
+            case .writeRefused:
                 return .refused("The Keychain refused the change — nothing was altered.")
+            case .wroteButUnreadable:
+                return .refused(Self.wroteButUnreadable)
             }
         case .biometric:
             guard biometryAvailable else {
@@ -333,13 +341,18 @@ final class ProtectionController {
             // 13p-fix R1-1: "lands" means READS BACK, not "the write
             // returned true" — that distinction cost the author her Auto
             // item on 2026-08-30 (see `CustodyHandover`).
-            guard CustodyHandover.perform(
+            switch CustodyHandover.perform(
                 write: { guardSeam.saveGated(key) },
+                // Presence only — reading an ACL'd item's DATA prompts, and
+                // a write must never prompt (R2-4's stated exception).
                 verify: { guardSeam.gatedItemExists() },
                 deleteOutgoing: { guardSeam.deleteAuto() },
-                rollBackIncoming: { guardSeam.deleteGated() })
-            else {
+                rollBackIncoming: { guardSeam.deleteGated() }) {
+            case .done: break
+            case .writeRefused:
                 return .refused("The Keychain refused the gated item — nothing was altered.")
+            case .wroteButUnreadable:
+                return .refused(Self.wroteButUnreadable)
             }
         case .passphrase:
             guardSeam.deleteAuto()
@@ -442,6 +455,17 @@ final class ProtectionController {
     private func persistDials() {
         gate.saveDials(dials, scope)
     }
+
+    /// 13p-fix ladder R2-2: the honest sentence for the arm where a write
+    /// DID land somewhere the read path cannot reach. Saying "nothing was
+    /// altered" there would be false in exactly the case this guard exists
+    /// to surface — and naming the symptom is what turns a recurrence into
+    /// a diagnosis instead of a mystery.
+    static let wroteButUnreadable =
+        "The Keychain accepted the key but cannot find it again — your "
+        + "current custody was left untouched. This usually means the app's "
+        + "signing identity changed; reinstalling the app from a build with "
+        + "the same identity restores it."
 
     // MARK: - The launch reconcile
 

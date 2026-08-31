@@ -63,23 +63,43 @@ nonisolated enum KeychainPartition {
 /// Refusing here costs a mode change the user can retry. Skipping it
 /// costs the key.
 nonisolated enum CustodyHandover {
-    /// Returns true only when the incoming custody is READABLE and the
-    /// outgoing item has been released. On failure nothing is deleted;
-    /// `rollBackIncoming` is a best-effort tidy of a write that landed
-    /// somewhere unreadable (it may itself be unable to reach the item —
-    /// that is the failure being handled, so it is never load-bearing).
+    /// The three outcomes are distinguished because they are not equally
+    /// true (13p-fix ladder R2-2): only `.writeRefused` leaves the
+    /// keychain untouched. `.wroteButUnreadable` means an item DID land
+    /// somewhere the read path cannot reach — the keychain-identity
+    /// symptom — and a surface that says "nothing was altered" there is
+    /// lying in exactly the case this rule exists to make visible.
+    enum Outcome: Equatable {
+        /// The incoming item is readable and the outgoing one is released.
+        case done
+        /// The write itself was refused — nothing changed anywhere.
+        case writeRefused
+        /// The write succeeded and the item could not be read back. The
+        /// outgoing custody is INTACT (that is the point); the incoming
+        /// write was rolled back best-effort, which may itself have been
+        /// unable to reach the item — that is the failure being handled,
+        /// so it is never load-bearing.
+        case wroteButUnreadable
+    }
+
+    /// `verify` must read through the SAME path production reads through.
+    /// Where identity can be checked for free (a plain item whose value is
+    /// readable), verify identity — presence alone passes on a stale item
+    /// left by an earlier access group. The GATED arms are the forced
+    /// exception: reading an ACL'd item's DATA prompts for biometrics, and
+    /// a write must never prompt, so they verify presence only.
     static func perform(
         write: () -> Bool,
         verify: () -> Bool,
         deleteOutgoing: () -> Void,
         rollBackIncoming: () -> Void = {}
-    ) -> Bool {
-        guard write() else { return false }
+    ) -> Outcome {
+        guard write() else { return .writeRefused }
         guard verify() else {
             rollBackIncoming()
-            return false
+            return .wroteButUnreadable
         }
         deleteOutgoing()
-        return true
+        return .done
     }
 }

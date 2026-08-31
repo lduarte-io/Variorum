@@ -147,9 +147,11 @@ struct Phase13pKeychainFactTests {
         let status = SecItemAdd(attributes as CFDictionary, nil)
         // Parameter validation runs BEFORE the entitlement check (the
         // spike's own discrimination logic, now re-confirmed codesigned):
-        // the plain control succeeds and the ACL control reads -34018 in
-        // this environment, while THIS combination reads -50 — a genuine
-        // rejection of the parameters, not of the environment.
+        // the plain control succeeds and the ACL control now LANDS (it
+        // read -34018 until the keychain identity arrived on 2026-08-30 —
+        // corrected here at 13p-fix ladder round 2), while THIS
+        // combination reads -50 — a genuine rejection of the parameters,
+        // not of the environment.
         #expect(status == errSecParam,
                 "Apple refuses the COMBINATION (got \(status)) — the escrow item necessarily carries no biometric gate, exactly as R13p-6 designs")
 
@@ -204,8 +206,13 @@ struct Phase13pKeychainFactTests {
         }
         #expect(probe(dataProtection: false) == errSecItemNotFound,
                 "the file-based keychain cannot see an ACL'd item")
-        #expect(probe(dataProtection: true) == errSecInteractionNotAllowed,
-                "the data-protection keychain HAS it (present, needs auth)")
+        // R2-5: NOT-absent is the discriminating fact. Production's own
+        // probe accepts `errSecSuccess || errSecInteractionNotAllowed`, so
+        // hard-asserting one of them would red this pin for a
+        // non-regression on a point release that returns the other.
+        // Measured here today: -25308.
+        #expect(probe(dataProtection: true) != errSecItemNotFound,
+                "the data-protection keychain HAS it")
     }
 
     /// THE RED-ON-OLD PIN, and the lesson of the verification gap that let
