@@ -227,17 +227,25 @@ struct EncryptionView: View {
 
     /// CF-12: the toggle's own copy — the sync-waits cost, the
     /// never-the-passcode rule, and the re-enrollment note, all stated.
+    /// R-pre13u-2 (pre-13u Act 9): opt-in framing — the OFF default is
+    /// stated honestly (sync keys open with the library; one unlock
+    /// covers both), and this is a SEPARATE extra ask, never required by
+    /// any at-open mode. (Functional copy; Act 10 styles, 13s re-voices.)
     static let biometricToggleCopy: String = {
         #if os(macOS)
-        "While this is on, sync waits each launch until you unlock — with Touch ID, "
-        + "or by typing your encryption passphrase. Your device passcode never unlocks "
-        + "it. If Touch ID is re-enrolled, the stored keys are invalidated by design — "
-        + "the passphrase still gets you in."
+        "Off, your sync keys open with your library — one unlock covers both. "
+        + "While this is on, sync separately waits each launch until you unlock — "
+        + "with Touch ID, or by typing your encryption passphrase — whatever your "
+        + "at-open mode. Your device passcode never unlocks it. If Touch ID is "
+        + "re-enrolled, the stored keys are invalidated by design — the passphrase "
+        + "still gets you in."
         #else
-        "While this is on, sync waits each launch until you unlock — with Face ID or "
-        + "Touch ID, or by typing your encryption passphrase. Your device passcode "
-        + "never unlocks it. If biometrics are re-enrolled, the stored keys are "
-        + "invalidated by design — the passphrase still gets you in."
+        "Off, your sync keys open with your library — one unlock covers both. "
+        + "While this is on, sync separately waits each launch until you unlock — "
+        + "with Face ID or Touch ID, or by typing your encryption passphrase — "
+        + "whatever your at-open mode. Your device passcode never unlocks it. If "
+        + "biometrics are re-enrolled, the stored keys are invalidated by design — "
+        + "the passphrase still gets you in."
         #endif
     }()
 

@@ -228,6 +228,18 @@ nonisolated enum ProtectionCopy {
         + "current way in was left exactly as it was. Nothing is lost — "
         + "your passphrase and recovery phrase still open your library."
 
+    /// F6 (pre-13u Act 9): the E2EE SYNC-custody arm's OWN sentence. The
+    /// store-key one above promises "still open your library" — true for
+    /// the at-open family and non-responsive when the SYNC gate's write
+    /// lands unreadable: that surface's road back is passphrase
+    /// re-enrollment of sync custody, and the sentence must name it.
+    /// (Functional copy; 13s re-voices.)
+    static let syncKeysWroteButUnreadable =
+        "The Keychain accepted the key but cannot find it again, so this "
+        + "\(deviceName)'s sync keys were left exactly as they were. Nothing "
+        + "is lost — entering your encryption passphrase re-enrolls sync on "
+        + "this \(deviceName)."
+
     // The escrow dial's ruled plain-consequence pair — knot 8, VERBATIM
     // (direction ruled; 13s may re-voice the exact words).
     static let escrowOn =

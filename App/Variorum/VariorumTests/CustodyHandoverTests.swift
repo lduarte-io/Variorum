@@ -107,8 +107,12 @@ struct CustodyHandoverTests {
                 unlockWithBiometrics: { nil }),
             client: nil, signedIn: { true })
         await session.setBiometricRequirement(true)
-        #expect(session.lastError == ProtectionCopy.wroteButUnreadable,
-                "the honest arm names the keychain-identity symptom, not 'nothing was altered'")
+        // F6 (pre-13u Act 9): the E2EE arm speaks its OWN sentence now —
+        // the store-key one promised "still open your library", which is
+        // non-responsive here; this surface's road back is passphrase
+        // re-enrollment of sync custody.
+        #expect(session.lastError == ProtectionCopy.syncKeysWroteButUnreadable,
+                "the honest arm names the keychain-identity symptom AND this surface's own road back")
     }
 
     @Test func theE2EEGateTurnsOffOnlyWhenThePlainItemReadsBack() {

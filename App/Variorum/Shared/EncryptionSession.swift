@@ -37,6 +37,55 @@ import Observation
 import os
 import VariorumCore
 
+/// R-pre13u-2 (pre-13u Act 9, the CF-12 rework — the author's ruling,
+/// confirmed at the sitting: *"a setting that is by default off for
+/// everyone — you can force a separate unlock for sync if you want,
+/// regardless of the keychain, or not"*): the sync-keys gate is OPT-IN,
+/// DEFAULT OFF. OFF ⇒ the E2EE keys ride the plain custody item behind
+/// the app's own at-open gate, whatever the mode (under Auto, sync is
+/// auto too — ONE prompt ever, the lobby's); ON ⇒ the separate unlock is
+/// honored regardless of at-open mode (two prompts is what opting in
+/// asks for).
+///
+/// THE MARKER below is what makes her "existing checked boxes reset"
+/// half real: a gated custody item claimed by NO recorded opt-in is
+/// LEGACY state under the old semantics, and the first moment material
+/// is in hand (a biometric unlock, or a passphrase enrollment) the
+/// custody transitions back to plain — her device ends with no second
+/// Touch ID, and one click re-enables the separate gate if ever wanted.
+/// An opt-in recorded through the toggle is never reset.
+///
+/// Device-local like the policy itself (never the vault, never synced).
+/// Production passes `.live` (UserDefaults) at the ONE composition site
+/// (AppServices); the default is ephemeral so no test construction can
+/// write the machine's defaults.
+nonisolated struct SyncGateOptIn: Sendable {
+    var confirmed: @Sendable () -> Bool
+    var record: @Sendable () -> Void
+
+    static let liveKey = "variorum.e2ee.syncGateOptIn"
+    static let live = SyncGateOptIn(
+        confirmed: { UserDefaults.standard.bool(forKey: liveKey) },
+        record: { UserDefaults.standard.set(true, forKey: liveKey) })
+
+    static func ephemeral(confirmed initial: Bool = false) -> SyncGateOptIn {
+        let box = LockedBool(initial)
+        return SyncGateOptIn(
+            confirmed: { box.value },
+            record: { box.value = true })
+    }
+
+    private final class LockedBool: @unchecked Sendable {
+        private let lock = NSLock()
+        private var stored: Bool
+        init(_ initial: Bool) { stored = initial }
+        var value: Bool {
+            get { lock.lock(); defer { lock.unlock() }; return stored }
+            set { lock.lock(); defer { lock.unlock() }; stored = newValue }
+        }
+    }
+}
+
 /// 13e batch 9 (B-1): what the biometric toggle's ONE custody hop found —
 /// carried out of the hop so the wording stays on the MainActor where it
 /// belongs. File-scope (not nested) so it is plainly `Sendable`.
@@ -156,16 +205,22 @@ final class EncryptionSession {
     /// flows stay dormant exactly like the sign-in surface.
     private let client: KeyVaultClient?
     private let signedIn: @Sendable () async -> Bool
+    /// R-pre13u-2: the opt-in marker — see `SyncGateOptIn`. Production
+    /// passes `.live`; the ephemeral default keeps every test construction
+    /// off the machine's UserDefaults.
+    private let syncGateOptIn: SyncGateOptIn
     private let logger = Logger(subsystem: "io.lduarte.Variorum", category: "e2ee")
 
     init(
         store: DeviceKeyStore,
         client: KeyVaultClient?,
-        signedIn: @escaping @Sendable () async -> Bool
+        signedIn: @escaping @Sendable () async -> Bool,
+        syncGateOptIn: SyncGateOptIn = .ephemeral()
     ) {
         self.store = store
         self.client = client
         self.signedIn = signedIn
+        self.syncGateOptIn = syncGateOptIn
     }
 
     /// CF-12: whether the biometric toggle is even offerable here.
@@ -413,14 +468,34 @@ final class EncryptionSession {
         busy = true
         lastError = nil
         defer { busy = false }
-        guard await store.unlockWithBiometrics() != nil else {
+        guard let material = await store.unlockWithBiometrics() else {
             lastError = Self.biometricUnlockFailedMessage
             return
         }
+        // R-pre13u-2 THE RESET: material is in hand — a legacy gate (no
+        // recorded opt-in) transitions back to plain now, so this was the
+        // LAST second prompt this device ever shows.
+        await resetLegacyGateIfUnclaimed(material)
         if case .enrolledLocked(let hasRecovery) = state {
             state = .enrolled(hasRecoveryWrap: hasRecovery)
         }
         onKeysChanged?()
+    }
+
+    /// R-pre13u-2's reset act (see `SyncGateOptIn`): a gated custody item
+    /// with NO recorded opt-in predates the semantics change — the first
+    /// moment material is in hand it moves back to the plain item, through
+    /// the ordinary `CustodyHandover`-disciplined OFF transition. A refused
+    /// or unreadable transition leaves the gate standing silently (the act
+    /// that put material in hand already succeeded; the next
+    /// material-in-hand moment retries).
+    private func resetLegacyGateIfUnclaimed(_ material: DeviceKeyMaterial) async {
+        guard !syncGateOptIn.confirmed() else { return }
+        let outcome = await store.offMain { store -> CustodyHandover.Outcome? in
+            guard store.isBiometricGateOn() else { return nil }
+            return store.setBiometricGate(false, material)
+        }
+        if outcome == .done { biometricRequired = false }
     }
 
     /// CF-12: the device-local policy toggle's act. Needs the unlocked
@@ -449,9 +524,16 @@ final class EncryptionSession {
             // 13p-fix R3-2: the arm where something DID land somewhere the
             // read path cannot reach. Saying "nothing was altered" here was
             // false on the exact family whose custody went missing.
-            lastError = ProtectionCopy.wroteButUnreadable
+            // F6 (pre-13u Act 9): this surface's OWN sentence now — the
+            // store-key one promised "still open your library", which is
+            // non-responsive when the SYNC gate fails; this road back is
+            // passphrase re-enrollment of sync custody.
+            lastError = ProtectionCopy.syncKeysWroteButUnreadable
         case .landed:
             biometricRequired = required
+            // R-pre13u-2: an ON landed through the toggle is a real opt-in
+            // under the NEW semantics — never reset.
+            if required { syncGateOptIn.record() }
         }
     }
 
@@ -486,6 +568,10 @@ final class EncryptionSession {
     }
 
     private func adopt(_ material: DeviceKeyMaterial) async {
+        // R-pre13u-2: the passphrase road is a material-in-hand moment too
+        // — a legacy gate resets FIRST, so the save below lands plain (a
+        // refused reset falls through to the old gated save, harmlessly).
+        await resetLegacyGateIfUnclaimed(material)
         if !(await store.offMain { $0.save(material) }) {
             // Keychain refusal is exceptional; the keys still work for this
             // process' healing round, but custody must be visible.

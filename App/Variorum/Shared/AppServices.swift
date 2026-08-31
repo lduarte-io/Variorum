@@ -208,7 +208,10 @@ final class AppServices {
         self.encryption = encryption ?? EncryptionSession(
             store: .keychain(),
             client: vaultClient,
-            signedIn: { await authSession.currentUserID != nil })
+            signedIn: { await authSession.currentUserID != nil },
+            // R-pre13u-2: the ONE production site passes the PERSISTED
+            // opt-in marker — the ephemeral default exists for tests.
+            syncGateOptIn: .live)
         // Bridge rounds ride the sync cadence: AFTER each sync round, never
         // interleaved with one (a landing sees the store the mirror sync
         // just settled). Unconfigured sessions no-op.

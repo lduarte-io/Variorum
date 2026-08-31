@@ -309,6 +309,88 @@ struct CopyFlowRoundTests {
         #expect(throws: Never.self) { try provider.currentKeys() }
     }
 
+    // MARK: - R-pre13u-2 (pre-13u Act 9): the sync gate is OPT-IN, default
+    // OFF — and legacy gates reset
+
+    /// THE RESET, RED ON OLD. A gated custody item claimed by NO recorded
+    /// opt-in is legacy state under the OLD semantics (her device's exact
+    /// state — the double-Touch-ID report). The first biometric unlock is
+    /// a material-in-hand moment: custody transitions back to plain, so
+    /// that was the LAST second prompt — the next launch reads keys with
+    /// no unlock at all (under Auto, sync is auto too; under a demanded
+    /// mode the lobby's one prompt covers both).
+    @Test func aLegacyGateWithNoRecordedOptInResetsAtTheNextBiometricUnlock() async throws {
+        let backing = InMemoryKeyBacking(
+            biometryAvailable: true, biometricUnlockSucceeds: true)
+        let store = DeviceKeyStore.inMemory(backing: backing)
+        let vault = ScriptedVault()
+        let session = makeEncryptionSession(store: store, vault: vault)
+        await session.setUp(passphrase: passphrase)
+        // The LEGACY state: gated custody with no opt-in recorded (the
+        // old-world toggle never wrote the marker) — set through the
+        // store, not the session's toggle.
+        let material = try #require(await session.heldMaterial())
+        #expect(store.setBiometricGate(true, material) == .done)
+        backing.simulateRelaunch()
+        #expect(store.load() == nil, "the legacy world: locked at launch")
+
+        await session.unlockWithBiometrics()
+        #expect(session.lastError == nil)
+        #expect(!store.isBiometricGateOn(),
+                "the unclaimed gate RESET to plain at the material-in-hand moment")
+        #expect(!session.biometricRequired, "the toggle reads OFF — the new default")
+
+        backing.simulateRelaunch()
+        #expect(store.load() != nil,
+                "the ONE-prompt world: a fresh launch reads keys with no second unlock")
+        #expect(throws: Never.self) {
+            try DeviceKeySyncProvider(store: store).currentKeys()
+        }
+    }
+
+    /// The control — her "one click re-enables" half: an opt-in recorded
+    /// THROUGH the toggle is honored regardless of at-open mode, and no
+    /// unlock ever resets it (two prompts is what opting in asks for).
+    @Test func anOptInRecordedThroughTheToggleIsNeverReset() async throws {
+        let backing = InMemoryKeyBacking(
+            biometryAvailable: true, biometricUnlockSucceeds: true)
+        let store = DeviceKeyStore.inMemory(backing: backing)
+        let vault = ScriptedVault()
+        let session = makeEncryptionSession(store: store, vault: vault)
+        await session.setUp(passphrase: passphrase)
+        await session.setBiometricRequirement(true)  // the deliberate opt-in
+        backing.simulateRelaunch()
+
+        await session.unlockWithBiometrics()
+        #expect(store.isBiometricGateOn(),
+                "an opted-in gate SURVIVES the unlock — never reset")
+        #expect(session.biometricRequired)
+        backing.simulateRelaunch()
+        #expect(store.load() == nil,
+                "and the next launch waits for its unlock again, exactly as opted into")
+    }
+
+    /// The passphrase road is a material-in-hand moment too: enrolling by
+    /// passphrase over a legacy gate resets it the same way.
+    @Test func thePassphraseRoadAlsoResetsALegacyGate() async throws {
+        let backing = InMemoryKeyBacking(
+            biometryAvailable: true, biometricUnlockSucceeds: false)
+        let store = DeviceKeyStore.inMemory(backing: backing)
+        let vault = ScriptedVault()
+        let session = makeEncryptionSession(store: store, vault: vault)
+        await session.setUp(passphrase: passphrase)
+        let material = try #require(await session.heldMaterial())
+        #expect(store.setBiometricGate(true, material) == .done)
+        backing.simulateRelaunch()
+
+        await session.enroll(passphrase: passphrase)
+        #expect(session.lastError == nil)
+        #expect(!store.isBiometricGateOn(),
+                "the unclaimed gate reset on the passphrase road too")
+        backing.simulateRelaunch()
+        #expect(store.load() != nil, "one-prompt world from here on")
+    }
+
     /// CF-2's pin: REGENERATING the phrase is authorized by the passphrase
     /// — a wrong passphrase refuses (verified against the vault by a real
     /// unwrap, never a local compare) and mints nothing; the right one
