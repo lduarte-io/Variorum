@@ -12,6 +12,14 @@ extension Queries {
     public struct TrashItem: Equatable, Sendable, Identifiable {
         public enum Kind: String, Equatable, Sendable, CaseIterable {
             case note, book, block, take
+            /// A deleted snippet GROUP (`container.kind='pool'` — the model
+            /// term survives, the K5 precedent). pre-13u Act 10 wave 2b
+            /// (item 17): the ruled delete-group door rides the ordinary
+            /// `deleteContainer`/Trash road, and a road the Trash cannot
+            /// list is the 13l Act 7 dishonesty (#77's 28 lost scraps) —
+            /// so the group rows here, and Put back is `restoreContainer`,
+            /// which revives its cascade-stamped snippets with it.
+            case snippetGroup
             /// A live-but-unplaced original whose whole descendant family is
             /// in the Trash — her round-8b ruling: it rides the family's
             /// clock rather than promising a permanence it will not keep.
@@ -195,6 +203,29 @@ extension Queries {
                         createdAt: row["created_at"]),
                     noteID: peer?.id, noteTitle: peer?.title,
                     versionOfNoteID: peer?.id)
+            }
+        }
+
+        if kinds.contains(.snippetGroup) {
+            // The delete-group door's honesty (item 17): a tombstoned scraps
+            // container rows like any other deleted thing. Named through the
+            // one pool display rule (title, else its created day).
+            items += try Row.fetchAll(
+                db,
+                sql: """
+                    SELECT id, title, created_at, deleted_at FROM container
+                    WHERE kind = 'pool' AND deleted_at IS NOT NULL AND deleted_at >= :cutoff
+                      AND NOT EXISTS (SELECT 1 FROM purge_intent pi
+                        WHERE pi.table_name = 'container' AND pi.row_id = container.id
+                          AND (pi.deleted_at IS NULL OR pi.deleted_at >= container.deleted_at))
+                    ORDER BY deleted_at \(dir), id \(dir)\(limitClause)
+                    """,
+                arguments: arguments
+            ).map { row in
+                TrashItem(
+                    kind: .snippetGroup, id: row["id"], deletedAt: row["deleted_at"],
+                    title: DisplayTitle.pool(
+                        title: row["title"], createdAtStamp: row["created_at"]))
             }
         }
 

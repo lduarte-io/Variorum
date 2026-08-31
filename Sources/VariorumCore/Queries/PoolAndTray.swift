@@ -7,9 +7,32 @@ import GRDB
 extension Queries {
     /// One pool scrap: the rendered slot plus the block's live tag paths
     /// (block tags primarily serve the pool — AppSpec §7).
+    ///
+    /// **pre-13u Act 10 wave 2b (item 17):** the row gains its HOME group
+    /// (`poolID` — the all-groups listing must say which group each snippet
+    /// lives in, and move-to-group needs the source) and the rendered take's
+    /// `updatedAt` stamp (the card's "edited …" metadata and the recent
+    /// sort's key — derived per listing load, never stored anywhere new).
     public struct PoolItem: Equatable, Sendable {
         public let block: RenderedBlock
         public let tagPaths: [String]
+        /// The container this scrap lives in (its snippet GROUP, in the
+        /// surface's ruled vocabulary — `container.kind='pool'` stays the
+        /// model term, the K5 precedent).
+        public let poolID: String
+        /// The rendered variant's `updated_at` (canonical ISO-8601 text);
+        /// nil on a gap slot.
+        public let updatedAt: String?
+
+        public init(
+            block: RenderedBlock, tagPaths: [String],
+            poolID: String = "", updatedAt: String? = nil
+        ) {
+            self.block = block
+            self.tagPaths = tagPaths
+            self.poolID = poolID
+            self.updatedAt = updatedAt
+        }
     }
 
     /// The live pools, oldest first (Phase 10, additive — the shell's pool
@@ -27,7 +50,7 @@ extension Queries {
 
     /// The pool's contents in pointer order — exactly `renderPost` (a pool
     /// is a container; one traversal, never a bespoke subsystem) joined
-    /// with each block's live tags.
+    /// with each block's live tags and each rendered take's edit stamp.
     public static func poolListing(_ db: Database, poolID: String) throws -> [PoolItem] {
         let rendered = try renderPost(db, containerID: poolID)
         guard !rendered.isEmpty else { return [] }
@@ -46,7 +69,61 @@ extension Queries {
         for row in tagRows {
             paths[row["block_id"], default: []].append(row["path"])
         }
-        return rendered.map { PoolItem(block: $0, tagPaths: paths[$0.blockID] ?? []) }
+        // The edit stamps for exactly the takes this listing renders —
+        // bounded by the listing itself (cost ∝ the pool's own size, which
+        // is what P1 permits of a deliberately-opened container surface).
+        let variantIDs = rendered.compactMap(\.variantID)
+        var stamps: [String: String] = [:]
+        if !variantIDs.isEmpty {
+            let marks = databaseQuestionMarks(count: variantIDs.count)
+            for row in try Row.fetchAll(
+                db, sql: "SELECT id, updated_at FROM variant WHERE id IN (\(marks))",
+                arguments: StatementArguments(variantIDs))
+            {
+                stamps[row["id"]] = row["updated_at"]
+            }
+        }
+        return rendered.map {
+            PoolItem(
+                block: $0, tagPaths: paths[$0.blockID] ?? [], poolID: poolID,
+                updatedAt: $0.variantID.flatMap { stamps[$0] })
+        }
+    }
+
+    /// **Every group's snippets in one listing** (pre-13u Act 10 wave 2b,
+    /// item 17 — the ruled "all snippets" rail row: search scoped by the
+    /// rail, and "All snippets" searches across every group). Groups in
+    /// their stable oldest-first order, each group's rows in pointer order —
+    /// the same `poolListing` traversal per group, so the two listings can
+    /// never disagree about a row.
+    ///
+    /// Cost ∝ the scrap corpus (the sum of the groups' own contents) — the
+    /// same class as opening each group, on a deliberately-opened surface;
+    /// the held observation over it re-fires at the same cadence
+    /// `observePool`'s always has (the tray-panel KnownIssues row's parked
+    /// class, unchanged in kind).
+    public static func allPoolsListing(_ db: Database) throws -> [PoolItem] {
+        try pools(db).flatMap { try poolListing(db, poolID: $0.id) }
+    }
+
+    /// **How many snippets each group holds** (the rail's counts — one
+    /// aggregate over the ownership index, never a per-group walk). Counts
+    /// live placements of live blocks, which is what the listing rows.
+    public static func poolCounts(_ db: Database) throws -> [String: Int] {
+        let rows = try Row.fetchAll(
+            db,
+            sql: """
+                SELECT cb.container_id AS pool_id, COUNT(*) AS n
+                FROM container_block cb
+                JOIN container c ON c.id = cb.container_id
+                 AND c.kind = 'pool' AND c.deleted_at IS NULL
+                JOIN block b ON b.id = cb.block_id AND b.deleted_at IS NULL
+                WHERE cb.deleted_at IS NULL
+                GROUP BY cb.container_id
+                """)
+        return Dictionary(uniqueKeysWithValues: rows.map {
+            ($0["pool_id"] as String, $0["n"] as Int)
+        })
     }
 
     /// One entry of a post's deleted-blocks tray.

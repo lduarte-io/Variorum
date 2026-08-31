@@ -444,6 +444,90 @@ extension Queries {
         }
         return hits
     }
+
+    // MARK: - The note picker's feed (pre-13u Act 10, item 14)
+
+    /// One row of the searchable note picker: enough context that five
+    /// notes all displaying "2026-08-01" are tellable apart — the display
+    /// title, the day, and a SNIPPET of the note's opening words, derived
+    /// at read time from the first block's representative take and NEVER
+    /// stored (the 13u item-4 display-NAME rule is deliberately not built
+    /// here — titles stay as they are; the snippet is row context only).
+    public struct NotePickerHit: Equatable, Sendable, Identifiable {
+        public let id: String
+        /// The display answer (`DisplayTitle.note` — title, else its day).
+        public let title: String
+        public let entryDate: String?
+        /// When the note was last touched (canonical ISO-8601 text).
+        public let touchedStamp: String
+        /// The note's opening words (the first block's default take,
+        /// capped) — nil when the note is empty.
+        public let snippet: String?
+    }
+
+    /// Search-as-you-type over the corpus's NOTES — the one searchable
+    /// note-picker component's feed (item 14: the "Mark as Versions with"
+    /// door, the Pool's Add-to-Book sheet's sibling, and wave 2c's Compare
+    /// "Choose a note…" all read this one query).
+    ///
+    /// Recent-first; contextual RANKING (version peers first where versions
+    /// are the subject) is the caller's pure brain over these rows, never a
+    /// second query shape. Bounded by `limit` like `searchCatalog` (whose
+    /// LIKE grammar and escape discipline this reuses — the same cost class
+    /// as the shipped ⌘K palette: a LIKE over the container table's title
+    /// columns, with the snippet subquery running only for the LIMIT rows).
+    /// An empty query returns the most recently touched notes (the resting
+    /// state). Saved versions never list (they are archived by the V1
+    /// classifier, and the archived fence below excludes them).
+    public static func notePickerNotes(
+        _ db: Database, query: String, excluding subjectID: String? = nil,
+        limit: Int = 30
+    ) throws -> [NotePickerHit] {
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        let escaped = trimmed
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "%", with: "\\%")
+            .replacingOccurrences(of: "_", with: "\\_")
+        let like = "%\(escaped)%"
+        return try Row.fetchAll(
+            db,
+            sql: """
+                SELECT c.id AS id, c.title AS title, c.entry_date AS entry_date,
+                       c.created_at AS created_at,
+                       COALESCE(c.last_touched_at, c.created_at) AS stamp,
+                       (SELECT SUBSTR(COALESCE(v.working_text, ''), 1, 160)
+                          FROM container_block cb
+                          JOIN block b ON b.id = cb.block_id AND b.deleted_at IS NULL
+                          LEFT JOIN variant v
+                            ON v.id = b.default_variant_id AND v.deleted_at IS NULL
+                         WHERE cb.container_id = c.id AND cb.deleted_at IS NULL
+                         ORDER BY cb.position, cb.id
+                         LIMIT 1) AS snippet
+                FROM container c
+                WHERE c.kind = 'post' AND c.deleted_at IS NULL AND c.archived_at IS NULL
+                  AND (:query = ''
+                       OR COALESCE(c.title, '') LIKE :like ESCAPE '\\'
+                       OR COALESCE(c.entry_date, '') LIKE :like ESCAPE '\\')
+                  AND (:subject IS NULL OR c.id <> :subject)
+                ORDER BY stamp DESC, c.id DESC
+                LIMIT :limit
+                """,
+            arguments: [
+                "query": trimmed, "like": like, "subject": subjectID, "limit": limit,
+            ]
+        ).map { row in
+            let snippet = (row["snippet"] as String?)?
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            return NotePickerHit(
+                id: row["id"],
+                title: DisplayTitle.note(
+                    title: row["title"], entryDate: row["entry_date"],
+                    createdAt: row["created_at"]),
+                entryDate: row["entry_date"],
+                touchedStamp: row["stamp"],
+                snippet: (snippet?.isEmpty ?? true) ? nil : snippet)
+        }
+    }
 }
 
 private func countsByReading(_ db: Database, sql: String) throws -> [String: Int] {

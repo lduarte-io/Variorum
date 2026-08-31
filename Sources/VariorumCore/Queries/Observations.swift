@@ -62,6 +62,13 @@ extension AppDatabase {
         observe { try Queries.pools($0) }
     }
 
+    /// Every group's snippets, live (pre-13u Act 10 wave 2b — the Snippets
+    /// surface's "all snippets" rail row). Same region class as
+    /// `observePool`, summed over the groups.
+    public func observeAllPoolItems() -> AsyncValueObservation<[Queries.PoolItem]> {
+        observe { try Queries.allPoolsListing($0) }
+    }
+
     /// The archived-posts recovery surface, live (Phase 10 — the face the
     /// Phase 4 closeout promised `unarchiveContainer`). `limit` REQUIRED —
     /// archives accumulate over years (review round 1).
