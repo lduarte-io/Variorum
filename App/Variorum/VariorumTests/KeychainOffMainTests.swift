@@ -415,6 +415,74 @@ private func recordingStoreKeyGuard(
         confirmPresence: { await inner.confirmPresence($0) })
 }
 
+/// **17h (13p-fix ladder R3-6) — `setMode` makes ZERO synchronous SecItem
+/// calls on the main thread.** The mode transition ran its whole custody
+/// choreography — the key read plus up to three handover round-trips —
+/// INLINE on the MainActor, the 13e B-1 class one settings-cadence door
+/// over, while its E2EE twin (`setBiometricRequirement`) rode `offMain`.
+/// The work now rides ONE serial off-main hop; the custody semantics are
+/// byte-identical (same reads, same writes, same order — the
+/// `CustodyReleaseTests` and `Phase13pControllerTests` transition pins
+/// ride unmodified as that half's proof).
+///
+/// RED ON OLD (behavioral revert executed): with the transition inlined
+/// back onto the MainActor — the pre-fix shape — every recorded call
+/// lands main-thread and `anyOnMainThread` goes red on all three arms.
+@MainActor
+@Suite("The mode transition's custody work hops off the main thread (17h R3-6)")
+struct ProtectionSetModeOffMainTests {
+    @Test func everyTransitionArmsGuardSeamWorkArrivesOffMain() async throws {
+        let log = KeychainCallLog()
+        let key = StoreKey.mint()
+        let backing = InMemoryStoreKeyGuardBacking(
+            auto: key, biometryAvailable: true, biometricSucceeds: true)
+        let recording = recordingStoreKeyGuard(log, backing: backing)
+        let dialsBox = ScriptedDialsBox(ProtectionDials())
+        let envelopeBox = ScriptedEnvelopeBox(nil)
+        let stamps = ScriptedStampsBox()
+        let gate = StoreLaunchGate(
+            dials: { _ in dialsBox.value },
+            saveDials: { new, _ in dialsBox.value = new },
+            guardFor: { _ in recording },
+            loadEnvelope: { _ in envelopeBox.value },
+            saveEnvelope: { new, _ in envelopeBox.value = new },
+            setAsideEnvelope: { _ in envelopeBox.value = nil },
+            stamp: { leaf, _ in stamps.value[leaf] },
+            setStamp: { date, leaf, _ in stamps.value[leaf] = date })
+        let controller = ProtectionController(configuration: .init(
+            scope: "set-mode-off-main", storeURL: nil, gate: gate,
+            isRealVariant: true,
+            makeKDF: { PassphraseKDF.Descriptor(
+                algorithm: PassphraseKDF.algorithmArgon2id, argon2Version: 0x13,
+                memoryKiB: 256, iterations: 1, parallelism: 1,
+                salt: PassphraseKDF.randomSalt(), outputBytes: 32) }))
+        #expect(await controller.setPassphrase("sesame") == nil)
+        log.reset()  // the setup's own seam reads are not this pin's subject
+
+        // INTO BIOMETRIC: the key read, the gated landing, its read-back
+        // verify, the silent item's release — all off-main, in order.
+        #expect(await controller.setMode(.biometric) == .changed)
+        #expect(log.names == ["loadAuto", "saveGated", "gatedItemExists", "deleteAuto"],
+                "the same reads and writes, in the same order — only the thread moves")
+        #expect(log.anyOnMainThread == false,
+                "ZERO synchronous SecItem calls on the main thread: \(log.calls)")
+
+        // INTO PASSPHRASE (the resident key stands in — no key read):
+        // both verified releases (17h R3-5), off-main.
+        log.reset()
+        #expect(await controller.setMode(.passphrase) == .changed)
+        #expect(log.names == ["deleteGated", "deleteAuto"])
+        #expect(log.anyOnMainThread == false, "\(log.calls)")
+
+        // BACK TO AUTO: the landing, its identity verify, the gate's
+        // release — off-main.
+        log.reset()
+        #expect(await controller.setMode(.auto) == .changed)
+        #expect(log.names == ["saveAuto", "loadAuto", "deleteGated"])
+        #expect(log.anyOnMainThread == false, "\(log.calls)")
+    }
+}
+
 /// **Ladder R2-m2 — the launch/unlock road makes ZERO synchronous SecItem
 /// calls on the main thread.** `ProtectionController.reconcile()` runs at
 /// exactly that cadence (AppBootstrap fires it once the stack is ready),

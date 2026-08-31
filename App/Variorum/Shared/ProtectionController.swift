@@ -394,7 +394,64 @@ final class ProtectionController {
             }
             guard hasPassphraseWrap else { return .needsPassphrase }
         }
-        guard let key = currentKey() else { return .refused(Self.keyUnavailable) }
+        // 17h (13p-fix ladder R3-6): the transition's SecItem work — the
+        // key read plus up to three handover round-trips — hops OFF the
+        // main actor (the 13e B-1 discipline; the reconcile's escrow arm
+        // already follows it, R2-m2). Byte-identical custody semantics:
+        // same reads, same writes, same order, same short-circuits — only
+        // the thread moved. The hop rides a SERIAL queue (the
+        // DeviceKeyStore.custodyQueue pattern) because the pre-fix
+        // MainActor body had no suspension point across its custody work,
+        // so two transitions could never interleave their SecItem calls —
+        // a detached task per call would give that ordering up for
+        // nothing. The dial write and resident adoption stay MainActor.
+        let resident = residentKey
+        let guardSeam = self.guardSeam
+        let transition = await Self.onCustodyQueue {
+            Self.transitionCustody(
+                to: newMode, residentKey: resident, guardSeam: guardSeam)
+        }
+        guard transition.outcome == .changed, let key = transition.key else {
+            return transition.outcome
+        }
+        dials.mode = newMode
+        // The key stays IN HAND across a mid-session transition (surfaced
+        // by ladder R1-m1's ownership guard): entering a demanded mode
+        // deletes the silent item, and every later key-needing act this
+        // session — the escrow dial's delete-with-ownership-proof, the
+        // set-screen, the phrase mint — reads `currentKey()`. The session
+        // that just HELD the key to make the transition keeps it as the
+        // resident, exactly as the unlock road adopts it; `lock()` drops
+        // it as always.
+        if newMode.isDemanded { residentKey = key }
+        persistDials()
+        return .changed
+    }
+
+    /// 17h R3-6 — the serial off-main custody hop (`setMode`'s SecItem
+    /// work; the E2EE twin's `DeviceKeyStore.offMain` pattern).
+    nonisolated private static let custodyQueue = DispatchQueue(
+        label: "io.lduarte.Variorum.store-custody", qos: .userInitiated)
+
+    nonisolated private static func onCustodyQueue<T: Sendable>(
+        _ body: @escaping @Sendable () -> T
+    ) async -> T {
+        await withCheckedContinuation { continuation in
+            custodyQueue.async { continuation.resume(returning: body()) }
+        }
+    }
+
+    /// The mode transition's custody choreography, extracted verbatim from
+    /// `setMode` at 17h R3-6 so it runs off-main. Returns the outcome and
+    /// — on `.changed` — the key in hand, for the MainActor's resident
+    /// adoption. Everything here is guard-seam work; nothing touches
+    /// controller state.
+    nonisolated private static func transitionCustody(
+        to newMode: StoreAtOpenMode, residentKey: StoreKey?, guardSeam: StoreKeyGuard
+    ) -> (outcome: ModeChangeOutcome, key: StoreKey?) {
+        guard let key = residentKey ?? guardSeam.loadAuto() else {
+            return (.refused(Self.keyUnavailable), nil)
+        }
         switch newMode {
         case .auto:
             // 13p-fix R1-1: verify the incoming item READS BACK before the
@@ -410,20 +467,20 @@ final class ProtectionController {
                 rollBackIncoming: { _ = guardSeam.deleteAuto() }) {
             case .done: break
             case .writeRefused:
-                return .refused("The Keychain refused the change — nothing was altered.")
+                return (.refused("The Keychain refused the change — nothing was altered."), nil)
             case .wroteButUnreadable:
-                return .refused(ProtectionCopy.wroteButUnreadable)
+                return (.refused(ProtectionCopy.wroteButUnreadable), nil)
             case .outgoingNotReleased:
                 // 17h R3-5's third shape: leaving the gated item behind
                 // under Auto would let a later Biometric-mode reading of
                 // "a gated item exists" mean nothing.
-                return .refused(ProtectionCopy.outgoingCustodyNotReleased)
+                return (.refused(ProtectionCopy.outgoingCustodyNotReleased), nil)
             }
         case .biometric:
-            guard biometryAvailable else {
-                return .refused("This \(ProtectionCopy.deviceName) has no "
+            guard guardSeam.biometryAvailable() else {
+                return (.refused("This \(ProtectionCopy.deviceName) has no "
                     + "\(ProtectionCopy.biometryName) to gate the key with — use "
-                    + "Passphrase at every open instead.")
+                    + "Passphrase at every open instead."), nil)
             }
             // The gated item lands FIRST; only then does the silent item
             // go (never a keyless moment, never a silent one either).
@@ -439,14 +496,14 @@ final class ProtectionController {
                 rollBackIncoming: { _ = guardSeam.deleteGated() }) {
             case .done: break
             case .writeRefused:
-                return .refused("The Keychain refused the gated item — nothing was altered.")
+                return (.refused("The Keychain refused the gated item — nothing was altered."), nil)
             case .wroteButUnreadable:
-                return .refused(ProtectionCopy.wroteButUnreadable)
+                return (.refused(ProtectionCopy.wroteButUnreadable), nil)
             case .outgoingNotReleased:
                 // 17h R3-5's first shape: a "Biometric" dial over a key
                 // that still releases silently is the theater R13p-14
                 // forbids — refuse rather than claim a gate that isn't.
-                return .refused(ProtectionCopy.outgoingCustodyNotReleased)
+                return (.refused(ProtectionCopy.outgoingCustodyNotReleased), nil)
             }
         case .passphrase:
             // 17h R3-5's second shape: this arm's law is "NEITHER item
@@ -457,24 +514,13 @@ final class ProtectionController {
             // keeps the mode that item serves; from Biometric a refused
             // gated release keeps the gate).
             guard guardSeam.deleteGated() else {
-                return .refused(ProtectionCopy.outgoingCustodyNotReleased)
+                return (.refused(ProtectionCopy.outgoingCustodyNotReleased), nil)
             }
             guard guardSeam.deleteAuto() else {
-                return .refused(ProtectionCopy.outgoingCustodyNotReleased)
+                return (.refused(ProtectionCopy.outgoingCustodyNotReleased), nil)
             }
         }
-        dials.mode = newMode
-        // The key stays IN HAND across a mid-session transition (surfaced
-        // by ladder R1-m1's ownership guard): entering a demanded mode
-        // deletes the silent item, and every later key-needing act this
-        // session — the escrow dial's delete-with-ownership-proof, the
-        // set-screen, the phrase mint — reads `currentKey()`. The session
-        // that just HELD the key to make the transition keeps it as the
-        // resident, exactly as the unlock road adopts it; `lock()` drops
-        // it as always.
-        if newMode.isDemanded { residentKey = key }
-        persistDials()
-        return .changed
+        return (.changed, key)
     }
 
     // MARK: - The escrow dial (R13p-6)
@@ -869,7 +915,8 @@ final class ProtectionController {
     static let nudgeSnoozeStamp = "nudgeSnoozedUntil"
     static let nudgeDismissedStamp = "nudgeDismissedForever"
 
-    static let keyUnavailable =
+    // Nonisolated since 17h R3-6: read from the off-main transition hop.
+    nonisolated static let keyUnavailable =
         "This library's key isn't in hand right now — unlock the library first."
 }
 
