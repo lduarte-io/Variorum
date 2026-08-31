@@ -1123,6 +1123,20 @@ the one-agent-at-a-time rule stands for CODE agents; the no-code mockup agent ru
 her word. Mockup HTML lands untracked in `notes/plans/pre-13u-mockups/` (gitignored with its
 screens sibling), path printed for her — never published.
 
+**MOCKUP DELIVERED (2026-08-31, ~02:05):** `notes/plans/pre-13u-mockups/blocks-and-snippets.html` —
+self-contained, untracked, verified zero external refs, nothing committed or published. Three
+Blocks directions (A Index — standing heading-index column beside a scroll-synced reading pane ·
+B Read — the calm rendered page, floating tool rail, margin doors on hover; its click-to-edit is
+13u2 item 17's door built once · C Blocks-workbench — blocks as objects: per-row facts,
+multi-select + bulk bar giving 13e's block multi-select a face, right-hand context panel on item
+10's idea; the one direction where the name "Blocks" stays right) + the Snippets refresh (ownership
+answered by structure — snippet groups as flat siblings in a left rail; search/filters; calm cards;
+multi-select; every existing door preserved; "pool" grep-verified absent from Snippets UI strings).
+Agent's flags for her round: the container noun ("group", alternatives group/set/box/shelf — hers);
+A and B are close relatives (A's right half is a compressed B — possibly ONE mode with a
+collapsible contents column; C is the genuinely separate idea). **Her ONE feedback round is now
+open.**
+
 ---
 
 # Obligations at close
