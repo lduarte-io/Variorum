@@ -939,6 +939,28 @@ doors.
    **(c)** the five encryption paragraphs collapse into the structure — a sentence survives only
    where truly necessary (her amended doctrine). The architect's sitting reply of 2026-08-31
    carries the reference version of the table — the batch renders it, not re-derives it.
+
+   **Seventh-wave sharpenings (2026-08-31, from her follow-up questions — these are PART OF the
+   table's spec):** **(i)** the table distinguishes the TWO new-device rows, which are different
+   mechanisms: *adopting a copy of the library* (AirDrop/13x/restored folder — the iCloud escrow
+   copy opens it, no Variorum secret) vs *a new empty device pulling your content via SYNC* — that
+   one takes the encryption passphrase ONCE (E2EE enrollment; the iCloud copy deliberately does
+   NOT substitute — the server must never be able to hand keys around). SAME passphrase, never a
+   separate code (the one-secret doctrine); #82 bound only the store key's local item, E2EE custody
+   unchanged by design. **(ii)** the demanded-modes row states the fallback truthfully: at THIS
+   device's lobby under Touch ID/Face ID, the fallbacks are the passphrase and recovery phrase —
+   the app NEVER silently opens via the iCloud copy on a device whose mode demands biometry (that
+   would be the theater R13p-16 killed); the escrow dial's already-worded caveat (a person using
+   your unlocked Mac could dig the copy out of iCloud Keychain; Locked-down turns it off for
+   exactly that reason) stays the honest disclosure. **(iii — her ask, verbatim: "maybe the
+   encryptions settings in settings should have an encryption explainer tab - i guess i could also
+   have it in the field guide and it makes sense there, but settings should also carry a better
+   explanation and point someone towards the tutorial"):** the settings surface gains an EXPLAINER
+   section/tab — the rendered table + a door to the field guide's privacy chapter — so settings
+   explains AND points, and the deep teaching lives in the tutorial. **(iv)** E2EE custody internals
+   never surface to users (her read, confirmed: "the E2EE is just about what i need to understand,
+   not my users") — user-facing copy speaks of ONE passphrase and what it opens, never of key
+   families.
 4. **The trash/encryption/archived sweep** — a general pass over the 13j/13l/13p-era surfaces (Trash,
    Archived, the lobby, the reminder/nudge family) for the same crowding/jank class; anything
    taste-shaped beyond the granted latitude lands on a propose-only list for her.
