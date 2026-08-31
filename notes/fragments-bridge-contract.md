@@ -979,3 +979,21 @@ now? I'd like to just carry it to fragments now, I think that's what would be mo
 brief is written NOW as a pre-13u-round architect-side deliverable (the Act 6 class) — see the
 pointer below once it lands. It equips her Fragments conversation with the FACTS and the ceremony
 format spec; it does not pre-decide road (a) — that ruling is hers with the Fragments agent.
+
+## CARRY-ITEM POINTER (2026-08-31) — the enrollment & suite-ceremony brief
+
+The brief her follow-up above ordered is written: **`notes/fragments-enrollment-brief-2026-08-31.md`**,
+self-contained for the Fragments agent (the lockbox reply's precedent). It carries: the two-layer
+answer (signup + tokens already possible at the one issuer; the passphrase-SET ceremony
+Variorum-only today, with nothing server-side preventing another client); the FULL ceremony format
+spec read from code with file:line citations — Argon2id v1 parameters (64 MiB / t=3 / p=1 /
+16-byte salt / 32-byte output, NFKD, descriptor-is-truth), the RFC 3394 wrap tree (master wrapped
+twice; corpus + journal_bridge class keys under master), the 12-word BIP-39 derivation
+(PBKDF2-HMAC-SHA512 ×2048 → HKDF-SHA256 under `variorum.suite.e2ee.v1`/`recovery-wrap-key`), the
+`key_vault` row + the `revision` CAS discipline (including the nil-omission PATCH trap), the
+enrollment/set/change flows and the ruled write-down/re-enter choreography, and the `e1:` AAD
+grammar with the bridge's day binding; what Fragments already holds vs what a set-ceremony build
+would add; the binding suite doctrines (one-secret, R-4/R-6, the NEVER list, T1's stale-copy
+recency warning, the layer separation); and the open (a)/(b) ruling stated without a
+recommendation — that ruling is hers with the Fragments agent. No secrets appear in it. She
+carries it; questions come back through this channel.
