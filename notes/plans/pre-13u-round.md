@@ -222,7 +222,11 @@ caffeinate is holding the machine.** **The Pool tag-column question is RESOLVED 
 mid-sitting re-cast already granted the latitude by name (*"tags as a column or not"*), and the
 eighth wave superseded the old screenshot-pair plan with a style guide she loved: the wave builds
 the mockup's card/metadata-chip grammar as the default, judges the column question in place, and
-notes the alternative in the morning bundle only if genuinely torn.
+notes the alternative in the morning bundle only if genuinely torn. **Cast confirmed at her
+goodnight (verbatim: "fable implementers on act 10 (both waves) + fable implementers for wave 9
+explaining the encryption by the way"):** BOTH Act 10 waves are Fable, and the ninth wave's
+encryption-explanation build (the memo's rendering, item 3) is explicitly Fable-implemented —
+consistent with her mid-sitting re-cast, now unambiguous.
 
 **THE NINTH WAVE'S CLOSING RIDERS (2026-08-31, pre-sleep — the memo's §9b/§9c, carried by her;
 the memo is the full text, this block is the ROUTING):**
