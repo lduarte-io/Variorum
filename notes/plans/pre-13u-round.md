@@ -189,8 +189,25 @@ settled product ruling; 13x-adjacent by nature if ever reopened). **(d)** Preced
 memo and her carried successor block differ, THE MEMO WINS (its own §10). **(e)** The memo's
 tutorial-privacy-chapter wording changes make the field-guide re-seed obligation live at closeout.
 
+**R-pre13u-8 — PHONE SHERLOCK, RULED (her word: "i agree, giving the word for it to become
+R-pre13u-8 for Act 0").** The tenth-wave proposed shape below builds as proposed, in Act 0: the
+phone seeds Sherlock at R-pre13u-1's first-write moment through the Journal-furniture gate
+(account-owned stores skip and arrive-by-sync); the pristine-copy dedupe repair (per-note manifest
+hashes; both-pristine → deterministic keeper; one-edited → edited kept; both-edited → both
+survive, an edited copy NEVER silently retired) lands beside the Journal-keeper repair — the
+`Sync/` half is Fable's under the standing rider, the seed rides the Opus half. **The RESTORE
+DOOR is also RULED (her word: "Restore door - yes, let's do it")** — a tutorial-style "restore the
+sample library" door on the field guide's restore precedent; the Mac face rides Act 10 (wave 1);
+the phone's face joins mobile's parity answer. **And R-pre13u-7 gains consequence (f), her
+instruction verbatim: "the ninth wave should have a note to write a mobile parity note explaining
+the posture, ensuring mobile matches, etc. no different settings for one account on mobile +
+mac."** → the closeout's MOBILE PARITY LINE carries a security-posture note: the memo's
+presentation (recipes, shapes, the escrow/posture coupling) reaches mobile as the SAME posture —
+one account has ONE posture across Mac + phone, never per-platform settings divergence (the
+`Shared/` custody brains already carry the semantics by construction; the faces are per-platform).
+
 **THE TENTH WAVE (2026-08-31, after Acts 3+4's close — her replies to the three parity calls;
-two settled, two pending her confirm):**
+the two pending items since RULED as R-pre13u-8 above):**
 
 - **PHONE SHERLOCK — her directive, verbatim: "hmmm can you explore any way that the phoen COULD
   get sherlock but if it synced it could just check for a duplicate and not include it? like if a
@@ -336,6 +353,16 @@ fallback if she wants the moment to be explicit.
 Her ruling recorded verbatim in `QUESTIONS` before any build; red-on-old pin for whichever shape;
 `MobileSoul` row; and the mobile file's header claim about the virgin-store guard **corrected**, since
 it is now known to be false.
+
+### SCOPE ADDITION (R-pre13u-8, ruled 2026-08-31 — see the RULINGS block): Act 0 also carries the
+### phone's Sherlock seed + the pristine-copy dedupe repair
+
+The Opus half adds the phone's Sherlock seed at the same first-write moment (account-owned stores
+skip — arrive-by-sync); the Fable `Sync/` half adds the pristine-copy dedupe beside the
+Journal-keeper repair (per-note manifest hashes against the bundled source; both-pristine →
+deterministic keeper; one-edited → the edited copy kept; both-edited → both survive — an edited
+copy is never silently retired; ordinary tombstones with explicit outbox rows; zero schema). The
+sample library's identity predicate is the Mac seeder's own `discover` predicate, shared.
 
 ---
 
