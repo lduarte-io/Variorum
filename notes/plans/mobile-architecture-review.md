@@ -83,6 +83,16 @@ the author asked to get ahead of.
 
 ## 2. Findings
 
+> **⚠️ DISPOSITIONED 2026-08-30 — and its sharpest case is STALE. READ THIS
+> FIRST.** `assertBookNameIsFree` landed inside the create-book door's runner
+> closure at `66606c0`, which is **not an ancestor** of this review's commit —
+> so "the phone calls it at zero" was true of the tree read here and false at
+> `HEAD` by the time this was dispositioned. Driven, a double tap on that door
+> mints **one** book. The finding's CLASS is real and was acted on: a shared
+> `MobileWriteLatch` now guards the three doors where a second flight mints an
+> uncaught row. The per-door verdict table, the traced mechanisms and the
+> proven reds are in `notes/plans/mobile-major-fix-round-record.md` (A1).
+
 ### MAJOR 1 — Twenty write doors have no in-flight latch; the create-book door mints duplicates on a double tap
 
 **What it is.** `MobileStructural`, `MobileEditorViewModel`,
@@ -155,6 +165,13 @@ slips through; layer 1 alone does not close it for other mints.
 alongside PL-10(b)'s guard, since the two remedies land at the same door.
 
 ---
+
+> **✔ FIXED 2026-08-30.** A monotonic handoff token, minted synchronously at
+> the tap and checked at entry and after every suspension: the last REQUESTED
+> tab wins, never the last completed task. Two pins drive the stale-completes-
+> last ordering and hold the user-visible half through the real gate (she can
+> type in the visible editor; the hidden one refuses). Both proven red.
+> Record: `notes/plans/mobile-major-fix-round-record.md` (A2).
 
 ### MAJOR 2 — The tab-switch liveness handoff is applied by unordered tasks while `tab` is set synchronously, so liveness can end up disagreeing with the visible tab
 

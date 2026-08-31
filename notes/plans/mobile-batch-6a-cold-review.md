@@ -19,6 +19,14 @@ note about a build the tree could not have made.
 
 ## MAJOR
 
+> **✔ FIXED 2026-08-30**, both halves — the line cap resets on every
+> `configure` (the recycling rule the file's own header states) and section
+> headers are MEASURED rather than pitched at 52pt. This review's measurements
+> were independently reproduced within a percent (41.17 / 54.89 against 41.3 /
+> 55.0), and each half was proven red SEPARATELY, confirming "jointly wrong".
+> **`m3` below is still open** and was deliberately not fixed with it.
+> Record: `notes/plans/mobile-major-fix-round-record.md` (C1).
+
 ### M1 · `MobileBlockHistorySheetView.swift:324, 354–359` (+ `MobileBlockHistory.swift:286`) · Both long section explainers are silently truncated, and the came-from one loses the half that explains the button beside it · **MEASURED**
 
 `MobileBlockHistoryCell` sets `metaLabel.numberOfLines = 2` once in `init` (line 324) and never
@@ -54,6 +62,15 @@ a per-row measured height). **Red-on-old pin:** configure a `.sectionHeader` cel
 unbounded height, and that `metaLabel.frame.maxY <= contentView.bounds.height`.
 
 ---
+
+> **✔ FIXED 2026-08-30.** The quiet sentence is now reserved for the case
+> where it is TRUE (`history.isEmpty && activeTakes.count <= 1`); above one
+> take the regions draw exactly as the Mac's do. **One deliberate stop short
+> of literal Mac convergence is recorded for the author** — the ordinary
+> one-take block keeps its calm one-line answer rather than a header plus a
+> "this take · 0" row, because I10 makes the Mac's branch unreachable there
+> and the sentence is true. One line and one pin if she wants it gone.
+> Record: `notes/plans/mobile-major-fix-round-record.md` (C2).
 
 ### M2 · `MobileBlockHistory.swift:298–302` · On a fanned block with no savepoints the face says *"This block has no past yet: one take…"* and hides every take section · **MEASURED (the core value) + traced (the branch)**
 

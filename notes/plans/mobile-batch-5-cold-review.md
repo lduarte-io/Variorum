@@ -23,6 +23,16 @@ repository.
 
 ## MAJOR
 
+> **✔ FIXED 2026-08-30**, with the gate this finding proposed and over the
+> machinery it named. The seed moved out of the shell into
+> `VariorumMobileApp`'s own task, AFTER `services.start()`, and now declines
+> until a device that belongs to an account has completed a first CLEAN round
+> — declining without consuming the mark, so the next launch asks again.
+> **The finding's own script is pinned** (`herCorpusArrivingDuringTheWaitCancelsTheSeed`)
+> and proven red at `books.count → 2`. One residual is the AUTHOR'S call and
+> is recorded rather than closed: a fresh install where she signs in AFTER the
+> shell appears. Record: `notes/plans/mobile-major-fix-round-record.md` (B1).
+
 ### [MAJOR] · `App/Variorum/VariorumMobile/Features/Shell/MobileStarterJournal.swift:12-37` + `MobileShellView.swift:167-174` · the starter-Journal seed runs before sign-in is *possible*, so its virgin-store guard cannot do the job its own header claims
 
 **What's wrong.** The file's header states the guard's purpose in terms
