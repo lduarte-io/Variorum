@@ -36,6 +36,10 @@ struct VariorumMobileApp: App {
     /// both scene edges. It only ever ends at `bootstrap.lock()`, which
     /// refuses under Auto on its own, so nothing here can ship theater.
     @State private var relock: MobileRelockCoordinator?
+    /// Pre-13u Act 0: the first-write occasion (R-pre13u-1 / R-pre13u-8).
+    /// Held for the session's lifetime like `services`, so the once-per-
+    /// launch flag it carries survives every view rebuild.
+    @State private var firstWrite: MobileFirstWriteFurniture?
     @Environment(\.colorScheme) private var scheme
 
     /// The lobby's voice comes from the DEVICE preference, not the store —
@@ -81,6 +85,13 @@ struct VariorumMobileApp: App {
                             stopServices: {
                                 services?.stop()
                                 services = nil
+                                // Act 0: the occasion belongs to the
+                                // session it was primed against. A lock
+                                // ends that session, so the next unlock
+                                // primes a fresh one against the fresh
+                                // store rather than spending a verdict
+                                // taken before the store was closed.
+                                firstWrite = nil
                             })
                         // Phase 13p ladder R2-M1: the phone wires the SAME
                         // four one-secret hooks the Mac wires (R13p-4 — one
@@ -96,38 +107,36 @@ struct VariorumMobileApp: App {
                             encryption: fresh.encryption,
                             keyVault: fresh.keyVault, auth: fresh.auth)
                         await fresh.start()
-                        // R27b (round 2, batch 5): the starter Journal,
-                        // seeded ONCE on a genuinely new store. It lives
-                        // HERE — after `start()` — and not on any view,
-                        // for two reasons. (1) The shell is hosted alone
-                        // by several suites and furniture must not appear
-                        // in a pin's world. (2) THE BATCH-5 COLD REVIEW'S
-                        // MAJOR: from the shell it ran concurrently with
-                        // this very task, so it decided "this store is
-                        // new" milliseconds into a launch whose first sync
-                        // pull had not begun — and a phone joining an
-                        // existing account minted a second Journal that
-                        // then propagated to every device. After `start()`
-                        // the sign-in question is settled, so the gate
-                        // below reads facts instead of a coin flip.
-                        // Idempotent by construction, so the re-run after
-                        // an unlock is a no-op.
-                        await MobileStarterJournal.seedIfNeeded(
+                        // Pre-13u Act 0 — R-pre13u-1: **NOTHING IS SEEDED
+                        // HERE ANY MORE.** The launch used to mint the
+                        // starter Journal (R27b, batch 5) behind a sync
+                        // gate and a 20-second bounded wait; her ruling
+                        // moved the MINT to her first WRITE and deleted the
+                        // wait, because the sign-in door lives inside the
+                        // shell — so at launch on a fresh install the
+                        // account question has no answer to read, and no
+                        // amount of waiting gives it one. What launch does
+                        // now is take ONE cheap local reading (`prime`) and
+                        // hand the write doors a signal to announce to.
+                        //
+                        // Composed here rather than on a view for the
+                        // batch-5 reason that still holds: the shell is
+                        // hosted alone by several suites, and furniture
+                        // must never appear in a pin's world.
+                        let furniture = MobileFirstWriteFurniture(
                             session: session,
                             storeVariant: bootstrap.storeVariant,
                             gate: MobileStarterJournal.SyncGate(
-                                // Captured STRONGLY, deliberately: the
-                                // closures outlive nothing (the seed is
-                                // awaited right here), and a nil'd weak
-                                // reference would read as "no account",
-                                // which is the unsafe direction.
+                                // Captured STRONGLY, deliberately: a nil'd
+                                // weak reference would read as "no
+                                // account", which is the unsafe direction.
                                 belongsToAnAccount: {
                                     fresh.sync.isConfigured
                                         || fresh.account.variorum != nil
-                                },
-                                hasSyncedCleanly: {
-                                    fresh.sync.status.lastSuccessAt != nil
                                 }))
+                        firstWrite = furniture
+                        session.onFirstWrite = { furniture.noteFirstWrite() }
+                        await furniture.prime()
                     }
             case .opening:
                 // 13l L-c: the store opens off the main thread now, so there

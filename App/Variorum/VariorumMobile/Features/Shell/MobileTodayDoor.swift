@@ -44,6 +44,12 @@ enum MobileTodayDoor {
                 return (entry.container.id,
                         ops.shelveInDailyJournalBook(entry.container.id))
             }
+        // Act 0 (R-pre13u-1): a door that put content in the store says so.
+        // Announce and move on — nothing here awaits what it starts. This
+        // door in particular can beat the furniture to the Journal book
+        // (`shelveInDailyJournalBook` creates and pins one itself), which
+        // is why the starter Journal's mint re-checks inside its own turn.
+        session.noteFirstWrite()
         return Outcome(postID: opened.postID, note: shelvingNote(opened.shelving))
     }
 
@@ -81,8 +87,11 @@ enum MobileNewNoteDoor {
 
     /// Mints the nameless bookless note; returns its id.
     static func mint(session: AppSession) async throws -> String {
-        try await session.runner.run { ops in
+        let id = try await session.runner.run { ops in
             try ops.createPost(title: nil)
         }.id
+        // Act 0 (R-pre13u-1): the first-write signal. Announce, move on.
+        session.noteFirstWrite()
+        return id
     }
 }

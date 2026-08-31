@@ -67,6 +67,30 @@ final class AppSession {
     /// included, so two sweeps never race.
     @ObservationIgnored var syncConfigured: () -> Bool = { false }
 
+    /// **The first-write signal** (pre-13u Act 0 — her B1 ruling
+    /// R-pre13u-1, *"seed on first WRITE, not first launch"*).
+    ///
+    /// Wired only by the PHONE today (`MobileFirstWriteFurniture`), and it
+    /// lives here for the reason `syncConfigured` does: this is the one
+    /// object every write door on either platform already holds, so a door
+    /// announces "she made something" in one line instead of five models
+    /// growing a new constructor parameter. Default is a no-op, which is
+    /// the honest answer for the Mac, for previews, and for every pin that
+    /// never wired it.
+    ///
+    /// **It is a signal, never a barrier.** Callers announce and move on —
+    /// nothing on a write path ever awaits what this starts. The whole
+    /// point of moving furniture off the launch path was that furniture can
+    /// always wait; it must not become something her keystroke waits for.
+    @ObservationIgnored var onFirstWrite: @MainActor () -> Void = {}
+
+    /// Announce that a door just put content in the store. Idempotence is
+    /// the LISTENER's job (the furniture's mark, its own once-per-launch
+    /// flag), deliberately: a door should not have to know whether it is
+    /// the first one, and a session that tracked it would have to decide
+    /// what "first" means across locks, re-composition and store swaps.
+    func noteFirstWrite() { onFirstWrite() }
+
     /// One best-effort local sweep (13j ladder B, B3 — `LocalPurge`, the
     /// transportless road: never-synced families physically remove with no
     /// server, no ledger, no horizon — there is no one to strand). Swept at

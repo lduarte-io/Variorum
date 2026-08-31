@@ -14,58 +14,78 @@
 //  (`MobileTutorialSeeder`'s shape) would look for a book called
 //  "Journal", find none after she deleted it, and put it back — which is
 //  precisely what she ruled out. So "deleted or archived" must be
-//  distinguishable from "never seeded", and TWO independent guards do it:
+//  distinguishable from "never seeded", and the guards below do it.
+//
+//  ── R-pre13u-1: SEED ON FIRST WRITE, NOT FIRST LAUNCH ─────────────────
+//  **Her ruling (2026-08-31, "First write + repair"), and it replaced the
+//  whole sync-gate apparatus this file used to carry.** The furniture is
+//  minted by her first WRITE — sign in before typing and the real Journal
+//  simply arrives — so the 20-second bounded wait and its polling are
+//  DELETED, and the launch-time seed call is gone from
+//  `VariorumMobileApp`. The occasion is now `MobileFirstWriteFurniture`,
+//  which the write doors announce to and nothing on a write path awaits.
+//
+//  **THE CORRECTION THIS HEADER OWED (dated 2026-08-31, the Act 0
+//  obligation).** What stood here claimed the virgin-store guard "protects
+//  a phone that syncs an existing account down". **That was FALSE, and the
+//  residual proved it:** the only sign-in surface lives inside the shell
+//  the seed launched with, so on a fresh install there was no ordering in
+//  which the account could be known first — install on a new phone against
+//  her existing account and it minted a Journal, designated it, pinned it
+//  and minted a note, every one an ordinary synced insert that propagated
+//  to every device. A local read of an empty store cannot tell "you have
+//  nothing" from "your things have not arrived yet", and no amount of
+//  waiting makes it able to: waiting only narrows the window.
+//
+//  **What actually protects it now** is that the question is asked at a
+//  moment when the answer exists. By the time she WRITES, sign-in either
+//  happened or did not, so `belongsToAnAccount` is a fact rather than a
+//  race — and a store that belongs to an account is simply not seeded at
+//  all (her accepted corner: an account whose sync never lands gets its
+//  Journal when sync first lands, and nothing before).
+//
+//  Three guards remain, and each answers a different question:
 //
 //  1. **A per-device, PER-STORE-VARIANT mark** (`UserDefaults`, the
 //     `IdleCommitScheduler` precedent — debug and release share a
 //     defaults domain, so an unscoped key would let a dev-store seed
-//     suppress the real store's). Set only after the seed lands.
-//  2. **A virgin-store guard**: the store must hold NO live book and NO
-//     live note. A store that already has content is not a new user's,
-//     however this device's mark reads — which is what protects a phone
-//     that syncs an existing account down, and what makes a seed
-//     interrupted halfway (app killed mid-seed) safe to re-attempt
-//     without ever minting a second Journal.
-//
-//  3. **THE SYNC GATE** (the batch-5 cold review's MAJOR). The two guards
-//     above are both LOCAL reads, and the seed used to run from the
-//     shell's own `.task`, concurrently with — and in practice long
-//     before — the sync chain that brings her corpus down: a bare-store
-//     read is milliseconds, a first pull is a network round trip. So a
-//     phone joining an EXISTING account minted a second `Journal`,
-//     designated it, pinned it and minted a note, and every one of those
-//     is an ordinary synced insert (SyncSpec §3's trigger-fed outbox)
-//     that propagates to her Mac. Nothing in the merge matrix converges a
-//     duplicate book away, and by design nothing should.
-//
-//     So the store is only judged NEW once sync has had its say. If this
-//     device's store belongs to an ACCOUNT — a composed sync chain, or a
-//     signed-in session whose chain has not composed yet — the seed waits
-//     for the first CLEAN round (bounded), then re-asks `storeIsNew`.
-//     Timing out means "we still don't know", and the seed declines: the
-//     mark is not set, so the next launch simply asks again. Furniture is
-//     the one thing in this app that can always wait.
+//     suppress the real store's). Set only after the seed lands. This is
+//     what makes her "delete it and it stays deleted" ruling real.
+//  2. **THE ACCOUNT GATE** — one fact, read AT THE WRITE: does this
+//     store's content belong to an account rather than to this launch?
+//     True for a composed sync chain OR a signed-in session whose chain
+//     has not composed yet (owner adoption can fail and leave a signed-in
+//     device unconfigured; that device's store still belongs to the
+//     account, and `isConfigured` alone reads the unsafe direction).
+//  3. **The virgin verdict, taken at LAUNCH and spent at the write.** A
+//     store that already holds her writing is not a new user's. It has to
+//     be read at launch because by the write moment her own first note may
+//     already have landed — reading it late would decline on the strength
+//     of the very keystroke that summoned the furniture. Reading is not
+//     seeding; what her ruling moved off the launch path is the MINT.
+//     Beside it, a **live re-check inside the mint's own runner turn**:
+//     if any book exists by then, nothing is minted. That guard cannot be
+//     read stale (AppSpec's `deleteBlock` precondition doctrine — a
+//     precondition evaluated inside the write's transaction), and it is
+//     what makes Today's Entry racing the furniture safe: `shelveInDaily
+//     JournalBook` creates and pins the Journal book itself, so whichever
+//     turn runs first, exactly one Journal book exists after both.
 //
 //  **The honest residual, recorded rather than papered over:** a user who
 //  deletes the starter book AND its entry, leaving a genuinely empty
 //  store, and THEN deletes and reinstalls the app, gets it once more —
 //  the mark dies with the install and the store looks new again. Closing
 //  that needs a synced marker, and the `setting` table has no public
-//  write door from app code (`upsertSetting` is internal), which would be
-//  a `Sources/` change this batch is fenced from. Narrow, non-destructive,
-//  and named.
+//  write door from app code (`upsertSetting` is internal). Narrow,
+//  non-destructive, and named.
 //
-//  **The SECOND honest residual, and it is the author's call, not this
-//  file's:** a genuinely fresh install where nobody is signed in seeds at
-//  once — correctly, because the store really is this device's — and if
-//  she THEN signs into an existing account from Settings, her own Journal
-//  arrives beside the starter one. The gate cannot close that: the only
-//  surface offering sign-in lives inside the shell the seed launches with.
-//  Closing it needs a product decision (an explicit first-run moment she
-//  can see, or a post-sign-in reconciliation), which is hers. What the
-//  gate DOES close is every case where the account was already known at
-//  launch — the reinstall, the second device, the relaunch — which is the
-//  one that reaches her real corpus without her doing anything at all.
+//  **The residual her ruling deliberately leaves open, and its answer:**
+//  seed while signed out, then sign in, and two designated Journal books
+//  meet. That is the SECOND half of "First write + repair" — a SyncSpec
+//  §7-class convergence repair (deterministic keeper, memberships
+//  re-pointed, loser tombstoned), which is `Sources/VariorumCore/Sync/`
+//  work and belongs to this round's Fable half. It is the only shape that
+//  also heals a device where the duplication already happened.
 //
 //  ── WHY THE ENTRY CARRIES NO `entry_date` ─────────────────────────────
 //  A journal entry stamped with TODAY would be the note
@@ -117,16 +137,17 @@ enum MobileStarterJournal {
         """
 
     /// What a seed attempt did. Every case is a real outcome, and none of
-    /// them throws: a first launch must never be blocked by furniture.
+    /// them throws: a first write must never be blocked by furniture.
     enum Outcome: Equatable {
         /// This device has already seeded this store variant.
         case alreadySeeded
-        /// The store is not a new user's — it holds books or notes.
+        /// The store is not a new user's — it held books or notes when the
+        /// app opened, or a book exists by the time the mint runs.
         case storeNotNew
-        /// This store belongs to an account whose first clean round has
-        /// not landed, so whether it is new is not yet knowable. NOT a
-        /// failure and NOT marked: the next launch asks again.
-        case awaitingFirstSync
+        /// This store's content belongs to an ACCOUNT, so the real Journal
+        /// is the account's to deliver. NOT marked: if she signs out and
+        /// starts fresh, the next write asks again.
+        case accountOwned
         case seeded(readingID: String)
         /// The store said no. Recorded, never surfaced — nothing the user
         /// asked for failed.
@@ -142,43 +163,45 @@ enum MobileStarterJournal {
     }
 
     /// **What the seed needs to know about sync, and nothing more** (guard
-    /// 3). Two facts, injected as closures so a pin drives every state
+    /// 2). ONE fact now, injected as a closure so a pin drives every state
     /// without composing a transport, and so this file never learns what a
     /// scheduler is.
+    ///
+    /// **`hasSyncedCleanly` is GONE with the wait it served** (R-pre13u-1).
+    /// It existed to answer *"has the account's content arrived yet?"*, a
+    /// question only a seed racing the first pull has to ask. Asking at the
+    /// write instead means the account's content does not need to have
+    /// arrived: an account-owned store is simply never seeded, so a failed
+    /// round, a long offline stretch and a §12 lockstep refusal all reach
+    /// the same correct answer with nothing waiting on them.
     struct SyncGate {
         /// True when this store's contents are defined by an ACCOUNT
         /// rather than by this launch — a composed sync chain, OR a
         /// signed-in session whose chain has not composed yet (owner
         /// adoption can fail and leave a signed-in device unconfigured;
-        /// that device's store still belongs to the account).
+        /// that device's store still belongs to the account, and
+        /// `isConfigured` alone reads the unsafe direction).
         var belongsToAnAccount: @MainActor () -> Bool
-        /// True once a round has finished WITHOUT error — i.e. a
-        /// pull-to-head has landed and the store now shows what the
-        /// account holds. A FAILED round is not an answer.
-        var hasSyncedCleanly: @MainActor () -> Bool
 
         /// The composition with no account anywhere — a dev store, or a
         /// caller that has no services yet. The store genuinely is this
-        /// device's, so the seed proceeds on the two local guards alone.
-        static let unowned = SyncGate(
-            belongsToAnAccount: { false }, hasSyncedCleanly: { true })
+        /// device's, so the seed proceeds on the local guards alone.
+        static let unowned = SyncGate(belongsToAnAccount: { false })
     }
 
-    /// How long the seed waits for a signed-in device's first clean round
-    /// before declining. Generous, because declining is free: nothing is
-    /// marked, and the next launch asks again.
-    static let firstRoundWait: Duration = .seconds(20)
-
-    /// The whole door. `loadMark`/`saveMark` are injectable so the pins
-    /// drive a real store without touching this machine's defaults; `gate`
-    /// is guard 3 (above), and its default is the no-account composition.
+    /// The whole door, spent at her FIRST WRITE.
+    ///
+    /// `storeWasEmptyAtLaunch` is guard 3's launch half — see
+    /// `MobileFirstWriteFurniture.prime()` for why it is taken then and
+    /// spent here. `loadMark`/`saveMark` are injectable so the pins drive a
+    /// real store without touching this machine's defaults; `gate`'s
+    /// default is the no-account composition.
     @discardableResult
     static func seedIfNeeded(
         session: AppSession,
         storeVariant: AppDatabase.StoreVariant = .real,
         gate: SyncGate = .unowned,
-        firstRoundWait: Duration? = nil,
-        pollInterval: Duration = .milliseconds(100),
+        storeWasEmptyAtLaunch: Bool,
         loadMark: (() -> Bool)? = nil,
         saveMark: ((Bool) -> Void)? = nil
     ) async -> Outcome {
@@ -187,50 +210,20 @@ enum MobileStarterJournal {
         let save = saveMark ?? { UserDefaults.standard.set($0, forKey: key) }
 
         guard !load() else { return .alreadySeeded }
+        // Read at the WRITE, where the answer exists. This is the guard the
+        // old header wrongly credited to the virgin-store read.
+        guard !gate.belongsToAnAccount() else { return .accountOwned }
+        guard storeWasEmptyAtLaunch else { return .storeNotNew }
 
         do {
-            // The cheap local answer first: a store that ALREADY holds
-            // content is not a new user's whatever sync says, and asking
-            // costs milliseconds. This is also what keeps the wait below
-            // off every ordinary launch — it is only ever paid on a store
-            // that currently looks empty.
-            guard try await storeIsNew(session) else { return .storeNotNew }
-
-            if gate.belongsToAnAccount() {
-                guard await waitForFirstCleanRound(
-                    gate: gate,
-                    limit: firstRoundWait ?? Self.firstRoundWait,
-                    poll: pollInterval)
-                else { return .awaitingFirstSync }
-                // Her corpus has landed if there was one. Ask again.
-                guard try await storeIsNew(session) else { return .storeNotNew }
+            guard let readingID = try await mint(session) else {
+                return .storeNotNew
             }
-
-            let readingID = try await mint(session)
             save(true)
             return .seeded(readingID: readingID)
         } catch {
             return .refused(String(describing: error))
         }
-    }
-
-    /// Waits for the gate's clean-round fact, bounded. Polled rather than
-    /// subscribed on purpose: `SyncSession.onRoundCompleted` is a SINGLE
-    /// closure already owned by `AppServices` (it is what triggers the
-    /// Fragments bridge after every round), so a second subscriber would
-    /// have to displace the first — furniture must not be able to break
-    /// the bridge. The cost is one cheap main-actor read every 100 ms, on
-    /// a virgin store only, at most once per launch.
-    private static func waitForFirstCleanRound(
-        gate: SyncGate, limit: Duration, poll: Duration
-    ) async -> Bool {
-        if gate.hasSyncedCleanly() { return true }
-        let deadline = ContinuousClock.now.advanced(by: limit)
-        while ContinuousClock.now < deadline {
-            do { try await Task.sleep(for: poll) } catch { return false }
-            if gate.hasSyncedCleanly() { return true }
-        }
-        return gate.hasSyncedCleanly()
     }
 
     /// A new user's store: no live book, and no live unarchived note.
@@ -252,15 +245,35 @@ enum MobileStarterJournal {
     /// `entry_date` ascending · designated · pinned), so a phone that
     /// seeded and a phone that pressed Today's Entry first end up with the
     /// same book.
-    private static func mint(_ session: AppSession) async throws -> String {
+    ///
+    /// **Returns nil when a book already exists by the time the turn runs**
+    /// — guard 3's live half, read INSIDE the write it authorizes rather
+    /// than before it. The occasion that makes this real is Today's Entry:
+    /// `shelveInDailyJournalBook` creates and pins the Journal book itself
+    /// (AppSpec §9), so her very first act can be a door that mints the
+    /// same book this one would. The runner is serial, so one of the two
+    /// turns sees the other's book and declines — and exactly one Journal
+    /// exists either way, without either door knowing about the other.
+    private static func mint(_ session: AppSession) async throws -> String? {
         // Captured as locals: the runner's body is `@Sendable` and runs
         // off this actor, so it must not reach back for isolated state.
         let name = bookName
         let title = entryTitle
         let text = entryText
         let label = undoLabel
-        return try await session.runner.run { _ in
+        return try await session.runner.run { _ -> String? in
             let quiet = Operations(undoStack: nil)
+            // Guard 3's live half, read inside the turn that acts on it.
+            // Two questions, both cheap and both shelf-bounded (P1: books,
+            // never a corpus): is a daily journal book already DESIGNATED
+            // (what Today's Entry does), and is the name already taken (a
+            // book she made herself, or a restored one)?
+            guard try quiet.dailyJournalBookID() == nil else { return nil }
+            do { try quiet.assertBookNameIsFree(name) }
+            catch let error as OperationError {
+                guard case .duplicateBookName = error else { throw error }
+                return nil
+            }
             let book = try quiet.createReading(
                 name: name, kind: .curated, profile: "journal",
                 sortField: .entryDate, sortDir: .asc)

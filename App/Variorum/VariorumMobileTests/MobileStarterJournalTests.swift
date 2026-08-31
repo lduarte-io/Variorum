@@ -11,8 +11,17 @@
 //  **The second clause is the whole difficulty, and it is what most of
 //  these pins are about.** A discover-by-name seeder would put the book
 //  back after she deleted it. Both guards are pinned independently — the
-//  per-store-variant mark AND the virgin-store guard — because either one
-//  alone would let the book return in a case she ruled out.
+//  per-store-variant mark AND the launch-time virgin verdict — because
+//  either one alone would let the book return in a case she ruled out.
+//
+//  ── UPDATED AT THE PRE-13u ROUND, ACT 0 (R-pre13u-1) ──────────────────
+//  The occasion moved from LAUNCH to her FIRST WRITE and the 20-second
+//  bounded wait was deleted, so the gate's pins changed shape with it: the
+//  three "wait for the first clean round" pins are retired (the wait they
+//  drove no longer exists), and in their place sit the pins for the rule
+//  that replaced them — an account-owned store is never seeded at all, and
+//  the launch verdict is taken by `prime` and spent here. The occasion
+//  itself is pinned in `MobileFirstWriteFurnitureTests`.
 //
 
 import Foundation
@@ -20,17 +29,14 @@ import Testing
 import VariorumCore
 @testable import VariorumMobile
 
-/// The two sync facts the seed reads, as values a pin can move — the
-/// stand-in for `SyncSession.isConfigured` / `status.lastSuccessAt` (and
-/// for the signed-in account state that precedes a composed chain).
+/// The one sync fact the seed reads, as a value a pin can move — the
+/// stand-in for `SyncSession.isConfigured` and for the signed-in account
+/// state that precedes a composed chain.
 @MainActor
 private final class FakeSync {
     var belongsToAnAccount = false
-    var hasSyncedCleanly = false
     var gate: MobileStarterJournal.SyncGate {
-        .init(
-            belongsToAnAccount: { [self] in belongsToAnAccount },
-            hasSyncedCleanly: { [self] in hasSyncedCleanly })
+        .init(belongsToAnAccount: { [self] in belongsToAnAccount })
     }
 }
 
@@ -52,6 +58,7 @@ struct MobileStarterJournalTests {
             let mark = Mark()
             let outcome = await MobileStarterJournal.seedIfNeeded(
                 session: session, storeVariant: .dev,
+                storeWasEmptyAtLaunch: true,
                 loadMark: mark.load, saveMark: mark.save)
 
             guard case .seeded(let readingID) = outcome else {
@@ -88,6 +95,7 @@ struct MobileStarterJournalTests {
             let mark = Mark()
             let outcome = await MobileStarterJournal.seedIfNeeded(
                 session: session, storeVariant: .dev,
+                storeWasEmptyAtLaunch: true,
                 loadMark: mark.load, saveMark: mark.save)
             guard case .seeded(let readingID) = outcome else {
                 Issue.record("expected a seed, got \(outcome)")
@@ -127,6 +135,7 @@ struct MobileStarterJournalTests {
             let mark = Mark()
             let first = await MobileStarterJournal.seedIfNeeded(
                 session: session, storeVariant: .dev,
+                storeWasEmptyAtLaunch: true,
                 loadMark: mark.load, saveMark: mark.save)
             guard case .seeded(let readingID) = first else {
                 Issue.record("expected a seed, got \(first)")
@@ -139,6 +148,7 @@ struct MobileStarterJournalTests {
 
             let second = await MobileStarterJournal.seedIfNeeded(
                 session: session, storeVariant: .dev,
+                storeWasEmptyAtLaunch: true,
                 loadMark: mark.load, saveMark: mark.save)
             #expect(second == .alreadySeeded)
 
@@ -149,15 +159,21 @@ struct MobileStarterJournalTests {
 
     /// The mark alone is not the whole guard. Even with a CLEARED mark —
     /// a reinstall, a second device — a store that already holds her
-    /// writing is not a new user's, and gets no furniture.
+    /// writing is not a new user's, and gets no furniture. Driven through
+    /// the SAME read `prime()` takes, so this pins the whole chain rather
+    /// than a hand-set boolean.
     @Test func aStoreWithContentIsNeverSeeded() async throws {
         try await withEditorWorld { session, db in
             _ = try await session.runner.run { ops in
                 try ops.createPost(title: "Something of mine")
             }
+            let wasEmpty = try await MobileStarterJournal.storeIsNew(session)
+            #expect(!wasEmpty, "the launch verdict must see her writing")
+
             let mark = Mark()   // never seeded on this device
             let outcome = await MobileStarterJournal.seedIfNeeded(
                 session: session, storeVariant: .dev,
+                storeWasEmptyAtLaunch: wasEmpty,
                 loadMark: mark.load, saveMark: mark.save)
             #expect(outcome == .storeNotNew)
             #expect(mark.seeded == false, "a refusal must not claim a seed")
@@ -174,21 +190,24 @@ struct MobileStarterJournalTests {
             _ = try await session.runner.run { ops in
                 try ops.createReading(name: "Essays", kind: .curated)
             }
+            let wasEmpty = try await MobileStarterJournal.storeIsNew(session)
             let mark = Mark()
             let outcome = await MobileStarterJournal.seedIfNeeded(
                 session: session, storeVariant: .dev,
+                storeWasEmptyAtLaunch: wasEmpty,
                 loadMark: mark.load, saveMark: mark.save)
             #expect(outcome == .storeNotNew)
         }
     }
 
-    /// Two launches in a row — the ordinary case — seed exactly one book.
-    @Test func seedingIsIdempotentAcrossLaunches() async throws {
+    /// Two writes in a row — the ordinary case — seed exactly one book.
+    @Test func seedingIsIdempotentAcrossWrites() async throws {
         try await withEditorWorld { session, db in
             let mark = Mark()
             for _ in 0..<3 {
                 _ = await MobileStarterJournal.seedIfNeeded(
                     session: session, storeVariant: .dev,
+                    storeWasEmptyAtLaunch: true,
                     loadMark: mark.load, saveMark: mark.save)
             }
             let books = try await db.read { db in try Queries.readings(db) }
@@ -196,14 +215,19 @@ struct MobileStarterJournalTests {
         }
     }
 
-    // MARK: The sync gate (the batch-5 cold review's MAJOR)
+    // MARK: The account gate (R-pre13u-1 — what replaced the sync wait)
 
-    /// **A SIGNED-IN DEVICE DOES NOT DECIDE ITS STORE IS NEW BEFORE SYNC
-    /// HAS ANSWERED.** The virgin-store guard is a LOCAL read of a store
-    /// whose contents are about to arrive over the network; asking it at
-    /// launch answers a question nobody has the facts for yet. Declining is
-    /// free — nothing is marked, so the next launch asks again.
-    @Test func aSignedInDeviceDeclinesUntilItsFirstCleanRound() async throws {
+    /// **AN ACCOUNT-OWNED STORE IS NEVER SEEDED.** The batch-5 gate asked
+    /// *"has the account's content arrived yet?"* and waited up to twenty
+    /// seconds for an answer it could not always get. Asked at the WRITE
+    /// instead, the question is simply *"does this store belong to an
+    /// account?"* — and if it does, her real Journal is the account's to
+    /// deliver, so nothing is minted and nothing is waited on.
+    ///
+    /// **Her accepted corner, ruled in the same breath:** an account whose
+    /// sync never lands (long offline, unreachable server, a §12 lockstep
+    /// refusal) gets its Journal when sync first lands, and nothing before.
+    @Test func anAccountOwnedStoreIsNeverSeeded() async throws {
         try await withEditorWorld { session, db in
             let mark = Mark()
             let sync = FakeSync()
@@ -211,99 +235,122 @@ struct MobileStarterJournalTests {
 
             let outcome = await MobileStarterJournal.seedIfNeeded(
                 session: session, storeVariant: .dev, gate: sync.gate,
-                firstRoundWait: .milliseconds(150),
-                pollInterval: .milliseconds(10),
+                storeWasEmptyAtLaunch: true,
                 loadMark: mark.load, saveMark: mark.save)
 
-            #expect(outcome == .awaitingFirstSync)
+            #expect(outcome == .accountOwned)
             #expect(!mark.seeded, "declining must not consume the one seed")
             let books = try await db.read { db in try Queries.readings(db) }
             #expect(books.isEmpty, "nothing was minted into her account's store")
         }
     }
 
-    /// **THE FINDING'S OWN SCRIPT, END TO END.** A phone joins an account
-    /// that already has a `Journal`. The first pull lands it DURING the
-    /// wait; the seed re-asks the virgin-store question and finds the
-    /// answer it could not have had at launch.
+    /// **THE FINDING THE OLD GATE COULD NOT CLOSE, CLOSED.** The residual
+    /// was: fresh install, nobody signed in, seed lands — then she signs in
+    /// from Settings and her own Journal arrives beside the starter one.
+    /// The sign-in door lives inside the shell the seed launched with, so
+    /// no launch-time ordering could avoid it.
     ///
-    /// On the pre-fix door this minted a second `Journal`, designated it,
-    /// pinned it to the shelf and minted a note — and `reading` is a synced
-    /// table with a trigger-fed outbox (SyncSpec §3), so all of it
-    /// propagated to every device on the account. Nothing in the merge
-    /// matrix converges a duplicate book away, and by design nothing should.
-    @Test func herCorpusArrivingDuringTheWaitCancelsTheSeed() async throws {
+    /// Under seed-on-first-write there IS an ordering, and this is it: sign
+    /// in, then write. The account is a fact by then, so nothing is minted.
+    @Test func signingInBeforeTypingLeavesNoStarterFurniture() async throws {
         try await withEditorWorld { session, db in
             let mark = Mark()
             let sync = FakeSync()
+
+            // Launch: nobody signed in, store empty. The verdict is taken…
+            let wasEmpty = try await MobileStarterJournal.storeIsNew(session)
+            #expect(wasEmpty)
+
+            // …she signs in from Settings…
             sync.belongsToAnAccount = true
 
-            let seeding = Task {
-                await MobileStarterJournal.seedIfNeeded(
-                    session: session, storeVariant: .dev, gate: sync.gate,
-                    firstRoundWait: .seconds(5),
-                    pollInterval: .milliseconds(5),
-                    loadMark: mark.load, saveMark: mark.save)
-            }
+            // …and only THEN writes.
+            let outcome = await MobileStarterJournal.seedIfNeeded(
+                session: session, storeVariant: .dev, gate: sync.gate,
+                storeWasEmptyAtLaunch: wasEmpty,
+                loadMark: mark.load, saveMark: mark.save)
 
-            // The first pull: HER Journal arrives.
-            try await session.runner.run { ops in
-                _ = try ops.createReading(
-                    name: MobileStarterJournal.bookName, kind: .curated,
-                    profile: "journal", sortField: .entryDate, sortDir: .asc)
-            }
-            sync.hasSyncedCleanly = true
-
-            #expect(await seeding.value == .storeNotNew)
-            #expect(!mark.seeded)
+            #expect(outcome == .accountOwned)
             let books = try await db.read { db in try Queries.readings(db) }
-            #expect(books.count == 1, "HER Journal, alone — no duplicate beside it")
+            #expect(books.isEmpty, "her Journal arrives by sync, alone")
         }
     }
 
-    /// And the account that really IS empty still gets its book: the gate
-    /// defers the question, it does not answer it in the negative.
-    @Test func anEmptyAccountStillGetsTheBookOnceSyncHasSpoken() async throws {
+    /// **The declining is FREE, and that is what makes it safe.** Nothing
+    /// is marked, so signing out and starting fresh asks again.
+    @Test func decliningForAnAccountDoesNotSpendTheSeed() async throws {
         try await withEditorWorld { session, db in
             let mark = Mark()
             let sync = FakeSync()
             sync.belongsToAnAccount = true
-            sync.hasSyncedCleanly = true
-
-            let outcome = await MobileStarterJournal.seedIfNeeded(
+            _ = await MobileStarterJournal.seedIfNeeded(
                 session: session, storeVariant: .dev, gate: sync.gate,
-                firstRoundWait: .milliseconds(150),
-                pollInterval: .milliseconds(10),
+                storeWasEmptyAtLaunch: true,
                 loadMark: mark.load, saveMark: mark.save)
 
+            sync.belongsToAnAccount = false   // she signed out
+            let outcome = await MobileStarterJournal.seedIfNeeded(
+                session: session, storeVariant: .dev, gate: sync.gate,
+                storeWasEmptyAtLaunch: true,
+                loadMark: mark.load, saveMark: mark.save)
             guard case .seeded = outcome else {
                 Issue.record("expected a seed, got \(outcome)")
                 return
             }
-            #expect(mark.seeded)
             let books = try await db.read { db in try Queries.readings(db) }
             #expect(books.count == 1)
         }
     }
 
-    /// A device with no account anywhere seeds at once, exactly as before —
-    /// the store genuinely IS this device's, and the gate must not make a
-    /// first launch wait on a network nobody is using.
-    @Test func aDeviceWithNoAccountSeedsWithoutWaiting() async throws {
-        try await withEditorWorld { session, _ in
-            let mark = Mark()
-            let sync = FakeSync()   // belongsToAnAccount stays false
+    // MARK: The live guard, read inside the mint's own turn
 
+    /// **TODAY'S ENTRY CAN BEAT THE FURNITURE TO THE JOURNAL BOOK.**
+    /// `shelveInDailyJournalBook` creates and pins the daily book itself
+    /// (AppSpec §9), so her very first act can mint exactly the book this
+    /// seeder would — after the launch verdict was taken, and while the
+    /// occasion is in flight. The verdict cannot see that; the guard inside
+    /// the mint's own runner turn can, and does.
+    @Test func aJournalBookArrivingFirstStopsTheMint() async throws {
+        try await withEditorWorld { session, db in
+            // The launch verdict: genuinely empty.
+            let wasEmpty = try await MobileStarterJournal.storeIsNew(session)
+            #expect(wasEmpty)
+
+            // Her first act is Today's Entry, which makes the book.
+            _ = try await MobileTodayDoor.open(session: session, day: "2026-08-30")
+
+            let mark = Mark()
             let outcome = await MobileStarterJournal.seedIfNeeded(
-                session: session, storeVariant: .dev, gate: sync.gate,
-                firstRoundWait: .seconds(30),   // never spent
-                pollInterval: .milliseconds(10),
+                session: session, storeVariant: .dev,
+                storeWasEmptyAtLaunch: wasEmpty,
                 loadMark: mark.load, saveMark: mark.save)
 
-            guard case .seeded = outcome else {
-                Issue.record("expected a seed, got \(outcome)")
-                return
+            #expect(outcome == .storeNotNew)
+            #expect(!mark.seeded)
+            let books = try await db.read { db in try Queries.readings(db) }
+            #expect(books.count == 1, "exactly ONE Journal, whichever door won")
+        }
+    }
+
+    /// The same guard, other door: a book she NAMED "Journal" herself is
+    /// hers, and nothing mints a second one beside it (the name half —
+    /// `assertBookNameIsFree`, the core's own five-door rule).
+    @Test func aBookAlreadyWearingTheNameStopsTheMint() async throws {
+        try await withEditorWorld { session, db in
+            let wasEmpty = try await MobileStarterJournal.storeIsNew(session)
+            _ = try await session.runner.run { ops in
+                try ops.createReading(
+                    name: MobileStarterJournal.bookName, kind: .curated)
             }
+            let mark = Mark()
+            let outcome = await MobileStarterJournal.seedIfNeeded(
+                session: session, storeVariant: .dev,
+                storeWasEmptyAtLaunch: wasEmpty,
+                loadMark: mark.load, saveMark: mark.save)
+            #expect(outcome == .storeNotNew)
+            let books = try await db.read { db in try Queries.readings(db) }
+            #expect(books.count == 1)
         }
     }
 
@@ -317,7 +364,7 @@ struct MobileStarterJournalTests {
                 .hasSuffix(AppDatabase.StoreVariant.real.rawValue))
     }
 
-    /// The seed leaves NO structural-undo entry: a first launch must not
+    /// The seed leaves NO structural-undo entry: a first write must not
     /// put furniture she never placed on top of her undo stack. (The quiet
     /// facade — `Operations(undoStack: nil)`, the tutorial seeder's shape.)
     @Test func theSeedIsQuiet() async throws {
@@ -325,6 +372,7 @@ struct MobileStarterJournalTests {
             let mark = Mark()
             _ = await MobileStarterJournal.seedIfNeeded(
                 session: session, storeVariant: .dev,
+                storeWasEmptyAtLaunch: true,
                 loadMark: mark.load, saveMark: mark.save)
             #expect(session.undoStack.depth == 0,
                     "the starter journal is not an act she can undo")

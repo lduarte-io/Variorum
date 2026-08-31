@@ -152,6 +152,12 @@ final class MobileCreateBookModel {
                 }.id
             }
             lastError = nil
+            // Act 0 (R-pre13u-1): the first-write signal. A book is not a
+            // note, and the starter Journal's own guards will decline
+            // against one — but the SAMPLE library has no virgin-store
+            // guard (her Act 3 ruling: every reader's store), so making a
+            // book as your very first act is still a first write.
+            session.noteFirstWrite()
             return id
         } catch OperationError.duplicateBookName(let existing) {
             // Her sentence, from the ONE home — HOISTED to `Shared/` for

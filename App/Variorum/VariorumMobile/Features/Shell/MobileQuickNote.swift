@@ -677,6 +677,11 @@ final class MobileQuickNoteModel {
                     // arrived before the mint segments correctly for free.
                     try ops.importPost(title: nil, text: snapshot, undoLabel: undoLabel)
                 }
+                // Act 0 (R-pre13u-1): the first-write signal — the box is
+                // the phone's fastest capture path, so it is also the
+                // likeliest first write there is. Announce, move on: the
+                // furniture that follows is never on this path's clock.
+                session.noteFirstWrite()
                 return await self?.adopt(result, mintedFrom: snapshot, session: session)
             } catch {
                 self?.lastError = MobileQuickNoteCopy.refusal(error)

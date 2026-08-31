@@ -210,6 +210,8 @@ final class MobileScrapsModel {
                 try ops.newBlock(in: poolID, text: text)
             }
             lastError = nil
+            // Act 0 (R-pre13u-1): the first-write signal. Announce, move on.
+            session.noteFirstWrite()
             await refresh()
             return true
         } catch {
