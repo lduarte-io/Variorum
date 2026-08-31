@@ -646,6 +646,12 @@ final class MobileEditorViewModel {
         // until the next grant or keystroke speaks. Recorded as a known
         // residue, not an oversight; closing it wants a way to tell "this
         // surface deleted it" from "someone else did", which is a design act.
+        //
+        // **AND IT IS OWNED, not left to whoever next edits this function**
+        // (round-2 MINOR R2-3): the leftover-review-backlog row in
+        // `notes/plans/mobile-round-2-handoff-2026-08-30.md` §7.2 carries the
+        // mechanism and that design question; the VOICE half — what the phone
+        // should SAY here — is flagged for the author.
         let wasGone = noteIsGone
         noteIsGone = (value == nil)
         if noteIsGone, !wasGone {

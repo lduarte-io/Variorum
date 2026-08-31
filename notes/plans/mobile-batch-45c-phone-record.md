@@ -409,8 +409,15 @@ nothing — the failure mode this round has caught six times. **Recorded as
 unpinnable-by-construction rather than papered over.** The conversion is
 compile-verified and the whole `MobileLensesTests` suite passes unmodified
 (**10** tests — *[CORRECTED 2026-08-31, the cold review's NIT 7: this read
-"11"; the file holds 10 `@Test`s and no `arguments:`, which §9's own
-`23 tests in 2 suites` for deletion + lenses confirms as 13 + 10]*), which is
+"11"; the file holds 10 `@Test`s, which §9's own `23 tests in 2 suites` for
+deletion + lenses confirms as 13 + 10. **REASON RE-STATED the same day,
+round-2 NIT R2-5:** the first correction said "and no `arguments:`", which is
+false — `MobileLensesTests.swift` carries three (`:52`, `:373`, `:456`), **all
+three GRDB SQL arguments and none on a `@Test` macro**, so the count of 10 is
+right for the reason the reviewer states and a future `grep -c 'arguments:'`
+check must not trip on the old wording. Re-derived the same way for the other
+three suites — liveness 17, takes 19, deletion 13 — every `arguments:`
+occurrence is SQL]*), which is
 the available evidence that nothing regressed. *(The fix wave then deleted
 `RowPrompt.currentName`, written at the opener and read nowhere — the
 review's NIT 10, residue of this very conversion.)*

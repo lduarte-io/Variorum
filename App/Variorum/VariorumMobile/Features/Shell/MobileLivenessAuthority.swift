@@ -213,15 +213,49 @@ final class MobileLivenessAuthority {
         if refresh {
             await editor.refreshTakesFromStore()
             guard isCurrent(token) else { return }
-            // The refresh is now the one suspension standing between the
-            // store's answer and the grant. A `noteIsGone` reading taken HERE
-            // cannot be stale — the read above just adopted the store's own
-            // answer through the same door, so a true value can only have
-            // come from a delivery that landed after it.
-            guard !editor.noteIsGone else {
-                refuseOverTombstone(editor)
-                return
+            // **THE BELT TAKES THE SAME MEDICINE AS THE ENTRY ARM** (round-2
+            // MINOR R2-2). The refresh is the one suspension standing between
+            // the store's answer and the grant, so a delivery landing inside
+            // it must still be able to stop the pen. Its first shape refused
+            // on the delivery alone, argued as *"a reading taken here cannot
+            // be stale"* — but LANDED after is not TAKEN after, and the gap
+            // between them is this file's own load-bearing premise
+            // (`confirmNoteStillLive`: a delivery's latency is real, and the
+            // argument is symmetric). A nil observed BEFORE the read above can
+            // land after it, and the belt then stood a LIVE note down and told
+            // her it had been deleted.
+            //
+            // So the belt earns its refusal the same way the arm above does:
+            // one indexed header read, paid only when the reading says gone.
+            // **Every refusal on this road is now store-confirmed** — no
+            // surface is stood down on a delivery that was already in the air.
+            if editor.noteIsGone {
+                let confirmedLive = await editor.confirmNoteStillLive()
+                guard isCurrent(token) else { return }
+                guard confirmedLive else {
+                    refuseOverTombstone(editor)
+                    return
+                }
             }
+        }
+        // **AND THE REFUSAL IS WITHDRAWN WHERE IT STOPS BEING TRUE**
+        // (round-2 MINOR R2-1). `statusMessage` is sticky by design — it is
+        // cleared only by an explicit `report(nil)`, and none of the three
+        // sites that do so is on this road — so the sentence this authority
+        // speaks at a refusal outlived the note it was about: refuse → Put
+        // back from the Trash → tap back, and the arm above heals everything
+        // (the pen, her words, her keystrokes) while the masthead still reads
+        // *"This note was deleted…"*. A grant is the exact moment that claim
+        // stops being true, so it is where it is taken back.
+        //
+        // **NARROW ON PURPOSE — it clears this ONE sentence, never a receipt.**
+        // Her commonest deletion road leaves *"Moved to the Trash…"* standing
+        // on the editor's own status line, and a grant that cleared whatever
+        // it found would eat it. Matching on the sentence also means the ONE
+        // rule covers the gate's producer as well as this file's: both speak
+        // `deletedNoteRefusal`, and a note that is live again wears neither.
+        if editor.statusMessage == MobileEditorViewModel.deletedNoteRefusal {
+            editor.report(nil)
         }
         // The pen is granted ONLY by a handoff still being asked for. The
         // superseding grant is what sets `live` and hands the pen on; an

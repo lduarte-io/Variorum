@@ -685,6 +685,16 @@ struct MobileLivenessTests {
     /// pen, the surface stays stood down and still believes the note is gone,
     /// and the gate refuses her keystroke. Quoted in the review's fix-wave
     /// section.
+    ///
+    /// **AND IT NOW CARRIES ROUND-2 MINOR R2-1: the refusal does not outlive
+    /// the note.** A refusing tap is driven BEFORE the Put back — which is
+    /// what puts the authority's sentence on the masthead — so the heal has
+    /// something false to withdraw. `statusMessage` is sticky by design, and
+    /// nothing on the grant road cleared it, so a working, live, editable
+    /// note wore a sentence saying it had been deleted. **Red on old:** drop
+    /// the narrow `report(nil)` before `noteLivenessGranted()` and the
+    /// `statusMessage == nil` assertion below fails with the refusal still
+    /// standing. Quoted in the WAVE 2 RESULTS section.
     @Test func aNotePutBackFromTheTrashGetsThePenBackOnTheNextTabTap() async throws {
         try await withEditorWorld { session, db in
             let post = try await session.runner.run { ops in
@@ -706,7 +716,16 @@ struct MobileLivenessTests {
             await shelf.loadOnce()
             #expect(shelf.noteIsGone, "the surface knows, and that is the stale value")
 
-            // Put back — from the Trash, which lives on this same tab.
+            // She taps back to Shelf FIRST — the note really is gone, so the
+            // authority refuses and SPEAKS. This is the sentence R2-1 is
+            // about, and it has to be on screen for the heal to withdraw it.
+            await editors.tabDidBecomeVisible(.shelf)
+            #expect(editors.live == nil, "refused over a real tombstone")
+            #expect(shelf.statusMessage == MobileEditorViewModel.deletedNoteRefusal,
+                    "and it said why")
+
+            // Put back — from the Trash, which lives on the Library tab.
+            await editors.tabDidBecomeVisible(.library)
             try await session.runner.run { ops in try ops.restoreContainer(post.id) }
 
             // …and straight back to Shelf, INSIDE the delivery gap.
@@ -715,6 +734,8 @@ struct MobileLivenessTests {
             #expect(editors.live === shelf, "the pen comes back on the tap")
             #expect(shelf.isLive)
             #expect(!shelf.noteIsGone, "the arm re-confirmed instead of refusing")
+            #expect(shelf.statusMessage == nil,
+                    "the refusal it spoke a moment ago is withdrawn — a live, editable note must never wear a sentence saying it was deleted")
             #expect(shelfStorage.string.contains("Base."),
                     "and the grant's refresh brought her words back with it")
             // INSIDE the block, per `puttingTheNoteBackLetsItsSurfaceWrite
@@ -785,26 +806,42 @@ struct MobileLivenessTests {
         }
     }
 
-    /// **THE WINDOW THE REORDER OPENS, AND THE BELT THAT CLOSES IT.**
+    /// **THE WINDOW THE REORDER OPENS, AND THE BELT THAT TAKES THE WAVE'S OWN
+    /// MEDICINE** — round-2 **MINOR R2-2**.
     ///
     /// Moving the authoritative read above the refresh (MAJOR 2) makes the
     /// refresh the one suspension left between the store's answer and the
     /// grant — the round-1 review's own clean bill had rested on there being
-    /// none. A header delivery landing inside it must still stop the grant,
-    /// and it may be acted on **without** a second store read: the read a
-    /// moment earlier adopted the store's own answer through the same door,
-    /// so a `noteIsGone` reading taken after it cannot be stale.
+    /// none. The belt's first shape refused on the header DELIVERY alone,
+    /// justified as *"a reading taken here cannot be stale"* — but LANDED
+    /// after is not TAKEN after, and the gap between them is this file's own
+    /// load-bearing premise (`confirmNoteStillLive`: a delivery's latency is
+    /// real). A nil observed BEFORE the read can land after it, and the belt
+    /// then stood a LIVE note down and told her it had been deleted.
     ///
     /// **What is driven, stated plainly:** the settle seam is synchronous, so
     /// the observer cannot `await` a delete — it drives `adoptHeader(nil)`,
-    /// the DELIVERY, which is the only input the belt reads. The store row
-    /// itself is left alone; a pin for a delivery-shaped belt drives the
-    /// delivery.
+    /// the DELIVERY, and **the store row is deliberately left ALIVE**. That is
+    /// precisely the stale-delivery world: the belt reads gone, the store says
+    /// live, and the grant must land.
     ///
-    /// **RED ON OLD:** remove the post-refresh `guard !editor.noteIsGone` and
-    /// the grant lands — `editors.live` is the editor, `isLive` is true, and
-    /// nothing is said.
-    @Test func aDeliveryLandingInsideTheRefreshStillStopsTheGrant() async throws {
+    /// **RED ON OLD, in two independent directions:** restore the bare
+    /// `guard !editor.noteIsGone else { refuseOverTombstone(editor); return }`
+    /// and the grant is refused — `editors.live` nil, `isLive` false, the
+    /// refusal spoken about a note the store never lost (quoted in the WAVE 2
+    /// RESULTS); or remove the belt outright and `noteIsGone` is still true at
+    /// the end, because nothing re-asked the store — so this pin witnesses the
+    /// belt's presence as well as its shape.
+    ///
+    /// **What it does NOT witness, recorded rather than implied:** the belt
+    /// refusing a note the store AGREES is gone. That world needs the row
+    /// deleted between the pre-refresh read and the refresh, i.e. an `await`
+    /// inside a synchronous settle observer, which cannot be written. The
+    /// refusal itself is pinned at the road's two other sites
+    /// (`aGrantForAKnownTombstoneStopsBeforeDoingAnyStoreWork` and
+    /// `aRefusedGrantLeavesHerWordsOnScreenAndSaysWhy`), and all three route
+    /// through the one `refuseOverTombstone`.
+    @Test func aDeliveryLandingInsideTheRefreshIsReConfirmedAgainstTheStore() async throws {
         try await withEditorWorld { session, _ in
             let post = try await session.runner.run { ops in
                 try ops.createPost(title: "gone mid-refresh", profile: .blog)
@@ -831,9 +868,13 @@ struct MobileLivenessTests {
             await editors.tabDidBecomeVisible(.shelf)
 
             #expect(settles >= 2, "the delivery landed inside the refresh, as intended")
-            #expect(editors.live == nil, "the grant stopped on the fresher reading")
-            #expect(!model.isLive)
-            #expect(model.statusMessage == MobileEditorViewModel.deletedNoteRefusal)
+            #expect(editors.live === model,
+                    "a LIVE note is not stood down by a delivery that was already in the air")
+            #expect(model.isLive)
+            #expect(!model.noteIsGone,
+                    "the belt re-asked the store and adopted its answer — it did not trust the delivery's ordering")
+            #expect(model.statusMessage == nil,
+                    "and nothing false was said about a note that never left")
         }
     }
 
