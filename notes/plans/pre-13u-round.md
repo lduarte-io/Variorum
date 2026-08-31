@@ -863,8 +863,17 @@ dial ON → quit → relaunch → read `log show --last 10m --predicate 'subsyst
 "io.lduarte.Variorum" AND category == "protection"'`. **PASS** = the relaunch line reads
 `item read back == current key: Optional(true) · wrote this pass: false` (the reconcile reads its
 own item back rather than re-writing). **FAIL** = `read back … Optional(false)`, or `wrote this
-pass: true` on every relaunch. Her result: ______ *(a FAIL comes back to the custody batch as a
-finding; the KnownIssues escrow row retires on a PASS).*
+pass: true` on every relaunch. Her result: **PASS on the first-launch evidence (2026-08-31
+00:56:57, read by the architect from the unified log — the `.info` flag and `/usr/bin/log` are both
+required; zsh shadows `log` with a builtin):**
+`escrow reconcile: dial ON · item read back == current key: Optional(true) · wrote this pass: false`
+— the reconcile found the iCloud item, read it back through the production path, it MATCHES the
+current key, and nothing needed re-writing. The silent-failure mode (believing a copy exists when it
+doesn't) is excluded on evidence; the item had landed in an earlier post-signing launch and
+verifiably round-trips. **The KnownIssues escrow row retires.** *(One residual for the successor: her
+confirming RELAUNCH — after the one-time sync-gate unlock — should show the same line again; and if
+she reports a SECOND biometric prompt on any launch AFTER that one-time unlock, that is a finding
+against the R-pre13u-2 reset, back to the custody batch.)*
 
 **VERIFICATION AT CLOSE:** core **1457/154 GREEN** (13p baseline 1453/154 + the 4 new core pins,
 exact) · Mac full suite **1871/317 ALL PASSED** (baseline 1854/314 + 17 new pins across 3 new
@@ -912,6 +921,24 @@ doors.
    on the passphrase set screen** — and on its SecureField siblings on the same surfaces for
    consistency (`SecretCheck`, the lobby's passphrase field), one shared control, not three ad-hoc
    ones.
+
+   **THE CLARITY TABLE IS THE CENTERPIECE (her sixth-wave escalation, 2026-08-31, verbatim: "I need
+   a way clearer chart and table of what settings you can have / what passphrase or autominted key
+   or icloud key or whatever / what you need to log in / where. I'm still confused which, again,
+   it's normally a bad sign when I'm confused because it will mean my users will be hopeless
+   confused + scared of the worst possible thing, which is losing all of their work… settings has
+   like 5 paragraphs around encryption it's also very confusing").** The deliverable, replacing the
+   paragraph stacks: **(a)** a LIVE "ways back in" checklist as the protection pane's centerpiece —
+   the actual legs THIS device/account has right now (Act 9's `ProtectionLegs` brain feeds it:
+   this-device unlock · passphrase · recovery phrase · iCloud Keychain copy), present/absent, with
+   one situation table behind a ? for depth — **situation → what opens the library** (this device
+   by mode · a new device with your iCloud · a new device without it · a restored backup on other
+   hardware · every-leg-lost = gone, the honest floor); **(b)** the same table, prose-lite and
+   device-neutral, aligned into the TUTORIAL's privacy chapter (13p's per-mode loss-math instruction
+   made scannable) — the field-guide re-seed obligation rides the closeout per the standing rule;
+   **(c)** the five encryption paragraphs collapse into the structure — a sentence survives only
+   where truly necessary (her amended doctrine). The architect's sitting reply of 2026-08-31
+   carries the reference version of the table — the batch renders it, not re-derives it.
 4. **The trash/encryption/archived sweep** — a general pass over the 13j/13l/13p-era surfaces (Trash,
    Archived, the lobby, the reminder/nudge family) for the same crowding/jank class; anything
    taste-shaped beyond the granted latitude lands on a propose-only list for her.
@@ -1040,7 +1067,9 @@ doors.
 architect's discretion — wave 1 the mechanical/polish items, wave 2 the surface redesigns (14–17,
 the panel, the lobby) — with a clean handoff seam between; one wave if it fits.
 
-**THE MOCKUP STEP (her instruction, fourth wave — runs AFTER the escrow step, before Act 10):** ONE
+**THE MOCKUP STEP (her instruction, fourth wave; SIXTH-WAVE AMENDMENT: the SUCCESSOR orchestrator
+spawns it — her word at the handoff seam, "I might as well have the same agent that will orchestrate
+the taste run the html mockup agent" — it is the successor's FIRST act, before 17h):** ONE
 mockup agent produces **local HTML** (a file path handed to her — NEVER published anywhere) covering
 **item 16's Blocks directions (2–3) and item 17's Snippets refresh**, in the app's own voice
 grammar. **ONE feedback round by design** — her words: *"I don't always like multiple rounds of html
