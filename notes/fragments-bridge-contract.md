@@ -914,3 +914,13 @@ on iOS you get that for free.
 `StoreKey.swift`, and `notes/plans/phase-13p-fix-dp-keychain.md` for the
 keychain incident. Questions come back through this channel; she
 carries everything.
+
+## CARRY-ITEM POINTER (2026-08-31) — the lockbox reply
+
+Fragments' `phase-20.9-memo-lockbox.md` (their journal at-rest encryption spec) was reviewed by the
+Variorum architect at the author's instruction; the full reply — her rulings (biometry-only gate;
+lock-ON requires enrollment and retires escrow; the un-locked two-item default stands; the minimal
+prompting cycle; no cross-app level enforcement) plus answers to all seven §6 questions and the
+findings (the free-page/WAL residue fix, the claims-table clauses, the visible-refusal replacement
+for the extinct pre-E2EE corner) — is **`notes/fragments-lockbox-reply-2026-08-31.md`**, written
+self-contained for the Fragments agent. She carries it; Batch A's hold lifts at her go.
