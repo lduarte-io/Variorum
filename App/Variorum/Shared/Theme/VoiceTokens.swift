@@ -91,6 +91,13 @@ struct VoiceTokens {
     let chosen: Color
     /// The editing ring (R6/R22 — the outline form).
     let ring: Color
+    /// **The star (pre-13u Act 10, item 13 — her call: "i like the blue
+    /// star").** A slot of its own so the star is BLUE in every voice (the
+    /// mockup's sidebar draws it so, W8-2): Terminal reuses its blue ring
+    /// hue, Study its blue accent — neither could serve directly (Terminal's
+    /// accent is green, Study's ring is orange). Hues are placeholders
+    /// revisable at 13s, like `alarm`'s.
+    let star: Color
     /// Comment surfaces (R7).
     let commentTint: Color
     let commentInk: Color
@@ -175,6 +182,7 @@ extension VoiceTokens {
         takeLine: Color(hex: 0xD6DCD0),
         chosen: Color(hex: 0x2F7D5F),
         ring: Color(hex: 0x3F7FD6),
+        star: Color(hex: 0x3F7FD6),
         commentTint: Color(hex: 0xF6F3E2),
         commentInk: Color(hex: 0x7A6F45),
         codeTint: Color(hex: 0xE9EBE2),
@@ -208,6 +216,7 @@ extension VoiceTokens {
         takeLine: Color(hex: 0x2C312C),
         chosen: Color(hex: 0x6FBF94),
         ring: Color(hex: 0x5B93DE),
+        star: Color(hex: 0x5B93DE),
         commentTint: Color(hex: 0x1C1910),
         commentInk: Color(hex: 0xB3A25F),
         codeTint: Color(hex: 0x1E211E),
@@ -242,6 +251,7 @@ extension VoiceTokens {
         takeLine: Color(hex: 0xE4DDD0),
         chosen: Color(hex: 0x5A7D46),
         ring: Color(hex: 0xB0713A),
+        star: Color(hex: 0x3D6B8E),
         commentTint: Color(hex: 0xFBF5E2),
         commentInk: Color(hex: 0x6D5F3E),
         codeTint: Color(hex: 0xF2EDE1),
@@ -276,6 +286,7 @@ extension VoiceTokens {
         takeLine: Color(hex: 0x38342C),
         chosen: Color(hex: 0x93B57E),
         ring: Color(hex: 0xD29A64),
+        star: Color(hex: 0x82ABCC),
         commentTint: Color(hex: 0x201C12),
         commentInk: Color(hex: 0xB3A25F),
         codeTint: Color(hex: 0x241F18),

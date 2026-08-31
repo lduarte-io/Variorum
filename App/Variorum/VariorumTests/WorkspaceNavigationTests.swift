@@ -157,47 +157,48 @@ struct OpenNotesTests {
         #expect(open.ids == ["b", "a"])
     }
 
-    @Test func theOrdinalsCoverExactlyTheShownRows() {
+    @Test func theOrdinalsCoverTheFirstNineRows() {
         var open = OpenNotes()
-        for i in 1...OpenNotes.visibleCap { open.opened("p\(i)") }
+        for i in 1...OpenNotes.ordinalCap { open.opened("p\(i)") }
         // Insertion order, so the FIRST opened is ⌘⇧1 (batch 3's pin read
         // the other way round — the ruled flip).
         #expect(open.id(atOrdinal: 1) == "p1")
-        #expect(open.id(atOrdinal: OpenNotes.visibleCap) == "p\(OpenNotes.visibleCap)")
+        #expect(open.id(atOrdinal: OpenNotes.ordinalCap) == "p\(OpenNotes.ordinalCap)")
         #expect(open.id(atOrdinal: 0) == nil)
-        #expect(open.id(atOrdinal: OpenNotes.visibleCap + 1) == nil,
-                "no key reaches past the strip")
-        #expect(open.shown.count == OpenNotes.visibleCap)
-        #expect(open.hiddenCount == 0)
-        // The two numbers that must never drift apart: the keys are
-        // ⌘⇧1…⌘⇧9, so the strip shows nine.
-        #expect(OpenNotes.visibleCap == 9)
+        #expect(open.id(atOrdinal: OpenNotes.ordinalCap + 1) == nil,
+                "the keys are ⌘⇧1…⌘⇧9 and stop there")
+        #expect(open.shown.count == OpenNotes.ordinalCap)
+        // The keys are ⌘⇧1…⌘⇧9, so the ordinal reach is nine.
+        #expect(OpenNotes.ordinalCap == 9)
     }
 
-    @Test func theListIsBoundedAndTheStripSaysSoInsteadOfCuttingSilently() {
+    /// **Act 10 item 9's mechanical half, pinned RED-ON-OLD:** a newly
+    /// opened note is NEVER hidden. The old model showed a nine-row prefix
+    /// of the insertion order, and a newcomer JOINS AT THE END — so the
+    /// tenth note she opened was invisible (her report: the newcomer landed
+    /// in the dead "…N more open" overflow). Now the strip shows every open
+    /// note and the SECTION scrolls (the starred precedent) — there is no
+    /// hidden set left to land in.
+    @Test func aNewlyOpenedNoteIsAlwaysShown() {
+        var open = OpenNotes()
+        for i in 1...15 { open.opened("p\(i)") }
+        // RED ON OLD: `shown` was `prefix(9)` and "p15" was hidden.
+        #expect(open.shown.contains("p15"), "the newcomer is visible")
+        #expect(open.shown == open.ids, "nothing is hidden — the section scrolls instead")
+    }
+
+    /// **The ruled auto-close cap (her word): 20.** Opening the 21st note
+    /// quietly closes the least-recently-opened one — a tab is a pointer,
+    /// nothing is lost.
+    @Test func theTwentyFirstNoteClosesTheLeastRecentlyOpenedTab() {
         var open = OpenNotes()
         for i in 1...(OpenNotes.trackedCap + 5) { open.opened("p\(i)") }
+        #expect(OpenNotes.trackedCap == 20, "her ruled cap")
         #expect(open.ids.count == OpenNotes.trackedCap, "the session memory's bound")
         #expect(open.recency.count == OpenNotes.trackedCap, "and it stays in step")
-        #expect(open.shown.count == OpenNotes.visibleCap)
-        #expect(open.hiddenCount == OpenNotes.trackedCap - OpenNotes.visibleCap,
-                "the truncation row's number — never a silent cut")
-        // The arm that DISCRIMINATES the ordinal's reach (added when the
-        // first revert ran green: with exactly nine open, "the shown rows"
-        // and "the tracked list" are the same list, so neither reading can
-        // be told from the other). Here they differ, and a key must not
-        // reach a row the strip does not show.
-        #expect(open.id(atOrdinal: OpenNotes.visibleCap) == open.shown.last)
-        #expect(open.id(atOrdinal: OpenNotes.visibleCap + 1) == nil,
-                "⌘⇧n stops at the strip, never at the session memory")
-
-        // Closing a shown row PROMOTES the next tracked note into view,
-        // which is the whole reason the tracked list is deeper than the
-        // shown one.
-        let promoted = open.ids[OpenNotes.visibleCap]
-        open.close(open.shown[0])
-        #expect(open.shown.contains(promoted))
-        #expect(open.hiddenCount == OpenNotes.trackedCap - OpenNotes.visibleCap - 1)
+        #expect(open.shown.count == OpenNotes.trackedCap, "everything open is shown")
+        #expect(!open.ids.contains("p1"), "the LRU-opened tab auto-closed")
+        #expect(open.ids.contains("p\(OpenNotes.trackedCap + 5)"), "the newest stays")
     }
 
     /// The half of her ruling that is NOT insertion order: **membership is
@@ -257,23 +258,22 @@ struct OpenNotesTests {
         #expect(open.ids == before)
     }
 
-    /// The reorder's reach stops at the STRIP: offsets are the shown rows',
-    /// and a hidden note cannot be dragged into or out of view.
-    @Test func theReorderStaysInsideTheShownRows() {
+    /// The reorder's reach covers the WHOLE strip — since Act 10 item 9
+    /// every open note is a shown row, so every row can be dragged; only an
+    /// offset past the list itself is inert.
+    @Test func theReorderCoversEveryOpenRow() {
         var open = OpenNotes()
         for i in 1...OpenNotes.trackedCap { open.opened("p\(i)") }
         let before = open.ids
-        // The first hidden row's index — beyond the strip.
-        open.move(fromOffsets: IndexSet(integer: OpenNotes.visibleCap), toOffset: 0)
-        #expect(open.ids == before, "an offset past the strip is inert")
+        // Past the whole list: inert, never a clamp into a surprise.
+        open.move(fromOffsets: IndexSet(integer: OpenNotes.trackedCap), toOffset: 0)
+        #expect(open.ids == before, "an offset past the list is inert")
 
-        open.move(fromOffsets: IndexSet(integer: 0), toOffset: OpenNotes.visibleCap)
-        #expect(open.ids.first == "p2", "a drag to the strip's own end still works")
-        // The arm that DISCRIMINATES where it lands — added because the
-        // first-row check alone passed revert I0-B (a drag that overshot by
-        // one still leaves "p2" in front). The dragged row must end up on
-        // the strip, as its LAST row, not past it into the hidden tail.
-        #expect(open.shown.last == "p1", "…and it lands ON the strip, not past its edge")
+        // The LAST row drags to the front — under the old prefix window
+        // this row was unreachable; now every row is on the strip.
+        open.move(fromOffsets: IndexSet(integer: OpenNotes.trackedCap - 1), toOffset: 0)
+        #expect(open.ids.first == "p\(OpenNotes.trackedCap)")
+        #expect(open.shown.first == open.ids.first)
     }
 }
 

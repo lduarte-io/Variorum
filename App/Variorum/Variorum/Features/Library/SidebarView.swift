@@ -152,11 +152,17 @@ struct SidebarView: View {
     }
 
     /// 13f batch 6 (W4) — the STARRED section, at the sidebar's TOP (her
-    /// ruling's placement). Rows are ordinary tagged List rows, exactly as
-    /// the Open strip's are, so a click navigates through the shell's own
-    /// selection and the `›` marker lands on the current one for free — a
-    /// book row goes to the book, a note row to the note. It renders only
-    /// when something is starred, so an unused feature costs no chrome.
+    /// ruling's placement). Rows are ordinary tagged List rows, so a click
+    /// navigates through the shell's own selection and the `›` marker lands
+    /// on the current one for free. It renders only when something is
+    /// starred, so an unused feature costs no chrome.
+    ///
+    /// **Act 10 item 13 (her screenshot showed TWO stars, one each side):
+    /// exactly ONE star — the blue one, on the RIGHT** (her lean, confirmed
+    /// in place: the right star is also the un-star door, so the mark and
+    /// the act live in one spot). Long titles show an ellipsis at rest and
+    /// marquee-scroll on hover ("stereo style" — `MarqueeText`); the
+    /// section carries more air above it (her third clause).
     @ViewBuilder
     private var starredSection: some View {
         if !stars.items.isEmpty {
@@ -164,23 +170,30 @@ struct SidebarView: View {
                 ForEach(stars.items, id: \.target) { item in
                     let destination = StarTargeting.selection(for: item.target)
                     HStack(spacing: 4) {
-                        Text(StarCopy.glyph)
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.accent)
-                        markedTitle(
-                            WorkspaceNaming.label(for: destination, titles: stars.titles),
-                            destination)
-                            .lineLimit(1)
-                            .truncationMode(.tail)
-                        Spacer(minLength: 0)
+                        if selection == destination, !tokens.selectionMarker.isEmpty {
+                            Text(tokens.selectionMarker.trimmingCharacters(in: .whitespaces))
+                                .foregroundStyle(tokens.accent)
+                                .fontWeight(.bold)
+                        }
+                        MarqueeText(
+                            text: tokens.chromeLabel(WorkspaceNaming.label(
+                                for: destination, titles: stars.titles)),
+                            font: tokens.small,
+                            color: selection == destination ? tokens.ink : tokens.muted,
+                            weight: selection == destination ? .semibold : .regular)
                         if let starDoor {
-                            // The un-star door on the row itself (her ruling:
-                            // "un-star anywhere") — the Open strip's ✕ shape.
+                            // THE one star: blue, on the right — and it is
+                            // the un-star door (her ruling: "un-star
+                            // anywhere").
                             Button(StarCopy.glyph) { starDoor.toggle(item.target) }
                                 .buttonStyle(.plain)
                                 .font(tokens.small)
-                                .foregroundStyle(tokens.muted)
+                                .foregroundStyle(tokens.star)
                                 .help(StarCopy.rowHelp)
+                        } else {
+                            Text(StarCopy.glyph)
+                                .font(tokens.small)
+                                .foregroundStyle(tokens.star)
                         }
                     }
                     .tag(destination)
@@ -196,89 +209,195 @@ struct SidebarView: View {
                 Text(tokens.chromeLabel(StarCopy.sectionHeader))
                     .font(tokens.small)
                     .foregroundStyle(tokens.accent)
+                    .padding(.top, 14)
             }
         }
     }
 
-    /// 13f batch 3 (W3/A27) — the OPEN strip, in the sidebar's free space.
-    /// Rows are ordinary tagged List rows, so clicking one navigates and
-    /// the `›` marker lands on the current note for free; the ✕ closes a
-    /// ROW and nothing else (closing never deletes — pure view state).
+    /// **The reorder payload** — its own transfer type, deliberately not a
+    /// plain String: the sidebar's whole surface is a `.plainText` import
+    /// drop target, and a dragged row's id must never be importable as a
+    /// note's text.
+    struct OpenNoteDragToken: Codable, Transferable {
+        let noteID: String
+        static var transferRepresentation: some TransferRepresentation {
+            CodableRepresentation(
+                contentType: UTType(exportedAs: "io.lduarte.variorum.open-note-row"))
+        }
+    }
+
+    /// About how tall one strip row runs (small type + padding) — the
+    /// section's ~7-row window is measured in these.
+    private static let openRowHeight: CGFloat = 24
+
+    /// 13f batch 3 (W3/A27) — the OPEN strip. **Act 10 item 9 rebuilt it:**
+    /// it left the List for the sidebar's bottom rail, shows EVERY open
+    /// note (the model's prefix window is gone — a newly opened note can no
+    /// longer land hidden), and past ~7 rows the SECTION scrolls in place
+    /// (her ruled shape, the starred precedent) with the newcomer auto-
+    /// revealed. The dead "…N more open" label died with the hidden set —
+    /// every open note is now its own clickable row, which is strictly more
+    /// door than the label ever was. ⌘⇧1…9 still reach the first nine rows,
+    /// whose badges say so; the ✕ closes a ROW and nothing else (closing
+    /// never deletes — pure view state); drag a row to reorder (her
+    /// session-only ruling, now via the strip's own transfer type).
     @ViewBuilder
-    private var openSection: some View {
+    private var openStrip: some View {
         let shown = workspace.openNotes.shown
         if !shown.isEmpty {
-            Section {
-                ForEach(shown, id: \.self) { noteID in
-                    HStack(spacing: 4) {
-                        markedTitle(workspace.label(for: .post(noteID)), .post(noteID))
-                            .lineLimit(1)
-                            .truncationMode(.tail)
-                        Spacer(minLength: 0)
-                        // The ordinal its key carries — so ⌘⇧n is legible
-                        // without opening a menu (the R73/R91/R93 mandate's
-                        // spirit at the surface that owns the list). Since
-                        // her round-7 ruling the strip is insertion-ordered,
-                        // so this number is a STABLE address: it stops
-                        // shuffling as she moves between notes.
-                        Text(tokens.chromeLabel(
-                            "\u{2318}\u{21e7}\((shown.firstIndex(of: noteID) ?? 0) + 1)"))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.faint)
-                        Button("\u{2715}") { workspace.closeNote(noteID) }
-                            .buttonStyle(.plain)
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
-                            .help("Close this row — the note itself is untouched")
-                    }
-                    .tag(SidebarSelection.post(noteID))
-                    .contextMenu {
-                        if let onOpenBeside {
-                            Button(WorkspaceNaming.openBesideVerb) { onOpenBeside(noteID) }
-                        }
-                        if let onOpenInNewWindow {
-                            Button(CapabilityRegistry.capability(.openInNewWindow).verb) {
-                                onOpenInNewWindow(noteID)
-                            }
-                        }
-                        if let starDoor {
-                            Button(starDoor.title(for: .post(noteID))) {
-                                starDoor.toggle(.post(noteID))
-                            }
-                        }
-                        Button("Close") { workspace.closeNote(noteID) }
-                    }
-                }
-                // Her ruling's second half: *"maybe they're draggable /
-                // reorderable manually like browser tabs as well though?
-                // session only, not a setting."* The arithmetic is pinned;
-                // the drag route itself is AppKit's inside the List and is
-                // on the visual-verification list.
-                .onMove { source, destination in
-                    workspace.moveOpenNotes(fromOffsets: source, toOffset: destination)
-                }
-                // The bounded-windows discipline: a visible marker, never a
-                // silent cut. The hidden notes are still open — closing a
-                // row promotes the next one into view.
-                if workspace.openNotes.hiddenCount > 0 {
-                    Text(tokens.chromeLabel(
-                        "\u{2026}\(workspace.openNotes.hiddenCount) more open"))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.faint)
-                        .help("More notes are open than this list shows (the first "
-                            + "\(OpenNotes.visibleCap) in the order you opened them appear "
-                            + "here, and \u{2318}\u{21e7}1\u{2013}9 reach them; drag a row to "
-                            + "reorder). Close a row and the next one appears.")
-                }
-            } header: {
+            VStack(alignment: .leading, spacing: 3) {
                 Text(tokens.chromeLabel(WorkspaceNaming.openSectionHeader))
                     .font(tokens.small)
                     .foregroundStyle(tokens.accent)
+                    .lineLimit(1)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 1) {
+                            ForEach(shown, id: \.self) { noteID in
+                                openRow(noteID, ordinal: (shown.firstIndex(of: noteID) ?? 99) + 1)
+                                    .id(noteID)
+                            }
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.bottom, 6)
+                    }
+                    .frame(maxHeight: Self.openRowHeight * 7.5)
+                    .fixedSize(horizontal: false, vertical: shown.count <= 7)
+                    // The newcomer reveal: the most-recently-opened note
+                    // scrolls into view the moment it joins — "a newly
+                    // opened note never lands hidden", made literal.
+                    .onChange(of: workspace.openNotes.recency.first) { _, newest in
+                        if let newest { proxy.scrollTo(newest) }
+                    }
+                }
             }
+        }
+    }
+
+    private func openRow(_ noteID: String, ordinal: Int) -> some View {
+        let destination = SidebarSelection.post(noteID)
+        let current = selection == destination
+        return HStack(spacing: 4) {
+            if current, !tokens.selectionMarker.isEmpty {
+                Text(tokens.selectionMarker.trimmingCharacters(in: .whitespaces))
+                    .foregroundStyle(tokens.accent)
+                    .fontWeight(.bold)
+            }
+            MarqueeText(
+                text: tokens.chromeLabel(workspace.label(for: destination)),
+                font: tokens.small,
+                color: current ? tokens.ink : tokens.muted,
+                weight: current ? .semibold : .regular)
+            // The ordinal its key carries — so ⌘⇧n is legible without
+            // opening a menu. Insertion-ordered (her round-7 ruling), so
+            // the number is a STABLE address; rows past nine are
+            // click/scroll rows and carry none.
+            if ordinal <= OpenNotes.ordinalCap {
+                Text(tokens.chromeLabel("\u{2318}\u{21e7}\(ordinal)"))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(1)
+            }
+            Button("\u{2715}") { workspace.closeNote(noteID) }
+                .buttonStyle(.plain)
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .help("Close this row — the note itself is untouched")
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .frame(minHeight: Self.openRowHeight - 5)
+        .background(
+            current ? AnyShapeStyle(tokens.wash) : AnyShapeStyle(Color.clear),
+            in: RoundedRectangle(cornerRadius: 6))
+        .contentShape(Rectangle())
+        .onTapGesture { selection = destination }
+        .draggable(OpenNoteDragToken(noteID: noteID))
+        .dropDestination(for: OpenNoteDragToken.self) { tokens, _ in
+            guard let dragged = tokens.first?.noteID, dragged != noteID,
+                  let source = workspace.openNotes.shown.firstIndex(of: dragged),
+                  let target = workspace.openNotes.shown.firstIndex(of: noteID)
+            else { return false }
+            // Drop-before-target, in the onMove convention (pre-move index).
+            workspace.moveOpenNotes(fromOffsets: IndexSet(integer: source), toOffset: target)
+            return true
+        }
+        .contextMenu {
+            if let onOpenBeside {
+                Button(WorkspaceNaming.openBesideVerb) { onOpenBeside(noteID) }
+            }
+            if let onOpenInNewWindow {
+                Button(CapabilityRegistry.capability(.openInNewWindow).verb) {
+                    onOpenInNewWindow(noteID)
+                }
+            }
+            if let starDoor {
+                Button(starDoor.title(for: .post(noteID))) {
+                    starDoor.toggle(.post(noteID))
+                }
+            }
+            Button("Close") { workspace.closeNote(noteID) }
         }
     }
 
     var body: some View {
+        // Act 10 item 9: the Open strip lives BELOW the List as the
+        // sidebar's bottom rail — always in reach, its own ~7-row scroll —
+        // and W8-3's solid grammar paints the whole column one flat room.
+        VStack(spacing: 0) {
+            sidebarList
+            openStrip
+        }
+        .background(tokens.room)
+        // The strip's names, resolved for exactly what is on screen and
+        // re-read whenever that set or its ORDER changes — which is every
+        // navigation (the shipped `PostTitleLabel` precedent: chrome titles
+        // are one-shot reads keyed on what they show, never a held
+        // observation per row).
+        .task(id: workspace.titleSubjectsKey) {
+            await workspace.resolveTitles(session: session)
+        }
+        // The library import door (Phase 11b, B2): drop `.md`/plain text
+        // anywhere on the sidebar → new post(s). The Blocks rows carry
+        // their own, deeper drop target, so a drop there lands as scraps.
+        // (The Open strip's row reorder rides its OWN transfer type, so a
+        // dragged row can never be mistaken for droppable text.)
+        .onDrop(of: [.fileURL, .plainText], isTargeted: nil) { providers in
+            let model = importer ?? ImportModel(session: session)
+            importer = model
+            return model.handleDrop(providers, into: .library)
+        }
+        .toolbar {
+            ToolbarItem {
+                Button("New Note", systemImage: "square.and.pencil") {
+                    Task {
+                        if let id = await model.createPost() {
+                            selection = .post(id)
+                        }
+                    }
+                }
+            }
+        }
+        .overlay(alignment: .bottom) {
+            if let error = model.lastError ?? importer?.lastError {
+                Text(error)
+                    .font(tokens.small)
+                    .alarmVoice()
+                    .textSelection(.enabled)
+                    .padding(4)
+            } else if let status = importer?.lastReport {
+                Text(status)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .textSelection(.enabled)
+                    .padding(4)
+            }
+        }
+    }
+
+    private var sidebarList: some View {
         List(selection: $selection) {
             starredSection
             Section {
@@ -373,51 +492,7 @@ struct SidebarView: View {
                         .foregroundStyle(tokens.accent)
                 }
             }
-            openSection
         }
         .scrollContentBackground(.hidden)
-        // The strip's names, resolved for exactly what is on screen and
-        // re-read whenever that set or its ORDER changes — which is every
-        // navigation (the shipped `PostTitleLabel` precedent: chrome titles
-        // are one-shot reads keyed on what they show, never a held
-        // observation per row).
-        .task(id: workspace.titleSubjectsKey) {
-            await workspace.resolveTitles(session: session)
-        }
-        .background(tokens.room)
-        // The library import door (Phase 11b, B2): drop `.md`/plain text
-        // anywhere on the sidebar → new post(s). The Blocks rows carry
-        // their own, deeper drop target, so a drop there lands as scraps.
-        .onDrop(of: [.fileURL, .plainText], isTargeted: nil) { providers in
-            let model = importer ?? ImportModel(session: session)
-            importer = model
-            return model.handleDrop(providers, into: .library)
-        }
-        .toolbar {
-            ToolbarItem {
-                Button("New Note", systemImage: "square.and.pencil") {
-                    Task {
-                        if let id = await model.createPost() {
-                            selection = .post(id)
-                        }
-                    }
-                }
-            }
-        }
-        .overlay(alignment: .bottom) {
-            if let error = model.lastError ?? importer?.lastError {
-                Text(error)
-                    .font(tokens.small)
-                    .alarmVoice()
-                    .textSelection(.enabled)
-                    .padding(4)
-            } else if let status = importer?.lastReport {
-                Text(status)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .textSelection(.enabled)
-                    .padding(4)
-            }
-        }
     }
 }

@@ -79,6 +79,75 @@ struct CalmSectionHeader: View {
     }
 }
 
+/// **Ellipsis at rest, marquee on hover** (Act 10 item 13 — her word:
+/// "stereo style"). At rest an ordinary truncating one-liner; while the
+/// pointer is over it, an overflowing title scrolls to its end and back so
+/// the whole name can be read in place. A non-overflowing title never
+/// moves. Chrome-cheap: one Text either way, animation only under the
+/// pointer (P3).
+struct MarqueeText: View {
+    let text: String
+    var font: Font
+    var color: Color
+    var weight: Font.Weight = .regular
+
+    @State private var hovering = false
+    @State private var phase = false
+    @State private var textWidth: CGFloat = 0
+    @State private var boxWidth: CGFloat = 0
+
+    private var overflow: CGFloat { max(0, textWidth - boxWidth) }
+    private var scrolling: Bool { hovering && overflow > 1 }
+
+    var body: some View {
+        Group {
+            if scrolling {
+                Text(text)
+                    .font(font)
+                    .fontWeight(weight)
+                    .foregroundStyle(color)
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
+                    .offset(x: phase ? -overflow : 0)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .clipped()
+                    .onAppear {
+                        withAnimation(
+                            .linear(duration: max(0.8, Double(overflow) / 30))
+                                .repeatForever(autoreverses: true)
+                        ) {
+                            phase = true
+                        }
+                    }
+                    .onDisappear { phase = false }
+            } else {
+                Text(text)
+                    .font(font)
+                    .fontWeight(weight)
+                    .foregroundStyle(color)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        // The measuring pair: the natural width (a hidden fixed-size twin)
+        // against the box the title actually has.
+        .background {
+            Text(text)
+                .font(font)
+                .fontWeight(weight)
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
+                .hidden()
+                .onGeometryChange(for: CGFloat.self) { $0.size.width } action: {
+                    textWidth = $0
+                }
+        }
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { boxWidth = $0 }
+        .onHover { hovering = $0 }
+    }
+}
+
 /// The mockup's `.btn`: squarish-rounded, bordered, generous.
 struct CalmButtonStyle: ButtonStyle {
     enum Role {

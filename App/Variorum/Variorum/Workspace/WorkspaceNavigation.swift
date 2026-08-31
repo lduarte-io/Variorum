@@ -255,15 +255,18 @@ nonisolated struct NavigationHistory: Equatable {
 ///   opened first.
 /// - **Manual reorder is hers**, session-only and never a setting.
 nonisolated struct OpenNotes: Equatable {
-    /// Rows the strip SHOWS — and exactly the reach of ⌘⇧1…⌘⇧9, chosen so
-    /// the two numbers cannot drift: every visible row carries a key, and
-    /// no key points at a row she cannot see.
-    static let visibleCap = 9
-    /// The session memory BEHIND the strip. Larger than what is shown so
-    /// closing a row promotes the next note instead of leaving a hole, and
-    /// so the strip can say honestly that more are open (the bounded-windows
-    /// discipline: a truncation marker, never a silent cut).
-    static let trackedCap = 12
+    /// The reach of ⌘⇧1…⌘⇧9 — the first nine rows in strip order. **Since
+    /// Act 10 item 9 this is a KEY cap, not a visibility cap**: the strip
+    /// shows EVERY open note (the section itself scrolls past ~7 — her
+    /// ruled shape, the starred precedent), so nothing she opens can ever
+    /// land hidden. The name changed with the meaning (`visibleCap` would
+    /// now be a lie).
+    static let ordinalCap = 9
+    /// **The ruled auto-close cap (her word, the Act 10 sitting): total
+    /// open tabs cap at 20** — opening the 21st quietly closes the
+    /// least-recently-opened note. A tab is a pointer; nothing is lost —
+    /// the note stays in the library.
+    static let trackedCap = 20
 
     /// Container ids in STRIP ORDER — insertion order, moved only by an
     /// explicit manual reorder and never by navigation. IDs only; the
@@ -295,10 +298,10 @@ nonisolated struct OpenNotes: Equatable {
     /// The manual reorder (her ruling's second half), in the `onMove`
     /// convention: `destination` is an index in the PRE-move list.
     ///
-    /// Offsets are the SHOWN rows' — and because `shown` is a prefix of
-    /// `ids`, they are `ids`' own indices, so there is no mapping table
-    /// that could go stale. Recency is untouched: rearranging the strip is
-    /// not using a note.
+    /// Offsets are the strip's rows — since Act 10 item 9 that is ALL of
+    /// `ids` (nothing is hidden), so there is no mapping table that could
+    /// go stale. Recency is untouched: rearranging the strip is not using
+    /// a note.
     mutating func move(fromOffsets source: IndexSet, toOffset destination: Int) {
         let limit = shown.count
         guard source.allSatisfy({ $0 >= 0 && $0 < limit }),
@@ -324,17 +327,20 @@ nonisolated struct OpenNotes: Equatable {
         }
     }
 
-    var shown: [String] { Array(ids.prefix(Self.visibleCap)) }
+    /// **Every open note, in strip order** (Act 10 item 9 — her ruled
+    /// shape). The old prefix window is GONE: a newly opened note joined
+    /// at the END and the prefix hid it — the newcomer landed invisible,
+    /// her reported defect. Now the strip shows everything and the SECTION
+    /// scrolls (the starred precedent); the dead "…N more open" label dies
+    /// with the hidden set. `OpenStripPins` holds the newcomer red-on-old.
+    var shown: [String] { ids }
 
-    /// What the truncation row reports — 0 ⇒ no row.
-    var hiddenCount: Int { max(0, ids.count - Self.visibleCap) }
-
-    /// ⌘⇧n — 1-based, over the SHOWN rows (a key never reaches past the
-    /// strip). nil where no nth row exists.
+    /// ⌘⇧n — 1-based, over the first `ordinalCap` rows (the keys are
+    /// ⌘⇧1…⌘⇧9; rows past nine are click/scroll rows). nil where no nth
+    /// row exists.
     func id(atOrdinal ordinal: Int) -> String? {
-        let shown = shown
-        guard ordinal >= 1, ordinal <= shown.count else { return nil }
-        return shown[ordinal - 1]
+        guard ordinal >= 1, ordinal <= min(Self.ordinalCap, ids.count) else { return nil }
+        return ids[ordinal - 1]
     }
 }
 
