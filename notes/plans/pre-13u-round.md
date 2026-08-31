@@ -873,7 +873,12 @@ doesn't) is excluded on evidence; the item had landed in an earlier post-signing
 verifiably round-trips. **The KnownIssues escrow row retires.** *(One residual for the successor: her
 confirming RELAUNCH — after the one-time sync-gate unlock — should show the same line again; and if
 she reports a SECOND biometric prompt on any launch AFTER that one-time unlock, that is a finding
-against the R-pre13u-2 reset, back to the custody batch.)*
+against the R-pre13u-2 reset, back to the custody batch.)* **RESIDUAL CLOSED (2026-08-31, ~01:55,
+her word to the successor): "i've done the sync unlock and it was successful - the confirming line
+was positive."** The R-pre13u-2 reset's material-in-hand moment completed on her device; the
+one-prompt world is live end to end. The tripwire survives as a watch, not a task: a SECOND
+biometric prompt on any FUTURE launch is a finding against the reset, back to the custody
+subsystem.
 
 **VERIFICATION AT CLOSE:** core **1457/154 GREEN** (13p baseline 1453/154 + the 4 new core pins,
 exact) · Mac full suite **1871/317 ALL PASSED** (baseline 1854/314 + 17 new pins across 3 new
