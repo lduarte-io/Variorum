@@ -973,3 +973,9 @@ and therefore never lock.
 
 **One-secret doctrine binds any road:** whatever sets the passphrase, both apps present ONE
 passphrase identity to the user — never a "Fragments passphrase" beside a "Variorum passphrase."
+
+**HER FOLLOW-UP (2026-08-31, same night — verbatim: "can you have a subagent write that brief
+now? I'd like to just carry it to fragments now, I think that's what would be most useful"):** the
+brief is written NOW as a pre-13u-round architect-side deliverable (the Act 6 class) — see the
+pointer below once it lands. It equips her Fragments conversation with the FACTS and the ceremony
+format spec; it does not pre-decide road (a) — that ruling is hers with the Fragments agent.
