@@ -2251,3 +2251,192 @@ of the restyled surfaces (legible by token construction; not eyeballed).
 - Every red-on-old pin was verified by BEHAVIORAL REVERT (the checkbox suppression, the
   tray List, the OpenNotes prefix window, the bar threshold, the arrows burst anchor —
   each re-run red on the reverted code, then restored).
+
+---
+
+# ACT 10 WAVE 2a RECORD (2026-08-31 — the protection/clarity wave, Fable implementer)
+
+**LIVE STATUS SECTION — updated per commit while the wave runs** (the session-limit
+protocol: the coordinator warned at 87%; this record is written mid-flight so a fresh
+successor can resume from the repo alone. A line marked PENDING is UNVERIFIED; a line
+marked IN-PROGRESS names exactly what remains).
+
+**Machinery honesty:** the original wave-2a session DIED mid-Group-B on a transient API
+auth error ("Not logged in") and was resumed by a successor with the same brief; the
+working tree survived (one uncommitted StoreProtection.swift edit), zero work lost. The
+recon subagent it had spawned completed after the death; its coordinates were relayed by
+the coordinator (no re-derivation). No further subagents were used.
+
+**Binding spec:** `notes/plans/pre-13u-memo-security-shapes.md` (the memo WINS over any
+other block); Act 10 item 3 + item 4 + the NINTH WAVE'S CLOSING RIDERS block above;
+render-don't-re-derive (§9c item 3) binds every surface below.
+
+## Commits, in order
+
+- `b177571` — **THE COUPLING (memo §4, the ONE behavior change): DONE.**
+  `ProtectionDials.effectiveEscrowOn` is the one rule; custody acts on it at the mode
+  transition itself (`reconcileEscrowToPosture`), at every ready-launch reconcile, and at
+  the dial door; the stored dial keeps her Auto choice. `lossLegs`/`lossMath` stop listing
+  a spare the posture removed (passphrase-mode escrow arm collapsed, supersession
+  recorded). Faces: Mac pane + phone sheet stop offering the dial under demanded modes,
+  speak `escrowNotOfferedUnderDemanded` (her why-sentence, near-verbatim) + the
+  kept-choice note; `ProtectionShapes.compoundWarning` rides the ON state on both.
+  `escrowUnderDemandedMode` superseded; its copy-sweep pin RE-ANCHORED (never deleted);
+  the mobile composed-from-legs pin superseded deliberately (posture-aware iCloud claim).
+  **Pins: `EscrowPostureCouplingTests` (7 tests) — REVERT-VERIFIED RED-ON-OLD** (probe
+  reverted `effectiveEscrowOn` + the lossLegs coupling: 5/7 red, 10 issues — the spare
+  survived into biometric and `escrowVerifiedLanded` stayed true; the two that stayed
+  green pin the face and the dial-door branch, mechanisms outside the probe). Restored
+  green 41/41 across the touched suites; Mac + iOS targets build.
+- `018d6ee` — **THE EYE/PEEK CONTROL (item 3): DONE.** `PeekableSecretField` (Shared);
+  adopted at EVERY passphrase-family field: set/reset sheets, SecretCheck's passphrase
+  arm, Mac lobby + failure surface, all six EncryptionViews fields, the phone's
+  ceremonies/lobby/failure. AuthViews' account-password trio deliberately stays plain (a
+  different secret family). Both targets build. No dedicated pin (a chrome control;
+  behavior rides existing surface pins) — the midpoint may add one if wanted.
+- `232b090` — **WIP:** `ProtectionShapes.checklistRows(_:mode:)` joined the shared brain
+  (the checklist's row model, three-value escrow truth, posture-aware). Compiling; no
+  face consumes it yet.
+
+## Piece-by-piece status (the successor's map)
+
+1. **`ProtectionShapes.swift` (Shared) — the memo brain: DONE** (b177571 + 232b090).
+   Keystone lines essentially verbatim: `oneLaw`, `deviceAsPowerfulAsPassphrase` (Touch
+   ID keystone), `syncSentence` (ratified, verbatim), `spareKeyIsAKey` (key-not-backup +
+   never-a-remote-sync-key), `resetRoad` ("passphrase is still the path"),
+   `compoundWarning`; the recipes (`openRecipes`/`opensNothingAlone` + the two new-device
+   rows split per seventh wave (i)); `demandedFallbackTruth` (seventh wave (ii)); the
+   three-row `shapes` summary (the ONLY table) with per-shape who-this-stops + the TWO
+   what-ifs; the four `needStates` (§5) + `currentNeedState`; `tierSentence` (T2's three
+   values, three sentences); `escrowLegSentence` (per-leg three-value truth);
+   `checklistRows`; `unchosenIndicatorLabel/Detail` (NEVER "encryption off");
+   `lockMomentFraming` + `syncSignupFraming` (the two ceremonies).
+2. **The coupling: DONE** (b177571, above).
+3. **The pane restructure (Mac ProtectionPane) — IN PROGRESS, NOT started in code beyond
+   the escrow section (which is DONE via b177571).** Remains: lead the pane with the live
+   checklist section (render `checklistRows(controller.legs, mode:)` + `tierSentence` +
+   `currentNeedState`); move the mode section's paragraph stack (oneDeviceNote,
+   openAppIsReadable) behind a ?-disclosure implemented as a NAMED extracted view (e.g.
+   `ModeHonestyDisclosure`) so the P47 pin can host it directly; keep modeSentence +
+   lossMath visible. **P47 RE-ANCHOR OWED:** `ProtectionSurfaceRenderTests
+   .theSettingsPaneShowsTheOpenAppIsReadableDisclosure` currently asserts those sentences
+   in the pane's dump — after the restructure, re-anchor with a supersession note naming
+   item 3's ?-disclosure ruling: assert the pane carries the door + still-visible
+   essentials, and host the extracted disclosure view directly for the moved sentences.
+   NEVER delete the pin.
+4. **The explainer tab — NOT STARTED.** Plan: `ProtectionExplainerView` (Shared, plain
+   styling) rendering: oneLaw → recipes (3 groups + the 2 new-device rows) → the shapes
+   table (3 rows, per-shape stops/what-ifs; Shape 3 marked not-offered) → the four
+   needStates → demandedFallbackTruth + spareKeyIsAKey + resetRoad + compoundWarning →
+   a pointer to the field guide's "keeping it private" chapter (BY NAME — a live
+   cross-scene door is a fork for the record; settings explains AND points, seventh wave
+   (iii)). Mount as a Settings TAB in `AppSettingsView` ("How Protection Works",
+   systemImage "questionmark.circle" or similar) + one pointer row in the ProtectionPane.
+   Add a P47-style pin hosting the explainer and asserting the keystones (verbatim
+   carriage — the render-don't-re-derive check).
+5. **T2 unknown rendering — PARTLY DONE** (the brain: tierSentence + escrowLegSentence +
+   checklistRows' unknown arm, 232b090). Remains: the pane's checklist renders the
+   unknown arm (piece 3); the phone sheet gains the standing ways-back-in line
+   (`prose(ProtectionCopy.waysBackInLine(controller.legs))` in the mode section — one
+   line, R-pre13u-4's letter).
+6. **The nudge tier-awareness (R-pre13u-4's faces) — NOT STARTED.** Plan:
+   `ProtectionNoticeBar.nudgeBar` consults `controller.legs.tier`; `.exposed` renders
+   `exposedNudgeHeadline`/`exposedNudgeBody` (already in ProtectionCopy since Act 9,
+   never yet rendered) instead of the gentle pair; offers unchanged; unknown stays
+   suppressed (Act 9's refreshNotices guard). Pin: a composition test that an exposed
+   controller's bar carries the exposed headline.
+7. **The unchosen-state indicator (memo §6) — NOT STARTED.** Plan: `ProtectionStatusRow`
+   beside SyncStatusRow/BridgeStatusRow in RootView's sidebar bottom safeAreaInset
+   (RootView.swift ~line 143; the bottom-left family). Shown when mode == .auto && no
+   wraps && !factsUnknown (the truly-unchosen state); label
+   `ProtectionShapes.unchosenIndicatorLabel` (+ tier-appropriate detail); opens Settings
+   (openSettings env action; the ProtectionNoticeBar's reminder door precedent). RootView
+   needs `protection: ProtectionController? = nil` added to init (defaulted — all test
+   call sites survive) and VariorumApp passes `bootstrap.protection`.
+8. **The ceremonies' copy — NOT STARTED.** Plan: PassphraseSetSheet gains
+   `var lockMoment: Bool = false`; the pane's `openSetSheet()` sets it true only when
+   summoned by a pending DEMANDED act; renders `ProtectionShapes.lockMomentFraming`.
+   EncryptionViews setup step 1 gains `ProtectionShapes.syncSignupFraming` (the ratified
+   sync sentence + device keystone) after `setupIntro`; the enrolled section's "This
+   device holds your encryption keys." line gains `deviceAsPowerfulAsPassphrase` beside
+   it. Verbatim carriage pinned by the explainer pin (piece 4) or its own copy pin.
+9. **The tutorial privacy chapter alignment (sixth wave (b)) — NOT STARTED.** Plan:
+   content-only edits to `TutorialSeeder.swift`'s two privacy lessons (~line 1201/1264):
+   the spare-key paragraph updates to the COUPLING truth (asking modes don't offer the
+   spare — today it says "Locked-down turns it off on purpose", now true of every asking
+   mode); add the one-law/recipes/sync-sentence/spare-key-corollary teaching, prose-lite
+   and device-neutral ("this device"); keep composing the legs list from
+   `ProtectionCopy.lossLegs` (the TutorialWalkTests contract at ~line 3050+ asserts every
+   leg appears — keep it green, extend deliberately if lesson structure changes). The
+   FIELD-GUIDE RE-SEED stays the closeout's obligation (not this wave's).
+   **Check `MobileTutorialSeeder.swift` line ~647** (the phone's privacy lesson does NOT
+   use lossLegs — deliberate; align its coupling-truth wording if it names the spare
+   under asking modes).
+10. **T1 — the stale-copy re-key guard: NOT STARTED (the ATTEMPT is owed).** The design
+    (settled by this session's reading, recorded so the successor need not re-derive):
+    a READ-ONLY `RekeyRecencyProbe` in `Sources/VariorumCore/Sync/` (Fable rider
+    honored; `notes/sync-postmortem-fragments.md` was read in full) — fetch loop over
+    `transport.pull(since: <local cursor>, limit: batchSize, activeKeyID: <provider's
+    corpus key id>, deviceID: nil)` — **deviceID nil on EVERY window** (a probe is not a
+    round; nil records NO server-side cursor — genuinely read-only; SyncTransport.swift
+    :60-71 documents this), pages until empty, dedupes container rows by rowID keeping
+    last, filters kind == "post" && deleted_at == nil (PLAIN columns — ids/dates/enums
+    are deliberately plain in the disclosure envelope; NO decryption — read the raw
+    SyncRow.columns, never crypto.decryptFromWire), compares against local container
+    rows: N = server-live ids absent locally; M = ids whose server updated_at > local
+    updated_at; latest = max server updated_at among those. Report struct + a pure
+    `RekeyGuard` rule (warn when N+M > 0; the near-empty corner is covered because a
+    fresh/stale store's cursor is behind, so the pull returns the full server picture).
+    WIRE: an `EncryptionSession.rekeyRecencyProbe` closure beside `rekeyRunner`
+    (AppServices.start ~line 260, composed like runAccountRekey: makeSyncTransport(auth)
+    + the engine's key provider + withDependencies database); the EncryptionViews
+    rekeySection's confirm button first runs the probe (busy state), and when the server
+    is ahead shows the COUNT-AND-DATES warning (her ruled emphasis, essentially
+    verbatim): "the server holds N notes this copy doesn't have, and newer versions of M
+    others, the latest from <date>. Re-keying replaces the server's copy with this one —
+    those would be lost. If you can remember your passphrase, that road keeps them." +
+    an explicit "Replace Anyway" confirm; a probe FAILURE (offline etc.) proceeds with
+    one honest couldn't-compare sentence (the door must never be blocked by the guard).
+    Tests: core `RekeyRecencyProbeTests` against the fake server
+    (Tests/VariorumCoreTests/Support/FakeSyncServer.swift:57) — stale-copy N/M/latest
+    correctness + the fresh-store (cursor 0) corner + zero-when-current; a face-level
+    composition pin that a server-ahead report renders the count-and-dates sentence.
+    **EITHER WAY the final ladder verdicts this door** (guarded with evidence, or a
+    KnownIssues row with an owner — the riders block).
+11. **Item 4 — the trash/encryption/archived sweep: NOT STARTED.** Coordinates (relayed
+    recon): Mac Trash = `Features/Library/RecoveryView.swift` (plain List; copy via
+    `Shared/RecoveryCopy.swift`); Archived = `Features/Library/ArchivedView.swift`
+    (plain List; local statics :143-146); Account pane = `Shared/AuthViews.swift` 37-438
+    (long strings :64-95; manifest row 04's grouping complaint). The pass: CalmGrammar
+    vocabulary (CalmCard/CalmSectionHeader/CalmButtonStyle — Mac-side surfaces;
+    AuthViews is SHARED, so restructure там must stay phone-legible), group by the
+    question each element answers, ?-disclosure for depth, NEVER delete a door. The
+    reminder/nudge family rides piece 6.
+12. **Screenshots — NOT DONE** (dev-store Debug build ONLY; gitignored
+    `notes/plans/pre-13u-act10-screens/`; wave 1's capture pattern). Owed: the rebuilt
+    pane (auto + demanded states), the explainer tab, the lobby's peek eye, the nudge's
+    exposed state if drivable, Trash/Archived/Account after the sweep.
+13. **Full verification at close — NOT RUN** (owed exactly as briefed): FULL Mac suite
+    (baseline 1919/327 + this wave's pins; latency pin per its KnownIssues row if red;
+    canvas suite isolated if load-flaky); core `swift test` if `Sources/` touched (T1
+    probe does touch it; baseline 1484/159); FULL mobile suite (Shared touched; baseline
+    602/97 + 2 standing). iOS build subsumed by the mobile run.
+14. **Keystone-lines-verbatim confirmation — PENDING** (assert at close: the memo's
+    keystones appear byte-close in ProtectionShapes; the explainer pin is the mechanism).
+15. **MOBILE PARITY note for the closeout** (piece for the record's close): the coupling
+    + checklist + tier sentences are ONE brain (`Shared/`) — one account, ONE posture,
+    both platforms (R-pre13u-8(f)); the phone's sheet renders the same sentences; the
+    phone's nudge FACE and checklist face are mobile's to compose at its resumption
+    (named surfaces: MobileProtectionSheet mode section's ways-back-in line — DONE here
+    if piece 5's phone line lands; the exposed-nudge face — mobile's).
+
+## Taste forks so far (for the morning bundle)
+
+1. **Settings panes keep system Form chrome** (not CalmGrammar-carded): the Settings
+   window is macOS-native chrome and its sibling panes (Appearance/Tags/Data Safety) are
+   all Form-styled; the clarity deliverable is CONTENT structure. The mockup-grammar
+   restyle of the Settings window itself is left to 13u2's app-wide continuation.
+   One-line swap per section if she wants cards there too.
+2. **The field-guide door from Settings points BY NAME** (chapter "keeping it private")
+   rather than a live cross-scene button — routing from the Settings scene into the main
+   window's book view is 13u2-adjacent machinery; the pointer is honest meanwhile.
