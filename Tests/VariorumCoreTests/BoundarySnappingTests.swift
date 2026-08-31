@@ -174,34 +174,12 @@ struct BoundarySnappingTests {
     }
 
     // MARK: Snap
-
-    @Test func snapPicksTheNearestBoundary() {
-        let text = "One. Two! Three?"  // boundaries [0, 5, 10, 16]
-        #expect(BoundarySnapping.snap(3, in: text, granularity: .sentence) == 5)
-        #expect(BoundarySnapping.snap(2, in: text, granularity: .sentence) == 0)
-        #expect(BoundarySnapping.snap(7, in: text, granularity: .sentence) == 5)
-        #expect(BoundarySnapping.snap(13, in: text, granularity: .sentence) == 10)  // 13 ties 10/16 → earlier
-        #expect(BoundarySnapping.snap(14, in: text, granularity: .sentence) == 16)
-    }
-
-    @Test func snapTieBreaksTowardTheEarlierBoundary() {
-        // "ab. cd." boundaries [0, 4, 7]; cut 2 is equidistant from 0 and 4.
-        #expect(BoundarySnapping.snap(2, in: "ab. cd.", granularity: .sentence) == 0)
-    }
-
-    @Test func snapClampsOutOfRangeCuts() {
-        let text = "One. Two."
-        #expect(BoundarySnapping.snap(-5, in: text, granularity: .sentence) == 0)
-        #expect(BoundarySnapping.snap(99, in: text, granularity: .sentence) == text.utf16.count)
-        #expect(BoundarySnapping.snap(3, in: "", granularity: .paragraph) == 0)
-    }
-
-    @Test func snapAtParagraphGranularityOnMultiParagraphBlocks() {
-        let text = "Para one.\n\nPara two.\nPara three."  // [0, 11, 21, 32]
-        #expect(BoundarySnapping.snap(9, in: text, granularity: .paragraph) == 11)
-        #expect(BoundarySnapping.snap(17, in: text, granularity: .paragraph) == 21)
-        #expect(BoundarySnapping.snap(30, in: text, granularity: .paragraph) == 32)
-    }
+    //
+    // (17f/P45: four tests of `snap(_:in:granularity:)` stood here. They were
+    // that function's ONLY callers anywhere in the repo — production had moved
+    // to `settle` at the S4-22 cut redesign — so they kept a dead public API
+    // permanently green while `divide`'s doc pointed readers at it. Removed
+    // with the function; the settle suite above is the shipping rule's pin.)
 
     // MARK: UTF-16 convention (TextKit 2's unit) on multi-scalar graphemes
 
@@ -209,8 +187,10 @@ struct BoundarySnappingTests {
         // 👩‍👩‍👧‍👦 = four surrogate pairs + three ZWJs = 11 UTF-16 units, offsets 3–13.
         let text = "Hi 👩‍👩‍👧‍👦. Done."
         #expect(text.utf16.count == 21)
-        #expect(BoundarySnapping.boundaries(in: text, granularity: .sentence) == [0, 16, 21])
-        #expect(BoundarySnapping.snap(10, in: text, granularity: .sentence) == 16)
+        let sentenceEnds = BoundarySnapping.boundaries(in: text, granularity: .sentence)
+        #expect(sentenceEnds == [0, 16, 21])
+        // A cut inside the cluster settles past it, in UTF-16 units.
+        #expect(BoundarySnapping.settle(10, in: text, among: sentenceEnds) == 16)
     }
 
     @Test func offsetsInsideAGraphemeAreRejected() {

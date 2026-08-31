@@ -178,9 +178,13 @@ extension Operations {
     /// active variant — a fanned block refuses toward the W ceremony
     /// (`divideW`). `cut` is a UTF-16 offset into the rendered text; the
     /// halves are whitespace-trimmed at the seam. Boundary discipline is
-    /// deliberately the editor's contract (`BoundarySnapping.snap`) — the
+    /// deliberately the editor's contract — `BoundarySnapping.settle`, the one
+    /// snap brain every shipped door consults (S4-22's ruled cut rule: word
+    /// edges are free, sentence ends and newlines pull a little); the
     /// operation checks well-formedness only (bounds, grapheme alignment,
     /// non-empty halves), never that the cut sits on a sentence mark.
+    /// *(17f/P45: this line used to name a `snap` function with no production
+    /// callers — a contract no door enforced.)*
     /// Note the documented
     /// restoreCommit behavior: a commit predating this cut still holds the
     /// full text, and restoring it resurrects both halves into the source's

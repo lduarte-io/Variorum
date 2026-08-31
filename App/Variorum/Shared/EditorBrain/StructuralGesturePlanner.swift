@@ -11,9 +11,10 @@
 //
 //  Discipline (plan ground rule): raw AppKit selections are never trusted at
 //  fragment boundaries (TEXTKIT2_NOTES §3) — everything normalizes through
-//  the index's tiling here first, and the offsets handed onward are
-//  BoundarySnapping-snapped, so the operations layer (which checks
-//  well-formedness only — Phase 3 ratification) always receives legal cuts.
+//  the index's tiling here first, and the offsets handed onward are settled
+//  through `BoundarySnapping.settle` (the ONE snap brain — S4-22), so the
+//  operations layer (which checks well-formedness only — Phase 3
+//  ratification) always receives legal cuts.
 //
 //  The pure layer never asserts (the Phase 7 MINOR-7 lesson): impossible
 //  states answer with a refusal, and the caller recovers.

@@ -111,16 +111,14 @@ public enum BoundarySnapping {
         return set.sorted()
     }
 
-    /// The nearest boundary to `cut` (clamped into the text); a distance tie
-    /// snaps to the earlier boundary.
-    public static func snap(_ cut: Int, in text: String, granularity: Granularity) -> Int {
-        let clamped = min(max(cut, 0), text.utf16.count)
-        let candidates = boundaries(in: text, granularity: granularity)
-        return candidates.min { a, b in
-            let (da, db) = (abs(a - clamped), abs(b - clamped))
-            return da == db ? a < b : da < db
-        } ?? clamped
-    }
+    // (17f/P45: a plain nearest-boundary `snap(_:in:granularity:)` lived here
+    // until the S4-22 cut redesign replaced it with `settle` — and then
+    // outlived it by two years' worth of phases with ZERO production callers
+    // on either platform, kept green by its own tests alone while `divide`'s
+    // op doc still named it as the boundary contract. The two genuinely
+    // disagree wherever a strong boundary sits within `settlePull`, so a
+    // session reading that doc learned a rule no door enforces. Removed with
+    // the doc corrected; `settle` below is the one snap brain.)
 
     // MARK: - The gentle settle (13b Stage 4, S4-22 ruling 1)
 

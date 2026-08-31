@@ -203,7 +203,13 @@ struct FocusHandoffTests {
                 await Task.yield()
             }
             #expect(h.model.fanPanel?.blockID == slots[1].blockID)
-            #expect(h.model.fanPanel?.variants.count == 2)
+            // The panel carries the block and nothing else (17f/P43); the
+            // fan itself is the sheet's own read. That the block really is
+            // fanned is a store fact, so assert it there.
+            let fan = try await w.database.read { db in
+                try Queries.blockFan(db, blockID: slots[1].blockID)
+            }
+            #expect(fan.count == 2)
         }
     }
 

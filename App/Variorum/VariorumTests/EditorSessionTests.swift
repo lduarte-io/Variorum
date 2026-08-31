@@ -713,23 +713,29 @@ struct FanFlowTests {
         }
     }
 
+    /// **Re-pointed at 17f/P43 onto a LIVE door.** This used to drive
+    /// `fanAction(.delete(…))` — dead production code whose only caller was
+    /// this test, which had to hand-construct a `FanPanelState` no UI road can
+    /// produce. So the suite guarded a door the app cannot open. ⌘⇧A
+    /// (`archiveCaretTake`) is a real key-bound door onto the same seam: the
+    /// op refuses, and the editor's status line has to SAY so.
     @Test func refusalsSurfaceAsMessages() async throws {
         try await withEditor(seedBlocks: ["only take"]) { h in
             let slots = try h.storeSlots()
-            h.model.fanPanel = .init(
-                blockID: slots[0].blockID, variants: [], chosenVariantID: slots[0].variantID)
-            h.model.fanAction(.delete(slots[0].variantID!))   // chosen AND last active
+            h.textView.setSelectedRange(NSRange(location: 2, length: 0))
+            h.model.updateCaretContext()
+            h.model.archiveCaretTake()   // the block's LAST active take (I10)
             for _ in 0..<2000 {
                 if h.model.statusMessage != nil { break }
                 await Task.yield()
                 try? await Task.sleep(for: .milliseconds(1))
             }
-            #expect(h.model.statusMessage?.contains("shown in the note") == true)
-            // The store refused: the variant is still there.
+            #expect(h.model.statusMessage?.contains("keeps at least one take") == true)
+            // The store refused: the variant is still there, still active.
             let surviving = try h.storeSlots()
             try #require(!surviving.isEmpty)
-            let survivingVariant = surviving[0].variantID
-            #expect(survivingVariant == slots[0].variantID)
+            #expect(surviving[0].variantID == slots[0].variantID)
+            #expect(surviving.map(\.text) == ["only take"])
         }
     }
 }

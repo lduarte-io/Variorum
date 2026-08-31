@@ -70,6 +70,20 @@ public final class UndoStack: @unchecked Sendable {
     }
 
     private let lock = NSLock()
+    /// **Retention, stated (17f/P44):** the stack is SESSION-SCOPED and never
+    /// persisted (AppSpec §9's "the deliberate cheap/nightmare line"), one per
+    /// `AppSession`, and it has no cap and no age-out — so a long writing
+    /// session accumulates one entry per structural act for the life of the
+    /// process, each holding its pre-images (a `TextPreImage` carries the
+    /// buffer's text and its post-op text; `MintedPreImage.birthTexts`
+    /// carries every minted variant's whole `working_text`). Bounded per act
+    /// by the edit, so P1's letter holds; unbounded in aggregate.
+    ///
+    /// This is recorded rather than capped on purpose: a retention ceiling is
+    /// a PRODUCT decision (how far back can she undo?), and a stack that
+    /// silently forgets is exactly the surprise the pointer religion exists
+    /// to avoid. If a ceiling is ever wanted it is the author's call and a
+    /// phase's work — not a constant chosen here.
     private var entries: [Entry] = []
     /// Entries undone and re-appliable, oldest-undone first (so `last` is
     /// the next redo — LIFO, the mirror of `entries`).
@@ -301,6 +315,14 @@ public final class UndoStack: @unchecked Sendable {
         return entry.label
     }
 
+    /// Empties BOTH stacks. **No production caller, deliberately (17f/P44):**
+    /// no app road clears undo history — a session's stack dies with its
+    /// process, and a "forget my undo history" door is product behaviour
+    /// nobody has asked for. This exists as the tests' reset seam (a suite
+    /// that drives many acts against one stack), and it is public because
+    /// `VariorumCoreTests` is a separate module. Kept, not removed: it is the
+    /// only way to return a stack to its birth state, and a test-support seam
+    /// that says so is not dead code.
     public func removeAll() {
         lock.withLock {
             entries.removeAll()

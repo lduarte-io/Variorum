@@ -414,9 +414,16 @@ struct DivideExtractGestureTests {
             h.model.updateCaretContext()
             #expect(h.model.gestureAvailability.takes)
             let blockID = try #require(h.model.caretBlockID)
-            await h.model.loadFan(blockID: blockID)
+            h.model.openFan(blockID: blockID)
             let panel = try #require(h.model.fanPanel)
-            #expect(panel.variants.count == 1)
+            #expect(panel.blockID == blockID)
+            // The door opened on an ARITY-1 block — the chicken-and-egg this
+            // pin exists for. Arity is a store fact (17f/P43: the panel no
+            // longer carries the fan it never read).
+            let fan = try await h.database.read { db in
+                try Queries.blockFan(db, blockID: blockID)
+            }
+            #expect(fan.count == 1)
         }
     }
 
