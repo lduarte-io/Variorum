@@ -649,6 +649,23 @@ Red-on-old pin (the evaluation count), the tutorial spine green, and the answer 
 **FILLED at the kickoff sitting — see KICKOFF item 6; all six routed to Act 10.** More may arrive;
 record each here in her words as it does.
 
+**Arrived later the same sitting (2026-08-30, her words), routed:**
+
+- *"when i have 10 'tabs' open, i can see that there's more open underneath but i can't click on the
+  'one more note open' to see what it is or move it up. not sure what what point the tabs should
+  auto cycle or if you have any ideas on that, because I do think it gets to a point where it would
+  just get messy, but just seeing '2 more open' and it's the 2 i most recently opened is a bittt
+  annoying. i'm open to ideas"* → **Act 10 item 9.**
+- *"i also am open to the idea that what is the pool (note not in a book) should just be a filter on
+  the library - i'm inclined towards liking the pool staying its own tab, but i do wonder if i
+  should have the library gaining more filters on my radar"* → **the 13i brief** (agenda line added
+  there — the Library-filter vocabulary belongs beside smart books/wings/starred, one design space,
+  never two mechanisms for one idea). Her inclination recorded: Pool stays its own tab; this round
+  changes nothing about the IA.
+- *"it's jarring when you go from being in a note to the library and the 'This note' section of the
+  UI just disappears - it feels a bit jumpy. not sure if we just neeed to smooth that animation or
+  what"* → **Act 10 item 10.**
+
 ---
 
 ## Act 9 — The custody batch: 17a + the CF-12/#82 builds + the routed review findings (Fable implementer)
@@ -778,6 +795,21 @@ doors.
    a refresh + fresh feeling added."* (Her second screenshot — the note ▾ menu's hairline dividers —
    is an instance of the grammar she means.) The latitude covers retiring the hairline-separator
    grammar where a calmer grouping serves better, within the two voices.
+9. **The open-notes tabs overflow** (her report is in Act 7's arrivals, verbatim). The mechanical
+   half is not a taste call: **a newly opened note never lands in the hidden overflow** (the
+   newcomer takes a visible slot; the least-recently-used visible note is what drops), and any
+   "N more open" affordance is a REAL DOOR (click → list → focus). The shape recommendation, hers to
+   see in screenshots: the Open section follows the starred-items precedent (13u item 10's ruled
+   shape) — visible up to ~7, then the section itself scrolls, no dead label; ⌘⇧1…9 stay bound to
+   the visible order. AUTO-CLOSE is held in reserve (open tabs are pointers — closing loses nothing —
+   so a soft LRU cap ~12 is defensible later at her word; not built now).
+10. **The note → library transition** (her report in Act 7's arrivals): the "This note" right region
+    must never teleport away — the panel animates out with the column width animating in sync, one
+    deliberate ease. The larger question is the implementer's to bring as a screenshot pair: whether
+    the right region keeps a CONTINUOUS identity across contexts (collapse gracefully vs. host a
+    library-context occupant such as a selected-note preview). Principle for the whole act: regions
+    visibly become things or visibly leave. Design this together with item 5 (the tags move) — one
+    coherent right edge, not two patches.
 
 ---
 

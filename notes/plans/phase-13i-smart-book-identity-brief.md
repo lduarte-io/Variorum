@@ -522,3 +522,17 @@ these trade offs and ideas for 13i. I think it'll take more of a
 design sitting to get to a place I'm totally happy with."* The
 sitting owns it. The plain (un-owned) smart book and the ruled
 conversion shape are unaffected meanwhile.
+
+---
+
+## Agenda line added 2026-08-30 (the pre-13u sitting) — the Library-filter vocabulary question
+
+Her words, verbatim: *"i also am open to the idea that what is the pool (note not in a book) should
+just be a filter on the library - i'm inclined towards liking the pool staying its own tab, but i do
+wonder if i should have the library gaining more filters on my radar."*
+
+Routed HERE deliberately: this sitting already designs starred smart books, wings, and the hybrid
+identity — "should the Library grow filters, and where is the line between a Library filter and a
+smart book" is the same design space, and smart books ARE this app's saved-filter machinery, so the
+question must be answered once, not by two mechanisms. Her inclination stands recorded (Pool stays
+its own tab); nothing changes before this sitting rules.
