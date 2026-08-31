@@ -48,10 +48,7 @@ struct NoteTrayTests {
         func bar(deleted: Int, preserved: Int) -> ContextBar {
             ContextBar(
                 tokens: .fallback(for: .light), originLabel: nil, forwardLabel: nil,
-                books: [],
-                tagFace: ContextBar.TagFace(
-                    tags: [], allTags: [], onApply: { _ in }, onRemove: { _ in }),
-                tagsFolded: false,
+                books: [], isNote: true,
                 // (Ladder B round-1 residuals, item 1 — annotated pin
                 // edit: TrayFace dropped preservedCount with the tooltip's
                 // originals clause; `preserved` stays a parameter here so
@@ -59,7 +56,7 @@ struct NoteTrayTests {
                 // exist — keeps its two-axis matrix.)
                 trayFace: ContextBar.TrayFace(
                     deletedCount: deleted, onOpen: {}),
-                onBack: {}, onForward: {}, onOpenBook: { _ in }, onToggleTags: {})
+                onBack: {}, onForward: {}, onOpenBook: { _ in })
         }
         #expect(!bar(deleted: 0, preserved: 0).trayDoorShown)
         // Even with originals waiting: the panel has them, the badge does not
@@ -71,13 +68,14 @@ struct NoteTrayTests {
                 "the glyph and the DELETED count, nothing else")
     }
 
-    /// K11's constant icon row is untouched by the new door — the four
-    /// aiming targets stay a fixed cluster, which is her stated reason for
-    /// the ruling. The tray badge rides after them.
-    @Test func theFourConstantIconsAreUnchangedByTheTrayDoor() {
-        #expect(ContextBarDoors.iconRow(isNote: true) == [.back, .book, .tags, .forward])
+    /// K11's constant icon row is untouched by the new door — the aiming
+    /// targets stay a fixed cluster, which is her stated reason for the
+    /// ruling. The tray badge rides after them. *(Three doors since Act 10
+    /// item 5 moved the ＃ to the masthead cluster.)*
+    @Test func theConstantIconsAreUnchangedByTheTrayDoor() {
+        #expect(ContextBarDoors.iconRow(isNote: true) == [.back, .book, .forward])
         #expect(ContextBarDoors.iconRow(isNote: false) == [.back, .forward])
-        #expect(ContextBarDoors.Icon.allCases.count == 4)
+        #expect(ContextBarDoors.Icon.allCases.count == 3)
     }
 
     /// The tooltip names the ONE number the badge shows — deleted blocks.

@@ -162,7 +162,7 @@ struct PostDetailView: View {
             // grammar instead of a toolbar. Title over its path line on
             // the left; the mode tabs as quiet voiced words on the right;
             // the page below is the hero.
-            HStack(alignment: .firstTextBaseline, spacing: 12) {
+            HStack(alignment: .top, spacing: 12) {
                 VStack(alignment: .leading, spacing: 1) {
                     // Sitting 9 (R67): the post's NAME, prominent — click
                     // to rename right here.
@@ -174,32 +174,43 @@ struct PostDetailView: View {
                         recentBookIDs: recentBookIDs)
                 }
                 Spacer()
-                if showsModeSwitcher {
-                    // The same vocabulary the sidebar rail renders, in the
-                    // one chrome control that fits a masthead corner. It
-                    // writes the detail's OWN mode state — the same binding
-                    // `CommandRouter.requestMode` writes through, so ⌘1–⌘6
-                    // and this door can never disagree.
-                    VoicedMenu(tokens: tokens, label: mode.rawValue, role: .quiet) {
-                        ForEach(Mode.allCases, id: \.self) { m in
-                            Button(m.rawValue) { mode = m }
+                // Act 10 item 5 — the masthead's right EDGE, one coherent
+                // column: the inspector icons on top, the note's tag cards
+                // under them, across from the membership chip (her ruling's
+                // letter — "under the scraps / outside reference / tray
+                // button … across from what books an item is in").
+                VStack(alignment: .trailing, spacing: 3) {
+                    HStack(alignment: .firstTextBaseline, spacing: 2) {
+                        if showsModeSwitcher {
+                            // The same vocabulary the sidebar rail renders, in
+                            // the one chrome control that fits a masthead
+                            // corner. It writes the detail's OWN mode state —
+                            // the same binding `CommandRouter.requestMode`
+                            // writes through, so ⌘1–⌘6 and this door can never
+                            // disagree.
+                            VoicedMenu(tokens: tokens, label: mode.rawValue, role: .quiet) {
+                                ForEach(Mode.allCases, id: \.self) { m in
+                                    Button(m.rawValue) { mode = m }
+                                }
+                            }
+                            .help("This note's mode — Write · Takes · Lenses · Compare · "
+                                + "Blocks · Canvas (⌘1–⌘6)")
+                        }
+                        // The masthead's inspector cluster, rendered FROM its
+                        // door table (the `LibraryCatalogView.mastheadDoors`
+                        // precedent — the table is the render source, not a
+                        // comment beside one), so "the tray icon sits with
+                        // scraps and references" is a claim a pin can hold.
+                        ForEach(Self.inspectorDoors, id: \.panel) { door in
+                            Button(door.title, systemImage: door.symbol) {
+                                toggle(door.panel)
+                            }
+                            .labelStyle(.iconOnly)
+                            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                            .help(door.help)
                         }
                     }
-                    .help("This note's mode — Write · Takes · Lenses · Compare · "
-                        + "Blocks · Canvas (⌘1–⌘6)")
-                }
-                // The masthead's inspector cluster, rendered FROM its door
-                // table (the `LibraryCatalogView.mastheadDoors` precedent —
-                // the table is the render source, not a comment beside one),
-                // so "the tray icon sits with scraps and references" is a
-                // claim a pin can hold.
-                ForEach(Self.inspectorDoors, id: \.panel) { door in
-                    Button(door.title, systemImage: door.symbol) {
-                        toggle(door.panel)
-                    }
-                    .labelStyle(.iconOnly)
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                    .help(door.help)
+                    MastheadTagCluster(session: session, postID: postID, tokens: tokens)
                 }
             }
             .frame(maxWidth: mastheadMeasure, alignment: .leading)

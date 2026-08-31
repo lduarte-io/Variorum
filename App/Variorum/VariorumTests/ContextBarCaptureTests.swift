@@ -58,15 +58,16 @@ struct ContextBarCaptureTests {
         // ruling cares about: at rest, the bar is unchanged).
         trayDeleted: Int = 0
     ) -> ContextBar {
-        ContextBar(
+        // (Act 10 item 5: the tags left the bar for the masthead cluster —
+        // `tags` survives here only as the is-a-note signal these captures
+        // always used it as, and `folded` is inert.)
+        _ = folded
+        return ContextBar(
             tokens: tokens, originLabel: origin, forwardLabel: forward, books: books,
-            tagFace: tags.map {
-                .init(tags: $0, allTags: $0, onApply: { _ in }, onRemove: { _ in })
-            },
-            tagsFolded: folded,
+            isNote: tags != nil,
             trayFace: tags == nil ? nil : .init(
                 deletedCount: trayDeleted, onOpen: {}),
-            onBack: {}, onForward: {}, onOpenBook: { _ in }, onToggleTags: {})
+            onBack: {}, onForward: {}, onOpenBook: { _ in })
     }
 
     @Test func captureTheBarsStates() throws {
@@ -148,15 +149,13 @@ struct ContextBarCaptureTests {
                                 : "\(Int(radius))pt")
                             .font(.system(size: 9, weight: .semibold))
                             .foregroundStyle(tokens.muted)
-                        ContextBar(
-                            tokens: tokens, originLabel: "Orbit", forwardLabel: "Field Notes",
-                            books: one,
-                            tagFace: .init(
-                                tags: tags, allTags: tags,
-                                onApply: { _ in }, onRemove: { _ in }),
-                            tagsFolded: false, chipCornerRadius: radius,
-                            onBack: {}, onForward: {}, onOpenBook: { _ in },
-                            onToggleTags: {})
+                        // Act 10 item 5: the chips render at their new
+                        // home's grammar — the cards directly (the cluster's
+                        // content), since the bar no longer carries them.
+                        NoteTagChips(
+                            tokens: tokens, tags: tags, allTags: tags,
+                            onApply: { _ in }, onRemove: { _ in },
+                            cornerRadius: radius)
                             .frame(width: 520, alignment: .leading)
                             .background(tokens.room)
                     }

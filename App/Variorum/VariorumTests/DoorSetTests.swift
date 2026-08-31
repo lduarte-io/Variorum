@@ -377,10 +377,8 @@ struct BookAscentDeclarationTests {
     private func bar(books: [Reading]) -> ContextBar {
         ContextBar(
             tokens: .fallback(for: .light), originLabel: nil, forwardLabel: nil,
-            books: books,
-            tagFace: .init(tags: [], allTags: [], onApply: { _ in }, onRemove: { _ in }),
-            tagsFolded: false,
-            onBack: {}, onForward: {}, onOpenBook: { _ in }, onToggleTags: {})
+            books: books, isNote: true,
+            onBack: {}, onForward: {}, onOpenBook: { _ in })
     }
 
     @Test func theAscentIsDeclaredOnceWithItsDoorAndItsRefusal() {

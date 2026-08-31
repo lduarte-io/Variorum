@@ -16,6 +16,17 @@
 //  each live or honestly grey, with the note's tag cards riding after them
 //  (K12: visible at rest; ＃ folds them, deliberately and stickily).
 //
+//  ── pre-13u ACT 10 item 5 — THE TAGS LEFT THIS BAR (her ruling) ─────────
+//  *"I also want the tags moved from where they are in the top bar to being
+//  under the scraps / outside reference / tray button - they look cluttered
+//  up there in the navigation bar and I think they'd look nicer on the far
+//  right, across from what books an item is in."* This SUPERSEDES the K12
+//  placement above IN PART: the cards, their ＋ and the ＃ fold now live in
+//  the masthead's right edge (`MastheadTagCluster`), across from the
+//  membership chip; the bar keeps ← · book · → and the tray badge. The
+//  fold's stickiness (`TagChipsFold`) and ⌘⇧I are untouched — one
+//  preference, a new address.
+//
 //  ── WHAT CHANGED, AND WHAT DID NOT ───────────────────────────────────────
 //  The NAVIGATION under it is 13f's, untouched: `NavigationHistory`'s
 //  arithmetic, ⌘[ / ⌘], and the W21/membership ascent (the shell decides
@@ -56,36 +67,19 @@ struct ContextBar: View {
     /// book opens on click, several open the list, none leaves the icon
     /// grey.
     let books: [Reading]
-    /// 13g batch 7 (R6-1): the note's tags, as coloured cards. Present only
-    /// when the pane holds a NOTE; a pane at the shelf or in a book has no
-    /// tags to wear, and no ＃ door either (P-2).
-    var tagFace: TagFace? = nil
-    /// K12 — her deliberate, sticky choice (`TagChipsFold`).
-    let tagsFolded: Bool
+    /// Whether the pane holds a NOTE — the book door and the tray badge are
+    /// note-only (P-2). (This used to be derived from the tag face; the
+    /// tags left for the masthead at Act 10 item 5.)
+    var isNote: Bool = false
     /// 13j J2 — the TRAY badge. Present only when the pane holds a note;
     /// the badge itself renders only when that note has deleted something
     /// (her sitting-round-1 ruling: *"visible ONLY when the note has
     /// deleted/archived blocks"* — calm at rest).
     var trayFace: TrayFace? = nil
-    /// R4-3: the chips' corner radius. Defaulted, so every caller in the
-    /// app gets the shipped shape and only the capture harness ever names
-    /// one (her experiment framing — the variants are a picture, not a
-    /// setting).
-    var chipCornerRadius: CGFloat = TagChipShape.cornerRadius
     let onBack: () -> Void
     let onForward: () -> Void
     /// The ascent: open this book, revealed at this note.
     let onOpenBook: (String) -> Void
-    let onToggleTags: () -> Void
-
-    /// Everything the tag half needs, bundled so the bar stays a pure
-    /// presentation of what it is handed (the `books` shape).
-    struct TagFace {
-        var tags: [Tag]
-        var allTags: [Tag]
-        var onApply: (String) -> Void
-        var onRemove: (Tag) -> Void
-    }
 
     /// The tray half, same bundling (13j J2).
     struct TrayFace {
@@ -109,21 +103,15 @@ struct ContextBar: View {
     /// act is unchanged; what it gains is a catalog row, a written refusal
     /// and this walk's coverage.
     static let surfaceCapabilities: [CapabilityID] = [
-        .navigateBack, .navigateForward, .toggleTagChips, .openBookAtNote,
-        // 13e E8: the CARDS' own doors — `＋` types a tag on, `✕` takes one
-        // off. They have worked since 13g R6-1 and were never declared; the
-        // Library's rows now render the same act, so the one act is
-        // declared once and both renderers name it (E11's shape, one act
-        // over).
-        .tagNote,
-        // 13j J2: the tray badge — the bar's fifth door, and the only one
+        .navigateBack, .navigateForward, .openBookAtNote,
+        // (`.toggleTagChips` and `.tagNote` moved to `MastheadTagCluster`
+        // with the cards — Act 10 item 5. One act, its renderer moved.)
+        // 13j J2: the tray badge — the bar's fourth door, and the only one
         // that is CONDITIONAL (see `trayDoorShown`).
         .showNoteTray,
     ]
 
     @State private var listingBooks = false
-
-    private var isNote: Bool { tagFace != nil }
 
     /// The doors this bar renders, in her screenshot's order — and the
     /// literal thing the body iterates, so "the row never changes" is a
@@ -145,11 +133,6 @@ struct ContextBar: View {
         CapabilityRegistry.isEnabled(
             .openBookAtNote, in: CapabilityContext(canAscendToBook: !books.isEmpty))
     }
-
-    /// What the ＃ door DOES, as a value the body reads: fold and the cards
-    /// go, unfold and they are back. K12's whole behaviour, stated where a
-    /// pin can hold it rather than only inside a `ViewBuilder`.
-    var chipsShown: Bool { tagFace != nil && !tagsFolded }
 
     /// **Whether the tray badge is on the bar** (13j J2), as a value rather
     /// than an `if` inside the body — the K11 discipline this file already
@@ -193,19 +176,11 @@ struct ContextBar: View {
                     switch icon {
                     case .back: backDoor
                     case .book: bookDoor
-                    case .tags: tagsDoor
                     case .forward: forwardDoor
                     }
                 }
                 if let trayFace, trayDoorShown {
                     trayDoor(trayFace)
-                }
-                if let tagFace, chipsShown {
-                    NoteTagChips(
-                        tokens: tokens, tags: tagFace.tags, allTags: tagFace.allTags,
-                        onApply: tagFace.onApply, onRemove: tagFace.onRemove,
-                        cornerRadius: chipCornerRadius)
-                        .padding(.leading, 6)
                 }
                 Spacer(minLength: 0)
             }
@@ -310,23 +285,4 @@ struct ContextBar: View {
         .help(WorkspaceNaming.trayDoorHelp(deleted: face.deletedCount))
     }
 
-    /// K12's deliberate fold. Folded it carries the count (the shipped
-    /// folded grammar); unfolded the cards are right there.
-    private var tagsDoor: some View {
-        Button(action: onToggleTags) {
-            glyph(enabled: true) {
-                HStack(spacing: 2) {
-                    Image(systemName: "number")
-                    if let count = ContextBarDoors.tagsDoorCount(
-                        folded: tagsFolded, tagCount: tagFace?.tags.count ?? 0) {
-                        Text(tokens.chromeLabel("\(count)"))
-                            .foregroundStyle(tokens.muted)
-                            .lineLimit(1)
-                    }
-                }
-            }
-        }
-        .buttonStyle(.plain)
-        .help(WorkspaceNaming.tagsFoldHelp(folded: tagsFolded))
-    }
 }

@@ -29,9 +29,12 @@ import Foundation
 
 nonisolated enum ContextBarDoors {
     /// The row, in her screenshot's order. `Hashable` because the bar
-    /// iterates it.
+    /// iterates it. (`.tags` LEFT the row at Act 10 item 5 — her ruling
+    /// moved the tag cards and their fold to the masthead's right edge,
+    /// `MastheadTagCluster`; this partially supersedes K11/K12's placement,
+    /// recorded there and in the wave record.)
     enum Icon: Hashable, Sendable, CaseIterable {
-        case back, book, tags, forward
+        case back, book, forward
     }
 
     /// **R4-1 — the two navigation glyphs are a MIRRORED PAIR**, her
@@ -48,18 +51,17 @@ nonisolated enum ContextBarDoors {
     static let backGlyph = "\u{2190}"
     static let forwardGlyph = "\u{2192}"
 
-    /// **THE CONSTANT ROW.** A pane holding a NOTE wears all four; a pane
+    /// **THE CONSTANT ROW.** A pane holding a NOTE wears all three; a pane
     /// holding a PLACE (the shelf, the library, a book, the recovery
     /// surface) wears the two that mean anything there.
     ///
-    /// The two note-only doors are ABSENT rather than grey at a place for
-    /// P-2's reason — a door that can never act in its context isn't
-    /// rendered — and that is a different rule from the greys inside the
-    /// note's own row, where a note with no books still HAS a book door
-    /// (her ruling names that case explicitly: *"the icon sits honestly
-    /// grey"*).
+    /// The note-only door is ABSENT rather than grey at a place for P-2's
+    /// reason — a door that can never act in its context isn't rendered —
+    /// and that is a different rule from the greys inside the note's own
+    /// row, where a note with no books still HAS a book door (her ruling
+    /// names that case explicitly: *"the icon sits honestly grey"*).
     static func iconRow(isNote: Bool) -> [Icon] {
-        isNote ? [.back, .book, .tags, .forward] : [.back, .forward]
+        isNote ? [.back, .book, .forward] : [.back, .forward]
     }
 
     /// What a click on the book icon DOES — her ruling, exactly: *"click =
@@ -82,7 +84,9 @@ nonisolated enum ContextBarDoors {
 
     /// What the ＃ door SAYS. Folded it carries the count (the shipped
     /// folded grammar, kept); unfolded the chips are right there, so a
-    /// number beside them would only repeat what she can see.
+    /// number beside them would only repeat what she can see. (The door
+    /// itself lives on the masthead cluster since Act 10 item 5 — the rule
+    /// moved with it, unchanged.)
     static func tagsDoorCount(folded: Bool, tagCount: Int) -> Int? {
         folded && tagCount > 0 ? tagCount : nil
     }

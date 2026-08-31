@@ -274,8 +274,13 @@ struct CapabilityRegistryTests {
             // 13f batch 5 (W23): the membership chip's per-book diverge door.
             .union(MembershipChip.surfaceCapabilities)
             // 13k K11/K12: the context bar's own icon row — ← and → (the
-            // ⌘[ / ⌘] acts, wearing their faces) and the ＃ tag fold.
+            // ⌘[ / ⌘] acts, wearing their faces).
             .union(ContextBar.surfaceCapabilities)
+            // Act 10 item 5 (A JUSTIFIED EDIT, the E2/E8 convention): the
+            // tag cards, their ＋ and the ＃ fold moved to the masthead's
+            // right edge — the acts moved WITH their renderer, so the
+            // cluster is a new line here and the union stays exact.
+            .union(MastheadTagCluster.surfaceCapabilities)
             // 13e E2 (A17): Write's block-selection banner — the SECOND
             // renderer of the one delete-selected act (the board's banner is
             // the first). A JUSTIFIED EDIT to this pin: E2 adds a surface

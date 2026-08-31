@@ -63,12 +63,8 @@ struct NoteWindowFirstPassTests {
     private func bar(books: [Reading], isNote: Bool, origin: String? = nil) -> ContextBar {
         ContextBar(
             tokens: .fallback(for: .light), originLabel: origin, forwardLabel: nil,
-            books: books,
-            tagFace: isNote
-                ? .init(tags: [], allTags: [], onApply: { _ in }, onRemove: { _ in })
-                : nil,
-            tagsFolded: false,
-            onBack: {}, onForward: {}, onOpenBook: { _ in }, onToggleTags: {})
+            books: books, isNote: isNote,
+            onBack: {}, onForward: {}, onOpenBook: { _ in })
     }
 
     /// **The clip's own precondition, closed.** A note-only window has no

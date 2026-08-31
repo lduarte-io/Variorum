@@ -298,17 +298,12 @@ struct ContextBarTests {
     /// and the tag fold as its own sticky preference. The claim below is
     /// unchanged — this is the new call shape.
     private func bar(
-        origin: String?, books: [Reading], forward: String? = nil, isNote: Bool = false,
-        tagsFolded: Bool = false
+        origin: String?, books: [Reading], forward: String? = nil, isNote: Bool = false
     ) -> ContextBar {
         ContextBar(
             tokens: .fallback(for: .light), originLabel: origin, forwardLabel: forward,
-            books: books,
-            tagFace: isNote
-                ? .init(tags: [], allTags: [], onApply: { _ in }, onRemove: { _ in })
-                : nil,
-            tagsFolded: tagsFolded,
-            onBack: {}, onForward: {}, onOpenBook: { _ in }, onToggleTags: {})
+            books: books, isNote: isNote,
+            onBack: {}, onForward: {}, onOpenBook: { _ in })
     }
 
     /// The bar exists exactly when it has something to say — a cold launch
@@ -328,43 +323,29 @@ struct ContextBarTests {
     /// **13k K11 — THE ROW NEVER CHANGES SHAPE.** Her ruling: *"the
     /// collapsing and growing in that bar is a little annoying to me"* …
     /// *"it should always look like this"*. So a note's bar renders all
-    /// four doors whatever the state is, and the ones that cannot act are
-    /// GREY rather than gone.
+    /// three doors whatever the state is, and the ones that cannot act are
+    /// GREY rather than gone. *(Act 10 item 5: the ＃ and the cards left
+    /// for the masthead cluster — the row is three doors now; the
+    /// constancy claim is unchanged.)*
     ///
     /// DISCRIMINATING REVERT: make `ContextBar.renderedIcons` drop `.back`
     /// when `originLabel == nil` (13f's own shape, where the back half
     /// rendered only with a history) — the first expectation fails.
-    @Test func theIconRowIsTheSameFourDoorsWhateverTheState() {
+    @Test func theIconRowIsTheSameThreeDoorsWhateverTheState() {
         let cold = bar(origin: nil, books: [], isNote: true)
-        #expect(cold.renderedIcons == [.back, .book, .tags, .forward])
+        #expect(cold.renderedIcons == [.back, .book, .forward])
         #expect(!cold.backEnabled && !cold.forwardEnabled && !cold.bookEnabled,
                 "all three greys, none of them absent")
         let full = bar(
             origin: "Shelf", books: [book("Orbit")], forward: "Field Notes", isNote: true)
-        #expect(full.renderedIcons == [.back, .book, .tags, .forward],
-                "the same four, in the same order")
+        #expect(full.renderedIcons == [.back, .book, .forward],
+                "the same three, in the same order")
         #expect(full.backEnabled && full.forwardEnabled && full.bookEnabled)
-        // A pane holding a PLACE has no tags and no book (P-2: a door that
-        // can never act in its context isn't rendered) — a different rule
-        // from the greys INSIDE a note's row, and the reason the shelf's
-        // chrome is unchanged by the always-visible row.
+        // A pane holding a PLACE has no book door (P-2: a door that can
+        // never act in its context isn't rendered) — a different rule from
+        // the greys INSIDE a note's row, and the reason the shelf's chrome
+        // is unchanged by the always-visible row.
         #expect(bar(origin: "Shelf", books: []).renderedIcons == [.back, .forward])
-    }
-
-    /// **13k K12 — the ＃ folds the CARDS, and only the cards.** The icon
-    /// row is identical either way (that is K11), and a place never shows
-    /// cards because it has none.
-    ///
-    /// DISCRIMINATING REVERT: make `ContextBar.chipsShown` ignore
-    /// `tagsFolded` — the second expectation fails.
-    @Test func theHashDoorFoldsTheCardsAndNothingElse() {
-        let showing = bar(origin: nil, books: [], isNote: true)
-        let folded = bar(origin: nil, books: [], isNote: true, tagsFolded: true)
-        #expect(showing.chipsShown)
-        #expect(!folded.chipsShown)
-        #expect(folded.renderedIcons == showing.renderedIcons,
-                "folding the cards never changes the row — that is the whole ruling")
-        #expect(!bar(origin: "Shelf", books: []).chipsShown, "a place has no cards")
     }
 }
 

@@ -110,6 +110,10 @@ struct NoteTagChips: View {
     /// R4-3: the shipped default, overridable so the capture harness can
     /// render her radius variants without a second copy of the chip.
     var cornerRadius: CGFloat = TagChipShape.cornerRadius
+    /// What the add door SAYS. The dense listing rows keep the bare ＋; the
+    /// masthead cluster passes "＋ tag" (Act 10 item 5 — her delegated
+    /// label call, judged in place).
+    var addLabel: String = "＋"
 
     @State private var adding = false
     @Environment(\.colorScheme) private var scheme
@@ -176,7 +180,7 @@ struct NoteTagChips: View {
 
     private var addDoor: some View {
         Button { adding = true } label: {
-            Text("＋")
+            Text(addLabel)
                 .font(tokens.small)
                 .foregroundStyle(tokens.faint)
                 .padding(.horizontal, 4)

@@ -75,7 +75,6 @@ struct NoteWindowView: View {
             // four app-scope greys already carry.
             onBack: {},
             onForward: {},
-            onToggleTags: { router.toggleTagChips() },
             onFocus: {},
             // The ascent from a note-only window: it names the book, and the
             // app's navigation TARGET — a full window — opens it and raises

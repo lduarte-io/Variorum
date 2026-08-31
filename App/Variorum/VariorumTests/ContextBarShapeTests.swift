@@ -24,15 +24,14 @@ import VariorumCore
 
 @Suite("The context bar's icon row (13k K11)")
 struct ContextBarDoorsTests {
-    /// **THE CONSTANT ROW.** Four doors for a note, in her screenshot's
-    /// order, whatever the state is; two for a place, because the other
-    /// two could never act there (P-2).
-    ///
-    /// DISCRIMINATING REVERT: return `[.back, .book, .forward]` for a note
-    /// (i.e. hide the tag door when there are no tags, the shape the
-    /// pre-13k bar had for its own halves) — the first expectation fails.
-    @Test func theRowIsFourDoorsForANoteAndTwoForAPlace() {
-        #expect(ContextBarDoors.iconRow(isNote: true) == [.back, .book, .tags, .forward])
+    /// **THE CONSTANT ROW.** Three doors for a note, whatever the state
+    /// is; two for a place, because the book door could never act there
+    /// (P-2). *(Act 10 item 5 SUPERSEDED the four-door row: her ruling
+    /// moved the ＃ and the cards to the masthead's right edge —
+    /// `MastheadTagCluster` — so `.tags` left the row. The constancy claim
+    /// itself is unchanged and still pinned here.)*
+    @Test func theRowIsThreeDoorsForANoteAndTwoForAPlace() {
+        #expect(ContextBarDoors.iconRow(isNote: true) == [.back, .book, .forward])
         #expect(ContextBarDoors.iconRow(isNote: false) == [.back, .forward])
     }
 
@@ -93,7 +92,8 @@ struct ContextBarDoorsTests {
     }
 
     /// The ＃ carries the count only when the cards are hidden — unfolded,
-    /// a number would repeat what is right beside it.
+    /// a number would repeat what is right beside it. (The door lives on
+    /// the masthead cluster since Act 10 item 5; the rule moved unchanged.)
     @Test func theTagsDoorCarriesTheCountOnlyWhenFolded() {
         #expect(ContextBarDoors.tagsDoorCount(folded: true, tagCount: 3) == 3)
         #expect(ContextBarDoors.tagsDoorCount(folded: true, tagCount: 0) == nil,

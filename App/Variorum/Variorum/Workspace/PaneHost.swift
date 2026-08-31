@@ -47,7 +47,6 @@ struct PaneHost<Content: View>: View {
     /// 13k K11: the → is a real forward door now — ⌘]'s face (R4-1
     /// replaced the chevron: it read as the ＃'s expander).
     let onForward: () -> Void
-    let onToggleTags: () -> Void
     let onFocus: () -> Void
     /// The ascent (W20 a): open this book, revealed at this note.
     let onOpenBook: (String, String) -> Void
@@ -62,13 +61,9 @@ struct PaneHost<Content: View>: View {
     /// the pane's note next changes.
     @State private var books: [Reading] = []
 
-    /// 13g batch 7 (R6-1): the note's tags and the live taxonomy behind the
-    /// `＋`. Same one-shot discipline as `books` and for the same reason —
-    /// a held observation on `post_tag` would re-read at write rate; this
-    /// re-reads when the pane's note changes and after her own add/remove,
-    /// which are the only two ways it moves from here.
-    @State private var tags: [Tag] = []
-    @State private var allTags: [Tag] = []
+    // (The tag half LEFT this host at Act 10 item 5 — the cards, their
+    // loaders and their doors live in `MastheadTagCluster` on the masthead's
+    // right edge now, her ruling.)
 
     /// 13j J2 — the tray badge's counts. Unlike `books`/`tags` above this
     /// IS a held observation, and deliberately so: the badge's whole job is
@@ -80,13 +75,6 @@ struct PaneHost<Content: View>: View {
     /// observation does not re-run at autosave rate on the table autosave
     /// writes (its own doc comment carries the reasoning).
     @State private var trayCounts = Queries.TrayCounts(deleted: 0, preservedOriginals: 0)
-
-    /// 13k K12: her deliberate, sticky fold — this Mac's own preference,
-    /// read the way every other local UI setting in the app is read
-    /// (`writeHoverHandles`, the paragraph gap, the spellcheck level). Every
-    /// bar in every window observes the same key, so ⌘⇧I and the ＃ icon
-    /// move all of them at once.
-    @AppStorage(TagChipsFold.settingKey) private var tagsFolded = TagChipsFold.defaultFolded
 
     /// The note this pane holds, if it holds one (a scraps container counts
     /// — it is a container with memberships like any other).
@@ -108,13 +96,7 @@ struct PaneHost<Content: View>: View {
                 originLabel: history.origin.map { workspace.label(for: $0) },
                 forwardLabel: history.next.map { workspace.label(for: $0) },
                 books: books,
-                tagFace: notePostID.map { postID in
-                    ContextBar.TagFace(
-                        tags: tags, allTags: allTags,
-                        onApply: { path in apply(path, to: postID) },
-                        onRemove: { tag in remove(tag, from: postID) })
-                },
-                tagsFolded: tagsFolded,
+                isNote: notePostID != nil,
                 trayFace: notePostID.map { postID in
                     ContextBar.TrayFace(
                         deletedCount: trayCounts.deleted,
@@ -125,8 +107,7 @@ struct PaneHost<Content: View>: View {
                 onOpenBook: { bookID in
                     guard let noteID else { return }
                     onOpenBook(bookID, noteID)
-                },
-                onToggleTags: onToggleTags)
+                })
             if bar.hasContent {
                 // The badge's popover is GONE (the post-13l polish round,
                 // ledger row 9 — the kickoff's C1 small call): the badge stays
@@ -151,7 +132,6 @@ struct PaneHost<Content: View>: View {
             PaneFocusCatcher(active: split && !focused, onFocus: onFocus)
         }
         .task(id: noteID) { await loadBooks() }
-        .task(id: notePostID) { await loadTags() }
         .task(id: notePostID) { await watchTray() }
     }
 
@@ -189,50 +169,6 @@ struct PaneHost<Content: View>: View {
             // A failed observation leaves the badge away rather than
             // showing a number it cannot stand behind.
             trayCounts = Queries.TrayCounts(deleted: 0, preservedOriginals: 0)
-        }
-    }
-
-    // MARK: - The tag half (13g batch 7, R6-1)
-
-    private func loadTags() async {
-        guard let postID = notePostID else {
-            tags = []
-            allTags = []
-            return
-        }
-        let read = try? await session.database.read { db in
-            (applied: try Queries.postTags(db, postID: postID),
-             all: try Queries.allTags(db))
-        }
-        tags = read?.applied ?? []
-        allTags = read?.all ?? []
-    }
-
-    /// Applying a typed path goes through the SHIPPED type-to-create door
-    /// (`TagAssignmentViewModel.applyTypedPath`, 13b 3D's N24), so the
-    /// hierarchy walk, the per-segment creation and the
-    /// already-applied-is-a-no-op rule are the one implementation the sheet
-    /// has always used — this face adds no tag semantics of its own.
-    private func apply(_ path: String, to postID: String) {
-        let model = TagAssignmentViewModel(session: session, postID: postID)
-        Task {
-            if await model.applyTypedPath(path) == nil, let error = model.lastError {
-                session.status.speak(error)
-            }
-            await loadTags()
-        }
-    }
-
-    private func remove(_ tag: Tag, from postID: String) {
-        Task {
-            do {
-                try await session.runner.run { ops in
-                    try ops.removeTag(tag.id, fromPost: postID)
-                }
-            } catch {
-                session.status.speak(TagsViewModel.message(error))
-            }
-            await loadTags()
         }
     }
 

@@ -106,26 +106,24 @@ struct NodSetTests {
         #expect(TagChipAdder.suggestions(many, typed: "", applied: []).count == 8)
     }
 
-    /// The bar's own rule, widened by R6-1: a pane holding a NOTE always has
-    /// something to say now, because the `＋` her ruling moved here is a door
-    /// that must exist before there is a tag to show. A pane holding a place
-    /// (shelf, library, a book) still renders nothing.
+    /// The bar's own rule: a pane holding a NOTE always has something to
+    /// say — K11's constant row (a grey book door is still a door, and the
+    /// tray badge lands here). A pane holding a place (shelf, library, a
+    /// book) still renders nothing until it has been somewhere. *(The
+    /// tag-door reason moved to the masthead cluster with the cards — Act
+    /// 10 item 5; the note-constancy claim itself is unchanged.)*
     ///
-    /// DISCRIMINATING REVERT: drop `|| tagFace != nil` from
-    /// `ContextBar.hasContent` and the second expectation fails — a bookless
-    /// note reached directly loses its tag door entirely.
-    @Test func aNotePaneAlwaysCarriesTheBarBecauseTheTagDoorLivesThere() {
-        func bar(tagFace: ContextBar.TagFace?) -> ContextBar {
+    /// DISCRIMINATING REVERT: drop `isNote ||` from
+    /// `ContextBarDoors.hasContent` and the second expectation fails.
+    @Test func aNotePaneAlwaysCarriesTheBar() {
+        func bar(isNote: Bool) -> ContextBar {
             ContextBar(
                 tokens: .fallback(for: .light), originLabel: nil, forwardLabel: nil,
-                books: [], tagFace: tagFace, tagsFolded: false,
-                onBack: {}, onForward: {}, onOpenBook: { _ in }, onToggleTags: {})
+                books: [], isNote: isNote,
+                onBack: {}, onForward: {}, onOpenBook: { _ in })
         }
-        #expect(!bar(tagFace: nil).hasContent, "a place has no tags")
-        #expect(
-            bar(tagFace: .init(tags: [], allTags: [], onApply: { _ in }, onRemove: { _ in }))
-                .hasContent,
-            "a note with NO tags still needs the ＋")
+        #expect(!bar(isNote: false).hasContent, "a place with no history says nothing")
+        #expect(bar(isNote: true).hasContent, "a note always carries the row")
     }
 
     /// The wire: applying and removing through the chip's own doors are the

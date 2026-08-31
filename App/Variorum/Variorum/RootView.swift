@@ -517,7 +517,6 @@ struct RootView: View {
                 router.workspace.focus(pane)
                 router.goForward(in: pane)
             },
-            onToggleTags: { router.toggleTagChips() },
             onFocus: { router.workspace.focus(pane) },
             // 13f W20(a): the bar's in-line ascends exactly like the chip's
             // link does — one shell decision, two doors.
