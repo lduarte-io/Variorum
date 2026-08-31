@@ -96,6 +96,38 @@ struct VariorumMobileApp: App {
                             encryption: fresh.encryption,
                             keyVault: fresh.keyVault, auth: fresh.auth)
                         await fresh.start()
+                        // R27b (round 2, batch 5): the starter Journal,
+                        // seeded ONCE on a genuinely new store. It lives
+                        // HERE — after `start()` — and not on any view,
+                        // for two reasons. (1) The shell is hosted alone
+                        // by several suites and furniture must not appear
+                        // in a pin's world. (2) THE BATCH-5 COLD REVIEW'S
+                        // MAJOR: from the shell it ran concurrently with
+                        // this very task, so it decided "this store is
+                        // new" milliseconds into a launch whose first sync
+                        // pull had not begun — and a phone joining an
+                        // existing account minted a second Journal that
+                        // then propagated to every device. After `start()`
+                        // the sign-in question is settled, so the gate
+                        // below reads facts instead of a coin flip.
+                        // Idempotent by construction, so the re-run after
+                        // an unlock is a no-op.
+                        await MobileStarterJournal.seedIfNeeded(
+                            session: session,
+                            storeVariant: bootstrap.storeVariant,
+                            gate: MobileStarterJournal.SyncGate(
+                                // Captured STRONGLY, deliberately: the
+                                // closures outlive nothing (the seed is
+                                // awaited right here), and a nil'd weak
+                                // reference would read as "no account",
+                                // which is the unsafe direction.
+                                belongsToAnAccount: {
+                                    fresh.sync.isConfigured
+                                        || fresh.account.variorum != nil
+                                },
+                                hasSyncedCleanly: {
+                                    fresh.sync.status.lastSuccessAt != nil
+                                }))
                     }
             case .opening:
                 // 13l L-c: the store opens off the main thread now, so there

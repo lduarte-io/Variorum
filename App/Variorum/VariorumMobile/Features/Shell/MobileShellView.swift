@@ -161,17 +161,13 @@ struct MobileShellView: View {
             }
         }
         .task { await starsModel.start() }
-        // R27b (round 2, batch 5): the starter Journal, seeded ONCE on a
-        // genuinely new store. It lives HERE and not on the shelf view
-        // because the shell is the app's composition root — the shelf is
-        // hosted alone by several suites, and furniture must not appear
-        // in a pin's world. Idempotent by construction (a per-store-variant
-        // mark AND a virgin-store guard), so a second `.task` is a no-op.
-        .task {
-            await MobileStarterJournal.seedIfNeeded(
-                session: session,
-                storeVariant: bootstrap?.storeVariant ?? .real)
-        }
+        // R27b's starter Journal used to be seeded from HERE, concurrently
+        // with the task that composes AppServices — which is what the
+        // batch-5 cold review's MAJOR was about: the seed always won that
+        // race, so its virgin-store guard was asked before sync could
+        // possibly have answered. It now runs in `VariorumMobileApp`'s own
+        // task, AFTER `services.start()`, where sign-in is settled and the
+        // sync gate has something true to read.
         #if DEBUG
         .fullScreenCover(isPresented: $spikePresented) { SpikeScreen() }
         #endif
@@ -308,12 +304,20 @@ struct MobileShellView: View {
             // pending text lands and the taker re-reads fresh BEFORE its
             // next keystroke can build on a stale photograph.
             let editors = router.editors
+            // THE ORDER IS FIXED HERE, SYNCHRONOUSLY (the architectural
+            // review's MAJOR 2), in the same turn as the `tab` assignment
+            // above. The task below suspends twice on database work, so two
+            // quick taps used to leave two unordered tasks racing to
+            // install liveness — and the loser installing last won. The
+            // token says which request this task belongs to; a task that
+            // resumes to find a newer one abandons its grant.
+            let handoff = editors.beginHandoff()
             // A5-8: a tab switch is a leaving, so the quick-note box files
             // whatever is in it (a no-op when it is empty).
             let quickNote = router.quickNote
             Task {
                 await quickNote.fileOnLeaving()
-                await editors.tabDidBecomeVisible(target)
+                await editors.tabDidBecomeVisible(target, handoff: handoff)
             }
         } label: {
             Text(tokens.chromeLabel(label))

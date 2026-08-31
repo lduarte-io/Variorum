@@ -65,6 +65,16 @@ final class MobileTakesBrowserController {
     /// every verb / projection ingest; empty when closed.
     private(set) var archived: [Variant] = []
 
+    /// One flight at a time for the MINTS (the architectural review's
+    /// MAJOR 1). `branchDisplayed` awaits a flush before it writes, which
+    /// is a wide window on a button that stays hittable throughout — and
+    /// nothing beneath the door catches a second `branchVariant`: the fan
+    /// is a list, so a double tap simply grew it by two takes she asked for
+    /// once. Scoped to the minting doors deliberately: choose/label/lock
+    /// are last-write-wins on one row and a latch would only hide a second
+    /// tap that changed nothing.
+    private let mintLatch = MobileWriteLatch()
+
     /// The pixels' hook: state or content changed — re-render the sheet.
     var onChanged: (() -> Void)?
 
@@ -325,6 +335,10 @@ final class MobileTakesBrowserController {
     /// goes live for editing; chosen never moves (R90).
     @discardableResult
     func branchDisplayed() async -> Variant? {
+        await mintLatch.run { await self.branchDisplayedOnce() } ?? nil
+    }
+
+    private func branchDisplayedOnce() async -> Variant? {
         guard let model, let blockID = openBlockID,
               let displayed = model.slot(for: blockID)?.variantID
         else { return nil }
@@ -377,6 +391,12 @@ final class MobileTakesBrowserController {
     }
 
     private func mint(
+        verb: Verb, _ body: @escaping @Sendable (Operations) throws -> Variant
+    ) async -> Variant? {
+        await mintLatch.run { await self.mintOnce(verb: verb, body) } ?? nil
+    }
+
+    private func mintOnce(
         verb: Verb, _ body: @escaping @Sendable (Operations) throws -> Variant
     ) async -> Variant? {
         guard let model else { return nil }

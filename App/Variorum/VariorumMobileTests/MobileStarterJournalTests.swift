@@ -20,6 +20,20 @@ import Testing
 import VariorumCore
 @testable import VariorumMobile
 
+/// The two sync facts the seed reads, as values a pin can move — the
+/// stand-in for `SyncSession.isConfigured` / `status.lastSuccessAt` (and
+/// for the signed-in account state that precedes a composed chain).
+@MainActor
+private final class FakeSync {
+    var belongsToAnAccount = false
+    var hasSyncedCleanly = false
+    var gate: MobileStarterJournal.SyncGate {
+        .init(
+            belongsToAnAccount: { [self] in belongsToAnAccount },
+            hasSyncedCleanly: { [self] in hasSyncedCleanly })
+    }
+}
+
 /// A mark that lives in the test, never in this machine's defaults.
 @MainActor
 private final class Mark {
@@ -179,6 +193,117 @@ struct MobileStarterJournalTests {
             }
             let books = try await db.read { db in try Queries.readings(db) }
             #expect(books.count == 1)
+        }
+    }
+
+    // MARK: The sync gate (the batch-5 cold review's MAJOR)
+
+    /// **A SIGNED-IN DEVICE DOES NOT DECIDE ITS STORE IS NEW BEFORE SYNC
+    /// HAS ANSWERED.** The virgin-store guard is a LOCAL read of a store
+    /// whose contents are about to arrive over the network; asking it at
+    /// launch answers a question nobody has the facts for yet. Declining is
+    /// free — nothing is marked, so the next launch asks again.
+    @Test func aSignedInDeviceDeclinesUntilItsFirstCleanRound() async throws {
+        try await withEditorWorld { session, db in
+            let mark = Mark()
+            let sync = FakeSync()
+            sync.belongsToAnAccount = true   // a composed chain, or a session
+
+            let outcome = await MobileStarterJournal.seedIfNeeded(
+                session: session, storeVariant: .dev, gate: sync.gate,
+                firstRoundWait: .milliseconds(150),
+                pollInterval: .milliseconds(10),
+                loadMark: mark.load, saveMark: mark.save)
+
+            #expect(outcome == .awaitingFirstSync)
+            #expect(!mark.seeded, "declining must not consume the one seed")
+            let books = try await db.read { db in try Queries.readings(db) }
+            #expect(books.isEmpty, "nothing was minted into her account's store")
+        }
+    }
+
+    /// **THE FINDING'S OWN SCRIPT, END TO END.** A phone joins an account
+    /// that already has a `Journal`. The first pull lands it DURING the
+    /// wait; the seed re-asks the virgin-store question and finds the
+    /// answer it could not have had at launch.
+    ///
+    /// On the pre-fix door this minted a second `Journal`, designated it,
+    /// pinned it to the shelf and minted a note — and `reading` is a synced
+    /// table with a trigger-fed outbox (SyncSpec §3), so all of it
+    /// propagated to every device on the account. Nothing in the merge
+    /// matrix converges a duplicate book away, and by design nothing should.
+    @Test func herCorpusArrivingDuringTheWaitCancelsTheSeed() async throws {
+        try await withEditorWorld { session, db in
+            let mark = Mark()
+            let sync = FakeSync()
+            sync.belongsToAnAccount = true
+
+            let seeding = Task {
+                await MobileStarterJournal.seedIfNeeded(
+                    session: session, storeVariant: .dev, gate: sync.gate,
+                    firstRoundWait: .seconds(5),
+                    pollInterval: .milliseconds(5),
+                    loadMark: mark.load, saveMark: mark.save)
+            }
+
+            // The first pull: HER Journal arrives.
+            try await session.runner.run { ops in
+                _ = try ops.createReading(
+                    name: MobileStarterJournal.bookName, kind: .curated,
+                    profile: "journal", sortField: .entryDate, sortDir: .asc)
+            }
+            sync.hasSyncedCleanly = true
+
+            #expect(await seeding.value == .storeNotNew)
+            #expect(!mark.seeded)
+            let books = try await db.read { db in try Queries.readings(db) }
+            #expect(books.count == 1, "HER Journal, alone — no duplicate beside it")
+        }
+    }
+
+    /// And the account that really IS empty still gets its book: the gate
+    /// defers the question, it does not answer it in the negative.
+    @Test func anEmptyAccountStillGetsTheBookOnceSyncHasSpoken() async throws {
+        try await withEditorWorld { session, db in
+            let mark = Mark()
+            let sync = FakeSync()
+            sync.belongsToAnAccount = true
+            sync.hasSyncedCleanly = true
+
+            let outcome = await MobileStarterJournal.seedIfNeeded(
+                session: session, storeVariant: .dev, gate: sync.gate,
+                firstRoundWait: .milliseconds(150),
+                pollInterval: .milliseconds(10),
+                loadMark: mark.load, saveMark: mark.save)
+
+            guard case .seeded = outcome else {
+                Issue.record("expected a seed, got \(outcome)")
+                return
+            }
+            #expect(mark.seeded)
+            let books = try await db.read { db in try Queries.readings(db) }
+            #expect(books.count == 1)
+        }
+    }
+
+    /// A device with no account anywhere seeds at once, exactly as before —
+    /// the store genuinely IS this device's, and the gate must not make a
+    /// first launch wait on a network nobody is using.
+    @Test func aDeviceWithNoAccountSeedsWithoutWaiting() async throws {
+        try await withEditorWorld { session, _ in
+            let mark = Mark()
+            let sync = FakeSync()   // belongsToAnAccount stays false
+
+            let outcome = await MobileStarterJournal.seedIfNeeded(
+                session: session, storeVariant: .dev, gate: sync.gate,
+                firstRoundWait: .seconds(30),   // never spent
+                pollInterval: .milliseconds(10),
+                loadMark: mark.load, saveMark: mark.save)
+
+            guard case .seeded = outcome else {
+                Issue.record("expected a seed, got \(outcome)")
+                return
+            }
         }
     }
 

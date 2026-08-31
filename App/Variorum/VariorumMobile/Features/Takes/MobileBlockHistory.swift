@@ -281,9 +281,17 @@ final class MobileBlockHistoryController {
         case deletedTake(Variant, meta: String)
         case origin(blockID: String, text: String, lineage: String)
 
+        /// A section header's MINIMUM pitch. It is no longer the whole
+        /// answer: the explainers are prose, so the sheet measures the row
+        /// (`MobileBlockHistoryCell.sectionHeaderHeight`) and floors it
+        /// here, keeping the shipped rhythm for the short headers while
+        /// letting the two long explainers say their whole sentence
+        /// (batch 6a's cold review, M1).
+        static let sectionHeaderFloor: CGFloat = 52
+
         var height: CGFloat {
             switch self {
-            case .sectionHeader: return 52
+            case .sectionHeader: return Self.sectionHeaderFloor
             case .takeHeader: return 34
             case .quietRun: return 30
             case .savepoint: return 62
@@ -297,13 +305,30 @@ final class MobileBlockHistoryController {
 
     func rows() -> [Row] {
         guard loaded else { return [] }
-        if history.isEmpty {
+        let active = history.activeTakes
+        // THE QUIET SENTENCE IS RESERVED FOR THE ONE-TAKE BLOCK (batch 6a's
+        // cold review, M2). `Queries.BlockHistory.isEmpty` is about
+        // SAVEPOINTS, archived takes, deleted takes and origins — it says
+        // nothing about how many live takes the block has. So a block she
+        // had FANNED but not yet committed (any `branchVariant`, the
+        // everyday state) fell down this arm and was told it has "one
+        // take", with every take section hidden: a face whose whole thesis
+        // is honest reporting, asserting a count that was false.
+        //
+        // The Mac guards the same sentence on `activeTakes.isEmpty` and
+        // draws its take sections unconditionally
+        // (`BlockHistoryPane.swift:475`); I10 makes its branch practically
+        // unreachable there, so the phone was the first surface ever to
+        // render this sentence and the `one take` clause had never been
+        // load-bearing. This is that rule in its reachable edition: the
+        // sentence stands only where it is TRUE, and the moment a second
+        // take exists the regions draw exactly as the Mac's do.
+        if history.isEmpty, active.count <= 1 {
             return [.quiet(BlockHistoryPath.nothingHere)]
         }
         var rows: [Row] = []
 
         // 1 — savepoint runs: ALL live takes, sectioned, the focused one open.
-        let active = history.activeTakes
         rows.append(.sectionHeader(
             title: BlockHistoryPath.savepointsSection,
             explainer: BlockHistoryPath.explainer))

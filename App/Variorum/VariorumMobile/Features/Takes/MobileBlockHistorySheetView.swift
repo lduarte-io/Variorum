@@ -253,7 +253,16 @@ extension MobileBlockHistorySheetView: UITableViewDataSource, UITableViewDelegat
     func tableView(
         _ tableView: UITableView, heightForRowAt indexPath: IndexPath
     ) -> CGFloat {
-        rows[indexPath.row].height
+        // Section headers are MEASURED (M1): their explainers are prose and
+        // a fixed pitch truncated the two longest of them. Everything else
+        // keeps the pure `Row.height` pitch, which is what makes this table
+        // cheap to lay out.
+        if case .sectionHeader(let title, let explainer) = rows[indexPath.row] {
+            return MobileBlockHistoryCell.sectionHeaderHeight(
+                title: title, explainer: explainer,
+                width: tableView.bounds.width, face: MobileEditorStyle.face)
+        }
+        return rows[indexPath.row].height
     }
 
     func tableView(
@@ -310,8 +319,12 @@ final class MobileBlockHistoryCell: UITableViewCell {
         case bringBack(blockID: String)
     }
 
-    private let titleLabel = UILabel()
-    private let metaLabel = UILabel()
+    /// Internal, not private, for ONE reason: M1's defect — a silently
+    /// truncated explainer — is invisible to a `rows()` pin and invisible
+    /// to a subview census. The only way to hold "the sentence really fits"
+    /// is to read the laid-out label, so the pin reads it.
+    let titleLabel = UILabel()
+    let metaLabel = UILabel()
     private let actButton = UIButton(type: .custom)
     private var act: Act?
     private var onAct: ((Act) -> Void)?
@@ -349,6 +362,12 @@ final class MobileBlockHistoryCell: UITableViewCell {
         titleLabel.textColor = face.ink
         metaLabel.font = face.chrome.withSize(11.5)
         metaLabel.textColor = face.muted
+        // RESET BOTH LINE CAPS ON EVERY CONFIGURE (batch 6a's cold review,
+        // M1 — and the recycled-cell rule this file's own header states):
+        // `init` set them once, so a cell that had carried a one-line row
+        // kept that cap when it came back as something taller.
+        titleLabel.numberOfLines = 2
+        metaLabel.numberOfLines = 2
 
         switch row {
         case .sectionHeader(let title, let explainer):
@@ -356,6 +375,15 @@ final class MobileBlockHistoryCell: UITableViewCell {
             titleLabel.font = face.chrome.withSize(12.5)
             titleLabel.textColor = face.muted
             titleLabel.text = MobileEditorStyle.chromeCase(title)
+            // UNBOUNDED, and the row is measured to fit it (see
+            // `sectionHeaderHeight`). The two explainers this face leans on
+            // hardest — the Savepoints one that says what the whole surface
+            // is, and the Came-from one whose second half explains the
+            // Bring back button rendered inches away — need three and four
+            // lines at default text size, and both stopped mid-thought
+            // under a two-line cap in a fixed 52pt row. The caps and the
+            // row height were jointly wrong, so both move.
+            metaLabel.numberOfLines = 0
             metaLabel.text = MobileEditorStyle.chromeCase(explainer)
 
         case .takeHeader(let variantID, let title, let focused, let savepoints, let expanded):
@@ -452,6 +480,38 @@ final class MobileBlockHistoryCell: UITableViewCell {
         actButton.titleLabel?.font = face.chrome.withSize(12)
         actButton.accessibilityIdentifier = identifier
         actButton.accessibilityLabel = label
+    }
+
+    /// **What a `.sectionHeader` row actually needs at this width** (batch
+    /// 6a's cold review, M1). Every other row kind carries text of a known
+    /// shape and keeps its fixed pitch from `Row.height`; only the section
+    /// headers carry prose, and their prose is the face's own explanation
+    /// of itself. Measuring is `layoutSubviews`' arithmetic run ahead of
+    /// time — same fonts, same `chromeCase` transform, same 12pt side
+    /// insets and 4pt vertical padding, and no act button (a header never
+    /// has one) — so the row can never be shorter than what the cell then
+    /// draws into it.
+    ///
+    /// Floored at the old fixed 52pt so short headers keep the calm rhythm
+    /// the face shipped with; only the long explainers grow.
+    static func sectionHeaderHeight(
+        title: String, explainer: String,
+        width: CGFloat, face: MobileEditorStyle.Face
+    ) -> CGFloat {
+        let textWidth = max(width - 24, 40)
+        let bounds = CGSize(width: textWidth, height: .greatestFiniteMagnitude)
+        let titleHeight = (MobileEditorStyle.chromeCase(title) as NSString)
+            .boundingRect(
+                with: bounds, options: [.usesLineFragmentOrigin, .usesFontLeading],
+                attributes: [.font: face.chrome.withSize(12.5)], context: nil)
+            .height
+        let metaHeight = (MobileEditorStyle.chromeCase(explainer) as NSString)
+            .boundingRect(
+                with: bounds, options: [.usesLineFragmentOrigin, .usesFontLeading],
+                attributes: [.font: face.chrome.withSize(11.5)], context: nil)
+            .height
+        return max(ceil(titleHeight) + 2 + ceil(metaHeight) + 8,
+                   MobileBlockHistoryController.Row.sectionHeaderFloor)
     }
 
     override func layoutSubviews() {

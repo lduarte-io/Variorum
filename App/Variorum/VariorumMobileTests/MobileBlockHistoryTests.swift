@@ -500,6 +500,152 @@ struct MobileBlockHistoryTests {
         }
     }
 
+    // MARK: The fix round — batch 6a's cold review
+
+    /// **A FANNED BLOCK IS NOT A BLOCK WITH ONE TAKE** (M2). The face used
+    /// to route on `Queries.BlockHistory.isEmpty`, which is about
+    /// savepoints, archived takes, deleted takes and origins and says
+    /// NOTHING about how many live takes there are — so the everyday state
+    /// after `branchVariant` (fanned, nothing committed yet) was answered
+    /// with *"This block has no past yet: one take…"* and every take
+    /// section was hidden. A false count, on the one surface whose whole
+    /// thesis is honest reporting.
+    ///
+    /// The Mac has always drawn its take sections unconditionally
+    /// (`BlockHistoryPane.swift:475`); this is the phone catching up.
+    @Test func aFannedBlockShowsItsTakesInsteadOfClaimingItHasOne() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedPost(session)
+            // Fan it and commit NOTHING — her ordinary "let me try another
+            // way of saying this" moment.
+            try await session.runner.run { ops in
+                _ = try ops.branchVariant(seed.blockID, from: seed.variantID)
+            }
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            model.blockHistory.open(blockID: seed.blockID)
+            await model.blockHistory.refresh()
+
+            let rows = model.blockHistory.rows()
+            #expect(!rows.contains(.quiet(BlockHistoryPath.nothingHere)),
+                    "the sentence asserts ONE take; this block has two")
+            #expect(sectionTitles(rows) == [BlockHistoryPath.savepointsSection],
+                    "region 1 draws — the other three are genuinely empty")
+            let takeHeaders = rows.filter {
+                if case .takeHeader = $0 { return true }
+                return false
+            }
+            #expect(takeHeaders.count == 2, "one header per live take, as on the Mac")
+        }
+    }
+
+    /// **BOTH LONG EXPLAINERS SAY THEIR WHOLE SENTENCE** (M1), measured on
+    /// the REAL mounted sheet at the real width, through the real delegate
+    /// height and the real cell layout.
+    ///
+    /// What was lost was not decoration: the Savepoints explainer's dropped
+    /// tail names the fourth region, and the Came-from explainer's dropped
+    /// tail is the sentence explaining the **Bring back** button rendered
+    /// inches away. The cap and the fixed 52pt row were JOINTLY wrong, so
+    /// this holds both halves — the label is unbounded AND the row it is
+    /// given is tall enough for it.
+    ///
+    /// The cell is deliberately configured as a `.takeHeader` FIRST: that
+    /// row kind sets a one-line title and a right-aligned meta, so a cell
+    /// arriving from the recycle pool proves the reset too.
+    @Test func bothLongExplainersFitTheRowsTheSheetGivesThem() async throws {
+        try await withEditorWorld { session, _ in
+            // A merge, so the came-from region really renders.
+            let post = try await session.runner.run { ops -> Container in
+                let post = try ops.createPost(title: "merged", profile: .blog)
+                _ = try ops.newBlock(in: post.id, text: "The first half.", at: .end)
+                _ = try ops.newBlock(in: post.id, text: "The second half.", at: .end)
+                return post
+            }
+            let parents = try await session.database.read { db in
+                try String.fetchAll(
+                    db,
+                    sql: """
+                        SELECT block_id FROM container_block
+                        WHERE container_id = ? AND deleted_at IS NULL ORDER BY position
+                        """,
+                    arguments: [post.id])
+            }
+            let mergedBlock = try await session.runner.run { ops -> String in
+                try ops.merge(parents[0], parents[1]).block.id
+            }
+
+            let (model, surface) = await makeSurfaceEditor(session, postID: post.id)
+            let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 402, height: 800))
+            let host = UIViewController()
+            host.view.addSubview(surface)
+            surface.frame = host.view.bounds
+            window.rootViewController = host
+            window.makeKeyAndVisible()
+            defer { window.isHidden = true }
+            window.layoutIfNeeded()
+
+            model.blockHistory.open(blockID: mergedBlock)
+            await settle { !model.blockHistory.rows().isEmpty }
+            let sheet = try #require(surface.textView.blockHistorySheetView)
+            window.layoutIfNeeded()
+
+            let table = sheet.tableForTesting
+            let rows = sheet.renderedRows
+            let headerIndices = rows.indices.filter {
+                if case .sectionHeader = rows[$0] { return true }
+                return false
+            }
+            #expect(headerIndices.count >= 2,
+                    "savepoints AND came-from — the two long explainers")
+
+            for index in headerIndices {
+                guard case .sectionHeader(let title, _) = rows[index] else { continue }
+                let height = sheet.tableView(
+                    table, heightForRowAt: IndexPath(row: index, section: 0))
+                let cell = MobileBlockHistoryCell(
+                    style: .default, reuseIdentifier: MobileBlockHistoryCell.reuseID)
+                // Out of the recycle pool wearing another row's caps.
+                cell.configure(
+                    .takeHeader(
+                        variantID: "v", title: "take 1 of 2", focused: true,
+                        savepoints: 3, expanded: false),
+                    face: MobileEditorStyle.face) { _ in }
+                cell.configure(rows[index], face: MobileEditorStyle.face) { _ in }
+                cell.frame = CGRect(
+                    x: 0, y: 0, width: table.bounds.width, height: height)
+                cell.layoutIfNeeded()
+
+                // The UNBOUNDED height, measured independently of the
+                // label — `sizeThatFits` honours `numberOfLines`, so asking
+                // the label how tall it wants to be answers with its own
+                // cap and pins nothing. (That mistake was made here once
+                // and the pin passed on the pre-fix code; this is the
+                // corrected form.)
+                let explainerText = cell.metaLabel.text ?? ""
+                let needed = (explainerText as NSString).boundingRect(
+                    with: CGSize(width: cell.metaLabel.bounds.width,
+                                 height: .greatestFiniteMagnitude),
+                    options: [.usesLineFragmentOrigin, .usesFontLeading],
+                    attributes: [.font: cell.metaLabel.font as Any],
+                    context: nil).height
+                #expect(cell.metaLabel.numberOfLines == 0,
+                        "\(title): a section header's explainer is prose — never capped")
+                #expect(
+                    cell.metaLabel.bounds.height >= needed - 0.5,
+                    "\(title): drawn in \(cell.metaLabel.bounds.height)pt, needs \(needed)pt — it stops mid-thought")
+                #expect(
+                    cell.metaLabel.frame.maxY <= cell.contentView.bounds.height + 0.5,
+                    "\(title): the explainer runs past the bottom of its own row")
+                #expect(
+                    cell.titleLabel.frame.minY >= -0.5,
+                    "\(title): the header's title is pushed off the top")
+            }
+
+            model.blockHistory.close()
+        }
+    }
+
     // MARK: The empty case
 
     /// An ordinary block has no past, and the face says exactly that rather

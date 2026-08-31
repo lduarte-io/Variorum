@@ -52,6 +52,9 @@ final class MobileCreateBookModel {
     }
 
     /// One-shot: the taxonomy for the smart picker (author-scale rows).
+    /// One flight at a time — this sheet's only write is the mint.
+    let latch = MobileWriteLatch()
+
     func loadTags() async {
         do {
             tags = try await session.database.read { try Queries.allTags($0) }
@@ -107,6 +110,18 @@ final class MobileCreateBookModel {
     /// race is the cross-device one her ruling deliberately tolerates
     /// (`BookNaming`'s doc has the why-not-a-schema-rule).
     func create() async -> String? {
+        // THE DOOR-LEVEL LATCH (the architectural review's MAJOR 1). The
+        // button's `.disabled` reads `canCreate`, which is a pure function
+        // of the name, the kind and the tags — NONE of which change during
+        // the write — so the sheet stays presented and the button stays
+        // hittable for the whole flight, and a double tap ran this twice.
+        // The core guard below now refuses the second mint, which is the
+        // authoritative layer and stays; this is the layer that stops a
+        // gesture made ONCE from producing a refusal she has to read.
+        await latch.run { await self.createOnce() } ?? nil
+    }
+
+    private func createOnce() async -> String? {
         guard canCreate else { return nil }
         let bookName = name.trimmingCharacters(in: .whitespaces)
         do {

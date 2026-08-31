@@ -19,6 +19,105 @@ import VariorumCore
 @Suite("Mobile liveness — the authority (S3 ladder fix)")
 struct MobileLivenessTests {
 
+    // MARK: The fix round — the architectural review's MAJOR 2
+
+    /// **THE LAST REQUESTED TAB WINS, NOT THE LAST COMPLETED TASK.**
+    ///
+    /// The shell assigns `tab` synchronously at the tap and hands the
+    /// liveness handoff to an unstructured `Task` that suspends twice on
+    /// database work (a pending flush, then a fresh read). Two quick taps —
+    /// Shelf → Library → Shelf — therefore left two independent tasks in
+    /// the air, each carrying the tab it captured at spawn, with nothing
+    /// capturing an order: whichever finished LAST installed the liveness
+    /// that stood.
+    ///
+    /// This drives exactly that shape: two handoffs REQUESTED in order, the
+    /// stale one COMPLETING last (which is what a slow flush on the leaving
+    /// editor produces). Ordering is expressed through the tokens rather
+    /// than by racing a real database, deliberately — a pin about ordering
+    /// must not itself depend on timing to fail.
+    ///
+    /// Both wrong end states the review traced are held here: the visible
+    /// editor stood down (*"I tap into my note and it won't let me type"*),
+    /// and a HIDDEN editor holding the pen — which is the exact law this
+    /// authority's own header says it exists to enforce.
+    @Test func theLastRequestedTabWinsEvenWhenTheStaleHandoffLandsLast() async throws {
+        try await withEditorWorld { session, _ in
+            let post = try await session.runner.run { ops in
+                try ops.createPost(title: "two tabs", profile: .blog)
+            }
+            _ = try await session.runner.run { ops in
+                try ops.newBlock(in: post.id, text: "Base.", at: .end)
+            }
+            let (shelfEditor, shelfStorage) = makeEditor(session, postID: post.id)
+            let (libraryEditor, libraryStorage) = makeEditor(session, postID: post.id)
+            let editors = MobileLivenessAuthority()
+            await editors.register(shelfEditor, tab: .shelf)
+            await editors.register(libraryEditor, tab: .library)
+            await shelfEditor.loadOnce()
+            await libraryEditor.loadOnce()
+
+            // Two taps, in this order: to Library, then straight back to
+            // Shelf. The tokens are minted at the taps, synchronously, the
+            // way the tab door mints them.
+            let toLibrary = editors.beginHandoff()
+            let toShelf = editors.beginHandoff()
+
+            // The SHELF handoff completes first; the stale LIBRARY one
+            // completes last — the ordering a stalled flush produces.
+            await editors.tabDidBecomeVisible(.shelf, handoff: toShelf)
+            await editors.tabDidBecomeVisible(.library, handoff: toLibrary)
+
+            #expect(editors.live === shelfEditor,
+                    "liveness follows the last REQUESTED tab")
+            #expect(shelfEditor.isLive)
+            #expect(!libraryEditor.isLive,
+                    "the hidden stack's editor must not hold the pen")
+
+            // The user-visible half, driven through the real gate: she taps
+            // into the note she is LOOKING at and types.
+            #expect(
+                typeEdit(
+                    shelfEditor, shelfStorage,
+                    range: NSRange(location: 0, length: 0), replacement: "x"),
+                "the visible editor must accept a keystroke")
+            #expect(
+                !typeEdit(
+                    libraryEditor, libraryStorage,
+                    range: NSRange(location: 0, length: 0), replacement: "x"),
+                "the hidden editor's gate must refuse")
+        }
+    }
+
+    /// The mirror, so neither direction is a coincidence: the same two
+    /// requests with the SHELF one stale still ends with Library live.
+    @Test func theMirrorHoldsToo_libraryRequestedLastKeepsThePen() async throws {
+        try await withEditorWorld { session, _ in
+            let post = try await session.runner.run { ops in
+                try ops.createPost(title: "two tabs", profile: .blog)
+            }
+            _ = try await session.runner.run { ops in
+                try ops.newBlock(in: post.id, text: "Base.", at: .end)
+            }
+            let (shelfEditor, _) = makeEditor(session, postID: post.id)
+            let (libraryEditor, _) = makeEditor(session, postID: post.id)
+            let editors = MobileLivenessAuthority()
+            await editors.register(shelfEditor, tab: .shelf)
+            await editors.register(libraryEditor, tab: .library)
+            await shelfEditor.loadOnce()
+            await libraryEditor.loadOnce()
+
+            let toShelf = editors.beginHandoff()
+            let toLibrary = editors.beginHandoff()
+            await editors.tabDidBecomeVisible(.library, handoff: toLibrary)
+            await editors.tabDidBecomeVisible(.shelf, handoff: toShelf)
+
+            #expect(editors.live === libraryEditor)
+            #expect(libraryEditor.isLive)
+            #expect(!shelfEditor.isLive)
+        }
+    }
+
     // MARK: The BLOCKER pin — the adjudicated loss script
 
     /// Type in A → tab-switch inside the debounce → type in B (a second

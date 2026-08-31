@@ -127,7 +127,21 @@ final class MobileCommentsController {
         await run { ops in try ops.restoreBlockComment(id) }
     }
 
+    /// One flight at a time (the architectural review's MAJOR 1). This
+    /// funnel is every comment write, and `addBlockComment` is the sharpest
+    /// unlatched mint in the app: `block_comment` has NO uniqueness by
+    /// design (AppSpec §7 — a note has no natural key), so nothing beneath
+    /// the door catches a second flight and a double-tapped submit left two
+    /// identical comments on the block.
+    private let latch = MobileWriteLatch()
+
     private func run(_ body: @escaping @Sendable (Operations) throws -> Void) async {
+        await latch.runIfFree { await self.runOnce(body) }
+    }
+
+    private func runOnce(
+        _ body: @escaping @Sendable (Operations) throws -> Void
+    ) async {
         guard let model else { return }
         do {
             try await session.runner.run(body)

@@ -36,6 +36,22 @@
 //    stood-down surface restyles too, so no mixed-voice storage survives
 //    a Settings flip.
 //
+//  · **THE LAST REQUESTED HANDOFF WINS, NEVER THE LAST COMPLETED ONE**
+//    (the architectural review's MAJOR 2). Every grant below suspends —
+//    on a flush, and on a fresh read — while the shell's `tab` state is
+//    assigned SYNCHRONOUSLY at the tap. So two taps spawned two
+//    independent tasks whose bodies interleaved across four suspension
+//    points of database work, each acting on the tab it captured at
+//    spawn, with nothing capturing an order. Whichever finished LAST
+//    installed the liveness that stood — and the two wrong end states
+//    were exactly the two this authority exists to forbid: the visible
+//    editor stood down (she taps into her note and cannot type), or a
+//    HIDDEN editor holding the pen. A monotonic `handoff` token closes
+//    it: a request mints the newest token, and any grant that resumes to
+//    find a newer one abandons itself instead of installing state the
+//    user has already asked to replace. Checked at entry AND after every
+//    suspension, because both windows are real.
+//
 
 import Foundation
 
@@ -51,6 +67,25 @@ final class MobileLivenessAuthority {
     private var entries: [Entry] = []
     /// The one live editor (weak — the screen owns its model).
     private(set) weak var live: MobileEditorViewModel?
+
+    /// The monotonic handoff token (MAJOR 2). Bumped by every request for
+    /// a grant — a tab tap, a registration — so an in-flight grant can ask
+    /// after each suspension whether it is still the one being asked for.
+    private var handoffGeneration = 0
+
+    /// Mints the newest token. **Called SYNCHRONOUSLY at the gesture**, in
+    /// the same turn as the `tab` assignment it belongs to, so the order of
+    /// REQUESTS is fixed before any task runs; the token is then carried
+    /// into the async grant.
+    @discardableResult
+    func beginHandoff() -> Int {
+        handoffGeneration += 1
+        return handoffGeneration
+    }
+
+    /// True while `token` is still the newest request. A grant that finds
+    /// this false has been superseded and must install nothing.
+    private func isCurrent(_ token: Int) -> Bool { token == handoffGeneration }
 
     /// Every registered, still-alive editor — the background flush's own
     /// bookkeeping (MAJOR 1: one mechanism, never a parallel slot).
@@ -74,7 +109,10 @@ final class MobileLivenessAuthority {
     func register(_ editor: MobileEditorViewModel, tab: MobileTab) async {
         entries.removeAll { $0.editor == nil || $0.editor === editor }
         entries.append(Entry(editor: editor, tab: tab))
-        await takeLiveness(editor, refresh: false)
+        // A push IS a request for the pen, so it mints its own token — a
+        // tab switch requested while this grant is mid-flush supersedes it,
+        // and this grant supersedes an older switch still in flight.
+        await takeLiveness(editor, refresh: false, handoff: beginHandoff())
     }
 
     /// A screen's teardown (pop). The revealed screen is a book list or a
@@ -89,10 +127,19 @@ final class MobileLivenessAuthority {
     /// liveness WITH a refresh (its surface may be a stale photograph of
     /// work done on the other tab); a tab with no editor leaves zero live
     /// editors (at most one is the law, not exactly one).
-    func tabDidBecomeVisible(_ tab: MobileTab) async {
+    ///
+    /// `handoff` is the token minted at the tap (`beginHandoff`). Passing
+    /// nil mints one here, which is right for a caller with nothing to race
+    /// — a sequential test, or a single switch — and wrong for the shell,
+    /// whose taps must be ordered before their tasks start.
+    func tabDidBecomeVisible(_ tab: MobileTab, handoff: Int? = nil) async {
+        let token = handoff ?? beginHandoff()
+        // AT ENTRY, before anything is touched: a task that resumes after a
+        // newer switch has already landed must not stand anyone down.
+        guard isCurrent(token) else { return }
         entries.removeAll { $0.editor == nil }
         if let heir = entries.last(where: { $0.tab == tab })?.editor {
-            await takeLiveness(heir, refresh: true)
+            await takeLiveness(heir, refresh: true, handoff: token)
         } else {
             for entry in entries { entry.editor?.standDown() }
             live = nil
@@ -104,16 +151,28 @@ final class MobileLivenessAuthority {
     /// the store — a stood-down sibling's typing included, because same-
     /// post editors share the ONE per-post coordinator; on re-entry the
     /// taker re-reads fresh through its one projection door; then the pen.
-    func takeLiveness(_ editor: MobileEditorViewModel, refresh: Bool) async {
+    func takeLiveness(
+        _ editor: MobileEditorViewModel, refresh: Bool, handoff: Int? = nil
+    ) async {
+        let token = handoff ?? beginHandoff()
+        guard isCurrent(token) else { return }
         entries.removeAll { $0.editor == nil }
         for entry in entries where entry.editor !== editor {
             entry.editor?.standDown()
         }
         live = editor
+        // The flush is what makes the window WIDE — it is real database
+        // work, and the review's traced race lives inside it.
         await editor.autosave.flushNow()
+        guard isCurrent(token) else { return }
         if refresh {
             await editor.refreshTakesFromStore()
+            guard isCurrent(token) else { return }
         }
+        // The pen is granted ONLY by a handoff still being asked for. The
+        // superseding grant is what sets `live` and hands the pen on; an
+        // abandoned one leaves the store work it already did (a flush is
+        // never wasted) and installs nothing.
         editor.noteLivenessGranted()
     }
 
