@@ -214,6 +214,9 @@ nonisolated enum ProtectionCopy {
     static let deviceName = "Mac"
     static let biometryName = "Touch ID"
 
+    static let credentialName = "login password"
+    #endif
+
     /// 13p-fix ladder R2-2 (moved here at R3-2, so BOTH surfaces can say
     /// it — `ProtectionController` is MainActor-isolated and the E2EE
     /// road needed the same sentence): the honest wording for the arm
@@ -224,9 +227,6 @@ nonisolated enum ProtectionCopy {
         "The Keychain accepted the key but cannot find it again, so your "
         + "current way in was left exactly as it was. Nothing is lost — "
         + "your passphrase and recovery phrase still open your library."
-
-    static let credentialName = "login password"
-    #endif
 
     // The escrow dial's ruled plain-consequence pair — knot 8, VERBATIM
     // (direction ruled; 13s may re-voice the exact words).
