@@ -81,6 +81,9 @@ nonisolated enum RecoveryCopy {
         case .book: return "Books"
         case .block: return "Blocks"
         case .take: return "Takes"
+        // Item 17's ruled vocabulary (the K5 precedent): "snippet"/"group"
+        // in every UI string; `container.kind='pool'` stays the model term.
+        case .snippetGroup: return "Snippet groups"
         case .preservedOriginal: return "Originals"
         }
     }
@@ -147,6 +150,7 @@ nonisolated enum RecoveryCopy {
         case .book: return "book"
         case .block: return "block"
         case .take: return "take"
+        case .snippetGroup: return "snippet group"
         case .preservedOriginal: return "preserved original"
         }
     }
@@ -691,6 +695,7 @@ extension Queries.TrashItem.Kind {
         case .book: return "reading"
         case .block: return "block"
         case .take: return "variant"
+        case .snippetGroup: return "container"  // a group IS a container
         case .preservedOriginal: return "block"  // rides its family; no own door
         }
     }

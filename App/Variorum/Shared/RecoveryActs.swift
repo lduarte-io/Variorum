@@ -116,6 +116,12 @@ enum TrashPutBack {
             case .note:
                 try ops.restoreContainer(item.id)
                 return .plain
+            // pre-13u Act 10 wave 2b (item 17): a snippet group is a
+            // container, so its Put back is the note's own road — the
+            // exact-stamp cascade revives its snippets with it.
+            case .snippetGroup:
+                try ops.restoreContainer(item.id)
+                return .plain
             case .book:
                 try ops.restoreReading(item.id)
                 return .plain
@@ -464,12 +470,15 @@ nonisolated enum TrashScope {
     /// because they ride a family clock and the deadline surface must show
     /// what is leaving; takes are not, per D1.
     static let listedKinds: Set<Queries.TrashItem.Kind> = [
-        .note, .book, .block, .preservedOriginal,
+        .note, .book, .block, .snippetGroup, .preservedOriginal,
     ]
 
     /// The filter picker's rows, in the order both surfaces show them.
+    /// `.snippetGroup` joined at pre-13u Act 10 wave 2b (item 17) — the
+    /// delete-group door's road must be listable, filterable, and bulk-
+    /// purgeable exactly like every other deleted thing.
     static let filterKinds: [Queries.TrashItem.Kind] = [
-        .note, .book, .block, .preservedOriginal,
+        .note, .book, .block, .snippetGroup, .preservedOriginal,
     ]
 
     /// What ONE listing asks the query for: the picked kind, or everything
@@ -484,7 +493,7 @@ nonisolated enum TrashScope {
     /// entirely (G6).
     static func emptyTrashTakes(_ kind: Queries.TrashItem.Kind) -> Bool {
         switch kind {
-        case .note, .book, .block: return true
+        case .note, .book, .block, .snippetGroup: return true
         case .take, .preservedOriginal: return false
         }
     }

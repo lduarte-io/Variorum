@@ -839,7 +839,9 @@ struct RecoveryView: View {
             if let noteID = item.noteID, !item.noteIsDeleted,
                item.kind != .note, item.kind != .book {
                 let pool = model.homeIsPool(item)
-                Button(pool ? "Open scraps" : "Open note") {
+                // Item 17's ruled vocabulary: the scrap area speaks as
+                // "snippets" in every UI string (the K5 precedent).
+                Button(pool ? "Open snippets" : "Open note") {
                     if pool, let openPool {
                         openPool(noteID)
                     } else {
@@ -875,6 +877,8 @@ struct RecoveryView: View {
         // out of the SCRAPS area, and the help was calling that pool a note.
         case .block: return "The block goes back where it was"
         case .take: return "The take comes back in its block, exactly as it was"
+        case .snippetGroup:
+            return "The group comes back with its snippets"
         case .preservedOriginal:
             return "Places the original back where it came from — it stops counting down"
         }
