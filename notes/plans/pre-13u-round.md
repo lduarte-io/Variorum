@@ -2330,25 +2330,22 @@ render-don't-re-derive (§9c item 3) binds every surface below.
    taste-fork 2). Mounted as Settings ▸ "How Protection Works";
    `theExplainerCarriesTheKeystonesVerbatim` pins BOTH halves (byte-exact keystone
    content + surface carriage) — piece 14's confirmation mechanism, already green.
-5. **T2 unknown rendering — PARTLY DONE** (the brain: tierSentence + escrowLegSentence +
-   checklistRows' unknown arm, 232b090). Remains: the pane's checklist renders the
-   unknown arm (piece 3); the phone sheet gains the standing ways-back-in line
-   (`prose(ProtectionCopy.waysBackInLine(controller.legs))` in the mode section — one
-   line, R-pre13u-4's letter).
-6. **The nudge tier-awareness (R-pre13u-4's faces) — NOT STARTED.** Plan:
-   `ProtectionNoticeBar.nudgeBar` consults `controller.legs.tier`; `.exposed` renders
-   `exposedNudgeHeadline`/`exposedNudgeBody` (already in ProtectionCopy since Act 9,
-   never yet rendered) instead of the gentle pair; offers unchanged; unknown stays
-   suppressed (Act 9's refreshNotices guard). Pin: a composition test that an exposed
-   controller's bar carries the exposed headline.
-7. **The unchosen-state indicator (memo §6) — NOT STARTED.** Plan: `ProtectionStatusRow`
-   beside SyncStatusRow/BridgeStatusRow in RootView's sidebar bottom safeAreaInset
-   (RootView.swift ~line 143; the bottom-left family). Shown when mode == .auto && no
-   wraps && !factsUnknown (the truly-unchosen state); label
-   `ProtectionShapes.unchosenIndicatorLabel` (+ tier-appropriate detail); opens Settings
-   (openSettings env action; the ProtectionNoticeBar's reminder door precedent). RootView
-   needs `protection: ProtectionController? = nil` added to init (defaulted — all test
-   call sites survive) and VariorumApp passes `bootstrap.protection`.
+5. **T2 unknown rendering — DONE.** The pane's checklist renders the three-value truth
+   (piece 3); the phone sheet gained the standing ways-back-in line (the same brain —
+   `waysBackInLine(controller.legs)` in the mode section, R-pre13u-4's letter).
+6. **The nudge tier-awareness (R-pre13u-4's faces) — DONE.** `nudgeBar` consults the
+   tier: exposed renders the hardened device-neutral pair, covered keeps the gentle
+   two-offer copy, unknown stays suppressed. Pinned both ways
+   (`ProtectionTierFaceTests.theExposedNudgeSpeaksTheHardenedCopy` +
+   `aCoveredNudgeKeepsTheGentleCopy`).
+7. **The unchosen-state indicator (memo §6) — DONE.** `ProtectionStatusRow` (Mac) leads
+   the sidebar's bottom status family (above Sync/Bridge); renders ONLY while the choice
+   is genuinely unmade (Auto + no secrets + facts readable); tier-true detail (exposed →
+   the hardened headline in alarm ink; covered-unchosen → the calm lock-and-keys line);
+   opens Settings; NEVER "encryption off" (pinned:
+   `theIndicatorRendersOnlyWhileTheChoiceIsUnmade` +
+   `theIndicatorCopyNamesTheLockAndKeysNeverEncryptionOff`). RootView gained the
+   defaulted `protection:` param; VariorumApp passes `bootstrap.protection`.
 8. **The ceremonies' copy — NOT STARTED.** Plan: PassphraseSetSheet gains
    `var lockMoment: Bool = false`; the pane's `openSetSheet()` sets it true only when
    summoned by a pending DEMANDED act; renders `ProtectionShapes.lockMomentFraming`.

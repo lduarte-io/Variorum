@@ -1,0 +1,69 @@
+//
+//  ProtectionStatusRow.swift
+//  Variorum (Mac)
+//
+//  pre-13u Act 10 wave 2a — **the unchosen-state indicator (memo §6):**
+//  prominent, bottom-left family (the sidebar's status rows, beside
+//  Sync/Bridge), and TRUTHFUL — NEVER "encryption off": the store is
+//  always encrypted (R13p-2); what is unchosen is the lock and the spare
+//  keys. It renders only while the protection choice is genuinely
+//  unmade (Auto + no secrets, facts readable) and leaves the moment a
+//  shape is chosen; the door opens Settings, where the choice lives.
+//  The detail line follows T2's tier truth: EXPOSED speaks the hardened
+//  device-neutral headline; a covered-but-unchosen state (a verified
+//  iCloud spare) keeps the calm sentence.
+//
+
+import SwiftUI
+
+struct ProtectionStatusRow: View {
+    @Bindable var controller: ProtectionController
+    let tokens: VoiceTokens
+    @Environment(\.openSettings) private var openSettings
+
+    /// The genuinely-unchosen state: nothing picked, nothing set, and the
+    /// facts READABLE (an unreadable sidecar must not be dressed as an
+    /// unmade choice — the pane carries the unknown sentence instead).
+    private var unchosen: Bool {
+        controller.dials.mode == .auto
+            && !controller.hasPassphraseWrap
+            && !controller.hasRecoveryWrap
+            && !controller.legs.factsUnknown
+    }
+
+    var body: some View {
+        if unchosen {
+            let exposed = controller.legs.tier == .exposed
+            Button {
+                openSettings()
+            } label: {
+                HStack(alignment: .firstTextBaseline, spacing: 7) {
+                    Image(systemName: exposed ? "exclamationmark.shield" : "shield")
+                        .font(tokens.small)
+                        .foregroundStyle(exposed ? tokens.alarm : tokens.muted)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(tokens.chromeLabel(ProtectionShapes.unchosenIndicatorLabel))
+                            .font(tokens.small)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(tokens.ink)
+                            .lineLimit(1)
+                        Text(exposed
+                             ? ProtectionCopy.exposedNudgeHeadline
+                             : ProtectionShapes.unchosenIndicatorDetail)
+                            .font(tokens.small)
+                            .foregroundStyle(exposed ? tokens.alarm : tokens.muted)
+                            .lineLimit(3)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(ProtectionShapes.unchosenIndicatorLabel)
+            .help(ProtectionShapes.unchosenIndicatorDetail)
+        }
+    }
+}

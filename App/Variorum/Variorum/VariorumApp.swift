@@ -48,7 +48,8 @@ struct VariorumApp: App {
             switch bootstrap.state {
             case .ready(let session):
                 RootView(
-                    session: session, services: services, windows: windows,
+                    session: session, services: services,
+                    protection: bootstrap.protection, windows: windows,
                     hotKeys: hotKeys)
                     .onAppear { appDelegate.session = session }
                     .task {

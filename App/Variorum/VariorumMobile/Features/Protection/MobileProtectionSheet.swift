@@ -255,6 +255,10 @@ struct MobileProtectionSheet: View {
             prose(ProtectionCopy.modeSentence(controller.dials.mode))
             prose(ProtectionCopy.lossMath(
                 controller.dials.mode, escrowOn: controller.dials.escrowOn))
+            // R-pre13u-4's standing ways-back-in line (Act 10 wave 2a) —
+            // the SAME brain as the Mac's checklist, so the two can never
+            // disagree about what exists.
+            prose(ProtectionCopy.waysBackInLine(controller.legs))
             // Item (h): a phone-only library has ONE enrolled device, so
             // the chain above is shorter than a reader may assume — say so.
             prose(ProtectionCopy.oneDeviceNote)

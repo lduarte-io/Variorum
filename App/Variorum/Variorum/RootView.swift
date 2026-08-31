@@ -17,6 +17,8 @@ struct RootView: View {
     /// Session services (Phase 8) — nil for the first frames until the root
     /// `.task` starts them; the footer appears when ready.
     let services: AppServices?
+    /// pre-13u Act 10 (memo §6): the unchosen-state indicator reads this.
+    let protection: ProtectionController?
     /// 13f batch 5b (W2/A26): the app's register of open windows and the ONE
     /// authority on which is key. This window reads two things from it — is
     /// it the key window (the mount gate) and is it the navigation target
@@ -105,6 +107,9 @@ struct RootView: View {
 
     init(
         session: AppSession, services: AppServices? = nil,
+        // pre-13u Act 10 (memo §6): the unchosen-state indicator's brain —
+        // defaulted so harness mounts never need one.
+        protection: ProtectionController? = nil,
         router: ShellRouter = ShellRouter(), windows: WindowRegistry = WindowRegistry(),
         // 13e E14: defaulted like `windows`, and defaulted to the INERT
         // system — a harness that mounts this view must never ask the real
@@ -113,6 +118,7 @@ struct RootView: View {
     ) {
         self.session = session
         self.services = services
+        self.protection = protection
         self.windows = windows
         self.hotKeys = hotKeys
         _router = State(initialValue: router)
@@ -147,6 +153,15 @@ struct RootView: View {
                         // keep the status rows readable over any list content.
                         VStack(alignment: .leading, spacing: 0) {
                             Divider().overlay(theme.tokens(for: scheme).line)
+                            // Memo §6: the unchosen-state indicator — the
+                            // bottom-left family's protection row. Renders
+                            // only while the choice is genuinely unmade;
+                            // NEVER "encryption off".
+                            if let protection {
+                                ProtectionStatusRow(
+                                    controller: protection,
+                                    tokens: theme.tokens(for: scheme))
+                            }
                             SyncStatusRow(services: services)
                             BridgeStatusRow(
                                 bridge: services.bridge,

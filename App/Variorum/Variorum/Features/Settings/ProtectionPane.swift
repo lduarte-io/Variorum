@@ -674,10 +674,21 @@ struct ProtectionNoticeBar: View {
     /// record: create a passphrase (the set screen, phrase alongside) AND
     /// the recovery phrase either way.
     private var nudgeBar: some View {
-        bar {
+        // R-pre13u-4's FACES (Act 10 wave 2a): the state-aware split —
+        // covered keeps the gentle two-offer nudge; EXPOSED (Auto + no
+        // secrets + no verifiably-landed escrow) renders the hardened
+        // plain-truth copy, device-neutral by her rider. Same offers, same
+        // cadence, never a modal — only the words harden. (The unknown
+        // tier never reaches here: refreshNotices suppresses the nudge
+        // while the sidecar is unreadable.)
+        let exposed = controller.legs.tier == .exposed
+        return bar {
             VStack(alignment: .leading, spacing: 2) {
-                Text(ProtectionCopy.nudgeHeadline).font(.callout.weight(.semibold))
-                Text(ProtectionCopy.nudgeBody)
+                Text(exposed ? ProtectionCopy.exposedNudgeHeadline
+                             : ProtectionCopy.nudgeHeadline)
+                    .font(.callout.weight(.semibold))
+                Text(exposed ? ProtectionCopy.exposedNudgeBody
+                             : ProtectionCopy.nudgeBody)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
