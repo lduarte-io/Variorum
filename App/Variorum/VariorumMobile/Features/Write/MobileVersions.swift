@@ -36,15 +36,30 @@
 //    same pushed screen, with a `‹ Versions` door back, which is the
 //    proposal's own drawn path line.
 //
-//  **EVERY SENTENCE COMES FROM `Shared/VersionsCopy.swift`.** The Mac and
-//  the phone must not describe one machinery two ways — that file's own
-//  header says the phone owes a face and *"when it builds one it must not
-//  re-write the sentences"*. **The one gap, recorded rather than papered
-//  over:** `VersionsPath.empty` names ⌘⇧S, and a chord is a platform fact
-//  (the Block History twin met the identical case with `noSavepoints`), so
-//  the empty line here is worded in the phone's grammar over the shared
-//  VERB — never a Mac chord, which would be the no-redirect breach
-//  (MobileSoul §4.4).
+//  **EVERY SENTENCE ABOUT THE MACHINERY COMES FROM
+//  `Shared/VersionsCopy.swift`.** The Mac and the phone must not describe one
+//  machinery two ways — that file's own header says the phone owes a face and
+//  *"when it builds one it must not re-write the sentences"*.
+//
+//  **FOUR phone-voiced strings exist, and they are enumerated, not counted**
+//  (corrected at the 6c fix wave, cold-review m2 — this header and the batch
+//  record both said "the one gap", and there were more):
+//
+//  · `MobileVersionsModel.noVersions` — the RE-VOICE. `VersionsPath.empty`
+//    names ⌘⇧S and a chord is a platform fact (the Block History twin met
+//    the identical case with `noSavepoints`), so the phone says the shared
+//    sentence over the shared VERB and a phone door — never a Mac chord,
+//    which would be the no-redirect breach (MobileSoul §4.4).
+//  · `MobileNoteActionsSheet.saveRowDetail` and `.versionsRowDetail` — the
+//    two ⋯ rows' detail subtitles, a FACE fact the shared file has no home
+//    for (an iOS sheet row has a subtitle; a Mac menu item does not).
+//    `VersionsPath.saveDetail` is the durable answer and is on the next
+//    Shared-touching batch's list.
+//  · `MobileVersionsView.backToListing` — the reader's `‹ Versions` door,
+//    composed from `VersionsPath.name` and a navigation glyph.
+//
+//  All four are held clear of the shared sentences by
+//  `theVersionsVocabularyIsSharedAndEveryPhoneVoicedLineIsListed`.
 //
 //  **The acts are the SHARED decision layer** (`Shared/VersionActs.swift`):
 //  flush-first is not this face's to remember, the receipts are not this
@@ -69,8 +84,17 @@ import VariorumCore
 final class MobileVersionsModel {
     @ObservationIgnored private let session: AppSession
     @ObservationIgnored let postID: String
+    /// **Bounded on purpose (P1), the two rooms' twin.** The cold review's
+    /// m3: this was the one new phone listing reading UNBOUNDED, and
+    /// *"versions are hand-saved so there are few"* is exactly the
+    /// true-today that 13w's automated rotation un-makes
+    /// (`notes/plans/whole-note-history-brief.md`). `Queries.noteVersions`
+    /// already carried its `limit`; nothing here asked for it.
+    @ObservationIgnored private let window: Int
 
     private(set) var versions: [Queries.NoteVersionItem] = []
+    /// The window+probe's answer: there are more moments than are listed.
+    private(set) var truncated = false
     /// The moment being READ (Q9's shape) — nil is the listing.
     private(set) var reading: Queries.NoteVersionItem?
     /// The moment's own blocks, read when it is opened. A version is sealed
@@ -87,18 +111,24 @@ final class MobileVersionsModel {
     /// its 30 days, `VersionActs.delete`'s own ratified road).
     var pendingDelete: Queries.NoteVersionItem?
 
-    init(session: AppSession, postID: String) {
+    init(session: AppSession, postID: String, window: Int = 200) {
         self.session = session
         self.postID = postID
+        self.window = window
     }
 
     // MARK: The listing
 
+    /// **Windowed with a probe row, and the marker is VISIBLE** — the Phase
+    /// 10 discipline the Archive and Trash rooms already keep, through the
+    /// same `TrashListing.windowed` brain rather than a second count.
     func load() async {
         do {
-            versions = try await session.database.read { [postID] db in
-                try Queries.noteVersions(db, of: postID)
+            let limit = window + 1
+            let rows = try await session.database.read { [postID] db in
+                try Queries.noteVersions(db, of: postID, limit: limit)
             }
+            (versions, truncated) = TrashListing.windowed(rows, window: window)
         } catch {
             status = .refusal(VersionActs.words(error))
         }
@@ -120,6 +150,14 @@ final class MobileVersionsModel {
                     .compactMap(\.text)
             }
         } catch {
+            // **A FAILED READ LANDS ON THE LISTING, never in an empty reader
+            // wearing three live verbs** (the cold review's n6). `reading`
+            // is set BEFORE the read so the cover appears immediately; if
+            // the read then refuses, leaving it set would put Restore,
+            // Promote and Delete on a moment whose words she never saw —
+            // three acts over an unread subject. The refusal is spoken on
+            // the listing instead, which is where she can act on it.
+            closeReader()
             status = .refusal(VersionActs.words(error))
         }
     }
@@ -213,12 +251,26 @@ final class MobileVersionsModel {
         VersionsPath.rowTitle(item)
     }
 
+    /// A row's second line: everything the shared meta says EXCEPT the piece
+    /// the row's title is already saying, plus the moment's first words.
+    ///
+    /// **It drops the title's own piece BY NAME, never by position** (the
+    /// cold review's m1). The first draft took `rowMeta` minus element 0 on
+    /// the strength of the date being first — a positional coupling to an
+    /// array whose contract promises no order and whose own doc names a live
+    /// future that will edit it: 13w's automated rotation renders in that
+    /// same list (`notes/plans/whole-note-history-brief.md`), and a new
+    /// leading piece would have silently dropped the block count instead
+    /// with nothing on screen to say so. Removing the piece that IS the
+    /// title says what the line actually means and survives a reorder.
+    ///
+    /// The assumption that remains — that the shared meta's leading piece is
+    /// the title's date — is no longer load-bearing, but it IS pinned
+    /// (`theRowsMetaSaysEverythingButTheTitle`), so a 13w reorder announces
+    /// itself here rather than passing quietly.
     static func rowMeta(_ item: Queries.NoteVersionItem) -> String {
-        var pieces = VersionsPath.rowMeta(item)
-        // The date leads the row's TITLE, so the meta line carries the rest
-        // (the block count, the cadence label) plus the moment's first
-        // words — the proposal's drawn row.
-        if !pieces.isEmpty { pieces.removeFirst() }
+        let title = VersionsPath.rowTitle(item)
+        var pieces = VersionsPath.rowMeta(item).filter { $0 != title }
         if let preview = item.preview?.trimmingCharacters(in: .whitespacesAndNewlines),
            !preview.isEmpty {
             pieces.append("\u{201C}\(preview.prefix(64))\u{201D}")
@@ -311,6 +363,12 @@ struct MobileVersionsView: View {
                     ForEach(model.versions, id: \.postID) { item in
                         row(item)
                     }
+                }
+                // The window is never silent (P1's visible half, and the
+                // Archive room's own sentence — this room has no filter to
+                // narrow either).
+                if model.truncated {
+                    line(MobileRoomListing.truncationMarker(shown: model.versions.count))
                 }
             }
             .padding(.horizontal, 8)

@@ -81,7 +81,20 @@ final class MobileArchiveModel {
             }
             receipt = Self.unarchivedReceipt
         } catch let error as OperationError {
-            lastError = Self.refusal(error)
+            // **The ONE deletion-refusal home, called DIRECTLY** (A1-18; the
+            // 6c cold review's n5 retired the one-line forward that used to
+            // stand here — a byte-identical twin of `MobileTrashModel`'s,
+            // i.e. two call sites that had to change together for no gain).
+            //
+            // **`act:` is `.putBack` and that is the closest arm, not the
+            // right one.** `DeletionRefusal.Act` has `.delete` and
+            // `.putBack` only, so an un-archive refusal speaks the put-back
+            // sentence. Inherited, harmless today (the only refusals this
+            // road can raise are the sealed/not-found family, which read the
+            // same either way), and the durable fix is an `.unarchive` arm —
+            // a FENCED (`Shared/RecoveryActs.swift`) addition, on the next
+            // Shared-touching batch's list.
+            lastError = DeletionRefusal.words(error, act: .putBack)
         } catch {
             lastError = DeletionRefusal.fallback(error)
         }
@@ -91,11 +104,4 @@ final class MobileArchiveModel {
 
     /// Moved with the act, byte-identical to what batch 4 shipped.
     static let unarchivedReceipt = "Unarchived — it's back in the library."
-
-    /// **Forwards to the ONE deletion-refusal home** (A1-18) — the same
-    /// forward `MobileTrashModel` keeps, so the two rooms cannot word one
-    /// refusal two ways.
-    static func refusal(_ error: OperationError) -> String {
-        DeletionRefusal.words(error, act: .putBack)
-    }
 }

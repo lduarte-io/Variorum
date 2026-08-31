@@ -141,3 +141,141 @@ simulator, private DerivedData, full mobile suite at the end — baseline
 607/94 + 2 known issues — quoted line, `Package.resolved` never swept,
 fence verified empty before the pathspec-limited commit, no pushes).
 Append a FIX WAVE RESULTS section to THIS file before the final message.
+
+---
+
+# FIX WAVE RESULTS (one Opus fix session, 2026-08-31)
+
+**ALL TEN LANDED. Nothing declined, nothing deferred.** Five items carry a
+red-on-old proof by behavioural revert with the failure quoted; the rest are
+honestly labelled NEW COVERAGE or doc-only, because a revert that could prove
+them does not exist inside this batch's fence.
+
+**Suite: 607/94 → 613/94** (+6 tests, +0 suites — `MobileVersionsTests` 11 →
+15, `MobileTrashTests` +2), same 2 known issues from the one documented
+diagnostic test.
+
+| # | Item | What landed | Pin, and what kind of proof it is |
+|---|---|---|---|
+| 1 | **m1** — `rowMeta`'s positional coupling | The shared file exposes no named pieces (READ, fenced), so the composition now drops **the piece that IS the title, by name** (`filter { $0 != rowTitle(item) }`) instead of counting to one — a reorder or a new leading piece can no longer silently drop the block count. The coupling underneath is named in the doc and the 13w future with it. | `theRowsMetaSaysEverythingButTheTitle` — **NEW COVERAGE, stated as such.** `rowMeta` had no pin at all (that absence IS the finding), and staging the drift means editing `Shared/VersionsCopy.swift`, which is fenced. Its last expectation (`rowMeta(item).first == rowTitle(item)`) is the drift signal: a 13w reorder reds there and names the coupling. |
+| 2 | **m2** — three invented sentences, one a near-verbatim rewrite | Save row's detail re-voiced to *"keeps a moment of the note, to come back to"*; Versions row's detail **composed from the shared verbs** (`read, restore or promote a saved moment`); the file header and the record corrected from "the ONE gap" to **four, enumerated**; `VersionsPath.saveDetail` added to the record's next-Shared-batch list (§5, now three items). | `theVersionsVocabularyIsSharedAndEveryPhoneVoicedLineIsListed` (renamed) — **RED ON OLD.** It enumerates all four phone-voiced strings and holds the invented ones ≥6 words clear of every shared sentence. |
+| 3 | **m3** — the unwindowed listing | `MobileVersionsModel(window: 200)`, `Queries.noteVersions(limit: window + 1)`, `TrashListing.windowed`, `truncated`, and a visible marker — the Archive room's shape exactly. Folds **n9's Versions half**. | `theVersionsListingIsWindowedAndSaysSo` — **RED ON OLD** (3 issues). |
+| 4 | **m4** — the false "proven road" claim | Comment rewritten to say what was actually traced (the cited precedent is DEBUG-only, unpinned, a different shape) and a dated correction added to the record's D4. The order was NOT inverted — the harness reached the composed road, so it is **driven** instead. | `theVersionsRowOpensTheRoomThroughTheWholeShell` — **RED ON OLD.** A mounted `MobileShellView` → the shelf's Today door → the real ⋯ sheet → the real row → the room arrives. |
+| 5 | **n5** — the second byte-identical `refusal(_:)` forward | Both forwards **deleted**; both call sites now call `DeletionRefusal.words(_:act: .putBack)` directly. The missing `.unarchive` arm is noted at `MobileArchiveModel`'s call site as a FENCED `Shared/` addition and added to the record's next-Shared-batch list. | Compile-proven (two symbols gone, no callers left); `theDeletionRefusalsHaveOneHome` updated to read the shared home directly and still holds the two surfaces' equality. |
+| 6 | **n6** — the empty reader with three live verbs | `closeReader()` in `read`'s catch, with the mechanism at the code. | `aFailedMomentReadLandsOnTheListingNotInAnEmptyReader` — **RED ON OLD.** The read failure is injected at the storage layer (an in-memory world has no other way to make a read throw); the pin holds the surface's contract, never the injection. |
+| 7 | **n7** — the pin's over-wide doc | Doc narrowed to the surface it drives (the Library), with the corpus-wide grep truth kept in the comment and labelled as grep-verified rather than driven. | Doc-only; the pin's assertions are unchanged. |
+| 8 | **n8** — no phone pin on the version fence | `theTwoRoomsCarryOnlyTheirOwnPromises` now saves a moment and asserts it does **not** row in the Archive room, beside a real archived note so the absence is never vacuous. | **NEW COVERAGE.** The fence is core's (`excludingVersionHistory: true` + nine core pins) and staging its failure means changing core, which is fenced. |
+| 9 | **n9** — both rooms' markers unpinned | Both rooms driven past a window of 1 and the marker asserted where she reads it. The filterless sentence gained **one home** — `MobileRoomListing.truncationMarker` (the Archive room's private copy retired rather than copied a third time for Versions) — and both rooms' prose lines gained the plain-sentence accessibility label the standing rule asks for. | `bothRoomsSayWhenTheWindowIsHidingSomething` — **RED ON OLD for the label half**, which is the honest description: the marker rendered before, but VoiceOver read it as chrome (`"showing the first 1."` against `"Showing the first 1."`). |
+| 10 | **n10** — the "Open note" doors never driven | Both driven on their real mounted surfaces, and the **id carried is asserted**, not merely that something fired — the Archive room opens the archived note itself, a Trash row opens the still-live note the deleted block came from. | `bothRoomsOpenNoteDoorsReallyOpenTheRightNote` — **RED ON OLD** (`"some-other-note" == archivedID` fails). |
+
+## The reds, quoted
+
+**m3** — the windowed read and the marker reverted:
+
+```
+✘ Test theVersionsListingIsWindowedAndSaysSo() recorded an issue at
+  MobileVersionsTests.swift:533:17: Expectation failed:
+  (model.versions.count → 3) == 2
+✘ … :534:17: Expectation failed:
+  (model → VariorumMobile.MobileVersionsModel).truncated → false
+✘ … :536:17: Expectation failed: (labels → ["~/versions", "whole moments of
+  this note, saved by hand. …", "Read Jun 30, 2026 at 6:00 PM", ×3])
+  .contains(MobileRoomListing.truncationMarker(shown: 2) → "Showing the first 2.")
+✘ Test theVersionsListingIsWindowedAndSaysSo() failed after 2.038 seconds
+  with 3 issues.
+```
+
+**n6** — `closeReader()` removed from the catch:
+
+```
+✘ Test aFailedMomentReadLandsOnTheListingNotInAnEmptyReader() recorded an
+  issue at MobileVersionsTests.swift:569:13: Expectation failed:
+  (model.reading → NoteVersionItem(postID: "00000000-…-000000000004",
+  savedAt: 2026-07-01 00:00:02 +0000, blockCount: 1,
+  preview: Optional("Readable."), cadence: …manual)) == nil
+✘ Test aFailedMomentReadLandsOnTheListingNotInAnEmptyReader() failed after
+  0.058 seconds with 1 issue.
+```
+
+**m2** — the shipped save-row detail (*"saves this whole note as it is right
+now"*) put back:
+
+```
+✘ Test theVersionsVocabularyIsSharedAndEveryPhoneVoicedLineIsListed()
+  recorded an issue at MobileVersionsTests.swift:421:17:
+  Expectation failed: (run → 7) < 6
+✘ Test theVersionsVocabularyIsSharedAndEveryPhoneVoicedLineIsListed()
+  failed after 0.016 seconds with 1 issue.
+```
+
+**m4** — the shell's `onOpenVersions:` wiring dropped (the row still renders
+— the door is optional by design, which is exactly why a row-level pin could
+not see this):
+
+```
+✘ Test theVersionsRowOpensTheRoomThroughTheWholeShell() recorded an issue at
+  MobileVersionsTests.swift:614:17: Expectation failed: (labels → ["Rename
+  Note", "Copy Note", "Find in Note", "Lock Note", "Note Actions", …,
+  "~/library", "Trash", "New Note", …, "Archived", "shelf", "library"])
+  .contains(MobileVersionsModel.noVersions → "No saved moments yet — Save a
+  Version in ⋯ keeps the whole note as it is right now.")
+✘ Test theVersionsRowOpensTheRoomThroughTheWholeShell() failed after 5.494
+  seconds with 1 issue.
+```
+
+**n9 + n10** — the Archive room's prose-line accessibility label removed and
+its `onOpen` pointed elsewhere, in one revert:
+
+```
+✘ Test bothRoomsSayWhenTheWindowIsHidingSomething() recorded an issue at
+  MobileTrashTests.swift:547:17: Expectation failed: (labels → ["~/archived",
+  "kept — no clock", "md", "Unarchive", "Open note", "showing the first 1."])
+  .contains(MobileRoomListing.truncationMarker(shown: 1) → "Showing the first 1.")
+✘ Test bothRoomsOpenNoteDoorsReallyOpenTheRightNote() recorded an issue at
+  MobileTrashTests.swift:586:13: Expectation failed:
+  (openedFromArchive.value → "some-other-note")
+  == (archivedID → "00000000-0000-0000-0000-000000000000")
+```
+
+Every revert was undone and the suite re-run green (below).
+
+## Files
+
+**Product (7):** `MobileVersions.swift` (m1, m2's header, m3, n6) ·
+`MobileNoteActions.swift` (m2, m4's comment) · `MobileRecoveryDoors.swift`
+(the filterless marker's one home) · `MobileArchiveView.swift` (n9 marker
+call + label) · `MobileArchiveModel.swift` (n5) · `MobileTrashModel.swift`
+(n5) · `MobileTrashView.swift` (n9 label).
+**Tests (2):** `MobileVersionsTests.swift` (+4, one renamed and widened, one
+helper) · `MobileTrashTests.swift` (+2, n7's doc, n8's assertions, the n5
+call-site update).
+**Records (2):** `mobile-batch-6c-record.md` (§1 D4's two dated corrections,
+§2's renamed pin + the wave's count line, §3's items 5 and 6, §5's residue
+list) · this file.
+
+## Counts and environment
+
+**Final line, quoted:**
+
+```
+✘ Test run with 613 tests in 94 suites passed after 180.841 seconds with 2 known issues.
+```
+
+The **2 known issues are the same single documented diagnostic test** as the
+baseline's — `anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`,
+which records two issues from one `withKnownIssue` block. No other test
+records an issue. Arithmetic exact: 607 + 6 = 613, suites unchanged.
+
+**Environment:** worktree `~/dev/variorum-mobile`, branch `mobile`. Private
+simulator `Variorum-6c-fix` (iPhone 17 Pro, iOS 26.2,
+`ApplicationAccessibilityEnabled` armed and read back `1`), private
+`-derivedDataPath` under this session's scratchpad; the simulator was
+**deleted at the end**. `Package.resolved` never swept. No Release build, no
+install, no push; the real store untouched, the live Mac app never quit.
+
+**Fence, verified before the commit:**
+
+```
+git diff --name-only -- Sources/ App/Variorum/Shared App/Variorum/Variorum \
+  "*.xcodeproj" "*.pbxproj"   →  (empty)
+```

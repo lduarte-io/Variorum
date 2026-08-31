@@ -122,7 +122,12 @@ final class MobileTrashModel {
         do {
             receipt = try await TrashPutBack.run(session: session, item: item)
         } catch let error as OperationError {
-            lastError = Self.refusal(error)
+            // **The ONE deletion-refusal home, called DIRECTLY** (A1-18; the
+            // 6c cold review's n5 retired the one-line forward — the Archive
+            // room grew a byte-identical twin of it at the split, and two
+            // call sites that must change together is the drift shape the
+            // shared home exists to end).
+            lastError = DeletionRefusal.words(error, act: .putBack)
         } catch {
             // Includes `RecoveryRefusal` — nothing was attempted, so it is a
             // refusal and never the `putBackUnplaced` RECEIPT the shipped
@@ -237,10 +242,4 @@ final class MobileTrashModel {
         RecoveryCopy.putBackReceipt(kind)
     }
 
-    /// **Forwards to the ONE deletion-refusal home** (A1-18): the seal said
-    /// as a diagnosis with the way out (the J8 doctrine), and everything else
-    /// in the shared table rather than a fourth private copy of it.
-    static func refusal(_ error: OperationError) -> String {
-        DeletionRefusal.words(error, act: .putBack)
-    }
 }

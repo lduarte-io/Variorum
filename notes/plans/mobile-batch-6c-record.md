@@ -105,6 +105,28 @@ were unreachable from it. Now:
 - **NO purge door**: a moment's Delete is a tombstone with 30 days, and the
   pin asserts `purge_intent` stays at 0.
 
+> **CORRECTED 2026-08-31 (the fix wave, cold-review m4) — the shipped
+> `versionsRow` comment claimed a provenance it did not have.** It justified
+> its `dismiss()`-then-push order as *"the shell's own settings-sheet grammar
+> … a proven road on this app"*. Traced: the cited precedent
+> (`MobileShellView.settingsSheet`'s `onOpenTutorialBook`) is **DEBUG-only,
+> unpinned, and a different shape** — the shell flips its own
+> `settingsPresented` flag and appends to the path in ONE scope, where the
+> Versions row uses an environment `dismiss()` inside the sheet followed by a
+> callback up the tree. No failure was ever observed and the ORDER is fine;
+> the CLAIM was the defect. The comment now says what was actually measured,
+> and the composed road is **driven end to end** by
+> `MobileVersionsTests.theVersionsRowOpensTheRoomThroughTheWholeShell` — a
+> mounted `MobileShellView`, the shelf's Today door into a note, the real ⋯
+> sheet, the real row, the room arriving — red-on-old when the shell's
+> `onOpenVersions:` wiring is dropped.
+>
+> **CORRECTED 2026-08-31 (m3):** the listing shipped **unbounded** — the one
+> new phone listing with no window and no truncation marker, while
+> `Queries.noteVersions` already carried its `limit`. It now takes
+> `window + 1` through `TrashListing.windowed` like both rooms, and renders
+> the filterless rooms' shared marker.
+
 ### D5 · THE EXPLAINER'S SECOND HALF — **NOT FLIPPED. The brief's premise does not hold, and here is the trace.** ⚠️
 
 The brief says: *"the phone now HAS a purge road, so the Block History
@@ -167,6 +189,10 @@ with SwiftUI's write-back landed in the same turn.
 **+15 tests, +1 suite** (592/93 → **607/94**), exactly accounted for:
 `MobileVersionsTests` 11 (new suite) · `MobileTrashTests` +2 ·
 `MobileDeletionTests` +1 · `MobileBlockHistoryTests` +1.
+
+*(The 2026-08-31 FIX WAVE adds **+6 tests, +0 suites** → **613/94**;
+its own per-item record, reds and quoted final line live in the
+"FIX WAVE RESULTS" section of `notes/plans/mobile-batch-6c-cold-review.md`.)*
 
 ### The three RED-ON-OLD proofs (the split's guards)
 
@@ -243,7 +269,9 @@ All three reverts were undone and the suite re-run green (§4).
   able to present one; the container ends unarchived and unsealed) ·
   `deleteConfirmsAndSendsTheMomentToTheTrash` (it rows in the Trash as a
   version and `purge_intent` stays 0) ·
-  `theVersionsVocabularyIsSharedAndTheOneGapIsPhoneVoiced` ·
+  `theVersionsVocabularyIsSharedAndEveryPhoneVoicedLineIsListed` (RENAMED
+  and widened at the 2026-08-31 fix wave — it was
+  `…AndTheOneGapIsPhoneVoiced`, and there were four gaps, not one) ·
   `anEmptyRoomInvitesTheFirstMoment` ·
   `aSealedNoteRefusesARestoreInTheFamilysVoice`.
 - `theDeletedRegionPromisesNoPurgeRoadTheAppDoesNotHave` — D5's traced fact,
@@ -263,14 +291,39 @@ All three reverts were undone and the suite re-run green (§4).
    three-row sheet to five, with the two time controls placed FIRST.
 4. **Q9 — the row's tap is Read**, verbs on the moment, reader replacing the
    listing on the same screen with a `‹ Versions` door back.
-5. **The Versions empty line is phone-voiced.** `VersionsPath.empty` names
-   ⌘⇧S; the phone says *"No saved moments yet — Save a Version in ⋯ keeps the
-   whole note as it is right now."* Same class as batch 6a's `noSavepoints`,
-   and pinned as a deliberate gap (the shared line is asserted to name a chord,
-   so nobody "fixes" the phone's by adopting it).
-6. **The Archive room's truncation marker** is `"Showing the first N."` — the
-   Trash's version ends *"narrow the filter to see more"* and this room has no
-   filter until her #85 batch.
+5. **The Versions phone-voiced lines — FOUR, not one.** *(CORRECTED
+   2026-08-31 at the fix wave, cold-review m2: this item, the file header and
+   the pin's own name all said "the ONE gap", and the batch had in fact
+   invented three sentences beside the re-voice — one of them, the save
+   row's detail, a **near-verbatim rewrite** of a clause inside
+   `VersionsPath.empty` (*"saves this whole note as it is right now"* against
+   *"saves the whole note as it is right now"* — seven words in common),
+   i.e. the same sentence living twice, which `VersionsCopy.swift`'s own
+   header forbids in as many words.)* The four, enumerated:
+   1. `MobileVersionsModel.noVersions` — the **RE-VOICE**, and the only line
+      allowed to track a shared sentence closely: `VersionsPath.empty` names
+      ⌘⇧S and the phone has no chords, so it says the same thing over the
+      shared VERB and a phone door. Same class as batch 6a's `noSavepoints`,
+      and pinned as a deliberate gap (the shared line is asserted to name a
+      chord, so nobody "fixes" the phone's by adopting it).
+   2. `MobileNoteActionsSheet.saveRowDetail` — **re-voiced at the fix wave**
+      to *"keeps a moment of the note, to come back to"*.
+   3. `MobileNoteActionsSheet.versionsRowDetail` — now composed from the
+      shared VERBS (`Read`, `Restore`, `Promote`) rather than invented.
+   4. `MobileVersionsView.backToListing` — composed from `VersionsPath.name`.
+
+   The pin was renamed
+   `theVersionsVocabularyIsSharedAndEveryPhoneVoicedLineIsListed` and now
+   enumerates all four, holding the invented ones clear of every shared
+   sentence by a longest-shared-word-run check (red-on-old at 7).
+6. **The filterless rooms' truncation marker** is `"Showing the first N."` —
+   the Trash's version ends *"narrow the filter to see more"* and neither the
+   Archive room nor Note ▸ Versions has a filter until her #85 batch.
+   *(Updated 2026-08-31 at the fix wave: the sentence now has ONE home,
+   `MobileRoomListing.truncationMarker`, since the Versions room joined it —
+   the Archive room's private copy retired rather than being copied a third
+   time. When #85 gives both rooms filters, the "narrow the filter" half
+   arrives for both at once.)*
 7. **The Library path line's spacing** moved to `16` (the Shelf's own value)
    now that it carries two trailing doors.
 
@@ -306,7 +359,25 @@ git diff --name-only -- Sources/ App/Variorum/Shared App/Variorum/Variorum \
   "*.xcodeproj" "*.pbxproj"   →  (empty)
 ```
 
-**The one Shared residue, recorded rather than edited (D1's letter):**
+**THE `Shared/` RESIDUE — the NEXT SHARED-TOUCHING BATCH'S LIST.** *(Grown
+from one item to three at the 2026-08-31 fix wave; every one of them is a
+`Shared/` edit, which is fenced for this batch and its wave.)*
+
+1. **`RecoveryCopy.surfaceName` has no caller on either platform** — the
+   original residue, in full below.
+2. **`VersionsPath.saveDetail` does not exist** (cold-review m2). The note ⋯
+   sheet's `Save a Version` row needs a one-line detail; `VersionsCopy` holds
+   sentences about the machinery and has no home for a menu row's subtitle,
+   so the phone voices its own and a pin holds it clear of every shared
+   sentence. A shared `saveDetail` is the durable answer — and the Mac will
+   want it the moment its own menu grows a subtitle.
+3. **`DeletionRefusal.Act` has no `.unarchive` arm** (cold-review n5). The
+   Archive room's un-archive refusals therefore speak the **put-back**
+   sentence — inherited, harmless today (the only refusals that road can
+   raise are the sealed/not-found family, which read the same either way),
+   and noted at the call site in `MobileArchiveModel`.
+
+**The first, in full, recorded rather than edited (D1's letter):**
 `RecoveryCopy.surfaceName` = `"Archived & Deleted"` in
 `App/Variorum/Shared/RecoveryCopy.swift` now has **no caller on either
 platform** — the Mac stopped reading it at the post-13l polish round, and the

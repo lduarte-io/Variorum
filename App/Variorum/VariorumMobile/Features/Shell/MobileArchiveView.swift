@@ -46,13 +46,6 @@ struct MobileArchiveView: View {
     static let emptyLine = "Nothing archived."
     static let unarchiveVerb = "Unarchive"
 
-    /// The Trash room's own marker, worded for a room with no filter yet
-    /// (her #85 gives this room the Library's kind filters next batch, and
-    /// the sentence gains its "narrow the filter" half then).
-    static func truncationMarker(shown: Int) -> String {
-        "Showing the first \(shown)."
-    }
-
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
@@ -64,8 +57,12 @@ struct MobileArchiveView: View {
                         row(item)
                     }
                 }
+                // The filterless rooms' one sentence (her #85 gives this room
+                // the Library's kind filters next batch, and the "narrow the
+                // filter" half arrives with them — for both rooms at once,
+                // from `MobileRoomListing`).
                 if model.truncated {
-                    line(Self.truncationMarker(shown: model.archived.count))
+                    line(MobileRoomListing.truncationMarker(shown: model.archived.count))
                 }
             }
             .padding(.horizontal, 8)
@@ -92,12 +89,19 @@ struct MobileArchiveView: View {
         .padding(.bottom, 6)
     }
 
+    /// **The plain sentence rides as the accessibility label** — the standing
+    /// rule (`MobileWriteScreen`'s own note: *labels stay plain; VoiceOver
+    /// reads words, not chrome styling*), which the Terminal voice's
+    /// lowercasing makes load-bearing rather than tidy. Added at the 6c fix
+    /// wave with n9's marker pin, since a marker VoiceOver reads as
+    /// *"showing the first 200."* is chrome leaking into speech.
     private func line(_ text: String) -> some View {
         Text(tokens.chromeLabel(text))
             .font(tokens.small)
             .foregroundStyle(tokens.muted)
             .padding(.horizontal, 12)
             .padding(.vertical, 16)
+            .accessibilityLabel(text)
     }
 
     /// Receipts and refusals, pinned to the bottom so an act's answer is

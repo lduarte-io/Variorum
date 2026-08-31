@@ -196,12 +196,19 @@ struct MobileTrashView: View {
         .padding(.bottom, 8)
     }
 
+    /// The room's prose lines — the empty line and the truncation marker.
+    /// **The plain sentence rides as the accessibility label** (the standing
+    /// rule; the Terminal voice lowercases chrome, and a marker VoiceOver
+    /// reads as *"showing the first 200 — narrow the filter to see more."*
+    /// is chrome leaking into speech). Added at the 6c fix wave beside n9's
+    /// marker pin.
     private func emptyLine(_ text: String) -> some View {
         Text(tokens.chromeLabel(text))
             .font(tokens.small)
             .foregroundStyle(tokens.muted)
             .padding(.horizontal, 12)
             .padding(.vertical, 16)
+            .accessibilityLabel(text)
     }
 
     /// The receipts and refusals, pinned to the bottom so an act's answer

@@ -177,7 +177,7 @@ struct MobileNoteActionsSheet: View {
     private var saveVersionRow: some View {
         actRow(
             title: VersionsPath.saveVerb,
-            detail: "saves this whole note as it is right now",
+            detail: Self.saveRowDetail,
             tint: tokens.accent
         ) {
             let model = model
@@ -185,19 +185,59 @@ struct MobileNoteActionsSheet: View {
         }
     }
 
-    /// **Versions…** — the moments of this note. Dismiss first, then push:
-    /// the shell's own settings-sheet grammar (`settingsPresented = false`
-    /// then append), which is a proven road on this app rather than a
-    /// sheet-over-sheet race.
+    /// **Versions…** — the moments of this note. Dismiss the sheet, then ask
+    /// the shell to push.
+    ///
+    /// **The order is deliberate; the "proven road" claim this comment used
+    /// to make was not** (the cold review's m4). It cited the shell's
+    /// settings-sheet grammar — which is DEBUG-only, unpinned, and a
+    /// different shape: there the shell flips its own `settingsPresented`
+    /// flag and appends to the path in ONE scope, while here an
+    /// environment `dismiss()` inside the sheet is followed by a callback up
+    /// the tree. Nothing was measured, and no failure was ever traced. What
+    /// the fix wave did instead of re-asserting it: DRIVE the composed road
+    /// on a mounted `MobileShellView`
+    /// (`MobileVersionsTests.theVersionsRowOpensTheRoomThroughTheWholeShell`),
+    /// so the claim is a pin rather than a comment.
     private var versionsRow: some View {
         actRow(
             title: VersionsPath.menuLabel,
-            detail: "the moments of this note you have saved",
+            detail: Self.versionsRowDetail,
             tint: tokens.accent
         ) {
             dismiss()
             onOpenVersions?()
         }
+    }
+
+    // MARK: - The two rows' own detail lines (phone-voiced, and listed)
+
+    /// **These two lines are the phone's OWN, and that is a recorded gap
+    /// rather than a licence** (the cold review's m2). `VersionsCopy` holds
+    /// every SENTENCE about the machinery; what it has no home for is a
+    /// menu row's one-line detail, which is a face fact — an iOS sheet row
+    /// has a subtitle and a Mac menu item does not.
+    ///
+    /// The first draft's save-row line read *"saves this whole note as it is
+    /// right now"* — one word off a clause inside `VersionsPath.empty`, i.e.
+    /// the same sentence living twice, which is exactly what that shared
+    /// file's header forbids. It is re-voiced here to say what the row
+    /// LEAVES BEHIND rather than to restate the act, and the pin
+    /// (`theVersionsVocabularyIsSharedAndEveryPhoneVoicedLineIsListed`)
+    /// enumerates all four phone-voiced Versions strings and holds them
+    /// clear of the shared sentences.
+    ///
+    /// **`VersionsPath.saveDetail` is the durable answer** and it is on the
+    /// next Shared-touching batch's list (`Shared/` is fenced this round).
+    static let saveRowDetail = "keeps a moment of the note, to come back to"
+
+    /// Composed from the shared VERBS rather than invented: this row's
+    /// detail is a list of what is behind the door, and those three words
+    /// are `VersionsPath`'s own.
+    static var versionsRowDetail: String {
+        "\(VersionsPath.openVerb.lowercased()), "
+            + "\(VersionsPath.restoreVerb.lowercased()) or "
+            + "\(VersionsPath.promoteVerb.lowercased()) a saved moment"
     }
 
     /// The stack's undo end. Rendered only when there IS one — P-2: a door

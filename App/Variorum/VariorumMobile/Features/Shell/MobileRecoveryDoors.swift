@@ -52,6 +52,22 @@ enum MobileRecoveryDoors {
     static var archiveLabel: String { RecoveryCopy.archivedSection }
 }
 
+/// **THE FILTERLESS ROOMS' TRUNCATION SENTENCE, DECLARED ONCE** (added at
+/// the 6c fix wave, m3/n9).
+///
+/// The Trash's marker ends *"— narrow the filter to see more"* because the
+/// Trash HAS a filter to narrow. The Archive room does not (its filters are
+/// her #85 batch's), and neither does Note ▸ Versions — so both say the same
+/// shorter thing, and that makes it one sentence with one home rather than
+/// two copies that drift the moment either room's wording is touched. It
+/// lives beside the door declaration for the same stated reason that file
+/// exists: a rule the second renderer copied is the round's own drift class.
+nonisolated enum MobileRoomListing {
+    static func truncationMarker(shown: Int) -> String {
+        "Showing the first \(shown)."
+    }
+}
+
 /// **The trash door, one renderer for both path lines.** A real `Button`
 /// (§15's trap (b): a door a pin can drive), labelled with the room's word.
 struct MobileTrashDoor: View {
