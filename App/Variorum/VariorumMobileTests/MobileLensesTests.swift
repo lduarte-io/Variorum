@@ -308,4 +308,219 @@ struct MobileLensesTests {
             #expect(model.slot(for: seed.blockA)?.variantID == seed.a1)
         }
     }
+
+    // MARK: - PR14 — the dangle says so LOUDLY, and offers the way back
+
+    /// **HER 13j GATE RULING (5), BUILT** (round 2, batch 6b): *"say loudly
+    /// if that take was archived and this is a fallback WITH a button for
+    /// quick restore."* Parity C5 shipped only the quiet count above; this
+    /// drives the loud half on the REAL sheet.
+    ///
+    /// The notice names the BLOCK (through `Queries.tocHandle`, the one
+    /// naming rule) and the STATE; Restore is a real Button; and after it
+    /// lands the lens is RE-APPLIED, so the block really does go back to
+    /// showing its pick.
+    ///
+    /// **Red on old (behavioural revert):** drop the `fallbackRow` from the
+    /// sheet's `ForEach` and the notice's label is not on screen; revert
+    /// `restoreDangling` to a no-op and the take stays archived.
+    @Test func anArchivedPickSaysSoLoudlyAndRestoreBringsItBack() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedLensWorld(session)
+            let (lensID, doomed) = try await session.runner.run {
+                [postID = seed.postID, blockB = seed.blockB, b1 = seed.b1] ops
+                -> (String, String) in
+                let lens = try ops.createLens(post: postID, name: "the other reading")
+                let b2 = try ops.branchVariant(blockB, from: b1)
+                try ops.autosave(b2.id, text: "Set-aside words.", charDelta: 5)
+                _ = try ops.setLensChoice(lens: lens.id, block: blockB, variant: b2.id)
+                try ops.archiveVariant(b2.id)
+                return (lens.id, b2.id)
+            }
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            let lenses = MobileLensesModel(
+                session: session, postID: seed.postID, editor: model)
+            await lenses.refresh()
+            await lenses.activate(lensID)
+
+            let dangle = try #require(lenses.activeDangles.first)
+            #expect(dangle.state == .archived)
+            #expect(dangle.variantID == doomed)
+            #expect(dangle.handle == Queries.tocHandle(name: nil, text: "A second block."))
+            #expect(lenses.activeLensHasFallback,
+                    "the chip's marker rides this — the page says so too")
+
+            try await withHostedSurface(
+                MobileLensSheet(model: lenses, tokens: .terminalLight)
+            ) { surface in
+                await surface.settle(40)
+                let notice = MobileLensesModel.fallbackNotice(dangle)
+                #expect(surface.visibleLabels.contains(notice),
+                        "labels were \(surface.visibleLabels)")
+                #expect(notice.contains("archived"))
+                #expect(!notice.contains("deleted"),
+                        "the states are worded APART, never hedged into one")
+
+                #expect(surface.activate(
+                    "\(MobileLensesModel.restoreVerb) \(dangle.handle)"),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(60)
+            }
+
+            let status = try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT status FROM variant WHERE id = ?", arguments: [doomed])
+            }
+            #expect(status == VariantStatus.active.rawValue, "the take really came back")
+            #expect(lenses.status == MobileLensesModel.restoredArchived)
+            // The pick is effective now, so the lens shows it again.
+            #expect(lenses.activeDangles.isEmpty)
+            #expect(!lenses.activeLensHasFallback)
+            #expect(model.slot(for: seed.blockB)?.variantID == doomed,
+                    "the lens was re-applied — the block shows its pick")
+        }
+    }
+
+    /// **THE EXACT FLIP, SAID HONESTLY** (#68(b)): a take that was ARCHIVED
+    /// when it was deleted comes back archived, so the pick STILL dangles —
+    /// and the receipt says exactly that instead of claiming the lens is
+    /// whole. The same correction the Mac's own door took at 13j ladder A.
+    @Test func aDeletedPickThatComesBackArchivedSaysSoRatherThanClaimingTheLens()
+        async throws
+    {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedLensWorld(session)
+            let (lensID, doomed) = try await session.runner.run {
+                [postID = seed.postID, blockB = seed.blockB, b1 = seed.b1] ops
+                -> (String, String) in
+                let lens = try ops.createLens(post: postID, name: "half gone")
+                let b2 = try ops.branchVariant(blockB, from: b1)
+                try ops.autosave(b2.id, text: "Doomed words.", charDelta: 3)
+                _ = try ops.setLensChoice(lens: lens.id, block: blockB, variant: b2.id)
+                // Archived FIRST, then deleted — so the restore's exact flip
+                // brings it back archived.
+                try ops.archiveVariant(b2.id)
+                try ops.deleteVariant(b2.id)
+                return (lens.id, b2.id)
+            }
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            let lenses = MobileLensesModel(
+                session: session, postID: seed.postID, editor: model)
+            await lenses.refresh()
+            await lenses.activate(lensID)
+
+            let dangle = try #require(lenses.activeDangles.first)
+            #expect(dangle.state == .deleted)
+            #expect(MobileLensesModel.fallbackNotice(dangle).contains("deleted"))
+
+            await lenses.restoreDangling(dangle)
+            #expect(lenses.status == MobileLensesModel.restoredDeletedButArchived,
+                    "status was \(String(describing: lenses.status))")
+            #expect(lenses.activeDangles.first?.state == .archived,
+                    "it still dangles — and the next Restore unarchives it")
+            #expect(lenses.activeLensHasFallback)
+            _ = doomed
+        }
+    }
+
+    /// The two states with NO road say so plainly rather than wearing a
+    /// button that could only fail (P-2).
+    ///
+    /// **`foreign` is the reachable one, and it is reached the only way it
+    /// occurs:** a `lens_choice` row naming a take that belongs to a
+    /// DIFFERENT block — the sync race `effectiveLensSelection`'s join
+    /// guards against (the core's own words). `setLensChoice` refuses it, as
+    /// it should, so the row is written directly, which is exactly what an
+    /// apply does. Its sibling `gone` shares the same arm of the face (no
+    /// `isRestorable`, the same plain sentence) and needs a hard-deleted
+    /// `variant` row that `lens_choice`'s foreign key forbids outside the
+    /// purge — so the ARM is pinned here and the state that cannot be minted
+    /// locally is named rather than faked.
+    @Test func aPickWithNoRoadBackOffersNoDoorAndSaysWhy() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedLensWorld(session)
+            let lensID = try await session.runner.run {
+                [postID = seed.postID] ops -> String in
+                try ops.createLens(post: postID, name: "pointing at nothing").id
+            }
+            try await db.write { [blockB = seed.blockB, a1 = seed.a1] db in
+                try db.execute(
+                    sql: """
+                        INSERT INTO lens_choice
+                          (id, lens_id, block_id, variant_id, created_at, updated_at)
+                        VALUES ('foreign-pick', ?, ?, ?, '2026-08-31T00:00:00Z',
+                                '2026-08-31T00:00:00Z')
+                        """,
+                    arguments: [lensID, blockB, a1])
+            }
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            let lenses = MobileLensesModel(
+                session: session, postID: seed.postID, editor: model)
+            await lenses.refresh()
+            await lenses.activate(lensID)
+
+            let dangle = try #require(lenses.activeDangles.first)
+            #expect(dangle.state == .foreign)
+            #expect(!dangle.isRestorable)
+            // The `gone` twin takes the identical arm — same sentence, same
+            // absent door — which is what makes pinning one enough.
+            #expect(!Queries.DanglingPick(variantID: "x", state: .gone).isRestorable)
+
+            try await withHostedSurface(
+                MobileLensSheet(model: lenses, tokens: .terminalLight)
+            ) { surface in
+                await surface.settle(40)
+                let labels = surface.visibleLabels
+                #expect(labels.contains(MobileLensesModel.fallbackNotice(dangle)),
+                        "labels were \(labels)")
+                #expect(labels.contains(MobileLensesModel.nothingToRestore))
+                #expect(!labels.contains {
+                    $0.hasPrefix(MobileLensesModel.restoreVerb)
+                }, "no door that could only fail — labels were \(labels)")
+            }
+            // And the guard behind the face: calling it anyway does nothing
+            // but say so.
+            await lenses.restoreDangling(dangle)
+            #expect(lenses.status == MobileLensesModel.nothingToRestore)
+        }
+    }
+
+    /// **THE MARKER IS ON THE PAGE THE LENS IS DRIVING** (PR14's first half
+    /// — *"say loudly"* means where she is looking, not only inside a sheet
+    /// she would have to think to open). The chip wears it while the ACTIVE
+    /// lens has a fallback, and a non-active lens's dangles never raise it.
+    @Test func theChipMarksTheFallbackOnlyWhileThatLensIsActive() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedLensWorld(session)
+            let lensID = try await session.runner.run {
+                [postID = seed.postID, blockB = seed.blockB, b1 = seed.b1] ops -> String in
+                let lens = try ops.createLens(post: postID, name: "half gone")
+                let b2 = try ops.branchVariant(blockB, from: b1)
+                try ops.autosave(b2.id, text: "Doomed words.", charDelta: 3)
+                _ = try ops.setLensChoice(lens: lens.id, block: blockB, variant: b2.id)
+                try ops.archiveVariant(b2.id)
+                return lens.id
+            }
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            let lenses = MobileLensesModel(
+                session: session, postID: seed.postID, editor: model)
+            await lenses.refresh()
+
+            // The lens exists and dangles, but she is not looking through it.
+            #expect(lenses.rows.first?.dangling.isEmpty == false)
+            // A lens she is not looking through is not falling back on
+            // anything she can see.
+            #expect(!lenses.activeLensHasFallback)
+            #expect(lenses.activeDangles.isEmpty)
+
+            await lenses.activate(lensID)
+            #expect(lenses.activeLensHasFallback)
+            lenses.returnToNote()
+            #expect(!lenses.activeLensHasFallback)
+        }
+    }
 }

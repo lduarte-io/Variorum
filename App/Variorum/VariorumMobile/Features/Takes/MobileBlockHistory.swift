@@ -24,9 +24,11 @@
 //    2. **Archived takes** — set aside, no clock, with Unarchive.
 //    3. **Deleted takes** — the 30-day clock and Put back, and **NO PURGE
 //       DOOR** (her evolved rule: Delete Now lives on TRASH SURFACES only —
-//       never in the writing flow. The phone's note-level trash section is
-//       batch 6b's; until it lands the phone's deleted-region explainer says
-//       the clock and Put back and promises no door that isn't there).
+//       never in the writing flow). Since batch 6b the region's explainer
+//       NAMES the road that does carry one: the per-note tray's **Leaving**
+//       section (blocks ▸ leaving), where a deleted take wears Put back and
+//       Delete Now. It still never names the global Trash, which by her D1
+//       ruling does not list takes at all.
 //    4. **Came from** — ALL of a merge's originals (never `.first` — the 13l
 //       walk's P-3), each with its text and a one-button `placeBlock` way
 //       back through the SHARED act (`PreservedOriginPutBack`).
@@ -129,31 +131,35 @@ final class MobileBlockHistoryController {
     /// The confirm's message (AppSpec §9's documented warning class).
     static var predatesSplitWarning: String { BlockHistoryCopy.predatesSplitDetail }
 
-    /// **The phone's deleted-region explainer.** The lead half is shared;
-    /// the clause naming where Delete Now lives is each platform's, and the
-    /// phone's honest answer today is that it has no such door yet — so it
-    /// passes nil and the sentence ends after Put back. It must NEVER name
-    /// the Mac's tray: that is the no-redirect breach (MobileSoul §4.4).
+    /// **The phone's deleted-region explainer — and its second half LANDED
+    /// AT BATCH 6b.** The lead half is shared; the clause naming where
+    /// Delete Now lives is each platform's, and it must NEVER name the Mac's
+    /// tray: that is the no-redirect breach (MobileSoul §4.4).
     ///
-    /// **BATCH 6c RE-EXAMINED THIS AND IT STAYS `nil`, for a reason worth
-    /// writing down rather than re-deriving.** 6c gave the phone a Trash
-    /// ROOM with both purge doors in it, and §70's handed-forward hook says
-    /// the second half lands *"when batch 6b gives the phone its note-level
-    /// trash section"*. The Trash room is not that door: **this region lists
-    /// deleted TAKES, and takes do not row in the global Trash** —
-    /// `TrashScope.listedKinds` is `[.note, .book, .block,
-    /// .preservedOriginal]` by her D1 ruling, and `TrashScope.kinds(filter:)`
-    /// cannot widen past it. So naming the Trash room here would send her to
-    /// a room where the take she is reading about does not appear: a door
-    /// that cannot act (P-2), wearing a true sentence's clothes.
+    /// **Why it was `nil` until now, kept so nobody re-derives it.** §70
+    /// handed the flip forward to *"when batch 6b gives the phone its
+    /// note-level trash section"*, and batch 6c — which gave the phone a
+    /// Trash ROOM with both purge doors in it — correctly DECLINED to flip
+    /// it on that room's arrival: **this region lists deleted TAKES, and
+    /// takes do not row in the global Trash.** `TrashScope.listedKinds` is
+    /// `[.note, .book, .block, .preservedOriginal]` by her D1 ruling, and
+    /// `TrashScope.kinds(filter:)` cannot widen past it, so naming the Trash
+    /// room here would have sent her to a room where the take she is reading
+    /// about does not appear — a door that cannot act (P-2), wearing a true
+    /// sentence's clothes.
     ///
-    /// The road that WILL make this sentence true is the per-note tray's
-    /// Leaving section (batch 6b), where a deleted take carries **Put back**
-    /// and **Delete Now** with confirm-every-time — §69.3's ruled shape.
-    /// `MobileBlockHistoryTests.theDeletedRegionPromisesNoPurgeRoadTheAppDoesNotHave`
-    /// pins the precondition, so the flip is one argument and the pin says so.
+    /// The road that makes the sentence true is the one §69.3 ruled and this
+    /// batch built: the per-note tray's **Leaving** section, where a deleted
+    /// take carries **Put back** and **Delete Now** with confirm-every-time.
+    /// The phrase is `MobileNoteTrayModel.purgeRoadPhrase`, composed from the
+    /// door's own two words rather than written a second time here.
+    /// `MobileBlockHistoryTests.theDeletedRegionNamesTheTrayAsItsPurgeRoad`
+    /// holds it, and holds the precondition BOTH ways: the sentence names a
+    /// road that really carries the take, and still never names the global
+    /// Trash, which still does not list takes.
     static var deletedExplainer: String {
-        BlockHistoryCopy.deletedRegionExplainer(purgeRoad: nil)
+        BlockHistoryCopy.deletedRegionExplainer(
+            purgeRoad: MobileNoteTrayModel.purgeRoadPhrase)
     }
 
     /// The phone's edition of "no saved moments yet" — the Mac's names ⌘S,

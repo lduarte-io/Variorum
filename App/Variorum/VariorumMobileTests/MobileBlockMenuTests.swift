@@ -365,19 +365,35 @@ struct MobileBlockMenuTests {
             // pin changed WITH the fact it pins.** M20 built the structural
             // undo door, so "There's no undo here" became false — the same
             // J8 failure this pin was written to prevent, arriving from the
-            // other direction. The receipt sentence is byte-unchanged; the
-            // tray is still unpromised.
-            #expect(model.statusMessage == "Block deleted.")
+            // other direction.
+            //
+            // **ROUND 2 BATCH 6b: THE THIRD SANCTIONED FLIP, and the last of
+            // this pin's "not yet" clauses.** Both strings carried an
+            // explicit note that they promised no tray *because the phone had
+            // none*; §69.3's tray landed at this batch, so both name it — the
+            // DURABLE road before the session's undo, because a destructive
+            // confirm owes her the durable one first. The phrase is COMPOSED
+            // from the door's own two words (`MobileNoteTrayModel
+            // .putBackRoadPhrase` over the chip and the segment), so a
+            // re-word cannot leave either sentence pointing at a door that no
+            // longer exists — which is what this assertion now holds.
+            #expect(model.statusMessage == MobileStructuralController.blockDeletedStatus)
+            #expect(MobileStructuralController.blockDeletedStatus
+                == "Block deleted — \(MobileNoteTrayModel.putBackRoadPhrase).")
+            #expect(MobileBlockMenuController.deleteConfirmDetail.hasPrefix(
+                "The block leaves this note, with its takes."))
             #expect(MobileBlockMenuController.deleteConfirmDetail
-                == "The block leaves this note, with its takes. "
-                    + "Undo is on the receipt afterwards, and in the note's ⋯.")
+                .contains("Undo is on the receipt afterwards, and in the note's ⋯."))
             for line in [MobileStructuralController.blockDeletedStatus,
                          MobileBlockMenuController.deleteConfirmDetail] {
                 // The no-redirect principle (MobileSoul §4) — unchanged.
                 #expect(!line.contains("Mac"))
-                // …and the new half: no phone string promises a surface the
-                // phone does not have. The tray twin is the parity ledger's.
-                #expect(!line.lowercased().contains("tray"))
+                // The road each names is a road THIS PHONE HAS: the tray's
+                // Leaving segment, reached from the blocks chip's sheet.
+                #expect(line.contains(MobileNoteTrayModel.roadPhrase(to: .leaving)),
+                        "line was \(line)")
+                // …and never the MAC's name for it, which names a Mac door.
+                #expect(!line.lowercased().contains("this note's tray"))
             }
             let deletedAt = try await db.read { db in
                 try String.fetchOne(
@@ -399,6 +415,102 @@ struct MobileBlockMenuTests {
             #expect(model.statusMessage
                 == "This note is locked — unlock it to delete the block.")
             #expect(model.index.entries.map(\.blockID) == [seed.blockB])
+        }
+    }
+
+    /// **PR6 — ARCHIVE BLOCK, THROUGH THE REAL ROW'S OWN HANDLER** (round 2,
+    /// batch 6b). 13j's round-7 ruling built `archiveBlock`/`unarchiveBlock`
+    /// and the Mac wore both doors from that phase; a grep of
+    /// `VariorumMobile/` for either op returned ZERO hits, so the phone had
+    /// the whole capability with no way in and (until this batch's tray) no
+    /// way back.
+    ///
+    /// The block leaves the SURFACE, its stamp lands, its takes are all still
+    /// there (archive destroys nothing), and the receipt names where it went
+    /// AND the promise that distinguishes it from the row beneath it: **no
+    /// clock**.
+    ///
+    /// **Red on old (behavioural revert):** delete the `archiveTitle` element
+    /// from `menuElements` and `MenuActionHandler.activate` returns false —
+    /// the row is not there to drive. Revert the act instead
+    /// (`archiveBlock` → a no-op) and the stamp assertion reds.
+    @Test func theArchiveRowSetsTheBlockAsideWithNoClock() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedTwoBlockPost(session)
+            let (model, storage) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            // Unflushed typing lands FIRST — the structural contract's
+            // flush, so the archived copy holds every typed byte.
+            let range = try #require(model.rangeOfBlock(seed.blockA))
+            typeEdit(model, storage,
+                     range: NSRange(location: range.upperBound, length: 0),
+                     replacement: " Typed.")
+
+            let elements = model.blockMenu.menuElements(
+                blockID: seed.blockA, includeTakes: true)
+            #expect(MenuActionHandler.activate(
+                MobileEditorStyle.chromeCase(MobileBlockMenuController.archiveTitle),
+                in: elements),
+                    "the Archive row's real handler must be drivable")
+            for _ in 0..<40 {
+                try? await Task.sleep(for: .milliseconds(10))
+                await Task.yield()
+            }
+
+            let stamps = try await db.read { db in
+                try Row.fetchOne(
+                    db, sql: "SELECT archived_at, deleted_at FROM block WHERE id = ?",
+                    arguments: [seed.blockA])
+            }
+            #expect(stamps?["archived_at"] as String? != nil, "the archive stamp landed")
+            #expect(stamps?["deleted_at"] as String? == nil,
+                    "archive is not deletion — no tombstone, no clock")
+            #expect(model.index.entries.map(\.blockID) == [seed.blockB],
+                    "the block left the surface")
+            #expect(try await storedText(db, variantID: seed.a1)
+                == "First block here. Typed.",
+                    "flush-first — the archived copy holds the typed bytes")
+
+            // The receipt says the promise and names the road back.
+            #expect(model.statusMessage == MobileStructuralController.blockArchivedStatus)
+            #expect(MobileStructuralController.blockArchivedStatus
+                .contains(RecoveryCopy.archivedForever))
+            #expect(MobileStructuralController.blockArchivedStatus
+                .contains(MobileNoteTrayModel.roadPhrase(to: .archived)))
+            #expect(!MobileStructuralController.blockArchivedStatus.contains("Mac"))
+
+            // It is NOT the destructive row — nothing is destroyed here.
+            let archive = try #require(
+                elements.first {
+                    $0.title == MobileEditorStyle.chromeCase(
+                        MobileBlockMenuController.archiveTitle)
+                } as? UIAction)
+            #expect(!archive.attributes.contains(.destructive))
+        }
+    }
+
+    /// The archive door refuses through the OPERATION under a seal, in phone
+    /// words, with nothing archived (P-2, fire-and-DO: no pre-check, the
+    /// ops layer's own answer).
+    @Test func archiveRefusesUnderTheSealInPhoneWords() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedTwoBlockPost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            try await session.runner.run { [postID = seed.postID] ops in
+                try ops.lockPost(postID)
+            }
+
+            await model.structural.archiveBlock(blockID: seed.blockA)
+            #expect(model.statusMessage
+                == "This note is locked — unlock it to archive the block.")
+            let stamp = try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT archived_at FROM block WHERE id = ?",
+                    arguments: [seed.blockA])
+            }
+            #expect(stamp == nil, "nothing was archived")
         }
     }
 

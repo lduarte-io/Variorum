@@ -18,10 +18,23 @@
 //  doors (M10; Delete joined at the S4 ladder — MAJOR 1's latch +
 //  flush-guard contract) — the deleted-blocks TRAY stays
 //  Mac-side in v1 (the refusal-free recovery road, named in the note).
-//  "Archive Block" is a recorded DELIBERATE ABSENCE: no such operation
-//  exists (blocks archive nowhere — only containers and takes do), the
-//  Mac offers no such door, and rendering one would invent product
-//  behavior.
+//  **"ARCHIVE BLOCK" LANDED AT ROUND 2 BATCH 6b (PR6), and the note above
+//  it is kept because it was TRUE WHEN WRITTEN and is now exactly false.**
+//  It said the row was a deliberate absence because *"no such operation
+//  exists (blocks archive nowhere — only containers and takes do), the Mac
+//  offers no such door"*. **13j's round-7 ruling built both ops**
+//  (`archiveBlock` / `unarchiveBlock`), the Mac's tray grew an archived
+//  section for them the same phase, and `Queries.archivedBlocks` has been
+//  reading that population ever since — so the phone was the one platform
+//  where a block could be UN-archived (from this batch's tray) and never
+//  archived. A capability with a way back and no way in is the half-door
+//  class, so the row is here now, one place above Delete Block: archive is
+//  the gentler of the two ways a block leaves the page.
+//
+//  Its way BACK is the tray — blocks ▸ archived — which is why the ruling
+//  that built the op and the batch that built the tray had to meet before
+//  this row could honestly exist (P-2: a door that sets a block aside owes
+//  a visible road to the place it set it aside in).
 //
 //  PROMPTS (Name…, Emoji…, the delete confirm) ride injectable seams —
 //  production installs UIAlertController plumbing at attach; tests
@@ -111,6 +124,13 @@ final class MobileBlockMenuController {
     static let insertBelowTitle = "New Block Below"
     static let divideTitle = "Divide Block"
     static let mergeTitle = "Merge with Previous"
+    /// **PR6 — the block-level archive door** (13j's round-7 ruling built
+    /// `archiveBlock`; the Mac wears it in the block TOC and the Takes
+    /// bottom bar through `CapabilityID.archiveBlock`). It sits immediately
+    /// above Delete Block because the two are the same shape — a block
+    /// leaves the page — and this is the gentler one: kept, forever, no
+    /// clock, one tap back from blocks ▸ archived.
+    static let archiveTitle = "Archive Block"
     static let deleteTitle = "Delete Block"
     /// The Mac CalloutMenu's row words, mirrored (one vocabulary).
     static let calloutToggleTitle = "Toggle Callout"
@@ -121,7 +141,7 @@ final class MobileBlockMenuController {
     static var rowTitles: [String] {
         [takesTitle, commentsTitle, calloutTitle, nameTitle,
          commitTitle, historyTitle,
-         insertBelowTitle, divideTitle, mergeTitle, deleteTitle]
+         insertBelowTitle, divideTitle, mergeTitle, archiveTitle, deleteTitle]
     }
 
     /// The callout submenu's titles in order (separators excluded) —
@@ -171,6 +191,14 @@ final class MobileBlockMenuController {
         elements.append(UIAction(title: cased(Self.mergeTitle)) { [weak self] _ in
             guard let model = self?.model else { return }
             Task { await model.structural.mergeWithPrevious() }
+        })
+        // PR6: archive before delete — the gentler exit reads first, the
+        // same way Insert Below heads the structural family "before the
+        // knives". NOT `.destructive`: nothing is destroyed and there is no
+        // clock, which is exactly what distinguishes it from the row below.
+        elements.append(UIAction(title: cased(Self.archiveTitle)) { [weak self] _ in
+            guard let model = self?.model else { return }
+            Task { await model.structural.archiveBlock(blockID: blockID) }
         })
         elements.append(UIAction(
             title: cased(Self.deleteTitle), attributes: .destructive
@@ -282,9 +310,8 @@ final class MobileBlockMenuController {
         }
     }
 
-    // MARK: - Delete block (confirm, since the phone has no structural
-    // undo — v1's recorded posture; the tray's recovery DOOR rides
-    // PL-3/13j)
+    // MARK: - Delete block (confirmed, and since batch 6b the confirm names
+    // the tray — the durable road back, beside the session's undo)
 
     /// The confirm's detail.
     ///
@@ -294,11 +321,12 @@ final class MobileBlockMenuController {
     /// phone face. J8's copy doctrine says otherwise, and her own morning
     /// report is the evidence: a promise a user cannot act on is not a fact
     /// she can use, it is a place she goes looking for and does not find.
-    /// This phone has NO tray face and NO undo door (v1's recorded posture,
-    /// verified by sweep this batch: no `restoreBlock` door anywhere in
-    /// `VariorumMobile`, and the structural undo stack is used only for
-    /// compounds), so the confirm says the two things that are true here and
-    /// promises nothing else.
+    /// This phone had NO tray face and NO undo door then (v1's recorded
+    /// posture, verified by sweep at that batch: no `restoreBlock` door
+    /// anywhere in `VariorumMobile`, and the structural undo stack used only
+    /// for compounds), so the confirm said the two things that were true and
+    /// promised nothing else. **Both halves have since landed** — see the two
+    /// graduations below.
     ///
     /// It does NOT say "do it on the Mac" — the no-redirect principle
     /// (MobileSoul §4) — and it does not say "gone forever" either, because
@@ -308,15 +336,25 @@ final class MobileBlockMenuController {
     /// second half FALSE.** It used to end *"There's no undo here"*, which
     /// was true when written and is the exact class J8 warns about from the
     /// other side: a copy line that keeps saying no after the door opens.
-    /// The structural undo door (her R10) now stands on the receipt this
-    /// delete writes and in the note's ⋯, so the confirm names the road it
-    /// really has. The tray twin is still the ledger's (batch 5) and is
-    /// still not promised here.
+    /// The structural undo door (her R10) stands on the receipt this delete
+    /// writes and in the note's ⋯, so the confirm names the road it has.
+    ///
+    /// **ROUND 2 BATCH 6b — IT GRADUATES AGAIN, and for the same reason a
+    /// second time.** The clause above ended *"The tray twin is still the
+    /// ledger's and is still not promised here"* — the tray landed at this
+    /// batch (§69.3), so the promise is real and the confirm makes it.
+    /// Undo is the SESSION's road back (it dies with the app; the phone's
+    /// stack is in-memory by construction); the tray is the DURABLE one, and
+    /// a destructive confirm owes her the durable one first.
     /// Pinned static — a promise made in a literal is a promise no test can
     /// keep.
-    static let deleteConfirmDetail =
-        "The block leaves this note, with its takes. Undo is on the receipt "
-        + "afterwards, and in the note's ⋯."
+    static var deleteConfirmDetail: String {
+        "The block leaves this note, with its takes. "
+            + "\(MobileNoteTrayModel.putBackRoadPhrase.prefix(1).uppercased())"
+            + "\(MobileNoteTrayModel.putBackRoadPhrase.dropFirst()) for "
+            + "\(TrashWindow.days) days; Undo is on the receipt afterwards, "
+            + "and in the note's ⋯."
+    }
 
     static let deleteNeedsItsConfirm =
         "Deleting a block needs its confirmation — nothing was deleted."

@@ -1323,3 +1323,123 @@ struct MobilePocketGuidePrivacyTests {
         }
     }
 }
+
+// MARK: - keeping & letting go (PR22 — the deletion chapter, batch 6b)
+
+/// **THE FIVE-PLACES MAP, RE-TAUGHT IN PHONE GRAMMAR** (round 2, batch 6b —
+/// §69.8). The Mac's field guide teaches the same map, the two sizes of
+/// moment, and the TWO EXITS by doing; its text names Mac doors and chords,
+/// so the pocket guide re-teaches rather than copying (MobileSoul §4.4).
+///
+/// Same anti-drift discipline as the privacy suite: the prose names the app's
+/// OWN words where it can (`TrashWindow.days`, the tray's segment words), so
+/// a re-worded door makes this red rather than merely stale.
+@MainActor
+@Suite("Mobile tutorial walk — keeping & letting go")
+struct MobilePocketGuideDeletionTests {
+    @Test func theChapterSitsBeforePrivacyAndCarriesTwoLessons() {
+        let index = try? #require(
+            MobileTutorialSeeder.plan.firstIndex { $0.chapter == "keeping & letting go" })
+        let privacy = MobileTutorialSeeder.plan.firstIndex {
+            $0.chapter == "keeping it private"
+        }
+        #expect(index != nil)
+        if let index, let privacy { #expect(index < privacy) }
+        #expect(MobileTutorialSeeder.plan.first {
+            $0.chapter == "keeping & letting go"
+        }?.lessons == ["the five places", "the two exits"])
+    }
+
+    /// All five places are named, each with the phone road that reaches it —
+    /// and the take's own paragraph, which is the one thing the Trash never
+    /// holds (her D1 ruling).
+    @Test func theFivePlacesLessonNamesEveryPlaceAndItsPhoneRoad() async throws {
+        try await withPocketGuideWorld { _, db, bookID in
+            let prose = try await db.read { db in
+                try Queries.renderedText(
+                    db, containerID: lessonID(db, bookID: bookID, "the five places"))
+            }
+            // 1–5, each by name.
+            #expect(prose.contains("WHERE YOU LEFT IT"))
+            #expect(prose.contains("ARCHIVED"))
+            #expect(prose.contains("THE TRASH"))
+            #expect(prose.contains("THIS NOTE'S VERSIONS"))
+            #expect(prose.contains("THIS BLOCK'S HISTORY"))
+            // The roads, in the phone's own words.
+            #expect(prose.contains(MobileBlocksSegment.archived.word))
+            #expect(prose.contains(MobileBlocksSegment.leaving.word))
+            #expect(prose.contains(MobileBlockMenuController.archiveTitle))
+            #expect(prose.contains(BlockHistoryPath.name))
+            #expect(prose.contains(RecoveryCopy.putBackVerb))
+            #expect(prose.contains(RecoveryCopy.deleteNowVerb))
+            #expect(prose.contains("\(TrashWindow.days) days"))
+            // The take's exception — the one thing the Trash never holds.
+            #expect(prose.contains("TAKES are the one thing that never rows in the Trash"))
+            // The no-redirect principle: no Mac door, no chord.
+            #expect(!prose.contains("Mac"))
+            #expect(!prose.contains("⌘"))
+        }
+    }
+
+    /// The two exits, told apart — and the lesson ASKS her to do both, which
+    /// is the guide's own device (every lesson performs what it teaches).
+    @Test func theTwoExitsLessonTellsDeletionFromTransformationAndStagesBoth()
+        async throws
+    {
+        try await withPocketGuideWorld { _, db, bookID in
+            let noteID = try await db.read { db in
+                try lessonID(db, bookID: bookID, "the two exits")
+            }
+            let prose = try await db.read { db in
+                try Queries.renderedText(db, containerID: noteID)
+            }
+            #expect(prose.contains("DELETION GOES TO THE TRASH"))
+            #expect(prose.contains("TRANSFORMATION GOES TO LINEAGE"))
+            // The distinction that matters: a transformed original is NOT
+            // deleted, so it wears no countdown.
+            #expect(prose.contains("kept WHOLE and set aside"))
+            #expect(prose.contains("wears no countdown"))
+            #expect(prose.contains(BlockHistoryPath.cameFromSection))
+            #expect(prose.contains(BlockHistoryPath.bringBackVerb))
+            #expect(prose.contains(MobileBlocksSegment.leaving.word))
+            #expect(!prose.contains("Mac"))
+
+            // The staged block the lesson asks her to act on — and its take,
+            // so the divide it teaches is the fanned kind whose original is
+            // exactly what "Came from" holds.
+            let blocks = try await db.read { db in
+                try Queries.blockTOC(db, post: noteID)
+            }
+            let last = try #require(blocks.last)
+            #expect(last.hasFan, "the practice block carries a take")
+            #expect(last.text?.contains("Delete me") == true)
+        }
+    }
+
+    /// **THE BATCH-5 REVIEW'S GUIDE NIT, CLOSED** (its own words: *"the
+    /// pocket guide now describes a shelf that does not exist"*). The
+    /// "getting around" lesson described a full-width Today's Entry door
+    /// batch 5 had replaced with a BADGE, and `grep` found no mention of the
+    /// quick-note box anywhere in the seeder — the surface that batch made
+    /// half the shelf.
+    @Test func theShelfLessonDescribesTheShelfThatExists() async throws {
+        try await withPocketGuideWorld { _, db, bookID in
+            let prose = try await db.read { db in
+                try Queries.renderedText(
+                    db, containerID: lessonID(db, bookID: bookID, "getting around"))
+            }
+            // The badge, in the ONE declaration's own words (a re-word of
+            // the door reds this rather than leaving it stale).
+            #expect(prose.contains(MobileShelfFaces.todayDoorTitle))
+            #expect(prose.contains("badge"))
+            // …and its fallback state, which is a real road she can meet.
+            #expect(prose.contains("its own row at the list's end"))
+            // The quick-note box, which had no mention at all.
+            #expect(prose.contains("QUICK NOTE box"))
+            #expect(prose.contains("just start typing"))
+            #expect(prose.contains("open ↵"))
+            // The retired shape is gone.
+            #expect(!prose.contains("✎ Today's Entry opens today's journal page"))
+        }
+    }
+}

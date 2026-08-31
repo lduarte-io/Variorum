@@ -73,6 +73,11 @@ struct MobileWriteScreen: View {
     /// chip's model and its sheet; a tap jumps the editor there.
     @State private var blockList: MobileBlockListModel
     @State private var blocksPresented = false
+    /// **The per-note TRAY** (round 2 batch 6b — §69.3's ruled shape): this
+    /// note's archived and leaving blocks, reached through the SAME sheet as
+    /// the block list, because all three are one subject in three states
+    /// (the design record's Q8 candidate — see `MobileBlockList.swift`).
+    @State private var tray: MobileNoteTrayModel
     /// Lenses (parity C5 — her top-bar sketch, the ruled saved-peek
     /// shape): the chip's model and its sheet; the active lens is
     /// session-local (evaporates with this screen — M9's lifetime).
@@ -131,6 +136,7 @@ struct MobileWriteScreen: View {
         _noteTags = State(initialValue: MobileNoteTagsModel(session: session, postID: postID))
         _references = State(initialValue: MobileReferencesModel(session: session, postID: postID))
         _blockList = State(initialValue: MobileBlockListModel(session: session, postID: postID))
+        _tray = State(initialValue: MobileNoteTrayModel(session: session, postID: postID))
         _lenses = State(initialValue: MobileLensesModel(
             session: session, postID: postID, editor: editor))
         self.session = session
@@ -326,7 +332,7 @@ struct MobileWriteScreen: View {
             MobileReferencesSheet(model: references, tokens: tokens)
         }
         .sheet(isPresented: $blocksPresented) {
-            MobileBlockListSheet(model: blockList, tokens: tokens) { blockID in
+            MobileBlockListSheet(model: blockList, tokens: tokens, tray: tray) { blockID in
                 blocksPresented = false
                 model.jumpToBlock(blockID)
             }
@@ -486,14 +492,28 @@ struct MobileWriteScreen: View {
         Button {
             lensesPresented = true
         } label: {
-            Text(tokens.chromeLabel(lenses.chipLabel))
+            // **PR14's marker** (her 13j gate ruling (5) — *"say loudly"*):
+            // while the ACTIVE lens has a pick that fell back to the note's
+            // own take, the chip says so on the page the lens is driving,
+            // in the alarm token, rather than leaving the fact inside a
+            // sheet she would have to think to open. The sheet's own loud
+            // region names WHICH block and offers the way back.
+            Text(tokens.chromeLabel(
+                lenses.chipLabel + (lenses.activeLensHasFallback ? " \u{26A0}" : "")))
                 .font(tokens.small)
-                .foregroundStyle(lenses.activeLensID != nil ? tokens.accent : tokens.faint)
+                .foregroundStyle(
+                    lenses.activeLensHasFallback
+                        ? tokens.alarm
+                        : (lenses.activeLensID != nil ? tokens.accent : tokens.faint))
                 .lineLimit(1)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Lenses")
+        .accessibilityLabel(lenses.activeLensHasFallback ? Self.lensFallbackChipLabel : "Lenses")
     }
+
+    /// The chip's spoken label while the active lens has a fallback — a
+    /// glyph is not a sentence, and VoiceOver reads words.
+    static let lensFallbackChipLabel = "Lenses — a pick fell back"
 
     /// Copy the whole note (round 2 batch 2 — M3 ≡ R6; her ask: *"a button
     /// added at the top that allows me to copy everything i've written in a
