@@ -47,6 +47,10 @@ struct MigrationTests {
         // asking to purge the same row dedupe as a pure duplicate,
         // SyncSpec §7) + the lookup index.
         "uq_purge_intent_live", "idx_purge_intent_row",
+        // Pre-13u Act 4 (17c P20, v1_15): the version-history classifier's
+        // own partial index — LOCAL only, no §12 lockstep event (the
+        // mirrors carry no indexes beyond the PK by design, SyncSpec §2).
+        "idx_container_note_version",
     ]
 
     // Tables synced to the server — all carry sync_version (AppSpec §6).

@@ -464,6 +464,44 @@ extension AppDatabase {
             // tombstone the other. The act is idempotent by nature.
             try createOutboxCaptureTriggers(db, table: "purge_intent", pk: "id")
         }
+        // Pre-13u round, Act 4 (17c item P20): AN INDEX FOR THE
+        // VERSION-HISTORY CLASSIFIER.
+        //
+        // `Queries.versionHistoryPredicate` classifies a saved note version
+        // by its BIRTH FACT — `archived_at IS NOT NULL AND archived_at =
+        // created_at` — and neither column was indexed, so every caller
+        // walked `idx_container_kind (kind='post')`, i.e. EVERY POST IN THE
+        // CORPUS. `deleteContainer` runs `noteVersionIDs` INSIDE its write
+        // transaction (Operations+Container.swift), so an ordinary note with
+        // zero versions held the write lock for a corpus-proportional walk,
+        // and a multi-select delete paid it once per note. Measured before:
+        // 0.374 ms at 2,000 posts → 1.791 ms at 20,000 — exactly linear.
+        //
+        // The index is PARTIAL on the classifier itself, so it contains
+        // saved versions and nothing else: a corpus of 20,000 notes with 15
+        // moments carries 15 entries. `(kind, deleted_at, id)` is the column
+        // order the four callers need — the live listings seek `kind='post'
+        // AND deleted_at IS NULL`, and `versionHistoryDeletedWith` (the
+        // `restoreContainer` road) seeks the same pair with a stamp — and it
+        // is what makes SQLite prefer it: stats-free (this repo never runs
+        // ANALYZE), the planner will not scan an index in place of an
+        // equality SEARCH, so the new index has to serve `kind` too.
+        //
+        // **NOT a SyncSpec §12 lockstep event, deliberately.** The Postgres
+        // mirrors carry no indexes beyond the PK by design (SyncSpec §2 —
+        // the constraint-free mirror is what makes the §7 repairs possible),
+        // so a local index changes no wire semantics, no column, and no
+        // classification. The marker stays 7. It is still a schema change,
+        // so it lands in its own commit ahead of anything that uses it
+        // (CLAUDE.md), and there is nothing for a client to disagree about:
+        // an un-migrated client simply keeps the old plan.
+        migrator.registerMigration("v1_15_note_version_index") { db in
+            try db.execute(sql: """
+                CREATE INDEX idx_container_note_version
+                  ON container(kind, deleted_at, id)
+                  WHERE archived_at IS NOT NULL AND archived_at = created_at;
+                """)
+        }
         return migrator
     }
 }
