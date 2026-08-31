@@ -42,7 +42,7 @@
 | | |
 |---|---|
 | branch | `mobile`, pushed; merge-base with main was `43a35ef` (re-derive — main moves) |
-| mobile suite | **632/96 green** (the filter unit's close, 2026-08-31); 2 known issues = the ONE documented diagnostic test (`MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`, two `withKnownIssue` records). A full-suite red at `MobilePerfWalkTests.typingAtTheViewportHoldsThePerKeystrokeBudgetAt100k` is the KNOWN load-flaky pin (KnownIssues row, owner 12) — re-run isolated before concluding anything |
+| mobile suite | **661/98 green** (batch 6b's unit close, 2026-08-31 — the successor seat's first unit; supersedes the 632/96 cutover reading); 2 known issues = the ONE documented diagnostic test (`MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`, two `withKnownIssue` records). A full-suite red at `MobilePerfWalkTests.typingAtTheViewportHoldsThePerKeystrokeBudgetAt100k` is the KNOWN load-flaky pin (KnownIssues row, owner 12) — re-run isolated before concluding anything |
 | hygiene | zero committed `Sources/`, `Shared/`, Mac-target, EditorBrain, schema, build-config changes ALL SEAT; marker 7; verify with the fence grep before trusting |
 | this seat shipped | the pre-batch sweep ladder (mandate discharged — see §2) · **batch 6c DONE** (Two-rooms + the Versions face; review 0B/0M; fix wave in) · **the filter batch CLOSED** (kind filters both rooms, books-as-rows, the #93(b) All-union, sort glyph; her #92–#94 rulings; the UNIT CLOSED banner tops `mobile-batch-filters-cold-review.md`) |
 | her phone | still the 2026-08-21 23:49 build (R30) — running three since-fixed BLOCKERs; the re-offer of an install window is on her list (standing handoff §8 item 15) and nobody owns it yet |

@@ -792,3 +792,44 @@ All six executed. The one substitution (MINOR 2's mechanism) is argued above
 rather than assumed, and the one thing NOT claimed — the quiet direction's
 heal — is named with its traced reason and left with no false promise anywhere
 in the code or the record.
+
+---
+
+# UNIT CLOSED (the Fable orchestrator, 2026-08-31)
+
+**Batch 6b's R28 unit is COMPLETE:** build `8a956b3` → cold review
+`c4c69ec` (0B · 0M · 3m · 3n) → fix wave `afbcf8d`, all six items, nothing
+declined. **Final: mobile 661/98 green, 2 known issues** (the one
+documented diagnostic test). Fence clean at every commit, verified by the
+orchestrator (`git diff --name-only 8a956b3^..afbcf8d -- Sources/
+App/Variorum/Shared App/Variorum/Variorum "*.xcodeproj" "*.pbxproj"` →
+empty). PL-14 CLOSES (its (e) was the last owed face); PL-11's (a)/(c)/(d)/(e)
+all delivered — (f), the cadence/pruning settings rows, remains batch 8's.
+
+**Two adjudications at the close:**
+
+1. **MINOR 2's deviation is ENDORSED post-hoc.** The adjudicated
+   `.task`-on-`MobileWriteScreen` shape was traced by the fixer NOT to
+   fire in either direction (a presenter's `.task` does not re-run on
+   sheet dismissal; at mount no lens is active) — shipping it would have
+   been a fix that fixes nothing. The substitute (the blocks sheet's
+   `onDismiss`, host-level) keeps the ruled intent exactly — the HOST
+   composes the two features, and the refresh fires at the precise moment
+   the stale marker becomes visible — and carries a PRODUCTION red-on-old.
+   The orchestrator verified the mechanism at the diff. *Standing process
+   note, unchanged: an in-batch deviation is normally PROPOSED before
+   built (the R2-4 precedent's own wording); endorsed post-hoc here
+   because the alternative was shipping a no-op, and the deviation was
+   flagged loudly with its trace.* The QUIET direction (archiving a
+   picked take from the takes browser leaves the ⚠ unraised until a sheet
+   cycle) is NAMED, NOT CLAIMED — its trace is in the wave's results; a
+   session-local marker that self-heals on the next sheet open, recorded
+   rather than chased into a held observation at autosave rate.
+2. **The aborted first full run** (a runner restart inside
+   `MobileFilterTests`, re-run 12/1 green isolated; the wave's diff
+   provably not-yet-executed at the crash point) is ACCEPTED as
+   load-class, not this wave's. Noted: this is the round's SECOND
+   observed runner-restart-under-load (the filter review's M2 run carried
+   one beside its perf-pin red). If a third appears, it earns its own
+   KnownIssues line beside the load-flaky pin row rather than another
+   in-record aside.
