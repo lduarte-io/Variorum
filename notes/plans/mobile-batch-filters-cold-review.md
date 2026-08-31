@@ -1,3 +1,13 @@
+> # ✅ UNIT CLOSED — 2026-08-31 (the cutover signal, per the seat handoff §6)
+>
+> Build `19e52d5` → her rulings `5b40049` (#93) → this review `5047ff9` →
+> fix wave `8b4d38b` (all nine items + the #93(b) UNION built; M1's ≥44 pt
+> speculation FALSIFIED by measurement — the real Menu element is 16.0 pt,
+> no layout fix owed; m6 deleted as unbuildable with the probe as reason).
+> **Final: mobile 632/96 green, 2 known issues (the one documented
+> diagnostic test).** Fence clean end to end. The successor seat starts at
+> BATCH 6B per `mobile-round-2-fable-seat-handoff.md` §3.
+
 # Cold review — the Library filter batch (`9be4f1a..19e52d5`)
 
 *Cold Opus reviewer, 2026-08-31. It reproduced the width dump exactly,

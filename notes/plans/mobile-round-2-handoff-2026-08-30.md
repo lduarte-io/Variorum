@@ -245,7 +245,7 @@ start until 13u lands; 🟢 rows could run tomorrow.
 | # | What | needs Mac? |
 |---|---|---|
 | **6c** | ~~**The Two-rooms IA**~~ — **DONE 2026-08-31** (built `799ff11` · cold-reviewed 0 BLOCKER/0 MAJOR · fix wave `52a00fc`; the Versions face shipped WITH it; records: `mobile-batch-6c-record.md` + `-cold-review.md`; D5's purge-road hook deliberately waits for 6b's tray, precondition-pinned) | ✅ done |
-| **—** | **The Library's filter vocabulary** — kind filters ("books", "posts") replacing provenance-only (`bookless`, `scraps`); **Archive inherits the same set.** She ranked this **above** the archive work | 🟢 no |
+| **—** | ~~**The Library's filter vocabulary**~~ — **DONE 2026-08-31** (built `19e52d5` · reviewed · fix wave `8b4d38b`; her #92 rulings + the #93(b) All = books+notes union; the Archive wears the honest reduced set — book-archiving is 13i's, #93(a); records: `mobile-batch-filters-record.md` + `-cold-review.md`) | ✅ done |
 | **6b** | **The per-note tray** — §69.3's ruled three-section shape | 🟢 no |
 | **9** | The editor's ⋯ menu · structural undo **and redo** doors · take history moves to the per-take ⋯ · the merge vocabulary (**propose-only**) · **🟠 TEXT SELECTION IS BROKEN** — *"holding it down makes you scroll upwards"* | 🟢 no |
 | **4.5c** | **Phone-local half only** — **B45-2 first** (batch 7 walks into it) · the A7/#34 seam carves · live-editor-over-a-tombstone · `MobileLenses:419` · 2 one-liners | 🟢 no |
