@@ -102,6 +102,34 @@ struct VariorumApp: App {
                             encryption: fresh.encryption,
                             keyVault: fresh.keyVault, auth: fresh.auth)
                         await fresh.start()
+                        // Pre-13u Act 3: THE SAMPLE LIBRARY — the Sherlock
+                        // adventures as a real book, seeded once per store.
+                        // Her ruling is default-on in every reader's store,
+                        // which puts this on every launch's path, so where
+                        // it sits matters: HERE, inside the window's own
+                        // `.task` and after `start()`, so (1) first paint is
+                        // already done — nothing in the launch awaits it —
+                        // and (2) the sign-in question is settled, so the
+                        // gate below reads facts instead of a coin flip (the
+                        // starter journal's batch-5 MAJOR, whose duplicate
+                        // book propagated to every device). Idempotent by
+                        // construction and resumable, so a re-run after an
+                        // unlock — or after a cancelled seed — is safe.
+                        await SampleLibrarySeeder.seedIfNeeded(
+                            session: session,
+                            storeVariant: bootstrap.storeVariant,
+                            gate: SampleLibrarySeeder.SyncGate(
+                                // Captured strongly, deliberately: the
+                                // closures outlive nothing, and a nil'd weak
+                                // reference would read as "no account",
+                                // which is the unsafe direction.
+                                belongsToAnAccount: {
+                                    fresh.sync.isConfigured
+                                        || fresh.account.variorum != nil
+                                },
+                                hasSyncedCleanly: {
+                                    fresh.sync.status.lastSuccessAt != nil
+                                }))
                     }
                     // 13p: the calm, dismissible protection notices (the
                     // Standard nudge's two-offer shape + the reminder).
