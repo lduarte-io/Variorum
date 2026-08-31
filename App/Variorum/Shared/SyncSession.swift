@@ -106,7 +106,13 @@ final class SyncSession {
         // ledger reconciliation, the horizon-gated family purges, and the
         // savepoint pruning mints — the memo's §4b, riding the existing
         // scheduler as designed.
-        let engine = SyncEngine(transport: transport, keyProvider: keyProvider)
+        // The sample-library dedupe's facts (pre-13u Act 0, R-pre13u-8):
+        // the engine cannot see the seeder, so the identity predicate and
+        // per-note manifest are handed in here — the one composition site
+        // both platforms share.
+        let engine = SyncEngine(
+            transport: transport, keyProvider: keyProvider,
+            sampleLibraryFacts: SampleLibrarySeeder.dedupeFacts())
         let janitor = (transport as? any SyncTransport & SyncPurgeTransport)
             .map { PurgeJanitor(transport: $0, keyProvider: keyProvider) }
         let scheduler = SyncScheduler(engine: engine, janitor: janitor)

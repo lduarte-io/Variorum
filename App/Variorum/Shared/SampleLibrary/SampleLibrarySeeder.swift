@@ -266,6 +266,24 @@ enum SampleLibrarySeeder {
         manifest(stories: try loadStories())
     }
 
+    /// **The dedupe repair's injected facts** (pre-13u Act 0, R-pre13u-8):
+    /// what the sync engine — which cannot see this file — needs to
+    /// recognise and classify a seeded copy. Wired at the ONE shared
+    /// composition site (`SyncSession.configure`), so both platforms hand
+    /// the engine the same facts and cannot drift. The manifest loader is
+    /// LAZY: the ~0.5 MB parse runs only if two same-name copies actually
+    /// meet, which happens at most about once in a store's life. The hash
+    /// recipe rides along as the same function the manifest's own
+    /// `isPristine` uses, so the pair can never disagree
+    /// (`SampleLibraryDedupeFactsTests` pins the agreement).
+    nonisolated static func dedupeFacts() -> SampleLibraryDedupeFacts {
+        SampleLibraryDedupeFacts(
+            bookName: bookName,
+            tagPath: tagName,
+            loadNoteHashes: { try manifest().noteHashes },
+            hash: BridgeHash.body(_:))
+    }
+
     // MARK: - Discovery (the idempotence guard)
 
     /// What the store already holds of this library. Deliberately reports
