@@ -215,7 +215,10 @@ never blocking. The remaining sequence runs one agent at a time to completion: A
 Act 0 Opus → Act 0 Fable (`Sync/`) → Act 10 wave 1 → wave 2 → the Opus midpoint review + fixes →
 the final Fable ladder (cap 3) → closeout. The `/Applications` refresh + tutorial re-seed run
 overnight ONLY if she quits the app before sleeping (asked); otherwise both are HELD for the
-morning per the never-quit rule. **The Pool tag-column question is RESOLVED without her** — her
+morning per the never-quit rule. **GRANTED (her word before sleeping: "i've quit variorum, and the
+mac will be left plugge din with the lid open") — instance check verified ZERO at 04:0x; the
+zero-instance window is open for the closeout's refresh + re-seed (A1 backup first, always);
+caffeinate is holding the machine.** **The Pool tag-column question is RESOLVED without her** — her
 mid-sitting re-cast already granted the latitude by name (*"tags as a column or not"*), and the
 eighth wave superseded the old screenshot-pair plan with a style guide she loved: the wave builds
 the mockup's card/metadata-chip grammar as the default, judges the column question in place, and
