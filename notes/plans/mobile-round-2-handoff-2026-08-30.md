@@ -244,7 +244,7 @@ start until 13u lands; 🟢 rows could run tomorrow.
 
 | # | What | needs Mac? |
 |---|---|---|
-| **6c** | **The Two-rooms IA** — her ruling; retires the combined "Archived & Deleted" surface | 🟢 no |
+| **6c** | ~~**The Two-rooms IA**~~ — **DONE 2026-08-31** (built `799ff11` · cold-reviewed 0 BLOCKER/0 MAJOR · fix wave `52a00fc`; the Versions face shipped WITH it; records: `mobile-batch-6c-record.md` + `-cold-review.md`; D5's purge-road hook deliberately waits for 6b's tray, precondition-pinned) | ✅ done |
 | **—** | **The Library's filter vocabulary** — kind filters ("books", "posts") replacing provenance-only (`bookless`, `scraps`); **Archive inherits the same set.** She ranked this **above** the archive work | 🟢 no |
 | **6b** | **The per-note tray** — §69.3's ruled three-section shape | 🟢 no |
 | **9** | The editor's ⋯ menu · structural undo **and redo** doors · take history moves to the per-take ⋯ · the merge vocabulary (**propose-only**) · **🟠 TEXT SELECTION IS BROKEN** — *"holding it down makes you scroll upwards"* | 🟢 no |
