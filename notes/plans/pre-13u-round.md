@@ -2713,3 +2713,21 @@ review's walk like wave 1's.
   cadence `observePool` always has (the tray-panel row's parked class, unchanged in
   kind, summed over groups — scraps-scale by nature).
 
+# ACT 10 WAVE 2c RECORD (2026-08-31 — the modes & views wave, Fable implementer)
+
+**Scope:** item 16 (the THREE ruled note modes — Index new after Takes · Read new
+read-only · Blocks kept-and-earned as the workbench, W8-1) · item 15 (the
+Compare + Lenses flow rebuild, built directly per her fifth-wave ruling) ·
+item 18 (the cohesive Book redesign IF the wave holds it — defers WHOLE
+otherwise, verdict recorded either way). Style guide W8-2/W8-3 binds; her
+amended copy doctrine binds; every door survives; P-3 hard (ONE live editor,
+liveness through `PaneTextAuthority` only); P1 measured on the Sherlock corpus.
+
+## LIVE STATUS (updated per commit — the checkpoint protocol)
+
+- (open) — reading done (plan §Act 10 + W8 rulings, the mockup style reference,
+  manifest rows 07/08/11/14, wave 2b's seam, PostMode/registry/TOC/read-tier/
+  Compare/Lenses/BookView surfaces). Build plan: (1) brains + core queries →
+  (2) Index mode → (3) Read mode → (4) Blocks workbench → (5) Compare+Lenses →
+  (6) tutorial + key sweep → item 18 verdict → full verification → records.
+

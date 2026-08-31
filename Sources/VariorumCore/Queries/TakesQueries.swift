@@ -361,6 +361,135 @@ extension Queries {
     }
 }
 
+// MARK: - The block workbench (pre-13u Act 10 wave 2c, item 16 — W8-1's
+// direction C: "blocks as objects", real facts per row)
+
+extension Queries {
+    /// One workbench row: the slot's identity + the FACTS her ruling asked
+    /// the page to earn — takes, comments, lock, words, edited, tags. Word
+    /// count and the edited day are derived AT READ TIME from the rendered
+    /// take's own row (nothing stored, nothing copied); tags are the
+    /// block's live applications as paths.
+    public struct WorkbenchRow: Equatable, Sendable {
+        public let blockID: String
+        public let placementID: String
+        public let name: String?
+        public let variantID: String?
+        public let text: String?
+        /// The fan: live ACTIVE takes (the badge's count).
+        public let activeVariantCount: Int
+        /// Everything live regardless of status — what EXISTS (R1-1's
+        /// distinction, carried so a bulk delete's ask can be honest).
+        public let liveVariantCount: Int
+        public let commentCount: Int
+        public let variantLocked: Bool
+        /// Words of the rendered take (the one `Queries.wordCount` rule).
+        public let wordCount: Int
+        /// The rendered take's `updated_at` — when this block's shown text
+        /// last moved.
+        public let editedAt: String?
+        /// Live tag paths on the block, sorted.
+        public let tagPaths: [String]
+
+        public init(
+            blockID: String, placementID: String, name: String?,
+            variantID: String?, text: String?, activeVariantCount: Int,
+            liveVariantCount: Int, commentCount: Int, variantLocked: Bool,
+            wordCount: Int, editedAt: String?, tagPaths: [String]
+        ) {
+            self.blockID = blockID
+            self.placementID = placementID
+            self.name = name
+            self.variantID = variantID
+            self.text = text
+            self.activeVariantCount = activeVariantCount
+            self.liveVariantCount = liveVariantCount
+            self.commentCount = commentCount
+            self.variantLocked = variantLocked
+            self.wordCount = wordCount
+            self.editedAt = editedAt
+            self.tagPaths = tagPaths
+        }
+
+        public var hasFan: Bool { activeVariantCount > 1 }
+    }
+
+    /// The post's workbench rows in reading order — `renderPost` (which
+    /// already counts takes and comments through the live block row)
+    /// joined with names, the rendered takes' edit stamps, and the blocks'
+    /// live tags. Cost ∝ the post (P1): three bounded statements over the
+    /// post's own ids, never a corpus walk.
+    public static func blockWorkbench(
+        _ db: Database, post containerID: String
+    ) throws -> [WorkbenchRow] {
+        let toc = try blockTOC(db, post: containerID)
+        guard !toc.isEmpty else { return [] }
+        let slots = try renderPost(db, containerID: containerID)
+        let slotsByID = Dictionary(uniqueKeysWithValues: slots.map { ($0.blockID, $0) })
+
+        // The rendered takes' edit stamps.
+        let variantIDs = toc.compactMap(\.variantID)
+        var editedAt: [String: String] = [:]
+        if !variantIDs.isEmpty {
+            let placeholders = databaseQuestionMarks(count: variantIDs.count)
+            for row in try Row.fetchAll(
+                db,
+                sql: "SELECT id, updated_at FROM variant WHERE id IN (\(placeholders))",
+                arguments: StatementArguments(variantIDs)
+            ) {
+                editedAt[row["id"]] = row["updated_at"]
+            }
+        }
+
+        // The blocks' live tags, as paths.
+        var tagPaths: [String: [String]] = [:]
+        let blockIDs = toc.map(\.blockID)
+        var start = 0
+        while start < blockIDs.count {
+            let chunk = Array(blockIDs[start..<min(start + fanChunk, blockIDs.count)])
+            start += fanChunk
+            let placeholders = databaseQuestionMarks(count: chunk.count)
+            for row in try Row.fetchAll(
+                db,
+                sql: """
+                    SELECT bt.block_id AS block_id, t.path AS path
+                    FROM block_tag bt
+                    JOIN tag t ON t.id = bt.tag_id AND t.deleted_at IS NULL
+                    WHERE bt.deleted_at IS NULL AND bt.block_id IN (\(placeholders))
+                    ORDER BY t.path
+                    """,
+                arguments: StatementArguments(chunk)
+            ) {
+                tagPaths[row["block_id"], default: []].append(row["path"])
+            }
+        }
+
+        return toc.map { row in
+            let slot = slotsByID[row.blockID]
+            return WorkbenchRow(
+                blockID: row.blockID, placementID: row.placementID,
+                name: row.name, variantID: row.variantID, text: row.text,
+                activeVariantCount: slot?.activeVariantCount ?? 0,
+                liveVariantCount: slot?.liveVariantCount ?? 0,
+                commentCount: slot?.commentCount ?? 0,
+                variantLocked: row.variantLocked,
+                wordCount: wordCount(row.text ?? ""),
+                editedAt: row.variantID.flatMap { editedAt[$0] },
+                tagPaths: tagPaths[row.blockID] ?? [])
+        }
+    }
+}
+
+extension AppDatabase {
+    /// The workbench's standing observation (wave 2c) — the TOC cadence,
+    /// widened with the facts.
+    public func observeBlockWorkbench(
+        _ containerID: String
+    ) -> AsyncValueObservation<[Queries.WorkbenchRow]> {
+        observe { try Queries.blockWorkbench($0, post: containerID) }
+    }
+}
+
 extension AppDatabase {
     /// The takes board's standing observation (Phase 11, A3). One post's
     /// combined projection — bounded by construction (cost ∝ this post).
