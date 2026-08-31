@@ -75,7 +75,7 @@ once. Claim a letter here first.
 | Letter | Subject | State |
 |---|---|---|
 | 17a–17f | The 2026-08-30 sweep's six groups | open, unstarted |
-| **17g** | **RESERVED — the `13p-fix` session** (author's live session of 2026-08-30: an issue she found testing the refreshed 13p install). That session owns this letter and writes its own entry; it does **not** fold into 17a. | in flight |
+| **17g** | **CLOSED 2026-08-30 — the `13p-fix` session** (author's live session of 2026-08-30: an issue she found testing the refreshed 13p install). That session owns this letter and writes its own entry; it does **not** fold into 17a. | **closed** |
 
 **Why 13p-fix is 17g and not part of 17a.** 17a is the *sweep's* 13p residue — eight findings from a
 review that read the code. 13p-fix is a *tested* defect she hit in the running app, with its own plan
@@ -932,3 +932,118 @@ WINS — it was written with the real code open and with instructions to refute.
 
 *No red-on-old pin.* Full evidence: review doc, P39.
 
+
+
+---
+
+## 17g — The macOS data-protection keychain asymmetry (the 13p-fix session)
+
+**Status: CLOSED 2026-08-30**, three review rounds, all-Opus cast at her
+instruction. **The full record is `notes/plans/phase-13p-fix-dp-keychain.md`**
+— the FINDING with its measurement, the fix design, the ledger, the batch
+record, and all three ladder rounds. This entry is the summary and the
+hand-offs.
+
+### What she hit
+
+Minutes after 13p's signing gap closed, she ticked *"Require Touch ID to
+unlock sync"*, it silently reverted, and then: *"i tried opening variorum
+and the touchid didn't work, even though i enrolled it, and then i
+entered my passphrase, and then i had to enter it again to get sync to
+start working."*
+
+### The mechanism, measured
+
+On macOS a keychain write carrying an access-control (biometry) ACL or
+`kSecAttrSynchronizable` is routed to the **data-protection** keychain,
+while a read without `kSecUseDataProtectionKeychain` searches the
+**file-based** one. That flag appeared **nowhere** in the codebase.
+Measured in the signed test host: `add 0` · `read-without -25300`
+(itemNotFound) · `read-with -25308` (present, needs auth).
+
+**Latent until that afternoon.** Before the signing gap closed, every
+ACL'd write died at `-34018`, so the gated paths never once succeeded and
+the asymmetry could not bite. Closing the gap did not break something
+that worked — it made a latent defect reachable. **iOS was never
+affected** (it has only the data-protection keychain).
+
+**Why it cost her custody rather than just failing.** Both gated
+transitions delete the surviving plain item immediately after a
+"successful" gated write. So her Biometric-mode switch wrote an
+unreadable gated store key and deleted the Auto item, and the sync toggle
+did the same to her E2EE custody. Both recovered by passphrase; no
+writing was ever at risk.
+
+### What shipped
+
+- **The flag on the three query builders** that own every DP-resident
+  site, behind one named constant (`KeychainPartition.dataProtection`)
+  rather than a comment pasted three times.
+- **`CustodyHandover`** — the rule the incident actually demanded: write,
+  **verify it reads back through the production read path**, only then
+  delete the outgoing item; typed outcomes so the arm where something
+  *did* land somewhere unreadable stops claiming "nothing was altered".
+  Both custody transitions and both surfaces now speak it.
+- **Pins:** the platform fact; a production round trip (write → find →
+  delete → confirm gone); three direct outcome tests; two E2EE transition
+  pins; a structural guard covering all three families. Every bug-class
+  fix red-on-old by **behavioural revert**, not assertion.
+- **Counts: Mac 1853 / 314** (baseline 1843/312; +10 tests, +2 suites,
+  arithmetic checked). Zero `Sources/VariorumCore/Sync/` lines, zero
+  schema, no lockstep — marker stays 7.
+
+### The three rounds, in one line each
+
+**Round 1 (14 findings)** — the phase had fixed the CAUSE and left the
+FAILURE MODE: both transitions still deleted the plain item on a write's
+word alone. Also falsified two of the phase's own claims (the escrow leg
+of the diagnosis was simply wrong; the batch record asserted facts about
+her live custody it had just proved unobservable).
+
+**Round 2 (1 MAJOR)** — round 1's revert drill proved the *store-key*
+guard and the record claimed "both proven". The **E2EE** guard had no pin
+of any kind — and that is the half whose item actually went missing.
+
+**Round 3 (3 MAJOR)** — and the sharpest finding of the phase was against
+the phase itself: see below.
+
+### ⚠️ The phase broke its own trap — recorded because that is the point
+
+Round 3 caught that the round-2 revert drill **removed the injected
+seam's use**, so the "fake-driven" E2EE pins fell through to the real
+`E2EEKeychainStorage` at its fixed account and **overwrote her live E2EE
+custody with test material**. Verified from the live Keychain: the item
+was created inside the drill window, and a read of its key *identifiers*
+(never its bytes) returned the drill's sentinel exactly.
+
+Consequence: **sync refuses until she re-enrolls with her passphrase** —
+the designed road, walked once already that evening, nothing at risk
+because the vault is server-side. An attempt to clean it up was correctly
+**blocked by the permission classifier** (deleting a keychain item via
+the test runner is a non-test action), and routing around it would have
+been the wrong move, so it was left to her with both roads written up.
+
+**The rule taken, now in the plan's ENVIRONMENT TRAPS in bold: a revert
+that removes an injected seam is never a valid drill.** Revert the
+outcome check instead — same red, zero real-world traffic.
+
+### Handed off, every item owned
+
+| item | owner |
+|---|---|
+| Should the store key be BOUND to this device? (its protection class is inert on macOS, so the key rides Migration Assistant to other hardware — two production comments claimed otherwise until now) | **QUESTIONS #82**, hers; KnownIssues at **13x** |
+| Deletes discard their status; `E2EECustodyStorage.live`'s wiring untested; `setMode`'s synchronous `SecItem*` on the MainActor; the test's global cache write | **17a** |
+| The escrow round trip has never been verified on any machine | **13x** |
+| A Developer ID build must carry the same `keychain-access-groups` | **13r** |
+| `saveGated`'s forced delete-then-add window (pre-existing since 14b) | **17a** |
+| `CanvasDragTrackingTests` load flake (found, not caused; both its tests) | **12** |
+| The `wroteButUnreadable` wording | **13s** voice pass |
+
+### Owed to the author
+
+1. **Re-enroll E2EE with your passphrase** (my drill's damage — see above).
+2. **The two-step clean-up** if the biometric-gate orphan is still there:
+   unlock FIRST, then toggle off. The one-step version refuses.
+3. **QUESTIONS #82.**
+4. **The install refresh** — the fixed build is not in `/Applications`;
+   that is a zero-instance window and her call.

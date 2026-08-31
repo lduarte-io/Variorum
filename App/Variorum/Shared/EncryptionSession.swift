@@ -44,6 +44,9 @@ private enum BiometricGateOutcome: Sendable {
     case landed
     case noMaterial
     case refused
+    /// 13p-fix R3-2: the write landed somewhere the read path cannot
+    /// reach — distinct from `refused`, because something DID change.
+    case wroteButUnreadable
 }
 
 @MainActor
@@ -431,13 +434,22 @@ final class EncryptionSession {
     func setBiometricRequirement(_ required: Bool) async {
         let outcome = await store.offMain { store -> BiometricGateOutcome in
             guard let material = store.load() else { return .noMaterial }
-            return store.setBiometricGate(required, material) ? .landed : .refused
+            switch store.setBiometricGate(required, material) {
+            case .done: return .landed
+            case .writeRefused: return .refused
+            case .wroteButUnreadable: return .wroteButUnreadable
+            }
         }
         switch outcome {
         case .noMaterial:
             lastError = "Unlock this device's keys first."
         case .refused:
             lastError = "The device Keychain refused the change — nothing was altered."
+        case .wroteButUnreadable:
+            // 13p-fix R3-2: the arm where something DID land somewhere the
+            // read path cannot reach. Saying "nothing was altered" here was
+            // false on the exact family whose custody went missing.
+            lastError = ProtectionCopy.wroteButUnreadable
         case .landed:
             biometricRequired = required
         }

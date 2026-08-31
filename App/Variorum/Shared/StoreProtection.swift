@@ -213,6 +213,18 @@ nonisolated enum ProtectionCopy {
     #else
     static let deviceName = "Mac"
     static let biometryName = "Touch ID"
+
+    /// 13p-fix ladder R2-2 (moved here at R3-2, so BOTH surfaces can say
+    /// it — `ProtectionController` is MainActor-isolated and the E2EE
+    /// road needed the same sentence): the honest wording for the arm
+    /// where a write DID land somewhere the read path cannot reach.
+    /// "Nothing was altered" is false there, in exactly the case the
+    /// guard exists to surface.
+    static let wroteButUnreadable =
+        "The Keychain accepted the key but cannot find it again, so your "
+        + "current way in was left exactly as it was. Nothing is lost — "
+        + "your passphrase and recovery phrase still open your library."
+
     static let credentialName = "login password"
     #endif
 

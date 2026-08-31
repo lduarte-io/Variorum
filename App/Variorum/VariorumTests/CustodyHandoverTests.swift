@@ -74,8 +74,23 @@ struct CustodyHandoverTests {
             custody: E2EECustodyStorage(
                 setGated: { _ in .wroteButUnreadable },
                 setPlain: { _ in .done }))
-        #expect(store.setBiometricGate(true, material()) == false,
+        #expect(store.setBiometricGate(true, material()) == .wroteButUnreadable,
                 "a gated item nothing can find is not a landed gate — and the plain item it would have replaced must not have been deleted")
+    }
+
+    /// 13p-fix R3-2, red-on-old: the E2EE surface must NOT say "nothing
+    /// was altered" when something landed somewhere unreadable. Before the
+    /// fix the seam returned a Bool, so this arm and a genuine refusal
+    /// were the same sentence — on the family whose custody went missing.
+    @MainActor @Test func theE2EESurfaceNamesTheSymptomWhenAWriteLandsUnreadable() async {
+        let session = EncryptionSession(
+            store: .keychain(custody: E2EECustodyStorage(
+                setGated: { _ in .wroteButUnreadable },
+                setPlain: { _ in .done })),
+            client: nil, signedIn: { true })
+        await session.setBiometricRequirement(true)
+        #expect(session.lastError == ProtectionCopy.wroteButUnreadable,
+                "the honest arm names the keychain-identity symptom, not 'nothing was altered'")
     }
 
     @Test func theE2EEGateTurnsOffOnlyWhenThePlainItemReadsBack() {
@@ -83,12 +98,12 @@ struct CustodyHandoverTests {
             custody: E2EECustodyStorage(
                 setGated: { _ in .done },
                 setPlain: { _ in .wroteButUnreadable }))
-        #expect(refusing.setBiometricGate(false, material()) == false)
+        #expect(refusing.setBiometricGate(false, material()) == .wroteButUnreadable)
 
         let working = DeviceKeyStore.keychain(
             custody: E2EECustodyStorage(
                 setGated: { _ in .done },
                 setPlain: { _ in .done }))
-        #expect(working.setBiometricGate(false, material()))
+        #expect(working.setBiometricGate(false, material()) == .done)
     }
 }

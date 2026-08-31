@@ -87,7 +87,11 @@ nonisolated struct DeviceKeyStore: Sendable {
     var isBiometricGateOn: @Sendable () -> Bool
     /// CF-12: re-persist the material under the given policy (ON ⇒ the
     /// `.biometryCurrentSet` item; OFF ⇒ the plain item).
-    var setBiometricGate: @Sendable (Bool, DeviceKeyMaterial) -> Bool
+    /// 13p-fix R3-2: carries the OUTCOME, not a Bool. Collapsing
+    /// `.writeRefused` and `.wroteButUnreadable` into `false` made the
+    /// E2EE surface say "nothing was altered" in exactly the case R2-2
+    /// called a lie — on the family whose item actually went missing.
+    var setBiometricGate: @Sendable (Bool, DeviceKeyMaterial) -> CustodyHandover.Outcome
     /// CF-12: evaluate biometrics (NEVER the device passcode — her ruling)
     /// and unlock this launch. nil = failed / cancelled / unavailable /
     /// invalidated-by-re-enrollment — the passphrase road is the fallback,
@@ -138,18 +142,20 @@ nonisolated struct DeviceKeyStore: Sendable {
                 // find the item again — see `CustodyHandover`.
                 if on {
                     // Presence only — reading an ACL'd item's data prompts.
-                    guard custody.setGated(material) == .done else { return false }
+                    let outcome = custody.setGated(material)
+                    guard outcome == .done else { return outcome }
                     E2EELaunchKeyCache.shared.value = material
-                    return true
+                    return .done
                 }
                 // Identity, not presence (R2-4), and the OFF arm gets the
                 // roll-back its ON twin has (R2-3): without it a failed
                 // verify leaves the plain item written AND the gated item
                 // alive — a silently-readable copy under a UI reporting a
                 // gate, which is the theater this codebase forbids.
-                guard custody.setPlain(material) == .done else { return false }
+                let outcome = custody.setPlain(material)
+                guard outcome == .done else { return outcome }
                 E2EELaunchKeyCache.shared.value = nil
-                return true
+                return .done
             },
             unlockWithBiometrics: {
                 guard let material = await E2EEKeychainStorage.unlockGatedItem() else {
@@ -208,7 +214,7 @@ nonisolated struct DeviceKeyStore: Sendable {
             clear: { backing.clear() },
             biometryAvailable: { backing.biometryIsAvailable() },
             isBiometricGateOn: { backing.isGated() },
-            setBiometricGate: { backing.setGate($0, $1) },
+            setBiometricGate: { backing.setGate($0, $1) ? .done : .writeRefused },
             unlockWithBiometrics: { backing.unlock() })
     }
 }

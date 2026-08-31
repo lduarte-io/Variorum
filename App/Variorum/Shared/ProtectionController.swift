@@ -328,7 +328,7 @@ final class ProtectionController {
             case .writeRefused:
                 return .refused("The Keychain refused the change — nothing was altered.")
             case .wroteButUnreadable:
-                return .refused(Self.wroteButUnreadable)
+                return .refused(ProtectionCopy.wroteButUnreadable)
             }
         case .biometric:
             guard biometryAvailable else {
@@ -352,7 +352,7 @@ final class ProtectionController {
             case .writeRefused:
                 return .refused("The Keychain refused the gated item — nothing was altered.")
             case .wroteButUnreadable:
-                return .refused(Self.wroteButUnreadable)
+                return .refused(ProtectionCopy.wroteButUnreadable)
             }
         case .passphrase:
             guardSeam.deleteAuto()
@@ -455,17 +455,6 @@ final class ProtectionController {
     private func persistDials() {
         gate.saveDials(dials, scope)
     }
-
-    /// 13p-fix ladder R2-2: the honest sentence for the arm where a write
-    /// DID land somewhere the read path cannot reach. Saying "nothing was
-    /// altered" there would be false in exactly the case this guard exists
-    /// to surface — and naming the symptom is what turns a recurrence into
-    /// a diagnosis instead of a mystery.
-    static let wroteButUnreadable =
-        "The Keychain accepted the key but cannot find it again — your "
-        + "current custody was left untouched. This usually means the app's "
-        + "signing identity changed; reinstalling the app from a build with "
-        + "the same identity restores it."
 
     // MARK: - The launch reconcile
 

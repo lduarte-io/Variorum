@@ -110,7 +110,7 @@ alone.**
 
 ## THE FIX (design, settled by the measurement)
 
-Exactly **three** private query builders own every DP-resident site
+Exactly **three** query builders own every DP-resident site (made `internal` at R1-3 so the structural pin can read them)
 (verified by grep; no other `kSecAttrAccessControl` /
 `kSecAttrSynchronizable` sites exist in production code):
 
@@ -246,6 +246,15 @@ configuration (anything not named exactly "Debug" builds SPM deps
 RELEASE and strips VariorumCore's DEBUG-gated oracles). Backups are
 WAL-safe with UTC names, ALWAYS before touching the real store (the A1
 rail). Never `git checkout` over uncommitted work.
+
+**⚠️ A REVERT THAT REMOVES AN INJECTED SEAM IS NEVER A VALID DRILL
+(13p-fix ladder R3-1 — learned the expensive way, in this phase).**
+Reverting `setBiometricGate` to its pre-fix body left
+`keychain(custody:)`'s parameter UNUSED, so the "fake-driven" pins fell
+straight through to the real `E2EEKeychainStorage` at its FIXED account
+and overwrote the author's live E2EE custody with test material. Revert
+the OUTCOME CHECK, never the seam: `if on { _ = custody.setGated(...);
+… return .done }` reddens the same pins with zero Keychain traffic.
 
 **This phase's own trap:** every keychain-touching test MUST use a
 throwaway service or a throwaway scope. `StoreKeyGuard`'s gated item
@@ -450,3 +459,28 @@ re-verification of the site enumeration, the no-stranding argument, and
 the R1-4 escrow correction — plus one useful new fact: the previously
 unreachable DP orphans are now not just readable but **deletable**
 (`E2EEKeychainStorage.clear()`'s gated leg could never fire before).
+
+
+---
+
+## LADDER — ROUND 3 (fresh Opus cold reviewer; the FINAL round — CLAUDE.md caps it at three)
+
+3 MAJOR · 5 MINOR · 6 NIT. Zero disputes. Per the cap, what is not fixed
+here is RECORDED WITH AN OWNER and not looped on.
+
+| # | sev | disposition |
+|---|---|---|
+| R3-1 | MAJOR | **CONFIRMED, AND IT HAPPENED — the worst finding of the phase, against the phase itself.** The round-2 revert drill removed the seam's USE, so `keychain(custody:)`'s parameter went unused and the fake-driven E2EE pins fell through to the real `E2EEKeychainStorage` at its FIXED account — violating the ENVIRONMENT TRAP this very plan states. Verified from the live Keychain: `e2ee-keys/device-keys` has `cdat == mdat == 2026-08-30 18:04:31`, inside the drill window, and a read of its key IDENTIFIERS (never its bytes) returned `corpusKeyID=corpus`, `journalBridgeKeyID=bridge`, `masterKey` = 32 zero bytes — **the drill's sentinel**. So the author's E2EE device custody was overwritten by a test. Consequence: sync refuses until she re-enrolls with her passphrase (the designed road, no data at risk — the vault is server-side). **Attempted cleanup was correctly BLOCKED** by the permission classifier: deleting a Keychain item via the test runner is a non-test action, and routing around it would have been the wrong move. Left to the author with both roads written up. Record fixed: the drill recipe is corrected and the ENVIRONMENT TRAPS section now carries the rule in bold. |
+| R3-2 | MAJOR | **FIXED, with a red-on-old pin.** R2-2's honesty fix reached only the store-key surface; `DeviceKeyStore.setBiometricGate` collapsed both failure arms into `Bool`, so the E2EE surface still said *"nothing was altered"* in the case R2-2 itself called a lie — on the family whose item actually went missing. The seam now carries `CustodyHandover.Outcome` end to end, `BiometricGateOutcome` gained the case, and the sentence moved to `ProtectionCopy` (nonisolated) so BOTH surfaces speak it. Drill run on the outcome mapping only — never the seam. |
+| R3-3 | MAJOR | **FIXED.** The GOVERNANCE section was stale: the CLAUDE.md amendment and the standing-fixes file were committed at `44693db`, 16 minutes before this phase's own round-2 commit, and `phase-17-standing-fixes.md` already RESERVED **17g** for this work. The author confirmed it directly. Ledger 6 is rewritten: the closeout is a 17g entry, no master-plan row, no master-plan closeout paragraph. |
+| R3-4 | MINOR | **RECORDED, owner 17a.** `E2EECustodyStorage.live`'s wiring is covered by nothing — transpose `deleteOutgoing`/`rollBackIncoming` and the suite stays green while the incident reinstates. A behavioural pin needs a further seam change; the reviewer labelled that honestly and so does this row. |
+| R3-5 | MINOR | **RECORDED, owner 17a.** The custody law is enforced on writes only: every delete discards its `OSStatus`, so a silently-failing delete produces the theater the codebase forbids — and a silently-failing delete in this exact family is *demonstrated*, not hypothetical (pre-fix `deleteGated` searched the wrong keychain for three hours). Remedy sketch and a `deletesSucceed` knob are named on the row. |
+| R3-6 | MINOR | **RECORDED, owner 17a.** `setMode` runs two-to-three synchronous `SecItem*` calls on the MainActor and this phase added one of them, against 13e batch 9's discipline — while the E2EE twin already rides `offMain`. User-initiated cadence, not per-round. |
+| R3-7 | MINOR | **FIXED (record) + RECORDED (test gap, owner 13x).** One of R1-4's two corroborations cannot have been observed and is struck through; TN3137 plus the -34018 inference carry it alone. The escrow family's live round trip is verified by nothing anywhere — a recovery leg 13x's adoption road is built on — so it gets a KnownIssues row rather than living only in a plan file that closes. |
+| R3-8 | MINOR | **FIXED.** The "Consequence for the author" enumeration covered only the E2EE half and omitted the store-key half she actually experienced; corrected, including the traced consequence that post-fix her Biometric-mode launch will now SUCCEED and the missing Auto item stays missing *by design* under a demanded mode. |
+| R3-9 | MINOR | **FIXED at closeout.** R1-9's promised parity wording was inaccurate: only the DP marker is a no-op on iOS — `CustodyHandover` is a genuine behavioural change shipping in `VariorumMobile`. MobileSoul gets a real row, not a no-op line. |
+| R3-NITs | NIT | Run-on line **FIXED**; the pin message that claimed a property it cannot observe **FIXED**; the `E2EELaunchKeyCache` global write **RECORDED** on 17a's row; the FIX table's stale "private" **FIXED**; the KnownIssues header's owner wording **FIXED** to include 17-entries; the `wroteButUnreadable` copy **re-worded** (it asserted one cause as "usually" and prescribed an action a user can't take) and flagged for 13s's voice pass. |
+
+**Clean bill accepted**, including its independent full-suite run at
+`9b1669c` — 1853/314 fully green, canvas flake included — which
+corroborates this phase's own measurement.
