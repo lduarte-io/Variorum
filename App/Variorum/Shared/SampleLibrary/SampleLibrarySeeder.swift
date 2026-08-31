@@ -1,10 +1,26 @@
 //
 //  SampleLibrarySeeder.swift
-//  Variorum
+//  Shared (Variorum + VariorumMobile)
 //
 //  Pre-13u round, Act 3 — THE SAMPLE LIBRARY: *The Adventures of Sherlock
 //  Holmes* as a real book of the app's own objects, one short story per
 //  note, one chapter per story.
+//
+//  ── HOISTED TO `Shared/` AT ACT 0 (2026-08-31 — R-pre13u-8) ───────────
+//  Her ruling gave the PHONE the same library: *"some people will be phone
+//  only users and they should get to experience it."* MobileSoul §3's rule
+//  is that a capability built Mac-side with its brain in app-local code is
+//  a parity defect at birth — so the seeder MOVED rather than being copied,
+//  file and resource together, into the `Shared/` synchronized group both
+//  app targets already carry. The type keeps its name, so **every Mac pin
+//  rides the hoist unmodified** (the 3C parity proof: a zero-test-edit Mac
+//  suite is the evidence that an address moved and behaviour did not).
+//
+//  What is per-platform, and deliberately NOT here: WHEN the seed runs.
+//  The Mac seeds from the window's `.task` after `start()` (her Act 3
+//  ruling — every reader's store); the phone seeds at the FIRST WRITE and
+//  only when the store belongs to no account (R-pre13u-1 + R-pre13u-8,
+//  `MobileFirstWriteFurniture`). Same brain, two occasions — §4's grammar.
 //
 //  Her ask and her rulings (2026-08-30, recorded in
 //  `notes/plans/pre-13u-round.md` § Act 3):
@@ -35,6 +51,13 @@
 //      and the SYNC GATE — a store that belongs to an ACCOUNT is not judged
 //      until sync has had its say, because a second machine that seeds
 //      before its first pull mints a duplicate library that then propagates.
+//      *(Dated correction, 2026-08-31 — Act 0: the starter journal's own
+//      version of that gate is GONE. R-pre13u-1 moved its occasion to the
+//      first WRITE, where the account question is a fact, and deleted the
+//      bounded wait; this file keeps the wait because ITS occasion is still
+//      the Mac's launch, which has the race the wait narrows. The phone
+//      never spends it — `MobileFirstWriteFurniture` answers the account
+//      question once and hands this seeder `.unowned`.)*
 //
 //  It differs from both in one respect that is deliberate: there is NO
 //  virgin-store guard. The sample library is not first-launch furniture for
@@ -51,11 +74,13 @@
 //  question, recorded for the author rather than invented here.
 //
 //  ── RESUMABLE, BECAUSE THE SEED CAN BE CANCELLED ──────────────────────
-//  The seed runs from the window's `.task`, so closing the window mid-seed
-//  cancels it. Discovery therefore reports WHICH story titles are already
-//  in the book, and the seed mints only the missing ones; the mark lands
-//  only when the whole set is present. A half-seeded library heals itself
-//  at the next launch instead of standing there forever.
+//  On the Mac the seed runs from the window's `.task`, so closing the
+//  window mid-seed cancels it; on the phone the occasion's task dies with
+//  a lock or a session teardown. Discovery therefore reports WHICH story
+//  titles are already in the book, and the seed mints only the missing
+//  ones; the mark lands only when the whole set is present. A half-seeded
+//  library heals itself at the next occasion instead of standing there
+//  forever.
 //
 //  ── P2, AND THE FIRST-LAUNCH CRITICAL PATH ────────────────────────────
 //  Every write goes through `session.runner` (the serial off-main executor)
@@ -74,6 +99,38 @@ import VariorumCore
 /// Anchors `Bundle(for:)` on this module, so the resource resolves in the
 /// app AND under the app-hosted test bundle.
 private final class SampleLibraryBundleAnchor {}
+
+/// **What the bundled source says every note of this library should say.**
+/// Built for R-pre13u-8's dedupe repair — see `SampleLibrarySeeder.manifest`
+/// for the whole reasoning. Deliberately at FILE SCOPE rather than nested
+/// inside the `@MainActor` seeder: it is a value that has to travel — read
+/// inside a database closure off the main actor, handed to the sync
+/// engine — and a nested type would inherit an isolation it has no use for.
+/// `nonisolated` for the same reason: both app targets default to
+/// MainActor isolation, and a manifest that could only be read on the main
+/// actor could not be read where it is needed.
+nonisolated struct SampleLibraryManifest: Sendable, Equatable {
+    /// The book's reserved name — half of the identity predicate a repair
+    /// uses to recognise a copy (`SampleLibrarySeeder.discover`'s own rule).
+    var bookName: String
+    /// The reserved tag path — the other half.
+    var tagName: String
+    /// note title → SHA-256 hex of the text the seed stores for it. Carries
+    /// the front-matter note as well as the twelve stories: the attribution
+    /// IS part of the shipped library.
+    var noteHashes: [String: String]
+
+    var titles: Set<String> { Set(noteHashes.keys) }
+
+    /// True when this note is byte-identical to what shipped. A title the
+    /// manifest does not know is NOT pristine — a note the reader added to
+    /// the book is her own writing, and the whole point of the rule is that
+    /// her writing is never the copy that gets retired.
+    func isPristine(title: String, renderedText: String) -> Bool {
+        guard let expected = noteHashes[title] else { return false }
+        return expected == BridgeHash.body(renderedText)
+    }
+}
 
 @MainActor
 enum SampleLibrarySeeder {
@@ -163,6 +220,50 @@ enum SampleLibrarySeeder {
         }
         flush()
         return stories
+    }
+
+    // MARK: - The manifest (the PRISTINE predicate's shared artifact)
+
+    /// **The artifact R-pre13u-8's dedupe repair consults.** Once the phone
+    /// can seed the library too, two devices can each correctly decide "no
+    /// sample library exists yet" and both seed, and the pair meets under
+    /// sync. Her ruled resolution needs one fact per note — *is this copy
+    /// still exactly what shipped?* — because the rule turns on it: both
+    /// pristine → deterministic keeper; one edited → the EDITED copy is
+    /// kept; both edited → both survive. **An edited copy is never silently
+    /// retired**, which is why the predicate is per-NOTE rather than
+    /// per-book: a reader who rewrote one paragraph of one story has edited
+    /// the library, and a book-level hash would have to be re-derived from
+    /// the notes anyway.
+    ///
+    /// **Why the hash is `BridgeHash.body`** and not a new primitive: the
+    /// repair runs inside `Sources/VariorumCore/Sync/`, which cannot see
+    /// app-target code at all — so the two sides must agree on a recipe
+    /// that BOTH can name. `BridgeHash.body` is public core (SHA-256 hex of
+    /// the UTF-8 bytes) and is already the bridge's own change-detection
+    /// recipe, so the engine side reads
+    /// `BridgeHash.body(Queries.renderedText(db, containerID: id))` with
+    /// nothing new imported and nothing duplicated.
+    ///
+    /// **The comparison is apples to apples by construction:** the seed
+    /// mints through `importPost`, whose bulk segmentation round-trips
+    /// byte-for-byte through `Queries.renderedText` (its own documented
+    /// contract, and `theManifestMatchesWhatTheSeedActuallyStores` pins it
+    /// against the real bundled text rather than a fixture).
+    ///
+    /// Pure, so a pin can drive it with a fixture.
+    nonisolated static func manifest(stories: [Story]) -> SampleLibraryManifest {
+        var hashes = [frontMatterTitle: BridgeHash.body(attributionText)]
+        for story in stories { hashes[story.title] = BridgeHash.body(story.text) }
+        return SampleLibraryManifest(
+            bookName: bookName, tagName: tagName, noteHashes: hashes)
+    }
+
+    /// The manifest for what this build actually ships. ~0.5 MB of string
+    /// work plus thirteen hashes — call it off the main actor, as the seed
+    /// does its own parse.
+    nonisolated static func manifest() throws -> SampleLibraryManifest {
+        manifest(stories: try loadStories())
     }
 
     // MARK: - Discovery (the idempotence guard)
