@@ -131,7 +131,6 @@ struct LensesBoardView: View {
                     .background(.quaternary)
             }
             content
-            footerRule
             TakesBottomBar(model: model)
         }
         .background(tokens.surface)
@@ -329,8 +328,10 @@ struct LensesBoardView: View {
 
     // MARK: - Header
 
-    /// Batch 9 (R101): the same quiet voiced line as the Takes header —
-    /// the align toggle as a chip, the column door as a word-menu.
+    /// Batch 9 (R101), reshaped at wave 2c (item 15): the align chip, the
+    /// ?-disclosure (the retired footer sentence's new home — her copy
+    /// doctrine: structure first, a sentence behind ? for depth), and the
+    /// column door as a generous calm control.
     private var header: some View {
         HStack(spacing: 8) {
             if model.columns.count > 1 {
@@ -343,11 +344,31 @@ struct LensesBoardView: View {
                         + "Unlocked: each column flows as its own read.")
             }
             Spacer()
+            Button("?") { ruleShown.toggle() }
+                .buttonStyle(.plain)
+                .font(tokens.small)
+                .foregroundStyle(tokens.faint)
+                .popover(isPresented: $ruleShown, arrowEdge: .bottom) {
+                    // The ONE rule — the exact sentence the footer carried,
+                    // now summoned instead of standing (item 15's bar: the
+                    // structure teaches; the words wait behind the ?).
+                    Text("Columns are ways of looking at the same note. Nothing here "
+                        + "changes the note except ✓ (make this the note) and ⧉ (make "
+                        + "a new note). Typing edits the take you're in — the same "
+                        + "take, everywhere it appears.")
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.ink)
+                        .frame(width: 300, alignment: .leading)
+                        .padding(14)
+                }
+                .help("What a lens column is — the one rule")
             addColumnMenu
         }
         .padding(.horizontal, 24)
-        .padding(.vertical, 6)
+        .padding(.vertical, 8)
     }
+
+    @State private var ruleShown = false
 
     /// The add-column MENU ITEMS — one body behind both doors (the header
     /// word-menu and the 4C dashed stub column below).
@@ -624,19 +645,46 @@ struct LensesBoardView: View {
 
     // MARK: - Column headers (prominent names + the slot picker + doors)
 
+    /// Wave 2c (item 15): the column headers are CARDS whose identity is a
+    /// LENS — a name, a kind line, the doors — never a note title or a
+    /// relationship line (that is Compare's card; the two modes now tell
+    /// themselves apart by exactly this structure).
     private var columnHeaders: some View {
         HStack(alignment: .top, spacing: 8) {
             Color.clear.frame(width: 4, height: 1)
             ForEach(model.columns) { column in
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 6) {
-                        slotPicker(column)
-                        Spacer()
+                CalmCard(tokens: tokens) {
+                    VStack(alignment: .leading, spacing: 5) {
+                        HStack(spacing: 6) {
+                            slotPicker(column)
+                            Spacer(minLength: 4)
+                            if model.columns.count > 1 {
+                                Button("✕") { model.removeColumn(column.id) }
+                                    .buttonStyle(.plain)
+                                    .foregroundStyle(tokens.muted)
+                                    .help("Close this column (a named lens stays saved; "
+                                        + "an unnamed one is let go)")
+                            }
+                        }
+                        Text(tokens.chromeLabel(kindCaption(column)))
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
+                            .lineLimit(1)
+                        columnDoors(column)
                     }
-                    columnDoors(column)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .topLeading)
             }
+        }
+    }
+
+    /// What KIND of way-of-looking this column is — said as a fact line,
+    /// not an explainer sentence.
+    private func kindCaption(_ column: TakesColumn) -> String {
+        switch column.kind {
+        case .main: "the note — its chosen takes"
+        case .scratch: "unnamed lens — 💾 keeps it"
+        case .lens: "saved lens"
         }
     }
 
@@ -685,11 +733,12 @@ struct LensesBoardView: View {
     }
 
     /// Every non-Chosen column's doors, visible — R89's "very obvious"
-    /// mandate: ✓ Make this the post (the adopt-SWAP), ⧉ Make this a post,
-    /// 💾 keep, ⋯ the rest.
+    /// mandate: ✓ Make this the note (the adopt-SWAP, the PRIMARY door),
+    /// ⧉ Make this a note, 💾 keep, ⋯ the rest. Wave 2c: generous calm
+    /// targets (W8-2); the ✕ moved to the card's title row.
     @ViewBuilder
     private func columnDoors(_ column: TakesColumn) -> some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 5) {
             switch column.kind {
             case .main:
                 Menu("⧉ Duplicate as Version") {
@@ -697,6 +746,8 @@ struct LensesBoardView: View {
                         Task { await model.promoteColumn(column.id) }
                     }
                 }
+                .menuStyle(.borderlessButton)
+                .fixedSize()
                 .help("Copies the note exactly as it is — takes and all — into a new linked note")
             case .scratch:
                 adoptDoor(column)
@@ -712,8 +763,11 @@ struct LensesBoardView: View {
                         Task { await model.promoteColumn(column.id, keepAsLens: true) }
                     }
                 }
+                .menuStyle(.borderlessButton)
+                .fixedSize()
                 .help("A new linked note whose text is what this column shows — no lens required (direct promote)")
                 Button("💾") { lensNamePrompt = LensPrompt(columnID: column.id) }
+                    .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
                     .help("Keep this way of looking: save it as a named lens")
             case .lens(let lensID):
                 adoptDoor(column)
@@ -725,6 +779,8 @@ struct LensesBoardView: View {
                         Task { await model.promoteColumn(column.id, carryFans: false) }
                     }
                 }
+                .menuStyle(.borderlessButton)
+                .fixedSize()
                 .help("A new linked note whose text is what this lens shows")
                 Menu("⋯") {
                     Button("Rename lens…") {
@@ -741,32 +797,21 @@ struct LensesBoardView: View {
                 .menuStyle(.borderlessButton)
                 .fixedSize()
             }
-            if model.columns.count > 1 {
-                Button("✕") { model.removeColumn(column.id) }
-                    .help("Close this column (a named lens stays saved; an unnamed one is let go)")
-            }
         }
         .font(tokens.small)
         .controlSize(.mini)
     }
 
     private func adoptDoor(_ column: TakesColumn) -> some View {
-        Button("✓ Make this the note") {
+        Button(tokens.chromeLabel("✓ Make this the note")) {
             Task { await model.adoptColumn(column.id) }
         }
+        .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary, compact: true))
         .help("The note's chosen takes become this column's — and the old chosen is "
             + "kept automatically as a lens (“chosen until …”), so you can always swap back")
     }
 
-    // MARK: - The one rule (stated, not implied)
-
-    private var footerRule: some View {
-        ChromeNotice(
-            tokens: tokens,
-            text: "Columns are ways of looking at the same note. Nothing here changes the note "
-                + "except ✓ (make this the note) and ⧉ (make a new note). Typing edits the take "
-                + "you're in — the same take, everywhere it appears.")
-            .padding(.horizontal, 24)
-            .padding(.vertical, 6)
-    }
+    // (The footer's standing rule sentence retired at wave 2c — item 15's
+    // copy doctrine. The exact sentence lives behind the header's ? now:
+    // structure teaches at rest, the words wait to be summoned.)
 }

@@ -765,6 +765,13 @@ struct CompareBoardView: View {
     let postID: String
     @State private var model: CompareViewModel
     @State private var diffPresentation: TakesDiffPresentation?
+    /// Wave 2c (item 15): which peer SLOT is choosing a note — the item-14
+    /// searchable picker replaces the flat dropdown enumeration.
+    @State private var pickingSlot: SlotPick?
+
+    struct SlotPick: Identifiable {
+        let id: String  // the peer slot's id
+    }
     /// The drop indicator's target (the BookView idiom).
     @State private var dropTargetBlockID: String?
     @State private var dropAtEndPostID: String?
@@ -849,6 +856,23 @@ struct CompareBoardView: View {
                 leftTitle: diff.leftTitle, rightTitle: diff.rightTitle,
                 leftText: diff.left, rightText: diff.right)
         }
+        // Wave 2c (item 15): the ONE searchable picker (item 14's
+        // component, its recorded 2c seam) — version peers ranked first,
+        // each wearing the honest mark; a snippet + day per row so five
+        // same-day notes are tellable apart.
+        .sheet(item: $pickingSlot) { pick in
+            NotePickerSheet(
+                tokens: tokens,
+                title: "Compare with",
+                prompt: "search notes",
+                source: .corpusNotes(
+                    session: session, excluding: postID,
+                    versionPeersOf: postID,
+                    peerAnnotation: "version of this note"),
+                onPick: { row in
+                    model.setPeer(slotID: pick.id, postID: row.id)
+                })
+        }
     }
 
     // MARK: Header (board-level)
@@ -881,36 +905,46 @@ struct CompareBoardView: View {
                     + "notes — the unrelated stretches are hidden. Nothing is moved or "
                     + "deleted; this is a way of looking. Off: every block shows.")
             Spacer()
+            // Wave 2c (item 15): generous calm doors (W8-2's grammar) —
+            // same acts, same words, real targets.
             Button(tokens.chromeLabel("make outline note")) {
                 Task { await model.makeOutlinePost() }
             }
-            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary, font: tokens.mono))
+            .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
             .help("A linked copy named \u{201C}outline of \u{2026}\u{201D} — each block starts as this "
                 + "note's first sentence per block; it opens beside the note here, "
                 + "registered block-by-block (R99 — the retired Outline tab's power, re-homed)")
             if model.peerSlots.count < 3 {
                 Button(tokens.chromeLabel("+ note")) { model.addPeerSlot() }
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet, font: tokens.mono))
+                    .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary, compact: true))
                     .help("Open another note beside these (compare holds up to four)")
             }
         }
         .controlSize(.small)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 6)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
     }
 
     // MARK: Column headers
 
+    /// Wave 2c (item 15): the column headers are CARDS — a note's identity
+    /// reads as a masthead (title, relationship, acts), which is exactly
+    /// how Compare tells itself apart from Lenses by structure: these
+    /// columns are NOTES; a lens column never wears a relationship line.
     private func columnHeaders(_ display: CompareViewModel.Display) -> some View {
         HStack(alignment: .top, spacing: 8) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(model.projection.anchor.title ?? "This note")
-                    .font(.caption.weight(.semibold))
-                    .lineLimit(1)
-                if model.projection.anchor.sealed {
-                    Text(tokens.chromeLabel("sealed — read-only"))
+            CalmCard(tokens: tokens) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(model.projection.anchor.title ?? "This note")
+                        .font(tokens.small.weight(.semibold))
+                        .foregroundStyle(tokens.ink)
+                        .lineLimit(1)
+                    Text(tokens.chromeLabel(
+                        model.projection.anchor.sealed
+                            ? "this note · sealed — read-only" : "this note"))
                         .font(tokens.small)
                         .foregroundStyle(tokens.muted)
+                        .lineLimit(1)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -928,92 +962,109 @@ struct CompareBoardView: View {
         }
         .controlSize(.small)
         .padding(.horizontal, 12)
-        .padding(.bottom, 4)
+        .padding(.bottom, 6)
     }
 
     @ViewBuilder
     private func peerHeader(
         _ slot: CompareViewModel.PeerSlot, filteredEmpty: Bool = false
     ) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            HStack(spacing: 4) {
-                Picker("Compare with", selection: Binding(
-                    get: { slot.postID },
-                    set: { model.setPeer(slotID: slot.id, postID: $0) })
-                ) {
-                    Text("Choose a note…").tag(String?.none)
-                    if !model.projection.versionPeers.isEmpty {
-                        Section("Versions of this note") {
-                            ForEach(model.projection.versionPeers, id: \.self) { id in
-                                Text(peerTitle(id)).tag(String?.some(id))
+        if let peerID = slot.postID {
+            CalmCard(tokens: tokens) {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                        Text(peerTitle(peerID))
+                            .font(tokens.small.weight(.semibold))
+                            .foregroundStyle(tokens.ink)
+                            .lineLimit(1)
+                        Spacer(minLength: 4)
+                        Button(tokens.chromeLabel("swap")) { pickingSlot = SlotPick(id: slot.id) }
+                            .buttonStyle(.plain)
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.accent)
+                            .help("Choose a different note for this column")
+                        Button("✕") { model.removePeerSlot(slot.id) }
+                            .buttonStyle(.plain)
+                            .foregroundStyle(tokens.muted)
+                            .help("Close this column (the note itself is untouched)")
+                    }
+                    relationshipLine(peerID)
+                    HStack(spacing: 5) {
+                        if model.isVersionPeer(peerID) {
+                            Button(tokens.chromeLabel("unmark")) { model.unmarkVersions(peerID) }
+                                .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
+                                .help("These two stop being versions of each other — the link "
+                                    + "deletes, both notes stay exactly as they are (Sitting 9, R60)")
+                        } else {
+                            Button(tokens.chromeLabel("mark as versions")) {
+                                model.markAsVersions(peerID)
                             }
-                        }
-                    }
-                    Section("Recent notes") {
-                        ForEach(model.peerCandidates, id: \.postID) { item in
-                            Text(item.displayTitle)
-                                .tag(String?.some(item.postID))
-                        }
-                    }
-                }
-                .labelsHidden()
-                .fixedSize()
-                Button("✕") { model.removePeerSlot(slot.id) }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(tokens.muted)
-                    .help("Close this column (the note itself is untouched)")
-            }
-            if let peerID = slot.postID {
-                relationshipLine(peerID)
-                HStack(spacing: 6) {
-                    if model.isVersionPeer(peerID) {
-                        Button("Unmark") { model.unmarkVersions(peerID) }
-                            .help("These two stop being versions of each other — the link deletes, "
-                                + "both notes stay exactly as they are (Sitting 9, R60)")
-                    } else {
-                        Button("Mark as Versions") { model.markAsVersions(peerID) }
+                            .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
                             .help("Says 'these two notes are versions of the same piece' — a "
                                 + "connection, not a copy. Blocks align side-by-side where LINEAGE "
                                 + "connects them; two unrelated notes you hand-link only pair "
                                 + "loosely. Unmarkable any time.")
+                        }
+                        Button(tokens.chromeLabel("diff")) { presentDiff(peerID) }
+                            .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
+                            .help("Line diff of the two notes' rendered text — savable to a file")
+                        // 13f batch 3 (W16): fire-and-DO — OPEN the note in
+                        // the ordinary editor; ⌘[ comes straight back (P-4,
+                        // the `.variorumOpenPost` channel).
+                        Button(tokens.chromeLabel(CapabilityRegistry.capability(.openPeerPost).verb)) {
+                            NotificationCenter.default.post(
+                                name: .variorumOpenPost, object: nil,
+                                userInfo: ["postID": peerID])
+                        }
+                        .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
+                        .help("Open this note on its own — \u{2318}[ comes straight back to "
+                            + "this comparison")
                     }
-                    Button("Diff") { presentDiff(peerID) }
-                        .help("Line diff of the two notes' rendered text — savable to a file")
-                    // 13f batch 3 (W16, her ruling: *"in compare … you
-                    // should be able to click on the post you're comparing
-                    // it with"*). Fire-and-DO: it OPENS the post in the
-                    // ordinary editor. The board names a destination and
-                    // the SHELL decides what that means (P-4 — the
-                    // `.variorumOpenPost` channel this app already
-                    // speaks), which is also what puts Compare on the
-                    // pane's history: ⌘[ comes straight back here.
-                    Button(CapabilityRegistry.capability(.openPeerPost).verb) {
-                        NotificationCenter.default.post(
-                            name: .variorumOpenPost, object: nil,
-                            userInfo: ["postID": peerID])
+                    if model.face(for: peerID)?.sealed == true {
+                        Text(tokens.chromeLabel("sealed — read-only"))
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
                     }
-                    .help("Open this note on its own — \u{2318}[ comes straight back to "
-                        + "this comparison")
-                }
-                if model.face(for: peerID)?.sealed == true {
-                    Text(tokens.chromeLabel("sealed — read-only"))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                }
-                // 13c 2E: N29's honesty line under the filter — an empty
-                // column must never read as content. This is the MIXED case
-                // (another column is related, this one isn't); it also
-                // covers the version-linked-but-lineage-less peer, whose
-                // header says "versions" and would otherwise sit blank.
-                if filteredEmpty {
-                    Text(tokens.chromeLabel("related blocks only — nothing from this note"))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                        .help("Lineage connects none of this note's blocks to the first "
-                            + "note's, so the filter leaves this column empty. Turn "
-                            + "\u{201C}related blocks only\u{201D} off to see it whole.")
+                    // 13c 2E: N29's honesty line under the filter — an empty
+                    // column must never read as content (the MIXED case; it
+                    // also covers the version-linked-but-lineage-less peer).
+                    if filteredEmpty {
+                        Text(tokens.chromeLabel("related blocks only — nothing from this note"))
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
+                            .help("Lineage connects none of this note's blocks to the first "
+                                + "note's, so the filter leaves this column empty. Turn "
+                                + "\u{201C}related blocks only\u{201D} off to see it whole.")
+                    }
                 }
             }
+        } else {
+            // An open slot is a DOOR where the column would be (the Lenses
+            // stub's dashed grammar — one vocabulary for "a column could
+            // stand here"): one generous click opens the searchable picker.
+            Button {
+                pickingSlot = SlotPick(id: slot.id)
+            } label: {
+                VStack(spacing: 6) {
+                    Text(tokens.chromeLabel("＋ choose a note"))
+                        .font(tokens.mono)
+                        .foregroundStyle(tokens.accent)
+                    Text(tokens.chromeLabel("versions of this note come first"))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .lineLimit(2)
+                }
+                .padding(12)
+                .frame(maxWidth: .infinity)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .strokeBorder(
+                        tokens.faint, style: StrokeStyle(lineWidth: 1, dash: [5, 4])))
+            .help("Open a note beside this one — search the library; version peers "
+                + "rank first")
         }
     }
 
@@ -1041,16 +1092,90 @@ struct CompareBoardView: View {
         }
     }
 
+    /// Wave 2c (item 15): the first open TEACHES BY WHAT IT OFFERS — two
+    /// real, generous doors where the centered gray prose stood (her copy
+    /// doctrine: structure over sentences), and the note's version peers
+    /// as direct one-click rows when they exist.
     private var emptyState: some View {
-        VStack(spacing: 8) {
-            Spacer()
-            Text("Pick a note to compare against — version peers appear first.")
-                .foregroundStyle(tokens.muted)
-            Text("Or mint an outline of this note — it opens right here, beside it.")
-                .font(tokens.small)
-                .foregroundStyle(tokens.faint)
-            Spacer()
+        VStack(alignment: .leading, spacing: 10) {
+            Spacer(minLength: 20)
+            HStack(alignment: .top, spacing: 12) {
+                Button {
+                    if let slot = model.peerSlots.first {
+                        pickingSlot = SlotPick(id: slot.id)
+                    }
+                } label: {
+                    CalmCard(tokens: tokens) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(tokens.chromeLabel("⌕ compare with a note"))
+                                .font(tokens.body)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(tokens.accent)
+                                .lineLimit(1)
+                            Text(tokens.chromeLabel(
+                                "search the library — it opens beside this note, "
+                                + "related blocks tied by lineage"))
+                                .font(tokens.small)
+                                .foregroundStyle(tokens.muted)
+                                .lineLimit(3)
+                                .multilineTextAlignment(.leading)
+                        }
+                    }
+                }
+                .buttonStyle(.plain)
+                Button {
+                    Task { await model.makeOutlinePost() }
+                } label: {
+                    CalmCard(tokens: tokens) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(tokens.chromeLabel("make outline note"))
+                                .font(tokens.body)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(tokens.ink)
+                                .lineLimit(1)
+                            Text(tokens.chromeLabel(
+                                "a linked condensation — first sentence per block — "
+                                + "minted and opened right here"))
+                                .font(tokens.small)
+                                .foregroundStyle(tokens.muted)
+                                .lineLimit(3)
+                                .multilineTextAlignment(.leading)
+                        }
+                    }
+                }
+                .buttonStyle(.plain)
+            }
+            if !model.projection.versionPeers.isEmpty {
+                Text(tokens.chromeLabel("versions of this note"))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .padding(.top, 8)
+                ForEach(model.projection.versionPeers, id: \.self) { peerID in
+                    Button {
+                        if let slot = model.peerSlots.first {
+                            model.setPeer(slotID: slot.id, postID: peerID)
+                        }
+                    } label: {
+                        CalmCard(tokens: tokens) {
+                            HStack(spacing: 8) {
+                                Text(peerTitle(peerID))
+                                    .font(tokens.small)
+                                    .foregroundStyle(tokens.ink)
+                                    .lineLimit(1)
+                                Spacer(minLength: 4)
+                                Text(tokens.chromeLabel("open beside ›"))
+                                    .font(tokens.small)
+                                    .foregroundStyle(tokens.accent)
+                                    .lineLimit(1)
+                            }
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            Spacer(minLength: 20)
         }
+        .frame(maxWidth: 560)
         .frame(maxWidth: .infinity)
     }
 
@@ -1197,7 +1322,12 @@ struct CompareBoardView: View {
     }
 
     private func peerTitle(_ id: String) -> String {
-        model.peerCandidates.first { $0.postID == id }?.title ?? "Version"
+        // The projection is the truth once a face has loaded (a picked
+        // note may sit outside the recent-100 candidates window).
+        if let title = model.projection.peers[id]?.title, !title.isEmpty {
+            return title
+        }
+        return model.peerCandidates.first { $0.postID == id }?.displayTitle ?? "Version"
     }
 }
 

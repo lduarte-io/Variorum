@@ -2747,4 +2747,13 @@ liveness through `PaneTextAuthority` only); P1 measured on the Sherlock corpus.
   lands in Index — the scrolled-open door, built ONCE on
   `CommandRouter.focusedBlock`). Registry: `.read` greys the editing families
   (projection tier, P-3); key labels swept. Pins: NewModesTests (4).
+- `ea75a9b` — **BLOCKS = THE WORKBENCH (direction C).** Facts per row ·
+  filter/show/sort postures (↑↓ wake only in note order — a sorted listing is
+  a way of looking) · multi-select on 13e's `BlockSelection` with the bulk bar
+  (top/bottom · carry-all merge chain · tag · move-out · archive · delete;
+  delete/merge = ONE ⌥⌘Z entry) · the context panel (editable body through the
+  ONE authority; facts; takes preview; doors to Write/Takes/History/tray).
+  Every TOC door survives; walk pins re-anchored deliberately with
+  supersession notes (both new faces declare the pair). Pins:
+  BlocksWorkbenchTests (6); BlockTOCTests rode UNMODIFIED.
 
