@@ -2549,5 +2549,167 @@ door survives.
   Compare's "Choose a note…" = `.corpusNotes(session:excluding:versionPeersOf:
   peerAnnotation:)` + its own onPick — no component change needed. Pins:
   NotePickerRankingTests (3) · NotePickerSourceTests (3) · the core ids-overload pin.
-- NEXT: the Pool page (item 2) with the book-picker door, then Snippets (item 17).
+- `85d120b` — **ITEM 2, THE POOL PAGE: DONE.** Calm cards over the hairline List; tag
+  chips on the metadata line (the column question judged in place — the chips are DOORS,
+  a text column is not; not torn); the quiet day beside the title (suppressed when the
+  title is the day); the per-row "add to book" door opens the item-14 picker over the
+  curated shelf (finished marked, gate speaks). Acts byte-identical; every context door,
+  drag, empty state survive. Pins: PoolPageTests (2).
+- `9adef40` — **ITEM 17, SNIPPETS: DONE.** Groups rail (flat siblings + counts) · the
+  four management doors (new/rename/delete-to-Trash with ask-time count · move-between) ·
+  search + tag/sort filters (in-memory over the held listing) · calm cards with the W8-4
+  takes badge/words/edited/chips · bulk bar (move/tag/archive/delete) · every prior door
+  survives · SNIPPETS vocabulary pinned (`SnippetsCopy.allStrings` sweep; the "pool:
+  Pool" chip dead; `PoolNaming` maps the seeded literal; ScrapsPanel swept). The
+  note-door kind fence PINNED staying. Pins: SnippetsVocabulary (2) · SnippetFilter (3)
+  · SnippetsGroupDoors (4).
+- (walk fix) — an empty GROUP speaks as an empty listing, not "Nothing matches."
+  (caught live in the wave's own dev walk).
+- (close) — the two standing pins whose cheese the ruled changes moved were re-anchored
+  DELIBERATELY with supersession notes: `noDoorPutsAPoolContainerInTheTrash` →
+  `aDeletedGroupRowsAsAGroupAndNeverAsANote` (its own doc had demanded exactly this:
+  *"If a pool-deleting door is ever built, this goes red and its Trash story has to be
+  designed with it"* — it went red on schedule; the never-as-a-note guard survives
+  whole) · `theTrashScopeIsOneDecisionForBothSurfaces` gains `.snippetGroup` with the
+  widening recorded. FULL verification below; wave CLOSED.
+
+## Per-item verdicts
+
+- **Item 14 — the searchable note-picker: BUILT + WIRED (both wave-2b consumers).**
+  `App/Variorum/Variorum/Core/Views/NotePicker.swift` — the shared Mac-chrome home
+  minted per CLAUDE.md's placement rule (Library + Pool consume it now; Compare in 2c).
+  Data-blind `NotePickerSheet` (W8-2 squarish search field, calm-card rows, ⏎ picks the
+  top row, Esc cancels, generation-guarded reads — the palette's cadence, no debounce
+  machinery) over a `NotePickerSource`. **The ranking rule in a sentence:** version
+  peers float to the top STABLY where versions are the subject, recent-first order is
+  preserved inside both partitions, and the day detail is suppressed when the title
+  already IS the day. Sources: `corpusNotes` (bounded `Queries.notePickerNotes` —
+  LIKE-escaped, snippet + day context per row, subject excluded, archived/deleted/
+  versions fenced), `versionPeers` (the Unmark door offers EXACTLY the linked peers —
+  R60/R68's unlinked-pick refusal corner closed structurally), `curatedBooks` (the
+  standing door's own population, finished books offered with the honest mark — the
+  gate still speaks on pick). The Library's two corpus-enumerating submenus (manifest
+  row 06 — "a disaster") retired; the ACTS byte-identical. Pins:
+  `NotePickerRankingTests` (3) · `NotePickerSourceTests` (3) · core
+  `SnippetsAndPickerQueryTests` (10, incl. bounded/snippet/escape/exclusion facts).
+  Walk-verified: `66-versions-picker.png` — six "2026-08-31" rows, every one tellable
+  apart by its snippet.
+- **Item 2 — the Pool page: REDESIGNED.** Calm cards over the hairline List (W8-2);
+  interactive tag chips on the metadata line; the quiet day beside the title (suppressed
+  when the title is the day); the per-row "add to book" door opens the item-14 picker
+  over the curated shelf. The dropdown's capability survives byte-identical
+  (`model.addToBook`, the same gate refusals in words) — pinned `PoolPageTests` (2: the
+  act drains the pool; a finished book's refusal speaks). Every context-menu door, the
+  drag payload, and the empty state survive. **The tag-column question, judged in
+  place (her overnight authorization):** chips on the metadata line — the chips are
+  DOORS (colour · leaf · ✕ off · ＋ types one on) and a tag COLUMN of plain text could
+  not be; not genuinely torn, so no screenshot pair queued. Walk:
+  `46-pool-page.png` · `47-book-picker.png` · `48-pool-after-add.png` (8 → 7, the drain
+  live).
+- **Item 17 — Snippets: REBUILT to the ruled direction (the mockup's Snippets tab).**
+  The groups rail as flat siblings with counts (the ownership answer in the structure);
+  + new group · rename group · delete group (the ordinary `deleteContainer`/Trash road —
+  the menu line and the ask-time-counted confirm both say where its snippets go; NO
+  ⌥⌘Z claimed, `deleteContainer` registers no structural undo by the 13j doctrine) ·
+  move snippets between groups (single ⋯ and bulk); search + tag + sort filters
+  in memory over the held listing (a keystroke never touches the store); calm cards
+  with the W8-4 "⑂ N takes" badge (free — `RenderedBlock.activeVariantCount` already
+  rode the listing), word counts (`Queries.wordCount`, the one rule), edited days, tag
+  chips, and the all-groups home line; multi-select with the bulk bar (move ▾ · tag ▾ ·
+  archive · delete · clear), acts landing in listing order; the dashed drop target +
+  the whole-list drop, the footer entry with its blinking cursor, open-as-editor,
+  drag-out (⌥ carries the fan), and the per-card tag/archive/delete trio all survive.
+  **The vocabulary is a PIN, not a hope:** `SnippetsCopy.allStrings` sweeps for
+  "pool"/"scrap"; the "pool: Pool" chip is dead; `PoolNaming` displays the app-seeded
+  literal "Pool" as "Snippets" (storage untouched — every stored "Pool" was app-minted,
+  no rename door existed before this wave; the she-renames-a-group-to-"Pool" corner is
+  recorded at the brain); the ScrapsPanel's strings swept the same way. **The Trash
+  story end-to-end:** `TrashItem.Kind.snippetGroup` + the pool arm (core), TrashPutBack
+  → `restoreContainer`, TrashScope lists/filters/bulk-purges it, RecoveryCopy speaks
+  "snippet group", the phone composes ALL of it from the shared brains with zero mobile
+  edits. `NoteDeletion.run`'s kind fence deliberately UNTOUCHED and PINNED staying (the
+  note-shaped doors still refuse pools; the group door is a deliberate, group-shaped
+  act). Pins: `SnippetGroupTrashTests` (2) · `SnippetsVocabularyTests` (2) ·
+  `SnippetFilterTests` (3) · `SnippetsGroupDoorsTests` (4) · core group-arm pair
+  REVERT-VERIFIED red-on-old. The deeper "what is this page for" question stays open,
+  as ruled. Walk: `49`–`59` (mint · groups · bulk · move · ⋯ menu · confirm · receipt)
+  + `62-trash.png` (the group ROWS, kind + clock) + `64-after-putback.png` (back whole).
+
+## THE COMPONENT SEAM FOR WAVE 2c (item 15's Compare "Choose a note…")
+
+`NotePickerSheet(tokens:title:prompt:emptyState:source:onPick:)` is data-blind — drop it
+in with `source: .corpusNotes(session:excluding:versionPeersOf:peerAnnotation:)` (peers
+ranked first — exactly the "version peers first where versions are the subject" rule)
+and Compare's own `onPick`. No component change needed; a new feed is a new
+`NotePickerSource` factory beside the three shipped ones.
+
+## Taste forks for the morning bundle
+
+1. **The Snippets card click model** — body click SELECTS (bulk bar appears),
+   double-click opens the editor (item 10's own ruled grammar, applied in place; the
+   old behavior was single-click-opens). One-line swap if she wants open-on-click back.
+2. **The Trash row's group title reads the STORED name** (core display rule) — a
+   deleted seeded-default group would row as "Pool" while the Snippets page calls it
+   "Snippets". Mapping it would put UI vocabulary into core's display brain (which also
+   names export folders), so left; visible only if the seeded default is deleted whole.
+3. **The delete-group confirm's Delete is the plain destructive role** — macOS renders
+   it red beside Cancel; no "type the name" ceremony (2 clicks total, the 13j notes
+   precedent). Say the word if she wants it heavier.
+4. **The bulk "tag ▾" applies ONE existing tag per pick** (batch semantics, skips
+   already-tagged); type-to-create stays the per-card sheet's. A typed-path bulk door
+   is a small addition if wanted.
+5. **The entry bar's blinking cursor** sits at the row's right edge (pre-existing
+   shipped layout, deliberately untouched).
+
+## Walk captures (gitignored `notes/plans/pre-13u-act10-screens/`)
+
+`40-launch` · `42-seeded-notes` · `43-shelf` · `44-newbook` · `45-books` ·
+`46-pool-page` · `47-book-picker` · `48-pool-after-add` · `49-snippets-empty` ·
+`50-snippets-filled` · `51-newgroup-ask` · `52-two-groups` · `53-bulk-bar` ·
+`54-two-selected` · `55-move-menu` · `56-after-move` · `57-group-menu` ·
+`58-delete-confirm` · `59-after-delete` · `60/61-library` · `62-trash` · `63-putback` ·
+`64-after-putback` · `65-row-menu` · `66-versions-picker`. Dev-store Debug build only;
+her real app/store untouched (zero instances before launch and after quit); the walk
+seeded its own notes/books/snippets by UI automation. Dark-mode passes not eyeballed
+(legible by token construction — both voices via `VoiceTokens`); folded to the midpoint
+review's walk like wave 1's.
+
+## Verification at close
+
+- **Core `swift test`: 1499 tests / 161 suites GREEN** — baseline 1489/160 + exactly
+  the wave's suite (+10/+1).
+- **Mac: 1955 tests / 337 suites — the ONLY red is the KNOWN load-flaky latency pin**
+  (`rewriteStrategyLatencies`), **ADJUDICATED PRE-EXISTING by its row's PAIRED
+  protocol**: isolated ×3 on this tree (50.83 / 50.99 / 50.99 ms) vs isolated ×2 on the
+  pre-wave baseline worktree at `ba513fb` (52.59 / 50.28 ms) — statistically identical,
+  and the wave's diff has ZERO editor-path lines (`git diff` over Editor/EditorBrain/
+  Domain: empty). Arithmetic exact: +19 pins / +7 suites over 1936/330
+  (SnippetGroupTrash 2 · NotePickerRanking 3 · NotePickerSource 3 · PoolPage 2 ·
+  SnippetsVocabulary 2 · SnippetFilter 3 · SnippetsGroupDoors 4). The tutorial spine
+  green inside the run; the canvas suite passed in-suite (no isolation needed). TWO
+  standing pins re-anchored DELIBERATELY with supersession notes (the close entry
+  above).
+- **Mobile: 602 tests / 97 suites PASSED + the 2 standing known issues — the baseline
+  exactly** (Shared/ was touched: RecoveryActs/RecoveryCopy; the phone's Trash gains
+  the group kind's rows/filter/put-back from the shared brains with zero mobile edits —
+  one posture, one account). The iOS build subsumed.
+- **Zero `Sources/VariorumCore/Sync/` lines** (the wave's core diff: Queries + tests
+  only); **zero schema**; lockstep marker untouched.
+- Red-on-old: the trash group-arm pair revert-verified (arm disabled → 2 tests red,
+  4 issues → restored green); the remaining new suites pin NEW brains and doors
+  (pin-with-the-build, the defect-class pins named above).
+
+## Residuals for the orchestrator (recorded, not dropped)
+
+- The tutorial/field-guide content still says "scraps" in its own prose (e.g. the
+  "archive · delete · scraps" trio) — tutorial CONTENT is the re-seed's and 13s's, not
+  a UI-string sweep's; the standing field-guide re-seed obligation at the round's
+  closeout is where the vocabulary catches up.
+- The mockup's group-menu caption promised "⌥⌘Z" for delete-group; the shipped line
+  deliberately does NOT (no undo entry exists — the Trash is the road). If she wants
+  `deleteContainer` undoable, that is the standing 13j-doctrine product call (the
+  KnownIssues quick-note row already carries it).
+- The Snippets surface's held observation (`observeAllPoolItems`) re-fires at the same
+  cadence `observePool` always has (the tray-panel row's parked class, unchanged in
+  kind, summed over groups — scraps-scale by nature).
 

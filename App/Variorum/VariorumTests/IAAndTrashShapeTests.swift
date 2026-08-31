@@ -183,9 +183,13 @@ struct IAAndTrashShapeTests {
     }
 
     /// The scope is one decision, and the filter can never widen past it.
+    /// *(Re-anchored at pre-13u Act 10 wave 2b: `.snippetGroup` joined the
+    /// scope — the ruled delete-group door's road must be listable — and
+    /// this equality is the deliberate record of that widening.)*
     @Test func theTrashScopeIsOneDecisionForBothSurfaces() {
         #expect(!TrashScope.listedKinds.contains(.take))
-        #expect(TrashScope.listedKinds == [.note, .book, .block, .preservedOriginal])
+        #expect(TrashScope.listedKinds
+            == [.note, .book, .block, .snippetGroup, .preservedOriginal])
         #expect(!TrashScope.filterKinds.contains(.take), "the picker cannot offer it either")
         #expect(TrashScope.kinds(filter: .block) == [.block])
         #expect(TrashScope.kinds(filter: nil) == TrashScope.listedKinds)

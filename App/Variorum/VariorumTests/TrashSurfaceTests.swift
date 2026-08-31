@@ -177,11 +177,17 @@ struct TrashPoolHonestyTests {
         }
     }
 
-    /// The other half of the check, pinned as the FACT it rests on: nothing
-    /// puts a pool CONTAINER in the Trash, so no row can call one a note.
-    /// If a pool-deleting door is ever built, this goes red and its Trash
-    /// story has to be designed with it.
-    @Test func noDoorPutsAPoolContainerInTheTrash() async throws {
+    /// **RE-ANCHORED at pre-13u Act 10 wave 2b (item 17) — the door this
+    /// pin waited for was BUILT, by her ruling, and its Trash story was
+    /// designed with it exactly as this pin's own doc demanded** (*"If a
+    /// pool-deleting door is ever built, this goes red and its Trash story
+    /// has to be designed with it"* — it went red, on schedule). The pin's
+    /// SPIRIT survives whole: a deleted pool container never rows as a
+    /// NOTE (the row-26 defect stays guarded) — it rows AS ITSELF, a
+    /// `.snippetGroup`, and its scraps ride the cascade under its one row.
+    /// The deliberate door + put-back loop is `SnippetGroupTrashTests`';
+    /// the note-shaped doors' refusal is `SnippetsGroupDoorsTests`'.
+    @Test func aDeletedGroupRowsAsAGroupAndNeverAsANote() async throws {
         try await withEditor(seedBlocks: ["Alpha one."]) { editor in
             let poolID = try await editor.session.runner.run { (ops: Operations) -> String in
                 let pool = try ops.createPool(title: "Scraps")
@@ -192,10 +198,10 @@ struct TrashPoolHonestyTests {
             let rows: [Queries.TrashItem] = try await editor.database.read { db in
                 try Queries.trash(db, now: harnessNow)
             }
-            #expect(!rows.contains { $0.id == poolID },
-                    "the note arm is fenced to kind='post' — a pool never lists")
+            #expect(rows.contains { $0.id == poolID && $0.kind == .snippetGroup },
+                    "the group rows as itself — the honest road the ruling asked for")
             #expect(rows.allSatisfy { $0.kind != .note },
-                    "and its scraps rode the cascade, so nothing strays either")
+                    "and never as a note; its scraps rode the cascade, so nothing strays either")
         }
     }
 }
