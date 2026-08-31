@@ -75,8 +75,25 @@ struct KeyedStoreConvergenceTests {
                 "\(client.name): conflict-as-variant over the encrypted store")
         }
 
-        // And the FILES never held the prose in the clear: close the pools
-        // (checkpointing the WALs) and byte-scan store + surviving sidecars.
+        // And the FILES never held the prose in the clear: close the pools and
+        // byte-scan store + WAL.
+        //
+        // **17f/P50 — the WAL scan was reviewed as unfalsifiable ("the WAL is
+        // checkpointed away before the test reads it") and MEASURED NOT TO BE.**
+        // The premise was that `lock()` closes the last connection, so SQLite
+        // checkpoints and deletes-or-truncates the `-wal`. Probed on this tree:
+        // the WAL measures 1,100,072 / 1,153,632 bytes BEFORE `lock()` and the
+        // identical byte counts AFTER it — the frames are still there, and the
+        // scan below has always read real WAL content. The finding is recorded
+        // as hollow rather than fixed.
+        //
+        // What WAS real is the silent-skip: `if let walBytes = try? …` meant a
+        // missing WAL would make the assertion vanish with nothing said — the
+        // hole the finding described would open later, unannounced. So the read
+        // is HARD and the frames are asserted present: if a future change ever
+        // does checkpoint the WAL away here, this says so instead of quietly
+        // becoming the dead belt. (`StoreEncryptionTests`' "WAL pages encrypt
+        // too" is the live sibling pin, scanning while its pool is open.)
         a.db.asRebindable().binding.lock()
         b.db.asRebindable().binding.lock()
         for url in [urlA, urlB] {
@@ -84,10 +101,11 @@ struct KeyedStoreConvergenceTests {
             #expect(bytes.range(of: Data(prose.utf8)) == nil,
                     "\(url.lastPathComponent) carries no plaintext prose")
             let wal = URL(fileURLWithPath: url.path + "-wal")
-            if let walBytes = try? Data(contentsOf: wal) {
-                #expect(walBytes.range(of: Data(prose.utf8)) == nil,
-                        "\(url.lastPathComponent)'s WAL carries no plaintext prose")
-            }
+            let walBytes = try Data(contentsOf: wal)
+            #expect(!walBytes.isEmpty,
+                    "\(url.lastPathComponent)'s WAL holds frames — an empty one scans nothing")
+            #expect(walBytes.range(of: Data(prose.utf8)) == nil,
+                    "\(url.lastPathComponent)'s WAL carries no plaintext prose")
         }
     }
 }

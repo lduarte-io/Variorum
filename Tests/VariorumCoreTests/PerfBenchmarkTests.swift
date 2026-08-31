@@ -10,11 +10,23 @@ extension Testing.Tag {
 }
 
 /// P1 asserted, not hoped (AppSpec §4): the same fixed-size probes are
-/// measured against a 1k-block and a 10k-block corpus, and the *ratio* must
-/// stay near-flat — absolute timings are machine noise, ratios are the
-/// assertion. A generous factor (3× for a 10× corpus) plus a small absolute
-/// floor (sub-floor timings pass outright) keep the suite honest without
-/// flaking on noisy hardware.
+/// measured against a 1k-block and a 10k-block corpus, and the large-corpus
+/// median must stay `≤ max(small × factor, budget)` — flat by RATIO (3× for a
+/// 10× corpus), or under an absolute BUDGET on a host fast enough that the
+/// small median × 3 falls below it.
+///
+/// **WHICH TERM BINDS DEPENDS ON THE HOST, AND EVERY RUN SAYS SO (17f/P48).**
+/// This docstring used to claim "absolute timings are machine noise, ratios
+/// are the assertion" — and that was not what the gate enforced: with the
+/// former 2 ms floor against sub-millisecond medians, the floor was the only
+/// binding term in four to five of the six pins on a quiet host, so
+/// `libraryPageIsFlat…` tolerated a 6.45× regression under a name asserting
+/// flatness. The project had already ruled this class a defect on the phone
+/// (`MobilePerfWalkTests`' bounds comment: *"a pin named 'flat' whose floor is
+/// the only binding bound is the record-claim class"*) and renamed those pins;
+/// the core suite never got that pass. It has one now: the names say
+/// flat-OR-under-budget, `expectFlat` prints and reports which term actually
+/// bound on this run, and the budget is derived below instead of round.
 ///
 /// Three corpora: `small` (100 posts × 10 blocks), `large` (1000 × 10 — the
 /// corpus-size axis), and `tall` (100 × 100 — same post count as small, 10×
@@ -42,24 +54,55 @@ struct PerfBenchmarkTests {
         return samples.sorted()[samples.count / 2]
     }
 
-    /// The P1 assertion: `large` must not scale with the corpus. Passes when
-    /// under the noise floor or within `factor` of the small-corpus median.
+    /// The absolute budget for a bounded query probe, **derived, not round**
+    /// (17f/P48). Measured large-corpus medians for these five probes, over two
+    /// hosts (a quiet one and this machine under agent load): 0.32–1.27 ms.
+    /// 1 ms sits above the cheapest of them (`library`, 0.32–0.40 ms) with ~2.5×
+    /// of headroom and BELOW the dearest (`timelinePage`, ~1.27 ms) — so at
+    /// least one pin is always ratio-bound and the budget can never become the
+    /// suite's only teeth.
+    ///
+    /// Why tightening it does not flake: the budget binds only when
+    /// `small × 3 < 1 ms`, i.e. when the small median is under ~0.33 ms — which
+    /// means a fast host, on which the large median is correlated and far below
+    /// the budget too. The dangerous case (a load spike inside one half only)
+    /// is what the median of 20 iterations absorbs. The former 2 ms value was
+    /// the whole of P48: it left `library` a 6.45× tolerated regression.
+    private static let queryBudget = Duration.milliseconds(1)
+
+    /// The P1 assertion: `large` must not scale with the corpus —
+    /// `large ≤ max(small × factor, budget)`. **Reports which term bound**, so
+    /// no reader (and no closeout) can mistake a budget pass for a flatness
+    /// measurement.
     private func expectFlat(
         small smallTime: Duration, large largeTime: Duration,
-        factor: Double = 3.0, floor: Duration = .milliseconds(2),
+        factor: Double = 3.0, floor: Duration = PerfBenchmarkTests.queryBudget,
         _ label: Comment
     ) {
         let s = Self.seconds(smallTime)
         let l = Self.seconds(largeTime)
+        let ratioBound = s * factor
+        let budget = Self.seconds(floor)
+        let bound = max(ratioBound, budget)
+        let binding = ratioBound >= budget
+            ? String(format: "RATIO ×%.1f", factor)
+            : String(format: "BUDGET %.1fms", budget * 1000)
         // Medians land in the run log so closeouts and post-macOS-update
-        // re-verifications have numbers to compare.
-        print(String(format: "P1 %@ — small: %.3fms, big: %.3fms", "\(label)", s * 1000, l * 1000))
+        // re-verifications have numbers to compare — and the binding term
+        // rides with them, because "0.4 ms, flat" and "0.4 ms, under a budget
+        // that would also have passed 1.0 ms" are different facts.
+        print(String(
+            format: "P1 %@ — small: %.3fms, big: %.3fms (%.2f×) — bound by %@ at %.3fms",
+            "\(label)", s * 1000, l * 1000, s > 0 ? l / s : 0, binding, bound * 1000))
         #expect(
-            l <= max(s * factor, Self.seconds(floor)),
-            "\(label): small=\(s * 1000)ms large=\(l * 1000)ms")
+            l <= bound,
+            """
+            \(label): small=\(s * 1000)ms large=\(l * 1000)ms \
+            ratio=\(s > 0 ? l / s : 0)× — bound by \(binding) at \(bound * 1000)ms
+            """)
     }
 
-    @Test func postRenderIsFlatInCorpusSize() throws {
+    @Test func postRenderIsFlatOrUnderBudgetInCorpusSize() throws {
         let small = try Self.small.get()
         let large = try Self.large.get()
         // Sanity: the probe is real and identical in both corpora.
@@ -76,7 +119,7 @@ struct PerfBenchmarkTests {
         expectFlat(small: smallTime, large: largeTime, "renderPost(50 blocks), 1k vs 10k corpus")
     }
 
-    @Test func readingAssemblyFirstPageIsFlatInCorpusSize() throws {
+    @Test func readingAssemblyFirstPageIsFlatOrUnderBudgetInCorpusSize() throws {
         let small = try Self.small.get()
         let large = try Self.large.get()
         let entries = try large.db.read { try Queries.assembleReading($0, readingID: large.bookReadingID) }
@@ -91,7 +134,7 @@ struct PerfBenchmarkTests {
         expectFlat(small: smallTime, large: largeTime, "assembleReading(50 posts), 1k vs 10k corpus")
     }
 
-    @Test func timelinePageIsFlatInCorpusSize() throws {
+    @Test func timelinePageIsFlatOrUnderBudgetInCorpusSize() throws {
         let small = try Self.small.get()
         let large = try Self.large.get()
         // A mid-corpus page, not the first: keyset must seek, never scan.
@@ -108,7 +151,7 @@ struct PerfBenchmarkTests {
         expectFlat(small: smallTime, large: largeTime, "timelinePage(50, keyset), 1k vs 10k corpus")
     }
 
-    @Test func libraryPageIsFlatInCorpusTextSize() throws {
+    @Test func libraryPageIsFlatOrUnderBudgetInCorpusTextSize() throws {
         // The MAJOR review finding's measurement: a bounded library page is
         // what `observeLibrary` re-fetches at container-write rate, so its
         // cost must track the post count, never the corpus text. Same 100
@@ -128,7 +171,7 @@ struct PerfBenchmarkTests {
             "library(limit 50), 100 posts at 1k vs 10k blocks")
     }
 
-    @Test func tagSubtreeIsFlatInCorpusSize() throws {
+    @Test func tagSubtreeIsFlatOrUnderBudgetInCorpusSize() throws {
         let small = try Self.small.get()
         let large = try Self.large.get()
         let subtree = try large.db.read { try Queries.tagSubtree($0, rootID: large.tagRootID) }

@@ -293,3 +293,111 @@ struct TriggerTests {
         #expect(try outboxRows(db).isEmpty)
     }
 }
+
+/// **Trigger coverage BY INTROSPECTION (17f/P49 — the pre-13u round's Act 5).**
+///
+/// The suite above exercises three tables' triggers by hand. Nothing checked
+/// that the OTHER sixteen have any, and `SyncSchema.swift`'s header promises
+/// that a table which forgets its wiring "silently never syncs (the
+/// introspection test in `SyncSchemaTests` fails the build instead)" — a
+/// promise that was only ever true about REGISTRY drift. Trigger creation is a
+/// hand-maintained list (`Triggers.swift`) plus six later per-migration calls,
+/// nothing structurally coupled to the registry, so a v1_15 table could join
+/// `SyncSchema.tables`, pass every existing pin, and never enqueue a row: its
+/// writes would stay on one device, silently, on both machines.
+///
+/// These pins READ the registry (they never re-list it), so a new synced table
+/// is covered the moment it is registered.
+@Suite("Trigger coverage by introspection (17f/P49)")
+struct TriggerCoverageTests {
+    private func triggerNames(_ db: AppDatabase) throws -> Set<String> {
+        try db.read { db in
+            Set(try String.fetchAll(
+                db, sql: "SELECT name FROM sqlite_master WHERE type = 'trigger'"))
+        }
+    }
+
+    private func triggerSQL(_ db: AppDatabase, _ name: String) throws -> String? {
+        try db.read { db in
+            try String.fetchOne(
+                db,
+                sql: "SELECT sql FROM sqlite_master WHERE type = 'trigger' AND name = ?",
+                arguments: [name])
+        }
+    }
+
+    @Test func everyRegisteredSyncedTableCarriesItsOutboxCapturePair() throws {
+        let db = try AppDatabase.inMemory()
+        let present = try triggerNames(db)
+        for table in SyncSchema.tables {
+            for event in ["insert", "update"] {
+                let name = "outbox_\(table.name)_\(event)"
+                guard present.contains(name) else {
+                    Issue.record(
+                        """
+                        \(table.name) is registered as synced but has no \(name) \
+                        trigger — every write to it would fail to enqueue, so its \
+                        rows would never leave this device and nothing anywhere \
+                        would say so.
+                        """)
+                    continue
+                }
+                let sql = try #require(try triggerSQL(db, name))
+                // The pair must enqueue THIS table's own PK (a wrong pk here
+                // enqueues a row id that no push can find) …
+                #expect(sql.contains("NEW.\(table.primaryKey)"),
+                        "\(name) does not enqueue NEW.\(table.primaryKey)")
+                #expect(sql.contains("INSERT OR REPLACE INTO sync_outbox"),
+                        "\(name) does not write the dirty-row set")
+                // … and must carry the echo suppression (SyncSpec §3): without
+                // it, remote apply re-enqueues everything it applies and the
+                // engine pushes forever.
+                #expect(sql.contains("_sync_applying"),
+                        "\(name) is not apply-mode suppressed")
+            }
+        }
+    }
+
+    @Test func noOutboxTriggerExistsForATableTheRegistryDoesNotCarry() throws {
+        // The other direction: a table that lost its registry row (or was
+        // renamed) leaves its triggers behind, writing outbox rows for a table
+        // the engine will never push.
+        let db = try AppDatabase.inMemory()
+        let registered = Set(SyncSchema.tables.map(\.name))
+        for name in try triggerNames(db) where name.hasPrefix("outbox_") {
+            let table = String(name.dropFirst("outbox_".count)
+                .dropLast(name.hasSuffix("_insert") ? "_insert".count : "_update".count))
+            #expect(registered.contains(table),
+                    "\(name) captures for '\(table)', which is not in SyncSchema.tables")
+        }
+    }
+
+    /// The tombstone-cascade half of the same gap, pinned the way
+    /// `MigrationTests` pins its table list: an exact set, so ADDING a cascade
+    /// (or losing one) is a visible diff rather than a silent change. A new
+    /// child table whose parent tombstone must reach it belongs in this list —
+    /// if a migration adds one and this test still passes, the cascade was
+    /// never created.
+    @Test func theTombstoneCascadeTriggerSetIsExactlyTheDocumentedOne() throws {
+        let db = try AppDatabase.inMemory()
+        let cascades = try triggerNames(db).filter { $0.hasPrefix("cascade_") }
+        #expect(cascades == [
+            // v1_core (AppSpec §14.4's enumerated set)
+            "cascade_block_tombstone",
+            "cascade_container_tombstone",
+            "cascade_reading_tombstone",
+            "cascade_tag_tombstone",
+            // v1_5 canvas_layout
+            "cascade_container_tombstone_canvas",
+            "cascade_block_tombstone_canvas",
+            // v1_7 lens / lens_choice
+            "cascade_container_tombstone_lens",
+            "cascade_lens_tombstone",
+            "cascade_block_tombstone_lens_choice",
+            // v1_8 block_comment
+            "cascade_block_tombstone_comment",
+            // v1_10 reading_section
+            "cascade_reading_tombstone_section",
+        ])
+    }
+}
