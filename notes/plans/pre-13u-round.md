@@ -2036,3 +2036,207 @@ conditions the suite actually runs in.
   iOS 26.2). The full mobile suite stays a round-end act.
 - **Zero `Sources/VariorumCore/Sync/` lines**, diff-verified; **no schema**; lockstep marker
   unchanged at 7.
+
+---
+
+# ACT 10 WAVE 1 RECORD (2026-08-31 — the mechanical/polish items, Fable implementer)
+
+**Commits, in order:** `61a5acf` (item 11) · `0e6a09e` (item 1 + `CalmGrammar.swift`) ·
+`01af914` (item 12) · `a977247` (items 9+13) · `1dc7cba` (item 5) · `dcb620d` (item 10) ·
+`e243c1a` (items 6+7) · `6da4600` (the Sherlock restore door) · `42eda78` (item 7's
+endpaper finish) · the closing verification/record commit. All pushed.
+
+**The style guide rode every touched surface** (W8-2/W8-3): `CalmGrammar.swift` in `Theme/`
+is the mockup grammar as chrome vocabulary — `CalmCard` (radius-10 bordered cards on the
+card surface, wash selection), `CalmSectionHeader` (an ordinary stacked header that CANNOT
+be clip-measured), `CalmButtonStyle` (the mockup's squarish-rounded generous `.btn`, with
+primary/danger roles), and `MarqueeText` (ellipsis at rest, stereo-scroll on hover). It
+COMPOSES with VoiceControls (still the quiet-word vocabulary); 13u2 inherits the app-wide
+continuation from this one file instead of per-view archaeology.
+
+## Per-item verdicts
+
+- **Item 1 — This Note's Tray: FIXED + restyled.** Traced class: the panel was a plain macOS
+  `List`, whose fixed section-header measurement clipped the Leaving header (title + multi-line
+  explainer) to the sliver her screenshot shows. Rebuilt as a ScrollView of calm cards —
+  the mechanism dies by construction. Order judged in place under the granted latitude:
+  **LEAVING first** (what is counting down is what she opened the tray for), takes fold, then
+  ARCHIVED. Pin `TrayPanelShapeTests.everySectionRendersUnclippedComposition` —
+  **revert-verified red-on-old** (the old body reflects `List<` and fails 5 ways) — over a
+  REAL ops-seeded store (deleted block · archived block · deleted take). Screenshot-verified
+  (`22-tray.png`): nothing clipped at 420 pt, full explainer, generous Put back doors.
+  *Small note:* the quiet meta line truncates its tail at narrow widths (countdown label) —
+  the preview deliberately wins (the P-1 squeeze lesson); a 2-line meta is a one-line change
+  if she wants it.
+- **Item 5 — tags out of the nav bar: BUILT.** `MastheadTagCluster` (Features/Tags) renders
+  the cards + the ＃ fold on the masthead's right edge, directly under the tray/scraps/
+  references icons, across from the membership chip — one coherent right edge (designed with
+  item 10). The context bar's constant row is **← · book · →** + the tray badge.
+  **The "+ tag" call (hers, delegated): taken.** The masthead's add door reads **"＋ tag"**
+  (room to be generous there); the Library rows keep the bare ＋ (dense listing — exactly her
+  clutter hedge). One preference (`TagChipsFold`) and one type-to-create door
+  (`applyTypedPath`) — addresses moved, zero semantics. **13k K11/K12 SUPERSEDED IN PART by
+  her ruling** (recorded in `ContextBar.swift`/`ContextBarDoors.swift` and here): the icon
+  row is three doors; the fold and the cards live at the masthead. `.tagNote`/`.toggleTagChips`
+  moved renderers; the registry walk union gained the cluster (the E2/E8 justified-edit
+  convention). ⌘⇧I unchanged. Screenshot-verified (`05-crop-top.png`).
+- **Item 6 — the bottom bar spreads back out: BUILT.** The collapse decision is pure
+  (`CommitBar.usesTwoRows`), the threshold measured down **1080 → 840** (the one-row content
+  runs ~800 pt in the wider monospace voice), and the two-row fallback's first row now
+  carries the counts on the right (her screenshot's empty-right fixed). Pin
+  `CommitBarLayoutTests.ordinaryWidthsKeepOneRow` — **red-on-old at 900 pt**.
+  *Visual note for the midpoint walk:* in the DEV-STORE walk the bottom bar did not render
+  at all — **on the PRE-WAVE binary too** (stale-build reproduction, `03-bottom.png`), so it
+  is NOT this wave's regression; a headless probe measured the hosted `EditorView` reserving
+  exactly the bar's 31 pt (969+31/1000), so the bar is healthy in isolation. Her own Aug-30
+  screenshot SHOWS the bar in her real build. The midpoint review should check the bar in
+  HER app; if it renders there, the dev observation is an environment/state condition of the
+  fresh dev store and nothing more.
+- **Item 7 — the lobby refresh: BUILT + screenshot-verified** (`21-lobby5.png`). Her floated
+  direction taken literally: the brand's TESSELLATING `girl-and-the-fan` (TASTE.md's named
+  seamless endpaper; the fan is the brand image) tiles the room at a 340 pt grain —
+  **rasterized at load: an SVG rep tiles as NOTHING in SwiftUI (measured)** — washed to an
+  undertone; the calm card (W8-2 grammar) sits in the UPPER THIRD, clear of the centered
+  system Touch ID dialog; under a Biometric demand only the Touch ID road shows and the
+  passphrase field arrives on demand behind one quiet word; recovery stays behind the
+  disclosure. Every sentence is the standing `ProtectionCopy` brain's — zero copy changes.
+  All four P47 lobby pins hold unmodified. *Taste dial noted for the morning:* the pattern's
+  presence is set by two opacities in `StoreLockView` (art 0.55 / wash 0.35 light; 0.08/0.5
+  dark) — one-line tuning if she wants it quieter or louder.
+- **Item 9 — tabs overflow: FIXED (her ruled shape).** `OpenNotes.shown` is EVERY open note
+  (the prefix window died); the strip left the List for the sidebar's BOTTOM RAIL, ~7 rows
+  tall then scrolling in place, with the newcomer auto-revealed (`ScrollViewReader` on the
+  recency head). The dead "…N more open" label died WITH the hidden set — every open note is
+  its own clickable row, strictly more door than the label ever was (the ruled
+  no-dead-label shape). **⌘⇧1–9 are a KEY cap** (`ordinalCap` — renamed with its meaning),
+  badges on the first nine rows only. **The ruled 20-tab auto-close built**
+  (`trackedCap = 20`; the 21st closes the least-recently-OPENED — a tab is a pointer,
+  nothing lost). Manual reorder now covers every row, via the strip's own transfer type
+  (`OpenNoteDragToken` — deliberately not a String, so a dragged row can never be imported
+  as text by the sidebar's plainText drop). Pins: `aNewlyOpenedNoteIsAlwaysShown` —
+  **revert-verified red-on-old** (prefix restored → 4 failures) — + the 20-cap and
+  reorder-reach pins; the old shown/hidden pins updated DELIBERATELY with supersession notes.
+- **Item 10 — the transition + the context-aware right panel: BUILT (her click model
+  exactly).** Row-body click SELECTS and shows `LibraryInfoPanel` (the dead highlight now
+  means something); TITLE click opens instantly as today; DOUBLE-CLICK anywhere opens (it
+  weirdly didn't — now routed before the single-tap). Books get the same model
+  (`selectBook`). The panel is per-kind: a NOTE shows words · blocks · with-takes · comments
+  · entry/edited/created days · its books · its tags; a BOOK shows kind+finished · notes ·
+  chapters · word target · cap · created — one-shot reads (the NoteCards discipline;
+  `Queries.wordCount` is the one counting rule). The panel is the note-side inspector's
+  WIDTH SIBLING (min 280/ideal 420) and both sides now animate their coming and going
+  (the never-teleports principle; PostDetailView's toggle wraps in `withAnimation`).
+  A multi-pick summarizes and points at the header's bulk doors. The pick follows the
+  LISTING (prune covers the panel too). **QUESTIONS #79's plain-click PROVISIONAL is
+  superseded by her own ruling** — noted at #79. Pins: the reworked
+  `NoteRowSelectionRuleTests`/`NoteRowRoutingTests` (13/13, including
+  `aPlainClickSelectsAndShowsTheInfoPanel`).
+- **Item 11 — the checkbox scroll-jump: FIXED, mechanism TRACED (it was unknown by her own
+  words).** The trace: a checkbox click runs `MarkdownActs.toggleCheckbox` BEFORE
+  `super.mouseDown`, so the CARET is still wherever it was before the click — after a
+  writing session, the document's END. The toggle's storage edit calls `didChangeText()`,
+  which runs `TypewriterScrollView.keepCaretClearance` — β1's typing-follow (armed by
+  default) — which computes the CARET's line bottom and scrolls down to it: the absolute
+  bottom, exactly her report. β1's own doc premise ("a click near the bottom of the page
+  never makes the view jump") missed the click-that-edits case. Fix: the toggle's mutation
+  runs under `withoutCaretFollow` (the `withSoftNewline`/`isPasting` idiom) — a click's edit
+  never drags the view to the caret; typing/paste/delete keep the clearance byte-identically.
+  Pin `CheckboxScrollTests.togglingACheckboxPreservesScrollAndCaret` — **red-on-old at a
+  measured 6,103 pt jump**, green with the fix; box toggles and caret preserved either way.
+- **Item 12 — typed arrows: BUILT (one brain, shareable).** `TypedArrows` in core Domain
+  (pure, line-scoped for P1): `->` → → and `<-` → ← at type time; **never inside a code
+  span** (the shipped F-3 vocabulary has inline code only — fenced blocks are not a concept
+  the app has, so the span guard is the whole code guard); `-->`/`<<-` stay literal
+  (recorded deliberate non-matches); UTF-16 arithmetic pinned against emoji prefixes. Mac
+  face: both writing surfaces (`EditorTextView` + `PaneTextView`) hook `insertText` after
+  `super` — the K5 trio shape — applying on the substitution's OWN runloop pass and sealing
+  the typing coalescing on both sides, so **⌘Z reverts just the substitution** (the
+  smart-quotes convention; the split rides real event turns, verified at the mechanism level
+  by `theSubstitutionIsItsOwnUndoableEdit` — the full two-step convention is unpinnable in
+  the harness, whose event undo-groups never close: measured, recorded in the test's doc).
+  **Hardened live:** a zero-gap keystroke burst landed the next key before the deferred pass
+  and the live-caret check declined — the substitution now ANCHORS at the typed pair
+  (`aFastBurstStillEarnsItsArrow`, revert-verified red-on-old). **Verified in the RUNNING
+  app** (`10-crop.png`: "in the editor e → f, back f ← e"). **The entanglement verdict:
+  NOT entangled with `MarkdownActs`' arming flow** — the second edit takes the proven K5
+  lead-insertion shape (its own `shouldChangeText` → consume), no verdict is armed-without-
+  consuming; built here, no deferral to 13u1. *Boundary recorded:* the QUICK-ENTRY bar is a
+  TextField, not a writing surface — text typed there (and handed off) stays literal by
+  design; the capture surface's ownership is 13u's standing question. **Up/down arrows —
+  PROPOSED ONLY (nothing built), her nod required:** candidates `-^` → ↑ and `-v` → ↓ (the
+  `->` family's own grammar: dash + direction glyph; `-v` risks colliding with words ending
+  "-v" far less than `^`/`v` alone would); alternative `|^` / `|v`. Her pick or veto at the
+  morning bundle.
+- **Item 13 — the Starred sidebar row: BUILT.** Exactly ONE star — blue, on the RIGHT (her
+  lean, confirmed in place: the right star is also the un-star door, so the mark and the act
+  live in one spot). **A `star` token joined the four voice palettes** (Terminal reuses its
+  blue ring hue; Study its blue accent — neither accent nor ring could serve alone: Terminal's
+  accent is green, Study's ring is orange; the mockup draws the star blue in both voices,
+  W8-2). Titles: ellipsis at rest, **marquee-scroll on hover** (`MarqueeText`, "stereo
+  style"); more air above the section (＋14 pt). P-8 holds throughout.
+- **The Sherlock restore door (tenth-wave ruling): BUILT.** `Help ▸ Restore the Sample
+  Library` + the ⌘K row (`.restoreSampleLibrary`, registered with the E2/E8 walk
+  conventions), riding `SampleLibrarySeeder`'s RESUMABLE seed — it mints only what is
+  MISSING (a deleted book comes back whole; surviving edited copies untouched), so unlike
+  the tutorial's replace **no confirm gates it**; fire-and-DO, opens the book, failures
+  speak.
+
+## The walk's captures (gitignored `notes/plans/pre-13u-act10-screens/`)
+
+`05-crop-top.png` (item 5's right edge) · `10-crop.png` (live arrows) · `21-lobby5.png`
+(item 7) · `22-tray.png` (item 1) · `cal.png` (the solid sidebar + the new bottom-rail Open
+strip — W8-3's flat column visible) · plus the trace/calibration frames. **Folded into the
+midpoint review's walk** (capture practicalities, recorded honestly): the library info
+panel + click model in motion, the starred marquee under a real pointer, the Open strip
+past 7 with drag reorder, the bottom bar in HER app (see item 6's note), dark-mode passes
+of the restyled surfaces (legible by token construction; not eyeballed).
+
+## Environment notes (for the orchestrator)
+
+- **The DEV store was found unopenable at wave start** — `sqlcipher hmac check failed
+  pgno=1` in the very first test run's host launch (07:24, BEFORE any wave code ran in an
+  app context), the failure surface offering no sidecar road. The broken file is SET ASIDE
+  as `variorum.sqlite.broken-2026-08-31` in the dev container (bytes preserved for the
+  morning if anyone cares); a fresh dev store minted for the walk and opens cleanly. Her
+  REAL store/app untouched (never launched; the walk used the Debug dev build only).
+- A leftover crashed test-host instance (the arrow suite's NSUndoManager exception during a
+  test-harness experiment) was killed; two Problem Reporter dialogs from earlier agents'
+  overnight work were left on her screen untouched.
+- **The Sherlock launch-seed did not fire in the dev walk** (0 books after writes on the
+  current binary) — possibly the R-pre13u-1 first-write moment's gate on this dev store, not
+  investigated further (the seeder's own suite is green; the log line to check is
+  `category == "sample-library"`, which showed nothing in the walk window). Worth one look
+  at the midpoint review.
+
+## Taste forks for the morning bundle
+
+1. **Tray section order** — Leaving above Archived (my call; the reverse is a two-line swap).
+2. **"＋ tag" vs "＋"** — labeled door in the masthead, bare ＋ on dense rows (her delegated
+   call, split by context; unify at her word).
+3. **The lobby's pattern presence** — two opacity dials, currently a visible-but-calm
+   endpaper; louder/quieter is one line.
+4. **Up/down arrows** — proposals only (`-^`/`-v`, alt `|^`/`|v`); nothing built.
+5. **The Open strip cap badges** — rows past nine carry no ⌘⇧ badge (the keys stop at 9);
+   an alternative is dimming, not hiding.
+6. **The library info panel's fact set** — my latitude pick (words/blocks/takes/comments/
+   days/books/tags; books get notes/chapters/target/cap); swap freely.
+
+## Verification at close
+
+- **Core `swift test`: 1484 tests / 159 suites, GREEN.**
+- **Mac suite: 1919 tests / 327 suites, GREEN — zero failures** (baseline 1908/323; the
+  arithmetic is exact: +11 pins in +4 suites — CheckboxScroll 1 · TypedArrowFace 6 ·
+  TrayPanelShape 1 · CommitBarLayout 3). The known load-flaky latency pin PASSED in this
+  run (no adjudication needed); the canvas suite passed in-suite. The tutorial spine green
+  inside the full run. Three standing pins were updated DELIBERATELY for moved cheese, each
+  carrying its supersession note: the ContextBar declaration pins (the tags' acts moved to
+  `MastheadTagCluster`, asserted from both sides) and the tray-move walk's List-class
+  anchors (the List is the retired clipping mechanism; the panel's composition is
+  `TrayPanelShapeTests`' pin now).
+- **iOS target BUILDS** (`VariorumMobile`, generic/platform=iOS) — mandatory: core
+  (`TypedArrows`) and `Shared/` (`VoiceTokens`' star token) were touched.
+- **Zero `Sources/VariorumCore/Sync/` lines** (diff-verified: the wave's only core change
+  is `Domain/TypedArrows.swift` + its tests); **zero schema**; lockstep marker untouched.
+- Every red-on-old pin was verified by BEHAVIORAL REVERT (the checkbox suppression, the
+  tray List, the OpenNotes prefix window, the bar threshold, the arrows burst anchor —
+  each re-run red on the reverted code, then restored).

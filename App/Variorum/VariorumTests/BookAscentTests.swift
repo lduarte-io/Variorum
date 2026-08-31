@@ -414,9 +414,15 @@ struct AscentDoorTests {
         // badge — the bar's fifth door and the only conditional one (it
         // renders when this note has deleted something). The five earlier
         // elements and their order are untouched.
+        // **Act 10 item 5 (a FOURTH justified edit, same convention — and
+        // this one REMOVES):** the tag cards and the ＃ fold moved to the
+        // masthead's right edge by her ruling, so `.toggleTagChips` and
+        // `.tagNote` are declared by `MastheadTagCluster` now — the acts
+        // moved WITH their renderer, asserted here from both sides so a
+        // drift in either home fails by name.
         #expect(ContextBar.surfaceCapabilities
-                == [.navigateBack, .navigateForward, .toggleTagChips,
-                    .openBookAtNote, .tagNote, .showNoteTray])
+                == [.navigateBack, .navigateForward, .openBookAtNote, .showNoteTray])
+        #expect(MastheadTagCluster.surfaceCapabilities == [.tagNote, .toggleTagChips])
     }
 
     /// Visiting a book floats it in the chooser — recorded at the ONE

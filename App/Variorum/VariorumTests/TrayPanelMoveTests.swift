@@ -89,17 +89,19 @@ struct TrayPanelMoveTests {
             #expect(session.commandRouter.activePostID == post,
                     "the detail registered")
             // At rest the detail is the page and nothing else: no inspector
-            // column, no panel list. (The signal is the REAL view tree —
-            // SwiftUI's inspector mounts a pane hosted under
-            // `InspectorStyleContext`, and the panel's own `List` mounts an
-            // outline list with a header view per Section. AppKit's
-            // accessibility tree is not populated in a headless test host, so
-            // the class names are the honest evidence available here.)
+            // column. (The signal is the REAL view tree — SwiftUI's
+            // inspector mounts a pane hosted under `InspectorStyleContext`.
+            // AppKit's accessibility tree is not populated in a headless
+            // test host, so the class names are the honest evidence
+            // available here. The panel's INTERIOR stopped being a `List`
+            // at Act 10 item 1 — the calm-card scroll rebuild — so the old
+            // OutlineList/ListTableHeaderView anchors are gone WITH the
+            // clipping mechanism they belonged to; the panel's own
+            // composition is `TrayPanelShapeTests`' pin now, over a seeded
+            // store.)
             let atRest = Self.classNames(hosting)
             #expect(!atRest.contains { $0.contains("InspectorStyleContext") },
                     "the side panel is not on screen at rest")
-            #expect(!atRest.contains { $0.contains("OutlineList") },
-                    "…and neither is the panel's list")
             #expect(atRest.contains("EditorTextView"), "the page itself IS mounted")
 
             #expect(session.commandRouter.requestNoteTray(TrayRequest(postID: post)),
@@ -110,10 +112,6 @@ struct TrayPanelMoveTests {
             let open = Self.classNames(hosting)
             #expect(open.contains { $0.contains("InspectorStyleContext") },
                     "the inspector column really opened — her \"pane to the right\"")
-            #expect(open.contains { $0.contains("OutlineList") },
-                    "with the panel's list inside it")
-            #expect(open.contains("ListTableHeaderView"),
-                    "and its SECTION HEADERS — the split her C1/G5 rulings asked for")
             #expect(open.contains("EditorTextView"),
                     "beside the page, never instead of it (it is a panel, not a sheet)")
         }

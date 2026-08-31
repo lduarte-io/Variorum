@@ -431,7 +431,9 @@ struct NoteTagDeclarationTests {
         #expect(CapabilityRegistry.doored(.surface).contains(.tagNote))
         // Every renderer of the ONE act names it (the walk asserts the
         // union equals the declared set; this states the three by name).
-        #expect(ContextBar.surfaceCapabilities.contains(.tagNote))
+        // Act 10 item 5: the cards moved from the context bar to the
+        // masthead cluster — the declaration moved WITH them.
+        #expect(MastheadTagCluster.surfaceCapabilities.contains(.tagNote))
         #expect(LibraryCatalogView.surfaceCapabilities.contains(.tagNote))
         #expect(PoolPostsView.surfaceCapabilities.contains(.tagNote))
     }
