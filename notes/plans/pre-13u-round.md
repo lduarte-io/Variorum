@@ -983,20 +983,23 @@ doors.
     otherwise), snippet/date context per row so five "2026-08-23"s are tellable apart. The derived
     display-name rule (13u item 4) is the ranking's natural friend but is NOT built early here —
     titles as they are, ranked well, is this act's bar.
-15. **The Compare + LENSES cleanup — ONE legibility pass over the pair** (widened at her fourth-wave
-    report: *"lenses are also guilty of being an insanely confusing tab - the difference from
-    compare is unclear and it does not need more explainer sentences… we just need way cleaner
-    UI/UX here"*). FACE-level only: the lens/compare semantics (13b's rebuild) are untouched; what
-    changes is legibility — the two modes become TELLABLE APART at a glance (what each is FOR must
-    be visible in the surface's structure, not narrated); Compare's empty state teaches the flow
-    (pick a note → columns appear; version peers first); the picker becomes item 14's component;
-    "make outline note" / "+ note" / "+ column" / "Duplicate as Version" get affordances that say
-    what they do; the toggle-chip rows read as settings rather than mystery pills. **HER COPY
-    DOCTRINE BINDS THE WHOLE ACT (verbatim): de-clutter by STRUCTURE and ?-icon disclosure, never
-    by adding prose** — the Lenses bottom explainer sentence is the named example of what goes
-    behind a ?, not what gets siblings. If the batch concludes the two MODES should merge or the
-    mode row should change, that is IA — a proposal to her, never a build (R60–94's mode row is
-    ruled canon). Screenshot-verified.
+15. **The Compare + LENSES cleanup — BUILD IT, no proposals (her fifth-wave ruling, verbatim: "i
+    honestly don't even want proposals - i want item 15 to just do its best with compare + lenses
+    and build the code changes - I find it hard to compare from screenshots, it's really a user
+    FLOW. that's why I keep saying UX - this is deeper than just UI and what buttons are there,
+    it's about how the user experiences the page.")** The batch redesigns the pair's USER FLOW
+    directly and lands the code — she judges it in the running app, not from stills. The bar: the
+    two modes tellable apart from their structure; Compare's first-open teaches by what it OFFERS
+    (pick a note / mint an outline as real, generous doors — not centered gray prose); the picker
+    is item 14's component; every act ("make outline note", "+ note", "+ column", "Duplicate as
+    Version", ✓/⧉) is a clear, generous control where the flow wants it. The lens/compare SEMANTICS
+    (13b's rebuild) are untouched, and the mode ROW itself (R60–94 canon) stays — everything INSIDE
+    the two modes is the batch's to reshape. **HER COPY DOCTRINE, as amended the same wave:** *"if
+    a new sentence is truly necessary it can be added, but in general the focus should be on an
+    excellent, guiding, clear user experience with nice, generous buttons"* — structure and
+    generous targets first, ?-disclosure for depth, a sentence only where truly necessary. Her
+    named negative example (13u's, not this round's — context only): the comment pane, "a big box
+    with a tiny place to click into and write in."
 16. **The Blocks page — PROPOSAL-FIRST, never built blind** (her own words: "I'm not even sure how
     to fix it"): the batch produces 2–3 concrete directions as mockups/screenshots for her ruling —
     her floated candidates seed them: (a) a book-page-like **in-note index/outline** (the block-TOC
@@ -1015,8 +1018,15 @@ doors.
     the one default pool): if the surface shows pools as what they are, her three questions stop
     needing to be asked. **PLUS the naming collision flagged for her, not solved:** the chip reads
     "pool: Pool" — `container.kind='pool'` (scrap areas) and the sidebar's Pool (bookless notes,
-    R29) share one word for two concepts. Renaming either is product vocabulary = HERS; the batch
-    brings candidates. The deeper "what is this page for" question stays recorded as open.
+    R29) share one word for two concepts. ~~Renaming either is product vocabulary = HERS; the batch
+    brings candidates.~~ **NAMING RULED (fifth wave, her words: "let's stop calling that whole thing
+    pool and focus on it being called snippets"):** the scrap-area vocabulary becomes **SNIPPETS in
+    every UI string** — the "pool: Pool" chip, the pool picker, the seeded default's displayed name,
+    any "pool" copy on the surface — on the K5 precedent (UI strings only; `container.kind='pool'`
+    stays the model term exactly as `kind='post'` survived the note sweep; canon docs unchanged).
+    The sidebar's Pool (bookless notes) KEEPS its name — the collision dissolves from the other
+    side; if she ever wants that renamed too, her word. The deeper "what is this page for" question
+    stays recorded as open.
 
 **Act 10 sizing (her authorization at the sitting):** the act is deliberately allowed to be
 "more significantly sized." It runs as **up to two sequential Fable implementer waves** at the
