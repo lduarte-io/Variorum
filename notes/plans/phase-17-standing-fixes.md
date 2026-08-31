@@ -74,7 +74,8 @@ once. Claim a letter here first.
 
 | Letter | Subject | State |
 |---|---|---|
-| 17a–17f | The 2026-08-30 sweep's six groups | open, unstarted *(17a closing at the pre-13u round's Act 9; 17c/17f run later in the same round)* |
+| **17a** | **CLOSED 2026-08-30 — the pre-13u round's Act 9 (the Fable custody batch).** All 8 items FIXED with revert-verified red-on-old pins; per-item dispositions in the entry below; the two KnownIssues rows that carried owner "17a" without being in the item list are RE-ROUTED to **17h** (opened at her word) | **closed** |
+| 17b–17f | The 2026-08-30 sweep's remaining groups | open, unstarted *(17c/17f run later in the same round)* |
 | **17g** | **CLOSED 2026-08-30 — the `13p-fix` session** (author's live session of 2026-08-30: an issue she found testing the refreshed 13p install). That session owns this letter and writes its own entry; it does **not** fold into 17a. | **closed** |
 | **17h** | **The custody riders 17a never listed** — opened at the author's word 2026-08-30 (the pre-13u sitting: "Open 17h, run it this round"). TWO items, both already traced in `KnownIssuesAndTechDebt.md` rows that carried owner "17a" without being in its 8-item list: **(1)** the `saveGated` delete-before-add window (13p-fix ladder R2-7 — a failed `SecItemAdd` after the forced delete leaves no custody; remedy sketch on the row: add under a temporary account → verify → swap → delete old, or an explicit accepted-window doc line); **(2)** the delete-status-discarded family (R3-5 — `deleteAuto`/`deleteGated` drop `OSStatus`, so the custody law binds writes only; remedy on the row: `Bool`-returning delete seams + refuse/report on failed release + a `deletesSucceed` knob pin; the riders travel with it: `E2EECustodyStorage.live` wiring coverage R3-4, `setMode`'s MainActor SecItem calls R3-6). The rows' mechanisms and remedies are the brief; runs as a small fresh Fable session inside the pre-13u round, after Act 9 closes. | **open** |
 
@@ -116,7 +117,7 @@ fold section at the end of `notes/plans/phase-13u-feel-and-polish.md`.
 
 | Entry | Subject | Items | Note |
 |---|---|---|---|
-| **17a** | The 13p residue — key custody, at-open modes & the re-lock teardown | 8 | **URGENT — run first.** |
+| **17a** | The 13p residue — key custody, at-open modes & the re-lock teardown | 8 | **CLOSED 2026-08-30** (the pre-13u round's Act 9; all 8 FIXED) |
 | **17b** | Doors that lose or mis-copy her text | 6 | — |
 | **17c** | The read layer's P1 debt (query-side) | 4 | — |
 | **17d** | Purge, sync & bridge honesty | 5 | **The `Sources/VariorumCore/Sync/` Fable rider binds P8, P9, P28 and P31.** |
@@ -127,9 +128,46 @@ fold section at the end of `notes/plans/phase-13u-feel-and-polish.md`.
 
 ## 17a — The 13p residue — key custody, at-open modes & the re-lock teardown
 
-**URGENT — run first.**
+**Status: CLOSED 2026-08-30 — the pre-13u round's Act 9 (Fable custody batch,
+commits `270bf4f…d6a4911` on `main`).** All 8 items **FIXED**, each with a
+red-on-old pin verified by a faithful behavioral revert (the drill red
+reproduced the traced end state in every case — the both-Keychain-items-deleted
+library for P2, the tail-in-no-row loss for P3, the full 64-hex key on the
+error channel for P15). The batch record is the **ACT 9 BATCH RECORD** section
+of `notes/plans/pre-13u-round.md`; suite counts and environment notes live
+there.
 
-**Status: open, unstarted.** 8 items, no pins.
+### Dispositions (per item)
+
+| item | verdict | pin(s) | notes |
+|---|---|---|---|
+| **P1** | **FIXED** | `Phase13pControllerTests.reconcileNeverOverwritesAnUnreadableSidecar` | ONE seam: `StoreLaunchGate.readEnvelope` (absent / loaded / UNREADABLE); `ensuredEnvelope` THROWS on unreadable — foreign is a move, unreadable is a refusal, only true absence mints. The launch reconcile can no longer overwrite an unreadable sidecar or orphan the escrow item; the nudge stays quiet over unknown facts. |
+| **P2** | **FIXED** | `…aModeChangeAuthorizesFromTheDiskNotTheCachedProjection` | `setMode`'s demanded-arm authorization is a FRESH disk read at the act (the `deleteBlock` in-transaction-precondition doctrine); the two invalidating doors (`setEscrow`, reconcile's escrow arm) refresh the projection as a belt. The old red reproduced the catastrophe: auto item nil, mode persisted. |
+| **P3** | **FIXED** | `MacWillLockTests` (2 pins) | `macWillLock` factory (the `mobileWillLock` twin), wired in `VariorumApp`: the active editor's full `finalizeWork` (tail crystallized, pending cross-block compound landed) runs BEFORE the registry and the services stop. Recorded corner: only the ACTIVE editor gets the full finalize — identical to the quit door it mirrors; widening both is a design act. |
+| **P10** | **FIXED** | `…aRecoveryWrapLandedDuringTheKDFSurvivesSetPassphrase` | `setPassphrase` derives the wrap FIRST (envelope-free, off-main — `StoreKeyEnvelope.makePassphraseWrap`/`adoptPassphraseWrap`, format guard kept) and reads the envelope FRESH after the derivation; every MainActor envelope writer is now an awaitless read→write, so the window is closed structurally, not narrowed. The pin's `makeKDF` hook stands in for the concurrent land deterministically. |
+| **P11** | **FIXED** | `…setPassphraseRefusesOverAnUnreadableSidecarInsteadOfOverwritingIt` · `Phase13pLobbyTests.anUnreadableSidecarLobbySaysTheTrueCauseNeverTheAbsentOne` | Every envelope-writing door refuses with the true (unreadable) sentence; the lobby's ONE `deadEndMessage` brain serves both platforms' faces. Recorded corners, deliberately unchanged: `failedOutcome` stays doorless on unreadable (widening that surface is design); `verifyPassphraseAgainstStore` answers nil on unreadable (a third guard answer is design) — doc'd at the site, harmless since every write door refuses regardless. |
+| **P12** | **FIXED** | `KeyedStoreTests.aPresentButUnreadableStoreClassifiesAsUnknownNeverAbsent` | `classify`: present-but-unreadable ⇒ `.encryptedOrUnknown` (nil-at-EOF distinguished from a throwing read; empty-file-as-absent pinned deliberate). No persisted mode downgrade; all classify consumers audited unchanged. |
+| **P13** | **FIXED** | `KeyedStoreTests.openStoreNeverMintsOverAPresentButUnreadableStore` | The never-mint refusal fires TYPED (`keyUnavailable`) for unreadable stores — the recovery road can render; nothing lands in custody (the old red reproduced the untyped "SQLite error 14" + minted-custody dead end). Rider: `routeAndOpen`'s nil-URL `?? .absent` → `?? .encryptedOrUnknown` — recorded as unpinnable without refactoring the private URL resolution into a seam. |
+| **P15** | **FIXED** | `StoreEncryptionMigrationTests.aFailedAttachNeverCarriesTheKeyHexInAnyErrorChannel` · `…redactionScrubsEveryOccurrenceOnBothChannels` | Catch-and-sanitize at BOTH key-bearing statements (`StoreKey.redactedDescription(of:)`; `RedactedKeyedStatementError` covers `localizedDescription` too, so the backup-log channel is closed at origin). The PRAGMA site is pinned pure only — that statement's failure is not drivable (SQLCipher defers key validation to the first page read); recorded, not skipped. |
+
+**The two KnownIssues rows that carried owner "17a" without being in this
+entry's item list** (the `saveGated` delete-before-add window, R2-7; the
+delete-status-discarded family, R3-5): **RE-ROUTED to 17h** — opened at the
+author's word at the pre-13u sitting; their rows in
+`KnownIssuesAndTechDebt.md` now name 17h. Not resolved here, not orphaned.
+
+**Landed WITH the batch (the same subsystem, the same commits):** the Act 1
+review's routed findings F1 (the state-dependent custody pin, fully faked),
+F4 (the `KeychainTestTripwire` — the R3-1 rule made structural), F5 (the fact
+suite's header), F6 (the E2EE arm's own `wroteButUnreadable` sentence); the
+R-pre13u-2 CF-12 rework (sync gate opt-in, default off, legacy gates reset);
+the R-pre13u-3 #82 build (the store key device-bound via the TN3137
+migration); and the R-pre13u-4/5 detection half (the `ProtectionLegs` nudge
+brain + the VERIFIED-LANDED escrow observable and its Console evidence line).
+Their records ride the batch record, not this entry.
+
+*(The original 8-item briefs below are kept verbatim as the entry's record —
+the finder claims, the verifier traces, and the provenance note.)*
 
 Eight findings, and **six of them are one root cause**: `StoreKeyEnvelope.load` and
 `StoreFilePresence.classify` throw typed errors that exist *precisely* to distinguish a corrupt or

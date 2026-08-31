@@ -359,7 +359,14 @@ struct EncryptionCustodyThreadTests {
 
         #expect(session.lastError == nil)
         #expect(session.state == .enrolled(hasRecoveryWrap: false))
-        #expect(log.names == ["save"], "the flow's one custody write")
+        // JUSTIFIED EDIT (pre-13u Act 9, R-pre13u-2): adopt now consults
+        // the gate FIRST (`resetLegacyGateIfUnclaimed` — a legacy gated
+        // custody with no recorded opt-in resets to plain at this
+        // material-in-hand moment), so the sequence gains one off-main
+        // read before the same one write. The off-main discipline this
+        // suite pins is unchanged — the consult rides the same hop.
+        #expect(log.names == ["isBiometricGateOn", "save"],
+                "the reset consult, then the flow's one custody write")
         #expect(log.anyOnMainThread == false)
     }
 
@@ -453,13 +460,19 @@ struct ProtectionReconcileOffMainTests {
         // escrow read, the landing write — all off-main, and the escrow
         // item really lands (the thread moved, never the meaning).
         await controller.reconcile()
-        #expect(log.names == ["loadAuto", "loadEscrow", "saveEscrow"],
-                "the same three reads/writes, in the same order")
+        // JUSTIFIED EDIT (pre-13u Act 9, R-pre13u-4): the arm ends every
+        // writing pass with a READ-BACK now — VERIFIED-LANDED is never
+        // the write's own word (the fourth call). Same reads, same
+        // writes, same short-circuit order, same hop.
+        #expect(log.names == ["loadAuto", "loadEscrow", "saveEscrow", "loadEscrow"],
+                "the same three reads/writes, then the verification read-back")
         #expect(log.anyOnMainThread == false,
                 "ZERO synchronous SecItem calls on the main thread: \(log.calls)")
         let storeID = try #require(envelopeBox.value?.storeID)
         #expect(backing.escrow[storeID] == key, "the escrow copy landed")
         #expect(!controller.escrowLandingFailed)
+        #expect(controller.escrowVerifiedLanded == true,
+                "and the read-back projected the verified fact")
 
         // THE OFF ARM: the leftover item goes (ownership-guarded, R1-m1)
         // — same discipline, same evidence.

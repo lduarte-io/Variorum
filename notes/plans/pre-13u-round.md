@@ -867,8 +867,15 @@ pass: true` on every relaunch. Her result: ______ *(a FAIL comes back to the cus
 finding; the KnownIssues escrow row retires on a PASS).*
 
 **VERIFICATION AT CLOSE:** core **1457/154 GREEN** (13p baseline 1453/154 + the 4 new core pins,
-exact) · Mac full suite: **[filled below at the close — run against 1854/314 + 17 new pins]** ·
-iOS target BUILDS · mobile suite vs 582/93 · tutorial spine green · zero
+exact) · Mac full suite **1871/317 ALL PASSED** (baseline 1854/314 + 17 new pins across 3 new
+suites — count arithmetic exact; a first full run under load reddened the KNOWN load-flaky canvas
+suite — green 6/6 isolated per the standing rule, the KnownIssues row's verdict confirmed — and
+caught two honest `KeychainOffMainTests` call-sequence pins meeting the batch's DELIBERATE
+sequence changes, both justified-edited with comments naming the ruling: adopt's reset consult
+before the save, R-pre13u-2; the escrow arm's verification read-back, R-pre13u-4; the clean full
+re-run followed) · **iOS target BUILDS** (the standing gate, green at every `Shared/`-touching
+commit and at close) · mobile **582/93 PASSED, 2 standing known issues** (the exact 13p baseline)
+· tutorial spine GREEN (all 10 tutorial suites in the full run) · zero
 `Sources/VariorumCore/Sync/` lines, zero schema, marker untouched (diff-verified: no file under
 `Sync/` in any commit). **Environment:** the real-store app was RUNNING at batch start (contrary
 to the brief's "closed tonight") — instance-check discipline held throughout (no Release builds,
