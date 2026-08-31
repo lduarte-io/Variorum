@@ -137,8 +137,20 @@ write without any complex setup but I dunno... is a nudge really enough for 'onl
 open your work until you set a passphrase if you don't have icloud keychain on?' It's hard to be a
 super secure app without forcing users to go through some kind of setup for their own security I
 guess. But at the same time, I think maybe that is ok? when does the nudge come up? and how much of a
-nudge is it? … I'm kind of questioning our overall approach."* Architect proposal at the sitting:
-STATE-AWARE nudging (see the sitting reply); her ruling to land here.
+nudge is it? … I'm kind of questioning our overall approach."* **RULED at the sitting: STATE-AWARE
+NUDGE**, her words: *"state aware nudge, but keep in mind that the phone has to invoke the same nudge
+and the language maybe should be 'this device'. also, sync will be free for the first 3 months so
+hopefully people sign up for sync anyway."* The shape: covered users (escrow verifiably landed, or
+any secret set) keep today's gentle nudge and cadence; the EXPOSED state (Auto + no secrets + escrow
+not landing) gets hardened plain-truth copy — device-neutral language ("this device", never "this
+Mac") — plus a standing "Ways back in" line in the Encryption pane counting the actual legs. Never a
+modal, never a gate; cadence numbers unchanged. **Both platforms invoke the same nudge brain** (her
+rider — the tier detection is shared; the faces per-platform). Detection lands in Act 9 (it rides the
+escrow verification); faces in Act 10 + a mobile deliverable named in the parity line.
+
+**R-pre13u-5 — escrow check timing (her word):** *"I can do the escrow later this batch too when it's
+a good moment - I'll be around for this full batch."* The author-run escrow round-trip check is
+scheduled INSIDE Act 9 at a moment the custody batch calls for it.
 
 ---
 
@@ -644,6 +656,21 @@ doors.
    block ▾ · Takes · commit ⌘S · history / note ▾ · comments · Aa"): *"this bottom bar should be
    spread out again, unless the window is small and it needs to be collapsed."* One row at ordinary
    widths; the collapse is a width-responsive fallback, not the default.
+7. **The lobby / first-unlock screen refresh** (her ask at the sitting, verbatim): *"this page looks
+   ugly - the touchid thing opens up centered, covering up the middle of the screen, and there's a
+   lot of stuff on that first unlock screen. I just think it needs to look a bit nicer - maybe throw
+   one of the tesselating background art photos on there with a calm white box in the middle for it,
+   aware that the prompt will appear. or do something else, idk exactly."* Design the lobby AROUND
+   the fact that the system Touch ID dialog lands centered (compose the calm box off-center or
+   size/place elements so the dialog doesn't occlude the essentials); reduce what's on screen at
+   first unlock (progressive disclosure — passphrase field can arrive on demand under Biometric).
+   Check `notes/brand/` for the tessellating background art she references; if the assets aren't
+   in-repo, ask her to supply before styling around them.
+8. **The standing mandate for the whole act** (her words): *"I just feel like the app feels a bit
+   dated in the way that apple apps sometimes do - one line bars between items, etc. I want a bit of
+   a refresh + fresh feeling added."* (Her second screenshot — the note ▾ menu's hairline dividers —
+   is an instance of the grammar she means.) The latitude covers retiring the hairline-separator
+   grammar where a calmer grouping serves better, within the two voices.
 
 ---
 
