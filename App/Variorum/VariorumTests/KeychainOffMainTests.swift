@@ -403,10 +403,10 @@ private func recordingStoreKeyGuard(
     return StoreKeyGuard(
         loadAuto: { log.note("loadAuto"); return inner.loadAuto() },
         saveAuto: { log.note("saveAuto"); return inner.saveAuto($0) },
-        deleteAuto: { log.note("deleteAuto"); inner.deleteAuto() },
+        deleteAuto: { log.note("deleteAuto"); return inner.deleteAuto() },
         gatedItemExists: { log.note("gatedItemExists"); return inner.gatedItemExists() },
         saveGated: { log.note("saveGated"); return inner.saveGated($0) },
-        deleteGated: { log.note("deleteGated"); inner.deleteGated() },
+        deleteGated: { log.note("deleteGated"); return inner.deleteGated() },
         unlockGated: { await inner.unlockGated() },
         biometryAvailable: { inner.biometryAvailable() },
         loadEscrow: { log.note("loadEscrow"); return inner.loadEscrow($0) },

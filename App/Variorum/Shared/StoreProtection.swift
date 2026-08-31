@@ -289,6 +289,25 @@ nonisolated enum ProtectionCopy {
         + "is lost — entering your encryption passphrase re-enrolls sync on "
         + "this \(deviceName)."
 
+    /// 17h (13p-fix ladder R3-5): the arm where the INCOMING custody is
+    /// fine but the OUTGOING item would not go — `SecItemDelete`'s status
+    /// was dropped at the leaves for two phases, so a transition promising
+    /// "the old item is deleted" completed on no evidence. The change is
+    /// backed out instead of left half-made. (Functional copy; 13s
+    /// re-voices.)
+    static let outgoingCustodyNotReleased =
+        "The Keychain could not remove the key's previous item, so your "
+        + "current way in was left exactly as it was. Nothing changed — "
+        + "you can try the switch again."
+
+    /// The sync-custody family's own sentence for the same arm (the F6
+    /// precedent: the store-key wording promises "your current way in",
+    /// which is non-responsive on the sync-gate surface).
+    static let syncKeysOutgoingNotReleased =
+        "The device Keychain could not remove the previous sync-key item, "
+        + "so the setting was left exactly as it was. Nothing changed — "
+        + "you can try again."
+
     // The escrow dial's ruled plain-consequence pair — knot 8, VERBATIM
     // (direction ruled; 13s may re-voice the exact words).
     static let escrowOn =

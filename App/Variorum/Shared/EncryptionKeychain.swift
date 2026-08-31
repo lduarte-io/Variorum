@@ -38,33 +38,68 @@ import LocalAuthentication
 import Security
 import VariorumCore
 
+/// 17h (13p-fix ladder R3-4): the fixed-account Keychain LEAVES behind a
+/// seam. `E2EECustodyStorage.live` used to close over the static
+/// functions directly, so its handover WIRING — which delete plays the
+/// outgoing role and which the rollback, for each direction — was covered
+/// by nothing: transposing them left the whole suite green while the
+/// 2026-08-30 incident's shape reinstated. The composition is now
+/// `wired(leaves:)` over this struct, pinned with a recording fake; the
+/// name→function mapping below is pinned through the test tripwire's
+/// refused-leaf names (`KeychainTestTripwire.refusedLeafNames`), so
+/// neither half can be transposed silently.
+nonisolated struct E2EECustodyLeaves: Sendable {
+    var saveGated: @Sendable (DeviceKeyMaterial) -> Bool
+    var savePlain: @Sendable (DeviceKeyMaterial) -> Bool
+    var loadPlain: @Sendable () -> DeviceKeyMaterial?
+    var gatedExists: @Sendable () -> Bool
+    var deletePlain: @Sendable () -> Bool
+    var deleteGated: @Sendable () -> Bool
+
+    static let live = E2EECustodyLeaves(
+        saveGated: { E2EEKeychainStorage.saveGated($0) },
+        savePlain: { E2EEKeychainStorage.save($0) },
+        loadPlain: { E2EEKeychainStorage.load() },
+        gatedExists: { E2EEKeychainStorage.gatedItemExists() },
+        deletePlain: { E2EEKeychainStorage.deletePlainItem() },
+        deleteGated: { E2EEKeychainStorage.deleteGatedItem() })
+}
+
 /// Persistence seam for the device's unwrapped key material (tests inject
 /// in-memory; production is the Keychain) — the `AuthTokensStore` pattern.
 /// The custody TRANSITION for the E2EE device keys, behind a seam so it
 /// can be pinned (13p-fix R2-1). Both arms run the `CustodyHandover`
 /// rule: write, verify through the production read path, only then
-/// delete the other half.
+/// delete the other half — and since 17h (R3-5) the delete's own status
+/// decides the outcome too.
 nonisolated struct E2EECustodyStorage: Sendable {
     var setGated: @Sendable (DeviceKeyMaterial) -> CustodyHandover.Outcome
     var setPlain: @Sendable (DeviceKeyMaterial) -> CustodyHandover.Outcome
 
-    static let live = E2EECustodyStorage(
-        setGated: { material in
-            CustodyHandover.perform(
-                write: { E2EEKeychainStorage.saveGated(material) },
-                // Presence only: reading an ACL'd item's DATA prompts, and
-                // a write must never prompt (R2-4's forced exception).
-                verify: { E2EEKeychainStorage.gatedItemExists() },
-                deleteOutgoing: { E2EEKeychainStorage.deletePlainItem() },
-                rollBackIncoming: { E2EEKeychainStorage.deleteGatedItem() })
-        },
-        setPlain: { material in
-            CustodyHandover.perform(
-                write: { E2EEKeychainStorage.save(material) },
-                verify: { E2EEKeychainStorage.load() == material },
-                deleteOutgoing: { E2EEKeychainStorage.deleteGatedItem() },
-                rollBackIncoming: { E2EEKeychainStorage.deletePlainItem() })
-        })
+    static let live = wired(leaves: .live)
+
+    /// The handover composition, over injectable leaves (17h R3-4 — the
+    /// wiring is what the 2026-08-30 incident's guard consists of, so it
+    /// gets its own pin instead of living only inside `.live`).
+    static func wired(leaves: E2EECustodyLeaves) -> E2EECustodyStorage {
+        E2EECustodyStorage(
+            setGated: { material in
+                CustodyHandover.perform(
+                    write: { leaves.saveGated(material) },
+                    // Presence only: reading an ACL'd item's DATA prompts, and
+                    // a write must never prompt (R2-4's forced exception).
+                    verify: { leaves.gatedExists() },
+                    deleteOutgoing: { leaves.deletePlain() },
+                    rollBackIncoming: { _ = leaves.deleteGated() })
+            },
+            setPlain: { material in
+                CustodyHandover.perform(
+                    write: { leaves.savePlain(material) },
+                    verify: { leaves.loadPlain() == material },
+                    deleteOutgoing: { leaves.deleteGated() },
+                    rollBackIncoming: { _ = leaves.deletePlain() })
+            })
+    }
 }
 
 nonisolated struct DeviceKeyStore: Sendable {
@@ -382,14 +417,22 @@ nonisolated enum E2EEKeychainStorage {
         return plainGone || gatedGone
     }
 
-    static func deletePlainItem() {
-        guard !KeychainTestTripwire.refusesFixedAccountMutation("deletePlainItem") else { return }
-        SecItemDelete(baseQuery() as CFDictionary)
+    /// 17h (R3-5): a delete answers whether the item is RELEASED — gone,
+    /// or never there — because its status is evidence exactly as a
+    /// write's is ("a write's success is not proof", both directions). A
+    /// tripwire refusal answers false: the release did not happen.
+    @discardableResult
+    static func deletePlainItem() -> Bool {
+        guard !KeychainTestTripwire.refusesFixedAccountMutation("deletePlainItem") else { return false }
+        let status = SecItemDelete(baseQuery() as CFDictionary)
+        return status == errSecSuccess || status == errSecItemNotFound
     }
 
-    static func deleteGatedItem() {
-        guard !KeychainTestTripwire.refusesFixedAccountMutation("deleteGatedItem") else { return }
-        SecItemDelete(gatedBaseQuery() as CFDictionary)
+    @discardableResult
+    static func deleteGatedItem() -> Bool {
+        guard !KeychainTestTripwire.refusesFixedAccountMutation("deleteGatedItem") else { return false }
+        let status = SecItemDelete(gatedBaseQuery() as CFDictionary)
+        return status == errSecSuccess || status == errSecItemNotFound
     }
 
     /// CF-12: whether the gated custody item exists — WITHOUT any prompt.

@@ -407,12 +407,17 @@ final class ProtectionController {
                 // may not open the store.
                 verify: { guardSeam.loadAuto() == key },
                 deleteOutgoing: { guardSeam.deleteGated() },
-                rollBackIncoming: { guardSeam.deleteAuto() }) {
+                rollBackIncoming: { _ = guardSeam.deleteAuto() }) {
             case .done: break
             case .writeRefused:
                 return .refused("The Keychain refused the change — nothing was altered.")
             case .wroteButUnreadable:
                 return .refused(ProtectionCopy.wroteButUnreadable)
+            case .outgoingNotReleased:
+                // 17h R3-5's third shape: leaving the gated item behind
+                // under Auto would let a later Biometric-mode reading of
+                // "a gated item exists" mean nothing.
+                return .refused(ProtectionCopy.outgoingCustodyNotReleased)
             }
         case .biometric:
             guard biometryAvailable else {
@@ -431,16 +436,32 @@ final class ProtectionController {
                 // a write must never prompt (R2-4's stated exception).
                 verify: { guardSeam.gatedItemExists() },
                 deleteOutgoing: { guardSeam.deleteAuto() },
-                rollBackIncoming: { guardSeam.deleteGated() }) {
+                rollBackIncoming: { _ = guardSeam.deleteGated() }) {
             case .done: break
             case .writeRefused:
                 return .refused("The Keychain refused the gated item — nothing was altered.")
             case .wroteButUnreadable:
                 return .refused(ProtectionCopy.wroteButUnreadable)
+            case .outgoingNotReleased:
+                // 17h R3-5's first shape: a "Biometric" dial over a key
+                // that still releases silently is the theater R13p-14
+                // forbids — refuse rather than claim a gate that isn't.
+                return .refused(ProtectionCopy.outgoingCustodyNotReleased)
             }
         case .passphrase:
-            guardSeam.deleteAuto()
-            guardSeam.deleteGated()
+            // 17h R3-5's second shape: this arm's law is "NEITHER item
+            // exists", and it used to take both deletes on no evidence at
+            // all. Each release is verified; gated goes FIRST so a refusal
+            // leaves a coherent state either way (from Auto the gated item
+            // is absent — trivially released — and a refused Auto release
+            // keeps the mode that item serves; from Biometric a refused
+            // gated release keeps the gate).
+            guard guardSeam.deleteGated() else {
+                return .refused(ProtectionCopy.outgoingCustodyNotReleased)
+            }
+            guard guardSeam.deleteAuto() else {
+                return .refused(ProtectionCopy.outgoingCustodyNotReleased)
+            }
         }
         dials.mode = newMode
         // The key stays IN HAND across a mid-session transition (surfaced

@@ -59,12 +59,26 @@ nonisolated enum KeychainTestTripwire {
 
     private static let tripLock = NSLock()
     nonisolated(unsafe) private static var trips = 0
+    nonisolated(unsafe) private static var refusedNames: [String] = []
 
     /// Observable for the pin: how many mutations have been refused.
     static var tripCount: Int {
         tripLock.lock()
         defer { tripLock.unlock() }
         return trips
+    }
+
+    /// 17h (R3-4's leaf-mapping pin): WHICH leaves refused, in order. A
+    /// test calls one `E2EECustodyLeaves.live` closure and asserts the
+    /// delta names the leaf it expects — so a leaves struct that lies
+    /// about its mapping (`deletePlain` wired to `deleteGatedItem`) goes
+    /// red without one byte of Keychain traffic. Append-only within a
+    /// process; concurrent suites can only ADD names, so a containment
+    /// assertion over a delta never false-fails.
+    static var refusedLeafNames: [String] {
+        tripLock.lock()
+        defer { tripLock.unlock() }
+        return refusedNames
     }
 
     /// Consulted FIRST by every fixed-account write/delete leaf: true =
@@ -77,6 +91,7 @@ nonisolated enum KeychainTestTripwire {
         guard armed else { return false }
         tripLock.lock()
         trips += 1
+        refusedNames.append(leaf)
         tripLock.unlock()
         NSLog("KeychainTestTripwire: refused E2EEKeychainStorage.%@ from a test process (the 13p-fix R3-1 class) — drive the injected seams instead", leaf)
         return true
@@ -155,6 +170,17 @@ nonisolated enum CustodyHandover {
         /// unable to reach the item — that is the failure being handled,
         /// so it is never load-bearing.
         case wroteButUnreadable
+        /// 17h (13p-fix ladder R3-5): the incoming item landed and read
+        /// back, but the OUTGOING one would not go — `SecItemDelete`
+        /// refused. Until this case existed the delete's status was
+        /// dropped at the leaves, so the custody law bound WRITES only: a
+        /// gate transition could complete with the old silently-releasing
+        /// item still in place (theater, R13p-14's exact prohibition), or
+        /// the OFF flip could leave the gated item deciding `load()`'s
+        /// behavior. The incoming write is rolled back best-effort (never
+        /// load-bearing, as above) and the transition refuses whole — the
+        /// state the surface reports stays the state the Keychain holds.
+        case outgoingNotReleased
     }
 
     /// `verify` must read through the SAME path production reads through.
@@ -163,10 +189,15 @@ nonisolated enum CustodyHandover {
     /// left by an earlier access group. The GATED arms are the forced
     /// exception: reading an ACL'd item's DATA prompts for biometrics, and
     /// a write must never prompt, so they verify presence only.
+    ///
+    /// `deleteOutgoing` answers whether the outgoing item is RELEASED
+    /// (deleted, or was never there) — 17h R3-5: a delete's status is
+    /// evidence exactly as a write's is, and dropping it enforced the
+    /// custody law in one direction only.
     static func perform(
         write: () -> Bool,
         verify: () -> Bool,
-        deleteOutgoing: () -> Void,
+        deleteOutgoing: () -> Bool,
         rollBackIncoming: () -> Void = {}
     ) -> Outcome {
         guard write() else { return .writeRefused }
@@ -174,7 +205,10 @@ nonisolated enum CustodyHandover {
             rollBackIncoming()
             return .wroteButUnreadable
         }
-        deleteOutgoing()
+        guard deleteOutgoing() else {
+            rollBackIncoming()
+            return .outgoingNotReleased
+        }
         return .done
     }
 }

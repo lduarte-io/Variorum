@@ -133,7 +133,11 @@ extension StoreKeyCustody {
     /// because a gate whose key still releases silently is theater,
     /// R13p-14's exact prohibition). The one deletion door; the guard's
     /// custody choreography orders it AFTER the replacement custody lands.
-    public static func deviceKeychainRemove(scope: String) {
+    /// 17h (13p-fix ladder R3-5): answers whether the item is RELEASED —
+    /// gone from BOTH keychains, or never there. A dropped delete status
+    /// enforced the custody law in one direction only.
+    @discardableResult
+    public static func deviceKeychainRemove(scope: String) -> Bool {
         StoreKeyKeychain.delete(scope: scope)
     }
 
@@ -265,11 +269,15 @@ nonisolated enum StoreKeyKeychain {
         return true
     }
 
-    static func delete(scope: String) {
+    @discardableResult
+    static func delete(scope: String) -> Bool {
         // BOTH keychains: a lingering legacy item under a demanded mode
         // would be a silently-readable copy — the theater R13p-14 forbids.
-        deleteItem(scope: scope, dataProtection: true)
-        deleteItem(scope: scope, dataProtection: false)
+        // 17h R3-5: released = success or not-found, on BOTH legs — a
+        // refusal on either leaves a copy the caller believes gone.
+        let bound = deleteItem(scope: scope, dataProtection: true)
+        let legacy = deleteItem(scope: scope, dataProtection: false)
+        return bound && legacy
     }
 
     // MARK: - The #82 migration (write → VERIFY → delete old)
@@ -314,8 +322,11 @@ nonisolated enum StoreKeyKeychain {
         return StoreKey(data: data)
     }
 
-    private static func deleteItem(scope: String, dataProtection: Bool) {
-        SecItemDelete(baseQuery(scope: scope, dataProtection: dataProtection) as CFDictionary)
+    @discardableResult
+    private static func deleteItem(scope: String, dataProtection: Bool) -> Bool {
+        let status = SecItemDelete(
+            baseQuery(scope: scope, dataProtection: dataProtection) as CFDictionary)
+        return status == errSecSuccess || status == errSecItemNotFound
     }
 
     private static func baseQuery(scope: String, dataProtection: Bool) -> [String: Any] {
@@ -355,7 +366,9 @@ nonisolated enum StoreKeyKeychain {
     static func load(scope: String) -> StoreKey? { nil }
     @discardableResult
     static func save(_ key: StoreKey, scope: String) -> Bool { false }
-    static func delete(scope: String) {}
+    // No keychain ⇒ no item ⇒ trivially released (17h R3-5).
+    @discardableResult
+    static func delete(scope: String) -> Bool { true }
 }
 #endif
 

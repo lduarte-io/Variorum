@@ -96,6 +96,9 @@ private enum BiometricGateOutcome: Sendable {
     /// 13p-fix R3-2: the write landed somewhere the read path cannot
     /// reach — distinct from `refused`, because something DID change.
     case wroteButUnreadable
+    /// 17h R3-5: the incoming item is fine but the OUTGOING one would not
+    /// go — the transition was backed out rather than left half-made.
+    case outgoingNotReleased
 }
 
 @MainActor
@@ -513,6 +516,7 @@ final class EncryptionSession {
             case .done: return .landed
             case .writeRefused: return .refused
             case .wroteButUnreadable: return .wroteButUnreadable
+            case .outgoingNotReleased: return .outgoingNotReleased
             }
         }
         switch outcome {
@@ -529,6 +533,12 @@ final class EncryptionSession {
             // non-responsive when the SYNC gate fails; this road back is
             // passphrase re-enrollment of sync custody.
             lastError = ProtectionCopy.syncKeysWroteButUnreadable
+        case .outgoingNotReleased:
+            // 17h R3-5: until the delete seams carried their status, this
+            // arm could not exist — the gate flip completed with the old
+            // item still in place, silently. The transition now backs out
+            // and says so.
+            lastError = ProtectionCopy.syncKeysOutgoingNotReleased
         case .landed:
             biometricRequired = required
             // R-pre13u-2: an ON landed through the toggle is a real opt-in

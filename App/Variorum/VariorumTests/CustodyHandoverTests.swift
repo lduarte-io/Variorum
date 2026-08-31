@@ -22,7 +22,7 @@ struct CustodyHandoverTests {
         let outcome = CustodyHandover.perform(
             write: { false },
             verify: { Issue.record("verify must not run after a refused write"); return true },
-            deleteOutgoing: { calls.record("delete") },
+            deleteOutgoing: { calls.record("delete"); return true },
             rollBackIncoming: { calls.record("rollback") })
         #expect(outcome == .writeRefused)
         #expect(calls.count("delete") == 0, "the outgoing custody is untouched")
@@ -36,7 +36,7 @@ struct CustodyHandoverTests {
         let outcome = CustodyHandover.perform(
             write: { true },
             verify: { false },
-            deleteOutgoing: { calls.record("delete") },
+            deleteOutgoing: { calls.record("delete"); return true },
             rollBackIncoming: { calls.record("rollback") })
         #expect(outcome == .wroteButUnreadable)
         #expect(calls.count("delete") == 0,
@@ -49,11 +49,27 @@ struct CustodyHandoverTests {
         let outcome = CustodyHandover.perform(
             write: { true },
             verify: { true },
-            deleteOutgoing: { calls.record("delete") },
+            deleteOutgoing: { calls.record("delete"); return true },
             rollBackIncoming: { calls.record("rollback") })
         #expect(outcome == .done)
         #expect(calls.count("delete") == 1)
         #expect(calls.count("rollback") == 0)
+    }
+
+    /// 17h R3-5, red-on-old: the delete leg's status decides the outcome.
+    /// Pre-fix `deleteOutgoing` was `() -> Void` — a refused release still
+    /// returned `.done`, so the custody law bound writes only and a
+    /// transition could complete with the outgoing item silently in place.
+    @Test func aRefusedOutgoingReleaseBacksTheTransitionOut() {
+        let calls = Calls()
+        let outcome = CustodyHandover.perform(
+            write: { true },
+            verify: { true },
+            deleteOutgoing: { calls.record("delete"); return false },
+            rollBackIncoming: { calls.record("rollback") })
+        #expect(outcome == .outgoingNotReleased)
+        #expect(calls.count("rollback") == 1,
+                "the incoming write is tidied best-effort — the transition refuses whole")
     }
 
     // MARK: - The E2EE transition (round 2's MAJOR)
@@ -113,6 +129,83 @@ struct CustodyHandoverTests {
         // re-enrollment of sync custody.
         #expect(session.lastError == ProtectionCopy.syncKeysWroteButUnreadable,
                 "the honest arm names the keychain-identity symptom AND this surface's own road back")
+    }
+
+    // MARK: - The LIVE wiring's composition (17h R3-4)
+
+    /// Ordered recorder — the wiring pins are about WHICH leaf plays
+    /// WHICH role, so order and identity both matter.
+    private final class OrderedCalls: @unchecked Sendable {
+        private let lock = NSLock()
+        private var recorded: [String] = []
+        var names: [String] { lock.lock(); defer { lock.unlock() }; return recorded }
+        func note(_ name: String) { lock.lock(); recorded.append(name); lock.unlock() }
+    }
+
+    private func recordingLeaves(
+        _ log: OrderedCalls,
+        gatedExists: Bool = true,
+        loadedBack: DeviceKeyMaterial? = nil,
+        deletesSucceed: Bool = true
+    ) -> E2EECustodyLeaves {
+        E2EECustodyLeaves(
+            saveGated: { _ in log.note("saveGated"); return true },
+            savePlain: { _ in log.note("savePlain"); return true },
+            loadPlain: { log.note("loadPlain"); return loadedBack },
+            gatedExists: { log.note("gatedExists"); return gatedExists },
+            deletePlain: { log.note("deletePlain"); return deletesSucceed },
+            deleteGated: { log.note("deleteGated"); return deletesSucceed })
+    }
+
+    /// 17h R3-4 — THE WIRING PIN. `.live` is `wired(leaves: .live)`, and
+    /// these drive the SAME composition through recording leaves: for the
+    /// gate-ON direction the OUTGOING item is the PLAIN one and the
+    /// rollback target the GATED one. Transposing
+    /// `deleteOutgoing`/`rollBackIncoming` in `wired` — the 2026-08-30
+    /// incident's reinstatement, which round 3 found no test could see —
+    /// changes these names: red.
+    @Test func gateOnReleasesThePlainItemAndOnlyThePlainItem() {
+        let log = OrderedCalls()
+        let storage = E2EECustodyStorage.wired(leaves: recordingLeaves(log))
+        #expect(storage.setGated(material()) == .done)
+        #expect(log.names == ["saveGated", "gatedExists", "deletePlain"])
+    }
+
+    @Test func gateOnRollsBackTheGatedItemWhenTheWriteIsUnreadable() {
+        let log = OrderedCalls()
+        let storage = E2EECustodyStorage.wired(
+            leaves: recordingLeaves(log, gatedExists: false))
+        #expect(storage.setGated(material()) == .wroteButUnreadable)
+        #expect(log.names == ["saveGated", "gatedExists", "deleteGated"],
+                "the rollback tidies the INCOMING gated write — never the plain custody")
+    }
+
+    @Test func gateOffReleasesTheGatedItemAndOnlyTheGatedItem() {
+        let log = OrderedCalls()
+        let m = material()
+        let storage = E2EECustodyStorage.wired(
+            leaves: recordingLeaves(log, loadedBack: m))
+        #expect(storage.setPlain(m) == .done)
+        #expect(log.names == ["savePlain", "loadPlain", "deleteGated"])
+    }
+
+    @Test func gateOffRollsBackThePlainItemWhenTheWriteIsUnreadable() {
+        let log = OrderedCalls()
+        let storage = E2EECustodyStorage.wired(
+            leaves: recordingLeaves(log, loadedBack: nil))
+        #expect(storage.setPlain(material()) == .wroteButUnreadable)
+        #expect(log.names == ["savePlain", "loadPlain", "deletePlain"])
+    }
+
+    /// 17h R3-5 through the composition: a refused release backs out, and
+    /// the best-effort rollback targets the INCOMING item.
+    @Test func aRefusedPlainReleaseBacksTheGateOnTransitionOut() {
+        let log = OrderedCalls()
+        let storage = E2EECustodyStorage.wired(
+            leaves: recordingLeaves(log, deletesSucceed: false))
+        #expect(storage.setGated(material()) == .outgoingNotReleased)
+        #expect(log.names == ["saveGated", "gatedExists", "deletePlain", "deleteGated"],
+                "the refused release, then the best-effort rollback of the incoming item")
     }
 
     @Test func theE2EEGateTurnsOffOnlyWhenThePlainItemReadsBack() {

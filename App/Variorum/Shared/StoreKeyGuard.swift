@@ -41,13 +41,17 @@ import VariorumCore
 /// LocalAuthentication, scoped per store variant like Batch 1's item).
 nonisolated struct StoreKeyGuard: Sendable {
     // The Auto item (Batch 1's — service io.lduarte.Variorum.store-key).
+    // 17h (13p-fix ladder R3-5): the deletes answer whether the item is
+    // RELEASED (deleted, or never there) — their status was dropped at
+    // both leaves, so the custody law's "the old item is DELETED" half
+    // was enforced on nobody's word at all.
     var loadAuto: @Sendable () -> StoreKey?
     var saveAuto: @Sendable (StoreKey) -> Bool
-    var deleteAuto: @Sendable () -> Void
+    var deleteAuto: @Sendable () -> Bool
     // The biometric-gated item (this batch).
     var gatedItemExists: @Sendable () -> Bool
     var saveGated: @Sendable (StoreKey) -> Bool
-    var deleteGated: @Sendable () -> Void
+    var deleteGated: @Sendable () -> Bool
     /// PROMPTS (Touch ID / Face ID) — production only; never on a test
     /// road. nil = failed / cancelled / unavailable / invalidated by
     /// biometry re-enrollment (the passphrase road recovers, by design).
@@ -101,14 +105,25 @@ nonisolated struct StoreKeyGuard: Sendable {
                 backing.auto = $0
                 return true
             },
-            deleteAuto: { backing.auto = nil },
+            // 17h R3-5: the deletes consult their own knob (the
+            // `savesSucceed` pattern) — a refused release changes nothing,
+            // exactly like the real Keychain.
+            deleteAuto: {
+                guard backing.deletesSucceed else { return false }
+                backing.auto = nil
+                return true
+            },
             gatedItemExists: { !backing.gatedWritesAreInvisible && backing.gated != nil },
             saveGated: {
                 guard backing.savesSucceed else { return false }
                 backing.gated = $0
                 return true
             },
-            deleteGated: { backing.gated = nil },
+            deleteGated: {
+                guard backing.deletesSucceed else { return false }
+                backing.gated = nil
+                return true
+            },
             unlockGated: { backing.biometricSucceeds ? backing.gated : nil },
             biometryAvailable: { backing.biometryAvailable },
             loadEscrow: { backing.escrow[$0] },
@@ -131,6 +146,10 @@ nonisolated final class InMemoryStoreKeyGuardBacking: @unchecked Sendable {
     private var _biometryAvailable: Bool
     private var _biometricSucceeds: Bool
     private var _savesSucceed = true
+    /// 17h R3-5: the delete twin of `savesSucceed` — script a Keychain
+    /// that refuses to release an item, so the refuse-on-failed-release
+    /// arms are drivable.
+    private var _deletesSucceed = true
     /// 13p-fix R1-1: reproduce the shape that cost the author her key —
     /// a gated WRITE that succeeds while the gated READ cannot find it
     /// (the data-protection/file-based split, and every future identity
@@ -170,6 +189,10 @@ nonisolated final class InMemoryStoreKeyGuardBacking: @unchecked Sendable {
     var savesSucceed: Bool {
         get { lock.lock(); defer { lock.unlock() }; return _savesSucceed }
         set { lock.lock(); defer { lock.unlock() }; _savesSucceed = newValue }
+    }
+    var deletesSucceed: Bool {
+        get { lock.lock(); defer { lock.unlock() }; return _deletesSucceed }
+        set { lock.lock(); defer { lock.unlock() }; _deletesSucceed = newValue }
     }
     var gatedWritesAreInvisible: Bool {
         get { lock.lock(); defer { lock.unlock() }; return _gatedWritesAreInvisible }
@@ -222,8 +245,14 @@ nonisolated enum StoreKeyGuardKeychain {
         return SecItemAdd(attributes as CFDictionary, nil) == errSecSuccess
     }
 
-    static func deleteGated(scope: String) {
-        SecItemDelete(gatedQuery(scope: scope) as CFDictionary)
+    /// 17h (R3-5): released = deleted, or never there. Anything else is a
+    /// refusal the caller must not paper over — the `.biometric` arm's
+    /// silently-still-releasing key and the `.auto` arm's lingering gate
+    /// were both this dropped status.
+    @discardableResult
+    static func deleteGated(scope: String) -> Bool {
+        let status = SecItemDelete(gatedQuery(scope: scope) as CFDictionary)
+        return status == errSecSuccess || status == errSecItemNotFound
     }
 
     /// The at-open unlock: evaluate biometrics (ONLY), then read under
