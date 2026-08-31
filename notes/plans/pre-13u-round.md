@@ -1137,6 +1137,21 @@ A and B are close relatives (A's right half is a compressed B — possibly ONE m
 collapsible contents column; C is the genuinely separate idea). **Her ONE feedback round is now
 open.**
 
+**17h CLOSED (2026-08-31, ~02:45 — the fresh Fable custody session; commits `73763c2` `bc48315`
+`98813d4` `eee25d2`, pushed).** Both items FIXED with revert-verified red-on-old pins: R2-7 as
+probe-first narrowing (`GatedSaveChoreography`, one brain, both gated families; the swap remedy
+REJECTED with a traced reason — renaming an ACL'd item is a `SecItemUpdate` and would prompt; the
+surviving between-two-adds crash window pinned as DOCUMENTED behavior, not claimed fixed) · R3-5
+with all riders (Bool delete seams, `CustodyHandover.outgoingNotReleased` roll-back-and-refuse,
+verified `.passphrase` releases, `deletesSucceed` knob; R3-4's five composition pins + the tripwire
+name mapping; R3-6's `setMode` custody choreography off-main byte-preserved). Scope note recorded
+at the entry: `deleteEscrow` deliberately not widened (opposite failure polarity, own observable).
+Counts: core **1457/154 exact** · Mac **1887/320** (arithmetic exact = 1871/317 + 16 pins/3 suites;
+the ONE red was the known latency pin, 3× isolated in its recorded band, adjudicated pre-existing
+on the diff fact) · tutorial spine 10/10 · iOS builds · zero `Sync/`, zero schema. Dispositions in
+the 17h entry (register flipped closed); the two KnownIssues rows resolved. The session died once
+awaiting its backgrounded suite (the standing memory trap) and was resumed to a synchronous close.
+
 ---
 
 # Obligations at close
