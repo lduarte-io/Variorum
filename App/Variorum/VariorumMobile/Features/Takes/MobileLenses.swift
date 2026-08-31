@@ -306,7 +306,17 @@ final class MobileLensesModel {
     /// through the overlay's own chosen-caught-up self-heal at the
     /// refresh delivery, and the lens session ends (✓ ends the peek,
     /// scaled up). Refuses under the seal in the standing wording.
-    func adoptView() async {
+    /// Returns whether this call FLEW — `false` means the latch turned it
+    /// away because a flight was already in the air. Discardable, because
+    /// the door does not care (P-2: a declined second tap is not a refusal
+    /// and must never be reported as one); it exists so a PIN can tell the
+    /// two outcomes apart. Counting the rows the store ended with cannot:
+    /// a second flight that happened to start after the first finished
+    /// finds `displayedDivergences` self-healed empty, returns at
+    /// `guard !picks.isEmpty`, and leaves the same one row a latched
+    /// decline would — green over nothing (R2-5).
+    @discardableResult
+    func adoptView() async -> Bool {
         await adoptLatch.runIfFree { await self.adoptViewOnce() }
     }
 

@@ -197,6 +197,12 @@ struct MobileStarterJournalTests {
     }
 
     // MARK: The sync gate (the batch-5 cold review's MAJOR)
+    //
+    // **These four pins drive the gate, so they drive it on the variant
+    // that consults it — `.real`** (R2-3 moved the A4 fence out of the gate
+    // and onto the store variant, where the transport fact lives). Each
+    // pin's CLAIM is unchanged, and none of them touches this machine's
+    // defaults: every one injects its own mark.
 
     /// **A SIGNED-IN DEVICE DOES NOT DECIDE ITS STORE IS NEW BEFORE SYNC
     /// HAS ANSWERED.** The virgin-store guard is a LOCAL read of a store
@@ -210,7 +216,7 @@ struct MobileStarterJournalTests {
             sync.belongsToAnAccount = true   // a composed chain, or a session
 
             let outcome = await MobileStarterJournal.seedIfNeeded(
-                session: session, storeVariant: .dev, gate: sync.gate,
+                session: session, storeVariant: .real, gate: sync.gate,
                 firstRoundWait: .milliseconds(150),
                 pollInterval: .milliseconds(10),
                 loadMark: mark.load, saveMark: mark.save)
@@ -240,7 +246,7 @@ struct MobileStarterJournalTests {
 
             let seeding = Task {
                 await MobileStarterJournal.seedIfNeeded(
-                    session: session, storeVariant: .dev, gate: sync.gate,
+                    session: session, storeVariant: .real, gate: sync.gate,
                     firstRoundWait: .seconds(5),
                     pollInterval: .milliseconds(5),
                     loadMark: mark.load, saveMark: mark.save)
@@ -271,7 +277,7 @@ struct MobileStarterJournalTests {
             sync.hasSyncedCleanly = true
 
             let outcome = await MobileStarterJournal.seedIfNeeded(
-                session: session, storeVariant: .dev, gate: sync.gate,
+                session: session, storeVariant: .real, gate: sync.gate,
                 firstRoundWait: .milliseconds(150),
                 pollInterval: .milliseconds(10),
                 loadMark: mark.load, saveMark: mark.save)
@@ -295,7 +301,7 @@ struct MobileStarterJournalTests {
             let sync = FakeSync()   // belongsToAnAccount stays false
 
             let outcome = await MobileStarterJournal.seedIfNeeded(
-                session: session, storeVariant: .dev, gate: sync.gate,
+                session: session, storeVariant: .real, gate: sync.gate,
                 firstRoundWait: .seconds(30),   // never spent
                 pollInterval: .milliseconds(10),
                 loadMark: mark.load, saveMark: mark.save)
@@ -307,7 +313,8 @@ struct MobileStarterJournalTests {
         }
     }
 
-    // MARK: The A4 fence inside the gate (the Fable sweep's finding 2)
+    // MARK: The A4 fence, at the variant (the Fable sweep's finding 2,
+    // single-sourced at R2-3)
 
     /// **A STORE THAT CAN NEVER SYNC MUST NOT WAIT FOR SYNC.**
     ///
@@ -315,32 +322,30 @@ struct MobileStarterJournalTests {
     /// so a DEV-store launch on a signed-in phone reads `account.variorum`
     /// non-nil — while a dev-store session never configures sync at all
     /// (`allowsSync` false ⇒ `configure` returns ⇒ no scheduler ⇒
-    /// `status.lastSuccessAt` nil forever). The pre-fix call site passed the
-    /// account facts alone, so that composition paid the full 20-second poll
+    /// `status.lastSuccessAt` nil forever). The pre-fix door consulted the
+    /// gate for every variant, so that state paid the full 20-second poll
     /// and answered `.awaitingFirstSync` on EVERY empty-store Debug launch,
     /// permanently: the starter Journal could never seed there, and each
     /// launch carried a background poll loop for nothing.
     ///
-    /// The gate now folds the A4 fence in: no transport means no corpus on
-    /// its way, so the store belongs to no account for the seed's purposes.
+    /// **The fence lives at the VARIANT** (R2-3), not inside the gate: only
+    /// a real store has a transport, so only a real store can have a corpus
+    /// on its way. The gate below says "account", loudly, and the dev store
+    /// seeds anyway — because the account is not the question here.
     ///
-    /// **Red-on-old:** drop `allowsSync() &&` from `SyncGate.live` and this
-    /// waits out its budget and returns `.awaitingFirstSync`.
+    /// **Red-on-old:** drop `storeVariant == .real,` from `seedIfNeeded`
+    /// and this waits out its budget and returns `.awaitingFirstSync`.
     @Test func aDevStoreThatCanNeverSyncSeedsWithoutWaiting() async throws {
         try await withEditorWorld { session, db in
             let mark = Mark()
-            // Signed in on this device (the shared Keychain), sync REFUSED
-            // by the store variant, and therefore no round can ever land.
-            let gate = MobileStarterJournal.SyncGate.live(
-                allowsSync: { false },
-                syncIsConfigured: { false },
-                hasAccountSession: { true },
-                hasSyncedCleanly: { false })
-            #expect(!gate.belongsToAnAccount(),
-                    "a store with no transport belongs to no account here")
+            // Signed in on this device (the shared Keychain), and no round
+            // can ever land — a dev store never configures sync at all.
+            let sync = FakeSync()
+            sync.belongsToAnAccount = true
+            sync.hasSyncedCleanly = false
 
             let outcome = await MobileStarterJournal.seedIfNeeded(
-                session: session, storeVariant: .dev, gate: gate,
+                session: session, storeVariant: .dev, gate: sync.gate,
                 firstRoundWait: .milliseconds(150),
                 pollInterval: .milliseconds(10),
                 loadMark: mark.load, saveMark: mark.save)
@@ -355,22 +360,25 @@ struct MobileStarterJournalTests {
     }
 
     /// The other direction, so the fence cannot be mistaken for a blanket
-    /// exemption: the REAL store's composition is byte-identical to the one
-    /// the four gate pins above drive — `allowsSync` is true there, so a
-    /// signed-in real store still defers until sync has spoken.
+    /// exemption: a signed-in REAL store still defers until sync has spoken,
+    /// exactly as the four gate pins above drive it.
+    ///
+    /// **Red-on-old:** remove `seedIfNeeded`'s gate consult altogether and
+    /// this seeds into an account's store — the batch-5 MAJOR, back.
+    /// *(Dropping only the `gate.belongsToAnAccount()` conjunct does NOT
+    /// red this pin, and the distinction is worth stating: that revert makes
+    /// the condition MORE inclusive — every real store waits — so what it
+    /// reds is `aDeviceWithNoAccountSeedsWithoutWaiting`, which spends the
+    /// full budget instead. Both reverts were run; both are recorded.)*
     @Test func theRealStoreCompositionStillDefersUntilSyncHasSpoken() async throws {
         try await withEditorWorld { session, db in
             let mark = Mark()
-            let gate = MobileStarterJournal.SyncGate.live(
-                allowsSync: { true },
-                syncIsConfigured: { false },
-                hasAccountSession: { true },   // a session whose chain has not composed
-                hasSyncedCleanly: { false })
-            #expect(gate.belongsToAnAccount(),
-                    "the unsafe direction is still covered — a signed-in device waits")
+            let sync = FakeSync()
+            sync.belongsToAnAccount = true   // a session whose chain has not composed
+            sync.hasSyncedCleanly = false
 
             let outcome = await MobileStarterJournal.seedIfNeeded(
-                session: session, storeVariant: .real, gate: gate,
+                session: session, storeVariant: .real, gate: sync.gate,
                 firstRoundWait: .milliseconds(120),
                 pollInterval: .milliseconds(10),
                 loadMark: mark.load, saveMark: mark.save)
@@ -379,6 +387,60 @@ struct MobileStarterJournalTests {
             #expect(!mark.seeded)
             let books = try await db.read { db in try Queries.readings(db) }
             #expect(books.isEmpty, "nothing was minted into her account's store")
+        }
+    }
+
+    /// **THE FENCE IS THE VARIANT — ONE GATE, TWO ANSWERS.** (R2-3's own
+    /// pin, and the one that discriminates.)
+    ///
+    /// The two pins above each drive one half of `if storeVariant == .real,
+    /// gate.belongsToAnAccount()`, and each is red under its own revert. This
+    /// one drives the WHOLE condition with a SINGLE gate value — the same
+    /// account-true, never-synced facts a signed-in phone reports — and
+    /// watches the two variants come out opposite. It is the pin that says
+    /// the fence is about the store's TRANSPORT rather than about anything
+    /// sync happened to answer.
+    ///
+    /// **Red-on-old, both directions, both run:** drop `storeVariant ==
+    /// .real,` and the dev leg stops seeding (`expected a seed, got
+    /// .awaitingFirstSync`); remove the gate consult altogether and the real
+    /// leg stops deferring (`(real → .seeded(…)) == .awaitingFirstSync`).
+    ///
+    /// The unsafe pair R2-3 named — a REAL store whose gate reads "no
+    /// account" because a transport fact was folded in — is unconstructible
+    /// from here: the gate no longer takes a transport fact at all.
+    @Test func oneGateSeedsTheDevStoreAndDefersTheRealOne() async throws {
+        try await withEditorWorld { session, db in
+            let sync = FakeSync()
+            sync.belongsToAnAccount = true
+            sync.hasSyncedCleanly = false     // and never will
+
+            // The REAL store goes first, on the empty store both legs see:
+            // it must decline, and declining mints nothing, so the second
+            // leg still meets a virgin store.
+            let realMark = Mark()
+            let real = await MobileStarterJournal.seedIfNeeded(
+                session: session, storeVariant: .real, gate: sync.gate,
+                firstRoundWait: .milliseconds(120),
+                pollInterval: .milliseconds(10),
+                loadMark: realMark.load, saveMark: realMark.save)
+            #expect(real == .awaitingFirstSync,
+                    "a real store on an account waits for the account to speak")
+            #expect(!realMark.seeded)
+
+            // Same gate, same facts, the OTHER variant.
+            let devMark = Mark()
+            let dev = await MobileStarterJournal.seedIfNeeded(
+                session: session, storeVariant: .dev, gate: sync.gate,
+                firstRoundWait: .milliseconds(120),
+                pollInterval: .milliseconds(10),
+                loadMark: devMark.load, saveMark: devMark.save)
+            guard case .seeded = dev else {
+                Issue.record("the dev store must not wait on a transport it has not got, got \(dev)")
+                return
+            }
+            let books = try await db.read { db in try Queries.readings(db) }
+            #expect(books.count == 1, "the dev seed's book alone — the real leg minted nothing")
         }
     }
 

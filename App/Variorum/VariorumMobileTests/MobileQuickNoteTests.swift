@@ -1079,6 +1079,101 @@ struct MobileQuickNoteTests {
         }
     }
 
+    /// **A REFUSED MINT AT A LEAVING LETS GO OF THE KEYBOARD TOO** — the
+    /// fix diff's own cold review, R2-2.
+    ///
+    /// Finding 6's fix put the focus drop in `reset()`, which covers the
+    /// three roads that CLEAR the box. The two REFUSAL roads deliberately do
+    /// not clear it (Q2 keeps her text and its reason), so they never reach
+    /// `reset()` — and a tab switch assigns `tab` synchronously with both
+    /// stacks alive, so the keyboard stood over the Library above an
+    /// invisible box holding un-filed text and an error she could not see.
+    /// Same symptom, third state.
+    ///
+    /// **The Q2 contracts ride in this pin unmoved**, so a later change
+    /// cannot buy the focus drop with her text: the box still holds every
+    /// character, `lastError` still says why, and `handOffCount` is still 0
+    /// because nothing was handed off.
+    ///
+    /// **Red-on-old:** drop `setFocused(false)` from `file()`'s refused-mint
+    /// arm and the field is still first responder after the leaving.
+    @Test func aRefusedMintAtALeavingLetsGoOfTheKeyboardToo() async throws {
+        try await withEditorWorld { session, db in
+            let box = quietBox(session)
+            let surface = HostedSurface(MobileQuickNoteBox(
+                model: box, tokens: VoiceTokens.terminalLight,
+                writingHeight: 320, onOpen: { _ in }))
+            await surface.settle()
+            let field = try #require(textInput(in: surface),
+                                     "the REAL field is mounted — this pin is worthless without it")
+            #expect(field.becomeFirstResponder(), "she taps into the box")
+            box.text = "the thought I had on the bus"
+            await surface.settle()
+            #expect(field.isFirstResponder, "…and types, with the caret in the box")
+
+            // The store goes away mid-round — this app's scene handler's own
+            // named case, injected as the refusal it produces.
+            try await session.database.write { db in
+                try db.execute(sql: """
+                    CREATE TRIGGER quicknote_store_unavailable
+                    BEFORE INSERT ON container
+                    BEGIN SELECT RAISE(ABORT, 'the store is unavailable'); END
+                    """)
+            }
+            await box.fileOnLeaving()
+            await surface.settle()
+
+            #expect(!field.isFirstResponder,
+                    "the shelf was left, so the keyboard was left — no keyboard over the Library")
+            #expect(!box.isFocused)
+            #expect(try await livePosts(db).isEmpty, "nothing minted, as the refusal says")
+            #expect(box.text == "the thought I had on the bus",
+                    "and Q2 is untouched — her text is still in the box")
+            #expect(box.lastError != nil, "…with the reason still on it")
+            #expect(box.handOffCount == 0, "nothing was handed off — the shipped contract")
+        }
+    }
+
+    /// Q2's other half, same seam: the note exists, the store REFUSED the
+    /// keystrokes that followed the mint (a seal landing mid-typing), so
+    /// `file()` returns without resetting — and used to return without
+    /// letting go of the caret.
+    ///
+    /// Pinned SEPARATELY from the road above rather than folded into it:
+    /// the two arms are two lines in two places, and one pin would leave
+    /// whichever arm it did not drive green over nothing.
+    ///
+    /// **Red-on-old:** drop `setFocused(false)` from `file()`'s
+    /// `autosave?.isDirty` arm and the field is still first responder.
+    @Test func aLeavingWhoseKeystrokesWereRefusedLetsGoOfTheKeyboardToo() async throws {
+        try await withEditorWorld { session, _ in
+            let box = quietBox(session)
+            let surface = HostedSurface(MobileQuickNoteBox(
+                model: box, tokens: VoiceTokens.terminalLight,
+                writingHeight: 320, onOpen: { _ in }))
+            await surface.settle()
+            let field = try #require(textInput(in: surface))
+
+            box.text = "before the seal"
+            let postID = try #require(await box.mintNow())
+            try await session.runner.run { ops in try ops.lockPost(postID) }
+            box.text = "before the seal, and after it"
+            #expect(field.becomeFirstResponder(), "she is still typing in the box")
+            await surface.settle()
+
+            await box.fileOnLeaving()
+            await surface.settle()
+
+            #expect(!field.isFirstResponder,
+                    "the keyboard does not stand over an error she cannot see")
+            #expect(!box.isFocused)
+            #expect(box.text == "before the seal, and after it",
+                    "the refused keystrokes are still hers to see")
+            #expect(box.lastError != nil)
+            #expect(box.handOffCount == 0, "the box has not let go of the note")
+        }
+    }
+
     // MARK: - The pure brains
 
     /// Churn is characters removed + characters inserted, equal weight

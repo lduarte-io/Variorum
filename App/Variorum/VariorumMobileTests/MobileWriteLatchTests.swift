@@ -229,8 +229,20 @@ struct MobileWriteLatchTests {
     /// "chosen until …" lens — the same clutter class as the branch doors
     /// above, on a door the class argument said was covered.
     ///
+    /// **AND THE PIN ASSERTS THE DECLINE, NOT ONLY THE COUNT** (R2-5, the
+    /// fix diff's own cold review). A row count has a silent-green
+    /// direction: if the second flight ever scheduled entirely after the
+    /// first completed, the self-healed peeks would empty
+    /// `displayedDivergences`, `adoptViewOnce` would return at
+    /// `guard !picks.isEmpty`, and ONE row would be counted with the latch
+    /// removed. `adoptView` now returns the latch's verdict, so the pin
+    /// reads the thing it is actually about: the first tap FLEW and the
+    /// second was TURNED AWAY. Both are asserted, because the count still
+    /// carries the user-visible half.
+    ///
     /// **Red-on-old:** point `adoptView` back at `adoptViewOnce` directly
-    /// (drop the latch) and the count is two.
+    /// (drop the latch) and the second flight is admitted — the verdict is
+    /// `true` and the count is two.
     @Test func twoTapsOnAdoptLeaveOnePreservationLens() async throws {
         try await withEditorWorld { session, db in
             let seed = try await session.runner.run { ops -> (String, String) in
@@ -253,8 +265,12 @@ struct MobileWriteLatchTests {
 
             let first = Task { await lenses.adoptView() }
             let second = Task { await lenses.adoptView() }
-            await first.value
-            await second.value
+            let firstFlew = await first.value
+            let secondFlew = await second.value
+
+            #expect(firstFlew, "the gesture she made really ran")
+            #expect(!secondFlew,
+                    "…and the second tap was DECLINED by the latch — not merely tidy")
 
             let preservations = try await liveRows(
                 db,

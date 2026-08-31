@@ -201,8 +201,15 @@ struct MobileLivenessTests {
     /// a HIDDEN editor holding it, is exactly what an unguarded resume
     /// produces here.
     ///
-    /// **Red-on-old:** remove the two post-suspension `guard isCurrent`
-    /// lines and the abandoned grant calls `noteLivenessGranted()`.
+    /// **Red-on-old — and R2-4 MEASURED exactly which revert reds it, which
+    /// corrected the record:** removing BOTH post-suspension `guard
+    /// isCurrent` lines reds this pin. Removing the post-FLUSH one ALONE
+    /// does NOT — on a `refresh: true` grant the post-REFRESH guard sits
+    /// downstream on the same road and catches the bump anyway. So this pin
+    /// proves the PAIR, not its own arm; the arm it names is isolated by
+    /// `aRefreshlessGrantSupersededDuringItsFlushInstallsNothing` below,
+    /// which runs the refreshless road where the post-flush guard is the
+    /// only one there is.
     @Test func aGrantSupersededDuringItsFlushInstallsNothing() async throws {
         try await withEditorWorld { session, _ in
             let world = try await twoTabWorld(session)
@@ -238,7 +245,8 @@ struct MobileLivenessTests {
     /// the refresh, between the two guards. Bumping there exercises the arm
     /// the first pin cannot reach.
     ///
-    /// **Red-on-old:** the same two lines.
+    /// **Red-on-old: the POST-REFRESH guard alone**, measured (R2-4) — this
+    /// is the one pin of the three that isolates a single line.
     @Test func aGrantSupersededDuringItsRefreshInstallsNothing() async throws {
         try await withEditorWorld { session, _ in
             let world = try await twoTabWorld(session)
@@ -256,6 +264,61 @@ struct MobileLivenessTests {
             #expect(!world.shelf.isLive,
                     "a grant superseded after its refresh installs nothing either")
             #expect(!world.library.isLive)
+        }
+    }
+
+    /// **THE POST-FLUSH GUARD, ISOLATED — on the road where it is the only
+    /// guard there is.** (R2-4's measurement, and finding 7's third arm.)
+    ///
+    /// R2-4 asked for the per-guard reverts to be RUN rather than traced,
+    /// and running them said something the trace had not: on a
+    /// `refresh: true` grant the two post-suspension guards sit in series,
+    /// so removing the FIRST changes nothing an assertion can see — the
+    /// second catches the same bump. Only the joint removal reds the two
+    /// pins above.
+    ///
+    /// A REFRESHLESS grant has no second guard: the flush guard is the last
+    /// thing between an abandoned grant and the pen. That is the shape
+    /// `register` uses in production (`takeLiveness(_, refresh: false)` —
+    /// a newcomer holds nothing yet, so there is nothing to re-read), so
+    /// this drives the arm exactly where it is load-bearing.
+    ///
+    /// **What this pin deliberately does NOT do, traced while building it:**
+    /// drive `register` itself. `isLive` starts TRUE on a fresh
+    /// `MobileEditorViewModel` (a screen with no authority must be able to
+    /// type), and `takeLiveness` stands down OTHERS, never its own taker —
+    /// so a superseded registration leaves the newcomer live by default and
+    /// the end state is indistinguishable from a granted one through this
+    /// surface. Finding 7's third arm (*"`register`'s self-minted token"*)
+    /// therefore stays traced-sound and undriven for a reason worth
+    /// recording: not a missing seam, an unobservable difference.
+    ///
+    /// **Red-on-old:** remove the post-FLUSH `guard isCurrent(token)` alone
+    /// and the superseded grant takes the pen.
+    @Test func aRefreshlessGrantSupersededDuringItsFlushInstallsNothing() async throws {
+        try await withEditorWorld { session, _ in
+            let world = try await twoTabWorld(session)
+            let editors = world.editors
+            #expect(!world.shelf.isLive && world.library.isLive,
+                    "the library editor holds the pen before the grant")
+
+            let token = editors.beginHandoff()
+            let bump = SupersedeOnSettle(at: 1, editors: editors)
+            let observer = world.shelf.autosave.observe(onSettled: bump.fire)
+            defer { world.shelf.autosave.stopObserving(observer) }
+
+            await editors.takeLiveness(world.shelf, refresh: false, handoff: token)
+
+            #expect(bump.fired, "the seam really fired — this pin proves nothing otherwise")
+            #expect(!world.shelf.isLive,
+                    "superseded at the only guard on this road, so it never got the pen")
+            #expect(!world.library.isLive,
+                    "and the stood-down editor stays down — at most one is the law")
+            #expect(
+                !typeEdit(
+                    world.shelf, world.shelfStorage,
+                    range: NSRange(location: 0, length: 0), replacement: "x"),
+                "the abandoned grant's editor gate refuses, as a stood-down surface must")
         }
     }
 

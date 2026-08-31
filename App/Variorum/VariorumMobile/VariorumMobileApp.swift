@@ -115,22 +115,23 @@ struct VariorumMobileApp: App {
                         await MobileStarterJournal.seedIfNeeded(
                             session: session,
                             storeVariant: bootstrap.storeVariant,
-                            // The Fable sweep's finding 2: the gate is
-                            // composed through `SyncGate.live`, which folds
-                            // the A4 fence in — a store that can never sync
-                            // has no corpus on its way and must not wait for
-                            // one. The REAL store's reading is byte-identical
-                            // to the old expression.
+                            // Two ACCOUNT facts, and only account facts. The
+                            // A4 fence — a store that can never sync has no
+                            // corpus on its way, so it must never wait for
+                            // one — lives at `seedIfNeeded`, beside the
+                            // store variant it is a fact about (R2-3).
+                            // Composing it in here instead restated
+                            // `storeVariant` through a fourth closure and
+                            // let the unsafe pair be built.
                             //
                             // Captured STRONGLY, deliberately: the closures
                             // outlive nothing (the seed is awaited right
                             // here), and a nil'd weak reference would read as
                             // "no account", which is the unsafe direction.
-                            gate: .live(
-                                allowsSync: { fresh.sync.allowsSync },
-                                syncIsConfigured: { fresh.sync.isConfigured },
-                                hasAccountSession: {
-                                    fresh.account.variorum != nil
+                            gate: MobileStarterJournal.SyncGate(
+                                belongsToAnAccount: {
+                                    fresh.sync.isConfigured
+                                        || fresh.account.variorum != nil
                                 },
                                 hasSyncedCleanly: {
                                     fresh.sync.status.lastSuccessAt != nil

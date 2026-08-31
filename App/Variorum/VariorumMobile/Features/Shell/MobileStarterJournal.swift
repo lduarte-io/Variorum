@@ -46,6 +46,12 @@
 //     mark is not set, so the next launch simply asks again. Furniture is
 //     the one thing in this app that can always wait.
 //
+//     **The gate is asked ONLY of a REAL store** (R2-3). A dev store has
+//     no transport, so it has no corpus on its way and nothing to wait
+//     for — and since Debug and Release share a Keychain, asking it anyway
+//     meant an empty dev store on a signed-in phone polled for twenty
+//     seconds and then declined, on every launch, forever.
+//
 //  **The honest residual, recorded rather than papered over:** a user who
 //  deletes the starter book AND its entry, leaving a genuinely empty
 //  store, and THEN deletes and reinstalls the app, gets it once more —
@@ -157,46 +163,21 @@ enum MobileStarterJournal {
         /// account holds. A FAILED round is not an answer.
         var hasSyncedCleanly: @MainActor () -> Bool
 
-        /// The composition with no account anywhere — a dev store, or a
-        /// caller that has no services yet. The store genuinely is this
-        /// device's, so the seed proceeds on the two local guards alone.
+        /// The composition for a caller with no services to ask — the
+        /// default, and what the standalone hosts get. It says the store
+        /// belongs to nobody, so the seed proceeds on the two local guards
+        /// alone.
+        ///
+        /// *(It is deliberately NOT the dev store's answer any more. The A4
+        /// fence — a store that can never sync has no corpus on its way —
+        /// lives at `seedIfNeeded`, where the store variant already is
+        /// (R2-3): expressing it here meant a fourth closure restating a
+        /// parameter the seed already had, and a caller could then compose
+        /// the unsafe pair — a REAL store whose gate answers "no account" —
+        /// which is precisely the batch-5 MAJOR. With the fence at the
+        /// variant that pair cannot be built.)*
         static let unowned = SyncGate(
             belongsToAnAccount: { false }, hasSyncedCleanly: { true })
-
-        /// **THE PRODUCTION COMPOSITION, AND IT HONOURS THE A4 FENCE**
-        /// (the Fable sweep's finding 2, 2026-08-30).
-        ///
-        /// The call site used to read the account facts alone, for every
-        /// store variant — which contradicted `unowned`'s own doc (*"a dev
-        /// store, or a caller that has no services yet"*) and produced a
-        /// state the gate can never leave. Debug and Release share a bundle
-        /// identity and therefore a Keychain (the A4 fence's own header), so
-        /// a Debug launch on a signed-in phone reads `account.variorum`
-        /// non-nil and answers `belongsToAnAccount` YES — while a dev-store
-        /// session NEVER configures sync (`allowsSync` false ⇒ `configure`
-        /// returns ⇒ no scheduler ⇒ `status.lastSuccessAt` stays nil
-        /// forever). The seed then paid a 20-second poll and declined, on
-        /// every empty-store Debug launch, permanently.
-        ///
-        /// **A store that can never sync belongs to no account for the
-        /// seed's purposes** — there is no corpus on its way, because there
-        /// is no transport to bring one. So `allowsSync` gates the account
-        /// question rather than being folded into the wait, which keeps
-        /// `SyncGate`'s two facts meaning exactly what they say and keeps
-        /// the REAL-store composition byte-identical (`allowsSync` is true
-        /// there, so the expression is the old one unchanged).
-        static func live(
-            allowsSync: @escaping @MainActor () -> Bool,
-            syncIsConfigured: @escaping @MainActor () -> Bool,
-            hasAccountSession: @escaping @MainActor () -> Bool,
-            hasSyncedCleanly: @escaping @MainActor () -> Bool
-        ) -> SyncGate {
-            SyncGate(
-                belongsToAnAccount: {
-                    allowsSync() && (syncIsConfigured() || hasAccountSession())
-                },
-                hasSyncedCleanly: hasSyncedCleanly)
-        }
     }
 
     /// How long the seed waits for a signed-in device's first clean round
@@ -231,7 +212,24 @@ enum MobileStarterJournal {
             // that currently looks empty.
             guard try await storeIsNew(session) else { return .storeNotNew }
 
-            if gate.belongsToAnAccount() {
+            // **THE A4 FENCE, SINGLE-SOURCED** (R2-3, the fix diff's own
+            // cold review). Only a REAL store can sync — `allowsSync` is
+            // derived from exactly this variant — so only a real store can
+            // have a corpus on its way, and only a real store may be made
+            // to wait for one. Asking the gate anywhere else was how an
+            // empty-store Debug launch on a signed-in phone (Debug and
+            // Release share a bundle identity and therefore a Keychain —
+            // the A4 fence's own header) paid a 20-second poll and then
+            // declined, permanently: a dev-store session never configures
+            // sync, so `status.lastSuccessAt` stays nil forever.
+            //
+            // Reading the variant HERE rather than folding a transport fact
+            // into the gate keeps `SyncGate`'s two facts meaning exactly
+            // what they say, and makes the unsafe pair — a real store whose
+            // gate answers "no account" — unconstructible rather than
+            // merely unused.
+
+            if storeVariant == .real, gate.belongsToAnAccount() {
                 guard await waitForFirstCleanRound(
                     gate: gate,
                     limit: firstRoundWait ?? Self.firstRoundWait,

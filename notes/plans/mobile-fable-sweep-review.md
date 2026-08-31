@@ -16,7 +16,7 @@ the end. Working tree left byte-identical except this file (the known
 
 | suite | claimed | **measured** |
 |---|---|---|
-| mobile | 582/93 green | **`Test run with 582 tests in 93 suites passed`, 2 known issues** (the two documented 4.5b diagnostic pins) — exact |
+| mobile | 582/93 green | **`Test run with 582 tests in 93 suites passed`, 2 known issues** (ONE documented 4.5b diagnostic pin — `MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`, whose single `withKnownIssue` block records two; corrected at R2-6, and grep-verified: it is the suite's only armed `withKnownIssue`) — exact |
 | core | 1453/154 | **`Test run with 1453 tests in 154 suites passed`** — exact |
 | Mac | 1843/312 (unverified since) | **NOT RUN, per the brief's own rule** — see the Mac-suite note below |
 
@@ -551,8 +551,10 @@ under this session's scratchpad; the simulator was deleted at the end.
 
 **Final suite:** `Test run with 588 tests in 93 suites passed after 125.844
 seconds with 2 known issues` — the 582/93 baseline plus this round's six pins,
-and the two known issues are the same two documented 4.5b diagnostic pins the
-sweep itself measured. `pipestatus` `0 0 0 0`.
+and the two known issues come from the ONE documented 4.5b diagnostic pin the
+sweep itself measured (`MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosed`
+`RatherThanReadAsAnAbsentDoor` — a single `withKnownIssue` block recording two
+issues; the "two pins" wording is corrected here at R2-6). `pipestatus` `0 0 0 0`.
 
 **Fence, verified before commit:** `git diff -- Sources/ App/Variorum/Shared
 App/Variorum/Variorum` is **EMPTY**. Zero `Sources/`, zero `Shared/`, zero
@@ -725,3 +727,81 @@ first fix brief. New pins proven red by behavioural revert with quoted
 output; R2-4 is a RECORD act (two single-guard reverts run and quoted, then
 restored). Append a WAVE 2 RESULTS section to this file; commit
 pathspec-limited; do not push.
+
+---
+
+# WAVE 2 RESULTS (the Opus fix session, 2026-08-30)
+
+**All seven items executed as one wave. Three code items, four record items,
+four new pins, every changed behaviour proven red by behavioural revert — and
+two of the reverts corrected a claim rather than confirming one.**
+
+**Environment of record:** worktree `~/dev/variorum-mobile`, branch `mobile` at
+`78af490`. Private simulator `Wave2-fix` (iPhone 17 Pro, iOS 26.2,
+`ApplicationAccessibilityEnabled` armed and verified `1`), private DerivedData
+under this session's scratchpad; the simulator was deleted at the end.
+
+**Final suite:** `Test run with 592 tests in 93 suites passed after 129.211
+seconds with 2 known issues` · `** TEST SUCCEEDED **` — the 588/93 baseline plus
+this wave's four pins. **The 2 known issues are R2-6's own subject, and the run
+proves R2-6 right:** both are recorded by the SINGLE test
+`anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor` (lines 497 and
+498 of its one `withKnownIssue` block) — *"passed after 0.455 seconds with 2
+known issues"*, one test, two issues.
+
+**Fence, verified before commit:** `git diff --name-only -- Sources/
+App/Variorum/Shared App/Variorum/Variorum "*.xcodeproj" "*.pbxproj"
+"*.entitlements" "*.plist"` is **EMPTY**. Zero `Sources/`, zero `Shared/`, zero
+`EditorBrain/`, zero Mac target, zero schema, zero build configuration. Nothing
+needed a fenced file, so nothing was reported as blocked; core and Mac suites
+were not run, by that fence's own argument. `Package.resolved` did NOT drift on
+this machine's runs, and was checked before the commit anyway (the standing note
+above).
+
+## Per-item dispositions
+
+| item | what landed | pin + its proven red | files |
+|---|---|---|---|
+| **R2-2** — both refusal roads let go of the keyboard | `file()`'s refused-mint arm and its dirty-autosave seal arm each drop focus at the point they return. **Text and `lastError` are untouched** (Q2's rule is the reason those roads skip `reset()` in the first place), and **all four `handOffCount == 0` sites are unmoved** — the counter must keep saying that nothing was filed. `reset()`'s doc gains the clause that the refusal roads carry the same rule by a different road | **TWO pins, one per arm**, both driven on the REAL mounted field through UIKit's responder API. `aRefusedMintAtALeavingLetsGoOfTheKeyboardToo` (ABORT-trigger world) — red by dropping `setFocused(false)` from the refused-mint arm: `✘ Expectation failed: !((field → <SwiftUI.VerticalTextView: …; text = 't...s' (length = 28)…>).isFirstResponder → true → true)` + `✘ !((box → MobileQuickNoteModel).isFocused → true → true)`, **and the seal pin stayed green in that same run**. `aLeavingWhoseKeystrokesWereRefusedLetsGoOfTheKeyboardToo` (the `lockPost` road) — red by dropping it from the `autosave?.isDirty` arm: `✘ !((field → …; text = 'b...t' (length = 29)…>).isFirstResponder → true → true)` + the `isFocused` twin. Restored, green | `MobileQuickNote.swift` · `MobileQuickNoteTests.swift` |
+| **R2-2 (recorded consequence)** | `open()` shares `file()`'s body, so a ⏎ or open-door press whose mint is REFUSED now drops the keyboard too. Stated at the code rather than discovered later: the gesture asked to leave the box for the note and could not, the error it leaves is the thing worth looking at, and her text is still in the box | *(behaviour note — carried by the two pins above)* | `MobileQuickNote.swift` |
+| **R2-3** — the fence is single-sourced at the variant | `seedIfNeeded` reads `if storeVariant == .real, gate.belongsToAnAccount()`; **`SyncGate` reverts to its two account facts** (`SyncGate.live` deleted); the call site composes the pre-F2 expression again; `unowned`'s doc and the file header say where the fence went and why. Real-store behaviour byte-identical; the `.dev` store never waits; **the unsafe pair (`.real` + a gate answering "no account" because a transport fact was folded in) is now unconstructible — the gate takes no transport fact at all** | **The four ORIGINAL gate pins ride green, adapted only as the fence forces:** each drives the ACCOUNT gate, so each now runs on the variant that consults it (`.dev` → `.real`; every one injects its own mark, so no defaults are touched and no claim moved). **NEW: `oneGateSeedsTheDevStoreAndDefersTheRealOne`** — one gate value, two variants, opposite outcomes. **THREE reverts run:** (a) drop `storeVariant == .real,` → `✘ aDevStoreThatCanNeverSyncSeedsWithoutWaiting … ↳ expected a seed, got .awaitingFirstSync` + the new pin's dev leg; (b) drop `gate.belongsToAnAccount()` → `✘ aDeviceWithNoAccountSeedsWithoutWaiting … failed after 30.038 seconds` (it spends the whole budget); (c) remove the gate consult entirely → `✘ theRealStoreCompositionStillDefersUntilSyncHasSpoken … (outcome → .seeded(readingID: …)) == .awaitingFirstSync`, plus `aSignedInDeviceDeclinesUntilItsFirstCleanRound`, `herCorpusArrivingDuringTheWaitCancelsTheSeed` (`books.count → 2`) and the new pin's real leg — **12 issues, the batch-5 MAJOR back in the room**. Restored, green | `MobileStarterJournal.swift` · `VariorumMobileApp.swift` · `MobileStarterJournalTests.swift` |
+| **R2-4** — the per-guard reverts, RUN | **A RECORD ACT, and the record it produced is a CORRECTION.** `MobileLivenessAuthority.swift` is **byte-identical to `HEAD`** (`git diff --quiet` on that path, verified after every revert) — it lives at `App/Variorum/VariorumMobile/Features/Shell/`, phone-local, not under `Shared/`. **Measured, against the finding's trace:** removing the post-FLUSH guard ALONE reds NOTHING — `✔ aGrantSupersededDuringItsFlushInstallsNothing passed after 0.014 seconds` · `✔ aGrantSupersededDuringItsRefreshInstallsNothing passed after 0.014 seconds` · `✔ Test run with 9 tests in 1 suite passed`. Removing the post-REFRESH guard alone reds exactly one — `✔ aGrantSupersededDuringItsFlush… passed` · `✘ aGrantSupersededDuringItsRefreshInstallsNothing … !((world.shelf).isLive → true → true)`. **So the two pins do NOT discriminate as traced:** on a `refresh: true` grant the guards sit in SERIES, and the second catches the first's bump, so the flush pin proves the PAIR and not its own arm | **NEW pin, to make the record's goal true rather than merely recorded:** `aRefreshlessGrantSupersededDuringItsFlushInstallsNothing` runs the `refresh: false` road — `register`'s production shape — where the flush guard is the only one there is. Red by removing that guard alone: `✘ !((world.shelf).isLive → true → true)` + `✘ !(typeEdit((world.shelf), …))`, **with both existing pins green in the same run**. Restored, green. Both existing pins' doc comments now name the revert that actually reds them | `MobileLivenessTests.swift` only |
+| **R2-5** — the adopt pin asserts the DECLINE | `adoptView` returns `runIfFree`'s Bool, `@discardableResult`, with the reason at the declaration: the door does not care (a declined second tap is not a refusal — P-2), a PIN does. The three pre-existing latch pins were **not churned** (the family NIT, recorded not acted on) | `twoTapsOnAdoptLeaveOnePreservationLens` now asserts `firstFlew && !secondFlew` beside the count. Red by pointing `adoptView` at `adoptViewOnce` directly: `✘ Expectation failed: !(secondFlew → <not evaluated>)` **and** `✘ (preservations → 2) == 1`. Restored, green | `MobileLenses.swift` · `MobileWriteLatchTests.swift` |
+| **R2-1** — PL-14(b) stops owing a discharged design session | The cell now reads that the archive/trash SEPARATION is **unbuilt** while its IA is **RULED** (*"Two rooms"*, QUESTIONS #84, 2026-08-30) — the design-session gate DISCHARGED, batch 6c — and says in one parenthetical what it corrects and why two adjacent ledger rows had disagreed | *(record work — no pin)* | `notes/MobileSoul.md` |
+| **R2-6** — one pin, two known issues | Both places corrected — the sweep's own baseline table and the FIX ROUND RESULTS line — each naming the single test and its single `withKnownIssue` block. Grep-verified: it is the suite's only ARMED `withKnownIssue` (`MobilePerfWalkTests`' `expectFlat(knownIssue:)` parameter has no call site passing it), and **this wave's own full-suite output proves it**: one test, "2 known issues" | *(record work — no pin; the final run is the measurement)* | `notes/plans/mobile-fable-sweep-review.md` |
+| **R2-7** — one `78.`, nothing renumbered | The CONFIRMED wrapper and the original entry are ONE `78.` block in the #77/#79 pattern (`… The original entry:** **May a journal-day deletion travel…`). **Nothing else in the file moved:** `git diff --stat` is `1 insertion(+), 2 deletions(-)`, and #76/#77/#79 are untouched. The bold markers were re-counted after the fold (10, even — the pre-fold blocks carried 6 + 4; a first attempt collapsed one pair and was caught by counting rather than by reading) | *(record work — no pin)* | `notes/QUESTIONS.md` |
+
+## Notes worth carrying
+
+- **R2-4 asked for a record and produced a correction, which is the whole point
+  of running reverts instead of tracing them.** The finding's parenthetical
+  (*"by trace they do discriminate"*) is FALSE for the shipped pins, and the
+  reason is structural rather than incidental: `takeLiveness(refresh: true)` puts
+  the two guards in series on one road, so the downstream one absorbs the
+  upstream one's bump and no assertion can tell which line caught it. The pair is
+  genuinely pinned (the joint revert reds both pins, as the first wave recorded);
+  the ARMS were not, until this wave added the refreshless road.
+- **Finding 7's third arm stays undriven, and now for a stated reason.**
+  Building the isolating pin, the natural target was `register` itself — the
+  production `refresh: false` caller. It cannot be asserted this way:
+  `MobileEditorViewModel.isLive` **defaults to `true`** (a screen with no
+  authority must be able to type) and `takeLiveness` stands down OTHERS, never
+  its own taker — so a superseded registration leaves the newcomer live *by
+  default*, indistinguishable through this surface from one that was granted.
+  Not a missing seam; an unobservable difference. Recorded at the pin.
+- **R2-3's red-on-old is not symmetric, and the asymmetry is worth keeping.**
+  Dropping the gate conjunct makes the condition MORE inclusive — every real
+  store waits — so it reds the "no account anywhere" pin by spending the entire
+  budget, not the deferral pins. The wave's first draft claimed the wrong revert
+  in a doc comment; running it caught that, and both doc comments now name the
+  revert that actually reds them.
+- **Adapting the four original gate pins from `.dev` to `.real` is the fence's
+  own consequence, not a weakening.** Each of those pins exists to drive the
+  ACCOUNT gate, and after R2-3 only a real store consults it — so on `.dev` they
+  would have gone on passing while asserting nothing, which is the green-over-
+  nothing class R2-5 is about. Every one injects its own mark, so none of them
+  touches this machine's defaults.
+- **One untracked file was present in the worktree and left strictly alone:**
+  `notes/plans/mobile-batch-6c-brief.md` (mtime 23:24, minutes before this
+  session's simulator was created — not this session's work). The commit is
+  pathspec-limited, so it could not be swept in.
