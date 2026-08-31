@@ -1188,6 +1188,13 @@ workbench page were EXCELLENT. So I've decided I need both."*
   ability to read."* (Direction B, adopted as a read-only mode: vertical/book-like; a click lands
   that sentence in INDEX already open; Index tracks position across Takes/Write/probably Blocks —
   the same scrolled-open-door mechanism as 13u item 17's read-view edit jump, built once.)
+  **Her sharpening (follow-up, verbatim): "for the read mode in each individual note, there should
+  also be a more minimal outline than 'index' for the read only mode"** — the note's Read mode
+  carries a MINIMAL companion outline (the book's small TOC-pane grammar), distinct from the full
+  Index mode. She also acknowledged the standing 13u defect in the same breath: *"i do know that
+  13u has to fix the defect that already exists in clicking somewhere in read mode not taking you
+  to the right location, but I think we have a good plan"* — the book-side jump fix stays 13u
+  item 17's; the note's Read click-through shares its mechanism.
 - **Mode-row canon consequence, recorded:** the note's mode row (R60–94; six modes, ⌘1–⌘6) GAINS
   Index and Read at her word — no existing tab is removed, so item 15's "the mode row stays"
   constraint survives as existing-tabs-stay. The field guide's "getting around" lesson enumerates
@@ -1248,7 +1255,11 @@ mode. Runs in Act 10 wave 2 IF it fits; else DEFERRED to 13u2 with the restyle c
 cohesive Book redesign** — verbatim: *"let's make usre that the index view for books + c (how the
 index view reconciles with the small outline pane) go together, since they're all UI changes in
 the same Book area, it should be a single cohesive book redesign."* Item 18 never splits across
-waves or phases; if it defers, it defers WHOLE.
+waves or phases; if it defers, it defers WHOLE. **Her sharpening (follow-up, verbatim): "i'd make
+it clear that i do like the more minimal outline to go along with the current modes"** — the
+book's small/minimal outline pane STAYS beside the current modes; the index-like view JOINS the
+Book area rather than replacing that pane. Two grains, deliberately: minimal outline as the
+companion, index as the full view.
 
 ---
 
