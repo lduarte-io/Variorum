@@ -425,7 +425,38 @@ final class ProtectionController {
         // it as always.
         if newMode.isDemanded { residentKey = key }
         persistDials()
+        // THE ESCROW/POSTURE COUPLING (ninth wave — memo §4, the one
+        // behavior change): the spare key follows the posture AT THE ACT,
+        // not merely at the next launch's reconcile — entering a demanded
+        // mode removes our own iCloud item (ownership-guarded, exactly the
+        // launch arm's semantics); returning to Auto re-lands the stored
+        // choice. The dial is untouched — it remembers her Auto choice.
+        await reconcileEscrowToPosture()
         return .changed
+    }
+
+    /// The coupling's act-time enforcement — the launch reconcile's escrow
+    /// arm, run with the CURRENT posture's effective value (same reads,
+    /// same writes, same off-main hop; nil leaves every projection alone,
+    /// exactly as at launch).
+    private func reconcileEscrowToPosture() async {
+        let effective = dials.effectiveEscrowOn
+        let resident = residentKey
+        let gate = self.gate
+        let guardSeam = self.guardSeam
+        let storeURL = configuration.storeURL
+        let outcome = await Task.detached(priority: .userInitiated) {
+            Self.reconcileEscrowOffMain(
+                escrowOn: effective, residentKey: resident,
+                gate: gate, guardSeam: guardSeam, storeURL: storeURL)
+        }.value
+        if let outcome {
+            escrowLandingFailed = outcome.landingFailed
+            escrowVerifiedLanded = outcome.verifiedLanded
+        }
+        // The arm can mint/save a fresh envelope; the projection follows
+        // the disk it just changed (the P2 doctrine).
+        refreshEnvelopeFacts()
     }
 
     /// 17h R3-6 — the serial off-main custody hop (`setMode`'s SecItem
@@ -526,9 +557,16 @@ final class ProtectionController {
     // MARK: - The escrow dial (R13p-6)
 
     /// Returns false with `lastError` worded on refusal.
+    ///
+    /// THE COUPLING (ninth wave — memo §4): the dial stores the
+    /// AUTO-posture choice; custody acts on the EFFECTIVE value. Under a
+    /// demanded posture the pane never offers this dial, but presets and
+    /// any future caller route through here too — an ON write then stores
+    /// the choice and lands nothing (the delete arm keeps the posture's
+    /// no-spare truth).
     @discardableResult
     func setEscrow(_ on: Bool) async -> Bool {
-        if on {
+        if on && !dials.mode.isDemanded {
             guard let key = currentKey() else {
                 lastError = Self.keyUnavailable
                 return false
@@ -651,7 +689,11 @@ final class ProtectionController {
             // inside one hop so nothing interleaves between them). The
             // resident key is MainActor state, read here and carried in;
             // the honesty flag lands back on the MainActor after.
-            let escrowOn = dials.escrowOn
+            // THE ESCROW/POSTURE COUPLING (ninth wave — memo §4): the
+            // reconcile acts on the EFFECTIVE value, so a demanded posture
+            // removes the spare at every ready launch and a return to Auto
+            // re-lands the stored choice. The dial itself is untouched.
+            let escrowOn = dials.effectiveEscrowOn
             let resident = residentKey
             let gate = self.gate
             let guardSeam = self.guardSeam
@@ -666,7 +708,7 @@ final class ProtectionController {
                 escrowVerifiedLanded = outcome.verifiedLanded
                 // R-pre13u-5: the author-run check's Console-side fact —
                 // "the reconcile reads its own item back" vs "re-writes".
-                logger.info("escrow reconcile: dial \(escrowOn ? "ON" : "OFF", privacy: .public) · item read back == current key: \(String(describing: outcome.verifiedLanded), privacy: .public) · wrote this pass: \(outcome.wrotePass, privacy: .public)")
+                logger.info("escrow reconcile: dial \(self.dials.escrowOn ? "ON" : "OFF", privacy: .public) · posture-effective \(escrowOn ? "ON" : "OFF", privacy: .public) · item read back == current key: \(String(describing: outcome.verifiedLanded), privacy: .public) · wrote this pass: \(outcome.wrotePass, privacy: .public)")
             }
             // P2: the escrow arm can set a foreign sidecar aside and mint
             // a fresh envelope; the projection (read above, BEFORE the

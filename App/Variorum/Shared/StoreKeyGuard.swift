@@ -17,11 +17,13 @@
 //                  whose key still releases silently is theater.
 //  · Passphrase  ⇒ NEITHER item exists — the typed passphrase (via the
 //                  envelope's wrap) is the only same-device road.
-//  The escrow item is orthogonal (its own dial) and is NEVER an open
-//  road: the app never consults it at open — it exists for RECOVERY on
-//  a machine that signed into the same iCloud (13x's adoption door),
-//  and under a demanded mode its presence is honestly worded as the
-//  same-machine bypass it is (`ProtectionCopy.escrowUnderDemandedMode`).
+//  The escrow item is NEVER an open road: the app never consults it at
+//  open — it exists for RECOVERY on a machine that signed into the same
+//  iCloud (13x's adoption door). Since the ninth wave's escrow/posture
+//  coupling (memo §4) it is no longer orthogonal to the modes: a
+//  DEMANDED mode removes it (the same-machine bypass the old
+//  `escrowUnderDemandedMode` caveat described can no longer exist —
+//  `ProtectionDials.effectiveEscrowOn` is the one rule).
 //
 //  PROMPT DISCIPLINE (the overnight rule, and the standing test rule):
 //  writing the gated item never prompts (delete-then-add — updating an

@@ -268,25 +268,35 @@ struct MobileProtectionSheet: View {
 
     // MARK: - Escrow (R13p-6, knot 8's ruled pair)
 
+    /// THE ESCROW/POSTURE COUPLING (ninth wave — memo §4; ONE posture per
+    /// account, the R-pre13u-8(f) parity rule): demanded modes do not OFFER
+    /// the spare — the same brain and the same sentences as the Mac's pane.
     private var escrowSection: some View {
         VStack(alignment: .leading, spacing: 0) {
-            sectionHeader("iCloud Keychain copy")
-            dialRow("Keep a copy of the key in iCloud Keychain",
-                    on: controller.dials.escrowOn) {
-                let next = !controller.dials.escrowOn
-                Task { _ = await controller.setEscrow(next) }
-            }
-            prose(controller.dials.escrowOn
-                  ? ProtectionCopy.escrowOn : ProtectionCopy.escrowOff)
-            if controller.dials.escrowOn {
-                if controller.escrowLandingFailed {
-                    alarm("The copy could not actually be saved — the Keychain refused "
-                          + "it. The dial is on, but no copy exists yet; your other "
-                          + "legs stand.")
+            sectionHeader("iCloud spare key")
+            if controller.dials.mode.isDemanded {
+                prose(ProtectionCopy.escrowNotOfferedUnderDemanded)
+                if controller.dials.escrowOn {
+                    prose(ProtectionCopy.escrowChoiceKeptNote)
                 }
-                prose(ProtectionCopy.escrowNeedsICloudKeychain)
-                if controller.dials.mode.isDemanded {
-                    alarm(ProtectionCopy.escrowUnderDemandedMode)
+            } else {
+                dialRow("Keep a spare key in iCloud Keychain",
+                        on: controller.dials.escrowOn) {
+                    let next = !controller.dials.escrowOn
+                    Task { _ = await controller.setEscrow(next) }
+                }
+                prose(controller.dials.escrowOn
+                      ? ProtectionCopy.escrowOn : ProtectionCopy.escrowOff)
+                if controller.dials.escrowOn {
+                    if controller.escrowLandingFailed {
+                        alarm("The copy could not actually be saved — the Keychain refused "
+                              + "it. The dial is on, but no copy exists yet; your other "
+                              + "legs stand.")
+                    }
+                    prose(ProtectionCopy.escrowNeedsICloudKeychain)
+                    // The compound warning (memo §3) rides the ON state here
+                    // exactly as on the Mac.
+                    prose(ProtectionShapes.compoundWarning)
                 }
             }
         }

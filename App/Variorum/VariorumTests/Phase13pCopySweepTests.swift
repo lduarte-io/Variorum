@@ -72,10 +72,17 @@ struct Phase13pCopySweepTests {
         #expect(ProtectionCopy.escrowOn != ProtectionCopy.escrowOff)
         #expect(ProtectionCopy.escrowOn.contains("iCloud"))
         #expect(ProtectionCopy.escrowOff.contains("unrecoverable"))
-        // And the two honesty riders the dial owes: what it needs to ride,
-        // and what it costs under a demanded gate.
+        // And the honesty riders the dial owes: what it needs to ride —
+        // and, SUPERSESSION (pre-13u ninth wave, memo §4 / R-pre13u-7(b)):
+        // the old `escrowUnderDemandedMode` caveat ("without passing the
+        // lock") described a spare key sitting beside a demanded gate,
+        // a state the escrow/posture coupling now removes — the successor
+        // sentence is her why-the-spare-isn't-offered ruling, pinned here
+        // in its place, never deleted.
         #expect(ProtectionCopy.escrowNeedsICloudKeychain.contains("nothing for it to ride"))
-        #expect(ProtectionCopy.escrowUnderDemandedMode.contains("without passing the lock"))
+        #expect(ProtectionCopy.escrowNotOfferedUnderDemanded.contains(
+            "wouldn't be providing extra protection"))
+        #expect(ProtectionCopy.escrowChoiceKeptNote.contains("returns as you left it"))
     }
 
     /// **THE NAMED NON-GOAL IS NAMED.** The plan declines exactly one threat

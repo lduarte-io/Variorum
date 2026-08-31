@@ -534,10 +534,14 @@ struct MobilePhoneProtectionCopyTests {
             for escrow in [true, false] {
                 let legs = ProtectionCopy.lossLegs(mode, escrowOn: escrow)
                 let sentence = ProtectionCopy.lossMath(mode, escrowOn: escrow)
-                if mode == .passphrase && !escrow {
+                if mode == .passphrase {
                     // The one arm that deliberately states the SHORT chain
                     // as prose (her own example, verbatim) rather than a
                     // list — and it must not claim an iCloud leg.
+                    // SUPERSESSION (ninth wave, memo §4): this arm now
+                    // covers BOTH escrow values — the escrow/posture
+                    // coupling means a passphrase-at-every-open library
+                    // carries no spare, whatever the stored Auto choice.
                     #expect(sentence.contains("IS enough"))
                     #expect(!sentence.contains("iCloud"))
                     continue
@@ -546,8 +550,11 @@ struct MobilePhoneProtectionCopyTests {
                     #expect(sentence.contains(leg),
                             "the sentence must name every way back in: \(leg)")
                 }
-                #expect(escrow == sentence.contains("iCloud"),
-                        "an iCloud leg is claimed only when the dial is on")
+                // SUPERSESSION (ninth wave, memo §4 — the coupling): an
+                // iCloud leg is claimed only when the dial is on AND the
+                // posture offers it (demanded modes never do).
+                #expect((escrow && !mode.isDemanded) == sentence.contains("iCloud"),
+                        "an iCloud leg is claimed only when the posture offers one")
             }
         }
     }

@@ -45,8 +45,22 @@ nonisolated enum StoreAtOpenMode: String, CaseIterable, Sendable, Codable {
 nonisolated struct ProtectionDials: Equatable, Sendable {
     var mode: StoreAtOpenMode = .auto
     /// R13p-6: the iCloud Keychain escrow copy. ON in Standard, OFF in
-    /// Locked-down.
+    /// Locked-down. **Since the ninth wave this stores the user's choice
+    /// for the AUTO posture** — custody acts on `effectiveEscrowOn`, and
+    /// the stored choice survives a stint in a demanded mode untouched.
     var escrowOn: Bool = true
+
+    /// **THE ESCROW/POSTURE COUPLING (pre-13u ninth wave — memo §4,
+    /// R-pre13u-7(b); the ONE behavior change the memo carries).** Ruled:
+    /// demanded at-open modes do not OFFER the iCloud spare, and escrow's
+    /// default follows the posture — her why-sentence, near-verbatim:
+    /// "anyone who has your computer password has your iCloud, so the
+    /// extra lock wouldn't be providing extra protection, so I don't
+    /// offer this." This is the ONE rule every custody act consults; the
+    /// stored `escrowOn` remembers the Auto-posture choice so a round
+    /// trip through an asking mode never clobbers it (the default follows
+    /// the posture; the choice is hers).
+    var effectiveEscrowOn: Bool { escrowOn && !mode.isDemanded }
     /// Re-lock when the Mac sleeps or the screen locks (demanded modes
     /// only — the dial's face renders only there).
     var relockOnSleepAndScreenLock: Bool = false
@@ -328,14 +342,25 @@ nonisolated enum ProtectionCopy {
         + "there is nothing for it to ride — the copy stays only on this "
         + "\(deviceName) until it's turned on in System Settings."
 
-    /// Honesty about the dial's interaction with a demanded gate: the
-    /// escrow copy has no biometric gate on it (Apple does not sync
-    /// access-controlled items — the spike's platform fact), so on THIS
-    /// Mac it is a silently-readable copy beside the gate.
-    static let escrowUnderDemandedMode =
-        "Note: the iCloud copy has no fingerprint gate on it — someone using this "
-        + "\(deviceName) as you could recover the key from iCloud Keychain without "
-        + "passing the lock. Locked-down turns it off for exactly that reason."
+    /// **THE COUPLING'S SENTENCE (ninth wave — memo §4, RULED; supersedes
+    /// the 13p knot-8 `escrowUnderDemandedMode` caveat).** The state that
+    /// caveat described — a silently-readable iCloud copy sitting beside a
+    /// demanded gate — can no longer exist: entering an asking mode removes
+    /// the spare. Her why-sentence is the copy, near-verbatim ("anyone who
+    /// has your computer password has your iCloud, so the extra lock
+    /// wouldn't be providing extra protection, so I don't offer this").
+    static let escrowNotOfferedUnderDemanded =
+        "While Variorum asks at open, the iCloud spare key isn't offered: anyone "
+        + "who has your computer password has your iCloud, so that spare wouldn't "
+        + "be providing extra protection. Your passphrase and recovery phrase are "
+        + "the ways back in here."
+
+    /// The coupling's second half, said only when a stored Auto choice
+    /// exists: nothing was clobbered — the default follows the posture,
+    /// the choice is kept.
+    static let escrowChoiceKeptNote =
+        "Your iCloud choice isn't lost — switch back to opening silently and it "
+        + "returns as you left it."
 
     // What each mode does and does not protect (knot 6's non-scary-but-
     // serious instruction, per mode).
@@ -387,7 +412,13 @@ nonisolated enum ProtectionCopy {
             // whole same-device story (the custody law, in words).
             legs = ["your encryption passphrase", "your recovery phrase (if saved)"]
         }
-        if escrowOn { legs.append("the copy in your iCloud Keychain") }
+        // THE COUPLING (ninth wave, memo §4): under a demanded mode no
+        // iCloud spare exists — the dial's stored choice is an AUTO-posture
+        // choice, and listing a leg the posture removed would be the exact
+        // almost-true the memo's §9c item 3 forbids.
+        if escrowOn && !mode.isDemanded {
+            legs.append("the copy in your iCloud Keychain")
+        }
         return legs
     }
 
@@ -404,11 +435,11 @@ nonisolated enum ProtectionCopy {
             return "Your ways back in: " + legs
                 + ". Lose every one of them and your writing is unrecoverable — by anyone."
         case .passphrase:
-            if escrowOn {
-                return "Your ways back in: " + legs + ". Forgetting the "
-                    + "passphrase is not enough to lose your writing while the "
-                    + "others stand — but it is the door you use every day."
-            }
+            // The old `escrowOn` arm ("not enough to lose your writing while
+            // the others stand") died with the ninth wave's coupling: a
+            // passphrase-at-every-open library carries NO iCloud spare, so
+            // the short chain below is the only truthful sentence. (Memo §4;
+            // the superseded wording lives in git history.)
             return "In this mode, forgetting your passphrase without the recovery "
                 + "phrase written down IS enough to lose your writing. Nothing on "
                 + "this \(deviceName) opens the library silently — that is the "

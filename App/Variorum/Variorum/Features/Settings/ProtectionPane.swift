@@ -286,34 +286,54 @@ struct ProtectionPane: View {
 
     // MARK: Escrow (R13p-6, knot 8's ruled pair)
 
+    /// THE ESCROW/POSTURE COUPLING (ninth wave — memo §4): demanded modes
+    /// do not OFFER the iCloud spare — her why-sentence stands where the
+    /// dial would, and the stored Auto choice is named as kept. The old
+    /// `escrowUnderDemandedMode` caveat described a state (spare beside a
+    /// demanded gate) that can no longer exist and is superseded.
+    @ViewBuilder
     private var escrowSection: some View {
-        Section("iCloud Keychain copy") {
-            Toggle("Keep a copy of the key in iCloud Keychain", isOn: Binding(
-                get: { controller.dials.escrowOn },
-                set: { on in Task { _ = await controller.setEscrow(on) } }))
-            Text(controller.dials.escrowOn
-                 ? ProtectionCopy.escrowOn : ProtectionCopy.escrowOff)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-            if controller.dials.escrowOn && controller.escrowLandingFailed {
-                Text("The copy could not actually be saved — this Mac's Keychain "
-                     + "refused it (the app's current signing can't reach the "
-                     + "iCloud-synced keychain). The dial is on, but no copy "
-                     + "exists yet; your other legs stand.")
-                    .font(.caption)
-                    .alarmVoice()
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            if controller.dials.escrowOn {
-                Text(ProtectionCopy.escrowNeedsICloudKeychain)
+        Section("iCloud spare key") {
+            if controller.dials.mode.isDemanded {
+                Text(ProtectionCopy.escrowNotOfferedUnderDemanded)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
-                if controller.dials.mode.isDemanded {
-                    Text(ProtectionCopy.escrowUnderDemandedMode)
+                if controller.dials.escrowOn {
+                    Text(ProtectionCopy.escrowChoiceKeptNote)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            } else {
+                Toggle("Keep a spare key in iCloud Keychain", isOn: Binding(
+                    get: { controller.dials.escrowOn },
+                    set: { on in Task { _ = await controller.setEscrow(on) } }))
+                Text(controller.dials.escrowOn
+                     ? ProtectionCopy.escrowOn : ProtectionCopy.escrowOff)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                if controller.dials.escrowOn && controller.escrowLandingFailed {
+                    Text("The copy could not actually be saved — this Mac's Keychain "
+                         + "refused it (the app's current signing can't reach the "
+                         + "iCloud-synced keychain). The dial is on, but no copy "
+                         + "exists yet; your other legs stand.")
                         .font(.caption)
                         .alarmVoice()
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                if controller.dials.escrowOn {
+                    Text(ProtectionCopy.escrowNeedsICloudKeychain)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    // The compound warning (memo §3, ships in copy): iCloud
+                    // holding both the copies and the key means one account
+                    // is everything — a read sentence, not a refusal.
+                    Text(ProtectionShapes.compoundWarning)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
