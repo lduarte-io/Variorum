@@ -953,8 +953,29 @@ final class MobileQuickNoteModel {
     }
 
     /// Back to an empty box, owning nothing.
+    ///
+    /// **AND WITHOUT THE CARET** (the Fable sweep's finding 6, 2026-08-30 —
+    /// the verdict §62 item 3 deliberately left to fresh eyes). A box that
+    /// was FOCUSED BUT NEVER MINTED takes `file()`'s first guard — `reset()`
+    /// and out, no hand-off, nothing announced — and `handOffCount` is the
+    /// only signal the face drops the keyboard on. So tap the box, type
+    /// nothing, tap Library, and the keyboard stood over the Library on a
+    /// shelf nobody could see: the same visible symptom as §59's MAJOR 3,
+    /// from a different state. (The tab bar really is reachable with the
+    /// keyboard up — batch 5's own keyboard-avoidance finding lifts it onto
+    /// the keyboard — so this is an ordinary gesture, not a corner.)
+    ///
+    /// **The fix is at the FOCUS seam, never at the counter.** The shipped
+    /// `handOffCount == 0` contract is RIGHT — nothing was handed off, and
+    /// bumping it would make the box claim a filing it never made. What is
+    /// true instead is that a leaving is a leaving of the SHELF SURFACE,
+    /// focus included: `reset()` runs on every road the box lets go by (the
+    /// never-minted empty box, the withdrawal, the completed hand-off), so
+    /// the caret goes with it here, and the face releases first responder
+    /// when the model says the box no longer holds it.
     private func reset() {
         cancelMintClock()
+        setFocused(false)
         // A boundary restore queued for the next turn would otherwise land
         // AFTER this, writing a filed note's text back into an empty box.
         restoreTask?.cancel()
@@ -1060,6 +1081,15 @@ struct MobileQuickNoteBox: View {
         .onChange(of: model.handOffCount) { _, _ in
             // The box has let go; the keyboard should let go with it.
             focused = false
+        }
+        .onChange(of: model.isFocused) { _, wants in
+            // The other direction of the same seam (the Fable sweep's
+            // finding 6): the model can also say the box has let go of the
+            // caret — which `reset()` now does on EVERY road out, including
+            // the never-minted empty box that announces no hand-off at all.
+            // Only the drop is honoured: raising the keyboard is always the
+            // user's own act, never a model's.
+            if !wants { focused = false }
         }
         .onChange(of: model.pendingOpen) { _, _ in
             if let postID = model.takePendingOpen() { onOpen(postID) }

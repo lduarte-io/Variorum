@@ -162,6 +162,41 @@ enum MobileStarterJournal {
         /// device's, so the seed proceeds on the two local guards alone.
         static let unowned = SyncGate(
             belongsToAnAccount: { false }, hasSyncedCleanly: { true })
+
+        /// **THE PRODUCTION COMPOSITION, AND IT HONOURS THE A4 FENCE**
+        /// (the Fable sweep's finding 2, 2026-08-30).
+        ///
+        /// The call site used to read the account facts alone, for every
+        /// store variant — which contradicted `unowned`'s own doc (*"a dev
+        /// store, or a caller that has no services yet"*) and produced a
+        /// state the gate can never leave. Debug and Release share a bundle
+        /// identity and therefore a Keychain (the A4 fence's own header), so
+        /// a Debug launch on a signed-in phone reads `account.variorum`
+        /// non-nil and answers `belongsToAnAccount` YES — while a dev-store
+        /// session NEVER configures sync (`allowsSync` false ⇒ `configure`
+        /// returns ⇒ no scheduler ⇒ `status.lastSuccessAt` stays nil
+        /// forever). The seed then paid a 20-second poll and declined, on
+        /// every empty-store Debug launch, permanently.
+        ///
+        /// **A store that can never sync belongs to no account for the
+        /// seed's purposes** — there is no corpus on its way, because there
+        /// is no transport to bring one. So `allowsSync` gates the account
+        /// question rather than being folded into the wait, which keeps
+        /// `SyncGate`'s two facts meaning exactly what they say and keeps
+        /// the REAL-store composition byte-identical (`allowsSync` is true
+        /// there, so the expression is the old one unchanged).
+        static func live(
+            allowsSync: @escaping @MainActor () -> Bool,
+            syncIsConfigured: @escaping @MainActor () -> Bool,
+            hasAccountSession: @escaping @MainActor () -> Bool,
+            hasSyncedCleanly: @escaping @MainActor () -> Bool
+        ) -> SyncGate {
+            SyncGate(
+                belongsToAnAccount: {
+                    allowsSync() && (syncIsConfigured() || hasAccountSession())
+                },
+                hasSyncedCleanly: hasSyncedCleanly)
+        }
     }
 
     /// How long the seed waits for a signed-in device's first clean round

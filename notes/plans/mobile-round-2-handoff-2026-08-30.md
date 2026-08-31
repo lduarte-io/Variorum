@@ -44,7 +44,7 @@ This file is the delta and the work inventory.
 | branch | `mobile`, pushed |
 | **mobile suite** | **582 / 93 green** (independently re-run at cutover, not inherited) |
 | core | **1453 / 154** — baseline exact |
-| Mac | **1843 / 312** — baseline exact; unverified since the fix round touched no Mac file (`git status` over `Variorum`/`Shared`/`VariorumTests` was empty) |
+| Mac | **1843 / 312** — baseline exact; unverified since the fix round touched no Mac file (`git status` over `Variorum`/`Shared`/`VariorumTests` was empty). **⚠️ EXPECT A KNOWN RED THAT IS NOT THIS ROUND'S** (added at the Fable sweep, finding 5): the `fa522d6` merge brought `main`'s 13p-fix keychain work into this tree, and QUESTIONS **#91** — written by the same session — records `CustodyHandoverTests.theE2EESurfaceNamesTheSymptomWhenAWriteLandsUnreadable` failing on CLEAN `main`, deliberately not fixed here and routed to the Mac session. It may already be fixed by a later 13p-fix ladder round; **unverified here**. Do not spend the which-kind-of-red time this repo keeps paying — check #91 first |
 | hygiene | zero `Sources/` (**vs the MERGE-BASE**), zero `Sync/`, zero `EditorBrain/`, no build config, marker **7** |
 | `main` | **moved 8 commits during the session** — the 13p-fix ladder, a tech-debt sweep, the pre-13u round plan. **No merge attempted; the post-13u merge is deliberately the next session's, not this one's** |
 
@@ -227,7 +227,7 @@ scheduled is in exactly one row below.** Nothing is in both.
 | **4.5d** | The keyboard bar's geometry | ✅ | ✅ · **fix round DONE 2026-08-30** — and its finding was that **13 of 14 fixes already existed uncommitted**, so the right act was to fix nothing |
 | **5** | **The shelf layout** R26/R27/R27b — her twice-stated complaint — **plus her two live refinements** (one-line box; the writing room made a pinned guarantee across 2,408 states) | ✅ | ✅ |
 | **6a** | **The Block History twin** — closes the **deleted-take dark window** (deleted takes were invisible *and* un-restorable on the phone) | ✅ | ✅ |
-| **—** | **PL-10(b)** the duplicate-book-name guard — the phone had zero sites where the Mac gates at five. **A UI courtesy gate, NOT a data defect** (author, 2026-08-30; no uniqueness exists on `reading.name`) | ✅ | ✅ (was 4.5d's) |
+| **—** | **PL-10(b)** the duplicate-book-name guard — the phone had zero sites where the Mac gates at five. **A UI courtesy gate, NOT a data defect** (author, 2026-08-30; no uniqueness exists on `reading.name`) | ✅ | ✅ **reviewed at the Fable sweep (2026-08-30)** — `mobile-fable-sweep-review.md` §2b discharge. *(Corrected there, finding 4: this cell used to read "✅ (was 4.5d's)", which the same document contradicted at §11.2 — 4.5d's cold review PREDATES this build work, so the wiring, the `BookNameCopy` hoist, `excluding:` and its three pins had no review at all until the sweep.)* |
 | **—** | **The handback checklist**, actually run — 13l's four all landed; **nothing returned to mobile** | ✅ | n/a |
 | **—** | **The mobile app's FIRST architecture review** — 0 BLOCKER · 2 MAJOR · 4 MINOR · 2 NIT | ✅ | n/a (it *is* a review) |
 | **—** | **The archive/trash design session** — 4 IA options; **she ruled "Two rooms"** | ✅ | n/a |

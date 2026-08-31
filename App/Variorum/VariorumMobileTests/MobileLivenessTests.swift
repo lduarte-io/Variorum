@@ -15,6 +15,63 @@ import UIKit
 import VariorumCore
 @testable import VariorumMobile
 
+/// **THE SEAM THE INTERIOR-ARM PINS RIDE.** `AutosaveCoordinator` notifies
+/// its settle observers SYNCHRONOUSLY at the tail of `flushNow`, so a
+/// closure installed here runs while `takeLiveness` is still inside its
+/// `await` — before the guard that follows it. That is a deterministic
+/// stand-in for "a second tab tap landed mid-flight", and it is the only
+/// honest one available: a real second tap would be a timing race, and a
+/// pin about ordering must not itself depend on timing.
+///
+/// `at` counts settles within one grant: 1 is `takeLiveness`'s own flush,
+/// 2 is the flush `refreshTakesFromStore` opens with.
+@MainActor
+private final class SupersedeOnSettle {
+    private let at: Int
+    private let editors: MobileLivenessAuthority
+    private var seen = 0
+    private(set) var fired = false
+
+    init(at: Int, editors: MobileLivenessAuthority) {
+        self.at = at
+        self.editors = editors
+    }
+
+    func fire() {
+        seen += 1
+        guard seen == at, !fired else { return }
+        fired = true
+        editors.beginHandoff()
+    }
+}
+
+/// Two editors on one post, one per tab — the alive-stacks shape every
+/// liveness pin needs. The library editor registers last, so it holds the
+/// pen when the world is handed back.
+@MainActor
+private func twoTabWorld(
+    _ session: AppSession
+) async throws -> (
+    editors: MobileLivenessAuthority,
+    shelf: MobileEditorViewModel, shelfStorage: NSTextStorage,
+    library: MobileEditorViewModel
+) {
+    let post = try await session.runner.run { ops in
+        try ops.createPost(title: "two tabs", profile: .blog)
+    }
+    _ = try await session.runner.run { ops in
+        try ops.newBlock(in: post.id, text: "Base.", at: .end)
+    }
+    let (shelf, shelfStorage) = makeEditor(session, postID: post.id)
+    let (library, _) = makeEditor(session, postID: post.id)
+    let editors = MobileLivenessAuthority()
+    await editors.register(shelf, tab: .shelf)
+    await shelf.loadOnce()
+    await editors.register(library, tab: .library)
+    await library.loadOnce()
+    return (editors, shelf, shelfStorage, library)
+}
+
 @MainActor
 @Suite("Mobile liveness — the authority (S3 ladder fix)")
 struct MobileLivenessTests {
@@ -115,6 +172,90 @@ struct MobileLivenessTests {
             #expect(editors.live === libraryEditor)
             #expect(libraryEditor.isLive)
             #expect(!shelfEditor.isLive)
+        }
+    }
+
+    // MARK: The INTERIOR arms (the Fable sweep's finding 7)
+
+    /// **A GRANT SUPERSEDED WHILE IT IS SUSPENDED INSTALLS NOTHING.**
+    ///
+    /// The two pins above drive the AT-ENTRY `isCurrent` check: they mint
+    /// both tokens up front and run the grants sequentially, so no newer
+    /// request ever arrives mid-flight. The sweep's finding 7 named that
+    /// honestly — the record says the token is *"checked at entry AND after
+    /// every suspension"* and only the entry half was pinned. These two pins
+    /// close the other half, one arm each.
+    ///
+    /// **Ordering is expressed through a SEAM, never a timing race** (the
+    /// A2 pins' own discipline, applied to a harder shape). The seam is the
+    /// coordinator's `onSettled`, which fires SYNCHRONOUSLY at the tail of
+    /// `flushNow` — i.e. while `takeLiveness` is still inside its `await`
+    /// and has not reached the guard that follows it. Bumping the generation
+    /// from there is exactly "a second `beginHandoff` landed mid-flight",
+    /// with nothing left to chance: no sleeps, no yields, no assumption
+    /// about how long a database write takes.
+    ///
+    /// This one drives the arm after the FLUSH (`MobileLivenessAuthority`'s
+    /// first post-suspension guard). The superseded grant must not hand the
+    /// pen over — the second wrong end state the authority's header forbids,
+    /// a HIDDEN editor holding it, is exactly what an unguarded resume
+    /// produces here.
+    ///
+    /// **Red-on-old:** remove the two post-suspension `guard isCurrent`
+    /// lines and the abandoned grant calls `noteLivenessGranted()`.
+    @Test func aGrantSupersededDuringItsFlushInstallsNothing() async throws {
+        try await withEditorWorld { session, _ in
+            let world = try await twoTabWorld(session)
+            let editors = world.editors
+            #expect(!world.shelf.isLive && world.library.isLive,
+                    "the library editor holds the pen before the grant")
+
+            // The shelf's grant is requested…
+            let token = editors.beginHandoff()
+            // …and a NEWER request lands while it is suspended at its flush.
+            let bump = SupersedeOnSettle(at: 1, editors: editors)
+            let observer = world.shelf.autosave.observe(onSettled: bump.fire)
+            defer { world.shelf.autosave.stopObserving(observer) }
+
+            await editors.takeLiveness(world.shelf, refresh: true, handoff: token)
+
+            #expect(bump.fired, "the seam really fired — this pin proves nothing otherwise")
+            #expect(!world.shelf.isLive,
+                    "the superseded grant must not hand the pen to the tab she left")
+            #expect(!world.library.isLive,
+                    "and the stood-down editor stays down — at most one is the law")
+            #expect(
+                !typeEdit(
+                    world.shelf, world.shelfStorage,
+                    range: NSRange(location: 0, length: 0), replacement: "x"),
+                "the abandoned grant's editor gate refuses, as a stood-down surface must")
+        }
+    }
+
+    /// The SECOND interior arm: superseded during the REFRESH, after the
+    /// flush guard has already passed. `refreshTakesFromStore` opens with a
+    /// `flushNow` of its own, so the same seam fires a second time — inside
+    /// the refresh, between the two guards. Bumping there exercises the arm
+    /// the first pin cannot reach.
+    ///
+    /// **Red-on-old:** the same two lines.
+    @Test func aGrantSupersededDuringItsRefreshInstallsNothing() async throws {
+        try await withEditorWorld { session, _ in
+            let world = try await twoTabWorld(session)
+            let editors = world.editors
+
+            let token = editors.beginHandoff()
+            let bump = SupersedeOnSettle(at: 2, editors: editors)
+            let observer = world.shelf.autosave.observe(onSettled: bump.fire)
+            defer { world.shelf.autosave.stopObserving(observer) }
+
+            await editors.takeLiveness(world.shelf, refresh: true, handoff: token)
+
+            #expect(bump.fired,
+                    "the refresh's own flush settled — the second seam really fired")
+            #expect(!world.shelf.isLive,
+                    "a grant superseded after its refresh installs nothing either")
+            #expect(!world.library.isLive)
         }
     }
 

@@ -5776,6 +5776,14 @@ rule: **explicit-path staging while another session is live**, which this
 batch followed and which is exactly what kept the damage to four empty
 renames.
 
+**AND ONE CONSEQUENCE THIS ACCOUNT OWED, LANDED HERE 2026-08-30** (batch 6a's
+own cold review asked for it at m6, and the Fable sweep's O2 routed it): the
+deletion of `OriginPeek.swift` went into `a232455` **without its replacement**,
+which arrived only with batch 6a's commit — so **the MAC TARGET COULD NOT
+COMPILE from `a232455` to `16ba929^`**. A bisect through that window fails to
+build, and it fails for a reason unrelated to whatever is being bisected. The
+full account is `notes/plans/mobile-round-2-orchestrator-handoff.md` §11.3.
+
 ### What batch 6a deliberately did NOT build
 
 - **The archive/trash IA separation on the phone** (§69.5) — her explicit

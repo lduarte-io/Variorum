@@ -1023,6 +1023,62 @@ struct MobileQuickNoteTests {
         }
     }
 
+    /// **AN EMPTY, FOCUSED BOX LEAVING DROPS THE KEYBOARD WITH IT** — the
+    /// Fable sweep's finding 6, which is §62 item 3's fresh-eyes verdict.
+    ///
+    /// The state: she taps the box, types nothing, and taps Library. The
+    /// never-minted empty box takes `file()`'s FIRST guard — `reset()` and
+    /// out — so no hand-off is announced, and `handOffCount` was the only
+    /// signal the face dropped the keyboard on. The keyboard therefore stood
+    /// over the Library, on a shelf now behind it: the same visible symptom
+    /// as §59's MAJOR 3, from a different state. (The tab bar IS reachable
+    /// with the keyboard up — batch 5's own keyboard-avoidance finding lifts
+    /// it onto the keyboard — so this is an ordinary gesture.)
+    ///
+    /// **The contract that must NOT flip rides in this same pin:**
+    /// `handOffCount` stays 0. Nothing was handed off, and a counter that
+    /// claimed otherwise would make the box lie about a filing it never
+    /// made. The fix belongs at the focus seam, and this asserts both halves
+    /// together so a later change cannot trade one for the other.
+    ///
+    /// Driven on the REAL mounted field through UIKit's own responder API,
+    /// because the whole finding is about first-responder state — a model
+    /// flag alone would prove nothing about the keyboard (§0's rule).
+    ///
+    /// **Red-on-old:** drop `setFocused(false)` from `reset()` (or the
+    /// `onChange(of: model.isFocused)` release from the face) and the field
+    /// is still first responder after the leaving.
+    @Test func anEmptyFocusedBoxLeavingLetsGoOfTheKeyboard() async throws {
+        try await withEditorWorld { session, db in
+            let box = quietBox(session)
+            // Hosted WITH a ruled writing height — the shelf's real shape,
+            // where the box's two states (collapsed / open) are live.
+            let surface = HostedSurface(MobileQuickNoteBox(
+                model: box, tokens: VoiceTokens.terminalLight,
+                writingHeight: 320, onOpen: { _ in }))
+            await surface.settle()
+
+            let field = try #require(textInput(in: surface),
+                                     "the REAL field is mounted — this pin is worthless without it")
+            #expect(field.becomeFirstResponder(), "she taps into the box")
+            await surface.settle()
+            #expect(field.isFirstResponder, "the caret really is in the box")
+            #expect(box.isFocused, "…and the face told the model so")
+
+            // …types nothing, and taps Library. A tab switch is a leaving.
+            await box.fileOnLeaving()
+            await surface.settle()
+
+            #expect(!field.isFirstResponder,
+                    "the box let go, so the keyboard let go — no keyboard over the Library")
+            #expect(!box.isFocused)
+            #expect(box.handOffCount == 0,
+                    "and NOTHING was handed off — the shipped contract, unflipped")
+            let posts = try await livePosts(db)
+            #expect(posts.isEmpty, "an empty box mints nothing, as ever")
+        }
+    }
+
     // MARK: - The pure brains
 
     /// Churn is characters removed + characters inserted, equal weight

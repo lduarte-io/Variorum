@@ -89,9 +89,21 @@ the author asked to get ahead of.
 > so "the phone calls it at zero" was true of the tree read here and false at
 > `HEAD` by the time this was dispositioned. Driven, a double tap on that door
 > mints **one** book. The finding's CLASS is real and was acted on: a shared
-> `MobileWriteLatch` now guards the three doors where a second flight mints an
-> uncaught row. The per-door verdict table, the traced mechanisms and the
+> `MobileWriteLatch` now guards the **four** doors where a second flight mints
+> an uncaught row. The per-door verdict table, the traced mechanisms and the
 > proven reds are in `notes/plans/mobile-major-fix-round-record.md` (A1).
+>
+> **⚠️ AMENDED 2026-08-30 by the Fable sweep (finding 1): this banner said
+> THREE, and three was one short.** `MobileLenses.adoptView` — a door on this
+> review's own twenty-file list (*"`MobileLenses` (5)"*) that the fix round's
+> verdict table never classified — mints an uncaught row too: its door is a
+> persistent plain `Button { Task { … } }` that does not dismiss, it renders
+> while `viewDiverges` (true for the whole first flight), it captures its picks
+> before its first suspension, and `adoptPicksPreservingChosen` inserts its
+> preservation `Lens` unconditionally on a table with no uniqueness. A double
+> tap left TWO "chosen until …" lenses. **Latched at the Opus fix round the
+> same day, red-on-old proven (`preservations → 2`).** The class argument
+> stands; its claimed coverage did not.
 
 ### MAJOR 1 — Twenty write doors have no in-flight latch; the create-book door mints duplicates on a double tap
 

@@ -89,6 +89,29 @@ final class MobileLensesModel {
     /// Refusals + outcomes, one voice (the sheet renders it).
     private(set) var status: String?
 
+    /// **ONE ADOPT AT A TIME** (the Fable sweep's finding 1, 2026-08-30).
+    /// `adoptView`'s door is a persistent plain `Button { Task { … } }` in
+    /// `saveDoors` — not an alert action, not a `UIMenu` row, so nothing
+    /// dismisses it on the first tap — and it renders for as long as
+    /// `viewDiverges`, which stays true for the whole of the first flight
+    /// (the peeks end only at the chosen-caught-up self-heal, AFTER that
+    /// flight's `refreshTakesFromStore`). `adoptView` captures its picks
+    /// before its first suspension, so a second tap inside the store
+    /// round-trip captures the SAME picks — and the op beneath,
+    /// `adoptPicksPreservingChosen`, inserts its preservation lens
+    /// UNCONDITIONALLY, before any pick validation, on a table with no
+    /// uniqueness. Nothing under the door can notice the second flight, so
+    /// a double tap left TWO auto-named "chosen until …" lenses in her list.
+    /// Byte-for-byte the mints-a-second-row class the latch exists for.
+    ///
+    /// Scoped to `adoptView` deliberately: `saveIntoActiveLens`'s writes are
+    /// an upsert plus a clear over one lens's rows — they converge, so a
+    /// second flight lands the same state and a latch would only hide a tap
+    /// that changed nothing. `saveCurrentView` and the rename door live
+    /// behind `.alert` action buttons, which dismiss on the first tap and
+    /// are outcome-safe by their host.
+    private let adoptLatch = MobileWriteLatch()
+
     init(session: AppSession, postID: String, editor: MobileEditorViewModel? = nil) {
         self.session = session
         self.postID = postID
@@ -284,6 +307,10 @@ final class MobileLensesModel {
     /// refresh delivery, and the lens session ends (✓ ends the peek,
     /// scaled up). Refuses under the seal in the standing wording.
     func adoptView() async {
+        await adoptLatch.runIfFree { await self.adoptViewOnce() }
+    }
+
+    private func adoptViewOnce() async {
         let picks = displayedDivergences
         guard !picks.isEmpty else { return }  // P-2: the door only renders divergent
         status = nil

@@ -307,6 +307,81 @@ struct MobileStarterJournalTests {
         }
     }
 
+    // MARK: The A4 fence inside the gate (the Fable sweep's finding 2)
+
+    /// **A STORE THAT CAN NEVER SYNC MUST NOT WAIT FOR SYNC.**
+    ///
+    /// Debug and Release share a bundle identity and therefore a Keychain,
+    /// so a DEV-store launch on a signed-in phone reads `account.variorum`
+    /// non-nil — while a dev-store session never configures sync at all
+    /// (`allowsSync` false ⇒ `configure` returns ⇒ no scheduler ⇒
+    /// `status.lastSuccessAt` nil forever). The pre-fix call site passed the
+    /// account facts alone, so that composition paid the full 20-second poll
+    /// and answered `.awaitingFirstSync` on EVERY empty-store Debug launch,
+    /// permanently: the starter Journal could never seed there, and each
+    /// launch carried a background poll loop for nothing.
+    ///
+    /// The gate now folds the A4 fence in: no transport means no corpus on
+    /// its way, so the store belongs to no account for the seed's purposes.
+    ///
+    /// **Red-on-old:** drop `allowsSync() &&` from `SyncGate.live` and this
+    /// waits out its budget and returns `.awaitingFirstSync`.
+    @Test func aDevStoreThatCanNeverSyncSeedsWithoutWaiting() async throws {
+        try await withEditorWorld { session, db in
+            let mark = Mark()
+            // Signed in on this device (the shared Keychain), sync REFUSED
+            // by the store variant, and therefore no round can ever land.
+            let gate = MobileStarterJournal.SyncGate.live(
+                allowsSync: { false },
+                syncIsConfigured: { false },
+                hasAccountSession: { true },
+                hasSyncedCleanly: { false })
+            #expect(!gate.belongsToAnAccount(),
+                    "a store with no transport belongs to no account here")
+
+            let outcome = await MobileStarterJournal.seedIfNeeded(
+                session: session, storeVariant: .dev, gate: gate,
+                firstRoundWait: .milliseconds(150),
+                pollInterval: .milliseconds(10),
+                loadMark: mark.load, saveMark: mark.save)
+
+            guard case .seeded = outcome else {
+                Issue.record("expected a seed, got \(outcome)")
+                return
+            }
+            let books = try await db.read { db in try Queries.readings(db) }
+            #expect(books.count == 1)
+        }
+    }
+
+    /// The other direction, so the fence cannot be mistaken for a blanket
+    /// exemption: the REAL store's composition is byte-identical to the one
+    /// the four gate pins above drive — `allowsSync` is true there, so a
+    /// signed-in real store still defers until sync has spoken.
+    @Test func theRealStoreCompositionStillDefersUntilSyncHasSpoken() async throws {
+        try await withEditorWorld { session, db in
+            let mark = Mark()
+            let gate = MobileStarterJournal.SyncGate.live(
+                allowsSync: { true },
+                syncIsConfigured: { false },
+                hasAccountSession: { true },   // a session whose chain has not composed
+                hasSyncedCleanly: { false })
+            #expect(gate.belongsToAnAccount(),
+                    "the unsafe direction is still covered — a signed-in device waits")
+
+            let outcome = await MobileStarterJournal.seedIfNeeded(
+                session: session, storeVariant: .real, gate: gate,
+                firstRoundWait: .milliseconds(120),
+                pollInterval: .milliseconds(10),
+                loadMark: mark.load, saveMark: mark.save)
+
+            #expect(outcome == .awaitingFirstSync)
+            #expect(!mark.seeded)
+            let books = try await db.read { db in try Queries.readings(db) }
+            #expect(books.isEmpty, "nothing was minted into her account's store")
+        }
+    }
+
     /// The mark is scoped per store variant — debug and release share one
     /// defaults domain, so an unscoped key would let a dev-store seed
     /// suppress her real store's (the `IdleCommitScheduler` precedent).

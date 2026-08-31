@@ -536,3 +536,68 @@ Commit pathspec-limited (`git commit -- <paths>` — a bare commit publishes
 the whole index) with the standing trailer; do NOT push. Append a "FIX
 ROUND RESULTS" section to THIS file with per-item dispositions before your
 final message.
+
+---
+
+# FIX ROUND RESULTS (the Opus fix session, 2026-08-30)
+
+**All ten items executed as one R28 unit. Four code items, six record items,
+six new pins, every bug-class fix proven red by behavioural revert.**
+
+**Environment of record:** worktree `~/dev/variorum-mobile`, branch `mobile` at
+`caa79ef`. Private simulator `Opus-fix-round` (iPhone 17 Pro, iOS 26.2,
+`ApplicationAccessibilityEnabled` armed and verified `1`), private DerivedData
+under this session's scratchpad; the simulator was deleted at the end.
+
+**Final suite:** `Test run with 588 tests in 93 suites passed after 125.844
+seconds with 2 known issues` — the 582/93 baseline plus this round's six pins,
+and the two known issues are the same two documented 4.5b diagnostic pins the
+sweep itself measured. `pipestatus` `0 0 0 0`.
+
+**Fence, verified before commit:** `git diff -- Sources/ App/Variorum/Shared
+App/Variorum/Variorum` is **EMPTY**. Zero `Sources/`, zero `Shared/`, zero
+`EditorBrain/`, zero schema, no build-configuration file. Nothing needed a
+fenced file, so nothing was reported as blocked. Core and Mac suites were NOT
+run, by that fence's own argument.
+
+## Per-item dispositions
+
+| item | what landed | pin + its proven red | files |
+|---|---|---|---|
+| **F1** — latch the lenses adopt door | `MobileLensesModel` gains its own `adoptLatch`; `adoptView` becomes the latched wrapper over a new `adoptViewOnce`. `saveIntoActiveLens` deliberately left unlatched (its upsert-and-clear writes converge — stated at the declaration) | **`MobileWriteLatchTests.twoTapsOnAdoptLeaveOnePreservationLens`.** Red by removing the latch (`adoptView` calling `adoptViewOnce` directly): `✘ recorded an issue at MobileWriteLatchTests.swift:266:13: Expectation failed: (preservations → 2) == 1`. Restored, green | `MobileLenses.swift` · `MobileWriteLatchTests.swift` |
+| **F1 (records)** | the fix round's A1 gains a verdict-table row for `adoptView`, the fourth adoption is named beside the three, the **universal sentence is struck and corrected in place** (with the rule it leaves behind: *a class argument may be stated as a class argument and never as coverage*), the seventeen becomes sixteen, and the `commitNow`-safe-only-by-its-host warning is written for batch 6b/9. The architecture review's MAJOR-1 banner reads **four** doors and carries the amendment | *(record work — no pin)* | `mobile-major-fix-round-record.md` · `mobile-architecture-review.md` |
+| **F2** — B1's gate honours the A4 fence | new `SyncGate.live(allowsSync:syncIsConfigured:hasAccountSession:hasSyncedCleanly:)` folds the fence into `belongsToAnAccount` (`allowsSync() && (isConfigured() ‖ hasAccount())`); the call site composes through it. **`SyncGate`'s two facts keep meaning exactly what they say**, and the REAL-store reading is byte-identical to the old expression. The four existing `MobileStarterJournalTests` gate pins ride **unmodified** | **`aDevStoreThatCanNeverSyncSeedsWithoutWaiting`** (+ its companion `theRealStoreCompositionStillDefersUntilSyncHasSpoken`, which holds the unsafe direction). Red by dropping `allowsSync() &&`: `✘ Expectation failed: !((gate → SyncGate(…)).belongsToAnAccount() → true)` and `✘ Issue recorded ↳ expected a seed, got .awaitingFirstSync`. Restored, green | `MobileStarterJournal.swift` · `VariorumMobileApp.swift` · `MobileStarterJournalTests.swift` |
+| **F6** — the empty-focused-box tab switch drops focus | fixed at the **focus seam**, not the counter: `reset()` now calls `setFocused(false)` (it runs on every road the box lets go by — the never-minted empty box, the withdrawal, the completed hand-off), and the face releases first responder on `onChange(of: model.isFocused)` when the model says the box no longer holds it. **Only the drop is honoured** — raising the keyboard stays the user's own act. The shipped `handOffCount == 0` contract did NOT flip and is asserted inside the same pin | **`MobileQuickNoteTests.anEmptyFocusedBoxLeavingLetsGoOfTheKeyboard`** — driven on the REAL mounted field through UIKit's own responder API, because the finding is about first-responder state. Red by dropping `setFocused(false)` from `reset()`: `✘ Expectation failed: !((field → <SwiftUI.VerticalTextView: …>).isFirstResponder → true → true)` and `✘ Expectation failed: !((box → MobileQuickNoteModel).isFocused → true → true)`. Restored, green | `MobileQuickNote.swift` · `MobileQuickNoteTests.swift` |
+| **F7** — the interior-arm liveness pin | **ATTEMPTED AND LANDED — both arms, deterministically.** TWO pins, `aGrantSupersededDuringItsFlushInstallsNothing` and `aGrantSupersededDuringItsRefreshInstallsNothing`, plus the `SupersedeOnSettle` seam and a `twoTabWorld` helper. **No production change** — `MobileLivenessAuthority.swift` is byte-identical to `HEAD`; the guards were already right and are now driven | Red by removing **both** post-suspension `guard isCurrent(token)` lines: `✘ aGrantSupersededDuringItsFlushInstallsNothing … !((world.shelf).isLive → true → true)` and `!(typeEdit(world.shelf, …))` — *the abandoned grant's editor ACCEPTED her keystroke, which is the hidden-pen end state the authority exists to forbid* — and `✘ aGrantSupersededDuringItsRefreshInstallsNothing … !((world.shelf).isLive → true → true)`. Restored, green | `MobileLivenessTests.swift` only |
+| **F3** — the parity ledger catches up | PL-11's still-owed list **strikes (e)**, replaced by the delivered account naming both live leaving roads; PL-14's status cell now records **(d)** the Block History twin and **(g)** the LR2-4 version-blind labels as DELIVERED (batch 6a), with its own remaining list restated | *(record work — no pin)* | `notes/MobileSoul.md` |
+| **F4** — the status table stops overstating | §7.1's PL-10(b) review cell reads *"✅ reviewed at the Fable sweep (2026-08-30) — `mobile-fable-sweep-review.md` §2b discharge"*, and names what it corrects (4.5d's cold review predates the build work; §11.2 said so and the table did not) | *(record work — no pin)* | `mobile-round-2-handoff-2026-08-30.md` |
+| **F5** — the §1 Mac cell carries the #91 caveat | the Mac row now warns that the merged tree carries #91's known-failing `CustodyHandoverTests` red from `main` — main's, routed there, possibly already fixed by a later 13p-fix round, **unverified here** — so a fresh session checks #91 before spending the which-kind-of-red time | *(record work — no pin)* | `mobile-round-2-handoff-2026-08-30.md` |
+| **F8** — QUESTIONS #90's over-equation | the *"MINOR 1 **is** 13u item 8's O(N²) row"* clause is replaced with the precision: MINOR 1 is `applyDifferential`, both platforms — **a different, unreported site** — covered only by the row's sweep-the-class-to-completion clause, never by fixing the row's named `planVisibleTakeEdit` example | *(record work — no pin)* | `notes/QUESTIONS.md` |
+| **O1** — the stale next-free marker | the mid-file *"Next free number: #83"* is replaced by a note explaining what it was and where it went; the real marker now sits at the **END** of the file reading **#92**, with #83 recorded as permanently unused so nobody fills it and creates two numbering histories | *(record work — no pin)* | `notes/QUESTIONS.md` |
+| **O2** — §70's staging-incident account | the correction batch 6a's review (m6) asked for lands **in §70**: the `OriginPeek.swift` deletion was committed without its replacement, so the **Mac target could not compile from `a232455` to `16ba929^`** and a bisect through that window fails to build for an unrelated reason. Points at the orchestrator handoff §11.3, which carries the full account (verified against it before writing) | *(record work — no pin)* | `mobile-round-2.md` |
+
+## Notes worth carrying
+
+- **F7 was not declined, and the reason it did not need to be is worth
+  keeping.** The brief allowed a decline if the ordering could not be made
+  deterministic, and a real second tap racing a real database write would
+  have been exactly the timing race the A2 pins' own discipline forbids. The
+  seam that made it deterministic is `AutosaveCoordinator.observe(onSettled:)`:
+  it fires **synchronously at the tail of `flushNow`**, i.e. while
+  `takeLiveness` is still inside its `await` and has not reached the guard
+  that follows. And because `refreshTakesFromStore` opens with a `flushNow`
+  of its own, the SAME seam fires a second time — inside the refresh, between
+  the two guards — so a settle-counting observer reaches **both** interior
+  arms with no sleeps, no yields, and no assumption about how long a write
+  takes. Finding 7's third arm (`register`'s self-minted token) is unchanged
+  and still traced-sound.
+- **What F1's correction leaves behind for the next reviewer**, stated in the
+  record rather than only here: sixteen unlatched files remain un-traced, and
+  the class argument covering them is now labelled as a class argument. One of
+  them, `MobileBlockHistory.commitNow`, is safe **only by its host** — its one
+  caller is a dismissing `UIMenu` row — so a Block History commit BUTTON in
+  batch 6b/9 needs the latch on the same day it ships.
+- **F6's fix deliberately does not touch `handOffCount`.** Both halves are
+  asserted in one pin so a later change cannot trade the focus release for a
+  counter bump: nothing was handed off, and a counter claiming otherwise would
+  make the box lie about a filing it never made.
