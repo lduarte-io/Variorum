@@ -878,3 +878,521 @@ ZERO changes under `Sources/`, `App/Variorum/Shared/`,
 `App/Variorum/Variorum/` (the Mac target), `EditorBrain/`, schema/migrations,
 build configs; `Package.resolved` untouched. No item's trace ran through
 `planVisibleTakeEdit` — 13u1 owns that neighbourhood.
+
+---
+
+# ROUND 2 — the FOCUSED re-review of the fix wave
+
+**Reviewer:** a fresh cold reviewer with zero implementation context.
+**Date:** 2026-08-31.
+**Target:** the wave's diff `ad88752..06d6163` (one commit), on branch
+`mobile` in the `~/dev/variorum-mobile` worktree. Round 1's full-batch
+clean bills stand; this pass is the FIXES and what they touched.
+
+## What I ran
+
+| act | result |
+|---|---|
+*[removed for publication]*
+| `ApplicationAccessibilityEnabled` | written and **read back `1`** |
+| derived data | private `-derivedDataPath` at `<scratchpad>/dd-round2` |
+| **FULL MOBILE SUITE** (from `App/Variorum/`), on the pristine final tree BEFORE any revert | `✘ Test run with 678 tests in 99 suites passed after 321.406 seconds with 2 known issues.` / `** TEST SUCCEEDED **` |
+| runner restarts | **ZERO** (`grep -c "Restarting after unexpected exit"` = 0) |
+| the load-flaky perf pin | `✔ typingAtTheViewportHoldsThePerKeystrokeBudgetAt100k() passed after 1.219 seconds` — **did not red; no isolated re-run needed** |
+| the 2 known issues | the same documented diagnostic, `MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`, which records issues BY DESIGN |
+| THREE production reverts (mine — R-R2-1 = the wave's R-W1, R-R2-2 = its R-W1b, R-R2-3 = its R-W2) | run, quoted below |
+| TWO temporary PROBE tests (mine, `ZZRound2Probes.swift`) | run, quoted below, **file deleted** |
+
+**Hygiene.** My copies live in a UNIQUELY named
+`<scratchpad>/45c-round2-prerevert/`; the FIVE stale copy dirs from other
+batches (`prerevert/`, `45c-prerevert/`, `45c-coldreview/`,
+`45c-wave-prerevert/`, `fixwave-prerevert/`) were neither read nor
+written. Every restore verified by `diff` **and** sha256:
+`MobileLivenessAuthority.swift` = `a4bef847…`,
+`MobileEditorViewModel.swift` = `156d904d…`, both matching the copies I
+took before touching anything; `git status --porcelain` empty afterwards,
+and `MobileLivenessTests` re-run green on the restored tree
+(`✔ Test run with 17 tests in 1 suite passed after 0.569 seconds`).
+`Package.resolved` untouched. No Release build, no install, no commit, no
+push. The real store was never touched; the live Mac app was never quit.
+Tree left byte-identical apart from this file.
+
+## Severity counts
+
+**BLOCKER 0 · MAJOR 0 · MINOR 3 · NIT 2**
+
+**No round 3 is triggered.** Both MAJORs are genuinely closed — I
+reproduced their reds myself, and the fixes are the right shape. What I
+found is one behaviour the wave's new sentence introduced, one
+justification that claims more than it proves, and one deferral left
+without an owner.
+
+---
+
+# FINDINGS
+
+## MINOR R2-1 — the authority's NEW sentence outlives the note it was about: after a Put back and a successful re-grant, the masthead still says *"This note was deleted…"* while she is typing in the note
+
+**Files:** `MobileLivenessAuthority.swift:244–247` (`refuseOverTombstone`'s
+`editor.report(…)`, added by this wave) with
+`MobileEditorViewModel.swift:299–304` (`noteLivenessGranted`, which clears
+nothing) and the sticky `statusMessage` convention at `:87–89`.
+**Label: MEASURED** (probe below).
+
+### Mechanism, traced then measured
+
+`statusMessage` is sticky by design: it is cleared only by an explicit
+`report(nil)`, and there are exactly three such sites — rename (`:1036`),
+seal (`:1151`) and entry date (`:1187`). **Nothing on the grant road
+clears it.** `noteLivenessGranted()` sets `isLive` and hands the keyboard
+back; `adoptHeader`'s restore branch sets `isEditable`; `ingest` /
+`applyProjection` repaint the surface. None of them touches the status
+line, and typing does not either.
+
+So the sequence **MAJOR 1's own fix now makes possible** ends in a false
+sentence:
+
+1. she deletes the note from a Library row;
+2. she taps to Shelf — the authority refuses and **now speaks**
+   (`aGrantForAKnownTombstoneStopsBeforeDoingAnyStoreWork` and
+   `aRefusedGrantLeavesHerWordsOnScreenAndSaysWhy` both pin that);
+3. she taps back to Library and Puts the note back from the Trash;
+4. she taps to Shelf — the re-confirming arm heals everything: the pen
+   returns, `noteIsGone` is false, the refresh brings her words back, the
+   gate accepts her keystroke…
+5. …and the masthead still reads **"This note was deleted — if it's still
+   in the Trash (30 days), put it back there to keep writing."**
+
+### The probe (mine, on the shipped tree — everything else in it passed)
+
+```
+PROBE-A refusal spoken: This note was deleted — if it's still in the Trash (30 days), put it back there to keep writing.
+PROBE-A status AFTER the heal: This note was deleted — if it's still in the Trash (30 days), put it back there to keep writing.
+✘ probeTheRefusalSentenceSurvivesThePutBackAndTheReGrant() … Expectation failed: (shelf.statusMessage → "This note was deleted — if it's still in the Trash (30 days), put it back there to keep writing.") == nil
+✘ Test probeTheRefusalSentenceSurvivesThePutBackAndTheReGrant() failed after 0.129 seconds with 1 issue.
+```
+
+The probe's other five expectations — `editors.live === shelf`,
+`isLive`, `!noteIsGone`, the words back on screen, and a `typeEdit` that
+is ACCEPTED — all passed. So this is isolated to the sentence: a working,
+live, editable note wearing a refusal about itself.
+
+### Apportioning honestly
+
+**The CLASS is one batch older than this wave.** The gate's own refusal
+(`MobileEditorViewModel.swift:1409–1412` → `refuse(…)` at `:2148–2149`)
+is equally sticky and equally survives a Put back — that site is
+4.5c-phone's, not the wave's. **What the wave added is a second producer,
+on the road it simultaneously taught to heal**, which is what makes the
+contradiction reachable without a keystroke into a tombstone first.
+
+**Severity by this round's own calibration:** round 1 rated *"the refusal
+promises the Trash for a note that has left it"* (MINOR 5) a MINOR — the
+same class, a sentence that is not true of the note in front of her. This
+is that class again, so MINOR it is. Nothing is lost and she can write.
+
+**Fix shape (one line, and it composes with the wave's own shape):** clear
+the refusal where the grant succeeds — in the authority, immediately
+before `editor.noteLivenessGranted()`:
+`if editor.statusMessage == MobileEditorViewModel.deletedNoteRefusal { editor.report(nil) }`
+— narrow on purpose, so a grant never eats an unrelated receipt. **Pin:**
+extend `aNotePutBackFromTheTrashGetsThePenBackOnTheNextTabTap` with a
+refusing tap before the Put back and a `statusMessage == nil` assertion
+after the heal (red on today's tree, per the probe above). Whoever fixes
+it should decide at the same time whether the GATE's producer wants the
+same treatment; one clearing rule covers both.
+
+---
+
+## MINOR R2-2 — the post-refresh belt's *"cannot be stale"* proof claims more than it proves, and the pin defending it drives exactly the stale case: a nil DELIVERY refuses a note that is LIVE in the store
+
+**Files:** `MobileLivenessAuthority.swift:216–224` (the comment and the
+belt) with the pin `aDeliveryLandingInsideTheRefreshStillStopsTheGrant`
+(`MobileLivenessTests.swift:807`). **Label: MEASURED** (probe below).
+
+### Mechanism
+
+The belt's written justification is:
+
+> *"A `noteIsGone` reading taken HERE cannot be stale — the read above just
+> adopted the store's own answer through the same door, so a true value can
+> only have come from a delivery that landed after it."*
+
+"Landed after" is not "observed after", and **the gap between the two is
+this file's own load-bearing premise**: `confirmNoteStillLive`'s docstring
+says it (`MobileEditorViewModel.swift:368–371` — *"a delivery whose latency
+is real, and a tab tap landing inside that latency would take the pen on a
+stale answer"*), and MAJOR 1 was argued from exactly that asymmetry. A nil
+header delivery **observed before** the confirm can **land after** it,
+inside the refresh; the belt then refuses a live note, stands the surface
+down, and speaks a refusal that is false.
+
+**The wave's own pin drives that world.** Its docstring is explicit that
+*"the store row itself is left alone"* — nothing is ever deleted in it —
+and the delivery is injected by hand at settle 2. It then reports the
+outcome as *"the grant stopped on the fresher reading"*. It was not
+fresher; there was nothing to be fresher than. The pin is a good pin of the
+BELT's mechanism and a poor witness for the belt's JUSTIFICATION, and the
+docstring should not be the thing a future session reads as proof of
+freshness.
+
+### The probe (mine — the same world, read back from the store's side)
+
+```
+PROBE-B store header is nil? false
+PROBE-B live? false status: This note was deleted — if it's still in the Trash (30 days), put it back there to keep writing.
+✘ probeTheBeltRefusesALiveNoteOnAStaleNilDelivery() … Expectation failed: (editors.live → nil) != nil
+```
+
+`Queries.containerHeader` returns a live row for the whole test, and the
+grant is refused anyway.
+
+### Why MINOR and not MAJOR
+
+Two things bound it, and both are the wave's own work:
+
+- **Reachability is sub-millisecond.** `noteIsGone` can only become true
+  from a header answer, and the only writer that can carry a value older
+  than our read is the observation. So the false refusal needs a delete
+  and a Put back straddling one delivery's flight, with a tab tap inside
+  it. A human cannot produce that.
+- **It is no longer terminal.** MAJOR 1's fix is precisely what heals it:
+  the next grant's entry arm re-confirms rather than refusing, so the
+  surface recovers on the following tap. The wave replaced a terminal
+  staleness with a transient one — which is a real improvement, just not
+  the absence the comment asserts.
+
+**Fix shape (either is fine, and the second is prettier):**
+(a) **record-only** — soften the claim to what holds (*"a nil reading here
+is either genuinely fresh or a delivery observed before the read; the
+latter is a sub-ms window and self-heals on the next grant, which
+re-confirms"*) and re-word the pin's narrative so it stops describing a
+fabricated delivery as fresher; or (b) **apply the wave's own medicine** —
+have the belt `confirmNoteStillLive()` instead of refusing on a delivery,
+exactly as MAJOR 1 taught the entry arm to. It is one indexed read on a
+road that has already done two, and it would make the belt's guarantee
+match its comment.
+
+---
+
+## MINOR R2-3 — the disclosed decline's own residual has NO OWNER: it lives in a production comment and a plan file that closes, while the SAME wave routed its sibling deferral to a durable owned row
+
+**Files:** `MobileEditorViewModel.swift:634–648` (the comment) and this
+file's FIX WAVE RESULTS (line ~729). **Label: READ-ONLY traced + verified.**
+
+### The decline's trace: SOUND, with two qualifications the record does not carry
+
+I verified it rather than taking it:
+
+- `deleteNote()` really does report on the **editor's own**
+  `statusMessage` — `report(RecoveryCopy.movedToTrashReceipt(.note))` at
+  `MobileEditorViewModel.swift:1082` — and
+  `MobileDeletionTests.deletingANoteMovesItToTheTrashAndSaysSo:62` pins
+  that receipt. So an `adoptHeader`-sited report WOULD overwrite it when
+  the observation's nil lands. **The property is real.**
+- **Qualification (i):** on that road the screen is dismissing —
+  `MobileNoteActions.swift:145–148` calls `dismiss()` and `onDeleted()`
+  the moment `deleteNote()` returns true — so the clobber is a flash under
+  an animation on a surface that is leaving, not a state she is left
+  standing in. The Library-row road cannot clobber at all
+  (`MobileLibraryViewModel.swift:385` reports on the LIBRARY model).
+- **Qualification (ii):** the pin could not have caught it either way.
+  `start()` is production-only (`MobileEditorViewModel.swift:502`), and no
+  headless world calls it, so no observation runs in tests. "Traced and
+  removed" is the honest description; nothing was measured.
+
+**I do not dispute the decline.** Speaking only where the refusal is
+decided is the cleaner rule, and the wave was right to record what it
+leaves rather than to widen quietly.
+
+### The finding is the ASYMMETRY
+
+The residual — *the SYNC road (deleted on the Mac while she is looking at
+it here) still drops the keyboard with nothing on screen* — is recorded in
+exactly two places: a comment inside `adoptHeader`, and the fix-wave
+section of **this file**, which closes with the batch. It is **not** in
+`mobile-round-2.md`'s ledger, **not** on the handoff's owned
+leftover-backlog row, and **not** in `KnownIssuesAndTechDebt.md`
+(grep-verified). Meanwhile the same wave, for MINOR 4, wrote a full clause
+onto the owned row in `mobile-round-2-handoff-2026-08-30.md` §7.2 — the
+right instinct, applied to one deferral and not its sibling.
+
+CLAUDE.md's rule is that deliberately-deferred work names an owner, and a
+17-entry or a project row satisfies it exactly as a phase number does. A
+code comment is durable but only reaches someone already editing
+`adoptHeader`; it is not a work item anybody will schedule.
+
+**My judgment, for the orchestrator to adjudicate:** the record + comment
+is **not enough**. One clause is owed, and the natural home is the one the
+wave already used — the owned row in
+`mobile-round-2-handoff-2026-08-30.md` §7.2 (or a numbered row in
+`mobile-round-2.md`'s ledger) — naming the residual and the design
+question it needs answered: *how does a relinquish tell "this surface
+deleted it" from "someone else did"?* That question is genuinely a design
+act, which is an argument for giving it an owner, not for leaving it
+unowned.
+
+---
+
+## NIT R2-4 — "Both refusal sites" is stale by one: there are THREE, and all three do route through `refuseOverTombstone`
+
+The fix-wave section says *"Both refusal sites now route through one
+private `refuseOverTombstone(_:)`"*. The sites are
+`MobileLivenessAuthority.swift:188` (the entry arm), `:210` (the
+authoritative read) and `:222` (the belt the same fix added). **All three
+verified routed**, and `standDownEveryone` now has exactly one caller
+(`refuseOverTombstone`), so the reporting road really is single. Only the
+count is wrong, and it is wrong because the wave grew a third site after
+writing the sentence.
+
+*(Noted and not raised: `tabDidBecomeVisible`'s else-branch at `:144–145`
+open-codes `standDownEveryone`'s two lines instead of calling it. That is
+pre-existing and arguably right — that road is not a tombstone refusal and
+must not speak.)*
+
+## NIT R2-5 — the shipped count correction repeats a false reason
+
+Record §4's correction reads *"the file holds 10 `@Test`s and **no
+`arguments:`**"*. There ARE three `arguments:` lines in
+`MobileLensesTests.swift` (`:52`, `:373`, `:456`) — all three are **GRDB
+SQL arguments**, none on a `@Test` macro, so the **10 is correct** and the
+correction's conclusion stands. The reason as written is not, and a future
+count check that re-runs `grep -c 'arguments:'` will trip on it. Same
+check re-derived for the other three suites: liveness 17, takes 19,
+deletion 13, lenses 10 — every `arguments:` occurrence is SQL.
+
+---
+
+# CLEAN BILL — the seven areas I was told to push hardest on
+
+### 1. MAJOR 1's fix — **CLOSED, correctly, and the arm order opens nothing**
+
+- **A2 token discipline on the added await: correct, and better than
+  merely correct.** `guard isCurrent(token)` sits between the await and
+  the refusal (`:186` before `:187`), so a superseded grant **cannot even
+  speak** — it returns having installed nothing. Same shape at both other
+  sites. The one thing that DOES install state across the await is
+  `confirmNoteStillLive`'s own `adoptHeader`, which round 1 already
+  adjudicated benign; it stays benign post-fix, and I re-derived why in
+  both directions: `adoptHeader`'s restore branch requires `isLive`, so a
+  superseded surface either has `isLive == false` already (the superseding
+  grant's stand-down ran first) or gets `isEditable = false` from that
+  stand-down a moment later. No leak either way.
+- **The Put-back pin really drives the shipped road** — I reproduced its
+  red myself (below), and the pin deliberately drives NO delivery after
+  the restore, which is the defect's precondition rather than an omission.
+- **ARM ORDER — no window re-opened.** Round 1's probe closed a
+  *terminal* staleness; re-confirming first cannot re-open it. A delete
+  landing between the entry confirm and the grant is still caught by the
+  authoritative read after the flush (`:207`) and then by the belt
+  (`:221`). The window that DID widen is a delete committing between the
+  authoritative read and the grant — it now spans `refreshTakesFromStore`
+  — and its outcome is unchanged from pre-fix: the observation's relinquish
+  drops the keyboard just after the grant. No byte can move (round 1's
+  MINOR 3 measurement), and the belt catches it whenever the delivery
+  arrives in time. **The narrow leftover** is a delete committing between
+  the read and the refresh's own store read, which would render an empty
+  projection and then grant — strictly narrower than the pre-fix behaviour
+  the fix replaced, so a reduction, not a regression. Recorded here rather
+  than raised.
+
+**RED ON OLD — my revert R-R2-1** (production; the wave's R-W1 exactly —
+the short-circuiting `guard !editor.noteIsGone else { refuseOverTombstone(editor); return }`
+restored, everything else post-fix):
+
+```
+✘ aNotePutBackFromTheTrashGetsThePenBackOnTheNextTabTap() … Expectation failed: (editors.live → nil) === (shelf → VariorumMobile.MobileEditorViewModel)
+✘ … Expectation failed: (shelf → …).isLive → false
+✘ … Expectation failed: !((shelf → …).noteIsGone → true → true)
+✘ … Expectation failed: (shelfStorage.string → "").contains("Base.")
+✘ … Expectation failed: typeEdit((shelf → …), (shelfStorage → ), range: ({1, 0}), replacement: "X")
+✘ … Expectation failed: try await storedText(db, variantID: minted.variant.id) == "BXase."
+✘ Test aNotePutBackFromTheTrashGetsThePenBackOnTheNextTabTap() failed after 5.735 seconds with 6 issues.
+✘ Test run with 17 tests in 1 suite failed after 6.380 seconds with 6 issues.
+```
+
+**Identical to the wave's quoted R-W1, assertion for assertion**, and the
+other 16 stayed green.
+
+### 2. MAJOR 2's fix, three halves — **all three hold**
+
+- **The authoritative read above the refresh: `renderFull([])` cannot run
+  for a gone note on ANY road into the grant.** `takeLiveness` has exactly
+  two callers — `register` (`refresh: false`, so no refresh at all) and
+  `tabDidBecomeVisible` (`refresh: true`, and the refresh is now below the
+  read). Verified against the wipe's actual mechanism:
+  `applyProjection`'s `.fullRender` arm with an empty non-delivery
+  projection → `renderFull(new, preserveTail: true)` → `tail = new.isEmpty ? "" : nil`
+  (`MobileEditorViewModel.swift:751–760`). The 25-odd OTHER callers of
+  `refreshTakesFromStore` (takes browser, structural, comments, lenses,
+  block history, undo) are not grant roads and are untouched by this fix —
+  correctly, since round 1 apportioned the blanking as pre-existing.
+  **A delivery-shaped empty projection is separately safe**: deliveries
+  never take a render arm (`.refetchFresh`), which is why the sync road
+  does not blank her surface.
+- **The ONE `refuseOverTombstone`: yes — and it is THREE sites, not two**
+  (NIT R2-4), all routed, with `standDownEveryone` reduced to a single
+  caller. `MobileWriteView.swift:295–302` renders `statusMessage`, so the
+  sentence reaches the screen with no new face, exactly as claimed.
+- **The non-stale belt: the mechanism is right, the PROOF is overstated**
+  — MINOR R2-2. It is a real belt closing a real window; what it cannot
+  claim is the absence of the other one.
+
+**RED ON OLD — my revert R-R2-3** (the wave's R-W2: the authoritative read
+moved back below the refresh, taking the belt with it):
+
+```
+✘ aRefusedGrantLeavesHerWordsOnScreenAndSaysWhy() … Expectation failed: (shelfStorage.string → "").contains("Base.")
+✘ Test aRefusedGrantLeavesHerWordsOnScreenAndSaysWhy() failed after 0.029 seconds with 1 issue.
+✘ aDeliveryLandingInsideTheRefreshStillStopsTheGrant() … Expectation failed: (editors.live → VariorumMobile.MobileEditorViewModel) == nil
+✘ … Expectation failed: !((model → …).isLive → true → true)
+✘ … Expectation failed: (model.statusMessage → nil) == (MobileEditorViewModel.deletedNoteRefusal → "This note was deleted — if it's still in the Trash (30 days), put it back there to keep writing.")
+✘ Test aDeliveryLandingInsideTheRefreshStillStopsTheGrant() failed after 2.663 seconds with 3 issues.
+✘ Test run with 17 tests in 1 suite failed after 3.356 seconds with 4 issues.
+```
+
+**`shelfStorage.string → ""` — round 1's measured wipe, reproduced a
+third time**, and matching the wave's quote exactly. The other 15 stayed
+green.
+
+### 3. THE DISCLOSED DECLINE — **trace sound, removal clean, residual UNOWNED**
+
+The trace verified (with two qualifications the record should carry) and
+the removal is complete: `adoptHeader` gained a comment and nothing else,
+there is no orphaned helper, and the app's only `refuseOverTombstone`
+caller set is the authority's three sites. The judgment on the residual is
+**MINOR R2-3** above; the short version for the orchestrator is that **the
+code comment plus a closing plan file is not an owner**, and the wave
+itself demonstrated the right remedy one item earlier.
+
+### 4. MINOR 6's number — **attribution VERIFIED by trace AND by running it**
+
+The wave says `settles` moved 2 → 1 because MAJOR 2's reorder means a
+tombstone is discovered before `refreshTakesFromStore` opens its own
+flush. Traced first: pre-wave the fall-through ran `flushNow` (settle 1) →
+`refreshTakesFromStore`'s own `flushNow` (settle 2) → confirm → refuse;
+post-wave it runs `flushNow` (settle 1) → confirm → refuse, and the
+refresh never happens. Then measured, with my revert **R-R2-2** (the
+wave's R-W1b — the entry arm replaced by a fall-through):
+
+```
+✘ aGrantForAKnownTombstoneStopsBeforeDoingAnyStoreWork() … Expectation failed: (settles → 1) == 0
+✘ Test aGrantForAKnownTombstoneStopsBeforeDoingAnyStoreWork() failed after 0.039 seconds with 1 issue.
+✘ Test run with 17 tests in 1 suite failed after 0.967 seconds with 1 issue.
+```
+
+**`settles → 1`, exactly as recorded, with the story that produces it.**
+The pin is honest coverage in its new shape, and the docstring now names
+both reverts that red it.
+
+### 5. Pin quality — **no green-over-nothing in the three new pins**
+
+- `aNotePutBackFromTheTrashGetsThePenBackOnTheNextTabTap` guards its own
+  precondition (`#expect(shelf.noteIsGone, "the surface knows, and that is
+  the stale value")`) so it cannot silently drift onto the other road, and
+  six of its assertions red on the old shape. **Strongest pin in the wave.**
+- `aRefusedGrantLeavesHerWordsOnScreenAndSaysWhy` guards the opposite
+  precondition (`#expect(!shelf.noteIsGone, "the surface has not been
+  told")`). Two of its four assertions (`live == nil`, `!isLive`) are green
+  on both trees — characterization, and the docstring says so rather than
+  claiming the red. The two that matter both red.
+- `aDeliveryLandingInsideTheRefreshStillStopsTheGrant` cannot pass
+  vacuously: if `settles` never reached 2 the delivery would not fire and
+  the grant would land, reddening `live == nil`. Its MECHANISM coverage is
+  sound; its NARRATIVE is MINOR R2-2.
+- The status assertion added to
+  `aGrantForAKnownTombstoneStopsBeforeDoingAnyStoreWork` reds under the
+  wave's R-W3, and I confirmed by grep that **every** consumer of the
+  sentence compares the SYMBOL `MobileEditorViewModel.deletedNoteRefusal`
+  (5 test sites, 2 production sites), never a literal — which is also the
+  independent proof that MINOR 5's "no pin is possible" is true by
+  construction, not by assertion.
+
+### 6. The record corrections — **spot-verified, all landed**
+
+- **MINOR 3's homes: FIVE, all corrected.** The production docstring on
+  `noteIsGone` (`:315–324`), the pin docstring on
+  `aNoteDeletedOnTheOtherTabNeverGetsThePenBack`, batch record §3, and the
+  two the review had not enumerated — `mobile-round-2.md` **§49** and
+  **ledger row 11**, both struck in place with the measured statement
+  beside them. A repo-wide grep for the false sentence returns only the
+  three sites that QUOTE it inside their own correction. The correction's
+  factual claim re-verified at the source: `Operations.autosave` →
+  `editableVariant` → `liveVariant` (`Operations.swift:78`).
+- **NIT 7:** §9's *"all GREEN on the final tree"* is now *"all GREEN"*
+  with the stale line explained; §4's `11 tests` is now `10`. Both counts
+  independently re-derived (see NIT R2-5 for the one wrong reason).
+- **NIT 9:** struck at the gate's comment (`:1400–1403`) and in record §3
+  point 4; the surviving claim (the `!isLive` ordering) is the true one.
+- **MINOR 5's measured no-pin:** verified by construction — see area 5.
+  The new sentence is honest for both gone shapes, and `TrashWindow.days`
+  still carries the number.
+- **NIT 10:** `RowPrompt.currentName` is gone and the alert reads only
+  `prompt.lensID` (`MobileLenses.swift:651–667`); the only surviving
+  `currentName` in the repo is the Mac's own `LensesBoardView` type, which
+  reads its own and is fenced.
+- **MINOR 4's routing:** the clause on
+  `mobile-round-2-handoff-2026-08-30.md` §7.2 is real, names the tombstone
+  direction beside batch 9's stranded-false direction, carries the
+  load-bearing constraint (**derive**, do not depth-count a photograph),
+  and names a pin for the new direction. Correctly routed.
+
+### 7. The fence — **re-derived by me, empty; tripwire zero**
+
+```
+$ git diff --name-only ad88752..06d6163 -- Sources/ App/Variorum/Shared App/Variorum/Variorum "*.xcodeproj" "*.pbxproj"
+(empty)
+$ git diff ad88752..06d6163 -- '*.swift' | grep -c planVisibleTakeEdit
+0
+```
+
+Eight changed files and no more: three phone-local production files
+(`MobileLivenessAuthority.swift`, `MobileEditorViewModel.swift`,
+`MobileLenses.swift`), one test file, four `notes/plans/` files.
+`Package.resolved` untouched; nothing under `Sources/`, `Shared/`,
+`EditorBrain/`, the Mac target, schema/migrations or build configs. **And
+the behavioural surface is genuinely tight**: outside the authority, the
+only non-comment production changes in the whole wave are the refusal
+STRING and the deletion of one dead struct field — every other line in
+`MobileEditorViewModel.swift` is documentation.
+
+
+---
+
+# ROUND-2 ADJUDICATION + WAVE-2 BRIEF (the Fable orchestrator, 2026-08-31)
+
+**ALL FIVE ACCEPTED, ZERO DISPUTES. No round 3 (no new BLOCKER/MAJOR).**
+One small final wave:
+
+1. **R2-1** — one narrow clear of the tombstone sentence on the grant
+   road before `noteLivenessGranted()` (clear ONLY the refusal-family
+   status, never an unrelated receipt — the deletion receipt's pin must
+   ride green). Pin red-on-old with the reviewer's own probe: refuse →
+   Put back → re-grant leaves NO stale "deleted" sentence while she
+   types in the live note.
+2. **R2-2 — the belt takes the wave's own medicine:** on a late
+   `noteIsGone` flip, the belt RE-CONFIRMS via `confirmNoteStillLive()`
+   (token-checked like every other await) instead of trusting delivery
+   ordering; the false-refusal window closes instead of being
+   documented. Re-word the pin so the live-in-store world drives to a
+   GRANT (red-on-old: the shipped belt refuses it falsely), and the
+   "cannot be stale" claim comes out of the comment — say what is now
+   true (every refusal on this road is store-confirmed).
+3. **R2-3** — one clause on the owned leftover-backlog row in
+   `mobile-round-2-handoff-2026-08-30.md` §7.2, beside MINOR 4's:
+   the SYNC-ROAD SILENT KEYBOARD DROP residual, with its design
+   question (how does a relinquish tell "this surface deleted it" from
+   "someone else did"?) — the MECHANISM investigation owned there; the
+   VOICE half (what the phone should say when sync deletes the note
+   under her — MobileSoul §5.3's discoverability family) flagged for
+   her bundle in the record.
+4. **R2-4** — "both" → "three", verified sites named. **R2-5** — restore
+   the true count reason (three GRDB SQL args exist; the `10` stands for
+   the reason the reviewer states).
+
+Then this unit CLOSES on the orchestrator's verification. Environment
+and rules exactly as wave 1 (own armed simulator, private DerivedData,
+deleted after; full suite — baseline 678/99 + 2 known issues — final
+line quoted; unique pre-revert dir, diff-verified restores; fence grep +
+planVisibleTakeEdit zero; pathspec-limited commit; no pushes). Append a
+WAVE 2 RESULTS section to THIS file before the final message.
