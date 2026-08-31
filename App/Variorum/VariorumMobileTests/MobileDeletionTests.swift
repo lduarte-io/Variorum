@@ -348,6 +348,48 @@ struct MobileDeletionTests {
         }
     }
 
+    /// **THE LAST `String(describing:)` IN THIS DOOR'S FAMILY IS CLOSED**
+    /// (4.5c-phone item 4 — A1-18's 4.5c share).
+    ///
+    /// `DeletionRefusal` exists because three private tables each covered a
+    /// different subset of `OperationError` and each fell through to a bare
+    /// enum dump, so one refused act read three ways depending on the door.
+    /// Two of the three were adopted at 4.5b; `deleteNoteRefusal` was the
+    /// third, and this pins that it now forwards rather than deciding.
+    ///
+    /// **SCOPE, STATED HONESTLY — this is a contract pin, not a road pin.**
+    /// `deleteContainer`'s only reachable refusal today is
+    /// `containerNotFound` (its body's one guard is `liveContainer`), and BOTH
+    /// tables word that identically — so nothing she can currently reach
+    /// changes, and `deletingAnAlreadyGoneNoteSpeaksPlainly` above still
+    /// passes unmodified, which is the proof. What closed is the FALLBACK: the
+    /// next refusal this op learns to throw arrives as a sentence instead of
+    /// `lockedPost(id: "…")`, which is the whole reason A1-18 wanted one home.
+    ///
+    /// **RED ON OLD (production, `MobileEditorViewModel.deleteNoteRefusal`):**
+    /// the pre-fix table returns `String(describing:)` for every case but one,
+    /// so the two `lockedPost`/`containerNotDeleted` rows below fail with the
+    /// raw enum text. Quoted in the batch record.
+    @Test func theNoteDeleteDoorSpeaksTheSharedDeletionVocabulary() {
+        let cases: [Error] = [
+            OperationError.containerNotFound(id: "c1"),
+            OperationError.lockedPost(id: "p1"),
+            OperationError.containerNotDeleted(id: "c1"),
+            OperationError.variantNotFound(id: "v1"),
+        ]
+        for error in cases {
+            let spoken = MobileEditorViewModel.deleteNoteRefusal(error)
+            #expect(spoken == DeletionRefusal.words(error, act: .delete),
+                    "the door forwards rather than keeping a table of its own")
+            #expect(!spoken.contains("OperationError"), "never the raw enum")
+            #expect(!spoken.contains("id: \""), "nor its associated values")
+        }
+        // The one case both tables always mapped, named so the pin records
+        // that this sentence did NOT change.
+        #expect(MobileEditorViewModel.deleteNoteRefusal(
+            OperationError.containerNotFound(id: "c1")) == "That note is already gone.")
+    }
+
     // MARK: - PR4 · Delete a book
 
     /// **The act, and the lesson she had to teach once already**: deleting

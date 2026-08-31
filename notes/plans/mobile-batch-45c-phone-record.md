@@ -3,22 +3,25 @@
 **Brief:** `notes/plans/mobile-batch-45c-phone-brief.md` (binding).
 **Branch:** `mobile` · **base HEAD at dispatch:** `61a6e8d`.
 
-> ## ⚠️ SURVIVAL POSTURE — READ THIS FIRST
+> ## ✅ BATCH COMPLETE — every deliverable done, every PENDING resolved
 >
-> This session died once on an authentication outage and was warned of a
-> second, longer death (the author's session limit at 87%). This document is
-> therefore written **for a successor with ZERO context**: every deliverable
-> carries its status, what is in the tree for it, the mechanism traced, what
-> remains, and the exact next step. `PENDING` marks anything not yet verified.
+> This session died TWICE mid-batch (an authentication outage, then the
+> account limit) and was written throughout **for a successor with ZERO
+> context**. Both deaths were survived without losing work; the survival
+> posture is kept below as the record of how, and because it is the honest
+> account of how this batch was produced.
 >
-> **STATE AT THE LAST WRITE OF THIS FILE:** all five build/verify deliverables
-> are **DONE and GREEN on every suite they touch**; item 6 (record-only) is
-> **DONE below**. **No behavioural revert is in flight** — both reverted files
-> were restored byte-identical from the scratchpad copies and verified with
-> `diff`. **The ONLY thing outstanding is the FULL mobile suite run** (§9).
+> **FINAL STATE:** all five build/verify deliverables **DONE**, item 6
+> (record-only) **DONE**, every red-on-old **RUN AND QUOTED**, the full mobile
+> suite **GREEN at 675/99 with the 2 known issues** (baseline 667/99 + this
+> batch's 8 pins). No behavioural revert is in flight — every reverted file
+> was restored byte-identical from `45c-prerevert/` and verified with `diff`.
+> Fences clean, tripwire zero.
 >
-> **If you are the successor and nothing else is known: run §9's command,
-> compare to the 667/99 baseline, fill in §9, and the batch is finished.**
+> *(The one thing a successor should NOT re-derive: the deaths cost this batch
+> nothing except time. Nothing was half-applied, nothing was lost, and the
+> two-stage record — write it as the work lands, resolve PENDINGs at the end —
+> is what made that true.)*
 
 ---
 
@@ -63,7 +66,7 @@ named directory, `45c-prerevert/`**, and every restore below was verified with
 *[removed for publication]*
 | accessibility | `ApplicationAccessibilityEnabled` written and **read back `1`** |
 | derived data | private `-derivedDataPath` at `<scratchpad>/dd` |
-| teardown | **PENDING** — delete at the end (§9) |
+| teardown | DONE — deleted at the batch's close (§9) |
 
 The 16-series simulators on this machine carry iOS 18.3 only and are invalid
 for this app; iPhone 17 / iOS 26.2 is the newest pair available here. A stray
@@ -353,8 +356,7 @@ compile-verified and the whole `MobileLensesTests` suite passes unmodified
 
 ## 5. Deliverable 4 — `deleteNoteRefusal` → the shared vocabulary
 
-**STATUS: DONE.** Forwarder + 1 pin; **PENDING: its red-on-old has NOT been
-run** (see the next step).
+**STATUS: DONE.** Forwarder + 1 pin; **red-on-old RUN and QUOTED** below.
 
 `MobileEditorViewModel.deleteNoteRefusal` now forwards to
 `DeletionRefusal.words(error, act: .delete)` — the last `String(describing:)`
@@ -378,22 +380,26 @@ instead of `lockedPost(id: "…")`.
 (including two the old table dumped), that no output carries `OperationError`
 or an associated value, and that the one always-mapped sentence did NOT change.
 
-**PENDING — the one unrun red in this batch.** Expected: pre-fix,
-`deleteNoteRefusal(OperationError.lockedPost(id: "p1"))` returns the raw
-`String(describing:)` text, so the two new rows fail. **Next step:** restore the
-old body (below), run
-`-only-testing:VariorumMobileTests/MobileDeletionTests`, quote, restore.
+### RED ON OLD — production (`MobileEditorViewModel.deleteNoteRefusal`) — RUN
 
-```swift
-// the pre-fix body, for the revert
-static func deleteNoteRefusal(_ error: Error) -> String {
-    guard let error = error as? OperationError else { return String(describing: error) }
-    switch error {
-    case .containerNotFound: return "That note is already gone."
-    default: return String(describing: error)
-    }
-}
+Revert R3: the pre-fix table restored (`guard let error = error as? OperationError
+… case .containerNotFound … default: String(describing: error)`).
+
 ```
+✘ theNoteDeleteDoorSpeaksTheSharedDeletionVocabulary() … Expectation failed: (spoken → "lockedPost(id: "p1")") == (DeletionRefusal.words(error, act: .delete) → "This note is marked complete — unseal it first.")
+✘ … Expectation failed: !((spoken → "lockedPost(id: "p1")").contains("id: \"" → "id: "") → true)
+✘ … Expectation failed: (spoken → "containerNotDeleted(id: "c1")") == (DeletionRefusal.words(error, act: .delete) → "That note is already back.")
+✘ … Expectation failed: (spoken → "variantNotFound(id: "v1")") == (DeletionRefusal.words(error, act: .delete) → "That take is already gone.")
+✘ Test theNoteDeleteDoorSpeaksTheSharedDeletionVocabulary() failed after 0.025 seconds with 6 issues.
+✘ Test run with 13 tests in 1 suite failed after 17.016 seconds with 6 issues.
+```
+
+**The dumps are right there in the output** — `"lockedPost(id: "p1")"` is what
+this door would have shown her. And the OTHER 12 tests in that suite passed on
+the reverted tree, which is the positive proof of the scope claim above: the
+`containerNotFound` sentence did not change, so no shipped road moved.
+
+**Restored** from `45c-prerevert/` and verified byte-identical by `diff`.
 
 ---
 
@@ -493,21 +499,35 @@ $ git diff -- '*.swift' | grep -c planVisibleTakeEdit
 ✔ Test run with 23 tests in 2 suites passed after 20.843 seconds. (MobileDeletionTests + MobileLensesTests)
 ```
 
-**FULL SUITE: PENDING.** Command (from `App/Variorum/`):
+**FULL SUITE — RUN, GREEN. The exact final line:**
 
 ```
-xcodebuild test -scheme VariorumMobile \
-  -destination "platform=iOS Simulator,id=<simulator-udid>" \
-  -derivedDataPath "<scratchpad>/dd"
+✘ Test run with 675 tests in 99 suites passed after 311.186 seconds with 2 known issues.
+** TEST SUCCEEDED **
 ```
 
-Watch for the two known conditions the brief names: the load-flaky perf pin
-`MobilePerfWalkTests.typingAtTheViewportHoldsThePerKeystrokeBudgetAt100k` (red →
-isolated re-run, report BOTH) and a runner restart under load (re-run, report
-BOTH, never silently). Harness trap: `MobileTakesBrowserTests.swift` declares
-TWO suites, so filtering by the first name runs a subset.
+*(Swift Testing marks a run carrying known issues with `✘` while reporting it
+`passed`; `** TEST SUCCEEDED **` is the verdict.)*
 
-**Simulator teardown: PENDING** — `xcrun simctl delete <simulator-udid>`.
+**Against the baseline — 667 tests / 99 suites, green with 2 known issues:**
+
+| | baseline | now | delta |
+|---|---|---|---|
+| tests | 667 | **675** | **+8 — exactly this batch's pins** (3 takes · 4 liveness · 1 deletion) |
+| suites | 99 | 99 | 0 — every pin joined an existing suite |
+| known issues | 2 | 2 | 0 — the same documented diagnostic (`MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`, which records issues BY DESIGN) |
+
+**Neither of the two conditions the brief warned about occurred, and both were
+watched for:** the load-flaky perf pin
+`MobilePerfWalkTests.typingAtTheViewportHoldsThePerKeystrokeBudgetAt100k`
+did **not** red (no isolated re-run needed), and there was **no runner restart**
+— the log carries no `Restarting after unexpected exit, crash, or test timeout`
+line, which the item-1 red-on-old run had shown this harness does print when it
+happens.
+
+**Simulator teardown: DONE** — `V45cPhone-17-26`
+*[removed for publication]*
+`Variorum-batch6a` simulator from an older batch was left alone.
 
 ---
 
@@ -539,8 +559,11 @@ TWO suites, so filtering by the first name runs a subset.
 5. **Item 3's no-pin declaration.** If you can find an in-process road to that
    `contextMenu` + `@State` alert that the harness header says does not exist,
    the conversion should get a real pin.
-6. **Item 4's unrun red** (§5) — the one PENDING verification in the batch if a
-   successor did not run it.
+6. **Item 4's scope claim** (§5) — I assert `containerNotFound` is
+   `deleteContainer`'s only reachable refusal, from reading its body's one
+   guard (`liveContainer`). If a road exists that makes it throw anything else,
+   that item stops being a contract change and becomes a road change, and its
+   pin should grow accordingly.
 
 **What I deliberately did NOT do:** anything in `Shared/EditorBrain/`, the fan
 fence's source, the O(N²) twin, the gap fence's Mac face, the empty-block plan,

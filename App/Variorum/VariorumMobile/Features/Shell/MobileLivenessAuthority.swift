@@ -160,6 +160,18 @@ final class MobileLivenessAuthority {
         for entry in entries where entry.editor !== editor {
             entry.editor?.standDown()
         }
+        // **NO PEN OVER A TOMBSTONE, AT ENTRY** (4.5c-phone item 2). Both
+        // stacks stay alive, so a note deleted from the LIBRARY tab leaves
+        // the other stack's editor standing on a tombstone — and popping the
+        // deleting stack (the fix §49 filed) reaches nothing, because the
+        // stale surface is not in it. Liveness is where it CAN be reached:
+        // this is the one act that hands a surface the pen.
+        //
+        // The cheap check first, on what the surface already knows.
+        guard !editor.noteIsGone else {
+            standDownEveryone()
+            return
+        }
         live = editor
         // The flush is what makes the window WIDE — it is real database
         // work, and the review's traced race lives inside it.
@@ -169,11 +181,33 @@ final class MobileLivenessAuthority {
             await editor.refreshTakesFromStore()
             guard isCurrent(token) else { return }
         }
+        // **AND THE AUTHORITATIVE ANSWER, AFTER THE SUSPENSIONS.** The entry
+        // check reads what the last header DELIVERY said, and a delivery has
+        // latency a tab tap can land inside; this asks the store itself, in
+        // the road that is already doing store work, immediately before the
+        // grant. The token is re-checked after it for the same reason every
+        // other suspension here is (MAJOR 2's discipline: a request that has
+        // been superseded installs nothing, whatever it learned).
+        let stillLive = await editor.confirmNoteStillLive()
+        guard isCurrent(token) else { return }
+        guard stillLive else {
+            standDownEveryone()
+            return
+        }
         // The pen is granted ONLY by a handoff still being asked for. The
         // superseding grant is what sets `live` and hands the pen on; an
         // abandoned one leaves the store work it already did (a flush is
         // never wasted) and installs nothing.
         editor.noteLivenessGranted()
+    }
+
+    /// Nobody holds the pen. *At most* one live editor is the law (never
+    /// exactly one), so a tab whose top surface stands on a tombstone is a
+    /// legal end state — and the refusal must reach the surface that asked,
+    /// which `takeLiveness` deliberately never stands down on its own road.
+    private func standDownEveryone() {
+        for entry in entries { entry.editor?.standDown() }
+        live = nil
     }
 
     /// The app-level background transition's targets (MAJOR 1): EVERY

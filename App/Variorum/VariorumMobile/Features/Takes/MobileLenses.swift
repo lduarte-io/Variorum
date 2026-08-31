@@ -623,17 +623,40 @@ struct MobileLensSheet: View {
         } message: {
             Text("A lens remembers which take each block shows — the note itself never moves.")
         }
-        .alert("Rename Lens", isPresented: .init(
-            get: { renamePrompt != nil },
-            set: { if !$0 { renamePrompt = nil } })
-        ) {
+        // **THE CANDIDATE SIXTH CONFIRM SITE, SETTLED BY SHAPE** (4.5c-phone
+        // item 3; §63 routed it here as *"not in the affected class — but it
+        // could not drive a genuine tap, so it is NOT PROVEN IMMUNE"*).
+        //
+        // It was the last read-back-your-own-subject site on the phone: the
+        // action asked `if let prompt = renamePrompt`, a computed binding over
+        // this view's `@State`, whose setter SwiftUI's dismissal machinery
+        // clears. The probe said the handler runs FIRST on the reachable road,
+        // which is why it never shipped as a broken door — but "first" was a
+        // measurement of SwiftUI's ordering, not a property of this code, and
+        // the four doors 4.5b fixed were broken by exactly that ordering
+        // moving one step.
+        //
+        // `presenting:` retires the question instead of re-answering it: the
+        // subject arrives as the closure's PARAMETER, captured when the alert
+        // is built, so there is nothing left to read back and no ordering to
+        // depend on. The three row doors 4.5b fixed took this same shape, and
+        // the rule it keeps is that batch's own: *a binding setter must never
+        // clear state that an action's continuation will read back.*
+        //
+        // `renameField` stays read synchronously and that is safe by the same
+        // rule read forwards: nothing clears it at dismissal.
+        .alert(
+            "Rename Lens",
+            isPresented: .init(
+                get: { renamePrompt != nil },
+                set: { if !$0 { renamePrompt = nil } }),
+            presenting: renamePrompt
+        ) { prompt in
             TextField("Name", text: $renameField)
             Button("Rename") {
-                if let prompt = renamePrompt {
-                    let name = renameField
-                    let model = model
-                    Task { await model.rename(prompt.lensID, to: name) }
-                }
+                let name = renameField
+                let model = model
+                Task { await model.rename(prompt.lensID, to: name) }
                 renamePrompt = nil
             }
             Button("Cancel", role: .cancel) { renamePrompt = nil }

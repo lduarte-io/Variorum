@@ -422,6 +422,218 @@ struct MobileLivenessTests {
         }
     }
 
+    // MARK: The tombstone — no pen over a note that is gone (4.5c-phone item 2)
+
+    /// **SHE DELETES THE NOTE FROM THE LIBRARY; THE OTHER TAB'S EDITOR IS
+    /// STILL STANDING ON IT.**
+    ///
+    /// Both stacks stay alive by design, so the shelf stack's
+    /// `MobileWriteScreen` survives a delete performed on the Library tab —
+    /// and §49's filed remedy (*"the Library row door passes no
+    /// `onDeleted`"*) reaches nothing, because the stale surface is not in the
+    /// stack that would pop. The next tab tap then ran the ordinary grant and
+    /// handed that surface the pen, so keystrokes autosaved into a tombstoned
+    /// note's variants: bytes written where no listing will ever show them.
+    ///
+    /// The refusal belongs at the one act that hands a surface the pen, which
+    /// is what this drives — `tabDidBecomeVisible`, the real road, not the
+    /// editor's own flag.
+    ///
+    /// **The keystroke is driven through the REAL GATE** (`typeEdit`), never
+    /// `UITextView.deleteBackward()`/`replace(_:withText:)`, which bypass it
+    /// (§5.1's trap).
+    ///
+    /// **RED ON OLD (production — `MobileLivenessAuthority.takeLiveness`'s two
+    /// new guards + `MobileEditorViewModel`'s `noteIsGone`):** the grant lands,
+    /// `editors.live` is the shelf editor, `isLive` is true, and the gate
+    /// ACCEPTS the keystroke into the tombstone. Quoted in the batch record.
+    @Test func aNoteDeletedOnTheOtherTabNeverGetsThePenBack() async throws {
+        try await withEditorWorld { session, db in
+            let post = try await session.runner.run { ops in
+                try ops.createPost(title: "deleted under her", profile: .blog)
+            }
+            let minted = try await session.runner.run { ops in
+                try ops.newBlock(in: post.id, text: "Base.", at: .end)
+            }
+            let (shelf, shelfStorage) = makeEditor(session, postID: post.id)
+            let editors = MobileLivenessAuthority()
+            await editors.register(shelf, tab: .shelf)
+            await shelf.loadOnce()
+            #expect(shelf.isLive && !shelf.noteIsGone, "the ordinary state first")
+
+            // She taps to the Library tab: the shelf editor stands down (no
+            // editor on that stack, so nobody holds the pen).
+            await editors.tabDidBecomeVisible(.library)
+            #expect(!shelf.isLive)
+
+            // …and deletes the note from a Library row. This is the door's own
+            // op; nothing tells the shelf stack anything.
+            try await session.runner.run { ops in try ops.deleteContainer(post.id) }
+
+            // Back to the shelf tab — the tap that used to hand over the pen.
+            await editors.tabDidBecomeVisible(.shelf)
+
+            #expect(editors.live == nil, "nobody holds the pen over a tombstone")
+            #expect(!shelf.isLive)
+            #expect(shelf.noteIsGone, "and the surface knows why, from the store")
+            #expect(
+                !typeEdit(
+                    shelf, shelfStorage,
+                    range: NSRange(location: 0, length: 0), replacement: "x"),
+                "the gate refuses a keystroke into a deleted note")
+            #expect(shelf.statusMessage == MobileEditorViewModel.deletedNoteRefusal,
+                    "and it SAYS so — naming the Trash, not a seal")
+            #expect(try await storedText(db, variantID: minted.variant.id) == "Base.",
+                    "nothing was written into the tombstoned note")
+        }
+    }
+
+    /// **THE LIVE SURFACE RELINQUISHES, TOO** — the sync road (deleted on the
+    /// Mac while she is looking at it on the phone), which no tab tap
+    /// mediates. The store's answer reaches the surface through the one
+    /// header door, and the keyboard goes with it.
+    ///
+    /// **RED ON OLD:** `adoptHeader`'s relinquish half + the gate's tombstone
+    /// belt. Pre-fix the editor keeps the pen and the gate accepts.
+    @Test func aNoteDeletedUnderALiveEditorStopsAcceptingKeystrokes() async throws {
+        try await withEditorWorld { session, db in
+            let post = try await session.runner.run { ops in
+                try ops.createPost(title: "deleted beneath her", profile: .blog)
+            }
+            let minted = try await session.runner.run { ops in
+                try ops.newBlock(in: post.id, text: "Base.", at: .end)
+            }
+            let (model, storage) = makeEditor(session, postID: post.id)
+            await model.loadOnce()
+            #expect(
+                typeEdit(
+                    model, storage,
+                    range: NSRange(location: ("Base." as NSString).length, length: 0),
+                    replacement: " typed"),
+                "the control: this surface accepts keystrokes while its note lives")
+            await model.autosave.flushNow()
+
+            // The note goes elsewhere (sync, or the Library on the other tab);
+            // the header observation is what tells this surface, and
+            // `loadOnce` drives that same door deterministically.
+            try await session.runner.run { ops in try ops.deleteContainer(post.id) }
+            await model.loadOnce()
+
+            #expect(model.noteIsGone)
+            #expect(
+                !typeEdit(
+                    model, storage,
+                    range: NSRange(location: 0, length: 0), replacement: "x"),
+                "a surface whose note went stops taking keystrokes")
+            #expect(model.statusMessage == MobileEditorViewModel.deletedNoteRefusal)
+            #expect(try await storedText(db, variantID: minted.variant.id) == "Base. typed",
+                    "and the words she typed BEFORE it went are untouched")
+        }
+    }
+
+    /// **THE ENTRY GUARD, ISOLATED — and it took a measurement to find a way**
+    /// (the R2-4 discipline, applied to this item's own pair).
+    ///
+    /// `takeLiveness` refuses a tombstone twice: cheaply at ENTRY, on what the
+    /// surface already knows from its last header delivery, and again after
+    /// its suspensions through an authoritative store read. Reverting each
+    /// half separately (recorded in the batch record) showed that on the
+    /// tab-tap road the **post-suspension read carries the pin alone** — the
+    /// entry guard fires there not at all, because nothing had told the
+    /// surface yet. Both reverts reddened `aNoteDeletedOnTheOtherTabNeverGets
+    /// ThePenBack` identically, so that pin proves the PAIR, not its arms.
+    ///
+    /// This isolates the entry arm on the road where it is the one that acts:
+    /// the surface ALREADY knows (its header observation delivered while the
+    /// tab was hidden — the production case the harness cannot run, driven
+    /// here through the same one door the observation uses). Its effect is
+    /// that the grant stops BEFORE doing store work, which the coordinator's
+    /// settle seam can see: with the guard, zero flushes; without it, the
+    /// grant flushes and re-reads before discovering what it already knew.
+    ///
+    /// **RED ON OLD:** remove the entry `guard !editor.noteIsGone` alone and
+    /// `settles` is non-zero. (The end state is the same either way — the
+    /// second guard catches it — which is exactly why this pin watches the
+    /// WORK rather than the outcome.)
+    @Test func aGrantForAKnownTombstoneStopsBeforeDoingAnyStoreWork() async throws {
+        try await withEditorWorld { session, _ in
+            let post = try await session.runner.run { ops in
+                try ops.createPost(title: "known gone", profile: .blog)
+            }
+            _ = try await session.runner.run { ops in
+                try ops.newBlock(in: post.id, text: "Base.", at: .end)
+            }
+            let (model, _) = makeEditor(session, postID: post.id)
+            let editors = MobileLivenessAuthority()
+            await editors.register(model, tab: .shelf)
+            await model.loadOnce()
+
+            // The note goes, and the surface's header door hears about it —
+            // in production the observation loop; here the same door, driven.
+            try await session.runner.run { ops in try ops.deleteContainer(post.id) }
+            await model.loadOnce()
+            #expect(model.noteIsGone, "the surface already knows before the grant")
+
+            var settles = 0
+            let observer = model.autosave.observe(onSettled: { settles += 1 })
+            defer { model.autosave.stopObserving(observer) }
+
+            await editors.tabDidBecomeVisible(.shelf)
+
+            #expect(settles == 0,
+                    "the grant refused at entry — no flush, no re-read for a note it knows is gone")
+            #expect(editors.live == nil)
+            #expect(!model.isLive)
+        }
+    }
+
+    /// **AND IT HEALS.** A Put back from the Trash makes the note real again,
+    /// and the surface standing on it takes keystrokes again — which is the
+    /// whole reason `noteIsGone` is kept apart from `isLive` rather than
+    /// latching the authority's own flag.
+    ///
+    /// **NOT A RED-ON-OLD PIN, and it says so rather than claiming one.** It
+    /// is a control against a WRONG FIX: an implementation that answered the
+    /// two pins above by latching `isLive` would fail this one, leaving her
+    /// looking at a restored note she cannot type in. On the pre-fix tree it
+    /// fails only at its own `noteIsGone` precondition — i.e. at machinery
+    /// that did not exist there — which is not evidence about a defect and is
+    /// recorded as such (measured, not assumed; the batch record carries the
+    /// output).
+    @Test func puttingTheNoteBackLetsItsSurfaceWriteAgain() async throws {
+        try await withEditorWorld { session, db in
+            let post = try await session.runner.run { ops in
+                try ops.createPost(title: "put back", profile: .blog)
+            }
+            let minted = try await session.runner.run { ops in
+                try ops.newBlock(in: post.id, text: "Base.", at: .end)
+            }
+            let (model, storage) = makeEditor(session, postID: post.id)
+            await model.loadOnce()
+
+            try await session.runner.run { ops in try ops.deleteContainer(post.id) }
+            await model.loadOnce()
+            #expect(model.noteIsGone)
+
+            // The Trash's Put back.
+            try await session.runner.run { ops in try ops.restoreContainer(post.id) }
+            await model.loadOnce()
+
+            #expect(!model.noteIsGone)
+            // INSIDE the block, deliberately: an empty render leaves a
+            // zero-length open tail behind it, so an edit at the document's
+            // very end would land in the tail and wait on a crystallization —
+            // true of the shipped editor, and nothing to do with this fix.
+            #expect(
+                typeEdit(
+                    model, storage,
+                    range: NSRange(location: 1, length: 0), replacement: "X"),
+                "the surface writes again with no further grant")
+            await model.autosave.flushNow()
+            #expect(try await storedText(db, variantID: minted.variant.id) == "BXase.")
+        }
+    }
+
     // MARK: MAJOR 1 — the background flush covers every registered editor
 
     @Test func theBackgroundFlushCoversEveryRegisteredEditor_bothArms() async throws {
