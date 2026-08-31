@@ -27,6 +27,13 @@
 > there is by design. **The file split must carry that section to
 > 13u1.** None of the seven has a red-on-old pin.
 
+> **ADDENDUM 2026-08-30 (later the same day — the pre-13u round, Act 2).** The cross-feature rule was
+> REFINED in CLAUDE.md (P39), and **13u2's roster gained the two real defects that survive the
+> refined rule**: **P39a** (break the `Library` ↔ `Pool` view-model cycle) and **P39b**
+> (`WriteTakesPanel` stops constructing `TakesViewModel`). Their section — "P39's two real defects
+> join 13u2's roster" — is at the END of this file. **The file split must carry that section to
+> 13u2.**
+
 **STATUS: READY — authored 2026-08-24 during 13l's night watch and
 FINALIZED at 13l's closeout the same day** (finals filled; the hang
 lead in item 1 arrived from 13l's ladder). She runs this phase
