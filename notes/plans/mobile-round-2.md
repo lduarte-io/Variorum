@@ -3496,9 +3496,22 @@ Both tab stacks are alive by design. The in-note door pops the screen;
 **the Library row door passes no `onDeleted`.** So: open a note, switch
 tabs, delete it from the Library row → the editor stays mounted, gets
 re-granted liveness on return, blanks its title, and **remains editable
-over a deleted note.** Keystrokes there autosave into tombstoned
-variants and are **lost**. The batch's own in-note door handles this
+over a deleted note.** ~~Keystrokes there autosave into tombstoned
+variants and are **lost**.~~ The batch's own in-note door handles this
 correctly; this one doesn't.
+
+> **[CORRECTED 2026-08-31 — 4.5c-phone's cold review, MINOR 3, MEASURED.]**
+> The struck sentence is FALSE and was believed through the fix's design.
+> **No byte was ever written into a tombstone**, before the fix or after:
+> `Operations.autosave` resolves through `liveVariant`, which throws
+> `variantNotFound` for a tombstoned variant, and `deleteContainer`'s
+> cascade tombstones the note's blocks and variants. **The real cost is
+> still a defect and still worth the fix:** the surface accepted keystrokes
+> it could never save, and every flush refused with a raw
+> `variantNotFound(id: "…")` dumped into her status line. The distinction
+> matters for anything that weighs this seam's belts later — a belt believed
+> to stop CORRUPTION is treated differently from one that stops a confusing
+> surface. Full record: `mobile-batch-45c-phone-cold-review.md`.
 
 ### 🟠 MAJOR — `MobileTrashModel` is a near-verbatim copy of the Mac's `RecoveryViewModel`
 M-C forbids it at birth, and **it is already drifting on day one**: the
@@ -3668,7 +3681,7 @@ the full verification block. Nothing below was inherited on trust.
 | 8 | 🟠 **The vertical geometry pins assert constants against themselves** (`air >= air`) — so the recorded guarantee that *"a future iOS trips here"* **does not exist**. §15 trap 1, for the fifth time | §45 (bar family) | **4.5d** |
 | 9 | 🟠 **Q4 — the background grant introduced a TERMINATION class that did not exist.** Taken asynchronously one hop after the phase change (Apple names exactly this as the anti-pattern) and **with no expiration handler**: an ungranted assertion writes SQLite unprotected (`0xdead10cc`), an overrun with no handler is fatal (`0x2182bad2`) — and the flush's last leg is a network round | §45 | **4.5a** |
 | 10 | 🟠 **Q3 — an emptied box leaves a live, empty, untitled note.** A5-3 disclosed an abandoned ONE-WORD note; it did not sanction a note with no content at all | §45 | **4.5a** |
-| 11 | 🟠 **§49 — deleting a note from the Library leaves a LIVE EDITOR on the tombstone.** The in-note door pops the screen; the Library row door passes no `onDeleted`. Keystrokes there autosave into tombstoned variants and are **lost** | §49 | **4.5b** |
+| 11 | 🟠 **§49 — deleting a note from the Library leaves a LIVE EDITOR on the tombstone.** The in-note door pops the screen; the Library row door passes no `onDeleted`. ~~Keystrokes there autosave into tombstoned variants and are **lost**~~ — **[CORRECTED 2026-08-31, 4.5c-phone's cold review MINOR 3, measured: no byte ever reached a tombstone (`Operations.autosave` refuses a tombstoned variant); the surface accepted keystrokes it could never save and dumped the raw `variantNotFound(id: "…")`. See §49's correction block]** | §49 | **4.5b** |
 | 12 | 🟠 **§49 — `MobileTrashModel` is a near-verbatim copy of the Mac's `RecoveryViewModel`.** M-C forbids it at birth and **it is already drifting on day one** (the two surfaces answer *"where did it go?"* differently). The batch hoisted the WORDS and stopped one layer short of the DECISIONS | §49 | **4.5b** |
 | 13 | 🟠 **B45-1 — `AppBootstrap.init` opens the store and runs the migration set SYNCHRONOUSLY ON THE MAIN THREAD before first paint** (`VariorumMobileApp.swift` constructs it as `@State`). A **P2 violation** — OverallModel §5. Same family as the Keychain launch hop 13e batch 9 fixed. *"A measurement is one signpost away"* and none was ever briefed — **measure, then fix** | her row, §Acts | **4.5a** |
 | 14 | 🟠 **B45-2 — the `displaySlot` / `slots[i]` coupling**, out-of-range-safe only by caller accident during the crystallization window. **PR8 reorder-takes is scheduled at batch 7**, so the schedule is walking straight into it. Make it explicit | her row, §Acts | **4.5c** |

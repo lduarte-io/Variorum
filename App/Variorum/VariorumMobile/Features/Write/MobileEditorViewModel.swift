@@ -310,8 +310,18 @@ final class MobileEditorViewModel {
     /// LIBRARY tab leaves the other stack's `MobileWriteScreen` standing on
     /// a tombstone: nothing pops it (the §49-filed `onDeleted` fix reaches
     /// only the deleting stack), and the next tab tap handed that surface
-    /// the pen. Typing then autosaved into a tombstoned note's variants —
-    /// bytes written where no listing will ever show them.
+    /// the pen.
+    ///
+    /// **WHAT THAT COST, MEASURED — not the loss it was first recorded as**
+    /// (round-1 MINOR 3, and the correction matters because a belt believed
+    /// to stop corruption is weighed differently from one that stops a
+    /// confusing surface). **No byte was ever written into a tombstone, pre-
+    /// fix or post-fix:** `Operations.autosave` resolves through
+    /// `liveVariant`, which throws `variantNotFound` for a tombstoned
+    /// variant, and `deleteContainer`'s cascade tombstones the note's blocks
+    /// and variants. So the pre-fix defect is that **the surface took
+    /// keystrokes it could never save** — every flush refusing, and the raw
+    /// `variantNotFound(id: "…")` landing in her status line.
     ///
     /// The fact comes from the ONE header door (`adoptHeader`), which is the
     /// only thing that ever answers with the store's own reading:
@@ -328,14 +338,26 @@ final class MobileEditorViewModel {
     /// could not type in until some later grant.
     @ObservationIgnored private(set) var noteIsGone = false
 
-    /// The gate's sentence for it. Phone-local because it is about a PHONE
-    /// surface's own state — a Write screen left standing on a tombstone by
-    /// the alive-stacks shape, which the Mac has no twin of. If the Mac ever
-    /// grows the same refusal it hoists this then (MobileSoul §3), rather
-    /// than writing a second sentence about one 30-day clock.
+    /// The refusal's sentence — spoken by the gate, and by the liveness
+    /// authority at the moment it declines the pen (the authority's road
+    /// drops the keyboard, so the gate is never consulted there).
+    ///
+    /// Phone-local because it is about a PHONE surface's own state — a Write
+    /// screen left standing on a tombstone by the alive-stacks shape, which
+    /// the Mac has no twin of. If the Mac ever grows the same refusal it
+    /// hoists this then (MobileSoul §3), rather than writing a second
+    /// sentence about one 30-day clock.
+    ///
+    /// **CONDITIONAL ABOUT THE TRASH, ON PURPOSE** (round-1 MINOR 5). The
+    /// fact underneath is `Queries.containerHeader == nil`, which is true for
+    /// a MISSING row as well as a tombstoned one — and the phone has a real
+    /// Delete Now door, so a stale surface can outlive its note's departure
+    /// from the Trash entirely. Promising a door with nothing behind it is
+    /// the failure this round words refusals to avoid; one sentence true in
+    /// both shapes beats a second store read to tell them apart.
     static var deletedNoteRefusal: String {
-        "This note was deleted \u{2014} it's in the Trash for "
-            + "\(TrashWindow.days) days. Put it back there to keep writing."
+        "This note was deleted \u{2014} if it's still in the Trash "
+            + "(\(TrashWindow.days) days), put it back there to keep writing."
     }
 
     /// Asks the STORE whether this surface's note is still live and adopts
@@ -357,6 +379,18 @@ final class MobileEditorViewModel {
             // A read that FAILED is not an answer about existence
             // (cancellation at teardown, a store that could not be opened):
             // the last store answer stands rather than a guess.
+            //
+            // **DELIBERATELY SILENT, unlike this door's two siblings**
+            // (round-1 NIT 8, ENDORSED). `loadOnce` and `observeHeader` both
+            // surface a non-cancellation error, because each is the road that
+            // was going to PAINT something and has nothing to paint. This one
+            // is a belt consulted inside a liveness handoff: refusing the pen
+            // because a read failed would strand her on a note that is
+            // probably fine, and (MINOR 3's measurement) keeping it cannot
+            // cost a byte, since a tombstoned variant refuses every write.
+            // The cost of speaking here is a sentence about plumbing on a
+            // surface that is working; the cost of staying silent is nothing
+            // she can lose. Recorded so the silence reads as a decision.
         }
         return !noteIsGone
     }
@@ -547,6 +581,15 @@ final class MobileEditorViewModel {
             }
         } catch is CancellationError {
         } catch {
+            // **THE STREAM EXITS HERE AND IS NEVER RESTARTED** — context
+            // named at the round-1 review, deliberately NOT rebuilt in its
+            // fix wave (a retry/backoff shape is a design act, not a
+            // drive-by). After one transient observation error this surface's
+            // header can only be re-answered by `loadOnce` or by
+            // `confirmNoteStillLive` — which is exactly why the liveness
+            // authority's tombstone arm re-confirms instead of refusing on
+            // its last delivery (MAJOR 1): were it still short-circuiting,
+            // one dropped stream would make a stale `noteIsGone` terminal.
             statusMessage = String(describing: error)
         }
     }
@@ -587,6 +630,22 @@ final class MobileEditorViewModel {
         // authority's to move, so `isLive` is not touched here (see
         // `noteIsGone`). Both directions are written, so a Put back from the
         // Trash restores the surface rather than stranding it.
+        //
+        // **AND IT DELIBERATELY SAYS NOTHING HERE** — a widening considered
+        // at the round-1 MAJOR 2 fix and DECLINED, traced rather than
+        // assumed. Speaking the refusal at this transition would clobber the
+        // receipt on her commonest deletion road: `deleteNote` reports
+        // *"Moved to the Trash…"* and the observation then delivers nil a
+        // beat later, so the note's OWN ⋯ door would answer its own act with
+        // a refusal about a door she just used. The refusal is spoken where
+        // it is DECIDED instead (`MobileLivenessAuthority.refuseOverTombstone`),
+        // which covers every road that hands this surface the pen.
+        //
+        // What that leaves: the SYNC road — deleted on the Mac while she is
+        // looking at it here — drops the keyboard with nothing on screen
+        // until the next grant or keystroke speaks. Recorded as a known
+        // residue, not an oversight; closing it wants a way to tell "this
+        // surface deleted it" from "someone else did", which is a design act.
         let wasGone = noteIsGone
         noteIsGone = (value == nil)
         if noteIsGone, !wasGone {
@@ -1336,8 +1395,12 @@ final class MobileEditorViewModel {
         // true; below the liveness belt this door would answer *"This note is
         // live in your other tab"* about a note that is in the Trash. Above
         // it, the more specific truth wins, and it is the one with a road in
-        // it. It sits above the seal for the same reason twice over: a note
-        // that no longer exists cannot be locked or unlocked.
+        // it.
+        //
+        // Its position above the SEAL is not a constraint at all, and the
+        // comment that claimed one is corrected here (round-1 NIT 9): a gone
+        // note has a nil `header`, so `header?.locked == true` is false
+        // whatever the order — the seal belt could never speak for it.
         //
         // Both the pen and the keyboard are already withdrawn by the time a
         // keystroke could arrive here on the ordinary roads; this is the

@@ -3,6 +3,22 @@
 **Brief:** `notes/plans/mobile-batch-45c-phone-brief.md` (binding).
 **Branch:** `mobile` · **base HEAD at dispatch:** `61a6e8d`.
 
+> ## ⚠️ AMENDED 2026-08-31 BY THE FIX WAVE — read this first
+>
+> The batch was cold-reviewed (`mobile-batch-45c-phone-cold-review.md`:
+> **BLOCKER 0 · MAJOR 2 · MINOR 4 · NIT 4**, all ten accepted, zero
+> disputes) and a fix wave landed. **Two claims in this record were
+> measured FALSE and are corrected in place below, marked
+> `[CORRECTED 2026-08-31]`** — §3's defect mechanism (no byte was ever
+> written into a tombstone), §3's seal-ordering justification (vacuous),
+> and §9/§4's two test counts. **Two behaviours this record describes
+> have CHANGED:** the authority's entry arm now RE-CONFIRMS instead of
+> refusing on a stale `noteIsGone` (MAJOR 1), and the authoritative
+> existence read now comes BEFORE the takes-refresh and SPEAKS its
+> refusal (MAJOR 2). The fix wave's own record — dispositions, reverts,
+> quoted reds — is the **FIX WAVE RESULTS** section at the end of the
+> cold-review file, and it governs where the two disagree.
+
 > ## ✅ BATCH COMPLETE — every deliverable done, every PENDING resolved
 >
 > This session died TWICE mid-batch (an authentication outage, then the
@@ -188,6 +204,26 @@ row; she taps back to Shelf. `MobileShellView.destination`'s note route passes
 row's delete never calls it, and popping the Library's stack would not reach the
 shelf stack's screen anyway. **§49's filed fix reaches nothing**, as §63 says.
 
+**[CORRECTED 2026-08-31 — the cold review's MINOR 3, measured]** This
+section's original account of what that COST was is struck. It said the
+pen let keystrokes *"autosave into a tombstoned note's variants — bytes
+written where no listing will ever show them"*. **No byte was ever
+written into a tombstone, pre-fix or post-fix.** `Operations.autosave`
+resolves through `liveVariant`
+(`Sources/VariorumCore/Operations/Operations.swift:78`), which throws
+`variantNotFound` for a tombstoned variant, and `deleteContainer`'s
+cascade tombstones the note's blocks and variants; the reviewer measured
+both the op directly and the editor's own flush road. **The true defect:
+the surface accepted keystrokes it could never save, and every flush
+refused with a raw `variantNotFound(id: "…")` dumped into her status
+line** (`String(describing: error)` at the autosave observer — pre-
+existing, and now confirmed reachable on exactly this road). The
+correction matters because a belt believed to stop CORRUPTION is weighed
+differently from one that stops a confusing surface — which is what a
+future session does when it revisits the `confirmNoteStillLive` swallow
+(§10 point 4). Production comment and pin docstring corrected with the
+code.
+
 What DOES reach it: `tabDidBecomeVisible(.shelf)` → `takeLiveness(heir,
 refresh: true)` → `noteLivenessGranted()`. That is the one act that hands a
 surface the pen, so that is where the refusal belongs.
@@ -222,9 +258,31 @@ surface the pen, so that is where the refusal belongs.
    `!isLive` check. Placed below it, the pin caught the surface answering
    *"This note is live in your other tab"* about a note in the Trash — because
    the authority's refusal stands the surface down, making `!isLive` true too.
-   The more specific truth wins, and it is the one with a road in it. It sits
+   The more specific truth wins, and it is the one with a road in it. ~~It sits
    above the seal for the same reason twice over: a note that no longer exists
-   cannot be locked or unlocked.
+   cannot be locked or unlocked.~~
+   **[CORRECTED 2026-08-31 — the cold review's NIT 9]** That last clause was
+   VACUOUS and is struck: when `noteIsGone` is true, `header` is nil, so
+   `header?.locked == true` is false *whatever the order* — the seal belt
+   could never have spoken for a gone note, and there was no ordering
+   constraint against it to satisfy. The constraint against `!isLive` is
+   real, and it is the one a pin caught.
+
+**[AMENDED 2026-08-31 — the fix wave changed parts 3 and 4's behaviour.]**
+Part 3's entry guard no longer refuses on `noteIsGone`: it **re-confirms**
+with one indexed header read and refuses only if the store agrees (the
+review's MAJOR 1 — refusing on the last delivery could strand her on a
+note she had just Put back, and short-circuited the very read that would
+have corrected it). The authoritative read moved **above**
+`refreshTakesFromStore` (MAJOR 2 — that refresh renders a tombstoned
+note's empty projection and wipes her words off the screen before
+anything establishes there is nothing to show), a cheap non-stale belt
+now guards the window the move opens, and the refusal **speaks**
+`deletedNoteRefusal` through the status road from where it is decided —
+part 4's gate belt could never reach that road, because the refusal drops
+the keyboard and `shouldChangeText` runs only for an editable view. Three
+pins were added; the full account is the cold-review file's **FIX WAVE
+RESULTS**.
 
 **Why the authoritative read and not the observation:** `observeContainerHeader`
 is a delivery with real latency and a tab tap can land inside it. One indexed
@@ -350,7 +408,12 @@ A behavioural pin would need to mount a door that cannot be mounted in process
 nothing — the failure mode this round has caught six times. **Recorded as
 unpinnable-by-construction rather than papered over.** The conversion is
 compile-verified and the whole `MobileLensesTests` suite passes unmodified
-(11 tests), which is the available evidence that nothing regressed.
+(**10** tests — *[CORRECTED 2026-08-31, the cold review's NIT 7: this read
+"11"; the file holds 10 `@Test`s and no `arguments:`, which §9's own
+`23 tests in 2 suites` for deletion + lenses confirms as 13 + 10]*), which is
+the available evidence that nothing regressed. *(The fix wave then deleted
+`RowPrompt.currentName`, written at the opener and read nowhere — the
+review's NIT 10, residue of this very conversion.)*
 
 ---
 
@@ -491,13 +554,22 @@ $ git diff -- '*.swift' | grep -c planVisibleTakeEdit
 
 **Baseline: 667/99 green with 2 known issues** (batch 9's unit close).
 
-**Per-suite runs, all GREEN on the final tree:**
+**Per-suite runs, all GREEN:**
 
 ```
 ✔ Test run with 14 tests in 1 suite passed after 0.590 seconds.   (MobileLivenessTests)
 ✔ Test run with 32 tests in 2 suites passed after 0.726 seconds.  (MobileLivenessTests + MobileTakesTests)
 ✔ Test run with 23 tests in 2 suites passed after 20.843 seconds. (MobileDeletionTests + MobileLensesTests)
 ```
+
+**[CORRECTED 2026-08-31 — the cold review's NIT 7]** This block was headed
+*"all GREEN on the final tree"* and the middle line is not from the final
+tree: `MobileLivenessTests` + `MobileTakesTests` hold **14 + 19 = 33** there,
+so `32` (13 + 19) predates the fourth liveness pin. The run happened and was
+green; the *final-tree* claim was the error. The other two lines and the full
+suite below are final-tree and were independently reproduced by the reviewer.
+*(The fix wave's three new pins move `MobileLivenessTests` to 17 and the full
+suite to 678 — its own section carries those runs.)*
 
 **FULL SUITE — RUN, GREEN. The exact final line:**
 
@@ -570,3 +642,29 @@ fence's source, the O(N²) twin, the gap fence's Mac face, the empty-block plan,
 `CrossBlockRefusal`'s hoist, the identity-audit hoist — all 13u's, per the
 brief's supersession banner — and the A7/#34 seam carves, deferred by ruling
 (§7).
+
+---
+
+## 11. Added by the fix wave (2026-08-31) — two dispositions this record owes
+
+- **MINOR 4 — the three sheets' `isEditable` PHOTOGRAPH is ROUTED, not fixed
+  here.** `MobileTakesBrowserView` / `MobileCommentsSheetView` /
+  `MobileBlockHistorySheetView` each capture `page.isEditable` at open and
+  restore it unconditionally at close, so a note that dies while a sheet is up
+  gets its keyboard handed back over a tombstone — the inverse leak of the
+  stranded-false defect batch 9 found in the same three lines. It is ONE class
+  with ONE ruled fix (the nesting-aware editability authority), so fixing half
+  of it here would have built machinery that fix then replaces. The clause
+  naming this direction now rides that owned row in
+  `mobile-round-2-handoff-2026-08-30.md` §7.2, with the note that the
+  authority must DERIVE editability at rest rather than restore a
+  photograph — a depth count alone would leave this direction leaking.
+- **NIT 8 — `confirmNoteStillLive`'s swallow is ENDORSED and its silence is
+  now a recorded decision.** §10 point 4 flagged it as a judgment; the review
+  assessed it right and on firmer ground than this record knew, because MINOR 3
+  measures that no write can reach a tombstoned note by any road — so "keeps
+  the pen on a failed read" cannot cost a byte, while refusing would strand
+  her on a note that is probably fine. Its two speaking siblings (`loadOnce`,
+  `observeHeader`) are the roads that were going to PAINT something; this one
+  is a belt inside a handoff. A comment at the catch says so. **No behaviour
+  changed.**

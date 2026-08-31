@@ -559,9 +559,13 @@ struct MobileLensSheet: View {
     @State private var renamePrompt: RowPrompt?
     @State private var renameField = ""
 
+    /// The alert's SUBJECT, carried into its action closure by
+    /// `presenting:` rather than read back out of `@State` at dismissal.
+    /// It holds the id and nothing else: the TextField is seeded from
+    /// `row.currentNameForPrompt` at the opener, so a second copy of the
+    /// name here was write-only residue (round-1 NIT 10).
     struct RowPrompt: Identifiable {
         let lensID: String
-        let currentName: String
         var id: String { lensID }
     }
 
@@ -705,7 +709,7 @@ struct MobileLensSheet: View {
         .contextMenu {
             Button(tokens.chromeLabel(MobileLensesModel.renameDoorTitle)) {
                 renameField = row.currentNameForPrompt
-                renamePrompt = RowPrompt(lensID: row.id, currentName: row.name)
+                renamePrompt = RowPrompt(lensID: row.id)
             }
             Button(tokens.chromeLabel(MobileLensesModel.deleteDoorTitle), role: .destructive) {
                 let model = model

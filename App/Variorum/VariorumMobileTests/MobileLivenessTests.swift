@@ -432,8 +432,18 @@ struct MobileLivenessTests {
     /// and §49's filed remedy (*"the Library row door passes no
     /// `onDeleted`"*) reaches nothing, because the stale surface is not in the
     /// stack that would pop. The next tab tap then ran the ordinary grant and
-    /// handed that surface the pen, so keystrokes autosaved into a tombstoned
-    /// note's variants: bytes written where no listing will ever show them.
+    /// handed that surface the pen — so the surface took keystrokes it could
+    /// never save.
+    ///
+    /// **AND THAT IS THE WHOLE COST — corrected at the round-1 review**
+    /// (MINOR 3). This docstring used to say the keystrokes *"autosaved into
+    /// a tombstoned note's variants: bytes written where no listing will ever
+    /// show them"*, and that was measured FALSE: `Operations.autosave`
+    /// resolves through `liveVariant`, which throws `variantNotFound` for a
+    /// tombstoned variant, so every flush refused and the raw enum landed in
+    /// her status line. The last assertion below (the stored text is
+    /// untouched) is green on the PRE-FIX tree too, for that reason — it is a
+    /// characterization, not this pin's red.
     ///
     /// The refusal belongs at the one act that hands a surface the pen, which
     /// is what this drives — `tabDidBecomeVisible`, the real road, not the
@@ -548,13 +558,27 @@ struct MobileLivenessTests {
     /// tab was hidden — the production case the harness cannot run, driven
     /// here through the same one door the observation uses). Its effect is
     /// that the grant stops BEFORE doing store work, which the coordinator's
-    /// settle seam can see: with the guard, zero flushes; without it, the
-    /// grant flushes and re-reads before discovering what it already knew.
+    /// settle seam can see: with the arm, zero flushes; without it, the grant
+    /// flushes and re-reads before discovering what it already knew.
     ///
-    /// **RED ON OLD:** remove the entry `guard !editor.noteIsGone` alone and
-    /// `settles` is non-zero. (The end state is the same either way — the
-    /// second guard catches it — which is exactly why this pin watches the
-    /// WORK rather than the outcome.)
+    /// **THE ARM'S SHAPE CHANGED AT THE ROUND-1 FIX (MAJOR 1) AND THIS PIN
+    /// FOLLOWED IT.** It no longer refuses on `noteIsGone` — it RE-CONFIRMS
+    /// with one indexed header read and refuses only if the store agrees, so
+    /// a note Put back while this surface was hidden heals on the tap rather
+    /// than being refused by a stale reading (`aNotePutBackFromTheTrashGets
+    /// ThePenBackOnTheNextTabTap` is that road). A header read is not a
+    /// flush, so the WORK assertion below is unchanged by the fix.
+    ///
+    /// **It also pins where the refusal SPEAKS.** This is the one road on
+    /// which the surface already knew, so `adoptHeader`'s gone-transition
+    /// never fires — the sentence can only come from the authority's own
+    /// refusal.
+    ///
+    /// **RED ON OLD (post-fix shape, run and quoted in the review's fix-wave
+    /// section):** replace the entry arm with a fall-through and `settles` is
+    /// non-zero (the end state is the same either way — the second guard
+    /// catches it — which is exactly why this pin watches the WORK); remove
+    /// `refuseOverTombstone`'s `editor.report(…)` and `statusMessage` is nil.
     @Test func aGrantForAKnownTombstoneStopsBeforeDoingAnyStoreWork() async throws {
         try await withEditorWorld { session, _ in
             let post = try await session.runner.run { ops in
@@ -584,6 +608,8 @@ struct MobileLivenessTests {
                     "the grant refused at entry — no flush, no re-read for a note it knows is gone")
             #expect(editors.live == nil)
             #expect(!model.isLive)
+            #expect(model.statusMessage == MobileEditorViewModel.deletedNoteRefusal,
+                    "the refusal SPEAKS from where it is decided — this surface already knew")
         }
     }
 
@@ -631,6 +657,183 @@ struct MobileLivenessTests {
                 "the surface writes again with no further grant")
             await model.autosave.flushNow()
             #expect(try await storedText(db, variantID: minted.variant.id) == "BXase.")
+        }
+    }
+
+    // MARK: The round-1 review's two MAJORs (fix wave, 2026-08-31)
+
+    /// **SHE PUTS THE NOTE BACK AND THE VERY NEXT TAP HANDS THE PEN BACK**
+    /// — the round-1 **MAJOR 1**.
+    ///
+    /// The Trash is on the LIBRARY tab, so a Put back is one tab tap away
+    /// from the shelf surface still standing on that note. If the shelf
+    /// surface's header delivery has not landed in that gap, the entry arm
+    /// used to read the stale `noteIsGone` and refuse — **short-circuiting
+    /// the very authoritative read that would have corrected it**, and
+    /// standing the surface down again. And it could not heal inside the
+    /// visit: `adoptHeader`'s restore branch requires `isLive`, which the
+    /// refusal had just made false. She is looking at her restored note with
+    /// no keyboard, and the only way out is a second round trip.
+    ///
+    /// **NO DELIVERY IS DRIVEN AFTER THE RESTORE, DELIBERATELY** — that gap
+    /// IS the defect's precondition, and driving `loadOnce` there would test
+    /// the observation instead of the arm.
+    ///
+    /// **RED ON OLD (production — `MobileLivenessAuthority.takeLiveness`'s
+    /// entry arm):** restore the short-circuiting `guard !editor.noteIsGone
+    /// else { refuseOverTombstone(editor); return }` and nobody holds the
+    /// pen, the surface stays stood down and still believes the note is gone,
+    /// and the gate refuses her keystroke. Quoted in the review's fix-wave
+    /// section.
+    @Test func aNotePutBackFromTheTrashGetsThePenBackOnTheNextTabTap() async throws {
+        try await withEditorWorld { session, db in
+            let post = try await session.runner.run { ops in
+                try ops.createPost(title: "put back, then tapped back", profile: .blog)
+            }
+            let minted = try await session.runner.run { ops in
+                try ops.newBlock(in: post.id, text: "Base.", at: .end)
+            }
+            let (shelf, shelfStorage) = makeEditor(session, postID: post.id)
+            let editors = MobileLivenessAuthority()
+            await editors.register(shelf, tab: .shelf)
+            await shelf.loadOnce()
+
+            // She taps to Library and deletes the note there; the shelf
+            // surface's header door hears it (in production the observation
+            // loop, here the same door driven).
+            await editors.tabDidBecomeVisible(.library)
+            try await session.runner.run { ops in try ops.deleteContainer(post.id) }
+            await shelf.loadOnce()
+            #expect(shelf.noteIsGone, "the surface knows, and that is the stale value")
+
+            // Put back — from the Trash, which lives on this same tab.
+            try await session.runner.run { ops in try ops.restoreContainer(post.id) }
+
+            // …and straight back to Shelf, INSIDE the delivery gap.
+            await editors.tabDidBecomeVisible(.shelf)
+
+            #expect(editors.live === shelf, "the pen comes back on the tap")
+            #expect(shelf.isLive)
+            #expect(!shelf.noteIsGone, "the arm re-confirmed instead of refusing")
+            #expect(shelfStorage.string.contains("Base."),
+                    "and the grant's refresh brought her words back with it")
+            // INSIDE the block, per `puttingTheNoteBackLetsItsSurfaceWrite
+            // Again`'s recorded open-tail behaviour.
+            #expect(
+                typeEdit(
+                    shelf, shelfStorage,
+                    range: NSRange(location: 1, length: 0), replacement: "X"),
+                "she can type in her restored note in the same visit")
+            await shelf.autosave.flushNow()
+            #expect(try await storedText(db, variantID: minted.variant.id) == "BXase.")
+        }
+    }
+
+    /// **A REFUSED GRANT LEAVES HER WORDS ON SCREEN, AND SAYS WHY** — the
+    /// round-1 **MAJOR 2**.
+    ///
+    /// `takeLiveness` used to do its store work before asking whether the
+    /// note existed: flush, then `refreshTakesFromStore`, then the
+    /// authoritative read. For a tombstoned note that refresh reads an EMPTY
+    /// projection and hands it to the one projection door, which renders it —
+    /// `renderFull([])` wipes the surface. Only then did the read discover
+    /// there was nothing there, stand the surface down, and set
+    /// `isEditable = false`. And `shouldChangeText`'s sentence is reachable
+    /// only for an EDITABLE text view, so the belt this batch built could
+    /// never speak on its own headline road: **a blank note, and silence.**
+    ///
+    /// Two things are pinned here, and they are the two halves of the fix:
+    /// the existence answer comes BEFORE the refresh (her words survive), and
+    /// the refusal speaks where it is decided (she is told why). The status
+    /// assertion is an end-state claim rather than an isolating one — on this
+    /// road the authority is the only speaker either way, but
+    /// `aGrantForAKnownTombstoneStopsBeforeDoingAnyStoreWork` is where that
+    /// site is isolated.
+    ///
+    /// **RED ON OLD (production — `MobileLivenessAuthority.takeLiveness`):**
+    /// move `confirmNoteStillLive()` back below the refresh and the surface
+    /// is `""`; drop `refuseOverTombstone`'s `report` and `statusMessage` is
+    /// nil. Both quoted in the review's fix-wave section.
+    @Test func aRefusedGrantLeavesHerWordsOnScreenAndSaysWhy() async throws {
+        try await withEditorWorld { session, _ in
+            let post = try await session.runner.run { ops in
+                try ops.createPost(title: "wiped and silent", profile: .blog)
+            }
+            _ = try await session.runner.run { ops in
+                try ops.newBlock(in: post.id, text: "Base.", at: .end)
+            }
+            let (shelf, shelfStorage) = makeEditor(session, postID: post.id)
+            let editors = MobileLivenessAuthority()
+            await editors.register(shelf, tab: .shelf)
+            await shelf.loadOnce()
+            #expect(shelfStorage.string.contains("Base."), "her words, on screen")
+
+            // The Library tab deletes it. NOTHING tells the shelf surface —
+            // this is the road where the grant itself is the first to learn.
+            await editors.tabDidBecomeVisible(.library)
+            try await session.runner.run { ops in try ops.deleteContainer(post.id) }
+            #expect(!shelf.noteIsGone, "the surface has not been told")
+
+            await editors.tabDidBecomeVisible(.shelf)
+
+            #expect(editors.live == nil, "nobody holds the pen over a tombstone")
+            #expect(!shelf.isLive)
+            #expect(shelfStorage.string.contains("Base."),
+                    "and her words did not leave the screen to prove it")
+            #expect(shelf.statusMessage == MobileEditorViewModel.deletedNoteRefusal,
+                    "she is told why — on a surface whose keyboard is now gone")
+        }
+    }
+
+    /// **THE WINDOW THE REORDER OPENS, AND THE BELT THAT CLOSES IT.**
+    ///
+    /// Moving the authoritative read above the refresh (MAJOR 2) makes the
+    /// refresh the one suspension left between the store's answer and the
+    /// grant — the round-1 review's own clean bill had rested on there being
+    /// none. A header delivery landing inside it must still stop the grant,
+    /// and it may be acted on **without** a second store read: the read a
+    /// moment earlier adopted the store's own answer through the same door,
+    /// so a `noteIsGone` reading taken after it cannot be stale.
+    ///
+    /// **What is driven, stated plainly:** the settle seam is synchronous, so
+    /// the observer cannot `await` a delete — it drives `adoptHeader(nil)`,
+    /// the DELIVERY, which is the only input the belt reads. The store row
+    /// itself is left alone; a pin for a delivery-shaped belt drives the
+    /// delivery.
+    ///
+    /// **RED ON OLD:** remove the post-refresh `guard !editor.noteIsGone` and
+    /// the grant lands — `editors.live` is the editor, `isLive` is true, and
+    /// nothing is said.
+    @Test func aDeliveryLandingInsideTheRefreshStillStopsTheGrant() async throws {
+        try await withEditorWorld { session, _ in
+            let post = try await session.runner.run { ops in
+                try ops.createPost(title: "gone mid-refresh", profile: .blog)
+            }
+            _ = try await session.runner.run { ops in
+                try ops.newBlock(in: post.id, text: "Base.", at: .end)
+            }
+            let (model, _) = makeEditor(session, postID: post.id)
+            let editors = MobileLivenessAuthority()
+            await editors.register(model, tab: .shelf)
+            await model.loadOnce()
+            #expect(!model.noteIsGone, "live at the authoritative read")
+
+            // Settle 1 is `takeLiveness`'s own flush; settle 2 is the one
+            // `refreshTakesFromStore` opens with — i.e. AFTER the store said
+            // the note is live, and BEFORE the grant.
+            var settles = 0
+            let observer = model.autosave.observe(onSettled: { [weak model] in
+                settles += 1
+                if settles == 2 { model?.adoptHeader(nil) }
+            })
+            defer { model.autosave.stopObserving(observer) }
+
+            await editors.tabDidBecomeVisible(.shelf)
+
+            #expect(settles >= 2, "the delivery landed inside the refresh, as intended")
+            #expect(editors.live == nil, "the grant stopped on the fresher reading")
+            #expect(!model.isLive)
+            #expect(model.statusMessage == MobileEditorViewModel.deletedNoteRefusal)
         }
     }
 

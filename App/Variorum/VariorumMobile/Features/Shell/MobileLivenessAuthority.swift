@@ -160,39 +160,68 @@ final class MobileLivenessAuthority {
         for entry in entries where entry.editor !== editor {
             entry.editor?.standDown()
         }
-        // **NO PEN OVER A TOMBSTONE, AT ENTRY** (4.5c-phone item 2). Both
-        // stacks stay alive, so a note deleted from the LIBRARY tab leaves
-        // the other stack's editor standing on a tombstone — and popping the
-        // deleting stack (the fix §49 filed) reaches nothing, because the
-        // stale surface is not in it. Liveness is where it CAN be reached:
-        // this is the one act that hands a surface the pen.
+        // **NO PEN OVER A TOMBSTONE** (4.5c-phone item 2). Both stacks stay
+        // alive, so a note deleted from the LIBRARY tab leaves the other
+        // stack's editor standing on a tombstone — and popping the deleting
+        // stack (the fix §49 filed) reaches nothing, because the stale
+        // surface is not in it. Liveness is where it CAN be reached: this is
+        // the one act that hands a surface the pen.
         //
-        // The cheap check first, on what the surface already knows.
-        guard !editor.noteIsGone else {
-            standDownEveryone()
-            return
+        // **THE CHEAP ARM RE-CONFIRMS; IT NEVER REFUSES ON ITS OWN**
+        // (round-1 MAJOR 1). `noteIsGone` is what the last header DELIVERY
+        // said, and this class's own justification for the authoritative
+        // read below is that a delivery's latency is real — an argument that
+        // is SYMMETRIC. Refusing on the stale value short-circuited the very
+        // read that would have corrected it, so a note Put back from the
+        // Trash (a Library-tab act, i.e. one tab tap away from her stale
+        // shelf surface) could be refused, and could not heal inside that
+        // visit: `adoptHeader`'s restore branch needs `isLive`, which the
+        // refusal has just made false.
+        //
+        // So the arm survives for what it was kept for — a note the store
+        // AGREES is gone skips the flush and the takes-refresh entirely —
+        // and pays one indexed header read to earn the right to refuse.
+        if editor.noteIsGone {
+            let confirmedLive = await editor.confirmNoteStillLive()
+            guard isCurrent(token) else { return }
+            guard confirmedLive else {
+                refuseOverTombstone(editor)
+                return
+            }
         }
         live = editor
         // The flush is what makes the window WIDE — it is real database
         // work, and the review's traced race lives inside it.
         await editor.autosave.flushNow()
         guard isCurrent(token) else { return }
-        if refresh {
-            await editor.refreshTakesFromStore()
-            guard isCurrent(token) else { return }
-        }
-        // **AND THE AUTHORITATIVE ANSWER, AFTER THE SUSPENSIONS.** The entry
-        // check reads what the last header DELIVERY said, and a delivery has
-        // latency a tab tap can land inside; this asks the store itself, in
-        // the road that is already doing store work, immediately before the
-        // grant. The token is re-checked after it for the same reason every
-        // other suspension here is (MAJOR 2's discipline: a request that has
-        // been superseded installs nothing, whatever it learned).
+        // **THE AUTHORITATIVE ANSWER, AND IT COMES BEFORE THE REFRESH**
+        // (round-1 MAJOR 2). Asked after the suspensions because a delivery
+        // has latency a tab tap can land inside; asked BEFORE
+        // `refreshTakesFromStore` because that read hands a tombstoned note's
+        // EMPTY projection to the one projection door, which renders it —
+        // her words leave the screen before anything has established there is
+        // nothing left to show. The token is re-checked after it for the same
+        // reason every other suspension here is (MAJOR 2's discipline: a
+        // request that has been superseded installs nothing, whatever it
+        // learned).
         let stillLive = await editor.confirmNoteStillLive()
         guard isCurrent(token) else { return }
         guard stillLive else {
-            standDownEveryone()
+            refuseOverTombstone(editor)
             return
+        }
+        if refresh {
+            await editor.refreshTakesFromStore()
+            guard isCurrent(token) else { return }
+            // The refresh is now the one suspension standing between the
+            // store's answer and the grant. A `noteIsGone` reading taken HERE
+            // cannot be stale — the read above just adopted the store's own
+            // answer through the same door, so a true value can only have
+            // come from a delivery that landed after it.
+            guard !editor.noteIsGone else {
+                refuseOverTombstone(editor)
+                return
+            }
         }
         // The pen is granted ONLY by a handoff still being asked for. The
         // superseding grant is what sets `live` and hands the pen on; an
@@ -201,10 +230,23 @@ final class MobileLivenessAuthority {
         editor.noteLivenessGranted()
     }
 
-    /// Nobody holds the pen. *At most* one live editor is the law (never
-    /// exactly one), so a tab whose top surface stands on a tombstone is a
-    /// legal end state — and the refusal must reach the surface that asked,
-    /// which `takeLiveness` deliberately never stands down on its own road.
+    /// Nobody holds the pen, **and the surface that asked is told why**
+    /// (round-1 MAJOR 2). *At most* one live editor is the law (never exactly
+    /// one), so a tab whose top surface stands on a tombstone is a legal end
+    /// state — but a legal end state is not a self-explaining one: the
+    /// refusal drops the keyboard, and `shouldChangeText`'s sentence is
+    /// reachable only for an EDITABLE text view, so the surface she is
+    /// looking at would say nothing at all. The sentence goes through the
+    /// status road the write view already renders.
+    ///
+    /// It stands EVERYONE down, the asker included — `takeLiveness`'s own
+    /// loop deliberately skips the taker, so this is what reaches it.
+    private func refuseOverTombstone(_ editor: MobileEditorViewModel) {
+        standDownEveryone()
+        editor.report(MobileEditorViewModel.deletedNoteRefusal)
+    }
+
+    /// Nobody holds the pen — a legal end state, not an error.
     private func standDownEveryone() {
         for entry in entries { entry.editor?.standDown() }
         live = nil
