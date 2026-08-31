@@ -241,9 +241,10 @@ public enum StoreFilePresence: Equatable, Sendable {
     /// The bytes lead with SQLite's plaintext magic — a pre-13p store, the
     /// one-time migration's subject.
     case plaintext
-    /// Real bytes that are not the plaintext magic: an encrypted store (or
-    /// something that is not a database at all — the keyed open decides,
-    /// loudly).
+    /// Real bytes that are not the plaintext magic — an encrypted store,
+    /// something that is not a database at all, OR a present file that
+    /// refused to open/read (pre-13u Act 9, 17a P12/P13): the keyed open
+    /// decides, loudly.
     case encryptedOrUnknown
 
     /// `SQLite format 3\0` — public so drills and verification tooling can
@@ -253,11 +254,35 @@ public enum StoreFilePresence: Equatable, Sendable {
         0x6F, 0x72, 0x6D, 0x61, 0x74, 0x20, 0x33, 0x00,
     ])
 
+    /// Pre-13u Act 9 (17a P12/P13): a PRESENT file whose open or read
+    /// fails (EACCES after an oddly-permissioned restore, fd exhaustion,
+    /// EIO, an unsatisfied iOS protection class) used to answer `.absent`
+    /// — indistinguishable from "no store here". Two irreversible things
+    /// keyed off that answer: the launch route PERSISTED a mode downgrade
+    /// to Auto (silently turning off the R13p-5 gate), and `resolveStoreKey`
+    /// skipped its never-mint-over-ciphertext refusal, minting and SAVING
+    /// a bogus key whose later failures were untyped — a doorless dead
+    /// end that survived the I/O condition clearing. Present-but-unreadable
+    /// now answers `.encryptedOrUnknown`: the route stays demanded, the
+    /// open refuses typed (`keyUnavailable`), and the sidecar recovery
+    /// road can render. A present-but-EMPTY file stays `.absent` — that
+    /// half of the doc is deliberate and unchanged.
     public static func classify(at url: URL) -> StoreFilePresence {
-        guard let handle = try? FileHandle(forReadingFrom: url) else { return .absent }
+        let present = FileManager.default.fileExists(atPath: url.path)
+        guard let handle = try? FileHandle(forReadingFrom: url) else {
+            return present ? .encryptedOrUnknown : .absent
+        }
         defer { try? handle.close() }
-        guard let head = try? handle.read(upToCount: 16) else { return .absent }
-        if head.isEmpty { return .absent }
-        return head == plaintextMagic ? .plaintext : .encryptedOrUnknown
+        do {
+            // nil WITHOUT a throw is EOF — an empty file, which is the
+            // deliberate `.absent` half; only a THROWING read is the
+            // unreadable case.
+            guard let head = try handle.read(upToCount: 16), !head.isEmpty else {
+                return .absent
+            }
+            return head == plaintextMagic ? .plaintext : .encryptedOrUnknown
+        } catch {
+            return .encryptedOrUnknown
+        }
     }
 }

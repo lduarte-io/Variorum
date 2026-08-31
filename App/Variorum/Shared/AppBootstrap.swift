@@ -222,9 +222,13 @@ final class AppBootstrap {
             // The one pre-unlock file contact: 16 bytes of presence. The
             // test-opener path has no file of its own — it routes as
             // "store present" so demanded gates are exercisable.
+            // P13 rider (pre-13u Act 9): a nil URL (`defaultStoreURL()`
+            // threw) routes as UNKNOWN, never absent — "we could not even
+            // resolve the path" must not authorize persisting a mode
+            // downgrade to Auto; the open road fails typed on its own.
             let presence: StoreFilePresence = testOpener != nil
                 ? .encryptedOrUnknown
-                : (storeURL.map(StoreFilePresence.classify(at:)) ?? .absent)
+                : (storeURL.map(StoreFilePresence.classify(at:)) ?? .encryptedOrUnknown)
             switch StoreLaunchRoute.resolve(dials: dials, presence: presence) {
             case .open:
                 break

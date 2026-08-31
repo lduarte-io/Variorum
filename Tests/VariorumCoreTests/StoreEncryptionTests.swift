@@ -169,6 +169,64 @@ struct KeyedStoreTests {
         #expect(!FileManager.default.fileExists(atPath: url.path),
                 "no store may be created whose key custody could not keep")
     }
+
+    // MARK: - The unreadable-store conflation (pre-13u Act 9 — 17a P12/P13)
+
+    /// P12/P13, RED ON OLD: a PRESENT store that cannot be opened for
+    /// reading (EACCES is the plausible instance — an oddly-permissioned
+    /// restore) used to classify `.absent`, indistinguishable from "no
+    /// store here". Present-but-unreadable is UNKNOWN, never absence; a
+    /// present-but-EMPTY file stays `.absent` (that half of the enum's
+    /// doc is deliberate, pinned here so it cannot drift).
+    @Test func aPresentButUnreadableStoreClassifiesAsUnknownNeverAbsent() throws {
+        let dir = try temporaryDirectory()
+        let url = dir.appendingPathComponent("unreadable.sqlite")
+        try Data((0..<64).map { _ in UInt8.random(in: 0...255) }).write(to: url)
+        try FileManager.default.setAttributes(
+            [.posixPermissions: 0o000], ofItemAtPath: url.path)
+        defer {
+            try? FileManager.default.setAttributes(
+                [.posixPermissions: 0o644], ofItemAtPath: url.path)
+            try? FileManager.default.removeItem(at: dir)
+        }
+        #expect(StoreFilePresence.classify(at: url) == .encryptedOrUnknown,
+                "present-but-unreadable is UNKNOWN — .absent authorized a persisted mode downgrade and a bogus key mint")
+
+        let empty = dir.appendingPathComponent("empty.sqlite")
+        FileManager.default.createFile(atPath: empty.path, contents: Data())
+        #expect(StoreFilePresence.classify(at: empty) == .absent,
+                "the empty-file-as-absent half is deliberate and unchanged")
+    }
+
+    /// P12/P13's sharp edge, RED ON OLD: the never-mint-over-ciphertext
+    /// refusal must fire for an unreadable store too. The old road minted
+    /// a fresh key, PERSISTED it into custody, and then failed the open
+    /// with an untyped error — so `failedOutcome` could never build the
+    /// sidecar recovery road, and every later launch repeated the doorless
+    /// failure even after the I/O condition cleared (custody now held the
+    /// bogus key).
+    @Test func openStoreNeverMintsOverAPresentButUnreadableStore() throws {
+        let dir = try temporaryDirectory()
+        let url = dir.appendingPathComponent("unreadable.sqlite")
+        try Data((0..<64).map { _ in UInt8.random(in: 0...255) }).write(to: url)
+        try FileManager.default.setAttributes(
+            [.posixPermissions: 0o000], ofItemAtPath: url.path)
+        defer {
+            try? FileManager.default.setAttributes(
+                [.posixPermissions: 0o644], ofItemAtPath: url.path)
+            try? FileManager.default.removeItem(at: dir)
+        }
+        let custody = StoreKeyCustody.inMemory()
+        do {
+            _ = try AppDatabase.openStore(at: url, custody: custody)
+            Issue.record("an unreadable store must refuse the open")
+        } catch let error as AppDatabase.StoreOpenError {
+            #expect(error.keyUnavailable,
+                    "the refusal is TYPED — the recovery road keys off exactly this")
+        }
+        #expect(custody.load() == nil,
+                "and NOTHING was minted into custody — a persisted bogus key made the dead end permanent")
+    }
 }
 
 @Suite("Phase 13p — the backup pin (spike Q5's corrected shape)")
