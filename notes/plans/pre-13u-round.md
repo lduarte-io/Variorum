@@ -1501,6 +1501,17 @@ doors.
 architect's discretion — wave 1 the mechanical/polish items, wave 2 the surface redesigns (14–17,
 the panel, the lobby) — with a clean handoff seam between; one wave if it fits.
 
+**SIZING DEVIATION (successor architect, 2026-08-31 mid-run — recorded per the skill's deviation
+rule):** wave 1 consumed nearly a full implementer session on the SMALLER half of the act's scope,
+so "wave 2" runs as **sequential focused Fable sessions** rather than one — **2a** the
+protection/clarity wave (items 3 + 4 + the eye peek + the Account pane + the T1 guard attempt +
+T2's unknown rendering — the "encryption explanation" wave her goodnight cast named), **2b** the
+library-ish surfaces (item 14's picker + item 2's Pool + item 17's Snippets), **2c** the modes &
+views (item 16's three ruled modes + item 15's Compare/Lenses + item 18's cohesive Book redesign,
+which defers WHOLE to 13u2 if 2c cannot hold it). Reason: the ~500k context-degradation rule
+applied to implementers — a mid-redesign session death is the worst outcome; her "both waves"
+cast language holds (all Fable, sequential, clean seams). Still ONE act, one record trail.
+
 **THE MOCKUP STEP (her instruction, fourth wave; SIXTH-WAVE AMENDMENT: the SUCCESSOR orchestrator
 spawns it — her word at the handoff seam, "I might as well have the same agent that will orchestrate
 the taste run the html mockup agent" — it is the successor's FIRST act, before 17h):** ONE
