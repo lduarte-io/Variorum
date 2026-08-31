@@ -206,6 +206,21 @@ presentation (recipes, shapes, the escrow/posture coupling) reaches mobile as th
 one account has ONE posture across Mac + phone, never per-platform settings divergence (the
 `Shared/` custody brains already carry the semantics by construction; the faces are per-platform).
 
+**THE OVERNIGHT AUTHORIZATION (2026-08-31, ~04:00 — her word, verbatim: "i'm going to sleep and i
+want this to be free to run until completion overnight").** The away-run rules are ACTIVE for the
+rest of the round: PROVISIONAL-and-continue on everything short of an author-only hard stop; taste
+forks are built to best judgment under her granted latitude with alternatives noted; anything
+genuinely hers is HELD and BUNDLED into the MORNING BUNDLE at close — never improvised around,
+never blocking. The remaining sequence runs one agent at a time to completion: Act 5 (in flight) →
+Act 0 Opus → Act 0 Fable (`Sync/`) → Act 10 wave 1 → wave 2 → the Opus midpoint review + fixes →
+the final Fable ladder (cap 3) → closeout. The `/Applications` refresh + tutorial re-seed run
+overnight ONLY if she quits the app before sleeping (asked); otherwise both are HELD for the
+morning per the never-quit rule. **The Pool tag-column question is RESOLVED without her** — her
+mid-sitting re-cast already granted the latitude by name (*"tags as a column or not"*), and the
+eighth wave superseded the old screenshot-pair plan with a style guide she loved: the wave builds
+the mockup's card/metadata-chip grammar as the default, judges the column question in place, and
+notes the alternative in the morning bundle only if genuinely torn.
+
 **THE TENTH WAVE (2026-08-31, after Acts 3+4's close — her replies to the three parity calls;
 the two pending items since RULED as R-pre13u-8 above):**
 
