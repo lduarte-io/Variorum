@@ -356,23 +356,57 @@ extension Queries {
     /// Cost ∝ this note's own fan history (`idx_variant_block` and the
     /// ownership index), never the corpus — and it is a DELIBERATELY-opened
     /// panel's read, like its siblings above.
+    ///
+    /// **THE NOTE DRIVES (pre-13u Act 4, 17c P18).** That claim used to be
+    /// false. The statement began `FROM variant v` and only reached the note
+    /// through `COALESCE(cb.container_id, b.last_container_id) = :post`,
+    /// which nothing can seek: `idx_variant_block` is `(block_id, status)`
+    /// and cannot serve a query with no block_id, and no index exists on
+    /// `variant.deleted_at`. The measured plan was `SCAN v` — a full B-tree
+    /// scan of the largest table in the store — and the panel holds this
+    /// read in a live observation whose region includes `variant`, so every
+    /// autosave re-ran it. Measured on an ORDINARY one-block note, which is
+    /// the point — the cost had nothing to do with the note: 0.836 ms at
+    /// ~12k variants → 4.783 ms at ~122k, linear in the CORPUS, with each
+    /// pass decrypting every page of the variant table under SQLCipher.
+    /// After: 0.472 ms → 0.470 ms, flat. (A 800-block note: 1.116 → 5.358 ms
+    /// before, 1.715 → 1.741 ms after — flat there too, and the residual is
+    /// the note's own size, which is what P1 permits.)
+    ///
+    /// The fix is the shape its four siblings already had: resolve the
+    /// note's blocks FIRST, from indexed roads, then reach their takes
+    /// through `idx_variant_block`. The `home` CTE is the COALESCE spelled
+    /// as two seekable arms — a block live-placed in this note
+    /// (`idx_cblock_order` on `container_id`), or a live block with no live
+    /// placement whose `last_container_id` is this note
+    /// (`idx_block_last_container`, the siblings' own driver). Those are
+    /// exactly the rows the COALESCE selected: a block placed in ANOTHER
+    /// note resolves to that note and is excluded by both arms, as before.
     public static func trayTakes(
         _ db: Database, postID: String, now: Date, limit: Int? = nil
     ) throws -> [TrayTake] {
         var sql = """
+            WITH home(block_id) AS (
+              SELECT cb.block_id FROM container_block cb
+               WHERE cb.container_id = :post AND cb.deleted_at IS NULL
+              UNION
+              SELECT b2.id FROM block b2
+               WHERE b2.last_container_id = :post AND b2.deleted_at IS NULL
+                 AND NOT EXISTS (SELECT 1 FROM container_block cb2
+                                  WHERE cb2.block_id = b2.id
+                                    AND cb2.deleted_at IS NULL)
+            )
             SELECT v.id AS variant_id, v.block_id AS block_id,
                    v.deleted_at AS deleted_at, v.label AS label,
                    v.working_text AS text,
                    b.name AS block_name, dv.working_text AS block_text
-            FROM variant v
-            JOIN block b ON b.id = v.block_id
-            LEFT JOIN container_block cb
-              ON cb.block_id = b.id AND cb.deleted_at IS NULL
+            FROM home
+            JOIN variant v ON v.block_id = home.block_id
+            JOIN block b ON b.id = home.block_id
             LEFT JOIN variant dv
               ON dv.id = b.default_variant_id AND dv.deleted_at IS NULL
             WHERE v.deleted_at IS NOT NULL AND v.deleted_at >= :cutoff
               AND b.deleted_at IS NULL
-              AND COALESCE(cb.container_id, b.last_container_id) = :post
               AND NOT EXISTS (SELECT 1 FROM purge_intent pi
                 WHERE pi.table_name = 'variant' AND pi.row_id = v.id
                   AND (pi.deleted_at IS NULL OR pi.deleted_at >= v.deleted_at))

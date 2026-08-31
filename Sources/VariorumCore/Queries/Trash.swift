@@ -148,7 +148,7 @@ extension Queries {
         var items: [TrashItem] = []
 
         if kinds.contains(.note) {
-            items += try Row.fetchAll(
+            let noteRows = try Row.fetchAll(
                 db,
                 sql: """
                     SELECT id, title, entry_date, created_at, deleted_at,
@@ -172,14 +172,22 @@ extension Queries {
                     ORDER BY deleted_at \(dir), id \(dir)\(limitClause)
                     """,
                 arguments: arguments
-            ).map { row -> TrashItem in
-                // A saved version names the note whose moment it is, so the
-                // row reads as one and gathers under it (ledger row 23). The
-                // lookup is skipped for every ordinary note, which is every
-                // row that is not born archived.
-                let peer = (row["born_archived"] as Int?) == 1
-                    ? try versionOfNote(db, versionID: row["id"])
-                    : nil
+            )
+            // A saved version names the note whose moment it is, so the row
+            // reads as one and gathers under it (ledger row 23). The lookup
+            // is skipped for every ordinary note, which is every row that is
+            // not born archived — and it is ONE statement for the whole
+            // page, not one per version (pre-13u Act 4, 17c P19: this used
+            // to be an N+1 inside the `.map`, each call walking every post
+            // in the corpus, inside a held observation that re-fires at
+            // autosave rate).
+            let peers = try versionsOfNotes(
+                db,
+                versionIDs: noteRows
+                    .filter { ($0["born_archived"] as Int?) == 1 }
+                    .map { $0["id"] as String })
+            items += noteRows.map { row -> TrashItem in
+                let peer = peers[row["id"] as String]
                 return TrashItem(
                     kind: .note, id: row["id"], deletedAt: row["deleted_at"],
                     title: DisplayTitle.note(
@@ -559,7 +567,9 @@ extension Queries {
             }
     }
 
-    private static func databaseQuestionMarks(count: Int) -> String {
+    /// The shared `IN (?, ?, …)` builder (internal since pre-13u Act 4:
+    /// `activeFans`' batched fetch is the second caller).
+    static func databaseQuestionMarks(count: Int) -> String {
         Array(repeating: "?", count: count).joined(separator: ", ")
     }
 }

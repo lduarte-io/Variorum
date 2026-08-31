@@ -116,20 +116,53 @@ extension Queries {
     /// blocks (round 1 NIT 9: ONE tested home for the per-block fan fetch —
     /// `takesProjection` and the aligned/outline view models all read
     /// through this, never re-typed SQL).
+    /// **ONE statement per call, not one per block (pre-13u Act 4, 17c
+    /// P21).** This ran a separate fetch inside a Swift loop, and
+    /// `takesProjection` hands it every non-gap slot of the post — then
+    /// `observeTakes` HOLDS that projection, whose region includes
+    /// `variant`, so a note of N blocks issued N statements at autosave
+    /// rate. Measured on the seeded Sherlock corpus (a 212-block story, on
+    /// disk and encrypted): `takesProjection` 71.0 ms → 32.3 ms; on an
+    /// 800-block note the fan fetch alone went 353 ms → 237 ms — a smaller
+    /// ratio than the statement count suggests, because what remains is
+    /// decoding the same 2,400 rows. Cost was always proportional to the
+    /// NOTE and never the corpus — so this is a constant factor, not a P1
+    /// break, and `observeTakes`' own doc stays true either way.
+    ///
+    /// The batching is chunked because SQLite binds a bounded number of
+    /// parameters per statement; every chunk keeps the same `(fan_position,
+    /// id)` order, and each block's fan is built in that order, so the
+    /// result is byte-identical to the per-block shape — including the
+    /// empty-array entry for a block whose fan is entirely archived.
     public static func activeFans(
         _ db: Database, blockIDs: [String]
     ) throws -> [String: [Variant]] {
         var fans: [String: [Variant]] = [:]
-        for blockID in blockIDs {
-            fans[blockID] = try Variant
-                .filter(Column("block_id") == blockID
-                        && Column("deleted_at") == nil
-                        && Column("status") == VariantStatus.active.rawValue)
-                .order(Column("fan_position"), Column("id"))
-                .fetchAll(db)
+        for blockID in blockIDs { fans[blockID] = [] }
+        let unique = Array(Set(blockIDs))
+        var start = 0
+        while start < unique.count {
+            let chunk = Array(unique[start..<min(start + Self.fanChunk, unique.count)])
+            start += Self.fanChunk
+            let placeholders = databaseQuestionMarks(count: chunk.count)
+            let rows = try Variant.fetchAll(
+                db,
+                sql: """
+                    SELECT * FROM variant
+                     WHERE block_id IN (\(placeholders))
+                       AND deleted_at IS NULL AND status = ?
+                     ORDER BY fan_position, id
+                    """,
+                arguments: StatementArguments(chunk + [VariantStatus.active.rawValue]))
+            for row in rows { fans[row.blockId]?.append(row) }
         }
         return fans
     }
+
+    /// How many block ids ride in one `IN` list. Well under SQLite's
+    /// parameter ceiling, and a note with more blocks than this simply
+    /// pays a second statement.
+    static let fanChunk = 400
 
     /// An id-keyed container liveness probe (round 2 NIT 6 — the tested
     /// home for the tutorial's seeding/reset checks; the SyncSession

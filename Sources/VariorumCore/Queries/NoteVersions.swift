@@ -292,31 +292,103 @@ extension Queries {
     public static func versionOfNote(
         _ db: Database, versionID: String
     ) throws -> (id: String, title: String?)? {
-        try Row.fetchOne(
+        try versionsOfNotes(db, versionIDs: [versionID])[versionID]
+    }
+
+    /// **The same answer for MANY versions, in ONE statement** (pre-13u
+    /// Act 4, 17c P19). `trash()`'s `.note` arm called the single-id door
+    /// inside a `.map`, once per born-archived row — and that statement has
+    /// no seekable driver for the note side, so SQLite drives `n` on
+    /// `idx_container_kind` and the inner loop is (the version's placements
+    /// × every post in the corpus). Measured: 3.75 ms at 2,000 containers →
+    /// 35.7 ms at 20,000, per call. The Trash listing is a HELD observation
+    /// whose region includes `variant`, so it re-fires at autosave rate:
+    /// with fifteen deleted moments in the window that was fifteen corpus
+    /// walks per keystroke's autosave.
+    ///
+    /// **What this fixes, and what it does not.** The N+1 is gone — one
+    /// listing now pays ONE pass however many versions it lists — and the
+    /// pass itself is far cheaper, because each edge direction is its own
+    /// arm and can seek `idx_edge_source` / `idx_edge_target` (the old
+    /// `block_id IN (source, target)` form could use neither). Measured for
+    /// fifteen versions at 20,000 containers: 551 ms → 15.0 ms, and a single
+    /// lookup 35.9 ms → 8.0 ms.
+    /// What remains is that the pass is still LINEAR in the corpus: the
+    /// planner drives `container` on `idx_container_kind` because the peer is
+    /// reached through `container_block` BY BLOCK ID, and the only index on
+    /// that column is the live-rows partial one (`uq_cblock_ownership …
+    /// WHERE deleted_at IS NULL`), while this lookup is deliberately
+    /// tombstone-insensitive — the common case is a version that rode its
+    /// note's deletion, so both sides' placements are tombstoned.
+    /// `block.last_container_id` is not a road either: `deleteContainer`
+    /// cascades without stamping it. What would close it is an index on
+    /// `container_block(block_id)`, which is a schema change with its own
+    /// write-path cost — recorded in `KnownIssuesAndTechDebt.md` rather
+    /// than taken here.
+    public static func versionsOfNotes(
+        _ db: Database, versionIDs: [String]
+    ) throws -> [String: (id: String, title: String?)] {
+        guard !versionIDs.isEmpty else { return [:] }
+        let placeholders = Array(repeating: "?", count: versionIDs.count)
+            .joined(separator: ", ")
+        let rows = try Row.fetchAll(
             db,
             sql: """
-                SELECT n.id AS note_id, n.title AS title,
-                       n.entry_date AS entry_date, n.created_at AS created_at
-                FROM edge e
-                JOIN container_block mine
-                  ON mine.block_id IN (e.source_block_id, e.target_block_id)
-                 AND mine.container_id = :version
-                JOIN container_block theirs
-                  ON theirs.block_id IN (e.source_block_id, e.target_block_id)
-                 AND theirs.block_id <> mine.block_id
-                JOIN container n
-                  ON n.id = theirs.container_id AND n.kind = 'post' AND n.id <> :version
-                WHERE e.type = 'version_of'
-                ORDER BY (n.deleted_at IS NULL) DESC, n.id
-                LIMIT 1
+                WITH mine(version_id, block_id) AS (
+                  SELECT cb.container_id, cb.block_id FROM container_block cb
+                   WHERE cb.container_id IN (\(placeholders))
+                ),
+                -- The two edge directions as separate arms, so each one can
+                -- SEEK (`idx_edge_source` / `idx_edge_target`); the old
+                -- `block_id IN (source, target)` form could use neither.
+                links(version_id, my_block, peer_block) AS (
+                  SELECT mine.version_id, mine.block_id, e.target_block_id
+                    FROM mine JOIN edge e ON e.source_block_id = mine.block_id
+                   WHERE e.type = 'version_of'
+                  UNION ALL
+                  SELECT mine.version_id, mine.block_id, e.source_block_id
+                    FROM mine JOIN edge e ON e.target_block_id = mine.block_id
+                   WHERE e.type = 'version_of'
+                )
+                SELECT links.version_id AS version_id,
+                       links.my_block AS my_block, links.peer_block AS peer_block,
+                       n.id AS note_id, n.title AS title,
+                       n.entry_date AS entry_date, n.created_at AS created_at,
+                       (n.deleted_at IS NULL) AS peer_is_live
+                  FROM links
+                  JOIN container_block theirs ON theirs.block_id = links.peer_block
+                  JOIN container n
+                    ON n.id = theirs.container_id AND n.kind = 'post'
+                   AND n.id <> links.version_id
                 """,
-            arguments: ["version": versionID]
-        ).map { row in
-            (id: row["note_id"],
-             title: DisplayTitle.note(
-                title: row["title"], entryDate: row["entry_date"],
-                createdAt: row["created_at"]))
+            arguments: StatementArguments(versionIDs))
+        // The single-id door's ORDER BY, applied per version: a LIVE peer
+        // wins, then the lexically smallest id — deterministic either way.
+        var best: [String: (live: Bool, id: String, title: String?)] = [:]
+        for row in rows {
+            // The old statement's `theirs.block_id <> mine.block_id`, applied
+            // HERE and not in SQL: as a WHERE term — in the arms or in the
+            // outer select — it costs the edge seeks the arms exist for
+            // (measured 13.8 ms → 106 ms for fifteen versions at 20,000
+            // containers). It fences a degenerate self-edge, which the
+            // canonical `(min(id), max(id))` storage of `version_of` cannot
+            // mint in the first place; free in Swift, so it stays.
+            guard (row["my_block"] as String?) != (row["peer_block"] as String?)
+            else { continue }
+            let versionID: String = row["version_id"]
+            let noteID: String = row["note_id"]
+            let live = (row["peer_is_live"] as Int? ?? 0) == 1
+            if let held = best[versionID],
+               held.live != live ? held.live : held.id <= noteID {
+                continue
+            }
+            best[versionID] = (
+                live: live, id: noteID,
+                title: DisplayTitle.note(
+                    title: row["title"], entryDate: row["entry_date"],
+                    createdAt: row["created_at"]))
         }
+        return best.mapValues { (id: $0.id, title: $0.title) }
     }
 }
 
