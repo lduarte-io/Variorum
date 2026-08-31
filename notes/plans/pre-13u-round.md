@@ -996,7 +996,11 @@ doors.
    dated in the way that apple apps sometimes do - one line bars between items, etc. I want a bit of
    a refresh + fresh feeling added."* (Her second screenshot — the note ▾ menu's hairline dividers —
    is an instance of the grammar she means.) The latitude covers retiring the hairline-separator
-   grammar where a calmer grouping serves better, within the two voices.
+   grammar where a calmer grouping serves better, within the two voices. **Eighth wave: the mandate
+   now has a CONCRETE reference — the mockup file's grammar is the style guide (W8-2: spacing,
+   squarish-rounded controls, calm cards, "doesn't have to be an exact 1 for 1"), and the sidebar's
+   liquid-glass floating pane retires for solid geometric lines (W8-3). Act 10 restyles what it
+   touches; 13u2 carries the app-wide continuation.**
 9. **The open-notes tabs overflow** (her report is in Act 7's arrivals, verbatim). The mechanical
    half is not a taste call: **a newly opened note never lands in the hidden overflow** (the
    newcomer takes a visible slot; the least-recently-used visible note is what drops), and any
@@ -1067,7 +1071,11 @@ doors.
     idea grown up: names/first-sentences, jump, collapse); (b) a **read-the-note view with reading
     tools**; (c) a rename away from "Blocks" either way. She picks; the build follows her pick
     (this act if timing allows, else the deferral is recorded with its owner). No silent redesign
-    of a mode's purpose — that is a product call.
+    of a mode's purpose — that is a product call. **RULED at the eighth wave (2026-08-31, the
+    mockup feedback — the W8-1 block below): BOTH build — Index as a new mode after Takes, Blocks
+    stays as the self-sufficient poweruser center — PLUS a note READ surface (read-only,
+    vertical/book-like, click-through landing in Index, position tracked across modes). The name
+    "Blocks" stays for direction C; the mockup file is the style reference.**
 17. **Snippets — the BOUNDED refresh, widened at her fourth wave** (her scoping: "a BIT of a
     refresh"; then: *"there's a field guide scraps - how? does each book have a pool? note have a
     pool? why can you not make a new pool, move items between pools, or delete them there?
@@ -1087,7 +1095,9 @@ doors.
     stays the model term exactly as `kind='post'` survived the note sweep; canon docs unchanged).
     The sidebar's Pool (bookless notes) KEEPS its name — the collision dissolves from the other
     side; if she ever wants that renamed too, her word. The deeper "what is this page for" question
-    stays recorded as open.
+    stays recorded as open. **Eighth wave (W8-4): the snippets direction is ruled GOOD; the
+    takes-count badge on snippet rows joins the build; "group" proceeds as the working container
+    noun (hers to override); the mockup's Snippets tab is the style reference.**
 
 **Act 10 sizing (her authorization at the sitting):** the act is deliberately allowed to be
 "more significantly sized." It runs as **up to two sequential Fable implementer waves** at the
@@ -1151,6 +1161,85 @@ the ONE red was the known latency pin, 3× isolated in its recorded band, adjudi
 on the diff fact) · tutorial spine 10/10 · iOS builds · zero `Sync/`, zero schema. Dispositions in
 the 17h entry (register flipped closed); the two KnownIssues rows resolved. The session died once
 awaiting its backgrounded suite (the standing memory trap) and was resumed to a synchronous close.
+
+## THE MOCKUP FEEDBACK — HER RULINGS, EIGHTH WAVE (2026-08-31, ~02:50; her one feedback round,
+## recorded verbatim-faithful; these RULE item 16, widen 17, sharpen 8, and mint item 18)
+
+Her opener: *"amazing work and loved the terminal and study voices, and the great ideas… I LOVED
+these mockups… beautiful work seriously."*
+
+**W8-1 — ITEM 16 RULED: BOTH directions build.** Her words: *"both the Index page and the Blocks -
+workbench page were EXCELLENT. So I've decided I need both."*
+- **Blocks stays Blocks — the poweruser center:** *"keep Blocks as the poweruser center for someone
+  who wants to really work with their block, without the side menu even. make sure it has high
+  quality doors to the trays, every operation blocks have, etc. this is a useful powerhouse for
+  something complex."* (Direction C builds as the Blocks mode; the name stays; self-sufficient —
+  tray doors and every block operation in the page.)
+- **Index goes in as a mode:** *"index page - obviously a need, seems more fundamental, let's put
+  it in under Takes."* (The architect's reading, stated to her in-turn: a NEW MODE TAB slotted
+  after Takes in the mode row — correctable at her word if she meant inside the Takes mode.)
+- **AND a note READ surface:** *"a Reading surface SHOULD be added! not the book surface (wouldn't
+  make sense for a note like it does for a book) within a book, but the Read surface that you
+  can't edit it (but clicking on it brings you to that sentence within index, already open, and
+  index tracks position with take / write / probably block too). But the read surface that's only
+  verticle or book like - that's the thing that notes have been missing relative to books, is the
+  ability to read."* (Direction B, adopted as a read-only mode: vertical/book-like; a click lands
+  that sentence in INDEX already open; Index tracks position across Takes/Write/probably Blocks —
+  the same scrolled-open-door mechanism as 13u item 17's read-view edit jump, built once.)
+- **Mode-row canon consequence, recorded:** the note's mode row (R60–94; six modes, ⌘1–⌘6) GAINS
+  Index and Read at her word — no existing tab is removed, so item 15's "the mode row stays"
+  constraint survives as existing-tabs-stay. The field guide's "getting around" lesson enumerates
+  the six modes, so the tutorial content changes → the re-seed obligation rides the closeout.
+  AppSpec §12's mode-row delta lands at closeout per the ritual.
+
+**W8-2 — THE MOCKUPS ARE THE STYLE GUIDE; the app restyles to them, Act 10 + 13u.** Her words:
+*"treat them as an actual guide - doesn't have to be an exact 1 for 1, but the spacing felt modern
+and satisfying, I lovedddd how clean it felt, it felt like I wanted the whole app restyled in that
+modern app look. I was drooooling for it!!!… the spacing is good, the size of the index search bar
+and it's squarish rounded corners felt great, loved it all."* And: *"i want to app restyled liked
+this during batch 10 & during the 13u batch. I feel like the Takes page and Write page already
+basically look like this."* And cohesion: *"I also feel like these mockups match the mobile app's
+modern feeling and like half of the book page's modern feeling. it matches a lot of the app, the
+app just all has to get more cohesive."* → Act 10's item 8 mandate now has a CONCRETE reference
+(the mockup file's grammar: the spacing scale, the squarish-rounded search bar, calm cards, no
+hairline grid); Act 10 restyles the surfaces it touches; **13u2 inherits the app-wide
+continuation** (addendum written in the 13u plan this turn). The mockup file
+`notes/plans/pre-13u-mockups/blocks-and-snippets.html` is the reference artifact — PRESERVE it.
+
+**W8-3 — LIQUID GLASS RETIRED ON THE SIDEBAR; solid geometric lines.** Her words (with her
+screenshot of the mockup's sidebar, manifest row 13): *"I liked how on the left even, it doesn't
+have the liquid glass pane floating on top - i realized i don't like that, and i'd rather have
+these more solid, geometric lines."* → part of the restyle mandate: the floating/glass pane
+grammar goes; flat, solid, geometric structure in.
+
+**W8-4 — SNIPPETS: ruled good, widened by one, two questions answered.** Her words: *"the snippets
+idea is good - can we show how many takes they're in? what if they were edited, do they still
+appear there? i think it's a cool idea."* → the takes-count badge on snippet rows is IN (the
+mockup's "⑂ N takes" becomes real). Answered in-turn (existing semantics, no invention): a snippet
+is a standalone block living in its group until moved/archived/deleted; editing it updates it in
+place (the "edited" metadata) and it STAYS listed; dragging into a note mints a lineage COPY and
+the original snippet remains — edits to the note's copy never touch the snippet. **The container
+noun stays open** — she engaged with the mockup's "group" without objecting; "group" proceeds as
+the working noun, hers to override.
+
+**W8-5 — NEW ITEM 18: the BOOK view's Outline glowup + an index-like book view.** Her words (with
+her screenshot of the current book Outline on the field guide, manifest row 14): *"I'm also
+realizing that I'd like a more 'index like' view on book - I think that outline could be a better
+job of being the 'google docs like' one super long document, just have better spacing and stuff
+because it's so bizarrely open on the right and it's ugly how the note details render below the
+note's opening paragraphs - if anything, those should render to the side. but yeah, i basically
+think that outline needs to get a bit prettier / earn its place as 'the whole document at once,
+but you can have sections collapsed and see the outline there' and there should ALSO be an index
+like view, and ALSO the book view is cool - it can share an outline with the more google docs
+'Outline' mode. I don't know how the index view will reconcile with the current smallness of the
+outline pane, but I'm sure a way will be found for things to work in the book view."* Her close:
+*"in the end, this html mockup provided the bookview AND the notes view with a much needed
+glowup."* → **Item 18** (book view): (a) Outline mode earns "the whole document at once,
+collapsible sections, outline visible" — fixed spacing, the open-right fixed, note details render
+to the SIDE never below the opening paragraphs; (b) an index-like view for books (the note Index's
+sibling — share the outline brain where honest); (c) the book view sharing an outline with Outline
+mode. Runs in Act 10 wave 2 IF it fits; else DEFERRED to 13u2 with the restyle continuation
+(recorded either way — never dropped).
 
 ---
 

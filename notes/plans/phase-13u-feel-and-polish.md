@@ -496,3 +496,18 @@ land here, where that surface is already open, rather than in the pre-13u round)
   reference to a sibling's view model.")
 - **P39b — `Editor/WriteTakesPanel.swift:51` stops constructing `TakesViewModel`.** Construction is
   lifecycle ownership; `RootView` constructs, features receive. (Violates "never constructs.")
+
+## ADDENDUM 2026-08-31 (the pre-13u round, eighth wave) — the APP-WIDE RESTYLE continuation joins 13u2
+
+At the pre-13u mockup feedback (the W8 rulings in `notes/plans/pre-13u-round.md`), the author ruled
+the round's Blocks/Snippets HTML mockups **an actual style guide** for the whole app — her words:
+*"it felt like I wanted the whole app restyled in that modern app look… i want to app restyled
+liked this during batch 10 & during the 13u batch. I feel like the Takes page and Write page
+already basically look like this"* — with the sidebar's liquid-glass floating pane retired for
+*"more solid, geometric lines"*, and cohesion the point (*"the app just all has to get more
+cohesive"*). The pre-13u round's Act 10 restyles the surfaces it touches; **13u2 inherits the
+app-wide continuation** — every surface it opens conforms to the reference grammar (spacing scale,
+squarish-rounded controls, calm cards over hairline grids, solid geometric sidebar), judged against
+the PRESERVED reference artifact `notes/plans/pre-13u-mockups/blocks-and-snippets.html` (local,
+gitignored — do not delete). Anything the pre-13u round's item 18 (book Outline glowup + index-like
+book view) defers lands here with it; the pre-13u closeout will say which.
