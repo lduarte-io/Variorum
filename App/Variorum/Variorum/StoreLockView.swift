@@ -34,6 +34,11 @@
 import SwiftUI
 import VariorumCore
 
+/// The endpaper's bundle anchor: `Bundle(for:)` finds the APP bundle even
+/// when this view is hosted from a test runner (whose `Bundle.main` is the
+/// runner, not the app).
+private final class LobbyEndpaperLocator {}
+
 struct StoreLockView: View {
     @Bindable var lobby: StoreLobby
 
@@ -61,10 +66,10 @@ struct StoreLockView: View {
                 Image(nsImage: endpaper)
                     .resizable(resizingMode: .tile)
                     .ignoresSafeArea()
-                    .opacity(scheme == .dark ? 0.05 : 0.35)
+                    .opacity(scheme == .dark ? 0.08 : 0.55)
                     .allowsHitTesting(false)
                 // The wash: the pattern stays an undertone, never a poster.
-                tokens.room.opacity(scheme == .dark ? 0.55 : 0.72)
+                tokens.room.opacity(scheme == .dark ? 0.5 : 0.35)
                     .ignoresSafeArea()
                     .allowsHitTesting(false)
             }
@@ -78,6 +83,7 @@ struct StoreLockView: View {
                 Spacer(minLength: 24)
             }
         }
+        .task { loadEndpaper() }
         .task {
             // The biometric demand asks as the lobby appears — once; the
             // button below re-asks. (The prompt is the mode's whole point.)
@@ -133,7 +139,6 @@ struct StoreLockView: View {
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(tokens.line, lineWidth: 1))
         .shadow(color: .black.opacity(scheme == .dark ? 0.5 : 0.10), radius: 22, y: 8)
         .padding(.horizontal, 32)
-        .task { loadEndpaper() }
     }
 
     @ViewBuilder
@@ -222,12 +227,32 @@ struct StoreLockView: View {
 
     private func loadEndpaper() {
         guard endpaper == nil,
-              let url = Bundle.main.url(forResource: "lobby-endpaper", withExtension: "svg"),
+              let url = Bundle(for: LobbyEndpaperLocator.self)
+                  .url(forResource: "lobby-endpaper", withExtension: "svg"),
               let image = NSImage(contentsOf: url)
         else { return }
         // The endpaper grain: the art's own 1024 pt reads as a poster; a
-        // ~340 pt tile reads as a pattern. `size` is the tile's point size.
-        image.size = NSSize(width: 340, height: 340)
-        endpaper = image
+        // ~340 pt tile reads as a pattern. RASTERIZED at 2× — SwiftUI's
+        // tiling draws bitmap reps; an SVG rep tiles as nothing (measured).
+        let tile = NSSize(width: 340, height: 340)
+        guard let rep = NSBitmapImageRep(
+            bitmapDataPlanes: nil, pixelsWide: 680, pixelsHigh: 680,
+            bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true,
+            isPlanar: false, colorSpaceName: .deviceRGB,
+            bytesPerRow: 0, bitsPerPixel: 0)
+        else { return }
+        rep.size = tile
+        NSGraphicsContext.saveGraphicsState()
+        if let context = NSGraphicsContext(bitmapImageRep: rep) {
+            NSGraphicsContext.current = context
+            image.draw(
+                in: NSRect(origin: .zero, size: tile),
+                from: .zero, operation: .sourceOver, fraction: 1)
+            context.flushGraphics()
+        }
+        NSGraphicsContext.restoreGraphicsState()
+        let raster = NSImage(size: tile)
+        raster.addRepresentation(rep)
+        endpaper = raster
     }
 }
