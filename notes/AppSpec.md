@@ -356,7 +356,12 @@ CREATE INDEX idx_reference_container ON reference(container_id, position);
 ### setting — global/document key-values
 ```sql
 CREATE TABLE setting (key TEXT PRIMARY KEY, value TEXT NOT NULL);
--- seeds: ('default_segmentation','paragraph'), ('major_revision_threshold','0.8'), ('idle_commit_hours','24')
+-- seeds: ('default_segmentation','paragraph'), ('major_revision_threshold','0.8'), ('idle_commit_hours','2')
+--   (`idle_commit_hours` seeded 24 until Phase 13j's savepoint-cadence ruling
+--    J11 dropped the idle timer to 2 h as the BACKSTOP behind `closeAutoCommit`;
+--    `seedV1Settings` seeds '2' and migration `v1_13_savepoint_backstop` moves
+--    existing stores still at the old default. This comment said 24 until
+--    17f/P46 corrected it — the shipped seed had not been 24 since August.)
 ```
 > Default segmentation is a document/global setting decoupled from UI/mode; `container.segmentation_default` overrides per-post; `profile='journal'` seeds `one_block`. Settings are **synced** (they're document semantics — segmentation must match on iOS capture): they carry `sync_version` per §6, are upsert-only, and never tombstone. **E2EE constraint (14b closeout, ladder R1-9): `setting.value` is classified PLAIN and the disclosure list promises "enum semantics, no prose" — that promise is COLUMN-fenced, so no future setting key may carry user-authored prose in its value; a prose-valued setting is a design change that must re-open the column's classification, never a quiet addition.**
 >
@@ -416,7 +421,7 @@ Every mutation is one of these; each is a single transaction through the operati
 - **newBlock(container, text, at)** — INSERT block; INSERT variant(working_text=text); set block.default_variant_id; INSERT container_block(chosen=variant, position at insertion point).
 - **autosave(variant, text, charDelta)** — UPDATE working_text, updated_at; accumulate churn; threshold-cross ⇒ stamp major revision, reset, rebaseline (§10).
 - **commit(variant, kind=manual, message?)** — INSERT commit_point(text=working_text). Counts as a major revision.
-- **idleAutoCommit(post)** *(author-approved 2026-07-04)* — when a post with uncommitted buffer changes goes untouched for `idle_commit_hours` (setting, default 24): one commit_point per dirty variant, kind='auto', at most one per idle period, only if the text changed since that variant's last commit. Visually quiet, prunable. Insurance for "I rewrote it over weeks and never committed."
+- **idleAutoCommit(post)** *(author-approved 2026-07-04)* — when a post with uncommitted buffer changes goes untouched for `idle_commit_hours` (setting, **default 2** — dropped from 24 by Phase 13j's savepoint-cadence ruling J11, where the idle timer became the backstop behind `closeAutoCommit`'s leaving-a-note savepoint; corrected here at 17f/P46): one commit_point per dirty variant, kind='auto', at most one per idle period, only if the text changed since that variant's last commit. Visually quiet, prunable. Insurance for "I rewrote it over weeks and never committed."
 - **restoreCommit(variant, commit)** — UPDATE working_text = commit.text (old commits remain; I5). **Known behavior (review #9):** a commit may predate a structural op — after a single-variant divide or extract, A's old commits still hold the full pre-split text, so restoring one resurrects both halves into A's buffer while the successor block still sits next door. Coherent under "coarse, not forensic"; the editor should warn ("this commit predates a split of this block") — documented Phase 3 test, UI warning at the editor phase.
 - **branchVariant(block, fromVariant)** — INSERT variant(parent=fromVariant, working_text=**copied**, fan_position=next). *The default gesture.*
 - **newBlankVariant(block)** — branch with working_text=''. *The "genuinely different take" gesture.*
