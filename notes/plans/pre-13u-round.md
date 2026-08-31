@@ -166,6 +166,29 @@ custody rows that carried owner "17a" outside its item list (R2-7 saveGated dele
 R3-5 delete-status-discarded + riders) become entry **17h** in `phase-17-standing-fixes.md` — a
 small fresh Fable session, run in this round after Act 9 closes, while the subsystem is warm.
 
+**R-pre13u-7 — THE NINTH WAVE: the security-clarity rulings (2026-08-31; carried by her to the
+successor from a background design session with the founding orchestrator).**
+**`notes/plans/pre-13u-memo-security-shapes.md` is the BINDING record** — the one law, the four
+credentials, the RECIPES presentation format, shapes 1–2 with per-shape "who this protects you
+from" + the two what-ifs, the per-mode "what YOU need" statements, the truthful unchosen-state
+indicator, the two decision ceremonies, the ratified sync sentence, the compound warning, rotation
+stays open (the Auto corner stated out loud). Her two-line version, verbatim: *"Read
+notes/plans/pre-13u-memo-security-shapes.md — it extends Act 10 item 3's spec and is the binding
+record of the security-clarity rulings; Shape 3 is deferred, the escrow/posture coupling is the
+one behavior change, the rest is wording."* Consequences, recorded: **(a)** the memo EXTENDS Act 10
+item 3's spec, and its recipes format SUPERSEDES the sixth-wave "one situation table behind a ?"
+in shape — no grand matrix; the three-row shapes summary is the ONLY surviving table (the
+seventh-wave truths — the two new-device rows, the demanded-mode fallback, E2EE-stays-internal —
+carry INTO the recipes/what-ifs wording unchanged). **(b)** The ONE behavior change is the
+escrow/posture coupling (§4: demanded modes do not offer the iCloud spare; escrow's default
+follows the posture; her why-sentence is the copy) — it builds in Act 10 with item 3. **(c)**
+Shape 3 is DEFERRED at her word (§8, verbatim: *"we're deferring a shape 3 where sync without
+variorum login is created - not making it now, I feel fairly satisfied"*) — a ruled non-build with
+the reopening question framed in the memo, deliberately NO owner slotted (not parked work — a
+settled product ruling; 13x-adjacent by nature if ever reopened). **(d)** Precedence: where the
+memo and her carried successor block differ, THE MEMO WINS (its own §10). **(e)** The memo's
+tutorial-privacy-chapter wording changes make the field-guide re-seed obligation live at closeout.
+
 ---
 
 ## Reading order (do this first, in this order)
@@ -944,6 +967,14 @@ doors.
    **(c)** the five encryption paragraphs collapse into the structure — a sentence survives only
    where truly necessary (her amended doctrine). The architect's sitting reply of 2026-08-31
    carries the reference version of the table — the batch renders it, not re-derives it.
+
+   **NINTH WAVE (R-pre13u-7 — read before building this item):**
+   **`notes/plans/pre-13u-memo-security-shapes.md` is the BINDING extension of this spec.** Its
+   RECIPES format supersedes the situation-table SHAPE — no grand matrix; the three-row shapes
+   summary is the only surviving table — while every seventh-wave truth below carries into the
+   recipes/what-ifs wording unchanged. The one behavior change riding this item: the memo §4
+   escrow/posture coupling — demanded modes do not offer the iCloud spare; escrow's default
+   follows the posture; her why-sentence is the copy.
 
    **Seventh-wave sharpenings (2026-08-31, from her follow-up questions — these are PART OF the
    table's spec):** **(i)** the table distinguishes the TWO new-device rows, which are different
