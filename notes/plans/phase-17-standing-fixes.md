@@ -77,7 +77,7 @@ once. Claim a letter here first.
 | **17a** | **CLOSED 2026-08-30 — the pre-13u round's Act 9 (the Fable custody batch).** All 8 items FIXED with revert-verified red-on-old pins; per-item dispositions in the entry below; the two KnownIssues rows that carried owner "17a" without being in the item list are RE-ROUTED to **17h** (opened at her word) | **closed** |
 | 17b–17f | The 2026-08-30 sweep's remaining groups | open, unstarted *(17c/17f run later in the same round)* |
 | **17g** | **CLOSED 2026-08-30 — the `13p-fix` session** (author's live session of 2026-08-30: an issue she found testing the refreshed 13p install). That session owns this letter and writes its own entry; it does **not** fold into 17a. | **closed** |
-| **17h** | **The custody riders 17a never listed** — opened at the author's word 2026-08-30 (the pre-13u sitting: "Open 17h, run it this round"). TWO items, both already traced in `KnownIssuesAndTechDebt.md` rows that carried owner "17a" without being in its 8-item list: **(1)** the `saveGated` delete-before-add window (13p-fix ladder R2-7 — a failed `SecItemAdd` after the forced delete leaves no custody; remedy sketch on the row: add under a temporary account → verify → swap → delete old, or an explicit accepted-window doc line); **(2)** the delete-status-discarded family (R3-5 — `deleteAuto`/`deleteGated` drop `OSStatus`, so the custody law binds writes only; remedy on the row: `Bool`-returning delete seams + refuse/report on failed release + a `deletesSucceed` knob pin; the riders travel with it: `E2EECustodyStorage.live` wiring coverage R3-4, `setMode`'s MainActor SecItem calls R3-6). The rows' mechanisms and remedies are the brief; runs as a small fresh Fable session inside the pre-13u round, after Act 9 closes. | **open** |
+| **17h** | **The custody riders 17a never listed** — opened at the author's word 2026-08-30 (the pre-13u sitting: "Open 17h, run it this round"). TWO items, both already traced in `KnownIssuesAndTechDebt.md` rows that carried owner "17a" without being in its 8-item list: **(1)** the `saveGated` delete-before-add window (13p-fix ladder R2-7 — a failed `SecItemAdd` after the forced delete leaves no custody; remedy sketch on the row: add under a temporary account → verify → swap → delete old, or an explicit accepted-window doc line); **(2)** the delete-status-discarded family (R3-5 — `deleteAuto`/`deleteGated` drop `OSStatus`, so the custody law binds writes only; remedy on the row: `Bool`-returning delete seams + refuse/report on failed release + a `deletesSucceed` knob pin; the riders travel with it: `E2EECustodyStorage.live` wiring coverage R3-4, `setMode`'s MainActor SecItem calls R3-6). The rows' mechanisms and remedies are the brief; runs as a small fresh Fable session inside the pre-13u round, after Act 9 closes. **CLOSED 2026-08-31** — both items FIXED (R2-7 as probe-first narrowing with the residual window recorded; R3-5 with all riders), every pin red-on-old by behavioral revert; the entry below is the record | **closed** |
 
 **Why 13p-fix is 17g and not part of 17a.** 17a is the *sweep's* 13p residue — eight findings from a
 review that read the code. 13p-fix is a *tested* defect she hit in the running app, with its own plan
@@ -1092,3 +1092,50 @@ outcome check instead — same red, zero real-world traffic.
 4. **The install refresh — DONE at the CLOSE (`8490ac3`):** `/Applications` was refreshed behind the
    A1 rail, hash-matched, the guard confirmed in the shipped binary. *(This item predated the CLOSE
    and stood uncorrected beside it — struck at the pre-13u round's Act 1 cold review, finding F3.)*
+
+---
+
+## 17h — The custody riders 17a never listed (R2-7 · R3-5 + riders)
+
+**Status: CLOSED 2026-08-31 — the pre-13u round's small fresh Fable session,
+commits `73763c2` (R3-5 + R3-4) · `bc48315` (R3-6) · `98813d4` (R2-7) + the
+records commit on `main`.** Both items FIXED; every bug-class pin red-on-old
+by a faithful **behavioral revert** (the R3-1 rule — the outcome check
+reverted, never the seam; each drill red reproduced the traced end state
+verbatim). Zero `Sources/VariorumCore/Sync/` lines, zero schema. The two
+`KnownIssuesAndTechDebt.md` rows that named this entry are REMOVED per that
+file's rule; this entry is the resolution record.
+
+### Dispositions (per item)
+
+| item | verdict | pin(s) | notes |
+|---|---|---|---|
+| **R3-5** (the delete-status-discarded family) | **FIXED** | `CustodyHandoverTests.aRefusedOutgoingReleaseBacksTheTransitionOut` · `.aRefusedPlainReleaseBacksTheGateOnTransitionOut` · `CustodyReleaseTests` (all three shapes) | Every delete seam answers RELEASED (deleted, or never there): `StoreKeyGuard.deleteAuto`/`deleteGated`, `E2EEKeychainStorage.deletePlainItem`/`deleteGatedItem`, core's `StoreKeyKeychain.delete` (both keychains, both legs). `CustodyHandover` consults its delete leg — the new `.outgoingNotReleased` outcome rolls the incoming item back best-effort and refuses whole; `setMode`'s `.passphrase` arm verifies BOTH releases (gated first, so a refusal leaves a coherent state from either direction); both surfaces word the arm (`ProtectionCopy.outgoingCustodyNotReleased` / `syncKeysOutgoingNotReleased`, the F6 own-sentence precedent). The `deletesSucceed` knob (the `savesSucceed` pattern) drives the pins. Drill red: every transition COMPLETED with the dial flipped over an unreleased item — the row's three shapes verbatim. **Scope note:** `deleteEscrow` deliberately not widened — the row named `deleteAuto`/`deleteGated` and all three reachable shapes; the escrow item's consistency has its own verified-landed observable (R-pre13u-4), and its delete's failure mode (a lingering RECOVERY copy) is the opposite polarity of custody loss. |
+| **R3-4** (rider: `E2EECustodyStorage.live`'s wiring covered by nothing) | **FIXED** | `CustodyHandoverTests`' five wiring pins (`gateOnReleasesThePlainItemAndOnlyThePlainItem` &c.) · `KeychainTripwireTests.theLiveLeavesReachTheStaticFunctionsTheirNamesClaim` | The composition is seamed: `E2EECustodyLeaves` (the fixed-account leaves as closures) + `E2EECustodyStorage.wired(leaves:)` with `.live = wired(leaves: .live)`. The handover ROLES are pinned with recording leaves — transposing `deleteOutgoing`/`rollBackIncoming` in `wired` reds on names; the NAME→FUNCTION mapping is pinned through the tripwire's new `refusedLeafNames` observable with zero Keychain traffic (containment over per-call deltas, race-safe by construction). `KeychainTripwireTests` is `.serialized` now — its exact `+5` count and the new tripper must not interleave. |
+| **R3-6** (rider: `setMode`'s synchronous `SecItem*` on the MainActor) | **FIXED** | `ProtectionSetModeOffMainTests.everyTransitionArmsGuardSeamWorkArrivesOffMain` | The transition's custody choreography extracted verbatim into the nonisolated `transitionCustody`, run in ONE hop on a SERIAL custody queue (the `DeviceKeyStore.custodyQueue` pattern — the pre-fix MainActor body had no suspension point across its custody work, so transitions never interleaved; the serial queue keeps exactly that, where a detached task per call would not). Custody semantics byte-preserved — the existing transition pins rode unmodified. Drill red: all three arms' calls landed main-thread while every call-order assertion stayed green. |
+| **R3-NIT** (rider: `CustodyHandoverTests` cache save/restore) | **ALREADY DISCHARGED** — Act 9 group 1 (`270bf4f`); not redone | — | Verified present in the test (`E2EELaunchKeyCache` save/restore around `theE2EEGateTurnsOffOnlyWhenThePlainItemReadsBack`). |
+| **R2-7** (the `saveGated` delete-before-add window) | **FIXED — probe-first narrowing; the residual window RECORDED, not claimed fixed** | `GatedSaveChoreographyTests` (4 pins) · `Phase13pKeychainFactTests.aGatedReSaveOverAnExistingItemLandsAndLeavesNoProbeLitter` (real DP keychain, signed host, throwaway scope) | **The traced mechanism:** both `saveGated`s ran delete→add (FORCED — updating an ACL'd item demands interactive auth; a write must never prompt), so an add failing after the delete left ZERO gated custody. The reachable harm road is E2EE's `DeviceKeyStore.save` under gate-ON (a passphrase re-unwrap's re-save); the store-key family reaches `saveGated` only from `setMode(.biometric)`, where the custody law keeps the gated item absent — unless an earlier delete failed silently, which is R3-5's third shape, now closed. **Why not the row's swap remedy:** renaming an ACL'd item (`SecItemUpdate` of its account) is an update too and demands interactive auth under the same platform rule that forced delete-then-add — the swap is unsound, and would additionally need crash-heal state machinery in the most safety-critical file. **The fix:** `GatedSaveChoreography` (ONE brain, both families): sweep probe litter → add a PROBE item (sibling account, same service/ACL/DP partition, dummy bytes) proving the keychain accepts an identical ACL'd add RIGHT NOW — identity/access group, DP admission, ACL acceptance, biometry state, disk, securityd — → sweep it → VERIFIED release (R3-5's semantics) → real add. Drill red: the pre-fix body (delete-then-add through the seam) left `existing == nil`, the traced zero-custody end state. **What survives, pinned as documented behavior** (`aFailureBetweenTheTwoAddsStillStrandsAndThatIsRecorded`, green on both trees BY DESIGN): a transient failing between two identical adds milliseconds apart, and the crash-between-syscalls window that always existed — in both, the material is in hand at the caller, the surfaces already word the refusal, and the vault re-derives custody by passphrase (a re-enrollment prompt, never lost writing). No further remedy exists under the never-prompt rule; not deferred work, so no KnownIssues row remains. |
+
+### Verification at close
+
+Core `swift test`: **1457/154 GREEN — exact baseline.** Full Mac suite (run
+ONCE, at close): **1887 tests in 320 suites — count arithmetic EXACT**
+(baseline 1871/317 + this entry's 16 pins across 3 new suites), green
+except the ONE known intermittent latency pin
+(`EditorWindowSmokeTests.rewriteStrategyLatencies(paragraphs: 250)` at
+54.87 ms in-suite; re-run ISOLATED per the standing rule three times:
+51.54 / 53.20 / 51.07 ms — the exact band its KnownIssues row records
+across three prior phases' loaded boxes). **Adjudicated PRE-EXISTING on
+the diff fact:** this entry's whole diff is 13 keychain/custody files +
+test pins, zero editor-path lines (diff-verified), and the row's 13p-close
+covariate — the author's LIVE real-store app running beside the test
+host — was active throughout; the row stays at its owner (12,
+perf-budget calibration). `CanvasDragTrackingTests` (the other known
+flake) passed inside the full run. Tutorial spine: **all 10 tutorial
+suites GREEN inside the full run.** iOS target **BUILDS**
+(`generic/platform=iOS Simulator`; the scheme's default destination
+resolves to "My Mac" and fails on provisioning — a destination artifact,
+not a compile failure). Zero `Sync/` lines, zero schema (diff-verified:
+no file under `Sources/VariorumCore/Sync/` in any commit). The author's
+real-store app was RUNNING throughout — never touched, no Release
+builds, no `/Applications` refresh.
