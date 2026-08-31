@@ -75,7 +75,8 @@ once. Claim a letter here first.
 | Letter | Subject | State |
 |---|---|---|
 | **17a** | **CLOSED 2026-08-30 — the pre-13u round's Act 9 (the Fable custody batch).** All 8 items FIXED with revert-verified red-on-old pins; per-item dispositions in the entry below; the two KnownIssues rows that carried owner "17a" without being in the item list are RE-ROUTED to **17h** (opened at her word) | **closed** |
-| 17b–17f | The 2026-08-30 sweep's remaining groups | open, unstarted *(17c/17f run later in the same round)* |
+| 17b, 17d–17f | The 2026-08-30 sweep's remaining groups | open, unstarted *(17f runs later in the same round)* |
+| **17c** | **CLOSED 2026-08-31 — the pre-13u round's Acts 3+4.** All 4 read-layer items (P18–P21) FIXED with revert-verified red-on-old pins (query plans and statement counts, never timings); the P20 index landed as its own schema commit and is NOT a §12 lockstep event (marker stays 7). Per-item dispositions with before/after numbers in the entry below; one residual (`container_block(block_id)`) re-routed to **12** in KnownIssues | **closed** |
 | **17g** | **CLOSED 2026-08-30 — the `13p-fix` session** (author's live session of 2026-08-30: an issue she found testing the refreshed 13p install). That session owns this letter and writes its own entry; it does **not** fold into 17a. | **closed** |
 | **17h** | **The custody riders 17a never listed** — opened at the author's word 2026-08-30 (the pre-13u sitting: "Open 17h, run it this round"). TWO items, both already traced in `KnownIssuesAndTechDebt.md` rows that carried owner "17a" without being in its 8-item list: **(1)** the `saveGated` delete-before-add window (13p-fix ladder R2-7 — a failed `SecItemAdd` after the forced delete leaves no custody; remedy sketch on the row: add under a temporary account → verify → swap → delete old, or an explicit accepted-window doc line); **(2)** the delete-status-discarded family (R3-5 — `deleteAuto`/`deleteGated` drop `OSStatus`, so the custody law binds writes only; remedy on the row: `Bool`-returning delete seams + refuse/report on failed release + a `deletesSucceed` knob pin; the riders travel with it: `E2EECustodyStorage.live` wiring coverage R3-4, `setMode`'s MainActor SecItem calls R3-6). The rows' mechanisms and remedies are the brief; runs as a small fresh Fable session inside the pre-13u round, after Act 9 closes. **CLOSED 2026-08-31** — both items FIXED (R2-7 as probe-first narrowing with the residual window recorded; R3-5 with all riders), every pin red-on-old by behavioral revert; the entry below is the record | **closed** |
 
@@ -422,7 +423,57 @@ WINS — it was written with the real code open and with instructions to refute.
 
 ## 17c — The read layer's P1 debt (query-side)
 
-**Status: open, unstarted.** 4 items, no pins.
+**Status: CLOSED 2026-08-31** — the pre-13u round's Act 4 (this batch also built Act 3, whose
+Sherlock corpus was the instrument). All four items **FIXED**, each with a red-on-old pin verified by
+reverting the fix and watching the pin go red. Commits `e08762b` (the schema change, on its own) and
+`edee416`.
+
+### Dispositions (per item)
+
+Every pin is a **shape** fact — a query plan or a statement count — never a timing, so it cannot pass
+or fail with machine load (P48's own lesson, applied here: a pin that cannot fail is a hole in the
+mechanism). All pins live in `Tests/VariorumCoreTests/ReadLayerP1Tests.swift`. Numbers are Debug
+builds on the author's M3; the corpus is a seeded probe at 2,000 and 20,000 containers (≈12k and
+≈122k variants), plus the real seeded Sherlock library where the surface is a note-level one.
+
+| Item | Verdict | Before → after | Pin (red-on-old verified) |
+|---|---|---|---|
+| **P18** trayTakes scans `variant` | **FIXED** | ordinary 1-block note **0.836 → 4.783 ms** across the corpus growth; after **0.472 → 0.470 ms — FLAT**. (800-block note: 1.116→5.358 before, 1.715→1.741 after.) | `theTrayTakesListingIsDrivenByTheNoteAndNeverScansTheVariantTable` — plan must not contain `SCAN v` and must name `idx_cblock_order`/`idx_block_last_container`. **Red on old:** both assertions fail (`SCAN v`). Plus an equivalence pin, `theRewrittenTrayListingSelectsExactlyWhatTheCoalesceDid` (moved-away block excluded, released original included), which passes on BOTH shapes by design — that is what makes it an equivalence pin. |
+| **P19** versionOfNote N+1 in the Trash | **FIXED** | fifteen versions at 20,000 containers **551 → 15.0 ms**; a single lookup **35.9 → 8.0 ms** | `theTrashListingCostsTheSameStatementsHoweverManyVersionsItLists` — statements for a listing with one version must equal those for ten. **Red on old: 6 vs 16.** Plus `theBatchedPeerLookupKeepsTheSingleDoorsAnswer` (live-peer-then-smallest-id ordering preserved; the single-id door now delegates, so the two cannot disagree). |
+| **P20** the classifier has no index | **FIXED** (schema `v1_15`, its own commit) | plain note with zero versions **0.374 → 1.791 ms** across the corpus growth; after **0.215 → 0.218 ms — FLAT** | `theVersionClassifierSeeksItsOwnIndexInsteadOfWalkingEveryPost` + `theDeletedWithRoadSeeksTheSameIndex`. **Red on old:** with the index dropped, the plan is `SEARCH v USING INDEX idx_container_kind (kind=?)`. |
+| **P21** activeFans one query per block | **FIXED** | 40 blocks: **40 statements → 1**. On the seeded Sherlock corpus (a 212-block story, on disk and encrypted) `takesProjection` **71.0 → 32.3 ms**; the 800-block fan fetch 353 → 237 ms | `theFanFetchIsOneStatementForTheWholeNote` (**red on old: 40**) + `theBatchedFanFetchMatchesThePerBlockShape` (an entry for every block asked about, empty where the fan is; `(fan_position, id)` order). |
+
+**The verifier's temperings were right, and the record says so.** P20's consequence really is
+single-digit milliseconds at any corpus she will have this year (its value is that the shape becomes
+flat, on the WRITE path, inside `deleteContainer`'s transaction); P21 really is a constant factor and
+not a P1 break, and its improvement is smaller than the statement count suggests because what remains
+is decoding the same rows. P18 was the sharpest of the four: it was corpus-linear on an ORDINARY
+one-block note, which is what made the doc comment's "never the corpus" false rather than optimistic.
+
+**One residual, recorded not fixed:** P19's pass is still LINEAR in the corpus — the peer is reached
+through `container_block` BY BLOCK ID, and the only index on that column is the live-rows partial one,
+while the lookup is deliberately tombstone-insensitive. Closing it needs an index on
+`container_block(block_id)`, a second schema change with its own write-path cost. It has a
+`KnownIssuesAndTechDebt.md` row owned by **12 (Hardening)**, beside its P1-tension siblings.
+
+**False doc comments corrected in the same commits** (the sweep named them): `PoolAndTray.swift`'s
+"Cost ∝ this note's own fan history … never the corpus" was false and is now true, with the mechanism
+written down; `NoteVersions.swift`'s two "never the corpus" claims now say exactly what is and is not
+corpus-shaped.
+
+**Verification at close:** core `swift test` **1465/155 green** (baseline 1457/154; +8 pins in one
+suite), three consecutive clean runs. Mac suite **1897/321** with ONE failure — the known load-flaky
+`EditorWindowSmokeTests.rewriteStrategyLatencies` pin at 52.98 ms against its 50 ms budget —
+**adjudicated PRE-EXISTING**: it failed isolated too (51.9–53.8 ms over four runs, load average
+12–20 on a 42-day-up box), and the **pre-round baseline commit `626c8c2`, built in a worktree and run
+under the same load, measured 52.53 ms** on the same test. Its KnownIssues row gains this covariate.
+Tutorial spine green; the iOS target builds.
+
+---
+
+**Original brief (kept as written, so the closing verdicts can be read against what was claimed):**
+
+4 items, no pins.
 
 Deliberately split from 13u1's O(N²) family: those are editor-seam and belong with the rewrite that
 touches that seam. **These four are `Queries/` — a different file, a different fix, and no reason to

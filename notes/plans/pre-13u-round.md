@@ -1311,3 +1311,185 @@ companion, index as the full view.
 - Act 5's honest P1 pins should exist **before** 13u1 changes P1-relevant code, not after.
 
 Nothing here blocks on 13y, 13i, or the mobile project.
+
+---
+
+# ACTS 3+4 BATCH RECORD (2026-08-31 — the sample library, then the read layer it measures)
+
+**Commits, in order:** `e727e6e` (Act 3 — the seeder, the text, the wiring, ten pins) ·
+`e08762b` (**schema `v1_15`, on its own commit** — the P20 index) · `edee416` (Act 4 — P18/P19/P21
+and eight pins) · this records commit.
+
+**Order was the point.** Act 3 ran first because Act 4's measurements are supposed to happen against
+a real 105k-word book rather than a synthetic fixture, and they did: every note-level number below
+comes from the seeded Sherlock corpus on a real on-disk SQLCipher store, and only the corpus-SCALING
+numbers come from a synthetic probe (2,000 and 20,000 containers), because twelve notes cannot
+demonstrate an asymptote.
+
+## Act 3 — the sample library
+
+**What it really is: 12 stories · 2,530 paragraphs · 104,350 words** (the app measures the seeded
+store at **105,335 words / 2,533 blocks** — its own word rule plus the three attribution paragraphs).
+Her two targets land in one corpus: ~105k in a book, and a ~10k note (the biggest story, "The
+Adventure of the Copper Beeches", is **9,944 words**; the smallest, "A Case of Identity", 6,975).
+**Bundle cost: 574,874 bytes — 561 KB** in the app, verified present in the built product's
+`Contents/Resources`.
+
+**The text.** Derived from the raw Project Gutenberg #1661 download by
+`notes/source/sherlock-extract.py` (committed, so the derivation is auditable and re-runnable): PG
+header/footer and the volume front matter stripped per her Gutenberg ruling, `%%% <title>` delimiters
+the seeder splits on and never stores. **The unwrapping is the load-bearing part and it was nearly a
+defect:** `SegmentationRules.bulkSegments` splits paragraph mode on every non-blank LINE, so shipping
+PG's 72-column hard wrapping would have minted **~11,000 one-line blocks** instead of 2,530
+paragraphs — a library that proved the opposite of what it exists to prove. Pinned
+(`bundledTextIsTheTwelveAdventures` asserts the block count stays in the 2,000–3,000 band).
+
+**Shape in the app.** A curated book, `the adventures of sherlock holmes`, **13 chapters**: a
+front-matter chapter `about this text` holding the plain source attribution, then one chapter per
+story, one note per story, every note tagged `sherlock holmes`. *The 13th chapter is a judgement I
+made and flag for her: her ruling says "ship the public-domain text with a plain source attribution",
+and an attribution that lives only in the repo is not shipped — so it is a note inside the book, which
+also means the tag really does select **everything**.*
+
+### The six traps, answered
+
+1. **First-launch cost — measured, and the answer is that it is off the path.** The seed sits after
+   `AppServices.start()` inside the window's own `.task`; the 562 KB parse runs off the main thread;
+   each story is its OWN runner turn, so a reader typing during the seed waits one story's writes
+   (~370 ms) and never the library's. **Measured on a fresh dev store, launch → first window on
+   screen: 1.25 s with the seed suppressed, 0.96 s with it running, 0.88 s on the already-seeded
+   second launch** (CGWindowList polling by PID; the differences are launch noise, which is the
+   finding — the seed is not on that path at all). **The seed's own cost, on a real on-disk encrypted
+   store: 4.4–4.5 s**, landing 4.3 MB + 1 MB WAL.
+2. **Undo — closed.** The seed runs on the QUIET facade (`Operations(undoStack: nil)`, the
+   `TutorialSeeder`/`MobileStarterJournal` shape), so twelve `importPost` calls leave the stack at
+   depth 0. Pinned: `seedRegistersNoUndoEntry`.
+3. **Idempotence — closed, and stronger than asked.** Three guards: a per-store-variant `UserDefaults`
+   mark, discovery by reserved book name + tag, and the sync gate. Pinned both ways
+   (`seedingTwiceIsANoOp` covers the mark AND, with the mark cleared, discovery). **Plus
+   resumability**, which the trap did not ask for but the placement demands: the seed runs from a
+   cancellable window task, so discovery reports WHICH story titles are already in the book and the
+   seed mints only the missing ones — a window closed mid-seed heals at the next launch instead of
+   leaving a half library forever (`aPartialSeedResumes`: 4 stories in, 8 minted, one book, 13
+   chapters).
+4. **`reading_section` at real scale — what I saw: nothing.** 13 chapters with 13 memberships
+   assemble in **0.80 ms** and the chapter resolution is exact (13 distinct `sectionPath`s, no chapter
+   holding two notes). This is the first real book the table has carried and it did not notice.
+5. **Sync baseline — one line, as asked.** A signed-in new user's first push is now ~105k words of
+   ciphertext: **~4.3 MB of store, 2,533 blocks / 2,533 variants / 2,533 placements / 13 memberships /
+   13 sections / 13 tag applications ≈ 7,600 rows** before she writes anything. That is the floor
+   **13y** should design its per-account quotas against, and it is close to the author's own entire
+   corpus at the 14c repush (7,278 rows).
+6. **THE PHONE — a proposal, not a build** (nothing mobile-side was touched). **Recommendation:
+   ARRIVE BY SYNC; do not seed on the phone.** Three reasons. (a) The phone is a first-class
+   birthplace of stores, but a phone-born store that later signs into an account would then carry a
+   second library, and the guard that prevents it is the same sync gate whose declining case is
+   already the awkward one. (b) The Mac seeds default-on, so any account with a Mac already has the
+   library and the phone gets it for free. (c) A phone-only user is exactly the case where 561 KB of
+   bundle and a 4.5 s first-launch write are least welcome — and the app's own answer for a
+   phone-first store is `MobileStarterJournal`, which is furniture sized for a phone.
+   **It interacts with R-pre13u-1** (seed-on-first-write): if the architect wants the phone to seed,
+   it should ride the SAME first-write moment the starter furniture now rides, not launch — otherwise
+   the phone gains a second launch-time seeding mechanism the round just deleted one of.
+
+### Her two verifications — both pinned
+
+- **The Pool is BLANK on a freshly seeded store** (`thePoolIsBlank`): `Queries.poolPosts` returns
+  nothing, because every seeded story is a member of the book. A seeding bug that left the stories
+  bookless would have filled a new reader's Pool with twelve strangers, exactly as she said.
+- **The `sherlock holmes` tag selects the whole set** (`theTagSelectsTheWholeSet`): 13 posts, the
+  stories and the attribution note, so the library is removable in one gesture.
+
+### Does it feel fast? — the acceptance bar
+
+Measured on the author's M3, Debug builds, against the seeded corpus on a real encrypted store:
+
+| Read | Time |
+|---|---|
+| Book assembly (13 entries, chapters resolved) | **0.80 ms** |
+| Library listing (200) | **0.25 ms** |
+| Bookshelf | **0.35 ms** |
+| Note render — the biggest story, 9,944 words / 212 blocks | **3.44 ms** |
+| `takesProjection` — same note | 71.0 ms **→ 32.3 ms after Act 4** |
+| Tray takes — same note | 0.95 → **0.80 ms** |
+| Pool listing | 0.42 ms |
+| Trash listing | ~2.0 ms |
+| One autosave inside the biggest story | **2.6 ms** |
+
+**P1 verdict: it holds.** Every read above is proportional to the note or the page, not to the
+corpus, and the two that were NOT — `trayTakes` and the classifier — are Act 4's fixes. Opening a
+10k-word story costs 3.4 ms; typing in it costs 2.6 ms per autosave. **One honest exception, recorded
+as a finding rather than polish:** `Queries.bookWordCounts` — the shelf's word/progress aggregate —
+costs **172–178 ms** on this corpus because it reads every block of every book. It is a deliberate
+ONE-SHOT (off-main, on shelf appearance, never held), so nothing re-runs it while she types and the
+shelf renders before it lands; what changed is that the sample library makes it **every new user's
+floor** rather than a mature corpus's. New `KnownIssuesAndTechDebt.md` row, owner **12**.
+
+### For 13i — the wing line (recorded here for the closeout to carry)
+
+**The sample library should become its own WING, removable in one gesture.** It is the cleanest first
+citizen of the wings design: a whole room of someone else's writing sitting in Home, beside her
+journal and the tutorial, is exactly the "different room in the same house" case. Today it is a book
+plus a tag, and the tag is what makes it removable as a set; a wing would make removal one gesture and
+would keep 105k words of Conan Doyle out of every Library and Pool listing she scrolls. *(Recorded for
+the architect to place on the 13i brief — this batch deliberately did not edit that file.)*
+
+### Open calls the architect may want to make (nothing was invented)
+
+- **No restore door.** Deleting the library is final, following her ruled starter-journal shape ("if
+  they delete that journal book … it just doesn't appear at all"). The tutorial has Help ▸ Restore;
+  whether the sample library deserves one is a product call, not mine.
+- **A signed-in device whose sync never lands cleanly never seeds.** The gate declines and re-asks
+  each launch (observed live on this machine's dev store, which is account-owned and does not complete
+  a round — the seeder logged `awaitingFirstSync`). Correct by design — the alternative is duplicating
+  a library that is about to arrive — but it means "default-on" is "default-on once sync has spoken"
+  for account-owned stores. The one-line logger (`subsystem io.lduarte.Variorum`, category
+  `sample-library`) exists precisely so this question is answerable in the field.
+
+## Act 4 — 17c's four items
+
+**All four FIXED, each with a red-on-old pin verified by reverting the fix** (behaviourally, for P19,
+so the new API stayed compiled). Per-item dispositions with before/after numbers are written into the
+**17c entry** of `notes/plans/phase-17-standing-fixes.md`, and its register row is flipped to closed.
+In brief:
+
+| Item | Before → after | Pin, red on old |
+|---|---|---|
+| **P18** trayTakes scanned `variant` | ordinary 1-block note 0.836 → 4.783 ms across a 10× corpus; after **0.472 → 0.470 ms, flat** | plan must not contain `SCAN v` — red on old |
+| **P19** Trash peer N+1 | 15 versions at 20k containers **551 → 15.0 ms** | statements for 1 vs 10 versions must be equal — red on old (6 vs 16) |
+| **P20** classifier had no index | plain note 0.374 → 1.791 ms across a 10× corpus; after **0.215 → 0.218 ms, flat** | plan names `idx_container_note_version` — red with the index dropped |
+| **P21** activeFans one query per block | 40 blocks: **40 statements → 1**; `takesProjection` 71.0 → 32.3 ms | statement count — red on old |
+
+**The P20 index is LOCAL and is NOT a §12 lockstep event** — the Postgres mirrors carry no indexes
+beyond the PK by design (SyncSpec §2), so nothing on the wire changes and **the marker stays 7**, as
+this plan's own line said it would. It still took its own commit ahead of everything that uses it.
+
+**One residual, recorded with an owner rather than smuggled in:** P19's single pass is still linear in
+the corpus, because the peer note is reached through `container_block` BY BLOCK ID and the only index
+there is the live-rows partial one, while the lookup must stay tombstone-insensitive. Closing it needs
+an index on `container_block(block_id)` — a second schema change on a busy table, so it is a
+`KnownIssuesAndTechDebt.md` row owned by **12**, not a drive-by.
+
+**The verifier's temperings held up and the record says so:** P20's real-world consequence is
+single-digit milliseconds (its value is that the WRITE path's shape becomes flat), and P21 is a
+constant factor rather than a P1 break. **P18 was the sharpest of the four** — corpus-linear on an
+ordinary ONE-BLOCK note, which is what made its "never the corpus" doc claim false rather than
+optimistic. All three false doc comments the sweep named are corrected in place.
+
+## Verification at close
+
+- **Core `swift test`: 1465 tests / 155 suites, GREEN** (baseline 1457/154; +8 pins in one new suite).
+  Three consecutive clean runs; one earlier run reported a single issue that did not reproduce in
+  three subsequent full runs and could not be identified from the output.
+- **Mac suite: 1897 tests / 321 suites** (baseline 1887/320; +10 pins in one new suite) with **one
+  failure — the known load-flaky `EditorWindowSmokeTests.rewriteStrategyLatencies`** at 52.98 ms
+  against its 50 ms budget. **Adjudicated PRE-EXISTING, and this time demonstrated rather than
+  inferred:** it fails ISOLATED too (51.9–53.8 ms over four runs), and the **pre-round baseline commit
+  `626c8c2` was checked out into a worktree, built, and run under the same load: 52.53 ms.** Load
+  average 12–20 on a 42-day-up box with her live app running. The KnownIssues row gains this as its
+  first both-trees-actually-built covariate.
+- **Tutorial spine green** inside the full run (every `Tutorial …` suite passed).
+- **iOS target builds** (`xcodebuild build -scheme VariorumMobile`) — mandatory because `Sources/` was
+  touched.
+- **Zero `Sources/VariorumCore/Sync/` lines**, diff-verified; one schema change, in its own commit;
+  lockstep marker unchanged at 7.
