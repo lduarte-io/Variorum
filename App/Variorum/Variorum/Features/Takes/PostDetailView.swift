@@ -253,10 +253,13 @@ struct PostDetailView: View {
                 CompareBoardView(session: session, postID: postID)
                     .id("compare-\(postID)")
             case .blocks:
-                BlockTOCView(session: session, postID: postID, onJump: { blockID in
+                // Wave 2c (item 16, W8-1): "keep Blocks as the poweruser
+                // center" — the workbench (facts, multi-select, the
+                // context panel); the TOC's every door survives inside it.
+                BlocksWorkbenchView(session: session, postID: postID, onJump: { blockID in
                     jump(to: blockID)
                 })
-                .id("toc-\(postID)")
+                .id("blocks-\(postID)")
             case .canvas:
                 // C3 (R40): canvas as a view ON the post — canvasProjection
                 // works over ANY container (a post is a container).

@@ -53,6 +53,14 @@ final class BlockTOCViewModel {
     }
 
     private(set) var rows: [Queries.TOCRow] = []
+    /// Wave 2c (item 16, direction C): the workbench's rows-with-FACTS —
+    /// populated only where `startFacts()` runs (the Blocks mode); Index
+    /// rides `rows` alone.
+    private(set) var facts: [Queries.WorkbenchRow] = []
+    /// The workbench's multi-select — the ONE selection brain (13e's
+    /// `BlockSelection`), pruned on every projection adopt so an act can
+    /// never address a ghost.
+    var picked = BlockSelection()
     private(set) var tray: [Queries.TrayItem] = []
     /// 13j ladder A round 1, finding A6 (the flow's SECOND instance): this
     /// mode's tray observation was held UNBOUNDED — the same `trayBlocks`
@@ -91,6 +99,25 @@ final class BlockTOCViewModel {
         } catch {
             statusMessage = String(describing: error)
         }
+    }
+
+    /// The workbench's facts observation (wave 2c — opt-in; only the
+    /// Blocks mode pays for the joined row).
+    func startFacts() async {
+        do {
+            for try await value in session.database.observeBlockWorkbench(postID) {
+                adopt(facts: value)
+            }
+        } catch is CancellationError {
+        } catch {
+            statusMessage = String(describing: error)
+        }
+    }
+
+    func adopt(facts: [Queries.WorkbenchRow]) {
+        self.facts = facts
+        picked.prune(to: Set(facts.map(\.blockID)))
+        authority.settle(isPending: { autosave.pending[$0] != nil })
     }
 
     func startTray() async {
@@ -263,6 +290,233 @@ final class BlockTOCViewModel {
         statusMessage = message
     }
 
+    // MARK: - The workbench's bulk acts (wave 2c, item 16 direction C —
+    // 13e's block multi-select given its management face)
+
+    /// The picked blocks in NOTE order (the store's projection order —
+    /// the selection never invents one).
+    var pickedInOrder: [String] {
+        picked.inOrder(rows.map(\.blockID))
+    }
+
+    /// Move every picked block to the top (bottom), keeping their
+    /// relative order — ONE compound entry, ordinary `reorder` ops.
+    func movePicked(toTop: Bool) async {
+        let chain = pickedInOrder
+        guard !chain.isEmpty else { return }
+        let others = rows.map(\.blockID).filter { !picked.contains($0) }
+        guard !others.isEmpty else { return }  // the whole note is picked — nothing to move past
+        statusMessage = nil
+        do {
+            let stack = session.undoStack
+            try await session.runner.run { ops in
+                try stack.withCompound(label: "Move Blocks", operations: ops) {
+                    if toTop {
+                        var previous: String?
+                        for blockID in chain {
+                            let target: Operations.InsertPosition =
+                                previous.map { .after($0) } ?? .before(others[0])
+                            try ops.reorder(blockID, to: target)
+                            previous = blockID
+                        }
+                    } else {
+                        for blockID in chain {
+                            try ops.reorder(blockID, to: .end)
+                        }
+                    }
+                }
+            }
+            statusMessage = "Moved \(chain.count) block\(chain.count == 1 ? "" : "s") "
+                + "to the \(toTop ? "top" : "bottom") (\u{2325}\u{2318}Z undoes in one go)."
+        } catch {
+            statusMessage = OpsRefusalCopy.message(for: error)
+        }
+    }
+
+    /// **Merge the picked run** — the third door of the 13e/13j act
+    /// (Write's `mergeChain`, the Takes board's ⌘-click merge, now the
+    /// workbench). The BRAINS are the shared ones (`BlockSelection`'s
+    /// contiguity, `CarryAllMerge`'s composition, the one refusal copy);
+    /// adjacency, fans and the displayed take are read FROM THE STORE —
+    /// a projection is a selection aid, never an authorization.
+    func mergePicked() async {
+        let pickedSet = picked.picked
+        guard pickedSet.count >= 2 else {
+            speak("\u{2318}-click a second block first — merge joins the blocks you pick.")
+            return
+        }
+        await autosave.flushNow()
+        let slots: [Queries.RenderedBlock]
+        do {
+            slots = try await session.database.read { [postID] db in
+                try Queries.renderPost(db, containerID: postID)
+            }
+        } catch {
+            statusMessage = OpsRefusalCopy.message(for: error)
+            return
+        }
+        let order = slots.map(\.blockID)
+        guard pickedSet.isSubset(of: Set(order)) else {
+            speak(BlockSelectionCopy.blockGoneForMerge)
+            return
+        }
+        guard BlockSelection.isContiguousRun(pickedSet, in: order) else {
+            speak("Merge joins neighbouring blocks — these aren't next to each other. "
+                + "Pick blocks that sit side by side.")
+            return
+        }
+        let chain = order.filter { pickedSet.contains($0) }
+        let fans: [String: [Variant]]
+        do {
+            fans = try await session.database.read { db in
+                var result: [String: [Variant]] = [:]
+                for id in chain {
+                    result[id] = try Queries.blockFan(db, blockID: id)
+                        .filter { $0.deletedAt == nil && $0.status == .active }
+                }
+                return result
+            }
+        } catch {
+            statusMessage = OpsRefusalCopy.message(for: error)
+            return
+        }
+        let displayed = Dictionary(
+            uniqueKeysWithValues: chain.map { id in
+                (id, slots.first { $0.blockID == id }?.variantID)
+            })
+        guard CarryAllMerge.chainComposes(order: chain, fans: fans, displayed: displayed)
+        else {
+            speak(FannedDefaultsCopy.takesChangedMerge)
+            return
+        }
+        statusMessage = nil
+        do {
+            let stack = session.undoStack
+            let carried: Int = try await session.runner.run { ops in
+                try stack.withCompound(label: "Merge Blocks", operations: ops) {
+                    var mergedID = chain[0]
+                    var leadingFan = fans[chain[0]] ?? []
+                    var leadingDisplayedID = displayed[chain[0]] ?? nil
+                    var takesOnMerged = leadingFan.count
+                    for next in chain.dropFirst() {
+                        let trailingFan = fans[next] ?? []
+                        if leadingFan.count > 1 || trailingFan.count > 1,
+                           let composition = CarryAllMerge.compose(
+                            leadingDisplayedID: leadingDisplayedID, leadingFan: leadingFan,
+                            trailingDisplayedID: displayed[next] ?? nil,
+                            trailingFan: trailingFan) {
+                            let result = try ops.mergeCeremony(
+                                mergedID, next,
+                                pairings: [composition.pairing], carries: composition.carries)
+                            let joined = CarryAllMerge.joinedTake(of: result)
+                            mergedID = result.block.id
+                            leadingFan = result.variants
+                            leadingDisplayedID = joined?.id
+                            takesOnMerged = result.variants.count
+                        } else {
+                            let result = try ops.merge(mergedID, next)
+                            mergedID = result.block.id
+                            leadingFan = [result.variant]
+                            leadingDisplayedID = result.variant.id
+                            takesOnMerged = 1
+                        }
+                    }
+                    return max(0, takesOnMerged - 1)
+                }
+            }
+            picked.clear()
+            speak(FannedDefaultsCopy.mergedChain(blocks: chain.count, carried: carried))
+        } catch {
+            let op = error as? OperationError
+            if case .blockNotFound = op {
+                statusMessage = BlockSelectionCopy.blockGoneForMerge
+            } else if case .blockNotPlaced = op {
+                statusMessage = BlockSelectionCopy.blockGoneForMerge
+            } else {
+                statusMessage = OpsRefusalCopy.message(for: error)
+            }
+        }
+    }
+
+    /// Bulk archive — the standing per-block op, plain loop (the Snippets
+    /// bulk grammar; archive is the no-clock verb).
+    func archivePicked() async {
+        let chain = pickedInOrder
+        guard !chain.isEmpty else { return }
+        statusMessage = nil
+        do {
+            try await session.runner.run { ops in
+                for id in chain { try ops.archiveBlock(id) }
+            }
+            picked.clear()
+            statusMessage = BlockSelectionCopy.archivedNote(home: .post)
+        } catch {
+            statusMessage = OpsRefusalCopy.message(for: error)
+        }
+    }
+
+    /// Bulk delete — 13e E2's compound shape: ONE entry, all-or-nothing,
+    /// the ruled receipt naming both roads back.
+    func deletePicked() async {
+        let pickedSet = picked.picked
+        guard !pickedSet.isEmpty else { return }
+        let order = rows.map(\.blockID)
+        let chain = pickedSet.subtracting(order).sorted()
+            + order.filter { pickedSet.contains($0) }
+        statusMessage = nil
+        do {
+            let stack = session.undoStack
+            try await session.runner.run { ops in
+                try stack.withCompound(label: "Delete Blocks", operations: ops) {
+                    for blockID in chain { try ops.deleteBlock(blockID) }
+                }
+            }
+            picked.clear()
+            statusMessage = BlockSelectionCopy.deletedNote(chain.count)
+        } catch {
+            statusMessage = OpsRefusalCopy.message(for: error)
+        }
+    }
+
+    /// Bulk tag — one existing tag to every picked block, already-tagged
+    /// rows skipping quietly (the standing batch semantics).
+    func tagPicked(_ tagID: String) async {
+        let chain = pickedInOrder
+        guard !chain.isEmpty else { return }
+        statusMessage = nil
+        do {
+            try await session.runner.run { ops in
+                for id in chain {
+                    do {
+                        _ = try ops.applyTag(tagID, toBlock: id)
+                    } catch OperationError.alreadyTagged {}
+                }
+            }
+            statusMessage = "Tagged \(chain.count) block\(chain.count == 1 ? "" : "s")."
+        } catch {
+            statusMessage = OpsRefusalCopy.message(for: error)
+        }
+    }
+
+    /// Bulk move-out to a snippet group — the honest per-block `moveBlock`
+    /// (I2: the blocks LEAVE this note), spoken with the road back.
+    func movePickedToPool(_ poolID: String, poolTitle: String?) async {
+        let chain = pickedInOrder
+        guard !chain.isEmpty else { return }
+        statusMessage = nil
+        do {
+            try await session.runner.run { ops in
+                for id in chain { try ops.moveBlock(id, to: poolID, at: .end) }
+            }
+            picked.clear()
+            let name = (poolTitle?.isEmpty == false) ? "\u{201C}\(poolTitle!)\u{201D}" : "Snippets"
+            statusMessage = "Moved \(chain.count) block\(chain.count == 1 ? "" : "s") to \(name) — "
+                + "they LEFT this note (takes went along). \u{2325}\u{2318}Z brings them back."
+        } catch {
+            statusMessage = OpsRefusalCopy.message(for: error)
+        }
+    }
+
     private func run(_ body: @escaping @Sendable (Operations) throws -> Void) async {
         statusMessage = nil
         do {
@@ -273,238 +527,11 @@ final class BlockTOCViewModel {
     }
 }
 
-struct BlockTOCView: View {
-    /// **THE ROW MENU'S DECLARED ACTS** (the post-13l polish round, ledger row
-    /// 14 / F1). Blocks mode's per-row menu is a listing's menu, not a
-    /// context menu and not a bar — a `.surface` door in the 13b 3D sense:
-    /// the target is the row you opened it on. It has offered *"Delete
-    /// block"* since 13c with no declaration anywhere; the pass that gave it
-    /// the ARCHIVE twin her F1 rule asks for declares the pair.
-    ///
-    /// (Its other rows — move to top/bottom, move to ordinal, move out to a
-    /// pool — are placement moves, which the round's own scope note excludes
-    /// as ordinary reversible editing rather than past-creating acts. They
-    /// stay undeclared, and that is now a recorded gap rather than an
-    /// invisible one.)
-    static let surfaceCapabilities: [CapabilityID] = [.archiveBlock, .deleteBlock]
-
-    let session: AppSession
-    let postID: String
-    /// Jump-to-block: the container switches to the Write editor with this
-    /// block's caret seed (the hybrid primitive fires there — never
-    /// in-place folding here).
-    var onJump: ((String) -> Void)?
-    @State private var model: BlockTOCViewModel
-    @State private var renameTarget: Queries.TOCRow?
-    @State private var renameText = ""
-    /// 13b 4D (N39): the typed-position prompt's target + entry.
-    @State private var moveTarget: Queries.TOCRow?
-    @State private var moveOrdinalText = ""
-    /// 13j (round 7): the tray panel this mode's section now opens.
-    @State private var trayShown = false
-
-    init(
-        session: AppSession, postID: String,
-        onJump: ((String) -> Void)? = nil, model: BlockTOCViewModel? = nil
-    ) {
-        self.session = session
-        self.postID = postID
-        self.onJump = onJump
-        _model = State(initialValue: model ?? BlockTOCViewModel(session: session, postID: postID))
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // (Round-1 MINOR-2: the never-dismissing red caption is gone —
-            // outcomes render in the shell's one StatusToast.)
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 4) {
-                    ForEach(Array(model.rows.enumerated()), id: \.element.placementID) { i, row in
-                        tocRow(row, ordinal: i + 1)
-                    }
-                    if !model.tray.isEmpty {
-                        traySection
-                    }
-                }
-                .padding(12)
-            }
-        }
-        .sheet(isPresented: $trayShown) {
-            TrayPanel(session: session, postID: postID)
-        }
-        .task { await model.start() }
-        .task { await model.startTray() }
-        .task { await model.startPools() }
-        .onDisappear { model.teardown() }
-        .alert(
-            "Name this block",
-            isPresented: Binding(
-                get: { renameTarget != nil },
-                set: { if !$0 { renameTarget = nil } }),
-            presenting: renameTarget
-        ) { row in
-            TextField("Name (blank clears)", text: $renameText)
-            Button("Save") {
-                let name = renameText
-                Task { await model.rename(blockID: row.blockID, to: name) }
-            }
-            Button("Cancel", role: .cancel) {}
-        }
-        // 13b 4D (N39): "what number block you want it to be out of the
-        // total post" — a typed position, clamped; non-numbers speak.
-        .alert(
-            "Move to block # (of \(model.rows.count))",
-            isPresented: Binding(
-                get: { moveTarget != nil },
-                set: { if !$0 { moveTarget = nil } }),
-            presenting: moveTarget
-        ) { row in
-            TextField("Position (1–\(model.rows.count))", text: $moveOrdinalText)
-            Button("Move") {
-                let raw = moveOrdinalText.trimmingCharacters(in: .whitespaces)
-                Task {
-                    if let target = Int(raw) {
-                        await model.move(blockID: row.blockID, toOrdinal: target)
-                    } else {
-                        model.speak("\u{201C}\(raw)\u{201D} isn't a position number — type 1 to \(model.rows.count).")
-                    }
-                }
-            }
-            Button("Cancel", role: .cancel) {}
-        }
-    }
-
-    @ViewBuilder
-    private func tocRow(_ row: Queries.TOCRow, ordinal: Int) -> some View {
-        let isExpanded = model.expanded.contains(row.blockID)
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 6) {
-                Button(isExpanded ? "▾" : "▸") { model.toggleExpanded(row.blockID) }
-                    .buttonStyle(.plain)
-                Text("\(ordinal)/\(model.rows.count)")
-                    .font(.caption.monospacedDigit())
-                    .foregroundStyle(.tertiary)
-                // The handle: name else read-time first sentence (the
-                // core derivation — one brain). Batch 7: body-size — the
-                // TOC is a reading surface, not fine print.
-                Text(Queries.tocHandle(name: row.name, text: row.text))
-                    .font(row.name != nil ? .body.weight(.semibold) : .body)
-                    .lineLimit(1)
-                if row.hasFan {
-                    Text("⑂").font(.caption).foregroundStyle(.blue)
-                }
-                if row.variantLocked {
-                    Text("locked").font(.caption2).foregroundStyle(.orange)
-                }
-                Spacer()
-                HStack(spacing: 2) {
-                    Button("↑") { Task { await model.move(blockID: row.blockID, up: true) } }
-                        .disabled(ordinal == 1)
-                    Button("↓") { Task { await model.move(blockID: row.blockID, up: false) } }
-                        .disabled(ordinal == model.rows.count)
-                }
-                .controlSize(.mini)
-                Menu("⋯") {
-                    Button("Name…") {
-                        renameText = row.name ?? ""
-                        renameTarget = row
-                    }
-                    Button("Jump to block") { onJump?(row.blockID) }
-                    Divider()
-                    // 13b 4D (N39): long-distance moves without dragging —
-                    // top / bottom / a typed position number.
-                    Button("Move to top") {
-                        Task { await model.moveToTop(row.blockID) }
-                    }
-                    .disabled(ordinal == 1)
-                    Button("Move to bottom") {
-                        Task { await model.moveToBottom(row.blockID) }
-                    }
-                    .disabled(ordinal == model.rows.count)
-                    Button("Move to block #…") {
-                        moveOrdinalText = "\(ordinal)"
-                        moveTarget = row
-                    }
-                    Divider()
-                    // 13b 4D (N32(a)): the honest title — it MOVES the
-                    // block out of this post (I2), never a copy.
-                    Menu("Move out to a pool (leaves this note)") {
-                        ForEach(model.pools, id: \.id) { pool in
-                            Button(pool.title ?? "Untitled pool") {
-                                Task {
-                                    await model.moveToPool(
-                                        row.blockID, poolID: pool.id,
-                                        poolTitle: pool.title)
-                                }
-                            }
-                        }
-                    }
-                    Divider()
-                    // Ledger row 14 (F1): archive rides beside delete, and
-                    // before it — the same order the menu bar's Block menu,
-                    // the block context menu and both bars' `block ▾` use.
-                    Button(CapabilityRegistry.capability(.archiveBlock).verb) {
-                        Task { await model.archiveBlock(row.blockID) }
-                    }
-                    Button("Delete block", role: .destructive) {
-                        Task { await model.deleteBlock(row.blockID) }
-                    }
-                }
-                .menuStyle(.borderlessButton)
-                .fixedSize()
-                .controlSize(.mini)
-            }
-            if isExpanded {
-                // The read-cheap tier; ONE block upgrades live on click
-                // (P3's split, reused). Text resolves through the
-                // authority — a blurred row never flashes stale (13b 1a).
-                if let variantID = row.variantID {
-                    PaneSurfaceView(
-                        text: model.displayText(variantID: variantID, storeText: row.text),
-                        isLive: model.liveBlockID == row.blockID && !row.variantLocked,
-                        role: "toc", variantID: variantID,
-                        onFocusRequest: { model.makeLive(row.blockID, variantID: variantID) },
-                        onEdit: { newText in
-                            model.paneEdited(
-                                variantID: variantID,
-                                oldText: row.text ?? "", newText: newText)
-                        })
-                        .padding(.leading, 20)
-                } else {
-                    Text("· · ·").foregroundStyle(.secondary).padding(.leading, 20)
-                }
-            }
-        }
-    }
-
-    /// **13j (her round-7 ruling): ONE panel, one truth.** This section used
-    /// to render its own small deleted-blocks list — a second listing over
-    /// the same query, which batch 2 left alone deliberately (two views over
-    /// one query is the pointer religion, not duplication) and flagged for
-    /// her. She ruled: *"routed to the one panel"*. So the section is now a
-    /// DOOR: it says how many blocks are waiting and opens This Note's Tray,
-    /// where the countdown, the archived rows and the preserved originals all
-    /// live. Nothing here can drift from that panel, because there is nothing
-    /// here to drift.
-    private var traySection: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Button {
-                // Ledger row 9: the ONE panel, wherever the door is — the
-                // router opens the detail's inspector, and this mode's own
-                // sheet is the fallback for a host with no inspector.
-                let request = TrayRequest(postID: postID)
-                if !session.commandRouter.requestNoteTray(request) {
-                    trayShown = true
-                }
-            } label: {
-                Text("\(TrayPath.menuLabel) — \(model.tray.count) deleted")
-                    .font(.caption.weight(.semibold))
-            }
-            .buttonStyle(.link)
-            .padding(.top, 12)
-            .help("Opens this note's tray: what it has deleted (with how long "
-                + "you have to put it back), what it has archived, and any "
-                + "originals a divide or merge preserved")
-        }
-    }
-}
+// (The old `BlockTOCView` VIEW — one row per block, raw source text, the
+// lower half of the window empty — retired at pre-13u Act 10 wave 2c, her
+// W8-1 ruling: its TOC idea GREW UP into `IndexModeView` (sections, the
+// reading pane) and its management half into `BlocksWorkbenchView` (facts,
+// multi-select, the context panel). EVERY door it carried survives in the
+// workbench: expand-to-edit, ↑↓, the whole ⋯ menu — name · jump · move to
+// top/bottom/# · move out to snippets · archive · delete — and the tray
+// door. The model above serves all three faces.)

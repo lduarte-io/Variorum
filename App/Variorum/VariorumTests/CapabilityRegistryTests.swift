@@ -360,7 +360,10 @@ struct CapabilityRegistryTests {
             // walk. It has offered "Delete block" since 13c and declared
             // nothing; the pass that gave it the Archive twin her rule asks
             // for declared the pair, which is what a registry of acts is for.
-            .union(BlockTOCView.surfaceCapabilities)
+            // (Re-anchored at pre-13u Act 10 wave 2c: the TOC page grew into
+            // the workbench + Index — both declare, both walked.)
+            .union(BlocksWorkbenchView.surfaceCapabilities)
+            .union(IndexModeView.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

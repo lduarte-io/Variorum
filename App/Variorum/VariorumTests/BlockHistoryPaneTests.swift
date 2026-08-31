@@ -603,19 +603,24 @@ struct BlockHistoryPaneTests {
         // and the act is one line away in the same list.
         #expect(deleteDoors.contains(.palette))
 
-        // The four RENDERERS, each named: the menu bar's Block menu, the
-        // block context menu, both bars' `block ▾`, and Blocks mode's rows.
+        // The RENDERERS, each named: the menu bar's Block menu, the block
+        // context menu, both bars' `block ▾`, and Blocks mode's rows.
+        // (Re-anchored at pre-13u Act 10 wave 2c: `BlockTOCView` grew into
+        // `BlocksWorkbenchView` + `IndexModeView` — W8-1's ruling; BOTH new
+        // faces carry the pair, so the promise widened rather than moved.)
         #expect(EditorCommands.menuRendered.contains(.archiveBlock))
         #expect(EditorViewModel.contextMenuCapabilities.contains(.archiveBlock))
         #expect(CommitBar.renderedCapabilities.contains(.archiveBlock))
         #expect(TakesBottomBar.renderedCapabilities.contains(.archiveBlock))
-        #expect(BlockTOCView.surfaceCapabilities.contains(.archiveBlock))
-        // …and each of those five renders the DELETE beside it.
+        #expect(BlocksWorkbenchView.surfaceCapabilities.contains(.archiveBlock))
+        #expect(IndexModeView.surfaceCapabilities.contains(.archiveBlock))
+        // …and each of those renders the DELETE beside it.
         #expect(EditorCommands.menuRendered.contains(.deleteBlock))
         #expect(EditorViewModel.contextMenuCapabilities.contains(.deleteBlock))
         #expect(CommitBar.renderedCapabilities.contains(.deleteBlock))
         #expect(TakesBottomBar.renderedCapabilities.contains(.deleteBlock))
-        #expect(BlockTOCView.surfaceCapabilities.contains(.deleteBlock))
+        #expect(BlocksWorkbenchView.surfaceCapabilities.contains(.deleteBlock))
+        #expect(IndexModeView.surfaceCapabilities.contains(.deleteBlock))
 
         // THE SCRAP ROWS are block doors too — a scrap IS a block — and batch
         // 1 gave them the delete while naming these two listings as F1's to

@@ -2738,4 +2738,13 @@ liveness through `PaneTextAuthority` only); P1 measured on the Sherlock corpus.
   derived; `WorkbenchQueryTests` 3 green) · `FlowParagraph` HOISTED
   BookView→`Core/Views` (hoist-at-next-touch; the Read mode is consumer #2;
   every existing pin rode unmodified — the 3C proof shape).
+- `1e3272d` — **INDEX + READ SHIPPED as modes.** The row: Write · Takes ·
+  **Index** · **Read** · Lenses · Compare · Blocks · Canvas (⌘1–⌘8 derive from
+  the one order — rail/menu/keys can't disagree). Index = direction A (sections
+  column + filter + fold-all + every TOC door + expand-to-edit via the ONE
+  authority + scroll-synced rendered pane, zero TK2 geometry); Read = direction
+  B (paper page, minimal companion outline per her sharpening, Aa scale, click
+  lands in Index — the scrolled-open door, built ONCE on
+  `CommandRouter.focusedBlock`). Registry: `.read` greys the editing families
+  (projection tier, P-3); key labels swept. Pins: NewModesTests (4).
 
