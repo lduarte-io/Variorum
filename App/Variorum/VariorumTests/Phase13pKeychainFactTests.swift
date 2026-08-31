@@ -3,17 +3,22 @@
 //  VariorumTests
 //
 //  Phase 13p, Batch 2 (commit 6) — THE Q3 CODESIGNED RE-CONFIRMATION
-//  (the spike memo's named PENDING): the spike's probe ran from an
-//  UNSIGNED CLI, where the three controls all died at the entitlement
-//  check (-34018) and only the question probe's DIFFERENT status (-50,
+//  (the spike memo's named PENDING), header brought current at the
+//  pre-13u round (Act 9, F5 — the old text described the pre-signing
+//  world in the present tense). The spike's probe ran from an UNSIGNED
+//  CLI, where the three controls all died at the entitlement check
+//  (-34018) and only the question probe's DIFFERENT status (-50,
 //  errSecParam) discriminated. This suite runs inside the SIGNED app
-//  test host: the PLAIN control genuinely succeeds, the ACL control
-//  surfaces the ENTITLEMENT FINDING its own doc comment records (no
-//  keychain identity in today's signing ⇒ -34018), and the question
-//  probe still reads -50 — pinning the two-item design (R13p-6) as
-//  platform fact: `kSecAttrSynchronizable` + `kSecAttrAccessControl`
-//  is refused as a COMBINATION, so the escrow item necessarily has no
-//  biometric gate.
+//  test host, and SINCE 2026-08-30 the app carries a real keychain
+//  identity (`keychain-access-groups` + the Mac Development profile —
+//  the 13p signing gap, closed by the author): the PLAIN control
+//  genuinely succeeds, the ACL control now asserts its write LANDS —
+//  it is the REGRESSION GUARD for the identity itself (a -34018 there
+//  means the entitlement, the profile, or this Mac's device
+//  registration was lost) — and the question probe still reads -50,
+//  pinning the two-item design (R13p-6) as platform fact:
+//  `kSecAttrSynchronizable` + `kSecAttrAccessControl` is refused as a
+//  COMBINATION, so the escrow item necessarily has no biometric gate.
 //
 //  PROMPT DISCIPLINE (the overnight rule): every probe here is a WRITE
 //  or a delete — an ACL'd item's creation never prompts (only reading
