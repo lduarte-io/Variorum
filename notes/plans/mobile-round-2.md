@@ -5822,6 +5822,7 @@ not exist.
 |---|---|
 | **Batch 5** — the shelf layout (R26/R27/R27b) + her two live refinements (one-line box; the writing room made a pinned guarantee) | `notes/plans/mobile-batch-5-record.md` · cold review: `notes/plans/mobile-batch-5-cold-review.md` |
 | **Batch 6a** — the Block History twin | **§70 of THIS file** · cold review: `notes/plans/mobile-batch-6a-cold-review.md` |
+| **Batch 6c** — THE TWO-ROOMS IA (her #84 ruling built: the Trash room · the Archive room · the two doors + the Shelf's second renderer · **the Versions face**) | brief: `notes/plans/mobile-batch-6c-brief.md` · record: `notes/plans/mobile-batch-6c-record.md` — **its §1 D5 records a brief premise that did not hold and was NOT built** (the Block History explainer's second half: that region lists deleted TAKES and `TrashScope` keeps takes out of the global Trash, so the new room is not that road — batch 6b's tray is) |
 | **Batch 4.5d's fix round** + PL-10(b) the duplicate-book-name guard | `notes/plans/mobile-batch-4.5d-record.md` |
 | **The five-MAJOR fix round** (B1 · C2 · A1 · A2 · C1) | `notes/plans/mobile-major-fix-round-record.md` |
 | **The mobile app's first architecture review** | `notes/plans/mobile-architecture-review.md` |
