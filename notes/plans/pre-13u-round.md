@@ -51,7 +51,13 @@ She invoked `/architect-phase` on this round. Her items, verbatim-faithful, each
    mobile session proved it pre-existing and fixed it at the merge (`43a35ef`). Two consequences:
    (a) the mobile merge's Mac/`Shared` deltas JOIN Act 1's review scope; (b) **the round gains a
    standing verification gate: the iOS target must build at every batch close** — the Mac suite
-   passing gave zero signal (the MobileSoul §3 class, live demonstration).
+   passing gave zero signal (the MobileSoul §3 class, live demonstration). *(REFINED later the same
+   sitting at her pushback — "every batch seems kind of frequent to me when this is the first time
+   it's broken. I'm open to other opinions" — architect's shape, standing unless she overrules: the
+   iOS BUILD check (~2 min, no tests) runs at the close of any batch that touched `Shared/` or
+   `Sources/` — a batch touching neither cannot break iOS and skips it; the full MOBILE SUITE runs
+   once, at phase/round end. Rationale: the cheap check is what localizes blame to one batch instead
+   of a phase's archaeology; the expensive check is the one worth rationing.)*
 4. **17a joins the roster** (it was not in the original draft): the 13p custody residue, URGENT
    run-first per the register — the same subsystem as the CF-12/#82 rulings, so it runs as ONE
    Fable custody batch with them (Act 9).
