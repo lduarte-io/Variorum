@@ -75,7 +75,8 @@ once. Claim a letter here first.
 | Letter | Subject | State |
 |---|---|---|
 | **17a** | **CLOSED 2026-08-30 — the pre-13u round's Act 9 (the Fable custody batch).** All 8 items FIXED with revert-verified red-on-old pins; per-item dispositions in the entry below; the two KnownIssues rows that carried owner "17a" without being in the item list are RE-ROUTED to **17h** (opened at her word) | **closed** |
-| 17b, 17d–17f | The 2026-08-30 sweep's remaining groups | open, unstarted *(17f runs later in the same round)* |
+| 17b, 17d, 17e | The 2026-08-30 sweep's remaining groups | open, unstarted |
+| **17f** | **CLOSED 2026-08-31 — the pre-13u round's Act 5.** 8 of 9 items FIXED (each with its evidence class named: three red-on-old drills, two grep-verified dead-code removals, one hoist, one canon correction, one documented mechanism); **P50 DISMISSED AS HOLLOW by measurement** — the WAL it claimed was checkpointed away measures byte-identical before and after `lock()`. Per-item dispositions in the entry below | **closed** |
 | **17c** | **CLOSED 2026-08-31 — the pre-13u round's Acts 3+4.** All 4 read-layer items (P18–P21) FIXED with revert-verified red-on-old pins (query plans and statement counts, never timings); the P20 index landed as its own schema commit and is NOT a §12 lockstep event (marker stays 7). Per-item dispositions with before/after numbers in the entry below; one residual (`container_block(block_id)`) re-routed to **12** in KnownIssues | **closed** |
 | **17g** | **CLOSED 2026-08-30 — the `13p-fix` session** (author's live session of 2026-08-30: an issue she found testing the refreshed 13p install). That session owns this letter and writes its own entry; it does **not** fold into 17a. | **closed** |
 | **17h** | **The custody riders 17a never listed** — opened at the author's word 2026-08-30 (the pre-13u sitting: "Open 17h, run it this round"). TWO items, both already traced in `KnownIssuesAndTechDebt.md` rows that carried owner "17a" without being in its 8-item list: **(1)** the `saveGated` delete-before-add window (13p-fix ladder R2-7 — a failed `SecItemAdd` after the forced delete leaves no custody; remedy sketch on the row: add under a temporary account → verify → swap → delete old, or an explicit accepted-window doc line); **(2)** the delete-status-discarded family (R3-5 — `deleteAuto`/`deleteGated` drop `OSStatus`, so the custody law binds writes only; remedy on the row: `Bool`-returning delete seams + refuse/report on failed release + a `deletesSucceed` knob pin; the riders travel with it: `E2EECustodyStorage.live` wiring coverage R3-4, `setMode`'s MainActor SecItem calls R3-6). The rows' mechanisms and remedies are the brief; runs as a small fresh Fable session inside the pre-13u round, after Act 9 closes. **CLOSED 2026-08-31** — both items FIXED (R2-7 as probe-first narrowing with the residual window recorded; R3-5 with all riders), every pin red-on-old by behavioral revert; the entry below is the record | **closed** |
@@ -123,7 +124,7 @@ fold section at the end of `notes/plans/phase-13u-feel-and-polish.md`.
 | **17c** | The read layer's P1 debt (query-side) | 4 | — |
 | **17d** | Purge, sync & bridge honesty | 5 | **The `Sources/VariorumCore/Sync/` Fable rider binds P8, P9, P28 and P31.** |
 | **17e** | Correctness & honesty singles | 10 | — |
-| **17f** | Dead code, canon corrections & test pins that cannot fail | 9 | — |
+| **17f** | Dead code, canon corrections & test pins that cannot fail | 9 | **CLOSED 2026-08-31** (the pre-13u round's Act 5; 8 FIXED, 1 dismissed as hollow) |
 
 ---
 
@@ -802,7 +803,30 @@ WINS — it was written with the real code open and with instructions to refute.
 
 ## 17f — Dead code, canon corrections & test pins that cannot fail
 
-**Status: open, unstarted.** 9 items, no pins.
+**Status: CLOSED 2026-08-31 — the pre-13u round's Act 5 (Opus implementer,
+commits `8bb0185…6ee0451` on `main`).** Eight items **FIXED**, one
+**DISMISSED AS HOLLOW**. The batch record — counts, the drills' numbers, the
+paired latency adjudication — is the **ACT 5 BATCH RECORD** section of
+`notes/plans/pre-13u-round.md`.
+
+### Dispositions (per item)
+
+| item | verdict | evidence class | notes |
+|---|---|---|---|
+| **P42** | **FIXED** | hoist (architectural): grep 5 → 0 duplications; 4 new pins | `CrystallizationPlanner.kindForTailEdit(mode:bulkPending:)` + `kindForDurabilityMint(mode:)` in `Shared/`, called from all five sites (Mac ×3, phone ×2). Both switch EXHAUSTIVELY, so a fourth segmentation mode is a build failure at the one place that decides. No behaviour change; the pins cover both occasions across every mode **and the one way they deliberately differ** (outside `one_block`: tail edit crystallizes as you type, durability mint takes the whole tail with the trailing run preserved). |
+| **P43** | **FIXED** | grep-verified dead code (the finding's own standard) | `fanAction` + `enum FanAction` + `loadFan`'s `Queries.blockFan` read + `FanPanelState.variants`/`.chosenVariantID` removed; `openFan` is synchronous now. `FanPanelState` KEPT (the sheet's `item:` binding — the verifier's correction). `refusalsSurfaceAsMessages` **re-pointed onto a live door** (⌘⇧A `archiveCaretTake` on a last active take — I10 refuses, the status line must say so), and the two tests reading `.variants` now read arity from the STORE. |
+| **P44** | **FIXED (documented)** | traced mechanism + documented decision | `removeAll()` is NOT dead — it has four test call sites; what was missing was the statement that it has **no production caller and deliberately none** (no app road clears undo history), which it now carries at the declaration. The ceiling-less retention is recorded at `entries` with its bound (per act ∝ the edit ⇒ P1's letter holds; session-scoped, never persisted). **No cap invented** — a retention ceiling is a product call (how far back can she undo?) and a stack that silently forgets is the surprise the pointer religion exists to avoid. **Architect note, not a KnownIssues row:** if a ceiling is ever wanted it is the author's, and nothing measured says it is needed. |
+| **P45** | **FIXED** | grep-verified dead code + doc correction | `BoundarySnapping.snap` had ZERO production callers on either platform, kept green by its own four tests, while `divide`'s op doc named it as the boundary contract — a rule no door enforces (the shipping one is `settle`, and the two disagree within `settlePull`). Function + its four tests removed; `Operations+Structural`'s divide doc and `StructuralGesturePlanner`'s header now name `settle`. The UTF-16-across-emoji pin survives, re-pointed at `settle` (same answer, 16). |
+| **P46** | **FIXED** | canon aligned to an already-ruled value | AppSpec §7's seed comment **and** §9's `idleAutoCommit` entry both corrected 24 → 2, each citing 13j's J11 savepoint-cadence ruling and `v1_13_savepoint_backstop`. The verifier's widening (TWO stale places, not one) was the correct read. Nothing else in canon touched. |
+| **P47** | **FIXED** | **red-on-old drilled**, both platforms | New `VariorumTests/ProtectionSurfaceRenderTests` (4 pins) + `VariorumMobileTests/MobileProtectionSurfaceTests` (3 pins). **Drill:** deleting `Text(ProtectionCopy.openAppIsReadable)` from the pane and the dead-end `Text` from each lobby fails 3 of 4 Mac pins and 2 of 3 phone pins; the roads-exist complement correctly still passes in both. **Two roads measured and rejected first, recorded in the file** so nobody repeats them: the hosted view's accessibility tree is EMPTY (zero subviews, zero a11y children) and `dataWithPDF` captures nothing (layer-backed). Reflection over the real `body` works, and an untaken `_ConditionalContent` branch is verifiably absent — which is what makes it a composition pin rather than a source grep. |
+| **P48** | **FIXED** | **red-on-old drilled** | Budget DERIVED (2 ms → 1 ms: above the cheapest measured large median, 0.32–0.40 ms, below the dearest, ~1.27 ms, so at least one pin is always ratio-bound); every run prints the ratio AND which term bound; the failure message names it; the five query pins renamed flat-**or-under-budget**; the docstring stops claiming "ratios are the assertion". **Drill:** a synthetic 4.38× library-page regression PASSES under the old floor (logged "bound by BUDGET 2.0ms") and FAILS under the new one. See the batch record for what binds per benchmark. |
+| **P49** | **FIXED** | **red-on-old drilled**; ZERO `Sync/` edits | New `TriggerCoverageTests` (3 pins) **reads the registry** rather than re-listing it: for all 19 registered tables, both outbox triggers exist, each enqueues its own PK, each writes `sync_outbox`, each carries the `_sync_applying` echo suppression — plus the reverse direction (no outbox trigger for an unregistered table) and the cascade set as an exact named list. **Drill:** skipping one table's trigger pair fires the pin naming the table and the consequence ("its rows would never leave this device and nothing anywhere would say so"). |
+| **P50** | **DISMISSED AS HOLLOW** | measurement | The premise — `lock()` closes the last connection, so the WAL is checkpointed away before the scan — is FALSE on this tree. Probed: the WAL measures **1,100,072 / 1,153,632 bytes before `lock()` and the identical byte counts after**, frames intact, so the scan has always read real WAL content. Not fixed. What WAS real is the silent skip (`if let … try?`), so the read is now hard and the frames asserted present: if a future change ever does checkpoint the WAL away here, it says so instead of quietly becoming the dead belt the finding described. |
+
+*(The original 9-item briefs below are kept verbatim as the entry's record —
+the finder claims, the verifier traces, and the provenance note.)*
+
+**Status when written: open, unstarted.** 9 items, no pins.
 
 The cheapest entry, and the one with the best ratio of effort to future time saved.
 

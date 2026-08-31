@@ -1654,3 +1654,133 @@ optimistic. All three false doc comments the sweep named are corrected in place.
   touched.
 - **Zero `Sources/VariorumCore/Sync/` lines**, diff-verified; one schema change, in its own commit;
   lockstep marker unchanged at 7.
+
+---
+
+# ACT 5 BATCH RECORD (2026-08-31 — 17f: dead code, canon corrections, and the pins that could not fail)
+
+**Commits, in order:** `8bb0185` (P42 — the crystallization-kind hoist) · `0c20c4f`
+(P43·P44·P45 — dead code out, two contracts corrected) · `130a9b6` (P46 — the canon
+correction) · `72232e2` (P47·P48·P49·P50 — the four pin items) · `6ee0451` (P47's mobile
+twin) · this records commit.
+
+**Nine items, eight FIXED, one DISMISSED AS HOLLOW.** Per-item dispositions with evidence
+classes live in the 17f entry of `notes/plans/phase-17-standing-fixes.md`; this record
+carries the numbers, the drills, and what now binds.
+
+## The four test findings — what changed and what proves it
+
+**All three fixed pin-items were drilled red-on-old**, because a pin that cannot fail is
+exactly what this act is about, and adding one without proving it fails would have repeated
+the defect in a new place.
+
+- **P47 (both platforms).** Drill: delete `Text(ProtectionCopy.openAppIsReadable)` from
+  `ProtectionPane.modeSection` and the dead-end `Text` from each lobby → **3 of 4 Mac pins
+  red, 2 of 3 phone pins red**, and in both cases the roads-exist complement correctly still
+  passes (it asserts the dead end's ABSENCE). Before this act, that same deletion left the
+  entire repo green.
+  **Two measured dead ends, recorded in the test file so they are not re-attempted:** the
+  hosted view's **accessibility tree is empty** in this environment (`NSHostingView` reports
+  0 subviews, 0 accessibility children) and **`dataWithPDF` captures nothing** (layer-backed
+  ⇒ nothing draws through `draw(_:)`; 833 bytes, no text). What works is reflecting the real
+  `body` — and the property that makes it a composition pin rather than a source grep was
+  verified, not assumed: **an untaken `_ConditionalContent` branch is ABSENT** from the dump
+  (a lobby with roads carries no dead-end sentence). One mechanical note carried in both
+  files: `dump` escapes non-ASCII, so sentences are matched through `String(reflecting:)`,
+  never against the raw literal — the reason a first pass reported false negatives on exactly
+  the sentences containing typographic apostrophes.
+- **P48.** Drill: a synthetic 4.38× library-page regression **PASSES under the old 2 ms
+  floor** — the run log printing `bound by BUDGET 2.0ms` — and **FAILS under the new
+  budget**. That is the finding's own example, made falsifiable.
+- **P49.** Drill: skip one registered table's trigger pair in `createOutboxCapture` → the pin
+  fires naming the table and the consequence ("its rows would never leave this device and
+  nothing anywhere would say so"). **Zero `Sources/VariorumCore/Sync/` lines** — the test
+  imports the registry and reads `sqlite_master`; the rider is intact, diff-verified.
+- **P50 — dismissed as hollow, by measurement, not by argument.** The claim was that
+  `lock()` closes the last connection so SQLite checkpoints the WAL away before the scan.
+  Probed on this tree: the WAL measures **1,100,072 / 1,153,632 bytes BEFORE `lock()` and
+  the identical byte counts AFTER it**, frames intact — so the scan has always read real WAL
+  content and the belt was live. Reordering it (the finding's proposed fix) was written,
+  measured to be unnecessary, and **reverted**. What survives is the one real (latent) hole:
+  `if let … try?` meant a missing WAL would make the assertion vanish silently, so the read
+  is now hard and the frames are asserted present — if a future change ever does checkpoint
+  the WAL away here, it says so rather than quietly becoming the dead belt.
+
+## WHAT BINDS IN EACH P1 BENCHMARK AFTER P48
+
+The assertion shape is unchanged (`large ≤ max(small × factor, budget)`, factor 3.0); what
+changed is that the **budget is derived (2 ms → 1 ms)**, every run **prints the ratio and
+names the binding term**, the failure message names it too, and the five query pins are
+renamed **flat-OR-under-budget** so no name claims what the gate does not enforce
+(`autosaveIsFlatInPostLength` keeps its flat name — see below).
+
+Budget derivation: measured large-corpus medians across two hosts (a quiet one and this
+machine under agent load) span **0.32–1.27 ms**. 1 ms sits above the cheapest (`library`,
+0.32–0.40 ms) and **below the dearest** (`timelinePage`, ~1.27 ms), so at least one pin is
+always ratio-bound and the budget can never become the suite's only teeth. It does not flake
+because it binds **only when `small × 3 < 1 ms`** — i.e. on a host fast enough that the
+correlated large median is far below it; the uncorrelated-spike case is what the median of 20
+iterations absorbs.
+
+| benchmark | measured (small → large, full-suite run) | what binds NOW |
+|---|---|---|
+| `postRenderIsFlatOrUnderBudgetInCorpusSize` | 0.817 → 0.831 ms (1.02×) | **RATIO** (bound 2.45 ms). Budget-bound only if the small median drops under ~0.33 ms |
+| `readingAssemblyFirstPageIsFlatOrUnderBudgetInCorpusSize` | 0.745 → 0.716 ms (0.96×) | **RATIO** (bound 2.23 ms); same fast-host caveat |
+| `timelinePageIsFlatOrUnderBudgetInCorpusSize` | 0.766 → 1.258 ms (1.64×) | **RATIO, always** — its large median exceeds the budget, so the budget is inert here. Its 1.6× is a real keyset-seek difference, stable across every run, well inside 3× |
+| `libraryPageIsFlatOrUnderBudgetInCorpusTextSize` | 0.401 → 0.397 ms (0.99×) | **RATIO on a loaded host (1.20 ms), BUDGET on a quiet one (1.0 ms)** — the cheapest probe, and the finding's example. Worst-case tolerated regression drops from **6.45× to ~3.1×** |
+| `tagSubtreeIsFlatOrUnderBudgetInCorpusSize` | 0.831 → 0.833 ms (1.00×) | **RATIO** (bound 2.49 ms) |
+| `autosaveIsFlatInPostLength` | 1.718 → 1.720 ms (1.00×) | **RATIO, always** — its own 1 ms floor cannot bind against a ~1.7 ms control, which is why this one keeps its flat name |
+
+Every one of the six was **RATIO-bound in the full-suite run** (i.e. under load), which is
+also the stability evidence: the tightened budget never became the binding term in the
+conditions the suite actually runs in.
+
+## The other five items, briefly
+
+- **P42** — the mode → kind rule now lives once in `Shared/EditorBrain/CrystallizationPlanner`
+  and is called from all five sites (Mac ×3, phone ×2). Both factories **switch exhaustively**,
+  so a fourth segmentation mode becomes a build failure at the one place that decides rather
+  than five silent fall-throughs. Evidence: grep 5 → 0 duplications, four new pins, iOS builds.
+- **P43** — `fanAction` + `enum FanAction` + `loadFan`'s per-open store read + two unread
+  `FanPanelState` fields removed; `openFan` is synchronous. `FanPanelState` itself stays (the
+  sheet's `item:` binding — the verifier's correction to the finder). The test that was the
+  dead code's only caller is **re-pointed onto a live door** (⌘⇧A `archiveCaretTake` on a last
+  active take), so the suite now guards a refusal the app can actually reach.
+- **P44** — no cap invented. `removeAll()` is not dead (four test call sites); what was missing
+  was the statement that it has **no production caller and deliberately none**, which it now
+  carries, alongside the retention fact at `entries` (bounded per act by the edit ⇒ P1's letter
+  holds; session-scoped, never persisted). **ARCHITECT NOTE:** a retention ceiling for the undo
+  stack is a *product* call — how far back can she undo — and nothing measured says one is
+  needed, so this is raised here rather than opened as a KnownIssues row.
+- **P45** — `BoundarySnapping.snap` and its four tests removed (zero production callers, kept
+  green by its own tests while `divide`'s doc named it as the contract); the divide doc and the
+  planner header now name `settle`, the rule that actually ships.
+- **P46** — AppSpec corrected 24 → 2 in **both** stale places (§7's seed comment and §9's
+  `idleAutoCommit`), each citing 13j's J11 ruling. Canon aligned to an already-ruled value;
+  nothing else in canon touched.
+
+## Verification at close
+
+- **Core `swift test`: 1464 tests / 156 suites, GREEN** (baseline 1465/155 — arithmetic:
+  −4 `snap` tests, +3 trigger-coverage pins, +1 new suite). Three consecutive clean runs; an
+  earlier run reported a single issue that did not reproduce and could not be identified from
+  the captured output — the same shape the Acts 3+4 record notes.
+- **Mac suite: 1905 tests / 322 suites** (baseline 1897/321 — +4 P47 pins, +4 P42 pins, +1
+  suite) with **one failure: the known load-flaky
+  `EditorWindowSmokeTests.rewriteStrategyLatencies`** at 50.88 ms against its 50 ms budget.
+  **Adjudicated PRE-EXISTING — and this act's diff touches `EditorViewModel`, so it was
+  adjudicated by measurement rather than by assertion.** Isolated re-runs on the current tree
+  swung 85.8 / 78.8 / 58.4 ms and one pass, so a single reading proves nothing; an
+  **interleaved paired comparison** against the pre-act commit `58e98c6` (built in its own
+  worktree, alternating base/current to control for load drift) reads:
+  **BASE 45.6 / 38.7 / 42.7 ms · CURRENT 39.8 / 39.7 / 39.5 ms** — the current tree is if
+  anything faster and steadier, and both pass the budget when the box is quiet. The
+  KnownIssues row gains a second both-trees-built covariate, and its remedy now has paired
+  calibration data.
+- **Tutorial spine green** inside the full run (all ten `Tutorial …` suites passed).
+- **iOS target builds** (`xcodebuild build -scheme VariorumMobile`) — mandatory, `Shared/` was
+  touched by P42.
+- **Mobile targeted run green: 3 tests / 1 suite** (`MobileProtectionSurfaceTests`, iPhone 17 /
+  iOS 26.2). The full mobile suite stays a round-end act.
+- **Zero `Sources/VariorumCore/Sync/` lines**, diff-verified; **no schema**; lockstep marker
+  unchanged at 7.
