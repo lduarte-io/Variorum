@@ -2756,4 +2756,16 @@ liveness through `PaneTextAuthority` only); P1 measured on the Sherlock corpus.
   Every TOC door survives; walk pins re-anchored deliberately with
   supersession notes (both new faces declare the pair). Pins:
   BlocksWorkbenchTests (6); BlockTOCTests rode UNMODIFIED.
+- `6dca6b2` — **COMPARE + LENSES REBUILT (item 15).** Compare's first open =
+  the OFFER page (two generous cards: search-the-library via the item-14
+  picker with version peers ranked + annotated · make-outline-note with its
+  consequence line; version peers as direct open-beside rows); the dropdown
+  dead — the picker everywhere; open slots wear the dashed choose-a-note door
+  (Lenses' own stub grammar — ONE "column could stand here" vocabulary);
+  column headers are NOTE cards (title · relationship · calm act row). Lenses:
+  the footer sentence retired INTO a ?-disclosure (exact words preserved,
+  summoned not standing); headers are LENS cards (name · kind line · doors,
+  adopt visibly primary). The two modes now tell apart by STRUCTURE (notes+
+  relationships vs ways-of-looking+adopt). Semantics byte-untouched; Compare/
+  Takes suites green unmodified.
 

@@ -50,6 +50,17 @@ struct NewModesTests {
             .showNoteTray, in: CapabilityContext(mode: .read)))
     }
 
+    /// The field guide's coverage contract carries the new modes (the walk
+    /// pin EXTENDED deliberately, never rewritten): "ways of looking" opens
+    /// with the index · read lesson, and the getting-around enumerator
+    /// changed with the row — TutorialBookShapeTests holds plan ⇔ seed.
+    @Test func theFieldGuideTeachesTheNewModes() {
+        let looking = TutorialSeeder.plan.first { $0.chapter == "ways of looking" }
+        #expect(looking?.lessons.first == "index \u{B7} read")
+        #expect(looking?.lessons.contains("blocks \u{B7} canvas") == true,
+                "the workbench lesson survives beside it")
+    }
+
     @Test func theNewModesDeclareTheirRowMenuActs() {
         // Declared ⇔ rendered (P-1): Index carries the TOC listing's
         // archive/delete pair on its ⋯ menu.
