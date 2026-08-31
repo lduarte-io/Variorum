@@ -1398,7 +1398,18 @@ companion, index as the full view.
 7. **MOBILE PARITY LINE** — required by CLAUDE.md's closeout ritual, and **Act 3 makes it a real
    question**: the phone is a first-class birthplace of stores since 13p, so a store created there
    either seeds Sherlock or receives it by sync, and the round must say which. *"Nothing
-   mobile-visible"* is not available as an answer for this round.
+   mobile-visible"* is not available as an answer for this round. **WIDENED at her sign-off
+   (2026-08-31, verbatim: "Remember to update mobile thoroughly at the end with whatever is new /
+   required - especially the encryption details / explanation, and the page redesigns"):** the
+   closeout writes a SELF-CONTAINED mobile update note (the 14a mobile-update-message precedent)
+   beside the MobileSoul row(s), covering AT LEAST: the security-clarity memo's presentation as
+   mobile's posture spec (R-pre13u-7(f) — one account, one posture, both platforms; the recipes/
+   shapes wording; the escrow/posture coupling the `Shared/` brains already carry), the
+   ProtectionLegs exposed-tier faces owed, the new note modes + the cohesive Book redesign (the
+   tenth-wave note), the Sherlock answer as built (R-pre13u-8 — the phone's seed + dedupe land in
+   Act 0 THIS round), the restore door's phone face, the Snippets/Blocks redesigns' parity
+   implications, and the style-guide grammar (her own observation: the mockups match mobile's
+   modern feeling — the Mac is converging TOWARD it).
 8. **Anything deferred lands in `KnownIssuesAndTechDebt.md` with an owner.** Never dropped back into
    the sweep artifact, which is a dated snapshot and not a tracking surface.
 9. **`/Applications/Variorum.app` refreshed** if any Mac app code changed, per CLAUDE.md — and note
