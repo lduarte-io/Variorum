@@ -1001,4 +1001,24 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: RULED 2026-08-30 (the pre-13u kickoff sitting) — option (c), BIND THE STORE KEY ONLY.** Her words: *"I agree with binding the store key only - it closes the last gap where only a computer password is enough to get your text, which is consistent."* Builds in the pre-13u round's Fable custody batch (Act 9), TN3137 migration round-trip pinned; the iCloud-escrow verification check is pulled into the same round at her word (*"I'm fine with verifying the escrow round trip this phase by the way"*) — escrow is the load-bearing Auto safety net post-binding. Her follow-on (is the nudge enough for Auto users without iCloud Keychain?) is the sitting's R-pre13u-4, pending. The binding record is `notes/plans/pre-13u-round.md`'s RULINGS block.
 
-*(Next free number: **#83**.)*
+---
+
+## The pre-13u round (2026-08-31) — Act 0's two rulings, recorded verbatim
+
+*(Written at Act 0's close per that act's own obligation — "her ruling recorded verbatim in `QUESTIONS` before any build" — and obligation 11. These are ALREADY-RULED items, not open questions: they are here so the rulings that shaped the mobile seeding change are findable from the file the checkpoint walks, not only from the round's plan. The binding record remains `notes/plans/pre-13u-round.md`'s RULINGS block.)*
+
+83. **2026-08-31 · pre-13u Act 0 · B1, the mobile starter-furniture residual — RULED.**
+
+    **R-pre13u-1, verbatim from the RULINGS block:** *"**B1, RULED: "First write + repair."** Seed-on-first-write: the mobile starter furniture (Journal book, designation, pin, starter note) is minted by her first WRITE, never by launch — sign in before typing and the real Journal simply arrives; the 20-second bounded wait is deleted. PLUS the SyncSpec §7-class convergence repair: two designated Journal books converge by deterministic keeper (the `tag.path` pattern — smaller id keeps, memberships re-pointed, loser tombstoned; the "same book" predicate is the batch's design item, designation + profile the candidate). The repair is `Sync/` work — **Fable**, per the standing rider. Empty-state copy rides the seed-on-write change so a fresh install doesn't read as broken. Her ruling lands in `QUESTIONS.md` at close per the Act 0 obligation."*
+
+    **Status: BUILT (the seed half) 2026-08-31, Act 0's Opus half** — seed-on-first-write, the wait deleted, the empty-state copy, and the mobile file's false virgin-store header claim corrected. **The repair half is the Fable `Sync/` session's**, and it is what closes the residual her ruling deliberately leaves open (seed while signed out, then sign in). Record: the round plan's "ACT 0 OPUS-HALF RECORD".
+
+84. **2026-08-31 · pre-13u Act 0 · The phone's Sherlock library — RULED.**
+
+    **R-pre13u-8, verbatim from the RULINGS block:** *"**PHONE SHERLOCK, RULED** (her word: "i agree, giving the word for it to become R-pre13u-8 for Act 0"). The tenth-wave proposed shape below builds as proposed, in Act 0: the phone seeds Sherlock at R-pre13u-1's first-write moment through the Journal-furniture gate (account-owned stores skip and arrive-by-sync); the pristine-copy dedupe repair (per-note manifest hashes; both-pristine → deterministic keeper; one-edited → edited kept; both-edited → both survive, an edited copy NEVER silently retired) lands beside the Journal-keeper repair — the `Sync/` half is Fable's under the standing rider, the seed rides the Opus half. **The RESTORE DOOR is also RULED** (her word: "Restore door - yes, let's do it") — a tutorial-style "restore the sample library" door on the field guide's restore precedent; the Mac face rides Act 10 (wave 1); the phone's face joins mobile's parity answer."*
+
+    Her originating directive, verbatim: *"hmmm can you explore any way that the phoen COULD get sherlock but if it synced it could just check for a duplicate and not include it? like if a book's hash was identical or something? some people will be phone only users and they should get to experience it."*
+
+    **Status: BUILT (the seed half + the manifest artifact) 2026-08-31, Act 0's Opus half** — the seeder HOISTED to `App/Variorum/Shared/`, the phone seeding at the same first-write moment through the same gate, and `SampleLibraryManifest` (the per-note pristine predicate the dedupe repair consults). **The dedupe repair itself is the Fable `Sync/` session's; the RESTORE DOOR is Act 10 wave 1's** (Mac) and mobile's parity answer (phone) — neither is built here.
+
+*(Next free number: **#85**.)*

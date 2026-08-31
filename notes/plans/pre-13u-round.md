@@ -409,6 +409,125 @@ deterministic keeper; one-edited → the edited copy kept; both-edited → both 
 copy is never silently retired; ordinary tombstones with explicit outbox rows; zero schema). The
 sample library's identity predicate is the Mac seeder's own `discover` predicate, shared.
 
+### ACT 0 OPUS-HALF RECORD (2026-08-31, the overnight run — the seed half of R-pre13u-1 + R-pre13u-8)
+
+**Scope built:** the four groups in the work order. **NOT built here and deliberately named:** the
+two `Sync/` convergence repairs (the Journal keeper + the pristine-copy dedupe) — the Fable session
+that follows, per the standing rider; and the **restore-the-sample-library door** (R-pre13u-8's
+ruled door — Mac face at Act 10 wave 1, phone face at mobile's parity answer). **ZERO
+`Sources/VariorumCore/Sync/` lines, ZERO schema, ZERO `Sources/` lines of any kind.**
+
+**Group 1 — B1, seed-on-first-write (R-pre13u-1).** The launch-time seed call is gone from
+`VariorumMobileApp`; the 20-second bounded wait, its 100 ms poll, and `SyncGate.hasSyncedCleanly`
+are DELETED with it. The occasion is `MobileFirstWriteFurniture` (new, mobile-local), announced to
+through a new `AppSession.noteFirstWrite()` seam wired at five write doors: the quick note's mint,
+＋ New Note, Today's Entry, ＋ New Book, ＋ new scrap. **Nothing on a write path awaits it** —
+`noteFirstWrite()` starts a task and returns.
+
+The gate reduced to ONE fact read AT THE WRITE (`belongsToAnAccount`) because that is the first
+moment the question has an answer: the sign-in door lives inside the shell, so at launch on a fresh
+install there is no ordering in which the account could be known, and waiting only narrows the
+window rather than closing it. An account-owned store seeds NOTHING — her ruled accepted corner
+("an account whose sync never lands" simply waits). `Outcome.awaitingFirstSync` was RETIRED rather
+than left unreachable (the 13c `noDailyBook` precedent: a case that can never be returned is the
+drift class); `.accountOwned` replaced it.
+
+**Two guards, at two moments, and the split is the design.** The virgin verdict is taken at LAUNCH
+(`prime()` — one cheap local read; reading is not seeding, and what her ruling moved off the launch
+path is the MINT) because by the write moment her own first note may already have landed, and
+reading it late would decline on the strength of the very keystroke that summoned the furniture.
+Beside it, a **live re-check inside the mint's own runner turn** (`dailyJournalBookID()` +
+`assertBookNameIsFree`, both public core reads), which cannot be read stale — AppSpec's
+`deleteBlock` precondition doctrine. That second guard is what makes **Today's Entry** safe:
+`shelveInDailyJournalBook` creates and pins the Journal book ITSELF, so her very first act can mint
+exactly the book the furniture would; the runner is serial, so one turn sees the other's book and
+declines, and exactly one Journal exists whichever door won.
+
+**Group 2 — empty-state copy.** `MobileEmptyStoreCopy` (mobile-local). The Library had **no empty
+state at all** — an empty store showed a path line, a search field, a filter row and nothing else —
+and now says `No notes yet.` / `＋ New Note starts one.` The shelf's existing books line gains the
+second road. **Both surfaces name the returning-owner road** (`Have an account? Settings ▸ Sync
+signs you in.`), because a fresh install has exactly two kinds of owner and naming only the first is
+what makes an empty screen read as *"my writing is gone"*. Door names are DERIVED from the doors
+(`MobileNewNoteDoor.doorTitle`), never retyped. FUNCTIONAL and PROVISIONAL — 13s rewords.
+
+**Group 3 — the phone's Sherlock seed (R-pre13u-8) + the HOIST.** The phone seeds the sample
+library at the same first-write moment through the same gate; an account-owned store skips
+(arrive-by-sync). **Placement reasoning, stated as the work order asks:** `SampleLibrarySeeder.swift`
+and `SherlockAdventures.txt` **MOVED** (git mv, one file, one resource) to
+`App/Variorum/Shared/SampleLibrary/` — `Shared/` is a `PBXFileSystemSynchronizedRootGroup` in BOTH
+app targets, so the hoist cost **zero pbxproj edits** and the resource lands in both bundles
+automatically (verified in both built products, not assumed). The type KEPT its name, which is why
+**`VariorumTests/SampleLibraryTests.swift` is byte-untouched** — the 3C parity proof that an address
+moved and behaviour did not. What is per-platform and deliberately NOT hoisted is WHEN the seed runs:
+the Mac keeps its launch occasion and its bounded wait (its occasion still has the race the wait
+narrows); the phone's occasion answers the account question once and hands the seeder `.unowned`, so
+**the wait is structurally unreachable from the phone**. Two now-stale sentences in the moved file's
+header carry dated corrections rather than silent edits.
+
+**THE MANIFEST — the artifact the Fable half consults.** `SampleLibraryManifest`, file-scope and
+`nonisolated` in the same file:
+
+```
+bookName: String            // the reserved book name  — half the identity predicate
+tagName:  String            // the reserved tag path   — the other half
+noteHashes: [String: String]  // note TITLE → SHA-256 hex of the text the seed stores
+titles: Set<String>
+func isPristine(title:renderedText:) -> Bool
+```
+
+Built by `SampleLibrarySeeder.manifest()` (from the bundle) or `.manifest(stories:)` (pure, for a
+pin). **The engine side needs to import nothing:** the recipe is core's own public
+`BridgeHash.body`, so the repair reads
+`BridgeHash.body(Queries.renderedText(db, containerID: id))` and compares — which matters because
+`Sources/VariorumCore/Sync/` cannot see app-target code at all, so the two halves must name ONE
+function that both can reach. **A title the manifest does not know is never pristine** — a note she
+ADDED to the book is her own, and "I have no hash for this" must never read as "this is untouched
+shipped content". Per-NOTE rather than per-book, because her rule turns on per-note truth (one
+edited → the edited copy kept) and a book hash would have to be re-derived from the notes anyway.
+
+**Group 4 — the header correction (the act's own obligation).** `MobileStarterJournal`'s header
+claimed the virgin-store guard *"protects a phone that syncs an existing account down"*. That was
+FALSE and the residual proved it; a dated in-place correction now says so, says why a local read of
+an empty store can never distinguish *"you have nothing"* from *"your things have not arrived yet"*,
+and says what actually protects it instead.
+
+**PINS, and the red-on-old evidence.** These are ruled behaviour CHANGES rather than bug fixes, so
+the guard's form is **behavioural revert**: the old behaviour was restored in the implementation and
+each named pin was observed RED, then restored. Three passes, all run:
+
+| pass | reverted | pins that went RED (observed) |
+|---|---|---|
+| A | the account gate; the in-turn live guard | `anAccountOwnedStoreIsNeverSeeded` · `signingInBeforeTypingLeavesNoStarterFurniture` · `decliningForAnAccountDoesNotSpendTheSeed` · `aJournalBookArrivingFirstStopsTheMint` (**`books.count → 2`** — the duplicate Journal itself) · `aBookAlreadyWearingTheNameStopsTheMint` (**`books.count → 2`**) |
+| B | the launch seeds again; the 20 s bounded wait; no phone sample seed | `primingSeedsNothing` (a Journal book present after launch alone) · `anAccountOwnedStoreDoesNotWait` (**`elapsed → 20.097 s` vs the 5 s budget** — the deleted wait, measured) · `anAccountOwnedStoreSeedsNothing` · `aPhoneOnlyStoreGetsTheSampleLibrary` · `theJournalIsSeededBeforeTheSampleLibrary` |
+| C | the manifest hash recipe perturbed by one newline | `theManifestMatchesWhatTheSeedActuallyStores` (**12 of 13 notes**) · `theHashIsTheCoresOwnRecipe` · `aTitleTheManifestDoesNotKnowIsNeverPristine` |
+
+The one pin with a deliberately WEAK guard is recorded as such: `MobileEmptyStoreTests` pins that
+the copy names both roads and DERIVES the door name — it cannot fail against a tree that has no copy
+at all, because the symbol would not exist. The view wiring it guards is one visible line per surface.
+
+**Counts.** Mobile **602 / 97 PASSED, the 2 standing known issues** (baseline 582/93 — +20 tests,
++4 suites). Mac **[see the close-of-act line below]** with `VariorumTests/` unmodified. iOS build
+gate green at every step (the standing per-batch gate).
+
+**Bundle delta on the phone:** the resource is **574,874 bytes raw / 211,562 gzipped** — the only
+size this act adds, and it is the same file the Mac already shipped.
+
+**Notes for the Fable `Sync/` half:**
+1. The manifest above is the pristine predicate; `SampleLibrarySeeder.bookName` / `.tagName` /
+   `discover` are the identity predicate, all now in `Shared/` — but **none of them is reachable from
+   `Sync/`**. Inject the manifest (or its `[title: hash]` dictionary) the way the engine already
+   takes its key providers; the hash recipe itself is reachable (`BridgeHash.body`).
+2. The Journal-keeper repair's "same book" predicate has a live precedent to match: this act's mint
+   guard uses **designation** (`dailyJournalBookID`) plus **name** (`assertBookNameIsFree`, which is
+   `BookNaming.key`-folded, not raw equality). The plan's candidate was "designation + profile".
+3. The residual the repair must heal is now precisely stated and pinned from the other side:
+   `signingInBeforeTypingLeavesNoStarterFurniture` pins that the *new* ordering avoids it; the repair
+   is for devices where it already happened.
+
+**Deferred / handed on:** the sample-library restore door (Act 10 wave 1 · mobile's parity answer,
+MobileSoul **PL-17**); both `Sync/` repairs (the Fable half); the empty-state copy's wording (13s).
+
 ---
 
 ## Act 1 — Cold review of 17g (the `13p-fix` session's work)
