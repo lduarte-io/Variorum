@@ -43,6 +43,20 @@ final class MobileArchiveModel {
 
     private(set) var archived: [Queries.TimelineItem] = []
     private(set) var truncated = false
+    /// **THE INHERITED FILTER** (her #85: *"Archived … needs the same filters
+    /// that the regular library has"*) — the SAME vocabulary the Library
+    /// speaks, through the one brain, narrowed to the doors whose kind can
+    /// exist in this room (`MobileListingFilter.archiveDoors`).
+    ///
+    /// **It is not applied in SQL, and it must not be**, unlike the Trash
+    /// room's: this room's listing is `Queries.archivedPosts`, which is
+    /// `kind = 'post'` by construction, so both of its doors name the same
+    /// set of rows today. Pushing a no-op predicate into the query would
+    /// invent a narrowing that the schema cannot have (§0's model fact) and
+    /// would be a second copy of the room's own definition. The filter
+    /// therefore SELECTS, and `visible` says plainly which doors show rows.
+    var filter: MobileListingFilter = .all
+
     private(set) var lastError: String?
     /// A landed act's own words — kept apart from `lastError` so a success
     /// is never rendered in the red slot.
@@ -51,6 +65,21 @@ final class MobileArchiveModel {
     init(session: AppSession, window: Int = 200) {
         self.session = session
         self.window = window
+    }
+
+    /// The rows the current door shows. **Everything in this room is a NOTE**
+    /// — `Queries.archivedPosts` reads `kind = 'post' … archived_at IS NOT
+    /// NULL` — so `.all` and `.notes` name the same set, and the three doors
+    /// that could not have content here are not rendered at all (P-2;
+    /// `MobileListingFilter.archiveDoors` carries the reasons). The switch is
+    /// exhaustive on purpose: a future kind that becomes archivable has to be
+    /// answered here rather than falling through to a listing that is quietly
+    /// wrong.
+    var visible: [Queries.TimelineItem] {
+        switch filter {
+        case .all, .notes: return archived
+        case .books, .bookless, .scraps: return []
+        }
     }
 
     /// **Through the CORE's own wrapper**, not a rolled `observe { … }` over

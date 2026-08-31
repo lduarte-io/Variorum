@@ -134,6 +134,7 @@ struct MobileDeletionTests {
             try await withHostedSurface(
                 MobileLibraryView(
                     model: library, scraps: scraps, stars: stars,
+                    books: MobileShelfViewModel(session: session),
                     tokens: .terminalLight, tabBar: { EmptyView() },
                     onOpen: { _ in })
             ) { surface in
@@ -275,6 +276,7 @@ struct MobileDeletionTests {
             try await withHostedSurface(
                 MobileLibraryView(
                     model: library, scraps: scraps, stars: stars,
+                    books: MobileShelfViewModel(session: session),
                     tokens: .terminalLight, tabBar: { EmptyView() },
                     onOpen: { _ in },
                     onOpenTrash: { trash.value = true },

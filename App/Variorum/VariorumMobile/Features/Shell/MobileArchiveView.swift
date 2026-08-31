@@ -25,12 +25,20 @@
 //  Rows stay OPEN-able: an archived note is a *work*, not a deletion, and
 //  it stays editable — the Library row's own grammar, one filter over.
 //
-//  **Structured for the NEXT batch** (her #85, which she ruled OUTRANKS
-//  this work): the Library is to grow KIND filters, and *"Archive inherits
-//  the same set"*. The listing here is deliberately a plain
-//  `ScrollView`/`LazyVStack` under a two-line masthead with nothing between
-//  them, so the Library's filter-row component drops into that gap on both
-//  surfaces as ONE brain rather than a second copy.
+//  **THE FILTER ROW LANDED** (the filter batch, 2026-08-31 — her #85:
+//  *"Archived … needs the same filters that the regular library has"*). 6c
+//  left the gap for it deliberately — a plain `ScrollView`/`LazyVStack` under
+//  a two-line masthead with nothing between them — and the Library's row drops
+//  into it as ONE brain (`MobileFilterRow`) rather than a second copy.
+//
+//  **Its door set is NARROWER than the Library's, and by a MODEL FACT rather
+//  than a face call:** `reading` carries no `archived_at` (AppSpec §7), so a
+//  book cannot be archived and a "books" door here could never have content —
+//  P-2 in its strongest form. `bookless` and `scraps` fail the same test for a
+//  different reason (no core read exists for archived-and-bookless, and the
+//  only archived-block read is per-NOTE). The trace lives on
+//  `MobileListingFilter.archiveDoors`; book-archiving would be a schema event,
+//  logged for her rather than improvised.
 //
 
 import SwiftUI
@@ -50,19 +58,29 @@ struct MobileArchiveView: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
                 header
-                if model.archived.isEmpty {
+                // **HER #85's OWN SENTENCE, MADE REAL** — the Library's filter
+                // row, same brain, in the gap 6c left for it. The door set is
+                // narrowed to what CAN exist here, and the narrowing is a
+                // model fact rather than a face call
+                // (`MobileListingFilter.archiveDoors` carries the trace).
+                MobileFilterRow(
+                    doors: MobileListingFilter.archiveDoors,
+                    selection: model.filter,
+                    tokens: tokens,
+                    select: { model.filter = $0 })
+                if model.visible.isEmpty {
                     line(Self.emptyLine)
                 } else {
-                    ForEach(model.archived, id: \.postID) { item in
+                    ForEach(model.visible, id: \.postID) { item in
                         row(item)
                     }
                 }
-                // The filterless rooms' one sentence (her #85 gives this room
-                // the Library's kind filters next batch, and the "narrow the
-                // filter" half arrives with them — for both rooms at once,
-                // from `MobileRoomListing`).
+                // The filterless rooms' one sentence — and this room keeps it
+                // (rather than the Trash's "narrow the filter to see more")
+                // because its filter cannot narrow: both of its doors name
+                // every row it holds. See `MobileListingFilter.archiveDoors`.
                 if model.truncated {
-                    line(MobileRoomListing.truncationMarker(shown: model.archived.count))
+                    line(MobileRoomListing.truncationMarker(shown: model.visible.count))
                 }
             }
             .padding(.horizontal, 8)

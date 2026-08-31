@@ -29,14 +29,12 @@ import VariorumCore
 @MainActor
 @Observable
 final class MobileLibraryViewModel {
-    enum Filter: String, CaseIterable, Sendable {
-        case all
-        case bookless
-        /// The scraps area (parity C3 — her "view your pool of scraps …
-        /// and maybe add to it"): standalone blocks, not notes — the
-        /// listing is `MobileScrapsModel`'s, not this model's.
-        case scraps
-    }
+    /// **THE ONE FILTER VOCABULARY** (the filter batch, her #85/#92) — the
+    /// declaration moved to `MobileListingFilter` when the Archive room grew
+    /// the same row, and this name stays as its handle so no call site had to
+    /// learn a second word for the same thing. `.books` and `.notes` are her
+    /// #92(a) additions; `.bookless` and `.scraps` are untouched.
+    typealias Filter = MobileListingFilter
 
     @ObservationIgnored private let session: AppSession
     /// Bounded on purpose (P1) — `observeLibrary` requires a limit.
@@ -62,12 +60,38 @@ final class MobileLibraryViewModel {
 
     var visible: [Queries.TimelineItem] {
         switch filter {
-        case .all: return all
+        // **`.all` and `.notes` deliver the SAME rows, and that is stated
+        // rather than hidden — PROVISIONAL, hers.** The Library's listing IS
+        // the note listing, so under her #92(a) vocabulary the two doors name
+        // one set until the resting surface is ruled to interleave kinds.
+        // The alternative (`.all` = books THEN notes, the Trash room's
+        // All-is-the-union grammar) would change the surface she looks at
+        // every day, which she did not ask for — so the built answer is the
+        // one that changes nothing she has, and the choice is logged in the
+        // batch record for her word.
+        case .all, .notes: return all
         case .bookless: return bookless
-        // Scraps are blocks, not notes — their listing is the scraps
-        // model's; this note listing is empty under that filter.
-        case .scraps: return []
+        // Books are readings and scraps are blocks — neither is a note, so
+        // this note listing is empty under both. Their rows come from the
+        // shelf model and `MobileScrapsModel` respectively.
+        case .books, .scraps: return []
         }
+    }
+
+    /// **The books listing's WINDOW** (#92(a) — books as rows).
+    ///
+    /// The FETCH is author-scale by core's own contract: `Queries.bookshelf`
+    /// takes no limit and `ShelfQueries`' header says why (*"reading rows +
+    /// counted joins — author-scale"*), which is exactly why the Shelf holds
+    /// it unbounded. So what this bounds is what the SURFACE BUILDS — the
+    /// scraps area's own shape (`MobileScrapsModel`'s window over a whole
+    /// delivery), and `count > window` is exact truth rather than a probe
+    /// approximation, so an exact-window shelf can never false-positive the
+    /// marker.
+    func windowedBooks(
+        _ books: [Queries.ShelfBook]
+    ) -> (rows: [Queries.ShelfBook], truncated: Bool) {
+        TrashListing.windowed(books, window: listingLimit)
     }
 
     // MARK: - The sort picker (parity C3 — ruling 9)

@@ -148,6 +148,10 @@ struct MobileShellView: View {
             stack(path: $libraryPath, owner: .library) {
                 MobileLibraryView(
                     model: libraryModel, scraps: scrapsModel, stars: starsModel,
+                    // The filter batch (#92(a)): the books filter lists her
+                    // books as rows, through the SHELF's own model — one held
+                    // observation and one set of row faces, never a second.
+                    books: shelfModel,
                     tokens: tokens,
                     tabBar: { tabBar },
                     onOpen: { libraryPath.append($0) },

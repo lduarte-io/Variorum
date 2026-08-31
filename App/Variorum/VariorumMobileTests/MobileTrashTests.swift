@@ -140,6 +140,7 @@ struct MobileTrashTests {
             try await withHostedSurface(
                 MobileLibraryView(
                     model: library, scraps: scraps, stars: stars,
+                    books: MobileShelfViewModel(session: session),
                     tokens: .terminalLight, tabBar: { EmptyView() },
                     onOpen: { _ in },
                     onOpenTrash: {}, onOpenArchive: {})
@@ -664,6 +665,7 @@ struct MobileTrashTests {
             try await withHostedSurface(
                 MobileLibraryView(
                     model: library, scraps: scraps, stars: stars,
+                    books: MobileShelfViewModel(session: session),
                     tokens: .terminalLight, tabBar: { EmptyView() },
                     onOpen: { _ in }, onOpenTrash: {}, onOpenArchive: {})
             ) { surface in

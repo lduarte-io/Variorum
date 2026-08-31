@@ -20,6 +20,33 @@ struct MobileLibraryView<TabBar: View>: View {
     /// The starred set (parity C3): the note rows' star door — the ONE
     /// model the shell threads to every surface with the door.
     @Bindable var stars: MobileStarsModel
+    /// **The books listing's model — the SHELF's own, threaded here** (the
+    /// filter batch, her #92(a): *"filtering to 'books' lists her books
+    /// themselves as openable rows"*).
+    ///
+    /// It is the SAME instance the Shelf holds, deliberately: `bookshelf` +
+    /// `shelfPins` + the daily designation ride one held observation there
+    /// and both tab stacks stay alive by design (`MobileLivenessAuthority` —
+    /// *"nothing about visibility ever fires `onDisappear`"*), so a second
+    /// model would be a second observation over rows the app is already
+    /// watching. Reusing it is also what keeps the row FACES from forking:
+    /// `rowName`/`rowMeta` are `MobileShelfFaces`, never a second rule.
+    ///
+    /// *(The 6c "nothing shared" ruling is about the two RECOVERY rooms'
+    /// message slots — an act in one speaking in the other. Nothing here acts:
+    /// the Library's book rows open a book and nothing else, so this model's
+    /// error and receipt slots are never written from this surface.)*
+    ///
+    /// **Consequence, stated so nobody re-derives it:** the held observation
+    /// belongs to the SHELF root's `.task`, not to this view — one loop for
+    /// one model, whichever surface is wearing it. In the app that root is
+    /// always mounted, so the rows are there before she can reach this filter;
+    /// a harness that mounts THIS view alone must drive the model the way the
+    /// app does (`start()` + `refreshTags()`), and the geometry/behaviour pins
+    /// do exactly that. A second `start()` here would run a second loop
+    /// writing identical values and double `observationTicks`, which
+    /// `MobileShelfPerfTests` reads.
+    let books: MobileShelfViewModel
     let tokens: VoiceTokens
     @ViewBuilder let tabBar: () -> TabBar
     let onOpen: (MobileRoute) -> Void
@@ -46,8 +73,15 @@ struct MobileLibraryView<TabBar: View>: View {
                         // The scraps area (parity C3): standalone blocks
                         // with their tags, and the mint door.
                         MobileScrapsSection(model: scraps, tokens: tokens)
+                    } else if model.filter == .books {
+                        // #92(a): her books themselves, as openable rows.
+                        bookRows
                     } else {
                         listingRows
+                        // The Archived room's door belongs under a NOTE
+                        // listing — it opens archived NOTES (§0's model
+                        // fact: a book cannot be archived at all), so it
+                        // does not trail the books or scraps listings.
                         archiveRow
                     }
                 }
@@ -129,7 +163,7 @@ struct MobileLibraryView<TabBar: View>: View {
     /// two-noun name existed. Deletion's door is the path line's 🗑.
     @ViewBuilder
     private var archiveRow: some View {
-        if let onOpenArchive {
+        if let onOpenArchive, model.filter.isNoteListing {
             Button(action: onOpenArchive) {
                 HStack {
                     Text(tokens.chromeLabel(MobileRecoveryDoors.archiveLabel))
@@ -202,29 +236,38 @@ struct MobileLibraryView<TabBar: View>: View {
             .padding(.bottom, 8)
     }
 
-    /// all · bookless · scraps — the filter's doors (text chrome, no
-    /// icons; scraps joined at parity C3 — the Pool's phone home grew
-    /// its standalone-blocks neighbor).
+    /// **all · books · notes · bookless · scraps** — her #85's kind doors
+    /// joining the provenance ones, through the ONE filter brain
+    /// (`MobileFilterRow`, which the Archive room renders too: *"Archived …
+    /// needs the same filters that the regular library has"*).
+    ///
+    /// The sort rides the trailing slot as a GLYPH (#92(b) — *"the width
+    /// budget gives at the SORT"*), and its **availability rule is
+    /// unchanged**: `.all` only. Bookless keeps the core query's own order,
+    /// scraps are pointer-ordered, books order as the SHELF orders (pins
+    /// first, then journals, then names — `MobileShelfFaces.ordered`), and
+    /// `.notes` shows the `.all` listing, so a sort door on any of them could
+    /// not mean what it says. *(PROVISIONAL, logged: `.notes` renders the same
+    /// rows as `.all` and therefore loses the sort by that rule — one line if
+    /// she wants it back.)*
     private var filterRow: some View {
-        HStack(spacing: 18) {
-            filterDoor("All", .all)
-            filterDoor("Bookless", .bookless)
-            filterDoor("Scraps", .scraps)
-            Spacer()
-            // The sort picker (parity C3 — her ruling 9), on the ALL
-            // filter only: bookless keeps the core query's own order and
-            // scraps are pointer-ordered, so a sort door there could
-            // never mean what it says (P-2 — it isn't rendered).
-            if model.filter == .all {
-                sortMenu
-            }
-        }
-        .padding(.horizontal, 20)
-        .padding(.bottom, 6)
+        MobileFilterRow(
+            doors: MobileListingFilter.libraryDoors,
+            selection: model.filter,
+            tokens: tokens,
+            select: { model.filter = $0 },
+            trailing: {
+                if model.filter == .all {
+                    sortMenu
+                }
+            })
     }
 
-    /// "sort: last touched" — the four standing stamps (entry date ·
-    /// created · last touched · last meaningful edit), newest first.
+    /// The four standing stamps (entry date · created · last touched · last
+    /// meaningful edit), newest first — **the menu is byte-unchanged; only its
+    /// door shrank** (#92(b)). The full verb and the current stamp moved into
+    /// the accessibility label, so what an assistive reader hears is strictly
+    /// more than the old text door said.
     private var sortMenu: some View {
         Menu {
             ForEach(MobileLibraryViewModel.sortOptions, id: \.self) { option in
@@ -240,24 +283,85 @@ struct MobileLibraryView<TabBar: View>: View {
                 }
             }
         } label: {
-            Text(tokens.chromeLabel("sort: \(MobileLibraryViewModel.sortWord(model.sort))"))
+            Image(systemName: MobileSortDoor.symbol)
                 .font(tokens.small)
                 .foregroundStyle(tokens.accent)
-                .lineLimit(1)
         }
-        .accessibilityLabel("Sort")
+        .accessibilityLabel(
+            MobileSortDoor.label(
+                sortWord: MobileLibraryViewModel.sortWord(model.sort)))
     }
 
-    private func filterDoor(_ label: String, _ target: MobileLibraryViewModel.Filter) -> some View {
-        Button {
-            model.filter = target
-        } label: {
-            Text(tokens.chromeLabel(label))
+    /// **BOOKS AS ROWS** — her #92(a): *"filtering to 'books' lists her books
+    /// themselves as openable rows"*, and the Library becomes the surface that
+    /// really does hold everything.
+    ///
+    /// **The faces are the SHELF's, through the existing brain** — never a
+    /// second row-rendering rule: `rowName` is `MobileShelfFaces.name` (the
+    /// stored name plus the finished " ✓" state) and `rowMeta` is
+    /// `MobileShelfFaces.meta` (LK5's order — count · tags · daily). The order
+    /// is `MobileShelfFaces.ordered`, so a book sits where the Shelf puts it.
+    /// A row opens the book's CONTENTS, which is exactly what the Shelf's row
+    /// does (P35's ruled inversion).
+    ///
+    /// **What a row deliberately does NOT carry:** the Shelf row's long-press
+    /// acts (pin · star · delete). This is a LISTING, not a second shelf — and
+    /// duplicating three acts is duplicating three confirms and two message
+    /// slots. Recorded as a call in the batch record.
+    @ViewBuilder
+    private var bookRows: some View {
+        let windowed = model.windowedBooks(books.orderedBooks)
+        if windowed.rows.isEmpty {
+            Text(tokens.chromeLabel(MobileListingFilter.noBooksLine))
                 .font(tokens.small)
-                .foregroundStyle(model.filter == target ? tokens.ink : tokens.faint)
+                .foregroundStyle(tokens.muted)
+                .padding(.vertical, 24)
+                .accessibilityLabel(MobileListingFilter.noBooksLine)
         }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(model.filter == target ? .isSelected : [])
+        ForEach(windowed.rows, id: \.reading.id) { book in
+            Button {
+                onOpen(.book(book.reading.id))
+            } label: {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text(tokens.chromeLabel(books.rowName(for: book)))
+                        .font(tokens.body)
+                        .foregroundStyle(
+                            book.reading.locked ? tokens.accent : tokens.ink)
+                        .lineLimit(1)
+                    Spacer(minLength: 12)
+                    Text(tokens.chromeLabel(books.rowMeta(for: book)))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .lineLimit(1)
+                }
+                .padding(.vertical, 10)
+                .padding(.horizontal, 12)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            // Plain, and it carries the META as well as the name — an
+            // explicit label REPLACES the one SwiftUI would compose from the
+            // row's children, so a name-only label would have dropped the
+            // count and tags out of the accessibility tree while the Shelf's
+            // own rows still spoke them (measured; the rule is
+            // `MobileShelfFaces.spokenRow`).
+            .accessibilityLabel(MobileShelfFaces.spokenRow(
+                name: books.rowName(for: book), meta: books.rowMeta(for: book)))
+        }
+        if windowed.truncated {
+            // The filterless rooms' one sentence, from its one home. (The
+            // Library's kind filter cannot narrow a books listing further —
+            // "books" IS the narrowing — so the Trash's "narrow the filter"
+            // half would be a road that does not exist here.)
+            Text(tokens.chromeLabel(
+                MobileRoomListing.truncationMarker(shown: windowed.rows.count)))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .padding(.vertical, 16)
+                .padding(.horizontal, 12)
+                .accessibilityLabel(
+                    MobileRoomListing.truncationMarker(shown: windowed.rows.count))
+        }
     }
 
     private var listingRows: some View {
