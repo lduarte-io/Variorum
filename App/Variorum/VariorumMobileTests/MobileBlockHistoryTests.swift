@@ -793,4 +793,38 @@ struct MobileBlockHistoryTests {
                 == "On the \(TrashWindow.days)-day clock. Put one back here; to end a "
                 + "take's remaining days early, open the tray.")
     }
+
+    /// **THE DELETED REGION PROMISES NO PURGE ROAD THE APP DOES NOT HAVE**
+    /// — §70's handed-forward hook, re-examined at batch 6c and answered
+    /// with the fact that decides it.
+    ///
+    /// 6c gave the phone a **Trash room** with both purge doors in it, which
+    /// looks like the second half of this sentence arriving. It is not:
+    /// **this region lists deleted TAKES, and takes do not row in the global
+    /// Trash** — `TrashScope.listedKinds` excludes `.take` by her D1 ruling
+    /// (*a deleted take on a living block is not a note leaving the
+    /// library*), and `TrashScope.kinds(filter:)` cannot widen past it. So
+    /// naming the Trash room here would point her at a room where the take
+    /// she is reading about does not appear: a door that cannot act (P-2)
+    /// wearing a true sentence's clothes.
+    ///
+    /// The road that WILL make it true is the per-note tray's Leaving
+    /// section (batch 6b), where a deleted take carries Put back and Delete
+    /// Now with confirm-every-time (§69.3). **This pin holds the
+    /// precondition**, so the flip is one argument and the reason is not
+    /// re-derived: if a later batch makes takes reachable from a purge road,
+    /// the first two expectations here change with it.
+    @Test func theDeletedRegionPromisesNoPurgeRoadTheAppDoesNotHave() async throws {
+        // The precondition, stated where the sentence is decided.
+        #expect(!TrashScope.listedKinds.contains(.take),
+                "if this ever flips, the explainer's second half is owed a road")
+        #expect(!MobileTrashView.filterKinds.contains(.take))
+        // So the phone's sentence ends after Put back, and promises nothing.
+        let phone = MobileBlockHistoryController.deletedExplainer
+        #expect(phone == BlockHistoryCopy.deletedRegionExplainer(purgeRoad: nil))
+        #expect(phone.hasSuffix("Put one back here."))
+        #expect(!phone.contains(RecoveryCopy.deleteNowVerb))
+        #expect(!phone.contains(RecoveryCopy.trashSection),
+                "it must not name a room the take is not in")
+    }
 }

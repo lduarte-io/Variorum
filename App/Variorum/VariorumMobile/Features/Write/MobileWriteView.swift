@@ -100,7 +100,11 @@ struct MobileWriteScreen: View {
     /// harness/preview use (the pins call the model door directly and
     /// assert the callback fired).
     private let onDeleted: (() -> Void)?
-    /// The ⋯ sheet (M20's persistent undo/redo door + PR1's Delete Note…).
+    /// **Note ▸ Versions (batch 6c)** — the shell pushes the note's moments
+    /// onto the OWNING stack; nil in harness/preview use.
+    private let onOpenVersions: (() -> Void)?
+    /// The ⋯ sheet (M20's persistent undo/redo door + PR1's Delete Note… +
+    /// batch 6c's two time controls).
     @State private var noteActionsPresented = false
     private let fallbackVoice: ThemeVoice
     @Environment(\.colorScheme) private var scheme
@@ -118,6 +122,7 @@ struct MobileWriteScreen: View {
         tab: MobileTab = .shelf,
         onOpenNote: ((String) -> Void)? = nil,
         onDeleted: (() -> Void)? = nil,
+        onOpenVersions: (() -> Void)? = nil,
         editor injected: MobileEditorViewModel? = nil
     ) {
         let editor = injected ?? MobileEditorViewModel(session: session, postID: postID)
@@ -134,6 +139,7 @@ struct MobileWriteScreen: View {
         self.tab = tab
         self.onOpenNote = onOpenNote
         self.onDeleted = onDeleted
+        self.onOpenVersions = onOpenVersions
         // The live phone voice governs from the first materialization —
         // set BEFORE the surface exists (makeUIView runs later). With a
         // router the value is already authoritative (idempotent).
@@ -331,7 +337,8 @@ struct MobileWriteScreen: View {
         .sheet(isPresented: $noteActionsPresented) {
             MobileNoteActionsSheet(
                 door: model.undoDoor, model: model, tokens: tokens,
-                onDeleted: { onDeleted?() })
+                onDeleted: { onDeleted?() },
+                onOpenVersions: { onOpenVersions?() })
                 .presentationDetents([.medium, .large])
         }
         // A12's destructive-undo warning for the RECEIPT's button (the ⋯

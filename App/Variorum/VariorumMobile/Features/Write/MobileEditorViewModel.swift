@@ -952,6 +952,23 @@ final class MobileEditorViewModel {
         }
     }
 
+    /// **SAVE A VERSION — the whole note's moment** (batch 6c; the note ⋯
+    /// sheet's row, ⌘⇧S's phone twin).
+    ///
+    /// The DECISION layer is shared (`Shared/VersionActs.swift`) and it is
+    /// what makes the flush non-optional: a moment saved while a keystroke
+    /// is still pending would be a moment missing the words that summoned
+    /// it. This door adds only the phone's voice — its receipt and its
+    /// refusal both land in the ONE status slot, which is rendered wherever
+    /// the acting door is standing (the ⋯ sheet, or the masthead).
+    func saveVersion() async {
+        do {
+            report(try await VersionActs.save(session: session, postID: postID))
+        } catch {
+            report(VersionActs.words(error))
+        }
+    }
+
     /// The delete door's confirm words — the shared deletion vocabulary, so
     /// the phone and the Mac cannot describe one clock two ways.
     ///

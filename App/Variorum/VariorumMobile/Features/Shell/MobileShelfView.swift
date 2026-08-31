@@ -68,6 +68,13 @@ struct MobileShelfView<TabBar: View>: View {
     /// a starred NOTE row's landing (parity C3).
     let onOpenNote: (String) -> Void
     let onSettings: () -> Void
+    /// **The Trash room's door, SECOND renderer** (batch 6c — the design
+    /// record's finding 1, and PROVISIONAL by its Q6). Books live HERE and
+    /// a deleted book rows in the Trash, so a trash door reachable only from
+    /// the Library would put a tab switch between deleting a book and
+    /// getting it back. One declaration (`MobileRecoveryDoors`), two
+    /// renderers, no new surface. nil in harness/preview use.
+    var onOpenTrash: (() -> Void)?
 
     @State private var createBookPresented = false
 
@@ -213,6 +220,9 @@ struct MobileShelfView<TabBar: View>: View {
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
             Spacer()
+            if let onOpenTrash {
+                MobileTrashDoor(tokens: tokens, act: onOpenTrash)
+            }
             Button {
                 Task {
                     if let postID = await model.newNote() {
@@ -359,10 +369,10 @@ struct MobileShelfView<TabBar: View>: View {
             case .book(let id): onOpenBook(id)
             case .note(let id, _): onOpenNote(id)
             case .bookRead(let id): onOpenBook(id)
-            // A star never names the recovery surface (PR2's route joined
-            // `MobileRoute` at round 2 batch 4) — stated rather than
+            // A star never names a recovery room or a note's Versions (both
+            // joined `MobileRoute` at batches 4 and 6c) — stated rather than
             // defaulted, so a future route has to be answered here.
-            case .recovery: break
+            case .trash, .archive, .versions: break
             }
         } label: {
             HStack(alignment: .firstTextBaseline, spacing: 8) {

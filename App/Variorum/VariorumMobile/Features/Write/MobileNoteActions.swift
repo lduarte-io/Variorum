@@ -15,6 +15,23 @@
 //    (the parity inventory's headline). Move to Trash, confirmed, with the
 //    destination and the clock named.
 //
+//  **BATCH 6c ADDS THE NOTE'S TWO TIME CONTROLS** — `Save a Version` and
+//  `Versions…` — and the pairing IS a teaching surface, not a pair of rows
+//  (the archive/trash design record's finding 2). The Mac teaches the two
+//  sizes of moment with two chords: ⌘S saves THIS TAKE's moment, ⌘⇧S saves
+//  THIS NOTE's. The phone has no chord culture (PL-11's own words), so the
+//  teaching needs another home — and it already had one, because the phone
+//  keeps block acts in the **block ⋯** and note acts here:
+//
+//      block ⋯  →  Commit Take    +  Block History…
+//      note  ⋯  →  Save a Version +  Versions…
+//
+//  Two menus, two grains, each holding its own *write a moment / see the
+//  moments* pair. **PROVISIONAL — the design record's Q5:** it grows a
+//  three-row sheet to five, and the alternative (a sixth masthead chip) was
+//  refused because that row already wraps five and its crowding is flagged
+//  for her.
+//
 //  **Why a SHEET and not a `Menu`** (the inventory recommended a `Menu`;
 //  this is the recorded deviation, and it is the round's own trap-2 rule
 //  paying rent): a SwiftUI `Menu`'s rows present into a separate context-
@@ -47,6 +64,11 @@ struct MobileNoteActionsSheet: View {
     let tokens: VoiceTokens
     /// The note went — the screen must navigate away from a tombstone.
     let onDeleted: () -> Void
+    /// **Versions… (batch 6c)** — dismiss this sheet and push the note's
+    /// Versions screen. nil in harness/preview use, where the row is still
+    /// rendered and pinned: it is the DOOR that is optional, never the row,
+    /// so a pin can prove the row exists and fires.
+    var onOpenVersions: (() -> Void)?
     @State private var deletePresented = false
     @Environment(\.dismiss) private var dismiss
 
@@ -67,6 +89,11 @@ struct MobileNoteActionsSheet: View {
                     .foregroundStyle(tokens.accent)
                     .buttonStyle(.plain)
             }
+            // The note's two TIME controls first — the grain pairing the
+            // phone teaches here instead of with chords (finding 2).
+            saveVersionRow
+            versionsRow
+            Divider().overlay(tokens.line)
             undoRow
             redoRow
             Divider().overlay(tokens.line)
@@ -137,6 +164,39 @@ struct MobileNoteActionsSheet: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .lineLimit(4)
                 .accessibilityLabel(message)
+        }
+    }
+
+    /// **Save a Version** — ⌘⇧S's phone twin, and the whole note's moment.
+    /// The sentence is the shared one (`VersionsPath`): the Mac and the
+    /// phone must not describe one machinery two ways.
+    ///
+    /// The sheet STAYS UP: this is a save, not a departure, and its receipt
+    /// (or refusal) is what `reportLine` below renders — a refusal spoken
+    /// behind a covering sheet was §49's own MINOR.
+    private var saveVersionRow: some View {
+        actRow(
+            title: VersionsPath.saveVerb,
+            detail: "saves this whole note as it is right now",
+            tint: tokens.accent
+        ) {
+            let model = model
+            Task { await model.saveVersion() }
+        }
+    }
+
+    /// **Versions…** — the moments of this note. Dismiss first, then push:
+    /// the shell's own settings-sheet grammar (`settingsPresented = false`
+    /// then append), which is a proven road on this app rather than a
+    /// sheet-over-sheet race.
+    private var versionsRow: some View {
+        actRow(
+            title: VersionsPath.menuLabel,
+            detail: "the moments of this note you have saved",
+            tint: tokens.accent
+        ) {
+            dismiss()
+            onOpenVersions?()
         }
     }
 

@@ -23,9 +23,13 @@ struct MobileLibraryView<TabBar: View>: View {
     let tokens: VoiceTokens
     @ViewBuilder let tabBar: () -> TabBar
     let onOpen: (MobileRoute) -> Void
-    /// The recovery surface's door (round 2 batch 4 — PR2). nil in
-    /// harness/preview use.
-    var onOpenRecovery: (() -> Void)?
+    /// **The Two-rooms doors** (batch 6c — her QUESTIONS #84 ruling). Batch
+    /// 4's single `onOpenRecovery` opened a screen holding both states; it
+    /// is now two destinations, and the Library is where both doors live:
+    /// the path line's 🗑 and the listing's narrowed trailing row. Both nil
+    /// in harness/preview use.
+    var onOpenTrash: (() -> Void)?
+    var onOpenArchive: (() -> Void)?
 
     @State private var query = ""
 
@@ -44,7 +48,7 @@ struct MobileLibraryView<TabBar: View>: View {
                         MobileScrapsSection(model: scraps, tokens: tokens)
                     } else {
                         listingRows
-                        recoveryRow
+                        archiveRow
                     }
                 }
                 .padding(.horizontal, 8)
@@ -112,17 +116,23 @@ struct MobileLibraryView<TabBar: View>: View {
         }
     }
 
-    /// **The recovery surface's door** (round 2 batch 4 — PR2). It is the
-    /// listing's own trailing row, the `+ new book` precedent: a list of
-    /// notes ends with the way to the notes that left. The path line stays
-    /// two doors wide (P38's crowding lesson), and a row is a real Button —
-    /// a door a pin can drive (§15's trap (b)), which a `Menu` item is not.
+    /// **THE ARCHIVE ROOM'S DOOR — the trailing row, NARROWED** (batch 6c;
+    /// batch 4's `recoveryRow`). It is the listing's own last row, the
+    /// `+ new book` precedent: a list of notes ends with the way to the
+    /// notes that left it — and a row is a real Button, a door a pin can
+    /// drive (§15's trap (b)), which a `Menu` item is not.
+    ///
+    /// **What changed is what it CLAIMS.** It said `RecoveryCopy.surfaceName`
+    /// — *"Archived & Deleted"* — and opened a screen holding both. Under
+    /// Two rooms it says **Archived** and opens only the archive: *"it no
+    /// longer claims deletion"*, which is the whole reason that awkward
+    /// two-noun name existed. Deletion's door is the path line's 🗑.
     @ViewBuilder
-    private var recoveryRow: some View {
-        if let onOpenRecovery {
-            Button(action: onOpenRecovery) {
+    private var archiveRow: some View {
+        if let onOpenArchive {
+            Button(action: onOpenArchive) {
                 HStack {
-                    Text(tokens.chromeLabel(RecoveryCopy.surfaceName))
+                    Text(tokens.chromeLabel(MobileRecoveryDoors.archiveLabel))
                         .font(tokens.small)
                         .foregroundStyle(tokens.accent)
                     Spacer()
@@ -132,16 +142,27 @@ struct MobileLibraryView<TabBar: View>: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(RecoveryCopy.surfaceName)
+            .accessibilityLabel(MobileRecoveryDoors.archiveLabel)
         }
     }
 
+    /// **The path line gains a THIRD door — the Trash's 🗑** (batch 6c;
+    /// option 2's own letter, and the analogue of her Mac B1 ruling, where
+    /// the Library masthead's trash icon replaced a ⋯ menu). This is the
+    /// cost she knowingly accepted: P38's crowding lesson kept this strip
+    /// two doors wide, and the Two-rooms option spends the third here rather
+    /// than in the filter row, which is already at its width budget.
     private var pathLine: some View {
-        HStack(alignment: .firstTextBaseline) {
+        // `spacing: 16` — the Shelf path line's own value, adopted now that
+        // this strip carries two trailing doors instead of one.
+        HStack(alignment: .firstTextBaseline, spacing: 16) {
             Text(tokens.path(["Library"]))
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
             Spacer()
+            if let onOpenTrash {
+                MobileTrashDoor(tokens: tokens, act: onOpenTrash)
+            }
             Button {
                 Task {
                     if let postID = await model.newNote() {

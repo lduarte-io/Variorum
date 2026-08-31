@@ -257,28 +257,80 @@ struct MobileDeletionTests {
         }
     }
 
-    /// **The recovery surface's door is on the Library, and it is a real
-    /// button.** (The row is the `+ new book` precedent: a list ends with
-    /// the way to the things that left it.)
-    @Test func theLibraryCarriesTheRecoveryDoor() async throws {
+    /// **TWO DOORS, TWO DESTINATIONS** (batch 6c — her QUESTIONS #84
+    /// ruling). Batch 4's pin drove ONE door labelled *"Archived & Deleted"*;
+    /// under Two rooms the Library carries two, and each must reach its own
+    /// room. Both are real Buttons driven through the real accessibility
+    /// activation, and the assertion that matters is that they are
+    /// DIFFERENT: a split whose two doors both opened the same screen would
+    /// pass a "the door exists" pin and fail the ruling entirely.
+    @Test func theLibraryCarriesBothRoomsDoors() async throws {
         try await withEditorWorld { session, _ in
             let library = MobileLibraryViewModel(session: session)
             let scraps = MobileScrapsModel(session: session)
             let stars = MobileStarsModel(session: session)
-            let opened = LockIsolatedBox(false)
+            let trash = LockIsolatedBox(false)
+            let archive = LockIsolatedBox(false)
 
             try await withHostedSurface(
                 MobileLibraryView(
                     model: library, scraps: scraps, stars: stars,
                     tokens: .terminalLight, tabBar: { EmptyView() },
                     onOpen: { _ in },
-                    onOpenRecovery: { opened.value = true })
+                    onOpenTrash: { trash.value = true },
+                    onOpenArchive: { archive.value = true })
             ) { surface in
-                #expect(surface.activate(RecoveryCopy.surfaceName),
+                await surface.settle(20)
+                // The path line's 🗑 — option 2's own letter, and the
+                // analogue of her Mac B1 masthead trash icon.
+                #expect(surface.activate(MobileRecoveryDoors.trashLabel),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(20)
+                #expect(trash.value, "the glyph really opens the Trash room")
+                #expect(!archive.value, "and it is NOT the archive door")
+
+                // The trailing row, NARROWED: it says Archived and opens
+                // only the archive.
+                #expect(surface.activate(MobileRecoveryDoors.archiveLabel),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(20)
+                #expect(archive.value, "the row really opens the Archive room")
+            }
+        }
+    }
+
+    /// **THE SHELF RENDERS THE SAME TRASH DOOR, FROM THE SAME DECLARATION**
+    /// (batch 6c, PROVISIONAL — the design record's finding 1 and its Q6).
+    ///
+    /// Books live on the Shelf and a deleted BOOK rows in the Trash, so a
+    /// trash door reachable only from the Library would put a tab switch
+    /// between deleting a book and getting it back. The pin drives the real
+    /// door on the real shelf and asserts it carries the SAME label the
+    /// Library's does — one declaration, two renderers, which is what stops
+    /// the two path lines drifting about what 🗑 means.
+    @Test func theShelfCarriesTheSameTrashDoor() async throws {
+        try await withEditorWorld { session, _ in
+            let shelf = MobileShelfViewModel(session: session)
+            let stars = MobileStarsModel(session: session)
+            let quick = MobileQuickNoteModel()
+            let opened = LockIsolatedBox(false)
+
+            try await withHostedSurface(
+                MobileShelfView(
+                    model: shelf, stars: stars, quickNote: quick,
+                    tokens: .terminalLight, tabBar: { EmptyView() },
+                    onOpenBook: { _ in }, onOpenForWriting: { _ in },
+                    onOpenNote: { _ in }, onSettings: {},
+                    onOpenTrash: { opened.value = true })
+            ) { surface in
+                await surface.settle(20)
+                #expect(surface.activate(MobileRecoveryDoors.trashLabel),
                         "labels were \(surface.visibleLabels)")
                 await surface.settle(20)
             }
-            #expect(opened.value, "the door really opens the surface")
+            #expect(opened.value, "the shelf's door really opens the Trash room")
+            // ONE declaration: the label the Shelf drove is the Library's.
+            #expect(MobileRecoveryDoors.trashLabel == RecoveryCopy.trashSection)
         }
     }
 

@@ -134,6 +134,24 @@ final class MobileBlockHistoryController {
     /// phone's honest answer today is that it has no such door yet — so it
     /// passes nil and the sentence ends after Put back. It must NEVER name
     /// the Mac's tray: that is the no-redirect breach (MobileSoul §4.4).
+    ///
+    /// **BATCH 6c RE-EXAMINED THIS AND IT STAYS `nil`, for a reason worth
+    /// writing down rather than re-deriving.** 6c gave the phone a Trash
+    /// ROOM with both purge doors in it, and §70's handed-forward hook says
+    /// the second half lands *"when batch 6b gives the phone its note-level
+    /// trash section"*. The Trash room is not that door: **this region lists
+    /// deleted TAKES, and takes do not row in the global Trash** —
+    /// `TrashScope.listedKinds` is `[.note, .book, .block,
+    /// .preservedOriginal]` by her D1 ruling, and `TrashScope.kinds(filter:)`
+    /// cannot widen past it. So naming the Trash room here would send her to
+    /// a room where the take she is reading about does not appear: a door
+    /// that cannot act (P-2), wearing a true sentence's clothes.
+    ///
+    /// The road that WILL make this sentence true is the per-note tray's
+    /// Leaving section (batch 6b), where a deleted take carries **Put back**
+    /// and **Delete Now** with confirm-every-time — §69.3's ruled shape.
+    /// `MobileBlockHistoryTests.theDeletedRegionPromisesNoPurgeRoadTheAppDoesNotHave`
+    /// pins the precondition, so the flip is one argument and the pin says so.
     static var deletedExplainer: String {
         BlockHistoryCopy.deletedRegionExplainer(purgeRoad: nil)
     }
