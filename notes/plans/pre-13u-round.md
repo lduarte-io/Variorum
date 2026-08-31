@@ -2536,6 +2536,10 @@ door survives.
   `Queries.trash`** (the ruled delete-group door's honesty — #77's lesson; Put back =
   `restoreContainer`, snippets ride the exact-stamp cascade). Pins:
   `SnippetsAndPickerQueryTests` (9), the group-arm pair REVERT-VERIFIED red-on-old.
-- NEXT: the Shared/faces half of the group kind (RecoveryActs/RecoveryCopy/RecoveryView),
-  then the picker component + Mark/Unmark wiring, then the Pool page, then Snippets.
+- `021dcdc` — **THE GROUP KIND'S FACES: DONE.** TrashPutBack `.snippetGroup` →
+  `restoreContainer`; TrashScope lists/filters/bulk-purges it; RecoveryCopy's ruled
+  vocabulary; RecoveryView help + "Open snippets"; the phone composes from the shared
+  brains (zero mobile edits). `NoteDeletion.run`'s kind fence deliberately untouched.
+  Pins: `SnippetGroupTrashTests` (2). Mac build + suite green.
+- NEXT: the picker component + Mark/Unmark wiring, then the Pool page, then Snippets.
 

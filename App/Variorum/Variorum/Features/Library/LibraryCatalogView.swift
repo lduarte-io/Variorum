@@ -398,6 +398,16 @@ struct LibraryCatalogView: View {
 
     static let mastheadDoors: [MastheadDoor] = MastheadDoor.allCases
 
+    /// Item 14: which note a version door was opened FOR, and which act it
+    /// fires. A value the sheet presents (the `presenting:` doctrine's
+    /// cousin — never a flag read back).
+    struct VersionPickTarget: Identifiable, Equatable {
+        enum Act { case mark, unmark }
+        let postID: String
+        let act: Act
+        var id: String { "\(postID)-\(act)" }
+    }
+
     let session: AppSession
     let model: LibraryCatalogModel
     let library: LibraryViewModel
@@ -426,6 +436,8 @@ struct LibraryCatalogView: View {
     @State private var tagSheetTarget: SidebarView.TagSheetTarget?
     @State private var renameTarget: String?
     @State private var renameTitle = ""
+    /// Item 14: the version doors' picker target — which note, which act.
+    @State private var versionPickTarget: VersionPickTarget?
     /// 13l Act 2 (item 3): the pending delete ask — one row's, or the whole
     /// ⌘-click selection's. One piece of state for both, because it is one
     /// act with one wording and one host.
@@ -465,6 +477,32 @@ struct LibraryCatalogView: View {
         .onChange(of: model.mode) { _, _ in model.clearSelection() }
         .sheet(item: $tagSheetTarget) { target in
             TagAssignmentSheet(session: session, postID: target.id, postTitle: target.title)
+        }
+        // Item 14: the version doors' searchable picker (both acts, one
+        // component — the seam wave 2c's Compare reuses).
+        .sheet(item: $versionPickTarget) { target in
+            NotePickerSheet(
+                tokens: tokens,
+                title: target.act == .mark
+                    ? "Mark as Versions with" : "Unmark Versions with",
+                emptyState: target.act == .mark
+                    ? "Nothing matches."
+                    : "No notes are marked as versions of this one.",
+                source: target.act == .mark
+                    ? .corpusNotes(
+                        session: session, excluding: target.postID,
+                        versionPeersOf: target.postID,
+                        peerAnnotation: "already versions")
+                    : .versionPeers(session: session, of: target.postID)
+            ) { row in
+                Task {
+                    if target.act == .mark {
+                        await library.markAsVersions(target.postID, row.id)
+                    } else {
+                        await library.unmarkVersions(target.postID, row.id)
+                    }
+                }
+            }
         }
         .alert(
             "Rename Note",
@@ -871,24 +909,23 @@ struct LibraryCatalogView: View {
             tagSheetTarget = .init(id: hit.id, title: hit.title)
         }
         Divider()
-        // version_of DOOR 1 (Phase 11 A2's TWO-door ratification —
-        // round 2, MAJOR 5: dropped in the sidebar→Library move,
-        // restored verbatim; the same op door 2 emits).
-        Menu("Mark as Versions with") {
-            ForEach(library.posts.filter { $0.postID != hit.id }, id: \.postID) { other in
-                Button(other.displayTitle) {
-                    Task { await library.markAsVersions(hit.id, other.postID) }
-                }
-            }
+        // version_of DOOR 1 (Phase 11 A2's TWO-door ratification; the same
+        // op door 2 emits). **pre-13u Act 10 wave 2b (item 14):** the flat
+        // corpus-enumerating submenu retires (manifest row 06 — "this is a
+        // disaster") for the ONE searchable note picker: bounded search,
+        // version peers ranked first and annotated, snippet + day context
+        // per row. The CAPABILITY is byte-identical — the pick still fires
+        // `library.markAsVersions`, refusals still speak.
+        Button("Mark as Versions with…") {
+            versionPickTarget = VersionPickTarget(postID: hit.id, act: .mark)
         }
-        // Sitting 9 (R60/R68): the inverse door beside the mark — an
-        // unlinked pick speaks its refusal instead of silently no-oping.
-        Menu("Unmark Versions with") {
-            ForEach(library.posts.filter { $0.postID != hit.id }, id: \.postID) { other in
-                Button(other.displayTitle) {
-                    Task { await library.unmarkVersions(hit.id, other.postID) }
-                }
-            }
+        // Sitting 9 (R60/R68): the inverse door beside the mark. The picker
+        // edition offers EXACTLY the linked peers — the old "an unlinked
+        // pick speaks its refusal" corner is now unreachable by
+        // construction (nothing unlinked is offered), which is strictly
+        // more honest than speaking after a bad offer.
+        Button("Unmark Versions with…") {
+            versionPickTarget = VersionPickTarget(postID: hit.id, act: .unmark)
         }
         Button("Duplicate as Version") {
             Task { await library.duplicateAsVersion(postID: hit.id) }

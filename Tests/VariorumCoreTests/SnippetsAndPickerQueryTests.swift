@@ -97,6 +97,23 @@ struct SnippetsAndPickerQueryTests {
         }
     }
 
+    @Test func notePickerIdsOverloadRowsExactlyThoseLiveNotes() throws {
+        try withOperations { ops, db in
+            let a = try ops.createPost(title: "anchor")
+            _ = try ops.newBlock(in: a.id, text: "anchor body")
+            let b = try ops.createPost(title: "peer")
+            let dead = try ops.createPost(title: "gone")
+            try ops.deleteContainer(dead.id)
+            let hits = try db.read {
+                try Queries.notePickerNotes($0, ids: [a.id, b.id, dead.id])
+            }
+            // Named live notes only, recent-first, same row shape (snippet
+            // included) — the Unmark door's peers render with full context.
+            #expect(Set(hits.map(\.id)) == [a.id, b.id])
+            #expect(hits.first { $0.id == a.id }?.snippet == "anchor body")
+        }
+    }
+
     @Test func notePickerNeverListsArchivedOrDeletedNotes() throws {
         try withOperations { ops, db in
             let live = try ops.createPost(title: "alive")

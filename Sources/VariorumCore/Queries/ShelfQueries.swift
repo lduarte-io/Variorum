@@ -528,6 +528,48 @@ extension Queries {
                 snippet: (snippet?.isEmpty ?? true) ? nil : snippet)
         }
     }
+
+    /// The same rows for NAMED notes (the Unmark door's version peers, and
+    /// any caller holding ids that must render with the picker's context).
+    /// Recent-first like its sibling; dead/archived ids simply don't row.
+    public static func notePickerNotes(
+        _ db: Database, ids: [String]
+    ) throws -> [NotePickerHit] {
+        guard !ids.isEmpty else { return [] }
+        let marks = databaseQuestionMarks(count: ids.count)
+        return try Row.fetchAll(
+            db,
+            sql: """
+                SELECT c.id AS id, c.title AS title, c.entry_date AS entry_date,
+                       c.created_at AS created_at,
+                       COALESCE(c.last_touched_at, c.created_at) AS stamp,
+                       (SELECT SUBSTR(COALESCE(v.working_text, ''), 1, 160)
+                          FROM container_block cb
+                          JOIN block b ON b.id = cb.block_id AND b.deleted_at IS NULL
+                          LEFT JOIN variant v
+                            ON v.id = b.default_variant_id AND v.deleted_at IS NULL
+                         WHERE cb.container_id = c.id AND cb.deleted_at IS NULL
+                         ORDER BY cb.position, cb.id
+                         LIMIT 1) AS snippet
+                FROM container c
+                WHERE c.kind = 'post' AND c.deleted_at IS NULL AND c.archived_at IS NULL
+                  AND c.id IN (\(marks))
+                ORDER BY stamp DESC, c.id DESC
+                """,
+            arguments: StatementArguments(ids)
+        ).map { row in
+            let snippet = (row["snippet"] as String?)?
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            return NotePickerHit(
+                id: row["id"],
+                title: DisplayTitle.note(
+                    title: row["title"], entryDate: row["entry_date"],
+                    createdAt: row["created_at"]),
+                entryDate: row["entry_date"],
+                touchedStamp: row["stamp"],
+                snippet: (snippet?.isEmpty ?? true) ? nil : snippet)
+        }
+    }
 }
 
 private func countsByReading(_ db: Database, sql: String) throws -> [String: Int] {
