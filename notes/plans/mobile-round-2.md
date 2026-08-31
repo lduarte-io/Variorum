@@ -5802,3 +5802,31 @@ renames.
 - When batch 6b gives the phone its note-level trash section, the deleted
   region's explainer gains its second half by passing that door's name to
   `BlockHistoryCopy.deletedRegionExplainer(purgeRoad:)`. Nothing else moves.
+
+## §71 — THE 2026-08-30 PARALLEL BOUT: WHERE ITS RECORDS LIVE (a pointer section, so nothing sits only in a file nobody opens)
+
+**Four pieces of work landed this day whose records are in their OWN
+files, not in this one.** They are listed here because this plan is what
+a fresh session reads, and a record it cannot find is a record that does
+not exist.
+
+| work | record |
+|---|---|
+| **Batch 5** — the shelf layout (R26/R27/R27b) + her two live refinements (one-line box; the writing room made a pinned guarantee) | `notes/plans/mobile-batch-5-record.md` · cold review: `notes/plans/mobile-batch-5-cold-review.md` |
+| **Batch 6a** — the Block History twin | **§70 of THIS file** · cold review: `notes/plans/mobile-batch-6a-cold-review.md` |
+| **Batch 4.5d's fix round** + PL-10(b) the duplicate-book-name guard | `notes/plans/mobile-batch-4.5d-record.md` |
+| **The five-MAJOR fix round** (B1 · C2 · A1 · A2 · C1) | `notes/plans/mobile-major-fix-round-record.md` |
+| **The mobile app's first architecture review** | `notes/plans/mobile-architecture-review.md` |
+| **The archive/trash design session** (four IA options; she ruled **Two rooms**) | `notes/plans/mobile-archive-trash-design/` (`proposal.html` + `README.md`) |
+| **The session's own handoff + THE WHOLE-ROUND STATUS TABLE** | `notes/plans/mobile-round-2-handoff-2026-08-30.md` — **§7 is authoritative over the batch map's cells** |
+
+**Suites moved 513/86 → 582/93.** Hygiene held: zero schema, zero
+`Sources/`, zero `Sync/`, marker 7.
+
+**Two findings from that day that are NOT mobile's** and are recorded
+where the Mac will meet them (QUESTIONS #91): `main` did not build for
+iOS at all (R3-2's sentence placed in the macOS-only branch of a
+`Shared/` conditional — found, proven pre-existing, fixed), and a
+separate *behaviour* failure in the same 13p-fix work
+(`CustodyHandoverTests.theE2EESurfaceNamesTheSymptomWhenAWriteLandsUnreadable`)
+which was deliberately **not** touched.
