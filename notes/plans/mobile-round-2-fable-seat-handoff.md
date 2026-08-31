@@ -170,3 +170,15 @@ Everything in the standing handoff §5/§6 binds. Added or re-proven here:
   stated as class arguments, never as coverage (the sweep's MAJOR).
 - Her memory file for this seat: `~/.claude/projects/-<home>-
   dev-variorum/memory/mobile-round-2-fable-seat.md` — keep it current.
+
+## 6. THE CUTOVER SIGNAL (added 2026-08-31, ~00:55, for the successor's timed check)
+
+The outgoing seat's LAST act is closing the filter unit. **The unmistakable
+signal is a "UNIT CLOSED" banner at the top of
+`notes/plans/mobile-batch-filters-cold-review.md`** (beside its FIX WAVE
+RESULTS section), plus this file's §1 counts updated, all PUSHED. Until
+that banner exists: the fix wave is either STILL RUNNING in the outgoing
+session or died — check `git log -1 --format=%ci` freshness and do NOT
+touch the tree while a wave may be live; if hours have passed with no
+banner and no fresh commit, treat it as died and read the tree for both
+corruption AND work (standing handoff §10.5) before anything else.
