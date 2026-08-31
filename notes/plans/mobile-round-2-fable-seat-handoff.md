@@ -105,7 +105,16 @@ next-free-number authority (#83 permanently unused).
    PR23 the voice fork (hoists `ThemeStore`; arch MINOR 3's structural
    half rides it — its cheap half, un-globaling the test mutation, is
    buildable now).**
-7. **The leftover review backlog** (one consolidated batch): batch-5
+7. **The leftover review backlog** (one consolidated batch) — **and since
+   2026-08-31 it also owns ONE REAL DEFECT with its fix's shape already
+   ruled: 🟠 the STRANDED `isEditable`** (batch 9's cold-review MAJOR 1;
+   three overlay sheets each save/force/restore the page's editability,
+   so an interleave leaves her note permanently read-only with no sheet
+   on screen — text-loss-adjacent). **The fix: ONE nesting-aware
+   editability authority on the write surface** replacing the three
+   per-sheet pairs, with the two-sheet interleave pinned red-on-old. The
+   binding row is `mobile-round-2-handoff-2026-08-30.md` **§7.2**; the
+   full record is `mobile-batch-9-record.md` §4.6. The rest: batch-5
    review's 4 MINOR + 5 NIT (the collapsed-box overflow is the sharpest) ·
    6a review's m3/m4/n7/n8/n9 (m5 is a Shared/ cleanup — fence-blocked) ·
    arch MINOR 4 (refusal copy's ten homes → extend `DeletionRefusal`'s

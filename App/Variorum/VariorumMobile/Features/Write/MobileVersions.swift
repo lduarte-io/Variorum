@@ -28,6 +28,12 @@
 //    block ⋯ = Commit Take + Block History…, note ⋯ = Save a Version +
 //    Versions…. The masthead's chip row was NOT an option: it already wraps
 //    five chips and its crowding is flagged PROVISIONAL for her.
+//    **THE BLOCK HALF OF THAT SENTENCE IS 6c's, AND BATCH 9 ENDED IT** —
+//    her ⋯ letter moved `Block History…` off the block ⋯ onto each live
+//    take card's own ⋯ (`MobileTakesBrowserController.historyTitle`), so
+//    the *write a moment / see the moments* pair now survives at exactly
+//    ONE grain: this one. `MobileBlockMenu`'s header carries the whole
+//    reasoning; the note kept its shape.
 //  · **Q9 — a row's tap is READ**, with Restore · Promote · Delete on the
 //    MOMENT rather than on the row. Four verbs do not fit a phone row, and
 //    the Mac's answer — read a moment BESIDE the note in a side panel — is

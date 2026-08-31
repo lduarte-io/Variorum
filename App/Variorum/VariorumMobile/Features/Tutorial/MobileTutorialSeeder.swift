@@ -365,10 +365,20 @@ enum MobileTutorialSeeder {
             + "and ⋯ holds the block's own acts — comments, callout, "
             + "savepoints, a new block below, divide, merge, delete.",
 
+            // The ROAD is composed, never re-typed (batch 9's fix wave,
+            // cold-review MAJOR 2): `Block History…` LEFT the block ⋯ at
+            // batch 9 — her letter moved it onto each take's own ⋯ — and
+            // this lesson still taught the retired road. The row's word
+            // comes from the door itself (`historyTitle`, composed in its
+            // turn from the SHARED `BlockHistoryPath.name`), so a re-word
+            // lands here for free and a MOVE reds the walk's pin.
             "Your writing is always autosaved; a SAVEPOINT is the "
-            + "deliberate extra. Commit Take, in ⋯, keeps the exact text "
-            + "of the take you're in, forever — and Block History… beside "
-            + "it opens everything this block has been: every take's saved "
+            + "deliberate extra. \(MobileBlockMenuController.commitTitle), in ⋯, "
+            + "keeps the exact text of the take you're in, forever — and the "
+            + "moments themselves are read back one door along: ⑂ on the "
+            + "bottom bar opens this block's takes, and each take's own ⋯ "
+            + "carries \(MobileTakesBrowserController.historyTitle), which opens "
+            + "everything this block has been: every take's saved "
             + "moments, with restore; the takes it archived or deleted, with "
             + "a way back; and the block it came out of. A savepoint from "
             + "before a divide says so, and asks first: restoring it brings "
@@ -698,10 +708,17 @@ enum MobileTutorialSeeder {
             + "note. ⋯ up by the title, then Versions… — read one, restore "
             + "it, or promote it into a note of its own.",
 
-            "5 — THIS BLOCK'S HISTORY: one block's whole time. ⋯ on the "
-            + "bottom bar, then Block History… — every take's saved moments, "
-            + "the takes this block archived or deleted, and the block it "
-            + "came out of.",
+            // **THE GUIDE'S ONLY ROAD to the came-from and deleted-takes
+            // regions**, so a wrong sentence here is worse than a dead
+            // door — it is a TAUGHT road that cannot act (P-2's own
+            // class). Batch 9 moved the face off the block ⋯ and onto
+            // each take's; the road below is composed from the door that
+            // now carries it.
+            "5 — THIS BLOCK'S HISTORY: one block's whole time. ⑂ on the "
+            + "bottom bar opens this block's takes; each take's own ⋯ carries "
+            + "\(MobileTakesBrowserController.historyTitle) — every take's saved "
+            + "moments, the takes this block archived or deleted, and the "
+            + "block it came out of.",
 
             "TAKES are the one thing that never rows in the Trash: a take on "
             + "its own is too small to make sense of out of context. It has "

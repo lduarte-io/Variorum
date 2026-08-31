@@ -1,5 +1,15 @@
 # Batch 9 — THE ⋯ VOCABULARY + TEXT SELECTION · the record (built 2026-08-31)
 
+> **⚠️ AMENDED BY THE FIX WAVE, 2026-08-31** (the cold review is
+> `mobile-batch-9-cold-review.md`; its **FIX WAVE RESULTS** section is that wave's own
+> record and carries the reds, the files and the final suite line). Four sections of
+> THIS file changed and are marked in place: **§4.3 item 1** (the rule-out re-measured
+> on a LOADED fixture — MINOR 2), **§4.4** (her "up and down" geometry argues against
+> S3 — NIT 4), **§4.6** (the stranding defect's owner COMMITTED and the fix's shape
+> ruled — MAJOR 1's record half; the defect itself is NOT fixed in that wave), and
+> **§5** (three provenance corrections to "what exists today, precisely" — MINOR 1).
+> **§8's count is superseded**: the wave added one walk pin, so the suite is **667 / 99**.
+
 **The brief is `notes/plans/mobile-batch-9-brief.md`** and it binds. Her list is
 verbatim there and in `notes/author-reports/2026-08-23-device-walk-and-product-asks.md`
 (the source both cite).
@@ -261,6 +271,45 @@ PROBE gestureRecognizers=[UITextMultiTapRecognizer, UITapAndAHalfRecognizer,
    happen.** A full `NSAttributedString` snapshot before and after two scroll jumps
    compares EQUAL, attributes included (`storageEqualAfterScroll=true`). The
    equality-gating in `MobileTakesChromeController.refresh` holds.
+
+   > **⚠️ RE-MEASURED AT THE FIX WAVE, on a LOADED fixture — cold-review MINOR 2, and
+   > the reviewer was right about the first measurement.** Every storage-WRITING branch
+   > of that refresh is conditional — `MobileTakesChrome.swift:195`
+   > (`where slot.hasFan` → `setTailReservation`), `MobileBlockDecor.swift:119`
+   > (`guard let presentation` → `setLeadingFirstLineReservation`, and only with an
+   > emoji), `MobileBlockDecor.swift:193` (`where slot.commentCount > 0`) — so on the
+   > original plain-block fixture the write path was **structurally unreachable** and
+   > the equality held by construction. The rule-out was a green over nothing.
+   >
+   > **The fix wave re-took it on a fixture that reaches all three writers** (120
+   > blocks; block 10 FANNED *and* commented, block 20 a callout carrying an emoji,
+   > block 30 plain-and-commented), and **proved they executed before reading the
+   > equality** — a paragraph's `tailIndent`/`firstLineHeadIndent` is non-zero only if
+   > the writer ran:
+   >
+   > ```
+   > PROBE slots=120 fanned=1 commented=2 emojiCallouts=1
+   > PROBE writersRan fannedTailIndent=-56.0 calloutFirstLineHeadIndent=27.0
+   > PROBE contentSize=(393.0, 9558.0) inset=UIEdgeInsets(top: 8.0, left: 15.0, bottom: 835.0, right: 15.0) contentInset=UIEdgeInsets(0,0,0,0) adjusted=UIEdgeInsets(0,0,0,0)
+   > PROBE storageEqualAfterFirstScroll=true
+   > PROBE storageEqualAfterScroll=true
+   > PROBE stringEqualAfterScroll=true
+   > PROBE offsetEnd=4200.0 contentSizeEnd=10242.0
+   > PROBE endFannedTailIndent=-56.0 endCalloutGap=27.0
+   > ```
+   >
+   > **The rule-out SURVIVES, and now it means something:** with all three writers
+   > populated and demonstrably fired, two scroll jumps (one carrying the loaded blocks
+   > off the near-viewport band entirely) leave storage byte-identical, attributes
+   > included. The equality gates — `setTailReservation`'s
+   > `guard abs(style.tailIndent - target) > 0.01` and its leading twin — are what hold
+   > it. **The "do not re-open" instruction therefore stands for the FANNED and CALLOUT
+   > shapes too**, which is exactly what the earlier fixture could not say and what her
+   > real notes actually carry.
+   >
+   > *The probe was again a throwaway (`ZZProbeLoadedChromeScroll`, deleted before
+   > commit — the 6b NIT-3 precedent); its numbers are above, which is the point, and
+   > its fixture is described precisely enough to rebuild in one sitting.*
 2. **"The typewriter room's recompute yanks the offset."** `textContainerInset.bottom`
    really is enormous (**835 pt of an 852 pt viewport**) and really does recompute on
    every height change. **Measured: the offset does not move.** Shrinking the surface by
@@ -290,6 +339,18 @@ was **confounded and is not evidence**: a synthetic `UIPanGestureRecognizer` has
 touch, so `pan.location(in:)` returns `.zero`, `panTargetBlockID` hit-tests above the
 text and returns nil, and the gate answered `no` at every angle including pure
 horizontal. Recorded as a confound rather than reported as a result.
+
+**⚠️ AND HER OWN GEOMETRY ARGUES AGAINST S3 — said out loud at the fix wave
+(cold-review NIT 4), because this table claims to rank by evidence.** The pan router's
+gate is **horizontal dominance** (`MobileTakesChrome.swift:566-567` —
+`abs(translation.x) > abs(translation.y) * 1.5, abs(translation.x) > 4`), and her
+report is about dragging **"up and down"**. A near-vertical drag cannot open that gate,
+so the direction she describes is evidence *against* this candidate, not for it. **S3
+stays on the list anyway, and deliberately:** it is one of only two app-local
+candidates, it is the cheapest of the four to fix if it IS the cause, and question 2 of
+§4.5 kills or confirms it outright in one observation. What changes is only the
+honesty of the ranking — S3 is the one candidate whose own predicate her wording
+already strains.
 
 ### 4.5 · THE ONE EXPERIMENT THAT SETTLES IT — hers, and it is small
 
@@ -332,8 +393,42 @@ sheets to another, so it closes the browser BEFORE opening the face (properly ne
 and `theHistoryDoorLeavesThePageEditableAfterwards` pins that ordering with a real red
 (**A6**). Whether the pre-existing interleave is reachable by any OTHER road was NOT
 established — both sheets are summoned from the keyboard bar, which a covering sheet
-hides — so it may be latent. **On her sitting list; the natural owner is 13u2's pane
-work or a 17-entry.**
+hides — so it may be latent. **On her sitting list.**
+
+### 🟠 THE OWNER, COMMITTED — and the fix's SHAPE ruled with it (fix wave, cold-review MAJOR 1)
+
+*This supersedes the sentence this section used to end on — **"the natural owner is
+13u2's pane work or a 17-entry"** — which named two candidates and therefore no owner:
+the exact state `notes/KnownIssuesAndTechDebt.md`'s header forbids, and the state the
+"six mobile brains" row was RESTORED to that file to escape. The reviewer was right
+that a defect living only as prose in a plan file that closes has no owner at all.*
+
+- **OWNER: the leftover-review-backlog consolidated batch** — the seat road's item 7
+  (`mobile-round-2-fable-seat-handoff.md`), now written on the authoritative schedule
+  row in `mobile-round-2-handoff-2026-08-30.md` **§7.2**. It is **in-round,
+  phone-local and days away**, which is why it beats both candidates the old sentence
+  offered: 13u2 is a Mac phase behind a fence, and a 17-entry would move a
+  phone-local defect out of the round that found it.
+- **THE FIX'S SHAPE, ruled at adjudication so the owner inherits a decision rather
+  than a design problem:** the three per-sheet `pageWasEditable` save/restore pairs
+  (`MobileTakesBrowserView.swift:226-234`, `MobileCommentsSheetView.swift:127-136`,
+  `MobileBlockHistorySheetView.swift:143-150`) are replaced by **ONE nesting-aware
+  editability authority on the write surface** — a depth count (sheets push and pop;
+  the page is editable only at depth 0), or an equivalent restore-to-rest rule. The
+  builder picks the minimal shape and **pins the reviewer's own two-sheet interleave
+  red-on-old** (browser open → history open → browser close → history close ⇒ the page
+  must end editable). This is the same "one authority" move `PaneTextAuthority` already
+  is for liveness; three independent save/restore pairs is the shape that produced the
+  bug.
+- **What must NOT silently regress:** batch 9's own door stays properly nested
+  (`openHistory` closes the browser BEFORE opening the face), and
+  `theHistoryDoorLeavesThePageEditableAfterwards` keeps pinning that ordering with its
+  A6 red. The authority replaces the mechanism underneath; it does not retire the pin.
+- **The un-established half stays un-established**, said rather than guessed: whether
+  any PRE-batch-9 road reaches the interleave was not determined here, and the cold
+  reviewer's own independent search found none (the other two sheets are summoned from
+  the keyboard bar, which a covering sheet hides). That is *support* for "latent",
+  never proof — and it is exactly why the defect needed a row that survives this file.
 
 ---
 
@@ -345,11 +440,27 @@ about that three dots menu a little more."*
 
 ### What exists today, precisely
 
+*(**Three corrections landed at the fix wave** — cold-review MINOR 1. This section
+carries the heading "what exists today, **precisely**" and goes to her sitting bundle,
+so the provenance had to be right. Every correction makes shape (A) STRONGER, not
+weaker: it stops being a phone invention to design and becomes a shipped Mac gesture to
+mirror.)*
+
 - **The phone has ONE merge door: `Merge with Previous`** in the block ⋯, acting on the
   caret's block (`MobileStructuralController.mergeWithPrevious`). Her reading of the
   menu is exactly right.
-- **The op underneath is NOT binary.** The Mac's 9d ruling replaced binary merge with an
-  **N-way merge chain**, and the phone rides the same core.
+- **THE CORE OPS ARE BINARY** — *this line used to read "the op underneath is NOT
+  binary", and that was wrong*:
+  `Operations+Structural.swift:659` is `merge(_ firstBlockID:, _ secondBlockID:)` and
+  `:836` is `mergeCeremony(leading:trailing:pairings:carries:)`. Both take exactly two
+  blocks. **The 9d N-way merge is a DOOR-level composition**, not an op: the Mac chains
+  binary links inside one compound (`EditorSurfaceController.swift:316`,
+  `case .mergeChain` → `runMergeChain`, over `CarryAllMerge.chainComposes` in
+  `Variorum/Features/Editor/FannedDefaults.swift:104`). **That brain is
+  Mac-app-local** — `CarryAllMerge` appears in three Mac files and in **zero** phone or
+  `Shared/` files — and **the phone's single door does no chaining at all**:
+  `MobileStructural.mergeWithPrevious` (`:202-314`) resolves exactly one
+  leading/trailing pair and calls `mergeCeremony` or `merge` once.
 - **The phone already shipped the CARRY-ALL MERGE as its fanned default (parity C5)**,
   composed from the Mac's own `mergeCeremony` with zero core change: one pairing of the
   two displayed takes plus every other active take carried whole. **She then ruled the
@@ -359,19 +470,29 @@ about that three dots menu a little more."*
   sharpening is why: *"i thought merge and divide were already overly fiddly on the mac
   app and I think mobile is good for exposing complexity that can't survive a
   simplified UI."*
-- **The Mac's own multi-merge affordance is ⌘-click take selection (13e)**, which has no
-  phone twin; the phone's **block multi-select is batch 7 (PR20)**, unbuilt.
+- **THE MAC ALREADY HAS SHAPE (A), SHIPPED — the Write surface's block-run merge
+  chain.** *This line used to name ⌘-click take selection (13e) as "the Mac's own
+  multi-merge affordance" and stop there, which omitted the one precedent that matters
+  most here.* Selecting a run of blocks on the Mac's Write surface and merging them is
+  the `.mergeChain` road above, with its own copy
+  (`FannedDefaultsCopy.mergedChain(blocks:carried:)`) and its own pairwise refusal
+  (`mergeCeremonyIsPairwise(blocks:)`). 13e's ⌘-click TAKE selection is a different
+  grain and does have no phone twin; the phone's **block multi-select is batch 7
+  (PR20)**, unbuilt.
 
 ### The three shapes
 
 **(A) SELECT-THEN-MERGE — ride batch 7's block multi-select.** PR20 gives the phone a
-multi-select mode over blocks; a `Merge Selected` act joins the run through the same
-N-way chain the single door uses. Her own third suggestion, verbatim (*"or a select and
-then merge?"*).
+multi-select mode over blocks; a `Merge Selected` act joins the run **the way the Mac's
+Write surface already does — a chain of binary links inside ONE compound**. Her own
+third suggestion, verbatim (*"or a select and then merge?"*).
 *For:* no new selection grammar — it composes a capability the round is already
-building; the run is visible and adjacent-by-construction; one act, one undo entry;
-nothing new to learn. *Against:* it is gated on batch 7 landing; multi-select is a mode,
-so it is two gestures rather than one for the common two-block case.
+building; **it is a MIRROR of a shipped Mac gesture rather than a phone invention**
+(MobileSoul §3's own preferred shape); the run is visible and
+adjacent-by-construction; one act, one undo entry; nothing new to learn.
+*Against:* it is gated on batch 7 landing; multi-select is a mode, so it is two
+gestures rather than one for the common two-block case; **and it needs the Mac's chain
+brain, which is Mac-app-local today** — see the corrected cost below.
 
 **(B) `Merge with Next` — the missing half of the door she already has.** One more row
 in the block ⋯. *For:* smallest possible change, no new machinery, and it removes a real
@@ -389,12 +510,33 @@ it is invention, which is hers alone to authorise.
 ### Recommendation
 
 **(A) as the answer to her question, with (B) shipped alongside it whenever the ⋯ is
-next open.** (A) is her own suggestion, it is the Mac's 13e shape in the phone's
-grammar, and it costs nothing new because batch 7 is already building the selection it
-needs. (B) is a one-row fix to a real gap that has nothing to do with "multi" and should
-not wait behind it. **(C) is recorded so she has seen it and is NOT recommended** — a
-phone-only merge idiom is precisely the fork §3 forbids, and her *"mobile is good for
-exposing complexity"* ruling points the other way.
+next open.** (A) is her own suggestion and it is **a shipped Mac gesture mirrored into
+the phone's grammar** — the Write surface's block-run merge chain — which is the
+strongest thing that can be said for a mobile shape. (B) is a one-row fix to a real gap
+that has nothing to do with "multi" and should not wait behind it. **(C) is recorded so
+she has seen it and is NOT recommended** — a phone-only merge idiom is precisely the
+fork §3 forbids, and her *"mobile is good for exposing complexity"* ruling points the
+other way.
+
+**(A)'S COST, STATED HONESTLY (fix-wave correction — this used to read "costs nothing
+new because batch 7 is already building the selection it needs", which was not true).**
+Beyond batch 7's selection, (A) needs **the chain composition, the pre-compound
+validation, and the compound itself** — and MobileSoul §3's rule is that a Mac brain
+the phone needs is **HOISTED, never re-derived**, so (A)'s real cost includes a
+`Shared/` hoist of `CarryAllMerge`. That is fenced this round, so it is a future
+batch's. **Still small, and still the right recommendation** — a hoist plus a door,
+against a gesture the Mac has already proven.
+
+**Riding with it, not a separate finding: the phone ALREADY re-derives
+`CarryAllMerge.compose` by hand.** `MobileStructural.swift:284-288` (the pairing +
+`MergeJoin.canon` + the `carries` filter) is logic-identical to
+`FannedDefaults.swift:71-78`. It is a live instance of the forked-brain class and it is
+**not** on `KnownIssuesAndTechDebt.md`'s eight-brain table. It is **pre-existing** — the
+phone shipped this shape first at parity C5 and the Mac copied it at 13j, saying so —
+so it is not batch 9's to fix; it belongs on that existing row, whose owner (*"the
+mobile app project row… any Mac phase touching one of these brains hoists it THEN"*)
+already covers it. Recorded here so the hoist (A) needs and the fork that already
+exists are known to be **the same piece of work**.
 
 **One thing her question implies that this batch will not decide:** whether *multi*
 merge means multi-BLOCK (join three blocks into one) or multi-TAKE (the pairing
@@ -619,7 +761,12 @@ and §4.6's numbers and is not in the tree or the suite counts.
 7. **`Merge with Next` is recommended regardless of the multi-merge shape** (§5) — a
    one-row fix to a real daily gap that has nothing to do with "multi".
 8. **The `isEditable` stranding (§4.6) is recorded, not fixed**, and whether any
-   pre-batch-9 road reaches it was not established.
+   pre-batch-9 road reaches it was not established. *(Fix-wave amendment: it now has a
+   **committed owner** — the leftover-review-backlog batch, on
+   `mobile-round-2-handoff-2026-08-30.md` §7.2 — and its fix's SHAPE is ruled (one
+   nesting-aware editability authority, replacing three save/restore pairs). §4.6
+   carries the whole ruling. The defect is still unfixed; what changed is that it can
+   no longer be lost when this file closes.)*
 
 ---
 

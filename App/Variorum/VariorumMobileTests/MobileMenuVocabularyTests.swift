@@ -106,8 +106,25 @@ struct MobileMenuVocabularyTests {
             // opens the browser on the caret's block. Driven through the
             // real controller the real button targets.
             let bar = MobileKeyboardBarController(textView: surface.textView)
-            #expect(MobileKeyboardBarController.restingActLabels == ["Formatting", "Takes", "Block"],
-                    "⑂ is literally the middle of the resting three")
+            // **"⑂ is literally the middle" — asserted against the REAL
+            // BAR** (batch 9's fix wave, cold-review NIT 2). This line
+            // used to compare `restingActLabels` to its own literal,
+            // which cannot fail; `MobileMarkdownTests` already anchors
+            // that constant to the rendered items, so what this pin owed
+            // was the LINK from the middle door to the act fired below.
+            let toolbar = try #require(bar.makeBar() as? UIToolbar)
+            // The label rides the item OR its custom view (the ⋯ door is
+            // a button) — the markdown suite's own walk shape.
+            func label(_ item: UIBarButtonItem) -> String? {
+                item.accessibilityLabel
+                    ?? (item.customView as? UIButton)?.accessibilityLabel
+            }
+            let acts = (toolbar.items ?? []).filter { label($0) != nil }
+            #expect(acts.count == 3, "the resting bar is three doors")
+            #expect(acts.compactMap(label)
+                    == MobileKeyboardBarController.restingActLabels)
+            #expect(acts[1].action == #selector(MobileKeyboardBarController.fireTakes),
+                    "the middle door is the act this pin then fires")
             let range = try #require(model.rangeOfBlock(seed.blockA))
             surface.textView.selectedRange = NSRange(location: range.location + 1, length: 0)
             #expect(!model.takesBrowser.isOpen)

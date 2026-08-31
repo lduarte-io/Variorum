@@ -21,13 +21,27 @@
 //  sizes of moment with two chords: ⌘S saves THIS TAKE's moment, ⌘⇧S saves
 //  THIS NOTE's. The phone has no chord culture (PL-11's own words), so the
 //  teaching needs another home — and it already had one, because the phone
-//  keeps block acts in the **block ⋯** and note acts here:
+//  keeps block acts in the **block ⋯** and note acts here. **As it stood
+//  at 6c, kept because it was TRUE WHEN WRITTEN** (`MobileBlockMenu`'s own
+//  convention for a superseded note):
 //
 //      block ⋯  →  Commit Take    +  Block History…
 //      note  ⋯  →  Save a Version +  Versions…
 //
-//  Two menus, two grains, each holding its own *write a moment / see the
-//  moments* pair. **PROVISIONAL — the design record's Q5:** it grows a
+//  **THE BLOCK ROW OF THAT DIAGRAM IS HISTORY, NOT CURRENT** (round 2,
+//  batch 9 — her ⋯ letter: *"take history should move into the three ...
+//  menu on each take rather than the main three dot menu"*). `Block
+//  History…` left the block ⋯ and now lives on every live take card's
+//  own ⋯ in the takes browser (`MobileTakesBrowserController.historyTitle`),
+//  so the block grain's pair is broken on purpose — `MobileBlockMenu`'s
+//  header carries the whole reasoning. What SURVIVES is exactly the row
+//  below it: the NOTE ⋯ still holds its own *write a moment / see the
+//  moments* pair, which is now the only place the phone teaches it, and
+//  which is why this file's own shape did not change.
+//
+//  Two grains, and since batch 9 only ONE of them still holds its own
+//  *write a moment / see the moments* pair here. **PROVISIONAL — the
+//  design record's Q5:** it grows a
 //  three-row sheet to five, and the alternative (a sixth masthead chip) was
 //  refused because that row already wraps five and its crowding is flagged
 //  for her.

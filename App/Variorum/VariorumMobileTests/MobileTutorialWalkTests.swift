@@ -608,6 +608,45 @@ struct MobileTutorialWritingWalkTests {
         }
     }
 
+    /// **THE SAVEPOINT PARAGRAPH'S ROADS EXIST** (batch 9's fix wave,
+    /// cold-review MAJOR 2 — the second of the two shipped lessons that
+    /// went on naming the retired block-⋯ history row).
+    ///
+    /// Both doors it teaches are asserted against the menus that carry
+    /// them, so a MOVE reds here rather than shipping a false
+    /// instruction into her pocket guide: `Commit Take` must still be a
+    /// block-⋯ row, and `Block History…` must NOT be — it is a take
+    /// card's row now, reached through the bar's ⑂.
+    ///
+    /// **Red on old (behavioural revert):** restore the pre-fix sentence
+    /// (*"Commit Take, in ⋯ … and Block History… beside it"*) and the
+    /// beside-it assertion reds.
+    @Test func theSavepointLessonTeachesRoadsThatStillExist() async throws {
+        try await withPocketGuideWorld { _, db, bookID in
+            let prose = try await db.read { db in
+                try Queries.renderedText(
+                    db, containerID: lessonID(db, bookID: bookID, "blocks & typing"))
+            }
+            // The act that STAYED, named from the menu that still holds it.
+            #expect(prose.contains(MobileBlockMenuController.commitTitle))
+            #expect(MobileBlockMenuController.rowTitles
+                    .contains(MobileBlockMenuController.commitTitle))
+            // The face that MOVED, named from the door that now carries it…
+            #expect(prose.contains(MobileTakesBrowserController.historyTitle))
+            #expect(!MobileBlockMenuController.rowTitles.contains {
+                $0.localizedCaseInsensitiveContains("history")
+            }, "the block ⋯ no longer carries it, so the lesson must not say it does")
+            // …and the lesson must not put the two side by side any more.
+            #expect(!prose.contains("\(MobileTakesBrowserController.historyTitle) beside"),
+                    "the retired 'beside it' pairing must not be taught")
+            #expect(prose.contains("⑂ on the bottom bar"),
+                    "the takes road, in the phone's own glyph")
+            // The no-redirect principle, as everywhere in the guide.
+            #expect(!prose.contains("Mac"))
+            #expect(!prose.contains("⌘"))
+        }
+    }
+
     /// The formatting lesson's acts fire on its own text: bold wraps a
     /// selection, the heading picker's direct pick and clear land, and a
     /// tap on the staged box ticks it — stored bytes byte-checked.
@@ -1369,7 +1408,21 @@ struct MobilePocketGuideDeletionTests {
             #expect(prose.contains(MobileBlocksSegment.archived.word))
             #expect(prose.contains(MobileBlocksSegment.leaving.word))
             #expect(prose.contains(MobileBlockMenuController.archiveTitle))
-            #expect(prose.contains(BlockHistoryPath.name))
+            // **THE ROAD, not merely the FACE'S NAME** (batch 9's fix
+            // wave, cold-review MAJOR 2). This line used to read
+            // `prose.contains(BlockHistoryPath.name)` — the face's name —
+            // so the navigation sentence could be arbitrarily wrong and
+            // the pin stayed green. It WAS wrong: batch 9 moved the door
+            // off the block ⋯ onto each take's own ⋯, and this lesson —
+            // the guide's ONLY road to the came-from and deleted-takes
+            // regions — went on teaching the retired one, in a store that
+            // ships. So the pin now asserts the road that EXISTS and
+            // refuses the road that does not.
+            #expect(prose.contains(MobileTakesBrowserController.historyTitle))
+            #expect(prose.contains("⑂ on the bottom bar"),
+                    "the takes road, in the phone's own glyph")
+            #expect(!prose.contains("⋯ on the bottom bar, then \(BlockHistoryPath.name)"),
+                    "the retired block-⋯ road must not be taught")
             #expect(prose.contains(RecoveryCopy.putBackVerb))
             #expect(prose.contains(RecoveryCopy.deleteNowVerb))
             #expect(prose.contains("\(TrashWindow.days) days"))

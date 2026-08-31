@@ -105,8 +105,25 @@ struct MobileBlockMenuTests {
             // its own flat one — and her letter retired the row, so the
             // split had nothing left to suppress. One builder, one list,
             // no arm.
-            let submenuElements = model.blockMenu.menuElements(blockID: seed.blockA)
-            #expect(submenuElements.map(\.title)
+            //
+            // **Read through the SEAM, not the builder twice** (batch 9's
+            // fix wave, cold-review NIT 1): with the arm gone, calling
+            // `menuElements` a second time and comparing to the same
+            // oracle pinned nothing the line above had not. The claim
+            // that WAS unpinned is the one `MobileEditMenuSeam` makes —
+            // that the edit menu's Block submenu is this same list — so
+            // this half now composes the real edit menu and reads that
+            // submenu's children.
+            //
+            // **Red on old (behavioural revert):** drop a row on the way
+            // through the seam (`.dropLast()` on `menuElements`'s result
+            // in `MobileEditMenuSeam`) and this reds while the bar's own
+            // assertion above stays green.
+            let composed = MobileEditMenu.menu(
+                model: model, range: NSRange(location: 1, length: 0), suggested: [])
+            let blockSubmenu = try #require(
+                composed.children.first { $0.title == cased("Block") } as? UIMenu)
+            #expect(blockSubmenu.children.map(\.title)
                 == MobileBlockMenuController.rowTitles.map(cased))
 
             // The callout submenu's words are the Mac CalloutMenu's rows,

@@ -239,7 +239,14 @@ final class MobileTakesBrowserController {
     /// `Block History…` byte-for-byte, which is also the honest word for
     /// what opens: the face is the BLOCK's whole past (batch 6a's F2
     /// rename), reached from a take rather than scoped to one.
-    static var historyTitle: String { "\(BlockHistoryPath.name)…" }
+    ///
+    /// **`nonisolated` since batch 9's fix wave (cold-review MAJOR 2):**
+    /// the pocket guide's two history lessons compose this row's word
+    /// instead of re-typing it — they had gone on teaching the retired
+    /// block-⋯ road for a whole batch — and `MobileTutorialSeeder` runs
+    /// off the main actor. Composition is what makes the walk's pin red
+    /// on the next move rather than merely stale.
+    nonisolated static var historyTitle: String { "\(BlockHistoryPath.name)…" }
 
     /// Opens the Block History face on the open block, with THIS take's
     /// savepoint run expanded.

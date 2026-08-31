@@ -130,11 +130,17 @@ final class MobileBlockMenuController {
     static let commentsTitle = "Comments…"
     static let calloutTitle = "Callout"
     static let nameTitle = "Name Block…"
-    /// The savepoint pair (parity C4a — AppSpec §9's deliberate-commit
+    /// The savepoint WRITER (parity C4a — AppSpec §9's deliberate-commit
     /// pillar reaches the phone: Commit acts on the caret block's DISPLAYED
-    /// take, and History opens that block's whole past, both through
-    /// `MobileBlockHistoryController`).
-    static let commitTitle = "Commit Take"
+    /// take, through `MobileBlockHistoryController`). **Its old partner
+    /// left at batch 9** — the header's G2 note has the whole reasoning —
+    /// so this is a savepoint pair no longer; the READER is each take
+    /// card's own `MobileTakesBrowserController.historyTitle`.
+    ///
+    /// `nonisolated` because the pocket guide's savepoint lesson composes
+    /// the word rather than re-typing it (batch 9's fix wave, MAJOR 2),
+    /// and `MobileTutorialSeeder` runs off the main actor.
+    nonisolated static let commitTitle = "Commit Take"
     /// The insert door (parity C4b item 1 — the registry's own verb).
     /// It heads the structural family: minting under the block is the
     /// gentlest structural act, so it reads before the knives.

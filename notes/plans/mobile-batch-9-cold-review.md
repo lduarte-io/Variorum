@@ -580,3 +580,393 @@ fence grep empty before the pathspec-limited commit; no pushes; reverts
 restored from pre-revert copies). Every behavioural change proven red by
 behavioural revert with output quoted, production or fixture named.
 Append a FIX WAVE RESULTS section to THIS file before the final message.
+
+---
+
+# FIX WAVE RESULTS (Opus fix session, 2026-08-31)
+
+**All five adjudicated items executed; nothing beyond them.** Two production
+behaviour changes (MAJOR 2's two lessons), two production isolation changes that
+serve them, three production comment corrections, three test changes, four
+document amendments. **The reds below are all PRODUCTION reverts**, each taken from
+a pre-revert copy under
+`…/scratchpad/fixwave-prerevert/` and restored from that copy (md5-verified on
+restore — never `git checkout --`, since every reverted file is one this wave also
+edits or shares a build with).
+
+## Environment
+
+*[removed for publication]*
+  **iPhone 17 Pro, iOS 26.2** — the only iOS-26 runtime on this machine; every
+  16-series sim here is iOS 18.3 and is not a valid destination.
+  `ApplicationAccessibilityEnabled` armed and **read back `1`**. Private
+  `-derivedDataPath` under this session's scratchpad. Simulator **deleted at the end**.
+- **`Package.resolved` never drifted** (`git status --porcelain -- "*Package.resolved"`
+  empty at commit). No Release build, no install, no push. The real store was never
+  opened; the live Mac app was never quit.
+- **No runner death observed** in this wave; the load-flaky perf pin
+  (`MobilePerfWalkTests.typingAtTheViewportHoldsThePerKeystrokeBudgetAt100k`,
+  KnownIssues, owner 12) **PASSED** in a re-run beside `MobileTrashTests`
+  (`✔ … passed after 1.064 seconds`), so no isolated re-run was owed.
+- **The harness trap was respected**: every filtered run named suites by STRUCT name
+  (`MobileMenuVocabularyTests`, `MobileBlockMenuTests`,
+  `MobileTutorialWritingWalkTests`, `MobilePocketGuideDeletionTests`), never by file,
+  and the closing run was unfiltered.
+
+## Final suite line, quoted
+
+```
+✘ Test run with 667 tests in 99 suites passed after 301.008 seconds with 2 known issues.
+** TEST SUCCEEDED **
+```
+
+**Baseline 666 / 99 + 2 known issues → 667 / 99 + 2 known issues.** The **+1** is
+exactly one new walk pin (`theSavepointLessonTeachesRoadsThatStillExist`, joining the
+existing `MobileTutorialWritingWalkTests` suite — hence +0 suites). The **2 known
+issues are the SAME single documented diagnostic test** as the baseline's, verified by
+name in a targeted re-run:
+
+```
+✘ Test anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor() recorded a known issue at MobileTrashTests.swift:781:17: Issue recorded
+✘ Test anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor() recorded a known issue at MobileTrashTests.swift:780:36: Issue recorded
+✘ Test anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor() passed after 0.434 seconds with 2 known issues.
+```
+
+No other test records an issue.
+
+---
+
+## Item 1 — MAJOR 1 · the stranded `isEditable` gets a COMMITTED OWNER · **RECORD HALF DONE, defect deliberately NOT fixed**
+
+**Executed exactly as adjudicated: the record half only.** The ruled fix (one
+nesting-aware editability authority replacing the three per-sheet save/restore pairs,
+pinned red-on-old against the reviewer's own two-sheet interleave) is written down for
+the owner to build; **this wave changed no sheet code**, and the diff proves it —
+`MobileTakesBrowserView.swift`, `MobileCommentsSheetView.swift` and
+`MobileBlockHistorySheetView.swift` are all untouched.
+
+**Where the owner now lives:**
+
+1. **`notes/plans/mobile-round-2-handoff-2026-08-30.md` §7.2** — the authoritative
+   schedule. The leftover-review-backlog row is retitled **"THE LEFTOVER REVIEW
+   BACKLOG (the seat road's item 7)"** and now carries the defect in full: the three
+   file:line save/restore sites, the mechanism in one sentence, its
+   text-loss-adjacent severity, the ruled fix shape with its red-on-old, the note that
+   batch 9's own door is already correctly nested and keeps its A6 pin, and the
+   un-established half **stated as un-established**.
+2. **`notes/plans/mobile-batch-9-record.md` §4.6** — the two-candidate sentence
+   (*"the natural owner is 13u2's pane work or a 17-entry"*) is **superseded in place**
+   by a new subsection naming the single owner, quoting the superseded wording so the
+   change is legible, and carrying the same four facts.
+3. **`notes/plans/mobile-round-2-fable-seat-handoff.md` item 7** — a pointer, so the
+   seat road and the schedule cannot drift apart.
+4. **`mobile-batch-9-record.md` §9's PROVISIONAL 8** amended to match.
+
+**Deviation from the reviewer's suggested location, and why.** The finding's fix shape
+proposed a row in `notes/KnownIssuesAndTechDebt.md` (owner 17b or 13u2).
+**Adjudication routed it to the round's own schedule instead**, and that is what was
+built: the committed owner is an **in-round, phone-local batch days away**, not a
+phase — 13u2 is a Mac phase behind this round's fence, and a 17-entry would move a
+phone-local defect out of the round that found it. The reviewer's underlying
+requirement — *an owner that survives a closing plan file* — is met by §7.2, which is
+the round's durable schedule and outlives every batch record. **No blank owner
+remains.**
+
+**No red owed** (no behavioural change).
+
+---
+
+## Item 2 — MAJOR 2 · the tutorial stops teaching the retired door · **FIXED, two lessons, two new reds**
+
+Both shipped sentences re-taught to the road that **exists**, composing rather than
+re-typing.
+
+- **`MobileTutorialSeeder.swift`, the savepoints lesson** (writing ▸ blocks & typing):
+  *"Commit Take, in ⋯ … and Block History… beside it"* becomes
+  *"…\(commitTitle), in ⋯, keeps the exact text of the take you're in, forever — and
+  the moments themselves are read back one door along: **⑂ on the bottom bar opens
+  this block's takes, and each take's own ⋯ carries \(historyTitle)**, which opens
+  everything this block has been…"*
+- **`MobileTutorialSeeder.swift`, the five-places lesson item 5** — the guide's ONLY
+  road to the *came from* and *deleted takes* regions:
+  *"⋯ on the bottom bar, then Block History…"* becomes
+  *"**⑂ on the bottom bar opens this block's takes; each take's own ⋯ carries
+  \(historyTitle)**"*.
+
+**The words are COMPOSED**, per the finding's fix shape:
+`MobileBlockMenuController.commitTitle` for the act that stayed, and
+`MobileTakesBrowserController.historyTitle` — itself composed from the SHARED
+`BlockHistoryPath.name` — for the row that moved. **This required two production
+isolation changes, disclosed rather than buried:** both statics live on `@MainActor`
+controllers and `MobileTutorialSeeder` runs off the main actor, so
+`commitTitle` and `historyTitle` are now `nonisolated` (a `let` of a `String` and a
+pure computed `String` over a `nonisolated enum` — no state crosses, no behaviour
+changes, and both are documented at the declaration with the reason).
+
+**The pins now assert the ROAD, not the face's name.**
+
+- `theFivePlacesLessonNamesEveryPlaceAndItsPhoneRoad` — the line
+  `#expect(prose.contains(BlockHistoryPath.name))` is replaced by three: the row's own
+  composed title, a positive on the takes road, and a **negative refusing the retired
+  road**.
+- **NEW:** `theSavepointLessonTeachesRoadsThatStillExist` (in
+  `MobileTutorialWritingWalkTests`) — asserts both doors against the menus that carry
+  them: `Commit Take` must still be a `rowTitles` entry, and **no `rowTitles` entry may
+  contain "history"**, so a future move reds here rather than shipping a false
+  instruction.
+
+### RED B1 — the five-places lesson (production revert: the pre-batch-9 sentence restored)
+
+```
+✘ Test theFivePlacesLessonNamesEveryPlaceAndItsPhoneRoad() recorded an issue at MobileTutorialWalkTests.swift:1422:13: Expectation failed: (prose → "Everything you have ever written here is in exactly ONE of five places. …
+✘ Test theFivePlacesLessonNamesEveryPlaceAndItsPhoneRoad() recorded an issue at MobileTutorialWalkTests.swift:1424:13: Expectation failed: !((prose → "Everything you have ever written here is in exactly ONE of five places. …
+✘ Test theFivePlacesLessonNamesEveryPlaceAndItsPhoneRoad() failed after 0.299 seconds with 2 issues.
+✘ Test run with 4 tests in 1 suite failed after 0.806 seconds with 2 issues.
+** TEST FAILED **
+```
+
+**Note which lines reddened, because it IS the finding**: 1422 (the `⑂ on the bottom
+bar` positive) and 1424 (the negative). **Line 1420 — the composed row title — stayed
+GREEN**, because the retired sentence also contains the string `Block History…`. That
+is the reviewer's point reproduced exactly: the old face-name assertion could not see
+this defect, and the two new assertions are what catch it.
+
+### RED B2 — the savepoints lesson (production revert: the pre-batch-9 sentence restored)
+
+```
+✘ Test theSavepointLessonTeachesRoadsThatStillExist() recorded an issue at MobileTutorialWalkTests.swift:640:13: Expectation failed: !((prose → "Everything you write is made of BLOCKS — paragraph-sized pieces …
+✘ Test theSavepointLessonTeachesRoadsThatStillExist() recorded an issue at MobileTutorialWalkTests.swift:642:13: Expectation failed: (prose → "Everything you write is made of BLOCKS — paragraph-sized pieces …
+✘ Test theSavepointLessonTeachesRoadsThatStillExist() failed after 0.217 seconds with 2 issues.
+✘ Test run with 3 tests in 1 suite failed after 1.000 seconds with 2 issues.
+** TEST FAILED **
+```
+
+Line 640 is the *"…beside"* negative; 642 is the takes-road positive.
+
+**Store safety, recorded because these lessons are note TEXT.** `MobileTutorialSeeder`
+is reached only from the DEBUG-only Settings door, and Debug builds resolve the **dev
+store** by construction (the A4 fence at the file's own header); every run in this wave
+was an in-memory test world. **The real store was not opened at any point.** The
+standing consequence stands and is stated so nobody re-derives it: **an already-seeded
+pocket guide keeps the old sentences until it is re-seeded** — `findOrSeed` returns an
+existing book untouched — so **the corrected lessons reach her phone on its next
+install + Restore**, and reach her Mac not at all (this is the phone's own seeder; the
+Mac's field guide was never wrong here). That re-seed is an install-time concern, not
+this wave's.
+
+---
+
+## Item 3 — MINOR 1 · §5's "what exists today, precisely" · **THREE CORRECTIONS LANDED**
+
+`mobile-batch-9-record.md` §5, in place, with a leading note saying why (it goes to her
+sitting bundle under a heading that promises precision):
+
+1. **"The op underneath is NOT binary" was WRONG and is reversed.** Both core ops are
+   binary (`Operations+Structural.swift:659` `merge(_:_:)`, `:836` `mergeCeremony`).
+   The 9d N-way merge is a **DOOR-level composition** — `EditorSurfaceController.swift:316`'s
+   `.mergeChain` over `CarryAllMerge.chainComposes` — whose brain is **Mac-app-local**
+   (three Mac files, zero phone or `Shared/` files), **and the phone's single door does
+   no chaining at all** (`MobileStructural.mergeWithPrevious:202-314` resolves one pair
+   and calls once).
+2. **The Mac's Write-surface block-run merge chain is named** — shape (A) itself,
+   already shipped, with its own copy (`FannedDefaultsCopy.mergedChain`) and its own
+   pairwise refusal. 13e's ⌘-click TAKE selection survives in the sentence as the
+   different grain it is.
+3. **(A)'s cost restated honestly.** *"Costs nothing new because batch 7 is already
+   building the selection it needs"* is replaced by the real bill: batch 7's selection
+   **plus** the chain composition, the pre-compound validation, the compound, and —
+   under MobileSoul §3 — a `Shared/` **hoist of `CarryAllMerge`** rather than a
+   re-derivation. Fenced this round, so a future batch's.
+
+**The recommendation STANDS and reads stronger**, as the reviewer predicted: (A) stops
+being a phone invention to design and becomes a shipped Mac gesture to mirror.
+
+**The riding observation is recorded, not fixed** (it is pre-existing and already
+owned): the phone re-derives `CarryAllMerge.compose` by hand at
+`MobileStructural.swift:284-288`, logic-identical to `FannedDefaults.swift:71-78`. It
+belongs on `KnownIssuesAndTechDebt.md`'s eight-brain row, whose owner (*"any Mac phase
+touching one of these brains hoists it THEN"*) already covers it — so nothing is
+blank-owner. §5 now says so, and says that this fork and the hoist (A) needs are **the
+same piece of work**.
+
+**No red owed** (document only — the diff carries zero merge/structural lines).
+
+---
+
+## Item 4 — MINOR 2 · the rule-out re-taken on a LOADED fixture · **RE-MEASURED; the rule-out SURVIVES, now honestly**
+
+The reviewer was right that the original measurement proved nothing: every
+storage-writing branch of the chrome refresh is conditional
+(`MobileTakesChrome.swift:195` `where slot.hasFan`; `MobileBlockDecor.swift:119`
+`guard let presentation` — and only with an emoji; `MobileBlockDecor.swift:193`
+`where slot.commentCount > 0`), so on a plain-block fixture the write path is
+**structurally unreachable**.
+
+**A throwaway probe was rebuilt on a fixture that reaches all three writers** — 120
+blocks; block 10 FANNED *and* commented (so the takes chrome's `commentMarkRoom` rides
+its tail reservation), block 20 a callout carrying an emoji, block 30
+plain-and-commented — mounted in a real `UIWindow` at 393 × 852, **and it proves the
+writers executed before it reads the equality**:
+
+```
+PROBE slots=120 fanned=1 commented=2 emojiCallouts=1
+PROBE writersRan fannedTailIndent=-56.0 calloutFirstLineHeadIndent=27.0
+PROBE contentSize=(393.0, 9558.0) inset=UIEdgeInsets(top: 8.0, left: 15.0, bottom: 835.0, right: 15.0) contentInset=UIEdgeInsets(0,0,0,0) adjusted=UIEdgeInsets(0,0,0,0)
+PROBE storageEqualAfterFirstScroll=true
+PROBE storageEqualAfterScroll=true
+PROBE stringEqualAfterScroll=true
+PROBE offsetEnd=4200.0 contentSizeEnd=10242.0
+PROBE endFannedTailIndent=-56.0 endCalloutGap=27.0
+```
+
+A non-zero `tailIndent` / `firstLineHeadIndent` is written by **nothing but** those two
+reservation writers, so `writersRan` is the falsifiable evidence the first measurement
+lacked. With both populated and fired, two scroll jumps — the second carrying the
+loaded blocks well off the near-viewport band — leave storage **byte-identical,
+attributes included**. The equality gates
+(`guard abs(style.tailIndent - target) > 0.01` and its leading twin) are what hold it.
+
+**Disposition: option (i) of the fix shape — re-measured, so the rule-out and its "do
+not re-open" both stand, and now cover the FANNED and CALLOUT shapes her real notes
+actually carry.** `mobile-batch-9-record.md` §4.3 item 1 carries the whole re-measurement
+in a marked block, including the admission that the first one was a green over nothing.
+
+**The probe does NOT ship** (`ZZProbeLoadedChromeScroll.swift`, deleted before commit —
+the reviewer's own NIT-3 precedent from 6b; `grep -rn "ZZProbe"` returns nothing). Its
+numbers and its fixture are in the record, described precisely enough to rebuild in one
+sitting.
+
+---
+
+## Item 5 — the four NITs · **ALL FOUR DONE, two with new reds**
+
+### NIT 1 — the cloned half is pointed at the unpinned edit-menu seam ✔ (the better spend, per the finding)
+
+`MobileBlockMenuTests.theTwoDoorsShareOneVocabulary`'s second half no longer calls
+`menuElements` twice against the same oracle. It now composes the **real edit menu**
+(`MobileEditMenu.menu(model:range:suggested:)`) and reads the **`Block` submenu's
+children** — the claim `MobileEditMenuSeam.swift:87` and `MobileBlockMenu.swift`'s
+header both make and which nothing pinned.
+
+**RED B3 — production revert: `.dropLast()` on the seam's `menuElements` result.**
+
+```
+✘ Test theTwoDoorsShareOneVocabulary() recorded an issue at MobileBlockMenuTests.swift:126:13: Expectation failed: (blockSubmenu.children.map(\.title) → ["comments…", "callout", "name block…", "commit take", "new block below", "divide block", "merge with previous", "archive block"]) == (MobileBlockMenuController.rowTitles.map(cased) → ["comments…", "callout", "name block…", "commit take", "new block below", "divide block", "merge with previous", "archive block", "delete block"])
+✘ Test theTwoDoorsShareOneVocabulary() failed after 0.070 seconds with 1 issue.
+✘ Test run with 11 tests in 1 suite failed after 1.036 seconds with 1 issue.
+** TEST FAILED **
+```
+
+**The finding proved from the other side:** the deleted half read the builder directly,
+so it would have stayed GREEN under this exact revert. The replacement is real
+coverage, not a re-shuffle.
+
+### NIT 2 — the constant compared to its own literal ✔
+
+`MobileMenuVocabularyTests.swift:109` (`restingActLabels == ["Formatting", "Takes",
+"Block"]`) is replaced by an assertion against the **real bar**: `bar.makeBar()`'s
+toolbar items, their labels (item or custom view — the markdown suite's own walk
+shape) compared to `restingActLabels`, and — the link this pin actually owed — **the
+middle door's `action` is `#selector(fireTakes)`**, i.e. the act the test then fires.
+
+**RED B4 — production revert: the middle act's selector changed to
+`#selector(toggleFormattingDoor)`.**
+
+```
+✘ Test theBlockMenuDropsTakesAndTheBarsMiddleActStillOpensTheBrowser() recorded an issue at MobileMenuVocabularyTests.swift:126:13: Expectation failed: (acts[1].action → toggleFormattingDoor) == (#selector(MobileKeyboardBarController.fireTakes) → fireTakes)
+✘ Test theBlockMenuDropsTakesAndTheBarsMiddleActStillOpensTheBrowser() failed after 0.110 seconds with 1 issue.
+✘ Test run with 5 tests in 1 suite failed after 3.095 seconds with 1 issue.
+** TEST FAILED **
+```
+
+**Exactly one issue — isolated to the new assertion**, and deliberately so: this revert
+leaves the labels untouched, so the retired line would have stayed green while the door
+it names had stopped being the door.
+
+### NIT 3 — the production comments still drawing the retired pairing ✔
+
+Three, swept, and where a road is named it is **composed**:
+
+- **`MobileNoteActions.swift:26`** — the `block ⋯ → Commit Take + Block History…` /
+  `note ⋯ → Save a Version + Versions…` diagram is now labelled **"as it stood at 6c,
+  kept because it was TRUE WHEN WRITTEN"** (`MobileBlockMenu`'s own convention for a
+  superseded note) and followed by what batch 9 changed and what survives: the pair now
+  exists at exactly ONE grain, the note's.
+- **`MobileVersions.swift:28`** — the Q5 paragraph gains the same correction, pointing
+  at `MobileBlockMenu`'s header for the reasoning rather than re-arguing it.
+- **`MobileUndoDoor.swift:255-259`** — the doc comment that asserted *"The road it names
+  is the phone's own"* now says the sentence names a **FACE, deliberately, and not a
+  road**, with the reason (a spelled road would be three taps long and would go stale
+  at the next move) and the instruction for a future author: **if it ever grows a road,
+  compose it from `historyTitle`.**
+
+**One thing deliberately NOT changed, and disclosed:** the user-facing string in
+`discardingUndoDetail` (*"…bring it back from the block's Block History at any time"*)
+is **untouched**. The reviewer called it *"still TRUE"*, and the adjudication scoped
+this clause to the production **comments**; editing shipped copy is a product-copy
+change, not a NIT's, and it would have needed its own red for a sentence that is not
+wrong. **`MobileBlockMenu.swift:283-287` needed nothing** — it already states the
+pairing ends there; its `commitTitle` doc comment (which still called the two a "pair")
+was corrected while that constant was being made `nonisolated`.
+
+### NIT 4 — §4.4 says that her own geometry argues against S3 ✔
+
+`mobile-batch-9-record.md` §4.4 gains the note beside the existing confound paragraph:
+the pan router gates on **horizontal dominance**
+(`MobileTakesChrome.swift:566-567`) and her report is about dragging **"up and down"**,
+so a near-vertical drag cannot open that gate — her wording is evidence *against* this
+candidate. **S3 stays on the list, and the record says why it stays** (one of only two
+app-local candidates, the cheapest to fix if it is the cause, and §4.5's question 2
+settles it in one observation). Only the honesty of the ranking changed, which is what
+the finding asked for.
+
+---
+
+## Files touched
+
+**Production (6):** `MobileTutorialSeeder.swift` (MAJOR 2 — two lessons) ·
+`MobileBlockMenu.swift` (`commitTitle` → `nonisolated`, its doc comment corrected) ·
+`MobileTakesBrowser.swift` (`historyTitle` → `nonisolated`, documented) ·
+`MobileNoteActions.swift`, `MobileVersions.swift`, `MobileUndoDoor.swift` (NIT 3 —
+comments only).
+
+**Tests (3):** `MobileTutorialWalkTests.swift` (the strengthened five-places road
+assertions + the new savepoints-road pin) · `MobileBlockMenuTests.swift` (NIT 1) ·
+`MobileMenuVocabularyTests.swift` (NIT 2).
+
+**Documents (4):** `mobile-batch-9-record.md` (banner + §4.3 · §4.4 · §4.6 · §5 · §9) ·
+`mobile-round-2-handoff-2026-08-30.md` (§7.2's leftover-backlog row) ·
+`mobile-round-2-fable-seat-handoff.md` (item 7's pointer) · **this file**.
+
+## Fence, re-derived at commit
+
+```
+$ git diff --name-only -- Sources/ App/Variorum/Shared App/Variorum/Variorum \
+      "*.xcodeproj" "*.pbxproj"
+(empty)
+
+$ git status --porcelain -- Sources/ App/Variorum/Shared App/Variorum/Variorum \
+      "*.xcodeproj" "*.pbxproj"
+(empty — nothing untracked there either)
+
+$ git diff -- '*.swift' | grep -c planVisibleTakeEdit
+0
+
+$ git status --porcelain | grep -i editorbrain
+(empty)
+
+$ git status --porcelain -- "*Package.resolved"
+(empty)
+```
+
+Zero `Sources/`, zero `Shared/`, zero Mac-target, zero `EditorBrain/`, zero schema,
+zero build-config, zero `Package.resolved`. The new test file the probe needed was a
+throwaway in the synchronized test group and is deleted; **no `.pbxproj` edit was ever
+required**.
+
+## One thing left for the orchestrator
+
+**Batch 9's own row in `mobile-round-2-handoff-2026-08-30.md` §7.2 is deliberately left
+un-struck.** Marking it DONE wants the fix wave's commit hash and is the closing act,
+which the adjudication assigns to the orchestrator ("*then the orchestrator verifies and
+closes*"). The row's neighbours (6c · the filter unit · 6b) show the house format.
