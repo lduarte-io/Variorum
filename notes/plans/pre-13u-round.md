@@ -800,6 +800,82 @@ VariorumMobile`), mobile suite green (582/93 baseline), tutorial spine green, th
 load-flaky suites re-run isolated before concluding anything from a red. Record per-item
 dispositions in the 17a entry (it closes) + a batch record in this file.
 
+### ACT 9 BATCH RECORD (2026-08-30, the Fable custody batch — implementer session; commits `270bf4f…d6a4911` + the records commit)
+
+**All seven work-order groups executed in order, one-to-a-few coherent commits each; every
+bug-class fix landed with a red-on-old pin verified by a faithful behavioral revert** (never a
+seam removal — the R3-1 trap honored; the drill reds reproduced the traced end states verbatim:
+P2's both-Keychain-items-deleted library, P3's tail-in-no-row loss, P13's untyped-error +
+minted-custody dead end, P15's full 64-hex key in both error channels, R-pre13u-2's two-prompt
+world). **17a is CLOSED** — per-item dispositions in `phase-17-standing-fixes.md`'s entry.
+
+| group | what landed | commit |
+|---|---|---|
+| 1 | **F1** — the state-dependent custody pin fully faked (red observed live on the pre-fix tree, 22:01); the R3-NIT `E2EELaunchKeyCache` save/restore rider (cache made internal); sibling sweep: `CustodyHandoverTests` is the ONLY suite driving `.keychain(` — no other live-`load` dependency | `270bf4f` |
+| 2 | **17a's eight items**, four commits: P1/P2/P10/P11 (the envelope-write family — the tri-state `readEnvelope` seam, throwing `ensuredEnvelope`, fresh-read `setMode` authorization, derive-then-read `setPassphrase`, the lobby's one `deadEndMessage` brain) · P3 (`macWillLock`, the `mobileWillLock` twin) · P12/P13 (present-but-unreadable ⇒ `.encryptedOrUnknown`, typed refusal, no mint, no persisted downgrade) · P15 (key-hex scrubbed from both error channels at origin) | `30fd249` `8aef252` `54d28ea` `b9c90f6` |
+| 3 | **F4** — `KeychainTestTripwire` (KeychainCustody.swift's third named rule): every fixed-account E2EE write/delete leaf refuses from a test process before any SecItem call; red-on-old via the SAFE drill (detection off + service redirected to a throwaway REVERTDRILL service in ONE edit; litter swept; the real-constants revert — the R3-1 act — never performed) | `ffa0a83` |
+| 4 | **R-pre13u-2 + F6** — the sync gate opt-in, DEFAULT OFF; `SyncGateOptIn` marker (production `.live` at AppServices; ephemeral default fences tests off the machine's defaults); LEGACY gates reset to plain at the first material-in-hand moment through the `CustodyHandover`-disciplined transition (her device ends at ONE prompt; one click re-enables); the E2EE arm's own `wroteButUnreadable` sentence | `a21bd63` |
+| 5 | **#82 (R-pre13u-3)** — the store key device-bound: DP flag + TN3137 migration (idempotent, crash-healing, open-never-hinges-on-it); `delete` takes both keychains; the two production comments' successors updated both sides | `bbf5cf2` |
+| 6 | **R-pre13u-4/5 detection** — `ProtectionLegs` (the ONE nudge brain, tier covered/exposed/unknown, device-neutral exposed copy + the ways-back-in line) · the VERIFIED-LANDED escrow observable (`escrowVerifiedLanded` + `EscrowReconcileOutcome`'s read-back leg) · the Console evidence line for her check | `7b16ad6` |
+| 7 | **F5** — the fact suite's header leaves the pre-signing world | `d6a4911` |
+
+**MEASURED PLATFORM FACTS (new, absorbed into the design and pinned):**
+1. **A PLAIN (no-ACL) data-protection item under a shared service/account IS matched by a no-flag
+   `SecItemDelete`** — unlike the ACL'd items 13p-fix measured (whose ACL is evidently what hides
+   them from legacy searches). Found when the #82 legacy sweep destroyed the bound item it had just
+   verified; the design answer is a distinct `<scope>-bound` account (the gated family's
+   account-carries-the-policy pattern), making the two families structurally unable to touch each
+   other whatever a point release decides about cross-visibility.
+2. **`FileHandle.read(upToCount:)` returns nil WITHOUT throwing at EOF** — so the P12/P13 classifier
+   distinguishes nil-at-EOF (empty file, the deliberate `.absent` half, now pinned) from a THROWING
+   read (unreadable ⇒ `.encryptedOrUnknown`).
+3. **Live end-to-end evidence for #82:** the hosted test runs migrated the DEV store's real key
+   mid-batch and the host kept opening through the bound item on every later suite boot.
+
+**RECORDED CORNERS (deliberately unchanged, each doc'd at its site):**
+`failedOutcome` stays doorless over an unreadable sidecar (widening that surface is design);
+`verifyPassphraseAgainstStore` answers nil on unreadable (a third guard answer is design; harmless —
+every write door refuses regardless); `macWillLock` finalizes only the ACTIVE editor, identically to
+the quit door it mirrors (widening both is one design act); the nil-URL route fallback fix rides
+P13 unpinned (no seam over the private URL resolution); P15's PRAGMA site is pinned pure only (that
+statement's failure is not drivable — SQLCipher defers key validation to the first page read);
+group 6's observable is a ruled feature, carried by traced mechanism + the refused/off/unknown arms
+rather than a bug-class red-on-old. **#82's build-config note:** the bound item belongs to the
+access group that migrated it, so the rare debug-build real-store opt-in road now lands on the
+sidecar recovery surface instead of opening silently (recorded in the family header + the
+KnownIssues residual row).
+
+**MOBILE (for the round's parity line):** groups 4 and 6 are `Shared/` brains — the phone INHERITS
+the opt-in/reset semantics and the `ProtectionLegs` tier by construction (R-pre13u-4's "both
+platforms invoke the same nudge brain", satisfied at the seam); the phone's FACES for the exposed
+tier and the pane line are the parity line's to name (Act 10 styles the Mac's). iOS target built
+green at every `Shared/`-touching commit and at close.
+
+**THE TWO RE-ROUTED KNOWNISSUES ROWS** (R2-7 `saveGated` delete-before-add; R3-5
+delete-status-discarded): never in 17a's 8-item list — **re-routed to 17h**, opened at the author's
+word; their rows now name 17h. Not resolved, not orphaned. (R3-5's R3-NIT rider WAS discharged here,
+group 1.)
+
+**ESCROW RESULT — PENDING (architect fills after her run).** The check needs the refreshed
+real-store build (the reconcile's escrow arm is real-variant-only by 13p design), so it runs after
+this batch's green suites and the `/Applications` refresh: launch → unlock → confirm the escrow
+dial ON → quit → relaunch → read `log show --last 10m --predicate 'subsystem ==
+"io.lduarte.Variorum" AND category == "protection"'`. **PASS** = the relaunch line reads
+`item read back == current key: Optional(true) · wrote this pass: false` (the reconcile reads its
+own item back rather than re-writing). **FAIL** = `read back … Optional(false)`, or `wrote this
+pass: true` on every relaunch. Her result: ______ *(a FAIL comes back to the custody batch as a
+finding; the KnownIssues escrow row retires on a PASS).*
+
+**VERIFICATION AT CLOSE:** core **1457/154 GREEN** (13p baseline 1453/154 + the 4 new core pins,
+exact) · Mac full suite: **[filled below at the close — run against 1854/314 + 17 new pins]** ·
+iOS target BUILDS · mobile suite vs 582/93 · tutorial spine green · zero
+`Sources/VariorumCore/Sync/` lines, zero schema, marker untouched (diff-verified: no file under
+`Sync/` in any commit). **Environment:** the real-store app was RUNNING at batch start (contrary
+to the brief's "closed tonight") — instance-check discipline held throughout (no Release builds,
+no `/Applications` refresh, never touched); it closed mid-batch. The revert drills' keychain
+traffic touched ONLY throwaway drill items (the F4 drill's own unguarded `clear()` swept its
+litter; `security`-CLI not-founds corroborated).
+
 ## Act 10 — The UI/UX pass: the tray, the Pool, and the protection surfaces (**Fable** implementer)
 
 **Re-cast mid-sitting by the author (2026-08-30):** *"make Batch 10's UI/UX improvements a Fable
@@ -907,12 +983,20 @@ doors.
     otherwise), snippet/date context per row so five "2026-08-23"s are tellable apart. The derived
     display-name rule (13u item 4) is the ranking's natural friend but is NOT built early here —
     titles as they are, ranked well, is this act's bar.
-15. **The Compare surface cleanup** — her verbatim in Act 7's arrivals. FACE-level only: the lens
-    semantics (13b's rebuild) are untouched; what changes is legibility — the empty state teaches
-    the flow (pick a note → columns appear; version peers first), the picker becomes item 14's
-    component, "make outline note" / "+ note" get affordances that say what they do, the toggle-chip
-    row reads as settings rather than mystery pills, and how-you-select-things becomes visible.
-    Screenshot-verified; anything that would CHANGE a flow (not just clarify it) comes back to her.
+15. **The Compare + LENSES cleanup — ONE legibility pass over the pair** (widened at her fourth-wave
+    report: *"lenses are also guilty of being an insanely confusing tab - the difference from
+    compare is unclear and it does not need more explainer sentences… we just need way cleaner
+    UI/UX here"*). FACE-level only: the lens/compare semantics (13b's rebuild) are untouched; what
+    changes is legibility — the two modes become TELLABLE APART at a glance (what each is FOR must
+    be visible in the surface's structure, not narrated); Compare's empty state teaches the flow
+    (pick a note → columns appear; version peers first); the picker becomes item 14's component;
+    "make outline note" / "+ note" / "+ column" / "Duplicate as Version" get affordances that say
+    what they do; the toggle-chip rows read as settings rather than mystery pills. **HER COPY
+    DOCTRINE BINDS THE WHOLE ACT (verbatim): de-clutter by STRUCTURE and ?-icon disclosure, never
+    by adding prose** — the Lenses bottom explainer sentence is the named example of what goes
+    behind a ?, not what gets siblings. If the batch concludes the two MODES should merge or the
+    mode row should change, that is IA — a proposal to her, never a build (R60–94's mode row is
+    ruled canon). Screenshot-verified.
 16. **The Blocks page — PROPOSAL-FIRST, never built blind** (her own words: "I'm not even sure how
     to fix it"): the batch produces 2–3 concrete directions as mockups/screenshots for her ruling —
     her floated candidates seed them: (a) a book-page-like **in-note index/outline** (the block-TOC
@@ -920,19 +1004,41 @@ doors.
     tools**; (c) a rename away from "Blocks" either way. She picks; the build follows her pick
     (this act if timing allows, else the deferral is recorded with its owner). No silent redesign
     of a mode's purpose — that is a product call.
-17. **Snippets — the BOUNDED refresh** (her own scoping: "that might be a bigger change that
-    shouldn't be done in Act 10, but a BIT of a refresh"): a door to create a new pool; search over
-    scraps; a more library-esque listing. **PLUS the naming collision flagged for her, not solved:**
-    the page's chip literally reads "pool: Pool" — `container.kind='pool'` (scrap areas) and the
-    sidebar's Pool (bookless notes, R29) share one word for two concepts, and her "it's confusing
-    what the pool even means / how it got there" is that collision speaking. Renaming either is
-    product vocabulary = HERS; the batch brings candidates. The deeper "what is this page for"
-    question is recorded as open, not answered here.
+17. **Snippets — the BOUNDED refresh, widened at her fourth wave** (her scoping: "a BIT of a
+    refresh"; then: *"there's a field guide scraps - how? does each book have a pool? note have a
+    pool? why can you not make a new pool, move items between pools, or delete them there?
+    definitely needs a more familiar surface"*): **pool MANAGEMENT doors** — create a new pool,
+    delete a pool (the ordinary `deleteContainer`/Trash road), move scraps between pools — plus
+    search over scraps and a more library-esque listing. **The ownership answer belongs IN the
+    surface's structure** (the true facts: pools are free-standing scrap areas — no book or note
+    owns one; "tutorial scraps" exists because the field guide seeded its own; most people live in
+    the one default pool): if the surface shows pools as what they are, her three questions stop
+    needing to be asked. **PLUS the naming collision flagged for her, not solved:** the chip reads
+    "pool: Pool" — `container.kind='pool'` (scrap areas) and the sidebar's Pool (bookless notes,
+    R29) share one word for two concepts. Renaming either is product vocabulary = HERS; the batch
+    brings candidates. The deeper "what is this page for" question stays recorded as open.
 
 **Act 10 sizing (her authorization at the sitting):** the act is deliberately allowed to be
 "more significantly sized." It runs as **up to two sequential Fable implementer waves** at the
 architect's discretion — wave 1 the mechanical/polish items, wave 2 the surface redesigns (14–17,
 the panel, the lobby) — with a clean handoff seam between; one wave if it fits.
+
+**THE MOCKUP STEP (her instruction, fourth wave — runs AFTER the escrow step, before Act 10):** ONE
+mockup agent produces **local HTML** (a file path handed to her — NEVER published anywhere) covering
+**item 16's Blocks directions (2–3) and item 17's Snippets refresh**, in the app's own voice
+grammar. **ONE feedback round by design** — her words: *"I don't always like multiple rounds of html
+because most of the time little details are off, and generally the direction is enough to
+establish."* **Compare/Lenses are EXCLUDED from the HTML step at her doubt** (*"the precise
+interactions shown by the buttons and what's available don't often cross into html land well… i do
+doubt a redesign there will go well"*) — item 15's proposals come as in-app screenshots from the
+Act 10 wave instead. **The capture rule (her instruction, verbatim-faithful):** *"i'd make sure that
+I save my prompts verbatim and try to ensure that the subagent has access to the images i've been
+giving you or at least a good description of them + the issue they show, because I've been putting a
+lot of feedback straight into my chat with you and I want to make sure it's all being captured
+appropriately."* — executed as `notes/plans/pre-13u-screens-manifest.md` (every screenshot's
+contents + her verbatim issue + the routed item; pixels in the gitignored
+`notes/plans/pre-13u-screens/` where recoverable). **The mockup agent and every Act 10 wave brief
+FROM the manifest + this file's items — never from any session's chat.**
 
 ---
 
