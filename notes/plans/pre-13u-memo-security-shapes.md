@@ -209,6 +209,25 @@ know for THEIR mode, what they need to be safe… I think things are starting to
 to me, which is a good sign. this was insanely thorny at the beginning - I can't believe we've gone
 through so many iterations."*
 
+## 9b. RESIDUAL TRAPS (named at the session's close, 2026-08-31 — the two worth outliving the chat)
+
+**T1 — the re-key from a STALE copy is the sharpest unguarded edge the new model exposes.** Tonight
+made Replace Encryption Keys the reset road: possession + account = new passphrase, local becomes
+truth, sync resumes. But "local" might be a MONTH-OLD backup — someone recovers an old copy, re-keys,
+and the wipe-and-repush clobbers everything the server learned since. The design is local-as-truth
+by intent; the trap is local-as-truth when local is stale. The guard worth building when this door
+is next touched: before a re-key re-push, compare recency (the server's newest change vs the local
+copy's) and WARN when the server is ahead — one honest sentence, not a refusal. Also verify the
+adjacent corner: a re-key from a near-EMPTY store must not silently push emptiness over a full
+server. **Route: the final ladder should look at this door; if unguarded, a KnownIssues row with an
+owner.**
+
+**T2 — the covered/exposed verdict needs an honest UNKNOWN.** The escrow read-back is verified on
+ONE machine (hers). On machines we have never seen — iCloud Keychain off, no Apple ID, managed
+devices — the probe may simply not know. The nudge tiers must not map "can't tell" onto either
+"covered" (false comfort) or "exposed" (crying wolf): unknown is its own state with its own gentle
+sentence. Act 10's rendering should honor the three-value truth the Act 9 brain already carries.
+
 ## 10. WHAT THE SUCCESSOR BUILDS FROM THIS
 
 Everything in §§1–6 as **wording + structure** on Act 10 item 3 (settings, the tutorial's privacy
