@@ -156,7 +156,15 @@ escrow verification); faces in Act 10 + a mobile deliverable named in the parity
 
 **R-pre13u-5 — escrow check timing (her word):** *"I can do the escrow later this batch too when it's
 a good moment - I'll be around for this full batch."* The author-run escrow round-trip check is
-scheduled INSIDE Act 9 at a moment the custody batch calls for it.
+scheduled INSIDE Act 9 at a moment the custody batch calls for it. **At the checkpoint (late
+evening): she closed the app — "i've closed my application, it's now refresh ready" — accepting the
+tonight-after-green-suites order (install refresh from the verified tree, the ladder still reviewing
+after with a re-refresh on any finding).**
+
+**R-pre13u-6 — 17h OPENED (her word at the checkpoint): "Open 17h, run it this round."** The two
+custody rows that carried owner "17a" outside its item list (R2-7 saveGated delete-before-add;
+R3-5 delete-status-discarded + riders) become entry **17h** in `phase-17-standing-fixes.md` — a
+small fresh Fable session, run in this round after Act 9 closes, while the subsystem is warm.
 
 ---
 

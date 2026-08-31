@@ -74,8 +74,9 @@ once. Claim a letter here first.
 
 | Letter | Subject | State |
 |---|---|---|
-| 17a–17f | The 2026-08-30 sweep's six groups | open, unstarted |
+| 17a–17f | The 2026-08-30 sweep's six groups | open, unstarted *(17a closing at the pre-13u round's Act 9; 17c/17f run later in the same round)* |
 | **17g** | **CLOSED 2026-08-30 — the `13p-fix` session** (author's live session of 2026-08-30: an issue she found testing the refreshed 13p install). That session owns this letter and writes its own entry; it does **not** fold into 17a. | **closed** |
+| **17h** | **The custody riders 17a never listed** — opened at the author's word 2026-08-30 (the pre-13u sitting: "Open 17h, run it this round"). TWO items, both already traced in `KnownIssuesAndTechDebt.md` rows that carried owner "17a" without being in its 8-item list: **(1)** the `saveGated` delete-before-add window (13p-fix ladder R2-7 — a failed `SecItemAdd` after the forced delete leaves no custody; remedy sketch on the row: add under a temporary account → verify → swap → delete old, or an explicit accepted-window doc line); **(2)** the delete-status-discarded family (R3-5 — `deleteAuto`/`deleteGated` drop `OSStatus`, so the custody law binds writes only; remedy on the row: `Bool`-returning delete seams + refuse/report on failed release + a `deletesSucceed` knob pin; the riders travel with it: `E2EECustodyStorage.live` wiring coverage R3-4, `setMode`'s MainActor SecItem calls R3-6). The rows' mechanisms and remedies are the brief; runs as a small fresh Fable session inside the pre-13u round, after Act 9 closes. | **open** |
 
 **Why 13p-fix is 17g and not part of 17a.** 17a is the *sweep's* 13p residue — eight findings from a
 review that read the code. 13p-fix is a *tested* defect she hit in the running app, with its own plan
