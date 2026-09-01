@@ -577,6 +577,50 @@ struct SampleLibraryDedupeRepairTests {
         }
     }
 
+    /// **RED ON OLD (round 2, R2-3 — MINOR):** the marker leaked past its
+    /// one-shot contract. `guard copies.count > 1` returned BEFORE the
+    /// clear, so on the common convergence — the other device's retirement
+    /// arriving in a non-empty pull, leaving ONE live copy — the pass ran
+    /// with count 1, returned, and never spent the marker: every later
+    /// empty pull opened an apply-mode transaction and (pre-R2-1) every
+    /// push chunk re-ran the pass, forever. Now a pass spends the marker
+    /// first, whatever it decides.
+    @Test func theMarkerIsSpentWhenTheOtherDevicesRetirementLands() async throws {
+        let (a, b, server) = try pairWithFacts()
+        let copyA = try seedCopy(a)
+        let copyB = try seedCopy(b)
+        try await a.push()
+        try await b.push()
+        try await b.pull()
+        #expect(try marker(b) == "1", "B deferred on A's copy arriving")
+        try await a.pull()
+        #expect(try marker(a) == "1", "A deferred on B's copy arriving")
+        // A's next round: the pull is an empty window (its marker re-fires
+        // the pass — both pristine, A's smaller id keeps, B's retires) and
+        // the push carries the retirement.
+        try await round(a)
+        #expect(try liveCopyIDs(a) == [copyA.bookID])
+        #expect(try marker(a) == nil)
+        // B's pull brings the retirement: its own copy dead, ONE live copy
+        // left. The pass runs on the touched book and stands down — and
+        // spends the marker doing so.
+        let arrival = try await b.pull()
+        #expect(arrival.applied > 0)
+        #expect(try liveCopyIDs(b) == [copyA.bookID])
+        #expect(try marker(b) == nil,
+                "spent by the pass that found one copy (old: leaked forever)")
+        // A truly empty window opens nothing: no marker, no transaction.
+        let empty = try await b.pull()
+        #expect(empty.applied == 0)
+        #expect(empty.repairs == 0)
+        try await assertFurnitureConverged(a, b, server)
+        for client in [a, b] {
+            #expect(try marker(client) == nil)
+            #expect(try liveCopyIDs(client) == [copyA.bookID])
+        }
+        _ = copyB
+    }
+
     @Test func noInjectedFactsMeansNoDedupe() async throws {
         // An engine nobody wired facts into cannot misidentify anything —
         // the repair is inert by default (the keyProvider pattern).

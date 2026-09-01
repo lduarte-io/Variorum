@@ -138,6 +138,14 @@ extension SyncEngine {
     /// same-name copies actually coexist.
     func dedupeSampleLibraryCopies(_ db: Database, touched: TouchedRows) throws -> Int {
         guard let facts = sampleLibraryFacts else { return 0 }
+        // ONE-SHOT, spent FIRST (the ladder's R2-3): a pass that runs
+        // consumes the marker before it decides anything — including the
+        // common convergence, where the other device's retirement arrives
+        // and only one live copy is left. Clearing after the count guard
+        // leaked the marker forever on exactly that road: every empty pull
+        // then opened an apply-mode transaction and every push chunk re-ran
+        // the pass, for the life of the store.
+        try setSampleDedupePending(db, false)
         // The seeder's own `discover` rule: EXACT live-name match.
         let copies = try String.fetchAll(
             db,
@@ -150,16 +158,14 @@ extension SyncEngine {
         // the push order and can still be in the pusher's next chunk, so a
         // pull landing between the chunks would read an edited-by-comment
         // copy as pristine and retire it. Classify only copies quiescent
-        // since a prior batch; the deferral leaves a ONE-SHOT local marker
-        // so the next apply (or the next pull, even an empty one) re-runs
-        // the pass instead of waiting for another book to change. Bounded
-        // by construction: the marker is cleared the moment a pass runs
-        // past this check, whatever that pass then decides.
+        // since a prior batch; the deferral re-arms the ONE-SHOT marker so
+        // the next PULL (an empty window included) re-runs the pass instead
+        // of waiting for another book to change. This is the only line
+        // that arms it.
         if copies.contains(where: touched.readingIDs.contains) {
             try setSampleDedupePending(db, true)
             return 0
         }
-        try setSampleDedupePending(db, false)
         let manifest = try facts.loadNoteHashes()
         let reservedTagID = try String.fetchOne(
             db, sql: "SELECT id FROM tag WHERE path = ? AND deleted_at IS NULL",
