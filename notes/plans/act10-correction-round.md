@@ -1053,6 +1053,24 @@ captures, counts, commits, new rows numbered after A's last).
 
 ---
 
+### BATCH C RECORD — THE NOTE MODES (a fresh Fable implementer session, 2026-09-01 ~10:45 →)
+
+#### LIVE STATUS — BATCH C (flipped in the same commit as each piece; a fresh session finishes from this list alone)
+
+- **Orientation:** DONE — the plan read in full (§0–§8, B's and A's records, this brief), CLAUDE.md, the resiliency protocol, the handoff's §2c, her report (§1 + image rows 1, 10–15), then the brief's files in its order (`PostDetailView` · `IndexModeView` · `ReadModeView` · `BlocksWorkbenchView` · `NoteIndexOutline` · `FlowParagraph` · `BlockHistoryPane` · the registry's two sites · `PostMode` · the book's paged engine `PagedReadModel`/`PagedReadView`/`BookView`'s `scroll · pages` · the seeder's two sites · the pins). Tree clean at `11b6f2a`; the dev-store Debug build pid 81367 running (batch A's product).
+- **The settled design (before any code moved):**
+  - **Row 1 (R-cor-5/7 whole):** `PostMode` drops `.index` → seven (`fromStored("Index")` → `.read`, the Outline→Compare precedent); `ReadModeView` becomes the READ HOST: an in-place `edit · read` switch (default `edit`, remembered per note under `readFace.<postID>`), the `▸ 01` column shared by both faces (`NoteIndexColumn`, the Index tab's column with its expanded editing card RETIRED and the block rows' handles a step larger), `edit` = `ReadEditPane` (the projection tier; a clicked block goes LIVE in place through the one `BlockTOCViewModel` authority — `PaneSurfaceView`, one ring), `read` = the calm page (continuous) or `NotePagesView` (the book's `PagedReadModel` over the one note — no second pager; the leaf views hoisted to `Core/Views/` under the hoist-at-next-touch rule), never editable; a `read` click → `LandingTarget` → `edit` at that block (B's brain, reused). `IndexModeView` survives as a typealias forward for the pins. The registry gains `readEditAttached` (the takes-board pattern) so the format family is honestly available in `edit` and grey in `read`.
+  - **Row 39:** the authority is `CurrentBlockMemory` (per-note, persisted like the mode memory) fed by `CommandRouter.noteFocusedBlock` — every existing reporter feeds it; `registerDetail` restores the fact from it, and every mode ENTERS on the fact: Write's bare arrival lands the caret at the fact's block (fixing row 49's caret-at-end), Takes' N9 landing focuses the fact's block instead of the first, Read's `edit` and Blocks already seed from it.
+  - **Rows 27/29:** a mode switch CLOSES the Block History pane (chosen over re-targeting: the question was asked in that mode); in Blocks the context panel YIELDS while any inspector column is open (one right region at a time).
+  - **Row 18:** a draggable divider (the `ShellSplit` grammar) with a remembered width. **Row 25:** measure first on the dev build (the count-2 + plain tap idiom is the prime suspect — a single click waits the double-click interval), then fix + a measure pin. **Row 26:** facts first, text after (PROVISIONAL). **Row 36:** Read's footer duplicate DROPS; the column's count line shows in `edit` only; Blocks keeps its three per A's table.
+- **Row 1 (R-cor-5/7):** NOT-STARTED — next.
+- **Row 39 / 49:** NOT-STARTED.
+- **Rows 27 / 29:** NOT-STARTED.
+- **Row 18:** NOT-STARTED. **Row 25:** NOT-STARTED (measure first). **Row 26:** NOT-STARTED. **Row 36:** NOT-STARTED.
+- **Row 54:** not on this surface — see the dispositions (the read tier is hosted by the library panel, the note-only window and the book; none of Read/Blocks/the history host composes `ReadPostView`).
+- **The USE gate / counts:** PENDING.
+- **No revert in flight.**
+
 ### BATCH F — THE RECOVERY FAMILY (brief; DRAFTED 2026-09-01 ~05:55 — spawn after C closes; her "special attention")
 
 **Token discipline (binding, from the orchestrator handoff §2c):** build ONE contact sheet of your capture directory with `python3 notes/plans/act10-correction-screens/tools/sheet.py <dir>` and name it in your record; the orchestrator reads the sheet first and opens full captures only where a tile earns it.
