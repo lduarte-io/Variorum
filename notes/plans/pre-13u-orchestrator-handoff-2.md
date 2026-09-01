@@ -132,3 +132,17 @@ resiliency protocol (+ the mobile session's addendum, 713c80e).
 
 The (a)/(b) Fragments-enrollment ruling (she carries the brief) · her mockup/taste bundle · the
 morning bundle's ratify list · anything new she reports (live finding source; record verbatim).
+
+**ADDED 2026-08-31 (her question: "is the 13u-1 round plan up to date? that's what's going to be
+running next"):** closeout step 7 — **refresh `notes/plans/phase-13u-feel-and-polish.md` for the
+13u1 kickoff**: a dated "pre-13u inheritance" addendum (what this round changed on and around the
+editor seam 13u1 rewrites — `TypedArrows` on the MarkdownActs-adjacent seam (wave 1's
+not-entangled verdict), the eight-mode row + the Blocks workbench's bulk delete/merge over
+13e's `BlockSelection` (item 5's compound semantics must compose with it), `CommitBar axis:
+.vertical` / `EditorView barPlacement: .side` (the book gutter host), `FlowParagraph` in
+`Core/Views`, the bottom bar's `usesTwoRows` at 840pt, the CalmGrammar vocabulary, the quick-
+entry bar untouched (item 9's ruling still open), the `planVisibleTakeEdit` O(N²) row still
+13u1's, final baselines, the resiliency protocol binding) + the 13u2 inheritance already written
+(P39a/b, the restyle continuation, the settings Form-chrome fork, the Trash card restyle, the
+paged Book/book Read chrome, M12) + a REFRESHED kickoff message naming the split execution and
+the ONE shared sitting's new inputs.
