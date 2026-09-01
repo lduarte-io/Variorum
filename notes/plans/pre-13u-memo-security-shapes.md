@@ -1,6 +1,8 @@
 # DESIGN MEMO — the security shapes, the recipes, and the one law
 ### (the founding sitting's nine-wave security-clarity thread, 2026-08-30 → 31)
 
+> **⚠️ SUPERSEDED IN DESIGN — 2026-09-01.** The author's encryption-clarity sitting after the round collapsed this memo's three-axis model (at-open modes · escrow dial · sync custody) into TWO POSTURES, Standard and Castle: `notes/plans/pre-13x-postures-design.md` is now the binding design (its §18 carries what of this memo survives and why the rest does not). The Act 10 surfaces built from this memo are rewritten by that phase. Kept verbatim as the record of how the model was reached — her sign-off here ("prettyyyy clear") preceded her next-day verdict that the average user could not hold it.
+
 **Provenance:** authored 2026-08-31 by the pre-13u round's FOUNDING orchestrator at the author's
 instruction (*"go ahead and make a design memo where all of this information and several verbatim
 exchanges from both of us are saved - this was a high value session and I do want it saved"*). This

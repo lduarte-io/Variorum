@@ -1155,4 +1155,6 @@ may append; the handoff lists any open findings it leaves.)*
     daily-identity memo builds at 13y); the Trash-deposit/put-back shape (#85(e)); the sync
     reconciliation probes — NOT run this round at your word (entry 17i, the memo's top).
 
-*(Next free number: **#87**.)*
+#87 — **The pre-13x POSTURES design's open rulings (2026-09-01; the design itself is yours — its §1 records your fifteen rulings from the sitting).** `notes/plans/pre-13x-postures-design.md` §16, verbatim: (a) the CF-11 "forget keys on this device" door folded into sign-out? (b) at Standard → Castle, re-key the retained on-disk backups (14 dailies + 4 weeklies) or record that pre-switch backups open with the passphrase you had then? (c) a keyless byte-copy backup at lock time when due? (d) a plain "Pause sync" convenience switch — offer or not (NOT a posture; deletion damage is already bounded)? (e) Castle's idle re-lock default (off; N minutes)? (f) the signup password minimum (the account password now confirms Standard's doors); (g) the Standard consent sentence and Castle's floor sentence, exact words. Pointers: #86(c)'s typed confirmation lands with the rebuilt Replace Keys (one home); #86(d)'s Fragments road runs AFTER this phase, as you said.
+
+*(Next free number: **#88**.)*

@@ -976,7 +976,7 @@ WINS — it was written with the real code open and with instructions to refute.
 
 ## 17i — Sync across devices: the reconciliation probes, the scenario sweep, the harness-realism fix
 
-**Status: open, unstarted** (opened 2026-08-31 at the author's word; brief =
+**Status: open, unstarted — PULLED INTO `pre-13x` (author, 2026-09-01: *"I would like to pull 17i into this in between phase"*; it runs as that phase's LAST batch, on the settled key path — `notes/plans/pre-13x-postures-design.md` §15.6)** (opened 2026-08-31 at the author's word; brief =
 `notes/plans/pre-13u-memo-sync-disagreements.md`).
 
 **What it is.** Not a bug list — a HUNT: the memo's four probes run first (each answer recorded in
