@@ -40,11 +40,11 @@ import VariorumCore
 struct BookAnchorTests {
     private func place(
         focused: String? = nil, spread: [String] = [], paged: String? = nil,
-        standing: String? = nil
+        index: String? = nil, standing: String? = nil
     ) -> BookAnchor.Place {
         BookAnchor.Place(
             focusedPostID: focused, spreadPostIDs: spread,
-            pagedPostID: paged, standingPostID: standing)
+            pagedPostID: paged, indexPostID: index, standingPostID: standing)
     }
 
     /// THE TABLE. One rule per surface, each reading a fact that surface
@@ -88,6 +88,15 @@ struct BookAnchorTests {
         #expect(BookAnchor.currentPost(
             mode: .read, readForm: .flow, place: place(focused: "a")) == nil,
                 "and with nothing carried yet it honestly has no place at all")
+
+        // Index (wave 2c): the column's reported selection is the place.
+        #expect(BookAnchor.currentPost(
+            mode: .index, readForm: .flow,
+            place: place(focused: "a", spread: ["b"], paged: "c",
+                         index: "e", standing: "d")) == "e")
+        #expect(BookAnchor.currentPost(
+            mode: .index, readForm: .flow, place: place(focused: "a", standing: "d")) == "d",
+                "nothing selected yet ⇒ the standing anchor, not another mode's focus")
     }
 }
 
@@ -155,6 +164,18 @@ struct BookCarryTests {
         model.carryPlace(from: .read, readForm: .flow)      // read → book
         #expect(model.pendingReveal == "p2",
                 "the flow tracks no scroll position, so the arrival is the place")
+    }
+
+    /// Leaving INDEX carries the column's reported selection (wave 2c —
+    /// the `notePagedAnchor` pattern, same reason: the selection is the
+    /// index's own fact, traveled one step to be readable here).
+    @Test func leavingTheIndexCarriesItsSelection() {
+        let model = model(entries: ["p0", "p1", "p2"])
+        model.focus("p0")
+        model.noteIndexAnchor("p2")
+        model.carryPlace(from: .index, readForm: .flow)
+        #expect(model.pendingReveal == "p2")
+        #expect(model.standingAnchorPostID == "p2")
     }
 
     /// A book with no place at all carries NOTHING — and does not wipe the

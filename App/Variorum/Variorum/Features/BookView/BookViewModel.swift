@@ -437,6 +437,9 @@ final class BookViewModel {
     /// Read ▸ Pages' address, REPORTED by the paginated reader (it owns its
     /// own model, so its place has to travel one step to be readable here).
     private(set) var pagedAnchorPostID: String?
+    /// Index's selected note, REPORTED by the index column (wave 2c — the
+    /// same pattern, same reason).
+    private(set) var indexAnchorPostID: String?
     /// Where the book was last carried to — the fallback for a surface that
     /// tracks no position (Read ▸ Scroll; see `BookAnchor`'s header).
     private(set) var standingAnchorPostID: String?
@@ -450,12 +453,18 @@ final class BookViewModel {
         pagedAnchorPostID = postID
     }
 
+    /// The index column's report (not a decision — the selection is its).
+    func noteIndexAnchor(_ postID: String?) {
+        indexAnchorPostID = postID
+    }
+
     /// The facts `BookAnchor` reads, assembled from my own state.
     var anchorPlace: BookAnchor.Place {
         BookAnchor.Place(
             focusedPostID: focusedPostID,
             spreadPostIDs: spreadEntries.map(\.postID),
             pagedPostID: pagedAnchorPostID,
+            indexPostID: indexAnchorPostID,
             standingPostID: standingAnchorPostID)
     }
 

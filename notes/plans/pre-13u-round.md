@@ -2794,4 +2794,30 @@ liveness through `PaneTextAuthority` only); P1 measured on the Sherlock corpus.
   blockTOC **1.9 ms**; the asserted ceiling is a 1 s sanity bound two orders
   above measured (the latency-pin lesson: a pin that reds under load cannot
   do its job), the real numbers stated here not asserted.
+- (continuation, commit A) — **ITEM 18 ATTEMPTED — the INDEX book view
+  ships.** Verdict grounds: the pieces were all proven grammars in-tree
+  (grouped-entries brain · FlowParagraph · the Index column grammar · the
+  W21 reveal/carry machinery), the continuation session was fresh, and the
+  field guide book (her screenshot's exact subject) is walkable for visual
+  proof. Shipped: `.index` joins `ViewMode` (compile-error-found switches);
+  `BookAnchor` gains the `indexPostID` fact + arm (the `pagedAnchor`
+  pattern — reported, never decided); `BookIndexView` — a 300 pt column
+  (chapters foldable, filter over titles/dates, chapter-filing ⋯ menus,
+  count footer) beside a scroll-synced rendered pane (read-cheap
+  FlowParagraph prose in the VOICE, lazy per note — P3/P1; ZERO live
+  editor, editing lands in Outline via the ascent's own `requestReveal`
+  door, double-click or the row menu). **The reconciliation, answered as
+  designed:** in Index the minimal navigator steps aside (the index IS the
+  outline pane grown up) and the shared `bookMasthead` rides into the index
+  column, so no chrome is lost; the minimal pane stays beside every other
+  mode (her sharpening honored). **The mode control became quiet word-tabs
+  (Outline · Index · Book · Read)** — the segmented picker retired (W8-2:
+  it is exactly the dated chrome grammar, and its ideal width had already
+  forced `.controlSize(.small)` at three labels; a fourth re-runs the
+  b6dae25 overflow). Index sits SECOND, mirroring the note row's Write ·
+  Takes · Index · Read cohesion. Tutorial's one tabs sentence updated
+  (content → the standing re-seed obligation). Pins: BookIndexColumnTests
+  (5 — incl. the ONE deliberate fold/filter divergence from the note
+  Index: a matching CHAPTER title keeps all its notes, documented at the
+  brain), BookAnchor/BookCarry `.index` arms; adjacent book suites green.
 

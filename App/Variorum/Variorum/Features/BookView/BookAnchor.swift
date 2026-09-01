@@ -37,6 +37,9 @@ nonisolated enum BookAnchor {
         var spreadPostIDs: [String] = []
         /// Read ▸ Pages' address, reported by the paginated reader.
         var pagedPostID: String?
+        /// Index's selected note, reported by the index column (wave 2c —
+        /// the same one-step travel as the paginated reader's address).
+        var indexPostID: String?
         /// Where the book was last carried TO — the answer for a surface
         /// that tracks no position of its own.
         var standingPostID: String?
@@ -72,6 +75,10 @@ nonisolated enum BookAnchor {
                 // The one surface that knows nothing (see the header).
                 return place.standingPostID
             }
+        case .index:
+            // The index's place is its selected note (reported, like the
+            // paginated reader's address).
+            return place.indexPostID ?? place.standingPostID
         }
     }
 }

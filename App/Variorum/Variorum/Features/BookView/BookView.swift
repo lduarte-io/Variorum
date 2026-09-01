@@ -94,9 +94,29 @@ struct BookView: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            navigator
-            Divider().overlay(tokens.line)
+            // Wave 2c (item 18, W8-5): in INDEX the minimal navigator steps
+            // aside — the index column IS the outline pane grown up, and it
+            // carries the same masthead so no chrome is lost. The minimal
+            // pane stays beside every other mode (her sharpening: "i do
+            // like the more minimal outline to go along with the current
+            // modes").
+            if structure.mode != .index {
+                navigator
+                Divider().overlay(tokens.line)
+            }
             switch structure.mode {
+            case .index:
+                BookIndexView(
+                    session: session, model: model, structure: structure,
+                    masthead: { bookMasthead },
+                    onEditInOutline: { postID in
+                        // Editing lives where editing lives: land the note
+                        // focused in Outline through the ascent's own door
+                        // (the reveal is consumed by Outline's landing).
+                        model.focus(postID)
+                        model.requestReveal(postID)
+                        structure.mode = .outline
+                    })
             case .outline:
                 outlineBody
             case .spread:
@@ -224,80 +244,94 @@ struct BookView: View {
 
     // MARK: - The navigator (R43: chapters · outline · settings)
 
+    /// The book's masthead chrome — title, the mode tabs, settings, the
+    /// order control, the finished chip. ONE definition for the navigator
+    /// AND the index column's header (wave 2c), so the two can never
+    /// disagree about what the book's header says.
+    ///
+    /// The mode control is quiet voiced WORD-TABS now, not the segmented
+    /// picker (wave 2c, the W8-2 restyle mandate — the segmented control is
+    /// exactly the dated chrome grammar the mockups retire, and its ideal
+    /// width already forced `.controlSize(.small)` at three labels; a
+    /// fourth would have re-run the b6dae25 overflow the old comment here
+    /// documented). Words truncate never — four short labels measure under
+    /// the 190 pt column in both voices.
+    @ViewBuilder private var bookMasthead: some View {
+        Text(tokens.path([readingName ?? model.readingName ?? "book"]))
+            .font(tokens.heading)
+            .foregroundStyle(tokens.accent)
+            .lineLimit(1)
+        HStack(spacing: 8) {
+            // Outline · Index · Book · Read — Index sits beside the
+            // writing surface, mirroring the note row's Write · Takes ·
+            // Index · Read shape (her cohesion mandate, W8-2).
+            modeTab("Outline", .outline)
+            modeTab("Index", .index)
+            modeTab("Book", .spread)
+            modeTab("Read", .read)
+            Spacer(minLength: 2)
+            Button {
+                settingsShown = true
+            } label: {
+                Image(systemName: "gearshape")
+            }
+            .buttonStyle(.borderless)
+            .help("Book settings — finish, length, rename")
+        }
+        // 13c 2C: READ's pair of faces (her direction — "the
+        // Apple-Books/Kindle PAIR of modes"). It sits UNDER the mode
+        // tabs rather than in a bottom bar, because one of the two
+        // faces (the flow) is a vertical scroll and carries no bottom
+        // chrome at all — the A6 argument. Surface-local, so
+        // recorded rather than declared (Stage 4 lesson 10).
+        if structure.mode == .read {
+            Picker("", selection: Binding(
+                get: { structure.readForm },
+                set: { switchReadForm(to: $0) })) {
+                Text(tokens.chromeLabel("Scroll")).tag(BookStructureModel.ReadForm.flow)
+                Text(tokens.chromeLabel("Pages")).tag(BookStructureModel.ReadForm.pages)
+            }
+            .pickerStyle(.segmented)
+            .controlSize(.small)
+            .help("Read the book as one continuous scroll, or as real pages "
+                + "with the text flowing across them")
+        }
+        orderControl
+        if let reading = structure.reading, reading.locked {
+            Text(tokens.chromeLabel("✓ finished"))
+                .font(tokens.small)
+                .foregroundStyle(tokens.accent)
+        }
+    }
+
+    /// One quiet word-tab (the note masthead's grammar): the active mode
+    /// wears ink weight + the accent; every other is a muted word.
+    private func modeTab(_ label: String, _ mode: BookStructureModel.ViewMode) -> some View {
+        Button {
+            switchMode(to: mode)
+        } label: {
+            Text(tokens.chromeLabel(label))
+                .font(structure.mode == mode
+                    ? tokens.small.weight(.semibold) : tokens.small)
+                .foregroundStyle(structure.mode == mode ? tokens.accent : tokens.muted)
+        }
+        .buttonStyle(.plain)
+        .help(modeHelp(mode))
+    }
+
+    private func modeHelp(_ mode: BookStructureModel.ViewMode) -> String {
+        switch mode {
+        case .outline: "The book's writing surface — every note in one column"
+        case .index: "The book's index — chapters and notes beside the whole text"
+        case .spread: "The two-up spread — each page a whole note"
+        case .read: "Read the book as pure text"
+        }
+    }
+
     private var navigator: some View {
         ScrollViewReader { proxy in
             VStack(alignment: .leading, spacing: 6) {
-                Text(tokens.path([readingName ?? model.readingName ?? "book"]))
-                    .font(tokens.heading)
-                    .foregroundStyle(tokens.accent)
-                    .lineLimit(1)
-                HStack(spacing: 8) {
-                    // 13c 2A (her 2026-07-23/24 direction): the three modes
-                    // read OUTLINE · BOOK · READ — outline is where the book
-                    // is written (A39), book is the post-per-page spread,
-                    // read is the reading flow.
-                    Picker("", selection: Binding(
-                        get: { structure.mode },
-                        set: { switchMode(to: $0) })) {
-                        Text(tokens.chromeLabel("Outline")).tag(BookStructureModel.ViewMode.outline)
-                        Text(tokens.chromeLabel("Book")).tag(BookStructureModel.ViewMode.spread)
-                        Text(tokens.chromeLabel("Read")).tag(BookStructureModel.ViewMode.read)
-                    }
-                    .pickerStyle(.segmented)
-                    // 13c 2D — found by this batch's visual loop, and
-                    // PRE-EXISTING (verified by capturing with this batch's
-                    // own control removed: identical). MEASURED with
-                    // temporary borders on the padded content box vs the
-                    // 190 pt frame box: the content's ideal width was
-                    // ~209 pt. `.frame(width:)` does not clip — it CENTERS
-                    // an over-wide child — so the whole navigator drew
-                    // ~9.5 pt left of its column and EVERY row in it (the
-                    // post list, the chapter doors, the smart-book notice)
-                    // lost its first character off the window edge. The
-                    // floor was the segmented picker's own minimum, which
-                    // grew when 2A renamed the modes `Outline · Book · Read`;
-                    // `.controlSize(.small)` brings the row under the column
-                    // without touching the column's intended width, and the
-                    // content box then sits inside the frame box exactly.
-                    // The b6dae25 chrome-sizing class, which P-8 carries as
-                    // standing law: chrome must never force its container
-                    // wider. (`.frame(maxWidth: .infinity)` was tried first
-                    // and did nothing — an HStack still reports its child's
-                    // ideal width upward.) If the smaller picker ever reads
-                    // wrong, the LOOK is the Design & UI review row's; a
-                    // column that clips its own text is not a taste question.
-                    .controlSize(.small)
-                    Button {
-                        settingsShown = true
-                    } label: {
-                        Image(systemName: "gearshape")
-                    }
-                    .buttonStyle(.borderless)
-                    .help("Book settings — finish, length, rename")
-                }
-                // 13c 2C: READ's pair of faces (her direction — "the
-                // Apple-Books/Kindle PAIR of modes"). It sits UNDER the mode
-                // picker rather than in a bottom bar, because one of the two
-                // faces (the flow) is a vertical scroll and carries no bottom
-                // chrome at all — the A6 argument. Surface-local, so
-                // recorded rather than declared (Stage 4 lesson 10).
-                if structure.mode == .read {
-                    Picker("", selection: Binding(
-                        get: { structure.readForm },
-                        set: { switchReadForm(to: $0) })) {
-                        Text(tokens.chromeLabel("Scroll")).tag(BookStructureModel.ReadForm.flow)
-                        Text(tokens.chromeLabel("Pages")).tag(BookStructureModel.ReadForm.pages)
-                    }
-                    .pickerStyle(.segmented)
-                    .help("Read the book as one continuous scroll, or as real pages "
-                        + "with the text flowing across them")
-                }
-                orderControl
-                if let reading = structure.reading, reading.locked {
-                    Text(tokens.chromeLabel("✓ finished"))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
-                }
+                bookMasthead
                 ScrollView {
                     VStack(alignment: .leading, spacing: 2) {
                         ForEach(structure.grouped(entries: model.entries), id: \.section?.id) { group in

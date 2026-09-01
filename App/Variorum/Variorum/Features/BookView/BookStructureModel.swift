@@ -42,7 +42,14 @@ final class BookStructureModel {
     /// batch record — compile silently against the wrong surface. Renaming
     /// BOTH cases out of the collision makes every stale reference a
     /// compile error instead.
-    enum ViewMode { case outline, spread, read }
+    /// - `.index` — the index-like book view (pre-13u Act 10 wave 2c, item
+    ///   18 / W8-5 — her ruling: "there should ALSO be an index like view").
+    ///   The note Index mode's sibling at book scale: a standing column of
+    ///   chapters and notes beside a scroll-synced rendered pane. While it
+    ///   is active the minimal navigator steps aside (her reconciliation
+    ///   question, answered: the index IS the outline pane grown up; the
+    ///   minimal pane stays beside the other modes — two grains, deliberate).
+    enum ViewMode { case outline, spread, read, index }
 
     /// READ's two faces (13c Batch 2C — her 2026-07-23/24 direction: Read is
     /// "the Apple-Books/Kindle PAIR of modes").

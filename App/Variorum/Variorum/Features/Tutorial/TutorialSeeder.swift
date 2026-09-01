@@ -518,8 +518,9 @@ enum TutorialSeeder {
             + "link instead.",
 
             "Now the one place the app shows you something other than what is "
-            + "stored. Open this book in READ mode (the Outline \u{B7} Book \u{B7} "
-            + "Read row above) and look at this lesson again: the markers are gone, "
+            + "stored. Open this book in READ mode (the Outline \u{B7} Index "
+            + "\u{B7} Book \u{B7} Read row above) and look at this lesson again: "
+            + "the markers are gone, "
             + "the headings are sizes, the list has bullets, the boxes are boxes, "
             + "and a link is just the words \u{2014} a plain click opens it, because "
             + "Read has no cursor to place. Read is for reading; everywhere you can "
