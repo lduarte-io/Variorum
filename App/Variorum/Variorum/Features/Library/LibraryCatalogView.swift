@@ -693,19 +693,11 @@ struct LibraryCatalogView: View {
             if let books = grouped[.book], !books.isEmpty {
                 Section(tokens.chromeLabel("Books")) {
                     ForEach(books, id: \.id) { hit in
-                        HStack {
-                            Image(systemName: "book").foregroundStyle(tokens.muted)
-                            // The TITLE opens instantly, as today (her click
-                            // model — the body selects, the words open).
-                            Text(hit.title)
-                                .font(tokens.body)
-                                .onTapGesture { openHit(hit) }
-                            if let detail = hit.detail {
-                                Text(tokens.chromeLabel(detail))
-                                    .font(tokens.small)
-                                    .foregroundStyle(tokens.muted)
-                            }
-                        }
+                        // The TITLE opens instantly, as today (her click
+                        // model — the body selects, the words open).
+                        CatalogBookLine(
+                            tokens: tokens, title: hit.title, detail: hit.detail,
+                            onTitleTap: { openHit(hit) })
                         .contentShape(Rectangle())
                         // Double-click anywhere opens (before the single so
                         // the two disambiguate); a body click selects and
@@ -850,23 +842,16 @@ struct LibraryCatalogView: View {
     }
 
     private func postRow(_ hit: Queries.CatalogHit) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-            // The TITLE opens instantly, as today — her click model keeps
-            // this road exactly.
-            Text(hit.title)
-                .font(tokens.body)
-                .foregroundStyle(tokens.ink)
-                .onTapGesture { openHit(hit) }
-            if let date = hit.detail {
-                Text(date).font(tokens.small).foregroundStyle(tokens.muted)
-            }
-            // The tags column (R46), wearing the note's OWN chip grammar
-            // since 13e E8 — colour, leaf, ✕ off, ＋ types one on. The
-            // sheet stays reachable from the row's context menu ("Tags…"),
-            // which is where the taxonomy-wide toggle list belongs.
-            tagsRow(hit)
-            Spacer()
-        }
+        // The TITLE opens instantly, as today — her click model keeps this
+        // road exactly. The tags column (R46) wears the note's OWN chip
+        // grammar since 13e E8 — colour, leaf, ✕ off, ＋ types one on; the
+        // sheet stays reachable from the row's context menu ("Tags…").
+        CatalogNoteLine(
+            tokens: tokens, title: hit.title, date: hit.detail,
+            tags: model.postTags[hit.id] ?? [], allTags: tags.tags,
+            onTitleTap: { openHit(hit) },
+            onApply: { path in Task { await model.applyTypedPath(path, to: [hit.id]) } },
+            onRemove: { tag in Task { await model.removeTag(tag.id, from: [hit.id]) } })
         .contentShape(Rectangle())
         // Act 10 item 10 — her click model, on P-0's reachable routing: a
         // DOUBLE-CLICK anywhere opens (it weirdly didn't); a single body
@@ -1142,5 +1127,82 @@ enum TagChips {
             result[row["chip_post_id"] as String, default: []].append(try Tag(row: row))
         }
         return result
+    }
+}
+
+
+// MARK: - The two List-mode row LINES (the Act 10 correction round, rows 10 + 11)
+
+/// **A book row's line** — icon · title · the kind label — on ONE text
+/// baseline. Her report (image 5): *"the word book is misaligned"*. The
+/// mechanism: the row's `HStack` had no alignment, so the smaller kind label
+/// centered vertically against the body-size title and its baseline sat
+/// below the title's. Extracted as its own view so a pin can mount the line
+/// alone and read its baselines.
+struct CatalogBookLine: View {
+    let tokens: VoiceTokens
+    let title: String
+    let detail: String?
+    let onTitleTap: () -> Void
+
+    static let probeSpace = "catalog-book-line"
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            // A symbol in a `Text` carries the title's own baseline (a bare
+            // `Image` would hand the stack its bottom edge).
+            Text(Image(systemName: "book"))
+                .font(tokens.body)
+                .foregroundStyle(tokens.muted)
+            Text(title)
+                .font(tokens.body)
+                .baselineProbe("book.title", in: Self.probeSpace)
+                .onTapGesture(perform: onTitleTap)
+            if let detail {
+                Text(tokens.chromeLabel(detail))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .baselineProbe("book.kind", in: Self.probeSpace)
+            }
+        }
+        .coordinateSpace(name: Self.probeSpace)
+    }
+}
+
+/// **A note row's line** — title · date · the tag cards and their ＋ — on
+/// ONE text baseline. Her report (image 4): *"the tags are also misaligned
+/// from the text"*. The row already aligned on `.firstTextBaseline`; the
+/// chips did not carry one (see `NoteTagChips.chip`), so the stack aligned
+/// the title to a symbol's bottom edge instead. Extracted for the same pin.
+struct CatalogNoteLine: View {
+    let tokens: VoiceTokens
+    let title: String
+    let date: String?
+    let tags: [Tag]
+    let allTags: [Tag]
+    let onTitleTap: () -> Void
+    let onApply: (String) -> Void
+    let onRemove: (Tag) -> Void
+
+    static let probeSpace = "catalog-note-line"
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(title)
+                .font(tokens.body)
+                .foregroundStyle(tokens.ink)
+                .baselineProbe("note.title", in: Self.probeSpace)
+                .onTapGesture(perform: onTitleTap)
+            if let date {
+                Text(date).font(tokens.small).foregroundStyle(tokens.muted)
+                    .baselineProbe("note.date", in: Self.probeSpace)
+            }
+            NoteTagsRow(
+                tokens: tokens, tags: tags, allTags: allTags,
+                onApply: onApply, onRemove: onRemove,
+                baselineProbePrefix: "note", baselineProbeSpace: Self.probeSpace)
+            Spacer()
+        }
+        .coordinateSpace(name: Self.probeSpace)
     }
 }

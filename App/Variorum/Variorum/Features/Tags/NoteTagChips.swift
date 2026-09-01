@@ -116,13 +116,26 @@ struct NoteTagChips: View {
     /// masthead cluster passes `false` since the correction round (row 15):
     /// its ONE door is the ＃ beside the cards, which opens the inline field.
     var showsAddDoor = true
+    /// The correction round (rows 10/11): a DEBUG baseline probe prefix —
+    /// the first chip's text reports under `<prefix>.chip`, the ＋ under
+    /// `<prefix>.plus`, in the row's named space. nil (the default) probes
+    /// nothing.
+    var baselineProbePrefix: String? = nil
+    var baselineProbeSpace: String = ""
 
     @State private var adding = false
     @Environment(\.colorScheme) private var scheme
 
     var body: some View {
-        HStack(spacing: 4) {
-            ForEach(tags, id: \.id) { chip($0) }
+        // Rows 10/11 (the correction round): the row aligns on the FIRST
+        // TEXT BASELINE all the way down — this stack, each chip's stack —
+        // so the baseline the listing row aligns to IS the chip text's. The
+        // old `.center` stacks handed up a symbol image's bottom edge as the
+        // "baseline", and the chip text landed ~2 pt under the title's.
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
+            ForEach(Array(tags.enumerated()), id: \.element.id) { index, tag in
+                chip(tag, probe: index == 0 ? baselineProbePrefix.map { "\($0).chip" } : nil)
+            }
             if showsAddDoor { addDoor }
         }
         .popover(isPresented: $adding, arrowEdge: .bottom) {
@@ -150,18 +163,22 @@ struct NoteTagChips: View {
     /// width, which is what "fits the tag" is. Long tags are still safe:
     /// `Text` compresses under a tight proposal and `truncationMode(.tail)`
     /// is still what it does when it must.
-    private func chip(_ tag: Tag) -> some View {
+    private func chip(_ tag: Tag, probe: String? = nil) -> some View {
         let tint = TagChipColor.color(forPath: tag.path, dark: scheme == .dark)
-        return HStack(spacing: 3) {
+        return HStack(alignment: .firstTextBaseline, spacing: 3) {
             Text(tokens.chromeLabel(TagChipLabel.leaf(of: tag.path)))
                 .font(tokens.small)
                 .foregroundStyle(tint)
                 .lineLimit(1)
                 .truncationMode(.tail)
+                .baselineProbe(probe, in: baselineProbeSpace)
             Button {
                 onRemove(tag)
             } label: {
-                Image(systemName: "xmark")
+                // A `Text` around the symbol, not a bare `Image`: a Text
+                // carries a real text baseline, so the ✕ sits on the chip's
+                // line and never becomes the stack's "baseline" itself.
+                Text(Image(systemName: "xmark"))
                     .font(.system(size: 7, weight: .bold))
                     .foregroundStyle(tokens.faint)
                     .contentShape(Rectangle())
@@ -185,6 +202,7 @@ struct NoteTagChips: View {
             Text(addLabel)
                 .font(tokens.small)
                 .foregroundStyle(tokens.faint)
+                .baselineProbe(baselineProbePrefix.map { "\($0).plus" }, in: baselineProbeSpace)
                 .padding(.horizontal, 4)
                 .padding(.vertical, 1)
                 .contentShape(Rectangle())
@@ -223,6 +241,9 @@ struct NoteTagsRow: View {
     /// True on rows that must stay quiet until pointed at (the note-card
     /// listing); false where the row always shows (the List mode's column).
     var revealsOnHover = false
+    /// The DEBUG baseline probe, passed through to the chips (rows 10/11).
+    var baselineProbePrefix: String? = nil
+    var baselineProbeSpace: String = ""
 
     /// The chip row's height, RESERVED even when nothing is drawn, so a card
     /// does not jump the moment the pointer arrives (the N40 jumping class:
@@ -242,7 +263,9 @@ struct NoteTagsRow: View {
             } else {
                 NoteTagChips(
                     tokens: tokens, tags: tags, allTags: allTags,
-                    onApply: onApply, onRemove: onRemove)
+                    onApply: onApply, onRemove: onRemove,
+                    baselineProbePrefix: baselineProbePrefix,
+                    baselineProbeSpace: baselineProbeSpace)
             }
         }
         .onHover { hovering = $0 }

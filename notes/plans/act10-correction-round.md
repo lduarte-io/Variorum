@@ -794,9 +794,20 @@ last. Then stop.
   fold's own pins were green on the old tree and are gone). **Tutorial text now behind the door:** the seeder's
   "the workspace" lesson still says "＃ folds the note's tag cards away and back (⌘⇧I too…)" — the closeout's
   copy change + re-seed (obligation 8); untouched here by the brief's rule.
-- **Rows 10 + 11 (library rows):** NOT-STARTED — the book row's HStack is `.center`-aligned (row 11's
-  mechanism, seen in the 2× crop: "book" sits below the title's baseline); the note row's chips measure
-  ~2 pt below the title baseline in the crop — the oracle pin decides the mechanism.
+- **Rows 10 + 11 (library rows):** DONE (this commit; hash next) — TWO mechanisms, both baseline: **(11)**
+  the book row's HStack had NO alignment (default `.center`), so the small "book" label centered against the
+  body-size title and its baseline sat below the title's; **(10)** the note row DID align on
+  `.firstTextBaseline`, but the chips handed the stack a SYMBOL IMAGE's bottom edge as their baseline — each
+  chip was a `.center` HStack of a Text and a bare `Image(xmark)`, and the first-baseline guide of that stack
+  resolved to the image — so the chip text landed ~2 pt under the title's line, and the ＋ rode with it. Fix:
+  the two List-mode row LINES extracted as views (`CatalogBookLine` · `CatalogNoteLine`, in
+  `LibraryCatalogView.swift`) aligned on `.firstTextBaseline` end to end; the book icon and the chip's ✕ are
+  `Text(Image(systemName:))` (a Text carries a real baseline); `NoteTagChips`' stacks align on the baseline
+  too (every renderer of the chips inherits it — the note cards, the Pool, the masthead). Pins
+  `LibraryRowAlignmentTests` ×2 — the lines mounted in a window, the DEBUG `BaselineProbe` oracle
+  (`Core/Views/BaselineProbe.swift`: `alignmentGuide` offset + the top in the line's named space) read for the
+  title vs the first chip's text vs the ＋, and the title vs the kind label, within 1 pt, in BOTH voices —
+  GREEN. Red-on-old PENDING (the behavioral revert runs next).
 - **Row 36 (the sweep table):** NOT-STARTED.
 - **The USE gate · the full Mac suite · the contact sheet:** NOT-STARTED.
 - **No revert in flight** (the row-2/3 revert ran and was restored — evidence above; tree clean against
