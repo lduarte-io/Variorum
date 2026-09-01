@@ -39,6 +39,44 @@ you do NOT drive the dev window while an implementer might (clicks collide).
   bundle `io.lduarte.Variorum.debug`; both books are seeded there (the field guide via Help ▸ Restore
   Tutorial…, Sherlock by default).
 
+
+## 2b. PROOF THAT THE CURRENT PIECE FINISHED (for a successor checking in ~50 minutes after 07:30 on 2026-09-01)
+
+The current piece is **the row-53 fix + the founding orchestrator's walk of it + batch B's CLOSE**. Run these,
+in order; each is a fact in the repo, never a claim:
+
+1. `git log --oneline -15` — look for (a) a commit whose subject starts `Correction round, batch B — row 53`
+   (the fix; `7569af3` exists already at 07:29 — the fix's FIRST commit), (b) a later commit from the same
+   session with counts/captures for row 53, and (c) an ORCHESTRATOR commit whose subject contains
+   `batch B CLOSED` (the founding session's walk of the six steps + the record marked closed).
+2. `grep -n "ROW 53 FIX" notes/plans/act10-correction-round.md` — the fix subsection exists; read its LIVE
+   STATUS lines: `FIXED` + a pin name + a red-on-old count means the fix is done; `PENDING` means mid-flight.
+3. `grep -n "BATCH B RECORD — CLOSED\|B CLOSED" notes/plans/act10-correction-round.md` — present ⇒ the
+   orchestrator walked it and closed it; absent ⇒ not yet.
+4. `tail -3 notes/plans/act10-correction-orchestrator-handoff.md` — the batch-close update lines; the last
+   line names the next batch and whether it was spawned.
+5. `git log -1 --format=%cd` — if the LAST commit is older than ~40 minutes and step 3 is absent, assume the
+   founding orchestrator (or the fix session) died: **adopt** — if the fix commit exists, walk row 53's six
+   steps yourself (the recipe in B's brief; `vd.sh`), close B's record, spawn A; if only `7569af3` exists
+   and nothing newer, re-spawn the row-53 fix session from the repo (the brief is row 53 + B's record).
+
+If step 3 is present and the last update line says "A spawned", the piece is done and batch A is the live
+one — read A's LIVE STATUS the same way.
+
+## 2c. TOKEN DISCIPLINE FOR LOOKING AT THE APP (adopted 2026-09-01 07:30 at her question)
+
+Images are the context cost (a 2× full-window capture ≈ 2–3k tokens; the founding session's batch-B walk
+read ~25 of them). From now on: **(1) contact sheet first** — `python3 act10-correction-screens/tools/
+sheet.py <capture-dir>` builds ONE `contact-sheet.png` (3 tiles per row, 460 px wide, file names under
+each); ONE Read of it replaces reading every capture; open a single full capture only when a tile shows
+something worth it. Every implementer brief from now on asks the implementer to build the sheet for its
+capture dir and name it in the record. **(2) Text before pixels** — facts the accessibility tree can answer
+(the rail's "block 1/215", the selected navigator row, a window's count/size, a button's presence) are read
+with `osascript` static-text queries (~100 tokens), not screenshots. **(3) Spot-check, not re-walk** — the
+orchestrator reads the implementer's sheet + 2–4 full captures at the riskiest rows + one live probe by hand
+of the row most likely to be wrong (row 53's class: the multi-expanded landing). **(4) Crop when a detail
+matters** — `sips -c <h> <w> --cropOffset <y> <x> in.png --out crop.png` before reading.
+
 ## 3. Machinery lessons (proven this run)
 
 - **Clicks:** System Events' `click at` never reached the SwiftUI window; the compiled CoreGraphics
@@ -84,3 +122,4 @@ eight rulings · row 52 (underscore emphasis vocabulary) · any scalpel revert (
 ## Batch-close updates (append one line per close; newest last)
 
 - ~06:50 — cutover document written; B walked; row 53 fix session running; A next.
+- ~07:30 — the fix session's first commit `7569af3` landed (row 53 converging landing); §2b proof checklist + §2c token discipline added at her question; she is starting a successor session to check in ~50 min.
