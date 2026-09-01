@@ -159,23 +159,23 @@ struct PostDetailView: View {
     /// engages only while a fan is open), so the masthead is a constant
     /// and the duplicate UserDefaults-read width brain dies with it.
     private let mastheadMeasure: CGFloat = 680
-    /// The trailing cluster's measured width — the title layer pads itself
-    /// by it on BOTH sides, so the centered title never runs under the icons
-    /// (the correction round, rows 4/19).
-    @State private var mastheadClusterWidth: CGFloat = 0
-    /// The masthead's own width — the title's padding floor reads it.
+    /// The icon row's measured width — the TITLE row's symmetric inset, so
+    /// the centered title never runs under the icons (rows 4/19, row 55).
+    @State private var mastheadIconRowWidth: CGFloat = 0
+    /// The tag cards' row's measured width — the PATH row's symmetric inset.
+    @State private var mastheadChipRowWidth: CGFloat = 0
+    /// The masthead's own width — the insets' floor reads it.
     @State private var mastheadWidth: CGFloat = 0
-    /// The title block never shrinks below this: with many tag cards the
-    /// cluster grows, and a title squeezed to "thr…" is worse than a chip
-    /// row that reaches a long path line's end (the walk's capture 11).
-    private let mastheadTitleFloor: CGFloat = 240
+    /// A centered line never shrinks below this, whatever shares its row.
+    private let mastheadLineFloor: CGFloat = 240
 
-    /// The title layer's symmetric inset: the cluster's width (so the title
-    /// never runs under the icons) — capped so the title keeps its floor.
-    private var mastheadTitleInset: CGFloat {
-        let wanted = mastheadClusterWidth + 12
+    /// A centered line's symmetric inset for the trailing thing on its row:
+    /// that thing's width (so the line never runs under it), capped so the
+    /// line keeps its floor.
+    private func mastheadInset(for trailingWidth: CGFloat) -> CGFloat {
+        let wanted = trailingWidth + 12
         guard mastheadWidth > 0 else { return wanted }
-        return min(wanted, max(0, (mastheadWidth - mastheadTitleFloor) / 2))
+        return min(wanted, max(0, (mastheadWidth - mastheadLineFloor) / 2))
     }
     /// The masthead's own coordinate space (the DEBUG oracle reads the
     /// title's midX in it against the masthead's midX).
@@ -196,27 +196,22 @@ struct PostDetailView: View {
             // masthead and centers, padded on BOTH sides by the cluster's
             // measured width so it can never run under the icons; the
             // cluster trails on its own layer. One layout for all modes.
-            ZStack(alignment: .top) {
-                VStack(alignment: .center, spacing: 1) {
+            // TWO ROWS, each a ZStack: the TITLE row (the title centered on
+            // the full width, inset on both sides by the width of what
+            // shares its line — the icon row) and the PATH row (the `~/book`
+            // chip centered, inset by the tag cards' row). Row 55's lesson:
+            // ONE inset for the whole block let the cards' width (three chips,
+            // or an open field) squeeze the title; what can collide with the
+            // title is only ever the icon row, so only that insets it.
+            VStack(spacing: 2) {
+                ZStack(alignment: .top) {
                     // Sitting 9 (R67): the post's NAME, prominent — click
                     // to rename right here.
                     PostTitleLabel(session: session, postID: postID, tokens: tokens)
-                    // Phase 13 (B3, R35): the membership indicator — now
-                    // the es path line ("~/orbit") + the add/diverge door.
-                    MembershipChip(
-                        session: session, postID: postID,
-                        recentBookIDs: recentBookIDs)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, mastheadTitleInset)
-                HStack(alignment: .top, spacing: 0) {
-                    Spacer(minLength: 0)
-                    // Act 10 item 5 — the masthead's right EDGE, one coherent
-                    // column: the inspector icons on top, the note's tag cards
-                    // under them, across from the membership chip (her ruling's
-                    // letter — "under the scraps / outside reference / tray
-                    // button … across from what books an item is in").
-                    VStack(alignment: .trailing, spacing: 3) {
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, mastheadInset(for: mastheadIconRowWidth))
+                    HStack(alignment: .top, spacing: 0) {
+                        Spacer(minLength: 0)
                         HStack(alignment: .firstTextBaseline, spacing: 2) {
                             if showsModeSwitcher {
                                 // The same vocabulary the sidebar rail renders, in
@@ -247,12 +242,36 @@ struct PostDetailView: View {
                                 .help(door.help)
                             }
                         }
+                        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: {
+                            mastheadIconRowWidth = $0
+                        }
+                    }
+                }
+                ZStack(alignment: .top) {
+                    // Phase 13 (B3, R35): the membership indicator — the es
+                    // path line ("~/orbit") + the add/diverge door.
+                    MembershipChip(
+                        session: session, postID: postID,
+                        recentBookIDs: recentBookIDs)
+                        // Row 55: while the tag field is out it overlays the
+                        // path line's end — the line yields quietly for that
+                        // moment and returns when the field closes, so a tag
+                        // going on never reads as a collision.
+                        .opacity(tagFieldOpen ? 0 : 1)
+                        .animation(.easeInOut(duration: 0.18), value: tagFieldOpen)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, mastheadInset(for: mastheadChipRowWidth))
+                    HStack(alignment: .top, spacing: 0) {
+                        Spacer(minLength: 0)
+                        // Act 10 item 5 — the note's tag cards on the
+                        // masthead's right edge, under the icons, across from
+                        // the membership chip (her ruling's letter).
                         MastheadTagCluster(
                             session: session, postID: postID, tokens: tokens,
                             fieldOpen: $tagFieldOpen)
-                    }
-                    .onGeometryChange(for: CGFloat.self) { $0.size.width } action: {
-                        mastheadClusterWidth = $0
+                            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: {
+                                mastheadChipRowWidth = $0
+                            }
                     }
                 }
             }
