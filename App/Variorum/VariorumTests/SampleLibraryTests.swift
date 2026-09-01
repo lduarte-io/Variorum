@@ -231,6 +231,64 @@ struct SampleLibraryTests {
         }
     }
 
+    /// **The midpoint review's m6, pinned (PROVISIONAL — her nod pending).**
+    /// The seed is default-on into EXISTING stores, so stamping at seed time
+    /// put thirteen Conan Doyle notes at the TOP of the Library and the
+    /// Timeline, above her own recent writing, on her real store at the next
+    /// launch. The stamps were wrong, not the sort: seeded stories carry the
+    /// work's publication date, so they sort where they belong and read
+    /// honestly on a timeline.
+    ///
+    /// *Red on the old code:* the seeded thirteen lead `.lastTouched` desc
+    /// and her note is 14th; the timeline's oldest page is 2026, not 1892.
+    /// Verified by reverting the fix.
+    @Test("Seeded stories are stamped 1892, so they never displace her own writing")
+    func theLibraryIsBackDatedToItsPublication() async throws {
+        try await withSampleWorld { session, db in
+            // Her own writing, minted on the ordinary clock.
+            let hers = try await session.runner.run { ops in
+                try ops.importPost(title: "Mine", text: "Today's thought.").container.id
+            }
+
+            let mark = Mark()
+            let outcome = await SampleLibrarySeeder.seedIfNeeded(
+                session: session, loadMark: mark.load, saveMark: mark.save)
+            guard case .seeded = outcome else {
+                Issue.record("expected a seed, got \(outcome)")
+                return
+            }
+
+            let stamp = SampleLibrarySeeder.publicationStamp
+            try await db.read { db in
+                // HER note leads every recency listing; the thirteen trail.
+                let recent = try Queries.library(
+                    db, sort: .lastTouched, direction: .desc, limit: 50)
+                #expect(recent.count == 14)
+                #expect(recent.first?.postID == hers,
+                        "her own note must lead the Library's recency sort")
+                #expect(recent.dropFirst().allSatisfy { $0.stamp == stamp },
+                        "every seeded story sits below it, at the publication date")
+
+                // The same for the by-revision stamp (the churn crossing the
+                // first minted block always lands) and for `created_at`.
+                let revised = try Queries.library(
+                    db, sort: .lastMajorRevision, direction: .desc, limit: 50)
+                #expect(revised.first?.postID == hers)
+                let created = try Queries.library(
+                    db, sort: .createdAt, direction: .desc, limit: 50)
+                #expect(created.first?.postID == hers)
+
+                // …and the Timeline really places them in 1892 — the oldest
+                // page is the sample library, stamped to the day.
+                let oldest = try Queries.timelinePage(
+                    db, order: .lastTouched, direction: .asc, limit: 13)
+                #expect(oldest.count == 13)
+                #expect(oldest.allSatisfy { $0.stamp == stamp })
+                #expect(oldest.allSatisfy { $0.createdAt == stamp })
+            }
+        }
+    }
+
     // MARK: - The traps
 
     @Test("TRAP 2: seeding leaves no structural-undo entry — the reader's first ⌥⌘Z is hers")

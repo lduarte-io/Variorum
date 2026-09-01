@@ -113,6 +113,7 @@
 //  sits after `AppServices.start()` inside the window's own task.
 //
 
+import Dependencies
 import Foundation
 import GRDB
 import OSLog
@@ -191,6 +192,37 @@ enum SampleLibrarySeeder {
     /// inventing one. (The plan's build-shape line conflated "segments on
     /// entry" with "segments by paragraph"; it now carries a correction.)
     nonisolated static let segmentation: Segmentation = .paragraph
+
+    /// **The library's own clock: 14 October 1892, the day *The Adventures
+    /// of Sherlock Holmes* was published** (the pre-13u midpoint review's
+    /// m6 — PROVISIONAL, the author's nod pending).
+    ///
+    /// The seed is default-on into EXISTING stores, so without this every
+    /// story lands stamped NOW and thirteen Conan Doyle notes sit above her
+    /// own recent writing in the Library and on the Timeline — on her real
+    /// store, at the next launch of the refreshed build. Stamping them with
+    /// the work's publication date sorts them where they belong (the bottom
+    /// of every recency view) and reads honestly on a timeline, which is a
+    /// better answer than a special case in the sort: the sort is right,
+    /// the stamps were wrong.
+    ///
+    /// Legal by the model's own rules: wall-clock timestamps are DISPLAY
+    /// data (SyncSpec §9 — sync's ordering authority is `server_seq`,
+    /// never a clock), and the seed is a local mint of shipped content, so
+    /// nothing downstream reads these stamps as evidence about when
+    /// anything happened on a device.
+    ///
+    /// The alternative, if she prefers it: stamp at seed time and accept
+    /// the displacement. One constant and one `withDependencies` scope
+    /// change back.
+    nonisolated static let publicationStamp = "1892-10-14T00:00:00.000Z"
+    /// Parsed by the store's OWN canonical formatter, so the stamp the rows
+    /// carry is byte-identical to the string above. The fallback can only
+    /// fire if that formatter regresses, and it is deliberately also very
+    /// old — the sort intent survives even then.
+    nonisolated static let publicationDate =
+        DateFormatter.variorumISO8601.date(from: publicationStamp)
+            ?? Date(timeIntervalSince1970: 0)
 
     nonisolated static let attributionText = """
         \u{201C}The Adventures of Sherlock Holmes\u{201D} by Arthur Conan Doyle, first \
@@ -529,6 +561,19 @@ enum SampleLibrarySeeder {
     /// Mints what is missing. ONE runner turn for the book's skeleton, then
     /// ONE PER STORY — so a reader typing during the seed waits at most one
     /// story's writes, never the library's.
+    ///
+    /// **Every turn runs under the library's own clock** (m6): the whole
+    /// seed is scoped by `withDependencies { $0.date = .constant(...) }`,
+    /// which is the operations layer's OWN time seam — `Operations` reads
+    /// `@Dependency(\.date)` and nothing else, so every stamp it writes
+    /// (`created_at`, `updated_at`, `last_touched_at`, and the
+    /// `last_major_revision_at` the first churn crossing lands) carries the
+    /// publication date. No raw row edit, no new operation, no second write
+    /// pass — the seed simply mints in 1892. The scope covers the book, the
+    /// tag and the chapters as well as the notes, deliberately: a library
+    /// whose notes say 1892 and whose book says today would be incoherent,
+    /// and books sort by NAME (`Queries.readings`), so nothing on the shelf
+    /// moves either way.
     @discardableResult
     static func seed(
         session: AppSession, stories: [Story], existing: Existing
@@ -542,31 +587,35 @@ enum SampleLibrarySeeder {
         let present = existing.presentTitles
         let chapters = existing.chapterIDsByName
 
+        let clock = Self.publicationDate
+
         // Turn 1: the book, the tag, and the front matter.
         let skeleton = try await session.runner.run { _ -> (book: String, tag: String) in
-            let quiet = Operations(undoStack: nil)
-            let bookID: String
-            if let known = existing.bookID {
-                bookID = known
-            } else {
-                bookID = try quiet.createReading(
-                    name: bookName, kind: .curated, profile: "book").id
+            try withDependencies { $0.date = .constant(clock) } operation: {
+                let quiet = Operations(undoStack: nil)
+                let bookID: String
+                if let known = existing.bookID {
+                    bookID = known
+                } else {
+                    bookID = try quiet.createReading(
+                        name: bookName, kind: .curated, profile: "book").id
+                }
+                let tagID = try existing.tagID ?? quiet.createTag(name: tagName).id
+                if !present.contains(frontTitle) {
+                    // m5: reuse a chapter a cancelled run already left behind,
+                    // never mint a second one wearing the same name.
+                    let sectionID = try chapters[frontChapter]
+                        ?? quiet.createSection(in: bookID, name: frontChapter).id
+                    let note = try quiet.importPost(
+                        title: frontTitle, text: frontText, undoLabel: label,
+                        segmentation: Self.segmentation)
+                    _ = try quiet.addPostToReading(note.container.id, to: bookID)
+                    try quiet.assignPostToSection(
+                        note.container.id, in: bookID, section: sectionID)
+                    _ = try quiet.applyTag(tagID, toPost: note.container.id)
+                }
+                return (bookID, tagID)
             }
-            let tagID = try existing.tagID ?? quiet.createTag(name: tagName).id
-            if !present.contains(frontTitle) {
-                // m5: reuse a chapter a cancelled run already left behind,
-                // never mint a second one wearing the same name.
-                let sectionID = try chapters[frontChapter]
-                    ?? quiet.createSection(in: bookID, name: frontChapter).id
-                let note = try quiet.importPost(
-                    title: frontTitle, text: frontText, undoLabel: label,
-                    segmentation: Self.segmentation)
-                _ = try quiet.addPostToReading(note.container.id, to: bookID)
-                try quiet.assignPostToSection(
-                    note.container.id, in: bookID, section: sectionID)
-                _ = try quiet.applyTag(tagID, toPost: note.container.id)
-            }
-            return (bookID, tagID)
         }
 
         // One turn per story.
@@ -576,18 +625,20 @@ enum SampleLibrarySeeder {
             let bookID = skeleton.book
             let tagID = skeleton.tag
             try await session.runner.run { _ in
-                let quiet = Operations(undoStack: nil)
-                // m5, again: a run cancelled between `createSection` and
-                // `importPost` left this story's chapter standing empty.
-                let sectionID = try chapters[story.title]
-                    ?? quiet.createSection(in: bookID, name: story.title).id
-                let note = try quiet.importPost(
-                    title: story.title, text: story.text, undoLabel: label,
-                    segmentation: Self.segmentation)
-                _ = try quiet.addPostToReading(note.container.id, to: bookID)
-                try quiet.assignPostToSection(
-                    note.container.id, in: bookID, section: sectionID)
-                _ = try quiet.applyTag(tagID, toPost: note.container.id)
+                try withDependencies { $0.date = .constant(clock) } operation: {
+                    let quiet = Operations(undoStack: nil)
+                    // m5, again: a run cancelled between `createSection` and
+                    // `importPost` left this story's chapter standing empty.
+                    let sectionID = try chapters[story.title]
+                        ?? quiet.createSection(in: bookID, name: story.title).id
+                    let note = try quiet.importPost(
+                        title: story.title, text: story.text, undoLabel: label,
+                        segmentation: Self.segmentation)
+                    _ = try quiet.addPostToReading(note.container.id, to: bookID)
+                    try quiet.assignPostToSection(
+                        note.container.id, in: bookID, section: sectionID)
+                    _ = try quiet.applyTag(tagID, toPost: note.container.id)
+                }
             }
             minted += 1
         }
