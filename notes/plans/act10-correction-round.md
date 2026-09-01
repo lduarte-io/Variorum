@@ -299,6 +299,7 @@ present), and the 13j recovery doctrine (the Trash is the recovery door).
 | **86** | (F's walk (d)/(e) — VERIFY FIRST) (d) ⌘K "block history" from Blocks spoke Write's caret sentence instead of opening the pane (likely healed by C's `CurrentBlockMemory` — `focusedBlock` now lives in Blocks); (e) a click on the masthead TITLE did not open the rename field (`seed-03`; the Library row menu's Rename… is the door) | ⌘K palette · the masthead title | Verify each on the dev build first. (d): if it still speaks the sentence, route the palette door to the current block (fix + pin); if healed, RECORD healed-by-C. (e): `git show 0e6a09e^:…PostDetailView.swift` — if the pre-Act-10 title was a rename door, RESTORE it (a regression; pin); if it never was, RECORD as not a defect (the row menu is the door) | G | OPEN |
 | **87** | (the orchestrator's Pool walk at D's close, both voices — `orchestrator-d/04`, `08`) the Pool is a WALL OF BARE DATES: a titleless note's card shows only its day and a lone `+`, no first words — while the note picker (D's `01-crop`) already shows a two-line preview under every match. Ten of the dev store's eleven Pool notes read identically | Pool cards (`Features/Pool/PoolPostsView.swift`) | The picker's preview road exists; a first-words line under a titleless card's date is the same derived, never-stored shape 13u2 item 4 RULED for note cards ("a little snippet of what the post starts with"). **HERS: build the Pool card's preview now in G (reusing the picker's preview road — one brain, no new rule), or leave the whole card family to 13u2 item 4's one-brain design** | **G** (RULED R-cor-11(2)) | OPEN |
 | **88** | (the orchestrator's Canvas walk, both voices — `05`, `09-crop`; Canvas is PRE-Act-10 — the restyle never reached it) Canvas on the 215-block story opens MID-BANK: cards 97–162 visible, the top row and both edge columns CLIPPED, `fit all` a click away; the toolbar mixes grammars — a "Tag filter" LABEL beside a system popup reading "tag filter: all", then calm chips (`fit all` · `Bank · 215` · `order by clicking…`) | Canvas (`Features/Canvas/`) | Not this round's surface by the ledger's letter (Act 10 did not touch Canvas) but her bar applies to what she sees. Two bounded candidates if she wants them: (a) a first arrival with no remembered layout opens FIT-ALL (or at the bank's top-left), never mid-bank; (b) the toolbar to the calm-chip grammar (one chip per control, the redundant label dropped). **HERS: G, or record for 13u2** | **G** (RULED R-cor-11(3) — both (a) and (b)) | OPEN |
+| **89** | (the orchestrator's row-74 probe, `orchestrator-e/r74-crop-side-by-side`) the tray's "leaving — on the 30-day clock" section MEANING LINE truncates mid-word at the inspector's default width: "…and originals riding a family's countdown. put back keeps a row; del…" — a sentence nobody can finish reading | This Note's Tray (`TrayPanel.swift`, the `CalmSectionHeader` meaning line) — and every other section explainer in the recovery family (Block History's, Archived's, the Trash's) | F's row 63 rule ("a sentence's own point fell off the end") applied to the explainers: the meaning line WRAPS to its full length (it is three short lines at 420 pt), never `lineLimit`-truncates; P-8's `lineLimit` rule is for chrome labels, not prose explainers. Sweep the family's explainers; pin: no explainer's rendered text ends in an ellipsis at the inspector's minimum width | G | OPEN |
 
 ## 4. The batches (one surface each — C-1). **ORDER AMENDED after the triage walk: B FIRST** — row 44 is a BLOCKER (the book hangs) and the riskiest fix (TK2 geometry inside lazy layout), so it gets the longest soak before the ladder; A (the chrome) follows immediately; then C, F, D, E.
 
@@ -444,7 +445,7 @@ not applied).
 
 ## 7d. THE LADDER — spawn text (so the review runs by copy; the skill's rules)
 
-After E closes and before the orchestrator's full walk: spawn a fresh `general-purpose` Agent (cold reviewer,
+After G closes (E's successor at R-cor-10) and before the orchestrator's full walk: spawn a fresh `general-purpose` Agent (cold reviewer,
 ZERO framing of the work) with exactly this: *"You are a cold reviewer. Read `notes/REVIEW_PROMPT.md` and
 follow it VERBATIM against the diff `git diff 962e7b8..HEAD -- App/ Sources/ Tests/` (the Act 10 correction
 round's combined diff; `962e7b8` is the last commit before batch B's first code commit — verify with
@@ -1623,8 +1624,8 @@ your record; then stop.
 | F's (a) | FIXED — the receipt/error is a LAID-OUT message row above the bottom divider (`messageRow`; the receipt muted, the error alarm; `lineLimit(3)` + `fixedSize` per P-8), never an overlay on the quick-entry bar (walked: "Note archived — it's kept in Archived, with no countdown." whole, above the bar) | `.theReceiptIsLaidOutAboveTheBarNeverOverIt` | 1 issue (`message.maxY → 672.0` against the bar's `579.5`) |
 | 36 (on this surface) | DONE — the old panel's facts CARD (words · blocks · with takes · comments · entry date · last edited · created) and its books and tags cards → ONE facts line (words · blocks · edited; the state words only when true); A's table's `LibraryInfoPanel.swift:189 words KEEP` is honored as the line's first fact; the tags stay on the row, the books on the note's masthead | — | — |
 | 54 (from B/C) | RECORDED — the panel does NOT show the read tier's provisional-width jump: the preview composes the SwiftUI `Text` tier (`FlowParagraph` rows in a `LazyVStack`), never `ReadPostView`; 13u2 item 1 keeps its other hosts (the note-only window, the book) | — | — |
-| **73** (new — the walk; NOT this surface — the book's) | RECORDED for the orchestrator (owner: **G** as a bounded fix, or B's road's next touch) — **an ascent INTO A NOT-YET-MOUNTED book lands at the TOP, never at the note.** Mechanism (traced at `BookView.swift:1284–1293`): `landOutlineReveal` runs at Outline's `onAppear` (and on `pendingReveal`'s change) and calls `model.consumeReveal()` BEFORE its `model.entries.contains(postID)` guard — at mount the book's entries have not arrived, so the request is consumed and DROPPED; nothing re-lands when the entries come. Reproduced TWICE in use: the panel's outline row (`15-terminal-outline-row-opens-book-at-note` — the Boscombe card mid-page, the page at the top) AND the standing 13f W20 chip ascent through the membership popover's link (`26-terminal-chip-popover-link-ascent` — identical), so the gap is the road's, not this door's; a navigator click on an OPEN book lands (B's pins cover exactly that case). Fix shape: never consume a reveal whose note is not yet in `entries` — leave it parked and land it on the entries' arrival (`.onChange(of: model.entries)` → `landOutlineReveal`), a few lines in `BookView.swift`; pin: a mounted book whose reveal request arrives before its entries lands the note at the top (RED on the current tree). | — | — |
-| **74** (new — seen at the code; NOT this surface) | RECORDED (owner: **G**, or 13u2 item 1's family) — the NOTE-side inspectors (`PostDetailView.swift:350` — references · scraps · Block History · the tray · Versions) and the Canvas tray (`CanvasView.swift:947`) are the same SwiftUI `.inspector` class row 34 retired here: their divider is the system's, drawn in a KEY window only, so tabbed out the boundary between a note and its tray/history pane may vanish exactly as the Library's did. VERIFY in use first (a window-id capture inactive, as this batch did) — a pane that paints its own wash may hold without it; the Library's column (an `HStack` + our line + a width rule) is the precedent if it does not. | — | — |
+| **73** (new — the walk; NOT this surface — the book's) | **RE-OWNED to G as a FIX by the orchestrator (18:30 MDT)** — RECORDED by E (owner: **G** as a bounded fix, or B's road's next touch) — **an ascent INTO A NOT-YET-MOUNTED book lands at the TOP, never at the note.** Mechanism (traced at `BookView.swift:1284–1293`): `landOutlineReveal` runs at Outline's `onAppear` (and on `pendingReveal`'s change) and calls `model.consumeReveal()` BEFORE its `model.entries.contains(postID)` guard — at mount the book's entries have not arrived, so the request is consumed and DROPPED; nothing re-lands when the entries come. Reproduced TWICE in use: the panel's outline row (`15-terminal-outline-row-opens-book-at-note` — the Boscombe card mid-page, the page at the top) AND the standing 13f W20 chip ascent through the membership popover's link (`26-terminal-chip-popover-link-ascent` — identical), so the gap is the road's, not this door's; a navigator click on an OPEN book lands (B's pins cover exactly that case). Fix shape: never consume a reveal whose note is not yet in `entries` — leave it parked and land it on the entries' arrival (`.onChange(of: model.entries)` → `landOutlineReveal`), a few lines in `BookView.swift`; pin: a mounted book whose reveal request arrives before its entries lands the note at the top (RED on the current tree). | — | — |
+| **74** (new — seen at the code; NOT this surface) | **CONFIRMED IN USE by the orchestrator's probe (18:25 MDT — window-id capture active vs inactive with the tray open: the divider present, then absent; `orchestrator-e/r74-*`) → G as a FIX** — RECORDED by E (owner: **G**, or 13u2 item 1's family) — the NOTE-side inspectors (`PostDetailView.swift:350` — references · scraps · Block History · the tray · Versions) and the Canvas tray (`CanvasView.swift:947`) are the same SwiftUI `.inspector` class row 34 retired here: their divider is the system's, drawn in a KEY window only, so tabbed out the boundary between a note and its tray/history pane may vanish exactly as the Library's did. VERIFY in use first (a window-id capture inactive, as this batch did) — a pane that paints its own wash may hold without it; the Library's column (an `HStack` + our line + a width rule) is the precedent if it does not. | — | — |
 
 #### The text tier, and row 54 — stated (the addendum's question)
 
@@ -1665,6 +1666,31 @@ Everything is committed and pushed through `4e5a39e` (+ the record commit `89b87
 
 ---
 
+#### BATCH E RECORD — CLOSED by the orchestrator (2026-09-01 18:30 MDT; captures `orchestrator-e/`)
+
+Verified against git first: eight commits `65db0e0`…`ef1a972`, tree clean, pushed; the code diff is exactly
+`LibraryInfoPanel.swift` (rebuilt) + `LibraryCatalogView.swift` + three lines of `RootView.swift` + the new pin
+file (C-1 held; core and `Shared/` untouched). Read the record, then two full captures at the riskiest rows
+(`batch-e/11` — the note panel: title · `161 words · 5 blocks · edited 2026-09-01` · the full-width Open · the
+rendered text in the voice's type, the picked row wearing the wash + tinted border; `14` — the Sherlock row's
+body click → the book's outline in the navigator's grammar, "About this book" indented under its
+differently-named chapter). **E's rows 1/33/34/56/F-(a) are FIXED in use; 24's panel half walked by E's burst.**
+**The live probe took E's row-74 suspicion and CONFIRMED it:** Boscombe open, the masthead's tray icon → the tray
+inspector; the window captured BY ID active and with Finder frontmost — at y = 1400 px the ACTIVE image has one
+edge at x = 2614 (the divider) and the INACTIVE image has NONE (`r74-tray-active/inactive`,
+`r74-crop-side-by-side`: a faint line on the left half, nothing on the right). The note-side inspectors ARE the
+key-window-divider class the Library just retired → **row 74 RE-OWNED to G as a FIX** (the Library's column-
+of-our-own precedent applied at the ONE `.inspector` host in `PostDetailView` that serves references · scraps ·
+Block History · the tray · Versions, plus the Canvas tray). **Row 73 → G as a fix** (E's traced mechanism: the
+reveal consumed before the entries arrive; a bounded `BookView` change + pin). **New row 89** from the same crop:
+the tray's "leaving" section meaning line TRUNCATES mid-word ("…put back keeps a row; del…") at the inspector's
+default width — a sentence nobody can finish; the meaning line wraps, never truncates (F's row 63 rule, applied to
+the section explainers). Counts at close: **Mac 2049/361 green** (D's 2037 + 12 / 359 + 2), core 1524/165 and
+`Shared/` untouched, spine green in-run. The tray was closed again at the end; the voice is Terminal.
+**Batch G spawned next.**
+
+---
+
 ### BATCH G — RESIDUALS AND WIDTH (brief; ADDED 2026-09-01 ~16:35 MDT at her ruling R-cor-10(2) — spawn after E closes; the ladder follows G. The row list is COMPLETED at D's close with the orchestrator's Snippets/Pool/Canvas walk finds — PENDING until then)
 
 **Token discipline (binding, from the orchestrator handoff §2c):** build ONE contact sheet of your capture directory with `python3 notes/plans/act10-correction-screens/tools/sheet.py <dir>` and name it in your record.
@@ -1689,11 +1715,16 @@ height is the target) · 80: `Features/Takes/PostDetailView.swift` (the two-row 
 `Registry/CapabilityRegistry.swift` (the `blockHistory` palette door) and `PostTitleLabel` in `PostDetailView.swift`
 (+ `git show 0e6a09e^:App/Variorum/Variorum/Features/Takes/PostDetailView.swift` for the pre-Act-10 title).
 
-**Rows: 59 · 72 · 80 · 81 · 82 · 83 · 84 · 85 · 86 — each stated in the ledger with its mechanism read and its pin —
+**Rows: 59 · 72 · 73 · 74 · 80 · 81 · 82 · 83 · 84 · 85 · 86 · 89 — each stated in the ledger with its mechanism read and its pin —
 plus 87 (the Pool card's first-words preview via the picker's road) and 88 (Canvas: fit-all on a first arrival
 with no remembered layout; the toolbar to the calm-chip grammar) — both RULED IN at R-cor-11. The E-close walk
 may add more.** Order: 86 first (verify-first, cheapest), then 59, 80, 81 (the width family — walk them at ~950 pt
-TOGETHER), 72, 83, 82, 85, 87, 88, 84 last (the one `Shared/` change). Files for 87: `Features/Pool/PoolPostsView.swift`
+TOGETHER), 74 + 89 (the inspector family — walk the tray active AND inactive by window id, `tools/winid`), 73, 72,
+83, 82, 85, 87, 88, 84 last (the one `Shared/` change). Files for 73: `Features/BookView/BookView.swift:1284–1293`
+(`landOutlineReveal` consumes a reveal before `entries` arrive — E's trace) with `BookOutlineLandingTests`; for 74:
+`Features/Takes/PostDetailView.swift:350` (the one `.inspector` host) + `Features/Canvas/CanvasView.swift:947`, on
+batch E's precedent (`LibraryCatalogView`'s column + `panelDivider` + a width rule; `LibraryPanelTests`' inactive-
+state pin is the shape); for 89: `Features/Tray/TrayPanel.swift` + `Shared/BlockHistoryFace.swift`'s explainers. Files for 87: `Features/Pool/PoolPostsView.swift`
 + the picker's preview road in `Core/Views/NotePicker.swift` (find where its two-line preview comes from — reuse THAT
 query/brain, never a second rule); for 88: `Features/Canvas/` (the arrival's viewport when no `canvas_layout` view
 state is remembered; the toolbar row) with the existing canvas pins (`CanvasDragTrackingTests` is load-flaky — a
