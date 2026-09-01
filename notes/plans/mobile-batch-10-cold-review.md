@@ -874,5 +874,109 @@ assertion follows the same property.
 **Suite (targeted):** `✔ Test run with 14 tests in 1 suite passed after
 8.562 seconds.` — exit 0.
 
-**RED-ON-OLD: PENDING** (the revert runs after this commit, per the
-Session Resiliency Protocol's commit-before-revert rule).
+**RED-ON-OLD — production revert `R-M2`, applied after the fix was
+committed** (the shipped shape restored exactly: the door slot deleted and
+the header rendering `model.doorRefusal ?? model.lastError`):
+
+```
+✘ Test aRefusedBookDoorSpeaksBesideTheDoorSheTapped() recorded an issue at MobileNavigationTests.swift:494:17: Expectation failed: (voiceFrame.minY → 89.0) >= (doorFrame.minY → 566.6666666666666)
+✘ Test aRefusedBookDoorSpeaksBesideTheDoorSheTapped() failed after 1.160 seconds with 1 issue.
+✘ Test run with 14 tests in 1 suite failed after 8.449 seconds with 1 issue.
+```
+
+**477 pt above the finger** — the finding's own mechanism, measured on a
+mounted twelve-note book rather than argued. Restored with
+`git checkout --` (the file was committed first); `git status` clean, `git
+diff` empty.
+
+---
+
+## Item 1 · MAJOR 1 — the band's release SETTLES · **FIXED** · animation itself DECLARED unpinnable
+
+**What changed.** `MobileShellView.settle` — one `Animation`
+(`.interactiveSpring(response: 0.32, dampingFraction: 0.86)`, the
+reviewer's own shape) — is applied in exactly two places, which together
+are every road the band's geometry can change:
+
+- **`selectPage`** wraps `tab = target` in `withAnimation(Self.settle)`.
+  It is the SINGLE road to a page change (the batch's own doctrine), so a
+  tap and a swipe now arrive identically — the reviewer's noted bonus,
+  taken deliberately rather than inherited.
+- **the drag's reset transaction** (see MINOR 1 below): `@GestureState`'s
+  `resetTransaction: Transaction(animation: MobileShellView.settle)`, so
+  the SNAP-BACK — the commoner outcome, since `landingDistance` is 28 % of
+  the screen — glides back on the same curve rather than cutting.
+
+The live drag is deliberately left un-animated: `updating` writes the
+clamped translation raw, so the band still tracks the finger 1:1. An
+animated live phase is the 13e drag-jitter lesson from the other side.
+
+**Why the two halves compose rather than fight.** The rendered offset is
+`f(tab) + drag`. Both terms change on release, both animate with the same
+spring from rest, and both start in the same turn — so the sum
+interpolates as one settle. Stated because it is the one thing a reader
+would reasonably worry about after MINOR 1's `@GestureState` move.
+
+**PIN — declared honestly, per the brief's own instruction.** The
+presence of a SwiftUI animation is not observable through this harness:
+`accessibilityActivate()` is UIKit's activation dispatch, there is no
+in-process road to a `DragGesture` recognizer, and a transaction's
+animation is not exposed to a test. **So no new pin claims it**, and the
+record says so rather than dressing a constant comparison as a guard (an
+`#expect(settle == .interactiveSpring(…))` would restate the declaration
+and prove nothing).
+
+**What IS pinned, and was already green — the state-level contract the
+brief names:** where a release LANDS is
+`aDragLandsOnlyWhenItCrossesOrIsFlicked` (short of the distance → home;
+across it → the next page; a flick lands without travelling; a
+contradicted projection lands nothing), with `theBandsEndsAreWallsNotRubber`
+and `aVerticalScrollNeverEngagesTheBand` beside it; and the mounted
+`theTabBarCarriesThreeDoorsAndEachOneMovesTheBand` now drives the
+ANIMATED `selectPage` on the real shell and still observes the selection
+move. The fix changes no landing, so there is no red to quote here — and
+that is the honest statement rather than a manufactured one.
+
+**The feel rides the DEVICE QUEUE**, exactly as the swipe itself already
+did (the batch record's own words). It is one gesture on her phone.
+
+**Files:** `App/Variorum/VariorumMobile/Features/Shell/MobileShellView.swift`.
+
+---
+
+## Item 3 · MINOR 1 — a cancelled gesture can no longer strand the band · **FIXED**
+
+`bandDrag` is now `@GestureState`, so SwiftUI resets it however the
+gesture ends — cancellation included. The failure the finding names (a
+system edge gesture takes over mid-pan; `onEnded` never fires; the shell
+sits permanently part-way between two pages showing a sliver of each)
+**cannot occur** rather than being cleaned up afterwards.
+
+**The latch stays `@State`, deliberately, and this is the one judgement
+call in the item.** `onEnded` must read the decision THIS drag took —
+that is what makes a scroll that curves unable to page — and
+`@GestureState` is documented as reset when the gesture ends, with no
+guarantee about ordering against `onEnded`. Reading it there would have
+been an untestable bet on undocumented ordering, on the seat's last unit
+before a device build. So the gesture is now three clauses instead of
+two: `onChanged` takes the latch and nothing else, `updating` carries the
+drag, `onEnded` reads the latch and clears it in a `defer` on every road
+out (including the declined one, exactly as before).
+
+**What a stranded LATCH can still cost, stated rather than hidden:** a
+cancelled gesture can leave `bandEngaged` set. Nothing renders from it,
+so nothing is visibly stranded — the harmful half is gone by
+construction. A stale `false` costs at most one swipe (the next drag
+declines and `onEnded`'s `defer` clears it); a stale `true` lets the next
+drag page from its first movement, which still has to cross
+`landingDistance` to land anything. Both self-clear at the next release.
+
+**PIN — declared, same reason as MAJOR 1:** a cancelled `DragGesture`
+cannot be synthesized in process (the batch record's own harness
+statement), and gesture-state lifetime is SwiftUI's, not the app's.
+The arithmetic the latch feeds is pinned as a pure brain and unchanged.
+
+**Files:** `App/Variorum/VariorumMobile/Features/Shell/MobileShellView.swift`.
+
+**Suite (targeted, both items):** `✔ Test run with 14 tests in 1 suite
+passed after 8.549 seconds.` — exit 0.

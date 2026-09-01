@@ -64,6 +64,26 @@ enum MobileTab {
 }
 
 struct MobileShellView: View {
+    /// **THE SETTLE — a page ARRIVES, it does not teleport** (the batch-10
+    /// cold review, MAJOR 1).
+    ///
+    /// The band tracked the finger one point per point and then hard-cut on
+    /// every release: `tab` and the drag were written in the same
+    /// synchronous turn, and neither a `Button` action nor a `DragGesture`
+    /// callback carries an animation, so a page 243 pt away simply *was*
+    /// at zero on the next frame. A drag has a continuous phase, so a
+    /// discontinuous end reads as a bug rather than as a page turn — and
+    /// this is the one feature she said was *"killing me"*.
+    ///
+    /// **ONE settle, both roads.** It lives on `selectPage` (the single
+    /// road to a page change) and on the drag's own reset transaction, so
+    /// a tap and a swipe arrive the same way and neither can drift from
+    /// the other. The live drag itself is deliberately NOT animated — an
+    /// animated `updating` would lag the finger, which is the 13e
+    /// drag-jitter lesson from the other direction.
+    static let settle: Animation = .interactiveSpring(
+        response: 0.32, dampingFraction: 0.86)
+
     let session: AppSession
     let services: AppServices?
     let router: MobileShellRouter
@@ -82,7 +102,22 @@ struct MobileShellView: View {
     /// The live band drag, in points, in the NAMED coordinate space
     /// (`MobileShellBand.coordinateSpace` — the 13e jitter rider). Zero
     /// whenever no page drag is in flight.
-    @State private var bandDrag: CGFloat = 0
+    ///
+    /// **`@GestureState`, not `@State`** (the batch-10 cold review, MINOR 1).
+    /// `onEnded` was the only road back to zero, and a DragGesture that is
+    /// CANCELLED rather than ended — a system edge gesture taking over, a
+    /// call sheet, an interruption mid-pan — does not reliably deliver it.
+    /// A stranded value left the shell parked part-way between two pages
+    /// with a sliver of each showing and the neighbour inert. SwiftUI resets
+    /// gesture state however the gesture ends, cancellation included, so
+    /// the failure cannot occur rather than being cleaned up after.
+    ///
+    /// **And the reset carries THE SETTLE** (`resetTransaction`): a
+    /// snap-back is the commoner outcome of a release — the landing distance
+    /// is 28 % of the screen — and it must glide back exactly as a landing
+    /// glides forward, or the band's most frequent release is its ugliest.
+    @GestureState(resetTransaction: Transaction(animation: MobileShellView.settle))
+    private var bandDrag: CGFloat = 0
     /// **THE DIRECTION LATCH**, decided once per gesture and then not
     /// re-asked: `nil` while undecided, `true` for a page, `false` for a
     /// drag this band has declined (a vertical scroll). Without the latch a
@@ -320,25 +355,30 @@ struct MobileShellView: View {
             minimumDistance: 1,
             coordinateSpace: .named(MobileShellBand.coordinateSpace)
         )
+        // THE LATCH, and only the latch — it is ordinary view state,
+        // because `onEnded` must be able to read the decision this drag
+        // took, and gesture state is gone by then.
         .onChanged { value in
-            if bandEngaged == nil, MobileShellBand.engages(value.translation) {
+            guard bandEngaged == nil else { return }
+            if MobileShellBand.engages(value.translation) {
                 bandEngaged = true
-            } else if bandEngaged == nil,
-                      abs(value.translation.height) > MobileShellBand.engageDistance {
+            } else if abs(value.translation.height) > MobileShellBand.engageDistance {
                 // It committed to the vertical first — this drag is the
                 // scroll view's, and asking again later is what the latch
                 // exists to prevent.
                 bandEngaged = false
             }
+        }
+        // THE LIVE DRAG, as gesture state: SwiftUI owns its lifetime, so a
+        // cancelled gesture cannot strand the band (MINOR 1).
+        .updating($bandDrag) { value, drag, _ in
             guard bandEngaged == true else { return }
-            bandDrag = MobileShellBand.clampedDrag(
+            drag = MobileShellBand.clampedDrag(
                 value.translation.width, current: tab, width: width)
         }
         .onEnded { value in
-            defer {
-                bandEngaged = nil
-                bandDrag = 0
-            }
+            // The latch is this view's to clear; the drag is SwiftUI's.
+            defer { bandEngaged = nil }
             guard bandEngaged == true else { return }
             let landed = MobileShellBand.landing(
                 current: tab,
@@ -364,9 +404,13 @@ struct MobileShellView: View {
     ///   review's MAJOR 2): the token is minted SYNCHRONOUSLY here, in the
     ///   same turn as the `tab` assignment, so the ORDER of requests is
     ///   fixed before any task runs.
+    /// · **The settle** (the cold review's MAJOR 1): the page change is the
+    ///   thing being animated, so the animation belongs where the change
+    ///   happens — which makes "a tap and a swipe are the same act" true of
+    ///   how they LOOK as well as of what they do.
     private func selectPage(_ target: MobileTab) {
         guard tab != target else { return }
-        tab = target
+        withAnimation(Self.settle) { tab = target }
         let editors = router.editors
         let handoff = editors.beginHandoff()
         let quickNote = router.quickNote
