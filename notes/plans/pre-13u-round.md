@@ -3287,6 +3287,20 @@ memo for me and link it to 13y for now."** → `notes/plans/pre-13u-memo-daily-j
 (owner 13y; the 13y row + a KnownIssues row point at it; SyncSpec §7 names it as the successor to
 the F6 interim). The near-empty re-key REFUSE-or-warn question rides the ratify list.
 
+**THE TWELFTH WAVE (2026-08-31, late — her sync-reconciliation questions, verbatim in
+`notes/plans/pre-13u-memo-sync-disagreements.md`'s closing section):** *"…what happens if you had the
+same store, then sync stopped working, and on two different devices you made edits… do we have any
+reconcillation posture? I'm wondering if all of these bugs in the Sync family are a sign that we
+don't have that issue well worked out."* + *"what if the phone deleted it more than 30 days ago?"*
+Answered in-turn (the posture's five rules; the horizon; the one corner not asserted — P1's
+edited-text-under-a-whole-note-tombstone — and the returner's local handling of purged rows, P2).
+**Her rulings, verbatim: "I do think a 'what wins when devices disagree' memo would be good. I'd
+honestly include the instructions for running the probe at the top of the design memo as an
+unsettled issue - and attach it to 17 something… I don't want to run the probe right now, I'd rather
+that we just finish this phase and its ladder out now."** → the memo written, **entry 17i opened**
+(the sync-across-devices hunt + the harness-realism fix — the ladder's own lesson that pins passing
+in the harness's order can fail in production's), NOT run this round.
+
 # LADDER ROUND 1 RECORD (2026-08-31 evening — the final Fable cold review over `64fe30b..HEAD`;
 # REVIEW_PROMPT verbatim + the four Review foci; findings recorded BEFORE any fix session; the
 # architect's dispositions at right. Foci: T1 GUARDED · keystones verbatim (one deviation, F8) ·

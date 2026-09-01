@@ -42,6 +42,13 @@ a conflict card labeled `'conflict'` on the same block; assert no text lost on e
 production round shape + a chunk split at each registry boundary the scenario crosses; any pin
 that passes only in the harness's order is a finding.
 
+**P5 — three traced observations from the pre-13u ladder's round-2 fix session (recorded there,
+not fixed — outside every finding's letter):** (a) the tag-collision repair orphan-stamps
+applications arriving AFTER the duplicate tag dies instead of re-pointing them — the later-arriving
+copy's stories lose the reserved tag on both devices; (b) a double-retirement race when the
+classifying device's push is delayed past the other device's pass and the evidence changes between
+the two; (c) the echo pull costs one extra round per two-copy meeting. Each is a probe here first.
+
 ---
 
 ## The five rules (the posture as canon states it)
