@@ -2723,9 +2723,9 @@ otherwise, verdict recorded either way). Style guide W8-2/W8-3 binds; her
 amended copy doctrine binds; every door survives; P-3 hard (ONE live editor,
 liveness through `PaneTextAuthority` only); P1 measured on the Sherlock corpus.
 
-## LIVE STATUS (updated per commit — the checkpoint protocol)
+## LIVE STATUS — FINAL (wave CLOSED 2026-08-31; the per-commit entries stand as the checkpoint trail)
 
-- (open) — reading done (plan §Act 10 + W8 rulings, the mockup style reference,
+- `37c1467` (base) — reading done (plan §Act 10 + W8 rulings, the mockup style reference,
   manifest rows 07/08/11/14, wave 2b's seam, PostMode/registry/TOC/read-tier/
   Compare/Lenses/BookView surfaces). Build plan: (1) brains + core queries →
   (2) Index mode → (3) Read mode → (4) Blocks workbench → (5) Compare+Lenses →
@@ -2779,7 +2779,7 @@ liveness through `PaneTextAuthority` only); P1 measured on the Sherlock corpus.
   CONTINUATION Fable session adopted them by reading the diffs (this
   record's successor-map purpose, exercised for real). The next entry is the
   continuation's first commit.
-- (continuation) — **THE WALK'S TWO FIXES + THE P1 SANITY PIN, adopted and
+- `a7d2c2b` (continuation) — **THE WALK'S TWO FIXES + THE P1 SANITY PIN, adopted and
   committed.** (a) The workbench row's stacked `.modifiers(...)` TapGestures
   dead-stalled EVERY click (the gesture graph waits on unmet modifier
   requirements instead of failing them) → ONE tap handler reading
@@ -2794,7 +2794,7 @@ liveness through `PaneTextAuthority` only); P1 measured on the Sherlock corpus.
   blockTOC **1.9 ms**; the asserted ceiling is a 1 s sanity bound two orders
   above measured (the latency-pin lesson: a pin that reds under load cannot
   do its job), the real numbers stated here not asserted.
-- (continuation, commit A) — **ITEM 18 ATTEMPTED — the INDEX book view
+- `46828a0` (continuation) — **ITEM 18 ATTEMPTED — the INDEX book view
   ships.** Verdict grounds: the pieces were all proven grammars in-tree
   (grouped-entries brain · FlowParagraph · the Index column grammar · the
   W21 reveal/carry machinery), the continuation session was fresh, and the
@@ -2820,7 +2820,7 @@ liveness through `PaneTextAuthority` only); P1 measured on the Sherlock corpus.
   (5 — incl. the ONE deliberate fold/filter divergence from the note
   Index: a matching CHAPTER title keeps all its notes, documented at the
   brain), BookAnchor/BookCarry `.index` arms; adjacent book suites green.
-- (continuation, commit B) — **ITEM 18 PART 2: the OUTLINE GLOWUP.** The
+- `9b740de` (continuation) — **ITEM 18 PART 2: the OUTLINE GLOWUP.** The
   three W8-5 asks, one grammar: **the DETAILS GUTTER** — a 190 pt rail at
   the prose column's right (the "bizarrely open" right earns its keep).
   Collapsed cards keep title + excerpt; the meta ("N w · ⑂ takes on M
@@ -2840,3 +2840,290 @@ liveness through `PaneTextAuthority` only); P1 measured on the Sherlock corpus.
   BookView). PostCardExcerpt absorbed into the row (one fetch serves card
   + gutter, same realized-row cadence — P1 unchanged).
 
+- **SESSION SEAM #2:** the continuation session died at its limit after `9b740de`.
+  A THIRD Fable session adopted the seam from this record (the item 18 verdict
+  grounds above were its brief) and shipped the next three.
+- `ba13dc8` (third session) — **THE SHERLOCK MODE-LEVEL MEASUREMENTS (the P1
+  statement).** `ModesSherlockMeasureTests` (2) on the REAL seeded library, not a
+  fixture: on the 9,944-word story — blockTOC **3.1 ms** · outline grouping
+  **1.8 ms** · word sum **16.0 ms** · blockWorkbench **22.2 ms** · renderPost
+  **2.8 ms**; on the 105k-word book — book snapshot **4.1 ms** · index flattening
+  **0.4 ms** · FULL realization **36.1 ms** over 2,533 blocks (the price the lazy
+  tiers never pay at once). Ceilings are sanity bounds two orders above measured
+  (the latency-pin lesson); the numbers live HERE, not in the assertions.
+- `bd6c81f` (third session) — **ITEM 18 MOUNT SMOKES.** `BookRedesignMountTests`
+  (2): the INDEX book view mounts chaptered with ZERO live editors (editing lands
+  in Outline — falsifiable by count); the Outline gutter's focused form
+  (`EditorView barPlacement: .side` + `CommitBar axis: .vertical`) mounts exactly
+  ONE live editor on focus and releases it on collapse. P-3's letter, counted.
+- `54a2cb1` (third session) — **THE MASTHEAD TAB-WRAP FIX — the walk earns its
+  keep.** The four word-tabs + gear compressed inside the 190 pt navigator and
+  wrapped mid-word ("outl/ine") — the b6dae25 class. Caught ONLY because the third
+  session walked a FRESH build: the continuation's post-commit captures were of a
+  STALE build, so the overflow had never been seen. Fix: the gear rides the
+  truncating TITLE line, the tabs own their row whole, every label `lineLimit(1)`
+  + `fixedSize` (P-8's letter); the masthead doc's false "four labels measure
+  under 190 pt" claim corrected to tell the story. Verified both ways — the stale
+  capture shows the wrap; shots 81/82 show one clean line in the navigator AND
+  the index column. **Lesson, recorded for the round:** a post-commit capture is
+  evidence only when it comes from a build of the committed tree.
+- **SESSION SEAM #3:** the third session died after `54a2cb1` with the two pin
+  re-anchors below COMPLETE but uncommitted in the tree, and its full-suite run
+  killed unfinished. The CLOSER (a fourth session) adopted both by diff-read.
+- `15c7463` (closer) — **THE TWO RULED PIN RE-ANCHORS, committed.**
+  `MarkdownActsTests.formattingIsAvailableWhereverTextIsEditedAndGreyWhereItIsNot`
+  — the premise "every mode hosts a live editable surface" was falsified BY
+  RULING (W8-1: READ is the projection tier, deliberately read-only); the pin now
+  asserts the formatting family greys in Read and stays `.act` in every EDITING
+  mode (the registry-side twin is `NewModesTests`). `PostDetailModeMemoryTests.
+  theModeVocabularyIsTheEightModeRail` — seven → six (Outline retired, 13b
+  4C/S4-3) → EIGHT, the third re-anchor in this pin's own lineage; the mode-row
+  change IS the ruled behavior change each time. **The full suite then found NO
+  further moved-cheese pin** (the coordinator's widened brief for the closer:
+  every other standing pin held against the eight-mode row, Read-as-projection,
+  the book's word-tabs, the details gutter and the workbench WITHOUT edit; the
+  predecessors' own three re-anchors — `CapabilityRegistryTests`' archive/delete
+  pair and `BlockHistoryPaneTests`' capability union, both widened from
+  `BlockTOCView` to `BlocksWorkbenchView` + `IndexModeView` "so the promise
+  widened rather than moved", and `BookAscentTests`' `.index` arm + carry pin —
+  all carry supersession notes citing W8-1).
+- (close, this commit) — **FULL VERIFICATION + THE RECORD.** Mac **1980/343** ·
+  core **1503/163** · iOS builds. The sections below.
+
+**WAVE STATUS: CLOSED 2026-08-31. Items 15, 16 and 18 BUILT; NOTHING from this
+wave defers to 13u2** (the item 18 whole-or-nothing clause was never invoked).
+
+## Per-item verdicts
+
+- **Item 16 — the three ruled note modes (W8-1): BUILT.** INDEX (direction A —
+  `IndexModeView`: the standing sections column on `Shared/NoteIndexOutline`,
+  filter, fold-all, every TOC door, expand-to-edit through the ONE
+  `PaneTextAuthority`, a scroll-synced rendered pane with ZERO TK2 geometry);
+  READ (direction B — `ReadModeView`: the paper page on `ReadingPageTokens`, the
+  MINIMAL companion outline per her sharpening, Aa scale, hover ordinals, NO live
+  editor — the registry greys the editing families; a paragraph click lands in
+  Index via the scrolled-open door); BLOCKS kept and EARNED (direction C —
+  `BlocksWorkbenchView`: facts per row from core `Queries.blockWorkbench`,
+  filter/show/sort postures, multi-select on 13e's `BlockSelection` with the bulk
+  bar, the context panel with an editable body through the ONE authority and
+  doors to Write/Takes/History/tray; every TOC door survives). The field guide
+  teaches all three. Pins: `NewModesTests` (5) · `BlocksWorkbenchTests` (6) ·
+  `NoteIndexOutlineTests` (4, incl. the DRIFT pin against `MarkdownRendering`) ·
+  core `WorkbenchQueryTests` (3) + `WorkbenchP1SanityTests` (1) ·
+  `ModesSherlockMeasureTests` (2) · the ruled re-anchors named above.
+  Walk-verified: shots 74–79, 83.
+- **Item 15 — the Compare + Lenses flow rebuild: BUILT DIRECTLY (her fifth-wave
+  ruling — no proposals).** Compare's first open is the OFFER page (two generous
+  cards: search-the-library via item 14's picker with version peers ranked +
+  honestly marked · make-outline-note with its consequence line; version peers as
+  direct open-beside rows); the "Choose a note…" dropdown is DEAD everywhere; an
+  open slot wears the dashed choose-a-note door (Lenses' own stub grammar — ONE
+  vocabulary); column headers are NOTE cards (title · relationship · calm acts).
+  Lenses: the footer explainer RETIRED into a ?-disclosure (exact words
+  preserved); headers are LENS cards (name · kind · doors, adopt visibly
+  primary). The two modes tell apart by STRUCTURE. Semantics byte-untouched
+  (13b's rebuild): `CompareComposition`/`CompareViewModel`/Takes suites green
+  UNMODIFIED — that is the proof, and deliberately no new pin (a flow rebuild
+  over pinned semantics pins nothing new). **She judges it in the running app by
+  her own ruling** — see the residuals: the 2c walk set carries no Compare/Lenses
+  capture.
+- **Item 18 — the cohesive Book redesign (W8-5): BUILT, WHOLE, IN-WAVE.** The
+  three asks, each with its grounds:
+  - **(a) The Outline glowup — the whole document at once, details to the SIDE,
+    the open-right earning its keep:** the DETAILS GUTTER (`9b740de`) — a 190 pt
+    rail right of the prose column carries the card meta ("N w · ⑂ takes on M
+    blocks") for collapsed AND expanded notes (never below the opening
+    paragraphs — her words' letter), and the FOCUSED note's whole editor bar
+    rides the same rail (`CommitBar axis: .vertical` — one brain, every door, two
+    arrangements; `EditorView barPlacement: .side`, used by this host only);
+    spacing swept to W8-2's grammar. Her screenshot's "full bottom-bar inside a
+    card below its paragraphs" is gone (shot 81). Pins: `BookRedesignMountTests`
+    (ONE live editor on focus, released on collapse) + `CommitBarLayout` /
+    `BlockHistoryPane` / `NoteVersionsPane` / `LifecycleFaces` / `BookView` suites
+    green.
+  - **(b) An index-like book view sharing the outline brain where honest:**
+    `BookIndexView` (`46828a0`) — a 300 pt column (chapters foldable, filter,
+    chapter-filing ⋯ menus, count footer) beside a scroll-synced read-cheap
+    rendered pane (lazy per note — P3/P1; ZERO live editor, editing = the
+    ascent's own reveal door into Outline). **The brain it shares is the BOOK's
+    outline brain** — `BookStructureModel.grouped(entries:)`, the exact function
+    Outline mode (`BookView.swift:150/362/804`) and the paged view consume — and
+    it deliberately does NOT share the note Index's `NoteIndexOutline`, because a
+    book's chapters are REAL `reading_section` rows while a note's sections are
+    DERIVED from headings; re-deriving would be a second brain over facts the
+    book already owns (`BookIndexView.swift:15`). What IS shared with the note
+    Index is the grammar (column + synced pane) and the one markdown transform
+    (`FlowParagraph`, hoisted for exactly this). "Where honest" honored by NOT
+    sharing the heading brain. Pins: `BookIndexColumnTests` (5, incl. the one
+    deliberate divergence — a matching CHAPTER title keeps all its notes) ·
+    `BookAscentTests`' `.index` anchor + carry · `BookRedesignMountTests` (mounts
+    chaptered with ZERO live editors). Shot 82.
+  - **(c) The book view sharing an outline with Outline mode, reconciled with the
+    small pane:** the minimal navigator pane STAYS beside Outline · Book · Read
+    (her sharpening: "I do like the more minimal outline to go along with the
+    current modes"); in INDEX it steps aside because the index IS that pane grown
+    up, and the shared `bookMasthead` rides into the index column so no chrome is
+    lost. The mode control became quiet word-tabs **Outline · Index · Book ·
+    Read** (the segmented picker retired per W8-2 — its width trap is what
+    `54a2cb1` then met and fixed in the tabs' own row). One outline brain feeds
+    every mode (ground (b)); one pane grammar at two grains (minimal beside the
+    modes, full as Index). Shots 81/82 show the same book in both.
+  - **Residue, named as residue (a built-whole design with a named residue is a
+    verdict, not a split):** the PAGED Book mode's and the book Read mode's chrome
+    are not restyled to W8-2 — 13u2's app-wide restyle continuation (its addendum
+    already carries it); the book Read-mode click-through jump defect stays 13u
+    item 17's (her own words at W8-1); the Outline card's excerpt reads the first
+    block verbatim (a taste fork below); the live field-guide re-seed + AppSpec
+    §12's mode-row delta ride the ROUND closeout by the standing rules.
+
+## The mode rows as they now read
+
+- **Note:** Write ⌘1 · Takes ⌘2 · **Index ⌘3** · **Read ⌘4** · Lenses ⌘5 ·
+  Compare ⌘6 · Blocks ⌘7 · Canvas ⌘8 — the rail, the masthead menu and the keys
+  all derive from the ONE `PostMode` order (`NewModesTests` pins that the order IS
+  the key mapping); the field guide enumerates it and every seeder key literal is
+  swept (`6a42071`).
+- **Book:** **Outline · Index · Book · Read** — quiet word-tabs in the navigator
+  masthead, Index second to mirror the note row's writing/reading cohesion.
+
+## The Sherlock numbers and the P1 statement
+
+On the REAL seeded library (`ba13dc8`, in-app): the 9,944-word story reads
+blockTOC 3.1 ms · outline grouping 1.8 ms · word sum 16.0 ms · blockWorkbench
+22.2 ms · renderPost 2.8 ms; the 105k-word book reads book snapshot 4.1 ms ·
+index flattening 0.4 ms · FULL realization 36.1 ms over 2,533 blocks. At the
+core layer on a same-scale fixture (`a7d2c2b`): blockWorkbench 16.4 ms cold ·
+blockTOC 1.9 ms. **P1 HOLDS for every surface this wave added:** each mode's read
+is a bounded per-note query (ms-scale at her working size); the book's 36.1 ms is
+the ONE-TIME cost of realizing all 2,533 blocks, which the lazy tiers
+(`LazyVStack` per note, read-cheap `FlowParagraph`) never pay at once; Index,
+Read, the workbench and the book Index depend on ZERO TK2 geometry; P-3 is
+counted, not assumed (`BookRedesignMountTests`: 0 live editors in the book Index,
+exactly 1 in the gutter's focused form). Every asserted ceiling sits two orders
+above the measured value, so the pins cannot red under load — the numbers are
+stated here, deliberately not asserted.
+
+## The scrolled-open door — built ONCE, two named reusers
+
+Read's paragraph click lands that block in Index already open and scrolled: the
+mechanism is `CommandRouter.focusedBlock` seeding the Index column's own
+one-shot `columnTarget` channel (one consumer per channel since `a7d2c2b`). **13u
+item 17** (the book Read-view edit jump — "clicking brings you to the top, which
+sucks") and **13i's Book Panel click-through** both REUSE this door rather than
+minting their own; the book-side ascent already routes through `requestReveal`,
+so item 17's remaining work is the TK2 scroll-to-location leg (TEXTKIT2 §2), not
+a new door.
+
+## Taste forks for the morning bundle
+
+1. **Read's slot — beside Index, after Takes** (recorded taste call: the row now
+   pairs writing · reading · comparing · managing, and Read's click-through lands
+   in Index, so they sit adjacent). **Consequence she will feel: ⌘3–⌘6 REMAPPED**
+   — Lenses ⌘5, Compare ⌘6, Blocks ⌘7, Canvas ⌘8. A re-slot is one line in
+   `PostMode` (everything derives from the order).
+2. **The book's Index tab sits SECOND** (Outline · Index · Book · Read), mirroring
+   the note row; the segmented picker became word-tabs (W8-2). One line to reorder.
+3. **The Outline card's excerpt reads the first block verbatim** — so a
+   chapter-numeral opener ("I.", *A Scandal in Bohemia*, shot 81) yields a
+   one-character excerpt. The seed's shape meeting a simple rule; skipping
+   trivially short first blocks is a small brain change if she wants it.
+4. **The details gutter is 190 pt and hosts the FOCUSED note's WHOLE editor bar
+   vertically** (Aa as a popover in the rail). Both arrangements are ONE brain
+   (`CommitBar axis:`), so "bar stays horizontal under the card, meta only in the
+   rail" is a one-argument swap if the rail feels crowded.
+5. **The book Index has NO live editor** — editing is the reveal door into Outline
+   (double-click or the row ⋯), the same posture as the note's Read → Index
+   click-through. In-place editing there would be a second host for the ONE
+   editor — a P-3 decision, not a tweak.
+6. **The book Index's ONE deliberate fold/filter divergence** from the note Index:
+   a matching CHAPTER title keeps ALL its notes (pinned, documented at the brain).
+   Her call if she'd rather the filter narrow to matching notes only.
+7. **The workbench's ↑↓ wake only in note order** — a sorted listing is a way of
+   looking, not a place to reorder; its row click model rides 13e's
+   `BlockSelection` as the Library's rows do.
+8. **Compare's first open is the OFFER page** (search the library · make an
+   outline note · version peers as direct rows) and the dropdown is gone
+   everywhere in favor of the picker; **Lenses' explainer sentence** lives behind
+   `?` with its exact words. Hers to judge in the running app — see residual 1.
+9. **Read's minimal companion outline is collapsible**, Aa-scaled, with hover
+   gutter ordinals and a meta bar carrying the tray door.
+
+## Walk captures (gitignored `notes/plans/pre-13u-act10-screens/`)
+
+74 index landing · 75 index scroll-sync · 76 read · 77 read click-through · 78
+workbench · 79 workbench bulk bar · 80 launch · 81 book Outline (the gutter + one
+clean tab line) · 82 book Index · 83 the note's eight-mode rail. Shots 81/82 are
+from the third session's FRESH build (the tab-wrap lesson above).
+
+## Machinery honesty
+
+**Three session deaths across the wave, every one continued LOSSLESSLY from this
+record:** the implementer died after `6a42071` with three fixes uncommitted (the
+continuation adopted them by diff-read → `a7d2c2b`); the continuation died after
+`9b740de` (the third session picked up the item 18 verdict grounds from the record
+and shipped the measurements, the mount smokes and the wrap fix); the third died
+after `54a2cb1` with the two pin re-anchors uncommitted and its suite run killed
+(the closer adopted them → `15c7463`, then ran the verification the third never
+finished). The per-commit LIVE STATUS entries + `git diff` were sufficient every
+time — the checkpoint protocol exercised for real, three times, with zero
+re-derivation. Two lessons the wave paid for: (1) a post-commit capture is
+evidence only from a build of the committed tree; (2) a suite run must be waited
+on in the FOREGROUND — the third session backgrounded it and ended its turn.
+
+## Verification at close
+
+- **Mac: 1980 tests / 343 suites GREEN in 267 s, ZERO failures** — baseline
+  1955/337 + exactly the wave's suites (+25/+6: NewModes 5 · BlocksWorkbench 6 ·
+  BookIndexColumn 5 · BookRedesignMount 2 · ModesSherlock 2 · NoteIndexOutline 4
+  = 24, + BookAscent's `.index` carry pin). **The known load-flaky latency pin
+  PASSED outright** — `rewriteStrategyLatencies` read **35.5 ms** at 50k words
+  (budget 50 ms) on a box 13 min past a reboot at load 25–44 — so the PAIRED
+  worktree protocol was not invoked (its stale `pre2c` registration at `37c1467`
+  was pruned at this close). `Canvas drag tracking` passed in-suite. **All ten
+  `Tutorial …` suites green** inside the run (the spine, 71/10 at `6a42071`,
+  unchanged since).
+- **Core `swift test`: 1503 tests / 163 suites GREEN in 50 s** — baseline
+  1499/161 + exactly the wave's (+4/+2: `WorkbenchQueryTests` 3 ·
+  `WorkbenchP1SanityTests` 1).
+- **iOS: `xcodebuild build -scheme VariorumMobile -destination
+  'generic/platform=iOS Simulator'` — BUILD SUCCEEDED** (11 pre-existing-class
+  warnings, zero errors; `Shared/` gained `NoteIndexOutline`). See residual 2 for
+  why the destination is now stated explicitly.
+- **Zero `Sources/VariorumCore/Sync/` lines; zero `Persistence/` lines; no
+  schema; lockstep marker untouched at 7** — `git diff --stat 37c1467..HEAD` over
+  both paths is empty.
+- **The author's real app was NOT running at any point** (`pgrep` by the
+  `/Applications` path empty before, during and after; no Release build, no
+  `/Applications` refresh — the round closeout's).
+- **Red-on-old:** the two ruled re-anchors are red on the pre-wave assertions by
+  construction (the old lines name the ruled-away state: formatting `.act` in
+  Read; a six-entry rail); the wave's new suites pin NEW brains and mounts
+  (pin-with-the-build), with the drift pin (`NoteIndexOutline` vs
+  `MarkdownRendering`) and the P-3 counts as the defect-class pins.
+
+## Residuals for the orchestrator (recorded, not dropped)
+
+1. **No Compare/Lenses capture exists in the 2c walk set** (74–83 cover
+   Index/Read/workbench/launch/book). Item 15 is hers to judge in the running app
+   by her own ruling — the orchestrator's pre-bundle walk should shoot the OFFER
+   page and one lens card from a fresh build so the bundle carries them.
+2. **The bare `xcodebuild build -scheme VariorumMobile` no longer proves the iOS
+   target:** since the 2026-08-30 signing change it resolves FIRST to "My Mac
+   (Designed for iPad)" and fails on the iOS Team Provisioning Profile excluding
+   this Mac — an environment fact, not a code one (zero compile errors). The
+   round's verification lines and 13r should state the destination
+   (`generic/platform=iOS Simulator`) so the check means what it says.
+3. **The full mobile test suite stays a round-end act** (the wave-1/2b posture);
+   `Shared/` gained one NEW file (`NoteIndexOutline`) and nothing existing there
+   moved.
+4. **The workbench's opt-in facts observation (`observeBlockWorkbench`)** is held
+   only in Blocks mode and re-fires at autosave cadence while its context panel's
+   body is edited — 22.2 ms cold at the 10k-word note, off-main. The tray-panel
+   KnownIssues row's parked class, unchanged in kind; measure at 12 beside its
+   siblings if it ever earns a row.
+5. **Carried to the ROUND closeout by the standing rules:** the live field-guide
+   re-seed (tutorial CONTENT changed: the eight-mode "getting around" + the new
+   "index · read" lesson); AppSpec §12's mode-row delta (six → eight; the book's
+   four word-tabs); the `/Applications` refresh; the mobile update note owes a
+   paragraph on the new modes + the Book redesign (obligation 7's "tenth-wave
+   note" clause).
