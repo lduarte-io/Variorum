@@ -24,7 +24,7 @@ you do NOT drive the dev window while an implementer might (clicks collide).
 
 ## 2. State at cutover (verify against git before trusting)
 
-- **Done:** the triage walk (captures `act10-correction-screens/triage/`); **batch B (the book)** built by
+- **Done (as of ~07:50):** batch B CLOSED (row 53 fixed + walked); batch A running. Earlier: the triage walk (captures `act10-correction-screens/triage/`); **batch B (the book)** built by
   its implementer (commits `be32fa7`…`1a6ceaf`) and WALKED by the orchestrator (`orchestrator-b/`): the
   hang is gone, rows 7/8/13/14/22/23/38-book/40/45/47 FIXED-walked; **row 53 (MAJOR — multi-expanded
   mis-landing) is being fixed by a fresh fix session** (spawned ~06:45). B's record is NOT closed until
@@ -122,4 +122,5 @@ eight rulings · row 52 (underscore emphasis vocabulary) · any scalpel revert (
 ## Batch-close updates (append one line per close; newest last)
 
 - ~06:50 — cutover document written; B walked; row 53 fix session running; A next.
+- ~07:50 — row 53 FIXED and walked (orchestrator-b53/ A–C); **batch B CLOSED**; Mac 2001/347; **batch A SPAWNED** (the chrome) — its record will appear under the BATCH A brief in the plan.
 - ~07:30 — the fix session's first commit `7569af3` landed (row 53 converging landing); §2b proof checklist + §2c token discipline added at her question; she is starting a successor session to check in ~50 min.
