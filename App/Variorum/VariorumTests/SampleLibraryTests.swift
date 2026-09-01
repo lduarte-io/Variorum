@@ -304,6 +304,67 @@ struct SampleLibraryTests {
         }
     }
 
+    /// **The midpoint review's m5(a), pinned.** `createSection` and
+    /// `importPost` are separate transactions, so a seed cancelled between
+    /// them leaves a chapter standing with no note in it — and chapter
+    /// names are deliberately NOT unique (AppSpec §7: duplicate names
+    /// legal, no natural key, no repair class). Resumability keyed on
+    /// `presentTitles` alone therefore minted a SECOND chapter of the same
+    /// name beside the empty one, and nothing would ever clear it.
+    ///
+    /// *Red on the old code:* 14 chapters, two of them "A Scandal in
+    /// Bohemia", one empty. Verified by reverting the fix.
+    @Test("A seed cancelled between the chapter and the note mints into THAT chapter")
+    func aResumedSeedReusesAnEmptyChapterInsteadOfDoublingIt() async throws {
+        try await withSampleWorld { session, db in
+            let all = try SampleLibrarySeeder.loadStories()
+            // A plain `String`: `Story` is nested in the `@MainActor` seeder,
+            // so its members cannot be read from the nonisolated closures.
+            let scandalTitle = try #require(all.first).title
+
+            // The exact half-state: the book, and the first story's chapter,
+            // with the note that belongs in it never minted.
+            let half = try await session.runner.run {
+                ops -> (book: String, chapter: String) in
+                let book = try ops.createReading(
+                    name: SampleLibrarySeeder.bookName, kind: .curated, profile: "book")
+                let chapter = try ops.createSection(in: book.id, name: scandalTitle)
+                return (book.id, chapter.id)
+            }
+            let bookID = half.book
+            let halfState = try await db.read { db in
+                (chapters: try Queries.readingSections(db, readingID: bookID).count,
+                 entries: try Queries.assembleReading(db, readingID: bookID).count)
+            }
+            #expect(halfState == (chapters: 1, entries: 0))
+
+            let mark = Mark()
+            let outcome = await SampleLibrarySeeder.seedIfNeeded(
+                session: session, loadMark: mark.load, saveMark: mark.save)
+            guard case .seeded(let seededBook, let minted) = outcome else {
+                Issue.record("expected a resumed seed, got \(outcome)")
+                return
+            }
+            #expect(seededBook == bookID)   // the half-built book was adopted
+            #expect(minted == 12)
+
+            try await db.read { db in
+                let chapters = try Queries.readingSections(db, readingID: bookID)
+                #expect(chapters.count == 13,
+                        "a resumed seed must not mint a second chapter of the same name")
+                #expect(chapters.filter { $0.name == scandalTitle }.count == 1)
+
+                // …and the note landed IN the chapter that was already there.
+                let entries = try Queries.assembleReading(db, readingID: bookID)
+                #expect(entries.count == 13)
+                let entry = try #require(entries.first { $0.title == scandalTitle })
+                #expect(entry.sectionID == half.chapter,
+                        "the note must land in the chapter that was already standing")
+                #expect(Set(entries.compactMap(\.sectionPath)).count == 13)
+            }
+        }
+    }
+
     @Test("Deleting the library is final — nothing puts it back")
     func deletionIsFinal() async throws {
         try await withSampleWorld { session, db in

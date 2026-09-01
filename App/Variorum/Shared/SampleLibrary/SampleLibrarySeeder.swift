@@ -73,6 +73,28 @@
 //  deliberately no restore door; whether one should exist is a product
 //  question, recorded for the author rather than invented here.
 //
+//  **The honest residual, recorded rather than papered over** (added
+//  2026-08-31, the midpoint review's m5 — the `MobileStarterJournal`
+//  header's own precedent, and the same mechanism): "deletion is final"
+//  is only as durable as the DEVICE MARK, and the mark is `UserDefaults`.
+//  Three ordinary things lose it — deleting and reinstalling the app, a
+//  store restored onto a new machine (13x's road: the store comes back,
+//  this device's defaults do not), and clearing the app's defaults — and
+//  a lost mark makes the store look unseeded. Discovery then covers the
+//  case where the library is still THERE (the reserved book name and tag
+//  are found, so nothing is re-minted), but it cannot cover the case the
+//  rule is actually about: a reader who DELETED the library, or renamed
+//  the book, gets it re-minted, because a deleted book and a never-seeded
+//  store are the same local reading.
+//
+//  Closing it needs a marker that travels with the STORE rather than the
+//  device — the `setting` table — and `upsertSetting` has no public write
+//  door from app code, which is exactly the blocker `MobileStarterJournal`
+//  records for its own version of this. Narrow, non-destructive, named.
+//  *(Two devices that each seed are a different problem with a different
+//  answer already built: the R-pre13u-8 pristine-copy dedupe repair in
+//  `Sources/VariorumCore/Sync/`.)*
+//
 //  ── RESUMABLE, BECAUSE THE SEED CAN BE CANCELLED ──────────────────────
 //  On the Mac the seed runs from the window's `.task`, so closing the
 //  window mid-seed cancels it; on the phone the occasion's task dies with
@@ -315,6 +337,23 @@ enum SampleLibrarySeeder {
         var bookID: String?
         var tagID: String?
         var presentTitles: Set<String> = []
+        /// **The book's live chapters, name → id** (the midpoint review's
+        /// m5). `createSection` and `importPost` are separate transactions,
+        /// so a cancelled seed can leave a chapter with no note in it — and
+        /// chapter names are deliberately NOT unique (AppSpec §7: "duplicate
+        /// names legal, no natural key, no repair class"), so a resumed run
+        /// that only checked `presentTitles` would mint a SECOND chapter of
+        /// the same name beside the empty one, forever. Reusing the chapter
+        /// heals the half-state instead of doubling it, and does it without
+        /// ever skipping the note the reader is actually missing.
+        ///
+        /// Reads on the same one `discover` transaction as `presentTitles`,
+        /// for the same reason it is safe: this book's chapters have exactly
+        /// one minter — this seeder — and a second occasion is already
+        /// serialized (the device mark, the Mac's single window task, the
+        /// phone's single `occasion` task). Two DEVICES seeding is the
+        /// dedupe repair's job, not this projection's.
+        var chapterIDsByName: [String: String] = [:]
 
         func isComplete(for titles: [String]) -> Bool {
             bookID != nil && titles.allSatisfy { presentTitles.contains($0) }
@@ -332,6 +371,12 @@ enum SampleLibrarySeeder {
             existing.presentTitles = Set(
                 try Queries.assembleReading(db, readingID: bookID)
                     .compactMap(\.title))
+            // `(position, id)` order, first wins — deterministic if an
+            // older half-run already left two chapters wearing one name.
+            for chapter in try Queries.readingSections(db, readingID: bookID)
+            where existing.chapterIDsByName[chapter.name] == nil {
+                existing.chapterIDsByName[chapter.name] = chapter.id
+            }
         }
         return existing
     }
@@ -495,6 +540,7 @@ enum SampleLibrarySeeder {
         let frontText = Self.attributionText
         let label = Self.undoLabel
         let present = existing.presentTitles
+        let chapters = existing.chapterIDsByName
 
         // Turn 1: the book, the tag, and the front matter.
         let skeleton = try await session.runner.run { _ -> (book: String, tag: String) in
@@ -508,13 +554,16 @@ enum SampleLibrarySeeder {
             }
             let tagID = try existing.tagID ?? quiet.createTag(name: tagName).id
             if !present.contains(frontTitle) {
-                let section = try quiet.createSection(in: bookID, name: frontChapter)
+                // m5: reuse a chapter a cancelled run already left behind,
+                // never mint a second one wearing the same name.
+                let sectionID = try chapters[frontChapter]
+                    ?? quiet.createSection(in: bookID, name: frontChapter).id
                 let note = try quiet.importPost(
                     title: frontTitle, text: frontText, undoLabel: label,
                     segmentation: Self.segmentation)
                 _ = try quiet.addPostToReading(note.container.id, to: bookID)
                 try quiet.assignPostToSection(
-                    note.container.id, in: bookID, section: section.id)
+                    note.container.id, in: bookID, section: sectionID)
                 _ = try quiet.applyTag(tagID, toPost: note.container.id)
             }
             return (bookID, tagID)
@@ -528,13 +577,16 @@ enum SampleLibrarySeeder {
             let tagID = skeleton.tag
             try await session.runner.run { _ in
                 let quiet = Operations(undoStack: nil)
-                let section = try quiet.createSection(in: bookID, name: story.title)
+                // m5, again: a run cancelled between `createSection` and
+                // `importPost` left this story's chapter standing empty.
+                let sectionID = try chapters[story.title]
+                    ?? quiet.createSection(in: bookID, name: story.title).id
                 let note = try quiet.importPost(
                     title: story.title, text: story.text, undoLabel: label,
                     segmentation: Self.segmentation)
                 _ = try quiet.addPostToReading(note.container.id, to: bookID)
                 try quiet.assignPostToSection(
-                    note.container.id, in: bookID, section: section.id)
+                    note.container.id, in: bookID, section: sectionID)
                 _ = try quiet.applyTag(tagID, toPost: note.container.id)
             }
             minted += 1
