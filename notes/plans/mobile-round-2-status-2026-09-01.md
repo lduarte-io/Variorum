@@ -104,3 +104,32 @@ multi-tenant): ✅ closed · PL-7 (13h): future · PL-9 (bridge door judgment): 
 | **B45-n / A1-n** | findings from the batch-4.5 investigation / the Act-1 cold read | `mobile-round-2.md` §52 / §56 |
 | **a "hoist"** | MOVING a rule out of one app's private code into `App/Variorum/Shared/` so BOTH apps call one copy (the Mac's old names stay as forwarders; the Mac suite passing unmodified is the proof) — the opposite of a **fork** (a second copy that drifts) | MobileSoul §3; the KnownIssues forked-brains row |
 | **the #94 hoists' direction** | NOT delivered by the Mac: they are MOBILE-round work postponed until main merges INTO mobile, because they edit `Shared/` and Mac files the Mac phases are rewriting; a Mac phase that happens to touch one hoists it then | `mobile-round-2-fable-seat-handoff.md` §4 |
+
+## H. HER RULINGS AT THIS READ (2026-09-01, verbatim-faithful — the round PAUSES after batch 10)
+
+- **"I think what I want is for you to just install the build on the phone that will be done now,
+  at the end of this session, to my phone."** → The seat's closing act after batch 10's unit
+  closes: a Release build of the closed tree (`xcodebuild -scheme VariorumMobile -configuration
+  Release -destination 'generic/platform=iOS' -allowProvisioningUpdates build`, the parity round's
+  recorded road) installed via `xcrun devicectl device install app --device
+  *[removed for publication]*
+  reads **available (paired)** at this write; the phone must be UNLOCKED at the install moment for
+  the bundle to mount (the 2026-08-11 precedent). Marker 7 on both sides — no lockstep risk.
+  **First launch note:** whichever build her phone runs today, this one carries 13p — the phone's
+  store migrates to the keyed format on the first launch (Auto mode: silent key mint into the iOS
+  Keychain; PL-15(b), proven on iOS) — and the pocket guide's corrected lessons (batch 9's tutorial
+  fix) reach an already-seeded guide only through its Restore door.
+- **"I probably won't finish this round before just finishing the mac side of things … And then
+  I'll resume mobile development when 13u is done on the mac side."** → **The round PAUSES at
+  batch 10's close.** Batch 8, the leftover-backlog batch, PL-13's faces, the two standalone
+  passes and the closeout WAIT for the post-13u resume (the successor handoff carries them in
+  order). Nothing closes early; the ledger rows stay open and owned.
+- **"especially since the data safety screen still remains and tbh mac is going to have some
+  changes still to that story that I've just decided."** → **PL-13's phone faces WAIT for the
+  Mac's revised data-safety story** — build nothing there until the Mac phase that carries her
+  new decision closes and writes its ledger line; the phone then builds to the RULED shape, never
+  the mid-design (the PL-14 precedent she praised).
+- Her read of the state: *"most of the obvious product features have been done on the mobile side
+  already so I'll be able to get more of a feel for the app."* The install is what turns the
+  round's five closed units into her lived experience; the device queue (§C) is what she can
+  answer once it is on her phone.
